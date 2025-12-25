@@ -20,7 +20,7 @@
     "@types/selenium-webdriver": "^4.1.22",
     "@typescript-eslint/eslint-plugin": "^5.39.0",
     "@typescript-eslint/parser": "^5.39.0",
-    "esbuild": "^0.25.0",
+    "esbuild": "^0.27.2",
     "eslint": "^8.26.0",
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-absolute-imports": "^0.0.3",
