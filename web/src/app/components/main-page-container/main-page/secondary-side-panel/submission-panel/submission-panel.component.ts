@@ -33,6 +33,7 @@ import { SubmissionService } from 'app/services/submission/submission.service';
   selector: 'submission-panel',
   templateUrl: './submission-panel.component.html',
   styleUrls: ['./submission-panel.component.scss'],
+  standalone: false,
 })
 export class SubmissionPanelComponent implements OnInit, OnDestroy {
   subscription: Subscription = new Subscription();

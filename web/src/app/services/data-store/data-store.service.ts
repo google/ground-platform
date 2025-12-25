@@ -639,7 +639,7 @@ export class DataStoreService {
       .set(newSurvey);
 
     const jobsCollectionRef = collection(
-      this.db.firestore,
+      this.db.firestore as any,
       `${SURVEYS_COLLECTION_NAME}/${surveyId}/${JOBS_COLLECTION_NAME}`
     );
 

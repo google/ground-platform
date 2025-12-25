@@ -20,6 +20,7 @@ import { Component, Input } from '@angular/core';
   selector: 'ground-step-card',
   templateUrl: './step-card.component.html',
   styleUrls: ['./step-card.component.scss'],
+  standalone: false,
 })
 export class StepCardComponent {
   @Input() jobName = '';

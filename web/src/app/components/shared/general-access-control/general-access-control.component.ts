@@ -50,6 +50,7 @@ const generalAccessLabels = Map<
   selector: 'ground-general-access-control',
   templateUrl: './general-access-control.component.html',
   styleUrls: ['./general-access-control.component.scss'],
+  standalone: false,
 })
 export class GeneralAccessControlComponent {
   private subscription = new Subscription();

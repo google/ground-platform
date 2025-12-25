@@ -21,7 +21,11 @@ import { List } from 'immutable';
 import { Option } from 'app/models/task/option.model';
 import { Task } from 'app/models/task/task.model';
 
-@Pipe({ name: 'getTaskOptions', pure: false })
+@Pipe({
+  name: 'getTaskOptions',
+  pure: false,
+  standalone: false,
+})
 export class TaskOptionsPipe implements PipeTransform {
   transform(tasks: List<Task>, filter: string): List<Option> {
     return (
@@ -35,6 +39,7 @@ export class TaskOptionsPipe implements PipeTransform {
   selector: 'ground-task-condition-form',
   templateUrl: './task-condition-form.component.html',
   styleUrls: ['./task-condition-form.component.scss'],
+  standalone: false,
 })
 export class TaskConditionFormComponent {
   @Input() formGroup!: FormGroup;

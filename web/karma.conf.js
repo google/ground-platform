@@ -28,7 +28,7 @@ module.exports = function (config) {
       'karma-jasmine',
       'karma-chrome-launcher',
       'karma-jasmine-html-reporter',
-      'karma-coverage', // Use this instead of istanbul-reporter
+      'karma-coverage',
       require('@angular-devkit/build-angular/plugins/karma'),
     ],
     client: {

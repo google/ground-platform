@@ -28,6 +28,7 @@ import { NavigationService } from 'app/services/navigation/navigation.service';
   selector: 'ground-job-list',
   templateUrl: './job-list.component.html',
   styleUrls: ['./job-list.component.scss'],
+  standalone: false,
 })
 export class JobListComponent {
   activeSurvey = input<Survey>();

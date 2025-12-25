@@ -23,6 +23,7 @@ import { Cardinality } from 'app/models/task/multiple-choice.model';
   selector: 'ground-edit-option',
   templateUrl: './edit-option.component.html',
   styleUrls: ['./edit-option.component.scss'],
+  standalone: false,
 })
 export class EditOptionComponent {
   @Input() formGroup!: FormGroup;

@@ -25,6 +25,7 @@ import { SideNavMode } from 'app/services/navigation/url-params';
   selector: 'ground-side-panel',
   templateUrl: './side-panel.component.html',
   styleUrls: ['./side-panel.component.css'],
+  standalone: false,
 })
 export class SidePanelComponent {
   activeSurvey = input<Survey>();

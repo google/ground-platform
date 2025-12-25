@@ -49,7 +49,7 @@ export class TaskService {
         switchMap(survey =>
           this.dataStoreService.tasks$(
             survey.id,
-            survey.jobs.values().next().value.id
+            survey.jobs.values().next().value?.id
           )
         )
       );

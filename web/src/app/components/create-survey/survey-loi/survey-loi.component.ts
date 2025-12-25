@@ -28,6 +28,7 @@ import { TaskService } from 'app/services/task/task.service';
   selector: 'survey-loi',
   templateUrl: './survey-loi.component.html',
   styleUrls: ['./survey-loi.component.scss'],
+  standalone: false,
 })
 export class SurveyLoiComponent {
   lois!: List<LocationOfInterest>;
@@ -43,6 +44,10 @@ export class SurveyLoiComponent {
 
   async ngOnInit() {
     this.job = this.surveyService.getActiveSurvey().jobs.first();
+
+    if (!this.job) {
+      return;
+    }
 
     this.loiService
       .getPredefinedLoisByJobId$(this.job.id)

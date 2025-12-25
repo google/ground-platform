@@ -9,8 +9,9 @@
     "sourceMap": true,
     "strict": true,
     "target": "es2019",
-    "resolveJsonModule": true,
-    "allowJs": true
+    "allowJs": true,
+    "skipLibCheck": true,
+    "types": ["node", "jasmine"]
   },
   "compileOnSave": true,
   "include": [

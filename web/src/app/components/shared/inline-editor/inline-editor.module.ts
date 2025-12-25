@@ -16,13 +16,13 @@
 
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
-import { AutoSizeInputModule } from 'ngx-autosize-input';
+import { AutoSizeInputDirective } from 'ngx-autosize-input';
 
 import { InlineEditorComponent } from './inline-editor.component';
 
 @NgModule({
   declarations: [InlineEditorComponent],
-  imports: [CommonModule, AutoSizeInputModule],
+  imports: [CommonModule, AutoSizeInputDirective],
   exports: [InlineEditorComponent],
 })
 export class InlineEditorModule {}

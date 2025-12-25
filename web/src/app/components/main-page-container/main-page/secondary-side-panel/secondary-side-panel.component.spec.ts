@@ -15,7 +15,7 @@
  */
 
 import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Map } from 'immutable';
 import { of } from 'rxjs';
 
@@ -40,7 +40,7 @@ describe('SecondarySidePanelComponent', () => {
     { type: DataSharingType.PRIVATE }
   );
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(async () => {
     navigationServiceSpy = jasmine.createSpyObj('NavigationService', [
       'getSideNavMode$',
       'getLoiId',
@@ -60,14 +60,14 @@ describe('SecondarySidePanelComponent', () => {
       () => SideNavMode.JOB_LIST
     );
 
-    TestBed.configureTestingModule({
+    await TestBed.configureTestingModule({
       declarations: [SecondarySidePanelComponent],
       providers: [
         { provide: NavigationService, useValue: navigationServiceSpy },
       ],
       schemas: [CUSTOM_ELEMENTS_SCHEMA],
     }).compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(SecondarySidePanelComponent);

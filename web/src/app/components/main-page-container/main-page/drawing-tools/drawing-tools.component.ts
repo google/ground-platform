@@ -44,6 +44,7 @@ import { NavigationService } from 'app/services/navigation/navigation.service';
   templateUrl: './drawing-tools.component.html',
   styleUrls: ['./drawing-tools.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: false,
 })
 export class DrawingToolsComponent implements OnInit, OnDestroy {
   private subscription: Subscription = new Subscription();

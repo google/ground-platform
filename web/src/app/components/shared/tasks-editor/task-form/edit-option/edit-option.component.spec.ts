@@ -29,8 +29,8 @@ describe('EditOptionComponent', () => {
   let component: EditOptionComponent;
   let fixture: ComponentFixture<EditOptionComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       declarations: [EditOptionComponent],
       imports: [
         CommonModule,
@@ -43,7 +43,7 @@ describe('EditOptionComponent', () => {
         MatButtonModule,
       ],
     }).compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(EditOptionComponent);

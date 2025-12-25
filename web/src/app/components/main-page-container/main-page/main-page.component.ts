@@ -38,6 +38,7 @@ import { TitleDialogComponent } from './title-dialog/title-dialog.component';
   selector: 'ground-main-page',
   templateUrl: './main-page.component.html',
   styleUrls: ['./main-page.component.scss'],
+  standalone: false,
 })
 export class MainPageComponent implements OnInit {
   activeSurvey = input.required<Survey>();

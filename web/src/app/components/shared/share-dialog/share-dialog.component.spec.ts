@@ -34,8 +34,8 @@ describe('ShareDialogComponent', () => {
   let component: ShareDialogComponent;
   let fixture: ComponentFixture<ShareDialogComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       declarations: [ShareDialogComponent],
       imports: [
         NoopAnimationsModule,
@@ -53,13 +53,13 @@ describe('ShareDialogComponent', () => {
         {
           provide: DraftSurveyService,
           useValue: {
-            getSurvey$: () => of({ acl: Map() }),
+            getSurvey$: () => of({ acl: Map(), getAclEntriesSorted: () => [] }),
             updateAcl: () => null,
           },
         },
       ],
     }).compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(ShareDialogComponent);

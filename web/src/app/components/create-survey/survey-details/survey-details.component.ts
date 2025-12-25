@@ -21,6 +21,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
   selector: 'survey-details',
   templateUrl: './survey-details.component.html',
   styleUrls: ['./survey-details.component.scss'],
+  standalone: false,
 })
 export class SurveyDetailsComponent implements OnInit {
   readonly titleControlKey = 'title';

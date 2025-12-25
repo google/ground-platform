@@ -22,11 +22,11 @@ describe('UserAvatarComponent', () => {
   let component: UserAvatarComponent;
   let fixture: ComponentFixture<UserAvatarComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       declarations: [UserAvatarComponent],
     }).compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(UserAvatarComponent);

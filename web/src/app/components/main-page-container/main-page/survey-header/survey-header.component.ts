@@ -27,6 +27,7 @@ import { SurveyService } from 'app/services/survey/survey.service';
   selector: 'ground-survey-header',
   templateUrl: './survey-header.component.html',
   styleUrls: ['./survey-header.component.scss'],
+  standalone: false,
 })
 export class SurveyHeaderComponent {
   activeSurvey = input<Survey>();
