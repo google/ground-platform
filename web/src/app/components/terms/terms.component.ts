@@ -26,6 +26,7 @@ import { NavigationService } from 'app/services/navigation/navigation.service';
   selector: 'ground-terms-page',
   templateUrl: './terms.component.html',
   styleUrls: ['./terms.component.scss'],
+  standalone: false,
 })
 export class TermsComponent implements OnInit {
   hasAcceptedTos: boolean;

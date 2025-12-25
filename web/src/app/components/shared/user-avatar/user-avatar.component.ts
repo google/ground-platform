@@ -20,6 +20,7 @@ import { Component, Input, OnInit } from '@angular/core';
   selector: 'user-avatar',
   templateUrl: './user-avatar.component.html',
   styleUrls: ['./user-avatar.component.scss'],
+  standalone: false,
 })
 export class UserAvatarComponent implements OnInit {
   @Input() displayText?: string;

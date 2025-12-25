@@ -39,6 +39,7 @@ interface DataSharingTermsDetails {
   selector: 'ground-edit-details',
   templateUrl: './edit-details.component.html',
   styleUrls: ['./edit-details.component.scss'],
+  standalone: false,
 })
 export class EditDetailsComponent implements OnInit {
   subscription: Subscription = new Subscription();

@@ -33,8 +33,8 @@ describe('ImportDialogComponent', () => {
   let component: ImportDialogComponent;
   let fixture: ComponentFixture<ImportDialogComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       declarations: [ImportDialogComponent],
       imports: [
         FileUploadModule,
@@ -49,7 +49,7 @@ describe('ImportDialogComponent', () => {
         { provide: MAT_DIALOG_DATA, useValue: {} },
       ],
     }).compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(ImportDialogComponent);

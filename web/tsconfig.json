@@ -1,7 +1,8 @@
 {
-  "extends": "./node_modules/gts/tsconfig-google.json",
+  "extends": "../node_modules/gts/tsconfig-google.json",
   "compilerOptions": {
     "baseUrl": "src",
+    "module": "es2022",
     "esModuleInterop": true,
     "rootDir": ".",
     "outDir": "build",
@@ -9,7 +10,8 @@
     "experimentalDecorators": true,
     "resolveJsonModule": true,
     "skipLibCheck": true,
-    "types": ["node"]
+    "types": ["node"],
+    "moduleResolution": "bundler"
   },
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,

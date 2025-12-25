@@ -44,7 +44,7 @@
     "ts-node": "^10.9.2"
   },
   "engines": {
-    "node": "20"
+    "node": "22"
   },
   "private": true,
   "devDependencies": {
@@ -54,20 +54,17 @@
     "@types/geojson": "^7946.0.14",
     "@types/jasmine": "^4.3.5",
     "@types/jsonstream": "0.8.30",
+    "@types/node": "^20.19.27",
     "@types/nodemailer": "^6.4.16",
     "@types/sanitize-html": "^2.13.0",
     "@types/terraformer__wkt": "2.0.0",
     "firebase-functions-test": "^3.3.0",
-    "firebase-tools": "^13.24.2",
     "form-data-encoder": "^4.0.2",
     "formdata-node": "^6.0.3",
-    "gts": "^5.3.1",
     "isolate-package": "^1.18.0",
     "jasmine": "^5.1.0",
-    "prettier": "^2.8.1",
     "source-map-support": "^0.5.21",
     "ts-mocha": "^10.0.0",
-    "typescript": "^5.7.3",
     "wkt": "0.1.1"
   },
   "type": "commonjs"

@@ -23,6 +23,7 @@ import { TaskGroup } from '../tasks-editor.component';
   selector: 'add-task-button',
   templateUrl: './add-task-button.component.html',
   styleUrls: ['./add-task-button.component.scss'],
+  standalone: false,
 })
 export class AddTaskButtonComponent {
   @Input() taskGroup?: TaskGroup;

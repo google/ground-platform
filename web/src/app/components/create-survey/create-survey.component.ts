@@ -110,6 +110,7 @@ const createSurveyPhaseMetadata = new Map<
   selector: 'create-survey',
   templateUrl: './create-survey.component.html',
   styleUrls: ['./create-survey.component.scss'],
+  standalone: false,
 })
 export class CreateSurveyComponent implements OnInit {
   subscription: Subscription = new Subscription();
@@ -148,10 +149,6 @@ export class CreateSurveyComponent implements OnInit {
     private loiService: LocationOfInterestService,
     private cdr: ChangeDetectorRef
   ) {}
-
-  ngAfterViewChecked(): void {
-    this.cdr.detectChanges();
-  }
 
   ngOnInit(): void {
     this.subscription.add(
@@ -195,7 +192,10 @@ export class CreateSurveyComponent implements OnInit {
   }
 
   onValidationChange(valid: boolean) {
-    this.canContinue = valid;
+    // Defer update to prevent NG0100 when child updates parent during change detection
+    setTimeout(() => {
+      this.canContinue = valid;
+    });
   }
 
   private isSetupFinished(survey: Survey): boolean {

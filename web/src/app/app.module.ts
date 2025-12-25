@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-import { HttpClientModule } from '@angular/common/http';
+import {
+  provideHttpClient,
+  withInterceptorsFromDi,
+} from '@angular/common/http';
 import { NgModule } from '@angular/core';
 import { AngularFireModule } from '@angular/fire/compat';
 import { AngularFireAuthModule } from '@angular/fire/compat/auth';
@@ -59,6 +62,24 @@ initializeApp(environment.firebase);
 
 @NgModule({
   declarations: [AppComponent],
+  bootstrap: [AppComponent],
+  imports: [
+    // TODO(#967): Replace compat libs with new AngularFire APIs:
+    //   provideFirebaseApp(() => initializeApp(environment.firebase)),
+    //   provideFirestore(() => getFirestore()),
+    AngularFireModule.initializeApp(environment.firebase),
+    AngularFireModule,
+    AngularFireAuthModule,
+    AngularFirestoreModule,
+    AngularFireFunctionsModule,
+    AngularFireRemoteConfigModule,
+    AngularFireStorageModule,
+    BrowserAnimationsModule,
+    BrowserModule,
+    AppRoutingModule,
+    FirebaseUIModule.forRoot(firebaseUiAuthConfig),
+    MainPageContainerModule,
+  ],
   providers: [
     {
       provide: FIRESTORE_SETTINGS,
@@ -86,25 +107,7 @@ initializeApp(environment.firebase);
       provide: USE_FUNCTIONS_EMULATOR,
       useValue: environment.useEmulators ? ['localhost', 5001] : undefined,
     },
+    provideHttpClient(withInterceptorsFromDi()),
   ],
-  imports: [
-    // TODO(#967): Replace compat libs with new AngularFire APIs:
-    //   provideFirebaseApp(() => initializeApp(environment.firebase)),
-    //   provideFirestore(() => getFirestore()),
-    AngularFireModule.initializeApp(environment.firebase),
-    AngularFireModule,
-    AngularFireAuthModule,
-    AngularFirestoreModule,
-    AngularFireFunctionsModule,
-    AngularFireRemoteConfigModule,
-    AngularFireStorageModule,
-    BrowserAnimationsModule,
-    BrowserModule,
-    AppRoutingModule,
-    FirebaseUIModule.forRoot(firebaseUiAuthConfig),
-    HttpClientModule,
-    MainPageContainerModule,
-  ],
-  bootstrap: [AppComponent],
 })
 export class AppModule {}

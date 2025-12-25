@@ -35,6 +35,7 @@ import { ImportDialogComponent } from '../import-dialog/import-dialog.component'
   selector: 'loi-editor',
   templateUrl: './loi-editor.component.html',
   styleUrls: ['./loi-editor.component.scss'],
+  standalone: false,
 })
 export class LoiEditorComponent {
   @Input() canImport!: boolean;

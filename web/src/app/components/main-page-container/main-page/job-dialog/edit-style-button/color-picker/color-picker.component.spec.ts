@@ -15,12 +15,13 @@
  */
 
 import { NO_ERRORS_SCHEMA } from '@angular/core';
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import {
   MAT_DIALOG_DATA,
   MatDialogModule,
   MatDialogRef,
 } from '@angular/material/dialog';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
 import { ColorPickerComponent } from './color-picker.component';
 
@@ -29,17 +30,17 @@ describe('ColorPickerComponent', () => {
   let fixture: ComponentFixture<ColorPickerComponent>;
   const dialogRef: Partial<MatDialogRef<ColorPickerComponent>> = {};
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       declarations: [ColorPickerComponent],
-      imports: [MatDialogModule],
+      imports: [MatDialogModule, NoopAnimationsModule],
       providers: [
-        { provide: MAT_DIALOG_DATA, useValue: {} },
+        { provide: MAT_DIALOG_DATA, useValue: { color: '#000000' } },
         { provide: MatDialogRef, useValue: dialogRef },
       ],
       schemas: [NO_ERRORS_SCHEMA],
     }).compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(ColorPickerComponent);

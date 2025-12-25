@@ -23,6 +23,7 @@ import { SurveyService } from 'app/services/survey/survey.service';
   selector: 'survey-json',
   templateUrl: './survey-json.component.html',
   styleUrls: ['./survey-json.component.scss'],
+  standalone: false,
 })
 export class SurveyJsonComponent {
   surveyId?: string;

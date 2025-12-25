@@ -28,7 +28,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: "20"
+          node-version: "22"
 
       - name: Create firebase-config.ts
         uses: "finnp/create-file-action@master"
@@ -37,7 +37,7 @@ jobs:
           FILE_DATA: ${{ secrets.FIREBASE_CONFIG_V2 }}
 
       - name: Install deps
-        run: npm ci
+        run: npm run --prefix=.. ci-all
 
       - name: Build Ground
         run: npm run build-all --config=dev --project=ground-dev-sig

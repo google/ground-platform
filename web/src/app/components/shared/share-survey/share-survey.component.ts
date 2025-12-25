@@ -7,6 +7,7 @@ import { ShareDialogComponent } from 'app/components/shared/share-dialog/share-d
   selector: 'share-survey',
   templateUrl: './share-survey.component.html',
   styleUrls: ['./share-survey.component.scss'],
+  standalone: false,
 })
 export class ShareSurveyComponent {
   constructor(private dialog: MatDialog) {}

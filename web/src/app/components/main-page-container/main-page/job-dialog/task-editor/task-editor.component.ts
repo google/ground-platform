@@ -64,6 +64,7 @@ export interface TaskTypeSelectOption {
   selector: 'ground-task-editor',
   templateUrl: './task-editor.component.html',
   styleUrls: ['./task-editor.component.scss'],
+  standalone: false,
 })
 export class TaskEditorComponent implements OnInit, OnChanges, OnDestroy {
   @Input() label?: string;

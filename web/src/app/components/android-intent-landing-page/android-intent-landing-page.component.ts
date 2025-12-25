@@ -25,6 +25,7 @@ import { NavigationService } from 'app/services/navigation/navigation.service';
   selector: 'ground-android-landing-page',
   templateUrl: './android-intent-landing-page.component.html',
   styleUrls: ['./android-intent-landing-page.component.scss'],
+  standalone: false,
 })
 export class AndroidIntentLandingPageComponent implements OnInit {
   googlePlayId$ = this.appConfigService.getGooglePlayId();

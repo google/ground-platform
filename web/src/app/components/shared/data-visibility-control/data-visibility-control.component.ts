@@ -25,6 +25,7 @@ import { DraftSurveyService } from 'app/services/draft-survey/draft-survey.servi
 @Component({
   selector: 'ground-data-visibility-control',
   templateUrl: './data-visibility-control.component.html',
+  standalone: false,
 })
 export class DataVisibilityControlComponent {
   private subscription = new Subscription();

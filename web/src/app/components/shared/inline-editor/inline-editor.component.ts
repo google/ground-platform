@@ -27,6 +27,7 @@ import {
   selector: 'inline-editor',
   templateUrl: './inline-editor.component.html',
   styleUrls: ['./inline-editor.component.scss'],
+  standalone: false,
 })
 export class InlineEditorComponent {
   @Input() data = '';

@@ -35,10 +35,7 @@ module.exports = function (config) {
       'karma-jasmine-matchers',
       'karma-jasmine-html-reporter',
       'karma-coverage-istanbul-reporter',
-      require(path.join(
-        __dirname,
-        'node_modules/@angular-devkit/build-angular/plugins/karma'
-      )),
+      require('@angular-devkit/build-angular/plugins/karma'),
     ],
     client: {
       clearContext: false, // leave Jasmine Spec Runner output visible in browser
