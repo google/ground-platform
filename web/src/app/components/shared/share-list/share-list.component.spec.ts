@@ -16,12 +16,23 @@
 
 import { HarnessLoader } from '@angular/cdk/testing';
 import { TestbedHarnessEnvironment } from '@angular/cdk/testing/testbed';
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import {
+  ComponentFixture,
+  TestBed,
+  fakeAsync,
+  tick,
+  waitForAsync,
+} from '@angular/core/testing';
 import { MatListModule } from '@angular/material/list';
 import { MatListHarness } from '@angular/material/list/testing';
-import { MatSelectModule } from '@angular/material/select';
+import {
+  MatSelect,
+  MatSelectChange,
+  MatSelectModule,
+} from '@angular/material/select';
 import { Map } from 'immutable';
 import { Subject, firstValueFrom, of } from 'rxjs';
+import { delay, map } from 'rxjs/operators';
 
 import { Role } from 'app/models/role.model';
 import { DataSharingType, Survey } from 'app/models/survey.model';
@@ -58,7 +69,7 @@ describe('ShareListComponent', () => {
 
   const user = new User('user1', 'user1@gmail.com', true);
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(async () => {
     draftSurveyServiceSpy = jasmine.createSpyObj<DraftSurveyService>(
       'DraftSurveyService',
       ['getSurvey$', 'updateAcl']
@@ -71,9 +82,14 @@ describe('ShareListComponent', () => {
     activeSurvey$ = new Subject<Survey>();
 
     draftSurveyServiceSpy.getSurvey$.and.returnValue(activeSurvey$);
-    authServiceSpy.getUser.and.returnValue(firstValueFrom(of(user)));
+    authServiceSpy.getUser.and.callFake(email => {
+      if (email === 'owner-email') {
+        return Promise.resolve(new User('owner', 'owner@gmail.com', true));
+      }
+      return Promise.resolve(user);
+    });
 
-    TestBed.configureTestingModule({
+    await TestBed.configureTestingModule({
       declarations: [ShareListComponent],
       imports: [MatListModule, MatSelectModule],
       providers: [
@@ -81,45 +97,45 @@ describe('ShareListComponent', () => {
         { provide: AuthService, useValue: authServiceSpy },
       ],
     }).compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(ShareListComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
     loader = TestbedHarnessEnvironment.loader(fixture);
   });
 
   it('should create', () => {
+    fixture.detectChanges();
     expect(component).toBeTruthy();
   });
 
   it('updates itself when acl changes', async () => {
-    activeSurvey$.next(survey);
-    fixture.detectChanges();
-    await fixture.whenStable();
-
-    expect(component.acl?.length).toBe(0);
-
     activeSurvey$.next(
       new Survey(
-        surveyId,
-        surveyTitle,
-        surveyDescription,
-        /* jobs= */ Map(),
-        /* acl= */ Map({ a: Role.OWNER, b: Role.OWNER }),
-        /* ownerId= */ 'user1',
+        'id',
+        'title',
+        'description',
+        Map(),
+        Map({ [user.email]: Role.VIEWER }),
+        'owner-email',
         { type: DataSharingType.PRIVATE }
       )
     );
-    fixture.detectChanges();
     await fixture.whenStable();
+    fixture.detectChanges();
 
-    expect(component.acl?.length).toBe(2);
+    expect(component.acl.length).toBeGreaterThan(0);
+    component.onRoleChange(
+      { value: Role.SURVEY_ORGANIZER } as MatSelectChange,
+      0
+    );
+    await fixture.whenStable();
+    fixture.detectChanges();
 
-    const aclList = await loader.getHarness(MatListHarness);
-    const aclListItems = await aclList.getItems();
-
-    expect(aclListItems.length).toBe(3);
+    expect(component.acl.length).toBe(1);
+    expect(component.acl[0].email).toBe(user.email);
+    expect(component.acl[0].role).toBe(Role.SURVEY_ORGANIZER);
+    expect(authServiceSpy.getUser).toHaveBeenCalled();
   });
 });

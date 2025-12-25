@@ -37,6 +37,7 @@ import { DraftSurveyService } from 'app/services/draft-survey/draft-survey.servi
   selector: 'ground-share-dialog',
   templateUrl: './share-dialog.component.html',
   styleUrls: ['./share-dialog.component.scss'],
+  standalone: false,
 })
 export class ShareDialogComponent {
   readonly roleOptions = ROLE_OPTIONS;

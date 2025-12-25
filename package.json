@@ -28,15 +28,24 @@
   },
   "homepage": "https://groundplatform.org",
   "devDependencies": {
+    "ajv": "^8.17.1",
+    "ajv-keywords": "^5.1.0",
+    "eslint": "^8.26.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-import": "^2.29.0",
+    "eslint-plugin-prettier": "^4.2.1",
     "firebase-tools": "^13.24.2",
+    "gts": "^5.3.1",
     "isolate-package": "^1.18.0",
     "nx": "22.2.1",
+    "prettier": "^2.8.1",
     "start-server-and-test": "^2.0.3",
     "ts-node": "^10.9.2",
-    "tslib": "^2.6.2"
+    "tslib": "^2.6.2",
+    "typescript": "^5.9.3"
   },
   "engines": {
-    "node": "20"
+    "node": "22"
   },
   "workspaces": [
     "proto",

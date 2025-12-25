@@ -16,7 +16,6 @@
 
 <div class="page">
   <ground-header></ground-header>
-
   <!-- TODO(#1170): Extract the spinner into a component -->
   <div id="loading-spinner" class="loading-spinner" *ngIf="createSurveyPhase === CreateSurveyPhase.LOADING">
     <div>
@@ -25,7 +24,6 @@
     </div>
   </div>
 
-  <div *ngIf="createSurveyPhase !== CreateSurveyPhase.LOADING" class="container">
     <div class="card">
       <img
         *ngIf="createSurveyPhase === CreateSurveyPhase.JOB_DETAILS"
@@ -49,12 +47,12 @@
               [description]="survey.description"
               (onValidationChange)="onValidationChange($event)"
             ></survey-details>
-            <job-details
+            <app-job-details
               *ngSwitchCase="CreateSurveyPhase.JOB_DETAILS"
               #jobDetails
               [name]="jobName()"
               (onValidationChange)="onValidationChange($event)"
-            ></job-details>
+            ></app-job-details>
             <survey-loi
               *ngSwitchCase="CreateSurveyPhase.DEFINE_LOIS"
               #surveyLoi
@@ -111,5 +109,4 @@
       </button>
       </div>
     </div>
-  </div>
 </div>

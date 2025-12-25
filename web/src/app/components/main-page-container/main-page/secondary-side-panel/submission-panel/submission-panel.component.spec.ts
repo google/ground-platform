@@ -15,16 +15,23 @@
  */
 
 import { NO_ERRORS_SCHEMA } from '@angular/core';
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { AngularFireStorage } from '@angular/fire/compat/storage';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatListModule } from '@angular/material/list';
+import { MatMenuModule } from '@angular/material/menu';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { Map } from 'immutable';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { List, Map } from 'immutable';
 import { of } from 'rxjs';
 
 import { AuditInfo } from 'app/models/audit-info.model';
 import { Job } from 'app/models/job.model';
 import { Submission } from 'app/models/submission/submission.model';
 import { DataSharingType, Survey } from 'app/models/survey.model';
+import { Task } from 'app/models/task/task.model';
+import { GroundIconModule } from 'app/modules/ground-icon.module';
 import { NavigationService } from 'app/services/navigation/navigation.service';
 import { SubmissionService } from 'app/services/submission/submission.service';
 
@@ -33,8 +40,8 @@ import { SubmissionPanelComponent } from './submission-panel.component';
 describe('SubmissionPanelComponent', () => {
   let component: SubmissionPanelComponent;
   let fixture: ComponentFixture<SubmissionPanelComponent>;
-  let submissionServiceSpy: jasmine.SpyObj<SubmissionService>;
-  let navigationServiceSpy: jasmine.SpyObj<NavigationService>;
+  let submissionService: jasmine.SpyObj<SubmissionService>;
+  let navigationService: jasmine.SpyObj<NavigationService>;
   let storageSpy: jasmine.SpyObj<AngularFireStorage>;
 
   const mockSurvey = new Survey(
@@ -59,39 +66,46 @@ describe('SubmissionPanelComponent', () => {
   const mockSubmission = new Submission(
     'sub1',
     'loi1',
-    { id: 'job1' } as Job,
+    { id: 'job1', getTasksSorted: () => List<Task>() } as unknown as Job,
     mockAuditInfo,
     mockAuditInfo,
     Map()
   );
 
-  beforeEach(waitForAsync(() => {
-    submissionServiceSpy = jasmine.createSpyObj('SubmissionService', [
+  beforeEach(async () => {
+    submissionService = jasmine.createSpyObj('SubmissionService', [
       'getSelectedSubmission$',
     ]);
-    navigationServiceSpy = jasmine.createSpyObj('NavigationService', [
+    navigationService = jasmine.createSpyObj('NavigationService', [
       'getTaskId$',
       'selectLocationOfInterest',
       'showSubmissionDetailWithHighlightedTask',
     ]);
     storageSpy = jasmine.createSpyObj('AngularFireStorage', ['ref']);
 
-    submissionServiceSpy.getSelectedSubmission$.and.returnValue(
+    submissionService.getSelectedSubmission$.and.returnValue(
       of(mockSubmission)
     );
-    navigationServiceSpy.getTaskId$.and.returnValue(of(null));
+    navigationService.getTaskId$.and.returnValue(of(null));
 
-    TestBed.configureTestingModule({
+    await TestBed.configureTestingModule({
       declarations: [SubmissionPanelComponent],
-      imports: [MatProgressSpinnerModule],
+      imports: [
+        MatButtonModule,
+        MatIconModule,
+        MatListModule,
+        MatMenuModule,
+        BrowserAnimationsModule,
+        GroundIconModule,
+      ],
       providers: [
-        { provide: SubmissionService, useValue: submissionServiceSpy },
-        { provide: NavigationService, useValue: navigationServiceSpy },
+        { provide: NavigationService, useValue: navigationService },
+        { provide: SubmissionService, useValue: submissionService },
         { provide: AngularFireStorage, useValue: storageSpy },
       ],
       schemas: [NO_ERRORS_SCHEMA],
     }).compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(SubmissionPanelComponent);
@@ -108,7 +122,7 @@ describe('SubmissionPanelComponent', () => {
     component.submission = mockSubmission;
     component.navigateToSubmissionList();
 
-    expect(navigationServiceSpy.selectLocationOfInterest).toHaveBeenCalledWith(
+    expect(navigationService.selectLocationOfInterest).toHaveBeenCalledWith(
       mockSurvey.id,
       mockSubmission.loiId
     );

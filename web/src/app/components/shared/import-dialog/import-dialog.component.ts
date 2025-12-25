@@ -26,6 +26,7 @@ import { NotificationService } from 'app/services/notification/notification.serv
   selector: 'ground-import-dialog',
   templateUrl: './import-dialog.component.html',
   styleUrls: ['./import-dialog.component.scss'],
+  standalone: false,
 })
 export class ImportDialogComponent {
   private surveyId: string;

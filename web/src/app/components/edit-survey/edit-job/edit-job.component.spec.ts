@@ -51,6 +51,7 @@ import { SurveyService } from 'app/services/survey/survey.service';
       useExisting: MockLoiEditorComponent,
     },
   ],
+  standalone: false,
 })
 class MockLoiEditorComponent {
   @Input() canImport!: boolean;
@@ -99,6 +100,7 @@ describe('EditJobComponent', () => {
           provide: DraftSurveyService,
           useValue: {
             getSurvey$: () => of(survey),
+            getSurvey: () => survey,
           },
         },
         {

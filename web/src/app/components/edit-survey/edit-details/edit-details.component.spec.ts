@@ -16,12 +16,7 @@
 
 import { CommonModule } from '@angular/common';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
-import {
-  ComponentFixture,
-  TestBed,
-  fakeAsync,
-  flushMicrotasks,
-} from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatCardModule } from '@angular/material/card';
 import {
   MatDialog,
@@ -116,7 +111,7 @@ describe('EditDetailsComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should copy the survey', fakeAsync(() => {
+  it('should copy the survey', async () => {
     const copyButton = fixture.debugElement.query(By.css('#copy-survey-button'))
       .nativeElement as HTMLElement;
 
@@ -124,10 +119,10 @@ describe('EditDetailsComponent', () => {
 
     expect(surveyServiceSpy.copySurvey).toHaveBeenCalledWith(survey.id);
 
-    flushMicrotasks();
+    await fixture.whenStable();
 
     expect(navigationServiceSpy.navigateToSurveyDashboard).toHaveBeenCalledWith(
       newSurveyId
     );
-  }));
+  });
 });

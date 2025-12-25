@@ -32,6 +32,7 @@ import { DynamicDataSource, DynamicFlatNode } from './tree-data-source';
   selector: 'ground-job-list-item',
   templateUrl: './job-list-item.component.html',
   styleUrls: ['./job-list-item.component.scss'],
+  standalone: false,
 })
 export class JobListItemComponent implements OnInit {
   @Input() job!: Job;

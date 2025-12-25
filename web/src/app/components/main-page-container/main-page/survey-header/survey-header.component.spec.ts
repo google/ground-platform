@@ -15,12 +15,15 @@
  */
 
 import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { Router } from '@angular/router';
+import { Map } from 'immutable';
 import { NEVER, of } from 'rxjs';
 
+import { DataSharingType, Survey } from 'app/models/survey.model';
+import { GroundIconModule } from 'app/modules/ground-icon.module';
 import { DataStoreService } from 'app/services/data-store/data-store.service';
 import { SurveyService } from 'app/services/survey/survey.service';
 
@@ -30,9 +33,19 @@ describe('SurveyHeaderComponent', () => {
   let component: SurveyHeaderComponent;
   let fixture: ComponentFixture<SurveyHeaderComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      imports: [MatIconModule, MatDialogModule],
+  const mockSurvey = new Survey(
+    'survey1',
+    'Survey Title',
+    'Description',
+    Map(),
+    Map(),
+    'owner1',
+    { type: DataSharingType.PRIVATE }
+  );
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [MatIconModule, MatDialogModule, GroundIconModule],
       declarations: [SurveyHeaderComponent],
       providers: [
         {
@@ -45,6 +58,7 @@ describe('SurveyHeaderComponent', () => {
             getActiveSurvey$: () => NEVER,
             getCurrentSurvey: () => {},
             canManageSurvey: () => {},
+            updateTitle: () => Promise.resolve(),
           },
         },
         {
@@ -57,11 +71,12 @@ describe('SurveyHeaderComponent', () => {
       ],
       schemas: [CUSTOM_ELEMENTS_SCHEMA],
     }).compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(SurveyHeaderComponent);
     component = fixture.componentInstance;
+    fixture.componentRef.setInput('activeSurvey', mockSurvey);
     fixture.detectChanges();
   });
 

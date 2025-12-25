@@ -15,8 +15,12 @@
  */
 
 import { NO_ERRORS_SCHEMA } from '@angular/core';
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import {
+  MAT_DIALOG_DATA,
+  MatDialogModule,
+  MatDialogRef,
+} from '@angular/material/dialog';
 
 import { NavigationService } from 'app/services/navigation/navigation.service';
 import { SurveyService } from 'app/services/survey/survey.service';
@@ -26,24 +30,25 @@ import { TitleDialogComponent } from './title-dialog.component';
 describe('TitleDialogComponent', () => {
   let component: TitleDialogComponent;
   let fixture: ComponentFixture<TitleDialogComponent>;
-  const dialogRef: Partial<MatDialogRef<TitleDialogComponent>> = {};
+  const dialogRefSpy: Partial<MatDialogRef<TitleDialogComponent>> = {};
   const surveyService = jasmine.createSpyObj('SurveyService', ['createSurvey']);
   const navigationService = jasmine.createSpyObj('NavigationService', [
     'selectSurvey',
   ]);
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       declarations: [TitleDialogComponent],
       imports: [MatDialogModule],
       providers: [
-        { provide: MatDialogRef, useValue: dialogRef },
+        { provide: MatDialogRef, useValue: dialogRefSpy },
+        { provide: MAT_DIALOG_DATA, useValue: { title: 'Title' } },
         { provide: SurveyService, useValue: surveyService },
         { provide: NavigationService, useValue: navigationService },
       ],
       schemas: [NO_ERRORS_SCHEMA],
     }).compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(TitleDialogComponent);

@@ -36,6 +36,7 @@ import { Job } from 'app/models/job.model';
   selector: 'ground-color-picker',
   templateUrl: './color-picker.component.html',
   styleUrls: ['./color-picker.component.scss'],
+  standalone: false,
 })
 export class ColorPickerComponent implements OnInit {
   job?: Job;

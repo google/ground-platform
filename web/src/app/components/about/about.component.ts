@@ -21,6 +21,7 @@ import { Component } from '@angular/core';
   selector: 'ground-about-page',
   templateUrl: './about.component.html',
   styleUrls: ['./about.component.scss'],
+  standalone: false,
 })
 export class AboutComponent {
   constructor(private location: Location) {}

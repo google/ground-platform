@@ -42,6 +42,7 @@ import {
   selector: 'edit-survey',
   templateUrl: './edit-survey.component.html',
   styleUrls: ['./edit-survey.component.scss'],
+  standalone: false,
 })
 export class EditSurveyComponent {
   private editSurveyPageSignal =
@@ -53,6 +54,7 @@ export class EditSurveyComponent {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   production = !!(environment as any)['production'];
   sectionTitle?: string = '';
+  sortedJobs = List<Job>();
 
   constructor(
     public dialog: MatDialog,
@@ -68,9 +70,10 @@ export class EditSurveyComponent {
         this.surveyId = surveyId;
         this.surveyService.activateSurvey(surveyId);
         await this.draftSurveyService.init(surveyId);
-        this.draftSurveyService
-          .getSurvey$()
-          .subscribe(survey => (this.survey = survey));
+        this.draftSurveyService.getSurvey$().subscribe(survey => {
+          this.survey = survey;
+          this.sortedJobs = this.survey.getJobsSorted();
+        });
       }
     });
 
@@ -89,10 +92,6 @@ export class EditSurveyComponent {
           break;
       }
     });
-  }
-
-  jobs(): List<Job> {
-    return this.survey!.getJobsSorted();
   }
 
   addJob(): void {

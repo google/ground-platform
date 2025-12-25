@@ -33,6 +33,7 @@ import { getLoiIcon } from 'app/utils/utils';
   selector: 'ground-loi-panel',
   templateUrl: './loi-panel.component.html',
   styleUrls: ['./loi-panel.component.scss'],
+  standalone: false,
 })
 export class LocationOfInterestPanelComponent implements OnInit, OnDestroy {
   subscription: Subscription = new Subscription();

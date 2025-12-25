@@ -27,6 +27,7 @@ import { AuthService } from 'app/services/auth/auth.service';
   selector: 'ground-account-popup',
   templateUrl: './account-popup.component.html',
   styleUrls: ['./account-popup.component.scss'],
+  standalone: false,
 })
 export class AccountPopupComponent implements OnInit {
   private readonly matDialogRef: MatDialogRef<AccountPopupComponent>;

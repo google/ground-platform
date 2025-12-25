@@ -139,7 +139,7 @@ describe('JobListItemComponent', () => {
     return List(submissions);
   }
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(async () => {
     surveyServiceSpy = jasmine.createSpyObj<SurveyService>('SurveyService', [
       'canManageSurvey',
       'getActiveSurvey$',
@@ -183,7 +183,7 @@ describe('JobListItemComponent', () => {
     );
     navigationServiceSpy.getUrlParams.and.returnValue(urlParamsSignal);
 
-    TestBed.configureTestingModule({
+    await TestBed.configureTestingModule({
       declarations: [JobListItemComponent],
       imports: [
         GroundIconModule,
@@ -208,7 +208,7 @@ describe('JobListItemComponent', () => {
         },
       ],
     }).compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(JobListItemComponent);

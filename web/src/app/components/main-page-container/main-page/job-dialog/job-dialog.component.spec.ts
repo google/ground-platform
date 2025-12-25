@@ -15,7 +15,7 @@
  */
 
 import { Component } from '@angular/core';
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import {
@@ -38,10 +38,18 @@ import { EditStyleButtonModule } from './edit-style-button/edit-style-button.mod
 import { JobDialogComponent } from './job-dialog.component';
 import { TaskEditorModule } from './task-editor/task-editor.module';
 
-@Component({ selector: 'mat-dialog-content', template: '' })
+@Component({
+  selector: 'mat-dialog-content',
+  template: '',
+  standalone: false,
+})
 class MatDialogContent {}
 
-@Component({ selector: 'mat-dialog-actions', template: '' })
+@Component({
+  selector: 'mat-dialog-actions',
+  template: '',
+  standalone: false,
+})
 class MatDialogActions {}
 
 describe('JobDialogComponent', () => {
@@ -51,9 +59,9 @@ describe('JobDialogComponent', () => {
     keydownEvents: () => NEVER,
   };
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(async () => {
     const routerSpy = createRouterSpy();
-    TestBed.configureTestingModule({
+    await TestBed.configureTestingModule({
       declarations: [JobDialogComponent, MatDialogContent, MatDialogActions],
       imports: [
         EditStyleButtonModule,
@@ -79,7 +87,7 @@ describe('JobDialogComponent', () => {
         },
       ],
     }).compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(JobDialogComponent);
