@@ -1,0 +1,180 @@
+{
+  "name": "web",
+  "$schema": "../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "sourceRoot": "web/src",
+  "prefix": "ground",
+  "i18n": {
+    "sourceLocale": "en",
+    "locales": {
+      "fr": {
+        "translation": "web/src/locale/messages.fr.json"
+      },
+      "vi": {
+        "translation": "web/src/locale/messages.vi.json"
+      }
+    }
+  },
+  "targets": {
+    "build": {
+      "executor": "@nx/angular:webpack-browser",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/web",
+        "index": "web/src/index.html",
+        "main": "web/src/main.ts",
+        "localize": true,
+        "i18nMissingTranslation": "error",
+        "polyfills": ["zone.js"],
+        "tsConfig": "web/tsconfig.app.json",
+        "aot": true,
+        "assets": [
+          "web/src/favicon.ico",
+          "web/src/assets"
+        ],
+        "stylePreprocessorOptions": {
+          "includePaths": ["web/src/app/styles"]
+        },
+        "styles": ["web/src/ground-theme.scss"],
+        "scripts": []
+      },
+      "configurations": {
+        "development": {
+          "fileReplacements": [
+            {
+              "replace": "web/src/environments/environment.ts",
+              "with": "web/src/environments/environment.local.ts"
+            }
+          ],
+          "buildOptimizer": false,
+          "optimization": false,
+          "vendorChunk": true,
+          "extractLicenses": false,
+          "sourceMap": true,
+          "namedChunks": true
+        },
+        "staging": {
+          "fileReplacements": [
+            {
+              "replace": "web/src/environments/environment.ts",
+              "with": "web/src/environments/environment.staging.ts"
+            }
+          ],
+          "buildOptimizer": false,
+          "optimization": false,
+          "vendorChunk": true,
+          "extractLicenses": false,
+          "sourceMap": true,
+          "namedChunks": true
+        },
+        "production": {
+          "fileReplacements": [
+            {
+              "replace": "web/src/environments/environment.ts",
+              "with": "web/src/environments/environment.production.ts"
+            }
+          ],
+          "optimization": true,
+          "outputHashing": "all",
+          "sourceMap": false,
+          "namedChunks": false,
+          "aot": true,
+          "extractLicenses": true,
+          "vendorChunk": false,
+          "buildOptimizer": true,
+          "budgets": [
+            {
+              "type": "initial",
+              "maximumWarning": "3mb",
+              "maximumError": "5mb"
+            },
+            {
+              "type": "anyComponentStyle",
+              "maximumWarning": "100kb",
+              "maximumError": "200kb"
+            }
+          ]
+        },
+        "en": {
+          "localize": ["en"]
+        },
+        "fr": {
+          "localize": ["fr"]
+        },
+        "vi": {
+          "localize": ["vi"]
+        }
+      },
+      "defaultConfiguration": "development"
+    },
+    "serve": {
+      "executor": "@nx/angular:dev-server",
+      "options": {
+        "buildTarget": "web:build"
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "web:build:development,en"
+        },
+        "staging": {
+          "buildTarget": "web:build:staging,en"
+        },
+        "production": {
+          "buildTarget": "web:build:production,en"
+        },
+        "fr": {
+          "buildTarget": "web:build:staging,fr"
+        },
+        "vi": {
+          "buildTarget": "web:build:staging,vi"
+        }
+      }
+    },
+    "extract-i18n": {
+      "executor": "@nx/angular:extract-i18n",
+      "options": {
+        "buildTarget": "web:build",
+        "format": "json",
+        "outputPath": "web/src/locale"
+      }
+    },
+    "test": {
+      "executor": "@angular-devkit/build-angular:karma",
+      "options": {
+        "main": "web/src/test.ts",
+        "polyfills": ["zone.js"],
+        "tsConfig": "web/tsconfig.spec.json",
+        "fileReplacements": [
+          {
+            "replace": "web/src/environments/environment.ts",
+            "with": "web/src/environments/environment.test.ts"
+          }
+        ],
+        "karmaConfig": "web/karma.conf.js",
+        "assets": [
+          "web/src/favicon.ico",
+          "web/src/assets"
+        ],
+        "stylePreprocessorOptions": {
+          "includePaths": ["web/src/app/styles"]
+        },
+        "styles": ["web/src/ground-theme.scss"],
+        "scripts": [],
+        "codeCoverage": true
+      }
+    },
+    "lint": {
+      "executor": "@angular-eslint/builder:lint",
+      "options": {
+        "eslintConfig": "web/.eslintrc.json",
+        "lintFilePatterns": ["web/**/*.spec.ts", "web/**/*.ts"]
+      }
+    },
+    "deploy": {
+      "executor": "@angular/fire:deploy",
+      "options": {
+        "buildTarget": "web:build"
+      }
+    }
+  }
+}
