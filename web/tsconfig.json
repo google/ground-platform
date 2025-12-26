@@ -1,5 +1,5 @@
 {
-  "extends": "../node_modules/gts/tsconfig-google.json",
+  "extends": "../tsconfig.base.json",
   "compilerOptions": {
     "baseUrl": "src",
     "module": "es2022",

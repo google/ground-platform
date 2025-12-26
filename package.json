@@ -45,15 +45,19 @@
   },
   "homepage": "https://groundplatform.org",
   "devDependencies": {
+    "@angular-eslint/eslint-plugin": "^21.1.0",
+    "@angular-eslint/eslint-plugin-template": "^21.1.0",
+    "@angular-eslint/template-parser": "^21.1.0",
     "@typescript-eslint/eslint-plugin": "^8.50.1",
     "@typescript-eslint/parser": "^8.50.1",
     "ajv": "^8.17.1",
     "ajv-keywords": "^5.1.0",
     "eslint": "^9.39.2",
     "eslint-config-prettier": "^10.1.8",
-    "eslint-import-resolver-typescript": "^3.6.3",
-    "eslint-plugin-absolute-imports": "^0.0.3",
+
     "eslint-plugin-import": "^2.29.0",
+    "eslint-plugin-n": "^17.0.0",
+
     "eslint-plugin-prettier": "^5.5.4",
     "firebase-tools": "^13.24.2",
     "gts": "^5.3.1",
@@ -76,5 +80,8 @@
   ],
   "optionalDependencies": {
     "@nx/nx-linux-x64-gnu": "^19.3.2"
+  },
+  "overrides": {
+    "eslint-plugin-n": "^17.0.0"
   }
 }
