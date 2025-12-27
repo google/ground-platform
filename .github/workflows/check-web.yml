@@ -40,10 +40,10 @@ jobs:
           node-version: "22"
 
       - name: Run tests
-        run: nx test --browsers=ChromeHeadless --watch=false --code-coverage
+        run: npx nx test --browsers=ChromeHeadless --watch=false --code-coverage
 
       - name: Run lint checks
-        run: nx lint
+        run: npx nx lint
 
       - name: Update test coverage report
         uses: codecov/codecov-action@v5
