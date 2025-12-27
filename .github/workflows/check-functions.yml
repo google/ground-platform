@@ -39,14 +39,8 @@ jobs:
         with:
           node-version: "22"
 
-      - name: Install dependencies
-        run: npm run --prefix=.. ci-all
-
-      - name: Build functions and local deps
-        run: npm run build-all
-
       - name: Run tests
-        run: npm run test
+        run: nx test
 
       - name: Run lint checks
-        run: npm run lint
+        run: nx lint
