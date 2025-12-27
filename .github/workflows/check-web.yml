@@ -26,9 +26,6 @@ jobs:
   check:
     name: Check
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./web
 
     steps:
       - name: Check out code
@@ -43,13 +40,13 @@ jobs:
         run: npm install
 
       - name: Build web and deps
-        run: npx nx build
+        run: npx nx build web
 
       - name: Run tests with coverage
-        run: npx nx test --browsers=ChromeHeadless --watch=false --code-coverage
+        run: npx nx test web --browsers=ChromeHeadless --watch=false --code-coverage
 
       - name: Run lint checks
-        run: npx nx lint
+        run: npx nx lint web
 
       - name: Update test coverage report
         uses: codecov/codecov-action@v5
