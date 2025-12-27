@@ -6,7 +6,6 @@
   "scripts": {
     "clean": "rm -rf dist *.log",
     "lint": "eslint --ext .js,.ts src/",
-    "lint:fix": "npm run lint -- --fix",
     "shell": "firebase functions:shell",
     "emulators": "firebase emulators:start --only functions,firestore --project local",
     "deploy": "firebase login && firebase deploy --project $npm_config_project --only functions",

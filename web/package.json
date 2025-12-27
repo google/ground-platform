@@ -9,7 +9,6 @@
     "test-headless": "ng test --browsers ChromeHeadlessNoSandbox --watch=false",
     "test-with-coverage": "npm run test -- --browsers ChromeHeadlessNoSandbox --watch=false --code-coverage",
     "lint": "ng lint",
-    "lint:fix": "npm run lint -- --fix",
     "posttest": "./posttest.sh",
     "postinstall": "node scripts/patch-karma.cjs",
     "login": "npx firebase login",

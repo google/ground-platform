@@ -9,7 +9,6 @@
   "scripts": {
     "clean": "rm -rf dist *.log src/generated",
     "lint": "eslint --ext .js,.ts src/",
-    "lint:fix": "npm run lint -- --fix",
     "test": "jasmine --config=jasmine.json",
     "build-local-deps": "npm run build --workspace=../proto",
     "build": "tsc",
