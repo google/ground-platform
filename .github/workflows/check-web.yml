@@ -39,17 +39,11 @@ jobs:
         with:
           node-version: "22"
 
-      - name: Build and install dependencies
-        run: npm run --prefix=.. ci-all
-
-      - name: Build web and local deps
-        run: npm run build-all --config=local
-
       - name: Run tests
-        run: npm run test-with-coverage
+        run: nx test --browsers=ChromeHeadless --watch=false --code-coverage
 
       - name: Run lint checks
-        run: npm run lint
+        run: nx lint
 
       - name: Update test coverage report
         uses: codecov/codecov-action@v5
