@@ -26,9 +26,6 @@ jobs:
   check:
     name: Check
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./functions
 
     steps:
       - name: Check out code
@@ -39,8 +36,14 @@ jobs:
         with:
           node-version: "22"
 
+      - name: Install deps
+        run: npm install
+
+      - name: Build
+        run: npx nx build functions
+
       - name: Run tests
-        run: nx test
+        run: npx nx test functions
 
       - name: Run lint checks
-        run: nx lint
+        run: npx nx lint functions
