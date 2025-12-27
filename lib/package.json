@@ -26,7 +26,7 @@
   "private": true,
   "dependencies": {
     "@google-cloud/firestore": "^7.7.0",
-    "proto": "workspace:*",
+    "proto": "*",
     "firebase-functions": "^5.1.1",
     "immutable": "^4.3.6",
     "long": "^5.2.3",

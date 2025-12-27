@@ -22,8 +22,8 @@
   },
   "dependencies": {
     "@fast-csv/format": "4.3.5",
-    "lib": "workspace:*",
-    "proto": "workspace:*",
+    "lib": "*",
+    "proto": "*",
     "@terraformer/wkt": "2.1.2",
     "busboy": "1.5.0",
     "cookie-parser": "^1.4.6",
