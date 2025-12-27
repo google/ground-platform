@@ -1,0 +1,42 @@
+import { FlatCompat } from '@eslint/eslintrc';
+import js from '@eslint/js';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const compat = new FlatCompat({
+    baseDirectory: __dirname,
+    recommendedConfig: js.configs.recommended,
+});
+
+export default [
+    {
+        ignores: [
+            "**/node_modules",
+            "**/lib"
+        ],
+    },
+    ...compat.config({
+        extends: "../node_modules/gts",
+        env: {
+            jasmine: true
+        },
+        parserOptions: {
+            sourceType: "module"
+        },
+        plugins: ["@typescript-eslint"],
+        root: true,
+        rules: {
+            "eqeqeq": ["error", "always", { "null": "ignore" }],
+            "object-curly-spacing": ["error", "always"],
+            // Relaxed rules to match legacy behavior without code changes
+            "@typescript-eslint/no-explicit-any": "warn",
+            "@typescript-eslint/no-require-imports": "warn",
+            "prettier/prettier": "warn",
+            "@typescript-eslint/no-unused-vars": "warn",
+            "@typescript-eslint/no-wrapper-object-types": "warn"
+        }
+    })
+];

@@ -8,7 +8,7 @@
   ],
   "scripts": {
     "clean": "rm -rf dist *.log src/generated",
-    "lint": "eslint --ext .js,.ts src/",
+    "lint": "eslint src/",
     "test": "jasmine --config=jasmine.json",
     "build-local-deps": "npm run build --workspace=../proto",
     "build": "tsc",
