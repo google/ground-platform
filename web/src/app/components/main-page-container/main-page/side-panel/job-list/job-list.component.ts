@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, computed, input } from '@angular/core';
+import { Component, computed, input, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { List } from 'immutable';
 
@@ -31,6 +31,9 @@ import { NavigationService } from 'app/services/navigation/navigation.service';
   standalone: false,
 })
 export class JobListComponent {
+  private loiService = inject(LocationOfInterestService);
+  readonly navigationService = inject(NavigationService);
+
   activeSurvey = input<Survey>();
 
   readonly jobs = computed(() => {
@@ -50,10 +53,7 @@ export class JobListComponent {
     return this.lois().groupBy(loi => loi.jobId);
   });
 
-  constructor(
-    readonly navigationService: NavigationService,
-    private loiService: LocationOfInterestService
-  ) {}
+  constructor() {}
 
   isSidePanelExpanded() {
     return this.navigationService.getSidePanelExpanded();

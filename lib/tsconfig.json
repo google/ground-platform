@@ -1,4 +1,5 @@
 {
+  "extends": "../tsconfig.base.json",
   "compilerOptions": {
     "module": "CommonJS",
     "noImplicitReturns": true,
@@ -11,7 +12,8 @@
     "allowJs": true,
     "resolveJsonModule": true,
     "esModuleInterop": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "rootDir": "src"
   },
   "compileOnSave": true,
   "include": [

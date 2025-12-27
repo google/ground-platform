@@ -3,7 +3,7 @@
     "indexes": "firestore/firestore.indexes.json"
   },
   "hosting": {
-    "public": "web/dist/web",
+    "source": "web",
     "redirects": [
       {
         "source": "/",

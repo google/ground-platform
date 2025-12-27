@@ -1,5 +1,5 @@
 {
-  "name": "@ground/proto",
+  "name": "proto",
   "version": "0.0.1",
   "description": "Ground shared Protocol Buffer definitions",
   "main": "dist/index.js",

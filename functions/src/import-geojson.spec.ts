@@ -17,7 +17,7 @@
 import {
   createMockFirestore,
   stubAdminApi,
-} from '@ground/lib/dist/testing/firestore';
+} from '@ground/lib/testing/firestore';
 import {
   createPostRequestSpy,
   createResponseSpy,

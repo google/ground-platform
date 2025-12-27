@@ -15,7 +15,7 @@
  */
 
 import { FlatTreeControl } from '@angular/cdk/tree';
-import { Component, Input, OnInit, SimpleChanges, effect } from '@angular/core';
+import { Component, Input, OnInit, SimpleChanges, effect, inject } from '@angular/core';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { List } from 'immutable';
 
@@ -39,6 +39,7 @@ export class JobListItemComponent implements OnInit {
   @Input() lois: List<LocationOfInterest> = List();
   @Input() actionsType: JobListItemActionsType = JobListItemActionsType.MENU;
 
+  private navigationService = inject(NavigationService);
   private urlParamsSignal = this.navigationService.getUrlParams();
 
   surveyId?: string | null;
@@ -55,7 +56,7 @@ export class JobListItemComponent implements OnInit {
 
   constructor(
     private sanitizer: DomSanitizer,
-    private navigationService: NavigationService,
+
     private groundPinService: GroundPinService,
     private authService: AuthService
   ) {

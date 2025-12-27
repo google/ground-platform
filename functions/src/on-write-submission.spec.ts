@@ -20,7 +20,7 @@ import {
   newDocumentSnapshot,
   newCountQuery,
   createMockFirestore,
-} from '@ground/lib/dist/testing/firestore';
+} from '@ground/lib/testing/firestore';
 import * as functions from './index';
 import { loi } from './common/datastore';
 import { Firestore } from 'firebase-admin/firestore';
