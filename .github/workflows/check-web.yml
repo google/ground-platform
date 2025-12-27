@@ -39,7 +39,13 @@ jobs:
         with:
           node-version: "22"
 
-      - name: Run tests
+      - name: Install deps
+        run: npm install
+
+      - name: Build web and deps
+        run: npx nx build
+
+      - name: Run tests with coverage
         run: npx nx test --browsers=ChromeHeadless --watch=false --code-coverage
 
       - name: Run lint checks
