@@ -1,6 +1,6 @@
 {
+  "extends": "../tsconfig.base.json",
   "compilerOptions": {
-    "baseUrl": ".",
     "module": "CommonJS",
     "esModuleInterop": true,
     "noImplicitReturns": true,

@@ -128,7 +128,7 @@ async function fetchWhispProperties(
 
   if (!response.ok) return {};
 
-  const json = await response.json();
+  const json = (await response.json()) as any;
 
   if (json?.code !== 'analysis_completed') return {};
 

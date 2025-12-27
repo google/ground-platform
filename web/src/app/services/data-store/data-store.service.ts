@@ -28,7 +28,7 @@ import {
   getDocs,
   serverTimestamp,
 } from '@angular/fire/firestore';
-import { registry } from '@ground/lib/dist/message-registry';
+import { registry } from '@ground/lib';
 import { GroundProtos } from '@ground/proto';
 import { getDownloadURL, getStorage, ref } from 'firebase/storage';
 import { List, Map, OrderedMap } from 'immutable';

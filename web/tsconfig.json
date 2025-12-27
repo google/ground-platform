@@ -2,9 +2,13 @@
   "extends": "../tsconfig.base.json",
   "compilerOptions": {
     "baseUrl": "src",
+    "paths": {
+      "@ground/lib": ["../../lib/src/index.ts"],
+      "@ground/lib/testing/firestore": ["../../lib/src/testing/firestore/index.ts"],
+      "@ground/proto": ["../../proto/dist/index.d.ts"]
+    },
     "module": "es2022",
     "esModuleInterop": true,
-    "rootDir": ".",
     "outDir": "build",
     "lib": ["es2022", "dom"],
     "experimentalDecorators": true,

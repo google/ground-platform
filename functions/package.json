@@ -1,5 +1,5 @@
 {
-  "name": "@ground/functions",
+  "name": "functions",
   "version": "0.0.1",
   "main": "dist/index.js",
   "description": "Cloud Functions for Firebase",
@@ -22,8 +22,8 @@
   },
   "dependencies": {
     "@fast-csv/format": "4.3.5",
-    "@ground/lib": "file:../lib",
-    "@ground/proto": "file:../proto",
+    "lib": "workspace:*",
+    "proto": "workspace:*",
     "@terraformer/wkt": "2.1.2",
     "busboy": "1.5.0",
     "cookie-parser": "^1.4.6",
