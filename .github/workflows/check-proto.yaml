@@ -39,11 +39,11 @@ jobs:
         with:
           node-version: "22"
 
-      - name: Install dependencies
-        run: npm run --prefix=.. ci-all
+      - name: Install deps
+        run: npm install
 
-      - name: Build protos
-        run: npm run build
+        - name: Build
+        run: npx nx build
 
       - name: Run lint checks
-        run: npm run lint
+        run: npx nx lint
