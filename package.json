@@ -23,11 +23,19 @@
           "build"
         ]
       },
-      "serve": {
+      "emulate": {
         "executor": "nx:run-commands",
         "options": {
           "commands": [
             "firebase experiments:enable webframeworks && firebase emulators:start --project demo-local --config firebase.local.json --import data/local",
+          ]
+        }
+      },
+      "serve": {
+        "executor": "nx:run-commands",
+        "options": {
+          "commands": [
+            "nx emulate",
             "nx serve web"
           ],
           "parallel": true
