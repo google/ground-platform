@@ -6,7 +6,7 @@
     "paths": {
       "@ground/lib": ["lib/src/index.ts"],
       "@ground/lib/testing/firestore": ["lib/src/testing/firestore/index.ts"],
-      "@ground/proto": ["proto/dist/index.d.ts"]
+      "@ground/proto": ["proto"]
     }
   }
 }
