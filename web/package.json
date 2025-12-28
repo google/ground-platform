@@ -17,7 +17,7 @@
     "@angular/common": "^21.0.6",
     "@angular/compiler": "^21.0.6",
     "@angular/core": "^21.0.6",
-    "@angular/fire": "^21.0.0-rc.0",
+    "@angular/fire": "^21.0.1",
     "@angular/forms": "^21.0.6",
     "@angular/google-maps": "^21.0.5",
     "@angular/localize": "^21.0.6",
