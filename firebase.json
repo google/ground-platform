@@ -4,9 +4,9 @@
     "indexes": "firestore/firestore.indexes.json"
   },
   "hosting": {
-    "public": "web/dist/web",
+    "public": "dist/web",
     "i18n": {
-      "root": "web/dist/web"
+      "root": "dist/web"
     },
     "redirects": [
       {

@@ -27,7 +27,8 @@
         "executor": "nx:run-commands",
         "options": {
           "commands": [
-            "firebase experiments:enable webframeworks && firebase emulators:start --project demo-local --config firebase.local.json --import data/local",
+            "firebase experiments:enable webframeworks",
+            "firebase emulators:start --project demo-local --config firebase.local.json --import data/local"
           ]
         }
       },

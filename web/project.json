@@ -23,7 +23,6 @@
         "outputPath": "dist/web",
         "index": "web/src/index.html",
         "main": "web/src/main.ts",
-        "localize": true,
         "i18nMissingTranslation": "error",
         "polyfills": ["zone.js"],
         "tsConfig": "web/tsconfig.app.json",
@@ -61,6 +60,7 @@
             }
           ],
           "buildOptimizer": false,
+          "localize": true,
           "optimization": false,
           "vendorChunk": true,
           "extractLicenses": false,
@@ -74,6 +74,7 @@
               "with": "web/src/environments/environment.production.ts"
             }
           ],
+          "localize": true,
           "optimization": true,
           "outputHashing": "all",
           "sourceMap": false,
