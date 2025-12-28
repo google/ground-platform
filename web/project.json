@@ -140,6 +140,7 @@
     },
     "test": {
       "executor": "@angular-devkit/build-angular:karma",
+      "dependsOn": ["pretest"],      
       "options": {
         "main": "web/src/test.ts",
         "polyfills": ["zone.js"],
