@@ -15,9 +15,9 @@
  */
 
 import { TestBed } from '@angular/core/testing';
-import { AngularFireAuth } from '@angular/fire/compat/auth';
-import { AngularFirestore } from '@angular/fire/compat/firestore';
-import { AngularFireFunctions } from '@angular/fire/compat/functions';
+import { Auth } from '@angular/fire/auth';
+import { Firestore } from '@angular/fire/firestore';
+import { Functions } from '@angular/fire/functions';
 import { Router } from '@angular/router';
 import { NEVER, of } from 'rxjs';
 
@@ -31,13 +31,14 @@ describe('AuthService', () => {
     TestBed.configureTestingModule({
       imports: [],
       providers: [
-        { provide: AngularFirestore, useValue: {} },
-        { provide: AngularFireFunctions, useValue: {} },
+        { provide: Firestore, useValue: {} },
+        { provide: Functions, useValue: {} },
         {
-          provide: AngularFireAuth,
+          provide: Auth,
           useValue: {
-            authState: NEVER,
-            onIdTokenChanged: (callback: Function) => callback(null),
+            // Mock properties as needed by authState if possible, or just {}
+            onAuthStateChanged: () => {},
+            onIdTokenChanged: () => {},
           },
         },
         { provide: DataStoreService, useValue: { user$: () => of() } },

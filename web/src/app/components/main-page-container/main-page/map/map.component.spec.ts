@@ -15,8 +15,8 @@
  */
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { AngularFireAuth } from '@angular/fire/compat/auth';
-import { AngularFirestore } from '@angular/fire/compat/firestore';
+import { Auth } from '@angular/fire/auth';
+import { Firestore } from '@angular/fire/firestore';
 import { GoogleMapsModule } from '@angular/google-maps';
 import { List, Map } from 'immutable';
 import { BehaviorSubject, of } from 'rxjs';
@@ -212,16 +212,16 @@ describe('MapComponent', () => {
         { provide: DrawingToolsService, useValue: drawingToolsServiceSpy },
         { provide: AuthService, useValue: {} },
         {
-          provide: AngularFireAuth,
+          provide: Auth,
           useValue: {
-            authState: of({
+            currentUser: {
               displayName: null,
               isAnonymous: true,
               uid: '',
-            }),
+            },
           },
         },
-        { provide: AngularFirestore, useValue: {} },
+        { provide: Firestore, useValue: {} },
       ],
     }).compileComponents();
   });

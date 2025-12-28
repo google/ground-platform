@@ -16,8 +16,8 @@
 
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { AngularFireAuth } from '@angular/fire/compat/auth';
-import { AngularFirestore } from '@angular/fire/compat/firestore';
+import { Auth } from '@angular/fire/auth';
+import { Firestore } from '@angular/fire/firestore';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
@@ -58,8 +58,8 @@ const authState = {
   uid: '',
 };
 
-const mockAngularFireAuth = {
-  authState: of(authState),
+const mockAuth = {
+  currentUser: authState,
 };
 
 describe('JobListComponent', () => {
@@ -85,10 +85,10 @@ describe('JobListComponent', () => {
           useValue: routerSpy,
         },
         { provide: NavigationService, useValue: navigationService },
-        { provide: AngularFirestore, useValue: {} },
+        { provide: Firestore, useValue: {} },
         {
-          provide: AngularFireAuth,
-          useValue: mockAngularFireAuth,
+          provide: Auth,
+          useValue: mockAuth,
         },
         { provide: DataStoreService, useValue: { user$: () => of() } },
         {

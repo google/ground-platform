@@ -16,7 +16,7 @@
 
 import { NO_ERRORS_SCHEMA, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { AngularFirestore } from '@angular/fire/compat/firestore';
+import { Firestore } from '@angular/fire/firestore';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
@@ -179,18 +179,8 @@ dataStoreServiceSpy.updateSubmission.and.returnValue(Promise.resolve());
 const authServiceSpy = jasmine.createSpyObj('AuthService', ['getUser$']);
 authServiceSpy.getUser$.and.returnValue(of(MockModel.user001));
 
-const angularFirestoreStub = {
-  collection: (_name: string) => ({
-    doc: (_id: string) => ({
-      valueChanges: () => of({}),
-      set: (_d: any) => Promise.resolve(),
-      get: () => of({}),
-      delete: () => Promise.resolve(),
-    }),
-    valueChanges: () => of([]),
-    snapshotChanges: () => of([]),
-  }),
-};
+// Stub for Firestore if needed, but likely unused in component if DataStore is mocked
+const firestoreStub = {};
 
 describe('SubmissionFormComponent', () => {
   let component: SubmissionFormComponent;
@@ -224,7 +214,7 @@ describe('SubmissionFormComponent', () => {
         { provide: NavigationService, useValue: navigationService },
         { provide: DataStoreService, useValue: dataStoreServiceSpy },
         { provide: AuthService, useValue: authServiceSpy },
-        { provide: AngularFirestore, useValue: angularFirestoreStub },
+        { provide: Firestore, useValue: firestoreStub },
       ],
       schemas: [NO_ERRORS_SCHEMA],
     });
