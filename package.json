@@ -38,9 +38,9 @@
   },
   "homepage": "https://groundplatform.org",
   "devDependencies": {
-    "@angular-eslint/eslint-plugin": "^21.1.0",
-    "@angular-eslint/eslint-plugin-template": "^21.1.0",
-    "@angular-eslint/template-parser": "^21.1.0",
+    "@angular-eslint/eslint-plugin": "^20.0.6",
+    "@angular-eslint/eslint-plugin-template": "^20.0.6",
+    "@angular-eslint/template-parser": "^20.0.6",
     "@eslint/eslintrc": "^3.3.3",
     "@typescript-eslint/eslint-plugin": "^8.50.1",
     "@typescript-eslint/parser": "^8.50.1",
