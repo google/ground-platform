@@ -26,9 +26,6 @@ jobs:
   check:
     name: Check
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./proto
 
     steps:
       - name: Check out code
@@ -43,7 +40,7 @@ jobs:
         run: npm install
 
         - name: Build
-        run: npx nx build
+        run: npx nx build proto
 
       - name: Run lint checks
-        run: npx nx lint
+        run: npx nx lint proto
