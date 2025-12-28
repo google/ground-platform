@@ -15,7 +15,8 @@ export default [
     {
         ignores: [
             "**/node_modules",
-            "**/lib"
+            "**/lib",
+            "**/coverage"
         ],
     },
     ...compat.config({
