@@ -6,7 +6,6 @@
     "clean": "nx run-many -t clean --exclude=root",
     "lint": "nx run-many -t lint --exclude=root",
     "build": "nx run-many -t build --exclude=root",
-    "start": "firebase experiments:enable webframeworks && firebase emulators:start --project demo-local --config firebase.local.json --import data/local",
     "deploy:staging": "firebase login && firebase deploy --project ground-dev-sig",
     "deploy:production": "firebase login && firebase deploy --project YOUR-PROD-PROJECT",
     "export:local": "firebase emulators:export data/local --project demo-local --only firestore",
@@ -18,11 +17,6 @@
   },
   "nx": {
     "targets": {
-      "start": {
-        "dependsOn": [
-          "build"
-        ]
-      },
       "emulate": {
         "executor": "nx:run-commands",
         "options": {
@@ -30,16 +24,6 @@
             "firebase experiments:enable webframeworks",
             "firebase emulators:start --project demo-local --config firebase.local.json --import data/local"
           ]
-        }
-      },
-      "serve": {
-        "executor": "nx:run-commands",
-        "options": {
-          "commands": [
-            "nx emulate",
-            "nx serve web"
-          ],
-          "parallel": true
         }
       }
     }

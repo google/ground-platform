@@ -3,7 +3,6 @@
   "version": "0.0.1",
   "scripts": {
     "clean": "rm -rf dist coverage *.log",
-    "serve": "ng serve",
     "pretest": "./pretest.sh",
     "posttest": "./posttest.sh",
     "postinstall": "node scripts/patch-karma.cjs",
