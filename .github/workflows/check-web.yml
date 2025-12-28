@@ -43,7 +43,7 @@ jobs:
         run: npx nx build web
 
       - name: Run tests with coverage
-        run: npx nx test web --browsers=ChromeHeadless --watch=false --code-coverage
+        run: npx nx test web --browsers=ChromeHeadlessNoSandbox --watch=false --code-coverage
 
       - name: Run lint checks
         run: npx nx lint web
