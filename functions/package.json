@@ -1,8 +1,5 @@
 {
   "name": "@ground/functions",
-  "nx": {
-    "name": "functions"
-  },
   "version": "0.0.1",
   "main": "dist/functions/src/index.js",
   "description": "Cloud Functions for Firebase",
@@ -13,18 +10,21 @@
     "clean": "rm -rf dist *.log",
     "lint": "eslint src/",
     "shell": "firebase functions:shell",
-    "emulators": "firebase emulators:start --only functions,firestore --project local",
-    "deploy": "firebase login && firebase deploy --project $npm_config_project --only functions",
-    "deploy-one": "firebase login && firebase deploy --project $npm_config_project --only functions:$npm_config_function",
+    "emulate": "firebase emulators:start --only functions,firestore --project demo-local",
     "logs": "firebase functions:log",
     "test": "jasmine --config=jasmine.json",
-    "build-local-deps": "npm run build --workspace=../proto --workspace=../lib",
     "build": "tsc",
-    "build-all": "npm run build-local-deps && npm run build",
-    "build-and-test": "npm run build && npm run test",
-    "build-all-and-test": "npm run build-all && npm run test",
-    "build-all-and-deploy": "npm run build-all && npm run deploy",
+    "deploy": "npm run build && firebase login && firebase deploy --project $npm_config_project --only functions",
     "watch": "tsc --watch"
+  },
+  "nx": {
+    "name": "functions",
+    "targets": {
+      "test": {
+        "commands": "jasmine --config=jasmine.json",
+        "dependsOn": ["build"]
+      }
+    }
   },
   "dependencies": {
     "@fast-csv/format": "4.3.5",
