@@ -3,6 +3,9 @@
   "version": "0.0.1",
   "main": "dist/functions/src/index.js",
   "description": "Cloud Functions for Firebase",
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "clean": "rm -rf dist *.log",
     "lint": "eslint src/",
