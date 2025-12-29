@@ -10,11 +10,8 @@
     "deploy": "npm run login && npx firebase deploy --only hosting --project $npm_config_project",
     "extract-i18n": "ng extract-i18n"
   },
-
   "devDependencies": {
-
     "@jridgewell/source-map": "^0.3.2",
-
     "@types/google.maps": "^3.54.10",
     "@types/jasmine": "^5.1.13",
     "@types/jasmine-expect": "3.8.1",
