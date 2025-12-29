@@ -61,9 +61,6 @@ const firebaseUiAuthConfig: firebaseui.auth.Config = {
   credentialHelper: firebaseui.auth.CredentialHelper.GOOGLE_YOLO,
 };
 
-console.log('Environment:', environment);
-// initializeApp(environment.firebase as any);
-
 @NgModule({
   declarations: [AppComponent],
   bootstrap: [AppComponent],
