@@ -79,11 +79,11 @@ runs:
 
     - name: Install dependencies
       shell: bash
-      run: npm run --prefix=.. ci-all
+      run: npm install
 
     - name: Build project and local deps
       shell: bash
-      run: npm run build-all --config=local
+      run: npx nx build
 
     - name: Run 'Create survey' test
       shell: bash
