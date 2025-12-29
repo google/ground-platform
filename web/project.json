@@ -20,7 +20,7 @@
       "executor": "@nx/angular:webpack-browser",
       "outputs": ["{options.outputPath}"],
       "options": {
-        "outputPath": "dist/web",
+        "outputPath": "web/dist/web",
         "index": "web/src/index.html",
         "main": "web/src/main.ts",
         "i18nMissingTranslation": "error",
