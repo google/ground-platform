@@ -63,6 +63,7 @@ export default [
                     "allowSeparatedGroups": true
                 }
             ],
+            "n/no-extraneous-import": "off",
             "n/no-missing-import": "off",
             "n/no-exports-assign": "off",
             "n/no-deprecated-api": "off",
