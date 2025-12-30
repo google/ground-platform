@@ -16,20 +16,40 @@
       "build": {
         "executor": "nx:run-commands",
         "options": {
-          "cwd": "web",
-          "command": "ng build",
-          "forwardAllArgs": true
+          "cwd": "web"
         },
-        "dependsOn": ["^build"]
+        "configurations": {
+          "development": {
+            "command": "ng build -c development"
+          },
+          "staging": {
+            "command": "ng build -c staging"
+          },
+          "production": {
+            "command": "ng build -c production"
+          }
+        },
+        "dependsOn": ["^build"],
+        "defaultConfiguration": "development"
       },
       "serve": {
         "executor": "nx:run-commands",
         "options": {
-          "cwd": "web",
-          "command": "ng serve",
-          "forwardAllArgs": true
+          "cwd": "web"
         },
-        "dependsOn": ["^build"]
+        "configurations": {
+          "development": {
+            "command": "ng serve -c development"
+          },
+          "staging": {
+            "command": "ng serve -c staging"
+          },
+          "production": {
+            "command": "ng serve -c production"
+          }
+        },
+        "dependsOn": ["^build"],
+        "defaultConfiguration": "development"
       },
       "test": {
         "executor": "nx:run-commands",
