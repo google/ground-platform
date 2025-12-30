@@ -10,6 +10,59 @@
     "deploy": "npm run login && npx firebase deploy --only hosting --project $npm_config_project",
     "extract-i18n": "ng extract-i18n"
   },
+  "nx": {
+    "name": "web",
+    "targets": {
+      "build": {
+        "executor": "nx:run-commands",
+        "options": {
+          "cwd": "web",
+          "command": "npx ng build",
+          "forwardAllArgs": true
+        }
+      },
+      "serve": {
+        "executor": "nx:run-commands",
+        "options": {
+          "cwd": "web",
+          "command": "npx ng serve",
+          "forwardAllArgs": true
+        }
+      },
+      "test": {
+        "executor": "nx:run-commands",
+        "options": {
+          "cwd": "web",
+          "command": "npx ng test",
+          "forwardAllArgs": true
+        }
+      },
+      "lint": {
+        "executor": "nx:run-commands",
+        "options": {
+          "cwd": "web",
+          "command": "npx ng lint",
+          "forwardAllArgs": true
+        }
+      },
+      "extract-i18n": {
+        "executor": "nx:run-commands",
+        "options": {
+          "cwd": "web",
+          "command": "npx ng extract-i18n",
+          "forwardAllArgs": true
+        }
+      },
+      "deploy": {
+        "executor": "nx:run-commands",
+        "options": {
+          "cwd": "web",
+          "command": "npx ng deploy",
+          "forwardAllArgs": true
+        }
+      }
+    }
+  },
   "dependencies": {
     "@angular/core": "^18.2.12"
   },

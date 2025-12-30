@@ -44,6 +44,7 @@
           },
           "configurations": {
             "development": {
+              "localize": false,
               "fileReplacements": [
                 {
                   "replace": "src/environments/environment.ts",
@@ -118,7 +119,7 @@
           },
           "configurations": {
             "development": {
-              "buildTarget": "web:build:development,en"
+              "buildTarget": "web:build:development"
             },
             "staging": {
               "buildTarget": "web:build:staging,en"
