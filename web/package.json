@@ -6,7 +6,7 @@
     "pretest": "./pretest.sh",
     "posttest": "./posttest.sh",
     "postinstall": "node scripts/patch-karma.cjs",
-    "login": "npx firebase login",
+    "login": "firebase login",
     "deploy": "npm run login && npx firebase deploy --only hosting --project $npm_config_project",
     "extract-i18n": "ng extract-i18n"
   },
@@ -55,7 +55,7 @@
         "executor": "nx:run-commands",
         "options": {
           "cwd": "web",
-          "command": "npx ng test",
+          "command": "ng test",
           "forwardAllArgs": true
         }
       },
@@ -63,7 +63,7 @@
         "executor": "nx:run-commands",
         "options": {
           "cwd": "web",
-          "command": "npx ng lint",
+          "command": "ng lint",
           "forwardAllArgs": true
         }
       },
@@ -71,7 +71,7 @@
         "executor": "nx:run-commands",
         "options": {
           "cwd": "web",
-          "command": "npx ng extract-i18n",
+          "command": "ng extract-i18n",
           "forwardAllArgs": true
         }
       },
@@ -79,7 +79,7 @@
         "executor": "nx:run-commands",
         "options": {
           "cwd": "web",
-          "command": "npx ng deploy",
+          "command": "ng deploy",
           "forwardAllArgs": true
         }
       }
