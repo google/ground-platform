@@ -19,7 +19,7 @@ import { NgModule } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
-import { QRCodeModule } from 'angularx-qrcode';
+import { QRCodeComponent } from 'angularx-qrcode';
 
 import { CopySurveyControlsComponent } from './copy-survey-controls.component';
 
@@ -30,7 +30,7 @@ import { CopySurveyControlsComponent } from './copy-survey-controls.component';
     MatButtonModule,
     MatIconModule,
     MatDialogModule,
-    QRCodeModule,
+    QRCodeComponent,
   ],
   exports: [CopySurveyControlsComponent],
 })

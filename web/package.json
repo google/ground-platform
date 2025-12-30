@@ -66,7 +66,7 @@
     }
   },
   "dependencies": {
-    "@angular/core": "^18.2.12"
+    "@angular/core": "20.3.15"
   },
   "devDependencies": {
     "@jridgewell/source-map": "^0.3.2",
