@@ -113,6 +113,9 @@
       "options": {
         "buildTarget": "web:build"
       },
+      "dependsOn": [
+        "^build"
+      ],
       "configurations": {
         "development": {
           "buildTarget": "web:build:development,en"
