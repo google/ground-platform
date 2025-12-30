@@ -17,170 +17,51 @@
   },
   "targets": {
     "build": {
-      "executor": "@nx/angular:webpack-browser",
-      "outputs": ["{options.outputPath}"],
+      "executor": "nx:run-commands",
       "options": {
-        "outputPath": "web/dist/web",
-        "index": "web/src/index.html",
-        "main": "web/src/main.ts",
-        "i18nMissingTranslation": "error",
-        "polyfills": ["zone.js"],
-        "tsConfig": "web/tsconfig.app.json",
-        "aot": true,
-        "assets": [
-          "web/src/favicon.ico",
-          "web/src/assets"
-        ],
-        "stylePreprocessorOptions": {
-          "includePaths": ["web/src/app/styles"]
-        },
-        "styles": ["web/src/ground-theme.scss"],
-        "scripts": []
-      },
-      "configurations": {
-        "development": {
-          "fileReplacements": [
-            {
-              "replace": "web/src/environments/environment.ts",
-              "with": "web/src/environments/environment.local.ts"
-            }
-          ],
-          "buildOptimizer": false,
-          "optimization": false,
-          "vendorChunk": true,
-          "extractLicenses": false,
-          "sourceMap": true,
-          "namedChunks": true
-        },
-        "staging": {
-          "fileReplacements": [
-            {
-              "replace": "web/src/environments/environment.ts",
-              "with": "web/src/environments/environment.staging.ts"
-            }
-          ],
-          "buildOptimizer": false,
-          "localize": true,
-          "optimization": false,
-          "vendorChunk": true,
-          "extractLicenses": false,
-          "sourceMap": true,
-          "namedChunks": true
-        },
-        "production": {
-          "fileReplacements": [
-            {
-              "replace": "web/src/environments/environment.ts",
-              "with": "web/src/environments/environment.production.ts"
-            }
-          ],
-          "localize": true,
-          "optimization": true,
-          "outputHashing": "all",
-          "sourceMap": false,
-          "namedChunks": false,
-          "aot": true,
-          "extractLicenses": true,
-          "vendorChunk": false,
-          "buildOptimizer": true,
-          "budgets": [
-            {
-              "type": "initial",
-              "maximumWarning": "3mb",
-              "maximumError": "5mb"
-            },
-            {
-              "type": "anyComponentStyle",
-              "maximumWarning": "100kb",
-              "maximumError": "200kb"
-            }
-          ]
-        },
-        "en": {
-          "localize": ["en"]
-        },
-        "fr": {
-          "localize": ["fr"]
-        },
-        "vi": {
-          "localize": ["vi"]
-        }
-      },
-      "defaultConfiguration": "development"
-    },
-    "serve": {
-      "executor": "@nx/angular:dev-server",
-      "options": {
-        "buildTarget": "web:build"
-      },
-      "dependsOn": [
-        "^build"
-      ],
-      "configurations": {
-        "development": {
-          "buildTarget": "web:build:development,en"
-        },
-        "staging": {
-          "buildTarget": "web:build:staging,en"
-        },
-        "production": {
-          "buildTarget": "web:build:production,en"
-        },
-        "fr": {
-          "buildTarget": "web:build:staging,fr"
-        },
-        "vi": {
-          "buildTarget": "web:build:staging,vi"
-        }
+        "cwd": "web",
+        "command": "npx ng build",
+        "forwardAllArgs": true
       }
     },
-    "extract-i18n": {
-      "executor": "@nx/angular:extract-i18n",
+    "serve": {
+      "executor": "nx:run-commands",
       "options": {
-        "buildTarget": "web:build",
-        "format": "json",
-        "outputPath": "web/src/locale"
+        "cwd": "web",
+        "command": "npx ng serve",
+        "forwardAllArgs": true
       }
     },
     "test": {
-      "executor": "@angular-devkit/build-angular:karma",
-      "dependsOn": ["build", "pretest"],
+      "executor": "nx:run-commands",
       "options": {
-        "main": "web/src/test.ts",
-        "polyfills": ["zone.js"],
-        "tsConfig": "web/tsconfig.spec.json",
-        "fileReplacements": [
-          {
-            "replace": "web/src/environments/environment.ts",
-            "with": "web/src/environments/environment.test.ts"
-          }
-        ],
-        "karmaConfig": "web/karma.conf.js",
-        "assets": [
-          "web/src/favicon.ico",
-          "web/src/assets"
-        ],
-        "stylePreprocessorOptions": {
-          "includePaths": ["web/src/app/styles"]
-        },
-        "styles": ["web/src/ground-theme.scss"],
-        "scripts": [],
-        "codeCoverage": true
+        "cwd": "web",
+        "command": "npx ng test",
+        "forwardAllArgs": true
       }
     },
     "lint": {
-      "executor": "@nx/eslint:lint",
+      "executor": "nx:run-commands",
       "options": {
-        "lintFilePatterns": [
-          "web/**/*.ts",
-          "web/**/*.html"
-        ]
+        "cwd": "web",
+        "command": "npx ng lint",
+        "forwardAllArgs": true
+      }
+    },
+    "extract-i18n": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "web",
+        "command": "npx ng extract-i18n",
+        "forwardAllArgs": true
       }
     },
     "deploy": {
-      "executor": "@angular/fire:deploy",
+      "executor": "nx:run-commands",
       "options": {
-        "buildTarget": "web:build"
+        "cwd": "web",
+        "command": "npx ng deploy",
+        "forwardAllArgs": true
       }
     }
   }
