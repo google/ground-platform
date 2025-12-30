@@ -25,8 +25,8 @@
         "function": "exportGeojson"
       },
       {
-        "source": "**/!(*.*)",
-        "destination": "/index.html"
+        "source": "/sessionLogin",
+        "function": "sessionLogin"
       }
     ]
   },
