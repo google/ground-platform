@@ -26,10 +26,10 @@
         "executor": "nx:run-commands",
         "options": {
           "cwd": "web",
-          "command": "npx ng serve",
+          "command": "ng serve",
           "forwardAllArgs": true
         },
-        "dependsOn": ["build"]
+        "dependsOn": ["^build"]
       },
       "test": {
         "executor": "nx:run-commands",
