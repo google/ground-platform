@@ -1,16 +1,12 @@
 {
-  "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
+  "$schema": "../node_modules/@angular/cli/lib/config/schema.json",
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
     "web": {
       "projectType": "application",
-      "schematics": {
-        "@schematics/angular:component": {
-          "style": "scss"
-        }
-      },
-      "root": ".",
+      "schematics": {},
+      "root": "",
       "sourceRoot": "src",
       "prefix": "ground",
       "i18n": {
@@ -31,40 +27,35 @@
             "outputPath": "dist/web",
             "index": "src/index.html",
             "main": "src/main.ts",
-            "polyfills": [
-              "zone.js"
-            ],
+            "localize": true,
+            "i18nMissingTranslation": "error",
+            "polyfills": ["zone.js"],
             "tsConfig": "tsconfig.app.json",
             "aot": true,
             "assets": [
               "src/favicon.ico",
               "src/assets"
             ],
-            "styles": [
-              "src/ground-theme.scss"
-            ],
-            "scripts": [],
             "stylePreprocessorOptions": {
-              "includePaths": [
-                "src/app/styles"
-              ]
+              "includePaths": ["src/app/styles"]
             },
-            "i18nMissingTranslation": "error"
+            "styles": ["src/ground-theme.scss"],
+            "scripts": []
           },
           "configurations": {
             "development": {
-              "buildOptimizer": false,
-              "optimization": false,
-              "vendorChunk": true,
-              "extractLicenses": false,
-              "sourceMap": true,
-              "namedChunks": true,
               "fileReplacements": [
                 {
                   "replace": "src/environments/environment.ts",
                   "with": "src/environments/environment.local.ts"
                 }
-              ]
+              ],
+              "buildOptimizer": false,
+              "optimization": false,
+              "vendorChunk": true,
+              "extractLicenses": false,
+              "sourceMap": true,
+              "namedChunks": true
             },
             "staging": {
               "fileReplacements": [
@@ -74,7 +65,6 @@
                 }
               ],
               "buildOptimizer": false,
-              "localize": true,
               "optimization": false,
               "vendorChunk": true,
               "extractLicenses": false,
@@ -88,7 +78,6 @@
                   "with": "src/environments/environment.production.ts"
                 }
               ],
-              "localize": true,
               "optimization": true,
               "outputHashing": "all",
               "sourceMap": false,
@@ -111,22 +100,15 @@
               ]
             },
             "en": {
-              "localize": [
-                "en"
-              ]
+              "localize": ["en"]
             },
             "fr": {
-              "localize": [
-                "fr"
-              ]
+              "localize": ["fr"]
             },
             "vi": {
-              "localize": [
-                "vi"
-              ]
+              "localize": ["vi"]
             }
-          },
-          "defaultConfiguration": "development"
+          }
         },
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
@@ -163,40 +145,32 @@
           "builder": "@angular-devkit/build-angular:karma",
           "options": {
             "main": "src/test.ts",
-            "polyfills": [
-              "zone.js"
-            ],
+            "polyfills": ["zone.js"],
             "tsConfig": "tsconfig.spec.json",
-            "karmaConfig": "karma.conf.js",
-            "assets": [
-              "src/favicon.ico",
-              "src/assets"
-            ],
-            "styles": [
-              "src/ground-theme.scss"
-            ],
-            "scripts": [],
-            "stylePreprocessorOptions": {
-              "includePaths": [
-                "src/app/styles"
-              ]
-            },
             "fileReplacements": [
               {
                 "replace": "src/environments/environment.ts",
                 "with": "src/environments/environment.test.ts"
               }
             ],
+            "karmaConfig": "karma.conf.js",
+            "assets": [
+              "src/favicon.ico",
+              "src/assets"
+            ],
+            "stylePreprocessorOptions": {
+              "includePaths": ["src/app/styles"]
+            },
+            "styles": ["src/ground-theme.scss"],
+            "scripts": [],
             "codeCoverage": true
           }
         },
         "lint": {
           "builder": "@angular-eslint/builder:lint",
           "options": {
-            "lintFilePatterns": [
-              "src/**/*.ts",
-              "src/**/*.html"
-            ]
+            "eslintConfig": ".eslintrc.json",
+            "lintFilePatterns": ["**/*.spec.ts", "**/*.ts"]
           }
         },
         "deploy": {
@@ -207,8 +181,5 @@
         }
       }
     }
-  },
-  "cli": {
-    "analytics": "1fa9ccae-cab9-41c7-872e-9ec8191e23c2"
   }
 }
