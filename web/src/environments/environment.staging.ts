@@ -15,6 +15,7 @@
  */
 
 import { Env } from 'environments/environment-enums';
+import { FirebaseOptions } from '@angular/fire/app';
 
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
@@ -25,7 +26,7 @@ const firebaseConfig = {
   messagingSenderId: '429183886479',
   appId: '1:429183886479:web:96481f53f1202bc2293cfa',
   measurementId: 'G-7CZYYG7L4D',
-};
+} as FirebaseOptions;
 
 export const environment = {
   production: false,

@@ -19,7 +19,7 @@ import {
   withInterceptorsFromDi,
 } from '@angular/common/http';
 import { NgModule } from '@angular/core';
-import { provideFirebaseApp } from '@angular/fire/app';
+import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
 import { provideAuth, getAuth } from '@angular/fire/auth';
 import {
   provideFirestore,
@@ -42,14 +42,10 @@ import {
 } from '@angular/fire/storage';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { initializeApp } from 'firebase/app';
 import { AppComponent } from 'app/app.component';
 import { MainPageContainerModule } from 'app/components/main-page-container/main-page-container.module';
 import { AppRoutingModule } from 'app/routing.module';
 import { environment } from 'environments/environment';
-
-
-
 
 @NgModule({
   declarations: [AppComponent],
@@ -62,8 +58,9 @@ import { environment } from 'environments/environment';
     MainPageContainerModule,
   ],
   providers: [
-    provideFirebaseApp(() => initializeApp(environment.firebase as any)),
+    provideFirebaseApp(() => initializeApp(environment.firebase)),
     provideAuth(() => {
+      console.log('getting auth');
       const auth = getAuth();
       // TODO: https://github.com/google/ground-platform/issues/979
       //   Set up auth emulator and enable rules.
@@ -94,7 +91,8 @@ import { environment } from 'environments/environment';
       }
       return storage;
     }),
-    provideHttpClient(withInterceptorsFromDi()),
-  ],
+
+    provideHttpClient(withInterceptorsFromDi())
+  ]
 })
-export class AppModule {}
+export class AppModule { }

@@ -20,6 +20,7 @@
 // The list of file replacements can be found in `angular.json`.
 
 import { Env } from 'environments/environment-enums';
+import { FirebaseOptions } from '@angular/fire/app';
 
 export const environment = {
   production: false,
@@ -27,7 +28,7 @@ export const environment = {
   firebase: {
     projectId: 'demo-local',
     apiKey: 'fake-api-key',
-  },
+  } as FirebaseOptions,
   cloudFunctionsUrl: '',
   useEmulators: true,
   env: Env.Local,
