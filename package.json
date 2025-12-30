@@ -86,8 +86,7 @@
     "@iplab/ngx-file-upload": "^18.1.1",
     "angularx-qrcode": "^18.0.2",
     "firebase": "^10.14.1",
-    "firebaseui": "^6.1.0",
-    "firebaseui-angular": "^6.3.0",
+
     "immutable": "^4.3.6",
     "marked": "^14.1.0",
     "ngx-autosize-input": "^18.2.9",

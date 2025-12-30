@@ -26,7 +26,9 @@
         Sign in to continue
       </p>
       <div class="buttons">
-        <firebase-ui (signInFailure)="errorCallback($event)"></firebase-ui>
+        <button mat-flat-button color="primary" (click)="onGoogleSignIn()">
+          Sign in with Google
+        </button>
       </div>
     </mat-card-content>
   </mat-card>

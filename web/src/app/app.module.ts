@@ -43,24 +43,13 @@ import {
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { initializeApp } from 'firebase/app';
-import { GoogleAuthProvider } from 'firebase/auth';
-import { FirebaseUIModule, firebaseui } from 'firebaseui-angular';
-
 import { AppComponent } from 'app/app.component';
 import { MainPageContainerModule } from 'app/components/main-page-container/main-page-container.module';
 import { AppRoutingModule } from 'app/routing.module';
 import { environment } from 'environments/environment';
-import { AngularFireAuthModule } from '@angular/fire/compat/auth';
 
-const firebaseUiAuthConfig: firebaseui.auth.Config = {
-  // Popup is required to prevent some browsers and Chrome incognito for getting
-  // blocked due to unsupported 3rd party cookies.
-  signInFlow: 'popup',
-  // For now we only use Google for auth.
-  signInOptions: [GoogleAuthProvider.PROVIDER_ID],
-  // Required to enable one-tap sign-up credential helper.
-  credentialHelper: firebaseui.auth.CredentialHelper.GOOGLE_YOLO,
-};
+
+
 
 @NgModule({
   declarations: [AppComponent],
@@ -69,7 +58,7 @@ const firebaseUiAuthConfig: firebaseui.auth.Config = {
     BrowserAnimationsModule,
     BrowserModule,
     AppRoutingModule,
-    FirebaseUIModule.forRoot(firebaseUiAuthConfig),
+
     MainPageContainerModule,
   ],
   providers: [

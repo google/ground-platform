@@ -17,9 +17,10 @@
         "executor": "nx:run-commands",
         "options": {
           "cwd": "web",
-          "command": "npx ng build",
+          "command": "ng build",
           "forwardAllArgs": true
-        }
+        },
+        "dependsOn": ["^build"]
       },
       "serve": {
         "executor": "nx:run-commands",
@@ -27,7 +28,8 @@
           "cwd": "web",
           "command": "npx ng serve",
           "forwardAllArgs": true
-        }
+        },
+        "dependsOn": ["build"]
       },
       "test": {
         "executor": "nx:run-commands",
