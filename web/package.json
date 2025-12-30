@@ -57,7 +57,8 @@
           "cwd": "web",
           "command": "ng test",
           "forwardAllArgs": true
-        }
+        },
+        "dependsOn": ["^build"]
       },
       "lint": {
         "executor": "nx:run-commands",
