@@ -50,6 +50,7 @@ import { AppComponent } from 'app/app.component';
 import { MainPageContainerModule } from 'app/components/main-page-container/main-page-container.module';
 import { AppRoutingModule } from 'app/routing.module';
 import { environment } from 'environments/environment';
+import { AngularFireAuthModule } from '@angular/fire/compat/auth';
 
 const firebaseUiAuthConfig: firebaseui.auth.Config = {
   // Popup is required to prevent some browsers and Chrome incognito for getting
@@ -68,20 +69,12 @@ const firebaseUiAuthConfig: firebaseui.auth.Config = {
     BrowserAnimationsModule,
     BrowserModule,
     AppRoutingModule,
+    AngularFireAuthModule,
     FirebaseUIModule.forRoot(firebaseUiAuthConfig),
     MainPageContainerModule,
   ],
   providers: [
     provideFirebaseApp(() => initializeApp(environment.firebase as any)),
-    provideAuth(() => {
-      // TODO: https://github.com/google/ground-platform/issues/979
-      //   Set up auth emulator and enable rules.
-      const auth = getAuth();
-      if (environment.useEmulators) {
-        connectAuthEmulator(auth, 'http://localhost:9099');
-      }
-      return auth;
-    }),
     provideFirestore(() => {
       const firestore = getFirestore();
       if (environment.useEmulators) {
