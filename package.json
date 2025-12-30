@@ -43,7 +43,7 @@
         "executor": "nx:run-commands",
         "options": {
           "commands": [
-            "nx build --configuration staging",
+            "nx build -- --configuration staging",
             "firebase deploy --config firebase.remote.json --project ground-dev-sig"
           ]
         }

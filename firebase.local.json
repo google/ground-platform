@@ -10,30 +10,9 @@
         "destination": "/signin",
         "type": 301
       }
-    ],
-    "rewrites": [
-      {
-        "source": "/importGeoJson",
-        "function": "importGeoJson"
-      },
-      {
-        "source": "/exportCsv",
-        "function": "exportCsv"
-      },
-      {
-        "source": "/exportGeojson",
-        "function": "exportGeojson"
-      },
-      {
-        "source": "/sessionLogin",
-        "function": "sessionLogin"
-      }
     ]
   },
   "emulators": {
-    "auth": {
-      "port": 9099
-    },
     "functions": {
       "port": 5001
     },

@@ -1,0 +1,18 @@
+{
+  "/importGeoJson": {
+    "target": "http://localhost:5001",
+    "secure": false
+  },
+  "/exportCsv": {
+    "target": "http://localhost:5001",
+    "secure": false
+  },
+  "/exportGeojson": {
+    "target": "http://localhost:5001",
+    "secure": false
+  },
+  "/sessionLogin": {
+    "target": "http://localhost:5001",
+    "secure": false
+  }
+}
