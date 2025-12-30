@@ -29,14 +29,15 @@
           }
         ]
       },
-      "emulate": {
+      "start": {
         "executor": "nx:run-commands",
         "options": {
           "commands": [
             "firebase experiments:enable webframeworks",
             "firebase emulators:start --project demo-local --config firebase.local.json --import data/local"
           ]
-        }
+        },
+        "dependsOn": ["build"]
       },
       "deploy:staging": {
         "executor": "nx:run-commands",
