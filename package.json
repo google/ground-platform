@@ -94,10 +94,17 @@
     "tslib": "^2.4.1"
   },
   "devDependencies": {
-    "@angular-eslint/eslint-plugin": "^18.4.3",
-    "@angular-eslint/eslint-plugin-template": "^18.4.3",
-    "@angular-eslint/template-parser": "^18.4.3",
+    "@angular-devkit/build-angular": "20.3.13",
+    "@angular-devkit/core": "20.3.13",
+    "@angular-eslint/builder": "^20.7.0",
+    "@angular-eslint/eslint-plugin": "^20.7.0",
+    "@angular-eslint/eslint-plugin-template": "^20.7.0",
+    "@angular-eslint/template-parser": "^20.7.0",
+    "@angular/cli": "20.3.13",
+    "@angular/compiler-cli": "20.3.15",
+    "@angular/language-service": "20.3.15",
     "@eslint/eslintrc": "^3.3.3",
+    "@nx/angular": "22.2.1",
     "@typescript-eslint/eslint-plugin": "^8.50.1",
     "@typescript-eslint/parser": "^8.50.1",
     "ajv": "^8.17.1",
@@ -108,20 +115,14 @@
     "eslint-plugin-n": "^17.0.0",
     "eslint-plugin-prettier": "^5.5.4",
     "firebase-tools": "^14.0.0",
-    "gts": "^5.3.1",
+    "gts": "^7.0.0",
     "isolate-package": "^1.18.0",
     "nx": "22.2.1",
     "prettier": "^3.7.4",
     "start-server-and-test": "^2.0.3",
     "ts-node": "^10.9.2",
     "tslib": "^2.6.2",
-    "typescript": "~5.9.0",
-    "@nx/angular": "22.2.1",
-    "@angular-devkit/core": "20.3.13",
-    "@angular-devkit/build-angular": "20.3.13",
-    "@angular/cli": "20.3.13",
-    "@angular/compiler-cli": "20.3.15",
-    "@angular/language-service": "20.3.15"
+    "typescript": "~5.9.0"
   },
   "engines": {
     "node": "20"
