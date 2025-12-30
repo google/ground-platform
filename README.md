@@ -69,6 +69,25 @@ Members of the core maintainers team can run the app against the live staging en
 nx run web:serve:staging
 ```
 
+## Deploy
+
+To build and deploy to staging, first sign into Firebase with:
+
+```bash
+npx firebase login
+```
+You can then deploy to prod with:
+
+```bash
+nx run deploy:staging
+```
+
+To deploy to your own production Firebase:
+
+1. Override `firebaseConfig` in [environment.production.ts](web/src/environments/environment.production.ts) with your Firebase project config.
+2. Update the project ID placeholder in [package.json](package.json).
+3. Run `nx run deploy:production`.
+
 ### Next steps
 
 For instructions on how to deploy to your own production Firebase project, see the [Ground Developer's Guide](https://github.com/google/ground-platform/wiki/Ground-Developer's-Guide).

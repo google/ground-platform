@@ -41,23 +41,19 @@
           "build"
         ]
       },
-      "deploy:staging": {
+      "deploy": {
         "executor": "nx:run-commands",
-        "options": {
-          "commands": [
-            "nx build -- --configuration staging",
-            "firebase deploy --config firebase.remote.json --project ground-dev-sig"
-          ]
-        }
-      },
-      "deploy:production": {
-        "executor": "nx:run-commands",
-        "options": {
-          "commands": [
-            "nx build --configuration production",
-            "firebase deploy --config firebase.remote.json --project PROD_PROJECT_ID"
-          ]
-        }
+        "configurations": {
+          "staging": {
+            "command": "firebase deploy --config firebase.remote.json --project ground-dev-sig"
+          },
+          "production": {
+            "command": "firebase deploy --config firebase.remote.json --project YOUR-PROD-PROJECT"
+          }
+        },
+        "dependsOn": [
+          "build"
+        ]
       }
     }
   },

@@ -6,8 +6,6 @@
     "pretest": "./pretest.sh",
     "posttest": "./posttest.sh",
     "postinstall": "node scripts/patch-karma.cjs",
-    "login": "firebase login",
-    "deploy": "npm run login && npx firebase deploy --only hosting --project $npm_config_project",
     "extract-i18n": "ng extract-i18n"
   },
   "nx": {

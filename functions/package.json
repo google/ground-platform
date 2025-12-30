@@ -14,7 +14,7 @@
     "logs": "firebase functions:log",
     "test": "jasmine --config=jasmine.json",
     "build": "tsc",
-    "deploy": "npm run build && firebase login && firebase deploy --project $npm_config_project --only functions",
+    "deploy": "npm run build && firebase deploy --project $npm_config_project --only functions",
     "watch": "tsc --watch"
   },
   "nx": {
