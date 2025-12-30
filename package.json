@@ -127,7 +127,7 @@
     "@angular/language-service": "^18.2.12"
   },
   "engines": {
-    "node": "22"
+    "node": "20"
   },
   "workspaces": [
     "proto",

@@ -32,7 +32,7 @@ Read through our [contributing guidelines](CONTRIBUTING.md) to learn about our s
 1. Install Node.js:
 
   ```bash
-  nvm install 22
+  nvm install 20
   ```
 
 1. Install [Firebase CLI](https://firebase.google.com/docs/cli) and [Nx](https://nx.dev):
