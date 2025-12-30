@@ -58,9 +58,8 @@ import { environment } from 'environments/environment';
     MainPageContainerModule,
   ],
   providers: [
-    provideFirebaseApp(() => initializeApp(environment.firebase)),
+    provideFirebaseApp(() => initializeApp(environment.firebase!)),
     provideAuth(() => {
-      console.log('getting auth');
       const auth = getAuth();
       // TODO: https://github.com/google/ground-platform/issues/979
       //   Set up auth emulator and enable rules.
