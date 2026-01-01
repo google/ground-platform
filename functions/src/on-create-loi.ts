@@ -120,6 +120,7 @@ async function fetchWhispProperties(
   headers: Headers,
   body: Body
 ): Promise<Properties> {
+  // eslint-disable-next-line n/no-unsupported-features/node-builtins
   const response = await fetch(url, {
     method: 'POST',
     headers,
@@ -128,7 +129,7 @@ async function fetchWhispProperties(
 
   if (!response.ok) return {};
 
-  const json = await response.json();
+  const json = (await response.json()) as any;
 
   if (json?.code !== 'analysis_completed') return {};
 

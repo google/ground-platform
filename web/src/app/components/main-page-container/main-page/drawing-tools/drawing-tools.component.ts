@@ -23,6 +23,7 @@ import {
   computed,
   effect,
   input,
+  inject,
 } from '@angular/core';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { List } from 'immutable';
@@ -47,6 +48,13 @@ import { NavigationService } from 'app/services/navigation/navigation.service';
   standalone: false,
 })
 export class DrawingToolsComponent implements OnInit, OnDestroy {
+  private readonly changeDetectorRef = inject(ChangeDetectorRef);
+  private drawingToolsService = inject(DrawingToolsService);
+  private sanitizer = inject(DomSanitizer);
+  private navigationService = inject(NavigationService);
+  private groundPinService = inject(GroundPinService);
+  private authService = inject(AuthService);
+
   private subscription: Subscription = new Subscription();
   survey = input<Survey>();
   pointValue = 'point';
@@ -75,18 +83,11 @@ export class DrawingToolsComponent implements OnInit, OnDestroy {
   isSubmissionSelected$: Observable<boolean>;
   disabled$: Observable<boolean>;
 
-  constructor(
-    private readonly changeDetectorRef: ChangeDetectorRef,
-    private drawingToolsService: DrawingToolsService,
-    private sanitizer: DomSanitizer,
-    private navigationService: NavigationService,
-    private groundPinService: GroundPinService,
-    private authService: AuthService
-  ) {
+  constructor() {
     this.isSubmissionSelected$ = this.navigationService
       .getSubmissionId$()
       .pipe(map(obs => !!obs));
-    this.disabled$ = drawingToolsService.getDisabled$();
+    this.disabled$ = this.drawingToolsService.getDisabled$();
 
     effect(() => {
       const survey = this.survey();

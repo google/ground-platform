@@ -19,7 +19,7 @@ import {
   newDocumentSnapshot,
   newEventContext,
   stubAdminApi,
-} from '@ground/lib/dist/testing/firestore';
+} from '@ground/lib/testing/firestore';
 import { resetDatastore } from './common/context';
 import { Firestore } from 'firebase-admin/firestore';
 import * as functions from './index';

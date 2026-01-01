@@ -16,6 +16,7 @@
 
 import { DocumentData } from '@angular/fire/firestore';
 import { toMessage } from '@ground/lib';
+
 import { GroundProtos } from '@ground/proto';
 import { Map } from 'immutable';
 

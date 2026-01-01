@@ -15,6 +15,7 @@
  */
 
 import { Env } from 'environments/environment-enums';
+import { FirebaseOptions } from '@angular/fire/app';
 
 // Replace with production values for your hosted environment.
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
@@ -26,7 +27,7 @@ const firebaseConfig = {
   messagingSenderId: '',
   appId: '',
   measurementId: '',
-};
+} as FirebaseOptions;
 
 export const environment = {
   production: true,

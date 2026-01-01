@@ -41,7 +41,7 @@ runs:
     - name: Set up Node.js
       uses: actions/setup-node@v2
       with:
-        node-version: "22"
+        node-version: "20"
 
     - name: Load cached Node modules
       id: cache-npm
@@ -79,11 +79,11 @@ runs:
 
     - name: Install dependencies
       shell: bash
-      run: npm run --prefix=.. ci-all
+      run: npm install
 
     - name: Build project and local deps
       shell: bash
-      run: npm run build-all --config=local
+      run: npx nx build
 
     - name: Run 'Create survey' test
       shell: bash

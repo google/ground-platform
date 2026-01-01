@@ -15,9 +15,9 @@
  */
 
 import { Component, Input, OnDestroy, OnInit, input } from '@angular/core';
-import { AngularFireStorage } from '@angular/fire/compat/storage';
+import { Storage, getDownloadURL, ref } from '@angular/fire/storage';
 import { List } from 'immutable';
-import { Subscription, firstValueFrom } from 'rxjs';
+import { Subscription } from 'rxjs';
 
 import { Point } from 'app/models/geometry/point';
 import { MultipleSelection } from 'app/models/submission/multiple-selection';
@@ -51,7 +51,7 @@ export class SubmissionPanelComponent implements OnInit, OnDestroy {
   constructor(
     private submissionService: SubmissionService,
     private navigationService: NavigationService,
-    private storage: AngularFireStorage
+    private storage: Storage
   ) {}
 
   ngOnInit() {
@@ -91,8 +91,8 @@ export class SubmissionPanelComponent implements OnInit, OnDestroy {
         const submissionImage = this.getTaskSubmissionResult(task);
         if (submissionImage) {
           const submissionImageValue = submissionImage.value as string;
-          const imageRef = this.storage.ref(submissionImageValue);
-          firstValueFrom(imageRef.getDownloadURL())
+          const imageRef = ref(this.storage, submissionImageValue);
+          getDownloadURL(imageRef)
             .then((url: string) => {
               this.firebaseURLs.set(submissionImageValue, url);
             })

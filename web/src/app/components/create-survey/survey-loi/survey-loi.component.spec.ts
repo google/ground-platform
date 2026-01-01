@@ -17,8 +17,8 @@
 import { CommonModule } from '@angular/common';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { AngularFireAuth } from '@angular/fire/compat/auth';
-import { AngularFirestore } from '@angular/fire/compat/firestore';
+import { Auth } from '@angular/fire/auth';
+import { Firestore } from '@angular/fire/firestore';
 import { MatDialog } from '@angular/material/dialog';
 import { List, Map } from 'immutable';
 import { BehaviorSubject, of } from 'rxjs';
@@ -91,8 +91,8 @@ describe('SurveyLoiComponent', () => {
       declarations: [SurveyLoiComponent],
       imports: [LoiSelectionModule, CommonModule],
       providers: [
-        { provide: AngularFirestore, useValue: {} },
-        { provide: AngularFireAuth, useValue: {} },
+        { provide: Firestore, useValue: {} },
+        { provide: Auth, useValue: {} },
         { provide: AuthService, useValue: {} },
         { provide: LocationOfInterestService, useValue: loiServiceSpy },
         { provide: NavigationService, useValue: navigationServiceSpy },
