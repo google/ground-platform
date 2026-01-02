@@ -49,5 +49,10 @@
     "e2e": {
       "cache": true
     }
+  },
+  "pluginsConfig": {
+    "@nx/js": {
+      "analyzeSourceFiles": true
+    }
   }
 }

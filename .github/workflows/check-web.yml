@@ -39,13 +39,7 @@ jobs:
       - name: Install deps
         run: npm install
 
-      - name: Build proto
-        run: npx nx build proto
-
-      - name: Build lib
-        run: npx nx build lib
-
-      - name: Build web
+      - name: Build web and deps
         run: npx nx build web
 
       - name: Run tests with coverage
