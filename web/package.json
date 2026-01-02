@@ -85,7 +85,8 @@
     }
   },
   "dependencies": {
-    "@angular/core": "20.3.15"
+    "@angular/core": "20.3.15",
+    "zone.js": "^0.14.10"
   },
   "devDependencies": {
     "@jridgewell/source-map": "^0.3.2",
