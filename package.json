@@ -3,10 +3,9 @@
   "version": "0.0.1",
   "description": "Root package for Ground hosted components",
   "scripts": {
-"clean": "nx run-many -t clean --exclude=root",
+    "clean": "nx run-many -t clean --exclude=root",
     "lint": "nx run-many -t lint --exclude=root",
     "test": "nx run-many -t test --exclude=root",
-    "start:test-android": "firebase emulators:start --project local --config firebase.local.json --import data/test-android",
     "export:local": "firebase emulators:export data/local --project demo-local --only firestore",
     "start-and-export:test": "firebase emulators:exec 'npm run watch:local' --project demo-local --ui --config firebase.local.json --import data/test --export-on-exit data/test",
     "test:e2e:create": "WAIT_ON_INTERVAL=30000 start-server-and-test start-and-export:test '5000|http://localhost:4000/firestore' 'npm run test:create --prefix=e2e-tests'",
@@ -41,6 +40,15 @@
         "dependsOn": [
           "build"
         ]
+      },
+      "start-android-test-data": {
+        "executor": "nx:run-commands",
+        "options": {
+          "commands": [
+            "firebase experiments:enable webframeworks",
+            "firebase emulators:start --project demo-local --config firebase.local.json --import data/test-android"
+          ]
+        }
       },
       "deploy": {
         "executor": "nx:run-commands",
