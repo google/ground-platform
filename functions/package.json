@@ -67,9 +67,7 @@
     "form-data-encoder": "^4.0.2",
     "formdata-node": "^6.0.3",
     "isolate-package": "^1.18.0",
-    "jasmine": "^5.1.0",
     "source-map-support": "^0.5.21",
-    "ts-mocha": "^10.0.0",
     "wkt": "0.1.1"
   },
   "type": "commonjs"
