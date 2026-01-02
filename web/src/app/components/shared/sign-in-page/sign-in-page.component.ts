@@ -15,7 +15,7 @@
  */
 
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { FirebaseUISignInFailure } from 'firebaseui-angular';
+import { Auth, GoogleAuthProvider, signInWithPopup } from '@angular/fire/auth';
 import { Observable, Subscription, filter } from 'rxjs';
 
 import { AuthService } from 'app/services/auth/auth.service';
@@ -31,7 +31,8 @@ export class SignInPageComponent implements OnInit, OnDestroy {
   private subscription = new Subscription();
   constructor(
     private authService: AuthService,
-    private navigationService: NavigationService
+    private navigationService: NavigationService,
+    private auth: Auth
   ) {}
 
   ngOnInit() {
@@ -52,8 +53,11 @@ export class SignInPageComponent implements OnInit, OnDestroy {
     return this.authService.isAuthenticated$();
   }
 
-  errorCallback(errorData: FirebaseUISignInFailure) {
-    // TODO: React to error.
-    alert(`Sign in error ${errorData.code}`);
+  onGoogleSignIn() {
+    signInWithPopup(this.auth, new GoogleAuthProvider())
+      .catch((error) => {
+        console.error('Sign in failed', error);
+        alert(`Sign in error ${error.code}`);
+      });
   }
 }

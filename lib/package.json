@@ -1,15 +1,21 @@
 {
   "name": "@ground/lib",
+  "nx": {
+    "name": "lib"
+  },
   "version": "0.0.1",
   "main": "dist/index.js",
   "description": "Ground shared lib",
+  "exports": {
+    ".": "./dist/index.js",
+    "./testing/firestore": "./dist/testing/firestore/index.js"
+  },
   "files": [
     "dist"
   ],
   "scripts": {
     "clean": "rm -rf dist *.log src/generated",
-    "lint": "eslint --ext .js,.ts src/",
-    "lint:fix": "npm run lint -- --fix",
+    "lint": "eslint src/",
     "test": "jasmine --config=jasmine.json",
     "build-local-deps": "npm run build --workspace=../proto",
     "build": "tsc",
@@ -18,12 +24,12 @@
     "build-all-and-test": "npm run build-all && npm run test"
   },
   "engines": {
-    "node": "22"
+    "node": "20"
   },
   "private": true,
   "dependencies": {
     "@google-cloud/firestore": "^7.7.0",
-    "@ground/proto": "file:../proto",
+    "@ground/proto": "*",
     "firebase-functions": "^5.1.1",
     "immutable": "^4.3.6",
     "long": "^5.2.3",
@@ -33,17 +39,12 @@
     "@types/geojson": "^7946.0.14",
     "@types/jasmine": "^4.3.5",
     "@types/source-map-support": "^0.5.10",
-    "@typescript-eslint/eslint-plugin": "^5.39.0",
-    "@typescript-eslint/parser": "^5.39.0",
     "diff": "^5.2.0",
-
     "jasmine": "^5.1.0",
     "jasmine-spec-reporter": "^7.0.0",
     "mock-cloud-firestore": "^0.12.0",
     "picocolors": "^1.1.1",
-
     "source-map-support": "^0.5.21",
     "ts-mocha": "^10.0.0"
-
   }
 }

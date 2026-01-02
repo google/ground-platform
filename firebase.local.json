@@ -3,37 +3,16 @@
     "indexes": "firestore/firestore.indexes.json"
   },
   "hosting": {
-    "public": "web/dist/web",
+    "source": "web",
     "redirects": [
       {
         "source": "/",
         "destination": "/signin",
         "type": 301
       }
-    ],
-    "rewrites": [
-      {
-        "source": "/importGeoJson",
-        "function": "importGeoJson"
-      },
-      {
-        "source": "/exportCsv",
-        "function": "exportCsv"
-      },
-      {
-        "source": "/exportGeojson",
-        "function": "exportGeojson"
-      },
-      {
-        "source": "**/!(*.*)",
-        "destination": "/index.html"
-      }
     ]
   },
   "emulators": {
-    "auth": {
-      "port": 9099
-    },
     "functions": {
       "port": 5001
     },

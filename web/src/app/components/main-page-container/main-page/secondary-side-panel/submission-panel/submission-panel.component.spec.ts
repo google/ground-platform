@@ -16,7 +16,7 @@
 
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { AngularFireStorage } from '@angular/fire/compat/storage';
+import { Storage } from '@angular/fire/storage';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
@@ -42,7 +42,7 @@ describe('SubmissionPanelComponent', () => {
   let fixture: ComponentFixture<SubmissionPanelComponent>;
   let submissionService: jasmine.SpyObj<SubmissionService>;
   let navigationService: jasmine.SpyObj<NavigationService>;
-  let storageSpy: jasmine.SpyObj<AngularFireStorage>;
+  let storageSpy: jasmine.SpyObj<Storage>;
 
   const mockSurvey = new Survey(
     'survey1',
@@ -81,7 +81,7 @@ describe('SubmissionPanelComponent', () => {
       'selectLocationOfInterest',
       'showSubmissionDetailWithHighlightedTask',
     ]);
-    storageSpy = jasmine.createSpyObj('AngularFireStorage', ['ref']);
+    storageSpy = jasmine.createSpyObj('Storage', ['ref']);
 
     submissionService.getSelectedSubmission$.and.returnValue(
       of(mockSubmission)
@@ -101,7 +101,7 @@ describe('SubmissionPanelComponent', () => {
       providers: [
         { provide: NavigationService, useValue: navigationService },
         { provide: SubmissionService, useValue: submissionService },
-        { provide: AngularFireStorage, useValue: storageSpy },
+        { provide: Storage, useValue: storageSpy },
       ],
       schemas: [NO_ERRORS_SCHEMA],
     }).compileComponents();

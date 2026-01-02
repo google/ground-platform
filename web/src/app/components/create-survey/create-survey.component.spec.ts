@@ -522,7 +522,7 @@ describe('CreateSurveyComponent', () => {
       // activeSurvey$.next(surveyWithJob);
 
       // Identity Hydration
-      spyOn(component, 'ngOnInit').and.stub();
+
 
       createComponent(false);
       spyOn(component, 'ngOnInit').and.stub();
@@ -557,7 +557,7 @@ describe('CreateSurveyComponent', () => {
       // activeSurvey$.next(surveyWithJob);
 
       // Identity Hydration
-      spyOn(component, 'ngOnInit').and.stub();
+
 
       createComponent(false);
       spyOn(component, 'ngOnInit').and.stub();
@@ -600,7 +600,7 @@ describe('CreateSurveyComponent', () => {
       // activeSurvey$.next(surveyWithJob);
 
       // Identity Hydration
-      spyOn(component, 'ngOnInit').and.stub();
+
 
       createComponent(false);
       spyOn(component, 'ngOnInit').and.stub();

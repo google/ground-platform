@@ -16,7 +16,7 @@
 
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { AngularFireAuth } from '@angular/fire/compat/auth';
+import { Auth, idToken } from '@angular/fire/auth';
 import { firstValueFrom } from 'rxjs';
 
 @Injectable({
@@ -25,7 +25,7 @@ import { firstValueFrom } from 'rxjs';
 export class HttpClientService {
   constructor(
     private httpClient: HttpClient,
-    private afAuth: AngularFireAuth
+    private auth: Auth
   ) {}
 
   /**
@@ -34,7 +34,7 @@ export class HttpClientService {
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async postWithAuth<T>(url: string, body: any | null): Promise<T> {
-    const token = await firstValueFrom(this.afAuth.idToken);
+    const token = await firstValueFrom(idToken(this.auth));
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
     return firstValueFrom(this.httpClient.post<T>(url, body, { headers }));
   }
