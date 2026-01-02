@@ -16,6 +16,7 @@
 
 import { Firestore } from '@google-cloud/firestore';
 
+// eslint-disable-next-line n/no-extraneous-require
 const MockFirebase = require('mock-cloud-firestore');
 
 // Set project as workaround for https://github.com/firebase/firebase-functions/issues/437.
