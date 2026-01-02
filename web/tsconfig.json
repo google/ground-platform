@@ -3,6 +3,9 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
+      "@ground/lib": ["../lib/src/index"],
+      "@ground/lib/testing/firestore": ["../lib/src/testing/firestore/index"],
+      "@ground/proto": ["../proto"],
       "app/*": ["src/app/*"],
       "environments/*": ["src/environments/*"],
       "testing/*": ["src/testing/*"]
