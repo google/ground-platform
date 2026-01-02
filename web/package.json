@@ -101,10 +101,6 @@
     "karma-coverage": "~2.2.1",
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "^2.1.0",
-    "prettier": "^2.8.1",
-    "prettier-eslint": "^15.0.1",
-    "puppeteer": "^24.10.0",
-    "ts-node": "^8.10.2",
-    "typescript": "^5.4.5"
+    "puppeteer": "^24.10.0"
   }
 }
