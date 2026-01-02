@@ -6,7 +6,7 @@
   "hosting": {
     "public": "web/dist/web",
     "i18n": {
-      "root": "."
+      "root": "web/dist/web"
     },
     "redirects": [
       {

@@ -3,92 +3,105 @@
   "version": "0.0.1",
   "scripts": {
     "clean": "rm -rf dist coverage *.log",
-    "build-local-deps": "npm run build --workspace=../proto --workspace=../lib",
-    "build": "ng build -c $npm_config_config",
-    "build-all": "npm run build-local-deps && npm run build",
-    "build-and-test": "npm run build --config=local && npm run test",
-    "build-all-and-test": "npm run build-all --config=local && npm run test",
-    "build-all-and-test-headless": "npm run build-all --config=local && npm run test-headless",
-    "watch": "npm run build -- --watch",
-    "start": "ng serve -c $npm_config_config",
-    "build-and-start": "npm run build && npm run start",
-    "build-all-and-start": "npm run build-all && npm run start",
     "pretest": "./pretest.sh",
-    "test": "ng test",
-    "test-headless": "ng test --browsers ChromeHeadlessNoSandbox --watch=false",
-    "test-with-coverage": "npm run test -- --browsers ChromeHeadlessNoSandbox --watch=false --code-coverage",
-    "lint": "ng lint",
-    "lint:fix": "npm run lint -- --fix",
     "posttest": "./posttest.sh",
     "postinstall": "node scripts/patch-karma.cjs",
-    "login": "npx firebase login",
-    "deploy": "npm run login && npx firebase deploy --only hosting --project $npm_config_project",
     "extract-i18n": "ng extract-i18n"
   },
-  "private": true,
+  "nx": {
+    "name": "web",
+    "targets": {
+      "build": {
+        "executor": "nx:run-commands",
+        "options": {
+          "cwd": "web"
+        },
+        "configurations": {
+          "development": {
+            "command": "ng build -c development"
+          },
+          "staging": {
+            "command": "ng build -c staging"
+          },
+          "production": {
+            "command": "ng build -c production"
+          }
+        },
+        "dependsOn": ["^build"],
+        "defaultConfiguration": "development"
+      },
+      "serve": {
+        "executor": "nx:run-commands",
+        "options": {
+          "cwd": "web"
+        },
+        "configurations": {
+          "development": {
+            "command": "ng serve -c development"
+          },
+          "staging": {
+            "command": "ng serve -c staging"
+          },
+          "production": {
+            "command": "ng serve -c production"
+          }
+        },
+        "dependsOn": ["^build"],
+        "defaultConfiguration": "development"
+      },
+      "test": {
+        "executor": "nx:run-commands",
+        "options": {
+          "cwd": "web",
+          "command": "ng test",
+          "forwardAllArgs": true
+        },
+        "dependsOn": ["^build"]
+      },
+      "lint": {
+        "executor": "nx:run-commands",
+        "options": {
+          "cwd": "web",
+          "command": "ng lint",
+          "forwardAllArgs": true
+        }
+      },
+      "extract-i18n": {
+        "executor": "nx:run-commands",
+        "options": {
+          "cwd": "web",
+          "command": "ng extract-i18n",
+          "forwardAllArgs": true
+        }
+      },
+      "deploy": {
+        "executor": "nx:run-commands",
+        "options": {
+          "cwd": "web",
+          "command": "ng deploy",
+          "forwardAllArgs": true
+        }
+      }
+    }
+  },
   "dependencies": {
-    "@angular/animations": "^21.0.6",
-    "@angular/cdk": "^21.0.5",
-    "@angular/common": "^21.0.6",
-    "@angular/compiler": "^21.0.6",
-    "@angular/core": "^21.0.6",
-    "@angular/fire": "^21.0.0-rc.0",
-    "@angular/forms": "^21.0.6",
-    "@angular/google-maps": "^21.0.5",
-    "@angular/localize": "^21.0.6",
-    "@angular/material": "^21.0.5",
-    "@angular/material-experimental": "^21.0.5",
-    "@angular/platform-browser": "^21.0.6",
-    "@angular/platform-browser-dynamic": "^21.0.6",
-    "@angular/router": "^21.0.6",
-    "@babel/runtime": "^7.24.7",
-    "@ground/lib": "file:../lib",
-    "@ground/proto": "file:../proto",
-    "@grpc/grpc-js": "^1.10.9",
-    "@iplab/ngx-file-upload": "^21.0.0",
-    "angularx-qrcode": "^21.0.4",
-    "firebase": "^10.7.2",
-    "firebaseui": "^6.1.0",
-    "firebaseui-angular": "^6.3.0",
-    "functions": "^1.0.9",
-    "immutable": "^4.3.6",
-    "marked": "^14.1.0",
-    "ngx-autosize-input": "^20.0.5",
-    "ngx-color": "^10.1.0",
-    "rxjs": "7.8.1",
-    "tslib": "^2.4.1",
-    "zone.js": "^0.15.1"
+    "@angular/core": "20.3.15",
+    "zone.js": "^0.14.10"
   },
   "devDependencies": {
-    "@angular-devkit/build-angular": "^21.0.4",
-    "@angular-eslint/builder": "^15",
-    "@angular-eslint/eslint-plugin-template": "^15.1.0",
-    "@angular/cli": "^21.0.4",
-    "@angular/compiler-cli": "^21.0.6",
-    "@angular/language-service": "^21.0.6",
     "@jridgewell/source-map": "^0.3.2",
     "@types/google.maps": "^3.54.10",
-    "@types/jasmine": "^5.1.13",
-    "@types/jasmine-expect": "3.8.1",
-    "@types/jasminewd2": "^2.0.8",
+    "@types/jasmine": "~5.1.0",
     "@types/webpack-env": "^1.15.3",
     "cpx": "^1.5.0",
-    "eslint-import-resolver-typescript": "^3.6.3",
-    "eslint-plugin-import": "^2.29.0",
     "inquirer": "^6.2.2",
     "inquirer-autocomplete-prompt": "^1.3.0",
-    "istanbul": "^0.4.5",
-    "jasmine-core": "^5.13.0",
-    "jasmine-matchers": "0.2.3",
-    "jasmine-spec-reporter": "~5.0.0",
+    "jasmine-core": "~5.1.0",
     "karma": "^6.4.4",
-    "karma-chrome-launcher": "^3.2.0",
-    "karma-coverage": "^2.2.1",
-    "karma-coverage-istanbul-reporter": "~3.0.2",
-    "karma-jasmine": "^5.1.0",
-    "karma-jasmine-html-reporter": "^1.5.0",
-    "karma-jasmine-matchers": "5.0.0",
-    "prettier-eslint": "^15.0.1",
-    "puppeteer": "^22.10.0"
+    "karma-chrome-launcher": "~3.2.0",
+    "karma-coverage": "~2.2.1",
+    "karma-jasmine": "~5.1.0",
+    "karma-jasmine-html-reporter": "^2.1.0",
+    "puppeteer": "^24.10.0"
   }
 }
