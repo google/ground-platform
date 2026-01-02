@@ -98,6 +98,8 @@
     "@angular/core": "^20.3.15",
     "@angular/fire": "^20.0.1",
     "@angular/forms": "^20.3.15",
+    "@angular/google-maps": "^20.2.14",
+    "@angular/localize": "^20.3.15",
     "@angular/material": "^20.2.14",
     "@angular/material-experimental": "^20.2.14",
     "@angular/platform-browser": "^20.3.15",
