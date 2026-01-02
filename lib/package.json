@@ -34,17 +34,5 @@
     "immutable": "^4.3.6",
     "long": "^5.2.3",
     "protobufjs": "^7.3.0"
-  },
-  "devDependencies": {
-    "@types/geojson": "^7946.0.14",
-    "@types/jasmine": "^4.3.5",
-    "@types/source-map-support": "^0.5.10",
-    "diff": "^5.2.0",
-    "jasmine": "^5.1.0",
-    "jasmine-spec-reporter": "^7.0.0",
-    "mock-cloud-firestore": "^0.12.0",
-    "picocolors": "^1.1.1",
-    "source-map-support": "^0.5.21",
-    "ts-mocha": "^10.0.0"
   }
 }

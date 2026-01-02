@@ -86,28 +86,5 @@
   },
   "dependencies": {
     "@angular/core": "20.3.15"
-  },
-  "devDependencies": {
-    "@jridgewell/source-map": "^0.3.2",
-    "@types/google.maps": "^3.54.10",
-    "@types/jasmine": "^5.1.13",
-    "@types/jasmine-expect": "3.8.1",
-    "@types/jasminewd2": "^2.0.8",
-    "@types/webpack-env": "^1.15.3",
-    "cpx": "^1.5.0",
-    "inquirer": "^6.2.2",
-    "inquirer-autocomplete-prompt": "^1.3.0",
-    "istanbul": "^0.4.5",
-    "jasmine-core": "^5.13.0",
-    "jasmine-matchers": "0.2.3",
-    "jasmine-spec-reporter": "~5.0.0",
-    "karma": "^6.4.4",
-    "karma-chrome-launcher": "^3.2.0",
-    "karma-coverage": "^2.2.1",
-    "karma-coverage-istanbul-reporter": "~3.0.2",
-    "karma-jasmine": "^5.1.0",
-    "karma-jasmine-html-reporter": "^1.5.0",
-    "karma-jasmine-matchers": "5.0.0",
-    "puppeteer": "^22.10.0"
   }
 }
