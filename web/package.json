@@ -96,7 +96,6 @@
     "cpx": "^1.5.0",
     "inquirer": "^6.2.2",
     "inquirer-autocomplete-prompt": "^1.3.0",
-    "jasmine-core": "~5.1.0",
     "karma": "^6.4.4",
     "karma-chrome-launcher": "~3.2.0",
     "karma-coverage": "~2.2.1",
