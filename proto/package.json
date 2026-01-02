@@ -1,8 +1,12 @@
 {
   "name": "@ground/proto",
+  "nx": {
+    "name": "proto"
+  },
   "version": "0.0.1",
   "description": "Ground shared Protocol Buffer definitions",
   "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "files": ["dist"],
   "scripts": {
     "clean": "rm -rf dist",

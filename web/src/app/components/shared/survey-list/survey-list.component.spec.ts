@@ -22,8 +22,8 @@ import {
   tick,
   waitForAsync,
 } from '@angular/core/testing';
-import { AngularFireAuth } from '@angular/fire/compat/auth';
-import { AngularFirestore } from '@angular/fire/compat/firestore';
+import { Auth } from '@angular/fire/auth';
+import { Firestore } from '@angular/fire/firestore';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
@@ -188,8 +188,8 @@ describe('SurveyListComponent', () => {
         { provide: MatDialog, useValue: dialogSpy },
         { provide: SurveyService, useValue: surveyServiceSpy },
         { provide: NavigationService, useValue: navigationServiceSpy },
-        { provide: AngularFirestore, useValue: {} },
-        { provide: AngularFireAuth, useValue: {} },
+        { provide: Firestore, useValue: {} },
+        { provide: Auth, useValue: {} },
         { provide: AuthService, useValue: authServiceSpy },
       ],
     }).compileComponents();

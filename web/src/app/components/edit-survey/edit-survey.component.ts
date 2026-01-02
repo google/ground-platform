@@ -16,7 +16,7 @@
 
 import '@angular/localize/init';
 
-import { Component, effect } from '@angular/core';
+import { Component, effect, inject } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { List } from 'immutable';
 
@@ -45,6 +45,12 @@ import {
   standalone: false,
 })
 export class EditSurveyComponent {
+  private surveyService = inject(SurveyService);
+  private jobService = inject(JobService);
+  private draftSurveyService = inject(DraftSurveyService);
+  private navigationService = inject(NavigationService);
+  public dialog = inject(MatDialog);
+
   private editSurveyPageSignal =
     this.navigationService.getEditSurveyPageSignal();
   private surveyIdSignal = this.navigationService.getSurveyId();
@@ -56,13 +62,7 @@ export class EditSurveyComponent {
   sectionTitle?: string = '';
   sortedJobs = List<Job>();
 
-  constructor(
-    public dialog: MatDialog,
-    private surveyService: SurveyService,
-    private jobService: JobService,
-    private draftSurveyService: DraftSurveyService,
-    private navigationService: NavigationService
-  ) {
+  constructor() {
     effect(async () => {
       const surveyId = this.surveyIdSignal();
 

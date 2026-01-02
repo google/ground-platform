@@ -117,7 +117,7 @@ export class NavigationService implements OnDestroy {
           route = route.parent!;
         }
 
-        this.urlSignal.set(e.url);
+        this.urlSignal.set(e?.url ?? '');
 
         this.urlParamsSignal.set(
           new UrlParams(

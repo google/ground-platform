@@ -16,8 +16,8 @@
 
 import { Component, NO_ERRORS_SCHEMA, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { AngularFireAuth } from '@angular/fire/compat/auth';
-import { AngularFirestore } from '@angular/fire/compat/firestore';
+import { Auth } from '@angular/fire/auth';
+import { Firestore } from '@angular/fire/firestore';
 import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NEVER, of } from 'rxjs';
@@ -90,8 +90,8 @@ describe('MainPageComponent', () => {
         { provide: SubmissionService, useValue: submissionService },
         { provide: SurveyService, useValue: surveyService },
         { provide: NavigationService, useValue: navigationService },
-        { provide: AngularFirestore, useValue: {} },
-        { provide: AngularFireAuth, useValue: {} },
+        { provide: Firestore, useValue: {} },
+        { provide: Auth, useValue: {} },
         { provide: Router, useValue: {} },
         {
           provide: AuthService,

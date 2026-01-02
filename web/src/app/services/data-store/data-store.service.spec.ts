@@ -15,14 +15,14 @@
  */
 
 import { TestBed } from '@angular/core/testing';
-import { AngularFirestore } from '@angular/fire/compat/firestore';
+import { Firestore } from '@angular/fire/firestore';
 
 import { DataStoreService } from 'app/services/data-store/data-store.service';
 
 describe('DataStoreService', () => {
   beforeEach(() =>
     TestBed.configureTestingModule({
-      providers: [{ provide: AngularFirestore, useValue: {} }],
+      providers: [{ provide: Firestore, useValue: {} }],
     })
   );
 

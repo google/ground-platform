@@ -51,8 +51,6 @@
 @use 'app/components/main-page-container/main-page/secondary-side-panel/_secondary-side-panel.component-theme' as secondary-side-panel;
 @use 'app/components/terms/_terms.component-theme.scss' as terms;
 
-@import 'firebaseui/dist/firebaseui.css';
-
 $theme: m3-theme.$light-theme;
 
 // Include the common styles for Angular Material. This allows us to only
