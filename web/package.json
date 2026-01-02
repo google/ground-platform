@@ -27,7 +27,9 @@
             "command": "ng build -c production"
           }
         },
-        "dependsOn": ["^build"],
+        "dependsOn": [
+          "^build"
+        ],
         "defaultConfiguration": "development"
       },
       "serve": {
@@ -46,7 +48,9 @@
             "command": "ng serve -c production"
           }
         },
-        "dependsOn": ["^build"],
+        "dependsOn": [
+          "^build"
+        ],
         "defaultConfiguration": "development"
       },
       "test": {
@@ -56,7 +60,9 @@
           "command": "ng test",
           "forwardAllArgs": true
         },
-        "dependsOn": ["^build"]
+        "dependsOn": [
+          "^build"
+        ]
       },
       "lint": {
         "executor": "nx:run-commands",
@@ -94,8 +100,6 @@
     "@types/jasmine": "~5.1.0",
     "@types/webpack-env": "^1.15.3",
     "cpx": "^1.5.0",
-    "inquirer": "^6.2.2",
-    "inquirer-autocomplete-prompt": "^1.3.0",
     "karma": "^6.4.4",
     "karma-chrome-launcher": "~3.2.0",
     "karma-coverage": "~2.2.1",
