@@ -65,12 +65,12 @@ runs:
 
     - name: Install dependencies
       shell: bash
-      run: npm run ci-all
+      run: npm install
 
     - name: Build project and local deps
       shell: bash
-      run: npm run build-all --config=local
+      run: npx nx build
 
     - name: Start Firebase emulator with Android test data
       shell: bash
-      run: npm run start:android
+      run: npx nx start-android-test-data
