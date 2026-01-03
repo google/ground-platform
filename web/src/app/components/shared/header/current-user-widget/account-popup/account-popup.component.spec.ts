@@ -31,9 +31,9 @@ describe('AccountPopupComponent', () => {
   let fixture: ComponentFixture<AccountPopupComponent>;
   const dialogRef: Partial<MatDialogRef<AccountPopupComponent>> = {};
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(async () => {
     const routerSpy = createRouterSpy();
-    TestBed.configureTestingModule({
+    await TestBed.configureTestingModule({
       declarations: [AccountPopupComponent],
       imports: [MatDialogModule],
       providers: [
@@ -43,7 +43,7 @@ describe('AccountPopupComponent', () => {
         { provide: Router, useValue: routerSpy },
       ],
     }).compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(AccountPopupComponent);

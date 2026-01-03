@@ -29,11 +29,12 @@ import { DraftSurveyService } from 'app/services/draft-survey/draft-survey.servi
   selector: 'ground-share-list',
   templateUrl: './share-list.component.html',
   styleUrls: ['./share-list.component.scss'],
+  standalone: false,
 })
 export class ShareListComponent {
-  acl?: Array<AclEntry>;
+  acl: Array<AclEntry> = [];
   survey?: Survey;
-  surveyOwnerEmail?: string;
+  surveyOwnerEmail = '';
 
   private subscription = new Subscription();
 
@@ -57,7 +58,7 @@ export class ShareListComponent {
 
     const owner = await this.authService.getUser(survey.ownerId);
 
-    this.surveyOwnerEmail = owner?.email;
+    this.surveyOwnerEmail = owner?.email || '';
 
     this.acl = survey
       .getAclSorted()
@@ -80,10 +81,11 @@ export class ShareListComponent {
       this.acl[index] = new AclEntry(this.acl[index].email, event.value);
     }
     // Add user owner.
-    this.acl.push(new AclEntry(this.surveyOwnerEmail!, Role.SURVEY_ORGANIZER));
+    const aclUpdate = [...this.acl];
+    aclUpdate.push(new AclEntry(this.surveyOwnerEmail!, Role.SURVEY_ORGANIZER));
 
     this.draftSurveyService.updateAcl(
-      Map(this.acl.map(entry => [entry.email, entry.role]))
+      Map(aclUpdate.map(entry => [entry.email, entry.role]))
     );
   }
 

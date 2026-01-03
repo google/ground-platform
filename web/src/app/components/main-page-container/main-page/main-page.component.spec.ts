@@ -15,9 +15,9 @@
  */
 
 import { Component, NO_ERRORS_SCHEMA, signal } from '@angular/core';
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { AngularFireAuth } from '@angular/fire/compat/auth';
-import { AngularFirestore } from '@angular/fire/compat/firestore';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { Auth } from '@angular/fire/auth';
+import { Firestore } from '@angular/fire/firestore';
 import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NEVER, of } from 'rxjs';
@@ -32,10 +32,18 @@ import { ActivatedRouteStub } from 'testing/activated-route-stub';
 
 import { MainPageComponent } from './main-page.component';
 
-@Component({ selector: 'ground-map', template: '' })
+@Component({
+  selector: 'ground-map',
+  template: '',
+  standalone: false,
+})
 class MapComponent {}
 
-@Component({ selector: 'mat-sidenav', template: '' })
+@Component({
+  selector: 'mat-sidenav',
+  template: '',
+  standalone: false,
+})
 class MatSideNavComponent {
   opened = false;
 }
@@ -46,7 +54,7 @@ describe('MainPageComponent', () => {
   let route: ActivatedRouteStub;
   const dialog: Partial<MatDialog> = {};
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(async () => {
     route = new ActivatedRouteStub();
 
     const surveyService = jasmine.createSpyObj('SurveyService', [
@@ -70,7 +78,7 @@ describe('MainPageComponent', () => {
       getUrlParams: () => signal({}),
     };
 
-    TestBed.configureTestingModule({
+    await TestBed.configureTestingModule({
       declarations: [MainPageComponent, MapComponent, MatSideNavComponent],
       providers: [
         { provide: ActivatedRoute, useValue: route },
@@ -82,8 +90,8 @@ describe('MainPageComponent', () => {
         { provide: SubmissionService, useValue: submissionService },
         { provide: SurveyService, useValue: surveyService },
         { provide: NavigationService, useValue: navigationService },
-        { provide: AngularFirestore, useValue: {} },
-        { provide: AngularFireAuth, useValue: {} },
+        { provide: Firestore, useValue: {} },
+        { provide: Auth, useValue: {} },
         { provide: Router, useValue: {} },
         {
           provide: AuthService,
@@ -109,7 +117,7 @@ describe('MainPageComponent', () => {
     fixture.componentRef.setInput('activeSurvey', mockSurvey);
     component = fixture.componentInstance;
     fixture.detectChanges();
-  }));
+  });
 
   it('should create', () => {
     expect(component).toBeTruthy();

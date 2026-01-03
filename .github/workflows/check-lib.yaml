@@ -26,24 +26,25 @@ jobs:
   check:
     name: Check
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./lib
 
     steps:
       - name: Check out code
-        uses: actions/checkout@v1
+        uses: actions/checkout@v6
 
       - name: Set up Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v6
         with:
           node-version: "20"
 
-      - name: Install dependencies
-        run: npm ci
+      - name: Install deps
+        run: npm install
 
-      - name: Build lib and local deps
-        run: npm run build-all
+      - name: Build web and deps
+        run: npx nx build lib
 
-      - name: Run tests
-        run: npm run test
+      - name: Run tests with coverage
+        run: npx nx test lib
+
+      - name: Run lint checks
+        run: npx nx lint lib
+

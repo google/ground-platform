@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, input } from '@angular/core';
+import { Component, input, inject } from '@angular/core';
 
 import { Survey } from 'app/models/survey.model';
 import { NavigationService } from 'app/services/navigation/navigation.service';
@@ -24,8 +24,10 @@ import { SideNavMode } from 'app/services/navigation/url-params';
   selector: 'ground-secondary-side-panel',
   templateUrl: './secondary-side-panel.component.html',
   styleUrls: ['./secondary-side-panel.component.css'],
+  standalone: false,
 })
 export class SecondarySidePanelComponent {
+  private navigationService = inject(NavigationService);
   activeSurvey = input<Survey>();
   loiIdSignal = this.navigationService.getLoiId();
   submissionIdSignal = this.navigationService.getSubmissionId();
@@ -33,5 +35,5 @@ export class SecondarySidePanelComponent {
 
   SideNavMode = SideNavMode;
 
-  constructor(private navigationService: NavigationService) {}
+  constructor() {}
 }

@@ -41,7 +41,6 @@ export interface DialogData {
       <button mat-button (click)="onConfirm()">Yes</button>
     </mat-dialog-actions>
   `,
-  standalone: true,
   imports: [
     MatDialogTitle,
     MatDialogContent,
@@ -49,6 +48,7 @@ export interface DialogData {
     MatDialogClose,
     MatButtonModule,
   ],
+  standalone: true,
 })
 export class ConfirmationDialogComponent {
   constructor(

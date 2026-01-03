@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, effect, input } from '@angular/core';
+import { Component, effect, input, inject } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { switchMap } from 'rxjs/operators';
 
@@ -24,8 +24,11 @@ import { SurveyService } from 'app/services/survey/survey.service';
   selector: 'ground-main-page-container',
   templateUrl: './main-page-container.component.html',
   styleUrls: ['./main-page-container.component.css'],
+  standalone: false,
 })
 export class MainPageContainerComponent {
+  private surveyService = inject(SurveyService);
+
   surveyId = input<string>();
   survey = toSignal(
     toObservable(this.surveyId).pipe(
@@ -33,7 +36,7 @@ export class MainPageContainerComponent {
     )
   );
 
-  constructor(private surveyService: SurveyService) {
+  constructor() {
     effect(() => {
       const id = this.surveyId();
       if (id) this.surveyService.activateSurvey(id);

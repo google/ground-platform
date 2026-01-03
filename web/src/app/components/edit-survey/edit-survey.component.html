@@ -79,7 +79,7 @@
       </div>
 
       <a
-        *ngFor="let job of jobs(); index as i"
+        *ngFor="let job of sortedJobs; index as i"
         mat-list-item
         id="job-{{ i }}"
         class="job-list-item"

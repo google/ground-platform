@@ -154,6 +154,7 @@ const AddLoiTaskGroups = List([TaskGroup.DROP_PIN, TaskGroup.DRAW_AREA]);
   selector: 'task-form',
   templateUrl: './task-form.component.html',
   styleUrls: ['./task-form.component.scss'],
+  standalone: false,
 })
 export class TaskFormComponent {
   @Input() formGroup!: FormGroup;

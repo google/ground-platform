@@ -25,7 +25,9 @@ import { SurveyService } from 'app/services/survey/survey.service';
 import { TaskService } from './task.service';
 
 describe('TaskService', () => {
-  const dataStoreServiceStub: Partial<DataStoreService> = {};
+  const dataStoreServiceStub: Partial<DataStoreService> = {
+    tasks$: () => new Subject(),
+  };
   const activeSurvey$ = new Subject<Survey | null>();
 
   beforeEach(() => {

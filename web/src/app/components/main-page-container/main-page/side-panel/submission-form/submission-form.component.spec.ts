@@ -15,7 +15,8 @@
  */
 
 import { NO_ERRORS_SCHEMA, signal } from '@angular/core';
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { Firestore } from '@angular/fire/firestore';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
@@ -25,7 +26,10 @@ import { MatInputModule } from '@angular/material/input';
 import { MatListModule } from '@angular/material/list';
 import { MatRadioModule } from '@angular/material/radio';
 import { By } from '@angular/platform-browser';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import {
+  BrowserAnimationsModule,
+  NoopAnimationsModule,
+} from '@angular/platform-browser/animations';
 import { Router } from '@angular/router';
 import { List, Map } from 'immutable';
 import { NEVER, of } from 'rxjs';
@@ -165,12 +169,24 @@ class MockSubmissionService {
 const surveyService = new MockSurveyService();
 const loiService = new MockLocationOfInterestService();
 const submissionService = new MockSubmissionService();
+const dataStoreServiceSpy = jasmine.createSpyObj('DataStoreService', [
+  'getServerTimestamp',
+  'updateSubmission',
+]);
+dataStoreServiceSpy.getServerTimestamp.and.returnValue(new Date());
+dataStoreServiceSpy.updateSubmission.and.returnValue(Promise.resolve());
+
+const authServiceSpy = jasmine.createSpyObj('AuthService', ['getUser$']);
+authServiceSpy.getUser$.and.returnValue(of(MockModel.user001));
+
+// Stub for Firestore if needed, but likely unused in component if DataStore is mocked
+const firestoreStub = {};
 
 describe('SubmissionFormComponent', () => {
   let component: SubmissionFormComponent;
   let fixture: ComponentFixture<SubmissionFormComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(async () => {
     const navigationService = {
       getSurveyId$: () => of(''),
       getUrlParams: () => signal(new UrlParams(null, null, null, null)),
@@ -181,34 +197,30 @@ describe('SubmissionFormComponent', () => {
     TestBed.configureTestingModule({
       declarations: [SubmissionFormComponent],
       imports: [
-        BrowserAnimationsModule,
         FormsModule,
         ReactiveFormsModule,
-        MatFormFieldModule,
+        NoopAnimationsModule,
         MatButtonModule,
+        MatCheckboxModule,
         MatFormFieldModule,
         MatInputModule,
-        MatRadioModule,
-        MatCheckboxModule,
-        MatIconModule,
         MatListModule,
-        JobListItemModule,
+        MatRadioModule,
       ],
       providers: [
-        { provide: DataStoreService, useValue: {} },
-        {
-          provide: LocationOfInterestService,
-          useValue: loiService,
-        },
         { provide: SurveyService, useValue: surveyService },
+        { provide: LocationOfInterestService, useValue: loiService },
         { provide: SubmissionService, useValue: submissionService },
-        { provide: Router, useValue: routerSpy },
         { provide: NavigationService, useValue: navigationService },
-        { provide: AuthService, useValue: { getUser$: () => NEVER } },
+        { provide: DataStoreService, useValue: dataStoreServiceSpy },
+        { provide: AuthService, useValue: authServiceSpy },
+        { provide: Firestore, useValue: firestoreStub },
       ],
       schemas: [NO_ERRORS_SCHEMA],
-    }).compileComponents();
-  }));
+    });
+
+    await TestBed.compileComponents();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(SubmissionFormComponent);

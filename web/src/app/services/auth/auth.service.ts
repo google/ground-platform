@@ -17,10 +17,16 @@
 import '@angular/localize/init';
 
 import { Injectable } from '@angular/core';
-import { AngularFireAuth } from '@angular/fire/compat/auth';
-import { AngularFireFunctions } from '@angular/fire/compat/functions';
-import { GoogleAuthProvider } from 'firebase/auth';
-import firebase from 'firebase/compat/app';
+import {
+  Auth,
+  authState,
+  GoogleAuthProvider,
+  signInWithPopup,
+  signOut,
+  User as FirebaseUser,
+  idToken,
+} from '@angular/fire/auth';
+import { Functions, httpsCallable } from '@angular/fire/functions';
 import { Observable, Subject, firstValueFrom, from } from 'rxjs';
 import { map, mergeWith, shareReplay, switchMap } from 'rxjs/operators';
 
@@ -63,19 +69,30 @@ export const ROLE_OPTIONS = [
 })
 export class AuthService {
   private user$: Observable<User>;
-  private tokenChanged$ = new Subject<firebase.User | null>();
+  private tokenChanged$ = new Subject<FirebaseUser | null>();
   private currentUser!: User;
   private hasAcceptedTos = false;
 
   constructor(
-    private afAuth: AngularFireAuth,
+    private auth: Auth,
     private dataStore: DataStoreService,
     private navigationService: NavigationService,
-    private functions: AngularFireFunctions,
+    private functions: Functions,
     private httpClientService: HttpClientService
   ) {
-    this.afAuth.onIdTokenChanged(user => this.tokenChanged$.next(user));
-    this.user$ = this.afAuth.authState.pipe(
+    // onIdTokenChanged via RxJS 'idToken' or 'user' specific helper?
+    // @angular/fire/auth provides 'user' which wraps onIdTokenChanged.
+    // However, existing code pipes it to tokenChanged$.
+    // Let's use the 'user' observable from @angular/fire/auth directly if possible, or just hook up manually.
+    // Typically `user(this.auth)` matches onIdTokenChanged.
+    // Let's explicitly use the modular onIdTokenChanged function for now to replicate exact behavior if simpler.
+    // actually, let's use the RxJS way:
+    // import { user } from '@angular/fire/auth'; --> corresponds to onIdTokenChanged.
+    // But I didn't import 'user' in the top block, I imported 'User as FirebaseUser'.
+    // Let's just use the strict SDK method in constructor.
+    this.auth.onIdTokenChanged(user => this.tokenChanged$.next(user));
+
+    this.user$ = authState(this.auth).pipe(
       mergeWith(this.tokenChanged$),
       switchMap(user => from(this.onAuthStateChange(user))),
       map(user => user || ANONYMOUS_USER),
@@ -104,7 +121,7 @@ export class AuthService {
   }
 
   private async onAuthStateChange(
-    user: firebase.User | null
+    user: FirebaseUser | null
   ): Promise<User | undefined> {
     if (!user) {
       return undefined;
@@ -115,8 +132,8 @@ export class AuthService {
 
   async callProfileRefresh() {
     // TODO(#1159): Refactor access to Cloud Functions into new service.
-    const refreshProfile = this.functions.httpsCallable('profile-refresh');
-    const result = await firstValueFrom(refreshProfile({}));
+    const refreshProfile = httpsCallable(this.functions, 'profile-refresh');
+    const result = (await refreshProfile({})).data;
     if (result !== 'OK') {
       throw new Error('User profile could not be updated');
     }
@@ -154,11 +171,11 @@ export class AuthService {
 
   async signIn() {
     const provider = new GoogleAuthProvider();
-    await this.afAuth.signInWithPopup(provider);
+    await signInWithPopup(this.auth, provider);
   }
 
   async signOut() {
-    await this.afAuth.signOut();
+    await signOut(this.auth);
     return this.navigationService.signOut();
   }
 

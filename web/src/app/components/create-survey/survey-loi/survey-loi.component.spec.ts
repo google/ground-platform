@@ -16,19 +16,15 @@
 
 import { CommonModule } from '@angular/common';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
-import {
-  ComponentFixture,
-  TestBed,
-  fakeAsync,
-  waitForAsync,
-} from '@angular/core/testing';
-import { AngularFireAuth } from '@angular/fire/compat/auth';
-import { AngularFirestore } from '@angular/fire/compat/firestore';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { Auth } from '@angular/fire/auth';
+import { Firestore } from '@angular/fire/firestore';
 import { MatDialog } from '@angular/material/dialog';
 import { List, Map } from 'immutable';
 import { BehaviorSubject, of } from 'rxjs';
 
 import { LoiSelectionModule } from 'app/components/shared/loi-selection/loi-selection.module';
+import { Job } from 'app/models/job.model';
 import { LocationOfInterest } from 'app/models/loi.model';
 import { DataSharingType, Survey } from 'app/models/survey.model';
 import { AuthService } from 'app/services/auth/auth.service';
@@ -56,7 +52,7 @@ describe('SurveyLoiComponent', () => {
     'id1',
     'title1',
     'description1',
-    Map(),
+    Map([['job1', new Job('job1', 0, '#000')]]),
     Map(),
     '',
     { type: DataSharingType.PRIVATE }
@@ -64,7 +60,7 @@ describe('SurveyLoiComponent', () => {
 
   const mockSurvey$ = of(mockSurvey);
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(async () => {
     navigationServiceSpy = jasmine.createSpyObj<NavigationService>(
       'NavigationService',
       ['getLocationOfInterestId$', 'getSubmissionId$', 'getSidePanelExpanded']
@@ -76,6 +72,13 @@ describe('SurveyLoiComponent', () => {
       'canManageSurvey',
     ]);
 
+    loiServiceSpy = jasmine.createSpyObj<LocationOfInterestService>(
+      'LocationOfInterestService',
+      ['getPredefinedLoisByJobId$']
+    );
+
+    loiServiceSpy.getPredefinedLoisByJobId$.and.returnValue(mockLois$);
+
     navigationServiceSpy.getSubmissionId$.and.returnValue(
       of<string | null>(null)
     );
@@ -84,12 +87,12 @@ describe('SurveyLoiComponent', () => {
     surveyServiceSpy.getActiveSurvey.and.returnValue(mockSurvey);
     surveyServiceSpy.getActiveSurvey$.and.returnValue(mockSurvey$);
 
-    TestBed.configureTestingModule({
+    await TestBed.configureTestingModule({
       declarations: [SurveyLoiComponent],
       imports: [LoiSelectionModule, CommonModule],
       providers: [
-        { provide: AngularFirestore, useValue: {} },
-        { provide: AngularFireAuth, useValue: {} },
+        { provide: Firestore, useValue: {} },
+        { provide: Auth, useValue: {} },
         { provide: AuthService, useValue: {} },
         { provide: LocationOfInterestService, useValue: loiServiceSpy },
         { provide: NavigationService, useValue: navigationServiceSpy },
@@ -98,7 +101,7 @@ describe('SurveyLoiComponent', () => {
       ],
       schemas: [NO_ERRORS_SCHEMA],
     }).compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(SurveyLoiComponent);

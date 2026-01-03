@@ -51,13 +51,18 @@
 @use 'app/components/main-page-container/main-page/secondary-side-panel/_secondary-side-panel.component-theme' as secondary-side-panel;
 @use 'app/components/terms/_terms.component-theme.scss' as terms;
 
-@import 'firebaseui/dist/firebaseui.css';
-
 $theme: m3-theme.$light-theme;
 
 // Include the common styles for Angular Material. This allows us to only
 // have to load a single css file for Angular Material in your app.
 @include mat.core();
+
+@for $zValue from 0 through 24 {
+  .mat-elevation-z#{$zValue} {
+    @include mat.elevation($zValue);
+  }
+}
+// @include mat.app-background();
 
 html {
   @include mat.all-component-themes($theme);

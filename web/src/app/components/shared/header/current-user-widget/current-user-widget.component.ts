@@ -24,6 +24,7 @@ import { AuthService } from 'app/services/auth/auth.service';
   selector: 'ground-current-user-widget',
   templateUrl: './current-user-widget.component.html',
   styleUrls: ['./current-user-widget.component.scss'],
+  standalone: false,
 })
 export class CurrentUserWidgetComponent {
   constructor(public auth: AuthService, private dialog: MatDialog) {}

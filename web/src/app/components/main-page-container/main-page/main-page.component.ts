@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, OnInit, effect, input } from '@angular/core';
+import { Component, OnInit, effect, input, inject } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Subscription } from 'rxjs';
 
@@ -38,22 +38,23 @@ import { TitleDialogComponent } from './title-dialog/title-dialog.component';
   selector: 'ground-main-page',
   templateUrl: './main-page.component.html',
   styleUrls: ['./main-page.component.scss'],
+  standalone: false,
 })
 export class MainPageComponent implements OnInit {
+  private navigationService = inject(NavigationService);
+  private surveyService = inject(SurveyService);
+  private loiService = inject(LocationOfInterestService);
+  private submissionService = inject(SubmissionService);
+  private authService = inject(AuthService);
+  private dialog = inject(MatDialog);
+
   activeSurvey = input.required<Survey>();
   private urlParamsSignal = this.navigationService.getUrlParams();
 
   subscription: Subscription = new Subscription();
   showSubmissionPanel: Boolean = false;
 
-  constructor(
-    private navigationService: NavigationService,
-    private surveyService: SurveyService,
-    private loiService: LocationOfInterestService,
-    private submissionService: SubmissionService,
-    private authService: AuthService,
-    private dialog: MatDialog
-  ) {
+  constructor() {
     effect(() => {
       const { loiId, submissionId } = this.urlParamsSignal();
       if (loiId) this.loiService.selectLocationOfInterest(loiId);

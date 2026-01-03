@@ -16,7 +16,7 @@
 
 import '@angular/localize/init';
 
-import { Component, effect } from '@angular/core';
+import { Component, effect, inject } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { List } from 'immutable';
 
@@ -42,8 +42,15 @@ import {
   selector: 'edit-survey',
   templateUrl: './edit-survey.component.html',
   styleUrls: ['./edit-survey.component.scss'],
+  standalone: false,
 })
 export class EditSurveyComponent {
+  private surveyService = inject(SurveyService);
+  private jobService = inject(JobService);
+  private draftSurveyService = inject(DraftSurveyService);
+  private navigationService = inject(NavigationService);
+  public dialog = inject(MatDialog);
+
   private editSurveyPageSignal =
     this.navigationService.getEditSurveyPageSignal();
   private surveyIdSignal = this.navigationService.getSurveyId();
@@ -53,14 +60,9 @@ export class EditSurveyComponent {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   production = !!(environment as any)['production'];
   sectionTitle?: string = '';
+  sortedJobs = List<Job>();
 
-  constructor(
-    public dialog: MatDialog,
-    private surveyService: SurveyService,
-    private jobService: JobService,
-    private draftSurveyService: DraftSurveyService,
-    private navigationService: NavigationService
-  ) {
+  constructor() {
     effect(async () => {
       const surveyId = this.surveyIdSignal();
 
@@ -68,9 +70,10 @@ export class EditSurveyComponent {
         this.surveyId = surveyId;
         this.surveyService.activateSurvey(surveyId);
         await this.draftSurveyService.init(surveyId);
-        this.draftSurveyService
-          .getSurvey$()
-          .subscribe(survey => (this.survey = survey));
+        this.draftSurveyService.getSurvey$().subscribe(survey => {
+          this.survey = survey;
+          this.sortedJobs = this.survey.getJobsSorted();
+        });
       }
     });
 
@@ -89,10 +92,6 @@ export class EditSurveyComponent {
           break;
       }
     });
-  }
-
-  jobs(): List<Job> {
-    return this.survey!.getJobsSorted();
   }
 
   addJob(): void {

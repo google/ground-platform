@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject, LOCALE_ID, OnInit } from '@angular/core';
+import { Component, Inject, LOCALE_ID, OnInit, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 
@@ -25,18 +25,20 @@ import { NavigationService } from 'app/services/navigation/navigation.service';
   selector: 'ground-android-landing-page',
   templateUrl: './android-intent-landing-page.component.html',
   styleUrls: ['./android-intent-landing-page.component.scss'],
+  standalone: false,
 })
 export class AndroidIntentLandingPageComponent implements OnInit {
+  private appConfigService = inject(AppConfigService);
+  private navigationService = inject(NavigationService);
+  private router = inject(Router);
+
   googlePlayId$ = this.appConfigService.getGooglePlayId();
   getItOnGooglePlayImageSrc: string;
   isAndroid = false;
   isIos = false;
 
   constructor(
-    @Inject(LOCALE_ID) public locale: string,
-    private appConfigService: AppConfigService,
-    private navigationService: NavigationService,
-    private router: Router
+    @Inject(LOCALE_ID) public locale: string
   ) {
     const languageId = locale.split('-')[0];
     switch (languageId) {

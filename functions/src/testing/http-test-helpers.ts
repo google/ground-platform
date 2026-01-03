@@ -15,7 +15,7 @@
  */
 
 import functions from 'firebase-functions';
-import { buffer } from 'node:stream/consumers';
+import { buffer } from 'stream/consumers';
 import { FormDataEncoder } from 'form-data-encoder';
 import { FormData } from 'formdata-node';
 

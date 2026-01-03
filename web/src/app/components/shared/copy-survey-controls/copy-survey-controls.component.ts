@@ -29,6 +29,7 @@ import { NotificationService } from 'app/services/notification/notification.serv
   selector: 'ground-copy-survey-controls',
   templateUrl: './copy-survey-controls.component.html',
   styleUrls: ['./copy-survey-controls.component.scss'],
+  standalone: false,
 })
 export class CopySurveyControlsComponent implements OnInit {
   @Input() surveyId = '';

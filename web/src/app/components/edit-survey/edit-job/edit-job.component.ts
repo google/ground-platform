@@ -39,6 +39,7 @@ enum EditJobSection {
   selector: 'edit-job',
   templateUrl: './edit-job.component.html',
   styleUrls: ['./edit-job.component.scss'],
+  standalone: false,
 })
 export class EditJobComponent {
   subscription: Subscription = new Subscription();
@@ -95,6 +96,8 @@ export class EditJobComponent {
     this.jobId = params['id'];
 
     this.job = this.draftSurveyService.getSurvey().getJob(this.jobId!);
+
+    if (!this.job) return;
 
     this.loisSubscription.add(
       this.loiService

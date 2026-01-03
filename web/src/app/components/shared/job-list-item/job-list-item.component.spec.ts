@@ -25,8 +25,8 @@ import {
   tick,
   waitForAsync,
 } from '@angular/core/testing';
-import { AngularFireAuth } from '@angular/fire/compat/auth';
-import { AngularFirestore } from '@angular/fire/compat/firestore';
+import { Auth } from '@angular/fire/auth';
+import { Firestore } from '@angular/fire/firestore';
 import { MatButtonHarness } from '@angular/material/button/testing';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatListModule } from '@angular/material/list';
@@ -61,8 +61,8 @@ const authState = {
   uid: '',
 };
 
-const mockAngularFireAuth = {
-  authState: of(authState),
+const mockAuth = {
+  currentUser: authState,
 };
 
 describe('JobListItemComponent', () => {
@@ -139,7 +139,7 @@ describe('JobListItemComponent', () => {
     return List(submissions);
   }
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(async () => {
     surveyServiceSpy = jasmine.createSpyObj<SurveyService>('SurveyService', [
       'canManageSurvey',
       'getActiveSurvey$',
@@ -183,7 +183,7 @@ describe('JobListItemComponent', () => {
     );
     navigationServiceSpy.getUrlParams.and.returnValue(urlParamsSignal);
 
-    TestBed.configureTestingModule({
+    await TestBed.configureTestingModule({
       declarations: [JobListItemComponent],
       imports: [
         GroundIconModule,
@@ -200,15 +200,15 @@ describe('JobListItemComponent', () => {
         { provide: SurveyService, useValue: surveyServiceSpy },
         { provide: LocationOfInterestService, useValue: loiServiceSpy },
         { provide: SubmissionService, useValue: submissionServiceSpy },
-        { provide: AngularFirestore, useValue: {} },
+        { provide: Firestore, useValue: {} },
         { provide: AuthService, useValue: {} },
         {
-          provide: AngularFireAuth,
-          useValue: mockAngularFireAuth,
+          provide: Auth,
+          useValue: mockAuth,
         },
       ],
     }).compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(JobListItemComponent);

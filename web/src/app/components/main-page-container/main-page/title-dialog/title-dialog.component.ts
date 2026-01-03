@@ -25,6 +25,7 @@ import { SurveyService } from 'app/services/survey/survey.service';
   selector: 'ground-title-dialog',
   templateUrl: './title-dialog.component.html',
   styleUrls: ['./title-dialog.component.scss'],
+  standalone: false,
 })
 export class TitleDialogComponent {
   surveyTitleForm: FormGroup;

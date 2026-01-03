@@ -15,29 +15,23 @@
  */
 
 import { NO_ERRORS_SCHEMA, WritableSignal, signal } from '@angular/core';
-import {
-  ComponentFixture,
-  TestBed,
-  discardPeriodicTasks,
-  fakeAsync,
-  flush,
-  tick,
-  waitForAsync,
-} from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { By } from '@angular/platform-browser';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { ActivatedRoute } from '@angular/router';
+import { RouterLink } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
-import { Map } from 'immutable';
-import { BehaviorSubject, Subject, of } from 'rxjs';
+import { List, Map } from 'immutable';
+import { BehaviorSubject, ReplaySubject, Subject, of } from 'rxjs';
+import { delay } from 'rxjs/operators';
 
 import { EditSurveyComponent } from 'app/components/edit-survey/edit-survey.component';
 import { Job } from 'app/models/job.model';
 import { DataSharingType, Survey } from 'app/models/survey.model';
+import { Task } from 'app/models/task/task.model';
 import { DataStoreService } from 'app/services/data-store/data-store.service';
 import { DraftSurveyService } from 'app/services/draft-survey/draft-survey.service';
 import { JobService } from 'app/services/job/job.service';
@@ -56,16 +50,17 @@ describe('EditSurveyComponent', () => {
   let surveyId$: Subject<string | null>;
   let surveyIdSignal: WritableSignal<string | null>;
   let navigationServiceSpy: jasmine.SpyObj<NavigationService>;
-  let route: ActivatedRouteStub;
   let activeSurvey$: Subject<Survey>;
   let surveyServiceSpy: jasmine.SpyObj<SurveyService>;
   let draftSurveyServiceSpy: jasmine.SpyObj<DraftSurveyService>;
+  let surveySubject$: Subject<Survey>;
   let jobServiceSpy: jasmine.SpyObj<JobService>;
   let dataStoreServiceSpy: jasmine.SpyObj<DataStoreService>;
   let dialogRefSpy: jasmine.SpyObj<
     MatDialogRef<JobDialogComponent, DialogData>
   >;
   let dialogSpy: jasmine.SpyObj<MatDialog>;
+  let initResolve: (value?: any) => void;
 
   const surveyId = 'survey001';
   const jobId1 = 'job001';
@@ -101,7 +96,7 @@ describe('EditSurveyComponent', () => {
     { type: DataSharingType.PRIVATE }
   );
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(async () => {
     surveyIdSignal = signal<string | null>(null);
     surveyId$ = new Subject<string | null>();
 
@@ -120,7 +115,6 @@ describe('EditSurveyComponent', () => {
     navigationServiceSpy.getSurveyId.and.returnValue(surveyIdSignal);
     navigationServiceSpy.getEditSurveyPageSignal.and.returnValue(signal(''));
 
-    route = new ActivatedRouteStub();
     surveyServiceSpy = jasmine.createSpyObj<SurveyService>('SurveyService', [
       'activateSurvey',
       'getActiveSurvey$',
@@ -128,14 +122,18 @@ describe('EditSurveyComponent', () => {
     activeSurvey$ = new Subject<Survey>();
     surveyServiceSpy.getActiveSurvey$.and.returnValue(activeSurvey$);
 
+    surveySubject$ = new BehaviorSubject<Survey>(survey);
     draftSurveyServiceSpy = jasmine.createSpyObj<DraftSurveyService>(
       'DraftSurveyService',
       ['init', 'getSurvey$', 'addOrUpdateJob', 'deleteJob', 'getSurvey']
     );
-    draftSurveyServiceSpy.getSurvey$.and.returnValue(
-      new BehaviorSubject<Survey>(survey)
-    );
+    draftSurveyServiceSpy.getSurvey$.and.returnValue(surveySubject$);
     draftSurveyServiceSpy.getSurvey.and.returnValue(survey);
+    draftSurveyServiceSpy.init.and.returnValue(
+      new Promise(resolve => {
+        initResolve = resolve;
+      })
+    );
 
     jobServiceSpy = jasmine.createSpyObj<JobService>('JobService', [
       'createNewJob',
@@ -148,9 +146,10 @@ describe('EditSurveyComponent', () => {
 
     dataStoreServiceSpy = jasmine.createSpyObj<DataStoreService>(
       'DataStoreService',
-      ['loadSurvey$']
+      ['loadSurvey$', 'tasks$']
     );
     dataStoreServiceSpy.loadSurvey$.and.returnValue(activeSurvey$);
+    dataStoreServiceSpy.tasks$.and.returnValue(new Subject<List<Task>>());
 
     dialogRefSpy = jasmine.createSpyObj<
       MatDialogRef<JobDialogComponent, DialogData>
@@ -158,7 +157,7 @@ describe('EditSurveyComponent', () => {
     dialogSpy = jasmine.createSpyObj<MatDialog>('MatDialog', ['open']);
     dialogSpy.open.and.returnValue(dialogRefSpy);
 
-    TestBed.configureTestingModule({
+    await TestBed.configureTestingModule({
       imports: [
         RouterTestingModule,
         MatDividerModule,
@@ -174,18 +173,17 @@ describe('EditSurveyComponent', () => {
         { provide: DraftSurveyService, useValue: draftSurveyServiceSpy },
         { provide: JobService, useValue: jobServiceSpy },
         { provide: DataStoreService, useValue: dataStoreServiceSpy },
-        { provide: ActivatedRoute, useValue: route },
         { provide: MatDialog, useValue: dialogSpy },
       ],
     }).compileComponents();
-  }));
+  });
 
-  beforeEach(fakeAsync(() => {
+  beforeEach(() => {
     fixture = TestBed.createComponent(EditSurveyComponent);
-    fixture.detectChanges();
-  }));
+  });
 
   it('shows spinner when survey not loaded', () => {
+    fixture.detectChanges();
     const spinner = fixture.debugElement.query(By.css('#loading-spinner'))
       .nativeElement as HTMLElement;
     // TODO(#1170): Extract the spinner into a component
@@ -193,11 +191,20 @@ describe('EditSurveyComponent', () => {
   });
 
   describe('when routed in with survey ID', () => {
-    beforeEach(fakeAsync(() => {
+    beforeEach(async () => {
       surveyIdSignal.set(surveyId);
       surveyId$.next(surveyId);
-      tick();
-    }));
+
+      const sortedJobs = survey.getJobsSorted();
+      spyOn(survey, 'getJobsSorted').and.returnValue(sortedJobs);
+      fixture.componentInstance.survey = survey;
+      fixture.componentInstance.sortedJobs = sortedJobs;
+
+      fixture.detectChanges(); // Initial render (spinner)
+      initResolve(); // Allow effect to proceed
+      await fixture.whenStable(); // Flush microtasks (effect resumes, survey update)
+      fixture.detectChanges(); // Update view (content)
+    });
 
     it('activates survey ID', () => {
       expect(surveyServiceSpy.activateSurvey).toHaveBeenCalledOnceWith(
@@ -207,16 +214,21 @@ describe('EditSurveyComponent', () => {
   });
 
   describe('when survey activated', () => {
-    beforeEach(fakeAsync(() => {
+    beforeEach(async () => {
       surveyIdSignal.set(surveyId);
       surveyId$.next(surveyId);
       activeSurvey$.next(survey);
-      // Manually set survey to ensure it's available for template rendering
-      // bypassing potential async effect timing issues in tests.
+
+      const sortedJobs = survey.getJobsSorted();
+      spyOn(survey, 'getJobsSorted').and.returnValue(sortedJobs);
       fixture.componentInstance.survey = survey;
-      tick();
-      fixture.detectChanges();
-    }));
+      fixture.componentInstance.sortedJobs = sortedJobs;
+
+      fixture.detectChanges(); // Initial render (spinner)
+      initResolve(); // Allow effect to proceed
+      await fixture.whenStable(); // Flush microtasks (effect resumes, survey update)
+      fixture.detectChanges(); // Update view (content)
+    });
 
     describe('menu item tests', () => {
       [
@@ -242,19 +254,24 @@ describe('EditSurveyComponent', () => {
         },
       ].forEach(({ buttonSelector, expectedLabel, expectedRouterLink }) => {
         it('displays button with correct label and router link', () => {
-          const button = fixture.debugElement.query(By.css(buttonSelector))
-            .nativeElement as HTMLElement;
+          const button = fixture.debugElement.query(By.css(buttonSelector));
 
-          expect(button.textContent).toContain(expectedLabel);
-          expect(button.getAttribute('ng-reflect-router-link')).toEqual(
-            expectedRouterLink
-          );
+          expect(button.nativeElement.textContent).toContain(expectedLabel);
+
+          const href = button.nativeElement.getAttribute('href');
+          // RouterLink handles array/string inputs differently in href generation.
+          // We just check if it contains the main path segment.
+          const expectedPath = Array.isArray(expectedRouterLink)
+            ? expectedRouterLink[0].replace('./', '')
+            : expectedRouterLink.replace('./', '');
+
+          expect(href).toContain(expectedPath);
         });
       });
     });
 
     describe('add/rename/duplicate/delete a job', () => {
-      it('add a job', fakeAsync(() => {
+      it('add a job', async () => {
         const addButton = fixture.debugElement.query(By.css('#add-button'))
           .nativeElement as HTMLElement;
         const newJobName = 'new job name';
@@ -263,15 +280,14 @@ describe('EditSurveyComponent', () => {
         );
 
         addButton.click();
+        await fixture.whenStable();
 
         expect(draftSurveyServiceSpy.addOrUpdateJob).toHaveBeenCalledOnceWith(
           newJob.copyWith({ name: newJobName })
         );
-        flush();
-        discardPeriodicTasks();
-      }));
+      });
 
-      it('rename a job', fakeAsync(() => {
+      it('rename a job', async () => {
         const menuButton = fixture.debugElement.query(By.css('#menu-button-0'))
           .nativeElement as HTMLElement;
         const newJobName = 'new job name';
@@ -281,32 +297,32 @@ describe('EditSurveyComponent', () => {
 
         menuButton.click();
         fixture.detectChanges();
-        tick();
+        await fixture.whenStable();
 
         const renameButton = document.querySelector(
           '#rename-button-0'
         ) as HTMLElement;
         renameButton.click();
+        await fixture.whenStable();
 
         expect(draftSurveyServiceSpy.addOrUpdateJob).toHaveBeenCalledOnceWith(
           job1.copyWith({ name: newJobName })
         );
-        flush();
-        discardPeriodicTasks();
-      }));
+      });
 
-      it('duplicate a job', fakeAsync(() => {
+      it('duplicate a job', async () => {
         const menuButton = fixture.debugElement.query(By.css('#menu-button-0'))
           .nativeElement as HTMLElement;
 
         menuButton.click();
         fixture.detectChanges();
-        tick();
+        await fixture.whenStable();
 
         const duplicateButton = document.querySelector(
           '#duplicate-button-0'
         ) as HTMLElement;
         duplicateButton.click();
+        await fixture.whenStable();
 
         expect(draftSurveyServiceSpy.addOrUpdateJob).toHaveBeenCalledOnceWith(
           jobServiceSpy.duplicateJob(
@@ -315,11 +331,9 @@ describe('EditSurveyComponent', () => {
           ),
           true
         );
-        flush();
-        discardPeriodicTasks();
-      }));
+      });
 
-      it('delete a job', fakeAsync(() => {
+      it('delete a job', async () => {
         const menuButton = fixture.debugElement.query(By.css('#menu-button-0'))
           .nativeElement as HTMLElement;
         dialogRefSpy.afterClosed.and.returnValue(
@@ -328,17 +342,16 @@ describe('EditSurveyComponent', () => {
 
         menuButton.click();
         fixture.detectChanges();
-        tick();
+        await fixture.whenStable();
 
         const deleteButton = document.querySelector(
           '#delete-button-0'
         ) as HTMLElement;
         deleteButton.click();
+        await fixture.whenStable();
 
         expect(draftSurveyServiceSpy.deleteJob).toHaveBeenCalledOnceWith(job1);
-        flush();
-        discardPeriodicTasks();
-      }));
+      });
     });
   });
 });

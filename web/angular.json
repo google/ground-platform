@@ -49,7 +49,8 @@
             "scripts": []
           },
           "configurations": {
-            "local": {
+            "development": {
+              "localize": false,
               "fileReplacements": [
                 {
                   "replace": "src/environments/environment.ts",
@@ -63,11 +64,11 @@
               "sourceMap": true,
               "namedChunks": true
             },
-            "dev": {
+            "staging": {
               "fileReplacements": [
                 {
                   "replace": "src/environments/environment.ts",
-                  "with": "src/environments/environment.dev.ts"
+                  "with": "src/environments/environment.staging.ts"
                 }
               ],
               "buildOptimizer": false,
@@ -77,11 +78,11 @@
               "sourceMap": true,
               "namedChunks": true
             },
-            "prod": {
+            "production": {
               "fileReplacements": [
                 {
                   "replace": "src/environments/environment.ts",
-                  "with": "src/environments/environment.prod.ts"
+                  "with": "src/environments/environment.production.ts"
                 }
               ],
               "optimization": true,
@@ -120,34 +121,36 @@
             "vi": {
               "localize": ["vi"]
             }
-          }
+          },
+          "defaultConfiguration": "development"
         },
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
-            "buildTarget": "web:build"
+            "buildTarget": "web:build",
+            "proxyConfig": "proxy.conf.json"
           },
           "configurations": {
-            "local": {
-              "buildTarget": "web:build:local,en"
+            "development": {
+              "buildTarget": "web:build:development"
             },
-            "dev": {
-              "buildTarget": "web:build:dev,en"
+            "staging": {
+              "buildTarget": "web:build:staging,en"
             },
-            "prod": {
-              "buildTarget": "web:build:prod,en"
+            "production": {
+              "buildTarget": "web:build:production,en"
             },
             "es": {
               "buildTarget": "web:build:dev,es"
             },
             "fr": {
-              "buildTarget": "web:build:dev,fr"
+              "buildTarget": "web:build:staging,fr"
             },
             "pt": {
               "buildTarget": "web:build:dev,pt"
             },
             "vi": {
-              "buildTarget": "web:build:dev,vi"
+              "buildTarget": "web:build:staging,vi"
             }
           }
         },
@@ -187,18 +190,19 @@
         "lint": {
           "builder": "@angular-eslint/builder:lint",
           "options": {
-            "eslintConfig": ".eslintrc.json",
             "lintFilePatterns": ["**/*.spec.ts", "**/*.ts"]
           }
         },
         "deploy": {
           "builder": "@angular/fire:deploy",
-          "options": {}
+          "options": {
+            "buildTarget": "web:build"
+          }
         }
       }
     }
   },
   "cli": {
-    "analytics": "a3d976d8-4082-411f-98f4-58b9c7a5b304"
+    "analytics": false
   }
 }
