@@ -70,7 +70,7 @@
     "@babel/runtime": "^7.24.7",
     "@grpc/grpc-js": "^1.10.9",
     "@iplab/ngx-file-upload": "^20.0.1",
-    "firebase": "^10.14.1",
+    "firebase": "^12.7.0",
     "immutable": "^4.3.6",
     "marked": "^14.1.0",
     "ngx-autosize-input": "^20.0.5",
