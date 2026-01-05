@@ -20,7 +20,6 @@ import {
   MAT_DIALOG_DATA,
   MatDialog,
   MatDialogActions,
-  MatDialogClose,
   MatDialogContent,
   MatDialogRef,
   MatDialogTitle,
@@ -42,11 +41,10 @@ export interface DialogData {
     </mat-dialog-actions>
   `,
   imports: [
-    MatDialogTitle,
-    MatDialogContent,
-    MatDialogActions,
-    MatDialogClose,
     MatButtonModule,
+    MatDialogActions,
+    MatDialogContent,
+    MatDialogTitle,
   ],
   standalone: true,
 })
