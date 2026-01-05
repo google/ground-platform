@@ -1,4 +1,4 @@
-# Copyright 2024 The Ground Authors.
+# Copyright 2026 The Ground Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,6 +17,9 @@ inputs:
   platform-repository:
     description: "ground-platform repository under test"
     default: google/ground-platform
+  platform-ref:
+    description: "Branch of the repository to checkout"
+    default: master
 
 runs:
   using: "composite"
@@ -25,6 +28,7 @@ runs:
       uses: actions/checkout@v4
       with:
         repository: ${{ inputs.platform-repository }}
+        ref: ${{ inputs.platform-ref }}
 
     - name: Load cached Firebase emulator
       uses: actions/cache@v4
