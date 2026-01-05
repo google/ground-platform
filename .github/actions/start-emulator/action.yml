@@ -78,6 +78,7 @@ runs:
     - name: Start Firebase emulator with Android test data
       shell: bash
       run: |
+        set -x
         echo "Running NX in directory: $(pwd)"
         cat package.json
         npx nx start-android-test-data
