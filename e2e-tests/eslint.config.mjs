@@ -15,6 +15,7 @@
  */
 
 import baseConfig from '../eslint.base.config.mjs';
+import typescriptParser from '@typescript-eslint/parser';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -24,28 +25,31 @@ const __dirname = path.dirname(__filename);
 export default [
   ...baseConfig,
   {
+    ignores: ['build'],
+  },
+  {
     languageOptions: {
       globals: {
-        require: 'readonly',
-        module: 'readonly',
-        process: 'readonly',
+        jasmine: 'readonly',
       },
     },
   },
   {
     files: ['**/*.ts'],
     languageOptions: {
+      parser: typescriptParser,
       parserOptions: {
         project: ['tsconfig.json'],
         tsconfigRootDir: __dirname,
       },
     },
     rules: {
-      '@typescript-eslint/no-explicit-any': 'warn',
-      '@typescript-eslint/no-require-imports': 'warn',
-      '@typescript-eslint/no-unused-vars': 'warn',
-      '@typescript-eslint/no-wrapper-object-types': 'warn',
-      '@typescript-eslint/no-floating-promises': 'off',
+      'n/no-unpublished-import': [
+        'error',
+        {
+          allowModules: ['jasmine'],
+        },
+      ],
     },
   },
 ];
