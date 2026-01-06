@@ -46,7 +46,7 @@ jobs:
   functions:
     needs: changes
     if: ${{ needs.changes.outputs.functions == 'true' }}
-    name: Functions
+    name: functions
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
@@ -67,7 +67,7 @@ jobs:
   lib:
     needs: changes
     if: ${{ needs.changes.outputs.lib == 'true' }}
-    name: Lib
+    name: lib
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
@@ -88,7 +88,7 @@ jobs:
   proto:
     needs: changes
     if: ${{ needs.changes.outputs.proto == 'true' }}
-    name: Proto
+    name: proto
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
@@ -106,7 +106,7 @@ jobs:
   web:
     needs: changes
     if: ${{ needs.changes.outputs.web == 'true' }}
-    name: Web
+    name: web
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
