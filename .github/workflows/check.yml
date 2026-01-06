@@ -59,7 +59,7 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v6
 
-      - name: Setup Environment
+      - name: Set up environment
         uses: ./.github/actions/setup
         with:
           cache-key-suffix: functions
@@ -82,7 +82,7 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v6
 
-      - name: Setup Environment
+      - name: Set up environment
         uses: ./.github/actions/setup
         with:
           cache-key-suffix: lib
@@ -105,7 +105,7 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v6
 
-      - name: Setup Environment
+      - name: Set up environment
         uses: ./.github/actions/setup
         with:
           cache-key-suffix: proto
@@ -125,7 +125,7 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v6
 
-      - name: Setup Environment
+      - name: Set up environment
         uses: ./.github/actions/setup
         with:
           cache-key-suffix: web

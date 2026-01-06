@@ -1,4 +1,4 @@
-name: "Setup Environment"
+name: "Set up environment"
 description: "Sets up Node.js and installs dependencies"
 
 inputs:
