@@ -1,8 +1,23 @@
-name: "Setup Environment"
+name: "Set up environment"
 description: "Sets up Node.js and installs dependencies"
+
+inputs:
+  cache-key-suffix:
+    description: "Suffix for the Nx cache key (e.g. job name)"
+    required: false
+    default: "default"
+
 runs:
   using: "composite"
   steps:
+    - name: Cache Nx
+      uses: actions/cache@v4
+      with:
+        path: .nx/cache
+        key: nx-${{ runner.os }}-${{ inputs.cache-key-suffix }}-${{ github.sha }}
+        restore-keys: |
+          nx-${{ runner.os }}-${{ inputs.cache-key-suffix }}-
+
     - name: Set up Node.js
       uses: actions/setup-node@v6
       with:

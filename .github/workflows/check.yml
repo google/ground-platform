@@ -2,6 +2,11 @@ name: Check
 
 on:
   pull_request:
+  push:
+    branches: [master]
+
+env:
+  NX_CACHE_DIRECTORY: .nx/cache
 
 permissions:
   contents: read
@@ -54,8 +59,10 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v6
 
-      - name: Setup Environment
+      - name: Set up environment
         uses: ./.github/actions/setup
+        with:
+          cache-key-suffix: functions
 
       - name: Build
         run: npx nx build functions
@@ -75,8 +82,10 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v6
 
-      - name: Setup Environment
+      - name: Set up environment
         uses: ./.github/actions/setup
+        with:
+          cache-key-suffix: lib
 
       - name: Build
         run: npx nx build lib
@@ -96,8 +105,10 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v6
 
-      - name: Setup Environment
+      - name: Set up environment
         uses: ./.github/actions/setup
+        with:
+          cache-key-suffix: proto
 
       - name: Build
         run: npx nx build proto
@@ -114,8 +125,10 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v6
 
-      - name: Setup Environment
+      - name: Set up environment
         uses: ./.github/actions/setup
+        with:
+          cache-key-suffix: web
 
       - name: Build
         run: npx nx build web
