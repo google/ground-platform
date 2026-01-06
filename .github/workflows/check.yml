@@ -21,6 +21,9 @@ jobs:
       proto: ${{ steps.filter.outputs.proto }}
       web: ${{ steps.filter.outputs.web }}
     steps:
+      - name: Check out code
+        uses: actions/checkout@v6
+
       - uses: dorny/paths-filter@v3
         id: filter
         with:
