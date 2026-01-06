@@ -3,6 +3,8 @@ name: Check
 on:
   pull_request:
 
+permissions: read-all
+
 jobs:
   changes:
     runs-on: ubuntu-latest
@@ -67,9 +69,6 @@ jobs:
     steps:
       - name: Setup Environment
         uses: ./.github/actions/setup
-
-      - name: Build dependencies
-        run: npx nx build proto
 
       - name: Build
         run: npx nx build lib
