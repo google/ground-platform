@@ -51,10 +51,10 @@ module.exports = function (config) {
     port: 9876,
     colors: true,
     logLevel: config.LOG_INFO,
-    autoWatch: true,
+    autoWatch: !process.env.CI,
     browsers: process.env.CI ? ['ChromeHeadlessNoSandbox'] : ['Chrome'],
-    singleRun: false,
-    restartOnFileChange: true,
+    singleRun: !!process.env.CI,
+    restartOnFileChange: !process.env.CI,
     customLaunchers: {
       ChromeHeadlessNoSandbox: {
         base: 'ChromeHeadless',
