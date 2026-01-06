@@ -185,6 +185,13 @@
             "styles": ["src/ground-theme.scss"],
             "scripts": [],
             "codeCoverage": true
+          },
+          "configurations": {
+            "ci": {
+              "browsers": "ChromeHeadlessNoSandbox",
+              "watch": false,
+              "codeCoverage": true
+            }
           }
         },
         "lint": {

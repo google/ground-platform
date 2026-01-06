@@ -1,0 +1,120 @@
+name: Check
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      functions: ${{ steps.filter.outputs.functions }}
+      lib: ${{ steps.filter.outputs.lib }}
+      proto: ${{ steps.filter.outputs.proto }}
+      web: ${{ steps.filter.outputs.web }}
+    steps:
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            functions:
+              - 'functions/**'
+              - 'package*.json'
+              - 'nx.json'
+              - '.github/workflows/check.yml'
+              - '.github/actions/setup/**'
+            lib:
+              - 'lib/**'
+              - 'package*.json'
+              - 'nx.json'
+              - '.github/workflows/check.yml'
+              - '.github/actions/setup/**'
+            proto:
+              - 'proto/**'
+              - 'package*.json'
+              - 'nx.json'
+              - '.github/workflows/check.yml'
+              - '.github/actions/setup/**'
+            web:
+              - 'web/**'
+              - 'package*.json'
+              - 'nx.json'
+              - '.github/workflows/check.yml'
+              - '.github/actions/setup/**'
+
+  functions:
+    needs: changes
+    if: ${{ needs.changes.outputs.functions == 'true' }}
+    name: Functions
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup Environment
+        uses: ./.github/actions/setup
+
+      - name: Build
+        run: npx nx build functions
+
+      - name: Test
+        run: npx nx test functions -c ci
+
+      - name: Lint
+        run: npx nx lint functions
+
+  lib:
+    needs: changes
+    if: ${{ needs.changes.outputs.lib == 'true' }}
+    name: Lib
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup Environment
+        uses: ./.github/actions/setup
+
+      - name: Build dependencies
+        run: npx nx build proto
+
+      - name: Build
+        run: npx nx build lib
+
+      - name: Test
+        run: npx nx test lib -c ci
+
+      - name: Lint
+        run: npx nx lint lib
+
+  proto:
+    needs: changes
+    if: ${{ needs.changes.outputs.proto == 'true' }}
+    name: Proto
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup Environment
+        uses: ./.github/actions/setup
+
+      - name: Build
+        run: npx nx build proto
+
+      - name: Lint
+        run: npx nx lint proto
+
+  web:
+    needs: changes
+    if: ${{ needs.changes.outputs.web == 'true' }}
+    name: Web
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup Environment
+        uses: ./.github/actions/setup
+
+      - name: Build
+        run: npx nx build web
+
+      - name: Test
+        run: npx nx test web -c ci
+
+      - name: Lint
+        run: npx nx lint web
+
+      - name: Update test coverage report
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}

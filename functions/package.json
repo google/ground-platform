@@ -24,7 +24,10 @@
         "commands": "jasmine --config=jasmine.json",
         "dependsOn": [
           "build"
-        ]
+        ],
+        "configurations": {
+          "ci": {}
+        }
       }
     }
   },

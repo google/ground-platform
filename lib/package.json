@@ -1,7 +1,15 @@
 {
   "name": "@ground/lib",
   "nx": {
-    "name": "lib"
+    "name": "lib",
+    "targets": {
+      "test": {
+        "command": "jasmine --config=jasmine.json",
+        "configurations": {
+          "ci": {}
+        }
+      }
+    }
   },
   "version": "0.0.1",
   "main": "dist/index.js",
