@@ -116,7 +116,7 @@ export class MessageRegistry {
 
   getFieldNameByNumber(
     descriptor: MessageDescriptor,
-    fieldNo: Number
+    fieldNo: number
   ): string | null {
     if (!descriptor.fields) return null;
     for (const fieldName in descriptor.fields) {
