@@ -36,7 +36,6 @@ import { SurveyLoiComponent } from './survey-loi.component';
 
 describe('SurveyLoiComponent', () => {
   let fixture: ComponentFixture<SurveyLoiComponent>;
-  let component: SurveyLoiComponent;
 
   let loiServiceSpy: jasmine.SpyObj<LocationOfInterestService>;
   let navigationServiceSpy: jasmine.SpyObj<NavigationService>;
@@ -105,7 +104,6 @@ describe('SurveyLoiComponent', () => {
 
   beforeEach(() => {
     fixture = TestBed.createComponent(SurveyLoiComponent);
-    component = fixture.componentInstance;
     fixture.detectChanges();
   });
 

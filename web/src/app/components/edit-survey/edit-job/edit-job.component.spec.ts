@@ -31,7 +31,7 @@ import { Subject, from, of } from 'rxjs';
 import { EditJobComponent } from 'app/components/edit-survey/edit-job/edit-job.component';
 import { LoiEditorComponent } from 'app/components/shared/loi-editor/loi-editor.component';
 import { TasksEditorModule } from 'app/components/shared/tasks-editor/tasks-editor.module';
-import { DataCollectionStrategy, Job } from 'app/models/job.model';
+import { Job } from 'app/models/job.model';
 import { LocationOfInterest } from 'app/models/loi.model';
 import { Role } from 'app/models/role.model';
 import { DataSharingType, Survey } from 'app/models/survey.model';

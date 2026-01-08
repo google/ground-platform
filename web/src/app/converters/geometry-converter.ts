@@ -145,7 +145,6 @@ function toLinearRing(coordinateList: List<any>): LinearRing {
  *
  * `null` values are not allowed.
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function indexedMapToList(map?: any): List<any> {
   if (
     !map ||

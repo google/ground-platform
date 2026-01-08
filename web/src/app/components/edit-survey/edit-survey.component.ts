@@ -160,12 +160,15 @@ export class EditSurveyComponent {
             const previousJob = this.survey?.getPreviousJob(job);
 
             this.draftSurveyService.deleteJob(job);
-            previousJob
-              ? this.navigationService.navigateToEditJob(
-                  this.draftSurveyService.getSurvey().id,
-                  previousJob.id
-                )
-              : this.navigationService.navigateToEditSurvey(this.surveyId!);
+
+            if (previousJob) {
+              this.navigationService.navigateToEditJob(
+                this.draftSurveyService.getSurvey().id,
+                previousJob.id
+              );
+            } else {
+              this.navigationService.navigateToEditSurvey(this.surveyId!);
+            }
           }
           break;
         default:

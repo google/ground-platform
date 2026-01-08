@@ -20,7 +20,7 @@ import { Auth } from '@angular/fire/auth';
 import { Firestore } from '@angular/fire/firestore';
 import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute, Router } from '@angular/router';
-import { NEVER, of } from 'rxjs';
+import { NEVER } from 'rxjs';
 
 import { Survey } from 'app/models/survey.model';
 import { AuthService } from 'app/services/auth/auth.service';

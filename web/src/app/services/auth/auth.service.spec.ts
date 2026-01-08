@@ -32,7 +32,9 @@ describe('AuthService', () => {
     TestBed.configureTestingModule({
       imports: [],
       providers: [
-        provideFirebaseApp(() => initializeApp({ appId: '123', apiKey: '123' })),
+        provideFirebaseApp(() =>
+          initializeApp({ appId: '123', apiKey: '123' })
+        ),
         provideAuth(() => getAuth()),
         { provide: Firestore, useValue: {} },
         { provide: Functions, useValue: {} },

@@ -16,37 +16,30 @@
 
 import { Injectable } from '@angular/core';
 import {
-  Firestore,
-  collection,
-  doc,
-  docData,
-  collectionData,
-  query,
-  where,
-  orderBy,
-  limit,
-  addDoc,
-  setDoc,
-  updateDoc,
-  deleteDoc,
-  runTransaction,
-  writeBatch,
-  serverTimestamp,
-  getDoc,
-  getDocs,
-  DocumentReference,
   CollectionReference,
-  FieldPath,
-  Timestamp,
   DocumentData,
+  FieldPath,
+  Firestore,
   QueryDocumentSnapshot,
   Transaction,
+  collection,
+  collectionData,
+  deleteDoc,
+  doc,
+  docData,
+  getDoc,
+  getDocs,
+  query,
+  runTransaction,
+  serverTimestamp,
+  setDoc,
+  where,
 } from '@angular/fire/firestore';
 import { registry } from '@ground/lib';
 import { GroundProtos } from '@ground/proto';
 import { getDownloadURL, getStorage, ref } from 'firebase/storage';
 import { List, Map, OrderedMap } from 'immutable';
-import { Observable, combineLatest, firstValueFrom, from } from 'rxjs';
+import { Observable, combineLatest, from } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { FirebaseDataConverter } from 'app/converters/firebase-data-converter';
@@ -146,8 +139,6 @@ export class DataStoreService {
   async saveRawSurvey(id: string, data: JsonBlob) {
     await setDoc(doc(this.db, SURVEYS_COLLECTION_NAME, id), data);
   }
-
-
 
   /**
    * Returns an Observable that loads and emits the list of surveys accessible
@@ -313,7 +304,11 @@ export class DataStoreService {
     surveyId: string,
     job: Job
   ): Promise<void> {
-    const jobRef = doc(this.db, `${SURVEYS_COLLECTION_NAME}/${surveyId}/jobs`, job.id);
+    const jobRef = doc(
+      this.db,
+      `${SURVEYS_COLLECTION_NAME}/${surveyId}/jobs`,
+      job.id
+    );
     transaction.set(jobRef, jobToDocument(job));
   }
 
@@ -349,7 +344,11 @@ export class DataStoreService {
       transaction.delete(doc.ref);
     });
 
-    const jobRef = doc(this.db, `${SURVEYS_COLLECTION_NAME}/${surveyId}/jobs`, jobId);
+    const jobRef = doc(
+      this.db,
+      `${SURVEYS_COLLECTION_NAME}/${surveyId}/jobs`,
+      jobId
+    );
     transaction.delete(jobRef);
   }
 
@@ -384,7 +383,9 @@ export class DataStoreService {
   ): Promise<void> {
     await this.deleteSubmissionsByLoiId(surveyId, loiId);
 
-    return await deleteDoc(doc(this.db, SURVEYS_COLLECTION_NAME, surveyId, 'lois', loiId));
+    return await deleteDoc(
+      doc(this.db, SURVEYS_COLLECTION_NAME, surveyId, 'lois', loiId)
+    );
   }
 
   async deleteSubmission(
@@ -508,7 +509,7 @@ export class DataStoreService {
     return combineLatest([importedLois, fieldDataLois]).pipe(
       map(([predefinedLois, fieldDataLois]) =>
         this.toLocationsOfInterest(
-          (predefinedLois as any[]).concat(fieldDataLois)
+          (predefinedLois as unknown[]).concat(fieldDataLois)
         )
       )
     );

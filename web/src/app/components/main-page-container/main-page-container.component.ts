@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, effect, input, inject } from '@angular/core';
+import { Component, effect, inject, input } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { switchMap } from 'rxjs/operators';
 

@@ -35,7 +35,6 @@ import { DataStoreService } from 'app/services/data-store/data-store.service';
 import { LoiSelectionComponent } from './loi-selection.component';
 
 describe('LoiSelectionComponent', () => {
-  let component: LoiSelectionComponent;
   let fixture: ComponentFixture<LoiSelectionComponent>;
 
   let dataStoreService: jasmine.SpyObj<DataStoreService>;
@@ -104,7 +103,7 @@ describe('LoiSelectionComponent', () => {
     fixture = TestBed.createComponent(LoiSelectionComponent);
     fixture.componentInstance.lois = List([poi1, poi2]);
     fixture.componentInstance.survey = survey;
-    component = fixture.componentInstance;
+    // component = fixture.componentInstance;
     fixture.detectChanges();
   });
 

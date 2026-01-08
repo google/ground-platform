@@ -14,25 +14,11 @@
  * limitations under the License.
  */
 
-import { HarnessLoader } from '@angular/cdk/testing';
-import { TestbedHarnessEnvironment } from '@angular/cdk/testing/testbed';
-import {
-  ComponentFixture,
-  TestBed,
-  fakeAsync,
-  tick,
-  waitForAsync,
-} from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatListModule } from '@angular/material/list';
-import { MatListHarness } from '@angular/material/list/testing';
-import {
-  MatSelect,
-  MatSelectChange,
-  MatSelectModule,
-} from '@angular/material/select';
+import { MatSelectChange, MatSelectModule } from '@angular/material/select';
 import { Map } from 'immutable';
-import { Subject, firstValueFrom, of } from 'rxjs';
-import { delay, map } from 'rxjs/operators';
+import { Subject } from 'rxjs';
 
 import { Role } from 'app/models/role.model';
 import { DataSharingType, Survey } from 'app/models/survey.model';
@@ -45,27 +31,10 @@ import { ShareListComponent } from './share-list.component';
 describe('ShareListComponent', () => {
   let component: ShareListComponent;
   let fixture: ComponentFixture<ShareListComponent>;
-  let loader: HarnessLoader;
 
   let draftSurveyServiceSpy: jasmine.SpyObj<DraftSurveyService>;
   let authServiceSpy: jasmine.SpyObj<AuthService>;
   let activeSurvey$: Subject<Survey>;
-
-  const [surveyId, surveyTitle, surveyDescription] = [
-    'survey1',
-    'title1',
-    'description1',
-  ];
-
-  const survey = new Survey(
-    surveyId,
-    surveyTitle,
-    surveyDescription,
-    /* jobs= */ Map(),
-    /* acl= */ Map(),
-    /* ownerId= */ '',
-    { type: DataSharingType.PRIVATE }
-  );
 
   const user = new User('user1', 'user1@gmail.com', true);
 
@@ -102,7 +71,6 @@ describe('ShareListComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(ShareListComponent);
     component = fixture.componentInstance;
-    loader = TestbedHarnessEnvironment.loader(fixture);
   });
 
   it('should create', () => {

@@ -19,12 +19,11 @@ import '@angular/localize/init';
 import { Injectable } from '@angular/core';
 import {
   Auth,
-  authState,
+  User as FirebaseUser,
   GoogleAuthProvider,
+  authState,
   signInWithPopup,
   signOut,
-  User as FirebaseUser,
-  idToken,
 } from '@angular/fire/auth';
 import { Functions, httpsCallable } from '@angular/fire/functions';
 import { Observable, Subject, firstValueFrom, from } from 'rxjs';
@@ -116,7 +115,10 @@ export class AuthService {
         {}
       );
     } catch (err) {
-      console.error('Session login failed. Some features may be unavailable');
+      console.error(
+        'Session login failed. Some features may be unavailable',
+        err
+      );
     }
   }
 
