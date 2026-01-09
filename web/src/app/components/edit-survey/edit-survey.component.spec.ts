@@ -57,7 +57,7 @@ describe('EditSurveyComponent', () => {
     MatDialogRef<JobDialogComponent, DialogData>
   >;
   let dialogSpy: jasmine.SpyObj<MatDialog>;
-  let initResolve: (value?: unknown) => void;
+  let initResolve: (value: void | PromiseLike<void>) => void;
 
   const surveyId = 'survey001';
   const jobId1 = 'job001';
