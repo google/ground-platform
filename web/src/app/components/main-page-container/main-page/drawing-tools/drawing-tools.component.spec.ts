@@ -19,7 +19,7 @@ import { MatButtonToggleGroup } from '@angular/material/button-toggle';
 import { By } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { Map } from 'immutable';
-import { BehaviorSubject, of } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 
 import { Job } from 'app/models/job.model';
 import { DataSharingType, Survey } from 'app/models/survey.model';

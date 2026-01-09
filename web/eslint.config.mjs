@@ -19,6 +19,7 @@ import angularTemplate from '@angular-eslint/template-parser';
 import angularTemplatePlugin from '@angular-eslint/eslint-plugin-template';
 import typescriptEslintPlugin from '@typescript-eslint/eslint-plugin';
 import typescriptParser from '@typescript-eslint/parser';
+import importPlugin from 'eslint-plugin-import';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -42,25 +43,29 @@ export default [
     },
     plugins: {
       '@typescript-eslint': typescriptEslintPlugin,
+      import: importPlugin,
     },
     rules: {
-      '@typescript-eslint/no-unsafe-function-type': 'off',
-      '@typescript-eslint/no-empty-object-type': 'off',
-      '@typescript-eslint/no-wrapper-object-types': 'off',
+      'import/no-duplicates': 'error',
+      'no-var': 'error',
+      'prefer-const': 'error',
+      'no-empty-function': 'off',
+      '@typescript-eslint/no-empty-function': 'off',
+      'no-shadow': 'off',
+      '@typescript-eslint/no-shadow': 'off',
+      'no-redeclare': 'error',
+      '@typescript-eslint/no-redeclare': 'error',
       '@typescript-eslint/no-explicit-any': 'warn',
       '@typescript-eslint/no-unused-vars': [
         'warn',
-        { argsIgnorePattern: '^_' },
+        { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
       ],
       '@typescript-eslint/no-unused-expressions': 'warn',
+      '@typescript-eslint/no-unsafe-function-type': 'off',
+      '@typescript-eslint/no-empty-object-type': 'off',
+      '@typescript-eslint/no-wrapper-object-types': 'off',
       '@typescript-eslint/ban-ts-comment': 'off',
       '@typescript-eslint/triple-slash-reference': 'off',
-      'no-var': 'off',
-      'prefer-const': 'off',
-      'no-empty-function': 'off',
-      'no-shadow': 'off',
-      'no-duplicate-imports': 'off',
-      'no-redeclare': 'off',
       '@typescript-eslint/no-floating-promises': 'off',
     },
   },

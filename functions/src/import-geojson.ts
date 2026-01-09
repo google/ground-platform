@@ -22,7 +22,7 @@ import JSONStream from 'jsonstream-ts';
 import { canImport } from './common/auth';
 import { DecodedIdToken } from 'firebase-admin/auth';
 import { GroundProtos } from '@ground/proto';
-import { toDocumentData, toGeometryPb, isGeometryValid } from '@ground/lib';
+import { isGeometryValid, toDocumentData, toGeometryPb } from '@ground/lib';
 import { Feature, GeoJsonProperties } from 'geojson';
 import { ErrorHandler } from './handlers';
 

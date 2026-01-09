@@ -20,25 +20,25 @@ import {
 } from '@angular/common/http';
 import { NgModule } from '@angular/core';
 import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
-import { provideAuth, getAuth } from '@angular/fire/auth';
+import { getAuth, provideAuth } from '@angular/fire/auth';
 import {
-  provideFirestore,
-  getFirestore,
   connectFirestoreEmulator,
+  getFirestore,
+  provideFirestore,
 } from '@angular/fire/firestore';
 import {
-  provideFunctions,
-  getFunctions,
   connectFunctionsEmulator,
+  getFunctions,
+  provideFunctions,
 } from '@angular/fire/functions';
 import {
-  provideRemoteConfig,
   getRemoteConfig,
+  provideRemoteConfig,
 } from '@angular/fire/remote-config';
 import {
-  provideStorage,
-  getStorage,
   connectStorageEmulator,
+  getStorage,
+  provideStorage,
 } from '@angular/fire/storage';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -91,7 +91,7 @@ import { environment } from 'environments/environment';
       return storage;
     }),
 
-    provideHttpClient(withInterceptorsFromDi())
-  ]
+    provideHttpClient(withInterceptorsFromDi()),
+  ],
 })
-export class AppModule { }
+export class AppModule {}

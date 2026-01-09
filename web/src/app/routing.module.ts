@@ -45,7 +45,6 @@ import {
   TASK_SEGMENT,
   TERMS,
 } from 'app/services/navigation/navigation.constants';
-import { NavigationService } from 'app/services/navigation/navigation.service';
 
 import { AboutComponent } from './components/about/about.component';
 import { AndroidIntentLandingPageComponent } from './components/android-intent-landing-page/android-intent-landing-page.component';

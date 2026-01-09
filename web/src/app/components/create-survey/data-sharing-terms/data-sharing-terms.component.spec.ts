@@ -28,7 +28,6 @@ import {
 } from 'app/models/survey.model';
 
 describe('DataSharingTermsComponent', () => {
-  let component: DataSharingTermsComponent;
   let fixture: ComponentFixture<DataSharingTermsComponent>;
 
   beforeEach(() => {
@@ -46,7 +45,6 @@ describe('DataSharingTermsComponent', () => {
     fixture = TestBed.createComponent(DataSharingTermsComponent);
     fixture.componentInstance.type = DataSharingType.PUBLIC;
     fixture.componentInstance.customText = 'Hey there here is an agreement';
-    component = fixture.componentInstance;
     fixture.detectChanges();
   });
 

@@ -27,7 +27,10 @@ import { AuthService } from 'app/services/auth/auth.service';
   standalone: false,
 })
 export class CurrentUserWidgetComponent {
-  constructor(public auth: AuthService, private dialog: MatDialog) {}
+  constructor(
+    public auth: AuthService,
+    private dialog: MatDialog
+  ) {}
 
   openProfileDialog(evt: MouseEvent): void {
     const target = new ElementRef(evt.currentTarget);

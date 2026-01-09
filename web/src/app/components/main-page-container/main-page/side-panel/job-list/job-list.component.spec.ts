@@ -73,9 +73,6 @@ describe('JobListComponent', () => {
       getSidePanelExpanded: () => true,
     };
     const routerSpy = createRouterSpy();
-    const surveyService = {
-      getActiveSurvey$: () => of(mockSurvey),
-    };
     await TestBed.configureTestingModule({
       declarations: [JobListComponent],
       imports: [MatIconModule, MatListModule, MatMenuModule, MatButtonModule],

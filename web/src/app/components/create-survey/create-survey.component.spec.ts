@@ -15,19 +15,13 @@
  */
 
 import { NO_ERRORS_SCHEMA } from '@angular/core';
-import {
-  ComponentFixture,
-  ComponentFixtureAutoDetect,
-  TestBed,
-} from '@angular/core/testing';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { By } from '@angular/platform-browser';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { ActivatedRoute } from '@angular/router';
 import { List, Map } from 'immutable';
-import { BehaviorSubject, Observable, ReplaySubject, Subject } from 'rxjs';
+import { Observable, ReplaySubject, Subject } from 'rxjs';
 
 import {
   CreateSurveyComponent,
@@ -523,7 +517,6 @@ describe('CreateSurveyComponent', () => {
 
       // Identity Hydration
 
-
       createComponent(false);
       spyOn(component, 'ngOnInit').and.stub();
 
@@ -557,7 +550,6 @@ describe('CreateSurveyComponent', () => {
       // activeSurvey$.next(surveyWithJob);
 
       // Identity Hydration
-
 
       createComponent(false);
       spyOn(component, 'ngOnInit').and.stub();
@@ -600,7 +592,6 @@ describe('CreateSurveyComponent', () => {
       // activeSurvey$.next(surveyWithJob);
 
       // Identity Hydration
-
 
       createComponent(false);
       spyOn(component, 'ngOnInit').and.stub();

@@ -17,7 +17,6 @@
 import '@angular/localize/init';
 
 import { ChangeDetectorRef, Component, OnInit, ViewChild } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
 import { List } from 'immutable';
 import { Subscription, combineLatest, filter } from 'rxjs';
 

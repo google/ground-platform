@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, input, inject } from '@angular/core';
+import { Component, inject, input } from '@angular/core';
 
 import { Survey } from 'app/models/survey.model';
 import { NavigationService } from 'app/services/navigation/navigation.service';

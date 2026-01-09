@@ -37,13 +37,11 @@ import {
   ABOUT,
   ANDROID_SEGMENT,
   ERROR,
-  JOB_ID_NEW,
   JOB_SEGMENT,
   LOI_ID,
   LOI_SEGMENT,
   SIGN_IN_SEGMENT,
   SUBMISSION_ID,
-  SUBMISSION_ID_NEW,
   SUBMISSION_SEGMENT,
   SURVEYS_CREATE,
   SURVEYS_EDIT,
@@ -219,7 +217,9 @@ export class NavigationService implements OnDestroy {
   clearSubmissionId() {
     const surveyId = this.urlParamsSignal().surveyId;
     const loiId = this.urlParamsSignal().loiId;
-    surveyId && loiId && this.selectLocationOfInterest(surveyId, loiId);
+    if (surveyId && loiId) {
+      this.selectLocationOfInterest(surveyId, loiId);
+    }
   }
 
   /**

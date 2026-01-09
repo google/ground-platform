@@ -33,7 +33,10 @@ import { LinearRing } from './linear-ring';
 export class Polygon implements Geometry {
   geometryType = GeometryType.POLYGON;
 
-  constructor(readonly shell: LinearRing, readonly holes: List<LinearRing>) {}
+  constructor(
+    readonly shell: LinearRing,
+    readonly holes: List<LinearRing>
+  ) {}
 
   equals(other: Polygon): boolean {
     return is(this.shell, other.shell) && is(this.holes, other.holes);

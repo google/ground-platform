@@ -18,13 +18,7 @@ import { HarnessLoader } from '@angular/cdk/testing';
 import { TestbedHarnessEnvironment } from '@angular/cdk/testing/testbed';
 import { CdkTreeModule } from '@angular/cdk/tree';
 import { WritableSignal, signal } from '@angular/core';
-import {
-  ComponentFixture,
-  TestBed,
-  fakeAsync,
-  tick,
-  waitForAsync,
-} from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Auth } from '@angular/fire/auth';
 import { Firestore } from '@angular/fire/firestore';
 import { MatButtonHarness } from '@angular/material/button/testing';
@@ -37,7 +31,6 @@ import { Router } from '@angular/router';
 import { List, Map } from 'immutable';
 import { Subject, of } from 'rxjs';
 
-import { AuditInfo } from 'app/models/audit-info.model';
 import { Coordinate } from 'app/models/geometry/coordinate';
 import { Point } from 'app/models/geometry/point';
 import { Job } from 'app/models/job.model';
@@ -78,12 +71,6 @@ describe('JobListItemComponent', () => {
   let locationOfInterestId$: Subject<string | null>;
   let urlParamsSignal: WritableSignal<UrlParams>;
 
-  const user = {
-    id: 'user001',
-    email: 'email@gmail.com',
-    isAuthenticated: false,
-  };
-
   const job = new Job(
     /* id= */ 'job001',
     /* index= */ 0,
@@ -117,26 +104,6 @@ describe('JobListItemComponent', () => {
       );
     }
     return List(lois);
-  }
-
-  function createSubmissions(
-    loi: LocationOfInterest,
-    count: number
-  ): List<Submission> {
-    const submissions: Submission[] = [];
-    for (let i = 0; i < count; i++) {
-      submissions.push(
-        new Submission(
-          'submission' + i,
-          loi.id,
-          job,
-          new AuditInfo(user, new Date(), new Date()),
-          new AuditInfo(user, new Date(), new Date()),
-          /* data= */ Map()
-        )
-      );
-    }
-    return List(submissions);
   }
 
   beforeEach(async () => {

@@ -34,7 +34,10 @@ export class QueryIterator implements AsyncIterator<QueryDocumentSnapshot> {
    * @param query The Firestore query to iterate over.
    * @param pageSize The number of documents to fetch in each batch.
    */
-  constructor(private query: Query, private pageSize: number) {}
+  constructor(
+    private query: Query,
+    private pageSize: number
+  ) {}
 
   /**
    * Fetches the next batch of documents and returns the next document in the iterator.

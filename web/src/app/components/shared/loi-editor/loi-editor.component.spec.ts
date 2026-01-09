@@ -24,10 +24,7 @@ import { List, Map } from 'immutable';
 import { of } from 'rxjs';
 
 import { ImportDialogComponent } from 'app/components/shared/import-dialog/import-dialog.component';
-import { Coordinate } from 'app/models/geometry/coordinate';
-import { Point } from 'app/models/geometry/point';
 import { Job } from 'app/models/job.model';
-import { LocationOfInterest } from 'app/models/loi.model';
 import { DataSharingType, Survey } from 'app/models/survey.model';
 import { Task } from 'app/models/task/task.model';
 import { DataStoreService } from 'app/services/data-store/data-store.service';
@@ -35,32 +32,13 @@ import { DataStoreService } from 'app/services/data-store/data-store.service';
 import { LoiEditorComponent } from './loi-editor.component';
 
 describe('LoiEditorComponent', () => {
-  let component: LoiEditorComponent;
   let fixture: ComponentFixture<LoiEditorComponent>;
 
   let dataStoreService: jasmine.SpyObj<DataStoreService>;
   let matDialogSpy: jasmine.SpyObj<MatDialog>;
 
-  const poiId1 = 'poi001';
-  const poiId2 = 'poi002';
   const jobId1 = 'job001';
   const jobId2 = 'job002';
-  const poi1 = new LocationOfInterest(
-    poiId1,
-    jobId1,
-    new Point(new Coordinate(1.23, 4.56)),
-    Map(),
-    '',
-    true
-  );
-  const poi2 = new LocationOfInterest(
-    poiId2,
-    jobId2,
-    new Point(new Coordinate(12.3, 45.6)),
-    Map(),
-    '',
-    true
-  );
   const job1 = new Job(jobId1, /* index */ 0);
   const job2 = new Job(jobId2, /* index */ 1);
   const survey = new Survey(
@@ -104,7 +82,6 @@ describe('LoiEditorComponent', () => {
     fixture.componentInstance.lois = List([]);
     fixture.componentInstance.survey = survey;
     fixture.componentInstance.canImport = true;
-    component = fixture.componentInstance;
     fixture.detectChanges();
   });
 

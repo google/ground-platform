@@ -37,9 +37,7 @@ export class AndroidIntentLandingPageComponent implements OnInit {
   isAndroid = false;
   isIos = false;
 
-  constructor(
-    @Inject(LOCALE_ID) public locale: string
-  ) {
+  constructor(@Inject(LOCALE_ID) public locale: string) {
     const languageId = locale.split('-')[0];
     switch (languageId) {
       case 'es':

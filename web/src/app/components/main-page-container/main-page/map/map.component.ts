@@ -53,7 +53,6 @@ import { SubmissionService } from 'app/services/submission/submission.service';
 // To make ESLint happy:
 /*global google*/
 
-const normalIconScale = 30;
 const zoomedInLevel = 13;
 const normalPolygonStrokeWeight = 3;
 const enlargedPolygonStrokeWeight = 6;

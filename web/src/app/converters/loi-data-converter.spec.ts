@@ -19,7 +19,6 @@ import { registry } from '@ground/lib';
 import { GroundProtos } from '@ground/proto';
 import { Map } from 'immutable';
 
-import { toGeometry } from 'app/converters/geometry-converter';
 import { Geometry } from 'app/models/geometry/geometry';
 import { LocationOfInterest } from 'app/models/loi.model';
 
