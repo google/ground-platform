@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { EventContext } from 'firebase-functions';
+import { EventContext } from 'firebase-functions/v1';
 import { QueryDocumentSnapshot } from 'firebase-functions/v1/firestore';
 import { getDatastore } from './common/context';
 import { Datastore } from './common/datastore';

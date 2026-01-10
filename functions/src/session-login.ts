@@ -14,17 +14,14 @@
  * limitations under the License.
  */
 
-import * as functions from 'firebase-functions';
+import { https, Response, logger } from 'firebase-functions/v1';
 import { setSessionCookie } from './common/auth';
 import { UNAUTHORIZED } from 'http-status-codes';
 
 /**
  * Generates and sets a session cookie for the current user.
  */
-export async function sessionLoginHandler(
-  req: functions.https.Request,
-  res: functions.Response
-) {
+export async function sessionLoginHandler(req: https.Request, res: Response) {
   try {
     // Required for CDN:
     // https://stackoverflow.com/questions/44929653/firebase-cloud-function-wont-store-cookie-named-other-than-session/44935288#44935288
@@ -32,7 +29,7 @@ export async function sessionLoginHandler(
     await setSessionCookie(req, res);
     res.end('OK');
   } catch (err: any) {
-    functions.logger.error(err);
+    logger.error(err);
     res.status(UNAUTHORIZED).send('Authorization error');
   }
 }

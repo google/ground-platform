@@ -33,9 +33,8 @@
   },
   "private": true,
   "dependencies": {
-    "@google-cloud/firestore": "^7.7.0",
     "@ground/proto": "*",
-    "firebase-functions": "^5.1.1",
+    "firebase-functions": "^6.6.0",
     "immutable": "^4.3.6",
     "long": "^5.2.3",
     "protobufjs": "^7.3.0"
