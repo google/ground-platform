@@ -49,16 +49,10 @@ Read through our [contributing guidelines](CONTRIBUTING.md) to learn about our s
   npm install
   ```
 
-1. Build and start local Firebase emulator with:
+1. Build and start local Firebase emulator and Angular dev server:
 
   ```bash
   nx start
-  ```
-
-1. Once the emulator is ready, in a separate terminal, build and run the web app with:
-   
-  ```bash
-  nx serve web
   ```
 
 1. Once started, the app will be available at http://localhost:4200. For development, and testing, the Firebase Emulator Suite UI is accessible at http://localhost:4000. Changes to the web app in `web/` and to the Cloud Functions in `functions/` are automatically rebuilt and reloaded on save.
