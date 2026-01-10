@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as functions from 'firebase-functions';
+import * as functions from 'firebase-functions/v1';
 import { firestore } from 'firebase-admin';
 import { DocumentData, FieldPath, GeoPoint } from 'firebase-admin/firestore';
 import { registry } from '@ground/lib';

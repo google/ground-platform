@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Change, EventContext } from 'firebase-functions';
+import { Change, EventContext } from 'firebase-functions/v1';
 import { DocumentSnapshot } from 'firebase-functions/v1/firestore';
 import { broadcastSurveyUpdate } from './common/broadcast-survey-update';
 

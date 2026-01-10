@@ -38,7 +38,11 @@
           ]
         },
         "dependsOn": [
-          "build"
+          {
+            "target": "build",
+            "projects": "functions",
+            "params": "developement"
+          }
         ]
       },
       "deploy": {
