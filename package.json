@@ -45,10 +45,10 @@
         "executor": "nx:run-commands",
         "configurations": {
           "staging": {
-            "command": "firebase deploy --config firebase.remote.json --project ground-dev-sig"
+            "command": "firebase deploy --config firebase.json --project ground-dev-sig"
           },
           "production": {
-            "command": "firebase deploy --config firebase.remote.json --project YOUR-PROD-PROJECT"
+            "command": "firebase deploy --config firebase.json --project YOUR-PROD-PROJECT"
           }
         },
         "dependsOn": [
