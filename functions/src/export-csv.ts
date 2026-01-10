@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as functions from 'firebase-functions';
+import * as functions from 'firebase-functions/v1';
 import * as csv from '@fast-csv/format';
 import { canExport, hasOrganizerRole } from './common/auth';
 import { isAccessibleLoi } from './common/utils';

@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-import functions from 'firebase-functions';
 import { buffer } from 'stream/consumers';
 import { FormDataEncoder } from 'form-data-encoder';
 import { FormData } from 'formdata-node';
+import { https, Response } from 'firebase-functions/v1';
 
 export async function createPostRequestSpy(
   args: object,
   form: FormData
-): Promise<functions.https.Request> {
+): Promise<https.Request> {
   const encoder = new FormDataEncoder(form);
-  return jasmine.createSpyObj<functions.https.Request>('request', ['unpipe'], {
+  return jasmine.createSpyObj<https.Request>('request', ['unpipe'], {
     ...args,
     method: 'POST',
     headers: encoder.headers,
@@ -34,15 +34,15 @@ export async function createPostRequestSpy(
 
 export async function createGetRequestSpy(
   args: object
-): Promise<functions.https.Request> {
-  return jasmine.createSpyObj<functions.https.Request>('request', ['unpipe'], {
+): Promise<https.Request> {
+  return jasmine.createSpyObj<https.Request>('request', ['unpipe'], {
     ...args,
     method: 'GET',
   });
 }
 
-export function createResponseSpy(chunks?: string[]): functions.Response<any> {
-  const res = jasmine.createSpyObj<functions.Response<any>>('response', [
+export function createResponseSpy(chunks?: string[]): Response<any> {
+  const res = jasmine.createSpyObj<Response<any>>('response', [
     'send',
     'status',
     'end',

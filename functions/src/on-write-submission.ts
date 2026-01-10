@@ -15,7 +15,7 @@
  */
 
 // import * as admin from 'firebase-admin';
-import { Change, EventContext } from 'firebase-functions';
+import { Change, EventContext } from 'firebase-functions/v1';
 import { DocumentSnapshot } from 'firebase-functions/v1/firestore';
 import { getDatastore } from './common/context';
 import { registry } from '@ground/lib';
