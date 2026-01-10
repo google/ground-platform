@@ -4,10 +4,7 @@
     "name": "lib",
     "targets": {
       "test": {
-        "commands": "jasmine --config=jasmine.json",
-        "configurations": {
-          "ci": {}
-        }
+        "commands": "jasmine --config=jasmine.json"
       }
     }
   },
