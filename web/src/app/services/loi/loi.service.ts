@@ -44,7 +44,7 @@ export class LocationOfInterestService {
           : this.dataStore.getAccessibleLois$(
               survey,
               user.id,
-              this.surveyService.canManageSurvey() ||
+              this.surveyService.canManageSurvey(survey) ||
                 survey.dataVisibility ===
                   SurveyDataVisibility.ALL_SURVEY_PARTICIPANTS
             )

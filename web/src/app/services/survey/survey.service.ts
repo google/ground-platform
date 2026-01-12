@@ -183,13 +183,17 @@ export class SurveyService {
   /**
    * Checks if a user has survey organizer or owner level permissions of the survey.
    */
-  canManageSurvey(): boolean {
+  canManageSurvey(survey?: Survey): boolean {
     const user = this.authService.getCurrentUser();
     if (!user) {
       return false;
     }
+    const targetSurvey = survey || this.activeSurvey;
+    if (!targetSurvey) {
+      return false;
+    }
     const userEmail = user.email;
-    const acl = this.activeSurvey.getAclEntriesSorted();
+    const acl = targetSurvey.getAclEntriesSorted();
     return !!acl.find(entry => entry.email === userEmail && entry.isManager());
   }
 }
