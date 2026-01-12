@@ -35,64 +35,41 @@ import { SurveyService } from 'app/services/survey/survey.service';
   providedIn: 'root',
 })
 export class SubmissionService {
-  private submissions$: Observable<List<Submission>>;
-  private selectedSubmissionId$ = new ReplaySubject<string>(1);
-  private selectedSubmission$ = new Observable<Submission>();
-
   constructor(
     private authService: AuthService,
     private dataStore: DataStoreService,
     private loiService: LocationOfInterestService,
     private surveyService: SurveyService
-  ) {
-    this.submissions$ = this.authService
-      .getUser$()
-      .pipe(
-        switchMap(user =>
-          surveyService
-            .getActiveSurvey$()
-            .pipe(
-              switchMap(survey =>
-                this.loiService
-                  .getSelectedLocationOfInterest$()
-                  .pipe(
-                    switchMap(loi =>
-                      !survey || !loi || !user
-                        ? of(List<Submission>())
-                        : this.dataStore.getAccessibleSubmissions$(
-                            survey,
-                            loi,
-                            user.id,
-                            this.surveyService.canManageSurvey() ||
-                              survey.dataVisibility ===
-                                SurveyDataVisibility.ALL_SURVEY_PARTICIPANTS
-                          )
-                    )
-                  )
-              )
-            )
-        )
-      );
+  ) {}
 
-    this.selectedSubmission$ = this.selectedSubmissionId$.pipe(
-      switchMap(submissionId =>
-        this.submissions$.pipe(
-          map(submissions => submissions.find(({ id }) => id === submissionId)!)
-        )
+  getSubmissions$(
+    survey: Survey,
+    loi: LocationOfInterest
+  ): Observable<List<Submission>> {
+    return this.authService.getUser$().pipe(
+      switchMap(user =>
+        !user
+          ? of(List<Submission>())
+          : this.dataStore.getAccessibleSubmissions$(
+              survey,
+              loi,
+              user.id,
+              this.surveyService.canManageSurvey() ||
+                survey.dataVisibility ===
+                  SurveyDataVisibility.ALL_SURVEY_PARTICIPANTS
+            )
       )
     );
   }
 
-  getSubmissions$(): Observable<List<Submission>> {
-    return this.submissions$;
-  }
-
-  selectSubmission(submissionId: string) {
-    this.selectedSubmissionId$.next(submissionId);
-  }
-
-  getSelectedSubmission$(): Observable<Submission> {
-    return this.selectedSubmission$;
+  getSubmission$(
+    survey: Survey,
+    loi: LocationOfInterest,
+    submissionId: string
+  ): Observable<Submission> {
+    return this.getSubmissions$(survey, loi).pipe(
+      map(submissions => submissions.find(({ id }) => id === submissionId)!)
+    );
   }
 
   createNewSubmission(

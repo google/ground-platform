@@ -146,16 +146,13 @@ class MockSurveyService {
 }
 
 class MockLocationOfInterestService {
-  getSelectedLocationOfInterest$() {
-    return of<LocationOfInterest>(MockModel.loi001);
-  }
   getLocationsOfInterest$() {
-    return of<LocationOfInterest>(MockModel.loi001);
+    return of(List([MockModel.loi001]));
   }
 }
 
 class MockSubmissionService {
-  getSelectedSubmission$() {
+  getSubmission$() {
     return of<Submission>(MockModel.submission001);
   }
 }
@@ -184,7 +181,8 @@ describe('SubmissionFormComponent', () => {
     const navigationService = {
       getSurveyId$: () => of(''),
       getUrlParams: () => signal(new UrlParams(null, null, null, null)),
-      getLocationOfInterestId$: () => NEVER,
+      getLocationOfInterestId$: () => of(MockModel.loi001.id),
+      getSubmissionId$: () => of(MockModel.submission001.id),
       getSidePanelExpanded: () => false,
     };
     TestBed.configureTestingModule({

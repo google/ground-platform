@@ -15,11 +15,14 @@
  */
 
 import { Component, Input, OnDestroy, OnInit, input } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { Storage, getDownloadURL, ref } from '@angular/fire/storage';
 import { List } from 'immutable';
-import { Subscription } from 'rxjs';
+import { Subscription, combineLatest, of } from 'rxjs';
+import { switchMap } from 'rxjs/operators';
 
 import { Point } from 'app/models/geometry/point';
+import { LocationOfInterest } from 'app/models/loi.model';
 import { MultipleSelection } from 'app/models/submission/multiple-selection';
 import { Result } from 'app/models/submission/result.model';
 import { Submission } from 'app/models/submission/submission.model';
@@ -38,8 +41,14 @@ import { SubmissionService } from 'app/services/submission/submission.service';
 export class SubmissionPanelComponent implements OnInit, OnDestroy {
   subscription: Subscription = new Subscription();
 
-  @Input() submissionId!: string;
+  submissionId = input<string>();
   activeSurvey = input<Survey>();
+  lois = input<List<LocationOfInterest>>();
+
+  activeSurvey$ = toObservable(this.activeSurvey);
+  lois$ = toObservable(this.lois);
+  submissionId$ = toObservable(this.submissionId);
+
   submission: Submission | null = null;
   tasks?: List<Task>;
   selectedTaskId: string | null = null;
@@ -56,17 +65,36 @@ export class SubmissionPanelComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.subscription.add(
-      this.submissionService.getSelectedSubmission$().subscribe(submission => {
-        if (submission instanceof Submission) {
-          this.submission = submission;
-          this.tasks = submission.job
-            ?.getTasksSorted()
-            .filter(task => !task.addLoiTask);
-          // Get image URL upon initialization to not send Firebase requests multiple times
-          this.getFirebaseImageURLs();
-          this.isLoading = false;
-        }
-      })
+      combineLatest([
+        this.activeSurvey$,
+        this.lois$,
+        this.submissionId$,
+        this.navigationService.getLocationOfInterestId$(),
+      ])
+        .pipe(
+          switchMap(([survey, lois, submissionId, loiId]) => {
+            const loi = lois?.find(l => l.id === loiId);
+            if (survey && loi && submissionId) {
+              return this.submissionService.getSubmission$(
+                survey,
+                loi,
+                submissionId
+              );
+            }
+            return of(null);
+          })
+        )
+        .subscribe(submission => {
+          if (submission instanceof Submission) {
+            this.submission = submission;
+            this.tasks = submission.job
+              ?.getTasksSorted()
+              .filter(task => !task.addLoiTask);
+            // Get image URL upon initialization to not send Firebase requests multiple times
+            this.getFirebaseImageURLs();
+            this.isLoading = false;
+          }
+        })
     );
     this.subscription.add(
       this.navigationService.getTaskId$().subscribe(taskId => {

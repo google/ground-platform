@@ -73,17 +73,19 @@ describe('SubmissionPanelComponent', () => {
 
   beforeEach(async () => {
     submissionService = jasmine.createSpyObj('SubmissionService', [
-      'getSelectedSubmission$',
+      'getSubmission$',
     ]);
     navigationService = jasmine.createSpyObj('NavigationService', [
       'getTaskId$',
+      'getLocationOfInterestId$',
       'selectLocationOfInterest',
       'showSubmissionDetailWithHighlightedTask',
     ]);
     storageSpy = jasmine.createSpyObj('Storage', ['ref']);
 
-    submissionService.getSelectedSubmission$.and.returnValue(
-      of(mockSubmission)
+    submissionService.getSubmission$.and.returnValue(of(mockSubmission));
+    navigationService.getLocationOfInterestId$.and.returnValue(
+      of(mockSubmission.loiId)
     );
     navigationService.getTaskId$.and.returnValue(of(null));
 
@@ -110,6 +112,8 @@ describe('SubmissionPanelComponent', () => {
     fixture = TestBed.createComponent(SubmissionPanelComponent);
     component = fixture.componentInstance;
     fixture.componentRef.setInput('activeSurvey', mockSurvey);
+    fixture.componentRef.setInput('submissionId', mockSubmission.id);
+    fixture.componentRef.setInput('lois', List());
     fixture.detectChanges();
   });
 
