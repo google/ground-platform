@@ -57,10 +57,10 @@
         "executor": "nx:run-commands",
         "configurations": {
           "staging": {
-            "command": "firebase deploy --config firebase.remote.json --project ground-dev-sig"
+            "command": "firebase deploy --config firebase.json --project ground-dev-sig"
           },
           "production": {
-            "command": "firebase deploy --config firebase.remote.json --project YOUR-PROD-PROJECT"
+            "command": "firebase deploy --config firebase.json --project YOUR-PROD-PROJECT"
           }
         },
         "dependsOn": [
@@ -78,17 +78,7 @@
     "url": "https://github.com/google/ground-platform/issues"
   },
   "homepage": "https://groundplatform.org",
-  "dependencies": {
-    "@babel/runtime": "^7.24.7",
-    "@grpc/grpc-js": "^1.10.9",
-    "@iplab/ngx-file-upload": "^20.0.1",
-    "firebase": "^10.14.1",
-    "immutable": "^4.3.6",
-    "marked": "^14.1.0",
-    "ngx-autosize-input": "^20.0.5",
-    "ngx-color": "^10.1.0",
-    "rxjs": "^7.8.2"
-  },
+
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.3",
     "@typescript-eslint/eslint-plugin": "^8.50.1",

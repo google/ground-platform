@@ -81,7 +81,7 @@ export class FirebaseDataConverter {
   }
 
   private static taskToJS(task: Task): {} {
-    const { type, multipleChoice, condition, id, ...taskDoc } = task;
+    const { type, multipleChoice, condition, id: _, ...taskDoc } = task;
 
     if (multipleChoice === undefined) {
       return {
@@ -118,7 +118,7 @@ export class FirebaseDataConverter {
         expressions: condition.expressions,
       };
     } else {
-      throw new Error(`Unimplemented task condition type $condition`);
+      throw new Error('Unimplemented task condition type $condition');
     }
   }
 
@@ -142,7 +142,7 @@ export class FirebaseDataConverter {
   }
 
   private static optionToJS(option: Option): {} {
-    const { id, ...optionDoc } = option;
+    const { id: _, ...optionDoc } = option;
     return optionDoc;
   }
 

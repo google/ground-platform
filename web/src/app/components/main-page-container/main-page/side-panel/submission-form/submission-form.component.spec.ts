@@ -21,20 +21,14 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatListModule } from '@angular/material/list';
 import { MatRadioModule } from '@angular/material/radio';
 import { By } from '@angular/platform-browser';
-import {
-  BrowserAnimationsModule,
-  NoopAnimationsModule,
-} from '@angular/platform-browser/animations';
-import { Router } from '@angular/router';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { List, Map } from 'immutable';
 import { NEVER, of } from 'rxjs';
 
-import { JobListItemModule } from 'app/components/shared/job-list-item/job-list-item.module';
 import { AuditInfo } from 'app/models/audit-info.model';
 import { Coordinate } from 'app/models/geometry/coordinate';
 import { Point } from 'app/models/geometry/point';
@@ -193,7 +187,6 @@ describe('SubmissionFormComponent', () => {
       getLocationOfInterestId$: () => NEVER,
       getSidePanelExpanded: () => false,
     };
-    const routerSpy = createRouterSpy();
     TestBed.configureTestingModule({
       declarations: [SubmissionFormComponent],
       imports: [
@@ -274,7 +267,3 @@ describe('SubmissionFormComponent', () => {
     }
   });
 });
-
-function createRouterSpy() {
-  return jasmine.createSpyObj('Router', ['navigate']);
-}

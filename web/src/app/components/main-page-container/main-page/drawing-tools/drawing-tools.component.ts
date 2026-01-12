@@ -22,8 +22,8 @@ import {
   OnInit,
   computed,
   effect,
-  input,
   inject,
+  input,
 } from '@angular/core';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { List } from 'immutable';

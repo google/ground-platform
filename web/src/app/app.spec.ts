@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { TestBed, waitForAsync } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 
 import { AppComponent } from 'app/app.component';

@@ -16,7 +16,7 @@
 
 import { DecodedIdToken, getAuth } from 'firebase-admin/auth';
 import { DocumentSnapshot } from 'firebase-admin/firestore';
-import { https, Response } from 'firebase-functions/v1';
+import { Response, https } from 'firebase-functions/v1';
 import { EmulatorIdToken } from '../handlers';
 import { GroundProtos } from '@ground/proto';
 import { registry } from '@ground/lib';

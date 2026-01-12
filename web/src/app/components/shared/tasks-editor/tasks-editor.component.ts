@@ -257,7 +257,7 @@ export class TasksEditorComponent {
             label: option.get('label')?.value as string,
             code: option.get('code')?.value as string,
             index: k,
-          } as Option)
+          }) as Option
       )
     );
 
@@ -290,7 +290,7 @@ export class TasksEditorComponent {
                     optionIds: List(
                       expression.get('optionIds')?.value as string[]
                     ),
-                  } as TaskConditionExpression)
+                  }) as TaskConditionExpression
               )
             ),
           } as TaskCondition)

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { EventContext } from 'firebase-functions';
+import { EventContext } from 'firebase-functions/v1';
 import { QueryDocumentSnapshot } from 'firebase-functions/v1/firestore';
 import { getDatastore } from './common/context';
 import { Datastore } from './common/datastore';
@@ -120,7 +120,6 @@ async function fetchWhispProperties(
   headers: Headers,
   body: Body
 ): Promise<Properties> {
-  // eslint-disable-next-line n/no-unsupported-features/node-builtins
   const response = await fetch(url, {
     method: 'POST',
     headers,

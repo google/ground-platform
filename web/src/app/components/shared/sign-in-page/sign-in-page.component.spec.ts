@@ -17,8 +17,8 @@
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { Auth } from '@angular/fire/auth';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { NavigationEnd, Router } from '@angular/router';
-import { BehaviorSubject, NEVER, of } from 'rxjs';
+import { Router } from '@angular/router';
+import { NEVER, of } from 'rxjs';
 
 import { AuthService } from 'app/services/auth/auth.service';
 import { DataStoreService } from 'app/services/data-store/data-store.service';
@@ -43,7 +43,10 @@ describe('SignInPageComponent', () => {
           provide: AuthService,
           useValue: { getUser$: () => NEVER, isAuthenticated$: () => NEVER },
         },
-        { provide: NavigationService, useValue: { navigateToTermsOfService: () => {} } },
+        {
+          provide: NavigationService,
+          useValue: { navigateToTermsOfService: () => {} },
+        },
         { provide: Auth, useValue: {} },
       ],
       schemas: [NO_ERRORS_SCHEMA],

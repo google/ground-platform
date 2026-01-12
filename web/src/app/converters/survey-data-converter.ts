@@ -189,7 +189,7 @@ function taskMultipleChoicePbToModel(pb: Pb.ITask): MultipleChoice | undefined {
   if (multipleChoiceQuestion) {
     return new MultipleChoice(
       multipleChoiceQuestion.type! ===
-      MultipleChoiceQuestionType.SELECT_MULTIPLE
+        MultipleChoiceQuestionType.SELECT_MULTIPLE
         ? Cardinality.SELECT_MULTIPLE
         : Cardinality.SELECT_ONE,
       List(

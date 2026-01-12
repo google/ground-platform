@@ -20,6 +20,8 @@
 const path = require('path');
 process.env.CHROME_BIN = require('puppeteer').executablePath();
 
+const isHeadless = !!process.env.GEMINI_CLI || !!process.env.CI;
+
 module.exports = function (config) {
   config.set({
     basePath: '',
@@ -51,10 +53,10 @@ module.exports = function (config) {
     port: 9876,
     colors: true,
     logLevel: config.LOG_INFO,
-    autoWatch: true,
-    browsers: ['Chrome'],
-    singleRun: false,
-    restartOnFileChange: true,
+    autoWatch: !isHeadless,
+    browsers: isHeadless ? ['ChromeHeadlessNoSandbox'] : ['Chrome'],
+    singleRun: isHeadless,
+    restartOnFileChange: !isHeadless,
     customLaunchers: {
       ChromeHeadlessNoSandbox: {
         base: 'ChromeHeadless',

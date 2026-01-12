@@ -54,10 +54,9 @@ export class SignInPageComponent implements OnInit, OnDestroy {
   }
 
   onGoogleSignIn() {
-    signInWithPopup(this.auth, new GoogleAuthProvider())
-      .catch((error) => {
-        console.error('Sign in failed', error);
-        alert(`Sign in error ${error.code}`);
-      });
+    signInWithPopup(this.auth, new GoogleAuthProvider()).catch(error => {
+      console.error('Sign in failed', error);
+      alert(`Sign in error ${error.code}`);
+    });
   }
 }

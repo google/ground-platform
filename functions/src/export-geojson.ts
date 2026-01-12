@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as functions from 'firebase-functions';
+import * as functions from 'firebase-functions/v1';
 import { canExport, hasOrganizerRole } from './common/auth';
 import { getDatastore } from './common/context';
 import { isAccessibleLoi } from './common/utils';

@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import * as functions from 'firebase-functions';
+import * as functions from 'firebase-functions/v1';
 import { firestore } from 'firebase-admin';
 import { DocumentData, FieldPath, GeoPoint } from 'firebase-admin/firestore';
 import { registry } from '@ground/lib';
 import { GroundProtos } from '@ground/proto';
 
 import Pb = GroundProtos.ground.v1beta1;
-import { leftOuterJoinSorted, QueryIterator } from './query-iterator';
+import { QueryIterator, leftOuterJoinSorted } from './query-iterator';
 
 const l = registry.getFieldIds(Pb.LocationOfInterest);
 const sb = registry.getFieldIds(Pb.Submission);

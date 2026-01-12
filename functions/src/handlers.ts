@@ -16,7 +16,7 @@
 
 import cors from 'cors';
 import { DecodedIdToken } from 'firebase-admin/auth';
-import { https, Response } from 'firebase-functions';
+import { Response, https } from 'firebase-functions/v1';
 import { getDecodedIdToken } from './common/auth';
 import { INTERNAL_SERVER_ERROR, UNAUTHORIZED } from 'http-status-codes';
 import cookieParser from 'cookie-parser';

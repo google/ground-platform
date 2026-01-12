@@ -37,7 +37,9 @@ export class AppConfigService {
 
   getGooglePlayId(): Observable<string> {
     return from(this.fetchConfig()).pipe(
-      switchMap(() => from(Promise.resolve(getString(this.remoteConfig, 'google_play_id'))))
+      switchMap(() =>
+        from(Promise.resolve(getString(this.remoteConfig, 'google_play_id')))
+      )
     );
   }
 }

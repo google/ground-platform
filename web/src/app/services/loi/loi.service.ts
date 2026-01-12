@@ -154,14 +154,14 @@ export class LocationOfInterestService {
   }
 
   async addPoint(
-    lat: number,
-    lng: number,
-    jobId: string
+    _lat: number,
+    _lng: number,
+    _jobId: string
   ): Promise<LocationOfInterest | null> {
     throw new Error('Adding LOIs via web app not yet supported');
   }
 
-  async updatePoint(loi: LocationOfInterest): Promise<void> {
+  async updatePoint(_loi: LocationOfInterest): Promise<void> {
     throw new Error('Editing LOIs via web app not yet supported');
   }
 }

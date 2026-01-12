@@ -15,17 +15,20 @@
  */
 
 import { Firestore } from '@google-cloud/firestore';
+import * as admin from 'firebase-admin';
+import * as firestore from 'firebase-admin/firestore';
 
 export function stubAdminApi(mockFirestore: Firestore) {
-  spyOn(require('firebase-admin'), 'initializeApp').and.returnValue({
+  spyOn(admin, 'initializeApp').and.returnValue({
     firestore: () => mockFirestore,
-  });
-  spyOn(require('firebase-admin/firestore'), 'getFirestore').and.returnValue(
-    mockFirestore
+  } as admin.app.App);
+
+  spyOn(firestore, 'getFirestore').and.returnValue(
+    mockFirestore as unknown as firestore.Firestore
   );
 }
 
 export function resetSpies() {
-  require('firebase-admin').initializeApp.and.callThrough();
-  require('firebase-admin/firestore').getFirestore.and.callThrough();
+  (admin.initializeApp as jasmine.Spy).and.callThrough();
+  (firestore.getFirestore as jasmine.Spy).and.callThrough();
 }

@@ -1,0 +1,148 @@
+name: Check
+
+on:
+  pull_request:
+  push:
+    branches: [master]
+
+env:
+  NX_CACHE_DIRECTORY: .nx/cache
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      functions: ${{ steps.filter.outputs.functions }}
+      lib: ${{ steps.filter.outputs.lib }}
+      proto: ${{ steps.filter.outputs.proto }}
+      web: ${{ steps.filter.outputs.web }}
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v6
+
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            functions:
+              - 'functions/**'
+              - 'package*.json'
+              - 'nx.json'
+              - '.github/workflows/check.yml'
+              - '.github/actions/setup/**'
+            lib:
+              - 'lib/**'
+              - 'package*.json'
+              - 'nx.json'
+              - '.github/workflows/check.yml'
+              - '.github/actions/setup/**'
+            proto:
+              - 'proto/**'
+              - 'package*.json'
+              - 'nx.json'
+              - '.github/workflows/check.yml'
+              - '.github/actions/setup/**'
+            web:
+              - 'web/**'
+              - 'package*.json'
+              - 'nx.json'
+              - '.github/workflows/check.yml'
+              - '.github/actions/setup/**'
+
+  functions:
+    needs: changes
+    if: ${{ needs.changes.outputs.functions == 'true' }}
+    name: functions
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v6
+
+      - name: Set up environment
+        uses: ./.github/actions/setup
+        with:
+          cache-key-suffix: functions
+
+      - name: Build
+        run: npx nx build functions
+
+      - name: Test
+        run: npx nx test functions
+
+      - name: Lint
+        run: npx nx lint functions
+
+  lib:
+    needs: changes
+    if: ${{ needs.changes.outputs.lib == 'true' }}
+    name: lib
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v6
+
+      - name: Set up environment
+        uses: ./.github/actions/setup
+        with:
+          cache-key-suffix: lib
+
+      - name: Build
+        run: npx nx build lib
+
+      - name: Test
+        run: npx nx test lib
+
+      - name: Lint
+        run: npx nx lint lib
+
+  proto:
+    needs: changes
+    if: ${{ needs.changes.outputs.proto == 'true' }}
+    name: proto
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v6
+
+      - name: Set up environment
+        uses: ./.github/actions/setup
+        with:
+          cache-key-suffix: proto
+
+      - name: Build
+        run: npx nx build proto
+
+      - name: Lint
+        run: npx nx lint proto
+
+  web:
+    needs: changes
+    if: ${{ needs.changes.outputs.web == 'true' }}
+    name: web
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v6
+
+      - name: Set up environment
+        uses: ./.github/actions/setup
+        with:
+          cache-key-suffix: web
+
+      - name: Build
+        run: npx nx build web
+
+      - name: Test
+        run: npx nx test web
+
+      - name: Lint
+        run: npx nx lint web
+
+      - name: Update test coverage report
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}

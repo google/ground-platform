@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, OnInit, effect, input, inject } from '@angular/core';
+import { Component, OnInit, effect, inject, input } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Subscription } from 'rxjs';
 

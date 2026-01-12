@@ -15,7 +15,7 @@
  */
 
 import 'module-alias/register';
-import * as functions from 'firebase-functions';
+import * as functions from 'firebase-functions/v1';
 import { onHttpsRequest, onHttpsRequestAsync } from './handlers';
 import { handleProfileRefresh } from './profile-refresh';
 import { sessionLoginHandler } from './session-login';

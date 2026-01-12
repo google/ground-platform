@@ -63,6 +63,6 @@ function linearRingPbToModel(pb: Pb.ILinearRing): LinearRing {
 }
 
 export function coordinatesPbToModel(pb: Pb.ICoordinates): Coordinate {
-  if (!pb.longitude || !pb.latitude) throw new Error(`Incomplete coordinate`);
+  if (!pb.longitude || !pb.latitude) throw new Error('Incomplete coordinate');
   return new Coordinate(pb.longitude, pb.latitude);
 }

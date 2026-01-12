@@ -15,7 +15,14 @@
  */
 
 import { FlatTreeControl } from '@angular/cdk/tree';
-import { Component, Input, OnInit, SimpleChanges, effect, inject } from '@angular/core';
+import {
+  Component,
+  Input,
+  OnInit,
+  SimpleChanges,
+  effect,
+  inject,
+} from '@angular/core';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { List } from 'immutable';
 
