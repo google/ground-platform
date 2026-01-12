@@ -15,9 +15,13 @@
  */
 
 import { Component, OnInit, effect, inject, input } from '@angular/core';
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { MatDialog } from '@angular/material/dialog';
+import { List } from 'immutable';
 import { Subscription } from 'rxjs';
+import { switchMap } from 'rxjs/operators';
 
+import { LocationOfInterest } from 'app/models/loi.model';
 import { Survey } from 'app/models/survey.model';
 import { AuthService } from 'app/services/auth/auth.service';
 import { LocationOfInterestService } from 'app/services/loi/loi.service';
@@ -49,18 +53,19 @@ export class MainPageComponent implements OnInit {
   private dialog = inject(MatDialog);
 
   activeSurvey = input.required<Survey>();
-  private urlParamsSignal = this.navigationService.getUrlParams();
+
+  lois = toSignal(
+    toObservable(this.activeSurvey).pipe(
+      switchMap(survey => this.loiService.getLocationsOfInterest$(survey))
+    ),
+    { initialValue: List<LocationOfInterest>() }
+  );
 
   subscription: Subscription = new Subscription();
   showSubmissionPanel: Boolean = false;
 
-  constructor() {
-    effect(() => {
-      const { loiId, submissionId } = this.urlParamsSignal();
-      if (loiId) this.loiService.selectLocationOfInterest(loiId);
-      if (submissionId) this.submissionService.selectSubmission(submissionId);
-    });
-  }
+  constructor() {}
+
 
   ngOnInit() {
     // Show title dialog to assign title on a new survey.

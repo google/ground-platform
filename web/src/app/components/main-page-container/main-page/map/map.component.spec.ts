@@ -155,12 +155,12 @@ describe('MapComponent', () => {
   beforeEach(async () => {
     loiServiceSpy = jasmine.createSpyObj<LocationOfInterestService>(
       'LocationOfInterestService',
-      ['getLocationsOfInterest$', 'updatePoint', 'addPoint']
+      ['updatePoint', 'addPoint']
     );
+
     mockLois$ = new BehaviorSubject<List<LocationOfInterest>>(
       List<LocationOfInterest>([poi1, poi2, polygonLoi1])
     );
-    loiServiceSpy.getLocationsOfInterest$.and.returnValue(mockLois$);
 
     navigationServiceSpy = jasmine.createSpyObj<NavigationService>(
       'NavigationService',
@@ -185,9 +185,9 @@ describe('MapComponent', () => {
 
     submissionServiceSpy = jasmine.createSpyObj<SubmissionService>(
       'SubmissionService',
-      ['getSelectedSubmission$']
+      ['getSubmission$']
     );
-    submissionServiceSpy.getSelectedSubmission$.and.returnValue(
+    submissionServiceSpy.getSubmission$.and.returnValue(
       of(null as unknown as Submission)
     );
 
@@ -229,6 +229,7 @@ describe('MapComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(MapComponent);
     fixture.componentRef.setInput('activeSurvey', mockSurvey);
+    fixture.componentRef.setInput('lois', mockLois$.getValue());
     component = fixture.componentInstance;
     component.shouldEnableDrawingTools = true;
     fixture.detectChanges();
@@ -276,7 +277,10 @@ describe('MapComponent', () => {
   });
 
   it('should render polygons on map - multipolygon loi', async () => {
-    mockLois$.next(List<LocationOfInterest>([multipolygonLoi1]));
+    fixture.componentRef.setInput(
+      'lois',
+      List<LocationOfInterest>([multipolygonLoi1])
+    );
     fixture.detectChanges();
     await fixture.whenStable();
 
@@ -309,6 +313,7 @@ describe('MapComponent', () => {
     beforeEach(() => {
       fixture = TestBed.createComponent(MapComponent);
       fixture.componentRef.setInput('activeSurvey', mockSurvey);
+      fixture.componentRef.setInput('lois', mockLois$.getValue());
       component = fixture.componentInstance;
       component.selectedJob = job1;
       fixture.detectChanges();
@@ -356,7 +361,8 @@ describe('MapComponent', () => {
         Map()
       );
       // poi1 deleted, poi2 modified, poi3 added & polygonLoi1 modified
-      mockLois$.next(
+      fixture.componentRef.setInput(
+        'lois',
         List<LocationOfInterest>([poi2Modified, poi3, polygonLoi1Modified])
       );
       fixture.detectChanges();
@@ -619,7 +625,10 @@ describe('MapComponent', () => {
   });
 
   it('should pop up dialog when overlapping polygons are clicked', async () => {
-    mockLois$.next(List<LocationOfInterest>([polygonLoi1, multipolygonLoi1]));
+    fixture.componentRef.setInput(
+      'lois',
+      List<LocationOfInterest>([polygonLoi1, multipolygonLoi1])
+    );
     fixture.detectChanges();
     await fixture.whenStable();
 

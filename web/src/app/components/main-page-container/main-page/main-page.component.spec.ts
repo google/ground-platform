@@ -20,7 +20,8 @@ import { Auth } from '@angular/fire/auth';
 import { Firestore } from '@angular/fire/firestore';
 import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute, Router } from '@angular/router';
-import { NEVER } from 'rxjs';
+import { List } from 'immutable';
+import { NEVER, of } from 'rxjs';
 
 import { Survey } from 'app/models/survey.model';
 import { AuthService } from 'app/services/auth/auth.service';
@@ -63,12 +64,11 @@ describe('MainPageComponent', () => {
     ]);
 
     const loiService = jasmine.createSpyObj('LocationOfInterestService', [
-      'selectLocationOfInterest$',
+      'getLocationsOfInterest$',
     ]);
 
     const submissionService = jasmine.createSpyObj('SubmissionService', [
-      'selectSubmission$',
-      'getSelectedSubmission$',
+      'getSubmissions$',
     ]);
 
     const navigationService = {
@@ -77,6 +77,8 @@ describe('MainPageComponent', () => {
       getSubmissionId$: () => NEVER,
       getUrlParams: () => signal({}),
     };
+
+    loiService.getLocationsOfInterest$.and.returnValue(of(List([])));
 
     await TestBed.configureTestingModule({
       declarations: [MainPageComponent, MapComponent, MatSideNavComponent],
