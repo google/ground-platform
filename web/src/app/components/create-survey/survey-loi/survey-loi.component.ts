@@ -50,7 +50,10 @@ export class SurveyLoiComponent {
     }
 
     this.loiService
-      .getPredefinedLoisByJobId$(this.job.id)
+      .getPredefinedLoisByJobId$(
+        this.surveyService.getActiveSurvey(),
+        this.job.id
+      )
       .subscribe(lois => (this.lois = lois));
   }
 

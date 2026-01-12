@@ -18,7 +18,7 @@ import { Component, OnDestroy, OnInit, input } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { MatDialog } from '@angular/material/dialog';
 import { List } from 'immutable';
-import { Subscription, combineLatest, switchMap } from 'rxjs';
+import { Observable, Subscription, combineLatest, switchMap } from 'rxjs';
 
 import { LoiPropertiesDialogComponent } from 'app/components/shared/loi-properties-dialog/loi-properties-dialog.component';
 import { LocationOfInterest } from 'app/models/loi.model';
@@ -38,8 +38,10 @@ import { getLoiIcon } from 'app/utils/utils';
 export class LocationOfInterestPanelComponent implements OnInit, OnDestroy {
   subscription: Subscription = new Subscription();
   activeSurvey = input<Survey>();
+  lois = input<List<LocationOfInterest>>(List());
 
   activeSurvey$ = toObservable(this.activeSurvey);
+  lois$ = toObservable(this.lois);
 
   loi!: LocationOfInterest;
   name!: string | null;
@@ -59,18 +61,20 @@ export class LocationOfInterestPanelComponent implements OnInit, OnDestroy {
     this.subscription.add(
       combineLatest([
         this.activeSurvey$,
-        this.loiService.getSelectedLocationOfInterest$(),
+        this.lois$,
+        this.navigationService.getLocationOfInterestId$(),
       ])
         .pipe(
-          switchMap(([survey, loi]) => {
-            if (survey) {
-              this.iconColor = survey.getJob(loi.jobId)!.color!;
+          switchMap(([survey, lois, loiId]) => {
+            const loi = lois.find(l => l.id === loiId);
+            if (survey && loi) {
+              this.iconColor = survey.getJob(loi.jobId)?.color!;
+              this.loi = loi;
+              this.name = LocationOfInterestService.getDisplayName(loi);
+              this.icon = getLoiIcon(loi);
+              return this.submissionService.getSubmissions$(survey, loi);
             }
-            this.loi = loi;
-            this.name = LocationOfInterestService.getDisplayName(loi);
-            this.icon = getLoiIcon(loi);
-
-            return this.submissionService.getSubmissions$();
+            return new Observable<List<Submission>>();
           })
         )
         .subscribe(submissions => {

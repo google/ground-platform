@@ -15,13 +15,11 @@
  */
 
 import { Component, computed, inject, input } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
 import { List } from 'immutable';
 
 import { Job } from 'app/models/job.model';
 import { LocationOfInterest } from 'app/models/loi.model';
 import { Survey } from 'app/models/survey.model';
-import { LocationOfInterestService } from 'app/services/loi/loi.service';
 import { NavigationService } from 'app/services/navigation/navigation.service';
 
 @Component({
@@ -31,10 +29,10 @@ import { NavigationService } from 'app/services/navigation/navigation.service';
   standalone: false,
 })
 export class JobListComponent {
-  private loiService = inject(LocationOfInterestService);
   readonly navigationService = inject(NavigationService);
 
   activeSurvey = input<Survey>();
+  lois = input<List<LocationOfInterest>>(List());
 
   readonly jobs = computed(() => {
     const survey = this.activeSurvey();
@@ -44,10 +42,6 @@ export class JobListComponent {
   });
 
   readonly defaultLois = List<LocationOfInterest>();
-
-  readonly lois = toSignal(this.loiService.getLocationsOfInterest$(), {
-    initialValue: List<LocationOfInterest>(),
-  });
 
   readonly loisByJob = computed(() => {
     return this.lois().groupBy(loi => loi.jobId);

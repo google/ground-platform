@@ -62,11 +62,7 @@ describe('LocationOfInterestPanelComponent', () => {
   beforeEach(async () => {
     loiServiceSpy = jasmine.createSpyObj<LocationOfInterestService>(
       'LocationOfInterestService',
-      [
-        'getLocationsOfInterest$',
-        'selectLocationOfInterest',
-        'getSelectedLocationOfInterest$',
-      ]
+      ['getLocationsOfInterest$']
     );
     submissionServiceSpy = jasmine.createSpyObj<SubmissionService>(
       'SubmissionService',
@@ -84,7 +80,7 @@ describe('LocationOfInterestPanelComponent', () => {
     dialogSpy = jasmine.createSpyObj<MatDialog>('MatDialog', ['open']);
 
     loiServiceSpy.getLocationsOfInterest$.and.returnValue(of(List([mockLoi])));
-    loiServiceSpy.getSelectedLocationOfInterest$.and.returnValue(of(mockLoi));
+
     submissionServiceSpy.getSubmissions$.and.returnValue(
       of(List<Submission>([]))
     );

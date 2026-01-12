@@ -19,6 +19,7 @@ import '@angular/localize/init';
 import { ChangeDetectorRef, Component, OnInit, ViewChild } from '@angular/core';
 import { List } from 'immutable';
 import { Subscription, combineLatest, filter } from 'rxjs';
+import { map, switchMap } from 'rxjs/operators';
 
 import { DataSharingTermsComponent } from 'app/components/create-survey/data-sharing-terms/data-sharing-terms.component';
 import { JobDetailsComponent } from 'app/components/create-survey/job-details/job-details.component';
@@ -162,11 +163,14 @@ export class CreateSurveyComponent implements OnInit {
     );
 
     this.subscription.add(
-      combineLatest([
-        this.surveyService.getActiveSurvey$(),
-        this.loiService.getLocationsOfInterest$(),
-      ])
+      this.surveyService
+        .getActiveSurvey$()
         .pipe(
+          switchMap(survey =>
+            this.loiService
+              .getLocationsOfInterest$(survey)
+              .pipe(map(lois => [survey, lois] as [Survey, List<LocationOfInterest>]))
+          ),
           filter(
             ([survey]) =>
               this.surveyId === SURVEY_ID_NEW || survey.id === this.surveyId
