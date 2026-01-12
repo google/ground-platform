@@ -20,7 +20,9 @@
 const path = require('path');
 process.env.CHROME_BIN = require('puppeteer').executablePath();
 
-const isHeadless = !!process.env.GEMINI_CLI || !!process.env.CI;
+const isAgent = !!process.env.ANTIGRAVITY_AGENT || !!process.env.GEMINI_CLI;
+const isCi = !!process.env.CI;
+const isHeadless = isCi || isAgent;
 
 module.exports = function (config) {
   config.set({
