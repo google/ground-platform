@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Input, OnDestroy, OnInit, input } from '@angular/core';
+import { Component, OnDestroy, OnInit, input } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { Storage, getDownloadURL, ref } from '@angular/fire/storage';
 import { List } from 'immutable';

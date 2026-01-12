@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, OnInit, effect, inject, input } from '@angular/core';
+import { Component, OnInit, inject, input } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { MatDialog } from '@angular/material/dialog';
 import { List } from 'immutable';
@@ -65,7 +65,6 @@ export class MainPageComponent implements OnInit {
   showSubmissionPanel: Boolean = false;
 
   constructor() {}
-
 
   ngOnInit() {
     // Show title dialog to assign title on a new survey.

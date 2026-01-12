@@ -16,12 +16,16 @@
 
 import { Injectable } from '@angular/core';
 import { List } from 'immutable';
-import { Observable, ReplaySubject, of } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 
 import { GeometryType } from 'app/models/geometry/geometry';
 import { LocationOfInterest } from 'app/models/loi.model';
-import { Survey, SurveyDataVisibility, SurveyState } from 'app/models/survey.model';
+import {
+  Survey,
+  SurveyDataVisibility,
+  SurveyState,
+} from 'app/models/survey.model';
 import { AuthService } from 'app/services/auth/auth.service';
 import { DataStoreService } from 'app/services/data-store/data-store.service';
 import { SurveyService } from 'app/services/survey/survey.service';
@@ -36,7 +40,9 @@ export class LocationOfInterestService {
     private surveyService: SurveyService
   ) {}
 
-  getLocationsOfInterest$(survey: Survey): Observable<List<LocationOfInterest>> {
+  getLocationsOfInterest$(
+    survey: Survey
+  ): Observable<List<LocationOfInterest>> {
     return this.authService.getUser$().pipe(
       switchMap(user =>
         !survey || survey.state === SurveyState.UNSAVED
@@ -59,7 +65,7 @@ export class LocationOfInterestService {
     );
   }
 
-  /* 
+  /*
    * @deprecated logic moved to components or NavigationService
    */
   // selectLocationOfInterest(loiId: string) {

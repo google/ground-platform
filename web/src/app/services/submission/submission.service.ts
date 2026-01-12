@@ -16,7 +16,7 @@
 
 import { Injectable } from '@angular/core';
 import { List, Map } from 'immutable';
-import { Observable, ReplaySubject, of } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 
 import { AuditInfo } from 'app/models/audit-info.model';
@@ -46,20 +46,22 @@ export class SubmissionService {
     survey: Survey,
     loi: LocationOfInterest
   ): Observable<List<Submission>> {
-    return this.authService.getUser$().pipe(
-      switchMap(user =>
-        !user
-          ? of(List<Submission>())
-          : this.dataStore.getAccessibleSubmissions$(
-              survey,
-              loi,
-              user.id,
-              this.surveyService.canManageSurvey() ||
-                survey.dataVisibility ===
-                  SurveyDataVisibility.ALL_SURVEY_PARTICIPANTS
-            )
-      )
-    );
+    return this.authService
+      .getUser$()
+      .pipe(
+        switchMap(user =>
+          !user
+            ? of(List<Submission>())
+            : this.dataStore.getAccessibleSubmissions$(
+                survey,
+                loi,
+                user.id,
+                this.surveyService.canManageSurvey() ||
+                  survey.dataVisibility ===
+                    SurveyDataVisibility.ALL_SURVEY_PARTICIPANTS
+              )
+        )
+      );
   }
 
   getSubmission$(

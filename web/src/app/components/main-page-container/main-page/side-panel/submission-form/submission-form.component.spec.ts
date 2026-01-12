@@ -27,7 +27,7 @@ import { MatRadioModule } from '@angular/material/radio';
 import { By } from '@angular/platform-browser';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { List, Map } from 'immutable';
-import { NEVER, of } from 'rxjs';
+import { of } from 'rxjs';
 
 import { AuditInfo } from 'app/models/audit-info.model';
 import { Coordinate } from 'app/models/geometry/coordinate';

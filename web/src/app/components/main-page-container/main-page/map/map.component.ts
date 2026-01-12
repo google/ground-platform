@@ -28,7 +28,13 @@ import {
 import { toObservable } from '@angular/core/rxjs-interop';
 import { GoogleMap } from '@angular/google-maps';
 import { Map as ImmutableMap, List } from 'immutable';
-import { BehaviorSubject, Observable, Subscription, combineLatest, of } from 'rxjs';
+import {
+  BehaviorSubject,
+  Observable,
+  Subscription,
+  combineLatest,
+  of,
+} from 'rxjs';
 import { filter, map, switchMap } from 'rxjs/operators';
 
 import { Coordinate } from 'app/models/geometry/coordinate';
