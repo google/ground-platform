@@ -41,7 +41,7 @@ runs:
 
     - name: Load cached Node modules
       id: cache-npm
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       env:
         cache-name: cache-node-modules
       with:
@@ -52,12 +52,6 @@ runs:
           ${{ runner.os }}-build-${{ env.cache-name }}-
           ${{ runner.os }}-build-
           ${{ runner.os }}-
-
-    - if: ${{ steps.cache-npm.outputs.cache-hit != 'true' }}
-      name: List the state of Node modules
-      continue-on-error: true
-      shell: bash
-      run: npm list
 
     - name: Install nx-linux-x64-gnu
       shell: bash
@@ -73,4 +67,18 @@ runs:
 
     - name: Start Firebase emulator with Android test data
       shell: bash
-      run: npx nx start-android-test-data
+      run: |
+        npx nx start-android-test-data > firebase-emulator.log 2>&1 &
+    
+        for i in {1..30}; do
+          if curl -s http://localhost:4000 > /dev/null 2>&1; then
+            echo "Firebase emulator started!"
+            exit 0
+          fi
+          echo "Waiting for Firebase emulator to start... ($i/30)"
+          sleep 5
+        done
+    
+        echo "Firebase Emulator failed to start"
+        cat firebase-emulator.log
+        exit 1
