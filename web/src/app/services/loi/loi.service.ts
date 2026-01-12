@@ -65,17 +65,6 @@ export class LocationOfInterestService {
     );
   }
 
-  /*
-   * @deprecated logic moved to components or NavigationService
-   */
-  // selectLocationOfInterest(loiId: string) {
-  //   this.selectedLoiId$.next(loiId);
-  // }
-
-  // getSelectedLocationOfInterest$(): Observable<LocationOfInterest> {
-  //   return this.selectedLoi$;
-  // }
-
   getPredefinedLoisByJobId$(
     survey: Survey,
     jobId: string
