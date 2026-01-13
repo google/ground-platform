@@ -36,6 +36,7 @@ import { SubmissionService } from 'app/services/submission/submission.service';
 
 import { Coordinate } from 'app/models/geometry/coordinate';
 import { Point } from 'app/models/geometry/point';
+import { MultipleSelection } from 'app/models/submission/multiple-selection';
 import { Result } from 'app/models/submission/result.model';
 import { SubmissionPanelComponent } from './submission-panel.component';
 
@@ -203,5 +204,70 @@ describe('SubmissionPanelComponent', () => {
       mockSubmission.id,
       task.id
     );
+  });
+
+  it('should navigate to submission list', () => {
+    fixture.componentRef.setInput('activeSurvey', mockSurvey);
+    component.submission = mockSubmission;
+
+    component.navigateToSubmissionList();
+
+    expect(navigationService.selectLocationOfInterest).toHaveBeenCalledWith(
+      mockSurvey.id,
+      mockSubmission.loiId
+    );
+  });
+
+  it('should get multiple choice other value', () => {
+    const task = new Task(
+      'task1',
+      TaskType.MULTIPLE_CHOICE,
+      'Multiple Choice',
+      true,
+      1
+    );
+    const multipleSelection = new MultipleSelection(
+      List(['option1']),
+      'Other value'
+    );
+    component.submission = new Submission(
+      'sub1',
+      'loi1',
+      job1,
+      mockAuditInfo,
+      mockAuditInfo,
+      Map({
+        task1: new Result(multipleSelection),
+      })
+    );
+
+    const result = component.getTaskMultipleChoiceOtherValue(task);
+
+    expect(result).toBe('Other: Other value');
+  });
+
+  it('should return "Other" when other value is empty but other option is selected', () => {
+    const task = new Task(
+      'task1',
+      TaskType.MULTIPLE_CHOICE,
+      'Multiple Choice',
+      true,
+      1
+    );
+    const multipleSelection = new MultipleSelection(List(), '');
+    component.submission = new Submission(
+      'sub1',
+      'loi1',
+      job1,
+      mockAuditInfo,
+      mockAuditInfo,
+      Map({
+        task1: new Result(multipleSelection),
+      })
+    );
+
+    const result = component.getTaskMultipleChoiceOtherValue(task);
+
+    expect(result).toBe('Other');
   });
 });
