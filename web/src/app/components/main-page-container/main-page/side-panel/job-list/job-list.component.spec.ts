@@ -23,7 +23,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
 import { MatMenuModule } from '@angular/material/menu';
 import { Router } from '@angular/router';
-import { Map, List } from 'immutable';
+import { List, Map } from 'immutable';
 import { of } from 'rxjs';
 
 import { Job } from 'app/models/job.model';
@@ -150,7 +150,7 @@ describe('JobListComponent', () => {
   it('should delegate isSidePanelExpanded to navigation service', () => {
     const navService = TestBed.inject(NavigationService);
     const spy = spyOn(navService, 'getSidePanelExpanded').and.returnValue(true);
-    
+
     expect(component.isSidePanelExpanded()).toBe(true);
     expect(spy).toHaveBeenCalled();
   });
