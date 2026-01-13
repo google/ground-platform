@@ -109,12 +109,13 @@
     "@grpc/grpc-js": "^1.10.9",
     "@iplab/ngx-file-upload": "^20.0.1",
     "angularx-qrcode": "^20.0.0",
-    "immutable": "^4.3.6",
+    "firebase": "^10.12.2",
+    "immutable": "catalog:",
     "marked": "^14.1.0",
     "ngx-autosize-input": "^20.0.5",
     "ngx-color": "^10.1.0",
-    "rxjs": "^7.8.2",
-    "zone.js": "^0.14.10"
+    "rxjs": "catalog:",
+    "zone.js": "catalog:"
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "^20.3.13",
@@ -130,6 +131,7 @@
     "@nx/angular": "^22.2.1",
     "@types/google.maps": "^3.54.10",
     "@types/jasmine": "~5.1.0",
+    "@types/node": "catalog:",
     "@types/webpack-env": "^1.15.3",
     "cpx": "^1.5.0",
     "karma": "^6.4.4",
