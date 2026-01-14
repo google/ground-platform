@@ -73,7 +73,7 @@
     "@typescript-eslint/parser": "^8.50.1",
     "ajv": "^8.17.1",
     "ajv-keywords": "^5.1.0",
-    "diff": "^5.2.0",
+    "diff": "^8.0.3",
     "esbuild": "^0.25.12",
     "eslint": "^9.39.2",
     "eslint-config-prettier": "^10.1.8",
