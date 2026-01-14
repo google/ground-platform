@@ -25,6 +25,7 @@ runs:
       uses: actions/checkout@v4
       with:
         repository: ${{ inputs.platform-repository }}
+        path: ground-platform
 
     - name: Load cached Firebase emulator
       uses: actions/cache@v4
@@ -54,18 +55,22 @@ runs:
           ${{ runner.os }}-
 
     - name: Install nx-linux-x64-gnu
+      working-directory: ground-platform
       shell: bash
       run: npm install @nx/nx-linux-x64-gnu
 
     - name: Install dependencies
+      working-directory: ground-platform
       shell: bash
       run: npm install
 
     - name: Build project and local deps
+      working-directory: ground-platform
       shell: bash
       run: npx nx build
 
     - name: Start Firebase emulator with Android test data
+      working-directory: ground-platform
       shell: bash
       run: |
         npx nx start-android-test-data > firebase-emulator.log 2>&1 &
