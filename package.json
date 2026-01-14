@@ -98,7 +98,6 @@
       "@firebase/util",
       "@parcel/watcher",
       "core-js",
-      "esbuild",
       "farmhash",
       "fsevents",
       "less",
