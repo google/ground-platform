@@ -112,12 +112,6 @@
       "unrs-resolver"
     ]
   },
-  "workspaces": [
-    "proto",
-    "lib",
-    "functions",
-    "web"
-  ],
   "optionalDependencies": {
     "@nx/nx-linux-x64-gnu": "^19.3.2"
   },
