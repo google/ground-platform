@@ -15,7 +15,10 @@
 -->
 
 <div class="page">
-  <ground-survey-header></ground-survey-header>
+  <ground-survey-header
+    *ngIf="survey; let activeSurvey"
+    [activeSurvey]="activeSurvey"
+  ></ground-survey-header>
 
   <!-- TODO(#1170): Extract the spinner into a component -->
   <div id="loading-spinner" class="loading-spinner" *ngIf="!survey">
