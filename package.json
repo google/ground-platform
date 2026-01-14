@@ -71,7 +71,6 @@
     "@eslint/eslintrc": "catalog:",
     "@typescript-eslint/eslint-plugin": "catalog:",
     "@typescript-eslint/parser": "catalog:",
-    "esbuild": "^0.25.12",
     "eslint": "catalog:",
     "eslint-config-prettier": "catalog:",
     "eslint-plugin-import": "catalog:",
