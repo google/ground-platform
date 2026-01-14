@@ -25,19 +25,23 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v6
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: "20"
-
       - name: Install pnpm
-        run: npm install pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: '9'
 
-      - name: Install deps
-        run: pnpm install
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: pnpm
+
+      - name: Install dependencies
+        shell: bash
+        run: pnpm install --frozen-lockfile
 
       - name: Build
-        run: npx nx build --configuration=staging
+        run: pnpm exec nx build --configuration=staging
 
       - name: Deploy to Firebase
         uses: FirebaseExtended/action-hosting-deploy@v0

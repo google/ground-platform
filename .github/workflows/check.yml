@@ -68,13 +68,13 @@ jobs:
           cache-key-suffix: functions
 
       - name: Build
-        run: npx nx build functions
+        run: pnpm exec nx build functions
 
       - name: Test
-        run: npx nx test functions
+        run: pnpm exec nx test functions
 
       - name: Lint
-        run: npx nx lint functions
+        run: pnpm exec nx lint functions
 
   lib:
     needs: changes
@@ -91,13 +91,13 @@ jobs:
           cache-key-suffix: lib
 
       - name: Build
-        run: npx nx build lib
+        run: pnpm exec nx build lib
 
       - name: Test
-        run: npx nx test lib
+        run: pnpm exec nx test lib
 
       - name: Lint
-        run: npx nx lint lib
+        run: pnpm exec nx lint lib
 
   proto:
     needs: changes
@@ -114,10 +114,10 @@ jobs:
           cache-key-suffix: proto
 
       - name: Build
-        run: npx nx build proto
+        run: pnpm exec nx build proto
 
       - name: Lint
-        run: npx nx lint proto
+        run: pnpm exec nx lint proto
 
   web:
     needs: changes
@@ -134,13 +134,13 @@ jobs:
           cache-key-suffix: web
 
       - name: Build
-        run: npx nx build web
+        run: pnpm exec nx build web
 
       - name: Test
-        run: npx nx test web
+        run: pnpm exec nx test web
 
       - name: Lint
-        run: npx nx lint web
+        run: pnpm exec nx lint web
 
       - name: Update test coverage report
         uses: codecov/codecov-action@v5
