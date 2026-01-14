@@ -38,15 +38,15 @@ Read through our [contributing guidelines](CONTRIBUTING.md) to learn about our s
 1. Install [Firebase CLI](https://firebase.google.com/docs/cli) and [Nx](https://nx.dev):
 
   ```bash
-  npm install -g firebase-tools nx
+  npm install -g firebase-tools nx pnpm
   ```
 
 ### Build and run locally
 
 1. Install dependencies:
 
-  ```bash 
-  npm install
+  ```bash
+  pnpm install
   ```
 
 1. Build and start local Firebase emulator and Angular dev server:
