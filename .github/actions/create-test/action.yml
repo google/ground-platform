@@ -11,19 +11,20 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 name: Create a new survey
 
 inputs:
   platform-repository:
-    description: "ground-platform repository under test"
+    description: 'ground-platform repository under test'
     default: google/ground-platform
 
   upload-artifacts:
-    description: "Whether to upload the final emulator data artifacts"
-    default: "false"
+    description: 'Whether to upload the final emulator data artifacts'
+    default: 'false'
 
 runs:
-  using: "composite"
+  using: 'composite'
   steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -83,7 +84,7 @@ runs:
       uses: actions/upload-artifact@v4
       with:
         name: data-create
-        path: "**/test"
+        path: '**/test'
         retention-days: 7
         overwrite: true
         if-no-files-found: error

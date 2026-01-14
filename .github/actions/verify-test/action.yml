@@ -11,19 +11,20 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 name: Verify survey submissions
 
 inputs:
   platform-repository:
-    description: "ground-platform repository under test"
+    description: 'ground-platform repository under test'
     default: google/ground-platform
 
   use-repo-data:
-    description: "Whether to use the local repository emulator data or not"
-    default: "true"
+    description: 'Whether to use the local repository emulator data or not'
+    default: 'true'
 
 runs:
-  using: "composite"
+  using: 'composite'
   steps:
     - name: Checkout code
       uses: actions/checkout@v4
