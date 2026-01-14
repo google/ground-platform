@@ -22,7 +22,9 @@ import { MatListModule } from '@angular/material/list';
 import { List, Map } from 'immutable';
 import { of } from 'rxjs';
 
+import { Coordinate } from 'app/models/geometry/coordinate';
 import { Geometry } from 'app/models/geometry/geometry';
+import { Point } from 'app/models/geometry/point';
 import { Job } from 'app/models/job.model';
 import { LocationOfInterest } from 'app/models/loi.model';
 import { Submission } from 'app/models/submission/submission.model';
@@ -55,18 +57,14 @@ describe('LocationOfInterestPanelComponent', () => {
   const mockLoi = new LocationOfInterest(
     'loi1',
     'job1',
-    { chainId: 'point1' } as unknown as Geometry,
+    new Point(new Coordinate(0, 0)),
     Map()
   );
 
   beforeEach(async () => {
     loiServiceSpy = jasmine.createSpyObj<LocationOfInterestService>(
       'LocationOfInterestService',
-      [
-        'getLocationsOfInterest$',
-        'selectLocationOfInterest',
-        'getSelectedLocationOfInterest$',
-      ]
+      ['getLocationsOfInterest$']
     );
     submissionServiceSpy = jasmine.createSpyObj<SubmissionService>(
       'SubmissionService',
@@ -84,7 +82,7 @@ describe('LocationOfInterestPanelComponent', () => {
     dialogSpy = jasmine.createSpyObj<MatDialog>('MatDialog', ['open']);
 
     loiServiceSpy.getLocationsOfInterest$.and.returnValue(of(List([mockLoi])));
-    loiServiceSpy.getSelectedLocationOfInterest$.and.returnValue(of(mockLoi));
+
     submissionServiceSpy.getSubmissions$.and.returnValue(
       of(List<Submission>([]))
     );
@@ -120,6 +118,17 @@ describe('LocationOfInterestPanelComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('should initialize component state on init', () => {
+    fixture.componentRef.setInput('lois', List([mockLoi]));
+    fixture.detectChanges();
+
+    expect(component.loi).toEqual(mockLoi);
+    expect(component.submissions).toBeDefined();
+    expect(component.isLoading).toBe(false);
+    expect(component.iconColor).toBe('#000');
+    expect(component.name).toBe('Unnamed point'); // Default name for mockLoi
   });
 
   it('should navigate to submission detail on selection', () => {

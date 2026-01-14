@@ -22,7 +22,7 @@ import { Coordinate } from 'app/models/geometry/coordinate';
 import { MultiPolygon } from 'app/models/geometry/multi-polygon';
 import { Point } from 'app/models/geometry/point';
 import { LocationOfInterest } from 'app/models/loi.model';
-import { Survey } from 'app/models/survey.model';
+import { DataSharingType, Survey, SurveyState } from 'app/models/survey.model';
 import { User } from 'app/models/user.model';
 import { AuthService } from 'app/services/auth/auth.service';
 import { DataStoreService } from 'app/services/data-store/data-store.service';
@@ -32,47 +32,136 @@ import { SurveyService } from 'app/services/survey/survey.service';
 import { polygonShellCoordsToPolygon } from 'testing/helpers';
 
 describe('LocationOfInterestService', () => {
-  const activeSurvey$ = new Subject<Survey | null>();
-  const user$ = new Subject<User | null>();
+  let service: LocationOfInterestService;
+  let dataStoreServiceSpy: jasmine.SpyObj<DataStoreService>;
+  let surveyServiceSpy: jasmine.SpyObj<SurveyService>;
 
-  const getMockLoi = (
-    properties: ImmutableMap<string, string | number> = ImmutableMap(),
-    customId = ''
-  ) => {
-    return new LocationOfInterest(
-      'loi001',
-      'job001',
-      new Point(new Coordinate(0.0, 0.0)),
-      properties,
-      customId
-    );
-  };
+  const user = new User('user001', 'user@test.com', true, 'User 1', 'photoUrl');
+  const survey = new Survey(
+    'survey001',
+    'title',
+    'description',
+    ImmutableMap(),
+    ImmutableMap(),
+    'ownerId',
+    { type: DataSharingType.PRIVATE }
+  );
+  const loi1 = new LocationOfInterest(
+    'loi001',
+    'job001',
+    new Point(new Coordinate(0.0, 0.0)),
+    ImmutableMap([['name', 'LOI 1 (Point)']]),
+    'custom001'
+  );
+  const loi2 = new LocationOfInterest(
+    'loi002',
+    'job001',
+    new Point(new Coordinate(10.0, 10.0)),
+    ImmutableMap([['name', 'LOI 2 (Point)']]),
+    'custom002'
+  );
 
   beforeEach(() => {
-    const navigationService = {
-      getSurveyId$: () => of(''),
-      getLocationOfInterestId$: () => of(''),
-    };
+    dataStoreServiceSpy = jasmine.createSpyObj<DataStoreService>(
+      'DataStoreService',
+      ['getAccessibleLois$']
+    );
+    surveyServiceSpy = jasmine.createSpyObj<SurveyService>('SurveyService', [
+      'canManageSurvey',
+    ]);
+
     TestBed.configureTestingModule({
       providers: [
-        { provide: AuthService, useValue: { getUser$: () => user$ } },
-        { provide: DataStoreService, useValue: {} },
-        {
-          provide: SurveyService,
-          useValue: {
-            getActiveSurvey$: () => activeSurvey$,
-          },
-        },
-        { provide: NavigationService, useValue: navigationService },
+        { provide: AuthService, useValue: { getUser$: () => of(user) } },
+        { provide: DataStoreService, useValue: dataStoreServiceSpy },
+        { provide: SurveyService, useValue: surveyServiceSpy },
       ],
     });
+
+    service = TestBed.inject(LocationOfInterestService);
   });
 
   it('should be created', () => {
-    const service: LocationOfInterestService = TestBed.inject(
-      LocationOfInterestService
-    );
     expect(service).toBeTruthy();
+  });
+
+  describe('getLocationsOfInterest$', () => {
+    it('should return empty list if survey is unsaved', done => {
+      const unsavedSurvey = new Survey(
+        '',
+        'title',
+        'description',
+        ImmutableMap(),
+        ImmutableMap(),
+        'ownerId',
+        { type: DataSharingType.PRIVATE },
+        SurveyState.UNSAVED
+      );
+
+      service.getLocationsOfInterest$(unsavedSurvey).subscribe(lois => {
+        expect(lois.size).toBe(0);
+        done();
+      });
+    });
+
+    it('should return accessible LOIs sorted by display name', done => {
+      dataStoreServiceSpy.getAccessibleLois$.and.returnValue(
+        of(List([loi2, loi1]))
+      );
+      surveyServiceSpy.canManageSurvey.and.returnValue(true);
+
+      service.getLocationsOfInterest$(survey).subscribe(lois => {
+        expect(lois.size).toBe(2);
+        expect(lois.get(0)).toEqual(loi1);
+        expect(lois.get(1)).toEqual(loi2);
+        done();
+      });
+    });
+  });
+
+  describe('getPredefinedLoisByJobId$', () => {
+    it('should filter predefined LOIs by job ID', done => {
+      const predefinedLoi = new LocationOfInterest(
+        'pre001',
+        'job001',
+        new Point(new Coordinate(0, 0)),
+        ImmutableMap(),
+        '',
+        true
+      );
+      // Explicitly set predefined (though it defaults to true/undefined usually implies existing).
+      // Ideally we would set checks based on implementation.
+      // Loi model usually assumes 'predefined' unless explicitly ad-hoc.
+      // Let's create one that is explicitly NOT predefined if possible, or another job.
+      const adHocLoi = new LocationOfInterest(
+        'adhoc001',
+        'job001',
+        new Point(new Coordinate(0, 0)),
+        ImmutableMap(),
+        '',
+        false
+      );
+
+      const otherJobLoi = new LocationOfInterest(
+        'other001',
+        'job002',
+        new Point(new Coordinate(0, 0)),
+        ImmutableMap(),
+        '',
+        true
+      );
+
+      dataStoreServiceSpy.getAccessibleLois$.and.returnValue(
+        of(List([predefinedLoi, adHocLoi, otherJobLoi]))
+      );
+      surveyServiceSpy.canManageSurvey.and.returnValue(true);
+
+      service.getPredefinedLoisByJobId$(survey, 'job001').subscribe(lois => {
+        expect(lois.size).toBe(1);
+        expect(lois.first()).toEqual(predefinedLoi);
+        done();
+      });
+    });
   });
 
   describe('getDisplayName', () => {
@@ -181,3 +270,16 @@ describe('LocationOfInterestService', () => {
     });
   });
 });
+
+const getMockLoi = (
+  properties: ImmutableMap<string, string | number> = ImmutableMap(),
+  customId = ''
+) => {
+  return new LocationOfInterest(
+    'loi001',
+    'job001',
+    new Point(new Coordinate(0.0, 0.0)),
+    properties,
+    customId
+  );
+};

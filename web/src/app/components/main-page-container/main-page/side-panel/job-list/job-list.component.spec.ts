@@ -23,7 +23,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
 import { MatMenuModule } from '@angular/material/menu';
 import { Router } from '@angular/router';
-import { Map } from 'immutable';
+import { List, Map } from 'immutable';
 import { of } from 'rxjs';
 
 import { Job } from 'app/models/job.model';
@@ -106,6 +106,53 @@ describe('JobListComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('should return sorted jobs', () => {
+    const job1 = new Job('job1', 1, 'red', 'Job 1', Map());
+    const job2 = new Job('job2', 0, 'blue', 'Job 2', Map());
+    const survey = new Survey(
+      's1',
+      'title',
+      'desc',
+      Map({ job1, job2 }),
+      Map(),
+      '',
+      { type: DataSharingType.PRIVATE }
+    );
+
+    fixture.componentRef.setInput('activeSurvey', survey);
+    fixture.detectChanges();
+
+    const jobs = component.jobs();
+    expect(jobs.size).toBe(2);
+    expect(jobs.get(0)).toEqual(job2);
+    expect(jobs.get(1)).toEqual(job1);
+  });
+
+  it('should group LOIs by job', () => {
+    const loi1 = { id: 'loi1', jobId: 'job1' } as any;
+    const loi2 = { id: 'loi2', jobId: 'job1' } as any;
+    const loi3 = { id: 'loi3', jobId: 'job2' } as any;
+    const lois = List([loi1, loi2, loi3]);
+
+    fixture.componentRef.setInput('lois', lois);
+    fixture.detectChanges();
+
+    const grouped = component.loisByJob();
+    expect(grouped.get('job1')?.size).toBe(2);
+    expect(grouped.get('job2')?.size).toBe(1);
+    expect(grouped.get('job1')?.includes(loi1)).toBe(true);
+    expect(grouped.get('job1')?.includes(loi2)).toBe(true);
+    expect(grouped.get('job2')?.includes(loi3)).toBe(true);
+  });
+
+  it('should delegate isSidePanelExpanded to navigation service', () => {
+    const navService = TestBed.inject(NavigationService);
+    const spy = spyOn(navService, 'getSidePanelExpanded').and.returnValue(true);
+
+    expect(component.isSidePanelExpanded()).toBe(true);
+    expect(spy).toHaveBeenCalled();
   });
 });
 

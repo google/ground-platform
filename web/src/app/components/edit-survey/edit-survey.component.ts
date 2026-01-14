@@ -16,7 +16,7 @@
 
 import '@angular/localize/init';
 
-import { Component, effect, inject } from '@angular/core';
+import { Component, effect, inject, input } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { List } from 'immutable';
 
@@ -53,9 +53,8 @@ export class EditSurveyComponent {
 
   private editSurveyPageSignal =
     this.navigationService.getEditSurveyPageSignal();
-  private surveyIdSignal = this.navigationService.getSurveyId();
+  surveyId = input<string>();
 
-  surveyId?: string;
   survey?: Survey;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   production = !!(environment as any)['production'];
@@ -64,12 +63,11 @@ export class EditSurveyComponent {
 
   constructor() {
     effect(async () => {
-      const surveyId = this.surveyIdSignal();
+      const id = this.surveyId();
 
-      if (surveyId) {
-        this.surveyId = surveyId;
-        this.surveyService.activateSurvey(surveyId);
-        await this.draftSurveyService.init(surveyId);
+      if (id) {
+        this.surveyService.activateSurvey(id);
+        await this.draftSurveyService.init(id);
         this.draftSurveyService.getSurvey$().subscribe(survey => {
           this.survey = survey;
           this.sortedJobs = this.survey.getJobsSorted();
@@ -153,7 +151,7 @@ export class EditSurveyComponent {
             })
           );
 
-          this.navigationService.navigateToEditJob(this.surveyId!, job.id);
+          this.navigationService.navigateToEditJob(this.survey!.id, job.id);
           break;
         case DialogType.DeleteJob:
           {
@@ -167,7 +165,7 @@ export class EditSurveyComponent {
                 previousJob.id
               );
             } else {
-              this.navigationService.navigateToEditSurvey(this.surveyId!);
+              this.navigationService.navigateToEditSurvey(this.survey!.id);
             }
           }
           break;
