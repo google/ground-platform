@@ -33,6 +33,7 @@
   },
   "private": true,
   "dependencies": {
+    "@google-cloud/firestore": "^7.7.0",
     "@ground/proto": "workspace:*",
     "firebase-admin": "catalog:",
     "firebase-functions": "catalog:",
