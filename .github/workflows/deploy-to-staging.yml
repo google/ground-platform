@@ -30,8 +30,11 @@ jobs:
         with:
           node-version: "20"
 
+      - name: Install pnpm
+        run: npm install pnpm
+
       - name: Install deps
-        run: npm install
+        run: pnpm install
 
       - name: Build
         run: npx nx build --configuration=staging
