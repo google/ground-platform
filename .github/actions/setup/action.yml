@@ -1,14 +1,14 @@
-name: "Set up environment"
-description: "Sets up Node.js and installs dependencies"
+name: Set up environment
+description: Sets up Node.js, pnpm, and installs dependencies
 
 inputs:
   cache-key-suffix:
-    description: "Suffix for the Nx cache key (e.g. job name)"
+    description: Suffix for the Nx cache key (e.g. job name)
     required: false
-    default: "default"
+    default: default
 
 runs:
-  using: "composite"
+  using: composite
   steps:
     - name: Cache Nx
       uses: actions/cache@v4
@@ -18,12 +18,17 @@ runs:
         restore-keys: |
           nx-${{ runner.os }}-${{ inputs.cache-key-suffix }}-
 
-    - name: Set up Node.js
-      uses: actions/setup-node@v6
+    - name: Install pnpm
+      uses: pnpm/action-setup@v3
       with:
-        node-version: "20"
-        cache: "npm"
+        version: '9'
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: pnpm
 
     - name: Install deps
-      run: npm ci
+      run: pnpm install --frozen-lockfile
       shell: bash
