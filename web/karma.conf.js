@@ -18,7 +18,9 @@
 // https://karma-runner.github.io/1.0/config/configuration-file.html
 
 const path = require('path');
-process.env.CHROME_BIN = require('puppeteer').executablePath();
+const puppeteer = require('puppeteer');
+
+process.env.CHROME_BIN = puppeteer.executablePath();
 
 const isAgent = !!process.env.ANTIGRAVITY_AGENT || !!process.env.GEMINI_CLI;
 const isCi = !!process.env.CI;
