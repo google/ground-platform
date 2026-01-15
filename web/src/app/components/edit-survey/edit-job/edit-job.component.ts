@@ -101,7 +101,10 @@ export class EditJobComponent {
 
     this.loisSubscription.add(
       this.loiService
-        .getPredefinedLoisByJobId$(this.job!.id)
+        .getPredefinedLoisByJobId$(
+          this.draftSurveyService.getSurvey(),
+          this.job!.id
+        )
         .subscribe((lois: List<LocationOfInterest>) => (this.lois = lois))
     );
 

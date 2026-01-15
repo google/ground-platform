@@ -28,8 +28,14 @@ import {
 import { toObservable } from '@angular/core/rxjs-interop';
 import { GoogleMap } from '@angular/google-maps';
 import { Map as ImmutableMap, List } from 'immutable';
-import { BehaviorSubject, Observable, Subscription, combineLatest } from 'rxjs';
-import { filter, map } from 'rxjs/operators';
+import {
+  BehaviorSubject,
+  Observable,
+  Subscription,
+  combineLatest,
+  of,
+} from 'rxjs';
+import { filter, map, switchMap } from 'rxjs/operators';
 
 import { Coordinate } from 'app/models/geometry/coordinate';
 import { Geometry, GeometryType } from 'app/models/geometry/geometry';
@@ -66,6 +72,7 @@ const enlargedPolygonStrokeWeight = 6;
 export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
   private subscription: Subscription = new Subscription();
   activeSurvey = input<Survey>();
+  lois = input<List<LocationOfInterest>>(List());
   private selectedJob$: BehaviorSubject<Job | undefined> = new BehaviorSubject<
     Job | undefined
   >(undefined);
@@ -126,7 +133,7 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
     private zone: NgZone,
     private changeDetectorRef: ChangeDetectorRef
   ) {
-    this.lois$ = this.loiService.getLocationsOfInterest$();
+    this.lois$ = toObservable(this.lois);
     this.activeSurvey$ = toObservable(this.activeSurvey).pipe(
       filter(s => !!s),
       map(s => s as Survey)
@@ -178,20 +185,35 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
 
     this.subscription.add(
       combineLatest([
+        this.activeSurvey$,
+        this.lois$,
         this.navigationService.getLocationOfInterestId$(),
         this.navigationService.getSubmissionId$(),
-        this.submissionService.getSelectedSubmission$(),
-      ]).subscribe(([, submissionId, submission]) => {
-        this.showSubmissionGeometry = !!submissionId;
-        if (submission instanceof Submission) {
-          this.submission = submission;
-          this.removeSubmissionResultsOnMap();
-          if (this.showSubmissionGeometry) {
-            this.addSubmissionResultsOnMap();
+      ])
+        .pipe(
+          switchMap(([survey, lois, loiId, submissionId]) => {
+            const loi = lois?.find(l => l.id === loiId);
+            if (survey && loi && submissionId) {
+              return this.submissionService.getSubmission$(
+                survey,
+                loi,
+                submissionId
+              );
+            }
+            return of(null);
+          })
+        )
+        .subscribe(submission => {
+          this.showSubmissionGeometry = !!submission;
+          if (submission instanceof Submission) {
+            this.submission = submission;
+            this.removeSubmissionResultsOnMap();
+            if (this.showSubmissionGeometry) {
+              this.addSubmissionResultsOnMap();
+            }
           }
-        }
-        this.cancelReposition();
-      })
+          this.cancelReposition();
+        })
     );
   }
 

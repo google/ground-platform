@@ -17,7 +17,7 @@
 import { buffer } from 'stream/consumers';
 import { FormDataEncoder } from 'form-data-encoder';
 import { FormData } from 'formdata-node';
-import { https, Response } from 'firebase-functions/v1';
+import { Response, https } from 'firebase-functions/v1';
 
 export async function createPostRequestSpy(
   args: object,

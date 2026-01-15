@@ -24,10 +24,11 @@ import { List, Map } from 'immutable';
 import { BehaviorSubject, of } from 'rxjs';
 
 import { LoiSelectionModule } from 'app/components/shared/loi-selection/loi-selection.module';
-import { Job } from 'app/models/job.model';
+import { DataCollectionStrategy, Job } from 'app/models/job.model';
 import { LocationOfInterest } from 'app/models/loi.model';
 import { DataSharingType, Survey } from 'app/models/survey.model';
 import { AuthService } from 'app/services/auth/auth.service';
+import { JobService } from 'app/services/job/job.service';
 import { LocationOfInterestService } from 'app/services/loi/loi.service';
 import { NavigationService } from 'app/services/navigation/navigation.service';
 import { SurveyService } from 'app/services/survey/survey.service';
@@ -36,6 +37,7 @@ import { SurveyLoiComponent } from './survey-loi.component';
 
 describe('SurveyLoiComponent', () => {
   let fixture: ComponentFixture<SurveyLoiComponent>;
+  let component: SurveyLoiComponent;
 
   let loiServiceSpy: jasmine.SpyObj<LocationOfInterestService>;
   let navigationServiceSpy: jasmine.SpyObj<NavigationService>;
@@ -71,6 +73,10 @@ describe('SurveyLoiComponent', () => {
       'canManageSurvey',
     ]);
 
+    const jobServiceSpy = jasmine.createSpyObj<JobService>('JobService', [
+      'addOrUpdateJob',
+    ]);
+
     loiServiceSpy = jasmine.createSpyObj<LocationOfInterestService>(
       'LocationOfInterestService',
       ['getPredefinedLoisByJobId$']
@@ -96,6 +102,7 @@ describe('SurveyLoiComponent', () => {
         { provide: LocationOfInterestService, useValue: loiServiceSpy },
         { provide: NavigationService, useValue: navigationServiceSpy },
         { provide: SurveyService, useValue: surveyServiceSpy },
+        { provide: JobService, useValue: jobServiceSpy },
         { provide: MatDialog, useValue: {} },
       ],
       schemas: [NO_ERRORS_SCHEMA],
@@ -104,11 +111,28 @@ describe('SurveyLoiComponent', () => {
 
   beforeEach(() => {
     fixture = TestBed.createComponent(SurveyLoiComponent);
+    component = fixture.componentInstance;
     fixture.detectChanges();
   });
 
-  it('Tests missing', () => {
-    // TODO(#1644): Add test coverage.
-    expect(true).toBeTruthy();
+  it('ngOnInit should populate lois', async () => {
+    component.ngOnInit();
+    expect(component.lois.size).toBe(1);
+    expect(component.lois.first()?.id).toBe('id1');
+  });
+
+  it('onStrategyChange should calls addOrUpdateJob', async () => {
+    const jobServiceSpy = TestBed.inject(
+      JobService
+    ) as jasmine.SpyObj<JobService>;
+    jobServiceSpy.addOrUpdateJob.and.returnValue(Promise.resolve());
+
+    await component.ngOnInit();
+    await component.onStrategyChange(DataCollectionStrategy.PREDEFINED);
+
+    expect(jobServiceSpy.addOrUpdateJob).toHaveBeenCalledWith(
+      mockSurvey.id,
+      jasmine.any(Job)
+    );
   });
 });

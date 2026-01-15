@@ -44,8 +44,6 @@ import {
 
 describe('EditSurveyComponent', () => {
   let fixture: ComponentFixture<EditSurveyComponent>;
-  let surveyId$: Subject<string | null>;
-  let surveyIdSignal: WritableSignal<string | null>;
   let navigationServiceSpy: jasmine.SpyObj<NavigationService>;
   let activeSurvey$: Subject<Survey>;
   let surveyServiceSpy: jasmine.SpyObj<SurveyService>;
@@ -94,22 +92,15 @@ describe('EditSurveyComponent', () => {
   );
 
   beforeEach(async () => {
-    surveyIdSignal = signal<string | null>(null);
-    surveyId$ = new Subject<string | null>();
-
     navigationServiceSpy = jasmine.createSpyObj<NavigationService>(
       'NavigationService',
       [
         'isShareSurveyPage',
         'getEditSurveyPageSignal',
-        'getSurveyId$',
-        'getSurveyId',
         'navigateToEditJob',
         'navigateToEditSurvey',
       ]
     );
-    navigationServiceSpy.getSurveyId$.and.returnValue(surveyId$);
-    navigationServiceSpy.getSurveyId.and.returnValue(surveyIdSignal);
     navigationServiceSpy.getEditSurveyPageSignal.and.returnValue(signal(''));
 
     surveyServiceSpy = jasmine.createSpyObj<SurveyService>('SurveyService', [
@@ -189,8 +180,7 @@ describe('EditSurveyComponent', () => {
 
   describe('when routed in with survey ID', () => {
     beforeEach(async () => {
-      surveyIdSignal.set(surveyId);
-      surveyId$.next(surveyId);
+      fixture.componentRef.setInput('surveyId', surveyId);
 
       const sortedJobs = survey.getJobsSorted();
       spyOn(survey, 'getJobsSorted').and.returnValue(sortedJobs);
@@ -212,8 +202,7 @@ describe('EditSurveyComponent', () => {
 
   describe('when survey activated', () => {
     beforeEach(async () => {
-      surveyIdSignal.set(surveyId);
-      surveyId$.next(surveyId);
+      fixture.componentRef.setInput('surveyId', surveyId);
       activeSurvey$.next(survey);
 
       const sortedJobs = survey.getJobsSorted();

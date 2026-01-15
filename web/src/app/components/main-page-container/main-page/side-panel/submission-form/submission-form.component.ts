@@ -22,8 +22,8 @@ import {
   Validators,
 } from '@angular/forms';
 import { List, Map } from 'immutable';
-import { Observable } from 'rxjs';
-import { first, map, switchMap } from 'rxjs/operators';
+import { Observable, combineLatest, of } from 'rxjs';
+import { filter, first, map, switchMap } from 'rxjs/operators';
 
 import { JobListItemActionsType } from 'app/components/shared/job-list-item/job-list-item.component';
 import { AuditInfo } from 'app/models/audit-info.model';
@@ -77,20 +77,46 @@ export class SubmissionFormComponent {
     surveyService.getActiveSurvey$().subscribe((survey?: Survey) => {
       this.surveyId = survey?.id;
     });
-    submissionService
-      .getSelectedSubmission$()
-      .subscribe((submission?: Submission | LoadingState) =>
-        this.onSelectSubmission(submission)
-      );
-    this.job$ = surveyService
-      .getActiveSurvey$()
+
+    const survey$ = surveyService.getActiveSurvey$();
+    const loiId$ = this.navigationService.getLocationOfInterestId$();
+    const submissionId$ = this.navigationService.getSubmissionId$();
+
+    const loi$ = combineLatest([survey$, loiId$]).pipe(
+      switchMap(([survey, loiId]) => {
+        if (!survey || !loiId) return of(undefined);
+        return loiService
+          .getLocationsOfInterest$(survey)
+          .pipe(map(lois => lois.find(l => l.id === loiId) || null));
+      })
+    );
+
+    this.job$ = combineLatest([survey$, loi$]).pipe(
+      map(([survey, loi]) => {
+        if (survey && loi) {
+          return survey.jobs.get(loi.jobId);
+        }
+        return undefined;
+      }),
+      filter(j => !!j),
+      map(j => j as Job)
+    );
+
+    combineLatest([survey$, loi$, submissionId$, this.authService.getUser$()])
       .pipe(
-        switchMap(survey =>
-          loiService
-            .getSelectedLocationOfInterest$()
-            .pipe(map(loi => survey.jobs.get(loi.jobId)!))
-        )
-      );
+        switchMap(([survey, loi, submissionId, user]) => {
+          if (survey && loi && submissionId && user) {
+            if (submissionId === 'new') {
+              return of(
+                submissionService.createNewSubmission(user, survey, loi)
+              );
+            }
+            return submissionService.getSubmission$(survey, loi, submissionId);
+          }
+          return of(undefined);
+        })
+      )
+      .subscribe(submission => this.onSelectSubmission(submission));
   }
 
   onCancel() {

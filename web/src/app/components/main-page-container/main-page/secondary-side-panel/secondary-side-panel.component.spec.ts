@@ -14,21 +14,25 @@
  * limitations under the License.
  */
 
-import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { CUSTOM_ELEMENTS_SCHEMA, WritableSignal, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Map } from 'immutable';
-import { of } from 'rxjs';
 
 import { DataSharingType, Survey } from 'app/models/survey.model';
 import { NavigationService } from 'app/services/navigation/navigation.service';
 import { SideNavMode } from 'app/services/navigation/url-params';
 
 import { SecondarySidePanelComponent } from './secondary-side-panel.component';
+import { By } from '@angular/platform-browser';
 
 describe('SecondarySidePanelComponent', () => {
   let component: SecondarySidePanelComponent;
   let fixture: ComponentFixture<SecondarySidePanelComponent>;
   let navigationServiceSpy: jasmine.SpyObj<NavigationService>;
+
+  let sideNavModeSignal: WritableSignal<SideNavMode>;
+  let loiIdSignal: WritableSignal<string | null>;
+  let submissionIdSignal: WritableSignal<string | null>;
 
   const mockSurvey = new Survey(
     'survey1',
@@ -42,23 +46,18 @@ describe('SecondarySidePanelComponent', () => {
 
   beforeEach(async () => {
     navigationServiceSpy = jasmine.createSpyObj('NavigationService', [
-      'getSideNavMode$',
+      'getSideNavMode',
       'getLoiId',
       'getSubmissionId',
-      'getSideNavMode',
     ]);
 
-    navigationServiceSpy.getSideNavMode$.and.returnValue(
-      of(SideNavMode.JOB_LIST)
-    );
-    // Mock signal functions
-    (navigationServiceSpy.getLoiId as jasmine.Spy).and.returnValue(() => null);
-    (navigationServiceSpy.getSubmissionId as jasmine.Spy).and.returnValue(
-      () => null
-    );
-    (navigationServiceSpy.getSideNavMode as jasmine.Spy).and.returnValue(
-      () => SideNavMode.JOB_LIST
-    );
+    sideNavModeSignal = signal(SideNavMode.JOB_LIST);
+    loiIdSignal = signal(null);
+    submissionIdSignal = signal(null);
+
+    navigationServiceSpy.getSideNavMode.and.returnValue(sideNavModeSignal);
+    navigationServiceSpy.getLoiId.and.returnValue(loiIdSignal);
+    navigationServiceSpy.getSubmissionId.and.returnValue(submissionIdSignal);
 
     await TestBed.configureTestingModule({
       declarations: [SecondarySidePanelComponent],
@@ -78,5 +77,62 @@ describe('SecondarySidePanelComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('should show ground-loi-panel when SideNavMode is JOB_LIST and loiId is present', () => {
+    sideNavModeSignal.set(SideNavMode.JOB_LIST);
+    loiIdSignal.set('loi1');
+    submissionIdSignal.set(null);
+    fixture.detectChanges();
+
+    const loiPanel = fixture.debugElement.query(By.css('ground-loi-panel'));
+    const submissionPanel = fixture.debugElement.query(
+      By.css('submission-panel')
+    );
+
+    expect(loiPanel).toBeTruthy();
+    expect(submissionPanel).toBeFalsy();
+  });
+
+  it('should show submission-panel when SideNavMode is SUBMISSION and submissionId is present', () => {
+    sideNavModeSignal.set(SideNavMode.SUBMISSION);
+    loiIdSignal.set('loi1');
+    submissionIdSignal.set('submission1');
+    fixture.detectChanges();
+
+    const loiPanel = fixture.debugElement.query(By.css('ground-loi-panel'));
+    const submissionPanel = fixture.debugElement.query(
+      By.css('submission-panel')
+    );
+
+    expect(submissionPanel).toBeTruthy();
+    expect(loiPanel).toBeFalsy();
+  });
+
+  it('should show nothing when SideNavMode is JOB_LIST but no loiId', () => {
+    sideNavModeSignal.set(SideNavMode.JOB_LIST);
+    loiIdSignal.set(null);
+    submissionIdSignal.set(null);
+    fixture.detectChanges();
+
+    const loiPanel = fixture.debugElement.query(By.css('ground-loi-panel'));
+    const submissionPanel = fixture.debugElement.query(
+      By.css('submission-panel')
+    );
+
+    expect(loiPanel).toBeFalsy();
+    expect(submissionPanel).toBeFalsy();
+  });
+
+  it('should not show submission-panel if submissionId is missing in SUBMISSION mode', () => {
+    sideNavModeSignal.set(SideNavMode.SUBMISSION);
+    loiIdSignal.set('loi1');
+    submissionIdSignal.set(null);
+    fixture.detectChanges();
+
+    const submissionPanel = fixture.debugElement.query(
+      By.css('submission-panel')
+    );
+    expect(submissionPanel).toBeFalsy();
   });
 });

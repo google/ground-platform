@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { https, Response, logger } from 'firebase-functions/v1';
+import { Response, https, logger } from 'firebase-functions/v1';
 import { setSessionCookie } from './common/auth';
 import { UNAUTHORIZED } from 'http-status-codes';
 
