@@ -27,7 +27,7 @@ import { MatRadioModule } from '@angular/material/radio';
 import { By } from '@angular/platform-browser';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { List, Map } from 'immutable';
-import { NEVER, of } from 'rxjs';
+import { of } from 'rxjs';
 
 import { AuditInfo } from 'app/models/audit-info.model';
 import { Coordinate } from 'app/models/geometry/coordinate';
@@ -146,16 +146,13 @@ class MockSurveyService {
 }
 
 class MockLocationOfInterestService {
-  getSelectedLocationOfInterest$() {
-    return of<LocationOfInterest>(MockModel.loi001);
-  }
   getLocationsOfInterest$() {
-    return of<LocationOfInterest>(MockModel.loi001);
+    return of(List([MockModel.loi001]));
   }
 }
 
 class MockSubmissionService {
-  getSelectedSubmission$() {
+  getSubmission$() {
     return of<Submission>(MockModel.submission001);
   }
 }
@@ -184,8 +181,10 @@ describe('SubmissionFormComponent', () => {
     const navigationService = {
       getSurveyId$: () => of(''),
       getUrlParams: () => signal(new UrlParams(null, null, null, null)),
-      getLocationOfInterestId$: () => NEVER,
+      getLocationOfInterestId$: () => of(MockModel.loi001.id),
+      getSubmissionId$: () => of(MockModel.submission001.id),
       getSidePanelExpanded: () => false,
+      clearSubmissionId: () => {},
     };
     TestBed.configureTestingModule({
       declarations: [SubmissionFormComponent],
@@ -223,6 +222,35 @@ describe('SubmissionFormComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('should initialize form with submission values', () => {
+    expect(component.submissionForm).toBeDefined();
+    expect(component.submissionForm?.get('task001')?.value).toBe('result');
+    // task003 is select multiple, so it uses option IDs as keys
+    expect(component.submissionForm?.get('option001')?.value).toBe(true);
+  });
+
+  it('should save submission when valid', async () => {
+    spyOn(component as any, 'navigateToLocationOfInterest');
+    component.submissionForm?.get('task001')?.setValue('new value');
+
+    component.onSave();
+
+    expect(dataStoreServiceSpy.updateSubmission).toHaveBeenCalled();
+    const args = dataStoreServiceSpy.updateSubmission.calls.mostRecent().args;
+    expect(args[1].data.get('task001').value).toBe('new value');
+  });
+
+  it('should navigate away on cancel', () => {
+    const navSpy = TestBed.inject(NavigationService) as unknown as {
+      clearSubmissionId: jasmine.Spy;
+    };
+    spyOn(navSpy, 'clearSubmissionId');
+
+    component.onCancel();
+
+    expect(navSpy.clearSubmissionId).toHaveBeenCalled();
   });
 
   it('should create text tasks with right "required" option', () => {

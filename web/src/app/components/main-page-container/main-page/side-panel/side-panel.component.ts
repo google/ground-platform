@@ -15,8 +15,10 @@
  */
 
 import { Component, input } from '@angular/core';
+import { List } from 'immutable';
 import { Observable } from 'rxjs';
 
+import { LocationOfInterest } from 'app/models/loi.model';
 import { Survey } from 'app/models/survey.model';
 import { NavigationService } from 'app/services/navigation/navigation.service';
 import { SideNavMode } from 'app/services/navigation/url-params';
@@ -29,6 +31,7 @@ import { SideNavMode } from 'app/services/navigation/url-params';
 })
 export class SidePanelComponent {
   activeSurvey = input<Survey>();
+  lois = input<List<LocationOfInterest>>();
   readonly sideNavMode = SideNavMode;
   readonly sideNavMode$: Observable<SideNavMode | null>;
 

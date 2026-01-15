@@ -18,7 +18,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Auth } from '@angular/fire/auth';
 import { Firestore } from '@angular/fire/firestore';
 import { GoogleMapsModule } from '@angular/google-maps';
-import { List, Map } from 'immutable';
+import { List, Map, OrderedMap } from 'immutable';
 import { BehaviorSubject, of } from 'rxjs';
 
 import { Coordinate } from 'app/models/geometry/coordinate';
@@ -27,8 +27,12 @@ import { Point } from 'app/models/geometry/point';
 import { Job } from 'app/models/job.model';
 import { LocationOfInterest } from 'app/models/loi.model';
 import { Submission } from 'app/models/submission/submission.model';
+import { Result } from 'app/models/submission/result.model';
 import { DataSharingType, Survey } from 'app/models/survey.model';
 import { AuthService } from 'app/services/auth/auth.service';
+import { Task, TaskType } from 'app/models/task/task.model';
+import { AuditInfo } from 'app/models/audit-info.model';
+import { User } from 'app/models/user.model';
 import {
   DrawingToolsService,
   EditMode,
@@ -47,6 +51,7 @@ describe('MapComponent', () => {
   let loiServiceSpy: jasmine.SpyObj<LocationOfInterestService>;
   let mockLocationOfInterestId$: BehaviorSubject<string | null>;
   let mockTaskId$: BehaviorSubject<string | null>;
+  let mockSubmissionId$: BehaviorSubject<string | null>;
   let navigationServiceSpy: jasmine.SpyObj<NavigationService>;
   let submissionServiceSpy: jasmine.SpyObj<SubmissionService>;
   let mockEditMode$: BehaviorSubject<EditMode>;
@@ -155,12 +160,12 @@ describe('MapComponent', () => {
   beforeEach(async () => {
     loiServiceSpy = jasmine.createSpyObj<LocationOfInterestService>(
       'LocationOfInterestService',
-      ['getLocationsOfInterest$', 'updatePoint', 'addPoint']
+      ['updatePoint', 'addPoint']
     );
+
     mockLois$ = new BehaviorSubject<List<LocationOfInterest>>(
       List<LocationOfInterest>([poi1, poi2, polygonLoi1])
     );
-    loiServiceSpy.getLocationsOfInterest$.and.returnValue(mockLois$);
 
     navigationServiceSpy = jasmine.createSpyObj<NavigationService>(
       'NavigationService',
@@ -179,15 +184,14 @@ describe('MapComponent', () => {
     );
     mockTaskId$ = new BehaviorSubject<string | null>(null);
     navigationServiceSpy.getTaskId$.and.returnValue(mockTaskId$);
-    navigationServiceSpy.getSubmissionId$.and.returnValue(
-      of<string | null>(null)
-    );
+    mockSubmissionId$ = new BehaviorSubject<string | null>(null);
+    navigationServiceSpy.getSubmissionId$.and.returnValue(mockSubmissionId$);
 
     submissionServiceSpy = jasmine.createSpyObj<SubmissionService>(
       'SubmissionService',
-      ['getSelectedSubmission$']
+      ['getSubmission$']
     );
-    submissionServiceSpy.getSelectedSubmission$.and.returnValue(
+    submissionServiceSpy.getSubmission$.and.returnValue(
       of(null as unknown as Submission)
     );
 
@@ -229,6 +233,7 @@ describe('MapComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(MapComponent);
     fixture.componentRef.setInput('activeSurvey', mockSurvey);
+    fixture.componentRef.setInput('lois', mockLois$.getValue());
     component = fixture.componentInstance;
     component.shouldEnableDrawingTools = true;
     fixture.detectChanges();
@@ -276,7 +281,10 @@ describe('MapComponent', () => {
   });
 
   it('should render polygons on map - multipolygon loi', async () => {
-    mockLois$.next(List<LocationOfInterest>([multipolygonLoi1]));
+    fixture.componentRef.setInput(
+      'lois',
+      List<LocationOfInterest>([multipolygonLoi1])
+    );
     fixture.detectChanges();
     await fixture.whenStable();
 
@@ -309,6 +317,7 @@ describe('MapComponent', () => {
     beforeEach(() => {
       fixture = TestBed.createComponent(MapComponent);
       fixture.componentRef.setInput('activeSurvey', mockSurvey);
+      fixture.componentRef.setInput('lois', mockLois$.getValue());
       component = fixture.componentInstance;
       component.selectedJob = job1;
       fixture.detectChanges();
@@ -356,7 +365,8 @@ describe('MapComponent', () => {
         Map()
       );
       // poi1 deleted, poi2 modified, poi3 added & polygonLoi1 modified
-      mockLois$.next(
+      fixture.componentRef.setInput(
+        'lois',
         List<LocationOfInterest>([poi2Modified, poi3, polygonLoi1Modified])
       );
       fixture.detectChanges();
@@ -619,7 +629,10 @@ describe('MapComponent', () => {
   });
 
   it('should pop up dialog when overlapping polygons are clicked', async () => {
-    mockLois$.next(List<LocationOfInterest>([polygonLoi1, multipolygonLoi1]));
+    fixture.componentRef.setInput(
+      'lois',
+      List<LocationOfInterest>([polygonLoi1, multipolygonLoi1])
+    );
     fixture.detectChanges();
     await fixture.whenStable();
 
@@ -714,4 +727,101 @@ describe('MapComponent', () => {
     expect(polygon.get('strokeColor')).toEqual(color);
     expect(polygon.get('strokeWeight')).toEqual(strokeWeight);
   }
+
+  describe('when submission is selected', () => {
+    const submissionId = 'submission001';
+    const taskPointId = 'task001';
+    const taskPolygonId = 'task002';
+
+    // Create Tasks
+    const taskPoint = new Task(
+      taskPointId,
+      TaskType.DROP_PIN,
+      'Drop Pin',
+      false,
+      1
+    );
+    const taskPolygon = new Task(
+      taskPolygonId,
+      TaskType.DRAW_AREA,
+      'Draw Area',
+      false,
+      2
+    );
+
+    // Create Job with Tasks
+    const jobWithTasks = new Job(
+      jobId1,
+      -1,
+      jobColor1,
+      'job001 name',
+      OrderedMap({
+        [taskPointId]: taskPoint,
+        [taskPolygonId]: taskPolygon,
+      })
+    );
+
+    // Create AuditInfo
+    const auditInfo = new AuditInfo(
+      new User('user1', 'user@test.com', true, 'User'),
+      new Date(),
+      new Date()
+    );
+
+    const submissionWithTasks = new Submission(
+      submissionId,
+      poiId1,
+      jobWithTasks,
+      auditInfo,
+      auditInfo,
+      Map({
+        [taskPointId]: new Result(new Point(new Coordinate(1.23, 4.56))),
+        [taskPolygonId]: new Result(
+          polygonShellCoordsToPolygon(polygon1ShellCoordinates)
+        ),
+      })
+    );
+
+    it('should render submission geometry on map', async () => {
+      submissionServiceSpy.getSubmission$.and.returnValue(
+        of(submissionWithTasks)
+      );
+      // We need to trigger the subscription in ngAfterViewInit
+      // This subscription combines: activeSurvey$, lois$, loiId$, submissionId$
+      // We need to allow these to emit.
+
+      // Mock survey inputs
+      fixture.componentRef.setInput('activeSurvey', mockSurvey);
+      fixture.componentRef.setInput('lois', mockLois$.getValue());
+
+      // Mock params
+      mockLocationOfInterestId$.next(poiId1);
+      mockSubmissionId$.next(submissionId);
+
+      fixture.detectChanges();
+      await fixture.whenStable();
+
+      // Check markers (points)
+      // One marker for LOI, one for Submission Task
+      // Wait, LOI marker might be there too? Yes.
+      // Task ID is 'task001'
+      const submissionMarker = component.markers.get(taskPointId);
+      expect(submissionMarker).toBeDefined();
+      assertMarkerLatLng(submissionMarker!, new google.maps.LatLng(4.56, 1.23));
+
+      // Check polygons
+      const submissionPolygons = component.polygons.get(taskPolygonId);
+      expect(submissionPolygons).toBeDefined();
+      expect(submissionPolygons?.length).toBe(1);
+      assertPolygonPaths(submissionPolygons![0], [
+        [
+          new google.maps.LatLng(0, 0),
+          new google.maps.LatLng(0, 10),
+          new google.maps.LatLng(10, 10),
+          new google.maps.LatLng(10, 0),
+          new google.maps.LatLng(0, 0),
+        ],
+      ]);
+    });
+  });
 });

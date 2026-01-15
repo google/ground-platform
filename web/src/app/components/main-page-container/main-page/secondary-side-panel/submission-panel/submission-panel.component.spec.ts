@@ -29,11 +29,15 @@ import { AuditInfo } from 'app/models/audit-info.model';
 import { Job } from 'app/models/job.model';
 import { Submission } from 'app/models/submission/submission.model';
 import { DataSharingType, Survey } from 'app/models/survey.model';
-import { Task } from 'app/models/task/task.model';
+import { Task, TaskType } from 'app/models/task/task.model';
 import { GroundIconModule } from 'app/modules/ground-icon.module';
 import { NavigationService } from 'app/services/navigation/navigation.service';
 import { SubmissionService } from 'app/services/submission/submission.service';
 
+import { Coordinate } from 'app/models/geometry/coordinate';
+import { Point } from 'app/models/geometry/point';
+import { MultipleSelection } from 'app/models/submission/multiple-selection';
+import { Result } from 'app/models/submission/result.model';
 import { SubmissionPanelComponent } from './submission-panel.component';
 
 describe('SubmissionPanelComponent', () => {
@@ -62,6 +66,8 @@ describe('SubmissionPanelComponent', () => {
 
   const mockAuditInfo = new AuditInfo(mockUser, new Date(), new Date());
 
+  const job1 = new Job('job1', 0, undefined, 'Job 1');
+
   const mockSubmission = new Submission(
     'sub1',
     'loi1',
@@ -73,17 +79,19 @@ describe('SubmissionPanelComponent', () => {
 
   beforeEach(async () => {
     submissionService = jasmine.createSpyObj('SubmissionService', [
-      'getSelectedSubmission$',
+      'getSubmission$',
     ]);
     navigationService = jasmine.createSpyObj('NavigationService', [
       'getTaskId$',
+      'getLocationOfInterestId$',
       'selectLocationOfInterest',
       'showSubmissionDetailWithHighlightedTask',
     ]);
     storageSpy = jasmine.createSpyObj('Storage', ['ref']);
 
-    submissionService.getSelectedSubmission$.and.returnValue(
-      of(mockSubmission)
+    submissionService.getSubmission$.and.returnValue(of(mockSubmission));
+    navigationService.getLocationOfInterestId$.and.returnValue(
+      of(mockSubmission.loiId)
     );
     navigationService.getTaskId$.and.returnValue(of(null));
 
@@ -110,6 +118,8 @@ describe('SubmissionPanelComponent', () => {
     fixture = TestBed.createComponent(SubmissionPanelComponent);
     component = fixture.componentInstance;
     fixture.componentRef.setInput('activeSurvey', mockSurvey);
+    fixture.componentRef.setInput('submissionId', mockSubmission.id);
+    fixture.componentRef.setInput('lois', List());
     fixture.detectChanges();
   });
 
@@ -117,13 +127,147 @@ describe('SubmissionPanelComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should navigate back to submission list', () => {
+  it('should format capture location coordinates', () => {
+    const task = new Task(
+      'task1',
+      TaskType.CAPTURE_LOCATION,
+      'Capture Location',
+      true,
+      1
+    );
+    const point = new Point(new Coordinate(10, 20), 10, 100);
+    component.submission = new Submission(
+      'sub1',
+      'loi1',
+      job1,
+      mockAuditInfo,
+      mockAuditInfo,
+      Map({
+        task1: new Result(point),
+      })
+    );
+
+    const result = component.getCaptureLocationCoord(task);
+    expect(result).toContain('20° N, 10° E');
+    expect(result).toContain('Altitude: 100m');
+    expect(result).toContain('Accuracy: 10m');
+  });
+
+  it('should format date', () => {
+    const task = new Task('task1', TaskType.DATE, 'Date', true, 1);
+    const date = new Date('2023-01-01T12:00:00');
+    component.submission = new Submission(
+      'sub1',
+      'loi1',
+      job1,
+      mockAuditInfo,
+      mockAuditInfo,
+      Map({
+        task1: new Result(date),
+      })
+    );
+
+    const result = component.getDate(task);
+    expect(result).toBe(date.toLocaleDateString());
+  });
+
+  it('should format time', () => {
+    const task = new Task('task1', TaskType.TIME, 'Time', true, 1);
+    const date = new Date('2023-01-01T12:00:00');
+    component.submission = new Submission(
+      'sub1',
+      'loi1',
+      job1,
+      mockAuditInfo,
+      mockAuditInfo,
+      Map({
+        task1: new Result(date),
+      })
+    );
+
+    const result = component.getTime(task);
+    expect(result).toBe(
+      date.toLocaleTimeString([], { hour: 'numeric', minute: 'numeric' })
+    );
+  });
+
+  it('should select geometry', () => {
+    const task = new Task('task1', TaskType.DRAW_AREA, 'Draw Area', true, 1);
     component.submission = mockSubmission;
+    component.selectGeometry(task);
+
+    expect(
+      navigationService.showSubmissionDetailWithHighlightedTask
+    ).toHaveBeenCalledWith(
+      mockSurvey.id,
+      mockSubmission.loiId,
+      mockSubmission.id,
+      task.id
+    );
+  });
+
+  it('should navigate to submission list', () => {
+    fixture.componentRef.setInput('activeSurvey', mockSurvey);
+    component.submission = mockSubmission;
+
     component.navigateToSubmissionList();
 
     expect(navigationService.selectLocationOfInterest).toHaveBeenCalledWith(
       mockSurvey.id,
       mockSubmission.loiId
     );
+  });
+
+  it('should get multiple choice other value', () => {
+    const task = new Task(
+      'task1',
+      TaskType.MULTIPLE_CHOICE,
+      'Multiple Choice',
+      true,
+      1
+    );
+    const multipleSelection = new MultipleSelection(
+      List(['option1']),
+      'Other value'
+    );
+    component.submission = new Submission(
+      'sub1',
+      'loi1',
+      job1,
+      mockAuditInfo,
+      mockAuditInfo,
+      Map({
+        task1: new Result(multipleSelection),
+      })
+    );
+
+    const result = component.getTaskMultipleChoiceOtherValue(task);
+
+    expect(result).toBe('Other: Other value');
+  });
+
+  it('should return "Other" when other value is empty but other option is selected', () => {
+    const task = new Task(
+      'task1',
+      TaskType.MULTIPLE_CHOICE,
+      'Multiple Choice',
+      true,
+      1
+    );
+    const multipleSelection = new MultipleSelection(List(), '');
+    component.submission = new Submission(
+      'sub1',
+      'loi1',
+      job1,
+      mockAuditInfo,
+      mockAuditInfo,
+      Map({
+        task1: new Result(multipleSelection),
+      })
+    );
+
+    const result = component.getTaskMultipleChoiceOtherValue(task);
+
+    expect(result).toBe('Other');
   });
 });
