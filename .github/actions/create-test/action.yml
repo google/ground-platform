@@ -39,20 +39,21 @@ runs:
         restore-keys: |
           ${{ runner.os }}-firebase-emulators-
 
-    - name: Install pnpm
-      uses: pnpm/action-setup@v3
-      with:
-        version: '9'
-
     - name: Set up Node.js
-      uses: actions/setup-node@v4
+      uses: actions/setup-node@v6
       with:
         node-version: '20'
         cache: pnpm
 
+    - name: Enable Corepack (pnpm)
+      shell: bash
+      run: corepack enable
+
     - name: Install dependencies
       shell: bash
       run: pnpm install --frozen-lockfile
+      env:
+        NX_REJECT_UNKNOWN_LOCAL_CACHE: '0'
 
     - name: Install Chrome
       uses: browser-actions/setup-chrome@v1

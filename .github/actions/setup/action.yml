@@ -1,5 +1,5 @@
 name: Set up environment
-description: Sets up Node.js, pnpm, and installs dependencies
+description: Sets up Node.js, pnpm, Nx cache, and installs dependencies
 
 inputs:
   cache-key-suffix:
@@ -10,7 +10,7 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Cache Nx
+    - name: Restore Nx cache
       uses: actions/cache@v4
       with:
         path: .nx/cache
@@ -18,16 +18,15 @@ runs:
         restore-keys: |
           nx-${{ runner.os }}-${{ inputs.cache-key-suffix }}-
 
-    - name: Install pnpm
-      uses: pnpm/action-setup@v3
-      with:
-        version: '9'
-
     - name: Set up Node.js
-      uses: actions/setup-node@v4
+      uses: actions/setup-node@v6
       with:
         node-version: '20'
         cache: pnpm
+
+    - name: Enable Corepack (pnpm)
+      shell: bash
+      run: corepack enable
 
     - name: Install dependencies
       shell: bash
