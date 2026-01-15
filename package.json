@@ -89,6 +89,7 @@
     "tslib": "catalog:",
     "typescript": "catalog:"
   },
+  "packageManager": "pnpm@9.0.0",
   "engines": {
     "node": "20"
   },
