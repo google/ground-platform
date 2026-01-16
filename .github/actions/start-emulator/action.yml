@@ -1,0 +1,89 @@
+# Copyright 2026 The Ground Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+name: Start Firebase emulator for Android tests
+
+inputs:
+  platform-repository:
+    description: "ground-platform repository under test"
+    default: google/ground-platform
+
+runs:
+  using: "composite"
+  steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        repository: ${{ inputs.platform-repository }}
+        path: ground-platform
+
+    - name: Load cached Firebase emulator
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/firebase/emulators
+        key: ${{ runner.os }}-firebase-emulators-${{ github.sha }}
+        restore-keys: |
+          ${{ runner.os }}-firebase-emulators-
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: "20"
+
+    - name: Load cached Node modules
+      id: cache-npm
+      uses: actions/cache@v4
+      env:
+        cache-name: cache-node-modules
+      with:
+        # npm cache files are stored in `~/.npm` on Linux/macOS
+        path: ~/.npm
+        key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-build-${{ env.cache-name }}-
+          ${{ runner.os }}-build-
+          ${{ runner.os }}-
+
+    - name: Install nx-linux-x64-gnu
+      working-directory: ground-platform
+      shell: bash
+      run: npm install @nx/nx-linux-x64-gnu
+
+    - name: Install dependencies
+      working-directory: ground-platform
+      shell: bash
+      run: npm install
+
+    - name: Build project and local deps
+      working-directory: ground-platform
+      shell: bash
+      run: npx nx build
+
+    - name: Start Firebase emulator with Android test data
+      working-directory: ground-platform
+      shell: bash
+      run: |
+        npx nx start-android-test-data > firebase-emulator.log 2>&1 &
+    
+        for i in {1..30}; do
+          if curl -s http://localhost:4000 > /dev/null 2>&1; then
+            echo "Firebase emulator started!"
+            exit 0
+          fi
+          echo "Waiting for Firebase emulator to start... ($i/30)"
+          sleep 5
+        done
+    
+        echo "Firebase Emulator failed to start"
+        cat firebase-emulator.log
+        exit 1

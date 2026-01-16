@@ -41,6 +41,18 @@
           "build"
         ]
       },
+      "start-android-test-data": {
+        "executor": "nx:run-commands",
+        "options": {
+          "commands": [
+            "firebase experiments:enable webframeworks",
+            "firebase emulators:start --project demo-local --config firebase.local.json --import data/test-android"
+          ]
+        },
+        "dependsOn": [
+          "build"
+        ]
+      },
       "deploy": {
         "executor": "nx:run-commands",
         "configurations": {
