@@ -23,7 +23,7 @@
     "protobufjs": "catalog:"
   },
   "devDependencies": {
-    "@bufbuild/buf": "^1.32.2",
-    "protobufjs-cli": "^1.1.2"
+    "@bufbuild/buf": "catalog:dev",
+    "protobufjs-cli": "catalog:dev"
   }
 }
