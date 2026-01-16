@@ -20,7 +20,7 @@
     "generate:pbts": "mkdir -p dist && pbts dist/ground-protos.js -o dist/ground-protos.d.ts"
   },
   "dependencies": {
-    "protobufjs": "^7.3.2"
+    "protobufjs": "catalog:"
   },
   "devDependencies": {
     "@bufbuild/buf": "^1.32.2",

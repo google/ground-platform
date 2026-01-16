@@ -5,43 +5,33 @@ packages:
   - 'web'
   - 'e2e-tests'
 
-catalog:
-  # Shared runtime dependencies
-  immutable: ^4.3.6
-  tslib: ^2.8.1
-  typescript: ~5.9.0
-  protobufjs: ^7.3.2
+catalogs:
+  default:
+    firebase-admin: 12.1.0
+    firebase-functions: ^6.6.0
+    immutable: ^4.3.6
+    protobufjs: ^7.3.2
 
-  # Firebase
-  firebase-admin: 12.1.0
-  firebase-functions: ^6.6.0
-  firebase-tools: ^14.0.0
-  firebase-functions-test: ^3.3.0
-
-  # Testing
-  jasmine: ~5.1.0
-  jasmine-expect: ^5.0.0
-  jasmine-spec-reporter: ^7.0.0
-  '@types/jasmine': ~5.1.0
-  ts-mocha: ^10.1.0
-
-  # Linting & Formatting
-  eslint: ^9.39.2
-  eslint-config-prettier: ^10.1.8
-  eslint-plugin-import: ^2.29.0
-  eslint-plugin-n: ^17.0.0
-  eslint-plugin-prettier: ^5.5.4
-  prettier: ^3.7.4
-  gts: ^7.0.0
-  '@eslint/eslintrc': ^3.3.3
-  '@typescript-eslint/eslint-plugin': ^8.50.1
-  '@typescript-eslint/parser': ^8.50.1
-
-  # Node & Tooling
-  nx: 22.2.1
-  ts-node: ^10.9.2
-  '@types/node': ^20.19.27
-  module-alias: ^2.2.2
-
-  # Angular
-  '@angular/cli': ^20.3.14
+  dev:
+    '@angular/cli': ^20.3.14
+    '@eslint/eslintrc': ^3.3.3
+    '@types/jasmine': ~5.1.0
+    '@types/node': ^20.19.27
+    '@typescript-eslint/eslint-plugin': ^8.50.1
+    '@typescript-eslint/parser': ^8.50.1
+    eslint: ^9.39.2
+    eslint-config-prettier: ^10.1.8
+    eslint-plugin-import: ^2.29.0
+    eslint-plugin-n: ^17.0.0
+    eslint-plugin-prettier: ^5.5.4
+    firebase-tools: ^14.0.0
+    gts: ^7.0.0
+    jasmine: ~5.1.0
+    jasmine-expect: ^5.0.0
+    jasmine-spec-reporter: ^7.0.0
+    nx: 22.2.1
+    prettier: ^3.7.4
+    tslib: ^2.8.1
+    ts-mocha: ^10.1.0
+    ts-node: ^10.9.2
+    typescript: ~5.9.0
