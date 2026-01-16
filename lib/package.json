@@ -33,20 +33,20 @@
   },
   "private": true,
   "dependencies": {
-    "@google-cloud/firestore": "^7.7.0",
+    "@google-cloud/firestore": "catalog:",
     "@ground/proto": "workspace:*",
     "firebase-admin": "catalog:",
     "firebase-functions": "catalog:",
-    "long": "^5.2.3",
+    "long": "catalog:",
     "protobufjs": "catalog:"
   },
   "devDependencies": {
-    "@types/geojson": "^7946.0.14",
+    "@types/geojson": "catalog:dev",
     "@types/jasmine": "catalog:dev",
-    "@types/source-map-support": "^0.5.10",
-    "diff": "^5.2.0",
-    "mock-cloud-firestore": "^0.12.0",
-    "picocolors": "^1.1.1",
-    "source-map-support": "^0.5.21"
+    "@types/source-map-support": "catalog:dev",
+    "diff": "catalog:dev",
+    "mock-cloud-firestore": "catalog:dev",
+    "picocolors": "catalog:dev",
+    "source-map-support": "catalog:dev"
   }
 }

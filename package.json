@@ -95,7 +95,7 @@
     "jasmine-spec-reporter": "catalog:dev",
     "nx": "catalog:dev",
     "prettier": "catalog:dev",
-    "start-server-and-test": "^2.0.3",
+    "start-server-and-test": "catalog:dev",
     "ts-mocha": "catalog:dev",
     "ts-node": "catalog:dev",
     "tslib": "catalog:dev",
