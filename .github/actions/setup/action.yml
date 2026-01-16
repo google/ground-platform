@@ -6,6 +6,10 @@ inputs:
     description: Suffix for the Nx cache key (e.g. job name)
     required: false
     default: default
+  install-chrome:
+    description: 'Whether to install Google Chrome'
+    required: false
+    default: 'false'
 
 runs:
   using: composite
@@ -34,3 +38,17 @@ runs:
       run: pnpm install --frozen-lockfile
       env:
         NX_REJECT_UNKNOWN_LOCAL_CACHE: '0'
+
+    - name: Install Chrome
+      if: ${{ inputs.install-chrome == 'true' }}
+      uses: browser-actions/setup-chrome@v1
+      id: setup-chrome
+      with:
+        chrome-version: stable
+
+    - name: Configure Chrome Environment
+      if: ${{ inputs.install-chrome == 'true' }}
+      shell: bash
+      run: |
+        echo "CHROME_BIN=${{ steps.setup-chrome.outputs.chrome-path }}" >> $GITHUB_ENV
+        echo "CHROME_PATH=${{ steps.setup-chrome.outputs.chrome-path }}" >> $GITHUB_ENV
