@@ -39,33 +39,10 @@ runs:
         restore-keys: |
           ${{ runner.os }}-firebase-emulators-
 
-    - name: Set up Node.js
-      uses: actions/setup-node@v6
+    - name: Set up environment
+      uses: ./.github/actions/setup
       with:
-        node-version: '20'
-        cache: pnpm
-
-    - name: Enable Corepack (pnpm)
-      shell: bash
-      run: corepack enable
-
-    - name: Install dependencies
-      shell: bash
-      run: pnpm install --frozen-lockfile
-      env:
-        NX_REJECT_UNKNOWN_LOCAL_CACHE: '0'
-
-    - name: Install Chrome
-      uses: browser-actions/setup-chrome@v1
-      id: setup-chrome
-      with:
-        chrome-version: stable
-
-    - name: Configure Chrome Environment
-      shell: bash
-      run: |
-        echo "CHROME_BIN=${{ steps.setup-chrome.outputs.chrome-path }}" >> $GITHUB_ENV
-        echo "CHROME_PATH=${{ steps.setup-chrome.outputs.chrome-path }}" >> $GITHUB_ENV
+        install-chrome: 'true'
 
     - name: Build project and local deps
       shell: bash

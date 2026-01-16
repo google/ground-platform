@@ -29,33 +29,34 @@ Read through our [contributing guidelines](CONTRIBUTING.md) to learn about our s
 ### One time setup
 
 1. Install [nvm](https://github.com/nvm-sh/nvm)
-1. Install Node.js:
+2. Install and use Node.js **20**:
 
-  ```bash
-  nvm install 20
-  ```
+```bash
+nvm install 20
+nvm use 20
+```
 
-1. Install [Firebase CLI](https://firebase.google.com/docs/cli) and [Nx](https://nx.dev):
+3. Install [Firebase CLI](https://firebase.google.com/docs/cli) and [Nx](https://nx.dev):
 
-  ```bash
-  npm install -g firebase-tools nx pnpm
-  ```
+```bash
+npm install -g firebase-tools nx pnpm
+```
 
 ### Build and run locally
 
-1. Install dependencies:
+4. Install dependencies:
 
-  ```bash
-  pnpm install
-  ```
+```bash
+pnpm install
+```
 
-1. Build and start local Firebase emulator and Angular dev server:
+5. Build and start local Firebase emulator and Angular dev server:
 
-  ```bash
-  nx start
-  ```
+```bash
+nx start
+```
 
-1. Once started, the app will be available at http://localhost:4200. For development, and testing, the Firebase Emulator Suite UI is accessible at http://localhost:4000. Changes to the web app in `web/` and to the Cloud Functions in `functions/` are automatically rebuilt and reloaded on save.
+6. Once started, the app will be available at http://localhost:4200. For development, and testing, the Firebase Emulator Suite UI is accessible at http://localhost:4000. Changes to the web app in `web/` and to the Cloud Functions in `functions/` are automatically rebuilt and reloaded on save.
 
 **Note**: The local build variant doesn't require API keys to run, but warnings related to missing Maps API keys will appear in the console. Authentication is also disabled.
 
@@ -76,6 +77,7 @@ To build and deploy to staging, first sign into Firebase with:
 ```bash
 npx firebase login
 ```
+
 You can then deploy to prod with:
 
 ```bash

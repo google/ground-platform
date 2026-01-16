@@ -25,23 +25,10 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v6
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: '20'
-          cache: pnpm
+      - name: Set up environment
+        uses: ./.github/actions/setup
 
-      - name: Enable Corepack (pnpm)
-        shell: bash
-        run: corepack enable
-
-      - name: Install dependencies
-        shell: bash
-        run: pnpm install --frozen-lockfile
-        env:
-          NX_REJECT_UNKNOWN_LOCAL_CACHE: '0'
-
-      - name: Build
+      - name: Build project and local deps
         run: pnpm exec nx build --configuration=staging
 
       - name: Deploy to Firebase
