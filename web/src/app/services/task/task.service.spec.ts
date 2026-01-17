@@ -32,7 +32,7 @@ describe('TaskService', () => {
     TestBed.configureTestingModule({
       imports: [RouterTestingModule],
       providers: [
-        { provide: DataStoreService, useValue: dataStoreServiceStub }        
+        { provide: DataStoreService, useValue: dataStoreServiceStub }
       ],
     });
   });
