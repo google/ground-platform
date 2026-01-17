@@ -16,14 +16,11 @@
 
 import { Injectable } from '@angular/core';
 import { List, Map } from 'immutable';
-import { Observable, switchMap } from 'rxjs';
 
 import { DataCollectionStrategy, Job } from 'app/models/job.model';
 import { MultipleChoice } from 'app/models/task/multiple-choice.model';
 import { Task, TaskType } from 'app/models/task/task.model';
 import { DataStoreService } from 'app/services/data-store/data-store.service';
-
-import { SurveyService } from '../survey/survey.service';
 
 export type TaskUpdate = {
   label: string;
@@ -37,23 +34,10 @@ export type TaskUpdate = {
   providedIn: 'root',
 })
 export class TaskService {
-  private tasks$: Observable<List<Task>>;
 
   constructor(
-    private dataStoreService: DataStoreService,
-    private surveyService: SurveyService
-  ) {
-    this.tasks$ = this.surveyService
-      .getActiveSurvey$()
-      .pipe(
-        switchMap(survey =>
-          this.dataStoreService.tasks$(
-            survey.id,
-            survey.jobs.values().next().value?.id
-          )
-        )
-      );
-  }
+    private dataStoreService: DataStoreService
+  ) { }
 
   /**
    * Creates and returns a new task with a generated unique identifier.
@@ -93,10 +77,6 @@ export class TaskService {
         id: this.dataStoreService.generateId(),
       })),
     } as MultipleChoice;
-  }
-
-  getTasks$(): Observable<List<Task>> {
-    return this.tasks$;
   }
 
   addOrUpdateTasks(

@@ -24,9 +24,7 @@ import { Job } from 'app/models/job.model';
 import { Role } from 'app/models/role.model';
 import { DataSharingType, Survey } from 'app/models/survey.model';
 import { Task } from 'app/models/task/task.model';
-import { DataStoreService } from 'app/services/data-store/data-store.service';
 import { DialogService } from 'app/services/dialog/dialog.service';
-import { SurveyService } from 'app/services/survey/survey.service';
 
 import { TaskDetailsComponent } from './task-details.component';
 
@@ -42,32 +40,22 @@ describe('TaskDetailsComponent', () => {
     '',
     { type: DataSharingType.PRIVATE }
   );
+  const job = new Job('job1', 0);
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [TaskDetailsComponent],
       imports: [MatDialogModule],
       providers: [
-        {
-          provide: DataStoreService,
-          useValue: {
-            generateId: () => '123',
-            tasks$: () => of(List<Task>([])),
-          },
-        },
         { provide: DialogService, useValue: {} },
-        {
-          provide: SurveyService,
-          useValue: {
-            getActiveSurvey$: () => of(survey),
-          },
-        },
       ],
       schemas: [NO_ERRORS_SCHEMA],
     }).compileComponents();
 
     fixture = TestBed.createComponent(TaskDetailsComponent);
     component = fixture.componentInstance;
+    component.job = job;
+    component.ngOnChanges();
     fixture.detectChanges();
   });
 

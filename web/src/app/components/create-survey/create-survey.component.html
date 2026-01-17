@@ -60,6 +60,7 @@
             <task-details
               *ngSwitchCase="CreateSurveyPhase.DEFINE_TASKS"
               #taskDetails
+              [job]="job()"
               (onValidationChange)="onValidationChange($event)"
             ></task-details>
             <data-sharing-terms
