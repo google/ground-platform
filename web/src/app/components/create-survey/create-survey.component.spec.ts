@@ -143,7 +143,6 @@ describe('CreateSurveyComponent', () => {
 
     route = new ActivatedRouteStub();
     surveyServiceSpy = jasmine.createSpyObj<SurveyService>('SurveyService', [
-      'activateSurvey',
       'getActiveSurvey$',
       'updateTitleAndDescription',
       'createSurvey',

@@ -54,6 +54,7 @@ describe('MainPageContainerComponent', () => {
       schemas: [NO_ERRORS_SCHEMA],
     }).compileComponents();
 
+    surveyService.loadSurvey$.and.returnValue(NEVER);
     fixture = TestBed.createComponent(MainPageContainerComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

@@ -36,6 +36,5 @@ export class MainPageContainerComponent {
     )
   );
 
-  constructor() {
-  }
+  constructor() {}
 }

@@ -99,12 +99,12 @@ describe('EditSurveyComponent', () => {
         'getEditSurveyPageSignal',
         'navigateToEditJob',
         'navigateToEditSurvey',
+        'selectSurvey',
       ]
     );
     navigationServiceSpy.getEditSurveyPageSignal.and.returnValue(signal(''));
 
     surveyServiceSpy = jasmine.createSpyObj<SurveyService>('SurveyService', [
-      'activateSurvey',
       'getActiveSurvey$',
     ]);
     activeSurvey$ = new Subject<Survey>();

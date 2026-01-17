@@ -48,7 +48,9 @@ describe('SurveyService', () => {
   );
 
   beforeEach(() => {
-    navigationServiceSpy = jasmine.createSpyObj('NavigationService', ['getSurveyId$']);
+    navigationServiceSpy = jasmine.createSpyObj('NavigationService', [
+      'getSurveyId$',
+    ]);
     surveyId$ = new BehaviorSubject<string | null>(null);
     navigationServiceSpy.getSurveyId$.and.returnValue(surveyId$);
 
