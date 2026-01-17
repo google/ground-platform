@@ -248,10 +248,8 @@ describe('CreateSurveyComponent', () => {
       await fixture.whenStable();
     });
 
-    it('activates survey ID', async () => {
-      expect(surveyServiceSpy.activateSurvey).toHaveBeenCalledOnceWith(
-        surveyId
-      );
+    it('initializes draft survey', async () => {
+      expect(draftSurveyServiceSpy.init).toHaveBeenCalledWith(surveyId);
     });
   });
 

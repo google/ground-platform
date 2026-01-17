@@ -193,10 +193,8 @@ describe('EditSurveyComponent', () => {
       fixture.detectChanges(); // Update view (content)
     });
 
-    it('activates survey ID', () => {
-      expect(surveyServiceSpy.activateSurvey).toHaveBeenCalledOnceWith(
-        surveyId
-      );
+    it('initializes draft survey', () => {
+      expect(draftSurveyServiceSpy.init).toHaveBeenCalledWith(surveyId);
     });
   });
 

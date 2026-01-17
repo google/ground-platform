@@ -34,7 +34,7 @@ const navigationService = {
 
 const surveyService = jasmine.createSpyObj('SurveyService', [
   'getActiveSurvey$',
-  'activateSurvey',
+  'loadSurvey$',
 ]);
 
 describe('MainPageContainerComponent', () => {

@@ -37,9 +37,5 @@ export class MainPageContainerComponent {
   );
 
   constructor() {
-    effect(() => {
-      const id = this.surveyId();
-      if (id) this.surveyService.activateSurvey(id);
-    });
   }
 }
