@@ -1,20 +1,16 @@
-name: Set up environment
-description: Sets up Node.js, pnpm, Nx cache, and installs dependencies
+name: "Set up environment"
+description: "Sets up Node.js and installs dependencies"
 
 inputs:
   cache-key-suffix:
-    description: Suffix for the Nx cache key (e.g. job name)
+    description: "Suffix for the Nx cache key (e.g. job name)"
     required: false
-    default: default
-  install-chrome:
-    description: 'Whether to install Google Chrome'
-    required: false
-    default: 'false'
+    default: "default"
 
 runs:
-  using: composite
+  using: "composite"
   steps:
-    - name: Restore Nx cache
+    - name: Cache Nx
       uses: actions/cache@v4
       with:
         path: .nx/cache
@@ -22,33 +18,12 @@ runs:
         restore-keys: |
           nx-${{ runner.os }}-${{ inputs.cache-key-suffix }}-
 
-    - name: Install pnpm
-      uses: pnpm/action-setup@v4
-      with:
-        version: 9
-
     - name: Set up Node.js
       uses: actions/setup-node@v6
       with:
-        node-version: '20'
-        cache: pnpm
+        node-version: "20"
+        cache: "npm"
 
-    - name: Install dependencies
+    - name: Install deps
+      run: npm ci
       shell: bash
-      run: pnpm install --frozen-lockfile
-      env:
-        NX_REJECT_UNKNOWN_LOCAL_CACHE: '0'
-
-    - name: Install Chrome
-      if: ${{ inputs.install-chrome == 'true' }}
-      uses: browser-actions/setup-chrome@v1
-      id: setup-chrome
-      with:
-        chrome-version: stable
-
-    - name: Configure Chrome Environment
-      if: ${{ inputs.install-chrome == 'true' }}
-      shell: bash
-      run: |
-        echo "CHROME_BIN=${{ steps.setup-chrome.outputs.chrome-path }}" >> $GITHUB_ENV
-        echo "CHROME_PATH=${{ steps.setup-chrome.outputs.chrome-path }}" >> $GITHUB_ENV

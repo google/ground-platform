@@ -25,11 +25,16 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v6
 
-      - name: Set up environment
-        uses: ./.github/actions/setup
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "20"
 
-      - name: Build project and local deps
-        run: pnpm exec nx build --configuration=staging
+      - name: Install deps
+        run: npm install
+
+      - name: Build
+        run: npx nx build --configuration=staging
 
       - name: Deploy to Firebase
         uses: FirebaseExtended/action-hosting-deploy@v0
