@@ -227,8 +227,8 @@ catalogs:
       specifier: ^1.5.0
       version: 1.5.0
     diff:
-      specifier: ^5.2.0
-      version: 5.2.0
+      specifier: ^8.0.3
+      version: 8.0.3
     eslint:
       specifier: ^9.39.2
       version: 9.39.2
@@ -540,7 +540,7 @@ importers:
         version: 0.5.10
       diff:
         specifier: catalog:dev
-        version: 5.2.0
+        version: 8.0.3
       mock-cloud-firestore:
         specifier: catalog:dev
         version: 0.12.0
@@ -674,7 +674,7 @@ importers:
         version: 0.3.11
       '@nx/angular':
         specifier: catalog:dev
-        version: 22.3.3(e63eaeba18a0b2cef72bb783b49c31a1)
+        version: 22.3.3(7171a1a0d96ad645015676b1003b116e)
       '@types/google.maps':
         specifier: catalog:dev
         version: 3.58.1
@@ -6372,12 +6372,12 @@ packages:
     resolution: {integrity: sha512-58lmxKSA4BNyLz+HHMUzlOEpg09FV+ev6ZMe3vJihgdxzgcwZ8VoEEPmALCZG9LmqfVoNMMKpttIYTVG6uDY7A==}
     engines: {node: '>=0.3.1'}
 
-  diff@5.2.0:
-    resolution: {integrity: sha512-uIFDxqpRZGZ6ThOk84hEfqWoHx2devRFvpTZcTHur85vImfaxUbTW9Ryh4CpCuDnToOP1CEtXKIgytHBPVff5A==}
-    engines: {node: '>=0.3.1'}
-
   diff@7.0.0:
     resolution: {integrity: sha512-PJWHUb1RFevKCwaFA9RlG5tCd+FO5iRh9A8HEtkmBH2Li03iJriB6m6JIN4rGz3K3JLawI7/veA1xzRKP6ISBw==}
+    engines: {node: '>=0.3.1'}
+
+  diff@8.0.3:
+    resolution: {integrity: sha512-qejHi7bcSD4hQAZE0tNAawRK1ZtafHDmMTMkrrIGgSLl7hTnQHmKCeB45xAcbfTqK2zowkM3j3bHt/4b/ARbYQ==}
     engines: {node: '>=0.3.1'}
 
   dijkstrajs@1.0.3:
@@ -16683,7 +16683,7 @@ snapshots:
       npm-pick-manifest: 10.0.0
       proc-log: 5.0.0
       promise-retry: 2.0.1
-      semver: 7.7.2
+      semver: 7.7.3
       which: 5.0.0
 
   '@npmcli/git@7.0.1':
@@ -16737,7 +16737,7 @@ snapshots:
       hosted-git-info: 8.1.0
       json-parse-even-better-errors: 4.0.0
       proc-log: 5.0.0
-      semver: 7.7.2
+      semver: 7.7.3
       validate-npm-package-license: 3.0.4
 
   '@npmcli/package-json@7.0.4':
@@ -16792,17 +16792,17 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@nx/angular@22.3.3(e63eaeba18a0b2cef72bb783b49c31a1)':
+  '@nx/angular@22.3.3(7171a1a0d96ad645015676b1003b116e)':
     dependencies:
       '@angular-devkit/core': 20.3.14(chokidar@4.0.3)
       '@angular-devkit/schematics': 20.3.14(chokidar@4.0.3)
-      '@nx/devkit': 22.3.3(nx@22.3.3)
-      '@nx/eslint': 22.3.3(@babel/traverse@7.28.6)(@zkochan/js-yaml@0.0.7)(eslint@9.39.2(jiti@2.6.1))(nx@22.3.3)
-      '@nx/js': 22.3.3(@babel/traverse@7.28.6)(nx@22.3.3)
-      '@nx/module-federation': 22.3.3(@babel/traverse@7.28.6)(nx@22.3.3)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(typescript@5.9.3)
-      '@nx/rspack': 22.3.3(@babel/traverse@7.28.6)(@module-federation/enhanced@0.22.1(@rspack/core@1.7.2)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(typescript@5.9.3)(webpack@5.104.1))(@module-federation/node@2.7.27(@rspack/core@1.7.2)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(typescript@5.9.3)(webpack@5.104.1))(@types/express@4.17.25)(less@4.5.1)(nx@22.3.3)(react-dom@19.2.3(react@19.2.3))(react-refresh@0.18.0)(react@19.2.3)(typescript@5.9.3)
-      '@nx/web': 22.3.3(@babel/traverse@7.28.6)(nx@22.3.3)
-      '@nx/webpack': 22.3.3(@babel/traverse@7.28.6)(@rspack/core@1.7.2)(nx@22.3.3)(typescript@5.9.3)
+      '@nx/devkit': 22.3.3(nx@22.2.1)
+      '@nx/eslint': 22.3.3(@babel/traverse@7.28.6)(@zkochan/js-yaml@0.0.7)(eslint@9.39.2(jiti@2.6.1))(nx@22.2.1)
+      '@nx/js': 22.3.3(@babel/traverse@7.28.6)(nx@22.2.1)
+      '@nx/module-federation': 22.3.3(@babel/traverse@7.28.6)(nx@22.2.1)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(typescript@5.9.3)
+      '@nx/rspack': 22.3.3(@babel/traverse@7.28.6)(@module-federation/enhanced@0.22.1(@rspack/core@1.7.2)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(typescript@5.9.3)(webpack@5.104.1))(@module-federation/node@2.7.27(@rspack/core@1.7.2)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(typescript@5.9.3)(webpack@5.104.1))(@types/express@4.17.25)(less@4.5.1)(nx@22.2.1)(react-dom@19.2.3(react@19.2.3))(react-refresh@0.18.0)(react@19.2.3)(typescript@5.9.3)
+      '@nx/web': 22.3.3(@babel/traverse@7.28.6)(nx@22.2.1)
+      '@nx/webpack': 22.3.3(@babel/traverse@7.28.6)(@rspack/core@1.7.2)(nx@22.2.1)(typescript@5.9.3)
       '@nx/workspace': 22.3.3
       '@phenomnomnominal/tsquery': 5.0.1(typescript@5.9.3)
       '@schematics/angular': 20.3.14(chokidar@4.0.3)
@@ -16855,6 +16855,17 @@ snapshots:
       - webpack-cli
       - webpack-hot-middleware
 
+  '@nx/devkit@22.3.3(nx@22.2.1)':
+    dependencies:
+      '@zkochan/js-yaml': 0.0.7
+      ejs: 3.1.10
+      enquirer: 2.3.6
+      minimatch: 9.0.3
+      nx: 22.2.1
+      semver: 7.7.3
+      tslib: 2.8.1
+      yargs-parser: 21.1.1
+
   '@nx/devkit@22.3.3(nx@22.3.3)':
     dependencies:
       '@zkochan/js-yaml': 0.0.7
@@ -16866,10 +16877,10 @@ snapshots:
       tslib: 2.8.1
       yargs-parser: 21.1.1
 
-  '@nx/eslint@22.3.3(@babel/traverse@7.28.6)(@zkochan/js-yaml@0.0.7)(eslint@9.39.2(jiti@2.6.1))(nx@22.3.3)':
+  '@nx/eslint@22.3.3(@babel/traverse@7.28.6)(@zkochan/js-yaml@0.0.7)(eslint@9.39.2(jiti@2.6.1))(nx@22.2.1)':
     dependencies:
-      '@nx/devkit': 22.3.3(nx@22.3.3)
-      '@nx/js': 22.3.3(@babel/traverse@7.28.6)(nx@22.3.3)
+      '@nx/devkit': 22.3.3(nx@22.2.1)
+      '@nx/js': 22.3.3(@babel/traverse@7.28.6)(nx@22.2.1)
       eslint: 9.39.2(jiti@2.6.1)
       semver: 7.7.3
       tslib: 2.8.1
@@ -16885,7 +16896,7 @@ snapshots:
       - supports-color
       - verdaccio
 
-  '@nx/js@22.3.3(@babel/traverse@7.28.6)(nx@22.3.3)':
+  '@nx/js@22.3.3(@babel/traverse@7.28.6)(nx@22.2.1)':
     dependencies:
       '@babel/core': 7.28.6
       '@babel/plugin-proposal-decorators': 7.28.6(@babel/core@7.28.6)
@@ -16894,7 +16905,7 @@ snapshots:
       '@babel/preset-env': 7.28.6(@babel/core@7.28.6)
       '@babel/preset-typescript': 7.28.5(@babel/core@7.28.6)
       '@babel/runtime': 7.28.6
-      '@nx/devkit': 22.3.3(nx@22.3.3)
+      '@nx/devkit': 22.3.3(nx@22.2.1)
       '@nx/workspace': 22.3.3
       '@zkochan/js-yaml': 0.0.7
       babel-plugin-const-enum: 1.2.0(@babel/core@7.28.6)
@@ -16921,14 +16932,14 @@ snapshots:
       - nx
       - supports-color
 
-  '@nx/module-federation@22.3.3(@babel/traverse@7.28.6)(nx@22.3.3)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(typescript@5.9.3)':
+  '@nx/module-federation@22.3.3(@babel/traverse@7.28.6)(nx@22.2.1)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(typescript@5.9.3)':
     dependencies:
       '@module-federation/enhanced': 0.21.6(@rspack/core@1.7.2)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(typescript@5.9.3)(webpack@5.104.1)
       '@module-federation/node': 2.7.27(@rspack/core@1.7.2)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(typescript@5.9.3)(webpack@5.104.1)
       '@module-federation/sdk': 0.21.6
-      '@nx/devkit': 22.3.3(nx@22.3.3)
-      '@nx/js': 22.3.3(@babel/traverse@7.28.6)(nx@22.3.3)
-      '@nx/web': 22.3.3(@babel/traverse@7.28.6)(nx@22.3.3)
+      '@nx/devkit': 22.3.3(nx@22.2.1)
+      '@nx/js': 22.3.3(@babel/traverse@7.28.6)(nx@22.2.1)
+      '@nx/web': 22.3.3(@babel/traverse@7.28.6)(nx@22.2.1)
       '@rspack/core': 1.7.2
       express: 4.22.1
       http-proxy-middleware: 3.0.5
@@ -17018,14 +17029,14 @@ snapshots:
   '@nx/nx-win32-x64-msvc@22.3.3':
     optional: true
 
-  '@nx/rspack@22.3.3(@babel/traverse@7.28.6)(@module-federation/enhanced@0.22.1(@rspack/core@1.7.2)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(typescript@5.9.3)(webpack@5.104.1))(@module-federation/node@2.7.27(@rspack/core@1.7.2)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(typescript@5.9.3)(webpack@5.104.1))(@types/express@4.17.25)(less@4.5.1)(nx@22.3.3)(react-dom@19.2.3(react@19.2.3))(react-refresh@0.18.0)(react@19.2.3)(typescript@5.9.3)':
+  '@nx/rspack@22.3.3(@babel/traverse@7.28.6)(@module-federation/enhanced@0.22.1(@rspack/core@1.7.2)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(typescript@5.9.3)(webpack@5.104.1))(@module-federation/node@2.7.27(@rspack/core@1.7.2)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(typescript@5.9.3)(webpack@5.104.1))(@types/express@4.17.25)(less@4.5.1)(nx@22.2.1)(react-dom@19.2.3(react@19.2.3))(react-refresh@0.18.0)(react@19.2.3)(typescript@5.9.3)':
     dependencies:
       '@module-federation/enhanced': 0.22.1(@rspack/core@1.7.2)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(typescript@5.9.3)(webpack@5.104.1)
       '@module-federation/node': 2.7.27(@rspack/core@1.7.2)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(typescript@5.9.3)(webpack@5.104.1)
-      '@nx/devkit': 22.3.3(nx@22.3.3)
-      '@nx/js': 22.3.3(@babel/traverse@7.28.6)(nx@22.3.3)
-      '@nx/module-federation': 22.3.3(@babel/traverse@7.28.6)(nx@22.3.3)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(typescript@5.9.3)
-      '@nx/web': 22.3.3(@babel/traverse@7.28.6)(nx@22.3.3)
+      '@nx/devkit': 22.3.3(nx@22.2.1)
+      '@nx/js': 22.3.3(@babel/traverse@7.28.6)(nx@22.2.1)
+      '@nx/module-federation': 22.3.3(@babel/traverse@7.28.6)(nx@22.2.1)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(typescript@5.9.3)
+      '@nx/web': 22.3.3(@babel/traverse@7.28.6)(nx@22.2.1)
       '@phenomnomnominal/tsquery': 5.0.1(typescript@5.9.3)
       '@rspack/core': 1.7.2
       '@rspack/dev-server': 1.1.5(@rspack/core@1.7.2)(@types/express@4.17.25)(webpack@5.104.1)
@@ -17078,10 +17089,10 @@ snapshots:
       - webpack-cli
       - webpack-hot-middleware
 
-  '@nx/web@22.3.3(@babel/traverse@7.28.6)(nx@22.3.3)':
+  '@nx/web@22.3.3(@babel/traverse@7.28.6)(nx@22.2.1)':
     dependencies:
-      '@nx/devkit': 22.3.3(nx@22.3.3)
-      '@nx/js': 22.3.3(@babel/traverse@7.28.6)(nx@22.3.3)
+      '@nx/devkit': 22.3.3(nx@22.2.1)
+      '@nx/js': 22.3.3(@babel/traverse@7.28.6)(nx@22.2.1)
       detect-port: 1.6.1
       http-server: 14.1.1
       picocolors: 1.1.1
@@ -17095,11 +17106,11 @@ snapshots:
       - supports-color
       - verdaccio
 
-  '@nx/webpack@22.3.3(@babel/traverse@7.28.6)(@rspack/core@1.7.2)(nx@22.3.3)(typescript@5.9.3)':
+  '@nx/webpack@22.3.3(@babel/traverse@7.28.6)(@rspack/core@1.7.2)(nx@22.2.1)(typescript@5.9.3)':
     dependencies:
       '@babel/core': 7.28.6
-      '@nx/devkit': 22.3.3(nx@22.3.3)
-      '@nx/js': 22.3.3(@babel/traverse@7.28.6)(nx@22.3.3)
+      '@nx/devkit': 22.3.3(nx@22.2.1)
+      '@nx/js': 22.3.3(@babel/traverse@7.28.6)(nx@22.2.1)
       '@phenomnomnominal/tsquery': 5.0.1(typescript@5.9.3)
       ajv: 8.17.1
       autoprefixer: 10.4.23(postcss@8.5.6)
@@ -20154,9 +20165,9 @@ snapshots:
 
   diff@4.0.2: {}
 
-  diff@5.2.0: {}
-
   diff@7.0.0: {}
+
+  diff@8.0.3: {}
 
   dijkstrajs@1.0.3: {}
 
@@ -24045,7 +24056,7 @@ snapshots:
     dependencies:
       hosted-git-info: 8.1.0
       proc-log: 5.0.0
-      semver: 7.7.2
+      semver: 7.7.3
       validate-npm-package-name: 6.0.2
 
   npm-package-arg@13.0.0:
@@ -24072,7 +24083,7 @@ snapshots:
       npm-install-checks: 7.1.2
       npm-normalize-package-bin: 4.0.0
       npm-package-arg: 12.0.2
-      semver: 7.7.2
+      semver: 7.7.3
 
   npm-pick-manifest@11.0.3:
     dependencies:
