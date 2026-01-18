@@ -192,7 +192,6 @@ describe('CreateSurveyComponent', () => {
     );
 
     taskServiceSpy = jasmine.createSpyObj<TaskService>('TaskService', [
-      'getTasks$',
       'updateLoiTasks',
     ]);
 
