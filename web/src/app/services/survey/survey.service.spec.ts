@@ -103,8 +103,8 @@ describe('SurveyService', () => {
           done();
         });
 
-      user$.next(mockUser);
       surveyId$.next(mockSurvey.id);
+      user$.next(mockUser);
     });
 
     it('should return UNSAVED_NEW when activating new survey ID', done => {
