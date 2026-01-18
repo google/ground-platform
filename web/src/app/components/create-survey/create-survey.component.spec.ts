@@ -143,7 +143,6 @@ describe('CreateSurveyComponent', () => {
 
     route = new ActivatedRouteStub();
     surveyServiceSpy = jasmine.createSpyObj<SurveyService>('SurveyService', [
-      'activateSurvey',
       'getActiveSurvey$',
       'updateTitleAndDescription',
       'createSurvey',
@@ -247,10 +246,8 @@ describe('CreateSurveyComponent', () => {
       await fixture.whenStable();
     });
 
-    it('activates survey ID', async () => {
-      expect(surveyServiceSpy.activateSurvey).toHaveBeenCalledOnceWith(
-        surveyId
-      );
+    it('initializes draft survey', async () => {
+      expect(draftSurveyServiceSpy.init).toHaveBeenCalledWith(surveyId);
     });
   });
 

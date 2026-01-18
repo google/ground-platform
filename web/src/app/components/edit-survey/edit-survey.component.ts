@@ -66,7 +66,6 @@ export class EditSurveyComponent {
       const id = this.surveyId();
 
       if (id) {
-        this.surveyService.activateSurvey(id);
         await this.draftSurveyService.init(id);
         this.draftSurveyService.getSurvey$().subscribe(survey => {
           this.survey = survey;

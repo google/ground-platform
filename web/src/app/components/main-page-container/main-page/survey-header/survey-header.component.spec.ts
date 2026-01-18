@@ -25,6 +25,7 @@ import { NEVER, of } from 'rxjs';
 import { DataSharingType, Survey } from 'app/models/survey.model';
 import { GroundIconModule } from 'app/modules/ground-icon.module';
 import { DataStoreService } from 'app/services/data-store/data-store.service';
+import { NavigationService } from 'app/services/navigation/navigation.service';
 import { SurveyService } from 'app/services/survey/survey.service';
 
 import { SurveyHeaderComponent } from './survey-header.component';
@@ -59,6 +60,14 @@ describe('SurveyHeaderComponent', () => {
             getCurrentSurvey: () => {},
             canManageSurvey: () => {},
             updateTitle: () => Promise.resolve(),
+          },
+        },
+        {
+          provide: NavigationService,
+          useValue: {
+            navigateToSurveyList: () => {},
+            isEditSurveyPage: () => false,
+            onClickSidePanelButton: () => {},
           },
         },
         {

@@ -24,6 +24,7 @@ import { of } from 'rxjs';
 import { AuthService } from 'app/services/auth/auth.service';
 import { DataStoreService } from 'app/services/data-store/data-store.service';
 import { DraftSurveyService } from 'app/services/draft-survey/draft-survey.service';
+import { NavigationService } from 'app/services/navigation/navigation.service';
 import { SurveyService } from 'app/services/survey/survey.service';
 
 import { HeaderComponent } from './header.component';
@@ -44,7 +45,19 @@ describe('HeaderComponent', () => {
         { provide: MatDialog, useValue: {} },
         { provide: AuthService, useValue: { getUser$: () => of() } },
         { provide: DraftSurveyService, useValue: {} },
-        { provide: Router, useValue: { events: of() } },
+        { provide: Router, useValue: { events: of(), url: '' } },
+        {
+          provide: NavigationService,
+          useValue: {
+            isEditSurveyPage: () => false,
+            isSurveyPage: () => false,
+            navigateToSurveyList: () => {},
+            navigateToEditSurvey: () => {},
+            navigateToAboutPage: () => {},
+            navigateToTermsOfService: () => {},
+            selectSurvey: () => {},
+          },
+        },
         {
           provide: SurveyService,
           useValue: {

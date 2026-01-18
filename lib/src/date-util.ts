@@ -25,6 +25,6 @@ export function timestampToInt(
   return (
     (Long.isLong(timestamp.seconds)
       ? timestamp.seconds.toInt()
-      : timestamp.seconds || 0) * 1000
+      : (timestamp.seconds as number) || 0) * 1000
   );
 }

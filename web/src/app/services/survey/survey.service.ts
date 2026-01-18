@@ -16,7 +16,7 @@
 
 import { Injectable } from '@angular/core';
 import { List, Map } from 'immutable';
-import { Observable, ReplaySubject, firstValueFrom, of } from 'rxjs';
+import { Observable, firstValueFrom, of } from 'rxjs';
 import { shareReplay, switchMap } from 'rxjs/operators';
 
 import { Role } from 'app/models/role.model';
@@ -24,31 +24,35 @@ import { DataSharingType, Survey, SurveyState } from 'app/models/survey.model';
 import { AuthService } from 'app/services/auth/auth.service';
 import { DataStoreService } from 'app/services/data-store/data-store.service';
 import { SURVEY_ID_NEW } from 'app/services/navigation/navigation.constants';
+import { NavigationService } from 'app/services/navigation/navigation.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class SurveyService {
-  private activeSurveyId$ = new ReplaySubject<string>(1);
   private activeSurvey$: Observable<Survey>;
   private activeSurvey!: Survey;
 
   constructor(
     private dataStore: DataStoreService,
-    private authService: AuthService
+    private authService: AuthService,
+    private navigationService: NavigationService
   ) {
     // Reload active survey each time authenticated user changes.
     this.activeSurvey$ = authService.getUser$().pipe(
       switchMap(() =>
         //  on each change to survey id.
-        this.activeSurveyId$.pipe(
+        this.navigationService.getSurveyId$().pipe(
           // Asynchronously load survey. switchMap() internally disposes
           // of previous subscription if present.
           switchMap(id => {
             if (id === SURVEY_ID_NEW) {
               return of(Survey.UNSAVED_NEW);
             }
-            return this.dataStore.loadSurvey$(id);
+            if (id) {
+              return this.dataStore.loadSurvey$(id);
+            }
+            return of(Survey.UNSAVED_NEW);
           })
         )
       ),
@@ -61,10 +65,6 @@ export class SurveyService {
 
   getActiveSurvey(): Survey {
     return this.activeSurvey;
-  }
-
-  activateSurvey(id: string) {
-    this.activeSurveyId$.next(id);
   }
 
   getActiveSurvey$(): Observable<Survey> {
