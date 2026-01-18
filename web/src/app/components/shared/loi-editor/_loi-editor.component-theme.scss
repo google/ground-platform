@@ -18,22 +18,22 @@
 @use '@angular/material' as mat;
 
 @mixin color($theme) {
-	.loi-editor .loi-editor-card .loi-editor-card-row button.import-lois-button {
-		--mdc-filled-button-container-color: #FFDDAB;
-		--mdc-filled-button-label-text-color: mat.get-theme-color($theme, on-secondary-container);
+  .loi-editor .loi-editor-card .loi-editor-card-row button.import-lois-button {
+    --mat-button-filled-container-color: #FFDDAB;
+    --mat-button-filled-label-text-color: mat.get-theme-color($theme, on-secondary-container);
   }
 }
 
 @mixin typography($theme) {
-	.loi-editor-card-row-title {
-		font: mat.get-theme-typography($theme, title-medium, font);
-	}
-	.loi-editor-card-row-subtitle {
-		font: mat.get-theme-typography($theme, body-medium, font);
-	}
+  .loi-editor-card-row-title {
+    font: mat.get-theme-typography($theme, title-medium, font);
+  }
+  .loi-editor-card-row-subtitle {
+    font: mat.get-theme-typography($theme, body-medium, font);
+  }
 }
 
 @mixin theme($theme) {
-	@include color($theme);
-	@include typography($theme);
+  @include color($theme);
+  @include typography($theme);
 }
