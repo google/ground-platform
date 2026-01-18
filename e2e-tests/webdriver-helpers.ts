@@ -26,10 +26,10 @@ import {
 import * as chrome from 'selenium-webdriver/chrome';
 
 import {
+  DEFAULT_TASK_TYPES,
   EXPECTED_SUBMISSION_COUNT,
   JOB_NAME,
   LONG_TIMEOUT,
-  DEFAULT_TASK_TYPES,
   MULTIPLE_CHOICE_ADD_OTHER,
   MULTIPLE_CHOICE_COUNT,
   SHORT_TIMEOUT,
@@ -69,7 +69,7 @@ export class WebDriverHelper {
       '--disable-dev-shm-usage'
     );
     this.driver = await builder.setChromeOptions(chromeOptions).build();
-    this.driver.manage().setTimeouts({ implicit: SHORT_TIMEOUT });
+    await this.driver.manage().setTimeouts({ implicit: SHORT_TIMEOUT });
     return this.driver.get(url);
   }
 
@@ -235,14 +235,13 @@ export class WebDriverHelper {
         try {
           try {
             await this.waitUntilPresent(By.css('.loi-icon'), SHORT_TIMEOUT);
-          } catch (e) {
+          } catch {
             const expandButtonSelector = By.css(
               '.job-list-item-container button'
             );
             await this.waitUntilPresent(expandButtonSelector, LONG_TIMEOUT);
-            const expandSubmissionsButton = await this.driver.findElement(
-              expandButtonSelector
-            );
+            const expandSubmissionsButton =
+              await this.driver.findElement(expandButtonSelector);
             await expandSubmissionsButton.click();
             await this.waitUntilPresent(By.css('.loi-icon'), LONG_TIMEOUT);
           }
@@ -339,7 +338,7 @@ export class WebDriverHelper {
     assertWebDriverInitialized(this.driver);
     try {
       await (await element()).click();
-    } catch (e) {
+    } catch {
       // Susceptible to StaleElementReferenceError. Delay and try again.
       await this.delay();
       await (await element()).click();

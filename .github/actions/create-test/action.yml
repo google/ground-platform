@@ -11,19 +11,20 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 name: Create a new survey
 
 inputs:
   platform-repository:
-    description: "ground-platform repository under test"
+    description: 'ground-platform repository under test'
     default: google/ground-platform
 
   upload-artifacts:
-    description: "Whether to upload the final emulator data artifacts"
-    default: "false"
+    description: 'Whether to upload the final emulator data artifacts'
+    default: 'false'
 
 runs:
-  using: "composite"
+  using: 'composite'
   steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -38,56 +39,18 @@ runs:
         restore-keys: |
           ${{ runner.os }}-firebase-emulators-
 
-    - name: Set up Node.js
-      uses: actions/setup-node@v2
+    - name: Set up environment
+      uses: ./.github/actions/setup
       with:
-        node-version: "20"
-
-    - name: Load cached Node modules
-      id: cache-npm
-      uses: actions/cache@v3
-      env:
-        cache-name: cache-node-modules
-      with:
-        # npm cache files are stored in `~/.npm` on Linux/macOS
-        path: ~/.npm
-        key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
-        restore-keys: |
-          ${{ runner.os }}-build-${{ env.cache-name }}-
-          ${{ runner.os }}-build-
-          ${{ runner.os }}-
-
-    - if: ${{ steps.cache-npm.outputs.cache-hit != 'true' }}
-      name: List the state of Node modules
-      continue-on-error: true
-      shell: bash
-      run: npm list
-
-    - name: Install Chrome
-      uses: browser-actions/setup-chrome@v1
-      id: setup-chrome
-      with:
-        chrome-version: 125
-
-    - name: Save CHROME_PATH
-      shell: bash
-      run: echo "CHROME_PATH=${{ steps.setup-chrome.outputs.chrome-path }}" >> $GITHUB_ENV
-
-    - name: Install nx-linux-x64-gnu
-      shell: bash
-      run: npm install @nx/nx-linux-x64-gnu
-
-    - name: Install dependencies
-      shell: bash
-      run: npm install
+        install-chrome: 'true'
 
     - name: Build project and local deps
       shell: bash
-      run: npx nx build
+      run: pnpm exec nx build
 
     - name: Run 'Create survey' test
       shell: bash
-      run: npm run test:e2e:create
+      run: pnpm run test:e2e:create
 
     - name: Move Firebase emulator data (avoids .gitignore)
       shell: bash
@@ -98,7 +61,7 @@ runs:
       uses: actions/upload-artifact@v4
       with:
         name: data-create
-        path: "**/test"
+        path: '**/test'
         retention-days: 7
         overwrite: true
         if-no-files-found: error
