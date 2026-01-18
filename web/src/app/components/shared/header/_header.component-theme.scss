@@ -11,12 +11,12 @@
   }
 
   .header .cancel-edit-button {
-    --mdc-text-button-label-text-color: #{mat.get-theme-color($theme, secondary)};
+    --mat-button-text-label-text-color: #{mat.get-theme-color($theme, secondary)};
   }
 
   .header .finish-edit-button {
-    --mdc-filled-button-container-color: #{mat.get-theme-color($theme, tertiary)};
-    --mdc-filled-button-label-text-color: #{mat.get-theme-color($theme, on-primary)};
+    --mat-button-filled-container-color: #{mat.get-theme-color($theme, tertiary)};
+    --mat-button-filled-label-text-color: #{mat.get-theme-color($theme, on-primary)};
   }
 }
 

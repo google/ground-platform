@@ -38,6 +38,7 @@
 @use 'app/components/shared/tasks-editor/task-form/edit-option/_edit-option.component-theme' as edit-option;
 @use 'app/components/shared/user-avatar/_user-avatar.component-theme' as user-avatar;
 @use 'app/components/create-survey/_create-survey.component-theme' as create-survey;
+@use 'app/components/create-survey/data-sharing-terms/_data-sharing-terms.component-theme' as data-sharing-terms;
 @use 'app/components/create-survey/step-card/_step-card.component-theme' as step-card;
 @use 'app/components/edit-survey/_edit-survey.component-theme.scss' as edit-survey;
 @use 'app/components/edit-survey/edit-job/_edit-job.component-theme' as edit-job;
@@ -89,6 +90,7 @@ html {
   @include create-survey.theme($theme);
   @include edit-survey.theme($theme);
   @include edit-job.theme($theme);
+  @include data-sharing-terms.theme($theme);
   @include step-card.theme($theme);
   @include drawing-tools.theme($theme);
   @include task-editor.theme($theme);
@@ -107,7 +109,6 @@ body {
   height: 100%;
   margin: 0;
   padding: 0;
-  --mdc-typography-button-letter-spacing: 0;
 }
 
 /* Space between button icon and label. */
