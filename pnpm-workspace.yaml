@@ -66,7 +66,7 @@ catalogs:
     '@nx/angular': ^22.2.1
     '@types/busboy': ^1.5.0
     '@types/cookie-parser': ^1.4.4
-    '@types/cors': 2.8.12
+    '@types/cors': 2.8.17
     '@types/geojson': ^7946.0.14
     '@types/google.maps': ^3.54.10
     '@types/jasmine': ~5.1.0
@@ -101,7 +101,7 @@ catalogs:
     karma-jasmine: ~5.1.0
     karma-jasmine-html-reporter: ^2.1.0
     mock-cloud-firestore: ^0.12.0
-    nx: 22.2.1
+    nx: ^22.2.1
     picocolors: ^1.1.1
     prettier: ^3.7.4
     protobufjs-cli: ^1.1.2
