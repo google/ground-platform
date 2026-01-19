@@ -16,7 +16,7 @@
 
 import { TestBed } from '@angular/core/testing';
 import { List, Map } from 'immutable';
-import { ReplaySubject, Subject, of, take } from 'rxjs';
+import { BehaviorSubject, ReplaySubject, Subject, of, take } from 'rxjs';
 
 import { DataSharingType, Survey, SurveyState } from 'app/models/survey.model';
 import { User } from 'app/models/user.model';
@@ -24,6 +24,7 @@ import { AuthService } from 'app/services/auth/auth.service';
 import { DataStoreService } from 'app/services/data-store/data-store.service';
 import { SurveyService } from 'app/services/survey/survey.service';
 import { SURVEY_ID_NEW } from 'app/services/navigation/navigation.constants';
+import { NavigationService } from 'app/services/navigation/navigation.service';
 import { Role } from 'app/models/role.model';
 
 describe('SurveyService', () => {
@@ -31,6 +32,8 @@ describe('SurveyService', () => {
   let dataStoreServiceSpy: jasmine.SpyObj<DataStoreService>;
   let authServiceSpy: jasmine.SpyObj<AuthService>;
 
+  let navigationServiceSpy: jasmine.SpyObj<NavigationService>;
+  let surveyId$: BehaviorSubject<string | null>;
   let user$: ReplaySubject<User>;
   const mockUser = new User('user1', 'user@test.com', true);
   const newSurveyId = 'newSurveyId';
@@ -45,6 +48,12 @@ describe('SurveyService', () => {
   );
 
   beforeEach(() => {
+    navigationServiceSpy = jasmine.createSpyObj('NavigationService', [
+      'getSurveyId$',
+    ]);
+    surveyId$ = new BehaviorSubject<string | null>(null);
+    navigationServiceSpy.getSurveyId$.and.returnValue(surveyId$);
+
     dataStoreServiceSpy = jasmine.createSpyObj('DataStoreService', [
       'loadSurvey$',
       'loadAccessibleSurveys$',
@@ -70,6 +79,7 @@ describe('SurveyService', () => {
       providers: [
         { provide: DataStoreService, useValue: dataStoreServiceSpy },
         { provide: AuthService, useValue: authServiceSpy },
+        { provide: NavigationService, useValue: navigationServiceSpy },
       ],
     });
 
@@ -93,8 +103,8 @@ describe('SurveyService', () => {
           done();
         });
 
+      surveyId$.next(mockSurvey.id);
       user$.next(mockUser);
-      service.activateSurvey(mockSurvey.id);
     });
 
     it('should return UNSAVED_NEW when activating new survey ID', done => {
@@ -107,7 +117,7 @@ describe('SurveyService', () => {
         });
 
       user$.next(mockUser);
-      service.activateSurvey(SURVEY_ID_NEW);
+      surveyId$.next(SURVEY_ID_NEW);
     });
   });
 
@@ -138,7 +148,7 @@ describe('SurveyService', () => {
     beforeEach(() => {
       // Activate survey to set this.activeSurvey
       user$.next(mockUser);
-      service.activateSurvey(mockSurvey.id);
+      surveyId$.next(mockSurvey.id);
     });
 
     it('should update title', async () => {

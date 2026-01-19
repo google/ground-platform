@@ -99,12 +99,12 @@ describe('EditSurveyComponent', () => {
         'getEditSurveyPageSignal',
         'navigateToEditJob',
         'navigateToEditSurvey',
+        'selectSurvey',
       ]
     );
     navigationServiceSpy.getEditSurveyPageSignal.and.returnValue(signal(''));
 
     surveyServiceSpy = jasmine.createSpyObj<SurveyService>('SurveyService', [
-      'activateSurvey',
       'getActiveSurvey$',
     ]);
     activeSurvey$ = new Subject<Survey>();
@@ -193,10 +193,8 @@ describe('EditSurveyComponent', () => {
       fixture.detectChanges(); // Update view (content)
     });
 
-    it('activates survey ID', () => {
-      expect(surveyServiceSpy.activateSurvey).toHaveBeenCalledOnceWith(
-        surveyId
-      );
+    it('initializes draft survey', () => {
+      expect(draftSurveyServiceSpy.init).toHaveBeenCalledWith(surveyId);
     });
   });
 
