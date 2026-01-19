@@ -37,7 +37,6 @@
     "@ground/proto": "workspace:*",
     "firebase-admin": "catalog:",
     "firebase-functions": "catalog:",
-    "long": "catalog:",
     "protobufjs": "catalog:"
   },
   "devDependencies": {
