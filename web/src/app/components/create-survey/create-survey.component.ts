@@ -154,7 +154,6 @@ export class CreateSurveyComponent implements OnInit {
     this.subscription.add(
       this.navigationService.getSurveyId$().subscribe(async surveyId => {
         this.surveyId = surveyId ? surveyId : SURVEY_ID_NEW;
-        this.surveyService.activateSurvey(this.surveyId);
         await this.draftSurveyService.init(this.surveyId);
         this.draftSurveyService
           .getSurvey$()
