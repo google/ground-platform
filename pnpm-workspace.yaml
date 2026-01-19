@@ -79,7 +79,6 @@ catalogs:
     '@types/webpack-env': ^1.15.3
     '@typescript-eslint/eslint-plugin': ^8.50.1
     '@typescript-eslint/parser': ^8.50.1
-    cpx: ^1.5.0
     diff: ^8.0.3
     eslint: ^9.39.2
     eslint-config-prettier: ^10.1.8
