@@ -90,37 +90,6 @@ describe('SurveyService', () => {
     expect(service).toBeTruthy();
   });
 
-  describe('activeSurvey$', () => {
-    it('should load survey when active survey ID changes', done => {
-      service
-        .getActiveSurvey$()
-        .pipe(take(1))
-        .subscribe(survey => {
-          expect(survey).toEqual(mockSurvey);
-          expect(dataStoreServiceSpy.loadSurvey$).toHaveBeenCalledWith(
-            mockSurvey.id
-          );
-          done();
-        });
-
-      surveyId$.next(mockSurvey.id);
-      user$.next(mockUser);
-    });
-
-    it('should return UNSAVED_NEW when activating new survey ID', done => {
-      service
-        .getActiveSurvey$()
-        .pipe(take(1))
-        .subscribe(survey => {
-          expect(survey).toEqual(Survey.UNSAVED_NEW);
-          done();
-        });
-
-      user$.next(mockUser);
-      surveyId$.next(SURVEY_ID_NEW);
-    });
-  });
-
   describe('getAccessibleSurveys$', () => {
     it('should return empty list if no user', done => {
       authServiceSpy.getCurrentUser.and.returnValue(null as unknown as User);
@@ -170,7 +139,7 @@ describe('SurveyService', () => {
 
     it('should update state', async () => {
       dataStoreServiceSpy.updateSurvey.and.resolveTo();
-      await service.updateState(SurveyState.DRAFT);
+      await service.updateState(mockSurvey, SurveyState.DRAFT);
       // Verify updateSurvey was called with mutated survey object (difficult to equality check exact object due to immutability/cloning)
       // Check if called.
       expect(dataStoreServiceSpy.updateSurvey).toHaveBeenCalled();
@@ -178,13 +147,20 @@ describe('SurveyService', () => {
 
     it('should update acl', async () => {
       dataStoreServiceSpy.updateSurvey.and.resolveTo();
-      await service.updateAcl(Map({ 'user@test.com': Role.SURVEY_ORGANIZER }));
+      await service.updateAcl(
+        mockSurvey,
+        Map({ 'user@test.com': Role.SURVEY_ORGANIZER })
+      );
       expect(dataStoreServiceSpy.updateSurvey).toHaveBeenCalled();
     });
 
     it('should update data sharing terms', async () => {
       dataStoreServiceSpy.updateSurvey.and.resolveTo();
-      await service.updateDataSharingTerms(DataSharingType.PUBLIC, 'Terms');
+      await service.updateDataSharingTerms(
+        mockSurvey,
+        DataSharingType.PUBLIC,
+        'Terms'
+      );
       expect(dataStoreServiceSpy.updateSurvey).toHaveBeenCalled();
     });
   });
@@ -238,10 +214,6 @@ describe('SurveyService', () => {
     it('should return false if no user', () => {
       authServiceSpy.getCurrentUser.and.returnValue(null as unknown as User);
       expect(service.canManageSurvey(mockSurvey)).toBe(false);
-    });
-
-    it('should return false if no survey', () => {
-      expect(service.canManageSurvey(undefined)).toBe(false);
     });
 
     it('should return true if user is manager', () => {

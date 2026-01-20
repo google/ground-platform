@@ -68,8 +68,6 @@ describe('SurveyLoiComponent', () => {
     );
 
     surveyServiceSpy = jasmine.createSpyObj<SurveyService>('SurveyService', [
-      'getActiveSurvey',
-      'getActiveSurvey$',
       'canManageSurvey',
     ]);
 
@@ -89,8 +87,6 @@ describe('SurveyLoiComponent', () => {
     );
 
     surveyServiceSpy.canManageSurvey.and.returnValue(true);
-    surveyServiceSpy.getActiveSurvey.and.returnValue(mockSurvey);
-    surveyServiceSpy.getActiveSurvey$.and.returnValue(mockSurvey$);
 
     await TestBed.configureTestingModule({
       declarations: [SurveyLoiComponent],
@@ -112,6 +108,7 @@ describe('SurveyLoiComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(SurveyLoiComponent);
     component = fixture.componentInstance;
+    fixture.componentRef.setInput('survey', mockSurvey);
     fixture.detectChanges();
   });
 
@@ -131,7 +128,7 @@ describe('SurveyLoiComponent', () => {
     await component.onStrategyChange(DataCollectionStrategy.PREDEFINED);
 
     expect(jobServiceSpy.addOrUpdateJob).toHaveBeenCalledWith(
-      mockSurvey.id,
+      mockSurvey,
       jasmine.any(Job)
     );
   });

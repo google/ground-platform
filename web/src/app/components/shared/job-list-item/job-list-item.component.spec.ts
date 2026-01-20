@@ -109,7 +109,6 @@ describe('JobListItemComponent', () => {
   beforeEach(async () => {
     surveyServiceSpy = jasmine.createSpyObj<SurveyService>('SurveyService', [
       'canManageSurvey',
-      'getActiveSurvey$',
     ]);
 
     loiServiceSpy = jasmine.createSpyObj<LocationOfInterestService>(
@@ -141,7 +140,6 @@ describe('JobListItemComponent', () => {
     locationOfInterestId$ = new Subject<string | null>();
     urlParamsSignal = signal<UrlParams>(new UrlParams(null, null, null, null));
 
-    surveyServiceSpy.getActiveSurvey$.and.returnValue(of(survey));
     spyOn(LocationOfInterestService, 'getDisplayName').and.returnValue('');
     submissionServiceSpy.getSubmissions$.and.returnValue(submissions$);
     navigationServiceSpy.getSurveyId$.and.returnValue(surveyId$);

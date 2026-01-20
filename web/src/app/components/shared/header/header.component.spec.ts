@@ -62,7 +62,6 @@ describe('HeaderComponent', () => {
           provide: SurveyService,
           useValue: {
             canManageSurvey: () => false,
-            getActiveSurvey$: () => of(null),
           },
         },
       ],
@@ -73,6 +72,7 @@ describe('HeaderComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(HeaderComponent);
     component = fixture.componentInstance;
+    fixture.componentRef.setInput('survey', { title: 'Survey Title' }); // Mock survey object
     fixture.detectChanges();
   });
 
