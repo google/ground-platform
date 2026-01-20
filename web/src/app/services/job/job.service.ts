@@ -17,7 +17,6 @@
 import { Injectable } from '@angular/core';
 import { List, Map } from 'immutable';
 
-
 import { DataCollectionStrategy, Job } from 'app/models/job.model';
 import { MultipleChoice } from 'app/models/task/multiple-choice.model';
 import { Option } from 'app/models/task/option.model';

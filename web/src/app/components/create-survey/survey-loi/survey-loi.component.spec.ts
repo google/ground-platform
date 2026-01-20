@@ -59,8 +59,6 @@ describe('SurveyLoiComponent', () => {
     { type: DataSharingType.PRIVATE }
   );
 
-
-
   beforeEach(async () => {
     navigationServiceSpy = jasmine.createSpyObj<NavigationService>(
       'NavigationService',

@@ -80,7 +80,6 @@ describe('JobListItemComponent', () => {
 
   const surveyId = 'survey1';
 
-
   function createLois(count: number): List<LocationOfInterest> {
     const lois: LocationOfInterest[] = [];
     for (let i = 0; i < count; i++) {

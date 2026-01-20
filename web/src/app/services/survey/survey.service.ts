@@ -18,13 +18,10 @@ import { Injectable } from '@angular/core';
 import { List, Map } from 'immutable';
 import { Observable, firstValueFrom, of } from 'rxjs';
 
-
 import { Role } from 'app/models/role.model';
 import { DataSharingType, Survey, SurveyState } from 'app/models/survey.model';
 import { AuthService } from 'app/services/auth/auth.service';
 import { DataStoreService } from 'app/services/data-store/data-store.service';
-
-
 
 @Injectable({
   providedIn: 'root',
