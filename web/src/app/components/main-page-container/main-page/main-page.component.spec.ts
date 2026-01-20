@@ -26,7 +26,7 @@ import { Firestore } from '@angular/fire/firestore';
 import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute, Router } from '@angular/router';
 import { List, Map } from 'immutable';
-import { BehaviorSubject, NEVER, ReplaySubject, of } from 'rxjs';
+import { BehaviorSubject, NEVER, of } from 'rxjs';
 
 import { DataSharingType, Survey } from 'app/models/survey.model';
 import { AuthService } from 'app/services/auth/auth.service';

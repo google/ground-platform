@@ -88,6 +88,7 @@
     "eslint-plugin-import": "catalog:dev",
     "eslint-plugin-n": "catalog:dev",
     "eslint-plugin-prettier": "catalog:dev",
+    "eslint-plugin-unused-imports": "catalog:dev",
     "firebase-tools": "catalog:dev",
     "gts": "catalog:dev",
     "jasmine": "catalog:dev",
