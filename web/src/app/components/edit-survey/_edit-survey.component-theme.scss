@@ -24,13 +24,15 @@
 
   .survey-details-container, .share-survey-container {
     .mat-mdc-card {
-      --mdc-elevated-card-container-elevation: 0;
+      --mat-card-elevated-container-elevation: 0;
+      --mat-card-elevated-container-color: #fcfdf7;
+
       border: 1px solid mat.get-theme-color($theme, neutral, 90);
     }
 
     .mdc-button {
       &.delete-survey-button {
-        --mdc-outlined-button-label-text-color: #{mat.get-theme-color($theme, error)};
+        --mat-button-outlined-label-text-color: #{mat.get-theme-color($theme, error)};
       }
     }
   }
