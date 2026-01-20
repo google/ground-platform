@@ -30,11 +30,15 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { Router } from '@angular/router';
 import { NEVER, of } from 'rxjs';
 
+import { Job } from 'app/models/job.model';
+import { Task, TaskType } from 'app/models/task/task.model';
+
 import { InlineEditorModule } from 'app/components/shared/inline-editor/inline-editor.module';
 import { AuthService } from 'app/services/auth/auth.service';
 import { DataStoreService } from 'app/services/data-store/data-store.service';
 
 import { EditStyleButtonModule } from './edit-style-button/edit-style-button.module';
+import { JobService } from 'app/services/job/job.service';
 import { JobDialogComponent } from './job-dialog.component';
 import { TaskEditorModule } from './task-editor/task-editor.module';
 
@@ -58,9 +62,19 @@ describe('JobDialogComponent', () => {
   const dialogRef: Partial<MatDialogRef<JobDialogComponent>> = {
     keydownEvents: () => NEVER,
   };
+  let jobServiceSpy: jasmine.SpyObj<JobService>;
 
   beforeEach(async () => {
     const routerSpy = createRouterSpy();
+    jobServiceSpy = jasmine.createSpyObj('JobService', [
+      'createTask',
+      'createNewJob',
+    ]);
+    jobServiceSpy.createTask.and.returnValue(
+      new Task('t1', TaskType.TEXT, '', false, 0)
+    );
+    jobServiceSpy.createNewJob.and.returnValue(new Job('j1', 1, '#000'));
+
     await TestBed.configureTestingModule({
       declarations: [JobDialogComponent, MatDialogContent, MatDialogActions],
       imports: [
@@ -78,6 +92,7 @@ describe('JobDialogComponent', () => {
       ],
       providers: [
         { provide: DataStoreService, useValue: { generateId: () => '123' } },
+        { provide: JobService, useValue: jobServiceSpy },
         { provide: MAT_DIALOG_DATA, useValue: { createJob: true } },
         { provide: MatDialogRef, useValue: dialogRef },
         { provide: Router, useValue: routerSpy },
@@ -97,6 +112,12 @@ describe('JobDialogComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('should add question', () => {
+    component.addQuestion();
+    expect(component.tasks.size).toBe(2);
+    expect(component.tasks.first()?.type).toBe(TaskType.TEXT);
   });
 });
 

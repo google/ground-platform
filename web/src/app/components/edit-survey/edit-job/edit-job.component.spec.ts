@@ -92,7 +92,6 @@ describe('EditJobComponent', () => {
         {
           provide: SurveyService,
           useValue: {
-
             canManageSurvey: () => true,
           },
         },

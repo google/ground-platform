@@ -238,6 +238,18 @@ describe('CreateSurveyComponent', () => {
     expect(spinner.innerText).toContain('Loading survey...');
   });
 
+  describe('when survey id is empty', () => {
+    beforeEach(() => {
+      surveyId$.next('');
+      createComponent();
+      fixture.detectChanges();
+    });
+
+    it('initializes with unsaved new survey', () => {
+      expect(component.survey).toEqual(Survey.UNSAVED_NEW);
+    });
+  });
+
   describe('when routed in with survey ID', () => {
     beforeEach(async () => {
       surveyId$.next(surveyId);

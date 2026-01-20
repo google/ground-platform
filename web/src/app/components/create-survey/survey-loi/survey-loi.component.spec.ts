@@ -132,4 +132,32 @@ describe('SurveyLoiComponent', () => {
       jasmine.any(Job)
     );
   });
+
+  it('ngOnChanges should update job and lois when survey input changes', () => {
+    const newSurvey = new Survey(
+      'id2',
+      'title2',
+      'description2',
+      Map([['job2', new Job('job2', 0, '#FFF')]]),
+      Map(),
+      '',
+      { type: DataSharingType.PRIVATE }
+    );
+
+    component.survey = newSurvey;
+    component.ngOnChanges({
+      survey: {
+        currentValue: newSurvey,
+        previousValue: mockSurvey,
+        firstChange: false,
+        isFirstChange: () => false,
+      },
+    });
+
+    expect(component.job?.id).toBe('job2');
+    expect(loiServiceSpy.getPredefinedLoisByJobId$).toHaveBeenCalledWith(
+      newSurvey,
+      'job2'
+    );
+  });
 });
