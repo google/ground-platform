@@ -16,14 +16,14 @@
 
 import { Injectable } from '@angular/core';
 import { List, Map } from 'immutable';
-import { firstValueFrom } from 'rxjs';
+
 
 import { DataCollectionStrategy, Job } from 'app/models/job.model';
 import { MultipleChoice } from 'app/models/task/multiple-choice.model';
 import { Option } from 'app/models/task/option.model';
 import { Task, TaskType } from 'app/models/task/task.model';
 import { DataStoreService } from 'app/services/data-store/data-store.service';
-import { DataSharingType, Survey, SurveyState } from 'app/models/survey.model';
+import { Survey } from 'app/models/survey.model';
 
 import { TaskService } from '../task/task.service';
 

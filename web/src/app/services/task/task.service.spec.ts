@@ -18,7 +18,7 @@ import { TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 import { Subject } from 'rxjs';
 
-import { Survey } from 'app/models/survey.model';
+
 import { DataStoreService } from 'app/services/data-store/data-store.service';
 import { TaskService } from './task.service';
 
@@ -26,7 +26,7 @@ describe('TaskService', () => {
   const dataStoreServiceStub: Partial<DataStoreService> = {
     tasks$: () => new Subject(),
   };
-  const activeSurvey$ = new Subject<Survey | null>();
+
 
   beforeEach(() => {
     TestBed.configureTestingModule({
