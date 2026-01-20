@@ -111,7 +111,7 @@ describe('MainPageComponent', () => {
           provide: SubmissionService,
           useValue: { getSubmissions$: () => NEVER },
         },
-        { provide: SurveyService, useValue: { getActiveSurvey$: () => NEVER } },
+        { provide: SurveyService, useValue: {} },
         { provide: NavigationService, useValue: navigationServiceSpy },
         { provide: Firestore, useValue: {} },
         { provide: Auth, useValue: {} },

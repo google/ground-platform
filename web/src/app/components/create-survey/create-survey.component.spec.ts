@@ -21,7 +21,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { By } from '@angular/platform-browser';
 import { ActivatedRoute } from '@angular/router';
 import { List, Map } from 'immutable';
-import { Observable, ReplaySubject, Subject } from 'rxjs';
+import { Observable, ReplaySubject, Subject, of } from 'rxjs';
 
 import {
   CreateSurveyComponent,
@@ -140,20 +140,20 @@ describe('CreateSurveyComponent', () => {
     );
     surveyId$ = new ReplaySubject<string | null>(1);
     navigationServiceSpy.getSurveyId$.and.returnValue(surveyId$);
-
     route = new ActivatedRouteStub();
     surveyServiceSpy = jasmine.createSpyObj<SurveyService>('SurveyService', [
-      'getActiveSurvey$',
+      'loadSurvey$',
+      'canManageSurvey',
       'updateTitleAndDescription',
-      'createSurvey',
-      'getActiveSurvey',
       'updateDataSharingTerms',
+      'deleteSurvey',
+      'createSurvey',
     ]);
     surveyServiceSpy.createSurvey.and.returnValue(
       new Promise(resolve => resolve(newSurveyId))
     );
     activeSurvey$ = new ReplaySubject<Survey>(1);
-    surveyServiceSpy.getActiveSurvey$.and.returnValue(activeSurvey$);
+    surveyServiceSpy.loadSurvey$.and.returnValue(activeSurvey$);
     surveyServiceSpy.updateDataSharingTerms.and.returnValue(
       new Promise(resolve => resolve(undefined))
     );
@@ -236,6 +236,18 @@ describe('CreateSurveyComponent', () => {
       .nativeElement as HTMLElement;
     // TODO(#1170): Extract the spinner into a component
     expect(spinner.innerText).toContain('Loading survey...');
+  });
+
+  describe('when survey id is empty', () => {
+    beforeEach(() => {
+      surveyId$.next('');
+      createComponent();
+      fixture.detectChanges();
+    });
+
+    it('initializes with unsaved new survey', () => {
+      expect(component.survey).toEqual(Survey.UNSAVED_NEW);
+    });
   });
 
   describe('when routed in with survey ID', () => {
@@ -445,7 +457,7 @@ describe('CreateSurveyComponent', () => {
         await fixture.whenStable();
 
         expect(jobServiceSpy.addOrUpdateJob).toHaveBeenCalledOnceWith(
-          surveyId,
+          surveyWithoutJob,
           newJob.copyWith({ name })
         );
       });
@@ -472,7 +484,7 @@ describe('CreateSurveyComponent', () => {
         // Let's hydrate as DEFINE_LOIS first if that's what natural flow does, then back.
         // Or just hydrate as JOB_DETAILS directly since we want to test JOB_DETAILS.
 
-        surveyServiceSpy.getActiveSurvey.and.returnValue(surveyWithJob);
+        surveyServiceSpy.loadSurvey$.and.returnValue(of(surveyWithJob));
         // We simulate the "Back" action manually or just start there.
         // Let's stick to the original test intent but hydrate.
       });
@@ -490,7 +502,7 @@ describe('CreateSurveyComponent', () => {
         await fixture.whenStable();
 
         expect(jobServiceSpy.addOrUpdateJob).toHaveBeenCalledOnceWith(
-          surveyId,
+          surveyWithJob,
           job.copyWith({ name })
         );
       });
@@ -569,6 +581,7 @@ describe('CreateSurveyComponent', () => {
       await fixture.whenStable();
 
       expect(surveyServiceSpy.updateDataSharingTerms).toHaveBeenCalledOnceWith(
+        surveyWithJob,
         DataSharingType.CUSTOM,
         'Good day, sir'
       );

@@ -46,9 +46,7 @@ describe('TaskDetailsComponent', () => {
     await TestBed.configureTestingModule({
       declarations: [TaskDetailsComponent],
       imports: [MatDialogModule],
-      providers: [
-        { provide: DialogService, useValue: {} },
-      ],
+      providers: [{ provide: DialogService, useValue: {} }],
       schemas: [NO_ERRORS_SCHEMA],
     }).compileComponents();
 

@@ -217,6 +217,7 @@ describe('SubmissionFormComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(SubmissionFormComponent);
     component = fixture.componentInstance;
+    fixture.componentRef.setInput('survey', MockModel.survey001);
     fixture.detectChanges();
   });
 

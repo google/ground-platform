@@ -14,7 +14,13 @@
  * limitations under the License.
  */
 
-import { Component, EventEmitter, Input, Output, ViewChild } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  Input,
+  Output,
+  ViewChild,
+} from '@angular/core';
 import { List } from 'immutable';
 
 import { TasksEditorComponent } from 'app/components/shared/tasks-editor/tasks-editor.component';
@@ -29,7 +35,6 @@ import { Task } from 'app/models/task/task.model';
 export class TaskDetailsComponent {
   @Output() onValidationChange: EventEmitter<boolean> =
     new EventEmitter<boolean>();
-
 
   @Input() job?: Job;
 
@@ -57,5 +62,4 @@ export class TaskDetailsComponent {
   onTasksChange(valid: boolean): void {
     this.onValidationChange.emit(valid);
   }
-
 }

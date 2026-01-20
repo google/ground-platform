@@ -14,11 +14,18 @@
  * limitations under the License.
  */
 
-import { Component } from '@angular/core';
+import {
+  Component,
+  Input,
+  OnChanges,
+  OnInit,
+  SimpleChanges,
+} from '@angular/core';
 import { List } from 'immutable';
 
 import { DataCollectionStrategy, Job } from 'app/models/job.model';
 import { LocationOfInterest } from 'app/models/loi.model';
+import { Survey } from 'app/models/survey.model';
 import { JobService } from 'app/services/job/job.service';
 import { LocationOfInterestService } from 'app/services/loi/loi.service';
 import { SurveyService } from 'app/services/survey/survey.service';
@@ -30,7 +37,8 @@ import { TaskService } from 'app/services/task/task.service';
   styleUrls: ['./survey-loi.component.scss'],
   standalone: false,
 })
-export class SurveyLoiComponent {
+export class SurveyLoiComponent implements OnInit, OnChanges {
+  @Input() survey!: Survey;
   lois!: List<LocationOfInterest>;
 
   job?: Job;
@@ -43,17 +51,25 @@ export class SurveyLoiComponent {
   ) {}
 
   async ngOnInit() {
-    this.job = this.surveyService.getActiveSurvey().jobs.first();
+    this.updateJobAndLois();
+  }
+
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['survey']) {
+      this.updateJobAndLois();
+    }
+  }
+
+  private updateJobAndLois() {
+    if (!this.survey) return;
+    this.job = this.survey.jobs.first();
 
     if (!this.job) {
       return;
     }
 
     this.loiService
-      .getPredefinedLoisByJobId$(
-        this.surveyService.getActiveSurvey(),
-        this.job.id
-      )
+      .getPredefinedLoisByJobId$(this.survey, this.job.id)
       .subscribe(lois => (this.lois = lois));
   }
 
@@ -62,7 +78,7 @@ export class SurveyLoiComponent {
       const tasks = this.taskService.updateLoiTasks(this.job?.tasks, strategy);
 
       await this.jobService.addOrUpdateJob(
-        this.surveyService.getActiveSurvey().id,
+        this.survey,
         this.job.copyWith({ tasks, strategy })
       );
     }

@@ -30,46 +30,10 @@ import { NavigationService } from 'app/services/navigation/navigation.service';
   providedIn: 'root',
 })
 export class SurveyService {
-  private activeSurvey$: Observable<Survey>;
-  private activeSurvey!: Survey;
-
   constructor(
     private dataStore: DataStoreService,
-    private authService: AuthService,
-    private navigationService: NavigationService
-  ) {
-    // Reload active survey each time authenticated user changes.
-    this.activeSurvey$ = authService.getUser$().pipe(
-      switchMap(() =>
-        //  on each change to survey id.
-        this.navigationService.getSurveyId$().pipe(
-          // Asynchronously load survey. switchMap() internally disposes
-          // of previous subscription if present.
-          switchMap(id => {
-            if (id === SURVEY_ID_NEW) {
-              return of(Survey.UNSAVED_NEW);
-            }
-            if (id) {
-              return this.dataStore.loadSurvey$(id);
-            }
-            return of(Survey.UNSAVED_NEW);
-          })
-        )
-      ),
-      // Cache last loaded survey so that late subscribers don't cause
-      // survey to be reloaded.
-      shareReplay(1)
-    );
-    this.activeSurvey$.subscribe(survey => (this.activeSurvey = survey));
-  }
-
-  getActiveSurvey(): Survey {
-    return this.activeSurvey;
-  }
-
-  getActiveSurvey$(): Observable<Survey> {
-    return this.activeSurvey$;
-  }
+    private authService: AuthService
+  ) {}
 
   loadSurvey$(id: string): Observable<Survey> {
     return this.dataStore.loadSurvey$(id);
@@ -119,9 +83,9 @@ export class SurveyService {
    * @param survey the survey instance.
    * @param state the new status of the survey.
    */
-  updateState(state: SurveyState): Promise<void> {
+  updateState(survey: Survey, state: SurveyState): Promise<void> {
     return this.dataStore.updateSurvey({
-      ...this.activeSurvey,
+      ...survey,
       state,
     } as Survey);
   }
@@ -132,8 +96,8 @@ export class SurveyService {
    * @param survey the survey instance.
    * @param acl the new access control list of the survey.
    */
-  updateAcl(acl: Map<string, Role>): Promise<void> {
-    return this.dataStore.updateSurvey({ ...this.activeSurvey, acl } as Survey);
+  updateAcl(survey: Survey, acl: Map<string, Role>): Promise<void> {
+    return this.dataStore.updateSurvey({ ...survey, acl } as Survey);
   }
 
   /**
@@ -143,11 +107,12 @@ export class SurveyService {
    * @param customText the text of the DataSharingTerms.
    */
   updateDataSharingTerms(
+    survey: Survey,
     type: DataSharingType,
     customText?: string
   ): Promise<void> {
     return this.dataStore.updateSurvey({
-      ...this.activeSurvey,
+      ...survey,
       dataSharingTerms: { type, ...(customText && { customText }) },
     } as Survey);
   }
@@ -183,17 +148,13 @@ export class SurveyService {
   /**
    * Checks if a user has survey organizer or owner level permissions of the survey.
    */
-  canManageSurvey(survey?: Survey): boolean {
+  canManageSurvey(survey: Survey): boolean {
     const user = this.authService.getCurrentUser();
     if (!user) {
       return false;
     }
-    const targetSurvey = survey || this.activeSurvey;
-    if (!targetSurvey) {
-      return false;
-    }
     const userEmail = user.email;
-    const acl = targetSurvey.getAclEntriesSorted();
+    const acl = survey.getAclEntriesSorted();
     return !!acl.find(entry => entry.email === userEmail && entry.isManager());
   }
 }
