@@ -35,7 +35,7 @@ describe('JobService', () => {
         {
           provide: SurveyService,
           useValue: {
-            getActiveSurvey$: () => activeSurvey$,
+
             getSurveyAcl: () => NEVER,
           },
         },

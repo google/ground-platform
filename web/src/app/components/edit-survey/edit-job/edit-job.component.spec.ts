@@ -92,7 +92,7 @@ describe('EditJobComponent', () => {
         {
           provide: SurveyService,
           useValue: {
-            getActiveSurvey$: () => of(survey),
+
             canManageSurvey: () => true,
           },
         },
