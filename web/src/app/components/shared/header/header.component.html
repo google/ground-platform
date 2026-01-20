@@ -29,19 +29,21 @@
 
   <div>
     <ng-container *ngIf="canManage">
-      <ng-container *ngIf="canManage && state === HeaderState.MAP_VIEW">
+      <ng-container *ngIf="state === HeaderState.MAP_VIEW">
         <button mat-icon-button [matMenuTriggerFor]="editSurveyMenu">
           <mat-icon fontSet="material-symbols-outlined">settings</mat-icon>
         </button>
 
+        <mat-menu #editSurveyMenu="matMenu">
+          <a (click)="onEditSurveyClick()">
+            <button mat-menu-item i18n="@@app.labels.manageSurvey">
+              Manage survey
+            </button>
+          </a>
+        </mat-menu>
+
         <div class="header-divider"></div>
       </ng-container>
-
-      <mat-menu #editSurveyMenu="matMenu">
-        <a (click)="onEditSurveyClick()">
-          <button mat-menu-item i18n="@@app.labels.manageSurvey">Manage survey</button>
-        </a>
-      </mat-menu>
 
       <ng-container *ngIf="state === HeaderState.EDIT_SURVEY">
         <button
