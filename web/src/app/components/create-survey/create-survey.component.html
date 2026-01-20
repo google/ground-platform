@@ -15,7 +15,7 @@
 -->
 
 <div class="page">
-  <ground-header></ground-header>
+  <ground-header [survey]="survey"></ground-header>
   <!-- TODO(#1170): Extract the spinner into a component -->
   <div id="loading-spinner" class="loading-spinner" *ngIf="createSurveyPhase === CreateSurveyPhase.LOADING">
     <div>
@@ -56,6 +56,7 @@
             <survey-loi
               *ngSwitchCase="CreateSurveyPhase.DEFINE_LOIS"
               #surveyLoi
+              [survey]="survey!"
             ></survey-loi>
             <task-details
               *ngSwitchCase="CreateSurveyPhase.DEFINE_TASKS"

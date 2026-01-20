@@ -56,7 +56,6 @@ describe('SurveyHeaderComponent', () => {
         {
           provide: SurveyService,
           useValue: {
-            getActiveSurvey$: () => NEVER,
             getCurrentSurvey: () => {},
             canManageSurvey: () => {},
             updateTitle: () => Promise.resolve(),

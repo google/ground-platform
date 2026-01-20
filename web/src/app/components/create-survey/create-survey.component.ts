@@ -18,7 +18,7 @@ import '@angular/localize/init';
 
 import { ChangeDetectorRef, Component, OnInit, ViewChild } from '@angular/core';
 import { List } from 'immutable';
-import { Subscription, filter } from 'rxjs';
+import { Subscription, filter, of } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 
 import { DataSharingTermsComponent } from 'app/components/create-survey/data-sharing-terms/data-sharing-terms.component';
@@ -161,9 +161,17 @@ export class CreateSurveyComponent implements OnInit {
       })
     );
 
+    const survey$ = this.navigationService.getSurveyId$().pipe(
+      switchMap(id => {
+        if (id === SURVEY_ID_NEW) {
+          return of(Survey.UNSAVED_NEW);
+        }
+        return id ? this.surveyService.loadSurvey$(id) : of(Survey.UNSAVED_NEW);
+      })
+    );
+
     this.subscription.add(
-      this.surveyService
-        .getActiveSurvey$()
+      survey$
         .pipe(
           switchMap(survey =>
             this.loiService
@@ -299,7 +307,6 @@ export class CreateSurveyComponent implements OnInit {
       default:
         break;
     }
-    this.survey = this.surveyService.getActiveSurvey();
   }
 
   async continue(): Promise<void> {
@@ -333,7 +340,6 @@ export class CreateSurveyComponent implements OnInit {
       default:
         break;
     }
-    this.survey = this.surveyService.getActiveSurvey();
   }
 
   private async saveSurveyTitleAndDescription(): Promise<string | void> {
@@ -364,7 +370,7 @@ export class CreateSurveyComponent implements OnInit {
       job = this.jobService.createNewJob();
     }
     await this.jobService.addOrUpdateJob(
-      this.surveyId!,
+      this.survey!,
       job.copyWith({
         name,
         color: job.color || this.jobService.getNextColor(this.survey?.jobs),
@@ -393,7 +399,11 @@ export class CreateSurveyComponent implements OnInit {
       this.dataSharingTerms?.formGroup.controls.customText.value ?? undefined;
 
     this.draftSurveyService.updateDataSharingTerms(type, customText);
-    await this.surveyService.updateDataSharingTerms(type, customText);
+    await this.surveyService.updateDataSharingTerms(
+      this.survey!,
+      type,
+      customText
+    );
   }
 
   private async setSurveyStateToReady(): Promise<void> {

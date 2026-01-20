@@ -15,8 +15,8 @@
 -->
 
 <loi-editor
-  *ngIf="surveyService.getActiveSurvey$() | async as survey"
-  [canImport]="surveyService.canManageSurvey()"
+  *ngIf="survey"
+  [canImport]="surveyService.canManageSurvey(survey)"
   [survey]="survey"
   [job]="job"
   [lois]="lois"

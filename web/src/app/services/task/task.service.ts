@@ -34,10 +34,7 @@ export type TaskUpdate = {
   providedIn: 'root',
 })
 export class TaskService {
-
-  constructor(
-    private dataStoreService: DataStoreService
-  ) { }
+  constructor(private dataStoreService: DataStoreService) {}
 
   /**
    * Creates and returns a new task with a generated unique identifier.

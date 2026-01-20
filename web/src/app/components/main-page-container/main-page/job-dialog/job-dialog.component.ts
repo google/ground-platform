@@ -25,7 +25,7 @@ import {
 } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { List } from 'immutable';
-import { Subscription } from 'rxjs';
+import { Subscription, firstValueFrom } from 'rxjs';
 
 import { DataCollectionStrategy, Job } from 'app/models/job.model';
 import { Task, TaskType } from 'app/models/task/task.model';
@@ -33,6 +33,7 @@ import { DataStoreService } from 'app/services/data-store/data-store.service';
 import { DialogService } from 'app/services/dialog/dialog.service';
 import { JobService } from 'app/services/job/job.service';
 import { NavigationService } from 'app/services/navigation/navigation.service';
+import { SurveyService } from 'app/services/survey/survey.service';
 
 import { MarkerColorEvent } from './edit-style-button/edit-style-button.component';
 import { TaskEditorComponent } from './task-editor/task-editor.component';
@@ -70,6 +71,7 @@ export class JobDialogComponent implements OnDestroy {
     private jobService: JobService,
     private dataStoreService: DataStoreService,
     private navigationService: NavigationService,
+    private surveyService: SurveyService,
     private readonly cdr: ChangeDetectorRef
   ) {
     this.defaultJobColor = '#ff9131';
@@ -181,10 +183,13 @@ export class JobDialogComponent implements OnDestroy {
     return true;
   }
 
-  private addOrUpdateJob(surveyId: string, job: Job) {
+  private async addOrUpdateJob(surveyId: string, job: Job) {
+    const survey = await firstValueFrom(
+      this.surveyService.loadSurvey$(surveyId)
+    );
     // TODO: Inform user job was saved
     this.jobService
-      .addOrUpdateJob(surveyId, job)
+      .addOrUpdateJob(survey, job)
       .then(() => this.close())
       .catch(err => {
         console.error(err);
