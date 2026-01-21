@@ -36,7 +36,7 @@ import { Point } from 'app/models/geometry/point';
 import { Job } from 'app/models/job.model';
 import { LocationOfInterest } from 'app/models/loi.model';
 import { Submission } from 'app/models/submission/submission.model';
-import { DataSharingType, Survey } from 'app/models/survey.model';
+
 import { GroundIconModule } from 'app/modules/ground-icon.module';
 import { AuthService } from 'app/services/auth/auth.service';
 import { DataStoreService } from 'app/services/data-store/data-store.service';
@@ -79,17 +79,6 @@ describe('JobListItemComponent', () => {
   );
 
   const surveyId = 'survey1';
-  const survey = new Survey(
-    /* id= */ surveyId,
-    /* title= */ 'title1',
-    /* description= */ 'description1',
-    /* jobs= */ Map({
-      job001: job,
-    }),
-    /* acl= */ Map(),
-    /* ownerId= */ '',
-    { type: DataSharingType.PRIVATE }
-  );
 
   function createLois(count: number): List<LocationOfInterest> {
     const lois: LocationOfInterest[] = [];
@@ -109,7 +98,6 @@ describe('JobListItemComponent', () => {
   beforeEach(async () => {
     surveyServiceSpy = jasmine.createSpyObj<SurveyService>('SurveyService', [
       'canManageSurvey',
-      'getActiveSurvey$',
     ]);
 
     loiServiceSpy = jasmine.createSpyObj<LocationOfInterestService>(
@@ -141,7 +129,6 @@ describe('JobListItemComponent', () => {
     locationOfInterestId$ = new Subject<string | null>();
     urlParamsSignal = signal<UrlParams>(new UrlParams(null, null, null, null));
 
-    surveyServiceSpy.getActiveSurvey$.and.returnValue(of(survey));
     spyOn(LocationOfInterestService, 'getDisplayName').and.returnValue('');
     submissionServiceSpy.getSubmissions$.and.returnValue(submissions$);
     navigationServiceSpy.getSurveyId$.and.returnValue(surveyId$);

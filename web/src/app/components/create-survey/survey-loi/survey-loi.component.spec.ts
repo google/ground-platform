@@ -59,8 +59,6 @@ describe('SurveyLoiComponent', () => {
     { type: DataSharingType.PRIVATE }
   );
 
-  const mockSurvey$ = of(mockSurvey);
-
   beforeEach(async () => {
     navigationServiceSpy = jasmine.createSpyObj<NavigationService>(
       'NavigationService',
@@ -68,8 +66,6 @@ describe('SurveyLoiComponent', () => {
     );
 
     surveyServiceSpy = jasmine.createSpyObj<SurveyService>('SurveyService', [
-      'getActiveSurvey',
-      'getActiveSurvey$',
       'canManageSurvey',
     ]);
 
@@ -89,8 +85,6 @@ describe('SurveyLoiComponent', () => {
     );
 
     surveyServiceSpy.canManageSurvey.and.returnValue(true);
-    surveyServiceSpy.getActiveSurvey.and.returnValue(mockSurvey);
-    surveyServiceSpy.getActiveSurvey$.and.returnValue(mockSurvey$);
 
     await TestBed.configureTestingModule({
       declarations: [SurveyLoiComponent],
@@ -112,6 +106,7 @@ describe('SurveyLoiComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(SurveyLoiComponent);
     component = fixture.componentInstance;
+    fixture.componentRef.setInput('survey', mockSurvey);
     fixture.detectChanges();
   });
 
@@ -131,8 +126,36 @@ describe('SurveyLoiComponent', () => {
     await component.onStrategyChange(DataCollectionStrategy.PREDEFINED);
 
     expect(jobServiceSpy.addOrUpdateJob).toHaveBeenCalledWith(
-      mockSurvey.id,
+      mockSurvey,
       jasmine.any(Job)
+    );
+  });
+
+  it('ngOnChanges should update job and lois when survey input changes', () => {
+    const newSurvey = new Survey(
+      'id2',
+      'title2',
+      'description2',
+      Map([['job2', new Job('job2', 0, '#FFF')]]),
+      Map(),
+      '',
+      { type: DataSharingType.PRIVATE }
+    );
+
+    component.survey = newSurvey;
+    component.ngOnChanges({
+      survey: {
+        currentValue: newSurvey,
+        previousValue: mockSurvey,
+        firstChange: false,
+        isFirstChange: () => false,
+      },
+    });
+
+    expect(component.job?.id).toBe('job2');
+    expect(loiServiceSpy.getPredefinedLoisByJobId$).toHaveBeenCalledWith(
+      newSurvey,
+      'job2'
     );
   });
 });

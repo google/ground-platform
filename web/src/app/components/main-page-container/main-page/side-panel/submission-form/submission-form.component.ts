@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component } from '@angular/core';
+import { Component, Input, OnChanges } from '@angular/core';
 import {
   FormBuilder,
   FormControl,
@@ -22,7 +22,7 @@ import {
   Validators,
 } from '@angular/forms';
 import { List, Map } from 'immutable';
-import { Observable, combineLatest, of } from 'rxjs';
+import { Observable, ReplaySubject, combineLatest, of } from 'rxjs';
 import { filter, first, map, switchMap } from 'rxjs/operators';
 
 import { JobListItemActionsType } from 'app/components/shared/job-list-item/job-list-item.component';
@@ -55,7 +55,8 @@ import { SurveyService } from 'app/services/survey/survey.service';
   styleUrls: ['./submission-form.component.scss'],
   standalone: false,
 })
-export class SubmissionFormComponent {
+export class SubmissionFormComponent implements OnChanges {
+  @Input() survey?: Survey;
   readonly taskTypes = TaskType;
   readonly cardinality = Cardinality;
   readonly jobListItemActionsType = JobListItemActionsType;
@@ -64,6 +65,7 @@ export class SubmissionFormComponent {
   submission?: Submission;
   submissionForm?: FormGroup;
   submissionTasks?: List<Task>;
+  private survey$ = new ReplaySubject<Survey>(1);
 
   constructor(
     private dataStoreService: DataStoreService,
@@ -74,15 +76,14 @@ export class SubmissionFormComponent {
     surveyService: SurveyService,
     loiService: LocationOfInterestService
   ) {
-    surveyService.getActiveSurvey$().subscribe((survey?: Survey) => {
+    this.survey$.subscribe((survey?: Survey) => {
       this.surveyId = survey?.id;
     });
 
-    const survey$ = surveyService.getActiveSurvey$();
     const loiId$ = this.navigationService.getLocationOfInterestId$();
     const submissionId$ = this.navigationService.getSubmissionId$();
 
-    const loi$ = combineLatest([survey$, loiId$]).pipe(
+    const loi$ = combineLatest([this.survey$, loiId$]).pipe(
       switchMap(([survey, loiId]) => {
         if (!survey || !loiId) return of(undefined);
         return loiService
@@ -91,7 +92,7 @@ export class SubmissionFormComponent {
       })
     );
 
-    this.job$ = combineLatest([survey$, loi$]).pipe(
+    this.job$ = combineLatest([this.survey$, loi$]).pipe(
       map(([survey, loi]) => {
         if (survey && loi) {
           return survey.jobs.get(loi.jobId);
@@ -102,7 +103,12 @@ export class SubmissionFormComponent {
       map(j => j as Job)
     );
 
-    combineLatest([survey$, loi$, submissionId$, this.authService.getUser$()])
+    combineLatest([
+      this.survey$,
+      loi$,
+      submissionId$,
+      this.authService.getUser$(),
+    ])
       .pipe(
         switchMap(([survey, loi, submissionId, user]) => {
           if (survey && loi && submissionId && user) {
@@ -117,6 +123,12 @@ export class SubmissionFormComponent {
         })
       )
       .subscribe(submission => this.onSelectSubmission(submission));
+  }
+
+  ngOnChanges(): void {
+    if (this.survey) {
+      this.survey$.next(this.survey);
+    }
   }
 
   onCancel() {

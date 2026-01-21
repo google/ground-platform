@@ -16,14 +16,13 @@
 
 import { Injectable } from '@angular/core';
 import { List, Map } from 'immutable';
-import { firstValueFrom } from 'rxjs';
 
 import { DataCollectionStrategy, Job } from 'app/models/job.model';
 import { MultipleChoice } from 'app/models/task/multiple-choice.model';
 import { Option } from 'app/models/task/option.model';
 import { Task, TaskType } from 'app/models/task/task.model';
 import { DataStoreService } from 'app/services/data-store/data-store.service';
-import { SurveyService } from 'app/services/survey/survey.service';
+import { Survey } from 'app/models/survey.model';
 
 import { TaskService } from '../task/task.service';
 
@@ -42,7 +41,6 @@ enum JobDefaultColors {
 export class JobService {
   constructor(
     private dataStoreService: DataStoreService,
-    private surveyService: SurveyService,
     private taskService: TaskService
   ) {}
 
@@ -118,16 +116,11 @@ export class JobService {
   /**
    * Adds/Updates the job of a survey with a given job value.
    */
-  async addOrUpdateJob(surveyId: string, job: Job): Promise<void> {
+  async addOrUpdateJob(survey: Survey, job: Job): Promise<void> {
     if (job.index === -1) {
-      const index = await this.getJobCount();
+      const index = survey.jobs.size;
       job = job.copyWith({ index });
     }
-    return this.dataStoreService.addOrUpdateJob(surveyId, job);
-  }
-
-  private async getJobCount(): Promise<number> {
-    const survey = await firstValueFrom(this.surveyService.getActiveSurvey$());
-    return survey.jobs?.size;
+    return this.dataStoreService.addOrUpdateJob(survey.id, job);
   }
 }
