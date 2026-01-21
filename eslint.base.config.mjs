@@ -16,6 +16,7 @@
 
 import gts from 'gts/build/eslint.config.js';
 import prettierPlugin from 'eslint-plugin-prettier';
+import unusedImports from 'eslint-plugin-unused-imports';
 
 export default [
   {
@@ -32,6 +33,7 @@ export default [
   {
     plugins: {
       prettier: prettierPlugin,
+      'unused-imports': unusedImports,
     },
     languageOptions: {
       globals: {
@@ -53,6 +55,7 @@ export default [
         clearTimeout: 'readonly',
         clearInterval: 'readonly',
         console: 'readonly',
+        // 'unused-imports': 'readonly' // Is this needed? No, it's a plugin.
       },
     },
     rules: {
@@ -71,6 +74,17 @@ export default [
       'n/no-extraneous-import': 'off',
       'n/no-missing-import': 'off',
       'prettier/prettier': 'warn',
+      'no-unused-vars': 'off',
+      'unused-imports/no-unused-imports': 'error',
+      'unused-imports/no-unused-vars': [
+        'warn',
+        {
+          vars: 'all',
+          varsIgnorePattern: '^_',
+          args: 'after-used',
+          argsIgnorePattern: '^_',
+        },
+      ],
     },
   },
 ];
