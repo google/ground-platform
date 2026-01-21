@@ -16,16 +16,16 @@
 
 import { TestBed } from '@angular/core/testing';
 import { List, Map } from 'immutable';
-import { BehaviorSubject, ReplaySubject, Subject, of, take } from 'rxjs';
+import { BehaviorSubject, ReplaySubject, of } from 'rxjs';
 
 import { DataSharingType, Survey, SurveyState } from 'app/models/survey.model';
 import { User } from 'app/models/user.model';
 import { AuthService } from 'app/services/auth/auth.service';
 import { DataStoreService } from 'app/services/data-store/data-store.service';
 import { SurveyService } from 'app/services/survey/survey.service';
-import { SURVEY_ID_NEW } from 'app/services/navigation/navigation.constants';
-import { NavigationService } from 'app/services/navigation/navigation.service';
+
 import { Role } from 'app/models/role.model';
+import { NavigationService } from 'app/services/navigation/navigation.service';
 
 describe('SurveyService', () => {
   let service: SurveyService;

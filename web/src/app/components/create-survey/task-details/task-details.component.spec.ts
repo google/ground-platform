@@ -17,13 +17,9 @@
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialogModule } from '@angular/material/dialog';
-import { List, Map } from 'immutable';
-import { of } from 'rxjs';
 
 import { Job } from 'app/models/job.model';
-import { Role } from 'app/models/role.model';
-import { DataSharingType, Survey } from 'app/models/survey.model';
-import { Task } from 'app/models/task/task.model';
+
 import { DialogService } from 'app/services/dialog/dialog.service';
 
 import { TaskDetailsComponent } from './task-details.component';
@@ -31,15 +27,7 @@ import { TaskDetailsComponent } from './task-details.component';
 describe('TaskDetailsComponent', () => {
   let component: TaskDetailsComponent;
   let fixture: ComponentFixture<TaskDetailsComponent>;
-  const survey = new Survey(
-    '123',
-    'title',
-    'description',
-    Map<string, Job>(),
-    Map<string, Role>(),
-    '',
-    { type: DataSharingType.PRIVATE }
-  );
+
   const job = new Job('job1', 0);
 
   beforeEach(async () => {

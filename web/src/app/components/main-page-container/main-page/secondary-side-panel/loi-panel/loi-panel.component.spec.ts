@@ -23,7 +23,7 @@ import { List, Map } from 'immutable';
 import { of } from 'rxjs';
 
 import { Coordinate } from 'app/models/geometry/coordinate';
-import { Geometry } from 'app/models/geometry/geometry';
+
 import { Point } from 'app/models/geometry/point';
 import { Job } from 'app/models/job.model';
 import { LocationOfInterest } from 'app/models/loi.model';
