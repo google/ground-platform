@@ -150,16 +150,8 @@ describe('MainPageComponent', () => {
   });
 
   it('should redirect to sign in if not authenticated', () => {
-    // Note: This test depends on environment.useEmulators.
-    // Ensure emulators are handled or mocked if relevant.
-    // Assuming default environment is used where check passes.
     isAuthenticated$.next(false);
-    // Since environment.useEmulators is imported directly, we can't easily mock it without proxyquire or similar.
-    // However, if we assume test environment might have it true/false.
-    // If it fails, checks environment config.
-    // For now assuming it is false in test env or we accept it might not call if emulators on.
-    // If it fails, we know why.
-    // Actually, in test environment, useEmulators is usually false?
+    expect(navigationServiceSpy.signIn).toHaveBeenCalled();
   });
 
   it('should update LOIs when active survey changes', fakeAsync(() => {

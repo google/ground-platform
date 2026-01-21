@@ -81,6 +81,7 @@
   "devDependencies": {
     "@angular/cli": "catalog:dev",
     "@eslint/eslintrc": "catalog:dev",
+    "@types/jasmine": "catalog:dev",
     "@typescript-eslint/eslint-plugin": "catalog:dev",
     "@typescript-eslint/parser": "catalog:dev",
     "eslint": "catalog:dev",

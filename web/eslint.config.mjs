@@ -57,7 +57,7 @@ export default [
       '@typescript-eslint/no-redeclare': 'error',
       '@typescript-eslint/no-explicit-any': 'warn',
       '@typescript-eslint/no-unused-vars': [
-        'warn',
+        'error',
         { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
       ],
       '@typescript-eslint/no-unused-expressions': 'warn',
