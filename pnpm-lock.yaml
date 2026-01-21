@@ -94,7 +94,7 @@ catalogs:
       specifier: 64.0.0
       version: 64.0.0
     http-status-codes:
-      specifier: 2.3.0
+      specifier: ^2.3.0
       version: 2.3.0
     immutable:
       specifier: ^4.3.6
