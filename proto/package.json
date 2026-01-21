@@ -10,7 +10,7 @@
   "files": ["dist"],
   "scripts": {
     "clean": "rm -rf dist",
-    "lint": "buf lint",
+    "lint": "node scripts/lint.js",
     "format": "buf format --write",
     "build": "npm run generate:pbjs && npm run generate:pbjson && npm run generate:pbts",
     "postbuild": "cp src/index.* dist/",
