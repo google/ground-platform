@@ -19,7 +19,6 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialogModule } from '@angular/material/dialog';
 
 import { Job } from 'app/models/job.model';
-
 import { DialogService } from 'app/services/dialog/dialog.service';
 
 import { TaskDetailsComponent } from './task-details.component';
