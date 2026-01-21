@@ -25,7 +25,6 @@ runs:
       uses: actions/checkout@v4
       with:
         repository: ${{ inputs.platform-repository }}
-        path: ground-platform
 
     - name: Load cached Firebase emulator
       uses: actions/cache@v4
@@ -39,20 +38,21 @@ runs:
       uses: ./.github/actions/setup
 
     - name: Start Firebase emulator with Android test data
-      working-directory: ground-platform
       shell: bash
       run: |
+        MAX_TRIES=60
         pnpm exec nx start-android-test-data > firebase-emulator.log 2>&1 &
     
-        for i in {1..30}; do
+        for i in $(seq 1 $MAX_TRIES); do
           if curl -s http://localhost:4000 > /dev/null 2>&1; then
             echo "Firebase emulator started!"
             exit 0
           fi
-          echo "Waiting for Firebase emulator to start... ($i/30)"
+          echo "Waiting for Firebase emulator to start... ($i/$MAX_TRIES)"
           sleep 5
         done
     
         echo "Firebase Emulator failed to start"
         cat firebase-emulator.log
         exit 1
+        
