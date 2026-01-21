@@ -194,7 +194,7 @@ catalogs:
       specifier: ^3.54.10
       version: 3.58.1
     '@types/jasmine':
-      specifier: ~5.1.0
+      specifier: ^5.1.15
       version: 5.1.15
     '@types/node':
       specifier: ^20.19.27
@@ -334,7 +334,7 @@ importers:
         specifier: catalog:dev
         version: 3.3.3
       '@types/jasmine':
-        specifier: ^5.1.15
+        specifier: catalog:dev
         version: 5.1.15
       '@typescript-eslint/eslint-plugin':
         specifier: catalog:dev
