@@ -43,8 +43,8 @@ runs:
         MAX_TRIES=60
         pnpm exec nx start-android-test-data > firebase-emulator.log 2>&1 &
     
-        for i in $(seq 1 $MAX_TRIES); do
-          if curl -s http://localhost:4000 > /dev/null 2>&1; then
+        for ((i=1; i<=$MAX_TRIES; i++)); do
+          if curl -sf http://localhost:4000 > /dev/null 2>&1; then
             echo "Firebase emulator started!"
             exit 0
           fi
