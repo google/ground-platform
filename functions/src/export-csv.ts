@@ -273,8 +273,9 @@ function getMultipleChoiceValues(
 
 function getMultipleChoiceLabel(task: Pb.ITask, id: string): string | null {
   return (
-    task?.multipleChoiceQuestion?.options?.find((o: any) => o.id === id)
-      ?.label ?? null
+    task?.multipleChoiceQuestion?.options?.find(
+      (o: Pb.Task.MultipleChoiceQuestion.IOption) => o.id === id
+    )?.label ?? null
   );
 }
 
