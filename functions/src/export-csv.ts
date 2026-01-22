@@ -183,14 +183,14 @@ function writeRow(
   csvStream.write(row);
 }
 
-function quote(value: any): string {
+function quote(value: unknown): string {
   if (value == null) {
     return '';
   }
   if (typeof value === 'number') {
     return value.toString();
   }
-  const escaped = value.toString().replaceAll('"', '""');
+  const escaped = String(value).replace(/"/g, '""');
   return `"${escaped}"`;
 }
 
