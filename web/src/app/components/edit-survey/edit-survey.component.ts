@@ -19,7 +19,9 @@ import '@angular/localize/init';
 import { Component, effect, inject, input, signal } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { List, Map } from 'immutable';
-import { firstValueFrom } from 'rxjs';
+import { Subscription, firstValueFrom } from 'rxjs';
+
+import { EditJobComponent } from 'app/components/edit-survey/edit-job/edit-job.component';
 
 import { Job } from 'app/models/job.model';
 import { Role } from 'app/models/role.model';
@@ -75,6 +77,9 @@ export class EditSurveyComponent {
 
   dirty = false;
 
+  private activeComponentSubscription = new Subscription();
+  private activeComponentRef: any;
+
   constructor() {
     effect(async () => {
       const id = this.surveyId();
@@ -106,6 +111,38 @@ export class EditSurveyComponent {
           break;
       }
     });
+
+    effect(() => {
+       const survey = this.survey();
+       if (this.activeComponentRef instanceof EditJobComponent) {
+         this.activeComponentRef.survey = survey;
+       }
+    });
+  }
+
+  onActivate(component: any) {
+    this.activeComponentRef = component;
+    if (component instanceof EditJobComponent) {
+      component.survey = this.survey();
+      this.activeComponentSubscription.add(
+        component.updateJob.subscribe((job: Job) => {
+          this.addOrUpdateJob(job);
+        })
+      );
+      this.activeComponentSubscription.add(
+        component.updateTasks.subscribe(
+          (event: { jobId: string; tasks: List<Task>; valid: boolean }) => {
+            this.addOrUpdateTasks(event.jobId, event.tasks, event.valid);
+          }
+        )
+      );
+    }
+  }
+
+  onDeactivate() {
+    this.activeComponentSubscription.unsubscribe();
+    this.activeComponentSubscription = new Subscription();
+    this.activeComponentRef = null;
   }
 
   addJob(): void {

@@ -16,15 +16,16 @@
 
 import {
   Component,
+  EventEmitter,
   Input,
   OnChanges,
+  Output,
   SimpleChanges,
   ViewChild,
 } from '@angular/core';
 import { List } from 'immutable';
 import { Subscription } from 'rxjs';
 
-import { EditSurveyComponent } from 'app/components/edit-survey/edit-survey.component';
 import { LoiEditorComponent } from 'app/components/shared/loi-editor/loi-editor.component';
 import { TasksEditorComponent } from 'app/components/shared/tasks-editor/tasks-editor.component';
 import { DataCollectionStrategy, Job } from 'app/models/job.model';
@@ -48,8 +49,30 @@ enum EditJobSection {
   standalone: false,
 })
 export class EditJobComponent {
-  @Input() survey?: Survey;
-  @Input('id') jobId?: string;
+  private _survey?: Survey;
+  @Input() set survey(value: Survey | undefined) {
+    this._survey = value;
+    this.tryUpdateJobState();
+  }
+  get survey(): Survey | undefined {
+    return this._survey;
+  }
+
+  private _jobId?: string;
+  @Input('id') set jobId(value: string | undefined) {
+    this._jobId = value;
+    this.tryUpdateJobState();
+  }
+  get jobId(): string | undefined {
+    return this._jobId;
+  }
+
+  @Output() updateJob = new EventEmitter<Job>();
+  @Output() updateTasks = new EventEmitter<{
+    jobId: string;
+    tasks: List<Task>;
+    valid: boolean;
+  }>();
 
   subscription: Subscription = new Subscription();
   loisSubscription: Subscription = new Subscription();
@@ -72,12 +95,17 @@ export class EditJobComponent {
   constructor(
     private loiService: LocationOfInterestService,
     private taskService: TaskService,
-    public surveyService: SurveyService,
-    public editSurveyComponent: EditSurveyComponent
+    public surveyService: SurveyService
   ) {}
 
   ngOnChanges(changes: SimpleChanges): void {
     if ((changes['survey'] || changes['jobId']) && this.survey && this.jobId) {
+      this.updateJobState(this.survey, this.jobId);
+    }
+  }
+
+  private tryUpdateJobState() {
+    if (this.survey && this.jobId) {
       this.updateJobState(this.survey, this.jobId);
     }
   }
@@ -116,11 +144,11 @@ export class EditJobComponent {
 
   onTasksChange(valid: boolean): void {
     if (this.jobId && this.tasksEditor) {
-      this.editSurveyComponent.addOrUpdateTasks(
-        this.jobId,
-        this.tasksEditor.toTasks(),
-        valid
-      );
+      this.updateTasks.emit({
+        jobId: this.jobId,
+        tasks: this.tasksEditor.toTasks(),
+        valid,
+      });
     }
   }
 
@@ -136,9 +164,7 @@ export class EditJobComponent {
     );
 
     if (this.job) {
-      this.editSurveyComponent.addOrUpdateJob(
-        this.job.copyWith({ tasks, strategy })
-      );
+      this.updateJob.emit(this.job.copyWith({ tasks, strategy }));
     }
   }
 

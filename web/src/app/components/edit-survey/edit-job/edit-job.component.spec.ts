@@ -28,7 +28,6 @@ import { List, Map } from 'immutable';
 import { Subject, from, of } from 'rxjs';
 
 import { EditJobComponent } from 'app/components/edit-survey/edit-job/edit-job.component';
-import { EditSurveyComponent } from 'app/components/edit-survey/edit-survey.component';
 import { LoiEditorComponent } from 'app/components/shared/loi-editor/loi-editor.component';
 import { TasksEditorModule } from 'app/components/shared/tasks-editor/tasks-editor.module';
 import { Job } from 'app/models/job.model';
@@ -101,13 +100,6 @@ describe('EditJobComponent', () => {
             getSurvey: () => survey,
           },
         },
-        {
-          provide: EditSurveyComponent,
-          useValue: {
-            survey: signal(survey),
-            updateJob: jasmine.createSpy('updateJob'),
-          },
-        },
       ],
     }).compileComponents();
 
@@ -115,20 +107,6 @@ describe('EditJobComponent', () => {
     component = fixture.componentInstance;
     component.survey = survey;
     component.jobId = jobId;
-    component.ngOnChanges({
-      survey: {
-        previousValue: undefined,
-        currentValue: survey,
-        firstChange: true,
-        isFirstChange: () => true,
-      },
-      jobId: {
-        previousValue: undefined,
-        currentValue: jobId,
-        firstChange: true,
-        isFirstChange: () => true,
-      },
-    });
     fixture.detectChanges();
   });
 
