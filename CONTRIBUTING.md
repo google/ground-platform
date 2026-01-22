@@ -71,11 +71,18 @@ git clone https://github.com/google/ground-platform.git
 > including installation instructions, see
 > https://github.com/creationix/nvm#installation>
 
-Install Node.js using:
+Install and use Node.js using:
 
 ```shell
-nvm install 16
+nvm install 20
+nvm use 20
 ```
+
+Install required global tools:
+```shell
+npm install -g firebase-tools nx pnpm
+```
+
 
 ### Building and running the app
 
@@ -83,50 +90,52 @@ nvm install 16
 
 To get up and running quickly, you can run the web app and Cloud Functions,locally using the Firebase Local Emulator Suite.
 
-To install dependencies, build, and run Ground locally:
-
+Install dependencies:
 ```shell
-npm run start:local
+pnpm install
+```
+Build and start the local Firebase Emulator and Angular dev server:
+``` shell
+nx start
 ```
 
-Once the local server is ready, the app will be available at http://localhost:5000. The Firebase Emulator Suite UI can be accessed at http://localhost:4000. Changes to the web app in `web/` and to Cloud Functions in `functions/` are automatially rebuilt and reloaded on save.
+Once started:
+- App: http://localhost:4200
+- Firebase Emulator UI: http://localhost:4000
+
+Changes to the web app in `web/` and to Cloud Functions in `functions/` are automatially rebuilt and reloaded on save.
 
 **Note**: The local build variant does not require API keys to run. Warnings related to missing API keys are expected. Authentication is also disabled.
 
-The local emulator is preloaded with a demo Ground survey. Run `npm run export:local` to persist changes to update the snapshot of demo data in the local db.
+The local emulator is preloaded with a demo survey.
+Run `nx export` to save updated demo data for the next run.
 
-#### Using live Firebase
+### Run against live staging environment
 
-Alternatively, you can test and deploy against a real Firebase project:
+#### Staging environment (maintainers only)
 
-1. Create a project as described in [Getting started with Firebase](https://cloud.google.com/firestore/docs/client/get-firebase) in the Firebase docs, or contact your administrator to get access to existing development and/or production projects. When creating a new project, be sure the following are enabled under "Build":
-
-  * Authentication > Sign-in method > Google
-  * Firestore Database
-  * Hosting
-  * Storage
-
-2. Create a web app under "Project Overview > Add app > Web" or choose an existing web one.
-
-3. Scroll down to the code snippet under "SDK setup and configuration" and select "Config". Copy and paste the code snippet into a new file in `web/keys/<project-id>/firebase-config.js`.
-
-4. Build and deploy all the things dev Firebase:
-
-    ```shell
-    npm run deploy --config=dev --project=<project-id>
-    ```
-
-Once complete, the web app will be available at dev project's Firebase Hosting URL.
-
-The web app may also be develop locally against the dev Firebase server with:
+Core maintainers can run the app against the live staging environment with:
 
 ```shell
-cd web && npm run start --config=dev --project=<project-id>
+nx run web:serve:staging
 ```
 
-The web app will be accessible at http://localhost:4200. The app will be rebuilt and reloaded changes are saved.
+#### Deploying to staging
+```shell 
+npx firebase login
+nx run deploy:staging
+```
+#### Deploying to your own production Firebase project
 
-See <firebase/README.md> and <web/README.md> for additional npm development script commands.
+Override firebaseConfig in environment.production.ts
+
+Update the Firebase project ID placeholder in package.json
+
+Deploy with:
+``` shell
+nx run deploy:production
+```
+
  
 ## Developing Ground
 
@@ -139,7 +148,7 @@ Before you begin work on a change, comment on one of the [open issues](https://g
 We strongly encourage contributors to create a separate branch for each pull request. Maintainers working directly in `google/ground-platform` should create branches with names in the form `<username>/<issue-no>/<short-desc>`. For example:
 
 ```shell
-git checkout -d <user-id>/1234/fix-save-button
+git checkout -b <user-id>/1234/fix-save-button
 ```
 
 ### Creating a pull request
