@@ -14,7 +14,14 @@
  * limitations under the License.
  */
 
-import { Component, ViewChild, effect } from '@angular/core';
+import {
+  Component,
+  Injector,
+  ViewChild,
+  effect,
+  inject,
+  runInInjectionContext,
+} from '@angular/core';
 import { ActivatedRoute, Params } from '@angular/router';
 import { List } from 'immutable';
 import { Subscription } from 'rxjs';
@@ -71,22 +78,26 @@ export class EditJobComponent {
     private taskService: TaskService,
     public surveyService: SurveyService,
     public editSurveyComponent: EditSurveyComponent
-  ) {
+  ) {}
+
+  private injector = inject(Injector);
+
+  private jobUpdateEffect = effect(() => {
+    const survey = this.editSurveyComponent.survey();
+    if (this.jobId && survey) {
+      runInInjectionContext(this.injector, () => {
+        this.updateJobState(survey, this.jobId!);
+      });
+    }
+  });
+
+  ngOnInit(): void {
     this.subscription.add(
       this.navigationService
         .getSurveyId$()
         .subscribe(surveyId => this.onSurveyIdChange(surveyId))
     );
 
-    effect(() => {
-      const survey = this.editSurveyComponent.survey();
-      if (this.jobId && survey) {
-        this.updateJobState(survey, this.jobId);
-      }
-    });
-  }
-
-  async ngOnInit(): Promise<void> {
     this.subscription.add(
       this.route.params.subscribe(async params => {
         this.jobId = params['id'];
@@ -98,32 +109,33 @@ export class EditJobComponent {
     );
   }
 
+
   private onSurveyIdChange(surveyId: string | null) {
     if (surveyId) {
       this.surveyId = surveyId;
     }
   }
 
+  // Track last fetching key to avoid redundant re-fetches
+  private lastLoiFetchKey: string | null = null;
+
   private updateJobState(survey: Survey, jobId: string) {
     const job = survey.getJob(jobId);
     if (!job) return;
 
-    // Check if job actually changed to avoid unnecessary updates/resets
-    if (this.job && this.job === job) return;
-
+    // Separate job update from LOI fetching to avoid re-fetching LOIs on every keystroke
     this.job = job;
 
-    this.loisSubscription.unsubscribe();
-    this.loisSubscription = this.loiService
-      .getPredefinedLoisByJobId$(survey, job.id)
-      .subscribe((lois: List<LocationOfInterest>) => (this.lois = lois));
+    const fetchKey = `${survey.id}-${jobId}`;
+    if (this.lastLoiFetchKey !== fetchKey) {
+      this.lastLoiFetchKey = fetchKey;
+      this.loisSubscription.unsubscribe();
+      this.loisSubscription = this.loiService
+        .getPredefinedLoisByJobId$(survey, job.id)
+        .subscribe((lois: List<LocationOfInterest>) => (this.lois = lois));
+    }
 
-    // Only set tasks if they haven't been edited locally.
-    // EditJobComponent keeps tasks in `this.tasks`.
-    // If the survey updates (e.g. from renaming job), tasks might not change.
-    // If we re-assign `this.tasks`, the editor might reset cursor/focus.
-    // However, if we added a task via `addOrUpdateTasks` (which calls `draftSurveyService`),
-    // the survey update will reflect that.
+    // Only set tasks if they have changed conceptually
     const tasks = this.job?.tasks?.toList().sortBy(task => task.index);
     if (this.tasks?.equals(tasks)) return;
     this.tasks = tasks;
