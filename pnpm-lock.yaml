@@ -64,34 +64,34 @@ catalogs:
       specifier: ^20.0.1
       version: 20.0.1
     '@terraformer/wkt':
-      specifier: 2.1.2
+      specifier: ^2.1.2
       version: 2.1.2
     angularx-qrcode:
       specifier: ^20.0.0
       version: 20.0.0
     busboy:
-      specifier: 1.5.0
+      specifier: ^1.5.0
       version: 1.5.0
     cookie-parser:
       specifier: ^1.4.6
       version: 1.4.7
     cors:
-      specifier: 2.8.5
+      specifier: ^2.8.5
       version: 2.8.5
     firebase:
       specifier: ^10.12.2
       version: 10.14.1
     firebase-admin:
-      specifier: 12.1.0
+      specifier: ^12.1.0
       version: 12.1.0
     firebase-functions:
       specifier: ^6.6.0
       version: 6.6.0
     google-auth-library:
-      specifier: 6.1.3
+      specifier: ^6.1.3
       version: 6.1.3
     googleapis:
-      specifier: 64.0.0
+      specifier: ^64.0.0
       version: 64.0.0
     http-status-codes:
       specifier: ^2.3.0
@@ -100,7 +100,7 @@ catalogs:
       specifier: ^4.3.6
       version: 4.3.7
     jsonstream-ts:
-      specifier: 1.3.6
+      specifier: ^1.3.6
       version: 1.3.6
     marked:
       specifier: ^14.1.0
@@ -124,7 +124,7 @@ catalogs:
       specifier: ^7.8.2
       version: 7.8.2
     sanitize-html:
-      specifier: ^2.13.1
+      specifier: ^2.17.0
       version: 2.17.0
     selenium-webdriver:
       specifier: ^4.19.0
@@ -179,7 +179,7 @@ catalogs:
       specifier: ^1.4.4
       version: 1.4.10
     '@types/cors':
-      specifier: 2.8.17
+      specifier: ^2.8.17
       version: 2.8.17
     '@types/geojson':
       specifier: ^7946.0.14
@@ -206,7 +206,7 @@ catalogs:
       specifier: ^0.5.10
       version: 0.5.10
     '@types/terraformer__wkt':
-      specifier: 2.0.0
+      specifier: ^2.0.0
       version: 2.0.0
     '@types/webpack-env':
       specifier: ^1.15.3
@@ -257,7 +257,7 @@ catalogs:
       specifier: ^1.18.0
       version: 1.26.1
     jasmine:
-      specifier: ~5.1.0
+      specifier: ^5.1.0
       version: 5.1.0
     jasmine-expect:
       specifier: ^5.0.0
@@ -269,13 +269,13 @@ catalogs:
       specifier: ^6.4.4
       version: 6.4.4
     karma-chrome-launcher:
-      specifier: ~3.2.0
+      specifier: ^3.2.0
       version: 3.2.0
     karma-coverage:
-      specifier: ~2.2.1
+      specifier: ^2.2.1
       version: 2.2.1
     karma-jasmine:
-      specifier: ~5.1.0
+      specifier: ^5.1.0
       version: 5.1.0
     karma-jasmine-html-reporter:
       specifier: ^2.1.0
@@ -314,7 +314,7 @@ catalogs:
       specifier: ^2.8.1
       version: 2.8.1
     typescript:
-      specifier: ~5.9.0
+      specifier: ^5.9.0
       version: 5.9.3
 
 importers:
@@ -4563,9 +4563,6 @@ packages:
     resolution: {integrity: sha512-B4xqkqfZ8Wek+rCOeRxsjMS9OgvzebEzzLYw7NHYuvzb7IdxOkI0ZHGgeEBX4PUM7QGVvNSK60T3OvWj3YfBRg==}
     peerDependencies:
       '@types/express': '*'
-
-  '@types/cors@2.8.12':
-    resolution: {integrity: sha512-vt+kDhq/M2ayberEtJcIN/hxXy1Pk+59g2FV/ZQceeaTyCtCucjL2Q7FXlFjtWn4n15KCr1NE2lNNFhp0lEThw==}
 
   '@types/cors@2.8.17':
     resolution: {integrity: sha512-8CGDvrBj1zgo2qE+oS3pOCyYNqCPryMWY2bGfwA0dcfopWGgxs+78df0Rs3rc9THP4JkOhLsAa+15VdpAqkcUA==}
@@ -17709,8 +17706,6 @@ snapshots:
     dependencies:
       '@types/express': 4.17.25
 
-  '@types/cors@2.8.12': {}
-
   '@types/cors@2.8.17':
     dependencies:
       '@types/node': 20.19.30
@@ -19602,7 +19597,7 @@ snapshots:
 
   engine.io@6.6.5:
     dependencies:
-      '@types/cors': 2.8.12
+      '@types/cors': 2.8.17
       '@types/node': 20.19.30
       accepts: 1.3.8
       base64id: 2.0.0
@@ -20344,7 +20339,7 @@ snapshots:
 
   firebase-functions@6.6.0(firebase-admin@12.1.0(encoding@0.1.13)):
     dependencies:
-      '@types/cors': 2.8.12
+      '@types/cors': 2.8.17
       '@types/express': 4.17.25
       cors: 2.8.5
       express: 4.22.1
