@@ -56,8 +56,7 @@ export class EditSurveyComponent {
   surveyId = input<string>();
 
   survey?: Survey;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  production = !!(environment as any)['production'];
+  production = !!(environment as Environment)['production'];
   sectionTitle?: string = '';
   sortedJobs = List<Job>();
 
