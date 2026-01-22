@@ -118,13 +118,15 @@ export class EditJobComponent {
       .getPredefinedLoisByJobId$(survey, job.id)
       .subscribe((lois: List<LocationOfInterest>) => (this.lois = lois));
 
-    // Only set tasks if they haven't been edited locally?
+    // Only set tasks if they haven't been edited locally.
     // EditJobComponent keeps tasks in `this.tasks`.
     // If the survey updates (e.g. from renaming job), tasks might not change.
     // If we re-assign `this.tasks`, the editor might reset cursor/focus.
     // However, if we added a task via `addOrUpdateTasks` (which calls `draftSurveyService`),
     // the survey update will reflect that.
-    this.tasks = this.job?.tasks?.toList().sortBy(task => task.index);
+    const tasks = this.job?.tasks?.toList().sortBy(task => task.index);
+    if (this.tasks?.equals(tasks)) return;
+    this.tasks = tasks;
   }
 
   onSectionChange(section: EditJobSection) {
