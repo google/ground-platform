@@ -23,7 +23,6 @@ import {
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { By } from '@angular/platform-browser';
-import { ActivatedRoute } from '@angular/router';
 import { User } from 'firebase/auth';
 import { List, Map } from 'immutable';
 import { Subject, from, of } from 'rxjs';
@@ -40,7 +39,6 @@ import { AuthService } from 'app/services/auth/auth.service';
 import { DataStoreService } from 'app/services/data-store/data-store.service';
 import { DialogService } from 'app/services/dialog/dialog.service';
 import { DraftSurveyService } from 'app/services/draft-survey/draft-survey.service';
-import { NavigationService } from 'app/services/navigation/navigation.service';
 import { SurveyService } from 'app/services/survey/survey.service';
 
 @Component({
@@ -104,18 +102,6 @@ describe('EditJobComponent', () => {
           },
         },
         {
-          provide: ActivatedRoute,
-          useValue: {
-            params: from([{ id: jobId }]),
-          },
-        },
-        {
-          provide: NavigationService,
-          useValue: {
-            getSurveyId$: () => of(survey.id),
-          },
-        },
-        {
           provide: EditSurveyComponent,
           useValue: {
             survey: signal(survey),
@@ -127,6 +113,22 @@ describe('EditJobComponent', () => {
 
     fixture = TestBed.createComponent(EditJobComponent);
     component = fixture.componentInstance;
+    component.survey = survey;
+    component.jobId = jobId;
+    component.ngOnChanges({
+      survey: {
+        previousValue: undefined,
+        currentValue: survey,
+        firstChange: true,
+        isFirstChange: () => true,
+      },
+      jobId: {
+        previousValue: undefined,
+        currentValue: jobId,
+        firstChange: true,
+        isFirstChange: () => true,
+      },
+    });
     fixture.detectChanges();
   });
 

@@ -16,13 +16,11 @@
 
 import {
   Component,
-  Injector,
+  Input,
+  OnChanges,
+  SimpleChanges,
   ViewChild,
-  effect,
-  inject,
-  runInInjectionContext,
 } from '@angular/core';
-import { ActivatedRoute, Params } from '@angular/router';
 import { List } from 'immutable';
 import { Subscription } from 'rxjs';
 
@@ -34,7 +32,7 @@ import { LocationOfInterest } from 'app/models/loi.model';
 import { Survey } from 'app/models/survey.model';
 import { Task } from 'app/models/task/task.model';
 import { LocationOfInterestService } from 'app/services/loi/loi.service';
-import { NavigationService } from 'app/services/navigation/navigation.service';
+
 import { SurveyService } from 'app/services/survey/survey.service';
 import { TaskService } from 'app/services/task/task.service';
 
@@ -50,11 +48,11 @@ enum EditJobSection {
   standalone: false,
 })
 export class EditJobComponent {
+  @Input() survey?: Survey;
+  @Input('id') jobId?: string;
+
   subscription: Subscription = new Subscription();
   loisSubscription: Subscription = new Subscription();
-
-  surveyId?: string;
-  jobId?: string;
 
   section: EditJobSection = EditJobSection.TASKS;
 
@@ -72,47 +70,15 @@ export class EditJobComponent {
   loiEditor?: LoiEditorComponent;
 
   constructor(
-    private route: ActivatedRoute,
-    private navigationService: NavigationService,
     private loiService: LocationOfInterestService,
     private taskService: TaskService,
     public surveyService: SurveyService,
     public editSurveyComponent: EditSurveyComponent
   ) {}
 
-  private injector = inject(Injector);
-
-  private jobUpdateEffect = effect(() => {
-    const survey = this.editSurveyComponent.survey();
-    if (this.jobId && survey) {
-      runInInjectionContext(this.injector, () => {
-        this.updateJobState(survey, this.jobId!);
-      });
-    }
-  });
-
-  ngOnInit(): void {
-    this.subscription.add(
-      this.navigationService
-        .getSurveyId$()
-        .subscribe(surveyId => this.onSurveyIdChange(surveyId))
-    );
-
-    this.subscription.add(
-      this.route.params.subscribe(async params => {
-        this.jobId = params['id'];
-        const survey = this.editSurveyComponent.survey();
-        if (survey) {
-          this.updateJobState(survey, this.jobId!);
-        }
-      })
-    );
-  }
-
-
-  private onSurveyIdChange(surveyId: string | null) {
-    if (surveyId) {
-      this.surveyId = surveyId;
+  ngOnChanges(changes: SimpleChanges): void {
+    if ((changes['survey'] || changes['jobId']) && this.survey && this.jobId) {
+      this.updateJobState(this.survey, this.jobId);
     }
   }
 
