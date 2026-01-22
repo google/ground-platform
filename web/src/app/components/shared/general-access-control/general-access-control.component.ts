@@ -16,13 +16,10 @@
 
 import '@angular/localize/init';
 
-import { Component } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { Map } from 'immutable';
-import { Subscription } from 'rxjs';
 
 import { Survey, SurveyGeneralAccess } from 'app/models/survey.model';
-import { AuthService } from 'app/services/auth/auth.service';
-import { DraftSurveyService } from 'app/services/draft-survey/draft-survey.service';
 
 const generalAccessLabels = Map<
   SurveyGeneralAccess,
@@ -53,43 +50,21 @@ const generalAccessLabels = Map<
   standalone: false,
 })
 export class GeneralAccessControlComponent {
-  private subscription = new Subscription();
+  @Input() survey?: Survey;
+  @Output() onGeneralAccessChange = new EventEmitter<SurveyGeneralAccess>();
 
-  selectedGeneralAccess!: SurveyGeneralAccess;
-
-  SurveyGeneralAccess = SurveyGeneralAccess;
-
-  generalAccessLabels = generalAccessLabels;
-
-  constructor(
-    readonly authService: AuthService,
-    readonly draftSurveyService: DraftSurveyService
-  ) {
-    this.subscription.add(
-      this.draftSurveyService
-        .getSurvey$()
-        .subscribe(survey => this.onSurveyLoaded(survey))
-    );
-  }
+  readonly SurveyGeneralAccess = SurveyGeneralAccess;
+  readonly generalAccessLabels = generalAccessLabels;
 
   get generalAccessKeys(): SurveyGeneralAccess[] {
     return Array.from(this.generalAccessLabels.keys());
   }
 
-  private async onSurveyLoaded(survey: Survey): Promise<void> {
-    // Default to RESTRICTED for general access if not explicitly set.
-    // This is present for backward-compatibility with older surveys.
-    this.selectedGeneralAccess =
-      survey.generalAccess || SurveyGeneralAccess.RESTRICTED;
+  get selectedGeneralAccess(): SurveyGeneralAccess {
+    return this.survey?.generalAccess || SurveyGeneralAccess.RESTRICTED;
   }
 
   changeGeneralAccess(generalAccess: SurveyGeneralAccess) {
-    this.selectedGeneralAccess = generalAccess;
-
-    this.draftSurveyService.updateGeneralAccess(generalAccess);
-  }
-
-  ngOnDestroy() {
-    this.subscription.unsubscribe();
+    this.onGeneralAccessChange.emit(generalAccess);
   }
 }

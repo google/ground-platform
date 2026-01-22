@@ -14,16 +14,20 @@
  * limitations under the License.
  */
 
-import { Component } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  Input,
+  OnChanges,
+  Output,
+} from '@angular/core';
 import { MatSelectChange } from '@angular/material/select';
 import { Map } from 'immutable';
-import { Subscription } from 'rxjs';
 
 import { AclEntry } from 'app/models/acl-entry.model';
 import { Role } from 'app/models/role.model';
 import { Survey } from 'app/models/survey.model';
 import { AuthService, ROLE_OPTIONS } from 'app/services/auth/auth.service';
-import { DraftSurveyService } from 'app/services/draft-survey/draft-survey.service';
 
 @Component({
   selector: 'ground-share-list',
@@ -31,41 +35,32 @@ import { DraftSurveyService } from 'app/services/draft-survey/draft-survey.servi
   styleUrls: ['./share-list.component.scss'],
   standalone: false,
 })
-export class ShareListComponent {
-  acl: Array<AclEntry> = [];
-  survey?: Survey;
-  surveyOwnerEmail = '';
+export class ShareListComponent implements OnChanges {
+  @Input() survey?: Survey;
+  @Output() onAclChange = new EventEmitter<Map<string, Role>>();
 
-  private subscription = new Subscription();
+  acl: Array<AclEntry> = [];
+  surveyOwnerEmail = '';
 
   readonly roleOptions = ROLE_OPTIONS;
 
   roles = Role;
 
-  constructor(
-    readonly authService: AuthService,
-    readonly draftSurveyService: DraftSurveyService
-  ) {
-    this.subscription.add(
-      this.draftSurveyService
-        .getSurvey$()
-        .subscribe(survey => this.onSurveyLoaded(survey))
-    );
-  }
+  constructor(readonly authService: AuthService) {}
 
-  private async onSurveyLoaded(survey: Survey): Promise<void> {
-    this.survey = survey;
+  async ngOnChanges(): Promise<void> {
+    if (this.survey) {
+      const owner = await this.authService.getUser(this.survey.ownerId);
 
-    const owner = await this.authService.getUser(survey.ownerId);
+      this.surveyOwnerEmail = owner?.email || '';
 
-    this.surveyOwnerEmail = owner?.email || '';
-
-    this.acl = survey
-      .getAclSorted()
-      .entrySeq()
-      .filter(([key]) => key !== this.surveyOwnerEmail)
-      .map(([key, value]) => new AclEntry(key, value))
-      .toArray();
+      this.acl = this.survey
+        .getAclSorted()
+        .entrySeq()
+        .filter(([key]) => key !== this.surveyOwnerEmail)
+        .map(([key, value]) => new AclEntry(key, value))
+        .toArray();
+    }
   }
 
   onRoleChange(event: MatSelectChange, index: number) {
@@ -82,14 +77,14 @@ export class ShareListComponent {
     }
     // Add user owner.
     const aclUpdate = [...this.acl];
-    aclUpdate.push(new AclEntry(this.surveyOwnerEmail!, Role.SURVEY_ORGANIZER));
+    if (this.surveyOwnerEmail) {
+      aclUpdate.push(
+        new AclEntry(this.surveyOwnerEmail, Role.SURVEY_ORGANIZER)
+      );
+    }
 
-    this.draftSurveyService.updateAcl(
+    this.onAclChange.emit(
       Map(aclUpdate.map(entry => [entry.email, entry.role]))
     );
-  }
-
-  ngOnDestroy() {
-    this.subscription.unsubscribe();
   }
 }

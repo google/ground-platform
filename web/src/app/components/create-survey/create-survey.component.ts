@@ -28,7 +28,6 @@ import { TaskDetailsComponent } from 'app/components/create-survey/task-details/
 import { DataCollectionStrategy, Job } from 'app/models/job.model';
 import { LocationOfInterest } from 'app/models/loi.model';
 import { Survey, SurveyState } from 'app/models/survey.model';
-import { DraftSurveyService } from 'app/services/draft-survey/draft-survey.service';
 import { JobService } from 'app/services/job/job.service';
 import { LocationOfInterestService } from 'app/services/loi/loi.service';
 import { SURVEY_ID_NEW } from 'app/services/navigation/navigation.constants';
@@ -142,7 +141,6 @@ export class CreateSurveyComponent implements OnInit {
 
   constructor(
     private surveyService: SurveyService,
-    private draftSurveyService: DraftSurveyService,
     private jobService: JobService,
     private taskService: TaskService,
     private navigationService: NavigationService,
@@ -151,22 +149,17 @@ export class CreateSurveyComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.subscription.add(
-      this.navigationService.getSurveyId$().subscribe(async surveyId => {
-        this.surveyId = surveyId ? surveyId : SURVEY_ID_NEW;
-        await this.draftSurveyService.init(this.surveyId);
-        this.draftSurveyService
-          .getSurvey$()
-          .subscribe(survey => (this.survey = survey));
-      })
-    );
-
     const survey$ = this.navigationService.getSurveyId$().pipe(
       switchMap(id => {
         if (id === SURVEY_ID_NEW) {
+          this.surveyId = SURVEY_ID_NEW;
           return of(Survey.UNSAVED_NEW);
         }
-        return id ? this.surveyService.loadSurvey$(id) : of(Survey.UNSAVED_NEW);
+        if (id) {
+          this.surveyId = id;
+          return this.surveyService.loadSurvey$(id);
+        }
+        return of(Survey.UNSAVED_NEW);
       })
     );
 
@@ -398,7 +391,6 @@ export class CreateSurveyComponent implements OnInit {
     const customText =
       this.dataSharingTerms?.formGroup.controls.customText.value ?? undefined;
 
-    this.draftSurveyService.updateDataSharingTerms(type, customText);
     await this.surveyService.updateDataSharingTerms(
       this.survey!,
       type,
@@ -407,8 +399,7 @@ export class CreateSurveyComponent implements OnInit {
   }
 
   private async setSurveyStateToReady(): Promise<void> {
-    this.draftSurveyService.updateState(SurveyState.READY);
-    await this.draftSurveyService.updateSurvey();
+    await this.surveyService.updateState(this.survey!, SurveyState.READY);
   }
 
   ngOnDestroy() {

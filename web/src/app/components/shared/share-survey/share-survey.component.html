@@ -27,7 +27,10 @@
     </mat-card-header>
 
     <mat-card-content>
-      <ground-share-list></ground-share-list>
+      <ground-share-list
+        [survey]="editSurveyComponent.survey()"
+        (onAclChange)="onAclChange($event)"
+      ></ground-share-list>
     </mat-card-content>
   </mat-card>
 
@@ -37,12 +40,19 @@
     </mat-card-header>
 
     <mat-card-content>
-      <ground-general-access-control></ground-general-access-control>
+      <ground-general-access-control
+        [survey]="editSurveyComponent.survey()"
+        (onGeneralAccessChange)="onGeneralAccessChange($event)"
+      ></ground-general-access-control>
     </mat-card-content>
   </mat-card>
 
   <mat-card>
-    <ground-data-visibility-control class="floating-button"></ground-data-visibility-control>
+    <ground-data-visibility-control
+      class="floating-button"
+      [survey]="editSurveyComponent.survey()"
+      (onDataVisibilityChange)="onDataVisibilityChange($event)"
+    ></ground-data-visibility-control>
 
     <mat-card-header>
       <mat-card-title i18n="@@app.cards.dataVisibility.title">Data visibility</mat-card-title>

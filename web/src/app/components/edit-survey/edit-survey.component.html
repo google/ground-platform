@@ -18,6 +18,11 @@
   <ground-survey-header
     *ngIf="survey; let activeSurvey"
     [activeSurvey]="activeSurvey"
+    [isDirty]="isDirty()"
+    [isValid]="isValid()"
+    (onAclChange)="updateAcl($event)"
+    (onPublish)="publish()"
+    (onCancel)="cancel()"
   ></ground-survey-header>
 
   <!-- TODO(#1170): Extract the spinner into a component -->

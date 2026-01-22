@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, effect } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Subscription } from 'rxjs';
 
+import { EditSurveyComponent } from 'app/components/edit-survey/edit-survey.component';
 import { SurveyDetailsComponent } from 'app/components/create-survey/survey-details/survey-details.component';
 import { DATA_SHARING_TYPE_DESCRIPTION, Survey } from 'app/models/survey.model';
 import { DraftSurveyService } from 'app/services/draft-survey/draft-survey.service';
@@ -55,12 +56,12 @@ export class EditDetailsComponent implements OnInit {
     public dialog: MatDialog,
     public draftSurveyService: DraftSurveyService,
     private surveyService: SurveyService,
-    private navigationService: NavigationService
-  ) {}
-
-  ngOnInit() {
-    this.subscription.add(
-      this.draftSurveyService.getSurvey$().subscribe(survey => {
+    private navigationService: NavigationService,
+    private editSurveyComponent: EditSurveyComponent
+  ) {
+    effect(() => {
+      const survey = this.editSurveyComponent.survey();
+      if (survey) {
         this.survey = survey;
         if (this.survey.dataSharingTerms) {
           const { type, customText } = this.survey.dataSharingTerms;
@@ -69,17 +70,27 @@ export class EditDetailsComponent implements OnInit {
             customText,
           };
         }
-      })
-    );
+      }
+    });
+  }
+
+  ngOnInit() {
+    // Logic moved to constructor effect
   }
 
   onDetailsChange(valid: boolean): void {
-    if (this.surveyDetails) {
+    if (this.surveyDetails && this.survey) {
       const [title, description] = this.surveyDetails.toTitleAndDescription();
 
-      this.draftSurveyService.updateTitleAndDescription(
+      const newSurvey = this.draftSurveyService.updateTitleAndDescription(
+        this.survey,
         title,
-        description,
+        description
+      );
+      this.editSurveyComponent.updateSurvey(newSurvey);
+
+      this.editSurveyComponent.valid = this.editSurveyComponent.valid.set(
+        this.survey.id,
         valid
       );
     }

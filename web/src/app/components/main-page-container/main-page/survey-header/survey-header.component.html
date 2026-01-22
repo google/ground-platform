@@ -23,6 +23,14 @@
     >
       <mat-icon>menu</mat-icon>
     </button>
+    <button
+      mat-button
+      class="cancel-button"
+      *ngIf="isEditSurveyPage()"
+      (click)="onCancel.emit()"
+    >
+      <ng-container i18n="@@app.editSurvey.cancel">Cancel</ng-container>
+    </button>
   </div>
   <div left>
     <div class="header-divider"></div>
@@ -30,5 +38,17 @@
     <div class="survey-title">
       {{ activeSurvey()?.title ?? 'Untitled survey' }}
     </div>
+  </div>
+  <div end>
+    <button
+      mat-flat-button
+      color="primary"
+      class="finish-button"
+      *ngIf="isEditSurveyPage()"
+      [disabled]="!isDirty || !isValid"
+      (click)="onPublish.emit()"
+    >
+      <ng-container i18n="@@app.editSurvey.publishChanges">Publish changes</ng-container>
+    </button>
   </div>
 </ground-header>

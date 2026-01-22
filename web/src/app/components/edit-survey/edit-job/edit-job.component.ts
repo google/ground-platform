@@ -14,17 +14,18 @@
  * limitations under the License.
  */
 
-import { Component, ViewChild } from '@angular/core';
+import { Component, ViewChild, effect } from '@angular/core';
 import { ActivatedRoute, Params } from '@angular/router';
 import { List } from 'immutable';
 import { Subscription } from 'rxjs';
 
+import { EditSurveyComponent } from 'app/components/edit-survey/edit-survey.component';
 import { LoiEditorComponent } from 'app/components/shared/loi-editor/loi-editor.component';
 import { TasksEditorComponent } from 'app/components/shared/tasks-editor/tasks-editor.component';
 import { DataCollectionStrategy, Job } from 'app/models/job.model';
 import { LocationOfInterest } from 'app/models/loi.model';
+import { Survey } from 'app/models/survey.model';
 import { Task } from 'app/models/task/task.model';
-import { DraftSurveyService } from 'app/services/draft-survey/draft-survey.service';
 import { LocationOfInterestService } from 'app/services/loi/loi.service';
 import { NavigationService } from 'app/services/navigation/navigation.service';
 import { SurveyService } from 'app/services/survey/survey.service';
@@ -69,19 +70,30 @@ export class EditJobComponent {
     private loiService: LocationOfInterestService,
     private taskService: TaskService,
     public surveyService: SurveyService,
-    public draftSurveyService: DraftSurveyService
+    private editSurveyComponent: EditSurveyComponent
   ) {
     this.subscription.add(
       this.navigationService
         .getSurveyId$()
         .subscribe(surveyId => this.onSurveyIdChange(surveyId))
     );
+
+    effect(() => {
+      const survey = this.editSurveyComponent.survey();
+      if (this.jobId && survey) {
+        this.updateJobState(survey, this.jobId);
+      }
+    });
   }
 
   async ngOnInit(): Promise<void> {
     this.subscription.add(
       this.route.params.subscribe(async params => {
-        await this.onJobIdChange(params);
+        this.jobId = params['id'];
+        const survey = this.editSurveyComponent.survey();
+        if (survey) {
+          this.updateJobState(survey, this.jobId!);
+        }
       })
     );
   }
@@ -92,22 +104,26 @@ export class EditJobComponent {
     }
   }
 
-  private onJobIdChange(params: Params) {
-    this.jobId = params['id'];
+  private updateJobState(survey: Survey, jobId: string) {
+    const job = survey.getJob(jobId);
+    if (!job) return;
 
-    this.job = this.draftSurveyService.getSurvey().getJob(this.jobId!);
+    // Check if job actually changed to avoid unnecessary updates/resets
+    if (this.job && this.job === job) return;
 
-    if (!this.job) return;
+    this.job = job;
 
-    this.loisSubscription.add(
-      this.loiService
-        .getPredefinedLoisByJobId$(
-          this.draftSurveyService.getSurvey(),
-          this.job!.id
-        )
-        .subscribe((lois: List<LocationOfInterest>) => (this.lois = lois))
-    );
+    this.loisSubscription.unsubscribe();
+    this.loisSubscription = this.loiService
+      .getPredefinedLoisByJobId$(survey, job.id)
+      .subscribe((lois: List<LocationOfInterest>) => (this.lois = lois));
 
+    // Only set tasks if they haven't been edited locally?
+    // EditJobComponent keeps tasks in `this.tasks`.
+    // If the survey updates (e.g. from renaming job), tasks might not change.
+    // If we re-assign `this.tasks`, the editor might reset cursor/focus.
+    // However, if we added a task via `addOrUpdateTasks` (which calls `draftSurveyService`),
+    // the survey update will reflect that.
     this.tasks = this.job?.tasks?.toList().sortBy(task => task.index);
   }
 
@@ -120,7 +136,7 @@ export class EditJobComponent {
 
   onTasksChange(valid: boolean): void {
     if (this.jobId && this.tasksEditor) {
-      this.draftSurveyService.addOrUpdateTasks(
+      this.editSurveyComponent.addOrUpdateTasks(
         this.jobId,
         this.tasksEditor.toTasks(),
         valid
@@ -139,18 +155,15 @@ export class EditJobComponent {
       this.addLoiTaskId
     );
 
-    this.draftSurveyService.addOrUpdateJob(
-      this.job!.copyWith({ tasks, strategy })
-    );
-
-    this.job = this.draftSurveyService.getSurvey().getJob(this.jobId!);
-
-    this.tasks = tasks?.toList().sortBy(task => task.index);
+    if (this.job) {
+      this.editSurveyComponent.addOrUpdateJob(
+        this.job.copyWith({ tasks, strategy })
+      );
+    }
   }
 
   ngOnDestroy() {
     this.subscription.unsubscribe();
-
     this.loisSubscription.unsubscribe();
   }
 }

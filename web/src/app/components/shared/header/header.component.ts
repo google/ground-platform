@@ -18,13 +18,7 @@ import { Component, Input, OnChanges } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Survey } from 'app/models/survey.model';
 
-import {
-  DialogData,
-  DialogType,
-  JobDialogComponent,
-} from 'app/components/edit-survey/job-dialog/job-dialog.component';
 import { AuthService } from 'app/services/auth/auth.service';
-import { DraftSurveyService } from 'app/services/draft-survey/draft-survey.service';
 import { NavigationService } from 'app/services/navigation/navigation.service';
 import { SurveyService } from 'app/services/survey/survey.service';
 
@@ -45,13 +39,11 @@ export class HeaderComponent implements OnChanges {
   surveyId = '';
   state = HeaderState.DEFAULT;
   readonly HeaderState = HeaderState;
-  isPublishingChanges = false;
   canManage = false;
 
   constructor(
     public dialog: MatDialog,
     public authService: AuthService,
-    public draftSurveyService: DraftSurveyService,
     public navigationService: NavigationService,
     public surveyService: SurveyService
   ) {}
@@ -89,48 +81,5 @@ export class HeaderComponent implements OnChanges {
 
   onTermsOfServiceClick() {
     this.navigationService.navigateToTermsOfService();
-  }
-
-  onCancelEditSurveyClick() {
-    if (!this.draftSurveyService.dirty) {
-      this.navigationService.selectSurvey(this.surveyId);
-      return;
-    }
-
-    const dialogRef = this.dialog.open(JobDialogComponent, {
-      data: { dialogType: DialogType.UndoJobs },
-      panelClass: 'small-width-dialog',
-    });
-
-    dialogRef.afterClosed().subscribe(async (result: DialogData) => {
-      if (result?.dialogType === DialogType.UndoJobs)
-        this.navigationService.selectSurvey(this.surveyId);
-    });
-  }
-
-  async onFinishEditSurveyClick() {
-    if (this.isDraftSurveyValid()) {
-      this.isPublishingChanges = true;
-      await this.draftSurveyService.updateSurvey();
-      this.isPublishingChanges = false;
-      this.navigationService.selectSurvey(this.surveyId);
-      return;
-    }
-
-    this.dialog.open(JobDialogComponent, {
-      data: { dialogType: DialogType.InvalidSurvey },
-      panelClass: 'small-width-dialog',
-    });
-  }
-
-  isDraftSurveyValid(): boolean {
-    return this.draftSurveyService.valid.reduce(
-      (accumulator, currentValue) => accumulator && currentValue,
-      true
-    );
-  }
-
-  isDraftSurveyDirtyAndValid(): boolean {
-    return this.draftSurveyService.dirty && this.isDraftSurveyValid();
   }
 }

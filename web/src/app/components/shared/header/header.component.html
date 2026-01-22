@@ -28,6 +28,7 @@
   </div>
 
   <div>
+    <ng-content select="[end]"></ng-content>
     <ng-container *ngIf="canManage">
       <ng-container *ngIf="state === HeaderState.MAP_VIEW">
         <button mat-icon-button [matMenuTriggerFor]="editSurveyMenu">
@@ -45,31 +46,6 @@
         <div class="header-divider"></div>
       </ng-container>
 
-      <ng-container *ngIf="state === HeaderState.EDIT_SURVEY">
-        <button
-          mat-button
-          class="cancel-edit-button"
-          i18n="@@app.labels.cancel"
-          (click)="onCancelEditSurveyClick()"
-        >
-          Cancel
-        </button>
-
-        <button
-          mat-flat-button
-          class="finish-edit-button"
-          [disabled]="isPublishingChanges"
-          (click)="onFinishEditSurveyClick()"
-        >
-          <span i18n="@@app.labels.publishChanges">Publish changes</span>
-
-          <mat-icon *ngIf="isPublishingChanges">
-            <mat-spinner diameter="18"></mat-spinner>
-          </mat-icon>
-        </button>
-
-        <div class="header-divider"></div>
-      </ng-container>
     </ng-container>
 
     <ng-container *ngIf="authService.getUser$() | async as user">

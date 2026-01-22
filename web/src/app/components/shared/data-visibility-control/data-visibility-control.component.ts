@@ -14,13 +14,10 @@
  * limitations under the License.
  */
 
-import { Component } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { MatSlideToggleChange } from '@angular/material/slide-toggle';
-import { Subscription } from 'rxjs';
 
 import { Survey, SurveyDataVisibility } from 'app/models/survey.model';
-import { AuthService } from 'app/services/auth/auth.service';
-import { DraftSurveyService } from 'app/services/draft-survey/draft-survey.service';
 
 @Component({
   selector: 'ground-data-visibility-control',
@@ -28,26 +25,16 @@ import { DraftSurveyService } from 'app/services/draft-survey/draft-survey.servi
   standalone: false,
 })
 export class DataVisibilityControlComponent {
-  private subscription = new Subscription();
+  @Input() survey?: Survey;
+  @Output() onDataVisibilityChange = new EventEmitter<SurveyDataVisibility>();
 
-  selectedDataVisibility!: SurveyDataVisibility;
+  readonly SurveyDataVisibility = SurveyDataVisibility;
 
-  SurveyDataVisibility = SurveyDataVisibility;
-
-  constructor(
-    readonly authService: AuthService,
-    readonly draftSurveyService: DraftSurveyService
-  ) {
-    this.subscription.add(
-      this.draftSurveyService
-        .getSurvey$()
-        .subscribe(survey => this.onSurveyLoaded(survey))
+  get selectedDataVisibility(): SurveyDataVisibility {
+    return (
+      this.survey?.dataVisibility ||
+      SurveyDataVisibility.CONTRIBUTOR_AND_ORGANIZERS
     );
-  }
-
-  private async onSurveyLoaded(survey: Survey): Promise<void> {
-    this.selectedDataVisibility =
-      survey.dataVisibility || SurveyDataVisibility.CONTRIBUTOR_AND_ORGANIZERS;
   }
 
   changeDataVisibility(event: MatSlideToggleChange) {
@@ -55,12 +42,6 @@ export class DataVisibilityControlComponent {
       ? SurveyDataVisibility.ALL_SURVEY_PARTICIPANTS
       : SurveyDataVisibility.CONTRIBUTOR_AND_ORGANIZERS;
 
-    this.selectedDataVisibility = dataVisibility;
-
-    this.draftSurveyService.updateDataVisibility(dataVisibility);
-  }
-
-  ngOnDestroy() {
-    this.subscription.unsubscribe();
+    this.onDataVisibilityChange.emit(dataVisibility);
   }
 }

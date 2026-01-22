@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component } from '@angular/core';
+import { Component, Inject } from '@angular/core';
 import {
   AbstractControl,
   FormControl,
@@ -22,16 +22,13 @@ import {
   ValidatorFn,
   Validators,
 } from '@angular/forms';
-import { MatDialogRef } from '@angular/material/dialog';
-import { MatSelectChange } from '@angular/material/select';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { Map } from 'immutable';
-import { Subscription } from 'rxjs';
 
 import { AclEntry } from 'app/models/acl-entry.model';
 import { Role } from 'app/models/role.model';
 import { Survey } from 'app/models/survey.model';
 import { ROLE_OPTIONS } from 'app/services/auth/auth.service';
-import { DraftSurveyService } from 'app/services/draft-survey/draft-survey.service';
 
 @Component({
   selector: 'ground-share-dialog',
@@ -64,17 +61,13 @@ export class ShareDialogComponent {
   /** The active survey. */
   private survey?: Survey;
 
-  private subscription = new Subscription();
-
   constructor(
     private dialogRef: MatDialogRef<ShareDialogComponent>,
-    private draftSurveyService: DraftSurveyService
+    @Inject(MAT_DIALOG_DATA) public data: { survey: Survey }
   ) {
-    this.subscription.add(
-      this.draftSurveyService
-        .getSurvey$()
-        .subscribe(survey => this.onSurveyLoaded(survey))
-    );
+    if (data.survey) {
+      this.onSurveyLoaded(data.survey);
+    }
   }
 
   /**
@@ -99,21 +92,6 @@ export class ShareDialogComponent {
     this.onSaveClicked();
   }
 
-  onRoleChange(event: MatSelectChange, index: number) {
-    if (!this.acl) {
-      return;
-    }
-    // value holds the selected Role enum value, or -1 if "Remove" was selected.
-    if (event.value < 0) {
-      // Remove data collector.
-      this.acl.splice(index, 1);
-    } else {
-      // Update data collector role.
-      this.acl[index] = new AclEntry(this.acl[index].email, event.value);
-    }
-    this.updateChangeState();
-  }
-
   /**
    * Close the dialog when "Cancel" is clicked.
    */
@@ -125,16 +103,7 @@ export class ShareDialogComponent {
    * Store the ACL associated with the survey.
    */
   onSaveClicked(): void {
-    // TODO: Show saving spinner.
-    this.draftSurveyService.updateAcl(this.getAclMap());
-    this.dialogRef.close();
-  }
-
-  /**
-   * Clean up Rx subscription when cleaning up the component.
-   */
-  ngOnDestroy(): void {
-    this.subscription.unsubscribe();
+    this.dialogRef.close({ acl: this.getAclMap() });
   }
 
   /**

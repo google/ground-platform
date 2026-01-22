@@ -16,12 +16,19 @@
 
 import '@angular/localize/init';
 
-import { Component, effect, inject, input } from '@angular/core';
+import { Component, effect, inject, input, signal } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { List } from 'immutable';
+import { List, Map } from 'immutable';
+import { firstValueFrom } from 'rxjs';
 
 import { Job } from 'app/models/job.model';
-import { Survey } from 'app/models/survey.model';
+import { Role } from 'app/models/role.model';
+import {
+  Survey,
+  SurveyDataVisibility,
+  SurveyGeneralAccess,
+} from 'app/models/survey.model';
+import { Task } from 'app/models/task/task.model';
 import { DraftSurveyService } from 'app/services/draft-survey/draft-survey.service';
 import { JobService } from 'app/services/job/job.service';
 import {
@@ -55,22 +62,32 @@ export class EditSurveyComponent {
     this.navigationService.getEditSurveyPageSignal();
   surveyId = input<string>();
 
-  survey?: Survey;
+  survey = signal<Survey | undefined>(undefined);
+  originalSurvey = signal<Survey | undefined>(undefined);
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   production = !!(environment as any)['production'];
   sectionTitle?: string = '';
   sortedJobs = List<Job>();
+
+  // Map from job ID to validation status.
+  valid = Map<string, boolean>();
+
+  dirty = false;
 
   constructor() {
     effect(async () => {
       const id = this.surveyId();
 
       if (id) {
-        await this.draftSurveyService.init(id);
-        this.draftSurveyService.getSurvey$().subscribe(survey => {
-          this.survey = survey;
-          this.sortedJobs = this.survey.getJobsSorted();
-        });
+        const original = await firstValueFrom(
+          this.surveyService.loadSurvey$(id)
+        );
+        this.originalSurvey.set(original);
+        this.survey.set(original);
+        this.sortedJobs = original.getJobsSorted();
+        this.dirty = false;
+        this.valid = Map<string, boolean>();
       }
     });
 
@@ -109,17 +126,20 @@ export class EditSurveyComponent {
   }
 
   async duplicateJob(job: Job): Promise<void> {
+    const survey = this.survey();
+    if (!survey) return;
+
     const newJob = this.jobService.duplicateJob(
       job,
-      this.jobService.getNextColor(this.survey?.jobs)
+      this.jobService.getNextColor(survey.jobs)
     );
 
-    this.draftSurveyService.addOrUpdateJob(newJob, true);
+    const newSurvey = this.draftSurveyService.addOrUpdateJob(survey, newJob);
+    this.survey.set(newSurvey);
+    this.sortedJobs = newSurvey.getJobsSorted();
+    this.dirty = true;
 
-    this.navigationService.navigateToEditJob(
-      this.draftSurveyService.getSurvey().id,
-      newJob.id
-    );
+    this.navigationService.navigateToEditJob(newSurvey.id, newJob.id);
   }
 
   deleteJob(job: Job): void {
@@ -139,32 +159,45 @@ export class EditSurveyComponent {
       if (!result) {
         return;
       }
+      const survey = this.survey();
+      if (!survey) return;
+
       switch (result.dialogType) {
         case DialogType.AddJob:
-        case DialogType.RenameJob:
-          this.draftSurveyService.addOrUpdateJob(
-            job.copyWith({
-              name: result.jobName,
-              color:
-                job.color || this.jobService.getNextColor(this.survey?.jobs),
-            })
+        case DialogType.RenameJob: {
+          const newJob = job.copyWith({
+            name: result.jobName,
+            color: job.color || this.jobService.getNextColor(survey.jobs),
+          });
+          const newSurvey = this.draftSurveyService.addOrUpdateJob(
+            survey,
+            newJob
           );
+          this.survey.set(newSurvey);
+          this.sortedJobs = newSurvey.getJobsSorted();
+          this.dirty = true;
 
-          this.navigationService.navigateToEditJob(this.survey!.id, job.id);
+          if (dialogType === DialogType.AddJob) {
+            this.valid = this.valid.set(newJob.id, false);
+          }
+
+          this.navigationService.navigateToEditJob(newSurvey.id, newJob.id);
           break;
+        }
         case DialogType.DeleteJob:
           {
-            const previousJob = this.survey?.getPreviousJob(job);
+            const previousJob = survey.getPreviousJob(job);
 
-            this.draftSurveyService.deleteJob(job);
+            const s = this.draftSurveyService.deleteJob(survey, job.id);
+            this.survey.set(s);
+            this.sortedJobs = s.getJobsSorted();
+            this.dirty = true;
+            this.valid = this.valid.remove(job.id);
 
             if (previousJob) {
-              this.navigationService.navigateToEditJob(
-                this.draftSurveyService.getSurvey().id,
-                previousJob.id
-              );
+              this.navigationService.navigateToEditJob(s.id, previousJob.id);
             } else {
-              this.navigationService.navigateToEditSurvey(this.survey!.id);
+              this.navigationService.navigateToEditSurvey(s.id);
             }
           }
           break;
@@ -172,5 +205,85 @@ export class EditSurveyComponent {
           break;
       }
     });
+  }
+
+  addOrUpdateTasks(jobId: string, tasks: List<Task>, valid: boolean): void {
+    const survey = this.survey();
+    if (!survey) return;
+
+    this.survey.set(
+      this.draftSurveyService.addOrUpdateTasks(survey, jobId, tasks)
+    );
+    this.valid = this.valid.set(jobId, valid);
+    this.dirty = true;
+  }
+
+  addOrUpdateJob(job: Job): void {
+    const survey = this.survey();
+    if (!survey) return;
+
+    const newSurvey = this.draftSurveyService.addOrUpdateJob(survey, job);
+    this.survey.set(newSurvey);
+    this.sortedJobs = newSurvey.getJobsSorted();
+    this.dirty = true;
+  }
+
+  updateAcl(acl: Map<string, Role>): void {
+    const survey = this.survey();
+    if (!survey) return;
+    this.survey.set(this.draftSurveyService.updateAcl(survey, acl));
+    this.dirty = true;
+  }
+
+  updateGeneralAccess(generalAccess: SurveyGeneralAccess): void {
+    const survey = this.survey();
+    if (!survey) return;
+    this.survey.set(
+      this.draftSurveyService.updateGeneralAccess(survey, generalAccess)
+    );
+    this.dirty = true;
+  }
+
+  updateDataVisibility(dataVisibility: SurveyDataVisibility): void {
+    const survey = this.survey();
+    if (!survey) return;
+    this.survey.set(
+      this.draftSurveyService.updateDataVisibility(survey, dataVisibility)
+    );
+    this.dirty = true;
+  }
+
+  updateSurvey(survey: Survey): void {
+    this.survey.set(survey);
+    this.sortedJobs = survey.getJobsSorted();
+    this.dirty = true;
+  }
+
+  isValid(): boolean {
+    return this.valid.valueSeq().every(v => v);
+  }
+
+  isDirty(): boolean {
+    return this.dirty;
+  }
+
+  async publish(): Promise<void> {
+    const survey = this.survey();
+    const original = this.originalSurvey();
+    if (!survey || !original) return;
+
+    await this.draftSurveyService.updateSurvey(survey, original);
+    this.originalSurvey.set(survey);
+    this.dirty = false;
+  }
+
+  cancel(): void {
+    const original = this.originalSurvey();
+    if (original) {
+      this.survey.set(original);
+      this.sortedJobs = original.getJobsSorted();
+      this.dirty = false;
+      this.valid = Map<string, boolean>();
+    }
   }
 }
