@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, OnInit, ViewChild, effect } from '@angular/core';
+import { Component, ViewChild, effect } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Subscription } from 'rxjs';
 
@@ -42,7 +42,7 @@ interface DataSharingTermsDetails {
   styleUrls: ['./edit-details.component.scss'],
   standalone: false,
 })
-export class EditDetailsComponent implements OnInit {
+export class EditDetailsComponent {
   subscription: Subscription = new Subscription();
 
   survey?: Survey;
@@ -72,10 +72,6 @@ export class EditDetailsComponent implements OnInit {
         }
       }
     });
-  }
-
-  ngOnInit() {
-    // Logic moved to constructor effect
   }
 
   onDetailsChange(valid: boolean): void {
