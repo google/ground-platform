@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { NO_ERRORS_SCHEMA } from '@angular/core';
+import { NO_ERRORS_SCHEMA, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
@@ -27,6 +27,7 @@ import {
   CreateSurveyComponent,
   CreateSurveyPhase,
 } from 'app/components/create-survey/create-survey.component';
+import { EditSurveyComponent } from 'app/components/edit-survey/edit-survey.component';
 import { DataSharingTermsComponent } from 'app/components/create-survey/data-sharing-terms/data-sharing-terms.component';
 import { JobDetailsComponent } from 'app/components/create-survey/job-details/job-details.component';
 import { SurveyDetailsComponent } from 'app/components/create-survey/survey-details/survey-details.component';
@@ -158,19 +159,6 @@ describe('CreateSurveyComponent', () => {
       new Promise(resolve => resolve(undefined))
     );
 
-    draftSurvey$ = new Subject<Survey>();
-    draftSurveyServiceSpy = jasmine.createSpyObj<DraftSurveyService>(
-      'DraftSurveyService',
-      [
-        'init',
-        'getSurvey$',
-        'updateDataSharingTerms',
-        'updateState',
-        'updateSurvey',
-      ]
-    );
-    draftSurveyServiceSpy.getSurvey$.and.returnValue(draftSurvey$);
-
     jobServiceSpy = jasmine.createSpyObj<JobService>('JobService', [
       'addOrUpdateJob',
       'createNewJob',
@@ -207,11 +195,19 @@ describe('CreateSurveyComponent', () => {
       providers: [
         { provide: NavigationService, useValue: navigationServiceSpy },
         { provide: SurveyService, useValue: surveyServiceSpy },
-        { provide: DraftSurveyService, useValue: draftSurveyServiceSpy },
         { provide: JobService, useValue: jobServiceSpy },
         { provide: LocationOfInterestService, useValue: loiServiceSpy },
         { provide: ActivatedRoute, useValue: route },
         { provide: TaskService, useValue: taskServiceSpy },
+        {
+          provide: EditSurveyComponent,
+          useValue: {
+            survey: signal(undefined),
+            updateAcl: jasmine.createSpy('updateAcl'),
+            updateGeneralAccess: jasmine.createSpy('updateGeneralAccess'),
+            updateDataVisibility: jasmine.createSpy('updateDataVisibility'),
+          },
+        },
       ],
     }).compileComponents();
   });
@@ -239,10 +235,11 @@ describe('CreateSurveyComponent', () => {
   });
 
   describe('when survey id is empty', () => {
-    beforeEach(() => {
-      surveyId$.next('');
+    beforeEach(async () => {
+      surveyId$.next(SURVEY_ID_NEW);
       createComponent();
       fixture.detectChanges();
+      await fixture.whenStable();
     });
 
     it('initializes with unsaved new survey', () => {
@@ -258,8 +255,8 @@ describe('CreateSurveyComponent', () => {
       await fixture.whenStable();
     });
 
-    it('initializes draft survey', async () => {
-      expect(draftSurveyServiceSpy.init).toHaveBeenCalledWith(surveyId);
+    it('loads survey', () => {
+      expect(component.surveyId).toBe(surveyId);
     });
   });
 

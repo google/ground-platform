@@ -40,7 +40,7 @@
   <div [ngSwitch]="section">
     <div *ngSwitchCase="EditJobSection.LOIS">
       <loi-editor
-        *ngIf="draftSurveyService.getSurvey$() | async as survey"
+        *ngIf="editSurveyComponent.survey() as survey"
         [canImport]="surveyService.canManageSurvey(survey)"
         [survey]="survey"
         [job]="job"

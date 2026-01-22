@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Input } from '@angular/core';
+import { Component, Input, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import {
   MatButtonToggle,
@@ -29,6 +29,7 @@ import { List, Map } from 'immutable';
 import { Subject, from, of } from 'rxjs';
 
 import { EditJobComponent } from 'app/components/edit-survey/edit-job/edit-job.component';
+import { EditSurveyComponent } from 'app/components/edit-survey/edit-survey.component';
 import { LoiEditorComponent } from 'app/components/shared/loi-editor/loi-editor.component';
 import { TasksEditorModule } from 'app/components/shared/tasks-editor/tasks-editor.module';
 import { Job } from 'app/models/job.model';
@@ -112,6 +113,13 @@ describe('EditJobComponent', () => {
           provide: NavigationService,
           useValue: {
             getSurveyId$: () => of(survey.id),
+          },
+        },
+        {
+          provide: EditSurveyComponent,
+          useValue: {
+            survey: signal(survey),
+            updateJob: jasmine.createSpy('updateJob'),
           },
         },
       ],

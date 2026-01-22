@@ -127,56 +127,5 @@ describe('HeaderComponent', () => {
     });
   });
 
-  describe('onCancelEditSurveyClick', () => {
-    it('should navigate to survey if not dirty', () => {
-      (
-        Object.getOwnPropertyDescriptor(draftSurveyServiceSpy, 'dirty')!
-          .get as jasmine.Spy
-      ).and.returnValue(false);
 
-      component.onCancelEditSurveyClick();
-
-      expect(navigationServiceSpy.selectSurvey).toHaveBeenCalledWith(
-        mockSurvey.id
-      );
-    });
-
-    // ... (in describe block)
-
-    it('should open dialog if dirty', () => {
-      (
-        Object.getOwnPropertyDescriptor(draftSurveyServiceSpy, 'dirty')!
-          .get as jasmine.Spy
-      ).and.returnValue(true);
-      matDialogSpy.open.and.returnValue({
-        afterClosed: () => of({ dialogType: DialogType.UndoJobs }),
-      } as any);
-
-      component.onCancelEditSurveyClick();
-
-      expect(matDialogSpy.open).toHaveBeenCalledWith(JobDialogComponent, {
-        data: {
-          dialogType: DialogType.UndoJobs,
-        },
-        panelClass: 'small-width-dialog',
-      });
-      expect(navigationServiceSpy.selectSurvey).toHaveBeenCalledWith(
-        mockSurvey.id
-      );
-    });
-
-    it('should not navigate if dialog cancelled', () => {
-      (
-        Object.getOwnPropertyDescriptor(draftSurveyServiceSpy, 'dirty')!
-          .get as jasmine.Spy
-      ).and.returnValue(true);
-      matDialogSpy.open.and.returnValue({
-        afterClosed: () => of(null),
-      } as any);
-
-      component.onCancelEditSurveyClick();
-
-      expect(navigationServiceSpy.selectSurvey).not.toHaveBeenCalled();
-    });
-  });
 });

@@ -70,7 +70,7 @@ export class EditJobComponent {
     private loiService: LocationOfInterestService,
     private taskService: TaskService,
     public surveyService: SurveyService,
-    private editSurveyComponent: EditSurveyComponent
+    public editSurveyComponent: EditSurveyComponent
   ) {
     this.subscription.add(
       this.navigationService

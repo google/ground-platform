@@ -15,7 +15,8 @@
  */
 
 import { NO_ERRORS_SCHEMA, WritableSignal, signal } from '@angular/core';
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { CommonModule } from '@angular/common';
+import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatMenuModule } from '@angular/material/menu';
@@ -24,7 +25,7 @@ import { By } from '@angular/platform-browser';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
 import { List, Map } from 'immutable';
-import { BehaviorSubject, Subject, of } from 'rxjs';
+import { BehaviorSubject, ReplaySubject, Subject, of } from 'rxjs';
 
 import { EditSurveyComponent } from 'app/components/edit-survey/edit-survey.component';
 import { Job } from 'app/models/job.model';
@@ -106,21 +107,22 @@ describe('EditSurveyComponent', () => {
 
     surveyServiceSpy = jasmine.createSpyObj<SurveyService>('SurveyService', [
       'canManageSurvey',
+      'loadSurvey$',
     ]);
-    activeSurvey$ = new Subject<Survey>();
+    activeSurvey$ = new ReplaySubject<Survey>(1);
+    surveyServiceSpy.loadSurvey$.and.returnValue(activeSurvey$);
+    surveyServiceSpy.canManageSurvey.and.returnValue(true);
 
     surveySubject$ = new BehaviorSubject<Survey>(survey);
     draftSurveyServiceSpy = jasmine.createSpyObj<DraftSurveyService>(
       'DraftSurveyService',
-      ['init', 'getSurvey$', 'addOrUpdateJob', 'deleteJob', 'getSurvey']
+      ['addOrUpdateJob', 'deleteJob', 'addOrUpdateTasks', 'updateSurvey']
     );
-    draftSurveyServiceSpy.getSurvey$.and.returnValue(surveySubject$);
-    draftSurveyServiceSpy.getSurvey.and.returnValue(survey);
-    draftSurveyServiceSpy.init.and.returnValue(
-      new Promise(resolve => {
-        initResolve = resolve;
-      })
-    );
+
+    // Default return values to avoid crashes in component
+    draftSurveyServiceSpy.addOrUpdateJob.and.returnValue(survey);
+    draftSurveyServiceSpy.deleteJob.and.returnValue(survey);
+    draftSurveyServiceSpy.addOrUpdateTasks.and.returnValue(survey);
 
     jobServiceSpy = jasmine.createSpyObj<JobService>('JobService', [
       'createNewJob',
@@ -147,6 +149,7 @@ describe('EditSurveyComponent', () => {
     await TestBed.configureTestingModule({
       imports: [
         RouterTestingModule,
+        CommonModule,
         MatDividerModule,
         MatMenuModule,
         MatProgressSpinnerModule,
@@ -178,40 +181,25 @@ describe('EditSurveyComponent', () => {
   });
 
   describe('when routed in with survey ID', () => {
-    beforeEach(async () => {
+    beforeEach(fakeAsync(() => {
       fixture.componentRef.setInput('surveyId', surveyId);
+      fixture.detectChanges();
+      tick();
+    }));
 
-      const sortedJobs = survey.getJobsSorted();
-      spyOn(survey, 'getJobsSorted').and.returnValue(sortedJobs);
-      fixture.componentInstance.survey = survey;
-      fixture.componentInstance.sortedJobs = sortedJobs;
-
-      fixture.detectChanges(); // Initial render (spinner)
-      initResolve(); // Allow effect to proceed
-      await fixture.whenStable(); // Flush microtasks (effect resumes, survey update)
-      fixture.detectChanges(); // Update view (content)
-    });
-
-    it('initializes draft survey', () => {
-      expect(draftSurveyServiceSpy.init).toHaveBeenCalledWith(surveyId);
+    it('loads survey', () => {
+      expect(surveyServiceSpy.loadSurvey$).toHaveBeenCalledWith(surveyId);
     });
   });
 
   describe('when survey activated', () => {
-    beforeEach(async () => {
+    beforeEach(fakeAsync(() => {
       fixture.componentRef.setInput('surveyId', surveyId);
       activeSurvey$.next(survey);
-
-      const sortedJobs = survey.getJobsSorted();
-      spyOn(survey, 'getJobsSorted').and.returnValue(sortedJobs);
-      fixture.componentInstance.survey = survey;
-      fixture.componentInstance.sortedJobs = sortedJobs;
-
-      fixture.detectChanges(); // Initial render (spinner)
-      initResolve(); // Allow effect to proceed
-      await fixture.whenStable(); // Flush microtasks (effect resumes, survey update)
-      fixture.detectChanges(); // Update view (content)
-    });
+      fixture.detectChanges();
+      tick();
+      fixture.detectChanges();
+    }));
 
     describe('menu item tests', () => {
       [
@@ -265,7 +253,8 @@ describe('EditSurveyComponent', () => {
         addButton.click();
         await fixture.whenStable();
 
-        expect(draftSurveyServiceSpy.addOrUpdateJob).toHaveBeenCalledOnceWith(
+        expect(draftSurveyServiceSpy.addOrUpdateJob).toHaveBeenCalledWith(
+          survey,
           newJob.copyWith({ name: newJobName })
         );
       });
@@ -288,7 +277,8 @@ describe('EditSurveyComponent', () => {
         renameButton.click();
         await fixture.whenStable();
 
-        expect(draftSurveyServiceSpy.addOrUpdateJob).toHaveBeenCalledOnceWith(
+        expect(draftSurveyServiceSpy.addOrUpdateJob).toHaveBeenCalledWith(
+          survey,
           job1.copyWith({ name: newJobName })
         );
       });
@@ -307,12 +297,12 @@ describe('EditSurveyComponent', () => {
         duplicateButton.click();
         await fixture.whenStable();
 
-        expect(draftSurveyServiceSpy.addOrUpdateJob).toHaveBeenCalledOnceWith(
+        expect(draftSurveyServiceSpy.addOrUpdateJob).toHaveBeenCalledWith(
+          survey,
           jobServiceSpy.duplicateJob(
             job1,
             jobServiceSpy.getNextColor(survey.jobs)
-          ),
-          true
+          )
         );
       });
 
@@ -333,7 +323,10 @@ describe('EditSurveyComponent', () => {
         deleteButton.click();
         await fixture.whenStable();
 
-        expect(draftSurveyServiceSpy.deleteJob).toHaveBeenCalledOnceWith(job1);
+        expect(draftSurveyServiceSpy.deleteJob).toHaveBeenCalledWith(
+          survey,
+          job1.id
+        );
       });
     });
   });

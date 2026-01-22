@@ -39,18 +39,10 @@ describe('ShareListComponent', () => {
   const user = new User('user1', 'user1@gmail.com', true);
 
   beforeEach(async () => {
-    draftSurveyServiceSpy = jasmine.createSpyObj<DraftSurveyService>(
-      'DraftSurveyService',
-      ['getSurvey$', 'updateAcl']
-    );
-
     authServiceSpy = jasmine.createSpyObj<AuthService>('AuthService', [
       'getUser',
     ]);
 
-    activeSurvey$ = new Subject<Survey>();
-
-    draftSurveyServiceSpy.getSurvey$.and.returnValue(activeSurvey$);
     authServiceSpy.getUser.and.callFake(email => {
       if (email === 'owner-email') {
         return Promise.resolve(new User('owner', 'owner@gmail.com', true));
@@ -62,7 +54,6 @@ describe('ShareListComponent', () => {
       declarations: [ShareListComponent],
       imports: [MatListModule, MatSelectModule],
       providers: [
-        { provide: DraftSurveyService, useValue: draftSurveyServiceSpy },
         { provide: AuthService, useValue: authServiceSpy },
       ],
     }).compileComponents();
@@ -79,18 +70,16 @@ describe('ShareListComponent', () => {
   });
 
   it('updates itself when acl changes', async () => {
-    activeSurvey$.next(
-      new Survey(
-        'id',
-        'title',
-        'description',
-        Map(),
-        Map({ [user.email]: Role.VIEWER }),
-        'owner-email',
-        { type: DataSharingType.PRIVATE }
-      )
+    component.survey = new Survey(
+      'id',
+      'title',
+      'description',
+      Map(),
+      Map({ [user.email]: Role.VIEWER }),
+      'owner-email',
+      { type: DataSharingType.PRIVATE }
     );
-    await fixture.whenStable();
+    await component.ngOnChanges();
     fixture.detectChanges();
 
     expect(component.acl.length).toBeGreaterThan(0);
@@ -98,7 +87,6 @@ describe('ShareListComponent', () => {
       { value: Role.SURVEY_ORGANIZER } as MatSelectChange,
       0
     );
-    await fixture.whenStable();
     fixture.detectChanges();
 
     expect(component.acl.length).toBe(1);

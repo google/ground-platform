@@ -15,7 +15,7 @@
  */
 
 import { CommonModule } from '@angular/common';
-import { NO_ERRORS_SCHEMA } from '@angular/core';
+import { NO_ERRORS_SCHEMA, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatCardModule } from '@angular/material/card';
 import {
@@ -29,6 +29,7 @@ import { Map } from 'immutable';
 import { of } from 'rxjs';
 
 import { EditDetailsComponent } from 'app/components/edit-survey/edit-details/edit-details.component';
+import { EditSurveyComponent } from 'app/components/edit-survey/edit-survey.component';
 import { Job } from 'app/models/job.model';
 import { Role } from 'app/models/role.model';
 import { DataSharingType, Survey } from 'app/models/survey.model';
@@ -87,6 +88,14 @@ describe('EditDetailsComponent', () => {
         {
           provide: DraftSurveyService,
           useValue: { getSurvey$: () => of(survey) },
+        },
+        {
+          provide: EditSurveyComponent,
+          useValue: {
+            survey: signal(survey),
+            valid: signal(Map()),
+            updateSurvey: jasmine.createSpy('updateSurvey'),
+          },
         },
         {
           provide: NavigationService,

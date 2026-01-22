@@ -16,7 +16,7 @@
 
 <div class="page">
   <ground-survey-header
-    *ngIf="survey; let activeSurvey"
+    *ngIf="survey(); let activeSurvey"
     [activeSurvey]="activeSurvey"
     [isDirty]="isDirty()"
     [isValid]="isValid()"
@@ -26,13 +26,13 @@
   ></ground-survey-header>
 
   <!-- TODO(#1170): Extract the spinner into a component -->
-  <div id="loading-spinner" class="loading-spinner" *ngIf="!survey">
+  <div id="loading-spinner" class="loading-spinner" *ngIf="!survey()">
     <div>
       <mat-spinner></mat-spinner>
       <p class="loading-label" i18n="@@app.labels.loadingSurvey">Loading survey...</p>
     </div>
   </div>
-  <div *ngIf="survey" class="container">
+  <div *ngIf="survey()" class="container">
     <mat-nav-list class="left-menu">
       <a
         mat-list-item
