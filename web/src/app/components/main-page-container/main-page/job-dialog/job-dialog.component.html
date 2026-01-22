@@ -57,28 +57,7 @@
       polygon in this job.
     </div>
   </div>
-  <div cdkDropList (cdkDropListDropped)="drop($event)">
-    <div
-      *ngFor="let task of tasks; let i = index; trackBy: trackByFn"
-      cdkDrag
-    >
-      <ground-task-editor
-        [label]="task.label"
-        [required]="task.required"
-        [taskType]="task.type"
-        [cardinality]="task.multipleChoice?.cardinality"
-        [multipleChoice]="task.multipleChoice"
-        [taskCount]="tasks.size"
-        (update)="onTaskUpdate($event, i)"
-        (delete)="onTaskDelete(i)"
-      >
-      </ground-task-editor>
-    </div>
-  </div>
-  <button mat-button class="add-question" type="button" (click)="addQuestion()">
-    <mat-icon color="primary">add</mat-icon>
-    <span class="link-add-question">Add question</span>
-  </button>
+  <tasks-editor #tasksEditor [tasks]="tasks"></tasks-editor>
 </mat-dialog-content>
 <mat-dialog-actions>
   <div>

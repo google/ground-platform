@@ -43,7 +43,7 @@
 @use 'app/components/edit-survey/_edit-survey.component-theme.scss' as edit-survey;
 @use 'app/components/edit-survey/edit-job/_edit-job.component-theme' as edit-job;
 @use 'app/components/main-page-container/main-page/drawing-tools/_drawing-tools.component-theme' as drawing-tools;
-@use 'app/components/main-page-container/main-page/job-dialog/task-editor/_task-editor.component-theme' as task-editor;
+
 @use 'app/components/main-page-container/main-page/job-dialog/_job-dialog.component-theme' as job-dialog;
 @use 'app/components/main-page-container/main-page/map/_map.component-theme' as map;
 @use 'app/components/main-page-container/main-page/side-panel/submission-form/_submission-form.component-theme' as submission-form;
@@ -93,7 +93,7 @@ html {
   @include data-sharing-terms.theme($theme);
   @include step-card.theme($theme);
   @include drawing-tools.theme($theme);
-  @include task-editor.theme($theme);
+
   @include job-dialog.theme($theme);
   @include map.theme($theme);
   @include submission-form.theme($theme);

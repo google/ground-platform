@@ -40,7 +40,7 @@ import { DataStoreService } from 'app/services/data-store/data-store.service';
 import { EditStyleButtonModule } from './edit-style-button/edit-style-button.module';
 import { JobService } from 'app/services/job/job.service';
 import { JobDialogComponent } from './job-dialog.component';
-import { TaskEditorModule } from './task-editor/task-editor.module';
+import { TasksEditorModule } from 'app/components/shared/tasks-editor/tasks-editor.module';
 
 @Component({
   selector: 'mat-dialog-content',
@@ -80,7 +80,7 @@ describe('JobDialogComponent', () => {
       imports: [
         EditStyleButtonModule,
         FormsModule,
-        TaskEditorModule,
+        TasksEditorModule,
         InlineEditorModule,
         ReactiveFormsModule,
         BrowserAnimationsModule,
@@ -112,12 +112,6 @@ describe('JobDialogComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
-  });
-
-  it('should add question', () => {
-    component.addQuestion();
-    expect(component.tasks.size).toBe(2);
-    expect(component.tasks.first()?.type).toBe(TaskType.TEXT);
   });
 });
 

@@ -14,19 +14,18 @@
  * limitations under the License.
  */
 
-import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import {
   ChangeDetectorRef,
   Component,
   Inject,
   OnDestroy,
-  QueryList,
-  ViewChildren,
+  ViewChild,
 } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { List } from 'immutable';
 import { Subscription, firstValueFrom } from 'rxjs';
 
+import { TasksEditorComponent } from 'app/components/shared/tasks-editor/tasks-editor.component';
 import { DataCollectionStrategy, Job } from 'app/models/job.model';
 import { Task, TaskType } from 'app/models/task/task.model';
 import { DataStoreService } from 'app/services/data-store/data-store.service';
@@ -36,7 +35,6 @@ import { NavigationService } from 'app/services/navigation/navigation.service';
 import { SurveyService } from 'app/services/survey/survey.service';
 
 import { MarkerColorEvent } from './edit-style-button/edit-style-button.component';
-import { TaskEditorComponent } from './task-editor/task-editor.component';
 
 // To make ESLint happy:
 /*global alert*/
@@ -56,8 +54,9 @@ export class JobDialogComponent implements OnDestroy {
   tasks: List<Task>;
   color!: string;
   defaultJobColor: string;
-  @ViewChildren(TaskEditorComponent)
-  taskEditors?: QueryList<TaskEditorComponent>;
+ 
+  @ViewChild('tasksEditor')
+  tasksEditor?: TasksEditorComponent;
 
   constructor(
     @Inject(MAT_DIALOG_DATA)
@@ -86,43 +85,6 @@ export class JobDialogComponent implements OnDestroy {
     });
   }
 
-  addQuestion() {
-    const newTask = this.jobService.createTask(
-      TaskType.TEXT,
-      /* label= */
-      '',
-      /* required= */
-      false,
-      /* index= */
-      this.tasks.size
-    );
-    this.tasks = this.tasks.push(newTask);
-    this.markTasksTouched();
-    this.focusNewQuestion();
-  }
-
-  /**
-   * Delete the task of a given index.
-   *
-   * @param index - The index of the task
-   * @returns void
-   *
-   */
-  onTaskDelete(index: number) {
-    this.dialogService
-      .openConfirmationDialog(
-        'Warning',
-        'Are you sure you wish to delete this question? Any associated data ' +
-          'will be lost. This cannot be undone.'
-      )
-      .afterClosed()
-      .subscribe(dialogResult => {
-        if (dialogResult) {
-          this.tasks = this.tasks.splice(index, 1);
-        }
-      });
-  }
-
   init(surveyId: string, createJob: boolean, job?: Job) {
     if (!createJob && !job) {
       console.warn('User passed an invalid job id');
@@ -133,14 +95,10 @@ export class JobDialogComponent implements OnDestroy {
     this.color = this.job?.color || this.defaultJobColor;
     if (!job) {
       this.job = this.jobService.createNewJob();
-      this.addQuestion();
-      return;
     }
     if (this.job?.tasks) {
       this.tasks =
         this.job.tasks.toList().sortBy(task => task.index) || List<Task>();
-    } else {
-      this.addQuestion();
     }
   }
 
@@ -149,38 +107,27 @@ export class JobDialogComponent implements OnDestroy {
       throw Error('Survey not yet loaded');
     }
 
-    if (!this.taskEditors) {
+    if (!this.tasksEditor) {
       return;
     }
 
-    this.markTasksTouched();
-
-    for (const editor of this.taskEditors) {
-      if (editor.taskGroup.invalid || !this.isTaskOptionsValid(editor)) {
+    if (this.tasksEditor.formGroup.invalid) {
+        this.tasksEditor.formGroup.markAllAsTouched();
         return;
-      }
     }
+    
+    // We get tasks from the editor to ensure we have the latest edits
+    const tasks = this.tasksEditor.toTasks();
+
     const job = new Job(
       this.job?.id || '',
       /* index */ this.job?.index || -1,
       this.color,
       this.jobName.trim(),
-      this.dataStoreService.convertTasksListToMap(this.tasks),
+      this.dataStoreService.convertTasksListToMap(tasks),
       DataCollectionStrategy.PREDEFINED
     );
     this.addOrUpdateJob(this.surveyId, job);
-  }
-
-  private isTaskOptionsValid(taskEditor: TaskEditorComponent): boolean {
-    if (!taskEditor.optionEditors) {
-      return true;
-    }
-    for (const editor of taskEditor.optionEditors) {
-      if (editor.optionGroup.invalid) {
-        return false;
-      }
-    }
-    return true;
   }
 
   private async addOrUpdateJob(surveyId: string, job: Job) {
@@ -219,40 +166,6 @@ export class JobDialogComponent implements OnDestroy {
     this.jobName = value;
   }
 
-  /**
-   * Updates the task at given index from event emitted from task-editor
-   *
-   * @param index - The index of the task
-   * @param event - updated task emitted from task-editor
-   * @returns void
-   *
-   */
-  onTaskUpdate(event: Task, index: number) {
-    const taskId = this.tasks.get(index)?.id;
-    const task = new Task(
-      taskId || '',
-      event.type,
-      event.label,
-      event.required,
-      index,
-      event.multipleChoice
-    );
-    this.tasks = this.tasks.set(index, task);
-  }
-
-  trackByFn(index: number) {
-    return index;
-  }
-
-  drop(event: CdkDragDrop<string[]>) {
-    const taskAtPrevIndex = this.tasks.get(event.previousIndex);
-    if (!taskAtPrevIndex) {
-      return;
-    }
-    this.tasks = this.tasks.delete(event.previousIndex);
-    this.tasks = this.tasks.insert(event.currentIndex, taskAtPrevIndex);
-  }
-
   ngOnDestroy() {
     this.subscription.unsubscribe();
   }
@@ -261,49 +174,11 @@ export class JobDialogComponent implements OnDestroy {
     this.color = event.color;
   }
 
-  private markTasksTouched(): void {
-    this.taskEditors?.forEach(editor => {
-      this.markOptionsTouched(editor);
-      editor.labelControl.markAsTouched();
-    });
-  }
-
-  private markOptionsTouched(editor: TaskEditorComponent): void {
-    editor.optionEditors?.forEach(editor => {
-      editor.optionGroup.markAllAsTouched();
-    });
-  }
-
-  private focusNewQuestion(): void {
-    if (this.taskEditors?.length) {
-      this.cdr.detectChanges();
-      const question = this.taskEditors.last;
-      question?.questionInput?.nativeElement.focus();
-    }
-  }
-
-  private isTaskOptionsDirty(taskEditor: TaskEditorComponent): boolean {
-    if (!taskEditor.optionEditors) {
-      return true;
-    }
-    for (const editor of taskEditor.optionEditors) {
-      if (editor.optionGroup.dirty) {
-        return false;
-      }
-    }
-    return true;
-  }
-
   private hasUnsavedChanges(): boolean {
-    if (!this.taskEditors) {
+    if (!this.tasksEditor) {
       return false;
     }
-    for (const editor of this.taskEditors) {
-      if (editor.taskGroup.dirty || !this.isTaskOptionsDirty(editor)) {
-        return true;
-      }
-    }
-    return false;
+    return this.tasksEditor.formGroup.dirty;
   }
 
   private close(): void {
@@ -312,3 +187,4 @@ export class JobDialogComponent implements OnDestroy {
     return this.navigationService.selectSurvey(this.surveyId!);
   }
 }
+
