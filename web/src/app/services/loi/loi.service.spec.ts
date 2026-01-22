@@ -27,7 +27,6 @@ import { User } from 'app/models/user.model';
 import { AuthService } from 'app/services/auth/auth.service';
 import { DataStoreService } from 'app/services/data-store/data-store.service';
 import { LocationOfInterestService } from 'app/services/loi/loi.service';
-
 import { SurveyService } from 'app/services/survey/survey.service';
 import { polygonShellCoordsToPolygon } from 'testing/helpers';
 

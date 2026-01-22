@@ -23,7 +23,6 @@ import { User } from 'app/models/user.model';
 import { AuthService } from 'app/services/auth/auth.service';
 import { DataStoreService } from 'app/services/data-store/data-store.service';
 import { SurveyService } from 'app/services/survey/survey.service';
-
 import { Role } from 'app/models/role.model';
 import { NavigationService } from 'app/services/navigation/navigation.service';
 
