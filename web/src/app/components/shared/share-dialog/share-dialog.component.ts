@@ -19,6 +19,7 @@ import {
   AbstractControl,
   FormControl,
   FormGroup,
+  ValidationErrors,
   ValidatorFn,
   Validators,
 } from '@angular/forms';
@@ -163,8 +164,7 @@ export class ShareDialogComponent {
   }
 
   private notInListValidator(): ValidatorFn {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return (control: AbstractControl): { [key: string]: any } | null => {
+    return (control: AbstractControl): ValidationErrors | null => {
       const emailsInAcl = this.acl?.map(entry => entry.email) || [];
       const newEmail = control.value;
       return emailsInAcl.includes(newEmail)
