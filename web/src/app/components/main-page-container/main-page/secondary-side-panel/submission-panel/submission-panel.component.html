@@ -56,7 +56,7 @@ limitations under the License.
                 </div>
                 <!-- Photo task types -->
                 <div *ngIf="task.type === taskType.PHOTO">
-                  <ng-container *ngIf="this.firebaseURLs.get(getTaskSubmissionResult(task)?.value) as downloadUrl; else loading">
+                  <ng-container *ngIf="firebaseURLs.get(getTaskSubmissionResult(task)?.value) as downloadUrl; else loading">
                     <img [src]="downloadUrl" class="submission-img" alt="Submission photo" i18n-alt="@@app.labels.loadingSubmissionPhoto" />
                   </ng-container>
                   <ng-template #loading>
