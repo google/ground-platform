@@ -83,7 +83,7 @@ export class JobService {
       index: -1,
       tasks: Map<string, Task>(
         job.tasks?.toArray().map(([_, task]) => {
-          const duplicateTask = this.taskService.duplicateTask(task);
+          const duplicateTask = this.taskService.duplicateTask(task, true);
           return [duplicateTask.id, duplicateTask];
         })
       ),

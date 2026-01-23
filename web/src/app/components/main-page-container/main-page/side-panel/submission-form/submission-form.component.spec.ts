@@ -233,7 +233,6 @@ describe('SubmissionFormComponent', () => {
   });
 
   it('should save submission when valid', async () => {
-    spyOn(component as any, 'navigateToLocationOfInterest');
     component.submissionForm?.get('task001')?.setValue('new value');
 
     component.onSave();
