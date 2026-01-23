@@ -23,7 +23,7 @@ import {
 } from '@angular/core';
 import { List } from 'immutable';
 
-import { TasksEditorComponent } from 'app/components/shared/tasks-editor/tasks-editor.component';
+import { TaskEditorComponent } from 'app/components/shared/task-editor/task-editor.component';
 import { Job } from 'app/models/job.model';
 import { Task } from 'app/models/task/task.model';
 
@@ -41,7 +41,7 @@ export class TaskDetailsComponent {
   tasks: List<Task> = List([]);
 
   @ViewChild('tasksEditor')
-  tasksEditor?: TasksEditorComponent;
+  tasksEditor?: TaskEditorComponent;
 
   constructor() {}
 

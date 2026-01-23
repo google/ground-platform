@@ -40,7 +40,7 @@ import { DataStoreService } from 'app/services/data-store/data-store.service';
 import { EditStyleButtonModule } from './edit-style-button/edit-style-button.module';
 import { JobService } from 'app/services/job/job.service';
 import { JobDialogComponent } from './job-dialog.component';
-import { TasksEditorModule } from 'app/components/shared/tasks-editor/tasks-editor.module';
+import { TaskEditorModule } from 'app/components/shared/task-editor/task-editor.module';
 
 @Component({
   selector: 'mat-dialog-content',
@@ -80,7 +80,7 @@ describe('JobDialogComponent', () => {
       imports: [
         EditStyleButtonModule,
         FormsModule,
-        TasksEditorModule,
+        TaskEditorModule,
         InlineEditorModule,
         ReactiveFormsModule,
         BrowserAnimationsModule,

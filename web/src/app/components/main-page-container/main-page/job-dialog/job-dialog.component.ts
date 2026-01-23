@@ -25,7 +25,7 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { List } from 'immutable';
 import { Subscription, firstValueFrom } from 'rxjs';
 
-import { TasksEditorComponent } from 'app/components/shared/tasks-editor/tasks-editor.component';
+import { TaskEditorComponent } from 'app/components/shared/task-editor/task-editor.component';
 import { DataCollectionStrategy, Job } from 'app/models/job.model';
 import { Task, TaskType } from 'app/models/task/task.model';
 import { DataStoreService } from 'app/services/data-store/data-store.service';
@@ -55,7 +55,7 @@ export class JobDialogComponent implements OnDestroy {
   color!: string;
   defaultJobColor: string;
   @ViewChild('tasksEditor')
-  tasksEditor?: TasksEditorComponent;
+  tasksEditor?: TaskEditorComponent;
 
   constructor(
     @Inject(MAT_DIALOG_DATA)

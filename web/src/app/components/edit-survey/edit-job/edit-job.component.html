@@ -51,12 +51,12 @@
     </div>
 
     <div *ngSwitchCase="EditJobSection.TASKS">
-      <tasks-editor
+      <task-editor
         [tasks]="tasks"
         (onValueChanges)="onTasksChange($event)"
         #tasksEditor
       >
-      </tasks-editor>
+      </task-editor>
     </div>
   </div>
 </div>
