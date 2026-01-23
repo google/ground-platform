@@ -96,8 +96,7 @@ export class JobDialogComponent implements OnDestroy {
       this.job = this.jobService.createNewJob();
     }
     if (this.job?.tasks) {
-      this.tasks =
-        this.job.tasks.toList().sortBy(task => task.index) || List<Task>();
+      this.tasks = this.job.tasks.toList().sortBy(task => task.index);
     }
   }
 
@@ -111,10 +110,9 @@ export class JobDialogComponent implements OnDestroy {
     }
 
     if (this.tasksEditor.formGroup.invalid) {
-        this.tasksEditor.formGroup.markAllAsTouched();
-        return;
+      this.tasksEditor.formGroup.markAllAsTouched();
+      return;
     }
-    
     // We get tasks from the editor to ensure we have the latest edits
     const tasks = this.tasksEditor.toTasks();
 
