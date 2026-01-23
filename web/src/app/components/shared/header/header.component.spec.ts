@@ -16,7 +16,7 @@
 
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { MatDialog } from '@angular/material/dialog';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { MatMenuModule } from '@angular/material/menu';
 import { Router } from '@angular/router';
 import { Map } from 'immutable';
@@ -150,7 +150,7 @@ describe('HeaderComponent', () => {
       ).and.returnValue(true);
       matDialogSpy.open.and.returnValue({
         afterClosed: () => of({ dialogType: DialogType.UndoJobs }),
-      } as any);
+      } as MatDialogRef<unknown, unknown>);
 
       component.onCancelEditSurveyClick();
 
@@ -172,7 +172,7 @@ describe('HeaderComponent', () => {
       ).and.returnValue(true);
       matDialogSpy.open.and.returnValue({
         afterClosed: () => of(null),
-      } as any);
+      } as MatDialogRef<unknown, unknown>);
 
       component.onCancelEditSurveyClick();
 

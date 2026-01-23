@@ -183,14 +183,14 @@ function writeRow(
   csvStream.write(row);
 }
 
-function quote(value: any): string {
+function quote(value: unknown): string {
   if (value == null) {
     return '';
   }
   if (typeof value === 'number') {
     return value.toString();
   }
-  const escaped = value.toString().replaceAll('"', '""');
+  const escaped = String(value).replace(/"/g, '""');
   return `"${escaped}"`;
 }
 
@@ -273,8 +273,9 @@ function getMultipleChoiceValues(
 
 function getMultipleChoiceLabel(task: Pb.ITask, id: string): string | null {
   return (
-    task?.multipleChoiceQuestion?.options?.find((o: any) => o.id === id)
-      ?.label ?? null
+    task?.multipleChoiceQuestion?.options?.find(
+      (o: Pb.Task.MultipleChoiceQuestion.IOption) => o.id === id
+    )?.label ?? null
   );
 }
 
