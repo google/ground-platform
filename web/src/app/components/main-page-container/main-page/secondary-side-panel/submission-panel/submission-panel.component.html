@@ -56,7 +56,12 @@ limitations under the License.
                 </div>
                 <!-- Photo task types -->
                 <div *ngIf="task.type === taskType.PHOTO">
-                  <img src="{{this.firebaseURLs.get(getTaskSubmissionResult(task)!.value)}}" class="submission-img" alt="Image could not be loaded"/>
+                  <ng-container *ngIf="this.firebaseURLs.get(getTaskSubmissionResult(task)?.value) as downloadUrl; else loading">
+                    <img [src]="downloadUrl" class="submission-img" alt="Submission photo" i18n-alt="@@app.labels.loadingSubmissionPhoto" />
+                  </ng-container>
+                  <ng-template #loading>
+                    <mat-spinner [diameter]="40"></mat-spinner>
+                  </ng-template>
                 </div>
                 <!-- Geometry task types -->
                 <div *ngIf="task.type === taskType.DROP_PIN || task.type === taskType.CAPTURE_LOCATION || task.type === taskType.DRAW_AREA">
