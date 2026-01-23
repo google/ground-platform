@@ -54,7 +54,6 @@ export class JobDialogComponent implements OnDestroy {
   tasks: List<Task>;
   color!: string;
   defaultJobColor: string;
- 
   @ViewChild('tasksEditor')
   tasksEditor?: TasksEditorComponent;
 
