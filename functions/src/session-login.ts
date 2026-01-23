@@ -28,7 +28,7 @@ export async function sessionLoginHandler(req: https.Request, res: Response) {
     res.setHeader('Cache-Control', 'private');
     await setSessionCookie(req, res);
     res.end('OK');
-  } catch (err: any) {
+  } catch (err) {
     logger.error(err);
     res.status(UNAUTHORIZED).send('Authorization error');
   }

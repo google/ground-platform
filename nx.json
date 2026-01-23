@@ -42,7 +42,8 @@
         "default",
         "{workspaceRoot}/.eslintrc.json",
         "{workspaceRoot}/.eslintignore",
-        "{workspaceRoot}/eslint.config.js"
+        "{workspaceRoot}/eslint.base.config.{js,mjs,cjs}",
+        "{projectRoot}/eslint.config.{js,mjs,cjs}"
       ],
       "cache": true
     },
