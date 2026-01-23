@@ -90,7 +90,7 @@ describe('JobService', () => {
   describe('duplicateJob', () => {
     it('should duplicate job with new IDs', () => {
       const oldTask = new Task('task1', TaskType.TEXT, 'Label', false, 0);
-      const newTask = new Task('task2', TaskType.TEXT, 'Label', false, 0);
+      const newTask = new Task('task1', TaskType.TEXT, 'Label', false, 0);
       const job = new Job(
         'job1',
         0,
@@ -108,8 +108,8 @@ describe('JobService', () => {
       expect(newJob.id).toBe('job2');
       expect(newJob.name).toBe('Copy of Job 1');
       expect(newJob.color).toBe('#FFF');
-      expect(newJob.tasks?.get('task2')).toEqual(newTask);
-      expect(taskServiceSpy.duplicateTask).toHaveBeenCalledWith(oldTask);
+      expect(newJob.tasks?.get('task1')).toEqual(newTask);
+      expect(taskServiceSpy.duplicateTask).toHaveBeenCalledWith(oldTask, true);
     });
   });
 
