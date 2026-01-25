@@ -64,79 +64,10 @@ git clone https://github.com/google/ground-platform.git
 
    You can then pull future upstream changes into your local clone with `git pull upstream master`.
 
-### Setting up your environment
+## Development
 
-> **Note**: This guide assumes nvm (Node Version Manager) will be used to
-> install and manage Node.js versions. For more information on nvm,
-> including installation instructions, see
-> https://github.com/creationix/nvm#installation>
+See [README.md](README.md#Quick-start) for instructions how to build, run, and test locally.
 
-Install and use Node.js using:
-
-```shell
-nvm install 20
-nvm use 20
-```
-
-Install required global tools:
-```shell
-npm install -g firebase-tools nx pnpm
-```
-
-
-### Building and running the app
-
-#### Running locally
-
-To get up and running quickly, you can run the web app and Cloud Functions,locally using the Firebase Local Emulator Suite.
-
-Install dependencies:
-```shell
-pnpm install
-```
-Build and start the local Firebase Emulator and Angular dev server:
-``` shell
-nx start
-```
-
-Once started:
-- App: http://localhost:4200
-- Firebase Emulator UI: http://localhost:4000
-
-Changes to the web app in `web/` and to Cloud Functions in `functions/` are automatially rebuilt and reloaded on save.
-
-**Note**: The local build variant does not require API keys to run. Warnings related to missing API keys are expected. Authentication is also disabled.
-
-The local emulator is preloaded with a demo survey.
-Run `nx export` to save updated demo data for the next run.
-
-### Run against live staging environment
-
-#### Staging environment (maintainers only)
-
-Core maintainers can run the app against the live staging environment with:
-
-```shell
-nx run web:serve:staging
-```
-
-#### Deploying to staging
-```shell 
-npx firebase login
-nx run deploy:staging
-```
-#### Deploying to your own production Firebase project
-
-Override firebaseConfig in environment.production.ts
-
-Update the Firebase project ID placeholder in package.json
-
-Deploy with:
-``` shell
-nx run deploy:production
-```
-
- 
 ## Developing Ground
 
 ### Claiming an issue
