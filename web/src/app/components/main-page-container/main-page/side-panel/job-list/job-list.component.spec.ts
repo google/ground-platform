@@ -33,6 +33,7 @@ import { LocationOfInterestService } from 'app/services/loi/loi.service';
 import { NavigationService } from 'app/services/navigation/navigation.service';
 
 import { JobListComponent } from './job-list.component';
+import { LocationOfInterest } from 'app/models/loi.model';
 
 const mockSurvey = new Survey(
   'survey001',
@@ -131,9 +132,9 @@ describe('JobListComponent', () => {
   });
 
   it('should group LOIs by job', () => {
-    const loi1 = { id: 'loi1', jobId: 'job1' } as any;
-    const loi2 = { id: 'loi2', jobId: 'job1' } as any;
-    const loi3 = { id: 'loi3', jobId: 'job2' } as any;
+    const loi1 = { id: 'loi1', jobId: 'job1' } as LocationOfInterest;
+    const loi2 = { id: 'loi2', jobId: 'job1' } as LocationOfInterest;
+    const loi3 = { id: 'loi3', jobId: 'job2' } as LocationOfInterest;
     const lois = List([loi1, loi2, loi3]);
 
     fixture.componentRef.setInput('lois', lois);
