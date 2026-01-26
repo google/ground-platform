@@ -29,8 +29,8 @@ import {
   SURVEY_SEGMENT,
 } from 'app/services/navigation/navigation.constants';
 import { NavigationService } from 'app/services/navigation/navigation.service';
-import { SurveyService } from 'app/services/survey/survey.service';
 import { environment } from 'environments/environment';
+import { Environment } from 'environments/environment-interface';
 
 import {
   DialogData,
@@ -45,7 +45,6 @@ import {
   standalone: false,
 })
 export class EditSurveyComponent {
-  private surveyService = inject(SurveyService);
   private jobService = inject(JobService);
   private draftSurveyService = inject(DraftSurveyService);
   private navigationService = inject(NavigationService);
@@ -56,8 +55,7 @@ export class EditSurveyComponent {
   surveyId = input<string>();
 
   survey?: Survey;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  production = !!(environment as any)['production'];
+  production = !!(environment as Environment)['production'];
   sectionTitle?: string = '';
   sortedJobs = List<Job>();
 

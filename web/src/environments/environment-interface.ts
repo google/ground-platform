@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 The Ground Authors.
+ * Copyright 2026 The Ground Authors.
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -14,10 +14,14 @@
  * limitations under the License.
  */
 
-import { Environment } from './environment-interface';
+import { Env } from './environment-enums';
+import { FirebaseOptions } from '@angular/fire/app';
 
-// This file will be replaced during build by using the `fileReplacements` array.
-// For example, `ng build --prod` replaces `environment.ts` with `environment.prod.ts`.
-// The list of file replacements can be found in `angular.json`.
-
-export const environment: Environment = {};
+export interface Environment {
+  cloudFunctionsUrl?: string;
+  env?: Env;
+  firebase?: FirebaseOptions;
+  googleMapsApiKey?: string;
+  production?: boolean;
+  useEmulators?: boolean;
+}
