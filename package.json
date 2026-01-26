@@ -76,6 +76,9 @@
       },
       "deploy": {
         "executor": "nx:run-commands",
+        "options": {
+          "command": "firebase deploy --config firebase.json --project ground-dev-sig"
+        },
         "configurations": {
           "staging": {
             "command": "firebase deploy --config firebase.json --project ground-dev-sig"
