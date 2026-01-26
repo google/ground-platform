@@ -30,6 +30,7 @@
   },
   "dependencies": {
     "@fast-csv/format": "catalog:",
+    "@google-cloud/functions-framework": "catalog:",
     "@ground/lib": "workspace:*",
     "@ground/proto": "workspace:*",
     "@terraformer/wkt": "catalog:",
@@ -40,8 +41,8 @@
     "firebase-functions": "catalog:",
     "google-auth-library": "catalog:",
     "googleapis": "catalog:",
-    "immutable": "catalog:",
     "http-status-codes": "catalog:",
+    "immutable": "catalog:",
     "jsonstream-ts": "catalog:",
     "module-alias": "catalog:",
     "nodemailer": "catalog:",

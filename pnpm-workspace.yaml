@@ -24,6 +24,7 @@ catalogs:
     '@babel/runtime': ^7.24.7
     '@fast-csv/format': ^4.3.5
     '@google-cloud/firestore': ^7.7.0
+    '@google-cloud/functions-framework': ^5.0.0
     '@grpc/grpc-js': ^1.10.9
     '@iplab/ngx-file-upload': ^20.0.1
     '@terraformer/wkt': ^2.1.2
@@ -91,8 +92,8 @@ catalogs:
     form-data-encoder: ^4.0.2
     formdata-node: ^6.0.3
     gts: ^7.0.0
-    isolate-package: ^1.18.0
-    jasmine: ^5.1.0
+    isolate-package: ^1.26.0
+    jasmine: ~5.1.0
     jasmine-expect: ^5.0.0
     jasmine-spec-reporter: ^7.0.0
     karma: ^6.4.4
