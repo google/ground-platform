@@ -39,7 +39,6 @@
     "cors": "catalog:",
     "firebase-admin": "catalog:",
     "firebase-functions": "catalog:",
-    "geojson": "catalog:",
     "google-auth-library": "catalog:",
     "googleapis": "catalog:",
     "http-status-codes": "catalog:",

@@ -15,16 +15,19 @@
  */
 
 import { GroundProtos } from '@ground/proto';
-import Long from 'long';
 
 export function timestampToInt(
   timestamp: GroundProtos.google.protobuf.ITimestamp | null | undefined
 ): number {
-  if (!timestamp) return 0;
+  if (
+    !timestamp ||
+    timestamp.seconds === null ||
+    timestamp.seconds === undefined
+  ) {
+    return 0;
+  }
 
-  return (
-    (Long.isLong(timestamp.seconds)
-      ? timestamp.seconds.toInt()
-      : (timestamp.seconds as number) || 0) * 1000
-  );
+  const ms = BigInt(timestamp.seconds) * BigInt(1000);
+
+  return Number(ms);
 }
