@@ -151,8 +151,5 @@
   },
   "optionalDependencies": {
     "@nx/nx-linux-x64-gnu": "^19.3.2"
-  },
-  "overrides": {
-    "eslint-plugin-n": "^17.0.0"
   }
 }
