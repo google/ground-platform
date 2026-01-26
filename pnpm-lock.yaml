@@ -221,8 +221,8 @@ catalogs:
       specifier: ^8.50.1
       version: 8.53.0
     diff:
-      specifier: ^8.0.3
-      version: 8.0.3
+      specifier: ^4.0.4
+      version: 4.0.4
     eslint:
       specifier: ^9.39.2
       version: 9.39.2
@@ -540,7 +540,7 @@ importers:
         version: 0.5.10
       diff:
         specifier: catalog:dev
-        version: 8.0.3
+        version: 4.0.4
       mock-cloud-firestore:
         specifier: catalog:dev
         version: 0.12.0
@@ -6235,12 +6235,12 @@ packages:
     resolution: {integrity: sha512-58lmxKSA4BNyLz+HHMUzlOEpg09FV+ev6ZMe3vJihgdxzgcwZ8VoEEPmALCZG9LmqfVoNMMKpttIYTVG6uDY7A==}
     engines: {node: '>=0.3.1'}
 
-  diff@7.0.0:
-    resolution: {integrity: sha512-PJWHUb1RFevKCwaFA9RlG5tCd+FO5iRh9A8HEtkmBH2Li03iJriB6m6JIN4rGz3K3JLawI7/veA1xzRKP6ISBw==}
+  diff@4.0.4:
+    resolution: {integrity: sha512-X07nttJQkwkfKfvTPG/KSnE2OMdcUCao6+eXF3wmnIQRn2aPAHH3VxDbDOdegkd6JbPsXqShpvEOHfAT+nCNwQ==}
     engines: {node: '>=0.3.1'}
 
-  diff@8.0.3:
-    resolution: {integrity: sha512-qejHi7bcSD4hQAZE0tNAawRK1ZtafHDmMTMkrrIGgSLl7hTnQHmKCeB45xAcbfTqK2zowkM3j3bHt/4b/ARbYQ==}
+  diff@7.0.0:
+    resolution: {integrity: sha512-PJWHUb1RFevKCwaFA9RlG5tCd+FO5iRh9A8HEtkmBH2Li03iJriB6m6JIN4rGz3K3JLawI7/veA1xzRKP6ISBw==}
     engines: {node: '>=0.3.1'}
 
   dijkstrajs@1.0.3:
@@ -19595,9 +19595,9 @@ snapshots:
 
   diff@4.0.2: {}
 
-  diff@7.0.0: {}
+  diff@4.0.4: {}
 
-  diff@8.0.3: {}
+  diff@7.0.0: {}
 
   dijkstrajs@1.0.3: {}
 
