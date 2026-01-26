@@ -65,8 +65,10 @@
   "functions": {
     "source": "./functions/isolate",
     "ignore": [".git", "firebase-debug.log", "firebase-debug.*.log"],
-    "predeploy": "npx isolate",
-    "isolate": true
+    "predeploy": [
+      "npx isolate-package",
+      "pnpm install --prefix ./functions/isolate --prod --no-frozen-lockfile --shamefully-hoist --ignore-workspace"
+    ]
   },
   "storage": {
     "rules": "storage/storage.rules"

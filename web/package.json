@@ -133,7 +133,6 @@
     "@types/jasmine": "catalog:dev",
     "@types/node": "catalog:dev",
     "@types/webpack-env": "catalog:dev",
-    "cpx": "catalog:dev",
     "karma": "catalog:dev",
     "karma-chrome-launcher": "catalog:dev",
     "karma-coverage": "catalog:dev",
