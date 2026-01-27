@@ -52,7 +52,7 @@ import {
   TaskGroup,
   taskGroupToTypes,
   taskTypeToGroup,
-} from '../tasks-editor.component';
+} from '../task-editor.component';
 
 export interface TaskTypeOption {
   icon: string;

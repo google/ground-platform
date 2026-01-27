@@ -18,7 +18,7 @@
 @use '@angular/material' as mat;
 
 @mixin color($theme) {
-  .tasks-editor {
+  .task-editor {
     color: mat.get-theme-color($theme, on-surface);
 
     .toolbar-right {
@@ -44,7 +44,7 @@
 }
 
 @mixin typography($theme) {
-  .tasks-editor {
+  .task-editor {
     .task-label, .loi-task-label {
       font: mat.get-theme-typography($theme, title-medium, font);
     }

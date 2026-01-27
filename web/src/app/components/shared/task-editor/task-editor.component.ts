@@ -84,12 +84,12 @@ export const taskTypeToGroup = new Map([
 ]);
 
 @Component({
-  selector: 'tasks-editor',
-  templateUrl: './tasks-editor.component.html',
-  styleUrls: ['./tasks-editor.component.scss'],
+  selector: 'task-editor',
+  templateUrl: './task-editor.component.html',
+  styleUrls: ['./task-editor.component.scss'],
   standalone: false,
 })
-export class TasksEditorComponent {
+export class TaskEditorComponent {
   formGroup!: FormGroup;
 
   @Input() tasks?: List<Task>;
