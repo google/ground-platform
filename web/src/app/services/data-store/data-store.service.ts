@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Injectable } from '@angular/core';
+import { Injectable, Injector, runInInjectionContext } from '@angular/core';
 import {
   CollectionReference,
   DocumentData,
@@ -88,7 +88,10 @@ export type JsonBlob = { [field: string]: any };
   providedIn: 'root',
 })
 export class DataStoreService {
-  constructor(private db: Firestore) {}
+  constructor(
+    private db: Firestore,
+    private injector: Injector
+  ) {}
 
   /**
    * Returns an Observable that loads and emits the survey with the specified
@@ -97,19 +100,21 @@ export class DataStoreService {
    * @param id the id of the requested survey.
    */
   loadSurvey$(id: string): Observable<Survey> {
-    return combineLatest([
-      docData(doc(this.db, SURVEYS_COLLECTION_NAME, id)),
-      this.loadJobs$(id),
-    ]).pipe(
-      map(surveyAndJobs => {
-        const [s, jobs] = surveyAndJobs;
+    return runInInjectionContext(this.injector, () =>
+      combineLatest([
+        docData(doc(this.db, SURVEYS_COLLECTION_NAME, id)),
+        this.loadJobs$(id),
+      ]).pipe(
+        map(surveyAndJobs => {
+          const [s, jobs] = surveyAndJobs;
 
-        const survey = surveyDocToModel(id, s as DocumentData, jobs);
+          const survey = surveyDocToModel(id, s as DocumentData, jobs);
 
-        if (survey instanceof Error) throw survey;
+          if (survey instanceof Error) throw survey;
 
-        return survey;
-      })
+          return survey;
+        })
+      )
     );
   }
 
@@ -120,16 +125,20 @@ export class DataStoreService {
    * @param id the id of the requested survey.
    */
   loadJobs$(id: string): Observable<List<Job>> {
-    return collectionData(
-      collection(this.db, `${SURVEYS_COLLECTION_NAME}/${id}/jobs`)
-    ).pipe(map(data => jobDocsToModel(data as DocumentData[])));
+    return runInInjectionContext(this.injector, () =>
+      collectionData(
+        collection(this.db, `${SURVEYS_COLLECTION_NAME}/${id}/jobs`)
+      ).pipe(map(data => jobDocsToModel(data as DocumentData[])))
+    );
   }
 
   /**
    * Returns the raw survey object from the db. Used for debugging only.
    */
   async loadRawSurvey(id: string) {
-    const d = await getDoc(doc(this.db, SURVEYS_COLLECTION_NAME, id));
+    const d = await runInInjectionContext(this.injector, () =>
+      getDoc(doc(this.db, SURVEYS_COLLECTION_NAME, id))
+    );
     return d.data();
   }
 
@@ -137,7 +146,9 @@ export class DataStoreService {
    * Updates the raw survey object in the db. Used for debugging only.
    */
   async saveRawSurvey(id: string, data: JsonBlob) {
-    await setDoc(doc(this.db, SURVEYS_COLLECTION_NAME, id), data);
+    await runInInjectionContext(this.injector, () =>
+      setDoc(doc(this.db, SURVEYS_COLLECTION_NAME, id), data)
+    );
   }
 
   /**
@@ -145,68 +156,70 @@ export class DataStoreService {
    * to the specified user.
    */
   loadAccessibleSurveys$(userEmail: string): Observable<List<Survey>> {
-    const surveysRef = collection(this.db, SURVEYS_COLLECTION_NAME);
-    const accessibleRestrictedSurveys$ = collectionData(
-      query(
-        surveysRef,
-        where(new FieldPath(s.acl, userEmail), 'in', [
-          AclRole.VIEWER,
-          AclRole.DATA_COLLECTOR,
-          AclRole.SURVEY_ORGANIZER,
-        ])
-      ),
-      { idField: 'id' }
-    ).pipe(
-      map(surveys =>
-        surveys
-          .map(s => surveyDocToModel(s['id'], s as DocumentData))
-          .filter(DataStoreService.filterAndLogError<Survey>)
-          .map(survey => survey as Survey)
-      ),
-      map(surveys =>
-        surveys.filter(
-          survey => survey.generalAccess === SurveyGeneralAccess.RESTRICTED
+    return runInInjectionContext(this.injector, () => {
+      const surveysRef = collection(this.db, SURVEYS_COLLECTION_NAME);
+      const accessibleRestrictedSurveys$ = collectionData(
+        query(
+          surveysRef,
+          where(new FieldPath(s.acl, userEmail), 'in', [
+            AclRole.VIEWER,
+            AclRole.DATA_COLLECTOR,
+            AclRole.SURVEY_ORGANIZER,
+          ])
+        ),
+        { idField: 'id' }
+      ).pipe(
+        map(surveys =>
+          surveys
+            .map(s => surveyDocToModel(s['id'], s as DocumentData))
+            .filter(DataStoreService.filterAndLogError<Survey>)
+            .map(survey => survey as Survey)
+        ),
+        map(surveys =>
+          surveys.filter(
+            survey => survey.generalAccess === SurveyGeneralAccess.RESTRICTED
+          )
         )
-      )
-    );
+      );
 
-    const accessibleUnlistedSurveys$ = collectionData(
-      query(
-        surveysRef,
-        where(s.generalAccess, '==', GeneralAccess.UNLISTED),
-        where(new FieldPath(s.acl, userEmail), '==', AclRole.SURVEY_ORGANIZER)
-      ),
-      { idField: 'id' }
-    ).pipe(
-      map(surveys =>
-        surveys
-          .map(s => surveyDocToModel(s['id'], s as DocumentData))
-          .filter(DataStoreService.filterAndLogError<Survey>)
-          .map(survey => survey as Survey)
-      )
-    );
+      const accessibleUnlistedSurveys$ = collectionData(
+        query(
+          surveysRef,
+          where(s.generalAccess, '==', GeneralAccess.UNLISTED),
+          where(new FieldPath(s.acl, userEmail), '==', AclRole.SURVEY_ORGANIZER)
+        ),
+        { idField: 'id' }
+      ).pipe(
+        map(surveys =>
+          surveys
+            .map(s => surveyDocToModel(s['id'], s as DocumentData))
+            .filter(DataStoreService.filterAndLogError<Survey>)
+            .map(survey => survey as Survey)
+        )
+      );
 
-    const publicSurveys$ = collectionData(
-      query(surveysRef, where(s.generalAccess, '==', GeneralAccess.PUBLIC)),
-      { idField: 'id' }
-    ).pipe(
-      map(surveys =>
-        surveys
-          .map(s => surveyDocToModel(s['id'], s as DocumentData))
-          .filter(DataStoreService.filterAndLogError<Survey>)
-          .map(survey => survey as Survey)
-      )
-    );
+      const publicSurveys$ = collectionData(
+        query(surveysRef, where(s.generalAccess, '==', GeneralAccess.PUBLIC)),
+        { idField: 'id' }
+      ).pipe(
+        map(surveys =>
+          surveys
+            .map(s => surveyDocToModel(s['id'], s as DocumentData))
+            .filter(DataStoreService.filterAndLogError<Survey>)
+            .map(survey => survey as Survey)
+        )
+      );
 
-    return combineLatest([
-      accessibleRestrictedSurveys$,
-      accessibleUnlistedSurveys$,
-      publicSurveys$,
-    ]).pipe(
-      map(([restricted, unlisted, publicSurveys]) =>
-        List([...restricted, ...unlisted, ...publicSurveys])
-      )
-    );
+      return combineLatest([
+        accessibleRestrictedSurveys$,
+        accessibleUnlistedSurveys$,
+        publicSurveys$,
+      ]).pipe(
+        map(([restricted, unlisted, publicSurveys]) =>
+          List([...restricted, ...unlisted, ...publicSurveys])
+        )
+      );
+    });
   }
 
   /**
@@ -225,23 +238,27 @@ export class DataStoreService {
   ): Promise<void> {
     const { id: surveyId, jobs } = survey;
 
-    await runTransaction(this.db, async transaction => {
-      if (jobIdsToDelete) {
-        for (const jobId of jobIdsToDelete) {
-          await this._deleteJobAndRelatedData(transaction, surveyId, jobId);
+    await runInInjectionContext(this.injector, () =>
+      runTransaction(this.db, async transaction => {
+        if (jobIdsToDelete) {
+          for (const jobId of jobIdsToDelete) {
+            await this._deleteJobAndRelatedData(transaction, surveyId, jobId);
+          }
         }
-      }
 
-      const jobsToUpdate = jobs.filter(
-        ({ id }) => !jobIdsToDelete?.includes(id)
-      );
-      for (const job of jobsToUpdate.values()) {
-        await this._addOrUpdateJobInTransaction(transaction, surveyId, job);
-      }
+        const jobsToUpdate = jobs.filter(
+          ({ id }) => !jobIdsToDelete?.includes(id)
+        );
+        for (const job of jobsToUpdate.values()) {
+          await this._addOrUpdateJobInTransaction(transaction, surveyId, job);
+        }
 
-      const surveyRef = doc(this.db, SURVEYS_COLLECTION_NAME, surveyId);
-      transaction.update(surveyRef, surveyToDocument(surveyId, survey));
-    });
+        const surveyRef = runInInjectionContext(this.injector, () =>
+          doc(this.db, SURVEYS_COLLECTION_NAME, surveyId)
+        );
+        transaction.update(surveyRef, surveyToDocument(surveyId, survey));
+      })
+    );
   }
 
   /**
@@ -251,10 +268,12 @@ export class DataStoreService {
    * @param name The new name of the survey.
    */
   updateSurveyTitle(surveyId: string, name: string): Promise<void> {
-    return setDoc(
-      doc(this.db, SURVEYS_COLLECTION_NAME, surveyId),
-      surveyToDocument(surveyId, { title: name }),
-      { merge: true }
+    return runInInjectionContext(this.injector, () =>
+      setDoc(
+        doc(this.db, SURVEYS_COLLECTION_NAME, surveyId),
+        surveyToDocument(surveyId, { title: name }),
+        { merge: true }
+      )
     );
   }
 
@@ -270,24 +289,30 @@ export class DataStoreService {
     name: string,
     description: string
   ): Promise<void> {
-    return setDoc(
-      doc(this.db, SURVEYS_COLLECTION_NAME, surveyId),
-      surveyToDocument(surveyId, { title: name, description }),
-      { merge: true }
+    return runInInjectionContext(this.injector, () =>
+      setDoc(
+        doc(this.db, SURVEYS_COLLECTION_NAME, surveyId),
+        surveyToDocument(surveyId, { title: name, description }),
+        { merge: true }
+      )
     );
   }
 
   addOrUpdateSurvey(survey: Survey): Promise<void> {
-    return setDoc(
-      doc(this.db, SURVEYS_COLLECTION_NAME, survey.id),
-      surveyToDocument(survey.id, survey)
+    return runInInjectionContext(this.injector, () =>
+      setDoc(
+        doc(this.db, SURVEYS_COLLECTION_NAME, survey.id),
+        surveyToDocument(survey.id, survey)
+      )
     );
   }
 
   addOrUpdateJob(surveyId: string, job: Job): Promise<void> {
-    return setDoc(
-      doc(this.db, `${SURVEYS_COLLECTION_NAME}/${surveyId}/jobs`, job.id),
-      jobToDocument(job)
+    return runInInjectionContext(this.injector, () =>
+      setDoc(
+        doc(this.db, `${SURVEYS_COLLECTION_NAME}/${surveyId}/jobs`, job.id),
+        jobToDocument(job)
+      )
     );
   }
 
@@ -304,10 +329,8 @@ export class DataStoreService {
     surveyId: string,
     job: Job
   ): Promise<void> {
-    const jobRef = doc(
-      this.db,
-      `${SURVEYS_COLLECTION_NAME}/${surveyId}/jobs`,
-      job.id
+    const jobRef = runInInjectionContext(this.injector, () =>
+      doc(this.db, `${SURVEYS_COLLECTION_NAME}/${surveyId}/jobs`, job.id)
     );
     transaction.set(jobRef, jobToDocument(job));
   }
@@ -326,28 +349,37 @@ export class DataStoreService {
     surveyId: string,
     jobId: string
   ): Promise<void> {
-    const loisQuery = query(
-      collection(this.db, `${SURVEYS_COLLECTION_NAME}/${surveyId}/lois`),
-      where(l.jobId, '==', jobId)
+    const loisQuery = runInInjectionContext(this.injector, () =>
+      query(
+        collection(this.db, `${SURVEYS_COLLECTION_NAME}/${surveyId}/lois`),
+        where(l.jobId, '==', jobId)
+      )
     );
-    const loisSnapshot = await getDocs(loisQuery);
+    const loisSnapshot = await runInInjectionContext(this.injector, () =>
+      getDocs(loisQuery)
+    );
     loisSnapshot.forEach(doc => {
       transaction.delete(doc.ref);
     });
 
-    const submissionsQuery = query(
-      collection(this.db, `${SURVEYS_COLLECTION_NAME}/${surveyId}/submissions`),
-      where(sb.jobId, '==', jobId)
+    const submissionsQuery = runInInjectionContext(this.injector, () =>
+      query(
+        collection(
+          this.db,
+          `${SURVEYS_COLLECTION_NAME}/${surveyId}/submissions`
+        ),
+        where(sb.jobId, '==', jobId)
+      )
     );
-    const submissionsSnapshot = await getDocs(submissionsQuery);
+    const submissionsSnapshot = await runInInjectionContext(this.injector, () =>
+      getDocs(submissionsQuery)
+    );
     submissionsSnapshot.forEach(doc => {
       transaction.delete(doc.ref);
     });
 
-    const jobRef = doc(
-      this.db,
-      `${SURVEYS_COLLECTION_NAME}/${surveyId}/jobs`,
-      jobId
+    const jobRef = runInInjectionContext(this.injector, () =>
+      doc(this.db, `${SURVEYS_COLLECTION_NAME}/${surveyId}/jobs`, jobId)
     );
     transaction.delete(jobRef);
   }
@@ -355,14 +387,18 @@ export class DataStoreService {
   async deleteSurvey(survey: Survey): Promise<void> {
     const { id: surveyId, jobs } = survey;
 
-    await runTransaction(this.db, async transaction => {
-      for (const { id: jobId } of jobs.values()) {
-        await this._deleteJobAndRelatedData(transaction, surveyId, jobId);
-      }
+    await runInInjectionContext(this.injector, () =>
+      runTransaction(this.db, async transaction => {
+        for (const { id: jobId } of jobs.values()) {
+          await this._deleteJobAndRelatedData(transaction, surveyId, jobId);
+        }
 
-      const surveyRef = doc(this.db, SURVEYS_COLLECTION_NAME, surveyId);
-      transaction.delete(surveyRef);
-    });
+        const surveyRef = runInInjectionContext(this.injector, () =>
+          doc(this.db, SURVEYS_COLLECTION_NAME, surveyId)
+        );
+        transaction.delete(surveyRef);
+      })
+    );
   }
 
   private async deleteSubmissionsByLoiId(
@@ -373,8 +409,14 @@ export class DataStoreService {
       collection(this.db, `${SURVEYS_COLLECTION_NAME}/${surveyId}/submissions`),
       where(sb.loiId, '==', loiId)
     );
-    const querySnapshot = await getDocs(submissions);
-    await Promise.all(querySnapshot.docs.map(doc => deleteDoc(doc.ref)));
+    const querySnapshot = await runInInjectionContext(this.injector, () =>
+      getDocs(submissions)
+    );
+    await Promise.all(
+      querySnapshot.docs.map(doc =>
+        runInInjectionContext(this.injector, () => deleteDoc(doc.ref))
+      )
+    );
   }
 
   async deleteLocationOfInterest(
@@ -383,8 +425,8 @@ export class DataStoreService {
   ): Promise<void> {
     await this.deleteSubmissionsByLoiId(surveyId, loiId);
 
-    return await deleteDoc(
-      doc(this.db, SURVEYS_COLLECTION_NAME, surveyId, 'lois', loiId)
+    return await runInInjectionContext(this.injector, () =>
+      deleteDoc(doc(this.db, SURVEYS_COLLECTION_NAME, surveyId, 'lois', loiId))
     );
   }
 
@@ -392,25 +434,29 @@ export class DataStoreService {
     surveyId: string,
     submissionId: string
   ): Promise<void> {
-    return await deleteDoc(
-      doc(
-        this.db,
-        SURVEYS_COLLECTION_NAME,
-        surveyId,
-        'submissions',
-        submissionId
+    return await runInInjectionContext(this.injector, () =>
+      deleteDoc(
+        doc(
+          this.db,
+          SURVEYS_COLLECTION_NAME,
+          surveyId,
+          'submissions',
+          submissionId
+        )
       )
     );
   }
 
   updateSubmission(surveyId: string, submission: Submission) {
-    return setDoc(
-      doc(
-        this.db,
-        `${SURVEYS_COLLECTION_NAME}/${surveyId}/submissions`,
-        submission.id
-      ),
-      FirebaseDataConverter.submissionToJS(submission)
+    return runInInjectionContext(this.injector, () =>
+      setDoc(
+        doc(
+          this.db,
+          `${SURVEYS_COLLECTION_NAME}/${surveyId}/submissions`,
+          submission.id
+        ),
+        FirebaseDataConverter.submissionToJS(submission)
+      )
     );
   }
 
@@ -421,8 +467,10 @@ export class DataStoreService {
    * @param uid the unique id used to represent the user in the data store.
    */
   user$(uid: string): Observable<User | undefined> {
-    return docData(doc(this.db, 'users', uid)).pipe(
-      map(data => FirebaseDataConverter.toUser(data as DocumentData, uid))
+    return runInInjectionContext(this.injector, () =>
+      docData(doc(this.db, 'users', uid)).pipe(
+        map(data => FirebaseDataConverter.toUser(data as DocumentData, uid))
+      )
     );
   }
 
@@ -434,11 +482,15 @@ export class DataStoreService {
    * @param userEmail The email of the user to check against the passlist.
    */
   async isPasslisted(userEmail: string): Promise<boolean> {
-    const docSnapshot = await getDoc(doc(this.db, 'passlist', userEmail));
+    const docSnapshot = await runInInjectionContext(this.injector, () =>
+      getDoc(doc(this.db, 'passlist', userEmail))
+    );
 
     if (docSnapshot.exists()) return true;
 
-    const regexpSnapshot = await getDoc(doc(this.db, 'passlist', 'regexp'));
+    const regexpSnapshot = await runInInjectionContext(this.injector, () =>
+      getDoc(doc(this.db, 'passlist', 'regexp'))
+    );
 
     if (regexpSnapshot.exists()) {
       const regexpData = regexpSnapshot.data() as
@@ -482,37 +534,39 @@ export class DataStoreService {
     userId: string,
     canViewAll: boolean
   ): Observable<List<LocationOfInterest>> {
-    if (canViewAll) {
-      return collectionData(
-        collection(this.db, `${SURVEYS_COLLECTION_NAME}/${surveyId}/lois`),
+    return runInInjectionContext(this.injector, () => {
+      if (canViewAll) {
+        return collectionData(
+          collection(this.db, `${SURVEYS_COLLECTION_NAME}/${surveyId}/lois`),
+          { idField: 'id' }
+        ).pipe(map(docs => this.toLocationsOfInterest(docs)));
+      }
+
+      const importedLois = collectionData(
+        query(
+          collection(this.db, `${SURVEYS_COLLECTION_NAME}/${surveyId}/lois`),
+          where(l.source, '==', Source.IMPORTED)
+        ),
         { idField: 'id' }
-      ).pipe(map(docs => this.toLocationsOfInterest(docs)));
-    }
+      );
 
-    const importedLois = collectionData(
-      query(
-        collection(this.db, `${SURVEYS_COLLECTION_NAME}/${surveyId}/lois`),
-        where(l.source, '==', Source.IMPORTED)
-      ),
-      { idField: 'id' }
-    );
+      const fieldDataLois = collectionData(
+        query(
+          collection(this.db, `${SURVEYS_COLLECTION_NAME}/${surveyId}/lois`),
+          where(l.source, '==', Source.FIELD_DATA),
+          where(l.ownerId, '==', userId)
+        ),
+        { idField: 'id' }
+      );
 
-    const fieldDataLois = collectionData(
-      query(
-        collection(this.db, `${SURVEYS_COLLECTION_NAME}/${surveyId}/lois`),
-        where(l.source, '==', Source.FIELD_DATA),
-        where(l.ownerId, '==', userId)
-      ),
-      { idField: 'id' }
-    );
-
-    return combineLatest([importedLois, fieldDataLois]).pipe(
-      map(([predefinedLois, fieldDataLois]) =>
-        this.toLocationsOfInterest(
-          (predefinedLois as unknown[]).concat(fieldDataLois)
+      return combineLatest([importedLois, fieldDataLois]).pipe(
+        map(([predefinedLois, fieldDataLois]) =>
+          this.toLocationsOfInterest(
+            (predefinedLois as unknown[]).concat(fieldDataLois)
+          )
         )
-      )
-    );
+      );
+    });
   }
 
   /**
@@ -530,28 +584,30 @@ export class DataStoreService {
     userId: string,
     canViewAll: boolean
   ): Observable<List<Submission>> {
-    const submissionsRef = collection(
-      this.db,
-      `${SURVEYS_COLLECTION_NAME}/${survey.id}/submissions`
-    );
-    const q = this.canViewSubmissions(
-      submissionsRef,
-      loi.id,
-      userId,
-      canViewAll
-    );
-    return collectionData(q, { idField: 'id' }).pipe(
-      map(array =>
-        List(
-          array
-            .map(obj =>
-              submissionDocToModel(survey.getJob(loi.jobId)!, obj['id'], obj)
-            )
-            .filter(DataStoreService.filterAndLogError<Submission>)
-            .map(submission => submission as Submission)
+    return runInInjectionContext(this.injector, () => {
+      const submissionsRef = collection(
+        this.db,
+        `${SURVEYS_COLLECTION_NAME}/${survey.id}/submissions`
+      );
+      const q = this.canViewSubmissions(
+        submissionsRef,
+        loi.id,
+        userId,
+        canViewAll
+      );
+      return collectionData(q, { idField: 'id' }).pipe(
+        map(array =>
+          List(
+            array
+              .map(obj =>
+                submissionDocToModel(survey.getJob(loi.jobId)!, obj['id'], obj)
+              )
+              .filter(DataStoreService.filterAndLogError<Submission>)
+              .map(submission => submission as Submission)
+          )
         )
-      )
-    );
+      );
+    });
   }
 
   // TODO: Define return type here and throughout.
@@ -674,17 +730,21 @@ export class DataStoreService {
   }
 
   getImageDownloadURL(path: string) {
-    return getDownloadURL(ref(getStorage(), path));
+    return runInInjectionContext(this.injector, () =>
+      getDownloadURL(ref(getStorage(), path))
+    );
   }
 
   async getTermsOfService(): Promise<string> {
-    const tos = await getDoc(doc(this.db, 'config', 'tos'));
+    const tos = await runInInjectionContext(this.injector, () =>
+      getDoc(doc(this.db, 'config', 'tos'))
+    );
     return tos.get('text');
   }
 
   async getAccessDeniedMessage(): Promise<{ message?: string; link?: string }> {
-    const accessDeniedMessage = await getDoc(
-      doc(this.db, 'config', 'accessDenied')
+    const accessDeniedMessage = await runInInjectionContext(this.injector, () =>
+      getDoc(doc(this.db, 'config', 'accessDenied'))
     );
     return {
       message: accessDeniedMessage.get('message'),
