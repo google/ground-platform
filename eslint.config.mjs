@@ -15,11 +15,7 @@
  */
 
 import gts from 'gts/build/eslint.config.js';
-import angularTemplate from '@angular-eslint/template-parser';
-import angularTemplatePlugin from '@angular-eslint/eslint-plugin-template';
 import typescriptEslintPlugin from '@typescript-eslint/eslint-plugin';
-import typescriptParser from '@typescript-eslint/parser';
-import importPlugin from 'eslint-plugin-import';
 import prettierPlugin from 'eslint-plugin-prettier';
 import unusedImports from 'eslint-plugin-unused-imports';
 import path from 'path';
@@ -171,53 +167,6 @@ export default [
       '@typescript-eslint/no-explicit-any': 'warn',
       '@typescript-eslint/no-wrapper-object-types': 'warn',
       '@typescript-eslint/no-floating-promises': 'off',
-    },
-  },
-  {
-    files: ['web/**/*.ts'],
-    languageOptions: {
-      parser: typescriptParser,
-      parserOptions: {
-        project: ['./web/tsconfig.json'],
-        tsconfigRootDir: __dirname,
-        sourceType: 'module',
-      },
-    },
-    plugins: {
-      '@typescript-eslint': typescriptEslintPlugin,
-      import: importPlugin,
-    },
-    rules: {
-      'import/no-duplicates': 'error',
-      'no-var': 'error',
-      'prefer-const': 'error',
-      'no-empty-function': 'off',
-      '@typescript-eslint/no-empty-function': 'off',
-      'no-shadow': 'off',
-      '@typescript-eslint/no-shadow': 'off',
-      'no-redeclare': 'error',
-      '@typescript-eslint/no-redeclare': 'error',
-      '@typescript-eslint/no-explicit-any': 'warn',
-      '@typescript-eslint/no-unused-expressions': 'warn',
-      '@typescript-eslint/no-unsafe-function-type': 'off',
-      '@typescript-eslint/no-empty-object-type': 'off',
-      '@typescript-eslint/no-wrapper-object-types': 'off',
-      '@typescript-eslint/ban-ts-comment': 'off',
-      '@typescript-eslint/triple-slash-reference': 'off',
-      '@typescript-eslint/no-floating-promises': 'off',
-    },
-  },
-  {
-    files: ['web/**/*.html'],
-    languageOptions: { parser: angularTemplate },
-    plugins: {
-      '@angular-eslint/template': angularTemplatePlugin,
-    },
-    rules: {
-      'prettier/prettier': ['warn', { parser: 'angular' }],
-      '@angular-eslint/template/prefer-control-flow': 'off',
-      '@angular-eslint/template/eqeqeq': 'warn',
-      '@angular-eslint/template/no-negated-async': 'warn',
     },
   },
 ];

@@ -190,8 +190,7 @@
         "lint": {
           "builder": "@angular-eslint/builder:lint",
           "options": {
-            "eslintConfig": "eslint.config.mjs",
-            "lintFilePatterns": ["web/**/*.spec.ts", "web/**/*.ts"]
+            "lintFilePatterns": ["**/*.spec.ts", "**/*.ts"]
           }
         },
         "deploy": {
