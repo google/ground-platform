@@ -120,10 +120,6 @@
   "devDependencies": {
     "@angular-devkit/build-angular": "catalog:dev",
     "@angular-devkit/core": "catalog:dev",
-    "@angular-eslint/builder": "catalog:dev",
-    "@angular-eslint/eslint-plugin": "catalog:dev",
-    "@angular-eslint/eslint-plugin-template": "catalog:dev",
-    "@angular-eslint/template-parser": "catalog:dev",
     "@angular/cli": "catalog:dev",
     "@angular/compiler-cli": "catalog:dev",
     "@angular/language-service": "catalog:dev",
