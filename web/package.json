@@ -67,8 +67,7 @@
       "lint": {
         "executor": "nx:run-commands",
         "options": {
-          "cwd": "web",
-          "command": "ng lint",
+          "command": "npx eslint \"web/src/**/*.ts\" --config eslint.config.mjs && npx eslint web/src/**/*.html --config eslint.config.mjs",
           "forwardAllArgs": true
         }
       },
