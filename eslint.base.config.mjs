@@ -122,4 +122,30 @@ export default [
       '@typescript-eslint/no-floating-promises': 'off',
     },
   },
+  {
+    files: ['lib/**/*.ts'],
+    languageOptions: {
+      globals: {
+        require: 'readonly',
+        module: 'readonly',
+        process: 'readonly',
+      },
+      parserOptions: {
+        project: ['./lib/tsconfig.json'],
+        tsconfigRootDir: __dirname,
+      },
+    },
+    rules: {
+      'n/no-extraneous-require': [
+        'error',
+        {
+          allowModules: ['firebase-admin'],
+        },
+      ],
+      '@typescript-eslint/no-require-imports': 'warn',
+      '@typescript-eslint/no-explicit-any': 'warn',
+      '@typescript-eslint/no-wrapper-object-types': 'warn',
+      '@typescript-eslint/no-floating-promises': 'off',
+    },
+  },
 ];
