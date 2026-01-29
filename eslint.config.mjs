@@ -148,7 +148,7 @@ export default [
     },
   },
   {
-    files: ['lib/**/*.ts'],
+    files: ['lib/**/*.ts', 'lib/**/*.js'],
     languageOptions: {
       globals: {
         require: 'readonly',
