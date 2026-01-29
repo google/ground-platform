@@ -103,6 +103,26 @@ export default [
     },
   },
   {
+    files: ['e2e-tests/**/*.ts'],
+    languageOptions: {
+      globals: {
+        jasmine: 'readonly',
+      },
+      parserOptions: {
+        project: ['./e2e-tests/tsconfig.json'],
+        tsconfigRootDir: __dirname,
+      },
+    },
+    rules: {
+      'n/no-unpublished-import': [
+        'error',
+        {
+          allowModules: ['jasmine'],
+        },
+      ],
+    },
+  },
+  {
     files: ['functions/**/*.ts'],
     languageOptions: {
       globals: {
