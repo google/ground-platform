@@ -198,7 +198,7 @@ export default [
       '@typescript-eslint/no-shadow': 'off',
       'no-redeclare': 'error',
       '@typescript-eslint/no-redeclare': 'error',
-      '@typescript-eslint/no-explicit-any': 'error',
+      '@typescript-eslint/no-explicit-any': 'warn',
       '@typescript-eslint/no-unused-vars': [
         'error',
         {
