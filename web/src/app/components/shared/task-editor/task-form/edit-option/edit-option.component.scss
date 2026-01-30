@@ -28,7 +28,7 @@
 
   .option-icon {
     margin-right: 12px;
-    min-width: 24px
+    min-width: 24px;
   }
 
   .drag-icon {
@@ -46,6 +46,7 @@
       background-color: inherit;
     }
     
+    // Hide underlines by default, show on hover/focus
     ::ng-deep .mat-mdc-form-field-underline {
       opacity: 0;
       transition: opacity 0.2s ease;
@@ -56,16 +57,17 @@
       transition: opacity 0.2s ease;
     }
     
-    &:hover {
+    &:hover,
+    &:focus-within {
       ::ng-deep .mat-mdc-form-field-underline,
       ::ng-deep .mdc-line-ripple {
         opacity: 1;
       }
     }
     
-    &:focus-within {
-      ::ng-deep .mat-mdc-form-field-underline,
-      ::ng-deep .mdc-line-ripple {
+    ::ng-deep .mat-focused {
+      .mat-mdc-form-field-underline,
+      .mdc-line-ripple {
         opacity: 1;
       }
     }
