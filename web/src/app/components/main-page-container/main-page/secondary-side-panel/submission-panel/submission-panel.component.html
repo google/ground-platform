@@ -14,80 +14,150 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-<div class="submission-panel" [ngClass]="{loading: isLoading}">
-  <div *ngIf="isLoading" class="progress-spinner">
+<div class="submission-panel" [ngClass]="{ loading: isLoading() }">
+  <div *ngIf="isLoading()" class="progress-spinner">
     <mat-spinner mode="indeterminate" diameter="50"></mat-spinner>
   </div>
 
-  <ng-container *ngIf="!isLoading">
+  <ng-container *ngIf="!isLoading()">
     <div class="submission-title">
       <div class="submission-title-left">
         <button mat-icon-button (click)="navigateToSubmissionList()">
           <mat-icon>arrow_back</mat-icon>
         </button>
-        <div class="submission-title-text">{{submission?.created?.user?.displayName}}</div>
+        <div class="submission-title-text">
+          {{ submission()?.created?.user?.displayName }}
+        </div>
       </div>
     </div>
     <div class="submission-subtitle">
-      {{submission?.lastModified?.clientTime | date: 'longDate' }} • 
-      {{submission?.lastModified?.clientTime | date: 'shortTime' }}
+      <span>
+        {{ submission()?.lastModified?.clientTime | date: 'longDate' }}
+      </span>
+      <span>&nbsp;&bull;&nbsp;</span>
+      <span>
+        {{ submission()?.lastModified?.clientTime | date: 'shortTime' }}
+      </span>
     </div>
     <div *ngIf="tasks" class="submission-tasks-container">
-      <div *ngFor="let task of submittedTasks; let i = index">
+      <div *ngFor="let task of submittedTasks(); let i = index">
         <ng-container>
           <mat-divider *ngIf="i > 0"></mat-divider>
           <div class="submission-task">
             <!-- Question -->
-            <div class="submission-question">{{task.label}}</div>
+            <div class="submission-question">{{ task.label }}</div>
             <!-- Response -->
             <div class="submission-response">
-              <div *ngIf="getTaskSubmissionResult(task).skipped" class="submission-no-response">
+              <div
+                *ngIf="getTaskSubmissionResult(task).skipped"
+                class="submission-no-response"
+                i18n="@@app.submissionPanel.skipped"
+              >
                 Skipped
               </div>
               <ng-container *ngIf="!getTaskSubmissionResult(task).skipped">
                 <!-- Multiple choice task types -->
-                <div *ngIf="task.type === taskType.MULTIPLE_CHOICE" class="submission-response-multiple-choice">
-                  <mat-checkbox disabled="true" checked="true" *ngFor="let optionId of getTaskMultipleChoiceSelections(task).values">
-                    {{getMultipleChoiceOption(task, optionId).label}}
+                <div
+                  *ngIf="task.type === taskType.MULTIPLE_CHOICE"
+                  class="submission-response-multiple-choice"
+                >
+                  <mat-checkbox
+                    disabled="true"
+                    checked="true"
+                    *ngFor="
+                      let optionId of getTaskMultipleChoiceSelections(task)
+                        .values
+                    "
+                  >
+                    {{ getMultipleChoiceOption(task, optionId).label }}
                   </mat-checkbox>
-                  <mat-checkbox disabled="true" checked="true" *ngIf="getTaskMultipleChoiceOtherValue(task) as otherValue">
-                    {{otherValue}}
+                  <mat-checkbox
+                    disabled="true"
+                    checked="true"
+                    *ngIf="getTaskMultipleChoiceOtherValue(task) as otherValue"
+                  >
+                    {{ otherValue }}
                   </mat-checkbox>
                 </div>
                 <!-- Photo task types -->
                 <div *ngIf="task.type === taskType.PHOTO">
-                  <ng-container *ngIf="firebaseURLs.get(getTaskSubmissionResult(task)?.value) as downloadUrl; else loading">
-                    <img [src]="downloadUrl" class="submission-img" alt="Submission photo" i18n-alt="@@app.labels.loadingSubmissionPhoto" />
+                  <ng-container
+                    *ngIf="
+                      firebaseURLs.get(
+                        getTaskSubmissionResult(task)?.value
+                      ) as downloadUrl;
+                      else loading
+                    "
+                  >
+                    <img
+                      [src]="downloadUrl"
+                      class="submission-img"
+                      alt="Submission photo"
+                      i18n-alt="@@app.labels.loadingSubmissionPhoto"
+                    />
                   </ng-container>
                   <ng-template #loading>
                     <mat-spinner [diameter]="40"></mat-spinner>
                   </ng-template>
                 </div>
                 <!-- Geometry task types -->
-                <div *ngIf="task.type === taskType.DROP_PIN || task.type === taskType.CAPTURE_LOCATION || task.type === taskType.DRAW_AREA">
-                  <div class="submission-response-geometry" [ngClass]="{'selected-submission-response-geometry': task.id === selectedTaskId}" (click)="selectGeometry(task)">
-                    <div class="submission-response-geometry-number" [ngStyle]="{ 'background-color': this.submission?.job.color ?? 'black' }">
-                      {{i + 1}}
+                <div
+                  *ngIf="
+                    task.type === taskType.DROP_PIN ||
+                    task.type === taskType.CAPTURE_LOCATION ||
+                    task.type === taskType.DRAW_AREA
+                  "
+                >
+                  <div
+                    class="submission-response-geometry"
+                    [ngClass]="{
+                      'selected-submission-response-geometry':
+                        task.id === selectedTaskId,
+                    }"
+                    (click)="selectGeometry(task)"
+                  >
+                    <div
+                      class="submission-response-geometry-number"
+                      [ngStyle]="{
+                        'background-color': submission()?.job.color ?? 'black',
+                      }"
+                    >
+                      {{ i + 1 }}
                     </div>
-                    <div *ngIf="task.type === taskType.DROP_PIN || task.type === taskType.DRAW_AREA" class="submission-response-geometry-label">
-                      {{task.id}}
+                    <div
+                      *ngIf="
+                        task.type === taskType.DROP_PIN ||
+                        task.type === taskType.DRAW_AREA
+                      "
+                      class="submission-response-geometry-label"
+                    >
+                      {{ task.id }}
                     </div>
-                    <div *ngIf="task.type === taskType.CAPTURE_LOCATION" class="submission-response-geometry-label">
-                      {{getCaptureLocationCoord(task)}}
+                    <div
+                      *ngIf="task.type === taskType.CAPTURE_LOCATION"
+                      class="submission-response-geometry-label"
+                    >
+                      {{ getCaptureLocationCoord(task) }}
                     </div>
                   </div>
                 </div>
                 <!-- Date task types -->
                 <div *ngIf="task.type === taskType.DATE">
-                  {{getDate(task)}}
+                  {{ getDate(task) }}
                 </div>
                 <!-- Time task types -->
                 <div *ngIf="task.type === taskType.TIME">
-                  {{getTime(task)}}
+                  {{ getTime(task) }}
                 </div>
                 <!-- Remaining task types -->
-                <div *ngIf="task.type === taskType.TEXT || task.type === taskType.NUMBER || task.type === taskType.DATE_TIME">
-                  {{getTaskSubmissionResult(task)!.value.toString()}}
+                <div
+                  *ngIf="
+                    task.type === taskType.TEXT ||
+                    task.type === taskType.NUMBER ||
+                    task.type === taskType.DATE_TIME
+                  "
+                >
+                  {{ getTaskSubmissionResult(task)!.value.toString() }}
                 </div>
               </ng-container>
             </div>

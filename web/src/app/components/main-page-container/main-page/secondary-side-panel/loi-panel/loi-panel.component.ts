@@ -14,15 +14,14 @@
  * limitations under the License.
  */
 
-import { Component, OnDestroy, OnInit, input } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
+import { Component, computed, inject, input } from '@angular/core';
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { MatDialog } from '@angular/material/dialog';
 import { List } from 'immutable';
-import { Observable, Subscription, combineLatest, switchMap } from 'rxjs';
+import { combineLatest, concat, delay, of, switchMap } from 'rxjs';
 
 import { LoiPropertiesDialogComponent } from 'app/components/shared/loi-properties-dialog/loi-properties-dialog.component';
 import { LocationOfInterest } from 'app/models/loi.model';
-import { Submission } from 'app/models/submission/submission.model';
 import { Survey } from 'app/models/survey.model';
 import { LocationOfInterestService } from 'app/services/loi/loi.service';
 import { NavigationService } from 'app/services/navigation/navigation.service';
@@ -35,54 +34,49 @@ import { getLoiIcon } from 'app/utils/utils';
   styleUrls: ['./loi-panel.component.scss'],
   standalone: false,
 })
-export class LocationOfInterestPanelComponent implements OnInit, OnDestroy {
-  subscription: Subscription = new Subscription();
-  activeSurvey = input<Survey>();
-  lois = input<List<LocationOfInterest>>(List());
+export class LocationOfInterestPanelComponent {
+  private submissionService = inject(SubmissionService);
+  private navigationService = inject(NavigationService);
 
-  activeSurvey$ = toObservable(this.activeSurvey);
-  lois$ = toObservable(this.lois);
+  readonly isLoading = computed(() => {
+    return this.submissions() === undefined;
+  });
+
+  activeSurvey = input<Survey>();
+  lois = input<List<LocationOfInterest>>();
+  loiId = input<string>();
 
   loi!: LocationOfInterest;
   name!: string | null;
   icon!: string;
   iconColor!: string;
-  submissions!: List<Submission>;
-  isLoading = true;
 
-  constructor(
-    private dialog: MatDialog,
-    private loiService: LocationOfInterestService,
-    private submissionService: SubmissionService,
-    private navigationService: NavigationService
-  ) {}
+  constructor(private dialog: MatDialog) {}
 
-  ngOnInit() {
-    this.subscription.add(
-      combineLatest([
-        this.activeSurvey$,
-        this.lois$,
-        this.navigationService.getLocationOfInterestId$(),
-      ])
-        .pipe(
-          switchMap(([survey, lois, loiId]) => {
-            const loi = lois.find(l => l.id === loiId);
-            if (survey && loi) {
-              this.iconColor = survey.getJob(loi.jobId)?.color ?? '';
-              this.loi = loi;
-              this.name = LocationOfInterestService.getDisplayName(loi);
-              this.icon = getLoiIcon(loi);
-              return this.submissionService.getSubmissions$(survey, loi);
-            }
-            return new Observable<List<Submission>>();
-          })
-        )
-        .subscribe(submissions => {
-          this.submissions = submissions;
-          this.isLoading = false;
-        })
-    );
-  }
+  submissions = toSignal(
+    combineLatest([
+      toObservable(this.activeSurvey),
+      toObservable(this.lois),
+      toObservable(this.loiId),
+    ]).pipe(
+      switchMap(([survey, lois, loiId]) => {
+        const loi = lois?.find(l => l.id === loiId);
+        if (survey && loi) {
+          console.log(loiId);
+          this.iconColor = survey.getJob(loi.jobId)?.color ?? '';
+          this.loi = loi;
+          this.name = LocationOfInterestService.getDisplayName(loi);
+          this.icon = getLoiIcon(loi);
+          return concat(
+            of(undefined),
+            this.submissionService.getSubmissions$(survey, loi).pipe(delay(100))
+          );
+        }
+        return of(null).pipe(delay(100));
+      })
+    ),
+    { initialValue: undefined }
+  );
 
   onSelectSubmission(submissionId: string) {
     if (!this.activeSurvey()) {
@@ -118,9 +112,5 @@ export class LocationOfInterestPanelComponent implements OnInit, OnDestroy {
       },
       panelClass: 'loi-properties-dialog-container',
     });
-  }
-
-  ngOnDestroy(): void {
-    this.subscription.unsubscribe();
   }
 }

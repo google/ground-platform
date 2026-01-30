@@ -14,18 +14,17 @@
  * limitations under the License.
  */
 
-import { Component, OnDestroy, OnInit, input } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
+import { Component, computed, inject, input } from '@angular/core';
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { Storage, getDownloadURL, ref } from '@angular/fire/storage';
 import { List } from 'immutable';
-import { Subscription, combineLatest, of } from 'rxjs';
-import { switchMap } from 'rxjs/operators';
+import { combineLatest, of } from 'rxjs';
+import { delay, switchMap } from 'rxjs/operators';
 
 import { Point } from 'app/models/geometry/point';
 import { LocationOfInterest } from 'app/models/loi.model';
 import { MultipleSelection } from 'app/models/submission/multiple-selection';
 import { Result } from 'app/models/submission/result.model';
-import { Submission } from 'app/models/submission/submission.model';
 import { Survey } from 'app/models/survey.model';
 import { Option } from 'app/models/task/option.model';
 import { Task, TaskType } from 'app/models/task/task.model';
@@ -38,83 +37,64 @@ import { SubmissionService } from 'app/services/submission/submission.service';
   styleUrls: ['./submission-panel.component.scss'],
   standalone: false,
 })
-export class SubmissionPanelComponent implements OnInit, OnDestroy {
-  subscription: Subscription = new Subscription();
+export class SubmissionPanelComponent {
+  private submissionService = inject(SubmissionService);
+  private navigationService = inject(NavigationService);
+  private storage = inject(Storage);
 
-  submissionId = input<string>();
   activeSurvey = input<Survey>();
   lois = input<List<LocationOfInterest>>();
-
-  activeSurvey$ = toObservable(this.activeSurvey);
-  lois$ = toObservable(this.lois);
-  submissionId$ = toObservable(this.submissionId);
-
-  submission: Submission | null = null;
-  tasks?: List<Task>;
+  submissionId = input<string>();
+  loiId = input<string>();
   selectedTaskId: string | null = null;
   firebaseURLs = new Map<string, string>();
-  isLoading = true;
+
+  readonly isLoading = computed(() => {
+    return this.submission() === undefined;
+  });
+
+  submission = toSignal(
+    combineLatest([
+      toObservable(this.activeSurvey),
+      toObservable(this.lois),
+      toObservable(this.submissionId),
+      toObservable(this.loiId),
+    ]).pipe(
+      switchMap(([survey, lois, submissionId, loiId]) => {
+        const loi = lois?.find(l => l.id === loiId);
+        if (survey && loi && submissionId) {
+          return this.submissionService
+            .getSubmission$(survey, loi, submissionId)
+            .pipe(delay(100));
+        }
+        return of(null).pipe(delay(100));
+      })
+    ),
+    { initialValue: undefined }
+  );
+
+  tasks = computed(() => {
+    const submission = this.submission();
+    if (!submission) return List<Task>();
+    return submission.job?.getTasksSorted().filter(t => !t.addLoiTask);
+  });
 
   public taskType = TaskType;
 
-  constructor(
-    private submissionService: SubmissionService,
-    private navigationService: NavigationService,
-    private storage: Storage
-  ) {}
+  constructor() {}
 
-  ngOnInit() {
-    this.subscription.add(
-      combineLatest([
-        this.activeSurvey$,
-        this.lois$,
-        this.submissionId$,
-        this.navigationService.getLocationOfInterestId$(),
-      ])
-        .pipe(
-          switchMap(([survey, lois, submissionId, loiId]) => {
-            const loi = lois?.find(l => l.id === loiId);
-            if (survey && loi && submissionId) {
-              return this.submissionService.getSubmission$(
-                survey,
-                loi,
-                submissionId
-              );
-            }
-            return of(null);
-          })
-        )
-        .subscribe(submission => {
-          if (submission instanceof Submission) {
-            this.submission = submission;
-            this.tasks = submission.job
-              ?.getTasksSorted()
-              .filter(task => !task.addLoiTask);
-            // Get image URL upon initialization to not send Firebase requests multiple times
-            this.getFirebaseImageURLs();
-            this.isLoading = false;
-          }
-        })
-    );
-    this.subscription.add(
-      this.navigationService.getTaskId$().subscribe(taskId => {
-        this.selectedTaskId = taskId;
-      })
-    );
-  }
-
-  get submittedTasks() {
-    if (!this.tasks) {
-      return [];
-    }
-
-    return this.tasks.filter(
-      task => this.getTaskSubmissionResult(task) !== undefined
-    );
-  }
+  readonly submittedTasks = computed(() => {
+    const currentTasks = this.tasks();
+    if (!currentTasks || currentTasks.size === 0) return [];
+    return currentTasks
+      .filter(task => this.getTaskSubmissionResult(task) !== undefined)
+      .toArray();
+  });
 
   getFirebaseImageURLs() {
-    this.tasks?.forEach(task => {
+    const tasks = this.tasks();
+    if (!tasks) return;
+    tasks.forEach(task => {
       if (task.type === this.taskType.PHOTO) {
         const submissionImage = this.getTaskSubmissionResult(task);
         const submissionImageValue = submissionImage?.value as string;
@@ -142,6 +122,8 @@ export class SubmissionPanelComponent implements OnInit, OnDestroy {
   }
 
   navigateToSubmissionList() {
+    const loiId = this.loiId();
+    if (!loiId) return;
     const survey = this.activeSurvey();
     if (!survey) {
       console.error("No active survey - can't navigate to submission list");
@@ -151,14 +133,13 @@ export class SubmissionPanelComponent implements OnInit, OnDestroy {
       console.error("No submission - can't navigate to submission list");
       return;
     }
-    this.navigationService.selectLocationOfInterest(
-      survey.id,
-      this.submission.loiId
-    );
+    this.navigationService.selectLocationOfInterest(survey.id, loiId);
   }
 
   getTaskSubmissionResult({ id: taskId }: Task): Result | undefined {
-    return this.submission?.data.get(taskId);
+    const submission = this.submission();
+    if (!submission) return;
+    return submission.data.get(taskId);
   }
 
   getMultipleChoiceOption(task: Task, optionId: string) {
@@ -190,11 +171,25 @@ export class SubmissionPanelComponent implements OnInit, OnDestroy {
     const { coord, accuracy, altitude } = this.getTaskSubmissionResult(task)!
       .value as Point;
     const { x, y } = coord;
-    const lng = Math.abs(x).toString() + (x > 0 ? '° E' : '° W');
-    const lat = Math.abs(y).toString() + (y > 0 ? '° N' : '° S');
+    const lngSuffix =
+      x >= 0
+        ? $localize`:@@app.labels.lngEast:E`
+        : $localize`:@@app.labels.lngWest:W`;
+    const latSuffix =
+      y >= 0
+        ? $localize`:@@app.labels.latNorth:N`
+        : $localize`:@@app.labels.latSouth:S`;
+    const lng = `${Math.abs(x)}° ${lngSuffix}`;
+    const lat = `${Math.abs(y)}° ${latSuffix}`;
     const result = [`${lat}, ${lng}`];
-    if (altitude) result.push(`Altitude: ${altitude}m`);
-    if (accuracy) result.push(`Accuracy: ${accuracy}m`);
+    if (altitude)
+      result.push(
+        $localize`:@@app.labels.altitude:Altitude: ${altitude}:altitude:m`
+      );
+    if (accuracy)
+      result.push(
+        $localize`:@@app.labels.accuracy:Accuracy: ${accuracy}:accuracy:m`
+      );
     return result.join('\n');
   }
 
@@ -211,25 +206,23 @@ export class SubmissionPanelComponent implements OnInit, OnDestroy {
   }
 
   selectGeometry(task: Task): void {
+    const submission = this.submission();
+    if (!submission) return;
     const survey = this.activeSurvey();
     if (!survey) {
       console.error("No active survey - can't select geometry");
       return;
     }
-    if (!this.submission) {
+    if (!submission) {
       console.error("No submission - can't select geometry");
       return;
     }
 
     this.navigationService.showSubmissionDetailWithHighlightedTask(
       survey.id,
-      this.submission.loiId,
-      this.submission.id,
+      submission.loiId,
+      submission.id,
       task.id
     );
-  }
-
-  ngOnDestroy(): void {
-    this.subscription.unsubscribe();
   }
 }
