@@ -40,17 +40,16 @@ export default [
       'web/src/test.ts',
     ],
   },
-  ...gts.map(config => ({
-    ...config,
-    ...(config.languageOptions?.parserOptions
-      ? {
-          languageOptions: {
-            ...config.languageOptions,
-            parserOptions: {},
-          },
-        }
-      : {}),
-  })),
+  ...gts.map(config => {
+    const newConfig = { ...config };
+    if (newConfig.languageOptions?.parserOptions) {
+      newConfig.languageOptions = {
+        ...newConfig.languageOptions,
+        parserOptions: {},
+      };
+    }
+    return newConfig;
+  }),
   {
     plugins: {
       '@typescript-eslint': typescriptEslintPlugin,
@@ -77,7 +76,6 @@ export default [
         clearTimeout: 'readonly',
         clearInterval: 'readonly',
         console: 'readonly',
-        // 'unused-imports': 'readonly' // Is this needed? No, it's a plugin.
       },
     },
     rules: {
