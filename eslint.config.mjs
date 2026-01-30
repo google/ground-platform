@@ -20,6 +20,7 @@ import angularTemplatePlugin from '@angular-eslint/eslint-plugin-template';
 import typescriptEslintPlugin from '@typescript-eslint/eslint-plugin';
 import typescriptParser from '@typescript-eslint/parser';
 import importPlugin from 'eslint-plugin-import';
+import nodePlugin from 'eslint-plugin-n';
 import prettierPlugin from 'eslint-plugin-prettier';
 import unusedImports from 'eslint-plugin-unused-imports';
 import path from 'path';
@@ -37,7 +38,6 @@ export default [
       '**/dist',
       '**/coverage',
       '**/src/generated',
-      'web/src/test.ts',
     ],
   },
   ...gts.map(config => {
@@ -53,6 +53,7 @@ export default [
   {
     plugins: {
       '@typescript-eslint': typescriptEslintPlugin,
+      n: nodePlugin,
       prettier: prettierPlugin,
       'unused-imports': unusedImports,
     },
@@ -97,12 +98,12 @@ export default [
       'no-unused-vars': 'off',
       'unused-imports/no-unused-imports': 'error',
       'unused-imports/no-unused-vars': [
-        'warn',
+        'error',
         {
-          vars: 'all',
-          varsIgnorePattern: '^_',
           args: 'after-used',
           argsIgnorePattern: '^_',
+          vars: 'all',
+          varsIgnorePattern: '^_',
         },
       ],
     },
@@ -197,14 +198,7 @@ export default [
       'no-redeclare': 'error',
       '@typescript-eslint/no-redeclare': 'error',
       '@typescript-eslint/no-explicit-any': 'warn',
-      '@typescript-eslint/no-unused-vars': [
-        'error',
-        {
-          argsIgnorePattern: '^_',
-          varsIgnorePattern: '^_',
-          caughtErrorsIgnorePattern: '^_',
-        },
-      ],
+      '@typescript-eslint/no-unused-vars': 'off',
       '@typescript-eslint/no-unused-expressions': 'warn',
       '@typescript-eslint/no-unsafe-function-type': 'off',
       '@typescript-eslint/no-empty-object-type': 'off',
