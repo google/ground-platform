@@ -206,13 +206,12 @@ export class SubmissionPanelComponent {
   }
 
   selectGeometry(task: Task): void {
-    const submission = this.submission();
-    if (!submission) return;
     const survey = this.activeSurvey();
     if (!survey) {
       console.error("No active survey - can't select geometry");
       return;
     }
+    const submission = this.submission();
     if (!submission) {
       console.error("No submission - can't select geometry");
       return;

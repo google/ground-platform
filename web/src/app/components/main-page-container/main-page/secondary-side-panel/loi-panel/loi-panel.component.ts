@@ -62,7 +62,6 @@ export class LocationOfInterestPanelComponent {
       switchMap(([survey, lois, loiId]) => {
         const loi = lois?.find(l => l.id === loiId);
         if (survey && loi) {
-          console.log(loiId);
           this.iconColor = survey.getJob(loi.jobId)?.color ?? '';
           this.loi = loi;
           this.name = LocationOfInterestService.getDisplayName(loi);
