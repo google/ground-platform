@@ -80,7 +80,7 @@ catalogs:
     '@types/webpack-env': ^1.15.3
     '@typescript-eslint/eslint-plugin': ^8.50.1
     '@typescript-eslint/parser': ^8.50.1
-    diff: ^4.0.4
+    diff: ^3.5.1
     eslint: ^9.39.2
     eslint-config-prettier: ^10.1.8
     eslint-plugin-import: ^2.29.0
