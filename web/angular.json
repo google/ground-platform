@@ -46,7 +46,11 @@
               "includePaths": ["src/app/styles"]
             },
             "styles": ["src/ground-theme.scss"],
-            "scripts": []
+            "scripts": [],
+            "allowedCommonJsDependencies": [
+              "@ground/proto",
+              "qrcode"
+            ]
           },
           "configurations": {
             "development": {

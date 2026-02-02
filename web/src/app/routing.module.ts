@@ -47,16 +47,22 @@ import {
 } from 'app/services/navigation/navigation.constants';
 
 import { AboutComponent } from './components/about/about.component';
+import { AboutModule } from './components/about/about.module';
 import { AndroidIntentLandingPageComponent } from './components/android-intent-landing-page/android-intent-landing-page.component';
+import { AndroidIntentLandingPageModule } from './components/android-intent-landing-page/android-intent-landing-page.module';
 import { EditDetailsComponent } from './components/edit-survey/edit-details/edit-details.component';
+import { EditDetailsModule } from './components/edit-survey/edit-details/edit-details.module';
 import { EditJobComponent } from './components/edit-survey/edit-job/edit-job.component';
+import { EditJobModule } from './components/edit-survey/edit-job/edit-job.module';
 import { EditSurveyComponent } from './components/edit-survey/edit-survey.component';
 import { EditSurveyModule } from './components/edit-survey/edit-survey.module';
 import { SurveyJsonComponent } from './components/edit-survey/survey-json/survey-json.component';
+import { SurveyJsonModule } from './components/edit-survey/survey-json/survey-json.module';
 import { ErrorComponent } from './components/error/error.component';
 import { ErrorModule } from './components/error/error.module';
 import { ShareSurveyComponent } from './components/shared/share-survey/share-survey.component';
 import { TermsComponent } from './components/terms/terms.component';
+import { TermsModule } from './components/terms/terms.module';
 
 const routes: Routes = [
   {
@@ -141,15 +147,21 @@ const routes: Routes = [
 const config = RouterModule.forRoot(routes, { bindToComponentInputs: true });
 
 @NgModule({
-  imports: [config],
-  exports: [
-    MainPageContainerModule,
-    RouterModule,
-    SignInPageModule,
-    SurveyListModule,
+  imports: [
+    config,
+    AboutModule,
+    AndroidIntentLandingPageModule,
     CreateSurveyModule,
+    EditDetailsModule,
+    EditJobModule,
     EditSurveyModule,
     ErrorModule,
+    MainPageContainerModule,
+    SignInPageModule,
+    SurveyJsonModule,
+    SurveyListModule,
+    TermsModule,
   ],
+  exports: [RouterModule],
 })
 export class AppRoutingModule {}
