@@ -43,18 +43,13 @@ export class SubmissionPanelComponent {
   private storage = inject(Storage);
 
   activeSurvey = input<Survey>();
-  lois = input<List<LocationOfInterest>>();
-  loiId = input<string>();
+  selectedLoi = input<LocationOfInterest>();
   submissionId = input<string>();
 
   selectedTaskId: string | null = null;
   firebaseURLs = new Map<string, string>();
 
   public taskType = TaskType;
-
-  readonly selectedLoi = computed(() => {
-    return this.lois()?.find(l => l.id === this.loiId());
-  });
 
   readonly isLoading = computed(() => {
     return this.submission() === undefined;
@@ -125,8 +120,8 @@ export class SubmissionPanelComponent {
   }
 
   navigateToSubmissionList() {
-    const loiId = this.loiId();
-    if (!loiId) return;
+    const loi = this.selectedLoi();
+    if (!loi) return;
     const survey = this.activeSurvey();
     if (!survey) {
       console.error("No active survey - can't navigate to submission list");
@@ -136,7 +131,7 @@ export class SubmissionPanelComponent {
       console.error("No submission - can't navigate to submission list");
       return;
     }
-    this.navigationService.selectLocationOfInterest(survey.id, loiId);
+    this.navigationService.selectLocationOfInterest(survey.id, loi.id);
   }
 
   getTaskSubmissionResult({ id: taskId }: Task): Result | undefined {

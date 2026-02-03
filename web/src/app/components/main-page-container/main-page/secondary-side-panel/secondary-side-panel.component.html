@@ -23,9 +23,8 @@
       <submission-panel
         *ngIf="submissionIdSignal()"
         [activeSurvey]="activeSurvey()"
-        [loiId]="loiIdSignal()"
+        [selectedLoi]="selectedLoi()"
         [submissionId]="submissionIdSignal()"
-        [lois]="lois()"
       ></submission-panel>
     </ng-container>
 
@@ -33,8 +32,7 @@
       <ground-loi-panel
         *ngIf="loiIdSignal()"
         [activeSurvey]="activeSurvey()"
-        [loiId]="loiIdSignal()"
-        [lois]="lois()"
+        [selectedLoi]="selectedLoi()"
       ></ground-loi-panel>
     </ng-container>
   </div>

@@ -120,8 +120,7 @@ describe('LocationOfInterestPanelComponent', () => {
 
   function setupPanelWithLoi() {
     fixture.componentRef.setInput('activeSurvey', mockSurvey);
-    fixture.componentRef.setInput('lois', List([mockLoi]));
-    fixture.componentRef.setInput('loiId', mockLoi.id);
+    fixture.componentRef.setInput('selectedLoi', mockLoi);
     fixture.detectChanges();
     tick(100);
     fixture.detectChanges();

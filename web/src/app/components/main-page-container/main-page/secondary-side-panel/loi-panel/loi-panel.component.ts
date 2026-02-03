@@ -17,7 +17,6 @@
 import { Component, computed, inject, input } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { MatDialog } from '@angular/material/dialog';
-import { List } from 'immutable';
 import { combineLatest, concat, delay, of, switchMap } from 'rxjs';
 
 import { LoiPropertiesDialogComponent } from 'app/components/shared/loi-properties-dialog/loi-properties-dialog.component';
@@ -39,16 +38,11 @@ export class LocationOfInterestPanelComponent {
   private navigationService = inject(NavigationService);
 
   activeSurvey = input<Survey>();
-  lois = input<List<LocationOfInterest>>();
-  loiId = input<string>();
+  selectedLoi = input<LocationOfInterest>();
 
   readonly isLoading = computed(() => {
     return this.submissions() === undefined;
   });
-
-  readonly selectedLoi = computed(() =>
-    this.lois()?.find(l => l.id === this.loiId())
-  );
 
   readonly name = computed(() => {
     const loi = this.selectedLoi();

@@ -137,8 +137,7 @@ describe('SubmissionPanelComponent', () => {
     const submission = { ...mockSubmission, data } as Submission;
     submissionService.getSubmission$.and.returnValue(of(submission));
     fixture.componentRef.setInput('activeSurvey', mockSurvey);
-    fixture.componentRef.setInput('lois', List<LocationOfInterest>([mockLoi]));
-    fixture.componentRef.setInput('loiId', mockLoi.id);
+    fixture.componentRef.setInput('selectedLoi', mockLoi);
     fixture.componentRef.setInput('submissionId', mockSubmission.id);
     fixture.detectChanges();
     tick(100);
