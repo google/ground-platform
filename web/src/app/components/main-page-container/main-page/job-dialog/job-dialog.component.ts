@@ -184,4 +184,3 @@ export class JobDialogComponent implements OnDestroy {
     return this.navigationService.selectSurvey(this.surveyId!);
   }
 }
-
