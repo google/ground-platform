@@ -17,10 +17,16 @@
 <div class="page">
   <ground-header [survey]="survey"></ground-header>
   <!-- TODO(#1170): Extract the spinner into a component -->
-  <div id="loading-spinner" class="loading-spinner" *ngIf="createSurveyPhase === CreateSurveyPhase.LOADING">
+  <div
+    id="loading-spinner"
+    class="loading-spinner"
+    *ngIf="createSurveyPhase === CreateSurveyPhase.LOADING"
+  >
     <div>
       <mat-spinner></mat-spinner>
-      <p class="loading-label" i18n="@@app.labels.loadingSurvey">Loading survey...</p>
+      <p class="loading-label" i18n="@@app.labels.loadingSurvey">
+        Loading survey...
+      </p>
     </div>
   </div>
 
@@ -34,11 +40,21 @@
       />
       <div class="create-survey-content">
         <div class="progress-bar-title">{{ progressBarTitle() }}</div>
-        <mat-progress-bar mode="determinate" [value]="progressBarValue()"></mat-progress-bar>
+        <mat-progress-bar
+          mode="determinate"
+          [value]="progressBarValue()"
+        ></mat-progress-bar>
         <ground-step-card
           [title]="cardTitle()"
           [description]="cardDescription()"
-          [jobName]="[CreateSurveyPhase.DEFINE_LOIS, CreateSurveyPhase.DEFINE_TASKS].includes(createSurveyPhase) ? jobName() : ''"
+          [jobName]="
+            [
+              CreateSurveyPhase.DEFINE_LOIS,
+              CreateSurveyPhase.DEFINE_TASKS,
+            ].includes(createSurveyPhase)
+              ? jobName()
+              : ''
+          "
         >
           <ng-container [ngSwitch]="createSurveyPhase">
             <survey-details
@@ -86,10 +102,9 @@
           id="back-button"
           class="button"
           color="primary"
-          i18n="@@app.labels.back"
           (click)="back()"
         >
-          Back
+          <span i18n="@@app.labels.back">Back</span>
         </button>
       </div>
 
@@ -99,17 +114,25 @@
           [surveyId]="surveyId"
         ></ground-copy-survey-controls>
 
-      <button
-        id="continue-button"
-        class="continue-button"
-        mat-flat-button
-        color="primary"
-        (click)="continue()"
-        [disabled]="!canContinue"
-      >
-        <span *ngIf="createSurveyPhase === CreateSurveyPhase.SHARE_SURVEY" i18n="@@app.labels.goToSurvey">Go to survey</span>
-        <span *ngIf="createSurveyPhase !== CreateSurveyPhase.SHARE_SURVEY" i18n="@@app.labels.continue">Continue</span>
-      </button>
+        <button
+          id="continue-button"
+          class="continue-button"
+          mat-flat-button
+          color="primary"
+          (click)="continue()"
+          [disabled]="!canContinue"
+        >
+          <span
+            *ngIf="createSurveyPhase === CreateSurveyPhase.SHARE_SURVEY"
+            i18n="@@app.labels.goToSurvey"
+            >Go to survey</span
+          >
+          <span
+            *ngIf="createSurveyPhase !== CreateSurveyPhase.SHARE_SURVEY"
+            i18n="@@app.labels.continue"
+            >Continue</span
+          >
+        </button>
       </div>
     </div>
   </div>

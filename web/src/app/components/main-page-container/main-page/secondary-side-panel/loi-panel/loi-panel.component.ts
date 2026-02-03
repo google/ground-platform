@@ -38,34 +38,44 @@ export class LocationOfInterestPanelComponent {
   private submissionService = inject(SubmissionService);
   private navigationService = inject(NavigationService);
 
-  readonly isLoading = computed(() => {
-    return this.submissions() === undefined;
-  });
-
   activeSurvey = input<Survey>();
   lois = input<List<LocationOfInterest>>();
   loiId = input<string>();
 
-  loi!: LocationOfInterest;
-  name!: string | null;
-  icon!: string;
-  iconColor!: string;
+  readonly isLoading = computed(() => {
+    return this.submissions() === undefined;
+  });
+
+  readonly selectedLoi = computed(() =>
+    this.lois()?.find(l => l.id === this.loiId())
+  );
+
+  readonly name = computed(() => {
+    const loi = this.selectedLoi();
+    return loi ? LocationOfInterestService.getDisplayName(loi) : null;
+  });
+
+  readonly icon = computed(() => {
+    const loi = this.selectedLoi();
+    return loi ? getLoiIcon(loi) : '';
+  });
+
+  readonly iconColor = computed(() => {
+    const survey = this.activeSurvey();
+    const loi = this.selectedLoi();
+    if (!survey || !loi) return '';
+    return survey.getJob(loi.jobId)?.color ?? '';
+  });
 
   constructor(private dialog: MatDialog) {}
 
   submissions = toSignal(
     combineLatest([
       toObservable(this.activeSurvey),
-      toObservable(this.lois),
-      toObservable(this.loiId),
+      toObservable(this.selectedLoi),
     ]).pipe(
-      switchMap(([survey, lois, loiId]) => {
-        const loi = lois?.find(l => l.id === loiId);
+      switchMap(([survey, loi]) => {
         if (survey && loi) {
-          this.iconColor = survey.getJob(loi.jobId)?.color ?? '';
-          this.loi = loi;
-          this.name = LocationOfInterestService.getDisplayName(loi);
-          this.icon = getLoiIcon(loi);
           return concat(
             of(undefined),
             this.submissionService.getSubmissions$(survey, loi).pipe(delay(100))
@@ -77,28 +87,34 @@ export class LocationOfInterestPanelComponent {
     { initialValue: undefined }
   );
 
-  onSelectSubmission(submissionId: string) {
-    if (!this.activeSurvey()) {
-      console.error('No active survey');
+  onSelectSubmission(submissionId: string): void {
+    const survey = this.activeSurvey();
+    const loi = this.selectedLoi();
+
+    if (!survey || !loi) {
+      console.error('Missing survey or LOI');
       return;
     }
+
     this.navigationService.showSubmissionDetail(
-      this.activeSurvey()!.id,
-      this.loi.id,
+      survey.id,
+      loi.id,
       submissionId
     );
   }
 
-  onClosePanel() {
+  onClosePanel(): void {
     this.navigationService.clearLocationOfInterestId();
   }
 
-  hasProperties() {
-    return this.loi.properties?.size;
+  hasProperties(): boolean {
+    return !!this.selectedLoi()?.properties?.size;
   }
 
   openPropertiesDialog(event: Event): void {
     event.stopPropagation();
+    const loi = this.selectedLoi();
+    if (!loi) return;
     this.dialog.open(LoiPropertiesDialogComponent, {
       width: '580px',
       height: '70%',
@@ -107,7 +123,7 @@ export class LocationOfInterestPanelComponent {
         iconColor: this.iconColor,
         iconName: this.icon,
         loiDisplayName: this.name,
-        properties: this.loi.properties?.toObject(),
+        properties: loi.properties.toObject(),
       },
       panelClass: 'loi-properties-dialog-container',
     });

@@ -135,16 +135,16 @@ describe('LocationOfInterestPanelComponent', () => {
     setupPanelWithLoi();
 
     expect(component.isLoading()).toBe(false);
-    expect(component.iconColor).toBe('#000');
-    expect(component.loi).toEqual(mockLoi);
-    expect(component.name).toBe('Unnamed point');
+    expect(component.selectedLoi()).toEqual(mockLoi);
+    expect(component.iconColor()).toBe('#000');
+    expect(component.name()).toBe('Unnamed point');
     expect(component.submissions).toBeDefined();
   }));
 
   it('should navigate to submission detail on selection', fakeAsync(() => {
     setupPanelWithLoi();
 
-    component.loi = mockLoi;
+    fixture.componentRef.setInput('loi', mockLoi);
     const submissionId = 'sub1';
     component.onSelectSubmission(submissionId);
 

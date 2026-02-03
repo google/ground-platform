@@ -44,24 +44,45 @@ export class SubmissionPanelComponent {
 
   activeSurvey = input<Survey>();
   lois = input<List<LocationOfInterest>>();
-  submissionId = input<string>();
   loiId = input<string>();
+  submissionId = input<string>();
+
   selectedTaskId: string | null = null;
   firebaseURLs = new Map<string, string>();
+
+  public taskType = TaskType;
+
+  readonly selectedLoi = computed(() => {
+    return this.lois()?.find(l => l.id === this.loiId());
+  });
 
   readonly isLoading = computed(() => {
     return this.submission() === undefined;
   });
 
+  readonly tasks = computed(() => {
+    const submission = this.submission();
+    if (!submission) return List<Task>();
+    return submission.job?.getTasksSorted().filter(t => !t.addLoiTask);
+  });
+
+  readonly submittedTasks = computed(() => {
+    const currentTasks = this.tasks();
+    if (!currentTasks || currentTasks.size === 0) return [];
+    return currentTasks
+      .filter(task => this.getTaskSubmissionResult(task) !== undefined)
+      .toArray();
+  });
+
+  constructor() {}
+
   submission = toSignal(
     combineLatest([
       toObservable(this.activeSurvey),
-      toObservable(this.lois),
+      toObservable(this.selectedLoi),
       toObservable(this.submissionId),
-      toObservable(this.loiId),
     ]).pipe(
-      switchMap(([survey, lois, submissionId, loiId]) => {
-        const loi = lois?.find(l => l.id === loiId);
+      switchMap(([survey, loi, submissionId]) => {
         if (survey && loi && submissionId) {
           return this.submissionService
             .getSubmission$(survey, loi, submissionId)
@@ -72,24 +93,6 @@ export class SubmissionPanelComponent {
     ),
     { initialValue: undefined }
   );
-
-  tasks = computed(() => {
-    const submission = this.submission();
-    if (!submission) return List<Task>();
-    return submission.job?.getTasksSorted().filter(t => !t.addLoiTask);
-  });
-
-  public taskType = TaskType;
-
-  constructor() {}
-
-  readonly submittedTasks = computed(() => {
-    const currentTasks = this.tasks();
-    if (!currentTasks || currentTasks.size === 0) return [];
-    return currentTasks
-      .filter(task => this.getTaskSubmissionResult(task) !== undefined)
-      .toArray();
-  });
 
   getFirebaseImageURLs() {
     const tasks = this.tasks();

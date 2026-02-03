@@ -23,10 +23,10 @@ limitations under the License.
     <div class="header">
       <div class="header-left">
         <mat-icon
-          svgIcon="{{ icon }}"
-          [ngStyle]="{ color: iconColor }"
+          svgIcon="{{ icon() }}"
+          [ngStyle]="{ color: iconColor() }"
         ></mat-icon>
-        <div>{{ name }}</div>
+        <div>{{ name() }}</div>
       </div>
 
       <button
