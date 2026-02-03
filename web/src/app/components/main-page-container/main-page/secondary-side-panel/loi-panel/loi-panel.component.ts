@@ -14,15 +14,13 @@
  * limitations under the License.
  */
 
-import { Component, OnDestroy, OnInit, input } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
+import { Component, computed, inject, input } from '@angular/core';
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { MatDialog } from '@angular/material/dialog';
-import { List } from 'immutable';
-import { Observable, Subscription, combineLatest, switchMap } from 'rxjs';
+import { combineLatest, concat, delay, of, switchMap } from 'rxjs';
 
 import { LoiPropertiesDialogComponent } from 'app/components/shared/loi-properties-dialog/loi-properties-dialog.component';
 import { LocationOfInterest } from 'app/models/loi.model';
-import { Submission } from 'app/models/submission/submission.model';
 import { Survey } from 'app/models/survey.model';
 import { LocationOfInterestService } from 'app/services/loi/loi.service';
 import { NavigationService } from 'app/services/navigation/navigation.service';
@@ -35,77 +33,82 @@ import { getLoiIcon } from 'app/utils/utils';
   styleUrls: ['./loi-panel.component.scss'],
   standalone: false,
 })
-export class LocationOfInterestPanelComponent implements OnInit, OnDestroy {
-  subscription: Subscription = new Subscription();
+export class LocationOfInterestPanelComponent {
+  private submissionService = inject(SubmissionService);
+  private navigationService = inject(NavigationService);
+
   activeSurvey = input<Survey>();
-  lois = input<List<LocationOfInterest>>(List());
+  selectedLoi = input<LocationOfInterest>();
 
-  activeSurvey$ = toObservable(this.activeSurvey);
-  lois$ = toObservable(this.lois);
+  readonly isLoading = computed(() => {
+    return this.submissions() === undefined;
+  });
 
-  loi!: LocationOfInterest;
-  name!: string | null;
-  icon!: string;
-  iconColor!: string;
-  submissions!: List<Submission>;
-  isLoading = true;
+  readonly name = computed(() => {
+    const loi = this.selectedLoi();
+    return loi ? LocationOfInterestService.getDisplayName(loi) : null;
+  });
 
-  constructor(
-    private dialog: MatDialog,
-    private loiService: LocationOfInterestService,
-    private submissionService: SubmissionService,
-    private navigationService: NavigationService
-  ) {}
+  readonly icon = computed(() => {
+    const loi = this.selectedLoi();
+    return loi ? getLoiIcon(loi) : '';
+  });
 
-  ngOnInit() {
-    this.subscription.add(
-      combineLatest([
-        this.activeSurvey$,
-        this.lois$,
-        this.navigationService.getLocationOfInterestId$(),
-      ])
-        .pipe(
-          switchMap(([survey, lois, loiId]) => {
-            const loi = lois.find(l => l.id === loiId);
-            if (survey && loi) {
-              this.iconColor = survey.getJob(loi.jobId)?.color ?? '';
-              this.loi = loi;
-              this.name = LocationOfInterestService.getDisplayName(loi);
-              this.icon = getLoiIcon(loi);
-              return this.submissionService.getSubmissions$(survey, loi);
-            }
-            return new Observable<List<Submission>>();
-          })
-        )
-        .subscribe(submissions => {
-          this.submissions = submissions;
-          this.isLoading = false;
-        })
-    );
-  }
+  readonly iconColor = computed(() => {
+    const survey = this.activeSurvey();
+    const loi = this.selectedLoi();
+    if (!survey || !loi) return '';
+    return survey.getJob(loi.jobId)?.color ?? '';
+  });
 
-  onSelectSubmission(submissionId: string) {
-    if (!this.activeSurvey()) {
-      console.error('No active survey');
+  constructor(private dialog: MatDialog) {}
+
+  submissions = toSignal(
+    combineLatest([
+      toObservable(this.activeSurvey),
+      toObservable(this.selectedLoi),
+    ]).pipe(
+      switchMap(([survey, loi]) => {
+        if (survey && loi) {
+          return concat(
+            of(undefined),
+            this.submissionService.getSubmissions$(survey, loi).pipe(delay(100))
+          );
+        }
+        return of(null).pipe(delay(100));
+      })
+    ),
+    { initialValue: undefined }
+  );
+
+  onSelectSubmission(submissionId: string): void {
+    const survey = this.activeSurvey();
+    const loi = this.selectedLoi();
+
+    if (!survey || !loi) {
+      console.error('Missing survey or LOI');
       return;
     }
+
     this.navigationService.showSubmissionDetail(
-      this.activeSurvey()!.id,
-      this.loi.id,
+      survey.id,
+      loi.id,
       submissionId
     );
   }
 
-  onClosePanel() {
+  onClosePanel(): void {
     this.navigationService.clearLocationOfInterestId();
   }
 
-  hasProperties() {
-    return this.loi.properties?.size;
+  hasProperties(): boolean {
+    return !!this.selectedLoi()?.properties?.size;
   }
 
   openPropertiesDialog(event: Event): void {
     event.stopPropagation();
+    const loi = this.selectedLoi();
+    if (!loi) return;
     this.dialog.open(LoiPropertiesDialogComponent, {
       width: '580px',
       height: '70%',
@@ -114,13 +117,9 @@ export class LocationOfInterestPanelComponent implements OnInit, OnDestroy {
         iconColor: this.iconColor,
         iconName: this.icon,
         loiDisplayName: this.name,
-        properties: this.loi.properties?.toObject(),
+        properties: loi.properties.toObject(),
       },
       panelClass: 'loi-properties-dialog-container',
     });
-  }
-
-  ngOnDestroy(): void {
-    this.subscription.unsubscribe();
   }
 }
