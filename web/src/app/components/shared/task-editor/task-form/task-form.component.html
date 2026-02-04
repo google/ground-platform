@@ -165,13 +165,13 @@
         (click)="onAddOption()"
         class="add-option"
       >
-        <ng-container i18n="app.taskEditor.multipleChoice.addOption"
+        <ng-container i18n="@@app.taskEditor.multipleChoice.addOption"
           >Add option</ng-container
         >
       </button>
 
       <ng-container *ngIf="!hasOtherOptionControl.value">
-        <div i18n="app.labels.or">or</div>
+        <div i18n="@@app.labels.or">or</div>
 
         <button
           mat-button
@@ -180,7 +180,7 @@
           color="primary"
           class="add-option"
         >
-          <ng-container i18n="app.taskEditor.multipleChoice.addOther"
+          <ng-container i18n="@@app.taskEditor.multipleChoice.addOther"
             >add "Other"</ng-container
           >
         </button>
