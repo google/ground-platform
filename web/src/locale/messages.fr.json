@@ -33,6 +33,7 @@
     "app.cards.dataVisibility.title": "Visibilité des données",
     "app.cards.dataVisibility.description": "Permettre aux collecteurs de données de voir les données des autres collecteurs",
     "app.login.signIn": " Connectez-vous pour continuer ",
+    "app.labels.survey": "Enquête",
     "app.labels.surveys": "Enquêtes",
     "app.labels.createSurvey": "Créer une enquête",
     "app.labels.createSurveyDescription": "Définir les missions et les sites pour les collecteurs de données",

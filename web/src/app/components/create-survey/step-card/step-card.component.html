@@ -16,6 +16,9 @@
 
 <div class="step-card">
   <h1 class="title">
+    <div *ngIf="surveyTitle">
+      <span i18n="@@app.labels.survey">Survey</span>: {{ surveyTitle }}
+    </div>
     <div *ngIf="jobName">
       <span i18n="@@app.labels.job">Job</span>: {{ jobName }}
     </div>

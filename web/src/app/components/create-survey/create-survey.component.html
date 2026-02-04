@@ -38,6 +38,7 @@
         <ground-step-card
           [title]="cardTitle()"
           [description]="cardDescription()"
+          [surveyTitle]="survey?.title || ''"
           [jobName]="[CreateSurveyPhase.DEFINE_LOIS, CreateSurveyPhase.DEFINE_TASKS].includes(createSurveyPhase) ? jobName() : ''"
         >
           <ng-container [ngSwitch]="createSurveyPhase">
