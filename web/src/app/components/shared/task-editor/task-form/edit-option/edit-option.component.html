@@ -28,6 +28,7 @@
       formControlName="label"
       autocomplete="off"
       (blur)="onLabelBlur()"
+      [placeholder]="'Option ' + ((index ?? 0) + 1)"
       required
     />
 
