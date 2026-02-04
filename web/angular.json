@@ -18,8 +18,14 @@
           "fr": {
             "translation": "src/locale/messages.fr.json"
           },
+          "lo": {
+            "translation": "src/locale/messages.lo.json"
+          },
           "pt": {
             "translation": "src/locale/messages.pt.json"
+          },
+          "th": {
+            "translation": "src/locale/messages.th.json"
           },
           "vi": {
             "translation": "src/locale/messages.vi.json"
@@ -110,19 +116,25 @@
                 }
               ]
             },
-            "en": {
+            "development-en": {
               "localize": ["en"]
             },
-            "es": {
+            "development-es": {
               "localize": ["es"]
             },
-            "fr": {
+            "development-fr": {
               "localize": ["fr"]
             },
-            "pt": {
+            "development-lo": {
+              "localize": ["lo"]
+            },
+            "development-pt": {
               "localize": ["pt"]
             },
-            "vi": {
+            "development-th": {
+              "localize": ["th"]
+            },
+            "development-vi": {
               "localize": ["vi"]
             }
           },
@@ -139,22 +151,28 @@
               "buildTarget": "web:build:development"
             },
             "staging": {
-              "buildTarget": "web:build:staging,en"
+              "buildTarget": "web:build:staging"
             },
             "production": {
-              "buildTarget": "web:build:production,en"
+              "buildTarget": "web:build:production"
             },
-            "es": {
-              "buildTarget": "web:build:dev,es"
+            "development-es": {
+              "buildTarget": "web:build:development-es"
             },
-            "fr": {
-              "buildTarget": "web:build:staging,fr"
+            "development-fr": {
+              "buildTarget": "web:build:development-fr"
             },
-            "pt": {
-              "buildTarget": "web:build:dev,pt"
+            "development-lo": {
+              "buildTarget": "web:build:development-lo"
             },
-            "vi": {
-              "buildTarget": "web:build:staging,vi"
+            "development-pt": {
+              "buildTarget": "web:build:development-pt"
+            },
+            "development-th": {
+              "buildTarget": "web:build:development-th"
+            },
+            "development-vi": {
+              "buildTarget": "web:build:development-vi"
             }
           }
         },
