@@ -37,7 +37,7 @@
             >Invalid email format</mat-error
           >
         }
-        @if (emailControl.getError('forbiddenName')) {
+        @if (emailControl.getError('emailAlreadyAdded')) {
           <mat-error i18n="@@app.controls.errors.emailAlreadyAdded"
             >Email address already added</mat-error
           >
