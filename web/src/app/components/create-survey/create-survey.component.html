@@ -20,7 +20,11 @@
   <div id="loading-spinner" class="loading-spinner" *ngIf="createSurveyPhase === CreateSurveyPhase.LOADING">
     <div>
       <mat-spinner></mat-spinner>
-      <p class="loading-label" i18n="@@app.labels.loadingSurvey">Loading survey...</p>
+      <p class="loading-label">
+        <ng-container i18n="@@app.labels.loadingSurvey"
+          >Loading survey...</ng-container
+        >
+      </p>
     </div>
   </div>
 
@@ -86,10 +90,9 @@
           id="back-button"
           class="button"
           color="primary"
-          i18n="@@app.labels.back"
           (click)="back()"
         >
-          Back
+          <ng-container i18n="@@app.labels.back">Back</ng-container>
         </button>
       </div>
 
@@ -99,17 +102,22 @@
           [surveyId]="surveyId"
         ></ground-copy-survey-controls>
 
-      <button
-        id="continue-button"
-        class="continue-button"
-        mat-flat-button
-        color="primary"
-        (click)="continue()"
-        [disabled]="!canContinue"
-      >
-        <span *ngIf="createSurveyPhase === CreateSurveyPhase.SHARE_SURVEY" i18n="@@app.labels.goToSurvey">Go to survey</span>
-        <span *ngIf="createSurveyPhase !== CreateSurveyPhase.SHARE_SURVEY" i18n="@@app.labels.continue">Continue</span>
-      </button>
+        <button
+          id="continue-button"
+          class="continue-button"
+          mat-flat-button
+          color="primary"
+          (click)="continue()"
+          [disabled]="!canContinue"
+        >
+          @if (createSurveyPhase === CreateSurveyPhase.SHARE_SURVEY) {
+            <ng-container i18n="@@app.labels.goToSurvey"
+              >Go to survey</ng-container
+            >
+          } @else {
+            <ng-container i18n="@@app.labels.continue">Continue</ng-container>
+          }
+        </button>
       </div>
     </div>
   </div>

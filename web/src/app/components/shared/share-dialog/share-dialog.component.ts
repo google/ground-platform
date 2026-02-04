@@ -168,7 +168,7 @@ export class ShareDialogComponent {
       const emailsInAcl = this.acl?.map(entry => entry.email) || [];
       const newEmail = control.value;
       return emailsInAcl.includes(newEmail)
-        ? { forbiddenName: { value: control.value } }
+        ? { emailAlreadyAdded: { value: control.value } }
         : null;
     };
   }

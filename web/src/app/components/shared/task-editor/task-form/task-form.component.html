@@ -60,13 +60,21 @@
         </button>
 
         <button mat-menu-item (click)="onTaskConditionToggle()">
-          <span>{{ !conditionControl ? 'Add condition' : 'Remove condition' }}</span>
+          @if (!conditionControl) {
+            <ng-container i18n="@@app.controls.tasks.addCondition"
+              >Add condition</ng-container
+            >
+          } @else {
+            <ng-container i18n="@@app.controls.tasks.removeCondition"
+              >Remove condition</ng-container
+            >
+          }
         </button>
 
         <mat-divider></mat-divider>
 
         <button mat-menu-item (click)="onTaskDelete()">
-          <span i18n="@@app.labels.delete">Delete</span>
+          <ng-container i18n="@@app.labels.delete">Delete</ng-container>
         </button>
       </mat-menu>
     </div>
@@ -78,7 +86,7 @@
 
       <mat-menu #menu="matMenu">
         <button mat-menu-item (click)="onTaskDelete()">
-          <span i18n="@@app.labels.delete">Delete</span>
+          <ng-container i18n="@@app.labels.delete">Delete</ng-container>
         </button>
       </mat-menu>
     </div>
@@ -157,11 +165,13 @@
         (click)="onAddOption()"
         class="add-option"
       >
-        Add option
+        <ng-container i18n="app.taskEditor.multipleChoice.addOption"
+          >Add option</ng-container
+        >
       </button>
 
       <ng-container *ngIf="!hasOtherOptionControl.value">
-        <div>or</div>
+        <div i18n="app.labels.or">or</div>
 
         <button
           mat-button
@@ -170,7 +180,9 @@
           color="primary"
           class="add-option"
         >
-          add "Other"
+          <ng-container i18n="app.taskEditor.multipleChoice.addOther"
+            >add "Other"</ng-container
+          >
         </button>
       </ng-container>
     </div>
