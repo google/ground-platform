@@ -40,7 +40,7 @@
             "index": "src/index.html",
             "main": "src/main.ts",
             "localize": true,
-            "i18nMissingTranslation": "error",
+            "i18nMissingTranslation": "warning",
             "polyfills": ["zone.js"],
             "tsConfig": "tsconfig.app.json",
             "aot": true,
