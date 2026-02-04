@@ -33,6 +33,7 @@
     "app.cards.dataVisibility.title": "Visibilidade dos dados",
     "app.cards.dataVisibility.description": "Permitir que os coletores de dados vejam os dados uns dos outros",
     "app.login.signIn": " Iniciar sessão para continuar ",
+    "app.labels.survey": "Inquérito",
     "app.labels.surveys": "Inquéritos",
     "app.labels.createSurvey": " Criar inquérito ",
     "app.labels.createSurveyDescription": " Definir tarefas e locais para os coletores de dados ",
