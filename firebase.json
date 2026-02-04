@@ -37,8 +37,32 @@
         "function": "sessionLogin"
       },
       {
-        "source": "/@(en|es|fr|lo|pt|th|vi){,/**}",
-        "destination": "/:1/index.html"
+        "source": "/en{,/**}",
+        "destination": "/en/index.html"
+      },
+      {
+        "source": "/es{,/**}",
+        "destination": "/es/index.html"
+      },
+      {
+        "source": "/fr{,/**}",
+        "destination": "/fr/index.html"
+      },
+      {
+        "source": "/lo{,/**}",
+        "destination": "/lo/index.html"
+      },
+      {
+        "source": "/pt{,/**}",
+        "destination": "/pt/index.html"
+      },
+      {
+        "source": "/th{,/**}",
+        "destination": "/th/index.html"
+      },
+      {
+        "source": "/vi{,/**}",
+        "destination": "/vi/index.html"
       },
       {
         "source": "/**",
