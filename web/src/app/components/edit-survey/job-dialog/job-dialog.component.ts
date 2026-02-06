@@ -60,8 +60,8 @@ export const dialogConfigs: Record<DialogType, DialogConfig> = {
   [DialogType.CopySurvey]: {
     title: $localize`:@@app.dialogs.copySurvey.title:Copy survey`,
     content: $localize`:@@app.dialogs.copySurvey.content:This survey and all its associated jobs will be copied. Data collection sites and submission data won't be included in the copy.`,
-    backButtonLabel: $localize`:@@app.labels.goBack:Cancel`,
-    continueButtonLabel: $localize`:@@app.labels.continue:Confirm`,
+    backButtonLabel: $localize`:@@app.labels.goBack:Go back`,
+    continueButtonLabel: $localize`:@@app.labels.continue:Continue`,
   },
   [DialogType.DeleteJob]: {
     title: $localize`:@@app.dialogs.deleteJob.title:Delete job`,

@@ -51,11 +51,13 @@ export class CopySurveyControlsComponent implements OnInit {
   copyLinkToClipboard() {
     navigator.clipboard.writeText(this.surveyAppLink).then(
       () => {
-        this.notificationService.success('Survey link copied to clipboard');
+        this.notificationService.success(
+          $localize`:@@app.notifications.success.surveyLinkCopied:Survey link copied to clipboard`
+        );
       },
       _ => {
         this.notificationService.error(
-          'Impossible to copy Survey link to clipboard'
+          $localize`:@@app.notifications.error.surveyLinkCopied:Impossible to copy Survey link to clipboard`
         );
       }
     );
@@ -79,12 +81,12 @@ export class CopySurveyControlsComponent implements OnInit {
       navigator.clipboard.write(data).then(
         () => {
           this.notificationService.success(
-            'Survey QR code copied to clipboard'
+            $localize`:@@app.notifications.success.surveyQrCodeCopied:Survey QR code copied to clipboard`
           );
         },
         _ => {
           this.notificationService.error(
-            'Impossible to copy Survey QR code to clipboard'
+            $localize`:@@app.notifications.error.surveyQrCodeCopied:Impossible to copy Survey QR code to clipboard`
           );
         }
       );
