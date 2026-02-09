@@ -33,6 +33,7 @@
     "app.cards.dataVisibility.title": "Khả năng hiển thị dữ liệu",
     "app.cards.dataVisibility.description": "Cho phép người thu thập dữ liệu xem dữ liệu của nhau",
     "app.login.signIn": " Đăng nhập để tiếp tục ",
+    "app.labels.survey": "Khảo sát",
     "app.labels.surveys": "Khảo sát",
     "app.labels.createSurvey": "Tạo khảo sát",
     "app.labels.createSurveyDescription": "Xác định công việc và địa điểm cho người thu thập dữ liệu",

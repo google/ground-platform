@@ -23,6 +23,7 @@ import { Component, Input } from '@angular/core';
   standalone: false,
 })
 export class StepCardComponent {
+  @Input() surveyTitle = '';
   @Input() jobName = '';
   @Input() title = '';
   @Input() subtitle = '';
