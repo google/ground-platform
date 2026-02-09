@@ -20,10 +20,16 @@ import { MatButtonModule } from '@angular/material/button';
 
 import { CurrentUserWidgetComponent } from 'app/components/shared/header/current-user-widget/current-user-widget.component';
 import { UserAvatarModule } from 'app/components/shared/user-avatar/user-avatar.module';
+import { AccountPopupModule } from './account-popup/account-popup.module';
 
 @NgModule({
   declarations: [CurrentUserWidgetComponent],
-  imports: [CommonModule, MatButtonModule, UserAvatarModule],
+  imports: [
+    CommonModule,
+    MatButtonModule,
+    AccountPopupModule,
+    UserAvatarModule,
+  ],
   exports: [CurrentUserWidgetComponent],
 })
 export class CurrentUserWidgetModule {}
