@@ -23,6 +23,7 @@ import {
   HostListener,
   Input,
   Output,
+  input,
 } from '@angular/core';
 import {
   AbstractControl,
@@ -159,6 +160,7 @@ const AddLoiTaskGroups = List([TaskGroup.DROP_PIN, TaskGroup.DRAW_AREA]);
 export class TaskFormComponent {
   @Input() formGroup!: FormGroup;
   @Input() formGroupIndex!: number;
+  isCreationMode = input<boolean>(false);
 
   @Output() delete = new EventEmitter();
   @Output() duplicate = new EventEmitter();

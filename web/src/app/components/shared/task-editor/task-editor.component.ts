@@ -15,7 +15,7 @@
  */
 
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, input } from '@angular/core';
 import {
   AbstractControl,
   FormArray,
@@ -93,6 +93,8 @@ export class TaskEditorComponent {
   formGroup!: FormGroup;
 
   @Input() tasks?: List<Task>;
+  isCreationMode = input<boolean>(false);
+
   @Output() onValidationChanges: EventEmitter<boolean> =
     new EventEmitter<boolean>();
   @Output() onValueChanges: EventEmitter<boolean> = new EventEmitter<boolean>();
