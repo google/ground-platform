@@ -180,8 +180,8 @@ export class TaskEditorComponent {
   onTaskDuplicate(index: number) {
     this.dialogService
       .openConfirmationDialog(
-        'Duplicate task',
-        'Are you sure you wish to duplicate this task?'
+        $localize`:@@app.dialogs.duplicateTask.title:Duplicate task`,
+        $localize`:@@app.dialogs.duplicateTask.content:Are you sure you wish to duplicate this task?`
       )
       .afterClosed()
       .subscribe(dialogResult => {
