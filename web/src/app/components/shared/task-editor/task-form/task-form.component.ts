@@ -329,7 +329,10 @@ export class TaskFormComponent {
 
   onAddOtherOption(): void {
     this.otherOption = this.formBuilder.group({
-      label: { value: 'Other...', disabled: true },
+      label: {
+        value: $localize`:@@app.labels.other:Other...`,
+        disabled: true,
+      },
     });
 
     this.hasOtherOptionControl.setValue(true);
