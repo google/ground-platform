@@ -339,18 +339,23 @@ export class TaskFormComponent {
   }
 
   openDeleteOptionDialog(index?: number) {
-    this.dialog
-      .open(JobDialogComponent, {
-        data: { dialogType: DialogType.DeleteOption },
-        panelClass: 'small-width-dialog',
-      })
-      .afterClosed()
-      .subscribe(async (result: DialogData) => {
-        if (result?.dialogType === DialogType.DeleteOption) {
-          if (index !== undefined) this.optionsControl.removeAt(index);
-          else this.hasOtherOptionControl.setValue(false);
-        }
-      });
+    if (this.isCreationMode()) {
+      if (index !== undefined) this.optionsControl.removeAt(index);
+      else this.hasOtherOptionControl.setValue(false);
+    } else {
+      this.dialog
+        .open(JobDialogComponent, {
+          data: { dialogType: DialogType.DeleteOption },
+          panelClass: 'small-width-dialog',
+        })
+        .afterClosed()
+        .subscribe(async (result: DialogData) => {
+          if (result?.dialogType === DialogType.DeleteOption) {
+            if (index !== undefined) this.optionsControl.removeAt(index);
+            else this.hasOtherOptionControl.setValue(false);
+          }
+        });
+    }
   }
 
   drop(event: CdkDragDrop<string[]>): void {

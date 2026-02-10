@@ -160,18 +160,21 @@ export class TaskEditorComponent {
   }
 
   onTaskDelete(index: number) {
-    this.dialogService
-      .openConfirmationDialog(
-        'Warning',
-        'Are you sure you wish to delete this question? Any associated data ' +
-          'will be lost. This cannot be undone.'
-      )
-      .afterClosed()
-      .subscribe(dialogResult => {
-        if (dialogResult) {
-          this.formArray.removeAt(index);
-        }
-      });
+    if (this.isCreationMode()) {
+      this.formArray.removeAt(index);
+    } else {
+      this.dialogService
+        .openConfirmationDialog(
+          $localize`:@@app.dialogs.deleteTask.title:Warning`,
+          $localize`:@@app.dialogs.deleteTask.content:Are you sure you wish to delete this question? Any associated data will be lost. This cannot be undone.`
+        )
+        .afterClosed()
+        .subscribe(dialogResult => {
+          if (dialogResult) {
+            this.formArray.removeAt(index);
+          }
+        });
+    }
   }
 
   onTaskDuplicate(index: number) {
