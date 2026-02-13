@@ -25,6 +25,13 @@
         "dependsOn": [
           "build"
         ]
+      },
+      "format:check": {
+        "executor": "nx:run-commands",
+        "options": {
+          "cwd": "functions",
+          "command": "prettier --check \"src/**/*.ts\""
+        }
       }
     }
   },
