@@ -191,12 +191,6 @@
             "codeCoverage": true
           }
         },
-        "lint": {
-          "builder": "@angular-eslint/builder:lint",
-          "options": {
-            "lintFilePatterns": ["**/*.spec.ts", "**/*.ts"]
-          }
-        },
         "deploy": {
           "builder": "@angular/fire:deploy",
           "options": {
