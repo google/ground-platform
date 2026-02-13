@@ -53,25 +53,8 @@ jobs:
               - '.github/workflows/check.yml'
               - '.github/actions/setup/**'
 
-  format:
-    name: Format Check
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out code
-        uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
-
-      - name: Set up environment
-        uses: ./.github/actions/setup
-        with:
-          cache-key-suffix: format
-
-      - name: Check Formatting
-        run: pnpm exec nx format:check
-
   functions:
-    needs: [changes, format]
+    needs: changes
     if: ${{ needs.changes.outputs.functions == 'true' }}
     name: functions
     runs-on: ubuntu-latest
@@ -84,17 +67,20 @@ jobs:
         with:
           cache-key-suffix: functions
 
+      - name: Format Check
+        run: pnpm exec nx run functions:format:check
+
+      - name: Lint
+        run: pnpm exec nx lint functions
+
       - name: Build
         run: pnpm exec nx build functions
 
       - name: Test
         run: pnpm exec nx test functions
 
-      - name: Lint
-        run: pnpm exec nx lint functions
-
   lib:
-    needs: [changes, format]
+    needs: changes
     if: ${{ needs.changes.outputs.lib == 'true' }}
     name: lib
     runs-on: ubuntu-latest
@@ -107,14 +93,17 @@ jobs:
         with:
           cache-key-suffix: lib
 
+      - name: Format Check
+        run: pnpm exec nx run lib:format:check
+
+      - name: Lint
+        run: pnpm exec nx lint lib
+
       - name: Build
         run: pnpm exec nx build lib
 
       - name: Test
         run: pnpm exec nx test lib
-
-      - name: Lint
-        run: pnpm exec nx lint lib
 
   proto:
     needs: changes
@@ -137,7 +126,7 @@ jobs:
         run: pnpm exec nx lint proto
 
   web:
-    needs: [changes, format]
+    needs: changes
     if: ${{ needs.changes.outputs.web == 'true' }}
     name: web
     runs-on: ubuntu-latest
@@ -162,14 +151,17 @@ jobs:
           echo "CHROME_BIN=${{ steps.setup-chrome.outputs.chrome-path }}" >> $GITHUB_ENV
           echo "CHROME_PATH=${{ steps.setup-chrome.outputs.chrome-path }}" >> $GITHUB_ENV
 
+      - name: Format Check
+        run: pnpm exec nx run web:format:check
+
+      - name: Lint
+        run: pnpm exec nx lint web
+
       - name: Build
         run: pnpm exec nx build web
 
       - name: Test
         run: pnpm exec nx test web
-
-      - name: Lint
-        run: pnpm exec nx lint web
 
       - name: Update test coverage report
         uses: codecov/codecov-action@v5
