@@ -37,6 +37,7 @@
     <task-form
       [formGroup]="formGroup"
       [formGroupIndex]="i"
+      [isCreationMode]="isCreationMode()"
       (delete)="onTaskDelete(i)"
       (duplicate)="onTaskDuplicate(i)"
       (toggleCondition)="onTaskConditionToggle(i)"
