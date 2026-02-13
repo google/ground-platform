@@ -93,7 +93,6 @@ export default [
       ],
       'n/no-extraneous-import': 'off',
       'n/no-missing-import': 'off',
-      'prettier/prettier': 'warn',
       'no-unused-vars': 'off',
       'unused-imports/no-unused-imports': 'error',
       'unused-imports/no-unused-vars': [
@@ -214,7 +213,6 @@ export default [
       '@angular-eslint/template': angularTemplatePlugin,
     },
     rules: {
-      'prettier/prettier': ['warn', { parser: 'angular' }],
       '@angular-eslint/template/prefer-control-flow': 'off',
       '@angular-eslint/template/eqeqeq': 'warn',
       '@angular-eslint/template/no-negated-async': 'warn',
