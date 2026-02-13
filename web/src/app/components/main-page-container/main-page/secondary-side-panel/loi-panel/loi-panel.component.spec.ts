@@ -15,7 +15,12 @@
  */
 
 import { NO_ERRORS_SCHEMA } from '@angular/core';
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import {
+  ComponentFixture,
+  TestBed,
+  fakeAsync,
+  tick,
+} from '@angular/core/testing';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
@@ -111,27 +116,34 @@ describe('LocationOfInterestPanelComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(LocationOfInterestPanelComponent);
     component = fixture.componentInstance;
-    fixture.componentRef.setInput('activeSurvey', mockSurvey);
-    fixture.detectChanges();
   });
+
+  function setupPanelWithLoi() {
+    fixture.componentRef.setInput('activeSurvey', mockSurvey);
+    fixture.componentRef.setInput('selectedLoi', mockLoi);
+    fixture.detectChanges();
+    tick(100);
+    fixture.detectChanges();
+  }
 
   it('should create', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should initialize component state on init', () => {
-    fixture.componentRef.setInput('lois', List([mockLoi]));
-    fixture.detectChanges();
+  it('should initialize component state on init', fakeAsync(() => {
+    setupPanelWithLoi();
 
-    expect(component.loi).toEqual(mockLoi);
+    expect(component.isLoading()).toBe(false);
+    expect(component.selectedLoi()).toEqual(mockLoi);
+    expect(component.iconColor()).toBe('#000');
+    expect(component.name()).toBe('Unnamed point');
     expect(component.submissions).toBeDefined();
-    expect(component.isLoading).toBe(false);
-    expect(component.iconColor).toBe('#000');
-    expect(component.name).toBe('Unnamed point'); // Default name for mockLoi
-  });
+  }));
 
-  it('should navigate to submission detail on selection', () => {
-    component.loi = mockLoi;
+  it('should navigate to submission detail on selection', fakeAsync(() => {
+    setupPanelWithLoi();
+
+    fixture.componentRef.setInput('loi', mockLoi);
     const submissionId = 'sub1';
     component.onSelectSubmission(submissionId);
 
@@ -140,7 +152,7 @@ describe('LocationOfInterestPanelComponent', () => {
       mockLoi.id,
       submissionId
     );
-  });
+  }));
 
   it('should clear LOI on close', () => {
     component.onClosePanel();

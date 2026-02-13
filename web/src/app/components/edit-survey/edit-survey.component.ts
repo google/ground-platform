@@ -37,6 +37,9 @@ import {
   DialogType,
   JobDialogComponent,
 } from './job-dialog/job-dialog.component';
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
+import { switchMap } from 'rxjs';
+import { SurveyService } from 'app/services/survey/survey.service';
 
 @Component({
   selector: 'edit-survey',
@@ -48,11 +51,18 @@ export class EditSurveyComponent {
   private jobService = inject(JobService);
   private draftSurveyService = inject(DraftSurveyService);
   private navigationService = inject(NavigationService);
+  private surveyService = inject(SurveyService);
   public dialog = inject(MatDialog);
 
   private editSurveyPageSignal =
     this.navigationService.getEditSurveyPageSignal();
+
   surveyId = input<string>();
+  activeSurvey = toSignal(
+    toObservable(this.surveyId).pipe(
+      switchMap(id => (id ? this.surveyService.loadSurvey$(id) : []))
+    )
+  );
 
   survey?: Survey;
   production = !!(environment as Environment)['production'];

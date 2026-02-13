@@ -16,8 +16,8 @@
 
 <div class="page">
   <ground-survey-header
-    *ngIf="survey; let activeSurvey"
-    [activeSurvey]="activeSurvey"
+    *ngIf="activeSurvey()"
+    [activeSurvey]="activeSurvey()"
   ></ground-survey-header>
 
   <!-- TODO(#1170): Extract the spinner into a component -->

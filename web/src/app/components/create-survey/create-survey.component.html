@@ -17,7 +17,11 @@
 <div class="page">
   <ground-header [survey]="survey"></ground-header>
   <!-- TODO(#1170): Extract the spinner into a component -->
-  <div id="loading-spinner" class="loading-spinner" *ngIf="createSurveyPhase === CreateSurveyPhase.LOADING">
+  <div
+    id="loading-spinner"
+    class="loading-spinner"
+    *ngIf="createSurveyPhase === CreateSurveyPhase.LOADING"
+  >
     <div>
       <mat-spinner></mat-spinner>
       <p class="loading-label">
@@ -38,11 +42,21 @@
       />
       <div class="create-survey-content">
         <div class="progress-bar-title">{{ progressBarTitle() }}</div>
-        <mat-progress-bar mode="determinate" [value]="progressBarValue()"></mat-progress-bar>
+        <mat-progress-bar
+          mode="determinate"
+          [value]="progressBarValue()"
+        ></mat-progress-bar>
         <ground-step-card
           [title]="cardTitle()"
           [description]="cardDescription()"
-          [jobName]="[CreateSurveyPhase.DEFINE_LOIS, CreateSurveyPhase.DEFINE_TASKS].includes(createSurveyPhase) ? jobName() : ''"
+          [jobName]="
+            [
+              CreateSurveyPhase.DEFINE_LOIS,
+              CreateSurveyPhase.DEFINE_TASKS,
+            ].includes(createSurveyPhase)
+              ? jobName()
+              : ''
+          "
         >
           <ng-container [ngSwitch]="createSurveyPhase">
             <survey-details
