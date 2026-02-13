@@ -101,6 +101,10 @@
   "homepage": "https://groundplatform.org",
   "devDependencies": {
     "@angular/cli": "catalog:dev",
+    "@angular-eslint/builder": "catalog:dev",
+    "@angular-eslint/eslint-plugin": "catalog:dev",
+    "@angular-eslint/eslint-plugin-template": "catalog:dev",
+    "@angular-eslint/template-parser": "catalog:dev",
     "@eslint/eslintrc": "catalog:dev",
     "@types/jasmine": "catalog:dev",
     "@typescript-eslint/eslint-plugin": "catalog:dev",
