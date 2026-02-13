@@ -53,8 +53,23 @@ jobs:
               - '.github/workflows/check.yml'
               - '.github/actions/setup/**'
 
+  format:
+    name: Format Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v6
+
+      - name: Set up environment
+        uses: ./.github/actions/setup
+        with:
+          cache-key-suffix: format
+
+      - name: Check Formatting
+        run: pnpm exec nx format:check
+
   functions:
-    needs: changes
+    needs: [changes, format]
     if: ${{ needs.changes.outputs.functions == 'true' }}
     name: functions
     runs-on: ubuntu-latest
@@ -77,7 +92,7 @@ jobs:
         run: pnpm exec nx lint functions
 
   lib:
-    needs: changes
+    needs: [changes, format]
     if: ${{ needs.changes.outputs.lib == 'true' }}
     name: lib
     runs-on: ubuntu-latest
@@ -120,7 +135,7 @@ jobs:
         run: pnpm exec nx lint proto
 
   web:
-    needs: changes
+    needs: [changes, format]
     if: ${{ needs.changes.outputs.web == 'true' }}
     name: web
     runs-on: ubuntu-latest
