@@ -33,9 +33,11 @@
     />
 
     <mat-error *ngIf="labelControl.touched && labelControl.invalid">
-      <ng-container *ngIf="labelControl.getError('required')">
-        Option text is required
-      </ng-container>
+      <ng-container
+        *ngIf="labelControl.getError('required')"
+        i18n="@@app.controls.errors.requiredOptionText"
+        >Option text is required</ng-container
+      >
     </mat-error>
   </mat-form-field>
 

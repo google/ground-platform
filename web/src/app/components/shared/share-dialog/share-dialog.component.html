@@ -14,35 +14,47 @@
   limitations under the License.
 -->
 
-<h1 mat-dialog-title>Add survey participants</h1>
+<h1 mat-dialog-title>
+  <ng-container i18n="@@app.dialogs.shareDialog.title"
+    >Add survey participants</ng-container
+  >
+</h1>
 
 <div mat-dialog-content>
-  <form class="share-form" [formGroup]="addUserForm" (ngSubmit)="onAddUserSubmit()">
+  <form
+    class="share-form"
+    [formGroup]="addUserForm"
+    (ngSubmit)="onAddUserSubmit()"
+  >
     <mat-form-field class="email-input">
-      <mat-label>Email address</mat-label>
+      <mat-label i18n="@@app.forms.labels.emailAddress"
+        >Email address</mat-label
+      >
       <input matInput formControlName="email" autocomplete="off" />
-      <mat-error *ngIf="emailControl.touched && emailControl.invalid">
-        <ng-container *ngIf="emailControl.getError('email')">
-          Invalid email format
-        </ng-container>
-        <ng-container *ngIf="emailControl.getError('forbiddenName')">
-          Email address already added
-        </ng-container>
-      </mat-error>
+      @if (emailControl.touched && emailControl.invalid) {
+        @if (emailControl.getError('email')) {
+          <mat-error i18n="@@app.controls.errors.invalidEmailFormat"
+            >Invalid email format</mat-error
+          >
+        }
+        @if (emailControl.getError('emailAlreadyAdded')) {
+          <mat-error i18n="@@app.controls.errors.emailAlreadyAdded"
+            >Email address already added</mat-error
+          >
+        }
+      }
     </mat-form-field>
     <mat-form-field>
       <mat-select formControlName="role">
-        <mat-option
-          *ngFor="let option of roleOptions"
-          [value]="option.value"
-          >{{ option.label }}</mat-option
-        >
+        @for (option of roleOptions; track option.value) {
+          <mat-option [value]="option.value">{{ option.label }}</mat-option>
+        }
       </mat-select>
     </mat-form-field>
   </form>
   <div mat-dialog-actions align="end">
     <button mat-button mat-flat-button (click)="onCancelClicked()">
-      <label>Cancel</label>
+      <ng-container i18n="@@app.labels.cancel">Cancel</ng-container>
     </button>
     <button
       mat-flat-button
@@ -50,7 +62,7 @@
       [disabled]="addUserForm.value['email'] == '' || !addUserForm.valid"
       (click)="onAddUserSubmit()"
     >
-      <label>Send</label>
+      <ng-container i18n="@@app.labels.send">Send</ng-container>
     </button>
   </div>
 </div>
