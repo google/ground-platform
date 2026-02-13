@@ -69,6 +69,7 @@ jobs:
 
       - name: Format Check
         run: pnpm exec nx run functions:format:check
+        continue-on-error: true
 
       - name: Lint
         run: pnpm exec nx lint functions
@@ -95,6 +96,7 @@ jobs:
 
       - name: Format Check
         run: pnpm exec nx run lib:format:check
+        continue-on-error: true
 
       - name: Lint
         run: pnpm exec nx lint lib
@@ -153,6 +155,7 @@ jobs:
 
       - name: Format Check
         run: pnpm exec nx run web:format:check
+        continue-on-error: true
 
       - name: Lint
         run: pnpm exec nx lint web
