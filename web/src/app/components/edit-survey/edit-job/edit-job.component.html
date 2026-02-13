@@ -20,10 +20,11 @@
 
     <mat-button-toggle-group
       (change)="onSectionChange($event.value)"
-      [value]="EditJobSection.TASKS"
+      [value]="section"
       class="edit-job-toggler"
       name="section"
-      aria-label="Section"
+      i18n-aria-label="@@app.labels.editJobSectionAria"
+      aria-label="Select job editor section"
     >
       <mat-button-toggle [value]="EditJobSection.TASKS">
         <mat-icon *ngIf="section !== EditJobSection.TASKS">list</mat-icon>
