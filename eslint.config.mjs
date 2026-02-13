@@ -19,9 +19,9 @@ import angularTemplate from '@angular-eslint/template-parser';
 import angularTemplatePlugin from '@angular-eslint/eslint-plugin-template';
 import typescriptEslintPlugin from '@typescript-eslint/eslint-plugin';
 import typescriptParser from '@typescript-eslint/parser';
+import eslintConfigPrettier from 'eslint-config-prettier';
 import importPlugin from 'eslint-plugin-import';
 import nodePlugin from 'eslint-plugin-n';
-import prettierPlugin from 'eslint-plugin-prettier';
 import unusedImports from 'eslint-plugin-unused-imports';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -54,7 +54,6 @@ export default [
     plugins: {
       '@typescript-eslint': typescriptEslintPlugin,
       n: nodePlugin,
-      prettier: prettierPlugin,
       'unused-imports': unusedImports,
     },
     languageOptions: {
@@ -221,4 +220,5 @@ export default [
       '@angular-eslint/template/no-negated-async': 'warn',
     },
   },
+  eslintConfigPrettier,
 ];

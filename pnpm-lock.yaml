@@ -235,9 +235,6 @@ catalogs:
     eslint-plugin-n:
       specifier: ^17.0.0
       version: 17.23.2
-    eslint-plugin-prettier:
-      specifier: ^5.5.4
-      version: 5.5.5
     eslint-plugin-unused-imports:
       specifier: ^4.3.0
       version: 4.3.0
@@ -363,9 +360,6 @@ importers:
       eslint-plugin-n:
         specifier: catalog:dev
         version: 17.23.2(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3)
-      eslint-plugin-prettier:
-        specifier: catalog:dev
-        version: 5.5.5(@types/eslint@9.6.1)(eslint-config-prettier@10.1.8(eslint@9.39.2(jiti@2.6.1)))(eslint@9.39.2(jiti@2.6.1))(prettier@3.8.0)
       eslint-plugin-unused-imports:
         specifier: catalog:dev
         version: 4.3.0(@typescript-eslint/eslint-plugin@8.53.0(@typescript-eslint/parser@8.53.0(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3))(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3))(eslint@9.39.2(jiti@2.6.1))
