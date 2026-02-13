@@ -15,6 +15,7 @@
 -->
 
 <ground-header></ground-header>
+
 <div class="body-container">
   <mat-card appearance="outlined" class="card">
     <mat-card-content class="content">
@@ -22,12 +23,23 @@
         <img class="logo" src="assets/img/logo.svg" alt="Ground logo" />
       </div>
       <p class="title">Ground</p>
-      <p class="cta" *ngIf="!(isAuthenticated$() | async)" i18n="@@app.login.signIn">
-        Sign in to continue
+      <p class="cta" *ngIf="!(isAuthenticated$() | async)">
+        <ng-container i18n="@@app.login.signInToContinue"
+          >Sign in to continue</ng-container
+        >
       </p>
+
       <div class="buttons">
-        <button mat-flat-button color="primary" (click)="onGoogleSignIn()">
-          Sign in with Google
+        <button
+          mat-flat-button
+          color="primary"
+          (click)="onGoogleSignIn()"
+          i18n-aria-label="@@app.login.signInWithGoogle"
+          aria-label="Sign in with Google"
+        >
+          <ng-container i18n="@@app.login.signInWithGoogle"
+            >Sign in with Google</ng-container
+          >
         </button>
       </div>
     </mat-card-content>

@@ -24,8 +24,10 @@
   >
     <div>
       <mat-spinner></mat-spinner>
-      <p class="loading-label" i18n="@@app.labels.loadingSurvey">
-        Loading survey...
+      <p class="loading-label">
+        <ng-container i18n="@@app.labels.loadingSurvey"
+          >Loading survey...</ng-container
+        >
       </p>
     </div>
   </div>
@@ -104,7 +106,7 @@
           color="primary"
           (click)="back()"
         >
-          <span i18n="@@app.labels.back">Back</span>
+          <ng-container i18n="@@app.labels.back">Back</ng-container>
         </button>
       </div>
 
@@ -122,16 +124,13 @@
           (click)="continue()"
           [disabled]="!canContinue"
         >
-          <span
-            *ngIf="createSurveyPhase === CreateSurveyPhase.SHARE_SURVEY"
-            i18n="@@app.labels.goToSurvey"
-            >Go to survey</span
-          >
-          <span
-            *ngIf="createSurveyPhase !== CreateSurveyPhase.SHARE_SURVEY"
-            i18n="@@app.labels.continue"
-            >Continue</span
-          >
+          @if (createSurveyPhase === CreateSurveyPhase.SHARE_SURVEY) {
+            <ng-container i18n="@@app.labels.goToSurvey"
+              >Go to survey</ng-container
+            >
+          } @else {
+            <ng-container i18n="@@app.labels.continue">Continue</ng-container>
+          }
         </button>
       </div>
     </div>
