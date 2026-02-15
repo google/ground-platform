@@ -52,6 +52,7 @@ export default [
     return newConfig;
   }),
   {
+    files: ['**/*.ts', '**/*.js'],
     plugins: {
       '@typescript-eslint': typescriptEslintPlugin,
       n: nodePlugin,
