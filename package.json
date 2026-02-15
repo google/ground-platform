@@ -24,7 +24,8 @@
         "dependsOn": [
           {
             "target": "lint",
-            "projects": "*"
+            "projects": "*",
+            "params": "forward"
           }
         ]
       },
