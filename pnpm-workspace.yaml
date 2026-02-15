@@ -1,9 +1,9 @@
 packages:
-  - 'e2e-tests'
-  - 'functions'
-  - 'lib'
-  - 'proto'
-  - 'web'
+  - e2e-tests
+  - functions
+  - lib
+  - proto
+  - web
 
 catalogs:
   default:
@@ -50,7 +50,6 @@ catalogs:
     sanitize-html: ^2.17.0
     selenium-webdriver: ^4.19.0
     zone.js: ^0.15.0
-
   dev:
     '@angular-devkit/build-angular': ^20.3.13
     '@angular-devkit/core': ^20.3.13
@@ -78,15 +77,16 @@ catalogs:
     '@types/source-map-support': ^0.5.10
     '@types/terraformer__wkt': ^2.0.0
     '@types/webpack-env': ^1.15.3
-    '@typescript-eslint/eslint-plugin': ^8.50.1
-    '@typescript-eslint/parser': ^8.50.1
+    '@typescript-eslint/eslint-plugin': ^8.55.0
+    '@typescript-eslint/parser': ^8.55.0
     diff: ^3.5.1
     eslint: ^9.39.2
     eslint-config-prettier: ^10.1.8
-    eslint-plugin-import: ^2.29.0
-    eslint-plugin-n: ^17.0.0
-    eslint-plugin-prettier: ^5.5.4
-    eslint-plugin-unused-imports: ^4.3.0
+    eslint-plugin-headers: ^1.3.4
+    eslint-plugin-import: ^2.32.0
+    eslint-plugin-n: ^17.24.0
+    eslint-plugin-prettier: ^5.5.5
+    eslint-plugin-unused-imports: ^4.4.1
     firebase-functions-test: ^3.3.0
     firebase-tools: ^14.0.0
     form-data-encoder: ^4.0.2
