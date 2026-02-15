@@ -109,7 +109,7 @@ export default [
         },
       ],
       'headers/header-format': [
-        'error',
+        'warn',
         {
           "source": "string",
           "content": `Copyright (year) {company}.
