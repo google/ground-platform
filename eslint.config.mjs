@@ -19,7 +19,7 @@ import angularTemplate from '@angular-eslint/template-parser';
 import angularTemplatePlugin from '@angular-eslint/eslint-plugin-template';
 import typescriptEslintPlugin from '@typescript-eslint/eslint-plugin';
 import typescriptParser from '@typescript-eslint/parser';
-import headers from "eslint-plugin-headers";
+import headers from 'eslint-plugin-headers';
 import importPlugin from 'eslint-plugin-import';
 import nodePlugin from 'eslint-plugin-n';
 import prettierPlugin from 'eslint-plugin-prettier';
@@ -112,8 +112,8 @@ export default [
       'headers/header-format': [
         'warn',
         {
-          "source": "string",
-          "content": `Copyright (year) {company}.
+          source: 'string',
+          content: `Copyright (year) {company}.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -126,14 +126,14 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.`,
-          "variables": {
-            "company": "The Ground Authors"
+          variables: {
+            company: 'The Ground Authors',
           },
-          "patterns": {
-            "year": {
-              "pattern": "\\d{4}",
-              "defaultValue": "2026"
-            }
+          patterns: {
+            year: {
+              pattern: '\\d{4}',
+              defaultValue: '2026',
+            },
           },
         },
       ],
