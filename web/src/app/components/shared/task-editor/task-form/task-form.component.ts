@@ -23,6 +23,7 @@ import {
   HostListener,
   Input,
   Output,
+  input,
 } from '@angular/core';
 import {
   AbstractControl,
@@ -159,6 +160,7 @@ const AddLoiTaskGroups = List([TaskGroup.DROP_PIN, TaskGroup.DRAW_AREA]);
 export class TaskFormComponent {
   @Input() formGroup!: FormGroup;
   @Input() formGroupIndex!: number;
+  isCreationMode = input<boolean>(false);
 
   @Output() delete = new EventEmitter();
   @Output() duplicate = new EventEmitter();
@@ -327,25 +329,33 @@ export class TaskFormComponent {
 
   onAddOtherOption(): void {
     this.otherOption = this.formBuilder.group({
-      label: { value: 'Other...', disabled: true },
+      label: {
+        value: $localize`:@@app.labels.other:Other...`,
+        disabled: true,
+      },
     });
 
     this.hasOtherOptionControl.setValue(true);
   }
 
   openDeleteOptionDialog(index?: number) {
-    this.dialog
-      .open(JobDialogComponent, {
-        data: { dialogType: DialogType.DeleteOption },
-        panelClass: 'small-width-dialog',
-      })
-      .afterClosed()
-      .subscribe(async (result: DialogData) => {
-        if (result?.dialogType === DialogType.DeleteOption) {
-          if (index !== undefined) this.optionsControl.removeAt(index);
-          else this.hasOtherOptionControl.setValue(false);
-        }
-      });
+    if (this.isCreationMode()) {
+      if (index !== undefined) this.optionsControl.removeAt(index);
+      else this.hasOtherOptionControl.setValue(false);
+    } else {
+      this.dialog
+        .open(JobDialogComponent, {
+          data: { dialogType: DialogType.DeleteOption },
+          panelClass: 'small-width-dialog',
+        })
+        .afterClosed()
+        .subscribe(async (result: DialogData) => {
+          if (result?.dialogType === DialogType.DeleteOption) {
+            if (index !== undefined) this.optionsControl.removeAt(index);
+            else this.hasOtherOptionControl.setValue(false);
+          }
+        });
+    }
   }
 
   drop(event: CdkDragDrop<string[]>): void {

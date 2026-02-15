@@ -51,9 +51,10 @@ limitations under the License.
               <div
                 *ngIf="getTaskSubmissionResult(task).skipped"
                 class="submission-no-response"
-                i18n="@@app.submissionPanel.skipped"
               >
-                Skipped
+                <ng-container i18n="@@app.submissionPanel.skipped"
+                  >Skipped</ng-container
+                >
               </div>
               <ng-container *ngIf="!getTaskSubmissionResult(task).skipped">
                 <!-- Multiple choice task types -->

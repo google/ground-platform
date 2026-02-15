@@ -49,8 +49,16 @@
         "destination": "/fr/index.html"
       },
       {
+        "source": "/lo{,/**}",
+        "destination": "/lo/index.html"
+      },
+      {
         "source": "/pt{,/**}",
         "destination": "/pt/index.html"
+      },
+      {
+        "source": "/th{,/**}",
+        "destination": "/th/index.html"
       },
       {
         "source": "/vi{,/**}",

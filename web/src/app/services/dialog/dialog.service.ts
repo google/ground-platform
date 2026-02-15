@@ -36,8 +36,10 @@ export interface DialogData {
     <h2 mat-dialog-title>{{ data.title }}</h2>
     <mat-dialog-content>{{ data.message }}</mat-dialog-content>
     <mat-dialog-actions>
-      <button mat-button (click)="onClose()">No</button>
-      <button mat-button (click)="onConfirm()">Yes</button>
+      <button mat-button (click)="onClose()" i18n="@@app.labels.no">No</button>
+      <button mat-button (click)="onConfirm()">
+        <span i18n="@@app.labels.yes">Yes</span>
+      </button>
     </mat-dialog-actions>
   `,
   imports: [
