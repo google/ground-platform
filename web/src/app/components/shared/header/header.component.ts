@@ -49,7 +49,10 @@ export class HeaderComponent implements OnChanges {
 
   @HostListener('window:beforeunload', ['$event'])
   unloadNotification($event: BeforeUnloadEvent): void {
-    if (this.draftSurveyService.dirty) {
+    if (
+      this.state === HeaderState.EDIT_SURVEY &&
+      this.draftSurveyService.dirty
+    ) {
       $event.preventDefault();
       $event.returnValue = true;
     }
