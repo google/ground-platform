@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-import { Component, Input, OnChanges } from '@angular/core';
+import { Component, HostListener, Input, OnChanges } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Survey } from 'app/models/survey.model';
 
 import {
-  DialogData,
   DialogType,
   JobDialogComponent,
 } from 'app/components/edit-survey/job-dialog/job-dialog.component';
@@ -47,6 +46,14 @@ export class HeaderComponent implements OnChanges {
   readonly HeaderState = HeaderState;
   isPublishingChanges = false;
   canManage = false;
+
+  @HostListener('window:beforeunload', ['$event'])
+  unloadNotification($event: BeforeUnloadEvent): void {
+    if (this.draftSurveyService.dirty) {
+      $event.preventDefault();
+      $event.returnValue = true;
+    }
+  }
 
   constructor(
     public dialog: MatDialog,
@@ -92,20 +99,7 @@ export class HeaderComponent implements OnChanges {
   }
 
   onCancelEditSurveyClick() {
-    if (!this.draftSurveyService.dirty) {
-      this.navigationService.selectSurvey(this.surveyId);
-      return;
-    }
-
-    const dialogRef = this.dialog.open(JobDialogComponent, {
-      data: { dialogType: DialogType.UndoJobs },
-      panelClass: 'small-width-dialog',
-    });
-
-    dialogRef.afterClosed().subscribe(async (result: DialogData) => {
-      if (result?.dialogType === DialogType.UndoJobs)
-        this.navigationService.selectSurvey(this.surveyId);
-    });
+    this.navigationService.selectSurvey(this.surveyId);
   }
 
   async onFinishEditSurveyClick() {
