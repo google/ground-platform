@@ -67,7 +67,7 @@ jobs:
         with:
           cache-key-suffix: functions
 
-      - name: Format Check
+      - name: Check formatting
         run: pnpm exec nx run functions:format:check
         continue-on-error: true
 
