@@ -71,6 +71,13 @@
           "forwardAllArgs": true
         }
       },
+      "format:check": {
+        "executor": "nx:run-commands",
+        "options": {
+          "cwd": "web",
+          "command": "prettier --check \"src/**/*.{ts,html,scss}\""
+        }
+      },
       "extract-i18n": {
         "executor": "nx:run-commands",
         "options": {
