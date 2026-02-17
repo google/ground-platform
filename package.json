@@ -28,6 +28,12 @@
           }
         ]
       },
+      "format:projects": {
+        "executor": "nx:run-commands",
+        "options": {
+          "command": "nx run-many -t format:check --exclude=root --parallel"
+        }
+      },
       "test": {
         "executor": "nx:noop",
         "dependsOn": [
@@ -113,7 +119,6 @@
     "eslint-config-prettier": "catalog:dev",
     "eslint-plugin-import": "catalog:dev",
     "eslint-plugin-n": "catalog:dev",
-    "eslint-plugin-prettier": "catalog:dev",
     "eslint-plugin-unused-imports": "catalog:dev",
     "firebase-tools": "catalog:dev",
     "gts": "catalog:dev",
