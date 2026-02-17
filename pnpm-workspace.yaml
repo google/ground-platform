@@ -85,7 +85,6 @@ catalogs:
     eslint-config-prettier: ^10.1.8
     eslint-plugin-import: ^2.29.0
     eslint-plugin-n: ^17.0.0
-    eslint-plugin-prettier: ^5.5.4
     eslint-plugin-unused-imports: ^4.3.0
     firebase-functions-test: ^3.3.0
     firebase-tools: ^14.0.0
