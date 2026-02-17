@@ -94,7 +94,7 @@ jobs:
         with:
           cache-key-suffix: lib
 
-      - name: Format Check
+      - name: Check formatting
         run: pnpm exec nx run lib:format:check
         continue-on-error: true
 
@@ -153,7 +153,7 @@ jobs:
           echo "CHROME_BIN=${{ steps.setup-chrome.outputs.chrome-path }}" >> $GITHUB_ENV
           echo "CHROME_PATH=${{ steps.setup-chrome.outputs.chrome-path }}" >> $GITHUB_ENV
 
-      - name: Format Check
+      - name: Check formatting
         run: pnpm exec nx run web:format:check
         continue-on-error: true
 
