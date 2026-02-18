@@ -2,7 +2,6 @@
   "name": "@ground/web",
   "version": "0.0.1",
   "scripts": {
-    "clean": "rm -rf dist coverage *.log",
     "pretest": "./pretest.sh",
     "posttest": "./posttest.sh",
     "postinstall": "node scripts/patch-karma.cjs",
@@ -11,6 +10,29 @@
   "nx": {
     "name": "web",
     "targets": {
+      "clean": {
+        "command": "rm -rf dist coverage *.log"
+      },
+      "lint": {
+        "executor": "nx:run-commands",
+        "options": {
+          "commands": [
+            "eslint \"src/**/*.ts\"",
+            "eslint \"src/**/*.html\""
+          ],
+          "forwardAllArgs": true
+        }
+      },
+      "test": {
+        "executor": "nx:run-commands",
+        "options": {
+          "command": "ng test",
+          "forwardAllArgs": true
+        },
+        "dependsOn": [
+          "^build"
+        ]
+      },
       "build": {
         "executor": "nx:run-commands",
         "options": {
@@ -53,29 +75,10 @@
         ],
         "defaultConfiguration": "development"
       },
-      "test": {
-        "executor": "nx:run-commands",
-        "options": {
-          "cwd": "web",
-          "command": "ng test",
-          "forwardAllArgs": true
-        },
-        "dependsOn": [
-          "^build"
-        ]
-      },
-      "lint": {
-        "executor": "nx:run-commands",
-        "options": {
-          "command": "npx eslint \"web/src/**/*.ts\" --config eslint.config.mjs && npx eslint web/src/**/*.html --config eslint.config.mjs",
-          "forwardAllArgs": true
-        }
-      },
       "format:check": {
         "executor": "nx:run-commands",
         "options": {
-          "cwd": "web",
-          "command": "prettier --check \"src/**/*.{ts,html,scss}\""
+          "command": "prettier --check \"{projectRoot}/src/**/*.{ts,html}\""
         }
       },
       "extract-i18n": {

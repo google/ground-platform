@@ -29,13 +29,22 @@
       ],
       "cache": true
     },
+    "clean": {
+      "cache": false,
+      "options": {
+        "cwd": "{projectRoot}"
+      }
+    },
     "test": {
       "inputs": [
         "default",
         "^production",
         "{workspaceRoot}/jest.preset.js"
       ],
-      "cache": true
+      "cache": true,
+      "options": {
+        "cwd": "{projectRoot}"
+      }
     },
     "lint": {
       "inputs": [
@@ -44,7 +53,20 @@
         "{workspaceRoot}/.eslintignore",
         "{workspaceRoot}/eslint.config.{js,mjs,cjs}"
       ],
-      "cache": true
+      "cache": true,
+      "options": {
+        "cwd": "{projectRoot}"
+      }
+    },
+    "format:projects": {
+      "inputs": [
+        "default",
+        "{workspaceRoot}/.prettierrc"
+      ],
+      "cache": true,
+      "options": {
+        "cwd": "{projectRoot}"
+      }
     },
     "e2e": {
       "cache": true

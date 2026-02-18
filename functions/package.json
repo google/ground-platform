@@ -7,12 +7,9 @@
     "dist"
   ],
   "scripts": {
-    "clean": "rm -rf dist *.log",
-    "lint": "eslint src/",
     "shell": "firebase functions:shell",
     "emulate": "firebase emulators:start --only functions,firestore --project demo-local",
     "logs": "firebase functions:log",
-    "test": "jasmine --config=jasmine.json",
     "build": "tsc",
     "deploy": "npm run build && firebase deploy --project $npm_config_project --only functions",
     "watch": "tsc --watch"
@@ -20,8 +17,14 @@
   "nx": {
     "name": "functions",
     "targets": {
+      "clean": {
+        "command": "rm -rf dist *.log"
+      },
+      "lint": {
+        "command": "eslint src"
+      },
       "test": {
-        "commands": "jasmine --config=jasmine.json",
+        "command": "jasmine --config=jasmine.json",
         "dependsOn": [
           "build"
         ]
@@ -29,8 +32,7 @@
       "format:check": {
         "executor": "nx:run-commands",
         "options": {
-          "cwd": "functions",
-          "command": "prettier --check \"src/**/*.ts\""
+          "command": "prettier --check \"{projectRoot}/src/**/*.ts\""
         }
       }
     }
