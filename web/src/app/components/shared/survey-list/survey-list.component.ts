@@ -14,13 +14,11 @@
  * limitations under the License.
  */
 
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { List, Map } from 'immutable';
-import { Subscription } from 'rxjs';
 
 import {
-  DialogData,
   DialogType,
   JobDialogComponent,
 } from 'app/components/edit-survey/job-dialog/job-dialog.component';
@@ -32,6 +30,8 @@ import {
 import { AuthService } from 'app/services/auth/auth.service';
 import { NavigationService } from 'app/services/navigation/navigation.service';
 import { SurveyService } from 'app/services/survey/survey.service';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { firstValueFrom } from 'rxjs';
 
 export enum SurveyListFilter {
   ALL,
@@ -46,74 +46,71 @@ export enum SurveyListFilter {
   styleUrls: ['./survey-list.component.scss'],
   standalone: false,
 })
-export class SurveyListComponent implements OnInit, OnDestroy {
-  private subscription = new Subscription();
-  allSurveys = List<Survey>();
-  surveys = List<Survey>();
-  currentFilter = SurveyListFilter.ALL;
-  filterCounters = Map([[SurveyListFilter.ALL, 0]]);
+export class SurveyListComponent {
+  private authService = inject(AuthService);
+  private dialog = inject(MatDialog);
+  private navigationService = inject(NavigationService);
+  private surveyService = inject(SurveyService);
 
-  SurveyListFilter = SurveyListFilter;
+  readonly SurveyListFilter = SurveyListFilter;
+  readonly SurveyGeneralAccess = SurveyGeneralAccess;
 
-  SurveyGeneralAccess = SurveyGeneralAccess;
+  private allSurveys = toSignal(this.surveyService.getAccessibleSurveys$(), {
+    initialValue: List<Survey>(),
+  });
 
-  constructor(
-    private authService: AuthService,
-    public dialog: MatDialog,
-    private navigationService: NavigationService,
-    private surveyService: SurveyService
-  ) {}
+  currentFilter = signal<SurveyListFilter>(SurveyListFilter.ALL);
 
-  ngOnInit(): void {
-    this.subscription.add(
-      this.surveyService.getAccessibleSurveys$().subscribe({
-        next: surveys => {
-          this.allSurveys = surveys;
-          this.applyFilterCounters();
-          this.applyFilter();
-        },
-        error: err => {
-          console.error(err);
-          this.navigationService.error(err);
-        },
-      })
-    );
-  }
+  surveys = computed(() => {
+    const surveys = this.allSurveys();
+    const filter = this.currentFilter();
 
-  applyFilterCounters(): void {
-    let restrictedCount = 0;
-    let unlistedCount = 0;
-    let publicCount = 0;
+    if (filter === SurveyListFilter.ALL) return surveys;
 
-    this.allSurveys.forEach(survey => {
-      if (survey.generalAccess === SurveyGeneralAccess.RESTRICTED) {
-        restrictedCount++;
-      } else if (survey.generalAccess === SurveyGeneralAccess.UNLISTED) {
-        unlistedCount++;
-      } else if (survey.generalAccess === SurveyGeneralAccess.PUBLIC) {
-        publicCount++;
+    return surveys.filter(s => {
+      switch (filter) {
+        case SurveyListFilter.RESTRICTED:
+          return s.generalAccess === SurveyGeneralAccess.RESTRICTED;
+        case SurveyListFilter.UNLISTED:
+          return s.generalAccess === SurveyGeneralAccess.UNLISTED;
+        case SurveyListFilter.PUBLIC:
+          return s.generalAccess === SurveyGeneralAccess.PUBLIC;
+        default:
+          return true;
       }
     });
+  });
 
-    this.filterCounters = Map([
-      [SurveyListFilter.ALL, this.allSurveys.size],
-      [SurveyListFilter.RESTRICTED, restrictedCount],
-      [SurveyListFilter.UNLISTED, unlistedCount],
-      [SurveyListFilter.PUBLIC, publicCount],
+  filterCounters = computed(() => {
+    const list = this.allSurveys();
+
+    const counts = {
+      [SurveyGeneralAccess.RESTRICTED]: 0,
+      [SurveyGeneralAccess.UNLISTED]: 0,
+      [SurveyGeneralAccess.PUBLIC]: 0,
+    };
+
+    list.forEach(s => {
+      if (s.generalAccess && s.generalAccess in counts)
+        counts[s.generalAccess]++;
+    });
+
+    return Map([
+      [SurveyListFilter.ALL, list.size],
+      [SurveyListFilter.RESTRICTED, counts[SurveyGeneralAccess.RESTRICTED]],
+      [SurveyListFilter.UNLISTED, counts[SurveyGeneralAccess.UNLISTED]],
+      [SurveyListFilter.PUBLIC, counts[SurveyGeneralAccess.PUBLIC]],
     ]);
-  }
+  });
 
-  applyFilter(): void {
-    this.surveys = this.allSurveys.filter(this.filterSurveys.bind(this));
-  }
+  constructor() {}
 
   handleFilterSelection(newFilter: SurveyListFilter): void {
-    this.currentFilter = newFilter;
-    this.applyFilter();
+    this.currentFilter.set(newFilter);
   }
 
   handleSurveySelection(clickedSurvey: Survey): void {
-    if (this.isSetupFinished(clickedSurvey)) {
+    if (clickedSurvey.state === SurveyState.READY) {
       this.navigationService.selectSurvey(clickedSurvey.id);
     } else {
       this.navigationService.navigateToCreateSurvey(clickedSurvey.id);
@@ -124,42 +121,18 @@ export class SurveyListComponent implements OnInit, OnDestroy {
     const isPasslisted = await this.authService.isPasslisted();
 
     if (!isPasslisted) {
-      this.dialog
-        .open(JobDialogComponent, {
-          data: { dialogType: DialogType.SurveyCreationDenied },
-          panelClass: 'small-width-dialog',
-        })
-        .afterClosed()
-        .subscribe(async (result: DialogData) => {
-          if (!result) return;
+      const dialogRef = this.dialog.open(JobDialogComponent, {
+        data: { dialogType: DialogType.SurveyCreationDenied },
+        panelClass: 'small-width-dialog',
+      });
 
-          this.navigationService.navigateToSubscriptionForm();
-        });
-
+      const result = await firstValueFrom(dialogRef.afterClosed());
+      if (result) {
+        this.navigationService.navigateToSubscriptionForm();
+      }
       return;
     }
 
     this.navigationService.navigateToCreateSurvey(null);
-  }
-
-  private filterSurveys(survey: Survey): boolean {
-    switch (this.currentFilter) {
-      case SurveyListFilter.RESTRICTED:
-        return survey.generalAccess === SurveyGeneralAccess.RESTRICTED;
-      case SurveyListFilter.UNLISTED:
-        return survey.generalAccess === SurveyGeneralAccess.UNLISTED;
-      case SurveyListFilter.PUBLIC:
-        return survey.generalAccess === SurveyGeneralAccess.PUBLIC;
-      default:
-        return true;
-    }
-  }
-
-  private isSetupFinished(survey: Survey): boolean {
-    return survey.state === SurveyState.READY;
-  }
-
-  ngOnDestroy(): void {
-    this.subscription.unsubscribe();
   }
 }
