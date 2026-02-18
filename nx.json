@@ -58,7 +58,7 @@
         "cwd": "{projectRoot}"
       }
     },
-    "format:projects": {
+    "format:check": {
       "inputs": [
         "default",
         "{workspaceRoot}/.prettierrc"

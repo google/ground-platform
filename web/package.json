@@ -78,7 +78,7 @@
       "format:check": {
         "executor": "nx:run-commands",
         "options": {
-          "command": "prettier --check \"{projectRoot}/src/**/*.{ts,html}\""
+          "command": "prettier --check \"src/**/*.{ts,html,scss}\""
         }
       },
       "extract-i18n": {

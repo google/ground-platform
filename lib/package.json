@@ -13,7 +13,7 @@
         "command": "jasmine --config=jasmine.json"
       },
       "format:check": {
-        "command": "prettier --check \"{projectRoot}/src/**/*.ts\""
+        "command": "prettier --check \"src/**/*.ts\""
       }
     }
   },

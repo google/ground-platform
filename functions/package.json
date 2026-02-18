@@ -32,7 +32,7 @@
       "format:check": {
         "executor": "nx:run-commands",
         "options": {
-          "command": "prettier --check \"{projectRoot}/src/**/*.ts\""
+          "command": "prettier --check \"src/**/*.ts\""
         }
       }
     }
