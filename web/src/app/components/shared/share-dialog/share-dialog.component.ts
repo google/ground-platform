@@ -83,6 +83,10 @@ export class ShareDialogComponent {
    * enter is pressed.
    */
   onAddUserSubmit(): void {
+    if (this.addUserForm.invalid) {
+      return;
+    }
+
     // UI is hidden until survey is loaded, so this should never happen.
     if (!this.survey || !this.acl) {
       return;
