@@ -116,13 +116,6 @@ export class ShareDialogComponent {
   }
 
   /**
-   * Close the dialog when "Cancel" is clicked.
-   */
-  onCancelClicked(): void {
-    this.dialogRef.close();
-  }
-
-  /**
    * Store the ACL associated with the survey.
    */
   onSaveClicked(): void {
