@@ -52,17 +52,19 @@
       </mat-select>
     </mat-form-field>
   </form>
-  <div mat-dialog-actions align="end">
-    <button mat-button mat-flat-button (click)="onCancelClicked()">
-      <ng-container i18n="@@app.labels.cancel">Cancel</ng-container>
-    </button>
-    <button
-      mat-flat-button
-      color="primary"
-      [disabled]="addUserForm.value['email'] == '' || !addUserForm.valid"
-      (click)="onAddUserSubmit()"
-    >
-      <ng-container i18n="@@app.labels.send">Send</ng-container>
-    </button>
-  </div>
+</div>
+
+<div mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close>
+    <ng-container i18n="@@app.labels.cancel">Cancel</ng-container>
+  </button>
+
+  <button
+    mat-flat-button
+    color="primary"
+    [disabled]="addUserForm.value['email'] === '' || !addUserForm.valid"
+    (click)="onAddUserSubmit()"
+  >
+    <ng-container i18n="@@app.labels.send">Send</ng-container>
+  </button>
 </div>
