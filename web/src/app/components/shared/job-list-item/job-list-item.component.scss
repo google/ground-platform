@@ -14,17 +14,14 @@
  * limitations under the License.
  */
 
-::ng-deep .mat-mdc-list .mat-mdc-list-item .mat-line {
-  word-wrap: break-word !important;
-  white-space: pre-wrap !important;
-}
-
 .job-list-item-container {
   margin-bottom: 8px;
 }
 
 .job-tree-node {
   display: flex;
+  width: 100%;
+  min-width: 0;
 
   .job-tree-node-label {
     min-width: 0;
@@ -35,6 +32,7 @@
 
     .job-name {
       flex: 1;
+      min-width: 0;
       text-overflow: ellipsis;
       overflow: hidden;
       white-space: nowrap;
@@ -48,17 +46,21 @@
 }
 
 .loi-tree-node {
+  display: flex;
+  align-items: center;
   border-radius: 24px;
   cursor: pointer;
+  min-width: 0;
+
+  .loi-icon {
+    flex-shrink: 0;
+  }
 
   .loi-name {
     flex: 1;
+    min-width: 0;
     padding-left: 16px;
-  }
-
-  &.tree-node-selected {
-    .loi-name {
-      font-weight: 700;
-    }
+    white-space: normal;
+    word-wrap: break-word;
   }
 }
