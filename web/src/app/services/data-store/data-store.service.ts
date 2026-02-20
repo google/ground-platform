@@ -186,7 +186,11 @@ export class DataStoreService {
         query(
           surveysRef,
           where(s.generalAccess, '==', GeneralAccess.UNLISTED),
-          where(new FieldPath(s.acl, userEmail), '==', AclRole.SURVEY_ORGANIZER)
+          where(new FieldPath(s.acl, userEmail), 'in', [
+            AclRole.VIEWER,
+            AclRole.DATA_COLLECTOR,
+            AclRole.SURVEY_ORGANIZER,
+          ])
         ),
         { idField: 'id' }
       ).pipe(
