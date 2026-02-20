@@ -314,7 +314,7 @@ function getPropertiesByName(
   properties: Set<string | number>
 ): List<string | number | null> {
   // Fill the list with the value associated with a prop, if the LOI has it, otherwise leave empty.
-  return List.of(...properties)
+  return List([...properties])
     .map(prop => loi.properties[prop])
     .map(value => value?.stringValue || value?.numericValue || null);
 }
