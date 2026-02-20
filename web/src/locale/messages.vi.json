@@ -9,7 +9,7 @@
     "app.texts.platformNotSupported.iosMessage": "{$START_TAG_STRONG}Platform Not Supported:{$CLOSE_TAG_STRONG} We've detected you're using an iOS device. Currently, {$START_TAG_STRONG}Ground is only available for Android.{$CLOSE_TAG_STRONG}",
     "app.texts.launchingGround": "Launching {$START_TAG_STRONG}Ground{$CLOSE_TAG_STRONG}...",
     "app.texts.installRedirectMessage": "If it doesn't open automatically, you will be redirected to Google Play to install it.",
-    "app.labels.googlePlayBadgeAlt": "Get in on Google Play",
+    "app.labels.googlePlayBadgeAlt": "Tải trên Google Play",
     "app.labels.loadingSurvey": "Đang tải khảo sát...",
     "app.labels.goToSurvey": "Đi tới khảo sát",
     "app.labels.continue": "Tiếp tục",
@@ -128,7 +128,7 @@
     "app.forms.labels.emailAddress": "Email address",
     "app.controls.errors.invalidEmailFormat": "Invalid email format",
     "app.controls.errors.emailAlreadyAdded": "Email address already added",
-    "app.labels.send": "Send",
+    "app.labels.send": "Gửi",
     "app.labels.roles.owner": "Chủ sở hữu",
     "app.cards.share.title": "Những người có quyền truy cập",
     "app.labels.addParticipants": "Thêm người tham gia",
@@ -150,8 +150,8 @@
     "app.controls.errors.requiredAnswer": "At least one answer must be selected",
     "app.texts.whenAdding": "Khi thêm một địa điểm thu thập mới...",
     "app.labels.addATask": "Thêm nhiệm vụ",
-    "app.dialogs.deleteTask.title": "Warning",
-    "app.dialogs.deleteTask.content": "Are you sure you wish to delete this question? Any associated data will be lost. This cannot be undone.",
+    "app.dialogs.deleteTask.title": "Cảnh báo",
+    "app.dialogs.deleteTask.content": "Bạn có chắc muốn xóa tùy chọn này? Tất cả dữ liệu liên quan sẽ bị mất và không thể phục hồi.",
     "app.dialogs.duplicateTask.title": "Duplicate task",
     "app.dialogs.duplicateTask.content": "Are you sure you wish to duplicate this task?",
     "app.controls.errors.requiredOptionText": "Option text is required",
@@ -187,7 +187,7 @@
     "app.labels.roles.dataCollector": "Người thu thập dữ liệu",
     "app.labels.roles.surveyOrganizer": "Người tổ chức khảo sát",
     "app.labels.roles.viewer": "Người xem",
-    "app.labels.no": "No",
-    "app.labels.yes": "Yes"
+    "app.labels.no": "Không",
+    "app.labels.yes": "Đúng"
   }
 }
