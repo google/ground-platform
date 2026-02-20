@@ -17,7 +17,7 @@ limitations under the License.
 <mat-list
   role="list"
   class="jobs"
-  [ngClass]="{collapsed: !isSidePanelExpanded()}"
+  [ngClass]="{ collapsed: !isSidePanelExpanded() }"
 >
   @for (entry of jobs(); track entry.id) {
     <ground-job-list-item

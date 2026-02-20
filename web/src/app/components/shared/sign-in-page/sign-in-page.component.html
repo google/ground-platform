@@ -26,7 +26,7 @@
         <img class="logo" src="assets/img/logo.svg" alt="Ground logo" />
       </div>
       <p class="title">Ground</p>
-      <p class="cta" *ngIf="!(isAuthenticated$() | async)">
+      <p class="cta" *ngIf="(isAuthenticated$() | async) === false">
         <ng-container i18n="@@app.login.signInToContinue"
           >Sign in to continue</ng-container
         >
