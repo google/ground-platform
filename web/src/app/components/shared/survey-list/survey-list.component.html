@@ -51,7 +51,7 @@
 
     <mat-card
       appearance="raised"
-      *ngFor="let survey of surveys; let i = index"
+      *ngFor="let survey of surveys(); let i = index"
       id="survey-card-{{ i }}"
       class="survey-card"
       (click)="handleSurveySelection(survey)"
@@ -78,17 +78,20 @@
 
 <ng-template #filterChip let-filter="filter", let-icon="icon">
   <mat-chip
-    *ngIf="filterCounters.get(filter)"
-    [disabled]="currentFilter === filter"
+    *ngIf="filterCounters().get(filter)"
+    [disabled]="currentFilter() === filter"
     (click)="handleFilterSelection(filter)"
   >
-    <mat-icon *ngIf="icon || currentFilter === filter" fontSet="material-symbols-outlined" matChipAvatar>
-      {{ currentFilter !== filter ? icon : "check" }}
+    <mat-icon
+      *ngIf="icon || currentFilter() === filter"
+      fontSet="material-symbols-outlined"
+      matChipAvatar
+    >
+      {{ currentFilter() !== filter ? icon : 'check' }}
     </mat-icon>
 
     <span *ngIf="filter === SurveyListFilter.ALL" i18n="@@app.labels.all">All</span>
     <span *ngIf="filter === SurveyListFilter.RESTRICTED" i18n="@@app.labels.restricted">Restricted</span>
     <span *ngIf="filter === SurveyListFilter.UNLISTED" i18n="@@app.labels.unlisted">Unlisted</span>
-    <span *ngIf="filter === SurveyListFilter.PUBLIC" i18n="@@app.labels.public">Public</span>
   </mat-chip>
 </ng-template>
