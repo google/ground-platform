@@ -21,13 +21,33 @@
 
   <div class="filters-container">
     <mat-chip-set aria-label="Survey filter">
-      <ng-container *ngTemplateOutlet="filterChip; context: { filter: SurveyListFilter.ALL }"></ng-container>
+      <ng-container
+        *ngTemplateOutlet="
+          filterChip;
+          context: { filter: SurveyListFilter.ALL }
+        "
+      ></ng-container>
 
-      <ng-container *ngTemplateOutlet="filterChip; context: { filter: SurveyListFilter.RESTRICTED, icon: 'lock' }"></ng-container>
+      <ng-container
+        *ngTemplateOutlet="
+          filterChip;
+          context: { filter: SurveyListFilter.RESTRICTED, icon: 'lock' }
+        "
+      ></ng-container>
 
-      <ng-container *ngTemplateOutlet="filterChip; context: { filter: SurveyListFilter.UNLISTED, icon: 'account_circle' }"></ng-container>
+      <ng-container
+        *ngTemplateOutlet="
+          filterChip;
+          context: { filter: SurveyListFilter.UNLISTED, icon: 'account_circle' }
+        "
+      ></ng-container>
 
-      <ng-container *ngTemplateOutlet="filterChip; context: { filter: SurveyListFilter.PUBLIC, icon: 'public' }"></ng-container>
+      <ng-container
+        *ngTemplateOutlet="
+          filterChip;
+          context: { filter: SurveyListFilter.PUBLIC, icon: 'public' }
+        "
+      ></ng-container>
     </mat-chip-set>
   </div>
 
@@ -43,9 +63,15 @@
           <mat-icon mat-card-avatar class="add-icon">add_24px</mat-icon>
         </div>
 
-        <mat-card-title class="survey-title" i18n="@@app.labels.createSurvey">Create survey</mat-card-title>
+        <mat-card-title class="survey-title" i18n="@@app.labels.createSurvey"
+          >Create survey</mat-card-title
+        >
 
-        <mat-card-subtitle class="survey-description" i18n="@@app.labels.createSurveyDescription">Define jobs and sites for data collectors</mat-card-subtitle>
+        <mat-card-subtitle
+          class="survey-description"
+          i18n="@@app.labels.createSurveyDescription"
+          >Define jobs and sites for data collectors</mat-card-subtitle
+        >
       </mat-card-header>
     </mat-card>
 
@@ -57,12 +83,22 @@
       (click)="handleSurveySelection(survey)"
     >
       <mat-card-header>
-        <mat-icon mat-card-avatar fontSet="material-symbols-outlined" class="add-icon general-access-icon">
+        <mat-icon
+          mat-card-avatar
+          fontSet="material-symbols-outlined"
+          class="add-icon general-access-icon"
+        >
           <ng-container [ngSwitch]="survey.generalAccess">
-            <ng-container *ngSwitchCase="SurveyGeneralAccess.RESTRICTED">lock</ng-container>
-            <ng-container *ngSwitchCase="SurveyGeneralAccess.UNLISTED">account_circle</ng-container>
-            <ng-container *ngSwitchCase="SurveyGeneralAccess.RESTRICTED">pending</ng-container>
-            <ng-container *ngSwitchDefault>public</ng-container> 
+            <ng-container *ngSwitchCase="SurveyGeneralAccess.RESTRICTED"
+              >lock</ng-container
+            >
+            <ng-container *ngSwitchCase="SurveyGeneralAccess.UNLISTED"
+              >account_circle</ng-container
+            >
+            <ng-container *ngSwitchCase="SurveyGeneralAccess.RESTRICTED"
+              >pending</ng-container
+            >
+            <ng-container *ngSwitchDefault>public</ng-container>
           </ng-container>
         </mat-icon>
 
@@ -76,7 +112,7 @@
   </div>
 </div>
 
-<ng-template #filterChip let-filter="filter", let-icon="icon">
+<ng-template #filterChip let-filter="filter" let-icon="icon">
   <mat-chip
     *ngIf="filterCounters().get(filter)"
     [disabled]="currentFilter() === filter"
@@ -90,8 +126,21 @@
       {{ currentFilter() !== filter ? icon : 'check' }}
     </mat-icon>
 
-    <span *ngIf="filter === SurveyListFilter.ALL" i18n="@@app.labels.all">All</span>
-    <span *ngIf="filter === SurveyListFilter.RESTRICTED" i18n="@@app.labels.restricted">Restricted</span>
-    <span *ngIf="filter === SurveyListFilter.UNLISTED" i18n="@@app.labels.unlisted">Unlisted</span>
+    <span *ngIf="filter === SurveyListFilter.ALL" i18n="@@app.labels.all"
+      >All</span
+    >
+    <span
+      *ngIf="filter === SurveyListFilter.RESTRICTED"
+      i18n="@@app.labels.restricted"
+      >Restricted</span
+    >
+    <span
+      *ngIf="filter === SurveyListFilter.UNLISTED"
+      i18n="@@app.labels.unlisted"
+      >Unlisted</span
+    >
+    <span *ngIf="filter === SurveyListFilter.PUBLIC" i18n="@@app.labels.public"
+      >Public</span
+    >
   </mat-chip>
 </ng-template>
