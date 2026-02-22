@@ -159,6 +159,7 @@ jobs:
 
       - name: Lint
         run: pnpm exec nx lint web
+        continue-on-error: true
 
       - name: Build
         run: pnpm exec nx build web

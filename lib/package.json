@@ -3,15 +3,17 @@
   "nx": {
     "name": "lib",
     "targets": {
+      "clean": {
+        "command": "rm -rf dist *.log src/generated"
+      },
+      "lint": {
+        "command": "eslint src"
+      },
       "test": {
-        "commands": "jasmine --config=jasmine.json"
+        "command": "jasmine --config=jasmine.json"
       },
       "format:check": {
-        "executor": "nx:run-commands",
-        "options": {
-          "cwd": "lib",
-          "command": "prettier --check \"src/**/*.ts\""
-        }
+        "command": "prettier --check \"src/**/*.ts\""
       }
     }
   },
@@ -26,9 +28,6 @@
     "dist"
   ],
   "scripts": {
-    "clean": "rm -rf dist *.log src/generated",
-    "lint": "eslint src/",
-    "test": "jasmine --config=jasmine.json",
     "build-local-deps": "npm run build --workspace=../proto",
     "build": "tsc",
     "build-all": "npm run build-local-deps && npm run build",
