@@ -16,5 +16,15 @@
 
 .share-form {
   display: flex;
-  flex-direction: column;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.share-form > :first-child {
+  flex-basis: 60%;
+  flex-shrink: 0;
+}
+
+.share-form > :last-child {
+  flex-grow: 1;
 }
