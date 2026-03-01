@@ -51,7 +51,7 @@
   align-items: center;
   justify-content: center;
   gap: 12px;
-  padding: 12px 24px;
+  padding: 0 0 12px 0;
   border: 1px solid #dadce0;
   border-radius: 4px;
   background-color: #fff;
@@ -84,10 +84,4 @@
     cursor: not-allowed;
     border-color: #f1f3f4;
   }
-}
-
-.google-logo {
-  width: 18px;
-  height: 18px;
-  flex-shrink: 0;
 }
