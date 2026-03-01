@@ -14,10 +14,7 @@
     "name": "root",
     "targets": {
       "clean": {
-        "executor": "nx:run-commands",
-        "options": {
-          "command": "nx run-many -t clean --exclude=root --parallel"
-        }
+        "command": "nx run-many -t clean --exclude=root --parallel --output-style=stream-without-prefixes"
       },
       "lint": {
         "executor": "nx:noop",
@@ -28,17 +25,20 @@
           }
         ]
       },
-      "format:projects": {
-        "executor": "nx:run-commands",
-        "options": {
-          "command": "nx run-many -t format:check --exclude=root --parallel"
-        }
-      },
       "test": {
         "executor": "nx:noop",
         "dependsOn": [
           {
             "target": "test",
+            "projects": "*"
+          }
+        ]
+      },
+      "format:projects": {
+        "executor": "nx:noop",
+        "dependsOn": [
+          {
+            "target": "format:check",
             "projects": "*"
           }
         ]
