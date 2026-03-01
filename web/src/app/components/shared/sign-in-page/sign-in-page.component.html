@@ -33,16 +33,13 @@
       </p>
 
       <div class="buttons">
-        <button
-          mat-flat-button
-          color="primary"
+        <button 
+          class="google-signin-btn" 
           (click)="onGoogleSignIn()"
-          i18n-aria-label="@@app.login.signInWithGoogle"
-          aria-label="Sign in with Google"
+          type="button"
         >
-          <ng-container i18n="@@app.login.signInWithGoogle"
-            >Sign in with Google</ng-container
-          >
+          <img src="assets/img/web_light_rd_na.svg" alt="" class="google-logo" />
+          <span i18n="@@app.login.signInWithGoogle">Sign in with Google</span>
         </button>
       </div>
     </mat-card-content>
