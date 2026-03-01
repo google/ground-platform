@@ -27,11 +27,16 @@
         </mat-radio-button>
         <div *ngIf="shouldShowCustomizeAgreementSection(option.value)">
           <h3 id="customize-agreement-header" class="field-header">
-            <span i18n="@@app.labels.customizeAgreement">Customize agreement</span>
+            <span i18n="@@app.labels.customizeAgreement"
+              >Customize agreement</span
+            >
           </h3>
-          <p class="field-description" i18n="@@app.texts.customAgreement">
-            Create a custom agreement which will be shown to data collectors before they can
-            collect data. Data collectors must agree to the terms of this agreement.
+          <p class="field-description">
+            <ng-container i18n="@@app.texts.customAgreement"
+              >Create a custom agreement which will be shown to data collectors
+              before they can collect data. Data collectors must agree to the
+              terms of this agreement.</ng-container
+            >
           </p>
           <mat-form-field class="custom-terms">
             <textarea matInput
@@ -40,10 +45,14 @@
               i18n-placeholder="@@app.forms.placeholders.customAgreement"
               aria-labelledby="customize-agreement-header">
             </textarea>
-            <mat-error *ngIf="customTextControl.touched && customTextControl.invalid">
-              <ng-container *ngIf="customTextControl.getError('required')" i18n="@@app.labels.required">
-                Required
-              </ng-container>
+            <mat-error
+              *ngIf="customTextControl.touched && customTextControl.invalid"
+            >
+              <ng-container
+                *ngIf="customTextControl.getError('required')"
+                i18n="@@app.labels.required"
+                >Required</ng-container
+              >
             </mat-error>
           </mat-form-field>
         </div>

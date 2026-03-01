@@ -16,7 +16,7 @@
 
 import '@angular/localize/init';
 
-import { Injectable } from '@angular/core';
+import { Injectable, Injector, runInInjectionContext } from '@angular/core';
 import {
   Auth,
   User as FirebaseUser,
@@ -77,7 +77,8 @@ export class AuthService {
     private dataStore: DataStoreService,
     private navigationService: NavigationService,
     private functions: Functions,
-    private httpClientService: HttpClientService
+    private httpClientService: HttpClientService,
+    private injector: Injector
   ) {
     // onIdTokenChanged via RxJS 'idToken' or 'user' specific helper?
     // @angular/fire/auth provides 'user' which wraps onIdTokenChanged.
@@ -134,7 +135,9 @@ export class AuthService {
 
   async callProfileRefresh() {
     // TODO(#1159): Refactor access to Cloud Functions into new service.
-    const refreshProfile = httpsCallable(this.functions, 'profile-refresh');
+    const refreshProfile = runInInjectionContext(this.injector, () =>
+      httpsCallable(this.functions, 'profile-refresh')
+    );
     const result = (await refreshProfile({})).data;
     if (result !== 'OK') {
       throw new Error('User profile could not be updated');
@@ -173,11 +176,13 @@ export class AuthService {
 
   async signIn() {
     const provider = new GoogleAuthProvider();
-    await signInWithPopup(this.auth, provider);
+    await runInInjectionContext(this.injector, () =>
+      signInWithPopup(this.auth, provider)
+    );
   }
 
   async signOut() {
-    await signOut(this.auth);
+    await runInInjectionContext(this.injector, () => signOut(this.auth));
     return this.navigationService.signOut();
   }
 

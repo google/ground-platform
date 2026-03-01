@@ -64,70 +64,10 @@ git clone https://github.com/google/ground-platform.git
 
    You can then pull future upstream changes into your local clone with `git pull upstream master`.
 
-### Setting up your environment
+## Development
 
-> **Note**: This guide assumes nvm (Node Version Manager) will be used to
-> install and manage Node.js versions. For more information on nvm,
-> including installation instructions, see
-> https://github.com/creationix/nvm#installation>
+See [README.md](README.md#Quick-start) for instructions how to build, run, and test locally.
 
-Install Node.js using:
-
-```shell
-nvm install 16
-```
-
-### Building and running the app
-
-#### Running locally
-
-To get up and running quickly, you can run the web app and Cloud Functions,locally using the Firebase Local Emulator Suite.
-
-To install dependencies, build, and run Ground locally:
-
-```shell
-npm run start:local
-```
-
-Once the local server is ready, the app will be available at http://localhost:5000. The Firebase Emulator Suite UI can be accessed at http://localhost:4000. Changes to the web app in `web/` and to Cloud Functions in `functions/` are automatially rebuilt and reloaded on save.
-
-**Note**: The local build variant does not require API keys to run. Warnings related to missing API keys are expected. Authentication is also disabled.
-
-The local emulator is preloaded with a demo Ground survey. Run `npm run export:local` to persist changes to update the snapshot of demo data in the local db.
-
-#### Using live Firebase
-
-Alternatively, you can test and deploy against a real Firebase project:
-
-1. Create a project as described in [Getting started with Firebase](https://cloud.google.com/firestore/docs/client/get-firebase) in the Firebase docs, or contact your administrator to get access to existing development and/or production projects. When creating a new project, be sure the following are enabled under "Build":
-
-  * Authentication > Sign-in method > Google
-  * Firestore Database
-  * Hosting
-  * Storage
-
-2. Create a web app under "Project Overview > Add app > Web" or choose an existing web one.
-
-3. Scroll down to the code snippet under "SDK setup and configuration" and select "Config". Copy and paste the code snippet into a new file in `web/keys/<project-id>/firebase-config.js`.
-
-4. Build and deploy all the things dev Firebase:
-
-    ```shell
-    npm run deploy --config=dev --project=<project-id>
-    ```
-
-Once complete, the web app will be available at dev project's Firebase Hosting URL.
-
-The web app may also be develop locally against the dev Firebase server with:
-
-```shell
-cd web && npm run start --config=dev --project=<project-id>
-```
-
-The web app will be accessible at http://localhost:4200. The app will be rebuilt and reloaded changes are saved.
-
-See <firebase/README.md> and <web/README.md> for additional npm development script commands.
- 
 ## Developing Ground
 
 ### Claiming an issue
@@ -139,7 +79,7 @@ Before you begin work on a change, comment on one of the [open issues](https://g
 We strongly encourage contributors to create a separate branch for each pull request. Maintainers working directly in `google/ground-platform` should create branches with names in the form `<username>/<issue-no>/<short-desc>`. For example:
 
 ```shell
-git checkout -d <user-id>/1234/fix-save-button
+git checkout -b <user-id>/1234/fix-save-button
 ```
 
 ### Creating a pull request

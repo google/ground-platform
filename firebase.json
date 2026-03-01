@@ -49,8 +49,16 @@
         "destination": "/fr/index.html"
       },
       {
+        "source": "/lo{,/**}",
+        "destination": "/lo/index.html"
+      },
+      {
         "source": "/pt{,/**}",
         "destination": "/pt/index.html"
+      },
+      {
+        "source": "/th{,/**}",
+        "destination": "/th/index.html"
       },
       {
         "source": "/vi{,/**}",
@@ -65,8 +73,10 @@
   "functions": {
     "source": "./functions/isolate",
     "ignore": [".git", "firebase-debug.log", "firebase-debug.*.log"],
-    "predeploy": "npx isolate",
-    "isolate": true
+    "predeploy": [
+      "npx isolate-package",
+      "pnpm install --prefix ./functions/isolate --prod --no-frozen-lockfile --shamefully-hoist --ignore-workspace"
+    ]
   },
   "storage": {
     "rules": "storage/storage.rules"

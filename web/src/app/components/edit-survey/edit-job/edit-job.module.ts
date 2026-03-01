@@ -24,7 +24,7 @@ import { MatIconModule } from '@angular/material/icon';
 
 import { EditJobComponent } from 'app/components/edit-survey/edit-job/edit-job.component';
 import { LoiEditorModule } from 'app/components/shared/loi-editor/loi-editor.module';
-import { TasksEditorModule } from 'app/components/shared/tasks-editor/tasks-editor.module';
+import { TaskEditorModule } from 'app/components/shared/task-editor/task-editor.module';
 
 @NgModule({
   declarations: [EditJobComponent],
@@ -34,7 +34,7 @@ import { TasksEditorModule } from 'app/components/shared/tasks-editor/tasks-edit
     MatButtonToggle,
     MatIconModule,
     LoiEditorModule,
-    TasksEditorModule,
+    TaskEditorModule,
   ],
   exports: [EditJobComponent],
 })

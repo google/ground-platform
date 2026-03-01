@@ -17,10 +17,9 @@
 import cors from 'cors';
 import { DecodedIdToken } from 'firebase-admin/auth';
 import { Response, https } from 'firebase-functions/v1';
+import { StatusCodes } from 'http-status-codes';
 import { getDecodedIdToken } from './common/auth';
-import { INTERNAL_SERVER_ERROR, UNAUTHORIZED } from 'http-status-codes';
 import cookieParser from 'cookie-parser';
-import HttpStatus from 'http-status-codes';
 
 const corsOptions = { origin: true };
 const corsMiddleware = cors(corsOptions);
@@ -54,13 +53,15 @@ async function requireIdToken(
   if (token) {
     return next(token);
   } else {
-    return res.status(UNAUTHORIZED).send('Unauthorized');
+    return res.status(StatusCodes.UNAUTHORIZED).send('Unauthorized');
   }
 }
 
 function onError(res: any, err: any) {
   console.error(err);
-  res.status(INTERNAL_SERVER_ERROR).end(`Internal error: ${err.message}`);
+  res
+    .status(StatusCodes.INTERNAL_SERVER_ERROR)
+    .end(`Internal error: ${err.message}`);
 }
 
 export type HttpsRequestHandler = (
@@ -121,7 +122,7 @@ export async function invokeCallbackAsync(
       res,
       user,
       () => {
-        res.status(HttpStatus.OK).end();
+        res.status(StatusCodes.OK).end();
         resolve(undefined);
       },
       (errorCode: number, message: string) => {
@@ -144,7 +145,7 @@ function invokeCallback(
     callback(req, res, user, done, error);
   } catch (e: any) {
     console.error('Unhandled exception', e);
-    error(HttpStatus.INTERNAL_SERVER_ERROR, e.toString());
+    error(StatusCodes.INTERNAL_SERVER_ERROR, e.toString());
   }
 }
 

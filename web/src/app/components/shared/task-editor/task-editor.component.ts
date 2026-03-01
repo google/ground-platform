@@ -15,7 +15,7 @@
  */
 
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, input } from '@angular/core';
 import {
   AbstractControl,
   FormArray,
@@ -84,15 +84,17 @@ export const taskTypeToGroup = new Map([
 ]);
 
 @Component({
-  selector: 'tasks-editor',
-  templateUrl: './tasks-editor.component.html',
-  styleUrls: ['./tasks-editor.component.scss'],
+  selector: 'task-editor',
+  templateUrl: './task-editor.component.html',
+  styleUrls: ['./task-editor.component.scss'],
   standalone: false,
 })
-export class TasksEditorComponent {
+export class TaskEditorComponent {
   formGroup!: FormGroup;
 
   @Input() tasks?: List<Task>;
+  isCreationMode = input<boolean>(false);
+
   @Output() onValidationChanges: EventEmitter<boolean> =
     new EventEmitter<boolean>();
   @Output() onValueChanges: EventEmitter<boolean> = new EventEmitter<boolean>();
@@ -158,25 +160,28 @@ export class TasksEditorComponent {
   }
 
   onTaskDelete(index: number) {
-    this.dialogService
-      .openConfirmationDialog(
-        'Warning',
-        'Are you sure you wish to delete this question? Any associated data ' +
-          'will be lost. This cannot be undone.'
-      )
-      .afterClosed()
-      .subscribe(dialogResult => {
-        if (dialogResult) {
-          this.formArray.removeAt(index);
-        }
-      });
+    if (this.isCreationMode()) {
+      this.formArray.removeAt(index);
+    } else {
+      this.dialogService
+        .openConfirmationDialog(
+          $localize`:@@app.dialogs.deleteTask.title:Warning`,
+          $localize`:@@app.dialogs.deleteTask.content:Are you sure you wish to delete this question? Any associated data will be lost. This cannot be undone.`
+        )
+        .afterClosed()
+        .subscribe(dialogResult => {
+          if (dialogResult) {
+            this.formArray.removeAt(index);
+          }
+        });
+    }
   }
 
   onTaskDuplicate(index: number) {
     this.dialogService
       .openConfirmationDialog(
-        'Duplicate task',
-        'Are you sure you wish to duplicate this task?'
+        $localize`:@@app.dialogs.duplicateTask.title:Duplicate task`,
+        $localize`:@@app.dialogs.duplicateTask.content:Are you sure you wish to duplicate this task?`
       )
       .afterClosed()
       .subscribe(dialogResult => {

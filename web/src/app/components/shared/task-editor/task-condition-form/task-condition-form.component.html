@@ -15,10 +15,12 @@
 -->
 
 <div [formGroup]="expressionControl" class="task-condition-form">
-  <div>If the answer to</div>
+  <div i18n="@@app.labels.ifTheAnswerTo">If the answer to</div>
 
   <mat-form-field>
-    <mat-label>Select question</mat-label>
+    <mat-label i18n="@@app.taskEditor.condition.selectQuestion"
+      >Select question</mat-label
+    >
 
     <mat-select formControlName="taskId">
       <mat-option *ngFor="let task of previousMultipleTasks" [value]="task.id">
@@ -27,16 +29,20 @@
     </mat-select>
 
     <mat-error *ngIf="taskIdControl.touched && taskIdControl.invalid">
-      <ng-container *ngIf="taskIdControl.hasError('required')">
-        A question must be selected as a condition
-      </ng-container>
+      <ng-container
+        *ngIf="taskIdControl.hasError('required')"
+        i18n="@@app.controls.errors.requiredQuestion"
+        >A question must be selected as a condition</ng-container
+      >
     </mat-error>
   </mat-form-field>
 
-  <div>is</div>
+  <div i18n="@@app.labels.is">is</div>
 
   <mat-form-field>
-    <mat-label>Select answer</mat-label>
+    <mat-label i18n="@@app.taskEditor.condition.selectAnswer"
+      >Select answer</mat-label
+    >
 
     <mat-select formControlName="optionIds" multiple>
       <mat-option *ngFor="let option of previousMultipleTasks | getTaskOptions:taskIdControl.value" [value]="option.id">
@@ -45,9 +51,11 @@
     </mat-select>
 
     <mat-error *ngIf="optionIdsControl.touched && optionIdsControl.invalid">
-      <ng-container *ngIf="optionIdsControl.hasError('required')">
-        At least one answer must be selected
-      </ng-container>
+      <ng-container
+        *ngIf="optionIdsControl.hasError('required')"
+        i18n="@@app.controls.errors.requiredAnswer"
+        >At least one answer must be selected</ng-container
+      >
     </mat-error>
   </mat-form-field>
 </div>

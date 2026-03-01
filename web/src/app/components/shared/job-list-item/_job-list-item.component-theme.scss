@@ -34,6 +34,10 @@
   .job-name, .loi-name {
     font: mat.get-theme-typography($theme, label-large, font);
   }
+
+  .loi-tree-node.tree-node-selected .loi-name {
+    font-weight: 700;
+  }
 }
 
 @mixin theme($theme) {

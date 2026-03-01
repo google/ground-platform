@@ -24,10 +24,12 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { BrowserModule } from '@angular/platform-browser';
 
 import { LocationOfInterestPanelComponent } from './loi-panel.component';
+import { LoiPropertiesDialogModule } from 'app/components/shared/loi-properties-dialog/loi-properties-dialog.module';
 
 @NgModule({
   imports: [
     BrowserModule,
+    LoiPropertiesDialogModule,
     MatButtonModule,
     MatCardModule,
     MatDialogModule,

@@ -31,6 +31,7 @@ import { Coordinate } from 'app/models/geometry/coordinate';
 import { Submission } from 'app/models/submission/submission.model';
 import { AuditInfo } from 'app/models/audit-info.model';
 import { Job } from 'app/models/job.model';
+import { Timestamp } from '@angular/fire/firestore';
 
 describe('SubmissionService', () => {
   let service: SubmissionService;
@@ -80,7 +81,9 @@ describe('SubmissionService', () => {
     ]);
 
     authServiceSpy.getUser$.and.returnValue(user$);
-    dataStoreServiceSpy.getServerTimestamp.and.returnValue(new Date() as any);
+    dataStoreServiceSpy.getServerTimestamp.and.returnValue(
+      Timestamp.fromDate(new Date())
+    );
     dataStoreServiceSpy.generateId.and.returnValue('newId');
 
     TestBed.configureTestingModule({

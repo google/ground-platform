@@ -42,4 +42,4 @@ import { LoiPropertiesDialogComponent } from './loi-properties-dialog.component'
     MatIconModule,
   ],
 })
-export class PropertiesDialogModule {}
+export class LoiPropertiesDialogModule {}

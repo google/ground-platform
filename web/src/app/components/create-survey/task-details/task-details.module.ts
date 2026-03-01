@@ -17,13 +17,13 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 
-import { TasksEditorModule } from 'app/components/shared/tasks-editor/tasks-editor.module';
+import { TaskEditorModule } from 'app/components/shared/task-editor/task-editor.module';
 
 import { TaskDetailsComponent } from './task-details.component';
 
 @NgModule({
   declarations: [TaskDetailsComponent],
-  imports: [CommonModule, TasksEditorModule],
+  imports: [CommonModule, TaskEditorModule],
   exports: [TaskDetailsComponent],
 })
 export class TaskDetailsModule {}

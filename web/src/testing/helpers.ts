@@ -14,14 +14,16 @@
  * limitations under the License.
  */
 
-import { Collection, List, is, isValueObject } from 'immutable';
+import { Collection, List, ValueObject, is, isValueObject } from 'immutable';
 
 import { Coordinate } from 'app/models/geometry/coordinate';
 import { LinearRing } from 'app/models/geometry/linear-ring';
 import { Polygon } from 'app/models/geometry/polygon';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function deepEqualityTester(a: any, b: any): boolean | undefined {
+export function deepEqualityTester(
+  a: unknown,
+  b: unknown
+): boolean | undefined {
   // `is()` doesn't do deep equals on arrays or dictionaries, so we let Jasmine
   // handle these instead. Jasmine will still pass individual elements back to
   // this tester.
@@ -31,17 +33,16 @@ export function deepEqualityTester(a: any, b: any): boolean | undefined {
     !isValueObject(a) ||
     !isValueObject(b)
   ) {
-    return;
+    return undefined;
   }
-  return is(a, b);
+  return is(a as ValueObject, b as ValueObject);
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function formatImmutableCollection(val: any): string | undefined {
+export function formatImmutableCollection(val: unknown): string | undefined {
   if (val instanceof Collection) {
-    return JSON.stringify((val as Collection<never, never>).toJS());
+    return JSON.stringify((val as Collection<unknown, unknown>).toJS());
   }
-  return;
+  return undefined;
 }
 
 /** Converts an array of coordinates to a Polygon.  */

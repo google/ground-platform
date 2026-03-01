@@ -20,8 +20,8 @@ import { canExport, hasOrganizerRole } from './common/auth';
 import { isAccessibleLoi } from './common/utils';
 import { geojsonToWKT } from '@terraformer/wkt';
 import { getDatastore } from './common/context';
-import * as HttpStatus from 'http-status-codes';
 import { DecodedIdToken } from 'firebase-admin/auth';
+import { StatusCodes } from 'http-status-codes';
 import { List } from 'immutable';
 import { QuerySnapshot } from 'firebase-admin/firestore';
 import { timestampToInt, toMessage } from '@ground/lib';
@@ -46,30 +46,30 @@ export async function exportCsvHandler(
 
   const surveyDoc = await db.fetchSurvey(surveyId);
   if (!surveyDoc.exists) {
-    res.status(HttpStatus.NOT_FOUND).send('Survey not found');
+    res.status(StatusCodes.NOT_FOUND).send('Survey not found');
     return;
   }
   if (!canExport(user, surveyDoc)) {
-    res.status(HttpStatus.FORBIDDEN).send('Permission denied');
+    res.status(StatusCodes.FORBIDDEN).send('Permission denied');
     return;
   }
   const survey = toMessage(surveyDoc.data()!, Pb.Survey);
   if (survey instanceof Error) {
     res
-      .status(HttpStatus.INTERNAL_SERVER_ERROR)
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
       .send('Unsupported or corrupt survey');
     return;
   }
 
   const jobDoc = await db.fetchJob(surveyId, jobId);
   if (!jobDoc.exists || !jobDoc.data()) {
-    res.status(HttpStatus.NOT_FOUND).send('Job not found');
+    res.status(StatusCodes.NOT_FOUND).send('Job not found');
     return;
   }
   const job = toMessage(jobDoc.data()!, Pb.Job);
   if (job instanceof Error) {
     res
-      .status(HttpStatus.INTERNAL_SERVER_ERROR)
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
       .send('Unsupported or corrupt job');
     return;
   }
@@ -127,7 +127,7 @@ export async function exportCsvHandler(
     }
   }
 
-  res.status(HttpStatus.OK);
+  res.status(StatusCodes.OK);
   csvStream.end();
 }
 
@@ -183,14 +183,14 @@ function writeRow(
   csvStream.write(row);
 }
 
-function quote(value: any): string {
+function quote(value: unknown): string {
   if (value == null) {
     return '';
   }
   if (typeof value === 'number') {
     return value.toString();
   }
-  const escaped = value.toString().replaceAll('"', '""');
+  const escaped = String(value).replace(/"/g, '""');
   return `"${escaped}"`;
 }
 
@@ -273,8 +273,9 @@ function getMultipleChoiceValues(
 
 function getMultipleChoiceLabel(task: Pb.ITask, id: string): string | null {
   return (
-    task?.multipleChoiceQuestion?.options?.find((o: any) => o.id === id)
-      ?.label ?? null
+    task?.multipleChoiceQuestion?.options?.find(
+      (o: Pb.Task.MultipleChoiceQuestion.IOption) => o.id === id
+    )?.label ?? null
   );
 }
 

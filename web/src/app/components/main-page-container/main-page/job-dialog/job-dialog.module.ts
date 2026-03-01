@@ -29,7 +29,7 @@ import { InlineEditorModule } from 'app/components/shared/inline-editor/inline-e
 
 import { EditStyleButtonModule } from './edit-style-button/edit-style-button.module';
 import { JobDialogComponent } from './job-dialog.component';
-import { TaskEditorModule } from './task-editor/task-editor.module';
+import { TaskEditorModule } from 'app/components/shared/task-editor/task-editor.module';
 
 @NgModule({
   declarations: [JobDialogComponent],

@@ -33,9 +33,9 @@
 @use 'app/components/shared/share-survey/_share-survey.component-theme' as share-survey;
 @use 'app/components/shared/sign-in-page/_sign-in-page.component-theme' as sign-in-page;
 @use 'app/components/shared/survey-list/_survey-list.component-theme' as survey-list;
-@use 'app/components/shared/tasks-editor/_tasks-editor.component-theme' as tasks-editor;
-@use 'app/components/shared/tasks-editor/task-condition-form/_task-condition-form-theme' as task-condition-form;
-@use 'app/components/shared/tasks-editor/task-form/edit-option/_edit-option.component-theme' as edit-option;
+@use 'app/components/shared/task-editor/_task-editor.component-theme' as task-editor;
+@use 'app/components/shared/task-editor/task-condition-form/_task-condition-form-theme' as task-condition-form;
+@use 'app/components/shared/task-editor/task-form/edit-option/_edit-option.component-theme' as edit-option;
 @use 'app/components/shared/user-avatar/_user-avatar.component-theme' as user-avatar;
 @use 'app/components/create-survey/_create-survey.component-theme' as create-survey;
 @use 'app/components/create-survey/data-sharing-terms/_data-sharing-terms.component-theme' as data-sharing-terms;
@@ -43,7 +43,7 @@
 @use 'app/components/edit-survey/_edit-survey.component-theme.scss' as edit-survey;
 @use 'app/components/edit-survey/edit-job/_edit-job.component-theme' as edit-job;
 @use 'app/components/main-page-container/main-page/drawing-tools/_drawing-tools.component-theme' as drawing-tools;
-@use 'app/components/main-page-container/main-page/job-dialog/task-editor/_task-editor.component-theme' as task-editor;
+
 @use 'app/components/main-page-container/main-page/job-dialog/_job-dialog.component-theme' as job-dialog;
 @use 'app/components/main-page-container/main-page/map/_map.component-theme' as map;
 @use 'app/components/main-page-container/main-page/side-panel/submission-form/_submission-form.component-theme' as submission-form;
@@ -83,7 +83,7 @@ html {
   @include share-survey.theme($theme);
   @include sign-in-page.theme($theme);
   @include survey-list.theme($theme);
-  @include tasks-editor.theme($theme);
+  @include task-editor.theme($theme);
   @include task-condition-form.theme($theme);
   @include edit-option.theme($theme);
   @include user-avatar.theme($theme);
@@ -93,7 +93,7 @@ html {
   @include data-sharing-terms.theme($theme);
   @include step-card.theme($theme);
   @include drawing-tools.theme($theme);
-  @include task-editor.theme($theme);
+
   @include job-dialog.theme($theme);
   @include map.theme($theme);
   @include submission-form.theme($theme);

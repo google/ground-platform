@@ -25,7 +25,7 @@ import {
 import { importGeoJsonCallback } from './import-geojson';
 import { DecodedIdToken } from 'firebase-admin/auth';
 import { Blob, FormData } from 'formdata-node';
-import HttpStatus from 'http-status-codes';
+import { StatusCodes } from 'http-status-codes';
 import { invokeCallbackAsync } from './handlers';
 import { SURVEY_ORGANIZER_ROLE } from './common/auth';
 import { resetDatastore } from './common/context';
@@ -202,31 +202,31 @@ describe('importGeoJson()', () => {
     {
       desc: 'imports points',
       input: geoJsonWithPoint,
-      expectedStatus: HttpStatus.OK,
+      expectedStatus: StatusCodes.OK,
       expected: [pointLoi],
     },
     {
       desc: 'imports polygons',
       input: geoJsonWithPolygon,
-      expectedStatus: HttpStatus.OK,
+      expectedStatus: StatusCodes.OK,
       expected: [polygonLoi],
     },
     {
       desc: 'imports multi-polygons',
       input: geoJsonWithMultiPolygon,
-      expectedStatus: HttpStatus.OK,
+      expectedStatus: StatusCodes.OK,
       expected: [multiPolygonLoi],
     },
     {
       desc: 'imports unsupported feature type',
       input: { ...geoJsonWithPoint, type: 'UnsupportedFeature' },
-      expectedStatus: HttpStatus.BAD_REQUEST,
+      expectedStatus: StatusCodes.BAD_REQUEST,
       expected: [],
     },
     {
       desc: 'imports non CRS84 point',
       input: geoJsonWithNonCRS84Point,
-      expectedStatus: HttpStatus.OK,
+      expectedStatus: StatusCodes.OK,
       expected: [],
     },
   ];

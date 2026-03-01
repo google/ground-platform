@@ -5,6 +5,13 @@
     "targets": {
       "test": {
         "commands": "jasmine --config=jasmine.json"
+      },
+      "format:check": {
+        "executor": "nx:run-commands",
+        "options": {
+          "cwd": "lib",
+          "command": "prettier --check \"src/**/*.ts\""
+        }
       }
     }
   },
@@ -37,7 +44,6 @@
     "@ground/proto": "workspace:*",
     "firebase-admin": "catalog:",
     "firebase-functions": "catalog:",
-    "long": "catalog:",
     "protobufjs": "catalog:"
   },
   "devDependencies": {

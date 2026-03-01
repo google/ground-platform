@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 The Ground Authors.
+ * Copyright 2026 The Ground Authors.
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -14,36 +14,14 @@
  * limitations under the License.
  */
 
-:host {
-  display: flex;
-}
+import { Env } from './environment-enums';
+import { FirebaseOptions } from '@angular/fire/app';
 
-.dot {
-  align-self: center;
-}
-
-.drag-icon {
-  display: block;
-  margin: 0px auto;
-  cursor: move;
-  align-self: center;
-  margin-right: 5px !important;
-  visibility: hidden;
-}
-
-:host:hover .drag-icon,
-:host:focus-within .drag-icon {
-  visibility: visible;
-}
-
-.task-option {
-  width: 300px;
-}
-
-.code-option {
-  width: 100px;
-}
-
-.option-content {
-  display: flex;
+export interface Environment {
+  cloudFunctionsUrl?: string;
+  env?: Env;
+  firebase?: FirebaseOptions;
+  googleMapsApiKey?: string;
+  production?: boolean;
+  useEmulators?: boolean;
 }

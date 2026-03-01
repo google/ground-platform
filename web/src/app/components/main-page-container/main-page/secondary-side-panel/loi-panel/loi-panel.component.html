@@ -14,16 +14,19 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-<div *ngIf="loi" class="loi-panel" [ngClass]="{loading: isLoading}">
-  <div *ngIf="isLoading" class="progress-spinner">
+<div class="loi-panel" [ngClass]="{ loading: isLoading() }">
+  <div *ngIf="isLoading()" class="progress-spinner">
     <mat-spinner mode="indeterminate" diameter="50"></mat-spinner>
   </div>
 
-  <ng-container *ngIf="!isLoading">
+  <ng-container *ngIf="!isLoading()">
     <div class="header">
       <div class="header-left">
-        <mat-icon svgIcon={{icon}} [ngStyle]="{color: iconColor}"></mat-icon>
-        <div>{{ name }}</div>
+        <mat-icon
+          svgIcon="{{ icon() }}"
+          [ngStyle]="{ color: iconColor() }"
+        ></mat-icon>
+        <div>{{ name() }}</div>
       </div>
 
       <button
@@ -41,27 +44,37 @@ limitations under the License.
       </button>
     </div>
 
-    <div *ngIf="submissions && submissions.count() === 0" class="no-lois-container">
-      <div class="mat-icon-container">
-        <mat-icon>inbox</mat-icon>
-      </div>
-      No data collected for this site
-    </div>
-
-    <mat-list *ngIf="submissions && submissions.count() > 0">
-      <div *ngFor="let submission of submissions; let i = index">
-        <mat-divider *ngIf="i > 0"></mat-divider>
-        <div class="submission-item">
-          <mat-list-item (click)="onSelectSubmission(submission.id)">
-            <mat-icon matListItemIcon class="material-symbols-outlined">text_snippet</mat-icon>
-            <h3 matListItemTitle>{{ submission.created.user.displayName }}</h3>
-            <p matListItemLine>{{ submission.created.clientTime | date: 'longDate' }}</p>
-          </mat-list-item>
-          <button mat-icon-button (click)="onSelectSubmission(submission.id)">
-            <mat-icon>chevron_right</mat-icon>
-          </button>
+    <ng-container *ngIf="submissions() as subs">
+      <div *ngIf="subs.count() === 0" class="no-lois-container">
+        <div class="mat-icon-container">
+          <mat-icon>inbox</mat-icon>
         </div>
+        <span i18n="@@app.loiPanel.noDataForThisSite"
+          >No data collected for this site</span
+        >
       </div>
-    </mat-list>
+
+      <mat-list *ngIf="subs.count() > 0">
+        <div *ngFor="let submission of subs; let i = index">
+          <mat-divider *ngIf="i > 0"></mat-divider>
+          <div class="submission-item">
+            <mat-list-item (click)="onSelectSubmission(submission.id)">
+              <mat-icon matListItemIcon class="material-symbols-outlined"
+                >text_snippet</mat-icon
+              >
+              <h3 matListItemTitle>
+                {{ submission.created.user.displayName }}
+              </h3>
+              <p matListItemLine>
+                {{ submission.created.clientTime | date: 'longDate' }}
+              </p>
+            </mat-list-item>
+            <button mat-icon-button (click)="onSelectSubmission(submission.id)">
+              <mat-icon>chevron_right</mat-icon>
+            </button>
+          </div>
+        </div>
+      </mat-list>
+    </ng-container>
   </ng-container>
 </div>

@@ -25,4 +25,4 @@ import { AndroidIntentLandingPageComponent } from './android-intent-landing-page
   imports: [CommonModule, RouterModule],
   exports: [AndroidIntentLandingPageComponent],
 })
-export class AndroidModule {}
+export class AndroidIntentLandingPageModule {}

@@ -28,13 +28,16 @@
       formControlName="label"
       autocomplete="off"
       (blur)="onLabelBlur()"
+      [placeholder]="'Option ' + ((index ?? 0) + 1)"
       required
     />
 
     <mat-error *ngIf="labelControl.touched && labelControl.invalid">
-      <ng-container *ngIf="labelControl.getError('required')">
-        Option text is required
-      </ng-container>
+      <ng-container
+        *ngIf="labelControl.getError('required')"
+        i18n="@@app.controls.errors.requiredOptionText"
+        >Option text is required</ng-container
+      >
     </mat-error>
   </mat-form-field>
 

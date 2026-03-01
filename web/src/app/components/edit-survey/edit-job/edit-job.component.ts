@@ -20,7 +20,7 @@ import { List } from 'immutable';
 import { Subscription } from 'rxjs';
 
 import { LoiEditorComponent } from 'app/components/shared/loi-editor/loi-editor.component';
-import { TasksEditorComponent } from 'app/components/shared/tasks-editor/tasks-editor.component';
+import { TaskEditorComponent } from 'app/components/shared/task-editor/task-editor.component';
 import { DataCollectionStrategy, Job } from 'app/models/job.model';
 import { LocationOfInterest } from 'app/models/loi.model';
 import { Task } from 'app/models/task/task.model';
@@ -58,7 +58,7 @@ export class EditJobComponent {
   EditJobSection = EditJobSection;
 
   @ViewChild('tasksEditor')
-  tasksEditor?: TasksEditorComponent;
+  tasksEditor?: TaskEditorComponent;
 
   @ViewChild('loiEditor')
   loiEditor?: LoiEditorComponent;

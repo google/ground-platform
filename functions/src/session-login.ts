@@ -16,7 +16,7 @@
 
 import { Response, https, logger } from 'firebase-functions/v1';
 import { setSessionCookie } from './common/auth';
-import { UNAUTHORIZED } from 'http-status-codes';
+import { StatusCodes } from 'http-status-codes';
 
 /**
  * Generates and sets a session cookie for the current user.
@@ -28,8 +28,8 @@ export async function sessionLoginHandler(req: https.Request, res: Response) {
     res.setHeader('Cache-Control', 'private');
     await setSessionCookie(req, res);
     res.end('OK');
-  } catch (err: any) {
+  } catch (err) {
     logger.error(err);
-    res.status(UNAUTHORIZED).send('Authorization error');
+    res.status(StatusCodes.UNAUTHORIZED).send('Authorization error');
   }
 }

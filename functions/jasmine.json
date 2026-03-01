@@ -1,12 +1,12 @@
 {
-    "spec_dir": "dist",
-    "spec_files": [
-      "**/*.spec.js"
-    ],
-    "helpers": [
-      "../../lib/dist/testing/reporter.js",
-      "../../lib/dist/testing/diff.js"
-    ],
-    "stopSpecOnExpectationFailure": false,
-    "random": false
-  }
+  "spec_dir": "dist",
+  "spec_files": [
+    "**/*.spec.js"
+  ],
+  "helpers": [
+    "../../lib/dist/testing/reporter.js",
+    "../../lib/dist/testing/diff.js"
+  ],
+  "stopSpecOnExpectationFailure": false,
+  "random": false
+}

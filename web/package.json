@@ -67,9 +67,15 @@
       "lint": {
         "executor": "nx:run-commands",
         "options": {
-          "cwd": "web",
-          "command": "ng lint",
+          "command": "npx eslint \"web/src/**/*.ts\" --config eslint.config.mjs && npx eslint web/src/**/*.html --config eslint.config.mjs",
           "forwardAllArgs": true
+        }
+      },
+      "format:check": {
+        "executor": "nx:run-commands",
+        "options": {
+          "cwd": "web",
+          "command": "prettier --check \"src/**/*.{ts,html,scss}\""
         }
       },
       "extract-i18n": {
@@ -120,10 +126,6 @@
   "devDependencies": {
     "@angular-devkit/build-angular": "catalog:dev",
     "@angular-devkit/core": "catalog:dev",
-    "@angular-eslint/builder": "catalog:dev",
-    "@angular-eslint/eslint-plugin": "catalog:dev",
-    "@angular-eslint/eslint-plugin-template": "catalog:dev",
-    "@angular-eslint/template-parser": "catalog:dev",
     "@angular/cli": "catalog:dev",
     "@angular/compiler-cli": "catalog:dev",
     "@angular/language-service": "catalog:dev",
@@ -133,7 +135,6 @@
     "@types/jasmine": "catalog:dev",
     "@types/node": "catalog:dev",
     "@types/webpack-env": "catalog:dev",
-    "cpx": "catalog:dev",
     "karma": "catalog:dev",
     "karma-chrome-launcher": "catalog:dev",
     "karma-coverage": "catalog:dev",

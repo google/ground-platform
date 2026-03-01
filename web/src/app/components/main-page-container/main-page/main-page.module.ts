@@ -29,6 +29,7 @@ import { MapModule } from './map/map.module';
 import { SecondarySidePanelModule } from './secondary-side-panel/secondary-side-panel.module';
 import { SidePanelModule } from './side-panel/side-panel.module';
 import { SurveyHeaderModule } from './survey-header/survey-header.module';
+import { TitleDialogModule } from './title-dialog/title-dialog.module';
 
 @NgModule({
   declarations: [MainPageComponent],
@@ -46,6 +47,7 @@ import { SurveyHeaderModule } from './survey-header/survey-header.module';
     SidePanelModule,
     SecondarySidePanelModule,
     SurveyHeaderModule,
+    TitleDialogModule,
   ],
 })
 export class MainPageModule {}

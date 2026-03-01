@@ -26,11 +26,11 @@ import { toLoiPbProperties } from './import-geojson';
 
 import Pb = GroundProtos.ground.v1beta1;
 
-type Properties = { [key: string]: string | number };
+type Properties = Record<string, string | number>;
 
-type Headers = { [key: string]: string };
+type Headers = Record<string, string>;
 
-type Body = { [key: string]: any };
+type Body = Record<string, unknown>;
 
 type PropertyGenerator = {
   headers?: Headers;

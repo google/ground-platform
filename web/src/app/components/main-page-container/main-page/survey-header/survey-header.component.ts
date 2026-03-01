@@ -17,7 +17,6 @@
 import { Component, input } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 
-import { ShareDialogComponent } from 'app/components/shared/share-dialog/share-dialog.component';
 import { Survey } from 'app/models/survey.model';
 import { NavigationService } from 'app/services/navigation/navigation.service';
 import { SurveyService } from 'app/services/survey/survey.service';
@@ -50,13 +49,6 @@ export class SurveyHeaderComponent {
 
   onSurveysButtonClick(): void {
     this.navigationService.navigateToSurveyList();
-  }
-
-  openShareDialog(): void {
-    this.dialog.open(ShareDialogComponent, {
-      width: '580px',
-      autoFocus: false,
-    });
   }
 
   onClickSidePanelButtonEvent() {

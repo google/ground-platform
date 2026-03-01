@@ -67,14 +67,18 @@ jobs:
         with:
           cache-key-suffix: functions
 
+      - name: Check formatting
+        run: pnpm exec nx run functions:format:check
+        continue-on-error: true
+
+      - name: Lint
+        run: pnpm exec nx lint functions
+
       - name: Build
         run: pnpm exec nx build functions
 
       - name: Test
         run: pnpm exec nx test functions
-
-      - name: Lint
-        run: pnpm exec nx lint functions
 
   lib:
     needs: changes
@@ -90,14 +94,18 @@ jobs:
         with:
           cache-key-suffix: lib
 
+      - name: Check formatting
+        run: pnpm exec nx run lib:format:check
+        continue-on-error: true
+
+      - name: Lint
+        run: pnpm exec nx lint lib
+
       - name: Build
         run: pnpm exec nx build lib
 
       - name: Test
         run: pnpm exec nx test lib
-
-      - name: Lint
-        run: pnpm exec nx lint lib
 
   proto:
     needs: changes
@@ -145,14 +153,18 @@ jobs:
           echo "CHROME_BIN=${{ steps.setup-chrome.outputs.chrome-path }}" >> $GITHUB_ENV
           echo "CHROME_PATH=${{ steps.setup-chrome.outputs.chrome-path }}" >> $GITHUB_ENV
 
+      - name: Check formatting
+        run: pnpm exec nx run web:format:check
+        continue-on-error: true
+
+      - name: Lint
+        run: pnpm exec nx lint web
+
       - name: Build
         run: pnpm exec nx build web
 
       - name: Test
         run: pnpm exec nx test web
-
-      - name: Lint
-        run: pnpm exec nx lint web
 
       - name: Update test coverage report
         uses: codecov/codecov-action@v5

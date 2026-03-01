@@ -18,12 +18,17 @@
   <div class="loi-editor-card">
     <div class="loi-editor-card-row">
       <div class="loi-editor-card-row-content">
-        <div class="loi-editor-card-row-title" i18n="@@app.cards.freeForm.title">
-          Free-form data collection
+        <div class="loi-editor-card-row-title">
+          <ng-container i18n="@@app.cards.freeForm.title"
+            >Free-form data collection</ng-container
+          >
         </div>
 
-        <div class="loi-editor-card-row-subtitle" i18n="@@app.cards.freeForm.description">
-          Allow data collectors to add and collect data about new locations as they go.
+        <div class="loi-editor-card-row-subtitle">
+          <ng-container i18n="@@app.cards.freeForm.description"
+            >Allow data collectors to add and collect data about new locations
+            as they go.</ng-container
+          >
         </div>
       </div>
 
@@ -41,12 +46,17 @@
   <div class="loi-editor-card" *ngIf="canImport">
     <div class="loi-editor-card-row">
       <div class="loi-editor-card-row-content">
-        <div class="loi-editor-card-row-title" i18n="@@app.cards.predefinedSampleSites.title">
-          Predefined sample sites
+        <div class="loi-editor-card-row-title">
+          <ng-container i18n="@@app.cards.predefinedSampleSites.title"
+            >Predefined sample sites</ng-container
+          >
         </div>
 
-        <div class="loi-editor-card-row-subtitle" i18n="@@app.cards.predefinedSampleSites.description">
-          Import areas or points of interest for which data should be collected.
+        <div class="loi-editor-card-row-subtitle">
+          <ng-container i18n="@@app.cards.predefinedSampleSites.description"
+            >Import areas or points of interest for which data should be
+            collected.</ng-container
+          >
         </div>
       </div>
 

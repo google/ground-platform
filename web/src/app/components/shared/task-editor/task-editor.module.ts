@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 The Ground Authors.
+ * Copyright 2023 The Ground Authors.
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -18,30 +18,24 @@ import { DragDropModule } from '@angular/cdk/drag-drop';
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { MatButtonModule } from '@angular/material/button';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatIconModule } from '@angular/material/icon';
-import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
-import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatDialogModule } from '@angular/material/dialog';
 
-import { OptionEditorModule } from './option-editor/option-editor.module';
+import { AddTaskButtonModule } from './add-task-button/add-task-button.module';
+import { TaskConditionFormModule } from './task-condition-form/task-condition-form.module';
+import { TaskFormModule } from './task-form/task-form.module';
 import { TaskEditorComponent } from './task-editor.component';
 
 @NgModule({
   declarations: [TaskEditorComponent],
   imports: [
     CommonModule,
-    MatFormFieldModule,
-    FormsModule,
-    ReactiveFormsModule,
-    MatInputModule,
-    MatSelectModule,
-    MatIconModule,
-    MatSlideToggleModule,
-    MatButtonModule,
-    OptionEditorModule,
     DragDropModule,
+    FormsModule,
+    MatDialogModule,
+    ReactiveFormsModule,
+    AddTaskButtonModule,
+    TaskConditionFormModule,
+    TaskFormModule,
   ],
   exports: [TaskEditorComponent],
 })

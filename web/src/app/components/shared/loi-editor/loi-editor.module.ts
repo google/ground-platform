@@ -21,6 +21,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 
 import { LoiEditorComponent } from './loi-editor.component';
+import { ImportDialogModule } from '../import-dialog/import-dialog.module';
 import { LoiSelectionModule } from '../loi-selection/loi-selection.module';
 
 @NgModule({
@@ -30,6 +31,7 @@ import { LoiSelectionModule } from '../loi-selection/loi-selection.module';
     MatButtonModule,
     MatIconModule,
     MatSlideToggleModule,
+    ImportDialogModule,
     LoiSelectionModule,
   ],
   exports: [LoiEditorComponent],
