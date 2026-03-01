@@ -1,7 +1,15 @@
 {
   "name": "@ground/proto",
   "nx": {
-    "name": "proto"
+    "name": "proto",
+    "targets": {
+      "clean": {
+        "command": "rm -rf dist"
+      },
+      "lint": {
+        "command": "node scripts/lint.js"
+      }
+    }
   },
   "version": "0.0.1",
   "description": "Ground shared Protocol Buffer definitions",
@@ -9,8 +17,6 @@
   "types": "dist/index.d.ts",
   "files": ["dist"],
   "scripts": {
-    "clean": "rm -rf dist",
-    "lint": "node scripts/lint.js",
     "format": "buf format --write",
     "build": "npm run generate:pbjs && npm run generate:pbjson && npm run generate:pbts",
     "postbuild": "cp src/index.* dist/",
