@@ -100,8 +100,8 @@ catalogs:
       specifier: ^2.3.0
       version: 2.3.0
     immutable:
-      specifier: ^4.3.6
-      version: 4.3.7
+      specifier: ^4.3.8
+      version: 4.3.8
     jsonstream-ts:
       specifier: ^1.3.6
       version: 1.3.6
@@ -463,7 +463,7 @@ importers:
         version: 2.3.0
       immutable:
         specifier: 'catalog:'
-        version: 4.3.7
+        version: 4.3.8
       jsonstream-ts:
         specifier: 'catalog:'
         version: 1.3.6
@@ -631,7 +631,7 @@ importers:
         version: 10.14.1
       immutable:
         specifier: 'catalog:'
-        version: 4.3.7
+        version: 4.3.8
       marked:
         specifier: 'catalog:'
         version: 14.1.4
@@ -7473,8 +7473,8 @@ packages:
   immediate@3.0.6:
     resolution: {integrity: sha512-XXOFtyqDjNDAQxVfYxuF7g9Il/IbWmmlQg2MYKOH8ExIT1qg6xc4zyS3HaEEATgs1btfzxq15ciUiY7gjSXRGQ==}
 
-  immutable@4.3.7:
-    resolution: {integrity: sha512-1hqclzwYwjRDFLjcFxOM5AYkkG0rpFPpr1RLPMEuGczoS7YA8gLhy8SWXYRAA/XwfEHpfo3cw5JGioS32fnMRw==}
+  immutable@4.3.8:
+    resolution: {integrity: sha512-d/Ld9aLbKpNwyl0KiM2CT1WYvkitQ1TSvmRtkcV8FKStiDoA7Slzgjmb/1G2yhKM1p0XeNOieaTbFZmU1d3Xuw==}
 
   immutable@5.1.4:
     resolution: {integrity: sha512-p6u1bG3YSnINT5RQmx/yRZBpenIl30kVxkTLDyHLIMk0gict704Q9n+thfDI7lTRm9vXdDYutVzXhzcThxTnXA==}
@@ -21390,7 +21390,7 @@ snapshots:
 
   immediate@3.0.6: {}
 
-  immutable@4.3.7: {}
+  immutable@4.3.8: {}
 
   immutable@5.1.4: {}
 
