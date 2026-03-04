@@ -30,7 +30,7 @@
     <div *ngFor="let task of submissionTasks">
       <div class="task-result">
         <!-- Text task -->
-        <div *ngIf="task.type == taskTypes.TEXT">
+        <div *ngIf="task.type === taskTypes.TEXT">
           <mat-form-field appearance="fill">
             <mat-label class="task-label" [attr.for]="task.id">
               {{ task.label }}
@@ -43,7 +43,7 @@
             />
           </mat-form-field>
         </div>
-        <div *ngIf="task.type == taskTypes.NUMBER">
+        <div *ngIf="task.type === taskTypes.NUMBER">
           <mat-form-field appearance="fill">
             <input
               type="number"
@@ -56,7 +56,7 @@
 
         <!-- Multiple choice task -->
         <div
-          *ngIf="task.type == taskTypes.MULTIPLE_CHOICE"
+          *ngIf="task.type === taskTypes.MULTIPLE_CHOICE"
           class="multiple-choice-task"
         >
           <!-- Radio button task -->
@@ -71,7 +71,7 @@
           <mat-radio-group
             [id]="task.id"
             [formControlName]="task.id"
-            *ngIf="task.multipleChoice?.cardinality == cardinality.SELECT_ONE"
+            *ngIf="task.multipleChoice?.cardinality === cardinality.SELECT_ONE"
             [required]="task.required"
           >
             <mat-radio-button
@@ -85,7 +85,7 @@
           <!-- Checkbox task -->
           <div
             *ngIf="
-              task.multipleChoice?.cardinality == cardinality.SELECT_MULTIPLE
+              task.multipleChoice?.cardinality === cardinality.SELECT_MULTIPLE
             "
           >
             <mat-checkbox

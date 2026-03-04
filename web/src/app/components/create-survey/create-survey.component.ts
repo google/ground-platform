@@ -16,7 +16,7 @@
 
 import '@angular/localize/init';
 
-import { ChangeDetectorRef, Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { List } from 'immutable';
 import { Subscription, filter, of } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
@@ -146,8 +146,7 @@ export class CreateSurveyComponent implements OnInit {
     private jobService: JobService,
     private taskService: TaskService,
     private navigationService: NavigationService,
-    private loiService: LocationOfInterestService,
-    private cdr: ChangeDetectorRef
+    private loiService: LocationOfInterestService
   ) {}
 
   ngOnInit(): void {
