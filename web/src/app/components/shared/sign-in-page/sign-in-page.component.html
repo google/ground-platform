@@ -33,13 +33,15 @@
       </p>
 
       <div class="buttons">
-        <button 
-          class="google-signin-btn" 
+        <button
+          matButton="outlined"
+          class="google-btn"
           (click)="onGoogleSignIn()"
-          type="button"
         >
-          <img src="assets/img/web_light_rd_na.svg" alt="" class="google-logo" />
-          <span i18n="@@app.login.signInWithGoogle">Sign in with Google</span>
+          <span class="google-btn-content">
+            <img src="assets/img/web_light_rd_na.svg" alt="Google logo" />
+            <span i18n="@@app.login.signInWithGoogle">Sign in with Google</span>
+          </span>
         </button>
       </div>
     </mat-card-content>
