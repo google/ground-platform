@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 
-import { Change, DocumentSnapshot, FirestoreEvent } from 'firebase-functions/v2/firestore';
+import {
+  Change,
+  DocumentSnapshot,
+  FirestoreEvent,
+} from 'firebase-functions/v2/firestore';
 import { broadcastSurveyUpdate } from './common/broadcast-survey-update';
 
 export async function onWriteLoiHandler(

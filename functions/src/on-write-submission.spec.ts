@@ -114,7 +114,10 @@ describe('onWriteSubmission()', () => {
 
     await expectAsync(
       onWriteSubmissionHandler({
-        data: { before: null as unknown as DocumentSnapshot, after: SUBMISSION },
+        data: {
+          before: null as unknown as DocumentSnapshot,
+          after: SUBMISSION,
+        },
         params: { surveyId: SURVEY_ID },
       } as any)
     ).toBeRejected();

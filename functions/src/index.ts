@@ -15,7 +15,10 @@
  */
 
 import 'module-alias/register';
-import { onDocumentCreated, onDocumentWritten } from 'firebase-functions/v2/firestore';
+import {
+  onDocumentCreated,
+  onDocumentWritten,
+} from 'firebase-functions/v2/firestore';
 import { onHttpsRequest, onHttpsRequestAsync } from './handlers';
 import { handleProfileRefresh } from './profile-refresh';
 import { sessionLoginHandler } from './session-login';
@@ -71,7 +74,10 @@ export const exportCsv = onHttpsRequest(exportCsvHandler);
 
 export const exportGeojson = onHttpsRequest(exportGeojsonHandler);
 
-export const onCreateLoi = onDocumentCreated(loiPathTemplate, onCreateLoiHandler);
+export const onCreateLoi = onDocumentCreated(
+  loiPathTemplate,
+  onCreateLoiHandler
+);
 
 export const onWriteJob = onDocumentWritten(jobPathTemplate, onWriteJobHandler);
 
@@ -82,6 +88,9 @@ export const onWriteSubmission = onDocumentWritten(
   onWriteSubmissionHandler
 );
 
-export const onWriteSurvey = onDocumentWritten(surveyPathTemplate, onWriteSurveyHandler);
+export const onWriteSurvey = onDocumentWritten(
+  surveyPathTemplate,
+  onWriteSurveyHandler
+);
 
 export const sessionLogin = onHttpsRequest(sessionLoginHandler);

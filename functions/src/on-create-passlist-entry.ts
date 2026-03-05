@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-import { FirestoreEvent, QueryDocumentSnapshot } from 'firebase-functions/v2/firestore';
+import {
+  FirestoreEvent,
+  QueryDocumentSnapshot,
+} from 'firebase-functions/v2/firestore';
 import { getDatastore, getMailService } from './common/context';
 import { MailServiceEmail } from './common/mail-service';
 import { stringFormat } from './common/utils';

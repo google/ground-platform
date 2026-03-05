@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 
-import { Change, DocumentSnapshot, FirestoreEvent } from 'firebase-functions/v2/firestore';
+import {
+  Change,
+  DocumentSnapshot,
+  FirestoreEvent,
+} from 'firebase-functions/v2/firestore';
 import { getDatastore } from './common/context';
 import { registry } from '@ground/lib';
 import { GroundProtos } from '@ground/proto';

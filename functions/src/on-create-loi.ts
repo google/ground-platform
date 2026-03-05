@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-import { FirestoreEvent, QueryDocumentSnapshot } from 'firebase-functions/v2/firestore';
+import {
+  FirestoreEvent,
+  QueryDocumentSnapshot,
+} from 'firebase-functions/v2/firestore';
 import { getDatastore } from './common/context';
 import { Datastore } from './common/datastore';
 import { broadcastSurveyUpdate } from './common/broadcast-survey-update';
