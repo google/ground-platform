@@ -32,8 +32,8 @@ Read through our [contributing guidelines](CONTRIBUTING.md) to learn about our s
 2. Install and use Node.js **20**:
 
 ```bash
-nvm install 20
-nvm use 20
+nvm install 22
+nvm use 22
 ```
 
 3. Install [Firebase CLI](https://firebase.google.com/docs/cli) and [Nx](https://nx.dev):
