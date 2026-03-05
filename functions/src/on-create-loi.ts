@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import { EventContext } from 'firebase-functions/v1';
-import { QueryDocumentSnapshot } from 'firebase-functions/v1/firestore';
+import { FirestoreEvent, QueryDocumentSnapshot } from 'firebase-functions/v2/firestore';
 import { getDatastore } from './common/context';
 import { Datastore } from './common/datastore';
 import { broadcastSurveyUpdate } from './common/broadcast-survey-update';
@@ -50,12 +49,11 @@ const defaultHeaders = { 'Content-Type': 'application/json' };
  * @param context The EventContext object provided by the Cloud Functions framework.
  */
 export async function onCreateLoiHandler(
-  snapshot: QueryDocumentSnapshot,
-  context: EventContext
+  event: FirestoreEvent<QueryDocumentSnapshot | undefined>
 ) {
-  const surveyId = context.params.surveyId;
-  const loiId = context.params.loiId;
-  const data = snapshot.data();
+  const surveyId = event.params.surveyId;
+  const loiId = event.params.loiId;
+  const data = event.data?.data();
 
   if (!loiId || !data) return;
 
@@ -99,7 +97,7 @@ export async function onCreateLoiHandler(
     )
   );
 
-  await broadcastSurveyUpdate(context.params.surveyId);
+  await broadcastSurveyUpdate(event.params.surveyId);
 }
 
 async function updateProperties(
