@@ -17,14 +17,15 @@
 import { buffer } from 'stream/consumers';
 import { FormDataEncoder } from 'form-data-encoder';
 import { FormData } from 'formdata-node';
-import { Response, https } from 'firebase-functions/v1';
+import { Request } from 'firebase-functions/v2/https';
+import type { Response } from 'express';
 
 export async function createPostRequestSpy(
   args: object,
   form: FormData
-): Promise<https.Request> {
+): Promise<Request> {
   const encoder = new FormDataEncoder(form);
-  return jasmine.createSpyObj<https.Request>('request', ['unpipe'], {
+  return jasmine.createSpyObj<Request>('request', ['unpipe'], {
     ...args,
     method: 'POST',
     headers: encoder.headers,
@@ -32,10 +33,8 @@ export async function createPostRequestSpy(
   });
 }
 
-export async function createGetRequestSpy(
-  args: object
-): Promise<https.Request> {
-  return jasmine.createSpyObj<https.Request>('request', ['unpipe'], {
+export async function createGetRequestSpy(args: object): Promise<Request> {
+  return jasmine.createSpyObj<Request>('request', ['unpipe'], {
     ...args,
     method: 'GET',
   });

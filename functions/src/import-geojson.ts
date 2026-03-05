@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import functions from 'firebase-functions/v1';
+import { Request } from 'firebase-functions/v2/https';
+import type { Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import { getDatastore } from './common/context';
 import Busboy from 'busboy';
@@ -37,8 +38,8 @@ class BadRequestError extends Error {
  * and required 'survey' id and 'job' id to the database.
  */
 export function importGeoJsonCallback(
-  req: functions.https.Request,
-  res: functions.Response<any>,
+  req: Request,
+  res: Response,
   user: DecodedIdToken,
   done: () => void,
   error: ErrorHandler

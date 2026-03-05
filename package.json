@@ -122,6 +122,7 @@
     "eslint-plugin-unused-imports": "catalog:dev",
     "firebase-tools": "catalog:dev",
     "gts": "catalog:dev",
+    "isolate-package": "catalog:dev",
     "jasmine": "catalog:dev",
     "jasmine-expect": "catalog:dev",
     "jasmine-spec-reporter": "catalog:dev",
