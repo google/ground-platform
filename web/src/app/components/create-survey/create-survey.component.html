@@ -32,7 +32,10 @@
     </div>
   </div>
 
-  <div class="container">
+  <div
+    *ngIf="createSurveyPhase !== CreateSurveyPhase.LOADING"
+    class="container"
+  >
     <div class="card">
       <img
         *ngIf="createSurveyPhase === CreateSurveyPhase.JOB_DETAILS"
@@ -112,7 +115,7 @@
 
       <div class="right-button-section">
         <ground-copy-survey-controls
-          *ngIf="createSurveyPhase == CreateSurveyPhase.SHARE_SURVEY"
+          *ngIf="createSurveyPhase === CreateSurveyPhase.SHARE_SURVEY"
           [surveyId]="surveyId"
         ></ground-copy-survey-controls>
 

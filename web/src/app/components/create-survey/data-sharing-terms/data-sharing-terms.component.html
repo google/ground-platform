@@ -15,11 +15,15 @@
 -->
 
 <form [formGroup]="formGroup">
-  <mat-radio-group class="data-sharing-terms"
+  <mat-radio-group
+    class="data-sharing-terms"
     [id]="typeControlKey"
     [formControlName]="typeControlKey"
   >
-    <mat-card *ngFor="let option of dataSharingTermsOptions" class="data-sharing-terms-card">
+    <mat-card
+      *ngFor="let option of dataSharingTermsOptions"
+      class="data-sharing-terms-card"
+    >
       <mat-card-content>
         <mat-radio-button class="option-radio-button" [value]="option.value">
           <span class="data-sharing-label">{{ option.label }}</span>
@@ -39,11 +43,13 @@
             >
           </p>
           <mat-form-field class="custom-terms">
-            <textarea matInput
+            <textarea
+              matInput
               formControlName="customText"
               placeholder="Enter the terms of your custom agreement..."
               i18n-placeholder="@@app.forms.placeholders.customAgreement"
-              aria-labelledby="customize-agreement-header">
+              aria-labelledby="customize-agreement-header"
+            >
             </textarea>
             <mat-error
               *ngIf="customTextControl.touched && customTextControl.invalid"

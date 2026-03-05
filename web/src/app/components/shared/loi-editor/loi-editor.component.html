@@ -60,11 +60,9 @@
         </div>
       </div>
 
-      <div
-        *ngIf="canImport && lois"
-        class="loi-editor-card-actions"
-      >
-        <button *ngIf="lois.size == 0"
+      <div *ngIf="canImport && lois" class="loi-editor-card-actions">
+        <button
+          *ngIf="lois.size === 0"
           mat-flat-button
           class="import-lois-button"
           (click)="importLois()"
@@ -74,7 +72,8 @@
           <span i18n="@@app.labels.import">Import</span>
         </button>
 
-        <button *ngIf="lois.size > 0"
+        <button
+          *ngIf="lois.size > 0"
           mat-flat-button
           class="clear-all-lois"
           (click)="clearLois()"
@@ -87,11 +86,7 @@
     </div>
 
     <div *ngIf="lois && lois.size > 0">
-      <loi-selection
-        [lois]="lois"
-        [survey]="survey"
-        [jobId]="job?.id"
-      >
+      <loi-selection [lois]="lois" [survey]="survey" [jobId]="job?.id">
       </loi-selection>
     </div>
   </div>

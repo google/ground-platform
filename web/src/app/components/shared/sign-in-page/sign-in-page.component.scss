@@ -15,7 +15,6 @@
  */
 
 .body-container {
-  background-image: url(/assets/img/happy-land.png);
   background-repeat: no-repeat;
   background-size: cover;
   width: 100vw;
@@ -34,7 +33,7 @@
   width: 420px;
   height: 460px;
   border-radius: 24px;
-  
+
   .content {
     padding: 40px;
   }
@@ -44,44 +43,17 @@
   margin-top: 48px;
   display: flex;
   justify-content: center;
-}
 
-.google-signin-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  padding: 0 0 12px 0;
-  border: 1px solid #dadce0;
-  border-radius: 4px;
-  background-color: #fff;
-  color: #3c4043;
-  font-family: 'Google Sans', Roboto, Arial, sans-serif;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  min-height: 40px;
+  .google-btn {
+    background-color: #F2F2F2 !important;
+    color: #1F1F1F !important;
+    font-family: 'Roboto', sans-serif;
+    padding: 0 !important;
 
-  &:hover {
-    box-shadow: 0 1px 2px 0 rgba(60, 64, 67, 0.3), 0 1px 3px 1px rgba(60, 64, 67, 0.15);
-    background-color: #f8f9fa;
-  }
-
-  &:active {
-    background-color: #f1f3f4;
-    box-shadow: 0 1px 2px 0 rgba(60, 64, 67, 0.3), 0 2px 6px 2px rgba(60, 64, 67, 0.15);
-  }
-
-  &:focus {
-    outline: none;
-    box-shadow: 0 1px 2px 0 rgba(60, 64, 67, 0.3), 0 1px 3px 1px rgba(60, 64, 67, 0.15);
-  }
-
-  &:disabled {
-    background-color: #f1f3f4;
-    color: #9aa0a6;
-    cursor: not-allowed;
-    border-color: #f1f3f4;
+    .google-btn-content {
+      display: flex;
+      align-items: center;
+      margin-right: 12px;
+    }
   }
 }

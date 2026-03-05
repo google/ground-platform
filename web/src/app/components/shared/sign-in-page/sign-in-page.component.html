@@ -16,27 +16,32 @@
 
 <ground-header></ground-header>
 
-<div class="body-container">
+<div
+  class="body-container"
+  style="background-image: url(assets/img/happy-land.png)"
+>
   <mat-card appearance="outlined" class="card">
     <mat-card-content class="content">
       <div>
         <img class="logo" src="assets/img/logo.svg" alt="Ground logo" />
       </div>
       <p class="title">Ground</p>
-      <p class="cta" *ngIf="!(isAuthenticated$() | async)">
+      <p class="cta" *ngIf="(isAuthenticated$() | async) === false">
         <ng-container i18n="@@app.login.signInToContinue"
           >Sign in to continue</ng-container
         >
       </p>
 
       <div class="buttons">
-        <button 
-          class="google-signin-btn" 
+        <button
+          matButton="outlined"
+          class="google-btn"
           (click)="onGoogleSignIn()"
-          type="button"
         >
-          <img src="assets/img/web_light_rd_na.svg" alt="" class="google-logo" />
-          <span i18n="@@app.login.signInWithGoogle">Sign in with Google</span>
+          <span class="google-btn-content">
+            <img src="assets/img/web_light_rd_na.svg" alt="Google logo" />
+            <span i18n="@@app.login.signInWithGoogle">Sign in with Google</span>
+          </span>
         </button>
       </div>
     </mat-card-content>
