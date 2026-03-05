@@ -23,6 +23,6 @@
     "@types/selenium-webdriver": "catalog:dev"
   },
   "engines": {
-    "node": "20"
+    "node": "22"
   }
 }

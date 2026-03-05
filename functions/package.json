@@ -58,7 +58,7 @@
     "sanitize-html": "catalog:"
   },
   "engines": {
-    "node": "20"
+    "node": "22"
   },
   "private": true,
   "devDependencies": {
