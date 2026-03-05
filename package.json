@@ -129,6 +129,7 @@
     "prettier": "catalog:dev",
     "start-server-and-test": "catalog:dev",
     "ts-mocha": "catalog:dev",
+    "ts-node": "catalog:dev",
     "tslib": "catalog:dev",
     "typescript": "catalog:dev"
   },
