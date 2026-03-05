@@ -17,17 +17,13 @@
 import {
   createMockFirestore,
   newDocumentSnapshot,
-  newEventContext,
   stubAdminApi,
 } from '@ground/lib/testing/firestore';
 import { resetDatastore } from './common/context';
 import { Firestore, QueryDocumentSnapshot } from 'firebase-admin/firestore';
-import firebaseFunctionsTest from 'firebase-functions-test';
-import * as functions from './index';
 import * as context from './common/context';
 import { MailService } from './common/mail-service';
-
-const test = firebaseFunctionsTest();
+import { onCreatePasslistEntryHandler } from './on-create-passlist-entry';
 
 describe('onCreatePasslistEntry()', () => {
   let mockFirestore: Firestore;
@@ -60,15 +56,12 @@ describe('onCreatePasslistEntry()', () => {
     resetDatastore();
   });
 
-  afterAll(() => {
-    test.cleanup();
-  });
-
   it('passlist notification email template exists', async () => {
     await mockFirestore.collection('passlists').add({});
-    await test.wrap(functions.onCreatePasslistEntry)(
-      newDocumentSnapshot({}) as QueryDocumentSnapshot
-    );
+    await onCreatePasslistEntryHandler({
+      data: newDocumentSnapshot({}) as QueryDocumentSnapshot,
+      params: {},
+    } as any);
     expect(getMailServiceMock).not.toHaveBeenCalled();
   });
 
@@ -86,10 +79,10 @@ describe('onCreatePasslistEntry()', () => {
     mockFirestore.doc('config/mail').set({ server: serverConfig });
     mockFirestore.doc('config/mail/templates/passlisted').set(mail);
     mockFirestore.doc(`passlists/${mail.to}`).set({});
-    await test.wrap(functions.onCreatePasslistEntry)(
-      newDocumentSnapshot({}) as QueryDocumentSnapshot,
-      newEventContext({ entryId: mail.to })
-    );
+    await onCreatePasslistEntryHandler({
+      data: newDocumentSnapshot({}) as QueryDocumentSnapshot,
+      params: { entryId: mail.to },
+    } as any);
     expect(getMailServiceMock).toHaveBeenCalled();
     expect(mailServiceMock.sendMail).toHaveBeenCalled();
     expect(mailServiceMock.sendMail).toHaveBeenCalledWith(mail);
