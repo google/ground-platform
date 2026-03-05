@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as functions from 'firebase-functions/v1';
+import { UserRecord } from 'firebase-admin/auth';
 import { firestore } from 'firebase-admin';
 import { DocumentData, FieldPath, GeoPoint } from 'firebase-admin/firestore';
 import { registry } from '@ground/lib';
@@ -111,7 +111,7 @@ export class Datastore {
    * Stores user email, name, and avatar to db for use in application LOIs.
    * These attributes are merged with other existing ones if already present.
    */
-  async mergeUserProfile(user: functions.auth.UserRecord) {
+  async mergeUserProfile(user: UserRecord) {
     const { uid, email, displayName, photoURL } = user;
     await this.db_.doc(`users/${uid}`).set(
       {

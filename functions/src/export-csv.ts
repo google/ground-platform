@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import * as functions from 'firebase-functions/v1';
+import { Request } from 'firebase-functions/v2/https';
+import type { Response } from 'express';
 import * as csv from '@fast-csv/format';
 import { canExport, hasOrganizerRole } from './common/auth';
 import { isAccessibleLoi } from './common/utils';
@@ -35,8 +36,8 @@ import Pb = GroundProtos.ground.v1beta1;
  * into a single table written to the response as a quote CSV file.
  */
 export async function exportCsvHandler(
-  req: functions.Request,
-  res: functions.Response<any>,
+  req: Request,
+  res: Response,
   user: DecodedIdToken
 ) {
   const db = getDatastore();

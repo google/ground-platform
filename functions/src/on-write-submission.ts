@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-// import * as admin from 'firebase-admin';
-import { Change, EventContext } from 'firebase-functions/v1';
-import { DocumentSnapshot } from 'firebase-functions/v1/firestore';
+import {
+  Change,
+  DocumentSnapshot,
+  FirestoreEvent,
+} from 'firebase-functions/v2/firestore';
 import { getDatastore } from './common/context';
 import { registry } from '@ground/lib';
 import { GroundProtos } from '@ground/proto';
@@ -25,11 +27,11 @@ import Pb = GroundProtos.ground.v1beta1;
 const sb = registry.getFieldIds(Pb.Submission);
 
 export async function onWriteSubmissionHandler(
-  change: Change<DocumentSnapshot>,
-  context: EventContext
+  event: FirestoreEvent<Change<DocumentSnapshot> | undefined>
 ) {
-  const surveyId = context.params.surveyId;
-  const loiId = change.after?.get(sb.loiId) || change.before?.get(sb.loiId);
+  const surveyId = event.params.surveyId;
+  const change = event.data;
+  const loiId = change?.after?.get(sb.loiId) || change?.before?.get(sb.loiId);
   if (!loiId) return;
   // Note: Counting submissions requires scanning the index, which has O(N) cost,
   // where N=submission count. This could be done in constant time by

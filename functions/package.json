@@ -65,6 +65,7 @@
     "@types/busboy": "catalog:dev",
     "@types/cookie-parser": "catalog:dev",
     "@types/cors": "catalog:dev",
+    "@types/express": "catalog:dev",
     "@types/geojson": "catalog:dev",
     "@types/jasmine": "catalog:dev",
     "@types/node": "catalog:dev",
@@ -73,8 +74,7 @@
     "@types/terraformer__wkt": "catalog:dev",
     "firebase-functions-test": "catalog:dev",
     "form-data-encoder": "catalog:dev",
-    "formdata-node": "catalog:dev",
-    "isolate-package": "catalog:dev"
+    "formdata-node": "catalog:dev"
   },
   "type": "commonjs"
 }

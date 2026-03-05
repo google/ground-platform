@@ -18,18 +18,14 @@ import {
   createMockFirestore,
   newCountQuery,
   newDocumentSnapshot,
-  newEventContext,
   stubAdminApi,
 } from '@ground/lib/testing/firestore';
-import * as functions from './index';
 import { loi } from './common/datastore';
 import { DocumentSnapshot, Firestore } from 'firebase-admin/firestore';
-import firebaseFunctionsTest from 'firebase-functions-test';
 import { resetDatastore } from './common/context';
 import { registry } from '@ground/lib';
 import { GroundProtos } from '@ground/proto';
-
-const test = firebaseFunctionsTest();
+import { onWriteSubmissionHandler } from './on-write-submission';
 
 import Pb = GroundProtos.ground.v1beta1;
 const l = registry.getFieldIds(Pb.LocationOfInterest);
@@ -39,7 +35,6 @@ describe('onWriteSubmission()', () => {
   let mockFirestore: Firestore;
   const SURVEY_ID = 'survey1';
   const SUBMISSION = newDocumentSnapshot({ loiId: 'loi1', [sb.loiId]: 'loi1' });
-  const CONTEXT = newEventContext({ surveyId: SURVEY_ID });
   const SURVEY_PATH = `surveys/${SURVEY_ID}`;
   const SUBMISSIONS_PATH = `${SURVEY_PATH}/submissions`;
   const LOI_ID = 'loi1';
@@ -52,10 +47,6 @@ describe('onWriteSubmission()', () => {
 
   afterEach(() => {
     resetDatastore();
-  });
-
-  afterAll(() => {
-    test.cleanup();
   });
 
   function installSubmissionCountSpy(
@@ -77,10 +68,10 @@ describe('onWriteSubmission()', () => {
   it('update submission count on create', async () => {
     installSubmissionCountSpy(SUBMISSIONS_PATH, LOI_ID, 2);
 
-    await test.wrap(functions.onWriteSubmission)(
-      { before: null as unknown as DocumentSnapshot, after: SUBMISSION },
-      CONTEXT
-    );
+    await onWriteSubmissionHandler({
+      data: { before: null as unknown as DocumentSnapshot, after: SUBMISSION },
+      params: { surveyId: SURVEY_ID },
+    } as any);
 
     const loi = await mockFirestore.doc(LOI_PATH).get();
     expect(loi.data()).toEqual({ [l.submissionCount]: 2 });
@@ -89,10 +80,10 @@ describe('onWriteSubmission()', () => {
   it('update submission count on delete', async () => {
     installSubmissionCountSpy(SUBMISSIONS_PATH, LOI_ID, 1);
 
-    await test.wrap(functions.onWriteSubmission)(
-      { before: SUBMISSION, after: null as unknown as DocumentSnapshot },
-      CONTEXT
-    );
+    await onWriteSubmissionHandler({
+      data: { before: SUBMISSION, after: null as unknown as DocumentSnapshot },
+      params: { surveyId: SURVEY_ID },
+    } as any);
 
     const loi = await mockFirestore.doc(LOI_PATH).get();
     expect(loi.data()).toEqual({ [l.submissionCount]: 1 });
@@ -101,13 +92,13 @@ describe('onWriteSubmission()', () => {
   it('do nothing on invalid change', async () => {
     installSubmissionCountSpy(SUBMISSIONS_PATH, LOI_ID, 1);
 
-    await test.wrap(functions.onWriteSubmission)(
-      {
+    await onWriteSubmissionHandler({
+      data: {
         before: null as unknown as DocumentSnapshot,
         after: null as unknown as DocumentSnapshot,
       },
-      CONTEXT
-    );
+      params: { surveyId: SURVEY_ID },
+    } as any);
 
     const loi = await mockFirestore.doc(LOI_PATH).get();
     expect(loi.data()).toEqual({});
@@ -122,10 +113,13 @@ describe('onWriteSubmission()', () => {
       });
 
     await expectAsync(
-      test.wrap(functions.onWriteSubmission)(
-        { before: null as unknown as DocumentSnapshot, after: SUBMISSION },
-        CONTEXT
-      )
+      onWriteSubmissionHandler({
+        data: {
+          before: null as unknown as DocumentSnapshot,
+          after: SUBMISSION,
+        },
+        params: { surveyId: SURVEY_ID },
+      } as any)
     ).toBeRejected();
   });
 });
