@@ -65,6 +65,7 @@
     "@types/busboy": "catalog:dev",
     "@types/cookie-parser": "catalog:dev",
     "@types/cors": "catalog:dev",
+    "@types/express": "catalog:dev",
     "@types/geojson": "catalog:dev",
     "@types/jasmine": "catalog:dev",
     "@types/node": "catalog:dev",
