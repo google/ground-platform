@@ -2,8 +2,7 @@
   "name": "@ground/web",
   "version": "0.0.1",
   "scripts": {
-    "postinstall": "node scripts/patch-karma.cjs",
-    "extract-i18n": "ng extract-i18n"
+    "postinstall": "node scripts/patch-karma.cjs"
   },
   "nx": {
     "name": "web",
