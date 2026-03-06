@@ -10,13 +10,15 @@
     "shell": "firebase functions:shell",
     "emulate": "firebase emulators:start --only functions,firestore --project demo-local",
     "logs": "firebase functions:log",
-    "build": "tsc",
     "deploy": "npm run build && firebase deploy --project $npm_config_project --only functions",
     "watch": "tsc --watch"
   },
   "nx": {
     "name": "functions",
     "targets": {
+      "build": {
+        "command": "tsc"
+      },
       "clean": {
         "command": "rm -rf dist *.log"
       },

@@ -3,6 +3,9 @@
   "nx": {
     "name": "lib",
     "targets": {
+      "build": {
+        "command": "tsc"
+      },
       "clean": {
         "command": "rm -rf dist *.log src/generated"
       },
@@ -29,7 +32,6 @@
   ],
   "scripts": {
     "build-local-deps": "npm run build --workspace=../proto",
-    "build": "tsc",
     "build-all": "npm run build-local-deps && npm run build",
     "build-and-test": "npm run build && npm run test",
     "build-all-and-test": "npm run build-all && npm run test"
