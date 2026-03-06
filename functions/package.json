@@ -6,13 +6,6 @@
   "files": [
     "dist"
   ],
-  "scripts": {
-    "shell": "firebase functions:shell",
-    "emulate": "firebase emulators:start --only functions,firestore --project demo-local",
-    "logs": "firebase functions:log",
-    "deploy": "npm run build && firebase deploy --project $npm_config_project --only functions",
-    "watch": "tsc --watch"
-  },
   "nx": {
     "name": "functions",
     "targets": {
@@ -36,6 +29,30 @@
         "options": {
           "command": "prettier --check \"src/**/*.ts\""
         }
+      },
+      "shell": {
+        "command": "firebase functions:shell"
+      },
+      "emulate": {
+        "command": "firebase emulators:start --only functions,firestore --project demo-local"
+      },
+      "logs": {
+        "command": "firebase functions:log"
+      },
+      "deploy": {
+        "executor": "nx:run-commands",
+        "configurations": {
+          "staging": {
+            "command": "firebase deploy --project ground-dev-sig --only functions"
+          },
+          "production": {
+            "command": "firebase deploy --project YOUR-PROD-PROJECT --only functions"
+          }
+        },
+        "dependsOn": ["build"]
+      },
+      "watch": {
+        "command": "tsc --watch"
       }
     }
   },
