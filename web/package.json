@@ -8,11 +8,16 @@
     "name": "web",
     "targets": {
       "clean": {
-        "command": "rm -rf dist coverage *.log"
+        "executor": "nx:run-commands",
+        "options": {
+          "cwd": "{projectRoot}",
+          "command": "rm -rf dist coverage *.log"
+        }
       },
       "lint": {
         "executor": "nx:run-commands",
         "options": {
+          "cwd": "{projectRoot}",
           "commands": [
             "eslint \"src/**/*.ts\"",
             "eslint \"src/**/*.html\""
@@ -23,6 +28,7 @@
       "test": {
         "executor": "nx:run-commands",
         "options": {
+          "cwd": "{projectRoot}",
           "command": "bash -c './pretest.sh && ng test; EXIT=$?; ./posttest.sh; exit $EXIT'"
         },
         "dependsOn": [
@@ -32,7 +38,7 @@
       "build": {
         "executor": "nx:run-commands",
         "options": {
-          "cwd": "web"
+          "cwd": "{projectRoot}"
         },
         "configurations": {
           "development": {
@@ -53,7 +59,7 @@
       "serve": {
         "executor": "nx:run-commands",
         "options": {
-          "cwd": "web"
+          "cwd": "{projectRoot}"
         },
         "configurations": {
           "development": {
@@ -74,13 +80,14 @@
       "format:check": {
         "executor": "nx:run-commands",
         "options": {
+          "cwd": "{projectRoot}",
           "command": "prettier --check \"src/**/*.{ts,html,scss}\""
         }
       },
       "extract-i18n": {
         "executor": "nx:run-commands",
         "options": {
-          "cwd": "web",
+          "cwd": "{projectRoot}",
           "command": "ng extract-i18n",
           "forwardAllArgs": true
         }
@@ -88,7 +95,7 @@
       "deploy": {
         "executor": "nx:run-commands",
         "options": {
-          "cwd": "web",
+          "cwd": "{projectRoot}",
           "command": "ng deploy",
           "forwardAllArgs": true
         }

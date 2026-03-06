@@ -10,16 +10,32 @@
     "name": "functions",
     "targets": {
       "build": {
-        "command": "tsc"
+        "executor": "nx:run-commands",
+        "options": {
+          "cwd": "{projectRoot}",
+          "command": "tsc"
+        }
       },
       "clean": {
-        "command": "rm -rf dist *.log"
+        "executor": "nx:run-commands",
+        "options": {
+          "cwd": "{projectRoot}",
+          "command": "rm -rf dist *.log"
+        }
       },
       "lint": {
-        "command": "eslint src"
+        "executor": "nx:run-commands",
+        "options": {
+          "cwd": "{projectRoot}",
+          "command": "eslint src"
+        }
       },
       "test": {
-        "command": "jasmine --config=jasmine.json",
+        "executor": "nx:run-commands",
+        "options": {
+          "cwd": "{projectRoot}",
+          "command": "jasmine --config=jasmine.json"
+        },
         "dependsOn": [
           "build"
         ]
@@ -27,6 +43,7 @@
       "format:check": {
         "executor": "nx:run-commands",
         "options": {
+          "cwd": "{projectRoot}",
           "command": "prettier --check \"src/**/*.ts\""
         }
       },
@@ -52,7 +69,11 @@
         "dependsOn": ["build"]
       },
       "watch": {
-        "command": "tsc --watch"
+        "executor": "nx:run-commands",
+        "options": {
+          "cwd": "{projectRoot}",
+          "command": "tsc --watch"
+        }
       }
     }
   },

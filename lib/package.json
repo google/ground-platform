@@ -4,19 +4,39 @@
     "name": "lib",
     "targets": {
       "build": {
-        "command": "tsc"
+        "executor": "nx:run-commands",
+        "options": {
+          "cwd": "{projectRoot}",
+          "command": "tsc"
+        }
       },
       "clean": {
-        "command": "rm -rf dist *.log src/generated"
+        "executor": "nx:run-commands",
+        "options": {
+          "cwd": "{projectRoot}",
+          "command": "rm -rf dist *.log src/generated"
+        }
       },
       "lint": {
-        "command": "eslint src"
+        "executor": "nx:run-commands",
+        "options": {
+          "cwd": "{projectRoot}",
+          "command": "eslint src"
+        }
       },
       "test": {
-        "command": "jasmine --config=jasmine.json"
+        "executor": "nx:run-commands",
+        "options": {
+          "cwd": "{projectRoot}",
+          "command": "jasmine --config=jasmine.json"
+        }
       },
       "format:check": {
-        "command": "prettier --check \"src/**/*.ts\""
+        "executor": "nx:run-commands",
+        "options": {
+          "cwd": "{projectRoot}",
+          "command": "prettier --check \"src/**/*.ts\""
+        }
       }
     }
   },

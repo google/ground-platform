@@ -6,10 +6,11 @@
       "build": {
         "executor": "nx:run-commands",
         "options": {
+          "cwd": "{projectRoot}",
           "commands": [
-            "mkdir -p dist && pbjs -p src src/ground/v1beta1/*.proto -t static-module -o dist/ground-protos.js",
-            "mkdir -p dist && pbjs -p src src/ground/v1beta1/*.proto -t json -o dist/ground-protos.json",
-            "pbts dist/ground-protos.js -o dist/ground-protos.d.ts",
+            "mkdir -p dist && pnpm exec pbjs -p src src/ground/v1beta1/*.proto -t static-module -o dist/ground-protos.js",
+            "mkdir -p dist && pnpm exec pbjs -p src src/ground/v1beta1/*.proto -t json -o dist/ground-protos.json",
+            "pnpm exec pbts dist/ground-protos.js -o dist/ground-protos.d.ts",
             "cp src/index.* dist/"
           ],
           "parallel": false
