@@ -8,6 +8,9 @@
       },
       "lint": {
         "command": "node scripts/lint.js"
+      },
+      "format:write": {
+        "command": "buf format --write"
       }
     }
   },
@@ -17,7 +20,6 @@
   "types": "dist/index.d.ts",
   "files": ["dist"],
   "scripts": {
-    "format": "buf format --write",
     "build": "npm run generate:pbjs && npm run generate:pbjson && npm run generate:pbts",
     "postbuild": "cp src/index.* dist/",
     "pbjs": "mkdir -p dist && pbjs -p src src/ground/v1beta1/*.proto",
