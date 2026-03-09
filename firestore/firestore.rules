@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+rules_version = '2';
+
  // Define access rules for Firestore collections and documents.
  service cloud.firestore {
   match /databases/{database}/documents {
