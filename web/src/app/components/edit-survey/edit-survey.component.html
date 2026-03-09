@@ -76,11 +76,7 @@
 
       <div class="job-label-and-add-button">
         <h3 matSubheader class="job-label" i18n="@@app.labels.jobs">Jobs</h3>
-        <button
-          mat-icon-button
-          id="add-button"
-          (click)="addJob()"
-        >
+        <button mat-icon-button id="add-button" (click)="addJob()">
           <mat-icon class="material-symbols-outlined">add</mat-icon>
         </button>
       </div>
@@ -144,9 +140,12 @@
 
         <router-outlet></router-outlet>
 
-        <div class="button-section" *ngIf="navigationService.isShareSurveyPage()">
+        <div
+          class="button-section"
+          *ngIf="navigationService.isShareSurveyPage()"
+        >
           <ground-copy-survey-controls
-            [surveyId]="surveyId()"
+            [surveyId]="surveyId() || ''"
           ></ground-copy-survey-controls>
         </div>
       </div>
