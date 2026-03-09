@@ -16,7 +16,7 @@
 
 import cors from 'cors';
 import { DecodedIdToken } from 'firebase-admin/auth';
-import { onRequest, Request } from 'firebase-functions/v2/https';
+import { Request, onRequest } from 'firebase-functions/v2/https';
 import type { Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import { getDecodedIdToken } from './common/auth';
@@ -123,7 +123,6 @@ export async function invokeCallbackAsync(
       res,
       user,
       () => {
-        res.status(StatusCodes.OK).end();
         resolve(undefined);
       },
       (errorCode: number, message: string) => {

@@ -118,7 +118,7 @@ export function importGeoJsonCallback(
       await Promise.all(inserts);
       const count = inserts.length;
       console.debug(`${count} LOIs imported`);
-      res.send(JSON.stringify({ count }));
+      res.status(StatusCodes.OK).send(JSON.stringify({ count }));
       done();
     } catch (err) {
       console.debug(err);
