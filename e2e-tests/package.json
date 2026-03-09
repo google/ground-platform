@@ -1,18 +1,30 @@
 {
   "name": "@ground/e2e-tests",
   "nx": {
-    "name": "e2e-tests"
+    "name": "e2e-tests",
+    "targets": {
+      "test:create": {
+        "command": "tsx node_modules/jasmine/bin/jasmine spec/create-survey.spec.ts"
+      },
+      "test:create:debug": {
+        "command": "tsx --inspect node_modules/jasmine/bin/jasmine spec/create-survey.spec.ts"
+      },
+      "test:verify": {
+        "command": "tsx node_modules/jasmine/bin/jasmine spec/verify-submissions.spec.ts"
+      },
+      "test:verify:debug": {
+        "command": "tsx --inspect node_modules/jasmine/bin/jasmine spec/verify-submissions.spec.ts"
+      },
+      "lint": {
+        "command": "gts lint"
+      },
+      "fix": {
+        "command": "gts fix"
+      }
+    }
   },
   "version": "0.0.1",
   "description": "Automated testing of the Ground platform.",
-  "scripts": {
-    "test:create": "tsx node_modules/jasmine/bin/jasmine spec/create-survey.spec.ts",
-    "test:create:debug": "tsx --inspect node_modules/jasmine/bin/jasmine spec/create-survey.spec.ts",
-    "test:verify": "tsx node_modules/jasmine/bin/jasmine spec/verify-submissions.spec.ts",
-    "test:verify:debug": "tsx --inspect node_modules/jasmine/bin/jasmine spec/verify-submissions.spec.ts",
-    "lint": "gts lint",
-    "fix": "gts fix"
-  },
   "license": "Apache-2.0",
   "dependencies": {
     "selenium-webdriver": "catalog:"

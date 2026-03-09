@@ -3,11 +3,27 @@
   "nx": {
     "name": "proto",
     "targets": {
+      "build": {
+        "executor": "nx:run-commands",
+        "options": {
+          "cwd": "{projectRoot}",
+          "commands": [
+            "mkdir -p dist && pnpm exec pbjs -p src src/ground/v1beta1/*.proto -t static-module -o dist/ground-protos.js",
+            "mkdir -p dist && pnpm exec pbjs -p src src/ground/v1beta1/*.proto -t json -o dist/ground-protos.json",
+            "pnpm exec pbts dist/ground-protos.js -o dist/ground-protos.d.ts",
+            "cp src/index.* dist/"
+          ],
+          "parallel": false
+        }
+      },
       "clean": {
         "command": "rm -rf dist"
       },
       "lint": {
         "command": "node scripts/lint.js"
+      },
+      "format:write": {
+        "command": "buf format --write"
       }
     }
   },
@@ -16,15 +32,6 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": ["dist"],
-  "scripts": {
-    "format": "buf format --write",
-    "build": "npm run generate:pbjs && npm run generate:pbjson && npm run generate:pbts",
-    "postbuild": "cp src/index.* dist/",
-    "pbjs": "mkdir -p dist && pbjs -p src src/ground/v1beta1/*.proto",
-    "generate:pbjs": "npm run pbjs -- -t static-module -o dist/ground-protos.js",
-    "generate:pbjson": "npm run pbjs -- -t json -o dist/ground-protos.json",
-    "generate:pbts": "mkdir -p dist && pbts dist/ground-protos.js -o dist/ground-protos.d.ts"
-  },
   "dependencies": {
     "protobufjs": "catalog:"
   },
