@@ -122,15 +122,23 @@ export function submissionDocToModel(
   id: string,
   data: DocumentData
 ): Submission | Error {
-  const pb = toMessage(data, Pb.Submission) as Pb.Submission;
-  if (!pb.jobId) return Error(`Missing job_id in submission ${id}`);
-  if (!pb.loiId) return Error(`Missing loi_id in loi ${id}`);
-  return new Submission(
-    id,
-    pb.loiId,
-    job,
-    authInfoPbToModel(pb.created!),
-    authInfoPbToModel(pb.lastModified!),
-    taskDataPbArrayToModel(pb.taskData)
-  );
+  try {
+    const pb = toMessage(data, Pb.Submission) as Pb.Submission;
+    if (!pb.jobId) return Error(`Missing job_id in submission ${id}`);
+    if (!pb.loiId) return Error(`Missing loi_id in loi ${id}`);
+    if (!pb.created)
+      return Error(`Missing created audit info in submission ${id}`);
+    if (!pb.lastModified)
+      return Error(`Missing last_modified audit info in submission ${id}`);
+    return new Submission(
+      id,
+      pb.loiId,
+      job,
+      authInfoPbToModel(pb.created),
+      authInfoPbToModel(pb.lastModified),
+      taskDataPbArrayToModel(pb.taskData)
+    );
+  } catch (e) {
+    return Error(`Invalid submission data for ${id}: ${e}`);
+  }
 }
