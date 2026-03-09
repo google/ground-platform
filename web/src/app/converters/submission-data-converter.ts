@@ -123,7 +123,9 @@ export function submissionDocToModel(
   data: DocumentData
 ): Submission | Error {
   try {
-    const pb = toMessage(data, Pb.Submission) as Pb.Submission;
+    const pbOrError = toMessage(data, Pb.Submission);
+    if (pbOrError instanceof Error) throw pbOrError;
+    const pb = pbOrError;
     if (!pb.jobId) return Error(`Missing job_id in submission ${id}`);
     if (!pb.loiId) return Error(`Missing loi_id in loi ${id}`);
     if (!pb.created)

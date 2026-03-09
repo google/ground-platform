@@ -44,7 +44,9 @@ export function loiDocToModel(
   data: DocumentData
 ): LocationOfInterest | Error {
   try {
-    const pb = toMessage(data, Pb.LocationOfInterest) as Pb.LocationOfInterest;
+    const pbOrError = toMessage(data, Pb.LocationOfInterest);
+    if (pbOrError instanceof Error) throw pbOrError;
+    const pb = pbOrError;
     if (!pb.jobId) return Error(`Missing job_id in loi ${id}`);
     if (!pb.geometry) return Error(`Missing geometry in loi ${id}`);
     const geometry = geometryPbToModel(pb.geometry);
