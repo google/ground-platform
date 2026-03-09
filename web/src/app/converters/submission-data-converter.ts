@@ -141,6 +141,6 @@ export function submissionDocToModel(
       taskDataPbArrayToModel(pb.taskData)
     );
   } catch (e) {
-    return Error(`Invalid submission data for ${id}: ${e}`);
+    return new Error(`Invalid submission data for ${id}`, {cause: e});
   }
 }

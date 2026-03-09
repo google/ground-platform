@@ -61,6 +61,6 @@ export function loiDocToModel(
       pb.source === Pb.LocationOfInterest.Source.IMPORTED
     );
   } catch (e) {
-    return Error(`Invalid LOI data for ${id}: ${e}`);
+    return new Error(`Invalid LOI data for ${id}`, {cause: e});
   }
 }
