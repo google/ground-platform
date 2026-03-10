@@ -14,22 +14,22 @@
  * limitations under the License.
  */
 
-import {Timestamp} from '@angular/fire/firestore';
-import {registry} from '@ground/lib';
-import {GroundProtos} from '@ground/proto';
-import {List, Map} from 'immutable';
+import { Timestamp } from '@angular/fire/firestore';
+import { registry } from '@ground/lib';
+import { GroundProtos } from '@ground/proto';
+import { List, Map } from 'immutable';
 
-import {Job} from 'app/models/job.model';
-import {Submission} from 'app/models/submission/submission.model';
+import { Job } from 'app/models/job.model';
+import { Submission } from 'app/models/submission/submission.model';
 import {
   Cardinality,
   MultipleChoice,
 } from 'app/models/task/multiple-choice.model';
-import {Option} from 'app/models/task/option.model';
-import {Task, TaskType} from 'app/models/task/task.model';
+import { Option } from 'app/models/task/option.model';
+import { Task, TaskType } from 'app/models/task/task.model';
 
-import {FirebaseDataConverter} from './firebase-data-converter';
-import {submissionDocToModel} from './submission-data-converter';
+import { FirebaseDataConverter } from './firebase-data-converter';
+import { submissionDocToModel } from './submission-data-converter';
 
 import Pb = GroundProtos.ground.v1beta1;
 
@@ -90,18 +90,21 @@ const submissionDoc001 = {
   [sb.loiId]: 'loi001',
   [sb.jobId]: 'job001',
   [sb.taskData]: [
-    {[td.taskId]: 'task001', [td.textResponse]: {[td_tr.text]: 'text result'}},
-    {[td.taskId]: 'task002', [td.numberResponse]: {[td_nr.number]: 123}},
+    {
+      [td.taskId]: 'task001',
+      [td.textResponse]: { [td_tr.text]: 'text result' },
+    },
+    { [td.taskId]: 'task002', [td.numberResponse]: { [td_nr.number]: 123 } },
     {
       [td.taskId]: 'task003',
       [td.dateTimeResponse]: {
-        [td_dr.dateTime]: {1: 1641533340},
+        [td_dr.dateTime]: { 1: 1641533340 },
       },
     },
     {
       [td.taskId]: 'task004',
       [td.dateTimeResponse]: {
-        [td_dr.dateTime]: {1: 1641534444},
+        [td_dr.dateTime]: { 1: 1641534444 },
       },
     },
     {

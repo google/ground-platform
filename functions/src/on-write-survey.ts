@@ -14,15 +14,17 @@
  * limitations under the License.
  */
 
-import {Change, EventContext} from 'firebase-functions';
-import {DocumentSnapshot} from 'firebase-functions/v1/firestore';
-import {broadcastSurveyUpdate} from './common/broadcast-survey-update';
+import {
+  Change,
+  DocumentSnapshot,
+  FirestoreEvent,
+} from 'firebase-functions/v2/firestore';
+import { broadcastSurveyUpdate } from './common/broadcast-survey-update';
 
 export function onWriteSurveyHandler(
-  _: Change<DocumentSnapshot>,
-  context: EventContext
+  event: FirestoreEvent<Change<DocumentSnapshot> | undefined>
 ): Promise<string> {
-  const surveyId = context.params.surveyId;
+  const surveyId = event.params.surveyId;
 
   return broadcastSurveyUpdate(surveyId);
 }

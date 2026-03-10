@@ -18,44 +18,51 @@
 // https://karma-runner.github.io/1.0/config/configuration-file.html
 
 const path = require('path');
-process.env.CHROME_BIN = require('puppeteer').executablePath();
+
+const isAgent = !!process.env.ANTIGRAVITY_AGENT || !!process.env.GEMINI_CLI;
+const isCi = !!process.env.CI;
+const isHeadless = isCi || isAgent;
+
+if (!isCi) {
+  const puppeteer = require('puppeteer');
+  process.env.CHROME_BIN = puppeteer.executablePath();
+}
 
 module.exports = function (config) {
   config.set({
     basePath: '',
-    frameworks: [
-      'jasmine',
-      'jasmine-matchers',
-      '@angular-devkit/build-angular',
-    ],
+    frameworks: ['jasmine', '@angular-devkit/build-angular'],
     plugins: [
       'karma-jasmine',
       'karma-chrome-launcher',
-      'karma-coverage',
-      'karma-jasmine-matchers',
       'karma-jasmine-html-reporter',
-      'karma-coverage-istanbul-reporter',
-      require(path.join(
-        __dirname,
-        'node_modules/@angular-devkit/build-angular/plugins/karma'
-      )),
+      'karma-coverage',
+      require('@angular-devkit/build-angular/plugins/karma'),
     ],
     client: {
       clearContext: false, // leave Jasmine Spec Runner output visible in browser
     },
-    coverageIstanbulReporter: {
-      dir: require('path').join(__dirname, './coverage/web'),
-      reports: ['html', 'lcovonly', 'text-summary', 'json-summary'],
-      fixWebpackSourcePaths: true,
+    jasmineHtmlReporter: {
+      suppressAll: true, // removes the duplicated traces
+    },
+    coverageReporter: {
+      dir: path.join(__dirname, './coverage/web'),
+      subdir: '.',
+      reporters: [
+        { type: 'html' },
+        { type: 'lcovonly' },
+        { type: 'text-summary' },
+        { type: 'json-summary' },
+      ],
     },
     reporters: ['progress', 'kjhtml'],
     port: 9876,
     colors: true,
     logLevel: config.LOG_INFO,
-    autoWatch: true,
-    browsers: ['Chrome'],
-    singleRun: false,
-    restartOnFileChange: true,
+    autoWatch: !isHeadless,
+    browsers: isHeadless ? ['ChromeHeadlessNoSandbox'] : ['Chrome'],
+    singleRun: isHeadless,
+    restartOnFileChange: !isHeadless,
     customLaunchers: {
       ChromeHeadlessNoSandbox: {
         base: 'ChromeHeadless',

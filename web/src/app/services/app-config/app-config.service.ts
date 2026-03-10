@@ -14,9 +14,13 @@
  * limitations under the License.
  */
 
-import {Injectable} from '@angular/core';
-import {AngularFireRemoteConfig} from '@angular/fire/compat/remote-config';
-import {Observable, from, switchMap} from 'rxjs';
+import { Injectable } from '@angular/core';
+import {
+  RemoteConfig,
+  fetchAndActivate,
+  getString,
+} from '@angular/fire/remote-config';
+import { Observable, from, switchMap } from 'rxjs';
 
 /**
  * Service for fetching and managing app configuration from Firebase Remote Config.
@@ -25,15 +29,17 @@ import {Observable, from, switchMap} from 'rxjs';
   providedIn: 'root',
 })
 export class AppConfigService {
-  constructor(private remoteConfig: AngularFireRemoteConfig) {}
+  constructor(private remoteConfig: RemoteConfig) {}
 
   fetchConfig(): Promise<boolean> {
-    return (this.remoteConfig as AngularFireRemoteConfig).fetchAndActivate();
+    return fetchAndActivate(this.remoteConfig);
   }
 
   getGooglePlayId(): Observable<string> {
     return from(this.fetchConfig()).pipe(
-      switchMap(() => from(this.remoteConfig.getString('google_play_id')))
+      switchMap(() =>
+        from(Promise.resolve(getString(this.remoteConfig, 'google_play_id')))
+      )
     );
   }
 }

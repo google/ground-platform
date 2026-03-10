@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import {DocumentData} from '@angular/fire/firestore';
-import {toMessage} from '@ground/lib';
-import {GroundProtos} from '@ground/proto';
-import {List, Map} from 'immutable';
+import { DocumentData } from '@angular/fire/firestore';
+import { toMessage } from '@ground/lib';
+import { GroundProtos } from '@ground/proto';
+import { List, Map, OrderedMap } from 'immutable';
 
-import {DataCollectionStrategy, Job} from 'app/models/job.model';
-import {Role} from 'app/models/role.model';
+import { DataCollectionStrategy, Job } from 'app/models/job.model';
+import { Role } from 'app/models/role.model';
 import {
   DataSharingType,
   Survey,
@@ -32,14 +32,14 @@ import {
   Cardinality,
   MultipleChoice,
 } from 'app/models/task/multiple-choice.model';
-import {Option} from 'app/models/task/option.model';
+import { Option } from 'app/models/task/option.model';
 import {
   TaskCondition,
   TaskConditionExpression,
   TaskConditionExpressionType,
   TaskConditionMatchType,
 } from 'app/models/task/task-condition.model';
-import {Task, TaskType} from 'app/models/task/task.model';
+import { Task, TaskType } from 'app/models/task/task.model';
 
 import Pb = GroundProtos.ground.v1beta1;
 
@@ -120,7 +120,7 @@ function jobPbToModel(pb: Pb.IJob): Job {
     pb.index!,
     pb.style?.color || undefined,
     pb.name!,
-    Map<string, Task>(
+    OrderedMap<string, Task>(
       pb.tasks!.map(taskPb => [taskPb.id!, taskPbToModel(taskPb)])
     ),
     pb.tasks!.find(task => task.level === DataCollectionLevel.LOI_METADATA)
@@ -165,10 +165,10 @@ function taskPbToModelTaskType(pb: Pb.ITask): TaskType {
 }
 
 function taskConditionPbToModel(pb: Pb.ITask): TaskCondition | undefined {
-  const {conditions} = pb;
+  const { conditions } = pb;
 
   if (Array.isArray(conditions) && conditions.length > 0) {
-    const {multipleChoice} = conditions[0];
+    const { multipleChoice } = conditions[0];
 
     return new TaskCondition(
       TaskConditionMatchType.MATCH_ALL,
@@ -184,12 +184,12 @@ function taskConditionPbToModel(pb: Pb.ITask): TaskCondition | undefined {
 }
 
 function taskMultipleChoicePbToModel(pb: Pb.ITask): MultipleChoice | undefined {
-  const {multipleChoiceQuestion} = pb;
+  const { multipleChoiceQuestion } = pb;
 
   if (multipleChoiceQuestion) {
     return new MultipleChoice(
       multipleChoiceQuestion.type! ===
-      MultipleChoiceQuestionType.SELECT_MULTIPLE
+        MultipleChoiceQuestionType.SELECT_MULTIPLE
         ? Cardinality.SELECT_MULTIPLE
         : Cardinality.SELECT_ONE,
       List(

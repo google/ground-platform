@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {DOCUMENT} from '@angular/common';
-import {Component, Inject} from '@angular/core';
+import { DOCUMENT } from '@angular/common';
+import { Component, Inject } from '@angular/core';
 
-import {environment} from 'environments/environment';
-import {Env} from 'environments/environment-enums';
+import { environment } from 'environments/environment';
+import { Env } from 'environments/environment-enums';
 
 /**
  * Top-level component. Delegates routing of sub-components to paths defined
@@ -28,6 +28,7 @@ import {Env} from 'environments/environment-enums';
   selector: 'ground-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.css'],
+  standalone: false,
 })
 export class AppComponent {
   public constructor(@Inject(DOCUMENT) private doc: Document) {

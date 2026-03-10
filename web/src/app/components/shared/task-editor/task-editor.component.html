@@ -1,0 +1,62 @@
+<!--
+  Copyright 2023 The Ground Authors.
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+      https://www.apache.org/licenses/LICENSE-2.0
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<div class="task-editor"
+  *ngIf="formArray"
+  cdkDropList
+  (cdkDropListDropped)="onTaskDrop($event)"
+>
+
+  <div
+    class="task-container"
+    *ngFor="let formGroup of formArray.controls; let i = index;"
+    [ngClass]="{'loi-task-container': formGroup.get('addLoiTask').value || formGroup.get('condition')}"
+  >
+    <div *ngIf="formGroup.get('addLoiTask').value" class="loi-task-label">
+      <ng-container i18n="@@app.texts.whenAdding"
+        >When adding a new collection site...</ng-container
+      >
+    </div>
+
+    <div *ngIf="formGroup.get('condition')">
+      <ground-task-condition-form
+        [formGroup]="formGroup.get('condition')"
+        [formGroupIndex]="i"
+        [tasks]="multipleChoiceTasks"
+      />
+    </div>
+
+    <task-form
+      [formGroup]="formGroup"
+      [formGroupIndex]="i"
+      [isCreationMode]="isCreationMode()"
+      (delete)="onTaskDelete(i)"
+      (duplicate)="onTaskDuplicate(i)"
+      (toggleCondition)="onTaskConditionToggle(i)"
+    >
+    </task-form>
+  </div>
+</div>
+
+<div class="add-task-buttons-container">
+  <div id="tasks-help-text" i18n="@@app.labels.addATask">Add a task</div>
+
+  <div id="add-task-buttons-list">
+    <add-task-button
+      *ngFor="let taskGroup of addableTaskGroups"
+      [taskGroup]="taskGroup"
+      (click)="onTaskAdd(taskGroup)"
+    >
+    </add-task-button>
+  </div>
+</div>

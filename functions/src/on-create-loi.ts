@@ -14,23 +14,25 @@
  * limitations under the License.
  */
 
-import {EventContext} from 'firebase-functions';
-import {QueryDocumentSnapshot} from 'firebase-functions/v1/firestore';
-import {getDatastore} from './common/context';
-import {Datastore} from './common/datastore';
-import {broadcastSurveyUpdate} from './common/broadcast-survey-update';
-import {GroundProtos} from '@ground/proto';
-import {toDocumentData, toGeoJsonGeometry, toMessage} from '@ground/lib';
-import {geojsonToWKT} from '@terraformer/wkt';
-import {toLoiPbProperties} from './import-geojson';
+import {
+  FirestoreEvent,
+  QueryDocumentSnapshot,
+} from 'firebase-functions/v2/firestore';
+import { getDatastore } from './common/context';
+import { Datastore } from './common/datastore';
+import { broadcastSurveyUpdate } from './common/broadcast-survey-update';
+import { GroundProtos } from '@ground/proto';
+import { toDocumentData, toGeoJsonGeometry, toMessage } from '@ground/lib';
+import { geojsonToWKT } from '@terraformer/wkt';
+import { toLoiPbProperties } from './import-geojson';
 
 import Pb = GroundProtos.ground.v1beta1;
 
-type Properties = {[key: string]: string | number};
+type Properties = Record<string, string | number>;
 
-type Headers = {[key: string]: string};
+type Headers = Record<string, string>;
 
-type Body = {[key: string]: any};
+type Body = Record<string, unknown>;
 
 type PropertyGenerator = {
   headers?: Headers;
@@ -40,7 +42,7 @@ type PropertyGenerator = {
   url: string;
 };
 
-const defaultHeaders = {'Content-Type': 'application/json'};
+const defaultHeaders = { 'Content-Type': 'application/json' };
 
 /**
  * Handles the creation of a Location of Interest (LOI) document in Firestore.
@@ -50,12 +52,11 @@ const defaultHeaders = {'Content-Type': 'application/json'};
  * @param context The EventContext object provided by the Cloud Functions framework.
  */
 export async function onCreateLoiHandler(
-  snapshot: QueryDocumentSnapshot,
-  context: EventContext
+  event: FirestoreEvent<QueryDocumentSnapshot | undefined>
 ) {
-  const surveyId = context.params.surveyId;
-  const loiId = context.params.loiId;
-  const data = snapshot.data();
+  const surveyId = event.params.surveyId;
+  const loiId = event.params.loiId;
+  const data = event.data?.data();
 
   if (!loiId || !data) return;
 
@@ -73,14 +74,14 @@ export async function onCreateLoiHandler(
     const propertyGenerator = propertyGeneratorDoc.data() as PropertyGenerator;
 
     if (propertyGeneratorDoc.id === 'whisp') {
-      const {body, headers, prefix, url} = propertyGenerator;
+      const { body, headers, prefix, url } = propertyGenerator;
 
       const wkt = geojsonToWKT(Datastore.fromFirestoreMap(geometry));
 
       const newProperties = await fetchWhispProperties(
         url,
-        {...defaultHeaders, ...headers},
-        {wkt, ...body}
+        { ...defaultHeaders, ...headers },
+        { wkt, ...body }
       );
 
       properties = await updateProperties(properties, newProperties, prefix);
@@ -95,11 +96,11 @@ export async function onCreateLoiHandler(
     surveyId,
     loiId,
     toDocumentData(
-      new Pb.LocationOfInterest({properties: toLoiPbProperties(properties)})
+      new Pb.LocationOfInterest({ properties: toLoiPbProperties(properties) })
     )
   );
 
-  await broadcastSurveyUpdate(context.params.surveyId);
+  await broadcastSurveyUpdate(event.params.surveyId);
 }
 
 async function updateProperties(
@@ -128,7 +129,7 @@ async function fetchWhispProperties(
 
   if (!response.ok) return {};
 
-  const json = await response.json();
+  const json = (await response.json()) as any;
 
   if (json?.code !== 'analysis_completed') return {};
 
@@ -158,7 +159,7 @@ function removePrefixedKeys(obj: Properties, prefix: string): Properties {
 function propertiesPbToObject(pb: {
   [k: string]: Pb.LocationOfInterest.IProperty;
 }): Properties {
-  const properties: {[k: string]: string | number} = {};
+  const properties: { [k: string]: string | number } = {};
   for (const k of Object.keys(pb)) {
     const v = pb[k].stringValue || pb[k].numericValue;
     if (v !== null && v !== undefined) {

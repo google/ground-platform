@@ -14,50 +14,57 @@
  * limitations under the License.
  */
 
-import {Injectable} from '@angular/core';
+import { Injectable, Injector, runInInjectionContext } from '@angular/core';
 import {
-  AngularFirestore,
   CollectionReference,
-  DocumentChangeAction,
-} from '@angular/fire/compat/firestore';
-import {
   DocumentData,
   FieldPath,
+  Firestore,
   QueryDocumentSnapshot,
+  Transaction,
   collection,
+  collectionData,
+  deleteDoc,
+  doc,
+  docData,
+  getDoc,
   getDocs,
+  query,
+  runTransaction,
   serverTimestamp,
+  setDoc,
+  where,
 } from '@angular/fire/firestore';
-import {registry} from '@ground/lib/dist/message-registry';
-import {GroundProtos} from '@ground/proto';
-import {getDownloadURL, getStorage, ref} from 'firebase/storage';
-import {List, Map} from 'immutable';
-import {Observable, combineLatest, firstValueFrom} from 'rxjs';
-import {map} from 'rxjs/operators';
+import { registry } from '@ground/lib';
+import { GroundProtos } from '@ground/proto';
+import { getDownloadURL, getStorage, ref } from 'firebase/storage';
+import { List, Map, OrderedMap } from 'immutable';
+import { Observable, combineLatest, from } from 'rxjs';
+import { map } from 'rxjs/operators';
 
-import {FirebaseDataConverter} from 'app/converters/firebase-data-converter';
-import {loiDocToModel} from 'app/converters/loi-data-converter';
+import { FirebaseDataConverter } from 'app/converters/firebase-data-converter';
+import { loiDocToModel } from 'app/converters/loi-data-converter';
 import {
   jobToDocument,
   surveyToDocument,
 } from 'app/converters/proto-model-converter';
-import {submissionDocToModel} from 'app/converters/submission-data-converter';
+import { submissionDocToModel } from 'app/converters/submission-data-converter';
 import {
   jobDocToModel,
   jobDocsToModel,
   surveyDocToModel,
 } from 'app/converters/survey-data-converter';
-import {Job} from 'app/models/job.model';
-import {LocationOfInterest} from 'app/models/loi.model';
-import {Role} from 'app/models/role.model';
-import {Submission} from 'app/models/submission/submission.model';
+import { Job } from 'app/models/job.model';
+import { LocationOfInterest } from 'app/models/loi.model';
+import { Role } from 'app/models/role.model';
+import { Submission } from 'app/models/submission/submission.model';
 import {
   Survey,
   SurveyGeneralAccess,
   SurveyState,
 } from 'app/models/survey.model';
-import {Task} from 'app/models/task/task.model';
-import {User} from 'app/models/user.model';
+import { Task } from 'app/models/task/task.model';
+import { User } from 'app/models/user.model';
 
 import Pb = GroundProtos.ground.v1beta1;
 
@@ -73,7 +80,7 @@ const SURVEYS_COLLECTION_NAME = 'surveys';
 const JOBS_COLLECTION_NAME = 'jobs';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type JsonBlob = {[field: string]: any};
+export type JsonBlob = { [field: string]: any };
 
 // TODO: Make DataStoreService and interface and turn this into concrete
 // implementation (e.g., CloudFirestoreService).
@@ -81,7 +88,10 @@ export type JsonBlob = {[field: string]: any};
   providedIn: 'root',
 })
 export class DataStoreService {
-  constructor(private db: AngularFirestore) {}
+  constructor(
+    private db: Firestore,
+    private injector: Injector
+  ) {}
 
   /**
    * Returns an Observable that loads and emits the survey with the specified
@@ -90,19 +100,21 @@ export class DataStoreService {
    * @param id the id of the requested survey.
    */
   loadSurvey$(id: string): Observable<Survey> {
-    return combineLatest([
-      this.db.collection(SURVEYS_COLLECTION_NAME).doc(id).valueChanges(),
-      this.loadJobs$(id),
-    ]).pipe(
-      map(surveyAndJobs => {
-        const [s, jobs] = surveyAndJobs;
+    return runInInjectionContext(this.injector, () =>
+      combineLatest([
+        docData(doc(this.db, SURVEYS_COLLECTION_NAME, id)),
+        this.loadJobs$(id),
+      ]).pipe(
+        map(surveyAndJobs => {
+          const [s, jobs] = surveyAndJobs;
 
-        const survey = surveyDocToModel(id, s as DocumentData, jobs);
+          const survey = surveyDocToModel(id, s as DocumentData, jobs);
 
-        if (survey instanceof Error) throw survey;
+          if (survey instanceof Error) throw survey;
 
-        return survey;
-      })
+          return survey;
+        })
+      )
     );
   }
 
@@ -113,63 +125,56 @@ export class DataStoreService {
    * @param id the id of the requested survey.
    */
   loadJobs$(id: string): Observable<List<Job>> {
-    return this.db
-      .collection(`${SURVEYS_COLLECTION_NAME}/${id}/jobs`)
-      .valueChanges()
-      .pipe(map(data => jobDocsToModel(data as DocumentData[])));
+    return runInInjectionContext(this.injector, () =>
+      collectionData(
+        collection(this.db, `${SURVEYS_COLLECTION_NAME}/${id}/jobs`)
+      ).pipe(map(data => jobDocsToModel(data as DocumentData[])))
+    );
   }
 
   /**
    * Returns the raw survey object from the db. Used for debugging only.
    */
   async loadRawSurvey(id: string) {
-    return (
-      await firstValueFrom(
-        this.db.collection(SURVEYS_COLLECTION_NAME).doc(id).get()
-      )
-    ).data();
+    const d = await runInInjectionContext(this.injector, () =>
+      getDoc(doc(this.db, SURVEYS_COLLECTION_NAME, id))
+    );
+    return d.data();
   }
 
   /**
    * Updates the raw survey object in the db. Used for debugging only.
    */
   async saveRawSurvey(id: string, data: JsonBlob) {
-    await this.db.collection(SURVEYS_COLLECTION_NAME).doc(id).set(data);
+    await runInInjectionContext(this.injector, () =>
+      setDoc(doc(this.db, SURVEYS_COLLECTION_NAME, id), data)
+    );
   }
-
-  /**
-   * Transforms an array of Firestore `DocumentChangeAction` into an array of `Survey` models.
-   *
-   * It extracts the document data and ID from each action, converts it to a `Survey` model using `surveyDocToModel`,
-   * filters out any invalid surveys using `DataStoreService.filterAndLogError`, and finally casts the remaining
-   * elements to the `Survey` type.
-   */
-  private documentChangeToSurvey = (surveys: DocumentChangeAction<unknown>[]) =>
-    surveys
-      .map((action: DocumentChangeAction<unknown>) => {
-        const docData = action.payload.doc.data() as DocumentData;
-        const id = action.payload.doc.id;
-        return surveyDocToModel(id, docData);
-      })
-      .filter(DataStoreService.filterAndLogError<Survey>)
-      .map(survey => survey as Survey);
 
   /**
    * Returns an Observable that loads and emits the list of surveys accessible
    * to the specified user.
    */
   loadAccessibleSurveys$(userEmail: string): Observable<List<Survey>> {
-    const accessibleRestrictedSurveys$ = this.db
-      .collection(SURVEYS_COLLECTION_NAME, ref =>
-        ref.where(new FieldPath(s.acl, userEmail), 'in', [
-          AclRole.VIEWER,
-          AclRole.DATA_COLLECTOR,
-          AclRole.SURVEY_ORGANIZER,
-        ])
-      )
-      .snapshotChanges()
-      .pipe(
-        map(this.documentChangeToSurvey),
+    return runInInjectionContext(this.injector, () => {
+      const surveysRef = collection(this.db, SURVEYS_COLLECTION_NAME);
+      const accessibleRestrictedSurveys$ = collectionData(
+        query(
+          surveysRef,
+          where(new FieldPath(s.acl, userEmail), 'in', [
+            AclRole.VIEWER,
+            AclRole.DATA_COLLECTOR,
+            AclRole.SURVEY_ORGANIZER,
+          ])
+        ),
+        { idField: 'id' }
+      ).pipe(
+        map(surveys =>
+          surveys
+            .map(s => surveyDocToModel(s['id'], s as DocumentData))
+            .filter(DataStoreService.filterAndLogError<Survey>)
+            .map(survey => survey as Survey)
+        ),
         map(surveys =>
           surveys.filter(
             survey => survey.generalAccess === SurveyGeneralAccess.RESTRICTED
@@ -177,35 +182,48 @@ export class DataStoreService {
         )
       );
 
-    const accessibleUnlistedSurveys$ = this.db
-      .collection(SURVEYS_COLLECTION_NAME, ref =>
-        ref
-          .where(s.generalAccess, '==', GeneralAccess.UNLISTED)
-          .where(
-            new FieldPath(s.acl, userEmail),
-            '==',
-            AclRole.SURVEY_ORGANIZER
-          )
-      )
-      .snapshotChanges()
-      .pipe(map(this.documentChangeToSurvey));
+      const accessibleUnlistedSurveys$ = collectionData(
+        query(
+          surveysRef,
+          where(s.generalAccess, '==', GeneralAccess.UNLISTED),
+          where(new FieldPath(s.acl, userEmail), 'in', [
+            AclRole.VIEWER,
+            AclRole.DATA_COLLECTOR,
+            AclRole.SURVEY_ORGANIZER,
+          ])
+        ),
+        { idField: 'id' }
+      ).pipe(
+        map(surveys =>
+          surveys
+            .map(s => surveyDocToModel(s['id'], s as DocumentData))
+            .filter(DataStoreService.filterAndLogError<Survey>)
+            .map(survey => survey as Survey)
+        )
+      );
 
-    const publicSurveys$ = this.db
-      .collection(SURVEYS_COLLECTION_NAME, ref =>
-        ref.where(s.generalAccess, '==', GeneralAccess.PUBLIC)
-      )
-      .snapshotChanges()
-      .pipe(map(this.documentChangeToSurvey));
+      const publicSurveys$ = collectionData(
+        query(surveysRef, where(s.generalAccess, '==', GeneralAccess.PUBLIC)),
+        { idField: 'id' }
+      ).pipe(
+        map(surveys =>
+          surveys
+            .map(s => surveyDocToModel(s['id'], s as DocumentData))
+            .filter(DataStoreService.filterAndLogError<Survey>)
+            .map(survey => survey as Survey)
+        )
+      );
 
-    return combineLatest([
-      accessibleRestrictedSurveys$,
-      accessibleUnlistedSurveys$,
-      publicSurveys$,
-    ]).pipe(
-      map(([restricted, unlisted, publicSurveys]) =>
-        List([...restricted, ...unlisted, ...publicSurveys])
-      )
-    );
+      return combineLatest([
+        accessibleRestrictedSurveys$,
+        accessibleUnlistedSurveys$,
+        publicSurveys$,
+      ]).pipe(
+        map(([restricted, unlisted, publicSurveys]) =>
+          List([...restricted, ...unlisted, ...publicSurveys])
+        )
+      );
+    });
   }
 
   /**
@@ -222,25 +240,29 @@ export class DataStoreService {
     survey: Survey,
     jobIdsToDelete?: List<string>
   ): Promise<void> {
-    const {id: surveyId, jobs} = survey;
+    const { id: surveyId, jobs } = survey;
 
-    await this.db.firestore.runTransaction(async transaction => {
-      if (jobIdsToDelete) {
-        for (const jobId of jobIdsToDelete) {
-          await this._deleteJobAndRelatedData(transaction, surveyId, jobId);
+    await runInInjectionContext(this.injector, () =>
+      runTransaction(this.db, async transaction => {
+        if (jobIdsToDelete) {
+          for (const jobId of jobIdsToDelete) {
+            await this._deleteJobAndRelatedData(transaction, surveyId, jobId);
+          }
         }
-      }
 
-      const jobsToUpdate = jobs.filter(({id}) => !jobIdsToDelete?.includes(id));
-      for (const job of jobsToUpdate.values()) {
-        await this._addOrUpdateJobInTransaction(transaction, surveyId, job);
-      }
+        const jobsToUpdate = jobs.filter(
+          ({ id }) => !jobIdsToDelete?.includes(id)
+        );
+        for (const job of jobsToUpdate.values()) {
+          await this._addOrUpdateJobInTransaction(transaction, surveyId, job);
+        }
 
-      const surveyRef = this.db.firestore
-        .collection(SURVEYS_COLLECTION_NAME)
-        .doc(surveyId);
-      transaction.update(surveyRef, surveyToDocument(surveyId, survey));
-    });
+        const surveyRef = runInInjectionContext(this.injector, () =>
+          doc(this.db, SURVEYS_COLLECTION_NAME, surveyId)
+        );
+        transaction.update(surveyRef, surveyToDocument(surveyId, survey));
+      })
+    );
   }
 
   /**
@@ -250,10 +272,13 @@ export class DataStoreService {
    * @param name The new name of the survey.
    */
   updateSurveyTitle(surveyId: string, name: string): Promise<void> {
-    return this.db
-      .collection(SURVEYS_COLLECTION_NAME)
-      .doc(surveyId)
-      .set(surveyToDocument(surveyId, {title: name}), {merge: true});
+    return runInInjectionContext(this.injector, () =>
+      setDoc(
+        doc(this.db, SURVEYS_COLLECTION_NAME, surveyId),
+        surveyToDocument(surveyId, { title: name }),
+        { merge: true }
+      )
+    );
   }
 
   /**
@@ -268,26 +293,31 @@ export class DataStoreService {
     name: string,
     description: string
   ): Promise<void> {
-    return this.db
-      .collection(SURVEYS_COLLECTION_NAME)
-      .doc(surveyId)
-      .set(surveyToDocument(surveyId, {title: name, description}), {
-        merge: true,
-      });
+    return runInInjectionContext(this.injector, () =>
+      setDoc(
+        doc(this.db, SURVEYS_COLLECTION_NAME, surveyId),
+        surveyToDocument(surveyId, { title: name, description }),
+        { merge: true }
+      )
+    );
   }
 
   addOrUpdateSurvey(survey: Survey): Promise<void> {
-    return this.db
-      .collection(SURVEYS_COLLECTION_NAME)
-      .doc(survey.id)
-      .set(surveyToDocument(survey.id, survey));
+    return runInInjectionContext(this.injector, () =>
+      setDoc(
+        doc(this.db, SURVEYS_COLLECTION_NAME, survey.id),
+        surveyToDocument(survey.id, survey)
+      )
+    );
   }
 
   addOrUpdateJob(surveyId: string, job: Job): Promise<void> {
-    return this.db
-      .collection(`${SURVEYS_COLLECTION_NAME}/${surveyId}/jobs`)
-      .doc(job.id)
-      .set(jobToDocument(job));
+    return runInInjectionContext(this.injector, () =>
+      setDoc(
+        doc(this.db, `${SURVEYS_COLLECTION_NAME}/${surveyId}/jobs`, job.id),
+        jobToDocument(job)
+      )
+    );
   }
 
   /**
@@ -299,13 +329,13 @@ export class DataStoreService {
    * @param job The Job object to add or update.
    */
   private async _addOrUpdateJobInTransaction(
-    transaction: firebase.default.firestore.Transaction,
+    transaction: Transaction,
     surveyId: string,
     job: Job
   ): Promise<void> {
-    const jobRef = this.db.firestore
-      .collection(`${SURVEYS_COLLECTION_NAME}/${surveyId}/jobs`)
-      .doc(job.id);
+    const jobRef = runInInjectionContext(this.injector, () =>
+      doc(this.db, `${SURVEYS_COLLECTION_NAME}/${surveyId}/jobs`, job.id)
+    );
     transaction.set(jobRef, jobToDocument(job));
   }
 
@@ -319,59 +349,78 @@ export class DataStoreService {
    * @param jobId The ID of the job to delete.
    */
   private async _deleteJobAndRelatedData(
-    transaction: firebase.default.firestore.Transaction,
+    transaction: Transaction,
     surveyId: string,
     jobId: string
   ): Promise<void> {
-    const firestore = this.db.firestore;
-
-    const loisQuery = firestore
-      .collection(`${SURVEYS_COLLECTION_NAME}/${surveyId}/lois`)
-      .where(l.jobId, '==', jobId);
-    const loisSnapshot = await loisQuery.get();
+    const loisQuery = runInInjectionContext(this.injector, () =>
+      query(
+        collection(this.db, `${SURVEYS_COLLECTION_NAME}/${surveyId}/lois`),
+        where(l.jobId, '==', jobId)
+      )
+    );
+    const loisSnapshot = await runInInjectionContext(this.injector, () =>
+      getDocs(loisQuery)
+    );
     loisSnapshot.forEach(doc => {
       transaction.delete(doc.ref);
     });
 
-    const submissionsQuery = firestore
-      .collection(`${SURVEYS_COLLECTION_NAME}/${surveyId}/submissions`)
-      .where(sb.jobId, '==', jobId);
-    const submissionsSnapshot = await submissionsQuery.get();
+    const submissionsQuery = runInInjectionContext(this.injector, () =>
+      query(
+        collection(
+          this.db,
+          `${SURVEYS_COLLECTION_NAME}/${surveyId}/submissions`
+        ),
+        where(sb.jobId, '==', jobId)
+      )
+    );
+    const submissionsSnapshot = await runInInjectionContext(this.injector, () =>
+      getDocs(submissionsQuery)
+    );
     submissionsSnapshot.forEach(doc => {
       transaction.delete(doc.ref);
     });
 
-    const jobRef = firestore
-      .collection(`${SURVEYS_COLLECTION_NAME}/${surveyId}/jobs`)
-      .doc(jobId);
+    const jobRef = runInInjectionContext(this.injector, () =>
+      doc(this.db, `${SURVEYS_COLLECTION_NAME}/${surveyId}/jobs`, jobId)
+    );
     transaction.delete(jobRef);
   }
 
   async deleteSurvey(survey: Survey): Promise<void> {
-    const {id: surveyId, jobs} = survey;
+    const { id: surveyId, jobs } = survey;
 
-    await this.db.firestore.runTransaction(async transaction => {
-      for (const {id: jobId} of jobs.values()) {
-        await this._deleteJobAndRelatedData(transaction, surveyId, jobId);
-      }
+    await runInInjectionContext(this.injector, () =>
+      runTransaction(this.db, async transaction => {
+        for (const { id: jobId } of jobs.values()) {
+          await this._deleteJobAndRelatedData(transaction, surveyId, jobId);
+        }
 
-      const surveyRef = this.db.firestore
-        .collection(SURVEYS_COLLECTION_NAME)
-        .doc(surveyId);
-      transaction.delete(surveyRef);
-    });
+        const surveyRef = runInInjectionContext(this.injector, () =>
+          doc(this.db, SURVEYS_COLLECTION_NAME, surveyId)
+        );
+        transaction.delete(surveyRef);
+      })
+    );
   }
 
   private async deleteSubmissionsByLoiId(
     surveyId: string,
     loiId: string
   ): Promise<void> {
-    const submissions = this.db.collection(
-      `${SURVEYS_COLLECTION_NAME}/${surveyId}/submissions`,
-      ref => ref.where(sb.loiId, '==', loiId)
+    const submissions = query(
+      collection(this.db, `${SURVEYS_COLLECTION_NAME}/${surveyId}/submissions`),
+      where(sb.loiId, '==', loiId)
     );
-    const querySnapshot = await firstValueFrom(submissions.get());
-    await Promise.all(querySnapshot.docs.map(doc => doc.ref.delete()));
+    const querySnapshot = await runInInjectionContext(this.injector, () =>
+      getDocs(submissions)
+    );
+    await Promise.all(
+      querySnapshot.docs.map(doc =>
+        runInInjectionContext(this.injector, () => deleteDoc(doc.ref))
+      )
+    );
   }
 
   async deleteLocationOfInterest(
@@ -380,31 +429,39 @@ export class DataStoreService {
   ): Promise<void> {
     await this.deleteSubmissionsByLoiId(surveyId, loiId);
 
-    return await this.db
-      .collection(SURVEYS_COLLECTION_NAME)
-      .doc(surveyId)
-      .collection('lois')
-      .doc(loiId)
-      .delete();
+    return await runInInjectionContext(this.injector, () =>
+      deleteDoc(doc(this.db, SURVEYS_COLLECTION_NAME, surveyId, 'lois', loiId))
+    );
   }
 
   async deleteSubmission(
     surveyId: string,
     submissionId: string
   ): Promise<void> {
-    return await this.db
-      .collection(SURVEYS_COLLECTION_NAME)
-      .doc(surveyId)
-      .collection('submissions')
-      .doc(submissionId)
-      .delete();
+    return await runInInjectionContext(this.injector, () =>
+      deleteDoc(
+        doc(
+          this.db,
+          SURVEYS_COLLECTION_NAME,
+          surveyId,
+          'submissions',
+          submissionId
+        )
+      )
+    );
   }
 
   updateSubmission(surveyId: string, submission: Submission) {
-    return this.db
-      .collection(`${SURVEYS_COLLECTION_NAME}/${surveyId}/submissions`)
-      .doc(submission.id)
-      .set(FirebaseDataConverter.submissionToJS(submission));
+    return runInInjectionContext(this.injector, () =>
+      setDoc(
+        doc(
+          this.db,
+          `${SURVEYS_COLLECTION_NAME}/${surveyId}/submissions`,
+          submission.id
+        ),
+        FirebaseDataConverter.submissionToJS(submission)
+      )
+    );
   }
 
   /**
@@ -414,12 +471,11 @@ export class DataStoreService {
    * @param uid the unique id used to represent the user in the data store.
    */
   user$(uid: string): Observable<User | undefined> {
-    return this.db
-      .doc<User>(`users/${uid}`)
-      .valueChanges()
-      .pipe(
+    return runInInjectionContext(this.injector, () =>
+      docData(doc(this.db, 'users', uid)).pipe(
         map(data => FirebaseDataConverter.toUser(data as DocumentData, uid))
-      );
+      )
+    );
   }
 
   /**
@@ -430,18 +486,20 @@ export class DataStoreService {
    * @param userEmail The email of the user to check against the passlist.
    */
   async isPasslisted(userEmail: string): Promise<boolean> {
-    const docSnapshot = await firstValueFrom(
-      this.db.doc(`passlist/${userEmail}`).get()
+    const docSnapshot = await runInInjectionContext(this.injector, () =>
+      getDoc(doc(this.db, 'passlist', userEmail))
     );
 
-    if (docSnapshot.exists) return true;
+    if (docSnapshot.exists()) return true;
 
-    const regexpSnapshot = await firstValueFrom(
-      this.db.doc(`passlist/regexp`).get()
+    const regexpSnapshot = await runInInjectionContext(this.injector, () =>
+      getDoc(doc(this.db, 'passlist', 'regexp'))
     );
 
-    if (regexpSnapshot.exists) {
-      const regexpData = regexpSnapshot.data() as {regexp?: string} | undefined;
+    if (regexpSnapshot.exists()) {
+      const regexpData = regexpSnapshot.data() as
+        | { regexp?: string }
+        | undefined;
 
       const regexpString = regexpData?.regexp;
 
@@ -456,7 +514,8 @@ export class DataStoreService {
   }
 
   private toLocationsOfInterest(
-    loiIds: {id: string}[]
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    loiIds: any[]
   ): List<LocationOfInterest> {
     return List(
       loiIds
@@ -475,38 +534,43 @@ export class DataStoreService {
    * @param canViewAll a flag indicating whether the user has permission to view all LOIs for this survey.
    */
   getAccessibleLois$(
-    {id: surveyId}: Survey,
+    { id: surveyId }: Survey,
     userId: string,
     canViewAll: boolean
   ): Observable<List<LocationOfInterest>> {
-    if (canViewAll) {
-      return this.db
-        .collection(`${SURVEYS_COLLECTION_NAME}/${surveyId}/lois`)
-        .valueChanges({idField: 'id'})
-        .pipe(map(this.toLocationsOfInterest));
-    }
+    return runInInjectionContext(this.injector, () => {
+      if (canViewAll) {
+        return collectionData(
+          collection(this.db, `${SURVEYS_COLLECTION_NAME}/${surveyId}/lois`),
+          { idField: 'id' }
+        ).pipe(map(docs => this.toLocationsOfInterest(docs)));
+      }
 
-    const importedLois = this.db.collection(
-      `${SURVEYS_COLLECTION_NAME}/${surveyId}/lois`,
-      ref => ref.where(l.source, '==', Source.IMPORTED)
-    );
+      const importedLois = collectionData(
+        query(
+          collection(this.db, `${SURVEYS_COLLECTION_NAME}/${surveyId}/lois`),
+          where(l.source, '==', Source.IMPORTED)
+        ),
+        { idField: 'id' }
+      );
 
-    const fieldDataLois = this.db.collection(
-      `${SURVEYS_COLLECTION_NAME}/${surveyId}/lois`,
-      ref =>
-        ref
-          .where(l.source, '==', Source.FIELD_DATA)
-          .where(l.ownerId, '==', userId)
-    );
+      const fieldDataLois = collectionData(
+        query(
+          collection(this.db, `${SURVEYS_COLLECTION_NAME}/${surveyId}/lois`),
+          where(l.source, '==', Source.FIELD_DATA),
+          where(l.ownerId, '==', userId)
+        ),
+        { idField: 'id' }
+      );
 
-    return combineLatest([
-      importedLois.valueChanges({idField: 'id'}),
-      fieldDataLois.valueChanges({idField: 'id'}),
-    ]).pipe(
-      map(([predefinedLois, fieldDataLois]) =>
-        this.toLocationsOfInterest(predefinedLois.concat(fieldDataLois))
-      )
-    );
+      return combineLatest([importedLois, fieldDataLois]).pipe(
+        map(([predefinedLois, fieldDataLois]) =>
+          this.toLocationsOfInterest(
+            (predefinedLois as unknown[]).concat(fieldDataLois)
+          )
+        )
+      );
+    });
   }
 
   /**
@@ -524,23 +588,30 @@ export class DataStoreService {
     userId: string,
     canViewAll: boolean
   ): Observable<List<Submission>> {
-    return this.db
-      .collection(`${SURVEYS_COLLECTION_NAME}/${survey.id}/submissions`, ref =>
-        this.canViewSubmissions(ref, loi.id, userId, canViewAll)
-      )
-      .valueChanges({idField: 'id'})
-      .pipe(
+    return runInInjectionContext(this.injector, () => {
+      const submissionsRef = collection(
+        this.db,
+        `${SURVEYS_COLLECTION_NAME}/${survey.id}/submissions`
+      );
+      const q = this.canViewSubmissions(
+        submissionsRef,
+        loi.id,
+        userId,
+        canViewAll
+      );
+      return collectionData(q, { idField: 'id' }).pipe(
         map(array =>
           List(
             array
               .map(obj =>
-                submissionDocToModel(survey.getJob(loi.jobId)!, obj.id, obj)
+                submissionDocToModel(survey.getJob(loi.jobId)!, obj['id'], obj)
               )
               .filter(DataStoreService.filterAndLogError<Submission>)
               .map(submission => submission as Submission)
           )
         )
       );
+    });
   }
 
   // TODO: Define return type here and throughout.
@@ -549,19 +620,23 @@ export class DataStoreService {
     loi: LocationOfInterest,
     submissionId: string
   ): Observable<Submission | Error> {
-    return this.db
-      .collection(`${SURVEYS_COLLECTION_NAME}/${survey.id}/submissions`)
-      .doc(submissionId)
-      .get()
-      .pipe(
-        map(doc =>
-          submissionDocToModel(
-            survey.getJob(loi.jobId)!,
-            doc.id,
-            doc.data()! as DocumentData
-          )
+    return from(
+      getDoc(
+        doc(
+          this.db,
+          `${SURVEYS_COLLECTION_NAME}/${survey.id}/submissions`,
+          submissionId
         )
-      );
+      )
+    ).pipe(
+      map(doc =>
+        submissionDocToModel(
+          survey.getJob(loi.jobId)!,
+          doc.id,
+          doc.data()! as DocumentData
+        )
+      )
+    );
   }
 
   tasks$(surveyId: string, jobId: string): Observable<List<Task>> {
@@ -575,7 +650,7 @@ export class DataStoreService {
   }
 
   generateId() {
-    return this.db.collection('ids').ref.doc().id;
+    return doc(collection(this.db, 'ids')).id;
   }
 
   getServerTimestamp() {
@@ -593,30 +668,27 @@ export class DataStoreService {
     user: User
   ): Promise<string> {
     const surveyId = this.generateId();
-    const {email: ownerEmail, id: ownerId} = user;
-    const acl = Map<string, Role>({[ownerEmail]: Role.SURVEY_ORGANIZER});
-    await this.db
-      .collection(SURVEYS_COLLECTION_NAME)
-      .doc(surveyId)
-      .set(
-        surveyToDocument(surveyId, {
-          title: name,
-          description,
-          acl,
-          ownerId,
-          state: SurveyState.DRAFT,
-        })
-      );
+    const { email: ownerEmail, id: ownerId } = user;
+    const acl = Map<string, Role>({ [ownerEmail]: Role.SURVEY_ORGANIZER });
+    await setDoc(
+      doc(this.db, SURVEYS_COLLECTION_NAME, surveyId),
+      surveyToDocument(surveyId, {
+        title: name,
+        description,
+        acl,
+        ownerId,
+        state: SurveyState.DRAFT,
+      })
+    );
     return Promise.resolve(surveyId);
   }
 
   async copySurvey(surveyId: string): Promise<string> {
     const newSurveyId = this.generateId();
 
-    const surveyDoc = await this.db
-      .collection(SURVEYS_COLLECTION_NAME)
-      .doc(surveyId)
-      .ref.get();
+    const surveyDoc = await getDoc(
+      doc(this.db, SURVEYS_COLLECTION_NAME, surveyId)
+    );
 
     const survey = surveyDocToModel(surveyId, surveyDoc.data() as DocumentData);
 
@@ -629,13 +701,10 @@ export class DataStoreService {
       acl: survey.acl.filter(role => role === Role.SURVEY_ORGANIZER),
     });
 
-    await this.db
-      .collection(SURVEYS_COLLECTION_NAME)
-      .doc(newSurveyId)
-      .set(newSurvey);
+    await setDoc(doc(this.db, SURVEYS_COLLECTION_NAME, newSurveyId), newSurvey);
 
     const jobsCollectionRef = collection(
-      this.db.firestore,
+      this.db,
       `${SURVEYS_COLLECTION_NAME}/${surveyId}/${JOBS_COLLECTION_NAME}`
     );
 
@@ -651,31 +720,36 @@ export class DataStoreService {
         id: newJobId,
       } as Job);
 
-      await this.db
-        .collection(
-          `${SURVEYS_COLLECTION_NAME}/${newSurveyId}/${JOBS_COLLECTION_NAME}`
-        )
-        .doc(newJobId)
-        .set(newJob);
+      await setDoc(
+        doc(
+          this.db,
+          `${SURVEYS_COLLECTION_NAME}/${newSurveyId}/${JOBS_COLLECTION_NAME}`,
+          newJobId
+        ),
+        newJob
+      );
     });
 
     return newSurveyId;
   }
 
   getImageDownloadURL(path: string) {
-    return getDownloadURL(ref(getStorage(), path));
+    return runInInjectionContext(this.injector, () =>
+      getDownloadURL(ref(getStorage(), path))
+    );
   }
 
   async getTermsOfService(): Promise<string> {
-    const tos = await this.db.collection('config').doc('tos').ref.get();
+    const tos = await runInInjectionContext(this.injector, () =>
+      getDoc(doc(this.db, 'config', 'tos'))
+    );
     return tos.get('text');
   }
 
-  async getAccessDeniedMessage(): Promise<{message?: string; link?: string}> {
-    const accessDeniedMessage = await this.db
-      .collection('config')
-      .doc('accessDenied')
-      .ref.get();
+  async getAccessDeniedMessage(): Promise<{ message?: string; link?: string }> {
+    const accessDeniedMessage = await runInInjectionContext(this.injector, () =>
+      getDoc(doc(this.db, 'config', 'accessDenied'))
+    );
     return {
       message: accessDeniedMessage.get('message'),
       link: accessDeniedMessage.get('link'),
@@ -683,13 +757,12 @@ export class DataStoreService {
   }
 
   /**
-   * Converts list of tasks to map.
+   * Converts list of tasks to ordered map.
    */
   convertTasksListToMap(tasks: List<Task>): Map<string, Task> {
-    let tasksMap = Map<string, Task>();
-    tasks.forEach((task: Task, index: number) => {
-      const jobFieldId = tasks && tasks.get(index)?.id;
-      const taskId = jobFieldId ? jobFieldId : this.generateId();
+    let tasksMap = OrderedMap<string, Task>();
+    tasks.forEach((task: Task) => {
+      const taskId = task.id ? task.id : this.generateId();
       tasksMap = tasksMap.set(taskId, task);
     });
     return tasksMap;
@@ -714,8 +787,8 @@ export class DataStoreService {
     userId: string,
     canViewAll: boolean
   ) {
-    const query = ref.where(sb.loiId, '==', loiId);
+    const q = query(ref, where(sb.loiId, '==', loiId));
 
-    return canViewAll ? query : query.where(sb.ownerId, '==', userId);
+    return canViewAll ? q : query(q, where(sb.ownerId, '==', userId));
   }
 }

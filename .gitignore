@@ -5,12 +5,14 @@
 !.eslintrc.json
 !.prettierrc.js
 !.github/
+!.well-known/
 **/isolate
 **/keys/
 **/dist/
 **/firebase-debug.log
 **/firebase-init.html
 **/google-maps-api-key.html
+**/test_output*.txt
 **/*-secret.json
 **/bower_components
 **/node_modules
@@ -22,3 +24,6 @@ web/coverage/
 # Firebase Emulator local snapshots
 data/local
 data/test
+
+.nx/cache
+.nx/workspace-data

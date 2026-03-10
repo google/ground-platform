@@ -1,0 +1,93 @@
+<!--
+  Copyright 2024 The Ground Authors.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<div class="loi-editor">
+  <div class="loi-editor-card">
+    <div class="loi-editor-card-row">
+      <div class="loi-editor-card-row-content">
+        <div class="loi-editor-card-row-title">
+          <ng-container i18n="@@app.cards.freeForm.title"
+            >Free-form data collection</ng-container
+          >
+        </div>
+
+        <div class="loi-editor-card-row-subtitle">
+          <ng-container i18n="@@app.cards.freeForm.description"
+            >Allow data collectors to add and collect data about new locations
+            as they go.</ng-container
+          >
+        </div>
+      </div>
+
+      <div class="loi-editor-card-actions">
+        <mat-slide-toggle
+          [checked]="job?.strategy === DataCollectionStrategy.MIXED"
+          (change)="toggleDataCollectorsCanAddLois($event)"
+          color="primary"
+        >
+        </mat-slide-toggle>
+      </div>
+    </div>
+  </div>
+
+  <div class="loi-editor-card" *ngIf="canImport">
+    <div class="loi-editor-card-row">
+      <div class="loi-editor-card-row-content">
+        <div class="loi-editor-card-row-title">
+          <ng-container i18n="@@app.cards.predefinedSampleSites.title"
+            >Predefined sample sites</ng-container
+          >
+        </div>
+
+        <div class="loi-editor-card-row-subtitle">
+          <ng-container i18n="@@app.cards.predefinedSampleSites.description"
+            >Import areas or points of interest for which data should be
+            collected.</ng-container
+          >
+        </div>
+      </div>
+
+      <div *ngIf="canImport && lois" class="loi-editor-card-actions">
+        <button
+          *ngIf="lois.size === 0"
+          mat-flat-button
+          class="import-lois-button"
+          (click)="importLois()"
+        >
+          <mat-icon class="material-symbols-outlined">input</mat-icon>
+
+          <span i18n="@@app.labels.import">Import</span>
+        </button>
+
+        <button
+          *ngIf="lois.size > 0"
+          mat-flat-button
+          class="clear-all-lois"
+          (click)="clearLois()"
+        >
+          <mat-icon class="material-symbols-outlined">delete</mat-icon>
+
+          <span i18n="@@app.labels.deleteAll">Delete all</span>
+        </button>
+      </div>
+    </div>
+
+    <div *ngIf="lois && lois.size > 0">
+      <loi-selection [lois]="lois" [survey]="survey" [jobId]="job?.id">
+      </loi-selection>
+    </div>
+  </div>
+</div>

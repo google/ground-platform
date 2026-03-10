@@ -1,0 +1,66 @@
+/**
+ * Copyright 2024 The Ground Authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the 'License');
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an 'AS IS' BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+ @use 'sass:map';
+ @use '@angular/material' as mat;
+
+ @mixin color($theme) {
+  .edit-survey-title {
+    color: mat.get-theme-color($theme, on-background);
+  }
+
+  .survey-details-container, .share-survey-container {
+    .mat-mdc-card {
+      --mat-card-elevated-container-elevation: 0;
+      --mat-card-elevated-container-color: #fcfdf7;
+
+      border: 1px solid mat.get-theme-color($theme, neutral, 90);
+    }
+
+    .mdc-button {
+      &.delete-survey-button {
+        --mat-button-outlined-label-text-color: #{mat.get-theme-color($theme, error)};
+      }
+    }
+  }
+ }
+
+ @mixin typography($theme) {
+  .edit-survey-title {
+    font: mat.get-theme-typography($theme, headline-small, font);
+  }
+
+  .job-label {
+    font: mat.get-theme-typography($theme, title-medium, font);
+  }
+
+  .survey-details-container, .share-survey-container {
+    .mat-mdc-card {
+      .mat-mdc-card-title {
+        font: mat.get-theme-typography($theme, title-medium, font);
+      }
+  
+      .mat-mdc-card-content {
+        font: mat.get-theme-typography($theme, body-medium, font);
+      }
+    }
+  }
+ }
+
+ @mixin theme($theme) {
+  @include color($theme);
+  @include typography($theme);
+ }

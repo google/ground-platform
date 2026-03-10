@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {List, Map} from 'immutable';
+import { List, OrderedMap } from 'immutable';
 
-import {Copiable} from './copiable';
-import {Task} from './task/task.model';
+import { Copiable } from './copiable';
+import { Task } from './task/task.model';
 
 export enum DataCollectionStrategy {
   PREDEFINED = 'PREDEFINED',
@@ -30,7 +30,7 @@ export class Job extends Copiable {
     readonly index: number,
     readonly color?: string,
     readonly name?: string,
-    readonly tasks?: Map<string, Task>,
+    readonly tasks?: OrderedMap<string, Task>,
     readonly strategy?: DataCollectionStrategy
   ) {
     super();

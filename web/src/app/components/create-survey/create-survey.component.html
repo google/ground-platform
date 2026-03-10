@@ -1,0 +1,141 @@
+<!--
+  Copyright 2023 The Ground Authors.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<div class="page">
+  <ground-header [survey]="survey"></ground-header>
+  <!-- TODO(#1170): Extract the spinner into a component -->
+  <div
+    id="loading-spinner"
+    class="loading-spinner"
+    *ngIf="createSurveyPhase === CreateSurveyPhase.LOADING"
+  >
+    <div>
+      <mat-spinner></mat-spinner>
+      <p class="loading-label">
+        <ng-container i18n="@@app.labels.loadingSurvey"
+          >Loading survey...</ng-container
+        >
+      </p>
+    </div>
+  </div>
+
+  <div
+    *ngIf="createSurveyPhase !== CreateSurveyPhase.LOADING"
+    class="container"
+  >
+    <div class="card">
+      <img
+        *ngIf="createSurveyPhase === CreateSurveyPhase.JOB_DETAILS"
+        class="picture"
+        src="assets/img/add-job.svg"
+        [alt]="cardTitle()"
+      />
+      <div class="create-survey-content">
+        <div class="progress-bar-title">{{ progressBarTitle() }}</div>
+        <mat-progress-bar
+          mode="determinate"
+          [value]="progressBarValue()"
+        ></mat-progress-bar>
+        <ground-step-card
+          [title]="cardTitle()"
+          [description]="cardDescription()"
+          [jobName]="
+            [
+              CreateSurveyPhase.DEFINE_LOIS,
+              CreateSurveyPhase.DEFINE_TASKS,
+            ].includes(createSurveyPhase)
+              ? jobName()
+              : ''
+          "
+        >
+          <ng-container [ngSwitch]="createSurveyPhase">
+            <survey-details
+              *ngSwitchCase="CreateSurveyPhase.SURVEY_DETAILS"
+              #surveyDetails
+              [title]="survey.title"
+              [description]="survey.description"
+              (onValidationChange)="onValidationChange($event)"
+            ></survey-details>
+            <app-job-details
+              *ngSwitchCase="CreateSurveyPhase.JOB_DETAILS"
+              #jobDetails
+              [name]="jobName()"
+              (onValidationChange)="onValidationChange($event)"
+            ></app-job-details>
+            <survey-loi
+              *ngSwitchCase="CreateSurveyPhase.DEFINE_LOIS"
+              #surveyLoi
+              [survey]="survey!"
+            ></survey-loi>
+            <task-details
+              *ngSwitchCase="CreateSurveyPhase.DEFINE_TASKS"
+              #taskDetails
+              [job]="job()"
+              (onValidationChange)="onValidationChange($event)"
+            ></task-details>
+            <data-sharing-terms
+              *ngSwitchCase="CreateSurveyPhase.DEFINE_DATA_SHARING_TERMS"
+              #dataSharingTerms
+              [type]="survey.dataSharingTerms.type"
+              [customText]="survey.dataSharingTerms.customText ?? ''"
+              (onValidationChange)="onValidationChange($event)"
+            ></data-sharing-terms>
+            <share-survey
+              *ngSwitchCase="CreateSurveyPhase.SHARE_SURVEY"
+            ></share-survey>
+          </ng-container>
+        </ground-step-card>
+      </div>
+    </div>
+    <div class="button-section">
+      <div class="left-button-section">
+        <button
+          mat-button
+          id="back-button"
+          class="button"
+          color="primary"
+          (click)="back()"
+        >
+          <ng-container i18n="@@app.labels.back">Back</ng-container>
+        </button>
+      </div>
+
+      <div class="right-button-section">
+        <ground-copy-survey-controls
+          *ngIf="createSurveyPhase === CreateSurveyPhase.SHARE_SURVEY"
+          [surveyId]="surveyId"
+        ></ground-copy-survey-controls>
+
+        <button
+          id="continue-button"
+          class="continue-button"
+          mat-flat-button
+          color="primary"
+          (click)="continue()"
+          [disabled]="!canContinue"
+        >
+          @if (createSurveyPhase === CreateSurveyPhase.SHARE_SURVEY) {
+            <ng-container i18n="@@app.labels.goToSurvey"
+              >Go to survey</ng-container
+            >
+          } @else {
+            <ng-container i18n="@@app.labels.continue">Continue</ng-container>
+          }
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

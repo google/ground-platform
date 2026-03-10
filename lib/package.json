@@ -1,56 +1,73 @@
 {
   "name": "@ground/lib",
+  "nx": {
+    "name": "lib",
+    "targets": {
+      "build": {
+        "executor": "nx:run-commands",
+        "options": {
+          "cwd": "{projectRoot}",
+          "command": "tsc"
+        }
+      },
+      "clean": {
+        "executor": "nx:run-commands",
+        "options": {
+          "cwd": "{projectRoot}",
+          "command": "rm -rf dist *.log src/generated"
+        }
+      },
+      "lint": {
+        "executor": "nx:run-commands",
+        "options": {
+          "cwd": "{projectRoot}",
+          "command": "eslint src"
+        }
+      },
+      "test": {
+        "executor": "nx:run-commands",
+        "options": {
+          "cwd": "{projectRoot}",
+          "command": "jasmine --config=jasmine.json"
+        }
+      },
+      "format:check": {
+        "executor": "nx:run-commands",
+        "options": {
+          "cwd": "{projectRoot}",
+          "command": "prettier --check \"src/**/*.ts\""
+        }
+      }
+    }
+  },
   "version": "0.0.1",
   "main": "dist/index.js",
   "description": "Ground shared lib",
+  "exports": {
+    ".": "./dist/index.js",
+    "./testing/firestore": "./dist/testing/firestore/index.js"
+  },
   "files": [
     "dist"
   ],
-  "scripts": {
-    "clean": "rm -rf dist *.log src/generated",
-    "lint": "eslint --ext .js,.ts src/",
-    "lint:fix": "npm run lint -- --fix",
-    "test": "jasmine --config=jasmine.json",
-    "ci-all": "npm run ci-local-deps && npm ci",
-    "ci-local-deps": "npm ci --workspace=../proto",
-    "build-local-deps": "npm run build --workspace=../proto",
-    "build": "tsc",
-    "build-all": "npm run build-local-deps && npm run build",
-    "build-and-test": "npm run build && npm run test",
-    "build-all-and-test": "npm run build-all && npm run test"
-  },
   "engines": {
-    "node": "20"
+    "node": "22"
   },
   "private": true,
   "dependencies": {
-    "@google-cloud/firestore": "^7.7.0",
-    "@ground/proto": "file:../proto",
-    "firebase-functions": "^5.1.1",
-    "immutable": "^4.3.6",
-    "long": "^5.2.3",
-    "protobufjs": "^7.3.0"
+    "@google-cloud/firestore": "catalog:",
+    "@ground/proto": "workspace:*",
+    "firebase-admin": "catalog:",
+    "firebase-functions": "catalog:",
+    "protobufjs": "catalog:"
   },
   "devDependencies": {
-    "@types/geojson": "^7946.0.14",
-    "@types/jasmine": "^4.3.5",
-    "@types/source-map-support": "^0.5.10",
-    "@typescript-eslint/eslint-plugin": "^5.39.0",
-    "@typescript-eslint/parser": "^5.39.0",
-    "colors": "^1.4.0",
-    "diff": "^5.2.0",
-    "eslint": "^8.26.0",
-    "eslint-config-prettier": "^8.5.0",
-    "eslint-plugin-import": "^2.29.0",
-    "eslint-plugin-prettier": "^4.2.1",
-    "gts": "^5.3.0",
-    "jasmine": "^5.1.0",
-    "jasmine-spec-reporter": "^7.0.0",
-    "mock-cloud-firestore": "^0.12.0",
-    "prettier": "^2.8.1",
-    "source-map-support": "^0.5.21",
-    "ts-mocha": "^10.0.0",
-    "ts-node": "^10.9.2",
-    "typescript": "^5.4.5"
+    "@types/geojson": "catalog:dev",
+    "@types/jasmine": "catalog:dev",
+    "@types/source-map-support": "catalog:dev",
+    "diff": "catalog:dev",
+    "mock-cloud-firestore": "catalog:dev",
+    "picocolors": "catalog:dev",
+    "source-map-support": "catalog:dev"
   }
 }

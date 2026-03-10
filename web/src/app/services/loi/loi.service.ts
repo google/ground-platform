@@ -14,62 +14,47 @@
  * limitations under the License.
  */
 
-import {Injectable} from '@angular/core';
-import {List} from 'immutable';
-import {Observable, ReplaySubject, of} from 'rxjs';
-import {map, switchMap} from 'rxjs/operators';
+import { Injectable } from '@angular/core';
+import { List } from 'immutable';
+import { Observable, of } from 'rxjs';
+import { map, switchMap } from 'rxjs/operators';
 
-import {GeometryType} from 'app/models/geometry/geometry';
-import {LocationOfInterest} from 'app/models/loi.model';
-import {SurveyDataVisibility, SurveyState} from 'app/models/survey.model';
-import {AuthService} from 'app/services/auth/auth.service';
-import {DataStoreService} from 'app/services/data-store/data-store.service';
-import {SurveyService} from 'app/services/survey/survey.service';
+import { GeometryType } from 'app/models/geometry/geometry';
+import { LocationOfInterest } from 'app/models/loi.model';
+import {
+  Survey,
+  SurveyDataVisibility,
+  SurveyState,
+} from 'app/models/survey.model';
+import { AuthService } from 'app/services/auth/auth.service';
+import { DataStoreService } from 'app/services/data-store/data-store.service';
+import { SurveyService } from 'app/services/survey/survey.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class LocationOfInterestService {
-  private lois$: Observable<List<LocationOfInterest>>;
-  private selectedLoiId$ = new ReplaySubject<string>(1);
-  private selectedLoi$: Observable<LocationOfInterest>;
-
   constructor(
     private authService: AuthService,
     private dataStore: DataStoreService,
     private surveyService: SurveyService
-  ) {
-    this.lois$ = this.authService
-      .getUser$()
-      .pipe(
-        switchMap(user =>
-          this.surveyService
-            .getActiveSurvey$()
-            .pipe(
-              switchMap(survey =>
-                !survey || survey.state === SurveyState.UNSAVED
-                  ? of(List<LocationOfInterest>())
-                  : this.dataStore.getAccessibleLois$(
-                      survey,
-                      user.id,
-                      this.surveyService.canManageSurvey() ||
-                        survey.dataVisibility ===
-                          SurveyDataVisibility.ALL_SURVEY_PARTICIPANTS
-                    )
-              )
+  ) {}
+
+  getLocationsOfInterest$(
+    survey: Survey
+  ): Observable<List<LocationOfInterest>> {
+    return this.authService.getUser$().pipe(
+      switchMap(user =>
+        !survey || survey.state === SurveyState.UNSAVED
+          ? of(List<LocationOfInterest>())
+          : this.dataStore.getAccessibleLois$(
+              survey,
+              user.id,
+              this.surveyService.canManageSurvey(survey) ||
+                survey.dataVisibility ===
+                  SurveyDataVisibility.ALL_SURVEY_PARTICIPANTS
             )
-        )
-      );
-
-    this.selectedLoi$ = this.selectedLoiId$.pipe(
-      switchMap(loiId =>
-        this.lois$.pipe(map(lois => lois.find(({id}) => id === loiId)!))
-      )
-    );
-  }
-
-  getLocationsOfInterest$(): Observable<List<LocationOfInterest>> {
-    return this.lois$.pipe(
+      ),
       map(lois =>
         lois.sort((a, b) =>
           LocationOfInterestService.getDisplayName(a).localeCompare(
@@ -80,18 +65,11 @@ export class LocationOfInterestService {
     );
   }
 
-  selectLocationOfInterest(loiId: string) {
-    this.selectedLoiId$.next(loiId);
-  }
-
-  getSelectedLocationOfInterest$(): Observable<LocationOfInterest> {
-    return this.selectedLoi$;
-  }
-
   getPredefinedLoisByJobId$(
+    survey: Survey,
     jobId: string
   ): Observable<List<LocationOfInterest>> {
-    return this.getLocationsOfInterest$().pipe(
+    return this.getLocationsOfInterest$(survey).pipe(
       map(lois =>
         lois.filter(loi => loi.jobId === jobId && loi.predefined !== false)
       )
@@ -122,7 +100,7 @@ export class LocationOfInterestService {
   }
 
   static getDisplayName(loi: LocationOfInterest): string {
-    const {customId, properties} = loi;
+    const { customId, properties } = loi;
     const name = properties?.get('name')?.toString()?.trim() || '';
     const loiId = customId?.trim() || '';
     if (name && loiId) {
@@ -154,14 +132,14 @@ export class LocationOfInterestService {
   }
 
   async addPoint(
-    lat: number,
-    lng: number,
-    jobId: string
+    _lat: number,
+    _lng: number,
+    _jobId: string
   ): Promise<LocationOfInterest | null> {
     throw new Error('Adding LOIs via web app not yet supported');
   }
 
-  async updatePoint(loi: LocationOfInterest): Promise<void> {
+  async updatePoint(_loi: LocationOfInterest): Promise<void> {
     throw new Error('Editing LOIs via web app not yet supported');
   }
 }

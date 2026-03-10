@@ -1,0 +1,85 @@
+/**
+ * Copyright 2023 The Ground Authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the 'License');
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an 'AS IS' BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+.page {
+  min-height: 100%;
+}
+
+.loading-spinner {
+  align-items: center;
+  display: flex;
+  justify-content: space-around;
+  min-height: 500px;
+}
+
+.container {
+  display: flex;
+}
+
+.left-menu {
+  width: 300px;
+  padding: 12px;
+
+  --mat-list-list-item-label-text-size: 14px;
+  --mat-list-list-item-label-text-color: #444746;
+  --mat-list-list-item-hover-label-text-color: #444746;
+  --mat-list-list-item-leading-icon-size: 24px;
+  --mat-list-list-item-leading-icon-color: #444746;
+  --mat-list-list-item-hover-leading-icon-color: #444746;
+  --mat-list-list-item-leading-avatar-color: #444746;
+
+  .is-active {
+    background-color: #dcddd9;
+  }
+
+  .mat-mdc-list-item {
+    border-radius: 32px;
+
+    .mat-mdc-list-item-icon {
+      margin-right: 12px;
+    }
+  }
+}
+
+.job-label-and-add-button {
+  align-items: flex-end;
+  display: flex;
+  justify-content: space-between;
+  margin: 8px 16px 8px 0px;
+}
+
+.job-label {
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.card {
+  padding: 16px 24px 24px;
+  background-color: #F9FAF4;
+  border-radius: 16px;
+  flex-grow: 1;
+  margin: 0 auto;
+  max-width: 1200px;
+
+  .content {
+    text-align: left;
+  }
+
+  .button-section {
+    margin-top: 16px;
+    padding: 8px 0;
+  }
+}

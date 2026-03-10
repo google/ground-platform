@@ -14,9 +14,13 @@
  * limitations under the License.
  */
 
-import {Constructor} from 'protobufjs';
-import {MessageDescriptor, MessageTypePath, registry} from './message-registry';
-import {DocumentData} from '@google-cloud/firestore';
+import { Constructor } from 'protobufjs';
+import {
+  MessageDescriptor,
+  MessageTypePath,
+  registry,
+} from './message-registry';
+import { DocumentData } from '@google-cloud/firestore';
 
 export function toMessage<T>(
   data: DocumentData,
@@ -92,7 +96,7 @@ function toMapValue(
   valueType: string,
   nestedObject: [key: string]
 ): any | null {
-  const messageMap: {[key: string]: any} = {};
+  const messageMap: { [key: string]: any } = {};
   for (const key in nestedObject) {
     const firestoreValue = nestedObject[key];
     messageMap[key.toString()] = toFieldValue(

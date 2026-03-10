@@ -14,69 +14,34 @@
  * limitations under the License.
  */
 
-import {Injectable} from '@angular/core';
-import {List, Map} from 'immutable';
-import {Observable, ReplaySubject, firstValueFrom, of} from 'rxjs';
-import {shareReplay, switchMap} from 'rxjs/operators';
+import { Injectable } from '@angular/core';
+import { List, Map } from 'immutable';
+import { Observable, firstValueFrom, of } from 'rxjs';
 
-import {Role} from 'app/models/role.model';
-import {DataSharingType, Survey, SurveyState} from 'app/models/survey.model';
-import {AuthService} from 'app/services/auth/auth.service';
-import {DataStoreService} from 'app/services/data-store/data-store.service';
-import {NavigationService} from 'app/services/navigation/navigation.service';
+import { Role } from 'app/models/role.model';
+import { DataSharingType, Survey, SurveyState } from 'app/models/survey.model';
+import { AuthService } from 'app/services/auth/auth.service';
+import { DataStoreService } from 'app/services/data-store/data-store.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class SurveyService {
-  private activeSurveyId$ = new ReplaySubject<string>(1);
-  private activeSurvey$: Observable<Survey>;
-  private activeSurvey!: Survey;
-
   constructor(
     private dataStore: DataStoreService,
     private authService: AuthService
-  ) {
-    // Reload active survey each time authenticated user changes.
-    this.activeSurvey$ = authService.getUser$().pipe(
-      switchMap(() =>
-        //  on each change to survey id.
-        this.activeSurveyId$.pipe(
-          // Asynchronously load survey. switchMap() internally disposes
-          // of previous subscription if present.
-          switchMap(id => {
-            if (id === NavigationService.SURVEY_ID_NEW) {
-              return of(Survey.UNSAVED_NEW);
-            }
-            return this.dataStore.loadSurvey$(id);
-          })
-        )
-      ),
-      // Cache last loaded survey so that late subscribers don't cause
-      // survey to be reloaded.
-      shareReplay(1)
-    );
-    this.activeSurvey$.subscribe(survey => (this.activeSurvey = survey));
-  }
+  ) {}
 
-  getActiveSurvey(): Survey {
-    return this.activeSurvey;
-  }
-
-  activateSurvey(id: string) {
-    this.activeSurveyId$.next(id);
-  }
-
-  getActiveSurvey$(): Observable<Survey> {
-    return this.activeSurvey$;
+  loadSurvey$(id: string): Observable<Survey> {
+    return this.dataStore.loadSurvey$(id);
   }
 
   getAccessibleSurveys$(): Observable<List<Survey>> {
     const user = this.authService.getCurrentUser();
     if (!user) {
-      return new Observable<List<Survey>>();
+      return of(List<Survey>());
     }
-    const {email: userEmail} = user;
+    const { email: userEmail } = user;
     return this.dataStore.loadAccessibleSurveys$(userEmail);
   }
 
@@ -115,8 +80,11 @@ export class SurveyService {
    * @param survey the survey instance.
    * @param state the new status of the survey.
    */
-  updateState(state: SurveyState): Promise<void> {
-    return this.dataStore.updateSurvey({...this.activeSurvey, state} as Survey);
+  updateState(survey: Survey, state: SurveyState): Promise<void> {
+    return this.dataStore.updateSurvey({
+      ...survey,
+      state,
+    } as Survey);
   }
 
   /**
@@ -125,8 +93,8 @@ export class SurveyService {
    * @param survey the survey instance.
    * @param acl the new access control list of the survey.
    */
-  updateAcl(acl: Map<string, Role>): Promise<void> {
-    return this.dataStore.updateSurvey({...this.activeSurvey, acl} as Survey);
+  updateAcl(survey: Survey, acl: Map<string, Role>): Promise<void> {
+    return this.dataStore.updateSurvey({ ...survey, acl } as Survey);
   }
 
   /**
@@ -136,12 +104,13 @@ export class SurveyService {
    * @param customText the text of the DataSharingTerms.
    */
   updateDataSharingTerms(
+    survey: Survey,
     type: DataSharingType,
     customText?: string
   ): Promise<void> {
     return this.dataStore.updateSurvey({
-      ...this.activeSurvey,
-      dataSharingTerms: {type, ...(customText && {customText})},
+      ...survey,
+      dataSharingTerms: { type, ...(customText && { customText }) },
     } as Survey);
   }
 
@@ -176,13 +145,13 @@ export class SurveyService {
   /**
    * Checks if a user has survey organizer or owner level permissions of the survey.
    */
-  canManageSurvey(): boolean {
+  canManageSurvey(survey: Survey): boolean {
     const user = this.authService.getCurrentUser();
     if (!user) {
       return false;
     }
     const userEmail = user.email;
-    const acl = this.activeSurvey.getAclEntriesSorted();
+    const acl = survey.getAclEntriesSorted();
     return !!acl.find(entry => entry.email === userEmail && entry.isManager());
   }
 }

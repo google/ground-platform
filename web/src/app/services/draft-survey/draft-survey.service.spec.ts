@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-import {TestBed} from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 
-import {DraftSurveyService} from './draft-survey.service';
-import {DataStoreService} from '../data-store/data-store.service';
+import { DraftSurveyService } from './draft-survey.service';
+import { DataStoreService } from '../data-store/data-store.service';
 
 describe('DraftSurveyService', () => {
   let service: DraftSurveyService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [{provide: DataStoreService, useValue: {}}],
+      providers: [{ provide: DataStoreService, useValue: {} }],
     });
     service = TestBed.inject(DraftSurveyService);
   });

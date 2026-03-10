@@ -19,7 +19,7 @@
 // `environment.test.ts`.
 // The list of file replacements can be found in `angular.json`.
 
-import {Env} from 'environments/environment-enums';
+import { Env } from 'environments/environment-enums';
 
 export const environment = {
   production: false,
@@ -27,4 +27,12 @@ export const environment = {
   cloudFunctionsUrl: '',
   useEmulators: false,
   env: Env.Test,
+  firebase: {
+    apiKey: 'mock-api-key',
+    authDomain: 'mock-auth-domain',
+    projectId: 'mock-project-id',
+    storageBucket: 'mock-storage-bucket',
+    messagingSenderId: 'mock-messaging-sender-id',
+    appId: 'mock-app-id',
+  },
 };

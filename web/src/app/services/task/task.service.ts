@@ -14,16 +14,13 @@
  * limitations under the License.
  */
 
-import {Injectable} from '@angular/core';
-import {List, Map} from 'immutable';
-import {Observable, switchMap} from 'rxjs';
+import { Injectable } from '@angular/core';
+import { List, Map } from 'immutable';
 
-import {DataCollectionStrategy, Job} from 'app/models/job.model';
-import {MultipleChoice} from 'app/models/task/multiple-choice.model';
-import {Task, TaskType} from 'app/models/task/task.model';
-import {DataStoreService} from 'app/services/data-store/data-store.service';
-
-import {SurveyService} from '../survey/survey.service';
+import { DataCollectionStrategy, Job } from 'app/models/job.model';
+import { MultipleChoice } from 'app/models/task/multiple-choice.model';
+import { Task, TaskType } from 'app/models/task/task.model';
+import { DataStoreService } from 'app/services/data-store/data-store.service';
 
 export type TaskUpdate = {
   label: string;
@@ -37,23 +34,7 @@ export type TaskUpdate = {
   providedIn: 'root',
 })
 export class TaskService {
-  private tasks$: Observable<List<Task>>;
-
-  constructor(
-    private dataStoreService: DataStoreService,
-    private surveyService: SurveyService
-  ) {
-    this.tasks$ = this.surveyService
-      .getActiveSurvey$()
-      .pipe(
-        switchMap(survey =>
-          this.dataStoreService.tasks$(
-            survey.id,
-            survey.jobs.values().next().value.id
-          )
-        )
-      );
-  }
+  constructor(private dataStoreService: DataStoreService) {}
 
   /**
    * Creates and returns a new task with a generated unique identifier.
@@ -70,33 +51,40 @@ export class TaskService {
   }
 
   /**
-   * Returns a new task which is an exact copy of the provided task, but with new UUIDs.
+   * Creates a duplicate of the provided task.
+   * @param task - The task to be duplicated.
+   * @param preserveId - If true, keeps the original task ID.
+   * If false (default), generates a new unique ID for the duplicate.
+   * @returns A new Task instance with duplicated nested properties.
    */
-  duplicateTask(task: Task): Task {
+  duplicateTask(task: Task, preserveId: boolean = false): Task {
     return {
       ...task,
-      id: this.dataStoreService.generateId(),
+      id: preserveId ? task.id : this.dataStoreService.generateId(),
       multipleChoice: task.multipleChoice
-        ? this.duplicateMultipleChoice(task.multipleChoice)
+        ? this.duplicateMultipleChoice(task.multipleChoice, preserveId)
         : undefined,
     } as Task;
   }
 
   /**
-   * Returns a new multiple choice which is an exact copy of the provided one, but with new UUIDs for all options.
+   * Creates a duplicate of the provided multiple choice object.
+   * @param multipleChoice - The multiple choice attribute to be duplicated.
+   * @param preserveId - If true, keeps the original option IDs.
+   * If false (default), generates new unique IDs for the options.
+   * @returns A new MultipleChoice instance with duplicated options.
    */
-  duplicateMultipleChoice(multipleChoice: MultipleChoice): MultipleChoice {
+  duplicateMultipleChoice(
+    multipleChoice: MultipleChoice,
+    preserveId: boolean = false
+  ): MultipleChoice {
     return {
       ...multipleChoice,
       options: multipleChoice.options?.map(option => ({
         ...option,
-        id: this.dataStoreService.generateId(),
+        id: preserveId ? option.id : this.dataStoreService.generateId(),
       })),
     } as MultipleChoice;
-  }
-
-  getTasks$(): Observable<List<Task>> {
-    return this.tasks$;
   }
 
   addOrUpdateTasks(
@@ -132,7 +120,7 @@ export class TaskService {
     );
 
     const newTasks = tasks.map((task: Task) =>
-      task.copyWith({index: task.index + 1})
+      task.copyWith({ index: task.index + 1 })
     );
 
     return newTasks.set(loiTask.id, loiTask);

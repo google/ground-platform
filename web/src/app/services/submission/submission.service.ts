@@ -14,85 +14,64 @@
  * limitations under the License.
  */
 
-import {Injectable} from '@angular/core';
-import {List, Map} from 'immutable';
-import {Observable, ReplaySubject, of} from 'rxjs';
-import {map, switchMap} from 'rxjs/operators';
+import { Injectable } from '@angular/core';
+import { List, Map } from 'immutable';
+import { Observable, of } from 'rxjs';
+import { map, switchMap } from 'rxjs/operators';
 
-import {AuditInfo} from 'app/models/audit-info.model';
-import {LocationOfInterest} from 'app/models/loi.model';
-import {Result} from 'app/models/submission/result.model';
-import {Submission} from 'app/models/submission/submission.model';
-import {Survey, SurveyDataVisibility} from 'app/models/survey.model';
-import {User} from 'app/models/user.model';
-import {AuthService} from 'app/services/auth/auth.service';
-import {DataStoreService} from 'app/services/data-store/data-store.service';
-import {LoadingState} from 'app/services/loading-state.model';
-import {LocationOfInterestService} from 'app/services/loi/loi.service';
-import {SurveyService} from 'app/services/survey/survey.service';
+import { AuditInfo } from 'app/models/audit-info.model';
+import { LocationOfInterest } from 'app/models/loi.model';
+import { Result } from 'app/models/submission/result.model';
+import { Submission } from 'app/models/submission/submission.model';
+import { Survey, SurveyDataVisibility } from 'app/models/survey.model';
+import { User } from 'app/models/user.model';
+import { AuthService } from 'app/services/auth/auth.service';
+import { DataStoreService } from 'app/services/data-store/data-store.service';
+import { LoadingState } from 'app/services/loading-state.model';
+import { LocationOfInterestService } from 'app/services/loi/loi.service';
+import { SurveyService } from 'app/services/survey/survey.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class SubmissionService {
-  private submissions$: Observable<List<Submission>>;
-  private selectedSubmissionId$ = new ReplaySubject<string>(1);
-  private selectedSubmission$ = new Observable<Submission>();
-
   constructor(
     private authService: AuthService,
     private dataStore: DataStoreService,
     private loiService: LocationOfInterestService,
     private surveyService: SurveyService
-  ) {
-    this.submissions$ = this.authService
+  ) {}
+
+  getSubmissions$(
+    survey: Survey,
+    loi: LocationOfInterest
+  ): Observable<List<Submission>> {
+    return this.authService
       .getUser$()
       .pipe(
         switchMap(user =>
-          surveyService
-            .getActiveSurvey$()
-            .pipe(
-              switchMap(survey =>
-                this.loiService
-                  .getSelectedLocationOfInterest$()
-                  .pipe(
-                    switchMap(loi =>
-                      !survey || !loi || !user
-                        ? of(List<Submission>())
-                        : this.dataStore.getAccessibleSubmissions$(
-                            survey,
-                            loi,
-                            user.id,
-                            this.surveyService.canManageSurvey() ||
-                              survey.dataVisibility ===
-                                SurveyDataVisibility.ALL_SURVEY_PARTICIPANTS
-                          )
-                    )
-                  )
+          !user
+            ? of(List<Submission>())
+            : this.dataStore.getAccessibleSubmissions$(
+                survey,
+                loi,
+                user.id,
+                this.surveyService.canManageSurvey(survey) ||
+                  survey.dataVisibility ===
+                    SurveyDataVisibility.ALL_SURVEY_PARTICIPANTS
               )
-            )
         )
       );
+  }
 
-    this.selectedSubmission$ = this.selectedSubmissionId$.pipe(
-      switchMap(submissionId =>
-        this.submissions$.pipe(
-          map(submissions => submissions.find(({id}) => id === submissionId)!)
-        )
-      )
+  getSubmission$(
+    survey: Survey,
+    loi: LocationOfInterest,
+    submissionId: string
+  ): Observable<Submission> {
+    return this.getSubmissions$(survey, loi).pipe(
+      map(submissions => submissions.find(({ id }) => id === submissionId)!)
     );
-  }
-
-  getSubmissions$(): Observable<List<Submission>> {
-    return this.submissions$;
-  }
-
-  selectSubmission(submissionId: string) {
-    this.selectedSubmissionId$.next(submissionId);
-  }
-
-  getSelectedSubmission$(): Observable<Submission> {
-    return this.selectedSubmission$;
   }
 
   createNewSubmission(

@@ -15,22 +15,31 @@
  */
 
 import 'module-alias/register';
-import * as functions from 'firebase-functions';
-import {onHttpsRequest, onHttpsRequestAsync} from './handlers';
-import {handleProfileRefresh} from './profile-refresh';
-import {sessionLoginHandler} from './session-login';
-import {importGeoJsonCallback} from './import-geojson';
-import {exportCsvHandler} from './export-csv';
-import {exportGeojsonHandler} from './export-geojson';
-import {onCall} from 'firebase-functions/v2/https';
-import {onCreateLoiHandler} from './on-create-loi';
-import {onCreatePasslistEntryHandler} from './on-create-passlist-entry';
-import {onWriteJobHandler} from './on-write-job';
-import {onWriteLoiHandler} from './on-write-loi';
-import {onWriteSubmissionHandler} from './on-write-submission';
-import {onWriteSurveyHandler} from './on-write-survey';
-import {job, loi, passlistEntry, submission, survey} from './common/datastore';
-import {initializeFirebaseApp} from './common/context';
+import {
+  onDocumentCreated,
+  onDocumentWritten,
+} from 'firebase-functions/v2/firestore';
+import { onHttpsRequest, onHttpsRequestAsync } from './handlers';
+import { handleProfileRefresh } from './profile-refresh';
+import { sessionLoginHandler } from './session-login';
+import { importGeoJsonCallback } from './import-geojson';
+import { exportCsvHandler } from './export-csv';
+import { exportGeojsonHandler } from './export-geojson';
+import { onCall } from 'firebase-functions/v2/https';
+import { onCreateLoiHandler } from './on-create-loi';
+import { onCreatePasslistEntryHandler } from './on-create-passlist-entry';
+import { onWriteJobHandler } from './on-write-job';
+import { onWriteLoiHandler } from './on-write-loi';
+import { onWriteSubmissionHandler } from './on-write-submission';
+import { onWriteSurveyHandler } from './on-write-survey';
+import {
+  job,
+  loi,
+  passlistEntry,
+  submission,
+  survey,
+} from './common/datastore';
+import { initializeFirebaseApp } from './common/context';
 
 // Ensure Firebase is initialized.
 initializeFirebaseApp();
@@ -54,9 +63,10 @@ export const profile = {
   refresh: onCall(request => handleProfileRefresh(request)),
 };
 
-export const onCreatePasslistEntry = functions.firestore
-  .document(passlistEntryPathTemplate)
-  .onCreate(onCreatePasslistEntryHandler);
+export const onCreatePasslistEntry = onDocumentCreated(
+  passlistEntryPathTemplate,
+  onCreatePasslistEntryHandler
+);
 
 export const importGeoJson = onHttpsRequestAsync(importGeoJsonCallback);
 
@@ -64,24 +74,23 @@ export const exportCsv = onHttpsRequest(exportCsvHandler);
 
 export const exportGeojson = onHttpsRequest(exportGeojsonHandler);
 
-export const onCreateLoi = functions.firestore
-  .document(loiPathTemplate)
-  .onCreate(onCreateLoiHandler);
+export const onCreateLoi = onDocumentCreated(
+  loiPathTemplate,
+  onCreateLoiHandler
+);
 
-export const onWriteJob = functions.firestore
-  .document(jobPathTemplate)
-  .onWrite(onWriteJobHandler);
+export const onWriteJob = onDocumentWritten(jobPathTemplate, onWriteJobHandler);
 
-export const onWriteLoi = functions.firestore
-  .document(loiPathTemplate)
-  .onWrite(onWriteLoiHandler);
+export const onWriteLoi = onDocumentWritten(loiPathTemplate, onWriteLoiHandler);
 
-export const onWriteSubmission = functions.firestore
-  .document(submissionPathTemplate)
-  .onWrite(onWriteSubmissionHandler);
+export const onWriteSubmission = onDocumentWritten(
+  submissionPathTemplate,
+  onWriteSubmissionHandler
+);
 
-export const onWriteSurvey = functions.firestore
-  .document(surveyPathTemplate)
-  .onWrite(onWriteSurveyHandler);
+export const onWriteSurvey = onDocumentWritten(
+  surveyPathTemplate,
+  onWriteSurveyHandler
+);
 
 export const sessionLogin = onHttpsRequest(sessionLoginHandler);

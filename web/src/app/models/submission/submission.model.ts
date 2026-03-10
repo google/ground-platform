@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {Map} from 'immutable';
+import { Map } from 'immutable';
 
-import {AuditInfo} from 'app/models/audit-info.model';
-import {Job} from 'app/models/job.model';
+import { AuditInfo } from 'app/models/audit-info.model';
+import { Job } from 'app/models/job.model';
 
-import {Result} from './result.model';
+import { Result } from './result.model';
 
 export type SubmissionData = Map<string, Result>;
 

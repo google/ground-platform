@@ -19,45 +19,51 @@
 @use '@angular/material' as mat;
 @use './m3-theme';
 
-@use 'app/components/general-access-control/_general-access-control.component-theme' as general-access-control;
-@use 'app/components/header/current-user-widget/account-popup/_account-popup.component-theme' as account-popup;
-@use 'app/components/header/_header.component-theme.scss' as header;
-@use 'app/components/import-dialog/_import-dialog.component-theme' as import-dialog;
-@use 'app/components/inline-editor/inline-editor.component-theme' as inline-editor;
-@use 'app/components/job-list-item/_job-list-item.component-theme' as job-list-item;
-@use 'app/components/loi-editor/_loi-editor.component-theme.scss' as loi-editor;
-@use 'app/components/loi-properties-dialog/loi-properties-dialog.component-theme' as loi-properties-dialog;
-@use 'app/components/loi-selection/loi-selection.component-theme' as loi-selection;
-@use 'app/components/share-dialog/_share-dialog.component-theme' as share-dialog;
-@use 'app/components/share-list/_share-list.component-theme' as share-list;
-@use 'app/components/share-survey/_share-survey.component-theme' as share-survey;
-@use 'app/components/sign-in-page/_sign-in-page.component-theme' as sign-in-page;
-@use 'app/components/survey-list/_survey-list.component-theme' as survey-list;
-@use 'app/components/tasks-editor/_tasks-editor.component-theme' as tasks-editor;
-@use 'app/components/tasks-editor/task-condition-form/_task-condition-form-theme' as task-condition-form;
-@use 'app/components/tasks-editor/task-form/edit-option/_edit-option.component-theme' as edit-option;
-@use 'app/components/user-avatar/_user-avatar.component-theme' as user-avatar;
-@use 'app/pages/create-survey/_create-survey.component-theme' as create-survey;
-@use 'app/pages/create-survey/step-card/_step-card.component-theme' as step-card;
-@use 'app/pages/edit-survey/_edit-survey.component-theme.scss' as edit-survey;
-@use 'app/pages/edit-survey/edit-job/_edit-job.component-theme' as edit-job;
-@use 'app/pages/main-page-container/main-page/drawing-tools/_drawing-tools.component-theme' as drawing-tools;
-@use 'app/pages/main-page-container/main-page/job-dialog/task-editor/_task-editor.component-theme' as task-editor;
-@use 'app/pages/main-page-container/main-page/job-dialog/_job-dialog.component-theme' as job-dialog;
-@use 'app/pages/main-page-container/main-page/map/_map.component-theme' as map;
-@use 'app/pages/main-page-container/main-page/side-panel/submission-form/_submission-form.component-theme' as submission-form;
-@use 'app/pages/main-page-container/main-page/survey-header/_survey-header.component-theme' as survey-header;
-@use 'app/pages/main-page-container/main-page/title-dialog/_title-dialog.component-theme' as title-dialog;
-@use 'app/pages/main-page-container/main-page/secondary-side-panel/_secondary-side-panel.component-theme' as secondary-side-panel;
-@use 'app/pages/terms/_terms.component-theme.scss' as terms;
+@use 'app/components/shared/general-access-control/_general-access-control.component-theme' as general-access-control;
+@use 'app/components/shared/header/current-user-widget/account-popup/_account-popup.component-theme' as account-popup;
+@use 'app/components/shared/header/_header.component-theme.scss' as header;
+@use 'app/components/shared/import-dialog/_import-dialog.component-theme' as import-dialog;
+@use 'app/components/shared/inline-editor/inline-editor.component-theme' as inline-editor;
+@use 'app/components/shared/job-list-item/_job-list-item.component-theme' as job-list-item;
+@use 'app/components/shared/loi-editor/_loi-editor.component-theme.scss' as loi-editor;
+@use 'app/components/shared/loi-properties-dialog/loi-properties-dialog.component-theme' as loi-properties-dialog;
+@use 'app/components/shared/loi-selection/loi-selection.component-theme' as loi-selection;
+@use 'app/components/shared/share-dialog/_share-dialog.component-theme' as share-dialog;
+@use 'app/components/shared/share-list/_share-list.component-theme' as share-list;
+@use 'app/components/shared/share-survey/_share-survey.component-theme' as share-survey;
+@use 'app/components/shared/sign-in-page/_sign-in-page.component-theme' as sign-in-page;
+@use 'app/components/shared/survey-list/_survey-list.component-theme' as survey-list;
+@use 'app/components/shared/task-editor/_task-editor.component-theme' as task-editor;
+@use 'app/components/shared/task-editor/task-condition-form/_task-condition-form-theme' as task-condition-form;
+@use 'app/components/shared/task-editor/task-form/edit-option/_edit-option.component-theme' as edit-option;
+@use 'app/components/shared/user-avatar/_user-avatar.component-theme' as user-avatar;
+@use 'app/components/create-survey/_create-survey.component-theme' as create-survey;
+@use 'app/components/create-survey/data-sharing-terms/_data-sharing-terms.component-theme' as data-sharing-terms;
+@use 'app/components/create-survey/step-card/_step-card.component-theme' as step-card;
+@use 'app/components/edit-survey/_edit-survey.component-theme.scss' as edit-survey;
+@use 'app/components/edit-survey/edit-job/_edit-job.component-theme' as edit-job;
+@use 'app/components/main-page-container/main-page/drawing-tools/_drawing-tools.component-theme' as drawing-tools;
 
-@import 'firebaseui/dist/firebaseui.css';
+@use 'app/components/main-page-container/main-page/job-dialog/_job-dialog.component-theme' as job-dialog;
+@use 'app/components/main-page-container/main-page/map/_map.component-theme' as map;
+@use 'app/components/main-page-container/main-page/side-panel/submission-form/_submission-form.component-theme' as submission-form;
+@use 'app/components/main-page-container/main-page/survey-header/_survey-header.component-theme' as survey-header;
+@use 'app/components/main-page-container/main-page/title-dialog/_title-dialog.component-theme' as title-dialog;
+@use 'app/components/main-page-container/main-page/secondary-side-panel/_secondary-side-panel.component-theme' as secondary-side-panel;
+@use 'app/components/terms/_terms.component-theme.scss' as terms;
 
 $theme: m3-theme.$light-theme;
 
 // Include the common styles for Angular Material. This allows us to only
 // have to load a single css file for Angular Material in your app.
 @include mat.core();
+
+@for $zValue from 0 through 24 {
+  .mat-elevation-z#{$zValue} {
+    @include mat.elevation($zValue);
+  }
+}
+// @include mat.app-background();
 
 html {
   @include mat.all-component-themes($theme);
@@ -77,16 +83,17 @@ html {
   @include share-survey.theme($theme);
   @include sign-in-page.theme($theme);
   @include survey-list.theme($theme);
-  @include tasks-editor.theme($theme);
+  @include task-editor.theme($theme);
   @include task-condition-form.theme($theme);
   @include edit-option.theme($theme);
   @include user-avatar.theme($theme);
   @include create-survey.theme($theme);
   @include edit-survey.theme($theme);
   @include edit-job.theme($theme);
+  @include data-sharing-terms.theme($theme);
   @include step-card.theme($theme);
   @include drawing-tools.theme($theme);
-  @include task-editor.theme($theme);
+
   @include job-dialog.theme($theme);
   @include map.theme($theme);
   @include submission-form.theme($theme);
@@ -102,7 +109,6 @@ body {
   height: 100%;
   margin: 0;
   padding: 0;
-  --mdc-typography-button-letter-spacing: 0;
 }
 
 /* Space between button icon and label. */

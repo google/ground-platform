@@ -1,0 +1,110 @@
+<!--
+Copyright 2021 The Ground Authors.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    https://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+
+<div class="job-list-item-container">
+  <mat-tree [dataSource]="dataSource" [treeControl]="treeControl">
+    <!-- Tree node for lois -->
+    <mat-tree-node
+      *matTreeNodeDef="let node"
+      matTreeNodePadding
+      mat-button
+      class="loi-tree-node"
+      tabindex="0"
+      role="button"
+      (click)="selectLoi(node)"
+      [class.tree-node-selected]="isSelectedLoi(node)"
+      [style.padding-left]="isSidePanelExpanded() ? '50px' : '0px'"
+    >
+      <ng-container *ngIf="isSidePanelExpanded()">
+        <mat-icon svgIcon="{{ node.iconName }}" class="loi-icon" [ngStyle]="{color: node.iconColor}"></mat-icon>
+
+        <div class="loi-name">{{ node.name }}</div>
+      </ng-container>
+
+      <ng-container *ngIf="!isSidePanelExpanded()">
+        <button mat-icon-button [attr.aria-label]="'Toggle ' + node.item">
+          <mat-icon svgIcon="{{ node.iconName }}" class="loi-icon" [ngStyle]="{color: node.iconColor}"></mat-icon>
+        </button>
+      </ng-container>
+    </mat-tree-node>
+    <!-- Tree node for jobs -->
+    <mat-tree-node
+      *matTreeNodeDef="let node; when: isJob"
+      matTreeNodePadding
+      class="job-tree-node"
+    >
+      <ng-container *ngIf="isSidePanelExpanded()">
+        <ng-container *ngIf="hasChild(node)">
+          <button mat-icon-button [attr.aria-label]="'Toggle ' + node.item" matTreeNodeToggle>
+            <mat-icon class="mat-icon-rtl-mirror">
+              {{treeControl.isExpanded(node) ? 'expand_more' : 'chevron_right'}}
+            </mat-icon>
+          </button>
+        </ng-container>
+
+        <ng-container *ngIf="!hasChild(node)">
+          <div style="width: 40px; visibility: hidden;"></div>
+        </ng-container>
+
+        <div class="job-tree-node-label">
+          <ng-container *ngTemplateOutlet="jobLabel; context: { node: node }"></ng-container>
+        </div>
+
+        <div [ngSwitch]="actionsType">
+          <div *ngSwitchCase="jobListItemActionsType.MENU">
+            <button mat-icon-button [matMenuTriggerFor]="jobMenu">
+              <mat-icon>more_vert</mat-icon>
+            </button>
+            <mat-menu #jobMenu="matMenu">
+              <a (click)="onDownloadCsvClick()" target="_blank">
+                <button mat-menu-item>
+                  <span i18n="@@app.labels.downloadCsv">Download job data (CSV)</span>
+                </button>
+              </a>
+
+              <a (click)="onDownloadGeoJsonClick()" target="_blank">
+                <button mat-menu-item>
+                  <span i18n="@@app.labels.downloadGeojson">Download site locations (GeoJSON)</span>
+                </button>
+              </a>
+            </mat-menu>
+          </div>
+          <div *ngSwitchCase="jobListItemActionsType.BACK">
+            <button mat-icon-button aria-label="back" (click)="onGoBackClick()">
+              <mat-icon>close</mat-icon>
+            </button>
+          </div>
+        </div>
+      </ng-container>
+
+      <ng-container *ngIf="!isSidePanelExpanded()">
+        <button mat-icon-button [attr.aria-label]="'Toggle ' + node.item" matTreeNodeToggle>
+          <mat-icon class="job-icon" [ngStyle]="{color: node.iconColor}">
+            {{ node.iconName }}
+          </mat-icon>
+        </button>
+      </ng-container>
+    </mat-tree-node>
+  </mat-tree>
+</div>
+
+<ng-template #jobLabel let-node="node">
+  <mat-icon class="job-icon" [ngStyle]="{color: node.iconColor}">
+    {{ node.iconName }}
+  </mat-icon>
+
+  <div class="job-name">{{ node.name }}</div>
+</ng-template>

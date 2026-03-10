@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import * as functions from 'firebase-functions';
-import {firestore} from 'firebase-admin';
-import {DocumentData, FieldPath, GeoPoint} from 'firebase-admin/firestore';
-import {registry} from '@ground/lib';
-import {GroundProtos} from '@ground/proto';
+import { UserRecord } from 'firebase-admin/auth';
+import { firestore } from 'firebase-admin';
+import { DocumentData, FieldPath, GeoPoint } from 'firebase-admin/firestore';
+import { registry } from '@ground/lib';
+import { GroundProtos } from '@ground/proto';
 
 import Pb = GroundProtos.ground.v1beta1;
-import {leftOuterJoinSorted, QueryIterator} from './query-iterator';
+import { QueryIterator, leftOuterJoinSorted } from './query-iterator';
 
 const l = registry.getFieldIds(Pb.LocationOfInterest);
 const sb = registry.getFieldIds(Pb.Submission);
@@ -104,22 +104,22 @@ export class Datastore {
 
   constructor(db: firestore.Firestore) {
     this.db_ = db;
-    db.settings({ignoreUndefinedProperties: true});
+    db.settings({ ignoreUndefinedProperties: true });
   }
 
   /**
    * Stores user email, name, and avatar to db for use in application LOIs.
    * These attributes are merged with other existing ones if already present.
    */
-  async mergeUserProfile(user: functions.auth.UserRecord) {
-    const {uid, email, displayName, photoURL} = user;
+  async mergeUserProfile(user: UserRecord) {
+    const { uid, email, displayName, photoURL } = user;
     await this.db_.doc(`users/${uid}`).set(
       {
         email,
         displayName,
         photoURL: photoURL && Datastore.trimPhotoURLSizeSuffix(photoURL),
       },
-      {merge: true}
+      { merge: true }
     );
   }
 
@@ -239,7 +239,7 @@ export class Datastore {
 
   async updateSubmissionCount(surveyId: string, loiId: string, count: number) {
     const loiRef = this.db_.doc(loi(surveyId, loiId));
-    await loiRef.update({[l.submissionCount]: count});
+    await loiRef.update({ [l.submissionCount]: count });
   }
 
   async updateLoiProperties(
@@ -248,7 +248,7 @@ export class Datastore {
     loiDoc: DocumentData
   ) {
     const loiRef = this.db_.doc(loi(surveyId, loiId));
-    await loiRef.update({[l.properties]: loiDoc[l.properties]});
+    await loiRef.update({ [l.properties]: loiDoc[l.properties] });
   }
 
   static toFirestoreMap(geometry: any) {

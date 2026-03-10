@@ -151,8 +151,8 @@ message Task {
       FLOAT = 1;
     }
     // Required. The type of number question.
-    Type type = 1;  
-}
+    Type type = 1;
+  }
 
   // A question whose response is entered manually as a data and/or time.
   message DateTimeQuestion {
@@ -214,7 +214,7 @@ message Task {
       DROP_PIN = 1;
       DRAW_AREA = 2;
     }
-    // Required. One or more methods which the user may use to complete the 
+    // Required. One or more methods which the user may use to complete the
     // geometry task. If multiple methods are specified, data collectors are
     // prompted which method should be used.
     repeated Method allowed_methods = 1;
@@ -231,7 +231,6 @@ message Task {
     // Optional. The minimum accuracy, in meters, required when "location lock"
     // is enabled. When unset (`0`), a default of 15m is used.
     float min_accuracy_meters = 3;
-
   }
 
   // A task in which the user must capture their current device location.
@@ -252,7 +251,7 @@ message Task {
     // Required. The maximum compass heading, in degrees, at which the photo may
     // be captured. Use 360 with min. 0 to disable this constraint.
     uint32 max_heading_degrees = 2;
-}
+  }
 
   // Defines a single condition used to determine whether a task should be
   // shown.

@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {Injectable} from '@angular/core';
-import {List, Map} from 'immutable';
-import {BehaviorSubject, Observable, firstValueFrom} from 'rxjs';
+import { Injectable } from '@angular/core';
+import { List, Map } from 'immutable';
+import { BehaviorSubject, Observable, firstValueFrom } from 'rxjs';
 
-import {Job} from 'app/models/job.model';
-import {Role} from 'app/models/role.model';
+import { Job } from 'app/models/job.model';
+import { Role } from 'app/models/role.model';
 import {
   DataSharingType,
   Survey,
@@ -27,9 +27,9 @@ import {
   SurveyGeneralAccess,
   SurveyState,
 } from 'app/models/survey.model';
-import {Task} from 'app/models/task/task.model';
+import { Task } from 'app/models/task/task.model';
 
-import {DataStoreService} from '../data-store/data-store.service';
+import { DataStoreService } from '../data-store/data-store.service';
 
 @Injectable({
   providedIn: 'root',
@@ -70,13 +70,13 @@ export class DraftSurveyService {
       const index =
         Math.max(...currentSurvey.jobs.valueSeq().map(j => j.index), 0) + 1;
 
-      job = job.copyWith({index});
+      job = job.copyWith({ index });
 
       if (!duplicate) this.valid = this.valid.set(job.id, false);
     }
 
     this.survey$.next(
-      currentSurvey.copyWith({jobs: currentSurvey.jobs.set(job.id, job)})
+      currentSurvey.copyWith({ jobs: currentSurvey.jobs.set(job.id, job) })
     );
 
     this.dirty = true;
@@ -86,7 +86,7 @@ export class DraftSurveyService {
     const currentSurvey = this.survey$.getValue();
 
     this.survey$.next(
-      currentSurvey.copyWith({jobs: currentSurvey.jobs.remove(job.id)})
+      currentSurvey.copyWith({ jobs: currentSurvey.jobs.remove(job.id) })
     );
 
     this.dirty = true;
@@ -103,7 +103,7 @@ export class DraftSurveyService {
     });
 
     this.survey$.next(
-      currentSurvey.copyWith({jobs: currentSurvey.jobs.set(job.id, job)})
+      currentSurvey.copyWith({ jobs: currentSurvey.jobs.set(job.id, job) })
     );
 
     this.dirty = true;
@@ -118,7 +118,7 @@ export class DraftSurveyService {
   ): void {
     const currentSurvey = this.survey$.getValue();
 
-    this.survey$.next(currentSurvey.copyWith({title, description}));
+    this.survey$.next(currentSurvey.copyWith({ title, description }));
 
     this.dirty = true;
 
@@ -128,7 +128,7 @@ export class DraftSurveyService {
   updateAcl(acl: Map<string, Role>): void {
     const currentSurvey = this.survey$.getValue();
 
-    this.survey$.next(currentSurvey.copyWith({acl}));
+    this.survey$.next(currentSurvey.copyWith({ acl }));
 
     this.dirty = true;
   }
@@ -136,7 +136,7 @@ export class DraftSurveyService {
   updateGeneralAccess(generalAccess: SurveyGeneralAccess): void {
     const currentSurvey = this.survey$.getValue();
 
-    this.survey$.next(currentSurvey.copyWith({generalAccess}));
+    this.survey$.next(currentSurvey.copyWith({ generalAccess }));
 
     this.dirty = true;
   }
@@ -144,7 +144,7 @@ export class DraftSurveyService {
   updateDataVisibility(dataVisibility: SurveyDataVisibility): void {
     const currentSurvey = this.survey$.getValue();
 
-    this.survey$.next(currentSurvey.copyWith({dataVisibility}));
+    this.survey$.next(currentSurvey.copyWith({ dataVisibility }));
 
     this.dirty = true;
   }
@@ -154,7 +154,7 @@ export class DraftSurveyService {
 
     this.survey$.next(
       currentSurvey.copyWith({
-        dataSharingTerms: {type, ...(customText && {customText})},
+        dataSharingTerms: { type, ...(customText && { customText }) },
       })
     );
 
@@ -164,7 +164,7 @@ export class DraftSurveyService {
   updateState(state: SurveyState): void {
     const currentSurvey = this.survey$.getValue();
 
-    this.survey$.next(currentSurvey.copyWith({state}));
+    this.survey$.next(currentSurvey.copyWith({ state }));
   }
 
   async updateSurvey(): Promise<void> {

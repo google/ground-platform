@@ -17,12 +17,15 @@
 export function deleteEmpty(
   dict: Record<any, any | undefined | null>
 ): Record<any, any> {
-  return Object.keys(dict).reduce((acc, key) => {
-    if (!isEmpty(dict[key])) {
-      acc[key] = dict[key];
-    }
-    return acc;
-  }, {} as Record<string, any>);
+  return Object.keys(dict).reduce(
+    (acc, key) => {
+      if (!isEmpty(dict[key])) {
+        acc[key] = dict[key];
+      }
+      return acc;
+    },
+    {} as Record<string, any>
+  );
 }
 
 export function isEmpty(obj: any | null | undefined): boolean {

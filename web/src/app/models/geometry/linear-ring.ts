@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {List} from 'immutable';
+import { List } from 'immutable';
 
-import {Coordinate} from './coordinate';
-import {GeometryType} from './geometry';
-import {LineString} from './line-string';
+import { Coordinate } from './coordinate';
+import { GeometryType } from './geometry';
+import { LineString } from './line-string';
 
 /**
  * Models an OGC SFS LinearRing. A LinearRing is a LineString which is both
