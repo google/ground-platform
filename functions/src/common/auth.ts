@@ -53,7 +53,7 @@ export async function getDecodedIdToken(
   const idToken = getAuthBearer(req);
   if (idToken) {
     return getAuth().verifyIdToken(idToken);
-  } else if (req.cookies) {
+  } else if (req.cookies?.[SESSION_COOKIE_NAME]) {
     return await getAuth().verifySessionCookie(
       req.cookies[SESSION_COOKIE_NAME],
       true /** checkRevoked */
