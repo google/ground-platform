@@ -17,6 +17,7 @@
 import { FirebaseOptions } from '@angular/fire/app';
 import { Env } from './environment-enums';
 import { Environment } from './environment-interface';
+import { buildVersion, buildCommitId } from './build-info.generated';
 
 // Replace with production values for your hosted environment.
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
@@ -37,4 +38,6 @@ export const environment: Environment = {
   cloudFunctionsUrl: '',
   useEmulators: false,
   env: Env.Prod,
+  version: buildVersion,
+  commitId: buildCommitId,
 };

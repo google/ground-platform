@@ -20,6 +20,7 @@
 **/generated/
 **/*.log
 web/google-maps-api.js
+web/src/environments/build-info.generated.ts
 web/coverage/
 # Firebase Emulator local snapshots
 data/local

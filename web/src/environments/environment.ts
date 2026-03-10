@@ -15,9 +15,10 @@
  */
 
 import { Environment } from './environment-interface';
+import { buildVersion, buildCommitId } from './build-info.generated';
 
 // This file will be replaced during build by using the `fileReplacements` array.
 // For example, `ng build --prod` replaces `environment.ts` with `environment.prod.ts`.
 // The list of file replacements can be found in `angular.json`.
 
-export const environment: Environment = {};
+export const environment: Environment = { version: buildVersion, commitId: buildCommitId };

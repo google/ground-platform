@@ -19,9 +19,11 @@ import { FirebaseOptions } from '@angular/fire/app';
 
 export interface Environment {
   cloudFunctionsUrl?: string;
+  commitId?: string;
   env?: Env;
   firebase?: FirebaseOptions;
   googleMapsApiKey?: string;
   production?: boolean;
   useEmulators?: boolean;
+  version?: string;
 }

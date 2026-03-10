@@ -17,6 +17,7 @@
 import { FirebaseOptions } from '@angular/fire/app';
 import { Env } from './environment-enums';
 import { Environment } from './environment-interface';
+import { buildVersion, buildCommitId } from './build-info.generated';
 
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
@@ -36,4 +37,6 @@ export const environment: Environment = {
   cloudFunctionsUrl: `https://${firebaseConfig.projectId}.web.app`,
   useEmulators: false,
   env: Env.Dev,
+  version: buildVersion,
+  commitId: buildCommitId,
 };

@@ -14,6 +14,13 @@
           "command": "rm -rf dist coverage *.log"
         }
       },
+      "generate-build-info": {
+        "executor": "nx:run-commands",
+        "options": {
+          "cwd": "{projectRoot}",
+          "command": "node scripts/generate-build-info.mjs"
+        }
+      },
       "lint": {
         "executor": "nx:run-commands",
         "options": {
@@ -52,7 +59,8 @@
           }
         },
         "dependsOn": [
-          "^build"
+          "^build",
+          "generate-build-info"
         ],
         "defaultConfiguration": "development"
       },
@@ -73,7 +81,8 @@
           }
         },
         "dependsOn": [
-          "^build"
+          "^build",
+          "generate-build-info"
         ],
         "defaultConfiguration": "development"
       },

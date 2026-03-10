@@ -35,4 +35,6 @@ export const environment = {
     messagingSenderId: 'mock-messaging-sender-id',
     appId: 'mock-app-id',
   },
+  version: '0.0.0-test',
+  commitId: 'test',
 };

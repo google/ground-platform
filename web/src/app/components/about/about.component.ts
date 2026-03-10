@@ -16,6 +16,7 @@
 
 import { Location } from '@angular/common';
 import { Component } from '@angular/core';
+import { environment } from 'environments/environment';
 
 @Component({
   selector: 'ground-about-page',
@@ -24,6 +25,9 @@ import { Component } from '@angular/core';
   standalone: false,
 })
 export class AboutComponent {
+  readonly version = environment.version;
+  readonly commitId = environment.commitId;
+
   constructor(private location: Location) {}
 
   onBackButtonClick() {

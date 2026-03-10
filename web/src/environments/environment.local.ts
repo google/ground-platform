@@ -22,6 +22,7 @@
 import { FirebaseOptions } from '@angular/fire/app';
 import { Env } from './environment-enums';
 import { Environment } from './environment-interface';
+import { buildVersion, buildCommitId } from './build-info.generated';
 
 export const environment: Environment = {
   production: false,
@@ -33,4 +34,6 @@ export const environment: Environment = {
   cloudFunctionsUrl: '',
   useEmulators: true,
   env: Env.Local,
+  version: buildVersion,
+  commitId: buildCommitId,
 };
