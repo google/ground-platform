@@ -32,6 +32,10 @@ import {
   provideFunctions,
 } from '@angular/fire/functions';
 import {
+  getAnalytics,
+  provideAnalytics,
+} from '@angular/fire/analytics';
+import {
   getRemoteConfig,
   provideRemoteConfig,
 } from '@angular/fire/remote-config';
@@ -82,6 +86,9 @@ import { environment } from 'environments/environment';
       }
       return functions;
     }),
+    ...(environment.firebase?.measurementId
+      ? [provideAnalytics(() => getAnalytics())]
+      : []),
     provideRemoteConfig(() => getRemoteConfig()),
     provideStorage(() => {
       const storage = getStorage();
