@@ -19,10 +19,10 @@ import {
   onDocumentCreated,
   onDocumentWritten,
 } from 'firebase-functions/v2/firestore';
-import { onHttpsRequest, onHttpsRequestAsync } from './handlers';
+import { onHttpsRequest } from './handlers';
 import { handleProfileRefresh } from './profile-refresh';
 import { sessionLoginHandler } from './session-login';
-import { importGeoJsonCallback } from './import-geojson';
+import { importGeoJsonHandler } from './import-geojson';
 import { exportCsvHandler } from './export-csv';
 import { exportGeojsonHandler } from './export-geojson';
 import { onCall } from 'firebase-functions/v2/https';
@@ -68,7 +68,7 @@ export const onCreatePasslistEntry = onDocumentCreated(
   onCreatePasslistEntryHandler
 );
 
-export const importGeoJson = onHttpsRequestAsync(importGeoJsonCallback);
+export const importGeoJson = onHttpsRequest(importGeoJsonHandler);
 
 export const exportCsv = onHttpsRequest(exportCsvHandler);
 
