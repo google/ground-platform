@@ -128,7 +128,6 @@ export async function exportCsvHandler(
     }
   }
 
-  res.status(StatusCodes.OK);
   csvStream.end();
 }
 
