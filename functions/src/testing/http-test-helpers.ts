@@ -44,6 +44,7 @@ export function createResponseSpy(chunks?: string[]): Response<any> {
   const res = jasmine.createSpyObj<Response<any>>('response', [
     'send',
     'status',
+    'json',
     'end',
     'write',
     'type',
@@ -54,6 +55,7 @@ export function createResponseSpy(chunks?: string[]): Response<any> {
     'removeListener',
   ]);
   res.status.and.callThrough().and.returnValue(res);
+  res.json.and.callThrough().and.returnValue(res);
   res.end.and.callThrough().and.returnValue(res);
   res.write.and.callFake((chunk: any): boolean => {
     chunks?.push(chunk.toString());
