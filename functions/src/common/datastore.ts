@@ -174,7 +174,7 @@ export class Datastore {
       .collection(lois(surveyId))
       .where(l.jobId, '==', jobId)
       .orderBy(FieldPath.documentId())
-      .select('5', '9', '10')
+      .select(String(l.ownerId), String(l.source), String(l.properties))
       .limit(limit);
   }
 

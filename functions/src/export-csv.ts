@@ -24,11 +24,13 @@ import { getDatastore } from './common/context';
 import { DecodedIdToken } from 'firebase-admin/auth';
 import { StatusCodes } from 'http-status-codes';
 import { List } from 'immutable';
-import { timestampToInt, toMessage } from '@ground/lib';
+import { registry, timestampToInt, toMessage } from '@ground/lib';
 import { GroundProtos } from '@ground/proto';
 import { toGeoJsonGeometry } from '@ground/lib';
 
 import Pb = GroundProtos.ground.v1beta1;
+
+const l = registry.getFieldIds(Pb.LocationOfInterest);
 
 /**
  * Iterates over all LOIs and submissions in a job, joining them
@@ -94,12 +96,15 @@ export async function exportCsvHandler(
     await Promise.all(
       snapshot.docs.map(async doc => {
         const loi = doc.data();
-        if (ownerIdFilter) {
-          if (!(loi[9] === 2 && loi[5] === ownerIdFilter)) {
-            return;
-          }
-        }
-        Object.keys(loi[10] || {}).forEach(key => loiProperties.add(key));
+        if (
+          loi[l.source] === Pb.LocationOfInterest.Source.IMPORTED ||
+          ownerIdFilter === null ||
+          loi[l.ownerId] === ownerIdFilter
+        ) {
+          Object.keys(loi[l.properties] || {}).forEach(key =>
+            loiProperties.add(key)
+          );
+        } else return;
       })
     );
     lastVisible = snapshot.docs[snapshot.docs.length - 1];
