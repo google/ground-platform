@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+rules_version = '2';
+
  // Define access rules for Firestore collections and documents.
  service cloud.firestore {
   match /databases/{database}/documents {
@@ -22,7 +24,8 @@
      * Fetches and returns the survey with the specified id.
      */
     function getSurvey(surveyId) {
-      return get(/databases/$(database)/documents/surveys/$(surveyId)).data;
+      let doc = get(/databases/$(database)/documents/surveys/$(surveyId));
+      return doc == null ? null : doc.data;
     }
 
     /**
@@ -55,14 +58,16 @@
      * Returns the regular expression matching emails granted access.
      */
     function getPassRegexp() {
-      return get(/databases/$(database)/documents/passlist/regexp).data.regexp
+      let doc = get(/databases/$(database)/documents/passlist/regexp);
+      return doc == null ? null : doc.data.regexp;
     }
 
     /**
      * Returns true iff the user's email is listed in the passlist or allowed via regex.
      */
     function isPasslisted() {
-      return request.auth.token.email.matches(getPassRegexp())
+      let regexp = getPassRegexp();
+      return (regexp != null && request.auth.token.email.matches(regexp))
         || exists(/databases/$(database)/documents/passlist/$(request.auth.token.email));
     }
 
@@ -78,7 +83,7 @@
      * survey.
      */
     function canViewSurvey(survey) {
-      return isSignedIn() &&
+      return survey != null && isSignedIn() &&
         (isUnlistedOrPublic(survey) || getRole(survey) != null);
     }
 
@@ -113,7 +118,7 @@
      * assigned this role by default.
      */
     function canManageSurvey(survey) {
-      return isSignedIn() && isOneOf(survey, [
+      return survey != null && isSignedIn() && isOneOf(survey, [
         3 /* SURVEY_ORGANIZER */
       ]);
     }
@@ -123,7 +128,7 @@
      * and submissions to the specified survey.
      */
     function canCollectData(survey) {
-      return isSignedIn() &&
+      return survey != null && isSignedIn() &&
         (isUnlistedOrPublic(survey) || isOneOf(survey, [
           2 /* DATA_COLLECTOR */,
           3 /* SURVEY_ORGANIZER */
