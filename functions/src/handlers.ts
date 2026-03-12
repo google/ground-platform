@@ -58,7 +58,7 @@ async function requireIdToken(
   }
 }
 
-function onError(res: any, err: any) {
+function onError(res: Response, err: any) {
   console.error(err);
   res
     .status(StatusCodes.INTERNAL_SERVER_ERROR)
@@ -78,8 +78,8 @@ export function onHttpsRequest(handler: HttpsRequestHandler) {
   return onRequest((req: Request, res: Response) =>
     corsMiddleware(req, res, () =>
       cookieParser()(
-        req as any,
-        res as any,
+        req as Request,
+        res as Response,
         async () =>
           await requireIdToken(req, res, async (idToken: DecodedIdToken) => {
             try {
@@ -104,7 +104,7 @@ export type ErrorHandler = (httpStatusCode: number, message: string) => void;
  */
 export type HttpsRequestCallback = (
   req: Request,
-  res: Response<any>,
+  res: Response,
   user: DecodedIdToken,
   done: () => void,
   error: ErrorHandler
@@ -113,7 +113,7 @@ export type HttpsRequestCallback = (
 export async function invokeCallbackAsync(
   callback: HttpsRequestCallback,
   req: Request,
-  res: Response<any>,
+  res: Response,
   user: DecodedIdToken
 ) {
   await new Promise((resolve, reject) =>
@@ -136,7 +136,7 @@ export async function invokeCallbackAsync(
 function invokeCallback(
   callback: HttpsRequestCallback,
   req: Request,
-  res: Response<any>,
+  res: Response,
   user: DecodedIdToken,
   done: () => void,
   error: ErrorHandler
@@ -159,8 +159,8 @@ export function onHttpsRequestAsync(callback: HttpsRequestCallback) {
   return onRequest((req: Request, res: Response) =>
     corsMiddleware(req, res, () =>
       cookieParser()(
-        req as any,
-        res as any,
+        req as Request,
+        res as Response,
         async () =>
           await requireIdToken(req, res, async (idToken: DecodedIdToken) => {
             await invokeCallbackAsync(callback, req, res, idToken);
