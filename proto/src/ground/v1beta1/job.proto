@@ -40,7 +40,16 @@ message Job {
   // One or more data collection tasks to be carried out by the user in order
   // to collect and submit data.
   repeated Task tasks = 5;
+
+  // Integrations enabled for this job, keyed by integration ID.
+  // The presence of an entry indicates the integration is active.
+  // The value holds integration-specific configuration (reserved for future use).
+  map<string, Integration> integrations = 6;
 }
+
+// Configuration for a single integration associated with a job.
+// Currently empty; will be extended with integration-specific fields.
+message Integration {}
 
 // A style used when rendering geometries and other UI elements associated
 // with this job.
