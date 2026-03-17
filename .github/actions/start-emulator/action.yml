@@ -43,7 +43,6 @@ runs:
         MAX_TRIES=60
         stdbuf -oL -eL pnpm exec nx start-android-test-data > /tmp/firebase-emulator.log 2>&1 &
         EMULATOR_PID=$!
-        echo $EMULATOR_PID > /tmp/firebase-emulator.pid
     
         for ((i=1; i<=$MAX_TRIES; i++)); do
           if ! kill -0 $EMULATOR_PID 2>/dev/null; then
