@@ -42,8 +42,14 @@ runs:
       run: |
         MAX_TRIES=60
         pnpm exec nx start-android-test-data > firebase-emulator.log 2>&1 &
+        EMULATOR_PID=$!
     
         for ((i=1; i<=$MAX_TRIES; i++)); do
+          if ! kill -0 $EMULATOR_PID 2>/dev/null; then
+            echo "Firebase emulator process exited unexpectedly"
+            exit 1
+          fi
+
           if curl -sf http://localhost:4000 > /dev/null 2>&1; then
             echo "Firebase emulator started!"
             exit 0
@@ -55,4 +61,11 @@ runs:
         echo "Firebase Emulator failed to start"
         cat firebase-emulator.log
         exit 1
+
+    - name: Upload Firebase emulator logs
+      if: always()
+      uses: actions/upload-artifact@v6
+      with:
+        name: firebase-emulator-logs
+        path: firebase-emulator.log
         
