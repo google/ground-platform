@@ -57,7 +57,7 @@ function taskDataPbArrayToModel(pb: Pb.ITaskData[]): SubmissionData {
     }
   });
 
-  return Map(submissionData);
+  return Map(submissionData) as unknown as SubmissionData;
 }
 
 function taskDataPbToModel(taskData: Pb.ITaskData): Result | null {

@@ -92,7 +92,7 @@ export class DrawingToolsComponent implements OnInit, OnDestroy {
     effect(() => {
       const survey = this.survey();
       if (survey) {
-        this.selectedJobId = survey.jobs.keySeq().first();
+        this.selectedJobId = survey.jobs.keySeq().first() ?? '';
         this.drawingToolsService.setSelectedJobId(this.selectedJobId);
       }
     });

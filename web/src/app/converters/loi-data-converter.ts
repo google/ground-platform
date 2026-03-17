@@ -36,7 +36,7 @@ function propertiesPbToModel(pb: {
       properties[k] = v;
     }
   }
-  return Map(properties);
+  return Map(properties) as unknown as Map<string, string | number>;
 }
 
 export function loiDocToModel(

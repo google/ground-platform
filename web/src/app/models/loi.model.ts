@@ -33,6 +33,6 @@ export class LocationOfInterest {
       .sort((a, b) =>
         (a.geometry?.getArea() || 0) < (b.geometry?.getArea() || 0) ? -1 : 1
       )
-      .first();
+      .first()!;
   }
 }

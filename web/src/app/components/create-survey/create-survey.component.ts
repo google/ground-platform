@@ -386,7 +386,7 @@ export class CreateSurveyComponent implements OnInit {
     await this.taskService.addOrUpdateTasks(
       survey.id,
       // Assume there is at least one job.
-      survey.jobs.first(),
+      survey.jobs.first()!,
       tasks!
     );
   }

@@ -312,7 +312,7 @@ export class SubmissionFormComponent implements OnChanges {
     result?: Result
   ): void {
     const selectedOptionId = (
-      (result?.value as MultipleSelection)?.values.first() as Option
+      (result?.value as MultipleSelection)?.values.first() as unknown as Option
     )?.id;
     group[task.id] = task.required
       ? new FormControl(selectedOptionId, Validators.required)
