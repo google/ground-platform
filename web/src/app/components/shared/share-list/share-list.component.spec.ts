@@ -85,7 +85,7 @@ describe('ShareListComponent', () => {
         'title',
         'description',
         Map(),
-        Map({ [user.email]: Role.VIEWER }),
+        Map({ [user.email]: Role.VIEWER }) as unknown as Map<string, Role>,
         'owner-email',
         { type: DataSharingType.PRIVATE }
       )

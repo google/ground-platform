@@ -221,7 +221,7 @@ describe('SurveyService', () => {
         'title',
         'desc',
         Map(),
-        Map({ [mockUser.email]: Role.SURVEY_ORGANIZER }),
+        Map({ [mockUser.email]: Role.SURVEY_ORGANIZER }) as unknown as Map<string, Role>,
         'ownerId',
         { type: DataSharingType.PRIVATE }
       );
@@ -234,7 +234,7 @@ describe('SurveyService', () => {
         'title',
         'desc',
         Map(),
-        Map({ [mockUser.email]: Role.OWNER }),
+        Map({ [mockUser.email]: Role.OWNER }) as unknown as Map<string, Role>,
         'ownerId',
         { type: DataSharingType.PRIVATE }
       );
@@ -247,7 +247,7 @@ describe('SurveyService', () => {
         'title',
         'desc',
         Map(),
-        Map({ [mockUser.email]: Role.VIEWER }),
+        Map({ [mockUser.email]: Role.VIEWER }) as unknown as Map<string, Role>,
         'ownerId',
         { type: DataSharingType.PRIVATE }
       );
