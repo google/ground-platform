@@ -57,7 +57,7 @@ function taskDataPbArrayToModel(pb: Pb.ITaskData[]): SubmissionData {
     }
   });
 
-  return Map(submissionData);
+  return Map(Object.entries(submissionData));
 }
 
 function taskDataPbToModel(taskData: Pb.ITaskData): Result | null {
