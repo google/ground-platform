@@ -182,7 +182,7 @@ describe('DrawingToolsComponent', () => {
       expect(
         authServiceSpy.canUserAddPointsToJob(
           mockSurvey,
-          mockSurvey.jobs.first()
+          mockSurvey.jobs.first()!
         )
       ).toBe(false);
 
