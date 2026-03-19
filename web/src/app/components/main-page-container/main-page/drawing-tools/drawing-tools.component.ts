@@ -61,7 +61,7 @@ export class DrawingToolsComponent implements OnInit, OnDestroy {
   polygonValue = 'polygon';
   selectedValue = '';
   private lastSelectedValue = '';
-  selectedJobId = '';
+  selectedJobId: string | undefined = '';
 
   readonly jobs = computed(() => {
     const survey = this.survey();
