@@ -1,8 +1,9 @@
-import { Component, input } from '@angular/core';
+import { Component, inject } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { MatDialog } from '@angular/material/dialog';
 
 import { ShareDialogComponent } from 'app/components/shared/share-dialog/share-dialog.component';
-import { Survey } from 'app/models/survey.model';
+import { DraftSurveyService } from 'app/services/draft-survey/draft-survey.service';
 
 @Component({
   selector: 'share-survey',
@@ -11,9 +12,10 @@ import { Survey } from 'app/models/survey.model';
   standalone: false,
 })
 export class ShareSurveyComponent {
-  survey = input<Survey>();
+  private draftSurveyService = inject(DraftSurveyService);
+  private dialog = inject(MatDialog);
 
-  constructor(private dialog: MatDialog) {}
+  survey = toSignal(this.draftSurveyService.getSurvey$());
 
   openShareDialog(): void {
     this.dialog.open(ShareDialogComponent, {
