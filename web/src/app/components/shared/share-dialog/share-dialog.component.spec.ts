@@ -17,15 +17,15 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
-import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatListModule } from '@angular/material/list';
 import { MatSelectModule } from '@angular/material/select';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { Map } from 'immutable';
-import { of } from 'rxjs';
 
+import { DataSharingType, Survey } from 'app/models/survey.model';
 import { DraftSurveyService } from 'app/services/draft-survey/draft-survey.service';
 
 import { ShareDialogComponent } from './share-dialog.component';
@@ -52,9 +52,20 @@ describe('ShareDialogComponent', () => {
         { provide: MatDialogRef, useValue: {} },
         {
           provide: DraftSurveyService,
+          useValue: { updateAcl: () => null },
+        },
+        {
+          provide: MAT_DIALOG_DATA,
           useValue: {
-            getSurvey$: () => of({ acl: Map(), getAclEntriesSorted: () => [] }),
-            updateAcl: () => null,
+            survey: new Survey(
+              'id',
+              'title',
+              'description',
+              Map(),
+              Map(),
+              'owner@example.com',
+              { type: DataSharingType.PRIVATE }
+            ),
           },
         },
       ],

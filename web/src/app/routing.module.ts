@@ -61,6 +61,7 @@ import { SurveyJsonModule } from './components/edit-survey/survey-json/survey-js
 import { ErrorComponent } from './components/error/error.component';
 import { ErrorModule } from './components/error/error.module';
 import { ShareSurveyComponent } from './components/shared/share-survey/share-survey.component';
+import { surveyResolver } from './resolvers/survey.resolver';
 import { TermsComponent } from './components/terms/terms.component';
 import { TermsModule } from './components/terms/terms.module';
 import { dirtyCheckGuard } from './guards/dirty-check.guard';
@@ -99,7 +100,11 @@ const routes: Routes = [
     children: [
       { path: 'job/:id', component: EditJobComponent },
       { path: 'survey', component: EditDetailsComponent },
-      { path: 'share', component: ShareSurveyComponent },
+      {
+        path: 'share',
+        component: ShareSurveyComponent,
+        resolve: { survey: surveyResolver },
+      },
       { path: 'json', component: SurveyJsonComponent },
     ],
   },

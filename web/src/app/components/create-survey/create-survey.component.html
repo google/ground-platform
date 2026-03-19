@@ -95,6 +95,7 @@
             ></data-sharing-terms>
             <share-survey
               *ngSwitchCase="CreateSurveyPhase.SHARE_SURVEY"
+              [survey]="survey"
             ></share-survey>
           </ng-container>
         </ground-step-card>
