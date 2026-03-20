@@ -3,6 +3,9 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatCardModule } from '@angular/material/card';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
+import { NEVER } from 'rxjs';
+
+import { DraftSurveyService } from 'app/services/draft-survey/draft-survey.service';
 
 import { ShareSurveyComponent } from './share-survey.component';
 
@@ -15,6 +18,12 @@ describe('ShareSurveyComponent', () => {
       imports: [MatIconModule, MatDialogModule, MatCardModule],
       declarations: [ShareSurveyComponent],
       schemas: [NO_ERRORS_SCHEMA],
+      providers: [
+        {
+          provide: DraftSurveyService,
+          useValue: { getSurvey$: () => NEVER },
+        },
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(ShareSurveyComponent);
