@@ -37,7 +37,7 @@ export class Job extends Copiable {
     readonly name?: string,
     readonly tasks?: OrderedMap<string, Task>,
     readonly strategy?: DataCollectionStrategy,
-    readonly integrations: Map<string, Integration> = Map()
+    readonly enabledIntegrations: Map<string, Integration> = Map()
   ) {
     super();
 

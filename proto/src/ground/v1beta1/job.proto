@@ -42,7 +42,7 @@ message Job {
   repeated Task tasks = 5;
 
   // Zero or more integrations enabled for this job.
-  repeated Integration integrations = 6;
+  repeated Integration enabled_integrations = 6;
 }
 
 // Configuration for a single integration associated with a job.
