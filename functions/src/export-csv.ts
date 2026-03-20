@@ -22,6 +22,7 @@ import { isAccessibleLoi } from './common/utils';
 import { geojsonToWKT } from '@terraformer/wkt';
 import { getDatastore } from './common/context';
 import { DecodedIdToken } from 'firebase-admin/auth';
+import { QueryDocumentSnapshot } from 'firebase-admin/firestore';
 import { StatusCodes } from 'http-status-codes';
 import { List } from 'immutable';
 import { registry, timestampToInt, toMessage } from '@ground/lib';
@@ -93,19 +94,8 @@ export async function exportCsvHandler(
   do {
     const snapshot = await query.get();
     if (snapshot.empty) break;
-    await Promise.all(
-      snapshot.docs.map(async doc => {
-        const loi = doc.data();
-        if (
-          loi[l.source] === Pb.LocationOfInterest.Source.IMPORTED ||
-          ownerIdFilter === null ||
-          loi[l.ownerId] === ownerIdFilter
-        ) {
-          Object.keys(loi[l.properties] || {}).forEach(key =>
-            loiProperties.add(key)
-          );
-        } else return;
-      })
+    snapshot.docs.forEach(doc =>
+      collectLoiProperties(doc, ownerIdFilter, loiProperties)
     );
     lastVisible = snapshot.docs[snapshot.docs.length - 1];
     query = query.startAfter(lastVisible);
@@ -315,6 +305,24 @@ function getFileName(jobName: string | null) {
   jobName = jobName || 'ground-export';
   const fileBase = jobName.toLowerCase().replace(/[^a-z0-9]/gi, '-');
   return `${fileBase}.csv`;
+}
+
+/**
+ * Adds the property keys of an accessible LOI document to the provided set.
+ */
+function collectLoiProperties(
+  doc: QueryDocumentSnapshot,
+  ownerIdFilter: string | null,
+  loiProperties: Set<string>
+): void {
+  const loi = doc.data();
+  if (
+    loi[l.source] === Pb.LocationOfInterest.Source.IMPORTED ||
+    ownerIdFilter === null ||
+    loi[l.ownerId] === ownerIdFilter
+  ) {
+    Object.keys(loi[l.properties] || {}).forEach(key => loiProperties.add(key));
+  }
 }
 
 /**
