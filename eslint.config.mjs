@@ -20,9 +20,9 @@ import angularTemplatePlugin from '@angular-eslint/eslint-plugin-template';
 import typescriptEslintPlugin from '@typescript-eslint/eslint-plugin';
 import typescriptParser from '@typescript-eslint/parser';
 import headers from 'eslint-plugin-headers';
+import eslintConfigPrettier from 'eslint-config-prettier';
 import importPlugin from 'eslint-plugin-import';
 import nodePlugin from 'eslint-plugin-n';
-import prettierPlugin from 'eslint-plugin-prettier';
 import unusedImports from 'eslint-plugin-unused-imports';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -56,7 +56,6 @@ export default [
     plugins: {
       '@typescript-eslint': typescriptEslintPlugin,
       n: nodePlugin,
-      prettier: prettierPlugin,
       'unused-imports': unusedImports,
       headers,
     },
@@ -97,7 +96,6 @@ export default [
       ],
       'n/no-extraneous-import': 'off',
       'n/no-missing-import': 'off',
-      'prettier/prettier': 'warn',
       'no-unused-vars': 'off',
       'unused-imports/no-unused-imports': 'error',
       'unused-imports/no-unused-vars': [
@@ -246,10 +244,10 @@ limitations under the License.`,
       '@angular-eslint/template': angularTemplatePlugin,
     },
     rules: {
-      'prettier/prettier': ['warn', { parser: 'angular' }],
       '@angular-eslint/template/prefer-control-flow': 'off',
       '@angular-eslint/template/eqeqeq': 'warn',
       '@angular-eslint/template/no-negated-async': 'warn',
     },
   },
+  eslintConfigPrettier,
 ];

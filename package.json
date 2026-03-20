@@ -2,22 +2,11 @@
   "name": "@ground/root",
   "version": "0.0.1",
   "description": "Root package for Ground hosted components",
-  "scripts": {
-    "export:local": "firebase emulators:export data/local --project demo-local --only firestore",
-    "start-and-export:test": "firebase emulators:exec 'npm run watch:local' --project demo-local --ui --config firebase.local.json --import data/test --export-on-exit data/test",
-    "test:e2e:create": "WAIT_ON_INTERVAL=30000 start-server-and-test start-and-export:test '5000|http://localhost:4000/firestore' 'npm run test:create --prefix=e2e-tests'",
-    "test:e2e:create:debug": "WAIT_ON_INTERVAL=30000 start-server-and-test start-and-export:test '5000|http://localhost:4000/firestore' 'npm run test:create:debug --prefix=e2e-tests'",
-    "test:e2e:verify": "WAIT_ON_INTERVAL=30000 start-server-and-test start-and-export:test '5000|http://localhost:4000/firestore' 'npm run test:verify --prefix=e2e-tests'",
-    "test:e2e:verify:debug": "WAIT_ON_INTERVAL=30000 start-server-and-test start-and-export:test '5000|http://localhost:4000/firestore' 'npm run test:verify:debug --prefix=e2e-tests'"
-  },
   "nx": {
     "name": "root",
     "targets": {
       "clean": {
-        "executor": "nx:run-commands",
-        "options": {
-          "command": "nx run-many -t clean --exclude=root --parallel"
-        }
+        "command": "nx run-many -t clean --exclude=root --parallel --output-style=stream-without-prefixes"
       },
       "lint": {
         "executor": "nx:noop",
@@ -34,6 +23,15 @@
         "dependsOn": [
           {
             "target": "test",
+            "projects": "*"
+          }
+        ]
+      },
+      "format:projects": {
+        "executor": "nx:noop",
+        "dependsOn": [
+          {
+            "target": "format:check",
             "projects": "*"
           }
         ]
@@ -88,6 +86,24 @@
         "dependsOn": [
           "build"
         ]
+      },
+      "export:local": {
+        "command": "firebase emulators:export data/local --project demo-local --only firestore"
+      },
+      "start-and-export:test": {
+        "command": "firebase emulators:exec 'npm run watch:local' --project demo-local --ui --config firebase.local.json --import data/test --export-on-exit data/test"
+      },
+      "test:e2e:create": {
+        "command": "WAIT_ON_INTERVAL=30000 start-server-and-test 'nx run root:start-and-export:test' '5000|http://localhost:4000/firestore' 'nx run e2e-tests:test:create'"
+      },
+      "test:e2e:create:debug": {
+        "command": "WAIT_ON_INTERVAL=30000 start-server-and-test 'nx run root:start-and-export:test' '5000|http://localhost:4000/firestore' 'nx run e2e-tests:test:create:debug'"
+      },
+      "test:e2e:verify": {
+        "command": "WAIT_ON_INTERVAL=30000 start-server-and-test 'nx run root:start-and-export:test' '5000|http://localhost:4000/firestore' 'nx run e2e-tests:test:verify'"
+      },
+      "test:e2e:verify:debug": {
+        "command": "WAIT_ON_INTERVAL=30000 start-server-and-test 'nx run root:start-and-export:test' '5000|http://localhost:4000/firestore' 'nx run e2e-tests:test:verify:debug'"
       }
     }
   },
@@ -115,10 +131,10 @@
     "eslint-plugin-headers": "catalog:dev",
     "eslint-plugin-import": "catalog:dev",
     "eslint-plugin-n": "catalog:dev",
-    "eslint-plugin-prettier": "catalog:dev",
     "eslint-plugin-unused-imports": "catalog:dev",
     "firebase-tools": "catalog:dev",
     "gts": "catalog:dev",
+    "isolate-package": "catalog:dev",
     "jasmine": "catalog:dev",
     "jasmine-expect": "catalog:dev",
     "jasmine-spec-reporter": "catalog:dev",
@@ -131,7 +147,7 @@
     "typescript": "catalog:dev"
   },
   "engines": {
-    "node": "20"
+    "node": "22"
   },
   "pnpm": {
     "onlyBuiltDependencies": [

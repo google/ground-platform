@@ -16,7 +16,8 @@
 
 import { DecodedIdToken, getAuth } from 'firebase-admin/auth';
 import { DocumentSnapshot } from 'firebase-admin/firestore';
-import { Response, https } from 'firebase-functions/v1';
+import { Request } from 'firebase-functions/v2/https';
+import type { Response } from 'express';
 import { EmulatorIdToken } from '../handlers';
 import { GroundProtos } from '@ground/proto';
 import { registry } from '@ground/lib';
@@ -34,7 +35,7 @@ export const DATA_COLLECTOR_ROLE = Pb.Role.DATA_COLLECTOR;
  * Returns the encoded auth token from the "Authorization: Bearer" HTTP header
  * if present, or `undefined` if not.
  */
-export function getAuthBearer(req: https.Request): string | undefined {
+export function getAuthBearer(req: Request): string | undefined {
   const authHeader = req.headers.authorization;
   if (authHeader?.startsWith('Bearer ')) {
     return authHeader.split('Bearer ')[1];
@@ -47,12 +48,12 @@ export function getAuthBearer(req: https.Request): string | undefined {
  * Verifies and returns the decoded user details from the `Authorization` header or session cookie.
  */
 export async function getDecodedIdToken(
-  req: https.Request
+  req: Request
 ): Promise<DecodedIdToken | undefined> {
   const idToken = getAuthBearer(req);
   if (idToken) {
     return getAuth().verifyIdToken(idToken);
-  } else if (req.cookies) {
+  } else if (req.cookies?.[SESSION_COOKIE_NAME]) {
     return await getAuth().verifySessionCookie(
       req.cookies[SESSION_COOKIE_NAME],
       true /** checkRevoked */
@@ -66,7 +67,7 @@ export async function getDecodedIdToken(
  * Generates and sets a session cookie for the current user into the provided response.
  */
 export async function setSessionCookie(
-  req: https.Request,
+  req: Request,
   res: Response
 ): Promise<void> {
   const token = getAuthBearer(req);

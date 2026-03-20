@@ -29,11 +29,11 @@ Read through our [contributing guidelines](CONTRIBUTING.md) to learn about our s
 ### One time setup
 
 1. Install [nvm](https://github.com/nvm-sh/nvm)
-2. Install and use Node.js **20**:
+2. Install and use Node.js **22**:
 
 ```bash
-nvm install 20
-nvm use 20
+nvm install 22
+nvm use 22
 ```
 
 3. Install [Firebase CLI](https://firebase.google.com/docs/cli) and [Nx](https://nx.dev):

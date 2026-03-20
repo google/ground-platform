@@ -115,27 +115,6 @@
                   "maximumError": "200kb"
                 }
               ]
-            },
-            "development-en": {
-              "localize": ["en"]
-            },
-            "development-es": {
-              "localize": ["es"]
-            },
-            "development-fr": {
-              "localize": ["fr"]
-            },
-            "development-lo": {
-              "localize": ["lo"]
-            },
-            "development-pt": {
-              "localize": ["pt"]
-            },
-            "development-th": {
-              "localize": ["th"]
-            },
-            "development-vi": {
-              "localize": ["vi"]
             }
           },
           "defaultConfiguration": "development"
@@ -155,24 +134,6 @@
             },
             "production": {
               "buildTarget": "web:build:production"
-            },
-            "development-es": {
-              "buildTarget": "web:build:development-es"
-            },
-            "development-fr": {
-              "buildTarget": "web:build:development-fr"
-            },
-            "development-lo": {
-              "buildTarget": "web:build:development-lo"
-            },
-            "development-pt": {
-              "buildTarget": "web:build:development-pt"
-            },
-            "development-th": {
-              "buildTarget": "web:build:development-th"
-            },
-            "development-vi": {
-              "buildTarget": "web:build:development-vi"
             }
           }
         },

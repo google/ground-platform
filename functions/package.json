@@ -6,25 +6,74 @@
   "files": [
     "dist"
   ],
-  "scripts": {
-    "clean": "rm -rf dist *.log",
-    "lint": "eslint src/",
-    "shell": "firebase functions:shell",
-    "emulate": "firebase emulators:start --only functions,firestore --project demo-local",
-    "logs": "firebase functions:log",
-    "test": "jasmine --config=jasmine.json",
-    "build": "tsc",
-    "deploy": "npm run build && firebase deploy --project $npm_config_project --only functions",
-    "watch": "tsc --watch"
-  },
   "nx": {
     "name": "functions",
     "targets": {
+      "build": {
+        "executor": "nx:run-commands",
+        "options": {
+          "cwd": "{projectRoot}",
+          "command": "tsc"
+        }
+      },
+      "clean": {
+        "executor": "nx:run-commands",
+        "options": {
+          "cwd": "{projectRoot}",
+          "command": "rm -rf dist *.log"
+        }
+      },
+      "lint": {
+        "executor": "nx:run-commands",
+        "options": {
+          "cwd": "{projectRoot}",
+          "command": "eslint src"
+        }
+      },
       "test": {
-        "commands": "jasmine --config=jasmine.json",
+        "executor": "nx:run-commands",
+        "options": {
+          "cwd": "{projectRoot}",
+          "command": "jasmine --config=jasmine.json"
+        },
         "dependsOn": [
           "build"
         ]
+      },
+      "format:check": {
+        "executor": "nx:run-commands",
+        "options": {
+          "cwd": "{projectRoot}",
+          "command": "prettier --check \"src/**/*.ts\""
+        }
+      },
+      "shell": {
+        "command": "firebase functions:shell"
+      },
+      "emulate": {
+        "command": "firebase emulators:start --only functions,firestore --project demo-local"
+      },
+      "logs": {
+        "command": "firebase functions:log"
+      },
+      "deploy": {
+        "executor": "nx:run-commands",
+        "configurations": {
+          "staging": {
+            "command": "firebase deploy --project ground-dev-sig --only functions"
+          },
+          "production": {
+            "command": "firebase deploy --project YOUR-PROD-PROJECT --only functions"
+          }
+        },
+        "dependsOn": ["build"]
+      },
+      "watch": {
+        "executor": "nx:run-commands",
+        "options": {
+          "cwd": "{projectRoot}",
+          "command": "tsc --watch"
+        }
       }
     }
   },
@@ -49,13 +98,14 @@
     "sanitize-html": "catalog:"
   },
   "engines": {
-    "node": "20"
+    "node": "22"
   },
   "private": true,
   "devDependencies": {
     "@types/busboy": "catalog:dev",
     "@types/cookie-parser": "catalog:dev",
     "@types/cors": "catalog:dev",
+    "@types/express": "catalog:dev",
     "@types/geojson": "catalog:dev",
     "@types/jasmine": "catalog:dev",
     "@types/node": "catalog:dev",
@@ -64,8 +114,7 @@
     "@types/terraformer__wkt": "catalog:dev",
     "firebase-functions-test": "catalog:dev",
     "form-data-encoder": "catalog:dev",
-    "formdata-node": "catalog:dev",
-    "isolate-package": "catalog:dev"
+    "formdata-node": "catalog:dev"
   },
   "type": "commonjs"
 }

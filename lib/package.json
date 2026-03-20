@@ -3,8 +3,40 @@
   "nx": {
     "name": "lib",
     "targets": {
+      "build": {
+        "executor": "nx:run-commands",
+        "options": {
+          "cwd": "{projectRoot}",
+          "command": "tsc"
+        }
+      },
+      "clean": {
+        "executor": "nx:run-commands",
+        "options": {
+          "cwd": "{projectRoot}",
+          "command": "rm -rf dist *.log src/generated"
+        }
+      },
+      "lint": {
+        "executor": "nx:run-commands",
+        "options": {
+          "cwd": "{projectRoot}",
+          "command": "eslint src"
+        }
+      },
       "test": {
-        "commands": "jasmine --config=jasmine.json"
+        "executor": "nx:run-commands",
+        "options": {
+          "cwd": "{projectRoot}",
+          "command": "jasmine --config=jasmine.json"
+        }
+      },
+      "format:check": {
+        "executor": "nx:run-commands",
+        "options": {
+          "cwd": "{projectRoot}",
+          "command": "prettier --check \"src/**/*.ts\""
+        }
       }
     }
   },
@@ -18,18 +50,8 @@
   "files": [
     "dist"
   ],
-  "scripts": {
-    "clean": "rm -rf dist *.log src/generated",
-    "lint": "eslint src/",
-    "test": "jasmine --config=jasmine.json",
-    "build-local-deps": "npm run build --workspace=../proto",
-    "build": "tsc",
-    "build-all": "npm run build-local-deps && npm run build",
-    "build-and-test": "npm run build && npm run test",
-    "build-all-and-test": "npm run build-all && npm run test"
-  },
   "engines": {
-    "node": "20"
+    "node": "22"
   },
   "private": true,
   "dependencies": {

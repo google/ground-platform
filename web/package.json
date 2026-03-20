@@ -2,19 +2,43 @@
   "name": "@ground/web",
   "version": "0.0.1",
   "scripts": {
-    "clean": "rm -rf dist coverage *.log",
-    "pretest": "./pretest.sh",
-    "posttest": "./posttest.sh",
-    "postinstall": "node scripts/patch-karma.cjs",
-    "extract-i18n": "ng extract-i18n"
+    "postinstall": "node scripts/patch-karma.cjs"
   },
   "nx": {
     "name": "web",
     "targets": {
+      "clean": {
+        "executor": "nx:run-commands",
+        "options": {
+          "cwd": "{projectRoot}",
+          "command": "rm -rf dist coverage *.log"
+        }
+      },
+      "lint": {
+        "executor": "nx:run-commands",
+        "options": {
+          "cwd": "{projectRoot}",
+          "commands": [
+            "eslint \"src/**/*.ts\"",
+            "eslint \"src/**/*.html\""
+          ],
+          "forwardAllArgs": true
+        }
+      },
+      "test": {
+        "executor": "nx:run-commands",
+        "options": {
+          "cwd": "{projectRoot}",
+          "command": "bash -c './pretest.sh && ng test; EXIT=$?; ./posttest.sh; exit $EXIT'"
+        },
+        "dependsOn": [
+          "^build"
+        ]
+      },
       "build": {
         "executor": "nx:run-commands",
         "options": {
-          "cwd": "web"
+          "cwd": "{projectRoot}"
         },
         "configurations": {
           "development": {
@@ -35,7 +59,7 @@
       "serve": {
         "executor": "nx:run-commands",
         "options": {
-          "cwd": "web"
+          "cwd": "{projectRoot}"
         },
         "configurations": {
           "development": {
@@ -53,7 +77,7 @@
         ],
         "defaultConfiguration": "development"
       },
-      "test": {
+      "format:check": {
         "executor": "nx:run-commands",
         "options": {
           "cwd": "web",
@@ -64,17 +88,10 @@
           "^build"
         ]
       },
-      "lint": {
-        "executor": "nx:run-commands",
-        "options": {
-          "command": "npx eslint \"web/src/**/*.ts\" --config eslint.config.mjs {args} && npx eslint web/src/**/*.html --config eslint.config.mjs {args}",
-          "forwardAllArgs": true
-        }
-      },
       "extract-i18n": {
         "executor": "nx:run-commands",
         "options": {
-          "cwd": "web",
+          "cwd": "{projectRoot}",
           "command": "ng extract-i18n",
           "forwardAllArgs": true
         }
@@ -82,7 +99,7 @@
       "deploy": {
         "executor": "nx:run-commands",
         "options": {
-          "cwd": "web",
+          "cwd": "{projectRoot}",
           "command": "ng deploy",
           "forwardAllArgs": true
         }

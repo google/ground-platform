@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component } from '@angular/core';
+import { Component, Inject } from '@angular/core';
 import {
   AbstractControl,
   FormControl,
@@ -23,10 +23,9 @@ import {
   ValidatorFn,
   Validators,
 } from '@angular/forms';
-import { MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { MatSelectChange } from '@angular/material/select';
 import { Map } from 'immutable';
-import { Subscription } from 'rxjs';
 
 import { AclEntry } from 'app/models/acl-entry.model';
 import { Role } from 'app/models/role.model';
@@ -65,17 +64,12 @@ export class ShareDialogComponent {
   /** The active survey. */
   private survey?: Survey;
 
-  private subscription = new Subscription();
-
   constructor(
     private dialogRef: MatDialogRef<ShareDialogComponent>,
-    private draftSurveyService: DraftSurveyService
+    private draftSurveyService: DraftSurveyService,
+    @Inject(MAT_DIALOG_DATA) data: { survey: Survey }
   ) {
-    this.subscription.add(
-      this.draftSurveyService
-        .getSurvey$()
-        .subscribe(survey => this.onSurveyLoaded(survey))
-    );
+    this.onSurveyLoaded(data.survey);
   }
 
   /**
@@ -83,6 +77,10 @@ export class ShareDialogComponent {
    * enter is pressed.
    */
   onAddUserSubmit(): void {
+    if (this.addUserForm.invalid) {
+      return;
+    }
+
     // UI is hidden until survey is loaded, so this should never happen.
     if (!this.survey || !this.acl) {
       return;
@@ -116,26 +114,12 @@ export class ShareDialogComponent {
   }
 
   /**
-   * Close the dialog when "Cancel" is clicked.
-   */
-  onCancelClicked(): void {
-    this.dialogRef.close();
-  }
-
-  /**
    * Store the ACL associated with the survey.
    */
   onSaveClicked(): void {
     // TODO: Show saving spinner.
     this.draftSurveyService.updateAcl(this.getAclMap());
     this.dialogRef.close();
-  }
-
-  /**
-   * Clean up Rx subscription when cleaning up the component.
-   */
-  ngOnDestroy(): void {
-    this.subscription.unsubscribe();
   }
 
   /**

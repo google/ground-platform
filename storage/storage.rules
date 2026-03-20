@@ -24,16 +24,67 @@ service firebase.storage {
     function isSignedIn() {
       return request.auth != null;
     }
-    
+
+    /**
+     * Returns the survey with the specified id.
+     */
+    function getSurvey(surveyId) {
+      return firestore.get(/databases/(default)/documents/surveys/$(surveyId)).data;
+    }
+
+    /**
+     * Returns true iff all authenticated users can read and contribute
+     * data to the specified survey.
+     */
+    function isUnlistedOrPublic(survey) {
+      return survey["8"] in [
+        2 /* UNLISTED */,
+        3 /* PUBLIC */
+      ];
+    }
+
+    /**
+     * Returns true if the current user has one of the specified roles in the
+     * given survey.
+     */
+    function isOneOf(survey, roles) {
+     return survey["4"][request.auth.token.email] in roles;
+    }
+
+    /**
+     * Returns true iff the user with the user's email can read the specified
+     * survey.
+     */
+    function canViewSurvey(surveyId) {
+      let survey = getSurvey(surveyId);
+      return survey != null && isSignedIn() &&
+        (isUnlistedOrPublic(survey) || survey["4"][request.auth.token.email] != null);
+    }
+
+    /**
+     * Returns true iff the current user with the given email can contribute LOIs
+     * and submissions to the specified survey.
+     */
+    function canCollectData(surveyId) {
+      let survey = getSurvey(surveyId);
+      return survey != null && isSignedIn() &&
+        (isUnlistedOrPublic(survey) || isOneOf(survey, [
+          2 /* DATA_COLLECTOR */,
+          3 /* SURVEY_ORGANIZER */
+        ]));
+    }
+
     match /offline-imagery/{allPaths=**} {
       // All authenticated users can read.
       allow read: if isSignedIn();
     }
     
-    match /user-media/{allPaths=**} {
-      // All authenticated users can read.
-      // TODO(#1373): Only allow users with permission to access.
-      allow create, read, write: if isSignedIn();
+    match /user-media/{surveyId}/{allPaths=**} {
+      // Only users with permission to access the survey can read media.
+      allow read: if canViewSurvey(surveyId);
+
+      // Only users with permission to contribute data to the survey can create/update media.
+      allow create, write: if canCollectData(surveyId);
     }    
   }
 }

@@ -21,7 +21,6 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 
 import { HeaderModule } from 'app/components/shared/header/header.module';
-import { ShareDialogModule } from 'app/components/shared/share-dialog/share-dialog.module';
 
 import { SurveyHeaderComponent } from './survey-header.component';
 
@@ -33,7 +32,6 @@ import { SurveyHeaderComponent } from './survey-header.component';
     MatButtonModule,
     MatIconModule,
     MatDialogModule,
-    ShareDialogModule,
   ],
   exports: [SurveyHeaderComponent],
 })

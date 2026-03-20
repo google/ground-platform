@@ -39,7 +39,10 @@ class MockMVCArray {
 
 // Define classes outside to allow inter-class usage
 class MockLatLng {
-  constructor(private _lat: number, private _lng: number) {}
+  constructor(
+    private _lat: number,
+    private _lng: number
+  ) {}
   lat() {
     return this._lat;
   }

@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import * as functions from 'firebase-functions/v1';
+import { Request } from 'firebase-functions/v2/https';
+import type { Response } from 'express';
 import { canExport, hasOrganizerRole } from './common/auth';
 import { getDatastore } from './common/context';
 import { isAccessibleLoi } from './common/utils';
@@ -30,8 +31,8 @@ import Pb = GroundProtos.ground.v1beta1;
  * Iterates over all LOIs in a job returning a valid GeoJSON file.
  */
 export async function exportGeojsonHandler(
-  req: functions.Request,
-  res: functions.Response<any>,
+  req: Request,
+  res: Response,
   user: DecodedIdToken
 ) {
   const db = getDatastore();

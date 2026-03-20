@@ -63,6 +63,7 @@ import { ErrorModule } from './components/error/error.module';
 import { ShareSurveyComponent } from './components/shared/share-survey/share-survey.component';
 import { TermsComponent } from './components/terms/terms.component';
 import { TermsModule } from './components/terms/terms.module';
+import { dirtyCheckGuard } from './guards/dirty-check.guard';
 
 const routes: Routes = [
   {
@@ -94,6 +95,7 @@ const routes: Routes = [
     path: `${SURVEY_SEGMENT}/:${SURVEY_ID}/${SURVEYS_EDIT}`,
     component: EditSurveyComponent,
     canActivate: [AuthGuard],
+    canDeactivate: [dirtyCheckGuard],
     children: [
       { path: 'job/:id', component: EditJobComponent },
       { path: 'survey', component: EditDetailsComponent },

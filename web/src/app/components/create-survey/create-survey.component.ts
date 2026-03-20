@@ -16,7 +16,7 @@
 
 import '@angular/localize/init';
 
-import { ChangeDetectorRef, Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { List } from 'immutable';
 import { Subscription, filter, of } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
@@ -146,8 +146,7 @@ export class CreateSurveyComponent implements OnInit {
     private jobService: JobService,
     private taskService: TaskService,
     private navigationService: NavigationService,
-    private loiService: LocationOfInterestService,
-    private cdr: ChangeDetectorRef
+    private loiService: LocationOfInterestService
   ) {}
 
   ngOnInit(): void {
@@ -384,12 +383,12 @@ export class CreateSurveyComponent implements OnInit {
     // Assume the survey exists.
     const survey = this.survey!;
 
-    await this.taskService.addOrUpdateTasks(
-      survey.id,
-      // Assume there is at least one job.
-      survey.jobs.first(),
-      tasks!
-    );
+    const job = survey.jobs.first();
+    if (!job) {
+      console.error('Cannot save tasks: survey has no jobs', survey.id);
+      return;
+    }
+    await this.taskService.addOrUpdateTasks(survey.id, job, tasks!);
   }
 
   private async saveDataSharingTerms(): Promise<void> {

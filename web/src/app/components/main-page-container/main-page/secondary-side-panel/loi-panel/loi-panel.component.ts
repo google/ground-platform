@@ -114,9 +114,9 @@ export class LocationOfInterestPanelComponent {
       height: '70%',
       autoFocus: false,
       data: {
-        iconColor: this.iconColor,
-        iconName: this.icon,
-        loiDisplayName: this.name,
+        iconColor: this.iconColor(),
+        iconName: this.icon(),
+        loiDisplayName: this.name(),
         properties: loi.properties.toObject(),
       },
       panelClass: 'loi-properties-dialog-container',

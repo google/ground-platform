@@ -15,7 +15,6 @@
  */
 
 .body-container {
-  background-image: url(/assets/img/happy-land.png);
   background-repeat: no-repeat;
   background-size: cover;
   width: 100vw;
@@ -34,7 +33,7 @@
   width: 420px;
   height: 460px;
   border-radius: 24px;
-  
+
   .content {
     padding: 40px;
   }
@@ -42,4 +41,19 @@
 
 .buttons {
   margin-top: 48px;
+  display: flex;
+  justify-content: center;
+
+  .google-btn {
+    background-color: #F2F2F2 !important;
+    color: #1F1F1F !important;
+    font-family: 'Roboto', sans-serif;
+    padding: 0 !important;
+
+    .google-btn-content {
+      display: flex;
+      align-items: center;
+      margin-right: 12px;
+    }
+  }
 }
