@@ -149,9 +149,10 @@ export function jobToDocument(job: Job): DocumentData {
       tasks: (tasks?.toList() ?? List())
         .map((task: Task) => toTaskMessage(task))
         .toArray(),
-      integrations: Object.fromEntries(
-        integrations.entrySeq().map(([k]) => [k, new Pb.Integration()])
-      ),
+      integrations: integrations
+        .valueSeq()
+        .map(i => new Pb.Integration({ id: i.id }))
+        .toArray(),
     })
   );
 }

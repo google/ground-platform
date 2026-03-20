@@ -41,15 +41,15 @@ message Job {
   // to collect and submit data.
   repeated Task tasks = 5;
 
-  // Integrations enabled for this job, keyed by integration ID.
-  // The presence of an entry indicates the integration is active.
-  // The value holds integration-specific configuration (reserved for future use).
-  map<string, Integration> integrations = 6;
+  // Zero or more integrations enabled for this job.
+  repeated Integration integrations = 6;
 }
 
 // Configuration for a single integration associated with a job.
-// Currently empty; will be extended with integration-specific fields.
-message Integration {}
+message Integration {
+  // Required. The system-defined unique identifier of this integration.
+  string id = 1;
+}
 
 // A style used when rendering geometries and other UI elements associated
 // with this job.

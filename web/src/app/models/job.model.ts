@@ -25,8 +25,9 @@ export enum DataCollectionStrategy {
 }
 
 // Configuration for a single integration associated with a job.
-// Currently empty; will be extended with integration-specific fields.
-export type Integration = Record<string, never>;
+export interface Integration {
+  id: string;
+}
 
 export class Job extends Copiable {
   constructor(
