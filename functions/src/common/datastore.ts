@@ -165,6 +165,19 @@ export class Datastore {
       .get();
   }
 
+  fetchPartialLocationsOfInterest(
+    surveyId: string,
+    jobId: string,
+    limit: number
+  ) {
+    return this.db_
+      .collection(lois(surveyId))
+      .where(l.jobId, '==', jobId)
+      .orderBy(FieldPath.documentId())
+      .select(String(l.ownerId), String(l.source), String(l.properties))
+      .limit(limit);
+  }
+
   fetchMailTemplate(templateId: string) {
     return this.fetchDoc_(mailTemplate(templateId));
   }

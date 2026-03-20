@@ -342,6 +342,22 @@ describe('exportCsv()', () => {
   beforeEach(() => {
     mockFirestore = createMockFirestore();
     stubAdminApi(mockFirestore);
+    spyOn(getDatastore(), 'fetchPartialLocationsOfInterest').and.callFake(
+      (surveyId: string, jobId: string) => {
+        const emptyQuery: any = {
+          get: async () => ({ empty: true, docs: [] }),
+          startAfter: () => emptyQuery,
+        };
+        return {
+          get: () =>
+            mockFirestore
+              .collection(`surveys/${surveyId}/lois`)
+              .where(l.jobId, '==', jobId)
+              .get(),
+          startAfter: () => emptyQuery,
+        } as any;
+      }
+    );
     spyOn(getDatastore(), 'fetchLoisSubmissions').and.callFake(
       async (surveyId: string, jobId: string, ownerId: string | null) =>
         fetchLoisSubmissionsFromMock(mockFirestore, surveyId, jobId, ownerId)
