@@ -80,13 +80,9 @@
       "format:check": {
         "executor": "nx:run-commands",
         "options": {
-          "cwd": "web",
-          "command": "ng test",
-          "forwardAllArgs": true
-        },
-        "dependsOn": [
-          "^build"
-        ]
+          "cwd": "{projectRoot}",
+          "command": "prettier --check \"src/**/*.{ts,html,scss}\""
+        }
       },
       "extract-i18n": {
         "executor": "nx:run-commands",
