@@ -15,7 +15,15 @@
  */
 
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
-import { Component, EventEmitter, Input, Output, input } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  HostListener,
+  Input,
+  Output,
+  input,
+  signal,
+} from '@angular/core';
 import {
   AbstractControl,
   FormArray,
@@ -114,6 +122,18 @@ export class TaskEditorComponent {
   ) {}
 
   multipleChoiceTasks = List<Task>();
+
+  expandedIndex = signal<number | null>(null);
+
+  @HostListener('document:click')
+  onDocumentClick(): void {
+    this.expandedIndex.set(null);
+  }
+
+  onTaskContainerClick(index: number, event: MouseEvent): void {
+    event.stopPropagation();
+    this.expandedIndex.set(index);
+  }
 
   ngOnChanges(): void {
     this.formGroup = this.formBuilder.group({
