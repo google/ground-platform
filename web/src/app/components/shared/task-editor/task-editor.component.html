@@ -19,7 +19,7 @@
 
   <div
     class="task-container"
-    *ngFor="let formGroup of formArray.controls; let i = index;"
+    *ngFor="let formGroup of formArray.controls; let i = index; trackBy: trackByTaskId"
     [ngClass]="{'loi-task-container': formGroup.get('addLoiTask').value || formGroup.get('condition')}"
   >
     <div *ngIf="formGroup.get('addLoiTask').value" class="loi-task-label">

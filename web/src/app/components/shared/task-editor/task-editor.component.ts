@@ -306,4 +306,8 @@ export class TaskEditorComponent {
   toTasks(): List<Task> {
     return List(this.formArray.controls.map((_, i: number) => this.toTask(i)));
   }
+
+  trackByTaskId(_index: number, control: AbstractControl): string {
+    return control.get('id')?.value;
+  }
 }
