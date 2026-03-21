@@ -19,8 +19,8 @@ import {
   Component,
   EventEmitter,
   HostListener,
-  Input,
   Output,
+  effect,
   input,
   signal,
 } from '@angular/core';
@@ -100,7 +100,7 @@ export const taskTypeToGroup = new Map([
 export class TaskEditorComponent {
   formGroup!: FormGroup;
 
-  @Input() tasks?: List<Task>;
+  tasks = input<List<Task>>();
   isCreationMode = input<boolean>(false);
 
   @Output() onValidationChanges: EventEmitter<boolean> =
@@ -114,16 +114,38 @@ export class TaskEditorComponent {
     TaskGroup.CAPTURE_LOCATION,
   ];
 
+  multipleChoiceTasks = List<Task>();
+
+  expandedIndex = signal<number | null>(null);
+
   constructor(
     private dataStoreService: DataStoreService,
     private dialogService: DialogService,
     private taskService: TaskService,
     private formBuilder: FormBuilder
-  ) {}
+  ) {
+    effect(() => {
+      this.formGroup = this.formBuilder.group({
+        tasks: this.formBuilder.array(
+          this.tasks()?.toArray().map((task: Task) => this.toControl(task)) ||
+            [],
+          Validators.required
+        ),
+      }) as FormGroup;
 
-  multipleChoiceTasks = List<Task>();
+      this.formGroup.statusChanges.subscribe(_ => {
+        this.onValidationChanges.emit(this.formGroup?.valid);
+      });
 
-  expandedIndex = signal<number | null>(null);
+      this.formGroup.valueChanges.subscribe(_ => {
+        this.multipleChoiceTasks = this.toTasks();
+        this.onValueChanges.emit(this.formGroup?.valid);
+      });
+
+      this.onValidationChanges.emit(this.formGroup?.valid);
+      this.multipleChoiceTasks = this.toTasks();
+    });
+  }
 
   @HostListener('document:click')
   onDocumentClick(): void {
@@ -133,29 +155,6 @@ export class TaskEditorComponent {
   onTaskContainerClick(index: number, event: MouseEvent): void {
     event.stopPropagation();
     this.expandedIndex.set(index);
-  }
-
-  ngOnChanges(): void {
-    this.formGroup = this.formBuilder.group({
-      tasks: this.formBuilder.array(
-        this.tasks?.toArray().map((task: Task) => this.toControl(task)) || [],
-        Validators.required
-      ),
-    }) as FormGroup;
-
-    this.formGroup.statusChanges.subscribe(_ => {
-      this.onValidationChanges.emit(this.formGroup?.valid);
-    });
-
-    this.formGroup.valueChanges.subscribe(_ => {
-      this.multipleChoiceTasks = this.toTasks();
-
-      this.onValueChanges.emit(this.formGroup?.valid);
-    });
-
-    this.onValidationChanges.emit(this.formGroup?.valid);
-
-    this.multipleChoiceTasks = this.toTasks();
   }
 
   get formArray() {
