@@ -17,7 +17,7 @@
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute } from '@angular/router';
-import { NEVER } from 'rxjs';
+import { NEVER, throwError } from 'rxjs';
 
 import { NavigationService } from 'app/services/navigation/navigation.service';
 import { SurveyService } from 'app/services/survey/survey.service';
@@ -30,6 +30,7 @@ const navigationService = {
   init: () => {},
   getSurveyId$: () => NEVER,
   getSurveyId: () => NEVER,
+  error: (_: Error) => {},
 };
 
 const surveyService = jasmine.createSpyObj('SurveyService', [
@@ -62,5 +63,16 @@ describe('MainPageContainerComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('should navigate to error page when survey fails to load', () => {
+    const error = new Error('not found');
+    surveyService.loadSurvey$.and.returnValue(throwError(() => error));
+    spyOn(navigationService, 'error');
+
+    fixture.componentRef.setInput('surveyId', 'invalid-id');
+    fixture.detectChanges();
+
+    expect(navigationService.error).toHaveBeenCalledWith(error);
   });
 });
