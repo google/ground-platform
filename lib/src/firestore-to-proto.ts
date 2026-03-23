@@ -77,7 +77,7 @@ function toMessageValue(
   if (!descriptor.fields) return null;
   const field = descriptor.fields[fieldName];
   const fieldType = field?.type;
-  if (field.keyType) {
+  if (field?.keyType) {
     if (field.keyType !== 'string')
       return Error(`${field.keyType} map keys not supported`);
     // TODO: Check that firestoreValue is an object.
