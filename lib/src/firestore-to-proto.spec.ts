@@ -111,6 +111,20 @@ describe('toMessage()', () => {
       }),
     },
     {
+      desc: 'skips null nested message',
+      input: {
+        '4': null,
+      },
+      expected: new Job(),
+    },
+    {
+      desc: 'skips null map field',
+      input: {
+        '4': null,
+      },
+      expected: new Survey(),
+    },
+    {
       desc: 'converts enum value',
       input: {
         '1': 3,
