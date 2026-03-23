@@ -150,8 +150,6 @@ function toMessageOrEnumValue(
     ? registry.getMessageDescriptor(constructor)
     : null;
   if (constructor && nestedDescriptor) {
-    if (!nestedDescriptor)
-      return Error(`Unknown message type ${nestedDescriptor}`);
     if (firestoreValue === null || firestoreValue === undefined) return null;
     // TODO: Check firestoreValue is a DocumentData.
     return toMessageInternal(
