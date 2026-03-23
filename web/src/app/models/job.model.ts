@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { List, OrderedMap } from 'immutable';
+import { List, Map, OrderedMap } from 'immutable';
 
 import { Copiable } from './copiable';
 import { Task } from './task/task.model';
@@ -24,6 +24,11 @@ export enum DataCollectionStrategy {
   MIXED = 'MIXED',
 }
 
+// Configuration for a single integration associated with a job.
+export interface Integration {
+  id: string;
+}
+
 export class Job extends Copiable {
   constructor(
     readonly id: string,
@@ -31,7 +36,8 @@ export class Job extends Copiable {
     readonly color?: string,
     readonly name?: string,
     readonly tasks?: OrderedMap<string, Task>,
-    readonly strategy?: DataCollectionStrategy
+    readonly strategy?: DataCollectionStrategy,
+    readonly enabledIntegrations: Map<string, Integration> = Map()
   ) {
     super();
 
