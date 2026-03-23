@@ -40,6 +40,15 @@ message Job {
   // One or more data collection tasks to be carried out by the user in order
   // to collect and submit data.
   repeated Task tasks = 5;
+
+  // Zero or more integrations enabled for this job.
+  repeated Integration enabled_integrations = 6;
+}
+
+// Configuration for a single integration associated with a job.
+message Integration {
+  // Required. The system-defined unique identifier of this integration.
+  string id = 1;
 }
 
 // A style used when rendering geometries and other UI elements associated

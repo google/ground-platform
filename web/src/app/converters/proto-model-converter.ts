@@ -138,7 +138,7 @@ export function surveyToDocument(
  * Returns the proto representation of a Job model object.
  */
 export function jobToDocument(job: Job): DocumentData {
-  const { id, index, name, color, tasks } = job;
+  const { id, index, name, color, tasks, enabledIntegrations } = job;
 
   return toDocumentData(
     new Pb.Job({
@@ -148,6 +148,10 @@ export function jobToDocument(job: Job): DocumentData {
       style: new Pb.Style({ color }),
       tasks: (tasks?.toList() ?? List())
         .map((task: Task) => toTaskMessage(task))
+        .toArray(),
+      enabledIntegrations: enabledIntegrations
+        .valueSeq()
+        .map(i => new Pb.Integration({ id: i.id }))
         .toArray(),
     })
   );

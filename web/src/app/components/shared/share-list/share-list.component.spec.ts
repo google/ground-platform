@@ -18,7 +18,6 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatListModule } from '@angular/material/list';
 import { MatSelectChange, MatSelectModule } from '@angular/material/select';
 import { Map } from 'immutable';
-import { Subject } from 'rxjs';
 
 import { Role } from 'app/models/role.model';
 import { DataSharingType, Survey } from 'app/models/survey.model';
@@ -34,23 +33,19 @@ describe('ShareListComponent', () => {
 
   let draftSurveyServiceSpy: jasmine.SpyObj<DraftSurveyService>;
   let authServiceSpy: jasmine.SpyObj<AuthService>;
-  let activeSurvey$: Subject<Survey>;
 
   const user = new User('user1', 'user1@gmail.com', true);
 
   beforeEach(async () => {
     draftSurveyServiceSpy = jasmine.createSpyObj<DraftSurveyService>(
       'DraftSurveyService',
-      ['getSurvey$', 'updateAcl']
+      ['updateAcl']
     );
 
     authServiceSpy = jasmine.createSpyObj<AuthService>('AuthService', [
       'getUser',
     ]);
 
-    activeSurvey$ = new Subject<Survey>();
-
-    draftSurveyServiceSpy.getSurvey$.and.returnValue(activeSurvey$);
     authServiceSpy.getUser.and.callFake(email => {
       if (email === 'owner-email') {
         return Promise.resolve(new User('owner', 'owner@gmail.com', true));
@@ -79,17 +74,19 @@ describe('ShareListComponent', () => {
   });
 
   it('updates itself when acl changes', async () => {
-    activeSurvey$.next(
+    fixture.componentRef.setInput(
+      'survey',
       new Survey(
         'id',
         'title',
         'description',
         Map(),
-        Map({ [user.email]: Role.VIEWER }),
+        Map([[user.email, Role.VIEWER]]),
         'owner-email',
         { type: DataSharingType.PRIVATE }
       )
     );
+    fixture.detectChanges();
     await fixture.whenStable();
     fixture.detectChanges();
 

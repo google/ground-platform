@@ -125,7 +125,8 @@ function jobPbToModel(pb: Pb.IJob): Job {
     ),
     pb.tasks!.find(task => task.level === DataCollectionLevel.LOI_METADATA)
       ? DataCollectionStrategy.MIXED
-      : DataCollectionStrategy.PREDEFINED
+      : DataCollectionStrategy.PREDEFINED,
+    Map((pb.enabledIntegrations ?? []).map(i => [i.id!, {id: i.id!}]))
   );
 }
 
