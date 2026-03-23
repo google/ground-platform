@@ -182,8 +182,8 @@ rules_version = '2';
       allow get: if canViewLoi(getSurvey(surveyId), resource.data);
       // Allow all survey users to list LOIs.
       allow list: if canViewSurvey(getSurvey(surveyId));
-      // Allow if user is owner of the existing LOI or can manage survey.
-      allow update, delete: if isLoiOwner(resource.data) || canManageSurvey(getSurvey(surveyId));
+      // Allow if user is owner of the existing LOI and can collect data, or can manage survey.
+      allow update, delete: if (isLoiOwner(resource.data) && canCollectData(getSurvey(surveyId))) || canManageSurvey(getSurvey(surveyId));
     }
 
     // Apply survey-level permissions to submission documents.
@@ -194,8 +194,8 @@ rules_version = '2';
       allow get: if canViewSubmission(getSurvey(surveyId), resource.data);
       // Allow all survey users to list submissions.
       allow list: if canViewSurvey(getSurvey(surveyId));
-      // Allow if user is owner of the existing submission or can manage survey.
-      allow update, delete: if isSubmissionOwner(resource.data) || canManageSurvey(getSurvey(surveyId));
+      // Allow if user is owner of the existing submission and can collect data, or can manage survey.
+      allow update, delete: if (isSubmissionOwner(resource.data) && canCollectData(getSurvey(surveyId))) || canManageSurvey(getSurvey(surveyId));
     }
 
     // Apply survey-level permissions to job documents.
