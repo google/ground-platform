@@ -25,7 +25,7 @@ export enum DataCollectionStrategy {
 }
 
 // Configuration for a single integration associated with a job.
-export interface EnabledIntegration {
+export interface Integration {
   id: string;
 }
 
@@ -37,7 +37,7 @@ export class Job extends Copiable {
     readonly name?: string,
     readonly tasks?: OrderedMap<string, Task>,
     readonly strategy?: DataCollectionStrategy,
-    readonly enabledIntegrations: Map<string, EnabledIntegration> = Map()
+    readonly enabledIntegrations: Map<string, Integration> = Map()
   ) {
     super();
 

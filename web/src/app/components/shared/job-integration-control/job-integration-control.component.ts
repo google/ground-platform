@@ -16,7 +16,7 @@
 
 import { Component, effect, input } from '@angular/core';
 import { MatSlideToggleChange } from '@angular/material/slide-toggle';
-import { EnabledIntegration, Job } from 'app/models/job.model';
+import { Integration, Job } from 'app/models/job.model';
 
 import { AuthService } from 'app/services/auth/auth.service';
 import { DraftSurveyService } from 'app/services/draft-survey/draft-survey.service';
@@ -54,7 +54,7 @@ export class JobIntegrationControlComponent {
       const updatedIntegrations = event.checked
         ? job.enabledIntegrations.set(integrationId, {
             id: integrationId,
-          } as EnabledIntegration)
+          } as Integration)
         : job.enabledIntegrations.delete(integrationId);
 
       this.draftSurveyService.addOrUpdateJob(
