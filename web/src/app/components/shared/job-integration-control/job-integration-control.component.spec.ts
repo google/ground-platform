@@ -14,15 +14,18 @@
  * limitations under the License.
  */
 
-import {ComponentFixture, TestBed} from '@angular/core/testing';
-import {MatSlideToggleChange, MatSlideToggleModule} from '@angular/material/slide-toggle';
-import {Map} from 'immutable';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import {
+  MatSlideToggleChange,
+  MatSlideToggleModule,
+} from '@angular/material/slide-toggle';
+import { Map } from 'immutable';
 
-import {Job} from 'app/models/job.model';
-import {AuthService} from 'app/services/auth/auth.service';
-import {DraftSurveyService} from 'app/services/draft-survey/draft-survey.service';
+import { Job } from 'app/models/job.model';
+import { AuthService } from 'app/services/auth/auth.service';
+import { DraftSurveyService } from 'app/services/draft-survey/draft-survey.service';
 
-import {JobIntegrationControlComponent} from './job-integration-control.component';
+import { JobIntegrationControlComponent } from './job-integration-control.component';
 
 describe('JobIntegrationControlComponent', () => {
   let component: JobIntegrationControlComponent;
@@ -43,8 +46,8 @@ describe('JobIntegrationControlComponent', () => {
       declarations: [JobIntegrationControlComponent],
       imports: [MatSlideToggleModule],
       providers: [
-        {provide: AuthService, useValue: {}},
-        {provide: DraftSurveyService, useValue: draftSurveyService},
+        { provide: AuthService, useValue: {} },
+        { provide: DraftSurveyService, useValue: draftSurveyService },
       ],
     }).compileComponents();
 
@@ -68,7 +71,7 @@ describe('JobIntegrationControlComponent', () => {
 
   it('reflects true when job has the integration enabled', () => {
     const job = mockJobBase.copyWith({
-      enabledIntegrations: Map([[integrationId, {id: integrationId}]]),
+      enabledIntegrations: Map([[integrationId, { id: integrationId }]]),
     });
     fixture.componentRef.setInput('surveyId', 'survey1');
     fixture.componentRef.setInput('integrationId', integrationId);
@@ -84,25 +87,29 @@ describe('JobIntegrationControlComponent', () => {
     fixture.componentRef.setInput('job', mockJobBase);
     fixture.detectChanges();
 
-    component.onIntegrationToggle({checked: true} as MatSlideToggleChange);
+    component.onIntegrationToggle({ checked: true } as MatSlideToggleChange);
 
-    const updatedJob: Job = draftSurveyService.addOrUpdateJob.calls.mostRecent().args[0];
+    const updatedJob: Job =
+      draftSurveyService.addOrUpdateJob.calls.mostRecent().args[0];
     expect(updatedJob.enabledIntegrations.has(integrationId)).toBeTrue();
-    expect(updatedJob.enabledIntegrations.get(integrationId)).toEqual({id: integrationId});
+    expect(updatedJob.enabledIntegrations.get(integrationId)).toEqual({
+      id: integrationId,
+    });
   });
 
   it('removes integration and calls service when toggle is turned off', () => {
     const job = mockJobBase.copyWith({
-      enabledIntegrations: Map([[integrationId, {id: integrationId}]]),
+      enabledIntegrations: Map([[integrationId, { id: integrationId }]]),
     });
     fixture.componentRef.setInput('surveyId', 'survey1');
     fixture.componentRef.setInput('integrationId', integrationId);
     fixture.componentRef.setInput('job', job);
     fixture.detectChanges();
 
-    component.onIntegrationToggle({checked: false} as MatSlideToggleChange);
+    component.onIntegrationToggle({ checked: false } as MatSlideToggleChange);
 
-    const updatedJob: Job = draftSurveyService.addOrUpdateJob.calls.mostRecent().args[0];
+    const updatedJob: Job =
+      draftSurveyService.addOrUpdateJob.calls.mostRecent().args[0];
     expect(updatedJob.enabledIntegrations.has(integrationId)).toBeFalse();
   });
 });

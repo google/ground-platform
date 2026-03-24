@@ -1,5 +1,5 @@
 /**
- * Copyright 2025 The Ground Authors.
+ * Copyright 2026 The Ground Authors.
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import {ComponentFixture, TestBed} from '@angular/core/testing';
-import {MatSlideToggleChange, MatSlideToggleModule} from '@angular/material/slide-toggle';
-import {Map} from 'immutable';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { MatSlideToggleChange, MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { Map } from 'immutable';
 
-import {DataSharingType, Survey, SurveyDataVisibility} from 'app/models/survey.model';
-import {AuthService} from 'app/services/auth/auth.service';
-import {DraftSurveyService} from 'app/services/draft-survey/draft-survey.service';
+import { DataSharingType, Survey, SurveyDataVisibility } from 'app/models/survey.model';
+import { AuthService } from 'app/services/auth/auth.service';
+import { DraftSurveyService } from 'app/services/draft-survey/draft-survey.service';
 
-import {DataVisibilityControlComponent} from './data-visibility-control.component';
+import { DataVisibilityControlComponent } from './data-visibility-control.component';
 
 describe('DataVisibilityControlComponent', () => {
   let component: DataVisibilityControlComponent;
@@ -37,7 +37,7 @@ describe('DataVisibilityControlComponent', () => {
     Map(),
     Map(),
     'owner1',
-    {type: DataSharingType.PRIVATE}
+    { type: DataSharingType.PRIVATE }
   );
 
   beforeEach(async () => {
@@ -49,8 +49,8 @@ describe('DataVisibilityControlComponent', () => {
       declarations: [DataVisibilityControlComponent],
       imports: [MatSlideToggleModule],
       providers: [
-        {provide: AuthService, useValue: {}},
-        {provide: DraftSurveyService, useValue: draftSurveyService},
+        { provide: AuthService, useValue: {} },
+        { provide: DraftSurveyService, useValue: draftSurveyService },
       ],
     }).compileComponents();
 
@@ -100,7 +100,7 @@ describe('DataVisibilityControlComponent', () => {
     fixture.componentRef.setInput('survey', mockSurveyBase);
     fixture.detectChanges();
 
-    component.onDataVisibilityChange({checked: true} as MatSlideToggleChange);
+    component.onDataVisibilityChange({ checked: true } as MatSlideToggleChange);
 
     expect(component.selectedDataVisibility).toBe(
       SurveyDataVisibility.ALL_SURVEY_PARTICIPANTS
@@ -117,7 +117,7 @@ describe('DataVisibilityControlComponent', () => {
     fixture.componentRef.setInput('survey', survey);
     fixture.detectChanges();
 
-    component.onDataVisibilityChange({checked: false} as MatSlideToggleChange);
+    component.onDataVisibilityChange({ checked: false } as MatSlideToggleChange);
 
     expect(component.selectedDataVisibility).toBe(
       SurveyDataVisibility.CONTRIBUTOR_AND_ORGANIZERS
