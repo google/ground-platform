@@ -146,6 +146,26 @@ const submission001 = {
   },
 };
 
+describe('submissionDocToModel_Error', () => {
+  it('returns Error when created audit info is missing', () => {
+    const {[sb.created]: _, ...dataWithoutCreated} = submissionDoc001;
+    const result = submissionDocToModel(job001, 'submission001', dataWithoutCreated);
+    expect(result instanceof Error).toBeTrue();
+    expect((result as Error).message).toContain(
+      'Missing created audit info in submission submission001'
+    );
+  });
+
+  it('returns Error when last_modified audit info is missing', () => {
+    const {[sb.lastModified]: _, ...dataWithoutLastModified} = submissionDoc001;
+    const result = submissionDocToModel(job001, 'submission001', dataWithoutLastModified);
+    expect(result instanceof Error).toBeTrue();
+    expect((result as Error).message).toContain(
+      'Missing last_modified audit info in submission submission001'
+    );
+  });
+});
+
 describe('submissionDocToModel', () => {
   it('Submission converts back and forth without losing data', () => {
     const submission001JS = FirebaseDataConverter.submissionToJS(

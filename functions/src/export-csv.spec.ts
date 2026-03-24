@@ -17,19 +17,19 @@
 import {
   createMockFirestore,
   stubAdminApi,
-} from '@ground/lib/dist/testing/firestore';
+} from '@ground/lib/testing/firestore';
 import {
   createGetRequestSpy,
   createResponseSpy,
 } from './testing/http-test-helpers';
-import {DecodedIdToken} from 'firebase-admin/auth';
-import {StatusCodes} from 'http-status-codes';
-import {SURVEY_ORGANIZER_ROLE} from './common/auth';
-import {resetDatastore} from './common/context';
-import {Firestore} from 'firebase-admin/firestore';
-import {exportCsvHandler} from './export-csv';
-import {registry} from '@ground/lib';
-import {GroundProtos} from '@ground/proto';
+import { DecodedIdToken } from 'firebase-admin/auth';
+import { StatusCodes } from 'http-status-codes';
+import { SURVEY_ORGANIZER_ROLE } from './common/auth';
+import { getDatastore, resetDatastore } from './common/context';
+import { Firestore, QueryDocumentSnapshot } from 'firebase-admin/firestore';
+import { exportCsvHandler } from './export-csv';
+import { registry } from '@ground/lib';
+import { GroundProtos } from '@ground/proto';
 
 import Pb = GroundProtos.ground.v1beta1;
 const sv = registry.getFieldIds(Pb.Survey);
@@ -47,6 +47,51 @@ const op = registry.getFieldIds(Pb.Task.MultipleChoiceQuestion.Option);
 const cl = registry.getFieldIds(Pb.TaskData.CaptureLocationResult);
 const a = registry.getFieldIds(Pb.AuditInfo);
 
+/**
+ * Fetches LOIs and submissions using simple queries compatible with
+ * mock-cloud-firestore (no compound indexes or cursor-based pagination),
+ * then joins them in-memory replicating the left-outer-join logic of
+ * the production QueryIterator-based implementation.
+ */
+async function* fetchLoisSubmissionsFromMock(
+  db: Firestore,
+  surveyId: string,
+  jobId: string,
+  ownerId: string | null
+): AsyncGenerator<[QueryDocumentSnapshot, QueryDocumentSnapshot | undefined]> {
+  const [loisSnap, subsSnap] = await Promise.all([
+    db.collection(`surveys/${surveyId}/lois`).where(l.jobId, '==', jobId).get(),
+    db
+      .collection(`surveys/${surveyId}/submissions`)
+      .where(s.jobId, '==', jobId)
+      .get(),
+  ]);
+
+  const loisDocs = [...loisSnap.docs].sort((a, b) =>
+    a.id.localeCompare(b.id)
+  ) as unknown as QueryDocumentSnapshot[];
+
+  let subsDocs = [...subsSnap.docs] as unknown as QueryDocumentSnapshot[];
+  if (ownerId) subsDocs = subsDocs.filter(d => d.get(s.ownerId) === ownerId);
+  subsDocs.sort((a, b) => {
+    const loiComp = String(a.get(s.loiId)).localeCompare(
+      String(b.get(s.loiId))
+    );
+    return loiComp !== 0 ? loiComp : a.id.localeCompare(b.id);
+  });
+
+  let si = 0;
+  for (const loiDoc of loisDocs) {
+    let found = false;
+    while (si < subsDocs.length && subsDocs[si].get(s.loiId) === loiDoc.id) {
+      yield [loiDoc, subsDocs[si]];
+      si++;
+      found = true;
+    }
+    if (!found) yield [loiDoc, undefined];
+  }
+}
+
 describe('exportCsv()', () => {
   let mockFirestore: Firestore;
   const email = 'somebody@test.it';
@@ -61,11 +106,11 @@ describe('exportCsv()', () => {
     [a.userId]: userId,
     [a.displayName]: 'display_name',
     [a.emailAddress]: 'address@email.com',
-    [a.clientTimestamp]: {1: 1, 2: 0},
-    [a.serverTimestamp]: {1: 1, 2: 0},
+    [a.clientTimestamp]: { 1: 1, 2: 0 },
+    [a.serverTimestamp]: { 1: 1, 2: 0 },
   };
 
-  const emptyJob = {id: 'job123'};
+  const emptyJob = { id: 'job123' };
   const job1 = {
     id: 'job123',
     [j.name]: 'Test job',
@@ -134,13 +179,15 @@ describe('exportCsv()', () => {
     [l.jobId]: job1.id,
     [l.customTag]: 'POINT_001',
     [l.geometry]: {
-      [g.point]: {[p.coordinates]: {[c.latitude]: 10.1, [c.longitude]: 125.6}},
+      [g.point]: {
+        [p.coordinates]: { [c.latitude]: 10.1, [c.longitude]: 125.6 },
+      },
     },
     [l.submissionCount]: 0,
     [l.source]: Pb.LocationOfInterest.Source.IMPORTED,
     [l.properties]: {
-      name: {[pr.stringValue]: 'Dinagat Islands'},
-      area: {[pr.numericValue]: 3.08},
+      name: { [pr.stringValue]: 'Dinagat Islands' },
+      area: { [pr.numericValue]: 3.08 },
     },
   };
   const pointLoi2 = {
@@ -149,12 +196,14 @@ describe('exportCsv()', () => {
     [l.jobId]: job1.id,
     [l.customTag]: 'POINT_002',
     [l.geometry]: {
-      [g.point]: {[p.coordinates]: {[c.latitude]: 47.05, [c.longitude]: 8.3}},
+      [g.point]: {
+        [p.coordinates]: { [c.latitude]: 47.05, [c.longitude]: 8.3 },
+      },
     },
     [l.submissionCount]: 0,
     [l.source]: Pb.LocationOfInterest.Source.FIELD_DATA,
     [l.properties]: {
-      name: {[pr.stringValue]: 'Luzern'},
+      name: { [pr.stringValue]: 'Luzern' },
     },
   };
   const submission1a = {
@@ -293,6 +342,26 @@ describe('exportCsv()', () => {
   beforeEach(() => {
     mockFirestore = createMockFirestore();
     stubAdminApi(mockFirestore);
+    spyOn(getDatastore(), 'fetchPartialLocationsOfInterest').and.callFake(
+      (surveyId: string, jobId: string) => {
+        const emptyQuery: any = {
+          get: async () => ({ empty: true, docs: [] }),
+          startAfter: () => emptyQuery,
+        };
+        return {
+          get: () =>
+            mockFirestore
+              .collection(`surveys/${surveyId}/lois`)
+              .where(l.jobId, '==', jobId)
+              .get(),
+          startAfter: () => emptyQuery,
+        } as any;
+      }
+    );
+    spyOn(getDatastore(), 'fetchLoisSubmissions').and.callFake(
+      async (surveyId: string, jobId: string, ownerId: string | null) =>
+        fetchLoisSubmissionsFromMock(mockFirestore, surveyId, jobId, ownerId)
+    );
   });
 
   afterEach(() => {
@@ -313,13 +382,13 @@ describe('exportCsv()', () => {
       it(desc, async () => {
         // Populate database.
         mockFirestore.doc(`surveys/${survey.id}`).set(survey);
-        jobs?.forEach(({id, ...job}) =>
+        jobs?.forEach(({ id, ...job }) =>
           mockFirestore.doc(`surveys/${survey.id}/jobs/${id}`).set(job)
         );
-        lois?.forEach(({id, ...loi}) =>
+        lois?.forEach(({ id, ...loi }) =>
           mockFirestore.doc(`surveys/${survey.id}/lois/${id}`).set(loi)
         );
-        submissions?.forEach(({id, ...submission}) =>
+        submissions?.forEach(({ id, ...submission }) =>
           mockFirestore
             .doc(`surveys/${survey.id}/submissions/${id}`)
             .set(submission)
@@ -337,7 +406,7 @@ describe('exportCsv()', () => {
         const res = createResponseSpy(chunks);
 
         // Run export CSV handler.
-        await exportCsvHandler(req, res, {email} as DecodedIdToken);
+        await exportCsvHandler(req, res, { email } as DecodedIdToken);
 
         // Check post-conditions.
         expect(res.status).toHaveBeenCalledOnceWith(StatusCodes.OK);
