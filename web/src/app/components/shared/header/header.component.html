@@ -31,7 +31,7 @@
     <ng-container *ngIf="canManage">
       <ng-container *ngIf="state === HeaderState.MAP_VIEW">
         <button mat-icon-button [matMenuTriggerFor]="editSurveyMenu">
-          <mat-icon fontSet="material-symbols-outlined">settings</mat-icon>
+          <mat-icon>settings</mat-icon>
         </button>
 
         <mat-menu #editSurveyMenu="matMenu">
@@ -77,7 +77,7 @@
 
     <ng-container *ngIf="authService.getUser$() | async as user">
       <button mat-icon-button [matMenuTriggerFor]="infoMenu">
-        <mat-icon fontSet="material-symbols-outlined">info_outline_24px</mat-icon>
+        <mat-icon>info_outline_24px</mat-icon>
       </button>
 
       <mat-menu #infoMenu="matMenu">

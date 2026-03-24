@@ -85,7 +85,6 @@
       <mat-card-header>
         <mat-icon
           mat-card-avatar
-          fontSet="material-symbols-outlined"
           class="add-icon general-access-icon"
         >
           <ng-container [ngSwitch]="survey.generalAccess">
@@ -117,7 +116,6 @@
   >
     <mat-icon
       *ngIf="icon || currentFilter() === filter"
-      fontSet="material-symbols-outlined"
       matChipAvatar
     >
       {{ currentFilter() !== filter ? icon : 'check' }}
