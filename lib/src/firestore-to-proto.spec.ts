@@ -125,6 +125,20 @@ describe('toMessage()', () => {
       expected: new Survey(),
     },
     {
+      desc: 'skips non-object map field',
+      input: {
+        '4': 'not an object',
+      },
+      expected: new Survey(),
+    },
+    {
+      desc: 'skips array map field',
+      input: {
+        '4': [1, 2, 3],
+      },
+      expected: new Survey(),
+    },
+    {
       desc: 'converts enum value',
       input: {
         '1': 3,
