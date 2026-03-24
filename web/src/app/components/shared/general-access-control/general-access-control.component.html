@@ -16,7 +16,7 @@
 
 <div class="general-access-control-container">
   <div class="general-access-icon" [ngSwitch]="selectedGeneralAccess">
-    <mat-icon class="material-symbols-outlined">
+    <mat-icon>
       {{ generalAccessLabels.get(selectedGeneralAccess)?.icon ?? generalAccessLabels.get(SurveyGeneralAccess.RESTRICTED)?.icon }}
     </mat-icon>
   </div>
