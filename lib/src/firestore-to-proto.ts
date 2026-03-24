@@ -80,7 +80,8 @@ function toMessageValue(
   if (field?.keyType) {
     if (field.keyType !== 'string')
       return Error(`${field.keyType} map keys not supported`);
-    // TODO: Check that firestoreValue is an object.
+    if (typeof firestoreValue !== 'object' || Array.isArray(firestoreValue))
+      return Error(`Expected object, but got ${firestoreValue}`);
     return toMapValue(messageTypePath, fieldType, firestoreValue);
   } else if (field?.rule === 'repeated') {
     if (!Array.isArray(firestoreValue))
