@@ -47,7 +47,7 @@ export class DataVisibilityControlComponent {
     });
   }
 
-  changeDataVisibility(event: MatSlideToggleChange) {
+  onDataVisibilityChange(event: MatSlideToggleChange) {
     const dataVisibility = event.checked
       ? SurveyDataVisibility.ALL_SURVEY_PARTICIPANTS
       : SurveyDataVisibility.CONTRIBUTOR_AND_ORGANIZERS;
