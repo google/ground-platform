@@ -14,7 +14,7 @@
   limitations under the License.
 -->
 
-<form [formGroup]="formGroup" class="task-input" [ngClass]="{'selected': expanded}" cdkDrag>
+<form [formGroup]="formGroup" class="task-input" [ngClass]="{'selected': expanded()}" cdkDrag>
   <mat-icon class="drag-icon" cdkDragHandle>drag_handle</mat-icon>
 
   <div class="task-toolbar">
@@ -25,13 +25,13 @@
         (selectionChange)="onTaskGroupSelect($event.value)"
       >
         <mat-select-trigger class="task-label">
-          <mat-icon class="material-symbols-outlined">{{ Tasks[taskGroup].icon }}</mat-icon>
+          <mat-icon>{{ Tasks[taskGroup].icon }}</mat-icon>
           <div>{{ Tasks[taskGroup].label }}</div>
         </mat-select-trigger>
 
         <mat-option *ngFor="let addLoiTaskGroup of AddLoiTaskGroups" [value]="addLoiTaskGroup">
           <div class="task-label">
-            <mat-icon class="material-symbols-outlined">{{ Tasks[addLoiTaskGroup].icon }}</mat-icon>
+            <mat-icon>{{ Tasks[addLoiTaskGroup].icon }}</mat-icon>
             <div>{{ Tasks[addLoiTaskGroup].label }}</div>
           </div>
         </mat-option>
@@ -39,7 +39,7 @@
     </div>
 
     <div *ngIf="!GeometryTasks.includes(taskGroup)" class="task-label">
-      <mat-icon class="material-symbols-outlined">{{ Tasks[taskGroup].icon }}</mat-icon>
+      <mat-icon>{{ Tasks[taskGroup].icon }}</mat-icon>
       <div>{{ Tasks[taskGroup].label }}</div>
     </div>
 
@@ -155,7 +155,7 @@
     </ground-edit-option>
 
     <div class="option-add-buttons">
-      <mat-icon class="option-icon material-symbols-outlined">
+      <mat-icon class="option-icon">
         {{ cardinalityControl.value === Cardinality.SELECT_ONE ? 'radio_button_unchecked' : 'check_box_outline_blank'}}
       </mat-icon>
 
