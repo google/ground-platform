@@ -65,19 +65,22 @@ export async function getDecodedIdToken(
 
 /**
  * Generates and sets a session cookie for the current user into the provided response.
+ * Returns the absolute expiry timestamp (ms since epoch) of the created cookie.
  */
 export async function setSessionCookie(
   req: Request,
   res: Response
-): Promise<void> {
+): Promise<number> {
   const token = getAuthBearer(req);
   const expiresIn = 60 * 60 * 24 * 5 * 1000; // 5 days
   const cookie = await getAuth().createSessionCookie(token!, { expiresIn });
+  const expiresAt = Date.now() + expiresIn;
   res.cookie(SESSION_COOKIE_NAME, cookie, {
     maxAge: expiresIn,
     httpOnly: true,
     secure: true,
   });
+  return expiresAt;
 }
 
 function isEmulatorIdToken(user: DecodedIdToken): boolean {
