@@ -29,6 +29,7 @@ import { of } from 'rxjs';
 
 import { AuthService } from 'app/services/auth/auth.service';
 import { DataStoreService } from 'app/services/data-store/data-store.service';
+import { User } from 'app/models/user.model';
 import { environment } from 'environments/environment';
 
 import { HttpClientService } from '../http-client/http-client.service';
@@ -42,7 +43,18 @@ function mockAuthProviders(mockAuth: Partial<Auth>, postWithAuth: jasmine.Spy) {
     { provide: Auth, useValue: mockAuth },
     { provide: Firestore, useValue: {} },
     { provide: Functions, useValue: {} },
-    { provide: DataStoreService, useValue: { user$: () => of() } },
+    {
+      provide: DataStoreService,
+      useValue: {
+        user$: () =>
+          of({
+            id: 'user-1',
+            email: 'test@test.com',
+            displayName: 'Test User',
+            isAuthenticated: true,
+          } as User),
+      },
+    },
     { provide: Router, useValue: { events: of() } },
     { provide: HttpClientService, useValue: { postWithAuth } },
   ];
@@ -137,6 +149,7 @@ describe('AuthService createSessionCookie()', () => {
 });
 
 describe('AuthService session cookie invalidation', () => {
+  let service: AuthService;
   let capturedIdTokenCallback: (user: FirebaseUser | null) => void;
 
   beforeEach(() => {
@@ -158,7 +171,7 @@ describe('AuthService session cookie invalidation', () => {
       providers: mockAuthProviders(mockAuth, jasmine.createSpy('postWithAuth')),
     });
 
-    TestBed.inject(AuthService);
+    service = TestBed.inject(AuthService);
   });
 
   afterEach(() => localStorage.clear());
@@ -172,6 +185,10 @@ describe('AuthService session cookie invalidation', () => {
   });
 
   it('preserves localStorage entry on token refresh for the same user', () => {
+    // Spy on callProfileRefresh to prevent it from calling httpsCallable with
+    // the mock Functions instance, which would fail with a missing _url error.
+    spyOn(service, 'callProfileRefresh').and.resolveTo();
+
     capturedIdTokenCallback!({ uid: 'user-1' } as FirebaseUser);
 
     expect(localStorage.getItem(SESSION_COOKIE_EXPIRES_AT_KEY)).not.toBeNull();
