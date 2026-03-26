@@ -65,6 +65,21 @@ describe('MainPageContainerComponent', () => {
     expect(component).toBeTruthy();
   });
 
+  it('should load survey when surveyId is provided', () => {
+    fixture.componentRef.setInput('surveyId', 'survey-123');
+    fixture.detectChanges();
+
+    expect(surveyService.loadSurvey$).toHaveBeenCalledWith('survey-123');
+  });
+
+  it('should not load survey when surveyId is not provided', () => {
+    surveyService.loadSurvey$.calls.reset();
+    fixture.componentRef.setInput('surveyId', undefined);
+    fixture.detectChanges();
+
+    expect(surveyService.loadSurvey$).not.toHaveBeenCalled();
+  });
+
   it('should navigate to error page when survey fails to load', () => {
     const error = new Error('not found');
     surveyService.loadSurvey$.and.returnValue(throwError(() => error));
