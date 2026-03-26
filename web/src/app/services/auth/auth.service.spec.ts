@@ -132,7 +132,7 @@ describe('AuthService createSessionCookie()', () => {
 
     await service.createSessionCookie();
 
-    expect(postWithAuthSpy).toHaveBeenCalledOnce();
+    expect(postWithAuthSpy).toHaveBeenCalledTimes(1);
   });
 });
 
