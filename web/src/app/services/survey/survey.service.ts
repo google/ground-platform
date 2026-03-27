@@ -17,6 +17,7 @@
 import { Injectable } from '@angular/core';
 import { List, Map } from 'immutable';
 import { Observable, firstValueFrom, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 
 import { Role } from 'app/models/role.model';
 import { DataSharingType, Survey, SurveyState } from 'app/models/survey.model';
@@ -42,7 +43,9 @@ export class SurveyService {
       return of(List<Survey>());
     }
     const { email: userEmail } = user;
-    return this.dataStore.loadAccessibleSurveys$(userEmail);
+    return this.dataStore
+      .loadAccessibleSurveys$(userEmail)
+      .pipe(catchError(() => of(List<Survey>())));
   }
 
   /**
