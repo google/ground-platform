@@ -25,6 +25,11 @@ import * as admin from 'firebase-admin';
  * See also: https://firebase.google.com/docs/cloud-messaging/concept-options#collapsible_and_non-collapsible_messages
  */
 export async function broadcastSurveyUpdate(topic: string): Promise<string> {
+  if (process.env.FUNCTIONS_EMULATOR === 'true') {
+    console.debug(`Skipping FCM message to ${topic} (emulator mode)`);
+    return '';
+  }
+
   console.debug(`Sending message to ${topic}`);
 
   return admin.messaging().send({ topic });
