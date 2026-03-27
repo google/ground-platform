@@ -79,12 +79,12 @@ service firebase.storage {
       allow read: if isSignedIn();
     }
     
-    match /user-media/{surveyId}/{allPaths=**} {
+    match /user-media/surveys/{surveyId}/{allPaths=**} {
       // Only users with permission to access the survey can read media.
       allow read: if canViewSurvey(surveyId);
 
       // Only users with permission to contribute data to the survey can create/update media.
       allow create, write: if canCollectData(surveyId);
-    }    
+    }
   }
 }
