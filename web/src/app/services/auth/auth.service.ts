@@ -16,7 +16,7 @@
 
 import '@angular/localize/init';
 
-import { Injectable, Injector, runInInjectionContext } from '@angular/core';
+import { Injectable, Injector, NgZone, runInInjectionContext } from '@angular/core';
 import {
   Auth,
   User as FirebaseUser,
@@ -27,7 +27,7 @@ import {
 } from '@angular/fire/auth';
 import { Functions, httpsCallable } from '@angular/fire/functions';
 import { Observable, Subject, firstValueFrom, from } from 'rxjs';
-import { map, mergeWith, shareReplay, switchMap } from 'rxjs/operators';
+import { filter, map, mergeWith, shareReplay, switchMap } from 'rxjs/operators';
 
 import { AclEntry } from 'app/models/acl-entry.model';
 import { DataCollectionStrategy, Job } from 'app/models/job.model';
@@ -78,18 +78,9 @@ export class AuthService {
     private navigationService: NavigationService,
     private functions: Functions,
     private httpClientService: HttpClientService,
-    private injector: Injector
+    private injector: Injector,
+    private ngZone: NgZone
   ) {
-    // onIdTokenChanged via RxJS 'idToken' or 'user' specific helper?
-    // @angular/fire/auth provides 'user' which wraps onIdTokenChanged.
-    // However, existing code pipes it to tokenChanged$.
-    // Let's use the 'user' observable from @angular/fire/auth directly if possible, or just hook up manually.
-    // Typically `user(this.auth)` matches onIdTokenChanged.
-    // Let's explicitly use the modular onIdTokenChanged function for now to replicate exact behavior if simpler.
-    // actually, let's use the RxJS way:
-    // import { user } from '@angular/fire/auth'; --> corresponds to onIdTokenChanged.
-    // But I didn't import 'user' in the top block, I imported 'User as FirebaseUser'.
-    // Let's just use the strict SDK method in constructor.
     this.auth.onIdTokenChanged(user => this.tokenChanged$.next(user));
 
     this.user$ = authState(this.auth).pipe(
@@ -183,7 +174,8 @@ export class AuthService {
 
   async signOut() {
     await runInInjectionContext(this.injector, () => signOut(this.auth));
-    return this.navigationService.signOut();
+    await firstValueFrom(this.user$.pipe(filter(user => !user.isAuthenticated)));
+    this.ngZone.run(() => this.navigationService.signOut());
   }
 
   /**
