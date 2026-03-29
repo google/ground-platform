@@ -100,7 +100,7 @@ export async function onCreateLoiHandler(
     )
   );
 
-  await broadcastSurveyUpdate(event.params.surveyId);
+  await broadcastSurveyUpdate(surveyId);
 }
 
 async function updateProperties(

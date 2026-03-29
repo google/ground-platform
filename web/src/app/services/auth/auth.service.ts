@@ -16,7 +16,12 @@
 
 import '@angular/localize/init';
 
-import { Injectable, Injector, runInInjectionContext } from '@angular/core';
+import {
+  Injectable,
+  Injector,
+  NgZone,
+  runInInjectionContext,
+} from '@angular/core';
 import {
   Auth,
   User as FirebaseUser,
@@ -27,7 +32,7 @@ import {
 } from '@angular/fire/auth';
 import { Functions, httpsCallable } from '@angular/fire/functions';
 import { Observable, Subject, firstValueFrom, from } from 'rxjs';
-import { map, mergeWith, shareReplay, switchMap } from 'rxjs/operators';
+import { filter, map, mergeWith, shareReplay, switchMap } from 'rxjs/operators';
 
 import { AclEntry } from 'app/models/acl-entry.model';
 import { DataCollectionStrategy, Job } from 'app/models/job.model';
@@ -80,7 +85,8 @@ export class AuthService {
     private navigationService: NavigationService,
     private functions: Functions,
     private httpClientService: HttpClientService,
-    private injector: Injector
+    private injector: Injector,
+    private ngZone: NgZone
   ) {
     // onIdTokenChanged via RxJS 'idToken' or 'user' specific helper?
     // @angular/fire/auth provides 'user' which wraps onIdTokenChanged.
@@ -196,7 +202,10 @@ export class AuthService {
 
   async signOut() {
     await runInInjectionContext(this.injector, () => signOut(this.auth));
-    return this.navigationService.signOut();
+    await firstValueFrom(
+      this.user$.pipe(filter(user => !user.isAuthenticated))
+    );
+    this.ngZone.run(() => this.navigationService.signOut());
   }
 
   /**
