@@ -105,6 +105,19 @@ html {
   @include terms.theme($theme);
 }
 
+// Prevent icon font ligature text from flashing before Material Icons fonts load.
+@font-face {
+  font-family: 'Material Icons';
+  font-style: normal;
+  font-display: block;
+}
+
+@font-face {
+  font-family: 'Material Symbols Outlined';
+  font-style: normal;
+  font-display: block;
+}
+
 // Global styles
 html,
 body {
