@@ -1,5 +1,5 @@
 /**
- * Copyright 2023 The Ground Authors.
+ * Copyright 2026 The Ground Authors.
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -17,14 +17,12 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 
-import { JobIntegrationEditorModule } from 'app/components/shared/job-integration-editor/job-integration-editor.module';
-import { LoiEditorModule } from 'app/components/shared/loi-editor/loi-editor.module';
-
-import { SurveyLoiComponent } from './survey-loi.component';
+import { JobIntegrationControlModule } from '../job-integration-control/job-integration-control.module';
+import { JobIntegrationEditorComponent } from './job-integration-editor.component';
 
 @NgModule({
-  declarations: [SurveyLoiComponent],
-  imports: [CommonModule, JobIntegrationEditorModule, LoiEditorModule],
-  exports: [SurveyLoiComponent],
+  declarations: [JobIntegrationEditorComponent],
+  imports: [CommonModule, JobIntegrationControlModule],
+  exports: [JobIntegrationEditorComponent],
 })
-export class SurveyLoiModule {}
+export class JobIntegrationEditorModule {}
