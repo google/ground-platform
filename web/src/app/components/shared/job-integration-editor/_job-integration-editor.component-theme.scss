@@ -14,15 +14,7 @@
  * limitations under the License.
  */
 
-@use 'sass:map';
 @use '@angular/material' as mat;
-
-@mixin color($theme) {
-  .job-integration-editor .job-integration-editor-card .job-integration-editor-card-row button.import-lois-button {
-    --mat-button-filled-container-color: #FFDDAB;
-    --mat-button-filled-label-text-color: mat.get-theme-color($theme, on-secondary-container);
-  }
-}
 
 @mixin typography($theme) {
   .job-integration-editor-card-row-title {
@@ -34,6 +26,5 @@
 }
 
 @mixin theme($theme) {
-  @include color($theme);
   @include typography($theme);
 }
