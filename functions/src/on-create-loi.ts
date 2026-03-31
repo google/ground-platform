@@ -19,30 +19,17 @@ import {
   QueryDocumentSnapshot,
 } from 'firebase-functions/v2/firestore';
 import { getDatastore } from './common/context';
-import { Datastore } from './common/datastore';
 import { broadcastSurveyUpdate } from './common/broadcast-survey-update';
 import { GroundProtos } from '@ground/proto';
 import { toDocumentData, toGeoJsonGeometry, toMessage } from '@ground/lib';
-import { geojsonToWKT } from '@terraformer/wkt';
 import { toLoiPbProperties } from './import-geojson';
+import {
+  Properties,
+  PropertyGeneratorConfig,
+  propertyGeneratorHandlers,
+} from './property-generators';
 
 import Pb = GroundProtos.ground.v1beta1;
-
-type Properties = Record<string, string | number>;
-
-type Headers = Record<string, string>;
-
-type Body = Record<string, unknown>;
-
-type PropertyGenerator = {
-  headers?: Headers;
-  body?: Body;
-  name: string;
-  prefix: string;
-  url: string;
-};
-
-const defaultHeaders = { 'Content-Type': 'application/json' };
 
 /**
  * Handles the creation of a Location of Interest (LOI) document in Firestore.
@@ -71,21 +58,14 @@ export async function onCreateLoiHandler(
   const propertyGenerators = await db.fetchPropertyGenerators();
 
   for (const propertyGeneratorDoc of propertyGenerators.docs) {
-    const propertyGenerator = propertyGeneratorDoc.data() as PropertyGenerator;
+    const config = propertyGeneratorDoc.data() as PropertyGeneratorConfig;
+    const handler = propertyGeneratorHandlers[propertyGeneratorDoc.id];
 
-    if (propertyGeneratorDoc.id === 'whisp') {
-      const { body, headers, prefix, url } = propertyGenerator;
+    if (!handler) continue;
 
-      const wkt = geojsonToWKT(Datastore.fromFirestoreMap(geometry));
+    const newProperties = await handler(config, geometry);
 
-      const newProperties = await fetchWhispProperties(
-        url,
-        { ...defaultHeaders, ...headers },
-        { wkt, ...body }
-      );
-
-      properties = await updateProperties(properties, newProperties, prefix);
-    }
+    properties = updateProperties(properties, newProperties, config.prefix);
 
     Object.keys(properties)
       .filter(key => typeof properties[key] === 'object')
@@ -103,37 +83,17 @@ export async function onCreateLoiHandler(
   await broadcastSurveyUpdate(surveyId);
 }
 
-async function updateProperties(
+function updateProperties(
   properties: Properties,
   newProperties: Properties,
   prefix?: string
-): Promise<Properties> {
+): Properties {
   if (prefix) properties = removePrefixedKeys(properties, prefix);
 
   return {
     ...properties,
     ...(prefix ? prefixKeys(newProperties, prefix) : newProperties),
   };
-}
-
-async function fetchWhispProperties(
-  url: string,
-  headers: Headers,
-  body: Body
-): Promise<Properties> {
-  const response = await fetch(url, {
-    method: 'POST',
-    headers,
-    body: JSON.stringify(body),
-  });
-
-  if (!response.ok) return {};
-
-  const json = (await response.json()) as any;
-
-  if (json?.code !== 'analysis_completed') return {};
-
-  return json?.data?.features[0]?.properties || {};
 }
 
 /**
