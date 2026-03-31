@@ -24,6 +24,7 @@
 @use 'app/components/shared/header/_header.component-theme.scss' as header;
 @use 'app/components/shared/import-dialog/_import-dialog.component-theme' as import-dialog;
 @use 'app/components/shared/inline-editor/inline-editor.component-theme' as inline-editor;
+@use 'app/components/shared/job-integration-editor/_job-integration-editor.component-theme' as job-integration-editor;
 @use 'app/components/shared/job-list-item/_job-list-item.component-theme' as job-list-item;
 @use 'app/components/shared/loi-editor/_loi-editor.component-theme.scss' as loi-editor;
 @use 'app/components/shared/loi-properties-dialog/loi-properties-dialog.component-theme' as loi-properties-dialog;
@@ -74,6 +75,7 @@ html {
   @include header.theme($theme);
   @include import-dialog.theme($theme);
   @include inline-editor.theme($theme);
+  @include job-integration-editor.theme($theme);
   @include job-list-item.theme($theme);
   @include loi-editor.theme($theme);
   @include loi-properties-dialog.theme($theme);
@@ -101,6 +103,19 @@ html {
   @include title-dialog.theme($theme);
   @include secondary-side-panel.theme($theme);
   @include terms.theme($theme);
+}
+
+// Prevent icon font ligature text from flashing before Material Icons fonts load.
+@font-face {
+  font-family: 'Material Icons';
+  font-style: normal;
+  font-display: block;
+}
+
+@font-face {
+  font-family: 'Material Symbols Outlined';
+  font-style: normal;
+  font-display: block;
 }
 
 // Global styles

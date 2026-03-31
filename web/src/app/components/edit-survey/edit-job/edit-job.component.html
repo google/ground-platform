@@ -39,7 +39,7 @@
   </div>
 
   <div [ngSwitch]="section">
-    <div *ngSwitchCase="EditJobSection.LOIS">
+    <div *ngSwitchCase="EditJobSection.LOIS" class="edit-job-lois">
       <loi-editor
         *ngIf="draftSurveyService.getSurvey$() | async as survey"
         [canImport]="surveyService.canManageSurvey(survey)"
@@ -49,6 +49,8 @@
         (updateStrategy)="onStrategyChange($event)"
         #loiEditor
       />
+
+      <job-integration-editor *ngIf="jobId" [jobId]="jobId"></job-integration-editor>
     </div>
 
     <div *ngSwitchCase="EditJobSection.TASKS">

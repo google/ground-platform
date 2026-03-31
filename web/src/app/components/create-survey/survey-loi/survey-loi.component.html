@@ -22,3 +22,5 @@
   [lois]="lois"
   (updateStrategy)="onStrategyChange($event)"
 />
+
+<job-integration-editor *ngIf="job" [jobId]="job.id"></job-integration-editor>
