@@ -14,12 +14,8 @@
  * limitations under the License.
  */
 
-import type { Properties, PropertyGeneratorConfig } from './types';
+import type { Properties, PropertyGeneratorHandler } from './types';
 
 // TODO: Implement geoid property generation.
-export async function geoidHandler(
-  _config: PropertyGeneratorConfig,
-  _geometry: object
-): Promise<Properties> {
-  return {};
-}
+export const geoidHandler: PropertyGeneratorHandler =
+  async (): Promise<Properties> => ({});
