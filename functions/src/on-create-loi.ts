@@ -55,13 +55,20 @@ export async function onCreateLoiHandler(
 
   let properties = propertiesPbToObject(loiPb.properties) || {};
 
+  const jobDoc = await db.fetchJob(surveyId, loiPb.jobId);
+  const jobPb = toMessage(jobDoc.data()!, Pb.Job) as Pb.Job;
+  const enabledIntegrationIds = new Set(
+    jobPb.enabledIntegrations.map(i => i.id)
+  );
+
   const propertyGenerators = await db.fetchPropertyGenerators();
 
   for (const propertyGeneratorDoc of propertyGenerators.docs) {
     const config = propertyGeneratorDoc.data() as PropertyGeneratorConfig;
     const handler = propertyGeneratorHandlers[propertyGeneratorDoc.id];
 
-    if (!handler) continue;
+    if (!handler || !enabledIntegrationIds.has(propertyGeneratorDoc.id))
+      continue;
 
     const newProperties = await handler(config, geometry);
 
