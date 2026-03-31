@@ -56,7 +56,7 @@ describe('onCreateLoiHandler()', () => {
         [p.coordinates]: { [c.latitude]: 10.0, [c.longitude]: 20.0 },
       },
     },
-    [l.properties]: {},
+    [l.properties]: { name: { [pr.stringValue]: 'Test LOI' } },
   };
 
   const whispConfig = {
