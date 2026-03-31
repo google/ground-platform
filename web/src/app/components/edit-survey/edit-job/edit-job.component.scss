@@ -39,6 +39,12 @@ task-button:hover {
 }
 
 .edit-job {
+  .edit-job-lois {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
   .edit-job-header {
     display: flex;
     gap: 16px;
