@@ -68,41 +68,45 @@ export function importGeoJsonCallback(
 
   // This code will process each file uploaded.
   busboy.on('file', async (_fieldname, fileStream) => {
-    const { survey: surveyId, job: jobId } = params;
-    if (!surveyId || !jobId) {
-      return error(StatusCodes.BAD_REQUEST, 'Missing survey and/or job ID');
-    }
-    const survey = await db.fetchSurvey(surveyId);
-    if (!survey.exists) {
-      return error(StatusCodes.NOT_FOUND, `Survey ${surveyId} not found`);
-    }
-    if (!canImport(user, survey)) {
-      return error(
-        StatusCodes.FORBIDDEN,
-        `User does not have permission to import into survey ${surveyId}`
+    try {
+      const { survey: surveyId, job: jobId } = params;
+      if (!surveyId || !jobId) {
+        return error(StatusCodes.BAD_REQUEST, 'Missing survey and/or job ID');
+      }
+      const survey = await db.fetchSurvey(surveyId);
+      if (!survey.exists) {
+        return error(StatusCodes.NOT_FOUND, `Survey ${surveyId} not found`);
+      }
+      if (!canImport(user, survey)) {
+        return error(
+          StatusCodes.FORBIDDEN,
+          `User does not have permission to import into survey ${surveyId}`
+        );
+      }
+
+      console.debug(
+        `Importing GeoJSON into survey '${surveyId}', job '${jobId}'`
       );
+
+      const parser = JSONStream.parse(['features', true], undefined);
+
+      fileStream.pipe(
+        parser
+          .on('header', (data: any) => {
+            try {
+              onGeoJsonType(data.type);
+              if (data.crs) onGeoJsonCrs(data.crs);
+            } catch (error: any) {
+              busboy.emit('error', error);
+            }
+          })
+          .on('data', (data: any) => {
+            if (!hasError) onGeoJsonFeature(data, surveyId, jobId);
+          })
+      );
+    } catch (err) {
+      busboy.emit('error', err);
     }
-
-    console.debug(
-      `Importing GeoJSON into survey '${surveyId}', job '${jobId}'`
-    );
-
-    const parser = JSONStream.parse(['features', true], undefined);
-
-    fileStream.pipe(
-      parser
-        .on('header', (data: any) => {
-          try {
-            onGeoJsonType(data.type);
-            if (data.crs) onGeoJsonCrs(data.crs);
-          } catch (error: any) {
-            busboy.emit('error', error);
-          }
-        })
-        .on('data', (data: any) => {
-          if (!hasError) onGeoJsonFeature(data, surveyId, jobId);
-        })
-    );
   });
 
   // Handle non-file fields in the task. survey and job must appear
