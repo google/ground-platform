@@ -16,7 +16,7 @@
 
 import cors from 'cors';
 import { DecodedIdToken } from 'firebase-admin/auth';
-import { onRequest, Request } from 'firebase-functions/v2/https';
+import { onRequest, HttpsOptions, Request } from 'firebase-functions/v2/https';
 import type { Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import { getDecodedIdToken } from './common/auth';
@@ -74,8 +74,11 @@ export type HttpsRequestHandler = (
 /**
  * A synchronous HTTPS request handler. The HTTPS request is closed as soon as the handler resolves.
  */
-export function onHttpsRequest(handler: HttpsRequestHandler) {
-  return onRequest((req: Request, res: Response) =>
+export function onHttpsRequest(
+  handler: HttpsRequestHandler,
+  options: HttpsOptions = {}
+) {
+  return onRequest(options, (req: Request, res: Response) =>
     corsMiddleware(req, res, () =>
       cookieParser()(
         req as any,
