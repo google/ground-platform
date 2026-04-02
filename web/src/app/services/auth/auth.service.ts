@@ -88,16 +88,6 @@ export class AuthService {
     private injector: Injector,
     private ngZone: NgZone
   ) {
-    // onIdTokenChanged via RxJS 'idToken' or 'user' specific helper?
-    // @angular/fire/auth provides 'user' which wraps onIdTokenChanged.
-    // However, existing code pipes it to tokenChanged$.
-    // Let's use the 'user' observable from @angular/fire/auth directly if possible, or just hook up manually.
-    // Typically `user(this.auth)` matches onIdTokenChanged.
-    // Let's explicitly use the modular onIdTokenChanged function for now to replicate exact behavior if simpler.
-    // actually, let's use the RxJS way:
-    // import { user } from '@angular/fire/auth'; --> corresponds to onIdTokenChanged.
-    // But I didn't import 'user' in the top block, I imported 'User as FirebaseUser'.
-    // Let's just use the strict SDK method in constructor.
     this.auth.onIdTokenChanged(user => {
       if (!user) localStorage.removeItem(SESSION_COOKIE_EXPIRES_AT_KEY);
       this.tokenChanged$.next(user);
