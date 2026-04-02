@@ -368,13 +368,12 @@ export class CreateSurveyComponent implements OnInit {
     } else {
       job = this.jobService.createNewJob();
     }
-    await this.jobService.addOrUpdateJob(
-      this.survey!,
-      job.copyWith({
-        name,
-        color: job.color || this.jobService.getNextColor(this.survey?.jobs),
-      })
-    );
+    const updatedJob = job.copyWith({
+      name,
+      color: job.color || this.jobService.getNextColor(this.survey?.jobs),
+    });
+    await this.jobService.addOrUpdateJob(this.survey!, updatedJob);
+    this.draftSurveyService.addOrUpdateJob(updatedJob);
   }
 
   private async saveTasks() {
@@ -389,6 +388,7 @@ export class CreateSurveyComponent implements OnInit {
       return;
     }
     await this.taskService.addOrUpdateTasks(survey.id, job, tasks!);
+    this.draftSurveyService.addOrUpdateTasks(job.id, tasks!, true);
   }
 
   private async saveDataSharingTerms(): Promise<void> {
