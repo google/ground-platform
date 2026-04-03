@@ -15,7 +15,7 @@
  */
 
 import { geojsonToWKT } from '@terraformer/wkt';
-import { Datastore } from '../common/datastore';
+import type { Geometry } from 'geojson';
 import type {
   Body,
   Headers,
@@ -36,11 +36,11 @@ const defaultHeaders = { 'Content-Type': 'application/json' };
 
 export async function whispHandler(
   config: PropertyGeneratorConfig,
-  geometry: object
+  geometry: Geometry
 ): Promise<Properties> {
   const { body, headers, url } = config;
 
-  const wkt = geojsonToWKT(Datastore.fromFirestoreMap(geometry));
+  const wkt = geojsonToWKT(geometry);
 
   return fetchWhispProperties(
     url,
