@@ -65,6 +65,12 @@ describe('onCreateLoiHandler()', () => {
     url: 'https://whisp.example.com/api',
   };
 
+  const geoidConfig = {
+    name: 'geoid',
+    prefix: 'geoid_',
+    url: 'https://geoid.example.com/api',
+  };
+
   beforeEach(() => {
     mockFirestore = createMockFirestore();
     stubAdminApi(mockFirestore);
@@ -75,6 +81,9 @@ describe('onCreateLoiHandler()', () => {
     mockFirestore
       .doc('config/integrations/propertyGenerators/whisp')
       .set(whispConfig);
+    mockFirestore
+      .doc('config/integrations/propertyGenerators/geoid')
+      .set(geoidConfig);
   });
 
   afterEach(() => {
@@ -117,5 +126,51 @@ describe('onCreateLoiHandler()', () => {
     expect(loiData?.[l.properties]?.['whisp_area']).toEqual({
       [pr.numericValue]: 100,
     });
+  });
+
+  it('runs geoid property generator and updates LOI properties when integration is enabled', async () => {
+    mockFirestore.doc(JOB_PATH).set({
+      [j.enabledIntegrations]: [{ [intgr.id]: 'geoid' }],
+    });
+    spyOn(globalThis, 'fetch').and.returnValue(
+      Promise.resolve({
+        ok: true,
+        text: () =>
+          Promise.resolve(
+            "type='Feature' id='019d4e5a-d6bb-7000-99d2-3c0d4081586b'"
+          ),
+      } as Response)
+    );
+
+    await onCreateLoiHandler({
+      data: newDocumentSnapshot(loiDoc) as unknown as QueryDocumentSnapshot,
+      params: { surveyId: SURVEY_ID, loiId: LOI_ID },
+    } as unknown as FirestoreEvent<QueryDocumentSnapshot | undefined>);
+
+    const loiData = (await mockFirestore.doc(LOI_PATH).get()).data();
+    expect(loiData?.[l.properties]?.['geoid_id']).toEqual({
+      [pr.stringValue]: '019d4e5a-d6bb-7000-99d2-3c0d4081586b',
+    });
+  });
+
+  it('skips geoid property generator when fetch fails', async () => {
+    mockFirestore.doc(JOB_PATH).set({
+      [j.enabledIntegrations]: [{ [intgr.id]: 'geoid' }],
+    });
+    spyOn(globalThis, 'fetch').and.returnValue(
+      Promise.resolve({
+        ok: false,
+        status: 500,
+        text: () => Promise.resolve('Internal Server Error'),
+      } as Response)
+    );
+
+    await onCreateLoiHandler({
+      data: newDocumentSnapshot(loiDoc) as unknown as QueryDocumentSnapshot,
+      params: { surveyId: SURVEY_ID, loiId: LOI_ID },
+    } as unknown as FirestoreEvent<QueryDocumentSnapshot | undefined>);
+
+    const loiData = (await mockFirestore.doc(LOI_PATH).get()).data();
+    expect(loiData?.[l.properties]?.['geoid_geoid_code']).toBeUndefined();
   });
 });
