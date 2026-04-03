@@ -68,7 +68,9 @@ export async function getFirebaseDownloadUrl(file: {
   setMetadata: (metadata: any) => Promise<unknown>;
 }): Promise<string> {
   const token = randomUUID();
-  await file.setMetadata({ metadata: { firebaseStorageDownloadTokens: token } });
+  await file.setMetadata({
+    metadata: { firebaseStorageDownloadTokens: token },
+  });
   const encoded = encodeURIComponent(file.name);
   return `https://firebasestorage.googleapis.com/v0/b/${file.bucket.name}/o/${encoded}?alt=media&token=${token}`;
 }
