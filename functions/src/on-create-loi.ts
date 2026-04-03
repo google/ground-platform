@@ -80,7 +80,10 @@ export async function onCreateLoiHandler(
       const newProperties = await handler(config, geometry);
     properties = updateProperties(properties, newProperties, config.prefix);
     } catch (e) {
-      console.error(`LOI ${loiId}: property generator '${generatorId}' failed:`, e);
+      console.error(
+        `LOI ${loiId}: property generator '${generatorId}' failed:`,
+        e
+      );
     }
 
     Object.keys(properties)
