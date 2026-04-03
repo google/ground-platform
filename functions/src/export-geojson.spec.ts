@@ -23,9 +23,10 @@ import {
   createResponseSpy,
 } from './testing/http-test-helpers';
 import { DecodedIdToken } from 'firebase-admin/auth';
-import { StatusCodes } from 'http-status-codes';
 import { DATA_COLLECTOR_ROLE } from './common/auth';
 import { resetDatastore } from './common/context';
+import * as context from './common/context';
+import { PassThrough } from 'stream';
 import { Firestore } from 'firebase-admin/firestore';
 import { exportGeojsonHandler } from './export-geojson';
 import { registry } from '@ground/lib';
@@ -45,6 +46,8 @@ const op = registry.getFieldIds(Pb.Task.MultipleChoiceQuestion.Option);
 
 describe('export()', () => {
   let mockFirestore: Firestore;
+  let storageChunks: string[];
+  const FIREBASE_DOWNLOAD_URL_PREFIX = 'https://firebasestorage.googleapis.com/v0/b/test-bucket/o/';
   const email = 'somebody@test.it';
   const userId = 'user5000';
   const survey = {
@@ -174,6 +177,22 @@ describe('export()', () => {
   beforeEach(() => {
     mockFirestore = createMockFirestore();
     stubAdminApi(mockFirestore);
+    storageChunks = [];
+    const writeStream = new PassThrough();
+    writeStream.on('data', (chunk: Buffer) =>
+      storageChunks.push(chunk.toString())
+    );
+    const mockFile = jasmine.createSpyObj('file', [
+      'createWriteStream',
+      'setMetadata',
+    ]);
+    mockFile.createWriteStream.and.returnValue(writeStream);
+    mockFile.setMetadata.and.resolveTo([{}]);
+    Object.defineProperty(mockFile, 'name', { value: 'temp/user5000/job.geojson' });
+    Object.defineProperty(mockFile, 'bucket', { value: { name: 'test-bucket' } });
+    const mockBucket = jasmine.createSpyObj('bucket', ['file']);
+    mockBucket.file.and.returnValue(mockFile);
+    spyOn(context, 'getStorageBucket').and.returnValue(mockBucket);
   });
 
   afterEach(() => {
@@ -200,8 +219,7 @@ describe('export()', () => {
             job: jobId,
           },
         });
-        const chunks: string[] = [];
-        const res = createResponseSpy(chunks);
+        const res = createResponseSpy();
 
         // Run export handler.
         await exportGeojsonHandler(req, res, {
@@ -210,13 +228,10 @@ describe('export()', () => {
         } as DecodedIdToken);
 
         // Check post-conditions.
-        expect(res.status).toHaveBeenCalledOnceWith(StatusCodes.OK);
-        expect(res.type).toHaveBeenCalledOnceWith('application/json');
-        expect(res.setHeader).toHaveBeenCalledOnceWith(
-          'Content-Disposition',
-          `attachment; filename=${expectedFilename}`
-        );
-        const output = JSON.parse(chunks.join(''));
+        expect(res.redirect as jasmine.Spy).toHaveBeenCalledTimes(1);
+        const redirectUrl: string = (res.redirect as jasmine.Spy).calls.mostRecent().args[0];
+        expect(redirectUrl).toContain(FIREBASE_DOWNLOAD_URL_PREFIX);
+        const output = JSON.parse(storageChunks.join(''));
         expect(output).toEqual(expectedGeojson);
         expect(JSON.stringify(output)).toEqual(JSON.stringify(expectedGeojson));
       })
