@@ -146,6 +146,18 @@ describe('AuthService createSessionCookie()', () => {
 
     expect(postWithAuthSpy).toHaveBeenCalledTimes(1);
   });
+
+  it('calls sessionLogin when the stored cookie expires within the refresh buffer', async () => {
+    const expiresWithinBuffer = Date.now() + 60 * 1000; // 1 minute from now, within the 5-minute buffer
+    localStorage.setItem(
+      SESSION_COOKIE_EXPIRES_AT_KEY,
+      String(expiresWithinBuffer)
+    );
+
+    await service.createSessionCookie();
+
+    expect(postWithAuthSpy).toHaveBeenCalledTimes(1);
+  });
 });
 
 describe('AuthService session cookie invalidation', () => {
