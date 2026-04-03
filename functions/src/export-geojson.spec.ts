@@ -47,7 +47,9 @@ const op = registry.getFieldIds(Pb.Task.MultipleChoiceQuestion.Option);
 describe('export()', () => {
   let mockFirestore: Firestore;
   let storageChunks: string[];
-  const FIREBASE_DOWNLOAD_URL_PREFIX = 'https://firebasestorage.googleapis.com/v0/b/test-bucket/o/';
+  let mockFile: jasmine.SpyObj<any>;
+  const FIREBASE_DOWNLOAD_URL_PREFIX =
+    'https://firebasestorage.googleapis.com/v0/b/test-bucket/o/';
   const email = 'somebody@test.it';
   const userId = 'user5000';
   const survey = {
@@ -182,14 +184,18 @@ describe('export()', () => {
     writeStream.on('data', (chunk: Buffer) =>
       storageChunks.push(chunk.toString())
     );
-    const mockFile = jasmine.createSpyObj('file', [
+    mockFile = jasmine.createSpyObj('file', [
       'createWriteStream',
       'setMetadata',
     ]);
     mockFile.createWriteStream.and.returnValue(writeStream);
     mockFile.setMetadata.and.resolveTo([{}]);
-    Object.defineProperty(mockFile, 'name', { value: 'temp/user5000/job.geojson' });
-    Object.defineProperty(mockFile, 'bucket', { value: { name: 'test-bucket' } });
+    Object.defineProperty(mockFile, 'name', {
+      value: 'temp/user5000/job.geojson',
+    });
+    Object.defineProperty(mockFile, 'bucket', {
+      value: { name: 'test-bucket' },
+    });
     const mockBucket = jasmine.createSpyObj('bucket', ['file']);
     mockBucket.file.and.returnValue(mockFile);
     spyOn(context, 'getStorageBucket').and.returnValue(mockBucket);
@@ -229,8 +235,17 @@ describe('export()', () => {
 
         // Check post-conditions.
         expect(res.redirect as jasmine.Spy).toHaveBeenCalledTimes(1);
-        const redirectUrl: string = (res.redirect as jasmine.Spy).calls.mostRecent().args[0];
+        const redirectUrl: string = (
+          res.redirect as jasmine.Spy
+        ).calls.mostRecent().args[0];
         expect(redirectUrl).toContain(FIREBASE_DOWNLOAD_URL_PREFIX);
+        expect(mockFile.createWriteStream).toHaveBeenCalledWith(
+          jasmine.objectContaining({
+            metadata: jasmine.objectContaining({
+              contentDisposition: `attachment; filename=${expectedFilename}`,
+            }),
+          })
+        );
         const output = JSON.parse(storageChunks.join(''));
         expect(output).toEqual(expectedGeojson);
         expect(JSON.stringify(output)).toEqual(JSON.stringify(expectedGeojson));

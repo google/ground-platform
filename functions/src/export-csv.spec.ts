@@ -96,6 +96,7 @@ async function* fetchLoisSubmissionsFromMock(
 describe('exportCsv()', () => {
   let mockFirestore: Firestore;
   let storageChunks: string[];
+  let mockFile: jasmine.SpyObj<any>;
   const FIREBASE_DOWNLOAD_URL_PREFIX =
     'https://firebasestorage.googleapis.com/v0/b/test-bucket/o/';
   const email = 'somebody@test.it';
@@ -351,7 +352,7 @@ describe('exportCsv()', () => {
     writeStream.on('data', (chunk: Buffer) =>
       storageChunks.push(chunk.toString())
     );
-    const mockFile = jasmine.createSpyObj('file', [
+    mockFile = jasmine.createSpyObj('file', [
       'createWriteStream',
       'setMetadata',
     ]);
@@ -437,6 +438,13 @@ describe('exportCsv()', () => {
           res.redirect as jasmine.Spy
         ).calls.mostRecent().args[0];
         expect(redirectUrl).toContain(FIREBASE_DOWNLOAD_URL_PREFIX);
+        expect(mockFile.createWriteStream).toHaveBeenCalledWith(
+          jasmine.objectContaining({
+            metadata: jasmine.objectContaining({
+              contentDisposition: `attachment; filename=${expectedFilename}`,
+            }),
+          })
+        );
         const output = storageChunks.join('').trim();
         const lines = output.split('\n');
         expect(lines).toEqual(expectedCsv);
