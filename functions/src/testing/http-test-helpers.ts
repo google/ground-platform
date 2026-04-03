@@ -48,6 +48,7 @@ export function createResponseSpy(chunks?: string[]): Response<any> {
     'write',
     'type',
     'setHeader',
+    'redirect',
     'on',
     'once',
     'emit',
