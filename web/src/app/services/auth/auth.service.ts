@@ -69,6 +69,8 @@ export const ROLE_OPTIONS = [
 ];
 
 const SESSION_COOKIE_EXPIRES_AT_KEY = 'sessionCookieExpiresAt';
+// Refresh the session cookie this many ms before it expires to avoid using a stale cookie.
+const SESSION_COOKIE_REFRESH_BUFFER_MS = 5 * 60 * 1000; // 5 minutes
 
 @Injectable({
   providedIn: 'root',
@@ -115,7 +117,7 @@ export class AuthService {
    */
   async createSessionCookie() {
     const stored = localStorage.getItem(SESSION_COOKIE_EXPIRES_AT_KEY);
-    if (stored !== null && Date.now() < parseInt(stored, 10)) {
+    if (stored !== null && Date.now() + SESSION_COOKIE_REFRESH_BUFFER_MS < parseInt(stored, 10)) {
       return;
     }
     try {
