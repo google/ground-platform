@@ -17,13 +17,14 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 
+import { JobIntegrationEditorModule } from 'app/components/shared/job-integration-editor/job-integration-editor.module';
 import { LoiEditorModule } from 'app/components/shared/loi-editor/loi-editor.module';
 
 import { SurveyLoiComponent } from './survey-loi.component';
 
 @NgModule({
   declarations: [SurveyLoiComponent],
-  imports: [CommonModule, LoiEditorModule],
+  imports: [CommonModule, JobIntegrationEditorModule, LoiEditorModule],
   exports: [SurveyLoiComponent],
 })
 export class SurveyLoiModule {}

@@ -16,8 +16,10 @@
 
 import { Component, inject, input } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { switchMap } from 'rxjs/operators';
+import { EMPTY } from 'rxjs';
+import { catchError, switchMap } from 'rxjs/operators';
 
+import { NavigationService } from 'app/services/navigation/navigation.service';
 import { SurveyService } from 'app/services/survey/survey.service';
 
 @Component({
@@ -28,11 +30,16 @@ import { SurveyService } from 'app/services/survey/survey.service';
 })
 export class MainPageContainerComponent {
   private surveyService = inject(SurveyService);
+  private navigationService = inject(NavigationService);
 
   surveyId = input<string>();
   survey = toSignal(
     toObservable(this.surveyId).pipe(
-      switchMap(id => (id ? this.surveyService.loadSurvey$(id) : []))
+      switchMap(id => (id ? this.surveyService.loadSurvey$(id) : [])),
+      catchError((err: Error) => {
+        this.navigationService.error(err);
+        return EMPTY;
+      })
     )
   );
 

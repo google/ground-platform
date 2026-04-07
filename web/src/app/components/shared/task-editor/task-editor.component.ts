@@ -15,7 +15,15 @@
  */
 
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
-import { Component, EventEmitter, Input, Output, input } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  HostListener,
+  Output,
+  effect,
+  input,
+  signal,
+} from '@angular/core';
 import {
   AbstractControl,
   FormArray,
@@ -92,7 +100,7 @@ export const taskTypeToGroup = new Map([
 export class TaskEditorComponent {
   formGroup!: FormGroup;
 
-  @Input() tasks?: List<Task>;
+  tasks = input<List<Task>>();
   isCreationMode = input<boolean>(false);
 
   @Output() onValidationChanges: EventEmitter<boolean> =
@@ -106,36 +114,47 @@ export class TaskEditorComponent {
     TaskGroup.CAPTURE_LOCATION,
   ];
 
+  multipleChoiceTasks = List<Task>();
+
+  expandedIndex = signal<number | null>(null);
+
   constructor(
     private dataStoreService: DataStoreService,
     private dialogService: DialogService,
     private taskService: TaskService,
     private formBuilder: FormBuilder
-  ) {}
+  ) {
+    effect(() => {
+      this.formGroup = this.formBuilder.group({
+        tasks: this.formBuilder.array(
+          this.tasks()?.toArray().map((task: Task) => this.toControl(task)) ||
+            [],
+          Validators.required
+        ),
+      }) as FormGroup;
 
-  multipleChoiceTasks = List<Task>();
+      this.formGroup.statusChanges.subscribe(_ => {
+        this.onValidationChanges.emit(this.formGroup?.valid);
+      });
 
-  ngOnChanges(): void {
-    this.formGroup = this.formBuilder.group({
-      tasks: this.formBuilder.array(
-        this.tasks?.toArray().map((task: Task) => this.toControl(task)) || [],
-        Validators.required
-      ),
-    }) as FormGroup;
+      this.formGroup.valueChanges.subscribe(_ => {
+        this.multipleChoiceTasks = this.toTasks();
+        this.onValueChanges.emit(this.formGroup?.valid);
+      });
 
-    this.formGroup.statusChanges.subscribe(_ => {
       this.onValidationChanges.emit(this.formGroup?.valid);
-    });
-
-    this.formGroup.valueChanges.subscribe(_ => {
       this.multipleChoiceTasks = this.toTasks();
-
-      this.onValueChanges.emit(this.formGroup?.valid);
     });
+  }
 
-    this.onValidationChanges.emit(this.formGroup?.valid);
+  @HostListener('document:click')
+  onDocumentClick(): void {
+    this.expandedIndex.set(null);
+  }
 
-    this.multipleChoiceTasks = this.toTasks();
+  onTaskContainerClick(index: number, event: MouseEvent): void {
+    event.stopPropagation();
+    this.expandedIndex.set(index);
   }
 
   get formArray() {
@@ -305,5 +324,9 @@ export class TaskEditorComponent {
 
   toTasks(): List<Task> {
     return List(this.formArray.controls.map((_, i: number) => this.toTask(i)));
+  }
+
+  trackByTaskId(_index: number, control: AbstractControl): string {
+    return control.get('id')?.value;
   }
 }

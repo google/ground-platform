@@ -18,9 +18,9 @@ import '@angular/localize/init';
 
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import {
+  ChangeDetectionStrategy,
   Component,
   EventEmitter,
-  HostListener,
   Input,
   Output,
   input,
@@ -156,21 +156,19 @@ const AddLoiTaskGroups = List([TaskGroup.DROP_PIN, TaskGroup.DRAW_AREA]);
   templateUrl: './task-form.component.html',
   styleUrls: ['./task-form.component.scss'],
   standalone: false,
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TaskFormComponent {
   @Input() formGroup!: FormGroup;
   @Input() formGroupIndex!: number;
   isCreationMode = input<boolean>(false);
 
+  expanded = input<boolean>(false);
+
   @Output() delete = new EventEmitter();
   @Output() duplicate = new EventEmitter();
   @Output() toggleCondition = new EventEmitter();
-
-  /** When expanded, options and actions below the fold are visible to the user. */
-  expanded: boolean;
-
-  /** Set to true when question gets focus, false when it loses focus. */
-  selected: boolean;
+  @Output() expand = new EventEmitter<void>();
 
   addLoiTask?: boolean;
 
@@ -200,21 +198,10 @@ export class TaskFormComponent {
     public dialog: MatDialog,
     private dataStoreService: DataStoreService,
     private formBuilder: FormBuilder
-  ) {
-    this.expanded = false;
-    this.selected = false;
-  }
+  ) {}
 
-  @HostListener('click')
   onTaskFocus() {
-    this.expanded = true;
-    this.selected = true;
-  }
-
-  @HostListener('document:click')
-  onTaskBlur() {
-    if (!this.selected) this.expanded = false;
-    this.selected = false;
+    this.expand.emit();
   }
 
   ngOnInit(): void {

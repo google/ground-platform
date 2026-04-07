@@ -88,8 +88,8 @@ catalogs:
       specifier: ^12.1.0
       version: 12.1.0
     firebase-functions:
-      specifier: ^6.6.0
-      version: 6.6.0
+      specifier: ^7.2.2
+      version: 7.2.3
     google-auth-library:
       specifier: ^6.1.3
       version: 6.1.3
@@ -118,8 +118,8 @@ catalogs:
       specifier: ^10.1.0
       version: 10.1.0
     nodemailer:
-      specifier: ^7.0.11
-      version: 7.0.12
+      specifier: ^8.0.4
+      version: 8.0.4
     protobufjs:
       specifier: ^7.3.2
       version: 7.5.4
@@ -463,7 +463,7 @@ importers:
         version: 12.1.0(encoding@0.1.13)
       firebase-functions:
         specifier: 'catalog:'
-        version: 6.6.0(firebase-admin@12.1.0(encoding@0.1.13))
+        version: 7.2.3(firebase-admin@12.1.0(encoding@0.1.13))
       google-auth-library:
         specifier: 'catalog:'
         version: 6.1.3(encoding@0.1.13)
@@ -484,7 +484,7 @@ importers:
         version: 2.2.3
       nodemailer:
         specifier: 'catalog:'
-        version: 7.0.12
+        version: 8.0.4
       sanitize-html:
         specifier: 'catalog:'
         version: 2.17.0
@@ -521,7 +521,7 @@ importers:
         version: 2.0.0
       firebase-functions-test:
         specifier: catalog:dev
-        version: 3.4.1(firebase-admin@12.1.0(encoding@0.1.13))(firebase-functions@6.6.0(firebase-admin@12.1.0(encoding@0.1.13)))(jest@30.2.0(@types/node@20.19.30)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@types/node@20.19.30)(typescript@5.9.3)))
+        version: 3.4.1(firebase-admin@12.1.0(encoding@0.1.13))(firebase-functions@7.2.3(firebase-admin@12.1.0(encoding@0.1.13)))(jest@30.2.0(@types/node@20.19.30)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@types/node@20.19.30)(typescript@5.9.3)))
       form-data-encoder:
         specifier: catalog:dev
         version: 4.1.0
@@ -542,7 +542,7 @@ importers:
         version: 12.1.0(encoding@0.1.13)
       firebase-functions:
         specifier: 'catalog:'
-        version: 6.6.0(firebase-admin@12.1.0(encoding@0.1.13))
+        version: 7.2.3(firebase-admin@12.1.0(encoding@0.1.13))
       protobufjs:
         specifier: 'catalog:'
         version: 7.5.4
@@ -6932,12 +6932,22 @@ packages:
       firebase-functions: '>=4.9.0'
       jest: '>=28.0.0'
 
-  firebase-functions@6.6.0:
-    resolution: {integrity: sha512-wwfo6JF+N7HUExVs5gUFgkgVGHDEog9O+qtouh7IuJWk8TBQ+KwXEgRiXbatSj7EbTu3/yYnHuzh3XExbfF6wQ==}
-    engines: {node: '>=14.10.0'}
+  firebase-functions@7.2.3:
+    resolution: {integrity: sha512-myrnxuvmfAQYsaat2Crv1k2qpb2BuRUVRfr1V/nVLNO4sObgd06NT08TsVF3PA6EkxyUsOKXmcvmGFiJC0R2fQ==}
+    engines: {node: '>=18.0.0'}
     hasBin: true
     peerDependencies:
+      '@apollo/server': ^5.2.0
+      '@as-integrations/express4': ^1.1.2
       firebase-admin: ^11.10.0 || ^12.0.0 || ^13.0.0
+      graphql: ^16.12.0
+    peerDependenciesMeta:
+      '@apollo/server':
+        optional: true
+      '@as-integrations/express4':
+        optional: true
+      graphql:
+        optional: true
 
   firebase-tools@14.27.0:
     resolution: {integrity: sha512-HrucHJ69mLM9pQhZFO1rb0N/QMpZD4iznoOtKd2lctEELPtbSMN5JHgdgzLlf+EXn5aQy87u5zlPd/0xwwyYTQ==}
@@ -9028,8 +9038,8 @@ packages:
     resolution: {integrity: sha512-OXdegQq03OmXEjt2hZP33W2YPs/E5BcFQks46+G2gAxs4gHOIVD1u7EqlYLYSKsaIpyKCK9Gbk0ta1/gjRSMRQ==}
     engines: {node: '>=6'}
 
-  nodemailer@7.0.12:
-    resolution: {integrity: sha512-H+rnK5bX2Pi/6ms3sN4/jRQvYSMltV6vqup/0SFOrxYYY/qoNvhXPlYq3e+Pm9RFJRwrMGbMIwi81M4dxpomhA==}
+  nodemailer@8.0.4:
+    resolution: {integrity: sha512-k+jf6N8PfQJ0Fe8ZhJlgqU5qJU44Lpvp2yvidH3vp1lPnVQMgi4yEEMPXg5eJS1gFIJTVq1NHBk7Ia9ARdSBdQ==}
     engines: {node: '>=6.0.0'}
 
   nopt@9.0.0:
@@ -20632,16 +20642,16 @@ snapshots:
       - encoding
       - supports-color
 
-  firebase-functions-test@3.4.1(firebase-admin@12.1.0(encoding@0.1.13))(firebase-functions@6.6.0(firebase-admin@12.1.0(encoding@0.1.13)))(jest@30.2.0(@types/node@20.19.30)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@types/node@20.19.30)(typescript@5.9.3))):
+  firebase-functions-test@3.4.1(firebase-admin@12.1.0(encoding@0.1.13))(firebase-functions@7.2.3(firebase-admin@12.1.0(encoding@0.1.13)))(jest@30.2.0(@types/node@20.19.30)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@types/node@20.19.30)(typescript@5.9.3))):
     dependencies:
       '@types/lodash': 4.17.23
       firebase-admin: 12.1.0(encoding@0.1.13)
-      firebase-functions: 6.6.0(firebase-admin@12.1.0(encoding@0.1.13))
+      firebase-functions: 7.2.3(firebase-admin@12.1.0(encoding@0.1.13))
       jest: 30.2.0(@types/node@20.19.30)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@types/node@20.19.30)(typescript@5.9.3))
       lodash: 4.17.23
       ts-deepmerge: 2.0.7
 
-  firebase-functions@6.6.0(firebase-admin@12.1.0(encoding@0.1.13)):
+  firebase-functions@7.2.3(firebase-admin@12.1.0(encoding@0.1.13)):
     dependencies:
       '@types/cors': 2.8.17
       '@types/express': 4.17.25
@@ -23461,7 +23471,7 @@ snapshots:
       long-timeout: 0.1.1
       sorted-array-functions: 1.3.0
 
-  nodemailer@7.0.12: {}
+  nodemailer@8.0.4: {}
 
   nopt@9.0.0:
     dependencies:

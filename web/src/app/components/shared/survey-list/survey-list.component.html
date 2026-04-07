@@ -60,7 +60,9 @@
     >
       <mat-card-header>
         <div class="add-icon-container">
-          <mat-icon mat-card-avatar class="add-icon">add_24px</mat-icon>
+          <mat-icon mat-card-avatar class="add-icon" fontSet="material-icons"
+            >add_24px</mat-icon
+          >
         </div>
 
         <mat-card-title class="survey-title" i18n="@@app.labels.createSurvey"
@@ -83,11 +85,7 @@
       (click)="handleSurveySelection(survey)"
     >
       <mat-card-header>
-        <mat-icon
-          mat-card-avatar
-          fontSet="material-symbols-outlined"
-          class="add-icon general-access-icon"
-        >
+        <mat-icon mat-card-avatar class="add-icon general-access-icon">
           <ng-container [ngSwitch]="survey.generalAccess">
             <ng-container *ngSwitchCase="SurveyGeneralAccess.RESTRICTED"
               >lock</ng-container
@@ -115,11 +113,7 @@
     [disabled]="currentFilter() === filter"
     (click)="handleFilterSelection(filter)"
   >
-    <mat-icon
-      *ngIf="icon || currentFilter() === filter"
-      fontSet="material-symbols-outlined"
-      matChipAvatar
-    >
+    <mat-icon *ngIf="icon || currentFilter() === filter" matChipAvatar>
       {{ currentFilter() !== filter ? icon : 'check' }}
     </mat-icon>
 

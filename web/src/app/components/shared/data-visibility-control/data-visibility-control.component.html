@@ -17,7 +17,7 @@
 <div class="data-visibility-control-container">
   <mat-slide-toggle
     [checked]="selectedDataVisibility === SurveyDataVisibility.ALL_SURVEY_PARTICIPANTS"
-    (change)="changeDataVisibility($event)"
+    (change)="onDataVisibilityChange($event)"
   >
   </mat-slide-toggle>
 </div>

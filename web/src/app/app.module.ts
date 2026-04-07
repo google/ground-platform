@@ -19,6 +19,7 @@ import {
   withInterceptorsFromDi,
 } from '@angular/common/http';
 import { NgModule } from '@angular/core';
+import { MatIconRegistry } from '@angular/material/icon';
 import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
 import { getAuth, provideAuth } from '@angular/fire/auth';
 import {
@@ -31,6 +32,10 @@ import {
   getFunctions,
   provideFunctions,
 } from '@angular/fire/functions';
+import {
+  getAnalytics,
+  provideAnalytics,
+} from '@angular/fire/analytics';
 import {
   getRemoteConfig,
   provideRemoteConfig,
@@ -82,6 +87,9 @@ import { environment } from 'environments/environment';
       }
       return functions;
     }),
+    ...(environment.firebase?.measurementId
+      ? [provideAnalytics(() => getAnalytics())]
+      : []),
     provideRemoteConfig(() => getRemoteConfig()),
     provideStorage(() => {
       const storage = getStorage();
@@ -94,4 +102,8 @@ import { environment } from 'environments/environment';
     provideHttpClient(withInterceptorsFromDi()),
   ],
 })
-export class AppModule {}
+export class AppModule {
+  constructor(iconRegistry: MatIconRegistry) {
+    iconRegistry.setDefaultFontSetClass('material-symbols-outlined');
+  }
+}

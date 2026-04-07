@@ -93,3 +93,25 @@ To deploy to your own production Firebase:
 ### Next steps
 
 For instructions on how to deploy to your own production Firebase project, see the [Ground Developer's Guide](https://github.com/google/ground-platform/wiki/Ground-Developer's-Guide).
+
+## Common commands
+
+All commands use [Nx](https://nx.dev) and [pnpm](https://pnpm.io). Run them from the repo root.
+
+| Command | Description |
+| ------- | ----------- |
+| `nx start` | Build and start the local Firebase emulator and Angular dev server |
+| `nx run root:build` | Build all packages |
+| `nx run root:test` | Run all tests |
+| `nx run root:lint` | Lint all packages |
+| `nx run web:serve` | Serve the web app only (no emulator) |
+| `nx run web:serve:staging` | Serve the web app against the live staging environment |
+| `nx run web:test` | Run web tests |
+| `nx run web:extract-i18n` | Extract i18n messages from the web app |
+| `nx run functions:test` | Run Cloud Functions tests |
+| `nx run functions:emulate` | Start the Firebase emulator for functions only |
+| `nx run functions:logs` | Tail Cloud Functions logs |
+| `nx run functions:shell` | Open an interactive Cloud Functions shell |
+| `nx run root:export:local` | Save current emulator data to disk for use on next run |
+| `nx run root:deploy:staging` | Build and deploy all to staging |
+| `nx run root:deploy:production` | Build and deploy all to production |

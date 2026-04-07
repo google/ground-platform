@@ -81,8 +81,6 @@ export class AndroidIntentLandingPageComponent implements OnInit {
 
     this.isIos = this.isIosDevice();
 
-    this.isIos = true;
-
     if (this.isIos) return;
 
     const googlePlayId = await firstValueFrom(this.googlePlayId$);
