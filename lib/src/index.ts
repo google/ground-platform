@@ -20,3 +20,4 @@ export { timestampToInt } from './date-util';
 export { deleteEmpty, isEmpty } from './obj-util';
 export { toGeoJsonGeometry, toGeometryPb, isGeometryValid } from './geo-json';
 export { registry } from './message-registry';
+export { SESSION_COOKIE_DURATION_MS } from './auth';

@@ -33,9 +33,9 @@ import { User } from 'app/models/user.model';
 import { environment } from 'environments/environment';
 
 import { HttpClientService } from '../http-client/http-client.service';
+import { SESSION_COOKIE_DURATION_MS } from '@ground/lib';
 
 const SESSION_COOKIE_EXPIRES_AT_KEY = 'sessionCookieExpiresAt';
-const FIVE_DAYS_MS = 60 * 60 * 24 * 5 * 1000;
 
 /** Providers shared by all describe blocks that use a mock Auth. */
 function mockAuthProviders(mockAuth: Partial<Auth>, postWithAuth: jasmine.Spy) {
@@ -97,7 +97,7 @@ describe('AuthService', () => {
 describe('AuthService createSessionCookie()', () => {
   let service: AuthService;
   let postWithAuthSpy: jasmine.Spy;
-  const futureExpiry = Date.now() + FIVE_DAYS_MS;
+  const futureExpiry = Date.now() + SESSION_COOKIE_DURATION_MS;
 
   beforeEach(() => {
     localStorage.clear();
@@ -167,7 +167,7 @@ describe('AuthService session cookie invalidation', () => {
   beforeEach(() => {
     localStorage.setItem(
       SESSION_COOKIE_EXPIRES_AT_KEY,
-      String(Date.now() + FIVE_DAYS_MS)
+      String(Date.now() + SESSION_COOKIE_DURATION_MS)
     );
 
     const onIdTokenChangedSpy = jasmine

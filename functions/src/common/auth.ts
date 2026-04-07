@@ -20,7 +20,7 @@ import { Request } from 'firebase-functions/v2/https';
 import type { Response } from 'express';
 import { EmulatorIdToken } from '../handlers';
 import { GroundProtos } from '@ground/proto';
-import { registry } from '@ground/lib';
+import { SESSION_COOKIE_DURATION_MS, registry } from '@ground/lib';
 
 import Pb = GroundProtos.ground.v1beta1;
 const s = registry.getFieldIds(Pb.Survey);
@@ -72,7 +72,7 @@ export async function setSessionCookie(
   res: Response
 ): Promise<number> {
   const token = getAuthBearer(req);
-  const expiresIn = 60 * 60 * 24 * 5 * 1000; // 5 days
+  const expiresIn = SESSION_COOKIE_DURATION_MS;
   const cookie = await getAuth().createSessionCookie(token!, { expiresIn });
   const expiresAt = Date.now() + expiresIn;
   res.cookie(SESSION_COOKIE_NAME, cookie, {

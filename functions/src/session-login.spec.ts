@@ -19,9 +19,8 @@ import type { Auth } from 'firebase-admin/auth';
 import { Request } from 'firebase-functions/v2/https';
 import type { Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
+import { SESSION_COOKIE_DURATION_MS } from '@ground/lib';
 import { sessionLoginHandler } from './session-login';
-
-const FIVE_DAYS_MS = 60 * 60 * 24 * 5 * 1000;
 
 describe('sessionLoginHandler', () => {
   let req: Request;
@@ -60,8 +59,10 @@ describe('sessionLoginHandler', () => {
       jasmine.objectContaining({ expiresAt: jasmine.any(Number) })
     );
     const { expiresAt } = (res.json as jasmine.Spy).calls.mostRecent().args[0];
-    expect(expiresAt).toBeGreaterThanOrEqual(before + FIVE_DAYS_MS);
-    expect(expiresAt).toBeLessThanOrEqual(after + FIVE_DAYS_MS);
+    expect(expiresAt).toBeGreaterThanOrEqual(
+      before + SESSION_COOKIE_DURATION_MS
+    );
+    expect(expiresAt).toBeLessThanOrEqual(after + SESSION_COOKIE_DURATION_MS);
   });
 
   it('sets httpOnly secure session cookie', async () => {
