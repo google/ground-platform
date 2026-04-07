@@ -70,9 +70,17 @@ export const onCreatePasslistEntry = onDocumentCreated(
 
 export const importGeoJson = onHttpsRequest(importGeoJsonHandler);
 
-export const exportCsv = onHttpsRequest(exportCsvHandler);
+export const exportCsv = onHttpsRequest(exportCsvHandler, {
+  memory: '4GiB',
+  timeoutSeconds: 3600,
+  cpu: 2,
+});
 
-export const exportGeojson = onHttpsRequest(exportGeojsonHandler);
+export const exportGeojson = onHttpsRequest(exportGeojsonHandler, {
+  memory: '4GiB',
+  timeoutSeconds: 3600,
+  cpu: 2,
+});
 
 export const onCreateLoi = onDocumentCreated(
   loiPathTemplate,

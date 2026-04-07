@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, computed, inject, input } from '@angular/core';
+import { Component, computed, effect, inject, input } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { Storage, getDownloadURL, ref } from '@angular/fire/storage';
 import { List } from 'immutable';
@@ -69,7 +69,14 @@ export class SubmissionPanelComponent {
       .toArray();
   });
 
-  constructor() {}
+  constructor() {
+    effect(() => {
+      if (this.submission()) {
+        this.firebaseURLs.clear();
+        this.getFirebaseImageURLs();
+      }
+    });
+  }
 
   submission = toSignal(
     combineLatest([

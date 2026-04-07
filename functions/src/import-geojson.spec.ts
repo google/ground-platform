@@ -27,7 +27,7 @@ import { DecodedIdToken } from 'firebase-admin/auth';
 import { Blob, FormData } from 'formdata-node';
 import { StatusCodes } from 'http-status-codes';
 import { SURVEY_ORGANIZER_ROLE } from './common/auth';
-import { resetDatastore } from './common/context';
+import { getDatastore, resetDatastore } from './common/context';
 import { Firestore } from 'firebase-admin/firestore';
 import { registry } from '@ground/lib';
 import { GroundProtos } from '@ground/proto';
@@ -277,4 +277,28 @@ describe('importGeoJson()', () => {
       expect(await loiData(surveyId)).toEqual(expected);
     })
   );
+
+  it('surfaces errors thrown during async file processing', async () => {
+    // Make fetchSurvey reject to simulate an unexpected async error in the file handler.
+    const db = getDatastore();
+    spyOn(db, 'fetchSurvey').and.returnValue(
+      Promise.reject(new Error('Database connection failed'))
+    );
+
+    const req = await createPostRequestSpy(
+      { url: '/importGeoJson' },
+      createPostData(surveyId, jobId, geoJsonWithPoint)
+    );
+    const res = createResponseSpy();
+
+    try {
+      await invokeCallbackAsync(importGeoJsonCallback, req, res, {
+        email,
+      } as DecodedIdToken);
+    } catch {
+      // Expected to reject.
+    }
+
+    expect(res.status).toHaveBeenCalledWith(StatusCodes.INTERNAL_SERVER_ERROR);
+  });
 });

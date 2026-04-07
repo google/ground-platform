@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-import { Component } from '@angular/core';
+import { Component, effect, input } from '@angular/core';
 import { MatSelectChange } from '@angular/material/select';
 import { Map } from 'immutable';
-import { Subscription } from 'rxjs';
 
 import { AclEntry } from 'app/models/acl-entry.model';
 import { Role } from 'app/models/role.model';
@@ -32,11 +31,10 @@ import { DraftSurveyService } from 'app/services/draft-survey/draft-survey.servi
   standalone: false,
 })
 export class ShareListComponent {
-  acl: Array<AclEntry> = [];
-  survey?: Survey;
-  surveyOwnerEmail = '';
+  survey = input<Survey>();
 
-  private subscription = new Subscription();
+  acl: Array<AclEntry> = [];
+  surveyOwnerEmail = '';
 
   readonly roleOptions = ROLE_OPTIONS;
 
@@ -46,16 +44,15 @@ export class ShareListComponent {
     readonly authService: AuthService,
     readonly draftSurveyService: DraftSurveyService
   ) {
-    this.subscription.add(
-      this.draftSurveyService
-        .getSurvey$()
-        .subscribe(survey => this.onSurveyLoaded(survey))
-    );
+    effect(() => {
+      const survey = this.survey();
+      if (survey) {
+        this.onSurveyLoaded(survey);
+      }
+    });
   }
 
   private async onSurveyLoaded(survey: Survey): Promise<void> {
-    this.survey = survey;
-
     const owner = await this.authService.getUser(survey.ownerId);
 
     this.surveyOwnerEmail = owner?.email || '';
@@ -87,9 +84,5 @@ export class ShareListComponent {
     this.draftSurveyService.updateAcl(
       Map(aclUpdate.map(entry => [entry.email, entry.role]))
     );
-  }
-
-  ngOnDestroy() {
-    this.subscription.unsubscribe();
   }
 }

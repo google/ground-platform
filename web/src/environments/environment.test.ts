@@ -19,9 +19,11 @@
 // `environment.test.ts`.
 // The list of file replacements can be found in `angular.json`.
 
+import { FirebaseOptions } from '@angular/fire/app';
 import { Env } from 'environments/environment-enums';
+import { Environment } from './environment-interface';
 
-export const environment = {
+export const environment: Environment = {
   production: false,
   googleMapsApiKey: '',
   cloudFunctionsUrl: '',
@@ -34,5 +36,5 @@ export const environment = {
     storageBucket: 'mock-storage-bucket',
     messagingSenderId: 'mock-messaging-sender-id',
     appId: 'mock-app-id',
-  },
+  } as FirebaseOptions,
 };

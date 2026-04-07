@@ -14,7 +14,13 @@
  * limitations under the License.
  */
 
-import { Component, Input, Pipe, PipeTransform } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  Input,
+  Pipe,
+  PipeTransform,
+} from '@angular/core';
 import { AbstractControl, FormArray, FormGroup } from '@angular/forms';
 import { List } from 'immutable';
 
@@ -23,7 +29,6 @@ import { Task } from 'app/models/task/task.model';
 
 @Pipe({
   name: 'getTaskOptions',
-  pure: false,
   standalone: false,
 })
 export class TaskOptionsPipe implements PipeTransform {
@@ -40,6 +45,7 @@ export class TaskOptionsPipe implements PipeTransform {
   templateUrl: './task-condition-form.component.html',
   styleUrls: ['./task-condition-form.component.scss'],
   standalone: false,
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TaskConditionFormComponent {
   @Input() formGroup!: FormGroup;

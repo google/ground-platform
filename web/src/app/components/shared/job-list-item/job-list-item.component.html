@@ -91,8 +91,16 @@ limitations under the License.
       </ng-container>
 
       <ng-container *ngIf="!isSidePanelExpanded()">
-        <button mat-icon-button [attr.aria-label]="'Toggle ' + node.item" matTreeNodeToggle>
-          <mat-icon class="job-icon" [ngStyle]="{color: node.iconColor}">
+        <button
+          mat-icon-button
+          [attr.aria-label]="'Toggle ' + node.item"
+          matTreeNodeToggle
+        >
+          <mat-icon
+            class="job-icon"
+            fontSet="material-icons"
+            [ngStyle]="{ color: node.iconColor }"
+          >
             {{ node.iconName }}
           </mat-icon>
         </button>
@@ -102,7 +110,11 @@ limitations under the License.
 </div>
 
 <ng-template #jobLabel let-node="node">
-  <mat-icon class="job-icon" [ngStyle]="{color: node.iconColor}">
+  <mat-icon
+    class="job-icon"
+    fontSet="material-icons"
+    [ngStyle]="{ color: node.iconColor }"
+  >
     {{ node.iconName }}
   </mat-icon>
 

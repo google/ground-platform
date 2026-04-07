@@ -22,14 +22,16 @@ import { isAccessibleLoi } from './common/utils';
 import { geojsonToWKT } from '@terraformer/wkt';
 import { getDatastore } from './common/context';
 import { DecodedIdToken } from 'firebase-admin/auth';
+import { QueryDocumentSnapshot } from 'firebase-admin/firestore';
 import { StatusCodes } from 'http-status-codes';
 import { List } from 'immutable';
-import { QuerySnapshot } from 'firebase-admin/firestore';
-import { timestampToInt, toMessage } from '@ground/lib';
+import { registry, timestampToInt, toMessage } from '@ground/lib';
 import { GroundProtos } from '@ground/proto';
 import { toGeoJsonGeometry } from '@ground/lib';
 
 import Pb = GroundProtos.ground.v1beta1;
+
+const l = registry.getFieldIds(Pb.LocationOfInterest);
 
 /**
  * Iterates over all LOIs and submissions in a job, joining them
@@ -85,8 +87,20 @@ export async function exportCsvHandler(
   const ownerIdFilter = canViewAll ? null : userId;
 
   const tasks = job.tasks.sort((a, b) => a.index! - b.index!);
-  const snapshot = await db.fetchLocationsOfInterest(surveyId, jobId);
-  const loiProperties = createProperySetFromSnapshot(snapshot, ownerIdFilter);
+
+  const loiProperties = new Set<string>();
+  let query = db.fetchPartialLocationsOfInterest(surveyId, jobId, 1000);
+  let lastVisible = null;
+  do {
+    const snapshot = await query.get();
+    if (snapshot.empty) break;
+    snapshot.docs.forEach(doc =>
+      collectLoiProperties(doc, ownerIdFilter, loiProperties)
+    );
+    lastVisible = snapshot.docs[snapshot.docs.length - 1];
+    query = query.startAfter(lastVisible);
+  } while (lastVisible);
+
   const headers = getHeaders(tasks, loiProperties);
 
   res.type('text/csv');
@@ -292,23 +306,27 @@ function getFileName(jobName: string | null) {
   return `${fileBase}.csv`;
 }
 
-function createProperySetFromSnapshot(
-  snapshot: QuerySnapshot,
-  ownerId: string | null
-): Set<string> {
-  const allKeys = new Set<string>();
-  snapshot.forEach(doc => {
-    const loi = toMessage(doc.data(), Pb.LocationOfInterest);
-    if (loi instanceof Error) return;
-    if (!isAccessibleLoi(loi, ownerId)) return;
-    const properties = loi.properties;
-    for (const key of Object.keys(properties || {})) {
-      allKeys.add(key);
-    }
-  });
-  return allKeys;
+/**
+ * Adds the property keys of an accessible LOI document to the provided set.
+ */
+function collectLoiProperties(
+  doc: QueryDocumentSnapshot,
+  ownerIdFilter: string | null,
+  loiProperties: Set<string>
+): void {
+  const loi = doc.data();
+  if (
+    loi[l.source] === Pb.LocationOfInterest.Source.IMPORTED ||
+    ownerIdFilter === null ||
+    loi[l.ownerId] === ownerIdFilter
+  ) {
+    Object.keys(loi[l.properties] || {}).forEach(key => loiProperties.add(key));
+  }
 }
 
+/**
+ * Retrieves the values of specified properties from a LocationOfInterest object.
+ */
 function getPropertiesByName(
   loi: Pb.LocationOfInterest,
   properties: Set<string | number>
