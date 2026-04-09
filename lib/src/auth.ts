@@ -1,5 +1,5 @@
 /**
- * Copyright 2024 The Ground Authors.
+ * Copyright 2026 The Ground Authors.
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -14,10 +14,5 @@
  * limitations under the License.
  */
 
-export { toDocumentData } from './proto-to-firestore';
-export { toMessage } from './firestore-to-proto';
-export { timestampToInt } from './date-util';
-export { deleteEmpty, isEmpty } from './obj-util';
-export { toGeoJsonGeometry, toGeometryPb, isGeometryValid } from './geo-json';
-export { registry } from './message-registry';
-export { SESSION_COOKIE_DURATION_MS } from './auth';
+/** Session cookie duration in milliseconds (5 days). */
+export const SESSION_COOKIE_DURATION_MS = 60 * 60 * 24 * 5 * 1000;
