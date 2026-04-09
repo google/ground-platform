@@ -67,51 +67,55 @@ export async function importGeoJsonHandler(
     await new Promise<void>((resolve, reject) => {
       // This code will process each file uploaded.
       busboy.on('file', async (_fieldname, fileStream) => {
-        const { survey: surveyId, job: jobId } = params;
-        if (!surveyId || !jobId) {
-          res
-            .status(StatusCodes.BAD_REQUEST)
-            .send('Missing survey and/or job ID');
-          return reject('Missing survey and/or job ID');
-        }
-        const survey = await db.fetchSurvey(surveyId);
-        if (!survey.exists) {
-          res
-            .status(StatusCodes.NOT_FOUND)
-            .send(`Survey ${surveyId} not found`);
-          return reject(`Survey ${surveyId} not found`);
-        }
-        if (!canImport(user, survey)) {
-          res
-            .status(StatusCodes.FORBIDDEN)
-            .send(
+        try {
+          const { survey: surveyId, job: jobId } = params;
+          if (!surveyId || !jobId) {
+            res
+              .status(StatusCodes.BAD_REQUEST)
+              .send('Missing survey and/or job ID');
+            return reject('Missing survey and/or job ID');
+          }
+          const survey = await db.fetchSurvey(surveyId);
+          if (!survey.exists) {
+            res
+              .status(StatusCodes.NOT_FOUND)
+              .send(`Survey ${surveyId} not found`);
+            return reject(`Survey ${surveyId} not found`);
+          }
+          if (!canImport(user, survey)) {
+            res
+              .status(StatusCodes.FORBIDDEN)
+              .send(
+                `User does not have permission to import into survey ${surveyId}`
+              );
+            return reject(
               `User does not have permission to import into survey ${surveyId}`
             );
-          return reject(
-            `User does not have permission to import into survey ${surveyId}`
+          }
+
+          console.debug(
+            `Importing GeoJSON into survey '${surveyId}', job '${jobId}'`
           );
+
+          const parser = JSONStream.parse(['features', true], undefined);
+
+          fileStream.pipe(
+            parser
+              .on('header', (data: any) => {
+                try {
+                  onGeoJsonType(data.type);
+                  if (data.crs) onGeoJsonCrs(data.crs);
+                } catch (error: any) {
+                  busboy.emit('error', error);
+                }
+              })
+              .on('data', (data: any) => {
+                if (!hasError) onGeoJsonFeature(data, surveyId, jobId);
+              })
+          );
+        } catch (err) {
+          busboy.emit('error', err);
         }
-
-        console.debug(
-          `Importing GeoJSON into survey '${surveyId}', job '${jobId}'`
-        );
-
-        const parser = JSONStream.parse(['features', true], undefined);
-
-        fileStream.pipe(
-          parser
-            .on('header', (data: any) => {
-              try {
-                onGeoJsonType(data.type);
-                if (data.crs) onGeoJsonCrs(data.crs);
-              } catch (error: any) {
-                busboy.emit('error', error);
-              }
-            })
-            .on('data', (data: any) => {
-              if (!hasError) onGeoJsonFeature(data, surveyId, jobId);
-            })
-        );
       });
 
       // Handle non-file fields in the task. survey and job must appear

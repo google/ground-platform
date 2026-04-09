@@ -291,13 +291,7 @@ describe('importGeoJson()', () => {
     );
     const res = createResponseSpy();
 
-    try {
-      await invokeCallbackAsync(importGeoJsonCallback, req, res, {
-        email,
-      } as DecodedIdToken);
-    } catch {
-      // Expected to reject.
-    }
+    await importGeoJsonHandler(req, res, { email } as DecodedIdToken);
 
     expect(res.status).toHaveBeenCalledWith(StatusCodes.INTERNAL_SERVER_ERROR);
   });
