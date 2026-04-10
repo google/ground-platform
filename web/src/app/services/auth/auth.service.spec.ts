@@ -29,7 +29,7 @@ import { of } from 'rxjs';
 
 import { AuthService } from 'app/services/auth/auth.service';
 import { DataStoreService } from 'app/services/data-store/data-store.service';
-import { User } from 'app/models/user.model';
+import { User, UserType } from 'app/models/user.model';
 import { environment } from 'environments/environment';
 
 import { HttpClientService } from '../http-client/http-client.service';
@@ -204,5 +204,50 @@ describe('AuthService session cookie invalidation', () => {
     capturedIdTokenCallback!({ uid: 'user-1' } as FirebaseUser);
 
     expect(localStorage.getItem(SESSION_COOKIE_EXPIRES_AT_KEY)).not.toBeNull();
+  });
+});
+
+describe('AuthService isAdmin()', () => {
+  let service: AuthService;
+
+  beforeEach(() => {
+    const mockAuth = createMockAuth(
+      jasmine.createSpy('onIdTokenChanged').and.returnValue(() => {})
+    );
+
+    TestBed.configureTestingModule({
+      providers: mockAuthProviders(mockAuth, jasmine.createSpy('postWithAuth')),
+    });
+
+    service = TestBed.inject(AuthService);
+  });
+
+  it('returns true when current user has ADMIN userType', () => {
+    service['currentUser'] = new User(
+      'uid',
+      'admin@example.com',
+      true,
+      'Admin',
+      undefined,
+      UserType.ADMIN
+    );
+    expect(service.isAdmin()).toBeTrue();
+  });
+
+  it('returns false when current user has UNDEFINED userType', () => {
+    service['currentUser'] = new User(
+      'uid',
+      'user@example.com',
+      true,
+      'User',
+      undefined,
+      UserType.UNDEFINED
+    );
+    expect(service.isAdmin()).toBeFalse();
+  });
+
+  it('returns false when current user has no userType', () => {
+    service['currentUser'] = new User('uid', 'user@example.com', true);
+    expect(service.isAdmin()).toBeFalse();
   });
 });
