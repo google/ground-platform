@@ -43,6 +43,14 @@ const generalAccessLabels = Map<
       label: $localize`:@@app.labels.unlisted:Unlisted`,
     },
   ],
+  [
+    SurveyGeneralAccess.PUBLIC,
+    {
+      description: $localize`:@@app.texts.generalAccess.public:Anyone can find and collect data for this survey`,
+      icon: 'public',
+      label: $localize`:@@app.labels.public:Public`,
+    },
+  ],
 ]);
 
 @Component({
@@ -76,7 +84,9 @@ export class GeneralAccessControlComponent {
   }
 
   get generalAccessKeys(): SurveyGeneralAccess[] {
-    return Array.from(this.generalAccessLabels.keys());
+    return Array.from(this.generalAccessLabels.keys()).filter(
+      key => key !== SurveyGeneralAccess.PUBLIC || this.authService.isAdmin()
+    );
   }
 
   changeGeneralAccess(generalAccess: SurveyGeneralAccess) {
