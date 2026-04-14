@@ -227,6 +227,18 @@ export class Datastore {
     await this.db_.doc(survey(surveyId)).collection('lois').add(loiDoc);
   }
 
+  async insertLocationsOfInterest(
+    surveyId: string,
+    loiDocs: DocumentData[]
+  ): Promise<void> {
+    const bulkWriter = this.db_.bulkWriter();
+    const collectionRef = this.db_.collection(lois(surveyId));
+    for (const loiDoc of loiDocs) {
+      bulkWriter.create(collectionRef.doc(), loiDoc);
+    }
+    await bulkWriter.close();
+  }
+
   async countSubmissionsForLoi(
     surveyId: string,
     loiId: string
