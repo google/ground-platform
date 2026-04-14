@@ -70,7 +70,11 @@ export const onCreatePasslistEntry = onDocumentCreated(
   onCreatePasslistEntryHandler
 );
 
-export const importGeoJson = onHttpsRequestAsync(importGeoJsonCallback);
+export const importGeoJson = onHttpsRequestAsync(importGeoJsonCallback, {
+  memory: '4GiB',
+  timeoutSeconds: 3600,
+  cpu: 2,
+});
 
 export const exportCsv = onHttpsRequest(exportCsvHandler, {
   memory: '4GiB',
