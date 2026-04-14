@@ -231,21 +231,21 @@ describe('importGeoJson()', () => {
     },
   ];
 
+  let insertLocationsOfInterestSpy: jasmine.Spy;
+
   beforeEach(() => {
     mockFirestore = createMockFirestore();
     stubAdminApi(mockFirestore);
+    const db = getDatastore();
+    insertLocationsOfInterestSpy = spyOn(
+      db,
+      'insertLocationsOfInterest'
+    ).and.returnValue(Promise.resolve());
   });
 
   afterEach(() => {
     resetDatastore();
   });
-
-  async function loiData(surveyId: string) {
-    const lois = await mockFirestore
-      .collection(`surveys/${surveyId}/lois`)
-      .get();
-    return lois.docs.map(doc => doc.data());
-  }
 
   function createPostData(surveyId: string, jobId: string, geoJson: object) {
     const form = new FormData();
@@ -255,34 +255,75 @@ describe('importGeoJson()', () => {
     return form;
   }
 
+  async function runImport(geoJson: object) {
+    const req = await createPostRequestSpy(
+      { url: '/importGeoJson' },
+      createPostData(surveyId, jobId, geoJson)
+    );
+    const res = createResponseSpy();
+    try {
+      // Ideally we would call `importGeoJson` directly rather than via `invokeCallbackAsync`,
+      // but that would require mocking all middleware which may be overkill.
+      await invokeCallbackAsync(importGeoJsonCallback, req, res, {
+        email,
+      } as DecodedIdToken);
+    } catch (err) {
+      console.log(err);
+    }
+    return res;
+  }
+
   testCases.forEach(({ desc, input, expectedStatus, expected }) =>
     it(desc, async () => {
       // Add survey.
       mockFirestore.doc(`surveys/${surveyId}`).set(survey);
 
-      // Build mock request and response.
-      const req = await createPostRequestSpy(
-        { url: '/importGeoJson' },
-        createPostData(surveyId, jobId, input)
-      );
-      const res = createResponseSpy();
+      const res = await runImport(input);
 
-      try {
-        // Run import GeoJSON function.
-        // Ideally we would call `importGeoJson` directly rather than via `invokeCallbackAsync`,
-        // but that would require mocking all middleware which may be overkill.
-        await invokeCallbackAsync(importGeoJsonCallback, req, res, {
-          email,
-        } as DecodedIdToken);
-      } catch (err) {
-        console.log(err);
-      }
-
-      // Check post-conditions.
       expect(res.status).toHaveBeenCalledOnceWith(expectedStatus);
-      expect(await loiData(surveyId)).toEqual(expected);
+      if (expectedStatus === StatusCodes.OK) {
+        expect(insertLocationsOfInterestSpy).toHaveBeenCalledOnceWith(
+          surveyId,
+          expected
+        );
+      } else {
+        expect(insertLocationsOfInterestSpy).not.toHaveBeenCalled();
+      }
     })
   );
+
+  it('bulk-inserts all features in a single call', async () => {
+    mockFirestore.doc(`surveys/${surveyId}`).set(survey);
+    const geoJsonWithMultiplePoints = {
+      type: 'FeatureCollection',
+      features: [
+        {
+          type: 'Feature',
+          geometry: { type: 'Point', coordinates: [125.6, 10.1] },
+          properties: {},
+        },
+        {
+          type: 'Feature',
+          geometry: { type: 'Point', coordinates: [126.0, 11.0] },
+          properties: {},
+        },
+        {
+          type: 'Feature',
+          geometry: { type: 'Point', coordinates: [127.0, 12.0] },
+          properties: {},
+        },
+      ],
+    };
+
+    await runImport(geoJsonWithMultiplePoints);
+
+    // All features must be passed to a single bulk insert call, not one call per feature.
+    expect(insertLocationsOfInterestSpy).toHaveBeenCalledTimes(1);
+    const [calledSurveyId, calledDocs] =
+      insertLocationsOfInterestSpy.calls.mostRecent().args;
+    expect(calledSurveyId).toBe(surveyId);
+    expect(calledDocs.length).toBe(3);
+  });
 
   it('surfaces errors thrown during async file processing', async () => {
     // Make fetchSurvey reject to simulate an unexpected async error in the file handler.

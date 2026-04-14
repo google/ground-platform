@@ -234,7 +234,7 @@ export class Datastore {
     const bulkWriter = this.db_.bulkWriter();
     const collectionRef = this.db_.collection(lois(surveyId));
     for (const loiDoc of loiDocs) {
-      bulkWriter.add(collectionRef.doc(), loiDoc);
+      bulkWriter.create(collectionRef.doc(), loiDoc);
     }
     await bulkWriter.close();
   }
