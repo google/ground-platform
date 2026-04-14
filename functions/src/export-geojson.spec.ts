@@ -23,7 +23,6 @@ import {
   createResponseSpy,
 } from './testing/http-test-helpers';
 import { DecodedIdToken } from 'firebase-admin/auth';
-import { StatusCodes } from 'http-status-codes';
 import { DATA_COLLECTOR_ROLE } from './common/auth';
 import { resetDatastore } from './common/context';
 import { Firestore } from 'firebase-admin/firestore';
@@ -210,7 +209,6 @@ describe('export()', () => {
         } as DecodedIdToken);
 
         // Check post-conditions.
-        expect(res.status).toHaveBeenCalledOnceWith(StatusCodes.OK);
         expect(res.type).toHaveBeenCalledOnceWith('application/json');
         expect(res.setHeader).toHaveBeenCalledOnceWith(
           'Content-Disposition',

@@ -22,11 +22,10 @@ import {
   createPostRequestSpy,
   createResponseSpy,
 } from './testing/http-test-helpers';
-import { importGeoJsonCallback } from './import-geojson';
+import { importGeoJsonHandler } from './import-geojson';
 import { DecodedIdToken } from 'firebase-admin/auth';
 import { Blob, FormData } from 'formdata-node';
 import { StatusCodes } from 'http-status-codes';
-import { invokeCallbackAsync } from './handlers';
 import { SURVEY_ORGANIZER_ROLE } from './common/auth';
 import { getDatastore, resetDatastore } from './common/context';
 import { Firestore } from 'firebase-admin/firestore';
@@ -267,19 +266,14 @@ describe('importGeoJson()', () => {
       );
       const res = createResponseSpy();
 
-      try {
-        // Run import GeoJSON function.
-        // Ideally we would call `importGeoJson` directly rather than via `invokeCallbackAsync`,
-        // but that would require mocking all middleware which may be overkill.
-        await invokeCallbackAsync(importGeoJsonCallback, req, res, {
-          email,
-        } as DecodedIdToken);
-      } catch (err) {
-        console.log(err);
-      }
+      await importGeoJsonHandler(req, res, { email } as DecodedIdToken);
 
       // Check post-conditions.
-      expect(res.status).toHaveBeenCalledOnceWith(expectedStatus);
+      if (expectedStatus === StatusCodes.OK) {
+        expect(res.json).toHaveBeenCalled();
+      } else {
+        expect(res.status).toHaveBeenCalledOnceWith(expectedStatus);
+      }
       expect(await loiData(surveyId)).toEqual(expected);
     })
   );
@@ -297,13 +291,7 @@ describe('importGeoJson()', () => {
     );
     const res = createResponseSpy();
 
-    try {
-      await invokeCallbackAsync(importGeoJsonCallback, req, res, {
-        email,
-      } as DecodedIdToken);
-    } catch {
-      // Expected to reject.
-    }
+    await importGeoJsonHandler(req, res, { email } as DecodedIdToken);
 
     expect(res.status).toHaveBeenCalledWith(StatusCodes.INTERNAL_SERVER_ERROR);
   });

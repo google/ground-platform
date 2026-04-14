@@ -16,7 +16,7 @@
 
 import cors from 'cors';
 import { DecodedIdToken } from 'firebase-admin/auth';
-import { onRequest, HttpsOptions, Request } from 'firebase-functions/v2/https';
+import { HttpsOptions, Request, onRequest } from 'firebase-functions/v2/https';
 import type { Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import { getDecodedIdToken } from './common/auth';
@@ -58,7 +58,7 @@ async function requireIdToken(
   }
 }
 
-function onError(res: any, err: any) {
+function onError(res: Response, err: any) {
   console.error(err);
   res
     .status(StatusCodes.INTERNAL_SERVER_ERROR)
@@ -81,8 +81,8 @@ export function onHttpsRequest(
   return onRequest(options, (req: Request, res: Response) =>
     corsMiddleware(req, res, () =>
       cookieParser()(
-        req as any,
-        res as any,
+        req as Request,
+        res as Response,
         async () =>
           await requireIdToken(req, res, async (idToken: DecodedIdToken) => {
             try {
@@ -90,84 +90,6 @@ export function onHttpsRequest(
             } catch (error) {
               onError(res, error);
             }
-          })
-      )
-    )
-  );
-}
-
-/** A function which is to be called by HTTPS callbacks on failure. */
-export type ErrorHandler = (httpStatusCode: number, message: string) => void;
-
-/**
- * A callback-based HTTPS request handler. Functions of this type are expected to call
- * `done()` on completion or `error()` on failure. The function itself may return before
- * work is completed, but the HTTPS request will not complete until one of those two
- * callbacks are invoked.
- */
-export type HttpsRequestCallback = (
-  req: Request,
-  res: Response<any>,
-  user: DecodedIdToken,
-  done: () => void,
-  error: ErrorHandler
-) => void;
-
-export async function invokeCallbackAsync(
-  callback: HttpsRequestCallback,
-  req: Request,
-  res: Response<any>,
-  user: DecodedIdToken
-) {
-  await new Promise((resolve, reject) =>
-    invokeCallback(
-      callback,
-      req,
-      res,
-      user,
-      () => {
-        res.status(StatusCodes.OK).end();
-        resolve(undefined);
-      },
-      (errorCode: number, message: string) => {
-        res.status(errorCode).end(message);
-        reject(`${message} (HTTP status ${errorCode})`);
-      }
-    )
-  );
-}
-
-function invokeCallback(
-  callback: HttpsRequestCallback,
-  req: Request,
-  res: Response<any>,
-  user: DecodedIdToken,
-  done: () => void,
-  error: ErrorHandler
-) {
-  try {
-    callback(req, res, user, done, error);
-  } catch (e: any) {
-    console.error('Unhandled exception', e);
-    error(StatusCodes.INTERNAL_SERVER_ERROR, e.toString());
-  }
-}
-
-/**
- * Call an asynchronous HTTPS request handler. Handlers of this type are expected to call
- * `done()` on completion or `error()` on failure. The handler itself may return before
- * work is completed, but the HTTPS request will not complete until one of those two
- * callbacks are invoked.
- */
-export function onHttpsRequestAsync(callback: HttpsRequestCallback) {
-  return onRequest((req: Request, res: Response) =>
-    corsMiddleware(req, res, () =>
-      cookieParser()(
-        req as any,
-        res as any,
-        async () =>
-          await requireIdToken(req, res, async (idToken: DecodedIdToken) => {
-            await invokeCallbackAsync(callback, req, res, idToken);
           })
       )
     )

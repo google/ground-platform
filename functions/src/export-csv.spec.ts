@@ -23,7 +23,6 @@ import {
   createResponseSpy,
 } from './testing/http-test-helpers';
 import { DecodedIdToken } from 'firebase-admin/auth';
-import { StatusCodes } from 'http-status-codes';
 import { SURVEY_ORGANIZER_ROLE } from './common/auth';
 import { getDatastore, resetDatastore } from './common/context';
 import { Firestore, QueryDocumentSnapshot } from 'firebase-admin/firestore';
@@ -409,7 +408,6 @@ describe('exportCsv()', () => {
         await exportCsvHandler(req, res, { email } as DecodedIdToken);
 
         // Check post-conditions.
-        expect(res.status).toHaveBeenCalledOnceWith(StatusCodes.OK);
         expect(res.type).toHaveBeenCalledOnceWith('text/csv');
         expect(res.setHeader).toHaveBeenCalledOnceWith(
           'Content-Disposition',

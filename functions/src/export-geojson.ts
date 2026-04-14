@@ -84,8 +84,6 @@ export async function exportGeojsonHandler(
     'Content-Disposition',
     'attachment; filename=' + getFileName(jobName)
   );
-  res.status(StatusCodes.OK);
-
   // Write opening of FeatureCollection manually
   res.write('{\n  "type": "FeatureCollection",\n  "features": [\n');
 
