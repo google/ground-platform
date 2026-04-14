@@ -22,6 +22,7 @@ import Busboy from 'busboy';
 import JSONStream from 'jsonstream-ts';
 import { canImport } from './common/auth';
 import { DecodedIdToken } from 'firebase-admin/auth';
+import { DocumentData } from 'firebase-admin/firestore';
 import { GroundProtos } from '@ground/proto';
 import { isGeometryValid, toDocumentData, toGeometryPb } from '@ground/lib';
 import { Feature, GeoJsonProperties } from 'geojson';
@@ -58,9 +59,8 @@ export function importGeoJsonCallback(
   // Dictionary used to accumulate task step values, keyed by step name.
   const params: { [name: string]: string } = {};
 
-  // Accumulate Promises for insert operations, so we don't finalize the res
-  // stream before operations are complete.
-  const inserts: any[] = [];
+  // Accumulate LOI documents to be bulk-inserted once the file is fully parsed.
+  const loiDocs: DocumentData[] = [];
 
   const db = getDatastore();
 
@@ -119,8 +119,8 @@ export function importGeoJsonCallback(
   busboy.on('finish', async () => {
     if (hasError) return;
     try {
-      await Promise.all(inserts);
-      const count = inserts.length;
+      await db.insertLocationsOfInterest(params.survey, loiDocs);
+      const count = loiDocs.length;
       console.debug(`${count} LOIs imported`);
       res.send(JSON.stringify({ count }));
       done();
@@ -207,10 +207,9 @@ export function importGeoJsonCallback(
       return;
     }
     try {
-      const loi = toDocumentData(
-        toLoiPb(geoJsonFeature as Feature, jobId, ownerId)
+      loiDocs.push(
+        toDocumentData(toLoiPb(geoJsonFeature as Feature, jobId, ownerId))
       );
-      inserts.push(db.insertLocationOfInterest(surveyId, loi));
     } catch (loiErr) {
       console.debug('Skipping LOI', loiErr);
     }
