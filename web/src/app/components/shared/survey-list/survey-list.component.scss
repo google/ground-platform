@@ -68,12 +68,21 @@
         margin-top: 60px;
         margin-bottom: 8px;
         line-height: 28px;
-        display: flex;
-        align-items: center;
         /* Inside auto layout */
         flex: none;
         order: 0;
         flex-grow: 0;
+        overflow: hidden;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+      }
+
+      .survey-description {
+        overflow: hidden;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
       }
     }
   }

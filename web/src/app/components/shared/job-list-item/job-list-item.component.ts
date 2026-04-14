@@ -125,7 +125,6 @@ export class JobListItemComponent implements OnInit {
   }
 
   async onDownloadCsvClick() {
-    // TODO(#1160): This can be optimized to only create a cookie when missing or expired.
     await this.authService.createSessionCookie();
     window.open(
       `${environment.cloudFunctionsUrl}/exportCsv?` +
@@ -135,7 +134,6 @@ export class JobListItemComponent implements OnInit {
   }
 
   async onDownloadGeoJsonClick() {
-    // TODO(#1160): This can be optimized to only create a cookie when missing or expired.
     await this.authService.createSessionCookie();
     window.open(
       `${environment.cloudFunctionsUrl}/exportGeojson?` +

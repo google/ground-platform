@@ -16,7 +16,12 @@
 
 import '@angular/localize/init';
 
-import { Injectable, Injector, NgZone, runInInjectionContext } from '@angular/core';
+import {
+  Injectable,
+  Injector,
+  NgZone,
+  runInInjectionContext,
+} from '@angular/core';
 import {
   Auth,
   User as FirebaseUser,
@@ -63,6 +68,10 @@ export const ROLE_OPTIONS = [
   },
 ];
 
+const SESSION_COOKIE_EXPIRES_AT_KEY = 'sessionCookieExpiresAt';
+// Refresh the session cookie this many ms before it expires to avoid using a stale cookie.
+const SESSION_COOKIE_REFRESH_BUFFER_MS = 5 * 60 * 1000; // 5 minutes
+
 @Injectable({
   providedIn: 'root',
 })
@@ -81,7 +90,10 @@ export class AuthService {
     private injector: Injector,
     private ngZone: NgZone
   ) {
-    this.auth.onIdTokenChanged(user => this.tokenChanged$.next(user));
+    this.auth.onIdTokenChanged(user => {
+      if (!user) localStorage.removeItem(SESSION_COOKIE_EXPIRES_AT_KEY);
+      this.tokenChanged$.next(user);
+    });
 
     this.user$ = authState(this.auth).pipe(
       mergeWith(this.tokenChanged$),
@@ -98,14 +110,22 @@ export class AuthService {
    * backend functions which require session auth. Namely, this is necessary for functions which
    * download arbitrarily large files (namely, "/exportCsv"). These functions can only be invoked via
    * HTTP GET, since browser do not allow streaming directly to disk via POST or other methods.
+   *
+   * Skips the server call if a valid session cookie was already created in this browser. The expiry
+   * timestamp is persisted in localStorage (sourced from the server response) so the check survives
+   * page refreshes. The entry is cleared when the user signs out (tracked via onIdTokenChanged).
    */
   async createSessionCookie() {
+    const stored = localStorage.getItem(SESSION_COOKIE_EXPIRES_AT_KEY);
+    if (stored !== null && Date.now() + SESSION_COOKIE_REFRESH_BUFFER_MS < parseInt(stored, 10)) {
+      return;
+    }
     try {
       // TODO(#1159): Refactor access to Cloud Functions into new service.
-      await this.httpClientService.postWithAuth(
-        `${environment.cloudFunctionsUrl}/sessionLogin`,
-        {}
-      );
+      const { expiresAt } = await this.httpClientService.postWithAuth<{
+        expiresAt: number;
+      }>(`${environment.cloudFunctionsUrl}/sessionLogin`, {});
+      localStorage.setItem(SESSION_COOKIE_EXPIRES_AT_KEY, String(expiresAt));
     } catch (err) {
       console.error(
         'Session login failed. Some features may be unavailable',
@@ -174,7 +194,9 @@ export class AuthService {
 
   async signOut() {
     await runInInjectionContext(this.injector, () => signOut(this.auth));
-    await firstValueFrom(this.user$.pipe(filter(user => !user.isAuthenticated)));
+    await firstValueFrom(
+      this.user$.pipe(filter(user => !user.isAuthenticated))
+    );
     this.ngZone.run(() => this.navigationService.signOut());
   }
 
