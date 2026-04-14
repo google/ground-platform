@@ -28,8 +28,8 @@ export async function sessionLoginHandler(req: Request, res: Response) {
     // Required for CDN:
     // https://stackoverflow.com/questions/44929653/firebase-cloud-function-wont-store-cookie-named-other-than-session/44935288#44935288
     res.setHeader('Cache-Control', 'private');
-    await setSessionCookie(req, res);
-    res.end('OK');
+    const expiresAt = await setSessionCookie(req, res);
+    res.json({ expiresAt });
   } catch (err) {
     logger.error(err);
     res.status(StatusCodes.UNAUTHORIZED).send('Authorization error');
