@@ -17,7 +17,12 @@
 import { Request } from 'firebase-functions/v2/https';
 import type { Response } from 'express';
 import { canExport, hasOrganizerRole } from './common/auth';
-import { getDatastore } from './common/context';
+import {
+  getDatastore,
+  getFirebaseDownloadUrl,
+  getStorageBucket,
+} from './common/context';
+import { getTempFilePath } from './common/temp-storage';
 import { isAccessibleLoi } from './common/utils';
 import { DecodedIdToken } from 'firebase-admin/auth';
 import { StatusCodes } from 'http-status-codes';
@@ -79,15 +84,18 @@ export async function exportGeojsonHandler(
 
   const ownerIdFilter = canViewAll ? null : userId;
 
-  res.type('application/json');
-  res.setHeader(
-    'Content-Disposition',
-    'attachment; filename=' + getFileName(jobName)
-  );
-  res.status(StatusCodes.OK);
+  const fileName = getFileName(jobName);
+  const bucket = getStorageBucket();
+  const file = bucket.file(getTempFilePath(userId, `${Date.now()}.geojson`));
+  const writeStream = file.createWriteStream({
+    metadata: {
+      contentType: 'application/json',
+      contentDisposition: `attachment; filename=${fileName}`,
+    },
+  });
 
   // Write opening of FeatureCollection manually
-  res.write('{\n  "type": "FeatureCollection",\n  "features": [\n');
+  writeStream.write('{\n  "type": "FeatureCollection",\n  "features": [\n');
 
   // Fetch all locations of interest
   const rows = await db.fetchLocationsOfInterest(surveyId, jobId);
@@ -103,13 +111,13 @@ export async function exportGeojsonHandler(
 
         // Manually write the separator comma before each feature except the first one.
         if (!first) {
-          res.write(',\n');
+          writeStream.write(',\n');
         } else {
           first = false;
         }
 
         // Use JSON.stringify to convert the feature object to a string and write it.
-        res.write(JSON.stringify(feature, null, 2));
+        writeStream.write(JSON.stringify(feature, null, 2));
       }
     } catch (e) {
       console.debug('Skipping row', e);
@@ -117,8 +125,15 @@ export async function exportGeojsonHandler(
   }
 
   // Close the FeatureCollection after the loop completes.
-  res.write('\n  ]\n}');
-  res.end();
+  writeStream.write('\n  ]\n}');
+  writeStream.end();
+
+  await new Promise<void>((resolve, reject) => {
+    writeStream.on('finish', resolve);
+    writeStream.on('error', reject);
+  });
+
+  res.redirect(await getFirebaseDownloadUrl(file));
 }
 
 function buildFeature(loi: Pb.LocationOfInterest) {

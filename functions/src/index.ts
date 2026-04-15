@@ -15,6 +15,7 @@
  */
 
 import 'module-alias/register';
+import { onSchedule } from 'firebase-functions/scheduler';
 import {
   onDocumentCreated,
   onDocumentWritten,
@@ -25,6 +26,7 @@ import { sessionLoginHandler } from './session-login';
 import { importGeoJsonCallback } from './import-geojson';
 import { exportCsvHandler } from './export-csv';
 import { exportGeojsonHandler } from './export-geojson';
+import { cleanTempHandler } from './clean-temp';
 import { onCall } from 'firebase-functions/v2/https';
 import { onCreateLoiHandler } from './on-create-loi';
 import { onCreatePasslistEntryHandler } from './on-create-passlist-entry';
@@ -106,3 +108,5 @@ export const onWriteSurvey = onDocumentWritten(
 );
 
 export const sessionLogin = onHttpsRequest(sessionLoginHandler);
+
+export const cleanTemp = onSchedule('every 1 hours', cleanTempHandler);

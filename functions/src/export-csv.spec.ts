@@ -23,9 +23,10 @@ import {
   createResponseSpy,
 } from './testing/http-test-helpers';
 import { DecodedIdToken } from 'firebase-admin/auth';
-import { StatusCodes } from 'http-status-codes';
 import { SURVEY_ORGANIZER_ROLE } from './common/auth';
 import { getDatastore, resetDatastore } from './common/context';
+import * as context from './common/context';
+import { PassThrough } from 'stream';
 import { Firestore, QueryDocumentSnapshot } from 'firebase-admin/firestore';
 import { exportCsvHandler } from './export-csv';
 import { registry } from '@ground/lib';
@@ -94,6 +95,10 @@ async function* fetchLoisSubmissionsFromMock(
 
 describe('exportCsv()', () => {
   let mockFirestore: Firestore;
+  let storageChunks: string[];
+  let mockFile: jasmine.SpyObj<any>;
+  const FIREBASE_DOWNLOAD_URL_PREFIX =
+    'https://firebasestorage.googleapis.com/v0/b/test-bucket/o/';
   const email = 'somebody@test.it';
   const userId = 'user5000';
   const survey = {
@@ -342,6 +347,26 @@ describe('exportCsv()', () => {
   beforeEach(() => {
     mockFirestore = createMockFirestore();
     stubAdminApi(mockFirestore);
+    storageChunks = [];
+    const writeStream = new PassThrough();
+    writeStream.on('data', (chunk: Buffer) =>
+      storageChunks.push(chunk.toString())
+    );
+    mockFile = jasmine.createSpyObj('file', [
+      'createWriteStream',
+      'setMetadata',
+    ]);
+    mockFile.createWriteStream.and.returnValue(writeStream);
+    mockFile.setMetadata.and.resolveTo([{}]);
+    Object.defineProperty(mockFile, 'name', {
+      value: 'temp/user5000/job.csv',
+    });
+    Object.defineProperty(mockFile, 'bucket', {
+      value: { name: 'test-bucket' },
+    });
+    const mockBucket = jasmine.createSpyObj('bucket', ['file']);
+    mockBucket.file.and.returnValue(mockFile);
+    spyOn(context, 'getStorageBucket').and.returnValue(mockBucket);
     spyOn(getDatastore(), 'fetchPartialLocationsOfInterest').and.callFake(
       (surveyId: string, jobId: string) => {
         const emptyQuery: any = {
@@ -402,20 +427,25 @@ describe('exportCsv()', () => {
             job: jobId,
           },
         });
-        const chunks: string[] = [];
-        const res = createResponseSpy(chunks);
+        const res = createResponseSpy();
 
         // Run export CSV handler.
         await exportCsvHandler(req, res, { email } as DecodedIdToken);
 
         // Check post-conditions.
-        expect(res.status).toHaveBeenCalledOnceWith(StatusCodes.OK);
-        expect(res.type).toHaveBeenCalledOnceWith('text/csv');
-        expect(res.setHeader).toHaveBeenCalledOnceWith(
-          'Content-Disposition',
-          `attachment; filename=${expectedFilename}`
+        expect(res.redirect as jasmine.Spy).toHaveBeenCalledTimes(1);
+        const redirectUrl: string = (
+          res.redirect as jasmine.Spy
+        ).calls.mostRecent().args[0];
+        expect(redirectUrl).toContain(FIREBASE_DOWNLOAD_URL_PREFIX);
+        expect(mockFile.createWriteStream).toHaveBeenCalledWith(
+          jasmine.objectContaining({
+            metadata: jasmine.objectContaining({
+              contentDisposition: `attachment; filename=${expectedFilename}`,
+            }),
+          })
         );
-        const output = chunks.join('').trim();
+        const output = storageChunks.join('').trim();
         const lines = output.split('\n');
         expect(lines).toEqual(expectedCsv);
       })
