@@ -135,10 +135,8 @@ describe('onCreateLoiHandler()', () => {
     spyOn(globalThis, 'fetch').and.returnValue(
       Promise.resolve({
         ok: true,
-        text: () =>
-          Promise.resolve(
-            "type='Feature' id='019d4e5a-d6bb-7000-99d2-3c0d4081586b'"
-          ),
+        json: () =>
+          Promise.resolve({ id: '019d4e5a-d6bb-7000-99d2-3c0d4081586b' }),
       } as Response)
     );
 
