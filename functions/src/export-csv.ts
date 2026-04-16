@@ -20,7 +20,12 @@ import * as csv from '@fast-csv/format';
 import { canExport, hasOrganizerRole } from './common/auth';
 import { isAccessibleLoi } from './common/utils';
 import { geojsonToWKT } from '@terraformer/wkt';
-import { getDatastore } from './common/context';
+import {
+  getDatastore,
+  getFirebaseDownloadUrl,
+  getStorageBucket,
+} from './common/context';
+import { getTempFilePath } from './common/temp-storage';
 import { DecodedIdToken } from 'firebase-admin/auth';
 import { QueryDocumentSnapshot } from 'firebase-admin/firestore';
 import { StatusCodes } from 'http-status-codes';
@@ -103,11 +108,15 @@ export async function exportCsvHandler(
 
   const headers = getHeaders(tasks, loiProperties);
 
-  res.type('text/csv');
-  res.setHeader(
-    'Content-Disposition',
-    'attachment; filename=' + getFileName(jobName)
-  );
+  const fileName = getFileName(jobName);
+  const bucket = getStorageBucket();
+  const file = bucket.file(getTempFilePath(userId, `${Date.now()}.csv`));
+  const writeStream = file.createWriteStream({
+    metadata: {
+      contentType: 'text/csv',
+      contentDisposition: `attachment; filename=${fileName}`,
+    },
+  });
 
   const csvStream = csv.format({
     delimiter: ',',
@@ -116,7 +125,7 @@ export async function exportCsvHandler(
     includeEndRowDelimiter: true, // Add \n to last row in CSV
     quote: false,
   });
-  csvStream.pipe(res);
+  csvStream.pipe(writeStream);
 
   const rows = await db.fetchLoisSubmissions(
     surveyId,
@@ -142,8 +151,14 @@ export async function exportCsvHandler(
     }
   }
 
-  res.status(StatusCodes.OK);
   csvStream.end();
+
+  await new Promise<void>((resolve, reject) => {
+    writeStream.on('finish', resolve);
+    writeStream.on('error', reject);
+  });
+
+  res.redirect(await getFirebaseDownloadUrl(file));
 }
 
 function getHeaders(tasks: Pb.ITask[], loiProperties: Set<string>): string[] {
