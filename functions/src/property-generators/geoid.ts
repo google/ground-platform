@@ -22,8 +22,6 @@ const COLLECTION_ID = 'ground';
 
 const defaultHeaders = { 'Content-Type': 'application/json' };
 
-const GEOID_ID_PATTERN = /\bid='([^']+)'/;
-
 export async function geoidHandler(
   config: PropertyGeneratorConfig,
   geometry: Geometry
@@ -60,10 +58,12 @@ async function fetchGeoidProperties(
     return {};
   }
 
-  const responseText = await response.text();
-  const id = GEOID_ID_PATTERN.exec(responseText)?.[1];
+  const responseJson = await response.json();
+  const id = responseJson?.id;
   if (!id) {
-    console.error(`geoid: response missing id field, body=${responseText}`);
+    console.error(
+      `geoid: response missing id field, body=${JSON.stringify(responseJson)}`
+    );
     return {};
   }
   console.log(`geoid: received id=${id}`);
