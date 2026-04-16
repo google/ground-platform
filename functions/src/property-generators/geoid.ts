@@ -17,9 +17,6 @@
 import type { Geometry } from 'geojson';
 import type { Headers, Properties, PropertyGeneratorConfig } from './types';
 
-const CATALOG_ID = 'ground';
-const COLLECTION_ID = 'ground';
-
 const defaultHeaders = { 'Content-Type': 'application/json' };
 
 export async function geoidHandler(
@@ -27,10 +24,9 @@ export async function geoidHandler(
   geometry: Geometry
 ): Promise<Properties> {
   const { headers, url } = config;
-  const endpoint = `${url}/features/catalogs/${CATALOG_ID}/collections/${COLLECTION_ID}/items`;
 
   return fetchGeoidProperties(
-    endpoint,
+    url,
     { ...defaultHeaders, ...headers },
     { type: 'Feature', geometry, properties: {} }
   );
