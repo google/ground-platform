@@ -65,9 +65,9 @@ describe('onCreateLoiHandler()', () => {
     url: 'https://whisp.example.com/api',
   };
 
-  const geoidConfig = {
-    name: 'geoid',
-    prefix: 'geoid_',
+  const geoIdConfig = {
+    name: 'geoId',
+    prefix: 'geoId_',
     url: 'https://geoid.example.com/api',
   };
 
@@ -82,8 +82,8 @@ describe('onCreateLoiHandler()', () => {
       .doc('config/integrations/propertyGenerators/whisp')
       .set(whispConfig);
     mockFirestore
-      .doc('config/integrations/propertyGenerators/geoid')
-      .set(geoidConfig);
+      .doc('config/integrations/propertyGenerators/geoId')
+      .set(geoIdConfig);
   });
 
   afterEach(() => {
@@ -128,9 +128,9 @@ describe('onCreateLoiHandler()', () => {
     });
   });
 
-  it('runs geoid property generator and updates LOI properties when integration is enabled', async () => {
+  it('runs geoId property generator and updates LOI properties when integration is enabled', async () => {
     mockFirestore.doc(JOB_PATH).set({
-      [j.enabledIntegrations]: [{ [intgr.id]: 'geoid' }],
+      [j.enabledIntegrations]: [{ [intgr.id]: 'geoId' }],
     });
     spyOn(globalThis, 'fetch').and.returnValue(
       Promise.resolve({
@@ -146,14 +146,14 @@ describe('onCreateLoiHandler()', () => {
     } as unknown as FirestoreEvent<QueryDocumentSnapshot | undefined>);
 
     const loiData = (await mockFirestore.doc(LOI_PATH).get()).data();
-    expect(loiData?.[l.properties]?.['geoid_id']).toEqual({
+    expect(loiData?.[l.properties]?.['geoId_id']).toEqual({
       [pr.stringValue]: '019d4e5a-d6bb-7000-99d2-3c0d4081586b',
     });
   });
 
-  it('skips geoid property generator when fetch fails', async () => {
+  it('skips geoId property generator when fetch fails', async () => {
     mockFirestore.doc(JOB_PATH).set({
-      [j.enabledIntegrations]: [{ [intgr.id]: 'geoid' }],
+      [j.enabledIntegrations]: [{ [intgr.id]: 'geoId' }],
     });
     spyOn(globalThis, 'fetch').and.returnValue(
       Promise.resolve({
@@ -169,6 +169,6 @@ describe('onCreateLoiHandler()', () => {
     } as unknown as FirestoreEvent<QueryDocumentSnapshot | undefined>);
 
     const loiData = (await mockFirestore.doc(LOI_PATH).get()).data();
-    expect(loiData?.[l.properties]?.['geoid_geoid_code']).toBeUndefined();
+    expect(loiData?.[l.properties]?.['geoId_id']).toBeUndefined();
   });
 });

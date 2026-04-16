@@ -14,31 +14,32 @@
  * limitations under the License.
  */
 
+import * as logger from 'firebase-functions/logger';
 import type { Geometry } from 'geojson';
 import type { Headers, Properties, PropertyGeneratorConfig } from './types';
 
 const defaultHeaders = { 'Content-Type': 'application/json' };
 
-export async function geoidHandler(
+export async function geoIdHandler(
   config: PropertyGeneratorConfig,
   geometry: Geometry
 ): Promise<Properties> {
   const { headers, url } = config;
 
-  return fetchGeoidProperties(
+  return fetchGeoIdProperties(
     url,
     { ...defaultHeaders, ...headers },
     { type: 'Feature', geometry, properties: {} }
   );
 }
 
-async function fetchGeoidProperties(
+async function fetchGeoIdProperties(
   url: string,
   headers: Headers,
   body: object
 ): Promise<Properties> {
   const bodyJson = JSON.stringify(body);
-  console.log(`geoid: POST ${url} body=${bodyJson}`);
+  logger.debug(`geoId: POST ${url} body=${bodyJson}`);
 
   const response = await fetch(url, {
     method: 'POST',
@@ -48,8 +49,8 @@ async function fetchGeoidProperties(
 
   if (!response.ok) {
     const errorBody = await response.text();
-    console.error(
-      `geoid: request failed with status ${response.status}: ${errorBody}`
+    logger.error(
+      `geoId: request failed with status ${response.status}: ${errorBody}`
     );
     return {};
   }
@@ -57,12 +58,12 @@ async function fetchGeoidProperties(
   const responseJson = await response.json();
   const id = responseJson?.id;
   if (!id) {
-    console.error(
-      `geoid: response missing id field, body=${JSON.stringify(responseJson)}`
+    logger.error(
+      `geoId: response missing id field, body=${JSON.stringify(responseJson)}`
     );
     return {};
   }
-  console.log(`geoid: received id=${id}`);
+  logger.debug(`geoId: received id=${id}`);
 
   return { id };
 }
