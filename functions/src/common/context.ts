@@ -18,6 +18,8 @@ import { Datastore } from './datastore';
 import { MailService } from './mail-service';
 import { getApp, initializeApp } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
+import { getStorage } from 'firebase-admin/storage';
+import { randomUUID } from 'crypto';
 
 let datastore: Datastore | undefined;
 let mailService: MailService | undefined;
@@ -48,4 +50,27 @@ export async function getMailService(): Promise<MailService | undefined> {
 
 export function resetDatastore() {
   datastore = undefined;
+}
+
+export function getStorageBucket() {
+  initializeFirebaseApp();
+  return getStorage().bucket();
+}
+
+/**
+ * Sets a Firebase Storage download token on the given file and returns a
+ * download URL that does not require IAM signing permissions.
+ */
+export async function getFirebaseDownloadUrl(file: {
+  name: string;
+  bucket: { name: string };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  setMetadata: (metadata: any) => Promise<unknown>;
+}): Promise<string> {
+  const token = randomUUID();
+  await file.setMetadata({
+    metadata: { firebaseStorageDownloadTokens: token },
+  });
+  const encoded = encodeURIComponent(file.name);
+  return `https://firebasestorage.googleapis.com/v0/b/${file.bucket.name}/o/${encoded}?alt=media&token=${token}`;
 }

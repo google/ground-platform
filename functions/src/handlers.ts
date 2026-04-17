@@ -16,7 +16,7 @@
 
 import cors from 'cors';
 import { DecodedIdToken } from 'firebase-admin/auth';
-import { onRequest, HttpsOptions, Request } from 'firebase-functions/v2/https';
+import { HttpsOptions, Request, onRequest } from 'firebase-functions/v2/https';
 import type { Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import { getDecodedIdToken } from './common/auth';
@@ -159,8 +159,11 @@ function invokeCallback(
  * work is completed, but the HTTPS request will not complete until one of those two
  * callbacks are invoked.
  */
-export function onHttpsRequestAsync(callback: HttpsRequestCallback) {
-  return onRequest((req: Request, res: Response) =>
+export function onHttpsRequestAsync(
+  callback: HttpsRequestCallback,
+  options: HttpsOptions = {}
+) {
+  return onRequest(options, (req: Request, res: Response) =>
     corsMiddleware(req, res, () =>
       cookieParser()(
         req as any,
