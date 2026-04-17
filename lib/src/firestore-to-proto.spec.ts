@@ -1,14 +1,14 @@
 /**
  * Copyright 2024 The Ground Authors.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
+ * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  *     https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
+ * distributed under the License is distributed on an 'AS IS' BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
@@ -219,7 +219,10 @@ describe('toMessage()', () => {
     },
   ].forEach(({ desc, input, expected }) =>
     it(desc, () => {
-      const output = toMessage(input, expected.constructor as Constructor<any>);
+      const output = toMessage(
+        input,
+        expected.constructor as Constructor<unknown>
+      );
       expect(output).toEqual(expected);
     })
   );
@@ -239,18 +242,18 @@ describe('toMessage()', () => {
 
   it('returns Error when constructor is not a protojs message', () => {
     class NotAProtoMessage {}
-    const output = toMessage({}, NotAProtoMessage as Constructor<any>);
+    const output = toMessage({}, NotAProtoMessage as Constructor<unknown>);
     expect(output).toEqual(jasmine.any(Error));
     expect((output as Error).message).toContain('is not a protojs message');
   });
 
   it('returns Error when message type not found in registry', () => {
     class UnknownProtoMessage {
-      static getTypeUrl(_prefix: string): string {
+      static getTypeUrl(): string {
         return '/ground.v1beta1.DoesNotExist';
       }
     }
-    const output = toMessage({}, UnknownProtoMessage as Constructor<any>);
+    const output = toMessage({}, UnknownProtoMessage as Constructor<unknown>);
     expect(output).toEqual(jasmine.any(Error));
     expect((output as Error).message).toContain('not found in registry');
   });
