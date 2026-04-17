@@ -45,7 +45,7 @@ catalogs:
     ngx-autosize-input: ^20.0.5
     ngx-color: ^10.1.0
     nodemailer: ^8.0.5
-    protobufjs: ^7.3.2
+    protobufjs: ^7.5.5
     rxjs: ^7.8.2
     sanitize-html: ^2.17.0
     selenium-webdriver: ^4.19.0
