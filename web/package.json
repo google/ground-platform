@@ -2,7 +2,7 @@
   "name": "@ground/web",
   "version": "0.0.1",
   "scripts": {
-    "postinstall": "node scripts/patch-karma.cjs"
+    "postinstall": "node scripts/patch-karma.cjs && node ../scripts/generate-build-info.mjs"
   },
   "nx": {
     "name": "web",
@@ -42,13 +42,13 @@
         },
         "configurations": {
           "development": {
-            "command": "ng build -c development"
+            "command": "node ../scripts/generate-build-info.mjs && ng build -c development"
           },
           "staging": {
-            "command": "ng build -c staging"
+            "command": "node ../scripts/generate-build-info.mjs && ng build -c staging"
           },
           "production": {
-            "command": "ng build -c production"
+            "command": "node ../scripts/generate-build-info.mjs && ng build -c production"
           }
         },
         "dependsOn": [
@@ -63,13 +63,13 @@
         },
         "configurations": {
           "development": {
-            "command": "ng serve -c development"
+            "command": "node ../scripts/generate-build-info.mjs && ng serve -c development"
           },
           "staging": {
-            "command": "ng serve -c staging"
+            "command": "node ../scripts/generate-build-info.mjs && ng serve -c staging"
           },
           "production": {
-            "command": "ng serve -c production"
+            "command": "node ../scripts/generate-build-info.mjs && ng serve -c production"
           }
         },
         "dependsOn": [
