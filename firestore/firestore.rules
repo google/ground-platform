@@ -124,6 +124,22 @@ rules_version = '2';
     }
 
     /**
+     * Returns true iff the current user has the ADMIN user type.
+     */
+    function isAdmin() {
+      let userDoc = get(/databases/$(database)/documents/users/$(request.auth.uid));
+      return userDoc != null && userDoc.data.userType == "ADMIN";
+    }
+
+    /**
+     * Returns true iff the incoming survey data does not set general_access to PUBLIC,
+     * or the current user is an admin.
+     */
+    function canSetGeneralAccess() {
+      return request.resource.data["8"] != 3 /* PUBLIC */ || isAdmin();
+    }
+
+    /**
      * Returns true iff the current user with the given email can contribute LOIs
      * and submissions to the specified survey.
      */
@@ -164,9 +180,10 @@ rules_version = '2';
 
     // Apply passlist and survey-level ACLs to survey documents.
     match /surveys/{surveyId} {
-      allow create: if isSignedIn() && isPasslisted();
+      allow create: if isSignedIn() && isPasslisted() && canSetGeneralAccess();
       allow read: if canViewSurvey(resource.data);
-      allow update, delete: if canManageSurvey(getSurvey(surveyId));
+      allow update: if canManageSurvey(getSurvey(surveyId)) && canSetGeneralAccess();
+      allow delete: if canManageSurvey(getSurvey(surveyId));
     }
 
     // Allow all signed in users to access Terms of Service and other config.

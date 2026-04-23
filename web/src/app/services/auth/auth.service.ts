@@ -38,7 +38,7 @@ import { AclEntry } from 'app/models/acl-entry.model';
 import { DataCollectionStrategy, Job } from 'app/models/job.model';
 import { Role } from 'app/models/role.model';
 import { Survey } from 'app/models/survey.model';
-import { User } from 'app/models/user.model';
+import { User, UserType } from 'app/models/user.model';
 import { DataStoreService } from 'app/services/data-store/data-store.service';
 import { NavigationService } from 'app/services/navigation/navigation.service';
 import { environment } from 'environments/environment';
@@ -223,6 +223,10 @@ export class AuthService {
       (this.isContributor(userRole) &&
         job.strategy !== DataCollectionStrategy.PREDEFINED)
     );
+  }
+
+  isAdmin(): boolean {
+    return this.currentUser?.userType === UserType.ADMIN;
   }
 
   isManager(role: Role): boolean {

@@ -14,12 +14,18 @@
  * limitations under the License.
  */
 
+export enum UserType {
+  UNDEFINED = 'UNDEFINED',
+  ADMIN = 'ADMIN',
+}
+
 export class User {
   constructor(
     readonly id: string,
     readonly email: string,
     readonly isAuthenticated: boolean,
     readonly displayName?: string,
-    readonly photoURL?: string
+    readonly photoURL?: string,
+    readonly userType?: UserType
   ) {}
 }
