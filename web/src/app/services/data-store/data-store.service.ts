@@ -739,11 +739,13 @@ export class DataStoreService {
     );
   }
 
-  async getTermsOfService(): Promise<string> {
+  async getTermsOfService(locale: string): Promise<string> {
     const tos = await runInInjectionContext(this.injector, () =>
       getDoc(doc(this.db, 'config', 'tos'))
     );
-    return tos.get('text');
+    const translations = tos.get('translations') ?? {};
+    const language = locale.split('-')[0];
+    return translations[locale] ?? translations[language] ?? tos.get('text');
   }
 
   async getAccessDeniedMessage(): Promise<{ message?: string; link?: string }> {
