@@ -22,17 +22,17 @@ import { fileURLToPath } from 'node:url';
 
 const scriptDir = dirname(fileURLToPath(import.meta.url));
 const repoRoot = resolve(scriptDir, '..');
-const webPackageJsonPath = resolve(repoRoot, 'web/package.json');
+const rootPackageJsonPath = resolve(repoRoot, 'package.json');
 const outputPath = resolve(
   repoRoot,
   'web/src/environments/build-info.generated.ts'
 );
 
-const { version } = JSON.parse(readFileSync(webPackageJsonPath, 'utf8'));
+const { version } = JSON.parse(readFileSync(rootPackageJsonPath, 'utf8'));
 const match = /^(\d+)\.(\d+)/.exec(version ?? '');
 if (!match) {
   throw new Error(
-    `Cannot parse major.minor from web/package.json version: "${version}"`
+    `Cannot parse major.minor from root package.json version: "${version}"`
   );
 }
 const [, major, minor] = match;
