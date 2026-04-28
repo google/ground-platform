@@ -34,7 +34,7 @@ import Pb = GroundProtos.ground.v1beta1;
  * Read the body of a multipart HTTP POSTed form containing a GeoJson 'file'
  * and required 'survey' id and 'job' id to the database.
  */
-export function importGeoJsonHandler(
+export async function importGeoJsonHandler(
   req: Request,
   res: Response,
   user: DecodedIdToken
@@ -58,7 +58,7 @@ export function importGeoJsonHandler(
 
   const ownerId = user.uid;
 
-  return new Promise<void>((resolve, reject) => {
+  await new Promise<void>((resolve, reject) => {
     let settled = false;
 
     function fail(code: number, message: string) {
