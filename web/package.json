@@ -2,7 +2,7 @@
   "name": "@ground/web",
   "version": "0.0.1",
   "scripts": {
-    "postinstall": "node scripts/patch-karma.cjs && node ../scripts/generate-build-info.mjs"
+    "postinstall": "node scripts/patch-karma.cjs"
   },
   "nx": {
     "name": "web",
