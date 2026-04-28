@@ -35,6 +35,13 @@
           "^build"
         ]
       },
+      "generate-build-info": {
+        "executor": "nx:run-commands",
+        "options": {
+          "cwd": "{projectRoot}",
+          "command": "node ../scripts/generate-build-info.mjs"
+        }
+      },
       "build": {
         "executor": "nx:run-commands",
         "options": {
@@ -52,7 +59,8 @@
           }
         },
         "dependsOn": [
-          "^build"
+          "^build",
+          "generate-build-info"
         ],
         "defaultConfiguration": "development"
       },
@@ -73,7 +81,8 @@
           }
         },
         "dependsOn": [
-          "^build"
+          "^build",
+          "generate-build-info"
         ],
         "defaultConfiguration": "development"
       },
