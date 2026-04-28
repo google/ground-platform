@@ -129,7 +129,7 @@ export async function importGeoJsonHandler(
         await db.insertLocationsOfInterest(params.survey, loiDocs);
         const count = loiDocs.length;
         console.debug(`${count} LOIs imported`);
-        res.send(JSON.stringify({ count }));
+        res.json({ count });
         succeed();
       } catch (err) {
         console.debug(err);
