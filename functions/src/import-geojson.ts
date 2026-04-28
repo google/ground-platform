@@ -38,13 +38,11 @@ class BadRequestError extends Error {
  * Read the body of a multipart HTTP POSTed form containing a GeoJson 'file'
  * and required 'survey' id and 'job' id to the database.
  */
-export function importGeoJsonCallback(
+export function importGeoJsonHandler(
   req: Request,
   res: Response,
-  user: DecodedIdToken,
-  done: () => void,
-  error: ErrorHandler
-) {
+  user: DecodedIdToken
+): Promise<void> {
   if (req.method !== 'POST') {
     return error(
       StatusCodes.METHOD_NOT_ALLOWED,
