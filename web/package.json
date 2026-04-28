@@ -35,6 +35,13 @@
           "^build"
         ]
       },
+      "generate-build-info": {
+        "executor": "nx:run-commands",
+        "options": {
+          "cwd": "{projectRoot}",
+          "command": "node ../scripts/generate-build-info.mjs"
+        }
+      },
       "build": {
         "executor": "nx:run-commands",
         "options": {
@@ -42,17 +49,18 @@
         },
         "configurations": {
           "development": {
-            "command": "node ../scripts/generate-build-info.mjs && ng build -c development"
+            "command": "ng build -c development"
           },
           "staging": {
-            "command": "node ../scripts/generate-build-info.mjs && ng build -c staging"
+            "command": "ng build -c staging"
           },
           "production": {
-            "command": "node ../scripts/generate-build-info.mjs && ng build -c production"
+            "command": "ng build -c production"
           }
         },
         "dependsOn": [
-          "^build"
+          "^build",
+          "generate-build-info"
         ],
         "defaultConfiguration": "development"
       },
@@ -63,17 +71,18 @@
         },
         "configurations": {
           "development": {
-            "command": "node ../scripts/generate-build-info.mjs && ng serve -c development"
+            "command": "ng serve -c development"
           },
           "staging": {
-            "command": "node ../scripts/generate-build-info.mjs && ng serve -c staging"
+            "command": "ng serve -c staging"
           },
           "production": {
-            "command": "node ../scripts/generate-build-info.mjs && ng serve -c production"
+            "command": "ng serve -c production"
           }
         },
         "dependsOn": [
-          "^build"
+          "^build",
+          "generate-build-info"
         ],
         "defaultConfiguration": "development"
       },
