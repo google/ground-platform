@@ -42,7 +42,7 @@ export class JobIntegrationEditorComponent {
       description: $localize`:@@app.cards.whispIntegration.description:Enable Whisp integration for this job.`,
     },
     {
-      id: 'geoid',
+      id: 'geoId',
       title: $localize`:@@app.cards.geoidIntegration.title:GeoID integration`,
       description: $localize`:@@app.cards.geoidIntegration.description:Enable GeoID integration for this job.`,
     },
