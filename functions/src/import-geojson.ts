@@ -30,10 +30,6 @@ import { HttpError } from './common/http-error';
 
 import Pb = GroundProtos.ground.v1beta1;
 
-class BadRequestError extends Error {
-  statusCode = StatusCodes.BAD_REQUEST;
-}
-
 /**
  * Read the body of a multipart HTTP POSTed form containing a GeoJson 'file'
  * and required 'survey' id and 'job' id to the database.
@@ -160,10 +156,14 @@ export function importGeoJsonHandler(
    */
   function onGeoJsonType(geoJsonType: string | undefined) {
     if (!geoJsonType)
-      throw new BadRequestError('Invalid GeoJSON: Missing "type" property');
+      throw new HttpError(
+        StatusCodes.BAD_REQUEST,
+        'Invalid GeoJSON: Missing "type" property'
+      );
 
     if (geoJsonType !== 'FeatureCollection') {
-      throw new BadRequestError(
+      throw new HttpError(
+        StatusCodes.BAD_REQUEST,
         `Unsupported GeoJSON Type: Expected 'FeatureCollection', got '${geoJsonType}'`
       );
     }
@@ -186,7 +186,8 @@ export function importGeoJsonHandler(
       }
     }
     if (!crs.endsWith('CRS84'))
-      throw new BadRequestError(
+      throw new HttpError(
+        StatusCodes.BAD_REQUEST,
         `Unsupported GeoJSON CRS: Expected 'CRS84', got '${JSON.stringify(
           geoJsonCrs
         )}'`
