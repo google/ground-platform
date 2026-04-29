@@ -20,6 +20,7 @@ import { Request } from 'firebase-functions/v2/https';
 import type { Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import { SESSION_COOKIE_DURATION_MS } from '@ground/lib';
+import { HttpError } from './common/http-error';
 import { sessionLoginHandler } from './session-login';
 
 describe('sessionLoginHandler', () => {
@@ -77,11 +78,14 @@ describe('sessionLoginHandler', () => {
     );
   });
 
-  it('returns 401 on auth error', async () => {
+  it('throws HttpError(401) on auth error', async () => {
     createSessionCookieSpy.and.rejectWith(new Error('invalid token'));
 
-    await sessionLoginHandler(req, res);
-
-    expect(res.status).toHaveBeenCalledWith(StatusCodes.UNAUTHORIZED);
+    await expectAsync(sessionLoginHandler(req, res)).toBeRejectedWith(
+      jasmine.objectContaining({
+        statusCode: StatusCodes.UNAUTHORIZED,
+        name: 'HttpError',
+      }) as unknown as HttpError
+    );
   });
 });
