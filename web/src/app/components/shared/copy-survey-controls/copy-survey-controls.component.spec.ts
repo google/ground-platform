@@ -21,8 +21,10 @@ import {
   tick,
 } from '@angular/core/testing';
 import { MatButtonModule } from '@angular/material/button';
+import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 
+import { QrCodeDialogComponent } from 'app/components/shared/qr-code-dialog/qr-code-dialog.component';
 import { NavigationService } from 'app/services/navigation/navigation.service';
 import { NotificationService } from 'app/services/notification/notification.service';
 
@@ -34,6 +36,7 @@ describe('ShareButtonsComponent', () => {
 
   let navigationService: jasmine.SpyObj<NavigationService>;
   let notificationService: jasmine.SpyObj<NotificationService>;
+  let dialog: jasmine.SpyObj<MatDialog>;
 
   beforeEach(() => {
     navigationService = jasmine.createSpyObj('NavigationService', [
@@ -45,12 +48,15 @@ describe('ShareButtonsComponent', () => {
       'error',
     ]);
 
+    dialog = jasmine.createSpyObj('MatDialog', ['open']);
+
     TestBed.configureTestingModule({
       declarations: [CopySurveyControlsComponent],
       imports: [MatIconModule, MatButtonModule],
       providers: [
         { provide: NavigationService, useValue: navigationService },
         { provide: NotificationService, useValue: notificationService },
+        { provide: MatDialog, useValue: dialog },
       ],
     }).compileComponents();
 
@@ -98,4 +104,15 @@ describe('ShareButtonsComponent', () => {
       'Impossible to copy Survey link to clipboard'
     );
   }));
+
+  it('should open the QR code dialog with the survey app link', () => {
+    component.surveyAppLink = 'https://example.com/survey/abc';
+
+    component.showQrCode();
+
+    expect(dialog.open).toHaveBeenCalledWith(QrCodeDialogComponent, {
+      autoFocus: false,
+      data: { surveyAppLink: 'https://example.com/survey/abc' },
+    });
+  });
 });
