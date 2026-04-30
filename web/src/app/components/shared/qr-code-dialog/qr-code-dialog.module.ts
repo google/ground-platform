@@ -1,5 +1,5 @@
 /**
- * Copyright 2025 The Ground Authors.
+ * Copyright 2026 The Ground Authors.
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -19,20 +19,19 @@ import { NgModule } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
+import { QRCodeComponent } from 'angularx-qrcode';
 
-import { QrCodeDialogModule } from 'app/components/shared/qr-code-dialog/qr-code-dialog.module';
-
-import { CopySurveyControlsComponent } from './copy-survey-controls.component';
+import { QrCodeDialogComponent } from './qr-code-dialog.component';
 
 @NgModule({
-  declarations: [CopySurveyControlsComponent],
+  declarations: [QrCodeDialogComponent],
   imports: [
     CommonModule,
     MatButtonModule,
-    MatIconModule,
     MatDialogModule,
-    QrCodeDialogModule,
+    MatIconModule,
+    QRCodeComponent,
   ],
-  exports: [CopySurveyControlsComponent],
+  exports: [QrCodeDialogComponent],
 })
-export class CopySurveyControlsModule {}
+export class QrCodeDialogModule {}

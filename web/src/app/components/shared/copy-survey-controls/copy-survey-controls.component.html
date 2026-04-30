@@ -21,27 +21,9 @@
     <span i18n="@@app.labels.copyLink">Copy link</span>
   </button>
 
-  <button mat-stroked-button (click)="copyQrCodeToClipboard()">
+  <button mat-stroked-button (click)="showQrCode()">
     <mat-icon>qr_code_2_24px</mat-icon>
 
-    <span i18n="@@app.labels.copyQrCode">Copy QR code</span>
+    <span i18n="@@app.labels.showQrCode">Show QR code</span>
   </button>
-</div>
-
-<div style="display: none">
-  <qrcode
-    *ngIf="surveyAppLink"
-    #qrCodeElement
-    [qrdata]="surveyAppLink"
-    [colorDark]="'#000000ff'"
-    [colorLight]="'#ffffffff'"
-    [elementType]="'canvas'"
-    [errorCorrectionLevel]="'M'"
-    [imageSrc]="'assets/img/logo.svg'"
-    [imageHeight]="75"
-    [imageWidth]="75"
-    [margin]="2"
-    [scale]="1"
-    [width]="300"
-  ></qrcode>
 </div>
