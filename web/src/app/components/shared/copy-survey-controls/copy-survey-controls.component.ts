@@ -14,14 +14,16 @@
  * limitations under the License.
  */
 
-import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
 
+import { QrCodeDialogComponent } from 'app/components/shared/qr-code-dialog/qr-code-dialog.component';
 import { NavigationService } from 'app/services/navigation/navigation.service';
 import { NotificationService } from 'app/services/notification/notification.service';
 
 /**
- * Implements the controls for copying the survey link and QR code
- * to the clipboard.
+ * Implements the controls for copying the survey link and showing
+ * the QR code.
  * This component is typically displayed in the survey create/edit
  * view, enabling users to quickly share the survey.
  */
@@ -34,14 +36,12 @@ import { NotificationService } from 'app/services/notification/notification.serv
 export class CopySurveyControlsComponent implements OnInit {
   @Input() surveyId = '';
 
-  @ViewChild('qrCodeElement', { read: ElementRef })
-  qrCodeElement!: ElementRef<HTMLCanvasElement>;
-
   surveyAppLink = '';
 
   constructor(
     private readonly navigationService: NavigationService,
-    private readonly notificationService: NotificationService
+    private readonly notificationService: NotificationService,
+    private readonly dialog: MatDialog
   ) {}
 
   ngOnInit() {
@@ -63,33 +63,10 @@ export class CopySurveyControlsComponent implements OnInit {
     );
   }
 
-  copyQrCodeToClipboard() {
-    const canvas = this.qrCodeElement!.nativeElement.querySelector('canvas');
-
-    if (!canvas) {
-      console.error('Canvas element not found');
-      return;
-    }
-
-    canvas.toBlob(blob => {
-      if (!blob) {
-        console.error('Failed to create blob from canvas');
-        return;
-      }
-
-      const data = [new ClipboardItem({ [blob.type]: blob })];
-      navigator.clipboard.write(data).then(
-        () => {
-          this.notificationService.success(
-            $localize`:@@app.notifications.success.surveyQrCodeCopied:Survey QR code copied to clipboard`
-          );
-        },
-        _ => {
-          this.notificationService.error(
-            $localize`:@@app.notifications.error.surveyQrCodeCopied:Impossible to copy Survey QR code to clipboard`
-          );
-        }
-      );
+  showQrCode() {
+    this.dialog.open(QrCodeDialogComponent, {
+      autoFocus: false,
+      data: { surveyAppLink: this.surveyAppLink },
     });
   }
 }
