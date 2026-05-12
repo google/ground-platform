@@ -20,6 +20,7 @@ import {
 } from '@angular/common/http';
 import { NgModule } from '@angular/core';
 import { MatIconRegistry } from '@angular/material/icon';
+import { MAT_SELECT_CONFIG } from '@angular/material/select';
 import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
 import { getAuth, provideAuth } from '@angular/fire/auth';
 import {
@@ -100,6 +101,7 @@ import { environment } from 'environments/environment';
     }),
 
     provideHttpClient(withInterceptorsFromDi()),
+    {provide: MAT_SELECT_CONFIG, useValue: {panelWidth: null}},
   ],
 })
 export class AppModule {
