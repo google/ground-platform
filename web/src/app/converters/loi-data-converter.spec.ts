@@ -100,6 +100,26 @@ describe('loiDocToModel', () => {
         ])
       ),
     },
+    {
+      expectation: 'converts submission count when set',
+      inputId: 'id0',
+      inputData: {
+        [lo.jobId]: 'jobId0',
+        [lo.geometry]: geoPointData,
+        [lo.properties]: {},
+        [lo.source]: Pb.LocationOfInterest.Source.IMPORTED,
+        [lo.submissionCount]: 3,
+      },
+      want: new LocationOfInterest(
+        'id0',
+        'jobId0',
+        geoPoint,
+        Map<string, string | number>(),
+        '',
+        true,
+        3
+      ),
+    },
   ];
 
   for (const t of testData) {
