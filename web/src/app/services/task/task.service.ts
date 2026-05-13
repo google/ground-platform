@@ -19,6 +19,7 @@ import { List, Map } from 'immutable';
 
 import { DataCollectionStrategy, Job } from 'app/models/job.model';
 import { MultipleChoice } from 'app/models/task/multiple-choice.model';
+import { Option } from 'app/models/task/option.model';
 import { Task, TaskType } from 'app/models/task/task.model';
 import { DataStoreService } from 'app/services/data-store/data-store.service';
 
@@ -57,23 +58,34 @@ export class TaskService {
    * boundary, the caller is responsible for remapping them.
    */
   duplicateTask(task: Task): Task {
-    return {
-      ...task,
-      id: this.dataStoreService.generateId(),
-      multipleChoice: task.multipleChoice
+    return new Task(
+      this.dataStoreService.generateId(),
+      task.type,
+      task.label,
+      task.required,
+      task.index,
+      task.multipleChoice
         ? this.duplicateMultipleChoice(task.multipleChoice)
         : undefined,
-    } as Task;
+      task.condition,
+      task.addLoiTask
+    );
   }
 
   duplicateMultipleChoice(multipleChoice: MultipleChoice): MultipleChoice {
-    return {
-      ...multipleChoice,
-      options: multipleChoice.options?.map(option => ({
-        ...option,
-        id: this.dataStoreService.generateId(),
-      })),
-    } as MultipleChoice;
+    return new MultipleChoice(
+      multipleChoice.cardinality,
+      multipleChoice.options.map(
+        option =>
+          new Option(
+            this.dataStoreService.generateId(),
+            option.code,
+            option.label,
+            option.index
+          )
+      ),
+      multipleChoice.hasOtherOption
+    );
   }
 
   addOrUpdateTasks(
