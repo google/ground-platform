@@ -80,7 +80,10 @@ describe('JobListItemComponent', () => {
 
   const surveyId = 'survey1';
 
-  function createLois(count: number): List<LocationOfInterest> {
+  function createLois(
+    count: number,
+    submissionCounts: number[] = []
+  ): List<LocationOfInterest> {
     const lois: LocationOfInterest[] = [];
     for (let i = 0; i < count; i++) {
       lois.push(
@@ -88,7 +91,10 @@ describe('JobListItemComponent', () => {
           /* id= */ 'loi' + i,
           /* jobId= */ job.id,
           /* geometry= */ new Point(new Coordinate(1.23, 4.56)),
-          /* properties= */ Map()
+          /* properties= */ Map(),
+          /* customId= */ '',
+          /* predefined= */ true,
+          /* submissionCount= */ submissionCounts[i] ?? 0
         )
       );
     }
@@ -207,6 +213,31 @@ describe('JobListItemComponent', () => {
 
     // One node for the job, three nodes for the loi
     expect((await jobTree.getNodes()).length).toBe(4);
+  });
+
+  it('should render submission counts for each LOI', async () => {
+    navigationServiceSpy.getSidePanelExpanded.and.returnValue(true);
+    fixture.detectChanges();
+
+    fixture.componentRef.setInput('lois', createLois(3, [0, 4, 12]));
+    fixture.detectChanges();
+
+    const jobTree = await loader.getHarness(MatTreeHarness);
+    const jobNode = (await jobTree.getNodes())[0];
+    await jobNode.expand();
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const counts = fixture.nativeElement.querySelectorAll(
+      '.loi-submission-count'
+    );
+    expect(counts.length).toBe(3);
+    expect(counts[0].textContent.trim()).toBe('0');
+    expect(counts[0].classList).toContain('empty');
+    expect(counts[1].textContent.trim()).toBe('4');
+    expect(counts[1].classList).not.toContain('empty');
+    expect(counts[2].textContent.trim()).toBe('12');
+    expect(counts[2].classList).not.toContain('empty');
   });
 
   it('should select LOI when LOI is clicked', async () => {

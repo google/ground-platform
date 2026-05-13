@@ -2,8 +2,12 @@
 @use '@angular/material' as mat;
 
 @mixin color($theme) {
-  .job-name, .loi-name {
+  .job-name, .loi-name, .loi-submission-count {
     color: mat.get-theme-color($theme, on-surface-variant);
+  }
+
+  .loi-submission-count.empty {
+    color: mat.get-theme-color($theme, neutral-variant, 50);
   }
 
   .tree-node-selected {
@@ -33,6 +37,10 @@
 @mixin typography($theme) {
   .job-name, .loi-name {
     font: mat.get-theme-typography($theme, label-large, font);
+  }
+
+  .loi-submission-count {
+    font: mat.get-theme-typography($theme, label-small, font);
   }
 
   .loi-tree-node.tree-node-selected .loi-name {

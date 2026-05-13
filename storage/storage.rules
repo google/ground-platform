@@ -84,12 +84,19 @@ service firebase.storage {
       allow read: if isSignedIn();
     }
     
-    match /user-media/surveys/{surveyId}/{allPaths=**} {
+    /**
+     * Returns true iff the requesting user owns the media at the given path.
+     */
+    function isResourceOwner(userId) {
+      return request.auth.uid == userId;
+    }
+
+    match /user-media/surveys/{surveyId}/users/{userId}/{allPaths=**} {
       // Only users with permission to access the survey can read media.
       allow read: if canViewSurvey(surveyId);
 
-      // Only users with permission to contribute data to the survey can create/update media.
-      allow create, write: if canCollectData(surveyId);
+      // Only the owning user with permission to contribute data to the survey can create/update media.
+      allow create, write: if isResourceOwner(userId) && canCollectData(surveyId);
     }
   }
 }
