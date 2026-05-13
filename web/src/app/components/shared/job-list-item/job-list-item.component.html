@@ -32,6 +32,13 @@ limitations under the License.
         <mat-icon svgIcon="{{ node.iconName }}" class="loi-icon" [ngStyle]="{color: node.iconColor}"></mat-icon>
 
         <div class="loi-name">{{ node.name }}</div>
+
+        <div
+          class="loi-submission-count"
+          [class.empty]="!node.loi?.submissionCount"
+        >
+          {{ node.loi?.submissionCount ?? 0 }}
+        </div>
       </ng-container>
 
       <ng-container *ngIf="!isSidePanelExpanded()">
@@ -56,7 +63,7 @@ limitations under the License.
         </ng-container>
 
         <ng-container *ngIf="!hasChild(node)">
-          <div style="width: 40px; visibility: hidden;"></div>
+          <div style="width: 40px; visibility: hidden"></div>
         </ng-container>
 
         <div class="job-tree-node-label">

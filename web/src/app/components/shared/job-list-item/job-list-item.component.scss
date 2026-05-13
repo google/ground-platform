@@ -63,4 +63,12 @@
     white-space: normal;
     word-wrap: break-word;
   }
+
+  .loi-submission-count {
+    flex-shrink: 0;
+    padding: 0 16px;
+    min-width: 48px;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
 }
