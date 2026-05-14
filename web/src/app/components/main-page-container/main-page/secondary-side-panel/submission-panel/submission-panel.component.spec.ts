@@ -43,7 +43,6 @@ import { SubmissionPanelComponent } from './submission-panel.component';
 import { Result } from 'app/models/submission/result.model';
 import { Point } from 'app/models/geometry/point';
 import { Coordinate } from 'app/models/geometry/coordinate';
-import { MultipleSelection } from 'app/models/submission/multiple-selection';
 import { LocationOfInterest } from 'app/models/loi.model';
 
 describe('SubmissionPanelComponent', () => {
@@ -191,36 +190,4 @@ describe('SubmissionPanelComponent', () => {
     );
   }));
 
-  it('should get multiple choice other value', fakeAsync(() => {
-    const task = new Task(
-      'task1',
-      TaskType.MULTIPLE_CHOICE,
-      'Multiple Choice',
-      true,
-      1
-    );
-    const multipleSelection = new MultipleSelection(
-      List(['option1']),
-      'Other value'
-    );
-    initializeWithSubmission(Map({ task1: new Result(multipleSelection) }));
-    const result = component.getTaskMultipleChoiceOtherValue(task);
-
-    expect(result).toBe('Other: Other value');
-  }));
-
-  it('should return "Other" when other value is empty but other option is selected', fakeAsync(() => {
-    const task = new Task(
-      'task1',
-      TaskType.MULTIPLE_CHOICE,
-      'Multiple Choice',
-      true,
-      1
-    );
-    const multipleSelection = new MultipleSelection(List(), '');
-    initializeWithSubmission(Map({ task1: new Result(multipleSelection) }));
-    const result = component.getTaskMultipleChoiceOtherValue(task);
-
-    expect(result).toBe('Other');
-  }));
 });

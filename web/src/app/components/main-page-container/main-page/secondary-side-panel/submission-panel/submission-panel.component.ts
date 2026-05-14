@@ -23,10 +23,8 @@ import { delay, switchMap } from 'rxjs/operators';
 
 import { Point } from 'app/models/geometry/point';
 import { LocationOfInterest } from 'app/models/loi.model';
-import { MultipleSelection } from 'app/models/submission/multiple-selection';
 import { Result } from 'app/models/submission/result.model';
 import { Survey } from 'app/models/survey.model';
-import { Option } from 'app/models/task/option.model';
 import { Task, TaskType } from 'app/models/task/task.model';
 import { NavigationService } from 'app/services/navigation/navigation.service';
 import { SubmissionService } from 'app/services/submission/submission.service';
@@ -145,30 +143,6 @@ export class SubmissionPanelComponent {
     const submission = this.submission();
     if (!submission) return;
     return submission.data.get(taskId);
-  }
-
-  getMultipleChoiceOption(task: Task, optionId: string) {
-    return task.multipleChoice?.options.find(
-      ({ id }: Option) => id === optionId
-    );
-  }
-
-  getTaskMultipleChoiceSelections(task: Task): MultipleSelection {
-    return this.getTaskSubmissionResult(task)!.value as MultipleSelection;
-  }
-
-  getTaskMultipleChoiceOtherValue(task: Task): string | null {
-    const multipleSelection = this.getTaskSubmissionResult(task)!
-      .value as MultipleSelection;
-    // Temporary workaround: Ensure at least one value is present: if no values are selected and 'otherText' is empty, add 'Other' as a fallback.
-    // https://github.com/google/ground-android/issues/2846
-    if (multipleSelection.values.size === 0 && !multipleSelection.otherValue)
-      return 'Other';
-    if (multipleSelection.otherValue)
-      return multipleSelection.otherValue.trim() !== ''
-        ? `Other: ${multipleSelection.otherValue}`
-        : 'Other';
-    return null;
   }
 
   getCaptureLocationCoord(task: Task): string {

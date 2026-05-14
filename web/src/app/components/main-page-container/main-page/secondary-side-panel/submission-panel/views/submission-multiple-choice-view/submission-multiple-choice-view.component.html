@@ -1,0 +1,16 @@
+<div class="submission-response-multiple-choice">
+  <mat-checkbox
+    disabled="true"
+    checked="true"
+    *ngFor="let optionId of selection().values"
+  >
+    {{ getOptionLabel(optionId) }}
+  </mat-checkbox>
+  <mat-checkbox
+    disabled="true"
+    checked="true"
+    *ngIf="otherValue() as value"
+  >
+    {{ value }}
+  </mat-checkbox>
+</div>

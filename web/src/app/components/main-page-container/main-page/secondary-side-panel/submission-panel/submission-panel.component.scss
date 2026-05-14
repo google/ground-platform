@@ -49,15 +49,6 @@
     border-radius: 4px;
     width: 100%;
   }
-  
-  .submission-response-multiple-choice {
-    display: flex;
-    flex-direction: column;
-  
-    ::ng-deep .mat-mdc-checkbox-disabled label {
-      color: inherit;
-    }
-  }
 
   .submission-response-geometry {
     display: flex;

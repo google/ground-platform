@@ -1,0 +1,8 @@
+.submission-response-multiple-choice {
+  display: flex;
+  flex-direction: column;
+
+  ::ng-deep .mat-mdc-checkbox-disabled label {
+    color: inherit;
+  }
+}
