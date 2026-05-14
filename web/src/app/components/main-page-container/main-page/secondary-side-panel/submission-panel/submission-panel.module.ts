@@ -24,6 +24,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { BrowserModule } from '@angular/platform-browser';
 
 import { SubmissionPanelComponent } from './submission-panel.component';
+import { SubmissionTextViewComponent } from './views/submission-text-view/submission-text-view.component';
 
 @NgModule({
   imports: [
@@ -36,6 +37,6 @@ import { SubmissionPanelComponent } from './submission-panel.component';
     MatProgressSpinnerModule,
   ],
   exports: [SubmissionPanelComponent],
-  declarations: [SubmissionPanelComponent],
+  declarations: [SubmissionPanelComponent, SubmissionTextViewComponent],
 })
 export class SubmissionPanelModule {}
