@@ -25,6 +25,7 @@ import { BrowserModule } from '@angular/platform-browser';
 
 import { SubmissionPanelComponent } from './submission-panel.component';
 import { SubmissionDateViewComponent } from './views/submission-date-view/submission-date-view.component';
+import { SubmissionGeometryViewComponent } from './views/submission-geometry-view/submission-geometry-view.component';
 import { SubmissionMultipleChoiceViewComponent } from './views/submission-multiple-choice-view/submission-multiple-choice-view.component';
 import { SubmissionPhotoViewComponent } from './views/submission-photo-view/submission-photo-view.component';
 import { SubmissionTextViewComponent } from './views/submission-text-view/submission-text-view.component';
@@ -44,6 +45,7 @@ import { SubmissionTimeViewComponent } from './views/submission-time-view/submis
   declarations: [
     SubmissionPanelComponent,
     SubmissionDateViewComponent,
+    SubmissionGeometryViewComponent,
     SubmissionMultipleChoiceViewComponent,
     SubmissionPhotoViewComponent,
     SubmissionTextViewComponent,

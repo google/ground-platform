@@ -141,23 +141,6 @@ describe('SubmissionPanelComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should format capture location coordinates', fakeAsync(() => {
-    const task = new Task(
-      'task1',
-      TaskType.CAPTURE_LOCATION,
-      'Capture Location',
-      true,
-      1
-    );
-    const point = new Point(new Coordinate(10, 20), 10, 100);
-    initializeWithSubmission(Map({ task1: new Result(point) }));
-    const result = component.getCaptureLocationCoord(task);
-
-    expect(result).toContain('20° N, 10° E');
-    expect(result).toContain('Altitude: 100m');
-    expect(result).toContain('Accuracy: 10m');
-  }));
-
   it('should select geometry', fakeAsync(() => {
     const task = new Task('task1', TaskType.DRAW_AREA, 'Draw Area', true, 1);
     initializeWithSubmission(Map({}));

@@ -69,46 +69,19 @@ limitations under the License.
                   [result]="getTaskSubmissionResult(task)!"
                 ></submission-photo-view>
                 <!-- Geometry task types -->
-                <div
+                <submission-geometry-view
                   *ngIf="
                     task.type === taskType.DROP_PIN ||
                     task.type === taskType.CAPTURE_LOCATION ||
                     task.type === taskType.DRAW_AREA
                   "
-                >
-                  <div
-                    class="submission-response-geometry"
-                    [ngClass]="{
-                      'selected-submission-response-geometry':
-                        task.id === selectedTaskId,
-                    }"
-                    (click)="selectGeometry(task)"
-                  >
-                    <div
-                      class="submission-response-geometry-number"
-                      [ngStyle]="{
-                        'background-color': submission()?.job.color ?? 'black',
-                      }"
-                    >
-                      {{ i + 1 }}
-                    </div>
-                    <div
-                      *ngIf="
-                        task.type === taskType.DROP_PIN ||
-                        task.type === taskType.DRAW_AREA
-                      "
-                      class="submission-response-geometry-label"
-                    >
-                      {{ task.id }}
-                    </div>
-                    <div
-                      *ngIf="task.type === taskType.CAPTURE_LOCATION"
-                      class="submission-response-geometry-label"
-                    >
-                      {{ getCaptureLocationCoord(task) }}
-                    </div>
-                  </div>
-                </div>
+                  [task]="task"
+                  [result]="getTaskSubmissionResult(task)!"
+                  [displayIndex]="i + 1"
+                  [jobColor]="submission()?.job?.color"
+                  [isSelected]="task.id === selectedTaskId"
+                  (selected)="selectGeometry(task)"
+                ></submission-geometry-view>
                 <!-- Date task types -->
                 <submission-date-view
                   *ngIf="task.type === taskType.DATE"

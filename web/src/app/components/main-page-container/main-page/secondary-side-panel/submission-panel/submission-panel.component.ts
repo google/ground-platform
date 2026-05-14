@@ -20,7 +20,6 @@ import { List } from 'immutable';
 import { combineLatest, of } from 'rxjs';
 import { delay, switchMap } from 'rxjs/operators';
 
-import { Point } from 'app/models/geometry/point';
 import { LocationOfInterest } from 'app/models/loi.model';
 import { Result } from 'app/models/submission/result.model';
 import { Survey } from 'app/models/survey.model';
@@ -101,33 +100,6 @@ export class SubmissionPanelComponent {
     const submission = this.submission();
     if (!submission) return;
     return submission.data.get(taskId);
-  }
-
-  getCaptureLocationCoord(task: Task): string {
-    // x represents longitude, y represents latitude
-    const { coord, accuracy, altitude } = this.getTaskSubmissionResult(task)!
-      .value as Point;
-    const { x, y } = coord;
-    const lngSuffix =
-      x >= 0
-        ? $localize`:@@app.labels.lngEast:E`
-        : $localize`:@@app.labels.lngWest:W`;
-    const latSuffix =
-      y >= 0
-        ? $localize`:@@app.labels.latNorth:N`
-        : $localize`:@@app.labels.latSouth:S`;
-    const lng = `${Math.abs(x)}° ${lngSuffix}`;
-    const lat = `${Math.abs(y)}° ${latSuffix}`;
-    const result = [`${lat}, ${lng}`];
-    if (altitude)
-      result.push(
-        $localize`:@@app.labels.altitude:Altitude: ${altitude}:altitude:m`
-      );
-    if (accuracy)
-      result.push(
-        $localize`:@@app.labels.accuracy:Accuracy: ${accuracy}:accuracy:m`
-      );
-    return result.join('\n');
   }
 
   selectGeometry(task: Task): void {
