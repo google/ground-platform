@@ -6,11 +6,7 @@
   >
     {{ getOptionLabel(optionId) }}
   </mat-checkbox>
-  <mat-checkbox
-    disabled="true"
-    checked="true"
-    *ngIf="otherValue() as value"
-  >
+  <mat-checkbox disabled="true" checked="true" *ngIf="otherValue() as value">
     {{ value }}
   </mat-checkbox>
 </div>

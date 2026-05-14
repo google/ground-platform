@@ -14,13 +14,7 @@
  * limitations under the License.
  */
 
-import {
-  Component,
-  effect,
-  inject,
-  input,
-  signal,
-} from '@angular/core';
+import { Component, effect, inject, input, signal } from '@angular/core';
 import { Storage, getDownloadURL, ref } from '@angular/fire/storage';
 
 import { Result } from 'app/models/submission/result.model';
@@ -48,9 +42,7 @@ export class SubmissionPhotoViewComponent {
       }
       getDownloadURL(ref(this.storage, path))
         .then(url => this.downloadUrl.set(url))
-        .catch(error =>
-          console.error(`Could not load image: ${path}`, error)
-        );
+        .catch(error => console.error(`Could not load image: ${path}`, error));
     });
   }
 }

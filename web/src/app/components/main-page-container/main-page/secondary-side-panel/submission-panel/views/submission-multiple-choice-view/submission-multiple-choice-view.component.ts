@@ -31,9 +31,7 @@ export class SubmissionMultipleChoiceViewComponent {
   task = input.required<Task>();
   result = input.required<Result>();
 
-  readonly selection = computed(
-    () => this.result().value as MultipleSelection
-  );
+  readonly selection = computed(() => this.result().value as MultipleSelection);
 
   readonly otherValue = computed<string | null>(() => {
     const sel = this.selection();
