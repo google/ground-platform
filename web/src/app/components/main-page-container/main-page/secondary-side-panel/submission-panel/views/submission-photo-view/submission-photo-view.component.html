@@ -1,0 +1,11 @@
+<ng-container *ngIf="downloadUrl() as url; else loading">
+  <img
+    [src]="url"
+    class="submission-img"
+    alt="Submission photo"
+    i18n-alt="@@app.labels.loadingSubmissionPhoto"
+  />
+</ng-container>
+<ng-template #loading>
+  <mat-spinner [diameter]="40"></mat-spinner>
+</ng-template>

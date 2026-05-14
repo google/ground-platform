@@ -64,26 +64,10 @@ limitations under the License.
                   [result]="getTaskSubmissionResult(task)!"
                 ></submission-multiple-choice-view>
                 <!-- Photo task types -->
-                <div *ngIf="task.type === taskType.PHOTO">
-                  <ng-container
-                    *ngIf="
-                      firebaseURLs.get(
-                        getTaskSubmissionResult(task)?.value
-                      ) as downloadUrl;
-                      else loading
-                    "
-                  >
-                    <img
-                      [src]="downloadUrl"
-                      class="submission-img"
-                      alt="Submission photo"
-                      i18n-alt="@@app.labels.loadingSubmissionPhoto"
-                    />
-                  </ng-container>
-                  <ng-template #loading>
-                    <mat-spinner [diameter]="40"></mat-spinner>
-                  </ng-template>
-                </div>
+                <submission-photo-view
+                  *ngIf="task.type === taskType.PHOTO"
+                  [result]="getTaskSubmissionResult(task)!"
+                ></submission-photo-view>
                 <!-- Geometry task types -->
                 <div
                   *ngIf="

@@ -21,7 +21,6 @@ import {
   fakeAsync,
   tick,
 } from '@angular/core/testing';
-import { Storage } from '@angular/fire/storage';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
@@ -50,8 +49,6 @@ describe('SubmissionPanelComponent', () => {
   let fixture: ComponentFixture<SubmissionPanelComponent>;
   let submissionService: jasmine.SpyObj<SubmissionService>;
   let navigationService: jasmine.SpyObj<NavigationService>;
-  let storageSpy: jasmine.SpyObj<Storage>;
-
   const mockSurvey = new Survey(
     'survey1',
     'Survey Title',
@@ -101,8 +98,6 @@ describe('SubmissionPanelComponent', () => {
       'selectLocationOfInterest',
       'showSubmissionDetailWithHighlightedTask',
     ]);
-    storageSpy = jasmine.createSpyObj('Storage', ['ref']);
-
     navigationService.getLocationOfInterestId$.and.returnValue(
       of(mockSubmission.loiId)
     );
@@ -121,7 +116,6 @@ describe('SubmissionPanelComponent', () => {
       providers: [
         { provide: NavigationService, useValue: navigationService },
         { provide: SubmissionService, useValue: submissionService },
-        { provide: Storage, useValue: storageSpy },
       ],
       schemas: [NO_ERRORS_SCHEMA],
     }).compileComponents();

@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import { Component, computed, effect, inject, input } from '@angular/core';
+import { Component, computed, inject, input } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { Storage, getDownloadURL, ref } from '@angular/fire/storage';
 import { List } from 'immutable';
 import { combineLatest, of } from 'rxjs';
 import { delay, switchMap } from 'rxjs/operators';
@@ -38,14 +37,12 @@ import { SubmissionService } from 'app/services/submission/submission.service';
 export class SubmissionPanelComponent {
   private submissionService = inject(SubmissionService);
   private navigationService = inject(NavigationService);
-  private storage = inject(Storage);
 
   activeSurvey = input<Survey>();
   selectedLoi = input<LocationOfInterest>();
   submissionId = input<string>();
 
   selectedTaskId: string | null = null;
-  firebaseURLs = new Map<string, string>();
 
   public taskType = TaskType;
 
@@ -67,15 +64,6 @@ export class SubmissionPanelComponent {
       .toArray();
   });
 
-  constructor() {
-    effect(() => {
-      if (this.submission()) {
-        this.firebaseURLs.clear();
-        this.getFirebaseImageURLs();
-      }
-    });
-  }
-
   submission = toSignal(
     combineLatest([
       toObservable(this.activeSurvey),
@@ -93,36 +81,6 @@ export class SubmissionPanelComponent {
     ),
     { initialValue: undefined }
   );
-
-  getFirebaseImageURLs() {
-    const tasks = this.tasks();
-    if (!tasks) return;
-    tasks.forEach(task => {
-      if (task.type === this.taskType.PHOTO) {
-        const submissionImage = this.getTaskSubmissionResult(task);
-        const submissionImageValue = submissionImage?.value as string;
-        if (
-          submissionImageValue &&
-          submissionImageValue.trim() !== '' &&
-          submissionImageValue !== '/'
-        ) {
-          const imageRef = ref(this.storage, submissionImageValue);
-          getDownloadURL(imageRef)
-            .then((url: string) => {
-              this.firebaseURLs.set(submissionImageValue, url);
-            })
-            .catch((error: Error) => {
-              console.error(
-                `Could not load image: ${submissionImageValue}`,
-                error
-              );
-            });
-        } else {
-          console.warn(`Task ${task.id} has no valid image path.`);
-        }
-      }
-    });
-  }
 
   navigateToSubmissionList() {
     const loi = this.selectedLoi();
