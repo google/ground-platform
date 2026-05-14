@@ -148,9 +148,10 @@ limitations under the License.
                   [result]="getTaskSubmissionResult(task)!"
                 ></submission-date-view>
                 <!-- Time task types -->
-                <div *ngIf="task.type === taskType.TIME">
-                  {{ getTime(task) }}
-                </div>
+                <submission-time-view
+                  *ngIf="task.type === taskType.TIME"
+                  [result]="getTaskSubmissionResult(task)!"
+                ></submission-time-view>
                 <!-- Remaining task types -->
                 <submission-text-view
                   *ngIf="

@@ -165,17 +165,6 @@ describe('SubmissionPanelComponent', () => {
     expect(result).toContain('Accuracy: 10m');
   }));
 
-  it('should format time', fakeAsync(() => {
-    const task = new Task('task1', TaskType.TIME, 'Time', true, 1);
-    const date = new Date('2023-01-01T12:00:00');
-    initializeWithSubmission(Map({ task1: new Result(date) }));
-    const result = component.getTime(task);
-
-    expect(result).toBe(
-      date.toLocaleTimeString([], { hour: 'numeric', minute: 'numeric' })
-    );
-  }));
-
   it('should select geometry', fakeAsync(() => {
     const task = new Task('task1', TaskType.DRAW_AREA, 'Draw Area', true, 1);
     initializeWithSubmission(Map({}));

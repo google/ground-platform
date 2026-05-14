@@ -198,12 +198,6 @@ export class SubmissionPanelComponent {
     return result.join('\n');
   }
 
-  getTime(task: Task): string {
-    return (
-      this.getTaskSubmissionResult(task)?.value as Date
-    ).toLocaleTimeString([], { hour: 'numeric', minute: 'numeric' });
-  }
-
   selectGeometry(task: Task): void {
     const survey = this.activeSurvey();
     if (!survey) {

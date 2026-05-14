@@ -26,6 +26,7 @@ import { BrowserModule } from '@angular/platform-browser';
 import { SubmissionPanelComponent } from './submission-panel.component';
 import { SubmissionDateViewComponent } from './views/submission-date-view/submission-date-view.component';
 import { SubmissionTextViewComponent } from './views/submission-text-view/submission-text-view.component';
+import { SubmissionTimeViewComponent } from './views/submission-time-view/submission-time-view.component';
 
 @NgModule({
   imports: [
@@ -42,6 +43,7 @@ import { SubmissionTextViewComponent } from './views/submission-text-view/submis
     SubmissionPanelComponent,
     SubmissionDateViewComponent,
     SubmissionTextViewComponent,
+    SubmissionTimeViewComponent,
   ],
 })
 export class SubmissionPanelModule {}
