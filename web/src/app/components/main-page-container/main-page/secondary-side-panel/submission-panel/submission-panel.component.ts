@@ -198,12 +198,6 @@ export class SubmissionPanelComponent {
     return result.join('\n');
   }
 
-  getDate(task: Task): string {
-    return (
-      this.getTaskSubmissionResult(task)?.value as Date
-    ).toLocaleDateString();
-  }
-
   getTime(task: Task): string {
     return (
       this.getTaskSubmissionResult(task)?.value as Date

@@ -165,15 +165,6 @@ describe('SubmissionPanelComponent', () => {
     expect(result).toContain('Accuracy: 10m');
   }));
 
-  it('should format date', fakeAsync(() => {
-    const task = new Task('task1', TaskType.DATE, 'Date', true, 1);
-    const date = new Date('2023-01-01T12:00:00');
-    initializeWithSubmission(Map({ task1: new Result(date) }));
-    const result = component.getDate(task);
-
-    expect(result).toBe(date.toLocaleDateString());
-  }));
-
   it('should format time', fakeAsync(() => {
     const task = new Task('task1', TaskType.TIME, 'Time', true, 1);
     const date = new Date('2023-01-01T12:00:00');
