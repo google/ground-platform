@@ -18,6 +18,7 @@ import { Injectable, Injector, runInInjectionContext } from '@angular/core';
 import {
   CollectionReference,
   DocumentData,
+  DocumentReference,
   FieldPath,
   Firestore,
   QueryDocumentSnapshot,
@@ -34,6 +35,7 @@ import {
   serverTimestamp,
   setDoc,
   where,
+  writeBatch,
 } from '@angular/fire/firestore';
 import { registry } from '@ground/lib';
 import { GroundProtos } from '@ground/proto';
@@ -78,6 +80,10 @@ const GeneralAccess = Pb.Survey.GeneralAccess;
 
 const SURVEYS_COLLECTION_NAME = 'surveys';
 const JOBS_COLLECTION_NAME = 'jobs';
+
+// Firestore caps writeBatch at 500 operations. Leave a small margin so callers
+// that append a few extra writes per chunk don't accidentally overflow.
+const MAX_BATCH_WRITES = 499;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type JsonBlob = { [field: string]: any };
@@ -228,9 +234,14 @@ export class DataStoreService {
 
   /**
    * Updates the survey with new title, description and jobs, and handles deletion of associated
-   * LOIs and submissions for the jobs to be deleted. Note that LOI/submission deletion is
-   * asynchronous and might leave unreferenced data temporarily. A scheduled job should delete
-   * these unreferenced lois and submissions(TODO(#1532)).
+   * LOIs and submissions for the jobs to be deleted.
+   *
+   * The survey/jobs mutation runs in a Firestore transaction (bounded in size).
+   * Associated LOIs and submissions are then removed via chunked writeBatches
+   * because their count is unbounded and would exceed Firestore's 500-write
+   * transaction limit. If the post-transaction batch phase fails, orphaned
+   * LOIs/submissions may remain; a scheduled cleanup job reconciles these
+   * (see #1532).
    *
    * @param survey The updated Survey object containing the modified survey data.
    * @param jobIdsToDelete List of job ids to delete. This is used to delete all the lois and
@@ -242,11 +253,25 @@ export class DataStoreService {
   ): Promise<void> {
     const { id: surveyId, jobs } = survey;
 
+    const orphanRefs: DocumentReference[] = [];
+    if (jobIdsToDelete) {
+      for (const jobId of jobIdsToDelete) {
+        orphanRefs.push(...(await this._collectJobDataRefs(surveyId, jobId)));
+      }
+    }
+
     await runInInjectionContext(this.injector, () =>
       runTransaction(this.db, async transaction => {
         if (jobIdsToDelete) {
           for (const jobId of jobIdsToDelete) {
-            await this._deleteJobAndRelatedData(transaction, surveyId, jobId);
+            const jobRef = runInInjectionContext(this.injector, () =>
+              doc(
+                this.db,
+                `${SURVEYS_COLLECTION_NAME}/${surveyId}/${JOBS_COLLECTION_NAME}`,
+                jobId
+              )
+            );
+            transaction.delete(jobRef);
           }
         }
 
@@ -263,6 +288,8 @@ export class DataStoreService {
         transaction.update(surveyRef, surveyToDocument(surveyId, survey));
       })
     );
+
+    await this._chunkedDelete(orphanRefs);
   }
 
   /**
@@ -341,31 +368,20 @@ export class DataStoreService {
 
   /**
    * @private
-   * Deletes a specific job and all its associated Locations of Interest (LOIs)
-   * and submissions within a Firestore transaction.
-   *
-   * @param transaction The Firestore transaction to perform the deletions within.
-   * @param surveyId The ID of the survey the job belongs to.
-   * @param jobId The ID of the job to delete.
+   * Returns the document references for every LOI and submission belonging to
+   * the given job. Used to collect orphaned records for deletion outside of a
+   * Firestore transaction, where the 500-write limit would otherwise apply.
    */
-  private async _deleteJobAndRelatedData(
-    transaction: Transaction,
+  private async _collectJobDataRefs(
     surveyId: string,
     jobId: string
-  ): Promise<void> {
+  ): Promise<DocumentReference[]> {
     const loisQuery = runInInjectionContext(this.injector, () =>
       query(
         collection(this.db, `${SURVEYS_COLLECTION_NAME}/${surveyId}/lois`),
         where(l.jobId, '==', jobId)
       )
     );
-    const loisSnapshot = await runInInjectionContext(this.injector, () =>
-      getDocs(loisQuery)
-    );
-    loisSnapshot.forEach(doc => {
-      transaction.delete(doc.ref);
-    });
-
     const submissionsQuery = runInInjectionContext(this.injector, () =>
       query(
         collection(
@@ -375,26 +391,55 @@ export class DataStoreService {
         where(sb.jobId, '==', jobId)
       )
     );
-    const submissionsSnapshot = await runInInjectionContext(this.injector, () =>
-      getDocs(submissionsQuery)
+    const [loisSnapshot, submissionsSnapshot] = await runInInjectionContext(
+      this.injector,
+      () => Promise.all([getDocs(loisQuery), getDocs(submissionsQuery)])
     );
-    submissionsSnapshot.forEach(doc => {
-      transaction.delete(doc.ref);
-    });
+    return [
+      ...loisSnapshot.docs.map(d => d.ref),
+      ...submissionsSnapshot.docs.map(d => d.ref),
+    ];
+  }
 
-    const jobRef = runInInjectionContext(this.injector, () =>
-      doc(this.db, `${SURVEYS_COLLECTION_NAME}/${surveyId}/jobs`, jobId)
-    );
-    transaction.delete(jobRef);
+  /**
+   * @private
+   * Deletes the given document references using chunked writeBatches so the
+   * total number of writes is not bounded by Firestore's 500-op transaction
+   * limit. Batches commit sequentially; a failure mid-way through leaves the
+   * remaining docs in place, to be cleaned up by the scheduled orphan sweeper.
+   */
+  private async _chunkedDelete(refs: DocumentReference[]): Promise<void> {
+    for (let i = 0; i < refs.length; i += MAX_BATCH_WRITES) {
+      const chunk = refs.slice(i, i + MAX_BATCH_WRITES);
+      await runInInjectionContext(this.injector, () => {
+        const batch = writeBatch(this.db);
+        for (const ref of chunk) {
+          batch.delete(ref);
+        }
+        return batch.commit();
+      });
+    }
   }
 
   async deleteSurvey(survey: Survey): Promise<void> {
     const { id: surveyId, jobs } = survey;
 
+    const orphanRefs: DocumentReference[] = [];
+    for (const { id: jobId } of jobs.values()) {
+      orphanRefs.push(...(await this._collectJobDataRefs(surveyId, jobId)));
+    }
+
     await runInInjectionContext(this.injector, () =>
       runTransaction(this.db, async transaction => {
         for (const { id: jobId } of jobs.values()) {
-          await this._deleteJobAndRelatedData(transaction, surveyId, jobId);
+          const jobRef = runInInjectionContext(this.injector, () =>
+            doc(
+              this.db,
+              `${SURVEYS_COLLECTION_NAME}/${surveyId}/${JOBS_COLLECTION_NAME}`,
+              jobId
+            )
+          );
+          transaction.delete(jobRef);
         }
 
         const surveyRef = runInInjectionContext(this.injector, () =>
@@ -403,6 +448,8 @@ export class DataStoreService {
         transaction.delete(surveyRef);
       })
     );
+
+    await this._chunkedDelete(orphanRefs);
   }
 
   private async deleteSubmissionsByLoiId(
