@@ -19,6 +19,7 @@ import {
   Firestore,
   getFirestore,
 } from 'firebase-admin/firestore';
+import * as logger from 'firebase-functions/logger';
 import { registry } from '@ground/lib';
 import { GroundProtos } from '@ground/proto';
 
@@ -55,13 +56,13 @@ export async function cleanOrphansHandler() {
     } catch (err) {
       // Don't let one bad survey abort the whole sweep — log and continue.
       failedSurveys++;
-      console.error(
+      logger.error(
         `cleanOrphans: survey ${surveyDoc.id} failed; continuing.`,
         err
       );
     }
   }
-  console.log(
+  logger.info(
     `Deleted ${totalDeleted} orphan LOI/submission doc(s) across ${surveysSnapshot.size} survey(s) (${failedSurveys} failed).`
   );
 }

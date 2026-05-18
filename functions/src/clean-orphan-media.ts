@@ -15,6 +15,7 @@
  */
 
 import { getFirestore } from 'firebase-admin/firestore';
+import * as logger from 'firebase-functions/logger';
 
 import { getStorageBucket } from './common/context';
 import { surveys } from './common/datastore';
@@ -41,7 +42,7 @@ export async function cleanOrphanMediaHandler() {
   });
 
   await Promise.all(orphans.map(f => f.delete()));
-  console.log(
+  logger.info(
     `Deleted ${orphans.length} orphan media file(s) under ${USER_MEDIA_SURVEYS_PREFIX}.`
   );
 }
