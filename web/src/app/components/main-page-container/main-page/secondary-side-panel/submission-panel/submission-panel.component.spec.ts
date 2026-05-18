@@ -166,4 +166,87 @@ describe('SubmissionPanelComponent', () => {
       mockSubmission.loiId
     );
   }));
+
+  it('does nothing on navigate when no selected LOI', () => {
+    component.navigateToSubmissionList();
+    expect(navigationService.selectLocationOfInterest).not.toHaveBeenCalled();
+  });
+
+  it('logs and bails on navigate when no active survey', () => {
+    spyOn(console, 'error');
+    fixture.componentRef.setInput('selectedLoi', mockLoi);
+    component.navigateToSubmissionList();
+    expect(console.error).toHaveBeenCalled();
+    expect(navigationService.selectLocationOfInterest).not.toHaveBeenCalled();
+  });
+
+  it('logs and bails on navigate when no submission has loaded', () => {
+    spyOn(console, 'error');
+    submissionService.getSubmission$.and.returnValue(of(null as any));
+    fixture.componentRef.setInput('activeSurvey', mockSurvey);
+    fixture.componentRef.setInput('selectedLoi', mockLoi);
+    fixture.componentRef.setInput('submissionId', mockSubmission.id);
+    fixture.detectChanges();
+    component.navigateToSubmissionList();
+    expect(console.error).toHaveBeenCalled();
+    expect(navigationService.selectLocationOfInterest).not.toHaveBeenCalled();
+  });
+
+  it('logs and bails on selectGeometry when no active survey', fakeAsync(() => {
+    spyOn(console, 'error');
+    const task = new Task('task1', TaskType.DRAW_AREA, 'Draw Area', true, 1);
+    fixture.componentRef.setInput('selectedLoi', mockLoi);
+    fixture.componentRef.setInput('submissionId', mockSubmission.id);
+    submissionService.getSubmission$.and.returnValue(of(mockSubmission));
+    fixture.detectChanges();
+    tick(100);
+    component.selectGeometry(task);
+    expect(console.error).toHaveBeenCalled();
+    expect(
+      navigationService.showSubmissionDetailWithHighlightedTask
+    ).not.toHaveBeenCalled();
+  }));
+
+  it('logs and bails on selectGeometry when no submission has loaded', () => {
+    spyOn(console, 'error');
+    const task = new Task('task1', TaskType.DRAW_AREA, 'Draw Area', true, 1);
+    submissionService.getSubmission$.and.returnValue(of(null as any));
+    fixture.componentRef.setInput('activeSurvey', mockSurvey);
+    fixture.componentRef.setInput('selectedLoi', mockLoi);
+    fixture.componentRef.setInput('submissionId', mockSubmission.id);
+    fixture.detectChanges();
+    component.selectGeometry(task);
+    expect(console.error).toHaveBeenCalled();
+    expect(
+      navigationService.showSubmissionDetailWithHighlightedTask
+    ).not.toHaveBeenCalled();
+  });
+
+  it('getTaskSubmissionResult returns result for a known task', fakeAsync(() => {
+    const result = new Result('answer');
+    initializeWithSubmission(Map({task1: result}));
+    expect(
+      component.getTaskSubmissionResult(
+        new Task('task1', TaskType.TEXT, 'Text', true, 1)
+      )
+    ).toBe(result);
+  }));
+
+  it('getTaskSubmissionResult returns undefined when no submission loaded', () => {
+    expect(
+      component.getTaskSubmissionResult(
+        new Task('task1', TaskType.TEXT, 'Text', true, 1)
+      )
+    ).toBeUndefined();
+  });
+
+  it('typed accessors narrow Result.value', () => {
+    const date = new Date();
+    const point = new Point(new Coordinate(0, 0));
+    expect(component.asString(new Result('hello'))).toBe('hello');
+    expect(component.asStringOrNumber(new Result(42))).toBe(42);
+    expect(component.asDate(new Result(date))).toBe(date);
+    expect(component.asGeometry(new Result(point))).toBe(point);
+    expect(component.asMultipleSelection(new Result(null)) as unknown).toBeNull();
+  });
 });

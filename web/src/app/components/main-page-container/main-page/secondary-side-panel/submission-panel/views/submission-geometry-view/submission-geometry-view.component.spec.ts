@@ -73,4 +73,58 @@ describe('SubmissionGeometryViewComponent', () => {
 
     expect(emitted).toBe(true);
   });
+
+  it('returns null capturedCoord for non-CAPTURE_LOCATION tasks', () => {
+    const task = new Task('task1', TaskType.DRAW_AREA, 'Draw Area', true, 1);
+    fixture.componentRef.setInput('task', task);
+    fixture.componentRef.setInput(
+      'geometry',
+      new Point(new Coordinate(0, 0))
+    );
+    fixture.componentRef.setInput('displayIndex', 1);
+    fixture.detectChanges();
+
+    expect(component.capturedCoord()).toBeNull();
+  });
+
+  it('formats Western and Southern hemisphere coordinates', () => {
+    const task = new Task(
+      'task1',
+      TaskType.CAPTURE_LOCATION,
+      'Capture Location',
+      true,
+      1
+    );
+    fixture.componentRef.setInput('task', task);
+    fixture.componentRef.setInput(
+      'geometry',
+      new Point(new Coordinate(-10, -20))
+    );
+    fixture.componentRef.setInput('displayIndex', 1);
+    fixture.detectChanges();
+
+    const text = component.capturedCoord()!;
+    expect(text).toContain('20° S, 10° W');
+  });
+
+  it('omits altitude and accuracy when absent', () => {
+    const task = new Task(
+      'task1',
+      TaskType.CAPTURE_LOCATION,
+      'Capture Location',
+      true,
+      1
+    );
+    fixture.componentRef.setInput('task', task);
+    fixture.componentRef.setInput(
+      'geometry',
+      new Point(new Coordinate(10, 20))
+    );
+    fixture.componentRef.setInput('displayIndex', 1);
+    fixture.detectChanges();
+
+    const text = component.capturedCoord()!;
+    expect(text).not.toContain('Altitude');
+    expect(text).not.toContain('Accuracy');
+  });
 });

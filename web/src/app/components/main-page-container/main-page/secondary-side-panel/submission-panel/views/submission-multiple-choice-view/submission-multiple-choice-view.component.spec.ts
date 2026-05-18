@@ -18,6 +18,8 @@ import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { List } from 'immutable';
 
+import { MultipleChoice, Cardinality } from 'app/models/task/multiple-choice.model';
+import { Option } from 'app/models/task/option.model';
 import { MultipleSelection } from 'app/models/submission/multiple-selection';
 import { Task, TaskType } from 'app/models/task/task.model';
 
@@ -27,12 +29,17 @@ describe('SubmissionMultipleChoiceViewComponent', () => {
   let fixture: ComponentFixture<SubmissionMultipleChoiceViewComponent>;
   let component: SubmissionMultipleChoiceViewComponent;
 
+  const options = List([
+    new Option('opt1', 'A', 'Apple', 0),
+    new Option('opt2', 'B', 'Banana', 1),
+  ]);
   const task = new Task(
     'task1',
     TaskType.MULTIPLE_CHOICE,
     'Multiple Choice',
     true,
-    1
+    1,
+    new MultipleChoice(Cardinality.SELECT_MULTIPLE, options, true)
   );
 
   beforeEach(async () => {
@@ -59,5 +66,22 @@ describe('SubmissionMultipleChoiceViewComponent', () => {
   it('returns "Other" when both values and otherValue are empty', () => {
     setInputs(new MultipleSelection(List(), ''));
     expect(component.otherValue()).toBe('Other');
+  });
+
+  it('returns "Other" when otherValue is whitespace only', () => {
+    setInputs(new MultipleSelection(List(['opt1']), '   '));
+    expect(component.otherValue()).toBe('Other');
+  });
+
+  it('returns null when values are present and otherValue is empty', () => {
+    setInputs(new MultipleSelection(List(['opt1']), ''));
+    expect(component.otherValue()).toBeNull();
+  });
+
+  it('looks up option labels by id', () => {
+    setInputs(new MultipleSelection(List(['opt1']), ''));
+    expect(component.getOptionLabel('opt1')).toBe('Apple');
+    expect(component.getOptionLabel('opt2')).toBe('Banana');
+    expect(component.getOptionLabel('missing')).toBeUndefined();
   });
 });
