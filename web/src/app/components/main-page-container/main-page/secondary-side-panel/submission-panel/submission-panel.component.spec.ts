@@ -1,14 +1,14 @@
 /**
  * Copyright 2025 The Ground Authors.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
+ * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  *     https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
+ * distributed under the License is distributed on an 'AS IS' BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
@@ -21,7 +21,6 @@ import {
   fakeAsync,
   tick,
 } from '@angular/core/testing';
-import { Storage } from '@angular/fire/storage';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
@@ -43,7 +42,6 @@ import { SubmissionPanelComponent } from './submission-panel.component';
 import { Result } from 'app/models/submission/result.model';
 import { Point } from 'app/models/geometry/point';
 import { Coordinate } from 'app/models/geometry/coordinate';
-import { MultipleSelection } from 'app/models/submission/multiple-selection';
 import { LocationOfInterest } from 'app/models/loi.model';
 
 describe('SubmissionPanelComponent', () => {
@@ -51,8 +49,6 @@ describe('SubmissionPanelComponent', () => {
   let fixture: ComponentFixture<SubmissionPanelComponent>;
   let submissionService: jasmine.SpyObj<SubmissionService>;
   let navigationService: jasmine.SpyObj<NavigationService>;
-  let storageSpy: jasmine.SpyObj<Storage>;
-
   const mockSurvey = new Survey(
     'survey1',
     'Survey Title',
@@ -102,8 +98,6 @@ describe('SubmissionPanelComponent', () => {
       'selectLocationOfInterest',
       'showSubmissionDetailWithHighlightedTask',
     ]);
-    storageSpy = jasmine.createSpyObj('Storage', ['ref']);
-
     navigationService.getLocationOfInterestId$.and.returnValue(
       of(mockSubmission.loiId)
     );
@@ -122,7 +116,6 @@ describe('SubmissionPanelComponent', () => {
       providers: [
         { provide: NavigationService, useValue: navigationService },
         { provide: SubmissionService, useValue: submissionService },
-        { provide: Storage, useValue: storageSpy },
       ],
       schemas: [NO_ERRORS_SCHEMA],
     }).compileComponents();
@@ -147,43 +140,6 @@ describe('SubmissionPanelComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
-
-  it('should format capture location coordinates', fakeAsync(() => {
-    const task = new Task(
-      'task1',
-      TaskType.CAPTURE_LOCATION,
-      'Capture Location',
-      true,
-      1
-    );
-    const point = new Point(new Coordinate(10, 20), 10, 100);
-    initializeWithSubmission(Map({ task1: new Result(point) }));
-    const result = component.getCaptureLocationCoord(task);
-
-    expect(result).toContain('20° N, 10° E');
-    expect(result).toContain('Altitude: 100m');
-    expect(result).toContain('Accuracy: 10m');
-  }));
-
-  it('should format date', fakeAsync(() => {
-    const task = new Task('task1', TaskType.DATE, 'Date', true, 1);
-    const date = new Date('2023-01-01T12:00:00');
-    initializeWithSubmission(Map({ task1: new Result(date) }));
-    const result = component.getDate(task);
-
-    expect(result).toBe(date.toLocaleDateString());
-  }));
-
-  it('should format time', fakeAsync(() => {
-    const task = new Task('task1', TaskType.TIME, 'Time', true, 1);
-    const date = new Date('2023-01-01T12:00:00');
-    initializeWithSubmission(Map({ task1: new Result(date) }));
-    const result = component.getTime(task);
-
-    expect(result).toBe(
-      date.toLocaleTimeString([], { hour: 'numeric', minute: 'numeric' })
-    );
-  }));
 
   it('should select geometry', fakeAsync(() => {
     const task = new Task('task1', TaskType.DRAW_AREA, 'Draw Area', true, 1);
@@ -211,36 +167,86 @@ describe('SubmissionPanelComponent', () => {
     );
   }));
 
-  it('should get multiple choice other value', fakeAsync(() => {
-    const task = new Task(
-      'task1',
-      TaskType.MULTIPLE_CHOICE,
-      'Multiple Choice',
-      true,
-      1
-    );
-    const multipleSelection = new MultipleSelection(
-      List(['option1']),
-      'Other value'
-    );
-    initializeWithSubmission(Map({ task1: new Result(multipleSelection) }));
-    const result = component.getTaskMultipleChoiceOtherValue(task);
+  it('does nothing on navigate when no selected LOI', () => {
+    component.navigateToSubmissionList();
+    expect(navigationService.selectLocationOfInterest).not.toHaveBeenCalled();
+  });
 
-    expect(result).toBe('Other: Other value');
+  it('logs and bails on navigate when no active survey', () => {
+    spyOn(console, 'error');
+    fixture.componentRef.setInput('selectedLoi', mockLoi);
+    component.navigateToSubmissionList();
+    expect(console.error).toHaveBeenCalled();
+    expect(navigationService.selectLocationOfInterest).not.toHaveBeenCalled();
+  });
+
+  it('logs and bails on navigate when no submission has loaded', () => {
+    spyOn(console, 'error');
+    submissionService.getSubmission$.and.returnValue(of(null as any));
+    fixture.componentRef.setInput('activeSurvey', mockSurvey);
+    fixture.componentRef.setInput('selectedLoi', mockLoi);
+    fixture.componentRef.setInput('submissionId', mockSubmission.id);
+    fixture.detectChanges();
+    component.navigateToSubmissionList();
+    expect(console.error).toHaveBeenCalled();
+    expect(navigationService.selectLocationOfInterest).not.toHaveBeenCalled();
+  });
+
+  it('logs and bails on selectGeometry when no active survey', fakeAsync(() => {
+    spyOn(console, 'error');
+    const task = new Task('task1', TaskType.DRAW_AREA, 'Draw Area', true, 1);
+    fixture.componentRef.setInput('selectedLoi', mockLoi);
+    fixture.componentRef.setInput('submissionId', mockSubmission.id);
+    submissionService.getSubmission$.and.returnValue(of(mockSubmission));
+    fixture.detectChanges();
+    tick(100);
+    component.selectGeometry(task);
+    expect(console.error).toHaveBeenCalled();
+    expect(
+      navigationService.showSubmissionDetailWithHighlightedTask
+    ).not.toHaveBeenCalled();
   }));
 
-  it('should return "Other" when other value is empty but other option is selected', fakeAsync(() => {
-    const task = new Task(
-      'task1',
-      TaskType.MULTIPLE_CHOICE,
-      'Multiple Choice',
-      true,
-      1
-    );
-    const multipleSelection = new MultipleSelection(List(), '');
-    initializeWithSubmission(Map({ task1: new Result(multipleSelection) }));
-    const result = component.getTaskMultipleChoiceOtherValue(task);
+  it('logs and bails on selectGeometry when no submission has loaded', () => {
+    spyOn(console, 'error');
+    const task = new Task('task1', TaskType.DRAW_AREA, 'Draw Area', true, 1);
+    submissionService.getSubmission$.and.returnValue(of(null as any));
+    fixture.componentRef.setInput('activeSurvey', mockSurvey);
+    fixture.componentRef.setInput('selectedLoi', mockLoi);
+    fixture.componentRef.setInput('submissionId', mockSubmission.id);
+    fixture.detectChanges();
+    component.selectGeometry(task);
+    expect(console.error).toHaveBeenCalled();
+    expect(
+      navigationService.showSubmissionDetailWithHighlightedTask
+    ).not.toHaveBeenCalled();
+  });
 
-    expect(result).toBe('Other');
+  it('getTaskSubmissionResult returns result for a known task', fakeAsync(() => {
+    const result = new Result('answer');
+    initializeWithSubmission(Map({task1: result}));
+    expect(
+      component.getTaskSubmissionResult(
+        new Task('task1', TaskType.TEXT, 'Text', true, 1)
+      )
+    ).toBe(result);
   }));
+
+  it('getTaskSubmissionResult returns undefined when no submission loaded', () => {
+    expect(
+      component.getTaskSubmissionResult(
+        new Task('task1', TaskType.TEXT, 'Text', true, 1)
+      )
+    ).toBeUndefined();
+  });
+
+  it('typed accessors narrow Result.value', () => {
+    const date = new Date();
+    const point = new Point(new Coordinate(0, 0));
+    expect(component.asString(new Result('hello'))).toBe('hello');
+    expect(component.asStringOrNumber(new Result(42))).toBe(42);
+    expect(component.asDate(new Result(date))).toBe(date);
+    expect(component.asGeometry(new Result(point))).toBe(point);
+    expect(component.asMultipleSelection(new Result(null)) as unknown).toBeNull();
+  });
 });

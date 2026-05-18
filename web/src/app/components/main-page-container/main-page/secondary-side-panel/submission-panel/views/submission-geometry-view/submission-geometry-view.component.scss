@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 The Ground Authors.
+ * Copyright 2026 The Ground Authors.
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -14,20 +14,27 @@
  * limitations under the License.
  */
 
-import { MultipleSelection } from './multiple-selection';
-import { Geometry } from '../geometry/geometry';
+.submission-response-geometry {
+  display: flex;
+  align-items: center;
+  min-height: 40px;
+  padding-inline-start: 8px;
+}
 
-export type ResultValue =
-  | null
-  | number
-  | string
-  | MultipleSelection
-  | Date
-  | Geometry;
+.submission-response-geometry-number {
+  display: flex;
+  border-radius: 6px;
+  width: 24px;
+  height: 24px;
+  justify-content: center;
+  align-items: center;
+  font-weight: 800;
+  font-size: 15px;
+  color: white;
+}
 
-export class Result {
-  constructor(
-    readonly value: ResultValue,
-    readonly skipped: boolean = false
-  ) {}
+.submission-response-geometry-label {
+  padding-left: 16px;
+  font-weight: 500;
+  white-space: pre-line;
 }

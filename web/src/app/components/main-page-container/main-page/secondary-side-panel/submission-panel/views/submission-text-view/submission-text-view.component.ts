@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 The Ground Authors.
+ * Copyright 2026 The Ground Authors.
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -14,20 +14,13 @@
  * limitations under the License.
  */
 
-import { MultipleSelection } from './multiple-selection';
-import { Geometry } from '../geometry/geometry';
+import { Component, input } from '@angular/core';
 
-export type ResultValue =
-  | null
-  | number
-  | string
-  | MultipleSelection
-  | Date
-  | Geometry;
-
-export class Result {
-  constructor(
-    readonly value: ResultValue,
-    readonly skipped: boolean = false
-  ) {}
+@Component({
+  selector: 'submission-text-view',
+  templateUrl: './submission-text-view.component.html',
+  standalone: false,
+})
+export class SubmissionTextViewComponent {
+  text = input.required<string | number>();
 }
