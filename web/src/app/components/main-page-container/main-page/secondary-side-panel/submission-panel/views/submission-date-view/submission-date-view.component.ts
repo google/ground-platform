@@ -16,17 +16,13 @@
 
 import { Component, computed, input } from '@angular/core';
 
-import { Result } from 'app/models/submission/result.model';
-
 @Component({
   selector: 'submission-date-view',
   templateUrl: './submission-date-view.component.html',
   standalone: false,
 })
 export class SubmissionDateViewComponent {
-  result = input.required<Result>();
+  date = input.required<Date>();
 
-  readonly formattedDate = computed(() =>
-    (this.result().value as Date).toLocaleDateString()
-  );
+  readonly formattedDate = computed(() => this.date().toLocaleDateString());
 }

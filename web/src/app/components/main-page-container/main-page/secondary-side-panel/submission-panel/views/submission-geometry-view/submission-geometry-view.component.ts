@@ -16,8 +16,8 @@
 
 import { Component, computed, input, output } from '@angular/core';
 
+import { Geometry } from 'app/models/geometry/geometry';
 import { Point } from 'app/models/geometry/point';
-import { Result } from 'app/models/submission/result.model';
 import { Task, TaskType } from 'app/models/task/task.model';
 
 @Component({
@@ -28,7 +28,7 @@ import { Task, TaskType } from 'app/models/task/task.model';
 })
 export class SubmissionGeometryViewComponent {
   task = input.required<Task>();
-  result = input.required<Result>();
+  geometry = input.required<Geometry>();
   displayIndex = input.required<number>();
   jobColor = input<string>();
   isSelected = input<boolean>(false);
@@ -40,7 +40,7 @@ export class SubmissionGeometryViewComponent {
   readonly capturedCoord = computed(() => {
     const task = this.task();
     if (task.type !== TaskType.CAPTURE_LOCATION) return null;
-    return this.formatCaptureLocationCoord(this.result().value as Point);
+    return this.formatCaptureLocationCoord(this.geometry() as Point);
   });
 
   onClick(): void {

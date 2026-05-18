@@ -17,7 +17,6 @@
 import { Component, computed, input } from '@angular/core';
 
 import { MultipleSelection } from 'app/models/submission/multiple-selection';
-import { Result } from 'app/models/submission/result.model';
 import { Option } from 'app/models/task/option.model';
 import { Task } from 'app/models/task/task.model';
 
@@ -29,9 +28,7 @@ import { Task } from 'app/models/task/task.model';
 })
 export class SubmissionMultipleChoiceViewComponent {
   task = input.required<Task>();
-  result = input.required<Result>();
-
-  readonly selection = computed(() => this.result().value as MultipleSelection);
+  selection = input.required<MultipleSelection>();
 
   readonly otherValue = computed<string | null>(() => {
     const sel = this.selection();

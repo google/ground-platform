@@ -16,18 +16,16 @@
 
 import { Component, computed, input } from '@angular/core';
 
-import { Result } from 'app/models/submission/result.model';
-
 @Component({
   selector: 'submission-time-view',
   templateUrl: './submission-time-view.component.html',
   standalone: false,
 })
 export class SubmissionTimeViewComponent {
-  result = input.required<Result>();
+  time = input.required<Date>();
 
   readonly formattedTime = computed(() =>
-    (this.result().value as Date).toLocaleTimeString([], {
+    this.time().toLocaleTimeString([], {
       hour: 'numeric',
       minute: 'numeric',
     })

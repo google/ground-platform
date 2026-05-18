@@ -16,13 +16,11 @@
 
 import { Component, input } from '@angular/core';
 
-import { Result } from 'app/models/submission/result.model';
-
 @Component({
   selector: 'submission-text-view',
   templateUrl: './submission-text-view.component.html',
   standalone: false,
 })
 export class SubmissionTextViewComponent {
-  result = input.required<Result>();
+  text = input.required<string | number>();
 }

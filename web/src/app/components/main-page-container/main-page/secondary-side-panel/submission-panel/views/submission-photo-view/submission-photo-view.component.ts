@@ -17,8 +17,6 @@
 import { Component, effect, inject, input, signal } from '@angular/core';
 import { Storage, getDownloadURL, ref } from '@angular/fire/storage';
 
-import { Result } from 'app/models/submission/result.model';
-
 @Component({
   selector: 'submission-photo-view',
   templateUrl: './submission-photo-view.component.html',
@@ -28,13 +26,13 @@ import { Result } from 'app/models/submission/result.model';
 export class SubmissionPhotoViewComponent {
   private storage = inject(Storage);
 
-  result = input.required<Result>();
+  path = input.required<string | null>();
 
   readonly downloadUrl = signal<string | undefined>(undefined);
 
   constructor() {
     effect(() => {
-      const path = this.result().value as string | undefined;
+      const path = this.path();
       this.downloadUrl.set(undefined);
       if (!path || path.trim() === '' || path === '/') {
         console.warn('Photo task has no valid image path.');
