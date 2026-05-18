@@ -19,7 +19,6 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { Coordinate } from 'app/models/geometry/coordinate';
 import { Point } from 'app/models/geometry/point';
-import { Result } from 'app/models/submission/result.model';
 import { Task, TaskType } from 'app/models/task/task.model';
 
 import { SubmissionGeometryViewComponent } from './submission-geometry-view.component';
@@ -48,7 +47,7 @@ describe('SubmissionGeometryViewComponent', () => {
     );
     const point = new Point(new Coordinate(10, 20), 10, 100);
     fixture.componentRef.setInput('task', task);
-    fixture.componentRef.setInput('result', new Result(point));
+    fixture.componentRef.setInput('geometry', point);
     fixture.componentRef.setInput('displayIndex', 1);
     fixture.detectChanges();
 
@@ -62,8 +61,8 @@ describe('SubmissionGeometryViewComponent', () => {
     const task = new Task('task1', TaskType.DRAW_AREA, 'Draw Area', true, 1);
     fixture.componentRef.setInput('task', task);
     fixture.componentRef.setInput(
-      'result',
-      new Result(new Point(new Coordinate(0, 0)))
+      'geometry',
+      new Point(new Coordinate(0, 0))
     );
     fixture.componentRef.setInput('displayIndex', 1);
     fixture.detectChanges();

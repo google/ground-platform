@@ -19,7 +19,6 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { List } from 'immutable';
 
 import { MultipleSelection } from 'app/models/submission/multiple-selection';
-import { Result } from 'app/models/submission/result.model';
 import { Task, TaskType } from 'app/models/task/task.model';
 
 import { SubmissionMultipleChoiceViewComponent } from './submission-multiple-choice-view.component';
@@ -48,7 +47,7 @@ describe('SubmissionMultipleChoiceViewComponent', () => {
 
   function setInputs(selection: MultipleSelection) {
     fixture.componentRef.setInput('task', task);
-    fixture.componentRef.setInput('result', new Result(selection));
+    fixture.componentRef.setInput('selection', selection);
     fixture.detectChanges();
   }
 

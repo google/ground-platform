@@ -16,8 +16,6 @@
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { Result } from 'app/models/submission/result.model';
-
 import { SubmissionDateViewComponent } from './submission-date-view.component';
 
 describe('SubmissionDateViewComponent', () => {
@@ -33,7 +31,7 @@ describe('SubmissionDateViewComponent', () => {
 
   it('renders the date in locale format', () => {
     const date = new Date('2023-01-01T12:00:00');
-    fixture.componentRef.setInput('result', new Result(date));
+    fixture.componentRef.setInput('date', date);
     fixture.detectChanges();
 
     expect(fixture.nativeElement.textContent.trim()).toBe(
