@@ -83,7 +83,7 @@ export class SubmissionPanelComponent {
       console.error("No active survey - can't navigate to submission list");
       return;
     }
-    if (!this.submission) {
+    if (!this.submission()) {
       console.error("No submission - can't navigate to submission list");
       return;
     }
