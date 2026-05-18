@@ -16,10 +16,18 @@
 
 import { TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
-import { Map } from 'immutable';
+import { List, Map } from 'immutable';
 
 import { DataCollectionStrategy, Job } from 'app/models/job.model';
 import { DataSharingType, Survey } from 'app/models/survey.model';
+import { Cardinality, MultipleChoice } from 'app/models/task/multiple-choice.model';
+import { Option } from 'app/models/task/option.model';
+import {
+  TaskCondition,
+  TaskConditionExpression,
+  TaskConditionExpressionType,
+  TaskConditionMatchType,
+} from 'app/models/task/task-condition.model';
 import { Task, TaskType } from 'app/models/task/task.model';
 import { DataStoreService } from 'app/services/data-store/data-store.service';
 import { JobService } from 'app/services/job/job.service';
@@ -90,7 +98,7 @@ describe('JobService', () => {
   describe('duplicateJob', () => {
     it('should duplicate job with new IDs', () => {
       const oldTask = new Task('task1', TaskType.TEXT, 'Label', false, 0);
-      const newTask = new Task('task1', TaskType.TEXT, 'Label', false, 0);
+      const newTask = new Task('newTask1', TaskType.TEXT, 'Label', false, 0);
       const job = new Job(
         'job1',
         0,
@@ -108,8 +116,124 @@ describe('JobService', () => {
       expect(newJob.id).toBe('job2');
       expect(newJob.name).toBe('Copy of Job 1');
       expect(newJob.color).toBe('#FFF');
-      expect(newJob.tasks?.get('task1')).toEqual(newTask);
-      expect(taskServiceSpy.duplicateTask).toHaveBeenCalledWith(oldTask, true);
+      expect(newJob.tasks?.get('newTask1')).toEqual(newTask);
+      expect(taskServiceSpy.duplicateTask).toHaveBeenCalledWith(oldTask);
+    });
+
+    it('should remap condition references to the duplicated task and option ids', () => {
+      const sourceOption = new Option('opt1', 'A', 'A', 0);
+      const sourceTask = new Task(
+        'src',
+        TaskType.MULTIPLE_CHOICE,
+        'Source',
+        false,
+        0,
+        new MultipleChoice(Cardinality.SELECT_ONE, List([sourceOption]))
+      );
+      const dependentTask = new Task(
+        'dep',
+        TaskType.TEXT,
+        'Dependent',
+        false,
+        1,
+        undefined,
+        new TaskCondition(
+          TaskConditionMatchType.MATCH_ALL,
+          List([
+            new TaskConditionExpression(
+              TaskConditionExpressionType.ONE_OF_SELECTED,
+              'src',
+              List(['opt1'])
+            ),
+          ])
+        )
+      );
+      const job = new Job(
+        'job1',
+        0,
+        '#000',
+        'Job 1',
+        Map({ src: sourceTask, dep: dependentTask }),
+        DataCollectionStrategy.MIXED
+      );
+
+      const newSourceTask = new Task(
+        'newSrc',
+        TaskType.MULTIPLE_CHOICE,
+        'Source',
+        false,
+        0,
+        new MultipleChoice(
+          Cardinality.SELECT_ONE,
+          List([new Option('newOpt1', 'A', 'A', 0)])
+        )
+      );
+      const newDependentTask = new Task(
+        'newDep',
+        TaskType.TEXT,
+        'Dependent',
+        false,
+        1,
+        undefined,
+        dependentTask.condition
+      );
+      dataStoreServiceSpy.generateId.and.returnValue('job2');
+      taskServiceSpy.duplicateTask.and.returnValues(
+        newSourceTask,
+        newDependentTask
+      );
+
+      const newJob = service.duplicateJob(job, '#FFF');
+
+      const remapped = newJob.tasks?.get('newDep');
+      const expression = remapped?.condition?.expressions.first();
+      expect(expression?.taskId).toBe('newSrc');
+      expect(expression?.optionIds.toArray()).toEqual(['newOpt1']);
+    });
+
+    it('should drop condition expressions whose source task is missing', () => {
+      const dependentTask = new Task(
+        'dep',
+        TaskType.TEXT,
+        'Dependent',
+        false,
+        0,
+        undefined,
+        new TaskCondition(
+          TaskConditionMatchType.MATCH_ALL,
+          List([
+            new TaskConditionExpression(
+              TaskConditionExpressionType.ONE_OF_SELECTED,
+              'missing',
+              List(['opt-missing'])
+            ),
+          ])
+        )
+      );
+      const job = new Job(
+        'job1',
+        0,
+        '#000',
+        'Job 1',
+        Map({ dep: dependentTask }),
+        DataCollectionStrategy.MIXED
+      );
+
+      const newDependentTask = new Task(
+        'newDep',
+        TaskType.TEXT,
+        'Dependent',
+        false,
+        0,
+        undefined,
+        dependentTask.condition
+      );
+      dataStoreServiceSpy.generateId.and.returnValue('job2');
+      taskServiceSpy.duplicateTask.and.returnValue(newDependentTask);
+
+      const newJob = service.duplicateJob(job, '#FFF');
+
+      expect(newJob.tasks?.get('newDep')?.condition?.expressions.size).toBe(0);
     });
   });
 

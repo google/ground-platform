@@ -20,6 +20,10 @@ import { List, Map } from 'immutable';
 import { DataCollectionStrategy, Job } from 'app/models/job.model';
 import { MultipleChoice } from 'app/models/task/multiple-choice.model';
 import { Option } from 'app/models/task/option.model';
+import {
+  TaskCondition,
+  TaskConditionExpression,
+} from 'app/models/task/task-condition.model';
 import { Task, TaskType } from 'app/models/task/task.model';
 import { DataStoreService } from 'app/services/data-store/data-store.service';
 import { Survey } from 'app/models/survey.model';
@@ -73,21 +77,71 @@ export class JobService {
   }
 
   /**
-   * Returns a new job which is an exact copy of the specified job, but with new UUIDs for all items recursively.
+   * Returns a new job which is an exact copy of the specified job, but with
+   * new UUIDs for the job, every task, and every multiple-choice option.
+   * Conditional task references (TaskConditionExpression) are remapped to
+   * the new task/option ids so dependencies survive the duplication.
    */
   duplicateJob(job: Job, color: string | undefined): Job {
+    // Pass 1: duplicate each task (with new ids) and record old → new id
+    // mappings for tasks and options.
+    const taskIdMap = new globalThis.Map<string, string>();
+    const optionIdMap = new globalThis.Map<string, string>();
+    const duplicates = (job.tasks?.toArray() ?? []).map(([, oldTask]) => {
+      const newTask = this.taskService.duplicateTask(oldTask);
+      taskIdMap.set(oldTask.id, newTask.id);
+      oldTask.multipleChoice?.options.forEach((oldOption, i) => {
+        const newOption = newTask.multipleChoice?.options.get(i);
+        if (newOption) optionIdMap.set(oldOption.id, newOption.id);
+      });
+      return newTask;
+    });
+
+    // Pass 2: remap any condition references using the id maps.
+    const tasks = Map<string, Task>(
+      duplicates.map(newTask => {
+        const remapped = newTask.condition
+          ? newTask.copyWith({
+              condition: this.remapCondition(
+                newTask.condition,
+                taskIdMap,
+                optionIdMap
+              ),
+            })
+          : newTask;
+        return [remapped.id, remapped];
+      })
+    );
+
     return job.copyWith({
       id: this.dataStoreService.generateId(),
       name: `Copy of ${job.name}`,
       color,
       index: -1,
-      tasks: Map<string, Task>(
-        job.tasks?.toArray().map(([_, task]) => {
-          const duplicateTask = this.taskService.duplicateTask(task, true);
-          return [duplicateTask.id, duplicateTask];
-        })
-      ),
+      tasks,
     });
+  }
+
+  private remapCondition(
+    condition: TaskCondition,
+    taskIdMap: globalThis.Map<string, string>,
+    optionIdMap: globalThis.Map<string, string>
+  ): TaskCondition {
+    const expressions = condition.expressions
+      .map(expr => {
+        const newTaskId = taskIdMap.get(expr.taskId);
+        if (!newTaskId) return null;
+        const newOptionIds = expr.optionIds
+          .map(id => optionIdMap.get(id))
+          .filter((id): id is string => !!id);
+        return new TaskConditionExpression(
+          expr.expressionType,
+          newTaskId,
+          newOptionIds
+        );
+      })
+      .filter((expr): expr is TaskConditionExpression => !!expr);
+    return new TaskCondition(condition.matchType, expressions);
   }
 
   /**
