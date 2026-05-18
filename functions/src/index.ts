@@ -28,6 +28,7 @@ import { exportCsvHandler } from './export-csv';
 import { exportGeojsonHandler } from './export-geojson';
 import { cleanTempHandler } from './clean-temp';
 import { cleanOrphanMediaHandler } from './clean-orphan-media';
+import { cleanOrphansHandler } from './clean-orphans';
 import { onCall } from 'firebase-functions/v2/https';
 import { onCreateLoiHandler } from './on-create-loi';
 import { onCreatePasslistEntryHandler } from './on-create-passlist-entry';
@@ -115,4 +116,13 @@ export const cleanTemp = onSchedule('every 1 hours', cleanTempHandler);
 export const cleanOrphanMedia = onSchedule(
   'every 24 hours',
   cleanOrphanMediaHandler
+);
+
+export const cleanOrphans = onSchedule(
+  {
+    schedule: 'every 24 hours',
+    memory: '2GiB',
+    timeoutSeconds: 540,
+  },
+  cleanOrphansHandler
 );
