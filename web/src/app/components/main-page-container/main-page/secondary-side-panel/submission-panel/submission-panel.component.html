@@ -41,70 +41,58 @@ limitations under the License.
     </div>
     <div *ngIf="tasks" class="submission-tasks-container">
       <div *ngFor="let task of submittedTasks(); let i = index">
-        <ng-container>
-          <mat-divider *ngIf="i > 0"></mat-divider>
-          <div class="submission-task">
-            <!-- Question -->
-            <div class="submission-question">{{ task.label }}</div>
-            <!-- Response -->
-            <div class="submission-response">
-              <div
-                *ngIf="getTaskSubmissionResult(task).skipped"
-                class="submission-no-response"
-              >
+        @let result = getTaskSubmissionResult(task);
+        <mat-divider *ngIf="i > 0"></mat-divider>
+        <div class="submission-task">
+          <div class="submission-question">{{ task.label }}</div>
+          <div class="submission-response">
+            @if (result?.skipped) {
+              <div class="submission-no-response">
                 <ng-container i18n="@@app.submissionPanel.skipped"
                   >Skipped</ng-container
                 >
               </div>
-              <ng-container *ngIf="!getTaskSubmissionResult(task).skipped">
-                <!-- Multiple choice task types -->
-                <submission-multiple-choice-view
-                  *ngIf="task.type === taskType.MULTIPLE_CHOICE"
-                  [task]="task"
-                  [result]="getTaskSubmissionResult(task)!"
-                ></submission-multiple-choice-view>
-                <!-- Photo task types -->
-                <submission-photo-view
-                  *ngIf="task.type === taskType.PHOTO"
-                  [result]="getTaskSubmissionResult(task)!"
-                ></submission-photo-view>
-                <!-- Geometry task types -->
-                <submission-geometry-view
-                  *ngIf="
-                    task.type === taskType.DROP_PIN ||
-                    task.type === taskType.CAPTURE_LOCATION ||
-                    task.type === taskType.DRAW_AREA
-                  "
-                  [task]="task"
-                  [result]="getTaskSubmissionResult(task)!"
-                  [displayIndex]="i + 1"
-                  [jobColor]="submission()?.job?.color"
-                  [isSelected]="task.id === selectedTaskId"
-                  (selected)="selectGeometry(task)"
-                ></submission-geometry-view>
-                <!-- Date task types -->
-                <submission-date-view
-                  *ngIf="task.type === taskType.DATE"
-                  [result]="getTaskSubmissionResult(task)!"
-                ></submission-date-view>
-                <!-- Time task types -->
-                <submission-time-view
-                  *ngIf="task.type === taskType.TIME"
-                  [result]="getTaskSubmissionResult(task)!"
-                ></submission-time-view>
-                <!-- Remaining task types -->
-                <submission-text-view
-                  *ngIf="
-                    task.type === taskType.TEXT ||
-                    task.type === taskType.NUMBER ||
-                    task.type === taskType.DATE_TIME
-                  "
-                  [result]="getTaskSubmissionResult(task)!"
-                ></submission-text-view>
-              </ng-container>
-            </div>
+            } @else if (task.type === taskType.MULTIPLE_CHOICE) {
+              <submission-multiple-choice-view
+                [task]="task"
+                [selection]="asMultipleSelection(result!)"
+              ></submission-multiple-choice-view>
+            } @else if (task.type === taskType.PHOTO) {
+              <submission-photo-view
+                [path]="asString(result!)"
+              ></submission-photo-view>
+            } @else if (
+              task.type === taskType.DROP_PIN ||
+              task.type === taskType.CAPTURE_LOCATION ||
+              task.type === taskType.DRAW_AREA
+            ) {
+              <submission-geometry-view
+                [task]="task"
+                [geometry]="asGeometry(result!)"
+                [displayIndex]="i + 1"
+                [jobColor]="submission()?.job?.color"
+                [isSelected]="task.id === selectedTaskId"
+                (selected)="selectGeometry(task)"
+              ></submission-geometry-view>
+            } @else if (task.type === taskType.DATE) {
+              <submission-date-view
+                [date]="asDate(result!)"
+              ></submission-date-view>
+            } @else if (task.type === taskType.TIME) {
+              <submission-time-view
+                [time]="asDate(result!)"
+              ></submission-time-view>
+            } @else if (
+              task.type === taskType.TEXT ||
+              task.type === taskType.NUMBER ||
+              task.type === taskType.DATE_TIME
+            ) {
+              <submission-text-view
+                [text]="asStringOrNumber(result!)"
+              ></submission-text-view>
+            }
           </div>
-        </ng-container>
+        </div>
       </div>
     </div>
   </ng-container>

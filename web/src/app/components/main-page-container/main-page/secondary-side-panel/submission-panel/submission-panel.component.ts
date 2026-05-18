@@ -15,12 +15,13 @@
  */
 
 import { Component, computed, inject, input } from '@angular/core';
-import { toObservable, toSignal } from '@angular/core/rxjs-interop';
+import { rxResource } from '@angular/core/rxjs-interop';
 import { List } from 'immutable';
-import { combineLatest, of } from 'rxjs';
-import { delay, switchMap } from 'rxjs/operators';
+import { of } from 'rxjs';
 
+import { Geometry } from 'app/models/geometry/geometry';
 import { LocationOfInterest } from 'app/models/loi.model';
+import { MultipleSelection } from 'app/models/submission/multiple-selection';
 import { Result } from 'app/models/submission/result.model';
 import { Survey } from 'app/models/survey.model';
 import { Task, TaskType } from 'app/models/task/task.model';
@@ -45,10 +46,6 @@ export class SubmissionPanelComponent {
 
   public taskType = TaskType;
 
-  readonly isLoading = computed(() => {
-    return this.submission() === undefined;
-  });
-
   readonly tasks = computed(() => {
     const submission = this.submission();
     if (!submission) return List<Task>();
@@ -63,23 +60,20 @@ export class SubmissionPanelComponent {
       .toArray();
   });
 
-  submission = toSignal(
-    combineLatest([
-      toObservable(this.activeSurvey),
-      toObservable(this.selectedLoi),
-      toObservable(this.submissionId),
-    ]).pipe(
-      switchMap(([survey, loi, submissionId]) => {
-        if (survey && loi && submissionId) {
-          return this.submissionService
-            .getSubmission$(survey, loi, submissionId)
-            .pipe(delay(100));
-        }
-        return of(null).pipe(delay(100));
-      })
-    ),
-    { initialValue: undefined }
-  );
+  private submissionResource = rxResource({
+    params: () => ({
+      survey: this.activeSurvey(),
+      loi: this.selectedLoi(),
+      submissionId: this.submissionId(),
+    }),
+    stream: ({params: {survey, loi, submissionId}}) =>
+      survey && loi && submissionId
+        ? this.submissionService.getSubmission$(survey, loi, submissionId)
+        : of(null),
+  });
+
+  readonly submission = this.submissionResource.value;
+  readonly isLoading = this.submissionResource.isLoading;
 
   navigateToSubmissionList() {
     const loi = this.selectedLoi();
@@ -101,6 +95,14 @@ export class SubmissionPanelComponent {
     if (!submission) return;
     return submission.data.get(taskId);
   }
+
+  asMultipleSelection = (r: Result): MultipleSelection =>
+    r.value as MultipleSelection;
+  asGeometry = (r: Result): Geometry => r.value as Geometry;
+  asDate = (r: Result): Date => r.value as Date;
+  asString = (r: Result): string => r.value as string;
+  asStringOrNumber = (r: Result): string | number =>
+    r.value as string | number;
 
   selectGeometry(task: Task): void {
     const survey = this.activeSurvey();
