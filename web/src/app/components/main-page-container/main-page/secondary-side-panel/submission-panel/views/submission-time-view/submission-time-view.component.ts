@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 The Ground Authors.
+ * Copyright 2026 The Ground Authors.
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -14,20 +14,20 @@
  * limitations under the License.
  */
 
-import { MultipleSelection } from './multiple-selection';
-import { Geometry } from '../geometry/geometry';
+import { Component, computed, input } from '@angular/core';
 
-export type ResultValue =
-  | null
-  | number
-  | string
-  | MultipleSelection
-  | Date
-  | Geometry;
+@Component({
+  selector: 'submission-time-view',
+  templateUrl: './submission-time-view.component.html',
+  standalone: false,
+})
+export class SubmissionTimeViewComponent {
+  time = input.required<Date>();
 
-export class Result {
-  constructor(
-    readonly value: ResultValue,
-    readonly skipped: boolean = false
-  ) {}
+  readonly formattedTime = computed(() =>
+    this.time().toLocaleTimeString([], {
+      hour: 'numeric',
+      minute: 'numeric',
+    })
+  );
 }
