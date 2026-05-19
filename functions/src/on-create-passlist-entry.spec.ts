@@ -87,4 +87,14 @@ describe('onCreatePasslistEntry()', () => {
     expect(mailServiceMock.sendMail).toHaveBeenCalled();
     expect(mailServiceMock.sendMail).toHaveBeenCalledWith(mail);
   });
+
+  it('skips email for domain-wide passlist entry', async () => {
+    mockFirestore.doc('config/mail').set({ server: serverConfig });
+    mockFirestore.doc('config/mail/templates/passlisted').set(mail);
+    await onCreatePasslistEntryHandler({
+      data: newDocumentSnapshot({}) as QueryDocumentSnapshot,
+      params: { entryId: '@example.com' },
+    } as any);
+    expect(getMailServiceMock).not.toHaveBeenCalled();
+  });
 });
