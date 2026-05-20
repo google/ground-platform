@@ -526,38 +526,27 @@ export class DataStoreService {
   }
 
   /**
-   * Returns a promise resolving to true if the user's email is either
-   * explicitly listed as a document ID in the 'passlist' collection or
-   * matches the regular expression stored in the 'passlist/regexp' document.
+   * Returns a promise resolving to true if the user's email is granted access
+   * by the passlist: either an exact-email entry (`passlist/<email>`) or a
+   * domain-wide entry (`passlist/@<domain>`).
    *
    * @param userEmail The email of the user to check against the passlist.
    */
   async isPasslisted(userEmail: string): Promise<boolean> {
-    const docSnapshot = await runInInjectionContext(this.injector, () =>
+    const emailSnapshot = await runInInjectionContext(this.injector, () =>
       getDoc(doc(this.db, 'passlist', userEmail))
     );
 
-    if (docSnapshot.exists()) return true;
+    if (emailSnapshot.exists()) return true;
 
-    const regexpSnapshot = await runInInjectionContext(this.injector, () =>
-      getDoc(doc(this.db, 'passlist', 'regexp'))
+    const domain = userEmail.split('@')[1];
+    if (!domain) return false;
+
+    const domainSnapshot = await runInInjectionContext(this.injector, () =>
+      getDoc(doc(this.db, 'passlist', `@${domain}`))
     );
 
-    if (regexpSnapshot.exists()) {
-      const regexpData = regexpSnapshot.data() as
-        | { regexp?: string }
-        | undefined;
-
-      const regexpString = regexpData?.regexp;
-
-      if (regexpString) {
-        const regex = new RegExp(regexpString);
-
-        return regex.test(userEmail);
-      }
-    }
-
-    return false;
+    return domainSnapshot.exists();
   }
 
   private toLocationsOfInterest(
