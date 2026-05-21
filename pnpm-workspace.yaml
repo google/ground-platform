@@ -21,11 +21,11 @@ catalogs:
     '@angular/platform-browser': ^20.3.15
     '@angular/platform-browser-dynamic': ^20.3.15
     '@angular/router': ^20.3.15
-    '@babel/runtime': ^7.24.7
+    '@babel/runtime': ^7.29.2
     '@fast-csv/format': ^4.3.5
     '@google-cloud/firestore': ^7.7.0
-    '@google-cloud/functions-framework': ^5.0.0
-    '@grpc/grpc-js': ^1.10.9
+    '@google-cloud/functions-framework': ^5.0.2
+    '@grpc/grpc-js': ^1.14.4
     '@iplab/ngx-file-upload': ^20.0.1
     '@terraformer/wkt': ^2.1.2
     angularx-qrcode: ^20.0.0
@@ -44,8 +44,8 @@ catalogs:
     module-alias: ^2.2.2
     ngx-autosize-input: ^20.0.5
     ngx-color: ^10.1.0
-    nodemailer: ^8.0.5
-    protobufjs: ^7.5.8
+    nodemailer: ^8.0.7
+    protobufjs: ^7.6.0
     rxjs: ^7.8.2
     sanitize-html: ^2.17.4
     selenium-webdriver: ^4.19.0
@@ -61,22 +61,22 @@ catalogs:
     '@angular/compiler-cli': ^20.3.15
     '@angular/language-service': ^20.3.15
     '@bufbuild/buf': ^1.32.2
-    '@eslint/eslintrc': ^3.3.3
+    '@eslint/eslintrc': ^3.3.5
     '@jridgewell/source-map': ^0.3.2
     '@nx/angular': ^22.2.1
     '@types/busboy': ^1.5.0
-    '@types/express': ^4.17.21
     '@types/cookie-parser': ^1.4.4
-    '@types/cors': ^2.8.17
+    '@types/cors': ^2.8.19
+    '@types/express': ^4.17.21
     '@types/geojson': ^7946.0.14
-    '@types/google.maps': ^3.54.10
+    '@types/google.maps': ^3.64.1
     '@types/jasmine': ^5.1.15
     '@types/node': ^20.19.27
     '@types/nodemailer': ^6.4.16
-    '@types/sanitize-html': ^2.13.0
+    '@types/sanitize-html': ^2.16.1
     '@types/selenium-webdriver': ^4.1.22
     '@types/source-map-support': ^0.5.10
-    '@types/terraformer__wkt': ^2.0.0
+    '@types/terraformer__wkt': ^2.0.3
     '@types/webpack-env': ^1.15.3
     '@typescript-eslint/eslint-plugin': ^8.55.0
     '@typescript-eslint/parser': ^8.55.0
@@ -105,7 +105,7 @@ catalogs:
     mock-cloud-firestore: ^0.12.0
     nx: ^22.2.1
     picocolors: ^1.1.1
-    prettier: ^3.7.4
+    prettier: ^3.8.3
     protobufjs-cli: ^1.2.1
     puppeteer: ^24.10.0
     source-map-support: ^0.5.21
