@@ -18,6 +18,7 @@ import {
   FirestoreEvent,
   QueryDocumentSnapshot,
 } from 'firebase-functions/v2/firestore';
+import * as logger from 'firebase-functions/logger';
 import { getDatastore } from './common/context';
 import { broadcastSurveyUpdate } from './common/broadcast-survey-update';
 import { GroundProtos } from '@ground/proto';
@@ -80,8 +81,8 @@ export async function onCreateLoiHandler(
       const newProperties = await handler(config, geometry);
       properties = updateProperties(properties, newProperties, config.prefix);
     } catch (e) {
-      console.error(
-        `LOI ${loiId}: property generator '${generatorId}' failed:`,
+      logger.error(
+        `onCreateLoi: loiId=${loiId} property generator '${generatorId}' failed:`,
         e
       );
     }
