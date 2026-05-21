@@ -61,9 +61,9 @@ rules_version = '2';
      */
     function isPasslisted() {
       let email = request.auth.token.email;
-      let domain = email.split('@')[1];
+      let domainKey = '@' + email.split('@')[1];
       return exists(/databases/$(database)/documents/passlist/$(email))
-        || exists(/databases/$(database)/documents/passlist/@$(domain));
+        || exists(/databases/$(database)/documents/passlist/$(domainKey));
     }
 
     /**
@@ -167,11 +167,14 @@ rules_version = '2';
       allow write: if userId == request.auth.uid;
     }
 
-    // Users may only read their own passlist entry. Domain-wide entries
-    // (`@<domain>`) are evaluated via `exists()` in rules and the client and
-    // must not be readable by signed-in users (would leak allowed domains).
+    // Users may read their own passlist entry (by exact email) and the
+    // domain-wide entry for their own email's domain (`@<domain>`). Other
+    // entries remain unreadable so the full passlist can't be enumerated.
     match /passlist/{entry} {
-      allow read: if isSignedIn() && entry == request.auth.token.email;
+      allow read: if isSignedIn() && (
+        entry == request.auth.token.email ||
+        entry == '@' + request.auth.token.email.split('@')[1]
+      );
     }
 
     // Apply passlist and survey-level ACLs to survey documents.
