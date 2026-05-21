@@ -33,7 +33,7 @@ import {
   TaskConditionMatchType,
 } from 'app/models/task/task-condition.model';
 import { Task, TaskType } from 'app/models/task/task.model';
-import { User } from 'app/models/user.model';
+import { User, UserType } from 'app/models/user.model';
 
 const TASK_TYPE_ENUMS_BY_STRING = Map([
   [TaskType.TEXT, 'text_field'],
@@ -162,12 +162,17 @@ export class FirebaseDataConverter {
     if (!data) {
       return;
     }
+    const userType =
+      data.userType in UserType
+        ? (data.userType as UserType)
+        : UserType.UNDEFINED;
     return new User(
       uid,
       data.email,
       data.isAuthenticated || true,
       data.displayName,
-      data.photoURL
+      data.photoURL,
+      userType
     );
   }
 

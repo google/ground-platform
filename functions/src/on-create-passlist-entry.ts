@@ -34,6 +34,11 @@ export async function onCreatePasslistEntryHandler(
 ) {
   const entryId = event.params.entryId;
 
+  // Domain-wide entries (`@<domain>`) are not user mailboxes, so skip mail.
+  if (typeof entryId === 'string' && entryId.startsWith('@')) {
+    return;
+  }
+
   const db = getDatastore();
 
   const template = await db.fetchMailTemplate('passlisted');

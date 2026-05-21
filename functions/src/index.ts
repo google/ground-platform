@@ -27,6 +27,7 @@ import { importGeoJsonCallback } from './import-geojson';
 import { exportCsvHandler } from './export-csv';
 import { exportGeojsonHandler } from './export-geojson';
 import { cleanTempHandler } from './clean-temp';
+import { cleanOrphanMediaHandler } from './clean-orphan-media';
 import { onCall } from 'firebase-functions/v2/https';
 import { onCreateLoiHandler } from './on-create-loi';
 import { onCreatePasslistEntryHandler } from './on-create-passlist-entry';
@@ -110,3 +111,8 @@ export const onWriteSurvey = onDocumentWritten(
 export const sessionLogin = onHttpsRequest(sessionLoginHandler);
 
 export const cleanTemp = onSchedule('every 1 hours', cleanTempHandler);
+
+export const cleanOrphanMedia = onSchedule(
+  'every 24 hours',
+  cleanOrphanMediaHandler
+);

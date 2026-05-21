@@ -15,7 +15,7 @@
  */
 
 import { Location } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, Inject, LOCALE_ID, OnInit } from '@angular/core';
 import { parse } from 'marked';
 
 import { AuthService } from 'app/services/auth/auth.service';
@@ -37,13 +37,14 @@ export class TermsComponent implements OnInit {
     private authService: AuthService,
     private dataStore: DataStoreService,
     private navigationService: NavigationService,
-    private location: Location
+    private location: Location,
+    @Inject(LOCALE_ID) private locale: string
   ) {
     this.hasAcceptedTos = this.authService.getHasAcceptedTos();
   }
 
   async ngOnInit() {
-    const text = await this.dataStore.getTermsOfService();
+    const text = await this.dataStore.getTermsOfService(this.locale);
 
     this.termsOfServiceText = await parse(text);
   }

@@ -25,7 +25,8 @@ export class LocationOfInterest {
     readonly geometry: Geometry,
     readonly properties: Map<string, string | number>,
     readonly customId: string = '',
-    readonly predefined: boolean = true
+    readonly predefined: boolean = true,
+    readonly submissionCount: number = 0
   ) {}
 
   static getSmallestByArea(

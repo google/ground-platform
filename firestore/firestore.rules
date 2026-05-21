@@ -55,20 +55,15 @@ rules_version = '2';
     }
 
     /**
-     * Returns the regular expression matching emails granted access.
-     */
-    function getPassRegexp() {
-      let doc = get(/databases/$(database)/documents/passlist/regexp);
-      return doc == null ? null : doc.data.regexp;
-    }
-
-    /**
-     * Returns true iff the user's email is listed in the passlist or allowed via regex.
+     * Returns true iff the user's email is granted access by the passlist:
+     * either by an exact-email entry (`passlist/<email>`) or by a domain-wide
+     * entry (`passlist/@<domain>`).
      */
     function isPasslisted() {
-      let regexp = getPassRegexp();
-      return (regexp != null && request.auth.token.email.matches(regexp))
-        || exists(/databases/$(database)/documents/passlist/$(request.auth.token.email));
+      let email = request.auth.token.email;
+      let domain = email.split('@')[1];
+      return exists(/databases/$(database)/documents/passlist/$(email))
+        || exists(/databases/$(database)/documents/passlist/@$(domain));
     }
 
     /**
@@ -124,6 +119,22 @@ rules_version = '2';
     }
 
     /**
+     * Returns true iff the current user has the ADMIN user type.
+     */
+    function isAdmin() {
+      let userDoc = get(/databases/$(database)/documents/users/$(request.auth.uid));
+      return userDoc != null && userDoc.data.userType == "ADMIN";
+    }
+
+    /**
+     * Returns true iff the incoming survey data does not set general_access to PUBLIC,
+     * or the current user is an admin.
+     */
+    function canSetGeneralAccess() {
+      return request.resource.data["8"] != 3 /* PUBLIC */ || isAdmin();
+    }
+
+    /**
      * Returns true iff the current user with the given email can contribute LOIs
      * and submissions to the specified survey.
      */
@@ -156,17 +167,19 @@ rules_version = '2';
       allow write: if userId == request.auth.uid;
     }
 
-    // All users need to be able to read the passlist for rules to work.
+    // Users may only read their own passlist entry. Domain-wide entries
+    // (`@<domain>`) are evaluated via `exists()` in rules and the client and
+    // must not be readable by signed-in users (would leak allowed domains).
     match /passlist/{entry} {
-      // TODO(#1602): Replace "regexp" with simple pattern matching.
-      allow read: if isSignedIn() && entry in ['regexp', request.auth.token.email];
+      allow read: if isSignedIn() && entry == request.auth.token.email;
     }
 
     // Apply passlist and survey-level ACLs to survey documents.
     match /surveys/{surveyId} {
-      allow create: if isSignedIn() && isPasslisted();
+      allow create: if isSignedIn() && isPasslisted() && canSetGeneralAccess();
       allow read: if canViewSurvey(resource.data);
-      allow update, delete: if canManageSurvey(getSurvey(surveyId));
+      allow update: if canManageSurvey(getSurvey(surveyId)) && canSetGeneralAccess();
+      allow delete: if canManageSurvey(getSurvey(surveyId));
     }
 
     // Allow all signed in users to access Terms of Service and other config.

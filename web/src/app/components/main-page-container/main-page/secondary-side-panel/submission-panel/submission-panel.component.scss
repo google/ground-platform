@@ -45,42 +45,4 @@
     padding-top: 8px;
   }
 
-  .submission-img {
-    border-radius: 4px;
-    width: 100%;
-  }
-  
-  .submission-response-multiple-choice {
-    display: flex;
-    flex-direction: column;
-  
-    ::ng-deep .mat-mdc-checkbox-disabled label {
-      color: inherit;
-    }
-  }
-
-  .submission-response-geometry {
-    display: flex;
-    align-items: center;
-    min-height: 40px;
-    padding-inline-start: 8px;
-  }
-
-  .submission-response-geometry-number {
-    display: flex;
-    border-radius: 6px;
-    width: 24px;
-    height: 24px;
-    justify-content: center;
-    align-items: center;
-    font-weight: 800;
-    font-size: 15px;
-    color: white;
-  }
-
-  .submission-response-geometry-label {
-    padding-left: 16px;
-    font-weight: 500;
-    white-space: pre-line;
-  }
 }
