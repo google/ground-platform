@@ -725,7 +725,7 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
         .map(
           ({ x, y }: { x: number; y: number }) => new google.maps.LatLng(y, x)
         )
-        .toJS()
+        .toArray()
     );
     return new google.maps.Polygon({
       paths: paths,
