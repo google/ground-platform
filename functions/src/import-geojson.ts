@@ -101,7 +101,7 @@ export function importGeoJsonCallback(
             }
           })
           .on('data', (data: any) => {
-            if (!hasError) onGeoJsonFeature(data, surveyId, jobId);
+            if (!hasError) onGeoJsonFeature(data, jobId);
           })
       );
     } catch (err) {
@@ -187,11 +187,7 @@ export function importGeoJsonCallback(
    * GeoJSON Feature objects within the file. It checks the feature type, geometry
    * validity, and converts the feature to a document data format for insertion.
    */
-  function onGeoJsonFeature(
-    geoJsonFeature: any,
-    surveyId: string,
-    jobId: string
-  ) {
+  function onGeoJsonFeature(geoJsonFeature: any, jobId: string) {
     if (geoJsonFeature.type !== 'Feature') {
       console.debug(
         `Skipping Feature with invalid type ${geoJsonFeature.type}`
