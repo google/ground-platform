@@ -19,8 +19,8 @@ import { RouterModule, Routes } from '@angular/router';
 
 import { CreateSurveyComponent } from 'app/components/create-survey/create-survey.component';
 import { CreateSurveyModule } from 'app/components/create-survey/create-survey.module';
-import { MainPageContainerComponent } from 'app/components/main-page-container/main-page-container.component';
-import { MainPageContainerModule } from 'app/components/main-page-container/main-page-container.module';
+import { MainPageComponent } from 'app/components/main-page/main-page.component';
+import { MainPageModule } from 'app/components/main-page/main-page.module';
 import { SignInPageComponent } from 'app/components/shared/sign-in-page/sign-in-page.component';
 import { SignInPageModule } from 'app/components/shared/sign-in-page/sign-in-page.module';
 import { SurveyListComponent } from 'app/components/shared/survey-list/survey-list.component';
@@ -105,20 +105,20 @@ const routes: Routes = [
   },
   {
     path: `${SURVEY_SEGMENT}/:${SURVEY_ID}`,
-    component: MainPageContainerComponent,
+    component: MainPageComponent,
     canActivate: [AuthGuard],
     children: [
       {
         path: `${LOI_SEGMENT}/:${LOI_ID}`,
-        component: MainPageContainerComponent,
+        component: MainPageComponent,
         children: [
           {
             path: `${SUBMISSION_SEGMENT}/:${SUBMISSION_ID}`,
-            component: MainPageContainerComponent,
+            component: MainPageComponent,
             children: [
               {
                 path: `${TASK_SEGMENT}/:${TASK_ID}`,
-                component: MainPageContainerComponent,
+                component: MainPageComponent,
               },
             ],
           },
@@ -158,7 +158,7 @@ const config = RouterModule.forRoot(routes, { bindToComponentInputs: true });
     EditJobModule,
     EditSurveyModule,
     ErrorModule,
-    MainPageContainerModule,
+    MainPageModule,
     SignInPageModule,
     SurveyJsonModule,
     SurveyListModule,

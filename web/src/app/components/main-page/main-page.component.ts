@@ -18,11 +18,10 @@ import { Component, OnInit, inject, input } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { MatDialog } from '@angular/material/dialog';
 import { List } from 'immutable';
-import { Subscription } from 'rxjs';
-import { switchMap } from 'rxjs/operators';
+import { EMPTY, Subscription } from 'rxjs';
+import { catchError, switchMap } from 'rxjs/operators';
 
 import { LocationOfInterest } from 'app/models/loi.model';
-import { Survey } from 'app/models/survey.model';
 import { AuthService } from 'app/services/auth/auth.service';
 import { LocationOfInterestService } from 'app/services/loi/loi.service';
 import { JOB_ID_NEW } from 'app/services/navigation/navigation.constants';
@@ -35,8 +34,8 @@ import { TitleDialogComponent } from './title-dialog/title-dialog.component';
 
 /**
  * Root component for main application page showing map, jobs list, and
- * survey header. Responsible for coordinating page-level URL states with
- * various services.
+ * survey header. Loads the active survey from the route and coordinates
+ * page-level URL states with various services.
  */
 @Component({
   selector: 'ground-main-page',
@@ -52,11 +51,23 @@ export class MainPageComponent implements OnInit {
   private authService = inject(AuthService);
   private dialog = inject(MatDialog);
 
-  activeSurvey = input.required<Survey>();
+  surveyId = input<string>();
+
+  survey = toSignal(
+    toObservable(this.surveyId).pipe(
+      switchMap(id => (id ? this.surveyService.loadSurvey$(id) : [])),
+      catchError((err: Error) => {
+        this.navigationService.error(err);
+        return EMPTY;
+      })
+    )
+  );
 
   lois = toSignal(
-    toObservable(this.activeSurvey).pipe(
-      switchMap(survey => this.loiService.getLocationsOfInterest$(survey))
+    toObservable(this.survey).pipe(
+      switchMap(survey =>
+        survey ? this.loiService.getLocationsOfInterest$(survey) : []
+      )
     ),
     { initialValue: List<LocationOfInterest>() }
   );

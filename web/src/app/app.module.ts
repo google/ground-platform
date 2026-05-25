@@ -49,7 +49,7 @@ import {
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { AppComponent } from 'app/app.component';
-import { MainPageContainerModule } from 'app/components/main-page-container/main-page-container.module';
+import { MainPageModule } from 'app/components/main-page/main-page.module';
 import { AppRoutingModule } from 'app/routing.module';
 import { environment } from 'environments/environment';
 
@@ -61,7 +61,7 @@ import { environment } from 'environments/environment';
     BrowserModule,
     AppRoutingModule,
 
-    MainPageContainerModule,
+    MainPageModule,
   ],
   providers: [
     provideFirebaseApp(() => initializeApp(environment.firebase!)),
