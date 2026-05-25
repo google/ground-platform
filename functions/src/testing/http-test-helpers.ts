@@ -43,6 +43,7 @@ export async function createGetRequestSpy(args: object): Promise<Request> {
 export function createResponseSpy(chunks?: string[]): Response<any> {
   const res = jasmine.createSpyObj<Response<any>>('response', [
     'send',
+    'json',
     'status',
     'end',
     'write',

@@ -29,6 +29,7 @@ import { StatusCodes } from 'http-status-codes';
 import { toMessage } from '@ground/lib';
 import { GroundProtos } from '@ground/proto';
 import { toGeoJsonGeometry } from '@ground/lib';
+import { HttpError } from './common/http-error';
 
 import Pb = GroundProtos.ground.v1beta1;
 
@@ -47,32 +48,29 @@ export async function exportGeojsonHandler(
 
   const surveyDoc = await db.fetchSurvey(surveyId);
   if (!surveyDoc.exists) {
-    res.status(StatusCodes.NOT_FOUND).send('Survey not found');
-    return;
+    throw new HttpError(StatusCodes.NOT_FOUND, 'Survey not found');
   }
   if (!canExport(user, surveyDoc)) {
-    res.status(StatusCodes.FORBIDDEN).send('Permission denied');
-    return;
+    throw new HttpError(StatusCodes.FORBIDDEN, 'Permission denied');
   }
   const survey = toMessage(surveyDoc.data()!, Pb.Survey);
   if (survey instanceof Error) {
-    res
-      .status(StatusCodes.INTERNAL_SERVER_ERROR)
-      .send('Unsupported or corrupt survey');
-    return;
+    throw new HttpError(
+      StatusCodes.INTERNAL_SERVER_ERROR,
+      'Unsupported or corrupt survey'
+    );
   }
 
   const jobDoc = await db.fetchJob(surveyId, jobId);
   if (!jobDoc.exists || !jobDoc.data()) {
-    res.status(StatusCodes.NOT_FOUND).send('Job not found');
-    return;
+    throw new HttpError(StatusCodes.NOT_FOUND, 'Job not found');
   }
   const job = toMessage(jobDoc.data()!, Pb.Job);
   if (job instanceof Error) {
-    res
-      .status(StatusCodes.INTERNAL_SERVER_ERROR)
-      .send('Unsupported or corrupt job');
-    return;
+    throw new HttpError(
+      StatusCodes.INTERNAL_SERVER_ERROR,
+      'Unsupported or corrupt job'
+    );
   }
   const { name: jobName } = job;
 

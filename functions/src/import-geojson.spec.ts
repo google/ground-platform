@@ -22,11 +22,11 @@ import {
   createPostRequestSpy,
   createResponseSpy,
 } from './testing/http-test-helpers';
-import { importGeoJsonCallback } from './import-geojson';
+import { importGeoJsonHandler } from './import-geojson';
 import { DecodedIdToken } from 'firebase-admin/auth';
 import { Blob, FormData } from 'formdata-node';
 import { StatusCodes } from 'http-status-codes';
-import { invokeCallbackAsync } from './handlers';
+import { HttpError } from './common/http-error';
 import { SURVEY_ORGANIZER_ROLE } from './common/auth';
 import { getDatastore, resetDatastore } from './common/context';
 import { Firestore } from 'firebase-admin/firestore';
@@ -255,22 +255,25 @@ describe('importGeoJson()', () => {
     return form;
   }
 
-  async function runImport(geoJson: object) {
+  async function runImport(geoJson: object): Promise<{
+    thrownStatusCode?: number;
+  }> {
     const req = await createPostRequestSpy(
       { url: '/importGeoJson' },
       createPostData(surveyId, jobId, geoJson)
     );
     const res = createResponseSpy();
     try {
-      // Ideally we would call `importGeoJson` directly rather than via `invokeCallbackAsync`,
-      // but that would require mocking all middleware which may be overkill.
-      await invokeCallbackAsync(importGeoJsonCallback, req, res, {
-        email,
-      } as DecodedIdToken);
+      await importGeoJsonHandler(req, res, { email } as DecodedIdToken);
+      return {};
     } catch (err) {
-      console.log(err);
+      return {
+        thrownStatusCode:
+          err instanceof HttpError
+            ? err.statusCode
+            : StatusCodes.INTERNAL_SERVER_ERROR,
+      };
     }
-    return res;
   }
 
   testCases.forEach(({ desc, input, expectedStatus, expected }) =>
@@ -278,15 +281,16 @@ describe('importGeoJson()', () => {
       // Add survey.
       mockFirestore.doc(`surveys/${surveyId}`).set(survey);
 
-      const res = await runImport(input);
+      const { thrownStatusCode } = await runImport(input);
 
-      expect(res.status).toHaveBeenCalledOnceWith(expectedStatus);
       if (expectedStatus === StatusCodes.OK) {
+        expect(thrownStatusCode).toBeUndefined();
         expect(insertLocationsOfInterestSpy).toHaveBeenCalledOnceWith(
           surveyId,
           expected
         );
       } else {
+        expect(thrownStatusCode).toBe(expectedStatus);
         expect(insertLocationsOfInterestSpy).not.toHaveBeenCalled();
       }
     })
@@ -332,20 +336,8 @@ describe('importGeoJson()', () => {
       Promise.reject(new Error('Database connection failed'))
     );
 
-    const req = await createPostRequestSpy(
-      { url: '/importGeoJson' },
-      createPostData(surveyId, jobId, geoJsonWithPoint)
-    );
-    const res = createResponseSpy();
+    const { thrownStatusCode } = await runImport(geoJsonWithPoint);
 
-    try {
-      await invokeCallbackAsync(importGeoJsonCallback, req, res, {
-        email,
-      } as DecodedIdToken);
-    } catch {
-      // Expected to reject.
-    }
-
-    expect(res.status).toHaveBeenCalledWith(StatusCodes.INTERNAL_SERVER_ERROR);
+    expect(thrownStatusCode).toBe(StatusCodes.INTERNAL_SERVER_ERROR);
   });
 });

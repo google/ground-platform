@@ -26,35 +26,27 @@ import { DocumentData } from 'firebase-admin/firestore';
 import { GroundProtos } from '@ground/proto';
 import { isGeometryValid, toDocumentData, toGeometryPb } from '@ground/lib';
 import { Feature, GeoJsonProperties } from 'geojson';
-import { ErrorHandler } from './handlers';
+import { HttpError } from './common/http-error';
 
 import Pb = GroundProtos.ground.v1beta1;
-
-class BadRequestError extends Error {
-  statusCode = StatusCodes.BAD_REQUEST;
-}
 
 /**
  * Read the body of a multipart HTTP POSTed form containing a GeoJson 'file'
  * and required 'survey' id and 'job' id to the database.
  */
-export function importGeoJsonCallback(
+export async function importGeoJsonHandler(
   req: Request,
   res: Response,
-  user: DecodedIdToken,
-  done: () => void,
-  error: ErrorHandler
-) {
+  user: DecodedIdToken
+): Promise<void> {
   if (req.method !== 'POST') {
-    return error(
+    throw new HttpError(
       StatusCodes.METHOD_NOT_ALLOWED,
       `Expected method POST, got ${req.method}`
     );
   }
 
   const busboy = Busboy({ headers: req.headers });
-
-  let hasError = false;
 
   // Dictionary used to accumulate task step values, keyed by step name.
   const params: { [name: string]: string } = {};
@@ -66,81 +58,96 @@ export function importGeoJsonCallback(
 
   const ownerId = user.uid;
 
-  // This code will process each file uploaded.
-  busboy.on('file', async (_fieldname, fileStream) => {
-    try {
-      const { survey: surveyId, job: jobId } = params;
-      if (!surveyId || !jobId) {
-        return error(StatusCodes.BAD_REQUEST, 'Missing survey and/or job ID');
-      }
-      const survey = await db.fetchSurvey(surveyId);
-      if (!survey.exists) {
-        return error(StatusCodes.NOT_FOUND, `Survey ${surveyId} not found`);
-      }
-      if (!canImport(user, survey)) {
-        return error(
-          StatusCodes.FORBIDDEN,
-          `User does not have permission to import into survey ${surveyId}`
+  await new Promise<void>((resolve, reject) => {
+    let settled = false;
+
+    function fail(code: number, message: string) {
+      if (settled) return;
+      settled = true;
+      reject(new HttpError(code, message));
+    }
+
+    function succeed() {
+      if (settled) return;
+      settled = true;
+      resolve();
+    }
+
+    // This code will process each file uploaded.
+    busboy.on('file', async (_fieldname, fileStream) => {
+      try {
+        const { survey: surveyId, job: jobId } = params;
+        if (!surveyId || !jobId) {
+          return fail(StatusCodes.BAD_REQUEST, 'Missing survey and/or job ID');
+        }
+        const survey = await db.fetchSurvey(surveyId);
+        if (!survey.exists) {
+          return fail(StatusCodes.NOT_FOUND, `Survey ${surveyId} not found`);
+        }
+        if (!canImport(user, survey)) {
+          return fail(
+            StatusCodes.FORBIDDEN,
+            `User does not have permission to import into survey ${surveyId}`
+          );
+        }
+
+        console.debug(
+          `Importing GeoJSON into survey '${surveyId}', job '${jobId}'`
         );
+
+        const parser = JSONStream.parse(['features', true], undefined);
+
+        fileStream.pipe(
+          parser
+            .on('header', (data: any) => {
+              try {
+                onGeoJsonType(data.type);
+                if (data.crs) onGeoJsonCrs(data.crs);
+              } catch (error: any) {
+                busboy.emit('error', error);
+              }
+            })
+            .on('data', (data: any) => {
+              if (!settled) onGeoJsonFeature(data, surveyId, jobId);
+            })
+        );
+      } catch (err) {
+        busboy.emit('error', err);
       }
+    });
 
-      console.debug(
-        `Importing GeoJSON into survey '${surveyId}', job '${jobId}'`
-      );
+    // Handle non-file fields in the task. survey and job must appear
+    // before the file for the file handler to work properly.
+    busboy.on('field', (key, val) => {
+      params[key] = val;
+    });
 
-      const parser = JSONStream.parse(['features', true], undefined);
+    // Triggered once all uploaded files are processed by Busboy.
+    busboy.on('finish', async () => {
+      if (settled) return;
+      try {
+        await db.insertLocationsOfInterest(params.survey, loiDocs);
+        const count = loiDocs.length;
+        console.debug(`${count} LOIs imported`);
+        res.json({ count });
+        succeed();
+      } catch (err) {
+        console.debug(err);
+        fail(StatusCodes.BAD_REQUEST, (err as Error).message);
+      }
+    });
 
-      fileStream.pipe(
-        parser
-          .on('header', (data: any) => {
-            try {
-              onGeoJsonType(data.type);
-              if (data.crs) onGeoJsonCrs(data.crs);
-            } catch (error: any) {
-              busboy.emit('error', error);
-            }
-          })
-          .on('data', (data: any) => {
-            if (!hasError) onGeoJsonFeature(data, surveyId, jobId);
-          })
-      );
-    } catch (err) {
-      busboy.emit('error', err);
-    }
+    busboy.on('error', (err: any) => {
+      console.error('Busboy error', err);
+      req.unpipe(busboy);
+      fail(err.statusCode || StatusCodes.INTERNAL_SERVER_ERROR, err.message);
+    });
+
+    // Start processing the body data.
+    // Use this for Cloud Functions rather than `req.pipe(busboy)`:
+    // https://github.com/mscdex/busboy/issues/229#issuecomment-648303108
+    busboy.end(req.rawBody);
   });
-
-  // Handle non-file fields in the task. survey and job must appear
-  // before the file for the file handler to work properly.
-  busboy.on('field', (key, val) => {
-    params[key] = val;
-  });
-
-  // Triggered once all uploaded files are processed by Busboy.
-  busboy.on('finish', async () => {
-    if (hasError) return;
-    try {
-      await db.insertLocationsOfInterest(params.survey, loiDocs);
-      const count = loiDocs.length;
-      console.debug(`${count} LOIs imported`);
-      res.send(JSON.stringify({ count }));
-      done();
-    } catch (err) {
-      console.debug(err);
-      error(StatusCodes.BAD_REQUEST, (err as Error).message);
-    }
-  });
-
-  busboy.on('error', (err: any) => {
-    console.error('Busboy error', err);
-    hasError = true;
-    req.unpipe(busboy);
-    error(err.statusCode || StatusCodes.INTERNAL_SERVER_ERROR, err.message);
-  });
-
-  // Start processing the body data.
-  // Use this for Cloud Functions rather than `req.pipe(busboy)`:
-  // https://github.com/mscdex/busboy/issues/229#issuecomment-648303108
-  busboy.end(req.rawBody);
 
   /**
    * This function is called by Busboy during file parsing to ensure that the GeoJSON
@@ -149,10 +156,14 @@ export function importGeoJsonCallback(
    */
   function onGeoJsonType(geoJsonType: string | undefined) {
     if (!geoJsonType)
-      throw new BadRequestError('Invalid GeoJSON: Missing "type" property');
+      throw new HttpError(
+        StatusCodes.BAD_REQUEST,
+        'Invalid GeoJSON: Missing "type" property'
+      );
 
     if (geoJsonType !== 'FeatureCollection') {
-      throw new BadRequestError(
+      throw new HttpError(
+        StatusCodes.BAD_REQUEST,
         `Unsupported GeoJSON Type: Expected 'FeatureCollection', got '${geoJsonType}'`
       );
     }
@@ -175,7 +186,8 @@ export function importGeoJsonCallback(
       }
     }
     if (!crs.endsWith('CRS84'))
-      throw new BadRequestError(
+      throw new HttpError(
+        StatusCodes.BAD_REQUEST,
         `Unsupported GeoJSON CRS: Expected 'CRS84', got '${JSON.stringify(
           geoJsonCrs
         )}'`

@@ -20,6 +20,7 @@ import { HttpsOptions, Request, onRequest } from 'firebase-functions/v2/https';
 import type { Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import { getDecodedIdToken } from './common/auth';
+import { HttpError } from './common/http-error';
 import cookieParser from 'cookie-parser';
 
 const corsOptions = { origin: true };
@@ -58,13 +59,6 @@ async function requireIdToken(
   }
 }
 
-function onError(res: any, err: any) {
-  console.error(err);
-  res
-    .status(StatusCodes.INTERNAL_SERVER_ERROR)
-    .end(`Internal error: ${err.message}`);
-}
-
 export type HttpsRequestHandler = (
   req: Request,
   res: Response,
@@ -72,7 +66,11 @@ export type HttpsRequestHandler = (
 ) => Promise<any>;
 
 /**
- * A synchronous HTTPS request handler. The HTTPS request is closed as soon as the handler resolves.
+ * Wraps an async HTTPS request handler with CORS, cookie parsing, and ID-token
+ * authentication. Translates `HttpError` thrown by the handler into the
+ * corresponding HTTP response. Generic errors become 500. On success, sends
+ * 200 OK if the handler did not already write headers (e.g. via `res.send`,
+ * `res.json`, `res.redirect`, or streaming).
  */
 export function onHttpsRequest(
   handler: HttpsRequestHandler,
@@ -87,90 +85,17 @@ export function onHttpsRequest(
           await requireIdToken(req, res, async (idToken: DecodedIdToken) => {
             try {
               await handler(req, res, idToken);
-            } catch (error) {
-              onError(res, error);
+              if (!res.headersSent) res.status(StatusCodes.OK).end();
+            } catch (err) {
+              if (err instanceof HttpError) {
+                res.status(err.statusCode).send(err.message);
+              } else {
+                console.error(err);
+                res
+                  .status(StatusCodes.INTERNAL_SERVER_ERROR)
+                  .end(`Internal error: ${(err as Error).message}`);
+              }
             }
-          })
-      )
-    )
-  );
-}
-
-/** A function which is to be called by HTTPS callbacks on failure. */
-export type ErrorHandler = (httpStatusCode: number, message: string) => void;
-
-/**
- * A callback-based HTTPS request handler. Functions of this type are expected to call
- * `done()` on completion or `error()` on failure. The function itself may return before
- * work is completed, but the HTTPS request will not complete until one of those two
- * callbacks are invoked.
- */
-export type HttpsRequestCallback = (
-  req: Request,
-  res: Response<any>,
-  user: DecodedIdToken,
-  done: () => void,
-  error: ErrorHandler
-) => void;
-
-export async function invokeCallbackAsync(
-  callback: HttpsRequestCallback,
-  req: Request,
-  res: Response<any>,
-  user: DecodedIdToken
-) {
-  await new Promise((resolve, reject) =>
-    invokeCallback(
-      callback,
-      req,
-      res,
-      user,
-      () => {
-        res.status(StatusCodes.OK).end();
-        resolve(undefined);
-      },
-      (errorCode: number, message: string) => {
-        res.status(errorCode).end(message);
-        reject(`${message} (HTTP status ${errorCode})`);
-      }
-    )
-  );
-}
-
-function invokeCallback(
-  callback: HttpsRequestCallback,
-  req: Request,
-  res: Response<any>,
-  user: DecodedIdToken,
-  done: () => void,
-  error: ErrorHandler
-) {
-  try {
-    callback(req, res, user, done, error);
-  } catch (e: any) {
-    console.error('Unhandled exception', e);
-    error(StatusCodes.INTERNAL_SERVER_ERROR, e.toString());
-  }
-}
-
-/**
- * Call an asynchronous HTTPS request handler. Handlers of this type are expected to call
- * `done()` on completion or `error()` on failure. The handler itself may return before
- * work is completed, but the HTTPS request will not complete until one of those two
- * callbacks are invoked.
- */
-export function onHttpsRequestAsync(
-  callback: HttpsRequestCallback,
-  options: HttpsOptions = {}
-) {
-  return onRequest(options, (req: Request, res: Response) =>
-    corsMiddleware(req, res, () =>
-      cookieParser()(
-        req as any,
-        res as any,
-        async () =>
-          await requireIdToken(req, res, async (idToken: DecodedIdToken) => {
-            await invokeCallbackAsync(callback, req, res, idToken);
           })
       )
     )
