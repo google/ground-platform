@@ -33,10 +33,7 @@ import {
   getFunctions,
   provideFunctions,
 } from '@angular/fire/functions';
-import {
-  getAnalytics,
-  provideAnalytics,
-} from '@angular/fire/analytics';
+import { getAnalytics, provideAnalytics } from '@angular/fire/analytics';
 import {
   getRemoteConfig,
   provideRemoteConfig,
@@ -101,7 +98,7 @@ import { environment } from 'environments/environment';
     }),
 
     provideHttpClient(withInterceptorsFromDi()),
-    {provide: MAT_SELECT_CONFIG, useValue: {panelWidth: null}},
+    { provide: MAT_SELECT_CONFIG, useValue: { panelWidth: null } },
   ],
 })
 export class AppModule {
