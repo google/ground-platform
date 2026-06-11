@@ -20,7 +20,7 @@ import { Subscription } from 'rxjs';
 
 import { SurveyDetailsComponent } from 'app/components/create-survey/survey-details/survey-details.component';
 import { DATA_SHARING_TYPE_DESCRIPTION, Survey } from 'app/models/survey.model';
-import { DraftSurveyService } from 'app/services/draft-survey/draft-survey.service';
+import { EditSurveySession } from 'app/services/edit-survey-session/edit-survey-session';
 import { NavigationService } from 'app/services/navigation/navigation.service';
 import { SurveyService } from 'app/services/survey/survey.service';
 
@@ -53,14 +53,14 @@ export class EditDetailsComponent implements OnInit {
 
   constructor(
     public dialog: MatDialog,
-    public draftSurveyService: DraftSurveyService,
+    private editSurveySession: EditSurveySession,
     private surveyService: SurveyService,
     private navigationService: NavigationService
   ) {}
 
   ngOnInit() {
     this.subscription.add(
-      this.draftSurveyService.getSurvey$().subscribe(survey => {
+      this.editSurveySession.getSurvey$().subscribe(survey => {
         this.survey = survey;
         if (this.survey.dataSharingTerms) {
           const { type, customText } = this.survey.dataSharingTerms;
@@ -77,7 +77,7 @@ export class EditDetailsComponent implements OnInit {
     if (this.surveyDetails) {
       const [title, description] = this.surveyDetails.toTitleAndDescription();
 
-      this.draftSurveyService.updateTitleAndDescription(
+      this.editSurveySession.updateTitleAndDescription(
         title,
         description,
         valid
