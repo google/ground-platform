@@ -33,10 +33,7 @@ import {
   getFunctions,
   provideFunctions,
 } from '@angular/fire/functions';
-import {
-  getAnalytics,
-  provideAnalytics,
-} from '@angular/fire/analytics';
+import { getAnalytics, provideAnalytics } from '@angular/fire/analytics';
 import {
   getRemoteConfig,
   provideRemoteConfig,
@@ -49,7 +46,7 @@ import {
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { AppComponent } from 'app/app.component';
-import { MainPageContainerModule } from 'app/components/main-page-container/main-page-container.module';
+import { MainPageModule } from 'app/components/main-page/main-page.module';
 import { AppRoutingModule } from 'app/routing.module';
 import { environment } from 'environments/environment';
 
@@ -61,7 +58,7 @@ import { environment } from 'environments/environment';
     BrowserModule,
     AppRoutingModule,
 
-    MainPageContainerModule,
+    MainPageModule,
   ],
   providers: [
     provideFirebaseApp(() => initializeApp(environment.firebase!)),
@@ -101,7 +98,7 @@ import { environment } from 'environments/environment';
     }),
 
     provideHttpClient(withInterceptorsFromDi()),
-    {provide: MAT_SELECT_CONFIG, useValue: {panelWidth: null}},
+    { provide: MAT_SELECT_CONFIG, useValue: { panelWidth: null } },
   ],
 })
 export class AppModule {

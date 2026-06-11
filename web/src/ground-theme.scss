@@ -43,14 +43,14 @@
 @use 'app/components/create-survey/step-card/_step-card.component-theme' as step-card;
 @use 'app/components/edit-survey/_edit-survey.component-theme.scss' as edit-survey;
 @use 'app/components/edit-survey/edit-job/_edit-job.component-theme' as edit-job;
-@use 'app/components/main-page-container/main-page/drawing-tools/_drawing-tools.component-theme' as drawing-tools;
+@use 'app/components/main-page/drawing-tools/_drawing-tools.component-theme' as drawing-tools;
 
-@use 'app/components/main-page-container/main-page/job-dialog/_job-dialog.component-theme' as job-dialog;
-@use 'app/components/main-page-container/main-page/map/_map.component-theme' as map;
-@use 'app/components/main-page-container/main-page/side-panel/submission-form/_submission-form.component-theme' as submission-form;
-@use 'app/components/main-page-container/main-page/survey-header/_survey-header.component-theme' as survey-header;
-@use 'app/components/main-page-container/main-page/title-dialog/_title-dialog.component-theme' as title-dialog;
-@use 'app/components/main-page-container/main-page/secondary-side-panel/_secondary-side-panel.component-theme' as secondary-side-panel;
+@use 'app/components/main-page/job-dialog/_job-dialog.component-theme' as job-dialog;
+@use 'app/components/main-page/map/_map.component-theme' as map;
+@use 'app/components/main-page/side-panel/submission-form/_submission-form.component-theme' as submission-form;
+@use 'app/components/main-page/survey-header/_survey-header.component-theme' as survey-header;
+@use 'app/components/main-page/title-dialog/_title-dialog.component-theme' as title-dialog;
+@use 'app/components/main-page/secondary-side-panel/_secondary-side-panel.component-theme' as secondary-side-panel;
 @use 'app/components/terms/_terms.component-theme.scss' as terms;
 
 $theme: m3-theme.$light-theme;
