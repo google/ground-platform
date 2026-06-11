@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, ViewChild, computed, inject } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { Subscription } from 'rxjs';
 
 import { SurveyDetailsComponent } from 'app/components/create-survey/survey-details/survey-details.component';
-import { DATA_SHARING_TYPE_DESCRIPTION, Survey } from 'app/models/survey.model';
+import { DATA_SHARING_TYPE_DESCRIPTION } from 'app/models/survey.model';
 import { EditSurveySession } from 'app/services/edit-survey-session/edit-survey-session';
 import { NavigationService } from 'app/services/navigation/navigation.service';
 import { SurveyService } from 'app/services/survey/survey.service';
@@ -41,37 +40,31 @@ interface DataSharingTermsDetails {
   styleUrls: ['./edit-details.component.scss'],
   standalone: false,
 })
-export class EditDetailsComponent implements OnInit {
-  subscription: Subscription = new Subscription();
+export class EditDetailsComponent {
+  public dialog = inject(MatDialog);
+  private editSurveySession = inject(EditSurveySession);
+  private surveyService = inject(SurveyService);
+  private navigationService = inject(NavigationService);
 
-  survey?: Survey;
+  readonly survey = this.editSurveySession.survey;
+
+  readonly dataSharingTermsDetails = computed<DataSharingTermsDetails | undefined>(
+    () => {
+      const dataSharingTerms = this.survey()?.dataSharingTerms;
+
+      if (!dataSharingTerms) return undefined;
+
+      const { type, customText } = dataSharingTerms;
+
+      return {
+        description: DATA_SHARING_TYPE_DESCRIPTION.get(type)!,
+        customText,
+      };
+    }
+  );
 
   @ViewChild('surveyDetails')
   surveyDetails?: SurveyDetailsComponent;
-
-  dataSharingTermsDetails?: DataSharingTermsDetails;
-
-  constructor(
-    public dialog: MatDialog,
-    private editSurveySession: EditSurveySession,
-    private surveyService: SurveyService,
-    private navigationService: NavigationService
-  ) {}
-
-  ngOnInit() {
-    this.subscription.add(
-      this.editSurveySession.getSurvey$().subscribe(survey => {
-        this.survey = survey;
-        if (this.survey.dataSharingTerms) {
-          const { type, customText } = this.survey.dataSharingTerms;
-          this.dataSharingTermsDetails = {
-            description: DATA_SHARING_TYPE_DESCRIPTION.get(type)!,
-            customText,
-          };
-        }
-      })
-    );
-  }
 
   onDetailsChange(valid: boolean): void {
     if (this.surveyDetails) {
@@ -94,7 +87,7 @@ export class EditDetailsComponent implements OnInit {
       .afterClosed()
       .subscribe(async (result: DialogData) => {
         if (result?.dialogType === DialogType.DeleteSurvey) {
-          this.surveyService.deleteSurvey(this.survey!);
+          this.surveyService.deleteSurvey(this.survey()!);
 
           this.navigationService.navigateToSurveyList();
         }
@@ -110,16 +103,12 @@ export class EditDetailsComponent implements OnInit {
       .afterClosed()
       .subscribe(async (result: DialogData) => {
         if (result?.dialogType === DialogType.CopySurvey) {
-          const { id: surveyId } = this.survey!;
+          const { id: surveyId } = this.survey()!;
 
           const newSurveyId = await this.surveyService.copySurvey(surveyId);
 
           this.navigationService.navigateToSurveyDashboard(newSurveyId);
         }
       });
-  }
-
-  ngOnDestroy() {
-    this.subscription.unsubscribe();
   }
 }
