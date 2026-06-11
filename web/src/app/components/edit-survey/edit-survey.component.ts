@@ -23,6 +23,7 @@ import { List } from 'immutable';
 import { Job } from 'app/models/job.model';
 import { Survey } from 'app/models/survey.model';
 import { DraftSurveyService } from 'app/services/draft-survey/draft-survey.service';
+import { EditSurveySession } from 'app/services/edit-survey-session/edit-survey-session';
 import { JobService } from 'app/services/job/job.service';
 import {
   SURVEYS_SHARE,
@@ -46,10 +47,12 @@ import { SurveyService } from 'app/services/survey/survey.service';
   templateUrl: './edit-survey.component.html',
   styleUrls: ['./edit-survey.component.scss'],
   standalone: false,
+  providers: [EditSurveySession],
 })
 export class EditSurveyComponent {
   private jobService = inject(JobService);
   private draftSurveyService = inject(DraftSurveyService);
+  private editSurveySession = inject(EditSurveySession);
   private navigationService = inject(NavigationService);
   private surveyService = inject(SurveyService);
   public dialog = inject(MatDialog);
@@ -74,6 +77,7 @@ export class EditSurveyComponent {
       const id = this.surveyId();
 
       if (id) {
+        await this.editSurveySession.init(id);
         await this.draftSurveyService.init(id);
         this.draftSurveyService.getSurvey$().subscribe(survey => {
           this.survey = survey;

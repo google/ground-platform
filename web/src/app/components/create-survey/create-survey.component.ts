@@ -29,6 +29,7 @@ import { DataCollectionStrategy, Job } from 'app/models/job.model';
 import { LocationOfInterest } from 'app/models/loi.model';
 import { Survey, SurveyState } from 'app/models/survey.model';
 import { DraftSurveyService } from 'app/services/draft-survey/draft-survey.service';
+import { EditSurveySession } from 'app/services/edit-survey-session/edit-survey-session';
 import { JobService } from 'app/services/job/job.service';
 import { LocationOfInterestService } from 'app/services/loi/loi.service';
 import { SURVEY_ID_NEW } from 'app/services/navigation/navigation.constants';
@@ -111,6 +112,7 @@ const createSurveyPhaseMetadata = new Map<
   templateUrl: './create-survey.component.html',
   styleUrls: ['./create-survey.component.scss'],
   standalone: false,
+  providers: [EditSurveySession],
 })
 export class CreateSurveyComponent implements OnInit {
   subscription: Subscription = new Subscription();
@@ -143,6 +145,7 @@ export class CreateSurveyComponent implements OnInit {
   constructor(
     private surveyService: SurveyService,
     private draftSurveyService: DraftSurveyService,
+    private editSurveySession: EditSurveySession,
     private jobService: JobService,
     private taskService: TaskService,
     private navigationService: NavigationService,
@@ -153,6 +156,7 @@ export class CreateSurveyComponent implements OnInit {
     this.subscription.add(
       this.navigationService.getSurveyId$().subscribe(async surveyId => {
         this.surveyId = surveyId ? surveyId : SURVEY_ID_NEW;
+        await this.editSurveySession.init(this.surveyId);
         await this.draftSurveyService.init(this.surveyId);
         this.draftSurveyService
           .getSurvey$()
