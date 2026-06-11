@@ -24,7 +24,7 @@ import { TaskEditorComponent } from 'app/components/shared/task-editor/task-edit
 import { DataCollectionStrategy, Job } from 'app/models/job.model';
 import { LocationOfInterest } from 'app/models/loi.model';
 import { Task } from 'app/models/task/task.model';
-import { DraftSurveyService } from 'app/services/draft-survey/draft-survey.service';
+import { EditSurveySession } from 'app/services/edit-survey-session/edit-survey-session';
 import { LocationOfInterestService } from 'app/services/loi/loi.service';
 import { NavigationService } from 'app/services/navigation/navigation.service';
 import { SurveyService } from 'app/services/survey/survey.service';
@@ -69,7 +69,7 @@ export class EditJobComponent {
     private loiService: LocationOfInterestService,
     private taskService: TaskService,
     public surveyService: SurveyService,
-    public draftSurveyService: DraftSurveyService
+    public editSurveySession: EditSurveySession
   ) {
     this.subscription.add(
       this.navigationService
@@ -95,14 +95,14 @@ export class EditJobComponent {
   private onJobIdChange(params: Params) {
     this.jobId = params['id'];
 
-    this.job = this.draftSurveyService.getSurvey().getJob(this.jobId!);
+    this.job = this.editSurveySession.getSurvey().getJob(this.jobId!);
 
     if (!this.job) return;
 
     this.loisSubscription.add(
       this.loiService
         .getPredefinedLoisByJobId$(
-          this.draftSurveyService.getSurvey(),
+          this.editSurveySession.getSurvey(),
           this.job!.id
         )
         .subscribe((lois: List<LocationOfInterest>) => (this.lois = lois))
@@ -120,7 +120,7 @@ export class EditJobComponent {
 
   onTasksChange(valid: boolean): void {
     if (this.jobId && this.tasksEditor) {
-      this.draftSurveyService.addOrUpdateTasks(
+      this.editSurveySession.addOrUpdateTasks(
         this.jobId,
         this.tasksEditor.toTasks(),
         valid
@@ -139,11 +139,11 @@ export class EditJobComponent {
       this.addLoiTaskId
     );
 
-    this.draftSurveyService.addOrUpdateJob(
+    this.editSurveySession.addOrUpdateJob(
       this.job!.copyWith({ tasks, strategy })
     );
 
-    this.job = this.draftSurveyService.getSurvey().getJob(this.jobId!);
+    this.job = this.editSurveySession.getSurvey().getJob(this.jobId!);
 
     this.tasks = tasks?.toList().sortBy(task => task.index);
   }
