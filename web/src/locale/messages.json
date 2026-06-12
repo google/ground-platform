@@ -116,6 +116,7 @@
     "app.labels.termsOfService": "Terms of service",
     "app.dialogs.importSites.importingSites": "Importing sites...",
     "app.dialogs.importSites.title": "Import data collection sites (.geojson)",
+    "app.dialogs.importSites.formatDescription": " Upload a GeoJSON {$START_TAG_CODE}FeatureCollection{$CLOSE_TAG_CODE}. Coordinates must use the WGS84 (CRS84) coordinate reference system, the only projection currently supported. Each feature's {$START_TAG_CODE}name{$CLOSE_TAG_CODE} property sets the site name, and the feature's top-level {$START_TAG_CODE}id{$CLOSE_TAG_CODE} sets the site ID. ",
     "app.labels.upload": "Upload",
     "app.labels.downloadCsv": "Download job data (CSV)",
     "app.labels.downloadGeojson": "Download site locations (GeoJSON)",

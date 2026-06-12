@@ -18,6 +18,18 @@ file-upload {
   width: 300px;
 }
 
+.format-description {
+  max-width: 300px;
+  margin: 0 0 16px;
+  font-size: 14px;
+  line-height: 1.4;
+  color: rgba(0, 0, 0, 0.6);
+
+  code {
+    font-family: monospace;
+  }
+}
+
 .spinner {
   margin: 0px auto;
 }

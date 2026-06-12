@@ -33,6 +33,15 @@
     >
   </h2>
   <mat-dialog-content>
+    <p
+      class="format-description"
+      i18n="@@app.dialogs.importSites.formatDescription"
+    >
+      Upload a GeoJSON <code>FeatureCollection</code>. Coordinates must use the
+      WGS84 (CRS84) coordinate reference system, the only projection currently
+      supported. Each feature's <code>name</code> property sets the site name,
+      and the feature's top-level <code>id</code> sets the site ID.
+    </p>
     <form [formGroup]="uploadForm">
       <div>
         <file-upload
