@@ -28,7 +28,6 @@ import { TaskDetailsComponent } from 'app/components/create-survey/task-details/
 import { DataCollectionStrategy, Job } from 'app/models/job.model';
 import { LocationOfInterest } from 'app/models/loi.model';
 import { Survey, SurveyState } from 'app/models/survey.model';
-import { DraftSurveyService } from 'app/services/draft-survey/draft-survey.service';
 import { EditSurveySession } from 'app/services/edit-survey-session/edit-survey-session';
 import { JobService } from 'app/services/job/job.service';
 import { LocationOfInterestService } from 'app/services/loi/loi.service';
@@ -144,7 +143,6 @@ export class CreateSurveyComponent implements OnInit {
 
   constructor(
     private surveyService: SurveyService,
-    private draftSurveyService: DraftSurveyService,
     private editSurveySession: EditSurveySession,
     private jobService: JobService,
     private taskService: TaskService,
@@ -157,8 +155,7 @@ export class CreateSurveyComponent implements OnInit {
       this.navigationService.getSurveyId$().subscribe(async surveyId => {
         this.surveyId = surveyId ? surveyId : SURVEY_ID_NEW;
         await this.editSurveySession.init(this.surveyId);
-        await this.draftSurveyService.init(this.surveyId);
-        this.draftSurveyService
+        this.editSurveySession
           .getSurvey$()
           .subscribe(survey => (this.survey = survey));
       })
@@ -377,7 +374,7 @@ export class CreateSurveyComponent implements OnInit {
       color: job.color || this.jobService.getNextColor(this.survey?.jobs),
     });
     await this.jobService.addOrUpdateJob(this.survey!, updatedJob);
-    this.draftSurveyService.addOrUpdateJob(updatedJob);
+    this.editSurveySession.addOrUpdateJob(updatedJob);
   }
 
   private async saveTasks() {
@@ -392,7 +389,7 @@ export class CreateSurveyComponent implements OnInit {
       return;
     }
     await this.taskService.addOrUpdateTasks(survey.id, job, tasks!);
-    this.draftSurveyService.addOrUpdateTasks(job.id, tasks!, true);
+    this.editSurveySession.addOrUpdateTasks(job.id, tasks!, true);
   }
 
   private async saveDataSharingTerms(): Promise<void> {
@@ -401,7 +398,7 @@ export class CreateSurveyComponent implements OnInit {
     const customText =
       this.dataSharingTerms?.formGroup.controls.customText.value ?? undefined;
 
-    this.draftSurveyService.updateDataSharingTerms(type, customText);
+    this.editSurveySession.updateDataSharingTerms(type, customText);
     await this.surveyService.updateDataSharingTerms(
       this.survey!,
       type,
@@ -410,8 +407,8 @@ export class CreateSurveyComponent implements OnInit {
   }
 
   private async setSurveyStateToReady(): Promise<void> {
-    this.draftSurveyService.updateState(SurveyState.READY);
-    await this.draftSurveyService.updateSurvey();
+    this.editSurveySession.updateState(SurveyState.READY);
+    await this.editSurveySession.updateSurvey();
   }
 
   ngOnDestroy() {

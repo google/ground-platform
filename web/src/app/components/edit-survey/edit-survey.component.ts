@@ -52,7 +52,7 @@ import { SurveyService } from 'app/services/survey/survey.service';
 export class EditSurveyComponent {
   private jobService = inject(JobService);
   private draftSurveyService = inject(DraftSurveyService);
-  private editSurveySession = inject(EditSurveySession);
+  readonly editSurveySession = inject(EditSurveySession);
   private navigationService = inject(NavigationService);
   private surveyService = inject(SurveyService);
   public dialog = inject(MatDialog);

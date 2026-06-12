@@ -14,7 +14,13 @@
  * limitations under the License.
  */
 
-import { Component, HostListener, Input, OnChanges } from '@angular/core';
+import {
+  Component,
+  HostListener,
+  Input,
+  OnChanges,
+  inject,
+} from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Survey } from 'app/models/survey.model';
 
@@ -23,7 +29,7 @@ import {
   JobDialogComponent,
 } from 'app/components/edit-survey/job-dialog/job-dialog.component';
 import { AuthService } from 'app/services/auth/auth.service';
-import { DraftSurveyService } from 'app/services/draft-survey/draft-survey.service';
+import { EditSurveySession } from 'app/services/edit-survey-session/edit-survey-session';
 import { NavigationService } from 'app/services/navigation/navigation.service';
 import { SurveyService } from 'app/services/survey/survey.service';
 
@@ -47,11 +53,18 @@ export class HeaderComponent implements OnChanges {
   isPublishingChanges = false;
   canManage = false;
 
+  /**
+   * The active editing session, if the header is rendered inside an
+   * edit/create-survey flow. `null` on pages without a survey draft (survey
+   * list, map view, etc.), where the edit-survey controls are never shown.
+   */
+  private editSurveySession = inject(EditSurveySession, { optional: true });
+
   @HostListener('window:beforeunload', ['$event'])
   unloadNotification($event: BeforeUnloadEvent): void {
     if (
       this.state === HeaderState.EDIT_SURVEY &&
-      this.draftSurveyService.dirty
+      this.editSurveySession?.dirty()
     ) {
       $event.preventDefault();
       $event.returnValue = true;
@@ -61,7 +74,6 @@ export class HeaderComponent implements OnChanges {
   constructor(
     public dialog: MatDialog,
     public authService: AuthService,
-    public draftSurveyService: DraftSurveyService,
     public navigationService: NavigationService,
     public surveyService: SurveyService
   ) {}
@@ -108,7 +120,7 @@ export class HeaderComponent implements OnChanges {
   async onFinishEditSurveyClick() {
     if (this.isDraftSurveyValid()) {
       this.isPublishingChanges = true;
-      await this.draftSurveyService.updateSurvey();
+      await this.editSurveySession?.updateSurvey();
       this.isPublishingChanges = false;
       this.navigationService.selectSurvey(this.surveyId);
       return;
@@ -121,13 +133,17 @@ export class HeaderComponent implements OnChanges {
   }
 
   isDraftSurveyValid(): boolean {
-    return this.draftSurveyService.valid.reduce(
+    const valid = this.editSurveySession?.valid();
+    if (!valid) {
+      return false;
+    }
+    return valid.reduce(
       (accumulator, currentValue) => accumulator && currentValue,
       true
     );
   }
 
   isDraftSurveyDirtyAndValid(): boolean {
-    return this.draftSurveyService.dirty && this.isDraftSurveyValid();
+    return (this.editSurveySession?.dirty() ?? false) && this.isDraftSurveyValid();
   }
 }

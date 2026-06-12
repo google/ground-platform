@@ -18,18 +18,20 @@ import { inject } from '@angular/core';
 import { CanDeactivateFn } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { firstValueFrom } from 'rxjs';
-import { DraftSurveyService } from 'app/services/draft-survey/draft-survey.service';
 import {
   DialogData,
   DialogType,
   JobDialogComponent,
 } from 'app/components/edit-survey/job-dialog/job-dialog.component';
 
-export const dirtyCheckGuard: CanDeactivateFn<any> = async () => {
-  const draftSurveyService = inject(DraftSurveyService);
+import type { EditSurveyComponent } from 'app/components/edit-survey/edit-survey.component';
+
+export const dirtyCheckGuard: CanDeactivateFn<EditSurveyComponent> = async (
+  component
+) => {
   const dialog = inject(MatDialog);
 
-  if (!draftSurveyService.dirty) {
+  if (!component.editSurveySession.dirty()) {
     return true;
   }
 
