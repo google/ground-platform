@@ -14,7 +14,7 @@
   limitations under the License.
 -->
 
-<ng-container *ngIf="survey$ | async as survey">
+<ng-container *ngIf="survey() as survey">
   <div class="job-integration-editor">
     <div
       *ngFor="let integration of integrations"

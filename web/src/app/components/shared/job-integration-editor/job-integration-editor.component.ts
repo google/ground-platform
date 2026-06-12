@@ -14,11 +14,9 @@
  * limitations under the License.
  */
 
-import { Component, input } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Component, inject, input } from '@angular/core';
 
-import { Survey } from 'app/models/survey.model';
-import { DraftSurveyService } from 'app/services/draft-survey/draft-survey.service';
+import { EditSurveySession } from 'app/services/edit-survey-session/edit-survey-session';
 
 interface IntegrationMetadata {
   id: string;
@@ -48,9 +46,7 @@ export class JobIntegrationEditorComponent {
     },
   ];
 
-  survey$: Observable<Survey>;
+  private editSurveySession = inject(EditSurveySession);
 
-  constructor(private draftSurveyService: DraftSurveyService) {
-    this.survey$ = this.draftSurveyService.getSurvey$();
-  }
+  survey = this.editSurveySession.survey;
 }

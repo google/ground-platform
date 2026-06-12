@@ -19,7 +19,7 @@ import { MatSlideToggleChange } from '@angular/material/slide-toggle';
 import { Integration, Job } from 'app/models/job.model';
 
 import { AuthService } from 'app/services/auth/auth.service';
-import { DraftSurveyService } from 'app/services/draft-survey/draft-survey.service';
+import { EditSurveySession } from 'app/services/edit-survey-session/edit-survey-session';
 
 @Component({
   selector: 'ground-job-integration-control',
@@ -35,7 +35,7 @@ export class JobIntegrationControlComponent {
 
   constructor(
     readonly authService: AuthService,
-    readonly draftSurveyService: DraftSurveyService
+    readonly editSurveySession: EditSurveySession
   ) {
     effect(() => {
       const surveyId = this.surveyId();
@@ -57,7 +57,7 @@ export class JobIntegrationControlComponent {
           } as Integration)
         : job.enabledIntegrations.delete(integrationId);
 
-      this.draftSurveyService.addOrUpdateJob(
+      this.editSurveySession.addOrUpdateJob(
         job.copyWith({ enabledIntegrations: updatedIntegrations })
       );
     }

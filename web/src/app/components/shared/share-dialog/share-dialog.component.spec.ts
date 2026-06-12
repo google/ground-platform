@@ -26,7 +26,7 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { Map } from 'immutable';
 
 import { DataSharingType, Survey } from 'app/models/survey.model';
-import { DraftSurveyService } from 'app/services/draft-survey/draft-survey.service';
+import { EditSurveySession } from 'app/services/edit-survey-session/edit-survey-session';
 
 import { ShareDialogComponent } from './share-dialog.component';
 
@@ -51,7 +51,7 @@ describe('ShareDialogComponent', () => {
       providers: [
         { provide: MatDialogRef, useValue: {} },
         {
-          provide: DraftSurveyService,
+          provide: EditSurveySession,
           useValue: { updateAcl: () => null },
         },
         {
