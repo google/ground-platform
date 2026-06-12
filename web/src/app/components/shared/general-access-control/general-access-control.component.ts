@@ -21,7 +21,7 @@ import { Map } from 'immutable';
 
 import { Survey, SurveyGeneralAccess } from 'app/models/survey.model';
 import { AuthService } from 'app/services/auth/auth.service';
-import { DraftSurveyService } from 'app/services/draft-survey/draft-survey.service';
+import { EditSurveySession } from 'app/services/edit-survey-session/edit-survey-session';
 
 const generalAccessLabels = Map<
   SurveyGeneralAccess,
@@ -70,7 +70,7 @@ export class GeneralAccessControlComponent {
 
   constructor(
     readonly authService: AuthService,
-    readonly draftSurveyService: DraftSurveyService
+    readonly editSurveySession: EditSurveySession
   ) {
     effect(() => {
       const survey = this.survey();
@@ -92,6 +92,6 @@ export class GeneralAccessControlComponent {
   changeGeneralAccess(generalAccess: SurveyGeneralAccess) {
     this.selectedGeneralAccess = generalAccess;
 
-    this.draftSurveyService.updateGeneralAccess(generalAccess);
+    this.editSurveySession.updateGeneralAccess(generalAccess);
   }
 }

@@ -31,7 +31,7 @@ import { AclEntry } from 'app/models/acl-entry.model';
 import { Role } from 'app/models/role.model';
 import { Survey } from 'app/models/survey.model';
 import { ROLE_OPTIONS } from 'app/services/auth/auth.service';
-import { DraftSurveyService } from 'app/services/draft-survey/draft-survey.service';
+import { EditSurveySession } from 'app/services/edit-survey-session/edit-survey-session';
 
 @Component({
   selector: 'ground-share-dialog',
@@ -66,7 +66,7 @@ export class ShareDialogComponent {
 
   constructor(
     private dialogRef: MatDialogRef<ShareDialogComponent>,
-    private draftSurveyService: DraftSurveyService,
+    private editSurveySession: EditSurveySession,
     @Inject(MAT_DIALOG_DATA) data: { survey: Survey }
   ) {
     this.onSurveyLoaded(data.survey);
@@ -118,7 +118,7 @@ export class ShareDialogComponent {
    */
   onSaveClicked(): void {
     // TODO: Show saving spinner.
-    this.draftSurveyService.updateAcl(this.getAclMap());
+    this.editSurveySession.updateAcl(this.getAclMap());
     this.dialogRef.close();
   }
 

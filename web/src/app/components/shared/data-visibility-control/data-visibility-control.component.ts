@@ -19,7 +19,7 @@ import { MatSlideToggleChange } from '@angular/material/slide-toggle';
 
 import { Survey, SurveyDataVisibility } from 'app/models/survey.model';
 import { AuthService } from 'app/services/auth/auth.service';
-import { DraftSurveyService } from 'app/services/draft-survey/draft-survey.service';
+import { EditSurveySession } from 'app/services/edit-survey-session/edit-survey-session';
 
 @Component({
   selector: 'ground-data-visibility-control',
@@ -35,7 +35,7 @@ export class DataVisibilityControlComponent {
 
   constructor(
     readonly authService: AuthService,
-    readonly draftSurveyService: DraftSurveyService
+    readonly editSurveySession: EditSurveySession
   ) {
     effect(() => {
       const survey = this.survey();
@@ -54,6 +54,6 @@ export class DataVisibilityControlComponent {
 
     this.selectedDataVisibility = dataVisibility;
 
-    this.draftSurveyService.updateDataVisibility(dataVisibility);
+    this.editSurveySession.updateDataVisibility(dataVisibility);
   }
 }
