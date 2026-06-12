@@ -121,7 +121,7 @@ catalogs:
       specifier: ^8.0.7
       version: 8.0.7
     protobufjs:
-      specifier: ^7.6.0
+      specifier: ^7.5.8
       version: 7.6.0
     rxjs:
       specifier: ^7.8.2
@@ -902,6 +902,7 @@ packages:
   '@angular/animations@20.3.16':
     resolution: {integrity: sha512-N83/GFY5lKNyWgPV3xHHy2rb3/eP1ZLzSVI+dmMVbf3jbqwY1YPQcMiAG8UDzaILY1Dkus91kWLF8Qdr3nHAzg==}
     engines: {node: ^20.19.0 || ^22.12.0 || >=24.0.0}
+    deprecated: '@angular/animations is deprecated. Use `animate.enter` and `animate.leave` instead. For more information see: https://v22.angular.dev/guide/animations.'
     peerDependencies:
       '@angular/core': 20.3.16
 
@@ -4738,9 +4739,6 @@ packages:
 
   '@types/node@25.5.0':
     resolution: {integrity: sha512-jp2P3tQMSxWugkCUKLRPVUpGaL5MVFwF8RDuSRztfwgN1wmqJeMSbKlnEtQqU8UrhTmzEmZdu2I6v2dpp7XIxw==}
-
-  '@types/node@25.9.0':
-    resolution: {integrity: sha512-AOQwYUNolgy3VosiRqXrACUXTN8nJUtPl7FJXMqZVyxiiCLhQuG3jXKvCS1ALr+Y2OmZhzzLVlYPEqJaiqkaJQ==}
 
   '@types/node@25.9.1':
     resolution: {integrity: sha512-xfrlY7UD5rMJk3ZVJP8BNzS28J36YJg+xp+LPXV1TdWxr8uMH5A860QNxYDGQe/ylDSgjxE52Q9VnO7p75tJxg==}
@@ -12404,7 +12402,7 @@ snapshots:
       '@angular-devkit/core': 20.3.16(chokidar@4.0.3)
       '@angular-devkit/schematics': 20.3.16(chokidar@4.0.3)
       '@inquirer/prompts': 7.8.2(@types/node@20.19.30)
-      '@listr2/prompt-adapter-inquirer': 3.0.1(@inquirer/prompts@7.8.2(@types/node@25.9.1))(@types/node@20.19.30)(listr2@9.0.1)
+      '@listr2/prompt-adapter-inquirer': 3.0.1(@inquirer/prompts@7.8.2(@types/node@20.19.30))(@types/node@20.19.30)(listr2@9.0.1)
       '@modelcontextprotocol/sdk': 1.26.0(zod@4.1.13)
       '@schematics/angular': 20.3.16(chokidar@4.0.3)
       '@yarnpkg/lockfile': 1.1.0
@@ -15382,7 +15380,7 @@ snapshots:
   '@grpc/grpc-js@1.9.16':
     dependencies:
       '@grpc/proto-loader': 0.7.15
-      '@types/node': 25.9.0
+      '@types/node': 25.9.1
 
   '@grpc/proto-loader@0.7.15':
     dependencies:
@@ -15935,7 +15933,7 @@ snapshots:
       '@jest/schemas': 29.6.3
       '@types/istanbul-lib-coverage': 2.0.6
       '@types/istanbul-reports': 3.0.4
-      '@types/node': 25.9.0
+      '@types/node': 25.9.1
       '@types/yargs': 17.0.35
       chalk: 4.1.2
 
@@ -16024,9 +16022,9 @@ snapshots:
 
   '@leichtgewicht/ip-codec@2.0.5': {}
 
-  '@listr2/prompt-adapter-inquirer@3.0.1(@inquirer/prompts@7.8.2(@types/node@25.9.1))(@types/node@20.19.30)(listr2@9.0.1)':
+  '@listr2/prompt-adapter-inquirer@3.0.1(@inquirer/prompts@7.8.2(@types/node@20.19.30))(@types/node@20.19.30)(listr2@9.0.1)':
     dependencies:
-      '@inquirer/prompts': 7.8.2(@types/node@25.9.1)
+      '@inquirer/prompts': 7.8.2(@types/node@20.19.30)
       '@inquirer/type': 3.0.10(@types/node@20.19.30)
       listr2: 9.0.1
     transitivePeerDependencies:
@@ -16656,7 +16654,7 @@ snapshots:
 
   '@npmcli/fs@5.0.0':
     dependencies:
-      semver: 7.7.4
+      semver: 7.8.0
 
   '@npmcli/git@7.0.1':
     dependencies:
@@ -16687,7 +16685,7 @@ snapshots:
       json-parse-even-better-errors: 5.0.0
       pacote: 21.3.1
       proc-log: 6.1.0
-      semver: 7.7.4
+      semver: 7.8.0
     transitivePeerDependencies:
       - supports-color
 
@@ -18168,7 +18166,7 @@ snapshots:
 
   '@types/bonjour@3.5.13':
     dependencies:
-      '@types/node': 25.9.0
+      '@types/node': 25.9.1
 
   '@types/busboy@1.5.4':
     dependencies:
@@ -18179,11 +18177,11 @@ snapshots:
   '@types/connect-history-api-fallback@1.5.4':
     dependencies:
       '@types/express-serve-static-core': 5.1.1
-      '@types/node': 25.9.0
+      '@types/node': 25.9.1
 
   '@types/connect@3.4.38':
     dependencies:
-      '@types/node': 25.9.0
+      '@types/node': 25.9.1
 
   '@types/cookie-parser@1.4.10(@types/express@4.17.25)':
     dependencies:
@@ -18216,7 +18214,7 @@ snapshots:
 
   '@types/express-serve-static-core@5.1.1':
     dependencies:
-      '@types/node': 25.9.0
+      '@types/node': 25.9.1
       '@types/qs': 6.14.0
       '@types/range-parser': 1.2.7
       '@types/send': 1.2.1
@@ -18242,7 +18240,7 @@ snapshots:
 
   '@types/http-proxy@1.17.17':
     dependencies:
-      '@types/node': 25.9.0
+      '@types/node': 25.9.1
 
   '@types/istanbul-lib-coverage@2.0.6': {}
 
@@ -18263,7 +18261,7 @@ snapshots:
   '@types/jsonwebtoken@9.0.10':
     dependencies:
       '@types/ms': 2.1.0
-      '@types/node': 25.9.0
+      '@types/node': 25.9.1
 
   '@types/linkify-it@5.0.0': {}
 
@@ -18286,7 +18284,7 @@ snapshots:
 
   '@types/node-forge@1.3.14':
     dependencies:
-      '@types/node': 25.9.0
+      '@types/node': 25.9.1
 
   '@types/node@14.18.63': {}
 
@@ -18297,10 +18295,6 @@ snapshots:
   '@types/node@25.5.0':
     dependencies:
       undici-types: 7.18.2
-
-  '@types/node@25.9.0':
-    dependencies:
-      undici-types: 7.24.6
 
   '@types/node@25.9.1':
     dependencies:
@@ -18324,7 +18318,7 @@ snapshots:
   '@types/request@2.48.13':
     dependencies:
       '@types/caseless': 0.12.5
-      '@types/node': 25.9.0
+      '@types/node': 25.9.1
       '@types/tough-cookie': 4.0.5
       form-data: 2.5.5
 
@@ -18344,11 +18338,11 @@ snapshots:
   '@types/send@0.17.6':
     dependencies:
       '@types/mime': 1.3.5
-      '@types/node': 25.9.0
+      '@types/node': 25.9.1
 
   '@types/send@1.2.1':
     dependencies:
-      '@types/node': 25.9.0
+      '@types/node': 25.9.1
 
   '@types/serve-index@1.9.4':
     dependencies:
@@ -18363,11 +18357,11 @@ snapshots:
   '@types/serve-static@2.2.0':
     dependencies:
       '@types/http-errors': 2.0.5
-      '@types/node': 25.9.0
+      '@types/node': 25.9.1
 
   '@types/sockjs@0.3.36':
     dependencies:
-      '@types/node': 25.9.0
+      '@types/node': 25.9.1
 
   '@types/source-map-support@0.5.10':
     dependencies:
@@ -18397,7 +18391,7 @@ snapshots:
 
   '@types/yauzl@2.10.3':
     dependencies:
-      '@types/node': 25.9.0
+      '@types/node': 25.9.1
     optional: true
 
   '@typescript-eslint/eslint-plugin@8.55.0(@typescript-eslint/parser@8.55.0(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3))(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3)':
@@ -20161,7 +20155,7 @@ snapshots:
   engine.io@6.6.5:
     dependencies:
       '@types/cors': 2.8.19
-      '@types/node': 25.9.0
+      '@types/node': 25.9.1
       accepts: 1.3.8
       base64id: 2.0.0
       cookie: 0.7.2
@@ -22664,7 +22658,7 @@ snapshots:
   jest-util@29.7.0:
     dependencies:
       '@jest/types': 29.6.3
-      '@types/node': 25.9.0
+      '@types/node': 25.9.1
       chalk: 4.1.2
       ci-info: 3.9.0
       graceful-fs: 4.2.11
@@ -22701,13 +22695,13 @@ snapshots:
 
   jest-worker@27.5.1:
     dependencies:
-      '@types/node': 25.9.0
+      '@types/node': 25.9.1
       merge-stream: 2.0.0
       supports-color: 8.1.1
 
   jest-worker@29.7.0:
     dependencies:
-      '@types/node': 25.9.0
+      '@types/node': 25.9.1
       jest-util: 29.7.0
       merge-stream: 2.0.0
       supports-color: 8.1.1
@@ -23728,7 +23722,7 @@ snapshots:
       make-fetch-happen: 15.0.3
       nopt: 9.0.0
       proc-log: 6.1.0
-      semver: 7.7.2
+      semver: 7.8.0
       tar: 7.5.15
       tinyglobby: 0.2.15
       which: 6.0.1
@@ -23783,11 +23777,11 @@ snapshots:
 
   npm-install-checks@6.3.0:
     dependencies:
-      semver: 7.7.4
+      semver: 7.8.0
 
   npm-install-checks@8.0.0:
     dependencies:
-      semver: 7.7.4
+      semver: 7.8.0
 
   npm-normalize-package-bin@3.0.1: {}
 
@@ -23797,7 +23791,7 @@ snapshots:
     dependencies:
       hosted-git-info: 7.0.2
       proc-log: 4.2.0
-      semver: 7.7.4
+      semver: 7.8.0
       validate-npm-package-name: 5.0.1
 
   npm-package-arg@13.0.0:
@@ -24764,7 +24758,7 @@ snapshots:
       '@protobufjs/path': 1.1.2
       '@protobufjs/pool': 1.1.0
       '@protobufjs/utf8': 1.1.1
-      '@types/node': 25.9.0
+      '@types/node': 25.9.1
       long: 5.3.2
 
   proxy-addr@2.0.7:
