@@ -55,8 +55,8 @@ export class EditSurveySession {
 
   /**
    * Observable view of {@link survey}, emitting only once a survey has been
-   * loaded. Provided as a bridge for consumers not yet migrated to the signal;
-   * remove once all consumers read {@link survey} directly.
+   * loaded. Exposed via {@link getSurvey$} for consumers that compose the draft
+   * into RxJS pipelines; reactive consumers should read {@link survey} directly.
    */
   private readonly survey$ = toObservable(this.survey).pipe(
     filter((survey): survey is Survey => survey !== undefined)
