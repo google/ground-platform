@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import type { Geometry } from 'geojson';
+
 export type Properties = Record<string, string | number>;
 
 export type Headers = Record<string, string>;
@@ -30,5 +32,5 @@ export type PropertyGeneratorConfig = {
 
 export type PropertyGeneratorHandler = (
   config: PropertyGeneratorConfig,
-  geometry: object
+  geometry: Geometry
 ) => Promise<Properties>;

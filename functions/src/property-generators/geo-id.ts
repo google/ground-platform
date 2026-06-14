@@ -1,5 +1,5 @@
 /**
- * Copyright 2024 The Ground Authors.
+ * Copyright 2026 The Ground Authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,57 +14,56 @@
  * limitations under the License.
  */
 
-import { geojsonToWKT } from '@terraformer/wkt';
+import * as logger from 'firebase-functions/logger';
 import type { Geometry } from 'geojson';
-import type {
-  Body,
-  Headers,
-  Properties,
-  PropertyGeneratorConfig,
-} from './types';
-
-type WhispResponse = {
-  code: string;
-  data?: {
-    features?: Array<{
-      properties?: Properties;
-    }>;
-  };
-};
+import type { Headers, Properties, PropertyGeneratorConfig } from './types';
 
 const defaultHeaders = { 'Content-Type': 'application/json' };
 
-export async function whispHandler(
+export async function geoIdHandler(
   config: PropertyGeneratorConfig,
   geometry: Geometry
 ): Promise<Properties> {
-  const { body, headers, url } = config;
+  const { headers, url } = config;
 
-  const wkt = geojsonToWKT(geometry);
-
-  return fetchWhispProperties(
+  return fetchGeoIdProperties(
     url,
     { ...defaultHeaders, ...headers },
-    { wkt, ...body }
+    { type: 'Feature', geometry, properties: {} }
   );
 }
 
-async function fetchWhispProperties(
+async function fetchGeoIdProperties(
   url: string,
   headers: Headers,
-  body: Body
+  body: object
 ): Promise<Properties> {
+  const bodyJson = JSON.stringify(body);
+  logger.debug(`geoId: POST ${url} body=${bodyJson}`);
+
   const response = await fetch(url, {
     method: 'POST',
     headers,
-    body: JSON.stringify(body),
+    body: bodyJson,
   });
 
-  if (!response.ok) return {};
+  if (!response.ok) {
+    const errorBody = await response.text();
+    logger.error(
+      `geoId: request failed with status ${response.status}: ${errorBody}`
+    );
+    return {};
+  }
 
-  const json = (await response.json()) as WhispResponse;
+  const responseJson = await response.json();
+  const id = responseJson?.id;
+  if (!id) {
+    logger.error(
+      `geoId: response missing id field, body=${JSON.stringify(responseJson)}`
+    );
+    return {};
+  }
+  logger.debug(`geoId: received id=${id}`);
 
-  if (json.code !== 'analysis_completed') return {};
-
-  return json.data?.features?.[0]?.properties || {};
+  return { id };
 }
