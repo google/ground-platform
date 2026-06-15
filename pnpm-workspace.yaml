@@ -11,7 +11,7 @@ catalogs:
     '@angular/cdk': ^20.2.14
     '@angular/common': ^20.3.15
     '@angular/compiler': ^20.3.16
-    '@angular/core': ^20.3.17
+    '@angular/core': ^20.3.25
     '@angular/fire': ^20.0.1
     '@angular/forms': ^20.3.15
     '@angular/google-maps': ^20.2.14
@@ -45,7 +45,7 @@ catalogs:
     ngx-autosize-input: ^20.0.5
     ngx-color: ^10.1.0
     nodemailer: ^8.0.7
-    protobufjs: ^7.6.0
+    protobufjs: ^7.6.3
     rxjs: ^7.8.2
     sanitize-html: ^2.17.4
     selenium-webdriver: ^4.19.0
