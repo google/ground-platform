@@ -1,5 +1,5 @@
 <!--
-  Copyright 2020 The Ground Authors.
+  Copyright 2019 The Ground Authors.
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -14,7 +14,20 @@
   limitations under the License.
 -->
 
-<ground-main-page *ngIf="survey(); let activeSurvey" [activeSurvey]="activeSurvey"></ground-main-page>
+<div class="page" *ngIf="survey(); let activeSurvey">
+  <ground-survey-header [activeSurvey]="activeSurvey"></ground-survey-header>
+  <div class="page-content">
+    <ground-side-panel
+      [activeSurvey]="activeSurvey"
+      [lois]="lois()"
+    ></ground-side-panel>
+    <ground-secondary-side-panel
+      [activeSurvey]="activeSurvey"
+      [lois]="lois()"
+    ></ground-secondary-side-panel>
+    <ground-map [activeSurvey]="activeSurvey" [lois]="lois()"></ground-map>
+  </div>
+</div>
 
 <div *ngIf="!survey()" class="progress-spinner">
   <mat-spinner mode="indeterminate"></mat-spinner>

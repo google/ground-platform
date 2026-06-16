@@ -14,9 +14,20 @@
  * limitations under the License.
  */
 
+:host {
+  width: 100vw;
+  height: 100vh;
+}
+
+.progress-spinner {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+}
+
 .page {
   min-height: 100%;
-  
+
   .page-content {
     display: flex;
     height: calc(100vh - 80px);

@@ -26,7 +26,7 @@ import { Firestore } from '@angular/fire/firestore';
 import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute, Router } from '@angular/router';
 import { List, Map } from 'immutable';
-import { BehaviorSubject, NEVER, of } from 'rxjs';
+import { BehaviorSubject, NEVER, of, throwError } from 'rxjs';
 
 import { DataSharingType, Survey } from 'app/models/survey.model';
 import { AuthService } from 'app/services/auth/auth.service';
@@ -68,8 +68,19 @@ describe('MainPageComponent', () => {
   let navigationServiceSpy: jasmine.SpyObj<NavigationService>;
   let authServiceSpy: jasmine.SpyObj<AuthService>;
   let loiServiceSpy: jasmine.SpyObj<LocationOfInterestService>;
+  let surveyServiceSpy: jasmine.SpyObj<SurveyService>;
   const surveyId$ = new BehaviorSubject<string>('');
   const isAuthenticated$ = new BehaviorSubject<boolean>(true);
+
+  const mockSurvey = new Survey(
+    'survey1',
+    'Title',
+    'Description',
+    Map(),
+    Map(),
+    'owner1',
+    { type: DataSharingType.PRIVATE }
+  );
 
   beforeEach(async () => {
     route = new ActivatedRouteStub();
@@ -80,6 +91,7 @@ describe('MainPageComponent', () => {
       'getSubmissionId$',
       'getUrlParams',
       'signIn',
+      'error',
     ]);
     authServiceSpy = jasmine.createSpyObj('AuthService', [
       'getUser$',
@@ -88,6 +100,9 @@ describe('MainPageComponent', () => {
     loiServiceSpy = jasmine.createSpyObj('LocationOfInterestService', [
       'getLocationsOfInterest$',
     ]);
+    surveyServiceSpy = jasmine.createSpyObj('SurveyService', ['loadSurvey$']);
+
+    surveyServiceSpy.loadSurvey$.and.returnValue(of(mockSurvey));
 
     navigationServiceSpy.getSurveyId$.and.returnValue(surveyId$);
     navigationServiceSpy.getLocationOfInterestId$.and.returnValue(NEVER);
@@ -111,7 +126,7 @@ describe('MainPageComponent', () => {
           provide: SubmissionService,
           useValue: { getSubmissions$: () => NEVER },
         },
-        { provide: SurveyService, useValue: {} },
+        { provide: SurveyService, useValue: surveyServiceSpy },
         { provide: NavigationService, useValue: navigationServiceSpy },
         { provide: Firestore, useValue: {} },
         { provide: Auth, useValue: {} },
@@ -124,21 +139,35 @@ describe('MainPageComponent', () => {
     fixture = TestBed.createComponent(MainPageComponent);
     component = fixture.componentInstance;
 
-    const mockSurvey = new Survey(
-      'survey1',
-      'Title',
-      'Description',
-      Map(),
-      Map(),
-      'owner1',
-      { type: DataSharingType.PRIVATE }
-    );
-    fixture.componentRef.setInput('activeSurvey', mockSurvey);
+    fixture.componentRef.setInput('surveyId', 'survey1');
     fixture.detectChanges();
   });
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('should load survey when surveyId is provided', () => {
+    expect(surveyServiceSpy.loadSurvey$).toHaveBeenCalledWith('survey1');
+    expect(component.survey()).toBe(mockSurvey);
+  });
+
+  it('should not load survey when surveyId is not provided', () => {
+    surveyServiceSpy.loadSurvey$.calls.reset();
+    fixture.componentRef.setInput('surveyId', undefined);
+    fixture.detectChanges();
+
+    expect(surveyServiceSpy.loadSurvey$).not.toHaveBeenCalled();
+  });
+
+  it('should navigate to error page when survey fails to load', () => {
+    const error = new Error('not found');
+    surveyServiceSpy.loadSurvey$.and.returnValue(throwError(() => error));
+
+    fixture.componentRef.setInput('surveyId', 'invalid-id');
+    fixture.detectChanges();
+
+    expect(navigationServiceSpy.error).toHaveBeenCalledWith(error);
   });
 
   it('should open title dialog when survey ID is NEW', () => {
@@ -176,7 +205,8 @@ describe('MainPageComponent', () => {
       'owner1',
       { type: DataSharingType.PRIVATE }
     );
-    fixture.componentRef.setInput('activeSurvey', newSurvey);
+    surveyServiceSpy.loadSurvey$.and.returnValue(of(newSurvey));
+    fixture.componentRef.setInput('surveyId', 'survey2');
     fixture.detectChanges();
     tick();
 
