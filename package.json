@@ -149,25 +149,6 @@
   "engines": {
     "node": "22"
   },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "@bufbuild/buf",
-      "@firebase/util",
-      "@parcel/watcher",
-      "core-js",
-      "esbuild",
-      "farmhash",
-      "fsevents",
-      "less",
-      "lmdb",
-      "msgpackr-extract",
-      "nx",
-      "protobufjs",
-      "puppeteer",
-      "re2",
-      "unrs-resolver"
-    ]
-  },
   "optionalDependencies": {
     "@nx/nx-linux-x64-gnu": "^19.3.2"
   }
