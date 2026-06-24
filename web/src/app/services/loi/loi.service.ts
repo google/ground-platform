@@ -56,11 +56,13 @@ export class LocationOfInterestService {
             )
       ),
       map(lois =>
-        lois.sort((a, b) =>
-          LocationOfInterestService.getDisplayName(a).localeCompare(
-            LocationOfInterestService.getDisplayName(b)
-          )
-        )
+        lois
+          .map(loi => ({
+            loi,
+            name: LocationOfInterestService.getDisplayName(loi),
+          }))
+          .sort((a, b) => a.name.localeCompare(b.name))
+          .map(({ loi }) => loi)
       )
     );
   }

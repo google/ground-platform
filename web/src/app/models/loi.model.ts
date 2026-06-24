@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { List, Map } from 'immutable';
+import { List, Map, is } from 'immutable';
 
 import { Geometry } from './geometry/geometry';
 
@@ -28,6 +28,18 @@ export class LocationOfInterest {
     readonly predefined: boolean = true,
     readonly submissionCount: number = 0
   ) {}
+
+  equals(other: LocationOfInterest): boolean {
+    return (
+      this.id === other.id &&
+      this.jobId === other.jobId &&
+      this.customId === other.customId &&
+      this.predefined === other.predefined &&
+      this.submissionCount === other.submissionCount &&
+      is(this.geometry, other.geometry) &&
+      is(this.properties, other.properties)
+    );
+  }
 
   static getSmallestByArea(
     lois: List<LocationOfInterest>
