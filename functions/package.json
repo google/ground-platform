@@ -98,7 +98,8 @@
     "sanitize-html": "catalog:"
   },
   "engines": {
-    "node": "22"
+    "node": "22",
+    "pnpm": "10.30.3"
   },
   "private": true,
   "devDependencies": {

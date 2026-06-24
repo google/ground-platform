@@ -5,6 +5,23 @@ packages:
   - proto
   - web
 
+onlyBuiltDependencies:
+  - '@bufbuild/buf'
+  - '@firebase/util'
+  - '@parcel/watcher'
+  - core-js
+  - esbuild
+  - farmhash
+  - fsevents
+  - less
+  - lmdb
+  - msgpackr-extract
+  - nx
+  - protobufjs
+  - puppeteer
+  - re2
+  - unrs-resolver
+
 catalogs:
   default:
     '@angular/animations': ^20.3.15
