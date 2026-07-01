@@ -22,9 +22,11 @@ jobs:
       web: ${{ steps.filter.outputs.web }}
     steps:
       - name: Check out code
-        uses: actions/checkout@v6
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+        with:
+          persist-credentials: false
 
-      - uses: dorny/paths-filter@v3
+      - uses: dorny/paths-filter@d1c1ffe0248fe513906c8e24db8ea791d46f8590 # v3
         id: filter
         with:
           filters: |
@@ -60,7 +62,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
-        uses: actions/checkout@v6
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+        with:
+          persist-credentials: false
 
       - name: Set up environment
         uses: ./.github/actions/setup
@@ -87,7 +91,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
-        uses: actions/checkout@v6
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+        with:
+          persist-credentials: false
 
       - name: Set up environment
         uses: ./.github/actions/setup
@@ -114,7 +120,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
-        uses: actions/checkout@v6
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+        with:
+          persist-credentials: false
 
       - name: Set up environment
         uses: ./.github/actions/setup
@@ -134,7 +142,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
-        uses: actions/checkout@v6
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+        with:
+          persist-credentials: false
 
       - name: Set up environment
         uses: ./.github/actions/setup
@@ -142,7 +152,7 @@ jobs:
           cache-key-suffix: web
 
       - name: Install Chrome
-        uses: browser-actions/setup-chrome@v1
+        uses: browser-actions/setup-chrome@c785b87e244131f27c9f19c1a33e2ead956ab7ce # v1
         id: setup-chrome
         with:
           chrome-version: stable
@@ -150,8 +160,10 @@ jobs:
       - name: Configure Chrome Environment
         shell: bash
         run: |
-          echo "CHROME_BIN=${{ steps.setup-chrome.outputs.chrome-path }}" >> $GITHUB_ENV
-          echo "CHROME_PATH=${{ steps.setup-chrome.outputs.chrome-path }}" >> $GITHUB_ENV
+          echo "CHROME_BIN=${STEPS_SETUP_CHROME_OUTPUTS_CHROME_PATH}" >> $GITHUB_ENV
+          echo "CHROME_PATH=${STEPS_SETUP_CHROME_OUTPUTS_CHROME_PATH}" >> $GITHUB_ENV
+        env:
+          STEPS_SETUP_CHROME_OUTPUTS_CHROME_PATH: ${{ steps.setup-chrome.outputs.chrome-path }}
 
       - name: Check formatting
         run: pnpm exec nx run web:format:check
@@ -168,6 +180,6 @@ jobs:
         run: pnpm exec nx test web
 
       - name: Update test coverage report
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@0fb7174895f61a3b6b78fc075e0cd60383518dac # v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
