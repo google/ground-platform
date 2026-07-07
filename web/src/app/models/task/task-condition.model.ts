@@ -28,7 +28,8 @@ export class TaskConditionExpression {
   constructor(
     readonly expressionType: TaskConditionExpressionType,
     readonly taskId: string,
-    readonly optionIds: List<string>
+    readonly optionIds: List<string>,
+    readonly otherSelected: boolean = false
   ) {}
 }
 
