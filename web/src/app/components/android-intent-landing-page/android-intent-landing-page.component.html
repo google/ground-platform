@@ -26,11 +26,11 @@
       <section i18n="@@app.texts.installRedirectMessage">If it doesn't open automatically, you will be redirected to Google Play to install it.</section>
 
       <section *ngIf="googlePlayId$ | async as googlePlayId">
-        <a [href]="playStoreUrl || 'https://play.google.com/store/apps/details?id=' + googlePlayId">
+        <a [href]="playStoreUrl || getPlayStoreUrl(googlePlayId)">
           <img
-              [src]="getItOnGooglePlayImageSrc"
-              alt="Get in on Google Play"
-              i18n-alt="@@app.labels.googlePlayBadgeAlt"
+            [src]="getItOnGooglePlayImageSrc"
+            alt="Get in on Google Play"
+            i18n-alt="@@app.labels.googlePlayBadgeAlt"
           />
         </a>
       </section>

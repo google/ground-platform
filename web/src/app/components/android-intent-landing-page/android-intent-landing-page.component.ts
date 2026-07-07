@@ -69,6 +69,10 @@ export class AndroidIntentLandingPageComponent implements OnInit {
    * `/android/survey/{surveyId}`, ignoring any query string or fragment.
    * Returns an empty string when no survey id is present.
    */
+  getPlayStoreUrl(googlePlayId: string): string {
+    return this.navigationService.getPlayStoreUrl(googlePlayId);
+  }
+
   private parseSurveyId(path: string): string {
     const segments = path.split(/[?#]/)[0].split('/');
     const surveyIndex = segments.indexOf(SURVEY_SEGMENT);
@@ -107,9 +111,10 @@ export class AndroidIntentLandingPageComponent implements OnInit {
 
     const surveyId = this.parseSurveyId(path);
 
-    this.playStoreUrl = surveyId
-      ? this.navigationService.getPlayStoreUrl(googlePlayId, surveyId)
-      : `https://play.google.com/store/apps/details?id=${googlePlayId}`;
+    this.playStoreUrl = this.navigationService.getPlayStoreUrl(
+      googlePlayId,
+      surveyId
+    );
 
     const timeout = 5000;
 
