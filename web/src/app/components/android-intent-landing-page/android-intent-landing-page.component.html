@@ -17,19 +17,28 @@
 <div class="page">
   <div class="container">
     <ng-container *ngIf="isIos">
-      <section i18n="@@app.texts.platformNotSupported.iosMessage"><strong>Platform Not Supported:</strong> We've detected you're using an iOS device. Currently, <strong>Ground is only available for Android.</strong></section>
+      <section i18n="@@app.texts.platformNotSupported.iosMessage">
+        <strong>Platform Not Supported:</strong> We've detected you're using an
+        iOS device. Currently,
+        <strong>Ground is only available for Android.</strong>
+      </section>
     </ng-container>
 
     <ng-container *ngIf="!isIos">
-      <section i18n="@@app.texts.launchingGround">Launching <strong>Ground</strong>...</section>
+      <section i18n="@@app.texts.launchingGround">
+        Launching <strong>Ground</strong>...
+      </section>
 
-      <section i18n="@@app.texts.installRedirectMessage">If it doesn't open automatically, you will be redirected to Google Play to install it.</section>
+      <section i18n="@@app.texts.installRedirectMessage">
+        If it doesn't open automatically, you will be redirected to Google Play
+        to install it.
+      </section>
 
       <section *ngIf="googlePlayId$ | async as googlePlayId">
         <a [href]="playStoreUrl || getPlayStoreUrl(googlePlayId)">
           <img
             [src]="getItOnGooglePlayImageSrc"
-            alt="Get in on Google Play"
+            alt="Get it on Google Play"
             i18n-alt="@@app.labels.googlePlayBadgeAlt"
           />
         </a>
