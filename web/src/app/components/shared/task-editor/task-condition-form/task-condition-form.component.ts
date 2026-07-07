@@ -25,6 +25,7 @@ import { AbstractControl, FormArray, FormGroup } from '@angular/forms';
 import { List } from 'immutable';
 
 import { Option } from 'app/models/task/option.model';
+import { OTHER_OPTION_ID } from 'app/models/task/task-condition.model';
 import { Task } from 'app/models/task/task.model';
 
 @Pipe({
@@ -51,6 +52,8 @@ export class TaskConditionFormComponent {
   @Input() formGroup!: FormGroup;
   @Input() formGroupIndex!: number;
   @Input() tasks!: List<Task>;
+
+  readonly OTHER_OPTION_ID = OTHER_OPTION_ID;
 
   previousMultipleTasks: List<Task> = List([]);
   options: List<Task> = List([]);
@@ -85,5 +88,11 @@ export class TaskConditionFormComponent {
 
   get optionIdsControl(): AbstractControl {
     return this.expressionControl.get('optionIds')!;
+  }
+
+  get selectedTaskHasOtherOption(): boolean {
+    return !!this.previousMultipleTasks.find(
+      task => task.id === this.taskIdControl.value
+    )?.multipleChoice?.hasOtherOption;
   }
 }

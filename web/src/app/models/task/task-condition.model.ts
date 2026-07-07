@@ -16,6 +16,8 @@
 
 import { List } from 'immutable';
 
+export const OTHER_OPTION_ID = '__other__';
+
 export enum TaskConditionMatchType {
   MATCH_ALL = 'MATCH_ALL',
 }
