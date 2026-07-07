@@ -265,6 +265,7 @@ function toTaskConditionMessage(
             multipleChoice: new Pb.Task.MultipleChoiceSelection({
               optionIds: expression.optionIds.toArray(),
               taskId: expression.taskId,
+              otherSelected: expression.otherSelected,
             }),
           })
       )
