@@ -26,7 +26,6 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { RouterModule } from '@angular/router';
 
 import { EditSurveyComponent } from 'app/components/edit-survey/edit-survey.component';
-import { CopySurveyControlsModule } from 'app/components/shared/copy-survey-controls/copy-survey-controls.module';
 
 import { SurveyHeaderModule } from '../main-page/survey-header/survey-header.module';
 
@@ -42,7 +41,6 @@ import { SurveyHeaderModule } from '../main-page/survey-header/survey-header.mod
     MatMenuModule,
     MatProgressSpinnerModule,
     RouterModule,
-    CopySurveyControlsModule,
     SurveyHeaderModule,
   ],
   exports: [EditSurveyComponent],

@@ -25,12 +25,15 @@ import { MatInputModule } from '@angular/material/input';
 import { MatListModule } from '@angular/material/list';
 import { MatSelectModule } from '@angular/material/select';
 
+import { CopySurveyControlsModule } from 'app/components/shared/copy-survey-controls/copy-survey-controls.module';
+
 import { GeneralAccessControlComponent } from './general-access-control.component';
 
 @NgModule({
   declarations: [GeneralAccessControlComponent],
   imports: [
     CommonModule,
+    CopySurveyControlsModule,
     FormsModule,
     MatButtonModule,
     MatDialogModule,
