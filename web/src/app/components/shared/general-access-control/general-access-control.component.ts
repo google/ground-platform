@@ -40,7 +40,7 @@ const generalAccessLabels = Map<
     {
       description: $localize`:@@app.texts.generalAccess.unlisted:Everyone with the survey QR code or link can collect data for this survey`,
       icon: 'account_circle',
-      label: $localize`:@@app.labels.unlisted:Unlisted`,
+      label: $localize`:@@app.labels.unlisted:Anyone with the link`,
     },
   ],
   [

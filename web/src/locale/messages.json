@@ -107,7 +107,7 @@
     "app.texts.generalAccess.restricted": "Only people with access can open with the link",
     "app.labels.restricted": "Restricted",
     "app.texts.generalAccess.unlisted": "Everyone with the survey QR code or link can collect data for this survey",
-    "app.labels.unlisted": "Unlisted",
+    "app.labels.unlisted": "Anyone with the link",
     "app.texts.generalAccess.public": "Anyone can find and collect data for this survey",
     "app.labels.public": "Public",
     "app.labels.signOut": "Sign out",
