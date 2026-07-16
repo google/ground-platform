@@ -20,8 +20,8 @@ import { List, Map } from 'immutable';
 
 import {
   DialogType,
-  JobDialogComponent,
-} from 'app/components/edit-survey/job-dialog/job-dialog.component';
+  DialogComponent,
+} from 'app/components/shared/dialog/dialog.component';
 import {
   Survey,
   SurveyGeneralAccess,
@@ -121,7 +121,7 @@ export class SurveyListComponent {
     const isPasslisted = await this.authService.isPasslisted();
 
     if (!isPasslisted) {
-      const dialogRef = this.dialog.open(JobDialogComponent, {
+      const dialogRef = this.dialog.open(DialogComponent, {
         data: { dialogType: DialogType.SurveyCreationDenied },
         panelClass: 'small-width-dialog',
       });

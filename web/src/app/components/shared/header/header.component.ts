@@ -20,8 +20,8 @@ import { Survey } from 'app/models/survey.model';
 
 import {
   DialogType,
-  JobDialogComponent,
-} from 'app/components/edit-survey/job-dialog/job-dialog.component';
+  DialogComponent,
+} from 'app/components/shared/dialog/dialog.component';
 import { AuthService } from 'app/services/auth/auth.service';
 import { DraftSurveyService } from 'app/services/draft-survey/draft-survey.service';
 import { NavigationService } from 'app/services/navigation/navigation.service';
@@ -114,7 +114,7 @@ export class HeaderComponent implements OnChanges {
       return;
     }
 
-    this.dialog.open(JobDialogComponent, {
+    this.dialog.open(DialogComponent, {
       data: { dialogType: DialogType.InvalidSurvey },
       panelClass: 'small-width-dialog',
     });

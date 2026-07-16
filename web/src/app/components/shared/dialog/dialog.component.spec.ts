@@ -23,16 +23,16 @@ import {
 import { By } from '@angular/platform-browser';
 
 import {
+  DialogComponent,
   DialogData,
   DialogType,
-  JobDialogComponent,
   dialogConfigs,
-} from './job-dialog.component';
+} from './dialog.component';
 
-describe('JobDialogComponent', () => {
-  let component: JobDialogComponent;
-  let fixture: ComponentFixture<JobDialogComponent>;
-  let dialogRefSpy: jasmine.SpyObj<MatDialogRef<JobDialogComponent>>;
+describe('DialogComponent', () => {
+  let component: DialogComponent;
+  let fixture: ComponentFixture<DialogComponent>;
+  let dialogRefSpy: jasmine.SpyObj<MatDialogRef<DialogComponent>>;
 
   const mockDialogData: DialogData = {
     dialogType: DialogType.UndoJobs,
@@ -42,7 +42,7 @@ describe('JobDialogComponent', () => {
     dialogRefSpy = jasmine.createSpyObj('MatDialogRef', ['close']);
 
     await TestBed.configureTestingModule({
-      declarations: [JobDialogComponent],
+      declarations: [DialogComponent],
       imports: [MatDialogModule],
       providers: [
         { provide: MatDialogRef, useValue: dialogRefSpy },
@@ -52,7 +52,7 @@ describe('JobDialogComponent', () => {
   });
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(JobDialogComponent);
+    fixture = TestBed.createComponent(DialogComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

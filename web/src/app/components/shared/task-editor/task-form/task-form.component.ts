@@ -38,8 +38,8 @@ import { List } from 'immutable';
 import {
   DialogData,
   DialogType,
-  JobDialogComponent,
-} from 'app/components/edit-survey/job-dialog/job-dialog.component';
+  DialogComponent,
+} from 'app/components/shared/dialog/dialog.component';
 import { Cardinality } from 'app/models/task/multiple-choice.model';
 import {
   TaskConditionExpressionType,
@@ -331,7 +331,7 @@ export class TaskFormComponent {
       else this.hasOtherOptionControl.setValue(false);
     } else {
       this.dialog
-        .open(JobDialogComponent, {
+        .open(DialogComponent, {
           data: { dialogType: DialogType.DeleteOption },
           panelClass: 'small-width-dialog',
         })

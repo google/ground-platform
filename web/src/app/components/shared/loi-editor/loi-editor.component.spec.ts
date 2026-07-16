@@ -25,8 +25,8 @@ import { of } from 'rxjs';
 
 import {
   DialogType,
-  JobDialogComponent,
-} from 'app/components/edit-survey/job-dialog/job-dialog.component';
+  DialogComponent,
+} from 'app/components/shared/dialog/dialog.component';
 import { ImportDialogComponent } from 'app/components/shared/import-dialog/import-dialog.component';
 import { DataCollectionStrategy, Job } from 'app/models/job.model';
 import { Coordinate } from 'app/models/geometry/coordinate';
@@ -202,7 +202,7 @@ describe('LoiEditorComponent', () => {
           .click();
 
         expect(matDialogSpy.open).toHaveBeenCalledWith(
-          JobDialogComponent,
+          DialogComponent,
           jasmine.objectContaining({
             data: jasmine.objectContaining({
               dialogType: DialogType.DeleteLois,
@@ -262,7 +262,7 @@ describe('LoiEditorComponent', () => {
         } as MatSlideToggleChange);
 
         expect(matDialogSpy.open).toHaveBeenCalledWith(
-          JobDialogComponent,
+          DialogComponent,
           jasmine.objectContaining({
             data: jasmine.objectContaining({
               dialogType: DialogType.DisableFreeForm,

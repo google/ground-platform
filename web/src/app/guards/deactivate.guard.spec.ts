@@ -20,7 +20,7 @@ import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { dirtyCheckGuard } from './dirty-check.guard';
 import { ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
 import { of } from 'rxjs';
-import { DialogType } from 'app/components/edit-survey/job-dialog/job-dialog.component';
+import { DialogType } from 'app/components/shared/dialog/dialog.component';
 
 describe('dirtyCheckGuard', () => {
   let draftSurveyServiceSpy: jasmine.SpyObj<DraftSurveyService>;

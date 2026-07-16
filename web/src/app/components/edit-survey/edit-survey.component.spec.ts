@@ -39,8 +39,8 @@ import { SurveyService } from 'app/services/survey/survey.service';
 import {
   DialogData,
   DialogType,
-  JobDialogComponent,
-} from './job-dialog/job-dialog.component';
+  DialogComponent,
+} from 'app/components/shared/dialog/dialog.component';
 
 describe('EditSurveyComponent', () => {
   let fixture: ComponentFixture<EditSurveyComponent>;
@@ -52,7 +52,7 @@ describe('EditSurveyComponent', () => {
   let jobServiceSpy: jasmine.SpyObj<JobService>;
   let dataStoreServiceSpy: jasmine.SpyObj<DataStoreService>;
   let dialogRefSpy: jasmine.SpyObj<
-    MatDialogRef<JobDialogComponent, DialogData>
+    MatDialogRef<DialogComponent, DialogData>
   >;
   let dialogSpy: jasmine.SpyObj<MatDialog>;
   let initResolve: (value: void | PromiseLike<void>) => void;
@@ -144,7 +144,7 @@ describe('EditSurveyComponent', () => {
     dataStoreServiceSpy.tasks$.and.returnValue(new Subject<List<Task>>());
 
     dialogRefSpy = jasmine.createSpyObj<
-      MatDialogRef<JobDialogComponent, DialogData>
+      MatDialogRef<DialogComponent, DialogData>
     >('MatDialogRef', ['afterClosed', 'close']);
     dialogSpy = jasmine.createSpyObj<MatDialog>('MatDialog', ['open']);
     dialogSpy.open.and.returnValue(dialogRefSpy);
