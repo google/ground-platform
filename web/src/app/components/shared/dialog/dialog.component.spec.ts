@@ -15,12 +15,17 @@
  */
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { FormsModule } from '@angular/forms';
+import { MatButtonModule } from '@angular/material/button';
 import {
   MAT_DIALOG_DATA,
   MatDialogModule,
   MatDialogRef,
 } from '@angular/material/dialog';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
 import { By } from '@angular/platform-browser';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
 import {
   DialogComponent,
@@ -34,82 +39,148 @@ describe('DialogComponent', () => {
   let fixture: ComponentFixture<DialogComponent>;
   let dialogRefSpy: jasmine.SpyObj<MatDialogRef<DialogComponent>>;
 
-  const mockDialogData: DialogData = {
-    dialogType: DialogType.UndoJobs,
-  };
-
-  beforeEach(async () => {
+  async function setup(data: DialogData): Promise<void> {
     dialogRefSpy = jasmine.createSpyObj('MatDialogRef', ['close']);
 
     await TestBed.configureTestingModule({
       declarations: [DialogComponent],
-      imports: [MatDialogModule],
+      imports: [
+        MatDialogModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatButtonModule,
+        FormsModule,
+        NoopAnimationsModule,
+      ],
       providers: [
         { provide: MatDialogRef, useValue: dialogRefSpy },
-        { provide: MAT_DIALOG_DATA, useValue: mockDialogData },
+        { provide: MAT_DIALOG_DATA, useValue: data },
       ],
     }).compileComponents();
-  });
 
-  beforeEach(() => {
     fixture = TestBed.createComponent(DialogComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
+  }
+
+  const buttons = () =>
+    fixture.debugElement.queryAll(By.css('.mat-mdc-dialog-actions button'));
+  const backButton = () => buttons()[0];
+  const continueButton = () => buttons()[buttons().length - 1];
+  const titleText = () =>
+    fixture.debugElement.query(By.css('.mat-mdc-dialog-title')).nativeElement
+      .textContent;
+
+  describe('confirmation dialog (UndoJobs)', () => {
+    beforeEach(async () => {
+      await setup({ dialogType: DialogType.UndoJobs });
+    });
+
+    it('creates', () => {
+      expect(component).toBeTruthy();
+    });
+
+    it('renders the title, content, and both buttons', () => {
+      expect(titleText()).toContain('Unpublished changes');
+      expect(
+        fixture.debugElement.query(By.css('.mat-mdc-dialog-content p'))
+          .nativeElement.textContent
+      ).toContain('If you leave this page');
+      expect(buttons().length).toBe(2);
+      expect(backButton().nativeElement.textContent).toContain('Go back');
+      expect(continueButton().nativeElement.textContent).toContain('Continue');
+    });
+
+    it('does not render the job-name input', () => {
+      expect(fixture.debugElement.query(By.css('#job-name'))).toBeNull();
+    });
+
+    it('closes without returning the dialog data when back is clicked', () => {
+      backButton().nativeElement.click();
+      expect(dialogRefSpy.close).toHaveBeenCalled();
+      expect(dialogRefSpy.close).not.toHaveBeenCalledWith(component.data);
+    });
+
+    it('closes with the dialog data when the continue button is clicked', () => {
+      continueButton().nativeElement.click();
+      expect(dialogRefSpy.close).toHaveBeenCalledWith(component.data);
+    });
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
+  describe('input dialog (AddJob)', () => {
+    beforeEach(async () => {
+      await setup({ dialogType: DialogType.AddJob, jobName: 'Initial' });
+    });
+
+    it('renders the job-name field and its label, but no content', () => {
+      const input = fixture.debugElement.query(By.css('#job-name'));
+      expect(input).toBeTruthy();
+      expect(input.nativeElement.id).toBe(DialogComponent.JOB_NAME_FIELD_ID);
+      expect(
+        fixture.debugElement.query(By.css('mat-label')).nativeElement.textContent
+      ).toContain('Job name');
+      expect(
+        fixture.debugElement.query(By.css('.mat-mdc-dialog-content p'))
+      ).toBeNull();
+    });
+
+    it('seeds the input from data.jobName', () => {
+      const input = fixture.debugElement.query(By.css('#job-name'))
+        .nativeElement as HTMLInputElement;
+      expect(input.value).toBe('Initial');
+    });
+
+    it('writes edits back to data.jobName (ngModel)', async () => {
+      const input = fixture.debugElement.query(By.css('#job-name'))
+        .nativeElement as HTMLInputElement;
+      input.value = 'Trees';
+      input.dispatchEvent(new Event('input'));
+      fixture.detectChanges();
+      await fixture.whenStable();
+      expect(component.data.jobName).toBe('Trees');
+    });
+
+    it('renders only the AddJob buttons (Cancel/Create)', () => {
+      expect(buttons().length).toBe(2);
+      expect(backButton().nativeElement.textContent).toContain('Cancel');
+      expect(continueButton().nativeElement.textContent).toContain('Create');
+    });
   });
 
-  it('should close dialog when back button is clicked', () => {
-    const backButton = fixture.debugElement.query(
-      By.css('.mat-mdc-dialog-actions button:first-child')
-    );
-    backButton.nativeElement.click();
-    expect(dialogRefSpy.close).toHaveBeenCalled();
+  describe('back-only dialog (InvalidSurvey)', () => {
+    beforeEach(async () => {
+      await setup({ dialogType: DialogType.InvalidSurvey });
+    });
+
+    it('renders only the back button (no continue)', () => {
+      expect(buttons().length).toBe(1);
+      expect(backButton().nativeElement.textContent).toContain('Go back');
+    });
+
+    it('closes without returning the dialog data when back is clicked', () => {
+      backButton().nativeElement.click();
+      expect(dialogRefSpy.close).toHaveBeenCalled();
+      expect(dialogRefSpy.close).not.toHaveBeenCalledWith(component.data);
+    });
   });
 
-  it('should close dialog when continue button is clicked', () => {
-    const continueButton = fixture.debugElement.query(
-      By.css('.mat-mdc-dialog-actions button:last-child')
+  describe('every DialogType', () => {
+    const allTypes = Object.values(DialogType).filter(
+      (v): v is DialogType => typeof v === 'number'
     );
-    continueButton.nativeElement.click();
-    expect(dialogRefSpy.close).toHaveBeenCalled();
-  });
 
-  it('should display the correct title in the template', () => {
-    const titleElement = fixture.debugElement.query(
-      By.css('.mat-mdc-dialog-title')
-    );
-    expect(titleElement.nativeElement.textContent).toContain(
-      dialogConfigs[DialogType.UndoJobs].title
-    );
-  });
+    allTypes.forEach(type => {
+      it(`renders the configured title and buttons for ${DialogType[type]}`, async () => {
+        await setup({ dialogType: type });
 
-  it('should display the correct content in the template', () => {
-    const contentElement = fixture.debugElement.query(
-      By.css('.mat-mdc-dialog-content')
-    );
-    expect(contentElement.nativeElement.textContent).toContain(
-      dialogConfigs[DialogType.UndoJobs].content
-    );
-  });
+        const config = dialogConfigs[type];
+        const expectedButtons =
+          (config.backButtonLabel ? 1 : 0) +
+          (config.continueButtonLabel ? 1 : 0);
 
-  it('should display the back button with the correct label', () => {
-    const backButton = fixture.debugElement.query(
-      By.css('.mat-mdc-dialog-actions button:first-child')
-    );
-    expect(backButton.nativeElement.textContent).toContain(
-      dialogConfigs[DialogType.UndoJobs].backButtonLabel
-    );
-  });
-
-  it('should display the continue button with the correct label', () => {
-    const continueButton = fixture.debugElement.query(
-      By.css('.mat-mdc-dialog-actions button:last-child')
-    );
-    expect(continueButton.nativeElement.textContent).toContain(
-      dialogConfigs[DialogType.UndoJobs].continueButtonLabel
-    );
+        expect(titleText()).toContain(config.title);
+        expect(buttons().length).toBe(expectedButtons);
+      });
+    });
   });
 });
