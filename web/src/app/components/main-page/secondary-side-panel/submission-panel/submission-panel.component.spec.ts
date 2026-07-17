@@ -35,6 +35,7 @@ import { Submission } from 'app/models/submission/submission.model';
 import { DataSharingType, Survey } from 'app/models/survey.model';
 import { Task, TaskType } from 'app/models/task/task.model';
 import { GroundIconModule } from 'app/modules/ground-icon.module';
+import { DialogService } from 'app/services/dialog/dialog.service';
 import { NavigationService } from 'app/services/navigation/navigation.service';
 import { SubmissionService } from 'app/services/submission/submission.service';
 
@@ -49,6 +50,7 @@ describe('SubmissionPanelComponent', () => {
   let fixture: ComponentFixture<SubmissionPanelComponent>;
   let submissionService: jasmine.SpyObj<SubmissionService>;
   let navigationService: jasmine.SpyObj<NavigationService>;
+  let dialogService: jasmine.SpyObj<DialogService>;
   const mockSurvey = new Survey(
     'survey1',
     'Survey Title',
@@ -91,7 +93,9 @@ describe('SubmissionPanelComponent', () => {
   beforeEach(async () => {
     submissionService = jasmine.createSpyObj('SubmissionService', [
       'getSubmission$',
+      'deleteSubmission',
     ]);
+    submissionService.deleteSubmission.and.resolveTo();
     navigationService = jasmine.createSpyObj('NavigationService', [
       'getTaskId$',
       'getLocationOfInterestId$',
@@ -102,6 +106,9 @@ describe('SubmissionPanelComponent', () => {
       of(mockSubmission.loiId)
     );
     navigationService.getTaskId$.and.returnValue(of(null));
+    dialogService = jasmine.createSpyObj('DialogService', [
+      'openConfirmationDialog',
+    ]);
 
     await TestBed.configureTestingModule({
       declarations: [SubmissionPanelComponent],
@@ -116,6 +123,7 @@ describe('SubmissionPanelComponent', () => {
       providers: [
         { provide: NavigationService, useValue: navigationService },
         { provide: SubmissionService, useValue: submissionService },
+        { provide: DialogService, useValue: dialogService },
       ],
       schemas: [NO_ERRORS_SCHEMA],
     }).compileComponents();
@@ -220,6 +228,45 @@ describe('SubmissionPanelComponent', () => {
     expect(
       navigationService.showSubmissionDetailWithHighlightedTask
     ).not.toHaveBeenCalled();
+  });
+
+  it('deletes submission and navigates back when confirmed', fakeAsync(() => {
+    dialogService.openConfirmationDialog.and.returnValue({
+      afterClosed: () => of(true),
+    } as any);
+    initializeWithSubmission(Map({}));
+
+    component.deleteSubmission();
+    tick();
+
+    expect(submissionService.deleteSubmission).toHaveBeenCalledWith(
+      mockSurvey.id,
+      mockSubmission.id
+    );
+    expect(navigationService.selectLocationOfInterest).toHaveBeenCalledWith(
+      mockSurvey.id,
+      mockSubmission.loiId
+    );
+  }));
+
+  it('does not delete submission when not confirmed', fakeAsync(() => {
+    dialogService.openConfirmationDialog.and.returnValue({
+      afterClosed: () => of(false),
+    } as any);
+    initializeWithSubmission(Map({}));
+
+    component.deleteSubmission();
+    tick();
+
+    expect(submissionService.deleteSubmission).not.toHaveBeenCalled();
+  }));
+
+  it('logs and bails on delete when no submission has loaded', () => {
+    spyOn(console, 'error');
+    component.deleteSubmission();
+    expect(console.error).toHaveBeenCalled();
+    expect(dialogService.openConfirmationDialog).not.toHaveBeenCalled();
+    expect(submissionService.deleteSubmission).not.toHaveBeenCalled();
   });
 
   it('getTaskSubmissionResult returns result for a known task', fakeAsync(() => {
