@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, computed, inject, input } from '@angular/core';
+import { Component, computed, inject, input, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { MatDialog } from '@angular/material/dialog';
 import { List } from 'immutable';
@@ -81,6 +81,7 @@ export class SubmissionPanelComponent {
 
   readonly submission = this.submissionResource.value;
   readonly isLoading = this.submissionResource.isLoading;
+  readonly isDeleting = signal(false);
 
   navigateToSubmissionList() {
     const loi = this.selectedLoi();
@@ -115,8 +116,17 @@ export class SubmissionPanelComponent {
       .afterClosed()
       .subscribe(async (result: DialogData) => {
         if (!result) return;
-        await this.submissionService.deleteSubmission(survey.id, submission.id);
+        this.isDeleting.set(true);
+        try {
+          await this.submissionService.deleteSubmission(
+            survey.id,
+            submission.id
+          );
         this.navigationService.selectLocationOfInterest(survey.id, loi.id);
+        } catch (e) {
+          console.error('Error deleting submission', e);
+          this.isDeleting.set(false);
+        }
       });
   }
 
