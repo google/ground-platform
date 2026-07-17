@@ -62,7 +62,7 @@ nx start
 
 The local emulator is preloaded with a demo survey. Run `nx export` to save the updated demo data to the local filesystem for use on the next run.
 
-## Run local web against the dev environment
+## Running the web app locally using dev Firebase
 
 By default `nx start` runs the web app against a local Firebase emulator (see
 [Build and run locally](#build-and-run-locally)). Sometimes it's useful to run
