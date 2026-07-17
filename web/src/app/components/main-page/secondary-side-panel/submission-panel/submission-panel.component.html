@@ -14,12 +14,15 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-<div class="submission-panel" [ngClass]="{ loading: isLoading() }">
-  <div *ngIf="isLoading()" class="progress-spinner">
+<div
+  class="submission-panel"
+  [ngClass]="{ loading: isLoading() || isDeleting() }"
+>
+  <div *ngIf="isLoading() || isDeleting()" class="progress-spinner">
     <mat-spinner mode="indeterminate" diameter="50"></mat-spinner>
   </div>
 
-  <ng-container *ngIf="!isLoading()">
+  <ng-container *ngIf="!isLoading() && !isDeleting()">
     <div class="submission-panel-header">
       <div class="submission-panel-header-left">
         <button mat-icon-button (click)="navigateToSubmissionList()">
