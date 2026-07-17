@@ -112,18 +112,18 @@ export interface DialogData {
 }
 
 @Component({
-  selector: 'job-dialog',
-  templateUrl: './job-dialog.component.html',
-  styleUrls: ['./job-dialog.component.scss'],
+  selector: 'ground-dialog',
+  templateUrl: './dialog.component.html',
+  styleUrls: ['./dialog.component.scss'],
   standalone: false,
 })
-export class JobDialogComponent {
+export class DialogComponent {
   public static readonly JOB_NAME_FIELD_ID = 'job-name';
 
   readonly DialogType = DialogType;
 
   constructor(
-    public dialogRef: MatDialogRef<JobDialogComponent>,
+    public dialogRef: MatDialogRef<DialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: DialogData
   ) {}
 
@@ -148,6 +148,6 @@ export class JobDialogComponent {
   }
 
   get jobNameFieldId() {
-    return JobDialogComponent.JOB_NAME_FIELD_ID;
+    return DialogComponent.JOB_NAME_FIELD_ID;
   }
 }

@@ -22,8 +22,8 @@ import { List } from 'immutable';
 import {
   DialogData,
   DialogType,
-  JobDialogComponent,
-} from 'app/components/edit-survey/job-dialog/job-dialog.component';
+  DialogComponent,
+} from 'app/components/shared/dialog/dialog.component';
 import { DataCollectionStrategy, Job } from 'app/models/job.model';
 import { LocationOfInterest } from 'app/models/loi.model';
 import { Survey } from 'app/models/survey.model';
@@ -63,7 +63,7 @@ export class LoiEditorComponent {
 
   clearLois() {
     this.dialog
-      .open(JobDialogComponent, {
+      .open(DialogComponent, {
         data: {
           dialogType: DialogType.DeleteLois,
           surveyId: this.survey.id,
@@ -87,7 +87,7 @@ export class LoiEditorComponent {
   toggleDataCollectorsCanAddLois(event: MatSlideToggleChange) {
     if (!event.checked) {
       this.dialog
-        .open(JobDialogComponent, {
+        .open(DialogComponent, {
           data: {
             dialogType: DialogType.DisableFreeForm,
           },

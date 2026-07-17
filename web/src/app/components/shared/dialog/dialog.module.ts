@@ -22,10 +22,10 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 
-import { JobDialogComponent } from 'app/components/edit-survey/job-dialog/job-dialog.component';
+import { DialogComponent } from 'app/components/shared/dialog/dialog.component';
 
 @NgModule({
-  declarations: [JobDialogComponent],
+  declarations: [DialogComponent],
   imports: [
     CommonModule,
     MatDialogModule,
@@ -34,6 +34,6 @@ import { JobDialogComponent } from 'app/components/edit-survey/job-dialog/job-di
     FormsModule,
     MatButtonModule,
   ],
-  exports: [JobDialogComponent],
+  exports: [DialogComponent],
 })
-export class JobDialogModule {}
+export class DialogModule {}
