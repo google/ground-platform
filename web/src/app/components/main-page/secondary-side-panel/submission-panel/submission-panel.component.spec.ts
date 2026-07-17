@@ -22,6 +22,7 @@ import {
   tick,
 } from '@angular/core/testing';
 import { MatButtonModule } from '@angular/material/button';
+import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
 import { MatMenuModule } from '@angular/material/menu';
@@ -34,8 +35,8 @@ import { Job } from 'app/models/job.model';
 import { Submission } from 'app/models/submission/submission.model';
 import { DataSharingType, Survey } from 'app/models/survey.model';
 import { Task, TaskType } from 'app/models/task/task.model';
+import { DialogType } from 'app/components/shared/dialog/dialog.component';
 import { GroundIconModule } from 'app/modules/ground-icon.module';
-import { DialogService } from 'app/services/dialog/dialog.service';
 import { NavigationService } from 'app/services/navigation/navigation.service';
 import { SubmissionService } from 'app/services/submission/submission.service';
 
@@ -50,7 +51,7 @@ describe('SubmissionPanelComponent', () => {
   let fixture: ComponentFixture<SubmissionPanelComponent>;
   let submissionService: jasmine.SpyObj<SubmissionService>;
   let navigationService: jasmine.SpyObj<NavigationService>;
-  let dialogService: jasmine.SpyObj<DialogService>;
+  let dialog: jasmine.SpyObj<MatDialog>;
   const mockSurvey = new Survey(
     'survey1',
     'Survey Title',
@@ -106,9 +107,7 @@ describe('SubmissionPanelComponent', () => {
       of(mockSubmission.loiId)
     );
     navigationService.getTaskId$.and.returnValue(of(null));
-    dialogService = jasmine.createSpyObj('DialogService', [
-      'openConfirmationDialog',
-    ]);
+    dialog = jasmine.createSpyObj('MatDialog', ['open']);
 
     await TestBed.configureTestingModule({
       declarations: [SubmissionPanelComponent],
@@ -123,7 +122,7 @@ describe('SubmissionPanelComponent', () => {
       providers: [
         { provide: NavigationService, useValue: navigationService },
         { provide: SubmissionService, useValue: submissionService },
-        { provide: DialogService, useValue: dialogService },
+        { provide: MatDialog, useValue: dialog },
       ],
       schemas: [NO_ERRORS_SCHEMA],
     }).compileComponents();
@@ -231,8 +230,8 @@ describe('SubmissionPanelComponent', () => {
   });
 
   it('deletes submission and navigates back when confirmed', fakeAsync(() => {
-    dialogService.openConfirmationDialog.and.returnValue({
-      afterClosed: () => of(true),
+    dialog.open.and.returnValue({
+      afterClosed: () => of({ dialogType: DialogType.DeleteSubmission }),
     } as any);
     initializeWithSubmission(Map({}));
 
@@ -250,8 +249,8 @@ describe('SubmissionPanelComponent', () => {
   }));
 
   it('does not delete submission when not confirmed', fakeAsync(() => {
-    dialogService.openConfirmationDialog.and.returnValue({
-      afterClosed: () => of(false),
+    dialog.open.and.returnValue({
+      afterClosed: () => of(undefined),
     } as any);
     initializeWithSubmission(Map({}));
 
@@ -265,7 +264,7 @@ describe('SubmissionPanelComponent', () => {
     spyOn(console, 'error');
     component.deleteSubmission();
     expect(console.error).toHaveBeenCalled();
-    expect(dialogService.openConfirmationDialog).not.toHaveBeenCalled();
+    expect(dialog.open).not.toHaveBeenCalled();
     expect(submissionService.deleteSubmission).not.toHaveBeenCalled();
   });
 
