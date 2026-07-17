@@ -27,6 +27,7 @@ export enum DialogType {
   CopySurvey,
   DeleteLois,
   DeleteOption,
+  DeleteSubmission,
   DeleteSurvey,
   DisableFreeForm,
   InvalidSurvey,
@@ -80,6 +81,12 @@ export const dialogConfigs: Record<DialogType, DialogConfig> = {
     content: $localize`:@@app.dialogs.deleteOption.content:Are you sure you wish to delete this option? All associated data will be lost. This cannot be undone.`,
     backButtonLabel: $localize`:@@app.labels.cancel:Cancel`,
     continueButtonLabel: $localize`:@@app.labels.confirm:Confirm`,
+  },
+  [DialogType.DeleteSubmission]: {
+    title: $localize`:@@app.dialogs.deleteSubmission.title:Delete submission?`,
+    content: $localize`:@@app.dialogs.deleteSubmission.content:This action will permanently delete this submission from the database. Are you sure you want to delete it?`,
+    backButtonLabel: $localize`:@@app.labels.cancel:Cancel`,
+    continueButtonLabel: $localize`:@@app.labels.delete:Delete`,
   },
   [DialogType.DeleteSurvey]: {
     title: $localize`:@@app.dialogs.deleteSurvey.title:Delete survey`,

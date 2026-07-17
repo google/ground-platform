@@ -16,16 +16,21 @@
 
 import { Component, computed, inject, input } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
+import { MatDialog } from '@angular/material/dialog';
 import { List } from 'immutable';
 import { of } from 'rxjs';
 
+import {
+  DialogComponent,
+  DialogData,
+  DialogType,
+} from 'app/components/shared/dialog/dialog.component';
 import { Geometry } from 'app/models/geometry/geometry';
 import { LocationOfInterest } from 'app/models/loi.model';
 import { MultipleSelection } from 'app/models/submission/multiple-selection';
 import { Result } from 'app/models/submission/result.model';
 import { Survey } from 'app/models/survey.model';
 import { Task, TaskType } from 'app/models/task/task.model';
-import { DialogService } from 'app/services/dialog/dialog.service';
 import { NavigationService } from 'app/services/navigation/navigation.service';
 import { SubmissionService } from 'app/services/submission/submission.service';
 
@@ -38,7 +43,7 @@ import { SubmissionService } from 'app/services/submission/submission.service';
 export class SubmissionPanelComponent {
   private submissionService = inject(SubmissionService);
   private navigationService = inject(NavigationService);
-  private dialogService = inject(DialogService);
+  private dialog = inject(MatDialog);
 
   activeSurvey = input<Survey>();
   selectedLoi = input<LocationOfInterest>();
@@ -100,14 +105,16 @@ export class SubmissionPanelComponent {
       console.error("No active survey or submission - can't delete submission");
       return;
     }
-    this.dialogService
-      .openConfirmationDialog(
-        $localize`:@@app.submissionPanel.deleteSubmission.title:Delete submission`,
-        $localize`:@@app.submissionPanel.deleteSubmission.message:Are you sure you wish to delete this submission? Any associated data will be lost. This cannot be undone.`
-      )
+    this.dialog
+      .open(DialogComponent, {
+        data: {
+          dialogType: DialogType.DeleteSubmission,
+        },
+        panelClass: 'small-width-dialog',
+      })
       .afterClosed()
-      .subscribe(async (confirmed: boolean) => {
-        if (!confirmed) return;
+      .subscribe(async (result: DialogData) => {
+        if (!result) return;
         await this.submissionService.deleteSubmission(survey.id, submission.id);
         this.navigationService.selectLocationOfInterest(survey.id, loi.id);
       });
