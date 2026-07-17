@@ -39,6 +39,7 @@ import { DialogType } from 'app/components/shared/dialog/dialog.component';
 import { GroundIconModule } from 'app/modules/ground-icon.module';
 import { NavigationService } from 'app/services/navigation/navigation.service';
 import { SubmissionService } from 'app/services/submission/submission.service';
+import { SurveyService } from 'app/services/survey/survey.service';
 
 import { SubmissionPanelComponent } from './submission-panel.component';
 import { Result } from 'app/models/submission/result.model';
@@ -51,6 +52,7 @@ describe('SubmissionPanelComponent', () => {
   let fixture: ComponentFixture<SubmissionPanelComponent>;
   let submissionService: jasmine.SpyObj<SubmissionService>;
   let navigationService: jasmine.SpyObj<NavigationService>;
+  let surveyService: jasmine.SpyObj<SurveyService>;
   let dialog: jasmine.SpyObj<MatDialog>;
   const mockSurvey = new Survey(
     'survey1',
@@ -107,6 +109,8 @@ describe('SubmissionPanelComponent', () => {
       of(mockSubmission.loiId)
     );
     navigationService.getTaskId$.and.returnValue(of(null));
+    surveyService = jasmine.createSpyObj('SurveyService', ['canManageSurvey']);
+    surveyService.canManageSurvey.and.returnValue(true);
     dialog = jasmine.createSpyObj('MatDialog', ['open']);
 
     await TestBed.configureTestingModule({
@@ -122,6 +126,7 @@ describe('SubmissionPanelComponent', () => {
       providers: [
         { provide: NavigationService, useValue: navigationService },
         { provide: SubmissionService, useValue: submissionService },
+        { provide: SurveyService, useValue: surveyService },
         { provide: MatDialog, useValue: dialog },
       ],
       schemas: [NO_ERRORS_SCHEMA],
@@ -267,6 +272,28 @@ describe('SubmissionPanelComponent', () => {
     expect(dialog.open).not.toHaveBeenCalled();
     expect(submissionService.deleteSubmission).not.toHaveBeenCalled();
   });
+
+  it('canManageSurvey reflects the survey service', fakeAsync(() => {
+    initializeWithSubmission(Map({}));
+    expect(component.canManageSurvey()).toBe(true);
+
+    surveyService.canManageSurvey.and.returnValue(false);
+    // Re-set the survey input so the computed re-evaluates.
+    fixture.componentRef.setInput('activeSurvey', { ...mockSurvey } as Survey);
+    expect(component.canManageSurvey()).toBe(false);
+  }));
+
+  it('logs and bails on delete when user cannot manage the survey', fakeAsync(() => {
+    spyOn(console, 'error');
+    surveyService.canManageSurvey.and.returnValue(false);
+    initializeWithSubmission(Map({}));
+
+    component.deleteSubmission();
+
+    expect(console.error).toHaveBeenCalled();
+    expect(dialog.open).not.toHaveBeenCalled();
+    expect(submissionService.deleteSubmission).not.toHaveBeenCalled();
+  }));
 
   it('getTaskSubmissionResult returns result for a known task', fakeAsync(() => {
     const result = new Result('answer');
