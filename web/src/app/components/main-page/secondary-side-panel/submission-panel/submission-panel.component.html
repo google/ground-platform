@@ -20,15 +20,31 @@ limitations under the License.
   </div>
 
   <ng-container *ngIf="!isLoading()">
-    <div class="submission-title">
-      <div class="submission-title-left">
+    <div class="submission-panel-header">
+      <div class="submission-panel-header-left">
         <button mat-icon-button (click)="navigateToSubmissionList()">
           <mat-icon>arrow_back</mat-icon>
         </button>
-        <div class="submission-title-text">
+        <div class="submission-panel-header-title">
           {{ submission()?.created?.user?.displayName }}
         </div>
       </div>
+      <button
+        mat-icon-button
+        [matMenuTriggerFor]="menu"
+        aria-label="Submission options"
+        i18n-aria-label="@@app.submissionPanel.options"
+      >
+        <mat-icon>more_vert</mat-icon>
+      </button>
+      <mat-menu #menu="matMenu">
+        <button mat-menu-item (click)="deleteSubmission()">
+          <mat-icon>delete</mat-icon>
+          <span i18n="@@app.submissionPanel.deleteSubmission"
+            >Delete submission</span
+          >
+        </button>
+      </mat-menu>
     </div>
     <div class="submission-subtitle">
       <span>
