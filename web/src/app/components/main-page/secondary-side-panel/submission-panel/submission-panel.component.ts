@@ -25,6 +25,7 @@ import { MultipleSelection } from 'app/models/submission/multiple-selection';
 import { Result } from 'app/models/submission/result.model';
 import { Survey } from 'app/models/survey.model';
 import { Task, TaskType } from 'app/models/task/task.model';
+import { DialogService } from 'app/services/dialog/dialog.service';
 import { NavigationService } from 'app/services/navigation/navigation.service';
 import { SubmissionService } from 'app/services/submission/submission.service';
 
@@ -37,6 +38,7 @@ import { SubmissionService } from 'app/services/submission/submission.service';
 export class SubmissionPanelComponent {
   private submissionService = inject(SubmissionService);
   private navigationService = inject(NavigationService);
+  private dialogService = inject(DialogService);
 
   activeSurvey = input<Survey>();
   selectedLoi = input<LocationOfInterest>();
@@ -88,6 +90,27 @@ export class SubmissionPanelComponent {
       return;
     }
     this.navigationService.selectLocationOfInterest(survey.id, loi.id);
+  }
+
+  deleteSubmission() {
+    const survey = this.activeSurvey();
+    const loi = this.selectedLoi();
+    const submission = this.submission();
+    if (!survey || !loi || !submission) {
+      console.error("No active survey or submission - can't delete submission");
+      return;
+    }
+    this.dialogService
+      .openConfirmationDialog(
+        $localize`:@@app.submissionPanel.deleteSubmission.title:Delete submission`,
+        $localize`:@@app.submissionPanel.deleteSubmission.message:Are you sure you wish to delete this submission? Any associated data will be lost. This cannot be undone.`
+      )
+      .afterClosed()
+      .subscribe(async (confirmed: boolean) => {
+        if (!confirmed) return;
+        await this.submissionService.deleteSubmission(survey.id, submission.id);
+        this.navigationService.selectLocationOfInterest(survey.id, loi.id);
+      });
   }
 
   getTaskSubmissionResult({ id: taskId }: Task): Result | undefined {
