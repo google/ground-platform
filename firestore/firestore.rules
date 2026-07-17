@@ -211,7 +211,9 @@ rules_version = '2';
       // Allow all survey users to list submissions.
       allow list: if canViewSurvey(getSurvey(surveyId));
       // Allow if user is owner of the existing submission and can collect data, or can manage survey.
-      allow update, delete: if (isSubmissionOwner(resource.data) && canCollectData(getSurvey(surveyId))) || canManageSurvey(getSurvey(surveyId));
+      allow update: if (isSubmissionOwner(resource.data) && canCollectData(getSurvey(surveyId))) || canManageSurvey(getSurvey(surveyId));
+      // Only survey managers (organizers and owners) may delete submissions.
+      allow delete: if canManageSurvey(getSurvey(surveyId));
     }
 
     // Apply survey-level permissions to job documents.
