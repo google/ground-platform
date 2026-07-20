@@ -18,6 +18,7 @@ import 'module-alias/register';
 import { onSchedule } from 'firebase-functions/scheduler';
 import {
   onDocumentCreated,
+  onDocumentDeleted,
   onDocumentWritten,
 } from 'firebase-functions/v2/firestore';
 import { onHttpsRequest, onHttpsRequestAsync } from './handlers';
@@ -31,6 +32,7 @@ import { cleanOrphanMediaHandler } from './clean-orphan-media';
 import { onCall } from 'firebase-functions/v2/https';
 import { onCreateLoiHandler } from './on-create-loi';
 import { onCreatePasslistEntryHandler } from './on-create-passlist-entry';
+import { onDeleteSubmissionHandler } from './on-delete-submission';
 import { onWriteJobHandler } from './on-write-job';
 import { onWriteLoiHandler } from './on-write-loi';
 import { onWriteSubmissionHandler } from './on-write-submission';
@@ -101,6 +103,11 @@ export const onWriteLoi = onDocumentWritten(loiPathTemplate, onWriteLoiHandler);
 export const onWriteSubmission = onDocumentWritten(
   submissionPathTemplate,
   onWriteSubmissionHandler
+);
+
+export const onDeleteSubmission = onDocumentDeleted(
+  submissionPathTemplate,
+  onDeleteSubmissionHandler
 );
 
 export const onWriteSurvey = onDocumentWritten(
