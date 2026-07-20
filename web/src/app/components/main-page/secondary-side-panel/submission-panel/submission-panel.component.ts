@@ -14,11 +14,17 @@
  * limitations under the License.
  */
 
-import { Component, computed, inject, input } from '@angular/core';
+import { Component, computed, inject, input, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
+import { MatDialog } from '@angular/material/dialog';
 import { List } from 'immutable';
 import { of } from 'rxjs';
 
+import {
+  DialogComponent,
+  DialogData,
+  DialogType,
+} from 'app/components/shared/dialog/dialog.component';
 import { Geometry } from 'app/models/geometry/geometry';
 import { LocationOfInterest } from 'app/models/loi.model';
 import { MultipleSelection } from 'app/models/submission/multiple-selection';
@@ -37,6 +43,7 @@ import { SubmissionService } from 'app/services/submission/submission.service';
 export class SubmissionPanelComponent {
   private submissionService = inject(SubmissionService);
   private navigationService = inject(NavigationService);
+  private dialog = inject(MatDialog);
 
   activeSurvey = input<Survey>();
   selectedLoi = input<LocationOfInterest>();
@@ -74,6 +81,7 @@ export class SubmissionPanelComponent {
 
   readonly submission = this.submissionResource.value;
   readonly isLoading = this.submissionResource.isLoading;
+  readonly isDeleting = signal(false);
 
   navigateToSubmissionList() {
     const loi = this.selectedLoi();
@@ -88,6 +96,38 @@ export class SubmissionPanelComponent {
       return;
     }
     this.navigationService.selectLocationOfInterest(survey.id, loi.id);
+  }
+
+  deleteSubmission() {
+    const survey = this.activeSurvey();
+    const loi = this.selectedLoi();
+    const submission = this.submission();
+    if (!survey || !loi || !submission) {
+      console.error("No active survey or submission - can't delete submission");
+      return;
+    }
+    this.dialog
+      .open(DialogComponent, {
+        data: {
+          dialogType: DialogType.DeleteSubmission,
+        },
+        panelClass: 'small-width-dialog',
+      })
+      .afterClosed()
+      .subscribe(async (result: DialogData) => {
+        if (!result) return;
+        this.isDeleting.set(true);
+        try {
+          await this.submissionService.deleteSubmission(
+            survey.id,
+            submission.id
+          );
+          this.navigationService.selectLocationOfInterest(survey.id, loi.id);
+        } catch (e) {
+          console.error('Error deleting submission', e);
+          this.isDeleting.set(false);
+        }
+      });
   }
 
   getTaskSubmissionResult({ id: taskId }: Task): Result | undefined {

@@ -14,21 +14,40 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-<div class="submission-panel" [ngClass]="{ loading: isLoading() }">
-  <div *ngIf="isLoading()" class="progress-spinner">
+<div
+  class="submission-panel"
+  [ngClass]="{ loading: isLoading() || isDeleting() }"
+>
+  <div *ngIf="isLoading() || isDeleting()" class="progress-spinner">
     <mat-spinner mode="indeterminate" diameter="50"></mat-spinner>
   </div>
 
-  <ng-container *ngIf="!isLoading()">
-    <div class="submission-title">
-      <div class="submission-title-left">
+  <ng-container *ngIf="!isLoading() && !isDeleting()">
+    <div class="submission-panel-header">
+      <div class="submission-panel-header-left">
         <button mat-icon-button (click)="navigateToSubmissionList()">
           <mat-icon>arrow_back</mat-icon>
         </button>
-        <div class="submission-title-text">
+        <div class="submission-panel-header-title">
           {{ submission()?.created?.user?.displayName }}
         </div>
       </div>
+      <button
+        mat-icon-button
+        [matMenuTriggerFor]="menu"
+        aria-label="Submission options"
+        i18n-aria-label="@@app.submissionPanel.options"
+      >
+        <mat-icon>more_vert</mat-icon>
+      </button>
+      <mat-menu #menu="matMenu">
+        <button mat-menu-item (click)="deleteSubmission()">
+          <mat-icon>delete</mat-icon>
+          <span i18n="@@app.submissionPanel.deleteSubmission"
+            >Delete submission</span
+          >
+        </button>
+      </mat-menu>
     </div>
     <div class="submission-subtitle">
       <span>
