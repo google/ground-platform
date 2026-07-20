@@ -33,7 +33,6 @@ import { Survey } from 'app/models/survey.model';
 import { Task, TaskType } from 'app/models/task/task.model';
 import { NavigationService } from 'app/services/navigation/navigation.service';
 import { SubmissionService } from 'app/services/submission/submission.service';
-import { SurveyService } from 'app/services/survey/survey.service';
 
 @Component({
   selector: 'submission-panel',
@@ -44,7 +43,6 @@ import { SurveyService } from 'app/services/survey/survey.service';
 export class SubmissionPanelComponent {
   private submissionService = inject(SubmissionService);
   private navigationService = inject(NavigationService);
-  private surveyService = inject(SurveyService);
   private dialog = inject(MatDialog);
 
   activeSurvey = input<Survey>();
@@ -85,11 +83,6 @@ export class SubmissionPanelComponent {
   readonly isLoading = this.submissionResource.isLoading;
   readonly isDeleting = signal(false);
 
-  readonly canManageSurvey = computed(() => {
-    const survey = this.activeSurvey();
-    return !!survey && this.surveyService.canManageSurvey(survey);
-  });
-
   navigateToSubmissionList() {
     const loi = this.selectedLoi();
     if (!loi) return;
@@ -111,10 +104,6 @@ export class SubmissionPanelComponent {
     const submission = this.submission();
     if (!survey || !loi || !submission) {
       console.error("No active survey or submission - can't delete submission");
-      return;
-    }
-    if (!this.canManageSurvey()) {
-      console.error('Only survey managers can delete submissions');
       return;
     }
     this.dialog
