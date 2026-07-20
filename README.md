@@ -62,13 +62,41 @@ nx start
 
 The local emulator is preloaded with a demo survey. Run `nx export` to save the updated demo data to the local filesystem for use on the next run.
 
-## Run against live staging environment
+## Running the web app locally using dev Firebase
 
-Members of the core maintainers team can run the app against the live staging environment with:
+By default `nx start` runs the web app against a local Firebase emulator (see
+[Build and run locally](#build-and-run-locally)). Sometimes it's useful to run
+the web app locally against the **live dev backend** instead — for example to
+reproduce an issue with real data, or to test against Cloud Functions and
+Firestore rules as actually deployed. The dev backend is the
+[`ground-dev-sig`](https://console.firebase.google.com/project/ground-dev-sig)
+Firebase project.
+
+To serve the local web app against dev:
 
 ```bash
 nx run web:serve:staging
 ```
+
+Once started, the app is available at http://localhost:4200 and connects to the
+live `ground-dev-sig` Firestore, Authentication, and Cloud Functions instead of
+the local emulator. Changes to the web app in `web/` are still rebuilt and
+reloaded on save, but the backend is remote — the Firebase Emulator Suite UI at
+http://localhost:4000 is not used in this mode.
+
+**Prerequisites:**
+
+- Install dependencies first with `pnpm install` (see
+  [One time setup](#one-time-setup)).
+- Unlike the local emulator, this mode has real authentication enabled. To sign
+  in and access surveys you need a Google account that has been added to the
+  `ground-dev-sig` passlist. Ask a member of the core maintainers team to grant
+  access if needed.
+
+> **Note on naming:** the Angular build configuration is named `staging`, but it
+> points at the dev project `ground-dev-sig`
+> ([`environment.staging.ts`](web/src/environments/environment.staging.ts)), so
+> `nx run web:serve:staging` serves against dev.
 
 ## Deploy
 
@@ -105,7 +133,7 @@ All commands use [Nx](https://nx.dev) and [pnpm](https://pnpm.io). Run them from
 | `nx run root:test` | Run all tests |
 | `nx run root:lint` | Lint all packages |
 | `nx run web:serve` | Serve the web app only (no emulator) |
-| `nx run web:serve:staging` | Serve the web app against the live staging environment |
+| `nx run web:serve:staging` | Serve the local web app against the live dev backend (`ground-dev-sig`) |
 | `nx run web:test` | Run web tests |
 | `nx run web:extract-i18n` | Extract i18n messages from the web app |
 | `nx run functions:test` | Run Cloud Functions tests |
