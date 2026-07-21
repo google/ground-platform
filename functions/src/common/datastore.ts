@@ -163,6 +163,10 @@ export class Datastore {
     return this.fetchDoc_(loi(surveyId, loiId));
   }
 
+  fetchSubmission(surveyId: string, submissionId: string) {
+    return this.db_.doc(submission(surveyId, submissionId)).get();
+  }
+
   fetchLocationsOfInterest(surveyId: string, jobId: string) {
     return this.db_
       .collection(lois(surveyId))
