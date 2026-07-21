@@ -15,13 +15,19 @@
  */
 
 import { Firestore } from '@google-cloud/firestore';
-import * as admin from 'firebase-admin';
+import * as app from 'firebase-admin/app';
 import * as firestore from 'firebase-admin/firestore';
 
+let initializeAppSpy: jasmine.Spy;
+
 export function stubAdminApi(mockFirestore: Firestore) {
-  spyOn(admin, 'initializeApp').and.returnValue({
+  const stubbedApp = {
     firestore: () => mockFirestore,
-  } as admin.app.App);
+  } as unknown as app.App;
+
+  initializeAppSpy = spyOnProperty(app, 'initializeApp', 'get').and.returnValue(
+    () => stubbedApp
+  );
 
   spyOn(firestore, 'getFirestore').and.returnValue(
     mockFirestore as unknown as firestore.Firestore
@@ -29,6 +35,6 @@ export function stubAdminApi(mockFirestore: Firestore) {
 }
 
 export function resetSpies() {
-  (admin.initializeApp as jasmine.Spy).and.callThrough();
+  initializeAppSpy?.and.callThrough();
   (firestore.getFirestore as jasmine.Spy).and.callThrough();
 }
