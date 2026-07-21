@@ -15,8 +15,13 @@
  */
 
 import { UserRecord } from 'firebase-admin/auth';
-import { firestore } from 'firebase-admin';
-import { DocumentData, FieldPath, GeoPoint } from 'firebase-admin/firestore';
+import {
+  DocumentData,
+  DocumentReference,
+  FieldPath,
+  Firestore,
+  GeoPoint,
+} from 'firebase-admin/firestore';
 import { registry } from '@ground/lib';
 import { GroundProtos } from '@ground/proto';
 
@@ -100,9 +105,9 @@ export const mailTemplate = (templateId: string) =>
   `${mail()}/templates/${templateId}`;
 
 export class Datastore {
-  private db_: firestore.Firestore;
+  private db_: Firestore;
 
-  constructor(db: firestore.Firestore) {
+  constructor(db: Firestore) {
     this.db_ = db;
     db.settings({ ignoreUndefinedProperties: true });
   }
@@ -124,8 +129,8 @@ export class Datastore {
   }
 
   async fetch_(
-    docRef: firestore.DocumentReference
-  ): Promise<firestore.DocumentData | null | undefined> {
+    docRef: DocumentReference
+  ): Promise<DocumentData | null | undefined> {
     const doc = await docRef.get();
     return doc.exists ? doc.data() : null;
   }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as admin from 'firebase-admin';
+import { getMessaging } from 'firebase-admin/messaging';
 
 /**
  * Sends an empty message to clients subscribed to the specified topic.
@@ -32,5 +32,5 @@ export async function broadcastSurveyUpdate(topic: string): Promise<string> {
 
   console.debug(`Sending message to ${topic}`);
 
-  return admin.messaging().send({ topic });
+  return getMessaging().send({ topic });
 }
