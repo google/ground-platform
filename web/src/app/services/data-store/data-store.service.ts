@@ -43,7 +43,7 @@ import { Observable, combineLatest, from } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { FirebaseDataConverter } from 'app/converters/firebase-data-converter';
-import { loiDocToModel } from 'app/converters/loi-data-converter';
+import { loiDocToModel, loiToDocument } from 'app/converters/loi-data-converter';
 import {
   jobToDocument,
   surveyToDocument,
@@ -419,6 +419,24 @@ export class DataStoreService {
     await Promise.all(
       querySnapshot.docs.map(doc =>
         runInInjectionContext(this.injector, () => deleteDoc(doc.ref))
+      )
+    );
+  }
+
+  /**
+   * Adds or updates a Location of Interest in Firestore.
+   *
+   * @param surveyId The ID of the survey the LOI belongs to.
+   * @param loi The LocationOfInterest model to save.
+   */
+  async addOrUpdateLoi(
+    surveyId: string,
+    loi: LocationOfInterest
+  ): Promise<void> {
+    return runInInjectionContext(this.injector, () =>
+      setDoc(
+        doc(this.db, `${SURVEYS_COLLECTION_NAME}/${surveyId}/lois`, loi.id),
+        loiToDocument(loi)
       )
     );
   }

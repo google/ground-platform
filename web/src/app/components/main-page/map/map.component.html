@@ -22,6 +22,37 @@ limitations under the License.
 >
 </google-map>
 
+<!-- Polygon drawing toolbar -->
+<div
+  *ngIf="shouldEnableDrawingTools && isDrawingPolygon"
+  id="polygon-draw-dialog"
+  class="polygon-draw-dialog"
+>
+  <div class="dialog-content">
+    <div class="dialog-text">
+      {{ drawingVertices.length < 3 ? 'Click map to add vertices' : 'Add more vertices or complete' }}
+    </div>
+    <button
+      class="dialog-button"
+      id="cancel-polygon"
+      mat-flat-button
+      (click)="onCancelPolygon()"
+    >
+      <label>Cancel</label>
+    </button>
+    <button
+      class="dialog-button"
+      id="complete-polygon"
+      mat-flat-button
+      color="primary"
+      [disabled]="drawingVertices.length < 3"
+      (click)="onCompletePolygon()"
+    >
+      <label>Complete</label>
+    </button>
+  </div>
+</div>
+
 <div
   *ngIf="shouldEnableDrawingTools && showRepositionConfirmDialog"
   id="reposition-confirm-dialog"

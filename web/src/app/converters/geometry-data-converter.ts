@@ -26,6 +26,54 @@ import { Polygon } from 'app/models/geometry/polygon';
 
 import Pb = GroundProtos.ground.v1beta1;
 
+// ── Model → Protobuf ──────────────────────────────────────────────────────────
+
+export function geometryModelToPb(geometry: Geometry): Pb.IGeometry {
+  if (geometry instanceof Point) {
+    return new Pb.Geometry({point: pointModelToPb(geometry)});
+  } else if (geometry instanceof Polygon) {
+    return new Pb.Geometry({polygon: polygonModelToPb(geometry)});
+  } else if (geometry instanceof MultiPolygon) {
+    return new Pb.Geometry({multiPolygon: multiPolygonModelToPb(geometry)});
+  } else {
+    throw new Error('Unsupported geometry type');
+  }
+}
+
+function pointModelToPb(point: Point): Pb.IPoint {
+  return new Pb.Point({
+    coordinates: coordinateModelToPb(point.coord),
+  });
+}
+
+function polygonModelToPb(polygon: Polygon): Pb.IPolygon {
+  return new Pb.Polygon({
+    shell: linearRingModelToPb(polygon.shell),
+    holes: polygon.holes.map(h => linearRingModelToPb(h)).toArray(),
+  });
+}
+
+function multiPolygonModelToPb(mp: MultiPolygon): Pb.IMultiPolygon {
+  return new Pb.MultiPolygon({
+    polygons: mp.polygons.map(p => polygonModelToPb(p)).toArray(),
+  });
+}
+
+function linearRingModelToPb(ring: LinearRing): Pb.ILinearRing {
+  return new Pb.LinearRing({
+    coordinates: ring.points.map(c => coordinateModelToPb(c)).toArray(),
+  });
+}
+
+function coordinateModelToPb(coord: Coordinate): Pb.ICoordinates {
+  return new Pb.Coordinates({
+    longitude: coord.x,
+    latitude: coord.y,
+  });
+}
+
+// ── Protobuf → Model ──────────────────────────────────────────────────────────
+
 export function geometryPbToModel(pb: Pb.IGeometry): Geometry {
   if (pb.point) {
     return pointPbToModel(pb.point);

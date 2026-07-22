@@ -30,11 +30,14 @@
     <img id="add-point-icon" class="add-point-icon" [src]="addPointIcon" />
   </mat-button-toggle>
   <mat-button-toggle
-    hidden
+    *ngIf="!jobs().isEmpty()"
+    id="add-polygon-button"
+    class="add-polygon-button"
     value="{{ polygonValue }}"
     (click)="onButtonClick()"
+    matTooltip="Draw polygon"
   >
-    add polygon
+    <mat-icon>pentagon</mat-icon>
   </mat-button-toggle>
 </mat-button-toggle-group>
 
