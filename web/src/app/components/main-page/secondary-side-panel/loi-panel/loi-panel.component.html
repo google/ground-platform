@@ -20,13 +20,13 @@ limitations under the License.
   </div>
 
   <ng-container *ngIf="!isLoading()">
-    <div class="header">
-      <div class="header-left">
+    <div class="loi-panel-header">
+      <div class="loi-panel-header-left">
         <mat-icon
           svgIcon="{{ icon() }}"
           [ngStyle]="{ color: iconColor() }"
         ></mat-icon>
-        <div>{{ name() }}</div>
+        <div class="loi-panel-header-title">{{ name() }}</div>
       </div>
 
       <button
