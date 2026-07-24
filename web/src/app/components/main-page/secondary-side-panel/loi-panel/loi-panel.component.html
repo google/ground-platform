@@ -32,13 +32,18 @@ limitations under the License.
       <button
         mat-icon-button
         *ngIf="hasProperties()"
-        aria-label="properties"
-        (click)="openPropertiesDialog($event)"
+        [matMenuTriggerFor]="menu"
+        aria-label="Site options"
+        i18n-aria-label="@@app.loiPanel.options"
       >
-        <mat-icon class="show-properties-icon">
-          data_info_alert
-        </mat-icon>
+        <mat-icon>more_vert</mat-icon>
       </button>
+      <mat-menu #menu="matMenu">
+        <button mat-menu-item (click)="openPropertiesDialog($event)">
+          <mat-icon>data_info_alert</mat-icon>
+          <span i18n="@@app.loiPanel.metadata">Metadata</span>
+        </button>
+      </mat-menu>
       <button mat-icon-button aria-label="back" (click)="onClosePanel()">
         <mat-icon>close</mat-icon>
       </button>
