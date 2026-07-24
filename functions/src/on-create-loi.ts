@@ -138,7 +138,7 @@ export function propertiesPbToObject(pb: {
   [k: string]: Pb.LocationOfInterest.IProperty;
 }): Properties {
   const properties: { [k: string]: string | number } = {};
-  for (const k of Object.keys(pb)) {
+  for (const k of Object.keys(pb).sort()) {
     const v = pb[k].stringValue || pb[k].numericValue;
     if (v !== null && v !== undefined) {
       properties[k] = v;
