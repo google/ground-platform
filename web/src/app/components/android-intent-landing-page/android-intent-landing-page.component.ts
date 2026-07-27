@@ -124,7 +124,9 @@ export class AndroidIntentLandingPageComponent implements OnInit {
     }, timeout);
 
     // Try opening the app via intent URL
-    window.location.href = `intent://${host}${path}#Intent;scheme=https;package=${googlePlayId};end`;
+    const fallbackUrl = encodeURIComponent(this.playStoreUrl);
+
+    window.location.href = `intent://${host}${path}#Intent;scheme=https;package=${googlePlayId};S.browser_fallback_url=${fallbackUrl};end`;
 
     // Cancel fallback if app is opened (browser loses focus)
     const blurHandler = () => {
