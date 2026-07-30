@@ -25,6 +25,7 @@ export enum DialogType {
   DeleteJob,
   UndoJobs,
   CopySurvey,
+  DeleteLoi,
   DeleteLois,
   DeleteOption,
   DeleteSubmission,
@@ -69,6 +70,12 @@ export const dialogConfigs: Record<DialogType, DialogConfig> = {
     content: $localize`:@@app.dialogs.deleteJob.content:This job and all of its associated data will be deleted. This operation can’t be undone. Are you sure?`,
     backButtonLabel: $localize`:@@app.labels.cancel:Cancel`,
     continueButtonLabel: $localize`:@@app.labels.confirm:Confirm`,
+  },
+  [DialogType.DeleteLoi]: {
+    title: $localize`:@@app.dialogs.deleteLoi.title:Delete location?`,
+    content: $localize`:@@app.dialogs.deleteLoi.content:This action will permanently delete this location and all the data collected for it. Are you sure you want to delete it?`,
+    backButtonLabel: $localize`:@@app.labels.cancel:Cancel`,
+    continueButtonLabel: $localize`:@@app.labels.delete:Delete`,
   },
   [DialogType.DeleteLois]: {
     title: $localize`:@@app.dialogs.deleteLois.title:Delete predefined sites`,
