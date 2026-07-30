@@ -78,6 +78,36 @@ export class LocationOfInterestService {
     );
   }
 
+  /**
+   * Returns true iff the current user may delete the given LOI.
+   *
+   * Imported LOIs are part of the survey design, so only survey organizers may
+   * remove them. LOIs added while collecting data belong to the collector who
+   * created them, and only that collector may remove them.
+   *
+   * Note this mirrors, but is deliberately narrower than, the `delete` rule in
+   * firestore.rules, which also lets organizers delete field data so that
+   * deleting a job or survey can clean up after itself.
+   */
+  canDeleteLocationOfInterest(
+    survey: Survey,
+    loi: LocationOfInterest
+  ): boolean {
+    if (loi.predefined) return this.surveyService.canManageSurvey(survey);
+    const user = this.authService.getCurrentUser();
+    return !!loi.ownerId && loi.ownerId === user?.id;
+  }
+
+  /**
+   * Deletes the given LOI along with every submission collected for it.
+   *
+   * @param surveyId the id of the survey the LOI belongs to.
+   * @param loiId the id of the LOI to delete.
+   */
+  deleteLocationOfInterest(surveyId: string, loiId: string): Promise<void> {
+    return this.dataStore.deleteLocationOfInterest(surveyId, loiId);
+  }
+
   /** A label for a given geometry type. Defaults to 'Polygon'. */
   private static geometryTypeLabel(geometryType?: GeometryType): string {
     switch (geometryType) {
