@@ -63,15 +63,19 @@ describe('LocationOfInterestService', () => {
   beforeEach(() => {
     dataStoreServiceSpy = jasmine.createSpyObj<DataStoreService>(
       'DataStoreService',
-      ['getAccessibleLois$']
+      ['getAccessibleLois$', 'deleteLocationOfInterest']
     );
+    dataStoreServiceSpy.deleteLocationOfInterest.and.resolveTo();
     surveyServiceSpy = jasmine.createSpyObj<SurveyService>('SurveyService', [
       'canManageSurvey',
     ]);
 
     TestBed.configureTestingModule({
       providers: [
-        { provide: AuthService, useValue: { getUser$: () => of(user) } },
+        {
+          provide: AuthService,
+          useValue: { getUser$: () => of(user), getCurrentUser: () => user },
+        },
         { provide: DataStoreService, useValue: dataStoreServiceSpy },
         { provide: SurveyService, useValue: surveyServiceSpy },
       ],
@@ -160,6 +164,110 @@ describe('LocationOfInterestService', () => {
         expect(lois.first()).toEqual(predefinedLoi);
         done();
       });
+    });
+  });
+
+  describe('canDeleteLocationOfInterest', () => {
+    /** An LOI imported from GeoJSON, i.e. part of the survey design. */
+    const importedLoi = new LocationOfInterest(
+      'imported001',
+      'job001',
+      new Point(new Coordinate(0, 0)),
+      ImmutableMap(),
+      '',
+      /* predefined= */ true,
+      /* submissionCount= */ 0,
+      /* ownerId= */ 'organizer001'
+    );
+
+    /** An LOI added while collecting data, owned by the signed-in user. */
+    const ownedFieldLoi = new LocationOfInterest(
+      'field001',
+      'job001',
+      new Point(new Coordinate(0, 0)),
+      ImmutableMap(),
+      '',
+      /* predefined= */ false,
+      /* submissionCount= */ 0,
+      /* ownerId= */ user.id
+    );
+
+    it('lets survey organizers delete imported LOIs', () => {
+      surveyServiceSpy.canManageSurvey.and.returnValue(true);
+
+      expect(
+        service.canDeleteLocationOfInterest(survey, importedLoi)
+      ).toBeTrue();
+    });
+
+    it('does not let non-organizers delete imported LOIs', () => {
+      surveyServiceSpy.canManageSurvey.and.returnValue(false);
+
+      expect(
+        service.canDeleteLocationOfInterest(survey, importedLoi)
+      ).toBeFalse();
+    });
+
+    it('lets the collector who created an LOI delete it', () => {
+      surveyServiceSpy.canManageSurvey.and.returnValue(false);
+
+      expect(
+        service.canDeleteLocationOfInterest(survey, ownedFieldLoi)
+      ).toBeTrue();
+    });
+
+    it('does not let organizers delete LOIs collected by others', () => {
+      surveyServiceSpy.canManageSurvey.and.returnValue(true);
+      const otherFieldLoi = new LocationOfInterest(
+        'field002',
+        'job001',
+        new Point(new Coordinate(0, 0)),
+        ImmutableMap(),
+        '',
+        /* predefined= */ false,
+        /* submissionCount= */ 0,
+        /* ownerId= */ 'someoneElse'
+      );
+
+      expect(
+        service.canDeleteLocationOfInterest(survey, otherFieldLoi)
+      ).toBeFalse();
+    });
+
+    it('does not allow deleting a field LOI with no known owner', () => {
+      surveyServiceSpy.canManageSurvey.and.returnValue(false);
+      const unownedFieldLoi = new LocationOfInterest(
+        'field003',
+        'job001',
+        new Point(new Coordinate(0, 0)),
+        ImmutableMap(),
+        '',
+        /* predefined= */ false
+      );
+
+      expect(
+        service.canDeleteLocationOfInterest(survey, unownedFieldLoi)
+      ).toBeFalse();
+    });
+  });
+
+  describe('deleteLocationOfInterest', () => {
+    it('delegates to the data store', async () => {
+      await service.deleteLocationOfInterest(survey.id, loi1.id);
+
+      expect(dataStoreServiceSpy.deleteLocationOfInterest).toHaveBeenCalledWith(
+        survey.id,
+        loi1.id
+      );
+    });
+
+    it('propagates data store failures', async () => {
+      const error = new Error('nope');
+      dataStoreServiceSpy.deleteLocationOfInterest.and.rejectWith(error);
+
+      await expectAsync(
+        service.deleteLocationOfInterest(survey.id, loi1.id)
+      ).toBeRejectedWith(error);
     });
   });
 
