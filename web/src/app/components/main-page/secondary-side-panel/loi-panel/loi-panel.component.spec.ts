@@ -24,6 +24,7 @@ import {
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
+import { MatMenuModule } from '@angular/material/menu';
 import { List, Map } from 'immutable';
 import { of } from 'rxjs';
 
@@ -102,6 +103,7 @@ describe('LocationOfInterestPanelComponent', () => {
         MatDialogModule,
         MatListModule,
         MatIconModule,
+        MatMenuModule,
       ],
       providers: [
         { provide: LocationOfInterestService, useValue: loiServiceSpy },
