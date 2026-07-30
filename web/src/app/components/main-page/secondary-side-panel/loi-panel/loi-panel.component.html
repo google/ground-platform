@@ -47,6 +47,7 @@ limitations under the License.
           <mat-icon>data_info_alert</mat-icon>
           <span i18n="@@app.loiPanel.metadata">Metadata</span>
         </button>
+        <mat-divider *ngIf="hasProperties() && canDelete()"></mat-divider>
         <button mat-menu-item *ngIf="canDelete()" (click)="deleteLoi()">
           <mat-icon>delete</mat-icon>
           <span i18n="@@app.loiPanel.deleteLoi">Delete location</span>
