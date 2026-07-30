@@ -81,19 +81,18 @@ export class LocationOfInterestService {
   /**
    * Returns true iff the current user may delete the given LOI.
    *
-   * Imported LOIs are part of the survey design, so only survey organizers may
-   * remove them. LOIs added while collecting data belong to the collector who
-   * created them, and only that collector may remove them.
+   * Survey organizers may delete any LOI in their survey, including field data
+   * collected by others, so that deleting a job or survey can clean up after
+   * itself. Otherwise an LOI added while collecting data belongs to the
+   * collector who created it, and only that collector may remove it.
    *
-   * Note this mirrors, but is deliberately narrower than, the `delete` rule in
-   * firestore.rules, which also lets organizers delete field data so that
-   * deleting a job or survey can clean up after itself.
+   * This mirrors the `delete` rule for LOIs in firestore.rules.
    */
   canDeleteLocationOfInterest(
     survey: Survey,
     loi: LocationOfInterest
   ): boolean {
-    if (loi.predefined) return this.surveyService.canManageSurvey(survey);
+    if (this.surveyService.canManageSurvey(survey)) return true;
     const user = this.authService.getCurrentUser();
     return !!loi.ownerId && loi.ownerId === user?.id;
   }
