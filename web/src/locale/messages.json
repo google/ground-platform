@@ -74,6 +74,7 @@
     "app.dialogs.deleteJob.title": "Delete job",
     "app.dialogs.deleteJob.content": "This job and all of its associated data will be deleted. This operation can’t be undone. Are you sure?",
     "app.labels.confirm": "Confirm",
+    "app.dialogs.deleteLoi.title": "Delete location?",
     "app.dialogs.deleteLois.title": "Delete predefined sites",
     "app.dialogs.deleteLois.content": "All predefined data collection sites and their associated data will be immediately deleted. This action cannot be undone.",
     "app.dialogs.deleteOption.title": "Delete option",
