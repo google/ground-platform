@@ -28,6 +28,7 @@ import { MatMenuModule } from '@angular/material/menu';
 import { List, Map } from 'immutable';
 import { of } from 'rxjs';
 
+import { DialogType } from 'app/components/shared/dialog/dialog.component';
 import { Coordinate } from 'app/models/geometry/coordinate';
 import { Point } from 'app/models/geometry/point';
 import { Job } from 'app/models/job.model';
@@ -69,8 +70,14 @@ describe('LocationOfInterestPanelComponent', () => {
   beforeEach(async () => {
     loiServiceSpy = jasmine.createSpyObj<LocationOfInterestService>(
       'LocationOfInterestService',
-      ['getLocationsOfInterest$']
+      [
+        'getLocationsOfInterest$',
+        'canDeleteLocationOfInterest',
+        'deleteLocationOfInterest',
+      ]
     );
+    loiServiceSpy.canDeleteLocationOfInterest.and.returnValue(true);
+    loiServiceSpy.deleteLocationOfInterest.and.resolveTo();
     submissionServiceSpy = jasmine.createSpyObj<SubmissionService>(
       'SubmissionService',
       ['getSubmissions$']
@@ -159,5 +166,80 @@ describe('LocationOfInterestPanelComponent', () => {
   it('should clear LOI on close', () => {
     component.onClosePanel();
     expect(navigationServiceSpy.clearLocationOfInterestId).toHaveBeenCalled();
+  });
+
+  it('exposes canDelete based on the LOI service', fakeAsync(() => {
+    loiServiceSpy.canDeleteLocationOfInterest.and.returnValue(false);
+    setupPanelWithLoi();
+
+    expect(component.canDelete()).toBeFalse();
+    expect(loiServiceSpy.canDeleteLocationOfInterest).toHaveBeenCalledWith(
+      mockSurvey,
+      mockLoi
+    );
+  }));
+
+  it('cannot delete when no LOI is selected', () => {
+    expect(component.canDelete()).toBeFalse();
+  });
+
+  it('deletes the LOI and closes the panel when confirmed', fakeAsync(() => {
+    dialogSpy.open.and.returnValue({
+      afterClosed: () => of({ dialogType: DialogType.DeleteLoi }),
+    } as any);
+    setupPanelWithLoi();
+
+    component.deleteLoi();
+    tick();
+
+    expect(loiServiceSpy.deleteLocationOfInterest).toHaveBeenCalledWith(
+      mockSurvey.id,
+      mockLoi.id
+    );
+    expect(navigationServiceSpy.clearLocationOfInterestId).toHaveBeenCalled();
+    expect(component.isDeleting()).toBeFalse();
+  }));
+
+  it('does not delete the LOI when not confirmed', fakeAsync(() => {
+    dialogSpy.open.and.returnValue({
+      afterClosed: () => of(undefined),
+    } as any);
+    setupPanelWithLoi();
+
+    component.deleteLoi();
+    tick();
+
+    expect(loiServiceSpy.deleteLocationOfInterest).not.toHaveBeenCalled();
+    expect(
+      navigationServiceSpy.clearLocationOfInterestId
+    ).not.toHaveBeenCalled();
+  }));
+
+  it('keeps the panel open when deletion fails', fakeAsync(() => {
+    spyOn(console, 'error');
+    loiServiceSpy.deleteLocationOfInterest.and.rejectWith(new Error('nope'));
+    dialogSpy.open.and.returnValue({
+      afterClosed: () => of({ dialogType: DialogType.DeleteLoi }),
+    } as any);
+    setupPanelWithLoi();
+
+    component.deleteLoi();
+    tick();
+
+    expect(
+      navigationServiceSpy.clearLocationOfInterestId
+    ).not.toHaveBeenCalled();
+    expect(component.isDeleting()).toBeFalse();
+    expect(console.error).toHaveBeenCalled();
+  }));
+
+  it('logs and bails on delete when no LOI is selected', () => {
+    spyOn(console, 'error');
+
+    component.deleteLoi();
+
+    expect(console.error).toHaveBeenCalled();
+    expect(dialogSpy.open).not.toHaveBeenCalled();
+    expect(loiServiceSpy.deleteLocationOfInterest).not.toHaveBeenCalled();
   });
 });
