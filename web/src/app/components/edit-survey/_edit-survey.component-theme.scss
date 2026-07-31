@@ -18,6 +18,10 @@
  @use '@angular/material' as mat;
 
  @mixin color($theme) {
+  .page > ground-survey-header {
+    background-color: mat.get-theme-color($theme, neutral, 94);
+  }
+
   .edit-survey-title {
     color: mat.get-theme-color($theme, on-background);
   }

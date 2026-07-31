@@ -191,6 +191,75 @@ describe('JobService', () => {
       expect(expression?.optionIds.toArray()).toEqual(['newOpt1']);
     });
 
+    it('should preserve the otherSelected flag when remapping conditions', () => {
+      const sourceTask = new Task(
+        'src',
+        TaskType.MULTIPLE_CHOICE,
+        'Source',
+        false,
+        0,
+        new MultipleChoice(Cardinality.SELECT_ONE, List([]), true)
+      );
+      const dependentTask = new Task(
+        'dep',
+        TaskType.TEXT,
+        'Dependent',
+        false,
+        1,
+        undefined,
+        new TaskCondition(
+          TaskConditionMatchType.MATCH_ALL,
+          List([
+            new TaskConditionExpression(
+              TaskConditionExpressionType.ONE_OF_SELECTED,
+              'src',
+              List([]),
+              /* otherSelected= */ true
+            ),
+          ])
+        )
+      );
+      const job = new Job(
+        'job1',
+        0,
+        '#000',
+        'Job 1',
+        Map({ src: sourceTask, dep: dependentTask }),
+        DataCollectionStrategy.MIXED
+      );
+
+      const newSourceTask = new Task(
+        'newSrc',
+        TaskType.MULTIPLE_CHOICE,
+        'Source',
+        false,
+        0,
+        new MultipleChoice(Cardinality.SELECT_ONE, List([]), true)
+      );
+      const newDependentTask = new Task(
+        'newDep',
+        TaskType.TEXT,
+        'Dependent',
+        false,
+        1,
+        undefined,
+        dependentTask.condition
+      );
+      dataStoreServiceSpy.generateId.and.returnValue('job2');
+      taskServiceSpy.duplicateTask.and.returnValues(
+        newSourceTask,
+        newDependentTask
+      );
+
+      const newJob = service.duplicateJob(job, '#FFF');
+
+      const expression = newJob.tasks
+        ?.get('newDep')
+        ?.condition?.expressions.first();
+      expect(expression?.taskId).toBe('newSrc');
+      expect(expression?.otherSelected).toBe(true);
+    });
+
     it('should drop condition expressions whose source task is missing', () => {
       const dependentTask = new Task(
         'dep',

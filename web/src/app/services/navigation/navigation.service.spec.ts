@@ -59,4 +59,11 @@ describe('NavigationService', () => {
       'survey/survey123/edit/survey'
     );
   });
+
+  it('getPlayStoreUrl carries the survey id in the install referrer', () => {
+    expect(service.getPlayStoreUrl('org.ground.app', 'survey123')).toBe(
+      'https://play.google.com/store/apps/details?id=org.ground.app' +
+        '&referrer=survey_id%3Dsurvey123'
+    );
+  });
 });

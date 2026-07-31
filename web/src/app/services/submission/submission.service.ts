@@ -74,6 +74,10 @@ export class SubmissionService {
     );
   }
 
+  deleteSubmission(surveyId: string, submissionId: string): Promise<void> {
+    return this.dataStore.deleteSubmission(surveyId, submissionId);
+  }
+
   createNewSubmission(
     user: User,
     survey: Survey,

@@ -22,8 +22,8 @@ import { DraftSurveyService } from 'app/services/draft-survey/draft-survey.servi
 import {
   DialogData,
   DialogType,
-  JobDialogComponent,
-} from 'app/components/edit-survey/job-dialog/job-dialog.component';
+  DialogComponent,
+} from 'app/components/shared/dialog/dialog.component';
 
 export const dirtyCheckGuard: CanDeactivateFn<any> = async () => {
   const draftSurveyService = inject(DraftSurveyService);
@@ -33,7 +33,7 @@ export const dirtyCheckGuard: CanDeactivateFn<any> = async () => {
     return true;
   }
 
-  const dialogRef = dialog.open(JobDialogComponent, {
+  const dialogRef = dialog.open(DialogComponent, {
     data: { dialogType: DialogType.UndoJobs },
     panelClass: 'small-width-dialog',
   });

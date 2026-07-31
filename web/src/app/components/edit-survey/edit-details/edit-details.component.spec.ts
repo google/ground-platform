@@ -39,8 +39,8 @@ import { SurveyService } from 'app/services/survey/survey.service';
 import {
   DialogData,
   DialogType,
-  JobDialogComponent,
-} from '../job-dialog/job-dialog.component';
+  DialogComponent,
+} from 'app/components/shared/dialog/dialog.component';
 
 describe('EditDetailsComponent', () => {
   let component: EditDetailsComponent;
@@ -56,7 +56,7 @@ describe('EditDetailsComponent', () => {
   );
   const newSurveyId = 'newSurveyId';
   let dialogRefSpy: jasmine.SpyObj<
-    MatDialogRef<JobDialogComponent, DialogData>
+    MatDialogRef<DialogComponent, DialogData>
   >;
   let dialogSpy: jasmine.SpyObj<MatDialog>;
   let navigationServiceSpy: jasmine.SpyObj<NavigationService>;
@@ -64,7 +64,7 @@ describe('EditDetailsComponent', () => {
 
   beforeEach(async () => {
     dialogRefSpy = jasmine.createSpyObj<
-      MatDialogRef<JobDialogComponent, DialogData>
+      MatDialogRef<DialogComponent, DialogData>
     >('MatDialogRef', ['afterClosed', 'close']);
     dialogSpy = jasmine.createSpyObj<MatDialog>('MatDialog', ['open']);
     dialogSpy.open.and.returnValue(dialogRefSpy);

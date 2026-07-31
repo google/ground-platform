@@ -16,6 +16,13 @@
 
 .page {
   min-height: 100%;
+
+  > ground-survey-header {
+    display: block;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+  }
 }
 
 .loading-spinner {

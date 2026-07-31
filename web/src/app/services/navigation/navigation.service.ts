@@ -349,6 +349,13 @@ export class NavigationService implements OnDestroy {
     return `${this.document.location.origin}/${ANDROID_SEGMENT}/${SURVEY_SEGMENT}/${surveyId}`;
   }
 
+  getPlayStoreUrl(googlePlayId: string, surveyId?: string): string {
+    const url = `https://play.google.com/store/apps/details?id=${googlePlayId}`;
+    if (!surveyId) return url;
+    const referrer = encodeURIComponent(`survey_id=${surveyId}`);
+    return `${url}&referrer=${referrer}`;
+  }
+
   getSidePanelExpanded(): boolean {
     return this.sidePanelExpanded;
   }

@@ -24,7 +24,6 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { CreateSurveyComponent } from 'app/components/create-survey/create-survey.component';
 import { DataSharingTermsModule } from 'app/components/create-survey/data-sharing-terms/data-sharing-terms.module';
 import { TaskDetailsModule } from 'app/components/create-survey/task-details/task-details.module';
-import { CopySurveyControlsModule } from 'app/components/shared/copy-survey-controls/copy-survey-controls.module';
 import { HeaderModule } from 'app/components/shared/header/header.module';
 import { ShareSurveyModule } from 'app/components/shared/share-survey/share-survey.module';
 
@@ -44,7 +43,6 @@ import { SurveyLoiModule } from './survey-loi/survey-loi.module';
     MatInputModule,
     MatProgressBarModule,
     MatProgressSpinnerModule,
-    CopySurveyControlsModule,
     ShareSurveyModule,
     StepCardModule,
     SurveyDetailsModule,

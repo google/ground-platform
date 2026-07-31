@@ -19,6 +19,7 @@ import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 
 import { AppConfigService } from 'app/services/app-config/app-config.service';
+import { SURVEY_SEGMENT } from 'app/services/navigation/navigation.constants';
 import { NavigationService } from 'app/services/navigation/navigation.service';
 
 @Component({
@@ -36,6 +37,7 @@ export class AndroidIntentLandingPageComponent implements OnInit {
   getItOnGooglePlayImageSrc: string;
   isAndroid = false;
   isIos = false;
+  playStoreUrl = '';
 
   constructor(@Inject(LOCALE_ID) public locale: string) {
     const languageId = locale.split('-')[0];
@@ -60,6 +62,22 @@ export class AndroidIntentLandingPageComponent implements OnInit {
         this.getItOnGooglePlayImageSrc =
           'assets/img/GetItOnGooglePlay_Badge_Web_color_English.png';
     }
+  }
+
+  /**
+   * Extracts the survey id from an app link path of the form
+   * `/android/survey/{surveyId}`, ignoring any query string or fragment.
+   * Returns an empty string when no survey id is present.
+   */
+  getPlayStoreUrl(googlePlayId: string): string {
+    return this.navigationService.getPlayStoreUrl(googlePlayId);
+  }
+
+  private parseSurveyId(path: string): string {
+    const segments = path.split(/[?#]/)[0].split('/');
+    const surveyIndex = segments.indexOf(SURVEY_SEGMENT);
+
+    return surveyIndex >= 0 ? (segments[surveyIndex + 1] ?? '') : '';
   }
 
   private isAndroidDevice(): boolean {
@@ -91,15 +109,24 @@ export class AndroidIntentLandingPageComponent implements OnInit {
 
     const path = this.router.url;
 
+    const surveyId = this.parseSurveyId(path);
+
+    this.playStoreUrl = this.navigationService.getPlayStoreUrl(
+      googlePlayId,
+      surveyId
+    );
+
     const timeout = 5000;
 
-    // Fallback: redirect to Google Play if app doesn't open
+    // Fallback: if the app didn't open, redirect to Google Play.
     const redirectTimeoutId = setTimeout(() => {
-      // window.location.href = `https://play.google.com/store/apps/details?id=${googlePlayId}`;
+      window.location.href = this.playStoreUrl;
     }, timeout);
 
     // Try opening the app via intent URL
-    window.location.href = `intent://${host}${path}#Intent;scheme=https;package=${googlePlayId};end`;
+    const fallbackUrl = encodeURIComponent(this.playStoreUrl);
+
+    window.location.href = `intent://${host}${path}#Intent;scheme=https;package=${googlePlayId};S.browser_fallback_url=${fallbackUrl};end`;
 
     // Cancel fallback if app is opened (browser loses focus)
     const blurHandler = () => {

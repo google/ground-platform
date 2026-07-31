@@ -24,6 +24,7 @@ import {
 } from './common/context';
 import { getTempFilePath } from './common/temp-storage';
 import { isAccessibleLoi } from './common/utils';
+import { propertiesPbToObject } from './on-create-loi';
 import { DecodedIdToken } from 'firebase-admin/auth';
 import { StatusCodes } from 'http-status-codes';
 import { toMessage } from '@ground/lib';
@@ -155,17 +156,4 @@ function getFileName(jobName: string | null) {
   jobName = jobName || 'ground-export';
   const fileBase = jobName.toLowerCase().replace(/[^a-z0-9]/gi, '-');
   return `${fileBase}.geojson`;
-}
-
-function propertiesPbToObject(pb: {
-  [k: string]: Pb.LocationOfInterest.IProperty;
-}): { [k: string]: string | number } {
-  const properties: { [k: string]: string | number } = {};
-  for (const k of Object.keys(pb).sort()) {
-    const v = pb[k].stringValue || pb[k].numericValue;
-    if (v !== null && v !== undefined) {
-      properties[k] = v;
-    }
-  }
-  return properties;
 }

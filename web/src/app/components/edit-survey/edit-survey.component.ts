@@ -35,8 +35,8 @@ import { Environment } from 'environments/environment-interface';
 import {
   DialogData,
   DialogType,
-  JobDialogComponent,
-} from './job-dialog/job-dialog.component';
+  DialogComponent,
+} from 'app/components/shared/dialog/dialog.component';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { switchMap } from 'rxjs';
 import { SurveyService } from 'app/services/survey/survey.service';
@@ -135,9 +135,9 @@ export class EditSurveyComponent {
   }
 
   openDialog(dialogType: DialogType, job: Job): void {
-    const dialogRef = this.dialog.open(JobDialogComponent, {
+    const dialogRef = this.dialog.open(DialogComponent, {
       autoFocus: [DialogType.AddJob, DialogType.RenameJob].includes(dialogType)
-        ? `#${JobDialogComponent.JOB_NAME_FIELD_ID}`
+        ? `#${DialogComponent.JOB_NAME_FIELD_ID}`
         : 'first-tabbable',
       data: { dialogType, jobName: job.name ?? '' },
       panelClass: 'small-width-dialog',

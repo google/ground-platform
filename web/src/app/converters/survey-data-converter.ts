@@ -177,7 +177,8 @@ function taskConditionPbToModel(pb: Pb.ITask): TaskCondition | undefined {
         new TaskConditionExpression(
           TaskConditionExpressionType.ONE_OF_SELECTED,
           multipleChoice!.taskId!,
-          List(multipleChoice!.optionIds!)
+          List(multipleChoice!.optionIds!),
+          multipleChoice!.otherSelected ?? false
         ),
       ])
     );

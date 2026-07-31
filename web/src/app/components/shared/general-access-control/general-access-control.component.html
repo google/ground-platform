@@ -41,4 +41,9 @@
       {{generalAccessLabels.get(selectedGeneralAccess)?.description}}
     </div>
   </div>
+
+  <ground-copy-survey-controls
+    *ngIf="selectedGeneralAccess === SurveyGeneralAccess.UNLISTED"
+    [surveyId]="survey()?.id || ''"
+  ></ground-copy-survey-controls>
 </div>

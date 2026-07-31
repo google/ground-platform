@@ -48,6 +48,13 @@
       <mat-option *ngFor="let option of previousMultipleTasks | getTaskOptions:taskIdControl.value" [value]="option.id">
         {{option.label}}
       </mat-option>
+      <mat-option
+        *ngIf="selectedTaskHasOtherOption"
+        [value]="OTHER_OPTION_ID"
+        i18n="@@app.taskEditor.condition.otherOption"
+      >
+        Other
+      </mat-option>
     </mat-select>
 
     <mat-error *ngIf="optionIdsControl.touched && optionIdsControl.invalid">

@@ -18,7 +18,7 @@ import {
   FirestoreEvent,
   QueryDocumentSnapshot,
 } from 'firebase-functions/v2/firestore';
-import * as logger from 'firebase-functions/logger';
+import { Datastore } from './common/datastore';
 import { getDatastore } from './common/context';
 import { broadcastSurveyUpdate } from './common/broadcast-survey-update';
 import { GroundProtos } from '@ground/proto';
@@ -50,9 +50,27 @@ export async function onCreateLoiHandler(
 
   const loiPb = toMessage(data, Pb.LocationOfInterest) as Pb.LocationOfInterest;
 
-  const geometry = toGeoJsonGeometry(loiPb.geometry!);
-
   const db = getDatastore();
+
+  const properties = await regenerateLoiProperties(db, surveyId, loiPb);
+
+  await db.updateLoiProperties(
+    surveyId,
+    loiId,
+    toDocumentData(
+      new Pb.LocationOfInterest({ properties: toLoiPbProperties(properties) })
+    )
+  );
+
+  await broadcastSurveyUpdate(surveyId);
+}
+
+export async function regenerateLoiProperties(
+  db: Datastore,
+  surveyId: string,
+  loiPb: Pb.LocationOfInterest
+): Promise<Properties> {
+  const geometry = toGeoJsonGeometry(loiPb.geometry!);
 
   let properties = propertiesPbToObject(loiPb.properties) || {};
 
@@ -92,15 +110,7 @@ export async function onCreateLoiHandler(
       .forEach(key => (properties[key] = JSON.stringify(properties[key])));
   }
 
-  await db.updateLoiProperties(
-    surveyId,
-    loiId,
-    toDocumentData(
-      new Pb.LocationOfInterest({ properties: toLoiPbProperties(properties) })
-    )
-  );
-
-  await broadcastSurveyUpdate(surveyId);
+  return properties;
 }
 
 function updateProperties(
@@ -136,11 +146,11 @@ function removePrefixedKeys(obj: Properties, prefix: string): Properties {
   return obj;
 }
 
-function propertiesPbToObject(pb: {
+export function propertiesPbToObject(pb: {
   [k: string]: Pb.LocationOfInterest.IProperty;
 }): Properties {
   const properties: { [k: string]: string | number } = {};
-  for (const k of Object.keys(pb)) {
+  for (const k of Object.keys(pb).sort()) {
     const v = pb[k].stringValue || pb[k].numericValue;
     if (v !== null && v !== undefined) {
       properties[k] = v;

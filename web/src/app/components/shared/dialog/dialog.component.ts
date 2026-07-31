@@ -27,6 +27,7 @@ export enum DialogType {
   CopySurvey,
   DeleteLois,
   DeleteOption,
+  DeleteSubmission,
   DeleteSurvey,
   DisableFreeForm,
   InvalidSurvey,
@@ -81,6 +82,12 @@ export const dialogConfigs: Record<DialogType, DialogConfig> = {
     backButtonLabel: $localize`:@@app.labels.cancel:Cancel`,
     continueButtonLabel: $localize`:@@app.labels.confirm:Confirm`,
   },
+  [DialogType.DeleteSubmission]: {
+    title: $localize`:@@app.dialogs.deleteSubmission.title:Delete submission?`,
+    content: $localize`:@@app.dialogs.deleteSubmission.content:This action will permanently delete this submission from the database. Are you sure you want to delete it?`,
+    backButtonLabel: $localize`:@@app.labels.cancel:Cancel`,
+    continueButtonLabel: $localize`:@@app.labels.delete:Delete`,
+  },
   [DialogType.DeleteSurvey]: {
     title: $localize`:@@app.dialogs.deleteSurvey.title:Delete survey`,
     content: $localize`:@@app.dialogs.deleteSurvey.content:Are you sure you wish to delete this survey? All associated data will be lost. This cannot be undone.`,
@@ -112,18 +119,18 @@ export interface DialogData {
 }
 
 @Component({
-  selector: 'job-dialog',
-  templateUrl: './job-dialog.component.html',
-  styleUrls: ['./job-dialog.component.scss'],
+  selector: 'ground-dialog',
+  templateUrl: './dialog.component.html',
+  styleUrls: ['./dialog.component.scss'],
   standalone: false,
 })
-export class JobDialogComponent {
+export class DialogComponent {
   public static readonly JOB_NAME_FIELD_ID = 'job-name';
 
   readonly DialogType = DialogType;
 
   constructor(
-    public dialogRef: MatDialogRef<JobDialogComponent>,
+    public dialogRef: MatDialogRef<DialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: DialogData
   ) {}
 
@@ -148,6 +155,6 @@ export class JobDialogComponent {
   }
 
   get jobNameFieldId() {
-    return JobDialogComponent.JOB_NAME_FIELD_ID;
+    return DialogComponent.JOB_NAME_FIELD_ID;
   }
 }

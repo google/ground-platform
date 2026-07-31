@@ -282,5 +282,11 @@ message Task {
     // Required. The system-defined unique identifier of the task to which this
     // MultipleChoiceSelection refers.
     string task_id = 2;
+
+    // When true, the condition passes if the data collector selected the
+    // "Other (specify)" option on the referenced task. May be combined with
+    // `option_ids`; the condition passes if any listed option is selected or,
+    // when this is true, if "Other" is selected.
+    bool other_selected = 3;
   }
 }

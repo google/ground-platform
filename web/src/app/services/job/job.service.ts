@@ -137,7 +137,8 @@ export class JobService {
         return new TaskConditionExpression(
           expr.expressionType,
           newTaskId,
-          newOptionIds
+          newOptionIds,
+          expr.otherSelected
         );
       })
       .filter((expr): expr is TaskConditionExpression => !!expr);

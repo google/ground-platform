@@ -22,6 +22,7 @@ import {
   tick,
 } from '@angular/core/testing';
 import { MatButtonModule } from '@angular/material/button';
+import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
 import { MatMenuModule } from '@angular/material/menu';
@@ -34,6 +35,7 @@ import { Job } from 'app/models/job.model';
 import { Submission } from 'app/models/submission/submission.model';
 import { DataSharingType, Survey } from 'app/models/survey.model';
 import { Task, TaskType } from 'app/models/task/task.model';
+import { DialogType } from 'app/components/shared/dialog/dialog.component';
 import { GroundIconModule } from 'app/modules/ground-icon.module';
 import { NavigationService } from 'app/services/navigation/navigation.service';
 import { SubmissionService } from 'app/services/submission/submission.service';
@@ -49,6 +51,7 @@ describe('SubmissionPanelComponent', () => {
   let fixture: ComponentFixture<SubmissionPanelComponent>;
   let submissionService: jasmine.SpyObj<SubmissionService>;
   let navigationService: jasmine.SpyObj<NavigationService>;
+  let dialog: jasmine.SpyObj<MatDialog>;
   const mockSurvey = new Survey(
     'survey1',
     'Survey Title',
@@ -91,7 +94,9 @@ describe('SubmissionPanelComponent', () => {
   beforeEach(async () => {
     submissionService = jasmine.createSpyObj('SubmissionService', [
       'getSubmission$',
+      'deleteSubmission',
     ]);
+    submissionService.deleteSubmission.and.resolveTo();
     navigationService = jasmine.createSpyObj('NavigationService', [
       'getTaskId$',
       'getLocationOfInterestId$',
@@ -102,6 +107,7 @@ describe('SubmissionPanelComponent', () => {
       of(mockSubmission.loiId)
     );
     navigationService.getTaskId$.and.returnValue(of(null));
+    dialog = jasmine.createSpyObj('MatDialog', ['open']);
 
     await TestBed.configureTestingModule({
       declarations: [SubmissionPanelComponent],
@@ -116,6 +122,7 @@ describe('SubmissionPanelComponent', () => {
       providers: [
         { provide: NavigationService, useValue: navigationService },
         { provide: SubmissionService, useValue: submissionService },
+        { provide: MatDialog, useValue: dialog },
       ],
       schemas: [NO_ERRORS_SCHEMA],
     }).compileComponents();
@@ -220,6 +227,45 @@ describe('SubmissionPanelComponent', () => {
     expect(
       navigationService.showSubmissionDetailWithHighlightedTask
     ).not.toHaveBeenCalled();
+  });
+
+  it('deletes submission and navigates back when confirmed', fakeAsync(() => {
+    dialog.open.and.returnValue({
+      afterClosed: () => of({ dialogType: DialogType.DeleteSubmission }),
+    } as any);
+    initializeWithSubmission(Map({}));
+
+    component.deleteSubmission();
+    tick();
+
+    expect(submissionService.deleteSubmission).toHaveBeenCalledWith(
+      mockSurvey.id,
+      mockSubmission.id
+    );
+    expect(navigationService.selectLocationOfInterest).toHaveBeenCalledWith(
+      mockSurvey.id,
+      mockSubmission.loiId
+    );
+  }));
+
+  it('does not delete submission when not confirmed', fakeAsync(() => {
+    dialog.open.and.returnValue({
+      afterClosed: () => of(undefined),
+    } as any);
+    initializeWithSubmission(Map({}));
+
+    component.deleteSubmission();
+    tick();
+
+    expect(submissionService.deleteSubmission).not.toHaveBeenCalled();
+  }));
+
+  it('logs and bails on delete when no submission has loaded', () => {
+    spyOn(console, 'error');
+    component.deleteSubmission();
+    expect(console.error).toHaveBeenCalled();
+    expect(dialog.open).not.toHaveBeenCalled();
+    expect(submissionService.deleteSubmission).not.toHaveBeenCalled();
   });
 
   it('getTaskSubmissionResult returns result for a known task', fakeAsync(() => {

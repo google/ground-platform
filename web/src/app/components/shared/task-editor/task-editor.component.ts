@@ -39,6 +39,7 @@ import {
 } from 'app/models/task/multiple-choice.model';
 import { Option } from 'app/models/task/option.model';
 import {
+  OTHER_OPTION_ID,
   TaskCondition,
   TaskConditionExpression,
   TaskConditionExpressionType,
@@ -255,7 +256,10 @@ export class TaskEditorComponent {
                 expressionType: expression.expressionType,
                 taskId: [expression.taskId, Validators.required],
                 optionIds: [
-                  expression.optionIds.toArray(),
+                  [
+                    ...expression.optionIds.toArray(),
+                    ...(expression.otherSelected ? [OTHER_OPTION_ID] : []),
+                  ],
                   Validators.required,
                 ],
               })
@@ -306,15 +310,19 @@ export class TaskEditorComponent {
             matchType: condition.get('matchType')?.value,
             expressions: List(
               (condition.get('expressions') as FormArray).controls.map(
-                (expression: AbstractControl) =>
-                  ({
+                (expression: AbstractControl) => {
+                  const selectedIds = (expression.get('optionIds')?.value ||
+                    []) as string[];
+                  return {
                     expressionType: expression.get('expressionType')
                       ?.value as TaskConditionExpressionType,
                     taskId: expression.get('taskId')?.value as string,
                     optionIds: List(
-                      expression.get('optionIds')?.value as string[]
+                      selectedIds.filter(id => id !== OTHER_OPTION_ID)
                     ),
-                  }) as TaskConditionExpression
+                    otherSelected: selectedIds.includes(OTHER_OPTION_ID),
+                  } as TaskConditionExpression;
+                }
               )
             ),
           } as TaskCondition)
