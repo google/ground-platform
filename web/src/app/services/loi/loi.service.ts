@@ -86,6 +86,13 @@ export class LocationOfInterestService {
    * itself. Otherwise an LOI added while collecting data belongs to the
    * collector who created it, and only that collector may remove it.
    *
+   * Imported LOIs are never deletable by a non-organizer, not even by the user
+   * who uploaded them. They are part of the survey design, and they are the
+   * only LOIs that can accumulate submissions from more than one collector, so
+   * deleting one takes other people's data with it. Ownership alone is not
+   * enough here: `ownerId` on an imported LOI is whoever ran the GeoJSON
+   * import, who may since have been demoted out of the organizer role.
+   *
    * This mirrors the `delete` rule for LOIs in firestore.rules.
    */
   canDeleteLocationOfInterest(
@@ -93,6 +100,7 @@ export class LocationOfInterestService {
     loi: LocationOfInterest
   ): boolean {
     if (this.surveyService.canManageSurvey(survey)) return true;
+    if (loi.predefined) return false;
     const user = this.authService.getCurrentUser();
     return !!loi.ownerId && loi.ownerId === user?.id;
   }

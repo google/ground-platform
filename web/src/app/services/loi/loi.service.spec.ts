@@ -208,6 +208,24 @@ describe('LocationOfInterestService', () => {
       ).toBeFalse();
     });
 
+    it('does not let the importer delete an imported LOI once demoted', () => {
+      surveyServiceSpy.canManageSurvey.and.returnValue(false);
+      const importedByCurrentUser = new LocationOfInterest(
+        'imported002',
+        'job001',
+        new Point(new Coordinate(0, 0)),
+        ImmutableMap(),
+        '',
+        /* predefined= */ true,
+        /* submissionCount= */ 3,
+        /* ownerId= */ user.id
+      );
+
+      expect(
+        service.canDeleteLocationOfInterest(survey, importedByCurrentUser)
+      ).toBeFalse();
+    });
+
     it('lets the collector who created an LOI delete it', () => {
       surveyServiceSpy.canManageSurvey.and.returnValue(false);
 
@@ -216,22 +234,48 @@ describe('LocationOfInterestService', () => {
       ).toBeTrue();
     });
 
-    it('does not let organizers delete LOIs collected by others', () => {
+    /** An LOI added while collecting data, owned by another user. */
+    const otherFieldLoi = new LocationOfInterest(
+      'field002',
+      'job001',
+      new Point(new Coordinate(0, 0)),
+      ImmutableMap(),
+      '',
+      /* predefined= */ false,
+      /* submissionCount= */ 0,
+      /* ownerId= */ 'someoneElse'
+    );
+
+    it('lets survey organizers delete LOIs collected by others', () => {
       surveyServiceSpy.canManageSurvey.and.returnValue(true);
-      const otherFieldLoi = new LocationOfInterest(
-        'field002',
-        'job001',
-        new Point(new Coordinate(0, 0)),
-        ImmutableMap(),
-        '',
-        /* predefined= */ false,
-        /* submissionCount= */ 0,
-        /* ownerId= */ 'someoneElse'
-      );
+
+      expect(
+        service.canDeleteLocationOfInterest(survey, otherFieldLoi)
+      ).toBeTrue();
+    });
+
+    it('does not let collectors delete LOIs collected by others', () => {
+      surveyServiceSpy.canManageSurvey.and.returnValue(false);
 
       expect(
         service.canDeleteLocationOfInterest(survey, otherFieldLoi)
       ).toBeFalse();
+    });
+
+    it('lets survey organizers delete a field LOI with no known owner', () => {
+      surveyServiceSpy.canManageSurvey.and.returnValue(true);
+      const unownedFieldLoi = new LocationOfInterest(
+        'field004',
+        'job001',
+        new Point(new Coordinate(0, 0)),
+        ImmutableMap(),
+        '',
+        /* predefined= */ false
+      );
+
+      expect(
+        service.canDeleteLocationOfInterest(survey, unownedFieldLoi)
+      ).toBeTrue();
     });
 
     it('does not allow deleting a field LOI with no known owner', () => {
