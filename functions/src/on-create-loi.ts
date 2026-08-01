@@ -18,6 +18,7 @@ import {
   FirestoreEvent,
   QueryDocumentSnapshot,
 } from 'firebase-functions/v2/firestore';
+import * as logger from 'firebase-functions/logger';
 import { Datastore } from './common/datastore';
 import { getDatastore } from './common/context';
 import { broadcastSurveyUpdate } from './common/broadcast-survey-update';
@@ -52,7 +53,7 @@ export async function onCreateLoiHandler(
 
   const db = getDatastore();
 
-  const properties = await regenerateLoiProperties(db, surveyId, loiPb);
+  const properties = await regenerateLoiProperties(db, surveyId, loiId, loiPb);
 
   await db.updateLoiProperties(
     surveyId,
@@ -68,6 +69,7 @@ export async function onCreateLoiHandler(
 export async function regenerateLoiProperties(
   db: Datastore,
   surveyId: string,
+  loiId: string,
   loiPb: Pb.LocationOfInterest
 ): Promise<Properties> {
   const geometry = toGeoJsonGeometry(loiPb.geometry!);

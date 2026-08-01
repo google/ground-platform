@@ -22,6 +22,7 @@ import {
   Firestore,
   GeoPoint,
 } from 'firebase-admin/firestore';
+import type { Geometry } from 'geojson';
 import { registry } from '@ground/lib';
 import { GroundProtos } from '@ground/proto';
 
