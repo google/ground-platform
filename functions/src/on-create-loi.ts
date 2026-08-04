@@ -20,7 +20,6 @@ import {
 } from 'firebase-functions/v2/firestore';
 import { Datastore } from './common/datastore';
 import { getDatastore } from './common/context';
-import { broadcastSurveyUpdate } from './common/broadcast-survey-update';
 import { GroundProtos } from '@ground/proto';
 import { toDocumentData, toGeoJsonGeometry, toMessage } from '@ground/lib';
 import { toLoiPbProperties } from './import-geojson';
@@ -54,6 +53,8 @@ export async function onCreateLoiHandler(
 
   const properties = await regenerateLoiProperties(db, surveyId, loiPb);
 
+  // No broadcast here: this write, like the create before it, already triggers
+  // `onWriteLoi`, which sends one.
   await db.updateLoiProperties(
     surveyId,
     loiId,
@@ -61,8 +62,6 @@ export async function onCreateLoiHandler(
       new Pb.LocationOfInterest({ properties: toLoiPbProperties(properties) })
     )
   );
-
-  await broadcastSurveyUpdate(surveyId);
 }
 
 export async function regenerateLoiProperties(
