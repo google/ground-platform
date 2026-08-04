@@ -72,8 +72,8 @@ export const dialogConfigs: Record<DialogType, DialogConfig> = {
     continueButtonLabel: $localize`:@@app.labels.confirm:Confirm`,
   },
   [DialogType.DeleteLoi]: {
-    title: $localize`:@@app.dialogs.deleteLoi.title:Delete location?`,
-    content: $localize`:@@app.dialogs.deleteLoi.content:This action will permanently delete this location and all the data collected for it. Are you sure you want to delete it?`,
+    title: $localize`:@@app.dialogs.deleteLoi.title:Delete site?`,
+    content: $localize`:@@app.dialogs.deleteLoi.content:This action will permanently delete this site and all the data collected for it. Are you sure you want to delete it?`,
     backButtonLabel: $localize`:@@app.labels.cancel:Cancel`,
     continueButtonLabel: $localize`:@@app.labels.delete:Delete`,
   },
