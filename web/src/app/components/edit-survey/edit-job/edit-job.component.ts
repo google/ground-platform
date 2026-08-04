@@ -43,7 +43,7 @@ enum EditJobSection {
 })
 export class EditJobComponent {
   subscription: Subscription = new Subscription();
-  loisSubscription: Subscription = new Subscription();
+  loisSubscription?: Subscription;
 
   surveyId?: string;
   jobId?: string;
@@ -97,16 +97,17 @@ export class EditJobComponent {
 
     this.job = this.draftSurveyService.getSurvey().getJob(this.jobId!);
 
+    this.loisSubscription?.unsubscribe();
+    this.loisSubscription = undefined;
+
     if (!this.job) return;
 
-    this.loisSubscription.add(
-      this.loiService
-        .getPredefinedLoisByJobId$(
-          this.draftSurveyService.getSurvey(),
-          this.job!.id
-        )
-        .subscribe((lois: List<LocationOfInterest>) => (this.lois = lois))
-    );
+    this.loisSubscription = this.loiService
+      .getPredefinedLoisByJobId$(
+        this.draftSurveyService.getSurvey(),
+        this.job.id
+      )
+      .subscribe((lois: List<LocationOfInterest>) => (this.lois = lois));
 
     this.tasks = this.job?.tasks?.toList().sortBy(task => task.index);
   }
@@ -151,6 +152,6 @@ export class EditJobComponent {
   ngOnDestroy() {
     this.subscription.unsubscribe();
 
-    this.loisSubscription.unsubscribe();
+    this.loisSubscription?.unsubscribe();
   }
 }
