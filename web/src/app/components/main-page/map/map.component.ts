@@ -382,22 +382,23 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
    * the map but not in the `newLocationsOfInterest` are considered as deleted.
    */
   private removeDeletedLocationsOfInterest(idsToRemove: List<string>) {
-    this.removeDeletedMarkers(idsToRemove);
-    this.removeDeletedPolygons(idsToRemove);
+    const ids = new Set(idsToRemove);
+    this.removeDeletedMarkers(ids);
+    this.removeDeletedPolygons(ids);
   }
 
-  private removeDeletedMarkers(idsToRemove: List<string>) {
+  private removeDeletedMarkers(idsToRemove: Set<string>) {
     for (const id of this.markers.keys()) {
-      if (idsToRemove.includes(id)) {
+      if (idsToRemove.has(id)) {
         this.markers.get(id)!.map = null;
         this.markers.delete(id);
       }
     }
   }
 
-  private removeDeletedPolygons(idsToRemove: List<string>) {
+  private removeDeletedPolygons(idsToRemove: Set<string>) {
     for (const id of this.polygons.keys()) {
-      if (idsToRemove.includes(id)) {
+      if (idsToRemove.has(id)) {
         for (const polygon of this.polygons.get(id)!) {
           polygon.setMap(null);
         }
