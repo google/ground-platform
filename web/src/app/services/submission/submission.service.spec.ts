@@ -72,6 +72,7 @@ describe('SubmissionService', () => {
     user$ = new ReplaySubject<User>(1);
     dataStoreServiceSpy = jasmine.createSpyObj('DataStoreService', [
       'getAccessibleSubmissions$',
+      'getAccessibleSubmission$',
       'generateId',
       'getServerTimestamp',
     ]);
@@ -130,13 +131,40 @@ describe('SubmissionService', () => {
   describe('getSubmission$', () => {
     it('should return submission if found', done => {
       user$.next(mockUser);
-      const submissions = List([mockSubmission]);
-      dataStoreServiceSpy.getAccessibleSubmissions$.and.returnValue(
-        of(submissions)
+      dataStoreServiceSpy.getAccessibleSubmission$.and.returnValue(
+        of(mockSubmission)
       );
 
       service.getSubmission$(mockSurvey, mockLoi, 'sub1').subscribe(result => {
         expect(result).toBe(mockSubmission);
+        expect(
+          dataStoreServiceSpy.getAccessibleSubmission$
+        ).toHaveBeenCalledOnceWith(mockSurvey, mockLoi, 'sub1');
+        done();
+      });
+    });
+
+    it('should read a single document rather than the whole collection', () => {
+      user$.next(mockUser);
+      dataStoreServiceSpy.getAccessibleSubmission$.and.returnValue(
+        of(mockSubmission)
+      );
+
+      service.getSubmission$(mockSurvey, mockLoi, 'sub1').subscribe();
+
+      expect(
+        dataStoreServiceSpy.getAccessibleSubmissions$
+      ).not.toHaveBeenCalled();
+    });
+
+    it('should return undefined if not found or not visible', done => {
+      user$.next(mockUser);
+      dataStoreServiceSpy.getAccessibleSubmission$.and.returnValue(
+        of(undefined)
+      );
+
+      service.getSubmission$(mockSurvey, mockLoi, 'sub1').subscribe(result => {
+        expect(result).toBeUndefined();
         done();
       });
     });

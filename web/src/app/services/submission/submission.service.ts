@@ -17,7 +17,7 @@
 import { Injectable } from '@angular/core';
 import { List, Map } from 'immutable';
 import { Observable, of } from 'rxjs';
-import { map, switchMap } from 'rxjs/operators';
+import { switchMap } from 'rxjs/operators';
 
 import { AuditInfo } from 'app/models/audit-info.model';
 import { LocationOfInterest } from 'app/models/loi.model';
@@ -68,10 +68,8 @@ export class SubmissionService {
     survey: Survey,
     loi: LocationOfInterest,
     submissionId: string
-  ): Observable<Submission> {
-    return this.getSubmissions$(survey, loi).pipe(
-      map(submissions => submissions.find(({ id }) => id === submissionId)!)
-    );
+  ): Observable<Submission | undefined> {
+    return this.dataStore.getAccessibleSubmission$(survey, loi, submissionId);
   }
 
   deleteSubmission(surveyId: string, submissionId: string): Promise<void> {

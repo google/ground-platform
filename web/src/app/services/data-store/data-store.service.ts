@@ -39,8 +39,8 @@ import { registry } from '@ground/lib';
 import { GroundProtos } from '@ground/proto';
 import { getDownloadURL, getStorage, ref } from 'firebase/storage';
 import { List, Map, OrderedMap } from 'immutable';
-import { Observable, combineLatest, from } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { Observable, combineLatest, from, of } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
 
 import { FirebaseDataConverter } from 'app/converters/firebase-data-converter';
 import { loiDocToModel } from 'app/converters/loi-data-converter';
@@ -601,6 +601,41 @@ export class DataStoreService {
         )
       );
     });
+  }
+
+  getAccessibleSubmission$(
+    survey: Survey,
+    loi: LocationOfInterest,
+    submissionId: string
+  ): Observable<Submission | undefined> {
+    return runInInjectionContext(this.injector, () =>
+      docData(
+        doc(
+          this.db,
+          `${SURVEYS_COLLECTION_NAME}/${survey.id}/submissions`,
+          submissionId
+        ),
+        { idField: 'id' }
+      ).pipe(
+        map(data => {
+          if (!data) return undefined;
+          const submission = submissionDocToModel(
+            survey.getJob(loi.jobId)!,
+            data['id'],
+            data
+          );
+          if (submission instanceof Error) {
+            console.error(submission);
+            return undefined;
+          }
+          return submission;
+        }),
+        catchError(err => {
+          console.error(`Error loading submission ${submissionId}`, err);
+          return of(undefined);
+        })
+      )
+    );
   }
 
   // TODO: Define return type here and throughout.
