@@ -14,31 +14,45 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-<div class="loi-panel" [ngClass]="{ loading: isLoading() }">
-  <div *ngIf="isLoading()" class="progress-spinner">
+<div class="loi-panel" [ngClass]="{ loading: isLoading() || isDeleting() }">
+  <div *ngIf="isLoading() || isDeleting()" class="progress-spinner">
     <mat-spinner mode="indeterminate" diameter="50"></mat-spinner>
   </div>
 
-  <ng-container *ngIf="!isLoading()">
-    <div class="header">
-      <div class="header-left">
+  <ng-container *ngIf="!isLoading() && !isDeleting()">
+    <div class="loi-panel-header">
+      <div class="loi-panel-header-left">
         <mat-icon
           svgIcon="{{ icon() }}"
           [ngStyle]="{ color: iconColor() }"
         ></mat-icon>
-        <div>{{ name() }}</div>
+        <div class="loi-panel-header-title">{{ name() }}</div>
       </div>
 
       <button
         mat-icon-button
-        *ngIf="hasProperties()"
-        aria-label="properties"
-        (click)="openPropertiesDialog($event)"
+        *ngIf="hasProperties() || canDelete()"
+        [matMenuTriggerFor]="menu"
+        aria-label="Site options"
+        i18n-aria-label="@@app.loiPanel.options"
       >
-        <mat-icon class="show-properties-icon">
-          data_info_alert
-        </mat-icon>
+        <mat-icon>more_vert</mat-icon>
       </button>
+      <mat-menu #menu="matMenu">
+        <button
+          mat-menu-item
+          *ngIf="hasProperties()"
+          (click)="openPropertiesDialog($event)"
+        >
+          <mat-icon>data_info_alert</mat-icon>
+          <span i18n="@@app.loiPanel.metadata">Metadata</span>
+        </button>
+        <mat-divider *ngIf="hasProperties() && canDelete()"></mat-divider>
+        <button mat-menu-item *ngIf="canDelete()" (click)="deleteLoi()">
+          <mat-icon>delete</mat-icon>
+          <span i18n="@@app.loiPanel.deleteLoi">Delete site</span>
+        </button>
+      </mat-menu>
       <button mat-icon-button aria-label="back" (click)="onClosePanel()">
         <mat-icon>close</mat-icon>
       </button>
@@ -59,9 +73,7 @@ limitations under the License.
           <mat-divider *ngIf="i > 0"></mat-divider>
           <div class="submission-item">
             <mat-list-item (click)="onSelectSubmission(submission.id)">
-              <mat-icon matListItemIcon
-                >text_snippet</mat-icon
-              >
+              <mat-icon matListItemIcon>text_snippet</mat-icon>
               <h3 matListItemTitle>
                 {{ submission.created.user.displayName }}
               </h3>

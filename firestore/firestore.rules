@@ -154,6 +154,16 @@ rules_version = '2';
     }
 
     /**
+     * Returns true iff the specified LOI was imported as part of the survey
+     * design (e.g. from GeoJSON), rather than added during data collection.
+     * Note that `ownerId` on such an LOI is whoever ran the import, which is
+     * not on its own grounds to let them modify it later.
+     */
+    function isImportedLoi(loi) {
+      return loi.get('9', 0) == 1 /* IMPORTED */;
+    }
+
+    /**
      * Returns true iff the current user is the owner of the specified submission.
      */
     function isSubmissionOwner(submission) {
@@ -199,7 +209,8 @@ rules_version = '2';
       // Allow all survey users to list LOIs.
       allow list: if canViewSurvey(getSurvey(surveyId));
       // Allow if user is owner of the existing LOI and can collect data, or can manage survey.
-      allow update, delete: if (isLoiOwner(resource.data) && canCollectData(getSurvey(surveyId))) || canManageSurvey(getSurvey(surveyId));
+      allow update: if (isLoiOwner(resource.data) && canCollectData(getSurvey(surveyId))) || canManageSurvey(getSurvey(surveyId));
+      allow delete: if (isLoiOwner(resource.data) && !isImportedLoi(resource.data) && canCollectData(getSurvey(surveyId))) || canManageSurvey(getSurvey(surveyId));
     }
 
     // Apply survey-level permissions to submission documents.

@@ -31,6 +31,9 @@ import { QueryIterator, leftOuterJoinSorted } from './query-iterator';
 const l = registry.getFieldIds(Pb.LocationOfInterest);
 const sb = registry.getFieldIds(Pb.Submission);
 
+/** gRPC status code returned by Firestore when a document doesn't exist. */
+const GRPC_STATUS_NOT_FOUND = 5;
+
 /**
  *
  */
@@ -256,7 +259,15 @@ export class Datastore {
 
   async updateSubmissionCount(surveyId: string, loiId: string, count: number) {
     const loiRef = this.db_.doc(loi(surveyId, loiId));
-    await loiRef.update({ [l.submissionCount]: count });
+    try {
+      await loiRef.update({ [l.submissionCount]: count });
+    } catch (e) {
+      // Deleting an LOI also deletes its submissions, so the resulting
+      // submission write events can arrive after the LOI itself is gone. There
+      // is no count left to update in that case.
+      if ((e as { code?: number }).code === GRPC_STATUS_NOT_FOUND) return;
+      throw e;
+    }
   }
 
   async updateLoiProperties(

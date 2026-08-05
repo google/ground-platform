@@ -20,21 +20,25 @@ import { MatCardModule } from '@angular/material/card';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
+import { MatMenuModule } from '@angular/material/menu';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { BrowserModule } from '@angular/platform-browser';
 
 import { LocationOfInterestPanelComponent } from './loi-panel.component';
+import { DialogModule } from 'app/components/shared/dialog/dialog.module';
 import { LoiPropertiesDialogModule } from 'app/components/shared/loi-properties-dialog/loi-properties-dialog.module';
 
 @NgModule({
   imports: [
     BrowserModule,
+    DialogModule,
     LoiPropertiesDialogModule,
     MatButtonModule,
     MatCardModule,
     MatDialogModule,
     MatIconModule,
     MatListModule,
+    MatMenuModule,
     MatProgressSpinnerModule,
   ],
   exports: [LocationOfInterestPanelComponent],

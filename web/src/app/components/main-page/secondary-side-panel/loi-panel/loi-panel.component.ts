@@ -14,11 +14,16 @@
  * limitations under the License.
  */
 
-import { Component, computed, inject, input } from '@angular/core';
+import { Component, computed, inject, input, signal } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { MatDialog } from '@angular/material/dialog';
 import { combineLatest, concat, delay, of, switchMap } from 'rxjs';
 
+import {
+  DialogComponent,
+  DialogData,
+  DialogType,
+} from 'app/components/shared/dialog/dialog.component';
 import { LoiPropertiesDialogComponent } from 'app/components/shared/loi-properties-dialog/loi-properties-dialog.component';
 import { LocationOfInterest } from 'app/models/loi.model';
 import { Survey } from 'app/models/survey.model';
@@ -34,14 +39,24 @@ import { getLoiIcon } from 'app/utils/utils';
   standalone: false,
 })
 export class LocationOfInterestPanelComponent {
+  private loiService = inject(LocationOfInterestService);
   private submissionService = inject(SubmissionService);
   private navigationService = inject(NavigationService);
 
   activeSurvey = input<Survey>();
   selectedLoi = input<LocationOfInterest>();
 
+  readonly isDeleting = signal(false);
+
   readonly isLoading = computed(() => {
     return this.submissions() === undefined;
+  });
+
+  readonly canDelete = computed(() => {
+    const survey = this.activeSurvey();
+    const loi = this.selectedLoi();
+    if (!survey || !loi) return false;
+    return this.loiService.canDeleteLocationOfInterest(survey, loi);
   });
 
   readonly name = computed(() => {
@@ -103,6 +118,35 @@ export class LocationOfInterestPanelComponent {
 
   hasProperties(): boolean {
     return !!this.selectedLoi()?.properties?.size;
+  }
+
+  deleteLoi(): void {
+    const survey = this.activeSurvey();
+    const loi = this.selectedLoi();
+    if (!survey || !loi) {
+      console.error("No active survey or LOI - can't delete location");
+      return;
+    }
+    this.dialog
+      .open(DialogComponent, {
+        data: {
+          dialogType: DialogType.DeleteLoi,
+        },
+        panelClass: 'small-width-dialog',
+      })
+      .afterClosed()
+      .subscribe(async (result: DialogData) => {
+        if (!result) return;
+        this.isDeleting.set(true);
+        try {
+          await this.loiService.deleteLocationOfInterest(survey.id, loi.id);
+          this.navigationService.clearLocationOfInterestId();
+        } catch (e) {
+          console.error('Error deleting location', e);
+        } finally {
+          this.isDeleting.set(false);
+        }
+      });
   }
 
   openPropertiesDialog(event: Event): void {
