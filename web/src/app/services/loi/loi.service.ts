@@ -30,6 +30,8 @@ import { AuthService } from 'app/services/auth/auth.service';
 import { DataStoreService } from 'app/services/data-store/data-store.service';
 import { SurveyService } from 'app/services/survey/survey.service';
 
+const displayNameCollator = new Intl.Collator();
+
 @Injectable({
   providedIn: 'root',
 })
@@ -61,7 +63,7 @@ export class LocationOfInterestService {
             loi,
             name: LocationOfInterestService.getDisplayName(loi),
           }))
-          .sort((a, b) => a.name.localeCompare(b.name))
+          .sort((a, b) => displayNameCollator.compare(a.name, b.name))
           .map(({ loi }) => loi)
       )
     );
