@@ -120,6 +120,27 @@ describe('loiDocToModel', () => {
         3
       ),
     },
+    {
+      expectation: 'converts owner id when set',
+      inputId: 'id0',
+      inputData: {
+        [lo.jobId]: 'jobId0',
+        [lo.geometry]: geoPointData,
+        [lo.properties]: {},
+        [lo.source]: Pb.LocationOfInterest.Source.FIELD_DATA,
+        [lo.ownerId]: 'user001',
+      },
+      want: new LocationOfInterest(
+        'id0',
+        'jobId0',
+        geoPoint,
+        Map<string, string | number>(),
+        '',
+        false,
+        0,
+        'user001'
+      ),
+    },
   ];
 
   for (const t of testData) {
