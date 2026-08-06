@@ -52,11 +52,18 @@ export class LocationOfInterestPanelComponent {
     return this.submissions() === undefined;
   });
 
-  readonly canDelete = computed(() => {
+  readonly canDeleteLocationOfInterest = computed(() => {
     const survey = this.activeSurvey();
     const loi = this.selectedLoi();
     if (!survey || !loi) return false;
     return this.loiService.canDeleteLocationOfInterest(survey, loi);
+  });
+
+  readonly canDeleteSubmissions = computed(() => {
+    const survey = this.activeSurvey();
+    const submissions = this.submissions();
+    if (!survey || !submissions) return false;
+    return this.submissionService.canDeleteSubmissions(survey, submissions);
   });
 
   readonly name = computed(() => {

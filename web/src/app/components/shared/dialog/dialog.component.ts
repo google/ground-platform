@@ -29,6 +29,7 @@ export enum DialogType {
   DeleteLois,
   DeleteOption,
   DeleteSubmission,
+  DeleteSubmissions,
   DeleteSurvey,
   DisableFreeForm,
   InvalidSurvey,
@@ -92,6 +93,12 @@ export const dialogConfigs: Record<DialogType, DialogConfig> = {
   [DialogType.DeleteSubmission]: {
     title: $localize`:@@app.dialogs.deleteSubmission.title:Delete submission?`,
     content: $localize`:@@app.dialogs.deleteSubmission.content:This action will permanently delete this submission from the database. Are you sure you want to delete it?`,
+    backButtonLabel: $localize`:@@app.labels.cancel:Cancel`,
+    continueButtonLabel: $localize`:@@app.labels.delete:Delete`,
+  },
+  [DialogType.DeleteSubmissions]: {
+    title: $localize`:@@app.dialogs.deleteSubmissions.title:Delete submissions?`,
+    content: $localize`:@@app.dialogs.deleteSubmissions.content:This action will permanently delete these submissions from the database. Are you sure you want to delete it?`,
     backButtonLabel: $localize`:@@app.labels.cancel:Cancel`,
     continueButtonLabel: $localize`:@@app.labels.delete:Delete`,
   },
