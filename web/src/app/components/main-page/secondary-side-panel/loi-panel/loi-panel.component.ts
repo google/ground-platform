@@ -156,6 +156,34 @@ export class LocationOfInterestPanelComponent {
       });
   }
 
+  deleteSubmissions(): void {
+    const survey = this.activeSurvey();
+    const loi = this.selectedLoi();
+    if (!survey || !loi) {
+      console.error("No active survey or LOI - can't delete submissions");
+      return;
+    }
+    this.dialog
+      .open(DialogComponent, {
+        data: {
+          dialogType: DialogType.DeleteSubmissions,
+        },
+        panelClass: 'small-width-dialog',
+      })
+      .afterClosed()
+      .subscribe(async (result: DialogData) => {
+        if (!result) return;
+        this.isDeleting.set(true);
+        try {
+          await this.submissionService.deleteSubmissionsForLoi(survey, loi.id);
+        } catch (e) {
+          console.error('Error deleting submissions', e);
+        } finally {
+          this.isDeleting.set(false);
+        }
+      });
+  }
+
   openPropertiesDialog(event: Event): void {
     event.stopPropagation();
     const loi = this.selectedLoi();
