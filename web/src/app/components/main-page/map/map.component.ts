@@ -116,6 +116,12 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
   submission: Submission | null = null;
   showSubmissionGeometry = false;
 
+  // ── Polygon drawing state ──────────────────────────────────────────────────
+  isDrawingPolygon = false;
+  drawingVertices: google.maps.LatLng[] = [];
+  private drawingPolygonOverlay: google.maps.Polygon | null = null;
+  private drawingVertexMarkers: google.maps.marker.AdvancedMarkerElement[] = [];
+
   readonly DEFAULT_MARKER_COLOR = 'black';
 
   @ViewChild(GoogleMap) map!: GoogleMap;
@@ -350,7 +356,8 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
         const newLocationOfInterest = await this.loiService.addPoint(
           event.latLng!.lat(),
           event.latLng!.lng(),
-          selectedJobId
+          selectedJobId,
+          this.lastFitSurveyId
         );
         if (newLocationOfInterest) {
           this.navigationService.selectLocationOfInterest(
@@ -360,9 +367,16 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
         }
         return;
       }
-      case EditMode.AddPolygon:
-        // TODO: Implement adding polygon.
+      case EditMode.AddPolygon: {
+        if (!selectedJobId) return;
+        const latLng = event.latLng!;
+        this.drawingVertices.push(latLng);
+        this.isDrawingPolygon = true;
+        this.addDrawingVertexMarker(latLng);
+        this.updateDrawingPolygonOverlay();
+        this.changeDetectorRef.detectChanges();
         return;
+      }
       case EditMode.None:
       default:
         this.navigationService.clearLocationOfInterestId();
@@ -615,6 +629,10 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
   }
 
   private onEditModeChange(editMode: EditMode) {
+    // Clear polygon drawing state whenever we leave AddPolygon mode.
+    if (editMode !== EditMode.AddPolygon) {
+      this.clearDrawingState();
+    }
     if (editMode !== EditMode.None) {
       this.navigationService.clearLocationOfInterestId();
       for (const marker of this.markers) {
@@ -625,10 +643,99 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
         marker[1].gmpClickable = true;
       }
     }
+    // Use crosshair cursor for both point and polygon drawing modes.
     this.mapOptions =
-      editMode === EditMode.AddPoint
+      editMode === EditMode.AddPoint || editMode === EditMode.AddPolygon
         ? this.crosshairCursorMapOptions
         : this.defaultCursorMapOptions;
+  }
+
+  // ── Polygon drawing helpers ────────────────────────────────────────────────
+
+  /**
+   * Adds a small dot marker at the given vertex position to give the user
+   * visual feedback about each clicked point.
+   */
+  private addDrawingVertexMarker(latLng: google.maps.LatLng) {
+    const dot = document.createElement('div');
+    dot.style.cssText =
+      'width:10px;height:10px;background:#1a73e8;border-radius:50%;' +
+      'border:2px solid white;box-shadow:0 1px 3px rgba(0,0,0,.4);';
+    const marker = new google.maps.marker.AdvancedMarkerElement({
+      map: this.map.googleMap,
+      position: latLng,
+      content: dot,
+      gmpClickable: false,
+    });
+    this.drawingVertexMarkers.push(marker);
+  }
+
+  /**
+   * Redraws the semi-transparent polygon preview that follows the cursor
+   * as the user adds vertices.
+   */
+  private updateDrawingPolygonOverlay() {
+    if (this.drawingPolygonOverlay) {
+      this.drawingPolygonOverlay.setMap(null);
+      this.drawingPolygonOverlay = null;
+    }
+    if (this.drawingVertices.length < 2) return;
+    this.drawingPolygonOverlay = new google.maps.Polygon({
+      paths: this.drawingVertices,
+      strokeColor: '#1a73e8',
+      strokeOpacity: 0.9,
+      strokeWeight: 2,
+      fillColor: '#1a73e8',
+      fillOpacity: 0.15,
+      map: this.map.googleMap,
+      clickable: false,
+    });
+  }
+
+  /** Removes all temporary drawing overlays and resets drawing state. */
+  private clearDrawingState() {
+    for (const m of this.drawingVertexMarkers) {
+      m.map = null;
+    }
+    this.drawingVertexMarkers = [];
+    if (this.drawingPolygonOverlay) {
+      this.drawingPolygonOverlay.setMap(null);
+      this.drawingPolygonOverlay = null;
+    }
+    this.drawingVertices = [];
+    this.isDrawingPolygon = false;
+  }
+
+  /**
+   * Called when the user clicks "Complete" in the polygon drawing toolbar.
+   * Saves the polygon as a new LOI and resets drawing mode.
+   */
+  async onCompletePolygon() {
+    if (this.drawingVertices.length < 3) return;
+    const selectedJobId = this.drawingToolsService.getSelectedJobId();
+    if (!selectedJobId) return;
+
+    const vertices = [...this.drawingVertices];
+    this.clearDrawingState();
+    this.drawingToolsService.setEditMode(EditMode.None);
+
+    const newLoi = await this.loiService.addPolygon(
+      vertices,
+      selectedJobId,
+      this.lastFitSurveyId
+    );
+    if (newLoi) {
+      this.navigationService.selectLocationOfInterest(
+        this.lastFitSurveyId,
+        newLoi.id
+      );
+    }
+  }
+
+  /** Called when the user clicks "Cancel" during polygon drawing. */
+  onCancelPolygon() {
+    this.clearDrawingState();
+    this.drawingToolsService.setEditMode(EditMode.None);
   }
 
   /**

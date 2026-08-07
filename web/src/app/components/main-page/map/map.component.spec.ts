@@ -160,7 +160,7 @@ describe('MapComponent', () => {
   beforeEach(async () => {
     loiServiceSpy = jasmine.createSpyObj<LocationOfInterestService>(
       'LocationOfInterestService',
-      ['updatePoint', 'addPoint']
+      ['updatePoint', 'addPoint', 'addPolygon']
     );
 
     mockLois$ = new BehaviorSubject<List<LocationOfInterest>>(
@@ -661,7 +661,7 @@ describe('MapComponent', () => {
       latLng: new google.maps.LatLng(45, 45),
     });
 
-    expect(loiServiceSpy.addPoint).toHaveBeenCalledOnceWith(45, 45, jobId2);
+    expect(loiServiceSpy.addPoint).toHaveBeenCalledOnceWith(45, 45, jobId2, surveyId);
   });
 
   it('should not add marker when job id is undefined', async () => {
@@ -677,8 +677,9 @@ describe('MapComponent', () => {
     expect(loiServiceSpy.addPoint).toHaveBeenCalledTimes(0);
   });
 
-  it('should do nothing when map clicked and edit mode is "AddPolygon"', async () => {
+  it('should collect a vertex when map clicked and edit mode is "AddPolygon"', async () => {
     mockEditMode$.next(EditMode.AddPolygon);
+    drawingToolsServiceSpy.getSelectedJobId.and.returnValue(jobId2);
     fixture.detectChanges();
     await fixture.whenStable();
 
@@ -687,6 +688,48 @@ describe('MapComponent', () => {
     });
 
     expect(loiServiceSpy.addPoint).toHaveBeenCalledTimes(0);
+    expect(component.drawingVertices.length).toBe(1);
+    expect(component.isDrawingPolygon).toBeTrue();
+  });
+
+  it('should save polygon and reset state when onCompletePolygon is called with 3+ vertices', async () => {
+    const newPolygonLoi = new LocationOfInterest(
+      'newPolyId',
+      jobId2,
+      polygonLoi1.geometry,
+      Map()
+    );
+    loiServiceSpy.addPolygon.and.returnValue(
+      new Promise(resolve => resolve(newPolygonLoi))
+    );
+    mockEditMode$.next(EditMode.AddPolygon);
+    drawingToolsServiceSpy.getSelectedJobId.and.returnValue(jobId2);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    // Simulate 3 clicks to collect vertices.
+    for (const [lat, lng] of [[1, 1], [2, 2], [3, 1]] as [number, number][]) {
+      google.maps.event.trigger(component.map.googleMap!, 'click', {
+        latLng: new google.maps.LatLng(lat, lng),
+      });
+    }
+    expect(component.drawingVertices.length).toBe(3);
+
+    await component.onCompletePolygon();
+
+    expect(loiServiceSpy.addPolygon).toHaveBeenCalledOnceWith(
+      jasmine.arrayWithExactContents([
+        new google.maps.LatLng(1, 1),
+        new google.maps.LatLng(2, 2),
+        new google.maps.LatLng(3, 1),
+      ]),
+      jobId2,
+      surveyId
+    );
+    expect(component.isDrawingPolygon).toBeFalse();
+    expect(component.drawingVertices.length).toBe(0);
+    expect(navigationServiceSpy.selectLocationOfInterest)
+      .toHaveBeenCalledOnceWith(surveyId, newPolygonLoi.id);
   });
 
   function assertMarkerLatLng(

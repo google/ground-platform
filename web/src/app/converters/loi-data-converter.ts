@@ -15,14 +15,14 @@
  */
 
 import { DocumentData } from '@angular/fire/firestore';
-import { toMessage } from '@ground/lib';
+import { toDocumentData, toMessage } from '@ground/lib';
 
 import { GroundProtos } from '@ground/proto';
 import { Map } from 'immutable';
 
 import { LocationOfInterest } from 'app/models/loi.model';
 
-import { geometryPbToModel } from './geometry-data-converter';
+import { geometryModelToPb, geometryPbToModel } from './geometry-data-converter';
 
 import Pb = GroundProtos.ground.v1beta1;
 
@@ -37,6 +37,23 @@ function propertiesPbToModel(pb: {
     }
   }
   return Map(Object.entries(properties));
+}
+
+/**
+ * Converts a LocationOfInterest model object to a Firestore document.
+ */
+export function loiToDocument(loi: LocationOfInterest): DocumentData {
+  return toDocumentData(
+    new Pb.LocationOfInterest({
+      jobId: loi.jobId,
+      geometry: geometryModelToPb(loi.geometry),
+      source: loi.predefined
+        ? Pb.LocationOfInterest.Source.IMPORTED
+        : Pb.LocationOfInterest.Source.FIELD_DATA,
+      customTag: loi.customId,
+      submissionCount: loi.submissionCount,
+    })
+  );
 }
 
 export function loiDocToModel(
