@@ -22,6 +22,7 @@ import {
   Firestore,
   GeoPoint,
 } from 'firebase-admin/firestore';
+import type { Geometry } from 'geojson';
 import { registry } from '@ground/lib';
 import { GroundProtos } from '@ground/proto';
 
@@ -316,7 +317,7 @@ export class Datastore {
    *
    * @returns GeoJSON geometry object (with geometry as list of lists)
    */
-  static fromFirestoreMap(geoJsonGeometry: any): any {
+  static fromFirestoreMap(geoJsonGeometry: object): Geometry {
     const geometryObject = geoJsonGeometry as pseudoGeoJsonGeometry;
     if (!geometryObject) {
       throw new Error(
@@ -328,7 +329,7 @@ export class Datastore {
       geometryObject.coordinates
     );
 
-    return geometryObject;
+    return geometryObject as unknown as Geometry;
   }
 
   static fromFirestoreValue(coordinates: any) {

@@ -18,6 +18,7 @@ import {
   FirestoreEvent,
   QueryDocumentSnapshot,
 } from 'firebase-functions/v2/firestore';
+import * as logger from 'firebase-functions/logger';
 import { Datastore } from './common/datastore';
 import { getDatastore } from './common/context';
 import { broadcastSurveyUpdate } from './common/broadcast-survey-update';
@@ -52,7 +53,7 @@ export async function onCreateLoiHandler(
 
   const db = getDatastore();
 
-  const properties = await regenerateLoiProperties(db, surveyId, loiPb);
+  const properties = await regenerateLoiProperties(db, surveyId, loiId, loiPb);
 
   await db.updateLoiProperties(
     surveyId,
@@ -68,6 +69,7 @@ export async function onCreateLoiHandler(
 export async function regenerateLoiProperties(
   db: Datastore,
   surveyId: string,
+  loiId: string,
   loiPb: Pb.LocationOfInterest
 ): Promise<Properties> {
   const geometry = toGeoJsonGeometry(loiPb.geometry!);
@@ -83,15 +85,27 @@ export async function regenerateLoiProperties(
   const propertyGenerators = await db.fetchPropertyGenerators();
 
   for (const propertyGeneratorDoc of propertyGenerators.docs) {
+    const generatorId = propertyGeneratorDoc.id;
     const config = propertyGeneratorDoc.data() as PropertyGeneratorConfig;
-    const handler = propertyGeneratorHandlers[propertyGeneratorDoc.id];
+    const handler = propertyGeneratorHandlers[generatorId];
 
-    if (!handler || !enabledIntegrationIds.has(propertyGeneratorDoc.id))
+    if (!handler) {
       continue;
+    }
 
-    const newProperties = await handler(config, geometry);
+    if (!enabledIntegrationIds.has(generatorId)) {
+      continue;
+    }
 
-    properties = updateProperties(properties, newProperties, config.prefix);
+    try {
+      const newProperties = await handler(config, geometry);
+      properties = updateProperties(properties, newProperties, config.prefix);
+    } catch (e) {
+      logger.error(
+        `onCreateLoi: loiId=${loiId} property generator '${generatorId}' failed:`,
+        e
+      );
+    }
 
     Object.keys(properties)
       .filter(key => typeof properties[key] === 'object')
