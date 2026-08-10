@@ -31,7 +31,11 @@ limitations under the License.
 
       <button
         mat-icon-button
-        *ngIf="hasProperties() || canDeleteSubmissions() || canDeleteLocationOfInterest()"
+        *ngIf="
+          hasProperties() ||
+          canDeleteSubmissions() ||
+          canDeleteLocationOfInterest()
+        "
         [matMenuTriggerFor]="menu"
         aria-label="Site options"
         i18n-aria-label="@@app.loiPanel.options"
@@ -48,7 +52,10 @@ limitations under the License.
           <span i18n="@@app.loiPanel.metadata">Metadata</span>
         </button>
         <mat-divider
-          *ngIf="hasProperties() && (canDeleteSubmissions() || canDeleteLocationOfInterest())"
+          *ngIf="
+            hasProperties() &&
+            (canDeleteSubmissions() || canDeleteLocationOfInterest())
+          "
         ></mat-divider>
         <button
           mat-menu-item
@@ -60,7 +67,11 @@ limitations under the License.
             >Delete submissions</span
           >
         </button>
-        <button mat-menu-item *ngIf="canDeleteLocationOfInterest()" (click)="deleteLoi()">
+        <button
+          mat-menu-item
+          *ngIf="canDeleteLocationOfInterest()"
+          (click)="deleteLoi()"
+        >
           <mat-icon>delete</mat-icon>
           <span i18n="@@app.loiPanel.deleteLoi">Delete site</span>
         </button>
