@@ -95,8 +95,10 @@ describe('SubmissionPanelComponent', () => {
     submissionService = jasmine.createSpyObj('SubmissionService', [
       'getSubmission$',
       'deleteSubmission',
+      'canDeleteSubmission',
     ]);
     submissionService.deleteSubmission.and.resolveTo();
+    submissionService.canDeleteSubmission.and.returnValue(true);
     navigationService = jasmine.createSpyObj('NavigationService', [
       'getTaskId$',
       'getLocationOfInterestId$',
@@ -146,6 +148,27 @@ describe('SubmissionPanelComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('offers deletion when the service allows it', fakeAsync(() => {
+    initializeWithSubmission(Map({}));
+
+    expect(component.canDeleteSubmission()).toBeTrue();
+    const [survey, submission] =
+      submissionService.canDeleteSubmission.calls.mostRecent().args;
+    expect(survey).toBe(mockSurvey);
+    expect(submission.id).toBe(mockSubmission.id);
+  }));
+
+  it('hides deletion when the user may not delete the submission', fakeAsync(() => {
+    submissionService.canDeleteSubmission.and.returnValue(false);
+    initializeWithSubmission(Map({}));
+
+    expect(component.canDeleteSubmission()).toBeFalse();
+  }));
+
+  it('cannot delete before a submission has loaded', () => {
+    expect(component.canDeleteSubmission()).toBeFalse();
   });
 
   it('should select geometry', fakeAsync(() => {
@@ -270,7 +293,7 @@ describe('SubmissionPanelComponent', () => {
 
   it('getTaskSubmissionResult returns result for a known task', fakeAsync(() => {
     const result = new Result('answer');
-    initializeWithSubmission(Map({task1: result}));
+    initializeWithSubmission(Map({ task1: result }));
     expect(
       component.getTaskSubmissionResult(
         new Task('task1', TaskType.TEXT, 'Text', true, 1)
@@ -293,6 +316,8 @@ describe('SubmissionPanelComponent', () => {
     expect(component.asStringOrNumber(new Result(42))).toBe(42);
     expect(component.asDate(new Result(date))).toBe(date);
     expect(component.asGeometry(new Result(point))).toBe(point);
-    expect(component.asMultipleSelection(new Result(null)) as unknown).toBeNull();
+    expect(
+      component.asMultipleSelection(new Result(null)) as unknown
+    ).toBeNull();
   });
 });
