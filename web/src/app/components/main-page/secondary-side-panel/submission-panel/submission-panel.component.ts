@@ -59,6 +59,13 @@ export class SubmissionPanelComponent {
     return submission.job?.getTasksSorted().filter(t => !t.addLoiTask);
   });
 
+  readonly canDeleteSubmission = computed(() => {
+    const survey = this.activeSurvey();
+    const submission = this.submission();
+    if (!survey || !submission) return false;
+    return this.submissionService.canDeleteSubmission(survey, submission);
+  });
+
   readonly submittedTasks = computed(() => {
     const currentTasks = this.tasks();
     if (!currentTasks || currentTasks.size === 0) return [];
@@ -73,7 +80,7 @@ export class SubmissionPanelComponent {
       loi: this.selectedLoi(),
       submissionId: this.submissionId(),
     }),
-    stream: ({params: {survey, loi, submissionId}}) =>
+    stream: ({ params: { survey, loi, submissionId } }) =>
       survey && loi && submissionId
         ? this.submissionService.getSubmission$(survey, loi, submissionId)
         : of(null),
@@ -141,8 +148,7 @@ export class SubmissionPanelComponent {
   asGeometry = (r: Result): Geometry => r.value as Geometry;
   asDate = (r: Result): Date => r.value as Date;
   asString = (r: Result): string => r.value as string;
-  asStringOrNumber = (r: Result): string | number =>
-    r.value as string | number;
+  asStringOrNumber = (r: Result): string | number => r.value as string | number;
 
   selectGeometry(task: Task): void {
     const survey = this.activeSurvey();
