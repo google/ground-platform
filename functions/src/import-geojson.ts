@@ -88,6 +88,8 @@ export function importGeoJsonCallback(
         `Importing GeoJSON into survey '${surveyId}', job '${jobId}'`
       );
 
+      const auditInfo = toAuditInfoPb(ownerId, params.clientTimestamp);
+
       const parser = JSONStream.parse(['features', true], undefined);
 
       fileStream.pipe(
@@ -101,7 +103,7 @@ export function importGeoJsonCallback(
             }
           })
           .on('data', (data: any) => {
-            if (!hasError) onGeoJsonFeature(data, jobId);
+            if (!hasError) onGeoJsonFeature(data, jobId, auditInfo);
           })
       );
     } catch (err) {
@@ -109,8 +111,8 @@ export function importGeoJsonCallback(
     }
   });
 
-  // Handle non-file fields in the task. survey and job must appear
-  // before the file for the file handler to work properly.
+  // Handle non-file fields in the task. survey, job, and clientTimestamp must
+  // appear before the file for the file handler to work properly.
   busboy.on('field', (key, val) => {
     params[key] = val;
   });
@@ -187,7 +189,11 @@ export function importGeoJsonCallback(
    * GeoJSON Feature objects within the file. It checks the feature type, geometry
    * validity, and converts the feature to a document data format for insertion.
    */
-  function onGeoJsonFeature(geoJsonFeature: any, jobId: string) {
+  function onGeoJsonFeature(
+    geoJsonFeature: any,
+    jobId: string,
+    auditInfo: Pb.AuditInfo
+  ) {
     if (geoJsonFeature.type !== 'Feature') {
       console.debug(
         `Skipping Feature with invalid type ${geoJsonFeature.type}`
@@ -204,7 +210,9 @@ export function importGeoJsonCallback(
     }
     try {
       loiDocs.push(
-        toDocumentData(toLoiPb(geoJsonFeature as Feature, jobId, ownerId))
+        toDocumentData(
+          toLoiPb(geoJsonFeature as Feature, jobId, ownerId, auditInfo)
+        )
       );
     } catch (loiErr) {
       console.debug('Skipping LOI', loiErr);
@@ -219,9 +227,9 @@ export function importGeoJsonCallback(
 function toLoiPb(
   feature: Feature,
   jobId: string,
-  ownerId: string
+  ownerId: string,
+  auditInfo: Pb.AuditInfo
 ): Pb.LocationOfInterest {
-  // TODO: Add created/modified metadata.
   const { id, geometry, properties } = feature;
   const geometryPb = toGeometryPb(geometry);
   return new Pb.LocationOfInterest({
@@ -231,6 +239,37 @@ function toLoiPb(
     source: Pb.LocationOfInterest.Source.IMPORTED,
     geometry: geometryPb,
     properties: toLoiPbProperties(properties),
+    created: auditInfo,
+    lastModified: auditInfo,
+  });
+}
+
+function toAuditInfoPb(
+  ownerId: string,
+  clientTimestamp?: string
+): Pb.AuditInfo {
+  const serverTimeMillis = Date.now();
+  const clientTimeMillis = toMillis(clientTimestamp) ?? serverTimeMillis;
+  return new Pb.AuditInfo({
+    userId: ownerId,
+    clientTimestamp: toTimestampPb(clientTimeMillis),
+    serverTimestamp: toTimestampPb(serverTimeMillis),
+  });
+}
+
+function toMillis(value: string | undefined): number | null {
+  if (!value) return null;
+  const millis = Number(value);
+  if (!Number.isFinite(millis)) {
+    console.debug(`Ignoring invalid client timestamp '${value}'`);
+    return null;
+  }
+  return millis;
+}
+
+function toTimestampPb(millis: number): GroundProtos.google.protobuf.Timestamp {
+  return new GroundProtos.google.protobuf.Timestamp({
+    seconds: Math.floor(millis / 1000),
   });
 }
 
