@@ -19,12 +19,12 @@ import {
   DocumentSnapshot,
   FirestoreEvent,
 } from 'firebase-functions/v2/firestore';
-import { broadcastSurveyUpdate } from './common/broadcast-survey-update';
+import { broadcastUpdate } from './common/broadcast';
 
 export function onWriteSurveyHandler(
   event: FirestoreEvent<Change<DocumentSnapshot> | undefined>
 ): Promise<string> {
   const surveyId = event.params.surveyId;
 
-  return broadcastSurveyUpdate(surveyId);
+  return broadcastUpdate({ type: 'survey', surveyId }, event.time);
 }

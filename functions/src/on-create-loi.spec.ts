@@ -28,7 +28,6 @@ import {
 import { resetDatastore } from './common/context';
 import { GroundProtos } from '@ground/proto';
 import { onCreateLoiHandler } from './on-create-loi';
-import * as broadcastModule from './common/broadcast-survey-update';
 
 import Pb = GroundProtos.ground.v1beta1;
 
@@ -68,9 +67,6 @@ describe('onCreateLoiHandler()', () => {
   beforeEach(() => {
     mockFirestore = createMockFirestore();
     stubAdminApi(mockFirestore);
-    spyOn(broadcastModule, 'broadcastSurveyUpdate').and.returnValue(
-      Promise.resolve('')
-    );
     mockFirestore.doc(LOI_PATH).set(loiDoc);
     mockFirestore
       .doc('config/integrations/propertyGenerators/whisp')

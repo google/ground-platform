@@ -19,12 +19,15 @@ import {
   DocumentSnapshot,
   FirestoreEvent,
 } from 'firebase-functions/v2/firestore';
-import { broadcastSurveyUpdate } from './common/broadcast-survey-update';
+import { broadcastUpdate } from './common/broadcast';
 
 export async function onWriteLoiHandler(
   event: FirestoreEvent<Change<DocumentSnapshot> | undefined>
 ) {
-  const surveyId = event.params.surveyId;
+  const { surveyId, loiId } = event.params;
+  // Defaults to false when the change isn't available, so that clients resync
+  // the LOI rather than dropping it.
+  const deleted = event.data?.after?.exists === false;
 
-  return broadcastSurveyUpdate(surveyId);
+  return broadcastUpdate({ type: 'loi', surveyId, loiId, deleted }, event.time);
 }
