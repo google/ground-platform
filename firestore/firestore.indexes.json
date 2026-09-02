@@ -1,15 +1,15 @@
 {
   "indexes": [
     {
-      "collectionGroup": "lois",
+      "collectionGroup": "submissions",
       "queryScope": "COLLECTION",
       "fields": [
         {
-          "fieldPath": "`2`", // job_id
+          "fieldPath": "`4`", // job_id
           "order": "ASCENDING"
         },
         {
-          "fieldPath": "`1`", // id
+          "fieldPath": "`2`", // loi_id
           "order": "ASCENDING"
         }
       ]
@@ -20,6 +20,10 @@
       "fields": [
         {
           "fieldPath": "`4`", // job_id
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "`5`", // owner_id
           "order": "ASCENDING"
         },
         {
