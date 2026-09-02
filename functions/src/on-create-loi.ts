@@ -20,6 +20,7 @@ import {
 } from 'firebase-functions/v2/firestore';
 import { Datastore } from './common/datastore';
 import { getDatastore } from './common/context';
+import { withServerTimestamp } from './common/audit-info';
 import { GroundProtos } from '@ground/proto';
 import { toDocumentData, toGeoJsonGeometry, toMessage } from '@ground/lib';
 import { toLoiPbProperties } from './import-geojson';
@@ -57,9 +58,28 @@ export async function onCreateLoiHandler(
     surveyId,
     loiId,
     toDocumentData(
-      new Pb.LocationOfInterest({ properties: toLoiPbProperties(properties) })
+      new Pb.LocationOfInterest({
+        properties: toLoiPbProperties(properties),
+        ...correctedAuditInfo(loiPb, event.time),
+      })
     )
   );
+}
+
+function correctedAuditInfo(
+  loiPb: Pb.LocationOfInterest,
+  eventTime: string
+): Partial<Pb.LocationOfInterest> {
+  if (!loiPb.created) return {};
+
+  const created = withServerTimestamp(loiPb.created, eventTime);
+
+  return {
+    created,
+    lastModified: loiPb.lastModified
+      ? withServerTimestamp(loiPb.lastModified, eventTime)
+      : created,
+  };
 }
 
 export async function regenerateLoiProperties(

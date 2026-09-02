@@ -276,7 +276,11 @@ export class Datastore {
     loiDoc: DocumentData
   ) {
     const loiRef = this.db_.doc(loi(surveyId, loiId));
-    await loiRef.update({ [l.properties]: loiDoc[l.properties] });
+    const update: DocumentData = { [l.properties]: loiDoc[l.properties] };
+    if (l.created in loiDoc) update[l.created] = loiDoc[l.created];
+    if (l.lastModified in loiDoc)
+      update[l.lastModified] = loiDoc[l.lastModified];
+    await loiRef.update(update);
   }
 
   static toFirestoreMap(geometry: any) {

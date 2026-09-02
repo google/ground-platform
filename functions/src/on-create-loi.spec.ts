@@ -38,6 +38,8 @@ const p = registry.getFieldIds(Pb.Point);
 const c = registry.getFieldIds(Pb.Coordinates);
 const j = registry.getFieldIds(Pb.Job);
 const intgr = registry.getFieldIds(Pb.Integration);
+const ai = registry.getFieldIds(Pb.AuditInfo);
+const ts = registry.getFieldIds(GroundProtos.google.protobuf.Timestamp);
 
 describe('onCreateLoiHandler()', () => {
   let mockFirestore: Firestore;
@@ -113,5 +115,49 @@ describe('onCreateLoiHandler()', () => {
     expect(loiData?.[l.properties]?.['whisp_area']).toEqual({
       [pr.numericValue]: 100,
     });
+  });
+
+  it('corrects created/lastModified server timestamps to the trigger event time', async () => {
+    mockFirestore.doc(JOB_PATH).set({});
+
+    const clientGuessedServerTimeMillis = Date.UTC(2020, 0, 1);
+    const clientTimeMillis = Date.UTC(2026, 0, 2, 3, 4, 5);
+    const eventTime = '2026-01-02T03:04:06.000Z';
+
+    const auditInfo = {
+      [ai.userId]: 'user1',
+      [ai.clientTimestamp]: { [ts.seconds]: clientTimeMillis / 1000 },
+      [ai.serverTimestamp]: {
+        [ts.seconds]: clientGuessedServerTimeMillis / 1000,
+      },
+    };
+    const loiDocWithAuditInfo = {
+      ...loiDoc,
+      [l.created]: auditInfo,
+      [l.lastModified]: auditInfo,
+    };
+    mockFirestore.doc(LOI_PATH).set(loiDocWithAuditInfo);
+
+    await onCreateLoiHandler({
+      data: newDocumentSnapshot(
+        loiDocWithAuditInfo
+      ) as unknown as QueryDocumentSnapshot,
+      params: { surveyId: SURVEY_ID, loiId: LOI_ID },
+      time: eventTime,
+    } as unknown as FirestoreEvent<QueryDocumentSnapshot | undefined>);
+
+    const loiData = (await mockFirestore.doc(LOI_PATH).get()).data();
+    const expectedServerTimeSeconds = Math.floor(Date.parse(eventTime) / 1000);
+
+    expect(loiData?.[l.created][ai.serverTimestamp][ts.seconds]).toEqual(
+      expectedServerTimeSeconds
+    );
+    expect(loiData?.[l.created][ai.clientTimestamp][ts.seconds]).toEqual(
+      clientTimeMillis / 1000
+    );
+    expect(loiData?.[l.created][ai.userId]).toEqual('user1');
+    expect(loiData?.[l.lastModified][ai.serverTimestamp][ts.seconds]).toEqual(
+      expectedServerTimeSeconds
+    );
   });
 });
