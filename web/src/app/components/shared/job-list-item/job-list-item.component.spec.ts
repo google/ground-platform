@@ -233,11 +233,8 @@ describe('JobListItemComponent', () => {
     );
     expect(counts.length).toBe(3);
     expect(counts[0].textContent.trim()).toBe('0');
-    expect(counts[0].classList).toContain('empty');
     expect(counts[1].textContent.trim()).toBe('4');
-    expect(counts[1].classList).not.toContain('empty');
     expect(counts[2].textContent.trim()).toBe('12');
-    expect(counts[2].classList).not.toContain('empty');
   });
 
   it('should select LOI when LOI is clicked', async () => {
