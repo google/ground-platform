@@ -14,8 +14,57 @@
  * limitations under the License.
  */
 
-import type { Properties, PropertyGeneratorHandler } from './types';
+import * as logger from 'firebase-functions/logger';
+import type { Geometry } from 'geojson';
+import type { Headers, Properties, PropertyGeneratorConfig } from './types';
 
-// TODO: Implement geoid property generation.
-export const geoidHandler: PropertyGeneratorHandler =
-  async (): Promise<Properties> => ({});
+const defaultHeaders = { 'Content-Type': 'application/json' };
+
+export async function geoidHandler(
+  config: PropertyGeneratorConfig,
+  geometry: Geometry,
+  loiId: string
+): Promise<Properties> {
+  const { headers, url } = config;
+
+  return fetchGeoIdProperties(
+    url,
+    { ...defaultHeaders, ...headers },
+    { type: 'Feature', geometry, id: loiId, properties: {} }
+  );
+}
+
+async function fetchGeoIdProperties(
+  url: string,
+  headers: Headers,
+  body: object
+): Promise<Properties> {
+  const bodyJson = JSON.stringify(body);
+  logger.debug(`geoid: POST ${url} body=${bodyJson}`);
+
+  const response = await fetch(url, {
+    method: 'POST',
+    headers,
+    body: bodyJson,
+  });
+
+  if (!response.ok) {
+    const errorBody = await response.text();
+    logger.error(
+      `geoid: request failed with status ${response.status}: ${errorBody}`
+    );
+    return {};
+  }
+
+  const responseJson = await response.json();
+  const geoid = responseJson?.geoid;
+  if (!geoid) {
+    logger.error(
+      `geoid: response missing geoid field, body=${JSON.stringify(responseJson)}`
+    );
+    return {};
+  }
+  logger.debug(`geoid: received geoid=${geoid}`);
+
+  return { geoid };
+}
