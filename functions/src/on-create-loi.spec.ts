@@ -66,8 +66,8 @@ describe('onCreateLoiHandler()', () => {
   };
 
   const geoIdConfig = {
-    name: 'geoId',
-    prefix: 'geoId_',
+    name: 'geoid',
+    prefix: 'geoid_',
     url: 'https://geoid.example.com/api',
   };
 
@@ -82,7 +82,7 @@ describe('onCreateLoiHandler()', () => {
       .doc('config/integrations/propertyGenerators/whisp')
       .set(whispConfig);
     mockFirestore
-      .doc('config/integrations/propertyGenerators/geoId')
+      .doc('config/integrations/propertyGenerators/geoid')
       .set(geoIdConfig);
   });
 
@@ -130,13 +130,17 @@ describe('onCreateLoiHandler()', () => {
 
   it('runs geoId property generator and updates LOI properties when integration is enabled', async () => {
     mockFirestore.doc(JOB_PATH).set({
-      [j.enabledIntegrations]: [{ [intgr.id]: 'geoId' }],
+      [j.enabledIntegrations]: [{ [intgr.id]: 'geoid' }],
     });
-    spyOn(globalThis, 'fetch').and.returnValue(
+    const fetchSpy = spyOn(globalThis, 'fetch').and.returnValue(
       Promise.resolve({
         ok: true,
         json: () =>
-          Promise.resolve({ id: '019d4e5a-d6bb-7000-99d2-3c0d4081586b' }),
+          Promise.resolve({
+            geoid: '019d4e5a-d6bb-7000-99d2-3c0d4081586b',
+            uri: 'https://geoid.example.com/019d4e5a-d6bb-7000-99d2-3c0d4081586b',
+            external_id: LOI_ID,
+          }),
       } as Response)
     );
 
@@ -145,15 +149,18 @@ describe('onCreateLoiHandler()', () => {
       params: { surveyId: SURVEY_ID, loiId: LOI_ID },
     } as unknown as FirestoreEvent<QueryDocumentSnapshot | undefined>);
 
+    const [, requestInit] = fetchSpy.calls.mostRecent().args;
+    expect(JSON.parse(requestInit!.body as string).id).toEqual(LOI_ID);
+
     const loiData = (await mockFirestore.doc(LOI_PATH).get()).data();
-    expect(loiData?.[l.properties]?.['geoId_id']).toEqual({
+    expect(loiData?.[l.properties]?.['geoid_geoid']).toEqual({
       [pr.stringValue]: '019d4e5a-d6bb-7000-99d2-3c0d4081586b',
     });
   });
 
   it('skips geoId property generator when fetch fails', async () => {
     mockFirestore.doc(JOB_PATH).set({
-      [j.enabledIntegrations]: [{ [intgr.id]: 'geoId' }],
+      [j.enabledIntegrations]: [{ [intgr.id]: 'geoid' }],
     });
     spyOn(globalThis, 'fetch').and.returnValue(
       Promise.resolve({
@@ -169,6 +176,6 @@ describe('onCreateLoiHandler()', () => {
     } as unknown as FirestoreEvent<QueryDocumentSnapshot | undefined>);
 
     const loiData = (await mockFirestore.doc(LOI_PATH).get()).data();
-    expect(loiData?.[l.properties]?.['geoId_id']).toBeUndefined();
+    expect(loiData?.[l.properties]?.['geoid_geoid']).toBeUndefined();
   });
 });

@@ -95,7 +95,7 @@ export async function regenerateLoiProperties(
     }
 
     try {
-      const newProperties = await handler(config, geometry);
+      const newProperties = await handler(config, geometry, loiId);
       properties = updateProperties(properties, newProperties, config.prefix);
     } catch (e) {
       logger.error(

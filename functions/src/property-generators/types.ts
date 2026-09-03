@@ -32,5 +32,6 @@ export type PropertyGeneratorConfig = {
 
 export type PropertyGeneratorHandler = (
   config: PropertyGeneratorConfig,
-  geometry: Geometry
+  geometry: Geometry,
+  loiId: string
 ) => Promise<Properties>;

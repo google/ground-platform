@@ -22,14 +22,15 @@ const defaultHeaders = { 'Content-Type': 'application/json' };
 
 export async function geoIdHandler(
   config: PropertyGeneratorConfig,
-  geometry: Geometry
+  geometry: Geometry,
+  loiId: string
 ): Promise<Properties> {
   const { headers, url } = config;
 
   return fetchGeoIdProperties(
     url,
     { ...defaultHeaders, ...headers },
-    { type: 'Feature', geometry, properties: {} }
+    { type: 'Feature', geometry, id: loiId, properties: {} }
   );
 }
 
@@ -56,14 +57,14 @@ async function fetchGeoIdProperties(
   }
 
   const responseJson = await response.json();
-  const id = responseJson?.id;
-  if (!id) {
+  const geoid = responseJson?.geoid;
+  if (!geoid) {
     logger.error(
-      `geoId: response missing id field, body=${JSON.stringify(responseJson)}`
+      `geoId: response missing geoid field, body=${JSON.stringify(responseJson)}`
     );
     return {};
   }
-  logger.debug(`geoId: received id=${id}`);
+  logger.debug(`geoId: received geoid=${geoid}`);
 
-  return { id };
+  return { geoid };
 }
