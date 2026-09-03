@@ -26,7 +26,8 @@ export class LocationOfInterest {
     readonly properties: Map<string, string | number>,
     readonly customId: string = '',
     readonly predefined: boolean = true,
-    readonly submissionCount: number = 0
+    readonly submissionCount: number = 0,
+    readonly ownerId: string = ''
   ) {}
 
   equals(other: LocationOfInterest): boolean {
@@ -36,6 +37,7 @@ export class LocationOfInterest {
       this.customId === other.customId &&
       this.predefined === other.predefined &&
       this.submissionCount === other.submissionCount &&
+      this.ownerId === other.ownerId &&
       is(this.geometry, other.geometry) &&
       is(this.properties, other.properties)
     );

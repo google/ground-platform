@@ -19,31 +19,39 @@ limitations under the License.
     <!-- Tree node for lois -->
     <mat-tree-node
       *matTreeNodeDef="let node"
-      matTreeNodePadding
       mat-button
       class="loi-tree-node"
       tabindex="0"
       role="button"
       (click)="selectLoi(node)"
       [class.tree-node-selected]="isSelectedLoi(node)"
-      [style.padding-left]="isSidePanelExpanded() ? '50px' : '0px'"
+      [class.expanded]="isSidePanelExpanded()"
     >
       <ng-container *ngIf="isSidePanelExpanded()">
-        <mat-icon svgIcon="{{ node.iconName }}" class="loi-icon" [ngStyle]="{color: node.iconColor}"></mat-icon>
+        <mat-icon
+          svgIcon="{{ node.iconName }}"
+          class="loi-icon"
+          [ngStyle]="{ color: node.iconColor }"
+        ></mat-icon>
 
         <div class="loi-name">{{ node.name }}</div>
 
-        <div
-          class="loi-submission-count"
-          [class.empty]="!node.loi?.submissionCount"
-        >
+        <div class="loi-submission-count">
           {{ node.loi?.submissionCount ?? 0 }}
         </div>
       </ng-container>
 
       <ng-container *ngIf="!isSidePanelExpanded()">
-        <button mat-icon-button [attr.aria-label]="'Toggle ' + node.item">
-          <mat-icon svgIcon="{{ node.iconName }}" class="loi-icon" [ngStyle]="{color: node.iconColor}"></mat-icon>
+        <button
+          mat-icon-button
+          class="loi-collapsed-toggle"
+          [attr.aria-label]="'Toggle ' + node.item"
+        >
+          <mat-icon
+            svgIcon="{{ node.iconName }}"
+            class="loi-icon"
+            [ngStyle]="{ color: node.iconColor }"
+          ></mat-icon>
         </button>
       </ng-container>
     </mat-tree-node>
@@ -54,37 +62,47 @@ limitations under the License.
       class="job-tree-node"
     >
       <ng-container *ngIf="isSidePanelExpanded()">
-        <ng-container *ngIf="hasChild(node)">
-          <button mat-icon-button [attr.aria-label]="'Toggle ' + node.item" matTreeNodeToggle>
-            <mat-icon class="mat-icon-rtl-mirror">
-              {{treeControl.isExpanded(node) ? 'expand_more' : 'chevron_right'}}
-            </mat-icon>
-          </button>
-        </ng-container>
-
-        <ng-container *ngIf="!hasChild(node)">
-          <div style="width: 40px; visibility: hidden"></div>
-        </ng-container>
+        <button
+          *ngIf="hasChild(node)"
+          class="expand-toggle"
+          [class.expanded]="treeControl.isExpanded(node)"
+          [attr.aria-label]="'Toggle ' + node.item"
+          matTreeNodeToggle
+        >
+          <mat-icon class="mat-icon-rtl-mirror expand-toggle-icon"
+            >arrow_right</mat-icon
+          >
+        </button>
 
         <div class="job-tree-node-label">
-          <ng-container *ngTemplateOutlet="jobLabel; context: { node: node }"></ng-container>
+          <ng-container
+            *ngTemplateOutlet="jobLabel; context: { node: node }"
+          ></ng-container>
         </div>
 
-        <div [ngSwitch]="actionsType">
+        <div [ngSwitch]="actionsType" class="job-actions">
           <div *ngSwitchCase="jobListItemActionsType.MENU">
-            <button mat-icon-button [matMenuTriggerFor]="jobMenu">
+            <button
+              mat-icon-button
+              class="job-menu-trigger"
+              [matMenuTriggerFor]="jobMenu"
+            >
               <mat-icon>more_vert</mat-icon>
             </button>
             <mat-menu #jobMenu="matMenu">
               <a (click)="onDownloadCsvClick()" target="_blank">
                 <button mat-menu-item>
-                  <span i18n="@@app.labels.downloadCsv">Download job data (CSV)</span>
+                  <span i18n="@@app.labels.downloadCsv"
+                    >Download job data (CSV)</span
+                  >
                 </button>
               </a>
 
               <a (click)="onDownloadGeoJsonClick()" target="_blank">
                 <button mat-menu-item>
-                  <span i18n="@@app.labels.downloadGeojson">Download site locations (GeoJSON)</span>
+                  <span i18n="@@app.labels.downloadGeojson"
+                    >Download site locations (GeoJSON)</span
+                  >
                 </button>
               </a>
             </mat-menu>

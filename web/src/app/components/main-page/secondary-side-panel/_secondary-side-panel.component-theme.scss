@@ -30,7 +30,7 @@
 
 @mixin typography($theme) {
   .secondary-side-panel {
-    .header {
+    .loi-panel-header-title {
       font: mat.get-theme-typography($theme, headline-small, font);
     }
 

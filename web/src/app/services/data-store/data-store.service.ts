@@ -405,14 +405,19 @@ export class DataStoreService {
     );
   }
 
-  private async deleteSubmissionsByLoiId(
+  async deleteSubmissionsByLoiId(
     surveyId: string,
-    loiId: string
+    loiId: string,
+    ownerId?: string
   ): Promise<void> {
-    const submissions = query(
-      collection(this.db, `${SURVEYS_COLLECTION_NAME}/${surveyId}/submissions`),
-      where(sb.loiId, '==', loiId)
+    const submissionsRef = collection(
+      this.db,
+      `${SURVEYS_COLLECTION_NAME}/${surveyId}/submissions`
     );
+    const byLoi = query(submissionsRef, where(sb.loiId, '==', loiId));
+    const submissions = ownerId
+      ? query(byLoi, where(sb.ownerId, '==', ownerId))
+      : byLoi;
     const querySnapshot = await runInInjectionContext(this.injector, () =>
       getDocs(submissions)
     );

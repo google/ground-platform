@@ -72,10 +72,14 @@ describe('SubmissionService', () => {
     user$ = new ReplaySubject<User>(1);
     dataStoreServiceSpy = jasmine.createSpyObj('DataStoreService', [
       'getAccessibleSubmissions$',
+      'deleteSubmissionsByLoiId',
       'generateId',
       'getServerTimestamp',
     ]);
-    authServiceSpy = jasmine.createSpyObj('AuthService', ['getUser$']);
+    authServiceSpy = jasmine.createSpyObj('AuthService', [
+      'getUser$',
+      'getCurrentUser',
+    ]);
     surveyServiceSpy = jasmine.createSpyObj('SurveyService', [
       'canManageSurvey',
     ]);
@@ -139,6 +143,67 @@ describe('SubmissionService', () => {
         expect(result).toBe(mockSubmission);
         done();
       });
+    });
+  });
+
+  describe('canDeleteSubmissions', () => {
+    it('is false when there is nothing to delete', () => {
+      surveyServiceSpy.canManageSurvey.and.returnValue(true);
+
+      expect(service.canDeleteSubmissions(mockSurvey, List())).toBeFalse();
+    });
+
+    it('is true for a survey manager', () => {
+      surveyServiceSpy.canManageSurvey.and.returnValue(true);
+
+      expect(
+        service.canDeleteSubmissions(mockSurvey, List([mockSubmission]))
+      ).toBeTrue();
+    });
+
+    it('is true for a collector who owns one of the submissions', () => {
+      surveyServiceSpy.canManageSurvey.and.returnValue(false);
+      authServiceSpy.getCurrentUser.and.returnValue(mockUser);
+
+      expect(
+        service.canDeleteSubmissions(mockSurvey, List([mockSubmission]))
+      ).toBeTrue();
+    });
+
+    it('is false for a collector who owns none of them', () => {
+      surveyServiceSpy.canManageSurvey.and.returnValue(false);
+      authServiceSpy.getCurrentUser.and.returnValue(
+        new User('someone-else', 'other@test.com', true)
+      );
+
+      expect(
+        service.canDeleteSubmissions(mockSurvey, List([mockSubmission]))
+      ).toBeFalse();
+    });
+  });
+
+  describe('deleteSubmissionsForLoi', () => {
+    it('clears every submission for a survey manager', async () => {
+      surveyServiceSpy.canManageSurvey.and.returnValue(true);
+      dataStoreServiceSpy.deleteSubmissionsByLoiId.and.resolveTo();
+
+      await service.deleteSubmissionsForLoi(mockSurvey, mockLoi.id);
+
+      expect(
+        dataStoreServiceSpy.deleteSubmissionsByLoiId
+      ).toHaveBeenCalledOnceWith(mockSurvey.id, mockLoi.id, undefined);
+    });
+
+    it('restricts a data collector to their own submissions', async () => {
+      surveyServiceSpy.canManageSurvey.and.returnValue(false);
+      authServiceSpy.getCurrentUser.and.returnValue(mockUser);
+      dataStoreServiceSpy.deleteSubmissionsByLoiId.and.resolveTo();
+
+      await service.deleteSubmissionsForLoi(mockSurvey, mockLoi.id);
+
+      expect(
+        dataStoreServiceSpy.deleteSubmissionsByLoiId
+      ).toHaveBeenCalledOnceWith(mockSurvey.id, mockLoi.id, mockUser.id);
     });
   });
 

@@ -43,6 +43,22 @@ const c = registry.getFieldIds(Pb.Coordinates);
 const pg = registry.getFieldIds(Pb.Polygon);
 const lr = registry.getFieldIds(Pb.LinearRing);
 const mp = registry.getFieldIds(Pb.MultiPolygon);
+const ai = registry.getFieldIds(Pb.AuditInfo);
+const ts = registry.getFieldIds(GroundProtos.google.protobuf.Timestamp);
+
+// Clock of the device requesting the import, as reported in the form data.
+const clientTimeMillis = Date.UTC(2026, 0, 2, 3, 4, 5);
+
+const importAuditInfo = {
+  [ai.clientTimestamp]: {
+    [ts.seconds]: clientTimeMillis / 1000,
+    [ts.nanos]: 0,
+  },
+  [ai.serverTimestamp]: {
+    [ts.seconds]: jasmine.any(Number),
+    [ts.nanos]: 0,
+  },
+};
 
 describe('importGeoJson()', () => {
   let mockFirestore: Firestore;
@@ -85,6 +101,8 @@ describe('importGeoJson()', () => {
       name: { [pr.stringValue]: 'Dinagat Islands' },
       area: { [pr.numericValue]: 3.08 },
     },
+    [l.created]: importAuditInfo,
+    [l.lastModified]: importAuditInfo,
   };
   const geoJsonWithPolygon = {
     type: 'FeatureCollection',
@@ -121,6 +139,8 @@ describe('importGeoJson()', () => {
     },
     [l.submissionCount]: 0,
     [l.source]: 1, // IMPORTED
+    [l.created]: importAuditInfo,
+    [l.lastModified]: importAuditInfo,
   };
   const geoJsonWithMultiPolygon = {
     type: 'FeatureCollection',
@@ -183,6 +203,8 @@ describe('importGeoJson()', () => {
     },
     [l.submissionCount]: 0,
     [l.source]: 1, // IMPORTED
+    [l.created]: importAuditInfo,
+    [l.lastModified]: importAuditInfo,
   };
   const geoJsonWithNonCRS84Point = {
     type: 'FeatureCollection',
@@ -247,18 +269,27 @@ describe('importGeoJson()', () => {
     resetDatastore();
   });
 
-  function createPostData(surveyId: string, jobId: string, geoJson: object) {
+  function createPostData(
+    surveyId: string,
+    jobId: string,
+    geoJson: object,
+    clientTimestamp?: number
+  ) {
     const form = new FormData();
     form.append('survey', surveyId);
     form.append('job', jobId);
+    // Fields are read as they stream in, so they must precede the file.
+    if (clientTimestamp !== undefined) {
+      form.append('clientTimestamp', clientTimestamp.toString());
+    }
     form.append('file', new Blob([JSON.stringify(geoJson)]), 'file.json');
     return form;
   }
 
-  async function runImport(geoJson: object) {
+  async function runImport(geoJson: object, clientTimestamp?: number) {
     const req = await createPostRequestSpy(
       { url: '/importGeoJson' },
-      createPostData(surveyId, jobId, geoJson)
+      createPostData(surveyId, jobId, geoJson, clientTimestamp)
     );
     const res = createResponseSpy();
     try {
@@ -278,7 +309,7 @@ describe('importGeoJson()', () => {
       // Add survey.
       mockFirestore.doc(`surveys/${surveyId}`).set(survey);
 
-      const res = await runImport(input);
+      const res = await runImport(input, clientTimeMillis);
 
       expect(res.status).toHaveBeenCalledOnceWith(expectedStatus);
       if (expectedStatus === StatusCodes.OK) {
@@ -291,6 +322,16 @@ describe('importGeoJson()', () => {
       }
     })
   );
+
+  it('falls back to the server clock when no client timestamp is sent', async () => {
+    mockFirestore.doc(`surveys/${surveyId}`).set(survey);
+
+    await runImport(geoJsonWithPoint);
+
+    const [, docs] = insertLocationsOfInterestSpy.calls.mostRecent().args;
+    const created = docs[0][l.created];
+    expect(created[ai.clientTimestamp]).toEqual(created[ai.serverTimestamp]);
+  });
 
   it('bulk-inserts all features in a single call', async () => {
     mockFirestore.doc(`surveys/${surveyId}`).set(survey);

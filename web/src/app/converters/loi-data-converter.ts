@@ -59,9 +59,10 @@ export function loiDocToModel(
       properties,
       pb.customTag,
       pb.source === Pb.LocationOfInterest.Source.IMPORTED,
-      pb.submissionCount ?? 0
+      pb.submissionCount ?? 0,
+      pb.ownerId ?? ''
     );
   } catch (e) {
-    return new Error(`Invalid LOI data for ${id}`, {cause: e});
+    return new Error(`Invalid LOI data for ${id}`, { cause: e });
   }
 }

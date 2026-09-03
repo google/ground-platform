@@ -25,9 +25,11 @@ export enum DialogType {
   DeleteJob,
   UndoJobs,
   CopySurvey,
+  DeleteLoi,
   DeleteLois,
   DeleteOption,
   DeleteSubmission,
+  DeleteSubmissions,
   DeleteSurvey,
   DisableFreeForm,
   InvalidSurvey,
@@ -70,6 +72,12 @@ export const dialogConfigs: Record<DialogType, DialogConfig> = {
     backButtonLabel: $localize`:@@app.labels.cancel:Cancel`,
     continueButtonLabel: $localize`:@@app.labels.confirm:Confirm`,
   },
+  [DialogType.DeleteLoi]: {
+    title: $localize`:@@app.dialogs.deleteLoi.title:Delete site?`,
+    content: $localize`:@@app.dialogs.deleteLoi.content:This action will permanently delete this site and all the data collected for it. Are you sure you want to delete it?`,
+    backButtonLabel: $localize`:@@app.labels.cancel:Cancel`,
+    continueButtonLabel: $localize`:@@app.labels.delete:Delete`,
+  },
   [DialogType.DeleteLois]: {
     title: $localize`:@@app.dialogs.deleteLois.title:Delete predefined sites`,
     content: $localize`:@@app.dialogs.deleteLois.content:All predefined data collection sites and their associated data will be immediately deleted. This action cannot be undone.`,
@@ -85,6 +93,12 @@ export const dialogConfigs: Record<DialogType, DialogConfig> = {
   [DialogType.DeleteSubmission]: {
     title: $localize`:@@app.dialogs.deleteSubmission.title:Delete submission?`,
     content: $localize`:@@app.dialogs.deleteSubmission.content:This action will permanently delete this submission from the database. Are you sure you want to delete it?`,
+    backButtonLabel: $localize`:@@app.labels.cancel:Cancel`,
+    continueButtonLabel: $localize`:@@app.labels.delete:Delete`,
+  },
+  [DialogType.DeleteSubmissions]: {
+    title: $localize`:@@app.dialogs.deleteSubmissions.title:Delete submissions?`,
+    content: $localize`:@@app.dialogs.deleteSubmissions.content:This action will permanently delete these submissions from the database. Are you sure you want to delete it?`,
     backButtonLabel: $localize`:@@app.labels.cancel:Cancel`,
     continueButtonLabel: $localize`:@@app.labels.delete:Delete`,
   },

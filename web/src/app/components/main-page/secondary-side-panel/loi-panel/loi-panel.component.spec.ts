@@ -24,9 +24,12 @@ import {
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
+import { MatMenuModule } from '@angular/material/menu';
 import { List, Map } from 'immutable';
 import { of } from 'rxjs';
 
+import { DialogType } from 'app/components/shared/dialog/dialog.component';
+import { AuditInfo } from 'app/models/audit-info.model';
 import { Coordinate } from 'app/models/geometry/coordinate';
 import { Point } from 'app/models/geometry/point';
 import { Job } from 'app/models/job.model';
@@ -65,15 +68,46 @@ describe('LocationOfInterestPanelComponent', () => {
     Map()
   );
 
+  const mockUser = {
+    id: 'user1',
+    email: 'user1@example.com',
+    displayName: 'User One',
+    isAuthenticated: true,
+  };
+
+  const mockSubmission = new Submission(
+    'sub1',
+    mockLoi.id,
+    mockSurvey.getJob('job1')!,
+    new AuditInfo(mockUser, new Date(), new Date()),
+    new AuditInfo(mockUser, new Date(), new Date()),
+    Map()
+  );
+
+  /** Makes the panel report one submission for the selected LOI. */
+  function withOneSubmission() {
+    submissionServiceSpy.getSubmissions$.and.returnValue(
+      of(List<Submission>([mockSubmission]))
+    );
+  }
+
   beforeEach(async () => {
     loiServiceSpy = jasmine.createSpyObj<LocationOfInterestService>(
       'LocationOfInterestService',
-      ['getLocationsOfInterest$']
+      [
+        'getLocationsOfInterest$',
+        'canDeleteLocationOfInterest',
+        'deleteLocationOfInterest',
+      ]
     );
+    loiServiceSpy.canDeleteLocationOfInterest.and.returnValue(true);
+    loiServiceSpy.deleteLocationOfInterest.and.resolveTo();
     submissionServiceSpy = jasmine.createSpyObj<SubmissionService>(
       'SubmissionService',
-      ['getSubmissions$']
+      ['getSubmissions$', 'deleteSubmissionsForLoi', 'canDeleteSubmissions']
     );
+    submissionServiceSpy.deleteSubmissionsForLoi.and.resolveTo();
+    submissionServiceSpy.canDeleteSubmissions.and.returnValue(true);
     navigationServiceSpy = jasmine.createSpyObj<NavigationService>(
       'NavigationService',
       [
@@ -102,6 +136,7 @@ describe('LocationOfInterestPanelComponent', () => {
         MatDialogModule,
         MatListModule,
         MatIconModule,
+        MatMenuModule,
       ],
       providers: [
         { provide: LocationOfInterestService, useValue: loiServiceSpy },
@@ -157,5 +192,154 @@ describe('LocationOfInterestPanelComponent', () => {
   it('should clear LOI on close', () => {
     component.onClosePanel();
     expect(navigationServiceSpy.clearLocationOfInterestId).toHaveBeenCalled();
+  });
+
+  it('exposes canDelete based on the LOI service', fakeAsync(() => {
+    loiServiceSpy.canDeleteLocationOfInterest.and.returnValue(false);
+    setupPanelWithLoi();
+
+    expect(component.canDeleteLocationOfInterest()).toBeFalse();
+    expect(loiServiceSpy.canDeleteLocationOfInterest).toHaveBeenCalledWith(
+      mockSurvey,
+      mockLoi
+    );
+  }));
+
+  it('cannot delete when no LOI is selected', () => {
+    expect(component.canDeleteLocationOfInterest()).toBeFalse();
+  });
+
+  it('deletes the LOI and closes the panel when confirmed', fakeAsync(() => {
+    dialogSpy.open.and.returnValue({
+      afterClosed: () => of({ dialogType: DialogType.DeleteLoi }),
+    } as any);
+    setupPanelWithLoi();
+
+    component.deleteLoi();
+    tick();
+
+    expect(loiServiceSpy.deleteLocationOfInterest).toHaveBeenCalledWith(
+      mockSurvey.id,
+      mockLoi.id
+    );
+    expect(navigationServiceSpy.clearLocationOfInterestId).toHaveBeenCalled();
+    expect(component.isDeleting()).toBeFalse();
+  }));
+
+  it('does not delete the LOI when not confirmed', fakeAsync(() => {
+    dialogSpy.open.and.returnValue({
+      afterClosed: () => of(undefined),
+    } as any);
+    setupPanelWithLoi();
+
+    component.deleteLoi();
+    tick();
+
+    expect(loiServiceSpy.deleteLocationOfInterest).not.toHaveBeenCalled();
+    expect(
+      navigationServiceSpy.clearLocationOfInterestId
+    ).not.toHaveBeenCalled();
+  }));
+
+  it('keeps the panel open when deletion fails', fakeAsync(() => {
+    spyOn(console, 'error');
+    loiServiceSpy.deleteLocationOfInterest.and.rejectWith(new Error('nope'));
+    dialogSpy.open.and.returnValue({
+      afterClosed: () => of({ dialogType: DialogType.DeleteLoi }),
+    } as any);
+    setupPanelWithLoi();
+
+    component.deleteLoi();
+    tick();
+
+    expect(
+      navigationServiceSpy.clearLocationOfInterestId
+    ).not.toHaveBeenCalled();
+    expect(component.isDeleting()).toBeFalse();
+    expect(console.error).toHaveBeenCalled();
+  }));
+
+  it('delegates the submission delete permission to the service', fakeAsync(() => {
+    withOneSubmission();
+    submissionServiceSpy.canDeleteSubmissions.and.returnValue(false);
+    setupPanelWithLoi();
+
+    expect(component.canDeleteSubmissions()).toBeFalse();
+    expect(submissionServiceSpy.canDeleteSubmissions).toHaveBeenCalledWith(
+      mockSurvey,
+      List([mockSubmission])
+    );
+  }));
+
+  it('deletes the submissions but keeps the site when confirmed', fakeAsync(() => {
+    withOneSubmission();
+    dialogSpy.open.and.returnValue({
+      afterClosed: () => of({ dialogType: DialogType.DeleteSubmissions }),
+    } as any);
+    setupPanelWithLoi();
+
+    component.deleteSubmissions();
+    tick();
+
+    expect(submissionServiceSpy.deleteSubmissionsForLoi).toHaveBeenCalledWith(
+      mockSurvey,
+      mockLoi.id
+    );
+    expect(loiServiceSpy.deleteLocationOfInterest).not.toHaveBeenCalled();
+    expect(
+      navigationServiceSpy.clearLocationOfInterestId
+    ).not.toHaveBeenCalled();
+    expect(component.isDeleting()).toBeFalse();
+  }));
+
+  it('does not delete the submissions when not confirmed', fakeAsync(() => {
+    withOneSubmission();
+    dialogSpy.open.and.returnValue({
+      afterClosed: () => of(undefined),
+    } as any);
+    setupPanelWithLoi();
+
+    component.deleteSubmissions();
+    tick();
+
+    expect(submissionServiceSpy.deleteSubmissionsForLoi).not.toHaveBeenCalled();
+  }));
+
+  it('keeps the panel usable when deleting submissions fails', fakeAsync(() => {
+    spyOn(console, 'error');
+    withOneSubmission();
+    submissionServiceSpy.deleteSubmissionsForLoi.and.rejectWith(
+      new Error('nope')
+    );
+    dialogSpy.open.and.returnValue({
+      afterClosed: () => of({ dialogType: DialogType.DeleteSubmissions }),
+    } as any);
+    setupPanelWithLoi();
+
+    component.deleteSubmissions();
+    tick();
+
+    expect(component.isDeleting()).toBeFalse();
+    expect(console.error).toHaveBeenCalled();
+  }));
+
+  it('logs and bails on submission delete when no LOI is selected', () => {
+    spyOn(console, 'error');
+
+    component.deleteSubmissions();
+
+    expect(console.error).toHaveBeenCalled();
+    expect(dialogSpy.open).not.toHaveBeenCalled();
+    expect(submissionServiceSpy.deleteSubmissionsForLoi).not.toHaveBeenCalled();
+  });
+
+  it('logs and bails on delete when no LOI is selected', () => {
+    spyOn(console, 'error');
+
+    component.deleteLoi();
+
+    expect(console.error).toHaveBeenCalled();
+    expect(dialogSpy.open).not.toHaveBeenCalled();
+    expect(loiServiceSpy.deleteLocationOfInterest).not.toHaveBeenCalled();
   });
 });

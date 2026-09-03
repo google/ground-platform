@@ -21,7 +21,6 @@ import {
 import * as logger from 'firebase-functions/logger';
 import { Datastore } from './common/datastore';
 import { getDatastore } from './common/context';
-import { broadcastSurveyUpdate } from './common/broadcast-survey-update';
 import { GroundProtos } from '@ground/proto';
 import { toDocumentData, toGeoJsonGeometry, toMessage } from '@ground/lib';
 import { toLoiPbProperties } from './import-geojson';
@@ -62,8 +61,6 @@ export async function onCreateLoiHandler(
       new Pb.LocationOfInterest({ properties: toLoiPbProperties(properties) })
     )
   );
-
-  await broadcastSurveyUpdate(surveyId);
 }
 
 export async function regenerateLoiProperties(
