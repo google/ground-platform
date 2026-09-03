@@ -22,7 +22,7 @@ export type {
   PropertyGeneratorHandler,
 } from './types';
 
-import { geoIdHandler } from './geoid';
+import { geoidHandler } from './geoid';
 import { whispHandler } from './whisp';
 import type { PropertyGeneratorHandler } from './types';
 
@@ -30,6 +30,6 @@ export const propertyGeneratorHandlers: Record<
   string,
   PropertyGeneratorHandler
 > = {
-  geoid: geoIdHandler,
+  geoid: geoidHandler,
   whisp: whispHandler,
 };

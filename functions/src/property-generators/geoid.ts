@@ -20,7 +20,7 @@ import type { Headers, Properties, PropertyGeneratorConfig } from './types';
 
 const defaultHeaders = { 'Content-Type': 'application/json' };
 
-export async function geoIdHandler(
+export async function geoidHandler(
   config: PropertyGeneratorConfig,
   geometry: Geometry,
   loiId: string
@@ -40,7 +40,7 @@ async function fetchGeoIdProperties(
   body: object
 ): Promise<Properties> {
   const bodyJson = JSON.stringify(body);
-  logger.debug(`geoId: POST ${url} body=${bodyJson}`);
+  logger.debug(`geoid: POST ${url} body=${bodyJson}`);
 
   const response = await fetch(url, {
     method: 'POST',
@@ -51,7 +51,7 @@ async function fetchGeoIdProperties(
   if (!response.ok) {
     const errorBody = await response.text();
     logger.error(
-      `geoId: request failed with status ${response.status}: ${errorBody}`
+      `geoid: request failed with status ${response.status}: ${errorBody}`
     );
     return {};
   }
@@ -60,11 +60,11 @@ async function fetchGeoIdProperties(
   const geoid = responseJson?.geoid;
   if (!geoid) {
     logger.error(
-      `geoId: response missing geoid field, body=${JSON.stringify(responseJson)}`
+      `geoid: response missing geoid field, body=${JSON.stringify(responseJson)}`
     );
     return {};
   }
-  logger.debug(`geoId: received geoid=${geoid}`);
+  logger.debug(`geoid: received geoid=${geoid}`);
 
   return { geoid };
 }

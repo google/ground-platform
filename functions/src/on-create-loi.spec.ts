@@ -65,7 +65,7 @@ describe('onCreateLoiHandler()', () => {
     url: 'https://whisp.example.com/api',
   };
 
-  const geoIdConfig = {
+  const geoidConfig = {
     name: 'geoid',
     prefix: 'geoid_',
     url: 'https://geoid.example.com/api',
@@ -83,7 +83,7 @@ describe('onCreateLoiHandler()', () => {
       .set(whispConfig);
     mockFirestore
       .doc('config/integrations/propertyGenerators/geoid')
-      .set(geoIdConfig);
+      .set(geoidConfig);
   });
 
   afterEach(() => {
@@ -128,7 +128,7 @@ describe('onCreateLoiHandler()', () => {
     });
   });
 
-  it('runs geoId property generator and updates LOI properties when integration is enabled', async () => {
+  it('runs geoid property generator and updates LOI properties when integration is enabled', async () => {
     mockFirestore.doc(JOB_PATH).set({
       [j.enabledIntegrations]: [{ [intgr.id]: 'geoid' }],
     });
@@ -158,7 +158,7 @@ describe('onCreateLoiHandler()', () => {
     });
   });
 
-  it('skips geoId property generator when fetch fails', async () => {
+  it('skips geoid property generator when fetch fails', async () => {
     mockFirestore.doc(JOB_PATH).set({
       [j.enabledIntegrations]: [{ [intgr.id]: 'geoid' }],
     });
