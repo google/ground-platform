@@ -15,55 +15,60 @@
  */
 
 import {
+  DocumentSnapshot,
   FirestoreEvent,
-  QueryDocumentSnapshot,
 } from 'firebase-functions/v2/firestore';
-import * as logger from 'firebase-functions/logger';
-import { Datastore } from './common/datastore';
 import { getDatastore } from './common/context';
 import { withServerTimestamp } from './common/audit-info';
-import { GroundProtos } from '@ground/proto';
-import { toDocumentData, toGeoJsonGeometry, toMessage } from '@ground/lib';
-import { toLoiPbProperties } from './import-geojson';
+import { broadcastUpdate } from './common/broadcast';
 import {
-  Properties,
-  PropertyGeneratorConfig,
-  propertyGeneratorHandlers,
-} from './property-generators';
+  propertiesEqual,
+  propertiesPbToObject,
+  regenerateLoiProperties,
+} from './common/loi-properties';
+import { GroundProtos } from '@ground/proto';
+import { toDocumentData, toMessage } from '@ground/lib';
+import { toLoiPbProperties } from './import-geojson';
 
 import Pb = GroundProtos.ground.v1beta1;
 
-/**
- * Handles the creation of a Location of Interest (LOI) document in Firestore.
- * This function is triggered by a Cloud Function on Firestore document creation.
- *
- * @param snapshot The QueryDocumentSnapshot object containing the created LOI data.
- * @param context The EventContext object provided by the Cloud Functions framework.
- */
 export async function onCreateLoiHandler(
-  event: FirestoreEvent<QueryDocumentSnapshot | undefined>
+  event: FirestoreEvent<DocumentSnapshot | undefined>
 ) {
-  const surveyId = event.params.surveyId;
-  const loiId = event.params.loiId;
+  const { surveyId, loiId } = event.params;
   const data = event.data?.data();
 
-  if (!loiId || !data) return;
+  if (!surveyId || !loiId || !data) return;
 
   const loiPb = toMessage(data, Pb.LocationOfInterest) as Pb.LocationOfInterest;
-
   const db = getDatastore();
 
   const properties = await regenerateLoiProperties(db, surveyId, loiId, loiPb);
+  const auditInfo = correctedAuditInfo(loiPb, event.time);
+  const propertiesChanged = !propertiesEqual(
+    propertiesPbToObject(loiPb.properties),
+    properties
+  );
 
-  await db.updateLoiProperties(
-    surveyId,
-    loiId,
-    toDocumentData(
-      new Pb.LocationOfInterest({
-        properties: toLoiPbProperties(properties),
-        ...correctedAuditInfo(loiPb, event.time),
-      })
-    )
+  if (propertiesChanged || Object.keys(auditInfo).length) {
+    await db.updateLoiProperties(
+      surveyId,
+      loiId,
+      toDocumentData(
+        new Pb.LocationOfInterest({
+          properties: toLoiPbProperties(properties),
+          ...auditInfo,
+        })
+      )
+    );
+
+    // onUpdateLoi announces the write just made.
+    return;
+  }
+
+  return broadcastUpdate(
+    { type: 'loi', surveyId, loiId, deleted: false },
+    event.time
   );
 }
 
@@ -81,99 +86,4 @@ function correctedAuditInfo(
       ? withServerTimestamp(loiPb.lastModified, eventTime)
       : created,
   };
-}
-
-export async function regenerateLoiProperties(
-  db: Datastore,
-  surveyId: string,
-  loiId: string,
-  loiPb: Pb.LocationOfInterest
-): Promise<Properties> {
-  const geometry = toGeoJsonGeometry(loiPb.geometry!);
-
-  let properties = propertiesPbToObject(loiPb.properties) || {};
-
-  const jobDoc = await db.fetchJob(surveyId, loiPb.jobId);
-  const jobPb = toMessage(jobDoc.data()!, Pb.Job) as Pb.Job;
-  const enabledIntegrationIds = new Set(
-    jobPb.enabledIntegrations.map(i => i.id)
-  );
-
-  const propertyGenerators = await db.fetchPropertyGenerators();
-
-  for (const propertyGeneratorDoc of propertyGenerators.docs) {
-    const generatorId = propertyGeneratorDoc.id;
-    const config = propertyGeneratorDoc.data() as PropertyGeneratorConfig;
-    const handler = propertyGeneratorHandlers[generatorId];
-
-    if (!handler) {
-      continue;
-    }
-
-    if (!enabledIntegrationIds.has(generatorId)) {
-      continue;
-    }
-
-    try {
-      const newProperties = await handler(config, geometry, loiId);
-      properties = updateProperties(properties, newProperties, config.prefix);
-    } catch (e) {
-      logger.error(
-        `onCreateLoi: loiId=${loiId} property generator '${generatorId}' failed:`,
-        e
-      );
-    }
-
-    Object.keys(properties)
-      .filter(key => typeof properties[key] === 'object')
-      .forEach(key => (properties[key] = JSON.stringify(properties[key])));
-  }
-
-  return properties;
-}
-
-function updateProperties(
-  properties: Properties,
-  newProperties: Properties,
-  prefix?: string
-): Properties {
-  if (prefix) properties = removePrefixedKeys(properties, prefix);
-
-  return {
-    ...properties,
-    ...(prefix ? prefixKeys(newProperties, prefix) : newProperties),
-  };
-}
-
-/**
- * Returns a new object with all keys of the original object prefixed with the given value.
- */
-function prefixKeys(obj: Properties, prefix: string): Properties {
-  return Object.keys(obj).reduce(
-    (a, k) => ((a[`${prefix}${k}`] = obj[k]), a),
-    {} as Properties
-  );
-}
-
-/**
- * Returns a new object containing only the keys that do not start with the specified prefix.
- */
-function removePrefixedKeys(obj: Properties, prefix: string): Properties {
-  Object.keys(obj).forEach(k => {
-    if (k.startsWith(prefix)) delete obj[k];
-  });
-  return obj;
-}
-
-export function propertiesPbToObject(pb: {
-  [k: string]: Pb.LocationOfInterest.IProperty;
-}): Properties {
-  const properties: { [k: string]: string | number } = {};
-  for (const k of Object.keys(pb).sort()) {
-    const v = pb[k].stringValue || pb[k].numericValue;
-    if (v !== null && v !== undefined) {
-      properties[k] = v;
-    }
-  }
-  return properties;
 }

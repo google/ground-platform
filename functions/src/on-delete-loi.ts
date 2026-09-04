@@ -1,33 +1,34 @@
 /**
- * Copyright 2024 The Ground Authors.
+ * Copyright 2026 The Ground Authors.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
+ * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  *     https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
+ * distributed under the License is distributed on an 'AS IS' BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
 
 import {
-  Change,
   DocumentSnapshot,
   FirestoreEvent,
 } from 'firebase-functions/v2/firestore';
 import { broadcastUpdate } from './common/broadcast';
 
-export async function onWriteLoiHandler(
-  event: FirestoreEvent<Change<DocumentSnapshot> | undefined>
+export async function onDeleteLoiHandler(
+  event: FirestoreEvent<DocumentSnapshot | undefined>
 ) {
   const { surveyId, loiId } = event.params;
-  // Defaults to false when the change isn't available, so that clients resync
-  // the LOI rather than dropping it.
-  const deleted = event.data?.after?.exists === false;
 
-  return broadcastUpdate({ type: 'loi', surveyId, loiId, deleted }, event.time);
+  if (!surveyId || !loiId) return;
+
+  return broadcastUpdate(
+    { type: 'loi', surveyId, loiId, deleted: true },
+    event.time
+  );
 }

@@ -19,6 +19,7 @@ import { onSchedule } from 'firebase-functions/scheduler';
 import {
   onDocumentCreated,
   onDocumentDeleted,
+  onDocumentUpdated,
   onDocumentWritten,
 } from 'firebase-functions/v2/firestore';
 import { onHttpsRequest, onHttpsRequestAsync } from './handlers';
@@ -30,11 +31,12 @@ import { exportGeojsonHandler } from './export-geojson';
 import { cleanTempHandler } from './clean-temp';
 import { cleanOrphanMediaHandler } from './clean-orphan-media';
 import { onCall } from 'firebase-functions/v2/https';
-import { onCreateLoiHandler } from './on-create-loi';
 import { onCreatePasslistEntryHandler } from './on-create-passlist-entry';
 import { onDeleteSubmissionHandler } from './on-delete-submission';
 import { onWriteJobHandler } from './on-write-job';
-import { onWriteLoiHandler } from './on-write-loi';
+import { onCreateLoiHandler } from './on-create-loi';
+import { onDeleteLoiHandler } from './on-delete-loi';
+import { onUpdateLoiHandler } from './on-update-loi';
 import { onWriteSubmissionHandler } from './on-write-submission';
 import { onWriteSurveyHandler } from './on-write-survey';
 import {
@@ -91,14 +93,22 @@ export const exportGeojson = onHttpsRequest(exportGeojsonHandler, {
   cpu: 2,
 });
 
+export const onWriteJob = onDocumentWritten(jobPathTemplate, onWriteJobHandler);
+
 export const onCreateLoi = onDocumentCreated(
   loiPathTemplate,
   onCreateLoiHandler
 );
 
-export const onWriteJob = onDocumentWritten(jobPathTemplate, onWriteJobHandler);
+export const onUpdateLoi = onDocumentUpdated(
+  loiPathTemplate,
+  onUpdateLoiHandler
+);
 
-export const onWriteLoi = onDocumentWritten(loiPathTemplate, onWriteLoiHandler);
+export const onDeleteLoi = onDocumentDeleted(
+  loiPathTemplate,
+  onDeleteLoiHandler
+);
 
 export const onWriteSubmission = onDocumentWritten(
   submissionPathTemplate,
