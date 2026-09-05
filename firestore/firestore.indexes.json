@@ -1,6 +1,38 @@
 {
   "indexes": [
     {
+      "collectionGroup": "lois",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "`5`", // owner_id
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "`9`", // source
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "`7`.`3`.`1`", // last_modified.server_timestamp.seconds
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "lois",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "`9`", // source
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "`7`.`3`.`1`", // last_modified.server_timestamp.seconds
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
       "collectionGroup": "submissions",
       "queryScope": "COLLECTION",
       "fields": [
