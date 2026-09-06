@@ -15,11 +15,15 @@
  */
 
 import { Injectable } from '@angular/core';
-import { List } from 'immutable';
+import { List, Map } from 'immutable';
 import { Observable, of } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 
+import { Coordinate } from 'app/models/geometry/coordinate';
 import { GeometryType } from 'app/models/geometry/geometry';
+import { LinearRing } from 'app/models/geometry/linear-ring';
+import { Point } from 'app/models/geometry/point';
+import { Polygon } from 'app/models/geometry/polygon';
 import { LocationOfInterest } from 'app/models/loi.model';
 import {
   Survey,
@@ -170,12 +174,57 @@ export class LocationOfInterestService {
     return bounds;
   }
 
+  /**
+   * Adds a new point LOI to Firestore for the given survey and job.
+   */
   async addPoint(
-    _lat: number,
-    _lng: number,
-    _jobId: string
+    lat: number,
+    lng: number,
+    jobId: string,
+    surveyId: string
   ): Promise<LocationOfInterest | null> {
-    throw new Error('Adding LOIs via web app not yet supported');
+    const id = this.dataStore.generateId();
+    const loi = new LocationOfInterest(
+      id,
+      jobId,
+      new Point(new Coordinate(lng, lat)),
+      Map<string, string | number>(),
+      /* customId= */ '',
+      /* predefined= */ false,
+      /* submissionCount= */ 0
+    );
+    await this.dataStore.addOrUpdateLoi(surveyId, loi);
+    return loi;
+  }
+
+  /**
+   * Adds a new polygon LOI to Firestore for the given survey and job.
+   * @param vertices Ordered list of LatLng vertices (the ring is closed automatically).
+   */
+  async addPolygon(
+    vertices: google.maps.LatLng[],
+    jobId: string,
+    surveyId: string
+  ): Promise<LocationOfInterest | null> {
+    if (vertices.length < 3) return null;
+    const id = this.dataStore.generateId();
+    // Close the ring by repeating the first vertex at the end.
+    const coords = [...vertices, vertices[0]].map(
+      v => new Coordinate(v.lng(), v.lat())
+    );
+    const shell = new LinearRing(List(coords));
+    const polygon = new Polygon(shell, List());
+    const loi = new LocationOfInterest(
+      id,
+      jobId,
+      polygon,
+      Map<string, string | number>(),
+      /* customId= */ '',
+      /* predefined= */ false,
+      /* submissionCount= */ 0
+    );
+    await this.dataStore.addOrUpdateLoi(surveyId, loi);
+    return loi;
   }
 
   async updatePoint(_loi: LocationOfInterest): Promise<void> {

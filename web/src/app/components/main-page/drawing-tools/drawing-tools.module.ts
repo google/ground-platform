@@ -22,6 +22,7 @@ import { MatExpansionModule } from '@angular/material/expansion';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSelectModule } from '@angular/material/select';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 import { DrawingToolsComponent } from './drawing-tools.component';
 
@@ -34,6 +35,7 @@ import { DrawingToolsComponent } from './drawing-tools.component';
     MatExpansionModule,
     MatFormFieldModule,
     MatSelectModule,
+    MatTooltipModule,
   ],
   exports: [DrawingToolsComponent],
   declarations: [DrawingToolsComponent],
