@@ -32,17 +32,16 @@ import { DataStoreService } from 'app/services/data-store/data-store.service';
 import { User, UserType } from 'app/models/user.model';
 import { environment } from 'environments/environment';
 
-import { HttpClientService } from '../http-client/http-client.service';
+import { CloudFunctionsService } from '../cloud-functions/cloud-functions.service';
 import { SESSION_COOKIE_DURATION_MS } from '@ground/lib';
 
 const SESSION_COOKIE_EXPIRES_AT_KEY = 'sessionCookieExpiresAt';
 
 /** Providers shared by all describe blocks that use a mock Auth. */
-function mockAuthProviders(mockAuth: Partial<Auth>, postWithAuth: jasmine.Spy) {
+function mockAuthProviders(mockAuth: Partial<Auth>, sessionLoginSpy: jasmine.Spy) {
   return [
     { provide: Auth, useValue: mockAuth },
     { provide: Firestore, useValue: {} },
-    { provide: Functions, useValue: {} },
     {
       provide: DataStoreService,
       useValue: {
@@ -56,7 +55,7 @@ function mockAuthProviders(mockAuth: Partial<Auth>, postWithAuth: jasmine.Spy) {
       },
     },
     { provide: Router, useValue: { events: of() } },
-    { provide: HttpClientService, useValue: { postWithAuth } },
+    { provide: CloudFunctionsService, useValue: { sessionLogin: sessionLoginSpy, profileRefresh: jasmine.createSpy('profileRefresh').and.resolveTo() } },
   ];
 }
 
@@ -80,10 +79,9 @@ describe('AuthService', () => {
         ),
         provideAuth(() => getAuth()),
         { provide: Firestore, useValue: {} },
-        { provide: Functions, useValue: {} },
         { provide: DataStoreService, useValue: { user$: () => of() } },
         { provide: Router, useValue: { events: of() } },
-        { provide: HttpClientService, useValue: {} },
+        { provide: CloudFunctionsService, useValue: {} },
       ],
     });
   });
@@ -96,14 +94,14 @@ describe('AuthService', () => {
 
 describe('AuthService createSessionCookie()', () => {
   let service: AuthService;
-  let postWithAuthSpy: jasmine.Spy;
+  let sessionLoginSpy: jasmine.Spy;
   const futureExpiry = Date.now() + SESSION_COOKIE_DURATION_MS;
 
   beforeEach(() => {
     localStorage.clear();
 
-    postWithAuthSpy = jasmine
-      .createSpy('postWithAuth')
+    sessionLoginSpy = jasmine
+      .createSpy('sessionLogin')
       .and.resolveTo({ expiresAt: futureExpiry });
 
     const mockAuth = createMockAuth(
@@ -111,7 +109,7 @@ describe('AuthService createSessionCookie()', () => {
     );
 
     TestBed.configureTestingModule({
-      providers: mockAuthProviders(mockAuth, postWithAuthSpy),
+      providers: mockAuthProviders(mockAuth, sessionLoginSpy),
     });
 
     service = TestBed.inject(AuthService);
@@ -122,10 +120,7 @@ describe('AuthService createSessionCookie()', () => {
   it('calls sessionLogin and persists expiresAt in localStorage on first call', async () => {
     await service.createSessionCookie();
 
-    expect(postWithAuthSpy).toHaveBeenCalledOnceWith(
-      `${environment.cloudFunctionsUrl}/sessionLogin`,
-      {}
-    );
+    expect(sessionLoginSpy).toHaveBeenCalledTimes(1);
     expect(localStorage.getItem(SESSION_COOKIE_EXPIRES_AT_KEY)).toBe(
       String(futureExpiry)
     );
@@ -136,7 +131,7 @@ describe('AuthService createSessionCookie()', () => {
 
     await service.createSessionCookie();
 
-    expect(postWithAuthSpy).not.toHaveBeenCalled();
+    expect(sessionLoginSpy).not.toHaveBeenCalled();
   });
 
   it('calls sessionLogin again when the stored cookie has expired', async () => {
@@ -144,7 +139,7 @@ describe('AuthService createSessionCookie()', () => {
 
     await service.createSessionCookie();
 
-    expect(postWithAuthSpy).toHaveBeenCalledTimes(1);
+    expect(sessionLoginSpy).toHaveBeenCalledTimes(1);
   });
 
   it('calls sessionLogin when the stored cookie expires within the refresh buffer', async () => {
@@ -156,7 +151,7 @@ describe('AuthService createSessionCookie()', () => {
 
     await service.createSessionCookie();
 
-    expect(postWithAuthSpy).toHaveBeenCalledTimes(1);
+    expect(sessionLoginSpy).toHaveBeenCalledTimes(1);
   });
 });
 
@@ -180,7 +175,7 @@ describe('AuthService session cookie invalidation', () => {
     const mockAuth = createMockAuth(onIdTokenChangedSpy);
 
     TestBed.configureTestingModule({
-      providers: mockAuthProviders(mockAuth, jasmine.createSpy('postWithAuth')),
+      providers: mockAuthProviders(mockAuth, jasmine.createSpy('sessionLogin')),
     });
 
     service = TestBed.inject(AuthService);
@@ -216,7 +211,7 @@ describe('AuthService isAdmin()', () => {
     );
 
     TestBed.configureTestingModule({
-      providers: mockAuthProviders(mockAuth, jasmine.createSpy('postWithAuth')),
+      providers: mockAuthProviders(mockAuth, jasmine.createSpy('sessionLogin')),
     });
 
     service = TestBed.inject(AuthService);
