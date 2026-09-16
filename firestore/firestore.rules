@@ -206,8 +206,14 @@ rules_version = '2';
       allow create: if isLoiOwner(request.resource.data) && canCollectData(getSurvey(surveyId));
       // Allow if user has read access to the survey and the LOI.
       allow get: if canViewLoi(getSurvey(surveyId), resource.data);
-      // Allow all survey users to list LOIs.
-      allow list: if canViewSurvey(getSurvey(surveyId));
+      // Allow survey users to list only the LOIs they can see: `list` is checked
+      // against the query, so an unfiltered one would return every document.
+      allow list: if canViewSurvey(getSurvey(surveyId)) && (
+        canManageSurvey(getSurvey(surveyId)) ||
+        canViewDataCollectedByOthers(getSurvey(surveyId)) ||
+        resource.data['9'] == 1 /* IMPORTED */ ||
+        isLoiOwner(resource.data)
+      );
       // Allow if user is owner of the existing LOI and can collect data, or can manage survey.
       allow update: if (isLoiOwner(resource.data) && canCollectData(getSurvey(surveyId))) || canManageSurvey(getSurvey(surveyId));
       allow delete: if (isLoiOwner(resource.data) && !isImportedLoi(resource.data) && canCollectData(getSurvey(surveyId))) || canManageSurvey(getSurvey(surveyId));
@@ -219,8 +225,13 @@ rules_version = '2';
       allow create: if isSubmissionOwner(request.resource.data) && canCollectData(getSurvey(surveyId));
       // Allow if user has read access to the survey and the submission.
       allow get: if canViewSubmission(getSurvey(surveyId), resource.data);
-      // Allow all survey users to list submissions.
-      allow list: if canViewSurvey(getSurvey(surveyId));
+      // Allow survey users to list only the submissions they can see: `list` is
+      // checked against the query, so an unfiltered one would return every document.
+      allow list: if canViewSurvey(getSurvey(surveyId)) && (
+        canManageSurvey(getSurvey(surveyId)) ||
+        canViewDataCollectedByOthers(getSurvey(surveyId)) ||
+        isSubmissionOwner(resource.data)
+      );
       // Allow if user is owner of the existing submission and can collect data, or can manage survey.
       allow update, delete: if (isSubmissionOwner(resource.data) && canCollectData(getSurvey(surveyId))) || canManageSurvey(getSurvey(surveyId));
     }
