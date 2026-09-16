@@ -19,6 +19,7 @@ import {
   DocumentData,
   DocumentReference,
   FieldPath,
+  FieldValue,
   Firestore,
   GeoPoint,
 } from 'firebase-admin/firestore';
@@ -266,6 +267,16 @@ export class Datastore {
       // Deleting an LOI also deletes its submissions, so the resulting
       // submission write events can arrive after the LOI itself is gone. There
       // is no count left to update in that case.
+      if ((e as { code?: number }).code === GRPC_STATUS_NOT_FOUND) return;
+      throw e;
+    }
+  }
+
+  async adjustSubmissionCount(surveyId: string, loiId: string, delta: number) {
+    const loiRef = this.db_.doc(loi(surveyId, loiId));
+    try {
+      await loiRef.update({ [l.submissionCount]: FieldValue.increment(delta) });
+    } catch (e) {
       if ((e as { code?: number }).code === GRPC_STATUS_NOT_FOUND) return;
       throw e;
     }
