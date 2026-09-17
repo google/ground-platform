@@ -97,6 +97,8 @@ export class EditJobComponent {
 
     this.job = this.draftSurveyService.getSurvey().getJob(this.jobId!);
 
+    this.addLoiTaskId = this.job?.tasks?.find(task => !!task.addLoiTask)?.id;
+
     if (!this.job) return;
 
     this.loisSubscription.add(
