@@ -79,6 +79,7 @@
       }
 
       .survey-description {
+        overflow-wrap: anywhere;
         overflow: hidden;
         display: -webkit-box;
         -webkit-line-clamp: 3;

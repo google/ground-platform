@@ -26,6 +26,10 @@
     margin: 0 12px;
   }
 
+  > div:first-child {
+    min-width: 0;
+  }
+
   div {
     display: flex;
     align-items: center;
