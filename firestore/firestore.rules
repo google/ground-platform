@@ -211,7 +211,7 @@ rules_version = '2';
       allow list: if canViewSurvey(getSurvey(surveyId)) && (
         canManageSurvey(getSurvey(surveyId)) ||
         canViewDataCollectedByOthers(getSurvey(surveyId)) ||
-        resource.data['9'] == 1 /* IMPORTED */ ||
+        isImportedLoi(resource.data) ||
         isLoiOwner(resource.data)
       );
       // Allow if user is owner of the existing LOI and can collect data, or can manage survey.
