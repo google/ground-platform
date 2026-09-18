@@ -1,0 +1,106 @@
+syntax = "proto3";
+
+package groundplatform.v2.survey;
+
+// Collaborator organizational roles within a survey or resource.
+enum Role {
+  // Unspecified role.
+  ROLE_UNSPECIFIED = 0;
+
+  // Viewer: Read-only access enabling map navigation, entity inspection, and
+  // submission viewing while hiding/disabling collection and editing actions.
+  VIEWER = 1;
+
+  // Data Collector: Field enumerator authorized to collect submissions and
+  // register ad-hoc geospatial entities.
+  DATA_COLLECTOR = 2;
+
+  // Survey Organizer: Project supervisor/manager authorized to edit forms,
+  // manage ACLs, publish schemas, review conflicts, and export data.
+  SURVEY_ORGANIZER = 3;
+}
+
+// Single collaborator entry in an Access Control List (ACL).
+message AclEntry {
+  // Unique identifier of the user (e.g., Firebase Auth UID).
+  string user_id = 1;
+
+  // Assigned role governing permissions.
+  Role role = 2;
+
+  // Invitation status for the collaborator.
+  enum InvitationStatus {
+    // Unspecified status.
+    INVITATION_STATUS_UNSPECIFIED = 0;
+
+    // Invitation dispatched; awaiting recipient acceptance.
+    PENDING = 1;
+
+    // Invitation accepted; survey populated in user's library.
+    ACCEPTED = 2;
+  }
+  InvitationStatus invitation_status = 3;
+}
+
+// Access Control List (ACL) resource defining collaborator permissions for a
+// survey.
+message SurveyAcl {
+  // Unique identifier of the survey.
+  string survey_id = 1;
+
+  // Collaborator Access Control List entries.
+  repeated AclEntry entries = 2;
+}
+
+// Resource quota tier applied to survey organizers and organizations.
+enum QuotaTier {
+  // Unspecified quota tier.
+  QUOTA_TIER_UNSPECIFIED = 0;
+
+  // Basic Tier: Default tier for free and community usage.
+  BASIC = 1;
+
+  // Sponsored Tier: Expanded capacity for verified non-profits and partner
+  // institutions.
+  SPONSORED = 2;
+}
+
+// Tiered quota limits and resource constraints governing survey creation,
+// collaborator access, and operational field collection.
+message QuotaLimits {
+  // Tier classification: Basic Tier (default) or Sponsored Tier.
+  QuotaTier tier = 1;
+
+  // --- Tiered Survey Organizer Limits (Administrative scopes) ---
+
+  // Maximum surveys an owner can create (Basic: 5, Sponsored: 100).
+  int32 max_surveys_per_owner = 2;
+
+  // Maximum forms allowed per survey (Basic: 5, Sponsored: 10).
+  int32 max_forms_per_survey = 3;
+
+  // Maximum questions/tasks per form (Basic: 10, Sponsored: 50).
+  int32 max_tasks_per_form = 4;
+
+  // Maximum photo tasks per form (Basic: 1, Sponsored: 10).
+  int32 max_photo_tasks_per_form = 5;
+
+  // Maximum predefined geospatial entities (Basic: 1,000, Sponsored: 10,000).
+  int32 max_predefined_entities = 6;
+
+  // Maximum users in the Access Control List (Basic: 10, Sponsored: 50).
+  int32 max_acl_users = 7;
+
+  // --- Tiered Data Collection Limits (Operational / field scopes) ---
+
+  // Maximum surveys a field collector can join (Basic: 5, Sponsored: 100).
+  int32 max_surveys_per_user = 8;
+
+  // Maximum ad-hoc / field-created entities per user (Basic: 100, Sponsored:
+  // 200).
+  int32 max_adhoc_entities_per_user = 9;
+
+  // Maximum submissions per predefined entity per user (Basic: 10, Sponsored:
+  // 50).
+  int32 max_submissions_per_entity_per_user = 10;
+}

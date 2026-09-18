@@ -1,0 +1,50 @@
+syntax = "proto3";
+
+package groundplatform.v2.forms;
+
+// Encrypted payload envelope representing an encrypted primary record or media
+// attachment.
+message EncryptedFile {
+  // Original relative filename of the file (e.g. "submission.pb.enc",
+  // "photo1.jpg.enc").
+  string filename = 1;
+
+  // MIME media content type of the underlying decrypted file (e.g.
+  // "application/x-protobuf", "image/jpeg").
+  string content_type = 2;
+
+  // MD5 or SHA-256 hex checksum of the unencrypted file for post-decryption
+  // verification.
+  string unencrypted_checksum = 3;
+
+  // Optional direct ciphertext bytes if transmitting payload inline within the
+  // manifest message.
+  bytes ciphertext = 4;
+}
+
+// Submission manifest envelope for encrypted end-to-end submissions.
+message EncryptedSubmissionManifest {
+  // Form identifier matching FormDef.form_id.
+  string form_id = 1;
+
+  // Form version string matching FormDef.version.
+  string version = 2;
+
+  // Unique submission instance UUID matching RecordMetadata.instance_id.
+  string instance_id = 3;
+
+  // Ephemeral 256-bit AES symmetric key encrypted with the recipient's RSA
+  // public key.
+  bytes base64_encrypted_key = 4;
+
+  // Encrypted primary ProtoForms record payload envelope.
+  EncryptedFile primary_record = 5;
+
+  // List of encrypted media attachment envelopes (photos, audio recordings,
+  // signatures).
+  repeated EncryptedFile media_attachments = 6;
+
+  // Cryptographic digital signature (RSA-SHA256) verifying manifest
+  // authenticity and integrity.
+  bytes base64_encrypted_signature = 7;
+}

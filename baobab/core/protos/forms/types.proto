@@ -1,0 +1,140 @@
+syntax = "proto3";
+
+package groundplatform.v2.forms;
+
+import "google/protobuf/timestamp.proto";
+import "google/type/date.proto";
+import "google/type/timeofday.proto";
+
+// Supported primitive and composite field data types in ProtoForms.
+//
+// These types map to native Protocol Buffer scalar and message types, ensuring
+// strong typing, binary efficiency, and cross-platform compatibility without
+// the string-casting pitfalls of legacy XML XForms.
+enum DataType {
+  // Unspecified or unknown data type.
+  DATA_TYPE_UNSPECIFIED = 0;
+
+  // UTF-8 encoded text string.
+  TYPE_STRING = 1;
+
+  // 32-bit signed integer.
+  TYPE_INT32 = 2;
+
+  // 64-bit signed integer.
+  TYPE_INT64 = 3;
+
+  // Double-precision 64-bit floating point number.
+  TYPE_DOUBLE = 4;
+
+  // Boolean value (true or false).
+  TYPE_BOOLEAN = 5;
+
+  // Calendar date (year, month, day) without timezone, using google.type.Date.
+  TYPE_DATE = 6;
+
+  // Time of day (hours, minutes, seconds, nanos), using google.type.TimeOfDay.
+  TYPE_TIME = 7;
+
+  // Point in time (UTC instant with nanosecond precision), using
+  // google.protobuf.Timestamp.
+  TYPE_DATETIME = 8;
+
+  // Geospatial coordinate point with latitude, longitude, altitude, and
+  // accuracy radius in meters.
+  TYPE_GEOPOINT = 9;
+
+  // Open polyline or path formed by two or more geospatial coordinates.
+  TYPE_GEOTRACE = 10;
+
+  // Bounded polygon formed by three or more geospatial coordinates where the
+  // first and last coordinate coincide.
+  TYPE_GEOSHAPE = 11;
+
+  // Binary media attachment reference (e.g. image, audio, video, document).
+  TYPE_BINARY = 12;
+
+  // Nested structured message or composite group.
+  TYPE_MESSAGE = 13;
+
+  // Single choice selection from a discrete list of options.
+  TYPE_SELECT_ONE = 14;
+
+  // Multiple choice selection from a discrete list of options.
+  TYPE_SELECT_MULTIPLE = 15;
+}
+
+// A single geographic coordinate point adhering to the WGS 84 coordinate
+// reference system, with optional altitude and horizontal accuracy.
+message GeoPoint {
+  // Latitude in decimal degrees (WGS 84), between -90.0 and +90.0 inclusive.
+  double latitude = 1;
+
+  // Longitude in decimal degrees (WGS 84), between -180.0 and +180.0 inclusive.
+  double longitude = 2;
+
+  // Altitude/elevation in meters above the WGS 84 reference ellipsoid.
+  double altitude_meters = 3;
+
+  // Estimated 1-sigma horizontal accuracy radius in meters. Smaller values
+  // indicate higher precision.
+  double accuracy_meters = 4;
+}
+
+// An ordered sequence of two or more geographic points forming an open polyline
+// path (such as a road segment, boundary line, river, or field transect).
+message GeoTrace {
+  // Ordered sequence of vertices comprising the trace path.
+  repeated GeoPoint points = 1;
+}
+
+// A closed polygonal area formed by three or more geographic points (such as a
+// land parcel, forest boundary, or agricultural plot perimeter).
+// The first and last coordinate must coincide to form a closed ring.
+message GeoShape {
+  // Ordered sequence of vertices defining the perimeter of the polygon.
+  repeated GeoPoint points = 1;
+}
+
+// Container capable of storing a typed scalar, date/time, geospatial, or binary
+// literal value. Used for action constants, dynamic defaults, and parameters.
+message TypedValue {
+  // The typed literal value.
+  oneof value {
+    // Literal string value.
+    string string_value = 1;
+
+    // Literal 32-bit signed integer.
+    int32 int32_value = 2;
+
+    // Literal 64-bit signed integer.
+    int64 int64_value = 3;
+
+    // Literal double-precision floating-point number.
+    double double_value = 4;
+
+    // Literal boolean value.
+    bool bool_value = 5;
+
+    // Literal calendar date (year, month, day).
+    google.type.Date date_value = 6;
+
+    // Literal time of day.
+    google.type.TimeOfDay time_value = 7;
+
+    // Literal timestamp point in time.
+    google.protobuf.Timestamp timestamp_value = 8;
+
+    // Literal geographic coordinate point.
+    GeoPoint geopoint_value = 9;
+
+    // Literal binary bytes payload.
+    bytes binary_value = 10;
+
+    // Literal geographic polyline trace.
+    GeoTrace geotrace_value = 11;
+
+    // Literal geographic closed polygon shape.
+    GeoShape geoshape_value = 12;
+  }
+}
