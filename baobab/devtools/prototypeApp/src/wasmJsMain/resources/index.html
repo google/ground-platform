@@ -4,6 +4,41 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ground 2.0 Mobile UI Prototype</title>
+    <link href="https://api.mapbox.com/mapbox-gl-js/v1.13.3/mapbox-gl.css" rel="stylesheet" />
+    <script src="https://api.mapbox.com/mapbox-gl-js/v1.13.3/mapbox-gl.js"></script>
+    <script>
+      // Ensure the Skia/Compose WebGL framebuffer preserves alpha transparency when
+      // MapboxBasemapView clears the map viewport rectangle with BlendMode.Clear.
+      (function () {
+        const origGetContext = HTMLCanvasElement.prototype.getContext;
+        HTMLCanvasElement.prototype.getContext = function (type, attrs) {
+          const isMapboxCanvas =
+            this.classList && this.classList.contains('mapboxgl-canvas');
+          if (
+            !isMapboxCanvas &&
+            (type === 'webgl' ||
+              type === 'webgl2' ||
+              type === 'experimental-webgl')
+          ) {
+            attrs = Object.assign({}, attrs || {}, {
+              alpha: true,
+              premultipliedAlpha: true,
+              preserveDrawingBuffer: true,
+            });
+            const gl = origGetContext.call(this, type, attrs);
+            if (gl && !gl.__groundAlphaPatched) {
+              gl.__groundAlphaPatched = true;
+              const origColorMask = gl.colorMask.bind(gl);
+              gl.colorMask = function (r, g, b, a) {
+                return origColorMask(r, g, b, r && g && b ? true : a);
+              };
+            }
+            return gl;
+          }
+          return origGetContext.call(this, type, attrs);
+        };
+      })();
+    </script>
     <style>
         html, body {
             width: 100%;
@@ -11,12 +46,763 @@
             margin: 0;
             padding: 0;
             overflow: hidden;
-            background-color: #F5F7F6;
+            background-color: #F0F4F1;
+        }
+        #mapbox-basemap-container {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 384px;
+            height: 640px;
+            z-index: 1;
+            overflow: hidden;
+            display: none;
+            pointer-events: none;
+            background-color: #163324;
+            box-sizing: border-box;
+        }
+        #ComposeTarget {
+            position: fixed;
+            inset: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 2;
+            background: transparent !important;
+        }
+        #ComposeTarget canvas {
+            background: transparent !important;
+        }
+        .ground-mapbox-badge {
+            position: absolute;
+            left: 10px;
+            bottom: 8px;
+            z-index: 5;
+            background: rgba(14, 34, 25, 0.82);
+            color: #C8E6C9;
+            border: 1px solid rgba(139, 214, 177, 0.45);
+            border-radius: 8px;
+            padding: 2px 7px;
+            font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+            font-size: 9px;
+            font-weight: 600;
+            letter-spacing: 0.2px;
+            pointer-events: none;
         }
     </style>
 </head>
 <body>
-    <div id="ComposeTarget" style="width: 100vw; height: 100vh;"></div>
+    <div id="mapbox-basemap-container">
+        <div id="ground-mapbox-badge" class="ground-mapbox-badge">Mapbox GL • Satellite (Nyeri 0.42°S, 36.95°E)</div>
+    </div>
+    <div id="ComposeTarget"></div>
+    <script>
+      window.GroundMapboxBridge = (function () {
+        const SURVEY_COORDS = {
+          'survey-kenya-coffee': {
+            lng: 36.9512,
+            lat: -0.4198,
+            zoom: 15.3,
+            label: 'Nyeri 0.42°S, 36.95°E',
+          },
+          'survey-amazon-canopy': {
+            lng: -62.2159,
+            lat: -3.4653,
+            zoom: 15.0,
+            label: 'Pará 3.46°S, 62.21°W',
+          },
+          'survey-serengeti-corridor': {
+            lng: 34.8328,
+            lat: -2.3333,
+            zoom: 14.8,
+            label: 'Serengeti 2.33°S, 34.83°E',
+          },
+          'survey-mekong-mangroves': {
+            lng: 106.3422,
+            lat: 9.8249,
+            zoom: 15.0,
+            label: 'Cần Thơ 9.82°N, 106.34°E',
+          },
+          'survey-oaxaca-watershed': {
+            lng: -96.7266,
+            lat: 17.0732,
+            zoom: 15.1,
+            label: 'Oaxaca 17.07°N, 96.72°W',
+          },
+          'survey-sumatra-peatland': {
+            lng: 101.4478,
+            lat: 0.5071,
+            zoom: 15.0,
+            label: 'Riau 0.51°N, 101.45°E',
+          },
+        };
+
+        let map = null;
+        let mapLoaded = false;
+        let currentWidthPx = 384;
+        let currentHeightPx = 640;
+        let currentSurveyId = 'survey-kenya-coffee';
+        let currentBasemapType = 'SATELLITE';
+        let currentOfflineVisible = true;
+        let currentZoomDelta = 0;
+        let lastSyncArgs = null;
+
+        function resolveAccessToken() {
+          try {
+            const params = new URLSearchParams(window.location.search);
+            const urlToken = params.get('mapbox_token');
+            if (urlToken && urlToken.startsWith('pk.')) return urlToken;
+            if (
+              window.MAPBOX_ACCESS_TOKEN &&
+              String(window.MAPBOX_ACCESS_TOKEN).startsWith('pk.')
+            ) {
+              return String(window.MAPBOX_ACCESS_TOKEN);
+            }
+            const saved =
+              window.localStorage &&
+              window.localStorage.getItem('GROUND_MAPBOX_TOKEN');
+            if (saved && saved.startsWith('pk.')) return saved;
+          } catch (e) {}
+          return '';
+        }
+
+        function buildBaseTerrainGeoJson(centerLng, centerLat) {
+          const dLng = 0.014;
+          const dLat = 0.018;
+          return {
+            type: 'FeatureCollection',
+            features: [
+              {
+                type: 'Feature',
+                properties: { kind: 'river', name: 'Gura River' },
+                geometry: {
+                  type: 'LineString',
+                  coordinates: [
+                    [centerLng - dLng * 0.9, centerLat - dLat * 0.32],
+                    [centerLng - dLng * 0.45, centerLat - dLat * 0.18],
+                    [centerLng - dLng * 0.1, centerLat - dLat * 0.04],
+                    [centerLng + dLng * 0.22, centerLat - dLat * 0.16],
+                    [centerLng + dLng * 0.55, centerLat + dLat * 0.09],
+                    [centerLng + dLng * 0.92, centerLat + dLat * 0.26],
+                  ],
+                },
+              },
+              {
+                type: 'Feature',
+                properties: { kind: 'road', name: 'Cooperative Feeder Track' },
+                geometry: {
+                  type: 'LineString',
+                  coordinates: [
+                    [centerLng - dLng * 0.42, centerLat + dLat * 0.65],
+                    [centerLng - dLng * 0.18, centerLat + dLat * 0.25],
+                    [centerLng + dLng * 0.08, centerLat - dLat * 0.05],
+                    [centerLng + dLng * 0.4, centerLat - dLat * 0.38],
+                    [centerLng + dLng * 0.78, centerLat - dLat * 0.68],
+                  ],
+                },
+              },
+            ],
+          };
+        }
+
+        function buildMapboxStyleV8(basemapType, isOfflineVisible) {
+          const isSat = basemapType === 'SATELLITE';
+          const survey =
+            SURVEY_COORDS[currentSurveyId] || SURVEY_COORDS['survey-kenya-coffee'];
+          return {
+            version: 8,
+            name: isSat ? 'Ground Mapbox Satellite Hybrid' : 'Ground Mapbox Outdoors Topo',
+            sources: {
+              'satellite-tiles': {
+                type: 'raster',
+                tiles: [
+                  'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+                ],
+                tileSize: 256,
+                maxzoom: 19,
+              },
+              'normal-tiles': {
+                type: 'raster',
+                tiles: [
+                  'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                ],
+                tileSize: 256,
+                maxzoom: 19,
+              },
+              'ground-base-terrain': {
+                type: 'geojson',
+                data: buildBaseTerrainGeoJson(survey.lng, survey.lat),
+              },
+              'ground-offline-sector': {
+                type: 'geojson',
+                data: { type: 'FeatureCollection', features: [] },
+              },
+              'ground-entities': {
+                type: 'geojson',
+                data: { type: 'FeatureCollection', features: [] },
+              },
+              'ground-submissions': {
+                type: 'geojson',
+                data: { type: 'FeatureCollection', features: [] },
+              },
+              'ground-user-gps': {
+                type: 'geojson',
+                data: { type: 'FeatureCollection', features: [] },
+              },
+            },
+            layers: [
+              {
+                id: 'ground-bg',
+                type: 'background',
+                paint: {
+                  'background-color': isSat ? '#142E21' : '#E3EFE6',
+                },
+              },
+              {
+                id: 'satellite-raster-layer',
+                type: 'raster',
+                source: 'satellite-tiles',
+                layout: {
+                  visibility: isSat ? 'visible' : 'none',
+                },
+                paint: {
+                  'raster-opacity': isOfflineVisible ? 1.0 : 0.32,
+                  'raster-contrast': 0.08,
+                  'raster-saturation': 0.05,
+                },
+              },
+              {
+                id: 'normal-raster-layer',
+                type: 'raster',
+                source: 'normal-tiles',
+                layout: {
+                  visibility: isSat ? 'none' : 'visible',
+                },
+                paint: {
+                  'raster-opacity': isOfflineVisible ? 0.95 : 0.32,
+                },
+              },
+              {
+                id: 'ground-river-line',
+                type: 'line',
+                source: 'ground-base-terrain',
+                filter: ['==', ['get', 'kind'], 'river'],
+                paint: {
+                  'line-color': isSat ? '#0288D1' : '#29B6F6',
+                  'line-width': 5,
+                  'line-opacity': 0.78,
+                },
+              },
+              {
+                id: 'ground-road-line',
+                type: 'line',
+                source: 'ground-base-terrain',
+                filter: ['==', ['get', 'kind'], 'road'],
+                paint: {
+                  'line-color': isSat ? '#D7CCC8' : '#8D6E63',
+                  'line-width': 3,
+                  'line-opacity': 0.65,
+                },
+              },
+              {
+                id: 'ground-offline-sector-line',
+                type: 'line',
+                source: 'ground-offline-sector',
+                layout: {
+                  visibility: isOfflineVisible ? 'visible' : 'none',
+                },
+                paint: {
+                  'line-color': isSat ? '#8BD6B1' : '#1E6F50',
+                  'line-width': 2,
+                  'line-dasharray': [3, 2],
+                  'line-opacity': 0.75,
+                },
+              },
+              {
+                id: 'ground-entities-fill',
+                type: 'fill',
+                source: 'ground-entities',
+                filter: ['==', ['geometry-type'], 'Polygon'],
+                paint: {
+                  'fill-color': ['get', 'color'],
+                  'fill-opacity': ['get', 'fillOpacity'],
+                },
+              },
+              {
+                id: 'ground-entities-outline',
+                type: 'line',
+                source: 'ground-entities',
+                filter: ['==', ['geometry-type'], 'Polygon'],
+                paint: {
+                  'line-color': ['get', 'strokeColor'],
+                  'line-width': ['get', 'strokeWidth'],
+                },
+              },
+              {
+                id: 'ground-entities-point',
+                type: 'circle',
+                source: 'ground-entities',
+                filter: ['==', ['geometry-type'], 'Point'],
+                paint: {
+                  'circle-radius': ['get', 'radius'],
+                  'circle-color': ['get', 'color'],
+                  'circle-opacity': 0.35,
+                  'circle-stroke-width': 2,
+                  'circle-stroke-color': ['get', 'strokeColor'],
+                },
+              },
+              {
+                id: 'ground-submissions-fill',
+                type: 'fill',
+                source: 'ground-submissions',
+                filter: ['==', ['geometry-type'], 'Polygon'],
+                paint: {
+                  'fill-color': ['get', 'color'],
+                  'fill-opacity': ['get', 'fillOpacity'],
+                },
+              },
+              {
+                id: 'ground-submissions-outline',
+                type: 'line',
+                source: 'ground-submissions',
+                filter: ['==', ['geometry-type'], 'Polygon'],
+                paint: {
+                  'line-color': ['get', 'strokeColor'],
+                  'line-width': ['get', 'strokeWidth'],
+                  'line-dasharray': [2.2, 1.6],
+                },
+              },
+              {
+                id: 'ground-user-gps-halo',
+                type: 'circle',
+                source: 'ground-user-gps',
+                paint: {
+                  'circle-radius': 24,
+                  'circle-color': '#4285F4',
+                  'circle-opacity': 0.24,
+                  'circle-stroke-width': 1.2,
+                  'circle-stroke-color': '#4285F4',
+                },
+              },
+              {
+                id: 'ground-user-gps-dot',
+                type: 'circle',
+                source: 'ground-user-gps',
+                paint: {
+                  'circle-radius': 7.5,
+                  'circle-color': '#1A73E8',
+                  'circle-stroke-width': 2.5,
+                  'circle-stroke-color': '#FFFFFF',
+                },
+              },
+            ],
+          };
+        }
+
+        function ensureMapInitialized() {
+          if (map || typeof window.mapboxgl === 'undefined') return map;
+          const container = document.getElementById('mapbox-basemap-container');
+          if (!container) return null;
+
+          const token = resolveAccessToken();
+          if (token) {
+            window.mapboxgl.accessToken = token;
+          }
+
+          const initialSurvey = SURVEY_COORDS[currentSurveyId];
+          map = new window.mapboxgl.Map({
+            container: 'mapbox-basemap-container',
+            style: buildMapboxStyleV8(currentBasemapType, currentOfflineVisible),
+            center: [initialSurvey.lng, initialSurvey.lat],
+            zoom: initialSurvey.zoom,
+            attributionControl: false,
+            interactive: false,
+            preserveDrawingBuffer: true,
+            fadeDuration: 0,
+          });
+
+          map.on('load', function () {
+            mapLoaded = true;
+            if (lastSyncArgs) {
+              applySyncState.apply(null, lastSyncArgs);
+            }
+          });
+
+          return map;
+        }
+
+        function screenToLngLat(normX, normY, fallbackCenterLng, fallbackCenterLat) {
+          if (map && currentWidthPx > 0 && currentHeightPx > 0) {
+            try {
+              const pt = map.unproject([
+                normX * currentWidthPx,
+                normY * currentHeightPx,
+              ]);
+              if (pt && isFinite(pt.lng) && isFinite(pt.lat)) {
+                return [pt.lng, pt.lat];
+              }
+            } catch (e) {}
+          }
+          return [
+            fallbackCenterLng + (normX - 0.5) * 0.014,
+            fallbackCenterLat - (normY - 0.5) * 0.018,
+          ];
+        }
+
+        function applySyncState(
+          surveyId,
+          basemapType,
+          isOfflineVisible,
+          panOffsetX,
+          panOffsetY,
+          userGpsX,
+          userGpsY,
+          featuresGeoJson
+        ) {
+          const survey =
+            SURVEY_COORDS[surveyId] || SURVEY_COORDS['survey-kenya-coffee'];
+          currentSurveyId = surveyId;
+          currentBasemapType = basemapType;
+          currentOfflineVisible = Boolean(isOfflineVisible);
+
+          const badge = document.getElementById('ground-mapbox-badge');
+          if (badge) {
+            const modeLabel =
+              basemapType === 'SATELLITE' ? 'Satellite' : 'Outdoors Topo';
+            const offlineTag = isOfflineVisible ? 'Offline Tiles ON' : 'Base Grid';
+            badge.textContent =
+              'Mapbox GL • ' +
+              modeLabel +
+              ' • ' +
+              offlineTag +
+              ' (' +
+              survey.label +
+              ')';
+          }
+
+          if (!map) return;
+
+          const shiftX = 0.5 - userGpsX + panOffsetX;
+          const shiftY = 0.5 - userGpsY + panOffsetY;
+          const cameraLng = survey.lng - shiftX * 0.014;
+          const cameraLat = survey.lat + shiftY * 0.018;
+          const targetZoom = Math.max(
+            10,
+            Math.min(19, survey.zoom + currentZoomDelta)
+          );
+
+          map.jumpTo({
+            center: [cameraLng, cameraLat],
+            zoom: targetZoom,
+          });
+
+          const isSat = basemapType === 'SATELLITE';
+          try {
+            if (map.getLayer('ground-bg')) {
+              map.setPaintProperty(
+                'ground-bg',
+                'background-color',
+                isSat ? '#142E21' : '#E3EFE6'
+              );
+            }
+            if (map.getLayer('satellite-raster-layer')) {
+              map.setLayoutProperty(
+                'satellite-raster-layer',
+                'visibility',
+                isSat ? 'visible' : 'none'
+              );
+              map.setPaintProperty(
+                'satellite-raster-layer',
+                'raster-opacity',
+                isOfflineVisible ? 1.0 : 0.32
+              );
+            }
+            if (map.getLayer('normal-raster-layer')) {
+              map.setLayoutProperty(
+                'normal-raster-layer',
+                'visibility',
+                isSat ? 'none' : 'visible'
+              );
+              map.setPaintProperty(
+                'normal-raster-layer',
+                'raster-opacity',
+                isOfflineVisible ? 0.95 : 0.32
+              );
+            }
+            if (map.getLayer('ground-offline-sector-line')) {
+              map.setLayoutProperty(
+                'ground-offline-sector-line',
+                'visibility',
+                isOfflineVisible ? 'visible' : 'none'
+              );
+            }
+          } catch (e) {}
+
+          const baseTerrainSource = map.getSource('ground-base-terrain');
+          if (baseTerrainSource) {
+            baseTerrainSource.setData(
+              buildBaseTerrainGeoJson(survey.lng, survey.lat)
+            );
+          }
+
+          // Update Offline Sector GeoJSON
+          const offlineSource = map.getSource('ground-offline-sector');
+          if (offlineSource) {
+            const p1 = screenToLngLat(0.05 + shiftX, 0.14 + shiftY, cameraLng, cameraLat);
+            const p2 = screenToLngLat(0.95 + shiftX, 0.14 + shiftY, cameraLng, cameraLat);
+            const p3 = screenToLngLat(0.95 + shiftX, 0.88 + shiftY, cameraLng, cameraLat);
+            const p4 = screenToLngLat(0.05 + shiftX, 0.88 + shiftY, cameraLng, cameraLat);
+            offlineSource.setData({
+              type: 'FeatureCollection',
+              features: isOfflineVisible
+                ? [
+                    {
+                      type: 'Feature',
+                      properties: {},
+                      geometry: {
+                        type: 'Polygon',
+                        coordinates: [[p1, p2, p3, p4, p1]],
+                      },
+                    },
+                  ]
+                : [],
+            });
+          }
+
+          // Update User GPS Blue Dot GeoJSON
+          const gpsSource = map.getSource('ground-user-gps');
+          if (gpsSource) {
+            const gpsPt = screenToLngLat(
+              userGpsX + shiftX,
+              userGpsY + shiftY,
+              cameraLng,
+              cameraLat
+            );
+            gpsSource.setData({
+              type: 'FeatureCollection',
+              features: [
+                {
+                  type: 'Feature',
+                  properties: {},
+                  geometry: {
+                    type: 'Point',
+                    coordinates: gpsPt,
+                  },
+                },
+              ],
+            });
+          }
+
+          // Parse featuresGeoJson and update ground-entities & ground-submissions
+          if (featuresGeoJson) {
+            try {
+              const parsed = JSON.parse(featuresGeoJson);
+              const entityFeatures = [];
+              const subFeatures = [];
+
+              if (Array.isArray(parsed.entities)) {
+                parsed.entities.forEach(function (ent) {
+                  const cx = ent.nx + shiftX;
+                  const cy = ent.ny + shiftY;
+                  const strokeColor =
+                    ent.selected && isSat ? '#FFFFFF' : ent.color;
+                  if (ent.geometryType === 'Polygon') {
+                    const pw = 0.22;
+                    const ph = 0.11;
+                    const c1 = screenToLngLat(cx - pw * 0.48, cy - ph * 0.42, cameraLng, cameraLat);
+                    const c2 = screenToLngLat(cx + pw * 0.45, cy - ph * 0.5, cameraLng, cameraLat);
+                    const c3 = screenToLngLat(cx + pw * 0.52, cy + ph * 0.38, cameraLng, cameraLat);
+                    const c4 = screenToLngLat(cx - pw * 0.4, cy + ph * 0.48, cameraLng, cameraLat);
+                    entityFeatures.push({
+                      type: 'Feature',
+                      properties: {
+                        id: ent.id,
+                        color: ent.color,
+                        strokeColor: strokeColor,
+                        fillOpacity: ent.selected ? 0.42 : 0.24,
+                        strokeWidth: ent.selected ? 3.8 : 2.2,
+                      },
+                      geometry: {
+                        type: 'Polygon',
+                        coordinates: [[c1, c2, c3, c4, c1]],
+                      },
+                    });
+                  } else {
+                    entityFeatures.push({
+                      type: 'Feature',
+                      properties: {
+                        id: ent.id,
+                        color: ent.color,
+                        strokeColor: strokeColor,
+                        radius: ent.selected ? 24 : 18,
+                      },
+                      geometry: {
+                        type: 'Point',
+                        coordinates: screenToLngLat(cx, cy, cameraLng, cameraLat),
+                      },
+                    });
+                  }
+                });
+              }
+
+              if (Array.isArray(parsed.submissions)) {
+                parsed.submissions.forEach(function (sub) {
+                  const gx = sub.nx + shiftX;
+                  const gy = sub.ny + shiftY;
+                  const gw = sub.wf;
+                  const gh = sub.hf;
+                  const strokeColor =
+                    sub.selected && isSat ? '#FFFFFF' : sub.color;
+                  const v1 = screenToLngLat(gx - gw * 0.46, gy - gh * 0.38, cameraLng, cameraLat);
+                  const v2 = screenToLngLat(gx + gw * 0.08, gy - gh * 0.52, cameraLng, cameraLat);
+                  const v3 = screenToLngLat(gx + gw * 0.5, gy - gh * 0.26, cameraLng, cameraLat);
+                  const v4 = screenToLngLat(gx + gw * 0.44, gy + gh * 0.42, cameraLng, cameraLat);
+                  const v5 = screenToLngLat(gx - gw * 0.12, gy + gh * 0.5, cameraLng, cameraLat);
+                  const v6 = screenToLngLat(gx - gw * 0.48, gy + gh * 0.24, cameraLng, cameraLat);
+                  subFeatures.push({
+                    type: 'Feature',
+                    properties: {
+                      id: sub.id,
+                      color: sub.color,
+                      strokeColor: strokeColor,
+                      fillOpacity: sub.selected ? 0.28 : 0.14,
+                      strokeWidth: sub.selected ? 3.4 : 2.5,
+                    },
+                    geometry: {
+                      type: 'Polygon',
+                      coordinates: [[v1, v2, v3, v4, v5, v6, v1]],
+                    },
+                  });
+                });
+              }
+
+              const entSource = map.getSource('ground-entities');
+              if (entSource) {
+                entSource.setData({
+                  type: 'FeatureCollection',
+                  features: entityFeatures,
+                });
+              }
+              const subSource = map.getSource('ground-submissions');
+              if (subSource) {
+                subSource.setData({
+                  type: 'FeatureCollection',
+                  features: subFeatures,
+                });
+              }
+            } catch (e) {}
+          }
+        }
+
+        return {
+          syncViewport: function (
+            leftPx,
+            topPx,
+            widthPx,
+            heightPx,
+            borderRadiusPx,
+            visible
+          ) {
+            const container = document.getElementById(
+              'mapbox-basemap-container'
+            );
+            if (!container) return;
+            if (!visible || widthPx <= 4 || heightPx <= 4) {
+              container.style.display = 'none';
+              return;
+            }
+            const w = Math.round(widthPx);
+            const h = Math.round(heightPx);
+            const sizeChanged =
+              Math.abs(w - currentWidthPx) > 1 ||
+              Math.abs(h - currentHeightPx) > 1;
+            currentWidthPx = w;
+            currentHeightPx = h;
+            container.style.display = 'block';
+            container.style.left = Math.round(leftPx) + 'px';
+            container.style.top = Math.round(topPx) + 'px';
+            container.style.width = w + 'px';
+            container.style.height = h + 'px';
+            container.style.borderRadius =
+              '0 0 ' +
+              Math.round(borderRadiusPx) +
+              'px ' +
+              Math.round(borderRadiusPx) +
+              'px';
+
+            const instance = ensureMapInitialized();
+            if (instance && sizeChanged) {
+              instance.resize();
+            }
+          },
+
+          syncState: function (
+            surveyId,
+            basemapType,
+            isOfflineVisible,
+            panOffsetX,
+            panOffsetY,
+            userGpsX,
+            userGpsY,
+            featuresGeoJson
+          ) {
+            lastSyncArgs = [
+              surveyId,
+              basemapType,
+              isOfflineVisible,
+              panOffsetX,
+              panOffsetY,
+              userGpsX,
+              userGpsY,
+              featuresGeoJson,
+            ];
+            ensureMapInitialized();
+            applySyncState.apply(null, lastSyncArgs);
+          },
+
+          panByPixels: function (dx, dy) {
+            if (map) {
+              map.panBy([-dx, -dy], { animate: false });
+            }
+          },
+
+          zoomBy: function (deltaZoom) {
+            currentZoomDelta = Math.max(
+              -4,
+              Math.min(3, currentZoomDelta + deltaZoom)
+            );
+            if (map) {
+              map.zoomTo(map.getZoom() + deltaZoom, { duration: 150 });
+            }
+          },
+
+          setAccessToken: function (token) {
+            if (token && String(token).startsWith('pk.')) {
+              window.MAPBOX_ACCESS_TOKEN = String(token);
+              try {
+                window.localStorage.setItem(
+                  'GROUND_MAPBOX_TOKEN',
+                  String(token)
+                );
+              } catch (e) {}
+              if (window.mapboxgl) {
+                window.mapboxgl.accessToken = String(token);
+              }
+              if (map) {
+                const styleUrl =
+                  currentBasemapType === 'SATELLITE'
+                    ? 'mapbox://styles/mapbox/satellite-streets-v12'
+                    : 'mapbox://styles/mapbox/outdoors-v12';
+                map.setStyle(styleUrl);
+              }
+            }
+          },
+
+          getMapInstance: function () {
+            return map;
+          },
+        };
+      })();
+    </script>
     <script src="prototypeapp.js"></script>
 </body>
 </html>

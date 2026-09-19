@@ -12,24 +12,28 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-pluginManagement {
-  repositories {
-    google()
-    mavenCentral()
-    gradlePluginPortal()
-  }
-}
+package org.groundplatform.v2.devtools.prototypeapp
 
-dependencyResolutionManagement {
-  repositories {
-    google()
-    mavenCentral()
-  }
-}
+internal actual fun syncPlatformMapboxViewport(
+  leftPx: Float,
+  topPx: Float,
+  widthPx: Float,
+  heightPx: Float,
+  borderRadiusPx: Float,
+  visible: Boolean,
+) = Unit
 
-rootProject.name = "prototypeApp"
+internal actual fun syncPlatformMapboxBasemap(
+  surveyId: String,
+  basemapType: String,
+  isOfflineVisible: Boolean,
+  panOffsetX: Float,
+  panOffsetY: Float,
+  userGpsX: Float,
+  userGpsY: Float,
+  featuresGeoJson: String,
+) = Unit
 
-includeBuild("../../shared/core")
+internal actual fun panPlatformMapboxBasemap(dxPx: Float, dyPx: Float) = Unit
 
-includeBuild("../../shared/ui")
-
+internal actual fun hidePlatformMapboxBasemap() = Unit

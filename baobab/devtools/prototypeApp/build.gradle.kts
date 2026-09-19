@@ -64,11 +64,11 @@ kotlin {
     val commonMain by getting {
       dependencies {
         implementation("org.groundplatform.v2:protoforms:2.0.0-SNAPSHOT")
-        implementation("org.groundplatform.v2:designsystem:2.0.0-SNAPSHOT")
         implementation("org.groundplatform.v2:protoforms-ui:2.0.0-SNAPSHOT")
         implementation(compose.runtime)
         implementation(compose.foundation)
         implementation(compose.material3)
+        implementation("org.jetbrains.compose.material:material-icons-core:1.7.3")
         implementation(compose.ui)
       }
     }

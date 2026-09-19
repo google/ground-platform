@@ -27,3 +27,8 @@ This directory contains standalone developer and inspection tools for Ground
     `JSON`) and `RecordInstance` (`XML` ↔ `textproto` / `JSON`), real-time XPath
     expression evaluation, and an embedded mobile form runner (`▶ RUN`) powered
     by [`../shared/ui/`](../shared/ui/).
+-   **[`prototypeApp/`](prototypeApp/)**: Interactive Compose Multiplatform Web
+    UX prototyping workbench that embeds a live mobile phone preview of the
+    Ground 2.0 Mobile UI (`Splash / Loading`, `Sign In`, `Terms of Service`, and
+    `Download survey` screens) for co-designing workflows with UX designers.
+

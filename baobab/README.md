@@ -39,7 +39,8 @@ baobab/
 ├── iosApp/                      # Runnable iOS Xcode app wrapper (IPA)   -> embeds shared/mobile
 ├── webApp/                      # Runnable Web Console app (Wasm/JS)     -> depends on shared/core & shared/ui
 ├── devtools/
-│   └── formdebugger/            # Interactive Compose Web workbench for XForms, ProtoForms & XPath
+│   ├── formdebugger/            # Interactive Compose Web workbench for XForms, ProtoForms & XPath
+│   └── prototypeApp/            # Interactive Compose Web UX prototype embedding Ground Mobile UI
 └── docs/                        # System architecture & Protocol Buffer data model specifications
 ```
 
@@ -96,6 +97,10 @@ baobab/
     `FormDef` and `RecordInstance` (`XML` ↔ `textproto` / `JSON`), real-time
     XPath expression evaluation, and an embedded mobile form runner (`▶ RUN`)
     powered by `shared/ui`.
+-   **[`devtools/prototypeApp/`](devtools/prototypeApp/)**: Interactive Compose
+    Multiplatform Web application that embeds a live preview of the Ground 2.0
+    Mobile UI (`Splash / Loading`, `Sign In`, `Terms of Service`, and `Download
+    survey` screens) for UX co-design.
 -   **[`docs/`](docs/)**: Comprehensive architectural design and data model
     documentation.
 
