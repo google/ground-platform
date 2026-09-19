@@ -1,0 +1,311 @@
+syntax = "proto3";
+
+package groundplatform.v2.survey;
+
+import "shared/protos/data/audit_record.proto";
+import "shared/protos/forms/form_def.proto";
+import "shared/protos/forms/types.proto";
+import "google/protobuf/any.proto";
+
+// Top-level Ground 2.0 Survey Definition.
+//
+// A Survey is the root organizational container in Ground 2.0, grouping
+// together one or more hierarchical Form definitions, preloaded entity
+// registries, and export configurations.
+message SurveyDef {
+  // Globally unique identifier for this survey definition (RFC 4122 v4 UUID).
+  string survey_id = 1;
+
+  // Human-readable survey title displayed in the Web Console and Mobile App.
+  string title = 2;
+
+  // Detailed description of the survey's goals and scope (Guardrail: max 255
+  // characters).
+  string description = 3;
+
+  // Multi-tenant organization identifier governing ownership, billing, and
+  // pooled quotas.
+  string organization_id = 4;
+
+  // User ID (e.g., Firebase Auth UID) of the primary survey owner/creator.
+  string owner_id = 5;
+
+  // Current lifecycle state of this survey definition.
+  SurveyState state = 6;
+
+  // Sequential version release string (e.g., "2026091401" or "1.0.0").
+  // Published versions are preserved as immutable snapshots.
+  string version = 7;
+
+  // Hierarchical ProtoForms form definitions contained within this survey.
+  repeated groundplatform.v2.forms.FormDef forms = 8;
+
+  // Sharing policy controlling general access to the survey (Restricted,
+  // Anyone with Link / QR Code, Public).
+  SharingPolicy sharing_policy = 9;
+
+  // Peer data visibility configuration controlling whether data collectors can
+  // view submissions and entities collected by peers on the map.
+  PeerDataVisibility peer_data_visibility = 10;
+
+  // Preloaded and field-created ODK Entity Datasets (tabular registries and
+  // geospatial entity lists).
+  repeated EntityDatasetDef entity_datasets = 11;
+
+  // Map visualization, default viewport, and ordered layer stack settings.
+  MapConfig map_config = 12;
+
+  // Default language locale code (e.g., "en", "vi", "fr", "es").
+  string default_language = 13;
+
+  // List of supported language locale codes configured for this survey.
+  repeated string supported_languages = 14;
+
+  // TODO: Implement hooks and APIs for data enrichment.
+
+  // Audit metadata recording survey creation and modification provenance.
+  groundplatform.v2.data.AuditInfo audit_info = 15;
+
+  // Typed extension payloads for custom, vendor, or experimental survey-level
+  // metadata.
+  repeated google.protobuf.Any custom_extensions = 16;
+
+  // Multi-lingual translation catalog for survey-level UI strings (such as
+  // form launch CTAs, survey title/description, map layer labels, and entity
+  // dataset titles).
+  groundplatform.v2.forms.TranslationCatalog translations = 17;
+
+  // Survey-specific launch and CTA configurations for forms in `forms`.
+  repeated FormLaunchConfig form_launch_configs = 18;
+}
+
+// Configures how a form is surfaced and launched by data collectors in the
+// survey UI.
+//
+// Decouples survey-level workflow entry points and multilingual CTA labels
+// from the portable, ODK-compatible `FormDef` schema.
+message FormLaunchConfig {
+  // Target form identifier (`FormDef.form_id`).
+  string form_id = 1;
+
+  // Multilingual label for the call-to-action (CTA) button used to start
+  // collecting data for this form (e.g., "Register Plot", "Record Harvest").
+  // Supports inline text (`LabelDef.text`) and localized catalog lookups
+  // (`LabelDef.text_id` referencing `SurveyDef.translations`).
+  // Falls back to `FormDef.title` if unset.
+  groundplatform.v2.forms.LabelDef cta_label = 2;
+
+  // Optional Material Symbols or vector icon identifier displayed on the CTA
+  // button (e.g., "add_location_alt", "forest").
+  string cta_icon = 3;
+
+  // Optional Entity Dataset identifier (`EntityDatasetDef.id`). When set,
+  // surfaces this CTA on the detail card / bottom sheet of entities in the
+  // specified dataset (pre-linking the new submission to the selected entity)
+  // rather than as a standalone top-level map action.
+  string target_entity_dataset_id = 4;
+}
+
+// Lifecycle state of a Survey definition.
+enum SurveyState {
+  // Unspecified lifecycle state.
+  SURVEY_STATE_UNSPECIFIED = 0;
+
+  // Staged in draft mode for creation, refinement, and testing without
+  // affecting ongoing field operations.
+  DRAFT = 1;
+
+  // Published release active for mobile synchronization and data
+  // collection.
+  ACTIVE = 2;
+
+  // Retired survey no longer active for new field data collection.
+  ARCHIVED = 3;
+
+  // Deleted survey, removed from all user interfaces.
+  DELETED = 4;
+}
+
+// Sharing policy controlling survey access outside explicit ACL invitations
+// (mirroring the Google Docs / Google Drive sharing model).
+enum SharingPolicy {
+  // Unspecified sharing policy.
+  SHARING_POLICY_UNSPECIFIED = 0;
+
+  // Restricted: Only users explicitly added to the survey Access Control
+  // List (ACL) can open and access the survey.
+  RESTRICTED = 1;
+
+  // Anyone with the link: Anyone who possesses the survey URL link or scans
+  // its QR code can access the survey and collect data without being on the
+  // ACL.
+  ANYONE_WITH_LINK = 2;
+
+  // Public: Discoverable in the public directory; anyone can open and
+  // collect data.
+  PUBLIC = 3;
+}
+
+// Peer data visibility controls for mobile field collectors.
+enum PeerDataVisibility {
+  // Unspecified visibility.
+  PEER_DATA_VISIBILITY_UNSPECIFIED = 0;
+
+  // Field collectors can view entities and submissions collected by all peers
+  // on the map to coordinate coverage and prevent duplicate registrations.
+  ALL = 1;
+
+  // Field collectors can only view their own collected submissions and entities
+  // to preserve respondent confidentiality.
+  OWN_ONLY = 2;
+}
+
+// Entity classification for preloaded and field-created Entity Datasets.
+enum EntityType {
+  // Unspecified entity type.
+  ENTITY_TYPE_UNSPECIFIED = 0;
+
+  // Relational, non-spatial records (e.g., registries of farmers, cooperative
+  // member rosters, species taxonomies). Queried using select_one_from_file and
+  // offline pulldata().
+  TABULAR = 1;
+
+  // Relational records tied to spatial geometries (points, polylines,
+  // polygons). Rendered directly on the web and mobile map as interactive
+  // vector features with searchable attribute cards.
+  GEOSPATIAL = 2;
+}
+
+// Definition of an ODK Entity Dataset (tabular registry or geospatial entity
+// list).
+//
+// In ODK / ProtoForms XPath expressions (`instance('<id>')/root/item[...]`) and
+// entity bindings (`entity_saveto`), every entity automatically exposes the
+// following reserved system properties:
+//   - "name" / "__id": Entity UUID (`EntityRecord.entity_id`)
+//   - "label": Human-readable label (`EntityRecord.label`)
+//   - "__version": Revision number (`EntityRecord.revision`)
+//   - "geometry": Spatial feature geometry (`EntityRecord.geometry`, for
+//   GEOSPATIAL datasets)
+message EntityDatasetDef {
+  // Unique dataset identifier (e.g., "cooperatives", "plots", "trees").
+  string id = 1;
+
+  // Human-readable title or display name.
+  string display_name = 2;
+
+  // Detailed description of the entity dataset.
+  string description = 3;
+
+  // Classification: TABULAR (non-spatial) or GEOSPATIAL (spatial vector
+  // features).
+  EntityType type = 4;
+
+  // Property uniquely identifying each entity in external CSV/GeoJSON imports
+  // (e.g., "id" or "name").
+  string key_property = 5;
+
+  // Property used as the human-readable display label in selection lists and
+  // attribute cards.
+  string label_property = 6;
+
+  // Whether field enumerators are permitted to register new entities ad-hoc on
+  // mobile.
+  bool field_creation_enabled = 7;
+
+  // Schema definitions for entity properties.
+  repeated EntityPropertyDefinition properties = 8;
+
+  // Expected spatial geometry type for GEOSPATIAL datasets (TYPE_GEOPOINT,
+  // TYPE_GEOTRACE, or TYPE_GEOSHAPE). Exposed to XPath/ProtoForms under the
+  // reserved "geometry" property.
+  groundplatform.v2.forms.DataType geometry_type = 9;
+}
+
+// Schema definition for an individual property in an Entity Dataset.
+message EntityPropertyDefinition {
+  // Property name matching CSV column header or GeoJSON property key
+  // (Guardrail: max 255 characters).
+  string name = 1;
+
+  // Data type of this property.
+  groundplatform.v2.forms.DataType type = 2;
+
+  // Human-readable property label.
+  string label = 3;
+
+  // Whether this property is mandatory during field entity registration.
+  bool required = 4;
+}
+
+// Visual styling attributes for map layers, form geometries, and geospatial
+// entities.
+message GeometryStyle {
+  // Hex color code (e.g., "#4285F4") for marker pins, polylines, and polygon
+  // perimeters.
+  string color = 1;
+
+  // Material or custom vector icon identifier for point markers.
+  string icon = 2;
+
+  // Stroke width in pixels for line traces and polygon boundaries.
+  double stroke_width = 3;
+
+  // Fill opacity (between 0.0 transparent and 1.0 opaque) for closed polygons.
+  double fill_opacity = 4;
+}
+
+// Map visualization, default viewport, and layer stack configuration for the
+// survey.
+message MapConfig {
+  // Default initial map center coordinate.
+  groundplatform.v2.forms.GeoPoint initial_center = 1;
+
+  // Default initial map zoom level.
+  double initial_zoom = 2;
+
+  // Ordered stack of visual layers rendered on the survey map (bottom-to-top
+  // z-order).
+  repeated LayerDef layers = 3;
+}
+
+// Definition of a visual map layer in the survey map view.
+//
+// Layers decouple data schemas (`FormDef`, `EntityDatasetDef`) from map
+// presentation, ordering, visibility, and styling.
+message LayerDef {
+  // Unique identifier for this map layer within the survey.
+  string id = 1;
+
+  // Human-readable display label shown in the map legend and layer switcher.
+  string label = 2;
+
+  // Whether this layer is toggled visible on the map by default.
+  bool visible_by_default = 3;
+
+  // Baseline visual styling rules for vector geometries rendered in this
+  // layer. For Entity Dataset layers (`entity_dataset_id`), per-entity
+  // ODK/simplestyle properties (`marker-color`, `stroke`, `fill`, etc. in
+  // `EntityRecord.properties`) override this default style.
+  GeometryStyle default_style = 4;
+
+  // Data source backing this map layer.
+  oneof source {
+    // ID of a GEOSPATIAL Entity Dataset (`EntityDatasetDef.id`).
+    string entity_dataset_id = 5;
+
+    // Specific geometry question field within a form (`FormDef`).
+    FormGeometrySource form_geometry = 6;
+  }
+}
+
+// Identifies a specific geometry question within a form to render as a map
+// layer.
+message FormGeometrySource {
+  // ID of the form containing the geometry question (`FormDef.form_id`).
+  string form_id = 1;
+
+  // Field path of the geometry question within the form (e.g.,
+  // "plot/boundary").
+  string field_path = 2;
+}

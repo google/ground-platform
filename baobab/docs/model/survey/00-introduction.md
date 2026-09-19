@@ -18,7 +18,7 @@ and operational records that power Ground 2.0 web and mobile applications.
 
 ## Package and File Architecture
 
-All Ground 2.0 schemas reside under `core/protos/` and are organized into
+All Ground 2.0 schemas reside under `shared/protos/` and are organized into
 modular `.proto` files under three packages: `groundplatform.v2.forms` (form
 definitions and records), `groundplatform.v2.survey` (survey definitions and
 metadata), and `groundplatform.v2.data` (user data records):

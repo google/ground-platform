@@ -12,23 +12,10 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-pluginManagement {
-  repositories {
-    google()
-    mavenCentral()
-    gradlePluginPortal()
-  }
-}
+package org.groundplatform.v2.mobile
 
-dependencyResolutionManagement {
-  repositories {
-    google()
-    mavenCentral()
-  }
-}
+import androidx.compose.ui.window.ComposeUIViewController
+import platform.UIKit.UIViewController
 
-rootProject.name = "formdebugger"
-
-includeBuild("../../shared/core")
-
-includeBuild("../../shared/ui")
+/** Entry point invoked by the iOS SwiftUI host app (`iosApp`) to mount `GroundMobileApp`. */
+fun MainViewController(): UIViewController = ComposeUIViewController { GroundMobileApp() }

@@ -12,23 +12,17 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-pluginManagement {
-  repositories {
-    google()
-    mavenCentral()
-    gradlePluginPortal()
+package org.groundplatform.v2.devtools.prototypeapp
+
+import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.window.ComposeViewport
+import kotlinx.browser.document
+import org.jetbrains.skiko.wasm.onWasmReady
+
+@OptIn(ExperimentalComposeUiApi::class)
+fun main() {
+  onWasmReady {
+    val container = document.getElementById("ComposeTarget") ?: document.body!!
+    ComposeViewport(container) { PrototypeApp() }
   }
 }
-
-dependencyResolutionManagement {
-  repositories {
-    google()
-    mavenCentral()
-  }
-}
-
-rootProject.name = "formdebugger"
-
-includeBuild("../../shared/core")
-
-includeBuild("../../shared/ui")

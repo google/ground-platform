@@ -27,8 +27,6 @@ dependencyResolutionManagement {
   }
 }
 
-rootProject.name = "formdebugger"
+rootProject.name = "protoforms-ui"
 
-includeBuild("../../shared/core")
-
-includeBuild("../../shared/ui")
+includeBuild("../core")

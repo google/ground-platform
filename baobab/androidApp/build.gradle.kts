@@ -12,23 +12,25 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-pluginManagement {
-  repositories {
-    google()
-    mavenCentral()
-    gradlePluginPortal()
-  }
+// Placeholder Android application build script wrapping `org.groundplatform.v2:mobile`.
+plugins {
+  kotlin("multiplatform") version "2.3.21"
+  id("org.jetbrains.compose") version "1.12.0"
+  id("org.jetbrains.kotlin.plugin.compose") version "2.3.21"
 }
 
-dependencyResolutionManagement {
-  repositories {
-    google()
-    mavenCentral()
+group = "org.groundplatform.v2.android"
+
+version = "2.0.0-SNAPSHOT"
+
+kotlin {
+  jvm()
+
+  sourceSets {
+    val commonMain by getting {
+      dependencies {
+        implementation("org.groundplatform.v2:mobile:2.0.0-SNAPSHOT")
+      }
+    }
   }
 }
-
-rootProject.name = "formdebugger"
-
-includeBuild("../../shared/core")
-
-includeBuild("../../shared/ui")

@@ -12,6 +12,7 @@ This repo contains Ground's hosted components and related docs:
 
 | Directory                | Component                                                                                                     |
 | ------------------------ | ------------------------------------------------------------------------------------------------------------- |
+| [baobab/](baobab/)       | _Ground 2.0 (experimental)_, KMP/CMP shared libraries, proto schemas, and mobile/web apps                     |
 | [docs/](docs/)           | _Public documentation_, including Ground homepage                                                             |
 | [firestore/](firestore/) | _Firestore config_ defining Firebase rules and other database settings                                        |
 | [functions/](functions/) | _Firebase Cloud Functions_, used to sync with Google Sheets and import/export data to/from other data sources |

@@ -15,20 +15,43 @@
   limitations under the License.
 -->
 
-# Ground 2.0
+# Ground 2.0 (`baobab/`)
 
-This directory contains the Protocol Buffer data models, Kotlin Multiplatform
-(KMP) core runtime library, documentation, and developer tools for **Ground 2.0**.
+This directory contains the Kotlin Multiplatform (KMP) and Compose Multiplatform
+(CMP) shared modules, Protocol Buffer data models, platform applications
+(`androidApp`, `iosApp`, `webApp`), developer tools, and technical documentation
+for **Ground 2.0**.
 
 ## Directory Structure
 
--   **`core/protos/`**: Protocol Buffer (`.proto`) schema definitions for forms
-    (`FormDef`, `RecordInstance`, `RecordSchema`, `FieldBinding`), survey
-    configurations (`SurveyDef`, `AclEntry`), and entity/submission/audit
-    records.
--   **`core/lib/`**: Kotlin Multiplatform library
-    (`org.groundplatform.v2:protoforms`) targeting JVM, JS (IR), WasmJS, and
-    iOS:
+```text
+baobab/
+├── shared/                      # All shared multiplatform schemas & modules
+│   ├── protos/                  # Protocol Buffer (.proto) schemas (forms, survey, data)
+│   ├── core/                    # Pure KMP runtime library (Android/JVM, iOS, JS, WasmJS)
+│   ├── ui/                      # Shared Compose theme & form runner widgets (Android/JVM, iOS, JS, WasmJS)
+│   └── mobile/                  # Shared Mobile services, data & Compose UI (Android & iOS ONLY)
+│       └── src/commonMain/.../mobile/
+│           ├── data/            # Local SQLite/Room persistence, offline queues & tile cache
+│           ├── services/        # Offline sync engine, GPS/geotrace tracking & media management
+│           └── ui/              # Mobile screens, ViewModels & navigation
+├── androidApp/                  # Runnable Android app wrapper (APK/AAB) -> depends on shared/mobile
+├── iosApp/                      # Runnable iOS Xcode app wrapper (IPA)   -> embeds shared/mobile
+├── webApp/                      # Runnable Web Console app (Wasm/JS)     -> depends on shared/core & shared/ui
+├── devtools/
+│   └── formdebugger/            # Interactive Compose Web workbench for XForms, ProtoForms & XPath
+└── docs/                        # System architecture & Protocol Buffer data model specifications
+```
+
+### Shared Modules ([`shared/`](shared/))
+
+-   **[`shared/protos/`](shared/protos/)**: Protocol Buffer (`proto3`) schema
+    definitions for forms (`FormDef`, `RecordInstance`, `RecordSchema`,
+    `FieldBinding`), survey configurations (`SurveyDef`, `AclEntry`), and
+    entity/submission/audit records.
+-   **[`shared/core/`](shared/core/)**: Pure Kotlin Multiplatform runtime
+    library (`org.groundplatform.v2:protoforms`) targeting JVM/Android, iOS, JS
+    (IR), and WasmJS:
     -   **XForms XML, TextProto & JSON Serialization**
         (`org.groundplatform.v2.core.forms.serialization`): Bidirectional
         conversion between ODK XForms XML (`<h:html>` and `<data>`),
@@ -45,25 +68,40 @@ This directory contains the Protocol Buffer data models, Kotlin Multiplatform
         engine (`FormEngine`, `FormSession`, `CompiledForm`) for dynamic
         repeats, calculations, relevance, constraints, cascading `itemset`s,
         translations, and ODK Entities.
--   **`core/ui/`**: Compose Multiplatform UI library
+-   **[`shared/ui/`](shared/ui/)**: Compose Multiplatform UI library
     (`org.groundplatform.v2:protoforms-ui`, package
     `org.groundplatform.v2.core.forms.ui`) targeting Web (`js` / `wasmJs`),
-    Android/JVM (`jvm`), and iOS (`iosArm64` / `iosSimulatorArm64`). Implements
-    a single-question-per-screen mobile form experience (`MobileFormRunner`,
-    `MobilePhoneFrame`, `FormWizardController`, `QuestionControlCard`, and
-    `ControlWidget` for all `ControlType` and `DataType` combinations).
--   **`devtools/formdebugger/`**: Single-page Kotlin Multiplatform Compose Web
-    application for interactive bidirectional editing of FormDef (XML ↔
-    TextProto / JSON), RecordInstance (XML ↔ TextProto / JSON), real-time XPath
-    expression evaluation, and an embedded mobile form runner (`▶ RUN`) powered
-    by `core/ui` with live synchronization to the RecordInstance and XPath
-    panels.
--   **`docs/`**: Comprehensive architectural design and data model
+    Android/JVM (`jvm`), and iOS (`iosArm64` / `iosSimulatorArm64`). Provides
+    shared Material 3 theming (`GroundTheme`) and the single-question-per-screen
+    form experience (`MobileFormRunner`, `MobilePhoneFrame`,
+    `FormWizardController`, `QuestionControlCard`, and `ControlWidget`).
+-   **[`shared/mobile/`](shared/mobile/)**: Shared Mobile application module
+    (`org.groundplatform.v2:mobile`) targeting **only Android/JVM and iOS**.
+    Contains mobile-specific local persistence (`data/`), domain services such
+    as offline sync and GPS tracking (`services/`), and mobile Compose screens &
+    ViewModels (`ui/`) shared identically by `androidApp` and `iosApp`. Exports
+    the `GroundMobile` XCFramework for Xcode.
+
+### Platform Applications & Tools
+
+-   **[`androidApp/`](androidApp/)**: Thin Android application entry point that
+    hosts `GroundMobileApp()` from `shared/mobile`.
+-   **[`iosApp/`](iosApp/)**: Thin Xcode / SwiftUI application entry point that
+    embeds `GroundMobile.framework` from `shared/mobile`.
+-   **[`webApp/`](webApp/)**: Ground 2.0 Web Console application (`wasmJs` /
+    `js`) for survey administration, map management, and data exploration,
+    built directly on `shared/core` and `shared/ui`.
+-   **[`devtools/formdebugger/`](devtools/formdebugger/)**: Single-page Compose
+    Multiplatform Web application for interactive bidirectional editing of
+    `FormDef` and `RecordInstance` (`XML` ↔ `textproto` / `JSON`), real-time
+    XPath expression evaluation, and an embedded mobile form runner (`▶ RUN`)
+    powered by `shared/ui`.
+-   **[`docs/`](docs/)**: Comprehensive architectural design and data model
     documentation.
 
 ## Running Core Library Tests
 
-From `core/lib/`:
+From `shared/core/`:
 
 ```bash
 # Run JVM unit and round-trip tests

@@ -12,23 +12,13 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-pluginManagement {
-  repositories {
-    google()
-    mavenCentral()
-    gradlePluginPortal()
-  }
+package org.groundplatform.v2.android
+
+import androidx.compose.runtime.Composable
+import org.groundplatform.v2.mobile.GroundMobileApp
+
+/** Android launcher entry point delegating to the shared `GroundMobileApp` composable. */
+@Composable
+fun MainActivityContent() {
+  GroundMobileApp()
 }
-
-dependencyResolutionManagement {
-  repositories {
-    google()
-    mavenCentral()
-  }
-}
-
-rootProject.name = "formdebugger"
-
-includeBuild("../../shared/core")
-
-includeBuild("../../shared/ui")
