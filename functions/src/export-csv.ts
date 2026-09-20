@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 The Ground Authors.
+ * Copyright 2026 The Ground Authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import {
   getStorageBucket,
 } from './common/context';
 import { getTempFilePath } from './common/temp-storage';
+import { getExportMediaUrl, getRequestBaseUrl } from './common/media';
 import { DecodedIdToken } from 'firebase-admin/auth';
 import { QueryDocumentSnapshot } from 'firebase-admin/firestore';
 import { StatusCodes } from 'http-status-codes';
@@ -93,6 +94,10 @@ export async function exportCsvHandler(
 
   const tasks = job.tasks.sort((a, b) => a.index! - b.index!);
 
+  const baseUrl = getRequestBaseUrl(req);
+  const photoUrl: PhotoUrlFn = (submissionId, taskId) =>
+    getExportMediaUrl(baseUrl, surveyId, submissionId, taskId);
+
   const loiProperties = new Set<string>();
   let query = db.fetchPartialLocationsOfInterest(surveyId, jobId, 1000);
   let lastVisible = null;
@@ -142,9 +147,17 @@ export async function exportCsvHandler(
       if (isAccessibleLoi(loi, ownerIdFilter) && submissionDoc) {
         const submission = toMessage(submissionDoc.data(), Pb.Submission);
         if (submission instanceof Error) throw submission;
-        writeRow(csvStream, loiProperties, tasks, loi, submission);
+        writeRow(
+          csvStream,
+          loiProperties,
+          tasks,
+          loi,
+          photoUrl,
+          submission,
+          submissionDoc.id
+        );
       } else {
-        writeRow(csvStream, loiProperties, tasks, loi);
+        writeRow(csvStream, loiProperties, tasks, loi, photoUrl);
       }
     } catch (e) {
       console.debug('Skipping row', e);
@@ -175,12 +188,21 @@ function getHeaders(tasks: Pb.ITask[], loiProperties: Set<string>): string[] {
   return headers.map(quote);
 }
 
+/**
+ * Returns the URL at which the photo submitted for a task can be fetched. The
+ * URL names the submission rather than the storage object, so it keeps working
+ * across re-exports and stays subject to the survey's access rules.
+ */
+type PhotoUrlFn = (submissionId: string, taskId: string) => string;
+
 function writeRow(
   csvStream: csv.CsvFormatterStream<csv.Row, csv.Row>,
   loiProperties: Set<string>,
   tasks: Pb.ITask[],
   loi: Pb.LocationOfInterest,
-  submission?: Pb.Submission
+  photoUrl: PhotoUrlFn,
+  submission?: Pb.Submission,
+  submissionId?: string
 ) {
   if (!loi.geometry) {
     console.debug(`Skipping LOI ${loi.id} - missing geometry`);
@@ -196,7 +218,8 @@ function writeRow(
   if (submission) {
     const { taskData: data } = submission;
     // Header: One column for each task
-    tasks.forEach(task => row.push(quote(getValue(task, data))));
+    const taskPhotoUrl = (taskId: string) => photoUrl(submissionId!, taskId);
+    tasks.forEach(task => row.push(quote(getValue(task, data, taskPhotoUrl))));
     // Header: contributor_username, contributor_email, created_client_timestamp, created_server_timestamp
     const { created } = submission;
     row.push(quote(created?.displayName));
@@ -229,11 +252,13 @@ function toWkt(geometry: Pb.IGeometry): string {
 }
 
 /**
- * Returns the string or number representation of a specific task element result.
+ * Returns the string or number representation of a specific task element
+ * result.
  */
 function getValue(
   task: Pb.ITask,
-  data: Pb.ITaskData[]
+  data: Pb.ITaskData[],
+  photoUrl: (taskId: string) => string
 ): string | number | null {
   const result = data.find(d => d.taskId === task.id);
   if (!result || result.skipped) return null;
@@ -263,7 +288,8 @@ function getValue(
         }),
       })
     );
-  } else if (takePhotoResult) return getPhotoUrlValue(takePhotoResult);
+  } else if (takePhotoResult)
+    return takePhotoResult.photoPath ? photoUrl(task.id!) : null;
   else return null;
 }
 
@@ -307,10 +333,6 @@ function getMultipleChoiceLabel(task: Pb.ITask, id: string): string | null {
       (o: Pb.Task.MultipleChoiceQuestion.IOption) => o.id === id
     )?.label ?? null
   );
-}
-
-function getPhotoUrlValue(result: Pb.TaskData.ITakePhotoResult): string | null {
-  return result?.photoPath || null;
 }
 
 /**
