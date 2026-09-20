@@ -43,6 +43,7 @@ export const userMediaPrefix = (surveyId: string) =>
 export function isMediaPathInSurvey(path: string, surveyId: string): boolean {
   return (
     !!surveyId &&
+    !!path &&
     path.startsWith(userMediaPrefix(surveyId)) &&
     !path.split('/').includes('..')
   );
