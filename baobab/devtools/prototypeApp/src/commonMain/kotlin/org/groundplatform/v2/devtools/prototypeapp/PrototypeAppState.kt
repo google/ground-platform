@@ -19,8 +19,19 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import groundplatform.v2.forms.FormDef
 import groundplatform.v2.forms.RecordInstance
+import kotlin.math.PI
+import kotlin.math.abs
+import kotlin.math.cos
+import kotlin.math.pow
 import org.groundplatform.v2.core.forms.serialization.XFormsXmlSerializer
 import org.groundplatform.v2.core.forms.ui.FormWizardController
+
+/** Specification for the Google Maps-style horizontal map scale bar widget. */
+data class MapScaleBarSpec(
+  val label: String,
+  val distanceMeters: Int,
+  val barWidthDp: Float,
+)
 
 /** Screens in the Ground 2.0 Mobile UI onboarding and survey workflow. */
 enum class PrototypeScreen(val stepNumber: Int, val title: String, val subtitle: String) {
@@ -494,6 +505,50 @@ class PrototypeAppState(
       val rawZoom = (15.3f + mapZoomDelta).coerceIn(10.0f, 19.0f)
       val tenths = (rawZoom * 10f + 0.5f).toInt()
       return "${tenths / 10}.${tenths % 10}z"
+    }
+
+  /**
+   * Computes a Google Maps-style horizontal scale bar specification (`label`, `distanceMeters`,
+   * `barWidthDp`) based on the active survey's latitude and current Mapbox zoom level.
+   */
+  val mapScaleBarSpec: MapScaleBarSpec
+    get() {
+      val (baseZoom, latitudeDeg) =
+        when (activeSurveyId) {
+          "survey-amazon-bio" -> 14.8f to -3.1190
+          "survey-tanzania-water" -> 15.1f to -6.1659
+          "survey-california-fire" -> 14.9f to 38.5449
+          else -> 15.3f to -0.4198
+        }
+      val effectiveZoom = (baseZoom + mapZoomDelta).coerceIn(10.0f, 19.0f).toDouble()
+      val metersPerDp =
+        (40075016.686 * cos(latitudeDeg * PI / 180.0)) / (512.0 * 2.0.pow(effectiveZoom))
+      val candidateMeters =
+        listOf(5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000, 50000)
+      val targetWidthDp = 72.0
+      val chosenMeters =
+        candidateMeters.minByOrNull { dist ->
+          val widthDp = dist / metersPerDp
+          val outOfRangePenalty =
+            when {
+              widthDp < 44.0 -> (44.0 - widthDp) * 4.0
+              widthDp > 112.0 -> (widthDp - 112.0) * 4.0
+              else -> 0.0
+            }
+          abs(widthDp - targetWidthDp) + outOfRangePenalty
+        } ?: 100
+      val barWidthDp = (chosenMeters / metersPerDp).toFloat().coerceIn(44f, 114f)
+      val label =
+        if (chosenMeters >= 1000) {
+          "${chosenMeters / 1000} km"
+        } else {
+          "$chosenMeters m"
+        }
+      return MapScaleBarSpec(
+        label = label,
+        distanceMeters = chosenMeters,
+        barWidthDp = barWidthDp,
+      )
     }
 
   /**

@@ -14,6 +14,7 @@
  */
 package org.groundplatform.v2.devtools.prototypeapp
 
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.tween
@@ -472,7 +473,7 @@ private fun SurveyMapView(state: PrototypeAppState) {
       )
     }
 
-    // 4B. Floating Mapbox Zoom In (+) / Zoom Level / Zoom Out (−) Control Pill on Right Edge
+    // 4B. Floating Mapbox Zoom In (+) / Zoom Out (−) Control Pill on Right Edge
     Surface(
       modifier =
         Modifier.align(Alignment.CenterEnd)
@@ -512,33 +513,6 @@ private fun SurveyMapView(state: PrototypeAppState) {
           color = Color(0xFF2D5944),
         )
 
-        // Current Zoom Level Readout (tap to reset to default survey zoom)
-        Box(
-          modifier =
-            Modifier.clip(RoundedCornerShape(8.dp))
-              .clickable {
-                state.resetMapZoom()
-              }
-              .padding(horizontal = 4.dp, vertical = 2.dp),
-          contentAlignment = Alignment.Center,
-        ) {
-          Text(
-            text = state.effectiveMapZoomLabel,
-            style =
-              MaterialTheme.typography.labelSmall.copy(
-                fontSize = 9.sp,
-                fontFamily = FontFamily.Monospace,
-                fontWeight = FontWeight.Bold,
-                color = Color(0xFF8BD6B1),
-              ),
-          )
-        }
-
-        HorizontalDivider(
-          modifier = Modifier.width(22.dp),
-          color = Color(0xFF2D5944),
-        )
-
         // Zoom Out (−)
         Box(
           modifier =
@@ -561,42 +535,55 @@ private fun SurveyMapView(state: PrototypeAppState) {
       }
     }
 
-    // 5. Bottom Overlay Stack: Google Maps-style "Recenter" Pill Button (when map is dragged/panned)
-    //    stacked cleanly above the Entity Bottom Sheet or Helper Hint Chip
+    // 5. Bottom Overlay Stack: Google Maps-style Horizontal Scale Widget in bottom-left
+    //    (plus optional "Recenter" Pill Button when map is panned) stacked cleanly above
+    //    the Entity Bottom Sheet or Helper Hint Chip
     Column(
       modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth(),
     ) {
-      if (!state.isCameraFollowingUser) {
-        Surface(
-          modifier =
-            Modifier.padding(start = 14.dp, bottom = 10.dp)
-              .clip(RoundedCornerShape(24.dp))
-              .clickable { state.recenterMapOnUser() },
-          shape = RoundedCornerShape(24.dp),
-          color = Color.White,
-          shadowElevation = 6.dp,
-        ) {
-          Row(
+      Row(
+        modifier =
+          Modifier.fillMaxWidth()
+            .padding(start = 14.dp, end = 14.dp, bottom = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
+      ) {
+        GoogleMapsScaleBarWidget(
+          scaleSpec = state.mapScaleBarSpec,
+          isSatellite = state.selectedBasemapType == BasemapType.SATELLITE,
+        )
+
+        if (!state.isCameraFollowingUser) {
+          Surface(
             modifier =
-              Modifier.border(1.5.dp, Color(0xFF1A73E8), RoundedCornerShape(24.dp))
-                .padding(horizontal = 14.dp, vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(6.dp),
+              Modifier.clip(RoundedCornerShape(24.dp))
+                .clickable { state.recenterMapOnUser() },
+            shape = RoundedCornerShape(24.dp),
+            color = Color.White,
+            shadowElevation = 6.dp,
           ) {
-            Icon(
-              imageVector = Icons.Default.MyLocation,
-              contentDescription = "Recenter map on GPS location",
-              tint = Color(0xFF1A73E8),
-              modifier = Modifier.size(16.dp),
-            )
-            Text(
-              text = "Recenter",
-              style =
-                MaterialTheme.typography.labelLarge.copy(
-                  color = Color(0xFF1A73E8),
-                  fontWeight = FontWeight.Bold,
-                ),
-            )
+            Row(
+              modifier =
+                Modifier.border(1.5.dp, Color(0xFF1A73E8), RoundedCornerShape(24.dp))
+                  .padding(horizontal = 14.dp, vertical = 7.dp),
+              verticalAlignment = Alignment.CenterVertically,
+              horizontalArrangement = Arrangement.spacedBy(6.dp),
+            ) {
+              Icon(
+                imageVector = Icons.Default.MyLocation,
+                contentDescription = "Recenter map on GPS location",
+                tint = Color(0xFF1A73E8),
+                modifier = Modifier.size(16.dp),
+              )
+              Text(
+                text = "Recenter",
+                style =
+                  MaterialTheme.typography.labelLarge.copy(
+                    color = Color(0xFF1A73E8),
+                    fontWeight = FontWeight.Bold,
+                  ),
+              )
+            }
           }
         }
       }
@@ -635,6 +622,108 @@ private fun SurveyMapView(state: PrototypeAppState) {
               ),
           )
         }
+      }
+    }
+  }
+}
+
+/**
+ * Google Maps-style horizontal scale bar widget rendered in the bottom-left corner of the map.
+ * Displays the current ground distance label (`100 m`, `200 m`, `1 km`, etc.) alongside a
+ * dynamically sized horizontal scale bracket (`|_________|`) that adapts to Map vs Satellite tiles.
+ */
+@Composable
+private fun GoogleMapsScaleBarWidget(
+  scaleSpec: MapScaleBarSpec,
+  isSatellite: Boolean,
+  modifier: Modifier = Modifier,
+) {
+  val animatedWidthDp by
+    animateDpAsState(
+      targetValue = scaleSpec.barWidthDp.dp,
+      animationSpec = tween(durationMillis = 180),
+      label = "googleMapsScaleBarWidth",
+    )
+  val bgColor = if (isSatellite) Color(0xCC0E2219) else Color(0xDDFFFFFF)
+  val borderColor = if (isSatellite) Color(0x668BD6B1) else Color(0x441F2937)
+  val primaryColor = if (isSatellite) Color.White else Color(0xFF202124)
+  val haloColor = if (isSatellite) Color(0xAA000000) else Color(0xCCFFFFFF)
+
+  Surface(
+    modifier = modifier,
+    shape = RoundedCornerShape(10.dp),
+    color = bgColor,
+    shadowElevation = 3.dp,
+  ) {
+    Row(
+      modifier =
+        Modifier.border(1.dp, borderColor, RoundedCornerShape(10.dp))
+          .padding(horizontal = 9.dp, vertical = 5.dp),
+      verticalAlignment = Alignment.CenterVertically,
+      horizontalArrangement = Arrangement.spacedBy(7.dp),
+    ) {
+      Text(
+        text = scaleSpec.label,
+        style =
+          MaterialTheme.typography.labelSmall.copy(
+            fontSize = 10.5.sp,
+            fontFamily = FontFamily.SansSerif,
+            fontWeight = FontWeight.Bold,
+            color = primaryColor,
+          ),
+      )
+
+      Canvas(
+        modifier =
+          Modifier.width(animatedWidthDp)
+            .height(9.dp)
+      ) {
+        val leftX = 1.dp.toPx()
+        val rightX = (size.width - 1.dp.toPx()).coerceAtLeast(leftX + 4f)
+        val topY = 1.dp.toPx()
+        val bottomY = size.height - 1.5.dp.toPx()
+        val haloStroke = 3.2.dp.toPx()
+        val mainStroke = 1.6.dp.toPx()
+
+        // High-contrast halo outline
+        drawLine(
+          color = haloColor,
+          start = Offset(leftX, bottomY),
+          end = Offset(rightX, bottomY),
+          strokeWidth = haloStroke,
+        )
+        drawLine(
+          color = haloColor,
+          start = Offset(leftX, topY),
+          end = Offset(leftX, bottomY),
+          strokeWidth = haloStroke,
+        )
+        drawLine(
+          color = haloColor,
+          start = Offset(rightX, topY),
+          end = Offset(rightX, bottomY),
+          strokeWidth = haloStroke,
+        )
+
+        // Crisp Google Maps-style scale bracket: |_________|
+        drawLine(
+          color = primaryColor,
+          start = Offset(leftX, bottomY),
+          end = Offset(rightX, bottomY),
+          strokeWidth = mainStroke,
+        )
+        drawLine(
+          color = primaryColor,
+          start = Offset(leftX, topY),
+          end = Offset(leftX, bottomY),
+          strokeWidth = mainStroke,
+        )
+        drawLine(
+          color = primaryColor,
+          start = Offset(rightX, topY),
+          end = Offset(rightX, bottomY),
+          strokeWidth = mainStroke,
+        )
       }
     }
   }

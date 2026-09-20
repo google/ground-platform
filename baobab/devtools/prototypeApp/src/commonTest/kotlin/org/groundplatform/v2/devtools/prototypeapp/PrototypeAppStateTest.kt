@@ -486,23 +486,30 @@ class PrototypeAppStateTest {
     val state = PrototypeAppState(initialScreen = PrototypeScreen.MAIN_SURVEY)
     assertEquals(0f, state.mapZoomDelta)
     assertEquals("15.3z", state.effectiveMapZoomLabel)
+    val initialScale = state.mapScaleBarSpec
+    assertTrue(initialScale.distanceMeters > 0)
+    assertTrue(initialScale.barWidthDp in 44f..114f)
 
     // Zoom in (+0.75) -> 16.1z
     state.zoomInMap()
     assertEquals(0.75f, state.mapZoomDelta)
     assertEquals("16.1z", state.effectiveMapZoomLabel)
+    state.zoomInMap()
+    state.zoomInMap()
+    val zoomedInScale = state.mapScaleBarSpec
+    assertTrue(zoomedInScale.distanceMeters < initialScale.distanceMeters)
 
-    // Zoom out twice (-1.5) -> 14.6z
+    // Zoom out
+    state.resetMapZoom()
     state.zoomOutMap()
     state.zoomOutMap()
-    assertEquals(-0.75f, state.mapZoomDelta)
-    assertEquals("14.6z", state.effectiveMapZoomLabel)
+    val zoomedOutScale = state.mapScaleBarSpec
+    assertTrue(zoomedOutScale.distanceMeters > initialScale.distanceMeters)
 
     // Reset zoom restores 0f delta (15.3z)
     state.resetMapZoom()
     assertEquals(0f, state.mapZoomDelta)
     assertEquals("15.3z", state.effectiveMapZoomLabel)
+    assertEquals(initialScale, state.mapScaleBarSpec)
   }
 }
-
-
