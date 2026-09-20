@@ -46,6 +46,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.automirrored.filled.Logout
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
@@ -469,6 +470,95 @@ private fun SurveyMapView(state: PrototypeAppState) {
             .padding(top = 74.dp, end = 10.dp, start = 14.dp)
             .heightIn(max = 460.dp),
       )
+    }
+
+    // 4B. Floating Mapbox Zoom In (+) / Zoom Level / Zoom Out (−) Control Pill on Right Edge
+    Surface(
+      modifier =
+        Modifier.align(Alignment.CenterEnd)
+          .padding(end = 10.dp),
+      shape = RoundedCornerShape(18.dp),
+      color = Color(0xEE133A29),
+      shadowElevation = 6.dp,
+    ) {
+      Column(
+        modifier =
+          Modifier.border(1.dp, Color(0xFF8BD6B1), RoundedCornerShape(18.dp))
+            .padding(vertical = 4.dp, horizontal = 4.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(2.dp),
+      ) {
+        // Zoom In (+)
+        Box(
+          modifier =
+            Modifier.size(32.dp)
+              .clip(CircleShape)
+              .clickable {
+                state.zoomInMap()
+                zoomPlatformMapboxBasemap(0.75f)
+              },
+          contentAlignment = Alignment.Center,
+        ) {
+          Icon(
+            imageVector = Icons.Default.Add,
+            contentDescription = "Zoom In Map",
+            tint = Color.White,
+            modifier = Modifier.size(18.dp),
+          )
+        }
+
+        HorizontalDivider(
+          modifier = Modifier.width(22.dp),
+          color = Color(0xFF2D5944),
+        )
+
+        // Current Zoom Level Readout (tap to reset to default survey zoom)
+        Box(
+          modifier =
+            Modifier.clip(RoundedCornerShape(8.dp))
+              .clickable {
+                state.resetMapZoom()
+              }
+              .padding(horizontal = 4.dp, vertical = 2.dp),
+          contentAlignment = Alignment.Center,
+        ) {
+          Text(
+            text = state.effectiveMapZoomLabel,
+            style =
+              MaterialTheme.typography.labelSmall.copy(
+                fontSize = 9.sp,
+                fontFamily = FontFamily.Monospace,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFF8BD6B1),
+              ),
+          )
+        }
+
+        HorizontalDivider(
+          modifier = Modifier.width(22.dp),
+          color = Color(0xFF2D5944),
+        )
+
+        // Zoom Out (−)
+        Box(
+          modifier =
+            Modifier.size(32.dp)
+              .clip(CircleShape)
+              .clickable {
+                state.zoomOutMap()
+                zoomPlatformMapboxBasemap(-0.75f)
+              },
+          contentAlignment = Alignment.Center,
+        ) {
+          Box(
+            modifier =
+              Modifier.width(12.dp)
+                .height(2.2.dp)
+                .clip(CircleShape)
+                .background(Color.White)
+          )
+        }
+      }
     }
 
     // 5. Bottom Overlay Stack: Google Maps-style "Recenter" Pill Button (when map is dragged/panned)

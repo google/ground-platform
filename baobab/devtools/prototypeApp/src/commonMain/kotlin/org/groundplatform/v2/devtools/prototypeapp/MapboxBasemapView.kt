@@ -118,6 +118,7 @@ fun MapboxBasemapView(
       selectedEntity?.id,
       selectedSubmission?.id,
       state.isCameraFollowingUser,
+      state.mapZoomDelta,
     ) {
       buildMapboxFeaturesPayloadJson(
         entities = visibleEntities,
@@ -125,6 +126,7 @@ fun MapboxBasemapView(
         selectedEntityId = selectedEntity?.id,
         selectedSubmissionId = selectedSubmission?.id,
         isCameraFollowingUser = state.isCameraFollowingUser,
+        zoomDelta = state.mapZoomDelta,
       )
     }
 
@@ -173,7 +175,9 @@ fun MapboxBasemapView(
         .onPointerEvent(PointerEventType.Scroll) { event ->
           val scrollDeltaY = event.changes.firstOrNull()?.scrollDelta?.y ?: 0f
           if (scrollDeltaY != 0f) {
-            zoomPlatformMapboxBasemap(-scrollDeltaY * 0.35f)
+            val step = (-scrollDeltaY * 0.35f).coerceIn(-1.2f, 1.2f)
+            state.zoomMapBy(step)
+            zoomPlatformMapboxBasemap(step)
           }
         }
         .pointerInput(viewportWidthCssPx, viewportHeightCssPx, density) {
@@ -190,8 +194,14 @@ fun MapboxBasemapView(
                 val geomId = hitResult.removePrefix("submission:")
                 state.selectSubmissionGeometry(geomId)
               }
-              hitResult.startsWith("control:") -> {
-                // Mapbox NavigationControl (+ / - / compass) handled directly by bridge
+              hitResult == "control:zoom-in" -> {
+                state.zoomInMap()
+              }
+              hitResult == "control:zoom-out" -> {
+                state.zoomOutMap()
+              }
+              hitResult == "control:compass" -> {
+                state.resetMapZoom()
               }
               else -> {
                 state.updateLayersSheetOpen(false)
@@ -234,6 +244,7 @@ private fun buildMapboxFeaturesPayloadJson(
   selectedEntityId: String?,
   selectedSubmissionId: String?,
   isCameraFollowingUser: Boolean,
+  zoomDelta: Float,
 ): String {
   val entitiesJson =
     entities.joinToString(separator = ",") { ent ->
@@ -255,7 +266,7 @@ private fun buildMapboxFeaturesPayloadJson(
       val shortBadge = escapeJsonString(sub.shortMapBadge)
       """{"id":"${sub.id}","submissionId":"${sub.submissionId}","label":"$shortBadge","nx":${sub.normalizedX},"ny":${sub.normalizedY},"wf":${sub.widthFraction},"hf":${sub.heightFraction},"color":"$hex","selected":$selected}"""
     }
-  return """{"isFollowingUser":$isCameraFollowingUser,"entities":[$entitiesJson],"submissions":[$submissionsJson]}"""
+  return """{"isFollowingUser":$isCameraFollowingUser,"zoomDelta":$zoomDelta,"entities":[$entitiesJson],"submissions":[$submissionsJson]}"""
 }
 
 private fun escapeJsonString(raw: String): String =

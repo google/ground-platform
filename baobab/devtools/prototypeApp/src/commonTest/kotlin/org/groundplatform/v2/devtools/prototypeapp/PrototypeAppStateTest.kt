@@ -480,6 +480,29 @@ class PrototypeAppStateTest {
     assertEquals(null, state.selectedEntityId)
     assertFalse(state.isEntityBottomSheetExpanded)
   }
+
+  @Test
+  fun mapZoomControls_supportZoomInZoomOutAndReset() {
+    val state = PrototypeAppState(initialScreen = PrototypeScreen.MAIN_SURVEY)
+    assertEquals(0f, state.mapZoomDelta)
+    assertEquals("15.3z", state.effectiveMapZoomLabel)
+
+    // Zoom in (+0.75) -> 16.1z
+    state.zoomInMap()
+    assertEquals(0.75f, state.mapZoomDelta)
+    assertEquals("16.1z", state.effectiveMapZoomLabel)
+
+    // Zoom out twice (-1.5) -> 14.6z
+    state.zoomOutMap()
+    state.zoomOutMap()
+    assertEquals(-0.75f, state.mapZoomDelta)
+    assertEquals("14.6z", state.effectiveMapZoomLabel)
+
+    // Reset zoom restores 0f delta (15.3z)
+    state.resetMapZoom()
+    assertEquals(0f, state.mapZoomDelta)
+    assertEquals("15.3z", state.effectiveMapZoomLabel)
+  }
 }
 
 

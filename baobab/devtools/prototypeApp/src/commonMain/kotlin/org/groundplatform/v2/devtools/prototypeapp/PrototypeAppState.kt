@@ -484,6 +484,18 @@ class PrototypeAppState(
   var mapPanOffsetY by mutableStateOf(0f)
     private set
 
+  /** Zoom delta relative to the active survey's default Mapbox zoom level (`[-5.0f, +3.7f]`). */
+  var mapZoomDelta by mutableStateOf(0f)
+    private set
+
+  /** Formatted current Mapbox zoom level badge (e.g. `"15.3z"`). */
+  val effectiveMapZoomLabel: String
+    get() {
+      val rawZoom = (15.3f + mapZoomDelta).coerceIn(10.0f, 19.0f)
+      val tenths = (rawZoom * 10f + 0.5f).toInt()
+      return "${tenths / 10}.${tenths % 10}z"
+    }
+
   /**
    * Total horizontal world-to-viewport shift (`(0.50f - userGpsNormalizedX) + mapPanOffsetX`).
    * Ensures `(userGpsNormalizedX, userGpsNormalizedY)` is always centered at `(0.50f, 0.50f)`
@@ -1279,6 +1291,27 @@ class PrototypeAppState(
     isCameraFollowingUser = true
     mapPanOffsetX = 0f
     mapPanOffsetY = 0f
+  }
+
+  /** Adjusts the Mapbox zoom level by [deltaZoom] (clamped to `[-5.0f, +3.7f]`). */
+  fun zoomMapBy(deltaZoom: Float) {
+    if (deltaZoom == 0f) return
+    mapZoomDelta = (mapZoomDelta + deltaZoom).coerceIn(-5.0f, 3.7f)
+  }
+
+  /** Zooms the Mapbox map in by one step (`+0.75` zoom levels). */
+  fun zoomInMap() {
+    zoomMapBy(0.75f)
+  }
+
+  /** Zooms the Mapbox map out by one step (`-0.75` zoom levels). */
+  fun zoomOutMap() {
+    zoomMapBy(-0.75f)
+  }
+
+  /** Resets the Mapbox zoom level to the active survey's default (`15.3z`). */
+  fun resetMapZoom() {
+    mapZoomDelta = 0f
   }
 
   /**

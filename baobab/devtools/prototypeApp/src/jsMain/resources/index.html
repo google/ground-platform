@@ -509,16 +509,6 @@
             fadeDuration: 0,
           });
 
-          try {
-            map.addControl(
-              new window.mapboxgl.NavigationControl({
-                showCompass: true,
-                showZoom: true,
-              }),
-              'bottom-right'
-            );
-          } catch (e) {}
-
           map.resize();
 
           if (typeof ResizeObserver !== 'undefined') {
@@ -720,11 +710,22 @@
 
           if (!map) return;
 
+          let parsedPayload = null;
+          if (featuresGeoJson) {
+            try {
+              parsedPayload = JSON.parse(featuresGeoJson);
+              if (
+                parsedPayload &&
+                typeof parsedPayload.zoomDelta === 'number' &&
+                isFinite(parsedPayload.zoomDelta)
+              ) {
+                currentZoomDelta = parsedPayload.zoomDelta;
+              }
+            } catch (e) {}
+          }
+
           const shiftX = 0.5 - userGpsX + panOffsetX;
           const shiftY = 0.5 - userGpsY + panOffsetY;
-          if (Math.abs(panOffsetX) < 0.0001 && Math.abs(panOffsetY) < 0.0001) {
-            currentZoomDelta = 0;
-          }
           const cameraLng = survey.lng - shiftX * 0.014;
           const cameraLat = survey.lat + shiftY * 0.018;
           const targetZoom = Math.max(
