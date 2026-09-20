@@ -60,6 +60,22 @@ internal actual fun panPlatformMapboxBasemap(dxPx: Float, dyPx: Float) {
   }
 }
 
+internal actual fun zoomPlatformMapboxBasemap(deltaZoom: Float) {
+  val bridge = js("window.GroundMapboxBridge")
+  if (bridge != null && bridge != undefined) {
+    bridge.zoomBy(deltaZoom)
+  }
+}
+
+internal actual fun handlePlatformMapboxClick(xPx: Float, yPx: Float): String {
+  val bridge = js("window.GroundMapboxBridge")
+  if (bridge != null && bridge != undefined && bridge.handleMapClick != undefined) {
+    val res = bridge.handleMapClick(xPx, yPx)
+    return (res as? String) ?: ""
+  }
+  return ""
+}
+
 internal actual fun hidePlatformMapboxBasemap() {
   val bridge = js("window.GroundMapboxBridge")
   if (bridge != null && bridge != undefined) {

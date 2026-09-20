@@ -36,4 +36,8 @@ internal actual fun syncPlatformMapboxBasemap(
 
 internal actual fun panPlatformMapboxBasemap(dxPx: Float, dyPx: Float) = Unit
 
+internal actual fun zoomPlatformMapboxBasemap(deltaZoom: Float) = Unit
+
+internal actual fun handlePlatformMapboxClick(xPx: Float, yPx: Float): String = ""
+
 internal actual fun hidePlatformMapboxBasemap() = Unit

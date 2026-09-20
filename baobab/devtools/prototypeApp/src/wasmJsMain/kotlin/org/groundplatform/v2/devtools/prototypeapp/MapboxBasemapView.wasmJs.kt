@@ -55,6 +55,23 @@ private external fun jsSyncMapboxBasemap(
 private external fun jsPanMapboxBasemap(dxPx: Float, dyPx: Float)
 
 @JsFun(
+  "(deltaZoom) => { " +
+    "if (window.GroundMapboxBridge && window.GroundMapboxBridge.zoomBy) { " +
+    "window.GroundMapboxBridge.zoomBy(deltaZoom); " +
+    "} }"
+)
+private external fun jsZoomMapboxBasemap(deltaZoom: Float)
+
+@JsFun(
+  "(xPx, yPx) => { " +
+    "if (window.GroundMapboxBridge && window.GroundMapboxBridge.handleMapClick) { " +
+    "return String(window.GroundMapboxBridge.handleMapClick(xPx, yPx) || ''); " +
+    "} " +
+    "return ''; }"
+)
+private external fun jsHandleMapboxClick(xPx: Float, yPx: Float): String
+
+@JsFun(
   "() => { " +
     "if (window.GroundMapboxBridge) { " +
     "window.GroundMapboxBridge.syncViewport(0, 0, 0, 0, 0, false); " +
@@ -98,6 +115,13 @@ internal actual fun syncPlatformMapboxBasemap(
 internal actual fun panPlatformMapboxBasemap(dxPx: Float, dyPx: Float) {
   jsPanMapboxBasemap(dxPx, dyPx)
 }
+
+internal actual fun zoomPlatformMapboxBasemap(deltaZoom: Float) {
+  jsZoomMapboxBasemap(deltaZoom)
+}
+
+internal actual fun handlePlatformMapboxClick(xPx: Float, yPx: Float): String =
+  jsHandleMapboxClick(xPx, yPx)
 
 internal actual fun hidePlatformMapboxBasemap() {
   jsHideMapboxBasemap()

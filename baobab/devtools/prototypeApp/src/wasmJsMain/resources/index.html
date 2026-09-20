@@ -94,6 +94,60 @@
             letter-spacing: 0.2px;
             pointer-events: none;
         }
+        .ground-entity-marker {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 8px;
+            border-radius: 16px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-size: 10px;
+            font-weight: 700;
+            line-height: 1.2;
+            white-space: nowrap;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.38);
+            user-select: none;
+            pointer-events: auto;
+        }
+        .ground-entity-marker-badge {
+            font-size: 9px;
+            font-weight: 600;
+            opacity: 0.92;
+            margin-left: 2px;
+        }
+        .ground-submission-marker {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-size: 8.5px;
+            font-weight: 700;
+            line-height: 1.2;
+            white-space: nowrap;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.35);
+            user-select: none;
+            pointer-events: auto;
+        }
+        .ground-gps-marker {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            padding: 2px 6px;
+            border-radius: 10px;
+            background: rgba(26, 115, 232, 0.92);
+            border: 1px solid #FFFFFF;
+            color: #FFFFFF;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-size: 8.5px;
+            font-weight: 700;
+            line-height: 1.2;
+            white-space: nowrap;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.28);
+            user-select: none;
+            pointer-events: none;
+        }
     </style>
 </head>
 <body>
@@ -128,52 +182,52 @@
             zoom: 15.0,
             label: 'Cần Thơ 9.82°N, 106.34°E',
           },
-          'survey-oaxaca-watershed': {
-            lng: -96.7266,
-            lat: 17.0732,
+          'survey-andean-watershed': {
+            lng: -71.9675,
+            lat: -13.532,
             zoom: 15.1,
-            label: 'Oaxaca 17.07°N, 96.72°W',
+            label: 'Cusco 13.53°S, 71.97°W',
           },
-          'survey-sumatra-peatland': {
-            lng: 101.4478,
-            lat: 0.5071,
-            zoom: 15.0,
-            label: 'Riau 0.51°N, 101.45°E',
+          'survey-borneo-peatland': {
+            lng: 113.9213,
+            lat: -2.2136,
+            zoom: 14.9,
+            label: 'Kalteng 2.21°S, 113.92°E',
           },
         };
 
         let map = null;
         let mapLoaded = false;
-        let currentWidthPx = 0;
-        let currentHeightPx = 0;
         let currentSurveyId = 'survey-kenya-coffee';
         let currentBasemapType = 'SATELLITE';
         let currentOfflineVisible = true;
         let currentZoomDelta = 0;
+        let currentWidthPx = 0;
+        let currentHeightPx = 0;
         let lastSyncArgs = null;
+        let activeMarkers = [];
+        let lastMarkersSignature = '';
 
         function resolveAccessToken() {
           try {
-            const params = new URLSearchParams(window.location.search);
-            const urlToken = params.get('mapbox_token');
-            if (urlToken && urlToken.startsWith('pk.')) return urlToken;
+            const params = new URLSearchParams(window.location.search || '');
+            const fromQuery = params.get('mapbox_token');
+            if (fromQuery && fromQuery.startsWith('pk.')) return fromQuery;
             if (
               window.MAPBOX_ACCESS_TOKEN &&
               String(window.MAPBOX_ACCESS_TOKEN).startsWith('pk.')
             ) {
               return String(window.MAPBOX_ACCESS_TOKEN);
             }
-            const saved =
+            const stored =
               window.localStorage &&
               window.localStorage.getItem('GROUND_MAPBOX_TOKEN');
-            if (saved && saved.startsWith('pk.')) return saved;
+            if (stored && stored.startsWith('pk.')) return stored;
           } catch (e) {}
           return '';
         }
 
         function buildBaseTerrainGeoJson(centerLng, centerLat) {
-          const dLng = 0.014;
-          const dLat = 0.018;
           return {
             type: 'FeatureCollection',
             features: [
@@ -183,26 +237,24 @@
                 geometry: {
                   type: 'LineString',
                   coordinates: [
-                    [centerLng - dLng * 0.9, centerLat - dLat * 0.32],
-                    [centerLng - dLng * 0.45, centerLat - dLat * 0.18],
-                    [centerLng - dLng * 0.1, centerLat - dLat * 0.04],
-                    [centerLng + dLng * 0.22, centerLat - dLat * 0.16],
-                    [centerLng + dLng * 0.55, centerLat + dLat * 0.09],
-                    [centerLng + dLng * 0.92, centerLat + dLat * 0.26],
+                    [centerLng - 0.0085, centerLat + 0.0072],
+                    [centerLng - 0.0038, centerLat + 0.0034],
+                    [centerLng + 0.0006, centerLat - 0.0002],
+                    [centerLng + 0.0048, centerLat - 0.0039],
+                    [centerLng + 0.0088, centerLat - 0.0078],
                   ],
                 },
               },
               {
                 type: 'Feature',
-                properties: { kind: 'road', name: 'Cooperative Feeder Track' },
+                properties: { kind: 'road', name: 'Nyeri-Othaya Access Rd' },
                 geometry: {
                   type: 'LineString',
                   coordinates: [
-                    [centerLng - dLng * 0.42, centerLat + dLat * 0.65],
-                    [centerLng - dLng * 0.18, centerLat + dLat * 0.25],
-                    [centerLng + dLng * 0.08, centerLat - dLat * 0.05],
-                    [centerLng + dLng * 0.4, centerLat - dLat * 0.38],
-                    [centerLng + dLng * 0.78, centerLat - dLat * 0.68],
+                    [centerLng - 0.0082, centerLat - 0.0058],
+                    [centerLng - 0.0021, centerLat - 0.0022],
+                    [centerLng + 0.0029, centerLat + 0.0011],
+                    [centerLng + 0.0084, centerLat + 0.0046],
                   ],
                 },
               },
@@ -216,7 +268,7 @@
             SURVEY_COORDS[currentSurveyId] || SURVEY_COORDS['survey-kenya-coffee'];
           return {
             version: 8,
-            name: isSat ? 'Ground Mapbox Satellite Hybrid' : 'Ground Mapbox Outdoors Topo',
+            name: isSat ? 'Ground Satellite Hybrid' : 'Ground Outdoors Topo',
             sources: {
               'satellite-tiles': {
                 type: 'raster',
@@ -327,7 +379,7 @@
                 id: 'ground-entities-fill',
                 type: 'fill',
                 source: 'ground-entities',
-                filter: ['==', ['geometry-type'], 'Polygon'],
+                filter: ['==', ['get', 'kind'], 'polygon'],
                 paint: {
                   'fill-color': ['get', 'color'],
                   'fill-opacity': ['get', 'fillOpacity'],
@@ -337,22 +389,34 @@
                 id: 'ground-entities-outline',
                 type: 'line',
                 source: 'ground-entities',
-                filter: ['==', ['geometry-type'], 'Polygon'],
+                filter: ['==', ['get', 'kind'], 'polygon'],
                 paint: {
                   'line-color': ['get', 'strokeColor'],
                   'line-width': ['get', 'strokeWidth'],
                 },
               },
               {
+                id: 'ground-entities-vertices',
+                type: 'circle',
+                source: 'ground-entities',
+                filter: ['all', ['==', ['geometry-type'], 'Point'], ['==', ['get', 'kind'], 'vertex']],
+                paint: {
+                  'circle-radius': ['get', 'radius'],
+                  'circle-color': '#FFFFFF',
+                  'circle-stroke-width': 2,
+                  'circle-stroke-color': ['get', 'strokeColor'],
+                },
+              },
+              {
                 id: 'ground-entities-point',
                 type: 'circle',
                 source: 'ground-entities',
-                filter: ['==', ['geometry-type'], 'Point'],
+                filter: ['all', ['==', ['geometry-type'], 'Point'], ['==', ['get', 'kind'], 'point']],
                 paint: {
                   'circle-radius': ['get', 'radius'],
                   'circle-color': ['get', 'color'],
-                  'circle-opacity': 0.35,
-                  'circle-stroke-width': 2,
+                  'circle-opacity': 0.42,
+                  'circle-stroke-width': 2.5,
                   'circle-stroke-color': ['get', 'strokeColor'],
                 },
               },
@@ -375,6 +439,18 @@
                   'line-color': ['get', 'strokeColor'],
                   'line-width': ['get', 'strokeWidth'],
                   'line-dasharray': [2.2, 1.6],
+                },
+              },
+              {
+                id: 'ground-submissions-vertices',
+                type: 'circle',
+                source: 'ground-submissions',
+                filter: ['==', ['geometry-type'], 'Point'],
+                paint: {
+                  'circle-radius': ['get', 'radius'],
+                  'circle-color': ['get', 'strokeColor'],
+                  'circle-stroke-width': 1.2,
+                  'circle-stroke-color': '#0E2219',
                 },
               },
               {
@@ -433,6 +509,16 @@
             fadeDuration: 0,
           });
 
+          try {
+            map.addControl(
+              new window.mapboxgl.NavigationControl({
+                showCompass: true,
+                showZoom: true,
+              }),
+              'bottom-right'
+            );
+          } catch (e) {}
+
           map.resize();
 
           if (typeof ResizeObserver !== 'undefined') {
@@ -458,22 +544,147 @@
           return map;
         }
 
-        function screenToLngLat(normX, normY, fallbackCenterLng, fallbackCenterLat) {
-          if (map && currentWidthPx > 0 && currentHeightPx > 0) {
+        /**
+         * Converts normalized survey world coordinates (wx, wy in [0, 1]) into fixed real-world
+         * [lng, lat] geographic coordinates anchored to the active survey.
+         */
+        function worldToLngLat(wx, wy, survey) {
+          return [
+            survey.lng + (wx - 0.5) * 0.014,
+            survey.lat - (wy - 0.5) * 0.018,
+          ];
+        }
+
+        function clearActiveMarkers() {
+          for (let i = 0; i < activeMarkers.length; i++) {
             try {
-              const pt = map.unproject([
-                normX * currentWidthPx,
-                normY * currentHeightPx,
-              ]);
-              if (pt && isFinite(pt.lng) && isFinite(pt.lat)) {
-                return [pt.lng, pt.lat];
-              }
+              activeMarkers[i].marker.remove();
             } catch (e) {}
           }
-          return [
-            fallbackCenterLng + (normX - 0.5) * 0.014,
-            fallbackCenterLat - (normY - 0.5) * 0.018,
-          ];
+          activeMarkers = [];
+        }
+
+        function syncMapboxMarkers(survey, userGpsX, userGpsY, parsed) {
+          if (!map || typeof window.mapboxgl === 'undefined') return;
+          const sig =
+            survey.lng +
+            ':' +
+            survey.lat +
+            ':' +
+            userGpsX.toFixed(4) +
+            ':' +
+            userGpsY.toFixed(4) +
+            ':' +
+            JSON.stringify(parsed || {});
+          if (sig === lastMarkersSignature && activeMarkers.length > 0) {
+            return;
+          }
+          lastMarkersSignature = sig;
+          clearActiveMarkers();
+
+          // 1. User GPS Location Marker Badge
+          const gpsEl = document.createElement('div');
+          gpsEl.className = 'ground-gps-marker';
+          const isFollowing = !parsed || parsed.isFollowingUser !== false;
+          gpsEl.textContent = isFollowing ? '⊕ You (Centered)' : '⊕ You (GPS)';
+          const gpsLngLat = worldToLngLat(userGpsX, userGpsY, survey);
+          const gpsMarker = new window.mapboxgl.Marker({
+            element: gpsEl,
+            anchor: 'top',
+            offset: [0, 12],
+          })
+            .setLngLat(gpsLngLat)
+            .addTo(map);
+          activeMarkers.push({
+            marker: gpsMarker,
+            element: gpsEl,
+            hitType: '',
+            hitId: '',
+          });
+
+          if (!parsed) return;
+
+          // 2. Dotted Submission Geometry Badges
+          if (Array.isArray(parsed.submissions)) {
+            parsed.submissions.forEach(function (sub) {
+              const el = document.createElement('div');
+              el.className = 'ground-submission-marker';
+              el.setAttribute('data-submission-id', sub.id);
+              if (sub.selected) {
+                el.style.backgroundColor = '#FFFFFF';
+                el.style.color = '#0E2219';
+                el.style.border = '1.5px solid ' + sub.color;
+              } else {
+                el.style.backgroundColor = 'rgba(14, 34, 25, 0.88)';
+                el.style.color = sub.color;
+                el.style.border = '1px solid ' + sub.color;
+              }
+              el.textContent = '⬡ ' + (sub.label || sub.id);
+              const subAnchorLngLat = worldToLngLat(
+                sub.nx,
+                sub.ny + sub.hf * 0.42,
+                survey
+              );
+              const m = new window.mapboxgl.Marker({
+                element: el,
+                anchor: 'top',
+                offset: [0, 4],
+              })
+                .setLngLat(subAnchorLngLat)
+                .addTo(map);
+              activeMarkers.push({
+                marker: m,
+                element: el,
+                hitType: 'submission',
+                hitId: sub.id,
+              });
+            });
+          }
+
+          // 3. Geospatial Entity Markers
+          if (Array.isArray(parsed.entities)) {
+            parsed.entities.forEach(function (ent) {
+              const el = document.createElement('div');
+              el.className = 'ground-entity-marker';
+              el.setAttribute('data-entity-id', ent.id);
+              if (ent.selected) {
+                el.style.backgroundColor = '#FFFFFF';
+                el.style.color = '#111827';
+                el.style.border = '2px solid ' + ent.color;
+              } else {
+                el.style.backgroundColor = ent.color;
+                el.style.color = '#FFFFFF';
+                el.style.border = '1px solid #FFFFFF';
+              }
+              const iconPrefix = ent.geometryType === 'Polygon' ? '▱ ' : '● ';
+              const titleSpan = document.createElement('span');
+              titleSpan.textContent = iconPrefix + (ent.label || ent.id);
+              el.appendChild(titleSpan);
+
+              if (ent.badge) {
+                const badgeSpan = document.createElement('span');
+                badgeSpan.className = 'ground-entity-marker-badge';
+                badgeSpan.style.color = ent.selected ? ent.color : '#E8F5E9';
+                badgeSpan.textContent = ent.badge;
+                el.appendChild(badgeSpan);
+              }
+
+              const entLngLat = worldToLngLat(ent.nx, ent.ny, survey);
+              const m = new window.mapboxgl.Marker({
+                element: el,
+                anchor: 'center',
+                offset: [0, 0],
+              })
+                .setLngLat(entLngLat)
+                .addTo(map);
+              activeMarkers.push({
+                marker: m,
+                element: el,
+                hitType: 'entity',
+                hitId: ent.id,
+              });
+            });
+          }
         }
 
         function applySyncState(
@@ -511,6 +722,9 @@
 
           const shiftX = 0.5 - userGpsX + panOffsetX;
           const shiftY = 0.5 - userGpsY + panOffsetY;
+          if (Math.abs(panOffsetX) < 0.0001 && Math.abs(panOffsetY) < 0.0001) {
+            currentZoomDelta = 0;
+          }
           const cameraLng = survey.lng - shiftX * 0.014;
           const cameraLat = survey.lat + shiftY * 0.018;
           const targetZoom = Math.max(
@@ -572,13 +786,13 @@
             );
           }
 
-          // Update Offline Sector GeoJSON
+          // Update Offline Sector GeoJSON using fixed real-world coordinates
           const offlineSource = map.getSource('ground-offline-sector');
           if (offlineSource) {
-            const p1 = screenToLngLat(0.05 + shiftX, 0.14 + shiftY, cameraLng, cameraLat);
-            const p2 = screenToLngLat(0.95 + shiftX, 0.14 + shiftY, cameraLng, cameraLat);
-            const p3 = screenToLngLat(0.95 + shiftX, 0.88 + shiftY, cameraLng, cameraLat);
-            const p4 = screenToLngLat(0.05 + shiftX, 0.88 + shiftY, cameraLng, cameraLat);
+            const p1 = worldToLngLat(0.05, 0.14, survey);
+            const p2 = worldToLngLat(0.95, 0.14, survey);
+            const p3 = worldToLngLat(0.95, 0.88, survey);
+            const p4 = worldToLngLat(0.05, 0.88, survey);
             offlineSource.setData({
               type: 'FeatureCollection',
               features: isOfflineVisible
@@ -596,15 +810,10 @@
             });
           }
 
-          // Update User GPS Blue Dot GeoJSON
+          // Update User GPS Blue Dot GeoJSON using fixed real-world coordinates
           const gpsSource = map.getSource('ground-user-gps');
           if (gpsSource) {
-            const gpsPt = screenToLngLat(
-              userGpsX + shiftX,
-              userGpsY + shiftY,
-              cameraLng,
-              cameraLat
-            );
+            const gpsPt = worldToLngLat(userGpsX, userGpsY, survey);
             gpsSource.setData({
               type: 'FeatureCollection',
               features: [
@@ -620,7 +829,7 @@
             });
           }
 
-          // Parse featuresGeoJson and update ground-entities & ground-submissions
+          // Parse featuresGeoJson and update ground-entities, ground-submissions & mapboxgl.Markers
           if (featuresGeoJson) {
             try {
               const parsed = JSON.parse(featuresGeoJson);
@@ -629,21 +838,22 @@
 
               if (Array.isArray(parsed.entities)) {
                 parsed.entities.forEach(function (ent) {
-                  const cx = ent.nx + shiftX;
-                  const cy = ent.ny + shiftY;
+                  const cx = ent.nx;
+                  const cy = ent.ny;
                   const strokeColor =
                     ent.selected && isSat ? '#FFFFFF' : ent.color;
                   if (ent.geometryType === 'Polygon') {
                     const pw = 0.22;
                     const ph = 0.11;
-                    const c1 = screenToLngLat(cx - pw * 0.48, cy - ph * 0.42, cameraLng, cameraLat);
-                    const c2 = screenToLngLat(cx + pw * 0.45, cy - ph * 0.5, cameraLng, cameraLat);
-                    const c3 = screenToLngLat(cx + pw * 0.52, cy + ph * 0.38, cameraLng, cameraLat);
-                    const c4 = screenToLngLat(cx - pw * 0.4, cy + ph * 0.48, cameraLng, cameraLat);
+                    const c1 = worldToLngLat(cx - pw * 0.48, cy - ph * 0.42, survey);
+                    const c2 = worldToLngLat(cx + pw * 0.45, cy - ph * 0.5, survey);
+                    const c3 = worldToLngLat(cx + pw * 0.52, cy + ph * 0.38, survey);
+                    const c4 = worldToLngLat(cx - pw * 0.4, cy + ph * 0.48, survey);
                     entityFeatures.push({
                       type: 'Feature',
                       properties: {
                         id: ent.id,
+                        kind: 'polygon',
                         color: ent.color,
                         strokeColor: strokeColor,
                         fillOpacity: ent.selected ? 0.42 : 0.24,
@@ -654,18 +864,35 @@
                         coordinates: [[c1, c2, c3, c4, c1]],
                       },
                     });
+                    [c1, c2, c3, c4].forEach(function (v) {
+                      entityFeatures.push({
+                        type: 'Feature',
+                        properties: {
+                          id: ent.id,
+                          kind: 'vertex',
+                          color: ent.color,
+                          strokeColor: strokeColor,
+                          radius: ent.selected ? 4.2 : 3.2,
+                        },
+                        geometry: {
+                          type: 'Point',
+                          coordinates: v,
+                        },
+                      });
+                    });
                   } else {
                     entityFeatures.push({
                       type: 'Feature',
                       properties: {
                         id: ent.id,
+                        kind: 'point',
                         color: ent.color,
                         strokeColor: strokeColor,
                         radius: ent.selected ? 24 : 18,
                       },
                       geometry: {
                         type: 'Point',
-                        coordinates: screenToLngLat(cx, cy, cameraLng, cameraLat),
+                        coordinates: worldToLngLat(cx, cy, survey),
                       },
                     });
                   }
@@ -674,18 +901,18 @@
 
               if (Array.isArray(parsed.submissions)) {
                 parsed.submissions.forEach(function (sub) {
-                  const gx = sub.nx + shiftX;
-                  const gy = sub.ny + shiftY;
+                  const gx = sub.nx;
+                  const gy = sub.ny;
                   const gw = sub.wf;
                   const gh = sub.hf;
                   const strokeColor =
                     sub.selected && isSat ? '#FFFFFF' : sub.color;
-                  const v1 = screenToLngLat(gx - gw * 0.46, gy - gh * 0.38, cameraLng, cameraLat);
-                  const v2 = screenToLngLat(gx + gw * 0.08, gy - gh * 0.52, cameraLng, cameraLat);
-                  const v3 = screenToLngLat(gx + gw * 0.5, gy - gh * 0.26, cameraLng, cameraLat);
-                  const v4 = screenToLngLat(gx + gw * 0.44, gy + gh * 0.42, cameraLng, cameraLat);
-                  const v5 = screenToLngLat(gx - gw * 0.12, gy + gh * 0.5, cameraLng, cameraLat);
-                  const v6 = screenToLngLat(gx - gw * 0.48, gy + gh * 0.24, cameraLng, cameraLat);
+                  const v1 = worldToLngLat(gx - gw * 0.46, gy - gh * 0.38, survey);
+                  const v2 = worldToLngLat(gx + gw * 0.08, gy - gh * 0.52, survey);
+                  const v3 = worldToLngLat(gx + gw * 0.5, gy - gh * 0.26, survey);
+                  const v4 = worldToLngLat(gx + gw * 0.44, gy + gh * 0.42, survey);
+                  const v5 = worldToLngLat(gx - gw * 0.12, gy + gh * 0.5, survey);
+                  const v6 = worldToLngLat(gx - gw * 0.48, gy + gh * 0.24, survey);
                   subFeatures.push({
                     type: 'Feature',
                     properties: {
@@ -699,6 +926,21 @@
                       type: 'Polygon',
                       coordinates: [[v1, v2, v3, v4, v5, v6, v1]],
                     },
+                  });
+                  [v1, v2, v3, v4, v5, v6].forEach(function (vertexCoord) {
+                    subFeatures.push({
+                      type: 'Feature',
+                      properties: {
+                        id: sub.id,
+                        color: sub.color,
+                        strokeColor: strokeColor,
+                        radius: sub.selected ? 3.8 : 2.8,
+                      },
+                      geometry: {
+                        type: 'Point',
+                        coordinates: vertexCoord,
+                      },
+                    });
                   });
                 });
               }
@@ -717,6 +959,8 @@
                   features: subFeatures,
                 });
               }
+
+              syncMapboxMarkers(survey, userGpsX, userGpsY, parsed);
             } catch (e) {}
           }
         }
@@ -812,6 +1056,110 @@
             if (map) {
               map.zoomTo(map.getZoom() + deltaZoom, { duration: 150 });
             }
+          },
+
+          handleMapClick: function (xPx, yPx) {
+            const container = document.getElementById(
+              'mapbox-basemap-container'
+            );
+            if (!container || !map) return '';
+            const cRect = container.getBoundingClientRect();
+            const clientX = cRect.left + xPx;
+            const clientY = cRect.top + yPx;
+
+            // 1. Check Mapbox NavigationControl buttons (+ / - / compass)
+            const zoomInBtn = container.querySelector('.mapboxgl-ctrl-zoom-in');
+            if (zoomInBtn) {
+              const r = zoomInBtn.getBoundingClientRect();
+              if (
+                clientX >= r.left &&
+                clientX <= r.right &&
+                clientY >= r.top &&
+                clientY <= r.bottom
+              ) {
+                this.zoomBy(0.75);
+                return 'control:zoom-in';
+              }
+            }
+            const zoomOutBtn = container.querySelector(
+              '.mapboxgl-ctrl-zoom-out'
+            );
+            if (zoomOutBtn) {
+              const r = zoomOutBtn.getBoundingClientRect();
+              if (
+                clientX >= r.left &&
+                clientX <= r.right &&
+                clientY >= r.top &&
+                clientY <= r.bottom
+              ) {
+                this.zoomBy(-0.75);
+                return 'control:zoom-out';
+              }
+            }
+            const compassBtn = container.querySelector(
+              '.mapboxgl-ctrl-compass'
+            );
+            if (compassBtn) {
+              const r = compassBtn.getBoundingClientRect();
+              if (
+                clientX >= r.left &&
+                clientX <= r.right &&
+                clientY >= r.top &&
+                clientY <= r.bottom
+              ) {
+                map.resetNorth();
+                return 'control:compass';
+              }
+            }
+
+            // 2. Check active mapboxgl.Marker badges (entity pills & submission badges)
+            for (let i = activeMarkers.length - 1; i >= 0; i--) {
+              const item = activeMarkers[i];
+              if (!item.hitType || !item.hitId || !item.element) continue;
+              const r = item.element.getBoundingClientRect();
+              if (
+                clientX >= r.left - 4 &&
+                clientX <= r.right + 4 &&
+                clientY >= r.top - 4 &&
+                clientY <= r.bottom + 4
+              ) {
+                return item.hitType + ':' + item.hitId;
+              }
+            }
+
+            // 3. Query rendered WebGL GeoJSON layers on mapboxgl.Map
+            try {
+              const bbox = [
+                [xPx - 6, yPx - 6],
+                [xPx + 6, yPx + 6],
+              ];
+              const hitFeatures = map.queryRenderedFeatures(bbox, {
+                layers: [
+                  'ground-submissions-vertices',
+                  'ground-submissions-outline',
+                  'ground-submissions-fill',
+                  'ground-entities-point',
+                  'ground-entities-vertices',
+                  'ground-entities-outline',
+                  'ground-entities-fill',
+                ],
+              });
+              if (hitFeatures && hitFeatures.length > 0) {
+                const feat = hitFeatures[0];
+                const propId = feat.properties && feat.properties.id;
+                const layerId = (feat.layer && feat.layer.id) || '';
+                if (propId) {
+                  if (layerId.indexOf('ground-submissions') === 0) {
+                    return 'submission:' + propId;
+                  }
+                  if (layerId.indexOf('ground-entities') === 0) {
+                    return 'entity:' + propId;
+                  }
+                }
+              }
+            } catch (e) {}
+
+            return '';
           },
 
           setAccessToken: function (token) {

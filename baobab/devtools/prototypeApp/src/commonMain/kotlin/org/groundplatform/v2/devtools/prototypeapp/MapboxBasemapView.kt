@@ -15,8 +15,8 @@
 package org.groundplatform.v2.devtools.prototypeapp
 
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -25,23 +25,20 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.PathEffect
-import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.drawscope.withTransform
+import androidx.compose.ui.input.pointer.PointerEventType
+import androidx.compose.ui.input.pointer.onPointerEvent
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalDensity
 
 /**
- * Synchronizes the DOM `#mapbox-basemap-container` viewport rectangle with the Compose layout
- * bounds of [MapboxBasemapView] and calls `map.resize()` on the underlying `mapboxgl.Map` instance.
+ * Synchronizes the DOM `#mapbox-basemap-container` viewport rectangle with the Compose
+ * [SurveyMapView] bounds inside the mobile/tablet device frame.
  */
 internal expect fun syncPlatformMapboxViewport(
   leftPx: Float,
@@ -53,8 +50,8 @@ internal expect fun syncPlatformMapboxViewport(
 )
 
 /**
- * Synchronizes the active survey camera coordinates, basemap style (`NORMAL` vs `SATELLITE`),
- * offline basemap tile visibility, pan offsets, user GPS location, and GeoJSON features with
+ * Synchronizes the live `mapboxgl.Map` camera, basemap style (`SATELLITE` vs `NORMAL`), offline
+ * tile visibility, and GeoJSON entity/submission layers + `mapboxgl.Marker`s via
  * `window.GroundMapboxBridge`.
  */
 internal expect fun syncPlatformMapboxBasemap(
@@ -68,29 +65,42 @@ internal expect fun syncPlatformMapboxBasemap(
   featuresGeoJson: String,
 )
 
-/** Pans the platform `mapboxgl.Map` instance by `(dxPx, dyPx)` CSS pixels during drag gestures. */
+/** Pans the live `mapboxgl.Map` instance by `(dxPx, dyPx)` CSS pixels during drag gestures. */
 internal expect fun panPlatformMapboxBasemap(dxPx: Float, dyPx: Float)
 
-/** Hides `#mapbox-basemap-container` when [MapboxBasemapView] leaves the composition. */
+/** Zooms the live `mapboxgl.Map` instance by `deltaZoom` during wheel/pinch gestures. */
+internal expect fun zoomPlatformMapboxBasemap(deltaZoom: Float)
+
+/**
+ * Performs interactive hit-testing at `(xPx, yPx)` CSS pixels relative to the Mapbox container
+ * against `mapboxgl.Marker` badges, `mapboxgl.NavigationControl` buttons, and WebGL GeoJSON layers
+ * (`map.queryRenderedFeatures`).
+ *
+ * Returns:
+ * - `"entity:<entityId>"` if an entity marker, polygon, or point was clicked
+ * - `"submission:<geometryId>"` if a submission geometry badge or dotted polygon was clicked
+ * - `"control:zoom"` if a Mapbox navigation control button was clicked
+ * - `""` if the empty map background was clicked
+ */
+internal expect fun handlePlatformMapboxClick(xPx: Float, yPx: Float): String
+
+/** Hides the `#mapbox-basemap-container` when leaving the Map view. */
 internal expect fun hidePlatformMapboxBasemap()
 
 /**
- * Real Mapbox GL JS (`mapboxgl.Map`) basemap view for `SurveyMapView`.
- *
- * Positions `#mapbox-basemap-container` at the exact window coordinates of `SurveyMapView`,
- * punches a transparent viewport (`BlendMode.Clear`) through the Compose Skia canvas so the live
- * `mapboxgl.Map` satellite/topographic tiles shine through, and synchronizes camera pan/zoom,
- * basemap style (`NORMAL` vs `SATELLITE`), offline basemap visibility, geospatial entities,
- * dotted form submission geometries, and the user's GPS blue dot with `window.GroundMapboxBridge`.
+ * Renders the real Mapbox GL JS basemap (`mapboxgl.Map`) inside `SurveyMapView` and delegates all
+ * polygon, point, submission geometry, offline sector, and GPS blue-dot rendering + hit-testing
+ * directly to Mapbox GL GeoJSON layers and `mapboxgl.Marker` instances.
  */
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun MapboxBasemapView(
   state: PrototypeAppState,
-  animatedShiftX: Float = state.mapWorldToScreenShiftX,
-  animatedShiftY: Float = state.mapWorldToScreenShiftY,
+  animatedShiftX: Float,
+  animatedShiftY: Float,
   modifier: Modifier = Modifier,
 ) {
-  val density = LocalDensity.current.density.coerceAtLeast(1f)
+  val density = LocalDensity.current.density
   var viewportLeftCssPx by remember { mutableStateOf(0f) }
   var viewportTopCssPx by remember { mutableStateOf(0f) }
   var viewportWidthCssPx by remember { mutableStateOf(0f) }
@@ -100,7 +110,6 @@ fun MapboxBasemapView(
   val visibleSubGeometries = state.visibleSubmissionGeometries
   val selectedEntity = state.selectedEntity
   val selectedSubmission = state.selectedSubmission
-  val isNormalBasemap = state.selectedBasemapType == BasemapType.NORMAL
 
   val featuresPayloadJson =
     remember(
@@ -108,12 +117,14 @@ fun MapboxBasemapView(
       visibleSubGeometries,
       selectedEntity?.id,
       selectedSubmission?.id,
+      state.isCameraFollowingUser,
     ) {
       buildMapboxFeaturesPayloadJson(
         entities = visibleEntities,
         submissions = visibleSubGeometries,
         selectedEntityId = selectedEntity?.id,
         selectedSubmissionId = selectedSubmission?.id,
+        isCameraFollowingUser = state.isCameraFollowingUser,
       )
     }
 
@@ -159,6 +170,36 @@ fun MapboxBasemapView(
           viewportWidthCssPx = sz.width / density
           viewportHeightCssPx = sz.height / density
         }
+        .onPointerEvent(PointerEventType.Scroll) { event ->
+          val scrollDeltaY = event.changes.firstOrNull()?.scrollDelta?.y ?: 0f
+          if (scrollDeltaY != 0f) {
+            zoomPlatformMapboxBasemap(-scrollDeltaY * 0.35f)
+          }
+        }
+        .pointerInput(viewportWidthCssPx, viewportHeightCssPx, density) {
+          detectTapGestures { tapOffset ->
+            val clickXCssPx = tapOffset.x / density
+            val clickYCssPx = tapOffset.y / density
+            val hitResult = handlePlatformMapboxClick(clickXCssPx, clickYCssPx)
+            when {
+              hitResult.startsWith("entity:") -> {
+                val entityId = hitResult.removePrefix("entity:")
+                state.selectEntity(entityId)
+              }
+              hitResult.startsWith("submission:") -> {
+                val geomId = hitResult.removePrefix("submission:")
+                state.selectSubmissionGeometry(geomId)
+              }
+              hitResult.startsWith("control:") -> {
+                // Mapbox NavigationControl (+ / - / compass) handled directly by bridge
+              }
+              else -> {
+                state.updateLayersSheetOpen(false)
+                state.updateEntityBottomSheetExpanded(false)
+              }
+            }
+          }
+        }
         .pointerInput(viewportWidthCssPx, viewportHeightCssPx, density) {
           detectDragGestures { change, dragAmount ->
             change.consume()
@@ -176,148 +217,14 @@ fun MapboxBasemapView(
             }
           }
         }
-        .clickable {
-          state.updateLayersSheetOpen(false)
-          state.updateEntityBottomSheetExpanded(false)
-        }
   ) {
-    // 1. Clear the Skia canvas pixels in the map viewport to rgba(0, 0, 0, 0) so the real
-    // mapboxgl.Map instance inside #mapbox-basemap-container (z-index: 1) shines right through.
+    // Clear the Skia canvas pixels in the map viewport to rgba(0, 0, 0, 0) so the real
+    // mapboxgl.Map WebGL canvas and mapboxgl.Marker elements inside #mapbox-basemap-container
+    // render directly with no static 2D canvas shapes overlaid on top.
     drawRect(
       color = Color.Transparent,
       blendMode = BlendMode.Clear,
     )
-
-    val shiftPxX = animatedShiftX * size.width
-    val shiftPxY = animatedShiftY * size.height
-
-    // 2. Render crisp interactive overlays aligned with the Mapbox GL GeoJSON sources/layers
-    withTransform({ translate(left = shiftPxX, top = shiftPxY) }) {
-      // Offline Basemap cached tile sector boundary (only rendered when Offline Basemap is ON)
-      if (state.isOfflineBasemapVisible) {
-        drawRect(
-          color =
-            if (isNormalBasemap) {
-              Color(0xFF1E6F50).copy(alpha = 0.52f)
-            } else {
-              Color(0xFF8BD6B1).copy(alpha = 0.48f)
-            },
-          topLeft = Offset(size.width * 0.05f, size.height * 0.14f),
-          size = Size(size.width * 0.90f, size.height * 0.74f),
-          style =
-            Stroke(
-              width = 1.6f,
-              pathEffect = PathEffect.dashPathEffect(floatArrayOf(12f, 8f), 0f),
-            ),
-        )
-      }
-
-      // A. Solid Polygon / Point footprints for visible Geospatial Entities
-      visibleEntities.forEach { entity ->
-        val cx = size.width * entity.normalizedX
-        val cy = size.height * entity.normalizedY
-        val isSelected = selectedEntity?.id == entity.id
-        val entityColor = Color(entity.colorHex)
-
-        if (entity.geometryTypeLabel == "Polygon") {
-          val polyWidth = size.width * 0.22f
-          val polyHeight = size.height * 0.11f
-          val polyPath =
-            Path().apply {
-              moveTo(cx - polyWidth * 0.48f, cy - polyHeight * 0.42f)
-              lineTo(cx + polyWidth * 0.45f, cy - polyHeight * 0.50f)
-              lineTo(cx + polyWidth * 0.52f, cy + polyHeight * 0.38f)
-              lineTo(cx - polyWidth * 0.40f, cy + polyHeight * 0.48f)
-              close()
-            }
-          drawPath(
-            path = polyPath,
-            color = entityColor.copy(alpha = if (isSelected) 0.42f else 0.24f),
-          )
-          drawPath(
-            path = polyPath,
-            color = if (isSelected && !isNormalBasemap) Color.White else entityColor,
-            style = Stroke(width = if (isSelected) 3.8f else 2.2f),
-          )
-        } else {
-          drawCircle(
-            color = entityColor.copy(alpha = if (isSelected) 0.40f else 0.22f),
-            radius = if (isSelected) 28f else 20f,
-            center = Offset(cx, cy),
-          )
-        }
-      }
-
-      // B. Dotted Polygon Outlines for visible Form Submission Geometries
-      val dottedStrokeEffect = PathEffect.dashPathEffect(floatArrayOf(8f, 6f), 0f)
-      visibleSubGeometries.forEach { subGeom ->
-        val gx = size.width * subGeom.normalizedX
-        val gy = size.height * subGeom.normalizedY
-        val gw = size.width * subGeom.widthFraction
-        val gh = size.height * subGeom.heightFraction
-        val isSelectedSub = selectedSubmission?.id == subGeom.submissionId
-        val geomColor = Color(subGeom.colorHex)
-
-        val vertices =
-          listOf(
-            Offset(gx - gw * 0.46f, gy - gh * 0.38f),
-            Offset(gx + gw * 0.08f, gy - gh * 0.52f),
-            Offset(gx + gw * 0.50f, gy - gh * 0.26f),
-            Offset(gx + gw * 0.44f, gy + gh * 0.42f),
-            Offset(gx - gw * 0.12f, gy + gh * 0.50f),
-            Offset(gx - gw * 0.48f, gy + gh * 0.24f),
-          )
-        val subPolyPath =
-          Path().apply {
-            moveTo(vertices.first().x, vertices.first().y)
-            for (i in 1 until vertices.size) {
-              lineTo(vertices[i].x, vertices[i].y)
-            }
-            close()
-          }
-
-        drawPath(
-          path = subPolyPath,
-          color = geomColor.copy(alpha = if (isSelectedSub) 0.28f else 0.14f),
-        )
-        drawPath(
-          path = subPolyPath,
-          color = if (isSelectedSub && !isNormalBasemap) Color.White else geomColor,
-          style =
-            Stroke(
-              width = if (isSelectedSub) 3.4f else 2.5f,
-              pathEffect = dottedStrokeEffect,
-            ),
-        )
-        vertices.forEach { vertex ->
-          drawCircle(
-            color = if (isSelectedSub && !isNormalBasemap) Color.White else geomColor,
-            radius = if (isSelectedSub) 3.6f else 2.6f,
-            center = vertex,
-          )
-        }
-      }
-
-      // C. User Current GPS Location Blue Dot
-      val blueDotCenter =
-        Offset(
-          x = size.width * state.userGpsNormalizedX,
-          y = size.height * state.userGpsNormalizedY,
-        )
-      drawCircle(
-        color = Color(0xFF4285F4).copy(alpha = 0.24f),
-        radius = 26f,
-        center = blueDotCenter,
-      )
-      drawCircle(
-        color = Color(0xFF4285F4).copy(alpha = 0.50f),
-        radius = 26f,
-        center = blueDotCenter,
-        style = Stroke(width = 1.2f),
-      )
-      drawCircle(color = Color.White, radius = 9.5f, center = blueDotCenter)
-      drawCircle(color = Color(0xFF1A73E8), radius = 7f, center = blueDotCenter)
-    }
   }
 }
 
@@ -326,21 +233,33 @@ private fun buildMapboxFeaturesPayloadJson(
   submissions: List<SubmissionGeometryPolygon>,
   selectedEntityId: String?,
   selectedSubmissionId: String?,
+  isCameraFollowingUser: Boolean,
 ): String {
   val entitiesJson =
     entities.joinToString(separator = ",") { ent ->
       val hex = colorHexToCssString(ent.colorHex)
       val selected = ent.id == selectedEntityId
-      """{"id":"${ent.id}","geometryType":"${ent.geometryTypeLabel}","nx":${ent.normalizedX},"ny":${ent.normalizedY},"color":"$hex","selected":$selected}"""
+      val shortLabel = escapeJsonString(ent.label.substringBefore(" •"))
+      val modelBadge =
+        if (ent.submissionModel == SubmissionModel.SINGLE_1_TO_1) {
+          "✓ 1:1"
+        } else {
+          "1:N(${ent.submissions.size})"
+        }
+      """{"id":"${ent.id}","label":"$shortLabel","badge":"$modelBadge","geometryType":"${ent.geometryTypeLabel}","nx":${ent.normalizedX},"ny":${ent.normalizedY},"color":"$hex","selected":$selected}"""
     }
   val submissionsJson =
     submissions.joinToString(separator = ",") { sub ->
       val hex = colorHexToCssString(sub.colorHex)
       val selected = sub.submissionId == selectedSubmissionId
-      """{"id":"${sub.id}","submissionId":"${sub.submissionId}","nx":${sub.normalizedX},"ny":${sub.normalizedY},"wf":${sub.widthFraction},"hf":${sub.heightFraction},"color":"$hex","selected":$selected}"""
+      val shortBadge = escapeJsonString(sub.shortMapBadge)
+      """{"id":"${sub.id}","submissionId":"${sub.submissionId}","label":"$shortBadge","nx":${sub.normalizedX},"ny":${sub.normalizedY},"wf":${sub.widthFraction},"hf":${sub.heightFraction},"color":"$hex","selected":$selected}"""
     }
-  return """{"entities":[$entitiesJson],"submissions":[$submissionsJson]}"""
+  return """{"isFollowingUser":$isCameraFollowingUser,"entities":[$entitiesJson],"submissions":[$submissionsJson]}"""
 }
+
+private fun escapeJsonString(raw: String): String =
+  raw.replace("\\", "\\\\").replace("\"", "\\\"")
 
 private fun colorHexToCssString(colorHex: Long): String {
   val rgb = (colorHex and 0xFFFFFFL).toString(16).padStart(6, '0').uppercase()
