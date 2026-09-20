@@ -86,7 +86,8 @@ export function getRequestBaseUrl(req: Request): string {
     firstHeaderValue(headers['x-forwarded-host']) ??
     firstHeaderValue(headers['host']);
   if (!host) return '';
-  const proto = firstHeaderValue(headers['x-forwarded-proto']) ?? 'https';
+  const rawProto = firstHeaderValue(headers['x-forwarded-proto']) ?? 'https';
+  const proto = rawProto === 'http' || rawProto === 'https' ? rawProto : 'https';
   return `${proto}://${host}`;
 }
 
