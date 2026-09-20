@@ -452,6 +452,34 @@ class PrototypeAppStateTest {
     state.closeActiveFormRunner()
     assertFalse(state.isDataCollectionFormOpen)
   }
+
+  @Test
+  fun entityBottomSheet_startsCollapsedAndSupportsExpandAndCollapse() {
+    val state = PrototypeAppState(initialScreen = PrototypeScreen.MAIN_SURVEY)
+
+    // Starts collapsed (compact peek bar) by default so it does not obscure the map
+    assertEquals("entity-nyr-104", state.selectedEntityId)
+    assertFalse(state.isEntityBottomSheetExpanded)
+
+    // Toggling expands the bottom sheet
+    state.toggleEntityBottomSheetExpanded()
+    assertTrue(state.isEntityBottomSheetExpanded)
+
+    // Explicit collapse returns to peek state without deselecting the entity
+    state.updateEntityBottomSheetExpanded(false)
+    assertFalse(state.isEntityBottomSheetExpanded)
+    assertEquals("entity-nyr-104", state.selectedEntityId)
+
+    // Selecting an entity explicitly expands the bottom sheet
+    state.selectEntity("entity-shade-201")
+    assertEquals("entity-shade-201", state.selectedEntityId)
+    assertTrue(state.isEntityBottomSheetExpanded)
+
+    // Closing the sheet deselects the entity and resets expanded state
+    state.selectEntity(null)
+    assertEquals(null, state.selectedEntityId)
+    assertFalse(state.isEntityBottomSheetExpanded)
+  }
 }
 
 

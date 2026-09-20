@@ -178,6 +178,7 @@ fun MapboxBasemapView(
         }
         .clickable {
           state.updateLayersSheetOpen(false)
+          state.updateEntityBottomSheetExpanded(false)
         }
   ) {
     // 1. Clear the Skia canvas pixels in the map viewport to rgba(0, 0, 0, 0) so the real

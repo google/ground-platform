@@ -51,6 +51,8 @@ import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Layers
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Map
@@ -1036,19 +1038,24 @@ private fun EntityBottomSheetCard(
       "$feet ft"
     }
 
+  val isExpanded = state.isEntityBottomSheetExpanded
+
   Surface(
-    modifier = modifier.heightIn(max = 415.dp),
+    modifier = modifier.heightIn(max = if (isExpanded) 415.dp else 72.dp),
     shape = RoundedCornerShape(topStart = 22.dp, topEnd = 22.dp),
     color = sheetBg,
     shadowElevation = 12.dp,
   ) {
     Column(
-      modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp),
+      modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
       verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-      // Bottom Sheet Drag Handle
+      // Bottom Sheet Drag Handle (clickable to toggle collapsed / expanded state)
       Box(
-        modifier = Modifier.fillMaxWidth(),
+        modifier =
+          Modifier.fillMaxWidth()
+            .clickable { state.toggleEntityBottomSheetExpanded() }
+            .padding(vertical = 2.dp),
         contentAlignment = Alignment.Center,
       ) {
         Box(
@@ -1060,16 +1067,18 @@ private fun EntityBottomSheetCard(
         )
       }
 
-      // Entity Header: Reference Badge + Title + SubmissionModel Badge + Close button
+      // Entity Header: Reference Badge + Title + Expand/Collapse button + Close button
       Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.Top,
+        verticalAlignment = Alignment.CenterVertically,
       ) {
         Row(
-          modifier = Modifier.weight(1f),
+          modifier =
+            Modifier.weight(1f)
+              .clickable { state.toggleEntityBottomSheetExpanded() },
           horizontalArrangement = Arrangement.spacedBy(8.dp),
-          verticalAlignment = Alignment.Top,
+          verticalAlignment = Alignment.CenterVertically,
         ) {
           Box(
             modifier =
@@ -1098,6 +1107,7 @@ private fun EntityBottomSheetCard(
                   fontWeight = FontWeight.Bold,
                   color = textColor,
                 ),
+              maxLines = 1,
             )
             Text(
               text = "${entity.datasetName} • ${entity.geometryTypeLabel} ($areaFormatted, $perimeterFormatted)",
@@ -1105,28 +1115,56 @@ private fun EntityBottomSheetCard(
                 MaterialTheme.typography.labelSmall.copy(
                   color = textColor.copy(alpha = 0.68f),
                 ),
+              maxLines = 1,
             )
           }
         }
 
-        // Close Bottom Sheet Button
-        Box(
-          modifier =
-            Modifier.clip(CircleShape)
-              .background(if (isDark) Color(0xFF2E3833) else Color(0xFFF3F4F6))
-              .clickable { state.selectEntity(null) }
-              .padding(6.dp)
+        Row(
+          horizontalArrangement = Arrangement.spacedBy(6.dp),
+          verticalAlignment = Alignment.CenterVertically,
         ) {
-          Icon(
-            imageVector = Icons.Default.Close,
-            contentDescription = "Close Entity Sheet",
-            tint = textColor,
-            modifier = Modifier.size(15.dp),
-          )
+          // Expand / Collapse Bottom Sheet Button
+          Box(
+            modifier =
+              Modifier.clip(CircleShape)
+                .background(if (isDark) Color(0xFF2E3833) else Color(0xFFF3F4F6))
+                .clickable { state.toggleEntityBottomSheetExpanded() }
+                .padding(6.dp)
+          ) {
+            Icon(
+              imageVector =
+                if (isExpanded) {
+                  Icons.Default.KeyboardArrowDown
+                } else {
+                  Icons.Default.KeyboardArrowUp
+                },
+              contentDescription = if (isExpanded) "Collapse Entity Sheet" else "Expand Entity Sheet",
+              tint = textColor,
+              modifier = Modifier.size(16.dp),
+            )
+          }
+
+          // Close Bottom Sheet Button
+          Box(
+            modifier =
+              Modifier.clip(CircleShape)
+                .background(if (isDark) Color(0xFF2E3833) else Color(0xFFF3F4F6))
+                .clickable { state.selectEntity(null) }
+                .padding(6.dp)
+          ) {
+            Icon(
+              imageVector = Icons.Default.Close,
+              contentDescription = "Close Entity Sheet",
+              tint = textColor,
+              modifier = Modifier.size(15.dp),
+            )
+          }
         }
       }
 
-      // Metadata & Share Actions Row: GeoID + 1:1/1:N Badge + QR Code Link + Share PDF Link
+      if (isExpanded) {
+        // Metadata & Share Actions Row: GeoID + 1:1/1:N Badge + QR Code Link + Share PDF Link
       Row(
         modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
         horizontalArrangement = Arrangement.spacedBy(6.dp),
@@ -1377,6 +1415,7 @@ private fun EntityBottomSheetCard(
             )
           }
         }
+      }
       }
     }
   }

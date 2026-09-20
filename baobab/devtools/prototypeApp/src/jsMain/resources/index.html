@@ -62,6 +62,12 @@
             background-color: #163324;
             box-sizing: border-box;
         }
+        #mapbox-basemap-container .mapboxgl-canvas-container,
+        #mapbox-basemap-container .mapboxgl-canvas {
+            width: 100% !important;
+            height: 100% !important;
+            display: block;
+        }
         #ComposeTarget {
             position: fixed;
             inset: 0;
@@ -139,8 +145,8 @@
 
         let map = null;
         let mapLoaded = false;
-        let currentWidthPx = 384;
-        let currentHeightPx = 640;
+        let currentWidthPx = 0;
+        let currentHeightPx = 0;
         let currentSurveyId = 'survey-kenya-coffee';
         let currentBasemapType = 'SATELLITE';
         let currentOfflineVisible = true;
@@ -402,7 +408,14 @@
         function ensureMapInitialized() {
           if (map || typeof window.mapboxgl === 'undefined') return map;
           const container = document.getElementById('mapbox-basemap-container');
-          if (!container) return null;
+          if (
+            !container ||
+            container.style.display === 'none' ||
+            container.offsetWidth <= 0 ||
+            container.offsetHeight <= 0
+          ) {
+            return null;
+          }
 
           const token = resolveAccessToken();
           if (token) {
@@ -421,8 +434,23 @@
             fadeDuration: 0,
           });
 
+          map.resize();
+
+          if (typeof ResizeObserver !== 'undefined') {
+            const ro = new ResizeObserver(function () {
+              if (map) {
+                map.resize();
+                if (lastSyncArgs) {
+                  applySyncState.apply(null, lastSyncArgs);
+                }
+              }
+            });
+            ro.observe(container);
+          }
+
           map.on('load', function () {
             mapLoaded = true;
+            map.resize();
             if (lastSyncArgs) {
               applySyncState.apply(null, lastSyncArgs);
             }
@@ -711,6 +739,7 @@
               container.style.display = 'none';
               return;
             }
+            const wasHidden = container.style.display === 'none';
             const w = Math.round(widthPx);
             const h = Math.round(heightPx);
             const sizeChanged =
@@ -731,8 +760,18 @@
               'px';
 
             const instance = ensureMapInitialized();
-            if (instance && sizeChanged) {
-              instance.resize();
+            if (instance) {
+              const canvas = instance.getCanvas ? instance.getCanvas() : null;
+              const canvasMismatch =
+                !canvas ||
+                Math.abs(canvas.clientWidth - w) > 1 ||
+                Math.abs(canvas.clientHeight - h) > 1;
+              if (wasHidden || sizeChanged || canvasMismatch) {
+                instance.resize();
+                if (lastSyncArgs) {
+                  applySyncState.apply(null, lastSyncArgs);
+                }
+              }
             }
           },
 

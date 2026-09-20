@@ -426,6 +426,14 @@ class PrototypeAppState(
   var selectedEntityId by mutableStateOf<String?>("entity-nyr-104")
     private set
 
+  /**
+   * Whether the Entity Bottom Sheet is expanded (`true`) to show full properties/submissions or
+   * collapsed (`false`, default) into a compact single-row peek bar at the bottom of the map so it
+   * does not obscure the map viewport.
+   */
+  var isEntityBottomSheetExpanded by mutableStateOf(false)
+    private set
+
   var selectedSubmissionId by mutableStateOf<String?>(null)
     private set
 
@@ -892,6 +900,7 @@ class PrototypeAppState(
     val geom = submissionGeometries.firstOrNull { it.id == geometryId } ?: return
     selectedEntityId = geom.entityId
     selectedSubmissionId = geom.submissionId
+    isEntityBottomSheetExpanded = true
     isLayersSheetOpen = false
   }
 
@@ -904,6 +913,7 @@ class PrototypeAppState(
           if (!nextVisible && selectedEntity?.layerId == layerId) {
             selectedEntityId = null
             selectedSubmissionId = null
+            isEntityBottomSheetExpanded = false
           }
           layer.copy(isVisible = nextVisible)
         } else {
@@ -917,14 +927,28 @@ class PrototypeAppState(
     selectedEntityId = entityId
     selectedSubmissionId = null
     if (entityId != null) {
+      isEntityBottomSheetExpanded = true
       isLayersSheetOpen = false
+    } else {
+      isEntityBottomSheetExpanded = false
     }
+  }
+
+  /** Toggles the Entity Bottom Sheet between expanded and collapsed (peek) state. */
+  fun toggleEntityBottomSheetExpanded() {
+    isEntityBottomSheetExpanded = !isEntityBottomSheetExpanded
+  }
+
+  /** Explicitly expands or collapses the Entity Bottom Sheet. */
+  fun updateEntityBottomSheetExpanded(expanded: Boolean) {
+    isEntityBottomSheetExpanded = expanded
   }
 
   /** Opens full details for a specific submission (from a 1:N entity bottom sheet or List view). */
   fun selectSubmissionDetail(submissionId: String?) {
     selectedSubmissionId = submissionId
     if (submissionId != null) {
+      isEntityBottomSheetExpanded = true
       val parentEntity = entities.firstOrNull { e -> e.submissions.any { it.id == submissionId } }
       if (parentEntity != null) {
         selectedEntityId = parentEntity.id
