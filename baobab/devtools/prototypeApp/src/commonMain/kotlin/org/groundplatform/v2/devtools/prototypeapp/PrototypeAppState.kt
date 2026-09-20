@@ -989,15 +989,13 @@ class PrototypeAppState(
       }
   }
 
-  /** Selects a Geospatial Entity on the map or list to open its bottom sheet. */
+  /** Selects a Geospatial Entity on the map or list to open its bottom sheet in collapsed/peek state. */
   fun selectEntity(entityId: String?) {
     selectedEntityId = entityId
     selectedSubmissionId = null
+    isEntityBottomSheetExpanded = false
     if (entityId != null) {
-      isEntityBottomSheetExpanded = true
       isLayersSheetOpen = false
-    } else {
-      isEntityBottomSheetExpanded = false
     }
   }
 

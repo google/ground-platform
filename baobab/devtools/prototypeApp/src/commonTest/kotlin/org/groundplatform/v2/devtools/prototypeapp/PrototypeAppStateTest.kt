@@ -470,10 +470,18 @@ class PrototypeAppStateTest {
     assertFalse(state.isEntityBottomSheetExpanded)
     assertEquals("entity-nyr-104", state.selectedEntityId)
 
-    // Selecting an entity explicitly expands the bottom sheet
+    // Selecting an entity opens the bottom sheet in collapsed/peek state so the map stays visible
     state.selectEntity("entity-shade-201")
     assertEquals("entity-shade-201", state.selectedEntityId)
+    assertFalse(state.isEntityBottomSheetExpanded)
+
+    // Swiping up expands the bottom sheet to full screen
+    state.updateEntityBottomSheetExpanded(true)
     assertTrue(state.isEntityBottomSheetExpanded)
+
+    // Swiping down collapses the bottom sheet back to peek state
+    state.updateEntityBottomSheetExpanded(false)
+    assertFalse(state.isEntityBottomSheetExpanded)
 
     // Closing the sheet deselects the entity and resets expanded state
     state.selectEntity(null)

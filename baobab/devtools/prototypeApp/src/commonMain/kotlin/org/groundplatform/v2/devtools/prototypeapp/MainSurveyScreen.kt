@@ -71,21 +71,28 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.SwapHoriz
 import androidx.compose.material.icons.filled.TouchApp
+import androidx.compose.material3.BottomSheetDefaults
+import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberBottomSheetScaffoldState
+import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -296,331 +303,388 @@ private fun MainSurveyTopAppBar(state: PrototypeAppState) {
  *   and submission geometry layers
  * - A bottom sheet displaying entity & submission details (`1:1` vs `1:N`)
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun SurveyMapView(state: PrototypeAppState) {
   val visibleEntities = state.visibleMapEntities
   val visibleSubGeometries = state.visibleSubmissionGeometries
   val selectedEntity = state.selectedEntity
-  val selectedSubmission = state.selectedSubmission
+  val isDark = state.isDarkTheme
+  val sheetBg = if (isDark) Color(0xFF1E2522) else Color.White
 
-  BoxWithConstraints(modifier = Modifier.fillMaxSize().background(Color.Transparent)) {
-    val mapWidthPx = constraints.maxWidth.toFloat()
-    val mapHeightPx = constraints.maxHeight.toFloat()
-
-    // Smoothly animate back to center when "Recenter" is tapped, or follow drag immediately
-    val shiftAnimSpec =
-      if (state.isCameraFollowingUser) {
-        tween<Float>(durationMillis = 280)
-      } else {
-        snap()
-      }
-    val animatedShiftX by
-      animateFloatAsState(
-        targetValue = state.mapWorldToScreenShiftX,
-        animationSpec = shiftAnimSpec,
-        label = "mapShiftX",
-      )
-    val animatedShiftY by
-      animateFloatAsState(
-        targetValue = state.mapWorldToScreenShiftY,
-        animationSpec = shiftAnimSpec,
-        label = "mapShiftY",
-      )
-
-    // 1. Real Mapbox GL JS Basemap (mapboxgl.Map via window.GroundMapboxBridge) + GeoJSON Layers & Mapbox Markers
-    MapboxBasemapView(
-      state = state,
-      animatedShiftX = animatedShiftX,
-      animatedShiftY = animatedShiftY,
-      modifier = Modifier.fillMaxSize(),
+  val sheetState =
+    rememberStandardBottomSheetState(
+      initialValue =
+        if (state.isEntityBottomSheetExpanded) {
+          SheetValue.Expanded
+        } else {
+          SheetValue.PartiallyExpanded
+        },
+      skipHiddenState = true,
     )
+  val scaffoldState = rememberBottomSheetScaffoldState(bottomSheetState = sheetState)
 
-    // 3. Top Map Overlay Bar: GNSS (GPS) Satellites & Accuracy Chip + "Layers" Button
-    Column(
-      modifier =
-        Modifier.align(Alignment.TopCenter)
-          .fillMaxWidth()
-          .padding(horizontal = 12.dp, vertical = 10.dp),
-      verticalArrangement = Arrangement.spacedBy(6.dp),
-    ) {
-      Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically,
+  LaunchedEffect(sheetState.currentValue) {
+    val expanded = sheetState.currentValue == SheetValue.Expanded
+    if (state.isEntityBottomSheetExpanded != expanded) {
+      state.updateEntityBottomSheetExpanded(expanded)
+    }
+  }
+
+  LaunchedEffect(state.selectedEntityId, state.isEntityBottomSheetExpanded) {
+    if (state.selectedEntityId != null) {
+      if (state.isEntityBottomSheetExpanded && sheetState.currentValue != SheetValue.Expanded) {
+        sheetState.expand()
+      } else if (
+        !state.isEntityBottomSheetExpanded &&
+          sheetState.currentValue != SheetValue.PartiallyExpanded
       ) {
-        // GNSS (GPS) Satellites & Current Horizontal Accuracy Chip over the map
-        Row(
-          modifier =
-            Modifier.clip(RoundedCornerShape(16.dp))
-              .background(Color(0xE60E271C))
-              .border(1.dp, Color(0xFF4CAF50), RoundedCornerShape(16.dp))
-              .padding(horizontal = 11.dp, vertical = 6.dp),
-          verticalAlignment = Alignment.CenterVertically,
-          horizontalArrangement = Arrangement.spacedBy(5.dp),
-        ) {
-          Icon(
-            imageVector = Icons.Default.SatelliteAlt,
-            contentDescription = "GNSS Satellites & Accuracy",
-            tint = Color(0xFF8BD6B1),
-            modifier = Modifier.size(13.dp),
-          )
-          Text(
-            text = "GNSS: ${state.gnssStatusChipLabel}",
-            style =
-              MaterialTheme.typography.labelSmall.copy(
-                fontSize = 10.sp,
-                color = Color.White,
-                fontWeight = FontWeight.Bold,
-              ),
-          )
-        }
-
-        // "Layers" Button to control basemap (Map vs Satellite), offline tiles, entities, and submission geometries
-        val totalSourcesCount = state.mapLayers.size + 1 // +1 for Offline Basemap
-        val activeSourcesCount =
-          state.visibleLayerIds.size + (if (state.isOfflineBasemapVisible) 1 else 0)
-        val layersTint = if (state.isLayersSheetOpen) Color(0xFF003825) else Color.White
-        Row(
-          modifier =
-            Modifier.clip(RoundedCornerShape(16.dp))
-              .background(if (state.isLayersSheetOpen) Color(0xFF8BD6B1) else Color(0xEE133A29))
-              .border(
-                width = 1.dp,
-                color = if (state.isLayersSheetOpen) Color.White else Color(0xFF8BD6B1),
-                shape = RoundedCornerShape(16.dp),
-              )
-              .clickable { state.updateLayersSheetOpen(!state.isLayersSheetOpen) }
-              .padding(horizontal = 12.dp, vertical = 6.dp),
-          verticalAlignment = Alignment.CenterVertically,
-          horizontalArrangement = Arrangement.spacedBy(5.dp),
-        ) {
-          Icon(
-            imageVector = Icons.Default.Layers,
-            contentDescription = null,
-            tint = layersTint,
-            modifier = Modifier.size(14.dp),
-          )
-          Text(
-            text = "Layers ($activeSourcesCount/$totalSourcesCount)",
-            style =
-              MaterialTheme.typography.labelSmall.copy(
-                color = layersTint,
-                fontWeight = FontWeight.Bold,
-              ),
-          )
-        }
-      }
-
-      // Compact Legend Strip: Solid Entity Outlines vs Dotted Form Submission Geometry Outlines + GPS Follow State
-      Row(
-        modifier =
-          Modifier.clip(RoundedCornerShape(12.dp))
-            .background(Color(0xCC0D2319))
-            .border(1.dp, Color(0xFF2D5944), RoundedCornerShape(12.dp))
-            .padding(horizontal = 10.dp, vertical = 4.dp),
-        horizontalArrangement = Arrangement.spacedBy(10.dp),
-        verticalAlignment = Alignment.CenterVertically,
-      ) {
-        Text(
-          text = "▢ Solid: Entity (${visibleEntities.size})",
-          style =
-            MaterialTheme.typography.labelSmall.copy(
-              fontSize = 9.5.sp,
-              color = Color(0xFFC8E6C9),
-              fontWeight = FontWeight.SemiBold,
-            ),
-        )
-        Text(
-          text = "┈ Dotted: Submission (${visibleSubGeometries.size})",
-          style =
-            MaterialTheme.typography.labelSmall.copy(
-              fontSize = 9.5.sp,
-              color = Color(0xFF90CAF9),
-              fontWeight = FontWeight.SemiBold,
-            ),
-        )
-        Row(
-          verticalAlignment = Alignment.CenterVertically,
-          horizontalArrangement = Arrangement.spacedBy(3.dp),
-        ) {
-          Icon(
-            imageVector = Icons.Default.MyLocation,
-            contentDescription = null,
-            tint = if (state.isCameraFollowingUser) Color(0xFF8BD6B1) else Color(0xFFFFCC80),
-            modifier = Modifier.size(10.dp),
-          )
-          Text(
-            text = if (state.isCameraFollowingUser) "GPS Auto-Center" else "Panned",
-            style =
-              MaterialTheme.typography.labelSmall.copy(
-                fontSize = 9.5.sp,
-                color = if (state.isCameraFollowingUser) Color(0xFF8BD6B1) else Color(0xFFFFCC80),
-                fontWeight = FontWeight.Bold,
-              ),
-          )
-        }
+        sheetState.partialExpand()
       }
     }
+  }
 
-    // 4. Floating "Layers" Popover Sheet (when Layers button is clicked)
-    if (state.isLayersSheetOpen) {
-      MapLayersControlSheet(
-        state = state,
-        modifier =
-          Modifier.align(Alignment.TopEnd)
-            .padding(top = 74.dp, end = 10.dp, start = 14.dp)
-            .heightIn(max = 460.dp),
-      )
-    }
+  val peekHeight = if (selectedEntity != null) 146.dp else 0.dp
 
-    // 4B. Floating Mapbox Zoom In (+) / Zoom Out (−) Control Pill on Right Edge
-    Surface(
-      modifier =
-        Modifier.align(Alignment.CenterEnd)
-          .padding(end = 10.dp),
-      shape = RoundedCornerShape(18.dp),
-      color = Color(0xEE133A29),
-      shadowElevation = 6.dp,
-    ) {
-      Column(
-        modifier =
-          Modifier.border(1.dp, Color(0xFF8BD6B1), RoundedCornerShape(18.dp))
-            .padding(vertical = 4.dp, horizontal = 4.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(2.dp),
-      ) {
-        // Zoom In (+)
-        Box(
-          modifier =
-            Modifier.size(32.dp)
-              .clip(CircleShape)
-              .clickable {
-                state.zoomInMap()
-                zoomPlatformMapboxBasemap(0.75f)
-              },
-          contentAlignment = Alignment.Center,
-        ) {
-          Icon(
-            imageVector = Icons.Default.Add,
-            contentDescription = "Zoom In Map",
-            tint = Color.White,
-            modifier = Modifier.size(18.dp),
-          )
-        }
-
-        HorizontalDivider(
-          modifier = Modifier.width(22.dp),
-          color = Color(0xFF2D5944),
-        )
-
-        // Zoom Out (−)
-        Box(
-          modifier =
-            Modifier.size(32.dp)
-              .clip(CircleShape)
-              .clickable {
-                state.zoomOutMap()
-                zoomPlatformMapboxBasemap(-0.75f)
-              },
-          contentAlignment = Alignment.Center,
-        ) {
-          Box(
-            modifier =
-              Modifier.width(12.dp)
-                .height(2.2.dp)
-                .clip(CircleShape)
-                .background(Color.White)
-          )
-        }
-      }
-    }
-
-    // 5. Bottom Overlay Stack: Google Maps-style Horizontal Scale Widget in bottom-left
-    //    (plus optional "Recenter" Pill Button when map is panned) stacked cleanly above
-    //    the Entity Bottom Sheet or Helper Hint Chip
-    Column(
-      modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth(),
-    ) {
-      Row(
-        modifier =
-          Modifier.fillMaxWidth()
-            .padding(start = 14.dp, end = 14.dp, bottom = 8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(10.dp),
-      ) {
-        GoogleMapsScaleBarWidget(
-          scaleSpec = state.mapScaleBarSpec,
-          isSatellite = state.selectedBasemapType == BasemapType.SATELLITE,
-        )
-
-        if (!state.isCameraFollowingUser) {
-          Surface(
-            modifier =
-              Modifier.clip(RoundedCornerShape(24.dp))
-                .clickable { state.recenterMapOnUser() },
-            shape = RoundedCornerShape(24.dp),
-            color = Color.White,
-            shadowElevation = 6.dp,
-          ) {
-            Row(
-              modifier =
-                Modifier.border(1.5.dp, Color(0xFF1A73E8), RoundedCornerShape(24.dp))
-                  .padding(horizontal = 14.dp, vertical = 7.dp),
-              verticalAlignment = Alignment.CenterVertically,
-              horizontalArrangement = Arrangement.spacedBy(6.dp),
-            ) {
-              Icon(
-                imageVector = Icons.Default.MyLocation,
-                contentDescription = "Recenter map on GPS location",
-                tint = Color(0xFF1A73E8),
-                modifier = Modifier.size(16.dp),
-              )
-              Text(
-                text = "Recenter",
-                style =
-                  MaterialTheme.typography.labelLarge.copy(
-                    color = Color(0xFF1A73E8),
-                    fontWeight = FontWeight.Bold,
-                  ),
-              )
-            }
-          }
-        }
-      }
-
+  BottomSheetScaffold(
+    scaffoldState = scaffoldState,
+    sheetPeekHeight = peekHeight,
+    sheetShape = RoundedCornerShape(topStart = 22.dp, topEnd = 22.dp),
+    sheetContainerColor = sheetBg,
+    sheetShadowElevation = 12.dp,
+    sheetSwipeEnabled = selectedEntity != null,
+    sheetDragHandle =
+      if (selectedEntity != null) {
+        { BottomSheetDefaults.DragHandle() }
+      } else {
+        null
+      },
+    containerColor = Color.Transparent,
+    sheetContent = {
       if (selectedEntity != null) {
         EntityBottomSheetCard(
           entity = selectedEntity,
           state = state,
-          modifier = Modifier.fillMaxWidth(),
+          modifier = Modifier.fillMaxWidth().fillMaxHeight(),
         )
       } else {
-        // Helper hint chip at the bottom of the map when no entity is selected
+        Spacer(modifier = Modifier.height(1.dp))
+      }
+    },
+  ) {
+    BoxWithConstraints(modifier = Modifier.fillMaxSize().background(Color.Transparent)) {
+      // Smoothly animate back to center when "Recenter" is tapped, or follow drag immediately
+      val shiftAnimSpec =
+        if (state.isCameraFollowingUser) {
+          tween<Float>(durationMillis = 280)
+        } else {
+          snap()
+        }
+      val animatedShiftX by
+        animateFloatAsState(
+          targetValue = state.mapWorldToScreenShiftX,
+          animationSpec = shiftAnimSpec,
+          label = "mapShiftX",
+        )
+      val animatedShiftY by
+        animateFloatAsState(
+          targetValue = state.mapWorldToScreenShiftY,
+          animationSpec = shiftAnimSpec,
+          label = "mapShiftY",
+        )
+
+      // 1. Real Mapbox GL JS Basemap (mapboxgl.Map via window.GroundMapboxBridge) + GeoJSON Layers & Mapbox Markers
+      MapboxBasemapView(
+        state = state,
+        animatedShiftX = animatedShiftX,
+        animatedShiftY = animatedShiftY,
+        modifier = Modifier.fillMaxSize(),
+      )
+
+      // 3. Top Map Overlay Bar: GNSS (GPS) Satellites & Accuracy Chip + "Layers" Button
+      Column(
+        modifier =
+          Modifier.align(Alignment.TopCenter)
+            .fillMaxWidth()
+            .padding(horizontal = 12.dp, vertical = 10.dp),
+        verticalArrangement = Arrangement.spacedBy(6.dp),
+      ) {
+        Row(
+          modifier = Modifier.fillMaxWidth(),
+          horizontalArrangement = Arrangement.SpaceBetween,
+          verticalAlignment = Alignment.CenterVertically,
+        ) {
+          // GNSS (GPS) Satellites & Current Horizontal Accuracy Chip over the map
+          Row(
+            modifier =
+              Modifier.clip(RoundedCornerShape(16.dp))
+                .background(Color(0xE60E271C))
+                .border(1.dp, Color(0xFF4CAF50), RoundedCornerShape(16.dp))
+                .padding(horizontal = 11.dp, vertical = 6.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(5.dp),
+          ) {
+            Icon(
+              imageVector = Icons.Default.SatelliteAlt,
+              contentDescription = "GNSS Satellites & Accuracy",
+              tint = Color(0xFF8BD6B1),
+              modifier = Modifier.size(13.dp),
+            )
+            Text(
+              text = "GNSS: ${state.gnssStatusChipLabel}",
+              style =
+                MaterialTheme.typography.labelSmall.copy(
+                  fontSize = 10.sp,
+                  color = Color.White,
+                  fontWeight = FontWeight.Bold,
+                ),
+            )
+          }
+
+          // "Layers" Button to control basemap (Map vs Satellite), offline tiles, entities, and submission geometries
+          val totalSourcesCount = state.mapLayers.size + 1 // +1 for Offline Basemap
+          val activeSourcesCount =
+            state.visibleLayerIds.size + (if (state.isOfflineBasemapVisible) 1 else 0)
+          val layersTint = if (state.isLayersSheetOpen) Color(0xFF003825) else Color.White
+          Row(
+            modifier =
+              Modifier.clip(RoundedCornerShape(16.dp))
+                .background(if (state.isLayersSheetOpen) Color(0xFF8BD6B1) else Color(0xEE133A29))
+                .border(
+                  width = 1.dp,
+                  color = if (state.isLayersSheetOpen) Color.White else Color(0xFF8BD6B1),
+                  shape = RoundedCornerShape(16.dp),
+                )
+                .clickable { state.updateLayersSheetOpen(!state.isLayersSheetOpen) }
+                .padding(horizontal = 12.dp, vertical = 6.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(5.dp),
+          ) {
+            Icon(
+              imageVector = Icons.Default.Layers,
+              contentDescription = null,
+              tint = layersTint,
+              modifier = Modifier.size(14.dp),
+            )
+            Text(
+              text = "Layers ($activeSourcesCount/$totalSourcesCount)",
+              style =
+                MaterialTheme.typography.labelSmall.copy(
+                  color = layersTint,
+                  fontWeight = FontWeight.Bold,
+                ),
+            )
+          }
+        }
+
+        // Compact Legend Strip: Solid Entity Outlines vs Dotted Form Submission Geometry Outlines + GPS Follow State
         Row(
           modifier =
-            Modifier.align(Alignment.CenterHorizontally)
-              .padding(14.dp)
-              .clip(RoundedCornerShape(20.dp))
-              .background(Color(0xE6133A29))
-              .border(1.dp, Color(0xFF8BD6B1), RoundedCornerShape(20.dp))
-              .padding(horizontal = 14.dp, vertical = 8.dp),
+            Modifier.clip(RoundedCornerShape(12.dp))
+              .background(Color(0xCC0D2319))
+              .border(1.dp, Color(0xFF2D5944), RoundedCornerShape(12.dp))
+              .padding(horizontal = 10.dp, vertical = 4.dp),
+          horizontalArrangement = Arrangement.spacedBy(10.dp),
           verticalAlignment = Alignment.CenterVertically,
-          horizontalArrangement = Arrangement.spacedBy(6.dp),
         ) {
-          Icon(
-            imageVector = Icons.Default.TouchApp,
-            contentDescription = null,
-            tint = Color(0xFF8BD6B1),
-            modifier = Modifier.size(14.dp),
-          )
           Text(
-            text = "Drag map to pan • Tap any entity or dotted polygon to inspect",
+            text = "▢ Solid: Entity (${visibleEntities.size})",
             style =
               MaterialTheme.typography.labelSmall.copy(
-                color = Color.White,
-                fontWeight = FontWeight.Medium,
+                fontSize = 9.5.sp,
+                color = Color(0xFFC8E6C9),
+                fontWeight = FontWeight.SemiBold,
               ),
           )
+          Text(
+            text = "┈ Dotted: Submission (${visibleSubGeometries.size})",
+            style =
+              MaterialTheme.typography.labelSmall.copy(
+                fontSize = 9.5.sp,
+                color = Color(0xFF90CAF9),
+                fontWeight = FontWeight.SemiBold,
+              ),
+          )
+          Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(3.dp),
+          ) {
+            Icon(
+              imageVector = Icons.Default.MyLocation,
+              contentDescription = null,
+              tint = if (state.isCameraFollowingUser) Color(0xFF8BD6B1) else Color(0xFFFFCC80),
+              modifier = Modifier.size(10.dp),
+            )
+            Text(
+              text = if (state.isCameraFollowingUser) "GPS Auto-Center" else "Panned",
+              style =
+                MaterialTheme.typography.labelSmall.copy(
+                  fontSize = 9.5.sp,
+                  color = if (state.isCameraFollowingUser) Color(0xFF8BD6B1) else Color(0xFFFFCC80),
+                  fontWeight = FontWeight.Bold,
+                ),
+            )
+          }
+        }
+      }
+
+      // 4. Floating "Layers" Popover Sheet (when Layers button is clicked)
+      if (state.isLayersSheetOpen) {
+        MapLayersControlSheet(
+          state = state,
+          modifier =
+            Modifier.align(Alignment.TopEnd)
+              .padding(top = 74.dp, end = 10.dp, start = 14.dp)
+              .heightIn(max = 460.dp),
+        )
+      }
+
+      // 4B. Floating Mapbox Zoom In (+) / Zoom Out (−) Control Pill on Right Edge
+      Surface(
+        modifier =
+          Modifier.align(Alignment.CenterEnd)
+            .padding(end = 10.dp),
+        shape = RoundedCornerShape(18.dp),
+        color = Color(0xEE133A29),
+        shadowElevation = 6.dp,
+      ) {
+        Column(
+          modifier =
+            Modifier.border(1.dp, Color(0xFF8BD6B1), RoundedCornerShape(18.dp))
+              .padding(vertical = 4.dp, horizontal = 4.dp),
+          horizontalAlignment = Alignment.CenterHorizontally,
+          verticalArrangement = Arrangement.spacedBy(2.dp),
+        ) {
+          // Zoom In (+)
+          Box(
+            modifier =
+              Modifier.size(32.dp)
+                .clip(CircleShape)
+                .clickable {
+                  state.zoomInMap()
+                  zoomPlatformMapboxBasemap(0.75f)
+                },
+            contentAlignment = Alignment.Center,
+          ) {
+            Icon(
+              imageVector = Icons.Default.Add,
+              contentDescription = "Zoom In Map",
+              tint = Color.White,
+              modifier = Modifier.size(18.dp),
+            )
+          }
+
+          HorizontalDivider(
+            modifier = Modifier.width(22.dp),
+            color = Color(0xFF2D5944),
+          )
+
+          // Zoom Out (−)
+          Box(
+            modifier =
+              Modifier.size(32.dp)
+                .clip(CircleShape)
+                .clickable {
+                  state.zoomOutMap()
+                  zoomPlatformMapboxBasemap(-0.75f)
+                },
+            contentAlignment = Alignment.Center,
+          ) {
+            Box(
+              modifier =
+                Modifier.width(12.dp)
+                  .height(2.2.dp)
+                  .clip(CircleShape)
+                  .background(Color.White)
+            )
+          }
+        }
+      }
+
+      // 5. Bottom Overlay Stack: Google Maps-style Horizontal Scale Widget in bottom-left
+      //    (plus optional "Recenter" Pill Button when map is panned) positioned cleanly above
+      //    the bottom sheet peek bar (or at bottom of map when no entity is selected)
+      Column(
+        modifier =
+          Modifier.align(Alignment.BottomCenter)
+            .fillMaxWidth()
+            .padding(bottom = peekHeight),
+      ) {
+        Row(
+          modifier =
+            Modifier.fillMaxWidth()
+              .padding(start = 14.dp, end = 14.dp, bottom = 8.dp),
+          verticalAlignment = Alignment.CenterVertically,
+          horizontalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+          GoogleMapsScaleBarWidget(
+            scaleSpec = state.mapScaleBarSpec,
+            isSatellite = state.selectedBasemapType == BasemapType.SATELLITE,
+          )
+
+          if (!state.isCameraFollowingUser) {
+            Surface(
+              modifier =
+                Modifier.clip(RoundedCornerShape(24.dp))
+                  .clickable { state.recenterMapOnUser() },
+              shape = RoundedCornerShape(24.dp),
+              color = Color.White,
+              shadowElevation = 6.dp,
+            ) {
+              Row(
+                modifier =
+                  Modifier.border(1.5.dp, Color(0xFF1A73E8), RoundedCornerShape(24.dp))
+                    .padding(horizontal = 14.dp, vertical = 7.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+              ) {
+                Icon(
+                  imageVector = Icons.Default.MyLocation,
+                  contentDescription = "Recenter map on GPS location",
+                  tint = Color(0xFF1A73E8),
+                  modifier = Modifier.size(16.dp),
+                )
+                Text(
+                  text = "Recenter",
+                  style =
+                    MaterialTheme.typography.labelLarge.copy(
+                      color = Color(0xFF1A73E8),
+                      fontWeight = FontWeight.Bold,
+                    ),
+                )
+              }
+            }
+          }
+        }
+
+        if (selectedEntity == null) {
+          // Helper hint chip at the bottom of the map when no entity is selected
+          Row(
+            modifier =
+              Modifier.align(Alignment.CenterHorizontally)
+                .padding(horizontal = 14.dp, vertical = 6.dp)
+                .clip(RoundedCornerShape(20.dp))
+                .background(Color(0xE6133A29))
+                .border(1.dp, Color(0xFF8BD6B1), RoundedCornerShape(20.dp))
+                .padding(horizontal = 14.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+          ) {
+            Icon(
+              imageVector = Icons.Default.TouchApp,
+              contentDescription = null,
+              tint = Color(0xFF8BD6B1),
+              modifier = Modifier.size(14.dp),
+            )
+            Text(
+              text = "Drag map to pan • Tap any entity or dotted polygon to inspect",
+              style =
+                MaterialTheme.typography.labelSmall.copy(
+                  color = Color.White,
+                  fontWeight = FontWeight.Medium,
+                ),
+            )
+          }
         }
       }
     }
@@ -1065,45 +1129,18 @@ private fun EntityBottomSheetCard(
       "$feet ft"
     }
 
-  val isExpanded = state.isEntityBottomSheetExpanded
-
-  Surface(
-    modifier = modifier.heightIn(max = if (isExpanded) 415.dp else 72.dp),
-    shape = RoundedCornerShape(topStart = 22.dp, topEnd = 22.dp),
-    color = sheetBg,
-    shadowElevation = 12.dp,
+  Column(
+    modifier = modifier.padding(horizontal = 16.dp, vertical = 4.dp),
+    verticalArrangement = Arrangement.spacedBy(8.dp),
   ) {
-    Column(
-      modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
-      verticalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-      // Bottom Sheet Drag Handle (clickable to toggle collapsed / expanded state)
-      Box(
-        modifier =
-          Modifier.fillMaxWidth()
-            .clickable { state.toggleEntityBottomSheetExpanded() }
-            .padding(vertical = 2.dp),
-        contentAlignment = Alignment.Center,
-      ) {
-        Box(
-          modifier =
-            Modifier.width(42.dp)
-              .height(4.dp)
-              .clip(CircleShape)
-              .background(Color(0xFFD1D5DB))
-        )
-      }
-
-      // Entity Header: Reference Badge + Title + Expand/Collapse button + Close button
+      // Entity Header: Reference Badge + Title + Close button
       Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
       ) {
         Row(
-          modifier =
-            Modifier.weight(1f)
-              .clickable { state.toggleEntityBottomSheetExpanded() },
+          modifier = Modifier.weight(1f),
           horizontalArrangement = Arrangement.spacedBy(8.dp),
           verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -1147,51 +1184,24 @@ private fun EntityBottomSheetCard(
           }
         }
 
-        Row(
-          horizontalArrangement = Arrangement.spacedBy(6.dp),
-          verticalAlignment = Alignment.CenterVertically,
+        // Close Bottom Sheet Button
+        Box(
+          modifier =
+            Modifier.clip(CircleShape)
+              .background(if (isDark) Color(0xFF2E3833) else Color(0xFFF3F4F6))
+              .clickable { state.selectEntity(null) }
+              .padding(6.dp)
         ) {
-          // Expand / Collapse Bottom Sheet Button
-          Box(
-            modifier =
-              Modifier.clip(CircleShape)
-                .background(if (isDark) Color(0xFF2E3833) else Color(0xFFF3F4F6))
-                .clickable { state.toggleEntityBottomSheetExpanded() }
-                .padding(6.dp)
-          ) {
-            Icon(
-              imageVector =
-                if (isExpanded) {
-                  Icons.Default.KeyboardArrowDown
-                } else {
-                  Icons.Default.KeyboardArrowUp
-                },
-              contentDescription = if (isExpanded) "Collapse Entity Sheet" else "Expand Entity Sheet",
-              tint = textColor,
-              modifier = Modifier.size(16.dp),
-            )
-          }
-
-          // Close Bottom Sheet Button
-          Box(
-            modifier =
-              Modifier.clip(CircleShape)
-                .background(if (isDark) Color(0xFF2E3833) else Color(0xFFF3F4F6))
-                .clickable { state.selectEntity(null) }
-                .padding(6.dp)
-          ) {
-            Icon(
-              imageVector = Icons.Default.Close,
-              contentDescription = "Close Entity Sheet",
-              tint = textColor,
-              modifier = Modifier.size(15.dp),
-            )
-          }
+          Icon(
+            imageVector = Icons.Default.Close,
+            contentDescription = "Close Entity Sheet",
+            tint = textColor,
+            modifier = Modifier.size(15.dp),
+          )
         }
       }
 
-      if (isExpanded) {
-        // Metadata & Share Actions Row: GeoID + 1:1/1:N Badge + QR Code Link + Share PDF Link
+      // Metadata & Share Actions Row: GeoID + 1:1/1:N Badge + QR Code Link + Share PDF Link
       Row(
         modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
         horizontalArrangement = Arrangement.spacedBy(6.dp),
@@ -1366,7 +1376,7 @@ private fun EntityBottomSheetCard(
       // Scrollable Body inside Bottom Sheet: Entity Properties + (1:1 Inline Data OR 1:N List / Detail)
       Column(
         modifier =
-          Modifier.weight(1f, fill = false)
+          Modifier.weight(1f)
             .fillMaxWidth()
             .verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -1443,8 +1453,6 @@ private fun EntityBottomSheetCard(
           }
         }
       }
-      }
-    }
   }
 }
 
