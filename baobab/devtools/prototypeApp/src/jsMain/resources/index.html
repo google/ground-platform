@@ -281,7 +281,7 @@
               'normal-tiles': {
                 type: 'raster',
                 tiles: [
-                  'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                  'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}',
                 ],
                 tileSize: 256,
                 maxzoom: 19,
@@ -768,7 +768,21 @@
               map.setPaintProperty(
                 'normal-raster-layer',
                 'raster-opacity',
-                isOfflineVisible ? 0.95 : 0.32
+                isOfflineVisible ? 0.98 : 0.35
+              );
+            }
+            if (map.getLayer('ground-river-line')) {
+              map.setPaintProperty(
+                'ground-river-line',
+                'line-color',
+                isSat ? '#0288D1' : '#0277BD'
+              );
+            }
+            if (map.getLayer('ground-road-line')) {
+              map.setPaintProperty(
+                'ground-road-line',
+                'line-color',
+                isSat ? '#D7CCC8' : '#6D4C41'
               );
             }
             if (map.getLayer('ground-offline-sector-line')) {
@@ -777,6 +791,14 @@
                 'visibility',
                 isOfflineVisible ? 'visible' : 'none'
               );
+              map.setPaintProperty(
+                'ground-offline-sector-line',
+                'line-color',
+                isSat ? '#8BD6B1' : '#1E6F50'
+              );
+            }
+            if (map.triggerRepaint) {
+              map.triggerRepaint();
             }
           } catch (e) {}
 

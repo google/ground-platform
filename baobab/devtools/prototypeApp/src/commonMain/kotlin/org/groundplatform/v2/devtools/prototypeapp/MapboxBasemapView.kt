@@ -106,6 +106,16 @@ fun MapboxBasemapView(
   var viewportWidthCssPx by remember { mutableStateOf(0f) }
   var viewportHeightCssPx by remember { mutableStateOf(0f) }
 
+  val activeSurveyId = state.activeSurveyId
+  val selectedBasemapType = state.selectedBasemapType
+  val isOfflineBasemapVisible = state.isOfflineBasemapVisible
+  val panOffsetX = state.mapPanOffsetX
+  val panOffsetY = state.mapPanOffsetY
+  val userGpsX = state.userGpsNormalizedX
+  val userGpsY = state.userGpsNormalizedY
+  val isCameraFollowingUser = state.isCameraFollowingUser
+  val mapZoomDelta = state.mapZoomDelta
+
   val visibleEntities = state.visibleMapEntities
   val visibleSubGeometries = state.visibleSubmissionGeometries
   val selectedEntity = state.selectedEntity
@@ -117,18 +127,46 @@ fun MapboxBasemapView(
       visibleSubGeometries,
       selectedEntity?.id,
       selectedSubmission?.id,
-      state.isCameraFollowingUser,
-      state.mapZoomDelta,
+      isCameraFollowingUser,
+      mapZoomDelta,
+      selectedBasemapType,
+      isOfflineBasemapVisible,
     ) {
       buildMapboxFeaturesPayloadJson(
         entities = visibleEntities,
         submissions = visibleSubGeometries,
         selectedEntityId = selectedEntity?.id,
         selectedSubmissionId = selectedSubmission?.id,
-        isCameraFollowingUser = state.isCameraFollowingUser,
-        zoomDelta = state.mapZoomDelta,
+        isCameraFollowingUser = isCameraFollowingUser,
+        zoomDelta = mapZoomDelta,
       )
     }
+
+  androidx.compose.runtime.LaunchedEffect(
+    activeSurveyId,
+    selectedBasemapType,
+    isOfflineBasemapVisible,
+    panOffsetX,
+    panOffsetY,
+    userGpsX,
+    userGpsY,
+    featuresPayloadJson,
+    viewportWidthCssPx,
+    viewportHeightCssPx,
+  ) {
+    if (viewportWidthCssPx > 4f && viewportHeightCssPx > 4f) {
+      syncPlatformMapboxBasemap(
+        surveyId = activeSurveyId,
+        basemapType = selectedBasemapType.name,
+        isOfflineVisible = isOfflineBasemapVisible,
+        panOffsetX = panOffsetX,
+        panOffsetY = panOffsetY,
+        userGpsX = userGpsX,
+        userGpsY = userGpsY,
+        featuresGeoJson = featuresPayloadJson,
+      )
+    }
+  }
 
   SideEffect {
     val isVisible = viewportWidthCssPx > 4f && viewportHeightCssPx > 4f
@@ -142,13 +180,13 @@ fun MapboxBasemapView(
     )
     if (isVisible) {
       syncPlatformMapboxBasemap(
-        surveyId = state.activeSurveyId,
-        basemapType = state.selectedBasemapType.name,
-        isOfflineVisible = state.isOfflineBasemapVisible,
-        panOffsetX = state.mapPanOffsetX,
-        panOffsetY = state.mapPanOffsetY,
-        userGpsX = state.userGpsNormalizedX,
-        userGpsY = state.userGpsNormalizedY,
+        surveyId = activeSurveyId,
+        basemapType = selectedBasemapType.name,
+        isOfflineVisible = isOfflineBasemapVisible,
+        panOffsetX = panOffsetX,
+        panOffsetY = panOffsetY,
+        userGpsX = userGpsX,
+        userGpsY = userGpsY,
         featuresGeoJson = featuresPayloadJson,
       )
     }
