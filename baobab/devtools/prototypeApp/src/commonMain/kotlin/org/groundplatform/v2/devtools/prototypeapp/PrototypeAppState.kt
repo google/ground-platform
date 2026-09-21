@@ -60,7 +60,7 @@ enum class PrototypeScreen(val stepNumber: Int, val title: String, val subtitle:
   MAIN_SURVEY(
     stepNumber = 5,
     title = "Main Survey (Map & List)",
-    subtitle = "Geospatial entity map, layers, 1:1 & 1:N bottom sheets, searchable list & drawer",
+    subtitle = "Survey map, layers, location & submission bottom sheets, searchable list & drawer",
   ),
 }
 
@@ -73,7 +73,7 @@ enum class MainSurveyViewMode(val label: String) {
 /** Category filter tabs inside the Main Survey `List` view (Forms group Submissions rather than being a separate list). */
 enum class ListFilterTab(val label: String) {
   ALL("All"),
-  ENTITIES("Sites"),
+  ENTITIES("Locations"),
   SUBMISSIONS("Submissions"),
 }
 
@@ -121,7 +121,7 @@ enum class MainDrawerSubView {
 enum class SubmissionModel(val badgeLabel: String, val description: String) {
   SINGLE_1_TO_1(
     badgeLabel = "Single Submission",
-    description = "Baseline registration / asset audit with a single submission per entity",
+    description = "Baseline registration / asset audit with a single submission per location",
   ),
   MULTIPLE_1_TO_N(
     badgeLabel = "Multiple Submissions",
@@ -240,7 +240,7 @@ data class SurveyPreviewItem(
  *   form geometry questions/fields, rendered with dotted polygon outlines)
  */
 enum class LayerSourceType(val badgeLabel: String) {
-  ENTITY_DATASET("Entity Dataset"),
+  ENTITY_DATASET("Survey Layer"),
   FORM_GEOMETRY("Form Geometry Field"),
 }
 
@@ -280,6 +280,8 @@ data class MapLayerItem(
   val formId: String? = null,
   val fieldPath: String? = null,
   val isDottedOutline: Boolean = sourceType == LayerSourceType.FORM_GEOMETRY,
+  val singularItemLabel: String = "location",
+  val pluralItemLabel: String = "locations",
   val pluralDomainLabel: String =
     when (id) {
       "layer-coffee-parcels" -> "Coffee Parcels"
@@ -292,18 +294,21 @@ data class MapLayerItem(
       "layer-coffee-parcels" -> "parcel"
       "layer-shade-transects" -> "plot"
       "layer-water-points" -> "station"
-      else -> "site"
+      else -> singularItemLabel
     },
   val pluralNoun: String =
     when (id) {
       "layer-coffee-parcels" -> "parcels"
       "layer-shade-transects" -> "plots"
       "layer-water-points" -> "stations"
-      else -> "sites"
+      else -> pluralItemLabel
     },
 ) {
   /** Formats a user-friendly domain item count for this layer (e.g. `"2 parcels"`, `"1 plot"`). */
   fun itemCountLabel(count: Int): String = "$count ${if (count == 1) singularNoun else pluralNoun}"
+
+  fun formatCountLabel(count: Int): String =
+    if (count == 1) "1 $singularItemLabel" else "$count $pluralItemLabel"
 }
 
 /**
@@ -351,6 +356,7 @@ data class SubmissionPreviewItem(
   val collectorEmail: String,
   val timestamp: String,
   val fields: List<SubmissionFieldEntry>,
+  val targetTypeLabel: String = "Location",
 )
 
 /**
@@ -374,17 +380,14 @@ data class GeospatialEntityItem(
   val colorHex: Long,
   val properties: Map<String, String>,
   val submissions: List<SubmissionPreviewItem>,
-) {
-  /** User-facing singular domain noun derived from the dataset (e.g. `"Coffee Parcel"`). */
-  val singularTypeLabel: String
-    get() =
-      when (datasetId) {
-        "coffee_parcels" -> "Coffee Parcel"
-        "shade_monitoring_plots" -> "Monitoring Plot"
-        "washing_stations" -> "Washing Station"
-        else -> datasetName.removeSuffix("s").ifBlank { "Site" }
-      }
-}
+  val singularTypeLabel: String =
+    when (datasetId) {
+      "coffee_parcels" -> "Coffee Parcel"
+      "shade_monitoring_plots" -> "Shade Tree Monitoring Plot"
+      "washing_stations" -> "Cooperative Washing Station"
+      else -> datasetName.removeSuffix("s").ifBlank { "Location" }
+    },
+)
 
 /** Represents a hierarchical Form (`FormDef` + `FormLaunchConfig`) in the active survey. */
 data class FormPreviewItem(
@@ -1068,11 +1071,11 @@ class PrototypeAppState(
    */
   val activeEntitiesCountNoun: String
     get() =
-      visibleEntityDatasetLayers.singleOrNull()?.pluralDomainLabel?.lowercase() ?: "sites"
+      visibleEntityDatasetLayers.singleOrNull()?.pluralDomainLabel?.lowercase() ?: "locations"
 
-  /** Resolves the user-facing singular domain noun for [entityId] (e.g. `"Coffee Parcel"`, or `"Site"`). */
+  /** Resolves the user-facing singular domain noun for [entityId] (e.g. `"Coffee Parcel"`, or `"Location"`). */
   fun entitySingularTypeLabel(entityId: String?): String =
-    entityId?.let { id -> entities.firstOrNull { it.id == id }?.singularTypeLabel } ?: "Site"
+    entityId?.let { id -> entities.firstOrNull { it.id == id }?.singularTypeLabel } ?: "Location"
 
   /** Resolves the dynamic display label for a [ListFilterTab] chip. */
   fun tabLabelFor(tab: ListFilterTab): String =
@@ -1595,6 +1598,7 @@ class PrototypeAppState(
         collectorEmail = signedInUserEmail,
         timestamp = "2026-09-19 18:30 UTC",
         fields = extractedFields,
+        targetTypeLabel = entity.singularTypeLabel,
       )
 
     entities =
@@ -1626,16 +1630,17 @@ class PrototypeAppState(
     activeQrCodeEntityId = null
   }
 
-  /** Opens the Share PDF modal sheet to share a Geospatial Entity's report PDF to a preferred app. */
+  /** Opens the Share PDF modal sheet to share a location's report PDF to a preferred app. */
   fun shareEntityPdf(entityId: String) {
     val entity = entities.firstOrNull { it.id == entityId } ?: return
+    val filePrefix = entity.singularTypeLabel.lowercase().replace(' ', '-')
     activeSharedPdfSheet =
       SharedPdfSheetState(
         targetId = entity.id,
         title = "Share ${entity.singularTypeLabel} PDF Report",
         subtitle = "${entity.label} • GeoID ${entity.geoId}",
-        pdfFileName = "${entity.id}-${entity.geoId}.pdf",
-        targetKindLabel = "${entity.singularTypeLabel} PDF",
+        pdfFileName = "$filePrefix-${entity.geoId}.pdf",
+        targetKindLabel = "${entity.singularTypeLabel} Summary PDF",
       )
   }
 
@@ -2104,33 +2109,39 @@ class PrototypeAppState(
      */
     fun defaultMapLayers(): List<MapLayerItem> =
       listOf(
-        // Entity Dataset Layers (solid outlines)
+        // Survey Dataset Layers (solid outlines)
         MapLayerItem(
           id = "layer-coffee-parcels",
           label = "Smallholder Coffee Parcels",
-          sourceDescription = "Entity Dataset: coffee_parcels (Polygon)",
+          sourceDescription = "Dataset: coffee_parcels (Polygon)",
           colorHex = 0xFF2E7D32,
           geometryTypeLabel = "Polygon",
           isVisible = true,
           sourceType = LayerSourceType.ENTITY_DATASET,
+          singularItemLabel = "coffee parcel",
+          pluralItemLabel = "coffee parcels",
         ),
         MapLayerItem(
           id = "layer-shade-transects",
           label = "Shade Tree Monitoring Plots",
-          sourceDescription = "Entity Dataset: shade_monitoring_plots (Polygon)",
+          sourceDescription = "Dataset: shade_monitoring_plots (Polygon)",
           colorHex = 0xFF1565C0,
           geometryTypeLabel = "Polygon",
           isVisible = true,
           sourceType = LayerSourceType.ENTITY_DATASET,
+          singularItemLabel = "monitoring plot",
+          pluralItemLabel = "monitoring plots",
         ),
         MapLayerItem(
           id = "layer-water-points",
           label = "Cooperative Washing Stations",
-          sourceDescription = "Entity Dataset: washing_stations (Point)",
+          sourceDescription = "Dataset: washing_stations (Point)",
           colorHex = 0xFFEF6C00,
           geometryTypeLabel = "Point",
           isVisible = true,
           sourceType = LayerSourceType.ENTITY_DATASET,
+          singularItemLabel = "washing station",
+          pluralItemLabel = "washing stations",
         ),
         // Form Geometry Question Layers (dotted polygon outlines, per `LayerDef.form_geometry`)
         MapLayerItem(
@@ -2364,6 +2375,7 @@ class PrototypeAppState(
                 collectorName = "Maya Lin",
                 collectorEmail = "maya.lin@groundplatform.org",
                 timestamp = "2026-09-18 10:14 UTC",
+                targetTypeLabel = "Coffee Parcel",
                 fields =
                   listOf(
                     SubmissionFieldEntry(
@@ -2435,6 +2447,7 @@ class PrototypeAppState(
                 collectorName = "Maya Lin",
                 collectorEmail = "maya.lin@groundplatform.org",
                 timestamp = "2026-09-19 08:45 UTC",
+                targetTypeLabel = "Shade Tree Monitoring Plot",
                 fields =
                   listOf(
                     SubmissionFieldEntry(
@@ -2474,6 +2487,7 @@ class PrototypeAppState(
                 collectorName = "Samuel Kariuki",
                 collectorEmail = "s.kariuki@kenyaforestry.org",
                 timestamp = "2026-06-14 14:20 UTC",
+                targetTypeLabel = "Shade Tree Monitoring Plot",
                 fields =
                   listOf(
                     SubmissionFieldEntry(
@@ -2503,6 +2517,7 @@ class PrototypeAppState(
                 collectorName = "Grace Wanjiku",
                 collectorEmail = "g.wanjiku@kenyaforestry.org",
                 timestamp = "2026-03-08 11:05 UTC",
+                targetTypeLabel = "Shade Tree Monitoring Plot",
                 fields =
                   listOf(
                     SubmissionFieldEntry(
@@ -2554,6 +2569,7 @@ class PrototypeAppState(
                 collectorName = "Samuel Kariuki",
                 collectorEmail = "s.kariuki@kenyaforestry.org",
                 timestamp = "2026-09-17 16:02 UTC",
+                targetTypeLabel = "Coffee Parcel",
                 fields =
                   listOf(
                     SubmissionFieldEntry(
@@ -2614,6 +2630,7 @@ class PrototypeAppState(
                 collectorName = "Maya Lin",
                 collectorEmail = "maya.lin@groundplatform.org",
                 timestamp = "2026-09-18 17:30 UTC",
+                targetTypeLabel = "Cooperative Washing Station",
                 fields =
                   listOf(
                     SubmissionFieldEntry(
@@ -2643,6 +2660,7 @@ class PrototypeAppState(
                 collectorName = "Grace Wanjiku",
                 collectorEmail = "g.wanjiku@kenyaforestry.org",
                 timestamp = "2026-08-22 09:50 UTC",
+                targetTypeLabel = "Cooperative Washing Station",
                 fields =
                   listOf(
                     SubmissionFieldEntry(

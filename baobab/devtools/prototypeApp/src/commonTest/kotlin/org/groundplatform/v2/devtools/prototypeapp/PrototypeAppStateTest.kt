@@ -164,17 +164,17 @@ class PrototypeAppStateTest {
     val state = PrototypeAppState(initialScreen = PrototypeScreen.MAIN_SURVEY)
     state.setMainSurveyViewMode(MainSurveyViewMode.LIST)
 
-    // ListFilterTab only contains ALL, ENTITIES ("Sites"), SUBMISSIONS (Forms are a grouping for Submissions)
+    // ListFilterTab only contains ALL, ENTITIES ("Locations"), SUBMISSIONS (Forms are a grouping for Submissions)
     assertEquals(
       listOf(ListFilterTab.ALL, ListFilterTab.ENTITIES, ListFilterTab.SUBMISSIONS),
       ListFilterTab.entries,
     )
-    assertEquals("Sites", ListFilterTab.ENTITIES.label)
-    assertEquals("Sites", state.activeEntitiesTabLabel)
-    assertEquals("sites", state.activeEntitiesCountNoun)
+    assertEquals("Locations", ListFilterTab.ENTITIES.label)
+    assertEquals("Locations", state.activeEntitiesTabLabel)
+    assertEquals("locations", state.activeEntitiesCountNoun)
     assertEquals("Coffee Parcel", state.entitySingularTypeLabel("entity-nyr-104"))
-    assertEquals("Monitoring Plot", state.entitySingularTypeLabel("entity-shade-201"))
-    assertEquals("Washing Station", state.entitySingularTypeLabel("entity-station-01"))
+    assertEquals("Shade Tree Monitoring Plot", state.entitySingularTypeLabel("entity-shade-201"))
+    assertEquals("Cooperative Washing Station", state.entitySingularTypeLabel("entity-station-01"))
 
     // When filtered down to a single visible entity dataset layer, dynamic domain naming activates
     state.toggleLayerVisibility("layer-shade-transects")
@@ -183,7 +183,7 @@ class PrototypeAppStateTest {
     assertEquals("coffee parcels", state.activeEntitiesCountNoun)
     state.toggleLayerVisibility("layer-shade-transects")
     state.toggleLayerVisibility("layer-water-points")
-    assertEquals("Sites", state.activeEntitiesTabLabel)
+    assertEquals("Locations", state.activeEntitiesTabLabel)
 
     // Unfiltered counts: 4 entities, 7 submissions grouped across 5 forms
     assertEquals(4, state.filteredListEntities.size)
@@ -620,7 +620,6 @@ class PrototypeAppStateTest {
       assertFalse(entity.datasetName.contains("1:N"), "Unexpected 1:N in entity datasetName: ${entity.datasetName}")
     }
   }
-
   @Test
   fun straightLineNavigation_toEntityAndSubmission_computesBearingDistanceAndStepsUser() {
     val state = PrototypeAppState(initialScreen = PrototypeScreen.MAIN_SURVEY)
@@ -735,6 +734,47 @@ class PrototypeAppStateTest {
     assertTrue(state.isSignedIn)
     assertEquals(PrototypeScreen.MAIN_SURVEY, state.currentScreen)
     assertEquals(MainDrawerSubView.SWITCH_SURVEYS, state.activeDrawerSubView)
+  }
+
+  @Test
+  fun userFacingTerminology_replacesEntityWithGenericOrDomainFocusedLanguage() {
+    val state = PrototypeAppState(initialScreen = PrototypeScreen.MAIN_SURVEY)
+
+    assertEquals("Locations", ListFilterTab.ENTITIES.label)
+    assertEquals("Survey Layer", LayerSourceType.ENTITY_DATASET.badgeLabel)
+
+    PrototypeScreen.entries.forEach { screen ->
+      assertFalse(screen.title.contains("entity", ignoreCase = true))
+      assertFalse(screen.subtitle.contains("entity", ignoreCase = true))
+      assertFalse(screen.subtitle.contains("entities", ignoreCase = true))
+    }
+
+    SubmissionModel.entries.forEach { model ->
+      assertFalse(model.badgeLabel.contains("entity", ignoreCase = true))
+      assertFalse(model.description.contains("entity", ignoreCase = true))
+    }
+
+    state.mapLayers.forEach { layer ->
+      assertFalse(layer.label.contains("entity", ignoreCase = true))
+      assertFalse(layer.sourceDescription.contains("entity", ignoreCase = true))
+      assertFalse(layer.formatCountLabel(1).contains("entity", ignoreCase = true))
+      assertFalse(layer.formatCountLabel(2).contains("entities", ignoreCase = true))
+    }
+
+    state.entities.forEach { entity ->
+      assertFalse(entity.singularTypeLabel.contains("entity", ignoreCase = true))
+      assertFalse(entity.datasetName.contains("entity", ignoreCase = true))
+      state.shareEntityPdf(entity.id)
+      val sheet = state.activeSharedPdfSheet!!
+      assertFalse(sheet.title.contains("entity", ignoreCase = true))
+      assertFalse(sheet.targetKindLabel.contains("entity", ignoreCase = true))
+      assertFalse(sheet.pdfFileName.contains("entity", ignoreCase = true))
+      state.closeSharePdfSheet()
+    }
+
+    state.allSubmissions.forEach { sub ->
+      assertFalse(sub.targetTypeLabel.contains("entity", ignoreCase = true))
+    }
   }
 }
 

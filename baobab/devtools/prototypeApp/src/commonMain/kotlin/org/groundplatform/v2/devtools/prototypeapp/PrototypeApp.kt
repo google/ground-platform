@@ -1990,7 +1990,7 @@ private fun UxDesignerInspectorPanel(
       )
       Text(
         text =
-          "Use this panel during UX review sessions to jump between onboarding and main survey screens, inspect 1:1 vs 1:N entity bottom sheets, toggle layers, or test XForms FormDef XML data collection.",
+          "Use this panel during UX review sessions to jump between onboarding and main survey screens, inspect single- vs multi-submission location bottom sheets, toggle layers, or test XForms FormDef XML data collection.",
         style = MaterialTheme.typography.bodySmall.copy(color = Color(0xFF4B5563)),
       )
 
@@ -2081,7 +2081,7 @@ private fun UxDesignerInspectorPanel(
           listOf(
             Triple(
               Icons.Default.Map,
-              "Map + 1:1 Site (Parcel)",
+              "Map + Coffee Parcel (1:1)",
               {
                 state.navigateTo(PrototypeScreen.MAIN_SURVEY)
                 state.setMainSurveyViewMode(MainSurveyViewMode.MAP)
@@ -2090,7 +2090,7 @@ private fun UxDesignerInspectorPanel(
             ),
             Triple(
               Icons.Default.Timeline,
-              "Map + 1:N Site (Plot)",
+              "Map + Shade Plot (1:N)",
               {
                 state.navigateTo(PrototypeScreen.MAIN_SURVEY)
                 state.setMainSurveyViewMode(MainSurveyViewMode.MAP)

@@ -403,7 +403,7 @@ fun PrototypeDataCollectionFormScreen(state: PrototypeAppState) {
                 if (entity != null) {
                   "${entity.label} • ${entity.geoId}"
                 } else {
-                  "Site Data Collection"
+                  form?.targetDatasetName ?: "Field Survey Data Collection"
                 },
               style =
                 MaterialTheme.typography.labelSmall.copy(
@@ -514,7 +514,7 @@ fun XFormsFormDefChromeSection(state: PrototypeAppState) {
         )
         Text(
           text =
-            "Paste an ODK XForms <h:html> FormDef below. Launching any entity form runs this FormDef in MobileFormRunner.",
+            "Paste an ODK XForms <h:html> FormDef below. Launching any survey form runs this FormDef in MobileFormRunner.",
           style = MaterialTheme.typography.bodySmall.copy(color = Color(0xFF4B5563)),
         )
       }
