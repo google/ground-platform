@@ -39,6 +39,7 @@ export default [
       '**/dist',
       '**/coverage',
       '**/src/generated',
+      'proto/bin',
     ],
   },
   ...gts.map(config => {
