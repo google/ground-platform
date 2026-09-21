@@ -19,7 +19,10 @@
 
 const path = require('path');
 
-const isAgent = !!process.env.ANTIGRAVITY_AGENT || !!process.env.GEMINI_CLI;
+const isAgent =
+  !!process.env.ANTIGRAVITY_AGENT ||
+  !!process.env.GEMINI_CLI ||
+  !!process.env.CLAUDECODE;
 const isCi = !!process.env.CI;
 const isHeadless = isCi || isAgent;
 
