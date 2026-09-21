@@ -1,0 +1,94 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%" fill="none">
+  <defs>
+    <linearGradient id="ac3-bg" x1="64" y1="32" x2="448" y2="480" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#1A5C43" />
+      <stop offset="100%" stop-color="#0A241A" />
+    </linearGradient>
+
+    <linearGradient id="ac3-pin" x1="136" y1="76" x2="376" y2="416" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#A7E3C5" />
+      <stop offset="48%" stop-color="#34A853" />
+      <stop offset="100%" stop-color="#144532" />
+    </linearGradient>
+
+    <linearGradient id="ac3-sun" x1="256" y1="148" x2="256" y2="328" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#FFF9E6" />
+      <stop offset="60%" stop-color="#FDE047" />
+      <stop offset="100%" stop-color="#F59E0B" />
+    </linearGradient>
+
+    <linearGradient id="ac3-orange" x1="236" y1="106" x2="276" y2="146" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#FB923C" />
+      <stop offset="100%" stop-color="#EA580C" />
+    </linearGradient>
+
+    <clipPath id="ac3-clip">
+      <path d="M256 76 C166 76, 104 142, 104 228 C104 318, 208 392, 244 422 C251 428, 261 428, 268 422 C304 392, 408 318, 408 228 C408 142, 346 76, 256 76 Z" />
+    </clipPath>
+  </defs>
+
+  <rect x="24" y="24" width="464" height="464" rx="128" fill="url(#ac3-bg)" />
+
+  <path
+    d="M256 76 C166 76, 104 142, 104 228 C104 318, 208 392, 244 422 C251 428, 261 428, 268 422 C304 392, 408 318, 408 228 C408 142, 346 76, 256 76 Z"
+    fill="url(#ac3-pin)"
+  />
+
+  <g clip-path="url(#ac3-clip)">
+    <!-- Warm Golden Sunrise Disc -->
+    <circle cx="256" cy="240" r="94" fill="url(#ac3-sun)" />
+
+    <!-- Cloud-Topped Savanna Acacia Crown (Organic Lobed Foliage Domes, Never Straight Lines) -->
+    <!-- Main Upper Cloud Canopy -->
+    <path
+      d="M174 192
+         C172 170, 198 156, 224 164
+         C238 148, 274 148, 288 164
+         C314 156, 346 168, 348 188
+         C350 202, 326 208, 294 204
+         C268 202, 244 202, 218 204
+         C190 206, 175 202, 174 192 Z"
+      fill="#0B291E"
+    />
+
+    <!-- Lower Side Cloud Bough -->
+    <path
+      d="M132 218
+         C130 200, 152 190, 176 196
+         C194 190, 218 198, 220 212
+         C222 222, 200 226, 174 224
+         C150 226, 133 224, 132 218 Z"
+      fill="#0B291E"
+    />
+
+    <!-- Trunk & Branching Forks -->
+    <path
+      d="M224 350
+         C238 320, 245 284, 245 248
+         C245 232, 220 222, 188 218
+         L208 212
+         C230 216, 244 224, 250 234
+         L252 194
+         L264 194
+         L268 248
+         C268 284, 275 320, 290 350
+         Z"
+      fill="#0B291E"
+    />
+
+    <!-- Rolling Earth Base -->
+    <path d="M104 342 C192 314, 320 314, 408 342 L256 436 Z" fill="#0B291E" />
+  </g>
+
+  <!-- Signature Small Orange Circle Motif -->
+  <circle cx="256" cy="122" r="20" fill="url(#ac3-orange)" />
+
+  <!-- Minimal Horizon Wave -->
+  <path
+    d="M144 432 C200 406, 312 406, 368 432"
+    stroke="#8BD6B1"
+    stroke-opacity="0.75"
+    stroke-width="14"
+    stroke-linecap="round"
+  />
+</svg>
