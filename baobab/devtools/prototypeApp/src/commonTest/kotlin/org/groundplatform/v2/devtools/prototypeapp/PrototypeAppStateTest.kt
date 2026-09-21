@@ -520,4 +520,90 @@ class PrototypeAppStateTest {
     assertEquals("15.3z", state.effectiveMapZoomLabel)
     assertEquals(initialScale, state.mapScaleBarSpec)
   }
+
+  @Test
+  fun groundSettingsAndSignInLanguageSelector_syncUserSettingsAndLocales() {
+    val state = PrototypeAppState(initialScreen = PrototypeScreen.SIGN_IN)
+
+    // Default settings match ground-android UserSettings defaults
+    assertEquals("en", state.selectedLanguageCode)
+    assertEquals("English", state.selectedLanguageDisplayName)
+    assertEquals("en (English)", state.selectedLanguageLocale)
+    assertFalse(state.shouldUploadPhotosOnWifiOnly)
+    assertEquals(MeasurementUnitSystem.METRIC, state.unitSystem)
+    assertEquals(
+      UserSettings(
+        language = "en",
+        measurementUnits = MeasurementUnitSystem.METRIC,
+        shouldUploadPhotosOnWifiOnly = false,
+      ),
+      state.userSettings,
+    )
+
+    // Selecting language on Sign-In screen updates both settings and localized strings
+    state.updateSelectedLanguage("fr")
+    assertEquals("fr", state.selectedLanguageCode)
+    assertEquals("Français", state.selectedLanguageDisplayName)
+    assertEquals("fr (Français)", state.selectedLanguageLocale)
+    assertEquals("Choix de la langue", groundLocalizedStringsFor(state.selectedLanguageCode).selectLanguageTitle)
+    assertEquals("Se connecter avec Google", groundLocalizedStringsFor(state.selectedLanguageCode).signInWithGoogle)
+
+    // Updating via legacy label or code also works seamlessly
+    state.updateLanguageLocale("Español")
+    assertEquals("es", state.selectedLanguageCode)
+    assertEquals("Español", state.selectedLanguageDisplayName)
+    assertEquals("Configuración", groundLocalizedStringsFor(state.selectedLanguageCode).settingsTitle)
+
+    // Toggle Upload photos over Wi-Fi only switch
+    state.updateUploadMediaOverUnmeteredConnectionOnly(true)
+    assertTrue(state.shouldUploadPhotosOnWifiOnly)
+    assertTrue(state.userSettings.shouldUploadPhotosOnWifiOnly)
+
+    // Change measurement units to Imperial
+    state.updateUnitSystem(MeasurementUnitSystem.IMPERIAL)
+    assertEquals(MeasurementUnitSystem.IMPERIAL, state.userSettings.measurementUnits)
+
+    // Visit website action records https://groundplatform.org/
+    state.visitGroundWebsite()
+    assertEquals(GROUND_WEBSITE_URL, state.visitedWebsiteUrl)
+    assertTrue(state.activeSurveyNotice?.contains(GROUND_WEBSITE_URL) == true)
+  }
+
+  @Test
+  fun mobileUiDataModels_doNotContain1To1Or1ToNIndicators() {
+    val state = PrototypeAppState(initialScreen = PrototypeScreen.MAIN_SURVEY)
+
+    SubmissionModel.entries.forEach { model ->
+      assertFalse(model.badgeLabel.contains("1:1"), "Unexpected 1:1 in badgeLabel: ${model.badgeLabel}")
+      assertFalse(model.badgeLabel.contains("1:N"), "Unexpected 1:N in badgeLabel: ${model.badgeLabel}")
+    }
+
+    state.mapLayers.forEach { layer ->
+      assertFalse(layer.label.contains("1:1"), "Unexpected 1:1 in layer label: ${layer.label}")
+      assertFalse(layer.label.contains("1:N"), "Unexpected 1:N in layer label: ${layer.label}")
+    }
+
+    state.forms.forEach { form ->
+      assertFalse(form.title.contains("1:1"), "Unexpected 1:1 in form title: ${form.title}")
+      assertFalse(form.title.contains("1:N"), "Unexpected 1:N in form title: ${form.title}")
+      assertFalse(form.description.contains("1:1"), "Unexpected 1:1 in form description: ${form.description}")
+      assertFalse(form.description.contains("1:N"), "Unexpected 1:N in form description: ${form.description}")
+      assertFalse(
+        form.targetDatasetName.contains("1:1"),
+        "Unexpected 1:1 in form targetDatasetName: ${form.targetDatasetName}",
+      )
+      assertFalse(
+        form.targetDatasetName.contains("1:N"),
+        "Unexpected 1:N in form targetDatasetName: ${form.targetDatasetName}",
+      )
+    }
+
+    state.entities.forEach { entity ->
+      assertFalse(entity.label.contains("1:1"), "Unexpected 1:1 in entity label: ${entity.label}")
+      assertFalse(entity.label.contains("1:N"), "Unexpected 1:N in entity label: ${entity.label}")
+      assertFalse(entity.datasetName.contains("1:1"), "Unexpected 1:1 in entity datasetName: ${entity.datasetName}")
+      assertFalse(entity.datasetName.contains("1:N"), "Unexpected 1:N in entity datasetName: ${entity.datasetName}")
+    }
+  }
 }
+

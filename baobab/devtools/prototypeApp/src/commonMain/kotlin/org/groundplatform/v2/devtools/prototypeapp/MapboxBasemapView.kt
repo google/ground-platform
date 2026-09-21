@@ -289,12 +289,7 @@ private fun buildMapboxFeaturesPayloadJson(
       val hex = colorHexToCssString(ent.colorHex)
       val selected = ent.id == selectedEntityId
       val shortLabel = escapeJsonString(ent.label.substringBefore(" •"))
-      val modelBadge =
-        if (ent.submissionModel == SubmissionModel.SINGLE_1_TO_1) {
-          "✓ 1:1"
-        } else {
-          "1:N(${ent.submissions.size})"
-        }
+      val modelBadge = ""
       """{"id":"${ent.id}","label":"$shortLabel","badge":"$modelBadge","geometryType":"${ent.geometryTypeLabel}","nx":${ent.normalizedX},"ny":${ent.normalizedY},"color":"$hex","selected":$selected}"""
     }
   val submissionsJson =

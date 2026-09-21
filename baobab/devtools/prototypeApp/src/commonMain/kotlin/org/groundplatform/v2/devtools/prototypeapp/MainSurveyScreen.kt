@@ -1201,7 +1201,7 @@ private fun EntityBottomSheetCard(
         }
       }
 
-      // Metadata & Share Actions Row: GeoID + 1:1/1:N Badge + QR Code Link + Share PDF Link
+      // Metadata & Share Actions Row: GeoID + QR Code Link + Share PDF Link
       Row(
         modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
         horizontalArrangement = Arrangement.spacedBy(6.dp),
@@ -1221,29 +1221,6 @@ private fun EntityBottomSheetCard(
               MaterialTheme.typography.labelSmall.copy(
                 color = Color(0xFF1B5E20),
                 fontFamily = FontFamily.Monospace,
-                fontWeight = FontWeight.Bold,
-              ),
-          )
-        }
-
-        // 1:1 vs 1:N Submission Model Badge
-        val isOneToOne = entity.submissionModel == SubmissionModel.SINGLE_1_TO_1
-        Box(
-          modifier =
-            Modifier.clip(RoundedCornerShape(8.dp))
-              .background(if (isOneToOne) Color(0xFFEFF6FF) else Color(0xFFFFF7ED))
-              .border(
-                width = 1.dp,
-                color = if (isOneToOne) Color(0xFF1D4ED8) else Color(0xFFC2410C),
-                shape = RoundedCornerShape(8.dp),
-              )
-              .padding(horizontal = 8.dp, vertical = 3.dp)
-        ) {
-          Text(
-            text = entity.submissionModel.badgeLabel,
-            style =
-              MaterialTheme.typography.labelSmall.copy(
-                color = if (isOneToOne) Color(0xFF1E40AF) else Color(0xFF9A3412),
                 fontWeight = FontWeight.Bold,
               ),
           )
@@ -1350,7 +1327,7 @@ private fun EntityBottomSheetCard(
                     if (isEnabled) {
                       form.ctaLabel
                     } else {
-                      "${form.ctaLabel} (1:1 Completed)"
+                      "${form.ctaLabel} (Completed)"
                     },
                   style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
                 )
@@ -1373,7 +1350,7 @@ private fun EntityBottomSheetCard(
 
       HorizontalDivider(color = textColor.copy(alpha = 0.1f))
 
-      // Scrollable Body inside Bottom Sheet: Entity Properties + (1:1 Inline Data OR 1:N List / Detail)
+      // Scrollable Body inside Bottom Sheet: Entity Properties + Submission Data / History
       Column(
         modifier =
           Modifier.weight(1f)
@@ -1415,7 +1392,7 @@ private fun EntityBottomSheetCard(
 
         // --- SUBMISSION DISPLAY LOGIC ---
         if (entity.submissionModel == SubmissionModel.SINGLE_1_TO_1) {
-          // 1:1 Entity:Submission -> Directly show the submission data inline on the card!
+          // Single-Submission Entity -> Directly show the submission data inline on the card!
           val sub = entity.submissions.firstOrNull()
           if (sub != null) {
             OneToOneInlineSubmissionCard(
@@ -1426,12 +1403,12 @@ private fun EntityBottomSheetCard(
             )
           } else {
             Text(
-              text = "No baseline submission recorded yet for this 1:1 entity.",
+              text = "No baseline submission recorded yet for this entity.",
               style = MaterialTheme.typography.bodySmall.copy(color = textColor.copy(alpha = 0.7f)),
             )
           }
         } else {
-          // 1:N Entity:Submissions -> Either show Full Submission Details (if a row was clicked)
+          // Multi-Submission Entity -> Either show Full Submission Details (if a row was clicked)
           // OR show the chronological list of submissions (data collector, timestamp)!
           if (selectedSubmission != null && selectedSubmission.entityId == entity.id) {
             SubmissionFullDetailsCard(
@@ -1457,7 +1434,7 @@ private fun EntityBottomSheetCard(
 }
 
 /**
- * Renders inline submission data for a `1:1` (`SubmissionModel.SINGLE_1_TO_1`) entity with data.
+ * Renders inline submission data for a `SubmissionModel.SINGLE_1_TO_1` entity with data.
  */
 @Composable
 private fun OneToOneInlineSubmissionCard(
@@ -1498,7 +1475,7 @@ private fun OneToOneInlineSubmissionCard(
             modifier = Modifier.size(14.dp),
           )
           Text(
-            text = "1:1 Submission (${submission.formTitle})",
+            text = "Submission (${submission.formTitle})",
             style =
               MaterialTheme.typography.labelMedium.copy(
                 fontWeight = FontWeight.Bold,
@@ -2149,7 +2126,7 @@ private fun SurveyListView(state: PrototypeAppState) {
                       ),
                   )
                   Text(
-                    text = "GeoID: ${entity.geoId} • ${entity.submissionModel.badgeLabel}",
+                    text = "GeoID: ${entity.geoId}",
                     style =
                       MaterialTheme.typography.labelSmall.copy(
                         color = Color(0xFF1E6F50),
@@ -2313,7 +2290,7 @@ private fun SurveyListView(state: PrototypeAppState) {
                 }
                 Text(
                   text =
-                    "Action: \"${form.ctaLabel}\" • ${form.submissionModel.badgeLabel} • ${form.version}",
+                    "Action: \"${form.ctaLabel}\" • ${form.version}",
                   style =
                     MaterialTheme.typography.labelSmall.copy(
                       color = Color(0xFF1E6F50),
@@ -3339,190 +3316,11 @@ private fun ManageOfflineMapsSubScreen(state: PrototypeAppState) {
 }
 
 /**
- * Drawer Sub-Screen: `Settings` (consistent with `docs/design/00-index.md` "Measurement Unit
- * Preferences", "On-the-Fly Language Switching", and "Uploaded Media Cache Eviction").
+ * Drawer Sub-Screen: `Settings` — delegates to [GroundSettingsScreen], ported from
+ * `org.groundplatform.android.ui.settings.SettingsScreen` in `github.com/google/ground-android`.
  */
 @Composable
 private fun SurveySettingsSubScreen(state: PrototypeAppState) {
-  val textColor = MaterialTheme.colorScheme.onSurface
-
-  Column(
-    modifier =
-      Modifier.fillMaxSize()
-        .verticalScroll(rememberScrollState())
-        .padding(16.dp),
-    verticalArrangement = Arrangement.spacedBy(14.dp),
-  ) {
-    Row(
-      modifier = Modifier.fillMaxWidth(),
-      horizontalArrangement = Arrangement.SpaceBetween,
-      verticalAlignment = Alignment.CenterVertically,
-    ) {
-      Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(6.dp),
-      ) {
-        Icon(
-          imageVector = Icons.Default.Settings,
-          contentDescription = null,
-          tint = Color(0xFF1E6F50),
-          modifier = Modifier.size(20.dp),
-        )
-        Text(
-          text = "Field App Settings",
-          style =
-            MaterialTheme.typography.titleMedium.copy(
-              fontWeight = FontWeight.Bold,
-              color = textColor,
-            ),
-        )
-      }
-      OutlinedButton(
-        onClick = { state.closeDrawerSubView() },
-        shape = RoundedCornerShape(10.dp),
-      ) {
-        Icon(
-          imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-          contentDescription = null,
-          modifier = Modifier.size(14.dp),
-        )
-        Spacer(modifier = Modifier.width(4.dp))
-        Text("Back to Survey")
-      }
-    }
-
-    // 1. Measurement Units (Metric vs Imperial)
-    Card(
-      modifier = Modifier.fillMaxWidth(),
-      shape = RoundedCornerShape(12.dp),
-      colors = CardDefaults.cardColors(containerColor = Color.White),
-    ) {
-      Column(
-        modifier = Modifier.padding(14.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-      ) {
-        Text(
-          text = "Measurement Unit System",
-          style =
-            MaterialTheme.typography.labelLarge.copy(
-              fontWeight = FontWeight.Bold,
-              color = Color(0xFF111827),
-            ),
-        )
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-          MeasurementUnitSystem.entries.forEach { sys ->
-            val selected = state.unitSystem == sys
-            Button(
-              onClick = { state.updateUnitSystem(sys) },
-              colors =
-                ButtonDefaults.buttonColors(
-                  containerColor = if (selected) Color(0xFF1E6F50) else Color(0xFFF3F4F6),
-                  contentColor = if (selected) Color.White else Color(0xFF374151),
-                ),
-              shape = RoundedCornerShape(10.dp),
-            ) {
-              Text(sys.label, style = MaterialTheme.typography.labelSmall)
-            }
-          }
-        }
-      }
-    }
-
-    // 2. On-the-Fly Survey Language Switching
-    Card(
-      modifier = Modifier.fillMaxWidth(),
-      shape = RoundedCornerShape(12.dp),
-      colors = CardDefaults.cardColors(containerColor = Color.White),
-    ) {
-      Column(
-        modifier = Modifier.padding(14.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-      ) {
-        Text(
-          text = "Survey & UI Language",
-          style =
-            MaterialTheme.typography.labelLarge.copy(
-              fontWeight = FontWeight.Bold,
-              color = Color(0xFF111827),
-            ),
-        )
-        Row(
-          modifier = Modifier.horizontalScroll(rememberScrollState()),
-          horizontalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-          listOf("en (English)", "sw (Kiswahili)", "vi (Tiếng Việt)", "es (Español)").forEach {
-            locale ->
-            val selected = state.selectedLanguageLocale == locale
-            Button(
-              onClick = { state.updateLanguageLocale(locale) },
-              colors =
-                ButtonDefaults.buttonColors(
-                  containerColor = if (selected) Color(0xFF1E6F50) else Color(0xFFF3F4F6),
-                  contentColor = if (selected) Color.White else Color(0xFF374151),
-                ),
-              shape = RoundedCornerShape(10.dp),
-            ) {
-              Text(locale, style = MaterialTheme.typography.labelSmall)
-            }
-          }
-        }
-      }
-    }
-
-    // 3. Uploaded Media Cache Eviction
-    Card(
-      modifier = Modifier.fillMaxWidth(),
-      shape = RoundedCornerShape(12.dp),
-      colors = CardDefaults.cardColors(containerColor = Color.White),
-    ) {
-      Row(
-        modifier = Modifier.fillMaxWidth().padding(14.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically,
-      ) {
-        Column(modifier = Modifier.weight(1f)) {
-          Text(
-            text = "Uploaded Media Cache Eviction",
-            style =
-              MaterialTheme.typography.labelLarge.copy(
-                fontWeight = FontWeight.Bold,
-                color = Color(0xFF111827),
-              ),
-          )
-          Text(
-            text =
-              if (state.mediaCacheCleared) {
-                "Evicted 128 MB of already-synced field photos (thumbnails preserved)."
-              } else {
-                "Purge locally cached photos already synchronized to cloud storage."
-              },
-            style = MaterialTheme.typography.labelSmall.copy(color = Color(0xFF6B7280)),
-          )
-        }
-        Button(
-          onClick = { state.evictUploadedMediaCache() },
-          enabled = !state.mediaCacheCleared,
-          colors =
-            ButtonDefaults.buttonColors(
-              containerColor = Color(0xFF1E6F50),
-              contentColor = Color.White,
-            ),
-          shape = RoundedCornerShape(10.dp),
-        ) {
-          if (state.mediaCacheCleared) {
-            Icon(
-              imageVector = Icons.Default.Check,
-              contentDescription = null,
-              modifier = Modifier.size(13.dp),
-            )
-            Spacer(modifier = Modifier.width(4.dp))
-          }
-          Text(
-            text = if (state.mediaCacheCleared) "Purged" else "Purge Cache",
-            style = MaterialTheme.typography.labelSmall,
-          )
-        }
-      }
-    }
-  }
+  GroundSettingsScreen(state = state)
 }
+

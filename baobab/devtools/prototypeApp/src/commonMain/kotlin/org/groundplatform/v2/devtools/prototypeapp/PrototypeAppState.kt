@@ -118,20 +118,60 @@ enum class MainDrawerSubView {
  */
 enum class SubmissionModel(val badgeLabel: String, val description: String) {
   SINGLE_1_TO_1(
-    badgeLabel = "1:1 Single Submission",
+    badgeLabel = "Single Submission",
     description = "Baseline registration / asset audit with a single submission per entity",
   ),
   MULTIPLE_1_TO_N(
-    badgeLabel = "1:N Multiple Submissions",
+    badgeLabel = "Multiple Submissions",
     description = "Longitudinal monitoring with chronological follow-up submissions",
   ),
 }
 
-/** Measurement unit preference (per `docs/design/00-index.md` "Configurable Unit System"). */
-enum class MeasurementUnitSystem(val label: String, val areaUnit: String, val distanceUnit: String) {
-  METRIC("Metric (ha, m)", "ha", "m"),
-  IMPERIAL("Imperial (acres, ft)", "acres", "ft"),
+/** Measurement unit preference (per `docs/design/00-index.md` and `ground-android` `MeasurementUnits`). */
+enum class MeasurementUnitSystem(
+  val label: String,
+  val shortLabel: String,
+  val areaUnit: String,
+  val distanceUnit: String,
+) {
+  METRIC("Metric (ha, m)", "Metric", "ha", "m"),
+  IMPERIAL("Imperial (acres, ft)", "Imperial", "acres", "ft"),
 }
+
+/** Supported language option matching `arrays.xml` & `strings-untranslated.xml` in `github.com/google/ground-android`. */
+data class GroundLanguageOption(
+  val code: String,
+  val label: String,
+)
+
+/**
+ * User settings model ported from `org.groundplatform.domain.model.settings.UserSettings` in
+ * `github.com/google/ground-android`.
+ */
+data class UserSettings(
+  val language: String = "en",
+  val measurementUnits: MeasurementUnitSystem = MeasurementUnitSystem.METRIC,
+  val shouldUploadPhotosOnWifiOnly: Boolean = true,
+)
+
+const val GROUND_WEBSITE_URL = "https://groundplatform.org/"
+
+/**
+ * Official language entries and entry values from `github.com/google/ground-android`
+ * (`app/src/main/res/values/arrays.xml` and `strings-untranslated.xml`), plus Kiswahili (`sw`).
+ */
+val GROUND_LANGUAGE_OPTIONS: List<GroundLanguageOption> =
+  listOf(
+    GroundLanguageOption(code = "en", label = "English"),
+    GroundLanguageOption(code = "fr", label = "Français"),
+    GroundLanguageOption(code = "es", label = "Español"),
+    GroundLanguageOption(code = "pt", label = "Português"),
+    GroundLanguageOption(code = "vi", label = "Tiếng Việt"),
+    GroundLanguageOption(code = "th", label = "ไทย"),
+    GroundLanguageOption(code = "lo", label = "ພາສາລາວ"),
+    GroundLanguageOption(code = "km", label = "ភាសាខ្មែរ"),
+    GroundLanguageOption(code = "sw", label = "Kiswahili"),
+  )
 
 /** Visual color/feature theme for a survey's placeholder map thumbnail. */
 enum class MapThumbnailTheme(
@@ -460,11 +500,34 @@ class PrototypeAppState(
   var unitSystem by mutableStateOf(MeasurementUnitSystem.METRIC)
     private set
 
+  var selectedLanguageCode by mutableStateOf("en")
+    private set
+
   var selectedLanguageLocale by mutableStateOf("en (English)")
+    private set
+
+  var shouldUploadPhotosOnWifiOnly by mutableStateOf(false)
+    private set
+
+  var visitedWebsiteUrl by mutableStateOf<String?>(null)
     private set
 
   var mediaCacheCleared by mutableStateOf(false)
     private set
+
+  /** Display label of the currently selected language (e.g. `"English"`, `"Français"`). */
+  val selectedLanguageDisplayName: String
+    get() =
+      GROUND_LANGUAGE_OPTIONS.firstOrNull { it.code == selectedLanguageCode }?.label ?: "English"
+
+  /** Snapshot of user settings matching `UserSettings` in `github.com/google/ground-android`. */
+  val userSettings: UserSettings
+    get() =
+      UserSettings(
+        language = selectedLanguageCode,
+        measurementUnits = unitSystem,
+        shouldUploadPhotosOnWifiOnly = shouldUploadPhotosOnWifiOnly,
+      )
 
   // --- User GPS Location & Auto-Centering Map Camera State ---
   /** Normalized world X coordinate `[0, 1]` of the collector's current GPS location. */
@@ -1298,9 +1361,44 @@ class PrototypeAppState(
     unitSystem = system
   }
 
-  /** Updates the active in-app language locale. */
+  /**
+   * Updates the active application & survey language using either a language code (e.g. `"en"`,
+   * `"fr"`, `"es"`, `"pt"`, `"vi"`, `"th"`, `"lo"`, `"km"`, `"sw"`) or a formatted locale string
+   * (e.g. `"fr (Français)"`). Synchronizes both [selectedLanguageCode] and [selectedLanguageLocale].
+   */
+  fun updateSelectedLanguage(languageCodeOrLocale: String) {
+    val trimmed = languageCodeOrLocale.trim()
+    val codeCandidate = trimmed.substringBefore(" ").lowercase()
+    val matched =
+      GROUND_LANGUAGE_OPTIONS.firstOrNull {
+        it.code.equals(trimmed, ignoreCase = true) ||
+          it.code.equals(codeCandidate, ignoreCase = true) ||
+          it.label.equals(trimmed, ignoreCase = true) ||
+          "${it.code} (${it.label})".equals(trimmed, ignoreCase = true)
+      }
+    if (matched != null) {
+      selectedLanguageCode = matched.code
+      selectedLanguageLocale = "${matched.code} (${matched.label})"
+    } else {
+      selectedLanguageCode = codeCandidate.ifEmpty { "en" }
+      selectedLanguageLocale = trimmed.ifEmpty { "en (English)" }
+    }
+  }
+
+  /** Updates the active in-app language locale (delegates to [updateSelectedLanguage]). */
   fun updateLanguageLocale(locale: String) {
-    selectedLanguageLocale = locale
+    updateSelectedLanguage(locale)
+  }
+
+  /** Updates the "Upload photos over Wi-Fi only" preference (matching `SettingsViewModel` in `ground-android`). */
+  fun updateUploadMediaOverUnmeteredConnectionOnly(enabled: Boolean) {
+    shouldUploadPhotosOnWifiOnly = enabled
+  }
+
+  /** Records a click on "Visit website" (`https://groundplatform.org/`) in the Settings Help section. */
+  fun visitGroundWebsite(url: String = GROUND_WEBSITE_URL) {
+    visitedWebsiteUrl = url
+    activeSurveyNotice = "Opened $url"
   }
 
   /** Evicts uploaded media attachments from local device cache (per `00-index.md`). */
@@ -1522,7 +1620,7 @@ class PrototypeAppState(
         // Entity Dataset Layers (solid outlines)
         MapLayerItem(
           id = "layer-coffee-parcels",
-          label = "Smallholder Coffee Parcels (1:1)",
+          label = "Smallholder Coffee Parcels",
           sourceDescription = "Entity Dataset: coffee_parcels (Polygon)",
           colorHex = 0xFF2E7D32,
           geometryTypeLabel = "Polygon",
@@ -1531,7 +1629,7 @@ class PrototypeAppState(
         ),
         MapLayerItem(
           id = "layer-shade-transects",
-          label = "Shade Tree Monitoring Plots (1:N)",
+          label = "Shade Tree Monitoring Plots",
           sourceDescription = "Entity Dataset: shade_monitoring_plots (Polygon)",
           colorHex = 0xFF1565C0,
           geometryTypeLabel = "Polygon",
@@ -1540,7 +1638,7 @@ class PrototypeAppState(
         ),
         MapLayerItem(
           id = "layer-water-points",
-          label = "Cooperative Washing Stations (1:N)",
+          label = "Cooperative Washing Stations",
           sourceDescription = "Entity Dataset: washing_stations (Point)",
           colorHex = 0xFFEF6C00,
           geometryTypeLabel = "Point",
@@ -1679,11 +1777,11 @@ class PrototypeAppState(
           id = "form-eudr-baseline",
           title = "EUDR Parcel Baseline Registration",
           description =
-            "Single-submission (1:1) baseline georeferencing, deforestation-free attestation, and cultivar count.",
+            "Single-submission baseline georeferencing, deforestation-free attestation, and cultivar count.",
           version = "v2026.09.1",
           submissionModel = SubmissionModel.SINGLE_1_TO_1,
           targetDatasetId = "coffee_parcels",
-          targetDatasetName = "Smallholder Coffee Parcels (1:1)",
+          targetDatasetName = "Smallholder Coffee Parcels",
           questionCount = 8,
           ctaLabel = "Register baseline parcel",
         ),
@@ -1691,11 +1789,11 @@ class PrototypeAppState(
           id = "form-household-interview",
           title = "Smallholder Household Socio-Economic Survey",
           description =
-            "Single-submission (1:1) grower household interview, farm income diversification, and cooperative membership.",
+            "Single-submission grower household interview, farm income diversification, and cooperative membership.",
           version = "v2026.09.1",
           submissionModel = SubmissionModel.SINGLE_1_TO_1,
           targetDatasetId = "coffee_parcels",
-          targetDatasetName = "Smallholder Coffee Parcels (1:1)",
+          targetDatasetName = "Smallholder Coffee Parcels",
           questionCount = 6,
           ctaLabel = "Interview household",
         ),
@@ -1703,11 +1801,11 @@ class PrototypeAppState(
           id = "form-shade-canopy-audit",
           title = "Seasonal Shade Tree & Canopy Audit",
           description =
-            "Longitudinal (1:N) multi-wave monitoring of native shade tree survival, canopy percentage, and soil moisture.",
+            "Longitudinal multi-wave monitoring of native shade tree survival, canopy percentage, and soil moisture.",
           version = "v2026.09.2",
           submissionModel = SubmissionModel.MULTIPLE_1_TO_N,
           targetDatasetId = "shade_monitoring_plots",
-          targetDatasetName = "Shade Tree Monitoring Plots (1:N)",
+          targetDatasetName = "Shade Tree Monitoring Plots",
           questionCount = 11,
           ctaLabel = "Record canopy audit",
         ),
@@ -1715,11 +1813,11 @@ class PrototypeAppState(
           id = "form-deforestation-alert",
           title = "GLAD Canopy Disturbance Alert Verification",
           description =
-            "Field ground-truthing (1:N) of satellite canopy disturbance and deforestation alerts.",
+            "Field ground-truthing of satellite canopy disturbance and deforestation alerts.",
           version = "v2026.09.2",
           submissionModel = SubmissionModel.MULTIPLE_1_TO_N,
           targetDatasetId = "shade_monitoring_plots",
-          targetDatasetName = "Shade Tree Monitoring Plots (1:N)",
+          targetDatasetName = "Shade Tree Monitoring Plots",
           questionCount = 5,
           ctaLabel = "Validate alert",
         ),
@@ -1727,11 +1825,11 @@ class PrototypeAppState(
           id = "form-water-quality",
           title = "Washing Station Effluent & Water Check",
           description =
-            "Periodic (1:N) water pH, turbidity, and eco-pulper recycling inspection at cooperative stations.",
+            "Periodic water pH, turbidity, and eco-pulper recycling inspection at cooperative stations.",
           version = "v2026.08.4",
           submissionModel = SubmissionModel.MULTIPLE_1_TO_N,
           targetDatasetId = "washing_stations",
-          targetDatasetName = "Cooperative Washing Stations (1:N)",
+          targetDatasetName = "Cooperative Washing Stations",
           questionCount = 6,
           ctaLabel = "Inspect water effluent",
         ),

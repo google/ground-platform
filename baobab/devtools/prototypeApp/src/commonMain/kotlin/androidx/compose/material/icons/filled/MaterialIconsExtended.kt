@@ -690,5 +690,172 @@ public val Icons.Filled.Tablet: ImageVector
   }
 private var _tablet: ImageVector? = null
 
+/** Matches `ic_cloud_upload.xml` from `github.com/google/ground-android`. */
+public val Icons.Filled.CloudUpload: ImageVector
+  get() {
+    if (_cloudUpload != null) return _cloudUpload!!
+    _cloudUpload =
+      materialIcon(name = "Filled.CloudUpload") {
+        materialPath {
+          moveTo(19.35f, 10.04f)
+          curveTo(18.67f, 6.59f, 15.64f, 4.0f, 12.0f, 4.0f)
+          curveTo(9.11f, 4.0f, 6.6f, 5.64f, 5.35f, 8.04f)
+          curveTo(2.34f, 8.36f, 0.0f, 10.91f, 0.0f, 14.0f)
+          curveToRelative(0.0f, 3.31f, 2.69f, 6.0f, 6.0f, 6.0f)
+          horizontalLineToRelative(13.0f)
+          curveToRelative(2.76f, 0.0f, 5.0f, -2.24f, 5.0f, -5.0f)
+          curveToRelative(0.0f, -2.64f, -2.05f, -4.78f, -4.65f, -4.96f)
+          close()
+          moveTo(14.0f, 13.0f)
+          verticalLineToRelative(4.0f)
+          horizontalLineToRelative(-4.0f)
+          verticalLineToRelative(-4.0f)
+          horizontalLineTo(7.0f)
+          lineToRelative(5.0f, -5.0f)
+          lineToRelative(5.0f, 5.0f)
+          horizontalLineToRelative(-3.0f)
+          close()
+        }
+      }
+    return _cloudUpload!!
+  }
+private var _cloudUpload: ImageVector? = null
+
+/** Matches `ic_language.xml` from `github.com/google/ground-android`. */
+public val Icons.Filled.Language: ImageVector
+  get() {
+    if (_language != null) return _language!!
+    _language =
+      materialIcon(name = "Filled.Language") {
+        materialPath {
+          moveTo(11.9f, 22.0f)
+          lineTo(16.45f, 10.0f)
+          lineTo(18.55f, 10.0f)
+          lineTo(23.1f, 22.0f)
+          lineTo(21.0f, 22.0f)
+          lineTo(19.925f, 18.95f)
+          lineTo(15.075f, 18.95f)
+          lineTo(14.0f, 22.0f)
+          close()
+          moveTo(4.0f, 19.0f)
+          lineTo(2.6f, 17.6f)
+          lineTo(7.65f, 12.55f)
+          quadTo(6.775f, 11.675f, 6.0625f, 10.55f)
+          quadTo(5.35f, 9.425f, 4.75f, 8.0f)
+          lineTo(6.85f, 8.0f)
+          quadTo(7.35f, 8.975f, 7.85f, 9.7f)
+          quadTo(8.35f, 10.425f, 9.05f, 11.15f)
+          quadTo(9.875f, 10.325f, 10.7625f, 8.8375f)
+          quadTo(11.65f, 7.35f, 12.1f, 6.0f)
+          lineTo(1.0f, 6.0f)
+          lineTo(1.0f, 4.0f)
+          lineTo(8.0f, 4.0f)
+          lineTo(8.0f, 2.0f)
+          lineTo(10.0f, 2.0f)
+          lineTo(10.0f, 4.0f)
+          lineTo(17.0f, 4.0f)
+          lineTo(17.0f, 6.0f)
+          lineTo(14.1f, 6.0f)
+          quadTo(13.575f, 7.8f, 12.525f, 9.7f)
+          quadTo(11.475f, 11.6f, 10.45f, 12.6f)
+          lineTo(12.85f, 15.05f)
+          lineTo(12.1f, 17.1f)
+          lineTo(9.05f, 13.975f)
+          close()
+          moveTo(15.7f, 17.2f)
+          lineTo(19.3f, 17.2f)
+          lineTo(17.5f, 12.1f)
+          close()
+        }
+      }
+    return _language!!
+  }
+private var _language: ImageVector? = null
+
+/** Matches `ic_measurement.xml` from `github.com/google/ground-android`. */
+public val Icons.Filled.Straighten: ImageVector
+  get() {
+    if (_straighten != null) return _straighten!!
+    _straighten =
+      materialIcon(name = "Filled.Straighten") {
+        materialPath {
+          moveTo(21.0f, 6.0f)
+          horizontalLineTo(3.0f)
+          curveTo(1.9f, 6.0f, 1.0f, 6.9f, 1.0f, 8.0f)
+          verticalLineToRelative(8.0f)
+          curveToRelative(0.0f, 1.1f, 0.9f, 2.0f, 2.0f, 2.0f)
+          horizontalLineToRelative(18.0f)
+          curveToRelative(1.1f, 0.0f, 2.0f, -0.9f, 2.0f, -2.0f)
+          verticalLineTo(8.0f)
+          curveTo(23.0f, 6.9f, 22.1f, 6.0f, 21.0f, 6.0f)
+          close()
+          moveTo(21.0f, 16.0f)
+          horizontalLineTo(3.0f)
+          verticalLineTo(8.0f)
+          horizontalLineToRelative(2.0f)
+          verticalLineToRelative(4.0f)
+          horizontalLineToRelative(2.0f)
+          verticalLineTo(8.0f)
+          horizontalLineToRelative(2.0f)
+          verticalLineToRelative(4.0f)
+          horizontalLineToRelative(2.0f)
+          verticalLineTo(8.0f)
+          horizontalLineToRelative(2.0f)
+          verticalLineToRelative(4.0f)
+          horizontalLineToRelative(2.0f)
+          verticalLineTo(8.0f)
+          horizontalLineToRelative(2.0f)
+          verticalLineToRelative(4.0f)
+          horizontalLineToRelative(2.0f)
+          verticalLineTo(8.0f)
+          horizontalLineToRelative(2.0f)
+          verticalLineTo(16.0f)
+          close()
+        }
+      }
+    return _straighten!!
+  }
+private var _straighten: ImageVector? = null
+
+/** Matches `ic_open_in_new.xml` from `github.com/google/ground-android`. */
+public val Icons.Filled.OpenInNew: ImageVector
+  get() {
+    if (_openInNew != null) return _openInNew!!
+    _openInNew =
+      materialIcon(name = "Filled.OpenInNew", autoMirror = true) {
+        materialPath {
+          moveTo(19.0f, 19.0f)
+          horizontalLineTo(5.0f)
+          verticalLineTo(5.0f)
+          horizontalLineToRelative(7.0f)
+          verticalLineTo(3.0f)
+          horizontalLineTo(5.0f)
+          curveToRelative(-1.11f, 0.0f, -2.0f, 0.9f, -2.0f, 2.0f)
+          verticalLineToRelative(14.0f)
+          curveToRelative(0.0f, 1.1f, 0.89f, 2.0f, 2.0f, 2.0f)
+          horizontalLineToRelative(14.0f)
+          curveToRelative(1.1f, 0.0f, 2.0f, -0.9f, 2.0f, -2.0f)
+          verticalLineToRelative(-7.0f)
+          horizontalLineToRelative(-2.0f)
+          verticalLineToRelative(7.0f)
+          close()
+          moveTo(14.0f, 3.0f)
+          verticalLineToRelative(2.0f)
+          horizontalLineToRelative(3.59f)
+          lineToRelative(-9.83f, 9.83f)
+          lineToRelative(1.41f, 1.41f)
+          lineTo(19.0f, 6.41f)
+          verticalLineTo(10.0f)
+          horizontalLineToRelative(2.0f)
+          verticalLineTo(3.0f)
+          horizontalLineToRelative(-7.0f)
+          close()
+        }
+      }
+    return _openInNew!!
+  }
+private var _openInNew: ImageVector? = null
+
+
 
 

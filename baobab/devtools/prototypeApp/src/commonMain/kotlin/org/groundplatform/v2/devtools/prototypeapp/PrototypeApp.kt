@@ -52,6 +52,7 @@ import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.MyLocation
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Smartphone
 import androidx.compose.material.icons.filled.Tablet
 import androidx.compose.material.icons.filled.Timeline
@@ -717,29 +718,31 @@ fun GroundSplashScreen(state: PrototypeAppState) {
   }
 }
 
-/** 2. Sign In screen (Sign in with Google only for now). */
+/** 2. Sign In screen (Sign in with Google + Language selector matching Ground SettingsSelectItem). */
 @Composable
 fun GroundSignInScreen(state: PrototypeAppState) {
   val surfaceColor = MaterialTheme.colorScheme.surface
   val onSurfaceColor = MaterialTheme.colorScheme.onSurface
+  val strings = groundLocalizedStringsFor(state.selectedLanguageCode)
 
   Column(
     modifier =
       Modifier.fillMaxSize()
         .background(surfaceColor)
-        .padding(horizontal = 24.dp, vertical = 28.dp),
+        .verticalScroll(rememberScrollState())
+        .padding(horizontal = 24.dp, vertical = 22.dp),
     horizontalAlignment = Alignment.CenterHorizontally,
     verticalArrangement = Arrangement.SpaceBetween,
   ) {
     // Top Brand Header
     Column(
       horizontalAlignment = Alignment.CenterHorizontally,
-      verticalArrangement = Arrangement.spacedBy(8.dp),
+      verticalArrangement = Arrangement.spacedBy(6.dp),
     ) {
-      Spacer(modifier = Modifier.height(8.dp))
+      Spacer(modifier = Modifier.height(4.dp))
       Box(
         modifier =
-          Modifier.size(64.dp).clip(RoundedCornerShape(18.dp)).background(Color(0xFF1E6F50)),
+          Modifier.size(60.dp).clip(RoundedCornerShape(18.dp)).background(Color(0xFF1E6F50)),
         contentAlignment = Alignment.Center,
       ) {
         Text(
@@ -770,6 +773,8 @@ fun GroundSignInScreen(state: PrototypeAppState) {
       )
     }
 
+    Spacer(modifier = Modifier.height(10.dp))
+
     // Center Field Survey Illustration Card
     Card(
       modifier = Modifier.fillMaxWidth(),
@@ -781,15 +786,15 @@ fun GroundSignInScreen(state: PrototypeAppState) {
         ),
     ) {
       Column(
-        modifier = Modifier.padding(18.dp),
+        modifier = Modifier.padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(12.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp),
       ) {
         // Stylized map preview graphic
         Box(
           modifier =
             Modifier.fillMaxWidth()
-              .height(148.dp)
+              .height(132.dp)
               .clip(RoundedCornerShape(14.dp))
               .background(Color(0xFF1B5E20))
         ) {
@@ -875,12 +880,16 @@ fun GroundSignInScreen(state: PrototypeAppState) {
       }
     }
 
-    // Bottom Sign-In Actions (Sign in with Google only for now)
+    Spacer(modifier = Modifier.height(10.dp))
+
+    // Language Selector matching Ground SettingsSelectItem + Bottom Sign-In Actions
     Column(
       modifier = Modifier.fillMaxWidth(),
       horizontalAlignment = Alignment.CenterHorizontally,
       verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
+      SignInLanguageSelector(state = state)
+
       Button(
         onClick = { state.signInWithGoogle() },
         modifier = Modifier.fillMaxWidth().height(52.dp),
@@ -915,7 +924,7 @@ fun GroundSignInScreen(state: PrototypeAppState) {
             )
           }
           Text(
-            text = "Sign in with Google",
+            text = strings.signInWithGoogle,
             style =
               MaterialTheme.typography.titleSmall.copy(
                 fontWeight = FontWeight.SemiBold,
@@ -1886,6 +1895,14 @@ private fun UxDesignerInspectorPanel(
               {
                 state.navigateTo(PrototypeScreen.MAIN_SURVEY)
                 state.updateDrawerOpen(true)
+              },
+            ),
+            Triple(
+              Icons.Default.Settings,
+              "Settings Screen",
+              {
+                state.navigateTo(PrototypeScreen.MAIN_SURVEY)
+                state.drawerOpenSettings()
               },
             ),
             Triple(
