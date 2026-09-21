@@ -16,6 +16,7 @@ package org.groundplatform.v2.devtools.prototypeapp
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 class PrototypeAppStateTest {
@@ -163,11 +164,26 @@ class PrototypeAppStateTest {
     val state = PrototypeAppState(initialScreen = PrototypeScreen.MAIN_SURVEY)
     state.setMainSurveyViewMode(MainSurveyViewMode.LIST)
 
-    // ListFilterTab only contains ALL, ENTITIES, SUBMISSIONS (Forms are a grouping for Submissions)
+    // ListFilterTab only contains ALL, ENTITIES ("Sites"), SUBMISSIONS (Forms are a grouping for Submissions)
     assertEquals(
       listOf(ListFilterTab.ALL, ListFilterTab.ENTITIES, ListFilterTab.SUBMISSIONS),
       ListFilterTab.entries,
     )
+    assertEquals("Sites", ListFilterTab.ENTITIES.label)
+    assertEquals("Sites", state.activeEntitiesTabLabel)
+    assertEquals("sites", state.activeEntitiesCountNoun)
+    assertEquals("Coffee Parcel", state.entitySingularTypeLabel("entity-nyr-104"))
+    assertEquals("Monitoring Plot", state.entitySingularTypeLabel("entity-shade-201"))
+    assertEquals("Washing Station", state.entitySingularTypeLabel("entity-station-01"))
+
+    // When filtered down to a single visible entity dataset layer, dynamic domain naming activates
+    state.toggleLayerVisibility("layer-shade-transects")
+    state.toggleLayerVisibility("layer-water-points")
+    assertEquals("Coffee Parcels", state.activeEntitiesTabLabel)
+    assertEquals("coffee parcels", state.activeEntitiesCountNoun)
+    state.toggleLayerVisibility("layer-shade-transects")
+    state.toggleLayerVisibility("layer-water-points")
+    assertEquals("Sites", state.activeEntitiesTabLabel)
 
     // Unfiltered counts: 4 entities, 7 submissions grouped across 5 forms
     assertEquals(4, state.filteredListEntities.size)
@@ -604,5 +620,122 @@ class PrototypeAppStateTest {
       assertFalse(entity.datasetName.contains("1:N"), "Unexpected 1:N in entity datasetName: ${entity.datasetName}")
     }
   }
+
+  @Test
+  fun straightLineNavigation_toEntityAndSubmission_computesBearingDistanceAndStepsUser() {
+    val state = PrototypeAppState(initialScreen = PrototypeScreen.MAIN_SURVEY)
+    assertEquals(null, state.activeNavigation)
+
+    // 1. Start straight-line navigation to a Geospatial Entity
+    state.startNavigationToEntity("entity-nyr-104")
+    val entityNav = assertNotNull(state.activeNavigation)
+    assertEquals(NavigationTargetKind.ENTITY, entityNav.targetKind)
+    assertEquals("entity-nyr-104", entityNav.targetId)
+    assertTrue(state.isNavigatingToEntity("entity-nyr-104"))
+    assertFalse(state.isNavigatingToSubmission("sub-nyr-104-a"))
+    assertTrue(entityNav.vector.distanceMeters > 0)
+    assertTrue(entityNav.vector.bearingDegrees in 0..359)
+    assertTrue(entityNav.formattedDistance.endsWith("m") || entityNav.formattedDistance.endsWith("km"))
+
+    // Verify Mapbox JSON payload includes active straight-line navigation metadata
+    val entityPayloadJson = buildMapboxFeaturesPayloadJson(state)
+    assertTrue(entityPayloadJson.contains("\"navigation\":{\"active\":true"))
+    assertTrue(entityPayloadJson.contains("\"kind\":\"ENTITY\""))
+    assertTrue(entityPayloadJson.contains("\"targetId\":\"entity-nyr-104\""))
+
+    // Verify Imperial unit formatting on active straight-line navigation
+    state.updateUnitSystem(MeasurementUnitSystem.IMPERIAL)
+    val imperialNav = assertNotNull(state.activeNavigation)
+    assertTrue(
+      imperialNav.formattedDistance.endsWith("ft") || imperialNav.formattedDistance.endsWith("mi"),
+      "Expected Imperial distance suffix but got: ${imperialNav.formattedDistance}",
+    )
+    state.updateUnitSystem(MeasurementUnitSystem.METRIC)
+
+    // 2. Simulate walking closer toward the navigation target until arrival
+    val initialDist = entityNav.vector.distanceMeters
+    state.stepUserTowardNavigationTarget(stepFraction = 0.5f)
+    val closerNav = assertNotNull(state.activeNavigation)
+    assertTrue(closerNav.vector.distanceMeters < initialDist)
+
+    repeat(10) { state.stepUserTowardNavigationTarget(stepFraction = 0.5f) }
+    val arrivedNav = assertNotNull(state.activeNavigation)
+    assertTrue(arrivedNav.vector.isArrived)
+    assertEquals(0, arrivedNav.vector.estimatedWalkMinutes)
+
+    // 3. Switch straight-line navigation to a Form Submission
+    state.startNavigationToSubmission("sub-shade-201-wave3")
+    val subNav = assertNotNull(state.activeNavigation)
+    assertEquals(NavigationTargetKind.SUBMISSION, subNav.targetKind)
+    assertEquals("sub-shade-201-wave3", subNav.targetId)
+    assertTrue(state.isNavigatingToSubmission("sub-shade-201-wave3"))
+    assertFalse(state.isNavigatingToEntity("entity-nyr-104"))
+    assertNotNull(state.formattedWayfindingBadgeForSubmission("sub-shade-201-wave3"))
+
+    val subPayloadJson = buildMapboxFeaturesPayloadJson(state)
+    assertTrue(subPayloadJson.contains("\"kind\":\"SUBMISSION\""))
+    assertTrue(subPayloadJson.contains("\"targetId\":\"sub-shade-201-wave3\""))
+
+    // 4. Toggle / Stop straight-line navigation
+    state.toggleNavigationToSubmission("sub-shade-201-wave3")
+    assertEquals(null, state.activeNavigation)
+    assertTrue(buildMapboxFeaturesPayloadJson(state).contains("\"navigation\":{\"active\":false}"))
+  }
+
+  @Test
+  fun downloadSurveyEscapeHatch_afterTosPromptsBeforeSignOut_andFromSurveyListReturnsToList() {
+    val state = PrototypeAppState()
+    state.completeSplashLoading()
+    state.signInWithGoogle()
+    state.acceptTermsOfService()
+
+    // 1. Reached after ToS -> origin is AFTER_TOS
+    assertEquals(PrototypeScreen.DOWNLOAD_SURVEY, state.currentScreen)
+    assertEquals(DownloadSurveyEntryOrigin.AFTER_TOS, state.downloadSurveyEntryOrigin)
+    assertFalse(state.isDownloadSurveyAccessedFromSurveyList)
+    assertFalse(state.isDownloadSurveySignOutPromptOpen)
+
+    // Back action prompts first without immediately signing out
+    state.navigateBackFromDownloadSurvey()
+    assertTrue(state.isDownloadSurveySignOutPromptOpen)
+    assertEquals(PrototypeScreen.DOWNLOAD_SURVEY, state.currentScreen)
+    assertTrue(state.isSignedIn)
+
+    // Canceling prompt keeps user on Download surveys screen and signed in
+    state.dismissDownloadSurveySignOutPrompt()
+    assertFalse(state.isDownloadSurveySignOutPromptOpen)
+    assertEquals(PrototypeScreen.DOWNLOAD_SURVEY, state.currentScreen)
+    assertTrue(state.isSignedIn)
+
+    // Confirming sign out from prompt signs the user out and returns to Sign In screen
+    state.navigateBackFromDownloadSurvey()
+    assertTrue(state.isDownloadSurveySignOutPromptOpen)
+    state.confirmDownloadSurveySignOut()
+    assertFalse(state.isDownloadSurveySignOutPromptOpen)
+    assertFalse(state.isSignedIn)
+    assertFalse(state.hasAcceptedTerms)
+    assertEquals(PrototypeScreen.SIGN_IN, state.currentScreen)
+
+    // 2. Re-sign in, open a survey, and access Download surveys from the Survey list (SWITCH_SURVEYS)
+    state.signInWithGoogle()
+    state.acceptTermsOfService()
+    state.openSurvey("survey-kenya-coffee")
+    state.drawerSwitchSurveys()
+    assertEquals(PrototypeScreen.MAIN_SURVEY, state.currentScreen)
+    assertEquals(MainDrawerSubView.SWITCH_SURVEYS, state.activeDrawerSubView)
+
+    state.openDownloadMoreSurveysScreen()
+    assertEquals(PrototypeScreen.DOWNLOAD_SURVEY, state.currentScreen)
+    assertEquals(DownloadSurveyEntryOrigin.SURVEY_LIST, state.downloadSurveyEntryOrigin)
+    assertTrue(state.isDownloadSurveyAccessedFromSurveyList)
+
+    // Back action when accessed from Survey list returns directly to the Survey list without prompting
+    state.navigateBackFromDownloadSurvey()
+    assertFalse(state.isDownloadSurveySignOutPromptOpen)
+    assertTrue(state.isSignedIn)
+    assertEquals(PrototypeScreen.MAIN_SURVEY, state.currentScreen)
+    assertEquals(MainDrawerSubView.SWITCH_SURVEYS, state.activeDrawerSubView)
+  }
 }
+
 

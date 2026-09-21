@@ -119,6 +119,7 @@ fun MapboxBasemapView(
   val visibleSubGeometries = state.visibleSubmissionGeometries
   val selectedEntity = state.selectedEntity
   val selectedSubmission = state.selectedSubmission
+  val activeNav = state.activeNavigation
 
   val featuresPayloadJson =
     remember(
@@ -126,6 +127,7 @@ fun MapboxBasemapView(
       visibleSubGeometries,
       selectedEntity?.id,
       selectedSubmission?.id,
+      activeNav,
       isCameraFollowingUser,
       mapZoomDelta,
       selectedBasemapType,
@@ -136,6 +138,7 @@ fun MapboxBasemapView(
         submissions = visibleSubGeometries,
         selectedEntityId = selectedEntity?.id,
         selectedSubmissionId = selectedSubmission?.id,
+        activeNavigation = activeNav,
         isCameraFollowingUser = isCameraFollowingUser,
         zoomDelta = mapZoomDelta,
       )
@@ -275,11 +278,23 @@ fun MapboxBasemapView(
   }
 }
 
+internal fun buildMapboxFeaturesPayloadJson(state: PrototypeAppState): String =
+  buildMapboxFeaturesPayloadJson(
+    entities = state.visibleMapEntities,
+    submissions = state.visibleSubmissionGeometries,
+    selectedEntityId = state.selectedEntity?.id,
+    selectedSubmissionId = state.selectedSubmission?.id,
+    activeNavigation = state.activeNavigation,
+    isCameraFollowingUser = state.isCameraFollowingUser,
+    zoomDelta = state.mapZoomDelta,
+  )
+
 private fun buildMapboxFeaturesPayloadJson(
   entities: List<GeospatialEntityItem>,
   submissions: List<SubmissionGeometryPolygon>,
   selectedEntityId: String?,
   selectedSubmissionId: String?,
+  activeNavigation: StraightLineNavigationState?,
   isCameraFollowingUser: Boolean,
   zoomDelta: Float,
 ): String {
@@ -298,7 +313,18 @@ private fun buildMapboxFeaturesPayloadJson(
       val shortBadge = escapeJsonString(sub.shortMapBadge)
       """{"id":"${sub.id}","submissionId":"${sub.submissionId}","label":"$shortBadge","nx":${sub.normalizedX},"ny":${sub.normalizedY},"wf":${sub.widthFraction},"hf":${sub.heightFraction},"color":"$hex","selected":$selected}"""
     }
-  return """{"isFollowingUser":$isCameraFollowingUser,"zoomDelta":$zoomDelta,"entities":[$entitiesJson],"submissions":[$submissionsJson]}"""
+  val navJson =
+    if (activeNavigation != null) {
+      val vec = activeNavigation.vector
+      val safeTitle = escapeJsonString(activeNavigation.targetTitle.substringBefore(" •"))
+      val safeDist =
+        escapeJsonString("${vec.formattedDistance} • ${vec.bearingDegrees}° ${vec.cardinalDirection}")
+      val hex = colorHexToCssString(activeNavigation.colorHex)
+      """{"active":true,"kind":"${activeNavigation.targetKind.badgeLabel}","targetId":"${activeNavigation.targetId}","title":"$safeTitle","distanceBadge":"$safeDist","fromX":${vec.fromNormalizedX},"fromY":${vec.fromNormalizedY},"toX":${vec.toNormalizedX},"toY":${vec.toNormalizedY},"bearing":${vec.bearingDegrees},"cardinal":"${vec.cardinalDirection}","arrived":${vec.hasArrived},"color":"$hex"}"""
+    } else {
+      """{"active":false}"""
+    }
+  return """{"isFollowingUser":$isCameraFollowingUser,"zoomDelta":$zoomDelta,"navigation":$navJson,"entities":[$entitiesJson],"submissions":[$submissionsJson]}"""
 }
 
 private fun escapeJsonString(raw: String): String =

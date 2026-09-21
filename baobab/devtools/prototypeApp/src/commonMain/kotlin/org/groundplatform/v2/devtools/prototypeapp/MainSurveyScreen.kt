@@ -52,6 +52,7 @@ import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.filled.Explore
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Layers
@@ -59,6 +60,7 @@ import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.MyLocation
+import androidx.compose.material.icons.filled.Navigation
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PictureAsPdf
 import androidx.compose.material.icons.filled.Polyline
@@ -70,17 +72,18 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.SwapHoriz
 import androidx.compose.material.icons.filled.TouchApp
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Checkbox
-import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -102,6 +105,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -235,7 +239,7 @@ private fun MainSurveyTopAppBar(state: PrototypeAppState) {
             modifier = Modifier.size(12.dp),
           )
           Text(
-            text = "${state.activeSurvey.location} • ${state.visibleMapEntities.size} entities on map",
+            text = "${state.activeSurvey.location} • ${state.visibleMapEntities.size} ${state.activeEntitiesCountNoun} on map",
             style = MaterialTheme.typography.labelSmall.copy(color = Color(0xFFC8E6C9)),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
@@ -305,8 +309,6 @@ private fun MainSurveyTopAppBar(state: PrototypeAppState) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun SurveyMapView(state: PrototypeAppState) {
-  val visibleEntities = state.visibleMapEntities
-  val visibleSubGeometries = state.visibleSubmissionGeometries
   val selectedEntity = state.selectedEntity
   val isDark = state.isDarkTheme
   val sheetBg = if (isDark) Color(0xFF1E2522) else Color.White
@@ -476,54 +478,40 @@ private fun SurveyMapView(state: PrototypeAppState) {
           }
         }
 
-        // Compact Legend Strip: Solid Entity Outlines vs Dotted Form Submission Geometry Outlines + GPS Follow State
+        // Compact GPS Follow State Chip
         Row(
           modifier =
             Modifier.clip(RoundedCornerShape(12.dp))
               .background(Color(0xCC0D2319))
               .border(1.dp, Color(0xFF2D5944), RoundedCornerShape(12.dp))
               .padding(horizontal = 10.dp, vertical = 4.dp),
-          horizontalArrangement = Arrangement.spacedBy(10.dp),
+          horizontalArrangement = Arrangement.spacedBy(3.dp),
           verticalAlignment = Alignment.CenterVertically,
         ) {
+          Icon(
+            imageVector = Icons.Default.MyLocation,
+            contentDescription = null,
+            tint = if (state.isCameraFollowingUser) Color(0xFF8BD6B1) else Color(0xFFFFCC80),
+            modifier = Modifier.size(10.dp),
+          )
           Text(
-            text = "▢ Solid: Entity (${visibleEntities.size})",
+            text = if (state.isCameraFollowingUser) "GPS Auto-Center" else "Panned",
             style =
               MaterialTheme.typography.labelSmall.copy(
                 fontSize = 9.5.sp,
-                color = Color(0xFFC8E6C9),
-                fontWeight = FontWeight.SemiBold,
+                color = if (state.isCameraFollowingUser) Color(0xFF8BD6B1) else Color(0xFFFFCC80),
+                fontWeight = FontWeight.Bold,
               ),
           )
-          Text(
-            text = "┈ Dotted: Submission (${visibleSubGeometries.size})",
-            style =
-              MaterialTheme.typography.labelSmall.copy(
-                fontSize = 9.5.sp,
-                color = Color(0xFF90CAF9),
-                fontWeight = FontWeight.SemiBold,
-              ),
+        }
+
+        // Straight-Line Navigation HUD Banner (when navigating to an Entity or Submission)
+        val activeNav = state.activeNavigation
+        if (activeNav != null) {
+          StraightLineNavigationHudBanner(
+            navState = activeNav,
+            state = state,
           )
-          Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(3.dp),
-          ) {
-            Icon(
-              imageVector = Icons.Default.MyLocation,
-              contentDescription = null,
-              tint = if (state.isCameraFollowingUser) Color(0xFF8BD6B1) else Color(0xFFFFCC80),
-              modifier = Modifier.size(10.dp),
-            )
-            Text(
-              text = if (state.isCameraFollowingUser) "GPS Auto-Center" else "Panned",
-              style =
-                MaterialTheme.typography.labelSmall.copy(
-                  fontSize = 9.5.sp,
-                  color = if (state.isCameraFollowingUser) Color(0xFF8BD6B1) else Color(0xFFFFCC80),
-                  fontWeight = FontWeight.Bold,
-                ),
-            )
-          }
         }
       }
 
@@ -681,6 +669,253 @@ private fun SurveyMapView(state: PrototypeAppState) {
                 MaterialTheme.typography.labelSmall.copy(
                   color = Color.White,
                   fontWeight = FontWeight.Medium,
+                ),
+            )
+          }
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Interactive Straight-Line Navigation HUD Banner displayed at the top of the Map View whenever
+ * straight-line navigation to a Geospatial Entity (`NavigationTargetKind.ENTITY`) or a Form
+ * Submission (`NavigationTargetKind.SUBMISSION`) is active.
+ *
+ * Displays:
+ * - Rotating compass bearing arrow (`navState.vector.bearingDegrees`)
+ * - Target type pill (`ENTITY` vs `SUBMISSION`), target label, and subtitle
+ * - Real-time geodesic distance (`m`/`km` or `ft`/`mi`), compass bearing (`0°..359°` + cardinal),
+ *   and estimated walk time (`~X min walk` or `Arrived at target`)
+ * - `"Walk Closer"` simulation button (`state.stepUserTowardNavigationTarget()`)
+ * - `"Stop"` button (`state.stopNavigation()`)
+ */
+@Composable
+private fun StraightLineNavigationHudBanner(
+  navState: StraightLineNavigationState,
+  state: PrototypeAppState,
+) {
+  val accentColor =
+    if (navState.targetKind == NavigationTargetKind.ENTITY) {
+      Color(0xFF00E5FF)
+    } else {
+      Color(0xFFFFB300)
+    }
+  val kindLabel =
+    if (navState.targetKind == NavigationTargetKind.ENTITY) {
+      "${state.entitySingularTypeLabel(navState.targetId).uppercase()} WAYFINDING"
+    } else {
+      "SUBMISSION WAYFINDING"
+    }
+
+  Surface(
+    modifier = Modifier.fillMaxWidth(),
+    shape = RoundedCornerShape(14.dp),
+    color = Color(0xF2082017),
+    shadowElevation = 8.dp,
+  ) {
+    Column(
+      modifier =
+        Modifier.border(1.5.dp, accentColor, RoundedCornerShape(14.dp))
+          .padding(horizontal = 12.dp, vertical = 8.dp),
+      verticalArrangement = Arrangement.spacedBy(6.dp),
+    ) {
+      Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+      ) {
+        Row(
+          verticalAlignment = Alignment.CenterVertically,
+          horizontalArrangement = Arrangement.spacedBy(8.dp),
+          modifier = Modifier.weight(1f),
+        ) {
+          // Rotating Compass Arrow Badge
+          Box(
+            modifier =
+              Modifier.size(32.dp)
+                .clip(CircleShape)
+                .background(accentColor.copy(alpha = 0.18f))
+                .border(1.5.dp, accentColor, CircleShape),
+            contentAlignment = Alignment.Center,
+          ) {
+            Icon(
+              imageVector = Icons.Default.Navigation,
+              contentDescription = "Compass Bearing Arrow",
+              tint = accentColor,
+              modifier =
+                Modifier.size(17.dp)
+                  .graphicsLayer(rotationZ = navState.vector.bearingDegrees.toFloat()),
+            )
+          }
+
+          Column(verticalArrangement = Arrangement.spacedBy(1.dp)) {
+            Row(
+              verticalAlignment = Alignment.CenterVertically,
+              horizontalArrangement = Arrangement.spacedBy(6.dp),
+            ) {
+              Box(
+                modifier =
+                  Modifier.clip(RoundedCornerShape(5.dp))
+                    .background(accentColor.copy(alpha = 0.22f))
+                    .padding(horizontal = 5.dp, vertical = 1.dp)
+              ) {
+                Text(
+                  text = kindLabel,
+                  style =
+                    MaterialTheme.typography.labelSmall.copy(
+                      fontSize = 8.sp,
+                      fontWeight = FontWeight.ExtraBold,
+                      color = accentColor,
+                      letterSpacing = 0.4.sp,
+                    ),
+                )
+              }
+              Text(
+                text =
+                  if (navState.vector.isArrived) {
+                    "ARRIVED AT TARGET (≤ 8 m)"
+                  } else {
+                    "~${navState.vector.estimatedWalkMinutes} min walk"
+                  },
+                style =
+                  MaterialTheme.typography.labelSmall.copy(
+                    fontSize = 9.sp,
+                    color =
+                      if (navState.vector.isArrived) {
+                        Color(0xFF81C784)
+                      } else {
+                        Color(0xFFC8E6C9)
+                      },
+                    fontWeight = FontWeight.Bold,
+                  ),
+              )
+            }
+
+            Text(
+              text = navState.targetTitle,
+              style =
+                MaterialTheme.typography.labelLarge.copy(
+                  color = Color.White,
+                  fontWeight = FontWeight.Bold,
+                ),
+              maxLines = 1,
+              overflow = TextOverflow.Ellipsis,
+            )
+
+            Text(
+              text = navState.targetSubtitle,
+              style =
+                MaterialTheme.typography.labelSmall.copy(
+                  fontSize = 9.5.sp,
+                  color = Color(0xFFB0BEC5),
+                ),
+              maxLines = 1,
+              overflow = TextOverflow.Ellipsis,
+            )
+          }
+        }
+
+        // Distance + Bearing Readout Pill
+        Column(
+          horizontalAlignment = Alignment.End,
+          verticalArrangement = Arrangement.spacedBy(2.dp),
+        ) {
+          Text(
+            text = navState.formattedDistance,
+            style =
+              MaterialTheme.typography.titleSmall.copy(
+                fontFamily = FontFamily.Monospace,
+                fontWeight = FontWeight.ExtraBold,
+                color = accentColor,
+              ),
+          )
+          Text(
+            text = "Bearing ${navState.vector.formattedBearing}",
+            style =
+              MaterialTheme.typography.labelSmall.copy(
+                fontSize = 9.5.sp,
+                fontFamily = FontFamily.Monospace,
+                color = Color.White,
+                fontWeight = FontWeight.SemiBold,
+              ),
+          )
+        }
+      }
+
+      // Bottom Control Strip: "Walk Closer" simulation button + "Stop" navigation button
+      Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+      ) {
+        Text(
+          text = "Straight-line geodesic vector from your GPS location",
+          style =
+            MaterialTheme.typography.labelSmall.copy(
+              fontSize = 9.sp,
+              color = Color(0xFF90A4AE),
+            ),
+          modifier = Modifier.weight(1f),
+        )
+
+        Row(
+          horizontalArrangement = Arrangement.spacedBy(6.dp),
+          verticalAlignment = Alignment.CenterVertically,
+        ) {
+          if (!navState.vector.isArrived) {
+            Row(
+              modifier =
+                Modifier.clip(RoundedCornerShape(8.dp))
+                  .background(Color(0xFF133A29))
+                  .border(1.dp, accentColor, RoundedCornerShape(8.dp))
+                  .clickable { state.stepUserTowardNavigationTarget() }
+                  .padding(horizontal = 8.dp, vertical = 4.dp),
+              verticalAlignment = Alignment.CenterVertically,
+              horizontalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
+              Icon(
+                imageVector = Icons.Default.Explore,
+                contentDescription = "Simulate walking closer to target",
+                tint = accentColor,
+                modifier = Modifier.size(11.dp),
+              )
+              Text(
+                text = "Walk Closer",
+                style =
+                  MaterialTheme.typography.labelSmall.copy(
+                    fontSize = 9.5.sp,
+                    color = accentColor,
+                    fontWeight = FontWeight.Bold,
+                  ),
+              )
+            }
+          }
+
+          Row(
+            modifier =
+              Modifier.clip(RoundedCornerShape(8.dp))
+                .background(Color(0xFF3E1F1F))
+                .border(1.dp, Color(0xFFEF5350), RoundedCornerShape(8.dp))
+                .clickable { state.stopNavigation() }
+                .padding(horizontal = 8.dp, vertical = 4.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(3.dp),
+          ) {
+            Icon(
+              imageVector = Icons.Default.Close,
+              contentDescription = "Stop Straight-Line Navigation",
+              tint = Color(0xFFFFCDD2),
+              modifier = Modifier.size(11.dp),
+            )
+            Text(
+              text = "Stop",
+              style =
+                MaterialTheme.typography.labelSmall.copy(
+                  fontSize = 9.5.sp,
+                  color = Color(0xFFFFCDD2),
+                  fontWeight = FontWeight.Bold,
                 ),
             )
           }
@@ -932,19 +1167,10 @@ private fun MapLayersControlSheet(
               shape = RoundedCornerShape(10.dp),
             )
             .clickable { state.toggleOfflineBasemapVisibility() }
-            .padding(horizontal = 8.dp, vertical = 5.dp),
+            .padding(start = 12.dp, end = 6.dp, top = 5.dp, bottom = 5.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
       ) {
-        Checkbox(
-          checked = state.isOfflineBasemapVisible,
-          onCheckedChange = { state.toggleOfflineBasemapVisibility() },
-          colors =
-            CheckboxDefaults.colors(
-              checkedColor = Color(0xFF1E6F50),
-              checkmarkColor = Color.White,
-            ),
-        )
         Column(modifier = Modifier.weight(1f)) {
           Text(
             text = "Offline Basemap Overlay (Nyeri Sector Tiles)",
@@ -959,13 +1185,31 @@ private fun MapLayersControlSheet(
             style = MaterialTheme.typography.labelSmall.copy(color = Color(0xFF6B7280)),
           )
         }
+        IconButton(
+          onClick = { state.toggleOfflineBasemapVisibility() },
+          modifier = Modifier.size(36.dp),
+        ) {
+          Icon(
+            imageVector =
+              if (state.isOfflineBasemapVisible) {
+                Icons.Default.Visibility
+              } else {
+                Icons.Default.VisibilityOff
+              },
+            contentDescription =
+              if (state.isOfflineBasemapVisible) "Hide layer" else "Show layer",
+            tint =
+              if (state.isOfflineBasemapVisible) Color(0xFF1E6F50) else Color(0xFF9CA3AF),
+            modifier = Modifier.size(20.dp),
+          )
+        }
       }
 
       HorizontalDivider(color = Color(0xFFE5E7EB))
 
-      // SECTION 2: Geospatial Entity Dataset Layers (Solid Outlines)
+      // SECTION 2: Survey Sites & Reference Layers (Solid Outlines)
       Text(
-        text = "2. GEOSPATIAL ENTITY DATASETS (SOLID OUTLINES)",
+        text = "2. SITES & REFERENCE LAYERS (SOLID OUTLINES)",
         style =
           MaterialTheme.typography.labelSmall.copy(
             fontWeight = FontWeight.Bold,
@@ -981,19 +1225,10 @@ private fun MapLayersControlSheet(
               .clip(RoundedCornerShape(10.dp))
               .background(if (layer.isVisible) Color(0xFFF3F8F5) else Color(0xFFF9FAFB))
               .clickable { state.toggleLayerVisibility(layer.id) }
-              .padding(horizontal = 8.dp, vertical = 5.dp),
+              .padding(start = 12.dp, end = 6.dp, top = 5.dp, bottom = 5.dp),
           verticalAlignment = Alignment.CenterVertically,
           horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-          Checkbox(
-            checked = layer.isVisible,
-            onCheckedChange = { state.toggleLayerVisibility(layer.id) },
-            colors =
-              CheckboxDefaults.colors(
-                checkedColor = Color(layer.colorHex),
-                checkmarkColor = Color.White,
-              ),
-          )
           // Solid layer color swatch
           Box(
             modifier =
@@ -1012,8 +1247,24 @@ private fun MapLayersControlSheet(
                 ),
             )
             Text(
-              text = "${layer.geometryTypeLabel} (Solid) • $layerEntityCount entities",
+              text = "${layer.geometryTypeLabel} (Solid) • ${layer.itemCountLabel(layerEntityCount)}",
               style = MaterialTheme.typography.labelSmall.copy(color = Color(0xFF6B7280)),
+            )
+          }
+          IconButton(
+            onClick = { state.toggleLayerVisibility(layer.id) },
+            modifier = Modifier.size(36.dp),
+          ) {
+            Icon(
+              imageVector =
+                if (layer.isVisible) {
+                  Icons.Default.Visibility
+                } else {
+                  Icons.Default.VisibilityOff
+                },
+              contentDescription = if (layer.isVisible) "Hide ${layer.label}" else "Show ${layer.label}",
+              tint = if (layer.isVisible) Color(layer.colorHex) else Color(0xFF9CA3AF),
+              modifier = Modifier.size(20.dp),
             )
           }
         }
@@ -1039,19 +1290,10 @@ private fun MapLayersControlSheet(
               .clip(RoundedCornerShape(10.dp))
               .background(if (layer.isVisible) Color(0xFFF0F7FF) else Color(0xFFF9FAFB))
               .clickable { state.toggleLayerVisibility(layer.id) }
-              .padding(horizontal = 8.dp, vertical = 5.dp),
+              .padding(start = 12.dp, end = 6.dp, top = 5.dp, bottom = 5.dp),
           verticalAlignment = Alignment.CenterVertically,
           horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-          Checkbox(
-            checked = layer.isVisible,
-            onCheckedChange = { state.toggleLayerVisibility(layer.id) },
-            colors =
-              CheckboxDefaults.colors(
-                checkedColor = Color(layer.colorHex),
-                checkmarkColor = Color.White,
-              ),
-          )
           // Dotted polygon swatch rendered with Canvas PathEffect.dashPathEffect
           Canvas(modifier = Modifier.size(18.dp)) {
             drawRect(
@@ -1085,6 +1327,22 @@ private fun MapLayersControlSheet(
                   fontFamily = FontFamily.Monospace,
                   color = Color(0xFF4B5563),
                 ),
+            )
+          }
+          IconButton(
+            onClick = { state.toggleLayerVisibility(layer.id) },
+            modifier = Modifier.size(36.dp),
+          ) {
+            Icon(
+              imageVector =
+                if (layer.isVisible) {
+                  Icons.Default.Visibility
+                } else {
+                  Icons.Default.VisibilityOff
+                },
+              contentDescription = if (layer.isVisible) "Hide ${layer.label}" else "Show ${layer.label}",
+              tint = if (layer.isVisible) Color(layer.colorHex) else Color(0xFF9CA3AF),
+              modifier = Modifier.size(20.dp),
             )
           }
         }
@@ -1220,6 +1478,82 @@ private fun EntityBottomSheetCard(
               MaterialTheme.typography.labelSmall.copy(
                 color = Color(0xFF1B5E20),
                 fontFamily = FontFamily.Monospace,
+                fontWeight = FontWeight.Bold,
+              ),
+          )
+        }
+
+        // Live Distance & Compass Bearing Badge from User GPS
+        val entityWayfindingBadge = state.formattedWayfindingBadgeForEntity(entity.id)
+        if (entityWayfindingBadge.isNotEmpty()) {
+          Box(
+            modifier =
+              Modifier.clip(RoundedCornerShape(8.dp))
+                .background(if (isDark) Color(0xFF112A32) else Color(0xFFE0F7FA))
+                .border(1.dp, Color(0xFF00ACC1), RoundedCornerShape(8.dp))
+                .padding(horizontal = 8.dp, vertical = 3.dp)
+          ) {
+            Text(
+              text = "➤ $entityWayfindingBadge",
+              style =
+                MaterialTheme.typography.labelSmall.copy(
+                  color = if (isDark) Color(0xFF80DEEA) else Color(0xFF006064),
+                  fontFamily = FontFamily.Monospace,
+                  fontWeight = FontWeight.Bold,
+                ),
+            )
+          }
+        }
+
+        // Straight-Line Navigation Toggle Button for Geospatial Entity
+        val isNavigatingEntity = state.isNavigatingToEntity(entity.id)
+        Row(
+          modifier =
+            Modifier.clip(RoundedCornerShape(8.dp))
+              .background(
+                if (isNavigatingEntity) {
+                  Color(0xFF00838F)
+                } else if (isDark) {
+                  Color(0xFF183138)
+                } else {
+                  Color(0xFFE0F7FA)
+                }
+              )
+              .border(
+                width = 1.dp,
+                color = if (isNavigatingEntity) Color(0xFF00E5FF) else Color(0xFF00838F),
+                shape = RoundedCornerShape(8.dp),
+              )
+              .clickable { state.toggleNavigationToEntity(entity.id) }
+              .padding(horizontal = 8.dp, vertical = 3.dp),
+          verticalAlignment = Alignment.CenterVertically,
+          horizontalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
+          Icon(
+            imageVector = Icons.Default.Navigation,
+            contentDescription = "Straight-line navigate to entity",
+            tint =
+              if (isNavigatingEntity) {
+                Color.White
+              } else if (isDark) {
+                Color(0xFF80DEEA)
+              } else {
+                Color(0xFF006064)
+              },
+            modifier = Modifier.size(12.dp),
+          )
+          Text(
+            text = if (isNavigatingEntity) "Stop Nav" else "Navigate",
+            style =
+              MaterialTheme.typography.labelSmall.copy(
+                color =
+                  if (isNavigatingEntity) {
+                    Color.White
+                  } else if (isDark) {
+                    Color(0xFF80DEEA)
+                  } else {
+                    Color(0xFF006064)
+                  },
                 fontWeight = FontWeight.Bold,
               ),
           )
@@ -1396,6 +1730,7 @@ private fun EntityBottomSheetCard(
           if (sub != null) {
             OneToOneInlineSubmissionCard(
               submission = sub,
+              state = state,
               isDark = isDark,
               textColor = textColor,
               onSharePdf = { state.shareSubmissionPdf(sub.id) },
@@ -1412,6 +1747,7 @@ private fun EntityBottomSheetCard(
           if (selectedSubmission != null && selectedSubmission.entityId == entity.id) {
             SubmissionFullDetailsCard(
               submission = selectedSubmission,
+              state = state,
               isDark = isDark,
               textColor = textColor,
               backLabel = "Back to all ${entity.submissions.size} submissions",
@@ -1421,6 +1757,7 @@ private fun EntityBottomSheetCard(
           } else {
             OneToManySubmissionsListSection(
               entity = entity,
+              state = state,
               isDark = isDark,
               textColor = textColor,
               onSelectSubmission = { state.selectSubmissionDetail(it.id) },
@@ -1438,10 +1775,14 @@ private fun EntityBottomSheetCard(
 @Composable
 private fun OneToOneInlineSubmissionCard(
   submission: SubmissionPreviewItem,
+  state: PrototypeAppState,
   isDark: Boolean,
   textColor: Color,
   onSharePdf: () -> Unit,
 ) {
+  val isNavigatingSub = state.isNavigatingToSubmission(submission.id)
+  val subWayfindingBadge = state.formattedWayfindingBadgeForSubmission(submission.id)
+
   Card(
     modifier =
       Modifier.fillMaxWidth()
@@ -1486,6 +1827,43 @@ private fun OneToOneInlineSubmissionCard(
           verticalAlignment = Alignment.CenterVertically,
           horizontalArrangement = Arrangement.spacedBy(6.dp),
         ) {
+          Row(
+            modifier =
+              Modifier.clip(RoundedCornerShape(6.dp))
+                .background(
+                  if (isNavigatingSub) {
+                    Color(0xFFE65100)
+                  } else if (isDark) {
+                    Color(0xFF2E261A)
+                  } else {
+                    Color(0xFFFFF8E1)
+                  }
+                )
+                .border(
+                  width = 1.dp,
+                  color = if (isNavigatingSub) Color(0xFFFFB300) else Color(0xFFF57C00),
+                  shape = RoundedCornerShape(6.dp),
+                )
+                .clickable { state.toggleNavigationToSubmission(submission.id) }
+                .padding(horizontal = 6.dp, vertical = 2.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(3.dp),
+          ) {
+            Icon(
+              imageVector = Icons.Default.Navigation,
+              contentDescription = "Straight-line navigate to submission",
+              tint = if (isNavigatingSub) Color.White else Color(0xFFF57C00),
+              modifier = Modifier.size(11.dp),
+            )
+            Text(
+              text = if (isNavigatingSub) "Navigating" else "Navigate",
+              style =
+                MaterialTheme.typography.labelSmall.copy(
+                  color = if (isNavigatingSub) Color.White else Color(0xFFF57C00),
+                  fontWeight = FontWeight.Bold,
+                ),
+            )
+          }
           Row(
             modifier =
               Modifier.clip(RoundedCornerShape(6.dp))
@@ -1554,6 +1932,17 @@ private fun OneToOneInlineSubmissionCard(
               fontWeight = FontWeight.Medium,
             ),
         )
+        if (subWayfindingBadge.isNotEmpty()) {
+          Text(
+            text = "• ➤ $subWayfindingBadge",
+            style =
+              MaterialTheme.typography.labelSmall.copy(
+                fontFamily = FontFamily.Monospace,
+                color = if (isDark) Color(0xFFFFCC80) else Color(0xFFE65100),
+                fontWeight = FontWeight.Bold,
+              ),
+          )
+        }
       }
 
       HorizontalDivider(color = textColor.copy(alpha = 0.1f))
@@ -1595,6 +1984,7 @@ private fun OneToOneInlineSubmissionCard(
 @Composable
 private fun OneToManySubmissionsListSection(
   entity: GeospatialEntityItem,
+  state: PrototypeAppState,
   isDark: Boolean,
   textColor: Color,
   onSelectSubmission: (SubmissionPreviewItem) -> Unit,
@@ -1618,6 +2008,8 @@ private fun OneToManySubmissionsListSection(
     }
 
     entity.submissions.forEachIndexed { index, sub ->
+      val isNavigatingSub = state.isNavigatingToSubmission(sub.id)
+      val subBadge = state.formattedWayfindingBadgeForSubmission(sub.id)
       Card(
         modifier =
           Modifier.fillMaxWidth()
@@ -1675,6 +2067,18 @@ private fun OneToManySubmissionsListSection(
                   )
                 }
               }
+              if (subBadge.isNotEmpty()) {
+                Text(
+                  text = "➤ $subBadge",
+                  style =
+                    MaterialTheme.typography.labelSmall.copy(
+                      fontSize = 9.sp,
+                      fontFamily = FontFamily.Monospace,
+                      fontWeight = FontWeight.Bold,
+                      color = if (isDark) Color(0xFFFFCC80) else Color(0xFFE65100),
+                    ),
+                )
+              }
             }
             Row(
               verticalAlignment = Alignment.CenterVertically,
@@ -1701,6 +2105,43 @@ private fun OneToManySubmissionsListSection(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(6.dp),
           ) {
+            Row(
+              modifier =
+                Modifier.clip(RoundedCornerShape(6.dp))
+                  .background(
+                    if (isNavigatingSub) {
+                      Color(0xFFE65100)
+                    } else if (isDark) {
+                      Color(0xFF2E261A)
+                    } else {
+                      Color(0xFFFFF8E1)
+                    }
+                  )
+                  .border(
+                    width = 1.dp,
+                    color = if (isNavigatingSub) Color(0xFFFFB300) else Color(0xFFF57C00),
+                    shape = RoundedCornerShape(6.dp),
+                  )
+                  .clickable { state.toggleNavigationToSubmission(sub.id) }
+                  .padding(horizontal = 6.dp, vertical = 2.dp),
+              verticalAlignment = Alignment.CenterVertically,
+              horizontalArrangement = Arrangement.spacedBy(3.dp),
+            ) {
+              Icon(
+                imageVector = Icons.Default.Navigation,
+                contentDescription = "Navigate to submission",
+                tint = if (isNavigatingSub) Color.White else Color(0xFFF57C00),
+                modifier = Modifier.size(11.dp),
+              )
+              Text(
+                text = if (isNavigatingSub) "Navigating" else "Navigate",
+                style =
+                  MaterialTheme.typography.labelSmall.copy(
+                    fontWeight = FontWeight.Bold,
+                    color = if (isNavigatingSub) Color.White else Color(0xFFF57C00),
+                  ),
+              )
+            }
             Row(
               modifier =
                 Modifier.clip(RoundedCornerShape(6.dp))
@@ -1756,12 +2197,16 @@ private fun OneToManySubmissionsListSection(
 @Composable
 private fun SubmissionFullDetailsCard(
   submission: SubmissionPreviewItem,
+  state: PrototypeAppState,
   isDark: Boolean,
   textColor: Color,
   backLabel: String,
   onBack: () -> Unit,
   onSharePdf: () -> Unit,
 ) {
+  val isNavigatingSub = state.isNavigatingToSubmission(submission.id)
+  val subWayfindingBadge = state.formattedWayfindingBadgeForSubmission(submission.id)
+
   Card(
     modifier =
       Modifier.fillMaxWidth()
@@ -1813,6 +2258,44 @@ private fun SubmissionFullDetailsCard(
           Row(
             modifier =
               Modifier.clip(RoundedCornerShape(8.dp))
+                .background(
+                  if (isNavigatingSub) {
+                    Color(0xFFE65100)
+                  } else if (isDark) {
+                    Color(0xFF2E261A)
+                  } else {
+                    Color(0xFFFFF8E1)
+                  }
+                )
+                .border(
+                  width = 1.dp,
+                  color = if (isNavigatingSub) Color(0xFFFFB300) else Color(0xFFF57C00),
+                  shape = RoundedCornerShape(8.dp),
+                )
+                .clickable { state.toggleNavigationToSubmission(submission.id) }
+                .padding(horizontal = 8.dp, vertical = 4.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+          ) {
+            Icon(
+              imageVector = Icons.Default.Navigation,
+              contentDescription = "Navigate to submission",
+              tint = if (isNavigatingSub) Color.White else Color(0xFFF57C00),
+              modifier = Modifier.size(12.dp),
+            )
+            Text(
+              text = if (isNavigatingSub) "Navigating" else "Navigate",
+              style =
+                MaterialTheme.typography.labelSmall.copy(
+                  color = if (isNavigatingSub) Color.White else Color(0xFFF57C00),
+                  fontWeight = FontWeight.Bold,
+                ),
+            )
+          }
+
+          Row(
+            modifier =
+              Modifier.clip(RoundedCornerShape(8.dp))
                 .background(if (isDark) Color(0xFF26332D) else Color(0xFFE8F5E9))
                 .border(1.dp, Color(0xFF1E6F50), RoundedCornerShape(8.dp))
                 .clickable { onSharePdf() }
@@ -1856,14 +2339,30 @@ private fun SubmissionFullDetailsCard(
               color = textColor,
             ),
         )
-        Text(
-          text = "Entity: ${submission.entityLabel}",
-          style =
-            MaterialTheme.typography.labelSmall.copy(
-              fontWeight = FontWeight.SemiBold,
-              color = if (isDark) Color(0xFF8BD6B1) else Color(0xFF1E6F50),
-            ),
-        )
+        Row(
+          verticalAlignment = Alignment.CenterVertically,
+          horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+          Text(
+            text = "${state.entitySingularTypeLabel(submission.entityId)}: ${submission.entityLabel}",
+            style =
+              MaterialTheme.typography.labelSmall.copy(
+                fontWeight = FontWeight.SemiBold,
+                color = if (isDark) Color(0xFF8BD6B1) else Color(0xFF1E6F50),
+              ),
+          )
+          if (subWayfindingBadge.isNotEmpty()) {
+            Text(
+              text = "➤ $subWayfindingBadge",
+              style =
+                MaterialTheme.typography.labelSmall.copy(
+                  fontFamily = FontFamily.Monospace,
+                  fontWeight = FontWeight.Bold,
+                  color = if (isDark) Color(0xFFFFCC80) else Color(0xFFE65100),
+                ),
+            )
+          }
+        }
         Row(
           verticalAlignment = Alignment.CenterVertically,
           horizontalArrangement = Arrangement.spacedBy(4.dp),
@@ -1955,7 +2454,7 @@ private fun SurveyListView(state: PrototypeAppState) {
         singleLine = true,
         placeholder = {
           Text(
-            text = "Search entities, forms, or submissions...",
+            text = "Search ${state.activeEntitiesCountNoun}, forms, or submissions...",
             style = MaterialTheme.typography.bodySmall.copy(color = Color(0xFF6B7280)),
           )
         },
@@ -1996,7 +2495,7 @@ private fun SurveyListView(state: PrototypeAppState) {
           ),
       )
 
-      // Category Filter Tabs: All | Entities | Submissions (Grouped by Form)
+      // Category Filter Tabs: All | Sites (or Domain Plural) | Submissions (Grouped by Form)
       Row(
         modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
         horizontalArrangement = Arrangement.spacedBy(6.dp),
@@ -2022,7 +2521,7 @@ private fun SurveyListView(state: PrototypeAppState) {
                 .padding(horizontal = 10.dp, vertical = 5.dp)
           ) {
             Text(
-              text = "${tab.label} ($countLabel)",
+              text = "${state.tabLabelFor(tab)} ($countLabel)",
               style =
                 MaterialTheme.typography.labelSmall.copy(
                   color = if (isSelected) Color.White else Color(0xFF374151),
@@ -2044,6 +2543,7 @@ private fun SurveyListView(state: PrototypeAppState) {
       ) {
         SubmissionFullDetailsCard(
           submission = selectedSubmission,
+          state = state,
           isDark = isDark,
           textColor = textColor,
           backLabel = "Back to Searchable List",
@@ -2054,7 +2554,7 @@ private fun SurveyListView(state: PrototypeAppState) {
       return
     }
 
-    // Scrollable Searchable List of Geospatial Entities and Submissions (grouped by Form)
+    // Scrollable Searchable List of Survey Sites and Submissions (grouped by Form)
     val matchedEntities = state.filteredListEntities
     val groupedSubmissions = state.groupedFilteredListSubmissions
 
@@ -2066,7 +2566,7 @@ private fun SurveyListView(state: PrototypeAppState) {
           .padding(horizontal = 14.dp, vertical = 10.dp),
       verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-      // 1. GEOSPATIAL ENTITIES SECTION
+      // 1. SURVEY SITES / DOMAIN ENTITIES SECTION
       if (matchedEntities.isNotEmpty()) {
         Row(
           verticalAlignment = Alignment.CenterVertically,
@@ -2079,7 +2579,7 @@ private fun SurveyListView(state: PrototypeAppState) {
             modifier = Modifier.size(14.dp),
           )
           Text(
-            text = "GEOSPATIAL ENTITIES (${matchedEntities.size})",
+            text = "${state.activeEntitiesTabLabel.uppercase()} (${matchedEntities.size})",
             style =
               MaterialTheme.typography.labelSmall.copy(
                 fontWeight = FontWeight.Bold,
@@ -2089,6 +2589,8 @@ private fun SurveyListView(state: PrototypeAppState) {
           )
         }
         matchedEntities.forEach { entity ->
+          val isNavigatingEntity = state.isNavigatingToEntity(entity.id)
+          val entityWayfindingBadge = state.formattedWayfindingBadgeForEntity(entity.id)
           Card(
             modifier =
               Modifier.fillMaxWidth()
@@ -2124,14 +2626,30 @@ private fun SurveyListView(state: PrototypeAppState) {
                         color = textColor,
                       ),
                   )
-                  Text(
-                    text = "GeoID: ${entity.geoId}",
-                    style =
-                      MaterialTheme.typography.labelSmall.copy(
-                        color = Color(0xFF1E6F50),
-                        fontWeight = FontWeight.SemiBold,
-                      ),
-                  )
+                  Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                  ) {
+                    Text(
+                      text = "GeoID: ${entity.geoId}",
+                      style =
+                        MaterialTheme.typography.labelSmall.copy(
+                          color = Color(0xFF1E6F50),
+                          fontWeight = FontWeight.SemiBold,
+                        ),
+                    )
+                    if (entityWayfindingBadge.isNotEmpty()) {
+                      Text(
+                        text = "➤ $entityWayfindingBadge",
+                        style =
+                          MaterialTheme.typography.labelSmall.copy(
+                            fontFamily = FontFamily.Monospace,
+                            fontWeight = FontWeight.Bold,
+                            color = if (isDark) Color(0xFF80DEEA) else Color(0xFF00838F),
+                          ),
+                      )
+                    }
+                  }
                   Text(
                     text = "${entity.datasetName} • ${entity.submissions.size} submission(s)",
                     style =
@@ -2161,11 +2679,48 @@ private fun SurveyListView(state: PrototypeAppState) {
                 }
               }
 
-              // Quick QR Code & Share PDF actions for Geospatial Entity in List View
+              // Quick Navigate, QR Code & Share PDF actions for Geospatial Entity in List View
               Row(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalAlignment = Alignment.CenterVertically,
               ) {
+                Row(
+                  modifier =
+                    Modifier.clip(RoundedCornerShape(6.dp))
+                      .background(
+                        if (isNavigatingEntity) {
+                          Color(0xFF00838F)
+                        } else if (isDark) {
+                          Color(0xFF183138)
+                        } else {
+                          Color(0xFFE0F7FA)
+                        }
+                      )
+                      .border(
+                        width = 1.dp,
+                        color = if (isNavigatingEntity) Color(0xFF00E5FF) else Color(0xFF00838F),
+                        shape = RoundedCornerShape(6.dp),
+                      )
+                      .clickable { state.startNavigationToEntity(entity.id) }
+                      .padding(horizontal = 7.dp, vertical = 2.dp),
+                  verticalAlignment = Alignment.CenterVertically,
+                  horizontalArrangement = Arrangement.spacedBy(4.dp),
+                ) {
+                  Icon(
+                    imageVector = Icons.Default.Navigation,
+                    contentDescription = "Navigate to Entity",
+                    tint = if (isNavigatingEntity) Color.White else Color(0xFF00838F),
+                    modifier = Modifier.size(11.dp),
+                  )
+                  Text(
+                    text = if (isNavigatingEntity) "Navigating" else "Navigate",
+                    style =
+                      MaterialTheme.typography.labelSmall.copy(
+                        color = if (isNavigatingEntity) Color.White else Color(0xFF00838F),
+                        fontWeight = FontWeight.Bold,
+                      ),
+                  )
+                }
                 Row(
                   modifier =
                     Modifier.clip(RoundedCornerShape(6.dp))
@@ -2317,6 +2872,8 @@ private fun SurveyListView(state: PrototypeAppState) {
 
             // Submissions belonging to this Form group
             group.submissions.forEach { sub ->
+              val isNavigatingSub = state.isNavigatingToSubmission(sub.id)
+              val subBadge = state.formattedWayfindingBadgeForSubmission(sub.id)
               Card(
                 modifier =
                   Modifier.fillMaxWidth()
@@ -2337,14 +2894,30 @@ private fun SurveyListView(state: PrototypeAppState) {
                     modifier = Modifier.weight(1f),
                     verticalArrangement = Arrangement.spacedBy(3.dp),
                   ) {
-                    Text(
-                      text = "Entity: ${sub.entityLabel}",
-                      style =
-                        MaterialTheme.typography.labelLarge.copy(
-                          fontWeight = FontWeight.Bold,
-                          color = textColor,
-                        ),
-                    )
+                    Row(
+                      verticalAlignment = Alignment.CenterVertically,
+                      horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                      Text(
+                        text = "${state.entitySingularTypeLabel(sub.entityId)}: ${sub.entityLabel}",
+                        style =
+                          MaterialTheme.typography.labelLarge.copy(
+                            fontWeight = FontWeight.Bold,
+                            color = textColor,
+                          ),
+                      )
+                      if (subBadge.isNotEmpty()) {
+                        Text(
+                          text = "➤ $subBadge",
+                          style =
+                            MaterialTheme.typography.labelSmall.copy(
+                              fontFamily = FontFamily.Monospace,
+                              fontWeight = FontWeight.Bold,
+                              color = if (isDark) Color(0xFFFFCC80) else Color(0xFFE65100),
+                            ),
+                        )
+                      }
+                    }
                     Row(
                       verticalAlignment = Alignment.CenterVertically,
                       horizontalArrangement = Arrangement.spacedBy(4.dp),
@@ -2381,6 +2954,43 @@ private fun SurveyListView(state: PrototypeAppState) {
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(6.dp),
                   ) {
+                    Row(
+                      modifier =
+                        Modifier.clip(RoundedCornerShape(6.dp))
+                          .background(
+                            if (isNavigatingSub) {
+                              Color(0xFFE65100)
+                            } else if (isDark) {
+                              Color(0xFF2E261A)
+                            } else {
+                              Color(0xFFFFF8E1)
+                            }
+                          )
+                          .border(
+                            width = 1.dp,
+                            color = if (isNavigatingSub) Color(0xFFFFB300) else Color(0xFFF57C00),
+                            shape = RoundedCornerShape(6.dp),
+                          )
+                          .clickable { state.startNavigationToSubmission(sub.id) }
+                          .padding(horizontal = 6.dp, vertical = 2.dp),
+                      verticalAlignment = Alignment.CenterVertically,
+                      horizontalArrangement = Arrangement.spacedBy(3.dp),
+                    ) {
+                      Icon(
+                        imageVector = Icons.Default.Navigation,
+                        contentDescription = "Navigate to Submission",
+                        tint = if (isNavigatingSub) Color.White else Color(0xFFF57C00),
+                        modifier = Modifier.size(11.dp),
+                      )
+                      Text(
+                        text = if (isNavigatingSub) "Navigating" else "Navigate",
+                        style =
+                          MaterialTheme.typography.labelSmall.copy(
+                            color = if (isNavigatingSub) Color.White else Color(0xFFF57C00),
+                            fontWeight = FontWeight.Bold,
+                          ),
+                      )
+                    }
                     Row(
                       modifier =
                         Modifier.clip(RoundedCornerShape(6.dp))
@@ -2439,7 +3049,7 @@ private fun SurveyListView(state: PrototypeAppState) {
           contentAlignment = Alignment.Center,
         ) {
           Text(
-            text = "No entities or submissions match \"${state.listSearchQuery}\".",
+            text = "No ${state.activeEntitiesCountNoun} or submissions match \"${state.listSearchQuery}\".",
             style = MaterialTheme.typography.bodySmall.copy(color = textColor.copy(alpha = 0.7f)),
           )
         }
@@ -2799,7 +3409,7 @@ private fun SwitchDownloadedSurveysSubScreen(state: PrototypeAppState) {
               }
             }
             Text(
-              text = "${survey.location} • ${survey.entityCount} entities • ${survey.offlineSizeLabel}",
+              text = "${survey.location} • ${survey.entityCount} sites • ${survey.offlineSizeLabel}",
               style =
                 MaterialTheme.typography.labelSmall.copy(
                   color = Color(0xFF1E6F50),
@@ -2902,7 +3512,7 @@ private fun EntityQrCodeModalDialog(
               modifier = Modifier.size(18.dp),
             )
             Text(
-              text = "Geospatial Entity QR Code",
+              text = "${entity.singularTypeLabel} QR Code",
               style =
                 MaterialTheme.typography.titleSmall.copy(
                   fontWeight = FontWeight.Bold,
@@ -2938,7 +3548,7 @@ private fun EntityQrCodeModalDialog(
         ) {
           Icon(
             imageVector = Icons.Default.QrCode,
-            contentDescription = "Entity QR Matrix",
+            contentDescription = "Site QR Matrix",
             tint = Color(0xFF111827),
             modifier = Modifier.size(116.dp),
           )
@@ -2970,7 +3580,7 @@ private fun EntityQrCodeModalDialog(
           )
         }
         Text(
-          text = "Scan with Ground or any EUDR compliance reader to verify entity geometry & GeoID.",
+          text = "Scan with Ground or any EUDR compliance reader to verify ${entity.singularTypeLabel.lowercase()} geometry & GeoID.",
           style = MaterialTheme.typography.labelSmall.copy(color = Color(0xFF6B7280)),
         )
 

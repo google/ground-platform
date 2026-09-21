@@ -164,6 +164,24 @@
             user-select: none;
             pointer-events: none;
         }
+        .ground-nav-midpoint-marker {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 3px 8px;
+            border-radius: 12px;
+            background: rgba(7, 24, 18, 0.92);
+            border: 1.5px solid #00E5FF;
+            color: #E0F7FA;
+            font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+            font-size: 9px;
+            font-weight: 700;
+            line-height: 1.2;
+            white-space: nowrap;
+            box-shadow: 0 2px 8px rgba(0, 229, 255, 0.45);
+            user-select: none;
+            pointer-events: none;
+        }
     </style>
 </head>
 <body>
@@ -315,6 +333,10 @@
                 data: { type: 'FeatureCollection', features: [] },
               },
               'ground-submissions': {
+                type: 'geojson',
+                data: { type: 'FeatureCollection', features: [] },
+              },
+              'ground-navigation': {
                 type: 'geojson',
                 data: { type: 'FeatureCollection', features: [] },
               },
@@ -470,6 +492,42 @@
                 },
               },
               {
+                id: 'ground-navigation-target-ring',
+                type: 'circle',
+                source: 'ground-navigation',
+                filter: ['==', ['geometry-type'], 'Point'],
+                paint: {
+                  'circle-radius': 28,
+                  'circle-color': '#00E5FF',
+                  'circle-opacity': 0.22,
+                  'circle-stroke-width': 3,
+                  'circle-stroke-color': '#00E5FF',
+                },
+              },
+              {
+                id: 'ground-navigation-line-casing',
+                type: 'line',
+                source: 'ground-navigation',
+                filter: ['==', ['geometry-type'], 'LineString'],
+                paint: {
+                  'line-color': '#071812',
+                  'line-width': 6.5,
+                  'line-opacity': 0.9,
+                },
+              },
+              {
+                id: 'ground-navigation-line-dash',
+                type: 'line',
+                source: 'ground-navigation',
+                filter: ['==', ['geometry-type'], 'LineString'],
+                paint: {
+                  'line-color': '#00E5FF',
+                  'line-width': 3.6,
+                  'line-dasharray': [2.2, 1.3],
+                  'line-opacity': 1.0,
+                },
+              },
+              {
                 id: 'ground-user-gps-halo',
                 type: 'circle',
                 source: 'ground-user-gps',
@@ -592,7 +650,13 @@
           const gpsEl = document.createElement('div');
           gpsEl.className = 'ground-gps-marker';
           const isFollowing = !parsed || parsed.isFollowingUser !== false;
-          gpsEl.textContent = isFollowing ? '⊕ You (Centered)' : '⊕ You (GPS)';
+          const navObj = parsed && parsed.navigation && parsed.navigation.active ? parsed.navigation : null;
+          if (navObj) {
+            gpsEl.textContent =
+              '⊕ You • ' + navObj.bearing + '° ' + (navObj.cardinal || '');
+          } else {
+            gpsEl.textContent = isFollowing ? '⊕ You (Centered)' : '⊕ You (GPS)';
+          }
           const gpsLngLat = worldToLngLat(userGpsX, userGpsY, survey);
           const gpsMarker = new window.mapboxgl.Marker({
             element: gpsEl,
@@ -609,6 +673,31 @@
           });
 
           if (!parsed) return;
+
+          // 1B. Straight-Line Navigation Midpoint Distance & Bearing Pill
+          if (navObj) {
+            const navMidEl = document.createElement('div');
+            navMidEl.className = 'ground-nav-midpoint-marker';
+            navMidEl.textContent =
+              (navObj.arrived ? '✓ Arrived • ' : '➤ ') +
+              (navObj.distanceBadge || '');
+            const midX = (navObj.fromX + navObj.toX) * 0.5;
+            const midY = (navObj.fromY + navObj.toY) * 0.5;
+            const midLngLat = worldToLngLat(midX, midY, survey);
+            const navMidMarker = new window.mapboxgl.Marker({
+              element: navMidEl,
+              anchor: 'center',
+              offset: [0, -10],
+            })
+              .setLngLat(midLngLat)
+              .addTo(map);
+            activeMarkers.push({
+              marker: navMidMarker,
+              element: navMidEl,
+              hitType: '',
+              hitId: '',
+            });
+          }
 
           // 2. Dotted Submission Geometry Badges
           if (Array.isArray(parsed.submissions)) {
@@ -868,12 +957,41 @@
             });
           }
 
-          // Parse featuresGeoJson and update ground-entities, ground-submissions & mapboxgl.Markers
+          // Parse featuresGeoJson and update ground-entities, ground-submissions, ground-navigation & mapboxgl.Markers
           if (featuresGeoJson) {
             try {
               const parsed = JSON.parse(featuresGeoJson);
               const entityFeatures = [];
               const subFeatures = [];
+              const navFeatures = [];
+
+              if (parsed && parsed.navigation && parsed.navigation.active) {
+                const nav = parsed.navigation;
+                const fromPt = worldToLngLat(nav.fromX, nav.fromY, survey);
+                const toPt = worldToLngLat(nav.toX, nav.toY, survey);
+                navFeatures.push({
+                  type: 'Feature',
+                  properties: {
+                    kind: 'line',
+                    color: nav.color || '#00E5FF',
+                  },
+                  geometry: {
+                    type: 'LineString',
+                    coordinates: [fromPt, toPt],
+                  },
+                });
+                navFeatures.push({
+                  type: 'Feature',
+                  properties: {
+                    kind: 'target',
+                    color: nav.color || '#00E5FF',
+                  },
+                  geometry: {
+                    type: 'Point',
+                    coordinates: toPt,
+                  },
+                });
+              }
 
               if (Array.isArray(parsed.entities)) {
                 parsed.entities.forEach(function (ent) {
@@ -996,6 +1114,13 @@
                 subSource.setData({
                   type: 'FeatureCollection',
                   features: subFeatures,
+                });
+              }
+              const navSource = map.getSource('ground-navigation');
+              if (navSource) {
+                navSource.setData({
+                  type: 'FeatureCollection',
+                  features: navFeatures,
                 });
               }
 

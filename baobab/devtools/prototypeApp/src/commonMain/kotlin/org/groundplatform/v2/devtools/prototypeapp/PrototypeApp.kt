@@ -38,17 +38,20 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.filled.Explore
 import androidx.compose.material.icons.filled.Layers
 import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.MyLocation
+import androidx.compose.material.icons.filled.Navigation
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
@@ -1249,221 +1252,363 @@ fun GroundDownloadSurveyScreen(state: PrototypeAppState) {
   val onSurfaceColor = MaterialTheme.colorScheme.onSurface
   val filtered = state.filteredSurveys
 
-  Column(modifier = Modifier.fillMaxSize().background(surfaceColor)) {
-    // Top Header + Search Bar Container
-    Column(
-      modifier =
-        Modifier.fillMaxWidth()
-          .background(Color(0xFF1E6F50))
-          .padding(horizontal = 16.dp, vertical = 14.dp),
-      verticalArrangement = Arrangement.spacedBy(12.dp),
-    ) {
-      Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically,
+  Box(modifier = Modifier.fillMaxSize().background(surfaceColor)) {
+    Column(modifier = Modifier.fillMaxSize()) {
+      // Top Header + Search Bar Container
+      Column(
+        modifier =
+          Modifier.fillMaxWidth()
+            .background(Color(0xFF1E6F50))
+            .padding(horizontal = 16.dp, vertical = 14.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
       ) {
-        Column {
-          Text(
-            text = "Download survey",
-            style =
-              MaterialTheme.typography.titleMedium.copy(
-                color = Color.White,
-                fontWeight = FontWeight.Bold,
-              ),
-          )
-          Text(
-            text = "${state.surveys.size} shared with you • ${state.downloadedSurveyCount} downloaded",
-            style = MaterialTheme.typography.labelSmall.copy(color = Color(0xFFC8E6C9)),
-          )
-        }
-
-        // User Avatar Pill
-        Box(
-          modifier =
-            Modifier.clip(CircleShape)
-              .background(Color(0xFF124531))
-              .border(1.dp, Color(0xFF8BD6B1), CircleShape)
-              .padding(horizontal = 10.dp, vertical = 5.dp)
+        Row(
+          modifier = Modifier.fillMaxWidth(),
+          horizontalArrangement = Arrangement.SpaceBetween,
+          verticalAlignment = Alignment.CenterVertically,
         ) {
-          Text(
-            text = "ML",
-            style =
-              MaterialTheme.typography.labelSmall.copy(
-                color = Color.White,
-                fontWeight = FontWeight.Bold,
-              ),
-          )
-        }
-      }
-
-      // Search Bar for filtering by survey name or location
-      OutlinedTextField(
-        value = state.searchQuery,
-        onValueChange = { state.updateSearchQuery(it) },
-        modifier = Modifier.fillMaxWidth(),
-        singleLine = true,
-        placeholder = {
-          Text(
-            text = "Search by name or location...",
-            style = MaterialTheme.typography.bodySmall.copy(color = Color(0xFF6B7280)),
-          )
-        },
-        leadingIcon = {
-          Icon(
-            imageVector = Icons.Default.Search,
-            contentDescription = "Search",
-            tint = Color(0xFF6B7280),
-            modifier = Modifier.size(18.dp),
-          )
-        },
-        trailingIcon = {
-          if (state.searchQuery.isNotEmpty()) {
-            Box(
+          Row(
+            modifier = Modifier.weight(1f),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+          ) {
+            // Escape hatch Back button:
+            // - Shown after ToS: prompts first before signing the user out
+            // - Accessed from the Survey list: returns the user to the Survey list
+            Row(
               modifier =
-                Modifier.clip(CircleShape)
-                  .clickable { state.clearSearchQuery() }
-                  .padding(6.dp)
+                Modifier.clip(RoundedCornerShape(8.dp))
+                  .background(Color(0xFF144D37))
+                  .clickable { state.navigateBackFromDownloadSurvey() }
+                  .padding(horizontal = 10.dp, vertical = 5.dp),
+              verticalAlignment = Alignment.CenterVertically,
+              horizontalArrangement = Arrangement.spacedBy(4.dp),
             ) {
               Icon(
-                imageVector = Icons.Default.Close,
-                contentDescription = "Clear Search",
-                tint = Color(0xFF374151),
-                modifier = Modifier.size(16.dp),
+                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                contentDescription = "Back",
+                tint = Color.White,
+                modifier = Modifier.size(14.dp),
+              )
+              Text(
+                text = "Back",
+                style =
+                  MaterialTheme.typography.labelMedium.copy(
+                    color = Color.White,
+                    fontWeight = FontWeight.SemiBold,
+                  ),
+              )
+            }
+
+            Column {
+              Text(
+                text = "Download survey",
+                style =
+                  MaterialTheme.typography.titleMedium.copy(
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold,
+                  ),
+              )
+              Text(
+                text =
+                  "${state.surveys.size} shared with you • ${state.downloadedSurveyCount} downloaded",
+                style = MaterialTheme.typography.labelSmall.copy(color = Color(0xFFC8E6C9)),
               )
             }
           }
-        },
-        shape = RoundedCornerShape(24.dp),
-        colors =
-          OutlinedTextFieldDefaults.colors(
-            focusedContainerColor = Color.White,
-            unfocusedContainerColor = Color.White,
-            focusedTextColor = Color(0xFF111827),
-            unfocusedTextColor = Color(0xFF111827),
-            focusedBorderColor = Color(0xFF8BD6B1),
-            unfocusedBorderColor = Color.Transparent,
-          ),
-      )
-    }
 
-    // Optional feedback toast banner when downloading/toggling a survey
-    state.activeSurveyNotice?.let { notice ->
+          // User Avatar Pill
+          Box(
+            modifier =
+              Modifier.clip(CircleShape)
+                .background(Color(0xFF124531))
+                .border(1.dp, Color(0xFF8BD6B1), CircleShape)
+                .padding(horizontal = 10.dp, vertical = 5.dp)
+          ) {
+            Text(
+              text = "ML",
+              style =
+                MaterialTheme.typography.labelSmall.copy(
+                  color = Color.White,
+                  fontWeight = FontWeight.Bold,
+                ),
+            )
+          }
+        }
+
+        // Search Bar for filtering by survey name or location
+        OutlinedTextField(
+          value = state.searchQuery,
+          onValueChange = { state.updateSearchQuery(it) },
+          modifier = Modifier.fillMaxWidth(),
+          singleLine = true,
+          placeholder = {
+            Text(
+              text = "Search by name or location...",
+              style = MaterialTheme.typography.bodySmall.copy(color = Color(0xFF6B7280)),
+            )
+          },
+          leadingIcon = {
+            Icon(
+              imageVector = Icons.Default.Search,
+              contentDescription = "Search",
+              tint = Color(0xFF6B7280),
+              modifier = Modifier.size(18.dp),
+            )
+          },
+          trailingIcon = {
+            if (state.searchQuery.isNotEmpty()) {
+              Box(
+                modifier =
+                  Modifier.clip(CircleShape)
+                    .clickable { state.clearSearchQuery() }
+                    .padding(6.dp)
+              ) {
+                Icon(
+                  imageVector = Icons.Default.Close,
+                  contentDescription = "Clear Search",
+                  tint = Color(0xFF374151),
+                  modifier = Modifier.size(16.dp),
+                )
+              }
+            }
+          },
+          shape = RoundedCornerShape(24.dp),
+          colors =
+            OutlinedTextFieldDefaults.colors(
+              focusedContainerColor = Color.White,
+              unfocusedContainerColor = Color.White,
+              focusedTextColor = Color(0xFF111827),
+              unfocusedTextColor = Color(0xFF111827),
+              focusedBorderColor = Color(0xFF8BD6B1),
+              unfocusedBorderColor = Color.Transparent,
+            ),
+        )
+      }
+
+      // Optional feedback toast banner when downloading/toggling a survey
+      state.activeSurveyNotice?.let { notice ->
+        Row(
+          modifier =
+            Modifier.fillMaxWidth()
+              .background(Color(0xFFE8F5E9))
+              .padding(horizontal = 14.dp, vertical = 8.dp),
+          horizontalArrangement = Arrangement.spacedBy(6.dp),
+          verticalAlignment = Alignment.CenterVertically,
+        ) {
+          Icon(
+            imageVector = Icons.Default.CheckCircle,
+            contentDescription = null,
+            tint = Color(0xFF1B5E20),
+            modifier = Modifier.size(14.dp),
+          )
+          Text(
+            text = notice,
+            style =
+              MaterialTheme.typography.labelSmall.copy(
+                color = Color(0xFF1B5E20),
+                fontWeight = FontWeight.SemiBold,
+              ),
+            modifier = Modifier.weight(1f),
+          )
+        }
+      }
+
+      // Section Summary Header
       Row(
         modifier =
           Modifier.fillMaxWidth()
-            .background(Color(0xFFE8F5E9))
-            .padding(horizontal = 14.dp, vertical = 8.dp),
-        horizontalArrangement = Arrangement.spacedBy(6.dp),
+            .padding(horizontal = 16.dp, vertical = 10.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
       ) {
-        Icon(
-          imageVector = Icons.Default.CheckCircle,
-          contentDescription = null,
-          tint = Color(0xFF1B5E20),
-          modifier = Modifier.size(14.dp),
-        )
         Text(
-          text = notice,
+          text =
+            if (state.searchQuery.isBlank()) {
+              "SURVEYS SHARED WITH YOU (${filtered.size})"
+            } else {
+              "MATCHING SURVEYS (${filtered.size} OF ${state.surveys.size})"
+            },
           style =
             MaterialTheme.typography.labelSmall.copy(
-              color = Color(0xFF1B5E20),
-              fontWeight = FontWeight.SemiBold,
+              fontWeight = FontWeight.Bold,
+              color = onSurfaceColor.copy(alpha = 0.65f),
+              letterSpacing = 0.6.sp,
             ),
-          modifier = Modifier.weight(1f),
         )
+        if (state.searchQuery.isNotBlank()) {
+          Text(
+            text = "Clear search",
+            style =
+              MaterialTheme.typography.labelSmall.copy(
+                fontWeight = FontWeight.SemiBold,
+                color = Color(0xFF1E6F50),
+              ),
+            modifier = Modifier.clickable { state.clearSearchQuery() },
+          )
+        }
       }
-    }
 
-    // Section Summary Header
-    Row(
-      modifier =
-        Modifier.fillMaxWidth()
-          .padding(horizontal = 16.dp, vertical = 10.dp),
-      horizontalArrangement = Arrangement.SpaceBetween,
-      verticalAlignment = Alignment.CenterVertically,
-    ) {
-      Text(
-        text =
-          if (state.searchQuery.isBlank()) {
-            "SURVEYS SHARED WITH YOU (${filtered.size})"
-          } else {
-            "MATCHING SURVEYS (${filtered.size} OF ${state.surveys.size})"
-          },
-        style =
-          MaterialTheme.typography.labelSmall.copy(
-            fontWeight = FontWeight.Bold,
-            color = onSurfaceColor.copy(alpha = 0.65f),
-            letterSpacing = 0.6.sp,
-          ),
-      )
-      if (state.searchQuery.isNotBlank()) {
-        Text(
-          text = "Clear search",
-          style =
-            MaterialTheme.typography.labelSmall.copy(
-              fontWeight = FontWeight.SemiBold,
-              color = Color(0xFF1E6F50),
-            ),
-          modifier = Modifier.clickable { state.clearSearchQuery() },
-        )
-      }
-    }
-
-    // Survey Items List
-    if (filtered.isEmpty()) {
-      Box(
-        modifier = Modifier.fillMaxSize().padding(32.dp),
-        contentAlignment = Alignment.Center,
-      ) {
-        Column(
-          horizontalAlignment = Alignment.CenterHorizontally,
-          verticalArrangement = Arrangement.spacedBy(8.dp),
+      // Survey Items List
+      if (filtered.isEmpty()) {
+        Box(
+          modifier = Modifier.fillMaxSize().padding(32.dp),
+          contentAlignment = Alignment.Center,
         ) {
-          Icon(
-            imageVector = Icons.Default.Map,
-            contentDescription = null,
-            tint = Color(0xFF1E6F50),
-            modifier = Modifier.size(36.dp),
-          )
-          Text(
-            text = "No surveys match \"${state.searchQuery}\"",
-            style =
-              MaterialTheme.typography.titleSmall.copy(
-                fontWeight = FontWeight.Bold,
-                color = onSurfaceColor,
-              ),
-            textAlign = TextAlign.Center,
-          )
-          Text(
-            text = "Try searching by another survey title, keyword, or location (e.g. Brazil, Kenya, Vietnam).",
-            style =
-              MaterialTheme.typography.bodySmall.copy(
-                color = onSurfaceColor.copy(alpha = 0.7f),
-                textAlign = TextAlign.Center,
-              ),
-          )
+          Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+          ) {
+            Icon(
+              imageVector = Icons.Default.Map,
+              contentDescription = null,
+              tint = Color(0xFF1E6F50),
+              modifier = Modifier.size(36.dp),
+            )
+            Text(
+              text = "No surveys match \"${state.searchQuery}\"",
+              style =
+                MaterialTheme.typography.titleSmall.copy(
+                  fontWeight = FontWeight.Bold,
+                  color = onSurfaceColor,
+                ),
+              textAlign = TextAlign.Center,
+            )
+            Text(
+              text =
+                "Try searching by another survey title, keyword, or location (e.g. Brazil, Kenya, Vietnam).",
+              style =
+                MaterialTheme.typography.bodySmall.copy(
+                  color = onSurfaceColor.copy(alpha = 0.7f),
+                  textAlign = TextAlign.Center,
+                ),
+              textAlign = TextAlign.Center,
+            )
+          }
+        }
+      } else {
+        Column(
+          modifier =
+            Modifier.weight(1f)
+              .fillMaxWidth()
+              .verticalScroll(rememberScrollState())
+              .padding(horizontal = 14.dp, vertical = 4.dp),
+          verticalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+          filtered.forEach { survey ->
+            SurveyListItemCard(
+              survey = survey,
+              isDarkTheme = state.isDarkTheme,
+              onDownloadClick = { state.downloadSurvey(survey.id) },
+              onToggleDownloadClick = { state.toggleSurveyDownloaded(survey.id) },
+              onOpenSurveyClick = { state.openSurvey(survey.id) },
+            )
+          }
+          Spacer(modifier = Modifier.height(12.dp))
         }
       }
-    } else {
+    }
+
+    if (state.isDownloadSurveySignOutPromptOpen) {
+      DownloadSurveySignOutPromptDialog(state)
+    }
+  }
+}
+
+/**
+ * Confirmation prompt dialog shown when the user taps Back on the Download surveys screen after
+ * accepting the Terms of Service, confirming before signing the user out.
+ */
+@Composable
+private fun DownloadSurveySignOutPromptDialog(state: PrototypeAppState) {
+  val isDark = state.isDarkTheme
+  val cardBg = if (isDark) Color(0xFF232B27) else Color.White
+  val textColor = if (isDark) Color.White else Color(0xFF111827)
+
+  Box(
+    modifier =
+      Modifier.fillMaxSize()
+        .background(Color.Black.copy(alpha = 0.5f))
+        .clickable { state.dismissDownloadSurveySignOutPrompt() },
+    contentAlignment = Alignment.Center,
+  ) {
+    Card(
+      modifier =
+        Modifier.width(316.dp)
+          .clickable(enabled = false) {},
+      shape = RoundedCornerShape(18.dp),
+      colors = CardDefaults.cardColors(containerColor = cardBg),
+      elevation = CardDefaults.cardElevation(defaultElevation = 12.dp),
+    ) {
       Column(
-        modifier =
-          Modifier.weight(1f)
-            .fillMaxWidth()
-            .verticalScroll(rememberScrollState())
-            .padding(horizontal = 14.dp, vertical = 4.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp),
+        modifier = Modifier.padding(20.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
       ) {
-        filtered.forEach { survey ->
-          SurveyListItemCard(
-            survey = survey,
-            isDarkTheme = state.isDarkTheme,
-            onDownloadClick = { state.downloadSurvey(survey.id) },
-            onToggleDownloadClick = { state.toggleSurveyDownloaded(survey.id) },
-            onOpenSurveyClick = { state.openSurvey(survey.id) },
+        Row(
+          verticalAlignment = Alignment.CenterVertically,
+          horizontalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+          Box(
+            modifier =
+              Modifier.size(36.dp)
+                .clip(CircleShape)
+                .background(Color(0xFFFFEBEE)),
+            contentAlignment = Alignment.Center,
+          ) {
+            Icon(
+              imageVector = Icons.AutoMirrored.Filled.Logout,
+              contentDescription = null,
+              tint = Color(0xFFD32F2F),
+              modifier = Modifier.size(18.dp),
+            )
+          }
+          Text(
+            text = "Sign out?",
+            style =
+              MaterialTheme.typography.titleMedium.copy(
+                fontWeight = FontWeight.Bold,
+                color = textColor,
+              ),
           )
         }
-        Spacer(modifier = Modifier.height(12.dp))
+
+        Text(
+          text =
+            "Going back will sign out ${state.signedInUserEmail} and return to the Sign In screen.",
+          style =
+            MaterialTheme.typography.bodySmall.copy(
+              color = textColor.copy(alpha = 0.8f),
+              lineHeight = 18.sp,
+            ),
+        )
+
+        Row(
+          modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
+          horizontalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+          OutlinedButton(
+            onClick = { state.dismissDownloadSurveySignOutPrompt() },
+            modifier = Modifier.weight(1f),
+            shape = RoundedCornerShape(12.dp),
+          ) {
+            Text("Cancel")
+          }
+          Button(
+            onClick = { state.confirmDownloadSurveySignOut() },
+            modifier = Modifier.weight(1f),
+            shape = RoundedCornerShape(12.dp),
+            colors =
+              ButtonDefaults.buttonColors(
+                containerColor = Color(0xFFD32F2F),
+                contentColor = Color.White,
+              ),
+          ) {
+            Text(
+              text = "Sign out",
+              style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+            )
+          }
+        }
       }
     }
   }
@@ -1936,7 +2081,7 @@ private fun UxDesignerInspectorPanel(
           listOf(
             Triple(
               Icons.Default.Map,
-              "Map + 1:1 Entity",
+              "Map + 1:1 Site (Parcel)",
               {
                 state.navigateTo(PrototypeScreen.MAIN_SURVEY)
                 state.setMainSurveyViewMode(MainSurveyViewMode.MAP)
@@ -1945,11 +2090,27 @@ private fun UxDesignerInspectorPanel(
             ),
             Triple(
               Icons.Default.Timeline,
-              "Map + 1:N Entity",
+              "Map + 1:N Site (Plot)",
               {
                 state.navigateTo(PrototypeScreen.MAIN_SURVEY)
                 state.setMainSurveyViewMode(MainSurveyViewMode.MAP)
                 state.selectEntity("entity-shade-201")
+              },
+            ),
+            Triple(
+              Icons.Default.Navigation,
+              "Navigate to Site",
+              {
+                state.navigateTo(PrototypeScreen.MAIN_SURVEY)
+                state.startNavigationToEntity("entity-nyr-104")
+              },
+            ),
+            Triple(
+              Icons.Default.Explore,
+              "Navigate to Submission",
+              {
+                state.navigateTo(PrototypeScreen.MAIN_SURVEY)
+                state.startNavigationToSubmission("sub-shade-201-wave3")
               },
             ),
             Triple(

@@ -20,8 +20,11 @@ import groundplatform.v2.forms.FormDef
 import groundplatform.v2.forms.RecordInstance
 import kotlin.math.PI
 import kotlin.math.abs
+import kotlin.math.atan2
 import kotlin.math.cos
+import kotlin.math.hypot
 import kotlin.math.pow
+import kotlin.math.roundToInt
 import org.groundplatform.v2.core.forms.serialization.XFormsXmlSerializer
 import org.groundplatform.v2.core.forms.ui.FormWizardController
 
@@ -70,7 +73,7 @@ enum class MainSurveyViewMode(val label: String) {
 /** Category filter tabs inside the Main Survey `List` view (Forms group Submissions rather than being a separate list). */
 enum class ListFilterTab(val label: String) {
   ALL("All"),
-  ENTITIES("Entities"),
+  ENTITIES("Sites"),
   SUBMISSIONS("Submissions"),
 }
 
@@ -277,7 +280,31 @@ data class MapLayerItem(
   val formId: String? = null,
   val fieldPath: String? = null,
   val isDottedOutline: Boolean = sourceType == LayerSourceType.FORM_GEOMETRY,
-)
+  val pluralDomainLabel: String =
+    when (id) {
+      "layer-coffee-parcels" -> "Coffee Parcels"
+      "layer-shade-transects" -> "Monitoring Plots"
+      "layer-water-points" -> "Washing Stations"
+      else -> label
+    },
+  val singularNoun: String =
+    when (id) {
+      "layer-coffee-parcels" -> "parcel"
+      "layer-shade-transects" -> "plot"
+      "layer-water-points" -> "station"
+      else -> "site"
+    },
+  val pluralNoun: String =
+    when (id) {
+      "layer-coffee-parcels" -> "parcels"
+      "layer-shade-transects" -> "plots"
+      "layer-water-points" -> "stations"
+      else -> "sites"
+    },
+) {
+  /** Formats a user-friendly domain item count for this layer (e.g. `"2 parcels"`, `"1 plot"`). */
+  fun itemCountLabel(count: Int): String = "$count ${if (count == 1) singularNoun else pluralNoun}"
+}
 
 /**
  * Represents a polygon geometry recorded as an answer to a geometry question/field
@@ -347,7 +374,17 @@ data class GeospatialEntityItem(
   val colorHex: Long,
   val properties: Map<String, String>,
   val submissions: List<SubmissionPreviewItem>,
-)
+) {
+  /** User-facing singular domain noun derived from the dataset (e.g. `"Coffee Parcel"`). */
+  val singularTypeLabel: String
+    get() =
+      when (datasetId) {
+        "coffee_parcels" -> "Coffee Parcel"
+        "shade_monitoring_plots" -> "Monitoring Plot"
+        "washing_stations" -> "Washing Station"
+        else -> datasetName.removeSuffix("s").ifBlank { "Site" }
+      }
+}
 
 /** Represents a hierarchical Form (`FormDef` + `FormLaunchConfig`) in the active survey. */
 data class FormPreviewItem(
@@ -377,6 +414,55 @@ data class SharedPdfSheetState(
   val targetKindLabel: String,
 )
 
+/** Distinguishes whether straight-line navigation is targeting a Geospatial Entity or a Submission. */
+enum class NavigationTargetKind(val badgeLabel: String) {
+  ENTITY("ENTITY"),
+  SUBMISSION("SUBMISSION"),
+}
+
+/**
+ * Computed straight-line geodesic vector from the collector's current GPS position
+ * (`userGpsNormalizedX`, `userGpsNormalizedY`) to a target entity or submission.
+ */
+data class StraightLineVector(
+  val fromNormalizedX: Float,
+  val fromNormalizedY: Float,
+  val toNormalizedX: Float,
+  val toNormalizedY: Float,
+  val distanceMeters: Int,
+  val formattedDistance: String,
+  val bearingDegrees: Int,
+  val cardinalDirection: String,
+  val estimatedWalkMinutes: Int,
+  val hasArrived: Boolean,
+) {
+  val isArrived: Boolean
+    get() = hasArrived
+
+  val formattedBearing: String
+    get() = "${bearingDegrees}° $cardinalDirection"
+}
+
+/**
+ * Active straight-line wayfinding navigation state guiding the collector from their current GPS
+ * position to either a [GeospatialEntityItem] or a [SubmissionPreviewItem].
+ */
+data class StraightLineNavigationState(
+  val targetKind: NavigationTargetKind,
+  val targetId: String,
+  val entityId: String,
+  val submissionId: String?,
+  val geometryId: String?,
+  val targetTitle: String,
+  val targetSubtitle: String,
+  val targetCoordinatesLabel: String,
+  val colorHex: Long,
+  val vector: StraightLineVector,
+) {
+  val formattedDistance: String
+    get() = vector.formattedDistance
+}
+
 /** Pre-cached Mapbox vector/raster offline basemap tile package (`Offline maps`). */
 data class OfflineTilePackageItem(
   val id: String,
@@ -386,6 +472,14 @@ data class OfflineTilePackageItem(
   val sizeLabel: String,
   val isDownloaded: Boolean,
 )
+
+/** Distinguishes how the user navigated to the "Download surveys" screen. */
+enum class DownloadSurveyEntryOrigin {
+  /** Shown after accepting the Terms of Service during onboarding (Back prompts to sign out). */
+  AFTER_TOS,
+  /** Accessed from the Downloaded Surveys list in the Main Survey UI (Back returns to the list). */
+  SURVEY_LIST,
+}
 
 /**
  * State controller for the Ground 2.0 Mobile UI Prototype workbench (`devtools/prototypeApp`).
@@ -417,6 +511,18 @@ class PrototypeAppState(
 
   var signedInUserEmail by mutableStateOf("maya.lin@groundplatform.org")
     private set
+
+  /** Tracks whether the Download surveys screen was reached after ToS or from the Survey list. */
+  var downloadSurveyEntryOrigin by mutableStateOf(DownloadSurveyEntryOrigin.AFTER_TOS)
+    private set
+
+  /** True when the sign-out confirmation prompt is open on the Download surveys screen. */
+  var isDownloadSurveySignOutPromptOpen by mutableStateOf(false)
+    private set
+
+  /** True when the Download surveys screen was opened from the Downloaded Surveys list. */
+  val isDownloadSurveyAccessedFromSurveyList: Boolean
+    get() = downloadSurveyEntryOrigin == DownloadSurveyEntryOrigin.SURVEY_LIST
 
   var signedInOrganization by mutableStateOf("Open Foris • East Africa Field Team")
     private set
@@ -670,6 +776,177 @@ class PrototypeAppState(
   var activeSharedPdfSheet by mutableStateOf<SharedPdfSheetState?>(null)
     private set
 
+  // --- Straight-Line Wayfinding Navigation State (Entities & Submissions) ---
+  /** Target kind (`ENTITY` or `SUBMISSION`) for active straight-line navigation (`null` when inactive). */
+  var navigationTargetKind by mutableStateOf<NavigationTargetKind?>(null)
+    private set
+
+  /** Target ID (`entityId` or `submissionId`) for active straight-line navigation (`null` when inactive). */
+  var navigationTargetId by mutableStateOf<String?>(null)
+    private set
+
+  /**
+   * Computes a [StraightLineVector] from the collector's current GPS position
+   * (`userGpsNormalizedX`, `userGpsNormalizedY`) to `(targetNormalizedX, targetNormalizedY)`
+   * using the active survey's geographic scale and the user's [unitSystem] (`METRIC` vs `IMPERIAL`).
+   */
+  fun computeStraightLineVector(
+    targetNormalizedX: Float,
+    targetNormalizedY: Float,
+  ): StraightLineVector {
+    val eastMeters = (targetNormalizedX - userGpsNormalizedX) * 1558.48
+    val northMeters = (userGpsNormalizedY - targetNormalizedY) * 2000.38
+    val distMeters = hypot(eastMeters, northMeters).roundToInt().coerceAtLeast(0)
+    val rawBearingDeg =
+      if (distMeters == 0) {
+        0.0
+      } else {
+        atan2(eastMeters, northMeters) * (180.0 / PI)
+      }
+    val bearingDeg = (((rawBearingDeg.roundToInt()) % 360) + 360) % 360
+    val cardinalDirections = listOf("N", "NE", "E", "SE", "S", "SW", "W", "NW")
+    val cardinalIdx = (((bearingDeg + 22.5) / 45.0).toInt()) % 8
+    val cardinal = cardinalDirections[cardinalIdx]
+    val formattedDist =
+      if (unitSystem == MeasurementUnitSystem.METRIC) {
+        if (distMeters >= 1000) {
+          val km = ((distMeters / 100.0).roundToInt()) / 10.0
+          "$km km"
+        } else {
+          "$distMeters m"
+        }
+      } else {
+        val feet = (distMeters * 3.28084).roundToInt()
+        if (feet >= 5280) {
+          val miles = ((feet / 528.0).roundToInt()) / 10.0
+          "$miles mi"
+        } else {
+          "$feet ft"
+        }
+      }
+    val walkMinutes =
+      if (distMeters <= 8) {
+        0
+      } else {
+        (distMeters / 65.0).roundToInt().coerceAtLeast(1)
+      }
+    return StraightLineVector(
+      fromNormalizedX = userGpsNormalizedX,
+      fromNormalizedY = userGpsNormalizedY,
+      toNormalizedX = targetNormalizedX,
+      toNormalizedY = targetNormalizedY,
+      distanceMeters = distMeters,
+      formattedDistance = formattedDist,
+      bearingDegrees = bearingDeg,
+      cardinalDirection = cardinal,
+      estimatedWalkMinutes = walkMinutes,
+      hasArrived = distMeters <= 8,
+    )
+  }
+
+  /**
+   * Resolves the normalized map coordinates `(normalizedX, normalizedY)` and optional
+   * [SubmissionGeometryPolygon] for any [SubmissionPreviewItem].
+   */
+  fun resolveSubmissionTargetGeometry(
+    submissionId: String,
+  ): Triple<Float, Float, SubmissionGeometryPolygon?>? {
+    val sub = allSubmissions.firstOrNull { it.id == submissionId } ?: return null
+    val geom = submissionGeometries.firstOrNull { it.submissionId == sub.id }
+    if (geom != null) {
+      return Triple(geom.normalizedX, geom.normalizedY, geom)
+    }
+    val parentEntity = entities.firstOrNull { it.id == sub.entityId } ?: return null
+    val subIndex = parentEntity.submissions.indexOfFirst { it.id == sub.id }.coerceAtLeast(0)
+    val offsetX = (subIndex * 0.014f)
+    val offsetY = (subIndex * 0.012f)
+    return Triple(
+      (parentEntity.normalizedX + offsetX).coerceIn(0.08f, 0.92f),
+      (parentEntity.normalizedY + offsetY).coerceIn(0.08f, 0.92f),
+      null,
+    )
+  }
+
+  /** Returns the live [StraightLineVector] from the user's GPS position to [entityId]. */
+  fun distanceAndBearingToEntity(entityId: String): StraightLineVector? {
+    val entity = entities.firstOrNull { it.id == entityId } ?: return null
+    return computeStraightLineVector(entity.normalizedX, entity.normalizedY)
+  }
+
+  /** Returns the live [StraightLineVector] from the user's GPS position to [submissionId]. */
+  fun distanceAndBearingToSubmission(submissionId: String): StraightLineVector? {
+    val (tx, ty, _) = resolveSubmissionTargetGeometry(submissionId) ?: return null
+    return computeStraightLineVector(tx, ty)
+  }
+
+  /** Formatted distance & compass bearing badge for [entityId] (e.g. `"495 m • 319° NW"`). */
+  fun formattedWayfindingBadgeForEntity(entityId: String): String {
+    val v = distanceAndBearingToEntity(entityId) ?: return ""
+    return "${v.formattedDistance} • ${v.bearingDegrees}° ${v.cardinalDirection}"
+  }
+
+  /** Formatted distance & compass bearing badge for [submissionId] (e.g. `"452 m • 321° NW"`). */
+  fun formattedWayfindingBadgeForSubmission(submissionId: String): String {
+    val v = distanceAndBearingToSubmission(submissionId) ?: return ""
+    return "${v.formattedDistance} • ${v.bearingDegrees}° ${v.cardinalDirection}"
+  }
+
+  /** True when straight-line navigation is currently active and targeting [entityId]. */
+  fun isNavigatingToEntity(entityId: String): Boolean =
+    navigationTargetKind == NavigationTargetKind.ENTITY && navigationTargetId == entityId
+
+  /** True when straight-line navigation is currently active and targeting [submissionId]. */
+  fun isNavigatingToSubmission(submissionId: String): Boolean =
+    navigationTargetKind == NavigationTargetKind.SUBMISSION && navigationTargetId == submissionId
+
+  /**
+   * Currently active straight-line navigation session ([StraightLineNavigationState]) to either a
+   * Geospatial Entity or a Form Submission, dynamically updated as the user's GPS position or
+   * measurement unit preference changes (`null` when navigation is inactive).
+   */
+  val activeNavigation: StraightLineNavigationState?
+    get() {
+      val kind = navigationTargetKind ?: return null
+      val targetId = navigationTargetId ?: return null
+      return when (kind) {
+        NavigationTargetKind.ENTITY -> {
+          val entity = entities.firstOrNull { it.id == targetId } ?: return null
+          val vector = computeStraightLineVector(entity.normalizedX, entity.normalizedY)
+          StraightLineNavigationState(
+            targetKind = NavigationTargetKind.ENTITY,
+            targetId = entity.id,
+            entityId = entity.id,
+            submissionId = null,
+            geometryId = null,
+            targetTitle = entity.label,
+            targetSubtitle = "${entity.datasetName} • GeoID: ${entity.geoId}",
+            targetCoordinatesLabel = entity.coordinatesLabel,
+            colorHex = entity.colorHex,
+            vector = vector,
+          )
+        }
+        NavigationTargetKind.SUBMISSION -> {
+          val sub = allSubmissions.firstOrNull { it.id == targetId } ?: return null
+          val parentEntity = entities.firstOrNull { it.id == sub.entityId } ?: return null
+          val (tx, ty, geom) = resolveSubmissionTargetGeometry(sub.id) ?: return null
+          val vector = computeStraightLineVector(tx, ty)
+          StraightLineNavigationState(
+            targetKind = NavigationTargetKind.SUBMISSION,
+            targetId = sub.id,
+            entityId = parentEntity.id,
+            submissionId = sub.id,
+            geometryId = geom?.id,
+            targetTitle =
+              geom?.shortMapBadge ?: "${sub.formTitle} (${parentEntity.label.substringBefore(" •")})",
+            targetSubtitle = "${sub.entityLabel} • ${sub.collectorName} (${sub.timestamp})",
+            targetCoordinatesLabel = parentEntity.coordinatesLabel,
+            colorHex = geom?.colorHex ?: parentEntity.colorHex,
+            vector = vector,
+          )
+        }
+      }
+    }
+
   // --- Data Collection Form & XForms FormDef Chrome State ---
   /**
    * Custom ODK XForms `<h:html>` definition editable in the Prototype App Chrome (`UxDesignerInspectorPanel`).
@@ -769,6 +1046,41 @@ class PrototypeAppState(
   val visibleMapEntities: List<GeospatialEntityItem>
     get() = entities.filter { it.layerId in visibleLayerIds }
 
+  /** Currently visible entity dataset layers (`LayerSourceType.ENTITY_DATASET`). */
+  val visibleEntityDatasetLayers: List<MapLayerItem>
+    get() = entityDatasetLayers.filter { it.isVisible }
+
+  /**
+   * User-facing plural category label for the `Sites` tab and list section header:
+   * - When exactly 1 entity dataset layer is visible on the map, returns its plural domain label
+   *   (e.g. `"Coffee Parcels"`, `"Monitoring Plots"`, `"Washing Stations"`).
+   * - When multiple entity dataset layers are visible (or none), falls back to `"Sites"`.
+   */
+  val activeEntitiesTabLabel: String
+    get() =
+      visibleEntityDatasetLayers.singleOrNull()?.pluralDomainLabel ?: ListFilterTab.ENTITIES.label
+
+  /**
+   * User-facing lowercase plural count noun for map counters, search hints, and empty states:
+   * - When 1 entity dataset layer is visible, returns its lowercase plural domain label
+   *   (e.g. `"coffee parcels"`, `"monitoring plots"`, `"washing stations"`).
+   * - Otherwise falls back to `"sites"`.
+   */
+  val activeEntitiesCountNoun: String
+    get() =
+      visibleEntityDatasetLayers.singleOrNull()?.pluralDomainLabel?.lowercase() ?: "sites"
+
+  /** Resolves the user-facing singular domain noun for [entityId] (e.g. `"Coffee Parcel"`, or `"Site"`). */
+  fun entitySingularTypeLabel(entityId: String?): String =
+    entityId?.let { id -> entities.firstOrNull { it.id == id }?.singularTypeLabel } ?: "Site"
+
+  /** Resolves the dynamic display label for a [ListFilterTab] chip. */
+  fun tabLabelFor(tab: ListFilterTab): String =
+    when (tab) {
+      ListFilterTab.ENTITIES -> activeEntitiesTabLabel
+      else -> tab.label
+    }
+
   /**
    * Submission geometries (recorded answers to form geometry questions/fields) currently visible
    * on the map with dotted polygon outlines according to active `FORM_GEOMETRY` layer toggles.
@@ -866,6 +1178,18 @@ class PrototypeAppState(
 
   /** Directly switches the active mobile screen (used by both flow buttons and UX workbench). */
   fun navigateTo(screen: PrototypeScreen) {
+    if (screen == PrototypeScreen.DOWNLOAD_SURVEY) {
+      downloadSurveyEntryOrigin =
+        if (
+          currentScreen == PrototypeScreen.MAIN_SURVEY &&
+            activeDrawerSubView == MainDrawerSubView.SWITCH_SURVEYS
+        ) {
+          DownloadSurveyEntryOrigin.SURVEY_LIST
+        } else {
+          DownloadSurveyEntryOrigin.AFTER_TOS
+        }
+    }
+    isDownloadSurveySignOutPromptOpen = false
     currentScreen = screen
     activeSurveyNotice = null
     isDrawerOpen = false
@@ -874,8 +1198,10 @@ class PrototypeAppState(
 
   /** Transitions from the Splash / Loading screen to the Sign In screen. */
   fun completeSplashLoading() {
+    isDownloadSurveySignOutPromptOpen = false
     currentScreen =
       if (isSignedIn && hasAcceptedTerms) {
+        downloadSurveyEntryOrigin = DownloadSurveyEntryOrigin.AFTER_TOS
         PrototypeScreen.DOWNLOAD_SURVEY
       } else if (isSignedIn) {
         PrototypeScreen.TERMS_OF_SERVICE
@@ -887,8 +1213,10 @@ class PrototypeAppState(
   /** Authenticates with Google and advances to the Terms of Service screen. */
   fun signInWithGoogle() {
     isSignedIn = true
+    isDownloadSurveySignOutPromptOpen = false
     currentScreen =
       if (hasAcceptedTerms) {
+        downloadSurveyEntryOrigin = DownloadSurveyEntryOrigin.AFTER_TOS
         PrototypeScreen.DOWNLOAD_SURVEY
       } else {
         PrototypeScreen.TERMS_OF_SERVICE
@@ -904,6 +1232,8 @@ class PrototypeAppState(
   fun acceptTermsOfService() {
     termsCheckboxChecked = true
     hasAcceptedTerms = true
+    downloadSurveyEntryOrigin = DownloadSurveyEntryOrigin.AFTER_TOS
+    isDownloadSurveySignOutPromptOpen = false
     currentScreen = PrototypeScreen.DOWNLOAD_SURVEY
   }
 
@@ -911,7 +1241,42 @@ class PrototypeAppState(
   fun declineTermsOfService() {
     isSignedIn = false
     hasAcceptedTerms = false
+    isDownloadSurveySignOutPromptOpen = false
     currentScreen = PrototypeScreen.SIGN_IN
+  }
+
+  /**
+   * Handles the Back escape hatch on the Download surveys screen:
+   * - When accessed from the Survey list (`SURVEY_LIST`), returns the user to the Survey list.
+   * - When shown after Terms of Service (`AFTER_TOS`), opens a confirmation prompt before signing
+   *   the user out.
+   */
+  fun navigateBackFromDownloadSurvey() {
+    if (downloadSurveyEntryOrigin == DownloadSurveyEntryOrigin.SURVEY_LIST) {
+      isDownloadSurveySignOutPromptOpen = false
+      isDrawerOpen = false
+      activeSurveyNotice = null
+      currentScreen = PrototypeScreen.MAIN_SURVEY
+      activeDrawerSubView = MainDrawerSubView.SWITCH_SURVEYS
+    } else {
+      isDownloadSurveySignOutPromptOpen = true
+    }
+  }
+
+  /** Confirms signing out from the Download surveys screen back-action confirmation prompt. */
+  fun confirmDownloadSurveySignOut() {
+    isDownloadSurveySignOutPromptOpen = false
+    isDrawerOpen = false
+    activeDrawerSubView = MainDrawerSubView.NONE
+    activeSurveyNotice = null
+    isSignedIn = false
+    hasAcceptedTerms = false
+    currentScreen = PrototypeScreen.SIGN_IN
+  }
+
+  /** Cancels/dismisses the sign-out confirmation prompt on the Download surveys screen. */
+  fun dismissDownloadSurveySignOutPrompt() {
+    isDownloadSurveySignOutPromptOpen = false
   }
 
   /** Updates the search bar query used to filter surveys by name or location. */
@@ -1267,10 +1632,10 @@ class PrototypeAppState(
     activeSharedPdfSheet =
       SharedPdfSheetState(
         targetId = entity.id,
-        title = "Share Entity PDF Report",
+        title = "Share ${entity.singularTypeLabel} PDF Report",
         subtitle = "${entity.label} • GeoID ${entity.geoId}",
         pdfFileName = "${entity.id}-${entity.geoId}.pdf",
-        targetKindLabel = "Geospatial Entity PDF",
+        targetKindLabel = "${entity.singularTypeLabel} PDF",
       )
   }
 
@@ -1307,6 +1672,8 @@ class PrototypeAppState(
   fun openDownloadMoreSurveysScreen() {
     isDrawerOpen = false
     activeDrawerSubView = MainDrawerSubView.NONE
+    downloadSurveyEntryOrigin = DownloadSurveyEntryOrigin.SURVEY_LIST
+    isDownloadSurveySignOutPromptOpen = false
     currentScreen = PrototypeScreen.DOWNLOAD_SURVEY
   }
 
@@ -1494,6 +1861,123 @@ class PrototypeAppState(
     }
   }
 
+  // --- Straight-Line Wayfinding Navigation Actions ---
+
+  /**
+   * Starts straight-line navigation from the collector's current GPS position to [entityId],
+   * ensuring its layer is visible, selecting the entity in collapsed bottom-sheet peek mode,
+   * and switching to the Map view with GPS auto-centering enabled.
+   */
+  fun startNavigationToEntity(entityId: String) {
+    val entity = entities.firstOrNull { it.id == entityId } ?: return
+    mapLayers =
+      mapLayers.map { layer ->
+        if (layer.id == entity.layerId) layer.copy(isVisible = true) else layer
+      }
+    navigationTargetKind = NavigationTargetKind.ENTITY
+    navigationTargetId = entity.id
+    selectedEntityId = entity.id
+    selectedSubmissionId = null
+    isEntityBottomSheetExpanded = false
+    isLayersSheetOpen = false
+    isDrawerOpen = false
+    activeDrawerSubView = MainDrawerSubView.NONE
+    mainViewMode = MainSurveyViewMode.MAP
+    if (currentScreen != PrototypeScreen.MAIN_SURVEY) {
+      currentScreen = PrototypeScreen.MAIN_SURVEY
+    }
+    recenterMapOnUser()
+    val badge = formattedWayfindingBadgeForEntity(entity.id)
+    activeSurveyNotice = "Straight-line navigation to ${entity.label} ($badge)"
+  }
+
+  /**
+   * Starts straight-line navigation from the collector's current GPS position to [submissionId]
+   * (targeting its recorded geometry polygon or parent entity location), ensuring both parent
+   * entity and form geometry layers are visible, selecting the submission, and switching to Map view.
+   */
+  fun startNavigationToSubmission(submissionId: String) {
+    val sub = allSubmissions.firstOrNull { it.id == submissionId } ?: return
+    val parentEntity = entities.firstOrNull { it.id == sub.entityId } ?: return
+    val geom = submissionGeometries.firstOrNull { it.submissionId == sub.id }
+    mapLayers =
+      mapLayers.map { layer ->
+        if (layer.id == parentEntity.layerId || (geom != null && layer.id == geom.layerId)) {
+          layer.copy(isVisible = true)
+        } else {
+          layer
+        }
+      }
+    navigationTargetKind = NavigationTargetKind.SUBMISSION
+    navigationTargetId = sub.id
+    selectedEntityId = parentEntity.id
+    selectedSubmissionId = sub.id
+    isEntityBottomSheetExpanded = false
+    isLayersSheetOpen = false
+    isDrawerOpen = false
+    activeDrawerSubView = MainDrawerSubView.NONE
+    mainViewMode = MainSurveyViewMode.MAP
+    if (currentScreen != PrototypeScreen.MAIN_SURVEY) {
+      currentScreen = PrototypeScreen.MAIN_SURVEY
+    }
+    recenterMapOnUser()
+    val badge = formattedWayfindingBadgeForSubmission(sub.id)
+    activeSurveyNotice =
+      "Straight-line navigation to ${sub.formTitle} • ${parentEntity.label.substringBefore(" •")} ($badge)"
+  }
+
+  /** Toggles straight-line navigation to [entityId] on or off. */
+  fun toggleNavigationToEntity(entityId: String) {
+    if (isNavigatingToEntity(entityId)) {
+      stopNavigation()
+    } else {
+      startNavigationToEntity(entityId)
+    }
+  }
+
+  /** Toggles straight-line navigation to [submissionId] on or off. */
+  fun toggleNavigationToSubmission(submissionId: String) {
+    if (isNavigatingToSubmission(submissionId)) {
+      stopNavigation()
+    } else {
+      startNavigationToSubmission(submissionId)
+    }
+  }
+
+  /** Stops active straight-line navigation and clears the navigation line & HUD banner. */
+  fun stopNavigation() {
+    navigationTargetKind = null
+    navigationTargetId = null
+    activeSurveyNotice = null
+  }
+
+  /**
+   * Advances the collector's simulated GPS blue dot along the active straight-line navigation
+   * vector toward the target entity or submission by [stepFraction] (`0.40f` by default, snapping
+   * directly onto the destination when within `12` meters).
+   */
+  fun stepUserTowardNavigationTarget(stepFraction: Float = 0.40f) {
+    val nav = activeNavigation ?: return
+    val targetX = nav.vector.toNormalizedX
+    val targetY = nav.vector.toNormalizedY
+    val dx = targetX - userGpsNormalizedX
+    val dy = targetY - userGpsNormalizedY
+    val fraction = stepFraction.coerceIn(0.10f, 1.0f)
+    val nextX =
+      if (nav.vector.distanceMeters <= 18) {
+        targetX
+      } else {
+        userGpsNormalizedX + dx * fraction
+      }
+    val nextY =
+      if (nav.vector.distanceMeters <= 18) {
+        targetY
+      } else {
+        userGpsNormalizedY + dy * fraction
+      }
+    updateUserGpsLocation(nextX, nextY)
+  }
+
   /** Toggles between Light and Dark Ground Material 3 themes. */
   fun toggleDarkTheme() {
     isDarkTheme = !isDarkTheme
@@ -1504,6 +1988,8 @@ class PrototypeAppState(
     currentScreen = PrototypeScreen.SPLASH
     isSignedIn = false
     hasAcceptedTerms = false
+    downloadSurveyEntryOrigin = DownloadSurveyEntryOrigin.AFTER_TOS
+    isDownloadSurveySignOutPromptOpen = false
     termsCheckboxChecked = true
     searchQuery = ""
     activeSurveyNotice = null
@@ -1518,6 +2004,8 @@ class PrototypeAppState(
     entities = defaultGeospatialEntities()
     selectedEntityId = "entity-nyr-104"
     selectedSubmissionId = null
+    navigationTargetKind = null
+    navigationTargetId = null
     listSearchQuery = ""
     listFilterTab = ListFilterTab.ALL
     userGpsNormalizedX = 0.50f

@@ -403,7 +403,7 @@ fun PrototypeDataCollectionFormScreen(state: PrototypeAppState) {
                 if (entity != null) {
                   "${entity.label} • ${entity.geoId}"
                 } else {
-                  "Geospatial Entity Data Collection"
+                  "Site Data Collection"
                 },
               style =
                 MaterialTheme.typography.labelSmall.copy(
