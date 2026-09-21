@@ -141,9 +141,6 @@ limitations under the License.`,
   {
     files: ['e2e-tests/**/*.ts'],
     languageOptions: {
-      globals: {
-        jasmine: 'readonly',
-      },
       parserOptions: {
         project: ['./e2e-tests/tsconfig.json'],
         tsconfigRootDir: __dirname,
