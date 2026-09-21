@@ -42,14 +42,56 @@ message AclEntry {
   InvitationStatus invitation_status = 3;
 }
 
-// Access Control List (ACL) resource defining collaborator permissions for a
-// survey.
+// Sharing policy controlling survey access outside explicit ACL invitations
+// (mirroring the Google Docs / Google Drive sharing model).
+enum SharingPolicy {
+  // Unspecified sharing policy.
+  SHARING_POLICY_UNSPECIFIED = 0;
+
+  // Restricted: Only users explicitly added to the survey Access Control
+  // List (ACL) can open and access the survey.
+  RESTRICTED = 1;
+
+  // Anyone with the link: Anyone who possesses the survey URL link or scans
+  // its QR code can access the survey and collect data without being on the
+  // ACL.
+  ANYONE_WITH_LINK = 2;
+
+  // Public: Discoverable in the public directory; anyone can open and
+  // collect data.
+  PUBLIC = 3;
+}
+
+// Peer data visibility controls for mobile field collectors.
+enum PeerDataVisibility {
+  // Unspecified visibility.
+  PEER_DATA_VISIBILITY_UNSPECIFIED = 0;
+
+  // Field collectors can view entities and submissions collected by all peers
+  // on the map to coordinate coverage and prevent duplicate registrations.
+  ALL = 1;
+
+  // Field collectors can only view their own collected submissions and entities
+  // to preserve respondent confidentiality.
+  OWN_ONLY = 2;
+}
+
+// Access Control List (ACL) and access rules governing collaborator permissions
+// and general visibility for a survey.
 message SurveyAcl {
   // Unique identifier of the survey.
   string survey_id = 1;
 
   // Collaborator Access Control List entries.
   repeated AclEntry entries = 2;
+
+  // Sharing policy controlling general access to the survey (Restricted,
+  // Anyone with Link / QR Code, Public).
+  SharingPolicy sharing_policy = 3;
+
+  // Peer data visibility configuration controlling whether data collectors can
+  // view submissions and entities collected by peers on the map.
+  PeerDataVisibility peer_data_visibility = 4;
 }
 
 // Resource quota tier applied to survey organizers and organizations.

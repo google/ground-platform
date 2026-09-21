@@ -1,0 +1,231 @@
+syntax = "proto3";
+
+package groundplatform.v2.survey;
+
+import "google/protobuf/struct.proto";
+import "shared/protos/forms/form_def.proto";
+import "shared/protos/forms/types.proto";
+import "shared/protos/survey/acl.proto";
+import "shared/protos/survey/survey_def.proto";
+
+// Core gRPC service for discovering, reading, and atomically mutating survey
+// definitions, sub-resources (forms, entity datasets, map layers), collaborator
+// ACLs, and survey access policies.
+//
+// Mobile clients download the complete `SurveyDef` via `GetSurvey` to operate
+// 100% offline. All creates, partial updates (including soft deletion via
+// `state = DELETED`), ACL grants/revocations, and permanent hard deletes are
+// executed through the batched `MutateSurvey` RPC so cross-referencing objects
+// can be committed together in a single atomic transaction.
+service SurveyService {
+  // Lists surveys accessible to the authenticated caller.
+  rpc ListSurveys(ListSurveysRequest) returns (ListSurveysResponse);
+
+  // Retrieves the complete `SurveyDef` (including all forms, entity dataset
+  // schemas, map configs, and translations) for offline mobile sync or web
+  // editing.
+  rpc GetSurvey(GetSurveyRequest) returns (GetSurveyResponse);
+
+  // Retrieves the Access Control List (ACL) and access rules (`SharingPolicy`
+  // and `PeerDataVisibility`) for a survey.
+  rpc GetSurveyAcl(GetSurveyAclRequest) returns (GetSurveyAclResponse);
+
+  // Atomically applies an ordered batch of mutations to create, patch (including
+  // soft-deleting via `state = DELETED`), configure ACLs/access rules, or
+  // permanently hard-delete a survey.
+  rpc MutateSurvey(MutateSurveyRequest) returns (MutateSurveyResponse);
+}
+
+// Request to list surveys accessible to the caller.
+message ListSurveysRequest {
+  // Optional organization ID filter.
+  string organization_id = 1;
+
+  // Maximum number of surveys to return per page.
+  int32 page_size = 2;
+
+  // Pagination cursor token from a previous `ListSurveysResponse`.
+  string page_token = 3;
+
+  // Whether to include soft-deleted surveys (`state == DELETED`).
+  bool include_deleted = 4;
+}
+
+// Response containing accessible surveys.
+message ListSurveysResponse {
+  // Accessible survey definitions (or summary projections).
+  repeated SurveyDef surveys = 1;
+
+  // Token for retrieving the next page of results, or empty if none remain.
+  string next_page_token = 2;
+}
+
+// Request to retrieve a single survey definition.
+message GetSurveyRequest {
+  // Unique identifier of the survey (`SurveyDef.survey_id`).
+  string survey_id = 1;
+
+  // Optional specific version string to fetch. If empty, returns the latest
+  // version.
+  string version = 2;
+}
+
+// Response containing the full survey definition and caller's effective access.
+message GetSurveyResponse {
+  // Complete survey definition for offline execution or editing.
+  SurveyDef survey = 1;
+
+  // Access rules and ACL for the survey, if authorized to view.
+  SurveyAcl acl = 2;
+}
+
+// Request to retrieve the ACL and access rules for a survey.
+message GetSurveyAclRequest {
+  // Unique identifier of the survey (`SurveyDef.survey_id`).
+  string survey_id = 1;
+}
+
+// Response containing the survey ACL and access rules.
+message GetSurveyAclResponse {
+  // Current ACL and sharing/visibility rules for the survey.
+  SurveyAcl acl = 1;
+}
+
+// Key-value mutation entry for setting, updating, or deleting a field or
+// keyed sub-resource within a `SurveyDef`.
+//
+// Setting `null_value` deletes or clears the element identified by `key`
+// (e.g., `"description"`, `"forms/<form_id>"`, `"entity_datasets/<dataset_id>"`,
+// `"map_config/layers/<layer_id>"`, `"form_launch_configs/<form_id>"`).
+// Soft deletion is performed by patching `key = "state"` with
+// `state_value = DELETED`.
+message SurveyFieldPatch {
+  // Target field name or collection item path within `SurveyDef` (e.g.,
+  // `"title"`, `"description"`, `"state"`, `"default_language"`,
+  // `"forms/<form_id>"`, `"entity_datasets/<dataset_id>"`,
+  // `"map_config/layers/<layer_id>"`, `"form_launch_configs/<form_id>"`).
+  string key = 1;
+
+  // New value to assign, or `null_value` to delete/clear the target key.
+  oneof value {
+    // Deletes the collection item or clears the field identified by `key`.
+    google.protobuf.NullValue null_value = 2;
+
+    // Scalar string value (e.g., for `"title"`, `"description"`,
+    // `"default_language"`).
+    string string_value = 3;
+
+    // Lifecycle state transition (for `"state"`, including `DELETED` for
+    // soft-delete).
+    SurveyState state_value = 4;
+
+    // Full map configuration replacement (for `"map_config"`).
+    MapConfig map_config_value = 5;
+
+    // Map layer definition to add or update (for
+    // `"map_config/layers/<layer_id>"`).
+    LayerDef layer_value = 6;
+
+    // Form definition to add or update (for `"forms/<form_id>"`).
+    groundplatform.v2.forms.FormDef form_value = 7;
+
+    // Form launch configuration to add or update (for
+    // `"form_launch_configs/<form_id>"`).
+    FormLaunchConfig form_launch_config_value = 8;
+
+    // Entity dataset schema to add or update (for
+    // `"entity_datasets/<dataset_id>"`).
+    EntityDatasetDef entity_dataset_value = 9;
+
+    // Translation catalog to set or update (for `"translations"`).
+    groundplatform.v2.forms.TranslationCatalog translations_value = 10;
+  }
+}
+
+// Key-value mutation entry for granting, updating, or revoking a user's role on
+// a survey.
+message AclRolePatch {
+  // Target user identifier (`AclEntry.user_id`, e.g., Firebase Auth UID or
+  // email).
+  string user_id = 1;
+
+  // Role assignment or `null_value` to revoke the user's access from the ACL.
+  oneof value {
+    // Revokes the user's explicit ACL entry on this survey.
+    google.protobuf.NullValue null_value = 2;
+
+    // Grants or updates the user's collaborator role (`VIEWER`,
+    // `DATA_COLLECTOR`, or `SURVEY_ORGANIZER`).
+    Role role = 3;
+  }
+}
+
+// Mutation updating survey-wide access rules (`SharingPolicy` and
+// `PeerDataVisibility`).
+message AccessRulesPatch {
+  // If non-unspecified, updates the survey's general sharing policy
+  // (`RESTRICTED`, `ANYONE_WITH_LINK`, `PUBLIC`).
+  SharingPolicy sharing_policy = 1;
+
+  // If non-unspecified, updates peer data visibility for field collectors
+  // (`ALL`, `OWN_ONLY`).
+  PeerDataVisibility peer_data_visibility = 2;
+}
+
+// A single mutation step within a batched `MutateSurveyRequest`.
+//
+// Mutations are applied sequentially within an atomic transaction, allowing
+// earlier operations in the batch (such as `create_survey` or adding an
+// `EntityDatasetDef` via `patch_field`) to be referenced immediately by
+// subsequent operations in the same batch (such as adding a `FormDef`,
+// `LayerDef`, or `FormLaunchConfig` that links to the new dataset).
+message SurveyMutation {
+  oneof operation {
+    // Creates a new `SurveyDef`.
+    SurveyDef create_survey = 1;
+
+    // Sets, updates, or deletes (`null_value`) a specific field or sub-resource
+    // (form, entity dataset, map layer, launch config, translation catalog, or
+    // soft-delete via `key = "state"` -> `DELETED`).
+    SurveyFieldPatch patch_field = 2;
+
+    // Grants, updates, or revokes (`null_value`) a single user's role on the
+    // survey ACL.
+    AclRolePatch patch_acl_role = 3;
+
+    // Updates the survey's `SharingPolicy` and/or `PeerDataVisibility`.
+    AccessRulesPatch patch_access_rules = 4;
+
+    // When true, permanently hard-deletes and purges the survey (soft delete is
+    // performed via `patch_field` setting `state = DELETED`).
+    bool delete_survey = 5;
+  }
+}
+
+// Request to atomically apply an ordered sequence of mutations to a survey.
+message MutateSurveyRequest {
+  // Target survey identifier (`SurveyDef.survey_id`).
+  string survey_id = 1;
+
+  // Expected base version for optimistic concurrency control on existing
+  // surveys (optional).
+  string base_version = 2;
+
+  // Ordered sequence of survey create, patch, ACL, or hard-delete mutations to
+  // execute atomically.
+  repeated SurveyMutation mutations = 3;
+}
+
+// Response returning the resulting survey state after applying all mutations.
+message MutateSurveyResponse {
+  // Target survey identifier.
+  string survey_id = 1;
+
+  // Resulting survey definition with incremented `version` and `audit_info`
+  // (unset if hard-deleted via `delete_survey`).
+  SurveyDef survey = 2;
+
+  // Resulting ACL and access rules for the survey (unset if hard-deleted via
+  // `delete_survey`).
+  SurveyAcl acl = 3;
+}

@@ -73,7 +73,11 @@ wire {
     include("google/type/date.proto")
     include("google/type/timeofday.proto")
   }
-  kotlin { boxOneOfsMinSize = 5000 }
+  kotlin {
+    boxOneOfsMinSize = 5000
+    rpcCallStyle = "suspending"
+    rpcRole = "server"
+  }
 }
 
 tasks

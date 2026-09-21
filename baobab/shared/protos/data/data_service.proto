@@ -1,0 +1,324 @@
+syntax = "proto3";
+
+package groundplatform.v2.data;
+
+import "google/protobuf/struct.proto";
+import "shared/protos/data/entity_record.proto";
+import "shared/protos/data/submission_record.proto";
+import "shared/protos/forms/record_instance.proto";
+import "shared/protos/forms/types.proto";
+
+// Core gRPC service for reading and atomically mutating `EntityRecord` and
+// `SubmissionRecord` data.
+//
+// All write operations (creating new records, partially patching fields via
+// key-value `NullValue` deletion—including setting `is_deleted = true` for soft
+// deletes—and permanently hard-deleting records) are unified into a single
+// batched `MutateData` RPC. This allows clients to atomically commit
+// interdependent mutations in one request (e.g., creating a new
+// `EntityRecord` and immediately creating a `SubmissionRecord` that references
+// its `entity_id`).
+service DataService {
+  // Retrieves a single entity record by ID.
+  rpc GetEntity(GetEntityRequest) returns (GetEntityResponse);
+
+  // Lists entity records for a survey (optionally filtered by dataset ID).
+  rpc ListEntities(ListEntitiesRequest) returns (ListEntitiesResponse);
+
+  // Retrieves a single submission record by ID.
+  rpc GetSubmission(GetSubmissionRequest) returns (GetSubmissionResponse);
+
+  // Lists submission records for a survey (optionally filtered by form ID or
+  // linked entity ID).
+  rpc ListSubmissions(ListSubmissionsRequest) returns (ListSubmissionsResponse);
+
+  // Atomically executes an ordered sequence of entity and submission mutations
+  // (`create`, `patch`, and hard `delete`).
+  rpc MutateData(MutateDataRequest) returns (MutateDataResponse);
+}
+
+// =============================================================================
+// Read Messages (Get / List)
+// =============================================================================
+
+// Request to fetch a single entity record.
+message GetEntityRequest {
+  // Survey identifier (`SurveyDef.survey_id`).
+  string survey_id = 1;
+
+  // Dataset identifier (`EntityDatasetDef.id`).
+  string dataset_id = 2;
+
+  // Unique entity UUID (`EntityRecord.entity_id`).
+  string entity_id = 3;
+}
+
+// Response containing the requested entity record.
+message GetEntityResponse {
+  // Retrieved entity record.
+  EntityRecord entity = 1;
+}
+
+// Request to list entities in a survey for offline dataset sync or management.
+message ListEntitiesRequest {
+  // Survey identifier (`SurveyDef.survey_id`).
+  string survey_id = 1;
+
+  // Optional dataset identifier filter (`EntityDatasetDef.id`). If empty,
+  // returns entities across all datasets in the survey.
+  string dataset_id = 2;
+
+  // Maximum number of entities to return per page.
+  int32 page_size = 3;
+
+  // Pagination cursor token from a previous `ListEntitiesResponse`.
+  string page_token = 4;
+
+  // Whether to include soft-deleted entities (`is_deleted == true`).
+  bool include_deleted = 5;
+}
+
+// Response containing matching entity records.
+message ListEntitiesResponse {
+  // Entity records matching the request.
+  repeated EntityRecord entities = 1;
+
+  // Token for retrieving the next page of results, or empty if none remain.
+  string next_page_token = 2;
+}
+
+// Request to fetch a single submission record.
+message GetSubmissionRequest {
+  // Survey identifier (`SurveyDef.survey_id`).
+  string survey_id = 1;
+
+  // Unique submission UUID (`SubmissionRecord.submission_id`).
+  string submission_id = 2;
+}
+
+// Response containing the requested submission record.
+message GetSubmissionResponse {
+  // Retrieved submission record.
+  SubmissionRecord submission = 1;
+}
+
+// Request to list submissions in a survey.
+message ListSubmissionsRequest {
+  // Survey identifier (`SurveyDef.survey_id`).
+  string survey_id = 1;
+
+  // Optional form identifier filter (`FormDef.form_id`).
+  string form_id = 2;
+
+  // Optional linked entity identifier filter (`EntityRecord.entity_id`).
+  string entity_id = 3;
+
+  // Maximum number of submissions to return per page.
+  int32 page_size = 4;
+
+  // Pagination cursor token from a previous `ListSubmissionsResponse`.
+  string page_token = 5;
+
+  // Whether to include soft-deleted submissions (`is_deleted == true`).
+  bool include_deleted = 6;
+}
+
+// Response containing matching submission records.
+message ListSubmissionsResponse {
+  // Submission records matching the request.
+  repeated SubmissionRecord submissions = 1;
+
+  // Token for retrieving the next page of results, or empty if none remain.
+  string next_page_token = 2;
+}
+
+// =============================================================================
+// Batched Mutation Messages (MutateData)
+// =============================================================================
+
+// Key-value mutation entry for partially updating an `EntityRecord`.
+//
+// `key` identifies an attribute key in `EntityRecord.properties` or a reserved
+// system property (`"label"`, `"geometry"`, `"is_deleted"`). Setting
+// `null_value` removes the attribute from `properties` or clears the targeted
+// field. Soft deletion is performed by patching `key = "is_deleted"` with
+// `bool_value = true`.
+message EntityFieldPatch {
+  // Property key in `EntityRecord.properties` or reserved field name
+  // (`"label"`, `"geometry"`, `"is_deleted"`).
+  string key = 1;
+
+  // Value to assign, or `null_value` to delete the property/field.
+  oneof value {
+    // Deletes the property `key` from `EntityRecord.properties` (or clears
+    // `"label"` / `"geometry"`).
+    google.protobuf.NullValue null_value = 2;
+
+    // Typed attribute value to set in `EntityRecord.properties[key]`.
+    groundplatform.v2.forms.TypedValue property_value = 3;
+
+    // Updates `EntityRecord.label` (when `key == "label"`).
+    string label_value = 4;
+
+    // Updates boolean system fields such as `EntityRecord.is_deleted` for
+    // soft-delete or restoration (when `key == "is_deleted"`).
+    bool bool_value = 5;
+
+    // Updates `EntityRecord.point` geometry (when `key == "geometry"`).
+    groundplatform.v2.forms.GeoPoint point_value = 6;
+
+    // Updates `EntityRecord.trace` geometry (when `key == "geometry"`).
+    groundplatform.v2.forms.GeoTrace trace_value = 7;
+
+    // Updates `EntityRecord.shape` geometry (when `key == "geometry"`).
+    groundplatform.v2.forms.GeoShape shape_value = 8;
+  }
+}
+
+// Collection of partial key-value mutations applied to an `EntityRecord`.
+message EntityPatch {
+  // Ordered list of key-value field/property mutations.
+  repeated EntityFieldPatch patches = 1;
+}
+
+// Mutation targeting a single `EntityRecord` (`create`, `patch`, or permanent
+// hard `delete`).
+message EntityMutation {
+  // Dataset identifier (`EntityDatasetDef.id`).
+  string dataset_id = 1;
+
+  // Target entity UUID (`EntityRecord.entity_id`).
+  string entity_id = 2;
+
+  // Expected base revision number for optimistic concurrency control on
+  // existing entities (optional).
+  int64 base_revision = 3;
+
+  // Concrete mutation operation to perform on the entity.
+  oneof operation {
+    // Creates a new `EntityRecord`.
+    EntityRecord create = 4;
+
+    // Applies partial key-value mutations to an existing entity (using
+    // `null_value` for property deletion, or `key = "is_deleted"` ->
+    // `bool_value = true` for soft deletion).
+    EntityPatch patch = 5;
+
+    // When true, permanently hard-deletes and purges the entity record from
+    // storage.
+    bool delete = 6;
+  }
+}
+
+// Key-value mutation entry for partially updating a `SubmissionRecord`.
+//
+// `key` identifies a field name or slash-delimited field path within
+// `RecordInstance.data`, or a system field such as `"is_deleted"` or
+// `"entity_id"`. Setting `null_value` removes the field answer from the record
+// node. Soft deletion is performed by patching `key = "is_deleted"` with
+// `bool_value = true`.
+message SubmissionFieldPatch {
+  // Field key or path within `SubmissionRecord.record.data` (e.g.,
+  // `"species"`, `"plot_details/canopy_cover"`), or system key
+  // (`"is_deleted"`, `"entity_id"`).
+  string key = 1;
+
+  // New field value to set, or `null_value` to delete the field answer.
+  oneof value {
+    // Deletes the field entry identified by `key`.
+    google.protobuf.NullValue null_value = 2;
+
+    // Sets or replaces the `FieldValue` (scalar, list, group node, or repeat
+    // list) at `key`.
+    groundplatform.v2.forms.FieldValue field_value = 3;
+
+    // Updates boolean system fields such as `SubmissionRecord.is_deleted` for
+    // soft-delete or restoration (when `key == "is_deleted"`).
+    bool bool_value = 4;
+
+    // Updates string system fields such as `SubmissionRecord.entity_id` (when
+    // `key == "entity_id"`).
+    string string_value = 5;
+  }
+}
+
+// Collection of partial key-value field mutations applied to a
+// `SubmissionRecord`.
+message SubmissionPatch {
+  // Ordered list of key-value field mutations.
+  repeated SubmissionFieldPatch patches = 1;
+}
+
+// Mutation targeting a single `SubmissionRecord` (`create`, `patch`, or
+// permanent hard `delete`).
+message SubmissionMutation {
+  // Target submission UUID (`SubmissionRecord.submission_id`).
+  string submission_id = 1;
+
+  // Expected base revision number for optimistic concurrency control on
+  // existing submissions (optional).
+  int64 base_revision = 2;
+
+  // Concrete mutation operation to perform on the submission.
+  oneof operation {
+    // Creates a new `SubmissionRecord`.
+    SubmissionRecord create = 3;
+
+    // Applies partial key-value field mutations to an existing submission
+    // (using `null_value` for field deletion, or `key = "is_deleted"` ->
+    // `bool_value = true` for soft deletion).
+    SubmissionPatch patch = 4;
+
+    // When true, permanently hard-deletes and purges the submission record from
+    // storage.
+    bool delete = 5;
+  }
+}
+
+// A single mutation item in a `MutateDataRequest` batch.
+message DataMutation {
+  oneof target {
+    // Mutation applied to an `EntityRecord`.
+    EntityMutation entity_mutation = 1;
+
+    // Mutation applied to a `SubmissionRecord`.
+    SubmissionMutation submission_mutation = 2;
+  }
+}
+
+// Request to atomically execute an ordered batch of entity and submission
+// mutations within a survey.
+//
+// Mutations are processed in order within a single transaction so that newly
+// created entities in the batch (`EntityMutation.create`) can be immediately
+// referenced by subsequent submission (`SubmissionMutation.create`) or entity
+// mutations in the same request.
+message MutateDataRequest {
+  // Survey identifier (`SurveyDef.survey_id`).
+  string survey_id = 1;
+
+  // Ordered sequence of entity and submission mutations to apply atomically.
+  repeated DataMutation mutations = 2;
+}
+
+// Outcome of an individual `DataMutation` within a `MutateDataResponse`.
+message DataMutationResult {
+  oneof result {
+    // Created or patched entity record (unset if hard-deleted via `delete`).
+    EntityRecord entity = 1;
+
+    // Created or patched submission record (unset if hard-deleted via
+    // `delete`).
+    SubmissionRecord submission = 2;
+
+    // Target record ID when permanently purged via a hard `delete` mutation.
+    string deleted_id = 3;
+  }
+}
+
+// Response returning the results of all mutations in the `MutateDataRequest`
+// batch, in corresponding order.
+message MutateDataResponse {
+  // Results corresponding 1:1 with `MutateDataRequest.mutations`.
+  repeated DataMutationResult results = 1;
+}
