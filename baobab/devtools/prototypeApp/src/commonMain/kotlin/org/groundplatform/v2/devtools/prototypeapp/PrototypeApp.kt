@@ -53,6 +53,7 @@ import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.MyLocation
 import androidx.compose.material.icons.filled.Navigation
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.ScreenRotation
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Smartphone
@@ -123,7 +124,7 @@ fun PrototypeApp(state: PrototypeAppState = remember { PrototypeAppState() }) {
           horizontalArrangement = Arrangement.spacedBy(20.dp),
         ) {
           val previewStageWeight =
-            if (state.deviceFormFactor == DeviceFormFactor.TABLET) 1.55f else 1.15f
+            if (state.effectiveFrameWidthDp >= 600) 1.55f else 1.15f
 
           // Left / Center stage: Embedded Mobile or Tablet Device Preview
           Box(
@@ -140,7 +141,9 @@ fun PrototypeApp(state: PrototypeAppState = remember { PrototypeAppState() }) {
               isDarkTheme = state.isDarkTheme,
               isScreenTransparent = isMapShowing,
               formFactor = state.deviceFormFactor,
+              orientation = state.deviceOrientation,
               onSelectFormFactor = { state.selectDeviceFormFactor(it) },
+              onRotateDevice = { state.rotateDevice() },
             ) {
               GroundMobilePrototypeScreenHost(state)
             }
@@ -294,6 +297,39 @@ private fun PrototypeWorkbenchTopBar(state: PrototypeAppState) {
           }
         }
 
+        // Rotate Device widget button in top bar
+        Row(
+          modifier =
+            Modifier.clip(RoundedCornerShape(8.dp))
+              .background(if (state.isDeviceRotated) Color(0xFF8BD6B1) else Color(0xFF245840))
+              .border(
+                1.dp,
+                if (state.isDeviceRotated) Color(0xFF8BD6B1) else Color(0xFF386B52),
+                RoundedCornerShape(8.dp),
+              )
+              .clickable { state.rotateDevice() }
+              .padding(horizontal = 10.dp, vertical = 6.dp),
+          verticalAlignment = Alignment.CenterVertically,
+          horizontalArrangement = Arrangement.spacedBy(5.dp),
+        ) {
+          Icon(
+            imageVector = Icons.Default.ScreenRotation,
+            contentDescription = "Rotate device",
+            tint = if (state.isDeviceRotated) Color(0xFF003825) else Color.White,
+            modifier = Modifier.size(14.dp),
+          )
+          Text(
+            text = "Rotate (${state.deviceOrientation.label})",
+            maxLines = 1,
+            softWrap = false,
+            style =
+              MaterialTheme.typography.labelMedium.copy(
+                color = if (state.isDeviceRotated) Color(0xFF003825) else Color.White,
+                fontWeight = if (state.isDeviceRotated) FontWeight.Bold else FontWeight.SemiBold,
+              ),
+          )
+        }
+
         // Theme toggle button
         Row(
           modifier =
@@ -363,18 +399,25 @@ fun MobileDevicePreviewFrame(
   isDarkTheme: Boolean,
   isScreenTransparent: Boolean = false,
   formFactor: DeviceFormFactor = DeviceFormFactor.MOBILE,
+  orientation: DeviceOrientation = formFactor.defaultOrientation,
   onSelectFormFactor: (DeviceFormFactor) -> Unit = {},
+  onRotateDevice: () -> Unit = {},
   modifier: Modifier = Modifier,
   content: @Composable () -> Unit,
 ) {
+  val frameWidthDp = formFactor.widthForOrientation(orientation)
+  val frameHeightDp = formFactor.heightForOrientation(orientation)
+  val dimensionsLabel = formFactor.dimensionsLabelForOrientation(orientation)
+  val isRotated = orientation != formFactor.defaultOrientation
+
   Column(
     modifier = modifier,
     horizontalAlignment = Alignment.CenterHorizontally,
     verticalArrangement = Arrangement.spacedBy(8.dp),
   ) {
-    // Stage Header with Device Title + Inline Mobile / Tablet Form Factor Toggle
+    // Stage Header with Device Title + Inline Mobile / Tablet Form Factor Toggle + Rotate Device Widget
     Row(
-      modifier = Modifier.width(formFactor.frameWidthDp.dp),
+      modifier = Modifier.width(frameWidthDp.dp),
       horizontalArrangement = Arrangement.SpaceBetween,
       verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -390,7 +433,7 @@ fun MobileDevicePreviewFrame(
             ),
         )
         Text(
-          text = "Viewport: ${formFactor.label} (${formFactor.dimensionsLabel})",
+          text = "Viewport: ${formFactor.label} • ${orientation.label} ($dimensionsLabel)",
           maxLines = 1,
           overflow = TextOverflow.Ellipsis,
           style =
@@ -401,61 +444,99 @@ fun MobileDevicePreviewFrame(
         )
       }
 
-      // Segmented Form Factor Pill Switcher right above the device frame
       Row(
-        modifier =
-          Modifier.clip(RoundedCornerShape(10.dp))
-            .background(Color(0xFFE2ECE6))
-            .border(1.dp, Color(0xFFB7D1C3), RoundedCornerShape(10.dp))
-            .padding(2.dp),
-        horizontalArrangement = Arrangement.spacedBy(2.dp),
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
         verticalAlignment = Alignment.CenterVertically,
       ) {
-        DeviceFormFactor.entries.forEach { factor ->
-          val isSelected = formFactor == factor
-          val icon =
-            if (factor == DeviceFormFactor.MOBILE) {
-              Icons.Default.Smartphone
-            } else {
-              Icons.Default.Tablet
+        // Segmented Form Factor Pill Switcher right above the device frame
+        Row(
+          modifier =
+            Modifier.clip(RoundedCornerShape(10.dp))
+              .background(Color(0xFFE2ECE6))
+              .border(1.dp, Color(0xFFB7D1C3), RoundedCornerShape(10.dp))
+              .padding(2.dp),
+          horizontalArrangement = Arrangement.spacedBy(2.dp),
+          verticalAlignment = Alignment.CenterVertically,
+        ) {
+          DeviceFormFactor.entries.forEach { factor ->
+            val isSelected = formFactor == factor
+            val icon =
+              if (factor == DeviceFormFactor.MOBILE) {
+                Icons.Default.Smartphone
+              } else {
+                Icons.Default.Tablet
+              }
+            Row(
+              modifier =
+                Modifier.clip(RoundedCornerShape(8.dp))
+                  .background(if (isSelected) Color(0xFF1E6F50) else Color.Transparent)
+                  .clickable { onSelectFormFactor(factor) }
+                  .padding(horizontal = 10.dp, vertical = 4.dp),
+              verticalAlignment = Alignment.CenterVertically,
+              horizontalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
+              Icon(
+                imageVector = icon,
+                contentDescription = factor.label,
+                tint = if (isSelected) Color.White else Color(0xFF1F2937),
+                modifier = Modifier.size(13.dp),
+              )
+              Text(
+                text = factor.label,
+                maxLines = 1,
+                softWrap = false,
+                style =
+                  MaterialTheme.typography.labelSmall.copy(
+                    color = if (isSelected) Color.White else Color(0xFF1F2937),
+                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                  ),
+              )
             }
-          Row(
-            modifier =
-              Modifier.clip(RoundedCornerShape(8.dp))
-                .background(if (isSelected) Color(0xFF1E6F50) else Color.Transparent)
-                .clickable { onSelectFormFactor(factor) }
-                .padding(horizontal = 10.dp, vertical = 4.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(4.dp),
-          ) {
-            Icon(
-              imageVector = icon,
-              contentDescription = factor.label,
-              tint = if (isSelected) Color.White else Color(0xFF1F2937),
-              modifier = Modifier.size(13.dp),
-            )
-            Text(
-              text = factor.label,
-              maxLines = 1,
-              softWrap = false,
-              style =
-                MaterialTheme.typography.labelSmall.copy(
-                  color = if (isSelected) Color.White else Color(0xFF1F2937),
-                  fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                ),
-            )
           }
+        }
+
+        // Rotate Device Widget right next to the Form Factor switcher
+        Row(
+          modifier =
+            Modifier.clip(RoundedCornerShape(10.dp))
+              .background(if (isRotated) Color(0xFF1E6F50) else Color(0xFFE2ECE6))
+              .border(
+                1.dp,
+                if (isRotated) Color(0xFF1E6F50) else Color(0xFFB7D1C3),
+                RoundedCornerShape(10.dp),
+              )
+              .clickable { onRotateDevice() }
+              .padding(horizontal = 10.dp, vertical = 6.dp),
+          verticalAlignment = Alignment.CenterVertically,
+          horizontalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
+          Icon(
+            imageVector = Icons.Default.ScreenRotation,
+            contentDescription = "Rotate device",
+            tint = if (isRotated) Color.White else Color(0xFF144532),
+            modifier = Modifier.size(13.dp),
+          )
+          Text(
+            text = "Rotate",
+            maxLines = 1,
+            softWrap = false,
+            style =
+              MaterialTheme.typography.labelSmall.copy(
+                color = if (isRotated) Color.White else Color(0xFF144532),
+                fontWeight = FontWeight.Bold,
+              ),
+          )
         }
       }
     }
 
-    // Outer Device Hardware Bezel (dynamically sized for Mobile vs Tablet)
+    // Outer Device Hardware Bezel (dynamically sized for Mobile vs Tablet and Portrait vs Landscape)
     val outerShape = RoundedCornerShape(formFactor.outerCornerRadiusDp.dp)
     val innerShape = RoundedCornerShape(formFactor.innerCornerRadiusDp.dp)
     Box(
       modifier =
-        Modifier.width(formFactor.frameWidthDp.dp)
-          .height(formFactor.frameHeightDp.dp)
+        Modifier.width(frameWidthDp.dp)
+          .height(frameHeightDp.dp)
           .clip(outerShape)
           .background(Color(0xFF111827))
           .border(2.dp, Color(0xFF374151), outerShape)
@@ -484,7 +565,7 @@ fun MobileDevicePreviewFrame(
         ) {
           Text(
             text =
-              if (formFactor == DeviceFormFactor.TABLET) {
+              if (formFactor == DeviceFormFactor.TABLET || orientation == DeviceOrientation.LANDSCAPE) {
                 "09:41 • Wed Sep 19"
               } else {
                 "09:41"
@@ -544,7 +625,16 @@ fun MobileDevicePreviewFrame(
         ) {
           Box(
             modifier =
-              Modifier.width(if (formFactor == DeviceFormFactor.TABLET) 160.dp else 116.dp)
+              Modifier.width(
+                  if (
+                    formFactor == DeviceFormFactor.TABLET ||
+                      orientation == DeviceOrientation.LANDSCAPE
+                  ) {
+                    160.dp
+                  } else {
+                    116.dp
+                  }
+                )
                 .height(4.dp)
                 .clip(CircleShape)
                 .background(Color(0xFF9CA3AF))
@@ -725,19 +815,28 @@ fun GroundCloudAcaciaLogo(modifier: Modifier = Modifier) {
 /** 1. Splash / Loading screen for Ground 2.0 featuring the Cloud Acacia SVG logo. */
 @Composable
 fun GroundSplashScreen(state: PrototypeAppState) {
-  Box(
+  val isCompactHeight = state.effectiveFrameHeightDp < 500
+
+  Column(
     modifier =
       Modifier.fillMaxSize()
         .background(Color(0xFF144532))
-        .padding(horizontal = 28.dp, vertical = 32.dp)
+        .verticalScroll(rememberScrollState())
+        .padding(
+          horizontal = 28.dp,
+          vertical = if (isCompactHeight) 16.dp else 32.dp,
+        ),
+    horizontalAlignment = Alignment.CenterHorizontally,
+    verticalArrangement = Arrangement.SpaceBetween,
   ) {
+    Spacer(modifier = Modifier.height(if (isCompactHeight) 4.dp else 20.dp))
+
     Column(
-      modifier = Modifier.align(Alignment.Center),
       horizontalAlignment = Alignment.CenterHorizontally,
-      verticalArrangement = Arrangement.spacedBy(16.dp),
+      verticalArrangement = Arrangement.spacedBy(if (isCompactHeight) 8.dp else 16.dp),
     ) {
       // Ground 2.0 Cloud Acacia Emblem Badge (from shared/assets/logo.svg)
-      GroundCloudAcaciaLogo(modifier = Modifier.size(124.dp))
+      GroundCloudAcaciaLogo(modifier = Modifier.size(if (isCompactHeight) 78.dp else 124.dp))
 
       Text(
         text = "Ground",
@@ -758,13 +857,13 @@ fun GroundSplashScreen(state: PrototypeAppState) {
           ),
       )
 
-      Spacer(modifier = Modifier.height(20.dp))
+      Spacer(modifier = Modifier.height(if (isCompactHeight) 6.dp else 20.dp))
 
       // Loading progress bar & status label
       Column(
         modifier = Modifier.fillMaxWidth(0.82f),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(10.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
       ) {
         LinearProgressIndicator(
           modifier = Modifier.fillMaxWidth().height(6.dp).clip(CircleShape),
@@ -779,11 +878,13 @@ fun GroundSplashScreen(state: PrototypeAppState) {
       }
     }
 
+    Spacer(modifier = Modifier.height(if (isCompactHeight) 12.dp else 24.dp))
+
     // Bottom interactive prototype trigger to advance from Splash -> Sign In
     Column(
-      modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth(),
+      modifier = Modifier.fillMaxWidth(),
       horizontalAlignment = Alignment.CenterHorizontally,
-      verticalArrangement = Arrangement.spacedBy(8.dp),
+      verticalArrangement = Arrangement.spacedBy(6.dp),
     ) {
       Button(
         onClick = { state.completeSplashLoading() },
@@ -2103,14 +2204,6 @@ private fun UxDesignerInspectorPanel(
               {
                 state.navigateTo(PrototypeScreen.MAIN_SURVEY)
                 state.startNavigationToEntity("entity-nyr-104")
-              },
-            ),
-            Triple(
-              Icons.Default.Explore,
-              "Navigate to Submission",
-              {
-                state.navigateTo(PrototypeScreen.MAIN_SURVEY)
-                state.startNavigationToSubmission("sub-shade-201-wave3")
               },
             ),
             Triple(
