@@ -147,15 +147,7 @@ export async function exportCsvHandler(
       if (isAccessibleLoi(loi, ownerIdFilter) && submissionDoc) {
         const submission = toMessage(submissionDoc.data(), Pb.Submission);
         if (submission instanceof Error) throw submission;
-        writeRow(
-          csvStream,
-          loiProperties,
-          tasks,
-          loi,
-          photoUrl,
-          submission,
-          submissionDoc.id
-        );
+        writeRow(csvStream, loiProperties, tasks, loi, photoUrl, submission);
       } else {
         writeRow(csvStream, loiProperties, tasks, loi, photoUrl);
       }
@@ -201,8 +193,7 @@ function writeRow(
   tasks: Pb.ITask[],
   loi: Pb.LocationOfInterest,
   photoUrl: PhotoUrlFn,
-  submission?: Pb.Submission,
-  submissionId?: string
+  submission?: Pb.Submission
 ) {
   if (!loi.geometry) {
     console.debug(`Skipping LOI ${loi.id} - missing geometry`);
@@ -218,7 +209,7 @@ function writeRow(
   if (submission) {
     const { taskData: data } = submission;
     // Header: One column for each task
-    const taskPhotoUrl = (taskId: string) => photoUrl(submissionId!, taskId);
+    const taskPhotoUrl = (taskId: string) => photoUrl(submission.id, taskId);
     tasks.forEach(task => row.push(quote(getValue(task, data, taskPhotoUrl))));
     // Header: contributor_username, contributor_email, created_client_timestamp, created_server_timestamp
     const { created } = submission;
