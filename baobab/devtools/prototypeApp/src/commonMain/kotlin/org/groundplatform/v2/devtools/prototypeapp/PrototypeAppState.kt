@@ -78,6 +78,14 @@ enum class ListFilterTab(val label: String) {
 }
 
 /**
+ * Screen orientation of the simulated device in the Prototype App wrapper (`Portrait` vs `Landscape`).
+ */
+enum class DeviceOrientation(val label: String) {
+  PORTRAIT("Portrait"),
+  LANDSCAPE("Landscape"),
+}
+
+/**
  * Device hardware bezel form factor selectable in the Prototype App wrapper page (`Mobile` vs `Tablet`).
  */
 enum class DeviceFormFactor(
@@ -87,6 +95,7 @@ enum class DeviceFormFactor(
   val frameHeightDp: Int,
   val outerCornerRadiusDp: Int,
   val innerCornerRadiusDp: Int,
+  val defaultOrientation: DeviceOrientation,
 ) {
   MOBILE(
     label = "Mobile",
@@ -95,6 +104,7 @@ enum class DeviceFormFactor(
     frameHeightDp = 764,
     outerCornerRadiusDp = 40,
     innerCornerRadiusDp = 32,
+    defaultOrientation = DeviceOrientation.PORTRAIT,
   ),
   TABLET(
     label = "Tablet",
@@ -103,7 +113,26 @@ enum class DeviceFormFactor(
     frameHeightDp = 620,
     outerCornerRadiusDp = 28,
     innerCornerRadiusDp = 20,
-  ),
+    defaultOrientation = DeviceOrientation.LANDSCAPE,
+  );
+
+  /** Returns the device bezel width in `dp` for the given [orientation]. */
+  fun widthForOrientation(orientation: DeviceOrientation): Int =
+    when (orientation) {
+      DeviceOrientation.PORTRAIT -> minOf(frameWidthDp, frameHeightDp)
+      DeviceOrientation.LANDSCAPE -> maxOf(frameWidthDp, frameHeightDp)
+    }
+
+  /** Returns the device bezel height in `dp` for the given [orientation]. */
+  fun heightForOrientation(orientation: DeviceOrientation): Int =
+    when (orientation) {
+      DeviceOrientation.PORTRAIT -> maxOf(frameWidthDp, frameHeightDp)
+      DeviceOrientation.LANDSCAPE -> minOf(frameWidthDp, frameHeightDp)
+    }
+
+  /** Returns the formatted `W × H dp` label for the given [orientation]. */
+  fun dimensionsLabelForOrientation(orientation: DeviceOrientation): String =
+    "${widthForOrientation(orientation)} × ${heightForOrientation(orientation)} dp"
 }
 
 /** Sub-screens opened from the Hamburger Navigation Drawer inside the Main Survey UI. */
@@ -241,7 +270,7 @@ data class SurveyPreviewItem(
  */
 enum class LayerSourceType(val badgeLabel: String) {
   ENTITY_DATASET("Survey Layer"),
-  FORM_GEOMETRY("Form Geometry Field"),
+  FORM_GEOMETRY("Submission Geometry"),
 }
 
 /** Primary map basemap mode selectable by the user in the `Layers` dialog (`Map` vs `Satellite`). */
@@ -277,7 +306,9 @@ data class MapLayerItem(
   val geometryTypeLabel: String,
   val isVisible: Boolean,
   val sourceType: LayerSourceType = LayerSourceType.ENTITY_DATASET,
+  val datasetId: String? = null,
   val formId: String? = null,
+  val formTitle: String? = null,
   val fieldPath: String? = null,
   val isDottedOutline: Boolean = sourceType == LayerSourceType.FORM_GEOMETRY,
   val singularItemLabel: String = "location",
@@ -304,6 +335,10 @@ data class MapLayerItem(
       else -> pluralItemLabel
     },
 ) {
+  /** True when this layer represents linked geospatial entity dataset data (`LayerSourceType.ENTITY_DATASET`). */
+  val isLinkedData: Boolean
+    get() = sourceType == LayerSourceType.ENTITY_DATASET
+
   /** Formats a user-friendly domain item count for this layer (e.g. `"2 parcels"`, `"1 plot"`). */
   fun itemCountLabel(count: Int): String = "$count ${if (count == 1) singularNoun else pluralNoun}"
 
@@ -402,11 +437,32 @@ data class FormPreviewItem(
   val ctaLabel: String,
 )
 
-/** Grouping of [SubmissionPreviewItem]s under a [FormPreviewItem] in the searchable `List` view. */
+/** Grouping of [SubmissionPreviewItem]s under a [FormPreviewItem] in submission lists. */
 data class FormSubmissionsGroup(
   val form: FormPreviewItem,
   val submissions: List<SubmissionPreviewItem>,
-)
+) {
+  val formTitle: String
+    get() = form.title
+}
+
+/**
+ * Grouping of map layers ([linkedEntityLayers] and [submissionLayers]) under the [FormPreviewItem]
+ * in which they are used in the `Layers` dialog, headed by the form's title (`form.title`).
+ */
+data class FormSubmissionLayersGroup(
+  val form: FormPreviewItem,
+  val linkedEntityLayers: List<MapLayerItem>,
+  val submissionLayers: List<MapLayerItem>,
+  val submissions: List<SubmissionPreviewItem>,
+) {
+  val formTitle: String
+    get() = form.title
+
+  /** All layers nested under this form: linked geospatial entity datasets first, then submission geometries. */
+  val layers: List<MapLayerItem>
+    get() = linkedEntityLayers + submissionLayers
+}
 
 /** Active PDF export & app-share sheet state for either a Geospatial Entity or a Form Submission. */
 data class SharedPdfSheetState(
@@ -505,6 +561,26 @@ class PrototypeAppState(
   /** Active hardware preview bezel form factor in the wrapper workbench (`Mobile` vs `Tablet`). */
   var deviceFormFactor by mutableStateOf(DeviceFormFactor.MOBILE)
     private set
+
+  /** Active screen orientation of the hardware preview bezel (`Portrait` vs `Landscape`). */
+  var deviceOrientation by mutableStateOf(deviceFormFactor.defaultOrientation)
+    private set
+
+  /** True when the active device is rotated away from its form factor's default orientation. */
+  val isDeviceRotated: Boolean
+    get() = deviceOrientation != deviceFormFactor.defaultOrientation
+
+  /** Effective width in `dp` of the hardware bezel for the current [deviceFormFactor] and [deviceOrientation]. */
+  val effectiveFrameWidthDp: Int
+    get() = deviceFormFactor.widthForOrientation(deviceOrientation)
+
+  /** Effective height in `dp` of the hardware bezel for the current [deviceFormFactor] and [deviceOrientation]. */
+  val effectiveFrameHeightDp: Int
+    get() = deviceFormFactor.heightForOrientation(deviceOrientation)
+
+  /** Formatted `W × H dp` label for the current [deviceFormFactor] and [deviceOrientation]. */
+  val effectiveDimensionsLabel: String
+    get() = deviceFormFactor.dimensionsLabelForOrientation(deviceOrientation)
 
   var isSignedIn by mutableStateOf(false)
     private set
@@ -894,6 +970,60 @@ class PrototypeAppState(
     return "${v.formattedDistance} • ${v.bearingDegrees}° ${v.cardinalDirection}"
   }
 
+  /**
+   * Returns `true` if [field] in [submissionId] represents a geometry question/field
+   * (either linked to a [SubmissionGeometryPolygon] in [submissionGeometries] or having a
+   * `geopoint` / `geotrace` / `geoshape` question or geometry value).
+   */
+  fun isSubmissionFieldGeometry(
+    submissionId: String,
+    field: SubmissionFieldEntry,
+  ): Boolean {
+    if (
+      submissionGeometries.any {
+        it.submissionId == submissionId &&
+          (it.fieldPath == field.questionName || it.questionLabel == field.questionLabel)
+      }
+    ) {
+      return true
+    }
+    val labelLower = field.questionLabel.lowercase()
+    val nameLower = field.questionName.lowercase()
+    val valTrimmed = field.answerValue.trim()
+    return labelLower.contains("geoshape") ||
+      labelLower.contains("geotrace") ||
+      labelLower.contains("geopoint") ||
+      nameLower.contains("geoshape") ||
+      nameLower.contains("geotrace") ||
+      nameLower.contains("geopoint") ||
+      valTrimmed.startsWith("Polygon (", ignoreCase = true) ||
+      valTrimmed.startsWith("LineString (", ignoreCase = true) ||
+      valTrimmed.startsWith("Point (", ignoreCase = true)
+  }
+
+  /**
+   * Formatted distance & compass bearing badge for a geometry [field] inside [submissionId]
+   * (e.g. `"452 m • 321° NW"`), or `""` if [field] is not a geometry field.
+   */
+  fun formattedWayfindingBadgeForSubmissionField(
+    submissionId: String,
+    field: SubmissionFieldEntry,
+  ): String {
+    if (!isSubmissionFieldGeometry(submissionId, field)) return ""
+    val geom =
+      submissionGeometries.firstOrNull {
+        it.submissionId == submissionId &&
+          (it.fieldPath == field.questionName || it.questionLabel == field.questionLabel)
+      }
+    val vector =
+      if (geom != null) {
+        computeStraightLineVector(geom.normalizedX, geom.normalizedY)
+      } else {
+        distanceAndBearingToSubmission(submissionId) ?: return ""
+      }
+    return "${vector.formattedDistance} • ${vector.bearingDegrees}° ${vector.cardinalDirection}"
+  }
+
   /** True when straight-line navigation is currently active and targeting [entityId]. */
   fun isNavigatingToEntity(entityId: String): Boolean =
     navigationTargetKind == NavigationTargetKind.ENTITY && navigationTargetId == entityId
@@ -1163,7 +1293,7 @@ class PrototypeAppState(
 
   /**
    * Submissions in the Main Survey `List` view grouped by their parent [FormPreviewItem]
-   * ("Forms" act as a grouping header for Submissions rather than a standalone list).
+   * (headed by each form's title rather than the generic word "Form").
    */
   val groupedFilteredListSubmissions: List<FormSubmissionsGroup>
     get() {
@@ -1178,6 +1308,66 @@ class PrototypeAppState(
         }
       }
     }
+
+  /**
+   * Submissions for a specific [entity] grouped by their parent [FormPreviewItem],
+   * using the form's title (`form.title`) as the group heading.
+   */
+  fun groupedSubmissionsForEntity(entity: GeospatialEntityItem): List<FormSubmissionsGroup> {
+    if (entity.submissions.isEmpty()) return emptyList()
+    val groupedByFormId = entity.submissions.groupBy { it.formId }
+    return groupedByFormId.map { (formId, subs) ->
+      val baseForm =
+        forms.firstOrNull { it.id == formId }
+          ?: FormPreviewItem(
+            id = formId,
+            title = subs.first().formTitle,
+            description = "",
+            version = subs.first().formVersion,
+            submissionModel = entity.submissionModel,
+            targetDatasetId = entity.datasetId,
+            targetDatasetName = entity.datasetName,
+            questionCount = subs.first().fields.size,
+            ctaLabel = subs.first().formTitle,
+          )
+      FormSubmissionsGroup(form = baseForm, submissions = subs)
+    }
+  }
+
+  /**
+   * Map layers grouped by the [FormPreviewItem] in which they are used for the `Layers` dialog,
+   * nesting linked geospatial entity datasets (`isLinkedData == true`) alongside any submission
+   * geometry layers under each form's title (`form.title`).
+   */
+  val groupedSubmissionLayersByForm: List<FormSubmissionLayersGroup>
+    get() =
+      forms.mapNotNull { form ->
+        val linkedLayers = entityDatasetLayers.filter { it.datasetId == form.targetDatasetId }
+        val matchingSubmissionLayers = formGeometryLayers.filter { it.formId == form.id }
+        if (linkedLayers.isNotEmpty() || matchingSubmissionLayers.isNotEmpty()) {
+          val formSubs = allSubmissions.filter { it.formId == form.id }
+          FormSubmissionLayersGroup(
+            form = form,
+            linkedEntityLayers = linkedLayers,
+            submissionLayers = matchingSubmissionLayers,
+            submissions = formSubs,
+          )
+        } else {
+          null
+        }
+      }
+
+  /** Toggles visibility of all submission layers belonging to [formId] in the `Layers` dialog. */
+  fun toggleFormSubmissionLayersVisibility(formId: String) {
+    val targetLayers = formGeometryLayers.filter { it.formId == formId }
+    if (targetLayers.isEmpty()) return
+    val nextVisible = !targetLayers.all { it.isVisible }
+    val targetIds = targetLayers.map { it.id }.toSet()
+    mapLayers =
+      mapLayers.map { layer ->
+        if (layer.id in targetIds) layer.copy(isVisible = nextVisible) else layer
+      }
+  }
 
   /** Directly switches the active mobile screen (used by both flow buttons and UX workbench). */
   fun navigateTo(screen: PrototypeScreen) {
@@ -1644,16 +1834,16 @@ class PrototypeAppState(
       )
   }
 
-  /** Opens the Share PDF modal sheet to share a Form Submission's report PDF to a preferred app. */
+  /** Opens the Share PDF modal sheet to share a submission's report PDF to a preferred app. */
   fun shareSubmissionPdf(submissionId: String) {
     val sub = allSubmissions.firstOrNull { it.id == submissionId } ?: return
     activeSharedPdfSheet =
       SharedPdfSheetState(
         targetId = sub.id,
-        title = "Share Submission PDF Report",
+        title = "Share ${sub.formTitle} PDF Report",
         subtitle = "${sub.formTitle} • ${sub.collectorName} (${sub.timestamp})",
         pdfFileName = "${sub.id}.pdf",
-        targetKindLabel = "Form Submission PDF",
+        targetKindLabel = "${sub.formTitle} PDF",
       )
   }
 
@@ -1780,16 +1970,38 @@ class PrototypeAppState(
   /** Selects the device preview form factor (`Mobile` vs `Tablet`) in the prototype wrapper page. */
   fun selectDeviceFormFactor(formFactor: DeviceFormFactor) {
     deviceFormFactor = formFactor
+    deviceOrientation = formFactor.defaultOrientation
   }
 
   /** Toggles between `Mobile` and `Tablet` form factors in the prototype wrapper page. */
   fun toggleDeviceFormFactor() {
-    deviceFormFactor =
+    val nextFormFactor =
       if (deviceFormFactor == DeviceFormFactor.MOBILE) {
         DeviceFormFactor.TABLET
       } else {
         DeviceFormFactor.MOBILE
       }
+    selectDeviceFormFactor(nextFormFactor)
+  }
+
+  /** Rotates the simulated device between `Portrait` and `Landscape` orientation (`90°` swap). */
+  fun rotateDevice() {
+    deviceOrientation =
+      if (deviceOrientation == DeviceOrientation.PORTRAIT) {
+        DeviceOrientation.LANDSCAPE
+      } else {
+        DeviceOrientation.PORTRAIT
+      }
+  }
+
+  /** Alias for [rotateDevice]: toggles between `Portrait` and `Landscape` device orientation. */
+  fun toggleDeviceOrientation() {
+    rotateDevice()
+  }
+
+  /** Explicitly sets the simulated device orientation (`Portrait` or `Landscape`). */
+  fun selectDeviceOrientation(orientation: DeviceOrientation) {
+    deviceOrientation = orientation
   }
 
   /**
@@ -2109,7 +2321,7 @@ class PrototypeAppState(
      */
     fun defaultMapLayers(): List<MapLayerItem> =
       listOf(
-        // Survey Dataset Layers (solid outlines)
+        // Survey Dataset Layers (solid outlines, linked to forms via datasetId)
         MapLayerItem(
           id = "layer-coffee-parcels",
           label = "Smallholder Coffee Parcels",
@@ -2118,6 +2330,7 @@ class PrototypeAppState(
           geometryTypeLabel = "Polygon",
           isVisible = true,
           sourceType = LayerSourceType.ENTITY_DATASET,
+          datasetId = "coffee_parcels",
           singularItemLabel = "coffee parcel",
           pluralItemLabel = "coffee parcels",
         ),
@@ -2129,6 +2342,7 @@ class PrototypeAppState(
           geometryTypeLabel = "Polygon",
           isVisible = true,
           sourceType = LayerSourceType.ENTITY_DATASET,
+          datasetId = "shade_monitoring_plots",
           singularItemLabel = "monitoring plot",
           pluralItemLabel = "monitoring plots",
         ),
@@ -2140,41 +2354,45 @@ class PrototypeAppState(
           geometryTypeLabel = "Point",
           isVisible = true,
           sourceType = LayerSourceType.ENTITY_DATASET,
+          datasetId = "washing_stations",
           singularItemLabel = "washing station",
           pluralItemLabel = "washing stations",
         ),
-        // Form Geometry Question Layers (dotted polygon outlines, per `LayerDef.form_geometry`)
+        // Submission Geometry Layers (dotted polygon outlines, grouped by form title)
         MapLayerItem(
           id = "layer-form-walked-perimeter",
           label = "Walked Parcel Perimeters",
-          sourceDescription = "Form Field: form-eudr-baseline :: parcel/walked_perimeter_geoshape",
+          sourceDescription = "EUDR Parcel Baseline Registration • Walked EUDR Perimeter Polygon",
           colorHex = 0xFF66BB6A,
           geometryTypeLabel = "Dotted Polygon",
           isVisible = true,
           sourceType = LayerSourceType.FORM_GEOMETRY,
           formId = "form-eudr-baseline",
+          formTitle = "EUDR Parcel Baseline Registration",
           fieldPath = "parcel/walked_perimeter_geoshape",
         ),
         MapLayerItem(
           id = "layer-form-canopy-subzone",
           label = "Surveyed Canopy Audit Sub-Zones",
-          sourceDescription = "Form Field: form-shade-canopy-audit :: audit/canopy_sample_polygon",
+          sourceDescription = "Seasonal Shade Tree & Canopy Audit • Surveyed Canopy Regeneration Sub-Plot",
           colorHex = 0xFF42A5F5,
           geometryTypeLabel = "Dotted Polygon",
           isVisible = true,
           sourceType = LayerSourceType.FORM_GEOMETRY,
           formId = "form-shade-canopy-audit",
+          formTitle = "Seasonal Shade Tree & Canopy Audit",
           fieldPath = "audit/canopy_sample_polygon",
         ),
         MapLayerItem(
           id = "layer-form-riparian-buffer",
           label = "Riparian Buffer Zone Polygons",
-          sourceDescription = "Form Field: form-water-quality :: inspection/riparian_buffer_zone",
+          sourceDescription = "Washing Station Effluent & Water Check • Riparian Filtration Buffer Polygon",
           colorHex = 0xFFFFCA28,
           geometryTypeLabel = "Dotted Polygon",
           isVisible = true,
           sourceType = LayerSourceType.FORM_GEOMETRY,
           formId = "form-water-quality",
+          formTitle = "Washing Station Effluent & Water Check",
           fieldPath = "inspection/riparian_buffer_zone",
         ),
       )

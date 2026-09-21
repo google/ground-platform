@@ -383,6 +383,51 @@ class PrototypeAppStateTest {
   }
 
   @Test
+  fun rotateDevice_rotatesMobileAndTabletBetweenPortraitAndLandscape() {
+    val state = PrototypeAppState()
+
+    // Mobile defaults to Portrait (404 × 764 dp)
+    assertEquals(DeviceFormFactor.MOBILE, state.deviceFormFactor)
+    assertEquals(DeviceOrientation.PORTRAIT, state.deviceOrientation)
+    assertFalse(state.isDeviceRotated)
+    assertEquals(404, state.effectiveFrameWidthDp)
+    assertEquals(764, state.effectiveFrameHeightDp)
+    assertEquals("404 × 764 dp", state.effectiveDimensionsLabel)
+
+    // Rotate Mobile -> Landscape (764 × 404 dp)
+    state.rotateDevice()
+    assertEquals(DeviceOrientation.LANDSCAPE, state.deviceOrientation)
+    assertTrue(state.isDeviceRotated)
+    assertEquals(764, state.effectiveFrameWidthDp)
+    assertEquals(404, state.effectiveFrameHeightDp)
+    assertEquals("764 × 404 dp", state.effectiveDimensionsLabel)
+
+    // Rotate Mobile back -> Portrait (404 × 764 dp)
+    state.rotateDevice()
+    assertEquals(DeviceOrientation.PORTRAIT, state.deviceOrientation)
+    assertFalse(state.isDeviceRotated)
+    assertEquals(404, state.effectiveFrameWidthDp)
+    assertEquals(764, state.effectiveFrameHeightDp)
+
+    // Switch to Tablet -> defaults to Landscape (780 × 620 dp)
+    state.selectDeviceFormFactor(DeviceFormFactor.TABLET)
+    assertEquals(DeviceFormFactor.TABLET, state.deviceFormFactor)
+    assertEquals(DeviceOrientation.LANDSCAPE, state.deviceOrientation)
+    assertFalse(state.isDeviceRotated)
+    assertEquals(780, state.effectiveFrameWidthDp)
+    assertEquals(620, state.effectiveFrameHeightDp)
+    assertEquals("780 × 620 dp", state.effectiveDimensionsLabel)
+
+    // Rotate Tablet -> Portrait (620 × 780 dp)
+    state.rotateDevice()
+    assertEquals(DeviceOrientation.PORTRAIT, state.deviceOrientation)
+    assertTrue(state.isDeviceRotated)
+    assertEquals(620, state.effectiveFrameWidthDp)
+    assertEquals(780, state.effectiveFrameHeightDp)
+    assertEquals("620 × 780 dp", state.effectiveDimensionsLabel)
+  }
+
+  @Test
   fun launchFormForEntity_opensFormWizardController_andCompletesSubmissionWithFormattedAnswers() {
     val state = PrototypeAppState(initialScreen = PrototypeScreen.MAIN_SURVEY)
     val initialShadeSubs = state.entities.first { it.id == "entity-shade-201" }.submissions.size
@@ -679,6 +724,15 @@ class PrototypeAppStateTest {
     state.toggleNavigationToSubmission("sub-shade-201-wave3")
     assertEquals(null, state.activeNavigation)
     assertTrue(buildMapboxFeaturesPayloadJson(state).contains("\"navigation\":{\"active\":false}"))
+
+    // 5. Verify distance/wayfinding badge is computed ONLY for geometry fields in a submission
+    val wave3Sub = assertNotNull(state.allSubmissions.firstOrNull { it.id == "sub-shade-201-wave3" })
+    val geomField = assertNotNull(wave3Sub.fields.firstOrNull { it.questionName == "audit/canopy_sample_polygon" })
+    val nonGeomField = assertNotNull(wave3Sub.fields.firstOrNull { it.questionName == "surviving_saplings_count" })
+    assertTrue(state.isSubmissionFieldGeometry(wave3Sub.id, geomField))
+    assertFalse(state.isSubmissionFieldGeometry(wave3Sub.id, nonGeomField))
+    assertTrue(state.formattedWayfindingBadgeForSubmissionField(wave3Sub.id, geomField).isNotEmpty())
+    assertEquals("", state.formattedWayfindingBadgeForSubmissionField(wave3Sub.id, nonGeomField))
   }
 
   @Test
@@ -776,6 +830,96 @@ class PrototypeAppStateTest {
       assertFalse(sub.targetTypeLabel.contains("entity", ignoreCase = true))
     }
   }
+
+  @Test
+  fun submissionListsAndLayersDialog_groupSubmissionsByFormAndUseFormTitleInsteadOfWordForm() {
+    val state = PrototypeAppState(initialScreen = PrototypeScreen.MAIN_SURVEY)
+
+    // 1. Main List View submission groups use form title
+    val listGroups = state.groupedFilteredListSubmissions
+    assertEquals(5, listGroups.size)
+    listGroups.forEach { group ->
+      assertEquals(group.form.title, group.formTitle)
+      assertFalse(
+        group.formTitle.contains("form", ignoreCase = true),
+        "Expected form title without 'form' but got: ${group.formTitle}",
+      )
+    }
+
+    // 2. Entity bottom sheet submission list groups submissions by form and uses form title
+    val shade201 = state.entities.first { it.id == "entity-shade-201" }
+    val shadeGroups = state.groupedSubmissionsForEntity(shade201)
+    assertEquals(2, shadeGroups.size)
+    assertEquals(
+      listOf(
+        "Seasonal Shade Tree & Canopy Audit",
+        "GLAD Canopy Disturbance Alert Verification",
+      ),
+      shadeGroups.map { it.formTitle },
+    )
+    assertEquals(2, shadeGroups[0].submissions.size)
+    assertEquals(1, shadeGroups[1].submissions.size)
+
+    // 3. Layers dialog uses form titles as headings and nests linked geospatial entities (with isLinkedData)
+    // alongside submission geometry layers
+    assertEquals("Submission Geometry", LayerSourceType.FORM_GEOMETRY.badgeLabel)
+    assertFalse(LayerSourceType.FORM_GEOMETRY.badgeLabel.contains("form", ignoreCase = true))
+
+    val layerGroups = state.groupedSubmissionLayersByForm
+    assertEquals(5, layerGroups.size)
+    assertEquals(
+      listOf(
+        "EUDR Parcel Baseline Registration",
+        "Smallholder Household Socio-Economic Survey",
+        "Seasonal Shade Tree & Canopy Audit",
+        "GLAD Canopy Disturbance Alert Verification",
+        "Washing Station Effluent & Water Check",
+      ),
+      layerGroups.map { it.formTitle },
+    )
+    layerGroups.forEach { group ->
+      assertEquals(group.form.title, group.formTitle)
+      assertTrue(group.linkedEntityLayers.isNotEmpty())
+      assertTrue(group.linkedEntityLayers.all { it.isLinkedData })
+      assertTrue(group.submissionLayers.none { it.isLinkedData })
+      group.submissionLayers.forEach { layer ->
+        assertEquals(group.form.title, layer.formTitle)
+        assertTrue(layer.sourceDescription.startsWith(group.form.title))
+        assertFalse(
+          layer.sourceDescription.contains("form", ignoreCase = true),
+          "Expected layer sourceDescription to use form title instead of 'Form': ${layer.sourceDescription}",
+        )
+      }
+    }
+
+    // "Smallholder Coffee Parcels" is used by both "EUDR Parcel Baseline Registration" and
+    // "Smallholder Household Socio-Economic Survey"; toggling its visibility in one switches both off
+    val eudrCoffeeLayer = layerGroups[0].linkedEntityLayers.first()
+    val householdCoffeeLayer = layerGroups[1].linkedEntityLayers.first()
+    assertEquals("layer-coffee-parcels", eudrCoffeeLayer.id)
+    assertEquals("layer-coffee-parcels", householdCoffeeLayer.id)
+    assertTrue(eudrCoffeeLayer.isVisible)
+    assertTrue(householdCoffeeLayer.isVisible)
+
+    state.toggleLayerVisibility("layer-coffee-parcels")
+    val updatedGroupsAfterOff = state.groupedSubmissionLayersByForm
+    assertFalse(updatedGroupsAfterOff[0].linkedEntityLayers.first().isVisible)
+    assertFalse(updatedGroupsAfterOff[1].linkedEntityLayers.first().isVisible)
+
+    state.toggleLayerVisibility("layer-coffee-parcels")
+    val updatedGroupsAfterOn = state.groupedSubmissionLayersByForm
+    assertTrue(updatedGroupsAfterOn[0].linkedEntityLayers.first().isVisible)
+    assertTrue(updatedGroupsAfterOn[1].linkedEntityLayers.first().isVisible)
+
+    // 4. Shared submission PDF sheet uses the form title instead of 'Form Submission PDF'
+    state.shareSubmissionPdf("sub-nyr-104-baseline")
+    val pdfSheet = assertNotNull(state.activeSharedPdfSheet)
+    assertTrue(pdfSheet.title.contains("EUDR Parcel Baseline Registration"))
+    assertFalse(pdfSheet.title.contains("form", ignoreCase = true))
+    assertFalse(pdfSheet.targetKindLabel.contains("form", ignoreCase = true))
+    state.closeSharePdfSheet()
+  }
 }
+
 
 
