@@ -1,6 +1,5 @@
 /**
- * IGNORE_COPYRIGHT: Ground is a Google-developed open-source project (The
- * Ground Authors) Copyright 2026 The Ground Authors.
+ * Copyright 2026 The Ground Authors.
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.

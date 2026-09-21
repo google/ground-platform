@@ -1,5 +1,4 @@
 <!--
-  IGNORE_COPYRIGHT: Ground is a Google-developed open-source project (The Ground Authors)
   Copyright 2026 The Ground Authors.
 
   Licensed under the Apache License, Version 2.0 (the 'License');
@@ -64,11 +63,10 @@ UX Co-Design Workbench for rapid iteration with UX designers.
         (`All`, `Forms`, `Entities`, `Submissions`) across the survey's forms,
         geospatial entities, and field submissions.
     -   **Hamburger / Navigation Drawer (`MainSurveyNavigationDrawerOverlay`)**:
-        Provides options to **Switch / download surveys**, **Manage offline
-        maps** (Mapbox vector/raster tile packages + 500 MB storage cap),
-        **Settings** (Metric/Imperial units, in-app language locale switcher,
-        and uploaded media cache eviction), **Terms of Service**, and **Sign
-        out**.
+        Provides options for **Surveys**, **Offline maps** (Mapbox vector/raster
+        tile packages + 500 MB storage cap), **Settings** (Metric/Imperial
+        units, in-app language locale switcher, and uploaded media cache
+        eviction), **Terms of Service**, and **Sign out**.
 
 ## Running the Local Development Web Server
 

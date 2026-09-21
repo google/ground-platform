@@ -1,5 +1,4 @@
 /*
- * IGNORE_COPYRIGHT: Ground is a Google-developed open-source project (The Ground Authors)
  * Copyright 2026 The Ground Authors.
  *
  * Licensed under the Apache License, Version 2.0 (the 'License'); you may not use this file except
@@ -123,7 +122,7 @@ import kotlin.math.roundToInt
  *     submissions (data collector, timestamp) that can be clicked to inspect full submission
  *     details.
  * - **List View**: Searchable list of Geospatial Entities and Submissions grouped by Form.
- * - **Hamburger Navigation Drawer**: Options to Switch surveys, Manage offline maps,
+ * - **Hamburger Navigation Drawer**: Options for Surveys, Offline maps,
  *   Change settings, View Terms of Service, and Sign out.
  */
 @Composable
@@ -2451,8 +2450,8 @@ private fun SurveyListView(state: PrototypeAppState) {
 
 /**
  * Hamburger Navigation Drawer overlay providing options to:
- * 1. Switch surveys (downloaded surveys screen with button to browse & download more surveys)
- * 2. Manage offline maps
+ * 1. Surveys (downloaded surveys screen with button to browse & download more surveys)
+ * 2. Offline maps
  * 3. Change settings
  * 4. View Terms of Service
  * 5. Sign out
@@ -2580,14 +2579,14 @@ private fun MainSurveyNavigationDrawerOverlay(state: PrototypeAppState) {
           // Navigation Drawer Options
           DrawerMenuItem(
             icon = Icons.Default.SwapHoriz,
-            title = "Switch surveys",
+            title = "Surveys",
             subtitle = "${state.downloadedSurveyCount} downloaded on device",
             textColor = textColor,
             onClick = { state.drawerSwitchSurveys() },
           )
           DrawerMenuItem(
             icon = Icons.Default.Map,
-            title = "Manage offline maps",
+            title = "Offline maps",
             subtitle = "Mapbox vector & satellite raster tile cache",
             textColor = textColor,
             onClick = { state.drawerManageOfflineMaps() },
@@ -2678,7 +2677,7 @@ private fun DrawerMenuItem(
 }
 
 /**
- * Separate screen accessible from the `"Switch surveys"` navigation drawer option showing ONLY the
+ * Separate screen accessible from the `"Surveys"` navigation drawer option showing ONLY the
  * surveys which have already been downloaded to the device, plus a primary action button
  * (`"Browse & download more surveys"`) which navigates to the full `Download surveys` screen.
  */
@@ -3166,7 +3165,7 @@ private fun SharePdfToAppModalDialog(
 }
 
 /**
- * Drawer Sub-Screen: `Manage offline maps` (consistent with `docs/design/00-index.md` "Offline
+ * Drawer Sub-Screen: `Offline maps` (consistent with `docs/design/00-index.md` "Offline
  * Storage Safeguards & Media Purging" — Mapbox vector & raster tiles and 500 MB storage guardrail).
  */
 @Composable

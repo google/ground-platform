@@ -1,5 +1,4 @@
 /*
- * IGNORE_COPYRIGHT: Ground is a Google-developed open-source project (The Ground Authors)
  * Copyright 2026 The Ground Authors.
  *
  * Licensed under the Apache License, Version 2.0 (the 'License'); you may not use this file except
@@ -378,7 +377,7 @@ data class SharedPdfSheetState(
   val targetKindLabel: String,
 )
 
-/** Pre-cached Mapbox vector/raster offline basemap tile package (`Manage offline maps`). */
+/** Pre-cached Mapbox vector/raster offline basemap tile package (`Offline maps`). */
 data class OfflineTilePackageItem(
   val id: String,
   val regionName: String,
@@ -726,7 +725,7 @@ class PrototypeAppState(
     get() = surveys.firstOrNull { it.id == activeSurveyId } ?: surveys.first()
 
   /**
-   * Surveys that have already been downloaded onto the device (shown on the `"Switch surveys"`
+   * Surveys that have already been downloaded onto the device (shown on the `"Surveys"`
    * screen accessible from the navigation drawer).
    */
   val downloadedSurveys: List<SurveyPreviewItem>
@@ -1296,7 +1295,7 @@ class PrototypeAppState(
   // --- Hamburger Navigation Drawer Actions ---
 
   /**
-   * Drawer option 1: "Switch surveys" — opens the dedicated screen showing only surveys that have
+   * Drawer option 1: "Surveys" — opens the dedicated screen showing only surveys that have
    * already been downloaded onto the device, with a primary button to browse & download more surveys.
    */
   fun drawerSwitchSurveys() {
@@ -1304,19 +1303,19 @@ class PrototypeAppState(
     activeDrawerSubView = MainDrawerSubView.SWITCH_SURVEYS
   }
 
-  /** Navigates from the "Switch surveys" screen to the full "Download survey" directory screen. */
+  /** Navigates from the "Surveys" screen to the full "Download survey" directory screen. */
   fun openDownloadMoreSurveysScreen() {
     isDrawerOpen = false
     activeDrawerSubView = MainDrawerSubView.NONE
     currentScreen = PrototypeScreen.DOWNLOAD_SURVEY
   }
 
-  /** Alias kept for compatibility: opens the "Switch surveys" sub-screen. */
+  /** Alias kept for compatibility: opens the "Surveys" sub-screen. */
   fun drawerSwitchOrDownloadSurveys() {
     drawerSwitchSurveys()
   }
 
-  /** Drawer option 2: Manage offline maps. */
+  /** Drawer option 2: Offline maps. */
   fun drawerManageOfflineMaps() {
     isDrawerOpen = false
     activeDrawerSubView = MainDrawerSubView.MANAGE_OFFLINE_MAPS
@@ -2174,7 +2173,7 @@ class PrototypeAppState(
         ),
       )
 
-    /** Sample Mapbox vector & satellite raster tile packages for `Manage offline maps`. */
+    /** Sample Mapbox vector & satellite raster tile packages for `Offline maps`. */
     fun defaultOfflineTilePackages(): List<OfflineTilePackageItem> =
       listOf(
         OfflineTilePackageItem(

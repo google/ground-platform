@@ -1,3 +1,18 @@
+<!--
+  Copyright 2026 The Ground Authors.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
 <svg width="277" height="377" viewBox="0 0 277 377" fill="none" xmlns="http://www.w3.org/2000/svg">
 <rect width="277" height="377" fill="#D4E8D1"/>
 <path d="M241.575 175.974C239.793 154.676 232.596 134.186 220.666 116.449C201.553 88.2036 170.359 72.9465 136.423 81.2618C104.334 89.1296 96.1889 123.857 69.4531 139.245C48.935 151.053 17.8469 170.318 22.821 204.499C24.4438 215.642 31.8241 223.765 41.9464 228.345C55.7868 234.591 75.1423 232.074 87.4842 241.166C101.785 251.731 113.598 266.646 144.686 277.832C169.277 286.682 197.008 276.092 215.567 259.344C238.46 238.73 244.168 205.487 241.575 175.974Z" fill="#6DDD81"/>
