@@ -23,7 +23,7 @@ const isCi = !!process.env.CI;
 const { KARMA_HEADLESS } = process.env;
 const isHeadless =
   KARMA_HEADLESS === '1' ||
-  (KARMA_HEADLESS !== '0' && (isCi || !process.stdout.isTTY));
+  (KARMA_HEADLESS !== '0' && (isCi || !process.stdout?.isTTY));
 
 if (!isCi) {
   const puppeteer = require('puppeteer');
