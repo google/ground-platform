@@ -344,8 +344,8 @@ fun SettingsScreen(
       if (visitedWebsiteNotice != null) {
         Surface(
           modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
-          shape = RoundedCornerShape(10.dp),
-          color = Color(0xFFE8F5E9),
+          shape = MaterialTheme.shapes.small,
+          color = MaterialTheme.colorScheme.secondaryContainer,
         ) {
           Row(
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
@@ -354,17 +354,14 @@ fun SettingsScreen(
             Icon(
               imageVector = Icons.Filled.Check,
               contentDescription = null,
-              tint = Color(0xFF1B5E20),
+              tint = MaterialTheme.colorScheme.onSecondaryContainer,
               modifier = Modifier.size(16.dp),
             )
             Spacer(modifier = Modifier.width(8.dp))
             Text(
               text = "Opened $visitedWebsiteNotice",
-              style =
-                MaterialTheme.typography.bodySmall.copy(
-                  color = Color(0xFF1B5E20),
-                  fontWeight = FontWeight.Medium,
-                ),
+              style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Medium),
+              color = MaterialTheme.colorScheme.onSecondaryContainer,
             )
           }
         }
@@ -567,18 +564,18 @@ fun SignInLanguageSelector(
   val languageOptions = remember {
     GROUND_LANGUAGE_OPTIONS.map { SettingsOption(label = it.label, value = it.code) }
   }
-  val containerColor =
-    if (state.isDarkTheme) Color(0xFF22302A) else Color(0xFFF3F7F4)
-  val borderColor =
-    if (state.isDarkTheme) Color(0xFF386B52) else Color(0xFFCCE0D5)
 
   Surface(
     modifier =
       modifier
         .fillMaxWidth()
-        .border(1.dp, borderColor, RoundedCornerShape(14.dp)),
-    shape = RoundedCornerShape(14.dp),
-    color = containerColor,
+        .border(
+          1.dp,
+          MaterialTheme.colorScheme.outlineVariant,
+          MaterialTheme.shapes.medium,
+        ),
+    shape = MaterialTheme.shapes.medium,
+    color = MaterialTheme.colorScheme.surfaceContainerLow,
   ) {
     SettingsSelectItem(
       icon = Icons.Filled.Language,

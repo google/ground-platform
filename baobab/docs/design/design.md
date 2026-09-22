@@ -428,42 +428,19 @@ To eliminate user confusion and align natively with industry-standard GIS and
 survey tools like ODK and KoboToolbox, Ground 2.0 systematically reframes its
 core concepts:
 
-| ODK Concept    | KoboToolbox | XLSForm Sheet/Row      | ArcGIS    | Ground 1.0   | Ground 2.0 Term |
-:                : Concept     :                        : Survey123 : Term         :                 :
-| -------------- | ----------- | ---------------------- | --------- | ------------ | --------------- |
-| **Survey**     | Project     | Workbook               | Survey    | Survey       | **Survey**      |
-:                :             :                        :           :              : (Root ACL/Org   :
-:                :             :                        :           :              : container)      :
-| **Form**       | Form        | `survey` (sheet)       | Form      | Job          | **Form**        |
-:                :             :                        :           :              : (Transaction /  :
-:                :             :                        :           :              : Encounter Log   :
-:                :             :                        :           :              : schema)         :
-| **Question**   | Question    | Row                    | Question  | Task         | **Question**    |
-:                :             :                        :           :              : (Individual     :
-:                :             :                        :           :              : input row)      :
-| **Repeat**     | Repeat      | `begin repeat`         | Repeat    | N/A          | **Repeat**      |
-:                : Question    :                        :           :              : (Variable loop  :
-:                :             :                        :           :              : structure)      :
-| **Group**      | Group       | `begin group`          | Group /   | N/A          | **Group** (UI   |
-:                :             :                        : Page      :              : section/logical :
-:                :             :                        :           :              : cluster)        :
-| **Note**       | Note        | `note` (type)          | Note      | Instructions | **Note**        |
-:                :             :                        :           : task         : (Read-only      :
-:                :             :                        :           :              : guidance block) :
-| **Submission** | Submission  | Instance               | Response  | Submission   | **Submission**  |
-:                : / Record    :                        :           :              : (Immutable      :
-:                :             :                        :           :              : event record)   :
-| **Entity List  | Dynamic     | `entities` /           | N/A       | N/A          | **Table /       |
-: (Tabular)**    : Attachments : `pulldata()`           :           :              : Entity          :
-:                :             :                        :           :              : Dataset**       :
-:                :             :                        :           :              : (Master data    :
-:                :             :                        :           :              : table)          :
-| **Entity List  | Dynamic     | `entities` /           | Feature   | Data         | **Data          |
-: (Geospatial)** : Attachments : `select_one_from_file` : Layers    : collection   : collection      :
-:                :             :                        :           : site         : sites / Entity  :
-:                :             :                        :           :              : Dataset**       :
-:                :             :                        :           :              : (Spatial master :
-:                :             :                        :           :              : table)          :
+<!-- mdformat off -->
+| ODK Concept | KoboToolbox Concept | XLSForm Sheet/Row | ArcGIS Survey123 | Ground 1.0 Term | Ground 2.0 Term |
+| --- | --- | --- | --- | --- | --- |
+| **Survey** | Project | Workbook | Survey | Survey | **Survey** (Root ACL/Org container) |
+| **Form** | Form | `survey` (sheet) | Form | Job | **Form** (Transaction / Encounter Log schema) |
+| **Question** | Question | Row | Question | Task | **Question** (Individual input row) |
+| **Repeat** | Repeat Question | `begin repeat` | Repeat | N/A | **Repeat** (Variable loop structure) |
+| **Group** | Group | `begin group` | Group / Page | N/A | **Group** (UI section/logical cluster) |
+| **Note** | Note | `note` (type) | Note | Instructions task | **Note** (Read-only guidance block) |
+| **Submission** | Submission / Record | Instance | Response | Submission | **Submission** (Immutable event record) |
+| **Entity List (Tabular)** | Dynamic Attachments | `entities` / `pulldata()` | N/A | N/A | **Table / Entity Dataset** (Master data table) |
+| **Entity List (Geospatial)** | Dynamic Attachments | `entities` / `select_one_from_file` | Feature Layers | Data collection site | **Data collection sites / Entity Dataset** (Spatial master table) |
+<!-- mdformat on -->
 
 ###### Mental Model & Terminology Mapping to ODK XForms
 

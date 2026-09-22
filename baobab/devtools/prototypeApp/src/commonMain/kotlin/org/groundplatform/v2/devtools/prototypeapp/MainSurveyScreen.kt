@@ -17,6 +17,7 @@ import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -26,6 +27,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -54,8 +56,6 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Explore
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Layers
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Map
@@ -75,23 +75,42 @@ import androidx.compose.material.icons.filled.SwapHoriz
 import androidx.compose.material.icons.filled.TouchApp
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.AssistChip
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ElevatedAssistChip
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.ModalDrawerSheet
+import androidx.compose.material3.NavigationDrawerItem
+import androidx.compose.material3.NavigationDrawerItemDefaults
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SheetValue
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.runtime.Composable
@@ -110,11 +129,16 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlin.math.roundToInt
+import org.groundplatform.v2.core.forms.ui.GroundAlertDialogOverlay
+import org.groundplatform.v2.core.forms.ui.GroundBadgeTone
+import org.groundplatform.v2.core.forms.ui.GroundModalBottomSheetOverlay
+import org.groundplatform.v2.core.forms.ui.GroundTonalBadge
 
 /**
  * 5. Main Survey UI screen (`PrototypeScreen.MAIN_SURVEY`) providing:
@@ -160,6 +184,11 @@ fun GroundMainSurveyScreen(state: PrototypeAppState) {
       }
     }
 
+    // Map Layers Modal Bottom Sheet (confined inside the mobile device frame)
+    if (state.isLayersSheetOpen) {
+      MapLayersControlSheet(state = state)
+    }
+
     // Slide-over Hamburger Navigation Drawer Overlay
     if (state.isDrawerOpen) {
       MainSurveyNavigationDrawerOverlay(state)
@@ -184,48 +213,38 @@ fun GroundMainSurveyScreen(state: PrototypeAppState) {
 }
 
 /** Top App Bar for the Main Survey UI with Hamburger Menu button and `Map` | `List` switcher. */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun MainSurveyTopAppBar(state: PrototypeAppState) {
-  Column(
-    modifier =
-      Modifier.fillMaxWidth()
-        .background(Color(0xFF1E6F50))
-        .padding(horizontal = 12.dp, vertical = 10.dp),
-    verticalArrangement = Arrangement.spacedBy(8.dp),
-  ) {
-    Row(
-      modifier = Modifier.fillMaxWidth(),
-      horizontalArrangement = Arrangement.SpaceBetween,
-      verticalAlignment = Alignment.CenterVertically,
-    ) {
-      // Hamburger Drawer Toggle Button
-      Box(
-        modifier =
-          Modifier.size(36.dp)
-            .clip(RoundedCornerShape(10.dp))
-            .background(Color(0xFF134B35))
-            .clickable { state.updateDrawerOpen(true) },
-        contentAlignment = Alignment.Center,
-      ) {
+  val topBarContainer =
+    if (state.isDarkTheme) {
+      MaterialTheme.colorScheme.primaryContainer
+    } else {
+      MaterialTheme.colorScheme.primary
+    }
+  val activePillContainer =
+    if (state.isDarkTheme) {
+      MaterialTheme.colorScheme.primary
+    } else {
+      MaterialTheme.colorScheme.inversePrimary
+    }
+  TopAppBar(
+    navigationIcon = {
+      IconButton(onClick = { state.updateDrawerOpen(true) }) {
         Icon(
           imageVector = Icons.Default.Menu,
           contentDescription = "Open Navigation Drawer",
           tint = Color.White,
-          modifier = Modifier.size(20.dp),
         )
       }
-
-      Spacer(modifier = Modifier.width(10.dp))
-
-      // Active Survey Title & Subtitle
-      Column(modifier = Modifier.weight(1f)) {
+    },
+    title = {
+      Column {
         Text(
           text = state.activeSurvey.title,
-          style =
-            MaterialTheme.typography.labelLarge.copy(
-              color = Color.White,
-              fontWeight = FontWeight.Bold,
-            ),
+          style = MaterialTheme.typography.titleSmall,
+          color = Color.White,
+          fontWeight = FontWeight.Bold,
           maxLines = 1,
           overflow = TextOverflow.Ellipsis,
         )
@@ -240,61 +259,69 @@ private fun MainSurveyTopAppBar(state: PrototypeAppState) {
             modifier = Modifier.size(12.dp),
           )
           Text(
-            text = "${state.activeSurvey.location} • ${state.visibleMapEntities.size} ${state.activeEntitiesCountNoun} on map",
-            style = MaterialTheme.typography.labelSmall.copy(color = Color(0xFFC8E6C9)),
+            text =
+              "${state.activeSurvey.location} • ${state.visibleMapEntities.size} ${state.activeEntitiesCountNoun} on map",
+            style = MaterialTheme.typography.labelSmall,
+            color = Color(0xFFC8E6C9),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
           )
         }
       }
-
-      Spacer(modifier = Modifier.width(8.dp))
-
-      // Map | List Segmented Toggle
-      Row(
-        modifier =
-          Modifier.clip(RoundedCornerShape(18.dp))
-            .background(Color(0xFF11422E))
-            .padding(2.dp),
-        horizontalArrangement = Arrangement.spacedBy(2.dp),
-      ) {
-        MainSurveyViewMode.entries.forEach { mode ->
+    },
+    actions = {
+      SingleChoiceSegmentedButtonRow(modifier = Modifier.padding(end = 8.dp)) {
+        MainSurveyViewMode.entries.forEachIndexed { index, mode ->
           val isSelected =
             state.activeDrawerSubView == MainDrawerSubView.NONE && state.mainViewMode == mode
-          val contentColor = if (isSelected) Color(0xFF003825) else Color.White
-          Row(
-            modifier =
-              Modifier.clip(RoundedCornerShape(16.dp))
-                .background(if (isSelected) Color(0xFF8BD6B1) else Color.Transparent)
-                .clickable { state.setMainSurveyViewMode(mode) }
-                .padding(horizontal = 10.dp, vertical = 5.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(4.dp),
-          ) {
-            Icon(
-              imageVector =
-                if (mode == MainSurveyViewMode.MAP) {
-                  Icons.Default.Map
-                } else {
-                  Icons.AutoMirrored.Filled.List
-                },
-              contentDescription = null,
-              tint = contentColor,
-              modifier = Modifier.size(13.dp),
-            )
-            Text(
-              text = if (mode == MainSurveyViewMode.MAP) "Map" else "List",
-              style =
-                MaterialTheme.typography.labelSmall.copy(
-                  color = contentColor,
-                  fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                ),
-            )
-          }
+          SegmentedButton(
+            selected = isSelected,
+            onClick = { state.setMainSurveyViewMode(mode) },
+            shape =
+              SegmentedButtonDefaults.itemShape(
+                index = index,
+                count = MainSurveyViewMode.entries.size,
+              ),
+            colors =
+              SegmentedButtonDefaults.colors(
+                activeContainerColor = activePillContainer,
+                activeContentColor = Color(0xFF003825),
+                activeBorderColor = activePillContainer,
+                inactiveContainerColor = Color(0xFF11422E),
+                inactiveContentColor = Color.White,
+                inactiveBorderColor = Color(0xFF386B52),
+              ),
+            icon = {
+              Icon(
+                imageVector =
+                  if (mode == MainSurveyViewMode.MAP) {
+                    Icons.Default.Map
+                  } else {
+                    Icons.AutoMirrored.Filled.List
+                  },
+                contentDescription = null,
+                modifier = Modifier.size(14.dp),
+              )
+            },
+            label = {
+              Text(
+                text = if (mode == MainSurveyViewMode.MAP) "Map" else "List",
+                style = MaterialTheme.typography.labelSmall,
+                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+              )
+            },
+          )
         }
       }
-    }
-  }
+    },
+    colors =
+      TopAppBarDefaults.topAppBarColors(
+        containerColor = topBarContainer,
+        titleContentColor = Color.White,
+        navigationIconContentColor = Color.White,
+        actionIconContentColor = Color.White,
+      ),
+  )
 }
 
 /**
@@ -311,8 +338,6 @@ private fun MainSurveyTopAppBar(state: PrototypeAppState) {
 @Composable
 private fun SurveyMapView(state: PrototypeAppState) {
   val selectedEntity = state.selectedEntity
-  val isDark = state.isDarkTheme
-  val sheetBg = if (isDark) Color(0xFF1E2522) else Color.White
 
   val sheetState =
     rememberStandardBottomSheetState(
@@ -351,9 +376,9 @@ private fun SurveyMapView(state: PrototypeAppState) {
   BottomSheetScaffold(
     scaffoldState = scaffoldState,
     sheetPeekHeight = peekHeight,
-    sheetShape = RoundedCornerShape(topStart = 22.dp, topEnd = 22.dp),
-    sheetContainerColor = sheetBg,
-    sheetShadowElevation = 12.dp,
+    sheetShape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
+    sheetContainerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+    sheetShadowElevation = 8.dp,
     sheetSwipeEnabled = selectedEntity != null,
     sheetDragHandle =
       if (selectedEntity != null) {
@@ -417,89 +442,89 @@ private fun SurveyMapView(state: PrototypeAppState) {
           verticalAlignment = Alignment.CenterVertically,
         ) {
           // GNSS (GPS) Satellites & Current Horizontal Accuracy Chip over the map
-          Row(
-            modifier =
-              Modifier.clip(RoundedCornerShape(16.dp))
-                .background(Color(0xE60E271C))
-                .border(1.dp, Color(0xFF4CAF50), RoundedCornerShape(16.dp))
-                .padding(horizontal = 11.dp, vertical = 6.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(5.dp),
+          Surface(
+            shape = MaterialTheme.shapes.large,
+            color = MaterialTheme.colorScheme.inverseSurface.copy(alpha = 0.92f),
+            contentColor = MaterialTheme.colorScheme.inverseOnSurface,
+            border = BorderStroke(1.dp, Color(0xFF4CAF50)),
+            shadowElevation = 2.dp,
           ) {
-            Icon(
-              imageVector = Icons.Default.SatelliteAlt,
-              contentDescription = "GNSS Satellites & Accuracy",
-              tint = Color(0xFF8BD6B1),
-              modifier = Modifier.size(13.dp),
-            )
-            Text(
-              text = "GNSS: ${state.gnssStatusChipLabel}",
-              style =
-                MaterialTheme.typography.labelSmall.copy(
-                  fontSize = 10.sp,
-                  color = Color.White,
-                  fontWeight = FontWeight.Bold,
-                ),
-            )
+            Row(
+              modifier = Modifier.padding(horizontal = 11.dp, vertical = 6.dp),
+              verticalAlignment = Alignment.CenterVertically,
+              horizontalArrangement = Arrangement.spacedBy(5.dp),
+            ) {
+              Icon(
+                imageVector = Icons.Default.SatelliteAlt,
+                contentDescription = "GNSS Satellites & Accuracy",
+                tint = Color(0xFF8BD6B1),
+                modifier = Modifier.size(14.dp),
+              )
+              Text(
+                text = "GNSS: ${state.gnssStatusChipLabel}",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.inverseOnSurface,
+                fontWeight = FontWeight.Bold,
+              )
+            }
           }
 
           // "Layers" Button to control basemap (Map vs Satellite), offline tiles, entities, and submission geometries
-          val layersTint = if (state.isLayersSheetOpen) Color(0xFF003825) else Color.White
-          Row(
-            modifier =
-              Modifier.clip(RoundedCornerShape(16.dp))
-                .background(if (state.isLayersSheetOpen) Color(0xFF8BD6B1) else Color(0xEE133A29))
-                .border(
-                  width = 1.dp,
-                  color = if (state.isLayersSheetOpen) Color.White else Color(0xFF8BD6B1),
-                  shape = RoundedCornerShape(16.dp),
-                )
-                .clickable { state.updateLayersSheetOpen(!state.isLayersSheetOpen) }
-                .padding(horizontal = 12.dp, vertical = 6.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(5.dp),
+          val layersBg =
+            if (state.isLayersSheetOpen) {
+              Color(0xFF8BD6B1)
+            } else {
+              MaterialTheme.colorScheme.inverseSurface.copy(alpha = 0.93f)
+            }
+          val layersContent =
+            if (state.isLayersSheetOpen) {
+              Color(0xFF003825)
+            } else {
+              MaterialTheme.colorScheme.inverseOnSurface
+            }
+          Surface(
+            onClick = { state.updateLayersSheetOpen(!state.isLayersSheetOpen) },
+            shape = MaterialTheme.shapes.large,
+            color = layersBg,
+            contentColor = layersContent,
+            border = BorderStroke(1.dp, Color(0xFF8BD6B1)),
+            shadowElevation = 3.dp,
           ) {
-            Icon(
-              imageVector = Icons.Default.Layers,
-              contentDescription = null,
-              tint = layersTint,
-              modifier = Modifier.size(14.dp),
-            )
-            Text(
-              text = "Layers",
-              style =
-                MaterialTheme.typography.labelSmall.copy(
-                  color = layersTint,
-                  fontWeight = FontWeight.Bold,
-                ),
-            )
+            Row(
+              modifier = Modifier.padding(horizontal = 12.dp, vertical = 7.dp),
+              verticalAlignment = Alignment.CenterVertically,
+              horizontalArrangement = Arrangement.spacedBy(6.dp),
+            ) {
+              Icon(
+                imageVector = Icons.Default.Layers,
+                contentDescription = null,
+                tint = layersContent,
+                modifier = Modifier.size(16.dp),
+              )
+              Text(
+                text = "Layers",
+                style = MaterialTheme.typography.labelSmall,
+                color = layersContent,
+                fontWeight = FontWeight.Bold,
+              )
+            }
           }
         }
 
         // Compact GPS Follow State Chip
-        Row(
-          modifier =
-            Modifier.clip(RoundedCornerShape(12.dp))
-              .background(Color(0xCC0D2319))
-              .border(1.dp, Color(0xFF2D5944), RoundedCornerShape(12.dp))
-              .padding(horizontal = 10.dp, vertical = 4.dp),
-          horizontalArrangement = Arrangement.spacedBy(3.dp),
-          verticalAlignment = Alignment.CenterVertically,
+        Surface(
+          shape = MaterialTheme.shapes.medium,
+          color = MaterialTheme.colorScheme.inverseSurface.copy(alpha = 0.85f),
+          border = BorderStroke(1.dp, Color(0xFF2D5944)),
         ) {
-          Icon(
-            imageVector = Icons.Default.MyLocation,
-            contentDescription = null,
-            tint = if (state.isCameraFollowingUser) Color(0xFF8BD6B1) else Color(0xFFFFCC80),
-            modifier = Modifier.size(10.dp),
-          )
+          val followColor =
+            if (state.isCameraFollowingUser) Color(0xFF8BD6B1) else Color(0xFFFFCC80)
           Text(
             text = if (state.isCameraFollowingUser) "GPS Auto-Center" else "Panned",
-            style =
-              MaterialTheme.typography.labelSmall.copy(
-                fontSize = 9.5.sp,
-                color = if (state.isCameraFollowingUser) Color(0xFF8BD6B1) else Color(0xFFFFCC80),
-                fontWeight = FontWeight.Bold,
-              ),
+            style = MaterialTheme.typography.labelSmall,
+            color = followColor,
+            fontWeight = FontWeight.SemiBold,
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
           )
         }
 
@@ -513,43 +538,26 @@ private fun SurveyMapView(state: PrototypeAppState) {
         }
       }
 
-      // 4. Floating "Layers" Popover Sheet (when Layers button is clicked)
-      if (state.isLayersSheetOpen) {
-        MapLayersControlSheet(
-          state = state,
-          modifier =
-            Modifier.align(Alignment.TopEnd)
-              .padding(top = 74.dp, end = 10.dp, start = 14.dp)
-              .heightIn(max = 460.dp),
-        )
-      }
-
       // 4B. Floating Mapbox Zoom In (+) / Zoom Out (−) Control Pill on Right Edge
       Surface(
-        modifier =
-          Modifier.align(Alignment.CenterEnd)
-            .padding(end = 10.dp),
-        shape = RoundedCornerShape(18.dp),
-        color = Color(0xEE133A29),
-        shadowElevation = 6.dp,
+        modifier = Modifier.align(Alignment.CenterEnd).padding(end = 10.dp),
+        shape = MaterialTheme.shapes.large,
+        color = MaterialTheme.colorScheme.inverseSurface.copy(alpha = 0.93f),
+        contentColor = MaterialTheme.colorScheme.inverseOnSurface,
+        border = BorderStroke(1.dp, Color(0xFF8BD6B1)),
+        tonalElevation = 3.dp,
+        shadowElevation = 4.dp,
       ) {
         Column(
-          modifier =
-            Modifier.border(1.dp, Color(0xFF8BD6B1), RoundedCornerShape(18.dp))
-              .padding(vertical = 4.dp, horizontal = 4.dp),
+          modifier = Modifier.padding(vertical = 2.dp, horizontal = 2.dp),
           horizontalAlignment = Alignment.CenterHorizontally,
-          verticalArrangement = Arrangement.spacedBy(2.dp),
         ) {
-          // Zoom In (+)
-          Box(
-            modifier =
-              Modifier.size(32.dp)
-                .clip(CircleShape)
-                .clickable {
-                  state.zoomInMap()
-                  zoomPlatformMapboxBasemap(0.75f)
-                },
-            contentAlignment = Alignment.Center,
+          IconButton(
+            onClick = {
+              state.zoomInMap()
+              zoomPlatformMapboxBasemap(0.75f)
+            },
+            modifier = Modifier.size(36.dp),
           ) {
             Icon(
               imageVector = Icons.Default.Add,
@@ -560,35 +568,28 @@ private fun SurveyMapView(state: PrototypeAppState) {
           }
 
           HorizontalDivider(
-            modifier = Modifier.width(22.dp),
+            modifier = Modifier.width(24.dp),
             color = Color(0xFF2D5944),
           )
 
-          // Zoom Out (−)
-          Box(
-            modifier =
-              Modifier.size(32.dp)
-                .clip(CircleShape)
-                .clickable {
-                  state.zoomOutMap()
-                  zoomPlatformMapboxBasemap(-0.75f)
-                },
-            contentAlignment = Alignment.Center,
+          IconButton(
+            onClick = {
+              state.zoomOutMap()
+              zoomPlatformMapboxBasemap(-0.75f)
+            },
+            modifier = Modifier.size(36.dp),
           ) {
-            Box(
-              modifier =
-                Modifier.width(12.dp)
-                  .height(2.2.dp)
-                  .clip(CircleShape)
-                  .background(Color.White)
+            Text(
+              text = "−",
+              color = Color.White,
+              style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
             )
           }
         }
       }
 
       // 5. Bottom Overlay Stack: Google Maps-style Horizontal Scale Widget in bottom-left
-      //    (plus optional "Recenter" Pill Button when map is panned) positioned cleanly above
-      //    the bottom sheet peek bar (or at bottom of map when no entity is selected)
+      //    (plus optional "Recenter" ExtendedFloatingActionButton when map is panned)
       Column(
         modifier =
           Modifier.align(Alignment.BottomCenter)
@@ -608,67 +609,59 @@ private fun SurveyMapView(state: PrototypeAppState) {
           )
 
           if (!state.isCameraFollowingUser) {
-            Surface(
-              modifier =
-                Modifier.clip(RoundedCornerShape(24.dp))
-                  .clickable { state.recenterMapOnUser() },
-              shape = RoundedCornerShape(24.dp),
-              color = Color.White,
-              shadowElevation = 6.dp,
-            ) {
-              Row(
-                modifier =
-                  Modifier.border(1.5.dp, Color(0xFF1A73E8), RoundedCornerShape(24.dp))
-                    .padding(horizontal = 14.dp, vertical = 7.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(6.dp),
-              ) {
+            ExtendedFloatingActionButton(
+              onClick = { state.recenterMapOnUser() },
+              icon = {
                 Icon(
                   imageVector = Icons.Default.MyLocation,
                   contentDescription = "Recenter map on GPS location",
-                  tint = Color(0xFF1A73E8),
-                  modifier = Modifier.size(16.dp),
+                  modifier = Modifier.size(18.dp),
                 )
+              },
+              text = {
                 Text(
                   text = "Recenter",
-                  style =
-                    MaterialTheme.typography.labelLarge.copy(
-                      color = Color(0xFF1A73E8),
-                      fontWeight = FontWeight.Bold,
-                    ),
+                  style = MaterialTheme.typography.labelLarge,
+                  fontWeight = FontWeight.Bold,
                 )
-              }
-            }
+              },
+              containerColor = MaterialTheme.colorScheme.primaryContainer,
+              contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+              modifier = Modifier.height(40.dp),
+            )
           }
         }
 
         if (selectedEntity == null) {
           // Helper hint chip at the bottom of the map when no location is selected
-          Row(
+          Surface(
             modifier =
               Modifier.align(Alignment.CenterHorizontally)
-                .padding(horizontal = 14.dp, vertical = 6.dp)
-                .clip(RoundedCornerShape(20.dp))
-                .background(Color(0xE6133A29))
-                .border(1.dp, Color(0xFF8BD6B1), RoundedCornerShape(20.dp))
-                .padding(horizontal = 14.dp, vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(6.dp),
+                .padding(horizontal = 14.dp, vertical = 6.dp),
+            shape = MaterialTheme.shapes.extraLarge,
+            color = MaterialTheme.colorScheme.inverseSurface.copy(alpha = 0.92f),
+            contentColor = MaterialTheme.colorScheme.inverseOnSurface,
+            border = BorderStroke(1.dp, Color(0xFF8BD6B1)),
+            shadowElevation = 2.dp,
           ) {
-            Icon(
-              imageVector = Icons.Default.TouchApp,
-              contentDescription = null,
-              tint = Color(0xFF8BD6B1),
-              modifier = Modifier.size(14.dp),
-            )
-            Text(
-              text = "Drag map to pan • Tap any location or dotted polygon to inspect",
-              style =
-                MaterialTheme.typography.labelSmall.copy(
-                  color = Color.White,
-                  fontWeight = FontWeight.Medium,
-                ),
-            )
+            Row(
+              modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
+              verticalAlignment = Alignment.CenterVertically,
+              horizontalArrangement = Arrangement.spacedBy(6.dp),
+            ) {
+              Icon(
+                imageVector = Icons.Default.TouchApp,
+                contentDescription = null,
+                tint = Color(0xFF8BD6B1),
+                modifier = Modifier.size(14.dp),
+              )
+              Text(
+                text = "Drag map to pan • Tap any location or dotted polygon to inspect",
+                style = MaterialTheme.typography.labelSmall,
+                color = Color.White,
+                fontWeight = FontWeight.Medium,
+              )
+            }
           }
         }
       }
@@ -680,14 +673,6 @@ private fun SurveyMapView(state: PrototypeAppState) {
  * Interactive Straight-Line Navigation HUD Banner displayed at the top of the Map View whenever
  * straight-line navigation to a Geospatial Entity (`NavigationTargetKind.ENTITY`) or a Form
  * Submission (`NavigationTargetKind.SUBMISSION`) is active.
- *
- * Displays:
- * - Rotating compass bearing arrow (`navState.vector.bearingDegrees`)
- * - Target type pill (`ENTITY` vs `SUBMISSION`), target label, and subtitle
- * - Real-time geodesic distance (`m`/`km` or `ft`/`mi`), compass bearing (`0°..359°` + cardinal),
- *   and estimated walk time (`~X min walk` or `Arrived at target`)
- * - `"Walk Closer"` simulation button (`state.stepUserTowardNavigationTarget()`)
- * - `"Stop"` button (`state.stopNavigation()`)
  */
 @Composable
 private fun StraightLineNavigationHudBanner(
@@ -707,15 +692,19 @@ private fun StraightLineNavigationHudBanner(
       "SUBMISSION WAYFINDING"
     }
 
-  Surface(
+  ElevatedCard(
     modifier = Modifier.fillMaxWidth(),
-    shape = RoundedCornerShape(14.dp),
-    color = Color(0xF2082017),
-    shadowElevation = 8.dp,
+    shape = MaterialTheme.shapes.medium,
+    colors =
+      CardDefaults.elevatedCardColors(
+        containerColor = MaterialTheme.colorScheme.inverseSurface.copy(alpha = 0.95f),
+        contentColor = MaterialTheme.colorScheme.inverseOnSurface,
+      ),
+    elevation = CardDefaults.elevatedCardElevation(defaultElevation = 6.dp),
   ) {
     Column(
       modifier =
-        Modifier.border(1.5.dp, accentColor, RoundedCornerShape(14.dp))
+        Modifier.border(1.5.dp, accentColor, MaterialTheme.shapes.medium)
           .padding(horizontal = 12.dp, vertical = 8.dp),
       verticalArrangement = Arrangement.spacedBy(6.dp),
     ) {
@@ -730,46 +719,38 @@ private fun StraightLineNavigationHudBanner(
           modifier = Modifier.weight(1f),
         ) {
           // Rotating Compass Arrow Badge
-          Box(
-            modifier =
-              Modifier.size(32.dp)
-                .clip(CircleShape)
-                .background(accentColor.copy(alpha = 0.18f))
-                .border(1.5.dp, accentColor, CircleShape),
-            contentAlignment = Alignment.Center,
+          Surface(
+            modifier = Modifier.size(32.dp),
+            shape = CircleShape,
+            color = accentColor.copy(alpha = 0.16f),
+            border = BorderStroke(1.5.dp, accentColor),
           ) {
-            Icon(
-              imageVector = Icons.Default.Navigation,
-              contentDescription = "Compass Bearing Arrow",
-              tint = accentColor,
-              modifier =
-                Modifier.size(17.dp)
-                  .graphicsLayer(rotationZ = navState.vector.bearingDegrees.toFloat()),
-            )
+            Box(contentAlignment = Alignment.Center) {
+              Icon(
+                imageVector = Icons.Default.Navigation,
+                contentDescription = "Compass Bearing Arrow",
+                tint = accentColor,
+                modifier =
+                  Modifier.size(17.dp)
+                    .graphicsLayer(rotationZ = navState.vector.bearingDegrees.toFloat()),
+              )
+            }
           }
 
-          Column(verticalArrangement = Arrangement.spacedBy(1.dp)) {
+          Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
             Row(
               verticalAlignment = Alignment.CenterVertically,
               horizontalArrangement = Arrangement.spacedBy(6.dp),
             ) {
-              Box(
-                modifier =
-                  Modifier.clip(RoundedCornerShape(5.dp))
-                    .background(accentColor.copy(alpha = 0.22f))
-                    .padding(horizontal = 5.dp, vertical = 1.dp)
-              ) {
-                Text(
-                  text = kindLabel,
-                  style =
-                    MaterialTheme.typography.labelSmall.copy(
-                      fontSize = 8.sp,
-                      fontWeight = FontWeight.ExtraBold,
-                      color = accentColor,
-                      letterSpacing = 0.4.sp,
-                    ),
-                )
-              }
+              GroundTonalBadge(
+                text = kindLabel,
+                tone =
+                  if (navState.targetKind == NavigationTargetKind.ENTITY) {
+                    GroundBadgeTone.PRIMARY
+                  } else {
+                    GroundBadgeTone.TERTIARY
+                  },
+              )
               Text(
                 text =
                   if (navState.vector.isArrived) {
@@ -777,38 +758,25 @@ private fun StraightLineNavigationHudBanner(
                   } else {
                     "~${navState.vector.estimatedWalkMinutes} min walk"
                   },
-                style =
-                  MaterialTheme.typography.labelSmall.copy(
-                    fontSize = 9.sp,
-                    color =
-                      if (navState.vector.isArrived) {
-                        Color(0xFF81C784)
-                      } else {
-                        Color(0xFFC8E6C9)
-                      },
-                    fontWeight = FontWeight.Bold,
-                  ),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.primary,
+                fontWeight = FontWeight.Bold,
               )
             }
 
             Text(
               text = navState.targetTitle,
-              style =
-                MaterialTheme.typography.labelLarge.copy(
-                  color = Color.White,
-                  fontWeight = FontWeight.Bold,
-                ),
+              style = MaterialTheme.typography.labelLarge,
+              color = MaterialTheme.colorScheme.onSurface,
+              fontWeight = FontWeight.Bold,
               maxLines = 1,
               overflow = TextOverflow.Ellipsis,
             )
 
             Text(
               text = navState.targetSubtitle,
-              style =
-                MaterialTheme.typography.labelSmall.copy(
-                  fontSize = 9.5.sp,
-                  color = Color(0xFFB0BEC5),
-                ),
+              style = MaterialTheme.typography.labelSmall,
+              color = MaterialTheme.colorScheme.onSurfaceVariant,
               maxLines = 1,
               overflow = TextOverflow.Ellipsis,
             )
@@ -833,9 +801,8 @@ private fun StraightLineNavigationHudBanner(
             text = "Bearing ${navState.vector.formattedBearing}",
             style =
               MaterialTheme.typography.labelSmall.copy(
-                fontSize = 9.5.sp,
                 fontFamily = FontFamily.Monospace,
-                color = Color.White,
+                color = MaterialTheme.colorScheme.onSurface,
                 fontWeight = FontWeight.SemiBold,
               ),
           )
@@ -850,11 +817,8 @@ private fun StraightLineNavigationHudBanner(
       ) {
         Text(
           text = "Straight-line geodesic vector from your GPS location",
-          style =
-            MaterialTheme.typography.labelSmall.copy(
-              fontSize = 9.sp,
-              color = Color(0xFF90A4AE),
-            ),
+          style = MaterialTheme.typography.labelSmall,
+          color = MaterialTheme.colorScheme.onSurfaceVariant,
           modifier = Modifier.weight(1f),
         )
 
@@ -863,60 +827,44 @@ private fun StraightLineNavigationHudBanner(
           verticalAlignment = Alignment.CenterVertically,
         ) {
           if (!navState.vector.isArrived) {
-            Row(
-              modifier =
-                Modifier.clip(RoundedCornerShape(8.dp))
-                  .background(Color(0xFF133A29))
-                  .border(1.dp, accentColor, RoundedCornerShape(8.dp))
-                  .clickable { state.stepUserTowardNavigationTarget() }
-                  .padding(horizontal = 8.dp, vertical = 4.dp),
-              verticalAlignment = Alignment.CenterVertically,
-              horizontalArrangement = Arrangement.spacedBy(4.dp),
-            ) {
-              Icon(
-                imageVector = Icons.Default.Explore,
-                contentDescription = "Simulate walking closer to target",
-                tint = accentColor,
-                modifier = Modifier.size(11.dp),
-              )
-              Text(
-                text = "Walk Closer",
-                style =
-                  MaterialTheme.typography.labelSmall.copy(
-                    fontSize = 9.5.sp,
-                    color = accentColor,
-                    fontWeight = FontWeight.Bold,
-                  ),
-              )
-            }
+            AssistChip(
+              onClick = { state.stepUserTowardNavigationTarget() },
+              leadingIcon = {
+                Icon(
+                  imageVector = Icons.Default.Explore,
+                  contentDescription = "Simulate walking closer to target",
+                  modifier = Modifier.size(14.dp),
+                )
+              },
+              label = {
+                Text(
+                  text = "Walk Closer",
+                  style = MaterialTheme.typography.labelSmall,
+                  fontWeight = FontWeight.Bold,
+                )
+              },
+            )
           }
 
-          Row(
-            modifier =
-              Modifier.clip(RoundedCornerShape(8.dp))
-                .background(Color(0xFF3E1F1F))
-                .border(1.dp, Color(0xFFEF5350), RoundedCornerShape(8.dp))
-                .clickable { state.stopNavigation() }
-                .padding(horizontal = 8.dp, vertical = 4.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(3.dp),
-          ) {
-            Icon(
-              imageVector = Icons.Default.Close,
-              contentDescription = "Stop Straight-Line Navigation",
-              tint = Color(0xFFFFCDD2),
-              modifier = Modifier.size(11.dp),
-            )
-            Text(
-              text = "Stop",
-              style =
-                MaterialTheme.typography.labelSmall.copy(
-                  fontSize = 9.5.sp,
-                  color = Color(0xFFFFCDD2),
-                  fontWeight = FontWeight.Bold,
-                ),
-            )
-          }
+          AssistChip(
+            onClick = { state.stopNavigation() },
+            leadingIcon = {
+              Icon(
+                imageVector = Icons.Default.Close,
+                contentDescription = "Stop Straight-Line Navigation",
+                tint = MaterialTheme.colorScheme.error,
+                modifier = Modifier.size(14.dp),
+              )
+            },
+            label = {
+              Text(
+                text = "Stop",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.error,
+                fontWeight = FontWeight.Bold,
+              )
+            },
+          )
         }
       }
     }
@@ -940,40 +888,35 @@ private fun GoogleMapsScaleBarWidget(
       animationSpec = tween(durationMillis = 180),
       label = "googleMapsScaleBarWidth",
     )
-  val bgColor = if (isSatellite) Color(0xCC0E2219) else Color(0xDDFFFFFF)
-  val borderColor = if (isSatellite) Color(0x668BD6B1) else Color(0x441F2937)
-  val primaryColor = if (isSatellite) Color.White else Color(0xFF202124)
-  val haloColor = if (isSatellite) Color(0xAA000000) else Color(0xCCFFFFFF)
+  val bgColor =
+    if (isSatellite) {
+      MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.90f)
+    } else {
+      MaterialTheme.colorScheme.surface.copy(alpha = 0.92f)
+    }
+  val primaryColor = MaterialTheme.colorScheme.onSurface
+  val haloColor = MaterialTheme.colorScheme.surface
 
   Surface(
     modifier = modifier,
-    shape = RoundedCornerShape(10.dp),
+    shape = MaterialTheme.shapes.small,
     color = bgColor,
+    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
     shadowElevation = 3.dp,
   ) {
     Row(
-      modifier =
-        Modifier.border(1.dp, borderColor, RoundedCornerShape(10.dp))
-          .padding(horizontal = 9.dp, vertical = 5.dp),
+      modifier = Modifier.padding(horizontal = 9.dp, vertical = 5.dp),
       verticalAlignment = Alignment.CenterVertically,
       horizontalArrangement = Arrangement.spacedBy(7.dp),
     ) {
       Text(
         text = scaleSpec.label,
-        style =
-          MaterialTheme.typography.labelSmall.copy(
-            fontSize = 10.5.sp,
-            fontFamily = FontFamily.SansSerif,
-            fontWeight = FontWeight.Bold,
-            color = primaryColor,
-          ),
+        style = MaterialTheme.typography.labelSmall,
+        color = primaryColor,
+        fontWeight = FontWeight.Bold,
       )
 
-      Canvas(
-        modifier =
-          Modifier.width(animatedWidthDp)
-            .height(9.dp)
-      ) {
+      Canvas(modifier = Modifier.width(animatedWidthDp).height(9.dp)) {
         val leftX = 1.dp.toPx()
         val rightX = (size.width - 1.dp.toPx()).coerceAtLeast(leftX + 4f)
         val topY = 1.dp.toPx()
@@ -981,7 +924,6 @@ private fun GoogleMapsScaleBarWidget(
         val haloStroke = 3.2.dp.toPx()
         val mainStroke = 1.6.dp.toPx()
 
-        // High-contrast halo outline
         drawLine(
           color = haloColor,
           start = Offset(leftX, bottomY),
@@ -1001,7 +943,6 @@ private fun GoogleMapsScaleBarWidget(
           strokeWidth = haloStroke,
         )
 
-        // Crisp Google Maps-style scale bracket: |_________|
         drawLine(
           color = primaryColor,
           start = Offset(leftX, bottomY),
@@ -1026,28 +967,23 @@ private fun GoogleMapsScaleBarWidget(
 }
 
 /**
- * Popover dialog opened by the `"Layers"` button to select/toggle:
+ * Material 3 [ModalBottomSheet] opened by the `"Layers"` button to select/toggle:
  * 1. **Basemap Type (`Map` vs `Satellite`)** & **Offline Basemap (`Mapbox Offline Tiles`)**
  * 2. **Geospatial Entity Layers (`LayerDef.entity_dataset_id`)** — rendered with solid outlines
  * 3. **Submission Geometry Layers (`LayerDef.form_geometry`)** — rendered with dotted polygon
  *    outlines corresponding to geometry questions/fields in the survey forms
  */
 @Composable
-private fun MapLayersControlSheet(
-  state: PrototypeAppState,
-  modifier: Modifier = Modifier,
-) {
-  Card(
-    modifier = modifier.fillMaxWidth(),
-    shape = RoundedCornerShape(16.dp),
-    colors = CardDefaults.cardColors(containerColor = Color.White),
-    elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+private fun MapLayersControlSheet(state: PrototypeAppState) {
+  GroundModalBottomSheetOverlay(
+    onDismissRequest = { state.updateLayersSheetOpen(false) }
   ) {
     Column(
       modifier =
-        Modifier.verticalScroll(rememberScrollState())
-          .padding(14.dp),
-      verticalArrangement = Arrangement.spacedBy(8.dp),
+        Modifier.fillMaxWidth()
+          .verticalScroll(rememberScrollState())
+          .padding(horizontal = 16.dp, vertical = 8.dp),
+      verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
       Row(
         modifier = Modifier.fillMaxWidth(),
@@ -1057,33 +993,24 @@ private fun MapLayersControlSheet(
         Column {
           Text(
             text = "Map Layers & Basemap",
-            style =
-              MaterialTheme.typography.titleSmall.copy(
-                fontWeight = FontWeight.Bold,
-                color = Color(0xFF111827),
-              ),
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold,
           )
           Text(
             text = "Select Map vs Satellite basemap and toggle survey map layers",
-            style = MaterialTheme.typography.labelSmall.copy(color = Color(0xFF6B7280)),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
           )
         }
-        Box(
-          modifier =
-            Modifier.clip(CircleShape)
-              .clickable { state.updateLayersSheetOpen(false) }
-              .padding(4.dp)
-        ) {
+        IconButton(onClick = { state.updateLayersSheetOpen(false) }) {
           Icon(
             imageVector = Icons.Default.Close,
             contentDescription = "Close Layers",
-            tint = Color(0xFF374151),
-            modifier = Modifier.size(16.dp),
           )
         }
       }
 
-      HorizontalDivider(color = Color(0xFFE5E7EB))
+      HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
       // Basemap section (Map vs Satellite + Offline Basemap Toggle)
       Text(
@@ -1091,36 +1018,23 @@ private fun MapLayersControlSheet(
         style =
           MaterialTheme.typography.labelSmall.copy(
             fontWeight = FontWeight.Bold,
-            color = Color(0xFF1E6F50),
+            color = MaterialTheme.colorScheme.primary,
             letterSpacing = 0.5.sp,
           ),
       )
-      // Map vs Satellite side-by-side cards (in Layers dialog only)
-      Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-      ) {
-        BasemapType.entries.forEach { basemap ->
+
+      SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
+        BasemapType.entries.forEachIndexed { index, basemap ->
           val isSelected = state.selectedBasemapType == basemap
-          val cardTitleColor = if (isSelected) Color(0xFF1B5E20) else Color(0xFF111827)
-          Column(
-            modifier =
-              Modifier.weight(1f)
-                .clip(RoundedCornerShape(10.dp))
-                .background(if (isSelected) Color(0xFFE8F5E9) else Color(0xFFF9FAFB))
-                .border(
-                  width = if (isSelected) 1.5.dp else 1.dp,
-                  color = if (isSelected) Color(0xFF1E6F50) else Color(0xFFE5E7EB),
-                  shape = RoundedCornerShape(10.dp),
-                )
-                .clickable { state.selectBasemapType(basemap) }
-                .padding(horizontal = 10.dp, vertical = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(2.dp),
-          ) {
-            Row(
-              verticalAlignment = Alignment.CenterVertically,
-              horizontalArrangement = Arrangement.spacedBy(5.dp),
-            ) {
+          SegmentedButton(
+            selected = isSelected,
+            onClick = { state.selectBasemapType(basemap) },
+            shape =
+              SegmentedButtonDefaults.itemShape(
+                index = index,
+                count = BasemapType.entries.size,
+              ),
+            icon = {
               Icon(
                 imageVector =
                   if (basemap == BasemapType.NORMAL) {
@@ -1129,81 +1043,55 @@ private fun MapLayersControlSheet(
                     Icons.Default.SatelliteAlt
                   },
                 contentDescription = null,
-                tint = cardTitleColor,
-                modifier = Modifier.size(14.dp),
+                modifier = Modifier.size(16.dp),
               )
+            },
+            label = {
               Text(
                 text = basemap.label,
-                style =
-                  MaterialTheme.typography.labelMedium.copy(
-                    fontWeight = FontWeight.Bold,
-                    color = cardTitleColor,
-                  ),
+                style = MaterialTheme.typography.labelMedium,
+                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
               )
-            }
-            Text(
-              text = basemap.description,
-              style =
-                MaterialTheme.typography.labelSmall.copy(
-                  fontSize = 9.5.sp,
-                  color = Color(0xFF6B7280),
-                ),
-            )
-          }
+            },
+          )
         }
       }
 
       // Offline Basemap Tile Package Overlay Toggle
-      Row(
-        modifier =
-          Modifier.fillMaxWidth()
-            .clip(RoundedCornerShape(10.dp))
-            .background(if (state.isOfflineBasemapVisible) Color(0xFFF0F7F3) else Color(0xFFF9FAFB))
-            .border(
-              width = 1.dp,
-              color = if (state.isOfflineBasemapVisible) Color(0xFF2E7D32) else Color(0xFFE5E7EB),
-              shape = RoundedCornerShape(10.dp),
-            )
-            .clickable { state.toggleOfflineBasemapVisibility() }
-            .padding(start = 12.dp, end = 6.dp, top = 5.dp, bottom = 5.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+      OutlinedCard(
+        onClick = { state.toggleOfflineBasemapVisibility() },
+        modifier = Modifier.fillMaxWidth(),
+        shape = MaterialTheme.shapes.medium,
+        colors =
+          CardDefaults.outlinedCardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainer
+          ),
       ) {
-        Column(modifier = Modifier.weight(1f)) {
-          Text(
-            text = "Offline Basemap Overlay (Nyeri Sector Tiles)",
-            style =
-              MaterialTheme.typography.labelMedium.copy(
-                fontWeight = FontWeight.SemiBold,
-                color = Color(0xFF111827),
-              ),
-          )
-          Text(
-            text = state.offlineBasemapStyle.tileDescription,
-            style = MaterialTheme.typography.labelSmall.copy(color = Color(0xFF6B7280)),
-          )
-        }
-        IconButton(
-          onClick = { state.toggleOfflineBasemapVisibility() },
-          modifier = Modifier.size(36.dp),
+        Row(
+          modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
+          verticalAlignment = Alignment.CenterVertically,
+          horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-          Icon(
-            imageVector =
-              if (state.isOfflineBasemapVisible) {
-                Icons.Default.Visibility
-              } else {
-                Icons.Default.VisibilityOff
-              },
-            contentDescription =
-              if (state.isOfflineBasemapVisible) "Hide layer" else "Show layer",
-            tint =
-              if (state.isOfflineBasemapVisible) Color(0xFF1E6F50) else Color(0xFF9CA3AF),
-            modifier = Modifier.size(20.dp),
+          Column(modifier = Modifier.weight(1f)) {
+            Text(
+              text = "Offline Basemap Overlay (Nyeri Sector Tiles)",
+              style = MaterialTheme.typography.labelMedium,
+              fontWeight = FontWeight.SemiBold,
+            )
+            Text(
+              text = state.offlineBasemapStyle.tileDescription,
+              style = MaterialTheme.typography.labelSmall,
+              color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+          }
+          Switch(
+            checked = state.isOfflineBasemapVisible,
+            onCheckedChange = { state.toggleOfflineBasemapVisibility() },
           )
         }
       }
 
-      HorizontalDivider(color = Color(0xFFE5E7EB))
+      HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
       // Section 2: Data collection sites (geospatial entities)
       Text(
@@ -1211,65 +1099,55 @@ private fun MapLayersControlSheet(
         style =
           MaterialTheme.typography.labelSmall.copy(
             fontWeight = FontWeight.Bold,
-            color = Color(0xFF1E6F50),
+            color = MaterialTheme.colorScheme.primary,
             letterSpacing = 0.5.sp,
           ),
       )
       state.entityDatasetLayers.forEach { layer ->
         val layerEntityCount = state.entities.count { it.layerId == layer.id }
-        Row(
-          modifier =
-            Modifier.fillMaxWidth()
-              .clip(RoundedCornerShape(10.dp))
-              .background(if (layer.isVisible) Color(0xFFF3F8F5) else Color(0xFFF9FAFB))
-              .clickable { state.toggleLayerVisibility(layer.id) }
-              .padding(start = 12.dp, end = 6.dp, top = 5.dp, bottom = 5.dp),
-          verticalAlignment = Alignment.CenterVertically,
-          horizontalArrangement = Arrangement.spacedBy(8.dp),
+        OutlinedCard(
+          onClick = { state.toggleLayerVisibility(layer.id) },
+          modifier = Modifier.fillMaxWidth(),
+          shape = MaterialTheme.shapes.medium,
+          colors =
+            CardDefaults.outlinedCardColors(
+              containerColor = MaterialTheme.colorScheme.surfaceContainer
+            ),
         ) {
-          // Solid layer color swatch
-          Box(
-            modifier =
-              Modifier.size(16.dp)
-                .clip(RoundedCornerShape(4.dp))
-                .background(Color(layer.colorHex).copy(alpha = 0.25f))
-                .border(2.dp, Color(layer.colorHex), RoundedCornerShape(4.dp))
-          )
-          Column(modifier = Modifier.weight(1f)) {
-            Text(
-              text = layer.label,
-              style =
-                MaterialTheme.typography.labelMedium.copy(
-                  fontWeight = FontWeight.SemiBold,
-                  color = Color(0xFF111827),
-                ),
-            )
-            Text(
-              text = "${layer.geometryTypeLabel} • ${layer.formatCountLabel(layerEntityCount)}",
-              style = MaterialTheme.typography.labelSmall.copy(color = Color(0xFF6B7280)),
-            )
-          }
-          IconButton(
-            onClick = { state.toggleLayerVisibility(layer.id) },
-            modifier = Modifier.size(36.dp),
+          Row(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
           ) {
-            Icon(
-              imageVector =
-                if (layer.isVisible) {
-                  Icons.Default.Visibility
-                } else {
-                  Icons.Default.VisibilityOff
-                },
-              contentDescription =
-                if (layer.isVisible) "Hide ${layer.label}" else "Show ${layer.label}",
-              tint = if (layer.isVisible) Color(layer.colorHex) else Color(0xFF9CA3AF),
-              modifier = Modifier.size(20.dp),
+            // Solid layer color swatch
+            Box(
+              modifier =
+                Modifier.size(16.dp)
+                  .clip(MaterialTheme.shapes.extraSmall)
+                  .background(Color(layer.colorHex).copy(alpha = 0.25f))
+                  .border(2.dp, Color(layer.colorHex), MaterialTheme.shapes.extraSmall)
+            )
+            Column(modifier = Modifier.weight(1f)) {
+              Text(
+                text = layer.label,
+                style = MaterialTheme.typography.labelMedium,
+                fontWeight = FontWeight.SemiBold,
+              )
+              Text(
+                text = "${layer.geometryTypeLabel} • ${layer.formatCountLabel(layerEntityCount)}",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+              )
+            }
+            Switch(
+              checked = layer.isVisible,
+              onCheckedChange = { state.toggleLayerVisibility(layer.id) },
             )
           }
         }
       }
 
-      HorizontalDivider(color = Color(0xFFE5E7EB))
+      HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
       // Section 3: Form submissions (geospatial fields from forms)
       Text(
@@ -1277,158 +1155,134 @@ private fun MapLayersControlSheet(
         style =
           MaterialTheme.typography.labelSmall.copy(
             fontWeight = FontWeight.Bold,
-            color = Color(0xFF1E6F50),
+            color = MaterialTheme.colorScheme.primary,
             letterSpacing = 0.5.sp,
           ),
       )
       state.groupedSubmissionLayersByForm.forEach { group ->
         val form = group.form
         val allGroupLayersVisible = group.layers.all { it.isVisible }
-        Column(
-          modifier =
-            Modifier.fillMaxWidth()
-              .clip(RoundedCornerShape(10.dp))
-              .background(if (allGroupLayersVisible) Color(0xFFF0F7FF) else Color(0xFFF9FAFB))
-              .border(
-                width = 1.dp,
-                color = if (allGroupLayersVisible) Color(0xFF90CAF9) else Color(0xFFE5E7EB),
-                shape = RoundedCornerShape(10.dp),
-              )
-              .padding(8.dp),
-          verticalArrangement = Arrangement.spacedBy(5.dp),
+        OutlinedCard(
+          modifier = Modifier.fillMaxWidth(),
+          shape = MaterialTheme.shapes.medium,
+          colors =
+            CardDefaults.outlinedCardColors(
+              containerColor = MaterialTheme.colorScheme.surfaceContainer
+            ),
         ) {
-          // Form Title Group Header
-          Row(
-            modifier =
-              Modifier.fillMaxWidth()
-                .clickable { state.toggleFormSubmissionLayersVisibility(form.id) }
-                .padding(horizontal = 4.dp, vertical = 2.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
+          Column(
+            modifier = Modifier.fillMaxWidth().padding(10.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
           ) {
-            Row(
-              verticalAlignment = Alignment.CenterVertically,
-              horizontalArrangement = Arrangement.spacedBy(6.dp),
-              modifier = Modifier.weight(1f),
-            ) {
-              Icon(
-                imageVector = Icons.Default.Description,
-                contentDescription = null,
-                tint = Color(0xFF1565C0),
-                modifier = Modifier.size(13.dp),
-              )
-              Text(
-                text = form.title,
-                style =
-                  MaterialTheme.typography.labelMedium.copy(
-                    fontWeight = FontWeight.Bold,
-                    color = Color(0xFF111827),
-                  ),
-              )
-            }
-            Row(
-              verticalAlignment = Alignment.CenterVertically,
-              horizontalArrangement = Arrangement.spacedBy(4.dp),
-            ) {
-              Box(
-                modifier =
-                  Modifier.clip(RoundedCornerShape(8.dp))
-                    .background(Color(0xFF1565C0))
-                    .padding(horizontal = 6.dp, vertical = 2.dp)
-              ) {
-                Text(
-                  text = "${group.submissions.size} submitted",
-                  style =
-                    MaterialTheme.typography.labelSmall.copy(
-                      fontSize = 8.5.sp,
-                      color = Color.White,
-                      fontWeight = FontWeight.Bold,
-                    ),
-                )
-              }
-              Icon(
-                imageVector =
-                  if (allGroupLayersVisible) {
-                    Icons.Default.Visibility
-                  } else {
-                    Icons.Default.VisibilityOff
-                  },
-                contentDescription =
-                  if (allGroupLayersVisible) "Hide ${form.title}" else "Show ${form.title}",
-                tint = if (allGroupLayersVisible) Color(0xFF1565C0) else Color(0xFF9CA3AF),
-                modifier = Modifier.size(18.dp),
-              )
-            }
-          }
-
-          group.layers.forEach { layer ->
-            val geomCount = state.submissionGeometries.count { it.layerId == layer.id }
+            // Form Title Group Header
             Row(
               modifier =
                 Modifier.fillMaxWidth()
-                  .clip(RoundedCornerShape(8.dp))
-                  .background(Color.White)
-                  .clickable { state.toggleLayerVisibility(layer.id) }
-                  .padding(start = 10.dp, end = 4.dp, top = 4.dp, bottom = 4.dp),
+                  .clip(MaterialTheme.shapes.small)
+                  .clickable { state.toggleFormSubmissionLayersVisibility(form.id) }
+                  .padding(horizontal = 4.dp, vertical = 2.dp),
+              horizontalArrangement = Arrangement.SpaceBetween,
               verticalAlignment = Alignment.CenterVertically,
-              horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-              // Dotted polygon swatch rendered with Canvas PathEffect.dashPathEffect
-              Canvas(modifier = Modifier.size(18.dp)) {
-                drawRect(
-                  color = Color(layer.colorHex).copy(alpha = 0.22f),
-                  size = size,
-                )
-                drawRect(
-                  color = Color(layer.colorHex),
-                  size = size,
-                  style =
-                    Stroke(
-                      width = 2.2f,
-                      pathEffect = PathEffect.dashPathEffect(floatArrayOf(3.5f, 2.5f), 0f),
-                    ),
-                )
-              }
-              Column(modifier = Modifier.weight(1f)) {
-                Text(
-                  text = layer.label,
-                  style =
-                    MaterialTheme.typography.labelMedium.copy(
-                      fontWeight = FontWeight.SemiBold,
-                      color = Color(0xFF111827),
-                    ),
-                )
-                Text(
-                  text =
-                    "${layer.geometryTypeLabel} • $geomCount ${if (geomCount == 1) "submission" else "submissions"}",
-                  style =
-                    MaterialTheme.typography.labelSmall.copy(
-                      fontSize = 9.5.sp,
-                      color = Color(0xFF4B5563),
-                    ),
-                )
-              }
-              IconButton(
-                onClick = { state.toggleLayerVisibility(layer.id) },
-                modifier = Modifier.size(34.dp),
+              Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                modifier = Modifier.weight(1f),
               ) {
                 Icon(
+                  imageVector = Icons.Default.Description,
+                  contentDescription = null,
+                  tint = MaterialTheme.colorScheme.secondary,
+                  modifier = Modifier.size(15.dp),
+                )
+                Text(
+                  text = form.title,
+                  style = MaterialTheme.typography.labelMedium,
+                  fontWeight = FontWeight.Bold,
+                )
+              }
+              Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+              ) {
+                GroundTonalBadge(
+                  text = "${group.submissions.size} submitted",
+                  tone = GroundBadgeTone.SECONDARY,
+                )
+                Icon(
                   imageVector =
-                    if (layer.isVisible) {
+                    if (allGroupLayersVisible) {
                       Icons.Default.Visibility
                     } else {
                       Icons.Default.VisibilityOff
                     },
                   contentDescription =
-                    if (layer.isVisible) "Hide ${layer.label}" else "Show ${layer.label}",
-                  tint = if (layer.isVisible) Color(layer.colorHex) else Color(0xFF9CA3AF),
-                  modifier = Modifier.size(19.dp),
+                    if (allGroupLayersVisible) "Hide ${form.title}" else "Show ${form.title}",
+                  tint =
+                    if (allGroupLayersVisible) {
+                      MaterialTheme.colorScheme.primary
+                    } else {
+                      MaterialTheme.colorScheme.onSurfaceVariant
+                    },
+                  modifier = Modifier.size(18.dp),
                 )
+              }
+            }
+
+            group.layers.forEach { layer ->
+              val geomCount = state.submissionGeometries.count { it.layerId == layer.id }
+              Surface(
+                onClick = { state.toggleLayerVisibility(layer.id) },
+                modifier = Modifier.fillMaxWidth(),
+                shape = MaterialTheme.shapes.small,
+                color = MaterialTheme.colorScheme.surface,
+              ) {
+                Row(
+                  modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp, vertical = 6.dp),
+                  verticalAlignment = Alignment.CenterVertically,
+                  horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                  // Dotted polygon swatch rendered with Canvas PathEffect.dashPathEffect
+                  Canvas(modifier = Modifier.size(18.dp)) {
+                    drawRect(
+                      color = Color(layer.colorHex).copy(alpha = 0.22f),
+                      size = size,
+                    )
+                    drawRect(
+                      color = Color(layer.colorHex),
+                      size = size,
+                      style =
+                        Stroke(
+                          width = 2.2f,
+                          pathEffect = PathEffect.dashPathEffect(floatArrayOf(3.5f, 2.5f), 0f),
+                        ),
+                    )
+                  }
+                  Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                      text = layer.label,
+                      style = MaterialTheme.typography.labelMedium,
+                      fontWeight = FontWeight.SemiBold,
+                    )
+                    Text(
+                      text =
+                        "${layer.geometryTypeLabel} • $geomCount ${if (geomCount == 1) "submission" else "submissions"}",
+                      style = MaterialTheme.typography.labelSmall,
+                      color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                  }
+                  Switch(
+                    checked = layer.isVisible,
+                    onCheckedChange = { state.toggleLayerVisibility(layer.id) },
+                  )
+                }
               }
             }
           }
         }
       }
+
+      Spacer(modifier = Modifier.height(12.dp))
     }
   }
 }
@@ -1472,381 +1326,275 @@ private fun EntityBottomSheetCard(
     modifier = modifier.padding(horizontal = 16.dp, vertical = 4.dp),
     verticalArrangement = Arrangement.spacedBy(8.dp),
   ) {
-      // Header: Reference Badge + Title + Close button
+    // Header: Reference Badge + Title + Close button
+    Row(
+      modifier = Modifier.fillMaxWidth(),
+      horizontalArrangement = Arrangement.SpaceBetween,
+      verticalAlignment = Alignment.CenterVertically,
+    ) {
       Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
+        modifier = Modifier.weight(1f),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically,
       ) {
-        Row(
-          modifier = Modifier.weight(1f),
-          horizontalArrangement = Arrangement.spacedBy(8.dp),
-          verticalAlignment = Alignment.CenterVertically,
-        ) {
-          Box(
-            modifier =
-              Modifier.size(26.dp)
-                .clip(CircleShape)
-                .background(Color(entity.colorHex)),
-            contentAlignment = Alignment.Center,
-          ) {
-            Icon(
-              imageVector =
-                if (entity.geometryTypeLabel == "Polygon") {
-                  Icons.Default.Polyline
-                } else {
-                  Icons.Default.LocationOn
-                },
-              contentDescription = null,
-              tint = Color.White,
-              modifier = Modifier.size(14.dp),
-            )
-          }
-          Column(modifier = Modifier.weight(1f)) {
-            Text(
-              text = entity.label,
-              style =
-                MaterialTheme.typography.titleSmall.copy(
-                  fontWeight = FontWeight.Bold,
-                  color = textColor,
-                ),
-              maxLines = 1,
-            )
-            Text(
-              text = "${entity.datasetName} • ${entity.geometryTypeLabel} ($areaFormatted, $perimeterFormatted)",
-              style =
-                MaterialTheme.typography.labelSmall.copy(
-                  color = textColor.copy(alpha = 0.68f),
-                ),
-              maxLines = 1,
-            )
-          }
-        }
-
-        // Close Bottom Sheet Button
         Box(
           modifier =
-            Modifier.clip(CircleShape)
-              .background(if (isDark) Color(0xFF2E3833) else Color(0xFFF3F4F6))
-              .clickable { state.selectEntity(null) }
-              .padding(6.dp)
+            Modifier.size(28.dp)
+              .clip(CircleShape)
+              .background(Color(entity.colorHex)),
+          contentAlignment = Alignment.Center,
         ) {
           Icon(
-            imageVector = Icons.Default.Close,
-            contentDescription = "Close Location Sheet",
-            tint = textColor,
+            imageVector =
+              if (entity.geometryTypeLabel == "Polygon") {
+                Icons.Default.Polyline
+              } else {
+                Icons.Default.LocationOn
+              },
+            contentDescription = null,
+            tint = Color.White,
             modifier = Modifier.size(15.dp),
           )
         }
-      }
-
-      // Metadata & Share Actions Row: GeoID + QR Code Link + Share PDF Link
-      Row(
-        modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
-        horizontalArrangement = Arrangement.spacedBy(6.dp),
-        verticalAlignment = Alignment.CenterVertically,
-      ) {
-        // GeoID Badge
-        Box(
-          modifier =
-            Modifier.clip(RoundedCornerShape(8.dp))
-              .background(Color(0xFFE8F5E9))
-              .border(1.dp, Color(0xFF2E7D32), RoundedCornerShape(8.dp))
-              .padding(horizontal = 8.dp, vertical = 3.dp)
-        ) {
+        Column(modifier = Modifier.weight(1f)) {
           Text(
-            text = "GeoID: ${entity.geoId}",
-            style =
-              MaterialTheme.typography.labelSmall.copy(
-                color = Color(0xFF1B5E20),
-                fontFamily = FontFamily.Monospace,
-                fontWeight = FontWeight.Bold,
-              ),
+            text = entity.label,
+            style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+            color = MaterialTheme.colorScheme.onSurface,
+            maxLines = 1,
+          )
+          Text(
+            text = "${entity.datasetName} • ${entity.geometryTypeLabel} ($areaFormatted, $perimeterFormatted)",
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            maxLines = 1,
           )
         }
+      }
 
-        // Live Distance & Compass Bearing Badge from User GPS
-        val entityWayfindingBadge = state.formattedWayfindingBadgeForEntity(entity.id)
-        if (entityWayfindingBadge.isNotEmpty()) {
-          Box(
-            modifier =
-              Modifier.clip(RoundedCornerShape(8.dp))
-                .background(if (isDark) Color(0xFF112A32) else Color(0xFFE0F7FA))
-                .border(1.dp, Color(0xFF00ACC1), RoundedCornerShape(8.dp))
-                .padding(horizontal = 8.dp, vertical = 3.dp)
-          ) {
-            Text(
-              text = "➤ $entityWayfindingBadge",
-              style =
-                MaterialTheme.typography.labelSmall.copy(
-                  color = if (isDark) Color(0xFF80DEEA) else Color(0xFF006064),
-                  fontFamily = FontFamily.Monospace,
-                  fontWeight = FontWeight.Bold,
-                ),
-            )
-          }
-        }
+      // Close Bottom Sheet Button
+      IconButton(
+        onClick = { state.selectEntity(null) },
+        modifier = Modifier.size(32.dp),
+      ) {
+        Icon(
+          imageVector = Icons.Default.Close,
+          contentDescription = "Close Location Sheet",
+          tint = MaterialTheme.colorScheme.onSurfaceVariant,
+          modifier = Modifier.size(18.dp),
+        )
+      }
+    }
 
-        // Straight-Line Navigation Toggle Button for Geospatial Entity
-        val isNavigatingEntity = state.isNavigatingToEntity(entity.id)
-        Row(
-          modifier =
-            Modifier.clip(RoundedCornerShape(8.dp))
-              .background(
-                if (isNavigatingEntity) {
-                  Color(0xFF00838F)
-                } else if (isDark) {
-                  Color(0xFF183138)
-                } else {
-                  Color(0xFFE0F7FA)
-                }
-              )
-              .border(
-                width = 1.dp,
-                color = if (isNavigatingEntity) Color(0xFF00E5FF) else Color(0xFF00838F),
-                shape = RoundedCornerShape(8.dp),
-              )
-              .clickable { state.toggleNavigationToEntity(entity.id) }
-              .padding(horizontal = 8.dp, vertical = 3.dp),
-          verticalAlignment = Alignment.CenterVertically,
-          horizontalArrangement = Arrangement.spacedBy(4.dp),
-        ) {
+    // Metadata & Share Actions Row: GeoID + QR Code Link + Share PDF Link
+    Row(
+      modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+      horizontalArrangement = Arrangement.spacedBy(6.dp),
+      verticalAlignment = Alignment.CenterVertically,
+    ) {
+      // GeoID Badge
+      GroundTonalBadge(
+        text = "GeoID: ${entity.geoId}",
+        tone = GroundBadgeTone.PRIMARY,
+        monospace = true,
+      )
+
+      // Live Distance & Compass Bearing Badge from User GPS
+      val entityWayfindingBadge = state.formattedWayfindingBadgeForEntity(entity.id)
+      if (entityWayfindingBadge.isNotEmpty()) {
+        GroundTonalBadge(
+          text = "➤ $entityWayfindingBadge",
+          tone = GroundBadgeTone.TERTIARY,
+          monospace = true,
+        )
+      }
+
+      // Straight-Line Navigation Toggle Button for Geospatial Entity
+      val isNavigatingEntity = state.isNavigatingToEntity(entity.id)
+      FilterChip(
+        selected = isNavigatingEntity,
+        onClick = { state.toggleNavigationToEntity(entity.id) },
+        label = {
+          Text(
+            text = if (isNavigatingEntity) "Stop Nav" else "Navigate",
+            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+          )
+        },
+        leadingIcon = {
           Icon(
             imageVector = Icons.Default.Navigation,
             contentDescription = "Straight-line navigate to entity",
-            tint =
-              if (isNavigatingEntity) {
-                Color.White
-              } else if (isDark) {
-                Color(0xFF80DEEA)
-              } else {
-                Color(0xFF006064)
-              },
-            modifier = Modifier.size(12.dp),
+            modifier = Modifier.size(13.dp),
           )
-          Text(
-            text = if (isNavigatingEntity) "Stop Nav" else "Navigate",
-            style =
-              MaterialTheme.typography.labelSmall.copy(
-                color =
-                  if (isNavigatingEntity) {
-                    Color.White
-                  } else if (isDark) {
-                    Color(0xFF80DEEA)
-                  } else {
-                    Color(0xFF006064)
-                  },
-                fontWeight = FontWeight.Bold,
-              ),
-          )
-        }
+        },
+      )
 
-        // QR Code Link
-        Row(
-          modifier =
-            Modifier.clip(RoundedCornerShape(8.dp))
-              .background(if (isDark) Color(0xFF26332D) else Color(0xFFEFF6F2))
-              .border(1.dp, Color(0xFF1E6F50), RoundedCornerShape(8.dp))
-              .clickable { state.openEntityQrCode(entity.id) }
-              .padding(horizontal = 8.dp, vertical = 3.dp),
-          verticalAlignment = Alignment.CenterVertically,
-          horizontalArrangement = Arrangement.spacedBy(4.dp),
-        ) {
+      // QR Code Link
+      AssistChip(
+        onClick = { state.openEntityQrCode(entity.id) },
+        label = {
+          Text(
+            text = "QR Code",
+            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+          )
+        },
+        leadingIcon = {
           Icon(
             imageVector = Icons.Default.QrCode,
             contentDescription = "${entity.singularTypeLabel} QR Code",
-            tint = if (isDark) Color(0xFF8BD6B1) else Color(0xFF1E6F50),
-            modifier = Modifier.size(12.dp),
+            modifier = Modifier.size(13.dp),
           )
-          Text(
-            text = "QR Code",
-            style =
-              MaterialTheme.typography.labelSmall.copy(
-                color = if (isDark) Color(0xFF8BD6B1) else Color(0xFF1E6F50),
-                fontWeight = FontWeight.Bold,
-              ),
-          )
-        }
+        },
+      )
 
-        // Share PDF Link
-        Row(
-          modifier =
-            Modifier.clip(RoundedCornerShape(8.dp))
-              .background(if (isDark) Color(0xFF26332D) else Color(0xFFEFF6F2))
-              .border(1.dp, Color(0xFF1E6F50), RoundedCornerShape(8.dp))
-              .clickable { state.shareEntityPdf(entity.id) }
-              .padding(horizontal = 8.dp, vertical = 3.dp),
-          verticalAlignment = Alignment.CenterVertically,
-          horizontalArrangement = Arrangement.spacedBy(4.dp),
-        ) {
+      // Share PDF Link
+      AssistChip(
+        onClick = { state.shareEntityPdf(entity.id) },
+        label = {
+          Text(
+            text = "Share PDF",
+            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+          )
+        },
+        leadingIcon = {
           Icon(
             imageVector = Icons.Default.Share,
             contentDescription = "Share ${entity.singularTypeLabel} PDF",
-            tint = if (isDark) Color(0xFF8BD6B1) else Color(0xFF1E6F50),
-            modifier = Modifier.size(12.dp),
+            modifier = Modifier.size(13.dp),
           )
-          Text(
-            text = "Share PDF",
-            style =
-              MaterialTheme.typography.labelSmall.copy(
-                color = if (isDark) Color(0xFF8BD6B1) else Color(0xFF1E6F50),
-                fontWeight = FontWeight.Bold,
-              ),
-          )
-        }
-      }
+        },
+      )
+    }
 
-      // Organizer-defined Action Buttons for this dataset type (`form.targetDatasetId == entity.datasetId`)
-      val entityForms = state.formsForEntity(entity)
-      if (entityForms.isNotEmpty()) {
-        Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-          Text(
-            text = "DATA COLLECTION FOR THIS ${entity.singularTypeLabel.uppercase()}",
-            style =
-              MaterialTheme.typography.labelSmall.copy(
-                fontSize = 9.sp,
-                fontWeight = FontWeight.Bold,
-                color = if (isDark) Color(0xFF8BD6B1) else Color(0xFF1E6F50),
-                letterSpacing = 0.5.sp,
-              ),
-          )
-          Row(
-            modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-          ) {
-            entityForms.forEach { form ->
-              val isEnabled = state.isFormButtonEnabled(entity, form)
-              Button(
-                onClick = { state.launchFormForEntity(entity.id, form.id) },
-                enabled = isEnabled,
-                shape = RoundedCornerShape(10.dp),
-                colors =
-                  ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF1E6F50),
-                    contentColor = Color.White,
-                    disabledContainerColor =
-                      if (isDark) Color(0xFF2A332E) else Color(0xFFE5E7EB),
-                    disabledContentColor =
-                      if (isDark) Color(0xFF6B7280) else Color(0xFF9CA3AF),
-                  ),
-              ) {
-                Icon(
-                  imageVector =
-                    if (isEnabled) Icons.Default.Description else Icons.Default.CheckCircle,
-                  contentDescription = null,
-                  modifier = Modifier.size(14.dp),
-                )
-                Spacer(modifier = Modifier.width(5.dp))
-                Text(
-                  text =
-                    if (isEnabled) {
-                      form.ctaLabel
-                    } else {
-                      "${form.ctaLabel} (Completed)"
-                    },
-                  style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                )
-              }
-            }
-          }
-          val triggeredBanner = state.activeSurveyNotice
-          if (triggeredBanner != null) {
-            Text(
-              text = triggeredBanner,
-              style =
-                MaterialTheme.typography.labelSmall.copy(
-                  color = if (isDark) Color(0xFF8BD6B1) else Color(0xFF1E6F50),
-                  fontWeight = FontWeight.SemiBold,
-                ),
-            )
-          }
-        }
-      }
-
-      HorizontalDivider(color = textColor.copy(alpha = 0.1f))
-
-      // Scrollable Body inside Bottom Sheet: Baseline Properties + Submission Data / History
-      Column(
-        modifier =
-          Modifier.weight(1f)
-            .fillMaxWidth()
-            .verticalScroll(rememberScrollState()),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-      ) {
-        // Baseline Attributes (`EntityRecord.properties`)
+    // Organizer-defined Action Buttons for this dataset type (`form.targetDatasetId == entity.datasetId`)
+    val entityForms = state.formsForEntity(entity)
+    if (entityForms.isNotEmpty()) {
+      Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        Text(
+          text = "DATA COLLECTION FOR THIS ${entity.singularTypeLabel.uppercase()}",
+          style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+          color = MaterialTheme.colorScheme.primary,
+        )
         Row(
           modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
           horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-          entity.properties.forEach { (key, value) ->
-            Column(
-              modifier =
-                Modifier.clip(RoundedCornerShape(8.dp))
-                  .background(if (isDark) Color(0xFF28312D) else Color(0xFFF5F8F6))
-                  .padding(horizontal = 10.dp, vertical = 6.dp)
+          entityForms.forEach { form ->
+            val isEnabled = state.isFormButtonEnabled(entity, form)
+            Button(
+              onClick = { state.launchFormForEntity(entity.id, form.id) },
+              enabled = isEnabled,
+              shape = MaterialTheme.shapes.small,
             ) {
-              Text(
-                text = key,
-                style =
-                  MaterialTheme.typography.labelSmall.copy(
-                    fontSize = 9.sp,
-                    color = textColor.copy(alpha = 0.6f),
-                  ),
+              Icon(
+                imageVector =
+                  if (isEnabled) Icons.Default.Description else Icons.Default.CheckCircle,
+                contentDescription = null,
+                modifier = Modifier.size(14.dp),
               )
+              Spacer(modifier = Modifier.width(5.dp))
               Text(
-                text = value,
-                style =
-                  MaterialTheme.typography.labelSmall.copy(
-                    fontWeight = FontWeight.SemiBold,
-                    color = textColor,
-                  ),
+                text =
+                  if (isEnabled) {
+                    form.ctaLabel
+                  } else {
+                    "${form.ctaLabel} (Completed)"
+                  },
+                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
               )
             }
           }
         }
+        val triggeredBanner = state.activeSurveyNotice
+        if (triggeredBanner != null) {
+          Text(
+            text = triggeredBanner,
+            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
+            color = MaterialTheme.colorScheme.primary,
+          )
+        }
+      }
+    }
 
-        // --- SUBMISSION DISPLAY LOGIC ---
-        if (entity.submissionModel == SubmissionModel.SINGLE_1_TO_1) {
-          // Single-Submission -> Directly show the submission data inline on the card!
-          val sub = entity.submissions.firstOrNull()
-          if (sub != null) {
-            OneToOneInlineSubmissionCard(
-              submission = sub,
-              state = state,
-              isDark = isDark,
-              textColor = textColor,
-              onSharePdf = { state.shareSubmissionPdf(sub.id) },
-            )
-          } else {
-            Text(
-              text = "No baseline submission recorded yet for this ${entity.singularTypeLabel.lowercase()}.",
-              style = MaterialTheme.typography.bodySmall.copy(color = textColor.copy(alpha = 0.7f)),
-            )
-          }
-        } else {
-          // Multi-Submission Entity -> Either show Full Submission Details (if a row was clicked)
-          // OR show the list of submissions grouped by form title!
-          if (selectedSubmission != null && selectedSubmission.entityId == entity.id) {
-            SubmissionFullDetailsCard(
-              submission = selectedSubmission,
-              state = state,
-              isDark = isDark,
-              textColor = textColor,
-              backLabel = "Back to all ${entity.submissions.size} submissions",
-              onBack = { state.selectSubmissionDetail(null) },
-              onSharePdf = { state.shareSubmissionPdf(selectedSubmission.id) },
-            )
-          } else {
-            OneToManySubmissionsListSection(
-              entity = entity,
-              state = state,
-              isDark = isDark,
-              textColor = textColor,
-              onSelectSubmission = { state.selectSubmissionDetail(it.id) },
-            )
+    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+
+    // Scrollable Body inside Bottom Sheet: Baseline Properties + Submission Data / History
+    Column(
+      modifier =
+        Modifier.weight(1f)
+          .fillMaxWidth()
+          .verticalScroll(rememberScrollState()),
+      verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+      // Baseline Attributes (`EntityRecord.properties`)
+      Row(
+        modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+      ) {
+        entity.properties.forEach { (key, value) ->
+          Surface(
+            shape = MaterialTheme.shapes.small,
+            color = MaterialTheme.colorScheme.surfaceContainer,
+          ) {
+            Column(modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)) {
+              Text(
+                text = key,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+              )
+              Text(
+                text = value,
+                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
+                color = MaterialTheme.colorScheme.onSurface,
+              )
+            }
           }
         }
       }
+
+      // --- SUBMISSION DISPLAY LOGIC ---
+      if (entity.submissionModel == SubmissionModel.SINGLE_1_TO_1) {
+        // Single-Submission -> Directly show the submission data inline on the card!
+        val sub = entity.submissions.firstOrNull()
+        if (sub != null) {
+          OneToOneInlineSubmissionCard(
+            submission = sub,
+            state = state,
+            isDark = isDark,
+            textColor = textColor,
+            onSharePdf = { state.shareSubmissionPdf(sub.id) },
+          )
+        } else {
+          Text(
+            text = "No baseline submission recorded yet for this ${entity.singularTypeLabel.lowercase()}.",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+          )
+        }
+      } else {
+        // Multi-Submission Entity -> Either show Full Submission Details (if a row was clicked)
+        // OR show the list of submissions grouped by form title!
+        if (selectedSubmission != null && selectedSubmission.entityId == entity.id) {
+          SubmissionFullDetailsCard(
+            submission = selectedSubmission,
+            state = state,
+            isDark = isDark,
+            textColor = textColor,
+            backLabel = "Back to all ${entity.submissions.size} submissions",
+            onBack = { state.selectSubmissionDetail(null) },
+            onSharePdf = { state.shareSubmissionPdf(selectedSubmission.id) },
+          )
+        } else {
+          OneToManySubmissionsListSection(
+            entity = entity,
+            state = state,
+            isDark = isDark,
+            textColor = textColor,
+            onSelectSubmission = { state.selectSubmissionDetail(it.id) },
+          )
+        }
+      }
+    }
   }
 }
 
@@ -1862,14 +1610,13 @@ private fun OneToOneInlineSubmissionCard(
   textColor: Color,
   onSharePdf: () -> Unit,
 ) {
-  Card(
-    modifier =
-      Modifier.fillMaxWidth()
-        .border(1.dp, Color(0xFF2E7D32), RoundedCornerShape(12.dp)),
-    shape = RoundedCornerShape(12.dp),
+  OutlinedCard(
+    modifier = Modifier.fillMaxWidth(),
+    shape = MaterialTheme.shapes.medium,
+    border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.45f)),
     colors =
-      CardDefaults.cardColors(
-        containerColor = if (isDark) Color(0xFF192820) else Color(0xFFF2F9F4)
+      CardDefaults.outlinedCardColors(
+        containerColor = MaterialTheme.colorScheme.surfaceContainerLow
       ),
   ) {
     Column(
@@ -1881,7 +1628,6 @@ private fun OneToOneInlineSubmissionCard(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
       ) {
-        val headerTint = if (isDark) Color(0xFF8BD6B1) else Color(0xFF1B5E20)
         Row(
           verticalAlignment = Alignment.CenterVertically,
           horizontalArrangement = Arrangement.spacedBy(5.dp),
@@ -1890,54 +1636,39 @@ private fun OneToOneInlineSubmissionCard(
           Icon(
             imageVector = Icons.Default.CheckCircle,
             contentDescription = null,
-            tint = headerTint,
+            tint = MaterialTheme.colorScheme.primary,
             modifier = Modifier.size(14.dp),
           )
           Text(
             text = submission.formTitle,
-            style =
-              MaterialTheme.typography.labelMedium.copy(
-                fontWeight = FontWeight.Bold,
-                color = headerTint,
-              ),
+            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+            color = MaterialTheme.colorScheme.primary,
           )
         }
         Row(
           verticalAlignment = Alignment.CenterVertically,
           horizontalArrangement = Arrangement.spacedBy(6.dp),
         ) {
-          Row(
-            modifier =
-              Modifier.clip(RoundedCornerShape(6.dp))
-                .background(if (isDark) Color(0xFF26332D) else Color(0xFFE8F5E9))
-                .border(1.dp, Color(0xFF1E6F50), RoundedCornerShape(6.dp))
-                .clickable { onSharePdf() }
-                .padding(horizontal = 6.dp, vertical = 2.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(3.dp),
-          ) {
-            Icon(
-              imageVector = Icons.Default.Share,
-              contentDescription = "Share Submission PDF",
-              tint = headerTint,
-              modifier = Modifier.size(11.dp),
-            )
-            Text(
-              text = "Share PDF",
-              style =
-                MaterialTheme.typography.labelSmall.copy(
-                  color = headerTint,
-                  fontWeight = FontWeight.Bold,
-                ),
-            )
-          }
+          AssistChip(
+            onClick = { onSharePdf() },
+            label = {
+              Text(
+                text = "Share PDF",
+                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+              )
+            },
+            leadingIcon = {
+              Icon(
+                imageVector = Icons.Default.Share,
+                contentDescription = "Share Submission PDF",
+                modifier = Modifier.size(12.dp),
+              )
+            },
+          )
           Text(
             text = submission.formVersion,
-            style =
-              MaterialTheme.typography.labelSmall.copy(
-                fontFamily = FontFamily.Monospace,
-                color = textColor.copy(alpha = 0.6f),
-              ),
+            style = MaterialTheme.typography.labelSmall.copy(fontFamily = FontFamily.Monospace),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
           )
         }
       }
@@ -1949,34 +1680,28 @@ private fun OneToOneInlineSubmissionCard(
         Icon(
           imageVector = Icons.Default.Person,
           contentDescription = null,
-          tint = textColor.copy(alpha = 0.78f),
+          tint = MaterialTheme.colorScheme.onSurfaceVariant,
           modifier = Modifier.size(13.dp),
         )
         Text(
           text = "Collector: ${submission.collectorName} •",
-          style =
-            MaterialTheme.typography.labelSmall.copy(
-              color = textColor.copy(alpha = 0.78f),
-              fontWeight = FontWeight.Medium,
-            ),
+          style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Medium),
+          color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         Icon(
           imageVector = Icons.Default.Schedule,
           contentDescription = null,
-          tint = textColor.copy(alpha = 0.78f),
+          tint = MaterialTheme.colorScheme.onSurfaceVariant,
           modifier = Modifier.size(12.dp),
         )
         Text(
           text = submission.timestamp,
-          style =
-            MaterialTheme.typography.labelSmall.copy(
-              color = textColor.copy(alpha = 0.78f),
-              fontWeight = FontWeight.Medium,
-            ),
+          style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Medium),
+          color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
       }
 
-      HorizontalDivider(color = textColor.copy(alpha = 0.1f))
+      HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
       submission.fields.forEach { field ->
         val fieldWayfindingBadge =
@@ -1988,10 +1713,8 @@ private fun OneToOneInlineSubmissionCard(
         ) {
           Text(
             text = field.questionLabel,
-            style =
-              MaterialTheme.typography.labelSmall.copy(
-                color = textColor.copy(alpha = 0.7f),
-              ),
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.weight(0.48f),
           )
           Spacer(modifier = Modifier.width(8.dp))
@@ -2001,21 +1724,14 @@ private fun OneToOneInlineSubmissionCard(
           ) {
             Text(
               text = field.answerValue,
-              style =
-                MaterialTheme.typography.labelSmall.copy(
-                  fontWeight = FontWeight.SemiBold,
-                  color = textColor,
-                ),
+              style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
+              color = MaterialTheme.colorScheme.onSurface,
             )
             if (fieldWayfindingBadge.isNotEmpty()) {
-              Text(
+              GroundTonalBadge(
                 text = "➤ $fieldWayfindingBadge",
-                style =
-                  MaterialTheme.typography.labelSmall.copy(
-                    fontFamily = FontFamily.Monospace,
-                    fontWeight = FontWeight.Bold,
-                    color = if (isDark) Color(0xFFFFCC80) else Color(0xFFE65100),
-                  ),
+                tone = GroundBadgeTone.WARNING,
+                monospace = true,
               )
             }
           }
@@ -2041,149 +1757,118 @@ private fun OneToManySubmissionsListSection(
   Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
     formGroups.forEach { group ->
       val form = group.form
-      Column(
-        modifier =
-          Modifier.fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp))
-            .background(if (isDark) Color(0xFF1E2622) else Color(0xFFF3F8F5))
-            .border(1.dp, Color(0xFFC8E0D4), RoundedCornerShape(12.dp))
-            .padding(9.dp),
-        verticalArrangement = Arrangement.spacedBy(6.dp),
+      OutlinedCard(
+        modifier = Modifier.fillMaxWidth(),
+        shape = MaterialTheme.shapes.medium,
+        colors =
+          CardDefaults.outlinedCardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLow
+          ),
       ) {
-        // Form Title Group Header
-        Row(
-          modifier = Modifier.fillMaxWidth(),
-          horizontalArrangement = Arrangement.SpaceBetween,
-          verticalAlignment = Alignment.CenterVertically,
+        Column(
+          modifier = Modifier.padding(10.dp),
+          verticalArrangement = Arrangement.spacedBy(6.dp),
         ) {
+          // Form Title Group Header
           Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(5.dp),
-            modifier = Modifier.weight(1f),
-          ) {
-            Icon(
-              imageVector = Icons.Default.Description,
-              contentDescription = null,
-              tint = if (isDark) Color(0xFF8BD6B1) else Color(0xFF1E6F50),
-              modifier = Modifier.size(13.dp),
-            )
-            Text(
-              text = form.title,
-              style =
-                MaterialTheme.typography.labelMedium.copy(
-                  fontWeight = FontWeight.Bold,
-                  color = textColor,
-                ),
-            )
-          }
-          Box(
-            modifier =
-              Modifier.clip(RoundedCornerShape(10.dp))
-                .background(Color(0xFF1E6F50))
-                .padding(horizontal = 7.dp, vertical = 2.dp)
-          ) {
-            Text(
-              text = "${group.submissions.size} submitted",
-              style =
-                MaterialTheme.typography.labelSmall.copy(
-                  fontSize = 8.5.sp,
-                  color = Color.White,
-                  fontWeight = FontWeight.Bold,
-                ),
-            )
-          }
-        }
-
-        group.submissions.forEachIndexed { index, sub ->
-          Card(
-            modifier =
-              Modifier.fillMaxWidth()
-                .border(
-                  width = 1.dp,
-                  color = if (isDark) Color(0xFF374151) else Color(0xFFD1E2D9),
-                  shape = RoundedCornerShape(10.dp),
-                )
-                .clickable { onSelectSubmission(sub) },
-            shape = RoundedCornerShape(10.dp),
-            colors =
-              CardDefaults.cardColors(
-                containerColor = if (isDark) Color(0xFF252E2A) else Color.White
-              ),
           ) {
             Row(
-              modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 9.dp),
-              horizontalArrangement = Arrangement.SpaceBetween,
               verticalAlignment = Alignment.CenterVertically,
+              horizontalArrangement = Arrangement.spacedBy(5.dp),
+              modifier = Modifier.weight(1f),
             ) {
-              Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                Row(
-                  horizontalArrangement = Arrangement.spacedBy(5.dp),
-                  verticalAlignment = Alignment.CenterVertically,
+              Icon(
+                imageVector = Icons.Default.Description,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(13.dp),
+              )
+              Text(
+                text = form.title,
+                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                color = MaterialTheme.colorScheme.onSurface,
+              )
+            }
+            GroundTonalBadge(
+              text = "${group.submissions.size} submitted",
+              tone = GroundBadgeTone.PRIMARY,
+            )
+          }
+
+          group.submissions.forEachIndexed { index, sub ->
+            OutlinedCard(
+              onClick = { onSelectSubmission(sub) },
+              modifier = Modifier.fillMaxWidth(),
+              shape = MaterialTheme.shapes.small,
+              colors =
+                CardDefaults.outlinedCardColors(
+                  containerColor = MaterialTheme.colorScheme.surface
+                ),
+            ) {
+              Row(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 9.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+              ) {
+                Column(
+                  modifier = Modifier.weight(1f),
+                  verticalArrangement = Arrangement.spacedBy(2.dp),
                 ) {
-                  Icon(
-                    imageVector = Icons.Default.Person,
-                    contentDescription = null,
-                    tint = textColor,
-                    modifier = Modifier.size(13.dp),
-                  )
-                  Text(
-                    text = sub.collectorName,
-                    style =
-                      MaterialTheme.typography.labelMedium.copy(
-                        fontWeight = FontWeight.Bold,
-                        color = textColor,
-                      ),
-                  )
-                  if (index == 0) {
-                    Box(
-                      modifier =
-                        Modifier.clip(RoundedCornerShape(6.dp))
-                          .background(Color(0xFFE8F5E9))
-                          .padding(horizontal = 5.dp, vertical = 1.dp)
-                    ) {
-                      Text(
+                  Row(
+                    horizontalArrangement = Arrangement.spacedBy(5.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                  ) {
+                    Icon(
+                      imageVector = Icons.Default.Person,
+                      contentDescription = null,
+                      tint = MaterialTheme.colorScheme.onSurface,
+                      modifier = Modifier.size(13.dp),
+                    )
+                    Text(
+                      text = sub.collectorName,
+                      style =
+                        MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                      color = MaterialTheme.colorScheme.onSurface,
+                    )
+                    if (index == 0) {
+                      GroundTonalBadge(
                         text = "LATEST",
-                        style =
-                          MaterialTheme.typography.labelSmall.copy(
-                            fontSize = 8.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color(0xFF1B5E20),
-                          ),
+                        tone = GroundBadgeTone.SECONDARY,
                       )
                     }
                   }
+                  Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                  ) {
+                    Icon(
+                      imageVector = Icons.Default.Schedule,
+                      contentDescription = null,
+                      tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                      modifier = Modifier.size(11.dp),
+                    )
+                    Text(
+                      text = "${sub.timestamp} • ${sub.formVersion}",
+                      style = MaterialTheme.typography.labelSmall,
+                      color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                  }
                 }
-                Row(
-                  verticalAlignment = Alignment.CenterVertically,
-                  horizontalArrangement = Arrangement.spacedBy(4.dp),
+
+                IconButton(
+                  onClick = { onSelectSubmission(sub) },
+                  modifier = Modifier.size(32.dp),
                 ) {
                   Icon(
-                    imageVector = Icons.Default.Schedule,
-                    contentDescription = null,
-                    tint = textColor.copy(alpha = 0.68f),
-                    modifier = Modifier.size(11.dp),
-                  )
-                  Text(
-                    text = "${sub.timestamp} • ${sub.formVersion}",
-                    style =
-                      MaterialTheme.typography.labelSmall.copy(
-                        color = textColor.copy(alpha = 0.68f),
-                      ),
+                    imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                    contentDescription = "Submission details",
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(20.dp),
                   )
                 }
-              }
-
-              val detailsColor = if (isDark) Color(0xFF8BD6B1) else Color(0xFF1E6F50)
-              IconButton(
-                onClick = { onSelectSubmission(sub) },
-                modifier = Modifier.size(32.dp),
-              ) {
-                Icon(
-                  imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                  contentDescription = "Submission details",
-                  tint = detailsColor,
-                  modifier = Modifier.size(20.dp),
-                )
               }
             }
           }
@@ -2204,14 +1889,13 @@ private fun SubmissionFullDetailsCard(
   onBack: () -> Unit,
   onSharePdf: () -> Unit,
 ) {
-  Card(
-    modifier =
-      Modifier.fillMaxWidth()
-        .border(1.5.dp, Color(0xFF1E6F50), RoundedCornerShape(12.dp)),
-    shape = RoundedCornerShape(12.dp),
+  OutlinedCard(
+    modifier = Modifier.fillMaxWidth(),
+    shape = MaterialTheme.shapes.medium,
+    border = BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary),
     colors =
-      CardDefaults.cardColors(
-        containerColor = if (isDark) Color(0xFF1C2722) else Color(0xFFF4FAF6)
+      CardDefaults.outlinedCardColors(
+        containerColor = MaterialTheme.colorScheme.surfaceContainerLow
       ),
   ) {
     Column(
@@ -2223,28 +1907,20 @@ private fun SubmissionFullDetailsCard(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
       ) {
-        Row(
-          modifier =
-            Modifier.clip(RoundedCornerShape(8.dp))
-              .background(Color(0xFF1E6F50))
-              .clickable { onBack() }
-              .padding(horizontal = 8.dp, vertical = 4.dp),
-          verticalAlignment = Alignment.CenterVertically,
-          horizontalArrangement = Arrangement.spacedBy(4.dp),
+        FilledTonalButton(
+          onClick = { onBack() },
+          shape = MaterialTheme.shapes.small,
+          contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
         ) {
           Icon(
             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
             contentDescription = null,
-            tint = Color.White,
             modifier = Modifier.size(13.dp),
           )
+          Spacer(modifier = Modifier.width(4.dp))
           Text(
             text = backLabel,
-            style =
-              MaterialTheme.typography.labelSmall.copy(
-                color = Color.White,
-                fontWeight = FontWeight.Bold,
-              ),
+            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
           )
         }
 
@@ -2252,39 +1928,27 @@ private fun SubmissionFullDetailsCard(
           verticalAlignment = Alignment.CenterVertically,
           horizontalArrangement = Arrangement.spacedBy(6.dp),
         ) {
-          Row(
-            modifier =
-              Modifier.clip(RoundedCornerShape(8.dp))
-                .background(if (isDark) Color(0xFF26332D) else Color(0xFFE8F5E9))
-                .border(1.dp, Color(0xFF1E6F50), RoundedCornerShape(8.dp))
-                .clickable { onSharePdf() }
-                .padding(horizontal = 8.dp, vertical = 4.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(4.dp),
-          ) {
-            Icon(
-              imageVector = Icons.Default.Share,
-              contentDescription = "Share Submission PDF",
-              tint = if (isDark) Color(0xFF8BD6B1) else Color(0xFF1E6F50),
-              modifier = Modifier.size(12.dp),
-            )
-            Text(
-              text = "Share PDF",
-              style =
-                MaterialTheme.typography.labelSmall.copy(
-                  color = if (isDark) Color(0xFF8BD6B1) else Color(0xFF1E6F50),
-                  fontWeight = FontWeight.Bold,
-                ),
-            )
-          }
+          AssistChip(
+            onClick = { onSharePdf() },
+            label = {
+              Text(
+                text = "Share PDF",
+                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+              )
+            },
+            leadingIcon = {
+              Icon(
+                imageVector = Icons.Default.Share,
+                contentDescription = "Share Submission PDF",
+                modifier = Modifier.size(12.dp),
+              )
+            },
+          )
 
           Text(
             text = "Schema: ${submission.formVersion}",
-            style =
-              MaterialTheme.typography.labelSmall.copy(
-                fontFamily = FontFamily.Monospace,
-                color = textColor.copy(alpha = 0.65f),
-              ),
+            style = MaterialTheme.typography.labelSmall.copy(fontFamily = FontFamily.Monospace),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
           )
         }
       }
@@ -2292,11 +1956,8 @@ private fun SubmissionFullDetailsCard(
       Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
         Text(
           text = submission.formTitle,
-          style =
-            MaterialTheme.typography.titleSmall.copy(
-              fontWeight = FontWeight.Bold,
-              color = textColor,
-            ),
+          style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+          color = MaterialTheme.colorScheme.onSurface,
         )
         Row(
           verticalAlignment = Alignment.CenterVertically,
@@ -2304,11 +1965,8 @@ private fun SubmissionFullDetailsCard(
         ) {
           Text(
             text = "${submission.targetTypeLabel}: ${submission.entityLabel}",
-            style =
-              MaterialTheme.typography.labelSmall.copy(
-                fontWeight = FontWeight.SemiBold,
-                color = if (isDark) Color(0xFF8BD6B1) else Color(0xFF1E6F50),
-              ),
+            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
+            color = MaterialTheme.colorScheme.primary,
           )
         }
         Row(
@@ -2318,12 +1976,13 @@ private fun SubmissionFullDetailsCard(
           Icon(
             imageVector = Icons.Default.Person,
             contentDescription = null,
-            tint = textColor.copy(alpha = 0.8f),
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.size(12.dp),
           )
           Text(
             text = "Data Collector: ${submission.collectorName} (${submission.collectorEmail})",
-            style = MaterialTheme.typography.labelSmall.copy(color = textColor.copy(alpha = 0.8f)),
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
           )
         }
         Row(
@@ -2333,63 +1992,57 @@ private fun SubmissionFullDetailsCard(
           Icon(
             imageVector = Icons.Default.Schedule,
             contentDescription = null,
-            tint = textColor.copy(alpha = 0.8f),
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.size(12.dp),
           )
           Text(
             text = "Collected: ${submission.timestamp}",
-            style = MaterialTheme.typography.labelSmall.copy(color = textColor.copy(alpha = 0.8f)),
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
           )
         }
       }
 
-      HorizontalDivider(color = textColor.copy(alpha = 0.12f))
+      HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
       submission.fields.forEach { field ->
         val fieldWayfindingBadge =
           state.formattedWayfindingBadgeForSubmissionField(submission.id, field)
-        Column(
-          modifier =
-            Modifier.fillMaxWidth()
-              .clip(RoundedCornerShape(8.dp))
-              .background(if (isDark) Color(0xFF25302B) else Color.White)
-              .padding(horizontal = 10.dp, vertical = 6.dp),
-          verticalArrangement = Arrangement.spacedBy(2.dp),
+        Surface(
+          modifier = Modifier.fillMaxWidth(),
+          shape = MaterialTheme.shapes.small,
+          color = MaterialTheme.colorScheme.surface,
         ) {
-          Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
+          Column(
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+            verticalArrangement = Arrangement.spacedBy(2.dp),
           ) {
-            Text(
-              text = field.questionLabel,
-              style =
-                MaterialTheme.typography.labelSmall.copy(
-                  color = textColor.copy(alpha = 0.65f),
-                ),
-              modifier = Modifier.weight(1f),
-            )
-            if (fieldWayfindingBadge.isNotEmpty()) {
-              Spacer(modifier = Modifier.width(6.dp))
+            Row(
+              modifier = Modifier.fillMaxWidth(),
+              horizontalArrangement = Arrangement.SpaceBetween,
+              verticalAlignment = Alignment.CenterVertically,
+            ) {
               Text(
-                text = "➤ $fieldWayfindingBadge",
-                style =
-                  MaterialTheme.typography.labelSmall.copy(
-                    fontFamily = FontFamily.Monospace,
-                    fontWeight = FontWeight.Bold,
-                    color = if (isDark) Color(0xFFFFCC80) else Color(0xFFE65100),
-                  ),
+                text = field.questionLabel,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.weight(1f),
               )
+              if (fieldWayfindingBadge.isNotEmpty()) {
+                Spacer(modifier = Modifier.width(6.dp))
+                GroundTonalBadge(
+                  text = "➤ $fieldWayfindingBadge",
+                  tone = GroundBadgeTone.WARNING,
+                  monospace = true,
+                )
+              }
             }
+            Text(
+              text = field.answerValue,
+              style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.SemiBold),
+              color = MaterialTheme.colorScheme.onSurface,
+            )
           }
-          Text(
-            text = field.answerValue,
-            style =
-              MaterialTheme.typography.bodySmall.copy(
-                fontWeight = FontWeight.SemiBold,
-                color = textColor,
-              ),
-          )
         }
       }
     }
@@ -2409,93 +2062,96 @@ private fun SurveyListView(state: PrototypeAppState) {
 
   Column(modifier = Modifier.fillMaxSize().background(surfaceColor)) {
     // Search Bar + Filter Tabs Header
-    Column(
-      modifier =
-        Modifier.fillMaxWidth()
-          .background(if (isDark) Color(0xFF222A26) else Color(0xFFEBF3EE))
-          .padding(horizontal = 14.dp, vertical = 10.dp),
-      verticalArrangement = Arrangement.spacedBy(8.dp),
+    Surface(
+      modifier = Modifier.fillMaxWidth(),
+      color = MaterialTheme.colorScheme.surfaceContainerLow,
     ) {
-      OutlinedTextField(
-        value = state.listSearchQuery,
-        onValueChange = { state.updateListSearchQuery(it) },
-        modifier = Modifier.fillMaxWidth(),
-        singleLine = true,
-        placeholder = {
-          Text(
-            text = "Search ${state.activeEntitiesCountNoun} or submissions...",
-            style = MaterialTheme.typography.bodySmall.copy(color = Color(0xFF6B7280)),
-          )
-        },
-        leadingIcon = {
-          Icon(
-            imageVector = Icons.Default.Search,
-            contentDescription = "Search",
-            tint = Color(0xFF6B7280),
-            modifier = Modifier.size(18.dp),
-          )
-        },
-        trailingIcon = {
-          if (state.listSearchQuery.isNotEmpty()) {
-            Box(
-              modifier =
-                Modifier.clip(CircleShape)
-                  .clickable { state.clearListSearchQuery() }
-                  .padding(6.dp)
-            ) {
-              Icon(
-                imageVector = Icons.Default.Close,
-                contentDescription = "Clear Search",
-                tint = Color(0xFF374151),
-                modifier = Modifier.size(16.dp),
-              )
-            }
-          }
-        },
-        shape = RoundedCornerShape(22.dp),
-        colors =
-          OutlinedTextFieldDefaults.colors(
-            focusedContainerColor = Color.White,
-            unfocusedContainerColor = Color.White,
-            focusedTextColor = Color(0xFF111827),
-            unfocusedTextColor = Color(0xFF111827),
-            focusedBorderColor = Color(0xFF1E6F50),
-            unfocusedBorderColor = Color.Transparent,
-          ),
-      )
-
-      // Category Filter Tabs: All | Locations | Submissions (Grouped by Form)
-      Row(
-        modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
-        horizontalArrangement = Arrangement.spacedBy(6.dp),
+      Column(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 10.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
       ) {
-        ListFilterTab.entries.forEach { tab ->
-          val isSelected = state.listFilterTab == tab
-          val countLabel =
-            when (tab) {
-              ListFilterTab.ALL -> state.entities.size + state.allSubmissions.size
-              ListFilterTab.ENTITIES -> state.entities.size
-              ListFilterTab.SUBMISSIONS -> state.allSubmissions.size
-            }
-          Box(
-            modifier =
-              Modifier.clip(RoundedCornerShape(16.dp))
-                .background(if (isSelected) Color(0xFF1E6F50) else Color.White)
-                .border(
-                  width = 1.dp,
-                  color = if (isSelected) Color(0xFF1E6F50) else Color(0xFFD1D5DB),
-                  shape = RoundedCornerShape(16.dp),
-                )
-                .clickable { state.selectListFilterTab(tab) }
-                .padding(horizontal = 10.dp, vertical = 5.dp)
-          ) {
+        OutlinedTextField(
+          value = state.listSearchQuery,
+          onValueChange = { state.updateListSearchQuery(it) },
+          modifier = Modifier.fillMaxWidth(),
+          singleLine = true,
+          placeholder = {
             Text(
-              text = "${state.tabLabelFor(tab)} ($countLabel)",
-              style =
-                MaterialTheme.typography.labelSmall.copy(
-                  color = if (isSelected) Color.White else Color(0xFF374151),
-                  fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                ),
+              text = "Search ${state.activeEntitiesCountNoun} or submissions...",
+              style = MaterialTheme.typography.bodySmall,
+              color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+          },
+          leadingIcon = {
+            Icon(
+              imageVector = Icons.Default.Search,
+              contentDescription = "Search",
+              tint = MaterialTheme.colorScheme.onSurfaceVariant,
+              modifier = Modifier.size(18.dp),
+            )
+          },
+          trailingIcon = {
+            if (state.listSearchQuery.isNotEmpty()) {
+              IconButton(
+                onClick = { state.clearListSearchQuery() },
+                modifier = Modifier.size(32.dp),
+              ) {
+                Icon(
+                  imageVector = Icons.Default.Close,
+                  contentDescription = "Clear Search",
+                  tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                  modifier = Modifier.size(16.dp),
+                )
+              }
+            }
+          },
+          shape = MaterialTheme.shapes.extraLarge,
+          colors =
+            OutlinedTextFieldDefaults.colors(
+              focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+              unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+              focusedBorderColor = MaterialTheme.colorScheme.primary,
+              unfocusedBorderColor = Color.Transparent,
+            ),
+        )
+
+        // Category Filter Tabs: All | Locations | Submissions (Grouped by Form)
+        Row(
+          modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+          horizontalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+          ListFilterTab.entries.forEach { tab ->
+            val isSelected = state.listFilterTab == tab
+            val countLabel =
+              when (tab) {
+                ListFilterTab.ALL -> state.entities.size + state.allSubmissions.size
+                ListFilterTab.ENTITIES -> state.entities.size
+                ListFilterTab.SUBMISSIONS -> state.allSubmissions.size
+              }
+            FilterChip(
+              selected = isSelected,
+              onClick = { state.selectListFilterTab(tab) },
+              label = {
+                Text(
+                  text = "${state.tabLabelFor(tab)} ($countLabel)",
+                  style =
+                    MaterialTheme.typography.labelSmall.copy(
+                      fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
+                    ),
+                )
+              },
+              leadingIcon =
+                if (isSelected) {
+                  {
+                    Icon(
+                      imageVector = Icons.Default.Check,
+                      contentDescription = null,
+                      modifier = Modifier.size(14.dp),
+                    )
+                  }
+                } else {
+                  null
+                },
             )
           }
         }
@@ -2535,254 +2191,49 @@ private fun SurveyListView(state: PrototypeAppState) {
           .padding(horizontal = 14.dp, vertical = 10.dp),
       verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-          // 1. SURVEY LOCATIONS SECTION (GROUPED BY DOMAIN DATASET)
-          if (matchedEntities.isNotEmpty()) {
-            val groupedByDataset = matchedEntities.groupBy { it.datasetName }
-            groupedByDataset.forEach { (datasetName, datasetEntities) ->
-              Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(5.dp),
-              ) {
-                Icon(
-                  imageVector = Icons.Default.LocationOn,
-                  contentDescription = null,
-                  tint = Color(0xFF1E6F50),
-                  modifier = Modifier.size(14.dp),
-                )
-                Text(
-                  text = "${datasetName.uppercase()} (${datasetEntities.size})",
-                  style =
-                    MaterialTheme.typography.labelSmall.copy(
-                      fontWeight = FontWeight.Bold,
-                      color = Color(0xFF1E6F50),
-                      letterSpacing = 0.6.sp,
-                    ),
-                )
-              }
-              datasetEntities.forEach { entity ->
-                val isNavigatingEntity = state.isNavigatingToEntity(entity.id)
-                val entityWayfindingBadge = state.formattedWayfindingBadgeForEntity(entity.id)
-                Card(
-                  modifier =
-                    Modifier.fillMaxWidth()
-                      .border(1.dp, Color(0xFFDDE5E0), RoundedCornerShape(12.dp))
-                      .clickable {
-                        state.selectEntity(entity.id)
-                        state.setMainSurveyViewMode(MainSurveyViewMode.MAP)
-                      },
-                  shape = RoundedCornerShape(12.dp),
-                  colors =
-                    CardDefaults.cardColors(
-                      containerColor = if (isDark) Color(0xFF232926) else Color.White
-                    ),
-                ) {
-                  Column(
-                    modifier = Modifier.fillMaxWidth().padding(12.dp),
-                    verticalArrangement = Arrangement.spacedBy(6.dp),
-                  ) {
-                    Row(
-                      modifier = Modifier.fillMaxWidth(),
-                      horizontalArrangement = Arrangement.SpaceBetween,
-                      verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                      Column(
-                        modifier = Modifier.weight(1f),
-                        verticalArrangement = Arrangement.spacedBy(3.dp),
-                      ) {
-                        Text(
-                          text = entity.label,
-                          style =
-                            MaterialTheme.typography.titleSmall.copy(
-                              fontWeight = FontWeight.Bold,
-                              color = textColor,
-                            ),
-                        )
-                        Row(
-                          verticalAlignment = Alignment.CenterVertically,
-                          horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        ) {
-                          Text(
-                            text = "GeoID: ${entity.geoId}",
-                            style =
-                              MaterialTheme.typography.labelSmall.copy(
-                                color = Color(0xFF1E6F50),
-                                fontWeight = FontWeight.SemiBold,
-                              ),
-                          )
-                          if (entityWayfindingBadge.isNotEmpty()) {
-                            Text(
-                              text = "➤ $entityWayfindingBadge",
-                              style =
-                                MaterialTheme.typography.labelSmall.copy(
-                                  fontFamily = FontFamily.Monospace,
-                                  fontWeight = FontWeight.Bold,
-                                  color = if (isDark) Color(0xFF80DEEA) else Color(0xFF00838F),
-                                ),
-                            )
-                          }
-                        }
-                        Text(
-                          text = "${entity.datasetName} • ${entity.submissions.size} submission(s)",
-                          style =
-                            MaterialTheme.typography.labelSmall.copy(
-                              color = textColor.copy(alpha = 0.68f),
-                            ),
-                        )
-                      }
-                      Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(3.dp),
-                      ) {
-                        Text(
-                          text = "View on Map",
-                          style =
-                            MaterialTheme.typography.labelSmall.copy(
-                              fontWeight = FontWeight.Bold,
-                              color = Color(0xFF1E6F50),
-                            ),
-                        )
-                        Icon(
-                          imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                          contentDescription = null,
-                          tint = Color(0xFF1E6F50),
-                          modifier = Modifier.size(12.dp),
-                        )
-                      }
-                    }
-
-                    // Quick Navigate, QR Code & Share PDF actions for location item in List View
-                    Row(
-                      horizontalArrangement = Arrangement.spacedBy(8.dp),
-                      verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                      Row(
-                        modifier =
-                          Modifier.clip(RoundedCornerShape(6.dp))
-                            .background(
-                              if (isNavigatingEntity) {
-                                Color(0xFF00838F)
-                              } else if (isDark) {
-                                Color(0xFF183138)
-                              } else {
-                                Color(0xFFE0F7FA)
-                              }
-                            )
-                            .border(
-                              width = 1.dp,
-                              color = if (isNavigatingEntity) Color(0xFF00E5FF) else Color(0xFF00838F),
-                              shape = RoundedCornerShape(6.dp),
-                            )
-                            .clickable { state.startNavigationToEntity(entity.id) }
-                            .padding(horizontal = 7.dp, vertical = 2.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(4.dp),
-                      ) {
-                        Icon(
-                          imageVector = Icons.Default.Navigation,
-                          contentDescription = "Navigate to ${entity.singularTypeLabel}",
-                          tint = if (isNavigatingEntity) Color.White else Color(0xFF00838F),
-                          modifier = Modifier.size(11.dp),
-                        )
-                        Text(
-                          text = if (isNavigatingEntity) "Navigating" else "Navigate",
-                          style =
-                            MaterialTheme.typography.labelSmall.copy(
-                              color = if (isNavigatingEntity) Color.White else Color(0xFF00838F),
-                              fontWeight = FontWeight.Bold,
-                            ),
-                        )
-                      }
-                      Row(
-                        modifier =
-                          Modifier.clip(RoundedCornerShape(6.dp))
-                            .background(if (isDark) Color(0xFF26332D) else Color(0xFFEFF6F2))
-                            .border(1.dp, Color(0xFF1E6F50), RoundedCornerShape(6.dp))
-                            .clickable { state.openEntityQrCode(entity.id) }
-                            .padding(horizontal = 7.dp, vertical = 2.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(4.dp),
-                      ) {
-                        Icon(
-                          imageVector = Icons.Default.QrCode,
-                          contentDescription = "${entity.singularTypeLabel} QR Code",
-                          tint = Color(0xFF1E6F50),
-                          modifier = Modifier.size(11.dp),
-                        )
-                        Text(
-                          text = "QR Code",
-                          style =
-                            MaterialTheme.typography.labelSmall.copy(
-                              color = Color(0xFF1E6F50),
-                              fontWeight = FontWeight.Bold,
-                            ),
-                        )
-                      }
-                      Row(
-                        modifier =
-                          Modifier.clip(RoundedCornerShape(6.dp))
-                            .background(if (isDark) Color(0xFF26332D) else Color(0xFFEFF6F2))
-                            .border(1.dp, Color(0xFF1E6F50), RoundedCornerShape(6.dp))
-                            .clickable { state.shareEntityPdf(entity.id) }
-                            .padding(horizontal = 7.dp, vertical = 2.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(4.dp),
-                      ) {
-                        Icon(
-                          imageVector = Icons.Default.Share,
-                          contentDescription = "Share ${entity.singularTypeLabel} PDF",
-                          tint = Color(0xFF1E6F50),
-                          modifier = Modifier.size(11.dp),
-                        )
-                        Text(
-                          text = "Share PDF",
-                          style =
-                            MaterialTheme.typography.labelSmall.copy(
-                              color = Color(0xFF1E6F50),
-                              fontWeight = FontWeight.Bold,
-                            ),
-                        )
-                      }
-                    }
-                  }
-                }
-              }
-            }
+      // 1. SURVEY LOCATIONS SECTION (GROUPED BY DOMAIN DATASET)
+      if (matchedEntities.isNotEmpty()) {
+        val groupedByDataset = matchedEntities.groupBy { it.datasetName }
+        groupedByDataset.forEach { (datasetName, datasetEntities) ->
+          Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(5.dp),
+          ) {
+            Icon(
+              imageVector = Icons.Default.LocationOn,
+              contentDescription = null,
+              tint = MaterialTheme.colorScheme.primary,
+              modifier = Modifier.size(14.dp),
+            )
+            Text(
+              text = "${datasetName.uppercase()} (${datasetEntities.size})",
+              style =
+                MaterialTheme.typography.labelSmall.copy(
+                  fontWeight = FontWeight.Bold,
+                  letterSpacing = 0.6.sp,
+                ),
+              color = MaterialTheme.colorScheme.primary,
+            )
           }
-
-          // 2. SUBMISSIONS SECTION (GROUPED BY FORM TITLE)
-          if (groupedSubmissions.isNotEmpty()) {
-            groupedSubmissions.forEach { group ->
-              val form = group.form
-              Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(5.dp),
-              ) {
-                Icon(
-                  imageVector = Icons.Default.Description,
-                  contentDescription = null,
-                  tint = Color(0xFF1E6F50),
-                  modifier = Modifier.size(14.dp),
-                )
-                Text(
-                  text = "${form.title.uppercase()} (${group.submissions.size})",
-                  style =
-                    MaterialTheme.typography.labelSmall.copy(
-                      fontWeight = FontWeight.Bold,
-                      color = Color(0xFF1E6F50),
-                      letterSpacing = 0.6.sp,
-                    ),
-                )
-              }
+          datasetEntities.forEach { entity ->
+            val isNavigatingEntity = state.isNavigatingToEntity(entity.id)
+            val entityWayfindingBadge = state.formattedWayfindingBadgeForEntity(entity.id)
+            OutlinedCard(
+              onClick = {
+                state.selectEntity(entity.id)
+                state.setMainSurveyViewMode(MainSurveyViewMode.MAP)
+              },
+              modifier = Modifier.fillMaxWidth(),
+              shape = MaterialTheme.shapes.medium,
+              colors =
+                CardDefaults.outlinedCardColors(
+                  containerColor = MaterialTheme.colorScheme.surface
+                ),
+            ) {
               Column(
-                modifier =
-                  Modifier.fillMaxWidth()
-                    .clip(RoundedCornerShape(14.dp))
-                    .background(if (isDark) Color(0xFF1E2622) else Color(0xFFF3F8F5))
-                    .border(1.dp, Color(0xFFC8E0D4), RoundedCornerShape(14.dp))
-                    .padding(10.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.fillMaxWidth().padding(12.dp),
+                verticalArrangement = Arrangement.spacedBy(6.dp),
               ) {
-                // Form Group Header Banner
                 Row(
                   modifier = Modifier.fillMaxWidth(),
                   horizontalArrangement = Arrangement.SpaceBetween,
@@ -2790,151 +2241,279 @@ private fun SurveyListView(state: PrototypeAppState) {
                 ) {
                   Column(
                     modifier = Modifier.weight(1f),
-                    verticalArrangement = Arrangement.spacedBy(2.dp),
+                    verticalArrangement = Arrangement.spacedBy(3.dp),
                   ) {
+                    Text(
+                      text = entity.label,
+                      style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+                      color = MaterialTheme.colorScheme.onSurface,
+                    )
                     Row(
                       verticalAlignment = Alignment.CenterVertically,
-                      horizontalArrangement = Arrangement.spacedBy(6.dp),
+                      horizontalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
-                      Icon(
-                        imageVector = Icons.Default.Description,
-                        contentDescription = null,
-                        tint = Color(0xFF1E6F50),
-                        modifier = Modifier.size(14.dp),
-                      )
                       Text(
-                        text = form.title,
-                        style =
-                          MaterialTheme.typography.labelLarge.copy(
-                            fontWeight = FontWeight.Bold,
-                            color = textColor,
-                          ),
+                        text = "GeoID: ${entity.geoId}",
+                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
+                        color = MaterialTheme.colorScheme.primary,
                       )
+                      if (entityWayfindingBadge.isNotEmpty()) {
+                        GroundTonalBadge(
+                          text = "➤ $entityWayfindingBadge",
+                          tone = GroundBadgeTone.TERTIARY,
+                          monospace = true,
+                        )
+                      }
                     }
                     Text(
-                      text = "Action: \"${form.ctaLabel}\" • ${form.version}",
-                      style =
-                        MaterialTheme.typography.labelSmall.copy(
-                          color = Color(0xFF1E6F50),
-                          fontWeight = FontWeight.SemiBold,
-                        ),
+                      text = "${entity.datasetName} • ${entity.submissions.size} submission(s)",
+                      style = MaterialTheme.typography.labelSmall,
+                      color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                   }
-
-                  Box(
-                    modifier =
-                      Modifier.clip(RoundedCornerShape(12.dp))
-                        .background(Color(0xFF1E6F50))
-                        .padding(horizontal = 8.dp, vertical = 3.dp)
+                  Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(3.dp),
                   ) {
                     Text(
-                      text = "${group.submissions.size} submitted",
-                      style =
-                        MaterialTheme.typography.labelSmall.copy(
-                          color = Color.White,
-                          fontWeight = FontWeight.Bold,
-                        ),
+                      text = "View on Map",
+                      style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                      color = MaterialTheme.colorScheme.primary,
+                    )
+                    Icon(
+                      imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                      contentDescription = null,
+                      tint = MaterialTheme.colorScheme.primary,
+                      modifier = Modifier.size(12.dp),
                     )
                   }
                 }
 
-                // Submissions belonging to this Form group
-                group.submissions.forEach { sub ->
-                  Card(
-                    modifier =
-                      Modifier.fillMaxWidth()
-                        .border(1.dp, Color(0xFFDDE5E0), RoundedCornerShape(10.dp))
-                        .clickable { state.selectSubmissionDetail(sub.id) },
-                    shape = RoundedCornerShape(10.dp),
-                    colors =
-                      CardDefaults.cardColors(
-                        containerColor = if (isDark) Color(0xFF252E2A) else Color.White
-                      ),
+                // Quick Navigate, QR Code & Share PDF actions for location item in List View
+                Row(
+                  horizontalArrangement = Arrangement.spacedBy(8.dp),
+                  verticalAlignment = Alignment.CenterVertically,
+                ) {
+                  FilterChip(
+                    selected = isNavigatingEntity,
+                    onClick = { state.startNavigationToEntity(entity.id) },
+                    label = {
+                      Text(
+                        text = if (isNavigatingEntity) "Navigating" else "Navigate",
+                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                      )
+                    },
+                    leadingIcon = {
+                      Icon(
+                        imageVector = Icons.Default.Navigation,
+                        contentDescription = "Navigate to ${entity.singularTypeLabel}",
+                        modifier = Modifier.size(12.dp),
+                      )
+                    },
+                  )
+                  AssistChip(
+                    onClick = { state.openEntityQrCode(entity.id) },
+                    label = {
+                      Text(
+                        text = "QR Code",
+                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                      )
+                    },
+                    leadingIcon = {
+                      Icon(
+                        imageVector = Icons.Default.QrCode,
+                        contentDescription = "${entity.singularTypeLabel} QR Code",
+                        modifier = Modifier.size(12.dp),
+                      )
+                    },
+                  )
+                  AssistChip(
+                    onClick = { state.shareEntityPdf(entity.id) },
+                    label = {
+                      Text(
+                        text = "Share PDF",
+                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                      )
+                    },
+                    leadingIcon = {
+                      Icon(
+                        imageVector = Icons.Default.Share,
+                        contentDescription = "Share ${entity.singularTypeLabel} PDF",
+                        modifier = Modifier.size(12.dp),
+                      )
+                    },
+                  )
+                }
+              }
+            }
+          }
+        }
+      }
+
+      // 2. SUBMISSIONS SECTION (GROUPED BY FORM TITLE)
+      if (groupedSubmissions.isNotEmpty()) {
+        groupedSubmissions.forEach { group ->
+          val form = group.form
+          Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(5.dp),
+          ) {
+            Icon(
+              imageVector = Icons.Default.Description,
+              contentDescription = null,
+              tint = MaterialTheme.colorScheme.primary,
+              modifier = Modifier.size(14.dp),
+            )
+            Text(
+              text = "${form.title.uppercase()} (${group.submissions.size})",
+              style =
+                MaterialTheme.typography.labelSmall.copy(
+                  fontWeight = FontWeight.Bold,
+                  letterSpacing = 0.6.sp,
+                ),
+              color = MaterialTheme.colorScheme.primary,
+            )
+          }
+          OutlinedCard(
+            modifier = Modifier.fillMaxWidth(),
+            shape = MaterialTheme.shapes.medium,
+            colors =
+              CardDefaults.outlinedCardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceContainerLow
+              ),
+          ) {
+            Column(
+              modifier = Modifier.padding(10.dp),
+              verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+              // Form Group Header Banner
+              Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+              ) {
+                Column(
+                  modifier = Modifier.weight(1f),
+                  verticalArrangement = Arrangement.spacedBy(2.dp),
+                ) {
+                  Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
                   ) {
-                    Row(
-                      modifier = Modifier.fillMaxWidth().padding(10.dp),
-                      horizontalArrangement = Arrangement.SpaceBetween,
-                      verticalAlignment = Alignment.CenterVertically,
+                    Icon(
+                      imageVector = Icons.Default.Description,
+                      contentDescription = null,
+                      tint = MaterialTheme.colorScheme.primary,
+                      modifier = Modifier.size(14.dp),
+                    )
+                    Text(
+                      text = form.title,
+                      style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+                      color = MaterialTheme.colorScheme.onSurface,
+                    )
+                  }
+                  Text(
+                    text = "Action: \"${form.ctaLabel}\" • ${form.version}",
+                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
+                    color = MaterialTheme.colorScheme.primary,
+                  )
+                }
+
+                GroundTonalBadge(
+                  text = "${group.submissions.size} submitted",
+                  tone = GroundBadgeTone.PRIMARY,
+                )
+              }
+
+              // Submissions belonging to this Form group
+              group.submissions.forEach { sub ->
+                OutlinedCard(
+                  onClick = { state.selectSubmissionDetail(sub.id) },
+                  modifier = Modifier.fillMaxWidth(),
+                  shape = MaterialTheme.shapes.small,
+                  colors =
+                    CardDefaults.outlinedCardColors(
+                      containerColor = MaterialTheme.colorScheme.surface
+                    ),
+                ) {
+                  Row(
+                    modifier = Modifier.fillMaxWidth().padding(10.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                  ) {
+                    Column(
+                      modifier = Modifier.weight(1f),
+                      verticalArrangement = Arrangement.spacedBy(3.dp),
                     ) {
-                      Column(
-                        modifier = Modifier.weight(1f),
-                        verticalArrangement = Arrangement.spacedBy(3.dp),
+                      Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
                       ) {
-                        Row(
-                          verticalAlignment = Alignment.CenterVertically,
-                          horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        ) {
-                          Text(
-                            text = "${sub.targetTypeLabel}: ${sub.entityLabel}",
-                            style =
-                              MaterialTheme.typography.labelLarge.copy(
-                                fontWeight = FontWeight.Bold,
-                                color = textColor,
-                              ),
-                          )
-                        }
-                        Row(
-                          verticalAlignment = Alignment.CenterVertically,
-                          horizontalArrangement = Arrangement.spacedBy(4.dp),
-                        ) {
-                          Icon(
-                            imageVector = Icons.Default.Person,
-                            contentDescription = null,
-                            tint = textColor.copy(alpha = 0.72f),
-                            modifier = Modifier.size(12.dp),
-                          )
-                          Text(
-                            text = "${sub.collectorName} •",
-                            style =
-                              MaterialTheme.typography.labelSmall.copy(
-                                color = textColor.copy(alpha = 0.72f),
-                              ),
-                          )
-                          Icon(
-                            imageVector = Icons.Default.Schedule,
-                            contentDescription = null,
-                            tint = textColor.copy(alpha = 0.72f),
-                            modifier = Modifier.size(11.dp),
-                          )
-                          Text(
-                            text = sub.timestamp,
-                            style =
-                              MaterialTheme.typography.labelSmall.copy(
-                                color = textColor.copy(alpha = 0.72f),
-                              ),
-                          )
-                        }
-                      }
-                      val detailsColor = if (isDark) Color(0xFF8BD6B1) else Color(0xFF1E6F50)
-                      IconButton(
-                        onClick = { state.selectSubmissionDetail(sub.id) },
-                        modifier = Modifier.size(32.dp),
-                      ) {
-                        Icon(
-                          imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                          contentDescription = "Submission details",
-                          tint = detailsColor,
-                          modifier = Modifier.size(20.dp),
+                        Text(
+                          text = "${sub.targetTypeLabel}: ${sub.entityLabel}",
+                          style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+                          color = MaterialTheme.colorScheme.onSurface,
                         )
                       }
+                      Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                      ) {
+                        Icon(
+                          imageVector = Icons.Default.Person,
+                          contentDescription = null,
+                          tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                          modifier = Modifier.size(12.dp),
+                        )
+                        Text(
+                          text = "${sub.collectorName} •",
+                          style = MaterialTheme.typography.labelSmall,
+                          color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                        Icon(
+                          imageVector = Icons.Default.Schedule,
+                          contentDescription = null,
+                          tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                          modifier = Modifier.size(11.dp),
+                        )
+                        Text(
+                          text = sub.timestamp,
+                          style = MaterialTheme.typography.labelSmall,
+                          color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                      }
+                    }
+                    IconButton(
+                      onClick = { state.selectSubmissionDetail(sub.id) },
+                      modifier = Modifier.size(32.dp),
+                    ) {
+                      Icon(
+                        imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                        contentDescription = "Submission details",
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(20.dp),
+                      )
                     }
                   }
                 }
               }
             }
           }
+        }
+      }
 
-          if (matchedEntities.isEmpty() && groupedSubmissions.isEmpty()) {
-            Box(
-              modifier = Modifier.fillMaxWidth().padding(32.dp),
-              contentAlignment = Alignment.Center,
-            ) {
-              Text(
-                text = "No ${state.activeEntitiesCountNoun} or submissions match \"${state.listSearchQuery}\".",
-                style = MaterialTheme.typography.bodySmall.copy(color = textColor.copy(alpha = 0.7f)),
-              )
-            }
-          }
+      if (matchedEntities.isEmpty() && groupedSubmissions.isEmpty()) {
+        Box(
+          modifier = Modifier.fillMaxWidth().padding(32.dp),
+          contentAlignment = Alignment.Center,
+        ) {
+          Text(
+            text = "No ${state.activeEntitiesCountNoun} or submissions match \"${state.listSearchQuery}\".",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+          )
+        }
+      }
     }
   }
 }
@@ -2949,24 +2528,19 @@ private fun SurveyListView(state: PrototypeAppState) {
  */
 @Composable
 private fun MainSurveyNavigationDrawerOverlay(state: PrototypeAppState) {
-  val isDark = state.isDarkTheme
-  val drawerBg = if (isDark) Color(0xFF1A211E) else Color.White
-  val textColor = if (isDark) Color.White else Color(0xFF111827)
-
   Box(modifier = Modifier.fillMaxSize()) {
     // Scrim backdrop
     Box(
       modifier =
         Modifier.fillMaxSize()
-          .background(Color.Black.copy(alpha = 0.45f))
+          .background(MaterialTheme.colorScheme.scrim.copy(alpha = 0.45f))
           .clickable { state.updateDrawerOpen(false) }
     )
 
-    // Slide-over Drawer Panel
-    Surface(
-      modifier = Modifier.fillMaxHeight().width(300.dp),
-      color = drawerBg,
-      shadowElevation = 16.dp,
+    // M3 ModalDrawerSheet Panel
+    ModalDrawerSheet(
+      modifier = Modifier.fillMaxHeight().width(308.dp),
+      drawerContainerColor = MaterialTheme.colorScheme.surfaceContainerLow,
     ) {
       Column(
         modifier = Modifier.fillMaxSize(),
@@ -2974,139 +2548,131 @@ private fun MainSurveyNavigationDrawerOverlay(state: PrototypeAppState) {
       ) {
         Column(modifier = Modifier.fillMaxWidth()) {
           // User Profile & Organization Header
-          Column(
-            modifier =
-              Modifier.fillMaxWidth()
-                .background(Color(0xFF144532))
-                .padding(horizontal = 18.dp, vertical = 20.dp),
-            verticalArrangement = Arrangement.spacedBy(6.dp),
+          Surface(
+            modifier = Modifier.fillMaxWidth(),
+            color = Color(0xFF144532),
+            contentColor = Color.White,
           ) {
-            Row(
-              modifier = Modifier.fillMaxWidth(),
-              horizontalArrangement = Arrangement.SpaceBetween,
-              verticalAlignment = Alignment.CenterVertically,
+            Column(
+              modifier = Modifier.padding(horizontal = 18.dp, vertical = 20.dp),
+              verticalArrangement = Arrangement.spacedBy(6.dp),
             ) {
-              Box(
-                modifier =
-                  Modifier.size(44.dp)
-                    .clip(CircleShape)
-                    .background(Color(0xFF8BD6B1)),
-                contentAlignment = Alignment.Center,
+              Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
               ) {
-                Text(
-                  text = "ML",
-                  style =
-                    MaterialTheme.typography.titleMedium.copy(
-                      color = Color(0xFF003825),
-                      fontWeight = FontWeight.ExtraBold,
-                    ),
-                )
+                Box(
+                  modifier =
+                    Modifier.size(44.dp)
+                      .clip(CircleShape)
+                      .background(Color(0xFF8BD6B1)),
+                  contentAlignment = Alignment.Center,
+                ) {
+                  Text(
+                    text = "ML",
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold),
+                    color = Color(0xFF003825),
+                  )
+                }
+                IconButton(
+                  onClick = { state.updateDrawerOpen(false) },
+                  modifier = Modifier.size(32.dp),
+                ) {
+                  Icon(
+                    imageVector = Icons.Default.Close,
+                    contentDescription = "Close Drawer",
+                    tint = Color.White,
+                    modifier = Modifier.size(18.dp),
+                  )
+                }
               }
-              Box(
-                modifier =
-                  Modifier.clip(CircleShape)
-                    .background(Color(0xFF1E6F50))
-                    .clickable { state.updateDrawerOpen(false) }
-                    .padding(6.dp)
-              ) {
-                Icon(
-                  imageVector = Icons.Default.Close,
-                  contentDescription = "Close Drawer",
-                  tint = Color.White,
-                  modifier = Modifier.size(16.dp),
-                )
-              }
-            }
 
-            Text(
-              text = state.signedInUserName,
-              style =
-                MaterialTheme.typography.titleMedium.copy(
-                  color = Color.White,
-                  fontWeight = FontWeight.Bold,
-                ),
-            )
-            Text(
-              text = state.signedInUserEmail,
-              style = MaterialTheme.typography.labelSmall.copy(color = Color(0xFFC8E6C9)),
-            )
-            Text(
-              text = state.signedInOrganization,
-              style = MaterialTheme.typography.labelSmall.copy(color = Color(0xFF8BD6B1)),
-            )
+              Text(
+                text = state.signedInUserName,
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                color = Color.White,
+              )
+              Text(
+                text = state.signedInUserEmail,
+                style = MaterialTheme.typography.labelSmall,
+                color = Color(0xFFC8E6C9),
+              )
+              Text(
+                text = state.signedInOrganization,
+                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
+                color = Color(0xFF8BD6B1),
+              )
+            }
           }
 
           // Active Survey Summary Banner
-          Column(
-            modifier =
-              Modifier.fillMaxWidth()
-                .background(if (isDark) Color(0xFF222C27) else Color(0xFFEFF6F2))
-                .padding(horizontal = 18.dp, vertical = 10.dp),
-            verticalArrangement = Arrangement.spacedBy(2.dp),
+          Surface(
+            modifier = Modifier.fillMaxWidth(),
+            color = MaterialTheme.colorScheme.surfaceContainer,
           ) {
-            Text(
-              text = "ACTIVE SURVEY",
-              style =
-                MaterialTheme.typography.labelSmall.copy(
-                  fontSize = 9.sp,
-                  fontWeight = FontWeight.Bold,
-                  color = Color(0xFF1E6F50),
-                ),
-            )
-            Text(
-              text = state.activeSurvey.title,
-              style =
-                MaterialTheme.typography.labelMedium.copy(
-                  fontWeight = FontWeight.Bold,
-                  color = textColor,
-                ),
-              maxLines = 1,
-              overflow = TextOverflow.Ellipsis,
-            )
+            Column(
+              modifier = Modifier.padding(horizontal = 18.dp, vertical = 10.dp),
+              verticalArrangement = Arrangement.spacedBy(2.dp),
+            ) {
+              Text(
+                text = "ACTIVE SURVEY",
+                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                color = MaterialTheme.colorScheme.primary,
+              )
+              Text(
+                text = state.activeSurvey.title,
+                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                color = MaterialTheme.colorScheme.onSurface,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+              )
+            }
           }
 
           Spacer(modifier = Modifier.height(8.dp))
 
-          // Navigation Drawer Options
+          // Navigation Drawer Options using M3 NavigationDrawerItem
           DrawerMenuItem(
             icon = Icons.Default.SwapHoriz,
             title = "Surveys",
             subtitle = "${state.downloadedSurveyCount} downloaded on device",
-            textColor = textColor,
+            selected = state.activeDrawerSubView == MainDrawerSubView.SWITCH_SURVEYS,
             onClick = { state.drawerSwitchSurveys() },
           )
           DrawerMenuItem(
             icon = Icons.Default.Map,
             title = "Offline maps",
             subtitle = "Mapbox vector & satellite raster tile cache",
-            textColor = textColor,
+            selected = state.activeDrawerSubView == MainDrawerSubView.MANAGE_OFFLINE_MAPS,
             onClick = { state.drawerManageOfflineMaps() },
           )
           DrawerMenuItem(
             icon = Icons.Default.Settings,
             title = "Settings",
             subtitle = "Units (${state.unitSystem.areaUnit}), language & media cache",
-            textColor = textColor,
+            selected = state.activeDrawerSubView == MainDrawerSubView.SETTINGS,
             onClick = { state.drawerOpenSettings() },
           )
           DrawerMenuItem(
             icon = Icons.Default.Description,
             title = "Terms of Service",
             subtitle = "Platform data governance & privacy terms",
-            textColor = textColor,
+            selected = false,
             onClick = { state.drawerViewTermsOfService() },
           )
 
           HorizontalDivider(
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-            color = textColor.copy(alpha = 0.1f),
+            color = MaterialTheme.colorScheme.outlineVariant,
           )
 
           DrawerMenuItem(
             icon = Icons.AutoMirrored.Filled.Logout,
             title = "Sign out",
             subtitle = "Disconnect ${state.signedInUserEmail}",
-            textColor = Color(0xFFD32F2F),
+            selected = false,
+            isDestructive = true,
             onClick = { state.drawerSignOut() },
           )
         }
@@ -3114,10 +2680,8 @@ private fun MainSurveyNavigationDrawerOverlay(state: PrototypeAppState) {
         // Footer version note
         Text(
           text = "Open Foris Ground 2.0 • Offline-First Core",
-          style =
-            MaterialTheme.typography.labelSmall.copy(
-              color = textColor.copy(alpha = 0.5f),
-            ),
+          style = MaterialTheme.typography.labelSmall,
+          color = MaterialTheme.colorScheme.onSurfaceVariant,
           modifier = Modifier.padding(18.dp),
         )
       }
@@ -3130,41 +2694,48 @@ private fun DrawerMenuItem(
   icon: ImageVector,
   title: String,
   subtitle: String,
-  textColor: Color,
+  selected: Boolean,
+  isDestructive: Boolean = false,
   onClick: () -> Unit,
 ) {
-  Row(
-    modifier =
-      Modifier.fillMaxWidth()
-        .clickable { onClick() }
-        .padding(horizontal = 18.dp, vertical = 11.dp),
-    verticalAlignment = Alignment.CenterVertically,
-    horizontalArrangement = Arrangement.spacedBy(14.dp),
-  ) {
-    Icon(
-      imageVector = icon,
-      contentDescription = title,
-      tint = textColor.copy(alpha = 0.85f),
-      modifier = Modifier.size(20.dp),
-    )
-    Column(modifier = Modifier.weight(1f)) {
-      Text(
-        text = title,
-        style =
-          MaterialTheme.typography.labelLarge.copy(
-            fontWeight = FontWeight.SemiBold,
-            color = textColor,
-          ),
-      )
-      Text(
-        text = subtitle,
-        style =
-          MaterialTheme.typography.labelSmall.copy(
-            color = textColor.copy(alpha = 0.65f),
-          ),
-      )
+  val itemColor =
+    if (isDestructive) {
+      MaterialTheme.colorScheme.error
+    } else {
+      MaterialTheme.colorScheme.onSurface
     }
-  }
+  NavigationDrawerItem(
+    label = {
+      Column {
+        Text(
+          text = title,
+          style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
+          color = itemColor,
+        )
+        Text(
+          text = subtitle,
+          style = MaterialTheme.typography.labelSmall,
+          color =
+            if (isDestructive) {
+              MaterialTheme.colorScheme.error.copy(alpha = 0.8f)
+            } else {
+              MaterialTheme.colorScheme.onSurfaceVariant
+            },
+        )
+      }
+    },
+    selected = selected,
+    onClick = onClick,
+    icon = {
+      Icon(
+        imageVector = icon,
+        contentDescription = title,
+        tint = itemColor,
+        modifier = Modifier.size(20.dp),
+      )
+    },
+    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+  )
 }
 
 /**
@@ -3174,7 +2745,6 @@ private fun DrawerMenuItem(
  */
 @Composable
 private fun SwitchDownloadedSurveysSubScreen(state: PrototypeAppState) {
-  val textColor = MaterialTheme.colorScheme.onSurface
   val downloadedList = state.downloadedSurveys
 
   Column(
@@ -3196,30 +2766,25 @@ private fun SwitchDownloadedSurveysSubScreen(state: PrototypeAppState) {
         Icon(
           imageVector = Icons.Default.SwapHoriz,
           contentDescription = null,
-          tint = Color(0xFF1E6F50),
+          tint = MaterialTheme.colorScheme.primary,
           modifier = Modifier.size(22.dp),
         )
         Column {
           Text(
             text = "Downloaded Surveys",
-            style =
-              MaterialTheme.typography.titleMedium.copy(
-                fontWeight = FontWeight.Bold,
-                color = textColor,
-              ),
+            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+            color = MaterialTheme.colorScheme.onSurface,
           )
           Text(
             text = "${downloadedList.size} offline-ready survey(s) on this device",
-            style =
-              MaterialTheme.typography.labelSmall.copy(
-                color = textColor.copy(alpha = 0.68f),
-              ),
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
           )
         }
       }
       OutlinedButton(
         onClick = { state.closeDrawerSubView() },
-        shape = RoundedCornerShape(10.dp),
+        shape = MaterialTheme.shapes.small,
       ) {
         Icon(
           imageVector = Icons.AutoMirrored.Filled.ArrowBack,
@@ -3234,19 +2799,28 @@ private fun SwitchDownloadedSurveysSubScreen(state: PrototypeAppState) {
     // List of Downloaded Surveys only
     downloadedList.forEach { survey ->
       val isActive = survey.id == state.activeSurveyId
-      Card(
-        modifier =
-          Modifier.fillMaxWidth()
-            .border(
-              width = if (isActive) 2.dp else 1.dp,
-              color = if (isActive) Color(0xFF1E6F50) else Color(0xFFDDE5E0),
-              shape = RoundedCornerShape(14.dp),
-            )
-            .clickable { state.openSurvey(survey.id) },
-        shape = RoundedCornerShape(14.dp),
+      OutlinedCard(
+        onClick = { state.openSurvey(survey.id) },
+        modifier = Modifier.fillMaxWidth(),
+        shape = MaterialTheme.shapes.medium,
+        border =
+          BorderStroke(
+            width = if (isActive) 1.5.dp else 1.dp,
+            color =
+              if (isActive) {
+                MaterialTheme.colorScheme.primary
+              } else {
+                MaterialTheme.colorScheme.outlineVariant
+              },
+          ),
         colors =
-          CardDefaults.cardColors(
-            containerColor = if (isActive) Color(0xFFEFF6F2) else Color.White
+          CardDefaults.outlinedCardColors(
+            containerColor =
+              if (isActive) {
+                MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.35f)
+              } else {
+                MaterialTheme.colorScheme.surface
+              }
           ),
       ) {
         Row(
@@ -3264,60 +2838,50 @@ private fun SwitchDownloadedSurveysSubScreen(state: PrototypeAppState) {
             ) {
               Text(
                 text = survey.title,
-                style =
-                  MaterialTheme.typography.titleSmall.copy(
-                    fontWeight = FontWeight.Bold,
-                    color = Color(0xFF111827),
-                  ),
+                style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+                color = MaterialTheme.colorScheme.onSurface,
               )
               if (isActive) {
-                Box(
-                  modifier =
-                    Modifier.clip(RoundedCornerShape(6.dp))
-                      .background(Color(0xFF1E6F50))
-                      .padding(horizontal = 6.dp, vertical = 2.dp)
-                ) {
-                  Text(
-                    text = "ACTIVE",
-                    style =
-                      MaterialTheme.typography.labelSmall.copy(
-                        fontSize = 8.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White,
-                      ),
-                  )
-                }
+                GroundTonalBadge(
+                  text = "ACTIVE",
+                  tone = GroundBadgeTone.PRIMARY,
+                )
               }
             }
             Text(
               text = "${survey.location} • ${survey.entityCount} locations • ${survey.offlineSizeLabel}",
-              style =
-                MaterialTheme.typography.labelSmall.copy(
-                  color = Color(0xFF1E6F50),
-                  fontWeight = FontWeight.SemiBold,
-                ),
+              style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
+              color = MaterialTheme.colorScheme.primary,
             )
             Text(
               text = survey.description,
-              style = MaterialTheme.typography.bodySmall.copy(color = Color(0xFF4B5563)),
+              style = MaterialTheme.typography.bodySmall,
+              color = MaterialTheme.colorScheme.onSurfaceVariant,
               maxLines = 2,
               overflow = TextOverflow.Ellipsis,
             )
           }
           Spacer(modifier = Modifier.width(8.dp))
-          Button(
-            onClick = { state.openSurvey(survey.id) },
-            colors =
-              ButtonDefaults.buttonColors(
-                containerColor = if (isActive) Color(0xFF144532) else Color(0xFF1E6F50),
-                contentColor = Color.White,
-              ),
-            shape = RoundedCornerShape(10.dp),
-          ) {
-            Text(
-              text = if (isActive) "Open" else "Switch",
-              style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-            )
+          if (isActive) {
+            FilledTonalButton(
+              onClick = { state.openSurvey(survey.id) },
+              shape = MaterialTheme.shapes.small,
+            ) {
+              Text(
+                text = "Open",
+                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+              )
+            }
+          } else {
+            Button(
+              onClick = { state.openSurvey(survey.id) },
+              shape = MaterialTheme.shapes.small,
+            ) {
+              Text(
+                text = "Switch",
+                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+              )
+            }
           }
         }
       }
@@ -3327,12 +2891,7 @@ private fun SwitchDownloadedSurveysSubScreen(state: PrototypeAppState) {
     Button(
       onClick = { state.openDownloadMoreSurveysScreen() },
       modifier = Modifier.fillMaxWidth().height(48.dp),
-      shape = RoundedCornerShape(12.dp),
-      colors =
-        ButtonDefaults.buttonColors(
-          containerColor = Color(0xFF1E6F50),
-          contentColor = Color.White,
-        ),
+      shape = MaterialTheme.shapes.medium,
     ) {
       Icon(
         imageVector = Icons.Default.Download,
@@ -3357,235 +2916,156 @@ private fun EntityQrCodeModalDialog(
   state: PrototypeAppState,
   entity: GeospatialEntityItem,
 ) {
-  Box(
-    modifier =
-      Modifier.fillMaxSize()
-        .background(Color.Black.copy(alpha = 0.5f))
-        .clickable { state.closeEntityQrCode() },
-    contentAlignment = Alignment.Center,
-  ) {
-    Card(
-      modifier =
-        Modifier.width(310.dp)
-          .clickable(enabled = false) {},
-      shape = RoundedCornerShape(18.dp),
-      colors = CardDefaults.cardColors(containerColor = Color.White),
-      elevation = CardDefaults.cardElevation(defaultElevation = 14.dp),
-    ) {
+  GroundAlertDialogOverlay(
+    onDismissRequest = { state.closeEntityQrCode() },
+    icon = {
+      Icon(
+        imageVector = Icons.Default.QrCode,
+        contentDescription = null,
+        tint = MaterialTheme.colorScheme.primary,
+      )
+    },
+    title = {
+      Text(
+        text = "${entity.singularTypeLabel} QR Code",
+        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+      )
+    },
+    text = {
       Column(
-        modifier = Modifier.padding(18.dp),
+        modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(10.dp),
       ) {
-        Row(
-          modifier = Modifier.fillMaxWidth(),
-          horizontalArrangement = Arrangement.SpaceBetween,
-          verticalAlignment = Alignment.CenterVertically,
+        // High-contrast QR matrix surface for scanning
+        Surface(
+          modifier = Modifier.size(148.dp),
+          shape = MaterialTheme.shapes.medium,
+          color = Color.White,
+          border = BorderStroke(2.dp, MaterialTheme.colorScheme.primary),
         ) {
-          Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(6.dp),
+          Box(
+            modifier = Modifier.padding(12.dp),
+            contentAlignment = Alignment.Center,
           ) {
             Icon(
               imageVector = Icons.Default.QrCode,
-              contentDescription = null,
-              tint = Color(0xFF1E6F50),
-              modifier = Modifier.size(18.dp),
-            )
-            Text(
-              text = "${entity.singularTypeLabel} QR Code",
-              style =
-                MaterialTheme.typography.titleSmall.copy(
-                  fontWeight = FontWeight.Bold,
-                  color = Color(0xFF111827),
-                ),
+              contentDescription = "${entity.label} QR Matrix",
+              tint = Color(0xFF111827),
+              modifier = Modifier.size(116.dp),
             )
           }
-          Box(
-            modifier =
-              Modifier.clip(CircleShape)
-                .background(Color(0xFFF3F4F6))
-                .clickable { state.closeEntityQrCode() }
-                .padding(5.dp)
-          ) {
-            Icon(
-              imageVector = Icons.Default.Close,
-              contentDescription = "Close QR Modal",
-              tint = Color(0xFF374151),
-              modifier = Modifier.size(14.dp),
-            )
-          }
-        }
-
-        // Simulated high-contrast QR matrix for the GeoID
-        Box(
-          modifier =
-            Modifier.size(148.dp)
-              .clip(RoundedCornerShape(12.dp))
-              .background(Color.White)
-              .border(2.dp, Color(0xFF144532), RoundedCornerShape(12.dp))
-              .padding(12.dp),
-          contentAlignment = Alignment.Center,
-        ) {
-          Icon(
-            imageVector = Icons.Default.QrCode,
-            contentDescription = "${entity.label} QR Matrix",
-            tint = Color(0xFF111827),
-            modifier = Modifier.size(116.dp),
-          )
         }
 
         Text(
           text = entity.label,
-          style =
-            MaterialTheme.typography.titleSmall.copy(
-              fontWeight = FontWeight.Bold,
-              color = Color(0xFF111827),
-            ),
+          style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+          color = MaterialTheme.colorScheme.onSurface,
         )
-        Box(
-          modifier =
-            Modifier.clip(RoundedCornerShape(8.dp))
-              .background(Color(0xFFE8F5E9))
-              .border(1.dp, Color(0xFF2E7D32), RoundedCornerShape(8.dp))
-              .padding(horizontal = 10.dp, vertical = 4.dp)
-        ) {
-          Text(
-            text = "GeoID: ${entity.geoId}",
-            style =
-              MaterialTheme.typography.labelSmall.copy(
-                fontFamily = FontFamily.Monospace,
-                fontWeight = FontWeight.Bold,
-                color = Color(0xFF1B5E20),
-              ),
-          )
-        }
+        GroundTonalBadge(
+          text = "GeoID: ${entity.geoId}",
+          tone = GroundBadgeTone.PRIMARY,
+          monospace = true,
+        )
         Text(
           text = "Scan with Ground or any EUDR compliance reader to verify ${entity.singularTypeLabel.lowercase()} geometry & GeoID.",
-          style = MaterialTheme.typography.labelSmall.copy(color = Color(0xFF6B7280)),
+          style = MaterialTheme.typography.labelSmall,
+          color = MaterialTheme.colorScheme.onSurfaceVariant,
+          textAlign = TextAlign.Center,
         )
-
-        Row(
-          modifier = Modifier.fillMaxWidth(),
-          horizontalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-          OutlinedButton(
-            onClick = { state.closeEntityQrCode() },
-            modifier = Modifier.weight(1f),
-            shape = RoundedCornerShape(10.dp),
-          ) {
-            Text("Close")
-          }
-          Button(
-            onClick = {
-              state.closeEntityQrCode()
-              state.shareEntityPdf(entity.id)
-            },
-            modifier = Modifier.weight(1f),
-            shape = RoundedCornerShape(10.dp),
-            colors =
-              ButtonDefaults.buttonColors(
-                containerColor = Color(0xFF1E6F50),
-                contentColor = Color.White,
-              ),
-          ) {
-            Icon(
-              imageVector = Icons.Default.Share,
-              contentDescription = null,
-              modifier = Modifier.size(13.dp),
-            )
-            Spacer(modifier = Modifier.width(4.dp))
-            Text("Share PDF")
-          }
-        }
       }
-    }
-  }
+    },
+    confirmButton = {
+      Button(
+        onClick = {
+          state.closeEntityQrCode()
+          state.shareEntityPdf(entity.id)
+        }
+      ) {
+        Icon(
+          imageVector = Icons.Default.Share,
+          contentDescription = null,
+          modifier = Modifier.size(14.dp),
+        )
+        Spacer(modifier = Modifier.width(6.dp))
+        Text("Share PDF")
+      }
+    },
+    dismissButton = {
+      TextButton(onClick = { state.closeEntityQrCode() }) {
+        Text("Close")
+      }
+    },
+  )
 }
 
 /**
- * Modal dialog allowing the user to share a generated offline PDF receipt for either a Geospatial
- * Entity or a Submission (`state.activeSharedPdfSheet`) to their preferred messaging/email app.
+ * Modal bottom sheet allowing the user to share a generated offline PDF receipt for either a
+ * Geospatial Entity or a Submission (`state.activeSharedPdfSheet`) to their preferred app.
  */
 @Composable
 private fun SharePdfToAppModalDialog(
   state: PrototypeAppState,
   sheet: SharedPdfSheetState,
 ) {
-  Box(
-    modifier =
-      Modifier.fillMaxSize()
-        .background(Color.Black.copy(alpha = 0.5f))
-        .clickable { state.closeSharePdfSheet() },
-    contentAlignment = Alignment.Center,
+  GroundModalBottomSheetOverlay(
+    onDismissRequest = { state.closeSharePdfSheet() }
   ) {
-    Card(
+    Column(
       modifier =
-        Modifier.width(330.dp)
-          .clickable(enabled = false) {},
-      shape = RoundedCornerShape(18.dp),
-      colors = CardDefaults.cardColors(containerColor = Color.White),
-      elevation = CardDefaults.cardElevation(defaultElevation = 14.dp),
+        Modifier.fillMaxWidth()
+          .padding(horizontal = 20.dp)
+          .padding(bottom = 24.dp),
+      verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-      Column(
-        modifier = Modifier.padding(18.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp),
+      Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
       ) {
         Row(
-          modifier = Modifier.fillMaxWidth(),
-          horizontalArrangement = Arrangement.SpaceBetween,
           verticalAlignment = Alignment.CenterVertically,
+          horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-          Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(6.dp),
-          ) {
-            Icon(
-              imageVector = Icons.Default.Share,
-              contentDescription = null,
-              tint = Color(0xFF1E6F50),
-              modifier = Modifier.size(18.dp),
-            )
-            Text(
-              text = "Share PDF to Preferred App",
-              style =
-                MaterialTheme.typography.titleSmall.copy(
-                  fontWeight = FontWeight.Bold,
-                  color = Color(0xFF111827),
-                ),
-            )
-          }
-          Box(
-            modifier =
-              Modifier.clip(CircleShape)
-                .background(Color(0xFFF3F4F6))
-                .clickable { state.closeSharePdfSheet() }
-                .padding(5.dp)
-          ) {
-            Icon(
-              imageVector = Icons.Default.Close,
-              contentDescription = "Close Share PDF Modal",
-              tint = Color(0xFF374151),
-              modifier = Modifier.size(14.dp),
-            )
-          }
+          Icon(
+            imageVector = Icons.Default.Share,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.size(20.dp),
+          )
+          Text(
+            text = "Share PDF to Preferred App",
+            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+            color = MaterialTheme.colorScheme.onSurface,
+          )
         }
+        IconButton(onClick = { state.closeSharePdfSheet() }) {
+          Icon(
+            imageVector = Icons.Default.Close,
+            contentDescription = "Close Share PDF Sheet",
+          )
+        }
+      }
 
-        // PDF attachment preview card
+      // PDF attachment preview card
+      OutlinedCard(
+        modifier = Modifier.fillMaxWidth(),
+        shape = MaterialTheme.shapes.medium,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary),
+        colors =
+          CardDefaults.outlinedCardColors(
+            containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.4f)
+          ),
+      ) {
         Row(
-          modifier =
-            Modifier.fillMaxWidth()
-              .clip(RoundedCornerShape(10.dp))
-              .background(Color(0xFFEFF6F2))
-              .border(1.dp, Color(0xFF1E6F50), RoundedCornerShape(10.dp))
-              .padding(10.dp),
+          modifier = Modifier.fillMaxWidth().padding(12.dp),
           verticalAlignment = Alignment.CenterVertically,
           horizontalArrangement = Arrangement.spacedBy(10.dp),
         ) {
           Icon(
             imageVector = Icons.Default.PictureAsPdf,
             contentDescription = null,
-            tint = Color(0xFFD32F2F),
+            tint = MaterialTheme.colorScheme.error,
             modifier = Modifier.size(26.dp),
           )
           Column(modifier = Modifier.weight(1f)) {
@@ -3595,61 +3075,49 @@ private fun SharePdfToAppModalDialog(
                 MaterialTheme.typography.labelMedium.copy(
                   fontFamily = FontFamily.Monospace,
                   fontWeight = FontWeight.Bold,
-                  color = Color(0xFF111827),
                 ),
+              color = MaterialTheme.colorScheme.onSurface,
             )
             Text(
               text = "${sheet.title} • ${sheet.subtitle}",
-              style = MaterialTheme.typography.labelSmall.copy(color = Color(0xFF374151)),
+              style = MaterialTheme.typography.labelSmall,
+              color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
           }
         }
+      }
 
-        Text(
-          text = "Select preferred application to send offline PDF receipt:",
-          style = MaterialTheme.typography.labelSmall.copy(color = Color(0xFF4B5563)),
-        )
+      Text(
+        text = "Select preferred application to send offline PDF receipt:",
+        style = MaterialTheme.typography.labelMedium,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+      )
 
-        Row(
-          modifier = Modifier.fillMaxWidth(),
-          horizontalArrangement = Arrangement.spacedBy(6.dp),
-        ) {
-          listOf("WhatsApp", "Gmail", "Google Drive", "Bluetooth").forEachIndexed { index, appName ->
-            val isPreferred = index == 0
-            Box(
-              modifier =
-                Modifier.weight(1f)
-                  .clip(RoundedCornerShape(8.dp))
-                  .background(if (isPreferred) Color(0xFF1E6F50) else Color(0xFFF3F4F6))
-                  .clickable { state.closeSharePdfSheet() }
-                  .padding(vertical = 8.dp),
-              contentAlignment = Alignment.Center,
-            ) {
+      Row(
+        modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+      ) {
+        listOf("WhatsApp", "Gmail", "Google Drive", "Bluetooth").forEachIndexed { index, appName ->
+          val isPreferred = index == 0
+          FilterChip(
+            selected = isPreferred,
+            onClick = { state.closeSharePdfSheet() },
+            label = {
               Text(
                 text = appName,
-                style =
-                  MaterialTheme.typography.labelSmall.copy(
-                    fontSize = 9.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = if (isPreferred) Color.White else Color(0xFF374151),
-                  ),
+                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
               )
-            }
-          }
+            },
+          )
         }
+      }
 
-        Button(
-          onClick = { state.closeSharePdfSheet() },
-          modifier = Modifier.fillMaxWidth(),
-          shape = RoundedCornerShape(10.dp),
-          colors =
-            ButtonDefaults.buttonColors(
-              containerColor = Color(0xFF1E6F50),
-              contentColor = Color.White,
-            ),
-        ) {
-          Text("Done")
-        }
+      Button(
+        onClick = { state.closeSharePdfSheet() },
+        modifier = Modifier.fillMaxWidth(),
+        shape = MaterialTheme.shapes.medium,
+      ) {
+        Text("Done")
       }
     }
   }
@@ -3661,8 +3129,6 @@ private fun SharePdfToAppModalDialog(
  */
 @Composable
 private fun ManageOfflineMapsSubScreen(state: PrototypeAppState) {
-  val textColor = MaterialTheme.colorScheme.onSurface
-
   Column(
     modifier =
       Modifier.fillMaxSize()
@@ -3682,21 +3148,18 @@ private fun ManageOfflineMapsSubScreen(state: PrototypeAppState) {
         Icon(
           imageVector = Icons.Default.Map,
           contentDescription = null,
-          tint = Color(0xFF1E6F50),
+          tint = MaterialTheme.colorScheme.primary,
           modifier = Modifier.size(20.dp),
         )
         Text(
           text = "Manage Offline Maps",
-          style =
-            MaterialTheme.typography.titleMedium.copy(
-              fontWeight = FontWeight.Bold,
-              color = textColor,
-            ),
+          style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+          color = MaterialTheme.colorScheme.onSurface,
         )
       }
       OutlinedButton(
         onClick = { state.closeDrawerSubView() },
-        shape = RoundedCornerShape(10.dp),
+        shape = MaterialTheme.shapes.small,
       ) {
         Icon(
           imageVector = Icons.AutoMirrored.Filled.ArrowBack,
@@ -3710,8 +3173,11 @@ private fun ManageOfflineMapsSubScreen(state: PrototypeAppState) {
 
     Card(
       modifier = Modifier.fillMaxWidth(),
-      shape = RoundedCornerShape(12.dp),
-      colors = CardDefaults.cardColors(containerColor = Color(0xFFE8F5E9)),
+      shape = MaterialTheme.shapes.medium,
+      colors =
+        CardDefaults.cardColors(
+          containerColor = MaterialTheme.colorScheme.secondaryContainer
+        ),
     ) {
       Column(
         modifier = Modifier.padding(12.dp),
@@ -3724,33 +3190,32 @@ private fun ManageOfflineMapsSubScreen(state: PrototypeAppState) {
           Icon(
             imageVector = Icons.Default.CheckCircle,
             contentDescription = null,
-            tint = Color(0xFF1B5E20),
+            tint = MaterialTheme.colorScheme.onSecondaryContainer,
             modifier = Modifier.size(15.dp),
           )
           Text(
             text = "Device Storage Safeguard Active (4.2 GB Available)",
-            style =
-              MaterialTheme.typography.labelMedium.copy(
-                fontWeight = FontWeight.Bold,
-                color = Color(0xFF1B5E20),
-              ),
+            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+            color = MaterialTheme.colorScheme.onSecondaryContainer,
           )
         }
         Text(
           text =
             "Pre-cached Mapbox vector & satellite raster tiles across zoom levels 10–19. Downloads automatically pause if device storage drops below 500 MB.",
-          style = MaterialTheme.typography.labelSmall.copy(color = Color(0xFF2E7D32)),
+          style = MaterialTheme.typography.labelSmall,
+          color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.85f),
         )
       }
     }
 
     state.offlineTilePackages.forEach { pkg ->
-      Card(
-        modifier =
-          Modifier.fillMaxWidth()
-            .border(1.dp, Color(0xFFDDE5E0), RoundedCornerShape(12.dp)),
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+      OutlinedCard(
+        modifier = Modifier.fillMaxWidth(),
+        shape = MaterialTheme.shapes.medium,
+        colors =
+          CardDefaults.outlinedCardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+          ),
       ) {
         Row(
           modifier = Modifier.fillMaxWidth().padding(12.dp),
@@ -3763,41 +3228,47 @@ private fun ManageOfflineMapsSubScreen(state: PrototypeAppState) {
           ) {
             Text(
               text = pkg.regionName,
-              style =
-                MaterialTheme.typography.labelLarge.copy(
-                  fontWeight = FontWeight.Bold,
-                  color = Color(0xFF111827),
-                ),
+              style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+              color = MaterialTheme.colorScheme.onSurface,
             )
             Text(
               text = "${pkg.tileTypeLabel} • ${pkg.zoomRangeLabel} • ${pkg.sizeLabel}",
-              style = MaterialTheme.typography.labelSmall.copy(color = Color(0xFF6B7280)),
+              style = MaterialTheme.typography.labelSmall,
+              color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
           }
-          Button(
-            onClick = { state.toggleOfflineTilePackage(pkg.id) },
-            colors =
-              ButtonDefaults.buttonColors(
-                containerColor = if (pkg.isDownloaded) Color(0xFFE8F5E9) else Color(0xFF1E6F50),
-                contentColor = if (pkg.isDownloaded) Color(0xFF1B5E20) else Color.White,
-              ),
-            shape = RoundedCornerShape(16.dp),
-          ) {
-            Icon(
-              imageVector =
-                if (pkg.isDownloaded) {
-                  Icons.Default.Check
-                } else {
-                  Icons.Default.Download
-                },
-              contentDescription = null,
-              modifier = Modifier.size(14.dp),
-            )
-            Spacer(modifier = Modifier.width(4.dp))
-            Text(
-              text = if (pkg.isDownloaded) "Cached" else "Download",
-              style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-            )
+          if (pkg.isDownloaded) {
+            FilledTonalButton(
+              onClick = { state.toggleOfflineTilePackage(pkg.id) },
+              shape = MaterialTheme.shapes.large,
+            ) {
+              Icon(
+                imageVector = Icons.Default.Check,
+                contentDescription = null,
+                modifier = Modifier.size(14.dp),
+              )
+              Spacer(modifier = Modifier.width(4.dp))
+              Text(
+                text = "Cached",
+                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+              )
+            }
+          } else {
+            Button(
+              onClick = { state.toggleOfflineTilePackage(pkg.id) },
+              shape = MaterialTheme.shapes.large,
+            ) {
+              Icon(
+                imageVector = Icons.Default.Download,
+                contentDescription = null,
+                modifier = Modifier.size(14.dp),
+              )
+              Spacer(modifier = Modifier.width(4.dp))
+              Text(
+                text = "Download",
+                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+              )
+            }
           }
         }
       }

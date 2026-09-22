@@ -13,6 +13,7 @@
  */
 package org.groundplatform.v2.devtools.prototypeapp
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -44,7 +45,6 @@ import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Download
-import androidx.compose.material.icons.filled.Explore
 import androidx.compose.material.icons.filled.Layers
 import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.LocationOn
@@ -59,21 +59,35 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Smartphone
 import androidx.compose.material.icons.filled.Tablet
 import androidx.compose.material.icons.filled.Timeline
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.CheckboxDefaults
+import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -95,7 +109,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import org.groundplatform.v2.core.forms.ui.GroundAlertDialogOverlay
+import org.groundplatform.v2.core.forms.ui.GroundBadgeTone
 import org.groundplatform.v2.core.forms.ui.GroundTheme
+import org.groundplatform.v2.core.forms.ui.GroundTonalBadge
 
 /**
  * Root Compose Multiplatform Web application for `baobab/devtools/prototypeApp`.
@@ -114,7 +131,12 @@ fun PrototypeApp(state: PrototypeAppState = remember { PrototypeAppState() }) {
   GroundTheme(darkTheme = state.isDarkTheme) {
     Surface(
       modifier = Modifier.fillMaxSize(),
-      color = if (isMapShowing) Color.Transparent else Color(0xFFF0F4F1),
+      color =
+        if (isMapShowing) {
+          Color.Transparent
+        } else {
+          MaterialTheme.colorScheme.surfaceContainerLowest
+        },
     ) {
       Column(modifier = Modifier.fillMaxSize()) {
         PrototypeWorkbenchTopBar(state)
@@ -163,15 +185,32 @@ fun PrototypeApp(state: PrototypeAppState = remember { PrototypeAppState() }) {
 /** Top navigation bar for the Web UX Prototype Workbench. */
 @Composable
 private fun PrototypeWorkbenchTopBar(state: PrototypeAppState) {
+  val chipColors =
+    androidx.compose.material3.FilterChipDefaults.filterChipColors(
+      containerColor = Color(0xFF1F4E39),
+      labelColor = Color.White,
+      iconColor = Color.White,
+      selectedContainerColor = Color(0xFF8BD6B1),
+      selectedLabelColor = Color(0xFF003825),
+      selectedLeadingIconColor = Color(0xFF003825),
+    )
+  val assistColors =
+    androidx.compose.material3.AssistChipDefaults.assistChipColors(
+      containerColor = Color(0xFF1F4E39),
+      labelColor = Color.White,
+      leadingIconContentColor = Color(0xFF8BD6B1),
+    )
   Surface(
     modifier = Modifier.fillMaxWidth(),
-    color = Color(0xFF133A29),
+    color = MaterialTheme.colorScheme.inverseSurface,
+    contentColor = MaterialTheme.colorScheme.inverseOnSurface,
+    tonalElevation = 2.dp,
     shadowElevation = 4.dp,
   ) {
     Row(
       modifier =
         Modifier.fillMaxWidth()
-          .padding(horizontal = 20.dp, vertical = 12.dp)
+          .padding(horizontal = 20.dp, vertical = 10.dp)
           .horizontalScroll(rememberScrollState()),
       horizontalArrangement = Arrangement.SpaceBetween,
       verticalAlignment = Alignment.CenterVertically,
@@ -189,31 +228,28 @@ private fun PrototypeWorkbenchTopBar(state: PrototypeAppState) {
           ) {
             Text(
               text = "Ground 2.0 Mobile UI Prototype",
-              style =
-                MaterialTheme.typography.titleMedium.copy(
-                  color = Color.White,
-                  fontWeight = FontWeight.Bold,
-                ),
+              style = MaterialTheme.typography.titleMedium,
+              color = Color.White,
+              fontWeight = FontWeight.Bold,
             )
-            Box(
-              modifier =
-                Modifier.clip(RoundedCornerShape(6.dp))
-                  .background(Color(0xFF1E6F50))
-                  .padding(horizontal = 8.dp, vertical = 2.dp)
+            Surface(
+              shape = MaterialTheme.shapes.extraSmall,
+              color = Color(0xFF1E6F50),
             ) {
               Text(
                 text = "devtools/prototypeApp",
-                style =
-                  MaterialTheme.typography.labelSmall.copy(
-                    color = Color(0xFFC8E6C9),
-                    fontFamily = FontFamily.Monospace,
-                  ),
+                style = MaterialTheme.typography.labelSmall,
+                color = Color(0xFFC8E6C9),
+                fontFamily = FontFamily.Monospace,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
               )
             }
           }
           Text(
             text = "Compose Multiplatform Mobile & Tablet UI Preview & UX Co-Design Workbench",
-            style = MaterialTheme.typography.labelSmall.copy(color = Color(0xFFA7C4B5)),
+            style = MaterialTheme.typography.labelSmall,
+            color = Color(0xFFA7C4B5),
           )
         }
       }
@@ -227,40 +263,30 @@ private fun PrototypeWorkbenchTopBar(state: PrototypeAppState) {
       ) {
         PrototypeScreen.entries.forEach { screen ->
           val isSelected = state.currentScreen == screen
-          Box(
-            modifier =
-              Modifier.clip(RoundedCornerShape(20.dp))
-                .background(if (isSelected) Color(0xFF8BD6B1) else Color(0xFF1F4E39))
-                .border(
-                  width = 1.dp,
-                  color = if (isSelected) Color(0xFF8BD6B1) else Color(0xFF386B52),
-                  shape = RoundedCornerShape(20.dp),
-                )
-                .clickable { state.navigateTo(screen) }
-                .padding(horizontal = 12.dp, vertical = 6.dp)
-          ) {
-            Text(
-              text = "${screen.stepNumber}. ${screen.title}",
-              style =
-                MaterialTheme.typography.labelMedium.copy(
-                  color = if (isSelected) Color(0xFF003825) else Color.White,
-                  fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                ),
-            )
-          }
+          FilterChip(
+            selected = isSelected,
+            onClick = { state.navigateTo(screen) },
+            colors = chipColors,
+            border =
+              androidx.compose.material3.FilterChipDefaults.filterChipBorder(
+                enabled = true,
+                selected = isSelected,
+                borderColor = Color(0xFF386B52),
+                selectedBorderColor = Color(0xFF8BD6B1),
+              ),
+            label = {
+              Text(
+                text = "${screen.stepNumber}. ${screen.title}",
+                style = MaterialTheme.typography.labelMedium,
+                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+              )
+            },
+          )
         }
 
         // Segmented Form Factor Toggle: Mobile | Tablet
-        Row(
-          modifier =
-            Modifier.clip(RoundedCornerShape(10.dp))
-              .background(Color(0xFF194230))
-              .border(1.dp, Color(0xFF386B52), RoundedCornerShape(10.dp))
-              .padding(2.dp),
-          horizontalArrangement = Arrangement.spacedBy(2.dp),
-          verticalAlignment = Alignment.CenterVertically,
-        ) {
-          DeviceFormFactor.entries.forEach { factor ->
+        SingleChoiceSegmentedButtonRow {
+          DeviceFormFactor.entries.forEachIndexed { index, factor ->
             val selected = state.deviceFormFactor == factor
             val icon =
               if (factor == DeviceFormFactor.MOBILE) {
@@ -268,123 +294,123 @@ private fun PrototypeWorkbenchTopBar(state: PrototypeAppState) {
               } else {
                 Icons.Default.Tablet
               }
-            Row(
-              modifier =
-                Modifier.clip(RoundedCornerShape(8.dp))
-                  .background(if (selected) Color(0xFF8BD6B1) else Color.Transparent)
-                  .clickable { state.selectDeviceFormFactor(factor) }
-                  .padding(horizontal = 10.dp, vertical = 5.dp),
-              verticalAlignment = Alignment.CenterVertically,
-              horizontalArrangement = Arrangement.spacedBy(4.dp),
-            ) {
-              Icon(
-                imageVector = icon,
-                contentDescription = factor.label,
-                tint = if (selected) Color(0xFF003825) else Color.White,
-                modifier = Modifier.size(14.dp),
-              )
-              Text(
-                text = factor.label,
-                maxLines = 1,
-                softWrap = false,
-                style =
-                  MaterialTheme.typography.labelMedium.copy(
-                    color = if (selected) Color(0xFF003825) else Color.White,
-                    fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
-                  ),
-              )
-            }
+            SegmentedButton(
+              selected = selected,
+              onClick = { state.selectDeviceFormFactor(factor) },
+              shape =
+                SegmentedButtonDefaults.itemShape(
+                  index = index,
+                  count = DeviceFormFactor.entries.size,
+                ),
+              colors =
+                SegmentedButtonDefaults.colors(
+                  activeContainerColor = Color(0xFF8BD6B1),
+                  activeContentColor = Color(0xFF003825),
+                  activeBorderColor = Color(0xFF8BD6B1),
+                  inactiveContainerColor = Color(0xFF194230),
+                  inactiveContentColor = Color.White,
+                  inactiveBorderColor = Color(0xFF386B52),
+                ),
+              icon = {
+                Icon(
+                  imageVector = icon,
+                  contentDescription = factor.label,
+                  modifier = Modifier.size(15.dp),
+                )
+              },
+              label = {
+                Text(
+                  text = factor.label,
+                  maxLines = 1,
+                  softWrap = false,
+                  style = MaterialTheme.typography.labelMedium,
+                )
+              },
+            )
           }
         }
 
         // Rotate Device widget button in top bar
-        Row(
-          modifier =
-            Modifier.clip(RoundedCornerShape(8.dp))
-              .background(if (state.isDeviceRotated) Color(0xFF8BD6B1) else Color(0xFF245840))
-              .border(
-                1.dp,
-                if (state.isDeviceRotated) Color(0xFF8BD6B1) else Color(0xFF386B52),
-                RoundedCornerShape(8.dp),
-              )
-              .clickable { state.rotateDevice() }
-              .padding(horizontal = 10.dp, vertical = 6.dp),
-          verticalAlignment = Alignment.CenterVertically,
-          horizontalArrangement = Arrangement.spacedBy(5.dp),
-        ) {
-          Icon(
-            imageVector = Icons.Default.ScreenRotation,
-            contentDescription = "Rotate device",
-            tint = if (state.isDeviceRotated) Color(0xFF003825) else Color.White,
-            modifier = Modifier.size(14.dp),
-          )
-          Text(
-            text = "Rotate (${state.deviceOrientation.label})",
-            maxLines = 1,
-            softWrap = false,
-            style =
-              MaterialTheme.typography.labelMedium.copy(
-                color = if (state.isDeviceRotated) Color(0xFF003825) else Color.White,
-                fontWeight = if (state.isDeviceRotated) FontWeight.Bold else FontWeight.SemiBold,
-              ),
-          )
-        }
+        FilterChip(
+          selected = state.isDeviceRotated,
+          onClick = { state.rotateDevice() },
+          colors = chipColors,
+          border =
+            androidx.compose.material3.FilterChipDefaults.filterChipBorder(
+              enabled = true,
+              selected = state.isDeviceRotated,
+              borderColor = Color(0xFF386B52),
+              selectedBorderColor = Color(0xFF8BD6B1),
+            ),
+          leadingIcon = {
+            Icon(
+              imageVector = Icons.Default.ScreenRotation,
+              contentDescription = "Rotate device",
+              modifier = Modifier.size(15.dp),
+            )
+          },
+          label = {
+            Text(
+              text = "Rotate (${state.deviceOrientation.label})",
+              maxLines = 1,
+              softWrap = false,
+              style = MaterialTheme.typography.labelMedium,
+            )
+          },
+        )
 
         // Theme toggle button
-        Row(
-          modifier =
-            Modifier.clip(RoundedCornerShape(8.dp))
-              .background(Color(0xFF245840))
-              .clickable { state.toggleDarkTheme() }
-              .padding(horizontal = 10.dp, vertical = 6.dp),
-          verticalAlignment = Alignment.CenterVertically,
-          horizontalArrangement = Arrangement.spacedBy(5.dp),
-        ) {
-          Icon(
-            imageVector = if (state.isDarkTheme) Icons.Default.LightMode else Icons.Default.DarkMode,
-            contentDescription = null,
-            tint = Color.White,
-            modifier = Modifier.size(14.dp),
-          )
-          Text(
-            text = if (state.isDarkTheme) "Light UI" else "Dark UI",
-            maxLines = 1,
-            softWrap = false,
-            style =
-              MaterialTheme.typography.labelMedium.copy(
-                color = Color.White,
-                fontWeight = FontWeight.SemiBold,
-              ),
-          )
-        }
+        AssistChip(
+          onClick = { state.toggleDarkTheme() },
+          colors = assistColors,
+          border =
+            androidx.compose.material3.AssistChipDefaults.assistChipBorder(
+              enabled = true,
+              borderColor = Color(0xFF386B52),
+            ),
+          leadingIcon = {
+            Icon(
+              imageVector =
+                if (state.isDarkTheme) Icons.Default.LightMode else Icons.Default.DarkMode,
+              contentDescription = null,
+              modifier = Modifier.size(15.dp),
+            )
+          },
+          label = {
+            Text(
+              text = if (state.isDarkTheme) "Light UI" else "Dark UI",
+              maxLines = 1,
+              softWrap = false,
+              style = MaterialTheme.typography.labelMedium,
+            )
+          },
+        )
 
         // Reset Flow button
-        Row(
-          modifier =
-            Modifier.clip(RoundedCornerShape(8.dp))
-              .background(Color(0xFF374151))
-              .clickable { state.resetPrototypeFlow() }
-              .padding(horizontal = 10.dp, vertical = 6.dp),
-          verticalAlignment = Alignment.CenterVertically,
-          horizontalArrangement = Arrangement.spacedBy(5.dp),
-        ) {
-          Icon(
-            imageVector = Icons.Default.Refresh,
-            contentDescription = null,
-            tint = Color.White,
-            modifier = Modifier.size(14.dp),
-          )
-          Text(
-            text = "Reset Flow",
-            maxLines = 1,
-            softWrap = false,
-            style =
-              MaterialTheme.typography.labelMedium.copy(
-                color = Color.White,
-                fontWeight = FontWeight.SemiBold,
-              ),
-          )
-        }
+        AssistChip(
+          onClick = { state.resetPrototypeFlow() },
+          colors = assistColors,
+          border =
+            androidx.compose.material3.AssistChipDefaults.assistChipBorder(
+              enabled = true,
+              borderColor = Color(0xFF386B52),
+            ),
+          leadingIcon = {
+            Icon(
+              imageVector = Icons.Default.Refresh,
+              contentDescription = null,
+              modifier = Modifier.size(15.dp),
+            )
+          },
+          label = {
+            Text(
+              text = "Reset Flow",
+              maxLines = 1,
+              softWrap = false,
+              style = MaterialTheme.typography.labelMedium,
+            )
+          },
+        )
       }
     }
   }
@@ -426,11 +452,9 @@ fun MobileDevicePreviewFrame(
           text = deviceTitle,
           maxLines = 1,
           overflow = TextOverflow.Ellipsis,
-          style =
-            MaterialTheme.typography.labelMedium.copy(
-              fontWeight = FontWeight.Bold,
-              color = Color(0xFF144532),
-            ),
+          style = MaterialTheme.typography.labelMedium,
+          color = MaterialTheme.colorScheme.primary,
+          fontWeight = FontWeight.Bold,
         )
         Text(
           text = "Viewport: ${formFactor.label} • ${orientation.label} ($dimensionsLabel)",
@@ -438,7 +462,7 @@ fun MobileDevicePreviewFrame(
           overflow = TextOverflow.Ellipsis,
           style =
             MaterialTheme.typography.labelSmall.copy(
-              color = Color(0xFF4B5563),
+              color = MaterialTheme.colorScheme.onSurfaceVariant,
               fontFamily = FontFamily.Monospace,
             ),
         )
@@ -448,17 +472,9 @@ fun MobileDevicePreviewFrame(
         horizontalArrangement = Arrangement.spacedBy(6.dp),
         verticalAlignment = Alignment.CenterVertically,
       ) {
-        // Segmented Form Factor Pill Switcher right above the device frame
-        Row(
-          modifier =
-            Modifier.clip(RoundedCornerShape(10.dp))
-              .background(Color(0xFFE2ECE6))
-              .border(1.dp, Color(0xFFB7D1C3), RoundedCornerShape(10.dp))
-              .padding(2.dp),
-          horizontalArrangement = Arrangement.spacedBy(2.dp),
-          verticalAlignment = Alignment.CenterVertically,
-        ) {
-          DeviceFormFactor.entries.forEach { factor ->
+        // Segmented Form Factor Switcher right above the device frame
+        SingleChoiceSegmentedButtonRow {
+          DeviceFormFactor.entries.forEachIndexed { index, factor ->
             val isSelected = formFactor == factor
             val icon =
               if (factor == DeviceFormFactor.MOBILE) {
@@ -466,67 +482,53 @@ fun MobileDevicePreviewFrame(
               } else {
                 Icons.Default.Tablet
               }
-            Row(
-              modifier =
-                Modifier.clip(RoundedCornerShape(8.dp))
-                  .background(if (isSelected) Color(0xFF1E6F50) else Color.Transparent)
-                  .clickable { onSelectFormFactor(factor) }
-                  .padding(horizontal = 10.dp, vertical = 4.dp),
-              verticalAlignment = Alignment.CenterVertically,
-              horizontalArrangement = Arrangement.spacedBy(4.dp),
-            ) {
-              Icon(
-                imageVector = icon,
-                contentDescription = factor.label,
-                tint = if (isSelected) Color.White else Color(0xFF1F2937),
-                modifier = Modifier.size(13.dp),
-              )
-              Text(
-                text = factor.label,
-                maxLines = 1,
-                softWrap = false,
-                style =
-                  MaterialTheme.typography.labelSmall.copy(
-                    color = if (isSelected) Color.White else Color(0xFF1F2937),
-                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                  ),
-              )
-            }
+            SegmentedButton(
+              selected = isSelected,
+              onClick = { onSelectFormFactor(factor) },
+              shape =
+                SegmentedButtonDefaults.itemShape(
+                  index = index,
+                  count = DeviceFormFactor.entries.size,
+                ),
+              icon = {
+                Icon(
+                  imageVector = icon,
+                  contentDescription = factor.label,
+                  modifier = Modifier.size(14.dp),
+                )
+              },
+              label = {
+                Text(
+                  text = factor.label,
+                  maxLines = 1,
+                  softWrap = false,
+                  style = MaterialTheme.typography.labelSmall,
+                )
+              },
+            )
           }
         }
 
         // Rotate Device Widget right next to the Form Factor switcher
-        Row(
-          modifier =
-            Modifier.clip(RoundedCornerShape(10.dp))
-              .background(if (isRotated) Color(0xFF1E6F50) else Color(0xFFE2ECE6))
-              .border(
-                1.dp,
-                if (isRotated) Color(0xFF1E6F50) else Color(0xFFB7D1C3),
-                RoundedCornerShape(10.dp),
-              )
-              .clickable { onRotateDevice() }
-              .padding(horizontal = 10.dp, vertical = 6.dp),
-          verticalAlignment = Alignment.CenterVertically,
-          horizontalArrangement = Arrangement.spacedBy(4.dp),
-        ) {
-          Icon(
-            imageVector = Icons.Default.ScreenRotation,
-            contentDescription = "Rotate device",
-            tint = if (isRotated) Color.White else Color(0xFF144532),
-            modifier = Modifier.size(13.dp),
-          )
-          Text(
-            text = "Rotate",
-            maxLines = 1,
-            softWrap = false,
-            style =
-              MaterialTheme.typography.labelSmall.copy(
-                color = if (isRotated) Color.White else Color(0xFF144532),
-                fontWeight = FontWeight.Bold,
-              ),
-          )
-        }
+        FilterChip(
+          selected = isRotated,
+          onClick = { onRotateDevice() },
+          leadingIcon = {
+            Icon(
+              imageVector = Icons.Default.ScreenRotation,
+              contentDescription = "Rotate device",
+              modifier = Modifier.size(14.dp),
+            )
+          },
+          label = {
+            Text(
+              text = "Rotate",
+              maxLines = 1,
+              softWrap = false,
+              style = MaterialTheme.typography.labelSmall,
+            )
+          },
+        )
       }
     }
 
@@ -547,98 +549,96 @@ fun MobileDevicePreviewFrame(
           Modifier.fillMaxSize()
             .clip(innerShape)
             .background(
-              when {
-                isScreenTransparent -> Color.Transparent
-                isDarkTheme -> Color(0xFF191C1A)
-                else -> Color(0xFFFBFDF9)
+              if (isScreenTransparent) {
+                Color.Transparent
+              } else {
+                MaterialTheme.colorScheme.surface
               }
             )
       ) {
         // Device Status Bar
-        Row(
-          modifier =
-            Modifier.fillMaxWidth()
-              .background(Color(0xFF0E3A28))
-              .padding(horizontal = 20.dp, vertical = 7.dp),
-          horizontalArrangement = Arrangement.SpaceBetween,
-          verticalAlignment = Alignment.CenterVertically,
+        Surface(
+          color = MaterialTheme.colorScheme.surfaceContainerHighest,
+          contentColor = MaterialTheme.colorScheme.onSurface,
+          modifier = Modifier.fillMaxWidth(),
         ) {
-          Text(
-            text =
-              if (formFactor == DeviceFormFactor.TABLET || orientation == DeviceOrientation.LANDSCAPE) {
-                "09:41 • Wed Sep 19"
-              } else {
-                "09:41"
-              },
-            style =
-              MaterialTheme.typography.labelSmall.copy(
-                fontWeight = FontWeight.Bold,
-                color = Color.White,
-              ),
-          )
-          // Camera punch-hole notch (Mobile) or slim landscape bezel sensor (Tablet)
-          if (formFactor == DeviceFormFactor.MOBILE) {
-            Box(
-              modifier =
-                Modifier.width(68.dp).height(11.dp).clip(CircleShape).background(Color(0xFF061B12))
+          Row(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 6.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+          ) {
+            Text(
+              text =
+                if (
+                  formFactor == DeviceFormFactor.TABLET ||
+                    orientation == DeviceOrientation.LANDSCAPE
+                ) {
+                  "09:41 • Wed Sep 19"
+                } else {
+                  "09:41"
+                },
+              style = MaterialTheme.typography.labelSmall,
+              fontWeight = FontWeight.Bold,
             )
-          } else {
-            Row(
-              verticalAlignment = Alignment.CenterVertically,
-              horizontalArrangement = Arrangement.spacedBy(6.dp),
-            ) {
+            // Camera punch-hole notch (Mobile) or slim landscape bezel sensor (Tablet)
+            if (formFactor == DeviceFormFactor.MOBILE) {
               Box(
                 modifier =
-                  Modifier.size(8.dp).clip(CircleShape).background(Color(0xFF061B12))
+                  Modifier.width(68.dp).height(11.dp).clip(CircleShape).background(Color(0xFF061B12))
               )
-              Text(
-                text = "FIELD TABLET • HIGH-PRECISION GNSS",
-                style =
-                  MaterialTheme.typography.labelSmall.copy(
-                    fontSize = 9.sp,
-                    color = Color(0xFF8BD6B1),
-                    fontWeight = FontWeight.Bold,
-                  ),
-              )
+            } else {
+              Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+              ) {
+                Box(
+                  modifier = Modifier.size(8.dp).clip(CircleShape).background(Color(0xFF061B12))
+                )
+                Text(
+                  text = "FIELD TABLET • HIGH-PRECISION GNSS",
+                  style = MaterialTheme.typography.labelSmall,
+                  color = MaterialTheme.colorScheme.primary,
+                  fontWeight = FontWeight.Bold,
+                )
+              }
             }
+            Text(
+              text = "5G • 100%",
+              style = MaterialTheme.typography.labelSmall,
+              fontWeight = FontWeight.SemiBold,
+            )
           }
-          Text(
-            text = "5G • 100%",
-            style =
-              MaterialTheme.typography.labelSmall.copy(
-                fontWeight = FontWeight.SemiBold,
-                color = Color.White,
-              ),
-          )
         }
 
         // Embedded Compose Multiplatform Screen Content
         Box(modifier = Modifier.weight(1f).fillMaxWidth()) { content() }
 
         // Bottom Gesture Navigation Bar
-        Box(
-          modifier =
-            Modifier.fillMaxWidth()
-              .background(if (isDarkTheme) Color(0xFF111412) else Color.White)
-              .padding(vertical = 7.dp),
-          contentAlignment = Alignment.Center,
+        Surface(
+          color = MaterialTheme.colorScheme.surfaceContainer,
+          modifier = Modifier.fillMaxWidth(),
         ) {
           Box(
-            modifier =
-              Modifier.width(
-                  if (
-                    formFactor == DeviceFormFactor.TABLET ||
-                      orientation == DeviceOrientation.LANDSCAPE
-                  ) {
-                    160.dp
-                  } else {
-                    116.dp
-                  }
-                )
-                .height(4.dp)
-                .clip(CircleShape)
-                .background(Color(0xFF9CA3AF))
-          )
+            modifier = Modifier.fillMaxWidth().padding(vertical = 7.dp),
+            contentAlignment = Alignment.Center,
+          ) {
+            Box(
+              modifier =
+                Modifier.width(
+                    if (
+                      formFactor == DeviceFormFactor.TABLET ||
+                        orientation == DeviceOrientation.LANDSCAPE
+                    ) {
+                      160.dp
+                    } else {
+                      116.dp
+                    }
+                  )
+                  .height(4.dp)
+                  .clip(CircleShape)
+                  .background(MaterialTheme.colorScheme.outline)
+            )
+          }
         }
       }
     }
@@ -820,7 +820,7 @@ fun GroundSplashScreen(state: PrototypeAppState) {
   Column(
     modifier =
       Modifier.fillMaxSize()
-        .background(Color(0xFF144532))
+        .background(MaterialTheme.colorScheme.primaryContainer)
         .verticalScroll(rememberScrollState())
         .padding(
           horizontal = 28.dp,
@@ -842,7 +842,7 @@ fun GroundSplashScreen(state: PrototypeAppState) {
         text = "Ground",
         style =
           MaterialTheme.typography.headlineLarge.copy(
-            color = Color.White,
+            color = MaterialTheme.colorScheme.onPrimaryContainer,
             fontWeight = FontWeight.ExtraBold,
             letterSpacing = 0.8.sp,
           ),
@@ -850,11 +850,9 @@ fun GroundSplashScreen(state: PrototypeAppState) {
 
       Text(
         text = "Community-centered geospatial data collection",
-        style =
-          MaterialTheme.typography.bodyMedium.copy(
-            color = Color(0xFFC8E6C9),
-            textAlign = TextAlign.Center,
-          ),
+        style = MaterialTheme.typography.bodyMedium,
+        color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.85f),
+        textAlign = TextAlign.Center,
       )
 
       Spacer(modifier = Modifier.height(if (isCompactHeight) 6.dp else 20.dp))
@@ -867,12 +865,13 @@ fun GroundSplashScreen(state: PrototypeAppState) {
       ) {
         LinearProgressIndicator(
           modifier = Modifier.fillMaxWidth().height(6.dp).clip(CircleShape),
-          color = Color(0xFF8BD6B1),
-          trackColor = Color(0xFF235C44),
+          color = MaterialTheme.colorScheme.primary,
+          trackColor = MaterialTheme.colorScheme.surfaceContainerHighest,
         )
         Text(
           text = "Initializing offline map engine & workspace...",
-          style = MaterialTheme.typography.labelSmall.copy(color = Color(0xFFA7C4B5)),
+          style = MaterialTheme.typography.labelSmall,
+          color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.78f),
           textAlign = TextAlign.Center,
         )
       }
@@ -889,16 +888,12 @@ fun GroundSplashScreen(state: PrototypeAppState) {
       Button(
         onClick = { state.completeSplashLoading() },
         modifier = Modifier.fillMaxWidth(),
-        colors =
-          ButtonDefaults.buttonColors(
-            containerColor = Color(0xFF8BD6B1),
-            contentColor = Color(0xFF003825),
-          ),
-        shape = RoundedCornerShape(14.dp),
+        shape = MaterialTheme.shapes.large,
       ) {
         Text(
           text = "Continue to Sign In",
-          style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+          style = MaterialTheme.typography.labelLarge,
+          fontWeight = FontWeight.Bold,
         )
         Spacer(modifier = Modifier.width(6.dp))
         Icon(
@@ -909,7 +904,8 @@ fun GroundSplashScreen(state: PrototypeAppState) {
       }
       Text(
         text = "Ground 2.0 Splash / Loading Screen • Tap to advance",
-        style = MaterialTheme.typography.labelSmall.copy(color = Color(0xFF88B39E)),
+        style = MaterialTheme.typography.labelSmall,
+        color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f),
       )
     }
   }
@@ -940,20 +936,16 @@ fun GroundSignInScreen(state: PrototypeAppState) {
       GroundCloudAcaciaLogo(modifier = Modifier.size(68.dp))
       Text(
         text = "Welcome to Ground",
-        style =
-          MaterialTheme.typography.headlineSmall.copy(
-            fontWeight = FontWeight.Bold,
-            color = onSurfaceColor,
-          ),
+        style = MaterialTheme.typography.headlineSmall,
+        color = onSurfaceColor,
+        fontWeight = FontWeight.Bold,
       )
       Text(
         text =
           "Collect field observations, map boundaries, and synchronize survey records offline.",
-        style =
-          MaterialTheme.typography.bodyMedium.copy(
-            color = onSurfaceColor.copy(alpha = 0.75f),
-            textAlign = TextAlign.Center,
-          ),
+        style = MaterialTheme.typography.bodyMedium,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        textAlign = TextAlign.Center,
       )
     }
 
@@ -962,11 +954,10 @@ fun GroundSignInScreen(state: PrototypeAppState) {
     // Center Field Survey Illustration Card
     Card(
       modifier = Modifier.fillMaxWidth(),
-      shape = RoundedCornerShape(20.dp),
+      shape = MaterialTheme.shapes.large,
       colors =
         CardDefaults.cardColors(
-          containerColor =
-            if (state.isDarkTheme) Color(0xFF22302A) else Color(0xFFEAF3EE)
+          containerColor = MaterialTheme.colorScheme.surfaceContainerLow
         ),
     ) {
       Column(
@@ -979,7 +970,7 @@ fun GroundSignInScreen(state: PrototypeAppState) {
           modifier =
             Modifier.fillMaxWidth()
               .height(132.dp)
-              .clip(RoundedCornerShape(14.dp))
+              .clip(MaterialTheme.shapes.medium)
               .background(Color(0xFF1B5E20))
         ) {
           Canvas(modifier = Modifier.fillMaxSize()) {
@@ -1030,36 +1021,36 @@ fun GroundSignInScreen(state: PrototypeAppState) {
             drawPath(path = poly, color = Color(0xFFA5D6A7), style = Stroke(width = 3f))
           }
 
-          Row(
-            modifier =
-              Modifier.align(Alignment.BottomStart)
-                .padding(10.dp)
-                .clip(RoundedCornerShape(8.dp))
-                .background(Color(0xCC0D3B10))
-                .padding(horizontal = 8.dp, vertical = 4.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(4.dp),
+          Surface(
+            color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.92f),
+            contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+            shape = MaterialTheme.shapes.small,
+            modifier = Modifier.align(Alignment.BottomStart).padding(10.dp),
           ) {
-            Icon(
-              imageVector = Icons.Default.LocationOn,
-              contentDescription = null,
-              tint = Color(0xFF8BD6B1),
-              modifier = Modifier.size(13.dp),
-            )
-            Text(
-              text = "Offline Satellite & Vector Layers Ready",
-              style = MaterialTheme.typography.labelSmall.copy(color = Color.White),
-            )
+            Row(
+              modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+              verticalAlignment = Alignment.CenterVertically,
+              horizontalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
+              Icon(
+                imageVector = Icons.Default.LocationOn,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(13.dp),
+              )
+              Text(
+                text = "Offline Satellite & Vector Layers Ready",
+                style = MaterialTheme.typography.labelSmall,
+              )
+            }
           }
         }
 
         Text(
           text = "Sign in to access surveys shared with your account.",
-          style =
-            MaterialTheme.typography.bodySmall.copy(
-              color = onSurfaceColor.copy(alpha = 0.8f),
-              textAlign = TextAlign.Center,
-            ),
+          style = MaterialTheme.typography.bodySmall,
+          color = MaterialTheme.colorScheme.onSurfaceVariant,
+          textAlign = TextAlign.Center,
         )
       }
     }
@@ -1074,143 +1065,152 @@ fun GroundSignInScreen(state: PrototypeAppState) {
     ) {
       SignInLanguageSelector(state = state)
 
-      Button(
+      OutlinedButton(
         onClick = { state.signInWithGoogle() },
         modifier = Modifier.fillMaxWidth().height(52.dp),
-        shape = RoundedCornerShape(26.dp),
+        shape = MaterialTheme.shapes.extraLarge,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
         colors =
-          ButtonDefaults.buttonColors(
-            containerColor = Color.White,
-            contentColor = Color(0xFF1F1F1F),
+          ButtonDefaults.outlinedButtonColors(
+            containerColor = MaterialTheme.colorScheme.surface,
+            contentColor = MaterialTheme.colorScheme.onSurface,
           ),
-        elevation = ButtonDefaults.buttonElevation(defaultElevation = 2.dp),
       ) {
         Row(
           verticalAlignment = Alignment.CenterVertically,
           horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
           // Google 'G' Badge
-          Box(
-            modifier =
-              Modifier.size(26.dp)
-                .clip(CircleShape)
-                .background(Color(0xFFF1F3F4))
-                .border(1.dp, Color(0xFFDADCE0), CircleShape),
-            contentAlignment = Alignment.Center,
+          Surface(
+            modifier = Modifier.size(26.dp),
+            shape = CircleShape,
+            color = MaterialTheme.colorScheme.surfaceContainerHigh,
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
           ) {
-            Text(
-              text = "G",
-              style =
-                MaterialTheme.typography.titleSmall.copy(
-                  color = Color(0xFF4285F4),
-                  fontWeight = FontWeight.ExtraBold,
-                ),
-            )
+            Box(contentAlignment = Alignment.Center) {
+              Text(
+                text = "G",
+                style = MaterialTheme.typography.titleSmall,
+                color = Color(0xFF4285F4),
+                fontWeight = FontWeight.ExtraBold,
+              )
+            }
           }
           Text(
             text = strings.signInWithGoogle,
-            style =
-              MaterialTheme.typography.titleSmall.copy(
-                fontWeight = FontWeight.SemiBold,
-                color = Color(0xFF1F1F1F),
-              ),
+            style = MaterialTheme.typography.titleSmall,
+            color = MaterialTheme.colorScheme.onSurface,
+            fontWeight = FontWeight.SemiBold,
           )
         }
       }
 
       Text(
         text = "Authentication is currently limited to Google Accounts.",
-        style =
-          MaterialTheme.typography.labelSmall.copy(
-            color = onSurfaceColor.copy(alpha = 0.6f),
-            textAlign = TextAlign.Center,
-          ),
+        style = MaterialTheme.typography.labelSmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        textAlign = TextAlign.Center,
       )
     }
   }
 }
 
 /** 3. Terms of Service screen. */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GroundTermsOfServiceScreen(state: PrototypeAppState) {
-  val surfaceColor = MaterialTheme.colorScheme.surface
   val onSurfaceColor = MaterialTheme.colorScheme.onSurface
 
-  Column(modifier = Modifier.fillMaxSize().background(surfaceColor)) {
-    // Top App Bar
-    Row(
-      modifier =
-        Modifier.fillMaxWidth()
-          .background(Color(0xFF1E6F50))
-          .padding(horizontal = 16.dp, vertical = 14.dp),
-      verticalAlignment = Alignment.CenterVertically,
-      horizontalArrangement = Arrangement.spacedBy(12.dp),
-    ) {
-      Row(
-        modifier =
-          Modifier.clip(RoundedCornerShape(8.dp))
-            .background(Color(0xFF144D37))
-            .clickable { state.declineTermsOfService() }
-            .padding(horizontal = 10.dp, vertical = 4.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(4.dp),
-      ) {
-        Icon(
-          imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-          contentDescription = null,
-          tint = Color.White,
-          modifier = Modifier.size(14.dp),
-        )
-        Text(
-          text = "Back",
-          style =
-            MaterialTheme.typography.labelMedium.copy(
-              color = Color.White,
-              fontWeight = FontWeight.SemiBold,
-            ),
-        )
-      }
-      Column {
-        Text(
-          text = "Terms of Service",
-          style =
-            MaterialTheme.typography.titleMedium.copy(
-              color = Color.White,
+  Scaffold(
+    topBar = {
+      TopAppBar(
+        title = {
+          Column {
+            Text(
+              text = "Terms of Service",
+              style = MaterialTheme.typography.titleMedium,
               fontWeight = FontWeight.Bold,
-            ),
-        )
-        Text(
-          text = "Signed in as ${state.signedInUserEmail}",
-          style = MaterialTheme.typography.labelSmall.copy(color = Color(0xFFC8E6C9)),
-        )
+            )
+            Text(
+              text = "Signed in as ${state.signedInUserEmail}",
+              style = MaterialTheme.typography.labelSmall,
+              color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+          }
+        },
+        navigationIcon = {
+          IconButton(onClick = { state.declineTermsOfService() }) {
+            Icon(
+              imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+              contentDescription = "Back",
+            )
+          }
+        },
+        colors =
+          TopAppBarDefaults.topAppBarColors(
+            containerColor = MaterialTheme.colorScheme.surface,
+            titleContentColor = MaterialTheme.colorScheme.onSurface,
+            navigationIconContentColor = MaterialTheme.colorScheme.onSurface,
+          ),
+      )
+    },
+    bottomBar = {
+      Surface(
+        modifier = Modifier.fillMaxWidth(),
+        color = MaterialTheme.colorScheme.surfaceContainer,
+        tonalElevation = 3.dp,
+        shadowElevation = 4.dp,
+      ) {
+        Row(
+          modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
+          horizontalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+          OutlinedButton(
+            onClick = { state.declineTermsOfService() },
+            modifier = Modifier.weight(0.42f),
+            shape = MaterialTheme.shapes.medium,
+          ) {
+            Text("Decline")
+          }
+          Button(
+            onClick = { state.acceptTermsOfService() },
+            enabled = state.termsCheckboxChecked,
+            modifier = Modifier.weight(0.58f),
+            shape = MaterialTheme.shapes.medium,
+          ) {
+            Text(
+              text = "Agree & Continue",
+              style = MaterialTheme.typography.labelLarge,
+              fontWeight = FontWeight.Bold,
+            )
+          }
+        }
       }
-    }
-
+    },
+    containerColor = MaterialTheme.colorScheme.surface,
+  ) { innerPadding ->
     // Scrollable Terms of Service Body
     Column(
       modifier =
-        Modifier.weight(1f)
-          .fillMaxWidth()
+        Modifier.fillMaxSize()
+          .padding(innerPadding)
           .verticalScroll(rememberScrollState())
-          .padding(horizontal = 18.dp, vertical = 16.dp),
+          .padding(horizontal = 18.dp, vertical = 12.dp),
       verticalArrangement = Arrangement.spacedBy(14.dp),
     ) {
       Text(
         text = "Please review and accept the Ground Terms of Service before downloading surveys.",
-        style =
-          MaterialTheme.typography.bodyMedium.copy(
-            fontWeight = FontWeight.SemiBold,
-            color = onSurfaceColor,
-          ),
+        style = MaterialTheme.typography.bodyMedium,
+        color = onSurfaceColor,
+        fontWeight = FontWeight.SemiBold,
       )
 
-      Card(
+      OutlinedCard(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(14.dp),
+        shape = MaterialTheme.shapes.medium,
         colors =
-          CardDefaults.cardColors(
-            containerColor =
-              if (state.isDarkTheme) Color(0xFF232B27) else Color(0xFFF3F7F4)
+          CardDefaults.outlinedCardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLow
           ),
       ) {
         Column(
@@ -1222,31 +1222,27 @@ fun GroundTermsOfServiceScreen(state: PrototypeAppState) {
             title = "Survey Data Collection & Sharing",
             body =
               "Field observations, GPS coordinates, geometries, and photos collected in Ground are shared with the survey organizers who granted you access to each survey.",
-            onSurfaceColor = onSurfaceColor,
           )
-          HorizontalDivider(color = onSurfaceColor.copy(alpha = 0.1f))
+          HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
           TermsSectionItem(
             number = "2",
             title = "Offline Storage & Synchronization",
             body =
               "Downloaded survey definitions and map tiles are cached locally on your device for offline field work and automatically synchronized when connectivity is restored.",
-            onSurfaceColor = onSurfaceColor,
           )
-          HorizontalDivider(color = onSurfaceColor.copy(alpha = 0.1f))
+          HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
           TermsSectionItem(
             number = "3",
             title = "Location & Sensor Permissions",
             body =
               "Ground uses device location services when capturing points, polygons, or transects during active data collection tasks.",
-            onSurfaceColor = onSurfaceColor,
           )
-          HorizontalDivider(color = onSurfaceColor.copy(alpha = 0.1f))
+          HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
           TermsSectionItem(
             number = "4",
             title = "Privacy & Responsible Use",
             body =
               "Do not record sensitive personal data unless explicitly authorized and consented to under your organization's survey governance protocol.",
-            onSurfaceColor = onSurfaceColor,
           )
         }
       }
@@ -1255,7 +1251,7 @@ fun GroundTermsOfServiceScreen(state: PrototypeAppState) {
       Row(
         modifier =
           Modifier.fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp))
+            .clip(MaterialTheme.shapes.medium)
             .clickable { state.setTermsChecked(!state.termsCheckboxChecked) }
             .padding(vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -1263,53 +1259,13 @@ fun GroundTermsOfServiceScreen(state: PrototypeAppState) {
         Checkbox(
           checked = state.termsCheckboxChecked,
           onCheckedChange = { state.setTermsChecked(it) },
-          colors =
-            CheckboxDefaults.colors(
-              checkedColor = Color(0xFF1E6F50),
-              checkmarkColor = Color.White,
-            ),
         )
         Spacer(modifier = Modifier.width(6.dp))
         Text(
           text = "I have read and agree to the Ground Terms of Service.",
-          style = MaterialTheme.typography.bodySmall.copy(color = onSurfaceColor),
+          style = MaterialTheme.typography.bodySmall,
+          color = onSurfaceColor,
         )
-      }
-    }
-
-    // Bottom Sticky Action Bar
-    Surface(
-      modifier = Modifier.fillMaxWidth(),
-      color = if (state.isDarkTheme) Color(0xFF1E2421) else Color.White,
-      shadowElevation = 6.dp,
-    ) {
-      Row(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
-      ) {
-        OutlinedButton(
-          onClick = { state.declineTermsOfService() },
-          modifier = Modifier.weight(0.42f),
-          shape = RoundedCornerShape(12.dp),
-        ) {
-          Text("Decline")
-        }
-        Button(
-          onClick = { state.acceptTermsOfService() },
-          enabled = state.termsCheckboxChecked,
-          modifier = Modifier.weight(0.58f),
-          shape = RoundedCornerShape(12.dp),
-          colors =
-            ButtonDefaults.buttonColors(
-              containerColor = Color(0xFF1E6F50),
-              contentColor = Color.White,
-            ),
-        ) {
-          Text(
-            text = "Agree & Continue",
-            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
-          )
-        }
       }
     }
   }
@@ -1320,24 +1276,19 @@ private fun TermsSectionItem(
   number: String,
   title: String,
   body: String,
-  onSurfaceColor: Color,
 ) {
   Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
     Text(
       text = "$number. $title",
-      style =
-        MaterialTheme.typography.labelLarge.copy(
-          fontWeight = FontWeight.Bold,
-          color = Color(0xFF1E6F50),
-        ),
+      style = MaterialTheme.typography.labelLarge,
+      color = MaterialTheme.colorScheme.primary,
+      fontWeight = FontWeight.Bold,
     )
     Text(
       text = body,
-      style =
-        MaterialTheme.typography.bodySmall.copy(
-          color = onSurfaceColor.copy(alpha = 0.82f),
-          lineHeight = 18.sp,
-        ),
+      style = MaterialTheme.typography.bodySmall,
+      color = MaterialTheme.colorScheme.onSurfaceVariant,
+      lineHeight = 18.sp,
     )
   }
 }
@@ -1347,97 +1298,70 @@ private fun TermsSectionItem(
  * by name or location by typing in the search bar. Each survey item includes a title, description,
  * map thumbnail, and an indicator for surveys that have already been downloaded.
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GroundDownloadSurveyScreen(state: PrototypeAppState) {
-  val surfaceColor = MaterialTheme.colorScheme.surface
   val onSurfaceColor = MaterialTheme.colorScheme.onSurface
   val filtered = state.filteredSurveys
 
-  Box(modifier = Modifier.fillMaxSize().background(surfaceColor)) {
-    Column(modifier = Modifier.fillMaxSize()) {
-      // Top Header + Search Bar Container
-      Column(
-        modifier =
-          Modifier.fillMaxWidth()
-            .background(Color(0xFF1E6F50))
-            .padding(horizontal = 16.dp, vertical = 14.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-      ) {
-        Row(
-          modifier = Modifier.fillMaxWidth(),
-          horizontalArrangement = Arrangement.SpaceBetween,
-          verticalAlignment = Alignment.CenterVertically,
-        ) {
-          Row(
-            modifier = Modifier.weight(1f),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-          ) {
-            // Escape hatch Back button:
-            // - Shown after ToS: prompts first before signing the user out
-            // - Accessed from the Survey list: returns the user to the Survey list
-            Row(
-              modifier =
-                Modifier.clip(RoundedCornerShape(8.dp))
-                  .background(Color(0xFF144D37))
-                  .clickable { state.navigateBackFromDownloadSurvey() }
-                  .padding(horizontal = 10.dp, vertical = 5.dp),
-              verticalAlignment = Alignment.CenterVertically,
-              horizontalArrangement = Arrangement.spacedBy(4.dp),
-            ) {
-              Icon(
-                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                contentDescription = "Back",
-                tint = Color.White,
-                modifier = Modifier.size(14.dp),
-              )
-              Text(
-                text = "Back",
-                style =
-                  MaterialTheme.typography.labelMedium.copy(
-                    color = Color.White,
-                    fontWeight = FontWeight.SemiBold,
-                  ),
-              )
-            }
-
-            Column {
-              Text(
-                text = "Download survey",
-                style =
-                  MaterialTheme.typography.titleMedium.copy(
-                    color = Color.White,
-                    fontWeight = FontWeight.Bold,
-                  ),
-              )
-              Text(
-                text =
-                  "${state.surveys.size} shared with you • ${state.downloadedSurveyCount} downloaded",
-                style = MaterialTheme.typography.labelSmall.copy(color = Color(0xFFC8E6C9)),
-              )
-            }
+  Scaffold(
+    topBar = {
+      TopAppBar(
+        title = {
+          Column {
+            Text(
+              text = "Download survey",
+              style = MaterialTheme.typography.titleMedium,
+              fontWeight = FontWeight.Bold,
+            )
+            Text(
+              text =
+                "${state.surveys.size} shared with you • ${state.downloadedSurveyCount} downloaded",
+              style = MaterialTheme.typography.labelSmall,
+              color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
           }
-
-          // User Avatar Pill
-          Box(
-            modifier =
-              Modifier.clip(CircleShape)
-                .background(Color(0xFF124531))
-                .border(1.dp, Color(0xFF8BD6B1), CircleShape)
-                .padding(horizontal = 10.dp, vertical = 5.dp)
+        },
+        navigationIcon = {
+          IconButton(onClick = { state.navigateBackFromDownloadSurvey() }) {
+            Icon(
+              imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+              contentDescription = "Back",
+            )
+          }
+        },
+        actions = {
+          Surface(
+            shape = CircleShape,
+            color = MaterialTheme.colorScheme.primaryContainer,
+            contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+            modifier = Modifier.padding(end = 12.dp),
           ) {
             Text(
               text = "ML",
-              style =
-                MaterialTheme.typography.labelSmall.copy(
-                  color = Color.White,
-                  fontWeight = FontWeight.Bold,
-                ),
+              style = MaterialTheme.typography.labelSmall,
+              fontWeight = FontWeight.Bold,
+              modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
             )
           }
-        }
-
-        // Search Bar for filtering by survey name or location
+        },
+        colors =
+          TopAppBarDefaults.topAppBarColors(
+            containerColor = MaterialTheme.colorScheme.surface,
+            titleContentColor = MaterialTheme.colorScheme.onSurface,
+            navigationIconContentColor = MaterialTheme.colorScheme.onSurface,
+          ),
+      )
+    },
+    containerColor = MaterialTheme.colorScheme.surface,
+  ) { innerPadding ->
+    Column(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
+      // Search Bar for filtering by survey name or location
+      Box(
+        modifier =
+          Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)
+      ) {
         OutlinedTextField(
           value = state.searchQuery,
           onValueChange = { state.updateSearchQuery(it) },
@@ -1446,42 +1370,35 @@ fun GroundDownloadSurveyScreen(state: PrototypeAppState) {
           placeholder = {
             Text(
               text = "Search by name or location...",
-              style = MaterialTheme.typography.bodySmall.copy(color = Color(0xFF6B7280)),
+              style = MaterialTheme.typography.bodySmall,
+              color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
           },
           leadingIcon = {
             Icon(
               imageVector = Icons.Default.Search,
               contentDescription = "Search",
-              tint = Color(0xFF6B7280),
+              tint = MaterialTheme.colorScheme.onSurfaceVariant,
               modifier = Modifier.size(18.dp),
             )
           },
           trailingIcon = {
             if (state.searchQuery.isNotEmpty()) {
-              Box(
-                modifier =
-                  Modifier.clip(CircleShape)
-                    .clickable { state.clearSearchQuery() }
-                    .padding(6.dp)
-              ) {
+              IconButton(onClick = { state.clearSearchQuery() }) {
                 Icon(
                   imageVector = Icons.Default.Close,
                   contentDescription = "Clear Search",
-                  tint = Color(0xFF374151),
-                  modifier = Modifier.size(16.dp),
+                  modifier = Modifier.size(18.dp),
                 )
               }
             }
           },
-          shape = RoundedCornerShape(24.dp),
+          shape = MaterialTheme.shapes.extraLarge,
           colors =
             OutlinedTextFieldDefaults.colors(
-              focusedContainerColor = Color.White,
-              unfocusedContainerColor = Color.White,
-              focusedTextColor = Color(0xFF111827),
-              unfocusedTextColor = Color(0xFF111827),
-              focusedBorderColor = Color(0xFF8BD6B1),
+              focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+              unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+              focusedBorderColor = MaterialTheme.colorScheme.primary,
               unfocusedBorderColor = Color.Transparent,
             ),
         )
@@ -1489,37 +1406,35 @@ fun GroundDownloadSurveyScreen(state: PrototypeAppState) {
 
       // Optional feedback toast banner when downloading/toggling a survey
       state.activeSurveyNotice?.let { notice ->
-        Row(
-          modifier =
-            Modifier.fillMaxWidth()
-              .background(Color(0xFFE8F5E9))
-              .padding(horizontal = 14.dp, vertical = 8.dp),
-          horizontalArrangement = Arrangement.spacedBy(6.dp),
-          verticalAlignment = Alignment.CenterVertically,
+        Surface(
+          color = MaterialTheme.colorScheme.secondaryContainer,
+          contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+          modifier = Modifier.fillMaxWidth(),
         ) {
-          Icon(
-            imageVector = Icons.Default.CheckCircle,
-            contentDescription = null,
-            tint = Color(0xFF1B5E20),
-            modifier = Modifier.size(14.dp),
-          )
-          Text(
-            text = notice,
-            style =
-              MaterialTheme.typography.labelSmall.copy(
-                color = Color(0xFF1B5E20),
-                fontWeight = FontWeight.SemiBold,
-              ),
-            modifier = Modifier.weight(1f),
-          )
+          Row(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 8.dp),
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+            verticalAlignment = Alignment.CenterVertically,
+          ) {
+            Icon(
+              imageVector = Icons.Default.CheckCircle,
+              contentDescription = null,
+              tint = MaterialTheme.colorScheme.primary,
+              modifier = Modifier.size(15.dp),
+            )
+            Text(
+              text = notice,
+              style = MaterialTheme.typography.labelSmall,
+              fontWeight = FontWeight.SemiBold,
+              modifier = Modifier.weight(1f),
+            )
+          }
         }
       }
 
       // Section Summary Header
       Row(
-        modifier =
-          Modifier.fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 10.dp),
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
       ) {
@@ -1533,20 +1448,18 @@ fun GroundDownloadSurveyScreen(state: PrototypeAppState) {
           style =
             MaterialTheme.typography.labelSmall.copy(
               fontWeight = FontWeight.Bold,
-              color = onSurfaceColor.copy(alpha = 0.65f),
+              color = MaterialTheme.colorScheme.onSurfaceVariant,
               letterSpacing = 0.6.sp,
             ),
         )
         if (state.searchQuery.isNotBlank()) {
-          Text(
-            text = "Clear search",
-            style =
-              MaterialTheme.typography.labelSmall.copy(
-                fontWeight = FontWeight.SemiBold,
-                color = Color(0xFF1E6F50),
-              ),
-            modifier = Modifier.clickable { state.clearSearchQuery() },
-          )
+          TextButton(onClick = { state.clearSearchQuery() }) {
+            Text(
+              text = "Clear search",
+              style = MaterialTheme.typography.labelSmall,
+              fontWeight = FontWeight.SemiBold,
+            )
+          }
         }
       }
 
@@ -1563,26 +1476,21 @@ fun GroundDownloadSurveyScreen(state: PrototypeAppState) {
             Icon(
               imageVector = Icons.Default.Map,
               contentDescription = null,
-              tint = Color(0xFF1E6F50),
+              tint = MaterialTheme.colorScheme.primary,
               modifier = Modifier.size(36.dp),
             )
             Text(
               text = "No surveys match \"${state.searchQuery}\"",
-              style =
-                MaterialTheme.typography.titleSmall.copy(
-                  fontWeight = FontWeight.Bold,
-                  color = onSurfaceColor,
-                ),
+              style = MaterialTheme.typography.titleSmall,
+              color = onSurfaceColor,
+              fontWeight = FontWeight.Bold,
               textAlign = TextAlign.Center,
             )
             Text(
               text =
                 "Try searching by another survey title, keyword, or location (e.g. Brazil, Kenya, Vietnam).",
-              style =
-                MaterialTheme.typography.bodySmall.copy(
-                  color = onSurfaceColor.copy(alpha = 0.7f),
-                  textAlign = TextAlign.Center,
-                ),
+              style = MaterialTheme.typography.bodySmall,
+              color = MaterialTheme.colorScheme.onSurfaceVariant,
               textAlign = TextAlign.Center,
             )
           }
@@ -1622,97 +1530,48 @@ fun GroundDownloadSurveyScreen(state: PrototypeAppState) {
  */
 @Composable
 private fun DownloadSurveySignOutPromptDialog(state: PrototypeAppState) {
-  val isDark = state.isDarkTheme
-  val cardBg = if (isDark) Color(0xFF232B27) else Color.White
-  val textColor = if (isDark) Color.White else Color(0xFF111827)
-
-  Box(
-    modifier =
-      Modifier.fillMaxSize()
-        .background(Color.Black.copy(alpha = 0.5f))
-        .clickable { state.dismissDownloadSurveySignOutPrompt() },
-    contentAlignment = Alignment.Center,
-  ) {
-    Card(
-      modifier =
-        Modifier.width(316.dp)
-          .clickable(enabled = false) {},
-      shape = RoundedCornerShape(18.dp),
-      colors = CardDefaults.cardColors(containerColor = cardBg),
-      elevation = CardDefaults.cardElevation(defaultElevation = 12.dp),
-    ) {
-      Column(
-        modifier = Modifier.padding(20.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
+  GroundAlertDialogOverlay(
+    onDismissRequest = { state.dismissDownloadSurveySignOutPrompt() },
+    icon = {
+      Icon(
+        imageVector = Icons.AutoMirrored.Filled.Logout,
+        contentDescription = null,
+        tint = MaterialTheme.colorScheme.error,
+      )
+    },
+    title = {
+      Text(
+        text = "Sign out?",
+        style = MaterialTheme.typography.titleMedium,
+        fontWeight = FontWeight.Bold,
+      )
+    },
+    text = {
+      Text(
+        text =
+          "Going back will sign out ${state.signedInUserEmail} and return to the Sign In screen.",
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+      )
+    },
+    confirmButton = {
+      Button(
+        onClick = { state.confirmDownloadSurveySignOut() },
+        colors =
+          ButtonDefaults.buttonColors(
+            containerColor = MaterialTheme.colorScheme.error,
+            contentColor = MaterialTheme.colorScheme.onError,
+          ),
       ) {
-        Row(
-          verticalAlignment = Alignment.CenterVertically,
-          horizontalArrangement = Arrangement.spacedBy(10.dp),
-        ) {
-          Box(
-            modifier =
-              Modifier.size(36.dp)
-                .clip(CircleShape)
-                .background(Color(0xFFFFEBEE)),
-            contentAlignment = Alignment.Center,
-          ) {
-            Icon(
-              imageVector = Icons.AutoMirrored.Filled.Logout,
-              contentDescription = null,
-              tint = Color(0xFFD32F2F),
-              modifier = Modifier.size(18.dp),
-            )
-          }
-          Text(
-            text = "Sign out?",
-            style =
-              MaterialTheme.typography.titleMedium.copy(
-                fontWeight = FontWeight.Bold,
-                color = textColor,
-              ),
-          )
-        }
-
-        Text(
-          text =
-            "Going back will sign out ${state.signedInUserEmail} and return to the Sign In screen.",
-          style =
-            MaterialTheme.typography.bodySmall.copy(
-              color = textColor.copy(alpha = 0.8f),
-              lineHeight = 18.sp,
-            ),
-        )
-
-        Row(
-          modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
-          horizontalArrangement = Arrangement.spacedBy(10.dp),
-        ) {
-          OutlinedButton(
-            onClick = { state.dismissDownloadSurveySignOutPrompt() },
-            modifier = Modifier.weight(1f),
-            shape = RoundedCornerShape(12.dp),
-          ) {
-            Text("Cancel")
-          }
-          Button(
-            onClick = { state.confirmDownloadSurveySignOut() },
-            modifier = Modifier.weight(1f),
-            shape = RoundedCornerShape(12.dp),
-            colors =
-              ButtonDefaults.buttonColors(
-                containerColor = Color(0xFFD32F2F),
-                contentColor = Color.White,
-              ),
-          ) {
-            Text(
-              text = "Sign out",
-              style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
-            )
-          }
-        }
+        Text("Sign out", fontWeight = FontWeight.Bold)
       }
-    }
-  }
+    },
+    dismissButton = {
+      OutlinedButton(onClick = { state.dismissDownloadSurveySignOutPrompt() }) {
+        Text("Cancel")
+      }
+    },
+  )
 }
 
 /**
@@ -1733,32 +1592,28 @@ private fun SurveyListItemCard(
   onOpenSurveyClick: () -> Unit,
 ) {
   val cardBg =
-    when {
-      isDarkTheme && survey.isDownloaded -> Color(0xFF1F2E26)
-      isDarkTheme -> Color(0xFF232725)
-      survey.isDownloaded -> Color(0xFFF4FAF6)
-      else -> Color.White
+    if (survey.isDownloaded) {
+      MaterialTheme.colorScheme.surfaceContainerLow
+    } else {
+      MaterialTheme.colorScheme.surface
     }
   val borderColor =
-    when {
-      survey.isDownloaded -> Color(0xFF2E7D32)
-      isDarkTheme -> Color(0xFF374151)
-      else -> Color(0xFFDDE5E0)
+    if (survey.isDownloaded) {
+      MaterialTheme.colorScheme.primary
+    } else {
+      MaterialTheme.colorScheme.outlineVariant
     }
-  val textColor = if (isDarkTheme) Color.White else Color(0xFF111827)
 
-  Card(
-    modifier =
-      Modifier.fillMaxWidth()
-        .border(
-          width = if (survey.isDownloaded) 1.5.dp else 1.dp,
-          color = borderColor,
-          shape = RoundedCornerShape(16.dp),
-        )
-        .clickable { onOpenSurveyClick() },
-    shape = RoundedCornerShape(16.dp),
-    colors = CardDefaults.cardColors(containerColor = cardBg),
-    elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+  OutlinedCard(
+    onClick = onOpenSurveyClick,
+    modifier = Modifier.fillMaxWidth(),
+    shape = MaterialTheme.shapes.large,
+    colors = CardDefaults.outlinedCardColors(containerColor = cardBg),
+    border =
+      BorderStroke(
+        width = if (survey.isDownloaded) 1.5.dp else 1.dp,
+        color = borderColor,
+      ),
   ) {
     Column(
       modifier = Modifier.fillMaxWidth().padding(12.dp),
@@ -1769,7 +1624,7 @@ private fun SurveyListItemCard(
         horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalAlignment = Alignment.Top,
       ) {
-        // Map Thumbnail Placeholder (82x82 dp)
+        // Map Thumbnail Placeholder (80x80 dp)
         SurveyMapThumbnail(
           theme = survey.thumbnailTheme,
           isDownloaded = survey.isDownloaded,
@@ -1780,27 +1635,15 @@ private fun SurveyListItemCard(
           modifier = Modifier.weight(1f),
           verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
-          // Title + Downloaded Corner Indicator
-          Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.Top,
-          ) {
-            Text(
-              text = survey.title,
-              style =
-                MaterialTheme.typography.titleSmall.copy(
-                  fontWeight = FontWeight.Bold,
-                  color = textColor,
-                ),
-              maxLines = 2,
-              overflow = TextOverflow.Ellipsis,
-              modifier = Modifier.weight(1f),
-            )
-          }
+          Text(
+            text = survey.title,
+            style = MaterialTheme.typography.titleSmall,
+            color = MaterialTheme.colorScheme.onSurface,
+            fontWeight = FontWeight.Bold,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
+          )
 
-          // Location tag
-          val locationColor = if (isDarkTheme) Color(0xFF8BD6B1) else Color(0xFF1E6F50)
           Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(3.dp),
@@ -1808,34 +1651,27 @@ private fun SurveyListItemCard(
             Icon(
               imageVector = Icons.Default.LocationOn,
               contentDescription = null,
-              tint = locationColor,
+              tint = MaterialTheme.colorScheme.primary,
               modifier = Modifier.size(12.dp),
             )
             Text(
               text = survey.location,
-              style =
-                MaterialTheme.typography.labelSmall.copy(
-                  fontWeight = FontWeight.SemiBold,
-                  color = locationColor,
-                ),
+              style = MaterialTheme.typography.labelSmall,
+              color = MaterialTheme.colorScheme.primary,
+              fontWeight = FontWeight.SemiBold,
             )
             Text(
               text = "• ${survey.coordinatesLabel}",
-              style =
-                MaterialTheme.typography.labelSmall.copy(
-                  color = textColor.copy(alpha = 0.55f),
-                ),
+              style = MaterialTheme.typography.labelSmall,
+              color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
           }
 
-          // Description
           Text(
             text = survey.description,
-            style =
-              MaterialTheme.typography.bodySmall.copy(
-                color = textColor.copy(alpha = 0.78f),
-                lineHeight = 16.sp,
-              ),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            lineHeight = 16.sp,
             maxLines = 2,
             overflow = TextOverflow.Ellipsis,
           )
@@ -1850,10 +1686,8 @@ private fun SurveyListItemCard(
       ) {
         Text(
           text = "${survey.entityCount} locations • ${survey.offlineSizeLabel}",
-          style =
-            MaterialTheme.typography.labelSmall.copy(
-              color = textColor.copy(alpha = 0.6f),
-            ),
+          style = MaterialTheme.typography.labelSmall,
+          color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
 
         if (survey.isDownloaded) {
@@ -1861,82 +1695,59 @@ private fun SurveyListItemCard(
             horizontalArrangement = Arrangement.spacedBy(6.dp),
             verticalAlignment = Alignment.CenterVertically,
           ) {
-            // Downloaded Indicator Pill
-            Row(
-              modifier =
-                Modifier.clip(RoundedCornerShape(20.dp))
-                  .background(Color(0xFFE8F5E9))
-                  .border(1.dp, Color(0xFF2E7D32), RoundedCornerShape(20.dp))
-                  .clickable { onToggleDownloadClick() }
-                  .padding(horizontal = 8.dp, vertical = 4.dp),
-              verticalAlignment = Alignment.CenterVertically,
-              horizontalArrangement = Arrangement.spacedBy(4.dp),
-            ) {
-              Icon(
-                imageVector = Icons.Default.Check,
-                contentDescription = null,
-                tint = Color(0xFF1B5E20),
-                modifier = Modifier.size(12.dp),
-              )
-              Text(
-                text = "Downloaded",
-                style =
-                  MaterialTheme.typography.labelSmall.copy(
-                    fontWeight = FontWeight.Bold,
-                    color = Color(0xFF1B5E20),
-                  ),
-              )
-            }
-            // Open Survey Button
-            Row(
-              modifier =
-                Modifier.clip(RoundedCornerShape(20.dp))
-                  .background(Color(0xFF1E6F50))
-                  .clickable { onOpenSurveyClick() }
-                  .padding(horizontal = 10.dp, vertical = 4.dp),
-              verticalAlignment = Alignment.CenterVertically,
-              horizontalArrangement = Arrangement.spacedBy(3.dp),
+            AssistChip(
+              onClick = onToggleDownloadClick,
+              leadingIcon = {
+                Icon(
+                  imageVector = Icons.Default.Check,
+                  contentDescription = null,
+                  modifier = Modifier.size(14.dp),
+                )
+              },
+              label = {
+                Text(
+                  text = "Downloaded",
+                  style = MaterialTheme.typography.labelSmall,
+                  fontWeight = FontWeight.Bold,
+                )
+              },
+              modifier = Modifier.height(30.dp),
+            )
+
+            FilledTonalButton(
+              onClick = onOpenSurveyClick,
+              modifier = Modifier.height(30.dp),
+              contentPadding = ButtonDefaults.TextButtonContentPadding,
             ) {
               Text(
                 text = "Open",
-                style =
-                  MaterialTheme.typography.labelSmall.copy(
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White,
-                  ),
+                style = MaterialTheme.typography.labelSmall,
+                fontWeight = FontWeight.Bold,
               )
+              Spacer(modifier = Modifier.width(3.dp))
               Icon(
                 imageVector = Icons.AutoMirrored.Filled.ArrowForward,
                 contentDescription = null,
-                tint = Color.White,
                 modifier = Modifier.size(12.dp),
               )
             }
           }
         } else {
-          // Download Button
-          Row(
-            modifier =
-              Modifier.clip(RoundedCornerShape(20.dp))
-                .background(Color(0xFF1E6F50))
-                .clickable { onDownloadClick() }
-                .padding(horizontal = 12.dp, vertical = 5.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(4.dp),
+          Button(
+            onClick = onDownloadClick,
+            modifier = Modifier.height(32.dp),
+            contentPadding = ButtonDefaults.TextButtonContentPadding,
           ) {
             Icon(
               imageVector = Icons.Default.Download,
               contentDescription = null,
-              tint = Color.White,
               modifier = Modifier.size(13.dp),
             )
+            Spacer(modifier = Modifier.width(4.dp))
             Text(
               text = "Download",
-              style =
-                MaterialTheme.typography.labelSmall.copy(
-                  fontWeight = FontWeight.Bold,
-                  color = Color.White,
-                ),
+              style = MaterialTheme.typography.labelSmall,
+              fontWeight = FontWeight.Bold,
             )
           }
         }
@@ -1954,9 +1765,9 @@ private fun SurveyMapThumbnail(
   Box(
     modifier =
       Modifier.size(80.dp)
-        .clip(RoundedCornerShape(12.dp))
+        .clip(MaterialTheme.shapes.medium)
         .background(Color(theme.primaryTerrainHex))
-        .border(1.dp, Color.Black.copy(alpha = 0.15f), RoundedCornerShape(12.dp))
+        .border(1.dp, MaterialTheme.colorScheme.outlineVariant, MaterialTheme.shapes.medium)
   ) {
     Canvas(modifier = Modifier.fillMaxSize()) {
       // Subtle map grid lines
@@ -2020,43 +1831,36 @@ private fun SurveyMapThumbnail(
     }
 
     // Bottom Map Layer Badge
-    Box(
-      modifier =
-        Modifier.align(Alignment.BottomStart)
-          .padding(4.dp)
-          .clip(RoundedCornerShape(4.dp))
-          .background(Color.Black.copy(alpha = 0.55f))
-          .padding(horizontal = 4.dp, vertical = 1.dp)
+    Surface(
+      color = MaterialTheme.colorScheme.scrim.copy(alpha = 0.65f),
+      contentColor = Color.White,
+      shape = MaterialTheme.shapes.extraSmall,
+      modifier = Modifier.align(Alignment.BottomStart).padding(4.dp),
     ) {
       Text(
         text = theme.badgeLabel,
-        style =
-          MaterialTheme.typography.labelSmall.copy(
-            fontSize = 8.sp,
-            color = Color.White,
-            fontWeight = FontWeight.Bold,
-          ),
+        style = MaterialTheme.typography.labelSmall,
+        fontWeight = FontWeight.Bold,
+        modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp),
       )
     }
 
     // Top-right mini offline check icon on map thumbnail when downloaded
     if (isDownloaded) {
-      Box(
-        modifier =
-          Modifier.align(Alignment.TopEnd)
-            .padding(4.dp)
-            .size(18.dp)
-            .clip(CircleShape)
-            .background(Color(0xFF2E7D32))
-            .border(1.dp, Color.White, CircleShape),
-        contentAlignment = Alignment.Center,
+      Surface(
+        shape = CircleShape,
+        color = MaterialTheme.colorScheme.primary,
+        contentColor = MaterialTheme.colorScheme.onPrimary,
+        border = BorderStroke(1.dp, Color.White),
+        modifier = Modifier.align(Alignment.TopEnd).padding(4.dp).size(18.dp),
       ) {
-        Icon(
-          imageVector = Icons.Default.Check,
-          contentDescription = "Downloaded",
-          tint = Color.White,
-          modifier = Modifier.size(11.dp),
-        )
+        Box(contentAlignment = Alignment.Center) {
+          Icon(
+            imageVector = Icons.Default.Check,
+            contentDescription = "Downloaded",
+            modifier = Modifier.size(11.dp),
+          )
+        }
       }
     }
   }
@@ -2068,11 +1872,14 @@ private fun UxDesignerInspectorPanel(
   state: PrototypeAppState,
   modifier: Modifier = Modifier,
 ) {
-  Card(
+  ElevatedCard(
     modifier = modifier,
-    shape = RoundedCornerShape(16.dp),
-    colors = CardDefaults.cardColors(containerColor = Color.White),
-    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+    shape = MaterialTheme.shapes.large,
+    colors =
+      CardDefaults.elevatedCardColors(
+        containerColor = MaterialTheme.colorScheme.surface
+      ),
+    elevation = CardDefaults.elevatedCardElevation(defaultElevation = 2.dp),
   ) {
     Column(
       modifier =
@@ -2083,22 +1890,21 @@ private fun UxDesignerInspectorPanel(
     ) {
       Text(
         text = "UX Co-Design & Flow Controls",
-        style =
-          MaterialTheme.typography.titleMedium.copy(
-            fontWeight = FontWeight.Bold,
-            color = Color(0xFF133A29),
-          ),
+        style = MaterialTheme.typography.titleMedium,
+        color = MaterialTheme.colorScheme.onSurface,
+        fontWeight = FontWeight.Bold,
       )
       Text(
         text =
           "Use this panel during UX review sessions to jump between onboarding and main survey screens, inspect single- vs multi-submission location bottom sheets, toggle layers, or test XForms FormDef XML data collection.",
-        style = MaterialTheme.typography.bodySmall.copy(color = Color(0xFF4B5563)),
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
       )
 
       // Live XForms FormDef XML Tester Section
       XFormsFormDefChromeSection(state)
 
-      HorizontalDivider(color = Color(0xFFE5E7EB))
+      HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
       // 1. Interactive Screen Stepper
       Text(
@@ -2106,63 +1912,76 @@ private fun UxDesignerInspectorPanel(
         style =
           MaterialTheme.typography.labelSmall.copy(
             fontWeight = FontWeight.Bold,
-            color = Color(0xFF1E6F50),
+            color = MaterialTheme.colorScheme.primary,
             letterSpacing = 0.6.sp,
           ),
       )
 
       PrototypeScreen.entries.forEach { screen ->
         val isActive = state.currentScreen == screen
-        Row(
-          modifier =
-            Modifier.fillMaxWidth()
-              .clip(RoundedCornerShape(12.dp))
-              .background(if (isActive) Color(0xFFE8F5E9) else Color(0xFFF9FAFB))
-              .border(
-                width = 1.dp,
-                color = if (isActive) Color(0xFF2E7D32) else Color(0xFFE5E7EB),
-                shape = RoundedCornerShape(12.dp),
-              )
-              .clickable { state.navigateTo(screen) }
-              .padding(12.dp),
-          horizontalArrangement = Arrangement.SpaceBetween,
-          verticalAlignment = Alignment.CenterVertically,
+        OutlinedCard(
+          onClick = { state.navigateTo(screen) },
+          modifier = Modifier.fillMaxWidth(),
+          shape = MaterialTheme.shapes.medium,
+          colors =
+            CardDefaults.outlinedCardColors(
+              containerColor =
+                if (isActive) {
+                  MaterialTheme.colorScheme.primaryContainer
+                } else {
+                  MaterialTheme.colorScheme.surfaceContainerLow
+                }
+            ),
+          border =
+            BorderStroke(
+              width = if (isActive) 1.5.dp else 1.dp,
+              color =
+                if (isActive) {
+                  MaterialTheme.colorScheme.primary
+                } else {
+                  MaterialTheme.colorScheme.outlineVariant
+                },
+            ),
         ) {
-          Column(modifier = Modifier.weight(1f)) {
-            Text(
-              text = "Step ${screen.stepNumber}: ${screen.title}",
-              style =
-                MaterialTheme.typography.labelLarge.copy(
-                  fontWeight = FontWeight.Bold,
-                  color = if (isActive) Color(0xFF1B5E20) else Color(0xFF1F2937),
-                ),
-            )
-            Text(
-              text = screen.subtitle,
-              style = MaterialTheme.typography.bodySmall.copy(color = Color(0xFF6B7280)),
-            )
-          }
-          if (isActive) {
-            Box(
-              modifier =
-                Modifier.clip(RoundedCornerShape(12.dp))
-                  .background(Color(0xFF1E6F50))
-                  .padding(horizontal = 8.dp, vertical = 3.dp)
-            ) {
+          Row(
+            modifier = Modifier.fillMaxWidth().padding(12.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+          ) {
+            Column(modifier = Modifier.weight(1f)) {
               Text(
+                text = "Step ${screen.stepNumber}: ${screen.title}",
+                style = MaterialTheme.typography.labelLarge,
+                color =
+                  if (isActive) {
+                    MaterialTheme.colorScheme.onPrimaryContainer
+                  } else {
+                    MaterialTheme.colorScheme.onSurface
+                  },
+                fontWeight = FontWeight.Bold,
+              )
+              Text(
+                text = screen.subtitle,
+                style = MaterialTheme.typography.bodySmall,
+                color =
+                  if (isActive) {
+                    MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
+                  } else {
+                    MaterialTheme.colorScheme.onSurfaceVariant
+                  },
+              )
+            }
+            if (isActive) {
+              GroundTonalBadge(
                 text = "ACTIVE",
-                style =
-                  MaterialTheme.typography.labelSmall.copy(
-                    color = Color.White,
-                    fontWeight = FontWeight.Bold,
-                  ),
+                tone = GroundBadgeTone.PRIMARY,
               )
             }
           }
         }
       }
 
-      HorizontalDivider(color = Color(0xFFE5E7EB))
+      HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
       // 2. Main Survey UI Quick State Shortcuts (Map, List, Layers, 1:1 vs 1:N, Drawer)
       Text(
@@ -2170,7 +1989,7 @@ private fun UxDesignerInspectorPanel(
         style =
           MaterialTheme.typography.labelSmall.copy(
             fontWeight = FontWeight.Bold,
-            color = Color(0xFF1E6F50),
+            color = MaterialTheme.colorScheme.primary,
             letterSpacing = 0.6.sp,
           ),
       )
@@ -2258,42 +2077,36 @@ private fun UxDesignerInspectorPanel(
               {
                 state.navigateTo(PrototypeScreen.MAIN_SURVEY)
                 state.setMainSurveyViewMode(MainSurveyViewMode.MAP)
-                val nextX = if (state.userGpsNormalizedX > 0.62f) 0.36f else state.userGpsNormalizedX + 0.08f
-                val nextY = if (state.userGpsNormalizedY > 0.60f) 0.38f else state.userGpsNormalizedY + 0.06f
+                val nextX =
+                  if (state.userGpsNormalizedX > 0.62f) 0.36f else state.userGpsNormalizedX + 0.08f
+                val nextY =
+                  if (state.userGpsNormalizedY > 0.60f) 0.38f else state.userGpsNormalizedY + 0.06f
                 state.updateUserGpsLocation(nextX, nextY)
               },
             ),
           )
         mainShortcuts.forEach { (icon, label, action) ->
-          Row(
-            modifier =
-              Modifier.clip(RoundedCornerShape(16.dp))
-                .background(Color(0xFFE8F5E9))
-                .border(1.dp, Color(0xFF2E7D32), RoundedCornerShape(16.dp))
-                .clickable { action() }
-                .padding(horizontal = 11.dp, vertical = 6.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(5.dp),
-          ) {
-            Icon(
-              imageVector = icon,
-              contentDescription = null,
-              tint = Color(0xFF1B5E20),
-              modifier = Modifier.size(13.dp),
-            )
-            Text(
-              text = label,
-              style =
-                MaterialTheme.typography.labelSmall.copy(
-                  color = Color(0xFF1B5E20),
-                  fontWeight = FontWeight.Bold,
-                ),
-            )
-          }
+          AssistChip(
+            onClick = action,
+            leadingIcon = {
+              Icon(
+                imageVector = icon,
+                contentDescription = null,
+                modifier = Modifier.size(14.dp),
+              )
+            },
+            label = {
+              Text(
+                text = label,
+                style = MaterialTheme.typography.labelSmall,
+                fontWeight = FontWeight.Bold,
+              )
+            },
+          )
         }
       }
 
-      HorizontalDivider(color = Color(0xFFE5E7EB))
+      HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
       // 3. Quick Search Presets (Name or Location)
       Text(
@@ -2301,7 +2114,7 @@ private fun UxDesignerInspectorPanel(
         style =
           MaterialTheme.typography.labelSmall.copy(
             fontWeight = FontWeight.Bold,
-            color = Color(0xFF1E6F50),
+            color = MaterialTheme.colorScheme.primary,
             letterSpacing = 0.6.sp,
           ),
       )
@@ -2309,43 +2122,47 @@ private fun UxDesignerInspectorPanel(
         modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
       ) {
-        val sampleQueries = listOf("All" to "", "Brazil" to "Brazil", "Kenya" to "Kenya", "Vietnam" to "Vietnam", "Mangrove" to "Mangrove", "Watershed" to "Watershed")
+        val sampleQueries =
+          listOf(
+            "All" to "",
+            "Brazil" to "Brazil",
+            "Kenya" to "Kenya",
+            "Vietnam" to "Vietnam",
+            "Mangrove" to "Mangrove",
+            "Watershed" to "Watershed",
+          )
         sampleQueries.forEach { (label, query) ->
           val selected = state.searchQuery == query
-          val contentColor = if (selected) Color.White else Color(0xFF374151)
-          Row(
-            modifier =
-              Modifier.clip(RoundedCornerShape(16.dp))
-                .background(if (selected) Color(0xFF1E6F50) else Color(0xFFF3F4F6))
-                .clickable {
-                  state.navigateTo(PrototypeScreen.DOWNLOAD_SURVEY)
-                  state.updateSearchQuery(query)
+          FilterChip(
+            selected = selected,
+            onClick = {
+              state.navigateTo(PrototypeScreen.DOWNLOAD_SURVEY)
+              state.updateSearchQuery(query)
+            },
+            leadingIcon =
+              if (query.isNotEmpty()) {
+                {
+                  Icon(
+                    imageVector = Icons.Default.Search,
+                    contentDescription = null,
+                    modifier = Modifier.size(14.dp),
+                  )
                 }
-                .padding(horizontal = 12.dp, vertical = 6.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(4.dp),
-          ) {
-            if (query.isNotEmpty()) {
-              Icon(
-                imageVector = Icons.Default.Search,
-                contentDescription = null,
-                tint = contentColor,
-                modifier = Modifier.size(12.dp),
+              } else {
+                null
+              },
+            label = {
+              Text(
+                text = if (query.isEmpty()) "Show All (${state.surveys.size})" else "\"$label\"",
+                style = MaterialTheme.typography.labelSmall,
+                fontWeight = FontWeight.SemiBold,
               )
-            }
-            Text(
-              text = if (query.isEmpty()) "Show All (${state.surveys.size})" else "\"$label\"",
-              style =
-                MaterialTheme.typography.labelSmall.copy(
-                  color = contentColor,
-                  fontWeight = FontWeight.SemiBold,
-                ),
-            )
-          }
+            },
+          )
         }
       }
 
-      HorizontalDivider(color = Color(0xFFE5E7EB))
+      HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
       // 4. Survey Download State Toggles
       Text(
@@ -2353,68 +2170,52 @@ private fun UxDesignerInspectorPanel(
         style =
           MaterialTheme.typography.labelSmall.copy(
             fontWeight = FontWeight.Bold,
-            color = Color(0xFF1E6F50),
+            color = MaterialTheme.colorScheme.primary,
             letterSpacing = 0.6.sp,
           ),
       )
       Text(
         text = "Toggle which surveys are marked as already downloaded on the device:",
-        style = MaterialTheme.typography.bodySmall.copy(color = Color(0xFF6B7280)),
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
       )
 
       state.surveys.forEach { survey ->
-        Row(
-          modifier =
-            Modifier.fillMaxWidth()
-              .clip(RoundedCornerShape(8.dp))
-              .background(Color(0xFFF9FAFB))
-              .clickable {
-                state.navigateTo(PrototypeScreen.DOWNLOAD_SURVEY)
-                state.toggleSurveyDownloaded(survey.id)
-              }
-              .padding(horizontal = 10.dp, vertical = 8.dp),
-          horizontalArrangement = Arrangement.SpaceBetween,
-          verticalAlignment = Alignment.CenterVertically,
+        OutlinedCard(
+          onClick = {
+            state.navigateTo(PrototypeScreen.DOWNLOAD_SURVEY)
+            state.toggleSurveyDownloaded(survey.id)
+          },
+          modifier = Modifier.fillMaxWidth(),
+          shape = MaterialTheme.shapes.small,
+          colors =
+            CardDefaults.outlinedCardColors(
+              containerColor = MaterialTheme.colorScheme.surfaceContainerLow
+            ),
         ) {
-          Column(modifier = Modifier.weight(1f)) {
-            Text(
-              text = survey.title,
-              style =
-                MaterialTheme.typography.labelMedium.copy(
-                  fontWeight = FontWeight.SemiBold,
-                  color = Color(0xFF111827),
-                ),
-              maxLines = 1,
-              overflow = TextOverflow.Ellipsis,
-            )
-            Text(
-              text = survey.location,
-              style = MaterialTheme.typography.labelSmall.copy(color = Color(0xFF6B7280)),
-            )
-          }
           Row(
-            modifier =
-              Modifier.clip(RoundedCornerShape(12.dp))
-                .background(if (survey.isDownloaded) Color(0xFFE8F5E9) else Color(0xFFE5E7EB))
-                .padding(horizontal = 8.dp, vertical = 3.dp),
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp, vertical = 8.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(4.dp),
           ) {
-            if (survey.isDownloaded) {
-              Icon(
-                imageVector = Icons.Default.Check,
-                contentDescription = null,
-                tint = Color(0xFF1B5E20),
-                modifier = Modifier.size(12.dp),
+            Column(modifier = Modifier.weight(1f)) {
+              Text(
+                text = survey.title,
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+                fontWeight = FontWeight.SemiBold,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+              )
+              Text(
+                text = survey.location,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
               )
             }
-            Text(
+            GroundTonalBadge(
               text = if (survey.isDownloaded) "Downloaded" else "Not Downloaded",
-              style =
-                MaterialTheme.typography.labelSmall.copy(
-                  fontWeight = FontWeight.Bold,
-                  color = if (survey.isDownloaded) Color(0xFF1B5E20) else Color(0xFF4B5563),
-                ),
+              tone = if (survey.isDownloaded) GroundBadgeTone.PRIMARY else GroundBadgeTone.NEUTRAL,
             )
           }
         }

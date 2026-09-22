@@ -13,30 +13,38 @@
  */
 package org.groundplatform.v2.core.forms.ui
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Slider
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -45,8 +53,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -69,6 +75,7 @@ fun QuestionControlCard(
   showValidationErrors: Boolean,
   modifier: Modifier = Modifier,
 ) {
+  val colors = MaterialTheme.colorScheme
   val fieldState = control.fieldState
   val labelText =
     control.label?.text?.takeIf { it.isNotBlank() } ?: control.canonicalPath.substringAfterLast('/')
@@ -78,14 +85,13 @@ fun QuestionControlCard(
       ?: control.hint?.guidanceText?.takeIf { it.isNotBlank() }
   var isGuidanceExpanded by remember(control.canonicalPath) { mutableStateOf(false) }
 
-  Card(
+  ElevatedCard(
     modifier = modifier.fillMaxWidth(),
-    shape = RoundedCornerShape(16.dp),
-    colors = CardDefaults.cardColors(containerColor = Color.White),
-    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+    shape = MaterialTheme.shapes.large,
+    colors = CardDefaults.elevatedCardColors(containerColor = colors.surfaceContainerLowest),
   ) {
     Column(
-      modifier = Modifier.fillMaxWidth().padding(18.dp),
+      modifier = Modifier.fillMaxWidth().padding(16.dp),
       verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
       // Top metadata badges (path, required, read-only / calculated)
@@ -99,29 +105,17 @@ fun QuestionControlCard(
           style =
             MaterialTheme.typography.labelSmall.copy(
               fontFamily = FontFamily.Monospace,
-              color = Color(0xFF6B7280),
+              color = colors.onSurfaceVariant,
             ),
         )
         Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
           if (fieldState.isRequired) {
-            BadgePill(
-              text = "Required *",
-              bgColor = Color(0xFFFEE2E2),
-              textColor = Color(0xFFB91C1C),
-            )
+            GroundTonalBadge(text = "Required *", tone = GroundBadgeTone.ERROR)
           }
           if (fieldState.isCalculated) {
-            BadgePill(
-              text = "Calculated",
-              bgColor = Color(0xFFE0F2FE),
-              textColor = Color(0xFF0369A1),
-            )
+            GroundTonalBadge(text = "Calculated", tone = GroundBadgeTone.TERTIARY)
           } else if (fieldState.isReadOnly) {
-            BadgePill(
-              text = "Read-only",
-              bgColor = Color(0xFFF3F4F6),
-              textColor = Color(0xFF4B5563),
-            )
+            GroundTonalBadge(text = "Read-only", tone = GroundBadgeTone.NEUTRAL)
           }
         }
       }
@@ -133,7 +127,7 @@ fun QuestionControlCard(
           style =
             MaterialTheme.typography.titleMedium.copy(
               fontWeight = FontWeight.Bold,
-              color = Color(0xFF111827),
+              color = colors.onSurface,
               lineHeight = 22.sp,
             ),
           modifier = Modifier.weight(1f),
@@ -145,36 +139,40 @@ fun QuestionControlCard(
         Text(
           text = hintText,
           style =
-            MaterialTheme.typography.bodyMedium.copy(color = Color(0xFF4B5563), lineHeight = 19.sp),
+            MaterialTheme.typography.bodyMedium.copy(
+              color = colors.onSurfaceVariant,
+              lineHeight = 20.sp,
+            ),
         )
       }
 
       // Expandable Guidance Hint
       if (guidanceText != null) {
-        Column(
-          modifier =
-            Modifier.fillMaxWidth()
-              .clip(RoundedCornerShape(8.dp))
-              .background(Color(0xFFF0FDF4))
-              .clickable { isGuidanceExpanded = !isGuidanceExpanded }
-              .padding(horizontal = 12.dp, vertical = 8.dp)
+        Surface(
+          onClick = { isGuidanceExpanded = !isGuidanceExpanded },
+          modifier = Modifier.fillMaxWidth(),
+          shape = MaterialTheme.shapes.small,
+          color = colors.secondaryContainer,
         ) {
-          Text(
-            text =
-              if (isGuidanceExpanded) "▼ Hide Enumerator Guidance"
-              else "▶ Show Enumerator Guidance",
-            style =
-              MaterialTheme.typography.labelMedium.copy(
-                fontWeight = FontWeight.SemiBold,
-                color = Color(0xFF15803D),
-              ),
-          )
-          if (isGuidanceExpanded) {
-            Spacer(modifier = Modifier.height(4.dp))
+          Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp)) {
             Text(
-              text = guidanceText,
-              style = MaterialTheme.typography.bodySmall.copy(color = Color(0xFF166534)),
+              text =
+                if (isGuidanceExpanded) "▼ Hide Enumerator Guidance"
+                else "▶ Show Enumerator Guidance",
+              style =
+                MaterialTheme.typography.labelMedium.copy(
+                  fontWeight = FontWeight.SemiBold,
+                  color = colors.onSecondaryContainer,
+                ),
             )
+            if (isGuidanceExpanded) {
+              Spacer(modifier = Modifier.height(4.dp))
+              Text(
+                text = guidanceText,
+                style =
+                  MaterialTheme.typography.bodySmall.copy(color = colors.onSecondaryContainer),
+              )
+            }
           }
         }
       }
@@ -187,13 +185,13 @@ fun QuestionControlCard(
           horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
           if (media.image_uri.isNotBlank()) {
-            BadgePill("🖼 ${media.image_uri}", Color(0xFFEDE9FE), Color(0xFF6D28D9))
+            GroundTonalBadge("🖼 ${media.image_uri}", GroundBadgeTone.PRIMARY)
           }
           if (media.audio_uri.isNotBlank()) {
-            BadgePill("🔊 ${media.audio_uri}", Color(0xFFFEF3C7), Color(0xFFB45309))
+            GroundTonalBadge("🔊 ${media.audio_uri}", GroundBadgeTone.SECONDARY)
           }
           if (media.video_uri.isNotBlank()) {
-            BadgePill("🎬 ${media.video_uri}", Color(0xFFDBEAFE), Color(0xFF1D4ED8))
+            GroundTonalBadge("🎬 ${media.video_uri}", GroundBadgeTone.TERTIARY)
           }
         }
       }
@@ -204,23 +202,25 @@ fun QuestionControlCard(
       // Validation Error Banner
       val status = fieldState.validationStatus
       if (status is ValidationStatus.Invalid && (showValidationErrors || !fieldState.isEmpty)) {
-        Column(
-          modifier =
-            Modifier.fillMaxWidth()
-              .background(Color(0xFFFEF2F2), RoundedCornerShape(10.dp))
-              .border(1.dp, Color(0xFFFECACA), RoundedCornerShape(10.dp))
-              .padding(12.dp),
-          verticalArrangement = Arrangement.spacedBy(4.dp),
+        Card(
+          modifier = Modifier.fillMaxWidth(),
+          shape = MaterialTheme.shapes.medium,
+          colors = CardDefaults.cardColors(containerColor = colors.errorContainer),
         ) {
-          status.errors.forEach { err ->
-            Text(
-              text = "⚠ ${err.message}",
-              style =
-                MaterialTheme.typography.bodySmall.copy(
-                  fontWeight = FontWeight.SemiBold,
-                  color = Color(0xFFB91C1C),
-                ),
-            )
+          Column(
+            modifier = Modifier.fillMaxWidth().padding(12.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+          ) {
+            status.errors.forEach { err ->
+              Text(
+                text = "⚠ ${err.message}",
+                style =
+                  MaterialTheme.typography.bodySmall.copy(
+                    fontWeight = FontWeight.SemiBold,
+                    color = colors.onErrorContainer,
+                  ),
+              )
+            }
           }
         }
       }
@@ -253,22 +253,23 @@ fun ControlWidget(control: ComponentState.ControlState, controller: FormWizardCo
 
 @Composable
 private fun ReadOnlyValueBox(fieldState: FieldState) {
-  Box(
-    modifier =
-      Modifier.fillMaxWidth()
-        .background(Color(0xFFF8FAFC), RoundedCornerShape(10.dp))
-        .border(1.dp, Color(0xFFE2E8F0), RoundedCornerShape(10.dp))
-        .padding(14.dp)
+  val colors = MaterialTheme.colorScheme
+  OutlinedCard(
+    modifier = Modifier.fillMaxWidth(),
+    shape = MaterialTheme.shapes.medium,
+    colors = CardDefaults.outlinedCardColors(containerColor = colors.surfaceContainer),
   ) {
-    Text(
-      text = formatFieldValueForDisplay(fieldState.value, fieldState.dataType),
-      style =
-        MaterialTheme.typography.bodyLarge.copy(
-          fontFamily = FontFamily.Monospace,
-          fontWeight = FontWeight.SemiBold,
-          color = Color(0xFF0F172A),
-        ),
-    )
+    Box(modifier = Modifier.fillMaxWidth().padding(14.dp)) {
+      Text(
+        text = formatFieldValueForDisplay(fieldState.value, fieldState.dataType),
+        style =
+          MaterialTheme.typography.bodyLarge.copy(
+            fontFamily = FontFamily.Monospace,
+            fontWeight = FontWeight.SemiBold,
+            color = colors.onSurface,
+          ),
+      )
+    }
   }
 }
 
@@ -305,6 +306,7 @@ private fun StringInputWidget(
   isMultiline: Boolean,
   controller: FormWizardController,
 ) {
+  val colors = MaterialTheme.colorScheme
   val currentStr = fieldState.value?.scalar_value?.string_value ?: ""
   var text by remember(path, currentStr) { mutableStateOf(currentStr) }
 
@@ -327,16 +329,15 @@ private fun StringInputWidget(
       ) {
         Text(
           text = "${text.length} chars",
-          style = MaterialTheme.typography.labelSmall.copy(color = Color(0xFF6B7280)),
+          style = MaterialTheme.typography.labelSmall.copy(color = colors.onSurfaceVariant),
         )
-        OutlinedButton(
+        TextButton(
           onClick = {
             text = ""
             controller.clearField(path)
-          },
-          modifier = Modifier.height(30.dp),
+          }
         ) {
-          Text("Clear", fontSize = 11.sp)
+          Text("Clear", style = MaterialTheme.typography.labelSmall)
         }
       }
     }
@@ -349,6 +350,7 @@ private fun IntegerInputWidget(
   fieldState: FieldState,
   controller: FormWizardController,
 ) {
+  val colors = MaterialTheme.colorScheme
   val scalar = fieldState.value?.scalar_value
   val initialNumber: Long? = scalar?.int64_value ?: scalar?.int32_value?.toLong()
   var text by remember(path, initialNumber) { mutableStateOf(initialNumber?.toString() ?: "") }
@@ -370,7 +372,7 @@ private fun IntegerInputWidget(
       horizontalArrangement = Arrangement.spacedBy(8.dp),
       verticalAlignment = Alignment.CenterVertically,
     ) {
-      OutlinedButton(
+      FilledTonalButton(
         onClick = { applyNumber((initialNumber ?: 0L) - 1L) },
         modifier = Modifier.height(52.dp),
       ) {
@@ -402,7 +404,7 @@ private fun IntegerInputWidget(
         isError = parseError != null,
         placeholder = { Text("0") },
       )
-      OutlinedButton(
+      FilledTonalButton(
         onClick = { applyNumber((initialNumber ?: 0L) + 1L) },
         modifier = Modifier.height(52.dp),
       ) {
@@ -412,7 +414,7 @@ private fun IntegerInputWidget(
     if (parseError != null) {
       Text(
         text = parseError!!,
-        style = MaterialTheme.typography.labelSmall.copy(color = Color(0xFFB91C1C)),
+        style = MaterialTheme.typography.labelSmall.copy(color = colors.error),
       )
     }
   }
@@ -424,6 +426,7 @@ private fun DecimalInputWidget(
   fieldState: FieldState,
   controller: FormWizardController,
 ) {
+  val colors = MaterialTheme.colorScheme
   val initialDouble: Double? = fieldState.value?.scalar_value?.double_value
   var text by remember(path) { mutableStateOf(initialDouble?.toString() ?: "") }
   var parseError by remember(path) { mutableStateOf<String?>(null) }
@@ -443,7 +446,7 @@ private fun DecimalInputWidget(
       horizontalArrangement = Arrangement.spacedBy(8.dp),
       verticalAlignment = Alignment.CenterVertically,
     ) {
-      OutlinedButton(
+      FilledTonalButton(
         onClick = {
           val next = (((initialDouble ?: 0.0) - 0.5) * 100.0).roundToInt() / 100.0
           text = next.toString()
@@ -476,7 +479,7 @@ private fun DecimalInputWidget(
         isError = parseError != null,
         placeholder = { Text("0.0") },
       )
-      OutlinedButton(
+      FilledTonalButton(
         onClick = {
           val next = (((initialDouble ?: 0.0) + 0.5) * 100.0).roundToInt() / 100.0
           text = next.toString()
@@ -491,12 +494,13 @@ private fun DecimalInputWidget(
     if (parseError != null) {
       Text(
         text = parseError!!,
-        style = MaterialTheme.typography.labelSmall.copy(color = Color(0xFFB91C1C)),
+        style = MaterialTheme.typography.labelSmall.copy(color = colors.error),
       )
     }
   }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun BooleanInputWidget(
   path: String,
@@ -504,32 +508,15 @@ private fun BooleanInputWidget(
   controller: FormWizardController,
 ) {
   val currentBool = fieldState.value?.scalar_value?.bool_value
-  Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-    listOf(true to "Yes (True)", false to "No (False)").forEach { (boolVal, label) ->
-      val isSelected = currentBool == boolVal
-      Box(
-        modifier =
-          Modifier.weight(1f)
-            .clip(RoundedCornerShape(12.dp))
-            .background(if (isSelected) Color(0xFFE8F5E9) else Color(0xFFF9FAFB))
-            .border(
-              width = if (isSelected) 2.dp else 1.dp,
-              color = if (isSelected) Color(0xFF1B5E20) else Color(0xFFD1D5DB),
-              shape = RoundedCornerShape(12.dp),
-            )
-            .clickable { controller.updateBoolean(path, boolVal) }
-            .padding(vertical = 14.dp, horizontal = 12.dp),
-        contentAlignment = Alignment.Center,
-      ) {
-        Text(
-          text = label,
-          style =
-            MaterialTheme.typography.bodyMedium.copy(
-              fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-              color = if (isSelected) Color(0xFF1B5E20) else Color(0xFF374151),
-            ),
-        )
-      }
+  val options = listOf(true to "Yes (True)", false to "No (False)")
+  SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
+    options.forEachIndexed { index, (boolVal, label) ->
+      SegmentedButton(
+        selected = currentBool == boolVal,
+        onClick = { controller.updateBoolean(path, boolVal) },
+        shape = SegmentedButtonDefaults.itemShape(index = index, count = options.size),
+        label = { Text(label, style = MaterialTheme.typography.labelLarge) },
+      )
     }
   }
 }
@@ -578,7 +565,7 @@ private fun DateInputWidget(
         singleLine = true,
         placeholder = { Text("YYYY-MM-DD") },
       )
-      OutlinedButton(
+      FilledTonalButton(
         onClick = {
           val epochDays = controller.session.environment.clockEpochMillis() / 86_400_000L
           val z = epochDays + 719468L
@@ -602,19 +589,19 @@ private fun DateInputWidget(
         onClick = { controller.updateDate(path, year, month, (day - 1).coerceIn(1, 28)) },
         modifier = Modifier.weight(1f),
       ) {
-        Text("-1 Day", fontSize = 11.sp)
+        Text("-1 Day", style = MaterialTheme.typography.labelSmall)
       }
       OutlinedButton(
         onClick = { controller.updateDate(path, year, month, (day + 1).coerceIn(1, 28)) },
         modifier = Modifier.weight(1f),
       ) {
-        Text("+1 Day", fontSize = 11.sp)
+        Text("+1 Day", style = MaterialTheme.typography.labelSmall)
       }
       OutlinedButton(
         onClick = { controller.updateDate(path, year, (month % 12) + 1, day) },
         modifier = Modifier.weight(1f),
       ) {
-        Text("+1 Month", fontSize = 11.sp)
+        Text("+1 Month", style = MaterialTheme.typography.labelSmall)
       }
     }
   }
@@ -660,7 +647,7 @@ private fun TimeInputWidget(
       singleLine = true,
       placeholder = { Text("HH:MM:SS") },
     )
-    OutlinedButton(
+    FilledTonalButton(
       onClick = {
         val totalSec =
           ((controller.session.environment.clockEpochMillis() / 1000L) % 86400L + 86400L) % 86400L
@@ -681,6 +668,7 @@ private fun TimestampInputWidget(
   fieldState: FieldState,
   controller: FormWizardController,
 ) {
+  val colors = MaterialTheme.colorScheme
   val ts = fieldState.value?.scalar_value?.timestamp_value
   Row(
     modifier = Modifier.fillMaxWidth(),
@@ -692,7 +680,7 @@ private fun TimestampInputWidget(
       style =
         MaterialTheme.typography.bodyMedium.copy(
           fontFamily = FontFamily.Monospace,
-          color = if (ts != null) Color(0xFF111827) else Color(0xFF9CA3AF),
+          color = if (ts != null) colors.onSurface else colors.onSurfaceVariant,
         ),
       modifier = Modifier.weight(1f),
     )
@@ -713,95 +701,98 @@ private fun GeoPointInputWidget(
   fieldState: FieldState,
   controller: FormWizardController,
 ) {
+  val colors = MaterialTheme.colorScheme
   val gp = fieldState.value?.scalar_value?.geopoint_value
   var latText by remember(path, gp) { mutableStateOf(gp?.latitude?.toString() ?: "") }
   var lonText by remember(path, gp) { mutableStateOf(gp?.longitude?.toString() ?: "") }
   var altText by remember(path, gp) { mutableStateOf(gp?.altitude_meters?.toString() ?: "0.0") }
   var accText by remember(path, gp) { mutableStateOf(gp?.accuracy_meters?.toString() ?: "3.5") }
 
-  Column(
-    modifier =
-      Modifier.fillMaxWidth()
-        .background(Color(0xFFF8FAFC), RoundedCornerShape(12.dp))
-        .border(1.dp, Color(0xFFE2E8F0), RoundedCornerShape(12.dp))
-        .padding(12.dp),
-    verticalArrangement = Arrangement.spacedBy(8.dp),
+  OutlinedCard(
+    modifier = Modifier.fillMaxWidth(),
+    shape = MaterialTheme.shapes.medium,
+    colors = CardDefaults.outlinedCardColors(containerColor = colors.surfaceContainerLow),
   ) {
-    Row(
-      modifier = Modifier.fillMaxWidth(),
-      horizontalArrangement = Arrangement.SpaceBetween,
-      verticalAlignment = Alignment.CenterVertically,
+    Column(
+      modifier = Modifier.fillMaxWidth().padding(12.dp),
+      verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-      Text(
-        text =
-          if (gp != null) {
-            "📍 ${gp.latitude}, ${gp.longitude} (±${gp.accuracy_meters}m)"
-          } else {
-            "📍 No GPS coordinates captured"
-          },
-        style =
-          MaterialTheme.typography.bodySmall.copy(
-            fontFamily = FontFamily.Monospace,
-            fontWeight = FontWeight.SemiBold,
-            color = Color(0xFF1E293B),
-          ),
-      )
-      Button(
-        onClick = {
-          controller.updateGeoPoint(
-            path = path,
-            latitude = -18.7669,
-            longitude = 46.8691,
-            altitudeMeters = 240.0,
-            accuracyMeters = 2.8,
-          )
-        },
-        modifier = Modifier.height(34.dp),
+      Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
       ) {
-        Text("Capture GPS Fix", fontSize = 11.sp)
+        Text(
+          text =
+            if (gp != null) {
+              "📍 ${gp.latitude}, ${gp.longitude} (±${gp.accuracy_meters}m)"
+            } else {
+              "📍 No GPS coordinates captured"
+            },
+          style =
+            MaterialTheme.typography.bodySmall.copy(
+              fontFamily = FontFamily.Monospace,
+              fontWeight = FontWeight.SemiBold,
+              color = colors.onSurface,
+            ),
+        )
+        FilledTonalButton(
+          onClick = {
+            controller.updateGeoPoint(
+              path = path,
+              latitude = -18.7669,
+              longitude = 46.8691,
+              altitudeMeters = 240.0,
+              accuracyMeters = 2.8,
+            )
+          },
+          contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
+        ) {
+          Text("Capture GPS Fix", style = MaterialTheme.typography.labelSmall)
+        }
       }
-    }
-    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-      OutlinedTextField(
-        value = latText,
-        onValueChange = {
-          latText = it
-          val lat = it.toDoubleOrNull()
-          val lon = lonText.toDoubleOrNull()
-          if (lat != null && lon != null) {
-            controller.updateGeoPoint(
-              path,
-              lat,
-              lon,
-              altText.toDoubleOrNull() ?: 0.0,
-              accText.toDoubleOrNull() ?: 3.5,
-            )
-          }
-        },
-        label = { Text("Latitude") },
-        modifier = Modifier.weight(1f),
-        singleLine = true,
-      )
-      OutlinedTextField(
-        value = lonText,
-        onValueChange = {
-          lonText = it
-          val lat = latText.toDoubleOrNull()
-          val lon = it.toDoubleOrNull()
-          if (lat != null && lon != null) {
-            controller.updateGeoPoint(
-              path,
-              lat,
-              lon,
-              altText.toDoubleOrNull() ?: 0.0,
-              accText.toDoubleOrNull() ?: 3.5,
-            )
-          }
-        },
-        label = { Text("Longitude") },
-        modifier = Modifier.weight(1f),
-        singleLine = true,
-      )
+      Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        OutlinedTextField(
+          value = latText,
+          onValueChange = {
+            latText = it
+            val lat = it.toDoubleOrNull()
+            val lon = lonText.toDoubleOrNull()
+            if (lat != null && lon != null) {
+              controller.updateGeoPoint(
+                path,
+                lat,
+                lon,
+                altText.toDoubleOrNull() ?: 0.0,
+                accText.toDoubleOrNull() ?: 3.5,
+              )
+            }
+          },
+          label = { Text("Latitude") },
+          modifier = Modifier.weight(1f),
+          singleLine = true,
+        )
+        OutlinedTextField(
+          value = lonText,
+          onValueChange = {
+            lonText = it
+            val lat = latText.toDoubleOrNull()
+            val lon = it.toDoubleOrNull()
+            if (lat != null && lon != null) {
+              controller.updateGeoPoint(
+                path,
+                lat,
+                lon,
+                altText.toDoubleOrNull() ?: 0.0,
+                accText.toDoubleOrNull() ?: 3.5,
+              )
+            }
+          },
+          label = { Text("Longitude") },
+          modifier = Modifier.weight(1f),
+          singleLine = true,
+        )
+      }
     }
   }
 }
@@ -813,6 +804,7 @@ private fun GeoVertexListWidget(
   controller: FormWizardController,
   isClosedShape: Boolean,
 ) {
+  val colors = MaterialTheme.colorScheme
   val existingPoints =
     if (isClosedShape) {
       fieldState.value?.scalar_value?.geoshape_value?.points ?: emptyList()
@@ -831,91 +823,100 @@ private fun GeoVertexListWidget(
     }
   }
 
-  Column(
-    modifier =
-      Modifier.fillMaxWidth()
-        .background(Color(0xFFF8FAFC), RoundedCornerShape(12.dp))
-        .border(1.dp, Color(0xFFE2E8F0), RoundedCornerShape(12.dp))
-        .padding(12.dp),
-    verticalArrangement = Arrangement.spacedBy(8.dp),
+  OutlinedCard(
+    modifier = Modifier.fillMaxWidth(),
+    shape = MaterialTheme.shapes.medium,
+    colors = CardDefaults.outlinedCardColors(containerColor = colors.surfaceContainerLow),
   ) {
-    Row(
-      modifier = Modifier.fillMaxWidth(),
-      horizontalArrangement = Arrangement.SpaceBetween,
-      verticalAlignment = Alignment.CenterVertically,
+    Column(
+      modifier = Modifier.fillMaxWidth().padding(12.dp),
+      verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-      Text(
-        text =
-          if (isClosedShape) {
-            "Polygon Vertices (${existingPoints.size})"
-          } else {
-            "Trace Vertices (${existingPoints.size})"
-          },
-        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
-      )
-      OutlinedButton(
-        onClick = {
-          val sample =
-            listOf(
-              GeoPoint(latitude = -18.7660, longitude = 46.8680),
-              GeoPoint(latitude = -18.7660, longitude = 46.8695),
-              GeoPoint(latitude = -18.7675, longitude = 46.8695),
-              GeoPoint(latitude = -18.7660, longitude = 46.8680),
-            )
-          updateVertices(sample)
-        },
-        modifier = Modifier.height(32.dp),
-      ) {
-        Text("Sample Geometry", fontSize = 11.sp)
-      }
-    }
-
-    existingPoints.forEachIndexed { idx, pt ->
       Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
       ) {
         Text(
-          text = "#${idx + 1}: (${pt.latitude}, ${pt.longitude})",
-          style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
+          text =
+            if (isClosedShape) {
+              "Polygon Vertices (${existingPoints.size})"
+            } else {
+              "Trace Vertices (${existingPoints.size})"
+            },
+          style =
+            MaterialTheme.typography.labelMedium.copy(
+              fontWeight = FontWeight.SemiBold,
+              color = colors.onSurface,
+            ),
         )
-        Text(
-          text = "✕",
-          color = Color(0xFFB91C1C),
-          modifier =
-            Modifier.clickable { updateVertices(existingPoints.filterIndexed { i, _ -> i != idx }) }
-              .padding(4.dp),
-        )
-      }
-    }
-
-    Row(
-      horizontalArrangement = Arrangement.spacedBy(6.dp),
-      verticalAlignment = Alignment.CenterVertically,
-    ) {
-      OutlinedTextField(
-        value = newLat,
-        onValueChange = { newLat = it },
-        label = { Text("Lat") },
-        modifier = Modifier.weight(1f),
-        singleLine = true,
-      )
-      OutlinedTextField(
-        value = newLon,
-        onValueChange = { newLon = it },
-        label = { Text("Lon") },
-        modifier = Modifier.weight(1f),
-        singleLine = true,
-      )
-      Button(
-        onClick = {
-          val lat = newLat.toDoubleOrNull() ?: -18.7669
-          val lon = newLon.toDoubleOrNull() ?: 46.8691
-          updateVertices(existingPoints + GeoPoint(latitude = lat, longitude = lon))
+        OutlinedButton(
+          onClick = {
+            val sample =
+              listOf(
+                GeoPoint(latitude = -18.7660, longitude = 46.8680),
+                GeoPoint(latitude = -18.7660, longitude = 46.8695),
+                GeoPoint(latitude = -18.7675, longitude = 46.8695),
+                GeoPoint(latitude = -18.7660, longitude = 46.8680),
+              )
+            updateVertices(sample)
+          },
+          contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
+        ) {
+          Text("Sample Geometry", style = MaterialTheme.typography.labelSmall)
         }
+      }
+
+      existingPoints.forEachIndexed { idx, pt ->
+        Row(
+          modifier = Modifier.fillMaxWidth(),
+          horizontalArrangement = Arrangement.SpaceBetween,
+          verticalAlignment = Alignment.CenterVertically,
+        ) {
+          Text(
+            text = "#${idx + 1}: (${pt.latitude}, ${pt.longitude})",
+            style =
+              MaterialTheme.typography.bodySmall.copy(
+                fontFamily = FontFamily.Monospace,
+                color = colors.onSurface,
+              ),
+          )
+          TextButton(
+            onClick = { updateVertices(existingPoints.filterIndexed { i, _ -> i != idx }) },
+            colors = ButtonDefaults.textButtonColors(contentColor = colors.error),
+          ) {
+            Text("✕")
+          }
+        }
+      }
+
+      Row(
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
+        verticalAlignment = Alignment.CenterVertically,
       ) {
-        Text("+ Pt")
+        OutlinedTextField(
+          value = newLat,
+          onValueChange = { newLat = it },
+          label = { Text("Lat") },
+          modifier = Modifier.weight(1f),
+          singleLine = true,
+        )
+        OutlinedTextField(
+          value = newLon,
+          onValueChange = { newLon = it },
+          label = { Text("Lon") },
+          modifier = Modifier.weight(1f),
+          singleLine = true,
+        )
+        Button(
+          onClick = {
+            val lat = newLat.toDoubleOrNull() ?: -18.7669
+            val lon = newLon.toDoubleOrNull() ?: 46.8691
+            updateVertices(existingPoints + GeoPoint(latitude = lat, longitude = lon))
+          }
+        ) {
+          Text("+ Pt")
+        }
       }
     }
   }
@@ -926,6 +927,7 @@ private fun SelectOneWidget(
   control: ComponentState.ControlState,
   controller: FormWizardController,
 ) {
+  val colors = MaterialTheme.colorScheme
   val path = control.canonicalPath
   val selectedValue = control.fieldState.value?.scalar_value?.string_value ?: ""
   val isQuick = control.appearance.split(' ').contains("quick")
@@ -934,7 +936,7 @@ private fun SelectOneWidget(
   if (control.options.isEmpty()) {
     Text(
       text = "(No selectable options match the current filter)",
-      style = MaterialTheme.typography.bodySmall.copy(color = Color(0xFF6B7280)),
+      style = MaterialTheme.typography.bodySmall.copy(color = colors.onSurfaceVariant),
     )
     return
   }
@@ -943,31 +945,43 @@ private fun SelectOneWidget(
     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
       control.options.forEach { option ->
         val isSelected = selectedValue == option.value
-        Column(
-          modifier =
-            Modifier.weight(1f)
-              .clip(RoundedCornerShape(10.dp))
-              .background(if (isSelected) Color(0xFFE8F5E9) else Color(0xFFF9FAFB))
-              .border(
-                width = if (isSelected) 2.dp else 1.dp,
-                color = if (isSelected) Color(0xFF1B5E20) else Color(0xFFE5E7EB),
-                shape = RoundedCornerShape(10.dp),
-              )
-              .clickable {
+        OutlinedCard(
+          onClick = {
+            controller.updateString(path, option.value)
+            if (isQuick) controller.nextStep()
+          },
+          modifier = Modifier.weight(1f),
+          shape = MaterialTheme.shapes.medium,
+          colors =
+            CardDefaults.outlinedCardColors(
+              containerColor =
+                if (isSelected) colors.primaryContainer else colors.surfaceContainerLow
+            ),
+          border =
+            BorderStroke(
+              width = if (isSelected) 2.dp else 1.dp,
+              color = if (isSelected) colors.primary else colors.outlineVariant,
+            ),
+        ) {
+          Column(
+            modifier = Modifier.fillMaxWidth().padding(8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+          ) {
+            RadioButton(
+              selected = isSelected,
+              onClick = {
                 controller.updateString(path, option.value)
                 if (isQuick) controller.nextStep()
-              }
-              .padding(8.dp),
-          horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-          RadioButton(
-            selected = isSelected,
-            onClick = {
-              controller.updateString(path, option.value)
-              if (isQuick) controller.nextStep()
-            },
-          )
-          Text(text = option.label.text, style = MaterialTheme.typography.labelSmall)
+              },
+            )
+            Text(
+              text = option.label.text,
+              style =
+                MaterialTheme.typography.labelSmall.copy(
+                  color = if (isSelected) colors.onPrimaryContainer else colors.onSurface
+                ),
+            )
+          }
         }
       }
     }
@@ -994,6 +1008,7 @@ private fun SelectMultipleWidget(
   control: ComponentState.ControlState,
   controller: FormWizardController,
 ) {
+  val colors = MaterialTheme.colorScheme
   val path = control.canonicalPath
   val selectedValues: List<String> =
     control.fieldState.value?.list_value?.values?.mapNotNull { it.string_value }
@@ -1005,7 +1020,7 @@ private fun SelectMultipleWidget(
   if (control.options.isEmpty()) {
     Text(
       text = "(No selectable options match the current filter)",
-      style = MaterialTheme.typography.bodySmall.copy(color = Color(0xFF6B7280)),
+      style = MaterialTheme.typography.bodySmall.copy(color = colors.onSurfaceVariant),
     )
     return
   }
@@ -1038,43 +1053,49 @@ private fun ChoiceCardRow(
   isMultiSelect: Boolean,
   onClick: () -> Unit,
 ) {
-  Row(
-    modifier =
-      Modifier.fillMaxWidth()
-        .clip(RoundedCornerShape(12.dp))
-        .background(if (isSelected) Color(0xFFE8F5E9) else Color(0xFFF9FAFB))
-        .border(
-          width = if (isSelected) 2.dp else 1.dp,
-          color = if (isSelected) Color(0xFF1B5E20) else Color(0xFFE5E7EB),
-          shape = RoundedCornerShape(12.dp),
-        )
-        .clickable { onClick() }
-        .padding(horizontal = 12.dp, vertical = 10.dp),
-    verticalAlignment = Alignment.CenterVertically,
-    horizontalArrangement = Arrangement.spacedBy(10.dp),
+  val colors = MaterialTheme.colorScheme
+  OutlinedCard(
+    onClick = onClick,
+    modifier = Modifier.fillMaxWidth(),
+    shape = MaterialTheme.shapes.medium,
+    colors =
+      CardDefaults.outlinedCardColors(
+        containerColor = if (isSelected) colors.primaryContainer else colors.surfaceContainerLow
+      ),
+    border =
+      BorderStroke(
+        width = if (isSelected) 2.dp else 1.dp,
+        color = if (isSelected) colors.primary else colors.outlineVariant,
+      ),
   ) {
-    if (isMultiSelect) {
-      Checkbox(checked = isSelected, onCheckedChange = { onClick() })
-    } else {
-      RadioButton(selected = isSelected, onClick = onClick)
-    }
-    Column(modifier = Modifier.weight(1f)) {
-      Text(
-        text = option.label.text,
-        style =
-          MaterialTheme.typography.bodyMedium.copy(
-            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-            color = if (isSelected) Color(0xFF1B5E20) else Color(0xFF111827),
-          ),
-      )
-      Text(
-        text = "value: ${option.value}",
-        style =
-          MaterialTheme.typography.labelSmall.copy(
-            fontFamily = FontFamily.Monospace,
-            color = Color(0xFF6B7280),
-          ),
-      )
+    Row(
+      modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
+      verticalAlignment = Alignment.CenterVertically,
+      horizontalArrangement = Arrangement.spacedBy(10.dp),
+    ) {
+      if (isMultiSelect) {
+        Checkbox(checked = isSelected, onCheckedChange = { onClick() })
+      } else {
+        RadioButton(selected = isSelected, onClick = onClick)
+      }
+      Column(modifier = Modifier.weight(1f)) {
+        Text(
+          text = option.label.text,
+          style =
+            MaterialTheme.typography.bodyMedium.copy(
+              fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+              color = if (isSelected) colors.onPrimaryContainer else colors.onSurface,
+            ),
+        )
+        Text(
+          text = "value: ${option.value}",
+          style =
+            MaterialTheme.typography.labelSmall.copy(
+              fontFamily = FontFamily.Monospace,
+              color = if (isSelected) colors.onPrimaryContainer else colors.onSurfaceVariant,
+            ),
+        )
+      }
     }
   }
 }
@@ -1084,6 +1105,7 @@ private fun RangeControlWidget(
   control: ComponentState.ControlState,
   controller: FormWizardController,
 ) {
+  val colors = MaterialTheme.colorScheme
   val path = control.canonicalPath
   val rangeCfg = control.controlDef.range_config
   val min = rangeCfg?.start ?: 0.0
@@ -1117,16 +1139,12 @@ private fun RangeControlWidget(
     ) {
       Text(
         text = "Min: $min",
-        style = MaterialTheme.typography.labelSmall.copy(color = Color(0xFF6B7280)),
+        style = MaterialTheme.typography.labelSmall.copy(color = colors.onSurfaceVariant),
       )
-      BadgePill(
-        text = "Selected: $currentVal",
-        bgColor = Color(0xFFE8F5E9),
-        textColor = Color(0xFF1B5E20),
-      )
+      GroundTonalBadge(text = "Selected: $currentVal", tone = GroundBadgeTone.PRIMARY)
       Text(
         text = "Max: $max",
-        style = MaterialTheme.typography.labelSmall.copy(color = Color(0xFF6B7280)),
+        style = MaterialTheme.typography.labelSmall.copy(color = colors.onSurfaceVariant),
       )
     }
     Slider(
@@ -1146,6 +1164,7 @@ private fun RankControlWidget(
   control: ComponentState.ControlState,
   controller: FormWizardController,
 ) {
+  val colors = MaterialTheme.colorScheme
   val path = control.canonicalPath
   val currentRankedValues: List<String> =
     control.fieldState.value
@@ -1161,57 +1180,57 @@ private fun RankControlWidget(
   Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
     Text(
       text = "Order items from highest (#1) to lowest priority:",
-      style = MaterialTheme.typography.labelMedium.copy(color = Color(0xFF4B5563)),
+      style = MaterialTheme.typography.labelMedium.copy(color = colors.onSurfaceVariant),
     )
     orderedOptions.forEachIndexed { index, option ->
-      Row(
-        modifier =
-          Modifier.fillMaxWidth()
-            .background(Color(0xFFF9FAFB), RoundedCornerShape(10.dp))
-            .border(1.dp, Color(0xFFE5E7EB), RoundedCornerShape(10.dp))
-            .padding(horizontal = 12.dp, vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(10.dp),
+      OutlinedCard(
+        modifier = Modifier.fillMaxWidth(),
+        shape = MaterialTheme.shapes.medium,
+        colors = CardDefaults.outlinedCardColors(containerColor = colors.surfaceContainerLow),
       ) {
-        BadgePill(
-          text = "#${index + 1}",
-          bgColor = Color(0xFFE8F5E9),
-          textColor = Color(0xFF1B5E20),
-        )
-        Text(
-          text = option.label.text,
-          style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
-          modifier = Modifier.weight(1f),
-        )
-        OutlinedButton(
-          onClick = {
-            if (index > 0) {
-              val mutable = orderedOptions.map { it.value }.toMutableList()
-              val tmp = mutable[index - 1]
-              mutable[index - 1] = mutable[index]
-              mutable[index] = tmp
-              controller.updateMultiSelect(path, mutable)
-            }
-          },
-          enabled = index > 0,
-          modifier = Modifier.height(32.dp),
+        Row(
+          modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
+          verticalAlignment = Alignment.CenterVertically,
+          horizontalArrangement = Arrangement.spacedBy(10.dp),
         ) {
-          Text("↑", fontSize = 12.sp)
-        }
-        OutlinedButton(
-          onClick = {
-            if (index < orderedOptions.lastIndex) {
-              val mutable = orderedOptions.map { it.value }.toMutableList()
-              val tmp = mutable[index + 1]
-              mutable[index + 1] = mutable[index]
-              mutable[index + 1 - 1] = tmp
-              controller.updateMultiSelect(path, mutable)
-            }
-          },
-          enabled = index < orderedOptions.lastIndex,
-          modifier = Modifier.height(32.dp),
-        ) {
-          Text("↓", fontSize = 12.sp)
+          GroundTonalBadge(text = "#${index + 1}", tone = GroundBadgeTone.PRIMARY)
+          Text(
+            text = option.label.text,
+            style =
+              MaterialTheme.typography.bodyMedium.copy(
+                fontWeight = FontWeight.Medium,
+                color = colors.onSurface,
+              ),
+            modifier = Modifier.weight(1f),
+          )
+          OutlinedButton(
+            onClick = {
+              if (index > 0) {
+                val mutable = orderedOptions.map { it.value }.toMutableList()
+                val tmp = mutable[index - 1]
+                mutable[index - 1] = mutable[index]
+                mutable[index] = tmp
+                controller.updateMultiSelect(path, mutable)
+              }
+            },
+            enabled = index > 0,
+          ) {
+            Text("↑", style = MaterialTheme.typography.labelMedium)
+          }
+          OutlinedButton(
+            onClick = {
+              if (index < orderedOptions.lastIndex) {
+                val mutable = orderedOptions.map { it.value }.toMutableList()
+                val tmp = mutable[index + 1]
+                mutable[index + 1] = mutable[index]
+                mutable[index] = tmp
+                controller.updateMultiSelect(path, mutable)
+              }
+            },
+            enabled = index < orderedOptions.lastIndex,
+          ) {
+            Text("↓", style = MaterialTheme.typography.labelMedium)
+          }
         }
       }
     }
@@ -1223,46 +1242,49 @@ private fun UploadControlWidget(
   control: ComponentState.ControlState,
   controller: FormWizardController,
 ) {
+  val colors = MaterialTheme.colorScheme
   val path = control.canonicalPath
   val mediaType = control.controlDef.media_type.ifBlank { "image/*" }
   val currentFile = control.fieldState.value?.scalar_value?.string_value ?: ""
 
-  Column(
-    modifier =
-      Modifier.fillMaxWidth()
-        .background(Color(0xFFF8FAFC), RoundedCornerShape(12.dp))
-        .border(1.dp, Color(0xFFE2E8F0), RoundedCornerShape(12.dp))
-        .padding(14.dp),
-    verticalArrangement = Arrangement.spacedBy(10.dp),
+  OutlinedCard(
+    modifier = Modifier.fillMaxWidth(),
+    shape = MaterialTheme.shapes.medium,
+    colors = CardDefaults.outlinedCardColors(containerColor = colors.surfaceContainerLow),
   ) {
-    Text(
-      text = "Accepted media: $mediaType",
-      style = MaterialTheme.typography.labelSmall.copy(color = Color(0xFF6B7280)),
-    )
-    Row(
-      modifier = Modifier.fillMaxWidth(),
-      horizontalArrangement = Arrangement.spacedBy(8.dp),
-      verticalAlignment = Alignment.CenterVertically,
+    Column(
+      modifier = Modifier.fillMaxWidth().padding(14.dp),
+      verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
-      OutlinedTextField(
-        value = currentFile,
-        onValueChange = { controller.updateString(path, it) },
-        modifier = Modifier.weight(1f),
-        singleLine = true,
-        placeholder = { Text("attachment_filename.jpg") },
+      Text(
+        text = "Accepted media: $mediaType",
+        style = MaterialTheme.typography.labelSmall.copy(color = colors.onSurfaceVariant),
       )
-      Button(
-        onClick = {
-          val ext =
-            when {
-              mediaType.startsWith("audio") -> "m4a"
-              mediaType.startsWith("video") -> "mp4"
-              else -> "jpg"
-            }
-          controller.updateString(path, "capture_${path.substringAfterLast('/')}.$ext")
-        }
+      Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically,
       ) {
-        Text("Capture")
+        OutlinedTextField(
+          value = currentFile,
+          onValueChange = { controller.updateString(path, it) },
+          modifier = Modifier.weight(1f),
+          singleLine = true,
+          placeholder = { Text("attachment_filename.jpg") },
+        )
+        Button(
+          onClick = {
+            val ext =
+              when {
+                mediaType.startsWith("audio") -> "m4a"
+                mediaType.startsWith("video") -> "mp4"
+                else -> "jpg"
+              }
+            controller.updateString(path, "capture_${path.substringAfterLast('/')}.$ext")
+          }
+        ) {
+          Text("Capture")
+        }
       }
     }
   }
@@ -1276,37 +1298,23 @@ private fun TriggerControlWidget(
   val path = control.canonicalPath
   val isAcknowledged = control.fieldState.value?.scalar_value?.string_value == "OK"
 
-  Button(
-    onClick = {
-      if (isAcknowledged) controller.clearField(path) else controller.updateString(path, "OK")
-    },
-    colors =
-      ButtonDefaults.buttonColors(
-        containerColor = if (isAcknowledged) Color(0xFF1B5E20) else Color(0xFF374151)
-      ),
-    modifier = Modifier.fillMaxWidth(),
-  ) {
-    Text(if (isAcknowledged) "✓ Acknowledged (OK)" else "Acknowledge / Confirm")
+  if (isAcknowledged) {
+    Button(
+      onClick = { controller.clearField(path) },
+      modifier = Modifier.fillMaxWidth(),
+    ) {
+      Text("✓ Acknowledged (OK)")
+    }
+  } else {
+    FilledTonalButton(
+      onClick = { controller.updateString(path, "OK") },
+      modifier = Modifier.fillMaxWidth(),
+    ) {
+      Text("Acknowledge / Confirm")
+    }
   }
 }
 
-@Composable
-internal fun BadgePill(text: String, bgColor: Color, textColor: Color) {
-  Box(
-    modifier =
-      Modifier.background(bgColor, RoundedCornerShape(999.dp))
-        .padding(horizontal = 10.dp, vertical = 3.dp)
-  ) {
-    Text(
-      text = text,
-      style =
-        MaterialTheme.typography.labelSmall.copy(
-          fontWeight = FontWeight.SemiBold,
-          color = textColor,
-        ),
-    )
-  }
-}
 
 /**
  * Formats a [FieldValue] into a human-readable summary string for read-only displays and review

@@ -13,9 +13,8 @@
  */
 package org.groundplatform.v2.devtools.prototypeapp
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -29,21 +28,26 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -51,9 +55,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -69,6 +71,8 @@ import org.groundplatform.v2.core.forms.serialization.TextProtoSerializer
 import org.groundplatform.v2.core.forms.serialization.XFormsXmlSerializer
 import org.groundplatform.v2.core.forms.ui.FormWizardController
 import org.groundplatform.v2.core.forms.ui.FormWizardStep
+import org.groundplatform.v2.core.forms.ui.GroundBadgeTone
+import org.groundplatform.v2.core.forms.ui.GroundTonalBadge
 import org.groundplatform.v2.core.forms.ui.MobileFormRunner
 import org.groundplatform.v2.core.forms.ui.formatFieldValueForDisplay
 
@@ -356,107 +360,99 @@ fun PrototypeDataCollectionFormScreen(state: PrototypeAppState) {
       ?: form?.title
       ?: "Data Collection Form"
 
-  Column(modifier = Modifier.fillMaxSize().background(Color(0xFFF3F6F4))) {
+  Column(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
     // Compact target entity & form context banner at the top of the device screen
-    Row(
-      modifier =
-        Modifier.fillMaxWidth()
-          .background(Color(0xFF0F3826))
-          .padding(horizontal = 12.dp, vertical = 8.dp),
-      horizontalArrangement = Arrangement.SpaceBetween,
-      verticalAlignment = Alignment.CenterVertically,
+    Surface(
+      color = MaterialTheme.colorScheme.inverseSurface,
+      contentColor = MaterialTheme.colorScheme.inverseOnSurface,
+      modifier = Modifier.fillMaxWidth(),
     ) {
       Row(
-        modifier = Modifier.weight(1f),
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 6.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
       ) {
-        Box(
-          modifier =
-            Modifier.size(26.dp)
-              .clip(RoundedCornerShape(7.dp))
-              .background(Color(0xFF1E6F50))
-              .clickable { state.closeActiveFormRunner() },
-          contentAlignment = Alignment.Center,
+        Row(
+          modifier = Modifier.weight(1f),
+          verticalAlignment = Alignment.CenterVertically,
+          horizontalArrangement = Arrangement.spacedBy(4.dp),
         ) {
-          Icon(
-            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-            contentDescription = "Back to Survey",
-            tint = Color.White,
-            modifier = Modifier.size(15.dp),
-          )
-        }
-
-        Column(modifier = Modifier.weight(1f)) {
-          Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(5.dp),
+          IconButton(
+            onClick = { state.closeActiveFormRunner() },
+            modifier = Modifier.size(36.dp),
           ) {
             Icon(
-              imageVector = Icons.Default.LocationOn,
-              contentDescription = null,
-              tint = Color(0xFF8BD6B1),
-              modifier = Modifier.size(12.dp),
+              imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+              contentDescription = "Back to Survey",
+              tint = Color.White,
+              modifier = Modifier.size(18.dp),
             )
+          }
+
+          Column(modifier = Modifier.weight(1f)) {
+            Row(
+              verticalAlignment = Alignment.CenterVertically,
+              horizontalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
+              Icon(
+                imageVector = Icons.Default.LocationOn,
+                contentDescription = null,
+                tint = Color(0xFF8BD6B1),
+                modifier = Modifier.size(14.dp),
+              )
+              Text(
+                text =
+                  if (entity != null) {
+                    "${entity.label} • ${entity.geoId}"
+                  } else {
+                    form?.targetDatasetName ?: "Field Survey Data Collection"
+                  },
+                style = MaterialTheme.typography.labelMedium,
+                color = Color(0xFF8BD6B1),
+                fontWeight = FontWeight.Bold,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+              )
+            }
             Text(
               text =
-                if (entity != null) {
-                  "${entity.label} • ${entity.geoId}"
+                if (form != null) {
+                  "${form.ctaLabel} — $resolvedTitle"
                 } else {
-                  form?.targetDatasetName ?: "Field Survey Data Collection"
+                  resolvedTitle
                 },
-              style =
-                MaterialTheme.typography.labelSmall.copy(
-                  color = Color(0xFF8BD6B1),
-                  fontWeight = FontWeight.Bold,
-                ),
+              style = MaterialTheme.typography.labelSmall,
+              color = Color.White.copy(alpha = 0.88f),
               maxLines = 1,
               overflow = TextOverflow.Ellipsis,
             )
           }
-          Text(
-            text =
-              if (form != null) {
-                "${form.ctaLabel} — $resolvedTitle"
-              } else {
-                resolvedTitle
-              },
-            style =
-              MaterialTheme.typography.labelSmall.copy(
-                color = Color.White.copy(alpha = 0.85f),
-                fontSize = 10.sp,
-              ),
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-          )
         }
-      }
 
-      Spacer(modifier = Modifier.width(8.dp))
+        Spacer(modifier = Modifier.width(8.dp))
 
-      // Return to map/list pill button
-      Row(
-        modifier =
-          Modifier.clip(RoundedCornerShape(8.dp))
-            .background(Color(0xFF1E563D))
-            .clickable { state.closeActiveFormRunner() }
-            .padding(horizontal = 8.dp, vertical = 4.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(4.dp),
-      ) {
-        Icon(
-          imageVector = Icons.Default.Close,
-          contentDescription = "Cancel Form",
-          tint = Color.White,
-          modifier = Modifier.size(12.dp),
-        )
-        Text(
-          text = "Map",
-          style =
-            MaterialTheme.typography.labelSmall.copy(
-              color = Color.White,
-              fontWeight = FontWeight.SemiBold,
+        AssistChip(
+          onClick = { state.closeActiveFormRunner() },
+          colors =
+            androidx.compose.material3.AssistChipDefaults.assistChipColors(
+              containerColor = Color(0xFF1E563D),
+              labelColor = Color.White,
+              leadingIconContentColor = Color.White,
             ),
+          border =
+            androidx.compose.material3.AssistChipDefaults.assistChipBorder(
+              enabled = true,
+              borderColor = Color(0xFF386B52),
+            ),
+          label = { Text("Map", style = MaterialTheme.typography.labelSmall) },
+          leadingIcon = {
+            Icon(
+              imageVector = Icons.Default.Close,
+              contentDescription = "Cancel Form",
+              modifier = Modifier.size(14.dp),
+            )
+          },
+          modifier = Modifier.height(32.dp),
         )
       }
     }
@@ -487,286 +483,241 @@ fun XFormsFormDefChromeSection(state: PrototypeAppState) {
   var showProtoPreview by remember { mutableStateOf(false) }
   var previewAsJson by remember { mutableStateOf(false) }
 
-  Column(
-    modifier =
-      Modifier.fillMaxWidth()
-        .clip(RoundedCornerShape(12.dp))
-        .background(Color(0xFFF4F8F5))
-        .border(1.dp, Color(0xFFC5DEC9), RoundedCornerShape(12.dp))
-        .padding(14.dp),
-    verticalArrangement = Arrangement.spacedBy(10.dp),
+  OutlinedCard(
+    modifier = Modifier.fillMaxWidth(),
+    shape = MaterialTheme.shapes.medium,
+    colors =
+      CardDefaults.outlinedCardColors(
+        containerColor = MaterialTheme.colorScheme.surfaceContainerLow
+      ),
+    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
   ) {
-    // Section Header + Live Status Badge
-    Row(
-      modifier = Modifier.fillMaxWidth(),
-      horizontalArrangement = Arrangement.SpaceBetween,
-      verticalAlignment = Alignment.CenterVertically,
+    Column(
+      modifier = Modifier.fillMaxWidth().padding(14.dp),
+      verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
-      Column(modifier = Modifier.weight(1f)) {
-        Text(
-          text = "XFORMS FORMDEF XML TESTER (DATA COLLECTION)",
-          style =
-            MaterialTheme.typography.labelSmall.copy(
-              fontWeight = FontWeight.Bold,
-              color = Color(0xFF1E6F50),
-              letterSpacing = 0.6.sp,
-            ),
-        )
-        Text(
-          text =
-            "Paste an ODK XForms <h:html> FormDef below. Launching any survey form runs this FormDef in MobileFormRunner.",
-          style = MaterialTheme.typography.bodySmall.copy(color = Color(0xFF4B5563)),
-        )
-      }
-
-      Spacer(modifier = Modifier.width(8.dp))
-
-      // Live status badge (Valid FormDef • N fields vs XML Parse Error)
-      val isError = xmlError != null
-      val badgeBg =
-        when {
-          isError -> Color(0xFFFDECEA)
-          parsedFormDef != null -> Color(0xFFE8F5E9)
-          else -> Color(0xFFE5E7EB)
-        }
-      val badgeTextColor =
-        when {
-          isError -> Color(0xFFB3261E)
-          parsedFormDef != null -> Color(0xFF1B5E20)
-          else -> Color(0xFF374151)
-        }
+      // Section Header + Live Status Badge
       Row(
-        modifier =
-          Modifier.clip(RoundedCornerShape(16.dp))
-            .background(badgeBg)
-            .padding(horizontal = 10.dp, vertical = 4.dp),
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(4.dp),
       ) {
-        if (!isError && parsedFormDef != null) {
-          Icon(
-            imageVector = Icons.Default.CheckCircle,
-            contentDescription = null,
-            tint = badgeTextColor,
-            modifier = Modifier.size(12.dp),
+        Column(modifier = Modifier.weight(1f)) {
+          Text(
+            text = "XFORMS FORMDEF XML TESTER (DATA COLLECTION)",
+            style =
+              MaterialTheme.typography.labelSmall.copy(
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.primary,
+                letterSpacing = 0.6.sp,
+              ),
+          )
+          Text(
+            text =
+              "Paste an ODK XForms <h:html> FormDef below. Launching any survey form runs this FormDef in MobileFormRunner.",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
           )
         }
-        Text(
+
+        Spacer(modifier = Modifier.width(8.dp))
+
+        val isError = xmlError != null
+        GroundTonalBadge(
           text =
             when {
               isError -> "XML Parse Error"
               parsedFormDef != null -> "Valid FormDef • $fieldCount fields"
               else -> "Using Built-In FormDef"
             },
-          style =
-            MaterialTheme.typography.labelSmall.copy(
-              fontWeight = FontWeight.Bold,
-              color = badgeTextColor,
-            ),
-        )
-      }
-    }
-
-    // Preset / Action Row: Load Sample XForms, Biometrics Preset, Clear, and Launch Form Now
-    Row(
-      modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
-      horizontalArrangement = Arrangement.spacedBy(8.dp),
-      verticalAlignment = Alignment.CenterVertically,
-    ) {
-      Button(
-        onClick = {
-          if (state.isDataCollectionFormOpen) {
-            state.closeActiveFormRunner()
-          } else {
-            state.launchActiveOrDefaultFormForTesting()
-          }
-        },
-        enabled = xmlError == null,
-        colors =
-          ButtonDefaults.buttonColors(
-            containerColor =
-              if (state.isDataCollectionFormOpen) Color(0xFFB3261E) else Color(0xFF1B5E20)
-          ),
-        modifier = Modifier.height(34.dp),
-      ) {
-        Text(
-          text =
-            if (state.isDataCollectionFormOpen) {
-              "■ Close Active Form Runner"
-            } else {
-              "▶ Test / Launch Form Now"
+          tone =
+            when {
+              isError -> GroundBadgeTone.ERROR
+              parsedFormDef != null -> GroundBadgeTone.PRIMARY
+              else -> GroundBadgeTone.NEUTRAL
             },
-          style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
         )
       }
 
-      OutlinedButton(
-        onClick = { state.resetDefaultXFormsXml() },
-        modifier = Modifier.height(34.dp),
-      ) {
-        Icon(
-          imageVector = Icons.Default.Refresh,
-          contentDescription = null,
-          modifier = Modifier.size(13.dp),
-        )
-        Spacer(modifier = Modifier.width(4.dp))
-        Text(
-          text = "Load Sample XForms",
-          style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
-        )
-      }
-
-      OutlinedButton(
-        onClick = { state.updateCustomXFormsXml(BAOBAB_BIOMETRICS_SAMPLE_XFORMS_XML) },
-        modifier = Modifier.height(34.dp),
-      ) {
-        Text(
-          text = "Baobab Preset",
-          style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
-        )
-      }
-
-      OutlinedButton(
-        onClick = { state.updateCustomXFormsXml("") },
-        modifier = Modifier.height(34.dp),
-      ) {
-        Text(
-          text = "Clear",
-          style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
-        )
-      }
-    }
-
-    // Multi-line Monospace OutlinedTextField for pasting / editing XForms FormDef XML
-    OutlinedTextField(
-      value = state.customXFormsXml,
-      onValueChange = { state.updateCustomXFormsXml(it) },
-      modifier = Modifier.fillMaxWidth().height(195.dp),
-      placeholder = {
-        Text(
-          text = "Paste ODK XForms <h:html>...</h:html> XML here to test in MobileFormRunner...",
-          style =
-            TextStyle(
-              fontFamily = FontFamily.Monospace,
-              fontSize = 12.sp,
-              color = Color(0xFF9CA3AF),
-            ),
-        )
-      },
-      textStyle =
-        TextStyle(
-          fontFamily = FontFamily.Monospace,
-          fontSize = 12.sp,
-          lineHeight = 16.sp,
-        ),
-      isError = xmlError != null,
-      colors =
-        OutlinedTextFieldDefaults.colors(
-          focusedContainerColor = Color.White,
-          unfocusedContainerColor = Color.White,
-          errorContainerColor = Color(0xFFFFF8F8),
-        ),
-    )
-
-    // Error details banner if XML is invalid
-    if (xmlError != null) {
-      Box(
-        modifier =
-          Modifier.fillMaxWidth()
-            .clip(RoundedCornerShape(8.dp))
-            .background(Color(0xFFFDECEA))
-            .border(1.dp, Color(0xFFF5C2C0), RoundedCornerShape(8.dp))
-            .padding(horizontal = 10.dp, vertical = 8.dp)
-      ) {
-        Text(
-          text = "XML Parse Error: $xmlError",
-          style =
-            TextStyle(
-              fontFamily = FontFamily.Monospace,
-              fontSize = 11.sp,
-              color = Color(0xFFB3261E),
-            ),
-        )
-      }
-    }
-
-    // Optional collapsible ProtoForms TextProto / JSON inspector (using TextProtoSerializer & ProtoJsonSerializer)
-    if (parsedFormDef != null && xmlError == null) {
+      // Preset / Action Row: Load Sample XForms, Biometrics Preset, Clear, and Launch Form Now
       Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
+        modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically,
       ) {
-        Text(
-          text =
-            "Parsed FormDef: \"${parsedFormDef.title.ifBlank { parsedFormDef.form_id }}\" (v${parsedFormDef.version.ifBlank { "1" }})",
-          style =
-            MaterialTheme.typography.labelSmall.copy(
-              fontFamily = FontFamily.Monospace,
-              color = Color(0xFF1B5E20),
-              fontWeight = FontWeight.SemiBold,
+        Button(
+          onClick = {
+            if (state.isDataCollectionFormOpen) {
+              state.closeActiveFormRunner()
+            } else {
+              state.launchActiveOrDefaultFormForTesting()
+            }
+          },
+          enabled = xmlError == null,
+          colors =
+            ButtonDefaults.buttonColors(
+              containerColor =
+                if (state.isDataCollectionFormOpen) {
+                  MaterialTheme.colorScheme.error
+                } else {
+                  MaterialTheme.colorScheme.primary
+                }
             ),
-          maxLines = 1,
-          overflow = TextOverflow.Ellipsis,
-          modifier = Modifier.weight(1f),
-        )
-
-        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+        ) {
           Text(
-            text = if (showProtoPreview) "Hide Proto" else "Inspect TextProto / JSON",
+            text =
+              if (state.isDataCollectionFormOpen) {
+                "■ Close Active Form Runner"
+              } else {
+                "▶ Test / Launch Form Now"
+              },
+            style = MaterialTheme.typography.labelMedium,
+            fontWeight = FontWeight.Bold,
+          )
+        }
+
+        OutlinedButton(onClick = { state.resetDefaultXFormsXml() }) {
+          Icon(
+            imageVector = Icons.Default.Refresh,
+            contentDescription = null,
+            modifier = Modifier.size(14.dp),
+          )
+          Spacer(modifier = Modifier.width(4.dp))
+          Text(text = "Load Sample XForms", style = MaterialTheme.typography.labelMedium)
+        }
+
+        OutlinedButton(
+          onClick = { state.updateCustomXFormsXml(BAOBAB_BIOMETRICS_SAMPLE_XFORMS_XML) }
+        ) {
+          Text(text = "Baobab Preset", style = MaterialTheme.typography.labelMedium)
+        }
+
+        OutlinedButton(onClick = { state.updateCustomXFormsXml("") }) {
+          Text(text = "Clear", style = MaterialTheme.typography.labelMedium)
+        }
+      }
+
+      // Multi-line Monospace OutlinedTextField for pasting / editing XForms FormDef XML
+      OutlinedTextField(
+        value = state.customXFormsXml,
+        onValueChange = { state.updateCustomXFormsXml(it) },
+        modifier = Modifier.fillMaxWidth().height(195.dp),
+        placeholder = {
+          Text(
+            text = "Paste ODK XForms <h:html>...</h:html> XML here to test in MobileFormRunner...",
+            style =
+              MaterialTheme.typography.bodySmall.copy(
+                fontFamily = FontFamily.Monospace,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+              ),
+          )
+        },
+        textStyle =
+          MaterialTheme.typography.bodySmall.copy(
+            fontFamily = FontFamily.Monospace,
+            lineHeight = 16.sp,
+          ),
+        isError = xmlError != null,
+        colors =
+          OutlinedTextFieldDefaults.colors(
+            focusedContainerColor = MaterialTheme.colorScheme.surface,
+            unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+            errorContainerColor = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.25f),
+          ),
+      )
+
+      // Error details banner if XML is invalid
+      if (xmlError != null) {
+        Surface(
+          color = MaterialTheme.colorScheme.errorContainer,
+          contentColor = MaterialTheme.colorScheme.onErrorContainer,
+          shape = MaterialTheme.shapes.small,
+          border = BorderStroke(1.dp, MaterialTheme.colorScheme.error.copy(alpha = 0.4f)),
+          modifier = Modifier.fillMaxWidth(),
+        ) {
+          Text(
+            text = "XML Parse Error: $xmlError",
             style =
               MaterialTheme.typography.labelSmall.copy(
-                color = Color(0xFF1E6F50),
-                fontWeight = FontWeight.Bold,
+                fontFamily = FontFamily.Monospace,
+                color = MaterialTheme.colorScheme.onErrorContainer,
               ),
-            modifier = Modifier.clickable { showProtoPreview = !showProtoPreview },
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 8.dp),
           )
         }
       }
 
-      if (showProtoPreview) {
-        val serializedProto =
-          remember(parsedFormDef, previewAsJson) {
-            if (previewAsJson) {
-              ProtoJsonSerializer.serializeFormDef(parsedFormDef, prettyPrint = true)
-            } else {
-              TextProtoSerializer.serializeFormDef(parsedFormDef)
-            }
-          }
+      // Optional collapsible ProtoForms TextProto / JSON inspector (using TextProtoSerializer & ProtoJsonSerializer)
+      if (parsedFormDef != null && xmlError == null) {
         Row(
-          horizontalArrangement = Arrangement.spacedBy(8.dp),
+          modifier = Modifier.fillMaxWidth(),
+          horizontalArrangement = Arrangement.SpaceBetween,
           verticalAlignment = Alignment.CenterVertically,
         ) {
-          OutlinedButton(
-            onClick = { previewAsJson = false },
-            modifier = Modifier.height(28.dp),
-          ) {
-            Text("TextProto", fontSize = 11.sp)
-          }
-          OutlinedButton(
-            onClick = { previewAsJson = true },
-            modifier = Modifier.height(28.dp),
-          ) {
-            Text("JSON", fontSize = 11.sp)
+          Text(
+            text =
+              "Parsed FormDef: \"${parsedFormDef.title.ifBlank { parsedFormDef.form_id }}\" (v${parsedFormDef.version.ifBlank { "1" }})",
+            style =
+              MaterialTheme.typography.labelSmall.copy(
+                fontFamily = FontFamily.Monospace,
+                color = MaterialTheme.colorScheme.primary,
+                fontWeight = FontWeight.SemiBold,
+              ),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.weight(1f),
+          )
+
+          TextButton(onClick = { showProtoPreview = !showProtoPreview }) {
+            Text(
+              text = if (showProtoPreview) "Hide Proto" else "Inspect TextProto / JSON",
+              style = MaterialTheme.typography.labelSmall,
+              fontWeight = FontWeight.Bold,
+            )
           }
         }
-        OutlinedTextField(
-          value = serializedProto,
-          onValueChange = {},
-          readOnly = true,
-          modifier = Modifier.fillMaxWidth().height(120.dp),
-          textStyle =
-            TextStyle(
-              fontFamily = FontFamily.Monospace,
-              fontSize = 11.sp,
-              lineHeight = 15.sp,
-            ),
-          colors =
-            OutlinedTextFieldDefaults.colors(
-              focusedContainerColor = Color(0xFFF9FAFB),
-              unfocusedContainerColor = Color(0xFFF9FAFB),
-            ),
-        )
+
+        if (showProtoPreview) {
+          val serializedProto =
+            remember(parsedFormDef, previewAsJson) {
+              if (previewAsJson) {
+                ProtoJsonSerializer.serializeFormDef(parsedFormDef, prettyPrint = true)
+              } else {
+                TextProtoSerializer.serializeFormDef(parsedFormDef)
+              }
+            }
+          Row(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+          ) {
+            FilterChip(
+              selected = !previewAsJson,
+              onClick = { previewAsJson = false },
+              label = { Text("TextProto", style = MaterialTheme.typography.labelSmall) },
+            )
+            FilterChip(
+              selected = previewAsJson,
+              onClick = { previewAsJson = true },
+              label = { Text("JSON", style = MaterialTheme.typography.labelSmall) },
+            )
+          }
+          OutlinedTextField(
+            value = serializedProto,
+            onValueChange = {},
+            readOnly = true,
+            modifier = Modifier.fillMaxWidth().height(120.dp),
+            textStyle =
+              MaterialTheme.typography.labelSmall.copy(
+                fontFamily = FontFamily.Monospace,
+                lineHeight = 15.sp,
+              ),
+            colors =
+              OutlinedTextFieldDefaults.colors(
+                focusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+                unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+              ),
+          )
+        }
       }
     }
   }
