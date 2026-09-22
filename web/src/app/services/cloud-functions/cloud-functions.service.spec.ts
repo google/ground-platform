@@ -35,7 +35,7 @@ describe('CloudFunctionsService', () => {
       jasmine.createSpy('callableFn').and.resolveTo({ data: 'OK' })
     );
 
-    spyOnProperty(fireFunctions, 'httpsCallable', 'get').and.returnValue(httpsCallableSpy);
+    spyOn(fireFunctions, 'httpsCallable').and.returnValue(httpsCallableSpy as any);
 
     TestBed.configureTestingModule({
       providers: [
