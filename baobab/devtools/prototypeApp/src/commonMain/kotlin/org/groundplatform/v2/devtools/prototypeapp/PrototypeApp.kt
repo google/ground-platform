@@ -587,20 +587,9 @@ fun MobileDevicePreviewFrame(
                   Modifier.width(68.dp).height(11.dp).clip(CircleShape).background(Color(0xFF061B12))
               )
             } else {
-              Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(6.dp),
-              ) {
-                Box(
-                  modifier = Modifier.size(8.dp).clip(CircleShape).background(Color(0xFF061B12))
-                )
-                Text(
-                  text = "FIELD TABLET • HIGH-PRECISION GNSS",
-                  style = MaterialTheme.typography.labelSmall,
-                  color = MaterialTheme.colorScheme.primary,
-                  fontWeight = FontWeight.Bold,
-                )
-              }
+              Box(
+                modifier = Modifier.size(8.dp).clip(CircleShape).background(Color(0xFF061B12))
+              )
             }
             Text(
               text = "5G • 100%",
