@@ -18,6 +18,12 @@
 
 Contains Compose Multiplatform screens, ViewModels, and navigation shared
 identically between `androidApp` and `iosApp`, including:
-- Map home screen, layer toggles, and LOI/entity selection sheets.
+- Map home screen and layer drawer split into two self-describing categories:
+  - **Data collection sites** (Geospatial Entity Lists / spatial master tables):
+    tapping a site pin opens its current status and launches site-first actions
+    (e.g., `[ + Inspect Site ]`, `[ + Update Info ]`).
+  - **Form Submissions** (completed submission GPS instances for `geopoint`,
+    `geotrace`, and `geoshape` questions): displays historical coverage and
+    completed visits/logs visually distinct from active sites.
 - Survey selector and offline area download screens.
 - Mobile form data collection host wrapping `MobileFormRunner` from `shared/ui`.

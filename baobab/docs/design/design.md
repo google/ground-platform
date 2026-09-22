@@ -269,20 +269,29 @@ enabling rich expression- and UI-driven custom form logic:
     and choice lists by querying preloaded tabular CSV registries and lookup
     tables offline at runtime.
 
-##### Preloaded & Field-Created Entities
+##### Preloaded & Field-Created Entities (Master Tables vs. Encounter Logs)
 
-Ground 2.0 supports two distinct classes of preloaded entity registries to
-support longitudinal and multi-visit workflows, mapping natively to ODK
-Central's "Entities" specification:
+Ground 2.0 is built around a clear separation between stateful master data and
+immutable event records, mapping natively to ODK Central's Entities and XForms
+specifications:
 
-*   **Tabular Entities**: Relational, non-spatial records (e.g., registries of
-    farmers, cooperative member rosters, or species taxonomies) uploaded by
-    organizers as CSVs. These are queried using XLSForm `select_one_from_file`
-    and offline `pulldata()` operations.
-*   **Geospatial Entities**: Relational records tied to a geometry (e.g.,
-    preloaded cocoa plot polygons or forest monitoring plots). These replace
-    Ground 1.0's rigid "sites" and are rendered directly on the map as
-    interactive vector features with searchable attribute cards.
+*   **Tables = Current State (Persistent Master Data)**: Flat, stateful master
+    datasets (`EntityDatasetDef` / ODK Entity Lists) where each row
+    (`EntityRecord`) represents a real-world object (site, plot, asset, or
+    participant). Ground 2.0 supports two classes of master tables:
+    *   **Tabular Entities (Lookup / Master Tables)**: Relational, non-spatial
+        records (e.g., registries of farmers, cooperative member rosters, or
+        species taxonomies) uploaded by organizers as CSVs or populated via
+        forms.
+    *   **Geospatial Entities (Data Collection Sites)**: Spatial master tables
+        where each row is tied to a geometry (e.g., cocoa plot polygons or
+        forest monitoring plots). These represent target **Data collection
+        sites** on the map as interactive vector features with searchable
+        attribute cards.
+*   **Forms = Transactions / Events (Encounter Logs)**: Questionnaires
+    (`FormDef`) filled out in the field. Completed **Form Submissions**
+    (`SubmissionRecord` / `RecordInstance`) are immutable event records
+    preserving GPS geometries, timestamps, and raw inputs.
 
 ###### Dynamic On-The-Fly Entity Creation
 
@@ -311,11 +320,23 @@ tree survival rates over time in Kenya's restoration tracts or conducting
 multi-season coffee audits in Burundi—Ground 2.0 replaces static "site-level"
 submissions with a relational, entity-linked data model. This architecture
 decouples the persistent identity of a subject (the **Entity**, stored within an
-**Entity Dataset**) from the discrete, time-series observations recorded against
-it (the **Submissions**).
+**Entity Dataset** / master table) from the discrete, time-series observations
+recorded against it (the **Submissions**).
 
-Survey organizers configure the relationship between Entities and Submissions in
-the Web Console Form Editor using the **Submission Model**:
+Survey organizers configure how a form interacts with master tables using four
+standard patterns (detailed with XLSForm mappings under
+[Mental Model & Terminology Mapping to ODK XForms](#mental-model--terminology-mapping-to-odk-xforms)):
+
+1.  **Populate a Table (Create Record)**: Creates a new entity row in a master
+    table (`entities` sheet `list_name` + `survey` sheet `save_to`).
+2.  **Update a Table (Update Record)**: Selects an existing entity (`select_one_from_file <table_name>.csv`, `entities` sheet `entity_id`) and updates its attributes via `save_to`.
+3.  **Reference a Table (Lookup / Read-Only)**: Reads choices or attributes from
+    a table (`select_one_from_file <table_name>.csv` or `instance('<table_name>')/root/item[...]`) without writing back.
+4.  **Log Only (Standard Survey)**: Records standalone encounter logs using
+    standard `survey` and `choices` sheets without an `entities` sheet.
+
+In addition, organizers can set the cardinality between an Entity and its
+Submissions using the **Submission Model**:
 
 *   **Single Submission (1:1)**: Optimized for baseline registrations, property
     georeferencing, or physical asset audits where each entity must receive
@@ -414,8 +435,9 @@ core concepts:
 :                :             :                        :           :              : (Root ACL/Org   :
 :                :             :                        :           :              : container)      :
 | **Form**       | Form        | `survey` (sheet)       | Form      | Job          | **Form**        |
-:                :             :                        :           :              : (XLSForm Schema :
-:                :             :                        :           :              : sheet)          :
+:                :             :                        :           :              : (Transaction /  :
+:                :             :                        :           :              : Encounter Log   :
+:                :             :                        :           :              : schema)         :
 | **Question**   | Question    | Row                    | Question  | Task         | **Question**    |
 :                :             :                        :           :              : (Individual     :
 :                :             :                        :           :              : input row)      :
@@ -429,17 +451,79 @@ core concepts:
 :                :             :                        :           : task         : (Read-only      :
 :                :             :                        :           :              : guidance block) :
 | **Submission** | Submission  | Instance               | Response  | Submission   | **Submission**  |
-:                : / Record    :                        :           :              : (Completed      :
-:                :             :                        :           :              : transaction)    :
-| **Entity       | Dynamic     | `entities` /           | N/A       | N/A          | **Entity        |
-: Dataset**      : Attachments : `pulldata()`           :           :              : Dataset**       :
-:                :             :                        :           :              : (Tabular entity :
-:                :             :                        :           :              : list)           :
-| **Entity       | Dynamic     | `entities` /           | Feature   | Data         | **Entity        |
-: Dataset**      : Attachments : `select_one_from_file` : Layers    : collection   : Dataset**       :
-:                :             :                        :           : site         : (Geospatial     :
-:                :             :                        :           :              : entity list w/  :
-:                :             :                        :           :              : `geometry`)     :
+:                : / Record    :                        :           :              : (Immutable      :
+:                :             :                        :           :              : event record)   :
+| **Entity List  | Dynamic     | `entities` /           | N/A       | N/A          | **Table /       |
+: (Tabular)**    : Attachments : `pulldata()`           :           :              : Entity          :
+:                :             :                        :           :              : Dataset**       :
+:                :             :                        :           :              : (Master data    :
+:                :             :                        :           :              : table)          :
+| **Entity List  | Dynamic     | `entities` /           | Feature   | Data         | **Data          |
+: (Geospatial)** : Attachments : `select_one_from_file` : Layers    : collection   : collection      :
+:                :             :                        :           : site         : sites / Entity  :
+:                :             :                        :           :              : Dataset**       :
+:                :             :                        :           :              : (Spatial master :
+:                :             :                        :           :              : table)          :
+
+###### Mental Model & Terminology Mapping to ODK XForms
+
+1.  **The Core Mental Model**
+    *   **Tables = Current State (Persistent Master Data)**: Flat, stateful
+        master datasets on ODK Central (`EntityDatasetDef`) where each row
+        (`EntityRecord`) represents a real-world object (site, plot, asset, or
+        participant).
+    *   **Forms = Transactions / Events (Encounter Logs)**: Questionnaires
+        (`FormDef`) filled out in the field. Completed submissions
+        (`SubmissionRecord`) are immutable event records preserving GPS,
+        timestamps, and raw inputs.
+2.  **For Survey Organizers / Form Designers: Forms & Tables**
+    Organizers define how a form interacts with master tables using standard
+    XLSForm syntax:
+    *   **Populate a Table (Create Record)**:
+        *   *ODK Concept*: Form configured to create a new entity.
+        *   *XLSForm Mapping*:
+            *   `entities` sheet: `list_name` specified, `create_condition`
+                (optional).
+            *   `survey` sheet: Target fields use the `save_to` column to
+                populate table attributes.
+    *   **Update a Table (Update Record)**:
+        *   *ODK Concept*: Form configured to update an existing entity.
+        *   *XLSForm Mapping*:
+            *   `survey` sheet: Select question using
+                `select_one_from_file <table_name>.csv`.
+            *   `entities` sheet: `entity_id` set to the selected entity's ID.
+            *   `survey` sheet: Updated fields mapped to table attributes via
+                `save_to`.
+    *   **Reference a Table (Lookup / Read-Only)**:
+        *   *ODK Concept*: Consuming an Entity List or external dataset without
+            writing back.
+        *   *XLSForm Mapping*:
+            *   `survey` sheet: `select_one_from_file <table_name>.csv` used for
+                choices/filtering, or pre-filling read-only `calculate` / `note`
+                fields with `instance('<table_name>')/root/item[...]`. No
+                `save_to` mapping.
+    *   **Log Only (Standard Survey)**:
+        *   *ODK Concept*: Traditional standalone XForm.
+        *   *XLSForm Mapping*: Standard `survey` and `choices` sheets only. No
+            `entities` sheet.
+3.  **For Data Collectors (Map UI & Field Workflow)**
+    The map layer drawer is split into two self-describing categories rather
+    than nesting layers under form menus:
+    *   **Data collection sites**:
+        *   *ODK Concept*: Geospatial Entity Lists (spatial master tables)
+            attached to the project.
+        *   *Field Interaction*: Represents the target locations/features on the
+            map. Tapping a site pin opens its current status and launches
+            available actions (e.g., `[ + Inspect Site ]`, `[ + Update Info ]`).
+        *   *Why*: Avoids duplicating the layer across multiple forms that
+            interact with the same site, enabling a natural "site-first"
+            workflow.
+    *   **Form Submissions**:
+        *   *ODK Concept*: Form submission GPS instances (`geopoint`,
+            `geotrace`, or `geoshape` questions recorded in completed submission
+            instances).
+        *   *Field Interaction*: Displays historical coverage and completed
+            visits/logs on the map. Kept visually distinct from active sites.
 
 ###### XLSForm Import & Export
 
@@ -855,6 +939,18 @@ entity registrations directly within forms.
 
 ###### Map Visualization & Overlay Logic
 
+*   **Two-Category Map Layer Drawer (`Data collection sites` vs. `Form
+    Submissions`)**: Rather than nesting map layers under form menus, the map
+    layer drawer splits layers into two self-describing categories:
+    *   **Data collection sites** (`entity_dataset_id`): Geospatial Entity Lists
+        (spatial master tables) attached to the survey. Represents target
+        locations and features on the map; avoids duplicating a layer across
+        multiple forms that interact with the same site, enabling a natural
+        "site-first" workflow.
+    *   **Form Submissions** (`form_geometry`): Form submission GPS instances
+        (`geopoint`, `geotrace`, or `geoshape` questions recorded in completed
+        submission instances). Displays historical coverage and completed
+        visits/logs on the map, kept visually distinct from active sites.
 *   **Layer Stack & Geometry Styling (`LayerDef`)**: Each geospatial entity
     dataset (`entity_dataset_id`) and form geometry question (`form_geometry`)
     rendered on the map is configured via an ordered `LayerDef` inside
@@ -863,25 +959,28 @@ entity registrations directly within forms.
     dataset layers, per-entity `simplestyle-spec` properties (`marker-color`,
     `stroke`, `fill`, etc. in `EntityRecord.properties`) override the layer's
     `default_style`.
-*   **Toggleable Geometries**: Individual form geometry layers (e.g., an access
-    path alongside a plot perimeter) and entity dataset layers can be toggled on
-    or off directly within the map layer controls.
+*   **Toggleable Geometries**: Individual form submission geometry layers (e.g.,
+    an access path alongside a plot perimeter) and data collection site layers
+    can be toggled on or off directly within the map layer controls.
 *   **Active Self-Intersection Prevention**: During manual polygon drawing, the
     mobile engine actively prohibits adding vertices that create
     self-intersecting (bowtie) segments, providing immediate on-screen guidance
     to maintain topological validity.
 
-###### Preloaded Entities & "Select an Entity" Interaction
+###### Preloaded Entities, Site-First Workflow, & "Select an Entity" Interaction
 
-*   **Selection Workflow**: Collectors select preloaded entities from a
-    searchable attribute list or by tapping map markers.
-*   **Interactive Overlays**: Preloaded geospatial entities render as map
-    overlays with visibility toggle controls.
-*   **Bottom Sheet Action**: Tapping an entity reveals a bottom sheet displaying
-    baseline attributes and historical submission timestamps, with an action to
-    launch a new submission pre-linked to that entity.
-*   **Mix-and-Match Forms**: Form designers can combine "Select an Entity"
-    questions with new geometry capture questions in the same form.
+*   **Site-First Map Interaction**: Tapping a site pin or polygon in a **Data
+    collection sites** layer opens a bottom sheet displaying its current status,
+    baseline attributes, and historical submission timestamps, alongside
+    available form action buttons configured for that table (e.g.,
+    `[ + Inspect Site ]`, `[ + Update Info ]`) pre-linked to the selected
+    entity.
+*   **Selection Workflow**: Collectors can also select preloaded entities from a
+    searchable attribute list or by tapping map markers when answering a
+    `select_one_from_file <table_name>.csv` question.
+*   **Mix-and-Match Forms**: Form designers can combine entity selection
+    (`select_one_from_file`) and `save_to` entity updates with new geometry
+    capture questions in the same form.
 
 ###### Geometry Capture via QR Code Scanning
 

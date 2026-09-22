@@ -57,7 +57,6 @@ import androidx.compose.material.icons.filled.Explore
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Layers
-import androidx.compose.material.icons.filled.Link
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.Menu
@@ -445,9 +444,6 @@ private fun SurveyMapView(state: PrototypeAppState) {
           }
 
           // "Layers" Button to control basemap (Map vs Satellite), offline tiles, entities, and submission geometries
-          val totalSourcesCount = state.mapLayers.size + 1 // +1 for Offline Basemap
-          val activeSourcesCount =
-            state.visibleLayerIds.size + (if (state.isOfflineBasemapVisible) 1 else 0)
           val layersTint = if (state.isLayersSheetOpen) Color(0xFF003825) else Color.White
           Row(
             modifier =
@@ -470,7 +466,7 @@ private fun SurveyMapView(state: PrototypeAppState) {
               modifier = Modifier.size(14.dp),
             )
             Text(
-              text = "Layers ($activeSourcesCount/$totalSourcesCount)",
+              text = "Layers",
               style =
                 MaterialTheme.typography.labelSmall.copy(
                   color = layersTint,
@@ -1209,43 +1205,176 @@ private fun MapLayersControlSheet(
 
       HorizontalDivider(color = Color(0xFFE5E7EB))
 
-      // Form sections: each Form Title is a heading containing its linked geospatial entities (with link icon)
-      // and any submission geometry layers
+      // Section 2: Data collection sites (geospatial entities)
+      Text(
+        text = "DATA COLLECTION SITES",
+        style =
+          MaterialTheme.typography.labelSmall.copy(
+            fontWeight = FontWeight.Bold,
+            color = Color(0xFF1E6F50),
+            letterSpacing = 0.5.sp,
+          ),
+      )
+      state.entityDatasetLayers.forEach { layer ->
+        val layerEntityCount = state.entities.count { it.layerId == layer.id }
+        Row(
+          modifier =
+            Modifier.fillMaxWidth()
+              .clip(RoundedCornerShape(10.dp))
+              .background(if (layer.isVisible) Color(0xFFF3F8F5) else Color(0xFFF9FAFB))
+              .clickable { state.toggleLayerVisibility(layer.id) }
+              .padding(start = 12.dp, end = 6.dp, top = 5.dp, bottom = 5.dp),
+          verticalAlignment = Alignment.CenterVertically,
+          horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+          // Solid layer color swatch
+          Box(
+            modifier =
+              Modifier.size(16.dp)
+                .clip(RoundedCornerShape(4.dp))
+                .background(Color(layer.colorHex).copy(alpha = 0.25f))
+                .border(2.dp, Color(layer.colorHex), RoundedCornerShape(4.dp))
+          )
+          Column(modifier = Modifier.weight(1f)) {
+            Text(
+              text = layer.label,
+              style =
+                MaterialTheme.typography.labelMedium.copy(
+                  fontWeight = FontWeight.SemiBold,
+                  color = Color(0xFF111827),
+                ),
+            )
+            Text(
+              text = "${layer.geometryTypeLabel} • ${layer.formatCountLabel(layerEntityCount)}",
+              style = MaterialTheme.typography.labelSmall.copy(color = Color(0xFF6B7280)),
+            )
+          }
+          IconButton(
+            onClick = { state.toggleLayerVisibility(layer.id) },
+            modifier = Modifier.size(36.dp),
+          ) {
+            Icon(
+              imageVector =
+                if (layer.isVisible) {
+                  Icons.Default.Visibility
+                } else {
+                  Icons.Default.VisibilityOff
+                },
+              contentDescription =
+                if (layer.isVisible) "Hide ${layer.label}" else "Show ${layer.label}",
+              tint = if (layer.isVisible) Color(layer.colorHex) else Color(0xFF9CA3AF),
+              modifier = Modifier.size(20.dp),
+            )
+          }
+        }
+      }
+
+      HorizontalDivider(color = Color(0xFFE5E7EB))
+
+      // Section 3: Form submissions (geospatial fields from forms)
+      Text(
+        text = "FORM SUBMISSIONS",
+        style =
+          MaterialTheme.typography.labelSmall.copy(
+            fontWeight = FontWeight.Bold,
+            color = Color(0xFF1E6F50),
+            letterSpacing = 0.5.sp,
+          ),
+      )
       state.groupedSubmissionLayersByForm.forEach { group ->
         val form = group.form
-        Text(
-          text = form.title.uppercase(),
-          style =
-            MaterialTheme.typography.labelSmall.copy(
-              fontWeight = FontWeight.Bold,
-              color = Color(0xFF1E6F50),
-              letterSpacing = 0.5.sp,
-            ),
-        )
-
-        group.layers.forEach { layer ->
+        val allGroupLayersVisible = group.layers.all { it.isVisible }
+        Column(
+          modifier =
+            Modifier.fillMaxWidth()
+              .clip(RoundedCornerShape(10.dp))
+              .background(if (allGroupLayersVisible) Color(0xFFF0F7FF) else Color(0xFFF9FAFB))
+              .border(
+                width = 1.dp,
+                color = if (allGroupLayersVisible) Color(0xFF90CAF9) else Color(0xFFE5E7EB),
+                shape = RoundedCornerShape(10.dp),
+              )
+              .padding(8.dp),
+          verticalArrangement = Arrangement.spacedBy(5.dp),
+        ) {
+          // Form Title Group Header
           Row(
             modifier =
               Modifier.fillMaxWidth()
-                .clip(RoundedCornerShape(10.dp))
-                .background(if (layer.isVisible) Color(0xFFF3F8F5) else Color(0xFFF9FAFB))
-                .clickable { state.toggleLayerVisibility(layer.id) }
-                .padding(start = 12.dp, end = 6.dp, top = 5.dp, bottom = 5.dp),
+                .clickable { state.toggleFormSubmissionLayersVisibility(form.id) }
+                .padding(horizontal = 4.dp, vertical = 2.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
           ) {
-            if (layer.isLinkedData) {
-              // Solid layer color swatch for linked geospatial entity dataset
+            Row(
+              verticalAlignment = Alignment.CenterVertically,
+              horizontalArrangement = Arrangement.spacedBy(6.dp),
+              modifier = Modifier.weight(1f),
+            ) {
+              Icon(
+                imageVector = Icons.Default.Description,
+                contentDescription = null,
+                tint = Color(0xFF1565C0),
+                modifier = Modifier.size(13.dp),
+              )
+              Text(
+                text = form.title,
+                style =
+                  MaterialTheme.typography.labelMedium.copy(
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF111827),
+                  ),
+              )
+            }
+            Row(
+              verticalAlignment = Alignment.CenterVertically,
+              horizontalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
               Box(
                 modifier =
-                  Modifier.size(16.dp)
-                    .clip(RoundedCornerShape(4.dp))
-                    .background(Color(layer.colorHex).copy(alpha = 0.25f))
-                    .border(2.dp, Color(layer.colorHex), RoundedCornerShape(4.dp))
+                  Modifier.clip(RoundedCornerShape(8.dp))
+                    .background(Color(0xFF1565C0))
+                    .padding(horizontal = 6.dp, vertical = 2.dp)
+              ) {
+                Text(
+                  text = "${group.submissions.size} submitted",
+                  style =
+                    MaterialTheme.typography.labelSmall.copy(
+                      fontSize = 8.5.sp,
+                      color = Color.White,
+                      fontWeight = FontWeight.Bold,
+                    ),
+                )
+              }
+              Icon(
+                imageVector =
+                  if (allGroupLayersVisible) {
+                    Icons.Default.Visibility
+                  } else {
+                    Icons.Default.VisibilityOff
+                  },
+                contentDescription =
+                  if (allGroupLayersVisible) "Hide ${form.title}" else "Show ${form.title}",
+                tint = if (allGroupLayersVisible) Color(0xFF1565C0) else Color(0xFF9CA3AF),
+                modifier = Modifier.size(18.dp),
               )
-            } else {
-              // Dotted polygon swatch for submission geometry layer
-              Canvas(modifier = Modifier.size(16.dp)) {
+            }
+          }
+
+          group.layers.forEach { layer ->
+            val geomCount = state.submissionGeometries.count { it.layerId == layer.id }
+            Row(
+              modifier =
+                Modifier.fillMaxWidth()
+                  .clip(RoundedCornerShape(8.dp))
+                  .background(Color.White)
+                  .clickable { state.toggleLayerVisibility(layer.id) }
+                  .padding(start = 10.dp, end = 4.dp, top = 4.dp, bottom = 4.dp),
+              verticalAlignment = Alignment.CenterVertically,
+              horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+              // Dotted polygon swatch rendered with Canvas PathEffect.dashPathEffect
+              Canvas(modifier = Modifier.size(18.dp)) {
                 drawRect(
                   color = Color(layer.colorHex).copy(alpha = 0.22f),
                   size = size,
@@ -1260,13 +1389,7 @@ private fun MapLayersControlSheet(
                     ),
                 )
               }
-            }
-
-            Column(modifier = Modifier.weight(1f)) {
-              Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(5.dp),
-              ) {
+              Column(modifier = Modifier.weight(1f)) {
                 Text(
                   text = layer.label,
                   style =
@@ -1275,45 +1398,33 @@ private fun MapLayersControlSheet(
                       color = Color(0xFF111827),
                     ),
                 )
-                if (layer.isLinkedData) {
-                  Icon(
-                    imageVector = Icons.Default.Link,
-                    contentDescription = "Linked data",
-                    tint = Color(0xFF1E6F50),
-                    modifier = Modifier.size(14.dp),
-                  )
-                }
+                Text(
+                  text =
+                    "${layer.geometryTypeLabel} • $geomCount ${if (geomCount == 1) "submission" else "submissions"}",
+                  style =
+                    MaterialTheme.typography.labelSmall.copy(
+                      fontSize = 9.5.sp,
+                      color = Color(0xFF4B5563),
+                    ),
+                )
               }
-              val subtitleText =
-                if (layer.isLinkedData) {
-                  val layerEntityCount = state.entities.count { it.layerId == layer.id }
-                  "${layer.geometryTypeLabel} • ${layer.formatCountLabel(layerEntityCount)}"
-                } else {
-                  val geomCount = state.submissionGeometries.count { it.layerId == layer.id }
-                  "${layer.geometryTypeLabel} • $geomCount ${if (geomCount == 1) "submission" else "submissions"}"
-                }
-              Text(
-                text = subtitleText,
-                style = MaterialTheme.typography.labelSmall.copy(color = Color(0xFF6B7280)),
-              )
-            }
-
-            IconButton(
-              onClick = { state.toggleLayerVisibility(layer.id) },
-              modifier = Modifier.size(36.dp),
-            ) {
-              Icon(
-                imageVector =
-                  if (layer.isVisible) {
-                    Icons.Default.Visibility
-                  } else {
-                    Icons.Default.VisibilityOff
-                  },
-                contentDescription =
-                  if (layer.isVisible) "Hide ${layer.label}" else "Show ${layer.label}",
-                tint = if (layer.isVisible) Color(layer.colorHex) else Color(0xFF9CA3AF),
-                modifier = Modifier.size(20.dp),
-              )
+              IconButton(
+                onClick = { state.toggleLayerVisibility(layer.id) },
+                modifier = Modifier.size(34.dp),
+              ) {
+                Icon(
+                  imageVector =
+                    if (layer.isVisible) {
+                      Icons.Default.Visibility
+                    } else {
+                      Icons.Default.VisibilityOff
+                    },
+                  contentDescription =
+                    if (layer.isVisible) "Hide ${layer.label}" else "Show ${layer.label}",
+                  tint = if (layer.isVisible) Color(layer.colorHex) else Color(0xFF9CA3AF),
+                  modifier = Modifier.size(19.dp),
+                )
+              }
             }
           }
         }

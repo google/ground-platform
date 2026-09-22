@@ -20,6 +20,35 @@ This directory houses the canonical Protocol Buffer (`proto3`) schema and gRPC
 service definitions shared across Ground 2.0 mobile, web, and backend
 components.
 
+## Core Mental Model & Package Mapping
+
+Ground 2.0's protocol buffer schemas directly model the ODK XForms & Entities
+distinction between stateful master tables and immutable encounter logs:
+
+-   **Tables = Current State (Persistent Master Data)**: Defined by
+    `EntityDatasetDef` (`groundplatform.v2.survey`) and stored as `EntityRecord`
+    rows (`groundplatform.v2.data`), where each row represents a real-world
+    object (site, plot, asset, or participant). Forms can **Populate a Table**
+    (create entity via `entities` sheet `list_name` + `save_to`), **Update a
+    Table** (select via `select_one_from_file <table_name>.csv`, set
+    `entity_id`, and map `save_to`), or **Reference a Table** (read-only lookup
+    via `select_one_from_file` or `instance('<table_name>')/root/item[...]`).
+-   **Forms = Transactions / Events (Encounter Logs)**: Defined by `FormDef`
+    (`groundplatform.v2.forms`) and persisted as immutable `SubmissionRecord` /
+    `RecordInstance` event records (`groundplatform.v2.data`) preserving GPS,
+    timestamps, and raw inputs. Standalone questionnaires with no `entities`
+    sheet act as **Log Only** forms.
+-   **Map Layer Categories (`LayerDef.source`)**: Rather than nesting map layers
+    under form menus, `MapConfig.layers` separates layers into two
+    self-describing categories:
+    -   **Data collection sites** (`entity_dataset_id`): Geospatial Entity Lists
+        (spatial master tables) representing target features on the map that
+        open site-first actions (e.g., `[ + Inspect Site ]`,
+        `[ + Update Info ]`).
+    -   **Form Submissions** (`form_geometry`): Completed submission GPS
+        instances (`geopoint`, `geotrace`, or `geoshape`) displaying historical
+        coverage and visits visually distinct from active sites.
+
 ## Packages
 
 -   **[`forms/`](forms/)** (`groundplatform.v2.forms`):

@@ -21,12 +21,17 @@ These rules govern all AI-assisted research, design, and code changes within `ba
 ## 1. Project Design & Architectural Reference
 
 * **Primary Source of Truth**: Refer to [`docs/design/design.md`](docs/design/design.md) (and supporting specifications under [`docs/design/`](docs/design/) and [`docs/model/`](docs/model/)) for project-specific product requirements, domain terminology, and system architecture.
-* **Domain Terminology**: Use Ground 2.0 / XLSForm-aligned terminology consistently across code, comments, and UI:
+* **Domain Terminology & Core Mental Model**: Use Ground 2.0 / ODK XForms & XLSForm-aligned terminology consistently across code, comments, and UI:
   * **Survey** (`SurveyDef`): Top-level organizational and ACL container.
-  * **Form** (`FormDef`): Hierarchical XLSForm-aligned schema (replaces Ground 1.0 "Job").
+  * **Tables = Current State (Persistent Master Data)** (`EntityDatasetDef` / `EntityRecord`): Flat, stateful master datasets on ODK Central where each row represents a real-world object (site, plot, asset, or participant). Replaces Ground 1.0 "Site".
+  * **Forms = Transactions / Events (Encounter Logs)** (`FormDef` / `SubmissionRecord` / `RecordInstance`): Questionnaires filled out in the field (replaces Ground 1.0 "Job"). Completed submissions are immutable event records preserving GPS, timestamps, and raw inputs.
   * **Question** / **Group** / **Repeat** / **Note**: Form tree elements (replaces Ground 1.0 "Task").
-  * **Submission** (`SubmissionRecord` / `RecordInstance`): Versioned data collection record.
-  * **Entity Dataset** & **Entity** (`EntityDatasetDef` / `EntityRecord`): Tabular or geospatial lookup/longitudinal entities (replaces Ground 1.0 "Site").
+  * **Form–Table Interactions (XLSForm Mapping)**:
+    * *Populate a Table (Create Record)*: `entities` sheet (`list_name`, optional `create_condition`) + `survey` sheet `save_to`.
+    * *Update a Table (Update Record)*: `select_one_from_file <table_name>.csv` + `entities` sheet `entity_id` + `survey` sheet `save_to`.
+    * *Reference a Table (Lookup / Read-Only)*: `select_one_from_file <table_name>.csv` or `instance('<table_name>')/root/item[...]` with no `save_to`.
+    * *Log Only (Standard Survey)*: Standard `survey` and `choices` sheets only (no `entities` sheet).
+  * **Map Layer Drawer Categories**: Split into **Data collection sites** (Geospatial Entity Lists / spatial master tables enabling a "site-first" workflow with actions like `[ + Inspect Site ]`, `[ + Update Info ]`) and **Form Submissions** (completed submission GPS instances showing historical coverage, visually distinct from active sites).
 * **Core Product Principles**: Ensure all implementations uphold *Proportional Complexity* (simple by default, progressive disclosure for advanced features), *Offline-First Resilience* (100% disconnected field execution and atomic local persistence), and *Real-World Usability* (clear, forgiving interactions with high-contrast legibility).
 
 ## 2. Open-Source Purity & Confidentiality
@@ -74,7 +79,12 @@ These rules govern all AI-assisted research, design, and code changes within `ba
   * Always wrap UI surfaces in [`GroundTheme`](shared/ui/src/commonMain/kotlin/org/groundplatform/v2/core/forms/ui/GroundTheme.kt) and reference semantic tokens from `MaterialTheme.colorScheme`, `MaterialTheme.typography`, and `MaterialTheme.shapes`.
   * **Prefer global theme definitions** over specifying ad-hoc colors (`Color(0x...)`), custom typography styles, or visual overrides on individual components. When a visual change is needed across components, update the centralized theme in `shared/ui/` rather than passing inline style overrides to individual composables.
 
-## 6. Code Formatting (`ktformat` & `buf`)
+## 6. ProtoForms Schema & ODK XForms Specification Boundary
+
+* **Strict ODK XForms Compatibility**: The ProtoForms Protocol Buffer schema ([`shared/protos/forms/`](shared/protos/forms/), package `groundplatform.v2.forms`) **must** remain strictly compatible with the **ODK XForms specification** (supporting lossless round-trip mapping with standard ODK XForms XML), even if Ground mobile or web clients do not implement all capabilities defined by the spec.
+* **No Non-Spec Extensions in ProtoForms**: Any feature, configuration, metadata, or behavior that is **not** part of the ODK XForms specification **must be implemented outside of the ProtoForms schema**—for example, in surrounding Ground schemas under [`shared/protos/survey/`](shared/protos/survey/) (such as `SurveyDef`, `FormLaunchConfig`, or `MapConfig`) or [`shared/protos/data/`](shared/protos/data/) (such as `SubmissionRecord`, `EntityRecord`, or `AuditRecord`), or in application-level KMP models. Never pollute `groundplatform.v2.forms` with Ground-specific or non-XForms constructs.
+
+## 7. Code Formatting (`ktformat` & `buf`)
 
 * **Kotlin Code (`ktformat`)**: All Kotlin source and Gradle script files (`.kt`, `.kts`) **must** be formatted using `ktformat` (`ktfmt` / Google style with 2-space indentation). Run `ktformat` on any new or modified Kotlin files before completing changes.
 * **Protocol Buffers (`buf`)**: All `proto3` schema files (`.proto` under [`shared/protos/`](shared/protos/)) **must** be formatted using `buf` (`buf format -w`). Run `buf format` whenever creating or modifying `.proto` definitions.

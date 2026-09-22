@@ -42,16 +42,22 @@ UX Co-Design Workbench for rapid iteration with UX designers.
 5.  **Main Survey UI (`PrototypeScreen.MAIN_SURVEY` in `MainSurveyScreen.kt`)**
     -   **Map & List View Switcher**: Top segmented control switching between
         **Map View** (`SurveyMapView`) and **List View** (`SurveyListView`).
-    -   **Interactive Map View & `Layers` Button (`LayerDef`)**: Displays Ground
-        geospatial entities (`EntityType.GEOSPATIAL` polygons and points with
-        reference badges `#1`–`#4` and GNSS wayfinding HUD) and a **`Layers`**
-        control button (`MapLayersControlSheet`) to toggle which entity layers
-        are visible on the map.
-    -   **Entity Bottom Sheet (`1:1` vs `1:N` Submission Model)**:
-        -   Clicking any geospatial entity on the map opens
-            `EntityBottomSheetCard` showing the entity label, dataset,
-            `SubmissionModel` badge, deterministic `GeoID`, area/perimeter
-            metrics, `Summary PDF` export badge, and baseline properties.
+    -   **Interactive Map View & `Layers` Drawer (`LayerDef`)**: Displays Ground
+        geospatial features with a **`Layers`** control button
+        (`MapLayersControlSheet`) split into two self-describing categories
+        rather than nesting layers under form menus:
+        -   **Data collection sites**: Geospatial Entity Lists (spatial master
+            tables) representing target locations/features on the map (`#1`–`#4`
+            with GNSS wayfinding HUD).
+        -   **Form Submissions**: Completed form submission GPS instances
+            (`geopoint`, `geotrace`, `geoshape`) displaying historical coverage
+            and visits visually distinct from active sites.
+    -   **Site-First Entity Bottom Sheet (`1:1` vs `1:N` Submission Model)**:
+        -   Tapping a site pin opens `EntityBottomSheetCard` showing its current
+            status (entity label, dataset, `SubmissionModel` badge,
+            deterministic `GeoID`, area/perimeter metrics, `Summary PDF` export
+            badge, and baseline attributes) and launches available site-first
+            form actions (e.g., `[ + Inspect Site ]`, `[ + Update Info ]`).
         -   **`1:1` (`SubmissionModel.SINGLE_1_TO_1`) with data**: Renders the
             submission data directly inline inside the bottom sheet card
             (`OneToOneInlineSubmissionCard`).

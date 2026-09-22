@@ -860,29 +860,36 @@ class PrototypeAppStateTest {
     assertEquals(2, shadeGroups[0].submissions.size)
     assertEquals(1, shadeGroups[1].submissions.size)
 
-    // 3. Layers dialog uses form titles as headings and nests linked geospatial entities (with isLinkedData)
-    // alongside submission geometry layers
+    // 3. Layers dialog separates Data layers into "Data collection sites" (entityDatasetLayers) and
+    // "Form submissions" (groupedSubmissionLayersByForm)
     assertEquals("Submission Geometry", LayerSourceType.FORM_GEOMETRY.badgeLabel)
     assertFalse(LayerSourceType.FORM_GEOMETRY.badgeLabel.contains("form", ignoreCase = true))
 
+    val siteLayers = state.entityDatasetLayers
+    assertEquals(3, siteLayers.size)
+    assertEquals(
+      listOf(
+        "Smallholder Coffee Parcels",
+        "Shade Tree Monitoring Plots",
+        "Cooperative Washing Stations",
+      ),
+      siteLayers.map { it.label },
+    )
+
     val layerGroups = state.groupedSubmissionLayersByForm
-    assertEquals(5, layerGroups.size)
+    assertEquals(3, layerGroups.size)
     assertEquals(
       listOf(
         "EUDR Parcel Baseline Registration",
-        "Smallholder Household Socio-Economic Survey",
         "Seasonal Shade Tree & Canopy Audit",
-        "GLAD Canopy Disturbance Alert Verification",
         "Washing Station Effluent & Water Check",
       ),
       layerGroups.map { it.formTitle },
     )
     layerGroups.forEach { group ->
       assertEquals(group.form.title, group.formTitle)
-      assertTrue(group.linkedEntityLayers.isNotEmpty())
-      assertTrue(group.linkedEntityLayers.all { it.isLinkedData })
-      assertTrue(group.submissionLayers.none { it.isLinkedData })
-      group.submissionLayers.forEach { layer ->
+      assertTrue(group.layers.isNotEmpty())
+      group.layers.forEach { layer ->
         assertEquals(group.form.title, layer.formTitle)
         assertTrue(layer.sourceDescription.startsWith(group.form.title))
         assertFalse(
@@ -892,24 +899,12 @@ class PrototypeAppStateTest {
       }
     }
 
-    // "Smallholder Coffee Parcels" is used by both "EUDR Parcel Baseline Registration" and
-    // "Smallholder Household Socio-Economic Survey"; toggling its visibility in one switches both off
-    val eudrCoffeeLayer = layerGroups[0].linkedEntityLayers.first()
-    val householdCoffeeLayer = layerGroups[1].linkedEntityLayers.first()
-    assertEquals("layer-coffee-parcels", eudrCoffeeLayer.id)
-    assertEquals("layer-coffee-parcels", householdCoffeeLayer.id)
-    assertTrue(eudrCoffeeLayer.isVisible)
-    assertTrue(householdCoffeeLayer.isVisible)
-
-    state.toggleLayerVisibility("layer-coffee-parcels")
-    val updatedGroupsAfterOff = state.groupedSubmissionLayersByForm
-    assertFalse(updatedGroupsAfterOff[0].linkedEntityLayers.first().isVisible)
-    assertFalse(updatedGroupsAfterOff[1].linkedEntityLayers.first().isVisible)
-
-    state.toggleLayerVisibility("layer-coffee-parcels")
-    val updatedGroupsAfterOn = state.groupedSubmissionLayersByForm
-    assertTrue(updatedGroupsAfterOn[0].linkedEntityLayers.first().isVisible)
-    assertTrue(updatedGroupsAfterOn[1].linkedEntityLayers.first().isVisible)
+    // Toggling form group visibility in the layers dialog hides/shows all layers for that form
+    assertTrue(state.formGeometryLayers.first { it.formId == "form-eudr-baseline" }.isVisible)
+    state.toggleFormSubmissionLayersVisibility("form-eudr-baseline")
+    assertFalse(state.formGeometryLayers.first { it.formId == "form-eudr-baseline" }.isVisible)
+    state.toggleFormSubmissionLayersVisibility("form-eudr-baseline")
+    assertTrue(state.formGeometryLayers.first { it.formId == "form-eudr-baseline" }.isVisible)
 
     // 4. Shared submission PDF sheet uses the form title instead of 'Form Submission PDF'
     state.shareSubmissionPdf("sub-nyr-104-baseline")

@@ -306,7 +306,6 @@ data class MapLayerItem(
   val geometryTypeLabel: String,
   val isVisible: Boolean,
   val sourceType: LayerSourceType = LayerSourceType.ENTITY_DATASET,
-  val datasetId: String? = null,
   val formId: String? = null,
   val formTitle: String? = null,
   val fieldPath: String? = null,
@@ -335,10 +334,6 @@ data class MapLayerItem(
       else -> pluralItemLabel
     },
 ) {
-  /** True when this layer represents linked geospatial entity dataset data (`LayerSourceType.ENTITY_DATASET`). */
-  val isLinkedData: Boolean
-    get() = sourceType == LayerSourceType.ENTITY_DATASET
-
   /** Formats a user-friendly domain item count for this layer (e.g. `"2 parcels"`, `"1 plot"`). */
   fun itemCountLabel(count: Int): String = "$count ${if (count == 1) singularNoun else pluralNoun}"
 
@@ -447,21 +442,16 @@ data class FormSubmissionsGroup(
 }
 
 /**
- * Grouping of map layers ([linkedEntityLayers] and [submissionLayers]) under the [FormPreviewItem]
- * in which they are used in the `Layers` dialog, headed by the form's title (`form.title`).
+ * Grouping of submission [MapLayerItem]s and [SubmissionPreviewItem]s under a [FormPreviewItem] in
+ * the `Layers` dialog, headed by the form's title (`form.title`).
  */
 data class FormSubmissionLayersGroup(
   val form: FormPreviewItem,
-  val linkedEntityLayers: List<MapLayerItem>,
-  val submissionLayers: List<MapLayerItem>,
+  val layers: List<MapLayerItem>,
   val submissions: List<SubmissionPreviewItem>,
 ) {
   val formTitle: String
     get() = form.title
-
-  /** All layers nested under this form: linked geospatial entity datasets first, then submission geometries. */
-  val layers: List<MapLayerItem>
-    get() = linkedEntityLayers + submissionLayers
 }
 
 /** Active PDF export & app-share sheet state for either a Geospatial Entity or a Form Submission. */
@@ -1335,21 +1325,18 @@ class PrototypeAppState(
   }
 
   /**
-   * Map layers grouped by the [FormPreviewItem] in which they are used for the `Layers` dialog,
-   * nesting linked geospatial entity datasets (`isLinkedData == true`) alongside any submission
-   * geometry layers under each form's title (`form.title`).
+   * Submission map layers grouped by their [FormPreviewItem] for the `Layers` dialog,
+   * using the form's title (`form.title`) as the group heading instead of the word "Form".
    */
   val groupedSubmissionLayersByForm: List<FormSubmissionLayersGroup>
     get() =
       forms.mapNotNull { form ->
-        val linkedLayers = entityDatasetLayers.filter { it.datasetId == form.targetDatasetId }
-        val matchingSubmissionLayers = formGeometryLayers.filter { it.formId == form.id }
-        if (linkedLayers.isNotEmpty() || matchingSubmissionLayers.isNotEmpty()) {
+        val matchingLayers = formGeometryLayers.filter { it.formId == form.id }
+        if (matchingLayers.isNotEmpty()) {
           val formSubs = allSubmissions.filter { it.formId == form.id }
           FormSubmissionLayersGroup(
             form = form,
-            linkedEntityLayers = linkedLayers,
-            submissionLayers = matchingSubmissionLayers,
+            layers = matchingLayers,
             submissions = formSubs,
           )
         } else {
@@ -2321,7 +2308,7 @@ class PrototypeAppState(
      */
     fun defaultMapLayers(): List<MapLayerItem> =
       listOf(
-        // Survey Dataset Layers (solid outlines, linked to forms via datasetId)
+        // Survey Dataset Layers (solid outlines)
         MapLayerItem(
           id = "layer-coffee-parcels",
           label = "Smallholder Coffee Parcels",
@@ -2330,7 +2317,6 @@ class PrototypeAppState(
           geometryTypeLabel = "Polygon",
           isVisible = true,
           sourceType = LayerSourceType.ENTITY_DATASET,
-          datasetId = "coffee_parcels",
           singularItemLabel = "coffee parcel",
           pluralItemLabel = "coffee parcels",
         ),
@@ -2342,7 +2328,6 @@ class PrototypeAppState(
           geometryTypeLabel = "Polygon",
           isVisible = true,
           sourceType = LayerSourceType.ENTITY_DATASET,
-          datasetId = "shade_monitoring_plots",
           singularItemLabel = "monitoring plot",
           pluralItemLabel = "monitoring plots",
         ),
@@ -2354,7 +2339,6 @@ class PrototypeAppState(
           geometryTypeLabel = "Point",
           isVisible = true,
           sourceType = LayerSourceType.ENTITY_DATASET,
-          datasetId = "washing_stations",
           singularItemLabel = "washing station",
           pluralItemLabel = "washing stations",
         ),
