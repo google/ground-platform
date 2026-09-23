@@ -21,8 +21,8 @@ import { onDeleteSubmissionHandler } from './on-delete-submission';
 
 describe('onDeleteSubmission()', () => {
   const SURVEY_ID = 'survey001';
-  const PHOTO_1 = `user-media/surveys/${SURVEY_ID}/submissions/subm001-task006.jpg`;
-  const PHOTO_2 = `user-media/surveys/${SURVEY_ID}/submissions/subm001-task007.jpg`;
+  const PHOTO_1 = `user-media/surveys/${SURVEY_ID}/submissions/task006-4f8b1c2d-9a3e-4d71-b0c5-2e6a7f9d1834.jpg`;
+  const PHOTO_2 = `user-media/surveys/${SURVEY_ID}/submissions/task007-7c2a5e18-3b64-4f9a-8d2e-15b0c7a3f6d9.jpg`;
 
   let mockBucket: jasmine.SpyObj<{ file: (path: string) => unknown }>;
   let deletedPaths: string[];

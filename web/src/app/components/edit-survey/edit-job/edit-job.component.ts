@@ -97,6 +97,8 @@ export class EditJobComponent {
 
     this.job = this.draftSurveyService.getSurvey().getJob(this.jobId!);
 
+    this.addLoiTaskId = this.job?.tasks?.find(task => !!task.addLoiTask)?.id;
+
     if (!this.job) return;
 
     this.loisSubscription.add(
@@ -129,19 +131,21 @@ export class EditJobComponent {
   }
 
   onStrategyChange(strategy: DataCollectionStrategy) {
-    const addLoiTask = this.job?.tasks?.find(task => !!task.addLoiTask);
+    const job = this.draftSurveyService.getSurvey().getJob(this.jobId!);
+
+    if (!job) return;
+
+    const addLoiTask = job.tasks?.find(task => !!task.addLoiTask);
 
     if (addLoiTask) this.addLoiTaskId = addLoiTask.id;
 
     const tasks = this.taskService.updateLoiTasks(
-      this.job?.tasks,
+      job.tasks,
       strategy,
       this.addLoiTaskId
     );
 
-    this.draftSurveyService.addOrUpdateJob(
-      this.job!.copyWith({ tasks, strategy })
-    );
+    this.draftSurveyService.addOrUpdateJob(job.copyWith({ tasks, strategy }));
 
     this.job = this.draftSurveyService.getSurvey().getJob(this.jobId!);
 

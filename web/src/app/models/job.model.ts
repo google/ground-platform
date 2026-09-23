@@ -24,6 +24,8 @@ export enum DataCollectionStrategy {
   MIXED = 'MIXED',
 }
 
+export const JOB_NAME_MAX_LENGTH = 255;
+
 // Configuration for a single integration associated with a job.
 export interface Integration {
   id: string;

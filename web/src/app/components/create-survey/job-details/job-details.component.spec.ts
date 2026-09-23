@@ -44,4 +44,15 @@ describe('JobDetailsComponent', () => {
 
     expect(component.toJobName()).toBe(newJobName);
   });
+
+  it('is invalid when job name is longer than the max length', () => {
+    const nameControl = component.formGroup.controls[component.nameControlKey];
+
+    nameControl.setValue('a'.repeat(component.nameMaxLength));
+    expect(component.formGroup.valid).toBeTrue();
+
+    nameControl.setValue('a'.repeat(component.nameMaxLength + 1));
+    expect(nameControl.hasError('maxlength')).toBeTrue();
+    expect(component.formGroup.valid).toBeFalse();
+  });
 });
