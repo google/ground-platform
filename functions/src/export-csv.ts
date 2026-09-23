@@ -26,6 +26,7 @@ import {
   getStorageBucket,
 } from './common/context';
 import { getTempFilePath } from './common/temp-storage';
+import { getExportMediaUrl, getRequestBaseUrl } from './common/media';
 import { DecodedIdToken } from 'firebase-admin/auth';
 import { QueryDocumentSnapshot } from 'firebase-admin/firestore';
 import { StatusCodes } from 'http-status-codes';
@@ -93,6 +94,10 @@ export async function exportCsvHandler(
 
   const tasks = job.tasks.sort((a, b) => a.index! - b.index!);
 
+  const baseUrl = getRequestBaseUrl(req);
+  const photoUrl: PhotoUrlFn = (submissionId, taskId) =>
+    getExportMediaUrl(baseUrl, surveyId, submissionId, taskId);
+
   const loiProperties = new Set<string>();
   let query = db.fetchPartialLocationsOfInterest(surveyId, jobId, 1000);
   let lastVisible = null;
@@ -142,9 +147,9 @@ export async function exportCsvHandler(
       if (isAccessibleLoi(loi, ownerIdFilter) && submissionDoc) {
         const submission = toMessage(submissionDoc.data(), Pb.Submission);
         if (submission instanceof Error) throw submission;
-        writeRow(csvStream, loiProperties, tasks, loi, submission);
+        writeRow(csvStream, loiProperties, tasks, loi, photoUrl, submission);
       } else {
-        writeRow(csvStream, loiProperties, tasks, loi);
+        writeRow(csvStream, loiProperties, tasks, loi, photoUrl);
       }
     } catch (e) {
       console.debug('Skipping row', e);
@@ -202,11 +207,19 @@ function capturesDeviceLocation(task: Pb.ITask): boolean {
   );
 }
 
+/**
+ * Returns the URL at which the photo submitted for a task can be fetched. The
+ * URL names the submission rather than the storage object, so it keeps working
+ * across re-exports and stays subject to the survey's access rules.
+ */
+type PhotoUrlFn = (submissionId: string, taskId: string) => string;
+
 function writeRow(
   csvStream: csv.CsvFormatterStream<csv.Row, csv.Row>,
   loiProperties: Set<string>,
   tasks: Pb.ITask[],
   loi: Pb.LocationOfInterest,
+  photoUrl: PhotoUrlFn,
   submission?: Pb.Submission
 ) {
   if (!loi.geometry) {
@@ -223,8 +236,9 @@ function writeRow(
   if (submission) {
     const { taskData: data } = submission;
     // Header: One or more columns for each task
+    const taskPhotoUrl = (taskId: string) => photoUrl(submission.id, taskId);
     tasks.forEach(task =>
-      getTaskValues(task, data).forEach(v => row.push(quote(v)))
+      getTaskValues(task, data, taskPhotoUrl).forEach(v => row.push(quote(v)))
     );
     // Header: contributor_username, contributor_email, created_client_timestamp, created_server_timestamp
     const { created } = submission;
@@ -261,10 +275,11 @@ function toWkt(geometry: Pb.IGeometry): string {
  */
 function getTaskValues(
   task: Pb.ITask,
-  data: Pb.ITaskData[]
+  data: Pb.ITaskData[],
+  photoUrl: (taskId: string) => string
 ): (string | number | null)[] {
   const result = data.find(d => d.taskId === task.id);
-  const value = getValue(task, result);
+  const value = getValue(task, result, photoUrl);
   if (!capturesDeviceLocation(task)) return [value];
   const location = result?.skipped
     ? null
@@ -274,11 +289,13 @@ function getTaskValues(
 }
 
 /**
- * Returns the string or number representation of a specific task element result.
+ * Returns the string or number representation of a specific task element
+ * result.
  */
 function getValue(
   task: Pb.ITask,
-  result: Pb.ITaskData | undefined
+  result: Pb.ITaskData | undefined,
+  photoUrl: (taskId: string) => string
 ): string | number | null {
   if (!result || result.skipped) return null;
   const {
@@ -306,7 +323,8 @@ function getValue(
         }),
       })
     );
-  } else if (takePhotoResult) return getPhotoUrlValue(takePhotoResult);
+  } else if (takePhotoResult)
+    return takePhotoResult.photoPath ? photoUrl(task.id!) : null;
   else return null;
 }
 
@@ -350,10 +368,6 @@ function getMultipleChoiceLabel(task: Pb.ITask, id: string): string | null {
       (o: Pb.Task.MultipleChoiceQuestion.IOption) => o.id === id
     )?.label ?? null
   );
-}
-
-function getPhotoUrlValue(result: Pb.TaskData.ITakePhotoResult): string | null {
-  return result?.photoPath || null;
 }
 
 /**

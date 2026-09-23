@@ -75,6 +75,10 @@ export class DraftSurveyService {
       if (!duplicate) this.valid = this.valid.set(job.id, false);
     }
 
+    if (job.tasks?.isEmpty() ?? true) {
+      this.valid = this.valid.set(job.id, false);
+    }
+
     this.survey$.next(
       currentSurvey.copyWith({ jobs: currentSurvey.jobs.set(job.id, job) })
     );
