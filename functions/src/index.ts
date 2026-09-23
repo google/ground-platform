@@ -27,6 +27,7 @@ import { sessionLoginHandler } from './session-login';
 import { importGeoJsonCallback } from './import-geojson';
 import { exportCsvHandler } from './export-csv';
 import { exportGeojsonHandler } from './export-geojson';
+import { exportMediaHandler } from './export-media';
 import { cleanTempHandler } from './clean-temp';
 import { cleanOrphanMediaHandler } from './clean-orphan-media';
 import { onCall } from 'firebase-functions/v2/https';
@@ -90,6 +91,8 @@ export const exportGeojson = onHttpsRequest(exportGeojsonHandler, {
   timeoutSeconds: 3600,
   cpu: 2,
 });
+
+export const exportMedia = onHttpsRequest(exportMediaHandler);
 
 export const onCreateLoi = onDocumentCreated(
   loiPathTemplate,
