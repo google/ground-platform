@@ -126,7 +126,6 @@
     "@angular/platform-browser": "catalog:",
     "@angular/platform-browser-dynamic": "catalog:",
     "@angular/router": "catalog:",
-    "@babel/runtime": "catalog:",
     "@grpc/grpc-js": "catalog:",
     "@iplab/ngx-file-upload": "catalog:",
     "angularx-qrcode": "catalog:",
