@@ -23,6 +23,9 @@ import { Injectable } from '@angular/core';
   providedIn: 'root',
 })
 export class GroundPinService {
+  /** Data URLs of pins without text, keyed by color. */
+  private readonly pinImageSources = new Map<string, string>();
+
   renderPin(options: { color?: string; text?: string }): string {
     const { color = GroundPinService.defaultIconColor, text } = options;
 
@@ -33,18 +36,48 @@ export class GroundPinService {
   }
 
   getPinImageSource(color?: string): string {
-    return GroundPinService.urlPrefix + btoa(this.renderPin({ color }));
+    const key = color ?? '';
+    let source = this.pinImageSources.get(key);
+    if (!source) {
+      source = GroundPinService.urlPrefix + btoa(this.renderPin({ color }));
+      this.pinImageSources.set(key, source);
+    }
+    return source;
   }
 
-  getPinImageSvgElement(color: string, text?: string): Element {
-    const svgMarker = document.createElement('div');
-    svgMarker.innerHTML = this.renderPin({ color, text });
-    svgMarker.style.transform = 'scale(1.5)';
-    return svgMarker;
+  /**
+   * Creates the element shown by a map marker.
+   *
+   * Pins without text are rendered as an image, so the browser decodes the SVG
+   * (and its filters) once per color and shares it across all pins, instead of
+   * parsing and painting a separate inline SVG for each one. This matters for
+   * surveys with thousands of LOIs. Pins with text keep an inline SVG, since
+   * text inside an image can't use the page font.
+   */
+  createPinElement(color: string, text?: string): Element {
+    const pin = document.createElement('div');
+    if (text) {
+      pin.innerHTML = this.renderPin({ color, text });
+    } else {
+      const image = document.createElement('img');
+      image.src = this.getPinImageSource(color);
+      image.width = GroundPinService.pinWidth;
+      image.height = GroundPinService.pinHeight;
+      image.alt = '';
+      // Prevents the browser's native image drag from interfering with map
+      // panning and marker dragging.
+      image.draggable = false;
+      pin.appendChild(image);
+    }
+    pin.style.transform = 'scale(1.5)';
+    return pin;
   }
 
   public static urlPrefix = 'data:image/svg+xml;charset=UTF-8;base64,';
   private static defaultIconColor = 'red';
+  /** Size of the SVG pin, as declared in `svgTemplate`. */
+  private static pinWidth = 22;
+  private static pinHeight = 24;
   private static svgTemplate = `<?xml version="1.0" encoding="UTF-8"?>
 <svg width="22px" height="24px" viewBox="0 0 22 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
     <defs>
