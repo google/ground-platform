@@ -36,9 +36,6 @@ catalogs:
     '@angular/material':
       specifier: ^20.2.14
       version: 20.2.14
-    '@angular/material-experimental':
-      specifier: ^20.2.14
-      version: 20.2.14
     '@angular/platform-browser':
       specifier: ^20.3.15
       version: 20.3.16
@@ -160,9 +157,6 @@ catalogs:
     '@eslint/eslintrc':
       specifier: ^3.3.5
       version: 3.3.5
-    '@jridgewell/source-map':
-      specifier: ^0.3.2
-      version: 0.3.11
     '@nx/angular':
       specifier: ^22.2.1
       version: 22.3.3
@@ -205,9 +199,6 @@ catalogs:
     '@types/terraformer__wkt':
       specifier: ^2.0.3
       version: 2.0.3
-    '@types/webpack-env':
-      specifier: ^1.15.3
-      version: 1.18.8
     '@typescript-eslint/eslint-plugin':
       specifier: ^8.55.0
       version: 8.55.0
@@ -599,9 +590,6 @@ importers:
       '@angular/material':
         specifier: 'catalog:'
         version: 20.2.14(ff268526924a3a6e1269aa7ae5f33043)
-      '@angular/material-experimental':
-        specifier: 'catalog:'
-        version: 20.2.14(b52db64a0e4859d19d55333896b96faa)
       '@angular/platform-browser':
         specifier: 'catalog:'
         version: 20.3.16(@angular/animations@20.3.16(@angular/core@20.3.25(@angular/compiler@20.3.25)(rxjs@7.8.2)(zone.js@0.15.1)))(@angular/common@20.3.25(@angular/core@20.3.25(@angular/compiler@20.3.25)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2))(@angular/core@20.3.25(@angular/compiler@20.3.25)(rxjs@7.8.2)(zone.js@0.15.1))
@@ -657,9 +645,6 @@ importers:
       '@angular/language-service':
         specifier: catalog:dev
         version: 20.3.16
-      '@jridgewell/source-map':
-        specifier: catalog:dev
-        version: 0.3.11
       '@nx/angular':
         specifier: catalog:dev
         version: 22.3.3(904de90a5e2458afddccc1ee4ca7817c)
@@ -672,9 +657,6 @@ importers:
       '@types/node':
         specifier: catalog:dev
         version: 20.19.30
-      '@types/webpack-env':
-        specifier: catalog:dev
-        version: 1.18.8
       karma:
         specifier: catalog:dev
         version: 6.4.4
@@ -934,12 +916,6 @@ packages:
       vitest:
         optional: true
 
-  '@angular/cdk-experimental@20.2.14':
-    resolution: {integrity: sha512-oTqd8fV9m8HfzIpd1GXJ9OOKhTV/2D3hPfhZjG4puTQ5JeWcljVR2T/fZHpWGnNRoHJL5MkIkQP6338uJbX22Q==}
-    peerDependencies:
-      '@angular/cdk': 20.2.14
-      '@angular/core': ^20.0.0 || ^21.0.0
-
   '@angular/cdk@20.2.14':
     resolution: {integrity: sha512-7bZxc01URbiPiIBWThQ69XwOxVduqEKN4PhpbF2AAyfMc/W8Hcr4VoIJOwL0O1Nkq5beS8pCAqoOeIgFyXd/kg==}
     peerDependencies:
@@ -1030,17 +1006,6 @@ packages:
     peerDependencies:
       '@angular/compiler': 20.3.16
       '@angular/compiler-cli': 20.3.16
-
-  '@angular/material-experimental@20.2.14':
-    resolution: {integrity: sha512-grAaF6iGVIirEr+alQ7MDwIcX19lNR5lBZtNf6Qw+8Xpij7scocrXYuTHS2pL8J4xCVEIH+PI0egYS0+DyER4Q==}
-    peerDependencies:
-      '@angular/cdk': 20.2.14
-      '@angular/cdk-experimental': 20.2.14
-      '@angular/common': ^20.0.0 || ^21.0.0
-      '@angular/core': ^20.0.0 || ^21.0.0
-      '@angular/forms': ^20.0.0 || ^21.0.0
-      '@angular/material': 20.2.14
-      '@angular/platform-browser': ^20.0.0 || ^21.0.0
 
   '@angular/material@20.2.14':
     resolution: {integrity: sha512-IbAgV6XLsvmHiJzxycVhcNC1PA4M30qi+ERCOir6cT333Bxm8vDV32gsOjfL52uzG5YRARroPC+8s1XqR2oxeA==}
@@ -4794,9 +4759,6 @@ packages:
 
   '@types/triple-beam@1.3.5':
     resolution: {integrity: sha512-6WaYesThRMCl19iryMYP7/x2OVgCtbIVflDGFpWnb9irXI3UjYE4AzmYuiUKY1AJstGijoY+MgUszMgRxIYTYw==}
-
-  '@types/webpack-env@1.18.8':
-    resolution: {integrity: sha512-G9eAoJRMLjcvN4I08wB5I7YofOb/kaJNd5uoCMX+LbKXTPCF+ZIHuqTnFaK9Jz1rgs035f9JUPUhNFtqgucy/A==}
 
   '@types/ws@8.18.1':
     resolution: {integrity: sha512-ThVF6DCVhA8kUGy+aazFQ4kXQ7E1Ty7A3ypFOe0IcJV8O/M511G99AW24irKrW56Wt44yG9+ij8FaqoBGkuBXg==}
@@ -12332,12 +12294,6 @@ snapshots:
       - yaml
     optional: true
 
-  '@angular/cdk-experimental@20.2.14(@angular/cdk@20.2.14(@angular/common@20.3.25(@angular/core@20.3.25(@angular/compiler@20.3.25)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2))(@angular/core@20.3.25(@angular/compiler@20.3.25)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2))(@angular/core@20.3.25(@angular/compiler@20.3.25)(rxjs@7.8.2)(zone.js@0.15.1))':
-    dependencies:
-      '@angular/cdk': 20.2.14(@angular/common@20.3.25(@angular/core@20.3.25(@angular/compiler@20.3.25)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2))(@angular/core@20.3.25(@angular/compiler@20.3.25)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2)
-      '@angular/core': 20.3.25(@angular/compiler@20.3.25)(rxjs@7.8.2)(zone.js@0.15.1)
-      tslib: 2.8.1
-
   '@angular/cdk@20.2.14(@angular/common@20.3.25(@angular/core@20.3.25(@angular/compiler@20.3.25)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2))(@angular/core@20.3.25(@angular/compiler@20.3.25)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2)':
     dependencies:
       '@angular/common': 20.3.25(@angular/core@20.3.25(@angular/compiler@20.3.25)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2)
@@ -12478,17 +12434,6 @@ snapshots:
       yargs: 18.0.0
     transitivePeerDependencies:
       - supports-color
-
-  '@angular/material-experimental@20.2.14(b52db64a0e4859d19d55333896b96faa)':
-    dependencies:
-      '@angular/cdk': 20.2.14(@angular/common@20.3.25(@angular/core@20.3.25(@angular/compiler@20.3.25)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2))(@angular/core@20.3.25(@angular/compiler@20.3.25)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2)
-      '@angular/cdk-experimental': 20.2.14(@angular/cdk@20.2.14(@angular/common@20.3.25(@angular/core@20.3.25(@angular/compiler@20.3.25)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2))(@angular/core@20.3.25(@angular/compiler@20.3.25)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2))(@angular/core@20.3.25(@angular/compiler@20.3.25)(rxjs@7.8.2)(zone.js@0.15.1))
-      '@angular/common': 20.3.25(@angular/core@20.3.25(@angular/compiler@20.3.25)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2)
-      '@angular/core': 20.3.25(@angular/compiler@20.3.25)(rxjs@7.8.2)(zone.js@0.15.1)
-      '@angular/forms': 20.3.16(@angular/common@20.3.25(@angular/core@20.3.25(@angular/compiler@20.3.25)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2))(@angular/core@20.3.25(@angular/compiler@20.3.25)(rxjs@7.8.2)(zone.js@0.15.1))(@angular/platform-browser@20.3.16(@angular/animations@20.3.16(@angular/core@20.3.25(@angular/compiler@20.3.25)(rxjs@7.8.2)(zone.js@0.15.1)))(@angular/common@20.3.25(@angular/core@20.3.25(@angular/compiler@20.3.25)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2))(@angular/core@20.3.25(@angular/compiler@20.3.25)(rxjs@7.8.2)(zone.js@0.15.1)))(rxjs@7.8.2)
-      '@angular/material': 20.2.14(ff268526924a3a6e1269aa7ae5f33043)
-      '@angular/platform-browser': 20.3.16(@angular/animations@20.3.16(@angular/core@20.3.25(@angular/compiler@20.3.25)(rxjs@7.8.2)(zone.js@0.15.1)))(@angular/common@20.3.25(@angular/core@20.3.25(@angular/compiler@20.3.25)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2))(@angular/core@20.3.25(@angular/compiler@20.3.25)(rxjs@7.8.2)(zone.js@0.15.1))
-      tslib: 2.8.1
 
   '@angular/material@20.2.14(ff268526924a3a6e1269aa7ae5f33043)':
     dependencies:
@@ -18327,8 +18272,6 @@ snapshots:
   '@types/tough-cookie@4.0.5': {}
 
   '@types/triple-beam@1.3.5': {}
-
-  '@types/webpack-env@1.18.8': {}
 
   '@types/ws@8.18.1':
     dependencies:
