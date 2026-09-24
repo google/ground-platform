@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 The Ground Authors.
+ * Copyright 2026 The Ground Authors.
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -19,23 +19,12 @@ import { NgModule } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
-import { CurrentUserWidgetModule } from './current-user-widget/current-user-widget.module';
-import { HeaderComponent } from './header.component';
-import { LanguageSwitcherModule } from './language-switcher/language-switcher.module';
+import { LanguageSwitcherComponent } from './language-switcher.component';
 
 @NgModule({
-  declarations: [HeaderComponent],
-  imports: [
-    CommonModule,
-    CurrentUserWidgetModule,
-    LanguageSwitcherModule,
-    MatButtonModule,
-    MatIconModule,
-    MatMenuModule,
-    MatProgressSpinnerModule,
-  ],
-  exports: [HeaderComponent],
+  declarations: [LanguageSwitcherComponent],
+  imports: [CommonModule, MatButtonModule, MatIconModule, MatMenuModule],
+  exports: [LanguageSwitcherComponent],
 })
-export class HeaderModule {}
+export class LanguageSwitcherModule {}

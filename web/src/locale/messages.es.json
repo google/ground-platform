@@ -188,6 +188,7 @@
     "app.labels.roles.surveyOrganizer": "Organizador de la encuesta",
     "app.labels.roles.viewer": "Observador",
     "app.labels.no": "No",
-    "app.labels.yes": "Si"
+    "app.labels.yes": "Si",
+    "app.labels.changeLanguage": "Cambiar idioma"
   }
 }

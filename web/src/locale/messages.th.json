@@ -188,6 +188,7 @@
     "app.labels.roles.surveyOrganizer": "ผู้จัดทำแบบสำรวจ",
     "app.labels.roles.viewer": "ผู้ดูข้อมูล",
     "app.labels.no": "ไม่",
-    "app.labels.yes": "ใช่"
+    "app.labels.yes": "ใช่",
+    "app.labels.changeLanguage": "เปลี่ยนภาษา"
   }
 }

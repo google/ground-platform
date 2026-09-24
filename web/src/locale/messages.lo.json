@@ -188,6 +188,7 @@
     "app.labels.roles.surveyOrganizer": "ຜູ້ຈັດການແບບສຳຫຼວດ",
     "app.labels.roles.viewer": "ຜູ້ເບິ່ງ",
     "app.labels.no": "No",
-    "app.labels.yes": "Yes"
+    "app.labels.yes": "Yes",
+    "app.labels.changeLanguage": "ປ່ຽນພາສາ"
   }
 }

@@ -188,6 +188,7 @@
     "app.labels.roles.surveyOrganizer": "Người tổ chức khảo sát",
     "app.labels.roles.viewer": "Người xem",
     "app.labels.no": "Không",
-    "app.labels.yes": "Đúng"
+    "app.labels.yes": "Đúng",
+    "app.labels.changeLanguage": "Thay đổi ngôn ngữ"
   }
 }

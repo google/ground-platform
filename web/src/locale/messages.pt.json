@@ -188,6 +188,7 @@
     "app.labels.roles.surveyOrganizer": "Organizador do inquérito",
     "app.labels.roles.viewer": "Visualizador",
     "app.labels.no": "Não",
-    "app.labels.yes": "Sim"
+    "app.labels.yes": "Sim",
+    "app.labels.changeLanguage": "Alterar idioma"
   }
 }

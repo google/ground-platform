@@ -199,6 +199,7 @@
     "app.labels.roles.surveyOrganizer": "Survey organizer",
     "app.labels.roles.viewer": "Viewer",
     "app.labels.no": "No",
-    "app.labels.yes": "Yes"
+    "app.labels.yes": "Yes",
+    "app.labels.changeLanguage": "Change language"
   }
 }
