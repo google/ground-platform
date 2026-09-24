@@ -188,6 +188,14 @@
     "app.labels.roles.surveyOrganizer": "ຜູ້ຈັດການແບບສຳຫຼວດ",
     "app.labels.roles.viewer": "ຜູ້ເບິ່ງ",
     "app.labels.no": "No",
-    "app.labels.yes": "Yes"
+    "app.labels.yes": "Yes",
+    "app.labels.changeLanguage": "ປ່ຽນພາສາ",
+    "app.labels.languages.en": "ອັງກິດ",
+    "app.labels.languages.es": "ສະແປນນິຊ",
+    "app.labels.languages.fr": "ຝຣັ່ງ",
+    "app.labels.languages.lo": "ລາວ",
+    "app.labels.languages.pt": "ປອກຕຸຍກິສ",
+    "app.labels.languages.th": "ໄທ",
+    "app.labels.languages.vi": "ຫວຽດນາມ"
   }
 }

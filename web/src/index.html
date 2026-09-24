@@ -21,6 +21,24 @@ limitations under the License.
     <!-- TODO(gmiceli): Set title dynamically https://angular.io/guide/set-document-title -->
     <title>Ground</title>
     <base href="/" />
+    <script>
+      // Redirects URLs without a locale prefix (e.g. "/") to the language
+      // chosen in LanguageSwitcherComponent before the app bundle loads.
+      // Keep the storage key and language codes in sync with that component.
+      (function () {
+        try {
+          var languages = ['en', 'es', 'fr', 'lo', 'pt', 'th', 'vi'];
+          var language = localStorage.getItem('ground.language');
+          var base = document.querySelector('base').getAttribute('href');
+          var l = window.location;
+          // Only localized builds have a locale in their base href.
+          if (base === '/' || !language || languages.indexOf(language) < 0) return;
+          if (languages.indexOf(l.pathname.split('/')[1]) >= 0) return;
+          if (base === '/' + language + '/') return;
+          l.replace('/' + language + l.pathname + l.search + l.hash);
+        } catch (e) {}
+      })();
+    </script>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="icon" type="image/x-icon" href="favicon.ico" />
     <link rel="icon" type="image/png" sizes="16x16" href="assets/icons/favicon-16x16.png">
