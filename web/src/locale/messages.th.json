@@ -189,6 +189,13 @@
     "app.labels.roles.viewer": "ผู้ดูข้อมูล",
     "app.labels.no": "ไม่",
     "app.labels.yes": "ใช่",
-    "app.labels.changeLanguage": "เปลี่ยนภาษา"
+    "app.labels.changeLanguage": "เปลี่ยนภาษา",
+    "app.labels.languages.en": "อังกฤษ",
+    "app.labels.languages.es": "สเปน",
+    "app.labels.languages.fr": "ฝรั่งเศส",
+    "app.labels.languages.lo": "ลาว",
+    "app.labels.languages.pt": "โปรตุเกส",
+    "app.labels.languages.th": "ไทย",
+    "app.labels.languages.vi": "เวียดนาม"
   }
 }

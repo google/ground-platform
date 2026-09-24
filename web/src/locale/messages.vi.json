@@ -189,6 +189,13 @@
     "app.labels.roles.viewer": "Người xem",
     "app.labels.no": "Không",
     "app.labels.yes": "Đúng",
-    "app.labels.changeLanguage": "Thay đổi ngôn ngữ"
+    "app.labels.changeLanguage": "Thay đổi ngôn ngữ",
+    "app.labels.languages.en": "Tiếng Anh",
+    "app.labels.languages.es": "Tiếng Tây Ban Nha",
+    "app.labels.languages.fr": "Tiếng Pháp",
+    "app.labels.languages.lo": "Tiếng Lào",
+    "app.labels.languages.pt": "Tiếng Bồ Đào Nha",
+    "app.labels.languages.th": "Tiếng Thái",
+    "app.labels.languages.vi": "Tiếng Việt"
   }
 }

@@ -189,6 +189,13 @@
     "app.labels.roles.viewer": "Observador",
     "app.labels.no": "No",
     "app.labels.yes": "Si",
-    "app.labels.changeLanguage": "Cambiar idioma"
+    "app.labels.changeLanguage": "Cambiar idioma",
+    "app.labels.languages.en": "Inglés",
+    "app.labels.languages.es": "Español",
+    "app.labels.languages.fr": "Francés",
+    "app.labels.languages.lo": "Lao",
+    "app.labels.languages.pt": "Portugués",
+    "app.labels.languages.th": "Tailandés",
+    "app.labels.languages.vi": "Vietnamita"
   }
 }

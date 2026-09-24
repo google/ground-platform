@@ -200,6 +200,13 @@
     "app.labels.roles.viewer": "Viewer",
     "app.labels.no": "No",
     "app.labels.yes": "Yes",
-    "app.labels.changeLanguage": "Change language"
+    "app.labels.changeLanguage": "Change language",
+    "app.labels.languages.en": "English",
+    "app.labels.languages.es": "Spanish",
+    "app.labels.languages.fr": "French",
+    "app.labels.languages.lo": "Lao",
+    "app.labels.languages.pt": "Portuguese",
+    "app.labels.languages.th": "Thai",
+    "app.labels.languages.vi": "Vietnamese"
   }
 }

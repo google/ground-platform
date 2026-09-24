@@ -27,11 +27,10 @@
   @for (language of languages; track language.code) {
     <button
       mat-menu-item
-      [attr.lang]="language.code"
       [disabled]="language.code === currentLanguageCode"
       (click)="onLanguageClick(language.code)"
     >
-      {{ language.nativeName }}
+      {{ language.name }}
     </button>
   }
 </mat-menu>
