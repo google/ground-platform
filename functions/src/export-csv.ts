@@ -171,13 +171,40 @@ function getHeaders(tasks: Pb.ITask[], loiProperties: Set<string>): string[] {
     'system:index',
     'geometry',
     ...loiProperties,
-    ...tasks.map(task => `data:${task.prompt || ''}`),
+    ...tasks.flatMap(getTaskHeaders),
     'data:contributor_name',
     'data:contributor_email',
     'data:created_client_timestamp',
     'data:created_server_timestamp',
   ];
   return headers.map(quote);
+}
+
+/**
+ * Returns the headers of the columns for a specific task. Tasks capturing the
+ * device location have additional columns for accuracy and altitude.
+ */
+function getTaskHeaders(task: Pb.ITask): string[] {
+  const header = `data:${task.prompt || ''}`;
+  if (capturesDeviceLocation(task)) {
+    return [header, `${header}:accuracy`, `${header}:altitude`];
+  }
+  return [header];
+}
+
+/**
+ * Returns true for "Capture location" tasks, and for "Drop pin" tasks
+ * requiring the pin to be placed at the device location.
+ */
+function capturesDeviceLocation(task: Pb.ITask): boolean {
+  const { captureLocation, drawGeometry } = task;
+  if (captureLocation) return true;
+  return (
+    !!drawGeometry?.requireDeviceLocation &&
+    !!drawGeometry.allowedMethods?.includes(
+      Pb.Task.DrawGeometry.Method.DROP_PIN
+    )
+  );
 }
 
 /**
@@ -208,9 +235,11 @@ function writeRow(
   getPropertiesByName(loi, loiProperties).forEach(v => row.push(quote(v)));
   if (submission) {
     const { taskData: data } = submission;
-    // Header: One column for each task
+    // Header: One or more columns for each task
     const taskPhotoUrl = (taskId: string) => photoUrl(submission.id, taskId);
-    tasks.forEach(task => row.push(quote(getValue(task, data, taskPhotoUrl))));
+    tasks.forEach(task =>
+      getTaskValues(task, data, taskPhotoUrl).forEach(v => row.push(quote(v)))
+    );
     // Header: contributor_username, contributor_email, created_client_timestamp, created_server_timestamp
     const { created } = submission;
     row.push(quote(created?.displayName));
@@ -221,8 +250,6 @@ function writeRow(
     row.push(
       quote(new Date(timestampToInt(created?.serverTimestamp)).toISOString())
     );
-  } else {
-    row.concat(new Array(tasks.length + 4).fill(''));
   }
   csvStream.write(row);
 }
@@ -243,15 +270,33 @@ function toWkt(geometry: Pb.IGeometry): string {
 }
 
 /**
+ * Returns the values of the columns for a specific task, in the same order as
+ * the headers returned by `getTaskHeaders()`.
+ */
+function getTaskValues(
+  task: Pb.ITask,
+  data: Pb.ITaskData[],
+  photoUrl: (taskId: string) => string
+): (string | number | null)[] {
+  const result = data.find(d => d.taskId === task.id);
+  const value = getValue(task, result, photoUrl);
+  if (!capturesDeviceLocation(task)) return [value];
+  const location = result?.skipped
+    ? null
+    : (result?.captureLocationResult ?? result?.drawGeometryResult);
+  // Unset accuracy and altitude are read as 0, so they are exported as empty.
+  return [value, location?.accuracy || null, location?.altitude || null];
+}
+
+/**
  * Returns the string or number representation of a specific task element
  * result.
  */
 function getValue(
   task: Pb.ITask,
-  data: Pb.ITaskData[],
+  result: Pb.ITaskData | undefined,
   photoUrl: (taskId: string) => string
 ): string | number | null {
-  const result = data.find(d => d.taskId === task.id);
   if (!result || result.skipped) return null;
   const {
     textResponse,
@@ -271,7 +316,6 @@ function getValue(
     // TODO(#1248): Test when implementing other plot annotations feature.
     return toWkt(drawGeometryResult.geometry);
   } else if (captureLocationResult) {
-    // TODO(#1916): Include altitude and accuracy in separate columns.
     return toWkt(
       new Pb.Geometry({
         point: new Pb.Point({
