@@ -78,8 +78,7 @@ export class GroundPinService {
   /** Size of the SVG pin, as declared in `svgTemplate`. */
   private static pinWidth = 22;
   private static pinHeight = 24;
-  private static svgTemplate = `<?xml version="1.0" encoding="UTF-8"?>
-<svg width="22px" height="24px" viewBox="0 0 22 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  private static svgTemplate = `<svg width="22px" height="24px" viewBox="0 0 22 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
     <defs>
         <filter x="-37.5%" y="-60.0%" width="175.0%" height="220.0%" filterUnits="objectBoundingBox" id="filter-1">
             <feGaussianBlur stdDeviation="0.666666667" in="SourceGraphic"></feGaussianBlur>
