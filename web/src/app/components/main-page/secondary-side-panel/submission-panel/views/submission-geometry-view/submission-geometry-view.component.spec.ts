@@ -60,10 +60,7 @@ describe('SubmissionGeometryViewComponent', () => {
   it('emits "selected" when clicked', () => {
     const task = new Task('task1', TaskType.DRAW_AREA, 'Draw Area', true, 1);
     fixture.componentRef.setInput('task', task);
-    fixture.componentRef.setInput(
-      'geometry',
-      new Point(new Coordinate(0, 0))
-    );
+    fixture.componentRef.setInput('geometry', new Point(new Coordinate(0, 0)));
     fixture.componentRef.setInput('displayIndex', 1);
     fixture.detectChanges();
 
@@ -77,9 +74,35 @@ describe('SubmissionGeometryViewComponent', () => {
   it('returns null capturedCoord for non-CAPTURE_LOCATION tasks', () => {
     const task = new Task('task1', TaskType.DRAW_AREA, 'Draw Area', true, 1);
     fixture.componentRef.setInput('task', task);
+    fixture.componentRef.setInput('geometry', new Point(new Coordinate(0, 0)));
+    fixture.componentRef.setInput('displayIndex', 1);
+    fixture.detectChanges();
+
+    expect(component.capturedCoord()).toBeNull();
+  });
+
+  it('formats coordinates of pins dropped at the device location', () => {
+    const task = new Task('task1', TaskType.DROP_PIN, 'Drop Pin', true, 1);
+    fixture.componentRef.setInput('task', task);
     fixture.componentRef.setInput(
       'geometry',
-      new Point(new Coordinate(0, 0))
+      new Point(new Coordinate(10, 20), 5, 200)
+    );
+    fixture.componentRef.setInput('displayIndex', 1);
+    fixture.detectChanges();
+
+    const text = component.capturedCoord()!;
+    expect(text).toContain('20° N, 10° E');
+    expect(text).toContain('Altitude: 200m');
+    expect(text).toContain('Accuracy: 5m');
+  });
+
+  it('returns null capturedCoord for pins placed manually', () => {
+    const task = new Task('task1', TaskType.DROP_PIN, 'Drop Pin', true, 1);
+    fixture.componentRef.setInput('task', task);
+    fixture.componentRef.setInput(
+      'geometry',
+      new Point(new Coordinate(10, 20))
     );
     fixture.componentRef.setInput('displayIndex', 1);
     fixture.detectChanges();
