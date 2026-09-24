@@ -257,11 +257,11 @@ describe('MapComponent', () => {
     expect(component.markers.size).toEqual(2);
     const marker1 = component.markers.get(poiId1)!;
     assertMarkerLatLng(marker1, new google.maps.LatLng(4.56, 1.23));
-    expect(marker1.element.innerHTML).toContain(`fill="${jobColor1}"`);
+    assertMarkerColor(marker1, jobColor1);
     expect(marker1.map).toEqual(component.map.googleMap!);
     const marker2 = component.markers.get(poiId2)!;
     assertMarkerLatLng(marker2, new google.maps.LatLng(45.6, 12.3));
-    expect(marker2.element.innerHTML).toContain(`fill="${jobColor2}"`);
+    assertMarkerColor(marker2, jobColor2);
     expect(marker2.map).toEqual(component.map.googleMap!);
   });
 
@@ -331,7 +331,7 @@ describe('MapComponent', () => {
       expect(component.markers.size).toEqual(1);
       const marker1 = component.markers.get(poiId1)!;
       assertMarkerLatLng(marker1, new google.maps.LatLng(4.56, 1.23));
-      expect(marker1.element.innerHTML).toContain(`fill="${jobColor1}"`);
+      assertMarkerColor(marker1, jobColor1);
       expect(marker1.map).toEqual(component.map.googleMap!);
     });
 
@@ -375,11 +375,11 @@ describe('MapComponent', () => {
       expect(component.markers.size).toEqual(2);
       const marker1 = component.markers.get(poiId2)!;
       assertMarkerLatLng(marker1, new google.maps.LatLng(45.7, 12.3));
-      expect(marker1.element.innerHTML).toContain(`fill="${jobColor2}"`);
+      assertMarkerColor(marker1, jobColor2);
       expect(marker1.map).toEqual(component.map.googleMap!);
       const marker2 = component.markers.get(poiId3)!;
       assertMarkerLatLng(marker2, new google.maps.LatLng(78.9, 78.9));
-      expect(marker2.element.innerHTML).toContain(`fill="${jobColor2}"`);
+      assertMarkerColor(marker2, jobColor2);
       expect(marker2.map).toEqual(component.map.googleMap!);
       expect(component.polygons.size).toEqual(1);
       const [polygon] = component.polygons.get(polygonLoiId1)!;
@@ -695,6 +695,15 @@ describe('MapComponent', () => {
   ): void {
     expect((marker.position as google.maps.LatLng).lat()).toEqual(latLng.lat());
     expect((marker.position as google.maps.LatLng).lng()).toEqual(latLng.lng());
+  }
+
+  function assertMarkerColor(
+    marker: google.maps.marker.AdvancedMarkerElement,
+    color: string
+  ): void {
+    const image = marker.element.querySelector('img')!;
+    const svg = atob(image.src.split(',')[1]);
+    expect(svg).toContain(`fill="${color}"`);
   }
 
   function assertPolygonPaths(
