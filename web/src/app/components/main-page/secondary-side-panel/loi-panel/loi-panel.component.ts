@@ -17,7 +17,7 @@
 import { Component, computed, inject, input, signal } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { MatDialog } from '@angular/material/dialog';
-import { combineLatest, concat, of, switchMap } from 'rxjs';
+import { combineLatest, concat, delay, of, switchMap } from 'rxjs';
 
 import {
   DialogComponent,
@@ -94,10 +94,10 @@ export class LocationOfInterestPanelComponent {
         if (survey && loi) {
           return concat(
             of(undefined),
-            this.submissionService.getSubmissions$(survey, loi)
+            this.submissionService.getSubmissions$(survey, loi).pipe(delay(100))
           );
         }
-        return of(null);
+        return of(null).pipe(delay(100));
       })
     ),
     { initialValue: undefined }
