@@ -65,7 +65,7 @@ import { DataStoreService } from '../data-store/data-store.service';
   providedIn: 'root',
 })
 export class NavigationService implements OnDestroy {
-  private sidePanelExpanded = true;
+  private sidePanelExpanded = signal(true);
 
   private urlSignal = signal<string>('');
 
@@ -357,11 +357,11 @@ export class NavigationService implements OnDestroy {
   }
 
   getSidePanelExpanded(): boolean {
-    return this.sidePanelExpanded;
+    return this.sidePanelExpanded();
   }
 
   onClickSidePanelButton() {
-    this.sidePanelExpanded = !this.sidePanelExpanded;
+    this.sidePanelExpanded.update(expanded => !expanded);
   }
 
   private editSurveyPageSignal = computed(() => {
