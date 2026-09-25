@@ -82,10 +82,6 @@ export class JobListItemComponent {
     this.navigationService.clearLocationOfInterestId();
   }
 
-  onClose() {
-    return this.navigationService.selectSurvey(this.surveyId()!);
-  }
-
   async onDownloadCsvClick() {
     await this.authService.createSessionCookie();
     window.open(

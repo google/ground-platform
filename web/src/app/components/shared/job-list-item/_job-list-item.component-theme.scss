@@ -6,10 +6,6 @@
     color: mat.get-theme-color($theme, on-surface-variant);
   }
 
-  .loi-submission-count.empty {
-    color: mat.get-theme-color($theme, neutral-variant, 50);
-  }
-
   .job-list-item-container {
     background-color: mat.get-theme-color($theme, surface-container);
 
@@ -29,10 +25,6 @@
 
     .tree-node-selected {
       background-color: rgba(mat.get-theme-color($theme, on-surface), 0.12);
-
-      .select-loi {
-        color: mat.get-theme-color($theme, on-secondary-container);
-      }
     }
   }
 }
