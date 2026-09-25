@@ -14,106 +14,68 @@
  * limitations under the License.
  */
 
-import { FlatTreeControl } from '@angular/cdk/tree';
 import {
+  ChangeDetectionStrategy,
   Component,
-  Input,
-  OnInit,
-  SimpleChanges,
-  effect,
+  computed,
   inject,
+  input,
+  signal,
 } from '@angular/core';
-import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { List } from 'immutable';
 
 import { Job } from 'app/models/job.model';
 import { LocationOfInterest } from 'app/models/loi.model';
 import { AuthService } from 'app/services/auth/auth.service';
-import { GroundPinService } from 'app/services/ground-pin/ground-pin.service';
+import { LocationOfInterestService } from 'app/services/loi/loi.service';
 import { NavigationService } from 'app/services/navigation/navigation.service';
+import { getLoiIcon } from 'app/utils/utils';
 import { environment } from 'environments/environment';
 
-import { DynamicDataSource, DynamicFlatNode } from './tree-data-source';
+/** An LOI row, with the values its template needs precomputed. */
+interface LoiListItem {
+  loi: LocationOfInterest;
+  name: string;
+  iconName: string;
+}
 
 @Component({
   selector: 'ground-job-list-item',
   templateUrl: './job-list-item.component.html',
   styleUrls: ['./job-list-item.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: false,
 })
-export class JobListItemComponent implements OnInit {
-  @Input() job!: Job;
-  @Input() lois: List<LocationOfInterest> = List();
-  @Input() actionsType: JobListItemActionsType = JobListItemActionsType.MENU;
-
+export class JobListItemComponent {
+  private authService = inject(AuthService);
   private navigationService = inject(NavigationService);
   private urlParamsSignal = this.navigationService.getUrlParams();
 
-  surveyId?: string | null;
-  loiId?: string | null;
-  jobPinUrl: SafeUrl;
+  job = input.required<Job>();
+  lois = input<List<LocationOfInterest>>(List());
+  actionsType = input<JobListItemActionsType>(JobListItemActionsType.MENU);
+
   readonly jobListItemActionsType = JobListItemActionsType;
-  treeControl: FlatTreeControl<DynamicFlatNode>;
-  dataSource: DynamicDataSource;
 
-  getLevel = (node: DynamicFlatNode) => node.level;
-  isExpandable = (node: DynamicFlatNode) => node.expandable;
-  hasChild = (node: DynamicFlatNode) => node.childCount > 0;
-  isJob = (_: number, node: DynamicFlatNode) => node.level === 0;
+  readonly surveyId = computed(() => this.urlParamsSignal().surveyId);
+  readonly loiId = computed(() => this.urlParamsSignal().loiId);
 
-  constructor(
-    private sanitizer: DomSanitizer,
+  readonly expanded = signal(false);
 
-    private groundPinService: GroundPinService,
-    private authService: AuthService
-  ) {
-    this.jobPinUrl = this.sanitizer.bypassSecurityTrustUrl(
-      this.groundPinService.getPinImageSource()
-    );
+  readonly hasLois = computed(() => this.lois().size > 0);
 
-    this.treeControl = new FlatTreeControl<DynamicFlatNode>(
-      this.getLevel,
-      this.isExpandable
-    );
+  readonly loiItems = computed<LoiListItem[]>(() =>
+    this.lois()
+      .map(loi => ({
+        loi,
+        name: LocationOfInterestService.getDisplayName(loi),
+        iconName: getLoiIcon(loi),
+      }))
+      .toArray()
+  );
 
-    this.dataSource = new DynamicDataSource(this.treeControl);
-
-    effect(() => {
-      const { surveyId, loiId } = this.urlParamsSignal();
-      this.surveyId = surveyId;
-      this.loiId = loiId;
-    });
-  }
-
-  ngOnInit() {
-    this.updatePinUrl();
-
-    this.dataSource.setJobAndLois(this.job, this.lois);
-
-    this.treeControl.expansionModel.changed.subscribe(change => {
-      if (change.added)
-        change.added.forEach(node => this.dataSource.expandJob(node));
-      if (change.removed)
-        change.removed.forEach(node => this.dataSource.collapseJob(node));
-    });
-  }
-
-  ngOnChanges(changes: SimpleChanges) {
-    if (changes['job']) {
-      this.updatePinUrl();
-    }
-
-    if (changes['job'] || changes['lois']) {
-      if (this.job) {
-        this.dataSource.setJobAndLois(this.job, this.lois);
-      }
-    }
-  }
-
-  private updatePinUrl() {
-    this.jobPinUrl = this.sanitizer.bypassSecurityTrustUrl(
-      this.groundPinService.getPinImageSource(this.job?.color)
-    );
+  toggleExpanded() {
+    this.expanded.update(expanded => !expanded);
   }
 
   onGoBackClick() {
@@ -121,14 +83,14 @@ export class JobListItemComponent implements OnInit {
   }
 
   onClose() {
-    return this.navigationService.selectSurvey(this.surveyId!);
+    return this.navigationService.selectSurvey(this.surveyId()!);
   }
 
   async onDownloadCsvClick() {
     await this.authService.createSessionCookie();
     window.open(
       `${environment.cloudFunctionsUrl}/exportCsv?` +
-        `survey=${this.surveyId}&job=${this.job?.id}`,
+        `survey=${this.surveyId()}&job=${this.job().id}`,
       '_blank'
     );
   }
@@ -137,21 +99,15 @@ export class JobListItemComponent implements OnInit {
     await this.authService.createSessionCookie();
     window.open(
       `${environment.cloudFunctionsUrl}/exportGeojson?` +
-        `survey=${this.surveyId}&job=${this.job?.id}`,
+        `survey=${this.surveyId()}&job=${this.job().id}`,
       '_blank'
     );
   }
 
-  isSelectedLoi(node: DynamicFlatNode): boolean {
-    return node.loi?.id === this.loiId;
-  }
-
-  selectLoi(node: DynamicFlatNode) {
-    if (this.surveyId && !node.isJob) {
-      this.navigationService.selectLocationOfInterest(
-        this.surveyId,
-        node.loi!.id
-      );
+  selectLoi(loi: LocationOfInterest) {
+    const surveyId = this.surveyId();
+    if (surveyId) {
+      this.navigationService.selectLocationOfInterest(surveyId, loi.id);
     }
   }
 

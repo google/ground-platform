@@ -10,25 +10,28 @@
     color: mat.get-theme-color($theme, neutral-variant, 50);
   }
 
-  .tree-node-selected {
-    background-color: rgba(mat.get-theme-color($theme, on-surface), 0.12);
+  .job-list-item-container {
+    background-color: mat.get-theme-color($theme, surface-container);
 
-    .select-loi {
-      color: mat.get-theme-color($theme, on-secondary-container);
-    }
-  }
-
-  .mat-tree {
-    --mat-tree-container-background-color: #{mat.get-theme-color($theme, surface-container)};
-
-    .mat-tree-node {
-      min-height: 36px;
+    .job-tree-node,
+    .loi-tree-node {
+      color: mat.get-theme-color($theme, on-surface);
     }
 
     .loi-tree-node {
+      background-color: transparent;
+
       &:hover {
         color: mat.get-theme-color($theme, on-secondary-container);
         background-color: rgba(mat.get-theme-color($theme, on-surface), 0.12);
+      }
+    }
+
+    .tree-node-selected {
+      background-color: rgba(mat.get-theme-color($theme, on-surface), 0.12);
+
+      .select-loi {
+        color: mat.get-theme-color($theme, on-secondary-container);
       }
     }
   }
