@@ -14,62 +14,32 @@
  * limitations under the License.
  */
 
-import { HarnessLoader } from '@angular/cdk/testing';
-import { TestbedHarnessEnvironment } from '@angular/cdk/testing/testbed';
-import { CdkTreeModule } from '@angular/cdk/tree';
 import { WritableSignal, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Auth } from '@angular/fire/auth';
-import { Firestore } from '@angular/fire/firestore';
-import { MatButtonHarness } from '@angular/material/button/testing';
-import { MatDialogModule } from '@angular/material/dialog';
-import { MatListModule } from '@angular/material/list';
+import { MatButtonModule } from '@angular/material/button';
 import { MatMenuModule } from '@angular/material/menu';
-import { MatTreeModule } from '@angular/material/tree';
-import { MatTreeHarness } from '@angular/material/tree/testing';
-import { Router } from '@angular/router';
 import { List, Map } from 'immutable';
-import { Subject, of } from 'rxjs';
 
 import { Coordinate } from 'app/models/geometry/coordinate';
 import { Point } from 'app/models/geometry/point';
 import { Job } from 'app/models/job.model';
 import { LocationOfInterest } from 'app/models/loi.model';
-import { Submission } from 'app/models/submission/submission.model';
-
 import { GroundIconModule } from 'app/modules/ground-icon.module';
 import { AuthService } from 'app/services/auth/auth.service';
-import { DataStoreService } from 'app/services/data-store/data-store.service';
 import { LocationOfInterestService } from 'app/services/loi/loi.service';
 import { NavigationService } from 'app/services/navigation/navigation.service';
 import { UrlParams } from 'app/services/navigation/url-params';
-import { SubmissionService } from 'app/services/submission/submission.service';
-import { SurveyService } from 'app/services/survey/survey.service';
 
-import { JobListItemComponent } from './job-list-item.component';
-
-const authState = {
-  displayName: null,
-  isAnonymous: true,
-  uid: '',
-};
-
-const mockAuth = {
-  currentUser: authState,
-};
+import {
+  JobListItemActionsType,
+  JobListItemComponent,
+} from './job-list-item.component';
 
 describe('JobListItemComponent', () => {
-  let component: JobListItemComponent;
   let fixture: ComponentFixture<JobListItemComponent>;
-  let loader: HarnessLoader;
-  let surveyServiceSpy: jasmine.SpyObj<SurveyService>;
-  let submissionServiceSpy: jasmine.SpyObj<SubmissionService>;
-  let loiServiceSpy: jasmine.SpyObj<LocationOfInterestService>;
   let navigationServiceSpy: jasmine.SpyObj<NavigationService>;
-  let submissions$: Subject<List<Submission>>;
-  let surveyId$: Subject<string | null>;
-  let locationOfInterestId$: Subject<string | null>;
   let urlParamsSignal: WritableSignal<UrlParams>;
+  let sidePanelExpanded: WritableSignal<boolean>;
 
   const job = new Job(
     /* id= */ 'job001',
@@ -101,160 +71,173 @@ describe('JobListItemComponent', () => {
     return List(lois);
   }
 
+  function query<T extends Element>(selector: string): T | null {
+    return fixture.nativeElement.querySelector(selector);
+  }
+
+  function queryAll<T extends Element>(selector: string): T[] {
+    return Array.from(fixture.nativeElement.querySelectorAll(selector));
+  }
+
+  function setLois(lois: List<LocationOfInterest>) {
+    fixture.componentRef.setInput('lois', lois);
+    fixture.detectChanges();
+  }
+
+  function clickExpandToggle() {
+    query<HTMLButtonElement>('.expand-toggle')!.click();
+    fixture.detectChanges();
+  }
+
   beforeEach(async () => {
-    surveyServiceSpy = jasmine.createSpyObj<SurveyService>('SurveyService', [
-      'canManageSurvey',
-    ]);
-
-    loiServiceSpy = jasmine.createSpyObj<LocationOfInterestService>(
-      'LocationOfInterestService',
-      ['getLocationsOfInterest$']
-    );
-
-    submissionServiceSpy = jasmine.createSpyObj<SubmissionService>(
-      'SubmissionService',
-      ['getSubmissions$']
-    );
-
     navigationServiceSpy = jasmine.createSpyObj<NavigationService>(
       'NavigationService',
       [
-        'getSurveyId$',
-        'getLocationOfInterestId$',
-        'selectLocationOfInterest',
-        'getSurveyId',
-        'getLoiId',
-        'getUrlParams',
+        'clearLocationOfInterestId',
         'getSidePanelExpanded',
-        'isEditSurveyPage',
+        'getUrlParams',
+        'selectLocationOfInterest',
       ]
     );
 
-    submissions$ = new Subject<List<Submission>>();
-    surveyId$ = new Subject<string | null>();
-    locationOfInterestId$ = new Subject<string | null>();
-    urlParamsSignal = signal<UrlParams>(new UrlParams(null, null, null, null));
+    urlParamsSignal = signal(new UrlParams(surveyId, null, null, null));
+    sidePanelExpanded = signal(true);
 
-    spyOn(LocationOfInterestService, 'getDisplayName').and.returnValue('');
-    submissionServiceSpy.getSubmissions$.and.returnValue(submissions$);
-    navigationServiceSpy.getSurveyId$.and.returnValue(surveyId$);
-    navigationServiceSpy.getLocationOfInterestId$.and.returnValue(
-      locationOfInterestId$
+    spyOn(LocationOfInterestService, 'getDisplayName').and.callFake(
+      loi => `Site ${loi.id}`
     );
     navigationServiceSpy.getUrlParams.and.returnValue(urlParamsSignal);
+    // Read through a signal, like the real service, so OnPush views update.
+    navigationServiceSpy.getSidePanelExpanded.and.callFake(() =>
+      sidePanelExpanded()
+    );
 
     await TestBed.configureTestingModule({
       declarations: [JobListItemComponent],
-      imports: [
-        GroundIconModule,
-        MatDialogModule,
-        MatListModule,
-        MatMenuModule,
-        MatTreeModule,
-        CdkTreeModule,
-      ],
+      imports: [GroundIconModule, MatButtonModule, MatMenuModule],
       providers: [
-        { provide: DataStoreService, useValue: { user$: () => of() } },
         { provide: NavigationService, useValue: navigationServiceSpy },
-        { provide: Router, useValue: {} },
-        { provide: SurveyService, useValue: surveyServiceSpy },
-        { provide: LocationOfInterestService, useValue: loiServiceSpy },
-        { provide: SubmissionService, useValue: submissionServiceSpy },
-        { provide: Firestore, useValue: {} },
         { provide: AuthService, useValue: {} },
-        {
-          provide: Auth,
-          useValue: mockAuth,
-        },
       ],
     }).compileComponents();
   });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(JobListItemComponent);
-    component = fixture.componentInstance;
-    component.job = job;
-    component.lois = List();
+    fixture.componentRef.setInput('job', job);
     fixture.detectChanges();
-    loader = TestbedHarnessEnvironment.loader(fixture);
-
-    surveyId$.next(surveyId);
-    urlParamsSignal.set(new UrlParams(surveyId, null, null, null));
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
+  it('should render the job', () => {
+    expect(queryAll('.job-tree-node').length).toBe(1);
+    expect(query('.job-name')!.textContent!.trim()).toBe('job 1');
   });
 
-  it('should render job tree', async () => {
-    const jobTree = await loader.getHarness(MatTreeHarness);
-    expect((await jobTree.getNodes()).length).toBe(1);
+  it('should not show the expand toggle when the job has no lois', () => {
+    expect(query('.expand-toggle')).toBeNull();
   });
 
-  it('should render lois for a job', async () => {
-    fixture.componentRef.setInput('lois', createLois(2));
-    fixture.detectChanges();
+  it('should not render lois until the job is expanded', () => {
+    setLois(createLois(2));
 
-    const jobTree = await loader.getHarness(MatTreeHarness);
-    const jobNode = (await jobTree.getNodes())[0];
-    await jobNode.expand();
-
-    // One node for the job, 2 nodes for the lois
-    expect((await jobTree.getNodes()).length).toBe(3);
+    expect(queryAll('.loi-tree-node').length).toBe(0);
   });
 
-  it('should dynamically render lois for a job', async () => {
-    const jobTree = await loader.getHarness(MatTreeHarness);
-    const jobNode = (await jobTree.getNodes())[0];
-    await jobNode.expand();
+  it('should render lois when the job is expanded', () => {
+    setLois(createLois(2));
 
-    fixture.componentRef.setInput('lois', createLois(3));
-    fixture.detectChanges();
+    clickExpandToggle();
 
-    // One node for the job, three nodes for the loi
-    expect((await jobTree.getNodes()).length).toBe(4);
+    expect(queryAll('.loi-tree-node').length).toBe(2);
+    expect(query('.expand-toggle')!.getAttribute('aria-expanded')).toBe('true');
   });
 
-  it('should render submission counts for each LOI', async () => {
-    navigationServiceSpy.getSidePanelExpanded.and.returnValue(true);
-    fixture.detectChanges();
+  it('should hide lois when the job is collapsed again', () => {
+    setLois(createLois(2));
+    clickExpandToggle();
 
-    fixture.componentRef.setInput('lois', createLois(3, [0, 4, 12]));
-    fixture.detectChanges();
+    clickExpandToggle();
 
-    const jobTree = await loader.getHarness(MatTreeHarness);
-    const jobNode = (await jobTree.getNodes())[0];
-    await jobNode.expand();
-    fixture.detectChanges();
-    await fixture.whenStable();
+    expect(queryAll('.loi-tree-node').length).toBe(0);
+  });
 
-    const counts = fixture.nativeElement.querySelectorAll(
-      '.loi-submission-count'
+  it('should render lois added after the job was expanded', () => {
+    setLois(createLois(1));
+    clickExpandToggle();
+
+    setLois(createLois(3));
+
+    expect(queryAll('.loi-tree-node').length).toBe(3);
+  });
+
+  it('should render the name and submission count of each loi', () => {
+    setLois(createLois(3, [0, 4, 12]));
+    clickExpandToggle();
+
+    const names = queryAll('.loi-name').map(e => e.textContent!.trim());
+    const counts = queryAll('.loi-submission-count').map(e =>
+      e.textContent!.trim()
     );
-    expect(counts.length).toBe(3);
-    expect(counts[0].textContent.trim()).toBe('0');
-    expect(counts[1].textContent.trim()).toBe('4');
-    expect(counts[2].textContent.trim()).toBe('12');
+    expect(names).toEqual(['Site loi0', 'Site loi1', 'Site loi2']);
+    expect(counts).toEqual(['0', '4', '12']);
   });
 
-  it('should select LOI when LOI is clicked', async () => {
-    const jobTree = await loader.getHarness(MatTreeHarness);
-    const jobNode = (await jobTree.getNodes())[0];
-    await jobNode.expand();
+  it('should highlight the selected loi', () => {
+    setLois(createLois(3));
+    clickExpandToggle();
 
-    const lois = createLois(1);
-    const loiId = lois.first()!.id;
-
-    fixture.componentRef.setInput('lois', lois);
+    urlParamsSignal.set(new UrlParams(surveyId, 'loi1', null, null));
     fixture.detectChanges();
 
-    const selectLoiButton = await loader.getHarness(
-      MatButtonHarness.with({ selector: '.loi-tree-node' })
+    const selected = queryAll('.loi-tree-node').map(e =>
+      e.classList.contains('tree-node-selected')
     );
-    await selectLoiButton.click();
+    expect(selected).toEqual([false, true, false]);
+  });
+
+  it('should select the loi when it is clicked', () => {
+    setLois(createLois(2));
+    clickExpandToggle();
+
+    queryAll<HTMLButtonElement>('.loi-tree-node')[1].click();
 
     expect(
       navigationServiceSpy.selectLocationOfInterest
-    ).toHaveBeenCalledOnceWith(surveyId, loiId);
+    ).toHaveBeenCalledOnceWith(surveyId, 'loi1');
+  });
+
+  it('should close the loi when the back button is clicked', () => {
+    fixture.componentRef.setInput('actionsType', JobListItemActionsType.BACK);
+    fixture.detectChanges();
+
+    query<HTMLButtonElement>('.job-actions button')!.click();
+
+    expect(navigationServiceSpy.clearLocationOfInterestId).toHaveBeenCalled();
+  });
+
+  describe('when the side panel is collapsed', () => {
+    beforeEach(() => {
+      setLois(createLois(2));
+      sidePanelExpanded.set(false);
+      fixture.detectChanges();
+    });
+
+    it('should expand the job when its icon is clicked', () => {
+      query<HTMLButtonElement>('.job-tree-node button')!.click();
+      fixture.detectChanges();
+
+      expect(queryAll('.loi-collapsed-toggle').length).toBe(2);
+      expect(queryAll('.loi-name').length).toBe(0);
+    });
+
+    it('should label loi buttons with the loi name', () => {
+      query<HTMLButtonElement>('.job-tree-node button')!.click();
+      fixture.detectChanges();
+
+      const labels = queryAll('.loi-collapsed-toggle').map(e =>
+        e.getAttribute('aria-label')
+      );
+      expect(labels).toEqual(['Site loi0', 'Site loi1']);
+    });
   });
 });

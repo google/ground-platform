@@ -157,7 +157,7 @@ describe('LocationOfInterestPanelComponent', () => {
     fixture.componentRef.setInput('activeSurvey', mockSurvey);
     fixture.componentRef.setInput('selectedLoi', mockLoi);
     fixture.detectChanges();
-    tick(100);
+    tick();
     fixture.detectChanges();
   }
 
