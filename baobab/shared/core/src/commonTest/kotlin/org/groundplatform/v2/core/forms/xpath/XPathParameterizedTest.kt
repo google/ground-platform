@@ -1,13 +1,13 @@
-/**
+/*
  * Copyright 2026 The Ground Authors.
  *
- * Licensed under the Apache License, Version 2.0 (the 'License'); you may not use this file except
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
  *
  *     https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an 'AS IS' BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
@@ -26,7 +26,7 @@ import org.groundplatform.v2.core.forms.xpath.ast.XPathDependency
 import org.groundplatform.v2.core.forms.xpath.model.XPathValue
 
 /**
- * Data-driven parameterized test suite verifying XPath 1.0 and ODK XForms specification compliance
+ * Data-driven parameterized test suite verifying XPath 1.0 and XForms specification compliance
  * against ProtoForms Protocol Buffer literals ([groundplatform.v2.forms.RecordInstance] &
  * [groundplatform.v2.forms.FormDef]).
  */
@@ -314,9 +314,40 @@ class XPathParameterizedTest {
           expectedNumber = 77.0,
         ),
         ParameterizedCase(
-          name = "Complex boolean predicate filtering repeat items",
+          name = "Complex boolean predicate filtering repeat items (ODK nodeset-vs-boolean)",
+          // `active = true()` is TRUE for every member that HAS an `active` node, because XPath
+          // 1.0 §3.4 converts the node-set to a boolean by existence. So this filters on
+          // `age > 15` alone and the first match is Bob, not Charlie. ODK Collect, Enketo and
+          // Kobo all behave this way; see the `= 'true'` case below for the intended idiom.
           expression = "/household/member[age > 15 and active = true()]/name",
+          expectedString = "Bob",
+        ),
+        ParameterizedCase(
+          name = "ODK idiom: boolean field compared against the string 'true'",
+          expression = "/household/member[age > 15 and active = 'true']/name",
           expectedString = "Charlie",
+        ),
+        ParameterizedCase(
+          name = "ODK idiom: boolean field compared against the string 'false'",
+          // Bob is the only member with active=false. Coercing 'false' to a boolean would make
+          // this match nobody, since every non-empty string converts to true.
+          expression = "/household/member[active = 'false']/name",
+          expectedString = "Bob",
+        ),
+        ParameterizedCase(
+          name = "Non-empty nodeset equals true() regardless of node value",
+          expression = "/household/member[2]/active = true()",
+          expectedBoolean = true,
+        ),
+        ParameterizedCase(
+          name = "Non-empty nodeset does not equal false()",
+          expression = "/household/member[2]/active = false()",
+          expectedBoolean = false,
+        ),
+        ParameterizedCase(
+          name = "Missing node equals false() (empty nodeset converts to false)",
+          expression = "/household/member[2]/no_such_field = false()",
+          expectedBoolean = true,
         ),
 
         // =========================================================================
@@ -336,6 +367,71 @@ class XPathParameterizedTest {
           name = "min() and max() across repeat items",
           expression = "max(/household/member/age) - min(/household/member/age)",
           expectedNumber = 28.0, // 40 - 12
+        ),
+
+        // =========================================================================
+        // 4b. Node-set identity: duplicates removed, results in document order
+        //
+        // A node-set is a *set*. When several context nodes reach the same target,
+        // the result must collapse to one node. These previously over-counted,
+        // because XPathNode uses identity equality while traversal allocates a
+        // fresh wrapper per visit, defeating every dedup attempt in the evaluator.
+        // =========================================================================
+        ParameterizedCase(
+          name = "Parent step from repeat items collapses to a single node",
+          // All 3 members share one parent. Returned 3 before the fix.
+          expression = "count(/household/member/..)",
+          expectedNumber = 1.0,
+        ),
+        ParameterizedCase(
+          name = "Ancestor axis from repeat items collapses to a single node",
+          // Likewise reached once per member. Returned 3 before the fix.
+          expression = "count(/household/member/ancestor::household)",
+          expectedNumber = 1.0,
+        ),
+        ParameterizedCase(
+          name = "Two-level parent step from nested repeat collapses to a single node",
+          // 4 trees across 2 parcels all climb to the same root. Returned 4 before.
+          expression = "count(/household/parcel/tree/../..)",
+          expectedNumber = 1.0,
+        ),
+        ParameterizedCase(
+          name = "preceding-sibling across repeat items yields the union, not a concatenation",
+          // member[1] has none, member[2] has {1}, member[3] has {1,2}; the union is
+          // {member[1], member[2]} = 2. Concatenation gave 3.
+          expression = "count(/household/member/preceding-sibling::member)",
+          expectedNumber = 2.0,
+        ),
+        ParameterizedCase(
+          name = "Union of a node-set with itself is idempotent",
+          // linkedSetOf could not dedup identity-equal nodes, so this returned 6.
+          expression = "count(/household/member | /household/member)",
+          expectedNumber = 3.0,
+        ),
+        ParameterizedCase(
+          name = "Union returns nodes in document order regardless of operand order",
+          // string() takes the first node in *document order*, so listing member[3]
+          // first must not change the answer. Returned "Charlie" before the fix.
+          expression = "string(/household/member[3]/name | /household/member[1]/name)",
+          expectedString = "Alice",
+        ),
+        // Controls: dedup must not merge genuinely distinct nodes, nor disturb order.
+        ParameterizedCase(
+          name = "Dedup preserves distinct children that share a parent",
+          expression = "count(/household/member/name)",
+          expectedNumber = 3.0,
+        ),
+        ParameterizedCase(
+          name = "Dedup distinguishes same-positioned nodes under different parents",
+          // tree[1]/tree[2] exist under both parcel[1] and parcel[2]; keying on the
+          // full root-to-node index path must keep all 4 distinct.
+          expression = "count(/household/parcel/tree)",
+          expectedNumber = 4.0,
+        ),
+        ParameterizedCase(
+          name = "Dedup preserves document order of repeat items",
+          expression = "join(',', /household/member/name)",
+          expectedString = "Alice,Bob,Charlie",
         ),
         ParameterizedCase(
           name = "position(..) inside repeat context",
@@ -499,7 +595,7 @@ class XPathParameterizedTest {
           expectedString = "Computed Default",
         ),
         ParameterizedCase(
-          name = "boolean-from-string() strict ODK rules ('true' and '1' only)",
+          name = "boolean-from-string() strict XForms rules ('true' and '1' only)",
           expression =
             "boolean-from-string('true') and boolean-from-string('1') and not(boolean-from-string('false')) and not(boolean-from-string('yes'))",
           expectedBoolean = true,
@@ -519,7 +615,7 @@ class XPathParameterizedTest {
         // 8. Date, Time & Mathematical Functions
         // =========================================================================
         ParameterizedCase(
-          name = "format-date() with ODK pattern tokens (%Y, %m, %d, %a, %b, %e)",
+          name = "format-date() with XForms pattern tokens (%Y, %m, %d, %a, %b, %e)",
           expression = "format-date(/household/schedule_date, '%Y-%m-%d (%a, %b %e)')",
           expectedString = "2026-09-17 (Thu, Sep 17)",
         ),
@@ -632,6 +728,109 @@ class XPathParameterizedTest {
           expression =
             "join(',', randomize(/household/member/name, 'seed-alpha')) = join(',', randomize(/household/member/name, 'seed-alpha'))",
           expectedBoolean = true,
+        ),
+
+        // =========================================================================
+        // 12. Spec-conformance regressions
+        // =========================================================================
+
+        // XPath 1.0 §4.4: round() returns the number closest to the argument that
+        // is an integer; if two are equally close, the one closest to POSITIVE
+        // infinity wins. So round(-1.5) is -1, not -2.
+        ParameterizedCase(
+          name = "round() breaks ties toward positive infinity (negative half)",
+          expression = "round(-1.5)",
+          expectedNumber = -1.0,
+        ),
+        ParameterizedCase(
+          name = "round() breaks ties toward positive infinity (positive half)",
+          expression = "round(1.5)",
+          expectedNumber = 2.0,
+        ),
+        ParameterizedCase(
+          name = "round() rounds negative non-ties to nearest",
+          expression = "round(-1.6)",
+          expectedNumber = -2.0,
+        ),
+        ParameterizedCase(
+          name = "round() with places argument breaks ties toward positive infinity",
+          expression = "round(-1.25, 1)",
+          expectedNumber = -1.2,
+        ),
+
+        // XPath 1.0 §4.2: substring() returns characters whose position is
+        // >= round(start) and < round(start) + round(length). Infinite and
+        // out-of-range bounds must degrade gracefully, not underflow to "".
+        ParameterizedCase(
+          name = "substring() with -Infinity start returns whole string",
+          expression = "substring('12345', -1 div 0)",
+          expectedString = "12345",
+        ),
+        ParameterizedCase(
+          name = "substring() with negative start and infinite length returns whole string",
+          expression = "substring('12345', -42, 1 div 0)",
+          expectedString = "12345",
+        ),
+        ParameterizedCase(
+          name = "substring() with huge finite length does not overflow to empty",
+          expression = "substring('12345', 2, 100000000000)",
+          expectedString = "2345",
+        ),
+        ParameterizedCase(
+          name = "substring() with NaN start returns empty string",
+          expression = "substring('12345', 0 div 0)",
+          expectedString = "",
+        ),
+
+        // XPath 1.0 §4.3: string(-0) is "-0". Kotlin's `-0.0 == 0.0` is true, so a
+        // naive zero check loses the sign.
+        ParameterizedCase(
+          name = "negative zero formats as -0 per string() rules",
+          expression = "string(-0.0)",
+          expectedString = "-0",
+        ),
+        ParameterizedCase(
+          name = "positive zero still formats as 0",
+          expression = "string(0.0)",
+          expectedString = "0",
+        ),
+
+        // XPath 1.0 §2.4: predicates on a reverse axis are numbered by proximity
+        // position, counting back from the context node. member[3] is Charlie, so
+        // the nearest preceding sibling is Bob -- not Alice.
+        ParameterizedCase(
+          name = "preceding-sibling::[1] selects the nearest preceding sibling",
+          expression = "/household/member[3]/preceding-sibling::member[1]/name",
+          expectedString = "Bob",
+        ),
+        ParameterizedCase(
+          name = "preceding-sibling::[2] selects the second-nearest preceding sibling",
+          expression = "/household/member[3]/preceding-sibling::member[2]/name",
+          expectedString = "Alice",
+        ),
+        ParameterizedCase(
+          name = "following-sibling::[1] still selects the nearest following sibling",
+          expression = "/household/member[1]/following-sibling::member[1]/name",
+          expectedString = "Bob",
+        ),
+
+        // XPath 1.0 §3.7: after a `*` that was parsed as a NameTest, a following NCName such as
+        // `div`/`mod`/`and`/`or` is an OperatorName, not a name test. These expressions fail to
+        // parse at all if the lexer treats the operator as an element name.
+        ParameterizedCase(
+          name = "'and' is an operator directly after a wildcard name test",
+          expression = "/household/member[1]/* and true()",
+          expectedBoolean = true,
+        ),
+        ParameterizedCase(
+          name = "'or' is an operator directly after a wildcard name test",
+          expression = "/household/member[1]/* or false()",
+          expectedBoolean = true,
+        ),
+        ParameterizedCase(
+          name = "'*' is still a multiply operator between two operands",
+          expression = "6 * 7",
+          expectedNumber = 42.0,
         ),
       )
   }

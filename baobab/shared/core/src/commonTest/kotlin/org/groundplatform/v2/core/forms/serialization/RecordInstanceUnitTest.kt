@@ -1,13 +1,13 @@
-/**
+/*
  * Copyright 2026 The Ground Authors.
  *
- * Licensed under the Apache License, Version 2.0 (the 'License'); you may not use this file except
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
  *
  *     https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an 'AS IS' BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
@@ -32,6 +32,9 @@ import groundplatform.v2.forms.TypedValueList
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
+import kotlin.test.assertTrue
+import okio.ByteString
+import okio.ByteString.Companion.encodeUtf8
 
 class RecordInstanceUnitTest {
 
@@ -257,5 +260,80 @@ class RecordInstanceUnitTest {
     val xml = XFormsXmlSerializer.serialize(record, rootElementName = "forest_inventory")
     val deserialized = XFormsXmlSerializer.deserializeRecordInstance(xml, schema = schema)
     assertEquals(record, deserialized)
+  }
+
+  @Test
+  fun testOdkBinaryFilenameXmlCompatibility() {
+    // In ODK Collect / KoboToolbox / OpenRosa submissions, binary fields emit the attachment
+    // filename directly inside the XML element (<photo>capture_001.jpg</photo>) while the media
+    // bytes travel as a separate multipart/form-data part.
+    val schema =
+      RecordSchema(
+        name = "data",
+        fields = listOf(FieldDefinition(name = "photo", type = DataType.TYPE_BINARY)),
+      )
+    val record =
+      RecordInstance(
+        form_id = "photo_survey",
+        data_ =
+          RecordNode(
+            fields =
+              mapOf(
+                "photo" to
+                  FieldValue(
+                    scalar_value = TypedValue(binary_value = "capture_001.jpg".encodeUtf8())
+                  )
+              )
+          ),
+      )
+
+    val xml = XFormsXmlSerializer.serialize(record)
+    assertTrue(xml.contains("<photo>capture_001.jpg</photo>"), "Actual XML: $xml")
+
+    val deserialized = XFormsXmlSerializer.deserializeRecordInstance(xml, schema = schema)
+    assertEquals(record, deserialized)
+  }
+
+  @Test
+  fun testRawBinaryBytesRoundTripWithoutCorruption() {
+    // When raw non-UTF-8 bytes (e.g. a PNG/JPEG header with 0x89, 0xFF, 0x00) are stored in
+    // binary_value, ByteString.utf8() would replace invalid sequences with U+FFFD. Verify that
+    // standalone XML serialization preserves raw bytes byte-for-byte.
+    val schema =
+      RecordSchema(
+        name = "data",
+        fields = listOf(FieldDefinition(name = "signature", type = DataType.TYPE_BINARY)),
+      )
+    val rawBytes =
+      ByteString.of(
+        0x89.toByte(),
+        0x50.toByte(),
+        0x4E.toByte(),
+        0x47.toByte(),
+        0x0D.toByte(),
+        0x0A.toByte(),
+        0x1A.toByte(),
+        0x0A.toByte(),
+        0xFF.toByte(),
+        0xD8.toByte(),
+        0x00.toByte(),
+      )
+    val record =
+      RecordInstance(
+        form_id = "sig_survey",
+        data_ =
+          RecordNode(
+            fields =
+              mapOf("signature" to FieldValue(scalar_value = TypedValue(binary_value = rawBytes)))
+          ),
+      )
+
+    val xml = XFormsXmlSerializer.serialize(record)
+    val deserialized = XFormsXmlSerializer.deserializeRecordInstance(xml, schema = schema)
+    assertEquals(
+      rawBytes,
+      deserialized.data_?.fields?.get("signature")?.scalar_value?.binary_value,
+      "Raw non-UTF-8 binary_value must round-trip through XML without U+FFFD corruption",
+    )
   }
 }

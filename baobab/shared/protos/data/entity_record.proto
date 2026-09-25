@@ -21,7 +21,7 @@ package groundplatform.v2.data;
 import "shared/protos/data/audit_record.proto";
 import "shared/protos/forms/types.proto";
 
-// A persistent, versioned entity record within an ODK Entity Dataset.
+// A persistent, versioned entity record within an Entity Dataset.
 message EntityRecord {
   // Unique entity UUID (RFC 4122 v4).
   string entity_id = 1;
@@ -36,7 +36,7 @@ message EntityRecord {
   string label = 4;
 
   // Spatial geometry associated with this geospatial entity (if type is
-  // GEOSPATIAL). Exposed to ODK / ProtoForms XPath expressions and
+  // GEOSPATIAL). Exposed to XForms / ProtoForms XPath expressions and
   // `entity_saveto` bindings under the reserved system property name
   // `"geometry"`. Topological guardrail: Maximum 50 vertices per polygon.
   oneof geometry {

@@ -13,20 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-/**
- * 2026 The Ground Authors.
- *
- * Licensed under the Apache License, Version 2.0 (the 'License'); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
- *
- *     https://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an 'AS IS' BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
- */
 package org.groundplatform.v2.core.forms.engine
 
 import groundplatform.v2.forms.ActionDef
@@ -186,14 +172,16 @@ class CompiledForm internal constructor(val formDef: FormDef) {
       }
     }
 
-    while (ready.isNotEmpty() || result.size < allBindings.size) {
-      val current =
-        if (ready.isNotEmpty()) {
-          ready.removeFirst()
-        } else {
-          // Break any dependency cycle deterministically by picking first unvisited binding
-          allBindings.indices.first { !visited[it] }
-        }
+    while (result.size < allBindings.size) {
+      if (ready.isEmpty()) {
+        // Kahn's algorithm running dry with bindings left over means the dependency graph has a
+        // cycle (e.g. `a = b + 1` and `b = a + 1`). Previously this picked an arbitrary unvisited
+        // binding and carried on, which silently produced values that depended on declaration
+        // order. Fail the compile instead, matching how ODK Collect/JavaRosa reject cyclic forms.
+        val cyclePaths = allBindings.filterIndexed { i, _ -> !visited[i] }.map { it.relativePath }
+        throw CyclicDependencyException(cyclePaths.sorted())
+      }
+      val current = ready.removeFirst()
       if (visited[current]) continue
       visited[current] = true
       result.add(allBindings[current])
@@ -353,3 +341,16 @@ class CompiledFieldBinding(
   val constraintExpr: CompiledXPathExpression?,
   val requiredExpr: CompiledXPathExpression?,
 )
+
+/**
+ * Thrown when a form's `calculate` / `relevant` expressions form a circular dependency, so no valid
+ * evaluation order exists.
+ *
+ * @property paths relative paths of the bindings participating in the cycle, sorted for stable
+ *   error messages.
+ */
+class CyclicDependencyException(val paths: List<String>) :
+  IllegalArgumentException(
+    "Circular dependency between form bindings: ${paths.joinToString(", ")}. " +
+      "Check the calculate and relevant expressions on these fields."
+  )

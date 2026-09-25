@@ -1,13 +1,13 @@
-/**
+/*
  * Copyright 2026 The Ground Authors.
  *
- * Licensed under the Apache License, Version 2.0 (the 'License'); you may not use this file except
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
  *
  *     https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an 'AS IS' BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
@@ -96,5 +96,48 @@ class XmlParserAndWriterTest {
     assertFailsWith<IllegalArgumentException> {
       XmlParser.parse("<person><name>Alice</wrong></person>")
     }
+  }
+
+  @Test
+  fun testSupplementaryPlaneCharacterReferences() {
+    // U+1F600 GRINNING FACE is outside the BMP, so it needs a surrogate pair. Decoding it with
+    // `Int.toChar()` truncates to the low 16 bits and yields U+F600 (a private-use character).
+    val xml = """<note label="&#x1F600; &#128512;">Tree &#x1F333; here</note>"""
+    val root = XmlParser.parse(xml)
+
+    assertEquals("\uD83D\uDE00 \uD83D\uDE00", root.attr("label"))
+    assertEquals("Tree \uD83C\uDF33 here", root.textContent)
+
+    // Each emoji is a surrogate pair, so it occupies two UTF-16 code units.
+    assertEquals(2, "\uD83C\uDF33".length)
+
+    val reparsed = XmlParser.parse(XmlWriter(prettyPrint = false).writeElement(root))
+    assertEquals(root.textContent, reparsed.textContent)
+    assertEquals(root.attr("label"), reparsed.attr("label"))
+  }
+
+  @Test
+  fun testOutOfRangeCharacterReferenceIsLeftLiteral() {
+    // Beyond U+10FFFF, and an unpaired surrogate half: neither is a legal XML character, so both
+    // should be passed through untouched rather than silently mangled.
+    val root = XmlParser.parse("<note>&#x110000; &#xD800;</note>")
+    assertEquals("&#x110000; &#xD800;", root.textContent)
+  }
+
+  @Test
+  fun testBareAmpersandDoesNotSwallowFollowingEntity() {
+    // The entity scan used to search for ';' without bound, so the bare '&' consumed everything
+    // up to the ';' that terminates '&lt;', leaving that entity undecoded.
+    val root = XmlParser.parse("<note>a & b &lt; c &amp; d</note>")
+    assertEquals("a & b < c & d", root.textContent)
+
+    val attrRoot = XmlParser.parse("""<note text="Tom & Jerry &lt; 5"/>""")
+    assertEquals("Tom & Jerry < 5", attrRoot.attr("text"))
+  }
+
+  @Test
+  fun testUnrecognizedEntityIsPreservedLiterally() {
+    val root = XmlParser.parse("<note>5 &nbsp; 10 &notanentity; done</note>")
+    assertEquals("5 &nbsp; 10 &notanentity; done", root.textContent)
   }
 }

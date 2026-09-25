@@ -59,7 +59,7 @@ message SurveyDef {
   reserved 9, 10;
   reserved "sharing_policy", "peer_data_visibility";
 
-  // Preloaded and field-created ODK Entity Datasets (tabular registries and
+  // Preloaded and field-created Entity Datasets (tabular registries and
   // geospatial entity lists).
   repeated EntityDatasetDef entity_datasets = 11;
 
@@ -94,7 +94,7 @@ message SurveyDef {
 // survey UI.
 //
 // Decouples survey-level workflow entry points and multilingual CTA labels
-// from the portable, ODK-compatible `FormDef` schema.
+// from the portable, XForms-compatible `FormDef` schema.
 message FormLaunchConfig {
   // Target form identifier (`FormDef.form_id`).
   string form_id = 1;
@@ -126,15 +126,18 @@ enum SurveyState {
   // affecting ongoing field operations.
   DRAFT = 1;
 
-  // Published release active for mobile synchronization and data
-  // collection.
-  ACTIVE = 2;
+  // Published release active for mobile synchronization and field/desk
+  // data collection.
+  PUBLISHED = 2;
+
+  // Closed survey: collection ended; submissions and entities are read-only.
+  CLOSED = 3;
 
   // Retired survey no longer active for new field data collection.
-  ARCHIVED = 3;
+  ARCHIVED = 4;
 
-  // Deleted survey, removed from all user interfaces.
-  DELETED = 4;
+  // Deleted survey, removed from user interfaces.
+  DELETED = 5;
 }
 
 // Entity classification for preloaded and field-created Entity Datasets.
@@ -153,10 +156,10 @@ enum EntityType {
   GEOSPATIAL = 2;
 }
 
-// Definition of an ODK Entity Dataset (tabular registry or geospatial entity
+// Definition of an Entity Dataset (tabular registry or geospatial entity
 // list).
 //
-// In ODK / ProtoForms XPath expressions (`instance('<id>')/root/item[...]`) and
+// In XForms / ProtoForms XPath expressions (`instance('<id>')/root/item[...]`) and
 // entity bindings (`entity_saveto`), every entity automatically exposes the
 // following reserved system properties:
 //   - "name" / "__id": Entity UUID (`EntityRecord.entity_id`)
@@ -262,7 +265,7 @@ message LayerDef {
 
   // Baseline visual styling rules for vector geometries rendered in this
   // layer. For Entity Dataset layers (`entity_dataset_id`), per-entity
-  // ODK/simplestyle properties (`marker-color`, `stroke`, `fill`, etc. in
+  // `simplestyle-spec` properties (`marker-color`, `stroke`, `fill`, etc. in
   // `EntityRecord.properties`) override this default style.
   GeometryStyle default_style = 4;
 

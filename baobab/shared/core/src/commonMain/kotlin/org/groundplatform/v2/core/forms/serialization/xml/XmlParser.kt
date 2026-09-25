@@ -1,13 +1,13 @@
-/**
+/*
  * Copyright 2026 The Ground Authors.
  *
- * Licensed under the Apache License, Version 2.0 (the 'License'); you may not use this file except
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
  *
  *     https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an 'AS IS' BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
@@ -29,28 +29,18 @@ internal object XmlParser {
       while (i < input.length) {
         val c = input[i]
         if (c == '&') {
+          // Bound the lookahead. An unbounded search for ';' lets a bare '&' in the text consume
+          // everything up to the terminator of the *next* entity, so "a & b &lt; c" would leave
+          // "&lt;" undecoded. Entity names are short, so cap the scan instead.
+          val limit = minOf(input.length, i + 1 + MAX_ENTITY_NAME_LENGTH)
           val semi = input.indexOf(';', i + 1)
-          if (semi != -1) {
-            val entity = input.substring(i + 1, semi)
-            val decodedChar =
-              when {
-                entity == "lt" -> '<'
-                entity == "gt" -> '>'
-                entity == "amp" -> '&'
-                entity == "quot" -> '"'
-                entity == "apos" -> '\''
-                entity.startsWith("#x") || entity.startsWith("#X") ->
-                  entity.substring(2).toIntOrNull(16)?.toChar()
-                entity.startsWith("#") -> entity.substring(1).toIntOrNull(10)?.toChar()
-                else -> null
-              }
-            if (decodedChar != null) {
-              append(decodedChar)
-            } else {
-              append('&').append(entity).append(';')
+          if (semi in (i + 1) until limit) {
+            val decoded = decodeEntity(input.substring(i + 1, semi))
+            if (decoded != null) {
+              append(decoded)
+              i = semi + 1
+              continue
             }
-            i = semi + 1
-            continue
           }
         }
         append(c)
@@ -58,6 +48,44 @@ internal object XmlParser {
       }
     }
   }
+
+  /** Upper bound on the characters scanned when looking for an entity reference terminator. */
+  private const val MAX_ENTITY_NAME_LENGTH = 32
+
+  /**
+   * Decodes the body of an entity reference (the text between `&` and `;`), or returns `null` if it
+   * is not a reference this parser recognizes, in which case the `&` is treated as literal text.
+   */
+  private fun decodeEntity(entity: String): String? =
+    when {
+      entity == "lt" -> "<"
+      entity == "gt" -> ">"
+      entity == "amp" -> "&"
+      entity == "quot" -> "\""
+      entity == "apos" -> "'"
+      entity.startsWith("#x") || entity.startsWith("#X") ->
+        codePointToString(entity.substring(2).toIntOrNull(16))
+      entity.startsWith("#") -> codePointToString(entity.substring(1).toIntOrNull(10))
+      else -> null
+    }
+
+  /**
+   * Converts a Unicode code point to a string, encoding supplementary-plane code points (above
+   * `U+FFFF`) as a surrogate pair. `Int.toChar()` truncates to the low 16 bits, which silently
+   * corrupts emoji and other astral characters into unrelated BMP characters.
+   */
+  private fun codePointToString(codePoint: Int?): String? {
+    if (codePoint == null || codePoint < 0 || codePoint > MAX_CODE_POINT) return null
+    // Unpaired surrogate halves are not legal XML characters.
+    if (codePoint in 0xD800..0xDFFF) return null
+    if (codePoint <= 0xFFFF) return codePoint.toChar().toString()
+    val offset = codePoint - 0x10000
+    val high = (0xD800 + (offset shr 10)).toChar()
+    val low = (0xDC00 + (offset and 0x3FF)).toChar()
+    return "$high$low"
+  }
+
+  private const val MAX_CODE_POINT = 0x10FFFF
 }
 
 private class XmlTokenizer(private val src: String) {

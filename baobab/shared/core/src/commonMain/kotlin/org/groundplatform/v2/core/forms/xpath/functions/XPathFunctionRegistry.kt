@@ -13,20 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-/**
- * 2026 The Ground Authors.
- *
- * Licensed under the Apache License, Version 2.0 (the 'License'); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
- *
- *     https://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an 'AS IS' BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
- */
 package org.groundplatform.v2.core.forms.xpath.functions
 
 import groundplatform.v2.forms.ControlDef
@@ -57,7 +43,7 @@ import org.groundplatform.v2.core.forms.xpath.model.TemporalUtils
 import org.groundplatform.v2.core.forms.xpath.model.XPathNode
 import org.groundplatform.v2.core.forms.xpath.model.XPathValue
 
-/** Registry and implementation of all standard XPath 1.0 and ODK XForms functions. */
+/** Registry and implementation of all standard XPath 1.0 and XForms functions. */
 internal object XPathFunctionRegistry {
 
   /** Evaluates a function call expression [name] with raw AST [args] in [context]. */
@@ -170,10 +156,17 @@ internal object XPathFunctionRegistry {
         if (startNum.isNaN() || lenNum.isNaN() || lenNum <= 0.0) {
           XPathValue.Str("")
         } else {
-          val startIdx = (startNum.toInt() - 1).coerceAtLeast(0)
+          // Clamp in Double/Long space before narrowing. `(-Infinity).toInt()` is Int.MIN_VALUE and
+          // subtracting 1 from that wraps around to Int.MAX_VALUE, which would make an unbounded
+          // start behave like a start past the end of the string and yield "".
+          val startIdxLong = clampToLong(startNum) - 1L
+          val startIdx = startIdxLong.coerceIn(0L, str.length.toLong()).toInt()
           val endIdx =
-            if (lenNum.isInfinite()) str.length
-            else (startNum.toInt() - 1 + lenNum.toInt()).coerceAtMost(str.length)
+            if (lenNum.isInfinite()) {
+              str.length
+            } else {
+              (startIdxLong + clampToLong(lenNum)).coerceIn(0L, str.length.toLong()).toInt()
+            }
           if (startIdx >= str.length || startIdx >= endIdx) XPathValue.Str("")
           else XPathValue.Str(str.substring(startIdx, endIdx))
         }
@@ -396,8 +389,10 @@ internal object XPathFunctionRegistry {
         } else {
           val factor = 10.0.pow(places)
           val scaled = num * factor
-          // Half-up rounding per XPath / ODK specification
-          val rounded = if (scaled >= 0.0) floor(scaled + 0.5) else ceil(scaled - 0.5)
+          // XPath 1.0 section 4.4: ties round to the value closest to POSITIVE infinity, so
+          // round(-1.5) is -1. That is floor(x + 0.5) for negative and positive values alike --
+          // ceil(x - 0.5) would incorrectly round -1.5 away from zero to -2.
+          val rounded = floor(scaled + 0.5)
           XPathValue.Number(rounded / factor)
         }
       }
@@ -797,7 +792,7 @@ internal object XPathFunctionRegistry {
     arg1: XPathValue,
     context: EvaluationContext,
   ): XPathValue {
-    // Supports both ODK signature: jr:choice-name(choice_val, 'field_path')
+    // Supports both JavaRosa/XForms signature: jr:choice-name(choice_val, 'field_path')
     // and ProtoForms doc signature: jr:choice-name(node_target, choice_val)
     val choiceVal: String
     val fieldPath: String
@@ -874,4 +869,18 @@ internal object XPathFunctionRegistry {
       throw XPathEvaluationException("Function '$name' expects $range arguments, got ${args.size}")
     }
   }
+
+  /**
+   * Narrows an XPath number to a [Long] for string-index arithmetic, saturating rather than
+   * wrapping. `Double.toInt()`/`toLong()` map infinities and out-of-range values onto the numeric
+   * extremes, where a subsequent `- 1` or `+ len` silently overflows. Bounds are kept within [Int]
+   * range so two clamped values can be added without overflowing a [Long].
+   */
+  private fun clampToLong(value: Double): Long =
+    when {
+      value.isNaN() -> 0L
+      value >= Int.MAX_VALUE.toDouble() -> Int.MAX_VALUE.toLong()
+      value <= Int.MIN_VALUE.toDouble() -> Int.MIN_VALUE.toLong()
+      else -> value.toLong()
+    }
 }

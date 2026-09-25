@@ -1,13 +1,13 @@
 /*
  * Copyright 2026 The Ground Authors.
  *
- * Licensed under the Apache License, Version 2.0 (the 'License'); you may not use this file except
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
  *
  *     https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an 'AS IS' BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
@@ -37,7 +37,7 @@ data class FormState(
   /** The underlying form definition schema, bindings, translations, and view specification. */
   val formDef: FormDef,
   /**
-   * The effective record instance with non-relevant fields, groups, and repeats pruned per the ODK
+   * The effective record instance with non-relevant fields, groups, and repeats pruned per the
    * XForms specification. Used for XPath evaluation and final submission output.
    */
   val recordInstance: RecordInstance,
@@ -57,12 +57,22 @@ data class FormState(
   val fieldStates: Map<String, FieldState>,
   /** Materialized, repeat-expanded UI view component hierarchy ready for rendering. */
   val rootComponents: List<ComponentState>,
-  /** Evaluated ODK Entity dataset operations (creation/update) for the current record state. */
+  /** Evaluated XForms Entity dataset operations (creation/update) for the current record state. */
   val entityStates: List<EntityState>,
   /** All active validation errors across currently relevant fields. */
   val validationErrors: List<ValidationError>,
   /** Pending hardware or platform side-effect requests emitted by triggered actions. */
   val pendingRequests: List<PlatformEffectRequest> = emptyList(),
+  /**
+   * True when the evaluation pipeline exhausted its pass budget without the pruned record,
+   * relevance map and dynamic repeat counts all stabilising.
+   *
+   * The values in this state are then whatever the last pass computed, and are **not** guaranteed
+   * to be self-consistent. This normally indicates a form whose `relevant` and `calculate`
+   * expressions depend on each other cyclically. Surfacing it is deliberate: the alternative is
+   * showing an enumerator plausible-looking but wrong answers with no signal at all.
+   */
+  val didNotConverge: Boolean = false,
 ) {
   /** True when all relevant fields pass required and constraint checks. */
   val isValid: Boolean
@@ -267,7 +277,7 @@ data class ResolvedIntent(
 )
 
 /**
- * Evaluated ODK Entity creation or update operation derived from `ModelDef.entities` and
+ * Evaluated XForms Entity creation or update operation derived from `ModelDef.entities` and
  * `FieldBinding.entity_saveto` mappings for the current record state.
  */
 data class EntityState(

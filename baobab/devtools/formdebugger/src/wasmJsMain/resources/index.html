@@ -19,6 +19,152 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ProtoForms Form Debugger</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <script>
+      // Chrome DevTools Custom Formatter for Kotlin / Jetpack Compose State & Delegates
+      (function () {
+        window.devtoolsFormatters = window.devtoolsFormatters || [];
+
+        function unwrapValue(val) {
+          if (val == null) return val;
+          try {
+            if (typeof val === 'object') {
+              if ('value' in val) return val.value;
+              if ('_value' in val) return val._value;
+              if (typeof val.getValue === 'function') return val.getValue();
+            }
+          } catch (e) {}
+          return val;
+        }
+
+        const kotlinComposeFormatter = {
+          header: function (obj, config) {
+            if (!obj || (typeof obj !== 'object' && typeof obj !== 'function')) return null;
+            if (config && config.__isKotlinCleanView) return null;
+
+            try {
+              const className =
+                (obj.constructor && obj.constructor.name !== 'Object' && obj.constructor.name) ||
+                (obj.rtti && (obj.rtti.className || obj.rtti.name)) ||
+                '';
+
+              // Single State / Delegate wrapper (e.g. SnapshotMutableStateImpl)
+              if (className.includes('State') || ('value' in obj && '_value' in obj)) {
+                const val = unwrapValue(obj);
+                return [
+                  'span',
+                  { style: 'font-family: monospace;' },
+                  ['span', { style: 'color: #881391; font-weight: bold;' }, className || 'State'],
+                  ' (',
+                  ['object', { object: val }],
+                  ')'
+                ];
+              }
+
+              // Object containing $delegate or mangled properties
+              const allKeys = Object.getOwnPropertyNames(obj);
+              const delegateKeys = allKeys.filter(function (k) { return k.endsWith('$delegate'); });
+              if (delegateKeys.length === 0 && !allKeys.some(function (k) { return k.startsWith('$') && !k.startsWith('$$'); })) {
+                return null;
+              }
+
+              const title = className || 'Object';
+              const previewKeys = delegateKeys.slice(0, 3).map(function (k) { return k.replace(/\$delegate$/, ''); });
+              const previewText = previewKeys.length > 0 ? ' {' + previewKeys.join(', ') + (delegateKeys.length > 3 ? ', …' : '') + '}' : '';
+
+              return [
+                'span',
+                { style: 'font-family: monospace;' },
+                ['span', { style: 'color: #881391; font-weight: bold;' }, title],
+                ['span', { style: 'color: #5f6368;' }, previewText]
+              ];
+            } catch (e) {
+              return null;
+            }
+          },
+
+          hasBody: function (obj) {
+            return Boolean(obj && typeof obj === 'object');
+          },
+
+          body: function (obj, config) {
+            try {
+              const allKeys = Object.getOwnPropertyNames(obj);
+              const rows = [];
+              const cleanProps = [];
+              const normalProps = [];
+              const internalProps = [];
+
+              for (let i = 0; i < allKeys.length; i++) {
+                const k = allKeys[i];
+                if (k.startsWith('$$') || k === 'rtti') {
+                  internalProps.push(k);
+                } else if (k.endsWith('$delegate')) {
+                  cleanProps.push(k);
+                } else {
+                  normalProps.push(k);
+                }
+              }
+
+              // Render clean delegated properties
+              for (let i = 0; i < cleanProps.length; i++) {
+                const k = cleanProps[i];
+                const cleanName = k.replace(/\$delegate$/, '');
+                let val;
+                try {
+                  if (cleanName in obj && typeof obj[cleanName] !== 'function') {
+                    val = obj[cleanName];
+                  } else {
+                    val = unwrapValue(obj[k]);
+                  }
+                } catch (e) {
+                  val = unwrapValue(obj[k]);
+                }
+
+                rows.push([
+                  'div',
+                  { style: 'padding-left: 14px; line-height: 1.5; font-family: monospace;' },
+                  ['span', { style: 'color: #1a73e8; font-weight: 500;' }, cleanName],
+                  ['span', { style: 'color: #5f6368;' }, ': '],
+                  ['object', { object: val }]
+                ]);
+              }
+
+              // Render normal properties
+              for (let i = 0; i < normalProps.length; i++) {
+                const k = normalProps[i];
+                const cleanName = k.startsWith('$') ? k.substring(1) : k;
+                const val = obj[k];
+                rows.push([
+                  'div',
+                  { style: 'padding-left: 14px; line-height: 1.5; font-family: monospace;' },
+                  ['span', { style: 'color: #333333;' }, cleanName],
+                  ['span', { style: 'color: #5f6368;' }, ': '],
+                  ['object', { object: val }]
+                ]);
+              }
+
+              // Collapsible / subdued internal properties
+              if (internalProps.length > 0) {
+                rows.push([
+                  'div',
+                  { style: 'padding-left: 14px; margin-top: 4px; color: #80868b; font-size: 11px; font-style: italic;' },
+                  '(' + internalProps.length + ' internal fields: ' + internalProps.join(', ') + ')'
+                ]);
+              }
+
+              return ['div', {}, ...rows];
+            } catch (e) {
+              return ['div', {}, String(e)];
+            }
+          }
+        };
+
+        window.devtoolsFormatters.push(kotlinComposeFormatter);
+      })();
+    </script>
     <style>
         html, body {
             width: 100%;
@@ -27,6 +173,7 @@
             padding: 0;
             overflow: hidden;
             background-color: #F5F7F6;
+            font-family: 'Google Sans Flex', sans-serif;
         }
     </style>
 </head>

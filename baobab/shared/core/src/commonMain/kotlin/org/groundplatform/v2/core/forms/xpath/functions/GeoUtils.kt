@@ -1,13 +1,13 @@
-/**
+/*
  * Copyright 2026 The Ground Authors.
  *
- * Licensed under the Apache License, Version 2.0 (the 'License'); you may not use this file except
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
  *
  *     https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an 'AS IS' BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
@@ -23,7 +23,7 @@ import kotlin.math.sqrt
 import org.groundplatform.v2.core.forms.xpath.model.XPathValue
 
 /**
- * Pure Kotlin Multiplatform geospatial geometry utilities for ODK XForms functions:
+ * Pure Kotlin Multiplatform geospatial geometry utilities for XForms functions:
  * - `distance(geotrace | geoshape | nodeset | pointA, pointB)`
  * - `area(geoshape | nodeset)`
  * - `geofence(geopoint, geoshape)`
@@ -31,7 +31,7 @@ import org.groundplatform.v2.core.forms.xpath.model.XPathValue
  */
 internal object GeoUtils {
 
-  // Standard WGS84 Equatorial Radius in meters used by ODK JavaRosa
+  // Standard WGS84 Equatorial Radius in meters used by JavaRosa / XForms
   const val EARTH_RADIUS_METERS = 6378137.0
 
   private fun toRadians(deg: Double): Double = deg * PI / 180.0
@@ -79,7 +79,7 @@ internal object GeoUtils {
 
   /**
    * Computes enclosed surface area in square meters (`m^2`) for a polygon defined by [points] using
-   * the spherical polygon excess / Shoelace projection formula (matching ODK JavaRosa).
+   * the spherical polygon excess / Shoelace projection formula (matching JavaRosa / XForms).
    */
   fun calculateAreaSquareMeters(points: List<GeoPoint>): Double {
     if (points.size < 3) return 0.0

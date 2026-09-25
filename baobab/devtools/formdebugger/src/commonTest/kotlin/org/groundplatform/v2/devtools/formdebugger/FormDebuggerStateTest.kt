@@ -1,13 +1,13 @@
 /*
  * Copyright 2026 The Ground Authors.
  *
- * Licensed under the Apache License, Version 2.0 (the 'License'); you may not use this file except
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
  *
  *     https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an 'AS IS' BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
@@ -138,8 +138,8 @@ class FormDebuggerStateTest {
     assertContains(state.formTextProto, "\"formId\": \"baobab_survey\"")
     assertContains(state.formTextProto, "\"title\": \"Baobab Tree Survey\"")
     assertContains(state.recordTextProto, "\"formId\": \"baobab_survey\"")
-    assertContains(state.recordTextProto, "\"stringValue\": \"Adansonia digitata\"")
-    assertContains(state.recordTextProto, "\"doubleValue\": 24.8")
+    assertContains(state.recordTextProto, "\"species\": \"Adansonia digitata\"")
+    assertContains(state.recordTextProto, "\"height_m\": 24.8")
 
     // Edit FormDef JSON -> should update FormDef XML
     val updatedFormJson =
@@ -155,10 +155,10 @@ class FormDebuggerStateTest {
     val updatedRecordJson =
       state.recordTextProto
         .replace(
-          "\"stringValue\": \"Adansonia digitata\"",
-          "\"stringValue\": \"Adansonia suarezensis\"",
+          "\"species\": \"Adansonia digitata\"",
+          "\"species\": \"Adansonia suarezensis\"",
         )
-        .replace("\"doubleValue\": 24.8", "\"doubleValue\": 31.5")
+        .replace("\"height_m\": 24.8", "\"height_m\": 31.5")
     state.onRecordTextProtoChanged(updatedRecordJson)
     assertNull(state.recordTextProtoError)
     assertContains(state.recordXml, "<species>Adansonia suarezensis</species>")
@@ -216,5 +216,18 @@ class FormDebuggerStateTest {
 
     state.closeFormRunner()
     assertEquals(false, state.isFormRunnerOpen)
+  }
+
+  @Test
+  fun testLoadAllFiveWorkbenchExampleForms() {
+    val state = FormDebuggerState(loadInitialSample = true)
+    org.groundplatform.v2.core.forms.ui.WorkbenchExampleForm.entries.forEach { example ->
+      state.loadExampleForm(example, autoRun = true)
+      assertEquals(example, state.selectedExampleForm)
+      assertNull(state.formXmlError)
+      assertNull(state.recordXmlError)
+      assertTrue(state.isFormRunnerOpen)
+      assertNotNull(state.wizardController)
+    }
   }
 }

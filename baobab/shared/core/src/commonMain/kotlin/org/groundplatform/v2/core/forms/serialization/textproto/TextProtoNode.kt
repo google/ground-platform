@@ -1,17 +1,37 @@
-/**
+/*
  * Copyright 2026 The Ground Authors.
  *
- * Licensed under the Apache License, Version 2.0 (the 'License'); you may not use this file except
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
  *
  *     https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an 'AS IS' BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
 package org.groundplatform.v2.core.forms.serialization.textproto
+
+import okio.ByteString
+import okio.ByteString.Companion.toByteString
+
+/**
+ * Reinterprets each character in `0..255` as a single byte (ISO-8859-1 / Latin-1).
+ *
+ * This is the inverse of [ByteString.toLatin1String] and is lossless for any string produced by it.
+ * Characters above `U+00FF` cannot originate from a byte field and are masked to their low byte.
+ */
+internal fun String.latin1ToByteString(): ByteString =
+  ByteArray(length) { i -> (this[i].code and 0xFF).toByte() }.toByteString()
+
+/**
+ * Maps each byte to the character with the same code point, so no byte is lost to UTF-8 decoding.
+ */
+internal fun ByteString.toLatin1String(): String {
+  val bytes = toByteArray()
+  return buildString(bytes.size) { for (b in bytes) append(((b.toInt()) and 0xFF).toChar()) }
+}
 
 /** Represents a parsed Protocol Buffer Text Format (`textproto`) message AST. */
 internal data class TextProtoMessage(val fields: List<TextProtoField> = emptyList()) {
@@ -29,6 +49,9 @@ internal data class TextProtoMessage(val fields: List<TextProtoField> = emptyLis
 
   /** Returns a nullable string value for [name]. */
   fun getStringOrNull(name: String): String? = getField(name)?.asStringOrNull()
+
+  /** Returns the raw bytes of the `bytes` field [name], or null if absent. */
+  fun getByteStringOrNull(name: String): ByteString? = getField(name)?.asByteStringOrNull()
 
   /** Returns an Int value for [name], or [default]. */
   fun getInt(name: String, default: Int = 0): Int = getField(name)?.asIntOrNull() ?: default
@@ -108,11 +131,30 @@ internal sealed class TextProtoValue {
 
   data class ListVal(val elements: List<TextProtoValue>) : TextProtoValue()
 
+  /**
+   * A `bytes` field. Kept distinct from [StringVal] because arbitrary bytes are not necessarily
+   * valid UTF-8, so they must be written with `\xNN` escapes rather than decoded as text.
+   */
+  data class BytesVal(val value: ByteString) : TextProtoValue()
+
   fun asStringOrNull(): String? =
     when (this) {
       is StringVal -> value
       is IdentifierVal -> name
       is NumberVal -> raw
+      else -> null
+    }
+
+  /**
+   * Interprets this value as raw bytes.
+   *
+   * The parser always produces a [StringVal], having already decoded `\xNN` and octal escapes into
+   * characters in the range `0..255`, so each character maps back to exactly one byte.
+   */
+  fun asByteStringOrNull(): ByteString? =
+    when (this) {
+      is BytesVal -> value
+      is StringVal -> value.latin1ToByteString()
       else -> null
     }
 

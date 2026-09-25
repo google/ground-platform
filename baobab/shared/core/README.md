@@ -25,19 +25,19 @@ dependencies** and compiles to **Android/JVM (`jvm`)**, **iOS (`iosArm64`,
 ## Key Packages
 
 -   **[`org.groundplatform.v2.core.forms.serialization`](src/commonMain/kotlin/org/groundplatform/v2/core/forms/serialization/README.md)**:
-    Bidirectional lossless conversion between ODK XForms XML (`<h:html>` and
+    Bidirectional lossless conversion between XForms XML (`<h:html>` and
     `<data>`), `groundplatform.v2.forms` Protocol Buffer messages (`FormDef`,
     `RecordInstance`), Protocol Buffer Text Format (`textproto`), and Canonical
     Proto3 JSON (`ProtoJsonSerializer`).
 -   **[`org.groundplatform.v2.core.forms.xpath`](src/commonMain/kotlin/org/groundplatform/v2/core/forms/xpath/README.md)**:
-    Full XPath 1.0 + ODK XForms AST lexer, parser, dependency analyzer, and
+    Full XPath 1.0 + XForms AST lexer, parser, dependency analyzer, and
     evaluator operating directly against `RecordInstance` and `FormDef` models.
 -   **[`org.groundplatform.v2.core.forms.engine`](src/commonMain/kotlin/org/groundplatform/v2/core/forms/engine/README.md)**
     & **`org.groundplatform.v2.core.forms.model`**: Immutable runtime state
     models (`FormState`, `ComponentState`) and the 5-stage reactive evaluation
     pipeline (`FormEngine`, `FormSession`, `CompiledForm`) supporting dynamic
     repeats, calculations, relevance, constraints, cascading `itemset`s,
-    multilingual translations, and ODK Entities.
+    multilingual translations, and XForms Entities.
 
 ## Building and Running Tests
 

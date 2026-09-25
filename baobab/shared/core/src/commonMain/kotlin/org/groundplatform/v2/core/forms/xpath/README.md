@@ -16,7 +16,7 @@
 
 # ProtoForms XPath Engine (`org.groundplatform.v2.core.forms.xpath`)
 
-A pure Kotlin Multiplatform (KMP) XPath 1.0 + ODK XForms expression parser,
+A pure Kotlin Multiplatform (KMP) XPath 1.0 + XForms expression parser,
 static dependency analyzer, and runtime evaluator designed specifically to
 evaluate expressions directly against **ProtoForms** Protocol Buffer messages
 (`FormDef`, `RecordInstance`, `RecordNode`, `FieldValue`, and `TypedValue`)
@@ -83,7 +83,7 @@ org.groundplatform.v2.core.forms.xpath
 ├── XPathException.kt              # Syntax, arity, and evaluation exception hierarchy
 ├── ast/
 │   ├── XPathToken.kt              # Lexer token stream types
-│   ├── XPathLexer.kt              # ODK XForms / XPath 1.0 tokenizer
+│   ├── XPathLexer.kt              # XForms / XPath 1.0 tokenizer
 │   ├── XPathAst.kt                # Immutable AST nodes & XPathDependency model
 │   ├── XPathParser.kt             # Recursive-descent Pratt parser
 │   └── DependencyAnalyzer.kt      # Compile-time dependency extractor
@@ -94,7 +94,7 @@ org.groundplatform.v2.core.forms.xpath
 ├── eval/
 │   └── XPathEvaluator.kt          # AST evaluator & equality predicate pushdown optimizer
 └── functions/
-    ├── XPathFunctionRegistry.kt   # Complete ODK XForms standard function library
+    ├── XPathFunctionRegistry.kt   # Complete XForms standard function library
     ├── GeoUtils.kt                # WGS84 Haversine distance, spherical area & geofencing
     └── CryptoAndPrngUtils.kt      # Pure-Kotlin MD5/SHA-1/SHA-256/384/512 & Park-Miller PRNG
 ```
@@ -271,9 +271,9 @@ class SqliteEntityDatasetProvider(private val db: MyDatabase) : SecondaryInstanc
 
 --------------------------------------------------------------------------------
 
-## Supported ODK XForms Functions
+## Supported XForms Functions
 
-All standard XPath 1.0 and ODK XForms functions are implemented in `commonMain`:
+All standard XPath 1.0 and XForms functions are implemented in `commonMain`:
 
 -   **Control Flow & Logic**: `if`, `coalesce`, `once`, `true`, `false`,
     `boolean`, `boolean-from-string`, `not`, `checklist`, `weighted-checklist`.
@@ -319,7 +319,7 @@ export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
 ### Run JVM Unit and Parameterized Tests
 
 To execute all `commonTest` and JUnit 5 `@ParameterizedTest` suites (covering
-150+ XPath / ODK XForms expressions evaluated against pure Kotlin ProtoForms DSL
+150+ XPath / XForms expressions evaluated against pure Kotlin ProtoForms DSL
 literals):
 
 ```bash

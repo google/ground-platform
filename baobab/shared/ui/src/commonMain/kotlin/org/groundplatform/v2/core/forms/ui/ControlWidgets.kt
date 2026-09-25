@@ -1,20 +1,19 @@
 /*
  * Copyright 2026 The Ground Authors.
  *
- * Licensed under the Apache License, Version 2.0 (the 'License'); you may not use this file except
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
  *
  *     https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an 'AS IS' BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
 package org.groundplatform.v2.core.forms.ui
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -53,7 +52,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -104,7 +102,6 @@ fun QuestionControlCard(
           text = control.canonicalPath,
           style =
             MaterialTheme.typography.labelSmall.copy(
-              fontFamily = FontFamily.Monospace,
               color = colors.onSurfaceVariant,
             ),
         )
@@ -169,8 +166,7 @@ fun QuestionControlCard(
               Spacer(modifier = Modifier.height(4.dp))
               Text(
                 text = guidanceText,
-                style =
-                  MaterialTheme.typography.bodySmall.copy(color = colors.onSecondaryContainer),
+                style = MaterialTheme.typography.bodySmall.copy(color = colors.onSecondaryContainer),
               )
             }
           }
@@ -264,7 +260,6 @@ private fun ReadOnlyValueBox(fieldState: FieldState) {
         text = formatFieldValueForDisplay(fieldState.value, fieldState.dataType),
         style =
           MaterialTheme.typography.bodyLarge.copy(
-            fontFamily = FontFamily.Monospace,
             fontWeight = FontWeight.SemiBold,
             color = colors.onSurface,
           ),
@@ -290,11 +285,11 @@ private fun InputByDataTypeWidget(
     DataType.TYPE_DATE -> DateInputWidget(path, fieldState, controller)
     DataType.TYPE_TIME -> TimeInputWidget(path, fieldState, controller)
     DataType.TYPE_DATETIME -> TimestampInputWidget(path, fieldState, controller)
-    DataType.TYPE_GEOPOINT -> GeoPointInputWidget(path, fieldState, controller)
+    DataType.TYPE_GEOPOINT -> GeoPointInputWidget(control, path, fieldState, controller)
     DataType.TYPE_GEOTRACE ->
-      GeoVertexListWidget(path, fieldState, controller, isClosedShape = false)
+      GeoVertexListWidget(control, path, fieldState, controller, isClosedShape = false)
     DataType.TYPE_GEOSHAPE ->
-      GeoVertexListWidget(path, fieldState, controller, isClosedShape = true)
+      GeoVertexListWidget(control, path, fieldState, controller, isClosedShape = true)
     else -> StringInputWidget(path, fieldState, isMultiline, controller)
   }
 }
@@ -308,7 +303,19 @@ private fun StringInputWidget(
 ) {
   val colors = MaterialTheme.colorScheme
   val currentStr = fieldState.value?.scalar_value?.string_value ?: ""
-  var text by remember(path, currentStr) { mutableStateOf(currentStr) }
+  // Key on `path` only. Keying on `currentStr` too meant every keystroke changed the key (the
+  // engine echoes the new value straight back), so `remember` discarded and recreated the state on
+  // each character -- resetting cursor position, selection and any in-progress IME composition.
+  var text by remember(path) { mutableStateOf(currentStr) }
+
+  // Adopt values the engine changed on its own (a `calculate` firing, a clear, restoring a saved
+  // draft) without clobbering what the user is typing. After a keystroke `currentStr` matches
+  // `text`, so this is a no-op in the common case.
+  LaunchedEffect(path, currentStr) {
+    if (currentStr != text) {
+      text = currentStr
+    }
+  }
 
   Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
     OutlinedTextField(
@@ -382,20 +389,21 @@ private fun IntegerInputWidget(
         value = text,
         onValueChange = { raw ->
           text = raw
-          if (raw.isBlank()) {
-            parseError = null
-            controller.clearField(path)
-          } else {
-            val parsed = raw.trim().toLongOrNull()
-            if (parsed != null) {
+          when (val parsed = parseIntegerInput(raw, fieldState.dataType)) {
+            is IntegerInput.Empty -> {
+              parseError = null
+              controller.clearField(path)
+            }
+            is IntegerInput.Invalid -> {
+              parseError = parsed.message
+            }
+            is IntegerInput.Valid -> {
               parseError = null
               if (fieldState.dataType == DataType.TYPE_INT64) {
-                controller.updateLong(path, parsed)
+                controller.updateLong(path, parsed.value)
               } else {
-                controller.updateInt(path, parsed.toInt())
+                controller.updateInt(path, parsed.value.toInt())
               }
-            } else {
-              parseError = "Enter a whole integer number"
             }
           }
         },
@@ -679,7 +687,6 @@ private fun TimestampInputWidget(
       text = ts?.toString() ?: "(No timestamp recorded)",
       style =
         MaterialTheme.typography.bodyMedium.copy(
-          fontFamily = FontFamily.Monospace,
           color = if (ts != null) colors.onSurface else colors.onSurfaceVariant,
         ),
       modifier = Modifier.weight(1f),
@@ -697,16 +704,22 @@ private fun TimestampInputWidget(
 
 @Composable
 private fun GeoPointInputWidget(
+  control: ComponentState.ControlState,
   path: String,
   fieldState: FieldState,
   controller: FormWizardController,
 ) {
   val colors = MaterialTheme.colorScheme
   val gp = fieldState.value?.scalar_value?.geopoint_value
+  val appearanceTokens = control.appearance.split(' ').filter { it.isNotBlank() }
+  val panAllowed = appearanceTokens.contains("placement-map") || appearanceTokens.contains("map")
+  val accuracyThreshold =
+    control.controlDef.geo_config?.accuracy_threshold_meters?.takeIf { it > 0.0 }
+
   var latText by remember(path, gp) { mutableStateOf(gp?.latitude?.toString() ?: "") }
   var lonText by remember(path, gp) { mutableStateOf(gp?.longitude?.toString() ?: "") }
-  var altText by remember(path, gp) { mutableStateOf(gp?.altitude_meters?.toString() ?: "0.0") }
-  var accText by remember(path, gp) { mutableStateOf(gp?.accuracy_meters?.toString() ?: "3.5") }
+  var altText by remember(path, gp) { mutableStateOf(gp?.altitude_meters?.toString() ?: "1680.0") }
+  var accText by remember(path, gp) { mutableStateOf(gp?.accuracy_meters?.toString() ?: "3.2") }
 
   OutlinedCard(
     modifier = Modifier.fillMaxWidth(),
@@ -717,6 +730,25 @@ private fun GeoPointInputWidget(
       modifier = Modifier.fillMaxWidth().padding(12.dp),
       verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
+      // Geospatial capability & constraint badges
+      Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
+        verticalAlignment = Alignment.CenterVertically,
+      ) {
+        GroundTonalBadge(
+          text = if (panAllowed) "🖐 Map Pan Allowed" else "🔒 No Pan Allowed (GPS Only)",
+          tone = if (panAllowed) GroundBadgeTone.PRIMARY else GroundBadgeTone.TERTIARY,
+        )
+        if (accuracyThreshold != null) {
+          val meetsAccuracy = gp == null || gp.accuracy_meters <= accuracyThreshold
+          GroundTonalBadge(
+            text = "🎯 Required GPS <= ${accuracyThreshold}m",
+            tone = if (meetsAccuracy) GroundBadgeTone.SECONDARY else GroundBadgeTone.TERTIARY,
+          )
+        }
+      }
+
       Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -731,30 +763,83 @@ private fun GeoPointInputWidget(
             },
           style =
             MaterialTheme.typography.bodySmall.copy(
-              fontFamily = FontFamily.Monospace,
               fontWeight = FontWeight.SemiBold,
               color = colors.onSurface,
             ),
         )
+      }
+
+      // GPS Fix & Pan Simulation Controls
+      Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+      ) {
         FilledTonalButton(
           onClick = {
             controller.updateGeoPoint(
               path = path,
-              latitude = -18.7669,
-              longitude = 46.8691,
-              altitudeMeters = 240.0,
-              accuracyMeters = 2.8,
+              latitude = -1.292066,
+              longitude = 36.821946,
+              altitudeMeters = 1680.0,
+              accuracyMeters = 3.2,
             )
           },
-          contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
+          contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp),
         ) {
-          Text("Capture GPS Fix", style = MaterialTheme.typography.labelSmall)
+          Text("🛰 GPS Fix (±3.2m ✓)", style = MaterialTheme.typography.labelSmall)
+        }
+        OutlinedButton(
+          onClick = {
+            controller.updateGeoPoint(
+              path = path,
+              latitude = -1.292180,
+              longitude = 36.822090,
+              altitudeMeters = 1680.0,
+              accuracyMeters = 14.2,
+            )
+          },
+          contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp),
+        ) {
+          Text("⚠ Weak GPS (±14.2m)", style = MaterialTheme.typography.labelSmall)
+        }
+        if (panAllowed) {
+          OutlinedButton(
+            onClick = {
+              val baseLat = gp?.latitude ?: -1.292066
+              val baseLon = gp?.longitude ?: 36.821946
+              val baseAcc = gp?.accuracy_meters ?: 4.0
+              val pannedLat = ((baseLat + 0.00012) * 1000000.0).toInt() / 1000000.0
+              val pannedLon = ((baseLon + 0.00015) * 1000000.0).toInt() / 1000000.0
+              controller.updateGeoPoint(
+                path = path,
+                latitude = pannedLat,
+                longitude = pannedLon,
+                altitudeMeters = gp?.altitude_meters ?: 1680.0,
+                accuracyMeters = baseAcc,
+              )
+            },
+            contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp),
+          ) {
+            Text("🖐 Pan Map (+15m)", style = MaterialTheme.typography.labelSmall)
+          }
         }
       }
+
+      if (!panAllowed) {
+        Text(
+          text =
+            "Manual map panning is locked for this point. Coordinates must come from a hardware GNSS fix" +
+              (if (accuracyThreshold != null) " with <= ${accuracyThreshold}m accuracy." else "."),
+          style = MaterialTheme.typography.labelSmall.copy(color = colors.onSurfaceVariant),
+        )
+      }
+
       Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         OutlinedTextField(
           value = latText,
           onValueChange = {
+            if (!panAllowed) return@OutlinedTextField
             latText = it
             val lat = it.toDoubleOrNull()
             val lon = lonText.toDoubleOrNull()
@@ -763,18 +848,20 @@ private fun GeoPointInputWidget(
                 path,
                 lat,
                 lon,
-                altText.toDoubleOrNull() ?: 0.0,
-                accText.toDoubleOrNull() ?: 3.5,
+                altText.toDoubleOrNull() ?: 1680.0,
+                accText.toDoubleOrNull() ?: 3.2,
               )
             }
           },
-          label = { Text("Latitude") },
+          enabled = panAllowed,
+          label = { Text(if (panAllowed) "Latitude (Pan OK)" else "Latitude (GPS Locked)") },
           modifier = Modifier.weight(1f),
           singleLine = true,
         )
         OutlinedTextField(
           value = lonText,
           onValueChange = {
+            if (!panAllowed) return@OutlinedTextField
             lonText = it
             val lat = latText.toDoubleOrNull()
             val lon = it.toDoubleOrNull()
@@ -783,12 +870,13 @@ private fun GeoPointInputWidget(
                 path,
                 lat,
                 lon,
-                altText.toDoubleOrNull() ?: 0.0,
-                accText.toDoubleOrNull() ?: 3.5,
+                altText.toDoubleOrNull() ?: 1680.0,
+                accText.toDoubleOrNull() ?: 3.2,
               )
             }
           },
-          label = { Text("Longitude") },
+          enabled = panAllowed,
+          label = { Text(if (panAllowed) "Longitude (Pan OK)" else "Longitude (GPS Locked)") },
           modifier = Modifier.weight(1f),
           singleLine = true,
         )
@@ -799,12 +887,16 @@ private fun GeoPointInputWidget(
 
 @Composable
 private fun GeoVertexListWidget(
+  control: ComponentState.ControlState,
   path: String,
   fieldState: FieldState,
   controller: FormWizardController,
   isClosedShape: Boolean,
 ) {
   val colors = MaterialTheme.colorScheme
+  val appearanceTokens = control.appearance.split(' ').filter { it.isNotBlank() }
+  val panOverrideAllowed =
+    appearanceTokens.contains("placement-map") || appearanceTokens.contains("walk-or-draw")
   val existingPoints =
     if (isClosedShape) {
       fieldState.value?.scalar_value?.geoshape_value?.points ?: emptyList()
@@ -812,8 +904,8 @@ private fun GeoVertexListWidget(
       fieldState.value?.scalar_value?.geotrace_value?.points ?: emptyList()
     }
 
-  var newLat by remember(path) { mutableStateOf("-18.7669") }
-  var newLon by remember(path) { mutableStateOf("46.8691") }
+  var newLat by remember(path) { mutableStateOf("-1.2921") }
+  var newLon by remember(path) { mutableStateOf("36.8219") }
 
   fun updateVertices(points: List<GeoPoint>) {
     if (isClosedShape) {
@@ -834,6 +926,23 @@ private fun GeoVertexListWidget(
     ) {
       Row(
         modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
+        verticalAlignment = Alignment.CenterVertically,
+      ) {
+        GroundTonalBadge(
+          text = if (isClosedShape) "🚶 Walk Plot Perimeter" else "🚶 Walk Transect",
+          tone = GroundBadgeTone.PRIMARY,
+        )
+        GroundTonalBadge(
+          text =
+            if (panOverrideAllowed) "🖐 GPS Override / Pan Allowed While Walking"
+            else "🔒 GPS Stream Only",
+          tone = if (panOverrideAllowed) GroundBadgeTone.SECONDARY else GroundBadgeTone.TERTIARY,
+        )
+      }
+
+      Row(
+        modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
       ) {
@@ -850,20 +959,94 @@ private fun GeoVertexListWidget(
               color = colors.onSurface,
             ),
         )
-        OutlinedButton(
-          onClick = {
-            val sample =
-              listOf(
-                GeoPoint(latitude = -18.7660, longitude = 46.8680),
-                GeoPoint(latitude = -18.7660, longitude = 46.8695),
-                GeoPoint(latitude = -18.7675, longitude = 46.8695),
-                GeoPoint(latitude = -18.7660, longitude = 46.8680),
-              )
-            updateVertices(sample)
-          },
-          contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
-        ) {
-          Text("Sample Geometry", style = MaterialTheme.typography.labelSmall)
+        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+          FilledTonalButton(
+            onClick = {
+              val idx = existingPoints.size
+              val nextPt =
+                GeoPoint(
+                  latitude = -1.2921 - (idx * 0.0002),
+                  longitude = 36.8219 + (idx * 0.0003),
+                  altitude_meters = 1680.0,
+                  accuracy_meters = 3.4,
+                )
+              val updated =
+                if (isClosedShape && existingPoints.size >= 3) {
+                  existingPoints.dropLast(1) + nextPt + existingPoints.first()
+                } else {
+                  existingPoints + nextPt
+                }
+              updateVertices(updated)
+            },
+            contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp),
+          ) {
+            Text("🛰 Walk +1 GPS Vertex", style = MaterialTheme.typography.labelSmall)
+          }
+          if (panOverrideAllowed) {
+            OutlinedButton(
+              onClick = {
+                val idx = existingPoints.size
+                val pannedPt =
+                  GeoPoint(
+                    latitude = -1.2918 + (idx * 0.00015),
+                    longitude = 36.8226 + (idx * 0.0002),
+                    altitude_meters = 1681.0,
+                    accuracy_meters = 1.5,
+                  )
+                val updated =
+                  if (isClosedShape && existingPoints.size >= 3) {
+                    existingPoints.dropLast(1) + pannedPt + existingPoints.first()
+                  } else {
+                    existingPoints + pannedPt
+                  }
+                updateVertices(updated)
+              },
+              contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp),
+            ) {
+              Text("🖐 Pan Override Vertex", style = MaterialTheme.typography.labelSmall)
+            }
+          }
+          OutlinedButton(
+            onClick = {
+              val sample =
+                listOf(
+                  GeoPoint(
+                    latitude = -1.2921,
+                    longitude = 36.8219,
+                    altitude_meters = 1680.0,
+                    accuracy_meters = 3.5,
+                  ),
+                  GeoPoint(
+                    latitude = -1.2925,
+                    longitude = 36.8224,
+                    altitude_meters = 1681.0,
+                    accuracy_meters = 3.8,
+                  ),
+                  GeoPoint(
+                    latitude = -1.2918,
+                    longitude = 36.8228,
+                    altitude_meters = 1682.0,
+                    accuracy_meters = 3.2,
+                  ),
+                  GeoPoint(
+                    latitude = -1.2915,
+                    longitude = 36.8221,
+                    altitude_meters = 1680.0,
+                    accuracy_meters = 3.4,
+                  ),
+                  GeoPoint(
+                    latitude = -1.2921,
+                    longitude = 36.8219,
+                    altitude_meters = 1680.0,
+                    accuracy_meters = 3.5,
+                  ),
+                )
+              updateVertices(sample)
+            },
+            contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp),
+          ) {
+            Text("Reset Polygon", style = MaterialTheme.typography.labelSmall)
+          }
         }
       }
 
@@ -874,10 +1057,9 @@ private fun GeoVertexListWidget(
           verticalAlignment = Alignment.CenterVertically,
         ) {
           Text(
-            text = "#${idx + 1}: (${pt.latitude}, ${pt.longitude})",
+            text = "#${idx + 1}: (${pt.latitude}, ${pt.longitude}) ±${pt.accuracy_meters}m",
             style =
               MaterialTheme.typography.bodySmall.copy(
-                fontFamily = FontFamily.Monospace,
                 color = colors.onSurface,
               ),
           )
@@ -897,6 +1079,7 @@ private fun GeoVertexListWidget(
         OutlinedTextField(
           value = newLat,
           onValueChange = { newLat = it },
+          enabled = panOverrideAllowed,
           label = { Text("Lat") },
           modifier = Modifier.weight(1f),
           singleLine = true,
@@ -904,16 +1087,26 @@ private fun GeoVertexListWidget(
         OutlinedTextField(
           value = newLon,
           onValueChange = { newLon = it },
+          enabled = panOverrideAllowed,
           label = { Text("Lon") },
           modifier = Modifier.weight(1f),
           singleLine = true,
         )
         Button(
           onClick = {
-            val lat = newLat.toDoubleOrNull() ?: -18.7669
-            val lon = newLon.toDoubleOrNull() ?: 46.8691
-            updateVertices(existingPoints + GeoPoint(latitude = lat, longitude = lon))
-          }
+            val lat = newLat.toDoubleOrNull() ?: -1.2921
+            val lon = newLon.toDoubleOrNull() ?: 36.8219
+            updateVertices(
+              existingPoints +
+                GeoPoint(
+                  latitude = lat,
+                  longitude = lon,
+                  altitude_meters = 1680.0,
+                  accuracy_meters = 2.5,
+                )
+            )
+          },
+          enabled = panOverrideAllowed,
         ) {
           Text("+ Pt")
         }
@@ -1091,7 +1284,6 @@ private fun ChoiceCardRow(
           text = "value: ${option.value}",
           style =
             MaterialTheme.typography.labelSmall.copy(
-              fontFamily = FontFamily.Monospace,
               color = if (isSelected) colors.onPrimaryContainer else colors.onSurfaceVariant,
             ),
         )
@@ -1245,7 +1437,8 @@ private fun UploadControlWidget(
   val colors = MaterialTheme.colorScheme
   val path = control.canonicalPath
   val mediaType = control.controlDef.media_type.ifBlank { "image/*" }
-  val currentFile = control.fieldState.value?.scalar_value?.string_value ?: ""
+  val currentFile =
+    control.fieldState.value?.scalar_value?.let { it.string_value ?: it.binary_value?.utf8() } ?: ""
 
   OutlinedCard(
     modifier = Modifier.fillMaxWidth(),
@@ -1299,10 +1492,7 @@ private fun TriggerControlWidget(
   val isAcknowledged = control.fieldState.value?.scalar_value?.string_value == "OK"
 
   if (isAcknowledged) {
-    Button(
-      onClick = { controller.clearField(path) },
-      modifier = Modifier.fillMaxWidth(),
-    ) {
+    Button(onClick = { controller.clearField(path) }, modifier = Modifier.fillMaxWidth()) {
       Text("✓ Acknowledged (OK)")
     }
   } else {
@@ -1314,7 +1504,6 @@ private fun TriggerControlWidget(
     }
   }
 }
-
 
 /**
  * Formats a [FieldValue] into a human-readable summary string for read-only displays and review
@@ -1363,4 +1552,36 @@ fun formatFieldValueForDisplay(value: FieldValue?, dataType: DataType): String {
         ?: scalar.bool_value?.toString()
         ?: "(Unanswered)"
   }
+}
+
+/** Range of values representable by a proto `int32` field. */
+private val INT32_RANGE = Int.MIN_VALUE.toLong()..Int.MAX_VALUE.toLong()
+
+/** Outcome of interpreting the raw text a user typed into an integer control. */
+internal sealed interface IntegerInput {
+  /** The control is empty, so the underlying field should be cleared. */
+  data object Empty : IntegerInput
+
+  /** The text is not a usable integer; [message] explains why. */
+  data class Invalid(val message: String) : IntegerInput
+
+  /** The text parsed to [value], which is in range for the target data type. */
+  data class Valid(val value: Long) : IntegerInput
+}
+
+/**
+ * Parses [raw] as an integer appropriate for [dataType].
+ *
+ * Values outside the `int32` range are reported as [IntegerInput.Invalid] rather than being
+ * narrowed with `toInt()`, which would silently wrap (for example `3000000000` would be stored as
+ * `-1294967296`). Only `TYPE_INT64` fields accept the full `Long` range.
+ */
+internal fun parseIntegerInput(raw: String, dataType: DataType): IntegerInput {
+  if (raw.isBlank()) return IntegerInput.Empty
+  val parsed =
+    raw.trim().toLongOrNull() ?: return IntegerInput.Invalid("Enter a whole integer number")
+  if (dataType != DataType.TYPE_INT64 && parsed !in INT32_RANGE) {
+    return IntegerInput.Invalid("Enter a value between ${Int.MIN_VALUE} and ${Int.MAX_VALUE}")
+  }
+  return IntegerInput.Valid(parsed)
 }

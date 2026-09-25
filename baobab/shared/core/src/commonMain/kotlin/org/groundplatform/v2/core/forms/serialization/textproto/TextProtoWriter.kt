@@ -1,17 +1,19 @@
-/**
+/*
  * Copyright 2026 The Ground Authors.
  *
- * Licensed under the Apache License, Version 2.0 (the 'License'); you may not use this file except
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
  *
  *     https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an 'AS IS' BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
 package org.groundplatform.v2.core.forms.serialization.textproto
+
+import okio.ByteString
 
 /** Pretty-printer for Protocol Buffer Text Format (`textproto` / `txtpb`). */
 internal class TextProtoWriter(private val indentStep: String = "  ") {
@@ -48,6 +50,14 @@ internal class TextProtoWriter(private val indentStep: String = "  ") {
           .append(escapeString(v.value))
           .append("\"\n")
       }
+      is TextProtoValue.BytesVal -> {
+        sb
+          .append(currentIndent)
+          .append(field.name)
+          .append(": \"")
+          .append(escapeBytes(v.value))
+          .append("\"\n")
+      }
       is TextProtoValue.NumberVal -> {
         sb.append(currentIndent).append(field.name).append(": ").append(v.raw).append("\n")
       }
@@ -67,6 +77,30 @@ internal class TextProtoWriter(private val indentStep: String = "  ") {
           '\r' -> append("\\r")
           '\t' -> append("\\t")
           else -> append(c)
+        }
+      }
+    }
+
+    /**
+     * Escapes arbitrary bytes for a textproto `bytes` field.
+     *
+     * Printable ASCII is emitted verbatim so common payloads stay readable; every other byte
+     * becomes a `\xNN` escape. Decoding the bytes as UTF-8 would replace invalid sequences with
+     * `U+FFFD` and silently corrupt the payload.
+     */
+    fun escapeBytes(bytes: ByteString): String = buildString {
+      for (b in bytes.toByteArray()) {
+        when (val code = b.toInt() and 0xFF) {
+          '\\'.code -> append("\\\\")
+          '"'.code -> append("\\\"")
+          '\n'.code -> append("\\n")
+          '\r'.code -> append("\\r")
+          '\t'.code -> append("\\t")
+          in 0x20..0x7E -> append(code.toChar())
+          else -> {
+            append("\\x")
+            append(code.toString(16).padStart(2, '0').uppercase())
+          }
         }
       }
     }

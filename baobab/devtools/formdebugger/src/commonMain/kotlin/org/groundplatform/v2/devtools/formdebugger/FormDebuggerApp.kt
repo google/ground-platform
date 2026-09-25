@@ -1,13 +1,13 @@
 /*
  * Copyright 2026 The Ground Authors.
  *
- * Licensed under the Apache License, Version 2.0 (the 'License'); you may not use this file except
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
  *
  *     https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an 'AS IS' BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
@@ -49,29 +49,23 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.layout
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.groundplatform.v2.core.forms.ui.FormWizardController
+import org.groundplatform.v2.core.forms.ui.GroundBadgeTone
+import org.groundplatform.v2.core.forms.ui.GroundTheme
+import org.groundplatform.v2.core.forms.ui.GroundTonalBadge
+import org.groundplatform.v2.core.forms.ui.LocalGroundBrandFontFamily
 import org.groundplatform.v2.core.forms.ui.MobileFormRunner
 import org.groundplatform.v2.core.forms.ui.MobilePhoneFrame
-
-private val FormDebuggerColors: ColorScheme =
-  lightColorScheme(
-    primary = Color(0xFF1B5E20),
-    onPrimary = Color.White,
-    primaryContainer = Color(0xFFE8F5E9),
-    onPrimaryContainer = Color(0xFF1B5E20),
-    secondary = Color(0xFF33691E),
-    onSecondary = Color.White,
-    background = Color(0xFFF5F7F6),
-    surface = Color.White,
-    onSurface = Color(0xFF1C1B1F),
-    error = Color(0xFFB3261E),
-  )
+import org.groundplatform.v2.core.forms.ui.WorkbenchExampleForm
 
 @Composable
 fun FormDebuggerApp(state: FormDebuggerState = remember { FormDebuggerState() }) {
@@ -79,7 +73,7 @@ fun FormDebuggerApp(state: FormDebuggerState = remember { FormDebuggerState() })
   val formatDisplayName = repr.displayName
   val formatRadioLabel = repr.radioLabel
 
-  MaterialTheme(colorScheme = FormDebuggerColors) {
+  GroundTheme {
     Surface(
       modifier =
         Modifier.layout { measurable, constraints ->
@@ -115,11 +109,71 @@ fun FormDebuggerApp(state: FormDebuggerState = remember { FormDebuggerState() })
           onClearAll = state::clearAll,
         )
 
+        // Swappable Workbench Example Forms Bar
+        Card(
+          modifier = Modifier.fillMaxWidth(),
+          colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+          elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+        ) {
+          Column(
+            modifier = Modifier.fillMaxWidth().padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+          ) {
+            Text(
+              text = "Swap Workbench Example Form",
+              style =
+                MaterialTheme.typography.titleSmall.copy(
+                  fontWeight = FontWeight.Bold,
+                  color = MaterialTheme.colorScheme.primary,
+                ),
+            )
+            Row(
+              modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+              horizontalArrangement = Arrangement.spacedBy(10.dp),
+              verticalAlignment = Alignment.CenterVertically,
+            ) {
+              WorkbenchExampleForm.entries.forEach { example ->
+                val isSelected = state.selectedExampleForm == example
+                OutlinedButton(
+                  onClick = { state.loadExampleForm(example, autoRun = true) },
+                  colors =
+                    ButtonDefaults.outlinedButtonColors(
+                      containerColor =
+                        if (isSelected) {
+                          MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.45f)
+                        } else {
+                          Color.Transparent
+                        }
+                    ),
+                ) {
+                  Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                    Row(
+                      verticalAlignment = Alignment.CenterVertically,
+                      horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    ) {
+                      Text(
+                        text = example.shortLabel,
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.Bold,
+                      )
+                      GroundTonalBadge(
+                        text = example.badgeText,
+                        tone =
+                          if (isSelected) GroundBadgeTone.PRIMARY else GroundBadgeTone.SECONDARY,
+                      )
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+
         // Section 1: Form Definition (XForms XML <-> TextProto / JSON) + RUN button
         BidiEditorSection(
           sectionTitle = "1. Form Definition (FormDef)",
           sectionSubtitle =
-            "Paste or edit ODK XForms XML (<h:html>) or ProtoForms FormDef $formatRadioLabel. Click RUN to execute the form in the embedded mobile view.",
+            "Paste or edit XForms XML (<h:html>) or ProtoForms FormDef $formatRadioLabel. Click RUN to execute the form in the embedded mobile view.",
           leftTitle = "XForms Form Definition (XML)",
           leftValue = state.formXml,
           onLeftChanged = state::onFormXmlChanged,
@@ -176,7 +230,7 @@ fun FormDebuggerApp(state: FormDebuggerState = remember { FormDebuggerState() })
         BidiEditorSection(
           sectionTitle = "2. Record Instance (RecordInstance)",
           sectionSubtitle =
-            "Paste or edit ODK submission XML (<data id=\"...\">) or ProtoForms RecordInstance $formatRadioLabel. Automatically updates as you answer questions in the mobile runner.",
+            "Paste or edit XForms submission XML (<data id=\"...\">) or ProtoForms RecordInstance $formatRadioLabel. Automatically updates as you answer questions in the mobile runner.",
           leftTitle = "Record Instance (XML)",
           leftValue = state.recordXml,
           onLeftChanged = state::onRecordXmlChanged,
@@ -209,6 +263,7 @@ private fun HeaderBar(
   onLoadSample: () -> Unit,
   onClearAll: () -> Unit,
 ) {
+  val brandFont = LocalGroundBrandFontFamily.current
   Card(
     modifier = Modifier.fillMaxWidth(),
     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
@@ -221,7 +276,13 @@ private fun HeaderBar(
     ) {
       Column {
         Text(
-          text = "ProtoForms Form Debugger",
+          text =
+            buildAnnotatedString {
+              withStyle(SpanStyle(fontFamily = brandFont, fontWeight = FontWeight.ExtraBold)) {
+                append("Ground")
+              }
+              append(" ProtoForms Debugger")
+            },
           style =
             MaterialTheme.typography.headlineSmall.copy(
               fontWeight = FontWeight.Bold,
@@ -279,7 +340,6 @@ private fun ProtoRepresentationSelector(
           text = option.radioLabel,
           style =
             MaterialTheme.typography.bodyMedium.copy(
-              fontFamily = FontFamily.Monospace,
               fontWeight = if (selected == option) FontWeight.Bold else FontWeight.Normal,
               color =
                 if (selected == option) MaterialTheme.colorScheme.primary else Color(0xFF333333),
@@ -489,7 +549,6 @@ private fun EmbeddedMobileFormRunnerPanel(
             text = "Current Screen: ${step.title} (${step.stepKey})",
             style =
               MaterialTheme.typography.bodySmall.copy(
-                fontFamily = FontFamily.Monospace,
                 fontWeight = FontWeight.SemiBold,
                 color = Color(0xFF1F2937),
               ),
@@ -521,7 +580,6 @@ private fun EmbeddedMobileFormRunnerPanel(
                   text = fs.canonicalPath,
                   style =
                     MaterialTheme.typography.bodySmall.copy(
-                      fontFamily = FontFamily.Monospace,
                       fontWeight = FontWeight.Medium,
                       color = if (fs.isRelevant) Color(0xFF0F172A) else Color(0xFF9CA3AF),
                     ),
@@ -544,7 +602,6 @@ private fun EmbeddedMobileFormRunnerPanel(
                     },
                   style =
                     MaterialTheme.typography.bodySmall.copy(
-                      fontFamily = FontFamily.Monospace,
                       color = if (fs.isRelevant) Color(0xFF1B5E20) else Color(0xFF9CA3AF),
                     ),
                 )
@@ -595,15 +652,14 @@ private fun EditorPane(
         Text(
           text = placeholder,
           style =
-            TextStyle(
-              fontFamily = FontFamily.Monospace,
+            MaterialTheme.typography.bodySmall.copy(
               fontSize = 13.sp,
               color = Color(0xFF999999),
             ),
         )
       },
       textStyle =
-        TextStyle(fontFamily = FontFamily.Monospace, fontSize = 13.sp, lineHeight = 18.sp),
+        MaterialTheme.typography.bodySmall.copy(fontSize = 13.sp, lineHeight = 18.sp),
       isError = error != null,
       colors =
         OutlinedTextFieldDefaults.colors(
@@ -623,8 +679,7 @@ private fun EditorPane(
         Text(
           text = error,
           style =
-            TextStyle(
-              fontFamily = FontFamily.Monospace,
+            MaterialTheme.typography.labelSmall.copy(
               fontSize = 12.sp,
               color = Color(0xFFB3261E),
             ),
@@ -675,7 +730,7 @@ private fun XPathEvaluatorSection(
           )
           Text(
             text =
-              "Enter an ODK XPath expression below to evaluate in real-time against the active FormDef and RecordInstance.",
+              "Enter an XForms XPath expression below to evaluate in real-time against the active FormDef and RecordInstance.",
             style = MaterialTheme.typography.bodySmall.copy(color = Color(0xFF666666)),
           )
         }
@@ -704,7 +759,7 @@ private fun XPathEvaluatorSection(
           OutlinedButton(onClick = { onXPathChanged(preset) }, modifier = Modifier.height(32.dp)) {
             Text(
               text = preset,
-              style = TextStyle(fontFamily = FontFamily.Monospace, fontSize = 11.sp),
+              style = MaterialTheme.typography.labelSmall.copy(fontSize = 11.sp),
             )
           }
         }
@@ -728,16 +783,14 @@ private fun XPathEvaluatorSection(
             Text(
               text = "e.g. /data/species or concat(/data/species, ' - ', /data/height_m)",
               style =
-                TextStyle(
-                  fontFamily = FontFamily.Monospace,
+                MaterialTheme.typography.bodyMedium.copy(
                   fontSize = 14.sp,
                   color = Color(0xFF999999),
                 ),
             )
           },
           textStyle =
-            TextStyle(
-              fontFamily = FontFamily.Monospace,
+            MaterialTheme.typography.bodyMedium.copy(
               fontSize = 14.sp,
               fontWeight = FontWeight.Medium,
             ),
@@ -766,8 +819,7 @@ private fun XPathEvaluatorSection(
           readOnly = true,
           modifier = Modifier.fillMaxWidth().height(180.dp),
           textStyle =
-            TextStyle(
-              fontFamily = FontFamily.Monospace,
+            MaterialTheme.typography.bodySmall.copy(
               fontSize = 13.sp,
               lineHeight = 19.sp,
               color =

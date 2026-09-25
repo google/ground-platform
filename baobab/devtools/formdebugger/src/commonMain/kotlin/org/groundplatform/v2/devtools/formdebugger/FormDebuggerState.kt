@@ -1,13 +1,13 @@
 /*
  * Copyright 2026 The Ground Authors.
  *
- * Licensed under the Apache License, Version 2.0 (the 'License'); you may not use this file except
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
  *
  *     https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an 'AS IS' BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
@@ -22,6 +22,7 @@ import org.groundplatform.v2.core.forms.serialization.ProtoJsonSerializer
 import org.groundplatform.v2.core.forms.serialization.TextProtoSerializer
 import org.groundplatform.v2.core.forms.serialization.XFormsXmlSerializer
 import org.groundplatform.v2.core.forms.ui.FormWizardController
+import org.groundplatform.v2.core.forms.ui.WorkbenchExampleForm
 import org.groundplatform.v2.core.forms.xpath.EvaluationContext
 import org.groundplatform.v2.core.forms.xpath.XPathEngine
 import org.groundplatform.v2.core.forms.xpath.model.XPathNode
@@ -47,6 +48,9 @@ enum class ProtoRepresentation(val radioLabel: String, val displayName: String) 
 class FormDebuggerState(loadInitialSample: Boolean = true) {
 
   var protoRepresentation by mutableStateOf(ProtoRepresentation.TEXTPROTO)
+    private set
+
+  var selectedExampleForm by mutableStateOf<WorkbenchExampleForm?>(null)
     private set
 
   var formXml by mutableStateOf("")
@@ -324,7 +328,8 @@ class FormDebuggerState(loadInitialSample: Boolean = true) {
   private fun deserializeRecordInstance(input: String): RecordInstance =
     when (protoRepresentation) {
       ProtoRepresentation.TEXTPROTO -> TextProtoSerializer.deserializeRecordInstance(input)
-      ProtoRepresentation.JSON -> ProtoJsonSerializer.deserializeRecordInstance(input)
+      ProtoRepresentation.JSON ->
+        ProtoJsonSerializer.deserializeRecordInstance(input, formDef = currentFormDef)
     }
 
   private fun refreshRecordFromXmlIfValid() {
@@ -384,6 +389,7 @@ class FormDebuggerState(loadInitialSample: Boolean = true) {
 
   /** Loads default sample XForms FormDef, RecordInstance, and XPath expression. */
   fun loadSampleData() {
+    selectedExampleForm = null
     onFormXmlChanged(SAMPLE_FORM_XML)
     onRecordXmlChanged(SAMPLE_RECORD_XML)
     onXPathChanged(
@@ -391,8 +397,35 @@ class FormDebuggerState(loadInitialSample: Boolean = true) {
     )
   }
 
+  /**
+   * Swaps the active FormDef and RecordInstance in the Form Debugger to the given [example] form.
+   */
+  fun loadExampleForm(example: WorkbenchExampleForm, autoRun: Boolean = true) {
+    selectedExampleForm = example
+    onFormXmlChanged(example.xformsXml)
+    onRecordXmlChanged(example.sampleInstanceXml)
+    val sampleXPath =
+      when (example) {
+        WorkbenchExampleForm.SINGLE_POINT_LAND_USE ->
+          "concat('Land Use: ', /data/land_use, ' | Point: ', /data/sample_point)"
+        WorkbenchExampleForm.SAMPLE_PLOTS_FOREST_ASSESSMENT ->
+          "concat('Plot: ', /data/sample_plot_entity, ' | Canopy: ', /data/canopy_cover_pct, '%')"
+        WorkbenchExampleForm.COMMODITY_PERIMETER_AND_CENTER ->
+          "concat('Commodity: ', /data/commodity_type, ' | Center: ', /data/plot_center_point)"
+        WorkbenchExampleForm.HOUSEHOLD_SURVEY_PAST_INDIVIDUALS ->
+          "concat('Respondent: ', /data/primary_respondent_id, ' | HH Size: ', /data/current_household_size)"
+        WorkbenchExampleForm.ALL_FIELD_TYPES ->
+          "concat('Species: ', /data/dominant_shade_species, ' | Saplings: ', /data/surviving_saplings_count)"
+      }
+    onXPathChanged(sampleXPath)
+    if (autoRun) {
+      runForm()
+    }
+  }
+
   /** Clears all fields. */
   fun clearAll() {
+    selectedExampleForm = null
     onFormXmlChanged("")
     onRecordXmlChanged("")
     onXPathChanged("")

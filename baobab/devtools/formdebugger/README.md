@@ -17,7 +17,7 @@
 # ProtoForms Form Debugger (`devtools/formdebugger`)
 
 A Kotlin Multiplatform (KMP) Compose single-page web application for inspecting,
-converting, and debugging ODK XForms XML definitions, ProtoForms `textproto` /
+converting, and debugging XForms XML definitions, ProtoForms `textproto` /
 `JSON` representations, and real-time XPath expressions.
 
 ## Features
@@ -29,15 +29,15 @@ converting, and debugging ODK XForms XML definitions, ProtoForms `textproto` /
 
 2.  **Form Definition (`FormDef`) Bidirectional Editor**
 
-    -   Paste or edit an ODK XForms XML definition (`<h:html>...</h:html>`) on
-        the left, or edit the equivalent `groundplatform.v2.forms.FormDef`
+    -   Paste or edit an XForms XML definition (`<h:html>...</h:html>`) on the
+        left, or edit the equivalent `groundplatform.v2.forms.FormDef`
         (`textproto` or `JSON`) on the right.
     -   Modifying either field automatically updates the other representation in
         real-time.
 
 3.  **Record Instance (`RecordInstance`) Bidirectional Editor**
 
-    -   Paste or edit an ODK submission XML payload (`<data
+    -   Paste or edit an XForms submission XML payload (`<data
         id="...">...</data>`) on the left, or edit the equivalent
         `groundplatform.v2.forms.RecordInstance` (`textproto` or `JSON`) on the
         right.
@@ -46,7 +46,7 @@ converting, and debugging ODK XForms XML definitions, ProtoForms `textproto` /
 
 4.  **Real-Time XPath Evaluator**
 
-    -   Enter any ODK XForms XPath expression (e.g. `/data/species`,
+    -   Enter any XForms XPath expression (e.g. `/data/species`,
         `concat(/data/species, ' - ', /data/height_m)`, `count(/data/*)`).
     -   Evaluates immediately in real-time against the active `FormDef` and
         `RecordInstance` and displays the formatted string result, type,
@@ -72,6 +72,19 @@ or **JS (IR)** target:
 # Alternatively, start the JS (IR) browser development server:
 ./gradlew jsBrowserDevelopmentRun
 ```
+
+### Choosing Between `wasmJsBrowserDevelopmentRun` and `jsBrowserDevelopmentRun`
+
+-   **`wasmJsBrowserDevelopmentRun` (Kotlin/Wasm — Default)**: Compiles Kotlin
+    to WebAssembly GC (`*.wasm`). Provides near-native runtime performance and
+    matches the primary production target. Enable **Chrome DevTools → Settings →
+    Preferences → Console → Custom formatters** to inspect Wasm GC `Struct`
+    instances as readable Kotlin objects.
+-   **`jsBrowserDevelopmentRun` (Kotlin/JS IR — Debugging & Fallback)**:
+    Compiles Kotlin to standard JavaScript (`*.js`). Useful when stepping
+    through code in Chrome DevTools, as Kotlin classes and variables map to
+    native JS objects and can be evaluated directly in the DevTools Console
+    without Wasm `$` wrappers.
 
 ### Accessing the Web App
 

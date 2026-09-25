@@ -22,52 +22,53 @@ UX Co-Design Workbench for rapid iteration with UX designers.
 
 ## Prototype Screens Included
 
-1.  **Splash / Loading Screen (`PrototypeScreen.SPLASH`)**
-    -   Displays the Ground emblem, title, tagline, and workspace initialization
-        progress bar with a prototype action to continue to Sign In.
-2.  **Sign In Screen (`PrototypeScreen.SIGN_IN`)**
+1.  **Sign In Screen (`PrototypeScreen.SIGN_IN`)**
     -   Displays the Ground welcome header, field survey map preview card, and a
         **Sign in with Google** button (only Google authentication enabled for
         now).
-3.  **Terms of Service Screen (`PrototypeScreen.TERMS_OF_SERVICE`)**
+2.  **Terms of Service Screen (`PrototypeScreen.TERMS_OF_SERVICE`)**
     -   Displays the scrollable Terms of Service sections, agreement checkbox,
         and **Decline** / **Agree & Continue** actions.
-4.  **Download Survey Screen (`PrototypeScreen.DOWNLOAD_SURVEY`)**
+3.  **Download Survey Screen (`PrototypeScreen.DOWNLOAD_SURVEY`)**
     -   Displays the list of all surveys shared with the signed-in user.
     -   Includes a live **Search bar** to filter surveys by **name** (title or
         description) or **location** (region, country, or coordinates).
     -   Each survey item displays a **title**, **location**, **description**,
         **map thumbnail** (stylized placeholder), and a **`✓ Downloaded`**
         indicator badge on surveys already downloaded for offline use.
-5.  **Main Survey UI (`PrototypeScreen.MAIN_SURVEY` in `MainSurveyScreen.kt`)**
-    -   **Map & List View Switcher**: Top segmented control switching between
-        **Map View** (`SurveyMapView`) and **List View** (`SurveyListView`).
+4.  **Main Survey UI (`PrototypeScreen.MAIN_SURVEY` in `MainSurveyScreen.kt`)**
+    -   **Unified Persistent Bottom Sheet (`SurveyPersistentBottomSheetContent`)**:
+        Replaces separate `Map | List` screens with a single multi-stage bottom
+        sheet over the live Mapbox canvas:
+        -   **Default / Peek State (No site selected)**: Peeks at the bottom of
+            the map with the **Search bar** and category filter chips (`All`,
+            `Places`, `Map features`) and expands into the
+            full searchable list (`BottomSheetSearchableListContent`).
+        -   **Selected Site State (`EntityBottomSheetCard`)**: Tapping a site on
+            the map or selecting a site in the expanded list transitions the
+            bottom sheet in-place to `EntityBottomSheetCard` (with a `← All
+            sites` back pill), reusing shared `EntitySummaryHeader`,
+            `EntityMetadataAndActionsRow`, and `FormGroupedSubmissionsSection`
+            composables.
     -   **Interactive Map View & `Layers` Drawer (`LayerDef`)**: Displays Ground
-        geospatial features with a **`Layers`** control button
-        (`MapLayersControlSheet`) split into two self-describing categories
-        rather than nesting layers under form menus:
-        -   **Data collection sites**: Geospatial Entity Lists (spatial master
+        geospatial entity geometries with a **`Layers`** control button
+        (`MapLayersControlSheet`):
+        -   **Map features**: Geospatial Entity Lists (spatial master
             tables) representing target locations/features on the map (`#1`–`#4`
-            with GNSS wayfinding HUD).
-        -   **Form Submissions**: Completed form submission GPS instances
-            (`geopoint`, `geotrace`, `geoshape`) displaying historical coverage
-            and visits visually distinct from active sites.
-    -   **Site-First Entity Bottom Sheet (`1:1` vs `1:N` Submission Model)**:
-        -   Tapping a site pin opens `EntityBottomSheetCard` showing its current
-            status (entity label, dataset, `SubmissionModel` badge,
-            deterministic `GeoID`, area/perimeter metrics, `Summary PDF` export
-            badge, and baseline attributes) and launches available site-first
-            form actions (e.g., `[ + Inspect Site ]`, `[ + Update Info ]`).
-        -   **`1:1` (`SubmissionModel.SINGLE_1_TO_1`) with data**: Renders the
-            submission data directly inline inside the bottom sheet card
-            (`OneToOneInlineSubmissionCard`).
-        -   **`1:N` (`SubmissionModel.MULTIPLE_1_TO_N`)**: Renders a
-            chronological list of submissions (data collector name and
-            timestamp) that can be clicked to inspect the **Full Submission
-            Details** (`SubmissionFullDetailsCard`).
-    -   **Searchable List View (`SurveyListView`)**: Search bar and filter tabs
-        (`All`, `Forms`, `Entities`, `Submissions`) across the survey's forms,
-        geospatial entities, and field submissions.
+            with GNSS wayfinding HUD). Form submission geometries are not shown
+            on the map or in cluster chips.
+    -   **Site-First Entity Bottom Sheet & `simplestyle-spec` Marker Progression**:
+        -   All forms linked to an entity dataset follow a unified **`1:N`
+            relationship** with entities.
+        -   Entity points, lines, and polygons render `simplestyle-spec` style
+            properties (`marker-symbol`, `marker-color`, `stroke`, `fill`)
+            updated dynamically via XLSForm `save_to` bindings across a 3-stage
+            workflow progression:
+            -   **`○` (Empty Circle)**: Initialized / pending baseline state.
+            -   **`◐` (Half-Filled Circle)**: Intermediate / in-progress state
+                after initial form submission.
+            -   **`✓` (Checkmark)**: Final `"completed"` state after follow-up /
+                verification submission.
     -   **Hamburger / Navigation Drawer (`MainSurveyNavigationDrawerOverlay`)**:
         Provides options for **Surveys**, **Offline maps** (Mapbox vector/raster
         tile packages + 500 MB storage cap), **Settings** (Metric/Imperial
@@ -89,6 +90,21 @@ the **WasmJS** or **JS (IR)** target (defaults to port `8091`):
 # Alternatively, start the JS (IR) browser development server:
 ./gradlew jsBrowserDevelopmentRun
 ```
+
+### Choosing Between `wasmJsBrowserDevelopmentRun` and `jsBrowserDevelopmentRun`
+
+-   **`wasmJsBrowserDevelopmentRun` (Kotlin/Wasm — Default)**: Compiles Kotlin
+    to WebAssembly GC (`*.wasm`). Provides near-native runtime performance, fast
+    incremental linking, and matches the primary production target. When
+    debugging in Chrome DevTools, enable **Settings → Preferences → Console →
+    Custom formatters** so Wasm GC `Struct` instances render as readable Kotlin
+    objects (note that local variable names in the **Scope** pane still include
+    a `$` prefix).
+-   **`jsBrowserDevelopmentRun` (Kotlin/JS IR — Debugging & Fallback)**:
+    Compiles Kotlin to standard JavaScript (`*.js`). Best when stepping through
+    complex state or inspecting objects in Chrome DevTools, as Kotlin classes
+    and locals map directly to native JS objects and can be evaluated in the
+    DevTools Console without Wasm `$` wrappers.
 
 ### Custom Port Override
 

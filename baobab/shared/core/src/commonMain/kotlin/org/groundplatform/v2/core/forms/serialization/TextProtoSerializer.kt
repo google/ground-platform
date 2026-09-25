@@ -1,13 +1,13 @@
-/**
+/*
  * Copyright 2026 The Ground Authors.
  *
- * Licensed under the Apache License, Version 2.0 (the 'License'); you may not use this file except
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
  *
  *     https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an 'AS IS' BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
@@ -63,7 +63,7 @@ import groundplatform.v2.forms.TypedValue
 import groundplatform.v2.forms.TypedValueList
 import groundplatform.v2.forms.ViewComponent
 import groundplatform.v2.forms.ViewDef
-import okio.ByteString.Companion.encodeUtf8
+import okio.ByteString
 import org.groundplatform.v2.core.forms.serialization.textproto.TextProtoField
 import org.groundplatform.v2.core.forms.serialization.textproto.TextProtoMessage
 import org.groundplatform.v2.core.forms.serialization.textproto.TextProtoParser
@@ -464,7 +464,7 @@ object TextProtoSerializer {
     msg.time_value?.let { addMessage("time_value", encodeTimeOfDay(it)) }
     msg.timestamp_value?.let { addMessage("timestamp_value", encodeInstant(it)) }
     msg.geopoint_value?.let { addMessage("geopoint_value", encodeGeoPoint(it)) }
-    msg.binary_value?.let { addStringAlways("binary_value", it.utf8()) }
+    msg.binary_value?.let { addBytesAlways("binary_value", it) }
     msg.geotrace_value?.let { addMessage("geotrace_value", encodeGeoTrace(it)) }
     msg.geoshape_value?.let { addMessage("geoshape_value", encodeGeoShape(it)) }
   }
@@ -867,7 +867,7 @@ object TextProtoSerializer {
       time_value = node.getMessageOrNull("time_value")?.let { decodeTimeOfDay(it) },
       timestamp_value = node.getMessageOrNull("timestamp_value")?.let { decodeInstant(it) },
       geopoint_value = node.getMessageOrNull("geopoint_value")?.let { decodeGeoPoint(it) },
-      binary_value = node.getStringOrNull("binary_value")?.encodeUtf8(),
+      binary_value = node.getByteStringOrNull("binary_value"),
       geotrace_value = node.getMessageOrNull("geotrace_value")?.let { decodeGeoTrace(it) },
       geoshape_value = node.getMessageOrNull("geoshape_value")?.let { decodeGeoShape(it) },
     )
@@ -920,6 +920,11 @@ object TextProtoSerializer {
 
     fun addStringAlways(name: String, value: String) {
       fields.add(TextProtoField(name, TextProtoValue.StringVal(value)))
+    }
+
+    /** Adds a `bytes` field, preserving every byte exactly via `\xNN` escapes when written. */
+    fun addBytesAlways(name: String, value: ByteString) {
+      fields.add(TextProtoField(name, TextProtoValue.BytesVal(value)))
     }
 
     fun addInt(name: String, value: Int) {

@@ -1,13 +1,13 @@
 /*
  * Copyright 2026 The Ground Authors.
  *
- * Licensed under the Apache License, Version 2.0 (the 'License'); you may not use this file except
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
  *
  *     https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an 'AS IS' BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
@@ -79,5 +79,42 @@ internal actual fun hidePlatformMapboxBasemap() {
   val bridge = js("window.GroundMapboxBridge")
   if (bridge != null && bridge != undefined) {
     bridge.syncViewport(0f, 0f, 0f, 0f, 0f, false)
+  }
+}
+
+internal actual fun searchPlatformMapboxPlaces(
+  surveyId: String,
+  query: String,
+  isAirplaneMode: Boolean,
+  onResultsJson: (String) -> Unit,
+) {
+  val bridge = js("window.GroundMapboxBridge")
+  if (bridge != null && bridge != undefined && bridge.searchPlaces != undefined) {
+    bridge.searchPlaces(surveyId, query, isAirplaneMode) { json: dynamic ->
+      onResultsJson((json as? String) ?: "[]")
+    }
+  } else {
+    onResultsJson("[]")
+  }
+}
+
+internal actual fun flyPlatformMapboxToPlace(
+  lng: Double,
+  lat: Double,
+  zoom: Float,
+  name: String,
+  category: String,
+  coordinatesLabel: String,
+) {
+  val bridge = js("window.GroundMapboxBridge")
+  if (bridge != null && bridge != undefined && bridge.flyToPlace != undefined) {
+    bridge.flyToPlace(lng, lat, zoom, name, category, coordinatesLabel)
+  }
+}
+
+internal actual fun clearPlatformMapboxPlace() {
+  val bridge = js("window.GroundMapboxBridge")
+  if (bridge != null && bridge != undefined && bridge.clearSelectedPlace != undefined) {
+    bridge.clearSelectedPlace()
   }
 }

@@ -18,7 +18,7 @@
 
 A Kotlin Multiplatform (KMP) library
 (`org.groundplatform.v2:xforms-proto-serializer`) that serializes and
-deserializes [ODK XForms](https://getodk.github.io/xforms-spec/) XML documents
+deserializes [XForms](https://getodk.github.io/xforms-spec/) XML documents
 (`FormDef` form definitions and `RecordInstance` submission instances) to and
 from the **ProtoForms** protocol buffer model (generated with
 [Square Wire](https://square.github.io/wire/)).
@@ -27,10 +27,10 @@ from the **ProtoForms** protocol buffer model (generated with
 
 ## Overview
 
-The library bridges ODK XForms XML and strongly-typed Protocol Buffer
+The library bridges XForms XML and strongly-typed Protocol Buffer
 representations defined in the `groundplatform.v2.forms` schema:
 
--   **Form Definitions (`FormDef`)**: Converts `<h:html>` ODK XForms
+-   **Form Definitions (`FormDef`)**: Converts `<h:html>` XForms
     documents—including `<model>` (`<instance>`, `<bind>`, `<itext>`
     translations, secondary `<instance>` choice datasets) and `<body>` UI
     controls (`<input>`, `<select1>`, `<select>`, `<range>`, `<rank>`,
@@ -66,7 +66,7 @@ All serialization and deserialization entry points are available on the
 
 ### 1. Form Definitions (`FormDef`)
 
-Deserialize an ODK XForms `<h:html>` XML document into a `FormDef` protobuf
+Deserialize an XForms `<h:html>` XML document into a `FormDef` protobuf
 object and serialize it back to XML:
 
 ```kotlin
@@ -109,7 +109,7 @@ println("Form Title: ${formDef.title}")
 println("Form ID: ${formDef.instanceId}")
 println("Controls count: ${formDef.body.controls.size}")
 
-// Serialize FormDef proto -> ODK XForms XML string
+// Serialize FormDef proto -> XForms XML string
 val serializedFormXml: String = XFormsXmlSerializer.serialize(
   formDef = formDef,
   prettyPrint = true,
@@ -118,7 +118,7 @@ val serializedFormXml: String = XFormsXmlSerializer.serialize(
 
 ### 2. Submission Instances (`RecordInstance`)
 
-Deserialize an ODK XForms `<data>` submission XML string into a `RecordInstance`
+Deserialize an XForms `<data>` submission XML string into a `RecordInstance`
 protobuf object and serialize it back to XML:
 
 ```kotlin
@@ -142,7 +142,7 @@ val recordInstance: RecordInstance = XFormsXmlSerializer.deserializeRecordInstan
   formDef = formDef, // optional
 )
 
-// Serialize RecordInstance proto -> ODK XForms submission XML string
+// Serialize RecordInstance proto -> XForms submission XML string
 val serializedSubmissionXml: String = XFormsXmlSerializer.serialize(
   record = recordInstance,
   prettyPrint = true,

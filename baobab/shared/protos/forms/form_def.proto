@@ -114,7 +114,7 @@ message PrimaryInstance {
 message SecondaryInstance {
   // Unique instance identifier referenced in expressions via instance('id').
   // In hosted, database-backed runtimes (such as Ground), this id implicitly
-  // binds to a managed ODK Entity Dataset (EntityDatasetDef).
+  // binds to a managed Entity Dataset (EntityDatasetDef).
   string id = 1;
 
   // External resource URI pointing to CSV, GeoJSON, or XML data
@@ -356,8 +356,8 @@ message EntityDeclaration {
 // for sending finalized form records.
 //
 // Clients and form editors are expected to preserve all submission metadata
-// (including base64_rsa_public_key) for round-trip compatibility with ODK
-// Forms, even if the client relies on transport-layer security (TLS/HTTPS or
+// (including base64_rsa_public_key) for round-trip compatibility with XForms,
+// even if the client relies on transport-layer security (TLS/HTTPS or
 // gRPC) rather than payload encryption.
 message SubmissionConfig {
   // Optional custom endpoint URL or gRPC service address to send submissions
@@ -389,7 +389,7 @@ message SubmissionConfig {
 // and submission parameters.
 //
 // Clients are expected to preserve all form model metadata and extension
-// payloads even if they do not support all features of ODK Forms.
+// payloads even if they do not support all features of the XForms specification.
 message ModelDef {
   // Primary record schema and field structures captured by this form.
   PrimaryInstance primary_instance = 1;
@@ -536,18 +536,18 @@ message RangeConfig {
 // Configuration parameters for geospatial capture controls (geopoint, geotrace,
 // geoshape).
 //
-// Matches ODK XForms accuracy attributes on `<input>` and XLSForm parameters.
+// Matches XForms accuracy attributes on `<input>` and XLSForm parameters.
 message GeoConfig {
   // Target horizontal accuracy threshold in meters for auto-acceptance.
   // Once sensor accuracy meets or beats this threshold, the capture dialog
   // automatically accepts the reading and closes.
-  // Corresponds to ODK XForms `<input accuracyThreshold="...">` and XLSForm
+  // Corresponds to XForms `<input accuracyThreshold="...">` and XLSForm
   // `capture-accuracy` / `body::accuracyThreshold`.
   double accuracy_threshold_meters = 1;
 
   // Horizontal accuracy threshold in meters above which the UI displays an
   // uncertainty warning (e.g., red dialog in ODK Collect).
-  // Corresponds to ODK XForms `<input unacceptableAccuracyThreshold="...">` and
+  // Corresponds to XForms `<input unacceptableAccuracyThreshold="...">` and
   // XLSForm `warning-accuracy` / `body::unacceptableAccuracyThreshold`.
   double warning_threshold_meters = 2;
 
@@ -717,6 +717,6 @@ message FormDef {
 
   // Typed extension payloads for custom, vendor, or experimental form-level
   // metadata. Clients are expected to preserve all metadata and extension
-  // payloads even if they do not support all features of ODK Forms.
+  // payloads even if they do not support all features of the XForms specification.
   repeated google.protobuf.Any custom_extensions = 7;
 }

@@ -13,20 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-/**
- * 2026 The Ground Authors.
- *
- * Licensed under the Apache License, Version 2.0 (the 'License'); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
- *
- *     https://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an 'AS IS' BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
- */
 package org.groundplatform.v2.core.forms.engine
 
 import com.squareup.wire.ofEpochSecond
@@ -69,16 +55,17 @@ import org.groundplatform.v2.core.forms.model.ValidationErrorKind
 import org.groundplatform.v2.core.forms.model.ValidationStatus
 import org.groundplatform.v2.core.forms.xpath.EvaluationContext
 import org.groundplatform.v2.core.forms.xpath.SecondaryInstanceProvider
+import org.groundplatform.v2.core.forms.xpath.XPathException
 import org.groundplatform.v2.core.forms.xpath.model.TemporalUtils
 import org.groundplatform.v2.core.forms.xpath.model.XPathNode
 import org.groundplatform.v2.core.forms.xpath.model.XPathValue
 
 /**
- * Stateless evaluation engine for ProtoForms and ODK XForms specifications.
+ * Stateless evaluation engine for ProtoForms and XForms specifications.
  *
  * Evaluates dynamic form states (`relevant`, `calculate`, `required`, `constraint`, `jr:count`
  * repeats, cascading `itemset` queries, localized `<output>` interpolations, preloads, lifecycle
- * events/actions, and ODK Entities) in pure Kotlin Multiplatform.
+ * events/actions, and XForms Entities) in pure Kotlin Multiplatform.
  */
 object FormEngine {
 
@@ -86,6 +73,31 @@ object FormEngine {
 
   /** Pre-compiles a [FormDef] into a [CompiledForm] with cached ASTs and dependency ordering. */
   fun compile(formDef: FormDef): CompiledForm = CompiledForm(formDef)
+
+  /**
+   * Checks whether [formDef] can be compiled, returning any problems as data instead of throwing.
+   *
+   * [compile] deliberately fails fast: a form whose bindings form a dependency cycle has no valid
+   * evaluation order, and filling it in would silently produce values that depend on declaration
+   * order. That is the right behavior for the runtime, but it makes the form impossible to even
+   * open, which is a poor experience for whoever has to *fix* it. This entry point exists so form
+   * authoring and import tooling can detect the problem, name the fields responsible, and decide
+   * its own policy.
+   */
+  fun validate(formDef: FormDef): FormValidationResult {
+    return try {
+      compile(formDef)
+      FormValidationResult.VALID
+    } catch (e: CyclicDependencyException) {
+      FormValidationResult(listOf(FormValidationProblem.CircularDependency(e.paths)))
+    } catch (e: XPathException) {
+      // Expression parsing happens eagerly while indexing bindings, so a malformed calculate or
+      // relevant expression also surfaces here rather than at evaluation time.
+      FormValidationResult(
+        listOf(FormValidationProblem.InvalidExpression(e.message ?: "Invalid XPath expression"))
+      )
+    }
+  }
 
   /**
    * Initializes a new or reopened form session, executing schema defaults, preload calculations,
@@ -493,6 +505,7 @@ object FormEngine {
     var relevancyMap = linkedMapOf<String, Boolean>()
     var prunedNode = workingRawNode
     val dynamicRepeatCounts = mutableMapOf<String, Int>()
+    var converged = false
 
     // Multi-pass convergence loop for repeat counts, top-down relevancy, and calculations
     for (pass in 0 until MAX_CONVERGENCE_PASSES) {
@@ -565,6 +578,7 @@ object FormEngine {
           relevancyMap == prevRelevancy &&
           dynamicRepeatCounts == prevCounts
       ) {
+        converged = true
         break
       }
     }
@@ -636,6 +650,7 @@ object FormEngine {
       entityStates = entityStates,
       validationErrors = validationErrors,
       pendingRequests = allPendingRequests,
+      didNotConverge = !converged,
     )
   }
 

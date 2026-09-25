@@ -19,6 +19,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ground 2.0 Mobile UI Prototype</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
     <link href="https://api.mapbox.com/mapbox-gl-js/v1.13.3/mapbox-gl.css" rel="stylesheet" />
     <script src="https://api.mapbox.com/mapbox-gl-js/v1.13.3/mapbox-gl.js"></script>
     <script>
@@ -54,6 +57,149 @@
         };
       })();
     </script>
+    <script>
+      // Chrome DevTools Custom Formatter for Kotlin / Jetpack Compose State & Delegates
+      (function () {
+        window.devtoolsFormatters = window.devtoolsFormatters || [];
+
+        function unwrapValue(val) {
+          if (val == null) return val;
+          try {
+            if (typeof val === 'object') {
+              if ('value' in val) return val.value;
+              if ('_value' in val) return val._value;
+              if (typeof val.getValue === 'function') return val.getValue();
+            }
+          } catch (e) {}
+          return val;
+        }
+
+        const kotlinComposeFormatter = {
+          header: function (obj, config) {
+            if (!obj || (typeof obj !== 'object' && typeof obj !== 'function')) return null;
+            if (config && config.__isKotlinCleanView) return null;
+
+            try {
+              const className =
+                (obj.constructor && obj.constructor.name !== 'Object' && obj.constructor.name) ||
+                (obj.rtti && (obj.rtti.className || obj.rtti.name)) ||
+                '';
+
+              // Single State / Delegate wrapper (e.g. SnapshotMutableStateImpl)
+              if (className.includes('State') || ('value' in obj && '_value' in obj)) {
+                const val = unwrapValue(obj);
+                return [
+                  'span',
+                  { style: 'font-family: monospace;' },
+                  ['span', { style: 'color: #881391; font-weight: bold;' }, className || 'State'],
+                  ' (',
+                  ['object', { object: val }],
+                  ')'
+                ];
+              }
+
+              // Object containing $delegate or mangled properties
+              const allKeys = Object.getOwnPropertyNames(obj);
+              const delegateKeys = allKeys.filter(function (k) { return k.endsWith('$delegate'); });
+              if (delegateKeys.length === 0 && !allKeys.some(function (k) { return k.startsWith('$') && !k.startsWith('$$'); })) {
+                return null;
+              }
+
+              const title = className || 'Object';
+              const previewKeys = delegateKeys.slice(0, 3).map(function (k) { return k.replace(/\$delegate$/, ''); });
+              const previewText = previewKeys.length > 0 ? ' {' + previewKeys.join(', ') + (delegateKeys.length > 3 ? ', …' : '') + '}' : '';
+
+              return [
+                'span',
+                { style: 'font-family: monospace;' },
+                ['span', { style: 'color: #881391; font-weight: bold;' }, title],
+                ['span', { style: 'color: #5f6368;' }, previewText]
+              ];
+            } catch (e) {
+              return null;
+            }
+          },
+
+          hasBody: function (obj) {
+            return Boolean(obj && typeof obj === 'object');
+          },
+
+          body: function (obj, config) {
+            try {
+              const allKeys = Object.getOwnPropertyNames(obj);
+              const rows = [];
+              const cleanProps = [];
+              const normalProps = [];
+              const internalProps = [];
+
+              for (let i = 0; i < allKeys.length; i++) {
+                const k = allKeys[i];
+                if (k.startsWith('$$') || k === 'rtti') {
+                  internalProps.push(k);
+                } else if (k.endsWith('$delegate')) {
+                  cleanProps.push(k);
+                } else {
+                  normalProps.push(k);
+                }
+              }
+
+              // Render clean delegated properties
+              for (let i = 0; i < cleanProps.length; i++) {
+                const k = cleanProps[i];
+                const cleanName = k.replace(/\$delegate$/, '');
+                let val;
+                try {
+                  if (cleanName in obj && typeof obj[cleanName] !== 'function') {
+                    val = obj[cleanName];
+                  } else {
+                    val = unwrapValue(obj[k]);
+                  }
+                } catch (e) {
+                  val = unwrapValue(obj[k]);
+                }
+
+                rows.push([
+                  'div',
+                  { style: 'padding-left: 14px; line-height: 1.5; font-family: monospace;' },
+                  ['span', { style: 'color: #1a73e8; font-weight: 500;' }, cleanName],
+                  ['span', { style: 'color: #5f6368;' }, ': '],
+                  ['object', { object: val }]
+                ]);
+              }
+
+              // Render normal properties
+              for (let i = 0; i < normalProps.length; i++) {
+                const k = normalProps[i];
+                const cleanName = k.startsWith('$') ? k.substring(1) : k;
+                const val = obj[k];
+                rows.push([
+                  'div',
+                  { style: 'padding-left: 14px; line-height: 1.5; font-family: monospace;' },
+                  ['span', { style: 'color: #333333;' }, cleanName],
+                  ['span', { style: 'color: #5f6368;' }, ': '],
+                  ['object', { object: val }]
+                ]);
+              }
+
+              // Collapsible / subdued internal properties
+              if (internalProps.length > 0) {
+                rows.push([
+                  'div',
+                  { style: 'padding-left: 14px; margin-top: 4px; color: #80868b; font-size: 11px; font-style: italic;' },
+                  '(' + internalProps.length + ' internal fields: ' + internalProps.join(', ') + ')'
+                ]);
+              }
+
+              return ['div', {}, ...rows];
+            } catch (e) {
+              return ['div', {}, String(e)];
+            }
+          }
+        };
+
+        window.devtoolsFormatters.push(kotlinComposeFormatter);
+      })();
+    </script>
     <style>
         html, body {
             width: 100%;
@@ -62,6 +208,7 @@
             padding: 0;
             overflow: hidden;
             background-color: #F0F4F1;
+            font-family: 'Google Sans Flex', sans-serif;
         }
         #mapbox-basemap-container {
             position: fixed;
@@ -81,6 +228,10 @@
             width: 100% !important;
             height: 100% !important;
             display: block;
+        }
+        #mapbox-basemap-container .mapboxgl-ctrl-logo,
+        #mapbox-basemap-container .mapboxgl-ctrl-attrib {
+            display: none !important;
         }
         #ComposeTarget {
             position: fixed;
@@ -104,7 +255,7 @@
             border: 1px solid rgba(139, 214, 177, 0.45);
             border-radius: 8px;
             padding: 2px 7px;
-            font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+            font-family: 'Google Sans Flex', sans-serif;
             font-size: 9px;
             font-weight: 600;
             letter-spacing: 0.2px;
@@ -113,23 +264,30 @@
         .ground-entity-marker {
             display: inline-flex;
             align-items: center;
-            gap: 4px;
-            padding: 4px 8px;
+            gap: 5px;
+            padding: 3px 5px 3px 8px;
             border-radius: 16px;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: 'Google Sans Flex', sans-serif;
             font-size: 10px;
             font-weight: 700;
             line-height: 1.2;
             white-space: nowrap;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.38);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.42);
             user-select: none;
             pointer-events: auto;
         }
         .ground-entity-marker-badge {
-            font-size: 9px;
-            font-weight: 600;
-            opacity: 0.92;
-            margin-left: 2px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 16px;
+            height: 16px;
+            padding: 0 4.5px;
+            border-radius: 999px;
+            font-size: 9.5px;
+            font-weight: 800;
+            line-height: 1;
+            box-sizing: border-box;
         }
         .ground-submission-marker {
             display: inline-flex;
@@ -137,7 +295,7 @@
             gap: 3px;
             padding: 2px 6px;
             border-radius: 10px;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: 'Google Sans Flex', sans-serif;
             font-size: 8.5px;
             font-weight: 700;
             line-height: 1.2;
@@ -155,7 +313,7 @@
             background: rgba(26, 115, 232, 0.92);
             border: 1px solid #FFFFFF;
             color: #FFFFFF;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: 'Google Sans Flex', sans-serif;
             font-size: 8.5px;
             font-weight: 700;
             line-height: 1.2;
@@ -173,7 +331,7 @@
             background: rgba(7, 24, 18, 0.92);
             border: 1.5px solid #00E5FF;
             color: #E0F7FA;
-            font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+            font-family: 'Google Sans Flex', sans-serif;
             font-size: 9px;
             font-weight: 700;
             line-height: 1.2;
@@ -182,16 +340,173 @@
             user-select: none;
             pointer-events: none;
         }
+        .ground-cluster-balloon-wrapper {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            user-select: none;
+            pointer-events: auto;
+            cursor: pointer;
+        }
+        .ground-cluster-balloon {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: stretch;
+            gap: 4px;
+            padding: 5px 9px 6px 9px;
+            border-radius: 14px;
+            background: rgba(14, 34, 25, 0.96);
+            border: 1.5px solid #8BD6B1;
+            color: #FFFFFF;
+            font-family: 'Google Sans Flex', sans-serif;
+            font-size: 10.5px;
+            font-weight: 800;
+            line-height: 1;
+            white-space: nowrap;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.55);
+        }
+        .ground-cluster-balloon.selected {
+            background: #FFFFFF;
+            border: 2px solid #00E676;
+            color: #0E2219;
+            box-shadow: 0 4px 14px rgba(0, 230, 118, 0.48);
+        }
+        .ground-cluster-sites-header {
+            font-size: 9.5px;
+            font-weight: 800;
+            color: #8BD6B1;
+            letter-spacing: 0.2px;
+            line-height: 1.1;
+        }
+        .ground-cluster-balloon.selected .ground-cluster-sites-header {
+            color: #1B5E20;
+        }
+        .ground-cluster-chips-row {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .ground-cluster-group-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 2px 6px 2px 4px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.13);
+        }
+        .ground-cluster-balloon.selected .ground-cluster-group-chip {
+            background: rgba(14, 34, 25, 0.10);
+        }
+        .ground-cluster-sub-divider {
+            width: 1px;
+            height: 14px;
+            background: rgba(139, 214, 177, 0.45);
+            margin: 0 1px;
+        }
+        .ground-cluster-balloon.selected .ground-cluster-sub-divider {
+            background: rgba(14, 34, 25, 0.22);
+        }
+        .ground-cluster-submission-geom-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 2px 6px 2px 5px;
+            border-radius: 6px;
+            border: 1.5px dashed #66BB6A;
+            background: rgba(102, 187, 106, 0.18);
+            color: #D8F3DC;
+        }
+        .ground-cluster-balloon.selected .ground-cluster-submission-geom-chip {
+            border-color: #2E7D32;
+            background: rgba(46, 125, 50, 0.12);
+            color: #0E2219;
+        }
+        .ground-cluster-submission-geom-icon {
+            font-size: 10px;
+            line-height: 1;
+            color: #8BD6B1;
+        }
+        .ground-cluster-balloon.selected .ground-cluster-submission-geom-icon {
+            color: #2E7D32;
+        }
+        .ground-cluster-symbol-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 15px;
+            height: 15px;
+            border-radius: 999px;
+            color: #FFFFFF;
+            font-size: 9px;
+            font-weight: 800;
+            line-height: 1;
+            box-sizing: border-box;
+        }
+        .ground-cluster-no-symbol-badge {
+            display: inline-block;
+            width: 13px;
+            height: 13px;
+            border-radius: 999px;
+            box-sizing: border-box;
+        }
+        .ground-cluster-group-count {
+            font-size: 10.5px;
+            font-weight: 800;
+            line-height: 1;
+        }
+        .ground-cluster-balloon-tail {
+            width: 0;
+            height: 0;
+            border-left: 6px solid transparent;
+            border-right: 6px solid transparent;
+            border-top: 6px solid #8BD6B1;
+            margin-top: -1px;
+        }
+        .ground-cluster-balloon-wrapper.selected .ground-cluster-balloon-tail {
+            border-top-color: #00E676;
+        }
+        .ground-cluster-anchor-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 999px;
+            background: #8BD6B1;
+            border: 1.5px solid #0E2219;
+            margin-top: 1px;
+        }
     </style>
 </head>
 <body>
     <div id="mapbox-basemap-container">
-        <div id="ground-mapbox-badge" class="ground-mapbox-badge">Mapbox GL • Satellite (Nyeri 0.42°S, 36.95°E)</div>
+        <div id="ground-mapbox-badge" class="ground-mapbox-badge">Satellite (Nyeri 0.42°S, 36.95°E)</div>
     </div>
     <div id="ComposeTarget"></div>
     <script>
       window.GroundMapboxBridge = (function () {
         const SURVEY_COORDS = {
+          'survey-single-point-land-use': {
+            lng: 36.9498,
+            lat: -0.4188,
+            zoom: 15.3,
+            label: 'Nyeri Land Use 0.42°S, 36.95°E',
+          },
+          'survey-sample-plots-forest': {
+            lng: 36.9506,
+            lat: -0.4192,
+            zoom: 15.4,
+            label: 'Aberdare Sample Plots 0.42°S, 36.95°E',
+          },
+          'survey-commodity-perimeter-center': {
+            lng: 36.9510,
+            lat: -0.4195,
+            zoom: 15.3,
+            label: 'Mt. Kenya EUDR Plots 0.42°S, 36.95°E',
+          },
+          'survey-household-past-individuals': {
+            lng: 36.9502,
+            lat: -0.4190,
+            zoom: 15.3,
+            label: 'Nyeri Household Panel 0.42°S, 36.95°E',
+          },
           'survey-kenya-coffee': {
             lng: 36.9512,
             lat: -0.4198,
@@ -241,6 +556,186 @@
         let lastSyncArgs = null;
         let activeMarkers = [];
         let lastMarkersSignature = '';
+        let lastPayloadIsLocationLocked = true;
+        let lastAppliedUserGpsKey = '';
+        let lastAppliedZoomDelta = 0;
+
+        const state = {
+          map: null,
+          focusedPlace: null,
+          isLocationLocked: true,
+          hasUserPanned: false,
+          surveyId: null,
+          hasSeenUnlockedPayloadSinceFocus: false,
+        };
+
+        const placeBoundsCache = {};
+
+        function inferHalfSpanDegForCategory(category, explicitZoom) {
+          const cat = String(category || '').toLowerCase();
+          if (cat.indexOf('country') !== -1) return 4.2;
+          if (cat.indexOf('state') !== -1 || cat.indexOf('province') !== -1 || (cat.indexOf('region') !== -1 && cat.indexOf('regional hub') === -1)) return 1.1;
+          if (cat.indexOf('county') !== -1 || cat.indexOf('district') !== -1 || cat.indexOf('national park') !== -1) return 0.28;
+          if (cat.indexOf('city') !== -1 || cat.indexOf('regional hub') !== -1 || cat.indexOf('municipality') !== -1) return 0.065;
+          if (cat.indexOf('town') !== -1 || cat.indexOf('sub-county') !== -1) return 0.032;
+          if (cat.indexOf('forest') !== -1 || cat.indexOf('reserve') !== -1 || cat.indexOf('dam') !== -1 || cat.indexOf('reservoir') !== -1 || cat.indexOf('hydrology') !== -1) return 0.018;
+          if (cat.indexOf('village') !== -1 || cat.indexOf('locality') !== -1 || cat.indexOf('hamlet') !== -1 || cat.indexOf('sub-location') !== -1 || cat.indexOf('market') !== -1) return 0.009;
+          if (cat.indexOf('neighborhood') !== -1 || cat.indexOf('suburb') !== -1 || cat.indexOf('river') !== -1 || cat.indexOf('crossing') !== -1 || cat.indexOf('junction') !== -1) return 0.0045;
+          const z = Number(explicitZoom);
+          if (isFinite(z) && z >= 2.0 && z <= 18.5) {
+            return Math.max(0.0015, 180.0 / Math.pow(2, z + 0.65));
+          }
+          return 0.0025;
+        }
+
+        function computePlaceBoundsAndZoom(lng, lat, category, rawBbox, explicitZoom, name) {
+          const key = Number(lng).toFixed(4) + ',' + Number(lat).toFixed(4);
+          const nameKey = String(name || '').trim().toLowerCase();
+          let bbox = null;
+          if (Array.isArray(rawBbox) && rawBbox.length >= 4) {
+            const b0 = Number(rawBbox[0]);
+            const b1 = Number(rawBbox[1]);
+            const b2 = Number(rawBbox[2]);
+            const b3 = Number(rawBbox[3]);
+            if (isFinite(b0) && isFinite(b1) && isFinite(b2) && isFinite(b3)) {
+              bbox = [Math.min(b0, b2), Math.min(b1, b3), Math.max(b0, b2), Math.max(b1, b3)];
+            }
+          }
+          if (!bbox && placeBoundsCache[key]) {
+            bbox = placeBoundsCache[key];
+          }
+          if (!bbox && nameKey && placeBoundsCache['name:' + nameKey]) {
+            bbox = placeBoundsCache['name:' + nameKey];
+          }
+          if (!bbox || (Math.abs(bbox[2] - bbox[0]) < 0.0002 && Math.abs(bbox[3] - bbox[1]) < 0.0002)) {
+            const halfSpan = inferHalfSpanDegForCategory(category, explicitZoom);
+            bbox = [lng - halfSpan, lat - halfSpan * 0.85, lng + halfSpan, lat + halfSpan * 0.85];
+          }
+          placeBoundsCache[key] = bbox;
+          if (nameKey) {
+            placeBoundsCache['name:' + nameKey] = bbox;
+          }
+          const spanLng = Math.abs(bbox[2] - bbox[0]);
+          const spanLat = Math.abs(bbox[3] - bbox[1]);
+          const maxSpan = Math.max(spanLng, spanLat);
+          let targetZoom = Number(explicitZoom);
+          if (!isFinite(targetZoom) || targetZoom <= 0 || maxSpan > 0.0004) {
+            const computed = Math.log(360.0 / Math.max(0.0004, maxSpan)) / Math.LN2 - 0.65;
+            targetZoom = Math.max(2.2, Math.min(16.8, computed));
+          }
+          return { bbox: bbox, zoom: Number(targetZoom.toFixed(2)) };
+        }
+
+        function applyFocusedPlaceCamera(mapInstance, place, durationMs) {
+          if (!mapInstance || !place) return;
+          const dur = typeof durationMs === 'number' ? durationMs : 850;
+          try {
+            if (
+              Array.isArray(place.bbox) &&
+              place.bbox.length === 4 &&
+              (Math.abs(place.bbox[2] - place.bbox[0]) > 0.0003 ||
+                Math.abs(place.bbox[3] - place.bbox[1]) > 0.0003)
+            ) {
+              mapInstance.fitBounds(
+                [
+                  [Number(place.bbox[0]), Number(place.bbox[1])],
+                  [Number(place.bbox[2]), Number(place.bbox[3])],
+                ],
+                {
+                  padding: { top: 68, bottom: 108, left: 40, right: 40 },
+                  maxZoom: Math.min(16.8, Math.max(2.5, (Number(place.zoom) || 15.5) + 0.6)),
+                  duration: dur,
+                  essential: true,
+                }
+              );
+              return;
+            }
+          } catch (e) {}
+          try {
+            mapInstance.flyTo({
+              center: [Number(place.lng), Number(place.lat)],
+              zoom: Number(place.zoom) || 14.5,
+              essential: true,
+              duration: dur,
+            });
+          } catch (e) {}
+        }
+
+        if (!window.__groundPlaceClickAwayListenerAttached) {
+          window.__groundPlaceClickAwayListenerAttached = true;
+          document.addEventListener(
+            'pointerdown',
+            function (ev) {
+              if (!state.focusedPlace && !window.__groundSelectedPlaceMarker) return;
+              const elapsed = Date.now() - (state.focusedPlace ? state.focusedPlace.focusedAt || 0 : 0);
+              if (elapsed < 320) return;
+              const target = ev && ev.target;
+              if (
+                target &&
+                target.closest &&
+                (target.closest('.mapboxgl-ctrl-zoom-in') ||
+                  target.closest('.mapboxgl-ctrl-zoom-out') ||
+                  target.closest('.mapboxgl-ctrl-compass'))
+              ) {
+                return;
+              }
+              if (window.GroundMapboxBridge && window.GroundMapboxBridge.clearSelectedPlace) {
+                window.GroundMapboxBridge.clearSelectedPlace();
+              }
+            },
+            true
+          );
+        }
+
+        function escapeHtml(str) {
+          return String(str == null ? '' : str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+        }
+
+        function renderFocusedPlaceMarker(place) {
+          if (!map || !window.mapboxgl || !place) return;
+          try {
+            if (window.__groundSelectedPlaceMarker) {
+              window.__groundSelectedPlaceMarker.remove();
+              window.__groundSelectedPlaceMarker = null;
+            }
+            const el = document.createElement('div');
+            el.className = 'ground-entity-marker ground-place-marker';
+            el.style.background = '#0E2219';
+            el.style.border = '2px solid #80DEEA';
+            el.style.color = '#FFFFFF';
+            el.style.cursor = 'pointer';
+            if (place.category || place.coordinatesLabel) {
+              el.title =
+                (place.name || 'Place') +
+                (place.category ? ' • ' + place.category : '') +
+                (place.coordinatesLabel ? ' (' + place.coordinatesLabel + ')' : '') +
+                ' — Click to dismiss';
+            }
+            el.innerHTML =
+              '<span class="ground-entity-marker-badge" style="background:#00ACC1;color:#FFFFFF;">★</span>' +
+              '<span>' +
+              escapeHtml(String(place.name || 'Place')) +
+              '</span>' +
+              '<span class="ground-place-marker-dismiss" style="margin-left:6px;opacity:0.82;font-weight:700;font-size:12px;">×</span>';
+            el.addEventListener('click', function (ev) {
+              if (ev && ev.stopPropagation) ev.stopPropagation();
+              if (window.GroundMapboxBridge && window.GroundMapboxBridge.clearSelectedPlace) {
+                window.GroundMapboxBridge.clearSelectedPlace();
+              }
+            });
+            window.__groundSelectedPlaceMarker = new window.mapboxgl.Marker({
+              element: el,
+              anchor: 'center',
+            })
+              .setLngLat([Number(place.lng), Number(place.lat)])
+              .addTo(map);
+          } catch (e) {}
+        }
 
         function resolveAccessToken() {
           try {
@@ -261,45 +756,19 @@
           return '';
         }
 
-        function buildBaseTerrainGeoJson(centerLng, centerLat) {
+        function buildBaseTerrainGeoJson() {
           return {
             type: 'FeatureCollection',
-            features: [
-              {
-                type: 'Feature',
-                properties: { kind: 'river', name: 'Gura River' },
-                geometry: {
-                  type: 'LineString',
-                  coordinates: [
-                    [centerLng - 0.0085, centerLat + 0.0072],
-                    [centerLng - 0.0038, centerLat + 0.0034],
-                    [centerLng + 0.0006, centerLat - 0.0002],
-                    [centerLng + 0.0048, centerLat - 0.0039],
-                    [centerLng + 0.0088, centerLat - 0.0078],
-                  ],
-                },
-              },
-              {
-                type: 'Feature',
-                properties: { kind: 'road', name: 'Nyeri-Othaya Access Rd' },
-                geometry: {
-                  type: 'LineString',
-                  coordinates: [
-                    [centerLng - 0.0082, centerLat - 0.0058],
-                    [centerLng - 0.0021, centerLat - 0.0022],
-                    [centerLng + 0.0029, centerLat + 0.0011],
-                    [centerLng + 0.0084, centerLat + 0.0046],
-                  ],
-                },
-              },
-            ],
+            features: [],
           };
         }
 
         function buildMapboxStyleV8(basemapType, isOfflineVisible) {
           const isSat = basemapType === 'SATELLITE';
-          const survey =
-            SURVEY_COORDS[currentSurveyId] || SURVEY_COORDS['survey-kenya-coffee'];
+          const isClustering = Boolean(
+            lastParsedPayload && lastParsedPayload.isClusteringActive
+          );
+          const featureVis = isClustering ? 'none' : 'visible';
           return {
             version: 8,
             name: isSat ? 'Ground Satellite Hybrid' : 'Ground Outdoors Topo',
@@ -319,10 +788,6 @@
                 ],
                 tileSize: 256,
                 maxzoom: 19,
-              },
-              'ground-base-terrain': {
-                type: 'geojson',
-                data: buildBaseTerrainGeoJson(survey.lng, survey.lat),
               },
               'ground-offline-sector': {
                 type: 'geojson',
@@ -378,33 +843,12 @@
                 },
               },
               {
-                id: 'ground-river-line',
-                type: 'line',
-                source: 'ground-base-terrain',
-                filter: ['==', ['get', 'kind'], 'river'],
-                paint: {
-                  'line-color': isSat ? '#0288D1' : '#29B6F6',
-                  'line-width': 5,
-                  'line-opacity': 0.78,
-                },
-              },
-              {
-                id: 'ground-road-line',
-                type: 'line',
-                source: 'ground-base-terrain',
-                filter: ['==', ['get', 'kind'], 'road'],
-                paint: {
-                  'line-color': isSat ? '#D7CCC8' : '#8D6E63',
-                  'line-width': 3,
-                  'line-opacity': 0.65,
-                },
-              },
-              {
                 id: 'ground-offline-sector-line',
                 type: 'line',
                 source: 'ground-offline-sector',
                 layout: {
-                  visibility: isOfflineVisible ? 'visible' : 'none',
+                  visibility:
+                    isOfflineVisible && !isClustering ? 'visible' : 'none',
                 },
                 paint: {
                   'line-color': isSat ? '#8BD6B1' : '#1E6F50',
@@ -418,6 +862,7 @@
                 type: 'fill',
                 source: 'ground-entities',
                 filter: ['==', ['get', 'kind'], 'polygon'],
+                layout: { visibility: featureVis },
                 paint: {
                   'fill-color': ['get', 'color'],
                   'fill-opacity': ['get', 'fillOpacity'],
@@ -427,7 +872,43 @@
                 id: 'ground-entities-outline',
                 type: 'line',
                 source: 'ground-entities',
-                filter: ['==', ['get', 'kind'], 'polygon'],
+                filter: ['all', ['==', ['get', 'kind'], 'polygon'], ['!=', ['get', 'isPending'], true]],
+                layout: { visibility: featureVis },
+                paint: {
+                  'line-color': ['get', 'strokeColor'],
+                  'line-width': ['get', 'strokeWidth'],
+                },
+              },
+              {
+                id: 'ground-entities-outline-pending',
+                type: 'line',
+                source: 'ground-entities',
+                filter: ['all', ['==', ['get', 'kind'], 'polygon'], ['==', ['get', 'isPending'], true]],
+                layout: { visibility: featureVis },
+                paint: {
+                  'line-color': ['get', 'strokeColor'],
+                  'line-width': ['get', 'strokeWidth'],
+                  'line-dasharray': [2.6, 1.8],
+                },
+              },
+              {
+                id: 'ground-entities-linestring-casing',
+                type: 'line',
+                source: 'ground-entities',
+                filter: ['==', ['get', 'kind'], 'linestring'],
+                layout: { visibility: featureVis },
+                paint: {
+                  'line-color': '#0E2219',
+                  'line-width': 6.5,
+                  'line-opacity': 0.85,
+                },
+              },
+              {
+                id: 'ground-entities-linestring',
+                type: 'line',
+                source: 'ground-entities',
+                filter: ['==', ['get', 'kind'], 'linestring'],
+                layout: { visibility: featureVis },
                 paint: {
                   'line-color': ['get', 'strokeColor'],
                   'line-width': ['get', 'strokeWidth'],
@@ -438,6 +919,7 @@
                 type: 'circle',
                 source: 'ground-entities',
                 filter: ['all', ['==', ['geometry-type'], 'Point'], ['==', ['get', 'kind'], 'vertex']],
+                layout: { visibility: featureVis },
                 paint: {
                   'circle-radius': ['get', 'radius'],
                   'circle-color': '#FFFFFF',
@@ -450,10 +932,11 @@
                 type: 'circle',
                 source: 'ground-entities',
                 filter: ['all', ['==', ['geometry-type'], 'Point'], ['==', ['get', 'kind'], 'point']],
+                layout: { visibility: featureVis },
                 paint: {
                   'circle-radius': ['get', 'radius'],
                   'circle-color': ['get', 'color'],
-                  'circle-opacity': 0.42,
+                  'circle-opacity': ['get', 'fillOpacity'],
                   'circle-stroke-width': 2.5,
                   'circle-stroke-color': ['get', 'strokeColor'],
                 },
@@ -463,6 +946,7 @@
                 type: 'fill',
                 source: 'ground-submissions',
                 filter: ['==', ['geometry-type'], 'Polygon'],
+                layout: { visibility: featureVis },
                 paint: {
                   'fill-color': ['get', 'color'],
                   'fill-opacity': ['get', 'fillOpacity'],
@@ -473,6 +957,7 @@
                 type: 'line',
                 source: 'ground-submissions',
                 filter: ['==', ['geometry-type'], 'Polygon'],
+                layout: { visibility: featureVis },
                 paint: {
                   'line-color': ['get', 'strokeColor'],
                   'line-width': ['get', 'strokeWidth'],
@@ -484,6 +969,7 @@
                 type: 'circle',
                 source: 'ground-submissions',
                 filter: ['==', ['geometry-type'], 'Point'],
+                layout: { visibility: featureVis },
                 paint: {
                   'circle-radius': ['get', 'radius'],
                   'circle-color': ['get', 'strokeColor'],
@@ -572,25 +1058,69 @@
           }
 
           const initialSurvey = SURVEY_COORDS[currentSurveyId];
+          const hasPendingFocus =
+            state.focusedPlace && !state.focusedPlace.userPannedAfterFocus;
+          const initCenter = hasPendingFocus
+            ? [state.focusedPlace.lng, state.focusedPlace.lat]
+            : [initialSurvey.lng, initialSurvey.lat];
+          const initZoom = hasPendingFocus
+            ? state.focusedPlace.zoom
+            : initialSurvey.zoom;
+
           map = new window.mapboxgl.Map({
             container: 'mapbox-basemap-container',
             style: buildMapboxStyleV8(currentBasemapType, currentOfflineVisible),
-            center: [initialSurvey.lng, initialSurvey.lat],
-            zoom: initialSurvey.zoom,
+            center: initCenter,
+            zoom: initZoom,
             attributionControl: false,
             interactive: false,
             preserveDrawingBuffer: true,
             fadeDuration: 0,
           });
+          state.map = map;
 
           map.resize();
+
+          if (hasPendingFocus) {
+            renderFocusedPlaceMarker(state.focusedPlace);
+          }
+
+          ['dragstart', 'wheel', 'touchstart'].forEach(function (evtName) {
+            map.on(evtName, function () {
+              state.hasUserPanned = true;
+              state.isLocationLocked = false;
+              if (state.focusedPlace) {
+                state.focusedPlace.userPannedAfterFocus = true;
+                state.focusedPlace.needsCameraSync = false;
+              }
+            });
+          });
+          map.on('movestart', function (e) {
+            if (e && e.originalEvent) {
+              state.hasUserPanned = true;
+              state.isLocationLocked = false;
+              if (state.focusedPlace) {
+                state.focusedPlace.userPannedAfterFocus = true;
+                state.focusedPlace.needsCameraSync = false;
+              }
+            }
+          });
 
           if (typeof ResizeObserver !== 'undefined') {
             const ro = new ResizeObserver(function () {
               if (map) {
                 map.resize();
+                if (state.focusedPlace && !state.focusedPlace.userPannedAfterFocus) {
+                  renderFocusedPlaceMarker(state.focusedPlace);
+                  applyFocusedPlaceCamera(
+                    map,
+                    state.focusedPlace,
+                    state.focusedPlace.needsCameraSync ? 850 : 250
+                  );
+                  state.focusedPlace.needsCameraSync = false;
+                }
                 if (lastSyncArgs) {
-                  applySyncState.apply(null, lastSyncArgs);
+                  applySyncState.apply(null, lastSyncArgs.concat([true]));
                 }
               }
             });
@@ -599,9 +1129,17 @@
 
           map.on('load', function () {
             mapLoaded = true;
+            lastEntitiesSourceSignature = '';
+            lastMarkersSignature = '';
+            lastOfflineSectorKey = '';
             map.resize();
+            if (state.focusedPlace && !state.focusedPlace.userPannedAfterFocus) {
+              renderFocusedPlaceMarker(state.focusedPlace);
+              applyFocusedPlaceCamera(map, state.focusedPlace, 850);
+              state.focusedPlace.needsCameraSync = false;
+            }
             if (lastSyncArgs) {
-              applySyncState.apply(null, lastSyncArgs);
+              applySyncState.apply(null, lastSyncArgs.concat([true]));
             }
           });
 
@@ -619,6 +1157,12 @@
           ];
         }
 
+        let lastFeaturesJsonString = '';
+        let lastParsedPayload = null;
+        let lastEntitiesSourceSignature = '';
+        let lastTerrainSurveyId = '';
+        let lastOfflineSectorKey = '';
+
         function clearActiveMarkers() {
           for (let i = 0; i < activeMarkers.length; i++) {
             try {
@@ -630,7 +1174,29 @@
 
         function syncMapboxMarkers(survey, userGpsX, userGpsY, parsed) {
           if (!map || typeof window.mapboxgl === 'undefined') return;
+          const entityCount =
+            parsed && typeof parsed.entityCount === 'number'
+              ? parsed.entityCount
+              : parsed && Array.isArray(parsed.entities)
+              ? parsed.entities.length
+              : 0;
+          const selectedEntId = (parsed && parsed.selectedEntityId) || '';
+          const selectedClustId = (parsed && parsed.selectedClusterId) || '';
+          const clusterCount =
+            parsed && Array.isArray(parsed.clusters)
+              ? parsed.clusters.length
+              : 0;
+          const navActiveSig =
+            parsed && parsed.navigation && parsed.navigation.active
+              ? parsed.navigation.distanceBadge + ':' + parsed.navigation.fromX + ':' + parsed.navigation.fromY
+              : 'none';
+          const subCount =
+            parsed && Array.isArray(parsed.submissions)
+              ? parsed.submissions.length
+              : 0;
           const sig =
+            currentSurveyId +
+            ':' +
             survey.lng +
             ':' +
             survey.lat +
@@ -639,7 +1205,19 @@
             ':' +
             userGpsY.toFixed(4) +
             ':' +
-            JSON.stringify(parsed || {});
+            entityCount +
+            ':' +
+            subCount +
+            ':' +
+            selectedEntId +
+            ':' +
+            Boolean(parsed && parsed.isClusteringActive) +
+            ':' +
+            selectedClustId +
+            ':' +
+            clusterCount +
+            ':' +
+            navActiveSig;
           if (sig === lastMarkersSignature && activeMarkers.length > 0) {
             return;
           }
@@ -699,68 +1277,168 @@
             });
           }
 
-          // 2. Dotted Submission Geometry Badges
-          if (Array.isArray(parsed.submissions)) {
-            parsed.submissions.forEach(function (sub) {
-              const el = document.createElement('div');
-              el.className = 'ground-submission-marker';
-              el.setAttribute('data-submission-id', sub.id);
-              if (sub.selected) {
-                el.style.backgroundColor = '#FFFFFF';
-                el.style.color = '#0E2219';
-                el.style.border = '1.5px solid ' + sub.color;
-              } else {
-                el.style.backgroundColor = 'rgba(14, 34, 25, 0.88)';
-                el.style.color = sub.color;
-                el.style.border = '1px solid ' + sub.color;
-              }
-              el.textContent = '⬡ ' + (sub.label || sub.id);
-              const subAnchorLngLat = worldToLngLat(
-                sub.nx,
-                sub.ny + sub.hf * 0.42,
-                survey
-              );
-              const m = new window.mapboxgl.Marker({
-                element: el,
-                anchor: 'top',
-                offset: [0, 4],
-              })
-                .setLngLat(subAnchorLngLat)
-                .addTo(map);
-              activeMarkers.push({
-                marker: m,
-                element: el,
-                hitType: 'submission',
-                hitId: sub.id,
+          // 2A. When map is zoomed out and clustering is active, render ONLY Cluster Balloons
+          if (parsed.isClusteringActive) {
+            if (Array.isArray(parsed.clusters) && parsed.clusters.length > 0) {
+              const maxClusterMarkers = 60;
+              parsed.clusters.slice(0, maxClusterMarkers).forEach(function (cluster) {
+                const wrapper = document.createElement('div');
+                wrapper.className =
+                  'ground-cluster-balloon-wrapper' +
+                  (cluster.selected ? ' selected' : '');
+                wrapper.setAttribute('data-cluster-id', cluster.id);
+                const sitesHeaderLabel =
+                  cluster.siteCountLabel ||
+                  String(
+                    cluster.siteCount != null ? cluster.siteCount : cluster.totalCount || 0
+                  ) + ' map features';
+                wrapper.title = sitesHeaderLabel;
+
+                const balloon = document.createElement('div');
+                balloon.className =
+                  'ground-cluster-balloon' +
+                  (cluster.selected ? ' selected' : '');
+
+                const headerEl = document.createElement('div');
+                headerEl.className = 'ground-cluster-sites-header';
+                headerEl.textContent = sitesHeaderLabel;
+                balloon.appendChild(headerEl);
+
+                const chipsRow = document.createElement('div');
+                chipsRow.className = 'ground-cluster-chips-row';
+
+                const siteGroups = Array.isArray(cluster.siteGroups)
+                  ? cluster.siteGroups
+                  : Array.isArray(cluster.groups)
+                  ? cluster.groups
+                  : [];
+                siteGroups.forEach(function (grp) {
+                  const chip = document.createElement('span');
+                  chip.className = 'ground-cluster-group-chip';
+                  const grpColor = grp.color || '#66BB6A';
+
+                  if (grp.isNoSymbol || !grp.symbol) {
+                    const noSymBadge = document.createElement('span');
+                    noSymBadge.className = 'ground-cluster-no-symbol-badge';
+                    noSymBadge.style.backgroundColor = 'rgba(102, 187, 106, 0.28)';
+                    noSymBadge.style.border = '1.5px solid ' + grpColor;
+                    noSymBadge.title = 'Unmarked feature';
+                    chip.appendChild(noSymBadge);
+                  } else {
+                    const symBadge = document.createElement('span');
+                    symBadge.className = 'ground-cluster-symbol-badge';
+                    symBadge.style.backgroundColor = grpColor;
+                    symBadge.textContent = grp.symbol;
+                    chip.appendChild(symBadge);
+                  }
+
+                  const countSpan = document.createElement('span');
+                  countSpan.className = 'ground-cluster-group-count';
+                  countSpan.textContent = String(grp.count || 0);
+                  chip.appendChild(countSpan);
+
+                  chipsRow.appendChild(chip);
+                });
+
+                balloon.appendChild(chipsRow);
+
+                const tail = document.createElement('div');
+                tail.className = 'ground-cluster-balloon-tail';
+                const dot = document.createElement('div');
+                dot.className = 'ground-cluster-anchor-dot';
+
+                wrapper.appendChild(balloon);
+                wrapper.appendChild(tail);
+                wrapper.appendChild(dot);
+
+                const clusterLngLat = worldToLngLat(
+                  cluster.nx,
+                  cluster.ny,
+                  survey
+                );
+                const m = new window.mapboxgl.Marker({
+                  element: wrapper,
+                  anchor: 'bottom',
+                  offset: [0, 0],
+                })
+                  .setLngLat(clusterLngLat)
+                  .addTo(map);
+                activeMarkers.push({
+                  marker: m,
+                  element: wrapper,
+                  hitType: 'cluster',
+                  hitId: cluster.id,
+                });
               });
-            });
+            }
+            return;
           }
 
-          // 3. Geospatial Entity Markers
+          // 3. Geospatial Entity Markers (simplestyle-spec marker-symbol & marker-color on Points, Lines, and Polygons)
+          // To scale smoothly to >10,000 polygons without DOM layout thrashing, only instantiate HTML DOM Markers
+          // for named baseline parcels or the currently selected polygon; unselected bulk random polygons render
+          // purely via WebGL GeoJSON layers (ground-entities-fill / ground-entities-outline).
           if (Array.isArray(parsed.entities)) {
             parsed.entities.forEach(function (ent) {
+              const isGeneratedRandom =
+                ent.id && ent.id.indexOf('entity-rnd-') === 0;
+              if (isGeneratedRandom && !ent.selected) {
+                return;
+              }
+              const isPending = Boolean(ent.isPending);
+              const markerColor = ent.markerColor || ent.color || '#2E7D32';
+              const markerSymbol = ent.markerSymbol || ent.badge || '○';
               const el = document.createElement('div');
               el.className = 'ground-entity-marker';
               el.setAttribute('data-entity-id', ent.id);
+              if (ent.statusSummary) {
+                el.title = (ent.label || ent.id) + ' • ' + ent.statusSummary;
+              }
               if (ent.selected) {
                 el.style.backgroundColor = '#FFFFFF';
                 el.style.color = '#111827';
-                el.style.border = '2px solid ' + ent.color;
-              } else {
-                el.style.backgroundColor = ent.color;
+                el.style.border =
+                  (isPending ? '2px dashed ' : '2px solid ') + markerColor;
+              } else if (isPending) {
+                el.style.backgroundColor = 'rgba(14, 34, 25, 0.92)';
                 el.style.color = '#FFFFFF';
-                el.style.border = '1px solid #FFFFFF';
+                el.style.border = '1.5px dashed ' + markerColor;
+              } else {
+                el.style.backgroundColor = markerColor;
+                el.style.color = '#FFFFFF';
+                el.style.border = '1.5px solid #FFFFFF';
               }
-              const iconPrefix = ent.geometryType === 'Polygon' ? '▱ ' : '● ';
+              const iconPrefix =
+                ent.geometryType === 'Polygon'
+                  ? '▱ '
+                  : ent.geometryType === 'LineString'
+                  ? '╱ '
+                  : '● ';
               const titleSpan = document.createElement('span');
               titleSpan.textContent = iconPrefix + (ent.label || ent.id);
               el.appendChild(titleSpan);
 
-              if (ent.badge) {
+              if (markerSymbol !== '') {
                 const badgeSpan = document.createElement('span');
                 badgeSpan.className = 'ground-entity-marker-badge';
-                badgeSpan.style.color = ent.selected ? ent.color : '#E8F5E9';
-                badgeSpan.textContent = ent.badge;
+                if (ent.selected) {
+                  badgeSpan.style.backgroundColor = isPending
+                    ? 'rgba(14, 34, 25, 0.12)'
+                    : markerColor;
+                  badgeSpan.style.color = isPending ? markerColor : '#FFFFFF';
+                  badgeSpan.style.border = isPending
+                    ? '1.5px dashed ' + markerColor
+                    : 'none';
+                } else if (isPending) {
+                  badgeSpan.style.backgroundColor = 'rgba(255, 255, 255, 0.14)';
+                  badgeSpan.style.color = markerColor;
+                  badgeSpan.style.border = '1px dashed ' + markerColor;
+                } else {
+                  badgeSpan.style.backgroundColor = '#FFFFFF';
+                  badgeSpan.style.color = markerColor;
+                  badgeSpan.style.border = 'none';
+                }
+                badgeSpan.textContent = markerSymbol;
                 el.appendChild(badgeSpan);
               }
 
@@ -790,7 +1468,8 @@
           panOffsetY,
           userGpsX,
           userGpsY,
-          featuresGeoJson
+          featuresGeoJson,
+          isReplay
         ) {
           const survey =
             SURVEY_COORDS[surveyId] || SURVEY_COORDS['survey-kenya-coffee'];
@@ -798,16 +1477,36 @@
           currentBasemapType = basemapType;
           currentOfflineVisible = Boolean(isOfflineVisible);
 
+          if (featuresGeoJson) {
+            if (featuresGeoJson !== lastFeaturesJsonString) {
+              try {
+                lastParsedPayload = JSON.parse(featuresGeoJson);
+                lastFeaturesJsonString = featuresGeoJson;
+              } catch (e) {}
+            }
+            if (
+              lastParsedPayload &&
+              typeof lastParsedPayload.zoomDelta === 'number' &&
+              isFinite(lastParsedPayload.zoomDelta)
+            ) {
+              currentZoomDelta = lastParsedPayload.zoomDelta;
+            }
+          }
+
           const badge = document.getElementById('ground-mapbox-badge');
           if (badge) {
             const modeLabel =
               basemapType === 'SATELLITE' ? 'Satellite' : 'Outdoors Topo';
             const offlineTag = isOfflineVisible ? 'Offline Tiles ON' : 'Base Grid';
+            const countTag =
+              lastParsedPayload && typeof lastParsedPayload.entityCount === 'number'
+                ? ' • ' + lastParsedPayload.entityCount + ' map features'
+                : '';
             badge.textContent =
-              'Mapbox GL • ' +
               modeLabel +
               ' • ' +
               offlineTag +
+              countTag +
               ' (' +
               survey.label +
               ')';
@@ -815,33 +1514,109 @@
 
           if (!map) return;
 
-          let parsedPayload = null;
-          if (featuresGeoJson) {
-            try {
-              parsedPayload = JSON.parse(featuresGeoJson);
-              if (
-                parsedPayload &&
-                typeof parsedPayload.zoomDelta === 'number' &&
-                isFinite(parsedPayload.zoomDelta)
-              ) {
-                currentZoomDelta = parsedPayload.zoomDelta;
-              }
-            } catch (e) {}
+          const isLocationLocked = lastParsedPayload
+            ? lastParsedPayload.isLocationLocked !== undefined
+              ? Boolean(lastParsedPayload.isLocationLocked)
+              : lastParsedPayload.isFollowingUser !== false
+            : true;
+
+          const surveyChanged = state.surveyId !== surveyId;
+          state.surveyId = surveyId;
+
+          if (!isReplay && !isLocationLocked) {
+            state.hasSeenUnlockedPayloadSinceFocus = true;
           }
 
-          const shiftX = 0.5 - userGpsX + panOffsetX;
-          const shiftY = 0.5 - userGpsY + panOffsetY;
-          const cameraLng = survey.lng - shiftX * 0.014;
-          const cameraLat = survey.lat + shiftY * 0.018;
+          const canTransitionToLocked =
+            !state.focusedPlace ||
+            state.hasSeenUnlockedPayloadSinceFocus ||
+            Date.now() - (state.focusedPlace.focusedAt || 0) > 600;
+          const lockTransitionedToTrue =
+            !isReplay &&
+            canTransitionToLocked &&
+            !lastPayloadIsLocationLocked &&
+            isLocationLocked;
+
+          if (!isReplay) {
+            lastPayloadIsLocationLocked = isLocationLocked;
+          }
+
           const targetZoom = Math.max(
-            10,
+            2,
             Math.min(19, survey.zoom + currentZoomDelta)
           );
+          const userLngLat = worldToLngLat(userGpsX, userGpsY, survey);
+          const gpsKey = userGpsX.toFixed(5) + ':' + userGpsY.toFixed(5);
 
-          map.jumpTo({
-            center: [cameraLng, cameraLat],
-            zoom: targetZoom,
-          });
+          if (surveyChanged) {
+            if (state.focusedPlace && !state.focusedPlace.userPannedAfterFocus) {
+              state.isLocationLocked = false;
+              map.resize();
+              renderFocusedPlaceMarker(state.focusedPlace);
+              applyFocusedPlaceCamera(map, state.focusedPlace, 850);
+              state.focusedPlace.needsCameraSync = false;
+              lastAppliedZoomDelta = currentZoomDelta;
+            } else {
+              state.focusedPlace = null;
+              if (window.__groundSelectedPlaceMarker) {
+                try {
+                  window.__groundSelectedPlaceMarker.remove();
+                } catch (e) {}
+                window.__groundSelectedPlaceMarker = null;
+              }
+              state.hasUserPanned = false;
+              state.isLocationLocked = isLocationLocked;
+              map.jumpTo({
+                center: userLngLat,
+                zoom: targetZoom,
+              });
+              lastAppliedUserGpsKey = gpsKey;
+              lastAppliedZoomDelta = currentZoomDelta;
+            }
+          } else if (lockTransitionedToTrue) {
+            state.isLocationLocked = true;
+            state.hasUserPanned = false;
+            state.focusedPlace = null;
+            if (window.__groundSelectedPlaceMarker) {
+              try {
+                window.__groundSelectedPlaceMarker.remove();
+              } catch (e) {}
+              window.__groundSelectedPlaceMarker = null;
+            }
+            map.flyTo({
+              center: userLngLat,
+              zoom: targetZoom,
+              essential: true,
+              duration: 350,
+            });
+            lastAppliedUserGpsKey = gpsKey;
+            lastAppliedZoomDelta = currentZoomDelta;
+          } else if (state.focusedPlace && state.focusedPlace.needsCameraSync) {
+            state.isLocationLocked = false;
+            map.resize();
+            renderFocusedPlaceMarker(state.focusedPlace);
+            applyFocusedPlaceCamera(map, state.focusedPlace, 850);
+            state.focusedPlace.needsCameraSync = false;
+            lastAppliedZoomDelta = currentZoomDelta;
+          } else if (!isLocationLocked || state.hasUserPanned || state.focusedPlace) {
+            state.isLocationLocked = false;
+            if (state.focusedPlace && !window.__groundSelectedPlaceMarker) {
+              renderFocusedPlaceMarker(state.focusedPlace);
+            }
+            lastAppliedZoomDelta = currentZoomDelta;
+          } else {
+            state.isLocationLocked = true;
+            const zoomChanged =
+              Math.abs(currentZoomDelta - lastAppliedZoomDelta) > 0.005;
+            if (gpsKey !== lastAppliedUserGpsKey || zoomChanged) {
+              map.jumpTo({
+                center: userLngLat,
+                zoom: targetZoom,
+              });
+              lastAppliedUserGpsKey = gpsKey;
+              lastAppliedZoomDelta = currentZoomDelta;
+            }
+          }
 
           const isSat = basemapType === 'SATELLITE';
           try {
@@ -876,25 +1651,14 @@
                 isOfflineVisible ? 0.98 : 0.35
               );
             }
-            if (map.getLayer('ground-river-line')) {
-              map.setPaintProperty(
-                'ground-river-line',
-                'line-color',
-                isSat ? '#0288D1' : '#0277BD'
-              );
-            }
-            if (map.getLayer('ground-road-line')) {
-              map.setPaintProperty(
-                'ground-road-line',
-                'line-color',
-                isSat ? '#D7CCC8' : '#6D4C41'
-              );
-            }
+            const isClusteringNow = Boolean(
+              lastParsedPayload && lastParsedPayload.isClusteringActive
+            );
             if (map.getLayer('ground-offline-sector-line')) {
               map.setLayoutProperty(
                 'ground-offline-sector-line',
                 'visibility',
-                isOfflineVisible ? 'visible' : 'none'
+                isOfflineVisible && !isClusteringNow ? 'visible' : 'none'
               );
               map.setPaintProperty(
                 'ground-offline-sector-line',
@@ -907,35 +1671,37 @@
             }
           } catch (e) {}
 
-          const baseTerrainSource = map.getSource('ground-base-terrain');
-          if (baseTerrainSource) {
-            baseTerrainSource.setData(
-              buildBaseTerrainGeoJson(survey.lng, survey.lat)
-            );
-          }
-
-          // Update Offline Sector GeoJSON using fixed real-world coordinates
-          const offlineSource = map.getSource('ground-offline-sector');
-          if (offlineSource) {
-            const p1 = worldToLngLat(0.05, 0.14, survey);
-            const p2 = worldToLngLat(0.95, 0.14, survey);
-            const p3 = worldToLngLat(0.95, 0.88, survey);
-            const p4 = worldToLngLat(0.05, 0.88, survey);
-            offlineSource.setData({
-              type: 'FeatureCollection',
-              features: isOfflineVisible
-                ? [
-                    {
-                      type: 'Feature',
-                      properties: {},
-                      geometry: {
-                        type: 'Polygon',
-                        coordinates: [[p1, p2, p3, p4, p1]],
+          // Update Offline Sector GeoJSON only when survey, clustering, or visibility changes
+          const isClusteringSector = Boolean(
+            lastParsedPayload && lastParsedPayload.isClusteringActive
+          );
+          const showOfflineSector =
+            Boolean(isOfflineVisible) && !isClusteringSector;
+          const offlineKey = surveyId + ':' + showOfflineSector;
+          if (lastOfflineSectorKey !== offlineKey) {
+            const offlineSource = map.getSource('ground-offline-sector');
+            if (offlineSource) {
+              const p1 = worldToLngLat(0.05, 0.14, survey);
+              const p2 = worldToLngLat(0.95, 0.14, survey);
+              const p3 = worldToLngLat(0.95, 0.88, survey);
+              const p4 = worldToLngLat(0.05, 0.88, survey);
+              offlineSource.setData({
+                type: 'FeatureCollection',
+                features: showOfflineSector
+                  ? [
+                      {
+                        type: 'Feature',
+                        properties: {},
+                        geometry: {
+                          type: 'Polygon',
+                          coordinates: [[p1, p2, p3, p4, p1]],
+                        },
                       },
-                    },
-                  ]
-                : [],
-            });
+                    ]
+                  : [],
+              });
+              lastOfflineSectorKey = offlineKey;
+            }
           }
 
           // Update User GPS Blue Dot GeoJSON using fixed real-world coordinates
@@ -957,12 +1723,10 @@
             });
           }
 
-          // Parse featuresGeoJson and update ground-entities, ground-submissions, ground-navigation & mapboxgl.Markers
-          if (featuresGeoJson) {
+          // Update ground-entities, ground-submissions, ground-navigation & mapboxgl.Markers
+          if (lastParsedPayload) {
             try {
-              const parsed = JSON.parse(featuresGeoJson);
-              const entityFeatures = [];
-              const subFeatures = [];
+              const parsed = lastParsedPayload;
               const navFeatures = [];
 
               if (parsed && parsed.navigation && parsed.navigation.active) {
@@ -992,130 +1756,6 @@
                   },
                 });
               }
-
-              if (Array.isArray(parsed.entities)) {
-                parsed.entities.forEach(function (ent) {
-                  const cx = ent.nx;
-                  const cy = ent.ny;
-                  const strokeColor =
-                    ent.selected && isSat ? '#FFFFFF' : ent.color;
-                  if (ent.geometryType === 'Polygon') {
-                    const pw = 0.22;
-                    const ph = 0.11;
-                    const c1 = worldToLngLat(cx - pw * 0.48, cy - ph * 0.42, survey);
-                    const c2 = worldToLngLat(cx + pw * 0.45, cy - ph * 0.5, survey);
-                    const c3 = worldToLngLat(cx + pw * 0.52, cy + ph * 0.38, survey);
-                    const c4 = worldToLngLat(cx - pw * 0.4, cy + ph * 0.48, survey);
-                    entityFeatures.push({
-                      type: 'Feature',
-                      properties: {
-                        id: ent.id,
-                        kind: 'polygon',
-                        color: ent.color,
-                        strokeColor: strokeColor,
-                        fillOpacity: ent.selected ? 0.42 : 0.24,
-                        strokeWidth: ent.selected ? 3.8 : 2.2,
-                      },
-                      geometry: {
-                        type: 'Polygon',
-                        coordinates: [[c1, c2, c3, c4, c1]],
-                      },
-                    });
-                    [c1, c2, c3, c4].forEach(function (v) {
-                      entityFeatures.push({
-                        type: 'Feature',
-                        properties: {
-                          id: ent.id,
-                          kind: 'vertex',
-                          color: ent.color,
-                          strokeColor: strokeColor,
-                          radius: ent.selected ? 4.2 : 3.2,
-                        },
-                        geometry: {
-                          type: 'Point',
-                          coordinates: v,
-                        },
-                      });
-                    });
-                  } else {
-                    entityFeatures.push({
-                      type: 'Feature',
-                      properties: {
-                        id: ent.id,
-                        kind: 'point',
-                        color: ent.color,
-                        strokeColor: strokeColor,
-                        radius: ent.selected ? 24 : 18,
-                      },
-                      geometry: {
-                        type: 'Point',
-                        coordinates: worldToLngLat(cx, cy, survey),
-                      },
-                    });
-                  }
-                });
-              }
-
-              if (Array.isArray(parsed.submissions)) {
-                parsed.submissions.forEach(function (sub) {
-                  const gx = sub.nx;
-                  const gy = sub.ny;
-                  const gw = sub.wf;
-                  const gh = sub.hf;
-                  const strokeColor =
-                    sub.selected && isSat ? '#FFFFFF' : sub.color;
-                  const v1 = worldToLngLat(gx - gw * 0.46, gy - gh * 0.38, survey);
-                  const v2 = worldToLngLat(gx + gw * 0.08, gy - gh * 0.52, survey);
-                  const v3 = worldToLngLat(gx + gw * 0.5, gy - gh * 0.26, survey);
-                  const v4 = worldToLngLat(gx + gw * 0.44, gy + gh * 0.42, survey);
-                  const v5 = worldToLngLat(gx - gw * 0.12, gy + gh * 0.5, survey);
-                  const v6 = worldToLngLat(gx - gw * 0.48, gy + gh * 0.24, survey);
-                  subFeatures.push({
-                    type: 'Feature',
-                    properties: {
-                      id: sub.id,
-                      color: sub.color,
-                      strokeColor: strokeColor,
-                      fillOpacity: sub.selected ? 0.28 : 0.14,
-                      strokeWidth: sub.selected ? 3.4 : 2.5,
-                    },
-                    geometry: {
-                      type: 'Polygon',
-                      coordinates: [[v1, v2, v3, v4, v5, v6, v1]],
-                    },
-                  });
-                  [v1, v2, v3, v4, v5, v6].forEach(function (vertexCoord) {
-                    subFeatures.push({
-                      type: 'Feature',
-                      properties: {
-                        id: sub.id,
-                        color: sub.color,
-                        strokeColor: strokeColor,
-                        radius: sub.selected ? 3.8 : 2.8,
-                      },
-                      geometry: {
-                        type: 'Point',
-                        coordinates: vertexCoord,
-                      },
-                    });
-                  });
-                });
-              }
-
-              const entSource = map.getSource('ground-entities');
-              if (entSource) {
-                entSource.setData({
-                  type: 'FeatureCollection',
-                  features: entityFeatures,
-                });
-              }
-              const subSource = map.getSource('ground-submissions');
-              if (subSource) {
-                subSource.setData({
-                  type: 'FeatureCollection',
-                  features: subFeatures,
-                });
-              }
               const navSource = map.getSource('ground-navigation');
               if (navSource) {
                 navSource.setData({
@@ -1124,12 +1764,248 @@
                 });
               }
 
+              const isClustering = Boolean(parsed.isClusteringActive);
+              const featureLayerIds = [
+                'ground-entities-fill',
+                'ground-entities-outline',
+                'ground-entities-outline-pending',
+                'ground-entities-linestring-casing',
+                'ground-entities-linestring',
+                'ground-entities-vertices',
+                'ground-entities-point',
+                'ground-submissions-fill',
+                'ground-submissions-outline',
+                'ground-submissions-vertices',
+              ];
+              for (let li = 0; li < featureLayerIds.length; li++) {
+                try {
+                  if (map.getLayer(featureLayerIds[li])) {
+                    map.setLayoutProperty(
+                      featureLayerIds[li],
+                      'visibility',
+                      isClustering ? 'none' : 'visible'
+                    );
+                  }
+                } catch (e) {}
+              }
+
+              // Only rebuild and re-upload the GeoJSON FeatureCollection to WebGL when the
+              // entities/submissions count, selection, clustering state, survey, or basemap mode actually changes
+              // (never on camera pan/zoom frames!).
+              const entitiesSig =
+                surveyId +
+                ':' +
+                isSat +
+                ':' +
+                isClustering +
+                ':' +
+                (parsed.entityCount || (parsed.entities ? parsed.entities.length : 0)) +
+                ':' +
+                (parsed.selectedEntityId || '') +
+                ':' +
+                (parsed.submissions ? parsed.submissions.length : 0);
+
+              if (entitiesSig !== lastEntitiesSourceSignature) {
+                const entityFeatures = [];
+                const subFeatures = [];
+
+                if (!isClustering && Array.isArray(parsed.entities)) {
+                  parsed.entities.forEach(function (ent) {
+                    const cx = ent.nx;
+                    const cy = ent.ny;
+                    const isPending = Boolean(ent.isPending);
+                    const isGeneratedRandom =
+                      ent.id && ent.id.indexOf('entity-rnd-') === 0;
+                    const fillColor = ent.fillColor || ent.markerColor || ent.color;
+                    const rawStroke = ent.strokeColor || ent.markerColor || ent.color;
+                    const strokeColor =
+                      ent.selected && isSat ? '#FFFFFF' : rawStroke;
+                    if (ent.geometryType === 'Polygon') {
+                      const pw = isGeneratedRandom ? 0.022 : 0.22;
+                      const ph = isGeneratedRandom ? 0.015 : 0.11;
+                      const c1 = worldToLngLat(cx - pw * 0.48, cy - ph * 0.42, survey);
+                      const c2 = worldToLngLat(cx + pw * 0.45, cy - ph * 0.5, survey);
+                      const c3 = worldToLngLat(cx + pw * 0.52, cy + ph * 0.38, survey);
+                      const c4 = worldToLngLat(cx - pw * 0.4, cy + ph * 0.48, survey);
+                      entityFeatures.push({
+                        type: 'Feature',
+                        properties: {
+                          id: ent.id,
+                          kind: 'polygon',
+                          isPending: isPending,
+                          color: fillColor,
+                          strokeColor: strokeColor,
+                          fillOpacity: ent.selected
+                            ? isPending
+                              ? 0.35
+                              : 0.52
+                            : isPending
+                            ? 0.14
+                            : 0.28,
+                          strokeWidth: ent.selected ? 3.8 : isGeneratedRandom ? 1.6 : 2.3,
+                        },
+                        geometry: {
+                          type: 'Polygon',
+                          coordinates: [[c1, c2, c3, c4, c1]],
+                        },
+                      });
+                      // Only emit 4 corner vertex Point features for baseline parcels or the actively selected polygon
+                      if (!isGeneratedRandom || ent.selected) {
+                        [c1, c2, c3, c4].forEach(function (v) {
+                          entityFeatures.push({
+                            type: 'Feature',
+                            properties: {
+                              id: ent.id,
+                              kind: 'vertex',
+                              isPending: isPending,
+                              color: fillColor,
+                              strokeColor: strokeColor,
+                              radius: ent.selected ? 4.2 : 3.2,
+                            },
+                            geometry: {
+                              type: 'Point',
+                              coordinates: v,
+                            },
+                          });
+                        });
+                      }
+                    } else if (ent.geometryType === 'LineString') {
+                      const lw = 0.24;
+                      const lh = 0.12;
+                      const l1 = worldToLngLat(cx - lw * 0.52, cy + lh * 0.44, survey);
+                      const l2 = worldToLngLat(cx - lw * 0.16, cy - lh * 0.18, survey);
+                      const l3 = worldToLngLat(cx + lw * 0.18, cy + lh * 0.22, survey);
+                      const l4 = worldToLngLat(cx + lw * 0.52, cy - lh * 0.42, survey);
+                      entityFeatures.push({
+                        type: 'Feature',
+                        properties: {
+                          id: ent.id,
+                          kind: 'linestring',
+                          isPending: isPending,
+                          color: fillColor,
+                          strokeColor: strokeColor,
+                          strokeWidth: ent.selected ? 4.4 : 3.2,
+                        },
+                        geometry: {
+                          type: 'LineString',
+                          coordinates: [l1, l2, l3, l4],
+                        },
+                      });
+                      [l1, l2, l3, l4].forEach(function (v) {
+                        entityFeatures.push({
+                          type: 'Feature',
+                          properties: {
+                            id: ent.id,
+                            kind: 'vertex',
+                            isPending: isPending,
+                            color: fillColor,
+                            strokeColor: strokeColor,
+                            radius: ent.selected ? 4.4 : 3.4,
+                          },
+                          geometry: {
+                            type: 'Point',
+                            coordinates: v,
+                          },
+                        });
+                      });
+                    } else {
+                      entityFeatures.push({
+                        type: 'Feature',
+                        properties: {
+                          id: ent.id,
+                          kind: 'point',
+                          isPending: isPending,
+                          color: fillColor,
+                          strokeColor: strokeColor,
+                          fillOpacity: ent.selected
+                            ? 0.50
+                            : isPending
+                            ? 0.14
+                            : 0.44,
+                          radius: ent.selected ? 24 : 18,
+                        },
+                        geometry: {
+                          type: 'Point',
+                          coordinates: worldToLngLat(cx, cy, survey),
+                        },
+                      });
+                    }
+                  });
+                }
+
+                if (!isClustering && Array.isArray(parsed.submissions)) {
+                  parsed.submissions.forEach(function (sub) {
+                    const gx = sub.nx;
+                    const gy = sub.ny;
+                    const gw = sub.wf;
+                    const gh = sub.hf;
+                    const strokeColor =
+                      sub.selected && isSat ? '#FFFFFF' : sub.color;
+                    const v1 = worldToLngLat(gx - gw * 0.46, gy - gh * 0.38, survey);
+                    const v2 = worldToLngLat(gx + gw * 0.08, gy - gh * 0.52, survey);
+                    const v3 = worldToLngLat(gx + gw * 0.5, gy - gh * 0.26, survey);
+                    const v4 = worldToLngLat(gx + gw * 0.44, gy + gh * 0.42, survey);
+                    const v5 = worldToLngLat(gx - gw * 0.12, gy + gh * 0.5, survey);
+                    const v6 = worldToLngLat(gx - gw * 0.48, gy + gh * 0.24, survey);
+                    subFeatures.push({
+                      type: 'Feature',
+                      properties: {
+                        id: sub.id,
+                        color: sub.color,
+                        strokeColor: strokeColor,
+                        fillOpacity: sub.selected ? 0.28 : 0.14,
+                        strokeWidth: sub.selected ? 3.4 : 2.5,
+                      },
+                      geometry: {
+                        type: 'Polygon',
+                        coordinates: [[v1, v2, v3, v4, v5, v6, v1]],
+                      },
+                    });
+                    [v1, v2, v3, v4, v5, v6].forEach(function (vertexCoord) {
+                      subFeatures.push({
+                        type: 'Feature',
+                        properties: {
+                          id: sub.id,
+                          color: sub.color,
+                          strokeColor: strokeColor,
+                          radius: sub.selected ? 3.8 : 2.8,
+                        },
+                        geometry: {
+                          type: 'Point',
+                          coordinates: vertexCoord,
+                        },
+                      });
+                    });
+                  });
+                }
+
+                const entSource = map.getSource('ground-entities');
+                if (entSource) {
+                  entSource.setData({
+                    type: 'FeatureCollection',
+                    features: entityFeatures,
+                  });
+                  if (mapLoaded) {
+                    lastEntitiesSourceSignature = entitiesSig;
+                  }
+                }
+                const subSource = map.getSource('ground-submissions');
+                if (subSource) {
+                  subSource.setData({
+                    type: 'FeatureCollection',
+                    features: subFeatures,
+                  });
+                }
+              }
+
               syncMapboxMarkers(survey, userGpsX, userGpsY, parsed);
             } catch (e) {}
           }
         }
 
         return {
+          state: state,
+
           syncViewport: function (
             leftPx,
             topPx,
@@ -1175,8 +2051,18 @@
                 Math.abs(canvas.clientHeight - h) > 1;
               if (wasHidden || sizeChanged || canvasMismatch) {
                 instance.resize();
+                if (state.focusedPlace && !state.focusedPlace.userPannedAfterFocus) {
+                  renderFocusedPlaceMarker(state.focusedPlace);
+                  instance.flyTo({
+                    center: [state.focusedPlace.lng, state.focusedPlace.lat],
+                    zoom: state.focusedPlace.zoom,
+                    essential: true,
+                    duration: state.focusedPlace.needsCameraSync ? 850 : 250,
+                  });
+                  state.focusedPlace.needsCameraSync = false;
+                }
                 if (lastSyncArgs) {
-                  applySyncState.apply(null, lastSyncArgs);
+                  applySyncState.apply(null, lastSyncArgs.concat([true]));
                 }
               }
             }
@@ -1206,7 +2092,35 @@
             applySyncState.apply(null, lastSyncArgs);
           },
 
+          sync: function (
+            surveyId,
+            basemapType,
+            isOfflineVisible,
+            panOffsetX,
+            panOffsetY,
+            userGpsX,
+            userGpsY,
+            featuresGeoJson
+          ) {
+            return this.syncState(
+              surveyId,
+              basemapType,
+              isOfflineVisible,
+              panOffsetX,
+              panOffsetY,
+              userGpsX,
+              userGpsY,
+              featuresGeoJson
+            );
+          },
+
           panByPixels: function (dx, dy) {
+            state.hasUserPanned = true;
+            state.isLocationLocked = false;
+            if (state.focusedPlace) {
+              state.focusedPlace.userPannedAfterFocus = true;
+              state.focusedPlace.needsCameraSync = false;
+            }
             if (map) {
               map.panBy([-dx, -dy], { animate: false });
             }
@@ -1214,9 +2128,10 @@
 
           zoomBy: function (deltaZoom) {
             currentZoomDelta = Math.max(
-              -4,
-              Math.min(3, currentZoomDelta + deltaZoom)
+              -13,
+              Math.min(3.2, currentZoomDelta + deltaZoom)
             );
+            lastAppliedZoomDelta = currentZoomDelta;
             if (map) {
               map.zoomTo(map.getZoom() + deltaZoom, { duration: 150 });
             }
@@ -1276,6 +2191,35 @@
               }
             }
 
+            // 1B. If a selected place chip is shown on the map, clicking the chip or clicking away
+            // anywhere on the map canvas dismisses the place chip.
+            if (window.__groundSelectedPlaceMarker || state.focusedPlace) {
+              let hitPlaceChip = false;
+              try {
+                if (
+                  window.__groundSelectedPlaceMarker &&
+                  window.__groundSelectedPlaceMarker.getElement
+                ) {
+                  const pEl = window.__groundSelectedPlaceMarker.getElement();
+                  if (pEl) {
+                    const pr = pEl.getBoundingClientRect();
+                    if (
+                      clientX >= pr.left - 6 &&
+                      clientX <= pr.right + 6 &&
+                      clientY >= pr.top - 6 &&
+                      clientY <= pr.bottom + 6
+                    ) {
+                      hitPlaceChip = true;
+                    }
+                  }
+                }
+              } catch (e) {}
+              this.clearSelectedPlace();
+              if (hitPlaceChip) {
+                return 'place:dismiss';
+              }
+            }
+
             // 2. Check active mapboxgl.Marker badges (entity pills & submission badges)
             for (let i = activeMarkers.length - 1; i >= 0; i--) {
               const item = activeMarkers[i];
@@ -1291,37 +2235,42 @@
               }
             }
 
-            // 3. Query rendered WebGL GeoJSON layers on mapboxgl.Map
-            try {
-              const bbox = [
-                [xPx - 6, yPx - 6],
-                [xPx + 6, yPx + 6],
-              ];
-              const hitFeatures = map.queryRenderedFeatures(bbox, {
-                layers: [
-                  'ground-submissions-vertices',
-                  'ground-submissions-outline',
-                  'ground-submissions-fill',
-                  'ground-entities-point',
-                  'ground-entities-vertices',
-                  'ground-entities-outline',
-                  'ground-entities-fill',
-                ],
-              });
-              if (hitFeatures && hitFeatures.length > 0) {
-                const feat = hitFeatures[0];
-                const propId = feat.properties && feat.properties.id;
-                const layerId = (feat.layer && feat.layer.id) || '';
-                if (propId) {
-                  if (layerId.indexOf('ground-submissions') === 0) {
-                    return 'submission:' + propId;
-                  }
-                  if (layerId.indexOf('ground-entities') === 0) {
-                    return 'entity:' + propId;
+            // 3. Query rendered WebGL GeoJSON layers on mapboxgl.Map (only when unclustered)
+            if (!(lastParsedPayload && lastParsedPayload.isClusteringActive)) {
+              try {
+                const bbox = [
+                  [xPx - 6, yPx - 6],
+                  [xPx + 6, yPx + 6],
+                ];
+                const hitFeatures = map.queryRenderedFeatures(bbox, {
+                  layers: [
+                    'ground-submissions-vertices',
+                    'ground-submissions-outline',
+                    'ground-submissions-fill',
+                    'ground-entities-point',
+                    'ground-entities-vertices',
+                    'ground-entities-linestring',
+                    'ground-entities-linestring-casing',
+                    'ground-entities-outline',
+                    'ground-entities-outline-pending',
+                    'ground-entities-fill',
+                  ],
+                });
+                if (hitFeatures && hitFeatures.length > 0) {
+                  const feat = hitFeatures[0];
+                  const propId = feat.properties && feat.properties.id;
+                  const layerId = (feat.layer && feat.layer.id) || '';
+                  if (propId) {
+                    if (layerId.indexOf('ground-submissions') === 0) {
+                      return 'submission:' + propId;
+                    }
+                    if (layerId.indexOf('ground-entities') === 0) {
+                      return 'entity:' + propId;
+                    }
                   }
                 }
-              }
-            } catch (e) {}
+              } catch (e) {}
+            }
 
             return '';
           },
@@ -1346,6 +2295,196 @@
                 map.setStyle(styleUrl);
               }
             }
+          },
+
+          searchPlaces: function (surveyId, query, isAirplaneMode, callback) {
+            if (isAirplaneMode || !query || !String(query).trim()) {
+              if (callback) callback('[]');
+              return;
+            }
+            const q = String(query).trim();
+            const survey =
+              SURVEY_COORDS[surveyId] || SURVEY_COORDS['survey-kenya-coffee'];
+            const token = resolveAccessToken();
+
+            function formatCoordLabel(lat, lng) {
+              const latDir = lat < 0 ? 'S' : 'N';
+              const lngDir = lng < 0 ? 'W' : 'E';
+              const fLat = Math.round(Math.abs(lat) * 10000) / 10000;
+              const fLng = Math.round(Math.abs(lng) * 10000) / 10000;
+              return fLat + '°' + latDir + ', ' + fLng + '°' + lngDir;
+            }
+
+            function toNormalized(lng, lat) {
+              const nx = Math.max(
+                0.05,
+                Math.min(0.95, 0.5 + (lng - survey.lng) / 0.014)
+              );
+              const ny = Math.max(
+                0.05,
+                Math.min(0.95, 0.5 + (survey.lat - lat) / 0.018)
+              );
+              return { nx: nx, ny: ny };
+            }
+
+            function mapMapboxFeatures(features) {
+              if (!Array.isArray(features)) return [];
+              return features.slice(0, 8).map(function (feat, idx) {
+                const center =
+                  feat.center ||
+                  (feat.geometry && feat.geometry.coordinates) || [
+                    survey.lng,
+                    survey.lat,
+                  ];
+                const lng = Number(center[0]) || survey.lng;
+                const lat = Number(center[1]) || survey.lat;
+                const norm = toNormalized(lng, lat);
+                const rawType =
+                  (Array.isArray(feat.place_type) && feat.place_type[0]) ||
+                  (feat.properties && feat.properties.addresstype) ||
+                  (feat.properties && feat.properties.type) ||
+                  (feat.properties && feat.properties.category) ||
+                  'Place';
+                const category =
+                  String(rawType).charAt(0).toUpperCase() +
+                  String(rawType).slice(1).replace(/_/g, ' ');
+                const name =
+                  feat.text ||
+                  (feat.properties && feat.properties.name) ||
+                  (feat.place_name ? String(feat.place_name).split(',')[0] : q);
+                const subtitle =
+                  feat.place_name ||
+                  (feat.properties && feat.properties.display_name) ||
+                  survey.label;
+                const boundsInfo = computePlaceBoundsAndZoom(
+                  lng,
+                  lat,
+                  category,
+                  feat.bbox,
+                  null,
+                  name
+                );
+                const bbox = boundsInfo.bbox;
+                return {
+                  id: String(feat.id || 'mapbox.places.' + idx + '.' + Math.abs(Math.round(lng * 1000))),
+                  name: String(name),
+                  categoryLabel: String(category),
+                  regionSubtitle: String(subtitle),
+                  coordinatesLabel: formatCoordLabel(lat, lng),
+                  nx: Number(norm.nx.toFixed(4)),
+                  ny: Number(norm.ny.toFixed(4)),
+                  lng: Number(lng.toFixed(6)),
+                  lat: Number(lat.toFixed(6)),
+                  bboxMinLng: Number(bbox[0].toFixed(6)),
+                  bboxMinLat: Number(bbox[1].toFixed(6)),
+                  bboxMaxLng: Number(bbox[2].toFixed(6)),
+                  bboxMaxLat: Number(bbox[3].toFixed(6)),
+                  targetZoom: Number(boundsInfo.zoom.toFixed(2)),
+                };
+              });
+            }
+
+            if (token && token.indexOf('pk.') === 0) {
+              const mapboxUrl =
+                'https://api.mapbox.com/geocoding/v5/mapbox.places/' +
+                encodeURIComponent(q) +
+                '.json?access_token=' +
+                encodeURIComponent(token) +
+                '&proximity=' +
+                encodeURIComponent(survey.lng + ',' + survey.lat) +
+                '&limit=8&types=country,region,postcode,district,place,locality,neighborhood,address,poi';
+              fetch(mapboxUrl)
+                .then(function (resp) {
+                  if (!resp.ok) throw new Error('Mapbox Places status ' + resp.status);
+                  return resp.json();
+                })
+                .then(function (data) {
+                  const mapped = mapMapboxFeatures(data && data.features);
+                  if (callback) callback(JSON.stringify(mapped));
+                })
+                .catch(function () {
+                  if (callback) callback('[]');
+                });
+              return;
+            }
+
+            // Fallback live geocoding when no pk.* token is set in localStorage/URL
+            const nominatimUrl =
+              'https://nominatim.openstreetmap.org/search?format=geojson&limit=6&q=' +
+              encodeURIComponent(q);
+            fetch(nominatimUrl)
+              .then(function (resp) {
+                if (!resp.ok) throw new Error('Geocoder status ' + resp.status);
+                return resp.json();
+              })
+              .then(function (data) {
+                const mapped = mapMapboxFeatures(data && data.features);
+                if (callback) callback(JSON.stringify(mapped));
+              })
+              .catch(function () {
+                if (callback) callback('[]');
+              });
+          },
+
+          flyToPlace: function (lng, lat, zoom, name, category, coordinatesLabel) {
+            const targetLng = Number(lng);
+            const targetLat = Number(lat);
+            if (!isFinite(targetLng) || !isFinite(targetLat)) return;
+            const boundsInfo = computePlaceBoundsAndZoom(
+              targetLng,
+              targetLat,
+              category,
+              null,
+              zoom,
+              name
+            );
+            const targetZoom = boundsInfo.zoom;
+            state.focusedPlace = {
+              lng: targetLng,
+              lat: targetLat,
+              zoom: targetZoom,
+              bbox: boundsInfo.bbox,
+              name: String(name || 'Place'),
+              category: String(category || ''),
+              coordinatesLabel: String(coordinatesLabel || ''),
+              needsCameraSync: true,
+              userPannedAfterFocus: false,
+              focusedAt: Date.now(),
+            };
+            state.hasUserPanned = true;
+            state.isLocationLocked = false;
+            state.hasSeenUnlockedPayloadSinceFocus = false;
+            lastPayloadIsLocationLocked = false;
+
+            ensureMapInitialized();
+            if (state.map && window.mapboxgl) {
+              try {
+                const container = document.getElementById(
+                  'mapbox-basemap-container'
+                );
+                const isContainerReady =
+                  container &&
+                  container.style.display !== 'none' &&
+                  container.offsetWidth > 4 &&
+                  container.offsetHeight > 4;
+                state.map.resize();
+                renderFocusedPlaceMarker(state.focusedPlace);
+                applyFocusedPlaceCamera(state.map, state.focusedPlace, 850);
+                if (isContainerReady && mapLoaded) {
+                  state.focusedPlace.needsCameraSync = false;
+                }
+              } catch (e) {}
+            }
+          },
+
+          clearSelectedPlace: function () {
+            state.focusedPlace = null;
+            try {
+              if (window.__groundSelectedPlaceMarker) {
+                window.__groundSelectedPlaceMarker.remove();
+                window.__groundSelectedPlaceMarker = null;
+              }
+            } catch (e) {}
           },
 
           getMapInstance: function () {

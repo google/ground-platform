@@ -1,13 +1,13 @@
 /*
  * Copyright 2026 The Ground Authors.
  *
- * Licensed under the Apache License, Version 2.0 (the 'License'); you may not use this file except
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
  *
  *     https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an 'AS IS' BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
@@ -78,6 +78,42 @@ private external fun jsHandleMapboxClick(xPx: Float, yPx: Float): String
 )
 private external fun jsHideMapboxBasemap()
 
+@JsFun(
+  "(surveyId, query, isAirplaneMode, callback) => { " +
+    "if (window.GroundMapboxBridge && window.GroundMapboxBridge.searchPlaces) { " +
+    "window.GroundMapboxBridge.searchPlaces(surveyId, query, isAirplaneMode, (json) => { callback(String(json || '[]')); }); " +
+    "} else { callback('[]'); } }"
+)
+private external fun jsSearchMapboxPlaces(
+  surveyId: String,
+  query: String,
+  isAirplaneMode: Boolean,
+  callback: (String) -> Unit,
+)
+
+@JsFun(
+  "(lng, lat, zoom, name, category, coordinatesLabel) => { " +
+    "if (window.GroundMapboxBridge && window.GroundMapboxBridge.flyToPlace) { " +
+    "window.GroundMapboxBridge.flyToPlace(lng, lat, zoom, name, category, coordinatesLabel); " +
+    "} }"
+)
+private external fun jsFlyMapboxToPlace(
+  lng: Double,
+  lat: Double,
+  zoom: Float,
+  name: String,
+  category: String,
+  coordinatesLabel: String,
+)
+
+@JsFun(
+  "() => { " +
+    "if (window.GroundMapboxBridge && window.GroundMapboxBridge.clearSelectedPlace) { " +
+    "window.GroundMapboxBridge.clearSelectedPlace(); " +
+    "} }"
+)
+private external fun jsClearMapboxPlace()
+
 internal actual fun syncPlatformMapboxViewport(
   leftPx: Float,
   topPx: Float,
@@ -124,4 +160,28 @@ internal actual fun handlePlatformMapboxClick(xPx: Float, yPx: Float): String =
 
 internal actual fun hidePlatformMapboxBasemap() {
   jsHideMapboxBasemap()
+}
+
+internal actual fun searchPlatformMapboxPlaces(
+  surveyId: String,
+  query: String,
+  isAirplaneMode: Boolean,
+  onResultsJson: (String) -> Unit,
+) {
+  jsSearchMapboxPlaces(surveyId, query, isAirplaneMode, onResultsJson)
+}
+
+internal actual fun flyPlatformMapboxToPlace(
+  lng: Double,
+  lat: Double,
+  zoom: Float,
+  name: String,
+  category: String,
+  coordinatesLabel: String,
+) {
+  jsFlyMapboxToPlace(lng, lat, zoom, name, category, coordinatesLabel)
+}
+
+internal actual fun clearPlatformMapboxPlace() {
+  jsClearMapboxPlace()
 }

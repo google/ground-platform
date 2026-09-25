@@ -1,13 +1,13 @@
-/**
+/*
  * Copyright 2026 The Ground Authors.
  *
- * Licensed under the Apache License, Version 2.0 (the 'License'); you may not use this file except
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
  *
  *     https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an 'AS IS' BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
@@ -43,12 +43,12 @@ import org.groundplatform.v2.core.forms.serialization.xml.XmlParser
 import org.groundplatform.v2.core.forms.serialization.xml.XmlText
 import org.groundplatform.v2.core.forms.serialization.xml.XmlWriter
 
-/** Serializes [FormDef] protocol buffer models into ODK XForms XML documents. */
+/** Serializes [FormDef] protocol buffer models into XForms XML documents. */
 internal object FormDefXmlSerializer {
 
   private data class CivilDate(val year: Int, val month: Int, val day: Int)
 
-  /** Serializes [formDef] into a complete ODK XForms XML document string. */
+  /** Serializes [formDef] into a complete XForms XML document string. */
   fun serialize(formDef: FormDef, prettyPrint: Boolean = true): String {
     val rootElement = serializeToElement(formDef)
     return XmlWriter(prettyPrint = prettyPrint, includeDeclaration = true).writeElement(rootElement)
@@ -265,9 +265,6 @@ internal object FormDefXmlSerializer {
       if (sec.id.isNotEmpty()) put("id", sec.id)
       if (sec.uri.isNotEmpty()) put("src", sec.uri)
     }
-    if (sec.uri.isNotEmpty()) {
-      return XmlElement(name = "instance", attributes = attrs)
-    }
     val children =
       if (sec.inline_data.isNotEmpty()) {
         try {
@@ -470,7 +467,7 @@ internal object FormDefXmlSerializer {
 
     val repeatEl = XmlElement(name = "repeat", attributes = repeatAttrs, children = repeatChildren)
 
-    // Wrap in <group ref="..."> if label is present (standard ODK XForms repeat pattern)
+    // Wrap in <group ref="..."> if label is present (standard XForms repeat pattern)
     return if (repeat.label != null) {
       val wrapperAttrs = buildMap {
         put("ref", nodesetPath)

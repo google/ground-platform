@@ -19,7 +19,7 @@
 Contains Compose Multiplatform screens, ViewModels, and navigation shared
 identically between `androidApp` and `iosApp`, including:
 - Map home screen and layer drawer split into two self-describing categories:
-  - **Data collection sites** (Geospatial Entity Lists / spatial master tables):
+  - **Map features** (Geospatial Entity Lists / spatial master tables):
     tapping a site pin opens its current status and launches site-first actions
     (e.g., `[ + Inspect Site ]`, `[ + Update Info ]`).
   - **Form Submissions** (completed submission GPS instances for `geopoint`,

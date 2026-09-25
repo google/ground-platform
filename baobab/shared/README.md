@@ -26,7 +26,7 @@ Ground 2.0 platform applications (`androidApp`, `iosApp`, `webApp`, and
 | Directory | Artifact / Module | Targets | Description |
 | :--- | :--- | :--- | :--- |
 | [`protos/`](protos/) | *(Proto3 Schemas)* | All Platforms | Canonical `.proto` definitions for forms (`groundplatform.v2.forms`), survey configuration (`groundplatform.v2.survey`), and operational records (`groundplatform.v2.data`). |
-| [`core/`](core/) | `org.groundplatform.v2:protoforms` | Android/JVM, iOS, JS, WasmJS | Pure KMP domain, serialization (XForms XML, TextProto, Proto3 JSON), XPath 1.0 + ODK evaluator, and 5-stage reactive `FormEngine` (no UI/Compose dependencies). |
+| [`core/`](core/) | `org.groundplatform.v2:protoforms` | Android/JVM, iOS, JS, WasmJS | Pure KMP domain, serialization (XForms XML, TextProto, Proto3 JSON), XPath 1.0 + XForms evaluator, and 5-stage reactive `FormEngine` (no UI/Compose dependencies). |
 | [`ui/`](ui/) | `org.groundplatform.v2:protoforms-ui` | Android/JVM, iOS, JS, WasmJS | Shared Compose Multiplatform theme (`GroundTheme`), design tokens, and form rendering library (`MobileFormRunner`, `FormWizardController`, `QuestionControlCard`, `ControlWidget`, and `MobilePhoneFrame`). |
 | [`mobile/`](mobile/) | `org.groundplatform.v2:mobile` | **Android/JVM & iOS Only** | Shared mobile application module containing mobile-specific services (`services/`), local persistence (`data/`), and mobile Compose screens/ViewModels (`ui/`) shared identically between `androidApp` and `iosApp`. Exports the unified `GroundMobile` XCFramework for Xcode. |
 

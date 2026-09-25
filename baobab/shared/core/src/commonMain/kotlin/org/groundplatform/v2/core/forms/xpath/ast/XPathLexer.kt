@@ -1,13 +1,13 @@
-/**
+/*
  * Copyright 2026 The Ground Authors.
  *
- * Licensed under the Apache License, Version 2.0 (the 'License'); you may not use this file except
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
  *
  *     https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an 'AS IS' BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
@@ -16,7 +16,7 @@ package org.groundplatform.v2.core.forms.xpath.ast
 import org.groundplatform.v2.core.forms.xpath.XPathSyntaxException
 
 /**
- * Lexical analyzer for XPath 1.0 and ODK XForms expressions.
+ * Lexical analyzer for XPath 1.0 and XForms expressions.
  *
  * Implements the XPath 1.0 lexical disambiguation rules (Section 3.7):
  * - If a token follows a value-producing token (`IDENTIFIER`, `NUMBER_LITERAL`, `STRING_LITERAL`,
@@ -31,6 +31,9 @@ class XPathLexer(private val input: String) {
     val tokens = mutableListOf<XPathToken>()
     var i = 0
     val len = input.length
+    // Whether the most recently emitted STAR token was a wildcard NameTest (as opposed to a
+    // MultiplyOperator). Only meaningful while STAR is the immediately preceding token.
+    var lastStarWasNameTest = false
 
     fun isOperatorContext(): Boolean {
       val prev = tokens.lastOrNull() ?: return false
@@ -43,6 +46,10 @@ class XPathLexer(private val input: String) {
         TokenType.DOT,
         TokenType.DOUBLE_DOT,
         TokenType.VARIABLE_REF -> true
+        // A `*` that was itself a wildcard NameTest terminates an operand, so a following NCName
+        // such as `div`/`mod`/`and`/`or` is an OperatorName (`child::* div 2`). A `*` acting as a
+        // MultiplyOperator does not -- there `div` would be an element name (`2 * div`).
+        TokenType.STAR -> lastStarWasNameTest
         else -> false
       }
     }
@@ -135,6 +142,10 @@ class XPathLexer(private val input: String) {
           i++
         }
         '*' -> {
+          // Per XPath 1.0 section 3.7 a `*` is a MultiplyOperator when an operand has just ended,
+          // and a wildcard NameTest otherwise. Record which role it played so the next NCName can
+          // be disambiguated.
+          lastStarWasNameTest = !isOperatorContext()
           tokens.add(XPathToken(TokenType.STAR, "*", startPos))
           i++
         }

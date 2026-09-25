@@ -1,20 +1,25 @@
-/**
+/*
  * Copyright 2026 The Ground Authors.
  *
- * Licensed under the Apache License, Version 2.0 (the 'License'); you may not use this file except
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
  *
  *     https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an 'AS IS' BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
 package org.groundplatform.v2.core.forms.serialization
 
+import groundplatform.v2.forms.FieldValue
+import groundplatform.v2.forms.RecordInstance
+import groundplatform.v2.forms.RecordNode
+import groundplatform.v2.forms.TypedValue
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import okio.ByteString.Companion.toByteString
 
 class TextProtoUnitTest {
 
@@ -79,5 +84,49 @@ class TextProtoUnitTest {
     val decodedRecord = TextProtoSerializer.deserializeRecordInstance(textProto)
 
     assertEquals(record, decodedRecord)
+  }
+
+  @Test
+  fun testBinaryValueSurvivesTextProtoRoundTrip() {
+    // Regression: `binary_value` used to be written with `ByteString.utf8()`, which replaces every
+    // invalid UTF-8 sequence with U+FFFD. Any real payload (a PNG header, encrypted bytes, a lone
+    // 0xFF) was silently corrupted on the way out and unrecoverable on the way back in.
+    val payload =
+      byteArrayOf(
+          0x89.toByte(),
+          0x50,
+          0x4E,
+          0x47,
+          0x0D,
+          0x0A,
+          0x1A,
+          0x0A,
+          0x00,
+          0xFF.toByte(),
+          0xFE.toByte(),
+          0xC0.toByte(),
+          0x22,
+          0x5C,
+        )
+        .toByteString()
+
+    val record =
+      RecordInstance(
+        form_id = "binary_form",
+        data_ =
+          RecordNode(
+            fields = mapOf("photo" to FieldValue(scalar_value = TypedValue(binary_value = payload)))
+          ),
+      )
+
+    val textProto = TextProtoSerializer.serializeRecordInstance(record)
+    val decoded = TextProtoSerializer.deserializeRecordInstance(textProto)
+
+    assertEquals(
+      payload,
+      decoded.data_?.fields?.get("photo")?.scalar_value?.binary_value,
+      "binary_value must round-trip byte-for-byte",
+    )
+    assertEquals(record, decoded)
   }
 }

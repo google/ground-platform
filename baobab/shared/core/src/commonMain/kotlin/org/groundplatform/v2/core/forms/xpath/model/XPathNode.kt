@@ -1,13 +1,13 @@
-/**
+/*
  * Copyright 2026 The Ground Authors.
  *
- * Licensed under the Apache License, Version 2.0 (the 'License'); you may not use this file except
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
  *
  *     https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an 'AS IS' BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
@@ -66,6 +66,65 @@ sealed interface XPathNode {
       curr = curr.parent
     }
     return "/" + segments.reversed().joinToString("/")
+  }
+
+  /**
+   * Returns this node's position within its containing document, as the sequence of child indices
+   * walked from the document root down to this node.
+   *
+   * This exists because [XPathNode] implementors are plain classes with *identity* equality, and
+   * [children] re-materializes fresh wrapper objects on every call. Two wrappers describing the
+   * same logical node are therefore never `==` to each other, which makes `distinct()`, `toSet()`
+   * and `indexOf` silently useless on node-sets. The key gives a node-set a structural identity
+   * suitable for both de-duplication and document-order sorting.
+   *
+   * [canonicalPath] is deliberately *not* used for this: it is a fine dedup key but sorts
+   * lexically, so `member[10]` would order before `member[2]`. Comparing integer indices
+   * positionally gives true document order.
+   */
+  fun documentOrderKey(): DocumentOrderKey {
+    val reversedIndices = mutableListOf<Int>()
+    var curr: XPathNode = this
+    while (true) {
+      val parentNode = curr.parent ?: break
+      val self = curr
+      // Locate this node among its parent's children structurally, since identity equality would
+      // never match the freshly materialized wrappers returned by children().
+      val index =
+        parentNode.children(null).indexOfFirst {
+          it.name == self.name && it.repeatIndex == self.repeatIndex
+        }
+      // A negative index means the node is not reachable from its own parent (virtual nodes such
+      // as synthesized metadata children). Treat those as position 0 rather than failing.
+      reversedIndices.add(if (index >= 0) index else 0)
+      curr = parentNode
+    }
+    return DocumentOrderKey(rootMarker = curr.hashCode(), indices = reversedIndices.asReversed())
+  }
+
+  /**
+   * Structural identity of a node's position within a document, used to de-duplicate and order
+   * node-sets.
+   *
+   * [rootMarker] distinguishes nodes that live in *different* documents (for example a primary
+   * instance node and a secondary-instance lookup row), which can otherwise share the same
+   * [indices] path and be wrongly merged. It is the identity hash of the topmost ancestor; these
+   * node classes do not override `hashCode`, and document roots are stable objects, so this is a
+   * reliable discriminator. XPath leaves the relative order of nodes from different documents
+   * implementation-defined, so grouping by this marker is sufficient.
+   */
+  data class DocumentOrderKey(val rootMarker: Int, val indices: List<Int>) :
+    Comparable<DocumentOrderKey> {
+    override fun compareTo(other: DocumentOrderKey): Int {
+      if (rootMarker != other.rootMarker) return rootMarker.compareTo(other.rootMarker)
+      val shared = minOf(indices.size, other.indices.size)
+      for (i in 0 until shared) {
+        val cmp = indices[i].compareTo(other.indices[i])
+        if (cmp != 0) return cmp
+      }
+      // A shorter path is an ancestor of the longer one, and ancestors precede descendants.
+      return indices.size.compareTo(other.indices.size)
+    }
   }
 
   /**

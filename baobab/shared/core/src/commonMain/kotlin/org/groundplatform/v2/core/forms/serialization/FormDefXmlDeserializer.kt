@@ -1,13 +1,13 @@
-/**
+/*
  * Copyright 2026 The Ground Authors.
  *
- * Licensed under the Apache License, Version 2.0 (the 'License'); you may not use this file except
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
  *
  *     https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an 'AS IS' BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
@@ -62,7 +62,7 @@ import org.groundplatform.v2.core.forms.serialization.xml.XmlElement
 import org.groundplatform.v2.core.forms.serialization.xml.XmlParser
 import org.groundplatform.v2.core.forms.serialization.xml.XmlText
 
-/** Deserializes ODK XForms XML form definitions into [FormDef] protocol buffer models. */
+/** Deserializes XForms XML form definitions into [FormDef] protocol buffer models. */
 internal object FormDefXmlDeserializer {
 
   private val WHITESPACE_REGEX = Regex("\\s+")
@@ -72,7 +72,7 @@ internal object FormDefXmlDeserializer {
     val defaultNode: RecordNode,
   )
 
-  /** Deserializes an ODK XForms XML document string into a [FormDef] message. */
+  /** Deserializes an XForms XML document string into a [FormDef] message. */
   fun deserialize(xml: String): FormDef {
     val root = XmlParser.parse(xml)
     val head = root.firstChildNamed("head")
@@ -214,7 +214,7 @@ internal object FormDefXmlDeserializer {
     val id = el.attr("id") ?: ""
     val src = el.attr("src") ?: ""
     val inlineData =
-      if (src.isEmpty() && el.childElements.isNotEmpty()) {
+      if (el.childElements.isNotEmpty()) {
         el.childElements.first().toXmlString(prettyPrint = false)
       } else {
         ""
@@ -543,7 +543,7 @@ internal object FormDefXmlDeserializer {
     for (child in containerEl.childElements) {
       when (child.localName) {
         "group" -> {
-          // Check if this is a wrapper group around a single <repeat> (standard ODK XForms repeat
+          // Check if this is a wrapper group around a single <repeat> (standard XForms repeat
           // idiom)
           val directRepeat = child.firstChildNamed("repeat")
           val nonLabelChildren =

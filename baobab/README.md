@@ -14,7 +14,7 @@
   limitations under the License.
 -->
 
-# Ground 2.0 (`baobab/`)
+# Ground 2.0
 
 This directory contains the Kotlin Multiplatform (KMP) and Compose Multiplatform
 (CMP) shared modules, Protocol Buffer data models, platform applications
@@ -24,7 +24,6 @@ for **Ground 2.0**.
 ## Directory Structure
 
 ```text
-baobab/
 ├── shared/                      # All shared multiplatform schemas & modules
 │   ├── protos/                  # Protocol Buffer (.proto) schemas (forms, survey, data)
 │   ├── core/                    # Pure KMP runtime library (Android/JVM, iOS, JS, WasmJS)
@@ -54,12 +53,12 @@ baobab/
     (IR), and WasmJS:
     -   **XForms XML, TextProto & JSON Serialization**
         (`org.groundplatform.v2.core.forms.serialization`): Bidirectional
-        conversion between ODK XForms XML (`<h:html>` and `<data>`),
+        conversion between XForms XML (`<h:html>` and `<data>`),
         `groundplatform.v2.forms` Protocol Buffer messages, Protocol Buffer Text
         Format (`textproto`), and Canonical Proto3 JSON (`ProtoJsonSerializer`).
-    -   **XPath 1.0 + ODK XForms Engine**
+    -   **XPath 1.0 + XForms Engine**
         (`org.groundplatform.v2.core.forms.xpath`): Full AST compiler and
-        evaluator for ODK XForms expressions against strongly-typed
+        evaluator for XForms expressions against strongly-typed
         `RecordInstance` and `FormDef` models.
     -   **Dynamic Form State Model & Evaluation Engine**
         (`org.groundplatform.v2.core.forms.engine` &
@@ -67,7 +66,7 @@ baobab/
         model (`FormState`, `ComponentState`) and reactive 5-stage evaluation
         engine (`FormEngine`, `FormSession`, `CompiledForm`) for dynamic
         repeats, calculations, relevance, constraints, cascading `itemset`s,
-        translations, and ODK Entities.
+        translations, and XForms Entities.
 -   **[`shared/ui/`](shared/ui/)**: Compose Multiplatform UI library
     (`org.groundplatform.v2:protoforms-ui`, package
     `org.groundplatform.v2.core.forms.ui`) targeting Web (`js` / `wasmJs`),
@@ -103,13 +102,13 @@ baobab/
 -   **[`docs/`](docs/)**: Comprehensive architectural design and data model
     documentation.
 
-## Mental Model & Terminology Mapping to ODK XForms
+## Mental Model & Terminology Mapping to XForms
 
 ### 1. The Core Mental Model
 
 -   **Tables = Current State (Persistent Master Data)**: Flat, stateful master
-    datasets on ODK Central (`EntityDatasetDef` / `EntityRecord`) where each row
-    represents a real-world object (site, plot, asset, or participant).
+    datasets (`EntityDatasetDef` / `EntityRecord`) where each row represents a
+    real-world object (site, plot, asset, or participant).
 -   **Forms = Transactions / Events (Encounter Logs)**: Questionnaires
     (`FormDef`) filled out in the field. Completed submissions
     (`SubmissionRecord` / `RecordInstance`) are immutable event records
@@ -121,14 +120,14 @@ Organizers define how a form interacts with master tables using standard XLSForm
 syntax:
 
 -   **Populate a Table (Create Record)**:
-    -   *ODK Concept*: Form configured to create a new entity.
+    -   *XForms Concept*: Form configured to create a new entity.
     -   *XLSForm Mapping*:
         -   `entities` sheet: `list_name` specified, `create_condition`
             (optional).
         -   `survey` sheet: Target fields use the `save_to` column to populate
             table attributes.
 -   **Update a Table (Update Record)**:
-    -   *ODK Concept*: Form configured to update an existing entity.
+    -   *XForms Concept*: Form configured to update an existing entity.
     -   *XLSForm Mapping*:
         -   `survey` sheet: Select question using
             `select_one_from_file <table_name>.csv`.
@@ -136,7 +135,7 @@ syntax:
         -   `survey` sheet: Updated fields mapped to table attributes via
             `save_to`.
 -   **Reference a Table (Lookup / Read-Only)**:
-    -   *ODK Concept*: Consuming an Entity List or external dataset without
+    -   *XForms Concept*: Consuming an Entity List or external dataset without
         writing back.
     -   *XLSForm Mapping*:
         -   `survey` sheet: `select_one_from_file <table_name>.csv` used for
@@ -144,28 +143,25 @@ syntax:
             fields with `instance('<table_name>')/root/item[...]`. No `save_to`
             mapping.
 -   **Log Only (Standard Survey)**:
-    -   *ODK Concept*: Traditional standalone XForm.
+    -   *XForms Concept*: Traditional standalone XForm.
     -   *XLSForm Mapping*: Standard `survey` and `choices` sheets only. No
         `entities` sheet.
 
 ### 3. For Data Collectors (Map UI & Field Workflow)
 
-The map layer drawer is split into two self-describing categories rather than
-nesting layers under form menus:
+The map layer drawer displays geospatial entity layers rather than nesting
+layers under form menus:
 
--   **Data collection sites**:
-    -   *ODK Concept*: Geospatial Entity Lists (spatial master tables) attached
-        to the project.
+-   **Map features**:
+    -   *XForms Concept*: Geospatial Entity Lists (spatial master tables)
+        attached to the survey.
     -   *Field Interaction*: Represents the target locations/features on the
-        map. Tapping a site pin opens its current status and launches available
-        actions (e.g., `[ + Inspect Site ]`, `[ + Update Info ]`).
+        map. Tapping a site pin opens its current status, submission history,
+        and launches available actions (e.g., `[ + Inspect Site ]`, `[ + Update
+        Info ]`).
     -   *Why*: Avoids duplicating the layer across multiple forms that interact
-        with the same site, enabling a natural "site-first" workflow.
--   **Form Submissions**:
-    -   *ODK Concept*: Form submission GPS instances (`geopoint`, `geotrace`, or
-        `geoshape` questions recorded in completed submission instances).
-    -   *Field Interaction*: Displays historical coverage and completed
-        visits/logs on the map. Kept visually distinct from active sites.
+        with the same site, enabling a natural "site-first" workflow without
+        cluttering the map with raw form submission geometries.
 
 ## Running Core Library Tests
 

@@ -1,13 +1,13 @@
-/**
+/*
  * Copyright 2026 The Ground Authors.
  *
- * Licensed under the Apache License, Version 2.0 (the 'License'); you may not use this file except
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
  *
  *     https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an 'AS IS' BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
@@ -18,19 +18,19 @@ import groundplatform.v2.forms.RecordInstance
 import groundplatform.v2.forms.RecordSchema
 
 /**
- * Primary Kotlin Multiplatform serializer and deserializer for ODK XForms XML documents to and from
+ * Primary Kotlin Multiplatform serializer and deserializer for XForms XML documents to and from
  * ProtoForms protocol buffer models ([FormDef] and [RecordInstance]).
  */
 object XFormsXmlSerializer {
 
   /**
-   * Deserializes an ODK XForms XML form definition (`<h:html>...</h:html>`) into a [FormDef]
-   * protobuf model.
+   * Deserializes an XForms XML form definition (`<h:html>...</h:html>`) into a [FormDef] protobuf
+   * model.
    */
   fun deserializeFormDef(xml: String): FormDef = FormDefXmlDeserializer.deserialize(xml)
 
   /**
-   * Serializes a [FormDef] protobuf model into an ODK XForms XML form definition string
+   * Serializes a [FormDef] protobuf model into an XForms XML form definition string
    * (`<h:html>...</h:html>`).
    */
   fun serialize(formDef: FormDef, prettyPrint: Boolean = true): String =
@@ -41,7 +41,7 @@ object XFormsXmlSerializer {
     FormDefXmlSerializer.serialize(formDef, prettyPrint = prettyPrint)
 
   /**
-   * Deserializes an ODK XForms submission instance XML (`<data id="...">...</data>`) into a
+   * Deserializes an XForms submission instance XML (`<data id="...">...</data>`) into a
    * [RecordInstance] protobuf model.
    *
    * @param xml The XML string representing the submission instance.
@@ -56,7 +56,7 @@ object XFormsXmlSerializer {
     RecordInstanceXmlSerializer.deserialize(xml = xml, schema = schema, formDef = formDef)
 
   /**
-   * Serializes a [RecordInstance] protobuf model into an ODK XForms submission instance XML string
+   * Serializes a [RecordInstance] protobuf model into an XForms submission instance XML string
    * (`<data id="...">...</data>`).
    */
   fun serialize(

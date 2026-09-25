@@ -22,7 +22,7 @@ components.
 
 ## Core Mental Model & Package Mapping
 
-Ground 2.0's protocol buffer schemas directly model the ODK XForms & Entities
+Ground 2.0's protocol buffer schemas directly model the XForms & Entities
 distinction between stateful master tables and immutable encounter logs:
 
 -   **Tables = Current State (Persistent Master Data)**: Defined by
@@ -41,7 +41,7 @@ distinction between stateful master tables and immutable encounter logs:
 -   **Map Layer Categories (`LayerDef.source`)**: Rather than nesting map layers
     under form menus, `MapConfig.layers` separates layers into two
     self-describing categories:
-    -   **Data collection sites** (`entity_dataset_id`): Geospatial Entity Lists
+    -   **Map features** (`entity_dataset_id`): Geospatial Entity Lists
         (spatial master tables) representing target features on the map that
         open site-first actions (e.g., `[ + Inspect Site ]`,
         `[ + Update Info ]`).

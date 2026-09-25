@@ -17,7 +17,7 @@
 # ProtoForms Compose Multiplatform UI Package (`org.groundplatform.v2.core.forms.ui`)
 
 This package implements the **Compose Multiplatform** UI component library
-(`org.groundplatform.v2:protoforms-ui`) for executing ProtoForms and ODK XForms
+(`org.groundplatform.v2:protoforms-ui`) for executing ProtoForms and XForms
 surveys across **Android (`jvm`)**, **iOS (`iosArm64`, `iosSimulatorArm64`)**,
 and **Web (`js`, `wasmJs`)**.
 
@@ -59,7 +59,7 @@ embedded inside web developer tools such as `devtools/formdebugger`.
 
 ### Key Design Principles
 
-1.  **Tree-to-Wizard Flattening (`FormWizardStep`)**: An ODK XForms / ProtoForms
+1.  **Tree-to-Wizard Flattening (`FormWizardStep`)**: An XForms / ProtoForms
     `FormDef` is a hierarchical tree of nested groups, repeat groups
     (`RepeatGroupState`), and controls (`ControlState`), whereas a mobile
     field-collection UI presents one question screen at a time.
@@ -72,15 +72,15 @@ embedded inside web developer tools such as `devtools/formdebugger`.
         `breadcrumbs` (e.g., `["Site Details", "Canopy Measurements #2"]`) and
         optional `RepeatStepContext`.
     -   **`FormWizardStep.FieldListGroupStep`**: A group with
-        `appearance="field-list"`, which per the ODK XForms specification
-        renders all of its relevant child questions together on a single screen.
+        `appearance="field-list"`, which per the XForms specification renders
+        all of its relevant child questions together on a single screen.
     -   **`FormWizardStep.RepeatHubStep`**: A repeat management card placed at
         the end of each `RepeatGroupState` that lets the user inspect existing
         repeat instances, delete an instance, or tap **`+ Add Another ...`** to
         append a new repeat instance and jump directly to its first question.
     -   **`FormWizardStep.SummaryStep`**: The final review screen listing all
         relevant questions and their current answers (with tap-to-edit jump
-        links), evaluated ODK Entities (`EntityState`), and whole-form
+        links), evaluated XForms Entities (`EntityState`), and whole-form
         validation status.
 
 2.  **Anchor-Preserving Dynamic Relevance**: Whenever the user edits an answer,

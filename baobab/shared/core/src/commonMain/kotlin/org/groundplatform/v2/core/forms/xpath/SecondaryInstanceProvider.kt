@@ -1,13 +1,13 @@
-/**
+/*
  * Copyright 2026 The Ground Authors.
  *
- * Licensed under the Apache License, Version 2.0 (the 'License'); you may not use this file except
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
  *
  *     https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an 'AS IS' BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
@@ -47,7 +47,7 @@ interface SecondaryInstanceProvider {
   ): List<Map<String, TypedValue>>? = null
 
   /**
-   * Resolves the virtual root node for `instance(instanceId)`. Standard ODK secondary instances
+   * Resolves the virtual root node for `instance(instanceId)`. Standard XForms secondary instances
    * expose `root/item` (or direct `item`) children under this node.
    */
   fun resolveRoot(instanceId: String): XPathNode?
@@ -118,6 +118,29 @@ class InMemorySecondaryInstanceProvider(
     }
 
     private fun parseInlineData(sec: SecondaryInstance): List<Map<String, TypedValue>> {
+      val trimmed = sec.inline_data.trim()
+      if (trimmed.isEmpty()) return emptyList()
+      if (trimmed.startsWith("<")) {
+        try {
+          val rootEl =
+            org.groundplatform.v2.core.forms.serialization.xml.XmlParser.parse(trimmed)
+          val itemElements =
+            rootEl.childrenNamed("item").ifEmpty {
+              if (rootEl.localName == "item") listOf(rootEl) else rootEl.childElements
+            }
+          return itemElements.mapNotNull { itemEl ->
+            if (itemEl.childElements.isEmpty()) {
+              null
+            } else {
+              itemEl.childElements.associate { colEl ->
+                colEl.localName to TypedValue(string_value = colEl.textContent.trim())
+              }
+            }
+          }
+        } catch (_: Exception) {
+          // Fall back to CSV parser if XML parsing fails
+        }
+      }
       val lines =
         sec.inline_data.lineSequence().map { it.trim() }.filter { it.isNotEmpty() }.toList()
       if (lines.isEmpty()) return emptyList()

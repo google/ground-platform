@@ -1,19 +1,18 @@
-/**
+/*
  * Copyright 2026 The Ground Authors.
  *
- * Licensed under the Apache License, Version 2.0 (the 'License'); you may not use this file except
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
  *
  *     https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an 'AS IS' BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
 package org.groundplatform.v2.core.forms.xpath.functions
 
-import kotlin.math.abs
 import kotlin.random.Random
 import okio.ByteString
 import okio.ByteString.Companion.decodeBase64
@@ -81,7 +80,7 @@ internal object CryptoAndPrngUtils {
   }
 
   /**
-   * Permutes [items] using the ODK/JavaRosa inside-out Fisher-Yates shuffle. When [seedStr] is
+   * Permutes [items] using the XForms / JavaRosa inside-out Fisher-Yates shuffle. When [seedStr] is
    * provided, uses a deterministic Park-Miller PRNG. Non-numeric seeds are hashed via SHA-256 to a
    * 64-bit big-endian integer first.
    */
@@ -106,7 +105,9 @@ internal object CryptoAndPrngUtils {
       }
 
     // Park-Miller Minimal Standard PRNG: X_{n+1} = (16807 * X_n) mod 2147483647
-    var state = abs(seedLong) % 2147483647L
+    // Mask the sign bit rather than using abs(): abs(Long.MIN_VALUE) is Long.MIN_VALUE (still
+    // negative), which would make `state` negative and pin every shuffled index to 0.
+    var state = (seedLong and Long.MAX_VALUE) % 2147483647L
     if (state == 0L) state = 1L
 
     fun nextParkMillerDouble(): Double {

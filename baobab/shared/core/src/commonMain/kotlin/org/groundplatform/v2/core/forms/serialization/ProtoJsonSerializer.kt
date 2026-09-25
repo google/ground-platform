@@ -1,13 +1,13 @@
-/**
+/*
  * Copyright 2026 The Ground Authors.
  *
- * Licensed under the Apache License, Version 2.0 (the 'License'); you may not use this file except
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
  *
  *     https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an 'AS IS' BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
@@ -70,6 +70,7 @@ import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.JsonUnquotedLiteral
 import kotlinx.serialization.json.booleanOrNull
 import kotlinx.serialization.json.doubleOrNull
 import kotlinx.serialization.json.intOrNull
@@ -80,20 +81,28 @@ import org.groundplatform.v2.core.forms.xpath.model.TemporalUtils
 
 /**
  * Serializer and deserializer between ProtoForms Protocol Buffer models ([FormDef] and
- * [RecordInstance]) and Canonical Proto3 JSON (`ProtoJSON`).
+ * [RecordInstance]) and ProtoJSON.
  *
- * Adheres to the [Proto3 JSON Specification](https://protobuf.dev/programming-guides/proto3/#json):
- * - Emits `lowerCamelCase` field names by default (or `snake_case` when `preserveProtoFieldNames =
- *   true`).
- * - Accepts both `lowerCamelCase` and `snake_case` field names during deserialization.
- * - Serializes `map<string, V>` fields (`RecordNode.fields`, `LanguageTranslation.strings`, etc.)
- *   as native JSON objects.
- * - Serializes `int64` values as JSON strings and accepts both JSON strings and numbers on input.
- * - Serializes `google.protobuf.Timestamp` as RFC 3339 strings (`YYYY-MM-DDTHH:MM:SSZ`) and accepts
- *   both RFC 3339 strings and `{"seconds": ..., "nanos": ...}` objects on input.
- * - Serializes `bytes` as Base64 strings.
+ * Uses a compact, human-debuggable flattened mapping (modeled after `google.protobuf.Struct` /
+ * `google.protobuf.Value` in the
+ * [Proto3 JSON Specification](https://protobuf.dev/programming-guides/proto3/#json)) for dynamic
+ * form records ([RecordNode], [FieldValue], [TypedValue]) and geospatial coordinates:
+ * - [RecordNode] maps directly to a flat JSON object (`{"species": "Adansonia digitata",
+ *   "height_m": 24.8}`) without intermediate `"fields"`, `"scalarValue"`, or `"stringValue"`
+ *   wrapper objects.
+ * - Nested groups ([FieldValue.node_value]) serialize as nested JSON objects, repeat groups
+ *   ([FieldValue.repeat_value]) as JSON arrays of objects, and multi-select lists
+ *   ([FieldValue.list_value]) as JSON arrays of scalar values.
+ * - [GeoPoint] values serialize as compact `[lat, lon]` or `[lat, lon, alt, acc]` coordinate
+ *   arrays, and [GeoTrace] / [GeoShape] values serialize as 2D coordinate arrays `[[lat, lon],
+ *   ...]`.
+ * - Deserialization accepts both the flattened representation and legacy canonical ProtoJSON
+ *   wrapper objects (`fields`, `scalarValue`, `stringValue`, `{"latitude": ..., "longitude":
+ *   ...}`).
  */
 object ProtoJsonSerializer {
+
+  private const val MAX_SAFE_JS_INTEGER = 9007199254740991L
 
   @OptIn(ExperimentalSerializationApi::class)
   private val prettyJson = Json {
@@ -139,8 +148,17 @@ object ProtoJsonSerializer {
     else compactJson.encodeToString(JsonObject.serializer(), obj)
   }
 
-  /** Parses a JSON string into a [RecordInstance] protobuf message. */
-  fun deserializeRecordInstance(json: String): RecordInstance {
+  /**
+   * Parses a JSON string into a [RecordInstance] protobuf message.
+   *
+   * Optionally accepts [formDef] or [schema] to guide exact field type disambiguation when
+   * deserializing flattened JSON values.
+   */
+  fun deserializeRecordInstance(
+    json: String,
+    formDef: FormDef? = null,
+    schema: RecordSchema? = formDef?.model?.primary_instance?.record_schema,
+  ): RecordInstance {
     val element =
       try {
         compactJson.parseToJsonElement(json)
@@ -150,7 +168,7 @@ object ProtoJsonSerializer {
     val obj =
       element as? JsonObject
         ?: throw IllegalArgumentException("Expected JSON object at root for RecordInstance")
-    return decodeRecordInstance(obj)
+    return decodeRecordInstance(obj, formDef, schema)
   }
 
   // ===========================================================================
@@ -285,7 +303,9 @@ object ProtoJsonSerializer {
       }
       addString("target_field", msg.target_field)
       addString("value_expression", msg.value_expression)
-      msg.literal_value?.let { addObject("literal_value", encodeTypedValue(it, snake)) }
+      msg.literal_value?.let {
+        encodeTypedValueElement(it, snake)?.let { el -> addElement("literal_value", el) }
+      }
     }
 
   private fun encodeEntityDeclaration(msg: EntityDeclaration, snake: Boolean): JsonObject =
@@ -487,87 +507,114 @@ object ProtoJsonSerializer {
       addString("field_path", msg.field_path)
       msg.start_time?.let { addStringAlways("start_time", formatRfc3339Timestamp(it)) }
       msg.end_time?.let { addStringAlways("end_time", formatRfc3339Timestamp(it)) }
-      msg.location?.let { addObject("location", encodeGeoPoint(it, snake)) }
+      msg.location?.let { addElement("location", encodeGeoPointArray(it)) }
       addString("old_value", msg.old_value)
       addString("new_value", msg.new_value)
     }
 
-  private fun encodeRecordNode(msg: RecordNode, snake: Boolean): JsonObject =
-    buildProtoJsonObject(snake) {
-      if (msg.fields.isNotEmpty()) {
-        val mapObj = linkedMapOf<String, JsonElement>()
-        msg.fields.forEach { (key, value) -> mapObj[key] = encodeFieldValue(value, snake) }
-        addObject("fields", JsonObject(mapObj))
+  private fun encodeRecordNode(msg: RecordNode, snake: Boolean): JsonObject {
+    val mapObj = linkedMapOf<String, JsonElement>()
+    msg.fields.forEach { (key, value) ->
+      encodeFieldValueElement(value, snake)?.let { mapObj[key] = it }
+    }
+    return JsonObject(mapObj)
+  }
+
+  private fun encodeFieldValueElement(msg: FieldValue, snake: Boolean): JsonElement? =
+    when {
+      msg.scalar_value != null -> encodeTypedValueElement(msg.scalar_value, snake)
+      msg.list_value != null ->
+        JsonArray(msg.list_value.values.mapNotNull { encodeTypedValueElement(it, snake) })
+      msg.node_value != null -> encodeRecordNode(msg.node_value, snake)
+      msg.repeat_value != null ->
+        JsonArray(msg.repeat_value.nodes.map { encodeRecordNode(it, snake) })
+      else -> null
+    }
+
+  @OptIn(ExperimentalSerializationApi::class)
+  private fun formatDoublePrimitive(value: Double): JsonPrimitive {
+    // Proto3 canonical JSON encodes non-finite doubles as quoted strings. They must be handled
+    // before the "add a decimal point" normalization below, which would otherwise turn the token
+    // "NaN" into the unquoted literal `NaN.0` -- output that no JSON parser can read.
+    if (value.isNaN()) return JsonPrimitive("NaN")
+    if (value == Double.POSITIVE_INFINITY) return JsonPrimitive("Infinity")
+    if (value == Double.NEGATIVE_INFINITY) return JsonPrimitive("-Infinity")
+    val s = value.toString()
+    val formatted =
+      if (!s.contains('.') && !s.contains('e') && !s.contains('E')) {
+        "$s.0"
+      } else {
+        s
+      }
+    return JsonUnquotedLiteral(formatted)
+  }
+
+  private fun encodeTypedValueElement(msg: TypedValue, snake: Boolean): JsonElement? =
+    when {
+      msg.string_value != null -> {
+        val str = msg.string_value
+        if (looksLikeTemporalLiteral(str)) {
+          JsonObject(mapOf("string" to JsonPrimitive(str)))
+        } else {
+          JsonPrimitive(str)
+        }
+      }
+      msg.int32_value != null -> JsonPrimitive(msg.int32_value)
+      msg.int64_value != null -> {
+        val v = msg.int64_value
+        if (
+          v !in Int.MIN_VALUE.toLong()..Int.MAX_VALUE.toLong() &&
+            v in -MAX_SAFE_JS_INTEGER..MAX_SAFE_JS_INTEGER
+        ) {
+          JsonPrimitive(v)
+        } else {
+          val keyName = if (snake) "int64_value" else "int64"
+          JsonObject(mapOf(keyName to JsonPrimitive(v.toString())))
+        }
+      }
+      msg.double_value != null -> formatDoublePrimitive(msg.double_value)
+      msg.bool_value != null -> JsonPrimitive(msg.bool_value)
+      msg.date_value != null -> JsonPrimitive(TemporalUtils.formatDate(msg.date_value))
+      msg.time_value != null -> JsonPrimitive(formatIsoTimeOfDay(msg.time_value))
+      msg.timestamp_value != null -> JsonPrimitive(formatRfc3339Timestamp(msg.timestamp_value))
+      msg.geopoint_value != null -> encodeGeoPointArray(msg.geopoint_value)
+      msg.binary_value != null ->
+        JsonObject(mapOf("base64" to JsonPrimitive(msg.binary_value.base64())))
+      msg.geotrace_value != null -> {
+        val pts = msg.geotrace_value.points
+        val coordsArray = JsonArray(pts.map { encodeGeoPointArray(it) })
+        if (pts.isNotEmpty() && (pts.size < 4 || pts.first() != pts.last())) {
+          coordsArray
+        } else {
+          JsonObject(mapOf("geotrace" to coordsArray))
+        }
+      }
+      msg.geoshape_value != null -> {
+        val pts = msg.geoshape_value.points
+        val coordsArray = JsonArray(pts.map { encodeGeoPointArray(it) })
+        if (pts.size >= 4 && pts.first() == pts.last()) {
+          coordsArray
+        } else {
+          JsonObject(mapOf("geoshape" to coordsArray))
+        }
+      }
+      else -> null
+    }
+
+  private fun encodeGeoPointArray(msg: GeoPoint): JsonArray {
+    val elements =
+      mutableListOf<JsonElement>(
+        formatDoublePrimitive(msg.latitude),
+        formatDoublePrimitive(msg.longitude),
+      )
+    if (msg.altitude_meters != 0.0 || msg.accuracy_meters != 0.0) {
+      elements.add(formatDoublePrimitive(msg.altitude_meters))
+      if (msg.accuracy_meters != 0.0) {
+        elements.add(formatDoublePrimitive(msg.accuracy_meters))
       }
     }
-
-  private fun encodeFieldValue(msg: FieldValue, snake: Boolean): JsonObject =
-    buildProtoJsonObject(snake) {
-      msg.scalar_value?.let { addObject("scalar_value", encodeTypedValue(it, snake)) }
-      msg.list_value?.let { addObject("list_value", encodeTypedValueList(it, snake)) }
-      msg.node_value?.let { addObject("node_value", encodeRecordNode(it, snake)) }
-      msg.repeat_value?.let { addObject("repeat_value", encodeRecordNodeList(it, snake)) }
-    }
-
-  private fun encodeTypedValueList(msg: TypedValueList, snake: Boolean): JsonObject =
-    buildProtoJsonObject(snake) {
-      addObjectList("values", msg.values) { encodeTypedValue(it, snake) }
-    }
-
-  private fun encodeRecordNodeList(msg: RecordNodeList, snake: Boolean): JsonObject =
-    buildProtoJsonObject(snake) {
-      addObjectList("nodes", msg.nodes) { encodeRecordNode(it, snake) }
-    }
-
-  private fun encodeTypedValue(msg: TypedValue, snake: Boolean): JsonObject =
-    buildProtoJsonObject(snake) {
-      msg.string_value?.let { addStringAlways("string_value", it) }
-      msg.int32_value?.let { addIntAlways("int32_value", it) }
-      // Proto3 JSON quotes 64-bit integers as strings to avoid IEEE-754 precision loss
-      msg.int64_value?.let { addStringAlways("int64_value", it.toString()) }
-      msg.double_value?.let { addDoubleAlways("double_value", it) }
-      msg.bool_value?.let { addBooleanAlways("bool_value", it) }
-      msg.date_value?.let { addObject("date_value", encodeDate(it, snake)) }
-      msg.time_value?.let { addObject("time_value", encodeTimeOfDay(it, snake)) }
-      msg.timestamp_value?.let { addStringAlways("timestamp_value", formatRfc3339Timestamp(it)) }
-      msg.geopoint_value?.let { addObject("geopoint_value", encodeGeoPoint(it, snake)) }
-      msg.binary_value?.let { addStringAlways("binary_value", it.base64()) }
-      msg.geotrace_value?.let { addObject("geotrace_value", encodeGeoTrace(it, snake)) }
-      msg.geoshape_value?.let { addObject("geoshape_value", encodeGeoShape(it, snake)) }
-    }
-
-  private fun encodeDate(msg: Date, snake: Boolean): JsonObject =
-    buildProtoJsonObject(snake) {
-      addInt("year", msg.year)
-      addInt("month", msg.month)
-      addInt("day", msg.day)
-    }
-
-  private fun encodeTimeOfDay(msg: TimeOfDay, snake: Boolean): JsonObject =
-    buildProtoJsonObject(snake) {
-      addInt("hours", msg.hours)
-      addInt("minutes", msg.minutes)
-      addInt("seconds", msg.seconds)
-      addInt("nanos", msg.nanos)
-    }
-
-  private fun encodeGeoPoint(msg: GeoPoint, snake: Boolean): JsonObject =
-    buildProtoJsonObject(snake) {
-      addDoubleAlways("latitude", msg.latitude)
-      addDoubleAlways("longitude", msg.longitude)
-      addDouble("altitude_meters", msg.altitude_meters)
-      addDouble("accuracy_meters", msg.accuracy_meters)
-    }
-
-  private fun encodeGeoTrace(msg: GeoTrace, snake: Boolean): JsonObject =
-    buildProtoJsonObject(snake) {
-      addObjectList("points", msg.points) { encodeGeoPoint(it, snake) }
-    }
-
-  private fun encodeGeoShape(msg: GeoShape, snake: Boolean): JsonObject =
-    buildProtoJsonObject(snake) {
-      addObjectList("points", msg.points) { encodeGeoPoint(it, snake) }
-    }
+    return JsonArray(elements)
+  }
 
   // ===========================================================================
   // FormDef Decoding
@@ -596,12 +643,20 @@ object ProtoJsonSerializer {
       submission = obj.getProtoObject("submission")?.let { decodeSubmissionConfig(it) },
     )
 
-  private fun decodePrimaryInstance(obj: JsonObject): PrimaryInstance =
-    PrimaryInstance(
-      record_schema = obj.getProtoObject("record_schema")?.let { decodeRecordSchema(it) },
-      default_values = obj.getProtoObject("default_values")?.let { decodeRecordNode(it) },
+  private fun decodePrimaryInstance(obj: JsonObject): PrimaryInstance {
+    val schema = obj.getProtoObject("record_schema")?.let { decodeRecordSchema(it) }
+    return PrimaryInstance(
+      record_schema = schema,
+      default_values =
+        obj.getProtoObject("default_values")?.let {
+          decodeRecordNode(
+            it,
+            schemaFields = schema?.fields?.associateBy { f -> f.name } ?: emptyMap(),
+          )
+        },
       message_type_name = obj.getProtoString("message_type_name"),
     )
+  }
 
   private fun decodeRecordSchema(obj: JsonObject): RecordSchema =
     RecordSchema(
@@ -702,7 +757,7 @@ object ProtoJsonSerializer {
       type = parseEnum(obj.getProtoStringOrNull("type"), ActionType.ACTION_TYPE_UNSPECIFIED),
       target_field = obj.getProtoString("target_field"),
       value_expression = obj.getProtoString("value_expression"),
-      literal_value = obj.getProtoObject("literal_value")?.let { decodeTypedValue(it) },
+      literal_value = obj.getProtoElement("literal_value")?.let { decodeTypedValueElement(it) },
     )
 
   private fun decodeEntityDeclaration(obj: JsonObject): EntityDeclaration =
@@ -841,14 +896,37 @@ object ProtoJsonSerializer {
   // RecordInstance Decoding
   // ===========================================================================
 
-  private fun decodeRecordInstance(obj: JsonObject): RecordInstance =
-    RecordInstance(
+  private fun decodeRecordInstance(
+    obj: JsonObject,
+    formDef: FormDef? = null,
+    schema: RecordSchema? = formDef?.model?.primary_instance?.record_schema,
+  ): RecordInstance {
+    val schemaFields = buildSchemaFieldMap(formDef, schema)
+    return RecordInstance(
       form_id = obj.getProtoString("form_id"),
       form_version = obj.getProtoString("form_version"),
       metadata = obj.getProtoObject("metadata")?.let { decodeRecordMetadata(it) },
-      data_ = obj.getProtoObject("data")?.let { decodeRecordNode(it) },
+      data_ = obj.getProtoObject("data")?.let { decodeRecordNode(it, schemaFields) },
       audit_log = obj.getProtoObject("audit_log")?.let { decodeAuditLog(it) },
     )
+  }
+
+  private fun buildSchemaFieldMap(
+    formDef: FormDef?,
+    schema: RecordSchema?,
+  ): Map<String, FieldDefinition> {
+    val result = linkedMapOf<String, FieldDefinition>()
+    schema?.fields?.forEach { result[it.name] = it }
+    formDef?.model?.bindings?.forEach { binding ->
+      if (binding.type != DataType.DATA_TYPE_UNSPECIFIED) {
+        val leafName = binding.field_path.trim('/').substringAfterLast('/')
+        if (leafName.isNotEmpty() && !result.containsKey(leafName)) {
+          result[leafName] = FieldDefinition(name = leafName, type = binding.type)
+        }
+      }
+    }
+    return result
+  }
 
   private fun decodeRecordMetadata(obj: JsonObject): RecordMetadata =
     RecordMetadata(
@@ -883,67 +961,316 @@ object ProtoJsonSerializer {
       field_path = obj.getProtoString("field_path"),
       start_time = obj.getProtoTimestamp("start_time"),
       end_time = obj.getProtoTimestamp("end_time"),
-      location = obj.getProtoObject("location")?.let { decodeGeoPoint(it) },
+      location = obj.getProtoElement("location")?.let { decodeGeoPointElement(it) },
       old_value = obj.getProtoString("old_value"),
       new_value = obj.getProtoString("new_value"),
     )
 
-  private fun decodeRecordNode(obj: JsonObject): RecordNode {
+  private fun isLegacyFieldValueObject(obj: JsonObject): Boolean =
+    obj.containsKey("scalarValue") ||
+      obj.containsKey("scalar_value") ||
+      obj.containsKey("listValue") ||
+      obj.containsKey("list_value") ||
+      obj.containsKey("nodeValue") ||
+      obj.containsKey("node_value") ||
+      obj.containsKey("repeatValue") ||
+      obj.containsKey("repeat_value")
+
+  private fun isLegacyFieldsContainer(obj: JsonObject): Boolean {
+    if (obj.size != 1 || !obj.containsKey("fields")) return false
+    return when (val raw = obj["fields"]) {
+      is JsonArray ->
+        raw.all { it is JsonObject && it.containsKey("key") && it.containsKey("value") }
+      is JsonObject -> raw.values.all { it is JsonObject && isLegacyFieldValueObject(it) }
+      else -> false
+    }
+  }
+
+  private fun decodeRecordNode(
+    obj: JsonObject,
+    schemaFields: Map<String, FieldDefinition> = emptyMap(),
+  ): RecordNode {
     val fieldsMap = linkedMapOf<String, FieldValue>()
-    val rawFields = obj.getProtoElement("fields")
-    when (rawFields) {
-      is JsonObject -> {
-        rawFields.forEach { (key, valueEl) ->
-          (valueEl as? JsonObject)?.let { fieldsMap[key] = decodeFieldValue(it) }
-        }
-      }
-      is JsonArray -> {
-        rawFields.forEach { entryEl ->
-          val entry = entryEl as? JsonObject ?: return@forEach
-          val key = entry.getProtoString("key")
-          val valueObj = entry.getProtoObject("value")
-          if (valueObj != null) {
-            fieldsMap[key] = decodeFieldValue(valueObj)
+    if (isLegacyFieldsContainer(obj)) {
+      when (val rawFields = obj["fields"]) {
+        is JsonObject -> {
+          rawFields.forEach { (key, valueEl) ->
+            val fieldDef = schemaFields[key]
+            decodeFieldValueElement(valueEl, fieldDef)?.let { fieldsMap[key] = it }
           }
         }
+        is JsonArray -> {
+          rawFields.forEach { entryEl ->
+            val entry = entryEl as? JsonObject ?: return@forEach
+            val key = entry.getProtoString("key")
+            val valueEl = entry["value"] ?: return@forEach
+            val fieldDef = schemaFields[key]
+            decodeFieldValueElement(valueEl, fieldDef)?.let { fieldsMap[key] = it }
+          }
+        }
+        else -> {}
       }
-      else -> {}
+      return RecordNode(fields = fieldsMap)
+    }
+
+    obj.forEach { (key, valueEl) ->
+      if (valueEl !is JsonNull) {
+        val fieldDef = schemaFields[key]
+        decodeFieldValueElement(valueEl, fieldDef)?.let { fieldsMap[key] = it }
+      }
     }
     return RecordNode(fields = fieldsMap)
   }
 
-  private fun decodeFieldValue(obj: JsonObject): FieldValue =
-    FieldValue(
-      scalar_value = obj.getProtoObject("scalar_value")?.let { decodeTypedValue(it) },
+  private fun decodeFieldValueElement(
+    element: JsonElement,
+    fieldDef: FieldDefinition? = null,
+  ): FieldValue? {
+    val expectedType =
+      fieldDef?.type?.takeIf { it != DataType.DATA_TYPE_UNSPECIFIED && !fieldDef.is_repeated }
+    return when (element) {
+      is JsonPrimitive ->
+        decodeTypedValueElement(element, expectedType)?.let { FieldValue(scalar_value = it) }
+      is JsonObject -> {
+        if (isLegacyFieldValueObject(element)) {
+          decodeLegacyFieldValue(element, fieldDef)
+        } else if (isTypedScalarObject(element)) {
+          decodeTypedValueElement(element, expectedType)?.let { FieldValue(scalar_value = it) }
+        } else {
+          val childSchema = fieldDef?.fields?.associateBy { it.name } ?: emptyMap()
+          FieldValue(node_value = decodeRecordNode(element, childSchema))
+        }
+      }
+      is JsonArray -> {
+        if (element.isEmpty()) {
+          if (fieldDef?.is_repeated == true && fieldDef.type == DataType.TYPE_MESSAGE) {
+            FieldValue(repeat_value = RecordNodeList(nodes = emptyList()))
+          } else {
+            FieldValue(list_value = TypedValueList(values = emptyList()))
+          }
+        } else if (
+          expectedType == DataType.TYPE_GEOPOINT ||
+            (expectedType != DataType.TYPE_SELECT_MULTIPLE && isGeoPointCoordinateArray(element))
+        ) {
+          FieldValue(scalar_value = TypedValue(geopoint_value = decodeGeoPointArray(element)))
+        } else if (is2DCoordinateArray(element)) {
+          val pts = element.mapNotNull { (it as? JsonArray)?.let(::decodeGeoPointArray) }
+          when {
+            expectedType == DataType.TYPE_GEOTRACE ->
+              FieldValue(scalar_value = TypedValue(geotrace_value = GeoTrace(points = pts)))
+            expectedType == DataType.TYPE_GEOSHAPE ->
+              FieldValue(scalar_value = TypedValue(geoshape_value = GeoShape(points = pts)))
+            pts.size >= 4 && pts.first() == pts.last() ->
+              FieldValue(scalar_value = TypedValue(geoshape_value = GeoShape(points = pts)))
+            else -> FieldValue(scalar_value = TypedValue(geotrace_value = GeoTrace(points = pts)))
+          }
+        } else if (element.all { it is JsonObject && !isTypedScalarObject(it) }) {
+          val childSchema = fieldDef?.fields?.associateBy { it.name } ?: emptyMap()
+          FieldValue(
+            repeat_value =
+              RecordNodeList(
+                nodes =
+                  element.mapNotNull {
+                    (it as? JsonObject)?.let { o -> decodeRecordNode(o, childSchema) }
+                  }
+              )
+          )
+        } else {
+          FieldValue(
+            list_value = TypedValueList(values = element.mapNotNull { decodeTypedValueElement(it) })
+          )
+        }
+      }
+    }
+  }
+
+  private fun decodeLegacyFieldValue(
+    obj: JsonObject,
+    fieldDef: FieldDefinition? = null,
+  ): FieldValue {
+    val childSchema = fieldDef?.fields?.associateBy { it.name } ?: emptyMap()
+    return FieldValue(
+      scalar_value =
+        obj.getProtoElement("scalar_value")?.let { decodeTypedValueElement(it, fieldDef?.type) },
       list_value = obj.getProtoObject("list_value")?.let { decodeTypedValueList(it) },
-      node_value = obj.getProtoObject("node_value")?.let { decodeRecordNode(it) },
-      repeat_value = obj.getProtoObject("repeat_value")?.let { decodeRecordNodeList(it) },
+      node_value = obj.getProtoObject("node_value")?.let { decodeRecordNode(it, childSchema) },
+      repeat_value =
+        obj.getProtoObject("repeat_value")?.let {
+          RecordNodeList(
+            nodes = it.getProtoObjects("nodes").map { n -> decodeRecordNode(n, childSchema) }
+          )
+        },
     )
+  }
 
   private fun decodeTypedValueList(obj: JsonObject): TypedValueList =
-    TypedValueList(values = obj.getProtoObjects("values").map { decodeTypedValue(it) })
-
-  private fun decodeRecordNodeList(obj: JsonObject): RecordNodeList =
-    RecordNodeList(nodes = obj.getProtoObjects("nodes").map { decodeRecordNode(it) })
-
-  private fun decodeTypedValue(obj: JsonObject): TypedValue =
-    TypedValue(
-      string_value = obj.getProtoStringOrNull("string_value"),
-      int32_value = obj.getProtoIntOrNull("int32_value"),
-      int64_value = obj.getProtoLongOrNull("int64_value"),
-      double_value = obj.getProtoDoubleOrNull("double_value"),
-      bool_value = obj.getProtoBooleanOrNull("bool_value"),
-      date_value = obj.getProtoDate("date_value"),
-      time_value = obj.getProtoTimeOfDay("time_value"),
-      timestamp_value = obj.getProtoTimestamp("timestamp_value"),
-      geopoint_value = obj.getProtoObject("geopoint_value")?.let { decodeGeoPoint(it) },
-      binary_value =
-        obj.getProtoStringOrNull("binary_value")?.let { str ->
-          str.decodeBase64() ?: str.encodeUtf8()
-        },
-      geotrace_value = obj.getProtoObject("geotrace_value")?.let { decodeGeoTrace(it) },
-      geoshape_value = obj.getProtoObject("geoshape_value")?.let { decodeGeoShape(it) },
+    TypedValueList(
+      values =
+        (obj.getProtoElement("values") as? JsonArray)?.mapNotNull { decodeTypedValueElement(it) }
+          ?: emptyList()
     )
+
+  private val TYPED_SCALAR_OBJECT_KEYS =
+    setOf(
+      "string",
+      "stringValue",
+      "string_value",
+      "int32",
+      "int32Value",
+      "int32_value",
+      "int64",
+      "int64Value",
+      "int64_value",
+      "double",
+      "doubleValue",
+      "double_value",
+      "bool",
+      "boolValue",
+      "bool_value",
+      "date",
+      "dateValue",
+      "date_value",
+      "time",
+      "timeValue",
+      "time_value",
+      "timestamp",
+      "timestampValue",
+      "timestamp_value",
+      "geopoint",
+      "geopointValue",
+      "geopoint_value",
+      "binary",
+      "base64",
+      "binaryValue",
+      "binary_value",
+      "geotrace",
+      "geotraceValue",
+      "geotrace_value",
+      "geoshape",
+      "geoshapeValue",
+      "geoshape_value",
+    )
+
+  private fun isTypedScalarObject(obj: JsonObject): Boolean {
+    if (obj.size == 1 && obj.keys.first() in TYPED_SCALAR_OBJECT_KEYS) return true
+    if (obj.containsKey("latitude") && obj.containsKey("longitude") && obj.size in 2..4) return true
+    return false
+  }
+
+  private fun isGeoPointCoordinateArray(arr: JsonArray): Boolean =
+    arr.size in 2..4 &&
+      arr.all { el -> el is JsonPrimitive && !el.isString && el.doubleOrNull != null }
+
+  private fun is2DCoordinateArray(arr: JsonArray): Boolean =
+    arr.isNotEmpty() && arr.all { el -> el is JsonArray && isGeoPointCoordinateArray(el) }
+
+  private fun decodeTypedValueElement(
+    element: JsonElement,
+    expectedType: DataType? = null,
+  ): TypedValue? =
+    when (element) {
+      is JsonPrimitive -> decodePrimitiveTypedValue(element, expectedType)
+      is JsonArray -> {
+        if (isGeoPointCoordinateArray(element)) {
+          TypedValue(geopoint_value = decodeGeoPointArray(element))
+        } else if (is2DCoordinateArray(element)) {
+          val pts = element.mapNotNull { (it as? JsonArray)?.let(::decodeGeoPointArray) }
+          if (
+            expectedType == DataType.TYPE_GEOSHAPE ||
+              (expectedType != DataType.TYPE_GEOTRACE && pts.size >= 4 && pts.first() == pts.last())
+          ) {
+            TypedValue(geoshape_value = GeoShape(points = pts))
+          } else {
+            TypedValue(geotrace_value = GeoTrace(points = pts))
+          }
+        } else {
+          null
+        }
+      }
+      is JsonObject -> decodeObjectTypedValue(element)
+    }
+
+  private fun decodePrimitiveTypedValue(
+    prim: JsonPrimitive,
+    expectedType: DataType? = null,
+  ): TypedValue? {
+    if (prim is JsonNull) return null
+    if (prim.isString) {
+      val s = prim.content
+      return when (expectedType) {
+        DataType.TYPE_STRING,
+        DataType.TYPE_SELECT_ONE -> TypedValue(string_value = s)
+        DataType.TYPE_DATE -> TypedValue(date_value = TemporalUtils.tryParseDate(s))
+        DataType.TYPE_TIME -> TypedValue(time_value = TemporalUtils.tryParseTime(s))
+        DataType.TYPE_DATETIME -> TypedValue(timestamp_value = parseRfc3339Timestamp(s))
+        DataType.TYPE_INT32 -> TypedValue(int32_value = s.toIntOrNull())
+        DataType.TYPE_INT64 -> TypedValue(int64_value = s.toLongOrNull())
+        DataType.TYPE_DOUBLE -> TypedValue(double_value = s.toDoubleOrNull())
+        DataType.TYPE_BOOLEAN -> TypedValue(bool_value = s.toBooleanStrictOrNull())
+        DataType.TYPE_BINARY -> TypedValue(binary_value = s.decodeBase64() ?: s.encodeUtf8())
+        else -> {
+          when {
+            isIsoDateLiteral(s) -> TypedValue(date_value = TemporalUtils.tryParseDate(s))
+            isRfc3339TimestampLiteral(s) -> TypedValue(timestamp_value = parseRfc3339Timestamp(s))
+            isIsoTimeLiteral(s) -> TypedValue(time_value = TemporalUtils.tryParseTime(s))
+            else -> TypedValue(string_value = s)
+          }
+        }
+      }
+    }
+    prim.booleanOrNull?.let {
+      return TypedValue(bool_value = it)
+    }
+    return when (expectedType) {
+      DataType.TYPE_DOUBLE -> TypedValue(double_value = prim.doubleOrNull)
+      DataType.TYPE_INT64 -> TypedValue(int64_value = prim.longOrNull)
+      DataType.TYPE_INT32 -> TypedValue(int32_value = prim.intOrNull)
+      else -> {
+        val raw = prim.content
+        when {
+          raw.contains('.') || raw.contains('e') || raw.contains('E') ->
+            TypedValue(double_value = prim.doubleOrNull)
+          prim.intOrNull != null -> TypedValue(int32_value = prim.intOrNull)
+          prim.longOrNull != null -> TypedValue(int64_value = prim.longOrNull)
+          else -> TypedValue(double_value = prim.doubleOrNull)
+        }
+      }
+    }
+  }
+
+  private fun decodeObjectTypedValue(obj: JsonObject): TypedValue {
+    if (obj.containsKey("latitude") && obj.containsKey("longitude")) {
+      return TypedValue(geopoint_value = decodeGeoPoint(obj))
+    }
+    return TypedValue(
+      string_value = obj.getProtoStringOrNull("string_value") ?: obj.getProtoStringOrNull("string"),
+      int32_value = obj.getProtoIntOrNull("int32_value") ?: obj.getProtoIntOrNull("int32"),
+      int64_value = obj.getProtoLongOrNull("int64_value") ?: obj.getProtoLongOrNull("int64"),
+      double_value = obj.getProtoDoubleOrNull("double_value") ?: obj.getProtoDoubleOrNull("double"),
+      bool_value = obj.getProtoBooleanOrNull("bool_value") ?: obj.getProtoBooleanOrNull("bool"),
+      date_value = obj.getProtoDate("date_value") ?: obj.getProtoDate("date"),
+      time_value = obj.getProtoTimeOfDay("time_value") ?: obj.getProtoTimeOfDay("time"),
+      timestamp_value =
+        obj.getProtoTimestamp("timestamp_value") ?: obj.getProtoTimestamp("timestamp"),
+      geopoint_value =
+        (obj.getProtoElement("geopoint_value") ?: obj.getProtoElement("geopoint"))?.let {
+          decodeGeoPointElement(it)
+        },
+      binary_value =
+        (obj.getProtoStringOrNull("binary_value")
+            ?: obj.getProtoStringOrNull("base64")
+            ?: obj.getProtoStringOrNull("binary"))
+          ?.let { str -> str.decodeBase64() ?: str.encodeUtf8() },
+      geotrace_value =
+        (obj.getProtoElement("geotrace_value") ?: obj.getProtoElement("geotrace"))?.let {
+          decodeGeoTraceElement(it)
+        },
+      geoshape_value =
+        (obj.getProtoElement("geoshape_value") ?: obj.getProtoElement("geoshape"))?.let {
+          decodeGeoShapeElement(it)
+        },
+    )
+  }
 
   private fun decodeDate(obj: JsonObject): Date =
     Date(
@@ -960,6 +1287,24 @@ object ProtoJsonSerializer {
       nanos = obj.getProtoInt("nanos"),
     )
 
+  private fun decodeGeoPointElement(el: JsonElement): GeoPoint? =
+    when (el) {
+      is JsonArray -> decodeGeoPointArray(el)
+      is JsonObject -> decodeGeoPoint(el)
+      else -> null
+    }
+
+  private fun decodeGeoPointArray(arr: JsonArray): GeoPoint {
+    fun JsonElement?.asDouble(): Double =
+      (this as? JsonPrimitive)?.let { it.doubleOrNull ?: it.content.toDoubleOrNull() } ?: 0.0
+    return GeoPoint(
+      latitude = arr.getOrNull(0).asDouble(),
+      longitude = arr.getOrNull(1).asDouble(),
+      altitude_meters = arr.getOrNull(2).asDouble(),
+      accuracy_meters = arr.getOrNull(3).asDouble(),
+    )
+  }
+
   private fun decodeGeoPoint(obj: JsonObject): GeoPoint =
     GeoPoint(
       latitude = obj.getProtoDouble("latitude"),
@@ -968,11 +1313,33 @@ object ProtoJsonSerializer {
       accuracy_meters = obj.getProtoDouble("accuracy_meters"),
     )
 
+  private fun decodeGeoTraceElement(el: JsonElement): GeoTrace? =
+    when (el) {
+      is JsonArray -> GeoTrace(points = el.mapNotNull { decodeGeoPointElement(it) })
+      is JsonObject -> decodeGeoTrace(el)
+      else -> null
+    }
+
   private fun decodeGeoTrace(obj: JsonObject): GeoTrace =
-    GeoTrace(points = obj.getProtoObjects("points").map { decodeGeoPoint(it) })
+    GeoTrace(
+      points =
+        (obj.getProtoElement("points") as? JsonArray)?.mapNotNull { decodeGeoPointElement(it) }
+          ?: emptyList()
+    )
+
+  private fun decodeGeoShapeElement(el: JsonElement): GeoShape? =
+    when (el) {
+      is JsonArray -> GeoShape(points = el.mapNotNull { decodeGeoPointElement(it) })
+      is JsonObject -> decodeGeoShape(el)
+      else -> null
+    }
 
   private fun decodeGeoShape(obj: JsonObject): GeoShape =
-    GeoShape(points = obj.getProtoObjects("points").map { decodeGeoPoint(it) })
+    GeoShape(
+      points =
+        (obj.getProtoElement("points") as? JsonArray)?.mapNotNull { decodeGeoPointElement(it) }
+          ?: emptyList()
+    )
 
   private inline fun <reified E : Enum<E>> parseEnum(name: String?, default: E): E {
     if (name == null) return default
@@ -982,6 +1349,37 @@ object ProtoJsonSerializer {
   // ===========================================================================
   // RFC 3339 Timestamp & Temporal Helpers
   // ===========================================================================
+
+  private val ISO_DATE_REGEX = Regex("""^\d{4}-\d{2}-\d{2}$""")
+  private val ISO_TIME_REGEX = Regex("""^\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?$""")
+  private val RFC3339_TIMESTAMP_REGEX =
+    Regex("""^\d{4}-\d{2}-\d{2}[Tt]\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:[Zz]|[+-]\d{2}:\d{2})$""")
+
+  private fun isIsoDateLiteral(str: String): Boolean =
+    ISO_DATE_REGEX.matches(str) && TemporalUtils.tryParseDate(str) != null
+
+  private fun isIsoTimeLiteral(str: String): Boolean =
+    ISO_TIME_REGEX.matches(str) && TemporalUtils.tryParseTime(str) != null
+
+  private fun isRfc3339TimestampLiteral(str: String): Boolean =
+    RFC3339_TIMESTAMP_REGEX.matches(str) && TemporalUtils.tryParseDate(str) != null
+
+  private fun looksLikeTemporalLiteral(str: String): Boolean =
+    isIsoDateLiteral(str) || isIsoTimeLiteral(str) || isRfc3339TimestampLiteral(str)
+
+  private fun formatIsoTimeOfDay(time: TimeOfDay): String {
+    val base =
+      "${time.hours.toString().padStart(2, '0')}:${time.minutes.toString().padStart(2, '0')}:${time.seconds.toString().padStart(2, '0')}"
+    val nano = time.nanos
+    val frac =
+      when {
+        nano == 0 -> ""
+        nano % 1_000_000 == 0 -> "." + (nano / 1_000_000).toString().padStart(3, '0')
+        nano % 1_000 == 0 -> "." + (nano / 1_000).toString().padStart(6, '0')
+        else -> "." + nano.toString().padStart(9, '0')
+      }
+    return "$base$frac"
+  }
 
   private fun formatRfc3339Timestamp(instant: Instant): String {
     val epochSec = instant.getEpochSecond()

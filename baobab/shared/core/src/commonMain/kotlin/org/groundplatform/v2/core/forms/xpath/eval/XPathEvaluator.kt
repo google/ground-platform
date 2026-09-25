@@ -1,13 +1,13 @@
-/**
+/*
  * Copyright 2026 The Ground Authors.
  *
- * Licensed under the Apache License, Version 2.0 (the 'License'); you may not use this file except
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
  *
  *     https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an 'AS IS' BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
@@ -63,13 +63,20 @@ internal class XPathEvaluator {
       val direct = node.children(targetName)
       result.addAll(direct)
       for (child in node.children(null)) {
-        if (child !in direct) {
+        // Structural comparison, not `child !in direct`: children() returns fresh wrapper objects
+        // on every call and XPathNode has identity equality, so the membership test was always
+        // true and the walk descended into nodes it had just matched, emitting nested same-named
+        // fields twice.
+        val alreadyMatched = direct.any {
+          it.name == child.name && it.repeatIndex == child.repeatIndex
+        }
+        if (!alreadyMatched) {
           search(child)
         }
       }
     }
     search(start)
-    return result
+    return normalizeNodeSet(result)
   }
 
   private fun evaluateBinary(expr: XPathExpr.BinaryExpr, context: EvaluationContext): XPathValue {
@@ -90,10 +97,9 @@ internal class XPathEvaluator {
       if (leftVal !is XPathValue.NodeSet || rightVal !is XPathValue.NodeSet) {
         throw XPathEvaluationException("Union operator '|' requires node-set operands")
       }
-      val combined = linkedSetOf<XPathNode>()
-      combined.addAll(leftVal.nodes)
-      combined.addAll(rightVal.nodes)
-      return XPathValue.NodeSet(combined.toList())
+      // Note: a Set cannot be used to merge these, because XPathNode has identity equality and
+      // children() hands back fresh wrappers each call. See normalizeNodeSet.
+      return XPathValue.NodeSet(normalizeNodeSet(leftVal.nodes + rightVal.nodes))
     }
 
     val left = evaluate(expr.left, context)
@@ -120,6 +126,19 @@ internal class XPathEvaluator {
   /**
    * Implements XPath 1.0 Section 3.4 existential comparison semantics with native support for
    * ProtoForms strongly-typed scalars (`DateVal`, `TimestampVal`, `Bool`, `Number`, `Str`).
+   *
+   * Two behaviours here are deliberate choices made for compatibility with ODK Collect (JavaRosa),
+   * Enketo and KoboToolbox, so that a form authored against those tools computes the same answers
+   * here:
+   * 1. **Node-set compared against a boolean** follows §3.4 strictly: both sides convert to
+   *    boolean, and `boolean(node-set)` is just "is it non-empty". So `field = true()` is true
+   *    whenever the node exists, *whatever its value*. This is surprising, but it is what every
+   *    other XForms engine does, and ODK documentation steers authors to `field = 'true'` for
+   *    exactly this reason.
+   * 2. **A typed boolean compared against a string** compares lexically (`"true"` / `"false"`)
+   *    rather than coercing the string to a boolean. ODK stores booleans as strings, so `field =
+   *    'false'` must be true for a field whose value is false. Strict §3.4 would convert `'false'`
+   *    to the boolean `true` (every non-empty string is true) and give the wrong answer.
    */
   private fun evaluateComparison(left: XPathValue, right: XPathValue, op: BinaryOp): Boolean {
     // 1. Both are NodeSets: true if ANY node in left and ANY node in right satisfy op
@@ -136,8 +155,10 @@ internal class XPathEvaluator {
 
     // 2. Left is NodeSet, Right is Scalar
     if (left is XPathValue.NodeSet) {
-      if (left.nodes.isEmpty() && right is XPathValue.Bool) {
-        return compareBooleans(false, right.value, op)
+      // Note: deliberately NOT `left.toBoolean()`, which applies a ProtoForms value-truthiness
+      // rule (see XPathValue.NodeSet.toBoolean). XPath's `boolean(node-set)` is purely existence.
+      if (right is XPathValue.Bool) {
+        return compareBooleans(left.nodes.isNotEmpty(), right.value, op)
       }
       for (ln in left.nodes) {
         if (compareScalars(ln.extractValue(), right, op)) {
@@ -149,8 +170,8 @@ internal class XPathEvaluator {
 
     // 3. Right is NodeSet, Left is Scalar
     if (right is XPathValue.NodeSet) {
-      if (right.nodes.isEmpty() && left is XPathValue.Bool) {
-        return compareBooleans(left.value, false, op)
+      if (left is XPathValue.Bool) {
+        return compareBooleans(left.value, right.nodes.isNotEmpty(), op)
       }
       for (rn in right.nodes) {
         if (compareScalars(left, rn.extractValue(), op)) {
@@ -179,6 +200,17 @@ internal class XPathEvaluator {
     }
 
     // Equality operators (=, !=)
+    // ODK/XForms represent booleans lexically, so `field = 'false'` must hold for a field whose
+    // value is false. Comparing these as booleans would convert the non-empty string 'false' to
+    // `true` and yield the opposite answer, so string literals win over boolean coercion here.
+    if (
+      (a is XPathValue.Bool && b is XPathValue.Str) || (a is XPathValue.Str && b is XPathValue.Bool)
+    ) {
+      val boolStr = a.toXPathString()
+      val otherStr = b.toXPathString()
+      return if (op == BinaryOp.EQ) boolStr == otherStr else boolStr != otherStr
+    }
+
     if (a is XPathValue.Bool || b is XPathValue.Bool) {
       return compareBooleans(a.toBoolean(), b.toBoolean(), op)
     }
@@ -279,12 +311,51 @@ internal class XPathEvaluator {
         for (pred in step.predicates) {
           filtered = applyPredicate(filtered, pred, context)
         }
+        // Reverse axes are enumerated nearest-first so predicates see proximity positions. The
+        // resulting node-set is still expected in document order (e.g. string() takes the first
+        // node in document order), so flip it back once predicates have been applied.
+        if (isReverseAxis(step.axis)) {
+          filtered = filtered.asReversed()
+        }
         stepCandidates.addAll(filtered)
       }
-      currentNodes = stepCandidates
+      // Distinct context nodes frequently reach the same target node -- every `member` shares one
+      // parent, every `member/name` shares a set of ancestors. XPath node-sets cannot contain
+      // duplicates, so merge them here. This must happen on the merged list only: normalizing
+      // inside the loop above would destroy the per-context proximity positions that predicates
+      // depend on, and would run before the reverse-axis flip.
+      currentNodes = normalizeNodeSet(stepCandidates)
     }
     return currentNodes
   }
+
+  /**
+   * Collapses [nodes] into a valid XPath node-set: duplicates removed, sorted into document order.
+   *
+   * Cannot be expressed as `distinct()` or `toSet()`. [XPathNode] implementors are plain classes
+   * using identity equality, and traversal re-materializes a fresh wrapper object for the same
+   * logical node on every call, so no two wrappers ever compare equal. Deduplication has to go
+   * through the structural [XPathNode.documentOrderKey] instead.
+   */
+  private fun normalizeNodeSet(nodes: List<XPathNode>): List<XPathNode> {
+    if (nodes.size < 2) return nodes
+    // Compute each key exactly once; the walk to the root is O(depth x siblings) and a
+    // comparison-based sort would otherwise recompute it on every comparison.
+    val seen = HashSet<XPathNode.DocumentOrderKey>(nodes.size)
+    val keyed = ArrayList<Pair<XPathNode.DocumentOrderKey, XPathNode>>(nodes.size)
+    for (node in nodes) {
+      val key = node.documentOrderKey()
+      if (seen.add(key)) {
+        keyed.add(key to node)
+      }
+    }
+    keyed.sortBy { it.first }
+    return keyed.map { it.second }
+  }
+
+  /** Axes whose proximity positions are numbered backwards from the context node. */
+  private fun isReverseAxis(axis: Axis): Boolean =
+    axis == Axis.PRECEDING_SIBLING || axis == Axis.ANCESTOR || axis == Axis.ANCESTOR_OR_SELF
 
   private fun expandAxisAndNodeTest(
     node: XPathNode,
@@ -348,12 +419,20 @@ internal class XPathEvaluator {
   private fun collectSiblings(node: XPathNode, following: Boolean): List<XPathNode> {
     val parent = node.parent ?: return emptyList()
     val allSiblings = parent.children(null)
-    val idx = allSiblings.indexOf(node)
+    // `children()` materializes fresh node objects on every call and XPathNode uses identity
+    // equality, so `indexOf(node)` would never match. Locate the context node by its structural
+    // identity within the parent instead: (name, repeatIndex) is unique among siblings because
+    // non-repeated fields have distinct names and repeated ones have distinct 1-based indices.
+    val idx = allSiblings.indexOfFirst {
+      it.name == node.name && it.repeatIndex == node.repeatIndex
+    }
     if (idx < 0) return emptyList()
     return if (following) {
       allSiblings.subList(idx + 1, allSiblings.size)
     } else {
-      allSiblings.subList(0, idx)
+      // preceding-sibling is a reverse axis: enumerate nearest-first so that predicate proximity
+      // positions are numbered outward from the context node (XPath 1.0 section 2.4).
+      allSiblings.subList(0, idx).asReversed()
     }
   }
 

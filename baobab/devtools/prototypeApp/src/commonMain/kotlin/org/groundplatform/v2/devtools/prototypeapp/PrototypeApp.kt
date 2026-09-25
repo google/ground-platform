@@ -1,13 +1,13 @@
 /*
  * Copyright 2026 The Ground Authors.
  *
- * Licensed under the Apache License, Version 2.0 (the 'License'); you may not use this file except
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
  *
  *     https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an 'AS IS' BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
@@ -43,6 +43,9 @@ import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.CloudDone
+import androidx.compose.material.icons.filled.CloudOff
+import androidx.compose.material.icons.filled.CloudUpload
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Layers
@@ -59,7 +62,6 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Smartphone
 import androidx.compose.material.icons.filled.Tablet
 import androidx.compose.material.icons.filled.Timeline
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -103,29 +105,32 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.groundplatform.v2.core.forms.ui.GroundAlertDialogOverlay
 import org.groundplatform.v2.core.forms.ui.GroundBadgeTone
 import org.groundplatform.v2.core.forms.ui.GroundTheme
 import org.groundplatform.v2.core.forms.ui.GroundTonalBadge
+import org.groundplatform.v2.core.forms.ui.LocalGroundBrandFontFamily
 
 /**
  * Root Compose Multiplatform Web application for `baobab/devtools/prototypeApp`.
  *
  * Renders an interactive UX design workbench that embeds a live Mobile or Tablet device preview of
- * the Ground 2.0 Compose Multiplatform UI (`Splash` -> `Sign In` -> `Terms of Service` ->
- * `Download survey` -> `Main Survey UI`).
+ * the Ground 2.0 Compose Multiplatform UI (`Sign In` -> `Terms of Service` -> `Download survey` ->
+ * `Main Survey UI`).
  */
 @Composable
 fun PrototypeApp(state: PrototypeAppState = remember { PrototypeAppState() }) {
   val isMapShowing =
     state.currentScreen == PrototypeScreen.MAIN_SURVEY &&
-      state.mainViewMode == MainSurveyViewMode.MAP &&
+      state.activeDrawerSubView == MainDrawerSubView.NONE &&
       !state.isDataCollectionFormOpen
 
   GroundTheme(darkTheme = state.isDarkTheme) {
@@ -145,8 +150,7 @@ fun PrototypeApp(state: PrototypeAppState = remember { PrototypeAppState() }) {
           modifier = Modifier.fillMaxSize().padding(16.dp),
           horizontalArrangement = Arrangement.spacedBy(20.dp),
         ) {
-          val previewStageWeight =
-            if (state.effectiveFrameWidthDp >= 600) 1.55f else 1.15f
+          val previewStageWeight = if (state.effectiveFrameWidthDp >= 600) 1.55f else 1.15f
 
           // Left / Center stage: Embedded Mobile or Tablet Device Preview
           Box(
@@ -159,7 +163,7 @@ fun PrototypeApp(state: PrototypeAppState = remember { PrototypeAppState() }) {
           ) {
             MobileDevicePreviewFrame(
               deviceTitle =
-                "Ground 2.0 ${state.deviceFormFactor.label} UI • Step ${state.currentScreen.stepNumber}/5: ${state.currentScreen.title}",
+                "Ground 2.0 ${state.deviceFormFactor.label} UI • Step ${state.currentScreen.stepNumber}/4: ${state.currentScreen.title}",
               isDarkTheme = state.isDarkTheme,
               isScreenTransparent = isMapShowing,
               formFactor = state.deviceFormFactor,
@@ -172,10 +176,7 @@ fun PrototypeApp(state: PrototypeAppState = remember { PrototypeAppState() }) {
           }
 
           // Right panel: UX Designer Flow & State Controls
-          UxDesignerInspectorPanel(
-            state = state,
-            modifier = Modifier.weight(0.85f).fillMaxHeight(),
-          )
+          UxDesignerInspectorPanel(state = state, modifier = Modifier.weight(0.85f).fillMaxHeight())
         }
       }
     }
@@ -185,20 +186,11 @@ fun PrototypeApp(state: PrototypeAppState = remember { PrototypeAppState() }) {
 /** Top navigation bar for the Web UX Prototype Workbench. */
 @Composable
 private fun PrototypeWorkbenchTopBar(state: PrototypeAppState) {
-  val chipColors =
-    androidx.compose.material3.FilterChipDefaults.filterChipColors(
-      containerColor = Color(0xFF1F4E39),
-      labelColor = Color.White,
-      iconColor = Color.White,
-      selectedContainerColor = Color(0xFF8BD6B1),
-      selectedLabelColor = Color(0xFF003825),
-      selectedLeadingIconColor = Color(0xFF003825),
-    )
   val assistColors =
     androidx.compose.material3.AssistChipDefaults.assistChipColors(
-      containerColor = Color(0xFF1F4E39),
+      containerColor = Color(0xFF1D5128),
       labelColor = Color.White,
-      leadingIconContentColor = Color(0xFF8BD6B1),
+      leadingIconContentColor = Color(0xFF9CD49F),
     )
   Surface(
     modifier = Modifier.fillMaxWidth(),
@@ -226,21 +218,24 @@ private fun PrototypeWorkbenchTopBar(state: PrototypeAppState) {
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp),
           ) {
+            val brandFont = LocalGroundBrandFontFamily.current
             Text(
-              text = "Ground 2.0 Mobile UI Prototype",
+              text =
+                buildAnnotatedString {
+                  withStyle(SpanStyle(fontFamily = brandFont, fontWeight = FontWeight.ExtraBold)) {
+                    append("Ground")
+                  }
+                  append(" 2.0 Mobile UI Prototype")
+                },
               style = MaterialTheme.typography.titleMedium,
               color = Color.White,
               fontWeight = FontWeight.Bold,
             )
-            Surface(
-              shape = MaterialTheme.shapes.extraSmall,
-              color = Color(0xFF1E6F50),
-            ) {
+            Surface(shape = MaterialTheme.shapes.extraSmall, color = Color(0xFF36693E)) {
               Text(
                 text = "devtools/prototypeApp",
                 style = MaterialTheme.typography.labelSmall,
-                color = Color(0xFFC8E6C9),
-                fontFamily = FontFamily.Monospace,
+                color = Color(0xFFB7F1B9),
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
               )
@@ -249,116 +244,18 @@ private fun PrototypeWorkbenchTopBar(state: PrototypeAppState) {
           Text(
             text = "Compose Multiplatform Mobile & Tablet UI Preview & UX Co-Design Workbench",
             style = MaterialTheme.typography.labelSmall,
-            color = Color(0xFFA7C4B5),
+            color = Color(0xFFC1C9BE),
           )
         }
       }
 
       Spacer(modifier = Modifier.width(16.dp))
 
-      // Screen Quick-Jump Pills + Device Form Factor Toggle + Controls
+      // Global Workbench Controls
       Row(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically,
       ) {
-        PrototypeScreen.entries.forEach { screen ->
-          val isSelected = state.currentScreen == screen
-          FilterChip(
-            selected = isSelected,
-            onClick = { state.navigateTo(screen) },
-            colors = chipColors,
-            border =
-              androidx.compose.material3.FilterChipDefaults.filterChipBorder(
-                enabled = true,
-                selected = isSelected,
-                borderColor = Color(0xFF386B52),
-                selectedBorderColor = Color(0xFF8BD6B1),
-              ),
-            label = {
-              Text(
-                text = "${screen.stepNumber}. ${screen.title}",
-                style = MaterialTheme.typography.labelMedium,
-                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-              )
-            },
-          )
-        }
-
-        // Segmented Form Factor Toggle: Mobile | Tablet
-        SingleChoiceSegmentedButtonRow {
-          DeviceFormFactor.entries.forEachIndexed { index, factor ->
-            val selected = state.deviceFormFactor == factor
-            val icon =
-              if (factor == DeviceFormFactor.MOBILE) {
-                Icons.Default.Smartphone
-              } else {
-                Icons.Default.Tablet
-              }
-            SegmentedButton(
-              selected = selected,
-              onClick = { state.selectDeviceFormFactor(factor) },
-              shape =
-                SegmentedButtonDefaults.itemShape(
-                  index = index,
-                  count = DeviceFormFactor.entries.size,
-                ),
-              colors =
-                SegmentedButtonDefaults.colors(
-                  activeContainerColor = Color(0xFF8BD6B1),
-                  activeContentColor = Color(0xFF003825),
-                  activeBorderColor = Color(0xFF8BD6B1),
-                  inactiveContainerColor = Color(0xFF194230),
-                  inactiveContentColor = Color.White,
-                  inactiveBorderColor = Color(0xFF386B52),
-                ),
-              icon = {
-                Icon(
-                  imageVector = icon,
-                  contentDescription = factor.label,
-                  modifier = Modifier.size(15.dp),
-                )
-              },
-              label = {
-                Text(
-                  text = factor.label,
-                  maxLines = 1,
-                  softWrap = false,
-                  style = MaterialTheme.typography.labelMedium,
-                )
-              },
-            )
-          }
-        }
-
-        // Rotate Device widget button in top bar
-        FilterChip(
-          selected = state.isDeviceRotated,
-          onClick = { state.rotateDevice() },
-          colors = chipColors,
-          border =
-            androidx.compose.material3.FilterChipDefaults.filterChipBorder(
-              enabled = true,
-              selected = state.isDeviceRotated,
-              borderColor = Color(0xFF386B52),
-              selectedBorderColor = Color(0xFF8BD6B1),
-            ),
-          leadingIcon = {
-            Icon(
-              imageVector = Icons.Default.ScreenRotation,
-              contentDescription = "Rotate device",
-              modifier = Modifier.size(15.dp),
-            )
-          },
-          label = {
-            Text(
-              text = "Rotate (${state.deviceOrientation.label})",
-              maxLines = 1,
-              softWrap = false,
-              style = MaterialTheme.typography.labelMedium,
-            )
-          },
-        )
-
         // Theme toggle button
         AssistChip(
           onClick = { state.toggleDarkTheme() },
@@ -366,7 +263,7 @@ private fun PrototypeWorkbenchTopBar(state: PrototypeAppState) {
           border =
             androidx.compose.material3.AssistChipDefaults.assistChipBorder(
               enabled = true,
-              borderColor = Color(0xFF386B52),
+              borderColor = Color(0xFF424940),
             ),
           leadingIcon = {
             Icon(
@@ -386,6 +283,54 @@ private fun PrototypeWorkbenchTopBar(state: PrototypeAppState) {
           },
         )
 
+        // Airplane mode (Offline simulator) toggle chip
+        FilterChip(
+          selected = state.isAirplaneMode,
+          onClick = { state.toggleAirplaneMode() },
+          colors =
+            androidx.compose.material3.FilterChipDefaults.filterChipColors(
+              containerColor = Color(0xFF1D5128),
+              labelColor = Color.White,
+              iconColor = Color.White,
+              selectedContainerColor = Color(0xFFFFB74D),
+              selectedLabelColor = Color(0xFF3E2723),
+              selectedLeadingIconColor = Color(0xFF3E2723),
+            ),
+          border =
+            androidx.compose.material3.FilterChipDefaults.filterChipBorder(
+              enabled = true,
+              selected = state.isAirplaneMode,
+              borderColor = Color(0xFF424940),
+              selectedBorderColor = Color(0xFFFFE082),
+            ),
+          leadingIcon = {
+            Icon(
+              imageVector =
+                if (state.isAirplaneMode) {
+                  Icons.Default.CloudOff
+                } else {
+                  Icons.Default.CloudDone
+                },
+              contentDescription = "Toggle Airplane mode (Offline simulation)",
+              modifier = Modifier.size(15.dp),
+            )
+          },
+          label = {
+            Text(
+              text =
+                if (state.isAirplaneMode) {
+                  "Airplane mode: ON (Offline)"
+                } else {
+                  "Airplane mode"
+                },
+              maxLines = 1,
+              softWrap = false,
+              style = MaterialTheme.typography.labelMedium,
+              fontWeight = if (state.isAirplaneMode) FontWeight.Bold else FontWeight.Medium,
+            )
+          },
+        )
+
         // Reset Flow button
         AssistChip(
           onClick = { state.resetPrototypeFlow() },
@@ -393,7 +338,7 @@ private fun PrototypeWorkbenchTopBar(state: PrototypeAppState) {
           border =
             androidx.compose.material3.AssistChipDefaults.assistChipBorder(
               enabled = true,
-              borderColor = Color(0xFF386B52),
+              borderColor = Color(0xFF424940),
             ),
           leadingIcon = {
             Icon(
@@ -441,7 +386,8 @@ fun MobileDevicePreviewFrame(
     horizontalAlignment = Alignment.CenterHorizontally,
     verticalArrangement = Arrangement.spacedBy(8.dp),
   ) {
-    // Stage Header with Device Title + Inline Mobile / Tablet Form Factor Toggle + Rotate Device Widget
+    // Stage Header with Device Title + Inline Mobile / Tablet Form Factor Toggle + Rotate Device
+    // Widget
     Row(
       modifier = Modifier.width(frameWidthDp.dp),
       horizontalArrangement = Arrangement.SpaceBetween,
@@ -463,7 +409,6 @@ fun MobileDevicePreviewFrame(
           style =
             MaterialTheme.typography.labelSmall.copy(
               color = MaterialTheme.colorScheme.onSurfaceVariant,
-              fontFamily = FontFamily.Monospace,
             ),
         )
       }
@@ -532,7 +477,8 @@ fun MobileDevicePreviewFrame(
       }
     }
 
-    // Outer Device Hardware Bezel (dynamically sized for Mobile vs Tablet and Portrait vs Landscape)
+    // Outer Device Hardware Bezel (dynamically sized for Mobile vs Tablet and Portrait vs
+    // Landscape)
     val outerShape = RoundedCornerShape(formFactor.outerCornerRadiusDp.dp)
     val innerShape = RoundedCornerShape(formFactor.innerCornerRadiusDp.dp)
     Box(
@@ -584,12 +530,13 @@ fun MobileDevicePreviewFrame(
             if (formFactor == DeviceFormFactor.MOBILE) {
               Box(
                 modifier =
-                  Modifier.width(68.dp).height(11.dp).clip(CircleShape).background(Color(0xFF061B12))
+                  Modifier.width(68.dp)
+                    .height(11.dp)
+                    .clip(CircleShape)
+                    .background(Color(0xFF061B12))
               )
             } else {
-              Box(
-                modifier = Modifier.size(8.dp).clip(CircleShape).background(Color(0xFF061B12))
-              )
+              Box(modifier = Modifier.size(8.dp).clip(CircleShape).background(Color(0xFF061B12)))
             }
             Text(
               text = "5G • 100%",
@@ -635,12 +582,13 @@ fun MobileDevicePreviewFrame(
 }
 
 /**
- * Host composable that switches between the 5 Ground Mobile UI prototype screens:
- * 1. Splash / Loading Screen
- * 2. Sign In Screen (Sign in with Google only)
- * 3. Terms of Service Screen
- * 4. Download Survey Screen (with search by name or location, map thumbnail, and downloaded indicator)
- * 5. Main Survey UI (Map & List Views, Layers toggle, 1:1 / 1:N Entity Bottom Sheet, and Navigation Drawer)
+ * Host composable that switches between the 4 Ground Mobile UI prototype screens:
+ * 1. Sign In Screen (Sign in with Google only)
+ * 2. Terms of Service Screen
+ * 3. Download Survey Screen (with search by name or location, map thumbnail, and downloaded
+ *    indicator)
+ * 4. Main Survey UI (Map & List Views, Layers toggle, simplestyle-spec Marker Progression ○ → ◐ →
+ *    ✓, and Navigation Drawer)
  */
 @Composable
 fun GroundMobilePrototypeScreenHost(state: PrototypeAppState) {
@@ -649,7 +597,6 @@ fun GroundMobilePrototypeScreenHost(state: PrototypeAppState) {
     return
   }
   when (state.currentScreen) {
-    PrototypeScreen.SPLASH -> GroundSplashScreen(state)
     PrototypeScreen.SIGN_IN -> GroundSignInScreen(state)
     PrototypeScreen.TERMS_OF_SERVICE -> GroundTermsOfServiceScreen(state)
     PrototypeScreen.DOWNLOAD_SURVEY -> GroundDownloadSurveyScreen(state)
@@ -658,7 +605,8 @@ fun GroundMobilePrototypeScreenHost(state: PrototypeAppState) {
 }
 
 /**
- * Renders the Ground 2.0 "Cloud Acacia" vector logo (`shared/assets/logo.svg` • `viewBox="0 0 512 512"`).
+ * Renders the Ground 2.0 "Cloud Acacia" vector logo (`shared/assets/logo.svg` • `viewBox="0 0 512
+ * 512"`).
  */
 @Composable
 fun GroundCloudAcaciaLogo(modifier: Modifier = Modifier) {
@@ -667,7 +615,8 @@ fun GroundCloudAcaciaLogo(modifier: Modifier = Modifier) {
     fun sx(x: Float) = x * s
     fun sy(y: Float) = y * s
 
-    // 1. Rounded Pebble App Container (<rect x="24" y="24" width="464" height="464" rx="128" fill="url(#ac3-bg)" />)
+    // 1. Rounded Pebble App Container (<rect x="24" y="24" width="464" height="464" rx="128"
+    // fill="url(#ac3-bg)" />)
     drawRoundRect(
       brush =
         Brush.linearGradient(
@@ -775,7 +724,8 @@ fun GroundCloudAcaciaLogo(modifier: Modifier = Modifier) {
       drawPath(path = earthBasePath, color = darkForest)
     }
 
-    // 4. Signature Small Orange Circle Motif (<circle cx="256" cy="122" r="20" fill="url(#ac3-orange)" />)
+    // 4. Signature Small Orange Circle Motif (<circle cx="256" cy="122" r="20"
+    // fill="url(#ac3-orange)" />)
     drawCircle(
       brush =
         Brush.linearGradient(
@@ -801,111 +751,15 @@ fun GroundCloudAcaciaLogo(modifier: Modifier = Modifier) {
   }
 }
 
-/** 1. Splash / Loading screen for Ground 2.0 featuring the Cloud Acacia SVG logo. */
-@Composable
-fun GroundSplashScreen(state: PrototypeAppState) {
-  val isCompactHeight = state.effectiveFrameHeightDp < 500
-
-  Column(
-    modifier =
-      Modifier.fillMaxSize()
-        .background(MaterialTheme.colorScheme.primaryContainer)
-        .verticalScroll(rememberScrollState())
-        .padding(
-          horizontal = 28.dp,
-          vertical = if (isCompactHeight) 16.dp else 32.dp,
-        ),
-    horizontalAlignment = Alignment.CenterHorizontally,
-    verticalArrangement = Arrangement.SpaceBetween,
-  ) {
-    Spacer(modifier = Modifier.height(if (isCompactHeight) 4.dp else 20.dp))
-
-    Column(
-      horizontalAlignment = Alignment.CenterHorizontally,
-      verticalArrangement = Arrangement.spacedBy(if (isCompactHeight) 8.dp else 16.dp),
-    ) {
-      // Ground 2.0 Cloud Acacia Emblem Badge (from shared/assets/logo.svg)
-      GroundCloudAcaciaLogo(modifier = Modifier.size(if (isCompactHeight) 78.dp else 124.dp))
-
-      Text(
-        text = "Ground",
-        style =
-          MaterialTheme.typography.headlineLarge.copy(
-            color = MaterialTheme.colorScheme.onPrimaryContainer,
-            fontWeight = FontWeight.ExtraBold,
-            letterSpacing = 0.8.sp,
-          ),
-      )
-
-      Text(
-        text = "Community-centered geospatial data collection",
-        style = MaterialTheme.typography.bodyMedium,
-        color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.85f),
-        textAlign = TextAlign.Center,
-      )
-
-      Spacer(modifier = Modifier.height(if (isCompactHeight) 6.dp else 20.dp))
-
-      // Loading progress bar & status label
-      Column(
-        modifier = Modifier.fillMaxWidth(0.82f),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-      ) {
-        LinearProgressIndicator(
-          modifier = Modifier.fillMaxWidth().height(6.dp).clip(CircleShape),
-          color = MaterialTheme.colorScheme.primary,
-          trackColor = MaterialTheme.colorScheme.surfaceContainerHighest,
-        )
-        Text(
-          text = "Initializing offline map engine & workspace...",
-          style = MaterialTheme.typography.labelSmall,
-          color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.78f),
-          textAlign = TextAlign.Center,
-        )
-      }
-    }
-
-    Spacer(modifier = Modifier.height(if (isCompactHeight) 12.dp else 24.dp))
-
-    // Bottom interactive prototype trigger to advance from Splash -> Sign In
-    Column(
-      modifier = Modifier.fillMaxWidth(),
-      horizontalAlignment = Alignment.CenterHorizontally,
-      verticalArrangement = Arrangement.spacedBy(6.dp),
-    ) {
-      Button(
-        onClick = { state.completeSplashLoading() },
-        modifier = Modifier.fillMaxWidth(),
-        shape = MaterialTheme.shapes.large,
-      ) {
-        Text(
-          text = "Continue to Sign In",
-          style = MaterialTheme.typography.labelLarge,
-          fontWeight = FontWeight.Bold,
-        )
-        Spacer(modifier = Modifier.width(6.dp))
-        Icon(
-          imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-          contentDescription = null,
-          modifier = Modifier.size(16.dp),
-        )
-      }
-      Text(
-        text = "Ground 2.0 Splash / Loading Screen • Tap to advance",
-        style = MaterialTheme.typography.labelSmall,
-        color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f),
-      )
-    }
-  }
-}
-
-/** 2. Sign In screen (Sign in with Google + Language selector matching Ground SettingsSelectItem). */
+/**
+ * 1. Sign In screen (Sign in with Google + Language selector matching Ground SettingsSelectItem).
+ */
 @Composable
 fun GroundSignInScreen(state: PrototypeAppState) {
   val surfaceColor = MaterialTheme.colorScheme.surface
   val onSurfaceColor = MaterialTheme.colorScheme.onSurface
   val strings = groundLocalizedStringsFor(state.selectedLanguageCode)
+  val brandFont = LocalGroundBrandFontFamily.current
 
   Column(
     modifier =
@@ -924,8 +778,24 @@ fun GroundSignInScreen(state: PrototypeAppState) {
       Spacer(modifier = Modifier.height(4.dp))
       GroundCloudAcaciaLogo(modifier = Modifier.size(68.dp))
       Text(
-        text = "Welcome to Ground",
-        style = MaterialTheme.typography.headlineSmall,
+        text = "Ground",
+        style =
+          MaterialTheme.typography.headlineMedium.copy(
+            fontFamily = brandFont,
+            color = MaterialTheme.colorScheme.primary,
+            fontWeight = FontWeight.ExtraBold,
+            letterSpacing = 0.6.sp,
+          ),
+      )
+      Text(
+        text =
+          buildAnnotatedString {
+            append("Welcome to ")
+            withStyle(SpanStyle(fontFamily = brandFont, fontWeight = FontWeight.Bold)) {
+              append("Ground")
+            }
+          },
+        style = MaterialTheme.typography.titleLarge,
         color = onSurfaceColor,
         fontWeight = FontWeight.Bold,
       )
@@ -945,9 +815,7 @@ fun GroundSignInScreen(state: PrototypeAppState) {
       modifier = Modifier.fillMaxWidth(),
       shape = MaterialTheme.shapes.large,
       colors =
-        CardDefaults.cardColors(
-          containerColor = MaterialTheme.colorScheme.surfaceContainerLow
-        ),
+        CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
     ) {
       Column(
         modifier = Modifier.padding(16.dp),
@@ -1104,7 +972,7 @@ fun GroundSignInScreen(state: PrototypeAppState) {
   }
 }
 
-/** 3. Terms of Service screen. */
+/** 2. Terms of Service screen. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GroundTermsOfServiceScreen(state: PrototypeAppState) {
@@ -1129,10 +997,7 @@ fun GroundTermsOfServiceScreen(state: PrototypeAppState) {
         },
         navigationIcon = {
           IconButton(onClick = { state.declineTermsOfService() }) {
-            Icon(
-              imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-              contentDescription = "Back",
-            )
+            Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
           }
         },
         colors =
@@ -1261,15 +1126,11 @@ fun GroundTermsOfServiceScreen(state: PrototypeAppState) {
 }
 
 @Composable
-private fun TermsSectionItem(
-  number: String,
-  title: String,
-  body: String,
-) {
+private fun TermsSectionItem(number: String, title: String, body: String) {
   Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
     Text(
       text = "$number. $title",
-      style = MaterialTheme.typography.labelLarge,
+      style = MaterialTheme.typography.titleSmall,
       color = MaterialTheme.colorScheme.primary,
       fontWeight = FontWeight.Bold,
     )
@@ -1283,9 +1144,9 @@ private fun TermsSectionItem(
 }
 
 /**
- * 4. "Download survey" screen where users can see a list of all surveys shared with them, or search
- * by name or location by typing in the search bar. Each survey item includes a title, description,
- * map thumbnail, and an indicator for surveys that have already been downloaded.
+ * 3. "Download survey" screen where users can see a list of all surveys shared with them, or search
+ *    by name or location by typing in the search bar. Each survey item includes a title,
+ *    description, map thumbnail, and an indicator for surveys that have already been downloaded.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -1313,10 +1174,7 @@ fun GroundDownloadSurveyScreen(state: PrototypeAppState) {
         },
         navigationIcon = {
           IconButton(onClick = { state.navigateBackFromDownloadSurvey() }) {
-            Icon(
-              imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-              contentDescription = "Back",
-            )
+            Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
           }
         },
         actions = {
@@ -1347,10 +1205,7 @@ fun GroundDownloadSurveyScreen(state: PrototypeAppState) {
   ) { innerPadding ->
     Column(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
       // Search Bar for filtering by survey name or location
-      Box(
-        modifier =
-          Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)
-      ) {
+      Box(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)) {
         OutlinedTextField(
           value = state.searchQuery,
           onValueChange = { state.updateSearchQuery(it) },
@@ -1454,10 +1309,7 @@ fun GroundDownloadSurveyScreen(state: PrototypeAppState) {
 
       // Survey Items List
       if (filtered.isEmpty()) {
-        Box(
-          modifier = Modifier.fillMaxSize().padding(32.dp),
-          contentAlignment = Alignment.Center,
-        ) {
+        Box(modifier = Modifier.fillMaxSize().padding(32.dp), contentAlignment = Alignment.Center) {
           Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -1556,9 +1408,7 @@ private fun DownloadSurveySignOutPromptDialog(state: PrototypeAppState) {
       }
     },
     dismissButton = {
-      OutlinedButton(onClick = { state.dismissDownloadSurveySignOutPrompt() }) {
-        Text("Cancel")
-      }
+      OutlinedButton(onClick = { state.dismissDownloadSurveySignOutPrompt() }) { Text("Cancel") }
     },
   )
 }
@@ -1598,11 +1448,7 @@ private fun SurveyListItemCard(
     modifier = Modifier.fillMaxWidth(),
     shape = MaterialTheme.shapes.large,
     colors = CardDefaults.outlinedCardColors(containerColor = cardBg),
-    border =
-      BorderStroke(
-        width = if (survey.isDownloaded) 1.5.dp else 1.dp,
-        color = borderColor,
-      ),
+    border = BorderStroke(width = if (survey.isDownloaded) 1.5.dp else 1.dp, color = borderColor),
   ) {
     Column(
       modifier = Modifier.fillMaxWidth().padding(12.dp),
@@ -1614,16 +1460,10 @@ private fun SurveyListItemCard(
         verticalAlignment = Alignment.Top,
       ) {
         // Map Thumbnail Placeholder (80x80 dp)
-        SurveyMapThumbnail(
-          theme = survey.thumbnailTheme,
-          isDownloaded = survey.isDownloaded,
-        )
+        SurveyMapThumbnail(theme = survey.thumbnailTheme, isDownloaded = survey.isDownloaded)
 
         // Survey Metadata (Title, Location, Description)
-        Column(
-          modifier = Modifier.weight(1f),
-          verticalArrangement = Arrangement.spacedBy(4.dp),
-        ) {
+        Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
           Text(
             text = survey.title,
             style = MaterialTheme.typography.titleSmall,
@@ -1747,10 +1587,7 @@ private fun SurveyListItemCard(
 
 /** Stylized map thumbnail placeholder rendered with Compose Canvas for each survey card. */
 @Composable
-private fun SurveyMapThumbnail(
-  theme: MapThumbnailTheme,
-  isDownloaded: Boolean,
-) {
+private fun SurveyMapThumbnail(theme: MapThumbnailTheme, isDownloaded: Boolean) {
   Box(
     modifier =
       Modifier.size(80.dp)
@@ -1780,18 +1617,9 @@ private fun SurveyMapThumbnail(
       val waterPath =
         Path().apply {
           moveTo(0f, size.height * 0.78f)
-          quadraticTo(
-            size.width * 0.45f,
-            size.height * 0.48f,
-            size.width,
-            size.height * 0.22f,
-          )
+          quadraticTo(size.width * 0.45f, size.height * 0.48f, size.width, size.height * 0.22f)
         }
-      drawPath(
-        path = waterPath,
-        color = Color(theme.secondaryWaterHex),
-        style = Stroke(width = 8f),
-      )
+      drawPath(path = waterPath, color = Color(theme.secondaryWaterHex), style = Stroke(width = 8f))
 
       // Survey ROI Polygon
       drawRect(
@@ -1857,24 +1685,15 @@ private fun SurveyMapThumbnail(
 
 /** Right-hand UX Designer Co-Design & Flow Inspector panel in the Web Prototype App. */
 @Composable
-private fun UxDesignerInspectorPanel(
-  state: PrototypeAppState,
-  modifier: Modifier = Modifier,
-) {
+private fun UxDesignerInspectorPanel(state: PrototypeAppState, modifier: Modifier = Modifier) {
   ElevatedCard(
     modifier = modifier,
     shape = MaterialTheme.shapes.large,
-    colors =
-      CardDefaults.elevatedCardColors(
-        containerColor = MaterialTheme.colorScheme.surface
-      ),
+    colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.surface),
     elevation = CardDefaults.elevatedCardElevation(defaultElevation = 2.dp),
   ) {
     Column(
-      modifier =
-        Modifier.fillMaxSize()
-          .verticalScroll(rememberScrollState())
-          .padding(20.dp),
+      modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(20.dp),
       verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
       Text(
@@ -1961,10 +1780,7 @@ private fun UxDesignerInspectorPanel(
               )
             }
             if (isActive) {
-              GroundTonalBadge(
-                text = "ACTIVE",
-                tone = GroundBadgeTone.PRIMARY,
-              )
+              GroundTonalBadge(text = "ACTIVE", tone = GroundBadgeTone.PRIMARY)
             }
           }
         }
@@ -1972,16 +1788,40 @@ private fun UxDesignerInspectorPanel(
 
       HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
-      // 2. Main Survey UI Quick State Shortcuts (Map, List, Layers, 1:1 vs 1:N, Drawer)
-      Text(
-        text = "2. MAIN SURVEY UI QUICK INSPECTOR (STEP 5)",
-        style =
-          MaterialTheme.typography.labelSmall.copy(
+      // 2. Main Survey UI Quick State Shortcuts (Map, List, Layers, ○ → ◐ → ✓ Marker States,
+      // Drawer)
+      Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+      ) {
+        Text(
+          text = "2. MAIN SURVEY UI QUICK INSPECTOR (STEP 4)",
+          style =
+            MaterialTheme.typography.labelSmall.copy(
+              fontWeight = FontWeight.Bold,
+              color = MaterialTheme.colorScheme.primary,
+              letterSpacing = 0.6.sp,
+            ),
+        )
+        FilledTonalButton(
+          onClick = { state.addRandomSites(5_000) },
+          modifier = Modifier.height(30.dp),
+          contentPadding = ButtonDefaults.TextButtonContentPadding,
+        ) {
+          Icon(
+            imageVector = Icons.Default.Layers,
+            contentDescription = null,
+            modifier = Modifier.size(13.dp),
+          )
+          Spacer(modifier = Modifier.width(4.dp))
+          Text(
+            text = "+5,000 Random Features (${state.entities.size})",
+            style = MaterialTheme.typography.labelSmall,
             fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.primary,
-            letterSpacing = 0.6.sp,
-          ),
-      )
+          )
+        }
+      }
       Row(
         modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -1990,7 +1830,25 @@ private fun UxDesignerInspectorPanel(
           listOf(
             Triple(
               Icons.Default.Map,
-              "Map + Coffee Parcel (1:1)",
+              "○ Pending Parcel (NYR-112)",
+              {
+                state.navigateTo(PrototypeScreen.MAIN_SURVEY)
+                state.setMainSurveyViewMode(MainSurveyViewMode.MAP)
+                state.selectEntity("entity-nyr-112")
+              },
+            ),
+            Triple(
+              Icons.Default.Map,
+              "◐ In Progress (NYR-108)",
+              {
+                state.navigateTo(PrototypeScreen.MAIN_SURVEY)
+                state.setMainSurveyViewMode(MainSurveyViewMode.MAP)
+                state.selectEntity("entity-nyr-108")
+              },
+            ),
+            Triple(
+              Icons.Default.CheckCircle,
+              "✓ Completed (NYR-104)",
               {
                 state.navigateTo(PrototypeScreen.MAIN_SURVEY)
                 state.setMainSurveyViewMode(MainSurveyViewMode.MAP)
@@ -1999,7 +1857,7 @@ private fun UxDesignerInspectorPanel(
             ),
             Triple(
               Icons.Default.Timeline,
-              "Map + Shade Plot (1:N)",
+              "✓ Transect Line (SHD-201)",
               {
                 state.navigateTo(PrototypeScreen.MAIN_SURVEY)
                 state.setMainSurveyViewMode(MainSurveyViewMode.MAP)
@@ -2007,8 +1865,17 @@ private fun UxDesignerInspectorPanel(
               },
             ),
             Triple(
+              Icons.Default.CheckCircle,
+              "Standalone Submission (No Feature)",
+              {
+                state.navigateTo(PrototypeScreen.MAIN_SURVEY)
+                state.setMainSurveyViewMode(MainSurveyViewMode.MAP)
+                state.selectSubmissionDetail("sub-standalone-pest-01")
+              },
+            ),
+            Triple(
               Icons.Default.Navigation,
-              "Navigate to Site",
+              "Navigate to Feature",
               {
                 state.navigateTo(PrototypeScreen.MAIN_SURVEY)
                 state.startNavigationToEntity("entity-nyr-104")
@@ -2037,6 +1904,14 @@ private fun UxDesignerInspectorPanel(
               {
                 state.navigateTo(PrototypeScreen.MAIN_SURVEY)
                 state.updateDrawerOpen(true)
+              },
+            ),
+            Triple(
+              Icons.Default.CloudUpload,
+              "Uploads (${state.mutations.size})",
+              {
+                state.navigateTo(PrototypeScreen.MAIN_SURVEY)
+                state.drawerOpenUploads()
               },
             ),
             Triple(
@@ -2078,11 +1953,7 @@ private fun UxDesignerInspectorPanel(
           AssistChip(
             onClick = action,
             leadingIcon = {
-              Icon(
-                imageVector = icon,
-                contentDescription = null,
-                modifier = Modifier.size(14.dp),
-              )
+              Icon(imageVector = icon, contentDescription = null, modifier = Modifier.size(14.dp))
             },
             label = {
               Text(

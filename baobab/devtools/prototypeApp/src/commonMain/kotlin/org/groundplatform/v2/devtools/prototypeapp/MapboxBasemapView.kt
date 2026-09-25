@@ -1,13 +1,13 @@
 /*
  * Copyright 2026 The Ground Authors.
  *
- * Licensed under the Apache License, Version 2.0 (the 'License'); you may not use this file except
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
  *
  *     https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an 'AS IS' BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
@@ -87,6 +87,36 @@ internal expect fun handlePlatformMapboxClick(xPx: Float, yPx: Float): String
 internal expect fun hidePlatformMapboxBasemap()
 
 /**
+ * Queries the Mapbox Places API (`mapbox.places` / Mapbox Geocoding API) via
+ * `window.GroundMapboxBridge.searchPlaces` for geographic places matching [query] near the active
+ * [surveyId], invoking [onResultsJson] with a JSON array of matching place objects.
+ *
+ * When [isAirplaneMode] is `true` (Offline), no network request is issued and `"[]"` is returned.
+ */
+internal expect fun searchPlatformMapboxPlaces(
+  surveyId: String,
+  query: String,
+  isAirplaneMode: Boolean,
+  onResultsJson: (String) -> Unit,
+)
+
+/**
+ * Flies the live `mapboxgl.Map` camera directly to `[lng, lat]` at [zoom] and renders a Mapbox
+ * Place pin marker (`name`, `category`, `coordinatesLabel`) on the map.
+ */
+internal expect fun flyPlatformMapboxToPlace(
+  lng: Double,
+  lat: Double,
+  zoom: Float,
+  name: String,
+  category: String,
+  coordinatesLabel: String,
+)
+
+/** Clears any active Mapbox Place search pin marker from the live `mapboxgl.Map`. */
+internal expect fun clearPlatformMapboxPlace()
+
+/**
  * Renders the real Mapbox GL JS basemap (`mapboxgl.Map`) inside `SurveyMapView` and delegates all
  * polygon, point, submission geometry, offline sector, and GPS blue-dot rendering + hit-testing
  * directly to Mapbox GL GeoJSON layers and `mapboxgl.Marker` instances.
@@ -115,34 +145,98 @@ fun MapboxBasemapView(
   val isCameraFollowingUser = state.isCameraFollowingUser
   val mapZoomDelta = state.mapZoomDelta
 
-  val visibleEntities = state.visibleMapEntities
-  val visibleSubGeometries = state.visibleSubmissionGeometries
+  val allEntities = state.entities
+  val mapLayers = state.mapLayers
+  val visibleEntities =
+    remember(allEntities, mapLayers) {
+      val visibleIds = mapLayers.filter { it.isVisible }.map { it.id }.toSet()
+      allEntities.filter { it.layerId in visibleIds }
+    }
+  val visibleSubGeometries = emptyList<SubmissionGeometryPolygon>()
   val selectedEntity = state.selectedEntity
   val selectedSubmission = state.selectedSubmission
   val activeNav = state.activeNavigation
+  val isClusteringActive = state.isMapClusteringActive
+  val clusterRadius = state.mapClusterRadiusNormalized
+  val mapClusters =
+    remember(visibleEntities, isClusteringActive, clusterRadius) {
+      if (!isClusteringActive) {
+        emptyList()
+      } else {
+        state.mapFeatureClusters
+      }
+    }
+  val selectedClusterId = state.selectedClusterId
 
+  val baseEntitiesJson =
+    remember(visibleEntities) {
+      serializeMapboxEntitiesJson(visibleEntities, selectedEntityId = null)
+    }
+
+  val entitiesJsonWithSelection =
+    remember(baseEntitiesJson, selectedEntity?.id) {
+      val selId = selectedEntity?.id
+      if (selId == null) {
+        baseEntitiesJson
+      } else {
+        baseEntitiesJson.replace(
+          "\"id\":\"$selId\",\"selected\":false",
+          "\"id\":\"$selId\",\"selected\":true",
+        )
+      }
+    }
+
+  val activeEntitiesCountNoun = state.activeEntitiesCountNoun
   val featuresPayloadJson =
     remember(
-      visibleEntities,
+      entitiesJsonWithSelection,
       visibleSubGeometries,
       selectedEntity?.id,
       selectedSubmission?.id,
       activeNav,
       isCameraFollowingUser,
       mapZoomDelta,
-      selectedBasemapType,
-      isOfflineBasemapVisible,
+      isClusteringActive,
+      mapClusters,
+      selectedClusterId,
+      activeEntitiesCountNoun,
     ) {
-      buildMapboxFeaturesPayloadJson(
-        entities = visibleEntities,
+      buildMapboxFeaturesPayloadJsonFromPrebuiltEntities(
+        entitiesJson = entitiesJsonWithSelection,
+        entityCount = visibleEntities.size,
         submissions = visibleSubGeometries,
         selectedEntityId = selectedEntity?.id,
         selectedSubmissionId = selectedSubmission?.id,
         activeNavigation = activeNav,
         isCameraFollowingUser = isCameraFollowingUser,
         zoomDelta = mapZoomDelta,
+        isClusteringActive = isClusteringActive,
+        clusters = mapClusters,
+        selectedClusterId = selectedClusterId,
+        activeEntitiesCountNoun = activeEntitiesCountNoun,
       )
     }
+
+  val selectedPlace = state.selectedPlace
+  androidx.compose.runtime.LaunchedEffect(
+    selectedPlace?.id,
+    selectedPlace?.longitude,
+    selectedPlace?.latitude,
+    selectedPlace?.targetZoom,
+  ) {
+    if (selectedPlace != null) {
+      flyPlatformMapboxToPlace(
+        lng = selectedPlace.longitude,
+        lat = selectedPlace.latitude,
+        zoom = selectedPlace.targetZoom.coerceIn(2.0f, 18.5f),
+        name = selectedPlace.name,
+        category = selectedPlace.categoryLabel,
+        coordinatesLabel = selectedPlace.coordinatesLabel,
+      )
+    } else {
+      clearPlatformMapboxPlace()
+    }
+  }
 
   androidx.compose.runtime.LaunchedEffect(
     activeSurveyId,
@@ -194,11 +288,7 @@ fun MapboxBasemapView(
     }
   }
 
-  DisposableEffect(Unit) {
-    onDispose {
-      hidePlatformMapboxBasemap()
-    }
-  }
+  DisposableEffect(Unit) { onDispose { hidePlatformMapboxBasemap() } }
 
   Canvas(
     modifier =
@@ -226,11 +316,25 @@ fun MapboxBasemapView(
             val clickYCssPx = tapOffset.y / density
             val hitResult = handlePlatformMapboxClick(clickXCssPx, clickYCssPx)
             when {
+              hitResult == "place:dismiss" -> {
+                state.clearSelectedPlace()
+              }
+              hitResult.startsWith("cluster:") -> {
+                state.clearSelectedPlace()
+                val clusterId = hitResult.removePrefix("cluster:")
+                val wasAlreadySelected = state.selectedClusterId == clusterId
+                state.selectCluster(clusterId)
+                if (wasAlreadySelected) {
+                  zoomPlatformMapboxBasemap(0.75f)
+                }
+              }
               hitResult.startsWith("entity:") -> {
+                state.clearSelectedPlace()
                 val entityId = hitResult.removePrefix("entity:")
                 state.selectEntity(entityId)
               }
               hitResult.startsWith("submission:") -> {
+                state.clearSelectedPlace()
                 val geomId = hitResult.removePrefix("submission:")
                 state.selectSubmissionGeometry(geomId)
               }
@@ -244,8 +348,14 @@ fun MapboxBasemapView(
                 state.resetMapZoom()
               }
               else -> {
+                state.clearSelectedPlace()
                 state.updateLayersSheetOpen(false)
-                state.updateEntityBottomSheetExpanded(false)
+                state.selectCluster(null)
+                if (state.isEntityBottomSheetExpanded) {
+                  state.updateEntityBottomSheetExpanded(false)
+                } else {
+                  state.selectEntity(null)
+                }
               }
             }
           }
@@ -260,10 +370,7 @@ fun MapboxBasemapView(
                 deltaNormalizedX = dragAmount.x / widthPx,
                 deltaNormalizedY = dragAmount.y / heightPx,
               )
-              panPlatformMapboxBasemap(
-                dxPx = dragAmount.x / density,
-                dyPx = dragAmount.y / density,
-              )
+              panPlatformMapboxBasemap(dxPx = dragAmount.x / density, dyPx = dragAmount.y / density)
             }
           }
         }
@@ -271,10 +378,7 @@ fun MapboxBasemapView(
     // Clear the Skia canvas pixels in the map viewport to rgba(0, 0, 0, 0) so the real
     // mapboxgl.Map WebGL canvas and mapboxgl.Marker elements inside #mapbox-basemap-container
     // render directly with no static 2D canvas shapes overlaid on top.
-    drawRect(
-      color = Color.Transparent,
-      blendMode = BlendMode.Clear,
-    )
+    drawRect(color = Color.Transparent, blendMode = BlendMode.Clear)
   }
 }
 
@@ -287,7 +391,26 @@ internal fun buildMapboxFeaturesPayloadJson(state: PrototypeAppState): String =
     activeNavigation = state.activeNavigation,
     isCameraFollowingUser = state.isCameraFollowingUser,
     zoomDelta = state.mapZoomDelta,
+    isClusteringActive = state.isMapClusteringActive,
+    clusters = state.mapFeatureClusters,
+    selectedClusterId = state.selectedClusterId,
+    activeEntitiesCountNoun = state.activeEntitiesCountNoun,
   )
+
+private fun serializeMapboxEntitiesJson(
+  entities: List<GeospatialEntityItem>,
+  selectedEntityId: String?,
+): String =
+  entities.joinToString(separator = ",") { ent ->
+    val markerColor = escapeJsonString(ent.markerColorCss)
+    val strokeColor = escapeJsonString(ent.strokeColorCss)
+    val fillColor = escapeJsonString(ent.fillColorCss)
+    val markerSymbol = escapeJsonString(ent.markerSymbol)
+    val selected = ent.id == selectedEntityId
+    val shortLabel = escapeJsonString(ent.label.substringBefore(" •"))
+    val statusSummary = escapeJsonString(ent.mapStatusSummaryBadge)
+    """{"id":"${ent.id}","selected":$selected,"label":"$shortLabel","badge":"$markerSymbol","markerSymbol":"$markerSymbol","markerColor":"$markerColor","strokeColor":"$strokeColor","fillColor":"$fillColor","statusSummary":"$statusSummary","submissionCount":${ent.submissionCount},"isCompleted":${ent.isCompleted},"isPending":${ent.isPending},"geometryType":"${ent.geometryTypeLabel}","nx":${ent.normalizedX},"ny":${ent.normalizedY},"color":"$markerColor"}"""
+  }
 
 private fun buildMapboxFeaturesPayloadJson(
   entities: List<GeospatialEntityItem>,
@@ -297,38 +420,90 @@ private fun buildMapboxFeaturesPayloadJson(
   activeNavigation: StraightLineNavigationState?,
   isCameraFollowingUser: Boolean,
   zoomDelta: Float,
+  isClusteringActive: Boolean = false,
+  clusters: List<MapFeatureCluster> = emptyList(),
+  selectedClusterId: String? = null,
+  activeEntitiesCountNoun: String = "map features",
+): String =
+  buildMapboxFeaturesPayloadJsonFromPrebuiltEntities(
+    entitiesJson = serializeMapboxEntitiesJson(entities, selectedEntityId),
+    entityCount = entities.size,
+    submissions = submissions,
+    selectedEntityId = selectedEntityId,
+    selectedSubmissionId = selectedSubmissionId,
+    activeNavigation = activeNavigation,
+    isCameraFollowingUser = isCameraFollowingUser,
+    zoomDelta = zoomDelta,
+    isClusteringActive = isClusteringActive,
+    clusters = clusters,
+    selectedClusterId = selectedClusterId,
+    activeEntitiesCountNoun = activeEntitiesCountNoun,
+  )
+
+private fun buildMapboxFeaturesPayloadJsonFromPrebuiltEntities(
+  entitiesJson: String,
+  entityCount: Int,
+  submissions: List<SubmissionGeometryPolygon>,
+  selectedEntityId: String?,
+  selectedSubmissionId: String?,
+  activeNavigation: StraightLineNavigationState?,
+  isCameraFollowingUser: Boolean,
+  zoomDelta: Float,
+  isClusteringActive: Boolean = false,
+  clusters: List<MapFeatureCluster> = emptyList(),
+  selectedClusterId: String? = null,
+  activeEntitiesCountNoun: String = "map features",
 ): String {
-  val entitiesJson =
-    entities.joinToString(separator = ",") { ent ->
-      val hex = colorHexToCssString(ent.colorHex)
-      val selected = ent.id == selectedEntityId
-      val shortLabel = escapeJsonString(ent.label.substringBefore(" •"))
-      val modelBadge = ""
-      """{"id":"${ent.id}","label":"$shortLabel","badge":"$modelBadge","geometryType":"${ent.geometryTypeLabel}","nx":${ent.normalizedX},"ny":${ent.normalizedY},"color":"$hex","selected":$selected}"""
-    }
-  val submissionsJson =
-    submissions.joinToString(separator = ",") { sub ->
-      val hex = colorHexToCssString(sub.colorHex)
-      val selected = sub.submissionId == selectedSubmissionId
-      val shortBadge = escapeJsonString(sub.shortMapBadge)
-      """{"id":"${sub.id}","submissionId":"${sub.submissionId}","label":"$shortBadge","nx":${sub.normalizedX},"ny":${sub.normalizedY},"wf":${sub.widthFraction},"hf":${sub.heightFraction},"color":"$hex","selected":$selected}"""
+  val effectiveEntitiesJson = if (isClusteringActive) "" else entitiesJson
+  val submissionsJson = ""
+  val clustersJson =
+    clusters.joinToString(separator = ",") { cluster ->
+      val selected = cluster.id == selectedClusterId
+      val safeSummary = escapeJsonString(cluster.balloonSummaryLabel)
+      val siteNoun =
+        if (cluster.siteCount == 1) {
+          activeEntitiesCountNoun.removeSuffix("s")
+        } else {
+          activeEntitiesCountNoun
+        }
+      val safeSiteCountLabel = escapeJsonString("${cluster.siteCount} $siteNoun")
+      val siteGroupsJson =
+        cluster.siteSymbolGroups.joinToString(separator = ",") { grp ->
+          val safeSym = escapeJsonString(grp.markerSymbol)
+          val safeColor = escapeJsonString(grp.colorCss)
+          val safeStatus = escapeJsonString(grp.statusLabel)
+          """{"symbol":"$safeSym","isNoSymbol":${grp.isNoSymbolGroup},"count":${grp.count},"color":"$safeColor","statusLabel":"$safeStatus"}"""
+        }
+      val groupsJson =
+        cluster.symbolGroups.joinToString(separator = ",") { grp ->
+          val safeSym = escapeJsonString(grp.markerSymbol)
+          val safeColor = escapeJsonString(grp.colorCss)
+          val safeStatus = escapeJsonString(grp.statusLabel)
+          """{"symbol":"$safeSym","isNoSymbol":${grp.isNoSymbolGroup},"count":${grp.count},"color":"$safeColor","statusLabel":"$safeStatus"}"""
+        }
+      """{"id":"${cluster.id}","nx":${cluster.normalizedX},"ny":${cluster.normalizedY},"totalCount":${cluster.totalCount},"siteCount":${cluster.siteCount},"siteCountLabel":"$safeSiteCountLabel","submissionGeometryCount":${cluster.submissionGeometryCount},"selected":$selected,"summaryLabel":"$safeSummary","siteGroups":[$siteGroupsJson],"groups":[$groupsJson]}"""
     }
   val navJson =
     if (activeNavigation != null) {
       val vec = activeNavigation.vector
       val safeTitle = escapeJsonString(activeNavigation.targetTitle.substringBefore(" •"))
       val safeDist =
-        escapeJsonString("${vec.formattedDistance} • ${vec.bearingDegrees}° ${vec.cardinalDirection}")
+        escapeJsonString(
+          "${vec.formattedDistance} • ${vec.bearingDegrees}° ${vec.cardinalDirection}"
+        )
       val hex = colorHexToCssString(activeNavigation.colorHex)
       """{"active":true,"kind":"${activeNavigation.targetKind.badgeLabel}","targetId":"${activeNavigation.targetId}","title":"$safeTitle","distanceBadge":"$safeDist","fromX":${vec.fromNormalizedX},"fromY":${vec.fromNormalizedY},"toX":${vec.toNormalizedX},"toY":${vec.toNormalizedY},"bearing":${vec.bearingDegrees},"cardinal":"${vec.cardinalDirection}","arrived":${vec.hasArrived},"color":"$hex"}"""
     } else {
       """{"active":false}"""
     }
-  return """{"isFollowingUser":$isCameraFollowingUser,"zoomDelta":$zoomDelta,"navigation":$navJson,"entities":[$entitiesJson],"submissions":[$submissionsJson]}"""
+  val selectedEntityIdJson =
+    if (selectedEntityId != null) "\"${escapeJsonString(selectedEntityId)}\"" else "null"
+  val selectedClusterIdJson =
+    if (selectedClusterId != null) "\"${escapeJsonString(selectedClusterId)}\"" else "null"
+  return """{"isFollowingUser":$isCameraFollowingUser,"isLocationLocked":$isCameraFollowingUser,"zoomDelta":$zoomDelta,"entityCount":$entityCount,"selectedEntityId":$selectedEntityIdJson,"isClusteringActive":$isClusteringActive,"selectedClusterId":$selectedClusterIdJson,"clusters":[$clustersJson],"navigation":$navJson,"entities":[$effectiveEntitiesJson],"submissions":[$submissionsJson]}"""
 }
 
-private fun escapeJsonString(raw: String): String =
-  raw.replace("\\", "\\\\").replace("\"", "\\\"")
+private fun escapeJsonString(raw: String): String = raw.replace("\\", "\\\\").replace("\"", "\\\"")
 
 private fun colorHexToCssString(colorHex: Long): String {
   val rgb = (colorHex and 0xFFFFFFL).toString(16).padStart(6, '0').uppercase()

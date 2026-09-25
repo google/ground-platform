@@ -18,7 +18,7 @@
 
 A pure Kotlin Multiplatform (KMP) runtime state model and reactive evaluation
 engine for **ProtoForms** (`groundplatform.v2.forms.Form` and `Record`) and the
-[ODK XForms specification](https://getodk.github.io/xforms-spec/).
+[XForms specification](https://getodk.github.io/xforms-spec/).
 
 --------------------------------------------------------------------------------
 
@@ -38,18 +38,20 @@ This package and its companion state package
     of a form and its `Record` at a point in time, including hierarchical UI
     element states (`DataFieldState`, `GroupState`, `RepeatGroupState`,
     `RepeatInstanceState`), flat O(1) path lookup maps (`elementsByPath`),
-    validation states, resolved multi-locale labels, and ODK Entity mutations.
+    validation states, resolved multi-locale labels, and XForms Entity
+    mutations.
 
 -   **Ahead-of-Time XPath Compilation & Topological DAG (`CompiledForm`)**:
     Pre-compiles all XPath expressions (`relevant`, `calculate`, `required`,
-    `constraint`, `count_xpath`, `filter_xpath`, `<output>` interpolations, and
+    `constraint`, `count_expression`, `nodeset_filter`, `<output>`
+    interpolations, and
     `Action` triggers) once per `Form` and orders calculated fields
     topologically using static dependency analysis.
 
 -   **Pure Functional Evaluation Pipeline (`FormEngine`)**: Evaluates dynamic
     repeat instance synthesis (`jr:count`), `calculate` cascades, visibility and
     validation rules, cascading `itemset` choice filtering, localized text/media
-    resolution, and ODK Entities (`EntityAction`) without side effects.
+    resolution, and XForms Entities (`EntityAction`) without side effects.
 
 -   **Stateful Session Coordinator (`FormSession`)**: Manages the lifecycle of a
     form-filling session (`ODK_INSTANCE_FIRST_LOAD`, `ODK_INSTANCE_LOAD`,
@@ -106,11 +108,11 @@ Every evaluation produces an immutable `FormState` containing:
 
 -   **`validationErrors: List<ValidationError>` & `isValid: Boolean`**:
     Aggregated `REQUIRED_MISSING` and `CONSTRAINT_VIOLATED` errors across all
-    *relevant* fields. Per ODK XForms semantics, non-relevant fields
+    *relevant* fields. Per XForms semantics, non-relevant fields
     (`isRelevant == false`) and children of non-relevant groups/repeats are
     automatically excluded from validation errors.
 
--   **`evaluatedEntities: List<EvaluatedEntity>`**: Resolved ODK Entity
+-   **`evaluatedEntities: List<EvaluatedEntity>`**: Resolved XForms Entity
     declarations (`CREATE` / `UPDATE`, entity ID, label, and `save_to` property
     map) when `EntitySpec.enabled_expression` evaluates to `true`.
 
@@ -146,28 +148,37 @@ Every evaluation produces an immutable `FormState` containing:
 initial load or mutation:
 
 1.  **Stage 1 — Repeat Instance Count Synchronization (`jr:count`)**: Evaluates
-    dynamic `RepeatDef.count_xpath` (or fixed `RepeatDef.count`) in structural
+    dynamic `RepeatDef.count_expression` in structural
     outer-to-inner order. When the target count exceeds existing instances in
     `Record`, new `RecordNode` instances are synthesized with schema defaults
     and `ODK_NEW_REPEAT` actions are fired.
 
-2.  **Stage 2 — Topological `calculate` Pass**: Evaluates all `FieldBinding`
-    `calculate_expression`s in topological dependency order (with multi-pass
-    convergence for repeat wildcards). Fields with `once(...)` or preload rules
-    preserve non-empty values when configured.
-
-3.  **Stage 3 — Relevance, Required, ReadOnly & Constraint Pass**: Traverses the
+2.  **Stage 2 — Relevance, Required, ReadOnly & Constraint Pass**: Traverses the
     UI element tree top-down. If an ancestor `GroupState` or `RepeatGroupState`
     evaluates `relevant_expression` to `false`, all descendant elements inherit
     `isRelevant = false` and bypass required/constraint checks.
 
+3.  **Stage 3 — Topological `calculate` Pass**: Evaluates all `FieldBinding`
+    `calculate_expression`s in topological dependency order. Fields with
+    `once(...)` or preload rules preserve non-empty values when configured.
+
+    > Note that relevance is evaluated *before* calculations within a single
+    > pass. Stages 1–3 therefore run inside a convergence loop (bounded by
+    > `MAX_CONVERGENCE_PASSES`) that repeats until the pruned record, the
+    > relevance map, and the dynamic repeat counts all stop changing. This is
+    > what allows a `relevant_expression` to depend on a `calculate_expression`
+    > (and vice versa): the first pass sees a stale value, and a subsequent pass
+    > settles it. A form whose calculations and relevance cannot reach a fixed
+    > point within `MAX_CONVERGENCE_PASSES` is left at the last computed state.
+
 4.  **Stage 4 — Dynamic Choice (`itemset`) & Text Resolution Pass**: Evaluates
-    `DynamicChoiceConfig.filter_xpath` against in-memory `Form.choice_datasets`
+    `ItemsetDef.nodeset_filter` against the in-memory
+    `ModelDef.secondary_instances`
     or a custom `SecondaryInstanceProvider`, resolves active locale translations
     (`TranslationEntry`), and interpolates inline `<output value="..."/>`
     expressions in labels, hints, help text, and error messages.
 
-5.  **Stage 5 — ODK Entities Pass**: Evaluates `Form.entities` (`EntitySpec`),
+5.  **Stage 5 — XForms Entities Pass**: Evaluates `Form.entities` (`EntitySpec`),
     Checking `enabled_expression`, resolving `id_expression` and
     `label_expression`, and collecting `save_to` property values from relevant
     fields.

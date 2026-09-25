@@ -16,3 +16,6 @@
 **/.gradle/
 **/.kotlin/
 **/kotlin-js-store/
+
+# Android SDK location (machine-specific, must not be committed)
+local.properties

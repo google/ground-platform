@@ -1,14 +1,14 @@
 <!--
   Copyright 2026 The Ground Authors.
 
-  Licensed under the Apache License, Version 2.0 (the 'License');
+  Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
   You may obtain a copy of the License at
 
       https://www.apache.org/licenses/LICENSE-2.0
 
   Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an 'AS IS' BASIS,
+  distributed under the License is distributed on an "AS IS" BASIS,
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   See the License for the specific language governing permissions and
   limitations under the License.
@@ -34,3 +34,24 @@ view (`ContentView.swift`).
     `MainViewController()` from `GroundMobile.framework`.
 -   **`iosApp/Info.plist`**: iOS bundle metadata and location/camera usage
     descriptions.
+-   **`project.yml`**: XcodeGen configuration for generating `iosApp.xcodeproj`.
+
+## How to Build and Run (macOS only)
+
+1.  **Build the Kotlin native framework**:
+    You need to compile the Kotlin multiplatform code into an iOS framework first.
+    ```sh
+    cd ../shared/mobile
+    ./gradlew linkDebugFrameworkIosSimulatorArm64 --offline
+    ```
+2.  **Generate the Xcode project**:
+    Use [XcodeGen](https://github.com/yonaskolb/XcodeGen) to generate the project file.
+    ```sh
+    cd ../iosApp
+    xcodegen generate
+    ```
+3.  **Open in Xcode**:
+    ```sh
+    open iosApp.xcodeproj
+    ```
+    Select a simulator (e.g., iPhone 15 Pro) and run (Cmd+R).

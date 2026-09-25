@@ -1,13 +1,13 @@
 /*
  * Copyright 2026 The Ground Authors.
  *
- * Licensed under the Apache License, Version 2.0 (the 'License'); you may not use this file except
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
  *
  *     https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an 'AS IS' BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
@@ -29,13 +29,12 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -47,15 +46,19 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.CloudDone
+import androidx.compose.material.icons.filled.CloudOff
+import androidx.compose.material.icons.filled.CloudUpload
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Explore
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Layers
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Map
@@ -64,34 +67,30 @@ import androidx.compose.material.icons.filled.MyLocation
 import androidx.compose.material.icons.filled.Navigation
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PictureAsPdf
-import androidx.compose.material.icons.filled.Polyline
 import androidx.compose.material.icons.filled.QrCode
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.SatelliteAlt
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.SwapHoriz
-import androidx.compose.material.icons.filled.TouchApp
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ElevatedAssistChip
-import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.ModalDrawerSheet
@@ -116,22 +115,20 @@ import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.PathEffect
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlin.math.roundToInt
@@ -139,47 +136,52 @@ import org.groundplatform.v2.core.forms.ui.GroundAlertDialogOverlay
 import org.groundplatform.v2.core.forms.ui.GroundBadgeTone
 import org.groundplatform.v2.core.forms.ui.GroundModalBottomSheetOverlay
 import org.groundplatform.v2.core.forms.ui.GroundTonalBadge
+import org.groundplatform.v2.core.forms.ui.LocalGroundBrandFontFamily
 
 /**
  * 5. Main Survey UI screen (`PrototypeScreen.MAIN_SURVEY`) providing:
- * - Top App Bar with Hamburger Menu, active survey title, and `Map` / `List` toggle.
+ * - Top App Bar with Hamburger Menu and active survey title.
  * - **Map View**: Displays Ground geospatial entities on the map, a `"Layers"` button to toggle
- *   layer visibility, and an interactive **Entity Bottom Sheet** when an entity is clicked:
- *   - For `1:1` (`SubmissionModel.SINGLE_1_TO_1`) entities with data: displays the submission data
- *     inline on the entity card.
- *   - For `1:N` (`SubmissionModel.MULTIPLE_1_TO_N`) entities: displays a chronological list of
- *     submissions (data collector, timestamp) that can be clicked to inspect full submission
- *     details.
- * - **List View**: Searchable list of Geospatial Entities and Submissions grouped by Form.
- * - **Hamburger Navigation Drawer**: Options for Surveys, Offline maps,
- *   Change settings, View Terms of Service, and Sign out.
+ * layer visibility, and an interactive **Entity Bottom Sheet** when an entity is clicked:
+ * ```
+ *     - Displays `simplestyle-spec` marker symbols (`○`, `◐`, `✓`) and `marker-color` across entity
+ *       points, lines, and polygons, and shows the unified chronological `1:N` list of submissions
+ *       grouped by form title, timestamp) that can be clicked to inspect full submission details.
+ * ```
+ * - **Unified Persistent Bottom Sheet (`SurveyPersistentBottomSheetContent`)**:
+ * ```
+ *     - When no map feature is selected, peeks at the bottom of the map with a Search bar and category
+ *       filter chips (`All`, `Places`, `Map features`) and expands into the full
+ *       searchable list of grouped map features and places.
+ *     - When a map feature is selected (via map tap or list selection), transitions in-place to
+ *       `EntityBottomSheetCard` showing its `simplestyle-spec` marker, baseline properties, form
+ *       launchers, and `1:N` submission history.
+ * ```
+ * - **Hamburger Navigation Drawer**: Options for Surveys, Outbox, Uploaded, Offline maps, Change
+ * settings, View Terms of Service, and Sign out.
  */
 @Composable
 fun GroundMainSurveyScreen(state: PrototypeAppState) {
-  val isMapShowing =
-    state.activeDrawerSubView == MainDrawerSubView.NONE &&
-      state.mainViewMode == MainSurveyViewMode.MAP
+  val isMapShowing = state.activeDrawerSubView == MainDrawerSubView.NONE
   val surfaceColor = if (isMapShowing) Color.Transparent else MaterialTheme.colorScheme.surface
   val activeQrEntity = state.activeQrCodeEntity
   val activePdfSheet = state.activeSharedPdfSheet
 
   Box(modifier = Modifier.fillMaxSize().background(surfaceColor)) {
     Column(modifier = Modifier.fillMaxSize()) {
-      // Top App Bar with Hamburger button, Survey Title, and Map/List View Switcher
+      // Top App Bar with Hamburger button, Survey Title, and quick sheet toggle
       MainSurveyTopAppBar(state)
 
-      // Main Body: either a Drawer Sub-View (Switch Surveys / Offline Maps / Settings) or Map / List View
+      // Main Body: either a Drawer Sub-View (Switch Surveys / Uploads / Offline Maps / Settings)
+      // or the unified Map + Persistent Bottom Sheet View
       Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
         when (state.activeDrawerSubView) {
           MainDrawerSubView.SWITCH_SURVEYS -> SwitchDownloadedSurveysSubScreen(state)
+          MainDrawerSubView.UPLOADS, MainDrawerSubView.OUTBOX, MainDrawerSubView.UPLOADED ->
+            UploadsMutationsSubScreen(state)
           MainDrawerSubView.MANAGE_OFFLINE_MAPS -> ManageOfflineMapsSubScreen(state)
           MainDrawerSubView.SETTINGS -> SurveySettingsSubScreen(state)
-          MainDrawerSubView.NONE -> {
-            when (state.mainViewMode) {
-              MainSurveyViewMode.MAP -> SurveyMapView(state)
-              MainSurveyViewMode.LIST -> SurveyListView(state)
-            }
-          }
+          MainDrawerSubView.NONE -> SurveyMapView(state)
         }
       }
     }
@@ -189,6 +191,11 @@ fun GroundMainSurveyScreen(state: PrototypeAppState) {
       MapLayersControlSheet(state = state)
     }
 
+    // Available Forms Modal Bottom Sheet (triggered by the bottom-centered FAB)
+    if (state.isAvailableFormsSheetOpen) {
+      AvailableFormsModalSheet(state = state)
+    }
+
     // Slide-over Hamburger Navigation Drawer Overlay
     if (state.isDrawerOpen) {
       MainSurveyNavigationDrawerOverlay(state)
@@ -196,23 +203,17 @@ fun GroundMainSurveyScreen(state: PrototypeAppState) {
 
     // Scannable Entity GeoID QR Code Modal Overlay
     if (activeQrEntity != null) {
-      EntityQrCodeModalDialog(
-        state = state,
-        entity = activeQrEntity,
-      )
+      EntityQrCodeModalDialog(state = state, entity = activeQrEntity)
     }
 
     // Share PDF to Preferred App Modal Overlay (for both Entities and Submissions)
     if (activePdfSheet != null) {
-      SharePdfToAppModalDialog(
-        state = state,
-        sheet = activePdfSheet,
-      )
+      SharePdfToAppModalDialog(state = state, sheet = activePdfSheet)
     }
   }
 }
 
-/** Top App Bar for the Main Survey UI with Hamburger Menu button and `Map` | `List` switcher. */
+/** Top App Bar for the Main Survey UI with Hamburger Menu button and Survey Title/Location. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun MainSurveyTopAppBar(state: PrototypeAppState) {
@@ -222,12 +223,7 @@ private fun MainSurveyTopAppBar(state: PrototypeAppState) {
     } else {
       MaterialTheme.colorScheme.primary
     }
-  val activePillContainer =
-    if (state.isDarkTheme) {
-      MaterialTheme.colorScheme.primary
-    } else {
-      MaterialTheme.colorScheme.inversePrimary
-    }
+
   TopAppBar(
     navigationIcon = {
       IconButton(onClick = { state.updateDrawerOpen(true) }) {
@@ -255,61 +251,16 @@ private fun MainSurveyTopAppBar(state: PrototypeAppState) {
           Icon(
             imageVector = Icons.Default.LocationOn,
             contentDescription = null,
-            tint = Color(0xFFC8E6C9),
+            tint = Color(0xFFB7F1B9),
             modifier = Modifier.size(12.dp),
           )
           Text(
             text =
               "${state.activeSurvey.location} • ${state.visibleMapEntities.size} ${state.activeEntitiesCountNoun} on map",
             style = MaterialTheme.typography.labelSmall,
-            color = Color(0xFFC8E6C9),
+            color = Color(0xFFB7F1B9),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
-          )
-        }
-      }
-    },
-    actions = {
-      SingleChoiceSegmentedButtonRow(modifier = Modifier.padding(end = 8.dp)) {
-        MainSurveyViewMode.entries.forEachIndexed { index, mode ->
-          val isSelected =
-            state.activeDrawerSubView == MainDrawerSubView.NONE && state.mainViewMode == mode
-          SegmentedButton(
-            selected = isSelected,
-            onClick = { state.setMainSurveyViewMode(mode) },
-            shape =
-              SegmentedButtonDefaults.itemShape(
-                index = index,
-                count = MainSurveyViewMode.entries.size,
-              ),
-            colors =
-              SegmentedButtonDefaults.colors(
-                activeContainerColor = activePillContainer,
-                activeContentColor = Color(0xFF003825),
-                activeBorderColor = activePillContainer,
-                inactiveContainerColor = Color(0xFF11422E),
-                inactiveContentColor = Color.White,
-                inactiveBorderColor = Color(0xFF386B52),
-              ),
-            icon = {
-              Icon(
-                imageVector =
-                  if (mode == MainSurveyViewMode.MAP) {
-                    Icons.Default.Map
-                  } else {
-                    Icons.AutoMirrored.Filled.List
-                  },
-                contentDescription = null,
-                modifier = Modifier.size(14.dp),
-              )
-            },
-            label = {
-              Text(
-                text = if (mode == MainSurveyViewMode.MAP) "Map" else "List",
-                style = MaterialTheme.typography.labelSmall,
-                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-              )
-            },
           )
         }
       }
@@ -329,10 +280,12 @@ private fun MainSurveyTopAppBar(state: PrototypeAppState) {
  * - Toggleable **Offline Basemap** (`Satellite + Contours` or `Vector Topographic`)
  * - Ground **Geospatial Entities** (`EntityType.GEOSPATIAL`, rendered with solid polygon outlines)
  * - **Submission Geometries** (`FormGeometrySource { form_id, field_path }`, rendered with dotted
- *   polygon outlines corresponding to geometry questions/fields in the survey forms)
- * - A `"Layers"` button (`MapLayersControlSheet`) to toggle the offline basemap, entity layers,
- *   and submission geometry layers
- * - A bottom sheet displaying entity & submission details (`1:1` vs `1:N`)
+ * polygon outlines corresponding to geometry questions/fields in the survey forms)
+ * - A `"Layers"` button (`MapLayersControlSheet`) to toggle the offline basemap, entity layers, and
+ * submission geometry layers
+ * - A unified persistent bottom sheet (`SurveyPersistentBottomSheetContent`) that peeks with a
+ * search bar & category filter chips by default, expands into the searchable list of map features and
+ * submissions, and transitions in-place to `EntityBottomSheetCard` when a map feature is selected.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -359,44 +312,37 @@ private fun SurveyMapView(state: PrototypeAppState) {
   }
 
   LaunchedEffect(state.selectedEntityId, state.isEntityBottomSheetExpanded) {
-    if (state.selectedEntityId != null) {
-      if (state.isEntityBottomSheetExpanded && sheetState.currentValue != SheetValue.Expanded) {
-        sheetState.expand()
-      } else if (
-        !state.isEntityBottomSheetExpanded &&
-          sheetState.currentValue != SheetValue.PartiallyExpanded
-      ) {
-        sheetState.partialExpand()
-      }
+    if (state.isEntityBottomSheetExpanded && sheetState.currentValue != SheetValue.Expanded) {
+      sheetState.expand()
+    } else if (!state.isEntityBottomSheetExpanded &&
+        sheetState.currentValue != SheetValue.PartiallyExpanded
+    ) {
+      sheetState.partialExpand()
     }
   }
 
-  val peekHeight = if (selectedEntity != null) 146.dp else 0.dp
+  val peekHeight =
+    if (selectedEntity != null || state.selectedSubmission != null) {
+      152.dp
+    } else {
+      122.dp
+    }
 
   BottomSheetScaffold(
     scaffoldState = scaffoldState,
     sheetPeekHeight = peekHeight,
     sheetShape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
     sheetContainerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+    sheetTonalElevation = 0.dp,
     sheetShadowElevation = 8.dp,
-    sheetSwipeEnabled = selectedEntity != null,
-    sheetDragHandle =
-      if (selectedEntity != null) {
-        { BottomSheetDefaults.DragHandle() }
-      } else {
-        null
-      },
+    sheetSwipeEnabled = true,
+    sheetDragHandle = { BottomSheetDefaults.DragHandle() },
     containerColor = Color.Transparent,
     sheetContent = {
-      if (selectedEntity != null) {
-        EntityBottomSheetCard(
-          entity = selectedEntity,
-          state = state,
-          modifier = Modifier.fillMaxWidth().fillMaxHeight(),
-        )
-      } else {
-        Spacer(modifier = Modifier.height(1.dp))
-      }
+      SurveyPersistentBottomSheetContent(
+        state = state,
+        modifier = Modifier.fillMaxWidth().fillMaxHeight(0.84f),
+      )
     },
   ) {
     BoxWithConstraints(modifier = Modifier.fillMaxSize().background(Color.Transparent)) {
@@ -420,7 +366,8 @@ private fun SurveyMapView(state: PrototypeAppState) {
           label = "mapShiftY",
         )
 
-      // 1. Real Mapbox GL JS Basemap (mapboxgl.Map via window.GroundMapboxBridge) + GeoJSON Layers & Mapbox Markers
+      // 1. Real Mapbox GL JS Basemap (mapboxgl.Map via window.GroundMapboxBridge) + GeoJSON Layers
+      // & Mapbox Markers
       MapboxBasemapView(
         state = state,
         animatedShiftX = animatedShiftX,
@@ -428,162 +375,103 @@ private fun SurveyMapView(state: PrototypeAppState) {
         modifier = Modifier.fillMaxSize(),
       )
 
-      // 3. Top Map Overlay Bar: GNSS (GPS) Satellites & Accuracy Chip + "Layers" Button
-      Column(
-        modifier =
-          Modifier.align(Alignment.TopCenter)
-            .fillMaxWidth()
-            .padding(horizontal = 12.dp, vertical = 10.dp),
-        verticalArrangement = Arrangement.spacedBy(6.dp),
-      ) {
-        Row(
-          modifier = Modifier.fillMaxWidth(),
-          horizontalArrangement = Arrangement.SpaceBetween,
-          verticalAlignment = Alignment.CenterVertically,
-        ) {
-          // GNSS (GPS) Satellites & Current Horizontal Accuracy Chip over the map
-          Surface(
-            shape = MaterialTheme.shapes.large,
-            color = MaterialTheme.colorScheme.inverseSurface.copy(alpha = 0.92f),
-            contentColor = MaterialTheme.colorScheme.inverseOnSurface,
-            border = BorderStroke(1.dp, Color(0xFF4CAF50)),
-            shadowElevation = 2.dp,
-          ) {
-            Row(
-              modifier = Modifier.padding(horizontal = 11.dp, vertical = 6.dp),
-              verticalAlignment = Alignment.CenterVertically,
-              horizontalArrangement = Arrangement.spacedBy(5.dp),
-            ) {
-              Icon(
-                imageVector = Icons.Default.SatelliteAlt,
-                contentDescription = "GNSS Satellites & Accuracy",
-                tint = Color(0xFF8BD6B1),
-                modifier = Modifier.size(14.dp),
-              )
-              Text(
-                text = "GNSS: ${state.gnssStatusChipLabel}",
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.inverseOnSurface,
-                fontWeight = FontWeight.Bold,
-              )
-            }
-          }
+      // 3. Top Map Overlay: Docked Navigation HUD Banner (flush with toolbar) + Floating Map Chips
+      Column(modifier = Modifier.align(Alignment.TopCenter).fillMaxWidth()) {
+        // Straight-Line Navigation HUD Banner docked to the top of the screen like Google Maps
+        val activeNav = state.activeNavigation
+        if (activeNav != null) {
+          StraightLineNavigationHudBanner(navState = activeNav, state = state)
+        }
 
-          // "Layers" Button to control basemap (Map vs Satellite), offline tiles, entities, and submission geometries
-          val layersBg =
-            if (state.isLayersSheetOpen) {
-              Color(0xFF8BD6B1)
-            } else {
-              MaterialTheme.colorScheme.inverseSurface.copy(alpha = 0.93f)
-            }
-          val layersContent =
-            if (state.isLayersSheetOpen) {
-              Color(0xFF003825)
-            } else {
-              MaterialTheme.colorScheme.inverseOnSurface
-            }
-          Surface(
-            onClick = { state.updateLayersSheetOpen(!state.isLayersSheetOpen) },
-            shape = MaterialTheme.shapes.large,
-            color = layersBg,
-            contentColor = layersContent,
-            border = BorderStroke(1.dp, Color(0xFF8BD6B1)),
-            shadowElevation = 3.dp,
+        // Floating Map Chips: GPS Accuracy Chip + "Layers" Button
+        Column(
+          modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 10.dp),
+          verticalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+          Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
           ) {
-            Row(
-              modifier = Modifier.padding(horizontal = 12.dp, vertical = 7.dp),
-              verticalAlignment = Alignment.CenterVertically,
-              horizontalArrangement = Arrangement.spacedBy(6.dp),
+            // GPS Current Horizontal Accuracy Chip over the map
+            Surface(
+              shape = MaterialTheme.shapes.large,
+              color = MaterialTheme.colorScheme.inverseSurface.copy(alpha = 0.92f),
+              contentColor = MaterialTheme.colorScheme.inverseOnSurface,
+              border = BorderStroke(1.dp, Color(0xFF4CAF50)),
+              shadowElevation = 2.dp,
+            ) {
+              Row(
+                modifier = Modifier.padding(horizontal = 11.dp, vertical = 6.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(5.dp),
+              ) {
+                Icon(
+                  imageVector = Icons.Default.SatelliteAlt,
+                  contentDescription = "GPS Accuracy",
+                  tint = Color(0xFF8BD6B1),
+                  modifier = Modifier.size(14.dp),
+                )
+                Text(
+                  text = "GPS Accuracy: ${state.gnssStatusChipLabel}",
+                  style = MaterialTheme.typography.labelSmall,
+                  color = MaterialTheme.colorScheme.inverseOnSurface,
+                  fontWeight = FontWeight.Bold,
+                )
+              }
+            }
+
+            // Layers FAB to control basemap (Map vs Satellite), offline tiles, entities, and
+            // submission geometries
+            val layersBg =
+              if (state.isLayersSheetOpen) {
+                Color(0xFF8BD6B1)
+              } else {
+                MaterialTheme.colorScheme.inverseSurface.copy(alpha = 0.93f)
+              }
+            val layersContent =
+              if (state.isLayersSheetOpen) {
+                Color(0xFF003825)
+              } else {
+                MaterialTheme.colorScheme.inverseOnSurface
+              }
+            FloatingActionButton(
+              onClick = { state.updateLayersSheetOpen(!state.isLayersSheetOpen) },
+              containerColor = layersBg,
+              contentColor = layersContent,
             ) {
               Icon(
                 imageVector = Icons.Default.Layers,
-                contentDescription = null,
-                tint = layersContent,
-                modifier = Modifier.size(16.dp),
-              )
-              Text(
-                text = "Layers",
-                style = MaterialTheme.typography.labelSmall,
-                color = layersContent,
-                fontWeight = FontWeight.Bold,
+                contentDescription = "Map Layers",
               )
             }
           }
-        }
 
-        // Compact GPS Follow State Chip
-        Surface(
-          shape = MaterialTheme.shapes.medium,
-          color = MaterialTheme.colorScheme.inverseSurface.copy(alpha = 0.85f),
-          border = BorderStroke(1.dp, Color(0xFF2D5944)),
-        ) {
-          val followColor =
-            if (state.isCameraFollowingUser) Color(0xFF8BD6B1) else Color(0xFFFFCC80)
-          Text(
-            text = if (state.isCameraFollowingUser) "GPS Auto-Center" else "Panned",
-            style = MaterialTheme.typography.labelSmall,
-            color = followColor,
-            fontWeight = FontWeight.SemiBold,
-            modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
-          )
-        }
-
-        // Straight-Line Navigation HUD Banner (when navigating to an Entity or Submission)
-        val activeNav = state.activeNavigation
-        if (activeNav != null) {
-          StraightLineNavigationHudBanner(
-            navState = activeNav,
-            state = state,
-          )
-        }
-      }
-
-      // 4B. Floating Mapbox Zoom In (+) / Zoom Out (−) Control Pill on Right Edge
-      Surface(
-        modifier = Modifier.align(Alignment.CenterEnd).padding(end = 10.dp),
-        shape = MaterialTheme.shapes.large,
-        color = MaterialTheme.colorScheme.inverseSurface.copy(alpha = 0.93f),
-        contentColor = MaterialTheme.colorScheme.inverseOnSurface,
-        border = BorderStroke(1.dp, Color(0xFF8BD6B1)),
-        tonalElevation = 3.dp,
-        shadowElevation = 4.dp,
-      ) {
-        Column(
-          modifier = Modifier.padding(vertical = 2.dp, horizontal = 2.dp),
-          horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-          IconButton(
-            onClick = {
-              state.zoomInMap()
-              zoomPlatformMapboxBasemap(0.75f)
-            },
-            modifier = Modifier.size(36.dp),
+          // Compact GPS Follow State Chip
+          Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
           ) {
-            Icon(
-              imageVector = Icons.Default.Add,
-              contentDescription = "Zoom In Map",
-              tint = Color.White,
-              modifier = Modifier.size(18.dp),
-            )
+            Surface(
+              shape = MaterialTheme.shapes.medium,
+              color = MaterialTheme.colorScheme.inverseSurface.copy(alpha = 0.85f),
+              border = BorderStroke(1.dp, Color(0xFF2D5944)),
+            ) {
+              val followColor =
+                if (state.isCameraFollowingUser) Color(0xFF8BD6B1) else Color(0xFFFFCC80)
+              Text(
+                text = if (state.isCameraFollowingUser) "GPS Auto-Center" else "Panned",
+                style = MaterialTheme.typography.labelSmall,
+                color = followColor,
+                fontWeight = FontWeight.SemiBold,
+                modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+              )
+            }
           }
 
-          HorizontalDivider(
-            modifier = Modifier.width(24.dp),
-            color = Color(0xFF2D5944),
-          )
-
-          IconButton(
-            onClick = {
-              state.zoomOutMap()
-              zoomPlatformMapboxBasemap(-0.75f)
-            },
-            modifier = Modifier.size(36.dp),
-          ) {
-            Text(
-              text = "−",
-              color = Color.White,
-              style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-            )
+          // Selected Cluster Balloon detail callout when a Mapbox cluster balloon is tapped
+          if (state.isMapClusteringActive && state.selectedCluster != null) {
+            MapClusterBalloonsOverlay(state = state)
           }
         }
       }
@@ -592,14 +480,10 @@ private fun SurveyMapView(state: PrototypeAppState) {
       //    (plus optional "Recenter" ExtendedFloatingActionButton when map is panned)
       Column(
         modifier =
-          Modifier.align(Alignment.BottomCenter)
-            .fillMaxWidth()
-            .padding(bottom = peekHeight),
+          Modifier.align(Alignment.BottomCenter).fillMaxWidth().padding(bottom = peekHeight)
       ) {
         Row(
-          modifier =
-            Modifier.fillMaxWidth()
-              .padding(start = 14.dp, end = 14.dp, bottom = 8.dp),
+          modifier = Modifier.fillMaxWidth().padding(start = 14.dp, end = 14.dp, bottom = 8.dp),
           verticalAlignment = Alignment.CenterVertically,
           horizontalArrangement = Arrangement.spacedBy(10.dp),
         ) {
@@ -632,35 +516,148 @@ private fun SurveyMapView(state: PrototypeAppState) {
           }
         }
 
-        if (selectedEntity == null) {
-          // Helper hint chip at the bottom of the map when no location is selected
-          Surface(
-            modifier =
-              Modifier.align(Alignment.CenterHorizontally)
-                .padding(horizontal = 14.dp, vertical = 6.dp),
-            shape = MaterialTheme.shapes.extraLarge,
-            color = MaterialTheme.colorScheme.inverseSurface.copy(alpha = 0.92f),
-            contentColor = MaterialTheme.colorScheme.inverseOnSurface,
-            border = BorderStroke(1.dp, Color(0xFF8BD6B1)),
-            shadowElevation = 2.dp,
+        // Single bottom-centered Floating Action Button to trigger data collection from a form
+        DataCollectionFormsFab(
+          state = state,
+          modifier =
+            Modifier.align(Alignment.CenterHorizontally)
+              .padding(horizontal = 14.dp, vertical = 6.dp),
+        )
+      }
+    }
+  }
+}
+
+/**
+ * Renders the expanded callout card for the currently selected [MapFeatureCluster] balloon when a
+ * geographically pinned Mapbox cluster balloon is tapped on the map.
+ */
+@Composable
+private fun MapClusterBalloonsOverlay(state: PrototypeAppState) {
+  val selectedCluster = state.selectedCluster ?: return
+  SelectedClusterBalloonDetailCard(
+    sitesCountLabel = state.formatClusterSitesCountLabel(selectedCluster.siteCount),
+    cluster = selectedCluster,
+    onZoomIn = {
+      state.zoomIntoCluster(selectedCluster.id)
+      zoomPlatformMapboxBasemap(0.75f)
+    },
+    onDismiss = { state.selectCluster(null) },
+  )
+}
+
+/**
+ * Expanded callout card for the currently selected [MapFeatureCluster] balloon showing the count of
+ * map features and their workflow states.
+ */
+@Composable
+private fun SelectedClusterBalloonDetailCard(
+  sitesCountLabel: String,
+  cluster: MapFeatureCluster,
+  onZoomIn: () -> Unit,
+  onDismiss: () -> Unit,
+) {
+  Surface(
+    shape = MaterialTheme.shapes.medium,
+    color = MaterialTheme.colorScheme.inverseSurface.copy(alpha = 0.96f),
+    contentColor = MaterialTheme.colorScheme.inverseOnSurface,
+    border = BorderStroke(1.5.dp, Color(0xFF8BD6B1)),
+    shadowElevation = 6.dp,
+    modifier = Modifier.fillMaxWidth(),
+  ) {
+    Column(
+      modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
+      verticalArrangement = Arrangement.spacedBy(6.dp),
+    ) {
+      Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+      ) {
+        Text(
+          text = sitesCountLabel,
+          style = MaterialTheme.typography.labelMedium,
+          color = Color(0xFF8BD6B1),
+          fontWeight = FontWeight.Bold,
+        )
+        Row(
+          verticalAlignment = Alignment.CenterVertically,
+          horizontalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+          TextButton(
+            onClick = onZoomIn,
+            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
+            modifier = Modifier.height(26.dp),
           ) {
-            Row(
-              modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
-              verticalAlignment = Alignment.CenterVertically,
-              horizontalArrangement = Arrangement.spacedBy(6.dp),
+            Text(
+              text = "Zoom in +",
+              style = MaterialTheme.typography.labelSmall,
+              color = Color(0xFF8BD6B1),
+              fontWeight = FontWeight.Bold,
+            )
+          }
+          IconButton(onClick = onDismiss, modifier = Modifier.size(22.dp)) {
+            Icon(
+              imageVector = Icons.Default.Close,
+              contentDescription = "Dismiss cluster balloon",
+              tint = Color.White.copy(alpha = 0.8f),
+              modifier = Modifier.size(14.dp),
+            )
+          }
+        }
+      }
+
+      if (cluster.siteSymbolGroups.isNotEmpty()) {
+        Row(
+          modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+          horizontalArrangement = Arrangement.spacedBy(8.dp),
+          verticalAlignment = Alignment.CenterVertically,
+        ) {
+          cluster.siteSymbolGroups.forEach { group ->
+            val groupColor = Color(group.colorHex)
+            Surface(
+              shape = RoundedCornerShape(10.dp),
+              color = Color.White.copy(alpha = 0.10f),
+              border = BorderStroke(1.dp, groupColor.copy(alpha = 0.85f)),
             ) {
-              Icon(
-                imageVector = Icons.Default.TouchApp,
-                contentDescription = null,
-                tint = Color(0xFF8BD6B1),
-                modifier = Modifier.size(14.dp),
-              )
-              Text(
-                text = "Drag map to pan • Tap any location or dotted polygon to inspect",
-                style = MaterialTheme.typography.labelSmall,
-                color = Color.White,
-                fontWeight = FontWeight.Medium,
-              )
+              Row(
+                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(5.dp),
+              ) {
+                if (group.isNoSymbolGroup) {
+                  Box(
+                    modifier =
+                      Modifier.size(12.dp)
+                        .clip(CircleShape)
+                        .background(groupColor.copy(alpha = 0.28f))
+                        .border(1.5.dp, groupColor, CircleShape)
+                  )
+                } else {
+                  Box(
+                    modifier = Modifier.size(14.dp).clip(CircleShape).background(groupColor),
+                    contentAlignment = Alignment.Center,
+                  ) {
+                    Text(
+                      text = group.markerSymbol,
+                      style = MaterialTheme.typography.labelSmall.copy(fontSize = 8.5.sp),
+                      color = Color.White,
+                      fontWeight = FontWeight.ExtraBold,
+                    )
+                  }
+                }
+                Text(
+                  text =
+                    if (group.isNoSymbolGroup) {
+                      "Unmarked map feature: ${group.count}"
+                    } else {
+                      "${group.statusLabel}: ${group.count}"
+                    },
+                  style = MaterialTheme.typography.labelSmall,
+                  color = Color.White,
+                  fontWeight = FontWeight.SemiBold,
+                )
+              }
             }
           }
         }
@@ -670,59 +667,240 @@ private fun SurveyMapView(state: PrototypeAppState) {
 }
 
 /**
- * Interactive Straight-Line Navigation HUD Banner displayed at the top of the Map View whenever
- * straight-line navigation to a Geospatial Entity (`NavigationTargetKind.ENTITY`) or a Form
- * Submission (`NavigationTargetKind.SUBMISSION`) is active.
+ * Single bottom-centered Floating Action Button (`ExtendedFloatingActionButton`) on the Main Survey
+ * screen (`Map` and `List` views) that opens the [AvailableFormsModalSheet] list of available forms
+ * to start data collection without requiring a geospatial entity to be pre-selected from the map.
  */
 @Composable
-private fun StraightLineNavigationHudBanner(
-  navState: StraightLineNavigationState,
-  state: PrototypeAppState,
-) {
-  val accentColor =
-    if (navState.targetKind == NavigationTargetKind.ENTITY) {
-      Color(0xFF00E5FF)
-    } else {
-      Color(0xFFFFB300)
-    }
-  val kindLabel =
-    if (navState.targetKind == NavigationTargetKind.ENTITY) {
-      "${state.entitySingularTypeLabel(navState.targetId).uppercase()} WAYFINDING"
-    } else {
-      "SUBMISSION WAYFINDING"
-    }
+private fun DataCollectionFormsFab(state: PrototypeAppState, modifier: Modifier = Modifier) {
+  ExtendedFloatingActionButton(
+    onClick = { state.openAvailableFormsSheet() },
+    modifier = modifier.height(46.dp),
+    shape = CircleShape,
+    containerColor = MaterialTheme.colorScheme.primary,
+    contentColor = MaterialTheme.colorScheme.onPrimary,
+    icon = {
+      Icon(
+        imageVector = Icons.Default.Add,
+        contentDescription = "Collect data from a form",
+        modifier = Modifier.size(20.dp),
+      )
+    },
+    text = {
+      Text(
+        text = "Collect data",
+        style = MaterialTheme.typography.labelLarge,
+        fontWeight = FontWeight.Bold,
+      )
+    },
+  )
+}
 
-  ElevatedCard(
-    modifier = Modifier.fillMaxWidth(),
-    shape = MaterialTheme.shapes.medium,
-    colors =
-      CardDefaults.elevatedCardColors(
-        containerColor = MaterialTheme.colorScheme.inverseSurface.copy(alpha = 0.95f),
-        contentColor = MaterialTheme.colorScheme.inverseOnSurface,
-      ),
-    elevation = CardDefaults.elevatedCardElevation(defaultElevation = 6.dp),
-  ) {
+/**
+ * Modal bottom sheet opened by the bottom-centered [DataCollectionFormsFab] listing all available
+ * forms in the active survey. Selecting a form launches data collection via
+ * [PrototypeAppState.launchFormFromFab], which presents the Map or List entity selector at the step
+ * in the data collection process where an `entityref` is required.
+ */
+@Composable
+private fun AvailableFormsModalSheet(state: PrototypeAppState) {
+  GroundModalBottomSheetOverlay(onDismissRequest = { state.closeAvailableFormsSheet() }) {
     Column(
       modifier =
-        Modifier.border(1.5.dp, accentColor, MaterialTheme.shapes.medium)
-          .padding(horizontal = 12.dp, vertical = 8.dp),
-      verticalArrangement = Arrangement.spacedBy(6.dp),
+        Modifier.fillMaxWidth()
+          .verticalScroll(rememberScrollState())
+          .padding(horizontal = 16.dp, vertical = 8.dp),
+      verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
       Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
       ) {
+        Column(modifier = Modifier.weight(1f)) {
+          Text(
+            text = "Available Data Collection Forms",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold,
+          )
+          Text(
+            text =
+              "Select a form to start data collection. You will be prompted to select the target location on the Map or List at the step where it is required.",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+          )
+        }
+        IconButton(onClick = { state.closeAvailableFormsSheet() }) {
+          Icon(imageVector = Icons.Default.Close, contentDescription = "Close Available Forms")
+        }
+      }
+
+      HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+
+      state.forms.forEach { form ->
+        val eligibleCount = state.eligibleEntitiesForForm(form).size
+        val totalDatasetCount = state.allDatasetEntitiesForForm(form).size
+        val canLaunch = !form.requiresEntity || eligibleCount > 0
+
+        OutlinedCard(
+          onClick = { if (canLaunch) state.launchFormFromFab(form.id) },
+          enabled = canLaunch,
+          modifier = Modifier.fillMaxWidth(),
+          shape = MaterialTheme.shapes.medium,
+          colors =
+            CardDefaults.outlinedCardColors(
+              containerColor = MaterialTheme.colorScheme.surfaceContainerLow
+            ),
+        ) {
+          Column(
+            modifier = Modifier.fillMaxWidth().padding(12.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp),
+          ) {
+            Row(
+              modifier = Modifier.fillMaxWidth(),
+              horizontalArrangement = Arrangement.SpaceBetween,
+              verticalAlignment = Alignment.CenterVertically,
+            ) {
+              Row(
+                modifier = Modifier.weight(1f),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+              ) {
+                Icon(
+                  imageVector = Icons.Default.Description,
+                  contentDescription = null,
+                  tint = MaterialTheme.colorScheme.primary,
+                  modifier = Modifier.size(16.dp),
+                )
+                Text(
+                  text = form.title,
+                  style = MaterialTheme.typography.labelLarge,
+                  fontWeight = FontWeight.Bold,
+                  color = MaterialTheme.colorScheme.onSurface,
+                )
+              }
+              GroundTonalBadge(
+                text = "${form.questionCount} questions",
+                tone = GroundBadgeTone.PRIMARY,
+              )
+            }
+
+            Text(
+              text = form.description,
+              style = MaterialTheme.typography.bodySmall,
+              color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+
+            Row(
+              modifier = Modifier.fillMaxWidth(),
+              horizontalArrangement = Arrangement.SpaceBetween,
+              verticalAlignment = Alignment.CenterVertically,
+            ) {
+              Column(modifier = Modifier.weight(1f)) {
+                if (form.requiresEntity) {
+                  Text(
+                    text = "Target: ${form.targetDatasetName}",
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.primary,
+                  )
+                  Text(
+                    text =
+                      "$eligibleCount of $totalDatasetCount ${form.targetSingularTypeLabel.lowercase()}(s) available • Select via Map or List in step 1",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                  )
+                } else {
+                  Text(
+                    text = "Target: Standalone field log (No map feature required)",
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.primary,
+                  )
+                  Text(
+                    text =
+                      "Records directly at your current GNSS position without an attached map feature",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                  )
+                }
+              }
+
+              Spacer(modifier = Modifier.width(8.dp))
+
+              Button(onClick = { state.launchFormFromFab(form.id) }, enabled = canLaunch) {
+                Text(
+                  text = form.ctaLabel,
+                  style = MaterialTheme.typography.labelMedium,
+                  fontWeight = FontWeight.Bold,
+                )
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Interactive Straight-Line Navigation HUD Banner docked to the top of the Map View (like Google
+ * Maps) using the toolbar background color whenever straight-line navigation to a Geospatial Entity
+ * (`NavigationTargetKind.ENTITY`) or a Form Submission (`NavigationTargetKind.SUBMISSION`) is
+ * active.
+ */
+@Composable
+private fun StraightLineNavigationHudBanner(
+  navState: StraightLineNavigationState,
+  state: PrototypeAppState,
+) {
+  val topBarContainer =
+    if (state.isDarkTheme) {
+      MaterialTheme.colorScheme.primaryContainer
+    } else {
+      MaterialTheme.colorScheme.primary
+    }
+  val accentColor =
+    when (navState.targetKind) {
+      NavigationTargetKind.ENTITY -> Color(0xFF80DEEA)
+      NavigationTargetKind.PLACE -> Color(0xFFA7FFEB)
+      NavigationTargetKind.SUBMISSION -> Color(0xFFFFD54F)
+    }
+  val kindLabel =
+    when (navState.targetKind) {
+      NavigationTargetKind.ENTITY ->
+        "${state.entitySingularTypeLabel(navState.targetId).uppercase()} WAYFINDING"
+      NavigationTargetKind.PLACE -> "PLACE WAYFINDING"
+      NavigationTargetKind.SUBMISSION -> "SUBMISSION WAYFINDING"
+    }
+
+  Surface(
+    modifier = Modifier.fillMaxWidth(),
+    shape = RoundedCornerShape(bottomStart = 16.dp, bottomEnd = 16.dp),
+    color = topBarContainer,
+    contentColor = Color.White,
+    shadowElevation = 6.dp,
+  ) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+      // Subtle top divider separating the docked navigation banner from the top toolbar
+      HorizontalDivider(color = Color.White.copy(alpha = 0.16f))
+
+      Column(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 10.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+      ) {
+        // Primary Wayfinding Row: Rotating Compass Arrow + Target Details + Distance/Bearing/Walk
+        // Readout
         Row(
+          modifier = Modifier.fillMaxWidth(),
+          horizontalArrangement = Arrangement.spacedBy(10.dp),
           verticalAlignment = Alignment.CenterVertically,
-          horizontalArrangement = Arrangement.spacedBy(8.dp),
-          modifier = Modifier.weight(1f),
         ) {
           // Rotating Compass Arrow Badge
           Surface(
-            modifier = Modifier.size(32.dp),
+            modifier = Modifier.size(38.dp),
             shape = CircleShape,
-            color = accentColor.copy(alpha = 0.16f),
+            color = Color(0xFF11422E),
             border = BorderStroke(1.5.dp, accentColor),
           ) {
             Box(contentAlignment = Alignment.Center) {
@@ -731,43 +909,34 @@ private fun StraightLineNavigationHudBanner(
                 contentDescription = "Compass Bearing Arrow",
                 tint = accentColor,
                 modifier =
-                  Modifier.size(17.dp)
+                  Modifier.size(19.dp)
                     .graphicsLayer(rotationZ = navState.vector.bearingDegrees.toFloat()),
               )
             }
           }
 
-          Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-            Row(
-              verticalAlignment = Alignment.CenterVertically,
-              horizontalArrangement = Arrangement.spacedBy(6.dp),
+          // Target Type Pill, Title & Subtitle
+          Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            Surface(
+              shape = CircleShape,
+              color = Color(0xFF11422E),
+              border = BorderStroke(1.dp, accentColor.copy(alpha = 0.65f)),
             ) {
-              GroundTonalBadge(
-                text = kindLabel,
-                tone =
-                  if (navState.targetKind == NavigationTargetKind.ENTITY) {
-                    GroundBadgeTone.PRIMARY
-                  } else {
-                    GroundBadgeTone.TERTIARY
-                  },
-              )
               Text(
-                text =
-                  if (navState.vector.isArrived) {
-                    "ARRIVED AT TARGET (≤ 8 m)"
-                  } else {
-                    "~${navState.vector.estimatedWalkMinutes} min walk"
-                  },
+                text = kindLabel,
                 style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.primary,
+                color = accentColor,
                 fontWeight = FontWeight.Bold,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
               )
             }
 
             Text(
               text = navState.targetTitle,
-              style = MaterialTheme.typography.labelLarge,
-              color = MaterialTheme.colorScheme.onSurface,
+              style = MaterialTheme.typography.titleSmall,
+              color = Color.White,
               fontWeight = FontWeight.Bold,
               maxLines = 1,
               overflow = TextOverflow.Ellipsis,
@@ -776,97 +945,142 @@ private fun StraightLineNavigationHudBanner(
             Text(
               text = navState.targetSubtitle,
               style = MaterialTheme.typography.labelSmall,
-              color = MaterialTheme.colorScheme.onSurfaceVariant,
+              color = Color(0xFFC8E6C9),
               maxLines = 1,
               overflow = TextOverflow.Ellipsis,
             )
           }
-        }
 
-        // Distance + Bearing Readout Pill
-        Column(
-          horizontalAlignment = Alignment.End,
-          verticalArrangement = Arrangement.spacedBy(2.dp),
-        ) {
-          Text(
-            text = navState.formattedDistance,
-            style =
-              MaterialTheme.typography.titleSmall.copy(
-                fontFamily = FontFamily.Monospace,
-                fontWeight = FontWeight.ExtraBold,
-                color = accentColor,
-              ),
-          )
-          Text(
-            text = "Bearing ${navState.vector.formattedBearing}",
-            style =
-              MaterialTheme.typography.labelSmall.copy(
-                fontFamily = FontFamily.Monospace,
-                color = MaterialTheme.colorScheme.onSurface,
-                fontWeight = FontWeight.SemiBold,
-              ),
-          )
-        }
-      }
-
-      // Bottom Control Strip: "Walk Closer" simulation button + "Stop" navigation button
-      Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically,
-      ) {
-        Text(
-          text = "Straight-line geodesic vector from your GPS location",
-          style = MaterialTheme.typography.labelSmall,
-          color = MaterialTheme.colorScheme.onSurfaceVariant,
-          modifier = Modifier.weight(1f),
-        )
-
-        Row(
-          horizontalArrangement = Arrangement.spacedBy(6.dp),
-          verticalAlignment = Alignment.CenterVertically,
-        ) {
-          if (!navState.vector.isArrived) {
-            AssistChip(
-              onClick = { state.stepUserTowardNavigationTarget() },
-              leadingIcon = {
-                Icon(
-                  imageVector = Icons.Default.Explore,
-                  contentDescription = "Simulate walking closer to target",
-                  modifier = Modifier.size(14.dp),
-                )
-              },
-              label = {
-                Text(
-                  text = "Walk Closer",
-                  style = MaterialTheme.typography.labelSmall,
+          // Distance + Bearing + Walk Time Readout Column (never wraps vertically)
+          Column(
+            horizontalAlignment = Alignment.End,
+            verticalArrangement = Arrangement.spacedBy(2.dp),
+          ) {
+            Text(
+              text = navState.formattedDistance,
+              style =
+                MaterialTheme.typography.titleMedium.copy(
+                  fontWeight = FontWeight.ExtraBold,
+                  color = Color.White,
+                ),
+              maxLines = 1,
+              softWrap = false,
+            )
+            Text(
+              text = "Bearing ${navState.vector.formattedBearing}",
+              style =
+                MaterialTheme.typography.labelSmall.copy(
+                  color = accentColor,
                   fontWeight = FontWeight.Bold,
-                )
-              },
+                ),
+              maxLines = 1,
+              softWrap = false,
+            )
+            Text(
+              text =
+                if (navState.vector.isArrived) {
+                  "ARRIVED (≤ 8 m)"
+                } else {
+                  "~${navState.vector.estimatedWalkMinutes} min walk"
+                },
+              style = MaterialTheme.typography.labelSmall,
+              color = Color(0xFFC8E6C9),
+              fontWeight = FontWeight.SemiBold,
+              maxLines = 1,
+              softWrap = false,
             )
           }
+        }
 
-          AssistChip(
-            onClick = { state.stopNavigation() },
-            leadingIcon = {
-              Icon(
-                imageVector = Icons.Default.Close,
-                contentDescription = "Stop Straight-Line Navigation",
-                tint = MaterialTheme.colorScheme.error,
-                modifier = Modifier.size(14.dp),
-              )
-            },
-            label = {
-              Text(
-                text = "Stop",
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.error,
-                fontWeight = FontWeight.Bold,
-              )
-            },
+        HorizontalDivider(color = Color.White.copy(alpha = 0.14f))
+
+        // Bottom Control Strip: Geodesic Vector Status + High-Contrast "Walk Closer" & "Stop" Pills
+        Row(
+          modifier = Modifier.fillMaxWidth(),
+          horizontalArrangement = Arrangement.spacedBy(8.dp),
+          verticalAlignment = Alignment.CenterVertically,
+        ) {
+          Text(
+            text = "Straight-line geodesic vector from your GPS location",
+            style = MaterialTheme.typography.labelSmall,
+            color = Color(0xFFC8E6C9),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.weight(1f),
           )
+
+          Row(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+          ) {
+            if (!navState.vector.isArrived) {
+              Surface(
+                onClick = { state.stepUserTowardNavigationTarget() },
+                shape = CircleShape,
+                color = Color(0xFF11422E),
+                contentColor = Color.White,
+                border = BorderStroke(1.dp, Color(0xFF8BD6B1)),
+              ) {
+                Row(
+                  modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
+                  verticalAlignment = Alignment.CenterVertically,
+                  horizontalArrangement = Arrangement.spacedBy(5.dp),
+                ) {
+                  Icon(
+                    imageVector = Icons.Default.Explore,
+                    contentDescription = "Simulate walking closer to target",
+                    tint = Color(0xFF8BD6B1),
+                    modifier = Modifier.size(14.dp),
+                  )
+                  Text(
+                    text = "Walk Closer",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 1,
+                    softWrap = false,
+                  )
+                }
+              }
+            }
+
+            Surface(
+              onClick = { state.stopNavigation() },
+              shape = CircleShape,
+              color = Color(0xFFB3261E),
+              contentColor = Color.White,
+              border = BorderStroke(1.dp, Color(0xFFFFCDD2).copy(alpha = 0.75f)),
+            ) {
+              Row(
+                modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+              ) {
+                Icon(
+                  imageVector = Icons.Default.Close,
+                  contentDescription = "Stop Straight-Line Navigation",
+                  tint = Color.White,
+                  modifier = Modifier.size(14.dp),
+                )
+                Text(
+                  text = "Stop",
+                  style = MaterialTheme.typography.labelSmall,
+                  color = Color.White,
+                  fontWeight = FontWeight.Bold,
+                  maxLines = 1,
+                  softWrap = false,
+                )
+              }
+            }
+          }
         }
       }
+
+      // Bottom accent bar matching the active navigation target kind
+      Box(
+        modifier =
+          Modifier.fillMaxWidth().height(2.5.dp).background(accentColor.copy(alpha = 0.85f))
+      )
     }
   }
 }
@@ -969,15 +1183,11 @@ private fun GoogleMapsScaleBarWidget(
 /**
  * Material 3 [ModalBottomSheet] opened by the `"Layers"` button to select/toggle:
  * 1. **Basemap Type (`Map` vs `Satellite`)** & **Offline Basemap (`Mapbox Offline Tiles`)**
- * 2. **Geospatial Entity Layers (`LayerDef.entity_dataset_id`)** — rendered with solid outlines
- * 3. **Submission Geometry Layers (`LayerDef.form_geometry`)** — rendered with dotted polygon
- *    outlines corresponding to geometry questions/fields in the survey forms
+ * 2. **Map Features (`LayerDef.entity_dataset_id`)** — geospatial entity layers rendered on the map
  */
 @Composable
 private fun MapLayersControlSheet(state: PrototypeAppState) {
-  GroundModalBottomSheetOverlay(
-    onDismissRequest = { state.updateLayersSheetOpen(false) }
-  ) {
+  GroundModalBottomSheetOverlay(onDismissRequest = { state.updateLayersSheetOpen(false) }) {
     Column(
       modifier =
         Modifier.fillMaxWidth()
@@ -997,16 +1207,18 @@ private fun MapLayersControlSheet(state: PrototypeAppState) {
             fontWeight = FontWeight.Bold,
           )
           Text(
-            text = "Select Map vs Satellite basemap and toggle survey map layers",
+            text =
+              if (state.hasGeospatialEntities) {
+                "Select Map vs Satellite basemap and toggle survey map layers"
+              } else {
+                "Select Map vs Satellite basemap and offline tile overlays"
+              },
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
           )
         }
         IconButton(onClick = { state.updateLayersSheetOpen(false) }) {
-          Icon(
-            imageVector = Icons.Default.Close,
-            contentDescription = "Close Layers",
-          )
+          Icon(imageVector = Icons.Default.Close, contentDescription = "Close Layers")
         }
       }
 
@@ -1030,10 +1242,7 @@ private fun MapLayersControlSheet(state: PrototypeAppState) {
             selected = isSelected,
             onClick = { state.selectBasemapType(basemap) },
             shape =
-              SegmentedButtonDefaults.itemShape(
-                index = index,
-                count = BasemapType.entries.size,
-              ),
+              SegmentedButtonDefaults.itemShape(index = index, count = BasemapType.entries.size),
             icon = {
               Icon(
                 imageVector =
@@ -1091,192 +1300,59 @@ private fun MapLayersControlSheet(state: PrototypeAppState) {
         }
       }
 
-      HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+      if (state.hasGeospatialEntities) {
+        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
-      // Section 2: Data collection sites (geospatial entities)
-      Text(
-        text = "DATA COLLECTION SITES",
-        style =
-          MaterialTheme.typography.labelSmall.copy(
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.primary,
-            letterSpacing = 0.5.sp,
-          ),
-      )
-      state.entityDatasetLayers.forEach { layer ->
-        val layerEntityCount = state.entities.count { it.layerId == layer.id }
-        OutlinedCard(
-          onClick = { state.toggleLayerVisibility(layer.id) },
-          modifier = Modifier.fillMaxWidth(),
-          shape = MaterialTheme.shapes.medium,
-          colors =
-            CardDefaults.outlinedCardColors(
-              containerColor = MaterialTheme.colorScheme.surfaceContainer
+        // Section 2: Map features (geospatial entities)
+        Text(
+          text = "MAP FEATURES",
+          style =
+            MaterialTheme.typography.labelSmall.copy(
+              fontWeight = FontWeight.Bold,
+              color = MaterialTheme.colorScheme.primary,
+              letterSpacing = 0.5.sp,
             ),
-        ) {
-          Row(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
+        )
+        state.entityDatasetLayers.forEach { layer ->
+          val layerEntityCount = state.entities.count { it.layerId == layer.id }
+          OutlinedCard(
+            onClick = { state.toggleLayerVisibility(layer.id) },
+            modifier = Modifier.fillMaxWidth(),
+            shape = MaterialTheme.shapes.medium,
+            colors =
+              CardDefaults.outlinedCardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceContainer
+              ),
           ) {
-            // Solid layer color swatch
-            Box(
-              modifier =
-                Modifier.size(16.dp)
-                  .clip(MaterialTheme.shapes.extraSmall)
-                  .background(Color(layer.colorHex).copy(alpha = 0.25f))
-                  .border(2.dp, Color(layer.colorHex), MaterialTheme.shapes.extraSmall)
-            )
-            Column(modifier = Modifier.weight(1f)) {
-              Text(
-                text = layer.label,
-                style = MaterialTheme.typography.labelMedium,
-                fontWeight = FontWeight.SemiBold,
-              )
-              Text(
-                text = "${layer.geometryTypeLabel} • ${layer.formatCountLabel(layerEntityCount)}",
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-              )
-            }
-            Switch(
-              checked = layer.isVisible,
-              onCheckedChange = { state.toggleLayerVisibility(layer.id) },
-            )
-          }
-        }
-      }
-
-      HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-
-      // Section 3: Form submissions (geospatial fields from forms)
-      Text(
-        text = "FORM SUBMISSIONS",
-        style =
-          MaterialTheme.typography.labelSmall.copy(
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.primary,
-            letterSpacing = 0.5.sp,
-          ),
-      )
-      state.groupedSubmissionLayersByForm.forEach { group ->
-        val form = group.form
-        val allGroupLayersVisible = group.layers.all { it.isVisible }
-        OutlinedCard(
-          modifier = Modifier.fillMaxWidth(),
-          shape = MaterialTheme.shapes.medium,
-          colors =
-            CardDefaults.outlinedCardColors(
-              containerColor = MaterialTheme.colorScheme.surfaceContainer
-            ),
-        ) {
-          Column(
-            modifier = Modifier.fillMaxWidth().padding(10.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-          ) {
-            // Form Title Group Header
             Row(
-              modifier =
-                Modifier.fillMaxWidth()
-                  .clip(MaterialTheme.shapes.small)
-                  .clickable { state.toggleFormSubmissionLayersVisibility(form.id) }
-                  .padding(horizontal = 4.dp, vertical = 2.dp),
-              horizontalArrangement = Arrangement.SpaceBetween,
+              modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
               verticalAlignment = Alignment.CenterVertically,
+              horizontalArrangement = Arrangement.spacedBy(10.dp),
             ) {
-              Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(6.dp),
-                modifier = Modifier.weight(1f),
-              ) {
-                Icon(
-                  imageVector = Icons.Default.Description,
-                  contentDescription = null,
-                  tint = MaterialTheme.colorScheme.secondary,
-                  modifier = Modifier.size(15.dp),
+              // Solid layer color swatch
+              Box(
+                modifier =
+                  Modifier.size(16.dp)
+                    .clip(MaterialTheme.shapes.extraSmall)
+                    .background(Color(layer.colorHex).copy(alpha = 0.25f))
+                    .border(2.dp, Color(layer.colorHex), MaterialTheme.shapes.extraSmall)
+              )
+              Column(modifier = Modifier.weight(1f)) {
+                Text(
+                  text = layer.label,
+                  style = MaterialTheme.typography.labelMedium,
+                  fontWeight = FontWeight.SemiBold,
                 )
                 Text(
-                  text = form.title,
-                  style = MaterialTheme.typography.labelMedium,
-                  fontWeight = FontWeight.Bold,
+                  text = "${layer.geometryTypeLabel} • ${layer.formatCountLabel(layerEntityCount)}",
+                  style = MaterialTheme.typography.labelSmall,
+                  color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
               }
-              Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(6.dp),
-              ) {
-                GroundTonalBadge(
-                  text = "${group.submissions.size} submitted",
-                  tone = GroundBadgeTone.SECONDARY,
-                )
-                Icon(
-                  imageVector =
-                    if (allGroupLayersVisible) {
-                      Icons.Default.Visibility
-                    } else {
-                      Icons.Default.VisibilityOff
-                    },
-                  contentDescription =
-                    if (allGroupLayersVisible) "Hide ${form.title}" else "Show ${form.title}",
-                  tint =
-                    if (allGroupLayersVisible) {
-                      MaterialTheme.colorScheme.primary
-                    } else {
-                      MaterialTheme.colorScheme.onSurfaceVariant
-                    },
-                  modifier = Modifier.size(18.dp),
-                )
-              }
-            }
-
-            group.layers.forEach { layer ->
-              val geomCount = state.submissionGeometries.count { it.layerId == layer.id }
-              Surface(
-                onClick = { state.toggleLayerVisibility(layer.id) },
-                modifier = Modifier.fillMaxWidth(),
-                shape = MaterialTheme.shapes.small,
-                color = MaterialTheme.colorScheme.surface,
-              ) {
-                Row(
-                  modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp, vertical = 6.dp),
-                  verticalAlignment = Alignment.CenterVertically,
-                  horizontalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                  // Dotted polygon swatch rendered with Canvas PathEffect.dashPathEffect
-                  Canvas(modifier = Modifier.size(18.dp)) {
-                    drawRect(
-                      color = Color(layer.colorHex).copy(alpha = 0.22f),
-                      size = size,
-                    )
-                    drawRect(
-                      color = Color(layer.colorHex),
-                      size = size,
-                      style =
-                        Stroke(
-                          width = 2.2f,
-                          pathEffect = PathEffect.dashPathEffect(floatArrayOf(3.5f, 2.5f), 0f),
-                        ),
-                    )
-                  }
-                  Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                      text = layer.label,
-                      style = MaterialTheme.typography.labelMedium,
-                      fontWeight = FontWeight.SemiBold,
-                    )
-                    Text(
-                      text =
-                        "${layer.geometryTypeLabel} • $geomCount ${if (geomCount == 1) "submission" else "submissions"}",
-                      style = MaterialTheme.typography.labelSmall,
-                      color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                  }
-                  Switch(
-                    checked = layer.isVisible,
-                    onCheckedChange = { state.toggleLayerVisibility(layer.id) },
-                  )
-                }
-              }
+              Switch(
+                checked = layer.isVisible,
+                onCheckedChange = { state.toggleLayerVisibility(layer.id) },
+              )
             }
           }
         }
@@ -1288,25 +1364,71 @@ private fun MapLayersControlSheet(state: PrototypeAppState) {
 }
 
 /**
- * Bottom Sheet shown when a survey location is clicked on the map:
- * - Shows main location metadata (Label, Dataset, `GeoID`, Area/Perimeter, Properties).
- * - For `1:1` (`SubmissionModel.SINGLE_1_TO_1`) with data: shows the submission
- *   data directly inline in the card.
- * - For `1:N` (`SubmissionModel.MULTIPLE_1_TO_N`): shows a list of submissions
- *   (data collector, timestamp) which can be clicked to see the full submission details.
+ * Unified Persistent Bottom Sheet content for [SurveyMapView] (Option A):
+ * 1. When a [GeospatialEntityItem] is selected (via map tap or list selection), renders
+ * ```
+ *    [EntityBottomSheetCard] with a `"All map features"` back pill, `simplestyle-spec` marker, baseline
+ *    attributes, form launchers, and `1:N` submissions.
+ * ```
+ * 2. When a standalone [SubmissionPreviewItem] is selected from the searchable list, renders
+ * ```
+ *    [SubmissionFullDetailsCard] with a back button returning to the searchable list.
+ * ```
+ * 3. When no specific item is selected, renders [SurveyListView] — peeking at the bottom of the map
+ * ```
+ *    with a Search bar and category filter chips (`All`, `Places`, `Map features`) and expanding
+ *    into the full grouped list.
+ * ```
  */
 @Composable
-private fun EntityBottomSheetCard(
-  entity: GeospatialEntityItem,
+private fun SurveyPersistentBottomSheetContent(
   state: PrototypeAppState,
   modifier: Modifier = Modifier,
 ) {
+  val selectedEntity = state.selectedEntity
   val selectedSubmission = state.selectedSubmission
   val isDark = state.isDarkTheme
-  val sheetBg = if (isDark) Color(0xFF1E2522) else Color.White
   val textColor = if (isDark) Color.White else Color(0xFF111827)
 
-  // Format area/perimeter according to active unit system
+  when {
+    selectedEntity != null -> {
+      EntityBottomSheetCard(entity = selectedEntity, state = state, modifier = modifier)
+    }
+    selectedSubmission != null -> {
+      Column(
+        modifier =
+          modifier
+            .verticalScroll(rememberScrollState())
+            .padding(horizontal = 14.dp, vertical = 6.dp)
+      ) {
+        SubmissionFullDetailsCard(
+          submission = selectedSubmission,
+          state = state,
+          isDark = isDark,
+          textColor = textColor,
+          backLabel = "Back to Searchable List",
+          onBack = { state.returnToBottomSheetList() },
+          onSharePdf = { state.shareSubmissionPdf(selectedSubmission.id) },
+        )
+      }
+    }
+    else -> {
+      BottomSheetSearchableListContent(state = state, modifier = modifier)
+    }
+  }
+}
+
+/**
+ * Shared Entity Summary Header used in both [EntityBottomSheetCard] and compact list cards in
+ * [BottomSheetSearchableListContent].
+ */
+@Composable
+private fun EntitySummaryHeader(
+  entity: GeospatialEntityItem,
+  state: PrototypeAppState,
+  compact: Boolean = false,
+  trailingContent: @Composable RowScope.() -> Unit = {},
+) {
   val areaFormatted =
     if (state.unitSystem == MeasurementUnitSystem.METRIC) {
       "${entity.areaHectares} ha"
@@ -1321,114 +1443,139 @@ private fun EntityBottomSheetCard(
       val feet = (entity.perimeterMeters * 3.28084).roundToInt()
       "$feet ft"
     }
+  val badgeSize = if (compact) 22.dp else 28.dp
 
-  Column(
-    modifier = modifier.padding(horizontal = 16.dp, vertical = 4.dp),
-    verticalArrangement = Arrangement.spacedBy(8.dp),
+  Row(
+    modifier = Modifier.fillMaxWidth(),
+    horizontalArrangement = Arrangement.SpaceBetween,
+    verticalAlignment = Alignment.CenterVertically,
   ) {
-    // Header: Reference Badge + Title + Close button
     Row(
-      modifier = Modifier.fillMaxWidth(),
-      horizontalArrangement = Arrangement.SpaceBetween,
+      modifier = Modifier.weight(1f),
+      horizontalArrangement = Arrangement.spacedBy(8.dp),
       verticalAlignment = Alignment.CenterVertically,
     ) {
-      Row(
-        modifier = Modifier.weight(1f),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalAlignment = Alignment.CenterVertically,
+      Box(
+        modifier =
+          Modifier.size(badgeSize).clip(CircleShape).background(Color(entity.markerColorHex)),
+        contentAlignment = Alignment.Center,
       ) {
-        Box(
-          modifier =
-            Modifier.size(28.dp)
-              .clip(CircleShape)
-              .background(Color(entity.colorHex)),
-          contentAlignment = Alignment.Center,
-        ) {
-          Icon(
-            imageVector =
-              if (entity.geometryTypeLabel == "Polygon") {
-                Icons.Default.Polyline
-              } else {
-                Icons.Default.LocationOn
-              },
-            contentDescription = null,
-            tint = Color.White,
-            modifier = Modifier.size(15.dp),
-          )
-        }
-        Column(modifier = Modifier.weight(1f)) {
-          Text(
-            text = entity.label,
-            style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
-            color = MaterialTheme.colorScheme.onSurface,
-            maxLines = 1,
-          )
-          Text(
-            text = "${entity.datasetName} • ${entity.geometryTypeLabel} ($areaFormatted, $perimeterFormatted)",
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            maxLines = 1,
-          )
-        }
+        Text(
+          text = entity.markerSymbol,
+          style =
+            if (compact) {
+              MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.ExtraBold)
+            } else {
+              MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold)
+            },
+          color = Color.White,
+        )
       }
-
-      // Close Bottom Sheet Button
-      IconButton(
-        onClick = { state.selectEntity(null) },
-        modifier = Modifier.size(32.dp),
-      ) {
-        Icon(
-          imageVector = Icons.Default.Close,
-          contentDescription = "Close Location Sheet",
-          tint = MaterialTheme.colorScheme.onSurfaceVariant,
-          modifier = Modifier.size(18.dp),
+      Column(modifier = Modifier.weight(1f)) {
+        Text(
+          text = entity.label,
+          style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+          color = MaterialTheme.colorScheme.onSurface,
+          maxLines = 1,
+          overflow = TextOverflow.Ellipsis,
+        )
+        Text(
+          text =
+            "${entity.datasetName} • ${entity.geometryTypeLabel} ($areaFormatted, $perimeterFormatted)",
+          style = MaterialTheme.typography.labelSmall,
+          color = MaterialTheme.colorScheme.onSurfaceVariant,
+          maxLines = 1,
+          overflow = TextOverflow.Ellipsis,
         )
       }
     }
 
-    // Metadata & Share Actions Row: GeoID + QR Code Link + Share PDF Link
     Row(
-      modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
-      horizontalArrangement = Arrangement.spacedBy(6.dp),
       verticalAlignment = Alignment.CenterVertically,
-    ) {
-      // GeoID Badge
+      horizontalArrangement = Arrangement.spacedBy(4.dp),
+      content = trailingContent,
+    )
+  }
+}
+
+/**
+ * Shared row of `simplestyle-spec` workflow status, `1:N` submission count, `GeoID`, sync status,
+ * live GNSS wayfinding badge, and quick action chips (`Navigate`, `QR Code`, `Share PDF`).
+ */
+@Composable
+private fun EntityMetadataAndActionsRow(
+  entity: GeospatialEntityItem,
+  state: PrototypeAppState,
+  showShareAndQrActions: Boolean,
+) {
+  val entityWayfindingBadge = state.formattedWayfindingBadgeForEntity(entity.id)
+  val isNavigatingEntity = state.isNavigatingToEntity(entity.id)
+
+  Row(
+    modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+    horizontalArrangement = Arrangement.spacedBy(6.dp),
+    verticalAlignment = Alignment.CenterVertically,
+  ) {
+    // Data-Driven Marker Symbol & Status Badge (○ Pending -> ◐ In progress -> ✓ Completed)
+    GroundTonalBadge(
+      text = entity.mapStatusSummaryBadge,
+      tone =
+        when (entity.markerSymbol) {
+          "✓" -> GroundBadgeTone.PRIMARY
+          "◐" -> GroundBadgeTone.TERTIARY
+          else -> GroundBadgeTone.WARNING
+        },
+    )
+
+    // 1:N Submission Count Badge
+    GroundTonalBadge(
+      text =
+        "${entity.submissionCount} ${if (entity.submissionCount == 1) "submission" else "submissions"}",
+      tone = GroundBadgeTone.SECONDARY,
+    )
+
+    // GeoID Badge
+    GroundTonalBadge(
+      text = "GeoID: ${entity.geoId}",
+      tone = GroundBadgeTone.SECONDARY,
+      monospace = true,
+    )
+
+    // Sync Status Indicator Badge
+    SyncStatusIndicatorBadge(
+      syncStatus = entity.syncStatus,
+      onClick = { state.cycleEntitySyncStatus(entity.id) },
+    )
+
+    // Live Distance & Compass Bearing Badge from User GPS
+    if (entityWayfindingBadge.isNotEmpty()) {
       GroundTonalBadge(
-        text = "GeoID: ${entity.geoId}",
-        tone = GroundBadgeTone.PRIMARY,
+        text = "➤ $entityWayfindingBadge",
+        tone = GroundBadgeTone.TERTIARY,
         monospace = true,
       )
+    }
 
-      // Live Distance & Compass Bearing Badge from User GPS
-      val entityWayfindingBadge = state.formattedWayfindingBadgeForEntity(entity.id)
-      if (entityWayfindingBadge.isNotEmpty()) {
-        GroundTonalBadge(
-          text = "➤ $entityWayfindingBadge",
-          tone = GroundBadgeTone.TERTIARY,
-          monospace = true,
+    // Straight-Line Navigation Toggle Button for Geospatial Entity
+    FilterChip(
+      selected = isNavigatingEntity,
+      onClick = { state.toggleNavigationToEntity(entity.id) },
+      label = {
+        Text(
+          text = if (isNavigatingEntity) "Stop Nav" else "Navigate",
+          style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
         )
-      }
+      },
+      leadingIcon = {
+        Icon(
+          imageVector = Icons.Default.Navigation,
+          contentDescription = "Straight-line navigate to entity",
+          modifier = Modifier.size(13.dp),
+        )
+      },
+    )
 
-      // Straight-Line Navigation Toggle Button for Geospatial Entity
-      val isNavigatingEntity = state.isNavigatingToEntity(entity.id)
-      FilterChip(
-        selected = isNavigatingEntity,
-        onClick = { state.toggleNavigationToEntity(entity.id) },
-        label = {
-          Text(
-            text = if (isNavigatingEntity) "Stop Nav" else "Navigate",
-            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-          )
-        },
-        leadingIcon = {
-          Icon(
-            imageVector = Icons.Default.Navigation,
-            contentDescription = "Straight-line navigate to entity",
-            modifier = Modifier.size(13.dp),
-          )
-        },
-      )
-
+    if (showShareAndQrActions) {
       // QR Code Link
       AssistChip(
         onClick = { state.openEntityQrCode(entity.id) },
@@ -1465,8 +1612,93 @@ private fun EntityBottomSheetCard(
         },
       )
     }
+  }
+}
 
-    // Organizer-defined Action Buttons for this dataset type (`form.targetDatasetId == entity.datasetId`)
+/**
+ * Bottom Sheet detail card shown when a survey location is selected (from the map or the bottom
+ * sheet list):
+ * - Shows main location metadata via [EntitySummaryHeader] and [EntityMetadataAndActionsRow].
+ * - Shows a `"All map features"` back pill to return directly to the searchable list in the bottom sheet.
+ * - Shows available form collection buttons and the unified `1:N` list of submissions grouped by
+ * form title via [FormGroupedSubmissionsSection].
+ */
+@Composable
+private fun EntityBottomSheetCard(
+  entity: GeospatialEntityItem,
+  state: PrototypeAppState,
+  modifier: Modifier = Modifier,
+) {
+  val selectedSubmission = state.selectedSubmission
+  val isDark = state.isDarkTheme
+  val textColor = if (isDark) Color.White else Color(0xFF111827)
+
+  Column(
+    modifier = modifier.padding(horizontal = 16.dp, vertical = 4.dp),
+    verticalArrangement = Arrangement.spacedBy(8.dp),
+  ) {
+    // Shared Header + Back to All Map Features pill + Expand/Collapse + Close
+    EntitySummaryHeader(
+      entity = entity,
+      state = state,
+      compact = false,
+      trailingContent = {
+        Surface(
+          onClick = { state.returnToBottomSheetList() },
+          shape = MaterialTheme.shapes.small,
+          color = MaterialTheme.colorScheme.secondaryContainer,
+          contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+        ) {
+          Row(
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(3.dp),
+          ) {
+            Icon(
+              imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+              contentDescription = "Back to all map features list",
+              modifier = Modifier.size(12.dp),
+            )
+            Text(
+              text = "All map features",
+              style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+            )
+          }
+        }
+
+        IconButton(
+          onClick = { state.toggleEntityBottomSheetExpanded() },
+          modifier = Modifier.size(28.dp),
+        ) {
+          Icon(
+            imageVector =
+              if (state.isEntityBottomSheetExpanded) {
+                Icons.Default.KeyboardArrowDown
+              } else {
+                Icons.Default.KeyboardArrowUp
+              },
+            contentDescription = "Toggle Sheet Expansion",
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.size(18.dp),
+          )
+        }
+
+        IconButton(onClick = { state.selectEntity(null) }, modifier = Modifier.size(28.dp)) {
+          Icon(
+            imageVector = Icons.Default.Close,
+            contentDescription = "Close Location Sheet",
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.size(18.dp),
+          )
+        }
+      },
+    )
+
+    // Shared Metadata Badges & Share/Navigate Actions Row
+    EntityMetadataAndActionsRow(entity = entity, state = state, showShareAndQrActions = true)
+
+    // Organizer-defined Action Buttons for this dataset type (`form.targetDatasetId ==
+    // entity.datasetId`)
     val entityForms = state.formsForEntity(entity)
     if (entityForms.isNotEmpty()) {
       Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -1520,10 +1752,7 @@ private fun EntityBottomSheetCard(
 
     // Scrollable Body inside Bottom Sheet: Baseline Properties + Submission Data / History
     Column(
-      modifier =
-        Modifier.weight(1f)
-          .fillMaxWidth()
-          .verticalScroll(rememberScrollState()),
+      modifier = Modifier.weight(1f).fillMaxWidth().verticalScroll(rememberScrollState()),
       verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
       // Baseline Attributes (`EntityRecord.properties`)
@@ -1552,210 +1781,52 @@ private fun EntityBottomSheetCard(
         }
       }
 
-      // --- SUBMISSION DISPLAY LOGIC ---
-      if (entity.submissionModel == SubmissionModel.SINGLE_1_TO_1) {
-        // Single-Submission -> Directly show the submission data inline on the card!
-        val sub = entity.submissions.firstOrNull()
-        if (sub != null) {
-          OneToOneInlineSubmissionCard(
-            submission = sub,
-            state = state,
-            isDark = isDark,
-            textColor = textColor,
-            onSharePdf = { state.shareSubmissionPdf(sub.id) },
-          )
-        } else {
-          Text(
-            text = "No baseline submission recorded yet for this ${entity.singularTypeLabel.lowercase()}.",
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-          )
-        }
+      // --- UNIFIED 1:N SUBMISSION DISPLAY LOGIC ---
+      if (selectedSubmission != null && selectedSubmission.entityId == entity.id) {
+        SubmissionFullDetailsCard(
+          submission = selectedSubmission,
+          state = state,
+          isDark = isDark,
+          textColor = textColor,
+          backLabel = "Back to all ${entity.submissions.size} submissions",
+          onBack = { state.selectSubmissionDetail(null) },
+          onSharePdf = { state.shareSubmissionPdf(selectedSubmission.id) },
+        )
+      } else if (entity.submissions.isNotEmpty()) {
+        FormGroupedSubmissionsSection(
+          groups = state.groupedSubmissionsForEntity(entity),
+          state = state,
+          showTargetEntityLabel = false,
+          showFormActionSubtitle = false,
+          onSelectSubmission = { state.selectSubmissionDetail(it.id) },
+        )
       } else {
-        // Multi-Submission Entity -> Either show Full Submission Details (if a row was clicked)
-        // OR show the list of submissions grouped by form title!
-        if (selectedSubmission != null && selectedSubmission.entityId == entity.id) {
-          SubmissionFullDetailsCard(
-            submission = selectedSubmission,
-            state = state,
-            isDark = isDark,
-            textColor = textColor,
-            backLabel = "Back to all ${entity.submissions.size} submissions",
-            onBack = { state.selectSubmissionDetail(null) },
-            onSharePdf = { state.shareSubmissionPdf(selectedSubmission.id) },
-          )
-        } else {
-          OneToManySubmissionsListSection(
-            entity = entity,
-            state = state,
-            isDark = isDark,
-            textColor = textColor,
-            onSelectSubmission = { state.selectSubmissionDetail(it.id) },
-          )
-        }
+        Text(
+          text =
+            "No submissions recorded yet for this ${entity.singularTypeLabel.lowercase()} (Marker: ${entity.markerSymbol} ${entity.workflowStatus}). Launch a form above to advance its marker via save_to (○ → ◐ → ✓).",
+          style = MaterialTheme.typography.bodySmall,
+          color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
       }
     }
   }
 }
 
 /**
- * Renders inline submission data for a `SubmissionModel.SINGLE_1_TO_1` entity with data,
- * headed directly by the form's title (`submission.formTitle`).
+ * Shared component that renders chronological submissions grouped by form (`FormSubmissionGroup`),
+ * used in both [EntityBottomSheetCard] (for a single entity's `1:N` submissions) and
+ * [BottomSheetSearchableListContent] (for survey-wide submissions).
  */
 @Composable
-private fun OneToOneInlineSubmissionCard(
-  submission: SubmissionPreviewItem,
+private fun FormGroupedSubmissionsSection(
+  groups: List<FormSubmissionsGroup>,
   state: PrototypeAppState,
-  isDark: Boolean,
-  textColor: Color,
-  onSharePdf: () -> Unit,
-) {
-  OutlinedCard(
-    modifier = Modifier.fillMaxWidth(),
-    shape = MaterialTheme.shapes.medium,
-    border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.45f)),
-    colors =
-      CardDefaults.outlinedCardColors(
-        containerColor = MaterialTheme.colorScheme.surfaceContainerLow
-      ),
-  ) {
-    Column(
-      modifier = Modifier.padding(12.dp),
-      verticalArrangement = Arrangement.spacedBy(6.dp),
-    ) {
-      Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically,
-      ) {
-        Row(
-          verticalAlignment = Alignment.CenterVertically,
-          horizontalArrangement = Arrangement.spacedBy(5.dp),
-          modifier = Modifier.weight(1f),
-        ) {
-          Icon(
-            imageVector = Icons.Default.CheckCircle,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.size(14.dp),
-          )
-          Text(
-            text = submission.formTitle,
-            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-            color = MaterialTheme.colorScheme.primary,
-          )
-        }
-        Row(
-          verticalAlignment = Alignment.CenterVertically,
-          horizontalArrangement = Arrangement.spacedBy(6.dp),
-        ) {
-          AssistChip(
-            onClick = { onSharePdf() },
-            label = {
-              Text(
-                text = "Share PDF",
-                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-              )
-            },
-            leadingIcon = {
-              Icon(
-                imageVector = Icons.Default.Share,
-                contentDescription = "Share Submission PDF",
-                modifier = Modifier.size(12.dp),
-              )
-            },
-          )
-          Text(
-            text = submission.formVersion,
-            style = MaterialTheme.typography.labelSmall.copy(fontFamily = FontFamily.Monospace),
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-          )
-        }
-      }
-
-      Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(4.dp),
-      ) {
-        Icon(
-          imageVector = Icons.Default.Person,
-          contentDescription = null,
-          tint = MaterialTheme.colorScheme.onSurfaceVariant,
-          modifier = Modifier.size(13.dp),
-        )
-        Text(
-          text = "Collector: ${submission.collectorName} •",
-          style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Medium),
-          color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        Icon(
-          imageVector = Icons.Default.Schedule,
-          contentDescription = null,
-          tint = MaterialTheme.colorScheme.onSurfaceVariant,
-          modifier = Modifier.size(12.dp),
-        )
-        Text(
-          text = submission.timestamp,
-          style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Medium),
-          color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-      }
-
-      HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-
-      submission.fields.forEach { field ->
-        val fieldWayfindingBadge =
-          state.formattedWayfindingBadgeForSubmissionField(submission.id, field)
-        Row(
-          modifier = Modifier.fillMaxWidth(),
-          horizontalArrangement = Arrangement.SpaceBetween,
-          verticalAlignment = Alignment.Top,
-        ) {
-          Text(
-            text = field.questionLabel,
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.weight(0.48f),
-          )
-          Spacer(modifier = Modifier.width(8.dp))
-          Column(
-            modifier = Modifier.weight(0.52f),
-            verticalArrangement = Arrangement.spacedBy(2.dp),
-          ) {
-            Text(
-              text = field.answerValue,
-              style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
-              color = MaterialTheme.colorScheme.onSurface,
-            )
-            if (fieldWayfindingBadge.isNotEmpty()) {
-              GroundTonalBadge(
-                text = "➤ $fieldWayfindingBadge",
-                tone = GroundBadgeTone.WARNING,
-                monospace = true,
-              )
-            }
-          }
-        }
-      }
-    }
-  }
-}
-
-/**
- * For `1:N` (`SubmissionModel.MULTIPLE_1_TO_N`) entities, groups submissions by form and uses the
- * title of the form as each group's header rather than saying the word "Form".
- */
-@Composable
-private fun OneToManySubmissionsListSection(
-  entity: GeospatialEntityItem,
-  state: PrototypeAppState,
-  isDark: Boolean,
-  textColor: Color,
+  showTargetEntityLabel: Boolean,
+  showFormActionSubtitle: Boolean,
   onSelectSubmission: (SubmissionPreviewItem) -> Unit,
 ) {
-  val formGroups = state.groupedSubmissionsForEntity(entity)
   Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-    formGroups.forEach { group ->
+    groups.forEach { group ->
       val form = group.form
       OutlinedCard(
         modifier = Modifier.fillMaxWidth(),
@@ -1775,22 +1846,34 @@ private fun OneToManySubmissionsListSection(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
           ) {
-            Row(
-              verticalAlignment = Alignment.CenterVertically,
-              horizontalArrangement = Arrangement.spacedBy(5.dp),
+            Column(
               modifier = Modifier.weight(1f),
+              verticalArrangement = Arrangement.spacedBy(2.dp),
             ) {
-              Icon(
-                imageVector = Icons.Default.Description,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(13.dp),
-              )
-              Text(
-                text = form.title,
-                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                color = MaterialTheme.colorScheme.onSurface,
-              )
+              Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(5.dp),
+              ) {
+                Icon(
+                  imageVector = Icons.Default.Description,
+                  contentDescription = null,
+                  tint = MaterialTheme.colorScheme.primary,
+                  modifier = Modifier.size(13.dp),
+                )
+                Text(
+                  text = form.title,
+                  style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                  color = MaterialTheme.colorScheme.onSurface,
+                )
+              }
+              if (showFormActionSubtitle) {
+                Text(
+                  text = "Action: \"${form.ctaLabel}\" • ${form.version}",
+                  style =
+                    MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
+                  color = MaterialTheme.colorScheme.primary,
+                )
+              }
             }
             GroundTonalBadge(
               text = "${group.submissions.size} submitted",
@@ -1804,9 +1887,7 @@ private fun OneToManySubmissionsListSection(
               modifier = Modifier.fillMaxWidth(),
               shape = MaterialTheme.shapes.small,
               colors =
-                CardDefaults.outlinedCardColors(
-                  containerColor = MaterialTheme.colorScheme.surface
-                ),
+                CardDefaults.outlinedCardColors(containerColor = MaterialTheme.colorScheme.surface),
             ) {
               Row(
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 9.dp),
@@ -1817,6 +1898,22 @@ private fun OneToManySubmissionsListSection(
                   modifier = Modifier.weight(1f),
                   verticalArrangement = Arrangement.spacedBy(2.dp),
                 ) {
+                  if (showTargetEntityLabel) {
+                    val targetDisplayLabel =
+                      if (sub.hasAttachedEntity) {
+                        "${sub.targetTypeLabel}: ${sub.entityLabel}"
+                      } else if (sub.coordinatesLabel.isNotBlank()) {
+                        "${sub.targetTypeLabel} • No attached map feature (${sub.coordinatesLabel.substringBefore(" (")})"
+                      } else {
+                        "${sub.targetTypeLabel} • No attached map feature"
+                      }
+                    Text(
+                      text = targetDisplayLabel,
+                      style =
+                        MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                      color = MaterialTheme.colorScheme.onSurface,
+                    )
+                  }
                   Row(
                     horizontalArrangement = Arrangement.spacedBy(5.dp),
                     verticalAlignment = Alignment.CenterVertically,
@@ -1824,21 +1921,36 @@ private fun OneToManySubmissionsListSection(
                     Icon(
                       imageVector = Icons.Default.Person,
                       contentDescription = null,
-                      tint = MaterialTheme.colorScheme.onSurface,
+                      tint =
+                        if (showTargetEntityLabel) {
+                          MaterialTheme.colorScheme.onSurfaceVariant
+                        } else {
+                          MaterialTheme.colorScheme.onSurface
+                        },
                       modifier = Modifier.size(13.dp),
                     )
                     Text(
                       text = sub.collectorName,
                       style =
-                        MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                      color = MaterialTheme.colorScheme.onSurface,
+                        if (showTargetEntityLabel) {
+                          MaterialTheme.typography.labelSmall
+                        } else {
+                          MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold)
+                        },
+                      color =
+                        if (showTargetEntityLabel) {
+                          MaterialTheme.colorScheme.onSurfaceVariant
+                        } else {
+                          MaterialTheme.colorScheme.onSurface
+                        },
                     )
-                    if (index == 0) {
-                      GroundTonalBadge(
-                        text = "LATEST",
-                        tone = GroundBadgeTone.SECONDARY,
-                      )
+                    if (index == 0 && !showTargetEntityLabel) {
+                      GroundTonalBadge(text = "LATEST", tone = GroundBadgeTone.SECONDARY)
                     }
+                    SyncStatusIndicatorBadge(
+                      syncStatus = sub.syncStatus,
+                      onClick = { state.cycleSubmissionSyncStatus(sub.id) },
+                    )
                   }
                   Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -1858,10 +1970,7 @@ private fun OneToManySubmissionsListSection(
                   }
                 }
 
-                IconButton(
-                  onClick = { onSelectSubmission(sub) },
-                  modifier = Modifier.size(32.dp),
-                ) {
+                IconButton(onClick = { onSelectSubmission(sub) }, modifier = Modifier.size(32.dp)) {
                   Icon(
                     imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
                     contentDescription = "Submission details",
@@ -1874,6 +1983,544 @@ private fun OneToManySubmissionsListSection(
           }
         }
       }
+    }
+  }
+}
+
+/**
+ * Searchable List content embedded inside the unified persistent bottom sheet (
+ * [SurveyPersistentBottomSheetContent]) when no specific entity or submission is selected:
+ * - Peeks at the bottom of the map with the Search bar (`"Search..."`)
+ *   and an Expand/Collapse sheet button.
+ * - Expands to display **Map layers** (grouped by spatial layer with un-nested entity records,
+ *   reusing [EntitySummaryHeader] and [EntityMetadataAndActionsRow]), **Data tables** (tabular datasets),
+ *   and **Places** (geographic places, landmarks, and coordinates in the survey region).
+ */
+@Composable
+private fun BottomSheetSearchableListContent(
+  state: PrototypeAppState,
+  modifier: Modifier = Modifier,
+) {
+  val allPlaces = state.places
+  val apiPlaces = state.mapboxPlacesApiResults
+  val isAirplaneMode = state.isAirplaneMode
+  val allEntities = state.entities
+  val listTab = state.listFilterTab
+  val listQuery = state.listSearchQuery
+  val mapLayers = state.mapLayers
+
+  val matchedPlaces =
+    remember(allPlaces, apiPlaces, listTab, listQuery, isAirplaneMode) { state.filteredListPlaces }
+  val matchedEntities = remember(allEntities, listTab, listQuery) { state.filteredListEntities }
+  val groupedEntities = remember(matchedEntities, mapLayers) { state.groupedFilteredListEntities }
+
+  Column(modifier = modifier) {
+    // Sticky Peek Header: Search Bar + Expand/Collapse Toggle
+    Column(
+      modifier = Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 4.dp),
+      verticalArrangement = Arrangement.spacedBy(6.dp),
+    ) {
+      Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+      ) {
+        OutlinedTextField(
+          value = state.listSearchQuery,
+          onValueChange = {
+            state.updateListSearchQuery(it)
+            if (it.isNotEmpty() && !state.isEntityBottomSheetExpanded) {
+              state.updateEntityBottomSheetExpanded(true)
+            }
+          },
+          modifier = Modifier.weight(1f),
+          singleLine = true,
+          placeholder = {
+            Text(
+              text = "Search...",
+              style = MaterialTheme.typography.bodySmall,
+              color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+          },
+          leadingIcon = {
+            Icon(
+              imageVector = Icons.Default.Search,
+              contentDescription = "Search",
+              tint = MaterialTheme.colorScheme.onSurfaceVariant,
+              modifier = Modifier.size(18.dp),
+            )
+          },
+          trailingIcon = {
+            if (state.listSearchQuery.isNotEmpty()) {
+              IconButton(
+                onClick = { state.clearListSearchQuery() },
+                modifier = Modifier.size(32.dp),
+              ) {
+                Icon(
+                  imageVector = Icons.Default.Close,
+                  contentDescription = "Clear Search",
+                  tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                  modifier = Modifier.size(16.dp),
+                )
+              }
+            }
+          },
+          shape = MaterialTheme.shapes.extraLarge,
+          colors =
+            OutlinedTextFieldDefaults.colors(
+              focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+              unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+              focusedBorderColor = MaterialTheme.colorScheme.primary,
+              unfocusedBorderColor = Color.Transparent,
+            ),
+        )
+
+        IconButton(
+          onClick = {
+            if (state.isEntityBottomSheetExpanded) {
+              state.setMainSurveyViewMode(MainSurveyViewMode.MAP)
+            } else {
+              state.setMainSurveyViewMode(MainSurveyViewMode.LIST)
+            }
+          },
+          modifier = Modifier.size(40.dp),
+        ) {
+          Icon(
+            imageVector =
+              if (state.isEntityBottomSheetExpanded) {
+                Icons.Default.KeyboardArrowDown
+              } else {
+                Icons.Default.KeyboardArrowUp
+              },
+            contentDescription =
+              if (state.isEntityBottomSheetExpanded) {
+                "Collapse list sheet to map"
+              } else {
+                "Expand searchable list sheet"
+              },
+            tint = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.size(22.dp),
+          )
+        }
+      }
+
+
+
+      // Offline / Airplane mode banner in the bottom sheet explaining that search is only in local
+      // map features and that Places search is not available offline.
+      if (isAirplaneMode) {
+        Surface(
+          shape = MaterialTheme.shapes.small,
+          color = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.85f),
+          border = BorderStroke(1.dp, MaterialTheme.colorScheme.error.copy(alpha = 0.45f)),
+          modifier = Modifier.fillMaxWidth(),
+        ) {
+          Row(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp, vertical = 7.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
+          ) {
+            Row(
+              modifier = Modifier.weight(1f),
+              verticalAlignment = Alignment.CenterVertically,
+              horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+              Icon(
+                imageVector = Icons.Default.CloudOff,
+                contentDescription = "Airplane mode active",
+                tint = MaterialTheme.colorScheme.onErrorContainer,
+                modifier = Modifier.size(16.dp),
+              )
+              Column(modifier = Modifier.weight(1f)) {
+                Text(
+                  text = "Offline (Airplane mode) • Searching local ${state.activeEntitiesCountNoun} only",
+                  style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                  color = MaterialTheme.colorScheme.onErrorContainer,
+                )
+                Text(
+                  text = "Search is only in local ${state.activeEntitiesCountNoun}. Places search is not available offline.",
+                  style = MaterialTheme.typography.labelSmall,
+                  color = MaterialTheme.colorScheme.onErrorContainer.copy(alpha = 0.9f),
+                )
+              }
+            }
+
+            Spacer(modifier = Modifier.width(6.dp))
+
+            AssistChip(
+              onClick = { state.updateAirplaneMode(false) },
+              label = {
+                Text(
+                  text = "Turn Off",
+                  style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                )
+              },
+            )
+          }
+        }
+      }
+    }
+
+    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+
+    // Scrollable Searchable List of Map features (grouped by dataset) and Places
+    Column(
+      modifier =
+        Modifier.weight(1f)
+          .fillMaxWidth()
+          .verticalScroll(rememberScrollState())
+          .padding(horizontal = 14.dp, vertical = 10.dp),
+      verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+      // 1. MAP LAYERS SECTION
+      if (groupedEntities.isNotEmpty()) {
+        Row(
+          modifier = Modifier.fillMaxWidth(),
+          verticalAlignment = Alignment.CenterVertically,
+          horizontalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+          Icon(
+            imageVector = Icons.Default.Layers,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.size(15.dp),
+          )
+          Text(
+            text = "MAP LAYERS",
+            style =
+              MaterialTheme.typography.labelSmall.copy(
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.primary,
+                letterSpacing = 0.6.sp,
+              ),
+          )
+        }
+
+        groupedEntities.forEach { group ->
+          val layer = group.layer
+          Column(
+            modifier = Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+          ) {
+            // Layer Group Header Banner
+            Row(
+              modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp, vertical = 2.dp),
+              horizontalArrangement = Arrangement.SpaceBetween,
+              verticalAlignment = Alignment.CenterVertically,
+            ) {
+              Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(2.dp),
+              ) {
+                Row(
+                  verticalAlignment = Alignment.CenterVertically,
+                  horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                  if (layer != null) {
+                    Box(
+                      modifier =
+                        Modifier.size(14.dp)
+                          .clip(MaterialTheme.shapes.extraSmall)
+                          .background(Color(layer.colorHex).copy(alpha = 0.25f))
+                          .border(2.dp, Color(layer.colorHex), MaterialTheme.shapes.extraSmall)
+                    )
+                  } else {
+                    Icon(
+                      imageVector = Icons.Default.LocationOn,
+                      contentDescription = null,
+                      tint = MaterialTheme.colorScheme.primary,
+                      modifier = Modifier.size(14.dp),
+                    )
+                  }
+                  Text(
+                    text = layer?.label ?: group.datasetName,
+                    style =
+                      MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+                    color = MaterialTheme.colorScheme.onSurface,
+                  )
+                }
+                Text(
+                  text =
+                    if (layer != null) {
+                      "${layer.geometryTypeLabel} • ${group.datasetName}"
+                    } else {
+                      group.datasetName
+                    },
+                  style =
+                    MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
+                  color = MaterialTheme.colorScheme.primary,
+                )
+              }
+
+              GroundTonalBadge(
+                text = "${group.entities.size}",
+                tone = GroundBadgeTone.PRIMARY,
+              )
+            }
+
+            // Map features belonging to this dataset group elevated to direct list items (no outer card nesting)
+            val maxRenderedFeatures = 40
+            val displayedFeatures =
+              if (group.entities.size > maxRenderedFeatures) {
+                group.entities.take(maxRenderedFeatures)
+              } else {
+                group.entities
+              }
+            displayedFeatures.forEach { entity ->
+              OutlinedCard(
+                onClick = { state.selectEntityFromList(entity.id) },
+                modifier = Modifier.fillMaxWidth(),
+                shape = MaterialTheme.shapes.small,
+                colors =
+                  CardDefaults.outlinedCardColors(
+                    containerColor = MaterialTheme.colorScheme.surface
+                  ),
+              ) {
+                Column(
+                  modifier = Modifier.fillMaxWidth().padding(10.dp),
+                  verticalArrangement = Arrangement.spacedBy(6.dp),
+                ) {
+                  EntitySummaryHeader(
+                    entity = entity,
+                    state = state,
+                    compact = true,
+                    trailingContent = {
+                      Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(3.dp),
+                      ) {
+                        Text(
+                          text = "Inspect",
+                          style =
+                            MaterialTheme.typography.labelSmall.copy(
+                              fontWeight = FontWeight.Bold
+                            ),
+                          color = MaterialTheme.colorScheme.primary,
+                        )
+                        Icon(
+                          imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                          contentDescription = null,
+                          tint = MaterialTheme.colorScheme.primary,
+                          modifier = Modifier.size(12.dp),
+                        )
+                      }
+                    },
+                  )
+
+                  EntityMetadataAndActionsRow(
+                    entity = entity,
+                    state = state,
+                    showShareAndQrActions = false,
+                  )
+                }
+              }
+            }
+            if (group.entities.size > maxRenderedFeatures) {
+              Surface(
+                shape = MaterialTheme.shapes.small,
+                color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.65f),
+                modifier = Modifier.fillMaxWidth(),
+              ) {
+                Text(
+                  text =
+                    "Showing first $maxRenderedFeatures of ${group.entities.size} ${layer?.pluralNoun ?: "features"} in ${group.datasetName}. Use the search bar above to filter all ${group.entities.size} ${layer?.pluralNoun ?: "features"}.",
+                  style = MaterialTheme.typography.labelSmall,
+                  color = MaterialTheme.colorScheme.onSecondaryContainer,
+                  fontWeight = FontWeight.Medium,
+                  modifier = Modifier.padding(horizontal = 10.dp, vertical = 8.dp),
+                )
+              }
+            }
+          }
+        }
+      }
+
+      // 2. DATA TABLES SECTION — only displayed when tabular datasets exist and have matching entries
+      // (Currently no non-spatial tabular datasets configured in the active survey)
+
+      // 3. PLACES SECTION — only available when online (!isAirplaneMode) and entries match
+      if (!isAirplaneMode && matchedPlaces.isNotEmpty()) {
+        if (groupedEntities.isNotEmpty()) {
+          HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+        }
+
+        Row(
+          modifier = Modifier.fillMaxWidth(),
+          verticalAlignment = Alignment.CenterVertically,
+          horizontalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+          Icon(
+            imageVector = Icons.Default.Explore,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.size(15.dp),
+          )
+          Text(
+            text = "PLACES",
+            style =
+              MaterialTheme.typography.labelSmall.copy(
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.primary,
+                letterSpacing = 0.6.sp,
+              ),
+          )
+        }
+
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+          matchedPlaces.forEach { place ->
+            val isSelectedPlace = state.selectedPlaceId == place.id
+            val isNavigatingPlace = state.isNavigatingToPlace(place.id)
+            val placeWayfindingBadge = state.formattedWayfindingBadgeForPlace(place.id)
+
+            OutlinedCard(
+              onClick = { state.selectPlace(place.id) },
+              modifier = Modifier.fillMaxWidth(),
+              shape = MaterialTheme.shapes.small,
+              border =
+                if (isSelectedPlace) {
+                  BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary)
+                } else {
+                  CardDefaults.outlinedCardBorder()
+                },
+              colors =
+                CardDefaults.outlinedCardColors(
+                  containerColor =
+                    if (isSelectedPlace) {
+                      MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.25f)
+                    } else {
+                      MaterialTheme.colorScheme.surface
+                    }
+                ),
+            ) {
+              Column(
+                modifier = Modifier.fillMaxWidth().padding(10.dp),
+                verticalArrangement = Arrangement.spacedBy(6.dp),
+              ) {
+                Row(
+                  modifier = Modifier.fillMaxWidth(),
+                  horizontalArrangement = Arrangement.SpaceBetween,
+                  verticalAlignment = Alignment.CenterVertically,
+                ) {
+                  Row(
+                    modifier = Modifier.weight(1f),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                  ) {
+                    Surface(
+                      modifier = Modifier.size(24.dp),
+                      shape = CircleShape,
+                      color = MaterialTheme.colorScheme.tertiaryContainer,
+                    ) {
+                      Box(contentAlignment = Alignment.Center) {
+                        Icon(
+                          imageVector = Icons.Default.Explore,
+                          contentDescription = null,
+                          tint = MaterialTheme.colorScheme.onTertiaryContainer,
+                          modifier = Modifier.size(14.dp),
+                        )
+                      }
+                    }
+                    Column(modifier = Modifier.weight(1f)) {
+                      Text(
+                        text = place.name,
+                        style =
+                          MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+                        color = MaterialTheme.colorScheme.onSurface,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                      )
+                      Text(
+                        text = "${place.categoryLabel} • ${place.regionSubtitle}",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                      )
+                    }
+                  }
+
+                  FilledTonalIconButton(
+                    onClick = { state.selectPlace(place.id) },
+                    modifier = Modifier.size(30.dp),
+                  ) {
+                    Icon(
+                      imageVector = Icons.Default.Explore,
+                      contentDescription = "Fly to place on map",
+                      tint = MaterialTheme.colorScheme.primary,
+                      modifier = Modifier.size(16.dp),
+                    )
+                  }
+                }
+
+                Row(
+                  modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+                  horizontalArrangement = Arrangement.spacedBy(6.dp),
+                  verticalAlignment = Alignment.CenterVertically,
+                ) {
+                  GroundTonalBadge(text = place.categoryLabel, tone = GroundBadgeTone.SECONDARY)
+                  GroundTonalBadge(
+                    text = place.coordinatesLabel,
+                    tone = GroundBadgeTone.SECONDARY,
+                    monospace = true,
+                  )
+                  if (placeWayfindingBadge.isNotEmpty()) {
+                    GroundTonalBadge(
+                      text = "➤ $placeWayfindingBadge",
+                      tone = GroundBadgeTone.TERTIARY,
+                      monospace = true,
+                    )
+                  }
+                  FilterChip(
+                    selected = isNavigatingPlace,
+                    onClick = { state.toggleNavigationToPlace(place.id) },
+                    label = {
+                      Text(
+                        text = if (isNavigatingPlace) "Stop Nav" else "Navigate",
+                        style =
+                          MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                      )
+                    },
+                    leadingIcon = {
+                      Icon(
+                        imageVector = Icons.Default.Navigation,
+                        contentDescription = "Straight-line navigate to place",
+                        modifier = Modifier.size(13.dp),
+                      )
+                    },
+                  )
+                }
+              }
+            }
+          }
+        }
+      }
+
+      if (matchedPlaces.isEmpty() && matchedEntities.isEmpty()) {
+        Box(
+          modifier = Modifier.fillMaxWidth().padding(32.dp),
+          contentAlignment = Alignment.Center,
+        ) {
+          Text(
+            text =
+              when {
+                isAirplaneMode ->
+                  "No local map layers match \"${state.listSearchQuery}\". Places search is not available offline."
+                else ->
+                  "No map layers or places match \"${state.listSearchQuery}\"."
+              },
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+          )
+        }
+      }
+    }
+
+    // Bottom-centered Floating Action Button inside the expanded sheet as well
+    if (state.isEntityBottomSheetExpanded) {
+      Box(
+        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+        contentAlignment = Alignment.Center,
+      ) { DataCollectionFormsFab(state = state) }
     }
   }
 }
@@ -1898,10 +2545,7 @@ private fun SubmissionFullDetailsCard(
         containerColor = MaterialTheme.colorScheme.surfaceContainerLow
       ),
   ) {
-    Column(
-      modifier = Modifier.padding(12.dp),
-      verticalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
+    Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
       Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -1928,6 +2572,11 @@ private fun SubmissionFullDetailsCard(
           verticalAlignment = Alignment.CenterVertically,
           horizontalArrangement = Arrangement.spacedBy(6.dp),
         ) {
+          SyncStatusIndicatorBadge(
+            syncStatus = submission.syncStatus,
+            onClick = { state.cycleSubmissionSyncStatus(submission.id) },
+          )
+
           AssistChip(
             onClick = { onSharePdf() },
             label = {
@@ -1947,7 +2596,7 @@ private fun SubmissionFullDetailsCard(
 
           Text(
             text = "Schema: ${submission.formVersion}",
-            style = MaterialTheme.typography.labelSmall.copy(fontFamily = FontFamily.Monospace),
+            style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
           )
         }
@@ -1963,8 +2612,16 @@ private fun SubmissionFullDetailsCard(
           verticalAlignment = Alignment.CenterVertically,
           horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
+          val detailTargetLabel =
+            if (submission.hasAttachedEntity) {
+              "${submission.targetTypeLabel}: ${submission.entityLabel}"
+            } else if (submission.coordinatesLabel.isNotBlank()) {
+              "${submission.targetTypeLabel} • No attached map feature (${submission.coordinatesLabel})"
+            } else {
+              "${submission.targetTypeLabel} • No attached map feature"
+            }
           Text(
-            text = "${submission.targetTypeLabel}: ${submission.entityLabel}",
+            text = detailTargetLabel,
             style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
             color = MaterialTheme.colorScheme.primary,
           )
@@ -2050,475 +2707,6 @@ private fun SubmissionFullDetailsCard(
 }
 
 /**
- * Searchable List View of the active survey (`MainSurveyViewMode.LIST`) displaying survey
- * locations (grouped by their domain dataset) and submissions (grouped by form).
- */
-@Composable
-private fun SurveyListView(state: PrototypeAppState) {
-  val isDark = state.isDarkTheme
-  val surfaceColor = MaterialTheme.colorScheme.surface
-  val textColor = MaterialTheme.colorScheme.onSurface
-  val selectedSubmission = state.selectedSubmission
-
-  Column(modifier = Modifier.fillMaxSize().background(surfaceColor)) {
-    // Search Bar + Filter Tabs Header
-    Surface(
-      modifier = Modifier.fillMaxWidth(),
-      color = MaterialTheme.colorScheme.surfaceContainerLow,
-    ) {
-      Column(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 10.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-      ) {
-        OutlinedTextField(
-          value = state.listSearchQuery,
-          onValueChange = { state.updateListSearchQuery(it) },
-          modifier = Modifier.fillMaxWidth(),
-          singleLine = true,
-          placeholder = {
-            Text(
-              text = "Search ${state.activeEntitiesCountNoun} or submissions...",
-              style = MaterialTheme.typography.bodySmall,
-              color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-          },
-          leadingIcon = {
-            Icon(
-              imageVector = Icons.Default.Search,
-              contentDescription = "Search",
-              tint = MaterialTheme.colorScheme.onSurfaceVariant,
-              modifier = Modifier.size(18.dp),
-            )
-          },
-          trailingIcon = {
-            if (state.listSearchQuery.isNotEmpty()) {
-              IconButton(
-                onClick = { state.clearListSearchQuery() },
-                modifier = Modifier.size(32.dp),
-              ) {
-                Icon(
-                  imageVector = Icons.Default.Close,
-                  contentDescription = "Clear Search",
-                  tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                  modifier = Modifier.size(16.dp),
-                )
-              }
-            }
-          },
-          shape = MaterialTheme.shapes.extraLarge,
-          colors =
-            OutlinedTextFieldDefaults.colors(
-              focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-              unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-              focusedBorderColor = MaterialTheme.colorScheme.primary,
-              unfocusedBorderColor = Color.Transparent,
-            ),
-        )
-
-        // Category Filter Tabs: All | Locations | Submissions (Grouped by Form)
-        Row(
-          modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
-          horizontalArrangement = Arrangement.spacedBy(6.dp),
-        ) {
-          ListFilterTab.entries.forEach { tab ->
-            val isSelected = state.listFilterTab == tab
-            val countLabel =
-              when (tab) {
-                ListFilterTab.ALL -> state.entities.size + state.allSubmissions.size
-                ListFilterTab.ENTITIES -> state.entities.size
-                ListFilterTab.SUBMISSIONS -> state.allSubmissions.size
-              }
-            FilterChip(
-              selected = isSelected,
-              onClick = { state.selectListFilterTab(tab) },
-              label = {
-                Text(
-                  text = "${state.tabLabelFor(tab)} ($countLabel)",
-                  style =
-                    MaterialTheme.typography.labelSmall.copy(
-                      fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
-                    ),
-                )
-              },
-              leadingIcon =
-                if (isSelected) {
-                  {
-                    Icon(
-                      imageVector = Icons.Default.Check,
-                      contentDescription = null,
-                      modifier = Modifier.size(14.dp),
-                    )
-                  }
-                } else {
-                  null
-                },
-            )
-          }
-        }
-      }
-    }
-
-    // If a submission is currently inspected in full detail, show it with a Back button
-    if (selectedSubmission != null) {
-      Column(
-        modifier =
-          Modifier.fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(14.dp)
-      ) {
-        SubmissionFullDetailsCard(
-          submission = selectedSubmission,
-          state = state,
-          isDark = isDark,
-          textColor = textColor,
-          backLabel = "Back to Searchable List",
-          onBack = { state.selectSubmissionDetail(null) },
-          onSharePdf = { state.shareSubmissionPdf(selectedSubmission.id) },
-        )
-      }
-      return
-    }
-
-    // Scrollable Searchable List of survey locations (grouped by dataset) and submissions (grouped by Form)
-    val matchedEntities = state.filteredListEntities
-    val groupedSubmissions = state.groupedFilteredListSubmissions
-
-    Column(
-      modifier =
-        Modifier.weight(1f)
-          .fillMaxWidth()
-          .verticalScroll(rememberScrollState())
-          .padding(horizontal = 14.dp, vertical = 10.dp),
-      verticalArrangement = Arrangement.spacedBy(12.dp),
-    ) {
-      // 1. SURVEY LOCATIONS SECTION (GROUPED BY DOMAIN DATASET)
-      if (matchedEntities.isNotEmpty()) {
-        val groupedByDataset = matchedEntities.groupBy { it.datasetName }
-        groupedByDataset.forEach { (datasetName, datasetEntities) ->
-          Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(5.dp),
-          ) {
-            Icon(
-              imageVector = Icons.Default.LocationOn,
-              contentDescription = null,
-              tint = MaterialTheme.colorScheme.primary,
-              modifier = Modifier.size(14.dp),
-            )
-            Text(
-              text = "${datasetName.uppercase()} (${datasetEntities.size})",
-              style =
-                MaterialTheme.typography.labelSmall.copy(
-                  fontWeight = FontWeight.Bold,
-                  letterSpacing = 0.6.sp,
-                ),
-              color = MaterialTheme.colorScheme.primary,
-            )
-          }
-          datasetEntities.forEach { entity ->
-            val isNavigatingEntity = state.isNavigatingToEntity(entity.id)
-            val entityWayfindingBadge = state.formattedWayfindingBadgeForEntity(entity.id)
-            OutlinedCard(
-              onClick = {
-                state.selectEntity(entity.id)
-                state.setMainSurveyViewMode(MainSurveyViewMode.MAP)
-              },
-              modifier = Modifier.fillMaxWidth(),
-              shape = MaterialTheme.shapes.medium,
-              colors =
-                CardDefaults.outlinedCardColors(
-                  containerColor = MaterialTheme.colorScheme.surface
-                ),
-            ) {
-              Column(
-                modifier = Modifier.fillMaxWidth().padding(12.dp),
-                verticalArrangement = Arrangement.spacedBy(6.dp),
-              ) {
-                Row(
-                  modifier = Modifier.fillMaxWidth(),
-                  horizontalArrangement = Arrangement.SpaceBetween,
-                  verticalAlignment = Alignment.CenterVertically,
-                ) {
-                  Column(
-                    modifier = Modifier.weight(1f),
-                    verticalArrangement = Arrangement.spacedBy(3.dp),
-                  ) {
-                    Text(
-                      text = entity.label,
-                      style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
-                      color = MaterialTheme.colorScheme.onSurface,
-                    )
-                    Row(
-                      verticalAlignment = Alignment.CenterVertically,
-                      horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    ) {
-                      Text(
-                        text = "GeoID: ${entity.geoId}",
-                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
-                        color = MaterialTheme.colorScheme.primary,
-                      )
-                      if (entityWayfindingBadge.isNotEmpty()) {
-                        GroundTonalBadge(
-                          text = "➤ $entityWayfindingBadge",
-                          tone = GroundBadgeTone.TERTIARY,
-                          monospace = true,
-                        )
-                      }
-                    }
-                    Text(
-                      text = "${entity.datasetName} • ${entity.submissions.size} submission(s)",
-                      style = MaterialTheme.typography.labelSmall,
-                      color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                  }
-                  Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(3.dp),
-                  ) {
-                    Text(
-                      text = "View on Map",
-                      style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                      color = MaterialTheme.colorScheme.primary,
-                    )
-                    Icon(
-                      imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                      contentDescription = null,
-                      tint = MaterialTheme.colorScheme.primary,
-                      modifier = Modifier.size(12.dp),
-                    )
-                  }
-                }
-
-                // Quick Navigate, QR Code & Share PDF actions for location item in List View
-                Row(
-                  horizontalArrangement = Arrangement.spacedBy(8.dp),
-                  verticalAlignment = Alignment.CenterVertically,
-                ) {
-                  FilterChip(
-                    selected = isNavigatingEntity,
-                    onClick = { state.startNavigationToEntity(entity.id) },
-                    label = {
-                      Text(
-                        text = if (isNavigatingEntity) "Navigating" else "Navigate",
-                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                      )
-                    },
-                    leadingIcon = {
-                      Icon(
-                        imageVector = Icons.Default.Navigation,
-                        contentDescription = "Navigate to ${entity.singularTypeLabel}",
-                        modifier = Modifier.size(12.dp),
-                      )
-                    },
-                  )
-                  AssistChip(
-                    onClick = { state.openEntityQrCode(entity.id) },
-                    label = {
-                      Text(
-                        text = "QR Code",
-                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                      )
-                    },
-                    leadingIcon = {
-                      Icon(
-                        imageVector = Icons.Default.QrCode,
-                        contentDescription = "${entity.singularTypeLabel} QR Code",
-                        modifier = Modifier.size(12.dp),
-                      )
-                    },
-                  )
-                  AssistChip(
-                    onClick = { state.shareEntityPdf(entity.id) },
-                    label = {
-                      Text(
-                        text = "Share PDF",
-                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                      )
-                    },
-                    leadingIcon = {
-                      Icon(
-                        imageVector = Icons.Default.Share,
-                        contentDescription = "Share ${entity.singularTypeLabel} PDF",
-                        modifier = Modifier.size(12.dp),
-                      )
-                    },
-                  )
-                }
-              }
-            }
-          }
-        }
-      }
-
-      // 2. SUBMISSIONS SECTION (GROUPED BY FORM TITLE)
-      if (groupedSubmissions.isNotEmpty()) {
-        groupedSubmissions.forEach { group ->
-          val form = group.form
-          Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(5.dp),
-          ) {
-            Icon(
-              imageVector = Icons.Default.Description,
-              contentDescription = null,
-              tint = MaterialTheme.colorScheme.primary,
-              modifier = Modifier.size(14.dp),
-            )
-            Text(
-              text = "${form.title.uppercase()} (${group.submissions.size})",
-              style =
-                MaterialTheme.typography.labelSmall.copy(
-                  fontWeight = FontWeight.Bold,
-                  letterSpacing = 0.6.sp,
-                ),
-              color = MaterialTheme.colorScheme.primary,
-            )
-          }
-          OutlinedCard(
-            modifier = Modifier.fillMaxWidth(),
-            shape = MaterialTheme.shapes.medium,
-            colors =
-              CardDefaults.outlinedCardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceContainerLow
-              ),
-          ) {
-            Column(
-              modifier = Modifier.padding(10.dp),
-              verticalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-              // Form Group Header Banner
-              Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-              ) {
-                Column(
-                  modifier = Modifier.weight(1f),
-                  verticalArrangement = Arrangement.spacedBy(2.dp),
-                ) {
-                  Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(6.dp),
-                  ) {
-                    Icon(
-                      imageVector = Icons.Default.Description,
-                      contentDescription = null,
-                      tint = MaterialTheme.colorScheme.primary,
-                      modifier = Modifier.size(14.dp),
-                    )
-                    Text(
-                      text = form.title,
-                      style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
-                      color = MaterialTheme.colorScheme.onSurface,
-                    )
-                  }
-                  Text(
-                    text = "Action: \"${form.ctaLabel}\" • ${form.version}",
-                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
-                    color = MaterialTheme.colorScheme.primary,
-                  )
-                }
-
-                GroundTonalBadge(
-                  text = "${group.submissions.size} submitted",
-                  tone = GroundBadgeTone.PRIMARY,
-                )
-              }
-
-              // Submissions belonging to this Form group
-              group.submissions.forEach { sub ->
-                OutlinedCard(
-                  onClick = { state.selectSubmissionDetail(sub.id) },
-                  modifier = Modifier.fillMaxWidth(),
-                  shape = MaterialTheme.shapes.small,
-                  colors =
-                    CardDefaults.outlinedCardColors(
-                      containerColor = MaterialTheme.colorScheme.surface
-                    ),
-                ) {
-                  Row(
-                    modifier = Modifier.fillMaxWidth().padding(10.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically,
-                  ) {
-                    Column(
-                      modifier = Modifier.weight(1f),
-                      verticalArrangement = Arrangement.spacedBy(3.dp),
-                    ) {
-                      Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                      ) {
-                        Text(
-                          text = "${sub.targetTypeLabel}: ${sub.entityLabel}",
-                          style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
-                          color = MaterialTheme.colorScheme.onSurface,
-                        )
-                      }
-                      Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(4.dp),
-                      ) {
-                        Icon(
-                          imageVector = Icons.Default.Person,
-                          contentDescription = null,
-                          tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                          modifier = Modifier.size(12.dp),
-                        )
-                        Text(
-                          text = "${sub.collectorName} •",
-                          style = MaterialTheme.typography.labelSmall,
-                          color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                        Icon(
-                          imageVector = Icons.Default.Schedule,
-                          contentDescription = null,
-                          tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                          modifier = Modifier.size(11.dp),
-                        )
-                        Text(
-                          text = sub.timestamp,
-                          style = MaterialTheme.typography.labelSmall,
-                          color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                      }
-                    }
-                    IconButton(
-                      onClick = { state.selectSubmissionDetail(sub.id) },
-                      modifier = Modifier.size(32.dp),
-                    ) {
-                      Icon(
-                        imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                        contentDescription = "Submission details",
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(20.dp),
-                      )
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-
-      if (matchedEntities.isEmpty() && groupedSubmissions.isEmpty()) {
-        Box(
-          modifier = Modifier.fillMaxWidth().padding(32.dp),
-          contentAlignment = Alignment.Center,
-        ) {
-          Text(
-            text = "No ${state.activeEntitiesCountNoun} or submissions match \"${state.listSearchQuery}\".",
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-          )
-        }
-      }
-    }
-  }
-}
-
-/**
  * Hamburger Navigation Drawer overlay providing options to:
  * 1. Surveys (downloaded surveys screen with button to browse & download more surveys)
  * 2. Offline maps
@@ -2528,6 +2716,7 @@ private fun SurveyListView(state: PrototypeAppState) {
  */
 @Composable
 private fun MainSurveyNavigationDrawerOverlay(state: PrototypeAppState) {
+  val brandFont = LocalGroundBrandFontFamily.current
   Box(modifier = Modifier.fillMaxSize()) {
     // Scrim backdrop
     Box(
@@ -2542,37 +2731,37 @@ private fun MainSurveyNavigationDrawerOverlay(state: PrototypeAppState) {
       modifier = Modifier.fillMaxHeight().width(308.dp),
       drawerContainerColor = MaterialTheme.colorScheme.surfaceContainerLow,
     ) {
-      Column(
-        modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.SpaceBetween,
-      ) {
+      Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.SpaceBetween) {
         Column(modifier = Modifier.fillMaxWidth()) {
           // User Profile & Organization Header
           Surface(
             modifier = Modifier.fillMaxWidth(),
-            color = Color(0xFF144532),
+            color = Color(0xFF1D5128),
             contentColor = Color.White,
           ) {
             Column(
               modifier = Modifier.padding(horizontal = 18.dp, vertical = 20.dp),
-              verticalArrangement = Arrangement.spacedBy(6.dp),
+              verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
               Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
               ) {
-                Box(
-                  modifier =
-                    Modifier.size(44.dp)
-                      .clip(CircleShape)
-                      .background(Color(0xFF8BD6B1)),
-                  contentAlignment = Alignment.Center,
+                Row(
+                  verticalAlignment = Alignment.CenterVertically,
+                  horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
+                  GroundCloudAcaciaLogo(modifier = Modifier.size(30.dp))
                   Text(
-                    text = "ML",
-                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold),
-                    color = Color(0xFF003825),
+                    text = "Ground",
+                    style =
+                      MaterialTheme.typography.titleLarge.copy(
+                        fontFamily = brandFont,
+                        fontWeight = FontWeight.ExtraBold,
+                        letterSpacing = 0.5.sp,
+                      ),
+                    color = Color.White,
                   )
                 }
                 IconButton(
@@ -2588,21 +2777,40 @@ private fun MainSurveyNavigationDrawerOverlay(state: PrototypeAppState) {
                 }
               }
 
-              Text(
-                text = state.signedInUserName,
-                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                color = Color.White,
-              )
-              Text(
-                text = state.signedInUserEmail,
-                style = MaterialTheme.typography.labelSmall,
-                color = Color(0xFFC8E6C9),
-              )
-              Text(
-                text = state.signedInOrganization,
-                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
-                color = Color(0xFF8BD6B1),
-              )
+              Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+              ) {
+                Box(
+                  modifier = Modifier.size(40.dp).clip(CircleShape).background(Color(0xFF9CD49F)),
+                  contentAlignment = Alignment.Center,
+                ) {
+                  Text(
+                    text = "ML",
+                    style =
+                      MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.ExtraBold),
+                    color = Color(0xFF003914),
+                  )
+                }
+                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                  Text(
+                    text = state.signedInUserName,
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                    color = Color.White,
+                  )
+                  Text(
+                    text = state.signedInUserEmail,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = Color(0xFFB7F1B9),
+                  )
+                  Text(
+                    text = state.signedInOrganization,
+                    style =
+                      MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
+                    color = Color(0xFF9CD49F),
+                  )
+                }
+              }
             }
           }
 
@@ -2622,7 +2830,7 @@ private fun MainSurveyNavigationDrawerOverlay(state: PrototypeAppState) {
               )
               Text(
                 text = state.activeSurvey.title,
-                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
                 color = MaterialTheme.colorScheme.onSurface,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
@@ -2633,57 +2841,82 @@ private fun MainSurveyNavigationDrawerOverlay(state: PrototypeAppState) {
           Spacer(modifier = Modifier.height(8.dp))
 
           // Navigation Drawer Options using M3 NavigationDrawerItem
-          DrawerMenuItem(
-            icon = Icons.Default.SwapHoriz,
-            title = "Surveys",
-            subtitle = "${state.downloadedSurveyCount} downloaded on device",
-            selected = state.activeDrawerSubView == MainDrawerSubView.SWITCH_SURVEYS,
-            onClick = { state.drawerSwitchSurveys() },
-          )
-          DrawerMenuItem(
-            icon = Icons.Default.Map,
-            title = "Offline maps",
-            subtitle = "Mapbox vector & satellite raster tile cache",
-            selected = state.activeDrawerSubView == MainDrawerSubView.MANAGE_OFFLINE_MAPS,
-            onClick = { state.drawerManageOfflineMaps() },
-          )
-          DrawerMenuItem(
-            icon = Icons.Default.Settings,
-            title = "Settings",
-            subtitle = "Units (${state.unitSystem.areaUnit}), language & media cache",
-            selected = state.activeDrawerSubView == MainDrawerSubView.SETTINGS,
-            onClick = { state.drawerOpenSettings() },
-          )
-          DrawerMenuItem(
-            icon = Icons.Default.Description,
-            title = "Terms of Service",
-            subtitle = "Platform data governance & privacy terms",
-            selected = false,
-            onClick = { state.drawerViewTermsOfService() },
-          )
+          Column(
+            modifier = Modifier.weight(1f).verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(2.dp),
+          ) {
+            DrawerMenuItem(
+              icon = Icons.Default.SwapHoriz,
+              title = "Surveys",
+              subtitle = "${state.downloadedSurveyCount} downloaded on device",
+              selected = state.activeDrawerSubView == MainDrawerSubView.SWITCH_SURVEYS,
+              onClick = { state.drawerSwitchSurveys() },
+            )
+            DrawerMenuItem(
+              icon = Icons.Default.CloudUpload,
+              title = "Uploads",
+              subtitle = null,
+              badgeText =
+                if (state.outboxMutationCount > 0) "${state.outboxMutationCount}" else null,
+              badgeTone = GroundBadgeTone.WARNING,
+              selected =
+                state.activeDrawerSubView == MainDrawerSubView.UPLOADS ||
+                  state.activeDrawerSubView == MainDrawerSubView.OUTBOX ||
+                  state.activeDrawerSubView == MainDrawerSubView.UPLOADED,
+              onClick = { state.drawerOpenUploads() },
+            )
+            DrawerMenuItem(
+              icon = Icons.Default.Map,
+              title = "Offline maps",
+              subtitle = "Vector & satellite raster tile cache",
+              selected = state.activeDrawerSubView == MainDrawerSubView.MANAGE_OFFLINE_MAPS,
+              onClick = { state.drawerManageOfflineMaps() },
+            )
+            DrawerMenuItem(
+              icon = Icons.Default.Settings,
+              title = "Settings",
+              subtitle = "Units (${state.unitSystem.areaUnit}), language & media cache",
+              selected = state.activeDrawerSubView == MainDrawerSubView.SETTINGS,
+              onClick = { state.drawerOpenSettings() },
+            )
+            DrawerMenuItem(
+              icon = Icons.Default.Description,
+              title = "Terms of Service",
+              subtitle = "Platform data governance & privacy terms",
+              selected = false,
+              onClick = { state.drawerViewTermsOfService() },
+            )
 
-          HorizontalDivider(
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-            color = MaterialTheme.colorScheme.outlineVariant,
-          )
+            HorizontalDivider(
+              modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+              color = MaterialTheme.colorScheme.outlineVariant,
+            )
 
-          DrawerMenuItem(
-            icon = Icons.AutoMirrored.Filled.Logout,
-            title = "Sign out",
-            subtitle = "Disconnect ${state.signedInUserEmail}",
-            selected = false,
-            isDestructive = true,
-            onClick = { state.drawerSignOut() },
+            DrawerMenuItem(
+              icon = Icons.AutoMirrored.Filled.Logout,
+              title = "Sign out",
+              subtitle = "Disconnect ${state.signedInUserEmail}",
+              selected = false,
+              isDestructive = true,
+              onClick = { state.drawerSignOut() },
+            )
+          }
+
+          // Footer version note
+          Text(
+            text =
+              buildAnnotatedString {
+                append("Open Foris ")
+                withStyle(SpanStyle(fontFamily = brandFont, fontWeight = FontWeight.Bold)) {
+                  append("Ground")
+                }
+                append(" 2.0 • Offline-First Core")
+              },
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(18.dp),
           )
         }
-
-        // Footer version note
-        Text(
-          text = "Open Foris Ground 2.0 • Offline-First Core",
-          style = MaterialTheme.typography.labelSmall,
-          color = MaterialTheme.colorScheme.onSurfaceVariant,
-          modifier = Modifier.padding(18.dp),
-        )
       }
     }
   }
@@ -2693,8 +2926,10 @@ private fun MainSurveyNavigationDrawerOverlay(state: PrototypeAppState) {
 private fun DrawerMenuItem(
   icon: ImageVector,
   title: String,
-  subtitle: String,
+  subtitle: String? = null,
   selected: Boolean,
+  badgeText: String? = null,
+  badgeTone: GroundBadgeTone = GroundBadgeTone.PRIMARY,
   isDestructive: Boolean = false,
   onClick: () -> Unit,
 ) {
@@ -2712,18 +2947,22 @@ private fun DrawerMenuItem(
           style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
           color = itemColor,
         )
-        Text(
-          text = subtitle,
-          style = MaterialTheme.typography.labelSmall,
-          color =
-            if (isDestructive) {
-              MaterialTheme.colorScheme.error.copy(alpha = 0.8f)
-            } else {
-              MaterialTheme.colorScheme.onSurfaceVariant
-            },
-        )
+        if (!subtitle.isNullOrBlank()) {
+          Text(
+            text = subtitle,
+            style = MaterialTheme.typography.labelSmall,
+            color =
+              if (isDestructive) {
+                MaterialTheme.colorScheme.error.copy(alpha = 0.8f)
+              } else {
+                MaterialTheme.colorScheme.onSurfaceVariant
+              },
+          )
+        }
       }
     },
+    badge =
+      badgeText?.let { countText -> { GroundTonalBadge(text = countText, tone = badgeTone) } },
     selected = selected,
     onClick = onClick,
     icon = {
@@ -2739,19 +2978,303 @@ private fun DrawerMenuItem(
 }
 
 /**
- * Separate screen accessible from the `"Surveys"` navigation drawer option showing ONLY the
- * surveys which have already been downloaded to the device, plus a primary action button
- * (`"Browse & download more surveys"`) which navigates to the full `Download surveys` screen.
+ * Unified `Uploads` screen accessible from the Hamburger Navigation Drawer, merging pending,
+ * in-progress, uploaded, and failed mutations into a single compact, user-friendly list with status
+ * filter chips (`Pending`, `In progress`, `Uploaded`, `Failed`).
+ */
+@Composable
+private fun UploadsMutationsSubScreen(state: PrototypeAppState) {
+  val filteredMutations = state.filteredUploadMutations
+  val activeFilter = state.selectedUploadStatusFilter
+
+  Column(
+    modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(14.dp),
+    verticalArrangement = Arrangement.spacedBy(8.dp),
+  ) {
+    // Compact Top Header: Title + Sync All (if pending/failed) + Back to Map
+    Row(
+      modifier = Modifier.fillMaxWidth(),
+      horizontalArrangement = Arrangement.SpaceBetween,
+      verticalAlignment = Alignment.CenterVertically,
+    ) {
+      Row(
+        modifier = Modifier.weight(1f),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+      ) {
+        Icon(
+          imageVector = Icons.Default.CloudUpload,
+          contentDescription = null,
+          tint = MaterialTheme.colorScheme.primary,
+          modifier = Modifier.size(20.dp),
+        )
+        Text(
+          text = "Uploads",
+          style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+          color = MaterialTheme.colorScheme.onSurface,
+        )
+      }
+
+      Row(
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
+        verticalAlignment = Alignment.CenterVertically,
+      ) {
+        if (state.outboxMutationCount > 0) {
+          FilledTonalButton(
+            onClick = { state.syncAllOutboxMutations() },
+            shape = MaterialTheme.shapes.small,
+            contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
+          ) {
+            Icon(
+              imageVector = Icons.Default.CloudUpload,
+              contentDescription = null,
+              modifier = Modifier.size(13.dp),
+            )
+            Spacer(modifier = Modifier.width(4.dp))
+            Text(
+              text = "Sync all (${state.outboxMutationCount})",
+              style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+            )
+          }
+        }
+
+        OutlinedButton(
+          onClick = { state.closeDrawerSubView() },
+          shape = MaterialTheme.shapes.small,
+          contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
+        ) {
+          Icon(
+            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+            contentDescription = null,
+            modifier = Modifier.size(13.dp),
+          )
+          Spacer(modifier = Modifier.width(4.dp))
+          Text("Back", style = MaterialTheme.typography.labelSmall)
+        }
+      }
+    }
+
+    // Status Filter Chips Row: Pending | In progress | Uploaded | Failed
+    Row(
+      modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+      horizontalArrangement = Arrangement.spacedBy(6.dp),
+      verticalAlignment = Alignment.CenterVertically,
+    ) {
+      UploadStatusFilter.entries.forEach { filter ->
+        val isSelected = activeFilter == filter
+        val count = state.uploadCountForFilter(filter)
+        FilterChip(
+          selected = isSelected,
+          onClick = { state.toggleUploadStatusFilter(filter) },
+          label = {
+            Text(
+              text = "${filter.label} ($count)",
+              style =
+                MaterialTheme.typography.labelSmall.copy(
+                  fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
+                ),
+            )
+          },
+          leadingIcon =
+            if (isSelected) {
+              {
+                Icon(
+                  imageVector = Icons.Default.Check,
+                  contentDescription = null,
+                  modifier = Modifier.size(14.dp),
+                )
+              }
+            } else {
+              null
+            },
+        )
+      }
+    }
+
+    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+
+    // Compact List of User-Friendly Upload Items
+    if (filteredMutations.isEmpty()) {
+      Box(
+        modifier = Modifier.fillMaxWidth().padding(vertical = 32.dp),
+        contentAlignment = Alignment.Center,
+      ) {
+        Text(
+          text =
+            if (activeFilter != null) {
+              "No ${activeFilter.label.lowercase()} uploads."
+            } else {
+              "No uploads yet."
+            },
+          style = MaterialTheme.typography.bodySmall,
+          color = MaterialTheme.colorScheme.onSurfaceVariant,
+          textAlign = TextAlign.Center,
+        )
+      }
+    } else {
+      Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        filteredMutations.forEach { mutation ->
+          UploadMutationRowCard(mutation = mutation, state = state)
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Compact, user-friendly row card for a [MutationLogItem] in `Uploads`, showing:
+ * - Action label (`Form submitted`, `Form modified`, `Form deleted`, `Map feature modified`, etc.) and
+ * form/feature title
+ * - Target entity label and concise timestamp
+ * - Status badge (`Pending`, `In progress`, `Uploaded`, `Failed`) and inline retry/upload action
+ */
+@Composable
+private fun UploadMutationRowCard(mutation: MutationLogItem, state: PrototypeAppState) {
+  val statusFilter = mutation.uploadStatusFilter
+  val badgeTone =
+    when (statusFilter) {
+      UploadStatusFilter.UPLOADED -> GroundBadgeTone.PRIMARY
+      UploadStatusFilter.IN_PROGRESS -> GroundBadgeTone.TERTIARY
+      UploadStatusFilter.PENDING -> GroundBadgeTone.NEUTRAL
+      UploadStatusFilter.FAILED -> GroundBadgeTone.WARNING
+    }
+
+  OutlinedCard(
+    onClick = {
+      if (mutation.submissionId != null) {
+        state.selectSubmissionDetail(mutation.submissionId)
+      } else if (mutation.entityId.isNotBlank()) {
+        state.selectEntity(mutation.entityId)
+      }
+      state.closeDrawerSubView()
+    },
+    modifier = Modifier.fillMaxWidth(),
+    shape = MaterialTheme.shapes.small,
+    border =
+      BorderStroke(
+        width = 1.dp,
+        color =
+          when (statusFilter) {
+            UploadStatusFilter.FAILED -> MaterialTheme.colorScheme.error.copy(alpha = 0.6f)
+            UploadStatusFilter.IN_PROGRESS -> MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
+            else -> MaterialTheme.colorScheme.outlineVariant
+          },
+      ),
+    colors = CardDefaults.outlinedCardColors(containerColor = MaterialTheme.colorScheme.surface),
+  ) {
+    Column(
+      modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp, vertical = 7.dp),
+      verticalArrangement = Arrangement.spacedBy(3.dp),
+    ) {
+      // Line 1: User-friendly action + title on left, compact status pill on right
+      Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+      ) {
+        Text(
+          text = "${mutation.operationKind.label} • ${mutation.title}",
+          style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+          color = MaterialTheme.colorScheme.onSurface,
+          maxLines = 1,
+          overflow = TextOverflow.Ellipsis,
+          modifier = Modifier.weight(1f).padding(end = 6.dp),
+        )
+
+        if (statusFilter == UploadStatusFilter.FAILED) {
+          Surface(
+            shape = RoundedCornerShape(4.dp),
+            color = MaterialTheme.colorScheme.errorContainer,
+            contentColor = MaterialTheme.colorScheme.onErrorContainer,
+          ) {
+            Text(
+              text = statusFilter.label,
+              style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+              modifier = Modifier.padding(horizontal = 6.dp, vertical = 1.dp),
+            )
+          }
+        } else {
+          GroundTonalBadge(text = statusFilter.label, tone = badgeTone)
+        }
+      }
+
+      // Line 2: Target entity label + timestamp on left, compact Retry/Upload action on right
+      Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+      ) {
+        Text(
+          text = "${mutation.targetLabel} • ${mutation.compactTimestamp}",
+          style = MaterialTheme.typography.labelSmall,
+          color = MaterialTheme.colorScheme.onSurfaceVariant,
+          maxLines = 1,
+          overflow = TextOverflow.Ellipsis,
+          modifier = Modifier.weight(1f).padding(end = 6.dp),
+        )
+
+        if (mutation.isOutbox) {
+          Surface(
+            onClick = { state.syncMutationNow(mutation.id) },
+            shape = RoundedCornerShape(4.dp),
+            color = MaterialTheme.colorScheme.secondaryContainer,
+            contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+          ) {
+            Row(
+              modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+              verticalAlignment = Alignment.CenterVertically,
+              horizontalArrangement = Arrangement.spacedBy(3.dp),
+            ) {
+              Icon(
+                imageVector =
+                  if (statusFilter == UploadStatusFilter.FAILED) {
+                    Icons.Default.Refresh
+                  } else {
+                    Icons.Default.CloudUpload
+                  },
+                contentDescription = null,
+                modifier = Modifier.size(11.dp),
+              )
+              Text(
+                text = if (statusFilter == UploadStatusFilter.FAILED) "Retry" else "Upload",
+                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+              )
+            }
+          }
+        }
+      }
+
+      if (mutation.state == MutationSyncState.UPLOADING) {
+        LinearProgressIndicator(
+          progress = { 0.74f },
+          modifier = Modifier.fillMaxWidth().height(3.dp).clip(CircleShape),
+          color = MaterialTheme.colorScheme.primary,
+          trackColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+        )
+      } else if (statusFilter == UploadStatusFilter.FAILED && mutation.stateDetail.isNotBlank()) {
+        Text(
+          text = mutation.stateDetail,
+          style = MaterialTheme.typography.labelSmall,
+          color = MaterialTheme.colorScheme.error,
+          maxLines = 1,
+          overflow = TextOverflow.Ellipsis,
+        )
+      }
+    }
+  }
+}
+
+/**
+ * Separate screen accessible from the `"Surveys"` navigation drawer option showing ONLY the surveys
+ * which have already been downloaded to the device, plus a primary action button (`"Browse &
+ * download more surveys"`) which navigates to the full `Download surveys` screen.
  */
 @Composable
 private fun SwitchDownloadedSurveysSubScreen(state: PrototypeAppState) {
   val downloadedList = state.downloadedSurveys
 
   Column(
-    modifier =
-      Modifier.fillMaxSize()
-        .verticalScroll(rememberScrollState())
-        .padding(16.dp),
+    modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),
     verticalArrangement = Arrangement.spacedBy(14.dp),
   ) {
     Row(
@@ -2782,10 +3305,7 @@ private fun SwitchDownloadedSurveysSubScreen(state: PrototypeAppState) {
           )
         }
       }
-      OutlinedButton(
-        onClick = { state.closeDrawerSubView() },
-        shape = MaterialTheme.shapes.small,
-      ) {
+      OutlinedButton(onClick = { state.closeDrawerSubView() }, shape = MaterialTheme.shapes.small) {
         Icon(
           imageVector = Icons.AutoMirrored.Filled.ArrowBack,
           contentDescription = null,
@@ -2828,10 +3348,7 @@ private fun SwitchDownloadedSurveysSubScreen(state: PrototypeAppState) {
           horizontalArrangement = Arrangement.SpaceBetween,
           verticalAlignment = Alignment.CenterVertically,
         ) {
-          Column(
-            modifier = Modifier.weight(1f),
-            verticalArrangement = Arrangement.spacedBy(4.dp),
-          ) {
+          Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Row(
               verticalAlignment = Alignment.CenterVertically,
               horizontalArrangement = Arrangement.spacedBy(6.dp),
@@ -2842,14 +3359,12 @@ private fun SwitchDownloadedSurveysSubScreen(state: PrototypeAppState) {
                 color = MaterialTheme.colorScheme.onSurface,
               )
               if (isActive) {
-                GroundTonalBadge(
-                  text = "ACTIVE",
-                  tone = GroundBadgeTone.PRIMARY,
-                )
+                GroundTonalBadge(text = "ACTIVE", tone = GroundBadgeTone.PRIMARY)
               }
             }
             Text(
-              text = "${survey.location} • ${survey.entityCount} locations • ${survey.offlineSizeLabel}",
+              text =
+                "${survey.location} • ${survey.entityCount} locations • ${survey.offlineSizeLabel}",
               style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
               color = MaterialTheme.colorScheme.primary,
             )
@@ -2873,10 +3388,7 @@ private fun SwitchDownloadedSurveysSubScreen(state: PrototypeAppState) {
               )
             }
           } else {
-            Button(
-              onClick = { state.openSurvey(survey.id) },
-              shape = MaterialTheme.shapes.small,
-            ) {
+            Button(onClick = { state.openSurvey(survey.id) }, shape = MaterialTheme.shapes.small) {
               Text(
                 text = "Switch",
                 style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
@@ -2912,10 +3424,7 @@ private fun SwitchDownloadedSurveysSubScreen(state: PrototypeAppState) {
  * allowing offline field verification and rapid lookup of the location's `GeoID`.
  */
 @Composable
-private fun EntityQrCodeModalDialog(
-  state: PrototypeAppState,
-  entity: GeospatialEntityItem,
-) {
+private fun EntityQrCodeModalDialog(state: PrototypeAppState, entity: GeospatialEntityItem) {
   GroundAlertDialogOverlay(
     onDismissRequest = { state.closeEntityQrCode() },
     icon = {
@@ -2944,10 +3453,7 @@ private fun EntityQrCodeModalDialog(
           color = Color.White,
           border = BorderStroke(2.dp, MaterialTheme.colorScheme.primary),
         ) {
-          Box(
-            modifier = Modifier.padding(12.dp),
-            contentAlignment = Alignment.Center,
-          ) {
+          Box(modifier = Modifier.padding(12.dp), contentAlignment = Alignment.Center) {
             Icon(
               imageVector = Icons.Default.QrCode,
               contentDescription = "${entity.label} QR Matrix",
@@ -2968,7 +3474,8 @@ private fun EntityQrCodeModalDialog(
           monospace = true,
         )
         Text(
-          text = "Scan with Ground or any EUDR compliance reader to verify ${entity.singularTypeLabel.lowercase()} geometry & GeoID.",
+          text =
+            "Scan with Ground or any EUDR compliance reader to verify ${entity.singularTypeLabel.lowercase()} geometry & GeoID.",
           style = MaterialTheme.typography.labelSmall,
           color = MaterialTheme.colorScheme.onSurfaceVariant,
           textAlign = TextAlign.Center,
@@ -2991,11 +3498,7 @@ private fun EntityQrCodeModalDialog(
         Text("Share PDF")
       }
     },
-    dismissButton = {
-      TextButton(onClick = { state.closeEntityQrCode() }) {
-        Text("Close")
-      }
-    },
+    dismissButton = { TextButton(onClick = { state.closeEntityQrCode() }) { Text("Close") } },
   )
 }
 
@@ -3004,18 +3507,10 @@ private fun EntityQrCodeModalDialog(
  * Geospatial Entity or a Submission (`state.activeSharedPdfSheet`) to their preferred app.
  */
 @Composable
-private fun SharePdfToAppModalDialog(
-  state: PrototypeAppState,
-  sheet: SharedPdfSheetState,
-) {
-  GroundModalBottomSheetOverlay(
-    onDismissRequest = { state.closeSharePdfSheet() }
-  ) {
+private fun SharePdfToAppModalDialog(state: PrototypeAppState, sheet: SharedPdfSheetState) {
+  GroundModalBottomSheetOverlay(onDismissRequest = { state.closeSharePdfSheet() }) {
     Column(
-      modifier =
-        Modifier.fillMaxWidth()
-          .padding(horizontal = 20.dp)
-          .padding(bottom = 24.dp),
+      modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp).padding(bottom = 24.dp),
       verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
       Row(
@@ -3040,10 +3535,7 @@ private fun SharePdfToAppModalDialog(
           )
         }
         IconButton(onClick = { state.closeSharePdfSheet() }) {
-          Icon(
-            imageVector = Icons.Default.Close,
-            contentDescription = "Close Share PDF Sheet",
-          )
+          Icon(imageVector = Icons.Default.Close, contentDescription = "Close Share PDF Sheet")
         }
       }
 
@@ -3073,7 +3565,6 @@ private fun SharePdfToAppModalDialog(
               text = sheet.pdfFileName,
               style =
                 MaterialTheme.typography.labelMedium.copy(
-                  fontFamily = FontFamily.Monospace,
                   fontWeight = FontWeight.Bold,
                 ),
               color = MaterialTheme.colorScheme.onSurface,
@@ -3116,24 +3607,19 @@ private fun SharePdfToAppModalDialog(
         onClick = { state.closeSharePdfSheet() },
         modifier = Modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.medium,
-      ) {
-        Text("Done")
-      }
+      ) { Text("Done") }
     }
   }
 }
 
 /**
- * Drawer Sub-Screen: `Offline maps` (consistent with `docs/design/00-index.md` "Offline
- * Storage Safeguards & Media Purging" — Mapbox vector & raster tiles and 500 MB storage guardrail).
+ * Drawer Sub-Screen: `Offline maps` (consistent with `docs/design/00-index.md` "Offline Storage
+ * Safeguards & Media Purging" — Mapbox vector & raster tiles and 500 MB storage guardrail).
  */
 @Composable
 private fun ManageOfflineMapsSubScreen(state: PrototypeAppState) {
   Column(
-    modifier =
-      Modifier.fillMaxSize()
-        .verticalScroll(rememberScrollState())
-        .padding(16.dp),
+    modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),
     verticalArrangement = Arrangement.spacedBy(12.dp),
   ) {
     Row(
@@ -3157,10 +3643,7 @@ private fun ManageOfflineMapsSubScreen(state: PrototypeAppState) {
           color = MaterialTheme.colorScheme.onSurface,
         )
       }
-      OutlinedButton(
-        onClick = { state.closeDrawerSubView() },
-        shape = MaterialTheme.shapes.small,
-      ) {
+      OutlinedButton(onClick = { state.closeDrawerSubView() }, shape = MaterialTheme.shapes.small) {
         Icon(
           imageVector = Icons.AutoMirrored.Filled.ArrowBack,
           contentDescription = null,
@@ -3175,14 +3658,9 @@ private fun ManageOfflineMapsSubScreen(state: PrototypeAppState) {
       modifier = Modifier.fillMaxWidth(),
       shape = MaterialTheme.shapes.medium,
       colors =
-        CardDefaults.cardColors(
-          containerColor = MaterialTheme.colorScheme.secondaryContainer
-        ),
+        CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer),
     ) {
-      Column(
-        modifier = Modifier.padding(12.dp),
-        verticalArrangement = Arrangement.spacedBy(4.dp),
-      ) {
+      Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
         Row(
           verticalAlignment = Alignment.CenterVertically,
           horizontalArrangement = Arrangement.spacedBy(5.dp),
@@ -3201,7 +3679,7 @@ private fun ManageOfflineMapsSubScreen(state: PrototypeAppState) {
         }
         Text(
           text =
-            "Pre-cached Mapbox vector & satellite raster tiles across zoom levels 10–19. Downloads automatically pause if device storage drops below 500 MB.",
+            "Pre-cached vector & satellite raster tiles across zoom levels 10–19. Downloads automatically pause if device storage drops below 500 MB.",
           style = MaterialTheme.typography.labelSmall,
           color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.85f),
         )
@@ -3213,19 +3691,14 @@ private fun ManageOfflineMapsSubScreen(state: PrototypeAppState) {
         modifier = Modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.medium,
         colors =
-          CardDefaults.outlinedCardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-          ),
+          CardDefaults.outlinedCardColors(containerColor = MaterialTheme.colorScheme.surface),
       ) {
         Row(
           modifier = Modifier.fillMaxWidth().padding(12.dp),
           horizontalArrangement = Arrangement.SpaceBetween,
           verticalAlignment = Alignment.CenterVertically,
         ) {
-          Column(
-            modifier = Modifier.weight(1f),
-            verticalArrangement = Arrangement.spacedBy(3.dp),
-          ) {
+          Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
             Text(
               text = pkg.regionName,
               style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
@@ -3285,3 +3758,89 @@ private fun SurveySettingsSubScreen(state: PrototypeAppState) {
   GroundSettingsScreen(state = state)
 }
 
+/**
+ * Material Design 3 status badge indicating whether a map feature (`GeospatialEntityItem`) or form
+ * submission (`SubmissionPreviewItem`) is [SyncStatus.UPLOADING], [SyncStatus.SYNCED], or
+ * [SyncStatus.FAILED].
+ */
+@Composable
+internal fun SyncStatusIndicatorBadge(
+  syncStatus: SyncStatus,
+  modifier: Modifier = Modifier,
+  countSuffix: String? = null,
+  isHighlighted: Boolean = false,
+  onClick: (() -> Unit)? = null,
+) {
+  val (icon, containerColor, contentColor, borderColor) =
+    when (syncStatus) {
+      SyncStatus.UPLOADING ->
+        SyncStatusVisualSpec(
+          icon = Icons.Default.CloudUpload,
+          containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+          contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
+          borderColor =
+            MaterialTheme.colorScheme.tertiary.copy(alpha = if (isHighlighted) 0.9f else 0.35f),
+        )
+      SyncStatus.SYNCED ->
+        SyncStatusVisualSpec(
+          icon = Icons.Default.CloudDone,
+          containerColor = MaterialTheme.colorScheme.primaryContainer,
+          contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+          borderColor =
+            MaterialTheme.colorScheme.primary.copy(alpha = if (isHighlighted) 0.9f else 0.35f),
+        )
+      SyncStatus.FAILED ->
+        SyncStatusVisualSpec(
+          icon = Icons.Default.CloudOff,
+          containerColor = MaterialTheme.colorScheme.errorContainer,
+          contentColor = MaterialTheme.colorScheme.onErrorContainer,
+          borderColor =
+            MaterialTheme.colorScheme.error.copy(alpha = if (isHighlighted) 0.95f else 0.50f),
+        )
+    }
+
+  val clickModifier =
+    if (onClick != null) {
+      Modifier.clickable(onClick = onClick)
+    } else {
+      Modifier
+    }
+
+  Surface(
+    modifier = modifier.then(clickModifier),
+    shape = RoundedCornerShape(6.dp),
+    color = containerColor,
+    contentColor = contentColor,
+    border = BorderStroke(if (isHighlighted) 1.5.dp else 1.dp, borderColor),
+  ) {
+    Row(
+      modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+      horizontalArrangement = Arrangement.spacedBy(4.dp),
+      verticalAlignment = Alignment.CenterVertically,
+    ) {
+      Icon(
+        imageVector = icon,
+        contentDescription = syncStatus.description,
+        tint = contentColor,
+        modifier = Modifier.size(12.dp),
+      )
+      Text(
+        text =
+          if (countSuffix != null) {
+            "${syncStatus.label} $countSuffix"
+          } else {
+            syncStatus.label
+          },
+        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+        color = contentColor,
+      )
+    }
+  }
+}
+
+private data class SyncStatusVisualSpec(
+  val icon: ImageVector,
+  val containerColor: Color,
+  val contentColor: Color,
+  val borderColor: Color,
+)

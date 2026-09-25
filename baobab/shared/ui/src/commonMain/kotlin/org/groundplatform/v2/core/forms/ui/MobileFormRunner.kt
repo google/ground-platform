@@ -1,13 +1,13 @@
 /*
  * Copyright 2026 The Ground Authors.
  *
- * Licensed under the Apache License, Version 2.0 (the 'License'); you may not use this file except
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
  *
  *     https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an 'AS IS' BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
@@ -55,8 +55,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import org.groundplatform.v2.core.forms.model.ComponentState
@@ -86,12 +84,20 @@ fun MobileFormRunner(
       ?: state.formDef.form_id.takeIf { it.isNotBlank() }
       ?: "Survey Form"
   val colors = MaterialTheme.colorScheme
+  // The top bar is a saturated `primary` surface, so everything drawn on it is tinted from
+  // `onPrimary` rather than the default surface roles. Deriving the de-emphasized variants by
+  // alpha (instead of naming more palette entries) keeps the title / subtitle / tonal-button
+  // hierarchy intact under both the light and dark schemes.
+  val onAppBar = colors.onPrimary
+  val onAppBarSecondary = colors.onPrimary.copy(alpha = 0.80f)
+  val appBarTonalContainer = colors.onPrimary.copy(alpha = 0.16f)
+  val appBarTrack = colors.onPrimary.copy(alpha = 0.24f)
 
   Scaffold(
     modifier = modifier.fillMaxSize(),
     containerColor = colors.surfaceContainerLow,
     topBar = {
-      Surface(color = Color(0xFF1B5E20), contentColor = Color.White, tonalElevation = 2.dp) {
+      Surface(color = colors.primary, contentColor = onAppBar, tonalElevation = 2.dp) {
         Column(modifier = Modifier.fillMaxWidth()) {
           TopAppBar(
             title = {
@@ -99,7 +105,7 @@ fun MobileFormRunner(
                 Text(
                   text = formTitle,
                   style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                  color = Color.White,
+                  color = onAppBar,
                 )
                 Text(
                   text =
@@ -109,7 +115,7 @@ fun MobileFormRunner(
                       "Step ${stepIndex + 1} of $totalSteps"
                     },
                   style = MaterialTheme.typography.labelSmall,
-                  color = Color(0xFFC8E6C9),
+                  color = onAppBarSecondary,
                 )
               }
             },
@@ -118,8 +124,8 @@ fun MobileFormRunner(
                 onClick = { controller.isOverviewOpen = !controller.isOverviewOpen },
                 colors =
                   ButtonDefaults.filledTonalButtonColors(
-                    containerColor = Color(0xFF2E7D32),
-                    contentColor = Color.White,
+                    containerColor = appBarTonalContainer,
+                    contentColor = onAppBar,
                   ),
                 contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
               ) {
@@ -132,7 +138,7 @@ fun MobileFormRunner(
                 Spacer(modifier = Modifier.width(6.dp))
                 TextButton(
                   onClick = onClose,
-                  colors = ButtonDefaults.textButtonColors(contentColor = Color.White),
+                  colors = ButtonDefaults.textButtonColors(contentColor = onAppBar),
                 ) {
                   Text(
                     text = "✕",
@@ -143,9 +149,9 @@ fun MobileFormRunner(
             },
             colors =
               TopAppBarDefaults.topAppBarColors(
-                containerColor = Color(0xFF1B5E20),
-                titleContentColor = Color.White,
-                actionIconContentColor = Color.White,
+                containerColor = colors.primary,
+                titleContentColor = onAppBar,
+                actionIconContentColor = onAppBar,
               ),
           )
 
@@ -162,7 +168,7 @@ fun MobileFormRunner(
               Text(
                 text = "🌐",
                 style = MaterialTheme.typography.labelMedium,
-                color = Color(0xFFC8E6C9),
+                color = onAppBarSecondary,
               )
               state.availableLanguages.forEach { lang ->
                 val isActive = lang == state.activeLanguage
@@ -171,10 +177,12 @@ fun MobileFormRunner(
                   onClick = { controller.setLanguage(lang) },
                   colors =
                     androidx.compose.material3.FilterChipDefaults.filterChipColors(
-                      containerColor = Color(0xFF144718),
-                      labelColor = Color.White,
-                      selectedContainerColor = Color.White,
-                      selectedLabelColor = Color(0xFF1B5E20),
+                      containerColor = appBarTonalContainer,
+                      labelColor = onAppBar,
+                      // Selected chips invert: the on-color becomes the fill, so the label has to
+                      // switch back to the bar's own color to stay legible.
+                      selectedContainerColor = onAppBar,
+                      selectedLabelColor = colors.primary,
                     ),
                   label = { Text(text = lang, style = MaterialTheme.typography.labelSmall) },
                 )
@@ -185,8 +193,8 @@ fun MobileFormRunner(
           LinearProgressIndicator(
             progress = { progress.coerceIn(0f, 1f) },
             modifier = Modifier.fillMaxWidth().height(5.dp),
-            color = Color(0xFF81C784),
-            trackColor = Color(0xFF0D3B10),
+            color = onAppBar,
+            trackColor = appBarTrack,
           )
         }
       }
@@ -214,7 +222,6 @@ fun MobileFormRunner(
             text = "${stepIndex + 1} / $totalSteps",
             style =
               MaterialTheme.typography.labelMedium.copy(
-                fontFamily = FontFamily.Monospace,
                 fontWeight = FontWeight.SemiBold,
                 color = colors.onSurfaceVariant,
               ),
@@ -460,7 +467,10 @@ private fun RepeatHubScreenContent(
           shape = MaterialTheme.shapes.medium,
           color = colors.surfaceContainer,
         ) {
-          Box(modifier = Modifier.fillMaxWidth().padding(16.dp), contentAlignment = Alignment.Center) {
+          Box(
+            modifier = Modifier.fillMaxWidth().padding(16.dp),
+            contentAlignment = Alignment.Center,
+          ) {
             Text(
               text = "No repeat entries added yet.",
               style = MaterialTheme.typography.bodyMedium.copy(color = colors.onSurfaceVariant),
@@ -502,7 +512,6 @@ private fun RepeatHubScreenContent(
                   text = instance.canonicalPath,
                   style =
                     MaterialTheme.typography.labelSmall.copy(
-                      fontFamily = FontFamily.Monospace,
                       color = colors.onSurfaceVariant,
                     ),
                 )
@@ -510,10 +519,7 @@ private fun RepeatHubScreenContent(
               if (repeatGroup.canRemoveInstance) {
                 TextButton(
                   onClick = {
-                    controller.removeRepeatInstance(
-                      repeatGroup.canonicalPath,
-                      instance.repeatIndex,
-                    )
+                    controller.removeRepeatInstance(repeatGroup.canonicalPath, instance.repeatIndex)
                   },
                   colors = ButtonDefaults.textButtonColors(contentColor = colors.error),
                 ) {
@@ -609,7 +615,6 @@ private fun FormSummaryScreenContent(controller: FormWizardController) {
                     "Instance ID: ${subResult.recordInstance.metadata?.instance_id ?: "(generated)"}",
                   style =
                     MaterialTheme.typography.labelSmall.copy(
-                      fontFamily = FontFamily.Monospace,
                       color = colors.onPrimaryContainer,
                     ),
                 )
@@ -640,7 +645,6 @@ private fun FormSummaryScreenContent(controller: FormWizardController) {
                     style =
                       MaterialTheme.typography.labelSmall.copy(
                         color = colors.onErrorContainer,
-                        fontFamily = FontFamily.Monospace,
                       ),
                     modifier = Modifier.clickable { controller.jumpToField(err.fieldPath) },
                   )
@@ -663,7 +667,8 @@ private fun FormSummaryScreenContent(controller: FormWizardController) {
           colors =
             CardDefaults.outlinedCardColors(
               containerColor =
-                if (isInvalid) colors.errorContainer.copy(alpha = 0.4f) else colors.surfaceContainerLow
+                if (isInvalid) colors.errorContainer.copy(alpha = 0.4f)
+                else colors.surfaceContainerLow
             ),
           border =
             BorderStroke(
@@ -695,7 +700,6 @@ private fun FormSummaryScreenContent(controller: FormWizardController) {
                 text = formatFieldValueForDisplay(fieldState.value, fieldState.dataType),
                 style =
                   MaterialTheme.typography.bodySmall.copy(
-                    fontFamily = FontFamily.Monospace,
                     color = if (fieldState.isEmpty) colors.onSurfaceVariant else colors.primary,
                   ),
               )
@@ -708,11 +712,11 @@ private fun FormSummaryScreenContent(controller: FormWizardController) {
         }
       }
 
-      // ODK Entities Preview (if declared)
+      // Entities Preview (if declared)
       if (state.entityStates.isNotEmpty()) {
         HorizontalDivider(color = colors.outlineVariant)
         Text(
-          text = "Evaluated ODK Entities (${state.entityStates.size})",
+          text = "Evaluated Entities (${state.entityStates.size})",
           style =
             MaterialTheme.typography.labelLarge.copy(
               fontWeight = FontWeight.Bold,
@@ -742,7 +746,6 @@ private fun FormSummaryScreenContent(controller: FormWizardController) {
                 text = "ID: ${entity.entityId} | Label: ${entity.label}",
                 style =
                   MaterialTheme.typography.labelSmall.copy(
-                    fontFamily = FontFamily.Monospace,
                     color = colors.onSecondaryContainer,
                   ),
               )
@@ -871,9 +874,7 @@ fun MobilePhoneFrame(
     ) {
       Column(
         modifier =
-          Modifier.fillMaxSize()
-            .clip(MaterialTheme.shapes.extraLarge)
-            .background(colors.surface)
+          Modifier.fillMaxSize().clip(MaterialTheme.shapes.extraLarge).background(colors.surface)
       ) {
         // Simulated Mobile Status Bar
         Row(
@@ -916,21 +917,15 @@ fun MobilePhoneFrame(
         // Bottom Gesture Home Bar
         Box(
           modifier =
-            Modifier.fillMaxWidth()
-              .background(colors.surfaceContainer)
-              .padding(vertical = 6.dp),
+            Modifier.fillMaxWidth().background(colors.surfaceContainer).padding(vertical = 6.dp),
           contentAlignment = Alignment.Center,
         ) {
           Box(
             modifier =
-              Modifier.width(110.dp)
-                .height(4.dp)
-                .clip(CircleShape)
-                .background(colors.outline)
+              Modifier.width(110.dp).height(4.dp).clip(CircleShape).background(colors.outline)
           )
         }
       }
     }
   }
 }
-

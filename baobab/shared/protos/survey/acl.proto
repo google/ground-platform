@@ -27,8 +27,8 @@ enum Role {
   // submission viewing while hiding/disabling collection and editing actions.
   VIEWER = 1;
 
-  // Data Collector: Field enumerator authorized to collect submissions and
-  // register ad-hoc geospatial entities.
+  // Data Collector: Field enumerator or desk photo-interpreter authorized to
+  // collect submissions and register ad-hoc geospatial entities.
   DATA_COLLECTOR = 2;
 
   // Survey Organizer: Project supervisor/manager authorized to edit forms,
@@ -138,10 +138,10 @@ message QuotaLimits {
   int32 max_forms_per_survey = 3;
 
   // Maximum questions/tasks per form (Basic: 10, Sponsored: 50).
-  int32 max_tasks_per_form = 4;
+  int32 max_questions_per_form = 4;
 
-  // Maximum photo tasks per form (Basic: 1, Sponsored: 10).
-  int32 max_photo_tasks_per_form = 5;
+  // Maximum photo questions per form (Basic: 1, Sponsored: 10).
+  int32 max_photo_questions_per_form = 5;
 
   // Maximum predefined geospatial entities (Basic: 1,000, Sponsored: 10,000).
   int32 max_predefined_entities = 6;

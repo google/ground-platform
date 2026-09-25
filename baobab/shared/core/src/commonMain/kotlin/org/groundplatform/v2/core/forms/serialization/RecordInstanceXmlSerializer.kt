@@ -1,13 +1,13 @@
-/**
+/*
  * Copyright 2026 The Ground Authors.
  *
- * Licensed under the Apache License, Version 2.0 (the 'License'); you may not use this file except
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
  *
  *     https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an 'AS IS' BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
@@ -31,6 +31,8 @@ import groundplatform.v2.forms.RecordNodeList
 import groundplatform.v2.forms.RecordSchema
 import groundplatform.v2.forms.TypedValue
 import groundplatform.v2.forms.TypedValueList
+import okio.ByteString
+import okio.ByteString.Companion.decodeBase64
 import okio.ByteString.Companion.encodeUtf8
 import org.groundplatform.v2.core.forms.serialization.xml.XmlElement
 import org.groundplatform.v2.core.forms.serialization.xml.XmlParser
@@ -38,8 +40,8 @@ import org.groundplatform.v2.core.forms.serialization.xml.XmlText
 import org.groundplatform.v2.core.forms.serialization.xml.XmlWriter
 
 /**
- * Serializes and deserializes ODK XForms submission instance XML (`<data id="...">...</data>`) to
- * and from `groundplatform.v2.forms.RecordInstance`.
+ * Serializes and deserializes XForms submission instance XML (`<data id="...">...</data>`) to and
+ * from `groundplatform.v2.forms.RecordInstance`.
  */
 internal object RecordInstanceXmlSerializer {
 
@@ -70,7 +72,7 @@ internal object RecordInstanceXmlSerializer {
     )
 
   /**
-   * Deserializes an ODK submission XML string into a [RecordInstance].
+   * Deserializes an XForms submission XML string into a [RecordInstance].
    *
    * @param xml The XML string representing the submission instance.
    * @param schema Optional [RecordSchema] to guide exact field typing (e.g. single-item repeats,
@@ -290,7 +292,7 @@ internal object RecordInstanceXmlSerializer {
         DataType.TYPE_GEOPOINT -> TypedValue(geopoint_value = parseGeoPoint(text))
         DataType.TYPE_GEOTRACE -> TypedValue(geotrace_value = parseGeoTrace(text))
         DataType.TYPE_GEOSHAPE -> TypedValue(geoshape_value = parseGeoShape(text))
-        DataType.TYPE_BINARY -> TypedValue(binary_value = text.encodeUtf8())
+        DataType.TYPE_BINARY -> parseBinaryValue(text)
         else -> TypedValue(string_value = text)
       }
     }
@@ -371,7 +373,7 @@ internal object RecordInstanceXmlSerializer {
     return TypedValue(string_value = text)
   }
 
-  /** Serializes a [RecordInstance] into an ODK submission XML string. */
+  /** Serializes a [RecordInstance] into an XForms submission XML string. */
   fun serialize(
     record: RecordInstance,
     rootElementName: String = "data",
@@ -473,9 +475,48 @@ internal object RecordInstanceXmlSerializer {
         typed.geotrace_value.points.joinToString("; ") { formatGeoPoint(it) }
       typed.geoshape_value != null ->
         typed.geoshape_value.points.joinToString("; ") { formatGeoPoint(it) }
-      typed.binary_value != null -> typed.binary_value.utf8()
+      typed.binary_value != null -> formatBinaryValue(typed.binary_value)
       else -> ""
     }
+
+  private const val BASE64_BINARY_PREFIX = "base64:"
+
+  /**
+   * Formats a [DataType.TYPE_BINARY] value for XForms submission XML.
+   *
+   * Per the ODK / OpenRosa Form Submission API (used by ODK Collect, KoboToolbox, and Enketo),
+   * binary fields store the attachment **filename** in the XML element (`<photo>image.jpg</photo>`)
+   * while the media bytes travel as a separate `multipart/form-data` part. When [bytes] is a valid
+   * printable UTF-8 string (and does not itself start with [BASE64_BINARY_PREFIX]), it is emitted
+   * verbatim as the attachment filename. When [bytes] holds raw binary data (non-UTF-8 sequences or
+   * XML-invalid control bytes), calling `ByteString.utf8()` would silently corrupt non-UTF-8 bytes
+   * into `U+FFFD`; we instead emit a `base64:`-prefixed payload so standalone XML serialization
+   * still round-trips byte-for-byte.
+   */
+  private fun formatBinaryValue(bytes: ByteString): String {
+    if (bytes.size == 0) return ""
+    val decoded = bytes.utf8()
+    val roundTripsAsPrintableUtf8 =
+      !decoded.startsWith(BASE64_BINARY_PREFIX) &&
+        !decoded.contains('\uFFFD') &&
+        decoded.encodeUtf8() == bytes &&
+        decoded.all { ch -> ch >= ' ' || ch == '\t' || ch == '\n' || ch == '\r' }
+    return if (roundTripsAsPrintableUtf8) {
+      decoded
+    } else {
+      BASE64_BINARY_PREFIX + bytes.base64()
+    }
+  }
+
+  private fun parseBinaryValue(text: String): TypedValue {
+    if (text.startsWith(BASE64_BINARY_PREFIX)) {
+      val payload = text.removePrefix(BASE64_BINARY_PREFIX).decodeBase64()
+      if (payload != null) {
+        return TypedValue(binary_value = payload)
+      }
+    }
+    return TypedValue(binary_value = text.encodeUtf8())
+  }
 
   // --- Geospatial Formatting & Parsing ---
 

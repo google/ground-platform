@@ -18,7 +18,7 @@
 
 A reusable **Compose Multiplatform** UI library
 ([`org.groundplatform.v2.core.forms.ui`](src/commonMain/kotlin/org/groundplatform/v2/core/forms/ui/README.md))
-for rendering and executing ProtoForms / ODK XForms definitions one question at
+for rendering and executing ProtoForms / XForms definitions one question at
 a time across **Android (`jvm`)**, **iOS (`iosArm64`, `iosSimulatorArm64`)**,
 and **Web (`js`, `wasmJs`)**.
 
