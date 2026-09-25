@@ -244,9 +244,13 @@ export class DataStoreService {
 
     await runInInjectionContext(this.injector, () =>
       runTransaction(this.db, async transaction => {
+        const promises: Promise<void>[] = [];
+
         if (jobIdsToDelete) {
           for (const jobId of jobIdsToDelete) {
-            await this._deleteJobAndRelatedData(transaction, surveyId, jobId);
+            promises.push(
+              this._deleteJobAndRelatedData(transaction, surveyId, jobId)
+            );
           }
         }
 
@@ -254,8 +258,12 @@ export class DataStoreService {
           ({ id }) => !jobIdsToDelete?.includes(id)
         );
         for (const job of jobsToUpdate.values()) {
-          await this._addOrUpdateJobInTransaction(transaction, surveyId, job);
+          promises.push(
+            this._addOrUpdateJobInTransaction(transaction, surveyId, job)
+          );
         }
+
+        await Promise.all(promises);
 
         const surveyRef = runInInjectionContext(this.injector, () =>
           doc(this.db, SURVEYS_COLLECTION_NAME, surveyId)
@@ -393,9 +401,11 @@ export class DataStoreService {
 
     await runInInjectionContext(this.injector, () =>
       runTransaction(this.db, async transaction => {
-        for (const { id: jobId } of jobs.values()) {
-          await this._deleteJobAndRelatedData(transaction, surveyId, jobId);
-        }
+        await Promise.all(
+          Array.from(jobs.values()).map(({ id: jobId }) =>
+            this._deleteJobAndRelatedData(transaction, surveyId, jobId)
+          )
+        );
 
         const surveyRef = runInInjectionContext(this.injector, () =>
           doc(this.db, SURVEYS_COLLECTION_NAME, surveyId)
