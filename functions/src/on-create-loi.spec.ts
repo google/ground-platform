@@ -20,15 +20,15 @@ import {
   stubAdminApi,
 } from '@ground/lib/testing/firestore';
 import { registry } from '@ground/lib';
-import { Firestore } from 'firebase-admin/firestore';
+import { DocumentData, Firestore } from 'firebase-admin/firestore';
 import {
+  DocumentSnapshot,
   FirestoreEvent,
-  QueryDocumentSnapshot,
 } from 'firebase-functions/v2/firestore';
 import { resetDatastore } from './common/context';
 import { GroundProtos } from '@ground/proto';
 import { onCreateLoiHandler } from './on-create-loi';
-import * as broadcastModule from './common/broadcast-survey-update';
+import * as broadcastModule from './common/broadcast';
 
 import Pb = GroundProtos.ground.v1beta1;
 
@@ -39,15 +39,19 @@ const p = registry.getFieldIds(Pb.Point);
 const c = registry.getFieldIds(Pb.Coordinates);
 const j = registry.getFieldIds(Pb.Job);
 const intgr = registry.getFieldIds(Pb.Integration);
+const ai = registry.getFieldIds(Pb.AuditInfo);
+const ts = registry.getFieldIds(GroundProtos.google.protobuf.Timestamp);
 
 describe('onCreateLoiHandler()', () => {
   let mockFirestore: Firestore;
+  let broadcastSpy: jasmine.Spy;
 
   const SURVEY_ID = 'survey1';
   const JOB_ID = 'job1';
   const LOI_ID = 'loi1';
   const LOI_PATH = `surveys/${SURVEY_ID}/lois/${LOI_ID}`;
   const JOB_PATH = `surveys/${SURVEY_ID}/jobs/${JOB_ID}`;
+  const EVENT_TIME = '2026-01-02T03:04:06.000Z';
 
   const loiDoc = {
     [l.jobId]: JOB_ID,
@@ -71,10 +75,18 @@ describe('onCreateLoiHandler()', () => {
     url: 'https://geoid.example.com/api',
   };
 
+  function createdEvent(data: DocumentData = loiDoc) {
+    return {
+      data: newDocumentSnapshot(data),
+      params: { surveyId: SURVEY_ID, loiId: LOI_ID },
+      time: EVENT_TIME,
+    } as unknown as FirestoreEvent<DocumentSnapshot | undefined>;
+  }
+
   beforeEach(() => {
     mockFirestore = createMockFirestore();
     stubAdminApi(mockFirestore);
-    spyOn(broadcastModule, 'broadcastSurveyUpdate').and.returnValue(
+    broadcastSpy = spyOn(broadcastModule, 'broadcastUpdate').and.returnValue(
       Promise.resolve('')
     );
     mockFirestore.doc(LOI_PATH).set(loiDoc);
@@ -94,12 +106,20 @@ describe('onCreateLoiHandler()', () => {
     mockFirestore.doc(JOB_PATH).set({});
     const fetchSpy = spyOn(globalThis, 'fetch');
 
-    await onCreateLoiHandler({
-      data: newDocumentSnapshot(loiDoc) as unknown as QueryDocumentSnapshot,
-      params: { surveyId: SURVEY_ID, loiId: LOI_ID },
-    } as unknown as FirestoreEvent<QueryDocumentSnapshot | undefined>);
+    await onCreateLoiHandler(createdEvent());
 
     expect(fetchSpy).not.toHaveBeenCalled();
+  });
+
+  it('broadcasts immediately when a created LOI needs no fixing up', async () => {
+    mockFirestore.doc(JOB_PATH).set({});
+
+    await onCreateLoiHandler(createdEvent());
+
+    expect(broadcastSpy).toHaveBeenCalledOnceWith(
+      { type: 'loi', surveyId: SURVEY_ID, loiId: LOI_ID, deleted: false },
+      EVENT_TIME
+    );
   });
 
   it('runs property generator and updates LOI properties when integration is enabled', async () => {
@@ -117,15 +137,69 @@ describe('onCreateLoiHandler()', () => {
       } as Response)
     );
 
-    await onCreateLoiHandler({
-      data: newDocumentSnapshot(loiDoc) as unknown as QueryDocumentSnapshot,
-      params: { surveyId: SURVEY_ID, loiId: LOI_ID },
-    } as unknown as FirestoreEvent<QueryDocumentSnapshot | undefined>);
+    await onCreateLoiHandler(createdEvent());
 
     const loiData = (await mockFirestore.doc(LOI_PATH).get()).data();
     expect(loiData?.[l.properties]?.['whisp_area']).toEqual({
       [pr.numericValue]: 100,
     });
+  });
+
+  it('defers the broadcast to the write it makes when fixing up a created LOI', async () => {
+    mockFirestore.doc(JOB_PATH).set({
+      [j.enabledIntegrations]: [{ [intgr.id]: 'whisp' }],
+    });
+    spyOn(globalThis, 'fetch').and.returnValue(
+      Promise.resolve({
+        ok: true,
+        json: () =>
+          Promise.resolve({
+            code: 'analysis_completed',
+            data: { features: [{ properties: { area: 100 } }] },
+          }),
+      } as Response)
+    );
+
+    await onCreateLoiHandler(createdEvent());
+
+    expect(broadcastSpy).not.toHaveBeenCalled();
+  });
+
+  it('corrects created/lastModified server timestamps to the trigger event time', async () => {
+    mockFirestore.doc(JOB_PATH).set({});
+
+    const clientGuessedServerTimeMillis = Date.UTC(2020, 0, 1);
+    const clientTimeMillis = Date.UTC(2026, 0, 2, 3, 4, 5);
+
+    const auditInfo = {
+      [ai.userId]: 'user1',
+      [ai.clientTimestamp]: { [ts.seconds]: clientTimeMillis / 1000 },
+      [ai.serverTimestamp]: {
+        [ts.seconds]: clientGuessedServerTimeMillis / 1000,
+      },
+    };
+    const loiDocWithAuditInfo = {
+      ...loiDoc,
+      [l.created]: auditInfo,
+      [l.lastModified]: auditInfo,
+    };
+    mockFirestore.doc(LOI_PATH).set(loiDocWithAuditInfo);
+
+    await onCreateLoiHandler(createdEvent(loiDocWithAuditInfo));
+
+    const loiData = (await mockFirestore.doc(LOI_PATH).get()).data();
+    const expectedServerTimeSeconds = Math.floor(Date.parse(EVENT_TIME) / 1000);
+
+    expect(loiData?.[l.created][ai.serverTimestamp][ts.seconds]).toEqual(
+      expectedServerTimeSeconds
+    );
+    expect(loiData?.[l.created][ai.clientTimestamp][ts.seconds]).toEqual(
+      clientTimeMillis / 1000
+    );
+    expect(loiData?.[l.created][ai.userId]).toEqual('user1');
+    expect(loiData?.[l.lastModified][ai.serverTimestamp][ts.seconds]).toEqual(
+      expectedServerTimeSeconds
+    );
   });
 
   it('runs geoid property generator and updates LOI properties when integration is enabled', async () => {
@@ -144,10 +218,7 @@ describe('onCreateLoiHandler()', () => {
       } as Response)
     );
 
-    await onCreateLoiHandler({
-      data: newDocumentSnapshot(loiDoc) as unknown as QueryDocumentSnapshot,
-      params: { surveyId: SURVEY_ID, loiId: LOI_ID },
-    } as unknown as FirestoreEvent<QueryDocumentSnapshot | undefined>);
+    await onCreateLoiHandler(createdEvent());
 
     const [, requestInit] = fetchSpy.calls.mostRecent().args;
     expect(JSON.parse(requestInit!.body as string).id).toEqual(LOI_ID);
@@ -170,10 +241,7 @@ describe('onCreateLoiHandler()', () => {
       } as Response)
     );
 
-    await onCreateLoiHandler({
-      data: newDocumentSnapshot(loiDoc) as unknown as QueryDocumentSnapshot,
-      params: { surveyId: SURVEY_ID, loiId: LOI_ID },
-    } as unknown as FirestoreEvent<QueryDocumentSnapshot | undefined>);
+    await onCreateLoiHandler(createdEvent());
 
     const loiData = (await mockFirestore.doc(LOI_PATH).get()).data();
     expect(loiData?.[l.properties]?.['geoid_geoid']).toBeUndefined();

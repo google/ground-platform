@@ -19,12 +19,12 @@ import {
   DocumentSnapshot,
   FirestoreEvent,
 } from 'firebase-functions/v2/firestore';
-import { broadcastSurveyUpdate } from './common/broadcast-survey-update';
+import { broadcastUpdate } from './common/broadcast';
 
 export async function onWriteJobHandler(
   event: FirestoreEvent<Change<DocumentSnapshot> | undefined>
 ) {
-  const surveyId = event.params.surveyId;
+  const { surveyId, jobId } = event.params;
 
-  return broadcastSurveyUpdate(surveyId);
+  return broadcastUpdate({ type: 'job', surveyId, jobId }, event.time);
 }

@@ -18,6 +18,7 @@ import { Request } from 'firebase-functions/v2/https';
 import type { Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import { getDatastore } from './common/context';
+import { toTimestampPb } from './common/audit-info';
 import Busboy from 'busboy';
 import JSONStream from 'jsonstream-ts';
 import { canImport } from './common/auth';
@@ -265,12 +266,6 @@ function toMillis(value: string | undefined): number | null {
     return null;
   }
   return millis;
-}
-
-function toTimestampPb(millis: number): GroundProtos.google.protobuf.Timestamp {
-  return new GroundProtos.google.protobuf.Timestamp({
-    seconds: Math.floor(millis / 1000),
-  });
 }
 
 export function toLoiPbProperties(properties: GeoJsonProperties): {
