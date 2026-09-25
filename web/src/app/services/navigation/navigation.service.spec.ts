@@ -60,6 +60,16 @@ describe('NavigationService', () => {
     );
   });
 
+  it('side panel is expanded by default and toggles on each click', () => {
+    expect(service.getSidePanelExpanded()).toBeTrue();
+
+    service.onClickSidePanelButton();
+    expect(service.getSidePanelExpanded()).toBeFalse();
+
+    service.onClickSidePanelButton();
+    expect(service.getSidePanelExpanded()).toBeTrue();
+  });
+
   it('getPlayStoreUrl carries the survey id in the install referrer', () => {
     expect(service.getPlayStoreUrl('org.ground.app', 'survey123')).toBe(
       'https://play.google.com/store/apps/details?id=org.ground.app' +
