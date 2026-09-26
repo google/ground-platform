@@ -1,0 +1,98 @@
+/*
+ * Copyright 2026 The Ground Authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
+ */
+package org.groundplatform.v2.devtools.prototypeapp.domain.usecase
+
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.MutationLogItem
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.MutationSyncState
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.SyncStatus
+import org.groundplatform.v2.devtools.prototypeapp.domain.repository.MutationRepository
+import org.groundplatform.v2.devtools.prototypeapp.domain.repository.SurveyRepository
+
+/**
+ * Multi-repository domain use case orchestrating [MutationRepository] and [SurveyRepository] to
+ * synchronize single or batch outbox mutations and update linked entity and submission
+ * [SyncStatus].
+ */
+class SyncMutationsUseCase(
+  private val mutationRepository: MutationRepository,
+  private val surveyRepository: SurveyRepository,
+) {
+  /**
+   * Synchronizes a single Outbox mutation ([mutationId]), transitioning its state to
+   * [MutationSyncState.UPLOADED] and updating the target entity or submission [SyncStatus] to
+   * [SyncStatus.SYNCED]. Returns the notice message if synchronized, or `null` if not found.
+   */
+  fun syncSingleMutation(mutationId: String): String? {
+    val mutations = mutationRepository.getMutations()
+    val target = mutations.firstOrNull { it.id == mutationId } ?: return null
+    val started = target.startedTimestamp ?: "2026-09-19 09:42:02 UTC"
+    val completed = "2026-09-19 09:42:06 UTC"
+    mutationRepository.updateMutation(mutationId) { item ->
+      item.copy(
+        state = MutationSyncState.UPLOADED,
+        stateDetail = "Synced to Ground Cloud • Commit rev #1052",
+        startedTimestamp = started,
+        completedTimestamp = completed,
+      )
+    }
+    val subId = target.submissionId
+    if (subId != null) {
+      surveyRepository.updateSubmissionSyncStatus(subId, SyncStatus.SYNCED)
+    } else {
+      surveyRepository.updateEntitySyncStatus(target.entityId, SyncStatus.SYNCED)
+    }
+    return "Uploaded mutation \"${target.title}\" ($completed)"
+  }
+
+  /**
+   * Synchronizes all pending/in-progress mutations in the Outbox for [activeSurveyId],
+   * transitioning them to [MutationSyncState.UPLOADED] and marking all entities and standalone
+   * submissions in [SurveyRepository] as [SyncStatus.SYNCED]. Returns the notice message if any
+   * outbox mutations were synced, or `null` when outbox is empty.
+   */
+  fun syncAllOutboxMutations(activeSurveyId: String): String? {
+    val allMutations = mutationRepository.getMutations()
+    val outboxCount = allMutations.count { it.surveyId == activeSurveyId && it.isOutbox }
+    if (outboxCount == 0) return null
+    val completed = "2026-09-19 09:42:10 UTC"
+    mutationRepository.setMutations(
+      allMutations.map { item ->
+        if (item.isOutbox) {
+          item.copy(
+            state = MutationSyncState.UPLOADED,
+            stateDetail = "Synced to Ground Cloud • Batch commit rev #1055",
+            startedTimestamp = item.startedTimestamp ?: "2026-09-19 09:42:04 UTC",
+            completedTimestamp = completed,
+          )
+        } else {
+          item
+        }
+      }
+    )
+    surveyRepository.setEntities(
+      surveyRepository.getEntities().map { entity ->
+        entity.copy(
+          submissions = entity.submissions.map { sub -> sub.copy(syncStatus = SyncStatus.SYNCED) },
+          syncStatus = SyncStatus.SYNCED,
+        )
+      }
+    )
+    surveyRepository.setStandaloneSubmissions(
+      surveyRepository.getStandaloneSubmissions().map { sub ->
+        sub.copy(syncStatus = SyncStatus.SYNCED)
+      }
+    )
+    return "Uploaded all $outboxCount Outbox mutation(s) to Ground Cloud ($completed)"
+  }
+}

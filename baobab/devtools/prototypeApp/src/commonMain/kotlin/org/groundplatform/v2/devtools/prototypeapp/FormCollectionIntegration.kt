@@ -97,121 +97,33 @@ import org.groundplatform.v2.core.forms.ui.formatFieldValueForDisplay
  * entity reference step (`select_one_from_file <dataset>.csv` / `appearance="map-select"`) when a
  * form requires a target geospatial entity.
  */
-const val ENTITY_REF_FIELD_PATH: String = "/data/target_entity"
+const val ENTITY_REF_FIELD_PATH: String = PrototypeAppDataStore.ENTITY_REF_FIELD_PATH
 
 /**
  * Default rich XForms `<h:html>` definition used in `devtools/prototypeApp` for EUDR / Shade-Tree /
  * Field Survey data collection and live XForms FormDef testing in the UX Chrome panel.
  *
- * Defaults to [WorkbenchExampleForm.ALL_FIELD_TYPES], showcasing all 20+ ProtoForms / XForms field
- * types while preserving `/data/dominant_shade_species` and `/data/surviving_saplings_count`.
+ * Provided by [PrototypeAppDataStore.DEFAULT_PROTOTYPE_XFORMS_XML].
  */
-val DEFAULT_PROTOTYPE_XFORMS_XML: String = WorkbenchExampleForm.ALL_FIELD_TYPES.xformsXml
+val DEFAULT_PROTOTYPE_XFORMS_XML: String = PrototypeAppDataStore.DEFAULT_PROTOTYPE_XFORMS_XML
 
 /**
  * Secondary XForms sample preset for Baobab / Shade Tree Biometrics testing in the Chrome panel.
+ *
+ * Provided by [PrototypeAppDataStore.BAOBAB_BIOMETRICS_SAMPLE_XFORMS_XML].
  */
 const val BAOBAB_BIOMETRICS_SAMPLE_XFORMS_XML: String =
-  """<h:html xmlns="http://www.w3.org/2002/xforms"
-        xmlns:h="http://www.w3.org/1999/xhtml"
-        xmlns:jr="http://openrosa.org/javarosa">
-  <h:head>
-    <h:title>Shade Tree &amp; Baobab Biometrics</h:title>
-    <model>
-      <instance>
-        <data id="baobab_biometrics" version="2026091901">
-          <meta>
-            <instanceID/>
-          </meta>
-          <species>Adansonia digitata</species>
-          <height_m>18.5</height_m>
-          <circumference_m>12.2</circumference_m>
-          <health_status>healthy</health_status>
-        </data>
-      </instance>
-      <bind nodeset="/data/meta/instanceID" type="string" jr:preload="uid"/>
-      <bind nodeset="/data/species" type="string" required="true()"/>
-      <bind nodeset="/data/height_m" type="decimal"/>
-      <bind nodeset="/data/circumference_m" type="decimal"/>
-      <bind nodeset="/data/health_status" type="string"/>
-    </model>
-  </h:head>
-  <h:body>
-    <input ref="/data/species">
-      <label>Tree Species</label>
-    </input>
-    <input ref="/data/height_m">
-      <label>Canopy Height (meters)</label>
-    </input>
-    <input ref="/data/circumference_m">
-      <label>Trunk Circumference (meters)</label>
-    </input>
-    <select1 ref="/data/health_status">
-      <label>Crown &amp; Bark Health Status</label>
-      <item>
-        <label>Healthy</label>
-        <value>healthy</value>
-      </item>
-      <item>
-        <label>Stressed</label>
-        <value>stressed</value>
-      </item>
-    </select1>
-  </h:body>
-</h:html>"""
+  PrototypeAppDataStore.BAOBAB_BIOMETRICS_SAMPLE_XFORMS_XML
+
+private val defaultResolveFormDefUseCase =
+  org.groundplatform.v2.devtools.prototypeapp.domain.usecase.ResolveFormDefForLaunchUseCase()
 
 /**
  * Built-in fallback XForms `<h:html>` XML definitions keyed by [FormPreviewItem.id], used when
  * [PrototypeAppState.customXFormsXml] is cleared/blank.
  */
-fun builtInFallbackXFormsXmlForForm(form: FormPreviewItem): String {
-  when (form.id) {
-    "form-single-point-land-use" -> return WorkbenchExampleForm.SINGLE_POINT_LAND_USE.xformsXml
-    "form-sample-plots-forest" ->
-      return WorkbenchExampleForm.SAMPLE_PLOTS_FOREST_ASSESSMENT.xformsXml
-    "form-commodity-perimeter-center" ->
-      return WorkbenchExampleForm.COMMODITY_PERIMETER_AND_CENTER.xformsXml
-    "form-household-past-individuals" ->
-      return WorkbenchExampleForm.HOUSEHOLD_SURVEY_PAST_INDIVIDUALS.xformsXml
-    "form-coffee-parcel" -> return WorkbenchExampleForm.ALL_FIELD_TYPES.xformsXml
-  }
-  val escapedTitle = form.title.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
-  val safeFormId = form.id.replace('-', '_')
-  return """<h:html xmlns="http://www.w3.org/2002/xforms"
-        xmlns:h="http://www.w3.org/1999/xhtml"
-        xmlns:jr="http://openrosa.org/javarosa">
-  <h:head>
-    <h:title>$escapedTitle</h:title>
-    <model>
-      <instance>
-        <data id="$safeFormId" version="${form.version}">
-          <meta>
-            <instanceID/>
-          </meta>
-          <organizer_action_cta>Verified in field (${form.ctaLabel})</organizer_action_cta>
-          <collector_observation>Field verification complete</collector_observation>
-          <canopy_or_parcel_metric>94</canopy_or_parcel_metric>
-        </data>
-      </instance>
-      <bind nodeset="/data/meta/instanceID" type="string" jr:preload="uid"/>
-      <bind nodeset="/data/organizer_action_cta" type="string" required="true()"/>
-      <bind nodeset="/data/collector_observation" type="string"/>
-      <bind nodeset="/data/canopy_or_parcel_metric" type="int"/>
-    </model>
-  </h:head>
-  <h:body>
-    <input ref="/data/organizer_action_cta">
-      <label>Completed Form Action (${form.ctaLabel})</label>
-    </input>
-    <input ref="/data/collector_observation">
-      <label>Field Observation Notes</label>
-    </input>
-    <input ref="/data/canopy_or_parcel_metric">
-      <label>Measured Field Metric / Score (%)</label>
-    </input>
-  </h:body>
-</h:html>"""
-}
+fun builtInFallbackXFormsXmlForForm(form: FormPreviewItem): String =
+  PrototypeAppDataStore.builtInFallbackXFormsXmlForForm(form)
 
 /** Parses the initial default XForms XML into a [FormDef] via [XFormsXmlSerializer]. */
 fun parseDefaultPrototypeFormDef(): FormDef =
@@ -228,92 +140,17 @@ fun ensureEntityRefStepInFormDef(
   form: FormPreviewItem,
   candidateEntities: List<GeospatialEntityItem> = emptyList(),
   defaultSelectedEntityId: String = "",
-): FormDef {
-  if (!form.requiresEntity) return baseFormDef
-  val baseXml = XFormsXmlSerializer.serializeFormDef(baseFormDef)
-  if (
-    baseXml.contains("/data/target_entity") ||
-      baseXml.contains("/data/sample_plot_entity") ||
-      baseXml.contains("/data/past_individual_id") ||
-      baseXml.contains("/data/primary_respondent_id") ||
-      baseXml.contains("appearance=\"map-select\"")
-  ) {
-    return baseFormDef
-  }
-
-  val escapedLabel =
-    "Select ${form.targetSingularTypeLabel} (${form.targetDatasetName})"
-      .replace("&", "&amp;")
-      .replace("<", "&lt;")
-      .replace(">", "&gt;")
-
-  val itemsXml =
-    if (candidateEntities.isNotEmpty()) {
-      candidateEntities.joinToString("\n") { ent ->
-        val itemLabel =
-          "${ent.label} (${ent.geoId})"
-            .replace("&", "&amp;")
-            .replace("<", "&lt;")
-            .replace(">", "&gt;")
-        """      <item>
-        <label>$itemLabel</label>
-        <value>${ent.id}</value>
-      </item>"""
-      }
-    } else {
-      """      <item>
-        <label>Default Feature</label>
-        <value>default_feature</value>
-      </item>"""
-    }
-
-  val withDataNode =
-    if (baseXml.contains("</meta>")) {
-      baseXml.replaceFirst(
-        "</meta>",
-        "</meta>\n          <target_entity>$defaultSelectedEntityId</target_entity>",
-      )
-    } else {
-      baseXml.replaceFirst(
-        Regex("(<data[^>]*>)"),
-        "$1\n          <target_entity>$defaultSelectedEntityId</target_entity>",
-      )
-    }
-
-  val withBinding =
-    withDataNode.replaceFirst(
-      "</model>",
-      """      <bind nodeset="/data/target_entity" type="string" required="true()"/>
-    </model>""",
-    )
-
-  val selectControlXml =
-    """  <h:body>
-    <select1 ref="/data/target_entity" appearance="map-select">
-      <label>$escapedLabel</label>
-$itemsXml
-    </select1>"""
-
-  val updatedXml =
-    if (withBinding.contains("<h:body>")) {
-      withBinding.replaceFirst("<h:body>", selectControlXml)
-    } else {
-      withBinding.replaceFirst("<body>", selectControlXml.replace("<h:body>", "<body>"))
-    }
-
-  return try {
-    XFormsXmlSerializer.deserializeFormDef(updatedXml)
-  } catch (_: Exception) {
-    baseFormDef
-  }
-}
+): FormDef =
+  defaultResolveFormDefUseCase.ensureEntityRefStepInFormDef(
+    baseFormDef = baseFormDef,
+    form = form,
+    candidateEntities = candidateEntities,
+    defaultSelectedEntityId = defaultSelectedEntityId,
+  )
 
 /**
- * Resolves the [FormDef] to execute in [FormWizardController] for a given [form]: uses
- * [customFormDef] when present and valid, otherwise parses the built-in fallback XForms XML for
- * [form]. When [includeEntityRefStep] is `true` and [form] requires a geospatial entity, prepends
- * the required `entityref` (`/data/target_entity`) step so the user can select the target entity on
- * the Map or List during data collection.
+ * Resolves the [FormDef] to execute in [FormWizardController] for a given [form] via
+ * [org.groundplatform.v2.devtools.prototypeapp.domain.usecase.ResolveFormDefForLaunchUseCase].
  */
 fun resolveFormDefForLaunch(
   customFormDef: FormDef?,
@@ -321,20 +158,14 @@ fun resolveFormDefForLaunch(
   candidateEntities: List<GeospatialEntityItem> = emptyList(),
   defaultSelectedEntityId: String = "",
   includeEntityRefStep: Boolean = false,
-): FormDef {
-  val base =
-    customFormDef ?: XFormsXmlSerializer.deserializeFormDef(builtInFallbackXFormsXmlForForm(form))
-  return if (includeEntityRefStep && form.requiresEntity) {
-    ensureEntityRefStepInFormDef(
-      baseFormDef = base,
-      form = form,
-      candidateEntities = candidateEntities,
-      defaultSelectedEntityId = defaultSelectedEntityId,
-    )
-  } else {
-    base
-  }
-}
+): FormDef =
+  defaultResolveFormDefUseCase(
+    customFormDef = customFormDef,
+    form = form,
+    candidateEntities = candidateEntities,
+    defaultSelectedEntityId = defaultSelectedEntityId,
+    includeEntityRefStep = includeEntityRefStep,
+  )
 
 /**
  * Returns `true` if [step] represents an `entityref` question step (e.g. bound to
@@ -363,8 +194,8 @@ fun isWizardStepEntityRef(step: FormWizardStep?): Boolean {
 
 /**
  * Extracts all answered fields from [recordInstance] (and [controller]'s [FormState]) into a list
- * of [SubmissionFieldEntry] items using [formatFieldValueForDisplay] from
- * `org.groundplatform.v2.core.forms.ui`.
+ * of [SubmissionFieldEntry] items via
+ * [org.groundplatform.v2.devtools.prototypeapp.domain.usecase.CompleteFormSubmissionUseCase].
  */
 fun extractSubmissionFieldsFromRecord(
   recordInstance: RecordInstance,
@@ -372,74 +203,15 @@ fun extractSubmissionFieldsFromRecord(
   resolvedFormDef: FormDef,
   form: FormPreviewItem,
   gnssBadge: String,
-): List<SubmissionFieldEntry> {
-  val evaluatedState: FormState =
-    if (controller != null && controller.formState.recordInstance == recordInstance) {
-      controller.formState
-    } else {
-      FormSession(
-          formDef = controller?.formState?.formDef ?: resolvedFormDef,
-          existingRecord = recordInstance,
-          isFirstLoad = false,
-        )
-        .state
-    }
-
-  val steps = controller?.steps ?: FormWizardController.buildSteps(evaluatedState)
-  val controlLabelsByPath = mutableMapOf<String, String>()
-  steps.forEach { step ->
-    when (step) {
-      is FormWizardStep.QuestionStep -> {
-        controlLabelsByPath[step.control.canonicalPath] = step.title
-      }
-      is FormWizardStep.FieldListGroupStep -> {
-        step.controls.forEach { ctrl ->
-          val label =
-            ctrl.label?.text?.takeIf { it.isNotBlank() }
-              ?: ctrl.canonicalPath.substringAfterLast('/')
-          controlLabelsByPath[ctrl.canonicalPath] = label
-        }
-      }
-      else -> {}
-    }
-  }
-
-  val entries = mutableListOf<SubmissionFieldEntry>()
-  evaluatedState.fieldStates.values.forEach { fs ->
-    val isMetaOrEntityRefField =
-      fs.relativePath == "meta/instanceID" ||
-        fs.relativePath.startsWith("meta/") ||
-        fs.canonicalPath.endsWith("/meta/instanceID") ||
-        fs.canonicalPath == ENTITY_REF_FIELD_PATH ||
-        fs.relativePath == "target_entity"
-    if (fs.isRelevant && !fs.isEmpty && !isMetaOrEntityRefField) {
-      val questionName = fs.relativePath.ifBlank { fs.canonicalPath.trimStart('/') }
-      val questionLabel =
-        controlLabelsByPath[fs.canonicalPath]
-          ?: fs.canonicalPath.substringAfterLast('/').replace('_', ' ')
-      val formattedValue = formatFieldValueForDisplay(fs.value, fs.dataType)
-      entries.add(
-        SubmissionFieldEntry(
-          questionName = questionName,
-          questionLabel = questionLabel,
-          answerValue = formattedValue,
-        )
-      )
-    }
-  }
-
-  if (entries.isEmpty()) {
-    entries.add(
-      SubmissionFieldEntry(
-        questionName = "organizer_action_cta",
-        questionLabel = "Completed Form Action (${form.ctaLabel})",
-        answerValue = "Verified in field ($gnssBadge)",
-      )
+): List<SubmissionFieldEntry> =
+  org.groundplatform.v2.devtools.prototypeapp.domain.usecase.CompleteFormSubmissionUseCase
+    .extractSubmissionFieldsFromRecord(
+      recordInstance = recordInstance,
+      controller = controller,
+      resolvedFormDef = resolvedFormDef,
+      form = form,
+      gnssBadge = gnssBadge,
     )
-  }
-
-  return entries
-}
 
 /**
  * Embedded Data Collection Form overlay rendered inside the mobile/tablet device frame when
