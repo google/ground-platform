@@ -1,28 +1,22 @@
----
-# Copyright 2026 The Ground Authors.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     https://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-onedoc_gdoc_url: https://docs.google.com/document/d/1aYEZItFSCmn1lziASTUM5YakNeaswvL65IuFDbzDgqY
-onedoc_md_file_id: d3dc6aaf-8d35-479e-bb58-1a913ba20c57
-onedoc_tab_id: t.t1wnwr6i9bn9
-onedoc_tab_title: Concept Brief
----
+<!--
+  Copyright 2026 The Ground Authors.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
 
 # Ground 2.0 Concept Brief
 
-**[SHARED EXTERNALLY]**
-
-Last modified: [2026-09-23](google-date:2026-09-23T12:00:00Z)
+Last modified: 2026-09-23
 
 ## Executive Summary
 
@@ -76,13 +70,13 @@ and the full power of XLSForm should appear only when asked for.
 
 ## Key Improvements Over Ground 1.0
 
-<!-- mdformat off(multiline tables break in GFM and OneDoc) -->
+<!-- mdformat off -->
 
 | # | Dimension | Ground 1.0 | Ground 2.0 |
 | - | --------- | ---------- | ---------- |
 | 1 | **Form model** | Ordered flat list of "tasks"; no groups, no repeats, no logic | Hierarchical XForms tree (Question / Group / Repeat / Note) with offline XPath `relevant`, `constraint`, `choice_filter`, `calculate`, `repeat_count`, `pulldata()`, and aggregate functions |
 | 2 | **Platform coverage** | Separate Android, Web, and backend codebases; no iOS | One shared KMP core (`shared/core`, `shared/ui`, `shared/mobile`) driving Android, iOS, and web; thin platform wrappers only |
-| 3 | **Data model** | Site-level submissions; no persistent subject identity | **Tables** (stateful entities / master data) vs. **Forms** (immutable event records), with 1:N longitudinal linking, `save_to` state progression, and on-the-fly field entity creation |
+| 3 | **Data model** | Site-level submissions; no persistent subject identity | **Data tables / Map layers** (tabular and geospatial shared entities) vs. **Forms** (immutable event records), with 1:N longitudinal linking, `save_to` state progression, and on-the-fly field entity creation |
 | 4 | **Traceability** | Overwrite-in-place edits; no history | Immutable survey/form/data revisions, Draft→Active→Closed publishing states, universal soft delete with 30-day trash, and an append-only audit log with field-level deltas |
 | 5 | **Authoring** | Schema-oriented task editor | Visual WYSIWYG Form Designer with live dual (mobile + web) previews, interactive logic testing, translation preview, visual version diffs, templates, and form copy/paste |
 | 6 | **Web console** | Survey design and read-only review | A full desktop workspace: in-browser data entry, vertex-level geometry editing, synchronized table/map views, photo lightbox with EXIF, bulk media export, conflict resolution queue, and 1M-feature rendering |
@@ -104,13 +98,13 @@ browser, and in the designer's live preview. The entity/submission split is what
 makes longitudinal monitoring, workflow state on the map, and visual
 classification all expressible without new primitives.
 
-<!-- mdformat off(multiline tables break in GFM and OneDoc) -->
+<!-- mdformat off -->
 
 | Foundation | What it unlocks |
 | ---------- | --------------- |
 | **XForms / XLSForm hierarchical model** | Native interoperability (ODK, Kobo, Survey123, Arena); one expression language across all clients |
 | **Shared multiplatform core** | Android + iOS + web feature parity; the WYSIWYG designer's live preview runs the *same* engine as the field |
-| **Tables vs. Forms (entities vs. events)** | Longitudinal M&E with 1:N submissions; map workflow state; visual classification (plots + interpretations) with no new primitives |
+| **Data tables / Map layers vs. Forms (entities vs. events)** | Longitudinal M&E with 1:N submissions; map workflow state; visual classification (plots + interpretations) with no new primitives |
 | **Centralized backend** | Versioning, audit trails, quota enforcement, and scale to 1M features / 1M submissions |
 
 <!-- mdformat on -->
@@ -202,7 +196,7 @@ requiring external BI pipelines, Ground 2.0 introduces built-in impact
 measurement and dashboarding structured around the **MAP framework (Mitigation,
 Adaptation, and Protection)**:
 
-<!-- mdformat off(multiline tables break in GFM and OneDoc) -->
+<!-- mdformat off -->
 
 | MAP Pillar | Focus | Representative Ground 2.0 Indicators |
 | ---------- | ----- | ------------------------------------ |
@@ -241,11 +235,11 @@ Adaptation, and Protection)**:
 
 Ground is a community-governed open-source project under the Open Foris
 initiative, directed by a multi-stakeholder steering committee per the
-[Open Foris Ground Community Charter](https://docs.google.com/document/d/1pjllfws_HMuHrDDbGokPZCATgok_8vxufkSmyVM4p_Q/edit?tab=t.0#heading=h.14535shxk14t).
+[Open Foris Ground Community Charter](https://docs.google.com/document/d/1pjllfws_HMuHrDDbGokPZCATgok_8vxufkSmyVM4p_Q/edit#heading=h.14535shxk14t).
 For planning purposes, Ground 2.0 currently anticipates the following division
 of hosting and engineering focus across three organizations:
 
-<!-- mdformat off(multiline tables break in GFM and OneDoc) -->
+<!-- mdformat off -->
 
 | Organization | Anticipated hosting | Anticipated engineering focus | Expected nature of participation |
 | ------------ | ------------------- | ----------------------------- | -------------------------------- |

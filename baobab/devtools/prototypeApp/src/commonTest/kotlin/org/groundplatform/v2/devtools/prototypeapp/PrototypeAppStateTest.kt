@@ -442,18 +442,17 @@ class PrototypeAppStateTest {
   }
 
   @Test
-  fun submissionGeometryLayersAndOfflineBasemap_toggleIndependentlyViaLayersDialog() {
+  fun mapLayersAndOfflineBasemap_toggleIndependentlyViaLayersSheet() {
     val state = PrototypeAppState(initialScreen = PrototypeScreen.MAIN_SURVEY)
 
-    // 3 entity dataset layers (solid) + 4 form geometry layers (not shown on map)
+    // 3 entity dataset layers; submissions are not shown as map layers
     assertEquals(3, state.entityDatasetLayers.size)
-    assertEquals(4, state.formGeometryLayers.size)
-    assertTrue(state.formGeometryLayers.all { it.isDottedOutline })
+    assertEquals(3, state.visibleEntityDatasetLayers.size)
     assertEquals(emptyList(), state.visibleSubmissionGeometries)
 
-    // Toggle off the "Walked Parcel Perimeters" form geometry layer (`layer-form-walked-perimeter`)
-    state.toggleLayerVisibility("layer-form-walked-perimeter")
-    assertEquals(emptyList(), state.visibleSubmissionGeometries)
+    // Toggle off the "Smallholder Coffee Parcels" map layer (`layer-coffee-parcels`)
+    state.toggleLayerVisibility("layer-coffee-parcels")
+    assertEquals(2, state.visibleEntityDatasetLayers.size)
 
     // Selecting a submission geometry resolves its parent entity and submission
     state.selectSubmissionGeometry("geom-sub-shade-201-w3")
@@ -1007,7 +1006,7 @@ class PrototypeAppStateTest {
   }
 
   @Test
-  fun submissionListsAndLayersDialog_groupSubmissionsByFormAndUseFormTitleInsteadOfWordForm() {
+  fun submissionListsAndLayersSheet_groupSubmissionsByFormAndUseFormTitleInsteadOfWordForm() {
     val state = PrototypeAppState(initialScreen = PrototypeScreen.MAIN_SURVEY)
 
     // 1. Main List View search no longer includes form submissions
@@ -1024,10 +1023,7 @@ class PrototypeAppStateTest {
     assertEquals(2, shadeGroups[0].submissions.size)
     assertEquals(1, shadeGroups[1].submissions.size)
 
-    // 3. Layers dialog displays "Map features" (entityDatasetLayers)
-    assertEquals("Submission Geometry", LayerSourceType.FORM_GEOMETRY.badgeLabel)
-    assertFalse(LayerSourceType.FORM_GEOMETRY.badgeLabel.contains("form", ignoreCase = true))
-
+    // 3. Layers sheet displays map layers (entityDatasetLayers); submissions are not shown as layers
     assertTrue(state.hasGeospatialEntities)
     val siteLayers = state.entityDatasetLayers
     assertEquals(3, siteLayers.size)
@@ -1039,20 +1035,9 @@ class PrototypeAppStateTest {
       ),
       siteLayers.map { it.label },
     )
+    assertEquals(emptyList(), state.visibleSubmissionGeometries)
 
-    val layerGroups = state.groupedSubmissionLayersByForm
-    assertEquals(4, layerGroups.size)
-    assertEquals(
-      listOf(
-        "EUDR Parcel Baseline Registration",
-        "Seasonal Shade Tree & Canopy Audit",
-        "Washing Station Effluent & Water Check",
-        "Opportunistic Berry Borer & Rust Sighting",
-      ),
-      layerGroups.map { it.formTitle },
-    )
-
-    // When a survey has no geospatial entities, Map features section in the layers dialog is hidden
+    // When a survey has no geospatial entities, map layers section in the Layers sheet is hidden
     val noEntityState = PrototypeAppState().apply {
       openSurvey("survey-single-point-land-use")
       entities = emptyList()
@@ -1060,25 +1045,6 @@ class PrototypeAppStateTest {
     assertTrue(noEntityState.entities.isEmpty())
     assertFalse(noEntityState.hasGeospatialEntities)
     assertTrue(noEntityState.entityDatasetLayers.isEmpty())
-    layerGroups.forEach { group ->
-      assertEquals(group.form.title, group.formTitle)
-      assertTrue(group.layers.isNotEmpty())
-      group.layers.forEach { layer ->
-        assertEquals(group.form.title, layer.formTitle)
-        assertTrue(layer.sourceDescription.startsWith(group.form.title))
-        assertFalse(
-          layer.sourceDescription.contains("form", ignoreCase = true),
-          "Expected layer sourceDescription to use form title instead of 'Form': ${layer.sourceDescription}",
-        )
-      }
-    }
-
-    // Toggling form group visibility in the layers dialog hides/shows all layers for that form
-    assertTrue(state.formGeometryLayers.first { it.formId == "form-eudr-baseline" }.isVisible)
-    state.toggleFormSubmissionLayersVisibility("form-eudr-baseline")
-    assertFalse(state.formGeometryLayers.first { it.formId == "form-eudr-baseline" }.isVisible)
-    state.toggleFormSubmissionLayersVisibility("form-eudr-baseline")
-    assertTrue(state.formGeometryLayers.first { it.formId == "form-eudr-baseline" }.isVisible)
 
     // 4. Shared submission PDF sheet uses the form title instead of 'Form Submission PDF'
     state.shareSubmissionPdf("sub-nyr-104-baseline")

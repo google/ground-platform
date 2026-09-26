@@ -24,7 +24,7 @@ These rules govern all AI-assisted research, design, and code changes within Gro
 * **UX & Content Guidelines**: Follow the Ground 2.0 terminology, UX writing rules, and core mental model defined in [`docs/ux/content-guidelines.md`](docs/ux/content-guidelines.md) and [`docs/product/terminology.md`](docs/product/terminology.md). Strictly use Ground 2.0 / XForms & XLSForm-aligned terminology across all UI copy, comments, and code:
   * **Survey** (`SurveyDef`): Top-level organizational and ACL container.
   * **Forms** (`FormDef`): Questionnaires / encounter logs (replaces Ground 1.0 "Job").
-  * **Tables / Layers** (`EntityDatasetDef`): Persistent master data / spatial datasets (replaces Ground 1.0 "Site").
+  * **Data tables / Map layers** (`EntityDatasetDef`): Persistent master data / spatial datasets (replaces Ground 1.0 "Site").
   * **Map features** (`EntityRecord`): Real-world spatial objects rendered on the map (replaces Ground 1.0 "Site").
   * **Questions / Groups / Repeats / Notes**: Form tree elements (replaces Ground 1.0 "Task").
   * **Submissions** (`SubmissionRecord`): Immutable historical records preserving timestamps and inputs.
@@ -56,7 +56,7 @@ These rules govern all AI-assisted research, design, and code changes within Gro
    */
   ```
   *(Adapt the comment syntax—e.g., `<!-- ... -->` for Markdown/XML/HTML or `# ...` for shell/YAML/properties—to match the file type.)*
-* **Quoting**: Use straight double quotes around `"License"` and `"AS IS"`, matching the canonical Apache 2.0 text and the rest of the `ground-internal` repository.
+* **Quoting**: Use straight double quotes around `"License"` and `"AS IS"`, matching the canonical Apache 2.0 text and the rest of the Ground repository.
 * **Open the block with `/*`, never `/**`**: `/**` makes the header a KDoc comment that binds to the following `package` declaration and leaks the license text into generated API documentation.
 * **Existing Files**: **Do not** update or alter the copyright year in existing files when modifying them. Preserve existing license headers as-is.
 

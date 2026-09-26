@@ -60,9 +60,9 @@ details.
 
 ### 1. The Core Mental Model
 
--   **Tables = Current State (Persistent Master Data)**: Flat, stateful master
-    datasets (`EntityDatasetDef` / `EntityRecord`) where each row represents a
-    real-world object (site, plot, asset, or participant).
+-   **Data tables / Map layers = Current State (Persistent Master Data)**: Flat,
+    stateful master datasets (`EntityDatasetDef` / `EntityRecord`) where each
+    row represents a real-world object (site, plot, asset, or participant).
 -   **Forms = Transactions / Events (Encounter Logs)**: Questionnaires
     (`FormDef`) filled out in the field. Completed submissions
     (`SubmissionRecord` / `RecordInstance`) are immutable event records

@@ -1,27 +1,23 @@
----
-# Copyright 2026 The Ground Authors.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     https://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-onedoc_gdoc_url: https://docs.google.com/document/d/1aYEZItFSCmn1lziASTUM5YakNeaswvL65IuFDbzDgqY
-onedoc_tab_title: XForms Integration
----
+<!--
+  Copyright 2026 The Ground Authors.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
 
 # XForms Integration & Entity-First Map Architecture
 
-**[SHARED EXTERNALLY]**
-
-Authors: [@gmiceli](http://who/gmiceli) \
-Last modified: [2026-09-24](google-date:2026-09-24T16:25:00Z)
+Authors: [Gino Miceli](https://github.com/gino-m) \
+Last modified: 2026-09-24
 
 ## Overview & Motivation
 
@@ -52,7 +48,7 @@ To keep the user experience simple and unified:
 
 Ground 2.0's automatic Entity provisioning and schema synchronization builds directly on proven patterns across leading XForms and XLSForm platforms:
 
-<!-- mdformat off(b/556740108: multiline tables break in GFM and OneDoc) -->
+<!-- mdformat off -->
 
 | Platform | Underlying Standard | Map Representation | How Form-to-Entity Schema Sync Works |
 | :--- | :--- | :--- | :--- |
@@ -69,7 +65,7 @@ Ground 2.0's automatic Entity provisioning and schema synchronization builds dir
 
 Ground 2.0 aligns its user-facing concepts directly with **XLSForm**, **ODK Entities**, **KoboToolbox**, and **ArcGIS Survey123** so surveys round-trip losslessly between Ground's visual WYSIWYG Designer and standard `.xlsx` / `.xml` files:
 
-<!-- mdformat off(b/556740108: multiline tables break in GFM and OneDoc) -->
+<!-- mdformat off -->
 
 | Ground 2.0 Term | Ground 1.0 Equivalent | ODK / XLSForm / Survey123 Equivalent | Purpose in Ground 2.0 |
 | :--- | :--- | :--- | :--- |
@@ -102,7 +98,7 @@ Under the hood, every Ground 2.0 form interaction with a Site Table maps to stan
         *   `survey` sheet: Uses `select_one_from_file <table_name>.csv` for cascading choices or `instance('<table_name>')/root/item[...]` in `calculate` / `note` fields, with no `entities` sheet or `save_to` bindings.
 4.  **Tabular / Non-Spatial Registry**:
     *   *User Experience*: Form registers or updates non-spatial entities (e.g., a cooperative member roster without coordinates).
-    *   *XLSForm Mapping*: Same `entities` + `save_to` structure, backed by an `EntityDatasetDef` with `type: TABULAR` (managed in the Tables view rather than rendered as a map layer).
+    *   *XLSForm Mapping*: Same `entities` + `save_to` structure, backed by an `EntityDatasetDef` with `type: TABULAR` (managed in the Data tables view rather than rendered as a map layer).
 
 ---
 
@@ -127,7 +123,7 @@ When an organizer creates the first form in a new survey (e.g., *"Tree Planting 
 
 As the organizer edits the form in the Survey Designer, Ground keeps `EntityDatasetDef.properties` and `FieldBinding.entity_saveto` synchronized automatically:
 
-<!-- mdformat off(b/556740108: multiline tables break in GFM and OneDoc) -->
+<!-- mdformat off -->
 
 | Designer Action on Form | Automatic `FormDef` (`entity_saveto`) Update | Automatic `EntityDatasetDef` Schema Update |
 | :--- | :--- | :--- |

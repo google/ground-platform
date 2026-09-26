@@ -15,7 +15,7 @@
  */
 
 // Bind webpack-dev-server to 0.0.0.0 and allow all host headers so the app
-// can be accessed both via localhost:8090 and via Cloudtop proxy URLs.
+// can be accessed both via localhost:8090 and via remote workstation URLs.
 if (config.devServer) {
   config.devServer.host = '0.0.0.0';
   config.devServer.allowedHosts = 'all';

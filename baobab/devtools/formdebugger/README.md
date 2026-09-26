@@ -89,17 +89,15 @@ or **JS (IR)** target:
 ### Accessing the Web App
 
 The development server binds to `0.0.0.0:8090` (with `allowedHosts: 'all'`) so
-it can be accessed both locally and remotely from a Google Cloudtop:
+it can be accessed both locally and from remote development environments:
 
 -   **Local machine**: `http://localhost:8090/`
--   **Cloudtop proxy URL**: `http://<hostname>.c.googlers.com:8090/` (e.g.
-    `http://$(hostname -f):8090/`)
+-   **Remote development workstation**: `http://<remote-host>:8090/`
 
 ### Custom Port Override
 
-Port `8090` is used by default (as port `8080` is frequently occupied on
-Cloudtop environments). To run the server on a custom port, pass
-`-Pport=<PORT>`:
+Port `8090` is used by default (as port `8080` is frequently occupied). To run
+the server on a custom port, pass `-Pport=<PORT>`:
 
 ```bash
 ./gradlew wasmJsBrowserDevelopmentRun -Pport=8095

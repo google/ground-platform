@@ -1,31 +1,23 @@
----
-# Copyright 2026 The Ground Authors.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     https://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-onedoc_gdoc_url: https://docs.google.com/document/d/1aYEZItFSCmn1lziASTUM5YakNeaswvL65IuFDbzDgqY
-onedoc_md_file_id: 5d4e7780-eb8c-4308-a9ed-558718181447
-onedoc_tab_id: t.0
-onedoc_tab_title: Product Requirements
-onedoc_title: Product Requirements
----
+<!--
+  Copyright 2026 The Ground Authors.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
 
 # Product Requirements
 
-**[SHARED EXTERNALLY]**
-
-Authors: [@gmiceli](http://who/gmiceli)… \
-Contributors: … \
-Last modified: [2026-09-24](google-date:2026-09-24T12:00:00Z)
+Authors: [Gino Miceli](https://github.com/gino-m) \
+Last modified: 2026-09-24
 
 ## Overview
 
@@ -43,10 +35,10 @@ Following its transition from a Google-incubated initiative to a community-gover
 ### Foundational References
 
 *   **[XForms Integration & Entity-First Map Architecture](xforms-integration.md)**: Architectural specification for Ground 2.0's Entity-only map model, automatic 1-Form-to-1-Entity provisioning, `save_to` schema synchronization, and XLSForm/ODK Entities mappings.
-*   **[Global Impact & Deployments](?tab=t.li0p596b998q)**: Case studies, field metrics, and partner pipelines across Ghana, Burundi, Kenya, and Viet Nam.
-*   **[Open Foris Ground Community Charter [SHARED EXTERNALLY]](https://docs.google.com/document/d/1pjllfws_HMuHrDDbGokPZCATgok_8vxufkSmyVM4p_Q/edit?tab=t.0#heading=h.14535shxk14t)**: Governance model, steering committee bylaws, and institutional partnership charter.
-*   **[Ground 1.0 PRD [SHARED EXTERNALLY]](https://docs.google.com/document/u/0/d/1-ARlIjK4VImSrWju_5D_wZiMMCl4vAGMm4Bozdnwj30/edit)**: Baseline Ground 1.0 workflows and task model.
-*   **[Ground 2026 Strategic Priorities [SHARED EXTERNALLY]](https://docs.google.com/document/u/0/d/18PKj2Qu3wRLwVS2Y8y3pdf7Zse1egIfu9JjvBX5wwR4/edit)**: Strategic roadmap for multiplatform parity, XLSForm alignment, and institutional scale.
+*   **[Global Impact & Deployments](impacts.md)**: Case studies, field metrics, and partner pipelines across Ghana, Burundi, Kenya, and Viet Nam.
+*   **[Open Foris Ground Community Charter](https://docs.google.com/document/d/1pjllfws_HMuHrDDbGokPZCATgok_8vxufkSmyVM4p_Q/edit#heading=h.14535shxk14t)**: Governance model, steering committee bylaws, and institutional partnership charter.
+*   **[Ground 1.0 PRD](https://docs.google.com/document/u/0/d/1-ARlIjK4VImSrWju_5D_wZiMMCl4vAGMm4Bozdnwj30/edit)**: Baseline Ground 1.0 workflows and task model.
+*   **[Ground 2026 Strategic Priorities](https://docs.google.com/document/u/0/d/18PKj2Qu3wRLwVS2Y8y3pdf7Zse1egIfu9JjvBX5wwR4/edit)**: Strategic roadmap for multiplatform parity, XLSForm alignment, and institutional scale.
 
 ### Guiding Product Principles
 
@@ -67,7 +59,7 @@ Following its transition from a Google-incubated initiative to a community-gover
 
 Ground 2.0 pairs a browser-based **Web Console** for survey design, visual satellite interpretation, and data management with a rugged, offline-first **Mobile App** (Android & iOS) for field execution:
 
-<!-- mdformat off(b/556740108: multiline tables break in GFM and OneDoc) -->
+<!-- mdformat off -->
 
 | Capability | Web Console (Browser) | Mobile App (Android & iOS) |
 | :--- | :--- | :--- |
@@ -209,9 +201,9 @@ Ground 2.0 integrates **Collect Earth Online (CEO)** directly into the Web Conso
 
 ### Tiered Quota Limits
 
-Usage is governed at the organization and user level across two tiers *(see [Future Work](?tab=t.9nlxzx2c7bzm#paid-quota-expansion--foundation-payment-model) for foundation-supported quota expansion)*:
+Usage is governed at the organization and user level across two tiers *(see [Future Work](future-work.md#paid-quota-expansion--foundation-payment-model) for foundation-supported quota expansion)*:
 
-<!-- mdformat off(b/556740108: multiline tables break in GFM and OneDoc) -->
+<!-- mdformat off -->
 
 | Administrative Scope (Survey Organizers) | Basic Tier (Default) | Sponsored Tier |
 | :--- | :--- | :--- |
@@ -239,9 +231,9 @@ Usage is governed at the organization and user level across two tiers *(see [Fut
 
 ## Not in Scope & Future Work
 
-To keep Ground 2.0 focused on cross-platform reliability, XLSForm compatibility, and visual classification parity, the following items are **out of scope for 2.0** and deferred to **[Future Work](?tab=t.9nlxzx2c7bzm)**:
+To keep Ground 2.0 focused on cross-platform reliability, XLSForm compatibility, and visual classification parity, the following items are **out of scope for 2.0** and deferred to **[Future Work](future-work.md)**:
 
 *   **Direct Database Streaming (P3)**: Live two-way sync with Google Sheets, BigQuery, or Earth Engine feature tables (use CSV/GeoJSON/Shapefile exports, webhooks, or REST APIs instead).
 *   **Custom Mobile Tile Services & Offline Drone Rasters (P3)**: Custom WMS/XYZ layers are supported in the Web Console for visual classification, while Mobile App offline basemaps standardize on built-in vector and satellite tiles (no sideloaded MBTiles, COGs, or UAV orthomosaics on mobile).
 *   **Dynamic On-Map Heatmaps & Custom BI Charts (P3)**: Beyond the built-in **MAP Impact Dashboards**, **Per-Plot Spectral Time Series**, and **Visual Classification QA/QC Dashboards**, ad-hoc statistical charting is left to external GIS/BI tools.
-*   **Refreshed Public Website**: See the **[Website Outline](?tab=t.2eof4y51gq64)** tab for the proposed `groundplatform.org` structure and copy strategy.
+*   **Refreshed Public Website**: See the **[Website Outline](website-outline.md)** tab for the proposed `groundplatform.org` structure and copy strategy.

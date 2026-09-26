@@ -186,9 +186,9 @@ fun GroundMainSurveyScreen(state: PrototypeAppState) {
       }
     }
 
-    // Map Layers Modal Bottom Sheet (confined inside the mobile device frame)
+    // Layers Modal Bottom Sheet (confined inside the mobile device frame)
     if (state.isLayersSheetOpen) {
-      MapLayersControlSheet(state = state)
+      LayersControlSheet(state = state)
     }
 
     // Available Forms Modal Bottom Sheet (triggered by the bottom-centered FAB)
@@ -279,13 +279,10 @@ private fun MainSurveyTopAppBar(state: PrototypeAppState) {
  * Interactive Map View showing:
  * - Toggleable **Offline Basemap** (`Satellite + Contours` or `Vector Topographic`)
  * - Ground **Geospatial Entities** (`EntityType.GEOSPATIAL`, rendered with solid polygon outlines)
- * - **Submission Geometries** (`FormGeometrySource { form_id, field_path }`, rendered with dotted
- * polygon outlines corresponding to geometry questions/fields in the survey forms)
- * - A `"Layers"` button (`MapLayersControlSheet`) to toggle the offline basemap, entity layers, and
- * submission geometry layers
+ * - A `"Layers"` button (`LayersControlSheet`) to toggle basemaps and map layers
  * - A unified persistent bottom sheet (`SurveyPersistentBottomSheetContent`) that peeks with a
- * search bar & category filter chips by default, expands into the searchable list of map features and
- * submissions, and transitions in-place to `EntityBottomSheetCard` when a map feature is selected.
+ * search bar by default, expands into the searchable list of map layers, data tables, and places,
+ * and transitions in-place to `EntityBottomSheetCard` when a map feature is selected.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -421,8 +418,7 @@ private fun SurveyMapView(state: PrototypeAppState) {
               }
             }
 
-            // Layers FAB to control basemap (Map vs Satellite), offline tiles, entities, and
-            // submission geometries
+            // Layers FAB to control basemaps and map layers
             val layersBg =
               if (state.isLayersSheetOpen) {
                 Color(0xFF8BD6B1)
@@ -442,7 +438,7 @@ private fun SurveyMapView(state: PrototypeAppState) {
             ) {
               Icon(
                 imageVector = Icons.Default.Layers,
-                contentDescription = "Map Layers",
+                contentDescription = "Layers",
               )
             }
           }
@@ -1186,7 +1182,7 @@ private fun GoogleMapsScaleBarWidget(
  * 2. **Map Features (`LayerDef.entity_dataset_id`)** — geospatial entity layers rendered on the map
  */
 @Composable
-private fun MapLayersControlSheet(state: PrototypeAppState) {
+private fun LayersControlSheet(state: PrototypeAppState) {
   GroundModalBottomSheetOverlay(onDismissRequest = { state.updateLayersSheetOpen(false) }) {
     Column(
       modifier =
@@ -1202,7 +1198,7 @@ private fun MapLayersControlSheet(state: PrototypeAppState) {
       ) {
         Column {
           Text(
-            text = "Map Layers & Basemap",
+            text = "Layers & Basemap",
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold,
           )
@@ -1218,7 +1214,7 @@ private fun MapLayersControlSheet(state: PrototypeAppState) {
           )
         }
         IconButton(onClick = { state.updateLayersSheetOpen(false) }) {
-          Icon(imageVector = Icons.Default.Close, contentDescription = "Close Layers")
+          Icon(imageVector = Icons.Default.Close, contentDescription = "Close layers")
         }
       }
 
@@ -1303,16 +1299,6 @@ private fun MapLayersControlSheet(state: PrototypeAppState) {
       if (state.hasGeospatialEntities) {
         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
-        // Section 2: Map features (geospatial entities)
-        Text(
-          text = "MAP FEATURES",
-          style =
-            MaterialTheme.typography.labelSmall.copy(
-              fontWeight = FontWeight.Bold,
-              color = MaterialTheme.colorScheme.primary,
-              letterSpacing = 0.5.sp,
-            ),
-        )
         state.entityDatasetLayers.forEach { layer ->
           val layerEntityCount = state.entities.count { it.layerId == layer.id }
           OutlinedCard(

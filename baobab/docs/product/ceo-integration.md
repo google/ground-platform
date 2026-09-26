@@ -1,29 +1,23 @@
----
-# Copyright 2026 The Ground Authors.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     https://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-onedoc_gdoc_url: https://docs.google.com/document/d/1aYEZItFSCmn1lziASTUM5YakNeaswvL65IuFDbzDgqY
-onedoc_md_file_id: 225bf0c3-86f9-4e74-a646-28b3bf1acabc
-onedoc_tab_id: t.o24u9v7vwav8
-onedoc_tab_title: CEO Integration & Deltas
----
+<!--
+  Copyright 2026 The Ground Authors.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
 
 # Collect Earth Online Integration
 
-**[SHARED EXTERNALLY]**
-
-Authors: [@gmiceli](http://who/gmiceli) \
-Last modified: [2026-09-24](google-date:2026-09-24T12:00:00Z)
+Authors: [Gino Miceli](https://github.com/gino-m) \
+Last modified: 2026-09-24
 
 ## Overview
 
@@ -38,7 +32,7 @@ Historically, **Collect Earth Online (CEO)** has served as the community standar
 
 Rolling Collect Earth Online into **Ground 2.0** eliminates this divide. By bringing satellite visual interpretation and mobile field validation into a single workspace around shared survey sites, a plot flagged by a desk interpreter on a laptop in the morning can immediately appear as a high-priority validation target on a field ranger's offline phone that afternoon—closing the loop between satellite observation and ground truth.
 
-> **Terminology & Parity**: See **[Terminology & Cross-Platform Parity](terminology.md)** for the complete mapping between Collect Earth Online (CEO) and Ground 2.0 concepts (e.g., CEO **Institution** $\rightarrow$ Ground **Organization**; CEO **Project** $\rightarrow$ Ground **Survey**; CEO **Survey Cards** $\rightarrow$ Ground **Form & Groups**; CEO **Plots & Samples** $\rightarrow$ Ground **Relational Layers/Tables**).
+> **Terminology & Parity**: See **[Terminology & Cross-Platform Parity](terminology.md)** for the complete mapping between Collect Earth Online (CEO) and Ground 2.0 concepts (e.g., CEO **Institution** $\rightarrow$ Ground **Organization**; CEO **Project** $\rightarrow$ Ground **Survey**; CEO **Survey Cards** $\rightarrow$ Ground **Form & Groups**; CEO **Plots & Samples** $\rightarrow$ Ground **Relational Map Layers / Data Tables**).
 
 ### Primary Personas & Jobs-to-be-Done
 

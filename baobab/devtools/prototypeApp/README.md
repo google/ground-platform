@@ -52,7 +52,7 @@ UX Co-Design Workbench for rapid iteration with UX designers.
             composables.
     -   **Interactive Map View & `Layers` Drawer (`LayerDef`)**: Displays Ground
         geospatial entity geometries with a **`Layers`** control button
-        (`MapLayersControlSheet`):
+        (`LayersControlSheet`):
         -   **Map features**: Geospatial Entity Lists (spatial master
             tables) representing target locations/features on the map (`#1`–`#4`
             with GNSS wayfinding HUD). Form submission geometries are not shown

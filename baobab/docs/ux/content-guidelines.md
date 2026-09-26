@@ -52,8 +52,8 @@ Ground 2.0 aligns with the modern XForms / XLSForm architecture and ODK Entities
 | **Survey** | The overarching project containing forms, data tables, map layers, and user permissions. | Use when referring to the entire data collection campaign or project container (e.g., *"Open survey"*, *"Survey settings"*). | Project, Workspace, Container |
 | **Form** | A questionnaire or data collection protocol completed by collectors in the field. | Use when referring to a questionnaire that collectors fill out (e.g., *"Add a form"*, *"Edit form questions"*, *"Start form"*). | Job, Questionnaire, Inspection sheet |
 | **Submission** | A completed record of answers submitted from a form, capturing field inputs, location, and timestamps. | Use when referring to collected data records or entries (e.g., *"3 submissions waiting to sync"*, *"Export submissions"*). | Record, Response, Log, Event, Transaction |
-| **Data table** *(or **Table**)* | A structured dataset or registry of master data (such as farmer directories, species lists, or equipment inventories). | Use when referring to non-spatial master data or lookup tables (e.g., *"Upload data table"*, *"Farmer registry table"*). | Master data, Entity dataset, Entity list, Sheet |
-| **Map layer** *(or **Layer**)* | A spatial dataset shown on the map (such as sample plots, parcel boundaries, or water points). | Use when referring to geographic features organized on the map (e.g., *"Show map layers"*, *"Toggle boundary layer"*). | Geospatial entity list, Feature class, Spatial dataset |
+| **Data table** | A structured dataset or registry of master data (such as farmer directories, species lists, or equipment inventories). | Use when referring to non-spatial master data or lookup tables (e.g., *"Upload data table"*, *"Farmer registry table"*). | Table (without "Data"), Master data, Entity dataset, Entity list, Sheet |
+| **Map layer** | A spatial dataset shown on the map (such as sample plots, parcel boundaries, or water points). | Use when referring to geographic features organized on the map (e.g., *"Show map layers"*, *"Toggle boundary layer"*). | Layer (without "Map"), Geospatial entity list, Feature class, Spatial dataset |
 | **Map feature** | An individual real-world geographic object displayed on the map (a point, line, or area). | Use **"Map feature"** as the general term, or use the specific real-world object name when known: **"Plot"**, **"Parcel"**, **"Tree"**, **"Water point"**. | Site, Data collection site, LOI, Spatial primitive, Geometry |
 | **Question** | An individual data entry field in a form (text, number, select, photo, location, etc.). | Use when referring to a form field or prompt (e.g., *"Add a question"*, *"Required question"*). | Task, Field binding, Data element |
 | **Group** | A section or set of related questions within a form. | Use when referring to question sections or clusters (e.g., *"Add question group"*, *"Group: Soil measurements"*). | Card, Fieldset, Block |
@@ -149,10 +149,11 @@ Examples:
   * ❌ *"Malformed email string."*
 
 ### Empty States
-When a list, map layer, or table contains no data, empty states should inform and orient the user:
+When a list, map layer, or data table contains no data, empty states should inform and orient the user:
 * **Explain what belongs here**: State clearly what the view is for.
 * **Explain why it's empty**: Clarify that no items exist yet.
 * **Provide a primary action**: Offer a direct button to create or add the first item.
+* **Hide unconfigured optional sections (progressive disclosure)**: When a list or section corresponds to an optional feature that the survey organizer hasn't used (for example, a survey with no data tables or no map layers), hide that section of the form or screen entirely rather than showing an empty state, keeping the UI clean and simple.
 
 Example:
 * **Title**: *"No forms yet"*

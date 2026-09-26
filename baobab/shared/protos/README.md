@@ -25,14 +25,15 @@ components.
 Ground 2.0's protocol buffer schemas directly model the XForms & Entities
 distinction between stateful master tables and immutable encounter logs:
 
--   **Tables = Current State (Persistent Master Data)**: Defined by
-    `EntityDatasetDef` (`groundplatform.v2.survey`) and stored as `EntityRecord`
-    rows (`groundplatform.v2.data`), where each row represents a real-world
-    object (site, plot, asset, or participant). Forms can **Populate a Table**
-    (create entity via `entities` sheet `list_name` + `save_to`), **Update a
-    Table** (select via `select_one_from_file <table_name>.csv`, set
-    `entity_id`, and map `save_to`), or **Reference a Table** (read-only lookup
-    via `select_one_from_file` or `instance('<table_name>')/root/item[...]`).
+-   **Data tables / Map layers = Current State (Persistent Master Data)**: Defined
+    by `EntityDatasetDef` (`groundplatform.v2.survey`) and stored as
+    `EntityRecord` rows (`groundplatform.v2.data`), where each row represents a
+    real-world object (site, plot, asset, or participant). Forms can **Populate a
+    Data table / Map layer** (create entity via `entities` sheet `list_name` +
+    `save_to`), **Update a Data table / Map layer** (select via
+    `select_one_from_file <table_name>.csv`, set `entity_id`, and map
+    `save_to`), or **Reference a Data table** (read-only lookup via
+    `select_one_from_file` or `instance('<table_name>')/root/item[...]`).
 -   **Forms = Transactions / Events (Encounter Logs)**: Defined by `FormDef`
     (`groundplatform.v2.forms`) and persisted as immutable `SubmissionRecord` /
     `RecordInstance` event records (`groundplatform.v2.data`) preserving GPS,

@@ -50,7 +50,8 @@ enum class PrototypeScreen(val stepNumber: Int, val title: String, val subtitle:
   MAIN_SURVEY(
     stepNumber = 4,
     title = "Main Survey (Map & List)",
-    subtitle = "Survey map, layers, location & submission bottom sheets, searchable list & drawer",
+    subtitle =
+      "Survey map, layers sheet, map feature & submission bottom sheets, searchable list & drawer",
   ),
 }
 
@@ -488,23 +489,20 @@ data class SurveyPreviewItem(
 /**
  * Distinguishes `LayerDef.source` in `SurveyDef.map_config.layers` (per `03-maps.md`):
  * - [ENTITY_DATASET]: `entity_dataset_id` (rendered with solid polygon/marker outlines)
- * - [FORM_GEOMETRY]: `FormGeometrySource { form_id, field_path }` (submission geometries from form
- *   geometry questions/fields, rendered with dotted polygon outlines)
  */
 enum class LayerSourceType(val badgeLabel: String) {
   ENTITY_DATASET("Survey Layer"),
-  FORM_GEOMETRY("Submission Geometry"),
 }
 
 /**
- * Primary map basemap mode selectable by the user in the `Layers` dialog (`Map` vs `Satellite`).
+ * Primary map basemap mode selectable by the user in the `Layers` sheet (`Map` vs `Satellite`).
  */
 enum class BasemapType(val label: String, val description: String) {
   NORMAL(label = "Map", description = "Standard vector terrain, roads & contour basemap"),
   SATELLITE(label = "Satellite", description = "High-resolution satellite & aerial canopy imagery"),
 }
 
-/** Offline basemap rendering style toggleable in the `Layers` dialog. */
+/** Offline basemap rendering style toggleable in the `Layers` sheet. */
 enum class OfflineBasemapStyle(val label: String, val tileDescription: String) {
   SATELLITE_HYBRID(
     label = "Satellite + Contours",
@@ -528,7 +526,6 @@ data class MapLayerItem(
   val formId: String? = null,
   val formTitle: String? = null,
   val fieldPath: String? = null,
-  val isDottedOutline: Boolean = sourceType == LayerSourceType.FORM_GEOMETRY,
   val singularItemLabel: String = "location",
   val pluralItemLabel: String = "locations",
   val pluralDomainLabel: String =
@@ -952,19 +949,6 @@ data class EntityDatasetFeaturesGroup(
 /** Grouping of [SubmissionPreviewItem]s under a [FormPreviewItem] in submission lists. */
 data class FormSubmissionsGroup(
   val form: FormPreviewItem,
-  val submissions: List<SubmissionPreviewItem>,
-) {
-  val formTitle: String
-    get() = form.title
-}
-
-/**
- * Grouping of submission [MapLayerItem]s and [SubmissionPreviewItem]s under a [FormPreviewItem] in
- * the `Layers` dialog, headed by the form's title (`form.title`).
- */
-data class FormSubmissionLayersGroup(
-  val form: FormPreviewItem,
-  val layers: List<MapLayerItem>,
   val submissions: List<SubmissionPreviewItem>,
 ) {
   val formTitle: String
@@ -1933,8 +1917,8 @@ class PrototypeAppState(
 
   /**
    * Layers backed by `LayerDef.entity_dataset_id` (rendered with solid outlines) when the survey
-   * has geospatial entities. Returns `emptyList()` when there are no geospatial entities so the Map
-   * features section of the Layers dialog is hidden.
+   * has geospatial entities. Returns `emptyList()` when there are no geospatial entities so the
+   * map layers section of the `Layers` sheet is hidden.
    */
   val entityDatasetLayers: List<MapLayerItem>
     get() =
@@ -1948,18 +1932,10 @@ class PrototypeAppState(
       }
 
   /**
-   * True when the active survey has geospatial entities to display under the "Map features" section
-   * of the Layers dialog.
+   * True when the active survey has geospatial entities to display in the `Layers` sheet.
    */
   val hasGeospatialEntities: Boolean
     get() = entities.isNotEmpty() && entityDatasetLayers.isNotEmpty()
-
-  /**
-   * Layers backed by `LayerDef.form_geometry` (`FormGeometrySource { form_id, field_path }`,
-   * rendered with dotted polygon outlines).
-   */
-  val formGeometryLayers: List<MapLayerItem>
-    get() = mapLayers.filter { it.sourceType == LayerSourceType.FORM_GEOMETRY }
 
   /** Set of currently visible map layer IDs based on the "Layers" sheet toggles. */
   val visibleLayerIds: Set<String>
@@ -2344,32 +2320,6 @@ class PrototypeAppState(
     }
   }
 
-  /**
-   * Submission map layers grouped by their [FormPreviewItem] for the `Layers` dialog, using the
-   * form's title (`form.title`) as the group heading instead of the word "Form".
-   */
-  val groupedSubmissionLayersByForm: List<FormSubmissionLayersGroup>
-    get() = forms.mapNotNull { form ->
-      val matchingLayers = formGeometryLayers.filter { it.formId == form.id }
-      if (matchingLayers.isNotEmpty()) {
-        val formSubs = allSubmissions.filter { it.formId == form.id }
-        FormSubmissionLayersGroup(form = form, layers = matchingLayers, submissions = formSubs)
-      } else {
-        null
-      }
-    }
-
-  /** Toggles visibility of all submission layers belonging to [formId] in the `Layers` dialog. */
-  fun toggleFormSubmissionLayersVisibility(formId: String) {
-    val targetLayers = formGeometryLayers.filter { it.formId == formId }
-    if (targetLayers.isEmpty()) return
-    val nextVisible = !targetLayers.all { it.isVisible }
-    val targetIds = targetLayers.map { it.id }.toSet()
-    mapLayers = mapLayers.map { layer ->
-      if (layer.id in targetIds) layer.copy(isVisible = nextVisible) else layer
-    }
-  }
-
   /** Directly switches the active mobile screen (used by both flow buttons and UX workbench). */
   fun navigateTo(screen: PrototypeScreen) {
     if (screen == PrototypeScreen.DOWNLOAD_SURVEY) {
@@ -2582,7 +2532,7 @@ class PrototypeAppState(
     )
   }
 
-  /** Toggles visibility of the downloaded Mapbox offline basemap in the `Layers` dialog. */
+  /** Toggles visibility of the downloaded Mapbox offline basemap in the `Layers` sheet. */
   fun toggleOfflineBasemapVisibility() {
     isOfflineBasemapVisible = !isOfflineBasemapVisible
   }
@@ -4143,19 +4093,14 @@ class PrototypeAppState(
 
   /**
    * Starts straight-line navigation from the collector's current GPS position to [submissionId]
-   * (targeting its recorded geometry polygon or parent entity location), ensuring both parent
-   * entity and form geometry layers are visible, selecting the submission, and switching to Map
-   * view.
+   * (targeting its recorded geometry polygon or parent entity location), ensuring the parent
+   * entity's map layer is visible, selecting the submission, and switching to Map view.
    */
   fun startNavigationToSubmission(submissionId: String) {
     val sub = allSubmissions.firstOrNull { it.id == submissionId } ?: return
     val parentEntity = entities.firstOrNull { it.id == sub.entityId }
-    val geom = submissionGeometries.firstOrNull { it.submissionId == sub.id }
     mapLayers = mapLayers.map { layer ->
-      if (
-        (parentEntity != null && layer.id == parentEntity.layerId) ||
-          (geom != null && layer.id == geom.layerId)
-      ) {
+      if (parentEntity != null && layer.id == parentEntity.layerId) {
         layer.copy(isVisible = true)
       } else {
         layer
@@ -6025,17 +5970,6 @@ class PrototypeAppState(
               singularItemLabel = "sample plot",
               pluralItemLabel = "sample plots",
             ),
-            MapLayerItem(
-              id = "layer-form-sample-plots-forest",
-              label = "Sample Plot Forest Stand Assessments",
-              sourceDescription = "Form: Sample Plot Entity & Forest Stand Assessment",
-              colorHex = 0xFF00897B,
-              geometryTypeLabel = "Polygon",
-              isVisible = true,
-              sourceType = LayerSourceType.FORM_GEOMETRY,
-              singularItemLabel = "forest stand assessment",
-              pluralItemLabel = "forest stand assessments",
-            ),
           )
         "survey-commodity-perimeter-center" ->
           listOf(
@@ -6064,25 +5998,13 @@ class PrototypeAppState(
               singularItemLabel = "past individual",
               pluralItemLabel = "past individuals",
             ),
-            MapLayerItem(
-              id = "layer-form-household-survey",
-              label = "Household Follow-Up Compound Check-Ins",
-              sourceDescription = "Form: Household Follow-Up Survey (Past Individuals)",
-              colorHex = 0xFF0277BD,
-              geometryTypeLabel = "Point",
-              isVisible = true,
-              sourceType = LayerSourceType.FORM_GEOMETRY,
-              singularItemLabel = "household check-in",
-              pluralItemLabel = "household check-ins",
-            ),
           )
         else -> defaultMapLayers()
       }
 
     /**
-     * Default map layer definitions (`LayerDef` inside `SurveyDef.map_config.layers`), including:
-     * - 3 Entity Dataset layers (`LayerDef.entity_dataset_id`, solid outlines)
-     * - 4 Form Geometry layers (`LayerDef.form_geometry`, dotted polygon outlines)
+     * Default map layer definitions (`LayerDef` inside `SurveyDef.map_config.layers`) backed by
+     * geospatial entity datasets (`LayerDef.entity_dataset_id`).
      */
     fun defaultMapLayers(): List<MapLayerItem> =
       listOf(
@@ -6120,64 +6042,13 @@ class PrototypeAppState(
           singularItemLabel = "washing station",
           pluralItemLabel = "washing stations",
         ),
-        // Submission Geometry Layers (dotted polygon outlines, grouped by form title)
-        MapLayerItem(
-          id = "layer-form-walked-perimeter",
-          label = "Walked Parcel Perimeters",
-          sourceDescription = "EUDR Parcel Baseline Registration • Walked EUDR Perimeter Polygon",
-          colorHex = 0xFF66BB6A,
-          geometryTypeLabel = "Dotted Polygon",
-          isVisible = true,
-          sourceType = LayerSourceType.FORM_GEOMETRY,
-          formId = "form-eudr-baseline",
-          formTitle = "EUDR Parcel Baseline Registration",
-          fieldPath = "parcel/walked_perimeter_geoshape",
-        ),
-        MapLayerItem(
-          id = "layer-form-canopy-subzone",
-          label = "Surveyed Canopy Audit Sub-Zones",
-          sourceDescription =
-            "Seasonal Shade Tree & Canopy Audit • Surveyed Canopy Regeneration Sub-Plot",
-          colorHex = 0xFF42A5F5,
-          geometryTypeLabel = "Dotted Polygon",
-          isVisible = true,
-          sourceType = LayerSourceType.FORM_GEOMETRY,
-          formId = "form-shade-canopy-audit",
-          formTitle = "Seasonal Shade Tree & Canopy Audit",
-          fieldPath = "audit/canopy_sample_polygon",
-        ),
-        MapLayerItem(
-          id = "layer-form-riparian-buffer",
-          label = "Riparian Buffer Zone Polygons",
-          sourceDescription =
-            "Washing Station Effluent & Water Check • Riparian Filtration Buffer Polygon",
-          colorHex = 0xFFFFCA28,
-          geometryTypeLabel = "Dotted Polygon",
-          isVisible = true,
-          sourceType = LayerSourceType.FORM_GEOMETRY,
-          formId = "form-water-quality",
-          formTitle = "Washing Station Effluent & Water Check",
-          fieldPath = "inspection/riparian_buffer_zone",
-        ),
-        MapLayerItem(
-          id = "layer-form-pest-sighting-zone",
-          label = "Opportunistic Pest & Rust Sighting Zones",
-          sourceDescription =
-            "Opportunistic Berry Borer & Rust Sighting • Affected Roadside Buffer Zone",
-          colorHex = 0xFFAB47BC,
-          geometryTypeLabel = "Dotted Polygon",
-          isVisible = true,
-          sourceType = LayerSourceType.FORM_GEOMETRY,
-          formId = "form-pest-disease-sighting",
-          formTitle = "Opportunistic Berry Borer & Rust Sighting",
-          fieldPath = "sighting/affected_buffer_geoshape",
-        ),
       )
 
     /**
      * Sample Submission Geometries (`SubmissionGeometryPolygon`) corresponding to geometry
      * questions/fields (`FormGeometrySource { form_id, field_path }`) in the survey's forms.
-     * Rendered on the map with dotted polygon outlines and toggleable via the `Layers` dialog.
+     * Submissions are not shown as layers in the `Layers` sheet; these geometries are used to
+     * resolve coordinates and bounds when inspecting or navigating to a submission.
      */
     fun defaultSubmissionGeometries(): List<SubmissionGeometryPolygon> =
       listOf(
