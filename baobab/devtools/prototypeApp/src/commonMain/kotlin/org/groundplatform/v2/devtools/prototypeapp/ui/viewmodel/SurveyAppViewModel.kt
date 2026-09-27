@@ -23,7 +23,8 @@ import org.groundplatform.v2.devtools.prototypeapp.data.repository.MutationRepos
 import org.groundplatform.v2.devtools.prototypeapp.data.repository.PlaceRepositoryImpl
 import org.groundplatform.v2.devtools.prototypeapp.data.repository.SettingsRepositoryImpl
 import org.groundplatform.v2.devtools.prototypeapp.data.repository.SurveyRepositoryImpl
-import org.groundplatform.v2.devtools.prototypeapp.domain.model.PrototypeScreen
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.AppScreen
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.MeasurementUnitSystem
 import org.groundplatform.v2.devtools.prototypeapp.domain.repository.LocationRepository
 import org.groundplatform.v2.devtools.prototypeapp.domain.repository.MutationRepository
 import org.groundplatform.v2.devtools.prototypeapp.domain.repository.PlaceRepository
@@ -32,25 +33,25 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.repository.SurveyRepos
 import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.ClusterMapFeaturesUseCase
 import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.CompleteFormSubmissionUseCase
 import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.ComputeWayfindingNavigationUseCase
-import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.GenerateRandomSitesUseCase
+import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.GeneratePrototypeRandomSitesUseCase
 import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.ResolveFormDefForLaunchUseCase
 import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.SearchPlacesUseCase
 import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.SyncMutationsUseCase
-import org.groundplatform.v2.devtools.prototypeapp.ui.state.PrototypeUiState
+import org.groundplatform.v2.devtools.prototypeapp.ui.state.AppUiState
 
 /**
- * Clean Architecture MVVM ViewModel (`PrototypeAppViewModel`) for `devtools/prototypeApp` per
+ * Clean Architecture MVVM ViewModel (`SurveyAppViewModel`) per
  * `docs/technical/client/architecture.md`:
- * - Exposes a single immutable [StateFlow] of [PrototypeUiState] (`uiState`).
+ * - Exposes a single immutable [StateFlow] of [AppUiState] (`uiState`).
  * - Calls Domain Repository interfaces ([SurveyRepository], [MutationRepository],
  *   [SettingsRepository], [PlaceRepository], [LocationRepository]) directly for simple CRUD.
  * - Delegates complex business logic, geometric computations, and multi-repository orchestration to
  *   dedicated Domain Use Cases ([CompleteFormSubmissionUseCase], [SyncMutationsUseCase],
  *   [ComputeWayfindingNavigationUseCase], [ClusterMapFeaturesUseCase], [SearchPlacesUseCase],
- *   [GenerateRandomSitesUseCase], [ResolveFormDefForLaunchUseCase]).
+ *   [GeneratePrototypeRandomSitesUseCase], [ResolveFormDefForLaunchUseCase]).
  */
-class PrototypeAppViewModel(
-  initialScreen: PrototypeScreen = PrototypeScreen.SIGN_IN,
+class SurveyAppViewModel(
+  initialScreen: AppScreen = AppScreen.SIGN_IN,
   val dataStore: PrototypeAppDataStore = PrototypeAppDataStore(),
   val surveyRepository: SurveyRepository = SurveyRepositoryImpl(dataStore),
   val mutationRepository: MutationRepository = MutationRepositoryImpl(dataStore),
@@ -74,12 +75,12 @@ class PrototypeAppViewModel(
     ComputeWayfindingNavigationUseCase(),
   val clusterMapFeaturesUseCase: ClusterMapFeaturesUseCase = ClusterMapFeaturesUseCase(),
   val searchPlacesUseCase: SearchPlacesUseCase = SearchPlacesUseCase(),
-  val generateRandomSitesUseCase: GenerateRandomSitesUseCase =
-    GenerateRandomSitesUseCase(surveyRepository = surveyRepository),
+  val generateRandomSitesUseCase: GeneratePrototypeRandomSitesUseCase =
+    GeneratePrototypeRandomSitesUseCase(surveyRepository = surveyRepository),
 ) {
   private val _uiState =
     MutableStateFlow(
-      PrototypeUiState(
+      AppUiState(
         currentScreen = initialScreen,
         surveys = surveyRepository.getSurveys(),
         activeSurveyId = surveyRepository.getActiveSurveyId(),
@@ -98,17 +99,15 @@ class PrototypeAppViewModel(
     )
 
   /** Single immutable stream of UI state observed by the Presentation Layer. */
-  val uiState: StateFlow<PrototypeUiState> = _uiState.asStateFlow()
+  val uiState: StateFlow<AppUiState> = _uiState.asStateFlow()
 
   /** Atomically updates [uiState] using [transform]. */
-  fun updateUiState(transform: (PrototypeUiState) -> PrototypeUiState) {
+  fun updateUiState(transform: (AppUiState) -> AppUiState) {
     _uiState.update(transform)
   }
 
   /** Synchronizes repository-backed collections into [uiState]. */
-  fun syncFromRepositories(
-    extraTransform: (PrototypeUiState) -> PrototypeUiState = { it }
-  ) {
+  fun syncFromRepositories(extraTransform: (AppUiState) -> AppUiState = { it }) {
     val locationSnapshot = locationRepository.getLocationSnapshot()
     _uiState.update { current ->
       extraTransform(
@@ -141,7 +140,7 @@ class PrototypeAppViewModel(
     _uiState.update { current ->
       current.copy(
         isSignedIn = true,
-        currentScreen = PrototypeScreen.TERMS_OF_SERVICE,
+        currentScreen = AppScreen.TERMS_OF_SERVICE,
       )
     }
   }
@@ -154,7 +153,7 @@ class PrototypeAppViewModel(
       } else {
         current.copy(
           hasAcceptedTerms = true,
-          currentScreen = PrototypeScreen.DOWNLOAD_SURVEY,
+          currentScreen = AppScreen.DOWNLOAD_SURVEY,
         )
       }
     }
@@ -166,7 +165,7 @@ class PrototypeAppViewModel(
     surveyRepository.loadSurveyDatasets(surveyId)
     syncFromRepositories { current ->
       current.copy(
-        currentScreen = PrototypeScreen.MAIN_SURVEY,
+        currentScreen = AppScreen.MAIN_SURVEY,
         selectedEntityId = null,
         selectedSubmissionId = null,
       )
@@ -192,23 +191,20 @@ class PrototypeAppViewModel(
     syncFromRepositories { it.copy(activeSurveyNotice = notice) }
   }
 
-  /** Generates and appends [count] random polygon sites via [GenerateRandomSitesUseCase]. */
+  /** Generates and appends [count] random polygon sites via [GeneratePrototypeRandomSitesUseCase]. */
   fun addRandomSites(count: Int = 5_000) {
     if (count <= 0) return
-    val totalCount = generateRandomSitesUseCase(count)
+    val result = generateRandomSitesUseCase(count) ?: return
     syncFromRepositories { current ->
       current.copy(
-        currentScreen = PrototypeScreen.MAIN_SURVEY,
-        activeSurveyNotice =
-          "Added $count random polygon features ($totalCount total map features)",
+        currentScreen = AppScreen.MAIN_SURVEY,
+        activeSurveyNotice = result.noticeMessage,
       )
     }
   }
 
   /** Updates measurement unit system via [SettingsRepository] and updates [uiState]. */
-  fun updateUnitSystem(
-    unitSystem: org.groundplatform.v2.devtools.prototypeapp.domain.model.MeasurementUnitSystem
-  ) {
+  fun updateUnitSystem(unitSystem: MeasurementUnitSystem) {
     settingsRepository.updateMeasurementUnits(unitSystem)
     syncFromRepositories()
   }
@@ -224,8 +220,8 @@ class PrototypeAppViewModel(
     surveyRepository.resetToDefaults()
     locationRepository.resetToDefaults()
     _uiState.value =
-      PrototypeUiState(
-        currentScreen = PrototypeScreen.SIGN_IN,
+      AppUiState(
+        currentScreen = AppScreen.SIGN_IN,
         surveys = surveyRepository.getSurveys(),
         activeSurveyId = surveyRepository.getActiveSurveyId(),
         mapLayers = surveyRepository.getMapLayers(),
@@ -242,3 +238,6 @@ class PrototypeAppViewModel(
       )
   }
 }
+
+/** Backward-compatible alias for [SurveyAppViewModel]. */
+typealias PrototypeAppViewModel = SurveyAppViewModel

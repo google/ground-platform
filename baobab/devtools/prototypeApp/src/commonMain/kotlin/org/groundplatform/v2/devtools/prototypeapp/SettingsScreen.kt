@@ -28,7 +28,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.toggleable
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -58,161 +57,27 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
-
-/**
- * Localized strings for the Settings screen and Login screen ported directly from
- * `github.com/google/ground-android` (`app/src/main/res/values-<lang>/strings.xml`).
- */
-data class GroundLocalizedStrings(
-  val settingsTitle: String,
-  val generalTitle: String,
-  val uploadMediaTitle: String,
-  val overWifiSummary: String,
-  val selectLanguageTitle: String,
-  val selectUnitsTitle: String,
-  val lengthMetric: String,
-  val lengthImperial: String,
-  val helpTitle: String,
-  val visitWebsiteTitle: String,
-  val signInWithGoogle: String,
-)
-
-/** Returns the [GroundLocalizedStrings] catalog for the given ISO language [code]. */
-fun groundLocalizedStringsFor(code: String): GroundLocalizedStrings =
-  when (code.lowercase()) {
-    "fr" ->
-      GroundLocalizedStrings(
-        settingsTitle = "Paramètres",
-        generalTitle = "Configuration générale",
-        uploadMediaTitle = "Télécharger des médias",
-        overWifiSummary = "Uniquement par Wi-Fi",
-        selectLanguageTitle = "Choix de la langue",
-        selectUnitsTitle = "Sélectionner les unités",
-        lengthMetric = "Métrique",
-        lengthImperial = "Impérial",
-        helpTitle = "Aide",
-        visitWebsiteTitle = "Visiter le site web",
-        signInWithGoogle = "Se connecter avec Google",
-      )
-    "es" ->
-      GroundLocalizedStrings(
-        settingsTitle = "Configuración",
-        generalTitle = "General",
-        uploadMediaTitle = "Subir fotos",
-        overWifiSummary = "Sólo a través de Wi-Fi",
-        selectLanguageTitle = "Seleccionar idioma",
-        selectUnitsTitle = "Seleccionar unidades",
-        lengthMetric = "Métrica",
-        lengthImperial = "Imperial",
-        helpTitle = "Ayuda",
-        visitWebsiteTitle = "Visitar sitio web",
-        signInWithGoogle = "Iniciar sesión con Google",
-      )
-    "pt" ->
-      GroundLocalizedStrings(
-        settingsTitle = "Configurações",
-        generalTitle = "Geral",
-        uploadMediaTitle = "Enviar fotos",
-        overWifiSummary = "Somente via Wi-Fi",
-        selectLanguageTitle = "Selecionar idioma",
-        selectUnitsTitle = "Selecionar unidades",
-        lengthMetric = "Métrica",
-        lengthImperial = "Imperial",
-        helpTitle = "Ajuda",
-        visitWebsiteTitle = "Visitar site",
-        signInWithGoogle = "Faça login com o Google",
-      )
-    "vi" ->
-      GroundLocalizedStrings(
-        settingsTitle = "Cài đặt",
-        generalTitle = "Chung",
-        uploadMediaTitle = "Tải ảnh lên",
-        overWifiSummary = "Chỉ khi có Wi-Fi",
-        selectLanguageTitle = "Chọn ngôn ngữ",
-        selectUnitsTitle = "Chọn đơn vị",
-        lengthMetric = "Hệ mét",
-        lengthImperial = "Hệ Anh",
-        helpTitle = "Trợ giúp",
-        visitWebsiteTitle = "Truy cập trang web",
-        signInWithGoogle = "Đăng nhập bằng Google",
-      )
-    "th" ->
-      GroundLocalizedStrings(
-        settingsTitle = "การตั้งค่า",
-        generalTitle = "ทั่วไป",
-        uploadMediaTitle = "อัปโหลดรูปภาพ",
-        overWifiSummary = "ผ่าน Wi-Fi เท่านั้น",
-        selectLanguageTitle = "เลือกภาษา",
-        selectUnitsTitle = "เลือกหน่วยวัด",
-        lengthMetric = "เมตริก",
-        lengthImperial = "อิมพีเรียล",
-        helpTitle = "ช่วยเหลือ",
-        visitWebsiteTitle = "เยี่ยมชมเว็บไซต์",
-        signInWithGoogle = "ลงชื่อเข้าใช้ด้วย Google",
-      )
-    "lo" ->
-      GroundLocalizedStrings(
-        settingsTitle = "ການຕັ້ງຄ່າ",
-        generalTitle = "ທົ່ວໄປ",
-        uploadMediaTitle = "ອັບໂຫຼດຮູບພາບ",
-        overWifiSummary = "ໃຊ້ໄດ້ສະເພາະ Wi-Fi ເທົ່ານັ້ນ",
-        selectLanguageTitle = "ເລືອກພາສາ",
-        selectUnitsTitle = "ເລືອກຫົວໜ່ວຍ",
-        lengthMetric = "ເມັດຕຣິກ",
-        lengthImperial = "ອິມພີເຣຍວ",
-        helpTitle = "ຊ່ວຍເຫຼືອ",
-        visitWebsiteTitle = "ເຂົ້າເບິ່ງເວັບໄຊ",
-        signInWithGoogle = "ເຂົ້າລະບົບດ້ວຍ Google",
-      )
-    "km" ->
-      GroundLocalizedStrings(
-        settingsTitle = "ការកំណត់",
-        generalTitle = "ទូទៅ",
-        uploadMediaTitle = "ផ្ទុករូបថតឡើង",
-        overWifiSummary = "តាមរយះការប្រើ Wi-Fi តែប៉ុណ្ណោះ",
-        selectLanguageTitle = "ជ្រើសរើសភាសា",
-        selectUnitsTitle = "ជ្រើសរើសឯកតា",
-        lengthMetric = "ម៉ែត្រ",
-        lengthImperial = "អ៊ីមភេរីយ៉ាល់",
-        helpTitle = "ជំនួយ",
-        visitWebsiteTitle = "ចូលមើលគេហទំព័រ",
-        signInWithGoogle = "ចូលដោយប្រើ Google",
-      )
-    "sw" ->
-      GroundLocalizedStrings(
-        settingsTitle = "Mipangilio",
-        generalTitle = "Jumla",
-        uploadMediaTitle = "Pakia picha",
-        overWifiSummary = "Kupitia Wi-Fi pekee",
-        selectLanguageTitle = "Chagua lugha",
-        selectUnitsTitle = "Chagua vipimo",
-        lengthMetric = "Metriki",
-        lengthImperial = "Imperiali",
-        helpTitle = "Msaada",
-        visitWebsiteTitle = "Tembelea tovuti",
-        signInWithGoogle = "Ingia kwa kutumia Google",
-      )
-    else ->
-      GroundLocalizedStrings(
-        settingsTitle = "Settings",
-        generalTitle = "General",
-        uploadMediaTitle = "Upload photos",
-        overWifiSummary = "Over Wi-Fi only",
-        selectLanguageTitle = "Select language",
-        selectUnitsTitle = "Select units",
-        lengthMetric = "Metric",
-        lengthImperial = "Imperial",
-        helpTitle = "Help",
-        visitWebsiteTitle = "Visit website",
-        signInWithGoogle = "Sign in with Google",
-      )
-  }
+import org.groundplatform.v2.core.forms.ui.resources.Res
+import org.groundplatform.v2.core.forms.ui.resources.general_title
+import org.groundplatform.v2.core.forms.ui.resources.help_title
+import org.groundplatform.v2.core.forms.ui.resources.length_imperial
+import org.groundplatform.v2.core.forms.ui.resources.length_metric
+import org.groundplatform.v2.core.forms.ui.resources.over_wifi_summary
+import org.groundplatform.v2.core.forms.ui.resources.select_language_title
+import org.groundplatform.v2.core.forms.ui.resources.select_units_title
+import org.groundplatform.v2.core.forms.ui.resources.settings_title
+import org.groundplatform.v2.core.forms.ui.resources.upload_media_title
+import org.groundplatform.v2.core.forms.ui.resources.visit_website_title
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.LANGUAGE_OPTIONS
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.MeasurementUnitSystem
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.UserSettings
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.WEBSITE_URL
+import org.jetbrains.compose.resources.stringResource
 
 /** Option item for [SettingsSelectItem], matching `Option` in `ground-android`. */
 data class SettingsOption(
@@ -223,11 +88,9 @@ data class SettingsOption(
 /**
  * Settings screen ported from `org.groundplatform.android.ui.settings.SettingsScreen` in
  * `github.com/google/ground-android`.
- *
- * Connected to [PrototypeAppState] for interactive KMP Compose prototyping.
  */
 @Composable
-fun GroundSettingsScreen(
+fun SettingsScreen(
   state: PrototypeAppState,
   onBack: () -> Unit = { state.closeDrawerSubView() },
 ) {
@@ -238,10 +101,19 @@ fun GroundSettingsScreen(
     },
     onLanguageChange = { state.updateSelectedLanguage(it) },
     onMeasurementUnitsChange = { state.updateUnitSystem(it) },
-    onVisitWebsiteClick = { state.visitGroundWebsite(GROUND_WEBSITE_URL) },
+    onVisitWebsiteClick = { state.visitGroundWebsite(WEBSITE_URL) },
     onBack = onBack,
     visitedWebsiteNotice = state.visitedWebsiteUrl,
   )
+}
+
+/** Backward-compatible alias for [SettingsScreen]. */
+@Composable
+fun GroundSettingsScreen(
+  state: PrototypeAppState,
+  onBack: () -> Unit = { state.closeDrawerSubView() },
+) {
+  SettingsScreen(state = state, onBack = onBack)
 }
 
 /**
@@ -260,22 +132,23 @@ fun SettingsScreen(
   onBack: () -> Unit,
   visitedWebsiteNotice: String? = null,
 ) {
-  val strings = remember(settings.language) { groundLocalizedStringsFor(settings.language) }
   val languageOptions = remember {
-    GROUND_LANGUAGE_OPTIONS.map { SettingsOption(label = it.label, value = it.code) }
+    LANGUAGE_OPTIONS.map { SettingsOption(label = it.label, value = it.code) }
   }
+  val metricLabel = stringResource(Res.string.length_metric)
+  val imperialLabel = stringResource(Res.string.length_imperial)
   val lengthOptions =
-    remember(strings) {
+    remember(metricLabel, imperialLabel) {
       listOf(
-        SettingsOption(label = strings.lengthMetric, value = MeasurementUnitSystem.METRIC.name),
-        SettingsOption(label = strings.lengthImperial, value = MeasurementUnitSystem.IMPERIAL.name),
+        SettingsOption(label = metricLabel, value = MeasurementUnitSystem.METRIC.name),
+        SettingsOption(label = imperialLabel, value = MeasurementUnitSystem.IMPERIAL.name),
       )
     }
 
   Scaffold(
     topBar = {
       TopAppBar(
-        title = { Text(text = strings.settingsTitle) },
+        title = { Text(text = stringResource(Res.string.settings_title)) },
         navigationIcon = {
           IconButton(onClick = onBack) {
             Icon(
@@ -300,12 +173,12 @@ fun SettingsScreen(
           .verticalScroll(rememberScrollState())
     ) {
       // General Section
-      SettingsCategory(title = strings.generalTitle) {
+      SettingsCategory(title = stringResource(Res.string.general_title)) {
         // Upload Media (Over Wi-Fi only)
         SettingsSwitchItem(
           icon = Icons.Filled.CloudUpload,
-          title = strings.uploadMediaTitle,
-          summary = strings.overWifiSummary,
+          title = stringResource(Res.string.upload_media_title),
+          summary = stringResource(Res.string.over_wifi_summary),
           checked = settings.shouldUploadPhotosOnWifiOnly,
           onCheckedChange = onUploadMediaOverUnmeteredConnectionOnlyChange,
         )
@@ -313,7 +186,7 @@ fun SettingsScreen(
         // Select Language
         SettingsSelectItem(
           icon = Icons.Filled.Language,
-          title = strings.selectLanguageTitle,
+          title = stringResource(Res.string.select_language_title),
           options = languageOptions,
           currentValue = settings.language,
           onValueChanged = onLanguageChange,
@@ -322,7 +195,7 @@ fun SettingsScreen(
         // Measurement Units
         SettingsSelectItem(
           icon = Icons.Filled.Straighten,
-          title = strings.selectUnitsTitle,
+          title = stringResource(Res.string.select_units_title),
           options = lengthOptions,
           currentValue = settings.measurementUnits.name,
           onValueChanged = { onMeasurementUnitsChange(MeasurementUnitSystem.valueOf(it)) },
@@ -332,11 +205,11 @@ fun SettingsScreen(
       HorizontalDivider()
 
       // Help Section
-      SettingsCategory(title = strings.helpTitle) {
+      SettingsCategory(title = stringResource(Res.string.help_title)) {
         SettingsItem(
           icon = Icons.Filled.OpenInNew,
-          title = strings.visitWebsiteTitle,
-          summary = GROUND_WEBSITE_URL,
+          title = stringResource(Res.string.visit_website_title),
+          summary = WEBSITE_URL,
           onClick = onVisitWebsiteClick,
         )
       }
@@ -549,8 +422,8 @@ fun SettingsSwitchItem(
 }
 
 /**
- * Language selector component for the Sign In / Login screen (`GroundSignInScreen`), built using
- * the same [SettingsSelectItem] and `ic_language` icon (`[Icons.Filled.Language]`) as the
+ * Language selector component for the Sign In / Login screen ([SignInScreen]), built using
+ * the same [SettingsSelectItem] and `ic_language` icon ([Icons.Filled.Language]) as the
  * `ground-android` Settings screen.
  */
 @Composable
@@ -558,12 +431,8 @@ fun SignInLanguageSelector(
   state: PrototypeAppState,
   modifier: Modifier = Modifier,
 ) {
-  val strings =
-    remember(state.selectedLanguageCode) {
-      groundLocalizedStringsFor(state.selectedLanguageCode)
-    }
   val languageOptions = remember {
-    GROUND_LANGUAGE_OPTIONS.map { SettingsOption(label = it.label, value = it.code) }
+    LANGUAGE_OPTIONS.map { SettingsOption(label = it.label, value = it.code) }
   }
 
   Surface(
@@ -580,7 +449,7 @@ fun SignInLanguageSelector(
   ) {
     SettingsSelectItem(
       icon = Icons.Filled.Language,
-      title = strings.selectLanguageTitle,
+      title = stringResource(Res.string.select_language_title),
       options = languageOptions,
       currentValue = state.selectedLanguageCode,
       onValueChanged = { state.updateSelectedLanguage(it) },

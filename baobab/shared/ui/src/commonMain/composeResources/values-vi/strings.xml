@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright 2026 The Ground Authors.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<resources>
+  <string name="settings_title">Cài đặt</string>
+  <string name="general_title">Chung</string>
+  <string name="upload_media_title">Tải ảnh lên</string>
+  <string name="over_wifi_summary">Chỉ khi có Wi-Fi</string>
+  <string name="select_language_title">Chọn ngôn ngữ</string>
+  <string name="select_units_title">Chọn đơn vị</string>
+  <string name="length_metric">Hệ mét</string>
+  <string name="length_imperial">Hệ Anh</string>
+  <string name="help_title">Trợ giúp</string>
+  <string name="visit_website_title">Truy cập trang web</string>
+  <string name="sign_in_with_google">Đăng nhập bằng Google</string>
+</resources>

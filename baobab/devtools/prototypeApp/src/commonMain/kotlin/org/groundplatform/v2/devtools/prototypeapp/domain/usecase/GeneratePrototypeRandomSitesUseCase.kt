@@ -18,7 +18,7 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.GeospatialEntity
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SyncStatus
 import org.groundplatform.v2.devtools.prototypeapp.domain.repository.SurveyRepository
 
-/** Result of generating random map features via [GenerateRandomSitesUseCase]. */
+/** Result of generating prototype random map features via [GeneratePrototypeRandomSitesUseCase]. */
 data class GenerateRandomSitesResult(
   val addedCount: Int,
   val totalEntityCount: Int,
@@ -27,10 +27,11 @@ data class GenerateRandomSitesResult(
 )
 
 /**
- * Domain use case that generates deterministic Halton-sequence / LCG polygon [GeospatialEntityItem]
- * features across the active survey region and updates [SurveyRepository].
+ * Prototype-only domain use case that generates deterministic Halton-sequence / LCG polygon
+ * [GeospatialEntityItem] features across the active survey region for map clustering stress testing
+ * (`+5K Fake Sites`) and updates [SurveyRepository].
  */
-class GenerateRandomSitesUseCase(private val surveyRepository: SurveyRepository) {
+class GeneratePrototypeRandomSitesUseCase(private val surveyRepository: SurveyRepository) {
   operator fun invoke(count: Int = 5_000): GenerateRandomSitesResult? {
     if (count <= 0) return null
     val existingEntities = surveyRepository.getEntities()
@@ -115,3 +116,6 @@ class GenerateRandomSitesUseCase(private val surveyRepository: SurveyRepository)
     )
   }
 }
+
+/** Backward-compatible alias for [GeneratePrototypeRandomSitesUseCase]. */
+typealias GenerateRandomSitesUseCase = GeneratePrototypeRandomSitesUseCase

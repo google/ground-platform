@@ -751,28 +751,18 @@ class PrototypeAppStateTest {
       state.userSettings,
     )
 
-    // Selecting language on Sign-In screen updates both settings and localized strings
+    // Selecting language on Sign-In screen updates both settings and locale display
     state.updateSelectedLanguage("fr")
     assertEquals("fr", state.selectedLanguageCode)
     assertEquals("Français", state.selectedLanguageDisplayName)
     assertEquals("fr (Français)", state.selectedLanguageLocale)
-    assertEquals(
-      "Choix de la langue",
-      groundLocalizedStringsFor(state.selectedLanguageCode).selectLanguageTitle,
-    )
-    assertEquals(
-      "Se connecter avec Google",
-      groundLocalizedStringsFor(state.selectedLanguageCode).signInWithGoogle,
-    )
+    assertEquals("fr", state.userSettings.language)
 
     // Updating via legacy label or code also works seamlessly
     state.updateLanguageLocale("Español")
     assertEquals("es", state.selectedLanguageCode)
     assertEquals("Español", state.selectedLanguageDisplayName)
-    assertEquals(
-      "Configuración",
-      groundLocalizedStringsFor(state.selectedLanguageCode).settingsTitle,
-    )
+    assertEquals("es", state.userSettings.language)
 
     // Toggle Upload photos over Wi-Fi only switch
     state.updateUploadMediaOverUnmeteredConnectionOnly(true)

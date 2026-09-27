@@ -17,18 +17,27 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import org.groundplatform.v2.devtools.prototypeapp.PrototypeApp
 import org.groundplatform.v2.devtools.prototypeapp.PrototypeAppState
-import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.PrototypeAppViewModel
+import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.SurveyAppViewModel
 
 /**
- * Presentation layer screen entry point (`ui/screen`) for the Ground 2.0 Prototype App, binding
- * [PrototypeAppViewModel] and [PrototypeAppState] to the Compose Multiplatform UI hierarchy per
- * Sections 3 & 6 of `docs/technical/client/architecture.md`.
+ * Presentation layer screen entry point (`ui/screen`) binding [SurveyAppViewModel] and
+ * [PrototypeAppState] to the Compose Multiplatform UI hierarchy per Sections 3 & 6 of
+ * `docs/technical/client/architecture.md`.
  */
 @Composable
-fun PrototypeAppScreen(
+fun AppScreenHost(
   state: PrototypeAppState = remember { PrototypeAppState() },
-  viewModel: PrototypeAppViewModel = state.viewModel,
+  viewModel: SurveyAppViewModel = state.viewModel,
 ) {
   state.syncViewModelState()
   PrototypeApp(state = state)
+}
+
+/** Backward-compatible alias for [AppScreenHost]. */
+@Composable
+fun PrototypeAppScreen(
+  state: PrototypeAppState = remember { PrototypeAppState() },
+  viewModel: SurveyAppViewModel = state.viewModel,
+) {
+  AppScreenHost(state = state, viewModel = viewModel)
 }

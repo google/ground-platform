@@ -14,16 +14,25 @@
 package org.groundplatform.v2.core.forms.ui
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -46,12 +55,22 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.ProvidableCompositionLocal
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -59,11 +78,47 @@ import groundplatform.v2.forms.ControlType
 import groundplatform.v2.forms.DataType
 import groundplatform.v2.forms.FieldValue
 import groundplatform.v2.forms.GeoPoint
+import kotlin.math.abs
 import kotlin.math.roundToInt
 import org.groundplatform.v2.core.forms.model.ComponentState
 import org.groundplatform.v2.core.forms.model.FieldState
 import org.groundplatform.v2.core.forms.model.ResolvedChoiceOption
 import org.groundplatform.v2.core.forms.model.ValidationStatus
+
+/**
+ * State passed to an optional host-provided map viewport ([LocalGeoPointMapViewport]) inside
+ * [GeoPointInputWidget] so host apps (such as `devtools/prototypeApp`) can render a live Mapbox GL
+ * JS basemap synchronized with the question's pan/zoom and GPS state.
+ */
+data class GeoPointMapViewportState(
+  val path: String,
+  val panAllowed: Boolean,
+  val isPanned: Boolean,
+  val liveGpsLatitude: Double,
+  val liveGpsLongitude: Double,
+  val targetLatitude: Double,
+  val targetLongitude: Double,
+  val accuracyMeters: Double,
+  val capturedPoint: GeoPoint?,
+  val panOffsetLat: Double,
+  val panOffsetLon: Double,
+  val zoomLevel: Float,
+  val onPanDeltaPixels: (dxPx: Float, dyPx: Float, widthPx: Float, heightPx: Float) -> Unit,
+  val onZoomDelta: (deltaZoom: Float) -> Unit,
+  val onRecenterGps: () -> Unit,
+)
+
+/**
+ * Optional composition local allowing a host application (such as `devtools/prototypeApp`) to
+ * render a live platform basemap inside [GeoPointInputWidget]'s map viewport. When `null`,
+ * [GeoPointInputWidget] renders its built-in interactive satellite/topographic Compose `Canvas`
+ * basemap.
+ */
+val LocalGeoPointMapViewport:
+  ProvidableCompositionLocal<(@Composable (GeoPointMapViewportState) -> Unit)?> =
+  compositionLocalOf {
+    null
+  }
 
 /** Renders a self-contained mobile question card for a single [ComponentState.ControlState]. */
 @Composable
@@ -84,8 +139,12 @@ fun QuestionControlCard(
   var isGuidanceExpanded by remember(control.canonicalPath) { mutableStateOf(false) }
 
   ElevatedCard(
-    modifier = modifier.fillMaxWidth(),
+    modifier =
+      modifier
+        .fillMaxWidth()
+        .border(1.dp, colors.outlineVariant.copy(alpha = 0.45f), MaterialTheme.shapes.large),
     shape = MaterialTheme.shapes.large,
+    elevation = CardDefaults.elevatedCardElevation(defaultElevation = 0.dp),
     colors = CardDefaults.elevatedCardColors(containerColor = colors.surfaceContainerLowest),
   ) {
     Column(

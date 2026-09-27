@@ -14,11 +14,11 @@
 package org.groundplatform.v2.devtools.prototypeapp
 
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.ClusterMarkerSymbolGroup as DomainClusterMarkerSymbolGroup
-import org.groundplatform.v2.devtools.prototypeapp.domain.model.GROUND_LANGUAGE_OPTIONS as DOMAIN_GROUND_LANGUAGE_OPTIONS
-import org.groundplatform.v2.devtools.prototypeapp.domain.model.GROUND_WEBSITE_URL as DOMAIN_GROUND_WEBSITE_URL
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.LANGUAGE_OPTIONS as DOMAIN_LANGUAGE_OPTIONS
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.MapClusterFeatureItem as DomainMapClusterFeatureItem
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SubmissionPreviewItem as DomainSubmissionPreviewItem
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SyncStatus as DomainSyncStatus
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.WEBSITE_URL as DOMAIN_WEBSITE_URL
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.deriveEntitySyncStatus as domainDeriveEntitySyncStatus
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.formatHexColorCss as domainFormatHexColorCss
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.groupClusterFeaturesByMarkerSymbol as domainGroupClusterFeaturesByMarkerSymbol
@@ -28,7 +28,9 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.parsePlaceCoordi
 
 typealias MapScaleBarSpec = org.groundplatform.v2.devtools.prototypeapp.domain.model.MapScaleBarSpec
 
-typealias PrototypeScreen = org.groundplatform.v2.devtools.prototypeapp.domain.model.PrototypeScreen
+typealias AppScreen = org.groundplatform.v2.devtools.prototypeapp.domain.model.AppScreen
+
+typealias PrototypeScreen = org.groundplatform.v2.devtools.prototypeapp.domain.model.AppScreen
 
 typealias MainSurveyViewMode =
   org.groundplatform.v2.devtools.prototypeapp.domain.model.MainSurveyViewMode
@@ -63,8 +65,10 @@ typealias MutationLogItem = org.groundplatform.v2.devtools.prototypeapp.domain.m
 typealias MeasurementUnitSystem =
   org.groundplatform.v2.devtools.prototypeapp.domain.model.MeasurementUnitSystem
 
+typealias LanguageOption = org.groundplatform.v2.devtools.prototypeapp.domain.model.LanguageOption
+
 typealias GroundLanguageOption =
-  org.groundplatform.v2.devtools.prototypeapp.domain.model.GroundLanguageOption
+  org.groundplatform.v2.devtools.prototypeapp.domain.model.LanguageOption
 
 typealias UserSettings = org.groundplatform.v2.devtools.prototypeapp.domain.model.UserSettings
 
@@ -137,14 +141,32 @@ typealias DownloadSurveyEntryOrigin =
 typealias PrototypeAppDataStore =
   org.groundplatform.v2.devtools.prototypeapp.data.datasource.local.PrototypeAppDataStore
 
-typealias PrototypeUiState = org.groundplatform.v2.devtools.prototypeapp.ui.state.PrototypeUiState
+typealias AppUiState = org.groundplatform.v2.devtools.prototypeapp.ui.state.AppUiState
+
+typealias MapViewportUiState =
+  org.groundplatform.v2.devtools.prototypeapp.ui.state.MapViewportUiState
+
+typealias FormCollectionUiState =
+  org.groundplatform.v2.devtools.prototypeapp.ui.state.FormCollectionUiState
+
+typealias PrototypeWorkbenchUiState =
+  org.groundplatform.v2.devtools.prototypeapp.ui.state.PrototypeWorkbenchUiState
+
+typealias PrototypeUiState = org.groundplatform.v2.devtools.prototypeapp.ui.state.AppUiState
+
+typealias SurveyAppViewModel =
+  org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.SurveyAppViewModel
 
 typealias PrototypeAppViewModel =
-  org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.PrototypeAppViewModel
+  org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.SurveyAppViewModel
 
-const val GROUND_WEBSITE_URL = DOMAIN_GROUND_WEBSITE_URL
+const val WEBSITE_URL = DOMAIN_WEBSITE_URL
 
-val GROUND_LANGUAGE_OPTIONS = DOMAIN_GROUND_LANGUAGE_OPTIONS
+const val GROUND_WEBSITE_URL = DOMAIN_WEBSITE_URL
+
+val LANGUAGE_OPTIONS = DOMAIN_LANGUAGE_OPTIONS
+
+val GROUND_LANGUAGE_OPTIONS = DOMAIN_LANGUAGE_OPTIONS
 
 fun parsePlaceCoordinates(coordinatesLabel: String): Pair<Double, Double>? =
   domainParsePlaceCoordinates(coordinatesLabel)

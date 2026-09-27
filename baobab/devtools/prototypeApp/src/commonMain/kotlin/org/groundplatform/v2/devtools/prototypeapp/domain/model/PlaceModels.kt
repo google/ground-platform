@@ -1,0 +1,139 @@
+/*
+ * Copyright 2026 The Ground Authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
+ */
+package org.groundplatform.v2.devtools.prototypeapp.domain.model
+
+import kotlin.math.abs
+import kotlin.math.ln
+
+/**
+ * Parses a place coordinate string (such as `"0.5012° S, 36.9324° E"`, `"0.4160°S, 36.9465°E"`, or
+ * `"-0.5012, 36.9324"`) into a `(latitude, longitude)` pair of decimal degrees.
+ */
+fun parsePlaceCoordinates(coordinatesLabel: String): Pair<Double, Double>? {
+  val cleaned = coordinatesLabel.trim()
+  if (cleaned.isEmpty()) return null
+  val parts = cleaned.split(Regex("""\s*[,;/]\s*|\s{2,}""")).filter { it.isNotBlank() }
+  if (parts.size < 2) return null
+
+  fun parseComponent(raw: String): Pair<Double, Char?>? {
+    val upper = raw.trim().uppercase()
+    val dirMatch = Regex("""([NSEW])\b""").find(upper)
+    val dir = dirMatch?.groupValues?.get(1)?.firstOrNull()
+    val numMatch = Regex("""[+-]?\d+(?:\.\d+)?""").find(upper) ?: return null
+    val rawValue = numMatch.value.toDoubleOrNull() ?: return null
+    val signedValue =
+      when (dir) {
+        'S',
+        'W' -> -abs(rawValue)
+        'N',
+        'E' -> abs(rawValue)
+        else -> rawValue
+      }
+    return signedValue to dir
+  }
+
+  val first = parseComponent(parts[0]) ?: return null
+  val second = parseComponent(parts[1]) ?: return null
+  val (lat, lng) =
+    if (first.second == 'E' || first.second == 'W' || second.second == 'N' || second.second == 'S') {
+      second.first to first.first
+    } else {
+      first.first to second.first
+    }
+  if (lat !in -90.0..90.0 || lng !in -180.0..180.0) return null
+  return lat to lng
+}
+
+/**
+ * Computes an appropriate Mapbox camera target zoom level (`[2.2f, 16.8f]`) from a place's
+ * geographic bounding box (`[bboxMinLng, bboxMinLat, bboxMaxLng, bboxMaxLat]`) or its
+ * [categoryLabel] (e.g. a Country zooms out to ~`5.2f`, a Region/County to ~`9.5f`, a Town to
+ * ~`12.5f`, a Village to ~`14.4f`, and a specific POI/Parcel to ~`16.2f`).
+ */
+fun inferTargetZoomForPlace(
+  categoryLabel: String,
+  bboxMinLng: Double? = null,
+  bboxMinLat: Double? = null,
+  bboxMaxLng: Double? = null,
+  bboxMaxLat: Double? = null,
+  fallbackZoomDelta: Float = 0.75f,
+): Float {
+  if (bboxMinLng != null && bboxMinLat != null && bboxMaxLng != null && bboxMaxLat != null) {
+    val spanLng = abs(bboxMaxLng - bboxMinLng)
+    val spanLat = abs(bboxMaxLat - bboxMinLat)
+    val maxSpan = maxOf(spanLng, spanLat)
+    if (maxSpan > 0.0002) {
+      val computed = (ln(360.0 / maxSpan) / ln(2.0) - 0.65).toFloat()
+      return computed.coerceIn(2.2f, 16.8f)
+    }
+  }
+  val cat = categoryLabel.lowercase()
+  return when {
+    cat.contains("country") -> 5.2f
+    cat.contains("state") ||
+      cat.contains("province") ||
+      (cat.contains("region") && !cat.contains("regional hub")) -> 7.6f
+    cat.contains("county") || cat.contains("district") || cat.contains("national park") -> 9.6f
+    cat.contains("city") || cat.contains("regional hub") || cat.contains("municipality") -> 11.8f
+    cat.contains("town") || cat.contains("sub-county") -> 12.8f
+    cat.contains("forest") ||
+      cat.contains("reserve") ||
+      cat.contains("dam") ||
+      cat.contains("reservoir") ||
+      cat.contains("hydrology") -> 13.6f
+    cat.contains("village") ||
+      cat.contains("locality") ||
+      cat.contains("hamlet") ||
+      cat.contains("sub-location") ||
+      cat.contains("market") -> 14.4f
+    cat.contains("neighborhood") ||
+      cat.contains("suburb") ||
+      cat.contains("river") ||
+      cat.contains("crossing") ||
+      cat.contains("junction") -> 15.3f
+    else -> (15.3f + fallbackZoomDelta).coerceIn(2.2f, 16.8f)
+  }
+}
+
+/**
+ * Represents a geographic place, landmark, town, road junction, or hydrology feature returned by
+ * the Mapbox Places API (`mapbox.places`) and searchable via `"Search places or map features..."`.
+ */
+data class SurveyPlaceItem(
+  val id: String,
+  val name: String,
+  val categoryLabel: String,
+  val regionSubtitle: String,
+  val coordinatesLabel: String,
+  val normalizedX: Float,
+  val normalizedY: Float,
+  val zoomDelta: Float = 0.75f,
+  val longitude: Double = parsePlaceCoordinates(coordinatesLabel)?.second ?: 36.9512,
+  val latitude: Double = parsePlaceCoordinates(coordinatesLabel)?.first ?: -0.4198,
+  val bboxMinLng: Double? = null,
+  val bboxMinLat: Double? = null,
+  val bboxMaxLng: Double? = null,
+  val bboxMaxLat: Double? = null,
+  val targetZoom: Float =
+    inferTargetZoomForPlace(
+      categoryLabel = categoryLabel,
+      bboxMinLng = bboxMinLng,
+      bboxMinLat = bboxMinLat,
+      bboxMaxLng = bboxMaxLng,
+      bboxMaxLat = bboxMaxLat,
+      fallbackZoomDelta = zoomDelta,
+    ),
+  val mapboxPlaceId: String = id,
+  val sourceLabel: String = "Places API",
+)

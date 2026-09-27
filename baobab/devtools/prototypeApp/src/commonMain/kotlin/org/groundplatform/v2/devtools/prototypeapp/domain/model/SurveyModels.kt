@@ -1,0 +1,72 @@
+/*
+ * Copyright 2026 The Ground Authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
+ */
+package org.groundplatform.v2.devtools.prototypeapp.domain.model
+
+/** Visual color/feature theme for a survey's placeholder map thumbnail. */
+enum class MapThumbnailTheme(
+  val primaryTerrainHex: Long,
+  val secondaryWaterHex: Long,
+  val accentPolygonHex: Long,
+  val badgeLabel: String,
+) {
+  RAINFOREST(
+    primaryTerrainHex = 0xFF1B5E20,
+    secondaryWaterHex = 0xFF0277BD,
+    accentPolygonHex = 0xFFA5D6A7,
+    badgeLabel = "CANOPY",
+  ),
+  SAVANNA(
+    primaryTerrainHex = 0xFF6D4C41,
+    secondaryWaterHex = 0xFF00838F,
+    accentPolygonHex = 0xFFFFE082,
+    badgeLabel = "CORRIDOR",
+  ),
+  HIGHLAND_AGRI(
+    primaryTerrainHex = 0xFF2E7D32,
+    secondaryWaterHex = 0xFF1565C0,
+    accentPolygonHex = 0xFFC5E1A5,
+    badgeLabel = "PARCELS",
+  ),
+  COASTAL_DELTA(
+    primaryTerrainHex = 0xFF00695C,
+    secondaryWaterHex = 0xFF0288D1,
+    accentPolygonHex = 0xFF80CBC4,
+    badgeLabel = "ESTUARY",
+  ),
+  WATERSHED(
+    primaryTerrainHex = 0xFF33691E,
+    secondaryWaterHex = 0xFF039BE5,
+    accentPolygonHex = 0xFFE6EE9C,
+    badgeLabel = "BASIN",
+  ),
+  PEATLAND(
+    primaryTerrainHex = 0xFF3E2723,
+    secondaryWaterHex = 0xFF006064,
+    accentPolygonHex = 0xFF80DEEA,
+    badgeLabel = "WETLAND",
+  ),
+}
+
+/** Represents a survey shared with the current user on the "Download survey" screen. */
+data class SurveyPreviewItem(
+  val id: String,
+  val title: String,
+  val description: String,
+  val location: String,
+  val coordinatesLabel: String,
+  val offlineSizeLabel: String,
+  val isDownloaded: Boolean,
+  val thumbnailTheme: MapThumbnailTheme,
+  val entityCount: Int,
+)

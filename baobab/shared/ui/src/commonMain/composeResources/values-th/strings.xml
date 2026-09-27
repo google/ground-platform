@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright 2026 The Ground Authors.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<resources>
+  <string name="settings_title">การตั้งค่า</string>
+  <string name="general_title">ทั่วไป</string>
+  <string name="upload_media_title">อัปโหลดรูปภาพ</string>
+  <string name="over_wifi_summary">ผ่าน Wi-Fi เท่านั้น</string>
+  <string name="select_language_title">เลือกภาษา</string>
+  <string name="select_units_title">เลือกหน่วยวัด</string>
+  <string name="length_metric">เมตริก</string>
+  <string name="length_imperial">อิมพีเรียล</string>
+  <string name="help_title">ช่วยเหลือ</string>
+  <string name="visit_website_title">เยี่ยมชมเว็บไซต์</string>
+  <string name="sign_in_with_google">ลงชื่อเข้าใช้ด้วย Google</string>
+</resources>

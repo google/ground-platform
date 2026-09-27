@@ -17,6 +17,7 @@ import groundplatform.v2.forms.FormDef
 import org.groundplatform.v2.core.forms.ui.FormWizardController
 import org.groundplatform.v2.core.forms.ui.WorkbenchExampleForm
 import org.groundplatform.v2.devtools.prototypeapp.data.datasource.local.PrototypeAppDataStore
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.AppScreen
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.BasemapType
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.DeviceFormFactor
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.DeviceOrientation
@@ -32,7 +33,6 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.MutationLogItem
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.NavigationTargetKind
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.OfflineBasemapStyle
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.OfflineTilePackageItem
-import org.groundplatform.v2.devtools.prototypeapp.domain.model.PrototypeScreen
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SharedPdfSheetState
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SubmissionGeometryPolygon
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SubmissionPreviewItem
@@ -42,19 +42,18 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.UploadStatusFilt
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.UserSettings
 
 /**
- * Pure, immutable UI state (`PrototypeUiState`) exposed as a `StateFlow<PrototypeUiState>` by
- * [org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.PrototypeAppViewModel] per Section 6 of
+ * Pure, immutable UI state (`AppUiState`) exposed as a `StateFlow<AppUiState>` by
+ * [org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.SurveyAppViewModel] per Section 6 of
  * `docs/technical/client/architecture.md`.
  */
-data class PrototypeUiState(
-  val currentScreen: PrototypeScreen = PrototypeScreen.SIGN_IN,
-  val isSignedIn: Boolean = currentScreen != PrototypeScreen.SIGN_IN,
+data class AppUiState(
+  val currentScreen: AppScreen = AppScreen.SIGN_IN,
+  val isSignedIn: Boolean = currentScreen != AppScreen.SIGN_IN,
   val signedInUserEmail: String = "maya.lin@groundplatform.org",
   val signedInUserName: String = "Maya Lin",
   val termsCheckboxChecked: Boolean = true,
   val hasAcceptedTerms: Boolean =
-    currentScreen == PrototypeScreen.DOWNLOAD_SURVEY ||
-      currentScreen == PrototypeScreen.MAIN_SURVEY,
+    currentScreen == AppScreen.DOWNLOAD_SURVEY || currentScreen == AppScreen.MAIN_SURVEY,
   val downloadSurveyEntryOrigin: DownloadSurveyEntryOrigin = DownloadSurveyEntryOrigin.AFTER_TOS,
   val isDownloadSurveySignOutPromptOpen: Boolean = false,
   val searchQuery: String = "",
@@ -130,4 +129,61 @@ data class PrototypeUiState(
   val wasFormLaunchedWithoutEntity: Boolean = false,
   val entityRefSelectorViewMode: MainSurveyViewMode = MainSurveyViewMode.MAP,
   val entityRefSearchQuery: String = "",
-)
+) {
+  /** Structured map viewport, GNSS location, and wayfinding state slice. */
+  val mapViewport: MapViewportUiState
+    get() =
+      MapViewportUiState(
+        userGpsNormalizedX = userGpsNormalizedX,
+        userGpsNormalizedY = userGpsNormalizedY,
+        userGpsCoordinatesLabel = userGpsCoordinatesLabel,
+        gnssSatelliteCount = gnssSatelliteCount,
+        gnssAccuracyMeters = gnssAccuracyMeters,
+        isCameraFollowingUser = isCameraFollowingUser,
+        locationLockState = locationLockState,
+        isMap3dMode = isMap3dMode,
+        mapBearingDegrees = mapBearingDegrees,
+        mapZoomDelta = mapZoomDelta,
+        mapPanOffsetX = mapPanOffsetX,
+        mapPanOffsetY = mapPanOffsetY,
+        cameraTargetCommandSeq = cameraTargetCommandSeq,
+        cameraTargetLng = cameraTargetLng,
+        cameraTargetLat = cameraTargetLat,
+        cameraTargetZoom = cameraTargetZoom,
+        navigationTargetKind = navigationTargetKind,
+        navigationTargetId = navigationTargetId,
+      )
+
+  /** Structured form runner and `entityRef` selector state slice. */
+  val formCollection: FormCollectionUiState
+    get() =
+      FormCollectionUiState(
+        activeDataCollectionEntityId = activeDataCollectionEntityId,
+        activeDataCollectionFormId = activeDataCollectionFormId,
+        activeFormWizardController = activeFormWizardController,
+        isAvailableFormsSheetOpen = isAvailableFormsSheetOpen,
+        wasFormLaunchedWithoutEntity = wasFormLaunchedWithoutEntity,
+        entityRefSelectorViewMode = entityRefSelectorViewMode,
+        entityRefSearchQuery = entityRefSearchQuery,
+      )
+
+  /** Prototype-only workbench simulation and XForms XML editor state slice. */
+  val workbench: PrototypeWorkbenchUiState
+    get() =
+      PrototypeWorkbenchUiState(
+        isDarkTheme = isDarkTheme,
+        deviceFormFactor = deviceFormFactor,
+        deviceOrientation = deviceOrientation,
+        isAirplaneMode = isAirplaneMode,
+        customXFormsXml = customXFormsXml,
+        selectedWorkbenchExampleForm = selectedWorkbenchExampleForm,
+        customFormDef = customFormDef,
+        xformsXmlError = xformsXmlError,
+        uploadedMediaCacheSizeLabel = uploadedMediaCacheSizeLabel,
+        uploadedMediaFileCount = uploadedMediaFileCount,
+        isWebsiteModalOpen = isWebsiteModalOpen,
+      )
+}
+
+/** Backward-compatible alias for [AppUiState]. */
+typealias PrototypeUiState = AppUiState
