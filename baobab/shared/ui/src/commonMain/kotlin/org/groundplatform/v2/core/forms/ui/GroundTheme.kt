@@ -53,6 +53,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import org.groundplatform.v2.core.forms.ui.resources.Res
 import org.groundplatform.v2.core.forms.ui.resources.google_sans_flex_bold
@@ -306,7 +307,11 @@ fun GroundTonalBadge(
         style =
           MaterialTheme.typography.labelSmall.copy(
             fontWeight = FontWeight.SemiBold,
+            fontFamily = if (monospace) FontFamily.Monospace else null,
           ),
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
+        softWrap = false,
       )
     }
   }

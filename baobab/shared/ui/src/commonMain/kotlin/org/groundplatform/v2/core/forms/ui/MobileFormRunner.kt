@@ -56,6 +56,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import org.groundplatform.v2.core.forms.model.ComponentState
 import org.groundplatform.v2.core.forms.model.FinalizationResult
@@ -132,6 +133,9 @@ fun MobileFormRunner(
                 Text(
                   text = if (controller.isOverviewOpen) "Close List" else "☰ Steps ($totalSteps)",
                   style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                  maxLines = 1,
+                  overflow = TextOverflow.Ellipsis,
+                  softWrap = false,
                 )
               }
               if (onClose != null) {
@@ -184,7 +188,15 @@ fun MobileFormRunner(
                       selectedContainerColor = onAppBar,
                       selectedLabelColor = colors.primary,
                     ),
-                  label = { Text(text = lang, style = MaterialTheme.typography.labelSmall) },
+                  label = {
+                    Text(
+                      text = lang,
+                      style = MaterialTheme.typography.labelSmall,
+                      maxLines = 1,
+                      overflow = TextOverflow.Ellipsis,
+                      softWrap = false,
+                    )
+                  },
                 )
               }
             }
@@ -214,7 +226,7 @@ fun MobileFormRunner(
             onClick = { controller.previousStep() },
             enabled = controller.canGoBack,
           ) {
-            Text("← Back")
+            Text("← Back", maxLines = 1, overflow = TextOverflow.Ellipsis, softWrap = false)
           }
 
           Text(
@@ -235,7 +247,7 @@ fun MobileFormRunner(
                 }
               },
             ) {
-              Text("Submit")
+              Text("Submit", maxLines = 1, overflow = TextOverflow.Ellipsis, softWrap = false)
             }
           } else {
             val isLastQuestionBeforeSummary = stepIndex == totalSteps - 2
@@ -247,7 +259,7 @@ fun MobileFormRunner(
                 OutlinedButton(
                   onClick = { controller.nextStep(enforceValidation = false) },
                 ) {
-                  Text("Skip")
+                  Text("Skip", maxLines = 1, overflow = TextOverflow.Ellipsis, softWrap = false)
                 }
               }
 
@@ -255,7 +267,12 @@ fun MobileFormRunner(
                 onClick = { controller.nextStep(enforceValidation = true) },
                 enabled = !controller.isCurrentStepWaitingForLocationCapture,
               ) {
-                Text(if (isLastQuestionBeforeSummary) "Review →" else "Next →")
+                Text(
+                  if (isLastQuestionBeforeSummary) "Review →" else "Next →",
+                  maxLines = 1,
+                  overflow = TextOverflow.Ellipsis,
+                  softWrap = false,
+                )
               }
             }
           }
@@ -353,7 +370,13 @@ fun MobileFormRunner(
               if (controller.isCurrentStepOptional) {
                 Spacer(modifier = Modifier.width(8.dp))
                 OutlinedButton(onClick = { controller.nextStep(enforceValidation = false) }) {
-                  Text("Skip →", style = MaterialTheme.typography.labelSmall)
+                  Text(
+                    "Skip →",
+                    style = MaterialTheme.typography.labelSmall,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    softWrap = false,
+                  )
                 }
               }
             }
@@ -407,6 +430,9 @@ private fun BreadcrumbBar(
                 Text(
                   text = "+ Add ${repeatContext.repeatGroupLabel}",
                   style = MaterialTheme.typography.labelSmall,
+                  maxLines = 1,
+                  overflow = TextOverflow.Ellipsis,
+                  softWrap = false,
                 )
               }
             }
@@ -424,6 +450,9 @@ private fun BreadcrumbBar(
                 Text(
                   text = "Delete #${repeatContext.repeatIndex}",
                   style = MaterialTheme.typography.labelSmall,
+                  maxLines = 1,
+                  overflow = TextOverflow.Ellipsis,
+                  softWrap = false,
                 )
               }
             }
@@ -542,7 +571,13 @@ private fun RepeatHubScreenContent(
                   },
                   colors = ButtonDefaults.textButtonColors(contentColor = colors.error),
                 ) {
-                  Text("Remove", style = MaterialTheme.typography.labelSmall)
+                  Text(
+                    "Remove",
+                    style = MaterialTheme.typography.labelSmall,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    softWrap = false,
+                  )
                 }
               }
             }
@@ -555,7 +590,12 @@ private fun RepeatHubScreenContent(
           onClick = { controller.addRepeatInstanceAndOpen(repeatGroup.canonicalPath) },
           modifier = Modifier.fillMaxWidth(),
         ) {
-          Text("+ Add Another $groupLabel")
+          Text(
+            "+ Add Another $groupLabel",
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            softWrap = false,
+          )
         }
       }
     }

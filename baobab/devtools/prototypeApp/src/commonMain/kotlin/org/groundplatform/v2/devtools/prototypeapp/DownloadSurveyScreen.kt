@@ -517,6 +517,9 @@ private fun SurveyListItemCard(
                   text = "Downloaded",
                   style = MaterialTheme.typography.labelSmall,
                   fontWeight = FontWeight.Bold,
+                  maxLines = 1,
+                  overflow = TextOverflow.Ellipsis,
+                  softWrap = false,
                 )
               },
               modifier = Modifier.height(30.dp),
@@ -531,6 +534,9 @@ private fun SurveyListItemCard(
                 text = "Open",
                 style = MaterialTheme.typography.labelSmall,
                 fontWeight = FontWeight.Bold,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                softWrap = false,
               )
               Spacer(modifier = Modifier.width(3.dp))
               Icon(
@@ -556,6 +562,9 @@ private fun SurveyListItemCard(
               text = "Download",
               style = MaterialTheme.typography.labelSmall,
               fontWeight = FontWeight.Bold,
+              maxLines = 1,
+              overflow = TextOverflow.Ellipsis,
+              softWrap = false,
             )
           }
         }

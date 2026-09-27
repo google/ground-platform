@@ -21,6 +21,8 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -312,7 +314,15 @@ fun DataCollectionFormScreen(state: PrototypeAppState) {
               enabled = true,
               borderColor = Color(0xFF386B52),
             ),
-          label = { Text("Map", style = MaterialTheme.typography.labelSmall) },
+          label = {
+            Text(
+              "Map",
+              style = MaterialTheme.typography.labelSmall,
+              maxLines = 1,
+              overflow = TextOverflow.Ellipsis,
+              softWrap = false,
+            )
+          },
           leadingIcon = {
             Icon(
               imageVector = Icons.Default.Close,
@@ -397,10 +407,11 @@ private fun EntityRefStepMapOrListSelector(
           modifier = Modifier.fillMaxWidth().padding(12.dp),
           verticalArrangement = Arrangement.spacedBy(6.dp),
         ) {
-          Row(
+          @OptIn(ExperimentalLayoutApi::class)
+          FlowRow(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp),
           ) {
             GroundTonalBadge(
               text = "STEP $currentStepNum OF $totalSteps • REQUIRED",
@@ -746,9 +757,15 @@ private fun EntityRefStepMapOrListSelector(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
       ) {
-        TextButton(onClick = { state.closeActiveFormRunner() }) { Text("Cancel") }
+        TextButton(onClick = { state.closeActiveFormRunner() }) {
+          Text("Cancel", maxLines = 1, overflow = TextOverflow.Ellipsis, softWrap = false)
+        }
 
-        Button(onClick = { controller.nextStep() }, enabled = selectedEntity != null) {
+        Button(
+          onClick = { controller.nextStep() },
+          enabled = selectedEntity != null,
+          modifier = Modifier.weight(1f, fill = false),
+        ) {
           Text(
             text =
               if (selectedEntity != null) {
@@ -758,6 +775,9 @@ private fun EntityRefStepMapOrListSelector(
               },
             style = MaterialTheme.typography.labelLarge,
             fontWeight = FontWeight.Bold,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            softWrap = false,
           )
           Spacer(modifier = Modifier.width(6.dp))
           Icon(
@@ -814,15 +834,19 @@ private fun EntityRefCandidateOptionCard(
       verticalAlignment = Alignment.CenterVertically,
     ) {
       Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-        Row(
-          verticalAlignment = Alignment.CenterVertically,
+        @OptIn(ExperimentalLayoutApi::class)
+        FlowRow(
           horizontalArrangement = Arrangement.spacedBy(6.dp),
+          verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
           Text(
             text = "${candidate.markerSymbol} ${candidate.label}",
             style = MaterialTheme.typography.labelLarge,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onSurface,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            softWrap = false,
           )
           GroundTonalBadge(
             text = candidate.mapStatusSummaryBadge,
@@ -860,6 +884,9 @@ private fun EntityRefCandidateOptionCard(
               text = "Select",
               style = MaterialTheme.typography.labelSmall,
               fontWeight = FontWeight.Bold,
+              maxLines = 1,
+              overflow = TextOverflow.Ellipsis,
+              softWrap = false,
             )
           },
         )

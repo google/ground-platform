@@ -506,6 +506,9 @@ internal fun UploadsMutationsSubScreen(state: PrototypeAppState) {
                 MaterialTheme.typography.labelSmall.copy(
                   fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
                 ),
+              maxLines = 1,
+              overflow = TextOverflow.Ellipsis,
+              softWrap = false,
             )
           },
           leadingIcon =
@@ -1030,6 +1033,9 @@ internal fun SharePdfToAppModalDialog(state: PrototypeAppState, sheet: SharedPdf
               Text(
                 text = appName,
                 style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                softWrap = false,
               )
             },
           )

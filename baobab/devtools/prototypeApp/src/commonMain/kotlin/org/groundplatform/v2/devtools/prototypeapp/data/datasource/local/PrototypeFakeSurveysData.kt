@@ -133,7 +133,7 @@ object PrototypeFakeSurveysData {
     listOf(
       SurveyPreviewItem(
         id = "survey-single-point-land-use",
-        title = "1. Simple Point & Land Use Survey",
+        title = "Simple Point & Land Use Survey",
         description =
           "Single GPS point (map pan allowed, <= 10m accuracy required) and land-use classification. Forms auto-create land_use_observations entities via save_to.",
         location = "Arusha, Tanzania",
@@ -145,7 +145,7 @@ object PrototypeFakeSurveysData {
       ),
       SurveyPreviewItem(
         id = "survey-sample-plots-forest",
-        title = "2. Sample Plot Forest Assessment Survey",
+        title = "Sample Plot Forest Assessment Survey",
         description =
           "Predefined permanent sample plot entities (SP-01 to SP-05) with forest stand assessment form: selecting the sample plot entity, taking a canopy photo, canopy cover %, and basal area.",
         location = "Pará, Brazil",
@@ -157,7 +157,7 @@ object PrototypeFakeSurveysData {
       ),
       SurveyPreviewItem(
         id = "survey-commodity-perimeter-center",
-        title = "3. Commodity Plot Perimeter & Center Mapping (EUDR)",
+        title = "Commodity Plot Perimeter & Center Mapping (EUDR)",
         description =
           "Walk forest-risk commodity plot boundary (GPS override / manual pan allowed while walking) and capture the plot center point. Forms auto-create commodity_plots entities via save_to.",
         location = "Ashanti Region, Ghana",
@@ -169,7 +169,7 @@ object PrototypeFakeSurveysData {
       ),
       SurveyPreviewItem(
         id = "survey-household-past-individuals",
-        title = "4. Household Panel Survey (Past Individuals)",
+        title = "Household Panel Survey (Past Individuals)",
         description =
           "Household longitudinal survey using a preloaded roster of past household individuals (IND-101 to IND-106) for residency reconciliation, occupation updates, and new member enrollment.",
         location = "Kakamega, Western Province",
@@ -181,7 +181,7 @@ object PrototypeFakeSurveysData {
       ),
       SurveyPreviewItem(
         id = "survey-kenya-coffee",
-        title = "5. All Form Field Types Showcase (Kenya Coffee)",
+        title = "All Form Field Types Showcase (Kenya Coffee)",
         description =
           "EUDR traceability polygon mapping, shade-tree biodiversity inventory, and all 20+ XForms field types showcase for cooperative coffee growers.",
         location = "Nyeri County, Kenya",

@@ -280,6 +280,7 @@ private fun PrototypeWorkbenchTopBar(state: PrototypeAppState) {
             Text(
               text = if (state.isDarkTheme) "Light UI" else "Dark UI",
               maxLines = 1,
+              overflow = TextOverflow.Ellipsis,
               softWrap = false,
               style = MaterialTheme.typography.labelMedium,
             )
@@ -327,6 +328,7 @@ private fun PrototypeWorkbenchTopBar(state: PrototypeAppState) {
                   "Airplane mode"
                 },
               maxLines = 1,
+              overflow = TextOverflow.Ellipsis,
               softWrap = false,
               style = MaterialTheme.typography.labelMedium,
               fontWeight = if (state.isAirplaneMode) FontWeight.Bold else FontWeight.Medium,
@@ -354,6 +356,7 @@ private fun PrototypeWorkbenchTopBar(state: PrototypeAppState) {
             Text(
               text = "Reset Flow",
               maxLines = 1,
+              overflow = TextOverflow.Ellipsis,
               softWrap = false,
               style = MaterialTheme.typography.labelMedium,
             )
@@ -861,6 +864,9 @@ private fun UxDesignerInspectorPanel(state: PrototypeAppState, modifier: Modifie
                 text = label,
                 style = MaterialTheme.typography.labelSmall,
                 fontWeight = FontWeight.Bold,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                softWrap = false,
               )
             },
           )
@@ -917,6 +923,9 @@ private fun UxDesignerInspectorPanel(state: PrototypeAppState, modifier: Modifie
                 text = if (query.isEmpty()) "Show All (${state.surveys.size})" else "\"$label\"",
                 style = MaterialTheme.typography.labelSmall,
                 fontWeight = FontWeight.SemiBold,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                softWrap = false,
               )
             },
           )

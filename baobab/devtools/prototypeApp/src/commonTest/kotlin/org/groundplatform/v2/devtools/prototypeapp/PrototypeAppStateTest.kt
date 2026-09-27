@@ -80,7 +80,7 @@ class PrototypeAppStateTest {
     // Search by another location
     state.updateSearchQuery("Brazil")
     assertEquals(1, state.filteredSurveys.size)
-    assertEquals("2. Sample Plot Forest Assessment Survey", state.filteredSurveys.first().title)
+    assertEquals("Sample Plot Forest Assessment Survey", state.filteredSurveys.first().title)
 
     // Clearing search restores full shared list
     state.clearSearchQuery()

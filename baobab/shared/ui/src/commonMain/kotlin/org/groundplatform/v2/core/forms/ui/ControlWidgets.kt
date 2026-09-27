@@ -22,6 +22,8 @@ import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -87,6 +89,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import groundplatform.v2.forms.ControlType
@@ -178,7 +181,12 @@ fun QuestionControlCard(
             MaterialTheme.typography.labelSmall.copy(
               color = colors.onSurfaceVariant,
             ),
+          maxLines = 1,
+          overflow = TextOverflow.Ellipsis,
+          softWrap = false,
+          modifier = Modifier.weight(1f, fill = false),
         )
+        Spacer(modifier = Modifier.width(6.dp))
         Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
           if (fieldState.isRequired) {
             GroundTonalBadge(text = "Required *", tone = GroundBadgeTone.ERROR)
@@ -468,7 +476,7 @@ private fun IntegerInputWidget(
         onClick = { applyNumber((initialNumber ?: 0L) - 1L) },
         modifier = Modifier.height(52.dp),
       ) {
-        Text("-1", fontWeight = FontWeight.Bold)
+        Text("-1", fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis, softWrap = false)
       }
       OutlinedTextField(
         value = text,
@@ -501,7 +509,7 @@ private fun IntegerInputWidget(
         onClick = { applyNumber((initialNumber ?: 0L) + 1L) },
         modifier = Modifier.height(52.dp),
       ) {
-        Text("+1", fontWeight = FontWeight.Bold)
+        Text("+1", fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis, softWrap = false)
       }
     }
     if (parseError != null) {
@@ -548,7 +556,7 @@ private fun DecimalInputWidget(
         },
         modifier = Modifier.height(52.dp),
       ) {
-        Text("-0.5", fontWeight = FontWeight.Bold)
+        Text("-0.5", fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis, softWrap = false)
       }
       OutlinedTextField(
         value = text,
@@ -581,7 +589,7 @@ private fun DecimalInputWidget(
         },
         modifier = Modifier.height(52.dp),
       ) {
-        Text("+0.5", fontWeight = FontWeight.Bold)
+        Text("+0.5", fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis, softWrap = false)
       }
     }
     if (parseError != null) {
@@ -608,7 +616,15 @@ private fun BooleanInputWidget(
         selected = currentBool == boolVal,
         onClick = { controller.updateBoolean(path, boolVal) },
         shape = SegmentedButtonDefaults.itemShape(index = index, count = options.size),
-        label = { Text(label, style = MaterialTheme.typography.labelLarge) },
+        label = {
+          Text(
+            label,
+            style = MaterialTheme.typography.labelLarge,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            softWrap = false,
+          )
+        },
       )
     }
   }
@@ -674,7 +690,7 @@ private fun DateInputWidget(
           controller.updateDate(path, civilYear, m, d)
         }
       ) {
-        Text("Today")
+        Text("Today", maxLines = 1, overflow = TextOverflow.Ellipsis, softWrap = false)
       }
     }
     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -682,19 +698,19 @@ private fun DateInputWidget(
         onClick = { controller.updateDate(path, year, month, (day - 1).coerceIn(1, 28)) },
         modifier = Modifier.weight(1f),
       ) {
-        Text("-1 Day", style = MaterialTheme.typography.labelSmall)
+        Text("-1 Day", style = MaterialTheme.typography.labelSmall, maxLines = 1, overflow = TextOverflow.Ellipsis, softWrap = false)
       }
       OutlinedButton(
         onClick = { controller.updateDate(path, year, month, (day + 1).coerceIn(1, 28)) },
         modifier = Modifier.weight(1f),
       ) {
-        Text("+1 Day", style = MaterialTheme.typography.labelSmall)
+        Text("+1 Day", style = MaterialTheme.typography.labelSmall, maxLines = 1, overflow = TextOverflow.Ellipsis, softWrap = false)
       }
       OutlinedButton(
         onClick = { controller.updateDate(path, year, (month % 12) + 1, day) },
         modifier = Modifier.weight(1f),
       ) {
-        Text("+1 Month", style = MaterialTheme.typography.labelSmall)
+        Text("+1 Month", style = MaterialTheme.typography.labelSmall, maxLines = 1, overflow = TextOverflow.Ellipsis, softWrap = false)
       }
     }
   }
@@ -750,7 +766,7 @@ private fun TimeInputWidget(
         controller.updateTime(path, hours, minutes, seconds)
       }
     ) {
-      Text("Now")
+      Text("Now", maxLines = 1, overflow = TextOverflow.Ellipsis, softWrap = false)
     }
   }
 }
@@ -782,7 +798,7 @@ private fun TimestampInputWidget(
         controller.updateTimestamp(path, epochSeconds)
       }
     ) {
-      Text("Capture Timestamp")
+      Text("Capture Timestamp", maxLines = 1, overflow = TextOverflow.Ellipsis, softWrap = false)
     }
   }
 }
@@ -959,29 +975,24 @@ private fun GeoPointInputWidget(
       verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
       // Top capability & status badges
-      Row(
+      @OptIn(ExperimentalLayoutApi::class)
+      FlowRow(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
+        verticalArrangement = Arrangement.spacedBy(6.dp),
       ) {
-        Row(
-          horizontalArrangement = Arrangement.spacedBy(6.dp),
-          verticalAlignment = Alignment.CenterVertically,
-        ) {
+        GroundTonalBadge(
+          text = if (panAllowed) "Map pan allowed" else "GPS only (no pan)",
+          icon = if (!panAllowed) Icons.Default.Lock else null,
+          tone = if (panAllowed) GroundBadgeTone.PRIMARY else GroundBadgeTone.TERTIARY,
+        )
+        if (accuracyThreshold != null) {
           GroundTonalBadge(
-            text = if (panAllowed) "Map pan allowed" else "GPS only (no pan)",
-            icon = if (!panAllowed) Icons.Default.Lock else null,
-            tone = if (panAllowed) GroundBadgeTone.PRIMARY else GroundBadgeTone.TERTIARY,
+            text = "Required ≤ ${accuracyThreshold} m",
+            icon = Icons.Default.Info,
+            tone = if (meetsAccuracy) GroundBadgeTone.SECONDARY else GroundBadgeTone.ERROR,
           )
-          if (accuracyThreshold != null) {
-            GroundTonalBadge(
-              text = "Required ≤ ${accuracyThreshold} m",
-              icon = Icons.Default.Info,
-              tone = if (meetsAccuracy) GroundBadgeTone.SECONDARY else GroundBadgeTone.ERROR,
-            )
-          }
         }
-
         GroundTonalBadge(
           text =
             when {
@@ -1203,6 +1214,7 @@ private fun GeoPointInputWidget(
             )
           },
           modifier = Modifier.weight(1f),
+          contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
         ) {
           Icon(
             imageVector = if (isPanned) Icons.Default.Place else Icons.Default.LocationOn,
@@ -1213,20 +1225,21 @@ private fun GeoPointInputWidget(
           Text(
             text = triggerLabel,
             style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            softWrap = false,
           )
         }
 
         if (isPanned) {
-          FilledTonalButton(
+          OutlinedIconButton(
             onClick = { viewportState.onRecenterGps() },
           ) {
             Icon(
               imageVector = Icons.Default.Refresh,
-              contentDescription = null,
-              modifier = Modifier.size(16.dp),
+              contentDescription = "Recenter on GPS",
+              modifier = Modifier.size(20.dp),
             )
-            Spacer(modifier = Modifier.width(4.dp))
-            Text("Recenter", style = MaterialTheme.typography.labelMedium)
           }
         }
       }
@@ -1711,22 +1724,21 @@ private fun GeoGeometryDrawingWidget(
       verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
       // Top Status & Capability Badges
-      Row(
+      @OptIn(ExperimentalLayoutApi::class)
+      FlowRow(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
+        verticalArrangement = Arrangement.spacedBy(6.dp),
       ) {
-        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-          GroundTonalBadge(
-            text = if (isClosedShape) "Polygon (≥3 pts)" else "Linestring (≥2 pts)",
-            tone = GroundBadgeTone.PRIMARY,
-          )
-          GroundTonalBadge(
-            text = if (panAllowed) "Walk or draw (Pan allowed)" else "GPS walk only (Locked)",
-            icon = if (!panAllowed) Icons.Default.Lock else null,
-            tone = if (panAllowed) GroundBadgeTone.SECONDARY else GroundBadgeTone.TERTIARY,
-          )
-        }
+        GroundTonalBadge(
+          text = if (isClosedShape) "Polygon (≥3 pts)" else "Linestring (≥2 pts)",
+          tone = GroundBadgeTone.PRIMARY,
+        )
+        GroundTonalBadge(
+          text = if (panAllowed) "Walk or draw (Pan allowed)" else "GPS walk only (Locked)",
+          icon = if (!panAllowed) Icons.Default.Lock else null,
+          tone = if (panAllowed) GroundBadgeTone.SECONDARY else GroundBadgeTone.TERTIARY,
+        )
         GroundTonalBadge(
           text = "${existingPoints.size} vertices",
           tone = if (hasMinVertices) GroundBadgeTone.PRIMARY else GroundBadgeTone.WARNING,
@@ -2248,6 +2260,7 @@ private fun GeoGeometryDrawingWidget(
             updateVertices(existingPoints + newPt)
           },
           modifier = Modifier.weight(1f),
+          contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
         ) {
           Icon(
             imageVector = if (isPanned) Icons.Default.Place else Icons.Default.LocationOn,
@@ -2258,11 +2271,14 @@ private fun GeoGeometryDrawingWidget(
           Text(
             text = triggerLabel,
             style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            softWrap = false,
           )
         }
 
         if (existingPoints.isNotEmpty()) {
-          OutlinedButton(
+          OutlinedIconButton(
             onClick = {
               undoGeometryHistory = undoGeometryHistory + listOf(existingPoints)
               redoGeometryHistory = emptyList()
@@ -2271,11 +2287,9 @@ private fun GeoGeometryDrawingWidget(
           ) {
             Icon(
               imageVector = Icons.Default.Close,
-              contentDescription = null,
-              modifier = Modifier.size(16.dp),
+              contentDescription = "Clear all vertices",
+              modifier = Modifier.size(20.dp),
             )
-            Spacer(modifier = Modifier.width(4.dp))
-            Text("Clear", style = MaterialTheme.typography.labelMedium)
           }
         }
       }
@@ -2521,8 +2535,12 @@ private fun RangeControlWidget(
       valueRange = min.toFloat()..max.toFloat(),
     )
     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-      OutlinedButton(onClick = { applyRangeVal(currentVal - step) }) { Text("- $step") }
-      OutlinedButton(onClick = { applyRangeVal(currentVal + step) }) { Text("+ $step") }
+      OutlinedButton(onClick = { applyRangeVal(currentVal - step) }) {
+        Text("- $step", maxLines = 1, overflow = TextOverflow.Ellipsis, softWrap = false)
+      }
+      OutlinedButton(onClick = { applyRangeVal(currentVal + step) }) {
+        Text("+ $step", maxLines = 1, overflow = TextOverflow.Ellipsis, softWrap = false)
+      }
     }
   }
 }
@@ -2652,7 +2670,7 @@ private fun UploadControlWidget(
             controller.updateString(path, "capture_${path.substringAfterLast('/')}.$ext")
           }
         ) {
-          Text("Capture")
+          Text("Capture", maxLines = 1, overflow = TextOverflow.Ellipsis, softWrap = false)
         }
       }
     }
@@ -2675,14 +2693,14 @@ private fun TriggerControlWidget(
         modifier = Modifier.size(18.dp),
       )
       Spacer(modifier = Modifier.width(6.dp))
-      Text("Acknowledged (OK)")
+      Text("Acknowledged (OK)", maxLines = 1, overflow = TextOverflow.Ellipsis, softWrap = false)
     }
   } else {
     FilledTonalButton(
       onClick = { controller.updateString(path, "OK") },
       modifier = Modifier.fillMaxWidth(),
     ) {
-      Text("Acknowledge / Confirm")
+      Text("Acknowledge / Confirm", maxLines = 1, overflow = TextOverflow.Ellipsis, softWrap = false)
     }
   }
 }

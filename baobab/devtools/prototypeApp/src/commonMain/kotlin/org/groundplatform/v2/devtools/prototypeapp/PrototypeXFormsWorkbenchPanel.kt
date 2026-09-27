@@ -467,12 +467,28 @@ fun PrototypeXFormsWorkbenchPanel(state: PrototypeAppState) {
             FilterChip(
               selected = !previewAsJson,
               onClick = { previewAsJson = false },
-              label = { Text("TextProto", style = MaterialTheme.typography.labelSmall) },
+              label = {
+                Text(
+                  "TextProto",
+                  style = MaterialTheme.typography.labelSmall,
+                  maxLines = 1,
+                  overflow = TextOverflow.Ellipsis,
+                  softWrap = false,
+                )
+              },
             )
             FilterChip(
               selected = previewAsJson,
               onClick = { previewAsJson = true },
-              label = { Text("JSON", style = MaterialTheme.typography.labelSmall) },
+              label = {
+                Text(
+                  "JSON",
+                  style = MaterialTheme.typography.labelSmall,
+                  maxLines = 1,
+                  overflow = TextOverflow.Ellipsis,
+                  softWrap = false,
+                )
+              },
             )
           }
           OutlinedTextField(

@@ -256,8 +256,7 @@ internal fun MainSurveyTopAppBar(state: PrototypeAppState) {
             modifier = Modifier.size(12.dp),
           )
           Text(
-            text =
-              "${state.activeSurvey.location} • ${state.visibleMapEntities.size} ${state.activeEntitiesCountNoun} on map",
+            text = state.activeSurvey.location,
             style = MaterialTheme.typography.labelSmall,
             color = Color(0xFFB7F1B9),
             maxLines = 1,
@@ -391,12 +390,16 @@ internal fun SurveyMapView(state: PrototypeAppState) {
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
           ) {
-            // GPS Current Horizontal Accuracy Chip over the map
+            // Combined GPS Status / Auto-Center Chip over the map
             Surface(
               shape = MaterialTheme.shapes.large,
               color = MaterialTheme.colorScheme.inverseSurface.copy(alpha = 0.92f),
               contentColor = MaterialTheme.colorScheme.inverseOnSurface,
-              border = BorderStroke(1.dp, Color(0xFF4CAF50)),
+              border =
+                BorderStroke(
+                  1.dp,
+                  if (state.isCameraFollowingUser) Color(0xFF4CAF50) else Color(0xFFFFCC80),
+                ),
               shadowElevation = 2.dp,
             ) {
               Row(
@@ -405,13 +408,25 @@ internal fun SurveyMapView(state: PrototypeAppState) {
                 horizontalArrangement = Arrangement.spacedBy(5.dp),
               ) {
                 Icon(
-                  imageVector = Icons.Default.SatelliteAlt,
-                  contentDescription = "GPS Accuracy",
-                  tint = Color(0xFF8BD6B1),
+                  imageVector =
+                    if (state.isCameraFollowingUser) {
+                      Icons.Default.SatelliteAlt
+                    } else {
+                      Icons.Default.MyLocation
+                    },
+                  contentDescription =
+                    if (state.isCameraFollowingUser) "GPS Auto-Center" else "Panned",
+                  tint =
+                    if (state.isCameraFollowingUser) Color(0xFF8BD6B1) else Color(0xFFFFCC80),
                   modifier = Modifier.size(14.dp),
                 )
                 Text(
-                  text = "GPS Accuracy: ${state.gnssStatusChipLabel}",
+                  text =
+                    if (state.isCameraFollowingUser) {
+                      "GPS: ${state.gnssStatusChipLabel}"
+                    } else {
+                      "Panned"
+                    },
                   style = MaterialTheme.typography.labelSmall,
                   color = MaterialTheme.colorScheme.inverseOnSurface,
                   fontWeight = FontWeight.Bold,
@@ -444,28 +459,6 @@ internal fun SurveyMapView(state: PrototypeAppState) {
             }
           }
 
-          // Compact GPS Follow State Chip
-          Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(6.dp),
-          ) {
-            Surface(
-              shape = MaterialTheme.shapes.medium,
-              color = MaterialTheme.colorScheme.inverseSurface.copy(alpha = 0.85f),
-              border = BorderStroke(1.dp, Color(0xFF2D5944)),
-            ) {
-              val followColor =
-                if (state.isCameraFollowingUser) Color(0xFF8BD6B1) else Color(0xFFFFCC80)
-              Text(
-                text = if (state.isCameraFollowingUser) "GPS Auto-Center" else "Panned",
-                style = MaterialTheme.typography.labelSmall,
-                color = followColor,
-                fontWeight = FontWeight.SemiBold,
-                modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
-              )
-            }
-          }
-
           // Selected Cluster Balloon detail callout when a Mapbox cluster balloon is tapped
           if (state.isMapClusteringActive && state.selectedCluster != null) {
             MapClusterBalloonsOverlay(state = state)
@@ -473,14 +466,17 @@ internal fun SurveyMapView(state: PrototypeAppState) {
         }
       }
 
-      // 5. Bottom Overlay Stack: Google Maps-style Horizontal Scale Widget in bottom-left
-      //    (plus optional "Recenter" ExtendedFloatingActionButton when map is panned)
-      Column(
+      // 5. Bottom Overlay Stack: Google Maps-style Horizontal Scale Widget in bottom-left,
+      //    optional "Recenter" button, and standard bottom-right Forms FAB
+      Row(
         modifier =
-          Modifier.align(Alignment.BottomCenter).fillMaxWidth().padding(bottom = peekHeight)
+          Modifier.align(Alignment.BottomCenter)
+            .fillMaxWidth()
+            .padding(start = 14.dp, end = 14.dp, bottom = peekHeight + 10.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween,
       ) {
         Row(
-          modifier = Modifier.fillMaxWidth().padding(start = 14.dp, end = 14.dp, bottom = 8.dp),
           verticalAlignment = Alignment.CenterVertically,
           horizontalArrangement = Arrangement.spacedBy(10.dp),
         ) {
@@ -513,13 +509,8 @@ internal fun SurveyMapView(state: PrototypeAppState) {
           }
         }
 
-        // Single bottom-centered Floating Action Button to trigger data collection from a form
-        DataCollectionFormsFab(
-          state = state,
-          modifier =
-            Modifier.align(Alignment.CenterHorizontally)
-              .padding(horizontal = 14.dp, vertical = 6.dp),
-        )
+        // Standard bottom-right Floating Action Button to view available forms
+        DataCollectionFormsFab(state = state)
       }
     }
   }
@@ -591,6 +582,9 @@ internal fun SelectedClusterBalloonDetailCard(
               style = MaterialTheme.typography.labelSmall,
               color = Color(0xFF8BD6B1),
               fontWeight = FontWeight.Bold,
+              maxLines = 1,
+              overflow = TextOverflow.Ellipsis,
+              softWrap = false,
             )
           }
           IconButton(onClick = onDismiss, modifier = Modifier.size(22.dp)) {
@@ -664,33 +658,35 @@ internal fun SelectedClusterBalloonDetailCard(
 }
 
 /**
- * Single bottom-centered Floating Action Button (`ExtendedFloatingActionButton`) on the Main Survey
- * screen (`Map` and `List` views) that opens the [AvailableFormsModalSheet] list of available forms
- * to start data collection without requiring a geospatial entity to be pre-selected from the map.
+ * Floating Action Button (`FloatingActionButton`) on the Main Survey screen
+ * that opens the [AvailableFormsModalSheet] list of available forms to
+ * start data collection without requiring a geospatial entity to be pre-selected from the map.
  */
 @Composable
 internal fun DataCollectionFormsFab(state: PrototypeAppState, modifier: Modifier = Modifier) {
-  ExtendedFloatingActionButton(
+  val formsBg =
+    if (state.isAvailableFormsSheetOpen) {
+      Color(0xFF8BD6B1)
+    } else {
+      MaterialTheme.colorScheme.inverseSurface.copy(alpha = 0.93f)
+    }
+  val formsContent =
+    if (state.isAvailableFormsSheetOpen) {
+      Color(0xFF003825)
+    } else {
+      MaterialTheme.colorScheme.inverseOnSurface
+    }
+  FloatingActionButton(
     onClick = { state.openAvailableFormsSheet() },
-    modifier = modifier.height(46.dp),
-    shape = CircleShape,
-    containerColor = MaterialTheme.colorScheme.primary,
-    contentColor = MaterialTheme.colorScheme.onPrimary,
-    icon = {
-      Icon(
-        imageVector = Icons.Default.Add,
-        contentDescription = "Collect data from a form",
-        modifier = Modifier.size(20.dp),
-      )
-    },
-    text = {
-      Text(
-        text = "Collect data",
-        style = MaterialTheme.typography.labelLarge,
-        fontWeight = FontWeight.Bold,
-      )
-    },
-  )
+    modifier = modifier,
+    containerColor = formsBg,
+    contentColor = formsContent,
+  ) {
+    Icon(
+      imageVector = Icons.Default.Description,
+      contentDescription = "Available forms",
+    )
+  }
 }
 
 /**
@@ -721,8 +717,7 @@ internal fun AvailableFormsModalSheet(state: PrototypeAppState) {
             fontWeight = FontWeight.Bold,
           )
           Text(
-            text =
-              "Select a form to start data collection. You will be prompted to select the target location on the Map or List at the step where it is required.",
+            text = "Select a form to start data collection.",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
           )
@@ -736,7 +731,6 @@ internal fun AvailableFormsModalSheet(state: PrototypeAppState) {
 
       state.forms.forEach { form ->
         val eligibleCount = state.eligibleEntitiesForForm(form).size
-        val totalDatasetCount = state.allDatasetEntitiesForForm(form).size
         val canLaunch = !form.requiresEntity || eligibleCount > 0
 
         OutlinedCard(
@@ -750,32 +744,22 @@ internal fun AvailableFormsModalSheet(state: PrototypeAppState) {
             ),
         ) {
           Column(
-            modifier = Modifier.fillMaxWidth().padding(12.dp),
-            verticalArrangement = Arrangement.spacedBy(6.dp),
+            modifier = Modifier.fillMaxWidth().padding(14.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
           ) {
             Row(
               modifier = Modifier.fillMaxWidth(),
               horizontalArrangement = Arrangement.SpaceBetween,
               verticalAlignment = Alignment.CenterVertically,
             ) {
-              Row(
+              Text(
+                text = form.title,
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.weight(1f),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(6.dp),
-              ) {
-                Icon(
-                  imageVector = Icons.Default.Description,
-                  contentDescription = null,
-                  tint = MaterialTheme.colorScheme.primary,
-                  modifier = Modifier.size(16.dp),
-                )
-                Text(
-                  text = form.title,
-                  style = MaterialTheme.typography.labelLarge,
-                  fontWeight = FontWeight.Bold,
-                  color = MaterialTheme.colorScheme.onSurface,
-                )
-              }
+              )
+              Spacer(modifier = Modifier.width(8.dp))
               GroundTonalBadge(
                 text = "${form.questionCount} questions",
                 tone = GroundBadgeTone.PRIMARY,
@@ -788,50 +772,25 @@ internal fun AvailableFormsModalSheet(state: PrototypeAppState) {
               color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
 
-            Row(
-              modifier = Modifier.fillMaxWidth(),
-              horizontalArrangement = Arrangement.SpaceBetween,
-              verticalAlignment = Alignment.CenterVertically,
+            Button(
+              onClick = { state.launchFormFromFab(form.id) },
+              enabled = canLaunch,
+              modifier = Modifier.align(Alignment.End),
             ) {
-              Column(modifier = Modifier.weight(1f)) {
-                if (form.requiresEntity) {
-                  Text(
-                    text = "Target: ${form.targetDatasetName}",
-                    style = MaterialTheme.typography.labelSmall,
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.primary,
-                  )
-                  Text(
-                    text =
-                      "$eligibleCount of $totalDatasetCount ${form.targetSingularTypeLabel.lowercase()}(s) available • Select via Map or List in step 1",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                  )
-                } else {
-                  Text(
-                    text = "Target: Standalone field log (No map feature required)",
-                    style = MaterialTheme.typography.labelSmall,
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.primary,
-                  )
-                  Text(
-                    text =
-                      "Records directly at your current GNSS position without an attached map feature",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                  )
-                }
-              }
-
-              Spacer(modifier = Modifier.width(8.dp))
-
-              Button(onClick = { state.launchFormFromFab(form.id) }, enabled = canLaunch) {
-                Text(
-                  text = form.ctaLabel,
-                  style = MaterialTheme.typography.labelMedium,
-                  fontWeight = FontWeight.Bold,
-                )
-              }
+              Icon(
+                imageVector = Icons.Default.Description,
+                contentDescription = null,
+                modifier = Modifier.size(16.dp),
+              )
+              Spacer(modifier = Modifier.width(6.dp))
+              Text(
+                text = form.ctaLabel,
+                style = MaterialTheme.typography.labelMedium,
+                fontWeight = FontWeight.Bold,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                softWrap = false,
+              )
             }
           }
         }

@@ -340,6 +340,9 @@ internal fun EntityMetadataAndActionsRow(
         Text(
           text = if (isNavigatingEntity) "Stop Nav" else "Navigate",
           style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+          maxLines = 1,
+          overflow = TextOverflow.Ellipsis,
+          softWrap = false,
         )
       },
       leadingIcon = {
@@ -359,6 +362,9 @@ internal fun EntityMetadataAndActionsRow(
           Text(
             text = "QR Code",
             style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            softWrap = false,
           )
         },
         leadingIcon = {
@@ -377,6 +383,9 @@ internal fun EntityMetadataAndActionsRow(
           Text(
             text = "Share PDF",
             style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            softWrap = false,
           )
         },
         leadingIcon = {
@@ -929,6 +938,9 @@ internal fun BottomSheetSearchableListContent(
                 Text(
                   text = "Turn Off",
                   style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                  maxLines = 1,
+                  overflow = TextOverflow.Ellipsis,
+                  softWrap = false,
                 )
               },
             )
@@ -984,47 +996,32 @@ internal fun BottomSheetSearchableListContent(
               horizontalArrangement = Arrangement.SpaceBetween,
               verticalAlignment = Alignment.CenterVertically,
             ) {
-              Column(
+              Row(
                 modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(2.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
               ) {
-                Row(
-                  verticalAlignment = Alignment.CenterVertically,
-                  horizontalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                  if (layer != null) {
-                    Box(
-                      modifier =
-                        Modifier.size(14.dp)
-                          .clip(MaterialTheme.shapes.extraSmall)
-                          .background(Color(layer.colorHex).copy(alpha = 0.25f))
-                          .border(2.dp, Color(layer.colorHex), MaterialTheme.shapes.extraSmall)
-                    )
-                  } else {
-                    Icon(
-                      imageVector = Icons.Default.LocationOn,
-                      contentDescription = null,
-                      tint = MaterialTheme.colorScheme.primary,
-                      modifier = Modifier.size(14.dp),
-                    )
-                  }
-                  Text(
-                    text = layer?.label ?: group.datasetName,
-                    style =
-                      MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
-                    color = MaterialTheme.colorScheme.onSurface,
+                if (layer != null) {
+                  Box(
+                    modifier =
+                      Modifier.size(14.dp)
+                        .clip(MaterialTheme.shapes.extraSmall)
+                        .background(Color(layer.colorHex).copy(alpha = 0.25f))
+                        .border(2.dp, Color(layer.colorHex), MaterialTheme.shapes.extraSmall)
+                  )
+                } else {
+                  Icon(
+                    imageVector = Icons.Default.LocationOn,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(14.dp),
                   )
                 }
                 Text(
-                  text =
-                    if (layer != null) {
-                      "${layer.geometryTypeLabel} • ${group.datasetName}"
-                    } else {
-                      group.datasetName
-                    },
+                  text = layer?.label ?: group.datasetName,
                   style =
-                    MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
-                  color = MaterialTheme.colorScheme.primary,
+                    MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+                  color = MaterialTheme.colorScheme.onSurface,
                 )
               }
 
@@ -1254,6 +1251,9 @@ internal fun BottomSheetSearchableListContent(
                         text = if (isNavigatingPlace) "Stop Nav" else "Navigate",
                         style =
                           MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        softWrap = false,
                       )
                     },
                     leadingIcon = {
@@ -1359,6 +1359,9 @@ internal fun SubmissionFullDetailsCard(
               Text(
                 text = "Share PDF",
                 style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                softWrap = false,
               )
             },
             leadingIcon = {
