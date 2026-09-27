@@ -33,6 +33,16 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Place
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -41,9 +51,11 @@ import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedCard
+import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.SegmentedButton
@@ -69,7 +81,10 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -240,13 +255,13 @@ fun QuestionControlCard(
           horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
           if (media.image_uri.isNotBlank()) {
-            GroundTonalBadge("🖼 ${media.image_uri}", GroundBadgeTone.PRIMARY)
+            GroundTonalBadge(media.image_uri, GroundBadgeTone.PRIMARY)
           }
           if (media.audio_uri.isNotBlank()) {
-            GroundTonalBadge("🔊 ${media.audio_uri}", GroundBadgeTone.SECONDARY)
+            GroundTonalBadge(media.audio_uri, GroundBadgeTone.SECONDARY)
           }
           if (media.video_uri.isNotBlank()) {
-            GroundTonalBadge("🎬 ${media.video_uri}", GroundBadgeTone.TERTIARY)
+            GroundTonalBadge(media.video_uri, GroundBadgeTone.TERTIARY)
           }
         }
       }
@@ -267,14 +282,25 @@ fun QuestionControlCard(
             verticalArrangement = Arrangement.spacedBy(4.dp),
           ) {
             status.errors.forEach { err ->
-              Text(
-                text = "⚠ ${err.message}",
-                style =
-                  MaterialTheme.typography.bodySmall.copy(
-                    fontWeight = FontWeight.SemiBold,
-                    color = colors.onErrorContainer,
-                  ),
-              )
+              Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+              ) {
+                Icon(
+                  imageVector = Icons.Default.Warning,
+                  contentDescription = null,
+                  tint = colors.onErrorContainer,
+                  modifier = Modifier.size(16.dp),
+                )
+                Text(
+                  text = err.message,
+                  style =
+                    MaterialTheme.typography.bodySmall.copy(
+                      fontWeight = FontWeight.SemiBold,
+                      color = colors.onErrorContainer,
+                    ),
+                )
+              }
             }
           }
         }
@@ -346,9 +372,9 @@ private fun InputByDataTypeWidget(
     DataType.TYPE_DATETIME -> TimestampInputWidget(path, fieldState, controller)
     DataType.TYPE_GEOPOINT -> GeoPointInputWidget(control, path, fieldState, controller)
     DataType.TYPE_GEOTRACE ->
-      GeoVertexListWidget(control, path, fieldState, controller, isClosedShape = false)
+      GeoGeometryDrawingWidget(control, path, fieldState, controller, isClosedShape = false)
     DataType.TYPE_GEOSHAPE ->
-      GeoVertexListWidget(control, path, fieldState, controller, isClosedShape = true)
+      GeoGeometryDrawingWidget(control, path, fieldState, controller, isClosedShape = true)
     else -> StringInputWidget(path, fieldState, isMultiline, controller)
   }
 }
@@ -761,6 +787,103 @@ private fun TimestampInputWidget(
   }
 }
 
+/**
+ * Returns `true` when [appearance] allows panning the map to place a point manually (`placement-map`,
+ * `map`, or `maps`). When `false`, point capture is locked to the user's live GPS position.
+ */
+fun isGeoPointPanAllowed(appearance: String): Boolean {
+  val tokens = appearance.split(' ').filter { it.isNotBlank() }
+  return tokens.any {
+    it.equals("placement-map", ignoreCase = true) ||
+      it.equals("map", ignoreCase = true) ||
+      it.equals("maps", ignoreCase = true)
+  }
+}
+
+/**
+ * Returns the primary action trigger label for a `geopoint` question:
+ * - `"Add point"` when the map has been panned away from the user's GPS position ([isPanned] is
+ *   `true`)
+ * - `"Capture location"` when centered on the user's GPS position ([isPanned] is `false`)
+ */
+fun geoPointPrimaryTriggerLabel(isPanned: Boolean): String =
+  if (isPanned) "Add point" else "Capture location"
+
+/** Rounds a geographic coordinate to 6 decimal places (~0.11 m precision). */
+internal fun roundGeoCoord6(value: Double): Double =
+  (value * 1_000_000.0).roundToInt() / 1_000_000.0
+
+/** Formats a decimal degree value to 6 decimal places. */
+private fun formatDecimal6(value: Double): String {
+  val rounded = roundGeoCoord6(abs(value))
+  val whole = rounded.toInt()
+  val frac = ((rounded - whole) * 1_000_000.0).roundToInt().toString().padStart(6, '0')
+  return "$whole.$frac"
+}
+
+/** Formats [latitude] and [longitude] into a cardinal degree string (e.g. `"1.292066° S, 36.821946° E"`). */
+fun formatGeoPointCoordinates(latitude: Double, longitude: Double): String {
+  val latHemisphere = if (latitude < 0.0) "S" else "N"
+  val lonHemisphere = if (longitude < 0.0) "W" else "E"
+  return "${formatDecimal6(latitude)}° $latHemisphere, ${formatDecimal6(longitude)}° $lonHemisphere"
+}
+
+/** Formats horizontal GPS accuracy in meters (e.g. `"±3.2 m"`). */
+fun formatGeoPointAccuracy(accuracyMeters: Double): String {
+  val tenths = (accuracyMeters * 10.0).roundToInt() / 10.0
+  return "±$tenths m"
+}
+
+/** Material Design 3 Undo icon. */
+val UndoIcon: ImageVector by lazy {
+  ImageVector.Builder(
+    name = "Undo",
+    defaultWidth = 24.dp,
+    defaultHeight = 24.dp,
+    viewportWidth = 24f,
+    viewportHeight = 24f,
+  ).apply {
+    path(fill = SolidColor(Color.Black)) {
+      moveTo(12.5f, 8.0f)
+      curveToRelative(-2.65f, 0.0f, -5.05f, 0.99f, -6.9f, 2.6f)
+      lineTo(2.0f, 7.0f)
+      verticalLineToRelative(9.0f)
+      horizontalLineToRelative(9.0f)
+      lineToRelative(-3.62f, -3.62f)
+      curveToRelative(1.39f, -1.16f, 3.16f, -1.88f, 5.12f, -1.88f)
+      curveToRelative(3.54f, 0.0f, 6.55f, 2.31f, 7.6f, 5.5f)
+      lineToRelative(2.37f, -0.78f)
+      curveTo(21.08f, 11.03f, 17.15f, 8.0f, 12.5f, 8.0f)
+      close()
+    }
+  }.build()
+}
+
+/** Material Design 3 Redo icon. */
+val RedoIcon: ImageVector by lazy {
+  ImageVector.Builder(
+    name = "Redo",
+    defaultWidth = 24.dp,
+    defaultHeight = 24.dp,
+    viewportWidth = 24f,
+    viewportHeight = 24f,
+  ).apply {
+    path(fill = SolidColor(Color.Black)) {
+      moveTo(18.4f, 10.6f)
+      curveTo(16.55f, 8.99f, 14.15f, 8.0f, 11.5f, 8.0f)
+      curveToRelative(-4.65f, 0.0f, -8.58f, 3.03f, -9.96f, 7.22f)
+      lineTo(3.9f, 16.0f)
+      curveToRelative(1.05f, -3.19f, 4.05f, -5.5f, 7.6f, -5.5f)
+      curveToRelative(1.95f, 0.0f, 3.73f, 0.72f, 5.12f, 1.88f)
+      lineTo(13.0f, 16.0f)
+      horizontalLineToRelative(9.0f)
+      verticalLineTo(7.0f)
+      lineToRelative(-3.6f, 3.6f)
+      close()
+    }
+  }.build()
+}
+
 @Composable
 private fun GeoPointInputWidget(
   control: ComponentState.ControlState,
@@ -770,15 +893,61 @@ private fun GeoPointInputWidget(
 ) {
   val colors = MaterialTheme.colorScheme
   val gp = fieldState.value?.scalar_value?.geopoint_value
-  val appearanceTokens = control.appearance.split(' ').filter { it.isNotBlank() }
-  val panAllowed = appearanceTokens.contains("placement-map") || appearanceTokens.contains("map")
+  val panAllowed = isGeoPointPanAllowed(control.appearance)
   val accuracyThreshold =
     control.controlDef.geo_config?.accuracy_threshold_meters?.takeIf { it > 0.0 }
 
-  var latText by remember(path, gp) { mutableStateOf(gp?.latitude?.toString() ?: "") }
-  var lonText by remember(path, gp) { mutableStateOf(gp?.longitude?.toString() ?: "") }
-  var altText by remember(path, gp) { mutableStateOf(gp?.altitude_meters?.toString() ?: "1680.0") }
-  var accText by remember(path, gp) { mutableStateOf(gp?.accuracy_meters?.toString() ?: "3.2") }
+  var liveGpsLat by remember(path) { mutableStateOf(gp?.latitude ?: -1.292066) }
+  var liveGpsLon by remember(path) { mutableStateOf(gp?.longitude ?: 36.821946) }
+  var liveGpsAlt by remember(path) { mutableStateOf(gp?.altitude_meters ?: 1680.0) }
+  var liveGpsAcc by remember(path) { mutableStateOf(gp?.accuracy_meters ?: 3.2) }
+  var panOffsetLat by remember(path) { mutableStateOf(0.0) }
+  var panOffsetLon by remember(path) { mutableStateOf(0.0) }
+  var zoomLevel by remember(path) { mutableStateOf(17.5f) }
+  var undoPointHistory by remember(path) { mutableStateOf<List<GeoPoint?>>(emptyList()) }
+  var redoPointHistory by remember(path) { mutableStateOf<List<GeoPoint?>>(emptyList()) }
+
+  val isPanned =
+    panAllowed && (abs(panOffsetLat) > 0.0000005 || abs(panOffsetLon) > 0.0000005)
+  val targetLat = roundGeoCoord6(liveGpsLat + if (panAllowed) panOffsetLat else 0.0)
+  val targetLon = roundGeoCoord6(liveGpsLon + if (panAllowed) panOffsetLon else 0.0)
+
+  val displayLat = if (isPanned) targetLat else (gp?.latitude ?: liveGpsLat)
+  val displayLon = if (isPanned) targetLon else (gp?.longitude ?: liveGpsLon)
+  val displayAlt = if (isPanned) liveGpsAlt else (gp?.altitude_meters ?: liveGpsAlt)
+  val displayAcc = if (isPanned) liveGpsAcc else (gp?.accuracy_meters ?: liveGpsAcc)
+  val meetsAccuracy = accuracyThreshold == null || displayAcc <= accuracyThreshold
+  val triggerLabel = geoPointPrimaryTriggerLabel(isPanned)
+
+  val viewportState =
+    GeoPointMapViewportState(
+      path = path,
+      panAllowed = panAllowed,
+      isPanned = isPanned,
+      liveGpsLatitude = liveGpsLat,
+      liveGpsLongitude = liveGpsLon,
+      targetLatitude = targetLat,
+      targetLongitude = targetLon,
+      accuracyMeters = displayAcc,
+      capturedPoint = gp,
+      panOffsetLat = panOffsetLat,
+      panOffsetLon = panOffsetLon,
+      zoomLevel = zoomLevel,
+      onPanDeltaPixels = { dxPx, dyPx, widthPx, heightPx ->
+        if (panAllowed && widthPx > 0f && heightPx > 0f) {
+          val spanDeg = 0.0016 * (17.5f / zoomLevel.coerceIn(13f, 20f))
+          panOffsetLon = (panOffsetLon - (dxPx / widthPx) * spanDeg).coerceIn(-0.02, 0.02)
+          panOffsetLat = (panOffsetLat + (dyPx / heightPx) * spanDeg).coerceIn(-0.02, 0.02)
+        }
+      },
+      onZoomDelta = { delta ->
+        zoomLevel = (zoomLevel + delta).coerceIn(13.5f, 19.5f)
+      },
+      onRecenterGps = {
+        panOffsetLat = 0.0
+        panOffsetLon = 0.0
+      },
+    )
 
   OutlinedCard(
     modifier = Modifier.fillMaxWidth(),
@@ -787,165 +956,696 @@ private fun GeoPointInputWidget(
   ) {
     Column(
       modifier = Modifier.fillMaxWidth().padding(12.dp),
-      verticalArrangement = Arrangement.spacedBy(8.dp),
+      verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
-      // Geospatial capability & constraint badges
-      Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(6.dp),
-        verticalAlignment = Alignment.CenterVertically,
-      ) {
-        GroundTonalBadge(
-          text = if (panAllowed) "🖐 Map Pan Allowed" else "🔒 No Pan Allowed (GPS Only)",
-          tone = if (panAllowed) GroundBadgeTone.PRIMARY else GroundBadgeTone.TERTIARY,
-        )
-        if (accuracyThreshold != null) {
-          val meetsAccuracy = gp == null || gp.accuracy_meters <= accuracyThreshold
-          GroundTonalBadge(
-            text = "🎯 Required GPS <= ${accuracyThreshold}m",
-            tone = if (meetsAccuracy) GroundBadgeTone.SECONDARY else GroundBadgeTone.TERTIARY,
-          )
-        }
-      }
-
+      // Top capability & status badges
       Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
       ) {
-        Text(
+        Row(
+          horizontalArrangement = Arrangement.spacedBy(6.dp),
+          verticalAlignment = Alignment.CenterVertically,
+        ) {
+          GroundTonalBadge(
+            text = if (panAllowed) "Map pan allowed" else "GPS only (no pan)",
+            icon = if (!panAllowed) Icons.Default.Lock else null,
+            tone = if (panAllowed) GroundBadgeTone.PRIMARY else GroundBadgeTone.TERTIARY,
+          )
+          if (accuracyThreshold != null) {
+            GroundTonalBadge(
+              text = "Required ≤ ${accuracyThreshold} m",
+              icon = Icons.Default.Info,
+              tone = if (meetsAccuracy) GroundBadgeTone.SECONDARY else GroundBadgeTone.ERROR,
+            )
+          }
+        }
+
+        GroundTonalBadge(
           text =
-            if (gp != null) {
-              "📍 ${gp.latitude}, ${gp.longitude} (±${gp.accuracy_meters}m)"
-            } else {
-              "📍 No GPS coordinates captured"
+            when {
+              isPanned -> "Panned"
+              gp != null -> "Captured"
+              else -> "Ready"
             },
-          style =
-            MaterialTheme.typography.bodySmall.copy(
-              fontWeight = FontWeight.SemiBold,
-              color = colors.onSurface,
-            ),
+          icon = if (gp != null) Icons.Default.Check else null,
+          tone =
+            when {
+              isPanned -> GroundBadgeTone.TERTIARY
+              gp != null -> GroundBadgeTone.SECONDARY
+              else -> GroundBadgeTone.NEUTRAL
+            },
         )
       }
 
-      // GPS Fix & Pan Simulation Controls
+      // Interactive Map Viewport for Add Point / Capture Location
+      GeoPointInteractiveMapBox(viewportState = viewportState)
+
+      // Read-only Coordinates & Accuracy Display Card (no manual coordinate text entry)
+      Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = MaterialTheme.shapes.small,
+        color = colors.surfaceContainerHighest.copy(alpha = 0.65f),
+        border = BorderStroke(1.dp, colors.outlineVariant.copy(alpha = 0.6f)),
+      ) {
+        Column(
+          modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 10.dp),
+          verticalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+          Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+          ) {
+            Column(modifier = Modifier.weight(1f)) {
+              Text(
+                text =
+                  when {
+                    isPanned -> "Target coordinates (panned crosshair)"
+                    gp != null -> "Captured coordinates"
+                    else -> "Current GPS coordinates"
+                  },
+                style =
+                  MaterialTheme.typography.labelSmall.copy(
+                    color = colors.onSurfaceVariant,
+                    fontWeight = FontWeight.Medium,
+                  ),
+              )
+              Text(
+                text = formatGeoPointCoordinates(displayLat, displayLon),
+                style =
+                  MaterialTheme.typography.bodyMedium.copy(
+                    fontWeight = FontWeight.Bold,
+                    color = colors.onSurface,
+                  ),
+              )
+              Text(
+                text = "$displayLat, $displayLon • Alt ${displayAlt.roundToInt()} m",
+                style =
+                  MaterialTheme.typography.labelSmall.copy(
+                    color = colors.onSurfaceVariant,
+                  ),
+              )
+            }
+
+            Spacer(modifier = Modifier.width(12.dp))
+
+            // Accuracy Readout Pill
+            Surface(
+              shape = MaterialTheme.shapes.small,
+              color =
+                if (meetsAccuracy) {
+                  colors.secondaryContainer
+                } else {
+                  colors.errorContainer
+                },
+              contentColor =
+                if (meetsAccuracy) {
+                  colors.onSecondaryContainer
+                } else {
+                  colors.onErrorContainer
+                },
+            ) {
+              Column(
+                modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                horizontalAlignment = Alignment.End,
+              ) {
+                Text(
+                  text = "Accuracy",
+                  style = MaterialTheme.typography.labelSmall,
+                )
+                Text(
+                  text = formatGeoPointAccuracy(displayAcc),
+                  style =
+                    MaterialTheme.typography.titleSmall.copy(
+                      fontWeight = FontWeight.Bold,
+                    ),
+                )
+              }
+            }
+          }
+
+          if (isPanned && gp != null) {
+            Text(
+              text =
+                "Saved point: ${gp.latitude}, ${gp.longitude} (${formatGeoPointAccuracy(gp.accuracy_meters)}) — tap \"Add point\" to update, or use Undo / Redo",
+              style =
+                MaterialTheme.typography.labelSmall.copy(
+                  color = colors.primary,
+                  fontWeight = FontWeight.Medium,
+                ),
+            )
+          } else if (gp != null) {
+            Text(
+              text =
+                "Location captured: ${gp.latitude}, ${gp.longitude} (${formatGeoPointAccuracy(gp.accuracy_meters)}) — tap \"Next →\" to continue, or use Undo / Redo",
+              style =
+                MaterialTheme.typography.labelSmall.copy(
+                  color = colors.primary,
+                  fontWeight = FontWeight.Medium,
+                ),
+            )
+          } else {
+            Text(
+              text =
+                if (isPanned) {
+                  "Map panned — tap \"Add point\" below to record this point"
+                } else {
+                  "Tap \"Capture location\" below to record your current GPS coordinates"
+                },
+              style =
+                MaterialTheme.typography.labelSmall.copy(
+                  color = colors.onSurfaceVariant,
+                ),
+            )
+          }
+        }
+      }
+
+      // Primary Action Row: [Undo] [Redo] [Capture location / Add point] [Recenter]
       Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically,
       ) {
-        FilledTonalButton(
+        OutlinedIconButton(
           onClick = {
+            if (undoPointHistory.isNotEmpty()) {
+              val prevPoint = undoPointHistory.last()
+              undoPointHistory = undoPointHistory.dropLast(1)
+              redoPointHistory = redoPointHistory + listOf(gp)
+              if (prevPoint != null) {
+                controller.updateGeoPoint(
+                  path = path,
+                  latitude = prevPoint.latitude,
+                  longitude = prevPoint.longitude,
+                  altitudeMeters = prevPoint.altitude_meters,
+                  accuracyMeters = prevPoint.accuracy_meters,
+                )
+              } else {
+                controller.clearField(path)
+              }
+            } else if (gp != null) {
+              redoPointHistory = redoPointHistory + listOf(gp)
+              controller.clearField(path)
+            }
+          },
+          enabled = undoPointHistory.isNotEmpty() || gp != null,
+        ) {
+          Icon(
+            imageVector = UndoIcon,
+            contentDescription = "Undo",
+            modifier = Modifier.size(20.dp),
+          )
+        }
+
+        OutlinedIconButton(
+          onClick = {
+            if (redoPointHistory.isNotEmpty()) {
+              val nextPoint = redoPointHistory.last()
+              redoPointHistory = redoPointHistory.dropLast(1)
+              undoPointHistory = undoPointHistory + listOf(gp)
+              if (nextPoint != null) {
+                controller.updateGeoPoint(
+                  path = path,
+                  latitude = nextPoint.latitude,
+                  longitude = nextPoint.longitude,
+                  altitudeMeters = nextPoint.altitude_meters,
+                  accuracyMeters = nextPoint.accuracy_meters,
+                )
+              } else {
+                controller.clearField(path)
+              }
+            }
+          },
+          enabled = redoPointHistory.isNotEmpty(),
+        ) {
+          Icon(
+            imageVector = RedoIcon,
+            contentDescription = "Redo",
+            modifier = Modifier.size(20.dp),
+          )
+        }
+
+        Button(
+          onClick = {
+            val captureLat = if (isPanned) targetLat else liveGpsLat
+            val captureLon = if (isPanned) targetLon else liveGpsLon
+            undoPointHistory = undoPointHistory + listOf(gp)
+            redoPointHistory = emptyList()
             controller.updateGeoPoint(
               path = path,
-              latitude = -1.292066,
-              longitude = 36.821946,
-              altitudeMeters = 1680.0,
-              accuracyMeters = 3.2,
+              latitude = captureLat,
+              longitude = captureLon,
+              altitudeMeters = liveGpsAlt,
+              accuracyMeters = liveGpsAcc,
             )
           },
-          contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp),
+          modifier = Modifier.weight(1f),
         ) {
-          Text("🛰 GPS Fix (±3.2m ✓)", style = MaterialTheme.typography.labelSmall)
+          Icon(
+            imageVector = if (isPanned) Icons.Default.Place else Icons.Default.LocationOn,
+            contentDescription = null,
+            modifier = Modifier.size(18.dp),
+          )
+          Spacer(modifier = Modifier.width(6.dp))
+          Text(
+            text = triggerLabel,
+            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+          )
         }
-        OutlinedButton(
-          onClick = {
-            controller.updateGeoPoint(
-              path = path,
-              latitude = -1.292180,
-              longitude = 36.822090,
-              altitudeMeters = 1680.0,
-              accuracyMeters = 14.2,
-            )
-          },
-          contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp),
-        ) {
-          Text("⚠ Weak GPS (±14.2m)", style = MaterialTheme.typography.labelSmall)
-        }
-        if (panAllowed) {
-          OutlinedButton(
-            onClick = {
-              val baseLat = gp?.latitude ?: -1.292066
-              val baseLon = gp?.longitude ?: 36.821946
-              val baseAcc = gp?.accuracy_meters ?: 4.0
-              val pannedLat = ((baseLat + 0.00012) * 1000000.0).toInt() / 1000000.0
-              val pannedLon = ((baseLon + 0.00015) * 1000000.0).toInt() / 1000000.0
-              controller.updateGeoPoint(
-                path = path,
-                latitude = pannedLat,
-                longitude = pannedLon,
-                altitudeMeters = gp?.altitude_meters ?: 1680.0,
-                accuracyMeters = baseAcc,
-              )
-            },
-            contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp),
+
+        if (isPanned) {
+          FilledTonalButton(
+            onClick = { viewportState.onRecenterGps() },
           ) {
-            Text("🖐 Pan Map (+15m)", style = MaterialTheme.typography.labelSmall)
+            Icon(
+              imageVector = Icons.Default.Refresh,
+              contentDescription = null,
+              modifier = Modifier.size(16.dp),
+            )
+            Spacer(modifier = Modifier.width(4.dp))
+            Text("Recenter", style = MaterialTheme.typography.labelMedium)
           }
         }
       }
 
+
       if (!panAllowed) {
         Text(
           text =
-            "Manual map panning is locked for this point. Coordinates must come from a hardware GNSS fix" +
-              (if (accuracyThreshold != null) " with <= ${accuracyThreshold}m accuracy." else "."),
+            "Map panning is disabled for this question. Coordinates are captured directly from your GPS location" +
+              (if (accuracyThreshold != null) " (requires ≤ ${accuracyThreshold} m accuracy)." else "."),
           style = MaterialTheme.typography.labelSmall.copy(color = colors.onSurfaceVariant),
-        )
-      }
-
-      Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        OutlinedTextField(
-          value = latText,
-          onValueChange = {
-            if (!panAllowed) return@OutlinedTextField
-            latText = it
-            val lat = it.toDoubleOrNull()
-            val lon = lonText.toDoubleOrNull()
-            if (lat != null && lon != null) {
-              controller.updateGeoPoint(
-                path,
-                lat,
-                lon,
-                altText.toDoubleOrNull() ?: 1680.0,
-                accText.toDoubleOrNull() ?: 3.2,
-              )
-            }
-          },
-          enabled = panAllowed,
-          label = { Text(if (panAllowed) "Latitude (Pan OK)" else "Latitude (GPS Locked)") },
-          modifier = Modifier.weight(1f),
-          singleLine = true,
-        )
-        OutlinedTextField(
-          value = lonText,
-          onValueChange = {
-            if (!panAllowed) return@OutlinedTextField
-            lonText = it
-            val lat = latText.toDoubleOrNull()
-            val lon = it.toDoubleOrNull()
-            if (lat != null && lon != null) {
-              controller.updateGeoPoint(
-                path,
-                lat,
-                lon,
-                altText.toDoubleOrNull() ?: 1680.0,
-                accText.toDoubleOrNull() ?: 3.2,
-              )
-            }
-          },
-          enabled = panAllowed,
-          label = { Text(if (panAllowed) "Longitude (Pan OK)" else "Longitude (GPS Locked)") },
-          modifier = Modifier.weight(1f),
-          singleLine = true,
         )
       }
     }
   }
 }
 
+/**
+ * Interactive map viewport rendered inside [GeoPointInputWidget] for `TYPE_GEOPOINT` questions.
+ *
+ * Delegates basemap rendering to [LocalGeoPointMapViewport] when provided by the host (e.g., live
+ * Mapbox GL JS basemap in `devtools/prototypeApp`), or renders a built-in interactive satellite and
+ * topographic Compose `Canvas` basemap with drag-to-pan gestures, GPS blue dot + accuracy halo,
+ * center target crosshair reticle, captured pin marker, zoom controls, and Recenter pill.
+ */
 @Composable
-private fun GeoVertexListWidget(
+private fun GeoPointInteractiveMapBox(viewportState: GeoPointMapViewportState) {
+  val hostMapViewport = LocalGeoPointMapViewport.current
+  val mapShape = RoundedCornerShape(12.dp)
+
+  Box(
+    modifier =
+      Modifier.fillMaxWidth()
+        .height(216.dp)
+        .clip(mapShape)
+        .border(1.dp, Color(0xFF2D5944), mapShape)
+  ) {
+    if (hostMapViewport != null) {
+      hostMapViewport(viewportState)
+    } else {
+      GeoPointFallbackCanvasMap(viewportState = viewportState)
+    }
+
+    // Center Target Crosshair / Reticle + Captured Pin Overlay
+    Canvas(modifier = Modifier.fillMaxSize()) {
+      val center = Offset(size.width / 2f, size.height / 2f)
+      val spanDeg = 0.0016f * (17.5f / viewportState.zoomLevel.coerceIn(13f, 20f))
+
+      // If a point is already captured, draw its saved pin marker relative to the current target center
+      val captured = viewportState.capturedPoint
+      if (captured != null) {
+        val dLon = (captured.longitude - viewportState.targetLongitude).toFloat()
+        val dLat = (captured.latitude - viewportState.targetLatitude).toFloat()
+        val savedX = center.x + (dLon / spanDeg) * size.width
+        val savedY = center.y - (dLat / spanDeg) * size.height
+        if (savedX in 0f..size.width && savedY in 0f..size.height) {
+          drawCircle(
+            color = Color(0xFF00E676).copy(alpha = 0.28f),
+            radius = 14.dp.toPx(),
+            center = Offset(savedX, savedY),
+          )
+          drawCircle(
+            color = Color.White,
+            radius = 7.dp.toPx(),
+            center = Offset(savedX, savedY),
+          )
+          drawCircle(
+            color = Color(0xFF00C853),
+            radius = 5.dp.toPx(),
+            center = Offset(savedX, savedY),
+          )
+        }
+      }
+
+      // Draw center target reticle / crosshair
+      val reticleColor =
+        if (viewportState.isPanned) {
+          Color(0xFFFFD54F)
+        } else {
+          Color(0xFF8BD6B1)
+        }
+      val ringRadius = 18.dp.toPx()
+      val tickInner = 7.dp.toPx()
+      val tickOuter = 25.dp.toPx()
+
+      // Outer target ring
+      drawCircle(
+        color = Color(0xFF091812).copy(alpha = 0.65f),
+        radius = ringRadius,
+        center = center,
+        style = Stroke(width = 3.5.dp.toPx()),
+      )
+      drawCircle(
+        color = reticleColor,
+        radius = ringRadius,
+        center = center,
+        style = Stroke(width = 2.dp.toPx()),
+      )
+
+      // 4 crosshair ticks (W, E, N, S)
+      drawLine(
+        color = reticleColor,
+        start = Offset(center.x - tickOuter, center.y),
+        end = Offset(center.x - tickInner, center.y),
+        strokeWidth = 2.dp.toPx(),
+      )
+      drawLine(
+        color = reticleColor,
+        start = Offset(center.x + tickInner, center.y),
+        end = Offset(center.x + tickOuter, center.y),
+        strokeWidth = 2.dp.toPx(),
+      )
+      drawLine(
+        color = reticleColor,
+        start = Offset(center.x, center.y - tickOuter),
+        end = Offset(center.x, center.y - tickInner),
+        strokeWidth = 2.dp.toPx(),
+      )
+      drawLine(
+        color = reticleColor,
+        start = Offset(center.x, center.y + tickInner),
+        end = Offset(center.x, center.y + tickOuter),
+        strokeWidth = 2.dp.toPx(),
+      )
+
+      // Center point dot
+      drawCircle(
+        color = Color(0xFF091812),
+        radius = 4.5.dp.toPx(),
+        center = center,
+      )
+      drawCircle(
+        color = if (viewportState.isPanned) Color(0xFFFFB300) else Color(0xFF00E676),
+        radius = 3.dp.toPx(),
+        center = center,
+      )
+    }
+
+    // Top-left floating status pill
+    Surface(
+      modifier = Modifier.align(Alignment.TopStart).padding(8.dp),
+      shape = RoundedCornerShape(8.dp),
+      color = Color(0xFF0A1F16).copy(alpha = 0.88f),
+      border = BorderStroke(1.dp, Color(0xFF2D5944)),
+    ) {
+      val textColor = if (viewportState.isPanned) Color(0xFFFFE082) else Color(0xFFB7F1B9)
+      Row(
+        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(5.dp),
+      ) {
+        Icon(
+          imageVector =
+            when {
+              !viewportState.panAllowed -> Icons.Default.Lock
+              viewportState.isPanned -> Icons.Default.Place
+              else -> Icons.Default.LocationOn
+            },
+          contentDescription = null,
+          tint = textColor,
+          modifier = Modifier.size(13.dp),
+        )
+        Text(
+          text =
+            when {
+              !viewportState.panAllowed -> "GPS locked"
+              viewportState.isPanned -> "Panned • Crosshair active"
+              else -> "Centered on GPS (drag map to pan)"
+            },
+          style =
+            MaterialTheme.typography.labelSmall.copy(
+              color = textColor,
+              fontWeight = FontWeight.SemiBold,
+            ),
+        )
+      }
+    }
+
+    // Top-right Zoom +/- buttons
+    Column(
+      modifier = Modifier.align(Alignment.TopEnd).padding(8.dp),
+      verticalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
+      Surface(
+        modifier =
+          Modifier.size(28.dp).clip(RoundedCornerShape(6.dp)).clickable {
+            viewportState.onZoomDelta(0.75f)
+          },
+        shape = RoundedCornerShape(6.dp),
+        color = Color(0xFF0A1F16).copy(alpha = 0.88f),
+        border = BorderStroke(1.dp, Color(0xFF2D5944)),
+      ) {
+        Box(contentAlignment = Alignment.Center) {
+          Text(
+            text = "+",
+            style =
+              MaterialTheme.typography.titleSmall.copy(
+                color = Color.White,
+                fontWeight = FontWeight.Bold,
+              ),
+          )
+        }
+      }
+      Surface(
+        modifier =
+          Modifier.size(28.dp).clip(RoundedCornerShape(6.dp)).clickable {
+            viewportState.onZoomDelta(-0.75f)
+          },
+        shape = RoundedCornerShape(6.dp),
+        color = Color(0xFF0A1F16).copy(alpha = 0.88f),
+        border = BorderStroke(1.dp, Color(0xFF2D5944)),
+      ) {
+        Box(contentAlignment = Alignment.Center) {
+          Text(
+            text = "−",
+            style =
+              MaterialTheme.typography.titleSmall.copy(
+                color = Color.White,
+                fontWeight = FontWeight.Bold,
+              ),
+          )
+        }
+      }
+    }
+
+    // Bottom-left GPS Accuracy & Zoom HUD pill
+    Surface(
+      modifier = Modifier.align(Alignment.BottomStart).padding(8.dp),
+      shape = RoundedCornerShape(8.dp),
+      color = Color(0xFF0A1F16).copy(alpha = 0.88f),
+      border = BorderStroke(1.dp, Color(0xFF2D5944)),
+    ) {
+      Row(
+        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+      ) {
+        Icon(
+          imageVector = Icons.Default.LocationOn,
+          contentDescription = null,
+          tint = Color.White,
+          modifier = Modifier.size(13.dp),
+        )
+        Text(
+          text =
+            "GPS ${formatGeoPointAccuracy(viewportState.accuracyMeters)} • ${((viewportState.zoomLevel * 10f).roundToInt() / 10f)}z",
+          style =
+            MaterialTheme.typography.labelSmall.copy(
+              color = Color.White,
+              fontWeight = FontWeight.SemiBold,
+            ),
+        )
+      }
+    }
+
+    // Bottom-right Recenter button when panned
+    if (viewportState.isPanned) {
+      Surface(
+        modifier =
+          Modifier.align(Alignment.BottomEnd)
+            .padding(8.dp)
+            .clip(RoundedCornerShape(16.dp))
+            .clickable { viewportState.onRecenterGps() },
+        shape = RoundedCornerShape(16.dp),
+        color = Color(0xFF0E2219).copy(alpha = 0.94f),
+        border = BorderStroke(1.dp, Color(0xFF8BD6B1)),
+      ) {
+        Row(
+          modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
+          verticalAlignment = Alignment.CenterVertically,
+          horizontalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
+          Icon(
+            imageVector = Icons.Default.Refresh,
+            contentDescription = null,
+            tint = Color(0xFF8BD6B1),
+            modifier = Modifier.size(14.dp),
+          )
+          Text(
+            text = "Recenter on GPS",
+            style =
+              MaterialTheme.typography.labelSmall.copy(
+                color = Color(0xFF8BD6B1),
+                fontWeight = FontWeight.Bold,
+              ),
+          )
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Built-in interactive satellite/topographic Compose [Canvas] map used when
+ * [LocalGeoPointMapViewport] is not provided (e.g. in `devtools/formdebugger` or unit previews).
+ */
+@Composable
+private fun GeoPointFallbackCanvasMap(viewportState: GeoPointMapViewportState) {
+  Canvas(
+    modifier =
+      Modifier.fillMaxSize()
+        .background(Color(0xFF10261C))
+        .pointerInput(viewportState.path, viewportState.panAllowed, viewportState.zoomLevel) {
+          if (viewportState.panAllowed) {
+            detectDragGestures { change, dragAmount ->
+              change.consume()
+              viewportState.onPanDeltaPixels(
+                dragAmount.x,
+                dragAmount.y,
+                size.width.toFloat(),
+                size.height.toFloat(),
+              )
+            }
+          }
+        }
+  ) {
+    val spanDeg = 0.0016f * (17.5f / viewportState.zoomLevel.coerceIn(13f, 20f))
+    val shiftX = (-viewportState.panOffsetLon.toFloat() / spanDeg) * size.width
+    val shiftY = (viewportState.panOffsetLat.toFloat() / spanDeg) * size.height
+
+    // Vegetated field parcels background
+    drawRect(
+      color = Color(0xFF173828),
+      topLeft = Offset(size.width * 0.08f + shiftX, size.height * 0.10f + shiftY),
+      size = Size(size.width * 0.36f, size.height * 0.34f),
+    )
+    drawRect(
+      color = Color(0xFF1C422F),
+      topLeft = Offset(size.width * 0.52f + shiftX, size.height * 0.16f + shiftY),
+      size = Size(size.width * 0.38f, size.height * 0.42f),
+    )
+    drawRect(
+      color = Color(0xFF153324),
+      topLeft = Offset(size.width * 0.18f + shiftX, size.height * 0.56f + shiftY),
+      size = Size(size.width * 0.44f, size.height * 0.32f),
+    )
+
+    // Subtle survey coordinate grid lines
+    val gridStepX = size.width / 6f
+    val gridStepY = size.height / 4f
+    val offsetModX = ((shiftX % gridStepX) + gridStepX) % gridStepX
+    val offsetModY = ((shiftY % gridStepY) + gridStepY) % gridStepY
+    for (i in -1..6) {
+      val x = i * gridStepX + offsetModX
+      drawLine(
+        color = Color.White.copy(alpha = 0.08f),
+        start = Offset(x, 0f),
+        end = Offset(x, size.height),
+        strokeWidth = 1f,
+      )
+    }
+    for (j in -1..4) {
+      val y = j * gridStepY + offsetModY
+      drawLine(
+        color = Color.White.copy(alpha = 0.08f),
+        start = Offset(0f, y),
+        end = Offset(size.width, y),
+        strokeWidth = 1f,
+      )
+    }
+
+    // Topographic stream / trail line
+    val streamPath =
+      Path().apply {
+        moveTo(0f + shiftX * 0.5f, size.height * 0.78f + shiftY)
+        cubicTo(
+          size.width * 0.35f + shiftX,
+          size.height * 0.62f + shiftY,
+          size.width * 0.65f + shiftX,
+          size.height * 0.40f + shiftY,
+          size.width * 1.05f + shiftX * 0.5f,
+          size.height * 0.18f + shiftY,
+        )
+      }
+    drawPath(
+      path = streamPath,
+      color = Color(0xFF4FC3F7).copy(alpha = 0.28f),
+      style =
+        Stroke(
+          width = 2.5.dp.toPx(),
+          pathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 6f)),
+        ),
+    )
+
+    // User's live GPS blue dot + horizontal accuracy halo
+    val gpsCenter = Offset(x = size.width / 2f + shiftX, y = size.height / 2f + shiftY)
+    val haloRadiusDp = (viewportState.accuracyMeters.toFloat() * 3.2f).coerceIn(14f, 56f).dp
+    drawCircle(
+      color = Color(0xFF42A5F5).copy(alpha = 0.22f),
+      radius = haloRadiusDp.toPx(),
+      center = gpsCenter,
+    )
+    drawCircle(
+      color = Color(0xFF64B5F6).copy(alpha = 0.55f),
+      radius = haloRadiusDp.toPx(),
+      center = gpsCenter,
+      style = Stroke(width = 1.2.dp.toPx()),
+    )
+    drawCircle(color = Color.White, radius = 7.dp.toPx(), center = gpsCenter)
+    drawCircle(color = Color(0xFF1E88E5), radius = 5.dp.toPx(), center = gpsCenter)
+  }
+}
+
+/**
+ * Interactive map-based drawing widget for `TYPE_GEOTRACE` (linestring / transect) and
+ * `TYPE_GEOSHAPE` (polygon / boundary) questions.
+ *
+ * Supports both:
+ * - **Pannable mode** (`appearance="placement-map"`, `"map"`, `"maps"`, or `"walk-or-draw"`): collector can pan the map to place vertices with `"Add point"`.
+ * - **Locked GPS mode** (default / GPS walk mode): map is locked to user GPS; collector records vertices along their walking path with `"Capture vertex"`.
+ *
+ * Provides:
+ * - Interactive Compose Canvas map rendering live crosshair target reticle, GPS position dot, vertices, connecting polylines, and closed polygon fill.
+ * - Primary action button: `"Add point"` (when panned) or `"Capture vertex"` (when on GPS).
+ * - Action buttons: `"Undo vertex"`, `"Clear"`, and `"Recenter"`.
+ * - Status HUD indicating vertex count, shape completion, and pan / lock mode.
+ */
+@Composable
+private fun GeoGeometryDrawingWidget(
   control: ComponentState.ControlState,
   path: String,
   fieldState: FieldState,
@@ -954,17 +1654,42 @@ private fun GeoVertexListWidget(
 ) {
   val colors = MaterialTheme.colorScheme
   val appearanceTokens = control.appearance.split(' ').filter { it.isNotBlank() }
-  val panOverrideAllowed =
-    appearanceTokens.contains("placement-map") || appearanceTokens.contains("walk-or-draw")
-  val existingPoints =
+  val panAllowed =
+    appearanceTokens.any {
+      it.equals("placement-map", ignoreCase = true) ||
+        it.equals("walk-or-draw", ignoreCase = true) ||
+        it.equals("map", ignoreCase = true) ||
+        it.equals("maps", ignoreCase = true)
+    }
+
+  val existingPoints: List<GeoPoint> =
     if (isClosedShape) {
       fieldState.value?.scalar_value?.geoshape_value?.points ?: emptyList()
     } else {
       fieldState.value?.scalar_value?.geotrace_value?.points ?: emptyList()
     }
 
-  var newLat by remember(path) { mutableStateOf("-1.2921") }
-  var newLon by remember(path) { mutableStateOf("36.8219") }
+  val firstExisting = existingPoints.firstOrNull()
+  var liveGpsLat by remember(path) { mutableStateOf(firstExisting?.latitude ?: -1.292066) }
+  var liveGpsLon by remember(path) { mutableStateOf(firstExisting?.longitude ?: 36.821946) }
+  var liveGpsAlt by remember(path) { mutableStateOf(firstExisting?.altitude_meters ?: 1680.0) }
+  var liveGpsAcc by remember(path) { mutableStateOf(firstExisting?.accuracy_meters ?: 3.2) }
+  var panOffsetLat by remember(path) { mutableStateOf(0.0) }
+  var panOffsetLon by remember(path) { mutableStateOf(0.0) }
+  var zoomLevel by remember(path) { mutableStateOf(17.5f) }
+  var undoGeometryHistory by remember(path) { mutableStateOf<List<List<GeoPoint>>>(emptyList()) }
+  var redoGeometryHistory by remember(path) { mutableStateOf<List<List<GeoPoint>>>(emptyList()) }
+
+  val isPanned = panAllowed && (abs(panOffsetLat) > 0.0000005 || abs(panOffsetLon) > 0.0000005)
+  val targetLat = roundGeoCoord6(liveGpsLat + if (panAllowed) panOffsetLat else 0.0)
+  val targetLon = roundGeoCoord6(liveGpsLon + if (panAllowed) panOffsetLon else 0.0)
+
+  val displayLat = if (isPanned) targetLat else liveGpsLat
+  val displayLon = if (isPanned) targetLon else liveGpsLon
+  val displayAcc = liveGpsAcc
+
+  val minVerticesRequired = if (isClosedShape) 3 else 2
+  val hasMinVertices = existingPoints.size >= minVerticesRequired
 
   fun updateVertices(points: List<GeoPoint>) {
     if (isClosedShape) {
@@ -974,6 +1699,8 @@ private fun GeoVertexListWidget(
     }
   }
 
+  val triggerLabel = if (isPanned) "Add point" else "Capture vertex"
+
   OutlinedCard(
     modifier = Modifier.fillMaxWidth(),
     shape = MaterialTheme.shapes.medium,
@@ -981,194 +1708,584 @@ private fun GeoVertexListWidget(
   ) {
     Column(
       modifier = Modifier.fillMaxWidth().padding(12.dp),
-      verticalArrangement = Arrangement.spacedBy(8.dp),
+      verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
-      Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(6.dp),
-        verticalAlignment = Alignment.CenterVertically,
-      ) {
-        GroundTonalBadge(
-          text = if (isClosedShape) "🚶 Walk Plot Perimeter" else "🚶 Walk Transect",
-          tone = GroundBadgeTone.PRIMARY,
-        )
-        GroundTonalBadge(
-          text =
-            if (panOverrideAllowed) "🖐 GPS Override / Pan Allowed While Walking"
-            else "🔒 GPS Stream Only",
-          tone = if (panOverrideAllowed) GroundBadgeTone.SECONDARY else GroundBadgeTone.TERTIARY,
-        )
-      }
-
+      // Top Status & Capability Badges
       Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
       ) {
-        Text(
-          text =
-            if (isClosedShape) {
-              "Polygon Vertices (${existingPoints.size})"
-            } else {
-              "Trace Vertices (${existingPoints.size})"
-            },
-          style =
-            MaterialTheme.typography.labelMedium.copy(
-              fontWeight = FontWeight.SemiBold,
-              color = colors.onSurface,
-            ),
-        )
         Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-          FilledTonalButton(
-            onClick = {
-              val idx = existingPoints.size
-              val nextPt =
-                GeoPoint(
-                  latitude = -1.2921 - (idx * 0.0002),
-                  longitude = 36.8219 + (idx * 0.0003),
-                  altitude_meters = 1680.0,
-                  accuracy_meters = 3.4,
-                )
-              val updated =
-                if (isClosedShape && existingPoints.size >= 3) {
-                  existingPoints.dropLast(1) + nextPt + existingPoints.first()
-                } else {
-                  existingPoints + nextPt
-                }
-              updateVertices(updated)
-            },
-            contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp),
-          ) {
-            Text("🛰 Walk +1 GPS Vertex", style = MaterialTheme.typography.labelSmall)
-          }
-          if (panOverrideAllowed) {
-            OutlinedButton(
-              onClick = {
-                val idx = existingPoints.size
-                val pannedPt =
-                  GeoPoint(
-                    latitude = -1.2918 + (idx * 0.00015),
-                    longitude = 36.8226 + (idx * 0.0002),
-                    altitude_meters = 1681.0,
-                    accuracy_meters = 1.5,
-                  )
-                val updated =
-                  if (isClosedShape && existingPoints.size >= 3) {
-                    existingPoints.dropLast(1) + pannedPt + existingPoints.first()
-                  } else {
-                    existingPoints + pannedPt
+          GroundTonalBadge(
+            text = if (isClosedShape) "Polygon (≥3 pts)" else "Linestring (≥2 pts)",
+            tone = GroundBadgeTone.PRIMARY,
+          )
+          GroundTonalBadge(
+            text = if (panAllowed) "Walk or draw (Pan allowed)" else "GPS walk only (Locked)",
+            icon = if (!panAllowed) Icons.Default.Lock else null,
+            tone = if (panAllowed) GroundBadgeTone.SECONDARY else GroundBadgeTone.TERTIARY,
+          )
+        }
+        GroundTonalBadge(
+          text = "${existingPoints.size} vertices",
+          tone = if (hasMinVertices) GroundBadgeTone.PRIMARY else GroundBadgeTone.WARNING,
+        )
+      }
+
+      // Interactive Map Viewport with Vertices, Lines, Polygon Fill, Crosshair & GPS Dot
+      Box(
+        modifier =
+          Modifier.fillMaxWidth()
+            .height(230.dp)
+            .clip(RoundedCornerShape(12.dp))
+            .border(1.dp, Color(0xFF2D5944), RoundedCornerShape(12.dp))
+      ) {
+        Canvas(
+          modifier =
+            Modifier.fillMaxSize()
+              .background(Color(0xFF10261C))
+              .pointerInput(path, panAllowed, zoomLevel) {
+                if (panAllowed) {
+                  detectDragGestures { change, dragAmount ->
+                    change.consume()
+                    val spanDeg = 0.0016 * (17.5f / zoomLevel.coerceIn(13f, 20f))
+                    panOffsetLon =
+                      (panOffsetLon - (dragAmount.x / size.width.toFloat()) * spanDeg).coerceIn(
+                        -0.02,
+                        0.02,
+                      )
+                    panOffsetLat =
+                      (panOffsetLat + (dragAmount.y / size.height.toFloat()) * spanDeg).coerceIn(
+                        -0.02,
+                        0.02,
+                      )
                   }
-                updateVertices(updated)
+                }
+              }
+        ) {
+          val spanDeg = 0.0016f * (17.5f / zoomLevel.coerceIn(13f, 20f))
+          val shiftX = (-panOffsetLon.toFloat() / spanDeg) * size.width
+          val shiftY = (panOffsetLat.toFloat() / spanDeg) * size.height
+          val center = Offset(size.width / 2f, size.height / 2f)
+
+          // Background Vegetated field parcels
+          drawRect(
+            color = Color(0xFF173828),
+            topLeft = Offset(size.width * 0.08f + shiftX, size.height * 0.10f + shiftY),
+            size = Size(size.width * 0.36f, size.height * 0.34f),
+          )
+          drawRect(
+            color = Color(0xFF1C422F),
+            topLeft = Offset(size.width * 0.52f + shiftX, size.height * 0.16f + shiftY),
+            size = Size(size.width * 0.38f, size.height * 0.42f),
+          )
+          drawRect(
+            color = Color(0xFF153324),
+            topLeft = Offset(size.width * 0.18f + shiftX, size.height * 0.56f + shiftY),
+            size = Size(size.width * 0.44f, size.height * 0.32f),
+          )
+
+          // Survey coordinate grid lines
+          val gridStepX = size.width / 6f
+          val gridStepY = size.height / 4f
+          val offsetModX = ((shiftX % gridStepX) + gridStepX) % gridStepX
+          val offsetModY = ((shiftY % gridStepY) + gridStepY) % gridStepY
+          for (i in -1..6) {
+            val x = i * gridStepX + offsetModX
+            drawLine(
+              color = Color.White.copy(alpha = 0.08f),
+              start = Offset(x, 0f),
+              end = Offset(x, size.height),
+              strokeWidth = 1f,
+            )
+          }
+          for (j in -1..4) {
+            val y = j * gridStepY + offsetModY
+            drawLine(
+              color = Color.White.copy(alpha = 0.08f),
+              start = Offset(0f, y),
+              end = Offset(size.width, y),
+              strokeWidth = 1f,
+            )
+          }
+
+          // User's live GPS blue dot + horizontal accuracy halo
+          val gpsCenter = Offset(x = size.width / 2f + shiftX, y = size.height / 2f + shiftY)
+          val haloRadiusDp = (displayAcc.toFloat() * 3.2f).coerceIn(14f, 56f).dp
+          drawCircle(
+            color = Color(0xFF42A5F5).copy(alpha = 0.22f),
+            radius = haloRadiusDp.toPx(),
+            center = gpsCenter,
+          )
+          drawCircle(
+            color = Color(0xFF64B5F6).copy(alpha = 0.55f),
+            radius = haloRadiusDp.toPx(),
+            center = gpsCenter,
+            style = Stroke(width = 1.2.dp.toPx()),
+          )
+          drawCircle(color = Color.White, radius = 7.dp.toPx(), center = gpsCenter)
+          drawCircle(color = Color(0xFF1E88E5), radius = 5.dp.toPx(), center = gpsCenter)
+
+          // Map vertices coordinates to screen pixels relative to current center target
+          val screenOffsets =
+            existingPoints.map { pt ->
+              val dLon = (pt.longitude - targetLon).toFloat()
+              val dLat = (pt.latitude - targetLat).toFloat()
+              Offset(
+                x = center.x + (dLon / spanDeg) * size.width,
+                y = center.y - (dLat / spanDeg) * size.height,
+              )
+            }
+
+          // Closed polygon translucent fill
+          if (isClosedShape && screenOffsets.size >= 3) {
+            val polyPath =
+              Path().apply {
+                moveTo(screenOffsets[0].x, screenOffsets[0].y)
+                for (i in 1 until screenOffsets.size) {
+                  lineTo(screenOffsets[i].x, screenOffsets[i].y)
+                }
+                close()
+              }
+            drawPath(path = polyPath, color = Color(0xFF4CAF50).copy(alpha = 0.22f))
+            drawPath(
+              path = polyPath,
+              color = Color(0xFF81C784),
+              style = Stroke(width = 2.5.dp.toPx()),
+            )
+          } else if (screenOffsets.size >= 2) {
+            // Linestring / polyline connecting consecutive vertices
+            val linePath =
+              Path().apply {
+                moveTo(screenOffsets[0].x, screenOffsets[0].y)
+                for (i in 1 until screenOffsets.size) {
+                  lineTo(screenOffsets[i].x, screenOffsets[i].y)
+                }
+              }
+            drawPath(
+              path = linePath,
+              color = Color(0xFF29B6F6),
+              style = Stroke(width = 2.8.dp.toPx()),
+            )
+          }
+
+          // Candidate line from last vertex to current target crosshair
+          if (screenOffsets.isNotEmpty()) {
+            val lastOffset = screenOffsets.last()
+            drawLine(
+              color = Color(0xFFFFD54F).copy(alpha = 0.75f),
+              start = lastOffset,
+              end = center,
+              strokeWidth = 1.8.dp.toPx(),
+              pathEffect = PathEffect.dashPathEffect(floatArrayOf(8f, 6f)),
+            )
+          }
+
+          // Draw vertex markers with vertex index circles
+          screenOffsets.forEachIndexed { idx, off ->
+            drawCircle(
+              color = Color(0xFF091812).copy(alpha = 0.6f),
+              radius = 9.dp.toPx(),
+              center = off,
+            )
+            drawCircle(
+              color = Color.White,
+              radius = 7.dp.toPx(),
+              center = off,
+            )
+            drawCircle(
+              color =
+                if (idx == 0) Color(0xFF00C853)
+                else if (idx == screenOffsets.lastIndex) Color(0xFFFF9100)
+                else Color(0xFF0288D1),
+              radius = 5.dp.toPx(),
+              center = off,
+            )
+          }
+
+          // Center Target Reticle / Crosshair
+          val reticleColor = if (isPanned) Color(0xFFFFD54F) else Color(0xFF8BD6B1)
+          val ringRadius = 18.dp.toPx()
+          val tickInner = 7.dp.toPx()
+          val tickOuter = 25.dp.toPx()
+
+          drawCircle(
+            color = Color(0xFF091812).copy(alpha = 0.65f),
+            radius = ringRadius,
+            center = center,
+            style = Stroke(width = 3.5.dp.toPx()),
+          )
+          drawCircle(
+            color = reticleColor,
+            radius = ringRadius,
+            center = center,
+            style = Stroke(width = 2.dp.toPx()),
+          )
+          drawLine(
+            color = reticleColor,
+            start = Offset(center.x - tickOuter, center.y),
+            end = Offset(center.x - tickInner, center.y),
+            strokeWidth = 2.dp.toPx(),
+          )
+          drawLine(
+            color = reticleColor,
+            start = Offset(center.x + tickInner, center.y),
+            end = Offset(center.x + tickOuter, center.y),
+            strokeWidth = 2.dp.toPx(),
+          )
+          drawLine(
+            color = reticleColor,
+            start = Offset(center.x, center.y - tickOuter),
+            end = Offset(center.x, center.y - tickInner),
+            strokeWidth = 2.dp.toPx(),
+          )
+          drawLine(
+            color = reticleColor,
+            start = Offset(center.x, center.y + tickInner),
+            end = Offset(center.x, center.y + tickOuter),
+            strokeWidth = 2.dp.toPx(),
+          )
+          drawCircle(
+            color = Color(0xFF091812),
+            radius = 4.5.dp.toPx(),
+            center = center,
+          )
+          drawCircle(
+            color = if (isPanned) Color(0xFFFFB300) else Color(0xFF00E676),
+            radius = 3.dp.toPx(),
+            center = center,
+          )
+        }
+
+        // Top-left floating status pill
+        Surface(
+          modifier = Modifier.align(Alignment.TopStart).padding(8.dp),
+          shape = RoundedCornerShape(8.dp),
+          color = Color(0xFF0A1F16).copy(alpha = 0.88f),
+          border = BorderStroke(1.dp, Color(0xFF2D5944)),
+        ) {
+          val textColor = if (isPanned) Color(0xFFFFE082) else Color(0xFFB7F1B9)
+          Row(
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(5.dp),
+          ) {
+            Icon(
+              imageVector =
+                when {
+                  !panAllowed -> Icons.Default.Lock
+                  isPanned -> Icons.Default.Place
+                  else -> Icons.Default.LocationOn
+                },
+              contentDescription = null,
+              tint = textColor,
+              modifier = Modifier.size(13.dp),
+            )
+            Text(
+              text =
+                when {
+                  !panAllowed -> "GPS stream only (Pan locked)"
+                  isPanned -> "Panned • Crosshair active"
+                  else -> "Centered on GPS (drag map to pan)"
+                },
+              style =
+                MaterialTheme.typography.labelSmall.copy(
+                  color = textColor,
+                  fontWeight = FontWeight.SemiBold,
+                ),
+            )
+          }
+        }
+
+        // Top-right Zoom +/- buttons
+        Column(
+          modifier = Modifier.align(Alignment.TopEnd).padding(8.dp),
+          verticalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
+          Surface(
+            modifier =
+              Modifier.size(28.dp).clip(RoundedCornerShape(6.dp)).clickable {
+                zoomLevel = (zoomLevel + 0.75f).coerceIn(13.5f, 19.5f)
               },
-              contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp),
-            ) {
-              Text("🖐 Pan Override Vertex", style = MaterialTheme.typography.labelSmall)
+            shape = RoundedCornerShape(6.dp),
+            color = Color(0xFF0A1F16).copy(alpha = 0.88f),
+            border = BorderStroke(1.dp, Color(0xFF2D5944)),
+          ) {
+            Box(contentAlignment = Alignment.Center) {
+              Text(
+                text = "+",
+                style =
+                  MaterialTheme.typography.titleSmall.copy(
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold,
+                  ),
+              )
             }
           }
-          OutlinedButton(
-            onClick = {
-              val sample =
-                listOf(
-                  GeoPoint(
-                    latitude = -1.2921,
-                    longitude = 36.8219,
-                    altitude_meters = 1680.0,
-                    accuracy_meters = 3.5,
-                  ),
-                  GeoPoint(
-                    latitude = -1.2925,
-                    longitude = 36.8224,
-                    altitude_meters = 1681.0,
-                    accuracy_meters = 3.8,
-                  ),
-                  GeoPoint(
-                    latitude = -1.2918,
-                    longitude = 36.8228,
-                    altitude_meters = 1682.0,
-                    accuracy_meters = 3.2,
-                  ),
-                  GeoPoint(
-                    latitude = -1.2915,
-                    longitude = 36.8221,
-                    altitude_meters = 1680.0,
-                    accuracy_meters = 3.4,
-                  ),
-                  GeoPoint(
-                    latitude = -1.2921,
-                    longitude = 36.8219,
-                    altitude_meters = 1680.0,
-                    accuracy_meters = 3.5,
-                  ),
-                )
-              updateVertices(sample)
-            },
-            contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp),
+          Surface(
+            modifier =
+              Modifier.size(28.dp).clip(RoundedCornerShape(6.dp)).clickable {
+                zoomLevel = (zoomLevel - 0.75f).coerceIn(13.5f, 19.5f)
+              },
+            shape = RoundedCornerShape(6.dp),
+            color = Color(0xFF0A1F16).copy(alpha = 0.88f),
+            border = BorderStroke(1.dp, Color(0xFF2D5944)),
           ) {
-            Text("Reset Polygon", style = MaterialTheme.typography.labelSmall)
+            Box(contentAlignment = Alignment.Center) {
+              Text(
+                text = "−",
+                style =
+                  MaterialTheme.typography.titleSmall.copy(
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold,
+                  ),
+              )
+            }
           }
         }
-      }
 
-      existingPoints.forEachIndexed { idx, pt ->
-        Row(
-          modifier = Modifier.fillMaxWidth(),
-          horizontalArrangement = Arrangement.SpaceBetween,
-          verticalAlignment = Alignment.CenterVertically,
+        // Bottom-left GPS Accuracy & Zoom HUD pill
+        Surface(
+          modifier = Modifier.align(Alignment.BottomStart).padding(8.dp),
+          shape = RoundedCornerShape(8.dp),
+          color = Color(0xFF0A1F16).copy(alpha = 0.88f),
+          border = BorderStroke(1.dp, Color(0xFF2D5944)),
         ) {
-          Text(
-            text = "#${idx + 1}: (${pt.latitude}, ${pt.longitude}) ±${pt.accuracy_meters}m",
-            style =
-              MaterialTheme.typography.bodySmall.copy(
-                color = colors.onSurface,
-              ),
-          )
-          TextButton(
-            onClick = { updateVertices(existingPoints.filterIndexed { i, _ -> i != idx }) },
-            colors = ButtonDefaults.textButtonColors(contentColor = colors.error),
+          Row(
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
           ) {
-            Text("✕")
+            Icon(
+              imageVector = Icons.Default.LocationOn,
+              contentDescription = null,
+              tint = Color.White,
+              modifier = Modifier.size(13.dp),
+            )
+            Text(
+              text =
+                "GPS ${formatGeoPointAccuracy(displayAcc)} • ${((zoomLevel * 10f).roundToInt() / 10f)}z",
+              style =
+                MaterialTheme.typography.labelSmall.copy(
+                  color = Color.White,
+                  fontWeight = FontWeight.SemiBold,
+                ),
+            )
+          }
+        }
+
+        // Bottom-right Recenter button when panned
+        if (isPanned) {
+          Surface(
+            modifier =
+              Modifier.align(Alignment.BottomEnd)
+                .padding(8.dp)
+                .clip(RoundedCornerShape(16.dp))
+                .clickable {
+                  panOffsetLat = 0.0
+                  panOffsetLon = 0.0
+                },
+            shape = RoundedCornerShape(16.dp),
+            color = Color(0xFF0E2219).copy(alpha = 0.94f),
+            border = BorderStroke(1.dp, Color(0xFF8BD6B1)),
+          ) {
+            Row(
+              modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
+              verticalAlignment = Alignment.CenterVertically,
+              horizontalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
+              Icon(
+                imageVector = Icons.Default.Refresh,
+                contentDescription = null,
+                tint = Color(0xFF8BD6B1),
+                modifier = Modifier.size(14.dp),
+              )
+              Text(
+                text = "Recenter on GPS",
+                style =
+                  MaterialTheme.typography.labelSmall.copy(
+                    color = Color(0xFF8BD6B1),
+                    fontWeight = FontWeight.Bold,
+                  ),
+              )
+            }
           }
         }
       }
 
+      // Coordinate Telemetry Bar
+      Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = MaterialTheme.shapes.small,
+        color = colors.surfaceContainer,
+        border = BorderStroke(1.dp, colors.outlineVariant.copy(alpha = 0.5f)),
+      ) {
+        Column(
+          modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp, vertical = 8.dp),
+          verticalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
+          Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+          ) {
+            Column {
+              Text(
+                text = if (isPanned) "Target Point Coordinates" else "GPS Location",
+                style = MaterialTheme.typography.labelSmall,
+              )
+              Text(
+                text = formatGeoPointCoordinates(displayLat, displayLon),
+                style =
+                  MaterialTheme.typography.titleSmall.copy(
+                    fontWeight = FontWeight.Bold,
+                    color = colors.onSurface,
+                  ),
+              )
+            }
+            Column(horizontalAlignment = Alignment.End) {
+              Text(
+                text = "Accuracy",
+                style = MaterialTheme.typography.labelSmall,
+              )
+              Text(
+                text = formatGeoPointAccuracy(displayAcc),
+                style =
+                  MaterialTheme.typography.titleSmall.copy(
+                    fontWeight = FontWeight.Bold,
+                  ),
+              )
+            }
+          }
+
+          if (hasMinVertices) {
+            Text(
+              text =
+                if (isClosedShape) {
+                  "${existingPoints.size} vertices captured • Closed polygon ready — tap \"Next →\" to continue or add more vertices"
+                } else {
+                  "${existingPoints.size} vertices captured • Linestring ready — tap \"Next →\" to continue or add more vertices"
+                },
+              style =
+                MaterialTheme.typography.labelSmall.copy(
+                  color = colors.primary,
+                  fontWeight = FontWeight.Medium,
+                ),
+            )
+          } else {
+            val needed = minVerticesRequired - existingPoints.size
+            Text(
+              text =
+                "Need $needed more ${if (needed == 1) "vertex" else "vertices"} to complete ${if (isClosedShape) "polygon" else "linestring"}. Tap \"$triggerLabel\" below to record.",
+              style =
+                MaterialTheme.typography.labelSmall.copy(
+                  color = colors.onSurfaceVariant,
+                ),
+            )
+          }
+        }
+      }
+
+      // Primary Controls Row: [Undo] [Redo] [Add point / Capture vertex] [Clear]
       Row(
-        horizontalArrangement = Arrangement.spacedBy(6.dp),
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically,
       ) {
-        OutlinedTextField(
-          value = newLat,
-          onValueChange = { newLat = it },
-          enabled = panOverrideAllowed,
-          label = { Text("Lat") },
-          modifier = Modifier.weight(1f),
-          singleLine = true,
-        )
-        OutlinedTextField(
-          value = newLon,
-          onValueChange = { newLon = it },
-          enabled = panOverrideAllowed,
-          label = { Text("Lon") },
-          modifier = Modifier.weight(1f),
-          singleLine = true,
-        )
+        OutlinedIconButton(
+          onClick = {
+            if (undoGeometryHistory.isNotEmpty()) {
+              val prev = undoGeometryHistory.last()
+              undoGeometryHistory = undoGeometryHistory.dropLast(1)
+              redoGeometryHistory = redoGeometryHistory + listOf(existingPoints)
+              updateVertices(prev)
+            } else if (existingPoints.isNotEmpty()) {
+              redoGeometryHistory = redoGeometryHistory + listOf(existingPoints)
+              updateVertices(existingPoints.dropLast(1))
+            }
+          },
+          enabled = undoGeometryHistory.isNotEmpty() || existingPoints.isNotEmpty(),
+        ) {
+          Icon(
+            imageVector = UndoIcon,
+            contentDescription = "Undo",
+            modifier = Modifier.size(20.dp),
+          )
+        }
+
+        OutlinedIconButton(
+          onClick = {
+            if (redoGeometryHistory.isNotEmpty()) {
+              val next = redoGeometryHistory.last()
+              redoGeometryHistory = redoGeometryHistory.dropLast(1)
+              undoGeometryHistory = undoGeometryHistory + listOf(existingPoints)
+              updateVertices(next)
+            }
+          },
+          enabled = redoGeometryHistory.isNotEmpty(),
+        ) {
+          Icon(
+            imageVector = RedoIcon,
+            contentDescription = "Redo",
+            modifier = Modifier.size(20.dp),
+          )
+        }
+
         Button(
           onClick = {
-            val lat = newLat.toDoubleOrNull() ?: -1.2921
-            val lon = newLon.toDoubleOrNull() ?: 36.8219
-            updateVertices(
-              existingPoints +
-                GeoPoint(
-                  latitude = lat,
-                  longitude = lon,
-                  altitude_meters = 1680.0,
-                  accuracy_meters = 2.5,
-                )
-            )
+            val captureLat = if (isPanned) targetLat else liveGpsLat
+            val captureLon = if (isPanned) targetLon else liveGpsLon
+            val newPt =
+              GeoPoint(
+                latitude = captureLat,
+                longitude = captureLon,
+                altitude_meters = liveGpsAlt,
+                accuracy_meters = liveGpsAcc,
+              )
+            undoGeometryHistory = undoGeometryHistory + listOf(existingPoints)
+            redoGeometryHistory = emptyList()
+            updateVertices(existingPoints + newPt)
           },
-          enabled = panOverrideAllowed,
+          modifier = Modifier.weight(1f),
         ) {
-          Text("+ Pt")
+          Icon(
+            imageVector = if (isPanned) Icons.Default.Place else Icons.Default.LocationOn,
+            contentDescription = null,
+            modifier = Modifier.size(18.dp),
+          )
+          Spacer(modifier = Modifier.width(6.dp))
+          Text(
+            text = triggerLabel,
+            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+          )
         }
+
+        if (existingPoints.isNotEmpty()) {
+          OutlinedButton(
+            onClick = {
+              undoGeometryHistory = undoGeometryHistory + listOf(existingPoints)
+              redoGeometryHistory = emptyList()
+              controller.clearField(path)
+            },
+          ) {
+            Icon(
+              imageVector = Icons.Default.Close,
+              contentDescription = null,
+              modifier = Modifier.size(16.dp),
+            )
+            Spacer(modifier = Modifier.width(4.dp))
+            Text("Clear", style = MaterialTheme.typography.labelMedium)
+          }
+        }
+      }
+
+
+      if (!panAllowed) {
+        Text(
+          text = "Map panning is disabled for this question. Vertices are captured directly along your GPS path.",
+          style = MaterialTheme.typography.labelSmall.copy(color = colors.onSurfaceVariant),
+        )
       }
     }
   }
@@ -1552,7 +2669,13 @@ private fun TriggerControlWidget(
 
   if (isAcknowledged) {
     Button(onClick = { controller.clearField(path) }, modifier = Modifier.fillMaxWidth()) {
-      Text("✓ Acknowledged (OK)")
+      Icon(
+        imageVector = Icons.Default.Check,
+        contentDescription = null,
+        modifier = Modifier.size(18.dp),
+      )
+      Spacer(modifier = Modifier.width(6.dp))
+      Text("Acknowledged (OK)")
     }
   } else {
     FilledTonalButton(

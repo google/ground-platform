@@ -28,12 +28,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Shapes
 import androidx.compose.material3.Surface
@@ -47,6 +49,7 @@ import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -260,6 +263,7 @@ fun GroundTonalBadge(
   tone: GroundBadgeTone = GroundBadgeTone.PRIMARY,
   outlined: Boolean = false,
   monospace: Boolean = false,
+  icon: ImageVector? = null,
   modifier: Modifier = Modifier,
 ) {
   val colors = MaterialTheme.colorScheme
@@ -285,14 +289,26 @@ fun GroundTonalBadge(
     contentColor = contentColor,
     border = if (outlined) BorderStroke(1.dp, borderColor) else null,
   ) {
-    Text(
-      text = text,
-      style =
-        MaterialTheme.typography.labelSmall.copy(
-          fontWeight = FontWeight.SemiBold,
-        ),
+    Row(
       modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
-    )
+      verticalAlignment = Alignment.CenterVertically,
+      horizontalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
+      if (icon != null) {
+        Icon(
+          imageVector = icon,
+          contentDescription = null,
+          modifier = Modifier.size(13.dp),
+        )
+      }
+      Text(
+        text = text,
+        style =
+          MaterialTheme.typography.labelSmall.copy(
+            fontWeight = FontWeight.SemiBold,
+          ),
+      )
+    }
   }
 }
 

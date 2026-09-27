@@ -830,6 +830,13 @@ class PrototypeAppState(
   val isCurrentFormStepEntityRef: Boolean
     get() = isWizardStepEntityRef(activeFormWizardController?.currentStep)
 
+  /**
+   * True when the embedded form runner is open and the current step in [activeFormWizardController]
+   * contains a `geopoint` (`DataType.TYPE_GEOPOINT`) question.
+   */
+  val isCurrentFormStepGeoPoint: Boolean
+    get() = isWizardStepGeoPoint(activeFormWizardController?.currentStep)
+
   /** The currently active survey loaded in the Main Survey UI. */
   val activeSurvey: SurveyPreviewItem
     get() = surveys.firstOrNull { it.id == activeSurveyId } ?: surveys.first()

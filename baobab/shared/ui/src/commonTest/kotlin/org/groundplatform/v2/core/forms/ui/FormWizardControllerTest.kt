@@ -13,6 +13,7 @@
  */
 package org.groundplatform.v2.core.forms.ui
 
+import groundplatform.v2.forms.GeoPoint
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -138,4 +139,189 @@ class FormWizardControllerTest {
     val finalization = controller.finalizeForm()
     assertIs<FinalizationResult.Success>(finalization)
   }
+
+  @Test
+  fun geoPointTriggerAndCoordinateFormatting_supportsCaptureLocationAndAddPointWhenPanned() {
+    // 1. Trigger label switches between "Capture location" (unpanned GPS) and "Add point" (panned)
+    assertEquals("Capture location", geoPointPrimaryTriggerLabel(isPanned = false))
+    assertEquals("Add point", geoPointPrimaryTriggerLabel(isPanned = true))
+
+    // 2. Map pan appearance detection
+    assertTrue(isGeoPointPanAllowed("placement-map"))
+    assertTrue(isGeoPointPanAllowed("map"))
+    assertTrue(isGeoPointPanAllowed("maps"))
+    assertFalse(isGeoPointPanAllowed(""))
+    assertFalse(isGeoPointPanAllowed("minimal"))
+
+    // 3. Coordinate and accuracy formatting for UI display
+    assertEquals(
+      "1.292066° S, 36.821946° E",
+      formatGeoPointCoordinates(latitude = -1.292066, longitude = 36.821946),
+    )
+    assertEquals("±3.2 m", formatGeoPointAccuracy(3.2))
+    assertEquals("±14.2 m", formatGeoPointAccuracy(14.2))
+  }
+
+  @Test
+  fun geoPointCaptureGating_disablesNextUntilCaptured_andSkipWorksForOptionalQuestions() {
+    val geoFormXml =
+      """
+      <h:html xmlns="http://www.w3.org/2002/xforms"
+              xmlns:h="http://www.w3.org/1999/xhtml">
+        <h:head>
+          <h:title>Plot Survey</h:title>
+          <model>
+            <instance>
+              <data id="plot_survey" version="1">
+                <plot_location/>
+                <optional_notes/>
+              </data>
+            </instance>
+            <bind nodeset="/data/plot_location" type="geopoint"/>
+            <bind nodeset="/data/optional_notes" type="string"/>
+          </model>
+        </h:head>
+        <h:body>
+          <input ref="/data/plot_location" appearance="placement-map">
+            <label>Capture Plot Location</label>
+          </input>
+          <input ref="/data/optional_notes">
+            <label>Optional Notes</label>
+          </input>
+        </h:body>
+      </h:html>
+      """
+    val formDef = XFormsXmlSerializer.deserializeFormDef(geoFormXml)
+    val controller = FormWizardController(formDef = formDef)
+
+    // Step 0: /data/plot_location (geopoint, optional)
+    val step0 = assertIs<FormWizardStep.QuestionStep>(controller.currentStep)
+    assertEquals("/data/plot_location", step0.control.canonicalPath)
+    assertTrue(controller.isCurrentStepWaitingForLocationCapture)
+    assertTrue(controller.isCurrentStepOptional)
+
+    // "Next" is disabled / blocked while location capture is pending
+    assertFalse(controller.nextStep(enforceValidation = true))
+    assertEquals(0, controller.currentStepIndex)
+    assertTrue(controller.showCurrentStepValidationWarning)
+
+    // "Skip" button action advances without enforcing validation
+    assertTrue(controller.nextStep(enforceValidation = false))
+    assertEquals(1, controller.currentStepIndex)
+    val step1 = assertIs<FormWizardStep.QuestionStep>(controller.currentStep)
+    assertEquals("/data/optional_notes", step1.control.canonicalPath)
+    assertFalse(controller.isCurrentStepWaitingForLocationCapture)
+    assertTrue(controller.isCurrentStepOptional)
+
+    // Go back to geopoint step
+    controller.previousStep()
+    assertEquals(0, controller.currentStepIndex)
+    assertTrue(controller.isCurrentStepWaitingForLocationCapture)
+
+    // Capture location -> now Next is unblocked!
+    controller.updateGeoPoint(
+      path = "/data/plot_location",
+      latitude = -1.292066,
+      longitude = 36.821946,
+      altitudeMeters = 1680.0,
+      accuracyMeters = 3.2,
+    )
+    assertFalse(controller.isCurrentStepWaitingForLocationCapture)
+    assertTrue(controller.nextStep(enforceValidation = true))
+    assertEquals(1, controller.currentStepIndex)
+
+    // Go back and Undo point selection -> Next is disabled again!
+    controller.previousStep()
+    assertEquals(0, controller.currentStepIndex)
+    assertFalse(controller.isCurrentStepWaitingForLocationCapture)
+
+    // Undo action clears field
+    controller.clearField("/data/plot_location")
+    assertTrue(controller.isCurrentStepWaitingForLocationCapture)
+    assertFalse(controller.nextStep(enforceValidation = true))
+  }
+
+  @Test
+  fun geoTraceAndGeoShapeCaptureGating_requiresMinimumVertices_andSupportsUndoAndSkip() {
+    val geometryFormXml =
+      """
+      <h:html xmlns="http://www.w3.org/2002/xforms"
+              xmlns:h="http://www.w3.org/1999/xhtml">
+        <h:head>
+          <h:title>Geometry Survey</h:title>
+          <model>
+            <instance>
+              <data id="geometry_survey" version="1">
+                <trail_path/>
+                <field_boundary/>
+                <notes/>
+              </data>
+            </instance>
+            <bind nodeset="/data/trail_path" type="geotrace"/>
+            <bind nodeset="/data/field_boundary" type="geoshape"/>
+            <bind nodeset="/data/notes" type="string"/>
+          </model>
+        </h:head>
+        <h:body>
+          <input ref="/data/trail_path" appearance="placement-map">
+            <label>Trail Path</label>
+          </input>
+          <input ref="/data/field_boundary" appearance="walk-or-draw">
+            <label>Field Boundary</label>
+          </input>
+          <input ref="/data/notes">
+            <label>Notes</label>
+          </input>
+        </h:body>
+      </h:html>
+      """
+    val formDef = XFormsXmlSerializer.deserializeFormDef(geometryFormXml)
+    val controller = FormWizardController(formDef = formDef)
+
+    val p1 = GeoPoint(latitude = -1.292066, longitude = 36.821946, altitude_meters = 1680.0, accuracy_meters = 3.2)
+    val p2 = GeoPoint(latitude = -1.293100, longitude = 36.822500, altitude_meters = 1682.0, accuracy_meters = 3.5)
+    val p3 = GeoPoint(latitude = -1.294200, longitude = 36.823800, altitude_meters = 1685.0, accuracy_meters = 4.0)
+
+    // 1. Step 0: /data/trail_path (geotrace) requires at least 2 vertices
+    assertEquals(0, controller.currentStepIndex)
+    assertTrue(controller.isCurrentStepWaitingForLocationCapture)
+
+    // Adding 1 vertex is not enough for linestring (needs >= 2)
+    controller.updateGeoTrace("/data/trail_path", listOf(p1))
+    assertTrue(controller.isCurrentStepWaitingForLocationCapture)
+    assertFalse(controller.nextStep(enforceValidation = true))
+
+    // Adding 2nd vertex satisfies linestring requirement
+    controller.updateGeoTrace("/data/trail_path", listOf(p1, p2))
+    assertFalse(controller.isCurrentStepWaitingForLocationCapture)
+    assertTrue(controller.nextStep(enforceValidation = true))
+    assertEquals(1, controller.currentStepIndex)
+
+    // 2. Step 1: /data/field_boundary (geoshape) requires at least 3 vertices
+    val step1 = assertIs<FormWizardStep.QuestionStep>(controller.currentStep)
+    assertEquals("/data/field_boundary", step1.control.canonicalPath)
+    assertTrue(controller.isCurrentStepWaitingForLocationCapture)
+
+    // Adding 2 vertices is not enough for closed polygon (needs >= 3)
+    controller.updateGeoShape("/data/field_boundary", listOf(p1, p2))
+    assertTrue(controller.isCurrentStepWaitingForLocationCapture)
+    assertFalse(controller.nextStep(enforceValidation = true))
+
+    // Adding 3rd vertex satisfies polygon requirement
+    controller.updateGeoShape("/data/field_boundary", listOf(p1, p2, p3))
+    assertFalse(controller.isCurrentStepWaitingForLocationCapture)
+
+    // Undo last vertex (back to 2) -> gates again!
+    controller.updateGeoShape("/data/field_boundary", listOf(p1, p2))
+    assertTrue(controller.isCurrentStepWaitingForLocationCapture)
+    assertFalse(controller.nextStep(enforceValidation = true))
+
+    // Skip allows advancing optional question even when incomplete
+    assertTrue(controller.isCurrentStepOptional)
+    assertTrue(controller.nextStep(enforceValidation = false))
+    assertEquals(2, controller.currentStepIndex)
+    val step2 = assertIs<FormWizardStep.QuestionStep>(controller.currentStep)
+    assertEquals("/data/notes", step2.control.canonicalPath)
+  }
 }
+

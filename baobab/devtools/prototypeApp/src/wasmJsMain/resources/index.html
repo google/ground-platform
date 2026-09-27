@@ -2035,12 +2035,7 @@
             container.style.top = Math.round(topPx) + 'px';
             container.style.width = w + 'px';
             container.style.height = h + 'px';
-            container.style.borderRadius =
-              '0 0 ' +
-              Math.round(borderRadiusPx) +
-              'px ' +
-              Math.round(borderRadiusPx) +
-              'px';
+            container.style.borderRadius = Math.round(borderRadiusPx) + 'px';
 
             const instance = ensureMapInitialized();
             if (instance) {

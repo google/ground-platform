@@ -382,6 +382,171 @@ fun MapboxBasemapView(
   }
 }
 
+/**
+ * Renders the live Mapbox GL JS basemap (`#mapbox-basemap-container`) inside the
+ * `GeoPointInputWidget` map viewport when collecting a `TYPE_GEOPOINT` question in
+ * [DataCollectionFormScreen].
+ */
+@OptIn(ExperimentalComposeUiApi::class)
+@Composable
+fun GeoPointFormMapboxViewport(
+  state: PrototypeAppState,
+  viewportState: org.groundplatform.v2.core.forms.ui.GeoPointMapViewportState,
+  modifier: Modifier = Modifier,
+) {
+  val density = LocalDensity.current.density
+  var viewportLeftCssPx by remember { mutableStateOf(0f) }
+  var viewportTopCssPx by remember { mutableStateOf(0f) }
+  var viewportWidthCssPx by remember { mutableStateOf(0f) }
+  var viewportHeightCssPx by remember { mutableStateOf(0f) }
+  var prevPanOffsetLat by remember(viewportState.path) { mutableStateOf(0.0) }
+  var prevPanOffsetLon by remember(viewportState.path) { mutableStateOf(0.0) }
+  var prevZoomLevel by remember(viewportState.path) { mutableStateOf(viewportState.zoomLevel) }
+
+  val activeSurveyId = state.activeSurveyId
+  val selectedBasemapType = state.selectedBasemapType
+  val isOfflineBasemapVisible = state.isOfflineBasemapVisible
+  val userGpsX = state.userGpsNormalizedX
+  val userGpsY = state.userGpsNormalizedY
+
+  val visibleEntities = state.visibleMapEntities
+  val baseEntitiesJson =
+    remember(visibleEntities, state.activeDataCollectionEntityId) {
+      serializeMapboxEntitiesJson(
+        visibleEntities,
+        selectedEntityId = state.activeDataCollectionEntityId,
+      )
+    }
+
+  val featuresPayloadJson =
+    remember(
+      baseEntitiesJson,
+      visibleEntities.size,
+      state.activeDataCollectionEntityId,
+      viewportState.isPanned,
+      viewportState.zoomLevel,
+      state.activeEntitiesCountNoun,
+    ) {
+      buildMapboxFeaturesPayloadJsonFromPrebuiltEntities(
+        entitiesJson = baseEntitiesJson,
+        entityCount = visibleEntities.size,
+        submissions = emptyList(),
+        selectedEntityId = state.activeDataCollectionEntityId,
+        selectedSubmissionId = null,
+        activeNavigation = null,
+        isCameraFollowingUser = !viewportState.isPanned,
+        zoomDelta = (viewportState.zoomLevel - 16.0f).coerceIn(-3.0f, 3.0f),
+        isClusteringActive = false,
+        clusters = emptyList(),
+        selectedClusterId = null,
+        activeEntitiesCountNoun = state.activeEntitiesCountNoun,
+      )
+    }
+
+  // Synchronize programmatic pan shifts (e.g., "Pan +15 m" or "Recenter" buttons) with Mapbox GL JS
+  androidx.compose.runtime.LaunchedEffect(
+    viewportState.panOffsetLat,
+    viewportState.panOffsetLon,
+    viewportState.isPanned,
+  ) {
+    val dLat = viewportState.panOffsetLat - prevPanOffsetLat
+    val dLon = viewportState.panOffsetLon - prevPanOffsetLon
+    prevPanOffsetLat = viewportState.panOffsetLat
+    prevPanOffsetLon = viewportState.panOffsetLon
+    if (!viewportState.isPanned) {
+      state.recenterMapOnUser()
+    } else if (
+      viewportWidthCssPx > 4f &&
+        viewportHeightCssPx > 4f &&
+        (kotlin.math.abs(dLat) > 0.00005 || kotlin.math.abs(dLon) > 0.00005)
+    ) {
+      val spanDeg = 0.0016 * (17.5f / viewportState.zoomLevel.coerceIn(13f, 20f))
+      val dxCss = (-(dLon / spanDeg) * viewportWidthCssPx).toFloat()
+      val dyCss = ((dLat / spanDeg) * viewportHeightCssPx).toFloat()
+      panPlatformMapboxBasemap(dxPx = dxCss, dyPx = dyCss)
+    }
+  }
+
+  androidx.compose.runtime.LaunchedEffect(viewportState.zoomLevel) {
+    val dZoom = viewportState.zoomLevel - prevZoomLevel
+    prevZoomLevel = viewportState.zoomLevel
+    if (kotlin.math.abs(dZoom) > 0.01f) {
+      zoomPlatformMapboxBasemap(dZoom)
+    }
+  }
+
+  SideEffect {
+    val isVisible = viewportWidthCssPx > 4f && viewportHeightCssPx > 4f
+    syncPlatformMapboxViewport(
+      leftPx = viewportLeftCssPx,
+      topPx = viewportTopCssPx,
+      widthPx = viewportWidthCssPx,
+      heightPx = viewportHeightCssPx,
+      borderRadiusPx = 12f,
+      visible = isVisible,
+    )
+    if (isVisible) {
+      syncPlatformMapboxBasemap(
+        surveyId = activeSurveyId,
+        basemapType = selectedBasemapType.name,
+        isOfflineVisible = isOfflineBasemapVisible,
+        panOffsetX = (-viewportState.panOffsetLon * 80.0).toFloat(),
+        panOffsetY = (viewportState.panOffsetLat * 80.0).toFloat(),
+        userGpsX = userGpsX,
+        userGpsY = userGpsY,
+        featuresGeoJson = featuresPayloadJson,
+      )
+    }
+  }
+
+  DisposableEffect(Unit) { onDispose { hidePlatformMapboxBasemap() } }
+
+  Canvas(
+    modifier =
+      modifier
+        .fillMaxSize()
+        .onGloballyPositioned { coordinates ->
+          val pos = coordinates.positionInWindow()
+          val sz = coordinates.size
+          viewportLeftCssPx = pos.x / density
+          viewportTopCssPx = pos.y / density
+          viewportWidthCssPx = sz.width / density
+          viewportHeightCssPx = sz.height / density
+        }
+        .onPointerEvent(PointerEventType.Scroll) { event ->
+          val scrollDeltaY = event.changes.firstOrNull()?.scrollDelta?.y ?: 0f
+          if (scrollDeltaY != 0f) {
+            val step = (-scrollDeltaY * 0.35f).coerceIn(-1.2f, 1.2f)
+            viewportState.onZoomDelta(step)
+          }
+        }
+        .pointerInput(
+          viewportState.path,
+          viewportState.panAllowed,
+          viewportWidthCssPx,
+          viewportHeightCssPx,
+          density,
+        ) {
+          if (viewportState.panAllowed) {
+            detectDragGestures { change, dragAmount ->
+              change.consume()
+              val widthPx = size.width.toFloat()
+              val heightPx = size.height.toFloat()
+              if (widthPx > 0f && heightPx > 0f) {
+                viewportState.onPanDeltaPixels(dragAmount.x, dragAmount.y, widthPx, heightPx)
+                panPlatformMapboxBasemap(
+                  dxPx = dragAmount.x / density,
+                  dyPx = dragAmount.y / density,
+                )
+              }
+            }
+          }
+        }
+  ) {
+    drawRect(color = Color.Transparent, blendMode = BlendMode.Clear)
+  }
+}
+
 internal fun buildMapboxFeaturesPayloadJson(state: PrototypeAppState): String =
   buildMapboxFeaturesPayloadJson(
     entities = state.visibleMapEntities,

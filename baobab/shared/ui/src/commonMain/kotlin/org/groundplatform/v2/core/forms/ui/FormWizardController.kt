@@ -19,6 +19,7 @@ import androidx.compose.runtime.setValue
 import com.google.type.Date
 import com.google.type.TimeOfDay
 import com.squareup.wire.ofEpochSecond
+import groundplatform.v2.forms.DataType
 import groundplatform.v2.forms.FieldValue
 import groundplatform.v2.forms.FormDef
 import groundplatform.v2.forms.GeoPoint
@@ -205,12 +206,29 @@ class FormWizardController(
       }
 
   /**
+   * Whether the [currentStep] contains a geometry (`TYPE_GEOPOINT`, `TYPE_GEOTRACE`, or
+   * `TYPE_GEOSHAPE`) question waiting for coordinates / vertices to be captured before advancing
+   * via "Next".
+   */
+  val isCurrentStepWaitingForLocationCapture: Boolean
+    get() = isWaitingForGeometryCapture(currentStep)
+
+  /**
+   * Whether the [currentStep] is an optional question (all its input controls are not required).
+   */
+  val isCurrentStepOptional: Boolean
+    get() = isStepOptional(currentStep)
+
+  /**
    * Advances to the next screen. If [enforceValidation] is true and the current question has
-   * validation errors (`REQUIRED_MISSING` or `CONSTRAINT_VIOLATED`), stays on the current step and
-   * highlights the validation warning banner.
+   * validation errors (`REQUIRED_MISSING` or `CONSTRAINT_VIOLATED`) or is waiting for a location
+   * capture, stays on the current step and highlights the validation warning banner.
    */
   fun nextStep(enforceValidation: Boolean = true): Boolean {
-    if (enforceValidation && currentStepErrors.isNotEmpty()) {
+    if (
+      enforceValidation &&
+        (currentStepErrors.isNotEmpty() || isCurrentStepWaitingForLocationCapture)
+    ) {
       showCurrentStepValidationWarning = true
       return false
     }
@@ -586,3 +604,54 @@ class FormWizardController(
     }
   }
 }
+
+/**
+ * Returns `true` if [control] represents a geometry question (`TYPE_GEOPOINT`, `TYPE_GEOTRACE`,
+ * or `TYPE_GEOSHAPE`) that has not yet captured the minimum required vertices:
+ * - `TYPE_GEOPOINT`: value is null
+ * - `TYPE_GEOTRACE`: fewer than 2 points
+ * - `TYPE_GEOSHAPE`: fewer than 3 points
+ */
+fun isControlWaitingForGeometryCapture(control: ComponentState.ControlState): Boolean {
+  val fieldState = control.fieldState
+  val scalar = fieldState.value?.scalar_value
+  return when (fieldState.dataType) {
+    DataType.TYPE_GEOPOINT -> scalar?.geopoint_value == null
+    DataType.TYPE_GEOTRACE -> (scalar?.geotrace_value?.points?.size ?: 0) < 2
+    DataType.TYPE_GEOSHAPE -> (scalar?.geoshape_value?.points?.size ?: 0) < 3
+    else -> false
+  }
+}
+
+/**
+ * Returns `true` if [step] contains a geometry question (`TYPE_GEOPOINT`, `TYPE_GEOTRACE`, or
+ * `TYPE_GEOSHAPE`) that has not yet had sufficient coordinates captured.
+ */
+fun isWaitingForGeometryCapture(step: FormWizardStep): Boolean =
+  when (step) {
+    is FormWizardStep.QuestionStep -> isControlWaitingForGeometryCapture(step.control)
+    is FormWizardStep.FieldListGroupStep ->
+      step.controls.any { isControlWaitingForGeometryCapture(it) }
+    else -> false
+  }
+
+/** Backward-compatible alias for [isWaitingForGeometryCapture]. */
+fun isWaitingForGeoPointCapture(step: FormWizardStep): Boolean = isWaitingForGeometryCapture(step)
+
+/**
+ * Returns `true` if [step] represents an optional question (all its input controls are not
+ * required, not read-only, and not calculated).
+ */
+fun isStepOptional(step: FormWizardStep): Boolean =
+  when (step) {
+    is FormWizardStep.QuestionStep ->
+      !step.control.fieldState.isRequired &&
+        !step.control.fieldState.isReadOnly &&
+        !step.control.fieldState.isCalculated
+    is FormWizardStep.FieldListGroupStep ->
+      step.controls.isNotEmpty() &&
+        step.controls.all {
+          !it.fieldState.isRequired && !it.fieldState.isReadOnly && !it.fieldState.isCalculated
+        }
+    else -> false
+  }

@@ -213,7 +213,6 @@ fun MobileFormRunner(
           OutlinedButton(
             onClick = { controller.previousStep() },
             enabled = controller.canGoBack,
-            modifier = Modifier.width(112.dp),
           ) {
             Text("← Back")
           }
@@ -235,17 +234,29 @@ fun MobileFormRunner(
                   onSubmitted?.invoke(res)
                 }
               },
-              modifier = Modifier.width(132.dp),
             ) {
-              Text("Submit ✓")
+              Text("Submit")
             }
           } else {
             val isLastQuestionBeforeSummary = stepIndex == totalSteps - 2
-            Button(
-              onClick = { controller.nextStep(enforceValidation = true) },
-              modifier = Modifier.width(132.dp),
+            Row(
+              horizontalArrangement = Arrangement.spacedBy(8.dp),
+              verticalAlignment = Alignment.CenterVertically,
             ) {
-              Text(if (isLastQuestionBeforeSummary) "Review →" else "Next →")
+              if (controller.isCurrentStepOptional) {
+                OutlinedButton(
+                  onClick = { controller.nextStep(enforceValidation = false) },
+                ) {
+                  Text("Skip")
+                }
+              }
+
+              Button(
+                onClick = { controller.nextStep(enforceValidation = true) },
+                enabled = !controller.isCurrentStepWaitingForLocationCapture,
+              ) {
+                Text(if (isLastQuestionBeforeSummary) "Review →" else "Next →")
+              }
             }
           }
         }
@@ -311,7 +322,8 @@ fun MobileFormRunner(
         // Validation blocker notice when user pressed Next on an invalid question
         if (
           controller.showCurrentStepValidationWarning &&
-            controller.currentStepErrors.isNotEmpty() &&
+            (controller.currentStepErrors.isNotEmpty() ||
+              controller.isCurrentStepWaitingForLocationCapture) &&
             currentStep !is FormWizardStep.SummaryStep
         ) {
           Card(
@@ -325,7 +337,12 @@ fun MobileFormRunner(
               verticalAlignment = Alignment.CenterVertically,
             ) {
               Text(
-                text = "Please resolve validation errors above or skip to continue.",
+                text =
+                  if (controller.isCurrentStepWaitingForLocationCapture) {
+                    "Please capture a location or drop a pin before proceeding."
+                  } else {
+                    "Please resolve validation errors above or skip to continue."
+                  },
                 style =
                   MaterialTheme.typography.bodySmall.copy(
                     color = colors.onErrorContainer,
@@ -333,9 +350,11 @@ fun MobileFormRunner(
                   ),
                 modifier = Modifier.weight(1f),
               )
-              Spacer(modifier = Modifier.width(8.dp))
-              OutlinedButton(onClick = { controller.nextStep(enforceValidation = false) }) {
-                Text("Skip →", style = MaterialTheme.typography.labelSmall)
+              if (controller.isCurrentStepOptional) {
+                Spacer(modifier = Modifier.width(8.dp))
+                OutlinedButton(onClick = { controller.nextStep(enforceValidation = false) }) {
+                  Text("Skip →", style = MaterialTheme.typography.labelSmall)
+                }
               }
             }
           }

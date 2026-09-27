@@ -167,6 +167,25 @@ fun isWizardStepEntityRef(step: FormWizardStep?): Boolean {
 }
 
 /**
+ * Returns `true` if [step] contains a geometry (`geopoint`, `geotrace`, or `geoshape`) question control.
+ */
+fun isWizardStepGeoPoint(step: FormWizardStep?): Boolean {
+  if (step == null) return false
+  val controls =
+    when (step) {
+      is FormWizardStep.QuestionStep -> listOf(step.control)
+      is FormWizardStep.FieldListGroupStep -> step.controls
+      else -> emptyList()
+    }
+  return controls.any {
+    val dt = it.fieldState.dataType
+    dt == groundplatform.v2.forms.DataType.TYPE_GEOPOINT ||
+      dt == groundplatform.v2.forms.DataType.TYPE_GEOTRACE ||
+      dt == groundplatform.v2.forms.DataType.TYPE_GEOSHAPE
+  }
+}
+
+/**
  * Extracts all answered fields from [recordInstance] (and [controller]'s [FormState]) into a list
  * of [SubmissionFieldEntry] items via
  * [org.groundplatform.v2.devtools.prototypeapp.domain.usecase.CompleteFormSubmissionUseCase].
@@ -315,14 +334,25 @@ fun DataCollectionFormScreen(state: PrototypeAppState) {
       )
     } else {
       // Shared MobileFormRunner component from org.groundplatform.v2.core.forms.ui
-      Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
-        MobileFormRunner(
-          controller = controller,
-          onClose = { state.closeActiveFormRunner() },
-          onSubmitted = { result: FinalizationResult.Success ->
-            state.completeActiveFormSubmission(result.recordInstance, result.entityStates)
-          },
-        )
+      androidx.compose.runtime.CompositionLocalProvider(
+        org.groundplatform.v2.core.forms.ui.LocalGeoPointMapViewport provides
+          { viewportState ->
+            GeoPointFormMapboxViewport(
+              state = state,
+              viewportState = viewportState,
+              modifier = Modifier.fillMaxSize(),
+            )
+          }
+      ) {
+        Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
+          MobileFormRunner(
+            controller = controller,
+            onClose = { state.closeActiveFormRunner() },
+            onSubmitted = { result: FinalizationResult.Success ->
+              state.completeActiveFormSubmission(result.recordInstance, result.entityStates)
+            },
+          )
+        }
       }
     }
   }

@@ -134,7 +134,7 @@ fun PrototypeApp(state: PrototypeAppState = remember { PrototypeAppState() }) {
   val isMapShowing =
     state.currentScreen == PrototypeScreen.MAIN_SURVEY &&
       state.activeDrawerSubView == MainDrawerSubView.NONE &&
-      !state.isDataCollectionFormOpen
+      (!state.isDataCollectionFormOpen || state.isCurrentFormStepGeoPoint)
 
   GroundTheme(darkTheme = state.isDarkTheme) {
     Surface(

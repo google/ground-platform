@@ -97,7 +97,7 @@ embedded inside web developer tools such as `devtools/formdebugger`.
         (`isCurrentStepValid()`). If a required field is empty or a `constraint`
         fails, an inline error banner is displayed with an option to fix the
         answer or explicitly **`Skip →`** while continuing drafts.
-    -   Tapping **`Submit ✓`** on the `SummaryStep` invokes
+    -   Tapping **`Submit`** on the `SummaryStep` invokes
         `FormSession.finalize()`, which updates `end` timestamp preloads
         (`RecordMetadata.end_time`), re-evaluates any dependent calculations,
         and performs whole-form validation across all relevant fields.
@@ -134,10 +134,12 @@ embedded inside web developer tools such as `devtools/formdebugger`.
 | `CONTROL_INPUT` +         | `TimestampInputWidget` | ISO/Epoch timestamp     |
 : `TYPE_DATETIME`           :                        : display with `Capture   :
 :                           :                        : Timestamp` button       :
-| `CONTROL_INPUT` +         | `GeoPointInputWidget`  | Latitude, longitude,    |
-: `TYPE_GEOPOINT`           :                        : altitude, accuracy      :
-:                           :                        : inputs + GPS preset     :
-:                           :                        : simulator               :
+| `CONTROL_INPUT` +         | `GeoPointInputWidget`  | Interactive map         |
+: `TYPE_GEOPOINT`           :                        : viewport, coordinates + :
+:                           :                        : accuracy display, and   :
+:                           :                        : `Capture location` /    :
+:                           :                        : `Drop pin` trigger with :
+:                           :                        : undo                    :
 | `CONTROL_INPUT` +         | `GeoVertexListWidget`  | Vertex list editor for  |
 : `TYPE_GEOTRACE` /         :                        : polylines (`GEOTRACE`)  :
 : `TYPE_GEOSHAPE`           :                        : and closed polygons     :

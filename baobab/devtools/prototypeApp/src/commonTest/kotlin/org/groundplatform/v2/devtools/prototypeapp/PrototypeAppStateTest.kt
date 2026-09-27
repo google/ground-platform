@@ -1759,5 +1759,33 @@ class PrototypeAppStateTest {
       }
     )
   }
+
+  @Test
+  fun geoPointStepInDataCollectionForm_showsMapAndSupportsCaptureLocationAndAddPointTriggers() {
+    val state = PrototypeAppState(initialScreen = PrototypeScreen.MAIN_SURVEY)
+    state.selectWorkbenchExampleForm(
+      org.groundplatform.v2.core.forms.ui.WorkbenchExampleForm.SINGLE_POINT_LAND_USE,
+      launchImmediately = true,
+    )
+
+    assertTrue(state.isDataCollectionFormOpen)
+    val ctrl = assertNotNull(state.activeFormWizardController)
+    assertEquals(0, ctrl.currentStepIndex)
+    assertTrue(state.isCurrentFormStepGeoPoint)
+
+    // Verify trigger labels for unpanned ("Capture location") vs panned ("Add point")
+    assertEquals(
+      "Capture location",
+      org.groundplatform.v2.core.forms.ui.geoPointPrimaryTriggerLabel(isPanned = false),
+    )
+    assertEquals(
+      "Add point",
+      org.groundplatform.v2.core.forms.ui.geoPointPrimaryTriggerLabel(isPanned = true),
+    )
+
+    // Advance to the next step (select1 land_use) -> isCurrentFormStepGeoPoint becomes false
+    assertTrue(ctrl.nextStep())
+    assertFalse(state.isCurrentFormStepGeoPoint)
+  }
 }
 
