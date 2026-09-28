@@ -16,12 +16,18 @@ package org.groundplatform.v2.devtools.prototypeapp
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.window.ComposeViewport
 import kotlinx.browser.document
+import kotlinx.browser.window
 import org.jetbrains.skiko.wasm.onWasmReady
 
 @OptIn(ExperimentalComposeUiApi::class)
 fun main() {
   onWasmReady {
     val container = document.getElementById("ComposeTarget") ?: document.body!!
-    ComposeViewport(container) { PrototypeApp() }
+    ComposeViewport(container) {
+      PrototypeApp(
+        initialPage = PrototypeWorkbenchPage.fromHash(window.location.hash),
+        onPageChanged = { window.location.hash = it.hash },
+      )
+    }
   }
 }

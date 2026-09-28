@@ -75,6 +75,81 @@ UX Co-Design Workbench for rapid iteration with UX designers.
         units, in-app language locale switcher, and uploaded media cache
         eviction), **Terms of Service**, and **Sign out**.
 
+## Survey Editor Page (`#survey-editor`)
+
+Switch pages with the **Mobile prototype** / **Survey editor** chips in the top
+bar, or deep-link to `http://localhost:8091/#survey-editor`. The old
+`#form-editor` link still works. The left-hand navigation lists:
+
+-   **Survey details**: Title, description, survey ID, and languages, plus
+    summary cards that link to each section.
+-   **Sharing**: Invite people by email with a role (Viewer, Data collector,
+    Survey organizer), change or remove roles, and set general access
+    (Restricted, Anyone with the link, Public) and what data collectors can
+    see. These mirror `acl.proto`.
+    -   Each new invite gets an invite link (`https://ground.example.org/join/…`)
+        with **Copy link** and **New link** actions. Until it's accepted, the
+        person is listed by email with an **Invited** badge.
+    -   **Open as invitee** previews what the invitee sees after opening the
+        link and signing in: they confirm their full name and profile photo.
+        Accepting caches both on their entry, and the list then shows them
+        by name and photo. The prototype draws placeholder portraits
+        (`avatar:<n>`) instead of loading real photo URLs.
+-   **Forms**, **Map layers**, **Data tables**: Headings list the survey's
+    items. Use **+** to add a new one, and drag items to reorder them within
+    their heading (screen readers get **Move up** / **Move down** actions).
+    -   Each **Map layer** opens an entity editor with:
+        -   An interactive map with a live Satellite / Terrain basemap (web
+            builds). Drag to pan; scroll, double-click, or use **+ / −** to
+            zoom; **Fit** frames all features. Click a feature to select it
+            (synced with the table). Drag the selected feature's vertices to
+            reshape it, drag its ○ midpoint handles to insert a vertex, or drag
+            inside it to move it. **Add point / line / polygon** draws a new
+            feature by clicking on the map; double-click (or click the first
+            polygon vertex) to finish.
+        -   An editable feature table, including geometry as `lat, lng; …`.
+        -   Style controls for color, stroke, fill, and default visibility.
+    -   Each **Data table** opens a spreadsheet-style entity editor.
+    -   Both share the dataset settings (ID, key and label properties, adding
+        in the field) and property schema editing. They mirror
+        `EntityDatasetDef` / `EntityRecord`.
+
+Code lives in `surveyeditor/` (`SurveyEditorModels.kt`, `SurveyEditorState.kt`,
+`SurveyEditorPage.kt`, `EntityDatasetEditor.kt`, `InteractiveLayerMap.kt`,
+`MapCamera.kt`). Drag-to-reorder for the navigation and the flow canvas shares
+`formeditor/DragReorder.kt`.
+
+The map's camera, gestures, hit-testing, and feature rendering are all in
+Compose. `MapCamera` uses the Mapbox GL JS Web Mercator conventions (a 512 px
+world at zoom 0). On web, a separate non-interactive `mapboxgl.Map`
+(`layer-editor-map.js`, `window.GroundLayerEditorMap`) follows that camera
+behind a transparent hole in the Compose canvas, so the two stay pixel-aligned.
+The JVM build shows a grid instead of a basemap.
+
+### Form Editor
+
+Selecting a Form opens the visual Form editor in `formeditor/`
+(`FormEditorModels.kt`, `FormEditorState.kt`, `FormEditorPage.kt`):
+
+-   **Flow canvas**: Shows a mini preview of every question screen, from
+    `Start` to `Review & submit`. Arrows show each possible transition. Solid
+    arrows mean the next screen is always shown, dashed arrows lead to a
+    conditional screen, and arcs show where screens get skipped when their
+    display logic is false. The header shows how many potential paths the
+    Form has.
+-   **Properties panel**: Edits the selected question's type, label, hint,
+    name, required flag, choices, and display logic (`relevant`).
+-   **Add / delete / duplicate / reorder**: Use **Add question**, which inserts
+    after the selected screen, plus the actions in the panel. Drag a screen
+    card along the canvas to reorder it: other screens slide aside to show
+    where it lands, and the canvas scrolls at its edges. The `←` / `→`
+    buttons on the selected card also move it one step.
+-   **XForms XML**: Shows the generated ODK-compatible XForms and confirms it
+    parses with the Ground form engine.
+-   **Preview flow**: Runs the generated Form in a device frame with the shared
+    `MobileFormRunner`. The side panel lists the current path, which updates as
+    display logic changes.
+
 ## Running the Local Development Web Server
 
 From `devtools/prototypeApp/`, start the local `webpack-dev-server` using either

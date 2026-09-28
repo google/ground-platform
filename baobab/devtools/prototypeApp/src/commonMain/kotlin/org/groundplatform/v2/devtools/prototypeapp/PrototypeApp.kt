@@ -91,7 +91,10 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -120,19 +123,44 @@ import org.groundplatform.v2.core.forms.ui.GroundTonalBadge
 import org.groundplatform.v2.core.forms.ui.LocalGroundBrandFontFamily
 import org.groundplatform.v2.core.forms.ui.resources.Res
 import org.groundplatform.v2.core.forms.ui.resources.sign_in_with_google
+import org.groundplatform.v2.devtools.prototypeapp.surveyeditor.SurveyEditorPage
+import org.groundplatform.v2.devtools.prototypeapp.surveyeditor.SurveyEditorState
 import org.jetbrains.compose.resources.stringResource
+
+/** Top-level pages of the prototype web app, addressable via the URL hash (e.g. `#survey-editor`). */
+enum class PrototypeWorkbenchPage(val label: String, val hash: String) {
+  MOBILE_PROTOTYPE("Mobile prototype", "prototype"),
+  SURVEY_EDITOR("Survey editor", "survey-editor");
+
+  companion object {
+    /** Legacy hashes kept working after pages were renamed. */
+    private val aliases = mapOf("form-editor" to SURVEY_EDITOR)
+
+    fun fromHash(hash: String?): PrototypeWorkbenchPage {
+      val h = hash?.removePrefix("#")
+      return entries.firstOrNull { it.hash == h } ?: aliases[h] ?: MOBILE_PROTOTYPE
+    }
+  }
+}
 
 /**
  * Root Compose Multiplatform Web application for `baobab/devtools/prototypeApp`.
  *
  * Renders an interactive UX design workbench that embeds a live Mobile or Tablet device preview of
  * the Ground 2.0 Compose Multiplatform UI (`Sign In` -> `Terms of Service` -> `Download survey` ->
- * `Main Survey UI`).
+ * `Main Survey UI`), plus a [SurveyEditorPage] for designing surveys, Forms, Map layers, and Data tables.
  */
 @Composable
-fun PrototypeApp(state: PrototypeAppState = remember { PrototypeAppState() }) {
+fun PrototypeApp(
+  state: PrototypeAppState = remember { PrototypeAppState() },
+  initialPage: PrototypeWorkbenchPage = PrototypeWorkbenchPage.MOBILE_PROTOTYPE,
+  onPageChanged: (PrototypeWorkbenchPage) -> Unit = {},
+) {
+  var page by remember { mutableStateOf(initialPage) }
+  val surveyEditorState = remember { SurveyEditorState() }
   val isMapShowing =
-    state.currentScreen == PrototypeScreen.MAIN_SURVEY &&
+    page == PrototypeWorkbenchPage.MOBILE_PROTOTYPE &&
+      state.currentScreen == PrototypeScreen.MAIN_SURVEY &&
       state.activeDrawerSubView == MainDrawerSubView.NONE &&
       (!state.isDataCollectionFormOpen || state.isCurrentFormStepGeoPoint)
 
@@ -147,48 +175,69 @@ fun PrototypeApp(state: PrototypeAppState = remember { PrototypeAppState() }) {
         },
     ) {
       Column(modifier = Modifier.fillMaxSize()) {
-        PrototypeWorkbenchTopBar(state)
+        PrototypeWorkbenchTopBar(
+          state = state,
+          page = page,
+          onSelectPage = {
+            page = it
+            onPageChanged(it)
+          },
+        )
 
-        Row(
-          modifier = Modifier.fillMaxSize().padding(16.dp),
-          horizontalArrangement = Arrangement.spacedBy(20.dp),
-        ) {
-          val previewStageWeight = if (state.effectiveFrameWidthDp >= 600) 1.55f else 1.15f
-
-          // Left / Center stage: Embedded Mobile or Tablet Device Preview
-          Box(
-            modifier =
-              Modifier.weight(previewStageWeight)
-                .fillMaxHeight()
-                .verticalScroll(rememberScrollState())
-                .horizontalScroll(rememberScrollState()),
-            contentAlignment = Alignment.TopCenter,
-          ) {
-            MobileDevicePreviewFrame(
-              deviceTitle =
-                "Ground 2.0 ${state.deviceFormFactor.label} UI • Step ${state.currentScreen.stepNumber}/4: ${state.currentScreen.title}",
-              isDarkTheme = state.isDarkTheme,
-              isScreenTransparent = isMapShowing,
-              formFactor = state.deviceFormFactor,
-              orientation = state.deviceOrientation,
-              onSelectFormFactor = { state.selectDeviceFormFactor(it) },
-              onRotateDevice = { state.rotateDevice() },
-            ) {
-              MobileScreenHost(state)
-            }
-          }
-
-          // Right panel: UX Designer Flow & State Controls
-          UxDesignerInspectorPanel(state = state, modifier = Modifier.weight(0.85f).fillMaxHeight())
+        when (page) {
+          PrototypeWorkbenchPage.SURVEY_EDITOR ->
+            SurveyEditorPage(state = surveyEditorState, isDarkTheme = state.isDarkTheme)
+          PrototypeWorkbenchPage.MOBILE_PROTOTYPE -> MobilePrototypePage(state, isMapShowing)
         }
       }
     }
   }
 }
 
+/** Device preview stage plus the UX co-design inspector panel. */
+@Composable
+private fun MobilePrototypePage(state: PrototypeAppState, isMapShowing: Boolean) {
+  Row(
+    modifier = Modifier.fillMaxSize().padding(16.dp),
+    horizontalArrangement = Arrangement.spacedBy(20.dp),
+  ) {
+    val previewStageWeight = if (state.effectiveFrameWidthDp >= 600) 1.55f else 1.15f
+
+    // Left / Center stage: Embedded Mobile or Tablet Device Preview
+    Box(
+      modifier =
+        Modifier.weight(previewStageWeight)
+          .fillMaxHeight()
+          .verticalScroll(rememberScrollState())
+          .horizontalScroll(rememberScrollState()),
+      contentAlignment = Alignment.TopCenter,
+    ) {
+      MobileDevicePreviewFrame(
+        deviceTitle =
+          "Ground 2.0 ${state.deviceFormFactor.label} UI • Step ${state.currentScreen.stepNumber}/4: ${state.currentScreen.title}",
+        isDarkTheme = state.isDarkTheme,
+        isScreenTransparent = isMapShowing,
+        formFactor = state.deviceFormFactor,
+        orientation = state.deviceOrientation,
+        onSelectFormFactor = { state.selectDeviceFormFactor(it) },
+        onRotateDevice = { state.rotateDevice() },
+      ) {
+        MobileScreenHost(state)
+      }
+    }
+
+    // Right panel: UX Designer Flow & State Controls
+    UxDesignerInspectorPanel(state = state, modifier = Modifier.weight(0.85f).fillMaxHeight())
+  }
+}
+
 /** Top navigation bar for the Web UX Prototype Workbench. */
 @Composable
-private fun PrototypeWorkbenchTopBar(state: PrototypeAppState) {
+private fun PrototypeWorkbenchTopBar(
+  state: PrototypeAppState,
+  page: PrototypeWorkbenchPage,
+  onSelectPage: (PrototypeWorkbenchPage) -> Unit,
+) {
   val assistColors =
     androidx.compose.material3.AssistChipDefaults.assistChipColors(
       containerColor = Color(0xFF1D5128),
@@ -259,6 +308,38 @@ private fun PrototypeWorkbenchTopBar(state: PrototypeAppState) {
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically,
       ) {
+        // Page switcher: Mobile prototype | Survey editor
+        PrototypeWorkbenchPage.entries.forEach { entry ->
+          FilterChip(
+            selected = page == entry,
+            onClick = { onSelectPage(entry) },
+            colors =
+              androidx.compose.material3.FilterChipDefaults.filterChipColors(
+                containerColor = Color(0xFF1D5128),
+                labelColor = Color.White,
+                selectedContainerColor = Color(0xFFB7F1B9),
+                selectedLabelColor = Color(0xFF002106),
+              ),
+            border =
+              androidx.compose.material3.FilterChipDefaults.filterChipBorder(
+                enabled = true,
+                selected = page == entry,
+                borderColor = Color(0xFF424940),
+                selectedBorderColor = Color(0xFFB7F1B9),
+              ),
+            label = {
+              Text(
+                text = entry.label,
+                maxLines = 1,
+                softWrap = false,
+                style = MaterialTheme.typography.labelMedium,
+                fontWeight = if (page == entry) FontWeight.Bold else FontWeight.Medium,
+              )
+            },
+          )
+        }
+        Spacer(modifier = Modifier.width(8.dp))
+
         // Theme toggle button
         AssistChip(
           onClick = { state.toggleDarkTheme() },

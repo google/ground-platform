@@ -1164,3 +1164,85 @@ private var _cloudOff: ImageVector? = null
 
 
 
+
+public val Icons.Filled.Remove: ImageVector
+  get() {
+    if (_remove != null) return _remove!!
+    _remove =
+      materialIcon(name = "Filled.Remove") {
+        materialPath {
+          moveTo(19.0f, 13.0f)
+          horizontalLineTo(5.0f)
+          verticalLineToRelative(-2.0f)
+          horizontalLineToRelative(14.0f)
+          verticalLineToRelative(2.0f)
+          close()
+        }
+      }
+    return _remove!!
+  }
+private var _remove: ImageVector? = null
+
+public val Icons.Filled.ZoomOutMap: ImageVector
+  get() {
+    if (_zoomOutMap != null) return _zoomOutMap!!
+    _zoomOutMap =
+      materialIcon(name = "Filled.ZoomOutMap") {
+        materialPath {
+          moveTo(15.0f, 3.0f)
+          lineToRelative(2.3f, 2.3f)
+          lineToRelative(-2.89f, 2.87f)
+          lineToRelative(1.42f, 1.42f)
+          lineTo(18.7f, 6.7f)
+          lineTo(21.0f, 9.0f)
+          verticalLineTo(3.0f)
+          close()
+          moveTo(3.0f, 9.0f)
+          lineToRelative(2.3f, -2.3f)
+          lineToRelative(2.87f, 2.89f)
+          lineToRelative(1.42f, -1.42f)
+          lineTo(6.7f, 5.3f)
+          lineTo(9.0f, 3.0f)
+          horizontalLineTo(3.0f)
+          close()
+          moveTo(9.0f, 21.0f)
+          lineToRelative(-2.3f, -2.3f)
+          lineToRelative(2.89f, -2.87f)
+          lineToRelative(-1.42f, -1.42f)
+          lineTo(5.3f, 17.3f)
+          lineTo(3.0f, 15.0f)
+          verticalLineToRelative(6.0f)
+          close()
+          moveTo(21.0f, 15.0f)
+          lineToRelative(-2.3f, 2.3f)
+          lineToRelative(-2.87f, -2.89f)
+          lineToRelative(-1.42f, 1.42f)
+          lineToRelative(2.89f, 2.87f)
+          lineTo(15.0f, 21.0f)
+          horizontalLineToRelative(6.0f)
+          close()
+        }
+      }
+    return _zoomOutMap!!
+  }
+private var _zoomOutMap: ImageVector? = null
+
+public val Icons.Filled.DragIndicator: ImageVector
+  get() {
+    if (_dragIndicator != null) return _dragIndicator!!
+    _dragIndicator =
+      materialIcon(name = "Filled.DragIndicator") {
+        materialPath {
+          for (cx in listOf(9.0f, 15.0f)) {
+            for (cy in listOf(6.0f, 12.0f, 18.0f)) {
+              moveTo(cx - 2.0f, cy)
+              arcToRelative(2.0f, 2.0f, 0.0f, true, true, 4.0f, 0.0f)
+              arcToRelative(2.0f, 2.0f, 0.0f, true, true, -4.0f, 0.0f)
+              close()
+            }
+          }
+        }
+      }
+    return _dragIndicator!!
+  }
+private var _dragIndicator: ImageVector? = null

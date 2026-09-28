@@ -1,0 +1,380 @@
+/*
+ * Copyright 2026 The Ground Authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
+ */
+package org.groundplatform.v2.devtools.prototypeapp.surveyeditor
+
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import kotlin.random.Random
+import org.groundplatform.v2.devtools.prototypeapp.formeditor.FormEditorSamples
+import org.groundplatform.v2.devtools.prototypeapp.formeditor.FormEditorState
+import org.groundplatform.v2.devtools.prototypeapp.formeditor.moved
+import org.groundplatform.v2.devtools.prototypeapp.formeditor.slugify
+
+/** Which pane of the Survey editor is showing. */
+sealed interface SurveyEditorSection {
+  data object Details : SurveyEditorSection
+
+  data object Sharing : SurveyEditorSection
+
+  data class Form(val key: String) : SurveyEditorSection
+
+  data class Dataset(val key: String) : SurveyEditorSection
+}
+
+/** A Form in the survey, each with its own [FormEditorState]. */
+class SurveyFormEntry(val key: String, val editor: FormEditorState)
+
+/**
+ * Observable state for the Survey editor page: survey details, sharing, Forms, Map layers, and Data
+ * tables, plus the currently selected section.
+ */
+class SurveyEditorState {
+  private var nextId = 100
+
+  var details: SurveyDetails by mutableStateOf(SurveyEditorSamples.details())
+    private set
+
+  var sharing: SharingSettings by mutableStateOf(SurveyEditorSamples.sharing())
+    private set
+
+  var forms: List<SurveyFormEntry> by
+    mutableStateOf(
+      listOf(
+        SurveyFormEntry("f1", FormEditorState(FormEditorSamples.shadeTreeVisit())),
+        SurveyFormEntry("f2", FormEditorState(FormEditorSamples.parcelBoundaryCheck())),
+      )
+    )
+    private set
+
+  var datasets: List<EntityDataset> by
+    mutableStateOf(
+      listOf(
+        SurveyEditorSamples.coffeeParcels(),
+        SurveyEditorSamples.shadePlots(),
+        SurveyEditorSamples.farmers(),
+        SurveyEditorSamples.treeSpecies(),
+      )
+    )
+    private set
+
+  var section: SurveyEditorSection by mutableStateOf(SurveyEditorSection.Details)
+    private set
+
+  val mapLayers: List<EntityDataset>
+    get() = datasets.filter { it.kind == DatasetKind.MAP_LAYER }
+
+  val dataTables: List<EntityDataset>
+    get() = datasets.filter { it.kind == DatasetKind.DATA_TABLE }
+
+  val selectedForm: SurveyFormEntry?
+    get() =
+      (section as? SurveyEditorSection.Form)?.let { s -> forms.firstOrNull { it.key == s.key } }
+
+  val selectedDataset: EntityDataset?
+    get() =
+      (section as? SurveyEditorSection.Dataset)?.let { s ->
+        datasets.firstOrNull { it.key == s.key }
+      }
+
+  fun select(section: SurveyEditorSection) {
+    this.section = section
+  }
+
+  fun datasetIssues(dataset: EntityDataset): List<DatasetIssue> =
+    EntityDatasetValidator.validate(dataset, datasets.map { it.id })
+
+  // Survey details & sharing ------------------------------------------------------------------
+
+  fun updateDetails(transform: (SurveyDetails) -> SurveyDetails) {
+    details = transform(details)
+  }
+
+  fun updateSharing(transform: (SharingSettings) -> SharingSettings) {
+    sharing = transform(sharing)
+  }
+
+  /**
+   * Adds (or updates the role of) a collaborator. New people get a pending invite with a fresh
+   * invite link token. Returns an error message, or `null`.
+   */
+  fun inviteCollaborator(email: String, role: CollaboratorRole): String? {
+    val normalized = email.trim().lowercase()
+    if (!Regex("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$").matches(normalized)) {
+      return "Enter a valid email address."
+    }
+    if (normalized == sharing.ownerEmail.lowercase()) return "That's the survey owner."
+    val existing = sharing.collaborators.indexOfFirst { it.email.lowercase() == normalized }
+    val updated = sharing.collaborators.toMutableList()
+    if (existing >= 0) {
+      updated[existing] = updated[existing].copy(role = role)
+    } else {
+      updated += Collaborator(normalized, role, inviteToken = newInviteToken())
+    }
+    sharing = sharing.copy(collaborators = updated)
+    return null
+  }
+
+  /** Invalidates the old invite link of a pending collaborator and issues a new one. */
+  fun resetInviteLink(email: String) {
+    updateCollaborator(email) {
+      if (it.status == InvitationStatus.PENDING) it.copy(inviteToken = newInviteToken()) else it
+    }
+  }
+
+  /**
+   * Simulates the invitee opening their invite link, signing in, and accepting. Their account's
+   * name and photo are cached on the ACL entry for display in the Sharing pane.
+   */
+  fun acceptInvite(
+    email: String,
+    displayName: String,
+    photoUrl: String?,
+    cachedOn: String = "",
+  ): String? {
+    val name = displayName.trim()
+    if (name.isEmpty()) return "Enter a name."
+    val person = sharing.collaborators.firstOrNull { it.email == email } ?: return "Not invited."
+    if (person.status == InvitationStatus.ACCEPTED) return "Already joined."
+    updateCollaborator(email) {
+      it.copy(
+        status = InvitationStatus.ACCEPTED,
+        inviteToken = null,
+        userId = "uid-${email.substringBefore('@').replace('.', '-')}",
+        profile = CachedProfile(name, photoUrl, cachedOn),
+      )
+    }
+    return null
+  }
+
+  fun setCollaboratorRole(email: String, role: CollaboratorRole) {
+    updateCollaborator(email) { it.copy(role = role) }
+  }
+
+  fun removeCollaborator(email: String) {
+    sharing = sharing.copy(collaborators = sharing.collaborators.filterNot { it.email == email })
+  }
+
+  private fun updateCollaborator(email: String, transform: (Collaborator) -> Collaborator) {
+    sharing =
+      sharing.copy(
+        collaborators = sharing.collaborators.map { if (it.email == email) transform(it) else it }
+      )
+  }
+
+  private fun newInviteToken(): String {
+    val alphabet = "abcdefghjkmnpqrstuvwxyz23456789"
+    fun chunk() = (1..4).map { alphabet[Random.nextInt(alphabet.length)] }.joinToString("")
+    return "${chunk()}-${chunk()}"
+  }
+
+  // Forms ------------------------------------------------------------------------------------
+
+  fun addForm() {
+    val title = uniqueTitle("New form", forms.map { it.editor.form.title })
+    val id = uniqueId(slugify(title), forms.map { it.editor.form.formId })
+    val entry = SurveyFormEntry(newKey("f"), FormEditorState(FormEditorSamples.blank(id, title)))
+    forms = forms + entry
+    section = SurveyEditorSection.Form(entry.key)
+  }
+
+  fun deleteForm(key: String) {
+    val index = forms.indexOfFirst { it.key == key }
+    if (index < 0) return
+    forms = forms.filterNot { it.key == key }
+    section =
+      forms.getOrNull(index.coerceAtMost(forms.lastIndex))?.let { SurveyEditorSection.Form(it.key) }
+        ?: SurveyEditorSection.Details
+  }
+
+  // Map layers & Data tables -----------------------------------------------------------------
+
+  fun addDataset(kind: DatasetKind) {
+    val title = uniqueTitle("New ${kind.singular.lowercase()}", datasets.map { it.displayName })
+    val dataset =
+      EntityDataset(
+        key = newKey("d"),
+        kind = kind,
+        id = uniqueId(slugify(title), datasets.map { it.id }),
+        displayName = title,
+        geometryKind = GeometryKind.POINT,
+        keyProperty = "id",
+        labelProperty = "name",
+        properties =
+          listOf(
+            EntityProperty("id", "ID", PropertyType.TEXT, required = true),
+            EntityProperty("name", "Name", PropertyType.TEXT),
+          ),
+      )
+    datasets = datasets + dataset
+    section = SurveyEditorSection.Dataset(dataset.key)
+  }
+
+  fun deleteDataset(key: String) {
+    val dataset = datasets.firstOrNull { it.key == key } ?: return
+    val siblings = datasets.filter { it.kind == dataset.kind }
+    val index = siblings.indexOf(dataset)
+    datasets = datasets.filterNot { it.key == key }
+    val remaining = siblings.filterNot { it.key == key }
+    section =
+      remaining.getOrNull(index.coerceAtMost(remaining.lastIndex))?.let {
+        SurveyEditorSection.Dataset(it.key)
+      } ?: SurveyEditorSection.Details
+  }
+
+  fun updateDataset(key: String, transform: (EntityDataset) -> EntityDataset) {
+    datasets = datasets.map { if (it.key == key) transform(it) else it }
+  }
+
+  /** Moves Form [key] to [toIndex] in the Forms list. */
+  fun moveForm(key: String, toIndex: Int) {
+    forms = forms.moved(forms.indexOfFirst { it.key == key }, toIndex)
+  }
+
+  /**
+   * Moves Map layer or Data table [key] to [toIndex] among datasets of the same kind. Datasets of
+   * the other kind keep their positions.
+   */
+  fun moveDataset(key: String, toIndex: Int) {
+    val kind = datasets.firstOrNull { it.key == key }?.kind ?: return
+    val siblings = datasets.filter { it.kind == kind }
+    val reordered = siblings.moved(siblings.indexOfFirst { it.key == key }, toIndex).iterator()
+    datasets = datasets.map { if (it.kind == kind) reordered.next() else it }
+  }
+
+  fun addProperty(key: String) {
+    updateDataset(key) { d ->
+      val name = uniqueId("property", d.properties.map { it.name })
+      d.copy(properties = d.properties + EntityProperty(name, "New property"))
+    }
+  }
+
+  /** Updates property [index]; renaming it also renames the matching cell values in every row. */
+  fun updateProperty(key: String, index: Int, property: EntityProperty) {
+    updateDataset(key) { d ->
+      val old = d.properties.getOrNull(index) ?: return@updateDataset d
+      val renamed = old.name != property.name
+      d.copy(
+        properties = d.properties.toMutableList().apply { set(index, property) },
+        keyProperty = if (renamed && d.keyProperty == old.name) property.name else d.keyProperty,
+        labelProperty =
+          if (renamed && d.labelProperty == old.name) property.name else d.labelProperty,
+        rows =
+          if (!renamed) d.rows
+          else
+            d.rows.map { row ->
+              val value = row.values[old.name]
+              if (value == null) row
+              else row.copy(values = row.values - old.name + (property.name to value))
+            },
+      )
+    }
+  }
+
+  fun removeProperty(key: String, index: Int) {
+    updateDataset(key) { d ->
+      val removed = d.properties.getOrNull(index) ?: return@updateDataset d
+      val remaining = d.properties.filterIndexed { i, _ -> i != index }
+      d.copy(
+        properties = remaining,
+        keyProperty =
+          if (d.keyProperty == removed.name) remaining.firstOrNull()?.name.orEmpty()
+          else d.keyProperty,
+        labelProperty =
+          if (d.labelProperty == removed.name) remaining.firstOrNull()?.name.orEmpty()
+          else d.labelProperty,
+        rows = d.rows.map { it.copy(values = it.values - removed.name) },
+      )
+    }
+  }
+
+  /**
+   * Appends an entity. Map layer features use [geometry] when given (e.g. vertices drawn on the
+   * map), otherwise a small default shape at [at] or near existing features.
+   */
+  fun addRow(key: String, at: LatLng? = null, geometry: List<LatLng>? = null): String {
+    val rowKey = newKey("r")
+    updateDataset(key) { d ->
+      val keyValue =
+        uniqueId(
+          "${d.id.take(3).uppercase()}-${d.rows.size + 1}",
+          d.rows.map { it.values[d.keyProperty].orEmpty() },
+        )
+      val shape =
+        if (d.kind == DatasetKind.MAP_LAYER) geometry ?: defaultGeometry(d, at) else emptyList()
+      d.copy(rows = d.rows + EntityRow(rowKey, mapOf(d.keyProperty to keyValue), shape))
+    }
+    return rowKey
+  }
+
+  fun updateCell(key: String, rowKey: String, property: String, value: String) {
+    updateDataset(key) { d ->
+      d.copy(
+        rows =
+          d.rows.map {
+            if (it.key == rowKey) it.copy(values = it.values + (property to value)) else it
+          }
+      )
+    }
+  }
+
+  fun updateGeometry(key: String, rowKey: String, geometry: List<LatLng>) {
+    updateDataset(key) { d ->
+      d.copy(rows = d.rows.map { if (it.key == rowKey) it.copy(geometry = geometry) else it })
+    }
+  }
+
+  fun removeRow(key: String, rowKey: String) {
+    updateDataset(key) { d -> d.copy(rows = d.rows.filterNot { it.key == rowKey }) }
+  }
+
+  // Helpers ----------------------------------------------------------------------------------
+
+  private fun defaultGeometry(d: EntityDataset, at: LatLng?): List<LatLng> {
+    val all = d.rows.flatMap { it.geometry }
+    val c =
+      at
+        ?: run {
+          val center =
+            if (all.isEmpty()) LatLng(-0.4180, 36.9530)
+            else LatLng(all.map { it.lat }.average(), all.map { it.lng }.average())
+          // Offset successive features so they don't overlap.
+          val step = 0.002 * ((d.rows.size % 5) - 2)
+          LatLng(center.lat + step, center.lng - step)
+        }
+    val s = 0.0015
+    return when (d.geometryKind) {
+      GeometryKind.POINT -> listOf(c)
+      GeometryKind.LINE -> listOf(c, LatLng(c.lat + s, c.lng + s), LatLng(c.lat + s, c.lng + 2 * s))
+      GeometryKind.POLYGON ->
+        listOf(c, LatLng(c.lat, c.lng + s), LatLng(c.lat - s, c.lng + s), LatLng(c.lat - s, c.lng))
+    }
+  }
+
+  private fun newKey(prefix: String) = "$prefix${nextId++}"
+
+  private fun uniqueTitle(base: String, taken: List<String>): String {
+    if (base !in taken) return base
+    var n = 2
+    while ("$base $n" in taken) n++
+    return "$base $n"
+  }
+
+  private fun uniqueId(base: String, taken: List<String>): String {
+    if (base !in taken) return base
+    var n = 2
+    while ("${base}_$n" in taken) n++
+    return "${base}_$n"
+  }
+}

@@ -11,20 +11,20 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.groundplatform.v2.devtools.prototypeapp
+package org.groundplatform.v2.devtools.prototypeapp.surveyeditor
 
-import androidx.compose.ui.ExperimentalComposeUiApi
-import androidx.compose.ui.window.ComposeViewport
-import kotlinx.browser.document
-import kotlinx.browser.window
+internal actual val isLayerEditorBasemapSupported: Boolean = false
 
-@OptIn(ExperimentalComposeUiApi::class)
-fun main() {
-  val container = document.getElementById("ComposeTarget") ?: document.body!!
-  ComposeViewport(container) {
-    PrototypeApp(
-      initialPage = PrototypeWorkbenchPage.fromHash(window.location.hash),
-      onPageChanged = { window.location.hash = it.hash },
-    )
-  }
-}
+internal actual fun syncLayerEditorBasemap(
+  leftPx: Float,
+  topPx: Float,
+  widthPx: Float,
+  heightPx: Float,
+  borderRadiusPx: Float,
+  centerLat: Double,
+  centerLng: Double,
+  zoom: Double,
+  basemap: String,
+) = Unit
+
+internal actual fun hideLayerEditorBasemap() = Unit
