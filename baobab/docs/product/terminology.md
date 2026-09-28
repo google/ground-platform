@@ -70,7 +70,6 @@ flowchart TD
    * Typical field defaults: `○` (Pending) $\rightarrow$ `◐` (In Progress) $\rightarrow$ `✓` (Completed).
    * Typical desk-to-field defaults: `○` (Unanalyzed) $\rightarrow$ `✓` (Consensus Reached) $\rightarrow$ `!` (Flagged for Field Validation) $\rightarrow$ `?` (Disputed / Needs SME Review).
 
----
 
 ## Cross-Platform Terminology Parity Matrix
 
@@ -97,15 +96,14 @@ The following matrix maps Ground 2.0 terminology against industry-standard data 
 | **Multi-Analyst Quality Control** | **Consensus & Disagreement Review** | **Convergence of Evidence** (Peer Consensus & SoT) | *(External analysis)* | *(N/A)* | *(N/A)* | *(N/A)* | **Data Quality Assessment** | *(N/A)* | Multi-`SubmissionRecord` consensus evaluation |
 | **Concurrent Disconnected Edits** | **Offline Sync Conflict Queue** | *(N/A — Web only)* | **Server Conflict Resolution** | *(N/A)* | *(N/A)* | *(N/A)* | *(N/A)* | *(N/A)* | Operational write-collision queue |
 
----
 
 ## Detailed Clarifications of Common Misalignments
 
-### 1. "Survey" vs. "Project" vs. "Form"
+### "Survey" vs. "Project" vs. "Form"
 * **The Confusion**: In Collect Earth Online (CEO) and KoboToolbox, the root container is called a **Project**, and the questionnaire inside is called a **Survey**. In Ground 2.0 (and Open Foris Arena / ArcGIS Survey123), the root container is a **Survey**, and the questionnaire inside is a **Form** (`FormDef`).
 * **Resolution**: Ground 2.0 maintains **Survey** as the container and **Form** as the questionnaire. Migration tools and UI onboarding from CEO will explicitly label this: *"Import CEO Project as a Ground Survey"*, where CEO's "Survey Questions" become a Form within the survey.
 
-### 2. "Map layers" and "Data tables"
+### "Map layers" and "Data tables"
 * **The Confusion**: Ground 1.0 used "Data collection sites", and early 2.0 drafts used "Tables" or "Entities" interchangeably for both non-spatial rosters and map polygons.
 * **Resolution**:
   * We use **"Map layers"** consistently across both the Organizer Survey Designer and the Mobile UI. In the designer, **Map layers** configure map display and symbology, while **Data tables** manage non-spatial lookup registries.
@@ -115,23 +113,23 @@ The following matrix maps Ground 2.0 terminology against industry-standard data 
     3. **Places**: Regional geographic places and landmarks.
   * Headings omit trailing type chips or badges (e.g. no trailing "Layer", "Table", or "Mapbox" labels), and category filter chips are omitted from the search bar to keep multi-layer search direct and uncluttered. Sections without entries (such as "Data tables" when none are configured or no matches exist) are omitted from the list view rather than rendering empty placeholders. On mobile, data collectors toggle map layer visibility in the map drawer and search across all datasets seamlessly.
 
-### 3. Survey Area
+### Survey Area
 * Ground surveys use **"Survey Area"** everywhere to describe the geographic scope (place name and bounding coordinates, e.g. "Nandi County, Kenya"), ensuring collectors are not artificially boxed into hard polygon perimeters. The term **Area of Interest (AOI)** is reserved strictly for the mathematical polygon bounding the probabilistic sample design generator.
 
-### 4. Time Series & Imagery
+### Time Series & Imagery
 * Instead of proprietary branding like "Geo-Dash", the historical satellite and spectral index analysis panel is simply called **"Time Series & Imagery"**.
 
-### 5. Sub-Plot Samples: Relational Tables vs. New Primitives
+### Sub-Plot Samples: Relational Tables vs. New Primitives
 * **The Confusion**: CEO uses a two-tier spatial hierarchy (Plot $\rightarrow$ Sample points) where fractional land cover (e.g. 70% Forest, 30% Agriculture) is calculated from sample points.
 * **Resolution**: Ground 2.0 avoids adding specialized "SubPlot" primitives to Protocol Buffers. Instead, the Sample Designer generates two standard linked tables: a parent `plots` layer and a child `samples` layer (with each sample point having a `plot_id` property). On the mobile form runner, sub-plots are simply handled as an XForms `begin repeat` loop over the points.
 
-### 6. Multi-Interpreter Disagreement vs. Offline Sync Conflict
+### Multi-Interpreter Disagreement vs. Offline Sync Conflict
 * **The Confusion**: Early concept briefs suggested reusing the "Conflict Review Queue" for photo-interpretation disagreement.
 * **Resolution**:
   * **Offline Sync Conflicts**: Accidental concurrent writes when two offline field devices edit the same entity's attributes. Resolved operationally by picking an authoritative edit.
   * **Consensus & Disagreement Review**: An intentional statistical workflow where multiple analysts independently evaluate the same plot. The 1:N relationship between an entity and submissions naturally stores every analyst's submission independently. The backend calculates agreement metrics (Peer Consensus and Source-of-Truth comparison) and routes disputed plots to a supervisor adjudication queue.
 
-### 7. Survey Lifecycle States
+### Survey Lifecycle States
 To align with both CEO and enterprise field governance, Ground 2.0 adopts a 5-stage lifecycle:
 1. **`DRAFT`**: Authoring, logic testing in live preview, not visible for field synchronization.
 2. **`PUBLISHED`**: Active and live for data collection (mobile sync and web interpretation).

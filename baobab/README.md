@@ -104,7 +104,7 @@ for **Ground 2.0**.
 
 ## Mental Model & Terminology Mapping to XForms
 
-### 1. The Core Mental Model
+### The Core Mental Model
 
 -   **Tables = Current State (Persistent Master Data)**: Flat, stateful master
     datasets (`EntityDatasetDef` / `EntityRecord`) where each row represents a
@@ -114,7 +114,7 @@ for **Ground 2.0**.
     (`SubmissionRecord` / `RecordInstance`) are immutable event records
     preserving GPS, timestamps, and raw inputs.
 
-### 2. For Survey Organizers / Form Designers: Forms & Tables
+### For Survey Organizers / Form Designers: Forms & Tables
 
 Organizers define how a form interacts with master tables using standard XLSForm
 syntax:
@@ -147,7 +147,7 @@ syntax:
     -   *XLSForm Mapping*: Standard `survey` and `choices` sheets only. No
         `entities` sheet.
 
-### 3. For Data Collectors (Map UI & Field Workflow)
+### For Data Collectors (Map UI & Field Workflow)
 
 The map layer drawer displays geospatial entity layers rather than nesting
 layers under form menus:

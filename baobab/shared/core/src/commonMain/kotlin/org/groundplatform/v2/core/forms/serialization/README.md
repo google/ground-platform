@@ -23,7 +23,6 @@ deserializes [XForms](https://getodk.github.io/xforms-spec/) XML documents
 from the **ProtoForms** protocol buffer model (generated with
 [Square Wire](https://square.github.io/wire/)).
 
---------------------------------------------------------------------------------
 
 ## Overview
 
@@ -41,7 +40,6 @@ representations defined in the `groundplatform.v2.forms` schema:
     values, coordinates/geometries, select lists, and metadata—to and from
     `groundplatform.v2.forms.RecordInstance` messages.
 
---------------------------------------------------------------------------------
 
 ## Supported Targets
 
@@ -56,7 +54,6 @@ Target     | Source Set   | Description
 **WasmJS** | `wasmJsMain` | WebAssembly (Browser/Node)
 **iOS**    | `iosMain`    | Apple iOS (Arm64 & X64)
 
---------------------------------------------------------------------------------
 
 ## Usage
 
@@ -64,7 +61,7 @@ All serialization and deserialization entry points are available on the
 `XFormsXmlSerializer` singleton object in package
 `org.groundplatform.v2.core.forms.serialization`.
 
-### 1. Form Definitions (`FormDef`)
+### Form Definitions (`FormDef`)
 
 Deserialize an XForms `<h:html>` XML document into a `FormDef` protobuf
 object and serialize it back to XML:
@@ -116,7 +113,7 @@ val serializedFormXml: String = XFormsXmlSerializer.serialize(
 )
 ```
 
-### 2. Submission Instances (`RecordInstance`)
+### Submission Instances (`RecordInstance`)
 
 Deserialize an XForms `<data>` submission XML string into a `RecordInstance`
 protobuf object and serialize it back to XML:
@@ -149,7 +146,6 @@ val serializedSubmissionXml: String = XFormsXmlSerializer.serialize(
 )
 ```
 
---------------------------------------------------------------------------------
 
 ## Building and Running Tests
 

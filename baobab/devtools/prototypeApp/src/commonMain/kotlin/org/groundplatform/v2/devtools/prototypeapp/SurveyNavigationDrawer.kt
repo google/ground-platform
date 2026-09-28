@@ -79,6 +79,7 @@ import androidx.compose.material3.AssistChip
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -1093,37 +1094,8 @@ internal fun ManageOfflineMapsSubScreen(state: PrototypeAppState) {
       }
     }
 
-    Card(
-      modifier = Modifier.fillMaxWidth(),
-      shape = MaterialTheme.shapes.medium,
-      colors =
-        CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer),
-    ) {
-      Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        Row(
-          verticalAlignment = Alignment.CenterVertically,
-          horizontalArrangement = Arrangement.spacedBy(5.dp),
-        ) {
-          Icon(
-            imageVector = Icons.Default.CheckCircle,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.onSecondaryContainer,
-            modifier = Modifier.size(15.dp),
-          )
-          Text(
-            text = "Device Storage Safeguard Active (4.2 GB Available)",
-            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-            color = MaterialTheme.colorScheme.onSecondaryContainer,
-          )
-        }
-        Text(
-          text =
-            "Pre-cached vector & satellite raster tiles across zoom levels 10–19. Downloads automatically pause if device storage drops below 500 MB.",
-          style = MaterialTheme.typography.labelSmall,
-          color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.85f),
-        )
-      }
-    }
+    // Clear, user-friendly device storage breakdown chart
+    DeviceStorageBreakdownCard(storage = state.deviceStorageInfo)
 
     state.offlineTilePackages.forEach { pkg ->
       OutlinedCard(
@@ -1151,7 +1123,7 @@ internal fun ManageOfflineMapsSubScreen(state: PrototypeAppState) {
           }
           if (pkg.isDownloaded) {
             FilledTonalButton(
-              onClick = { state.toggleOfflineTilePackage(pkg.id) },
+              onClick = { state.promptRemoveOfflineTilePackage(pkg.id) },
               shape = MaterialTheme.shapes.large,
             ) {
               Icon(
@@ -1161,7 +1133,7 @@ internal fun ManageOfflineMapsSubScreen(state: PrototypeAppState) {
               )
               Spacer(modifier = Modifier.width(4.dp))
               Text(
-                text = "Cached",
+                text = "Downloaded",
                 style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
               )
             }
@@ -1185,7 +1157,61 @@ internal fun ManageOfflineMapsSubScreen(state: PrototypeAppState) {
         }
       }
     }
+
+    if (state.pendingRemovalTilePackageId != null) {
+      RemoveOfflineTilePackageConfirmationDialog(state)
+    }
   }
+}
+
+/**
+ * Confirmation prompt dialog shown before removing an offline map tile package from the device.
+ */
+@Composable
+private fun RemoveOfflineTilePackageConfirmationDialog(state: PrototypeAppState) {
+  val packageId = state.pendingRemovalTilePackageId ?: return
+  val pkg = state.offlineTilePackages.firstOrNull { it.id == packageId } ?: return
+
+  GroundAlertDialogOverlay(
+    onDismissRequest = { state.dismissRemoveOfflineTilePackage() },
+    icon = {
+      Icon(
+        imageVector = Icons.Default.CloudOff,
+        contentDescription = null,
+        tint = MaterialTheme.colorScheme.error,
+      )
+    },
+    title = {
+      Text(
+        text = "Remove offline map?",
+        style = MaterialTheme.typography.titleMedium,
+        fontWeight = FontWeight.Bold,
+      )
+    },
+    text = {
+      Text(
+        text =
+          "Removing \"${pkg.regionName}\" (${pkg.tileTypeLabel}) will free ${pkg.sizeLabel} on this device. You will need an internet connection to download and view these map tiles offline again.",
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+      )
+    },
+    confirmButton = {
+      Button(
+        onClick = { state.confirmRemoveOfflineTilePackage() },
+        colors =
+          ButtonDefaults.buttonColors(
+            containerColor = MaterialTheme.colorScheme.error,
+            contentColor = MaterialTheme.colorScheme.onError,
+          ),
+      ) {
+        Text("Remove", fontWeight = FontWeight.Bold)
+      }
+    },
+    dismissButton = {
+      OutlinedButton(onClick = { state.dismissRemoveOfflineTilePackage() }) { Text("Cancel") }
+    },
+  )
 }
 
 /**
@@ -1195,4 +1221,233 @@ internal fun ManageOfflineMapsSubScreen(state: PrototypeAppState) {
 @Composable
 internal fun SurveySettingsSubScreen(state: PrototypeAppState) {
   SettingsScreen(state = state)
+}
+
+/**
+ * Clear, user-friendly device storage card displaying:
+ * - Total device storage capacity
+ * - Free / available device storage
+ * - Storage occupied by downloaded imagery (raster and vector basemap tiles)
+ * - Space taken up by data (surveys, forms, entities, submissions, mutations)
+ * - Visual stacked horizontal proportional chart bar with color-coded legend
+ */
+@Composable
+fun DeviceStorageBreakdownCard(
+  storage: DeviceStorageInfo,
+  modifier: Modifier = Modifier,
+) {
+  Card(
+    modifier = modifier.fillMaxWidth(),
+    shape = MaterialTheme.shapes.medium,
+    colors =
+      CardDefaults.cardColors(
+        containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+      ),
+    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+  ) {
+    Column(
+      modifier = Modifier.padding(14.dp),
+      verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+      // Header row: Icon, Title & Free / Total headline
+      Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+      ) {
+        Row(
+          verticalAlignment = Alignment.CenterVertically,
+          horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+          Icon(
+            imageVector = Icons.Default.CheckCircle,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.size(18.dp),
+          )
+          Text(
+            text = "Device Storage",
+            style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+            color = MaterialTheme.colorScheme.onSurface,
+          )
+        }
+        Text(
+          text = "${storage.freeStorageLabel} free of ${storage.totalStorageLabel}",
+          style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
+          color = MaterialTheme.colorScheme.primary,
+        )
+      }
+
+      // Proportional stacked horizontal bar chart
+      DeviceStorageBreakdownChart(
+        storage = storage,
+        modifier = Modifier.fillMaxWidth().height(16.dp),
+      )
+
+      // Storage breakdown legend items (Downloaded imagery, Submitted forms, photos, etc., Free, and Other)
+      Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+      ) {
+        StorageLegendRowItem(
+          color = StorageChartColors.downloadedImageryColor,
+          label = "Downloaded imagery",
+          value = storage.downloadedImageryStorageLabel,
+        )
+        StorageLegendRowItem(
+          color = StorageChartColors.dataColor,
+          label = "Submitted forms, photos, etc.",
+          value = storage.dataStorageLabel,
+        )
+        StorageLegendRowItem(
+          color = StorageChartColors.otherColor,
+          label = "System & other apps",
+          value = storage.otherUsedStorageLabel,
+        )
+        StorageLegendRowItem(
+          color = StorageChartColors.freeColor,
+          label = "Free storage",
+          value = storage.freeStorageLabel,
+        )
+      }
+
+      // Safeguard threshold reassurance notice
+      Text(
+        text =
+          "Offline downloads pause automatically if device storage drops below 500 MB to protect system stability.",
+        style = MaterialTheme.typography.labelSmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+      )
+    }
+  }
+}
+
+/**
+ * Stacked horizontal proportional bar chart illustrating device storage distribution.
+ */
+@Composable
+fun DeviceStorageBreakdownChart(
+  storage: DeviceStorageInfo,
+  modifier: Modifier = Modifier,
+) {
+  val imageryColor = StorageChartColors.downloadedImageryColor
+  val dataColor = StorageChartColors.dataColor
+  val otherColor = StorageChartColors.otherColor
+  val freeColor = StorageChartColors.freeColor
+
+  val imageryFrac = storage.imageryFraction
+  val dataFrac = storage.dataFraction
+  val otherFrac = storage.otherUsedFraction
+  val freeFrac = storage.freeFraction
+
+  Box(
+    modifier = modifier.clip(RoundedCornerShape(8.dp)).background(freeColor),
+  ) {
+    Canvas(modifier = Modifier.fillMaxSize()) {
+      val canvasWidth = size.width
+      val canvasHeight = size.height
+
+      var currentX = 0f
+
+      // 1. Downloaded Imagery slice
+      val imageryWidth = canvasWidth * imageryFrac
+      if (imageryWidth > 0f) {
+        drawRect(
+          color = imageryColor,
+          topLeft = Offset(currentX, 0f),
+          size = androidx.compose.ui.geometry.Size(imageryWidth, canvasHeight),
+        )
+        currentX += imageryWidth
+      }
+
+      // 2. Survey & form Data slice
+      val dataWidth = canvasWidth * dataFrac
+      if (dataWidth > 0f) {
+        drawRect(
+          color = dataColor,
+          topLeft = Offset(currentX, 0f),
+          size = androidx.compose.ui.geometry.Size(dataWidth, canvasHeight),
+        )
+        currentX += dataWidth
+      }
+
+      // 3. System & Other apps slice
+      val otherWidth = canvasWidth * otherFrac
+      if (otherWidth > 0f) {
+        drawRect(
+          color = otherColor,
+          topLeft = Offset(currentX, 0f),
+          size = androidx.compose.ui.geometry.Size(otherWidth, canvasHeight),
+        )
+        currentX += otherWidth
+      }
+
+      // 4. Remaining width is Free storage
+      val freeWidth = (canvasWidth - currentX).coerceAtLeast(0f)
+      if (freeWidth > 0f) {
+        drawRect(
+          color = freeColor,
+          topLeft = Offset(currentX, 0f),
+          size = androidx.compose.ui.geometry.Size(freeWidth, canvasHeight),
+        )
+      }
+    }
+  }
+}
+
+/** Single color-coded legend entry for [DeviceStorageBreakdownCard]. */
+@Composable
+private fun StorageLegendRowItem(
+  color: Color,
+  label: String,
+  value: String,
+  modifier: Modifier = Modifier,
+) {
+  Row(
+    modifier = modifier.fillMaxWidth(),
+    verticalAlignment = Alignment.CenterVertically,
+    horizontalArrangement = Arrangement.spacedBy(8.dp),
+  ) {
+    Box(
+      modifier = Modifier.size(10.dp).clip(CircleShape).background(color),
+    )
+    Row(
+      modifier = Modifier.weight(1f),
+      horizontalArrangement = Arrangement.SpaceBetween,
+      verticalAlignment = Alignment.CenterVertically,
+    ) {
+      Text(
+        text = label,
+        style = MaterialTheme.typography.labelSmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        maxLines = 1,
+        softWrap = false,
+        overflow = TextOverflow.Ellipsis,
+        modifier = Modifier.weight(1f, fill = false),
+      )
+      Spacer(modifier = Modifier.width(8.dp))
+      Text(
+        text = value,
+        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+        color = MaterialTheme.colorScheme.onSurface,
+        maxLines = 1,
+        softWrap = false,
+      )
+    }
+  }
+}
+
+/** Semantic, high-contrast Material 3 harmonious colors for the device storage chart segments. */
+internal object StorageChartColors {
+  /** Downloaded satellite & vector map imagery: deep teal/blue (`#0288D1`). */
+  val downloadedImageryColor: Color = Color(0xFF0288D1)
+
+  /** Survey definitions, master data & submissions: forest green (`#2E7D32`). */
+  val dataColor: Color = Color(0xFF2E7D32)
+
+  /** OS system files and other applications: slate gray (`#9E9E9E`). */
+  val otherColor: Color = Color(0xFF9E9E9E)
+
+  /** Free / available device storage: light neutral tint (`#E0E0E0`). */
+  val freeColor: Color = Color(0xFFE0E0E0)
 }

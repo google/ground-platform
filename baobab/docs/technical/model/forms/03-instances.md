@@ -138,7 +138,6 @@ Every primary instance includes a metadata block for tracking:
 *   `audit`: Client audit log reference.
 *   `entity`: Entity create/update declarations (see [Entities](#entities)).
 
---------------------------------------------------------------------------------
 
 ## Secondary Instances
 

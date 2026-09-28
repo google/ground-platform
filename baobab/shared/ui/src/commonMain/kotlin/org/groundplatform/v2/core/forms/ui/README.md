@@ -26,9 +26,8 @@ remaining completely decoupled from platform-specific navigation frameworks so
 that the same components can be rendered full-screen on a mobile device or
 embedded inside web developer tools such as `devtools/formdebugger`.
 
---------------------------------------------------------------------------------
 
-## 1. Architectural Design
+## Architectural Design
 
 ```
 ┌────────────────────────────────────────────────────────────────────────────┐
@@ -167,9 +166,8 @@ embedded inside web developer tools such as `devtools/formdebugger`.
 | `CONTROL_TRIGGER`         | `TriggerControlWidget` | Confirmation button     |
 :                           :                        : toggling `"OK"` value   :
 
---------------------------------------------------------------------------------
 
-## 2. Usage Guide
+## Usage Guide
 
 ### A. Full-Screen Mobile Usage (Android / iOS / Web)
 
@@ -258,9 +256,8 @@ controller.setLanguage("fr")
 val result = controller.finalizeForm()
 ```
 
---------------------------------------------------------------------------------
 
-## 3. Building and Running Tests
+## Building and Running Tests
 
 From `shared/ui/`:
 

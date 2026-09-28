@@ -17,11 +17,15 @@ package org.groundplatform.v2.devtools.prototypeapp
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandHorizontally
+import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -40,8 +44,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
-import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -187,10 +191,11 @@ internal fun buildDashboardDataTables(
 private val DashboardSidePanelWidth = 400.dp
 private val DashboardFirstColumnWidth = 200.dp
 private val DashboardColumnWidth = 160.dp
+private val DashboardTableTabsHeight = 48.dp
 
 /**
  * Main page of the Ground web dashboard (`#dashboard`).
- * - **Left**: The mobile bottom sheet content ([SurveyPersistentBottomSheetContent]) as a fixed side
+ * - **Left**: The mobile bottom sheet content ([SurveyPersistentBottomSheetContent]) as a collapsible side
  *   panel: the searchable list of map features and places, or the selected map feature's details and
  *   `1:N` submissions.
  * - **Main area**: The live survey map ([MapboxBasemapView]).
@@ -198,18 +203,42 @@ private val DashboardColumnWidth = 160.dp
  *   ([DashboardDataTablesPanel]) for its map layer and linked Form submissions.
  */
 @Composable
-internal fun WebDashboardPage(state: PrototypeAppState) {
+internal fun WebDashboardPage(
+  state: PrototypeAppState,
+  onOpenSurveyEditor: () -> Unit = {},
+  onSignOut: () -> Unit = { state.signOut() },
+) {
   val activeQrEntity = state.activeQrCodeEntity
   val activePdfSheet = state.activeSharedPdfSheet
+  val isSidePanelExpanded = state.isSidePanelExpanded
 
   Box(modifier = Modifier.fillMaxSize()) {
-    Row(modifier = Modifier.fillMaxSize()) {
-      DashboardSidePanel(
+    Column(modifier = Modifier.fillMaxSize()) {
+      WebTopToolbar(
         state = state,
-        modifier = Modifier.width(DashboardSidePanelWidth).fillMaxHeight(),
+        onOpenSurveyEditor = onOpenSurveyEditor,
+        onSignOut = onSignOut,
       )
-      VerticalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-      DashboardMapArea(state = state, modifier = Modifier.weight(1f).fillMaxHeight())
+      HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+      Row(modifier = Modifier.fillMaxWidth().weight(1f)) {
+        AnimatedVisibility(
+          visible = isSidePanelExpanded,
+          enter = expandHorizontally(),
+          exit = shrinkHorizontally(),
+        ) {
+          Row(modifier = Modifier.fillMaxHeight()) {
+            DashboardSidePanel(
+              state = state,
+              modifier = Modifier.width(DashboardSidePanelWidth).fillMaxHeight(),
+            )
+            VerticalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+          }
+        }
+        DashboardMapArea(
+          state = state,
+          modifier = Modifier.weight(1f).fillMaxHeight(),
+        )
+      }
     }
 
     if (activeQrEntity != null) {
@@ -221,48 +250,21 @@ internal fun WebDashboardPage(state: PrototypeAppState) {
   }
 }
 
-/** Left-hand panel: survey header plus the shared bottom sheet content in side-panel mode. */
+/**
+ * Left-hand panel: shared bottom sheet content (searchable feature list or selected entity details)
+ * in side-panel mode.
+ */
 @Composable
-private fun DashboardSidePanel(state: PrototypeAppState, modifier: Modifier = Modifier) {
+private fun DashboardSidePanel(
+  state: PrototypeAppState,
+  modifier: Modifier = Modifier,
+) {
   Surface(modifier = modifier, color = MaterialTheme.colorScheme.surfaceContainerLow) {
-    Column(modifier = Modifier.fillMaxSize()) {
-      Column(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
-        verticalArrangement = Arrangement.spacedBy(2.dp),
-      ) {
-        Text(
-          text = state.activeSurvey.title,
-          style = MaterialTheme.typography.titleMedium,
-          fontWeight = FontWeight.Bold,
-          maxLines = 1,
-          overflow = TextOverflow.Ellipsis,
-        )
-        Row(
-          verticalAlignment = Alignment.CenterVertically,
-          horizontalArrangement = Arrangement.spacedBy(4.dp),
-        ) {
-          Icon(
-            imageVector = Icons.Default.LocationOn,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.size(14.dp),
-          )
-          Text(
-            text = state.activeSurvey.location,
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-          )
-        }
-      }
-      HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-      SurveyPersistentBottomSheetContent(
-        state = state,
-        modifier = Modifier.fillMaxWidth().weight(1f).padding(top = 8.dp),
-        isSidePanel = true,
-      )
-    }
+    SurveyPersistentBottomSheetContent(
+      state = state,
+      modifier = Modifier.fillMaxSize().padding(top = 4.dp),
+      isSidePanel = true,
+    )
   }
 }
 
@@ -270,9 +272,34 @@ private fun DashboardSidePanel(state: PrototypeAppState, modifier: Modifier = Mo
 @Composable
 private fun DashboardMapArea(state: PrototypeAppState, modifier: Modifier = Modifier) {
   val selectedEntity = state.selectedEntity
+  var isTableExpanded by remember(selectedEntity?.id) { mutableStateOf(selectedEntity != null) }
 
   BoxWithConstraints(modifier = modifier) {
     val expandedTableHeight = (maxHeight * 0.42f).coerceAtLeast(160.dp)
+
+    // When an entity is selected, automatically expand the bottom table and recenter the entity
+    // adjusting for the reduced visible area of the viewport above the expanded table.
+    LaunchedEffect(selectedEntity?.id, state.entitySelectionEpoch) {
+      if (selectedEntity != null) {
+        isTableExpanded = true
+        val tablePanelHeight = expandedTableHeight + DashboardTableTabsHeight
+        val visibleViewportHeight = (maxHeight - tablePanelHeight).coerceAtLeast(0.dp)
+        val targetScreenY =
+          if (maxHeight > 0.dp) {
+            ((visibleViewportHeight / 2) / maxHeight).coerceIn(0.10f, 0.50f)
+          } else {
+            0.50f
+          }
+        state.recenterMapOnEntity(selectedEntity, targetScreenY)
+
+        val (lng, lat) = state.resolveEntityLngLat(selectedEntity)
+        recenterPlatformMapboxOnEntity(
+          lng = lng,
+          lat = lat,
+          bottomPaddingCssPx = tablePanelHeight.value,
+        )
+      }
+    }
 
     MapboxBasemapView(
       state = state,
@@ -301,6 +328,9 @@ private fun DashboardMapArea(state: PrototypeAppState, modifier: Modifier = Modi
           state = state,
           entity = selectedEntity,
           expandedTableHeight = expandedTableHeight,
+          isExpanded = isTableExpanded,
+          onToggleExpand = { isTableExpanded = !isTableExpanded },
+          onExpand = { isTableExpanded = true },
         )
       }
     }
@@ -308,8 +338,8 @@ private fun DashboardMapArea(state: PrototypeAppState, modifier: Modifier = Modi
 }
 
 /**
- * Collapsible panel over the bottom of the map with one tab per [DashboardDataTable]. Collapsed, it
- * shows only the tab strip; selecting a tab or the expand button reveals the table.
+ * Collapsible panel over the bottom of the map with one tab per [DashboardDataTable]. When an
+ * entity is selected, it expands automatically to show its map layer and linked Form submissions.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -317,9 +347,11 @@ private fun DashboardDataTablesPanel(
   state: PrototypeAppState,
   entity: GeospatialEntityItem,
   expandedTableHeight: Dp,
+  isExpanded: Boolean,
+  onToggleExpand: () -> Unit,
+  onExpand: () -> Unit,
   modifier: Modifier = Modifier,
 ) {
-  var isExpanded by remember { mutableStateOf(false) }
   var selectedTableId by remember { mutableStateOf<String?>(null) }
 
   val allEntities = state.entities
@@ -371,12 +403,6 @@ private fun DashboardDataTablesPanel(
           modifier = Modifier.size(18.dp),
         )
         Spacer(modifier = Modifier.width(8.dp))
-        Text(
-          text = "Data tables",
-          style = MaterialTheme.typography.titleSmall,
-          fontWeight = FontWeight.Bold,
-        )
-        Spacer(modifier = Modifier.width(12.dp))
         PrimaryScrollableTabRow(
           selectedTabIndex = selectedIndex,
           modifier = Modifier.weight(1f),
@@ -389,7 +415,7 @@ private fun DashboardDataTablesPanel(
               selected = index == selectedIndex,
               onClick = {
                 selectedTableId = tab.id
-                isExpanded = true
+                onExpand()
               },
               text = {
                 Text(
@@ -401,11 +427,11 @@ private fun DashboardDataTablesPanel(
             )
           }
         }
-        IconButton(onClick = { isExpanded = !isExpanded }) {
+        IconButton(onClick = onToggleExpand) {
           Icon(
             imageVector =
               if (isExpanded) Icons.Default.KeyboardArrowDown else Icons.Default.KeyboardArrowUp,
-            contentDescription = if (isExpanded) "Collapse data tables" else "Expand data tables",
+            contentDescription = if (isExpanded) "Collapse table" else "Expand table",
           )
         }
       }

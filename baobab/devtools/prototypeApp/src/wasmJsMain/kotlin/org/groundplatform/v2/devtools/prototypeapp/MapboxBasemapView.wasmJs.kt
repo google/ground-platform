@@ -185,3 +185,19 @@ internal actual fun flyPlatformMapboxToPlace(
 internal actual fun clearPlatformMapboxPlace() {
   jsClearMapboxPlace()
 }
+
+@JsFun(
+  "(lng, lat, bottomPaddingCssPx) => { " +
+    "if (window.GroundMapboxBridge && window.GroundMapboxBridge.recenterOnEntity) { " +
+    "window.GroundMapboxBridge.recenterOnEntity(lng, lat, bottomPaddingCssPx); " +
+    "} }"
+)
+private external fun jsRecenterMapboxOnEntity(lng: Double, lat: Double, bottomPaddingCssPx: Float)
+
+internal actual fun recenterPlatformMapboxOnEntity(
+  lng: Double,
+  lat: Double,
+  bottomPaddingCssPx: Float,
+) {
+  jsRecenterMapboxOnEntity(lng, lat, bottomPaddingCssPx)
+}

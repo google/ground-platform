@@ -245,7 +245,7 @@ While the current Ground 2.0 Product Requirements Document ([`prd.md`](prd.md)) 
 
 ### Detailed Product Requirements for the Top User Workflow Deltas
 
-#### 1. Within-Plot Sample Point Grids & Map-Driven Labeling
+#### Within-Plot Sample Point Grids & Map-Driven Labeling
 In land-use and forest inventories, a sample plot (such as a half-hectare or one-hectare square) rarely consists of a single uniform land cover. Photo-interpreters need to estimate what percentage of the plot is covered by trees, shrubs, crops, roads, or water.
 * **User Experience Requirement**:
   * When setting up a visual interpretation survey, the organizer can choose whether each plot is evaluated as a **Whole Plot** or subdivided into **Sub-Plot Sample Points** (e.g., a $3 \times 3$, $5 \times 5$, or $7 \times 7$ grid of internal points, random internal points, or user-drawn sub-features).
@@ -253,14 +253,14 @@ In land-use and forest inventories, a sample plot (such as a half-hectare or one
   * Selected points immediately turn the color of that answer choice on the map, and the cursor automatically advances to the next unlabeled sample point in the plot.
   * When all sample points in the plot are labeled, the platform automatically computes the plot-level fractional cover percentages (e.g., *68% Closed Forest, 20% Shade Cocoa, 12% Bare Soil*) for downstream reporting and field comparison.
 
-#### 2. Non-Destructive Plot Flagging & Confidence Handoff
+#### Non-Destructive Plot Flagging & Confidence Handoff
 In Collect Earth Online today, if an interpreter spends three minutes analyzing a difficult plot and decides to flag it, the system erases all of their answers on that plot. When integrating with mobile field teams in Ground 2.0, throwing away the desk analyst's partial observations deprives the field crew of critical context.
 * **User Experience Requirement**:
   * Every visual interpretation form includes a built-in **Confidence Slider (`0–100%`)** and a **Flag Plot** action.
   * When flagging a plot, the interpreter selects the destination (**Flag for Supervisor / SME Review** vs. **Flag for Mobile Field Validation**) and provides a brief note explaining what is uncertain (e.g., *"Cloud shadow on northeast quadrant"* or *"Cannot distinguish coffee/cocoa understory from bush fallow"*).
   * Any preliminary answers entered by the interpreter are **saved alongside the flag**, and are displayed as a read-only summary banner on the supervisor's review screen and on the field ranger's mobile device.
 
-#### 3. Multi-Interpreter Consensus vs. Offline Sync Conflict Resolution
+#### Multi-Interpreter Consensus vs. Offline Sync Conflict Resolution
 The current Ground 2.0 PRD proposes reusing the **Offline Sync Conflict Queue** to handle disagreement between multiple photo-interpreters. From a user's perspective, however, an offline sync conflict and a multi-interpreter QA/QC review are fundamentally different:
 * An **Offline Sync Conflict** happens accidentally when two field rangers edit the same property of a site while disconnected, and is resolved by picking one edit (*Latest Timestamp Wins*).
 * A **Multi-Interpreter QA/QC Review** is an intentional statistical workflow where an organizer assigns 3 or 5 analysts to independently classify the same plot online so the platform can measure agreement and compute a consensus label. If *Latest Timestamp Wins* were applied, the 3rd interpreter's submission would simply overwrite the 1st and 2nd interpreters' work.
@@ -270,13 +270,13 @@ The current Ground 2.0 PRD proposes reusing the **Offline Sync Conflict Queue** 
     * **Full Agreement**: The consensus classification is automatically promoted as the verified desk label for the plot.
     * **Disagreement Above Threshold**: The plot is automatically routed to the **Disagreement Review Queue** (for side-by-side supervisor adjudication) or—if configured by the organizer—automatically transitioned to **Needs Field Validation** so a mobile crew can settle the tie on the ground.
 
-#### 4. Scaling to National Inventories with Selective Mobile Sync
+#### Scaling to National Inventories with Selective Mobile Sync
 National remote-sensing campaigns operate at a vastly larger site count than purely mobile surveys: a national grid routinely contains **25,000 to 100,000 sample plots** interpreted by **50 to 300 analysts**, whereas mobile field teams may only physically visit **1% to 5%** of those plots (the ones flagged for ambiguity or selected for ground-truth calibration).
 * **User Experience Requirement**:
   * Allow visual interpretation campaigns in Ground 2.0 to host up to **100,000+ sample plots** and **500+ collaborators** in the Web Console.
   * Ensure the Mobile App does **not** attempt to download all 100,000 desk plots to a ranger's phone; instead, mobile devices automatically sync only the plots assigned to field validation (e.g., plots marked *Needs Field Validation* within the ranger's geographic region), keeping offline mobile sync fast and lightweight.
 
-#### 5. Inline Dockable Geo-Dash with One-Click Historical Imagery
+#### Inline Dockable Geo-Dash with One-Click Historical Imagery
 In Collect Earth Online, Geo-Dash opens as a separate pop-up browser window—which is frequently blocked by modern browsers and difficult to manage on single-monitor laptops.
 * **User Experience Requirement**:
   * Integrate **Geo-Dash** directly into the Ground 2.0 Web Console as a collapsible, resizable **Time-Series & Degradation Drawer** (with an option to pop it out onto a second monitor if desired).

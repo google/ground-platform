@@ -42,7 +42,6 @@ To keep the user experience simple and unified:
 3.  **Automatic Schema Synchronization**: As questions are added, renamed, or modified in the Survey Designer, Ground automatically keeps the backing `EntityDatasetDef` schema and the form's `save_to` mappings in sync behind the scenes.
 4.  **Submissions Live in the Entity History Timeline**: Every completed form still produces an immutable, timestamped `SubmissionRecord` linked to the Entity's UUID (`entity_id`). Tapping an Entity on the map opens its **current state** (from the Entity properties) alongside its chronological **Submission History** timeline and available follow-up forms (`[ + Inspect Site ]`, `[ + Update Info ]`).
 
----
 
 ## Prior Art Across the XForms Ecosystem
 
@@ -59,7 +58,6 @@ Ground 2.0's automatic Entity provisioning and schema synchronization builds dir
 
 <!-- mdformat on -->
 
----
 
 ## Terminology & XLSForm Mapping
 
@@ -100,13 +98,12 @@ Under the hood, every Ground 2.0 form interaction with a Site Table maps to stan
     *   *User Experience*: Form registers or updates non-spatial entities (e.g., a cooperative member roster without coordinates).
     *   *XLSForm Mapping*: Same `entities` + `save_to` structure, backed by an `EntityDatasetDef` with `type: TABULAR` (managed in the Data tables view rather than rendered as a map layer).
 
----
 
 ## Default Survey Designer Behavior & Schema Synchronization
 
 To make the Entity-only map seamless for non-technical organizers, the Web Console Survey Designer automates entity provisioning and schema synchronization:
 
-### 1. Automatic Entity Dataset Creation (`1 Form → 1 Entity Dataset` Default)
+### Automatic Entity Dataset Creation (`1 Form → 1 Entity Dataset` Default)
 
 When an organizer creates the first form in a new survey (e.g., *"Tree Planting Registration"*):
 
@@ -119,7 +116,7 @@ When an organizer creates the first form in a new survey (e.g., *"Tree Planting 
 3.  **Bind Primary Geometry**: The form's primary spatial question (`geopoint`, `geotrace`, or `geoshape`) is automatically bound to `entity_saveto: "geometry"` and sets `EntityDatasetDef.geometry_type`.
 4.  **Bind Entity Label**: The first required text or select question (or a configurable title template such as `concat(${farmer_name}, ' - ', ${plot_code})`) is bound to `EntityDeclaration.label_expression`.
 
-### 2. Live Form-to-Entity Schema Synchronization
+### Live Form-to-Entity Schema Synchronization
 
 As the organizer edits the form in the Survey Designer, Ground keeps `EntityDatasetDef.properties` and `FieldBinding.entity_saveto` synchronized automatically:
 
@@ -134,13 +131,12 @@ As the organizer edits the form in the Survey Designer, Ground keeps `EntityData
 
 <!-- mdformat on -->
 
----
 
 ## Practical Edge Cases & Resolution Rules
 
 While automatic `1:1` form-to-entity syncing handles simple surveys effortlessly, the Survey Designer enforces five rules to handle advanced XForms patterns cleanly:
 
-### 1. Multi-Form Workflows (`CREATE` vs. `UPDATE` on Shared Site Layers)
+### Multi-Form Workflows (`CREATE` vs. `UPDATE` on Shared Site Layers)
 
 *   **Scenario**: An organizer adds a *second* form to a survey (e.g., Form 1 = *"Register Plot"*, Form 2 = *"Annual Coffee Audit"*). If Form 2 automatically created a *new* Entity Dataset, audits would appear on a separate map layer instead of updating the registered plots.
 *   **Resolution**:
@@ -148,14 +144,14 @@ While automatic `1:1` form-to-entity syncing handles simple surveys effortlessly
         1.  **Follow up on existing sites (Default for Form 2+)**: Configures `EntityDeclaration(dataset = existing_dataset_id, action = UPDATE)` (or `UPSERT` if field collectors can also register new plots in the same form), auto-inserts the hidden site selector (`select_one_from_file <dataset_id>.csv`), and syncs any *new* questions added in Form 2 as additional columns on the shared `EntityDatasetDef`.
         2.  **Create a new map layer / site type**: Creates a separate `EntityDatasetDef` and `LayerDef` (e.g., mapping *Processing Mills* on a separate layer from *Farm Plots*).
 
-### 2. Forms with Multiple Spatial Questions
+### Forms with Multiple Spatial Questions
 
 *   **Scenario**: A single form captures both a **Plot Boundary** (`geoshape`) and a **Farmhouse Entrance Point** (`geopoint`). An ODK Entity (`EntityRecord`) has a single primary `geometry` field used for map rendering.
 *   **Resolution**:
     *   The **first spatial question** in the form is designated as the **Primary Map Geometry** (`entity_saveto: "geometry"`), which drives the map pin/polygon on the main layer.
     *   Any additional spatial questions in the same form are saved as standard entity properties (`entity_saveto: "farmhouse_entrance"` with `TYPE_GEOPOINT`) and rendered inside the Entity's detail view when the site is selected—or can optionally be toggled as the Primary Map Geometry in the Question settings card.
 
-### 3. Repeat Groups (`<repeat>`), Notes, and Reserved Identifiers
+### Repeat Groups (`<repeat>`), Notes, and Reserved Identifiers
 
 *   **Scenario**: In the ODK Entities specification, parent Entity records are flat key-value structures; questions nested inside a `<repeat>` group (e.g., measuring 20 individual trees inside one plot) cannot `save_to` flat columns on the parent Entity without overwriting each iteration. Additionally, ODK Entities reserves `name`, `label`, and prefixes starting with `__` (`__id`, `__version`, `__trunkVersion`, `__branchId`).
 *   **Resolution**:
@@ -163,13 +159,13 @@ While automatic `1:1` form-to-entity syncing handles simple surveys effortlessly
     *   **Notes**: Read-only `note` elements are excluded from `entity_saveto` and `EntityDatasetDef`.
     *   **Identifier Sanitization**: If a form question is named `name`, `label`, or `__*`, the Designer automatically prefixes the generated `entity_saveto` property name (e.g., `field_name` or `field_label`) while binding `label` to `EntityDeclaration.label_expression`.
 
-### 4. Visual Workflow State Progression on the Map (`○` → `◐` → `✓`)
+### Visual Workflow State Progression on the Map (`○` → `◐` → `✓`)
 
 *   **Scenario**: Supervisors and field enumerators need immediate visual feedback on the map showing which preloaded sites are **Pending (`○`)**, **In Progress (`◐`)**, or **Completed (`✓`)**.
 *   **Resolution**:
     *   Because the map renders Entities styled via [`simplestyle-spec` properties](https://github.com/mapbox/simplestyle-spec) (`marker-symbol`, `marker-color`, `stroke`, `fill`), forms automatically include calculated `entity_saveto` bindings that update the target Entity's visual status property upon submission—transitioning a site from **Pending (`○`, `#E65100`)** to **In Progress (`◐`, `#F9AB00`)** to **Completed (`✓`, `#1E8E3E`)** completely offline.
 
-### 5. Importing External XLSForms (`.xlsx`) Without an `entities` Sheet
+### Importing External XLSForms (`.xlsx`) Without an `entities` Sheet
 
 *   **Scenario**: A partner imports an existing KoboToolbox or ODK XLSForm (`.xlsx`) that only contains `survey` and `choices` sheets (no `entities` sheet or `save_to` column).
 *   **Resolution**:

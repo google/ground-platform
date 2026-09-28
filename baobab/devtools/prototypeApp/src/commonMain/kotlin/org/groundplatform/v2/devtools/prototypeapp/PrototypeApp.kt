@@ -91,6 +91,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -127,15 +128,22 @@ import org.groundplatform.v2.devtools.prototypeapp.surveyeditor.SurveyEditorPage
 import org.groundplatform.v2.devtools.prototypeapp.surveyeditor.SurveyEditorState
 import org.jetbrains.compose.resources.stringResource
 
-/** Top-level pages of the prototype web app, addressable via the URL hash (e.g. `#survey-editor`). */
+/** Top-level pages of the prototype web app, addressable via the URL hash (e.g. `#dashboard`). */
 enum class PrototypeWorkbenchPage(val label: String, val hash: String) {
   MOBILE_PROTOTYPE("Mobile prototype", "prototype"),
   WEB_DASHBOARD("Web dashboard", "dashboard"),
   SURVEY_EDITOR("Survey editor", "survey-editor");
 
+  /** Whether this page belongs to the unified web application (dashboard + survey editor). */
+  val isWebApp: Boolean
+    get() = this == WEB_DASHBOARD || this == SURVEY_EDITOR
+
   companion object {
+    /** Top-level switcher tabs shown in the workbench top bar. */
+    val topBarPages: List<PrototypeWorkbenchPage> = listOf(MOBILE_PROTOTYPE, WEB_DASHBOARD)
+
     /** Legacy hashes kept working after pages were renamed. */
-    private val aliases = mapOf("form-editor" to SURVEY_EDITOR)
+    private val aliases = mapOf("form-editor" to SURVEY_EDITOR, "web" to WEB_DASHBOARD)
 
     fun fromHash(hash: String?): PrototypeWorkbenchPage {
       val h = hash?.removePrefix("#")
@@ -149,8 +157,9 @@ enum class PrototypeWorkbenchPage(val label: String, val hash: String) {
  *
  * Renders an interactive UX design workbench that embeds a live Mobile or Tablet device preview of
  * the Ground 2.0 Compose Multiplatform UI (`Sign In` -> `Terms of Service` -> `Download survey` ->
- * `Main Survey UI`), a [WebDashboardPage] with the survey map and data tables, plus a
- * [SurveyEditorPage] for designing surveys, Forms, Map layers, and Data tables.
+ * `Main Survey UI`) and a unified web application combining the [WebDashboardPage] (survey map and
+ * data tables) with the [SurveyEditorPage] (for designing surveys, Forms, Map layers, and Data
+ * tables).
  */
 @Composable
 fun PrototypeApp(
@@ -159,7 +168,32 @@ fun PrototypeApp(
   onPageChanged: (PrototypeWorkbenchPage) -> Unit = {},
 ) {
   var page by remember { mutableStateOf(initialPage) }
-  val surveyEditorState = remember { SurveyEditorState() }
+  val surveyEditorState = remember {
+    SurveyEditorState().apply {
+      updateDetails {
+        it.copy(
+          title = state.activeSurvey.title,
+          description = state.activeSurvey.description,
+        )
+      }
+    }
+  }
+  LaunchedEffect(state.activeSurveyId) {
+    surveyEditorState.updateDetails {
+      it.copy(
+        title = state.activeSurvey.title,
+        description = state.activeSurvey.description,
+      )
+    }
+  }
+  LaunchedEffect(surveyEditorState.details.title, surveyEditorState.details.description) {
+    if (surveyEditorState.details.title.isNotBlank()) {
+      state.updateActiveSurveyDetails(
+        title = surveyEditorState.details.title,
+        description = surveyEditorState.details.description,
+      )
+    }
+  }
   val isMobileMapShowing =
     page == PrototypeWorkbenchPage.MOBILE_PROTOTYPE &&
       state.currentScreen == PrototypeScreen.MAIN_SURVEY &&
@@ -191,8 +225,27 @@ fun PrototypeApp(
 
         when (page) {
           PrototypeWorkbenchPage.SURVEY_EDITOR ->
-            SurveyEditorPage(state = surveyEditorState, isDarkTheme = state.isDarkTheme)
-          PrototypeWorkbenchPage.WEB_DASHBOARD -> WebDashboardPage(state)
+            SurveyEditorPage(
+              state = surveyEditorState,
+              isDarkTheme = state.isDarkTheme,
+              onBackToDashboard = {
+                page = PrototypeWorkbenchPage.WEB_DASHBOARD
+                onPageChanged(PrototypeWorkbenchPage.WEB_DASHBOARD)
+              },
+            )
+          PrototypeWorkbenchPage.WEB_DASHBOARD ->
+            WebDashboardPage(
+              state = state,
+              onOpenSurveyEditor = {
+                page = PrototypeWorkbenchPage.SURVEY_EDITOR
+                onPageChanged(PrototypeWorkbenchPage.SURVEY_EDITOR)
+              },
+              onSignOut = {
+                state.signOut()
+                page = PrototypeWorkbenchPage.MOBILE_PROTOTYPE
+                onPageChanged(PrototypeWorkbenchPage.MOBILE_PROTOTYPE)
+              },
+            )
           PrototypeWorkbenchPage.MOBILE_PROTOTYPE -> MobilePrototypePage(state, isMobileMapShowing)
         }
       }
@@ -314,10 +367,16 @@ private fun PrototypeWorkbenchTopBar(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically,
       ) {
-        // Page switcher: Mobile prototype | Survey editor
-        PrototypeWorkbenchPage.entries.forEach { entry ->
+        // Page switcher: Mobile prototype | Web dashboard (unified with Survey editor)
+        PrototypeWorkbenchPage.topBarPages.forEach { entry ->
+          val isSelected =
+            if (entry == PrototypeWorkbenchPage.WEB_DASHBOARD) {
+              page.isWebApp
+            } else {
+              page == entry
+            }
           FilterChip(
-            selected = page == entry,
+            selected = isSelected,
             onClick = { onSelectPage(entry) },
             colors =
               androidx.compose.material3.FilterChipDefaults.filterChipColors(
@@ -329,7 +388,7 @@ private fun PrototypeWorkbenchTopBar(
             border =
               androidx.compose.material3.FilterChipDefaults.filterChipBorder(
                 enabled = true,
-                selected = page == entry,
+                selected = isSelected,
                 borderColor = Color(0xFF424940),
                 selectedBorderColor = Color(0xFFB7F1B9),
               ),
@@ -339,7 +398,7 @@ private fun PrototypeWorkbenchTopBar(
                 maxLines = 1,
                 softWrap = false,
                 style = MaterialTheme.typography.labelMedium,
-                fontWeight = if (page == entry) FontWeight.Bold else FontWeight.Medium,
+                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
               )
             },
           )
@@ -374,7 +433,7 @@ private fun PrototypeWorkbenchTopBar(
           },
         )
 
-        // Airplane mode (Offline simulator) toggle chip
+        // Device offline (Offline simulator) toggle chip
         FilterChip(
           selected = state.isAirplaneMode,
           onClick = { state.toggleAirplaneMode() },
@@ -402,7 +461,7 @@ private fun PrototypeWorkbenchTopBar(
                 } else {
                   Icons.Default.CloudDone
                 },
-              contentDescription = "Toggle Airplane mode (Offline simulation)",
+              contentDescription = "Toggle Device offline simulation",
               modifier = Modifier.size(15.dp),
             )
           },
@@ -410,9 +469,9 @@ private fun PrototypeWorkbenchTopBar(
             Text(
               text =
                 if (state.isAirplaneMode) {
-                  "Airplane mode: ON (Offline)"
+                  "Device offline: ON"
                 } else {
-                  "Airplane mode"
+                  "Device offline"
                 },
               maxLines = 1,
               overflow = TextOverflow.Ellipsis,
@@ -911,6 +970,14 @@ private fun UxDesignerInspectorPanel(state: PrototypeAppState, modifier: Modifie
               {
                 state.navigateTo(PrototypeScreen.MAIN_SURVEY)
                 state.drawerOpenSettings()
+              },
+            ),
+            Triple(
+              Icons.Default.Map,
+              "Offline Maps & Storage",
+              {
+                state.navigateTo(PrototypeScreen.MAIN_SURVEY)
+                state.drawerManageOfflineMaps()
               },
             ),
             Triple(

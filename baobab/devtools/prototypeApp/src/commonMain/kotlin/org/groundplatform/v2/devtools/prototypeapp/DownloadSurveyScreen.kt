@@ -329,7 +329,7 @@ fun DownloadSurveyScreen(state: PrototypeAppState) {
               survey = survey,
               isDarkTheme = state.isDarkTheme,
               onDownloadClick = { state.downloadSurvey(survey.id) },
-              onToggleDownloadClick = { state.toggleSurveyDownloaded(survey.id) },
+              onToggleDownloadClick = { state.promptRemoveDownloadedSurvey(survey.id) },
               onOpenSurveyClick = { state.openSurvey(survey.id) },
             )
           }
@@ -341,7 +341,61 @@ fun DownloadSurveyScreen(state: PrototypeAppState) {
     if (state.isDownloadSurveySignOutPromptOpen) {
       DownloadSurveySignOutPromptDialog(state)
     }
+
+    if (state.pendingRemovalSurveyId != null) {
+      RemoveDownloadedSurveyConfirmationDialog(state)
+    }
   }
+}
+
+/**
+ * Confirmation prompt dialog shown before removing a downloaded survey from the device.
+ */
+@Composable
+private fun RemoveDownloadedSurveyConfirmationDialog(state: PrototypeAppState) {
+  val surveyId = state.pendingRemovalSurveyId ?: return
+  val survey = state.surveys.firstOrNull { it.id == surveyId } ?: return
+
+  GroundAlertDialogOverlay(
+    onDismissRequest = { state.dismissRemoveDownloadedSurvey() },
+    icon = {
+      Icon(
+        imageVector = Icons.Default.CloudOff,
+        contentDescription = null,
+        tint = MaterialTheme.colorScheme.error,
+      )
+    },
+    title = {
+      Text(
+        text = "Remove offline survey?",
+        style = MaterialTheme.typography.titleMedium,
+        fontWeight = FontWeight.Bold,
+      )
+    },
+    text = {
+      Text(
+        text =
+          "Removing \"${survey.title}\" will delete the offline copy (${survey.offlineSizeLabel}) from this device. You will need an internet connection to download and use it offline again.",
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+      )
+    },
+    confirmButton = {
+      Button(
+        onClick = { state.confirmRemoveDownloadedSurvey() },
+        colors =
+          ButtonDefaults.buttonColors(
+            containerColor = MaterialTheme.colorScheme.error,
+            contentColor = MaterialTheme.colorScheme.onError,
+          ),
+      ) {
+        Text("Remove", fontWeight = FontWeight.Bold)
+      }
+    },
+    dismissButton = {
+      OutlinedButton(onClick = { state.dismissRemoveDownloadedSurvey() }) { Text("Cancel") }
+    },
+  )
 }
 
 /**

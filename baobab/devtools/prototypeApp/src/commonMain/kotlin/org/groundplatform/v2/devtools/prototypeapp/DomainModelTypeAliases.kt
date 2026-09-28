@@ -72,6 +72,9 @@ typealias GroundLanguageOption =
 
 typealias UserSettings = org.groundplatform.v2.devtools.prototypeapp.domain.model.UserSettings
 
+typealias DeviceStorageInfo =
+  org.groundplatform.v2.devtools.prototypeapp.domain.model.DeviceStorageInfo
+
 typealias MapThumbnailTheme =
   org.groundplatform.v2.devtools.prototypeapp.domain.model.MapThumbnailTheme
 

@@ -2482,6 +2482,34 @@
             } catch (e) {}
           },
 
+          recenterOnEntity: function (lng, lat, bottomPaddingCssPx) {
+            const targetLng = Number(lng);
+            const targetLat = Number(lat);
+            if (!isFinite(targetLng) || !isFinite(targetLat)) return;
+            state.hasUserPanned = true;
+            state.isLocationLocked = false;
+            state.focusedPlace = null;
+            if (window.__groundSelectedPlaceMarker) {
+              try {
+                window.__groundSelectedPlaceMarker.remove();
+              } catch (e) {}
+              window.__groundSelectedPlaceMarker = null;
+            }
+            ensureMapInitialized();
+            const targetMap = state.map || map;
+            if (targetMap && window.mapboxgl) {
+              try {
+                const padY = Math.max(0, Math.round(Number(bottomPaddingCssPx) || 0));
+                targetMap.flyTo({
+                  center: [targetLng, targetLat],
+                  offset: [0, -Math.round(padY / 2)],
+                  essential: true,
+                  duration: 400,
+                });
+              } catch (e) {}
+            }
+          },
+
           getMapInstance: function () {
             return map;
           },

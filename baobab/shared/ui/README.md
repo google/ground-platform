@@ -22,7 +22,6 @@ for rendering and executing ProtoForms / XForms definitions one question at
 a time across **Android (`jvm`)**, **iOS (`iosArm64`, `iosSimulatorArm64`)**,
 and **Web (`js`, `wasmJs`)**.
 
---------------------------------------------------------------------------------
 
 ## Overview
 
@@ -57,7 +56,6 @@ and **Web (`js`, `wasmJs`)**.
 See the detailed package design and API reference in
 [`src/commonMain/kotlin/org/groundplatform/v2/core/forms/ui/README.md`](src/commonMain/kotlin/org/groundplatform/v2/core/forms/ui/README.md).
 
---------------------------------------------------------------------------------
 
 ## Quick Start
 

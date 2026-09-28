@@ -18,9 +18,8 @@
 
 This document outlines how Ground 2.0 implements **Clean Architecture** and **Model-View-ViewModel (MVVM)** across Kotlin Multiplatform (KMP) and Compose Multiplatform (CMP). It establishes explicit layering boundaries, dependency rules, naming standards, and answers who can communicate directly with repositories and system/hardware service clients.
 
----
 
-## 1. Core Principles & Motivation
+## Core Principles & Motivation
 
 Ground 2.0 is an offline-first, cross-platform geospatial data collection and monitoring platform targeting Android, iOS, and Web. Adopting Clean Architecture and MVVM provides critical engineering advantages:
 
@@ -38,9 +37,8 @@ Ground 2.0 is an offline-first, cross-platform geospatial data collection and mo
 - [Ground 2.0 Multiplatform Architecture (`shared/README.md`)](../../../shared/README.md)
 - [Ground 2.0 Shared Mobile Module (`shared/mobile/README.md`)](../../../shared/mobile/README.md)
 
----
 
-## 2. High-Level Architectural Layers
+## High-Level Architectural Layers
 
 The architecture is divided into three concentric Clean Architecture tiers, with the **Presentation Layer** structured according to **MVVM**:
 
@@ -101,9 +99,8 @@ flowchart TD
 | **Data** | Interface Adapters | Repository Implementations, Data Sources | Coordinates where data comes from (local database, remote server, or hardware sensors). Maps transport/storage models to clean Domain Models. |
 | **Framework** | Frameworks & Drivers | Platform SDKs, SQLite, Ktor, Device Clients | External operating system capabilities, hardware drivers, and raw communication channels. |
 
----
 
-## 3. The MVVM Pattern & Use Case Boundaries
+## The MVVM Pattern & Use Case Boundaries
 
 The presentation tier adheres to strict **Model-View-ViewModel (MVVM)** with unidirectional data flow (UDF).
 
@@ -166,9 +163,8 @@ sequenceDiagram
 2. **ViewModels Orchestrate Screen State**: ViewModels manage UI state and handle events. They delegate business rules to Use Cases and simple data storage/retrieval to Repositories. ViewModels never talk directly to Data Sources, Databases, or Device Clients.
 3. **State Flows Down, Events Flow Up**: ViewModels expose immutable `StateFlow<ScreenUiState>` representations of screen state. Side effects (e.g., snackbars, navigation) use shared channels or single-event flows.
 
----
 
-## 4. Communication with Device Services & Hardware APIs
+## Communication with Device Services & Hardware APIs
 
 A central architectural question in mobile engineering is: **Who can talk directly to device services and hardware wrappers (e.g., Location, Sensors, Camera, Bluetooth)?**
 
@@ -207,9 +203,8 @@ flowchart LR
 2. **Data Mapping & Boundary Isolation**: System services return platform-specific data types (e.g., `android.location.Location` on Android or `CLLocation` on iOS). The presentation and domain layers must never import or observe these types. The **Data Source** acts as the isolation boundary, transforming platform objects into clean Kotlin domain value objects (e.g., `LocationFix(latitude, longitude, altitude, accuracy)`).
 3. **Seamless Platform Swapping (KMP)**: In Kotlin Multiplatform, `LocationClient` defines a pure common interface in `commonMain`, while `androidMain` and `iosMain` provide native implementations using Android FusedLocationProvider and Apple CoreLocation respectively. Swapping platform implementations or providing test fakes requires touching only the framework/data source layer, leaving domain and presentation untouched.
 
----
 
-## 5. Architectural Variations & Scope Boundaries
+## Architectural Variations & Scope Boundaries
 
 While the **Data Source** is the canonical Clean Architecture pattern for device and hardware services, two other patterns are recognized depending on service scope:
 
@@ -227,24 +222,23 @@ flowchart TD
     class DATA_SOURCE,REPO_DIRECT,PRESENTATION opt;
 ```
 
-### 1. Data Source (Default for Data-Producing Services)
+### Data Source (Default for Data-Producing Services)
 - **Scope**: Continuous streams, sensor polling, hardware data feeds (GNSS location, compass heading, camera frame capture, battery status).
 - **Communication Path**: `UseCase` → `Repository` → `DataSource` → `DeviceClient`.
 - **Reason**: Requires data mapping, buffering, or coordination with databases/sync queues.
 
-### 2. Consolidated Repository (For Trivial / Atomic Operations)
+### Consolidated Repository (For Trivial / Atomic Operations)
 - **Scope**: Trivial device queries where introducing a separate Data Source class would be redundant boilerplate (e.g., single one-off battery level check or simple screen orientation query).
 - **Communication Path**: `UseCase` → `RepositoryImpl` → `DeviceClient`.
 - **Constraint**: The `RepositoryImpl` directly performs the conversion from platform-specific types to domain models.
 
-### 3. Presentation / UI Infrastructure (For Foreground UI Utilities)
+### Presentation / UI Infrastructure (For Foreground UI Utilities)
 - **Scope**: Visual platform interactions that do not produce domain data—such as opening the system share sheet, launching an external navigation intent (Google Maps), triggering native haptic feedback, or displaying OS runtime permission prompts.
 - **Communication Path**: `View` / `ViewModel` → `UiPlatformLauncher` / `HapticFeedbackClient`.
 - **Reason**: These are presentation/framework concerns that have no domain business logic and do not pass through the data layer.
 
----
 
-## 6. Directory Structure & Module Placement
+## Directory Structure & Module Placement
 
 Within Ground 2.0, clean layering is mapped across KMP modules:
 
@@ -273,9 +267,8 @@ Within Ground 2.0, clean layering is mapped across KMP modules:
 └── webApp/               # Compose Multiplatform Web application (WasmJS / JS)
 ```
 
----
 
-## 7. Summary Checklist for Code Reviews
+## Summary Checklist for Code Reviews
 
 When authoring or reviewing Kotlin code in Ground 2.0, verify against this checklist:
 

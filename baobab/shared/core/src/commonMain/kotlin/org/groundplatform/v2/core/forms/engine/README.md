@@ -20,7 +20,6 @@ A pure Kotlin Multiplatform (KMP) runtime state model and reactive evaluation
 engine for **ProtoForms** (`groundplatform.v2.forms.Form` and `Record`) and the
 [XForms specification](https://getodk.github.io/xforms-spec/).
 
---------------------------------------------------------------------------------
 
 ## Overview
 
@@ -58,7 +57,6 @@ This package and its companion state package
     `ODK_NEW_REPEAT`, `XFORMS_VALUE_CHANGED`, and submission finalization),
     exposing observable state transitions for UI ViewModels.
 
---------------------------------------------------------------------------------
 
 ## Supported Targets
 
@@ -72,11 +70,10 @@ Target     | Source Set   | Description
 **WasmJS** | `wasmJsMain` | WebAssembly (Browser/Node)
 **iOS**    | `iosMain`    | Apple iOS (Arm64 & X64)
 
---------------------------------------------------------------------------------
 
 ## Architecture & Design
 
-### 1. Package Layout
+### Package Layout
 
 ```text
 org.groundplatform.v2.core.forms
@@ -90,7 +87,7 @@ org.groundplatform.v2.core.forms
     └── RecordMutator.kt           # Copy-on-write helpers for immutable Record trees
 ```
 
-### 2. Runtime State Model (`org.groundplatform.v2.core.forms.model`)
+### Runtime State Model (`org.groundplatform.v2.core.forms.model`)
 
 Every evaluation produces an immutable `FormState` containing:
 
@@ -142,7 +139,7 @@ Every evaluation produces an immutable `FormState` containing:
 :                       :                       : `label`, `children`,        :
 :                       :                       : `canRemove`                 :
 
-### 3. Five-Stage Evaluation Pipeline (`FormEngine`)
+### Five-Stage Evaluation Pipeline (`FormEngine`)
 
 `FormEngine.evaluate()` executes a deterministic 5-stage pipeline on every
 initial load or mutation:
@@ -183,11 +180,10 @@ initial load or mutation:
     `label_expression`, and collecting `save_to` property values from relevant
     fields.
 
---------------------------------------------------------------------------------
 
 ## Usage Examples
 
-### 1. Managing an Interactive Form Session (`FormSession`)
+### Managing an Interactive Form Session (`FormSession`)
 
 For UI clients and ViewModels, `FormSession` coordinates initialization, user
 input, repeat manipulation, locale switching, and submission validation:
@@ -242,7 +238,7 @@ if (errors.isEmpty()) {
 }
 ```
 
-### 2. Stateless Functional Evaluation (`FormEngine` & `CompiledForm`)
+### Stateless Functional Evaluation (`FormEngine` & `CompiledForm`)
 
 If you manage state externally (e.g., in a Redux/MVI store or server-side
 validation service), use `CompiledForm` and `FormEngine` directly as pure
@@ -269,7 +265,7 @@ println("Validation errors: ${formState.validationErrors}")
 println("Evaluated entities: ${formState.evaluatedEntities}")
 ```
 
-### 3. Customizing Environment & Preload Providers (`FormEnvironment`)
+### Customizing Environment & Preload Providers (`FormEnvironment`)
 
 Implement `FormEnvironment` to supply platform-specific UUIDs, timestamps,
 device metadata, or SQLite-backed secondary instances
@@ -295,7 +291,6 @@ class AndroidFormEnvironment(
 }
 ```
 
---------------------------------------------------------------------------------
 
 ## Building and Running Tests
 

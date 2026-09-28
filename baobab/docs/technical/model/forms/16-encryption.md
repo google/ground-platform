@@ -103,7 +103,7 @@ base64_encrypted_signature: "OU7rbZl0uFy7xv/HnSl1juVrdf2fQpzcfjwetgl+wse..."
 
 ## Cryptographic Algorithms
 
-### 1. Payload Encryption (Symmetric)
+### Payload Encryption (Symmetric)
 
 The primary record binary (`.pb`) and all media attachments are encrypted using
 an ephemeral 256-bit AES key generated at random for each submission:
@@ -114,7 +114,7 @@ an ephemeral 256-bit AES key generated at random for each submission:
 -   **Modern Mode**: `AES-256-GCM` authenticated encryption with independent
     96-bit random nonces per attachment.
 
-### 2. Key Encapsulation (Asymmetric)
+### Key Encapsulation (Asymmetric)
 
 The ephemeral 256-bit AES key is wrapped with the recipient's RSA public key via
 **RSA-OAEP** with SHA-256 and MGF1 padding
@@ -123,7 +123,7 @@ The ephemeral 256-bit AES key is wrapped with the recipient's RSA public key via
 Once all payloads are encrypted and the manifest has been constructed, the
 cleartext symmetric key is wiped from memory.
 
-### 3. Integrity Signature
+### Integrity Signature
 
 To verify that the encrypted submission has not been altered or truncated in
 transit:

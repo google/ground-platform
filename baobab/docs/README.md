@@ -58,7 +58,7 @@ for Ground 2.0.
 See [`design/xforms-integration.md`](design/xforms-integration.md) for full
 details.
 
-### 1. The Core Mental Model
+### The Core Mental Model
 
 -   **Data tables / Map layers = Current State (Persistent Master Data)**: Flat,
     stateful master datasets (`EntityDatasetDef` / `EntityRecord`) where each
@@ -68,7 +68,7 @@ details.
     (`SubmissionRecord` / `RecordInstance`) are immutable event records
     preserving GPS, timestamps, and raw inputs.
 
-### 2. Default Survey Designer Behavior (`1 Form → 1 Entity Dataset`)
+### Default Survey Designer Behavior (`1 Form → 1 Entity Dataset`)
 
 -   **Automatic Provisioning**: Creating a new spatial form in the Survey
     Designer automatically provisions a backing `EntityDatasetDef` and
@@ -81,7 +81,7 @@ details.
     existing `EntityDatasetDef` (`action = UPDATE` / `UPSERT`) via
     `select_one_from_file <table_name>.csv`.
 
-### 3. Map UI & Field Workflow (Entity-Only Map)
+### Map UI & Field Workflow (Entity-Only Map)
 
 -   **Entities Only on the Map**: The map exclusively renders **Map features**
     (`GEOSPATIAL` Entity Lists), never separate raw submission geometry

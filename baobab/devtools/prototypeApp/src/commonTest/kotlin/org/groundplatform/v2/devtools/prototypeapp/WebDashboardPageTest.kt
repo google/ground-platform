@@ -39,6 +39,36 @@ class WebDashboardPageTest {
       PrototypeWorkbenchPage.WEB_DASHBOARD,
       PrototypeWorkbenchPage.fromHash("#dashboard"),
     )
+    assertEquals(
+      PrototypeWorkbenchPage.WEB_DASHBOARD,
+      PrototypeWorkbenchPage.fromHash("#web"),
+    )
+  }
+
+  @Test
+  fun webAppPages_combineDashboardAndSurveyEditorUnderWebTopBarTab() {
+    assertEquals(
+      listOf(PrototypeWorkbenchPage.MOBILE_PROTOTYPE, PrototypeWorkbenchPage.WEB_DASHBOARD),
+      PrototypeWorkbenchPage.topBarPages,
+    )
+    assertFalse(PrototypeWorkbenchPage.MOBILE_PROTOTYPE.isWebApp)
+    assertTrue(PrototypeWorkbenchPage.WEB_DASHBOARD.isWebApp)
+    assertTrue(PrototypeWorkbenchPage.SURVEY_EDITOR.isWebApp)
+  }
+
+  @Test
+  fun updateActiveSurveyDetails_updatesActiveSurveyTitleAndDescription() {
+    val testState = PrototypeAppState()
+    testState.updateActiveSurveyDetails(
+      title = "Updated Survey Title",
+      description = "Updated survey description from the survey editor.",
+    )
+
+    assertEquals("Updated Survey Title", testState.activeSurvey.title)
+    assertEquals(
+      "Updated survey description from the survey editor.",
+      testState.activeSurvey.description,
+    )
   }
 
   @Test
@@ -84,5 +114,105 @@ class WebDashboardPageTest {
     }
 
     assertEquals(submission.id, table.rows[table.selectedRowIndex].id)
+  }
+
+  @Test
+  fun recenterMapOnEntity_adjustsTargetScreenYForReducedViewport() {
+    val testState = PrototypeAppState()
+    testState.selectEntity(entity.id)
+    assertEquals(entity.id, testState.selectedEntityId)
+
+    val expandedTableHeightDp = 336f
+    val tabsHeightDp = 48f
+    val totalHeightDp = 800f
+    val tablePanelHeight = expandedTableHeightDp + tabsHeightDp
+    val visibleViewportHeight = totalHeightDp - tablePanelHeight
+    val targetScreenY = (visibleViewportHeight / 2) / totalHeightDp
+
+    testState.recenterMapOnEntity(entity, targetScreenY)
+    assertEquals(0.50f, entity.normalizedX + testState.mapWorldToScreenShiftX, 0.0001f)
+    assertEquals(targetScreenY, entity.normalizedY + testState.mapWorldToScreenShiftY, 0.0001f)
+  }
+
+  @Test
+  fun sidePanel_startsExpandedByDefault() {
+    val testState = PrototypeAppState()
+    assertTrue(testState.isSidePanelExpanded)
+    assertTrue(testState.isDashboardSidePanelExpanded)
+  }
+
+  @Test
+  fun toggleSidePanel_togglesBetweenExpandedAndCollapsed() {
+    val testState = PrototypeAppState()
+    assertTrue(testState.isSidePanelExpanded)
+
+    testState.toggleSidePanel()
+    assertFalse(testState.isSidePanelExpanded)
+    assertFalse(testState.isDashboardSidePanelExpanded)
+
+    testState.toggleDashboardSidePanel()
+    assertTrue(testState.isSidePanelExpanded)
+    assertTrue(testState.isDashboardSidePanelExpanded)
+  }
+
+  @Test
+  fun collapseAndExpandSidePanel_updatesStateExplicitly() {
+    val testState = PrototypeAppState()
+
+    testState.collapseSidePanel()
+    assertFalse(testState.isSidePanelExpanded)
+
+    testState.expandSidePanel()
+    assertTrue(testState.isSidePanelExpanded)
+
+    testState.collapseDashboardSidePanel()
+    assertFalse(testState.isDashboardSidePanelExpanded)
+
+    testState.expandDashboardSidePanel()
+    assertTrue(testState.isDashboardSidePanelExpanded)
+
+    testState.updateSidePanelExpanded(false)
+    assertFalse(testState.isSidePanelExpanded)
+
+    testState.updateSidePanelExpanded(true)
+    assertTrue(testState.isSidePanelExpanded)
+
+    testState.updateDashboardSidePanelExpanded(false)
+    assertFalse(testState.isDashboardSidePanelExpanded)
+
+    testState.updateDashboardSidePanelExpanded(true)
+    assertTrue(testState.isDashboardSidePanelExpanded)
+  }
+
+  @Test
+  fun resetPrototypeFlow_resetsSidePanelToExpanded() {
+    val testState = PrototypeAppState()
+    testState.collapseSidePanel()
+    assertFalse(testState.isSidePanelExpanded)
+
+    testState.resetPrototypeFlow()
+    assertTrue(testState.isSidePanelExpanded)
+  }
+
+  @Test
+  fun signedInUserInitials_derivesTwoLetterInitialsCorrectly() {
+    val testState = PrototypeAppState()
+    assertEquals("ML", testState.signedInUserInitials)
+  }
+
+  @Test
+  fun signOut_resetsAuthenticationAndNavigatesToSignIn() {
+    val testState = PrototypeAppState()
+    testState.signInWithGoogle()
+    testState.acceptTermsOfService()
+    testState.openSurvey(testState.surveys.first().id)
+    assertTrue(testState.isSignedIn)
+    assertEquals(PrototypeScreen.MAIN_SURVEY, testState.currentScreen)
+
+    testState.signOut()
+    assertFalse(testState.isSignedIn)
+    assertEquals(PrototypeScreen.SIGN_IN, testState.currentScreen)
+    assertFalse(testState.isDrawerOpen)
+    assertEquals(MainDrawerSubView.NONE, testState.activeDrawerSubView)
   }
 }

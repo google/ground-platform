@@ -29,7 +29,7 @@ resource-constrained, offline, and remote telemetry environments:
 > and `sms_tag` bindings) for round-trip compatibility with XForms, even if
 > the client runtime does not support SMS or low-bandwidth text serialization.
 
-## 1. Protocol Buffer Binary Wire Format
+## Protocol Buffer Binary Wire Format
 
 Unlike verbose XML or JSON representations, Protocol Buffers serialize records
 directly into a compact binary wire format using:
@@ -46,7 +46,7 @@ directly into a compact binary wire format using:
 This binary encoding typically reduces transmission sizes by **75% to 90%**
 compared to standard XForms XML documents without needing compression.
 
-## 2. SMS and Low-Bandwidth Text Representation
+## SMS and Low-Bandwidth Text Representation
 
 For environments where only SMS (140 bytes per message) or satellite text bursts
 are available, ProtoForms defines a deterministic text serialization configured

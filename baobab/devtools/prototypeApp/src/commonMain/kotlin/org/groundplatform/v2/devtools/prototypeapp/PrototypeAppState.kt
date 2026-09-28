@@ -202,6 +202,20 @@ class PrototypeAppState(
   var signedInUserName by mutableStateOf("Maya Lin")
     private set
 
+  /**
+   * Two-letter initials derived from [signedInUserName] for user avatar badges (e.g. `"ML"` for
+   * `"Maya Lin"`).
+   */
+  val signedInUserInitials: String
+    get() {
+      val parts = signedInUserName.trim().split("\\s+".toRegex()).filter { it.isNotEmpty() }
+      return when {
+        parts.isEmpty() -> "U"
+        parts.size == 1 -> parts[0].take(2).uppercase()
+        else -> "${parts.first().first()}${parts.last().first()}".uppercase()
+      }
+    }
+
   var signedInUserEmail by mutableStateOf("maya.lin@groundplatform.org")
     private set
 
@@ -211,6 +225,14 @@ class PrototypeAppState(
 
   /** True when the sign-out confirmation prompt is open on the Download surveys screen. */
   var isDownloadSurveySignOutPromptOpen by mutableStateOf(false)
+    private set
+
+  /** ID of a downloaded survey pending confirmation to remove from the device, or null. */
+  var pendingRemovalSurveyId by mutableStateOf<String?>(null)
+    private set
+
+  /** ID of an offline tile package pending confirmation to remove from the device, or null. */
+  var pendingRemovalTilePackageId by mutableStateOf<String?>(null)
     private set
 
   /** True when the Download surveys screen was opened from the Downloaded Surveys list. */
@@ -289,6 +311,10 @@ class PrototypeAppState(
   var selectedEntityId by mutableStateOf<String?>(null)
     private set
 
+  /** Monotonically increasing counter incremented every time an entity is selected. */
+  var entitySelectionEpoch by mutableStateOf(0L)
+    private set
+
   /**
    * Whether the Entity Bottom Sheet is expanded (`true`) to show full properties/submissions or
    * collapsed (`false`, default) into a compact single-row peek bar at the bottom of the map so it
@@ -296,6 +322,17 @@ class PrototypeAppState(
    */
   var isEntityBottomSheetExpanded by mutableStateOf(false)
     private set
+
+  /**
+   * Whether the left-hand panel in the web dashboard is expanded (`true`, default) or collapsed
+   * (`false`) to provide a full-width map view.
+   */
+  var isSidePanelExpanded by mutableStateOf(true)
+    private set
+
+  /** Alias for [isSidePanelExpanded] with dashboard prefix. */
+  val isDashboardSidePanelExpanded: Boolean
+    get() = isSidePanelExpanded
 
   var selectedSubmissionId by mutableStateOf<String?>(null)
     private set
@@ -414,6 +451,34 @@ class PrototypeAppState(
         measurementUnits = unitSystem,
         shouldUploadPhotosOnWifiOnly = shouldUploadPhotosOnWifiOnly,
       )
+
+  /**
+   * Device storage breakdown showing total device storage, free storage, storage occupied
+   * by downloaded imagery (vector & raster basemap tiles), and space taken up by data
+   * (surveys, forms, entities, submissions, mutations).
+   */
+  val deviceStorageInfo: DeviceStorageInfo
+    get() {
+      // Calculate downloaded imagery size from downloaded tile packages
+      val downloadedTilesBytes =
+        offlineTilePackages.filter { it.isDownloaded }.sumOf { pkg ->
+          when (pkg.id) {
+            "pkg-nyeri-satellite" -> 82_700_000L
+            "pkg-nyeri-topo" -> 14_200_000L
+            "pkg-kenya-regional" -> 168_000_000L
+            else -> 50_000_000L
+          }
+        }
+      val baseImageryBytes = 1_850_000_000L // Baseline offline imagery cache
+      val totalImageryBytes = baseImageryBytes + downloadedTilesBytes
+      val totalDataBytes = 420_000_000L + (mutations.size * 15_000L) + (entities.size * 8_000L)
+      return DeviceStorageInfo(
+        totalBytes = 64L * 1024L * 1024L * 1024L,
+        downloadedImageryBytes = totalImageryBytes,
+        dataBytes = totalDataBytes,
+        otherUsedBytes = 18_200_000_000L,
+      )
+    }
 
   // --- User GPS Location & Auto-Centering Map Camera State ---
   /** Normalized world X coordinate `[0, 1]` of the collector's current GPS location. */
@@ -1358,6 +1423,21 @@ class PrototypeAppState(
       "Loaded survey \"${activeSurvey.title}\" (${entities.size} entities, ${allSubmissions.size} preloaded submissions)."
   }
 
+  /** Updates the title and description of the currently active survey. */
+  fun updateActiveSurveyDetails(title: String, description: String) {
+    surveys =
+      surveys.map { item ->
+        if (item.id == activeSurveyId) {
+          item.copy(
+            title = title.ifBlank { item.title },
+            description = description.ifBlank { item.description },
+          )
+        } else {
+          item
+        }
+      }
+  }
+
   /** Toggles the downloaded status of a survey (for UX prototyping & testing). */
   fun toggleSurveyDownloaded(surveyId: String) {
     surveys = surveys.map { item ->
@@ -1374,6 +1454,40 @@ class PrototypeAppState(
         item
       }
     }
+  }
+
+  /**
+   * Prompts the user before removing a downloaded survey from the device.
+   * If the survey is not downloaded, downloads it immediately.
+   */
+  fun promptRemoveDownloadedSurvey(surveyId: String) {
+    val survey = surveys.firstOrNull { it.id == surveyId }
+    if (survey != null && survey.isDownloaded) {
+      pendingRemovalSurveyId = surveyId
+    } else {
+      downloadSurvey(surveyId)
+    }
+  }
+
+  /** Confirms removal of the pending downloaded survey from the device and dismisses the dialog. */
+  fun confirmRemoveDownloadedSurvey() {
+    val surveyId = pendingRemovalSurveyId
+    pendingRemovalSurveyId = null
+    if (surveyId != null) {
+      surveys = surveys.map { item ->
+        if (item.id == surveyId) {
+          activeSurveyNotice = "Removed offline copy of \"${item.title}\"."
+          item.copy(isDownloaded = false)
+        } else {
+          item
+        }
+      }
+    }
+  }
+
+  /** Dismisses/cancels the pending downloaded survey removal dialog. */
+  fun dismissRemoveDownloadedSurvey() {
+    pendingRemovalSurveyId = null
   }
 
   // --- Main Survey UI Actions ---
@@ -1486,6 +1600,7 @@ class PrototypeAppState(
     mainViewMode = MainSurveyViewMode.MAP
     if (entityId != null) {
       isLayersSheetOpen = false
+      entitySelectionEpoch++
     }
   }
 
@@ -1500,6 +1615,7 @@ class PrototypeAppState(
     isEntityBottomSheetExpanded = true
     mainViewMode = MainSurveyViewMode.MAP
     isLayersSheetOpen = false
+    entitySelectionEpoch++
   }
 
   /**
@@ -1572,6 +1688,38 @@ class PrototypeAppState(
     isEntityBottomSheetExpanded = expanded
   }
 
+  /** Toggles the web dashboard's left-hand side panel between expanded and collapsed states. */
+  fun toggleSidePanel() {
+    isSidePanelExpanded = !isSidePanelExpanded
+  }
+
+  /** Expands the web dashboard's left-hand side panel. */
+  fun expandSidePanel() {
+    isSidePanelExpanded = true
+  }
+
+  /** Collapses the web dashboard's left-hand side panel. */
+  fun collapseSidePanel() {
+    isSidePanelExpanded = false
+  }
+
+  /** Explicitly expands or collapses the web dashboard's left-hand side panel. */
+  fun updateSidePanelExpanded(expanded: Boolean) {
+    isSidePanelExpanded = expanded
+  }
+
+  /** Alias for [toggleSidePanel]. */
+  fun toggleDashboardSidePanel() = toggleSidePanel()
+
+  /** Alias for [expandSidePanel]. */
+  fun expandDashboardSidePanel() = expandSidePanel()
+
+  /** Alias for [collapseSidePanel]. */
+  fun collapseDashboardSidePanel() = collapseSidePanel()
+
+  /** Alias for [updateSidePanelExpanded]. */
+  fun updateDashboardSidePanelExpanded(expanded: Boolean) = updateSidePanelExpanded(expanded)
+
   /** Opens full details for a specific submission (from a 1:N entity bottom sheet or List view). */
   fun selectSubmissionDetail(submissionId: String?) {
     selectedSubmissionId = submissionId
@@ -1613,7 +1761,7 @@ class PrototypeAppState(
   fun selectListFilterTab(tab: ListFilterTab) {
     if (isAirplaneMode && tab == ListFilterTab.PLACES) {
       activeSurveyNotice =
-        "Offline (Airplane mode): Places search is not available offline. Searching local $activeEntitiesCountNoun only."
+        "Device offline: Places search is not available offline. Searching local $activeEntitiesCountNoun only."
       return
     }
     listFilterTab = tab
@@ -1637,9 +1785,9 @@ class PrototypeAppState(
         listFilterTab = ListFilterTab.ALL
       }
       activeSurveyNotice =
-        "Airplane mode ON (Offline): Places search disabled. Searching local $activeEntitiesCountNoun only."
+        "Device offline: Places search disabled. Searching local $activeEntitiesCountNoun only."
     } else {
-      activeSurveyNotice = "Airplane mode OFF (Online): Places API search enabled."
+      activeSurveyNotice = "Device online: Places API search enabled."
       val trimmed = listSearchQuery.trim()
       if (trimmed.isNotEmpty()) {
         triggerMapboxPlacesApiSearch(trimmed)
@@ -2283,11 +2431,45 @@ class PrototypeAppState(
     currentScreen = PrototypeScreen.SIGN_IN
   }
 
+  /** Signs the user out of the application and returns to the Sign In screen. */
+  fun signOut() {
+    drawerSignOut()
+  }
+
   /** Toggles download status of an offline Mapbox basemap tile package. */
   fun toggleOfflineTilePackage(packageId: String) {
     offlineTilePackages = offlineTilePackages.map { pkg ->
       if (pkg.id == packageId) pkg.copy(isDownloaded = !pkg.isDownloaded) else pkg
     }
+  }
+
+  /**
+   * Prompts the user before removing an offline map tile package from the device.
+   * If the package is not downloaded, downloads it immediately.
+   */
+  fun promptRemoveOfflineTilePackage(packageId: String) {
+    val pkg = offlineTilePackages.firstOrNull { it.id == packageId }
+    if (pkg != null && pkg.isDownloaded) {
+      pendingRemovalTilePackageId = packageId
+    } else {
+      toggleOfflineTilePackage(packageId)
+    }
+  }
+
+  /** Confirms removal of the pending offline tile package from the device and dismisses the dialog. */
+  fun confirmRemoveOfflineTilePackage() {
+    val packageId = pendingRemovalTilePackageId
+    pendingRemovalTilePackageId = null
+    if (packageId != null) {
+      offlineTilePackages = offlineTilePackages.map { pkg ->
+        if (pkg.id == packageId) pkg.copy(isDownloaded = false) else pkg
+      }
+    }
+  }
+
+  /** Dismisses/cancels the pending offline tile package removal dialog. */
+  fun dismissRemoveOfflineTilePackage() {
+    pendingRemovalTilePackageId = null
   }
 
   /** Updates the measurement unit preference (`METRIC` vs `IMPERIAL`). */
@@ -2411,6 +2593,36 @@ class PrototypeAppState(
     locationLockState = LocationLockState.LOCKED
     mapPanOffsetX = 0f
     mapPanOffsetY = 0f
+  }
+
+  /**
+   * Recenters the map camera on [entity], adjusting the normalized vertical screen center to
+   * [targetScreenY] (defaults to `0.50f` screen center) to account for reduced visible viewport
+   * area (such as an expanded bottom table in the web dashboard).
+   */
+  fun recenterMapOnEntity(entity: GeospatialEntityItem, targetScreenY: Float = 0.50f) {
+    isCameraFollowingUser = false
+    locationLockState = LocationLockState.PANNED
+    mapPanOffsetX = (userGpsNormalizedX - entity.normalizedX).coerceIn(-10000f, 10000f)
+    mapPanOffsetY =
+      ((userGpsNormalizedY - entity.normalizedY) + (targetScreenY - 0.50f)).coerceIn(-10000f, 10000f)
+  }
+
+  /**
+   * Recenters the map camera on the entity with [entityId], adjusting the normalized vertical screen
+   * center to [targetScreenY] (defaults to `0.50f` screen center).
+   */
+  fun recenterMapOnEntity(entityId: String, targetScreenY: Float = 0.50f) {
+    val entity = entities.firstOrNull { it.id == entityId } ?: return
+    recenterMapOnEntity(entity, targetScreenY)
+  }
+
+  /** Resolves the geographic coordinates `(lng, lat)` for [entity] in the active survey. */
+  fun resolveEntityLngLat(entity: GeospatialEntityItem): Pair<Double, Double> {
+    val (surveyLng, surveyLat) = activeSurveyBaseLngLat()
+    val lng = surveyLng + (entity.normalizedX - 0.5) * 0.014
+    val lat = surveyLat - (entity.normalizedY - 0.5) * 0.018
+    return lng to lat
   }
 
   /** Adjusts the Mapbox zoom level by [deltaZoom] (clamped to `[-5.0f, +3.7f]`). */
@@ -2726,6 +2938,7 @@ class PrototypeAppState(
     mutations = defaultMutations()
     selectedEntityId = null
     isEntityBottomSheetExpanded = false
+    isSidePanelExpanded = true
     selectedSubmissionId = null
     navigationTargetKind = null
     navigationTargetId = null

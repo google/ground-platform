@@ -62,3 +62,9 @@ internal actual fun flyPlatformMapboxToPlace(
 ) = Unit
 
 internal actual fun clearPlatformMapboxPlace() = Unit
+
+internal actual fun recenterPlatformMapboxOnEntity(
+  lng: Double,
+  lat: Double,
+  bottomPaddingCssPx: Float,
+) = Unit

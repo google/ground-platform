@@ -18,7 +18,7 @@
 
 These rules govern all AI-assisted research, design, and code changes within Ground 2.0. Follow them strictly when creating or modifying files in this directory and its subdirectories.
 
-## 1. Project Design & Architectural Reference
+## Project Design & Architectural Reference
 
 * **Primary Source of Truth**: Refer to [`docs/product/prd.md`](docs/product/prd.md) (and supporting specifications under [`docs/product/`](docs/product/) and [`docs/architecture.md`](docs/architecture.md)) for project-specific product requirements, domain terminology, and system architecture.
 * **UX & Content Guidelines**: Follow the Ground 2.0 terminology, UX writing rules, and core mental model defined in [`docs/ux/content-guidelines.md`](docs/ux/content-guidelines.md) and [`docs/product/terminology.md`](docs/product/terminology.md). Strictly use Ground 2.0 / XForms & XLSForm-aligned terminology across all UI copy, comments, and code:
@@ -30,13 +30,13 @@ These rules govern all AI-assisted research, design, and code changes within Gro
   * **Submissions** (`SubmissionRecord`): Immutable historical records preserving timestamps and inputs.
 * **Core Product Principles**: Ensure all implementations uphold *Proportional Complexity* (simple by default, progressive disclosure for advanced features), *Offline-First Resilience* (100% disconnected field execution and atomic local persistence), and *Real-World Usability* (clear, forgiving interactions with high-contrast legibility). Detailed interaction patterns, form–table mappings, and voice/tone rules are documented in [`docs/ux/content-guidelines.md`](docs/ux/content-guidelines.md).
 
-## 2. Open-Source Purity & Confidentiality
+## Open-Source Purity & Confidentiality
 
 * **Strictly Open Source**: Ground 2.0 is a fully public, open-source project released under the Apache 2.0 License.
 * **No Proprietary Content**: Never include proprietary code, algorithms, internal libraries, confidential information, internal URLs/identifiers (e.g., internal shortlinks, internal bug IDs, employee LDAPs/handles, or internal endpoints), API keys/secrets, or non-public datasets in submitted code, comments, tests, or assets.
 * **Public Dependencies & Assets Only**: Use only publicly available, open-source libraries, standard specifications (XForms, XLSForm, GeoJSON, Protobuf), and public-domain/openly licensed test fixtures and assets.
 
-## 3. License Headers (`Apache 2.0`)
+## License Headers (`Apache 2.0`)
 
 * **New Source Files**: Every newly created source, build, schema, script, or documentation file **must** begin with the standard Apache 2.0 license header using the **current calendar year**:
   ```kotlin
@@ -60,7 +60,7 @@ These rules govern all AI-assisted research, design, and code changes within Gro
 * **Open the block with `/*`, never `/**`**: `/**` makes the header a KDoc comment that binds to the following `package` declaration and leaks the license text into generated API documentation.
 * **Existing Files**: **Do not** update or alter the copyright year in existing files when modifying them. Preserve existing license headers as-is.
 
-## 4. Kotlin Multiplatform (KMP) Architecture
+## Kotlin Multiplatform (KMP) Architecture
 
 * **Shared Code in KMP**: All shared logic, data models, form evaluation, persistence, and shared UI **must** be written using **Kotlin Multiplatform** under [`shared/`](shared/):
   * [`shared/protos/`](shared/protos/): Protocol Buffer (`proto3`) schemas for forms, surveys, entities, submissions, and audit logs.
@@ -69,7 +69,7 @@ These rules govern all AI-assisted research, design, and code changes within Gro
   * [`shared/mobile/`](shared/mobile/): Shared mobile application core (`commonMain`) targeting Android and iOS (local persistence, offline sync, GNSS tracking, mobile screens, and ViewModels).
 * **Thin Platform Wrappers**: Keep [`androidApp/`](androidApp/), [`iosApp/`](iosApp/), and [`webApp/`](webApp/) as thin platform entry points and host integrations. Do not duplicate business logic, state machines, validation, or shared UI components across platform targets; use `expect`/`actual` abstractions only where native OS capabilities are required.
 
-## 5. User Interface: Material Design 3 & Compose Multiplatform
+## User Interface: Material Design 3 & Compose Multiplatform
 
 * **Material Design 3 (M3)**: All user interfaces across mobile and web must follow **Material Design 3** guidelines (`androidx.compose.material3.*`).
 * **Unmodified Compose Multiplatform**: Use standard **Compose Multiplatform** and Material 3 components out-of-the-box with minimal or no custom structural/behavioral modifications. Prefer standard M3 building blocks (`Scaffold`, `TopAppBar`, `Card`, `OutlinedTextField`, `Button`, `FilterChip`, `ModalBottomSheet`, etc.) over bespoke custom-drawn widgets.
@@ -77,7 +77,7 @@ These rules govern all AI-assisted research, design, and code changes within Gro
   * Always wrap UI surfaces in [`GroundTheme`](shared/ui/src/commonMain/kotlin/org/groundplatform/v2/core/forms/ui/GroundTheme.kt) and reference semantic tokens from `MaterialTheme.colorScheme`, `MaterialTheme.typography`, and `MaterialTheme.shapes`.
   * **Prefer global theme definitions** over specifying ad-hoc colors (`Color(0x...)`), custom typography styles, or visual overrides on individual components. When a visual change is needed across components, update the centralized theme in `shared/ui/` rather than passing inline style overrides to individual composables.
 
-## 6. ProtoForms Schema & XForms Compatibility Boundary
+## ProtoForms Schema & XForms Compatibility Boundary
 
 ### Normative references
 
@@ -97,7 +97,7 @@ ProtoForms ([`shared/protos/forms/`](shared/protos/forms/), package `groundplatf
 * **Round-trip fidelity is the acceptance criterion.** New schema surface needs a round-trip test in [`shared/core/src/commonTest/.../serialization/`](shared/core/src/commonTest/kotlin/org/groundplatform/v2/core/forms/serialization/) proving XML → proto → XML preserves the construct. Unrecognized attributes and elements should be preserved rather than dropped.
 * **Cite the spec in code.** When implementing spec-defined behavior, reference the specific section in a comment (e.g. `// XPath 1.0 section 4.4: ties round toward positive infinity`) so the next reader can check the implementation against the source.
 
-## 7. Code Formatting (`ktformat` & `buf`)
+## Code Formatting (`ktformat` & `buf`)
 
 * **Kotlin Code (`ktformat`)**: All Kotlin source and Gradle script files (`.kt`, `.kts`) **must** be formatted using `ktformat` (`ktfmt` / Google style with 2-space indentation). Run `ktformat` on any new or modified Kotlin files before completing changes.
 * **Protocol Buffers (`buf`)**: All `proto3` schema files (`.proto` under [`shared/protos/`](shared/protos/)) **must** be formatted using `buf` (`buf format -w`). Run `buf format` whenever creating or modifying `.proto` definitions.

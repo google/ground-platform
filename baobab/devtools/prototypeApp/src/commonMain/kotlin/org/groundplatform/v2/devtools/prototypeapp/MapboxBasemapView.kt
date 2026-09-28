@@ -117,6 +117,17 @@ internal expect fun flyPlatformMapboxToPlace(
 internal expect fun clearPlatformMapboxPlace()
 
 /**
+ * Recenters the live `mapboxgl.Map` camera on the geographic coordinates `[lng, lat]` of an
+ * entity, displacing the camera center upward by [bottomPaddingCssPx] / 2 so the entity is
+ * vertically centered in the visible viewport above an expanded bottom sheet or table.
+ */
+internal expect fun recenterPlatformMapboxOnEntity(
+  lng: Double,
+  lat: Double,
+  bottomPaddingCssPx: Float,
+)
+
+/**
  * Renders the real Mapbox GL JS basemap (`mapboxgl.Map`) inside `SurveyMapView` and delegates all
  * polygon, point, submission geometry, offline sector, and GPS blue-dot rendering + hit-testing
  * directly to Mapbox GL GeoJSON layers and `mapboxgl.Marker` instances.

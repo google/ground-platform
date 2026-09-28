@@ -71,20 +71,26 @@ UX Co-Design Workbench for rapid iteration with UX designers.
                 verification submission.
     -   **Hamburger / Navigation Drawer (`MainSurveyNavigationDrawerOverlay`)**:
         Provides options for **Surveys**, **Offline maps** (Mapbox vector/raster
-        tile packages + 500 MB storage cap), **Settings** (Metric/Imperial
-        units, in-app language locale switcher, and uploaded media cache
-        eviction), **Terms of Service**, and **Sign out**.
+        tile packages, user-friendly device storage breakdown chart showing total, free,
+        downloaded imagery, and data storage, plus 500 MB storage guardrail), **Settings**
+        (Metric/Imperial units, in-app language locale switcher, device storage chart, and
+        uploaded media cache eviction), **Terms of Service**, and **Sign out**.
 
 ## Web Dashboard Page (`#dashboard`)
 
-Switch to it with the **Web dashboard** chip in the top bar, or deep-link to
-`http://localhost:8091/#dashboard`. It shares state with the mobile prototype,
-so selections and survey changes carry over.
+Switch to the web application with the **Web dashboard** chip in the top bar, or
+deep-link to `http://localhost:8091/#dashboard`. It shares state with the mobile
+prototype, so selections and survey changes carry over.
 
--   **Left panel**: The same content as the mobile bottom sheet: the searchable
-    list of map features and places, or the selected map feature's details and
-    `1:N` submissions. Sheet expand/collapse buttons and field-only actions
-    (data collection launchers, **Navigate**) are hidden.
+-   **Top toolbar**: Displays Ground branding, the standard Material navigation
+    menu button to collapse or expand the left panel, the active survey title
+    with its location below it, a **Manage survey** button to enter the
+    **Survey editor**, and user profile controls.
+-   **Left panel**: Shows the same content as the mobile bottom sheet in
+    side-panel mode: the searchable list of map features and places, or the
+    selected map feature's details and `1:N` submissions. Field-only actions
+    (data collection launchers, **Navigate**) are hidden. Can be smoothly
+    collapsed or expanded using the navigation menu button in the top toolbar.
 -   **Map**: The live survey map fills the main area. Click a map feature to
     select it; click empty map to clear the selection.
 -   **Data tables**: While a map feature is selected, a panel docks to the
@@ -100,10 +106,11 @@ Code lives in `WebDashboardPage.kt`.
 
 ## Survey Editor Page (`#survey-editor`)
 
-Switch pages with the **Mobile prototype** / **Web dashboard** / **Survey
-editor** chips in the top bar, or deep-link to
-`http://localhost:8091/#survey-editor`. The old `#form-editor` link still
-works. The left-hand navigation lists:
+Open the survey editor from the web dashboard via the **Edit survey** button in
+the left-hand survey header (and return to the dashboard with the back arrow in
+the survey editor header or the **Web dashboard** top-bar chip), or deep-link
+directly to `http://localhost:8091/#survey-editor` (`#form-editor` also works).
+The left-hand navigation lists:
 
 -   **Survey details**: Title, description, survey ID, and languages, plus
     summary cards that link to each section.

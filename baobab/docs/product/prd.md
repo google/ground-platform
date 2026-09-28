@@ -53,7 +53,6 @@ Following its transition from a Google-incubated initiative to a community-gover
     *   *No GIS Jargon for Organizers*: Project managers and conservation leads can design sophisticated forms visually, manage sites in spreadsheet-like tables, and review map data without writing code or mastering desktop GIS software.
     *   *Zero-Assumption Mobile Design*: Built for frontline collectors and community rangers who may be first-time smartphone users—prioritizing large touch targets, clear visual cues, haptic feedback, and forgiving on-device error correction.
 
----
 
 ## Platform Experience: Web Console vs. Mobile App
 
@@ -75,7 +74,6 @@ Ground 2.0 pairs a browser-based **Web Console** for survey design, visual satel
 
 <!-- mdformat on -->
 
----
 
 ## Core Concepts & User Mental Model
 
@@ -98,11 +96,10 @@ To support both single-visit surveys and multi-year monitoring campaigns (such a
 
 > **Cross-Platform Terminology & Parity**: See **[Terminology & Cross-Platform Parity](terminology.md)** for the complete master lexicon and parity matrix mapping Ground 2.0 across Collect Earth Online (CEO), ODK Central/Collect, KoboToolbox, XLSForm, ArcGIS Survey123, and Open Foris Arena.
 
----
 
 ## Product Requirements
 
-### 1. Survey Design & Authoring (Web Console)
+### Survey Design & Authoring (Web Console)
 
 *   **Visual WYSIWYG Form Designer**:
     *   Build and reorder questions, nested groups, and repeating loops visually with contextual guidance cards—no coding or spreadsheet editing required.
@@ -121,7 +118,7 @@ To support both single-visit surveys and multi-year monitoring campaigns (such a
     *   **Draw or walk perimeter (Polygon)**: Walked boundary tracking or manual vertex drawing with live enclosed area (hectares/acres) and perimeter calculations.
     *   **Anti-Spoofing & Quality Policies**: Organizers can disable manual map drawing on any spatial question to require physical hardware GPS fixes on the ground, reject mock GPS locations, and enforce minimum GPS accuracy thresholds (e.g., `<= 5m`).
 
-### 2. Field Data Collection (Mobile App — Android & iOS)
+### Field Data Collection (Mobile App — Android & iOS)
 
 *   **Guided Offline Preparation & Storage Guardrails**:
     *   **Take Offline Workflow**: Collectors select target map areas before leaving connectivity to pre-cache multi-zoom vector and satellite basemaps alongside survey forms and site tables.
@@ -141,7 +138,7 @@ To support both single-visit surveys and multi-year monitoring campaigns (such a
     *   **On-Device Self-Correction**: Collectors can edit or delete their own field-created sites and submissions directly on-device to fix mistakes immediately.
     *   **Read-Only Viewer Mode**: Supervisors or guests with `Viewer` access can browse the map, sites, and submissions on mobile without accidentally modifying data.
 
-### 3. Visual Classification & Photo-Interpretation (Web Console)
+### Visual Classification & Photo-Interpretation (Web Console)
 
 Ground 2.0 integrates **Collect Earth Online (CEO)** directly into the Web Console so institutions can run remote satellite interpretation and ground verification in a single project:
 
@@ -154,7 +151,7 @@ Ground 2.0 integrates **Collect Earth Online (CEO)** directly into the Web Conso
     *   Keyboard-driven plot navigation, embedded reference guides, and plot flagging/skipping for ambiguous sites (which can then be routed to mobile field teams for ground-truthing).
     *   Assign plots to multiple interpreters, track inter-interpreter agreement on a **Disagreement Dashboard**, resolve conflicts, and import legacy CEO projects without losing completed work.
 
-### 4. Data Review, Traceability, & Compliance
+### Data Review, Traceability, & Compliance
 
 *   **Desktop Data Entry, QA/QC, & Interactive GIS Editing**:
     *   **Synchronized Table & Map Workspace**: Filter, sort (including by last updated date), search across attributes, and link map features to table rows via matching numerical badges.
@@ -167,7 +164,7 @@ Ground 2.0 integrates **Collect Earth Online (CEO)** directly into the Web Conso
     *   **Non-Destructive Soft Delete & 30-Day Trash**: Deleting a question retires it from future collection while preserving all historical answers. Deleted surveys, forms, and submissions move to a 30-day recovery trash before permanent removal.
     *   **Immutable Audit Log**: Every schema change, submission edit, and geometry refinement is recorded in an exportable audit log with user identity, UTC timestamp, and before/after field diffs—allowing supervisors to inspect or revert any change.
 
-### 5. Exports, Farmer Receipts, & Ecosystem Integrations
+### Exports, Farmer Receipts, & Ecosystem Integrations
 
 *   **Schema-Harmonized Dataset Exports**:
     *   Export data as **CSV, GeoJSON, or Shapefile** with custom filenames and dedicated GPS accuracy and altitude columns.
@@ -178,7 +175,7 @@ Ground 2.0 integrates **Collect Earth Online (CEO)** directly into the Web Conso
 *   **Partner Platform APIs & Webhooks**:
     *   Native bi-directional integration with **FAO FERM** (Framework for Ecosystem Restoration Monitoring) and **Open Foris Arena**, plus configurable real-time **Webhooks** with custom auth headers to stream incoming records into external national registries or enterprise pipelines.
 
-### 6. Governance, Sharing, & MAP Impact Dashboards
+### Governance, Sharing, & MAP Impact Dashboards
 
 *   **Multi-Tenant Organizations & Flexible Sharing**:
     *   Users and surveys belong to **Organizations** with pooled resource quotas.
@@ -191,7 +188,6 @@ Ground 2.0 integrates **Collect Earth Online (CEO)** directly into the Web Conso
         *   **Protection**: Intact forest and buffer hectares monitored, deforestation-free plot boundaries verified (e.g., EUDR), disturbance alerts ground-truthed, and community tenure mapped.
     *   Powers live **Organization & Survey MAP Dashboards** in the Web Console, a **Public Anonymized MAP Dashboard**, and **Automated Monthly Sponsor Digests**.
 
----
 
 ## Scale, Quotas, & Service Guardrails
 
@@ -227,7 +223,6 @@ Usage is governed at the organization and user level across two tiers *(see [Fut
 *   **Text Length Limits**: Survey/form titles up to **100 characters**; descriptions, choice labels, and site properties up to **255 characters**; instruction notes up to **1,024 characters**; open text responses up to **100 characters**.
 *   **Geometry & Media Limits**: Up to **50 vertices per polygon**; photos automatically scaled up to **48 megapixels** while preserving full camera EXIF and GPS metadata.
 
----
 
 ## Not in Scope & Future Work
 

@@ -96,6 +96,7 @@ fun SettingsScreen(
 ) {
   SettingsScreen(
     settings = state.userSettings,
+    storage = state.deviceStorageInfo,
     onUploadMediaOverUnmeteredConnectionOnlyChange = {
       state.updateUploadMediaOverUnmeteredConnectionOnly(it)
     },
@@ -125,6 +126,7 @@ fun GroundSettingsScreen(
 @Composable
 fun SettingsScreen(
   settings: UserSettings,
+  storage: DeviceStorageInfo = DeviceStorageInfo(),
   onUploadMediaOverUnmeteredConnectionOnlyChange: (Boolean) -> Unit,
   onLanguageChange: (String) -> Unit,
   onMeasurementUnitsChange: (MeasurementUnitSystem) -> Unit,
@@ -200,6 +202,15 @@ fun SettingsScreen(
           currentValue = settings.measurementUnits.name,
           onValueChanged = { onMeasurementUnitsChange(MeasurementUnitSystem.valueOf(it)) },
         )
+      }
+
+      HorizontalDivider()
+
+      // Device Storage Section
+      SettingsCategory(title = "Storage") {
+        Box(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)) {
+          DeviceStorageBreakdownCard(storage = storage)
+        }
       }
 
       HorizontalDivider()

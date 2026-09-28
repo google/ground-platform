@@ -940,13 +940,13 @@ internal fun BottomSheetSearchableListContent(
             ) {
               Icon(
                 imageVector = Icons.Default.CloudOff,
-                contentDescription = "Airplane mode active",
+                contentDescription = "Device offline",
                 tint = MaterialTheme.colorScheme.onErrorContainer,
                 modifier = Modifier.size(16.dp),
               )
               Column(modifier = Modifier.weight(1f)) {
                 Text(
-                  text = "Offline (Airplane mode) • Searching local ${state.activeEntitiesCountNoun} only",
+                  text = "Device offline • Searching local ${state.activeEntitiesCountNoun} only",
                   style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
                   color = MaterialTheme.colorScheme.onErrorContainer,
                 )
@@ -1350,28 +1350,37 @@ internal fun SubmissionFullDetailsCard(
       ),
   ) {
     Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+      // Header: Simple back arrow navigation + Form Title
+      Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
+      ) {
+        IconButton(
+          onClick = { onBack() },
+          modifier = Modifier.size(28.dp),
+        ) {
+          Icon(
+            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+            contentDescription = backLabel,
+            tint = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.size(18.dp),
+          )
+        }
+        Text(
+          text = submission.formTitle,
+          style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+          color = MaterialTheme.colorScheme.onSurface,
+          modifier = Modifier.weight(1f),
+        )
+      }
+
+      // Actions & Sync Status Row
       Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
       ) {
-        FilledTonalButton(
-          onClick = { onBack() },
-          shape = MaterialTheme.shapes.small,
-          contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
-        ) {
-          Icon(
-            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-            contentDescription = null,
-            modifier = Modifier.size(13.dp),
-          )
-          Spacer(modifier = Modifier.width(4.dp))
-          Text(
-            text = backLabel,
-            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-          )
-        }
-
         Row(
           verticalAlignment = Alignment.CenterVertically,
           horizontalArrangement = Arrangement.spacedBy(6.dp),
@@ -1400,39 +1409,32 @@ internal fun SubmissionFullDetailsCard(
               )
             },
           )
-
-          Text(
-            text = "Schema: ${submission.formVersion}",
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-          )
         }
+
+        Text(
+          text = "Schema: ${submission.formVersion}",
+          style = MaterialTheme.typography.labelSmall,
+          color = MaterialTheme.colorScheme.onSurfaceVariant,
+          maxLines = 1,
+          overflow = TextOverflow.Ellipsis,
+          softWrap = false,
+        )
       }
 
       Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+        val detailTargetLabel =
+          if (submission.hasAttachedEntity) {
+            "${submission.targetTypeLabel}: ${submission.entityLabel}"
+          } else if (submission.coordinatesLabel.isNotBlank()) {
+            "${submission.targetTypeLabel} • No attached map feature (${submission.coordinatesLabel})"
+          } else {
+            "${submission.targetTypeLabel} • No attached map feature"
+          }
         Text(
-          text = submission.formTitle,
-          style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
-          color = MaterialTheme.colorScheme.onSurface,
+          text = detailTargetLabel,
+          style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
+          color = MaterialTheme.colorScheme.primary,
         )
-        Row(
-          verticalAlignment = Alignment.CenterVertically,
-          horizontalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-          val detailTargetLabel =
-            if (submission.hasAttachedEntity) {
-              "${submission.targetTypeLabel}: ${submission.entityLabel}"
-            } else if (submission.coordinatesLabel.isNotBlank()) {
-              "${submission.targetTypeLabel} • No attached map feature (${submission.coordinatesLabel})"
-            } else {
-              "${submission.targetTypeLabel} • No attached map feature"
-            }
-          Text(
-            text = detailTargetLabel,
-            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
-            color = MaterialTheme.colorScheme.primary,
-          )
-        }
         Row(
           verticalAlignment = Alignment.CenterVertically,
           horizontalArrangement = Arrangement.spacedBy(4.dp),

@@ -37,6 +37,7 @@ import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
@@ -97,9 +98,14 @@ fun SurveyEditorPage(
   state: SurveyEditorState,
   isDarkTheme: Boolean,
   modifier: Modifier = Modifier,
+  onBackToDashboard: (() -> Unit)? = null,
 ) {
   Row(modifier = modifier.fillMaxSize()) {
-    SurveyNavigation(state, Modifier.width(280.dp).fillMaxHeight())
+    SurveyNavigation(
+      state = state,
+      modifier = Modifier.width(280.dp).fillMaxHeight(),
+      onBackToDashboard = onBackToDashboard,
+    )
     Box(modifier = Modifier.weight(1f).fillMaxHeight()) {
       when (val section = state.section) {
         SurveyEditorSection.Details -> SurveyDetailsPane(state)
@@ -132,26 +138,52 @@ fun SurveyEditorPage(
 // ---------------------------------------------------------------------------------------------
 
 @Composable
-private fun SurveyNavigation(state: SurveyEditorState, modifier: Modifier = Modifier) {
+private fun SurveyNavigation(
+  state: SurveyEditorState,
+  modifier: Modifier = Modifier,
+  onBackToDashboard: (() -> Unit)? = null,
+) {
   Surface(modifier = modifier, color = MaterialTheme.colorScheme.surfaceContainerLow) {
     Column(
       modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(12.dp),
       verticalArrangement = Arrangement.spacedBy(2.dp),
     ) {
-      Column(modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 12.dp)) {
-        Text(
-          text = "Survey editor",
-          style = MaterialTheme.typography.labelMedium,
-          color = MaterialTheme.colorScheme.primary,
-          fontWeight = FontWeight.Bold,
-        )
-        Text(
-          text = state.details.title.ifBlank { "Untitled survey" },
-          style = MaterialTheme.typography.titleMedium,
-          fontWeight = FontWeight.Bold,
-          maxLines = 2,
-          overflow = TextOverflow.Ellipsis,
-        )
+      Row(
+        modifier =
+          Modifier.fillMaxWidth()
+            .padding(
+              start = if (onBackToDashboard != null) 4.dp else 16.dp,
+              end = 16.dp,
+              top = 8.dp,
+              bottom = 12.dp,
+            ),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+      ) {
+        if (onBackToDashboard != null) {
+          IconButton(onClick = onBackToDashboard, modifier = Modifier.size(36.dp)) {
+            Icon(
+              imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+              contentDescription = "Back to web dashboard",
+              tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+          }
+        }
+        Column(modifier = Modifier.weight(1f)) {
+          Text(
+            text = "Survey editor",
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.primary,
+            fontWeight = FontWeight.Bold,
+          )
+          Text(
+            text = state.details.title.ifBlank { "Untitled survey" },
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
+          )
+        }
       }
 
       NavItem(

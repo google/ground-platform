@@ -118,3 +118,14 @@ internal actual fun clearPlatformMapboxPlace() {
     bridge.clearSelectedPlace()
   }
 }
+
+internal actual fun recenterPlatformMapboxOnEntity(
+  lng: Double,
+  lat: Double,
+  bottomPaddingCssPx: Float,
+) {
+  val bridge = js("window.GroundMapboxBridge")
+  if (bridge != null && bridge != undefined && bridge.recenterOnEntity != undefined) {
+    bridge.recenterOnEntity(lng, lat, bottomPaddingCssPx)
+  }
+}

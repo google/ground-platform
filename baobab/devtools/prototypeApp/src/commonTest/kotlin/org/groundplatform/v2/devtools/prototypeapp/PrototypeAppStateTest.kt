@@ -508,6 +508,37 @@ class PrototypeAppStateTest {
   }
 
   @Test
+  fun recenterMapOnEntity_adjustsPanOffset_centeringEntityAtTargetScreenY() {
+    val state = PrototypeAppState()
+    val entity = state.entities.first()
+
+    assertEquals(0L, state.entitySelectionEpoch)
+    state.selectEntity(entity.id)
+    assertEquals(1L, state.entitySelectionEpoch)
+    assertEquals(entity.id, state.selectedEntityId)
+
+    // Recenter at standard 0.50f center
+    state.recenterMapOnEntity(entity, targetScreenY = 0.50f)
+    assertFalse(state.isCameraFollowingUser)
+    assertEquals(LocationLockState.PANNED, state.locationLockState)
+    assertEquals(0.50f, entity.normalizedX + state.mapWorldToScreenShiftX, 0.0001f)
+    assertEquals(0.50f, entity.normalizedY + state.mapWorldToScreenShiftY, 0.0001f)
+
+    // Recenter adjusting for reduced viewport above expanded table (e.g. 0.26f)
+    state.recenterMapOnEntity(entity, targetScreenY = 0.26f)
+    assertEquals(0.50f, entity.normalizedX + state.mapWorldToScreenShiftX, 0.0001f)
+    assertEquals(0.26f, entity.normalizedY + state.mapWorldToScreenShiftY, 0.0001f)
+
+    // Selecting entity again increments entitySelectionEpoch
+    state.selectEntity(entity.id)
+    assertEquals(2L, state.entitySelectionEpoch)
+
+    // Selecting from list also increments entitySelectionEpoch
+    state.selectEntityFromList(entity.id)
+    assertEquals(3L, state.entitySelectionEpoch)
+  }
+
+  @Test
   fun deviceFormFactor_togglesBetweenMobileAndTablet() {
     val state = PrototypeAppState()
 
@@ -1786,6 +1817,113 @@ class PrototypeAppStateTest {
     // Advance to the next step (select1 land_use) -> isCurrentFormStepGeoPoint becomes false
     assertTrue(ctrl.nextStep())
     assertFalse(state.isCurrentFormStepGeoPoint)
+  }
+
+  @Test
+  fun deviceStorageInfo_calculatesStorageBreakdownAccurately() {
+    val state = PrototypeAppState(initialScreen = PrototypeScreen.MAIN_SURVEY)
+    val storage = state.deviceStorageInfo
+
+    // Verify storage figures exist and total is 64 GB
+    assertEquals(64L * 1024L * 1024L * 1024L, storage.totalBytes)
+    assertEquals("64.0 GB", storage.totalStorageLabel)
+
+    // Verify downloaded imagery, data, other used, and free storage are positive
+    assertTrue(storage.downloadedImageryBytes > 0L)
+    assertTrue(storage.dataBytes > 0L)
+    assertTrue(storage.otherUsedBytes > 0L)
+    assertTrue(storage.freeBytes > 0L)
+
+    // Verify fractions sum to <= 1.0f and are in valid range [0, 1]
+    assertTrue(storage.imageryFraction in 0.0f..1.0f)
+    assertTrue(storage.dataFraction in 0.0f..1.0f)
+    assertTrue(storage.otherUsedFraction in 0.0f..1.0f)
+    assertTrue(storage.freeFraction in 0.0f..1.0f)
+    assertTrue(storage.imageryFraction + storage.dataFraction + storage.otherUsedFraction <= 1.0f)
+
+    // Labels should be non-empty and formatted
+    assertTrue(storage.downloadedImageryStorageLabel.contains("GB") || storage.downloadedImageryStorageLabel.contains("MB"))
+    assertTrue(storage.dataStorageLabel.contains("MB") || storage.dataStorageLabel.contains("GB"))
+    assertTrue(storage.freeStorageLabel.contains("GB"))
+    assertTrue(storage.totalStorageLabel.contains("GB"))
+
+    // Toggling tile package download updates imagery size dynamically
+    val initialImageryBytes = storage.downloadedImageryBytes
+    val pkg = state.offlineTilePackages.first { !it.isDownloaded }
+    state.toggleOfflineTilePackage(pkg.id)
+    val updatedStorage = state.deviceStorageInfo
+    assertTrue(updatedStorage.downloadedImageryBytes > initialImageryBytes)
+  }
+
+  @Test
+  fun promptRemoveDownloadedSurvey_requiresConfirmationBeforeRemoval() {
+    val state = PrototypeAppState(initialScreen = PrototypeScreen.DOWNLOAD_SURVEY)
+    val targetId = "survey-kenya-coffee"
+    assertTrue(state.surveys.first { it.id == targetId }.isDownloaded)
+
+    // User clicks Downloaded button -> triggers prompt confirmation
+    state.promptRemoveDownloadedSurvey(targetId)
+    assertEquals(targetId, state.pendingRemovalSurveyId)
+    // Survey is NOT yet removed
+    assertTrue(state.surveys.first { it.id == targetId }.isDownloaded)
+
+    // User cancels/dismisses dialog
+    state.dismissRemoveDownloadedSurvey()
+    assertEquals(null, state.pendingRemovalSurveyId)
+    assertTrue(state.surveys.first { it.id == targetId }.isDownloaded)
+
+    // User prompts again and confirms removal
+    state.promptRemoveDownloadedSurvey(targetId)
+    assertEquals(targetId, state.pendingRemovalSurveyId)
+    state.confirmRemoveDownloadedSurvey()
+    assertEquals(null, state.pendingRemovalSurveyId)
+    assertFalse(state.surveys.first { it.id == targetId }.isDownloaded)
+    assertTrue(state.activeSurveyNotice?.contains("Removed offline copy") == true)
+  }
+
+  @Test
+  fun promptRemoveDownloadedSurvey_downloadsImmediatelyIfNotAlreadyDownloaded() {
+    val state = PrototypeAppState(initialScreen = PrototypeScreen.DOWNLOAD_SURVEY)
+    val targetId = "survey-serengeti-corridor"
+    assertFalse(state.surveys.first { it.id == targetId }.isDownloaded)
+
+    // Prompting on a non-downloaded survey downloads directly without warning
+    state.promptRemoveDownloadedSurvey(targetId)
+    assertEquals(null, state.pendingRemovalSurveyId)
+    assertTrue(state.surveys.first { it.id == targetId }.isDownloaded)
+  }
+
+  @Test
+  fun promptRemoveOfflineTilePackage_requiresConfirmationBeforeRemoval() {
+    val state = PrototypeAppState(initialScreen = PrototypeScreen.MAIN_SURVEY)
+    val downloadedPkg = state.offlineTilePackages.first { it.isDownloaded }
+
+    // User clicks Downloaded button -> triggers prompt confirmation
+    state.promptRemoveOfflineTilePackage(downloadedPkg.id)
+    assertEquals(downloadedPkg.id, state.pendingRemovalTilePackageId)
+    // Package is NOT yet removed
+    assertTrue(state.offlineTilePackages.first { it.id == downloadedPkg.id }.isDownloaded)
+
+    // User cancels/dismisses
+    state.dismissRemoveOfflineTilePackage()
+    assertEquals(null, state.pendingRemovalTilePackageId)
+    assertTrue(state.offlineTilePackages.first { it.id == downloadedPkg.id }.isDownloaded)
+
+    // User prompts again and confirms
+    state.promptRemoveOfflineTilePackage(downloadedPkg.id)
+    state.confirmRemoveOfflineTilePackage()
+    assertEquals(null, state.pendingRemovalTilePackageId)
+    assertFalse(state.offlineTilePackages.first { it.id == downloadedPkg.id }.isDownloaded)
+  }
+
+  @Test
+  fun promptRemoveOfflineTilePackage_downloadsImmediatelyIfNotAlreadyDownloaded() {
+    val state = PrototypeAppState(initialScreen = PrototypeScreen.MAIN_SURVEY)
+    val nonDownloadedPkg = state.offlineTilePackages.first { !it.isDownloaded }
+
+    state.promptRemoveOfflineTilePackage(nonDownloadedPkg.id)
+    assertEquals(null, state.pendingRemovalTilePackageId)
+    assertTrue(state.offlineTilePackages.first { it.id == nonDownloadedPkg.id }.isDownloaded)
   }
 }
 

@@ -20,9 +20,8 @@ These guidelines govern all user-facing copy, terminology, voice, tone, and cont
 
 This guide is for UX writers, product designers, technical writers, and engineers writing strings, labels, instructions, dialogs, and messages.
 
----
 
-## 1. Voice & Tone
+## Voice & Tone
 
 Ground connects non-technical survey organizers, conservation managers, and frontline community collectors in remote and challenging environments. Our copy should feel human, dependable, and easy to understand at a glance under bright sunlight or in difficult field conditions.
 
@@ -39,9 +38,8 @@ While our voice never changes, our tone shifts depending on the user's emotional
 * **Day-to-day Data Entry & Form Building**: Efficient, neutral, and invisible. Keep labels and instructions out of the way of work.
 * **Errors, Offline Warnings & Destructive Confirmations**: Calm, serious, reassuring, and explicit. Avoid alarming jargon, exclamation marks, or ambiguous choices.
 
----
 
-## 2. Domain Terminology & Glossary
+## Domain Terminology & Glossary
 
 Ground 2.0 aligns with the modern XForms / XLSForm architecture and ODK Entities mental model. Always use standard Ground 2.0 terminology across user interfaces, user guides, button copy, and tooltips.
 
@@ -68,9 +66,8 @@ Never use deprecated Ground 1.0 terms in new user interfaces or documentation:
 * ❌ **Never say "Task"**: Form entry fields are **Questions**.
 * ❌ **Never say "LOI" (Location of Interest)**: Use **Map feature** or specific feature types.
 
----
 
-## 3. Plain Language & De-Jargonizing
+## Plain Language & De-Jargonizing
 
 Frontline collectors and community rangers work under intense sun, intermittent connectivity, and diverse linguistic backgrounds. Avoid GIS jargon, technical database terminology, and internal abstractions.
 
@@ -87,9 +84,8 @@ Frontline collectors and community rangers work under intense sun, intermittent 
 | *XLSForm syntax error* / *Validation schema failure* | **Check form questions** | *"There is a problem in row 12 of your form"* |
 | *Authentication credentials expired* | **Please sign in again** | *"Your session expired. Please sign in again."* |
 
----
 
-## 4. Component & Pattern Copy Guidelines
+## Component & Pattern Copy Guidelines
 
 ### Buttons & Interactive Controls
 * **Lead with a strong, specific action verb**: Tell the user exactly what will happen.
@@ -166,9 +162,8 @@ Use standard, short status descriptors:
 * **Survey & Form State**: *"Draft"*, *"Published"*, *"Archived"*.
 * **Feature Status**: *"Pending"*, *"In progress"*, *"Completed"*, *"Needs review"*.
 
----
 
-## 5. Style, Mechanics & Formatting
+## Style, Mechanics & Formatting
 
 ### Capitalization
 * **Sentence case everywhere**: Use sentence case for all UI copy—including page titles, dialog headers, table headers, menu items, buttons, form labels, and radio options.
@@ -199,9 +194,8 @@ Use standard, short status descriptors:
 * **Spell out numbers zero through nine** in body prose (*"Select three plots"*), but **use numerals (0, 1, 2...)** for counts, metrics, coordinates, and measurements (*"3 submissions waiting"*, *"5 meters"*, *"12 MB"*).
 * Always specify units explicitly (*"meters"*, *"km"*, *"ha"*, *"MB"*) and format units consistently.
 
----
 
-## 6. Accessibility & Global Inclusivity
+## Accessibility & Global Inclusivity
 
 Ground is deployed globally across diverse cultures, languages, and technical backgrounds.
 
@@ -216,9 +210,8 @@ Ground is deployed globally across diverse cultures, languages, and technical ba
   * Use second-person (*"you"*, *"your"*) or gender-neutral third-person (*"they"*, *"their"*).
   * Never use gendered pronouns (*"he/she"*, *"his/her"*).
 
----
 
-## 7. Cross-Platform Parity Reference
+## Cross-Platform Parity Reference
 
 For a comprehensive cross-platform mapping of Ground 2.0 terminology to Collect Earth Online (CEO), ODK Central/Collect, KoboToolbox, XLSForm, ArcGIS Survey123, and Open Foris Arena, refer to:
 * **[`docs/product/terminology.md`](../product/terminology.md)**: Master cross-platform terminology matrix and concept crosswalk.
