@@ -16,6 +16,9 @@ package org.groundplatform.v2.devtools.prototypeapp.surveyeditor
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.spring
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
@@ -24,14 +27,19 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -40,28 +48,46 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.DragIndicator
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Layers
+import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.InputChip
+import androidx.compose.material3.InputChipDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationDrawerItem
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.NavigationDrawerItemDefaults
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.foundation.ScrollState
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
@@ -69,6 +95,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalDensity
@@ -81,6 +112,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+import org.groundplatform.v2.core.forms.ui.GroundBadgeTone
+import org.groundplatform.v2.core.forms.ui.GroundTonalBadge
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInWindow
+import kotlinx.coroutines.delay
+import org.groundplatform.v2.devtools.prototypeapp.data.datasource.remote.MapboxPlacesDataSource
+import org.groundplatform.v2.devtools.prototypeapp.data.datasource.local.PrototypeFakePlacesData
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyPlaceItem
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.parsePlaceCoordinates
 import org.groundplatform.v2.devtools.prototypeapp.formeditor.DragAxis
 import org.groundplatform.v2.devtools.prototypeapp.formeditor.DragReorderState
 import org.groundplatform.v2.devtools.prototypeapp.formeditor.DropdownSelector
@@ -113,10 +155,14 @@ fun SurveyEditorPage(
         is SurveyEditorSection.Form -> {
           val entry = state.selectedForm
           if (entry != null) {
+            LaunchedEffect(entry.editor.form.questions) {
+              state.syncDatasetsLinkedToForm(entry)
+            }
             key(entry.key) {
               FormEditorPage(
                 state = entry.editor,
                 isDarkTheme = isDarkTheme,
+                onCreateDataset = { state.createDatasetForForm(entry.key) },
                 onDelete = { state.deleteForm(entry.key) },
               )
             }
@@ -413,25 +459,30 @@ private fun NavItem(
 // Survey details
 // ---------------------------------------------------------------------------------------------
 
+internal val LocalPaneScrollState = compositionLocalOf<ScrollState?> { null }
+
 @Composable
 internal fun PaneScaffold(
   title: String,
   subtitle: String,
   content: @Composable () -> Unit,
 ) {
-  Column(
-    modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(32.dp),
-    verticalArrangement = Arrangement.spacedBy(20.dp),
-  ) {
-    Column(modifier = Modifier.widthIn(max = 760.dp)) {
-      Text(title, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
-      Text(
-        subtitle,
-        style = MaterialTheme.typography.bodyMedium,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-      )
+  val scrollState = rememberScrollState()
+  CompositionLocalProvider(LocalPaneScrollState provides scrollState) {
+    Column(
+      modifier = Modifier.fillMaxSize().verticalScroll(scrollState).padding(32.dp),
+      verticalArrangement = Arrangement.spacedBy(20.dp),
+    ) {
+      Column(modifier = Modifier.widthIn(max = 760.dp)) {
+        Text(title, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+        Text(
+          subtitle,
+          style = MaterialTheme.typography.bodyMedium,
+          color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+      }
+      content()
     }
-    content()
   }
 }
 
@@ -461,36 +512,17 @@ private fun SurveyDetailsPane(state: SurveyEditorState) {
         minLines = 3,
         modifier = Modifier.fillMaxWidth(),
       )
-      Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-        OutlinedTextField(
-          value = details.surveyId,
-          onValueChange = { v -> state.updateDetails { it.copy(surveyId = v.trim()) } },
-          label = { Text("Survey ID") },
-          singleLine = true,
-          isError = !FormEditorValidator.isValidName(details.surveyId),
-          textStyle = MaterialTheme.typography.bodyMedium.copy(fontFamily = FontFamily.Monospace),
-          modifier = Modifier.weight(1f),
-        )
-        OutlinedTextField(
-          value = details.defaultLanguage,
-          onValueChange = { v -> state.updateDetails { it.copy(defaultLanguage = v.trim()) } },
-          label = { Text("Default language") },
-          singleLine = true,
-          modifier = Modifier.width(160.dp),
-        )
-      }
       OutlinedTextField(
-        value = details.supportedLanguages.joinToString(", "),
-        onValueChange = { v ->
-          state.updateDetails { d ->
-            d.copy(supportedLanguages = v.split(',').map { it.trim() }.filter { it.isNotEmpty() })
-          }
-        },
-        label = { Text("Supported languages") },
-        supportingText = { Text("Comma-separated language codes, e.g. en, sw") },
+        value = details.surveyId,
+        onValueChange = { v -> state.updateDetails { it.copy(surveyId = v.trim()) } },
+        label = { Text("Survey ID") },
         singleLine = true,
+        isError = !FormEditorValidator.isValidName(details.surveyId),
+        textStyle = MaterialTheme.typography.bodyMedium.copy(fontFamily = FontFamily.Monospace),
         modifier = Modifier.fillMaxWidth(),
       )
+      LanguageSelectorSection(state = state)
+      SurveyAreaSection(state = state)
     }
 
     SectionLabel("Contents")
@@ -523,6 +555,832 @@ private fun SummaryCard(label: String, count: Int, onClick: () -> Unit) {
       )
     }
   }
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun LanguageSelectorSection(state: SurveyEditorState) {
+  val details = state.details
+  val supported = details.supportedLanguages
+  val defaultLang = details.defaultLanguage
+  var showPicker by remember { mutableStateOf(false) }
+
+  if (showPicker) {
+    LanguagePickerDialog(
+      selectedCodes = supported.toSet(),
+      onAddLanguage = { lang ->
+        state.addSupportedLanguage(lang.code)
+      },
+      onDismiss = { showPicker = false },
+    )
+  }
+
+  Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+    Text(
+      "Languages",
+      style = MaterialTheme.typography.titleSmall,
+      fontWeight = FontWeight.SemiBold,
+    )
+    Text(
+      "Choose the languages in which forms and survey questions can be authored and collected. The default language is shown when a specific translation is not available.",
+      style = MaterialTheme.typography.bodySmall,
+      color = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
+
+    // Supported languages chips and Add button
+    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+      Text(
+        "Supported languages",
+        style = MaterialTheme.typography.labelMedium,
+        fontWeight = FontWeight.Medium,
+      )
+      FlowRow(
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+      ) {
+        supported.forEach { code ->
+          val lang = IsoLanguages.findByCode(code)
+          val displayName = lang?.name ?: code
+          val isDefault = code.equals(defaultLang, ignoreCase = true)
+          InputChip(
+            selected = isDefault,
+            onClick = { state.setDefaultLanguage(code) },
+            label = {
+              Text(
+                if (isDefault) "$displayName • Default" else displayName
+              )
+            },
+            trailingIcon = {
+              if (supported.size > 1) {
+                IconButton(
+                  onClick = { state.removeSupportedLanguage(code) },
+                  modifier = Modifier.size(18.dp),
+                ) {
+                  Icon(
+                    Icons.Default.Close,
+                    contentDescription = "Remove $displayName",
+                    modifier = Modifier.size(14.dp),
+                  )
+                }
+              }
+            },
+          )
+        }
+        OutlinedButton(
+          onClick = { showPicker = true },
+          shape = RoundedCornerShape(8.dp),
+        ) {
+          Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(16.dp))
+          Spacer(Modifier.width(6.dp))
+          Text("Add language")
+        }
+      }
+    }
+
+    // Default language selector
+    if (supported.isNotEmpty()) {
+      val defaultLanguageObject = IsoLanguages.findByCode(defaultLang)
+      val defaultLabel = defaultLanguageObject?.name ?: defaultLang.ifEmpty { "None selected" }
+      Box(modifier = Modifier.widthIn(max = 380.dp)) {
+        DropdownSelector(
+          label = "Default language",
+          selectedText = defaultLabel,
+          options = supported,
+          optionText = { code ->
+            IsoLanguages.findByCode(code)?.name ?: code
+          },
+          onSelect = { pickedCode ->
+            state.setDefaultLanguage(pickedCode)
+          },
+        )
+      }
+    }
+  }
+}
+
+@Composable
+private fun SurveyAreaSection(state: SurveyEditorState) {
+  val area = state.details.surveyArea
+  var showSearchDialog by remember { mutableStateOf(false) }
+
+  if (showSearchDialog) {
+    SurveyAreaPickerDialog(
+      surveyId = state.details.surveyId,
+      surveyLocationLabel = state.details.title.ifBlank { "Survey" },
+      surveyCenter = area?.center ?: LatLng(-0.4198, 36.9512),
+      currentAreaName = area?.name,
+      onSelectArea = { newArea ->
+        state.setSurveyArea(newArea)
+      },
+      onDismiss = { showSearchDialog = false },
+    )
+  }
+
+  Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+    Row(
+      modifier = Modifier.fillMaxWidth(),
+      verticalAlignment = Alignment.CenterVertically,
+      horizontalArrangement = Arrangement.SpaceBetween,
+    ) {
+      Column {
+        Text(
+          "Survey area",
+          style = MaterialTheme.typography.titleSmall,
+          fontWeight = FontWeight.SemiBold,
+        )
+        Text(
+          "Geographic coverage and boundary limits for data collection in this survey.",
+          style = MaterialTheme.typography.bodySmall,
+          color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+      }
+    }
+
+    if (area != null) {
+      OutlinedCard(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(12.dp),
+      ) {
+        Row(
+          modifier = Modifier.fillMaxWidth().padding(16.dp),
+          horizontalArrangement = Arrangement.spacedBy(16.dp),
+          verticalAlignment = Alignment.CenterVertically,
+        ) {
+          // Small static, non-pan/zoomable map thumbnail preview
+          SurveyAreaThumbnail(
+            area = area,
+            modifier = Modifier.size(width = 160.dp, height = 120.dp),
+          )
+
+          Column(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(6.dp),
+          ) {
+            Row(
+              verticalAlignment = Alignment.CenterVertically,
+              horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+              Icon(
+                Icons.Default.LocationOn,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(20.dp),
+              )
+              Text(
+                text = area.name,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+              )
+            }
+            Text(
+              text =
+                "Center: ${formatFixed(area.center.lat, 4)}°, ${formatFixed(area.center.lng, 4)}° • ${area.boundaries.size} boundary vertices",
+              style = MaterialTheme.typography.bodySmall,
+              color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Row(
+              horizontalArrangement = Arrangement.spacedBy(8.dp),
+              modifier = Modifier.padding(top = 4.dp),
+            ) {
+              OutlinedButton(
+                onClick = { showSearchDialog = true },
+                shape = RoundedCornerShape(8.dp),
+              ) {
+                Icon(Icons.Default.Search, contentDescription = null, modifier = Modifier.size(16.dp))
+                Spacer(Modifier.width(6.dp))
+                Text("Change area")
+              }
+              OutlinedButton(
+                onClick = { state.setSurveyArea(null) },
+                shape = RoundedCornerShape(8.dp),
+              ) {
+                Icon(Icons.Default.Delete, contentDescription = null, modifier = Modifier.size(16.dp))
+                Spacer(Modifier.width(6.dp))
+                Text("Remove")
+              }
+            }
+          }
+        }
+      }
+    } else {
+      OutlinedCard(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(12.dp),
+      ) {
+        Row(
+          modifier = Modifier.fillMaxWidth().padding(16.dp),
+          horizontalArrangement = Arrangement.spacedBy(16.dp),
+          verticalAlignment = Alignment.CenterVertically,
+        ) {
+          Box(
+            modifier =
+              Modifier.size(width = 160.dp, height = 100.dp)
+                .background(
+                  color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                  shape = RoundedCornerShape(8.dp),
+                ),
+            contentAlignment = Alignment.Center,
+          ) {
+            Icon(
+              Icons.Default.Map,
+              contentDescription = null,
+              tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+              modifier = Modifier.size(36.dp),
+            )
+          }
+
+          Column(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(6.dp),
+          ) {
+            Text(
+              text = "No survey area set",
+              style = MaterialTheme.typography.titleSmall,
+              fontWeight = FontWeight.SemiBold,
+            )
+            Text(
+              text = "Search for a location, town, region, or enter coordinates to set the survey boundary.",
+              style = MaterialTheme.typography.bodySmall,
+              color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            OutlinedButton(
+              onClick = { showSearchDialog = true },
+              shape = RoundedCornerShape(8.dp),
+              modifier = Modifier.padding(top = 4.dp),
+            ) {
+              Icon(Icons.Default.Search, contentDescription = null, modifier = Modifier.size(16.dp))
+              Spacer(Modifier.width(6.dp))
+              Text("Search and set area")
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Small, static (strictly non-interactive: not pan-able or zoom-able) map thumbnail displaying
+ * a real satellite basemap (on Web via Mapbox GL JS) with the survey area's boundary polygon
+ * and center point rendered on top using Web Mercator projection.
+ */
+@Composable
+private fun SurveyAreaThumbnail(
+  area: SurveyArea,
+  modifier: Modifier = Modifier,
+) {
+  val colors = MaterialTheme.colorScheme
+  val boundaryColor = colors.primary
+  val boundaryFill = colors.primary.copy(alpha = 0.28f)
+  val gridColor = colors.outlineVariant.copy(alpha = 0.45f)
+  val scrollState = LocalPaneScrollState.current
+  val scrollValue = scrollState?.value ?: 0
+  var rawWindowTop by remember { mutableStateOf<Float?>(null) }
+  val density = LocalDensity.current.density
+
+  var viewW by remember { mutableStateOf(0.0) }
+  var viewH by remember { mutableStateOf(0.0) }
+  var windowLeft by remember { mutableStateOf(0f) }
+  var windowTop by remember { mutableStateOf(0f) }
+
+  val pts = if (area.boundaries.isNotEmpty()) area.boundaries else listOf(area.center)
+  val camera = remember(area, pts, viewW, viewH) {
+    if (viewW > 4 && viewH > 4) {
+      val minLng = pts.minOf { it.lng }
+      val maxLng = pts.maxOf { it.lng }
+      val lngSpan = maxLng - minLng
+      // If the bounding box spans > 180° longitude (e.g. whole countries across anti-meridian
+      // or world bounds), fitting raw Mercator coordinates incorrectly averages to the Prime
+      // Meridian (0° lon, Europe). In such broad cases or when area.zoom is calibrated, anchor
+      // on the true geographic center.
+      if (lngSpan >= 180.0) {
+        MapCamera(area.center, area.zoom)
+      } else {
+        val fitted = MapCamera.fit(
+          points = pts,
+          width = viewW,
+          height = viewH,
+          padding = 16.0,
+        )
+        // Keep fitted zoom but guarantee the thumbnail centers directly over the surveyed place
+        fitted.copy(center = area.center)
+      }
+    } else {
+      MapCamera(area.center, area.zoom)
+    }
+  }
+
+  // React to scroll offset changes so windowTop updates immediately as the page scrolls
+  val baseTop = rawWindowTop
+  if (baseTop != null) {
+    val adjustedTop = baseTop - scrollValue
+    if (adjustedTop != windowTop) {
+      windowTop = adjustedTop
+    }
+  }
+
+  val showBasemap = isLayerEditorBasemapSupported
+  SideEffect {
+    if (viewW > 4 && viewH > 4 && showBasemap && (windowTop + viewH.toFloat()) > 0f) {
+      syncLayerEditorBasemap(
+        leftPx = windowLeft,
+        topPx = windowTop,
+        widthPx = viewW.toFloat(),
+        heightPx = viewH.toFloat(),
+        borderRadiusPx = 8f,
+        centerLat = camera.center.lat,
+        centerLng = camera.center.lng,
+        zoom = camera.zoom,
+        basemap = "SATELLITE",
+      )
+    } else {
+      hideLayerEditorBasemap()
+    }
+  }
+  DisposableEffect(Unit) {
+    onDispose { hideLayerEditorBasemap() }
+  }
+
+  Surface(
+    modifier =
+      modifier
+        .clip(RoundedCornerShape(8.dp))
+        .onGloballyPositioned { coords ->
+          val pos = coords.positionInWindow()
+          val currentTop = pos.y / density
+          windowLeft = pos.x / density
+          windowTop = currentTop
+          rawWindowTop = currentTop + (scrollState?.value ?: 0)
+          viewW = coords.size.width / density.toDouble()
+          viewH = coords.size.height / density.toDouble()
+        },
+    shape = RoundedCornerShape(8.dp),
+    color = Color.Transparent,
+    shadowElevation = 1.dp,
+  ) {
+    Canvas(modifier = Modifier.fillMaxSize()) {
+      if (showBasemap) {
+        // Punch a transparent hole so the real Mapbox basemap behind the Compose canvas shows.
+        drawRect(color = Color.Transparent, blendMode = BlendMode.Clear)
+      } else {
+        // Fallback for JVM: subtle background grid
+        drawRect(color = colors.surfaceContainerHigh)
+        val step = 24.dp.toPx()
+        var gx = 0f
+        while (gx < size.width) {
+          drawLine(gridColor, Offset(gx, 0f), Offset(gx, size.height), 1f)
+          gx += step
+        }
+        var gy = 0f
+        while (gy < size.height) {
+          drawLine(gridColor, Offset(0f, gy), Offset(size.width, gy), 1f)
+          gy += step
+        }
+      }
+
+      val w = size.width / density.toDouble()
+      val h = size.height / density.toDouble()
+      fun proj(p: LatLng): Offset {
+        val sp = camera.project(p, w, h)
+        return Offset((sp.x * density).toFloat(), (sp.y * density).toFloat())
+      }
+
+      // Draw boundary polygon (fill + stroke)
+      if (area.boundaries.size >= 3) {
+        val screenOffsets = area.boundaries.map(::proj)
+        val path =
+          Path().apply {
+            moveTo(screenOffsets.first().x, screenOffsets.first().y)
+            screenOffsets.drop(1).forEach { lineTo(it.x, it.y) }
+            close()
+          }
+        drawPath(path, color = boundaryFill)
+        drawPath(path, color = boundaryColor, style = Stroke(width = 2.5.dp.toPx()))
+
+        // Vertex handles
+        screenOffsets.forEach { pt ->
+          drawCircle(Color.White, radius = 3.5.dp.toPx(), center = pt)
+          drawCircle(boundaryColor, radius = 3.5.dp.toPx(), center = pt, style = Stroke(width = 1.5.dp.toPx()))
+        }
+      }
+
+      // Draw center marker
+      val centerOffset = proj(area.center)
+      drawCircle(Color.White, radius = 5.dp.toPx(), center = centerOffset)
+      drawCircle(boundaryColor, radius = 4.dp.toPx(), center = centerOffset)
+    }
+  }
+}
+
+/**
+ * Dialog allowing the user to search the Mapbox Places API (or enter raw GPS coordinates)
+ * to define the survey area boundary.
+ */
+@Composable
+private fun SurveyAreaPickerDialog(
+  surveyId: String,
+  surveyLocationLabel: String,
+  surveyCenter: LatLng,
+  currentAreaName: String?,
+  onSelectArea: (SurveyArea) -> Unit,
+  onDismiss: () -> Unit,
+) {
+  var searchQuery by remember { mutableStateOf("") }
+  var isSearching by remember { mutableStateOf(false) }
+  var remotePlaces by remember { mutableStateOf<List<SurveyPlaceItem>>(emptyList()) }
+  val localPlaces = remember { PrototypeFakePlacesData.defaultSurveyPlaces() }
+  val placesDataSource = remember { MapboxPlacesDataSource() }
+
+  // Query live Mapbox Places API when user types a query (with debounce)
+  LaunchedEffect(searchQuery, surveyId) {
+    val q = searchQuery.trim()
+    if (q.isBlank()) {
+      remotePlaces = emptyList()
+      isSearching = false
+      return@LaunchedEffect
+    }
+    isSearching = true
+    delay(250) // Debounce rapid keystrokes
+    placesDataSource.searchPlaces(
+      surveyId = surveyId,
+      query = q,
+      isAirplaneMode = false,
+      defaultRegionSubtitle = surveyLocationLabel,
+      centerLongitude = surveyCenter.lng,
+      centerLatitude = surveyCenter.lat,
+    ) { results ->
+      remotePlaces = results
+      isSearching = false
+    }
+  }
+
+  val matchingPlaces = remember(searchQuery, remotePlaces, localPlaces) {
+    val q = searchQuery.trim()
+    val directCoords = parsePlaceCoordinates(q)
+    val customPlace =
+      if (directCoords != null) {
+        val (lat, lng) = directCoords
+        SurveyPlaceItem(
+          id = "custom-coords",
+          name = "GPS: ${formatFixed(lat, 4)}°, ${formatFixed(lng, 4)}°",
+          categoryLabel = "Custom Coordinates",
+          regionSubtitle = "Direct coordinates input",
+          coordinatesLabel = "${formatFixed(lat, 4)}, ${formatFixed(lng, 4)}",
+          normalizedX = 0.5f,
+          normalizedY = 0.5f,
+          latitude = lat,
+          longitude = lng,
+          sourceLabel = "Coordinates",
+        )
+      } else {
+        null
+      }
+
+    if (q.isEmpty()) {
+      localPlaces
+    } else {
+      // Prioritize remote Mapbox Places API results, merged with matching local gazetteer entries
+      val combined = LinkedHashMap<String, SurveyPlaceItem>()
+      if (customPlace != null) {
+        combined[customPlace.id] = customPlace
+      }
+      for (apiPlace in remotePlaces) {
+        combined[apiPlace.id] = apiPlace
+      }
+      val filteredLocal =
+        localPlaces.filter { place ->
+          place.name.contains(q, ignoreCase = true) ||
+            place.categoryLabel.contains(q, ignoreCase = true) ||
+            place.regionSubtitle.contains(q, ignoreCase = true) ||
+            place.coordinatesLabel.contains(q, ignoreCase = true)
+        }
+      for (localPlace in filteredLocal) {
+        if (combined.values.none { it.name.equals(localPlace.name, ignoreCase = true) }) {
+          combined[localPlace.id] = localPlace
+        }
+      }
+      combined.values.toList()
+    }
+  }
+
+  AlertDialog(
+    onDismissRequest = onDismiss,
+    title = {
+      Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+      ) {
+        Icon(Icons.Default.Map, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+        Text("Select Survey Area")
+      }
+    },
+    text = {
+      Column(
+        modifier = Modifier.fillMaxWidth().heightIn(min = 360.dp, max = 520.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+      ) {
+        OutlinedTextField(
+          value = searchQuery,
+          onValueChange = { searchQuery = it },
+          label = { Text("Search places or enter coordinates") },
+          placeholder = { Text("e.g. Nairobi, Othaya, Chinga Dam, or -0.419, 36.950") },
+          leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
+          trailingIcon = {
+            if (isSearching) {
+              CircularProgressIndicator(
+                modifier = Modifier.size(18.dp),
+                strokeWidth = 2.dp,
+              )
+            } else if (searchQuery.isNotEmpty()) {
+              IconButton(onClick = { searchQuery = "" }) {
+                Icon(Icons.Default.Close, contentDescription = "Clear search")
+              }
+            }
+          },
+          singleLine = true,
+          modifier = Modifier.fillMaxWidth(),
+        )
+
+        Row(
+          modifier = Modifier.fillMaxWidth(),
+          horizontalArrangement = Arrangement.SpaceBetween,
+          verticalAlignment = Alignment.CenterVertically,
+        ) {
+          Text(
+            text =
+              if (searchQuery.isBlank()) "Suggested survey locations:"
+              else "${matchingPlaces.size} locations found:",
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+          )
+        }
+
+        Surface(
+          shape = RoundedCornerShape(8.dp),
+          color = MaterialTheme.colorScheme.surfaceContainerLow,
+          modifier = Modifier.weight(1f).fillMaxWidth(),
+        ) {
+          if (matchingPlaces.isEmpty()) {
+            Box(modifier = Modifier.fillMaxSize().padding(24.dp), contentAlignment = Alignment.Center) {
+              Text(
+                if (isSearching) "Searching places..." else "No places matching “$searchQuery”",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+              )
+            }
+          } else {
+            LazyColumn(modifier = Modifier.fillMaxSize()) {
+              items(matchingPlaces, key = { it.id }) { place ->
+                val isSelected = currentAreaName != null && place.name.equals(currentAreaName, ignoreCase = true)
+                Row(
+                  modifier =
+                    Modifier.fillMaxWidth()
+                      .clickable(enabled = !isSelected) {
+                        val area = placeToSurveyArea(place)
+                        onSelectArea(area)
+                        onDismiss()
+                      }
+                      .padding(horizontal = 14.dp, vertical = 10.dp),
+                  verticalAlignment = Alignment.CenterVertically,
+                  horizontalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                  Icon(
+                    Icons.Default.LocationOn,
+                    contentDescription = null,
+                    tint = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(24.dp),
+                  )
+                  Column(modifier = Modifier.weight(1f)) {
+                    Row(
+                      verticalAlignment = Alignment.CenterVertically,
+                      horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    ) {
+                      Text(
+                        text = place.name,
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.Medium,
+                      )
+                      val cleanSource =
+                        if (place.sourceLabel.equals("Places API", ignoreCase = true)) "Online"
+                        else place.sourceLabel
+                      if (cleanSource.isNotBlank()) {
+                        Text(
+                          text = "• $cleanSource",
+                          style = MaterialTheme.typography.labelSmall,
+                          color = MaterialTheme.colorScheme.primary,
+                        )
+                      }
+                    }
+                    Text(
+                      text = "${place.categoryLabel} • ${place.regionSubtitle}",
+                      style = MaterialTheme.typography.bodySmall,
+                      color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    Text(
+                      text = place.coordinatesLabel,
+                      style = MaterialTheme.typography.labelSmall.copy(fontFamily = FontFamily.Monospace),
+                      color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
+                    )
+                  }
+                  if (isSelected) {
+                    GroundTonalBadge(text = "Selected", tone = GroundBadgeTone.PRIMARY)
+                  } else {
+                    OutlinedButton(
+                      onClick = {
+                        val area = placeToSurveyArea(place)
+                        onSelectArea(area)
+                        onDismiss()
+                      },
+                      shape = RoundedCornerShape(6.dp),
+                    ) {
+                      Text("Select")
+                    }
+                  }
+                }
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+              }
+            }
+          }
+        }
+      }
+    },
+    confirmButton = {},
+    dismissButton = {
+      TextButton(onClick = onDismiss) {
+        Text("Cancel")
+      }
+    },
+  )
+}
+
+/**
+ * Converts a [SurveyPlaceItem] to a [SurveyArea] with appropriate polygon boundary vertices.
+ */
+private fun placeToSurveyArea(place: SurveyPlaceItem): SurveyArea {
+  val lat = place.latitude
+  val lng = place.longitude
+  val boundaries =
+    if (place.bboxMinLat != null && place.bboxMinLng != null && place.bboxMaxLat != null && place.bboxMaxLng != null) {
+      val minLng = place.bboxMinLng
+      val maxLng = place.bboxMaxLng
+      val minLat = place.bboxMinLat
+      val maxLat = place.bboxMaxLat
+      // If a country bounding box spans global bounds [-180, 180], restrict the boundary
+      // polygon to reasonable geographic extent centered around the place center
+      // so it does not wrap the whole globe into an invalid full-world box.
+      if (maxLng - minLng >= 350.0) {
+        val spanLat = (maxLat - minLat).coerceAtLeast(10.0)
+        val halfLng = (spanLat * 1.4).coerceAtMost(35.0)
+        listOf(
+          LatLng(maxLat, lng - halfLng),
+          LatLng(maxLat, lng + halfLng),
+          LatLng(minLat, lng + halfLng),
+          LatLng(minLat, lng - halfLng),
+        )
+      } else {
+        listOf(
+          LatLng(maxLat, minLng),
+          LatLng(maxLat, maxLng),
+          LatLng(minLat, maxLng),
+          LatLng(minLat, minLng),
+        )
+      }
+    } else {
+      val delta = 0.015
+      listOf(
+        LatLng(lat + delta, lng - delta),
+        LatLng(lat + delta, lng + delta),
+        LatLng(lat - delta, lng + delta),
+        LatLng(lat - delta, lng - delta),
+      )
+    }
+  return SurveyArea(
+    name = place.name,
+    boundaries = boundaries,
+    center = LatLng(lat, lng),
+    zoom = place.targetZoom.toDouble(),
+    sourceLabel = place.sourceLabel,
+  )
+}
+
+/**
+ * Searchable dialog allowing the user to search the full catalog of ISO 639-3 languages
+ * by code or name and add them to the survey.
+ */
+@Composable
+private fun LanguagePickerDialog(
+  selectedCodes: Set<String>,
+  onAddLanguage: (IsoLanguage) -> Unit,
+  onDismiss: () -> Unit,
+) {
+  var searchQuery by remember { mutableStateOf("") }
+  val searchResults = remember(searchQuery) {
+    IsoLanguages.search(searchQuery, limit = 40)
+  }
+
+  AlertDialog(
+    onDismissRequest = onDismiss,
+    title = {
+      Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+      ) {
+        Icon(Icons.Default.Language, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+        Text("Select Language")
+      }
+    },
+    text = {
+      Column(
+        modifier = Modifier.fillMaxWidth().heightIn(min = 360.dp, max = 500.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+      ) {
+        OutlinedTextField(
+          value = searchQuery,
+          onValueChange = { searchQuery = it },
+          label = { Text("Search by language name") },
+          placeholder = { Text("e.g. Swahili, English, Spanish, Amharic...") },
+          leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
+          trailingIcon = {
+            if (searchQuery.isNotEmpty()) {
+              IconButton(onClick = { searchQuery = "" }) {
+                Icon(Icons.Default.Close, contentDescription = "Clear search")
+              }
+            }
+          },
+          singleLine = true,
+          modifier = Modifier.fillMaxWidth(),
+        )
+
+        Text(
+          text = if (searchQuery.isBlank()) "Popular languages & catalog preview:" else "${searchResults.size} matches found:",
+          style = MaterialTheme.typography.labelSmall,
+          color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+
+        Surface(
+          shape = RoundedCornerShape(8.dp),
+          color = MaterialTheme.colorScheme.surfaceContainerLow,
+          modifier = Modifier.weight(1f).fillMaxWidth(),
+        ) {
+          if (searchResults.isEmpty()) {
+            Box(modifier = Modifier.fillMaxSize().padding(24.dp), contentAlignment = Alignment.Center) {
+              Text(
+                "No languages matching “$searchQuery”",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+              )
+            }
+          } else {
+            LazyColumn(modifier = Modifier.fillMaxSize()) {
+              items(searchResults, key = { it.id }) { lang ->
+                val isAlreadySelected =
+                  selectedCodes.any { it.equals(lang.code, ignoreCase = true) || it.equals(lang.id, ignoreCase = true) }
+                Row(
+                  modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable(enabled = !isAlreadySelected) {
+                      onAddLanguage(lang)
+                      onDismiss()
+                    }
+                    .padding(horizontal = 14.dp, vertical = 10.dp),
+                  verticalAlignment = Alignment.CenterVertically,
+                  horizontalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                  Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                      text = lang.name,
+                      style = MaterialTheme.typography.bodyMedium,
+                      fontWeight = FontWeight.Medium,
+                    )
+                  }
+                  if (isAlreadySelected) {
+                    GroundTonalBadge(text = "Added", tone = GroundBadgeTone.PRIMARY)
+                  } else {
+                    OutlinedButton(
+                      onClick = {
+                        onAddLanguage(lang)
+                        onDismiss()
+                      },
+                      shape = RoundedCornerShape(6.dp),
+                    ) {
+                      Text("Select")
+                    }
+                  }
+                }
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+              }
+            }
+          }
+        }
+      }
+    },
+    confirmButton = {},
+    dismissButton = {
+      TextButton(onClick = onDismiss) { Text("Close") }
+    },
+  )
 }
 
 // ---------------------------------------------------------------------------------------------

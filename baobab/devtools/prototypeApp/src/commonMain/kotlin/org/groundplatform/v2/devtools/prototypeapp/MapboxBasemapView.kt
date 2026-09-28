@@ -144,6 +144,7 @@ fun MapboxBasemapView(
   animatedShiftY: Float,
   modifier: Modifier = Modifier,
   collapseSheetOnBackgroundTap: Boolean = true,
+  showNavigationOverlay: Boolean = true,
 ) {
   val density = LocalDensity.current.density
   var viewportLeftCssPx by remember { mutableStateOf(0f) }
@@ -171,7 +172,7 @@ fun MapboxBasemapView(
   val visibleSubGeometries = emptyList<SubmissionGeometryPolygon>()
   val selectedEntity = state.selectedEntity
   val selectedSubmission = state.selectedSubmission
-  val activeNav = state.activeNavigation
+  val activeNav = if (showNavigationOverlay) state.activeNavigation else null
   val isClusteringActive = state.isMapClusteringActive
   val clusterRadius = state.mapClusterRadiusNormalized
   val mapClusters =

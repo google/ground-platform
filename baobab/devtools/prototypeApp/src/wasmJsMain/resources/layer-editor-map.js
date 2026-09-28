@@ -56,6 +56,25 @@ window.GroundLayerEditorMap = (function () {
     return container;
   }
 
+  function resolveAccessToken() {
+    try {
+      const params = new URLSearchParams(window.location.search || '');
+      const fromQuery = params.get('mapbox_token');
+      if (fromQuery && fromQuery.startsWith('pk.')) return fromQuery;
+      if (
+        window.MAPBOX_ACCESS_TOKEN &&
+        String(window.MAPBOX_ACCESS_TOKEN).startsWith('pk.')
+      ) {
+        return String(window.MAPBOX_ACCESS_TOKEN);
+      }
+      const stored =
+        window.localStorage &&
+        window.localStorage.getItem('GROUND_MAPBOX_TOKEN');
+      if (stored && stored.startsWith('pk.')) return stored;
+    } catch (e) {}
+    return '';
+  }
+
   function rasterSource(url) {
     return { type: 'raster', tiles: [url], tileSize: 256, maxzoom: 19 };
   }
@@ -68,6 +87,9 @@ window.GroundLayerEditorMap = (function () {
         satellite: rasterSource(
           'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
         ),
+        labels: rasterSource(
+          'https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}'
+        ),
         terrain: rasterSource(
           'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}'
         ),
@@ -75,15 +97,31 @@ window.GroundLayerEditorMap = (function () {
       layers: [
         { id: 'bg', type: 'background', paint: { 'background-color': '#1B2A22' } },
         { id: 'satellite', type: 'raster', source: 'satellite', layout: { visibility: 'visible' } },
+        { id: 'satellite-labels', type: 'raster', source: 'labels', layout: { visibility: 'visible' } },
         { id: 'terrain', type: 'raster', source: 'terrain', layout: { visibility: 'none' } },
       ],
     };
   }
 
   function applyBasemap(basemap) {
-    if (!map || !map.isStyleLoaded() || basemap === lastBasemap) return;
+    if (!map || basemap === lastBasemap) return;
+    const token = resolveAccessToken();
+    if (token) {
+      const styleUrl =
+        basemap === 'SATELLITE'
+          ? 'mapbox://styles/mapbox/standard-satellite'
+          : 'mapbox://styles/mapbox/outdoors-v12';
+      try {
+        map.setStyle(styleUrl);
+        lastBasemap = basemap;
+        return;
+      } catch (e) {}
+    }
+    if (!map.isStyleLoaded()) return;
     try {
-      map.setLayoutProperty('satellite', 'visibility', basemap === 'SATELLITE' ? 'visible' : 'none');
+      const showSatellite = basemap === 'SATELLITE';
+      map.setLayoutProperty('satellite', 'visibility', showSatellite ? 'visible' : 'none');
+      map.setLayoutProperty('satellite-labels', 'visibility', showSatellite ? 'visible' : 'none');
       map.setLayoutProperty('terrain', 'visibility', basemap === 'TERRAIN' ? 'visible' : 'none');
       lastBasemap = basemap;
     } catch (e) {}
@@ -102,9 +140,17 @@ window.GroundLayerEditorMap = (function () {
       el.style.borderRadius = radius + 'px';
       if (typeof window.mapboxgl === 'undefined') return;
       if (!map) {
+        const token = resolveAccessToken();
+        if (token) {
+          window.mapboxgl.accessToken = token;
+        }
+        const initialStyle =
+          token && basemap === 'SATELLITE'
+            ? 'mapbox://styles/mapbox/standard-satellite'
+            : buildStyle();
         map = new window.mapboxgl.Map({
           container: el,
-          style: buildStyle(),
+          style: initialStyle,
           center: [lng, lat],
           zoom: zoom,
           interactive: false,

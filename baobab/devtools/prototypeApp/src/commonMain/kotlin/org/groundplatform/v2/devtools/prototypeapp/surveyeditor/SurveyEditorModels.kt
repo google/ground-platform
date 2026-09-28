@@ -15,6 +15,23 @@ package org.groundplatform.v2.devtools.prototypeapp.surveyeditor
 
 import org.groundplatform.v2.devtools.prototypeapp.formeditor.FormEditorValidator
 
+/** Defines the geographic survey area and boundaries for the survey. */
+data class SurveyArea(
+  val name: String,
+  val boundaries: List<LatLng>,
+  val center: LatLng =
+    if (boundaries.isNotEmpty()) {
+      LatLng(
+        lat = boundaries.map { it.lat }.average(),
+        lng = boundaries.map { it.lng }.average(),
+      )
+    } else {
+      LatLng(0.0, 0.0)
+    },
+  val zoom: Double = 12.0,
+  val sourceLabel: String = "Selected boundary",
+)
+
 /** Survey-level metadata (mirrors the descriptive fields of `SurveyDef`). */
 data class SurveyDetails(
   val surveyId: String,
@@ -22,6 +39,7 @@ data class SurveyDetails(
   val description: String,
   val defaultLanguage: String = "en",
   val supportedLanguages: List<String> = listOf("en"),
+  val surveyArea: SurveyArea? = null,
 )
 
 /** Collaborator roles (mirrors `groundplatform.v2.survey.Role`). */
@@ -189,10 +207,14 @@ data class EntityDataset(
   val keyProperty: String,
   val labelProperty: String,
   val fieldCreationEnabled: Boolean = false,
+  val linkedFormKey: String? = null,
   val properties: List<EntityProperty>,
   val rows: List<EntityRow> = emptyList(),
   val style: LayerStyle = LayerStyle(),
 ) {
+  val isLinkedToForm: Boolean
+    get() = linkedFormKey != null
+
   fun property(name: String): EntityProperty? = properties.firstOrNull { it.name == name }
 
   fun labelOf(row: EntityRow): String =
@@ -306,6 +328,19 @@ object SurveyEditorSamples {
       description =
         "Monitor shade tree cover and parcel boundaries across smallholder coffee farms.",
       supportedLanguages = listOf("en", "sw"),
+      surveyArea =
+        SurveyArea(
+          name = "Othaya Sub-County, Nyeri",
+          center = LatLng(-0.4192, 36.9498),
+          zoom = 12.5,
+          boundaries =
+            listOf(
+              LatLng(-0.3960, 36.9220),
+              LatLng(-0.3960, 36.9780),
+              LatLng(-0.4420, 36.9780),
+              LatLng(-0.4420, 36.9220),
+            ),
+        ),
     )
 
   fun sharing() =

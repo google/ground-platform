@@ -17,6 +17,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import kotlin.random.Random
+import org.groundplatform.v2.devtools.prototypeapp.formeditor.EditorChoice
+import org.groundplatform.v2.devtools.prototypeapp.formeditor.EditorForm
+import org.groundplatform.v2.devtools.prototypeapp.formeditor.EditorQuestion
+import org.groundplatform.v2.devtools.prototypeapp.formeditor.EditorQuestionType
 import org.groundplatform.v2.devtools.prototypeapp.formeditor.FormEditorSamples
 import org.groundplatform.v2.devtools.prototypeapp.formeditor.FormEditorState
 import org.groundplatform.v2.devtools.prototypeapp.formeditor.moved
@@ -101,6 +105,58 @@ class SurveyEditorState {
     details = transform(details)
   }
 
+  /**
+   * Adds a language to the supported languages list if not already present.
+   * If [defaultLanguage] is currently empty, sets it to this language as well.
+   */
+  fun addSupportedLanguage(code: String) {
+    val normalized = code.trim().lowercase()
+    if (normalized.isEmpty()) return
+    updateDetails { current ->
+      val currentList = current.supportedLanguages
+      val newList = if (normalized in currentList) currentList else currentList + normalized
+      val defaultLang = current.defaultLanguage.ifEmpty { normalized }
+      current.copy(supportedLanguages = newList, defaultLanguage = defaultLang)
+    }
+  }
+
+  /**
+   * Removes a language from supported languages.
+   * If the removed language was the default language, resets default language
+   * to the first remaining supported language or empty string.
+   */
+  fun removeSupportedLanguage(code: String) {
+    val normalized = code.trim().lowercase()
+    updateDetails { current ->
+      val newList = current.supportedLanguages.filterNot { it.lowercase() == normalized }
+      val newDefault =
+        if (current.defaultLanguage.lowercase() == normalized) {
+          newList.firstOrNull() ?: ""
+        } else {
+          current.defaultLanguage
+        }
+      current.copy(supportedLanguages = newList, defaultLanguage = newDefault)
+    }
+  }
+
+  /**
+   * Sets the default language. Also ensures the language is included in [supportedLanguages].
+   */
+  fun setDefaultLanguage(code: String) {
+    val normalized = code.trim().lowercase()
+    if (normalized.isEmpty()) return
+    updateDetails { current ->
+      val currentList = current.supportedLanguages
+      val newList = if (normalized in currentList) currentList else currentList + normalized
+      current.copy(defaultLanguage = normalized, supportedLanguages = newList)
+    }
+  }
+
+  /** Sets or clears the survey area and boundaries. */
+  fun setSurveyArea(area: SurveyArea?) {
+    updateDetails { it.copy(surveyArea = area) }
+  }
+
   fun updateSharing(transform: (SharingSettings) -> SharingSettings) {
     sharing = transform(sharing)
   }
@@ -183,15 +239,189 @@ class SurveyEditorState {
 
   fun addForm() {
     val title = uniqueTitle("New form", forms.map { it.editor.form.title })
-    val id = uniqueId(slugify(title), forms.map { it.editor.form.formId })
-    val entry = SurveyFormEntry(newKey("f"), FormEditorState(FormEditorSamples.blank(id, title)))
+    val formId = uniqueId(slugify(title), forms.map { it.editor.form.formId })
+    val formKey = newKey("f")
+    val datasetKey = newKey("d")
+
+    val blankForm = FormEditorSamples.blank(formId, title)
+    val entry = SurveyFormEntry(formKey, FormEditorState(blankForm))
+
+    // By default, create a linked entity (Map layer) for the new form.
+    val linkedDataset =
+      EntityDataset(
+        key = datasetKey,
+        kind = DatasetKind.MAP_LAYER,
+        id = uniqueId(slugify(title), datasets.map { it.id }),
+        displayName = title,
+        geometryKind = GeometryKind.POINT,
+        keyProperty = "id",
+        labelProperty = "id",
+        linkedFormKey = formKey,
+        properties = listOf(EntityProperty("id", "ID", PropertyType.TEXT, required = true)) +
+          blankForm.questions.filter { it.type != EditorQuestionType.NOTE }.map { q ->
+            EntityProperty(
+              name = q.name,
+              label = q.label.ifBlank { q.name },
+              type = when {
+                q.type == EditorQuestionType.INTEGER -> PropertyType.INTEGER
+                q.type == EditorQuestionType.DECIMAL -> PropertyType.DECIMAL
+                q.type == EditorQuestionType.DATE -> PropertyType.DATE
+                else -> PropertyType.TEXT
+              },
+              required = q.required,
+            )
+          },
+      )
+
+    datasets = datasets + linkedDataset
     forms = forms + entry
     section = SurveyEditorSection.Form(entry.key)
+  }
+
+  /** Creates a new Map layer or Data table backed by and linked to [formKey]. */
+  fun createDatasetForForm(formKey: String, kind: DatasetKind = DatasetKind.MAP_LAYER) {
+    val formEntry = forms.firstOrNull { it.key == formKey } ?: return
+    val form = formEntry.editor.form
+    val datasetKey = newKey("d")
+    val title = uniqueTitle(form.title.ifBlank { "New ${kind.singular.lowercase()}" }, datasets.map { it.displayName })
+    val datasetId = uniqueId(slugify(title), datasets.map { it.id })
+
+    val formProps = form.questions.filter { it.type != EditorQuestionType.NOTE }.map { q ->
+      EntityProperty(
+        name = q.name,
+        label = q.label.ifBlank { q.name },
+        type = when {
+          q.type == EditorQuestionType.INTEGER -> PropertyType.INTEGER
+          q.type == EditorQuestionType.DECIMAL -> PropertyType.DECIMAL
+          q.type == EditorQuestionType.DATE -> PropertyType.DATE
+          else -> PropertyType.TEXT
+        },
+        required = q.required,
+      )
+    }
+
+    val idProp = EntityProperty("id", "ID", PropertyType.TEXT, required = true)
+    val properties = if (formProps.any { it.name == "id" }) formProps else listOf(idProp) + formProps
+
+    val dataset =
+      EntityDataset(
+        key = datasetKey,
+        kind = kind,
+        id = datasetId,
+        displayName = title,
+        geometryKind = GeometryKind.POINT,
+        keyProperty = properties.first().name,
+        labelProperty = properties.getOrNull(1)?.name ?: properties.first().name,
+        linkedFormKey = formKey,
+        properties = properties,
+      )
+
+    datasets = datasets + dataset
+    section = SurveyEditorSection.Dataset(dataset.key)
+  }
+
+  /** Creates a new Form backed by and linked to [datasetKey]. */
+  fun createFormForDataset(datasetKey: String) {
+    val dataset = datasets.firstOrNull { it.key == datasetKey } ?: return
+    val formKey = newKey("f")
+    val title = uniqueTitle("${dataset.displayName} form", forms.map { it.editor.form.title })
+    val formId = uniqueId(slugify(title), forms.map { it.editor.form.formId })
+
+    var questionIdx = 1
+    val questions = mutableListOf<EditorQuestion>()
+
+    if (dataset.kind == DatasetKind.MAP_LAYER) {
+      questions += EditorQuestion(
+        key = "q${questionIdx++}",
+        name = "location",
+        type = EditorQuestionType.LOCATION,
+        label = "Location",
+        required = true,
+      )
+    }
+
+    dataset.properties.forEach { prop ->
+      val qType = when (prop.type) {
+        PropertyType.INTEGER -> EditorQuestionType.INTEGER
+        PropertyType.DECIMAL -> EditorQuestionType.DECIMAL
+        PropertyType.DATE -> EditorQuestionType.DATE
+        PropertyType.BOOLEAN -> EditorQuestionType.SELECT_ONE
+        PropertyType.TEXT -> EditorQuestionType.TEXT
+      }
+      val choices = if (prop.type == PropertyType.BOOLEAN) {
+        listOf(EditorChoice("yes", "Yes"), EditorChoice("no", "No"))
+      } else {
+        emptyList()
+      }
+      questions += EditorQuestion(
+        key = "q${questionIdx++}",
+        name = prop.name,
+        type = qType,
+        label = prop.label,
+        required = prop.required,
+        choices = choices,
+      )
+    }
+
+    val form = EditorForm(formId = formId, title = title, questions = questions)
+    val formEntry = SurveyFormEntry(formKey, FormEditorState(form))
+
+    // Update dataset to link to this form
+    updateDataset(datasetKey) { it.copy(linkedFormKey = formKey) }
+
+    forms = forms + formEntry
+    section = SurveyEditorSection.Form(formKey)
+  }
+
+  /** Unlinks [datasetKey] from its linked form, making its schema directly editable. */
+  fun unlinkDataset(datasetKey: String) {
+    updateDataset(datasetKey) { it.copy(linkedFormKey = null) }
+  }
+
+  /** Synchronizes the schema of all datasets linked to [formEntry] with the form's questions. */
+  fun syncDatasetsLinkedToForm(formEntry: SurveyFormEntry) {
+    val form = formEntry.editor.form
+    val formProps = form.questions.filter { it.type != EditorQuestionType.NOTE }.map { q ->
+      EntityProperty(
+        name = q.name,
+        label = q.label.ifBlank { q.name },
+        type = when {
+          q.type == EditorQuestionType.INTEGER -> PropertyType.INTEGER
+          q.type == EditorQuestionType.DECIMAL -> PropertyType.DECIMAL
+          q.type == EditorQuestionType.DATE -> PropertyType.DATE
+          else -> PropertyType.TEXT
+        },
+        required = q.required,
+      )
+    }
+
+    val linkedDatasets = datasets.filter { it.linkedFormKey == formEntry.key }
+    if (linkedDatasets.isEmpty()) return
+
+    datasets = datasets.map { d ->
+      if (d.linkedFormKey != formEntry.key) d
+      else {
+        // Retain existing key property if not in form, or ensure at least one property exists
+        val idProp = d.properties.firstOrNull { it.name == d.keyProperty }
+          ?: EntityProperty("id", "ID", PropertyType.TEXT, required = true)
+        val combinedProps = if (formProps.any { it.name == idProp.name }) formProps else listOf(idProp) + formProps
+        val keyProp = if (combinedProps.any { it.name == d.keyProperty }) d.keyProperty else combinedProps.first().name
+        val labelProp = if (combinedProps.any { it.name == d.labelProperty }) d.labelProperty else keyProp
+
+        d.copy(
+          properties = combinedProps,
+          keyProperty = keyProp,
+          labelProperty = labelProp,
+        )
+      }
+    }
   }
 
   fun deleteForm(key: String) {
     val index = forms.indexOfFirst { it.key == key }
     if (index < 0) return
+    // Unlink any datasets linked to this deleted form
+    datasets = datasets.map { if (it.linkedFormKey == key) it.copy(linkedFormKey = null) else it }
     forms = forms.filterNot { it.key == key }
     section =
       forms.getOrNull(index.coerceAtMost(forms.lastIndex))?.let { SurveyEditorSection.Form(it.key) }

@@ -215,4 +215,30 @@ class WebDashboardPageTest {
     assertFalse(testState.isDrawerOpen)
     assertEquals(MainDrawerSubView.NONE, testState.activeDrawerSubView)
   }
+
+
+  @Test
+  fun layersSheet_togglesStateAndControlsBasemapAndLayerVisibility() {
+    val testState = PrototypeAppState()
+    assertFalse(testState.isLayersSheetOpen)
+
+    testState.updateLayersSheetOpen(true)
+    assertTrue(testState.isLayersSheetOpen)
+
+    testState.selectBasemapType(BasemapType.SATELLITE)
+    assertEquals(BasemapType.SATELLITE, testState.selectedBasemapType)
+
+    val initialOfflineVisibility = testState.isOfflineBasemapVisible
+    testState.toggleOfflineBasemapVisibility()
+    assertEquals(!initialOfflineVisibility, testState.isOfflineBasemapVisible)
+
+    val firstLayer = testState.entityDatasetLayers.first()
+    val initialLayerVisibility = firstLayer.isVisible
+    testState.toggleLayerVisibility(firstLayer.id)
+    assertEquals(!initialLayerVisibility, testState.entityDatasetLayers.first { it.id == firstLayer.id }.isVisible)
+
+    testState.updateLayersSheetOpen(false)
+    assertFalse(testState.isLayersSheetOpen)
+  }
 }
+

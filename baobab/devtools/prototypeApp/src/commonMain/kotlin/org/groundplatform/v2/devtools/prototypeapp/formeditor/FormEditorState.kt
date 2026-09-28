@@ -79,8 +79,11 @@ class FormEditorState(initialForm: EditorForm = FormEditorSamples.shadeTreeVisit
     form = form.copy(formId = formId)
   }
 
-  /** Inserts a new [type] question after the selected one (or at the end) and selects it. */
-  fun addQuestion(type: EditorQuestionType) {
+  /**
+   * Inserts a new [type] question at [atIndex] (or after the selected one, or at the end if none
+   * selected) and selects it.
+   */
+  fun addQuestion(type: EditorQuestionType, atIndex: Int? = null) {
     val key = newKey()
     val question =
       EditorQuestion(
@@ -92,7 +95,12 @@ class FormEditorState(initialForm: EditorForm = FormEditorSamples.shadeTreeVisit
           else "New ${type.label.lowercase()} question",
         choices = if (type.hasChoices) defaultChoices() else emptyList(),
       )
-    val insertAt = if (selectedIndex >= 0) selectedIndex + 1 else form.questions.size
+    val insertAt =
+      when {
+        atIndex != null -> atIndex.coerceIn(0, form.questions.size)
+        selectedIndex >= 0 -> selectedIndex + 1
+        else -> form.questions.size
+      }
     form = form.copy(questions = form.questions.toMutableList().apply { add(insertAt, question) })
     selectedKey = key
   }

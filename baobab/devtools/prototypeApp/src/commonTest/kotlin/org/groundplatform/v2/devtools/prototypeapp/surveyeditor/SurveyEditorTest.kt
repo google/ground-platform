@@ -15,6 +15,7 @@ package org.groundplatform.v2.devtools.prototypeapp.surveyeditor
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertIs
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
@@ -224,5 +225,193 @@ class SurveyEditorTest {
     assertEquals(listOf(layers[2], layers[0], layers[1]), state.mapLayers.map { it.key })
     assertEquals(tables, state.dataTables.map { it.key })
     assertEquals(kinds, state.datasets.map { it.kind })
+  }
+
+  @Test
+  fun isoLanguages_lookupAndSearch() {
+    assertTrue(IsoLanguages.all.size >= 7900)
+
+    // Lookup by 2-letter ISO 639-1 code
+    val english = IsoLanguages.findByCode("en")
+    assertNotNull(english)
+    assertEquals("eng", english.id)
+    assertEquals("en", english.part1)
+    assertEquals("English", english.name)
+    assertEquals("en", english.code)
+
+    // Lookup by 3-letter ISO 639-3 code
+    val swahili = IsoLanguages.findByCode("swa")
+    assertNotNull(swahili)
+    assertEquals("swa", swahili.id)
+    assertEquals("sw", swahili.part1)
+    assertEquals("sw", swahili.code)
+
+    // Case-insensitive lookup
+    assertEquals(english, IsoLanguages.findByCode("EN"))
+    assertEquals(english, IsoLanguages.findByCode("EnG"))
+
+    // Search functionality
+    val swahiliMatches = IsoLanguages.search("swahili")
+    assertTrue(swahiliMatches.any { it.id == "swa" || it.name.contains("Swahili", ignoreCase = true) })
+
+    val spanishMatches = IsoLanguages.search("spa")
+    assertTrue(spanishMatches.any { it.id == "spa" })
+  }
+
+  @Test
+  fun languageSelection_addRemoveAndSetDefault() {
+    val state = SurveyEditorState()
+    assertEquals(listOf("en", "sw"), state.details.supportedLanguages)
+    assertEquals("en", state.details.defaultLanguage)
+
+    // Add a new supported language
+    state.addSupportedLanguage("fra")
+    assertEquals(listOf("en", "sw", "fra"), state.details.supportedLanguages)
+    assertEquals("en", state.details.defaultLanguage)
+
+    // Set new default language
+    state.setDefaultLanguage("sw")
+    assertEquals("sw", state.details.defaultLanguage)
+
+    // Set default language to a language not yet in supported languages
+    state.setDefaultLanguage("deu")
+    assertEquals("deu", state.details.defaultLanguage)
+    assertTrue(state.details.supportedLanguages.contains("deu"))
+
+    // Remove the current default language; falls back to first remaining
+    state.removeSupportedLanguage("deu")
+    assertFalse(state.details.supportedLanguages.contains("deu"))
+    assertEquals("en", state.details.defaultLanguage)
+
+    // Adding existing language doesn't duplicate
+    state.addSupportedLanguage("en")
+    assertEquals(listOf("en", "sw", "fra"), state.details.supportedLanguages)
+  }
+
+  @Test
+  fun surveyArea_setAndClear() {
+    val state = SurveyEditorState()
+    val initialArea = assertNotNull(state.details.surveyArea)
+    assertEquals("Othaya Sub-County, Nyeri", initialArea.name)
+    assertEquals(4, initialArea.boundaries.size)
+
+    // Clear survey area
+    state.setSurveyArea(null)
+    assertNull(state.details.surveyArea)
+
+    // Set a new survey area
+    val customArea =
+      SurveyArea(
+        name = "Chinga Dam & Reservoir",
+        boundaries =
+          listOf(
+            LatLng(-0.4130, 36.9430),
+            LatLng(-0.4130, 36.9720),
+            LatLng(-0.4380, 36.9720),
+            LatLng(-0.4380, 36.9430),
+          ),
+        center = LatLng(-0.4258, 36.9574),
+        zoom = 13.0,
+      )
+    state.setSurveyArea(customArea)
+    val updated = assertNotNull(state.details.surveyArea)
+    assertEquals("Chinga Dam & Reservoir", updated.name)
+    assertEquals(4, updated.boundaries.size)
+    assertEquals(-0.4258, updated.center.lat)
+    assertEquals(36.9574, updated.center.lng)
+  }
+
+  @Test
+  fun addForm_createsLinkedMapLayerByDefault() {
+    val state = SurveyEditorState()
+    val initialLayersCount = state.mapLayers.size
+    state.addForm()
+
+    assertEquals(initialLayersCount + 1, state.mapLayers.size)
+    val form = assertNotNull(state.selectedForm)
+    val linkedLayer = assertNotNull(state.mapLayers.firstOrNull { it.linkedFormKey == form.key })
+    assertEquals("New form", linkedLayer.displayName)
+    assertTrue(linkedLayer.isLinkedToForm)
+    assertEquals(form.key, linkedLayer.linkedFormKey)
+    assertTrue(linkedLayer.properties.any { it.name == "id" })
+  }
+
+  @Test
+  fun createDatasetForForm_createsAndLinksDataset() {
+    val state = SurveyEditorState()
+    val form = state.forms.first()
+    val initialLayers = state.mapLayers.size
+
+    state.createDatasetForForm(form.key, DatasetKind.MAP_LAYER)
+    assertEquals(initialLayers + 1, state.mapLayers.size)
+    val dataset = assertNotNull(state.selectedDataset)
+    assertEquals(form.key, dataset.linkedFormKey)
+    assertTrue(dataset.isLinkedToForm)
+    // Check that form questions were mapped to dataset properties
+    assertTrue(dataset.properties.any { it.name == "visit_date" })
+    assertTrue(dataset.properties.any { it.name == "farm_location" })
+  }
+
+  @Test
+  fun createFormForDataset_createsAndLinksForm() {
+    val state = SurveyEditorState()
+    val parcels = state.mapLayers.first { it.id == "coffee_parcels" }
+    assertFalse(parcels.isLinkedToForm)
+
+    state.createFormForDataset(parcels.key)
+    val form = assertNotNull(state.selectedForm)
+    val updatedParcels = state.datasets.first { it.key == parcels.key }
+    assertTrue(updatedParcels.isLinkedToForm)
+    assertEquals(form.key, updatedParcels.linkedFormKey)
+    // Map layer form includes location question
+    assertTrue(form.editor.form.questions.any { it.name == "location" })
+    // Map layer form includes parcel properties
+    assertTrue(form.editor.form.questions.any { it.name == "parcel_id" })
+    assertTrue(form.editor.form.questions.any { it.name == "parcel_name" })
+  }
+
+  @Test
+  fun syncDatasetsLinkedToForm_updatesDatasetProperties() {
+    val state = SurveyEditorState()
+    state.addForm()
+    val formEntry = state.selectedForm!!
+    val linkedLayer = state.mapLayers.first { it.linkedFormKey == formEntry.key }
+
+    // Add a question to the form
+    formEntry.editor.addQuestion(
+      org.groundplatform.v2.devtools.prototypeapp.formeditor.EditorQuestionType.INTEGER
+    )
+    val addedQuestion = formEntry.editor.form.questions.last()
+    state.syncDatasetsLinkedToForm(formEntry)
+
+    val updatedLayer = state.mapLayers.first { it.key == linkedLayer.key }
+    assertTrue(updatedLayer.properties.any { it.name == addedQuestion.name })
+  }
+
+  @Test
+  fun unlinkDataset_clearsFormLink() {
+    val state = SurveyEditorState()
+    state.addForm()
+    val formEntry = state.selectedForm!!
+    val linkedLayer = state.mapLayers.first { it.linkedFormKey == formEntry.key }
+    assertTrue(linkedLayer.isLinkedToForm)
+
+    state.unlinkDataset(linkedLayer.key)
+    val unlinkedLayer = state.mapLayers.first { it.key == linkedLayer.key }
+    assertFalse(unlinkedLayer.isLinkedToForm)
+    assertNull(unlinkedLayer.linkedFormKey)
+  }
+
+  @Test
+  fun deleteForm_unlinksAssociatedDatasets() {
+    val state = SurveyEditorState()
+    state.addForm()
+    val formEntry = state.selectedForm!!
+    val linkedLayer = state.mapLayers.first { it.linkedFormKey == formEntry.key }
+
+    state.deleteForm(formEntry.key)
+    val remainingLayer = state.mapLayers.first { it.key == linkedLayer.key }
+    assertFalse(remainingLayer.isLinkedToForm)
+    assertNull(remainingLayer.linkedFormKey)
   }
 }

@@ -40,6 +40,8 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.automirrored.filled.Logout
+import androidx.compose.material.icons.filled.AirplanemodeActive
+import androidx.compose.material.icons.filled.AirplanemodeInactive
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
@@ -457,9 +459,9 @@ private fun PrototypeWorkbenchTopBar(
             Icon(
               imageVector =
                 if (state.isAirplaneMode) {
-                  Icons.Default.CloudOff
+                  Icons.Default.AirplanemodeActive
                 } else {
-                  Icons.Default.CloudDone
+                  Icons.Default.AirplanemodeInactive
                 },
               contentDescription = "Toggle Device offline simulation",
               modifier = Modifier.size(15.dp),

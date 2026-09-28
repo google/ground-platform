@@ -37,13 +37,17 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Link
 import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material3.Button
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
@@ -495,13 +499,75 @@ private fun DatasetSettingsPanel(
         optionText = { "${it.label} (${it.name})" },
         onSelect = { p -> state.updateDataset(key) { it.copy(labelProperty = p.name) } },
       )
-      SwitchRow(
-        title = "Allow adding in the field",
-        description =
-          "Data collectors can add new ${if (isMap) "map features" else "rows"} from the mobile app.",
-        checked = dataset.fieldCreationEnabled,
-        onCheckedChange = { v -> state.updateDataset(key) { it.copy(fieldCreationEnabled = v) } },
-      )
+      SectionLabel("Field collection & Form")
+      val linkedForm = state.forms.firstOrNull { it.key == dataset.linkedFormKey }
+      if (linkedForm != null) {
+        Surface(
+          color = MaterialTheme.colorScheme.primaryContainer,
+          shape = MaterialTheme.shapes.small,
+          modifier = Modifier.fillMaxWidth(),
+        ) {
+          Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+              Icon(
+                Icons.Default.Link,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(18.dp),
+              )
+              Spacer(Modifier.width(6.dp))
+              Text(
+                "Linked to ${linkedForm.editor.form.title}",
+                style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                fontWeight = FontWeight.Bold,
+              )
+            }
+            Text(
+              "Data collectors can add new ${if (isMap) "map features" else "rows"} using this form. Schema properties stay in sync with form questions.",
+              style = MaterialTheme.typography.bodySmall,
+              color = MaterialTheme.colorScheme.onPrimaryContainer,
+            )
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+              Button(
+                onClick = { state.select(SurveyEditorSection.Form(linkedForm.key)) },
+              ) {
+                Icon(Icons.Default.Edit, contentDescription = null, modifier = Modifier.size(16.dp))
+                Spacer(Modifier.width(4.dp))
+                Text("Edit form")
+              }
+              OutlinedButton(
+                onClick = { state.unlinkDataset(key) },
+              ) {
+                Icon(Icons.Default.Close, contentDescription = null, modifier = Modifier.size(16.dp))
+                Spacer(Modifier.width(4.dp))
+                Text("Unlink form")
+              }
+            }
+          }
+        }
+      } else {
+        Surface(
+          color = MaterialTheme.colorScheme.surfaceContainerLow,
+          shape = MaterialTheme.shapes.small,
+          modifier = Modifier.fillMaxWidth(),
+        ) {
+          Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text(
+              "No form is linked to this ${dataset.kind.singular.lowercase()}. Data collectors can only view existing items.",
+              style = MaterialTheme.typography.bodySmall,
+              color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Button(
+              onClick = { state.createFormForDataset(key) },
+            ) {
+              Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(16.dp))
+              Spacer(Modifier.width(4.dp))
+              Text("Create form for ${dataset.kind.singular.lowercase()}")
+            }
+          }
+        }
+      }
 
       if (isMap) {
         SectionLabel("Map style")
@@ -511,18 +577,46 @@ private fun DatasetSettingsPanel(
       }
 
       SectionLabel("Properties")
+      if (dataset.isLinkedToForm) {
+        Surface(
+          color = MaterialTheme.colorScheme.surfaceContainerHigh,
+          shape = MaterialTheme.shapes.small,
+          modifier = Modifier.fillMaxWidth(),
+        ) {
+          Row(
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+          ) {
+            Icon(
+              Icons.Default.Link,
+              contentDescription = null,
+              tint = MaterialTheme.colorScheme.primary,
+              modifier = Modifier.size(16.dp),
+            )
+            Spacer(Modifier.width(6.dp))
+            Text(
+              "Properties are managed by the linked form. To edit, add, or delete properties, edit the form.",
+              style = MaterialTheme.typography.bodySmall,
+              color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+          }
+        }
+      }
       dataset.properties.forEachIndexed { index, property ->
         PropertyEditor(
           property = property,
-          canRemove = dataset.properties.size > 1,
+          readOnly = dataset.isLinkedToForm,
+          canRemove = !dataset.isLinkedToForm && dataset.properties.size > 1,
           onChange = { state.updateProperty(key, index, it) },
           onRemove = { state.removeProperty(key, index) },
         )
       }
-      TextButton(onClick = { state.addProperty(key) }) {
-        Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(18.dp))
-        Spacer(Modifier.width(4.dp))
-        Text("Add property")
+      if (!dataset.isLinkedToForm) {
+        TextButton(onClick = { state.addProperty(key) }) {
+          Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(18.dp))
+          Spacer(Modifier.width(4.dp))
+          Text("Add property")
+        }
       }
     }
   }
@@ -593,6 +687,7 @@ private fun LayerStyleEditor(dataset: EntityDataset, update: ((LayerStyle) -> La
 @Composable
 private fun PropertyEditor(
   property: EntityProperty,
+  readOnly: Boolean = false,
   canRemove: Boolean,
   onChange: (EntityProperty) -> Unit,
   onRemove: () -> Unit,
@@ -612,6 +707,7 @@ private fun PropertyEditor(
           onValueChange = { onChange(property.copy(label = it)) },
           label = { Text("Label") },
           singleLine = true,
+          enabled = !readOnly,
           modifier = Modifier.weight(1f),
         )
         OutlinedTextField(
@@ -619,27 +715,44 @@ private fun PropertyEditor(
           onValueChange = { onChange(property.copy(name = it.trim())) },
           label = { Text("Name") },
           singleLine = true,
+          enabled = !readOnly,
           textStyle = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
           modifier = Modifier.width(120.dp),
         )
       }
       Row(verticalAlignment = Alignment.CenterVertically) {
         Box(modifier = Modifier.weight(1f)) {
-          DropdownSelector(
-            label = "Type",
-            selectedText = property.type.label,
-            options = PropertyType.entries,
-            optionText = { it.label },
-            onSelect = { onChange(property.copy(type = it)) },
-          )
+          if (readOnly) {
+            OutlinedTextField(
+              value = property.type.label,
+              onValueChange = {},
+              label = { Text("Type") },
+              readOnly = true,
+              enabled = false,
+              singleLine = true,
+              modifier = Modifier.fillMaxWidth(),
+            )
+          } else {
+            DropdownSelector(
+              label = "Type",
+              selectedText = property.type.label,
+              options = PropertyType.entries,
+              optionText = { it.label },
+              onSelect = { onChange(property.copy(type = it)) },
+            )
+          }
         }
+        Spacer(Modifier.width(8.dp))
         Checkbox(
           checked = property.required,
+          enabled = !readOnly,
           onCheckedChange = { onChange(property.copy(required = it)) },
         )
         Text("Required", style = MaterialTheme.typography.bodySmall)
-        IconButton(onClick = onRemove, enabled = canRemove) {
-          Icon(Icons.Default.Close, contentDescription = "Remove property")
+        if (!readOnly) {
+          IconButton(onClick = onRemove, enabled = canRemove) {
+            Icon(Icons.Default.Close, contentDescription = "Remove property")
+          }
         }
       }
     }

@@ -157,7 +157,8 @@ import org.groundplatform.v2.core.forms.ui.LocalGroundBrandFontFamily
  * ```
  *
  * When [isSidePanel] is `true` (the web dashboard's left-hand panel), the sheet expand/collapse
- * toggles and mobile-only field actions (data collection launchers, `Navigate`) are hidden.
+ * toggles and mobile-only field actions (data collection launchers, `Navigate`, sync status chips)
+ * are hidden.
  */
 @Composable
 internal fun SurveyPersistentBottomSheetContent(
@@ -194,6 +195,7 @@ internal fun SurveyPersistentBottomSheetContent(
           backLabel = "Back to Searchable List",
           onBack = { state.returnToBottomSheetList() },
           onSharePdf = { state.shareSubmissionPdf(selectedSubmission.id) },
+          isSidePanel = isSidePanel,
         )
       }
     }
@@ -293,6 +295,8 @@ internal fun EntityMetadataAndActionsRow(
   state: PrototypeAppState,
   showShareAndQrActions: Boolean,
   showNavigateAction: Boolean = true,
+  showDistanceAndHeading: Boolean = showNavigateAction,
+  showSyncStatus: Boolean = true,
 ) {
   val entityWayfindingBadge = state.formattedWayfindingBadgeForEntity(entity.id)
   val isNavigatingEntity = state.isNavigatingToEntity(entity.id)
@@ -328,13 +332,15 @@ internal fun EntityMetadataAndActionsRow(
     )
 
     // Sync Status Indicator Badge
-    SyncStatusIndicatorBadge(
-      syncStatus = entity.syncStatus,
-      onClick = { state.cycleEntitySyncStatus(entity.id) },
-    )
+    if (showSyncStatus) {
+      SyncStatusIndicatorBadge(
+        syncStatus = entity.syncStatus,
+        onClick = { state.cycleEntitySyncStatus(entity.id) },
+      )
+    }
 
     // Live Distance & Compass Bearing Badge from User GPS
-    if (showNavigateAction && entityWayfindingBadge.isNotEmpty()) {
+    if (showDistanceAndHeading && entityWayfindingBadge.isNotEmpty()) {
       GroundTonalBadge(
         text = "➤ $entityWayfindingBadge",
         tone = GroundBadgeTone.TERTIARY,
@@ -421,7 +427,7 @@ internal fun EntityMetadataAndActionsRow(
  * form title via [FormGroupedSubmissionsSection].
  *
  * When [isSidePanel] is `true`, the sheet expansion toggle and mobile-only field actions (`Navigate`,
- * data collection launchers) are hidden.
+ * data collection launchers, sync status chips) are hidden.
  */
 @Composable
 internal fun EntityBottomSheetCard(
@@ -503,6 +509,8 @@ internal fun EntityBottomSheetCard(
       state = state,
       showShareAndQrActions = true,
       showNavigateAction = !isSidePanel,
+      showDistanceAndHeading = !isSidePanel,
+      showSyncStatus = !isSidePanel,
     )
 
     // Organizer-defined Action Buttons for this dataset type (`form.targetDatasetId ==
@@ -599,6 +607,7 @@ internal fun EntityBottomSheetCard(
           backLabel = "Back to all ${entity.submissions.size} submissions",
           onBack = { state.selectSubmissionDetail(null) },
           onSharePdf = { state.shareSubmissionPdf(selectedSubmission.id) },
+          isSidePanel = isSidePanel,
         )
       } else if (entity.submissions.isNotEmpty()) {
         FormGroupedSubmissionsSection(
@@ -607,6 +616,7 @@ internal fun EntityBottomSheetCard(
           showTargetEntityLabel = false,
           showFormActionSubtitle = false,
           onSelectSubmission = { state.selectSubmissionDetail(it.id) },
+          showSyncStatus = !isSidePanel,
         )
       } else {
         Text(
@@ -632,6 +642,7 @@ internal fun FormGroupedSubmissionsSection(
   showTargetEntityLabel: Boolean,
   showFormActionSubtitle: Boolean,
   onSelectSubmission: (SubmissionPreviewItem) -> Unit,
+  showSyncStatus: Boolean = true,
 ) {
   Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
     groups.forEach { group ->
@@ -755,10 +766,12 @@ internal fun FormGroupedSubmissionsSection(
                     if (index == 0 && !showTargetEntityLabel) {
                       GroundTonalBadge(text = "LATEST", tone = GroundBadgeTone.SECONDARY)
                     }
-                    SyncStatusIndicatorBadge(
-                      syncStatus = sub.syncStatus,
-                      onClick = { state.cycleSubmissionSyncStatus(sub.id) },
-                    )
+                    if (showSyncStatus) {
+                      SyncStatusIndicatorBadge(
+                        syncStatus = sub.syncStatus,
+                        onClick = { state.cycleSubmissionSyncStatus(sub.id) },
+                      )
+                    }
                   }
                   Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -1112,6 +1125,9 @@ internal fun BottomSheetSearchableListContent(
                     entity = entity,
                     state = state,
                     showShareAndQrActions = false,
+                    showNavigateAction = !isSidePanel,
+                    showDistanceAndHeading = !isSidePanel,
+                    showSyncStatus = !isSidePanel,
                   )
                 }
               }
@@ -1264,34 +1280,36 @@ internal fun BottomSheetSearchableListContent(
                     tone = GroundBadgeTone.SECONDARY,
                     monospace = true,
                   )
-                  if (placeWayfindingBadge.isNotEmpty()) {
+                  if (!isSidePanel && placeWayfindingBadge.isNotEmpty()) {
                     GroundTonalBadge(
                       text = "➤ $placeWayfindingBadge",
                       tone = GroundBadgeTone.TERTIARY,
                       monospace = true,
                     )
                   }
-                  FilterChip(
-                    selected = isNavigatingPlace,
-                    onClick = { state.toggleNavigationToPlace(place.id) },
-                    label = {
-                      Text(
-                        text = if (isNavigatingPlace) "Stop Nav" else "Navigate",
-                        style =
-                          MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        softWrap = false,
-                      )
-                    },
-                    leadingIcon = {
-                      Icon(
-                        imageVector = Icons.Default.Navigation,
-                        contentDescription = "Straight-line navigate to place",
-                        modifier = Modifier.size(13.dp),
-                      )
-                    },
-                  )
+                  if (!isSidePanel) {
+                    FilterChip(
+                      selected = isNavigatingPlace,
+                      onClick = { state.toggleNavigationToPlace(place.id) },
+                      label = {
+                        Text(
+                          text = if (isNavigatingPlace) "Stop Nav" else "Navigate",
+                          style =
+                            MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                          maxLines = 1,
+                          overflow = TextOverflow.Ellipsis,
+                          softWrap = false,
+                        )
+                      },
+                      leadingIcon = {
+                        Icon(
+                          imageVector = Icons.Default.Navigation,
+                          contentDescription = "Straight-line navigate to place",
+                          modifier = Modifier.size(13.dp),
+                        )
+                      },
+                    )
+                  }
                 }
               }
             }
@@ -1320,7 +1338,7 @@ internal fun BottomSheetSearchableListContent(
     }
 
     // Bottom-centered Floating Action Button inside the expanded sheet as well
-    if (state.isEntityBottomSheetExpanded) {
+    if (!isSidePanel && state.isEntityBottomSheetExpanded) {
       Box(
         modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
         contentAlignment = Alignment.Center,
@@ -1339,6 +1357,7 @@ internal fun SubmissionFullDetailsCard(
   backLabel: String,
   onBack: () -> Unit,
   onSharePdf: () -> Unit,
+  isSidePanel: Boolean = false,
 ) {
   OutlinedCard(
     modifier = Modifier.fillMaxWidth(),
@@ -1385,10 +1404,12 @@ internal fun SubmissionFullDetailsCard(
           verticalAlignment = Alignment.CenterVertically,
           horizontalArrangement = Arrangement.spacedBy(6.dp),
         ) {
-          SyncStatusIndicatorBadge(
-            syncStatus = submission.syncStatus,
-            onClick = { state.cycleSubmissionSyncStatus(submission.id) },
-          )
+          if (!isSidePanel) {
+            SyncStatusIndicatorBadge(
+              syncStatus = submission.syncStatus,
+              onClick = { state.cycleSubmissionSyncStatus(submission.id) },
+            )
+          }
 
           AssistChip(
             onClick = { onSharePdf() },
@@ -1494,7 +1515,7 @@ internal fun SubmissionFullDetailsCard(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.weight(1f),
               )
-              if (fieldWayfindingBadge.isNotEmpty()) {
+              if (!isSidePanel && fieldWayfindingBadge.isNotEmpty()) {
                 Spacer(modifier = Modifier.width(6.dp))
                 GroundTonalBadge(
                   text = "➤ $fieldWayfindingBadge",

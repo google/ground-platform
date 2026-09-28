@@ -35,15 +35,20 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CornerSize
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.Layers
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.HorizontalDivider
@@ -247,6 +252,12 @@ internal fun WebDashboardPage(
     if (activePdfSheet != null) {
       SharePdfToAppModalDialog(state = state, sheet = activePdfSheet)
     }
+    if (state.isLayersSheetOpen) {
+      LayersControlModalDialog(
+        state = state,
+        onDismiss = { state.updateLayersSheetOpen(false) },
+      )
+    }
   }
 }
 
@@ -307,11 +318,20 @@ private fun DashboardMapArea(state: PrototypeAppState, modifier: Modifier = Modi
       animatedShiftY = state.mapWorldToScreenShiftY,
       modifier = Modifier.fillMaxSize(),
       collapseSheetOnBackgroundTap = false,
+      showNavigationOverlay = false,
     )
 
-    if (state.isMapClusteringActive && state.selectedCluster != null) {
-      Box(modifier = Modifier.align(Alignment.TopEnd).padding(12.dp).width(360.dp)) {
-        MapClusterBalloonsOverlay(state = state)
+    Column(
+      modifier = Modifier.align(Alignment.TopEnd).padding(14.dp),
+      horizontalAlignment = Alignment.End,
+      verticalArrangement = Arrangement.spacedBy(10.dp),
+    ) {
+      LayersFloatingActionButton(state = state)
+
+      if (state.isMapClusteringActive && state.selectedCluster != null) {
+        Box(modifier = Modifier.width(360.dp)) {
+          MapClusterBalloonsOverlay(state = state)
+        }
       }
     }
 
@@ -546,4 +566,58 @@ private fun DashboardDataTableView(
       }
     }
   }
+}
+
+/**
+ * Modal dialog for selecting basemaps and toggling survey map layers on the web dashboard.
+ */
+@Composable
+internal fun LayersControlModalDialog(
+  state: PrototypeAppState,
+  onDismiss: () -> Unit = { state.updateLayersSheetOpen(false) },
+) {
+  AlertDialog(
+    onDismissRequest = onDismiss,
+    icon = {
+      Icon(
+        imageVector = Icons.Default.Layers,
+        contentDescription = null,
+        tint = MaterialTheme.colorScheme.primary,
+      )
+    },
+    title = {
+      Text(
+        text = "Layers & Basemap",
+        style = MaterialTheme.typography.titleMedium,
+        fontWeight = FontWeight.Bold,
+      )
+    },
+    text = {
+      Column(
+        modifier =
+          Modifier.fillMaxWidth()
+            .widthIn(min = 360.dp, max = 460.dp)
+            .verticalScroll(rememberScrollState()),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+      ) {
+        Text(
+          text =
+            if (state.hasGeospatialEntities) {
+              "Select Map vs Satellite basemap and toggle survey map layers"
+            } else {
+              "Select Map vs Satellite basemap and offline tile overlays"
+            },
+          style = MaterialTheme.typography.bodySmall,
+          color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+
+        LayersSelectorContent(state = state)
+      }
+    },
+    confirmButton = {
+      Button(onClick = onDismiss) {
+        Text("Done")
+      }
+    },
+  )
 }

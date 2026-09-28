@@ -435,28 +435,7 @@ internal fun SurveyMapView(state: PrototypeAppState) {
             }
 
             // Layers FAB to control basemaps and map layers
-            val layersBg =
-              if (state.isLayersSheetOpen) {
-                Color(0xFF8BD6B1)
-              } else {
-                MaterialTheme.colorScheme.inverseSurface.copy(alpha = 0.93f)
-              }
-            val layersContent =
-              if (state.isLayersSheetOpen) {
-                Color(0xFF003825)
-              } else {
-                MaterialTheme.colorScheme.inverseOnSurface
-              }
-            FloatingActionButton(
-              onClick = { state.updateLayersSheetOpen(!state.isLayersSheetOpen) },
-              containerColor = layersBg,
-              contentColor = layersContent,
-            ) {
-              Icon(
-                imageVector = Icons.Default.Layers,
-                contentDescription = "Layers",
-              )
-            }
+            LayersFloatingActionButton(state = state)
           }
 
           // Selected Cluster Balloon detail callout when a Mapbox cluster balloon is tapped
@@ -1136,6 +1115,189 @@ internal fun GoogleMapsScaleBarWidget(
   }
 }
 
+/** Floating Action Button that toggles the map layers and basemap selector. */
+@Composable
+internal fun LayersFloatingActionButton(
+  state: PrototypeAppState,
+  modifier: Modifier = Modifier,
+) {
+  val layersBg =
+    if (state.isLayersSheetOpen) {
+      Color(0xFF8BD6B1)
+    } else {
+      MaterialTheme.colorScheme.inverseSurface.copy(alpha = 0.93f)
+    }
+  val layersContent =
+    if (state.isLayersSheetOpen) {
+      Color(0xFF003825)
+    } else {
+      MaterialTheme.colorScheme.inverseOnSurface
+    }
+  FloatingActionButton(
+    onClick = { state.updateLayersSheetOpen(!state.isLayersSheetOpen) },
+    containerColor = layersBg,
+    contentColor = layersContent,
+    modifier = modifier,
+  ) {
+    Icon(
+      imageVector = Icons.Default.Layers,
+      contentDescription = "Layers",
+    )
+  }
+}
+
+/**
+ * Shared body of the layers & basemap selector:
+ * 1. Basemap switcher (`Map` vs `Satellite`)
+ * 2. Offline basemap tile package overlay toggle
+ * 3. Map layers toggles for survey geospatial entities
+ */
+@Composable
+internal fun LayersSelectorContent(
+  state: PrototypeAppState,
+  modifier: Modifier = Modifier,
+) {
+  Column(
+    modifier = modifier.fillMaxWidth(),
+    verticalArrangement = Arrangement.spacedBy(12.dp),
+  ) {
+    // Basemap section (Map vs Satellite + Offline Basemap Toggle)
+    Text(
+      text = "BASEMAP",
+      style =
+        MaterialTheme.typography.labelSmall.copy(
+          fontWeight = FontWeight.Bold,
+          color = MaterialTheme.colorScheme.primary,
+          letterSpacing = 0.5.sp,
+        ),
+    )
+
+    SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
+      BasemapType.entries.forEachIndexed { index, basemap ->
+        val isSelected = state.selectedBasemapType == basemap
+        SegmentedButton(
+          selected = isSelected,
+          onClick = { state.selectBasemapType(basemap) },
+          shape =
+            SegmentedButtonDefaults.itemShape(index = index, count = BasemapType.entries.size),
+          icon = {
+            Icon(
+              imageVector =
+                if (basemap == BasemapType.NORMAL) {
+                  Icons.Default.Map
+                } else {
+                  Icons.Default.SatelliteAlt
+                },
+              contentDescription = null,
+              modifier = Modifier.size(16.dp),
+            )
+          },
+          label = {
+            Text(
+              text = basemap.label,
+              style = MaterialTheme.typography.labelMedium,
+              fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+            )
+          },
+        )
+      }
+    }
+
+    // Offline Basemap Tile Package Overlay Toggle
+    OutlinedCard(
+      onClick = { state.toggleOfflineBasemapVisibility() },
+      modifier = Modifier.fillMaxWidth(),
+      shape = MaterialTheme.shapes.medium,
+      colors =
+        CardDefaults.outlinedCardColors(
+          containerColor = MaterialTheme.colorScheme.surfaceContainer
+        ),
+    ) {
+      Row(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+      ) {
+        Column(modifier = Modifier.weight(1f)) {
+          Text(
+            text = "Offline Basemap Overlay (Nyeri Sector Tiles)",
+            style = MaterialTheme.typography.labelMedium,
+            fontWeight = FontWeight.SemiBold,
+          )
+          Text(
+            text = state.offlineBasemapStyle.tileDescription,
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+          )
+        }
+        Switch(
+          checked = state.isOfflineBasemapVisible,
+          onCheckedChange = { state.toggleOfflineBasemapVisibility() },
+        )
+      }
+    }
+
+    if (state.hasGeospatialEntities) {
+      HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+
+      // Section 2: Map layers (geospatial entities)
+      Text(
+        text = "MAP LAYERS",
+        style =
+          MaterialTheme.typography.labelSmall.copy(
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.primary,
+            letterSpacing = 0.5.sp,
+          ),
+      )
+
+      state.entityDatasetLayers.forEach { layer ->
+        val layerEntityCount = state.entities.count { it.layerId == layer.id }
+        OutlinedCard(
+          onClick = { state.toggleLayerVisibility(layer.id) },
+          modifier = Modifier.fillMaxWidth(),
+          shape = MaterialTheme.shapes.medium,
+          colors =
+            CardDefaults.outlinedCardColors(
+              containerColor = MaterialTheme.colorScheme.surfaceContainer
+            ),
+        ) {
+          Row(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+          ) {
+            // Solid layer color swatch
+            Box(
+              modifier =
+                Modifier.size(16.dp)
+                  .clip(MaterialTheme.shapes.extraSmall)
+                  .background(Color(layer.colorHex).copy(alpha = 0.25f))
+                  .border(2.dp, Color(layer.colorHex), MaterialTheme.shapes.extraSmall)
+            )
+            Column(modifier = Modifier.weight(1f)) {
+              Text(
+                text = layer.label,
+                style = MaterialTheme.typography.labelMedium,
+                fontWeight = FontWeight.SemiBold,
+              )
+              Text(
+                text = "${layer.geometryTypeLabel} • ${layer.formatCountLabel(layerEntityCount)}",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+              )
+            }
+            Switch(
+              checked = layer.isVisible,
+              onCheckedChange = { state.toggleLayerVisibility(layer.id) },
+            )
+          }
+        }
+      }
+    }
+  }
+}
+
 /**
  * Material 3 [ModalBottomSheet] opened by the `"Layers"` button to select/toggle:
  * 1. **Basemap Type (`Map` vs `Satellite`)** & **Offline Basemap (`Mapbox Offline Tiles`)**
@@ -1180,140 +1342,7 @@ internal fun LayersControlSheet(state: PrototypeAppState) {
 
       HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
-      // Basemap section (Map vs Satellite + Offline Basemap Toggle)
-      Text(
-        text = "BASEMAP",
-        style =
-          MaterialTheme.typography.labelSmall.copy(
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.primary,
-            letterSpacing = 0.5.sp,
-          ),
-      )
-
-      SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
-        BasemapType.entries.forEachIndexed { index, basemap ->
-          val isSelected = state.selectedBasemapType == basemap
-          SegmentedButton(
-            selected = isSelected,
-            onClick = { state.selectBasemapType(basemap) },
-            shape =
-              SegmentedButtonDefaults.itemShape(index = index, count = BasemapType.entries.size),
-            icon = {
-              Icon(
-                imageVector =
-                  if (basemap == BasemapType.NORMAL) {
-                    Icons.Default.Map
-                  } else {
-                    Icons.Default.SatelliteAlt
-                  },
-                contentDescription = null,
-                modifier = Modifier.size(16.dp),
-              )
-            },
-            label = {
-              Text(
-                text = basemap.label,
-                style = MaterialTheme.typography.labelMedium,
-                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-              )
-            },
-          )
-        }
-      }
-
-      // Offline Basemap Tile Package Overlay Toggle
-      OutlinedCard(
-        onClick = { state.toggleOfflineBasemapVisibility() },
-        modifier = Modifier.fillMaxWidth(),
-        shape = MaterialTheme.shapes.medium,
-        colors =
-          CardDefaults.outlinedCardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainer
-          ),
-      ) {
-        Row(
-          modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
-          verticalAlignment = Alignment.CenterVertically,
-          horizontalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-          Column(modifier = Modifier.weight(1f)) {
-            Text(
-              text = "Offline Basemap Overlay (Nyeri Sector Tiles)",
-              style = MaterialTheme.typography.labelMedium,
-              fontWeight = FontWeight.SemiBold,
-            )
-            Text(
-              text = state.offlineBasemapStyle.tileDescription,
-              style = MaterialTheme.typography.labelSmall,
-              color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-          }
-          Switch(
-            checked = state.isOfflineBasemapVisible,
-            onCheckedChange = { state.toggleOfflineBasemapVisibility() },
-          )
-        }
-      }
-
-      if (state.hasGeospatialEntities) {
-        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-
-        // Section 2: Map layers (geospatial entities)
-        Text(
-          text = "MAP LAYERS",
-          style =
-            MaterialTheme.typography.labelSmall.copy(
-              fontWeight = FontWeight.Bold,
-              color = MaterialTheme.colorScheme.primary,
-              letterSpacing = 0.5.sp,
-            ),
-        )
-
-        state.entityDatasetLayers.forEach { layer ->
-          val layerEntityCount = state.entities.count { it.layerId == layer.id }
-          OutlinedCard(
-            onClick = { state.toggleLayerVisibility(layer.id) },
-            modifier = Modifier.fillMaxWidth(),
-            shape = MaterialTheme.shapes.medium,
-            colors =
-              CardDefaults.outlinedCardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceContainer
-              ),
-          ) {
-            Row(
-              modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
-              verticalAlignment = Alignment.CenterVertically,
-              horizontalArrangement = Arrangement.spacedBy(10.dp),
-            ) {
-              // Solid layer color swatch
-              Box(
-                modifier =
-                  Modifier.size(16.dp)
-                    .clip(MaterialTheme.shapes.extraSmall)
-                    .background(Color(layer.colorHex).copy(alpha = 0.25f))
-                    .border(2.dp, Color(layer.colorHex), MaterialTheme.shapes.extraSmall)
-              )
-              Column(modifier = Modifier.weight(1f)) {
-                Text(
-                  text = layer.label,
-                  style = MaterialTheme.typography.labelMedium,
-                  fontWeight = FontWeight.SemiBold,
-                )
-                Text(
-                  text = "${layer.geometryTypeLabel} • ${layer.formatCountLabel(layerEntityCount)}",
-                  style = MaterialTheme.typography.labelSmall,
-                  color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-              }
-              Switch(
-                checked = layer.isVisible,
-                onCheckedChange = { state.toggleLayerVisibility(layer.id) },
-              )
-            }
-          }
-        }
-      }
+      LayersSelectorContent(state = state)
 
       Spacer(modifier = Modifier.height(12.dp))
     }

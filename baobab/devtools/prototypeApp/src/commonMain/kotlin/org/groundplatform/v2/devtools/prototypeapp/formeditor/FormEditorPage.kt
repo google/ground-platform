@@ -21,6 +21,7 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -44,16 +45,22 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.DragIndicator
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.Layers
 import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Warning
@@ -84,6 +91,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -95,6 +103,9 @@ import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.pointer.PointerEventType
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -134,11 +145,12 @@ fun FormEditorPage(
   state: FormEditorState,
   isDarkTheme: Boolean,
   modifier: Modifier = Modifier,
+  onCreateDataset: (() -> Unit)? = null,
   onDelete: (() -> Unit)? = null,
 ) {
   Box(modifier = modifier.fillMaxSize()) {
     Column(modifier = Modifier.fillMaxSize()) {
-      FormEditorToolbar(state, onDelete)
+      FormEditorToolbar(state, onCreateDataset, onDelete)
       Row(
         modifier = Modifier.fillMaxSize().padding(16.dp),
         horizontalArrangement = Arrangement.spacedBy(16.dp),
@@ -158,7 +170,12 @@ fun FormEditorPage(
 }
 
 @Composable
-private fun FormEditorToolbar(state: FormEditorState, onDelete: (() -> Unit)?) {
+private fun FormEditorToolbar(
+  state: FormEditorState,
+  onCreateDataset: (() -> Unit)?,
+  onDelete: (() -> Unit)?,
+) {
+  var overflowExpanded by remember { mutableStateOf(false) }
   Surface(
     modifier = Modifier.fillMaxWidth(),
     color = MaterialTheme.colorScheme.surfaceContainer,
@@ -200,17 +217,35 @@ private fun FormEditorToolbar(state: FormEditorState, onDelete: (() -> Unit)?) {
         textStyle = MaterialTheme.typography.bodyMedium.copy(fontFamily = FontFamily.Monospace),
         modifier = Modifier.width(200.dp),
       )
-      Spacer(Modifier.width(8.dp))
-      AddQuestionButton(onAdd = state::addQuestion)
-      OutlinedButton(onClick = { state.isXmlViewerOpen = true }) {
-        Icon(Icons.Default.Description, contentDescription = null, modifier = Modifier.size(18.dp))
-        Spacer(Modifier.width(6.dp))
-        Text("XForms XML")
+      Spacer(Modifier.weight(1f))
+      if (onCreateDataset != null) {
+        OutlinedButton(onClick = onCreateDataset) {
+          Icon(Icons.Default.Layers, contentDescription = null, modifier = Modifier.size(18.dp))
+          Spacer(Modifier.width(6.dp))
+          Text("Create layer")
+        }
       }
       Button(onClick = state::startPreview) {
         Icon(Icons.Default.PlayArrow, contentDescription = null, modifier = Modifier.size(18.dp))
         Spacer(Modifier.width(6.dp))
-        Text("Preview flow")
+        Text("Preview")
+      }
+      Box {
+        IconButton(onClick = { overflowExpanded = true }) {
+          Icon(Icons.Default.MoreVert, contentDescription = "More options")
+        }
+        DropdownMenu(expanded = overflowExpanded, onDismissRequest = { overflowExpanded = false }) {
+          DropdownMenuItem(
+            text = { Text("Export XForms XML") },
+            leadingIcon = {
+              Icon(Icons.Default.Description, contentDescription = null, modifier = Modifier.size(18.dp))
+            },
+            onClick = {
+              overflowExpanded = false
+              state.isXmlViewerOpen = true
+            },
+          )
+        }
       }
       if (onDelete != null) {
         TextButton(onClick = onDelete) {
@@ -228,25 +263,46 @@ private fun FormEditorToolbar(state: FormEditorState, onDelete: (() -> Unit)?) {
   }
 }
 
+/** Standard icon representing each [EditorQuestionType]. */
+internal fun questionTypeIcon(type: EditorQuestionType): ImageVector =
+  when (type) {
+    EditorQuestionType.TEXT -> Icons.Default.Edit
+    EditorQuestionType.LONG_TEXT -> Icons.Default.Description
+    EditorQuestionType.INTEGER -> Icons.AutoMirrored.Filled.List
+    EditorQuestionType.DECIMAL -> Icons.AutoMirrored.Filled.List
+    EditorQuestionType.SELECT_ONE -> Icons.Default.CheckCircle
+    EditorQuestionType.SELECT_MULTIPLE -> Icons.Default.Check
+    EditorQuestionType.DATE -> Icons.Default.DateRange
+    EditorQuestionType.LOCATION -> Icons.Default.LocationOn
+    EditorQuestionType.PHOTO -> Icons.Default.AccountCircle
+    EditorQuestionType.NOTE -> Icons.Default.Info
+  }
+
+/** Dropdown menu listing all question types with their icons for insertion at [atIndex]. */
 @Composable
-private fun AddQuestionButton(onAdd: (EditorQuestionType) -> Unit) {
-  var expanded by remember { mutableStateOf(false) }
-  Box {
-    Button(onClick = { expanded = true }) {
-      Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(18.dp))
-      Spacer(Modifier.width(6.dp))
-      Text("Add question")
-    }
-    DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-      EditorQuestionType.entries.forEach { type ->
-        DropdownMenuItem(
-          text = { Text(type.label) },
-          onClick = {
-            onAdd(type)
-            expanded = false
-          },
-        )
-      }
+private fun AddQuestionMenu(
+  expanded: Boolean,
+  onDismiss: () -> Unit,
+  onAdd: (EditorQuestionType, Int?) -> Unit,
+  atIndex: Int? = null,
+) {
+  DropdownMenu(expanded = expanded, onDismissRequest = onDismiss) {
+    EditorQuestionType.entries.forEach { type ->
+      DropdownMenuItem(
+        text = { Text(type.label) },
+        leadingIcon = {
+          Icon(
+            questionTypeIcon(type),
+            contentDescription = null,
+            modifier = Modifier.size(18.dp),
+            tint = MaterialTheme.colorScheme.primary,
+          )
+        },
+        onClick = {
+          onAdd(type, atIndex)
+          onDismiss()
+        },
+      )
     }
   }
 }
@@ -289,6 +345,7 @@ private fun FlowCanvasPanel(state: FormEditorState, modifier: Modifier = Modifie
   val form = state.form
   val edges = state.flowEdges
   val issues = state.issues
+  val horizontalScroll = rememberScrollState()
   ElevatedCard(
     modifier = modifier,
     shape = MaterialTheme.shapes.large,
@@ -334,7 +391,62 @@ private fun FlowCanvasPanel(state: FormEditorState, modifier: Modifier = Modifie
         FlowLegend()
       }
       HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-      FlowCanvas(state, edges, Modifier.fillMaxSize())
+      FlowCanvas(state, edges, horizontalScroll, Modifier.weight(1f).fillMaxWidth())
+      FlowHorizontalScrollBar(
+        scrollState = horizontalScroll,
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+      )
+    }
+  }
+}
+
+@Composable
+private fun FlowHorizontalScrollBar(
+  scrollState: androidx.compose.foundation.ScrollState,
+  modifier: Modifier = Modifier,
+) {
+  val maxScroll = scrollState.maxValue
+  if (maxScroll <= 0) return
+
+  val coroutineScope = rememberCoroutineScope()
+  val colors = MaterialTheme.colorScheme
+
+  Box(
+    modifier =
+      modifier
+        .height(10.dp)
+        .clip(CircleShape)
+        .background(colors.surfaceContainerHighest.copy(alpha = 0.5f)),
+  ) {
+    androidx.compose.foundation.layout.BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+      val trackWidthPx = with(LocalDensity.current) { maxWidth.toPx() }
+      val totalContentPx = trackWidthPx + maxScroll.toFloat()
+      val thumbWidthFraction = (trackWidthPx / totalContentPx).coerceIn(0.1f, 1f)
+      val thumbWidthPx = trackWidthPx * thumbWidthFraction
+      val scrollFraction =
+        if (maxScroll > 0) (scrollState.value.toFloat() / maxScroll).coerceIn(0f, 1f) else 0f
+      val thumbOffsetPx = scrollFraction * (trackWidthPx - thumbWidthPx)
+      val thumbOffsetDp = with(LocalDensity.current) { thumbOffsetPx.toDp() }
+      val thumbWidthDp = with(LocalDensity.current) { thumbWidthPx.toDp() }
+
+      Box(
+        modifier =
+          Modifier.offset(x = thumbOffsetDp)
+            .width(thumbWidthDp)
+            .height(10.dp)
+            .clip(CircleShape)
+            .background(colors.outline.copy(alpha = 0.65f))
+            .pointerInput(maxScroll, trackWidthPx, thumbWidthPx) {
+              detectHorizontalDragGestures { change, dragAmount ->
+                change.consume()
+                val scrollableTrack = trackWidthPx - thumbWidthPx
+                if (scrollableTrack > 0f) {
+                  val deltaScroll = (dragAmount / scrollableTrack) * maxScroll
+                  scrollState.dispatchRawDelta(deltaScroll)
+                }
+              }
+            }
+      )
     }
   }
 }
@@ -374,10 +486,14 @@ private fun LegendItem(text: String, color: Color, dashed: Boolean) {
 }
 
 @Composable
-private fun FlowCanvas(state: FormEditorState, edges: List<FlowEdge>, modifier: Modifier) {
+private fun FlowCanvas(
+  state: FormEditorState,
+  edges: List<FlowEdge>,
+  horizontalScroll: androidx.compose.foundation.ScrollState,
+  modifier: Modifier,
+) {
   val form = state.form
   val layout = remember(form.questions.size, edges) { FlowLayout(form.questions.size, edges) }
-  val horizontalScroll = rememberScrollState()
   val density = LocalDensity.current
   val selectedSlot =
     if (state.selectedIndex >= 0) FormFlowGraph.questionSlot(state.selectedIndex) else -1
@@ -403,7 +519,18 @@ private fun FlowCanvas(state: FormEditorState, edges: List<FlowEdge>, modifier: 
   val edgeZonePx = with(density) { 56.dp.toPx() }
   val edgeAlpha by animateFloatAsState(if (drag.isDragging) 0.15f else 1f)
   Box(
-    modifier = modifier.horizontalScroll(horizontalScroll).verticalScroll(rememberScrollState())
+    modifier =
+      modifier
+        .horizontalScroll(horizontalScroll)
+        .verticalScroll(rememberScrollState())
+        .pointerInput(drag.isDragging) {
+          if (!drag.isDragging) {
+            detectHorizontalDragGestures { change, dragAmount ->
+              change.consume()
+              horizontalScroll.dispatchRawDelta(-dragAmount)
+            }
+          }
+        }
   ) {
     Box(modifier = Modifier.width(layout.totalWidth).height(layout.totalHeight)) {
       Canvas(modifier = Modifier.fillMaxSize().graphicsLayer { alpha = edgeAlpha }) {
@@ -426,6 +553,16 @@ private fun FlowCanvas(state: FormEditorState, edges: List<FlowEdge>, modifier: 
         text = "Start",
         modifier = Modifier.offset(layout.x(0), layout.top(0)),
       )
+
+      // Hoverable "+" between Start and Q1 (or Q0)
+      AddQuestionAffordance(
+        centerX = layout.x(0) + layout.width(0) + SlotGap / 2,
+        centerY = layout.midY,
+        atIndex = 0,
+        onAdd = state::addQuestion,
+        alwaysVisible = false,
+      )
+
       form.questions.forEachIndexed { index, question ->
         val slot = FormFlowGraph.questionSlot(index)
         key(question.key) {
@@ -443,10 +580,7 @@ private fun FlowCanvas(state: FormEditorState, edges: List<FlowEdge>, modifier: 
             isSelected = question.key == state.selectedKey,
             hasIssues = state.issuesFor(question.key).isNotEmpty(),
             isDragged = isDragged,
-            canMoveEarlier = index > 0,
-            canMoveLater = index < form.questions.lastIndex,
             onClick = { state.select(question.key) },
-            onMove = { delta -> state.moveQuestion(question.key, delta) },
             modifier =
               Modifier.offset(layout.x(slot), layout.top(slot))
                 .zIndex(if (isDragged) 1f else 0f)
@@ -481,11 +615,85 @@ private fun FlowCanvas(state: FormEditorState, edges: List<FlowEdge>, modifier: 
                   },
                 ),
           )
+
+          // Insertion affordance between question screens (hoverable),
+          // or permanent at the very end of questions (after last question)
+          val isLastQuestion = index == form.questions.lastIndex
+          AddQuestionAffordance(
+            centerX = layout.x(slot) + layout.width(slot) + SlotGap / 2,
+            centerY = layout.midY,
+            atIndex = index + 1,
+            onAdd = state::addQuestion,
+            alwaysVisible = isLastQuestion,
+          )
         }
       }
       TerminalNode(
         text = "Review & submit",
         modifier = Modifier.offset(layout.x(layout.endSlot), layout.top(layout.endSlot)),
+      )
+    }
+  }
+}
+
+@Composable
+private fun AddQuestionAffordance(
+  centerX: Dp,
+  centerY: Dp,
+  atIndex: Int,
+  onAdd: (EditorQuestionType, Int?) -> Unit,
+  alwaysVisible: Boolean = false,
+  modifier: Modifier = Modifier,
+) {
+  var isHovered by remember { mutableStateOf(false) }
+  var menuExpanded by remember { mutableStateOf(false) }
+  val colors = MaterialTheme.colorScheme
+
+  val buttonSize = 32.dp
+  val slotWidth = SlotGap
+  val slotHeight = 64.dp
+
+  Box(
+    modifier =
+      modifier
+        .offset(x = centerX - slotWidth / 2, y = centerY - slotHeight / 2)
+        .size(slotWidth, slotHeight)
+        .pointerInput(Unit) {
+          awaitPointerEventScope {
+            while (true) {
+              val event = awaitPointerEvent()
+              when (event.type) {
+                PointerEventType.Enter -> isHovered = true
+                PointerEventType.Exit -> isHovered = false
+              }
+            }
+          }
+        },
+    contentAlignment = Alignment.Center,
+  ) {
+    val visible = alwaysVisible || isHovered || menuExpanded
+    if (visible) {
+      Surface(
+        onClick = { menuExpanded = true },
+        shape = CircleShape,
+        color = if (alwaysVisible && !isHovered) colors.primaryContainer else colors.primary,
+        contentColor = if (alwaysVisible && !isHovered) colors.onPrimaryContainer else colors.onPrimary,
+        shadowElevation = if (isHovered || menuExpanded) 4.dp else 1.dp,
+        modifier = Modifier.size(buttonSize),
+      ) {
+        Box(contentAlignment = Alignment.Center) {
+          Icon(
+            Icons.Default.Add,
+            contentDescription = "Add question here",
+            modifier = Modifier.size(18.dp),
+          )
+        }
+      }
+      AddQuestionMenu(
+        expanded = menuExpanded,
+        onDismiss = { menuExpanded = false },
+        onAdd = onAdd,
+        atIndex = atIndex,
       )
     }
   }
@@ -562,10 +770,7 @@ private fun ScreenPreviewCard(
   isSelected: Boolean,
   hasIssues: Boolean,
   isDragged: Boolean,
-  canMoveEarlier: Boolean,
-  canMoveLater: Boolean,
   onClick: () -> Unit,
-  onMove: (Int) -> Unit,
   modifier: Modifier = Modifier,
 ) {
   val colors = MaterialTheme.colorScheme
@@ -602,6 +807,12 @@ private fun ScreenPreviewCard(
           modifier = Modifier.size(16.dp),
         )
         GroundTonalBadge(text = "Q${index + 1}", tone = GroundBadgeTone.PRIMARY)
+        Icon(
+          questionTypeIcon(question.type),
+          contentDescription = null,
+          modifier = Modifier.size(14.dp),
+          tint = colors.onSurfaceVariant,
+        )
         Text(
           text = question.type.label,
           style = MaterialTheme.typography.labelSmall,
@@ -631,43 +842,14 @@ private fun ScreenPreviewCard(
 
       MiniScreen(question, form.title, Modifier.weight(1f).fillMaxWidth())
 
-      Row(
+      Text(
+        text = question.name + if (question.required) " *" else "",
+        style = MaterialTheme.typography.labelSmall.copy(fontFamily = FontFamily.Monospace),
+        color = colors.onSurfaceVariant,
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
         modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
-        verticalAlignment = Alignment.CenterVertically,
-      ) {
-        Text(
-          text = question.name + if (question.required) " *" else "",
-          style = MaterialTheme.typography.labelSmall.copy(fontFamily = FontFamily.Monospace),
-          color = colors.onSurfaceVariant,
-          maxLines = 1,
-          overflow = TextOverflow.Ellipsis,
-          modifier = Modifier.weight(1f),
-        )
-        if (isSelected) {
-          IconButton(
-            onClick = { onMove(-1) },
-            enabled = canMoveEarlier,
-            modifier = Modifier.size(24.dp),
-          ) {
-            Icon(
-              Icons.AutoMirrored.Filled.ArrowBack,
-              contentDescription = "Move earlier",
-              modifier = Modifier.size(16.dp),
-            )
-          }
-          IconButton(
-            onClick = { onMove(1) },
-            enabled = canMoveLater,
-            modifier = Modifier.size(24.dp),
-          ) {
-            Icon(
-              Icons.AutoMirrored.Filled.ArrowForward,
-              contentDescription = "Move later",
-              modifier = Modifier.size(16.dp),
-            )
-          }
-        }
-      }
+      )
     }
   }
 }
@@ -964,6 +1146,7 @@ private fun QuestionProperties(state: FormEditorState, question: EditorQuestion)
       selectedText = question.type.label,
       options = EditorQuestionType.entries,
       optionText = { it.label },
+      optionIcon = { questionTypeIcon(it) },
       onSelect = { state.changeType(key, it) },
     )
 
@@ -1179,6 +1362,7 @@ internal fun <T> DropdownSelector(
   optionText: (T) -> String,
   onSelect: (T) -> Unit,
   modifier: Modifier = Modifier,
+  optionIcon: ((T) -> ImageVector)? = null,
 ) {
   var expanded by remember { mutableStateOf(false) }
   Box(modifier = modifier.fillMaxWidth()) {
@@ -1207,6 +1391,17 @@ internal fun <T> DropdownSelector(
       options.forEach { option ->
         DropdownMenuItem(
           text = { Text(optionText(option), maxLines = 1, overflow = TextOverflow.Ellipsis) },
+          leadingIcon =
+            optionIcon?.invoke(option)?.let { icon ->
+              {
+                Icon(
+                  icon,
+                  contentDescription = null,
+                  modifier = Modifier.size(18.dp),
+                  tint = MaterialTheme.colorScheme.primary,
+                )
+              }
+            },
           onClick = {
             onSelect(option)
             expanded = false

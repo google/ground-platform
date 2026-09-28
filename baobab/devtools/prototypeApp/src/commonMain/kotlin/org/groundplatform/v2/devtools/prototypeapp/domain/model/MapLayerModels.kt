@@ -36,7 +36,7 @@ enum class LayerSourceType(val badgeLabel: String) {
  */
 enum class BasemapType(val label: String, val description: String) {
   NORMAL(label = "Map", description = "Standard vector terrain, roads & contour basemap"),
-  SATELLITE(label = "Satellite", description = "High-resolution satellite & aerial canopy imagery"),
+  SATELLITE(label = "Satellite", description = "Mapbox Standard Satellite imagery with reference labels"),
 }
 
 /** Offline basemap rendering style toggleable in the `Layers` sheet. */

@@ -757,6 +757,14 @@
                 tileSize: 256,
                 maxzoom: 19,
               },
+              'satellite-labels-tiles': {
+                type: 'raster',
+                tiles: [
+                  'https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',
+                ],
+                tileSize: 256,
+                maxzoom: 19,
+              },
               'normal-tiles': {
                 type: 'raster',
                 tiles: [
@@ -805,6 +813,17 @@
                   'raster-opacity': isOfflineVisible ? 1.0 : 0.32,
                   'raster-contrast': 0.08,
                   'raster-saturation': 0.05,
+                },
+              },
+              {
+                id: 'satellite-labels-layer',
+                type: 'raster',
+                source: 'satellite-labels-tiles',
+                layout: {
+                  visibility: isSat ? 'visible' : 'none',
+                },
+                paint: {
+                  'raster-opacity': isOfflineVisible ? 1.0 : 0.85,
                 },
               },
               {
@@ -1607,6 +1626,18 @@
                 isOfflineVisible ? 1.0 : 0.32
               );
             }
+            if (map.getLayer('satellite-labels-layer')) {
+              map.setLayoutProperty(
+                'satellite-labels-layer',
+                'visibility',
+                isSat ? 'visible' : 'none'
+              );
+              map.setPaintProperty(
+                'satellite-labels-layer',
+                'raster-opacity',
+                isOfflineVisible ? 1.0 : 0.85
+              );
+            }
             if (map.getLayer('normal-raster-layer')) {
               map.setLayoutProperty(
                 'normal-raster-layer',
@@ -2253,7 +2284,7 @@
               if (map) {
                 const styleUrl =
                   currentBasemapType === 'SATELLITE'
-                    ? 'mapbox://styles/mapbox/satellite-streets-v12'
+                    ? 'mapbox://styles/mapbox/standard-satellite'
                     : 'mapbox://styles/mapbox/outdoors-v12';
                 map.setStyle(styleUrl);
               }
