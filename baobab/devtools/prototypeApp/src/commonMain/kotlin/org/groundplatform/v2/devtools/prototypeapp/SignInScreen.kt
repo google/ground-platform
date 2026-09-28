@@ -98,7 +98,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
@@ -146,8 +145,8 @@ fun MobileScreenHost(state: PrototypeAppState) {
 }
 
 /**
- * Renders the Ground 2.0 "Cloud Acacia" vector logo (`shared/assets/logo.svg` • `viewBox="0 0 512
- * 512"`).
+ * Renders the Ground 2.0 5-Tone Flat "Cloud Acacia" vector logo (`shared/assets/logo.svg` •
+ * `viewBox="0 0 512 512"`).
  */
 @Composable
 fun CloudAcaciaLogo(modifier: Modifier = Modifier) {
@@ -156,138 +155,115 @@ fun CloudAcaciaLogo(modifier: Modifier = Modifier) {
     fun sx(x: Float) = x * s
     fun sy(y: Float) = y * s
 
-    // 1. Rounded Pebble App Container (<rect x="24" y="24" width="464" height="464" rx="128"
-    // fill="url(#ac3-bg)" />)
+    val containerForest = Color(0xFF0F3828)
+    val dropletMint = Color(0xFF52D69A)
+    val sunGold = Color(0xFFFDE047)
+    val deepPine = Color(0xFF071F16)
+    val geopointOrange = Color(0xFFF97316)
+
+    // 1. Solid Deep Forest Pebble App Container (<rect x="24" y="24" width="464" height="464"
+    // rx="128" fill="#0F3828" />)
     drawRoundRect(
-      brush =
-        Brush.linearGradient(
-          colors = listOf(Color(0xFF1A5C43), Color(0xFF0A241A)),
-          start = Offset(sx(64f), sy(32f)),
-          end = Offset(sx(448f), sy(480f)),
-        ),
+      color = containerForest,
       topLeft = Offset(sx(24f), sy(24f)),
       size = Size(sx(464f), sy(464f)),
       cornerRadius = CornerRadius(sx(128f), sy(128f)),
     )
 
-    // 2. Outer Map Pin / Canopy Droplet Path
+    // 2. Solid Crisp Mint-Emerald Droplet Sky
     val pinPath =
       Path().apply {
-        moveTo(sx(256f), sy(76f))
-        cubicTo(sx(166f), sy(76f), sx(104f), sy(142f), sx(104f), sy(228f))
-        cubicTo(sx(104f), sy(318f), sx(208f), sy(392f), sx(244f), sy(422f))
-        cubicTo(sx(251f), sy(428f), sx(261f), sy(428f), sx(268f), sy(422f))
-        cubicTo(sx(304f), sy(392f), sx(408f), sy(318f), sx(408f), sy(228f))
-        cubicTo(sx(408f), sy(142f), sx(346f), sy(76f), sx(256f), sy(76f))
+        moveTo(sx(256f), sy(64f))
+        cubicTo(sx(160f), sy(64f), sx(94f), sy(134f), sx(94f), sy(224f))
+        cubicTo(sx(94f), sy(318f), sx(204f), sy(392f), sx(243f), sy(422f))
+        cubicTo(sx(250f), sy(428f), sx(262f), sy(428f), sx(269f), sy(422f))
+        cubicTo(sx(308f), sy(392f), sx(418f), sy(318f), sx(418f), sy(224f))
+        cubicTo(sx(418f), sy(134f), sx(352f), sy(64f), sx(256f), sy(64f))
         close()
       }
 
-    drawPath(
-      path = pinPath,
-      brush =
-        Brush.linearGradient(
-          0.0f to Color(0xFFA7E3C5),
-          0.48f to Color(0xFF34A853),
-          1.0f to Color(0xFF144532),
-          start = Offset(sx(136f), sy(76f)),
-          end = Offset(sx(376f), sy(416f)),
-        ),
-    )
+    drawPath(path = pinPath, color = dropletMint)
 
-    // 3. Clipped Interior Scene (<g clip-path="url(#ac3-clip)">)
+    // 3. Clipped Savanna Landscape Inside the Droplet (<g clip-path="url(#gm-pin-clip)">)
     clipPath(pinPath) {
-      // Warm Golden Sunrise Disc (<circle cx="256" cy="240" r="94" fill="url(#ac3-sun)" />)
+      // Solid Radiant Gold Sunrise Disc (<circle cx="256" cy="244" r="104" fill="#FDE047" />)
       drawCircle(
-        brush =
-          Brush.linearGradient(
-            0.0f to Color(0xFFFFF9E6),
-            0.60f to Color(0xFFFDE047),
-            1.0f to Color(0xFFF59E0B),
-            start = Offset(sx(256f), sy(148f)),
-            end = Offset(sx(256f), sy(328f)),
-          ),
-        radius = sx(94f),
-        center = Offset(sx(256f), sy(240f)),
+        color = sunGold,
+        radius = sx(104f),
+        center = Offset(sx(256f), sy(244f)),
       )
 
-      val darkForest = Color(0xFF0B291E)
-
-      // Main Upper Cloud Canopy
+      // Solid Ultra-Deep Pine Cloud Acacia Canopy (3 Golden-Ratio Lobes)
       val upperCloudPath =
         Path().apply {
-          moveTo(sx(174f), sy(192f))
-          cubicTo(sx(172f), sy(170f), sx(198f), sy(156f), sx(224f), sy(164f))
-          cubicTo(sx(238f), sy(148f), sx(274f), sy(148f), sx(288f), sy(164f))
-          cubicTo(sx(314f), sy(156f), sx(346f), sy(168f), sx(348f), sy(188f))
-          cubicTo(sx(350f), sy(202f), sx(326f), sy(208f), sx(294f), sy(204f))
-          cubicTo(sx(268f), sy(202f), sx(244f), sy(202f), sx(218f), sy(204f))
-          cubicTo(sx(190f), sy(206f), sx(175f), sy(202f), sx(174f), sy(192f))
+          moveTo(sx(164f), sy(182f))
+          cubicTo(sx(162f), sy(158f), sx(190f), sy(146f), sx(218f), sy(154f))
+          cubicTo(sx(234f), sy(134f), sx(278f), sy(132f), sx(298f), sy(152f))
+          cubicTo(sx(332f), sy(142f), sx(374f), sy(156f), sx(376f), sy(182f))
+          cubicTo(sx(378f), sy(200f), sx(348f), sy(204f), sx(308f), sy(198f))
+          cubicTo(sx(274f), sy(192f), sx(238f), sy(192f), sx(204f), sy(196f))
+          cubicTo(sx(178f), sy(198f), sx(165f), sy(194f), sx(164f), sy(182f))
           close()
         }
-      drawPath(path = upperCloudPath, color = darkForest)
+      drawPath(path = upperCloudPath, color = deepPine)
 
-      // Lower Side Cloud Bough
+      // Lower-Left Cloud Bough (22px Clear Sky Channel for Small-Size Legibility)
       val sideCloudPath =
         Path().apply {
-          moveTo(sx(132f), sy(218f))
-          cubicTo(sx(130f), sy(200f), sx(152f), sy(190f), sx(176f), sy(196f))
-          cubicTo(sx(194f), sy(190f), sx(218f), sy(198f), sx(220f), sy(212f))
-          cubicTo(sx(222f), sy(222f), sx(200f), sy(226f), sx(174f), sy(224f))
-          cubicTo(sx(150f), sy(226f), sx(133f), sy(224f), sx(132f), sy(218f))
+          moveTo(sx(118f), sy(230f))
+          cubicTo(sx(116f), sy(210f), sx(142f), sy(200f), sx(170f), sy(208f))
+          cubicTo(sx(190f), sy(202f), sx(216f), sy(210f), sx(218f), sy(226f))
+          cubicTo(sx(220f), sy(238f), sx(196f), sy(242f), sx(166f), sy(240f))
+          cubicTo(sx(138f), sy(242f), sx(119f), sy(238f), sx(118f), sy(230f))
           close()
         }
-      drawPath(path = sideCloudPath, color = darkForest)
+      drawPath(path = sideCloudPath, color = deepPine)
 
-      // Trunk & Branching Forks
+      // Calligraphic Trunk with Grounded Root Flare & Open Branch Window
       val trunkPath =
         Path().apply {
-          moveTo(sx(224f), sy(350f))
-          cubicTo(sx(238f), sy(320f), sx(245f), sy(284f), sx(245f), sy(248f))
-          cubicTo(sx(245f), sy(232f), sx(220f), sy(222f), sx(188f), sy(218f))
-          lineTo(sx(208f), sy(212f))
-          cubicTo(sx(230f), sy(216f), sx(244f), sy(224f), sx(250f), sy(234f))
-          lineTo(sx(252f), sy(194f))
-          lineTo(sx(264f), sy(194f))
-          lineTo(sx(268f), sy(248f))
-          cubicTo(sx(268f), sy(284f), sx(275f), sy(320f), sx(290f), sy(350f))
+          moveTo(sx(200f), sy(354f))
+          cubicTo(sx(228f), sy(324f), sx(241f), sy(288f), sx(243f), sy(252f))
+          cubicTo(sx(243f), sy(238f), sx(215f), sy(232f), sx(180f), sy(230f))
+          lineTo(sx(202f), sy(218f))
+          cubicTo(sx(226f), sy(220f), sx(243f), sy(228f), sx(249f), sy(242f))
+          lineTo(sx(249f), sy(186f))
+          lineTo(sx(267f), sy(186f))
+          cubicTo(sx(267f), sy(210f), sx(268f), sy(232f), sx(269f), sy(252f))
+          cubicTo(sx(271f), sy(288f), sx(284f), sy(324f), sx(312f), sy(354f))
           close()
         }
-      drawPath(path = trunkPath, color = darkForest)
+      drawPath(path = trunkPath, color = deepPine)
 
-      // Rolling Earth Base
+      // Low-Horizon Rolling Earth Mound
       val earthBasePath =
         Path().apply {
-          moveTo(sx(104f), sy(342f))
-          cubicTo(sx(192f), sy(314f), sx(320f), sy(314f), sx(408f), sy(342f))
-          lineTo(sx(256f), sy(436f))
+          moveTo(sx(94f), sy(344f))
+          cubicTo(sx(190f), sy(312f), sx(322f), sy(312f), sx(418f), sy(344f))
+          lineTo(sx(256f), sy(440f))
           close()
         }
-      drawPath(path = earthBasePath, color = darkForest)
+      drawPath(path = earthBasePath, color = deepPine)
     }
 
-    // 4. Signature Small Orange Circle Motif (<circle cx="256" cy="122" r="20"
-    // fill="url(#ac3-orange)" />)
+    // 4. Solid Persimmon-Orange Geopoint Circle at Zenith (<circle cx="256" cy="114" r="24"
+    // fill="#F97316" />)
     drawCircle(
-      brush =
-        Brush.linearGradient(
-          colors = listOf(Color(0xFFFB923C), Color(0xFFEA580C)),
-          start = Offset(sx(236f), sy(106f)),
-          end = Offset(sx(276f), sy(146f)),
-        ),
-      radius = sx(20f),
-      center = Offset(sx(256f), sy(122f)),
+      color = geopointOrange,
+      radius = sx(24f),
+      center = Offset(sx(256f), sy(114f)),
     )
 
-    // 5. Minimal Horizon Wave (<path d="M144 432 C200 406, 312 406, 368 432" ... />)
+    // 5. Bold Rounded Concentric Horizon Arc (<path d="M142 440 C200 412, 312 412, 370 440" ... />)
     val horizonWavePath =
       Path().apply {
-        moveTo(sx(144f), sy(432f))
-        cubicTo(sx(200f), sy(406f), sx(312f), sy(406f), sx(368f), sy(432f))
+        moveTo(sx(142f), sy(440f))
+        cubicTo(sx(200f), sy(412f), sx(312f), sy(412f), sx(370f), sy(440f))
       }
     drawPath(
       path = horizonWavePath,
-      color = Color(0xFF8BD6B1).copy(alpha = 0.75f),
-      style = Stroke(width = sx(14f), cap = StrokeCap.Round),
+      color = dropletMint,
+      style = Stroke(width = sx(16f), cap = StrokeCap.Round),
     )
   }
 }

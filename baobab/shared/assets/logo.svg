@@ -15,95 +15,74 @@
 -->
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%" fill="none">
   <defs>
-    <linearGradient id="ac3-bg" x1="64" y1="32" x2="448" y2="480" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#1A5C43" />
-      <stop offset="100%" stop-color="#0A241A" />
-    </linearGradient>
-
-    <linearGradient id="ac3-pin" x1="136" y1="76" x2="376" y2="416" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#A7E3C5" />
-      <stop offset="48%" stop-color="#34A853" />
-      <stop offset="100%" stop-color="#144532" />
-    </linearGradient>
-
-    <linearGradient id="ac3-sun" x1="256" y1="148" x2="256" y2="328" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#FFF9E6" />
-      <stop offset="60%" stop-color="#FDE047" />
-      <stop offset="100%" stop-color="#F59E0B" />
-    </linearGradient>
-
-    <linearGradient id="ac3-orange" x1="236" y1="106" x2="276" y2="146" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#FB923C" />
-      <stop offset="100%" stop-color="#EA580C" />
-    </linearGradient>
-
-    <clipPath id="ac3-clip">
-      <path d="M256 76 C166 76, 104 142, 104 228 C104 318, 208 392, 244 422 C251 428, 261 428, 268 422 C304 392, 408 318, 408 228 C408 142, 346 76, 256 76 Z" />
+    <clipPath id="gm-pin-clip">
+      <path d="M256 64 C160 64, 94 134, 94 224 C94 318, 204 392, 243 422 C250 428, 262 428, 269 422 C308 392, 418 318, 418 224 C418 134, 352 64, 256 64 Z" />
     </clipPath>
   </defs>
 
-  <rect x="24" y="24" width="464" height="464" rx="128" fill="url(#ac3-bg)" />
+  <!-- 1. Solid Deep Forest Pebble Container -->
+  <rect x="24" y="24" width="464" height="464" rx="128" fill="#0F3828" />
 
+  <!-- 2. Solid Crisp Mint-Emerald Droplet Sky -->
   <path
-    d="M256 76 C166 76, 104 142, 104 228 C104 318, 208 392, 244 422 C251 428, 261 428, 268 422 C304 392, 408 318, 408 228 C408 142, 346 76, 256 76 Z"
-    fill="url(#ac3-pin)"
+    d="M256 64 C160 64, 94 134, 94 224 C94 318, 204 392, 243 422 C250 428, 262 428, 269 422 C308 392, 418 318, 418 224 C418 134, 352 64, 256 64 Z"
+    fill="#52D69A"
   />
 
-  <g clip-path="url(#ac3-clip)">
-    <!-- Warm Golden Sunrise Disc -->
-    <circle cx="256" cy="240" r="94" fill="url(#ac3-sun)" />
+  <!-- Clipped Savanna Landscape Inside the Droplet -->
+  <g clip-path="url(#gm-pin-clip)">
+    <!-- 3. Solid Radiant Gold Sunrise Disc -->
+    <circle cx="256" cy="244" r="104" fill="#FDE047" />
 
-    <!-- Cloud-Topped Savanna Acacia Crown (Organic Lobed Foliage Domes, Never Straight Lines) -->
-    <!-- Main Upper Cloud Canopy -->
+    <!-- 4. Solid Ultra-Deep Pine Cloud Acacia Canopy (3 Golden-Ratio Lobes) -->
     <path
-      d="M174 192
-         C172 170, 198 156, 224 164
-         C238 148, 274 148, 288 164
-         C314 156, 346 168, 348 188
-         C350 202, 326 208, 294 204
-         C268 202, 244 202, 218 204
-         C190 206, 175 202, 174 192 Z"
-      fill="#0B291E"
+      d="M164 182
+         C162 158, 190 146, 218 154
+         C234 134, 278 132, 298 152
+         C332 142, 374 156, 376 182
+         C378 200, 348 204, 308 198
+         C274 192, 238 192, 204 196
+         C178 198, 165 194, 164 182 Z"
+      fill="#071F16"
     />
 
-    <!-- Lower Side Cloud Bough -->
+    <!-- Lower-Left Cloud Bough (22px Clear Sky Channel for Small-Size Legibility) -->
     <path
-      d="M132 218
-         C130 200, 152 190, 176 196
-         C194 190, 218 198, 220 212
-         C222 222, 200 226, 174 224
-         C150 226, 133 224, 132 218 Z"
-      fill="#0B291E"
+      d="M118 230
+         C116 210, 142 200, 170 208
+         C190 202, 216 210, 218 226
+         C220 238, 196 242, 166 240
+         C138 242, 119 238, 118 230 Z"
+      fill="#071F16"
     />
 
-    <!-- Trunk & Branching Forks -->
+    <!-- Calligraphic Trunk with Grounded Root Flare & Open Branch Window -->
     <path
-      d="M224 350
-         C238 320, 245 284, 245 248
-         C245 232, 220 222, 188 218
-         L208 212
-         C230 216, 244 224, 250 234
-         L252 194
-         L264 194
-         L268 248
-         C268 284, 275 320, 290 350
+      d="M200 354
+         C228 324, 241 288, 243 252
+         C243 238, 215 232, 180 230
+         L202 218
+         C226 220, 243 228, 249 242
+         L249 186
+         L267 186
+         C267 210, 268 232, 269 252
+         C271 288, 284 324, 312 354
          Z"
-      fill="#0B291E"
+      fill="#071F16"
     />
 
-    <!-- Rolling Earth Base -->
-    <path d="M104 342 C192 314, 320 314, 408 342 L256 436 Z" fill="#0B291E" />
+    <!-- Low-Horizon Rolling Earth Mound -->
+    <path d="M94 344 C190 312, 322 312, 418 344 L256 440 Z" fill="#071F16" />
   </g>
 
-  <!-- Signature Small Orange Circle Motif -->
-  <circle cx="256" cy="122" r="20" fill="url(#ac3-orange)" />
+  <!-- 5. Solid Persimmon-Orange Geopoint Circle at Zenith -->
+  <circle cx="256" cy="114" r="24" fill="#F97316" />
 
-  <!-- Minimal Horizon Wave -->
+  <!-- Bold Rounded Concentric Horizon Arc -->
   <path
-    d="M144 432 C200 406, 312 406, 368 432"
-    stroke="#8BD6B1"
-    stroke-opacity="0.75"
-    stroke-width="14"
+    d="M142 440 C200 412, 312 412, 370 440"
+    stroke="#52D69A"
+    stroke-width="16"
     stroke-linecap="round"
   />
 </svg>
