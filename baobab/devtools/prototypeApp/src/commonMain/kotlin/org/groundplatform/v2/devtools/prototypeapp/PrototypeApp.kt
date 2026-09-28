@@ -130,6 +130,7 @@ import org.jetbrains.compose.resources.stringResource
 /** Top-level pages of the prototype web app, addressable via the URL hash (e.g. `#survey-editor`). */
 enum class PrototypeWorkbenchPage(val label: String, val hash: String) {
   MOBILE_PROTOTYPE("Mobile prototype", "prototype"),
+  WEB_DASHBOARD("Web dashboard", "dashboard"),
   SURVEY_EDITOR("Survey editor", "survey-editor");
 
   companion object {
@@ -148,7 +149,8 @@ enum class PrototypeWorkbenchPage(val label: String, val hash: String) {
  *
  * Renders an interactive UX design workbench that embeds a live Mobile or Tablet device preview of
  * the Ground 2.0 Compose Multiplatform UI (`Sign In` -> `Terms of Service` -> `Download survey` ->
- * `Main Survey UI`), plus a [SurveyEditorPage] for designing surveys, Forms, Map layers, and Data tables.
+ * `Main Survey UI`), a [WebDashboardPage] with the survey map and data tables, plus a
+ * [SurveyEditorPage] for designing surveys, Forms, Map layers, and Data tables.
  */
 @Composable
 fun PrototypeApp(
@@ -158,11 +160,14 @@ fun PrototypeApp(
 ) {
   var page by remember { mutableStateOf(initialPage) }
   val surveyEditorState = remember { SurveyEditorState() }
-  val isMapShowing =
+  val isMobileMapShowing =
     page == PrototypeWorkbenchPage.MOBILE_PROTOTYPE &&
       state.currentScreen == PrototypeScreen.MAIN_SURVEY &&
       state.activeDrawerSubView == MainDrawerSubView.NONE &&
       (!state.isDataCollectionFormOpen || state.isCurrentFormStepGeoPoint)
+  // The Mapbox basemap renders behind the Compose canvas, so the root surface must stay transparent
+  // whenever a page shows it.
+  val isMapShowing = isMobileMapShowing || page == PrototypeWorkbenchPage.WEB_DASHBOARD
 
   GroundTheme(darkTheme = state.isDarkTheme) {
     Surface(
@@ -187,7 +192,8 @@ fun PrototypeApp(
         when (page) {
           PrototypeWorkbenchPage.SURVEY_EDITOR ->
             SurveyEditorPage(state = surveyEditorState, isDarkTheme = state.isDarkTheme)
-          PrototypeWorkbenchPage.MOBILE_PROTOTYPE -> MobilePrototypePage(state, isMapShowing)
+          PrototypeWorkbenchPage.WEB_DASHBOARD -> WebDashboardPage(state)
+          PrototypeWorkbenchPage.MOBILE_PROTOTYPE -> MobilePrototypePage(state, isMobileMapShowing)
         }
       }
     }

@@ -75,11 +75,35 @@ UX Co-Design Workbench for rapid iteration with UX designers.
         units, in-app language locale switcher, and uploaded media cache
         eviction), **Terms of Service**, and **Sign out**.
 
+## Web Dashboard Page (`#dashboard`)
+
+Switch to it with the **Web dashboard** chip in the top bar, or deep-link to
+`http://localhost:8091/#dashboard`. It shares state with the mobile prototype,
+so selections and survey changes carry over.
+
+-   **Left panel**: The same content as the mobile bottom sheet: the searchable
+    list of map features and places, or the selected map feature's details and
+    `1:N` submissions. Sheet expand/collapse buttons and field-only actions
+    (data collection launchers, **Navigate**) are hidden.
+-   **Map**: The live survey map fills the main area. Click a map feature to
+    select it; click empty map to clear the selection.
+-   **Data tables**: While a map feature is selected, a panel docks to the
+    bottom of the map. Collapsed, it shows one tab per table; pick a tab or use
+    the arrow button to expand it. Tabs are:
+    -   The map feature's **Map layer**, listing every feature in it with the
+        selected one highlighted. Click a row to select that feature.
+    -   One table per **Form** with submissions for the selected feature, with a
+        column per question. Click a row to open that submission in the left
+        panel.
+
+Code lives in `WebDashboardPage.kt`.
+
 ## Survey Editor Page (`#survey-editor`)
 
-Switch pages with the **Mobile prototype** / **Survey editor** chips in the top
-bar, or deep-link to `http://localhost:8091/#survey-editor`. The old
-`#form-editor` link still works. The left-hand navigation lists:
+Switch pages with the **Mobile prototype** / **Web dashboard** / **Survey
+editor** chips in the top bar, or deep-link to
+`http://localhost:8091/#survey-editor`. The old `#form-editor` link still
+works. The left-hand navigation lists:
 
 -   **Survey details**: Title, description, survey ID, and languages, plus
     summary cards that link to each section.

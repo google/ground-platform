@@ -120,6 +120,10 @@ internal expect fun clearPlatformMapboxPlace()
  * Renders the real Mapbox GL JS basemap (`mapboxgl.Map`) inside `SurveyMapView` and delegates all
  * polygon, point, submission geometry, offline sector, and GPS blue-dot rendering + hit-testing
  * directly to Mapbox GL GeoJSON layers and `mapboxgl.Marker` instances.
+ *
+ * When [collapseSheetOnBackgroundTap] is `true` (mobile bottom sheet host), tapping the empty map
+ * first collapses an expanded sheet before clearing the selection. Hosts without a bottom sheet
+ * (the web dashboard) pass `false` so a background tap clears the selection immediately.
  */
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -128,6 +132,7 @@ fun MapboxBasemapView(
   animatedShiftX: Float,
   animatedShiftY: Float,
   modifier: Modifier = Modifier,
+  collapseSheetOnBackgroundTap: Boolean = true,
 ) {
   val density = LocalDensity.current.density
   var viewportLeftCssPx by remember { mutableStateOf(0f) }
@@ -351,7 +356,7 @@ fun MapboxBasemapView(
                 state.clearSelectedPlace()
                 state.updateLayersSheetOpen(false)
                 state.selectCluster(null)
-                if (state.isEntityBottomSheetExpanded) {
+                if (collapseSheetOnBackgroundTap && state.isEntityBottomSheetExpanded) {
                   state.updateEntityBottomSheetExpanded(false)
                 } else {
                   state.selectEntity(null)

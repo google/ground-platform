@@ -155,11 +155,15 @@ import org.groundplatform.v2.core.forms.ui.LocalGroundBrandFontFamily
  *    with a Search bar and category filter chips (`All`, `Places`, `Map features`) and expanding
  *    into the full grouped list.
  * ```
+ *
+ * When [isSidePanel] is `true` (the web dashboard's left-hand panel), the sheet expand/collapse
+ * toggles and mobile-only field actions (data collection launchers, `Navigate`) are hidden.
  */
 @Composable
 internal fun SurveyPersistentBottomSheetContent(
   state: PrototypeAppState,
   modifier: Modifier = Modifier,
+  isSidePanel: Boolean = false,
 ) {
   val selectedEntity = state.selectedEntity
   val selectedSubmission = state.selectedSubmission
@@ -168,7 +172,12 @@ internal fun SurveyPersistentBottomSheetContent(
 
   when {
     selectedEntity != null -> {
-      EntityBottomSheetCard(entity = selectedEntity, state = state, modifier = modifier)
+      EntityBottomSheetCard(
+        entity = selectedEntity,
+        state = state,
+        modifier = modifier,
+        isSidePanel = isSidePanel,
+      )
     }
     selectedSubmission != null -> {
       Column(
@@ -189,7 +198,7 @@ internal fun SurveyPersistentBottomSheetContent(
       }
     }
     else -> {
-      BottomSheetSearchableListContent(state = state, modifier = modifier)
+      BottomSheetSearchableListContent(state = state, modifier = modifier, isSidePanel = isSidePanel)
     }
   }
 }
@@ -283,6 +292,7 @@ internal fun EntityMetadataAndActionsRow(
   entity: GeospatialEntityItem,
   state: PrototypeAppState,
   showShareAndQrActions: Boolean,
+  showNavigateAction: Boolean = true,
 ) {
   val entityWayfindingBadge = state.formattedWayfindingBadgeForEntity(entity.id)
   val isNavigatingEntity = state.isNavigatingToEntity(entity.id)
@@ -324,7 +334,7 @@ internal fun EntityMetadataAndActionsRow(
     )
 
     // Live Distance & Compass Bearing Badge from User GPS
-    if (entityWayfindingBadge.isNotEmpty()) {
+    if (showNavigateAction && entityWayfindingBadge.isNotEmpty()) {
       GroundTonalBadge(
         text = "➤ $entityWayfindingBadge",
         tone = GroundBadgeTone.TERTIARY,
@@ -333,26 +343,28 @@ internal fun EntityMetadataAndActionsRow(
     }
 
     // Straight-Line Navigation Toggle Button for Geospatial Entity
-    FilterChip(
-      selected = isNavigatingEntity,
-      onClick = { state.toggleNavigationToEntity(entity.id) },
-      label = {
-        Text(
-          text = if (isNavigatingEntity) "Stop Nav" else "Navigate",
-          style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-          maxLines = 1,
-          overflow = TextOverflow.Ellipsis,
-          softWrap = false,
-        )
-      },
-      leadingIcon = {
-        Icon(
-          imageVector = Icons.Default.Navigation,
-          contentDescription = "Straight-line navigate to entity",
-          modifier = Modifier.size(13.dp),
-        )
-      },
-    )
+    if (showNavigateAction) {
+      FilterChip(
+        selected = isNavigatingEntity,
+        onClick = { state.toggleNavigationToEntity(entity.id) },
+        label = {
+          Text(
+            text = if (isNavigatingEntity) "Stop Nav" else "Navigate",
+            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            softWrap = false,
+          )
+        },
+        leadingIcon = {
+          Icon(
+            imageVector = Icons.Default.Navigation,
+            contentDescription = "Straight-line navigate to entity",
+            modifier = Modifier.size(13.dp),
+          )
+        },
+      )
+    }
 
     if (showShareAndQrActions) {
       // QR Code Link
@@ -407,12 +419,16 @@ internal fun EntityMetadataAndActionsRow(
  * - Shows a `"All map features"` back pill to return directly to the searchable list in the bottom sheet.
  * - Shows available form collection buttons and the unified `1:N` list of submissions grouped by
  * form title via [FormGroupedSubmissionsSection].
+ *
+ * When [isSidePanel] is `true`, the sheet expansion toggle and mobile-only field actions (`Navigate`,
+ * data collection launchers) are hidden.
  */
 @Composable
 internal fun EntityBottomSheetCard(
   entity: GeospatialEntityItem,
   state: PrototypeAppState,
   modifier: Modifier = Modifier,
+  isSidePanel: Boolean = false,
 ) {
   val selectedSubmission = state.selectedSubmission
   val isDark = state.isDarkTheme
@@ -451,21 +467,23 @@ internal fun EntityBottomSheetCard(
           }
         }
 
-        IconButton(
-          onClick = { state.toggleEntityBottomSheetExpanded() },
-          modifier = Modifier.size(28.dp),
-        ) {
-          Icon(
-            imageVector =
-              if (state.isEntityBottomSheetExpanded) {
-                Icons.Default.KeyboardArrowDown
-              } else {
-                Icons.Default.KeyboardArrowUp
-              },
-            contentDescription = "Toggle Sheet Expansion",
-            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.size(18.dp),
-          )
+        if (!isSidePanel) {
+          IconButton(
+            onClick = { state.toggleEntityBottomSheetExpanded() },
+            modifier = Modifier.size(28.dp),
+          ) {
+            Icon(
+              imageVector =
+                if (state.isEntityBottomSheetExpanded) {
+                  Icons.Default.KeyboardArrowDown
+                } else {
+                  Icons.Default.KeyboardArrowUp
+                },
+              contentDescription = "Toggle Sheet Expansion",
+              tint = MaterialTheme.colorScheme.onSurfaceVariant,
+              modifier = Modifier.size(18.dp),
+            )
+          }
         }
 
         IconButton(onClick = { state.selectEntity(null) }, modifier = Modifier.size(28.dp)) {
@@ -480,11 +498,16 @@ internal fun EntityBottomSheetCard(
     )
 
     // Shared Metadata Badges & Share/Navigate Actions Row
-    EntityMetadataAndActionsRow(entity = entity, state = state, showShareAndQrActions = true)
+    EntityMetadataAndActionsRow(
+      entity = entity,
+      state = state,
+      showShareAndQrActions = true,
+      showNavigateAction = !isSidePanel,
+    )
 
     // Organizer-defined Action Buttons for this dataset type (`form.targetDatasetId ==
-    // entity.datasetId`)
-    val entityForms = state.formsForEntity(entity)
+    // entity.datasetId`). Data collection happens on mobile, so the side panel omits them.
+    val entityForms = if (isSidePanel) emptyList() else state.formsForEntity(entity)
     if (entityForms.isNotEmpty()) {
       Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
         Text(
@@ -780,11 +803,14 @@ internal fun FormGroupedSubmissionsSection(
  * - Expands to display **Map layers** (grouped by spatial layer with un-nested entity records,
  *   reusing [EntitySummaryHeader] and [EntityMetadataAndActionsRow]), **Data tables** (tabular datasets),
  *   and **Places** (geographic places, landmarks, and coordinates in the survey region).
+ *
+ * When [isSidePanel] is `true`, the Expand/Collapse sheet button is hidden.
  */
 @Composable
 internal fun BottomSheetSearchableListContent(
   state: PrototypeAppState,
   modifier: Modifier = Modifier,
+  isSidePanel: Boolean = false,
 ) {
   val allPlaces = state.places
   val apiPlaces = state.mapboxPlacesApiResults
@@ -860,32 +886,34 @@ internal fun BottomSheetSearchableListContent(
             ),
         )
 
-        IconButton(
-          onClick = {
-            if (state.isEntityBottomSheetExpanded) {
-              state.setMainSurveyViewMode(MainSurveyViewMode.MAP)
-            } else {
-              state.setMainSurveyViewMode(MainSurveyViewMode.LIST)
-            }
-          },
-          modifier = Modifier.size(40.dp),
-        ) {
-          Icon(
-            imageVector =
+        if (!isSidePanel) {
+          IconButton(
+            onClick = {
               if (state.isEntityBottomSheetExpanded) {
-                Icons.Default.KeyboardArrowDown
+                state.setMainSurveyViewMode(MainSurveyViewMode.MAP)
               } else {
-                Icons.Default.KeyboardArrowUp
-              },
-            contentDescription =
-              if (state.isEntityBottomSheetExpanded) {
-                "Collapse list sheet to map"
-              } else {
-                "Expand searchable list sheet"
-              },
-            tint = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.size(22.dp),
-          )
+                state.setMainSurveyViewMode(MainSurveyViewMode.LIST)
+              }
+            },
+            modifier = Modifier.size(40.dp),
+          ) {
+            Icon(
+              imageVector =
+                if (state.isEntityBottomSheetExpanded) {
+                  Icons.Default.KeyboardArrowDown
+                } else {
+                  Icons.Default.KeyboardArrowUp
+                },
+              contentDescription =
+                if (state.isEntityBottomSheetExpanded) {
+                  "Collapse list sheet to map"
+                } else {
+                  "Expand searchable list sheet"
+                },
+              tint = MaterialTheme.colorScheme.primary,
+              modifier = Modifier.size(22.dp),
+            )
+          }
         }
       }
 
