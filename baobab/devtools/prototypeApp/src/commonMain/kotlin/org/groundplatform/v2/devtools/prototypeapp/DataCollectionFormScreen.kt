@@ -13,11 +13,9 @@
  */
 package org.groundplatform.v2.devtools.prototypeapp
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -41,21 +39,16 @@ import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Map
-import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
@@ -64,7 +57,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -77,22 +69,15 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import groundplatform.v2.forms.FormDef
 import groundplatform.v2.forms.RecordInstance
-import org.groundplatform.v2.core.forms.engine.FormSession
 import org.groundplatform.v2.core.forms.model.FinalizationResult
 import org.groundplatform.v2.core.forms.model.FormState
-import org.groundplatform.v2.core.forms.serialization.ProtoJsonSerializer
-import org.groundplatform.v2.core.forms.serialization.TextProtoSerializer
-import org.groundplatform.v2.core.forms.serialization.XFormsXmlSerializer
 import org.groundplatform.v2.core.forms.ui.FormWizardController
 import org.groundplatform.v2.core.forms.ui.FormWizardStep
 import org.groundplatform.v2.core.forms.ui.GroundBadgeTone
 import org.groundplatform.v2.core.forms.ui.GroundTonalBadge
 import org.groundplatform.v2.core.forms.ui.MobileFormRunner
-import org.groundplatform.v2.core.forms.ui.WorkbenchExampleForm
-import org.groundplatform.v2.core.forms.ui.formatFieldValueForDisplay
 
 /**
  * Canonical XForms `entityref` nodeset path (`/data/target_entity`) representing the geospatial
@@ -100,7 +85,6 @@ import org.groundplatform.v2.core.forms.ui.formatFieldValueForDisplay
  * form requires a target geospatial entity.
  */
 const val ENTITY_REF_FIELD_PATH: String = PrototypeAppDataStore.ENTITY_REF_FIELD_PATH
-
 
 private val defaultResolveFormDefUseCase =
   org.groundplatform.v2.devtools.prototypeapp.domain.usecase.ResolveFormDefForLaunchUseCase()
@@ -169,7 +153,8 @@ fun isWizardStepEntityRef(step: FormWizardStep?): Boolean {
 }
 
 /**
- * Returns `true` if [step] contains a geometry (`geopoint`, `geotrace`, or `geoshape`) question control.
+ * Returns `true` if [step] contains a geometry (`geopoint`, `geotrace`, or `geoshape`) question
+ * control.
  */
 fun isWizardStepGeoPoint(step: FormWizardStep?): Boolean {
   if (step == null) return false
@@ -344,6 +329,7 @@ fun DataCollectionFormScreen(state: PrototypeAppState) {
       )
     } else {
       // Shared MobileFormRunner component from org.groundplatform.v2.core.forms.ui
+      val mediaCaptureHandler = remember { PrototypeMediaCaptureHandler() }
       androidx.compose.runtime.CompositionLocalProvider(
         org.groundplatform.v2.core.forms.ui.LocalGeoPointMapViewport provides
           { viewportState ->
@@ -352,7 +338,8 @@ fun DataCollectionFormScreen(state: PrototypeAppState) {
               viewportState = viewportState,
               modifier = Modifier.fillMaxSize(),
             )
-          }
+          },
+        org.groundplatform.v2.core.forms.ui.LocalMediaCaptureHandler provides mediaCaptureHandler,
       ) {
         Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
           MobileFormRunner(

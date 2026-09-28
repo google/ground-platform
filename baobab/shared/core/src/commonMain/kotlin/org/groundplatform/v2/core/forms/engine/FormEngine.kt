@@ -40,6 +40,7 @@ import kotlin.math.max
 import kotlin.math.roundToInt
 import kotlin.math.roundToLong
 import kotlin.random.Random
+import org.groundplatform.v2.core.forms.media.MediaCapture
 import org.groundplatform.v2.core.forms.model.ComponentState
 import org.groundplatform.v2.core.forms.model.EntityState
 import org.groundplatform.v2.core.forms.model.FieldState
@@ -1344,6 +1345,7 @@ object FormEngine {
               appearance = control.appearance,
               options = options,
               resolvedIntent = resolvedIntent,
+              mediaCapture = MediaCapture.resolveSpec(control, fieldState.binding),
             )
           )
         }

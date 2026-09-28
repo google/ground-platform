@@ -29,6 +29,8 @@ import groundplatform.v2.forms.RecordInstance
 import groundplatform.v2.forms.TypedValue
 import org.groundplatform.v2.core.forms.engine.FormEnvironment
 import org.groundplatform.v2.core.forms.engine.FormSession
+import org.groundplatform.v2.core.forms.media.MediaAttachment
+import org.groundplatform.v2.core.forms.media.MediaAttachmentRejectedException
 import org.groundplatform.v2.core.forms.model.ComponentState
 import org.groundplatform.v2.core.forms.model.FinalizationResult
 import org.groundplatform.v2.core.forms.model.FormState
@@ -403,6 +405,35 @@ class FormWizardController(
   }
 
   /**
+   * Answers the photo / video / audio question at [path] with [attachment]. Returns an error
+   * message if the attachment was rejected (e.g. wrong media type), or `null` on success.
+   */
+  fun attachMedia(path: String, attachment: MediaAttachment): String? {
+    showCurrentStepValidationWarning = false
+    submissionResult = null
+    return try {
+      session.attachMedia(path, attachment)
+      null
+    } catch (e: MediaAttachmentRejectedException) {
+      e.message ?: "Attachment rejected"
+    }
+  }
+
+  /** Clears the media question at [path] and discards its attachment. */
+  fun removeMedia(path: String) {
+    showCurrentStepValidationWarning = false
+    submissionResult = null
+    session.removeMedia(path)
+  }
+
+  /** The attachment currently answering the media question at [path], if its bytes are loaded. */
+  fun attachmentFor(path: String): MediaAttachment? = session.attachmentFor(path)
+
+  /** Attachments that accompany a submission of the current record (relevant answers only). */
+  val referencedAttachments: List<MediaAttachment>
+    get() = session.referencedAttachments()
+
+  /**
    * Appends a new repeat instance to [repeatPath] and navigates directly to the first question of
    * the newly created repeat instance.
    */
@@ -606,8 +637,8 @@ class FormWizardController(
 }
 
 /**
- * Returns `true` if [control] represents a geometry question (`TYPE_GEOPOINT`, `TYPE_GEOTRACE`,
- * or `TYPE_GEOSHAPE`) that has not yet captured the minimum required vertices:
+ * Returns `true` if [control] represents a geometry question (`TYPE_GEOPOINT`, `TYPE_GEOTRACE`, or
+ * `TYPE_GEOSHAPE`) that has not yet captured the minimum required vertices:
  * - `TYPE_GEOPOINT`: value is null
  * - `TYPE_GEOTRACE`: fewer than 2 points
  * - `TYPE_GEOSHAPE`: fewer than 3 points

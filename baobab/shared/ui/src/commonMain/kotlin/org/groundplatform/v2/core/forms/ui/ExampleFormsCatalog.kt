@@ -30,8 +30,8 @@ package org.groundplatform.v2.core.forms.ui
  *    list of past individuals (`past_individuals`) for respondent lookup and roster reconciliation.
  * 5. [ALL_FIELD_TYPES]: Comprehensive showcase of all XForms / ProtoForms field types (`string`,
  *    `multiline`, `int`, `decimal`, `boolean`, `date`, `time`, `dateTime`, `select1`, `likert`,
- *    `select`, `range`, `rank`, `geopoint`, `geotrace`, `geoshape`, `upload`, `trigger`,
- *    `calculate`, `field-list` group, and `repeat`).
+ *    `select`, `range`, `rank`, `geopoint`, `geotrace`, `geoshape`, photo / video / audio `upload`,
+ *    `trigger`, `calculate`, `field-list` group, and `repeat`).
  */
 enum class WorkbenchExampleForm(
   val id: String,
@@ -723,7 +723,7 @@ enum class WorkbenchExampleForm(
     shortLabel = "5. All Form Field Types (Current)",
     title = "EUDR & Shade-Tree Field Survey",
     subtitle =
-      "Comprehensive showcase of all XForms / ProtoForms field types (`string`, `int`, `decimal`, `boolean`, `date`, `time`, `select1`, `likert`, `select`, `range`, `rank`, `geopoint`, `geotrace`, `geoshape`, `upload`, `trigger`, `calculate`, `group`, `repeat`).",
+      "Comprehensive showcase of all XForms / ProtoForms field types (`string`, `int`, `decimal`, `boolean`, `date`, `time`, `select1`, `likert`, `select`, `range`, `rank`, `geopoint`, `geotrace`, `geoshape`, photo / video / audio `upload`, `trigger`, `calculate`, `group`, `repeat`).",
     badgeText = "All 20+ Field Types",
     requiresEntity = false,
     xformsXml =
@@ -754,6 +754,8 @@ enum class WorkbenchExampleForm(
                 <riparian_transect>-1.2921 36.8219 1680 3.5; -1.2924 36.8222 1679 3.6</riparian_transect>
                 <plot_boundary>-1.2921 36.8219 1680 3.5; -1.2925 36.8224 1681 3.8; -1.2918 36.8228 1682 3.2; -1.2921 36.8219 1680 3.5</plot_boundary>
                 <leaf_voucher_photo>erythrina_voucher_104.jpg</leaf_voucher_photo>
+                <canopy_walkthrough_video/>
+                <farmer_interview_audio/>
                 <safety_protocol_ack>OK</safety_protocol_ack>
                 <calculated_shade_index/>
                 <site_conditions_group>
@@ -825,7 +827,9 @@ enum class WorkbenchExampleForm(
             <bind nodeset="/data/plot_center_gps" type="geopoint" required="true()" accuracyThreshold="10.0"/>
             <bind nodeset="/data/riparian_transect" type="geotrace"/>
             <bind nodeset="/data/plot_boundary" type="geoshape" required="true()" entities:saveto="geometry"/>
-            <bind nodeset="/data/leaf_voucher_photo" type="binary"/>
+            <bind nodeset="/data/leaf_voucher_photo" type="binary" orx:max-pixels="1600"/>
+            <bind nodeset="/data/canopy_walkthrough_video" type="binary"/>
+            <bind nodeset="/data/farmer_interview_audio" type="binary"/>
             <bind nodeset="/data/safety_protocol_ack" type="string"/>
             <bind nodeset="/data/calculated_shade_index"
                   type="string"
@@ -947,8 +951,16 @@ enum class WorkbenchExampleForm(
             <hint ref="jr:itext('/data/plot_boundary:hint')"/>
           </input>
           <upload ref="/data/leaf_voucher_photo" mediatype="image/*">
-            <label>Botanical Voucher Photo (Binary Media Upload)</label>
-            <hint>Attach a high-resolution leaf/bark specimen photo (`mediatype="image/*"`).</hint>
+            <label>Botanical Voucher Photo (Photo Capture)</label>
+            <hint>Take or choose a leaf/bark specimen photo (`mediatype="image/*"`, downscaled to 1600 px via `orx:max-pixels`).</hint>
+          </upload>
+          <upload ref="/data/canopy_walkthrough_video" mediatype="video/*" appearance="new">
+            <label>Canopy Walkthrough Video (Video Capture)</label>
+            <hint>Record a short 360° pan of the shade canopy from plot center (`mediatype="video/*"`; `appearance="new"` requires a fresh recording).</hint>
+          </upload>
+          <upload ref="/data/farmer_interview_audio" mediatype="audio/*">
+            <label>Farmer Interview Note (Audio Recording)</label>
+            <hint>Record the grower describing shade-tree management practices (`mediatype="audio/*"`).</hint>
           </upload>
           <trigger ref="/data/safety_protocol_ack">
             <label>Acknowledge Canopy &amp; Wildlife Safety Protocol (Trigger Control)</label>
@@ -1013,6 +1025,8 @@ enum class WorkbenchExampleForm(
         <riparian_transect>-1.2921 36.8219 1680 3.5; -1.2924 36.8222 1679 3.6</riparian_transect>
         <plot_boundary>-1.2921 36.8219 1680 3.5; -1.2925 36.8224 1681 3.8; -1.2918 36.8228 1682 3.2; -1.2921 36.8219 1680 3.5</plot_boundary>
         <leaf_voucher_photo>erythrina_voucher_104.jpg</leaf_voucher_photo>
+        <canopy_walkthrough_video/>
+        <farmer_interview_audio/>
         <safety_protocol_ack>OK</safety_protocol_ack>
         <site_conditions_group>
           <soil_moisture_class>moist_well_drained</soil_moisture_class>

@@ -33,11 +33,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.LocationOn
@@ -46,7 +44,6 @@ import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
@@ -98,6 +95,7 @@ import groundplatform.v2.forms.FieldValue
 import groundplatform.v2.forms.GeoPoint
 import kotlin.math.abs
 import kotlin.math.roundToInt
+import org.groundplatform.v2.core.forms.media.MediaCapture
 import org.groundplatform.v2.core.forms.model.ComponentState
 import org.groundplatform.v2.core.forms.model.FieldState
 import org.groundplatform.v2.core.forms.model.ResolvedChoiceOption
@@ -177,10 +175,7 @@ fun QuestionControlCard(
       ) {
         Text(
           text = control.canonicalPath,
-          style =
-            MaterialTheme.typography.labelSmall.copy(
-              color = colors.onSurfaceVariant,
-            ),
+          style = MaterialTheme.typography.labelSmall.copy(color = colors.onSurfaceVariant),
           maxLines = 1,
           overflow = TextOverflow.Ellipsis,
           softWrap = false,
@@ -332,7 +327,7 @@ fun ControlWidget(control: ComponentState.ControlState, controller: FormWizardCo
       SelectMultipleWidget(control = control, controller = controller)
     ControlType.CONTROL_RANGE -> RangeControlWidget(control = control, controller = controller)
     ControlType.CONTROL_RANK -> RankControlWidget(control = control, controller = controller)
-    ControlType.CONTROL_UPLOAD -> UploadControlWidget(control = control, controller = controller)
+    ControlType.CONTROL_UPLOAD -> MediaCaptureWidget(control = control, controller = controller)
     ControlType.CONTROL_TRIGGER -> TriggerControlWidget(control = control, controller = controller)
     ControlType.CONTROL_INPUT,
     ControlType.CONTROL_TYPE_UNSPECIFIED ->
@@ -476,7 +471,13 @@ private fun IntegerInputWidget(
         onClick = { applyNumber((initialNumber ?: 0L) - 1L) },
         modifier = Modifier.height(52.dp),
       ) {
-        Text("-1", fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis, softWrap = false)
+        Text(
+          "-1",
+          fontWeight = FontWeight.Bold,
+          maxLines = 1,
+          overflow = TextOverflow.Ellipsis,
+          softWrap = false,
+        )
       }
       OutlinedTextField(
         value = text,
@@ -509,7 +510,13 @@ private fun IntegerInputWidget(
         onClick = { applyNumber((initialNumber ?: 0L) + 1L) },
         modifier = Modifier.height(52.dp),
       ) {
-        Text("+1", fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis, softWrap = false)
+        Text(
+          "+1",
+          fontWeight = FontWeight.Bold,
+          maxLines = 1,
+          overflow = TextOverflow.Ellipsis,
+          softWrap = false,
+        )
       }
     }
     if (parseError != null) {
@@ -556,7 +563,13 @@ private fun DecimalInputWidget(
         },
         modifier = Modifier.height(52.dp),
       ) {
-        Text("-0.5", fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis, softWrap = false)
+        Text(
+          "-0.5",
+          fontWeight = FontWeight.Bold,
+          maxLines = 1,
+          overflow = TextOverflow.Ellipsis,
+          softWrap = false,
+        )
       }
       OutlinedTextField(
         value = text,
@@ -589,7 +602,13 @@ private fun DecimalInputWidget(
         },
         modifier = Modifier.height(52.dp),
       ) {
-        Text("+0.5", fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis, softWrap = false)
+        Text(
+          "+0.5",
+          fontWeight = FontWeight.Bold,
+          maxLines = 1,
+          overflow = TextOverflow.Ellipsis,
+          softWrap = false,
+        )
       }
     }
     if (parseError != null) {
@@ -698,19 +717,37 @@ private fun DateInputWidget(
         onClick = { controller.updateDate(path, year, month, (day - 1).coerceIn(1, 28)) },
         modifier = Modifier.weight(1f),
       ) {
-        Text("-1 Day", style = MaterialTheme.typography.labelSmall, maxLines = 1, overflow = TextOverflow.Ellipsis, softWrap = false)
+        Text(
+          "-1 Day",
+          style = MaterialTheme.typography.labelSmall,
+          maxLines = 1,
+          overflow = TextOverflow.Ellipsis,
+          softWrap = false,
+        )
       }
       OutlinedButton(
         onClick = { controller.updateDate(path, year, month, (day + 1).coerceIn(1, 28)) },
         modifier = Modifier.weight(1f),
       ) {
-        Text("+1 Day", style = MaterialTheme.typography.labelSmall, maxLines = 1, overflow = TextOverflow.Ellipsis, softWrap = false)
+        Text(
+          "+1 Day",
+          style = MaterialTheme.typography.labelSmall,
+          maxLines = 1,
+          overflow = TextOverflow.Ellipsis,
+          softWrap = false,
+        )
       }
       OutlinedButton(
         onClick = { controller.updateDate(path, year, (month % 12) + 1, day) },
         modifier = Modifier.weight(1f),
       ) {
-        Text("+1 Month", style = MaterialTheme.typography.labelSmall, maxLines = 1, overflow = TextOverflow.Ellipsis, softWrap = false)
+        Text(
+          "+1 Month",
+          style = MaterialTheme.typography.labelSmall,
+          maxLines = 1,
+          overflow = TextOverflow.Ellipsis,
+          softWrap = false,
+        )
       }
     }
   }
@@ -788,7 +825,7 @@ private fun TimestampInputWidget(
       text = ts?.toString() ?: "(No timestamp recorded)",
       style =
         MaterialTheme.typography.bodyMedium.copy(
-          color = if (ts != null) colors.onSurface else colors.onSurfaceVariant,
+          color = if (ts != null) colors.onSurface else colors.onSurfaceVariant
         ),
       modifier = Modifier.weight(1f),
     )
@@ -804,8 +841,9 @@ private fun TimestampInputWidget(
 }
 
 /**
- * Returns `true` when [appearance] allows panning the map to place a point manually (`placement-map`,
- * `map`, or `maps`). When `false`, point capture is locked to the user's live GPS position.
+ * Returns `true` when [appearance] allows panning the map to place a point manually
+ * (`placement-map`, `map`, or `maps`). When `false`, point capture is locked to the user's live GPS
+ * position.
  */
 fun isGeoPointPanAllowed(appearance: String): Boolean {
   val tokens = appearance.split(' ').filter { it.isNotBlank() }
@@ -837,7 +875,10 @@ private fun formatDecimal6(value: Double): String {
   return "$whole.$frac"
 }
 
-/** Formats [latitude] and [longitude] into a cardinal degree string (e.g. `"1.292066° S, 36.821946° E"`). */
+/**
+ * Formats [latitude] and [longitude] into a cardinal degree string (e.g. `"1.292066° S, 36.821946°
+ * E"`).
+ */
 fun formatGeoPointCoordinates(latitude: Double, longitude: Double): String {
   val latHemisphere = if (latitude < 0.0) "S" else "N"
   val lonHemisphere = if (longitude < 0.0) "W" else "E"
@@ -853,51 +894,55 @@ fun formatGeoPointAccuracy(accuracyMeters: Double): String {
 /** Material Design 3 Undo icon. */
 val UndoIcon: ImageVector by lazy {
   ImageVector.Builder(
-    name = "Undo",
-    defaultWidth = 24.dp,
-    defaultHeight = 24.dp,
-    viewportWidth = 24f,
-    viewportHeight = 24f,
-  ).apply {
-    path(fill = SolidColor(Color.Black)) {
-      moveTo(12.5f, 8.0f)
-      curveToRelative(-2.65f, 0.0f, -5.05f, 0.99f, -6.9f, 2.6f)
-      lineTo(2.0f, 7.0f)
-      verticalLineToRelative(9.0f)
-      horizontalLineToRelative(9.0f)
-      lineToRelative(-3.62f, -3.62f)
-      curveToRelative(1.39f, -1.16f, 3.16f, -1.88f, 5.12f, -1.88f)
-      curveToRelative(3.54f, 0.0f, 6.55f, 2.31f, 7.6f, 5.5f)
-      lineToRelative(2.37f, -0.78f)
-      curveTo(21.08f, 11.03f, 17.15f, 8.0f, 12.5f, 8.0f)
-      close()
+      name = "Undo",
+      defaultWidth = 24.dp,
+      defaultHeight = 24.dp,
+      viewportWidth = 24f,
+      viewportHeight = 24f,
+    )
+    .apply {
+      path(fill = SolidColor(Color.Black)) {
+        moveTo(12.5f, 8.0f)
+        curveToRelative(-2.65f, 0.0f, -5.05f, 0.99f, -6.9f, 2.6f)
+        lineTo(2.0f, 7.0f)
+        verticalLineToRelative(9.0f)
+        horizontalLineToRelative(9.0f)
+        lineToRelative(-3.62f, -3.62f)
+        curveToRelative(1.39f, -1.16f, 3.16f, -1.88f, 5.12f, -1.88f)
+        curveToRelative(3.54f, 0.0f, 6.55f, 2.31f, 7.6f, 5.5f)
+        lineToRelative(2.37f, -0.78f)
+        curveTo(21.08f, 11.03f, 17.15f, 8.0f, 12.5f, 8.0f)
+        close()
+      }
     }
-  }.build()
+    .build()
 }
 
 /** Material Design 3 Redo icon. */
 val RedoIcon: ImageVector by lazy {
   ImageVector.Builder(
-    name = "Redo",
-    defaultWidth = 24.dp,
-    defaultHeight = 24.dp,
-    viewportWidth = 24f,
-    viewportHeight = 24f,
-  ).apply {
-    path(fill = SolidColor(Color.Black)) {
-      moveTo(18.4f, 10.6f)
-      curveTo(16.55f, 8.99f, 14.15f, 8.0f, 11.5f, 8.0f)
-      curveToRelative(-4.65f, 0.0f, -8.58f, 3.03f, -9.96f, 7.22f)
-      lineTo(3.9f, 16.0f)
-      curveToRelative(1.05f, -3.19f, 4.05f, -5.5f, 7.6f, -5.5f)
-      curveToRelative(1.95f, 0.0f, 3.73f, 0.72f, 5.12f, 1.88f)
-      lineTo(13.0f, 16.0f)
-      horizontalLineToRelative(9.0f)
-      verticalLineTo(7.0f)
-      lineToRelative(-3.6f, 3.6f)
-      close()
+      name = "Redo",
+      defaultWidth = 24.dp,
+      defaultHeight = 24.dp,
+      viewportWidth = 24f,
+      viewportHeight = 24f,
+    )
+    .apply {
+      path(fill = SolidColor(Color.Black)) {
+        moveTo(18.4f, 10.6f)
+        curveTo(16.55f, 8.99f, 14.15f, 8.0f, 11.5f, 8.0f)
+        curveToRelative(-4.65f, 0.0f, -8.58f, 3.03f, -9.96f, 7.22f)
+        lineTo(3.9f, 16.0f)
+        curveToRelative(1.05f, -3.19f, 4.05f, -5.5f, 7.6f, -5.5f)
+        curveToRelative(1.95f, 0.0f, 3.73f, 0.72f, 5.12f, 1.88f)
+        lineTo(13.0f, 16.0f)
+        horizontalLineToRelative(9.0f)
+        verticalLineTo(7.0f)
+        lineToRelative(-3.6f, 3.6f)
+        close()
+      }
     }
-  }.build()
+    .build()
 }
 
 @Composable
@@ -923,8 +968,7 @@ private fun GeoPointInputWidget(
   var undoPointHistory by remember(path) { mutableStateOf<List<GeoPoint?>>(emptyList()) }
   var redoPointHistory by remember(path) { mutableStateOf<List<GeoPoint?>>(emptyList()) }
 
-  val isPanned =
-    panAllowed && (abs(panOffsetLat) > 0.0000005 || abs(panOffsetLon) > 0.0000005)
+  val isPanned = panAllowed && (abs(panOffsetLat) > 0.0000005 || abs(panOffsetLon) > 0.0000005)
   val targetLat = roundGeoCoord6(liveGpsLat + if (panAllowed) panOffsetLat else 0.0)
   val targetLon = roundGeoCoord6(liveGpsLon + if (panAllowed) panOffsetLon else 0.0)
 
@@ -956,9 +1000,7 @@ private fun GeoPointInputWidget(
           panOffsetLat = (panOffsetLat + (dyPx / heightPx) * spanDeg).coerceIn(-0.02, 0.02)
         }
       },
-      onZoomDelta = { delta ->
-        zoomLevel = (zoomLevel + delta).coerceIn(13.5f, 19.5f)
-      },
+      onZoomDelta = { delta -> zoomLevel = (zoomLevel + delta).coerceIn(13.5f, 19.5f) },
       onRecenterGps = {
         panOffsetLat = 0.0
         panOffsetLon = 0.0
@@ -1053,10 +1095,7 @@ private fun GeoPointInputWidget(
               )
               Text(
                 text = "$displayLat, $displayLon • Alt ${displayAlt.roundToInt()} m",
-                style =
-                  MaterialTheme.typography.labelSmall.copy(
-                    color = colors.onSurfaceVariant,
-                  ),
+                style = MaterialTheme.typography.labelSmall.copy(color = colors.onSurfaceVariant),
               )
             }
 
@@ -1082,16 +1121,10 @@ private fun GeoPointInputWidget(
                 modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
                 horizontalAlignment = Alignment.End,
               ) {
-                Text(
-                  text = "Accuracy",
-                  style = MaterialTheme.typography.labelSmall,
-                )
+                Text(text = "Accuracy", style = MaterialTheme.typography.labelSmall)
                 Text(
                   text = formatGeoPointAccuracy(displayAcc),
-                  style =
-                    MaterialTheme.typography.titleSmall.copy(
-                      fontWeight = FontWeight.Bold,
-                    ),
+                  style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
                 )
               }
             }
@@ -1125,10 +1158,7 @@ private fun GeoPointInputWidget(
                 } else {
                   "Tap \"Capture location\" below to record your current GPS coordinates"
                 },
-              style =
-                MaterialTheme.typography.labelSmall.copy(
-                  color = colors.onSurfaceVariant,
-                ),
+              style = MaterialTheme.typography.labelSmall.copy(color = colors.onSurfaceVariant),
             )
           }
         }
@@ -1164,11 +1194,7 @@ private fun GeoPointInputWidget(
           },
           enabled = undoPointHistory.isNotEmpty() || gp != null,
         ) {
-          Icon(
-            imageVector = UndoIcon,
-            contentDescription = "Undo",
-            modifier = Modifier.size(20.dp),
-          )
+          Icon(imageVector = UndoIcon, contentDescription = "Undo", modifier = Modifier.size(20.dp))
         }
 
         OutlinedIconButton(
@@ -1192,11 +1218,7 @@ private fun GeoPointInputWidget(
           },
           enabled = redoPointHistory.isNotEmpty(),
         ) {
-          Icon(
-            imageVector = RedoIcon,
-            contentDescription = "Redo",
-            modifier = Modifier.size(20.dp),
-          )
+          Icon(imageVector = RedoIcon, contentDescription = "Redo", modifier = Modifier.size(20.dp))
         }
 
         Button(
@@ -1232,9 +1254,7 @@ private fun GeoPointInputWidget(
         }
 
         if (isPanned) {
-          OutlinedIconButton(
-            onClick = { viewportState.onRecenterGps() },
-          ) {
+          OutlinedIconButton(onClick = { viewportState.onRecenterGps() }) {
             Icon(
               imageVector = Icons.Default.Refresh,
               contentDescription = "Recenter on GPS",
@@ -1244,12 +1264,12 @@ private fun GeoPointInputWidget(
         }
       }
 
-
       if (!panAllowed) {
         Text(
           text =
             "Map panning is disabled for this question. Coordinates are captured directly from your GPS location" +
-              (if (accuracyThreshold != null) " (requires ≤ ${accuracyThreshold} m accuracy)." else "."),
+              (if (accuracyThreshold != null) " (requires ≤ ${accuracyThreshold} m accuracy)."
+              else "."),
           style = MaterialTheme.typography.labelSmall.copy(color = colors.onSurfaceVariant),
         )
       }
@@ -1288,7 +1308,8 @@ private fun GeoPointInteractiveMapBox(viewportState: GeoPointMapViewportState) {
       val center = Offset(size.width / 2f, size.height / 2f)
       val spanDeg = 0.0016f * (17.5f / viewportState.zoomLevel.coerceIn(13f, 20f))
 
-      // If a point is already captured, draw its saved pin marker relative to the current target center
+      // If a point is already captured, draw its saved pin marker relative to the current target
+      // center
       val captured = viewportState.capturedPoint
       if (captured != null) {
         val dLon = (captured.longitude - viewportState.targetLongitude).toFloat()
@@ -1301,11 +1322,7 @@ private fun GeoPointInteractiveMapBox(viewportState: GeoPointMapViewportState) {
             radius = 14.dp.toPx(),
             center = Offset(savedX, savedY),
           )
-          drawCircle(
-            color = Color.White,
-            radius = 7.dp.toPx(),
-            center = Offset(savedX, savedY),
-          )
+          drawCircle(color = Color.White, radius = 7.dp.toPx(), center = Offset(savedX, savedY))
           drawCircle(
             color = Color(0xFF00C853),
             radius = 5.dp.toPx(),
@@ -1366,11 +1383,7 @@ private fun GeoPointInteractiveMapBox(viewportState: GeoPointMapViewportState) {
       )
 
       // Center point dot
-      drawCircle(
-        color = Color(0xFF091812),
-        radius = 4.5.dp.toPx(),
-        center = center,
-      )
+      drawCircle(color = Color(0xFF091812), radius = 4.5.dp.toPx(), center = center)
       drawCircle(
         color = if (viewportState.isPanned) Color(0xFFFFB300) else Color(0xFF00E676),
         radius = 3.dp.toPx(),
@@ -1540,21 +1553,23 @@ private fun GeoPointInteractiveMapBox(viewportState: GeoPointMapViewportState) {
 private fun GeoPointFallbackCanvasMap(viewportState: GeoPointMapViewportState) {
   Canvas(
     modifier =
-      Modifier.fillMaxSize()
-        .background(Color(0xFF10261C))
-        .pointerInput(viewportState.path, viewportState.panAllowed, viewportState.zoomLevel) {
-          if (viewportState.panAllowed) {
-            detectDragGestures { change, dragAmount ->
-              change.consume()
-              viewportState.onPanDeltaPixels(
-                dragAmount.x,
-                dragAmount.y,
-                size.width.toFloat(),
-                size.height.toFloat(),
-              )
-            }
+      Modifier.fillMaxSize().background(Color(0xFF10261C)).pointerInput(
+        viewportState.path,
+        viewportState.panAllowed,
+        viewportState.zoomLevel,
+      ) {
+        if (viewportState.panAllowed) {
+          detectDragGestures { change, dragAmount ->
+            change.consume()
+            viewportState.onPanDeltaPixels(
+              dragAmount.x,
+              dragAmount.y,
+              size.width.toFloat(),
+              size.height.toFloat(),
+            )
           }
         }
+      }
   ) {
     val spanDeg = 0.0016f * (17.5f / viewportState.zoomLevel.coerceIn(13f, 20f))
     val shiftX = (-viewportState.panOffsetLon.toFloat() / spanDeg) * size.width
@@ -1618,10 +1633,7 @@ private fun GeoPointFallbackCanvasMap(viewportState: GeoPointMapViewportState) {
       path = streamPath,
       color = Color(0xFF4FC3F7).copy(alpha = 0.28f),
       style =
-        Stroke(
-          width = 2.5.dp.toPx(),
-          pathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 6f)),
-        ),
+        Stroke(width = 2.5.dp.toPx(), pathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 6f))),
     )
 
     // User's live GPS blue dot + horizontal accuracy halo
@@ -1648,11 +1660,14 @@ private fun GeoPointFallbackCanvasMap(viewportState: GeoPointMapViewportState) {
  * `TYPE_GEOSHAPE` (polygon / boundary) questions.
  *
  * Supports both:
- * - **Pannable mode** (`appearance="placement-map"`, `"map"`, `"maps"`, or `"walk-or-draw"`): collector can pan the map to place vertices with `"Add point"`.
- * - **Locked GPS mode** (default / GPS walk mode): map is locked to user GPS; collector records vertices along their walking path with `"Capture vertex"`.
+ * - **Pannable mode** (`appearance="placement-map"`, `"map"`, `"maps"`, or `"walk-or-draw"`):
+ *   collector can pan the map to place vertices with `"Add point"`.
+ * - **Locked GPS mode** (default / GPS walk mode): map is locked to user GPS; collector records
+ *   vertices along their walking path with `"Capture vertex"`.
  *
  * Provides:
- * - Interactive Compose Canvas map rendering live crosshair target reticle, GPS position dot, vertices, connecting polylines, and closed polygon fill.
+ * - Interactive Compose Canvas map rendering live crosshair target reticle, GPS position dot,
+ *   vertices, connecting polylines, and closed polygon fill.
  * - Primary action button: `"Add point"` (when panned) or `"Capture vertex"` (when on GPS).
  * - Action buttons: `"Undo vertex"`, `"Clear"`, and `"Recenter"`.
  * - Status HUD indicating vertex count, shape completion, and pan / lock mode.
@@ -1667,13 +1682,12 @@ private fun GeoGeometryDrawingWidget(
 ) {
   val colors = MaterialTheme.colorScheme
   val appearanceTokens = control.appearance.split(' ').filter { it.isNotBlank() }
-  val panAllowed =
-    appearanceTokens.any {
-      it.equals("placement-map", ignoreCase = true) ||
-        it.equals("walk-or-draw", ignoreCase = true) ||
-        it.equals("map", ignoreCase = true) ||
-        it.equals("maps", ignoreCase = true)
-    }
+  val panAllowed = appearanceTokens.any {
+    it.equals("placement-map", ignoreCase = true) ||
+      it.equals("walk-or-draw", ignoreCase = true) ||
+      it.equals("map", ignoreCase = true) ||
+      it.equals("maps", ignoreCase = true)
+  }
 
   val existingPoints: List<GeoPoint> =
     if (isClosedShape) {
@@ -1755,26 +1769,28 @@ private fun GeoGeometryDrawingWidget(
       ) {
         Canvas(
           modifier =
-            Modifier.fillMaxSize()
-              .background(Color(0xFF10261C))
-              .pointerInput(path, panAllowed, zoomLevel) {
-                if (panAllowed) {
-                  detectDragGestures { change, dragAmount ->
-                    change.consume()
-                    val spanDeg = 0.0016 * (17.5f / zoomLevel.coerceIn(13f, 20f))
-                    panOffsetLon =
-                      (panOffsetLon - (dragAmount.x / size.width.toFloat()) * spanDeg).coerceIn(
-                        -0.02,
-                        0.02,
-                      )
-                    panOffsetLat =
-                      (panOffsetLat + (dragAmount.y / size.height.toFloat()) * spanDeg).coerceIn(
-                        -0.02,
-                        0.02,
-                      )
-                  }
+            Modifier.fillMaxSize().background(Color(0xFF10261C)).pointerInput(
+              path,
+              panAllowed,
+              zoomLevel,
+            ) {
+              if (panAllowed) {
+                detectDragGestures { change, dragAmount ->
+                  change.consume()
+                  val spanDeg = 0.0016 * (17.5f / zoomLevel.coerceIn(13f, 20f))
+                  panOffsetLon =
+                    (panOffsetLon - (dragAmount.x / size.width.toFloat()) * spanDeg).coerceIn(
+                      -0.02,
+                      0.02,
+                    )
+                  panOffsetLat =
+                    (panOffsetLat + (dragAmount.y / size.height.toFloat()) * spanDeg).coerceIn(
+                      -0.02,
+                      0.02,
+                    )
                 }
               }
+            }
         ) {
           val spanDeg = 0.0016f * (17.5f / zoomLevel.coerceIn(13f, 20f))
           val shiftX = (-panOffsetLon.toFloat() / spanDeg) * size.width
@@ -1840,15 +1856,14 @@ private fun GeoGeometryDrawingWidget(
           drawCircle(color = Color(0xFF1E88E5), radius = 5.dp.toPx(), center = gpsCenter)
 
           // Map vertices coordinates to screen pixels relative to current center target
-          val screenOffsets =
-            existingPoints.map { pt ->
-              val dLon = (pt.longitude - targetLon).toFloat()
-              val dLat = (pt.latitude - targetLat).toFloat()
-              Offset(
-                x = center.x + (dLon / spanDeg) * size.width,
-                y = center.y - (dLat / spanDeg) * size.height,
-              )
-            }
+          val screenOffsets = existingPoints.map { pt ->
+            val dLon = (pt.longitude - targetLon).toFloat()
+            val dLat = (pt.latitude - targetLat).toFloat()
+            Offset(
+              x = center.x + (dLon / spanDeg) * size.width,
+              y = center.y - (dLat / spanDeg) * size.height,
+            )
+          }
 
           // Closed polygon translucent fill
           if (isClosedShape && screenOffsets.size >= 3) {
@@ -1901,16 +1916,11 @@ private fun GeoGeometryDrawingWidget(
               radius = 9.dp.toPx(),
               center = off,
             )
-            drawCircle(
-              color = Color.White,
-              radius = 7.dp.toPx(),
-              center = off,
-            )
+            drawCircle(color = Color.White, radius = 7.dp.toPx(), center = off)
             drawCircle(
               color =
                 if (idx == 0) Color(0xFF00C853)
-                else if (idx == screenOffsets.lastIndex) Color(0xFFFF9100)
-                else Color(0xFF0288D1),
+                else if (idx == screenOffsets.lastIndex) Color(0xFFFF9100) else Color(0xFF0288D1),
               radius = 5.dp.toPx(),
               center = off,
             )
@@ -1958,11 +1968,7 @@ private fun GeoGeometryDrawingWidget(
             end = Offset(center.x, center.y + tickOuter),
             strokeWidth = 2.dp.toPx(),
           )
-          drawCircle(
-            color = Color(0xFF091812),
-            radius = 4.5.dp.toPx(),
-            center = center,
-          )
+          drawCircle(color = Color(0xFF091812), radius = 4.5.dp.toPx(), center = center)
           drawCircle(
             color = if (isPanned) Color(0xFFFFB300) else Color(0xFF00E676),
             radius = 3.dp.toPx(),
@@ -2157,16 +2163,10 @@ private fun GeoGeometryDrawingWidget(
               )
             }
             Column(horizontalAlignment = Alignment.End) {
-              Text(
-                text = "Accuracy",
-                style = MaterialTheme.typography.labelSmall,
-              )
+              Text(text = "Accuracy", style = MaterialTheme.typography.labelSmall)
               Text(
                 text = formatGeoPointAccuracy(displayAcc),
-                style =
-                  MaterialTheme.typography.titleSmall.copy(
-                    fontWeight = FontWeight.Bold,
-                  ),
+                style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
               )
             }
           }
@@ -2190,10 +2190,7 @@ private fun GeoGeometryDrawingWidget(
             Text(
               text =
                 "Need $needed more ${if (needed == 1) "vertex" else "vertices"} to complete ${if (isClosedShape) "polygon" else "linestring"}. Tap \"$triggerLabel\" below to record.",
-              style =
-                MaterialTheme.typography.labelSmall.copy(
-                  color = colors.onSurfaceVariant,
-                ),
+              style = MaterialTheme.typography.labelSmall.copy(color = colors.onSurfaceVariant),
             )
           }
         }
@@ -2219,11 +2216,7 @@ private fun GeoGeometryDrawingWidget(
           },
           enabled = undoGeometryHistory.isNotEmpty() || existingPoints.isNotEmpty(),
         ) {
-          Icon(
-            imageVector = UndoIcon,
-            contentDescription = "Undo",
-            modifier = Modifier.size(20.dp),
-          )
+          Icon(imageVector = UndoIcon, contentDescription = "Undo", modifier = Modifier.size(20.dp))
         }
 
         OutlinedIconButton(
@@ -2237,11 +2230,7 @@ private fun GeoGeometryDrawingWidget(
           },
           enabled = redoGeometryHistory.isNotEmpty(),
         ) {
-          Icon(
-            imageVector = RedoIcon,
-            contentDescription = "Redo",
-            modifier = Modifier.size(20.dp),
-          )
+          Icon(imageVector = RedoIcon, contentDescription = "Redo", modifier = Modifier.size(20.dp))
         }
 
         Button(
@@ -2283,7 +2272,7 @@ private fun GeoGeometryDrawingWidget(
               undoGeometryHistory = undoGeometryHistory + listOf(existingPoints)
               redoGeometryHistory = emptyList()
               controller.clearField(path)
-            },
+            }
           ) {
             Icon(
               imageVector = Icons.Default.Close,
@@ -2294,10 +2283,10 @@ private fun GeoGeometryDrawingWidget(
         }
       }
 
-
       if (!panAllowed) {
         Text(
-          text = "Map panning is disabled for this question. Vertices are captured directly along your GPS path.",
+          text =
+            "Map panning is disabled for this question. Vertices are captured directly along your GPS path.",
           style = MaterialTheme.typography.labelSmall.copy(color = colors.onSurfaceVariant),
         )
       }
@@ -2474,7 +2463,7 @@ private fun ChoiceCardRow(
           text = "value: ${option.value}",
           style =
             MaterialTheme.typography.labelSmall.copy(
-              color = if (isSelected) colors.onPrimaryContainer else colors.onSurfaceVariant,
+              color = if (isSelected) colors.onPrimaryContainer else colors.onSurfaceVariant
             ),
         )
       }
@@ -2624,60 +2613,6 @@ private fun RankControlWidget(
 }
 
 @Composable
-private fun UploadControlWidget(
-  control: ComponentState.ControlState,
-  controller: FormWizardController,
-) {
-  val colors = MaterialTheme.colorScheme
-  val path = control.canonicalPath
-  val mediaType = control.controlDef.media_type.ifBlank { "image/*" }
-  val currentFile =
-    control.fieldState.value?.scalar_value?.let { it.string_value ?: it.binary_value?.utf8() } ?: ""
-
-  OutlinedCard(
-    modifier = Modifier.fillMaxWidth(),
-    shape = MaterialTheme.shapes.medium,
-    colors = CardDefaults.outlinedCardColors(containerColor = colors.surfaceContainerLow),
-  ) {
-    Column(
-      modifier = Modifier.fillMaxWidth().padding(14.dp),
-      verticalArrangement = Arrangement.spacedBy(10.dp),
-    ) {
-      Text(
-        text = "Accepted media: $mediaType",
-        style = MaterialTheme.typography.labelSmall.copy(color = colors.onSurfaceVariant),
-      )
-      Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-      ) {
-        OutlinedTextField(
-          value = currentFile,
-          onValueChange = { controller.updateString(path, it) },
-          modifier = Modifier.weight(1f),
-          singleLine = true,
-          placeholder = { Text("attachment_filename.jpg") },
-        )
-        Button(
-          onClick = {
-            val ext =
-              when {
-                mediaType.startsWith("audio") -> "m4a"
-                mediaType.startsWith("video") -> "mp4"
-                else -> "jpg"
-              }
-            controller.updateString(path, "capture_${path.substringAfterLast('/')}.$ext")
-          }
-        ) {
-          Text("Capture", maxLines = 1, overflow = TextOverflow.Ellipsis, softWrap = false)
-        }
-      }
-    }
-  }
-}
-
-@Composable
 private fun TriggerControlWidget(
   control: ComponentState.ControlState,
   controller: FormWizardController,
@@ -2700,7 +2635,12 @@ private fun TriggerControlWidget(
       onClick = { controller.updateString(path, "OK") },
       modifier = Modifier.fillMaxWidth(),
     ) {
-      Text("Acknowledge / Confirm", maxLines = 1, overflow = TextOverflow.Ellipsis, softWrap = false)
+      Text(
+        "Acknowledge / Confirm",
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
+        softWrap = false,
+      )
     }
   }
 }
@@ -2744,6 +2684,7 @@ fun formatFieldValueForDisplay(value: FieldValue?, dataType: DataType): String {
       scalar.geotrace_value?.let { gt -> "${gt.points.size} trace points" } ?: "(Unanswered)"
     DataType.TYPE_GEOSHAPE ->
       scalar.geoshape_value?.let { gs -> "${gs.points.size} polygon vertices" } ?: "(Unanswered)"
+    DataType.TYPE_BINARY -> MediaCapture.attachmentFileName(value) ?: "(Unanswered)"
     else ->
       scalar.string_value?.takeIf { it.isNotEmpty() }
         ?: scalar.int64_value?.toString()

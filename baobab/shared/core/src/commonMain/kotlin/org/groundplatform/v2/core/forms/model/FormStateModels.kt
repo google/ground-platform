@@ -25,6 +25,7 @@ import groundplatform.v2.forms.RecordInstance
 import groundplatform.v2.forms.RecordNode
 import groundplatform.v2.forms.RepeatDef
 import groundplatform.v2.forms.TypedValue
+import org.groundplatform.v2.core.forms.media.MediaCaptureSpec
 
 /**
  * Complete, immutable runtime state snapshot of a form and its associated record data.
@@ -193,6 +194,11 @@ sealed interface ComponentState {
     val options: List<ResolvedChoiceOption>,
     /** Evaluated external application launch intent configuration, if declared. */
     val resolvedIntent: ResolvedIntent?,
+    /**
+     * Resolved photo / video / audio capture configuration for `CONTROL_UPLOAD` media questions, or
+     * `null` for every other control type.
+     */
+    val mediaCapture: MediaCaptureSpec? = null,
   ) : ComponentState
 
   /** Materialized visual or logical group container (`GroupDef`). */
