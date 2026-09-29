@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
-import { CdkTreeModule } from '@angular/cdk/tree';
 import { NgModule } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
-import { MatTreeModule } from '@angular/material/tree';
 import { BrowserModule } from '@angular/platform-browser';
 
 import { JobListItemComponent } from './job-list-item.component';
@@ -34,8 +32,6 @@ import { JobListItemComponent } from './job-list-item.component';
     MatListModule,
     MatMenuModule,
     MatSnackBarModule,
-    MatTreeModule,
-    CdkTreeModule,
   ],
   exports: [JobListItemComponent],
   declarations: [JobListItemComponent],

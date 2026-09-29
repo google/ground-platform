@@ -23,6 +23,7 @@
   align-items: center;
   width: 100%;
   min-width: 0;
+  min-height: 36px;
   position: relative;
 
   .expand-toggle {
@@ -94,18 +95,18 @@
 .loi-tree-node {
   display: flex;
   align-items: center;
+  width: 100%;
+  min-height: 36px;
+  padding: 0;
+  border: none;
   border-radius: 24px;
+  font: inherit;
+  text-align: start;
   cursor: pointer;
   min-width: 0;
 
   .loi-icon {
     flex-shrink: 0;
-  }
-
-  .loi-collapsed-toggle {
-    height: 36px;
-    padding-top: 6px;
-    padding-bottom: 6px;
   }
 
   &.expanded .loi-icon {
@@ -127,4 +128,11 @@
     text-align: right;
     font-variant-numeric: tabular-nums;
   }
+}
+
+.loi-collapsed-toggle {
+  display: flex;
+  height: 36px;
+  padding-top: 6px;
+  padding-bottom: 6px;
 }
