@@ -138,11 +138,9 @@
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "catalog:dev",
-    "@angular-devkit/core": "catalog:dev",
     "@angular/cli": "catalog:dev",
     "@angular/compiler-cli": "catalog:dev",
     "@angular/language-service": "catalog:dev",
-    "@nx/angular": "catalog:dev",
     "@types/google.maps": "catalog:dev",
     "@types/jasmine": "catalog:dev",
     "@types/node": "catalog:dev",

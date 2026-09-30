@@ -9,11 +9,7 @@ onlyBuiltDependencies:
   - '@bufbuild/buf'
   - '@firebase/util'
   - '@parcel/watcher'
-  - core-js
   - esbuild
-  - farmhash
-  - fsevents
-  - less
   - lmdb
   - msgpackr-extract
   - nx
@@ -21,6 +17,9 @@ onlyBuiltDependencies:
   - puppeteer
   - re2
   - unrs-resolver
+
+ignoredBuiltDependencies:
+  - less
 
 catalogs:
   default:
@@ -65,7 +64,6 @@ catalogs:
     zone.js: ^0.15.0
   dev:
     '@angular-devkit/build-angular': ^20.3.13
-    '@angular-devkit/core': ^20.3.13
     '@angular-eslint/builder': ^20.7.0
     '@angular-eslint/eslint-plugin': ^20.7.0
     '@angular-eslint/eslint-plugin-template': ^20.7.0
@@ -75,7 +73,6 @@ catalogs:
     '@angular/language-service': ^20.3.15
     '@bufbuild/buf': ^1.32.2
     '@eslint/eslintrc': ^3.3.5
-    '@nx/angular': ^22.2.1
     '@types/busboy': ^1.5.0
     '@types/cookie-parser': ^1.4.4
     '@types/cors': ^2.8.19
@@ -98,7 +95,6 @@ catalogs:
     eslint-plugin-import: ^2.32.0
     eslint-plugin-n: ^17.24.0
     eslint-plugin-unused-imports: ^4.4.1
-    firebase-functions-test: ^3.3.0
     firebase-tools: ^15.0.0
     form-data-encoder: ^4.0.2
     formdata-node: ^6.0.3

@@ -111,7 +111,6 @@
     "@types/nodemailer": "catalog:dev",
     "@types/sanitize-html": "catalog:dev",
     "@types/terraformer__wkt": "catalog:dev",
-    "firebase-functions-test": "catalog:dev",
     "form-data-encoder": "catalog:dev",
     "formdata-node": "catalog:dev"
   },
