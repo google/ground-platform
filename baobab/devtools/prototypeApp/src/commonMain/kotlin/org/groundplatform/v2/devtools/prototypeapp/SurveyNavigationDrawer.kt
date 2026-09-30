@@ -18,7 +18,6 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -446,7 +445,7 @@ internal fun UploadsMutationsSubScreen(state: PrototypeAppState) {
 
     // Status Filter Chips Row: Pending | In progress | Uploaded | Failed
     Row(
-      modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+      modifier = Modifier.fillMaxWidth().horizontalScrollWithMouseDrag(rememberScrollState()),
       horizontalArrangement = Arrangement.spacedBy(6.dp),
       verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -1004,7 +1003,7 @@ internal fun SharePdfToAppModalDialog(state: PrototypeAppState, sheet: SharedPdf
       )
 
       Row(
-        modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+        modifier = Modifier.fillMaxWidth().horizontalScrollWithMouseDrag(rememberScrollState()),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
       ) {
         listOf("WhatsApp", "Gmail", "Google Drive", "Bluetooth").forEachIndexed { index, appName ->

@@ -129,8 +129,11 @@ data class GeospatialEntityItem(
   val isCompleted: Boolean
     get() = markerSymbol == "✓" || workflowStatus.equals("Completed", ignoreCase = true)
 
-  /** True when `marker-symbol` is in the initial empty circle (`"○"`) state. */
-  val isPending: Boolean
+  /**
+   * True when `marker-symbol` is in the initial empty circle (`"○"`) workflow state. Unrelated to
+   * upload state; see `PrototypeAppState.pendingUploadEntityIds` for unsynced changes.
+   */
+  val isNotStarted: Boolean
     get() = markerSymbol == "○"
 
   /**

@@ -22,6 +22,7 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -31,6 +32,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -427,6 +429,25 @@ fun MobileDevicePreviewFrame(
         )
 
         if (state != null) {
+          OutlinedButton(
+            onClick = { state.selectWorkbenchPage(PrototypeWorkbenchPage.WEB_DASHBOARD) },
+            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
+            modifier = Modifier.height(32.dp),
+          ) {
+            Icon(
+              imageVector = Icons.Default.Map,
+              contentDescription = null,
+              modifier = Modifier.size(14.dp),
+            )
+            Spacer(modifier = Modifier.width(4.dp))
+            Text(
+              text = "Web app",
+              style = MaterialTheme.typography.labelSmall,
+              fontWeight = FontWeight.SemiBold,
+              maxLines = 1,
+            )
+          }
+
           PrototypeDebugToolsButton(state = state)
         }
       }
@@ -676,7 +697,7 @@ private fun UxDesignerInspectorPanel(state: PrototypeAppState, modifier: Modifie
         }
       }
       Row(
-        modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+        modifier = Modifier.fillMaxWidth().horizontalScrollWithMouseDrag(rememberScrollState()),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
       ) {
         val mainShortcuts: List<Triple<ImageVector, String, () -> Unit>> =
@@ -843,7 +864,7 @@ private fun UxDesignerInspectorPanel(state: PrototypeAppState, modifier: Modifie
           ),
       )
       Row(
-        modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+        modifier = Modifier.fillMaxWidth().horizontalScrollWithMouseDrag(rememberScrollState()),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
       ) {
         val sampleQueries =

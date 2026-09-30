@@ -21,7 +21,6 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -290,8 +289,9 @@ internal fun SurveyMapView(state: PrototypeAppState) {
         122.dp
       }
 
-    // Fit a newly selected map feature into the map area above the sheet. Records without geometry
-    // replace the sheet's contents without moving the map.
+    // Fit a newly selected map feature into the map area above the sheet. Mobile has no side
+    // details panel, so only the sheet is compensated for (vertically); the feature stays centered
+    // horizontally. Records without geometry replace the sheet's contents without moving the map.
     LaunchedEffect(selectedEntity?.id, state.entitySelectionEpoch) {
       val entity = selectedEntity ?: return@LaunchedEffect
       if (!entity.hasGeometry) return@LaunchedEffect
@@ -303,6 +303,7 @@ internal fun SurveyMapView(state: PrototypeAppState) {
         framePlatformMapboxOnEntity(
           bounds = state.resolveEntityLngLatBounds(entity),
           bottomPaddingCssPx = peekHeight.value,
+          rightPaddingCssPx = 0f,
           maxZoom = entity.geometryKind.maxFramingZoom,
         )
       state.syncMapZoomDelta(fittedZoomDelta.toFloat())
@@ -571,7 +572,7 @@ internal fun SelectedClusterBalloonDetailCard(
 
       if (cluster.siteSymbolGroups.isNotEmpty()) {
         Row(
-          modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+          modifier = Modifier.fillMaxWidth().horizontalScrollWithMouseDrag(rememberScrollState()),
           horizontalArrangement = Arrangement.spacedBy(8.dp),
           verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -1272,6 +1273,7 @@ internal fun LayersSelectorContent(
                 text = layer.label,
                 style = MaterialTheme.typography.labelMedium,
                 fontWeight = FontWeight.SemiBold,
+                color = layerNameColor(layer.isVisible),
               )
               Text(
                 text = "${layer.geometryTypeLabel} • ${layer.formatCountLabel(layerEntityCount)}",
@@ -1279,10 +1281,7 @@ internal fun LayersSelectorContent(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
               )
             }
-            Switch(
-              checked = layer.isVisible,
-              onCheckedChange = { state.toggleLayerVisibility(layer.id) },
-            )
+            LayerVisibilityToggle(layer = layer, state = state)
           }
         }
       }

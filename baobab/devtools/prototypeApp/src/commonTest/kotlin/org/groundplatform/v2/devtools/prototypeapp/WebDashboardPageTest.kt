@@ -277,4 +277,190 @@ class WebDashboardPageTest {
     testState.updateLayersSheetOpen(false)
     assertFalse(testState.isLayersSheetOpen)
   }
+
+  @Test
+  fun detailsPanel_startsExpandedByDefault() {
+    val testState = PrototypeAppState()
+    assertTrue(testState.isDetailsPanelExpanded)
+    assertTrue(testState.isDashboardDetailsPanelExpanded)
+    assertTrue(testState.isRightPanelExpanded)
+  }
+
+  @Test
+  fun toggleDetailsPanel_togglesBetweenExpandedAndCollapsed() {
+    val testState = PrototypeAppState()
+    assertTrue(testState.isDetailsPanelExpanded)
+
+    testState.toggleDetailsPanel()
+    assertFalse(testState.isDetailsPanelExpanded)
+    assertFalse(testState.isDashboardDetailsPanelExpanded)
+    assertFalse(testState.isRightPanelExpanded)
+
+    testState.toggleDashboardDetailsPanel()
+    assertTrue(testState.isDetailsPanelExpanded)
+
+    testState.collapseDetailsPanel()
+    assertFalse(testState.isDetailsPanelExpanded)
+
+    testState.expandDetailsPanel()
+    assertTrue(testState.isDetailsPanelExpanded)
+
+    testState.updateDetailsPanelExpanded(false)
+    assertFalse(testState.isDetailsPanelExpanded)
+
+    testState.updateDetailsPanelExpanded(true)
+    assertTrue(testState.isDetailsPanelExpanded)
+
+    testState.toggleRightPanel()
+    assertFalse(testState.isRightPanelExpanded)
+
+    testState.expandRightPanel()
+    assertTrue(testState.isRightPanelExpanded)
+
+    testState.collapseRightPanel()
+    assertFalse(testState.isRightPanelExpanded)
+
+    testState.updateRightPanelExpanded(true)
+    assertTrue(testState.isRightPanelExpanded)
+  }
+
+  @Test
+  fun openingTable_collapsesDetailsPanel() {
+    val testState = PrototypeAppState()
+    testState.selectEntity(entity.id)
+    assertTrue(testState.isDetailsPanelExpanded)
+    assertFalse(testState.isDashboardTableExpanded)
+
+    testState.showSelectedEntityInTable()
+    assertTrue(testState.isDashboardTableExpanded)
+    assertFalse(testState.isDetailsPanelExpanded)
+
+    // Collapsing the data table restores the details panel for the selected entity
+    testState.toggleDashboardTableExpanded()
+    assertFalse(testState.isDashboardTableExpanded)
+    assertTrue(testState.isDetailsPanelExpanded)
+
+    // Expanding via updateDashboardTableExpanded also collapses details panel
+    testState.updateDashboardTableExpanded(true)
+    assertTrue(testState.isDashboardTableExpanded)
+    assertFalse(testState.isDetailsPanelExpanded)
+  }
+
+  @Test
+  fun selectingEntityWhileTableIsOpen_keepsDetailsPanelCollapsed() {
+    val testState = PrototypeAppState()
+    testState.updateDashboardTableExpanded(true)
+    assertTrue(testState.isDashboardTableExpanded)
+    assertFalse(testState.isDetailsPanelExpanded)
+
+    testState.selectEntity(entity.id)
+    assertEquals(entity.id, testState.selectedEntityId)
+    assertFalse(testState.isDetailsPanelExpanded)
+
+    // Closing the table restores the panel
+    testState.updateDashboardTableExpanded(false)
+    assertTrue(testState.isDetailsPanelExpanded)
+  }
+
+  @Test
+  fun resetPrototypeFlow_resetsDetailsPanelToExpanded() {
+    val testState = PrototypeAppState()
+    testState.collapseDetailsPanel()
+    assertFalse(testState.isDetailsPanelExpanded)
+
+    testState.resetPrototypeFlow()
+    assertTrue(testState.isDetailsPanelExpanded)
+  }
+
+  @Test
+  fun buildDashboardTableCsv_quotesFieldsPerRfc4180() {
+    val table =
+      DashboardDataTable(
+        id = "dataset:test",
+        datasetId = "test",
+        title = "Test",
+        kind = DashboardDataTableKind.DATA_TABLE,
+        columns = listOf("Label", "Notes"),
+        rows =
+          listOf(
+            DashboardDataTableRow(id = "1", cells = listOf("Plain", "a,b")),
+            DashboardDataTableRow(id = "2", cells = listOf("Say \"hi\"", "line1\nline2")),
+            DashboardDataTableRow(id = "3", cells = listOf("", "cr\rhere")),
+          ),
+      )
+
+    assertEquals(
+      "Label,Notes\r\n" +
+        "Plain,\"a,b\"\r\n" +
+        "\"Say \"\"hi\"\"\",\"line1\nline2\"\r\n" +
+        ",\"cr\rhere\"\r\n",
+      buildDashboardTableCsv(table),
+    )
+  }
+
+  @Test
+  fun buildDashboardTableCsv_includesHeaderAndEveryRow() {
+    val table = layerTable()
+    val lines = buildDashboardTableCsv(table).split("\r\n").filter { it.isNotEmpty() }
+
+    assertTrue(lines.first().startsWith("Label,Submissions,Sync,GeoID"))
+    assertFalse("Status" in table.columns)
+    assertTrue(lines.size >= table.rows.size + 1)
+  }
+
+  @Test
+  fun dashboardTableCsvFileName_sanitizesTitle() {
+    val table = layerTable().copy(title = "Plots: A/B <2026>?")
+
+    assertEquals("Plots_ A_B _2026__.csv", dashboardTableCsvFileName(table))
+    assertEquals("table.csv", dashboardTableCsvFileName(table.copy(title = "  ")))
+  }
+
+  @Test
+  fun buildDashboardLayerSummary_countsFeaturesPerStatus() {
+    val summary = buildDashboardLayerSummary(state.entities, entity.datasetId)!!
+
+    assertEquals(entity.datasetName, summary.title)
+    assertEquals(datasetEntities.size, summary.featureCount)
+    assertEquals(datasetEntities.size, summary.statusCounts.sumOf { it.count })
+    assertEquals(
+      datasetEntities.map { it.mapStatusSummaryBadge }.toSet(),
+      summary.statusCounts.map { it.label }.toSet(),
+    )
+    assertEquals(
+      summary.statusCounts.map { it.count }.sortedDescending(),
+      summary.statusCounts.map { it.count },
+    )
+    assertEquals(null, buildDashboardLayerSummary(state.entities, "missing-dataset"))
+  }
+
+  @Test
+  fun selectLayer_isMutuallyExclusiveWithEntitySelection() {
+    val testState = PrototypeAppState()
+    testState.selectEntity(entity.id)
+
+    testState.selectLayer(entity.datasetId)
+    assertEquals(entity.datasetId, testState.selectedLayerDatasetId)
+    assertEquals(null, testState.selectedEntityId)
+    assertEquals(entity.datasetId, testState.dashboardTableDatasetId)
+    assertTrue(testState.isDetailsPanelExpanded)
+
+    testState.selectEntity(entity.id)
+    assertEquals(null, testState.selectedLayerDatasetId)
+    assertEquals(entity.id, testState.selectedEntityId)
+  }
+
+  @Test
+  fun showSelectedLayerInTable_expandsTableOnLayerDataset() {
+    val testState = PrototypeAppState()
+    testState.selectLayer(entity.datasetId)
+
+    testState.showSelectedLayerInTable()
+    assertTrue(testState.isDashboardTableExpanded)
+    assertEquals(entity.datasetId, testState.dashboardTableDatasetId)
+    assertFalse(testState.isDetailsPanelExpanded)
+
+    testState.updateDashboardTableExpanded(false)
+    assertTrue(testState.isDetailsPanelExpanded)
+  }
 }

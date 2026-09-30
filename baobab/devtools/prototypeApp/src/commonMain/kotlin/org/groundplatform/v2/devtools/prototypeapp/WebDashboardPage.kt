@@ -17,7 +17,10 @@ package org.groundplatform.v2.devtools.prototypeapp
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.expandHorizontally
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkHorizontally
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -35,6 +38,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -42,6 +46,10 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Description
+import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.filled.ExpandContent
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.TableRows
@@ -50,6 +58,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.PrimaryScrollableTabRow
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
@@ -57,7 +66,11 @@ import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
+import androidx.compose.material3.TooltipAnchorPosition
+import androidx.compose.material3.TooltipBox
+import androidx.compose.material3.TooltipDefaults
 import androidx.compose.material3.VerticalDivider
+import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -109,9 +122,9 @@ internal data class DashboardDataTable(
 
 /**
  * Builds the web dashboard's data tables: one per entity dataset in [entities] (in order of first
- * appearance), with the [selectedEntityId] row highlighted. Presentation properties are summarized
- * by the `Status` column and left out; property values that reference another record are shown as
- * that record's label via [relatedLabel].
+ * appearance), with the [selectedEntityId] row highlighted. Presentation properties (marker and
+ * stroke styling) are left out; property values that reference another record are shown as that
+ * record's label via [relatedLabel].
  */
 internal fun buildDashboardDataTables(
   entities: List<GeospatialEntityItem>,
@@ -138,7 +151,7 @@ internal fun buildDashboardDataTables(
           } else {
             DashboardDataTableKind.DATA_TABLE
           },
-        columns = listOf("Label", "Status", "Submissions", "Sync", "GeoID") + propertyKeys,
+        columns = listOf("Label", "Submissions", "Sync", "GeoID") + propertyKeys,
         rows =
           datasetEntities.map { entity ->
             DashboardDataTableRow(
@@ -146,7 +159,6 @@ internal fun buildDashboardDataTables(
               cells =
                 listOf(
                   entity.label,
-                  entity.mapStatusSummaryBadge,
                   entity.submissionCount.toString(),
                   entity.syncStatus.label,
                   entity.geoId,
@@ -161,11 +173,47 @@ internal fun buildDashboardDataTables(
       )
     }
 
-private val DashboardSidePanelWidth = 400.dp
+/**
+ * Serializes [table] as CSV per RFC 4180: a header row of column names followed by one line per
+ * row, with CRLF line breaks. Fields containing a comma, double quote, CR, or LF are enclosed in
+ * double quotes, and embedded double quotes are escaped by doubling them.
+ */
+internal fun buildDashboardTableCsv(table: DashboardDataTable): String {
+  val builder = StringBuilder()
+  (listOf(table.columns) + table.rows.map { it.cells }).forEach { fields ->
+    fields.joinTo(builder, separator = ",") { escapeCsvField(it) }
+    builder.append("\r\n")
+  }
+  return builder.toString()
+}
+
+/** Quotes [field] for CSV when required by RFC 4180 (section 2, rules 6 and 7). */
+private fun escapeCsvField(field: String): String =
+  if (field.any { it == ',' || it == '"' || it == '\r' || it == '\n' }) {
+    "\"" + field.replace("\"", "\"\"") + "\""
+  } else {
+    field
+  }
+
+/**
+ * File name for downloading [table] as CSV: its title with characters that are invalid in file
+ * names replaced by `_`, plus the `.csv` extension.
+ */
+internal fun dashboardTableCsvFileName(table: DashboardDataTable): String {
+  val baseName =
+    table.title
+      .replace(Regex("""[\\/:*?"<>|\x00-\x1F]"""), "_")
+      .trim()
+      .trim('.')
+      .ifEmpty { "table" }
+  return "$baseName.csv"
+}
+
+private val DashboardSidePanelWidth = 300.dp
 private val DashboardFirstColumnWidth = 200.dp
 private val DashboardColumnWidth = 160.dp
 private val DashboardTableTabsHeight = 48.dp
-private val DashboardDetailsCardWidth = 380.dp
+private val DashboardDetailsCardWidth = 320.dp
 private val DashboardOverlayMargin = 14.dp
 
 /**
@@ -263,10 +311,17 @@ private fun DashboardMapArea(state: PrototypeAppState, modifier: Modifier = Modi
         else -> DashboardTableTabsHeight
       }
 
+    val isDetailsExpanded = state.isDetailsPanelExpanded
+
     // Fit a newly selected entity into the part of the map not covered by the floating card or the
     // table. Expanding or collapsing the table re-centers without zooming. Records without geometry
     // open the card without moving the map.
-    LaunchedEffect(selectedEntity?.id, state.entitySelectionEpoch, isTableExpanded) {
+    LaunchedEffect(
+      selectedEntity?.id,
+      state.entitySelectionEpoch,
+      isTableExpanded,
+      isDetailsExpanded,
+    ) {
       val entity = selectedEntity ?: return@LaunchedEffect
       if (!entity.hasGeometry) return@LaunchedEffect
       val isNewSelection = state.entitySelectionEpoch != lastFramedSelectionEpoch
@@ -280,11 +335,17 @@ private fun DashboardMapArea(state: PrototypeAppState, modifier: Modifier = Modi
         }
       state.recenterMapOnEntity(entity, targetScreenY)
 
+      val rightPaddingCssPx =
+        if (isDetailsExpanded) {
+          (DashboardDetailsCardWidth + DashboardOverlayMargin * 2).value
+        } else {
+          DashboardOverlayMargin.value
+        }
       val fittedZoomDelta =
         framePlatformMapboxOnEntity(
           bounds = state.resolveEntityLngLatBounds(entity),
           bottomPaddingCssPx = tablePanelHeight.value,
-          rightPaddingCssPx = (DashboardDetailsCardWidth + DashboardOverlayMargin * 2).value,
+          rightPaddingCssPx = rightPaddingCssPx,
           fitToBounds = isNewSelection,
           maxZoom = entity.geometryKind.maxFramingZoom,
         )
@@ -311,23 +372,86 @@ private fun DashboardMapArea(state: PrototypeAppState, modifier: Modifier = Modi
       }
     }
 
-    // Floating details card, kept clear of the data table panel.
+    // Floating details card or compact collapsed pill, kept clear of the data table panel.
+    val allEntities = state.entities
+    val selectedLayerDatasetId = state.selectedLayerDatasetId
+    val layerSummary =
+      remember(allEntities, selectedLayerDatasetId) {
+        selectedLayerDatasetId?.let { buildDashboardLayerSummary(allEntities, it) }
+      }
+    val summaryLayer =
+      layerSummary?.let { summary ->
+        val layerId = allEntities.firstOrNull { it.datasetId == summary.datasetId }?.layerId
+        state.mapLayers.firstOrNull { it.id == layerId }
+      }
+    val hasDetails = selectedEntity != null || selectedSubmission != null || layerSummary != null
     val cardModifier =
-      Modifier.align(Alignment.TopEnd)
-        .padding(DashboardOverlayMargin)
+      Modifier.padding(DashboardOverlayMargin)
         .width(DashboardDetailsCardWidth)
         .heightIn(
           max = (maxHeight - tablePanelHeight - DashboardOverlayMargin * 2).coerceAtLeast(160.dp)
         )
-    when {
-      selectedEntity != null ->
-        WebEntityDetailsCard(entity = selectedEntity, state = state, modifier = cardModifier)
-      selectedSubmission != null ->
-        WebSubmissionDetailsCard(
-          submission = selectedSubmission,
-          state = state,
-          modifier = cardModifier,
+    AnimatedVisibility(
+      visible = isDetailsExpanded && hasDetails,
+      enter = expandHorizontally(expandFrom = Alignment.End) + fadeIn(),
+      exit = shrinkHorizontally(shrinkTowards = Alignment.End) + fadeOut(),
+      modifier = Modifier.align(Alignment.TopEnd),
+    ) {
+      when {
+        selectedEntity != null ->
+          WebEntityDetailsCard(
+            entity = selectedEntity,
+            state = state,
+            onCollapse = { state.collapseDetailsPanel() },
+            modifier = cardModifier,
+          )
+        selectedSubmission != null ->
+          WebSubmissionDetailsCard(
+            submission = selectedSubmission,
+            state = state,
+            onCollapse = { state.collapseDetailsPanel() },
+            modifier = cardModifier,
+          )
+        layerSummary != null ->
+          WebLayerDetailsCard(
+            summary = layerSummary,
+            layer = summaryLayer,
+            state = state,
+            onCollapse = { state.collapseDetailsPanel() },
+            modifier = cardModifier,
+          )
+      }
+    }
+
+    AnimatedVisibility(
+      visible = !isDetailsExpanded && hasDetails,
+      enter = fadeIn(),
+      exit = fadeOut(),
+      modifier = Modifier.align(Alignment.TopEnd),
+    ) {
+      if (selectedEntity == null && selectedSubmission == null && layerSummary != null) {
+        CollapsedLayerDetailsPill(
+          title = layerSummary.title,
+          layer = summaryLayer,
+          onExpand = { state.expandDetailsPanel() },
+          onClose = { state.selectLayer(null) },
+          modifier = Modifier.padding(DashboardOverlayMargin),
         )
+      } else {
+        CollapsedDetailsPill(
+          entity = selectedEntity,
+          submission = selectedSubmission,
+          onExpand = { state.expandDetailsPanel() },
+          onClose = {
+            if (selectedSubmission != null && selectedEntity == null) {
+              state.selectSubmissionDetail(null)
+            } else {
+              state.selectEntity(null)
+            }
+          },
+          modifier = Modifier.padding(DashboardOverlayMargin),
+        )
+      }
     }
 
     // The scale bar sits on top of the data table panel so it stays visible when the panel opens.
@@ -366,6 +490,74 @@ private fun BasemapToggle(state: PrototypeAppState) {
           ),
         label = { Text(type.label) },
       )
+    }
+  }
+}
+
+/** Compact floating pill shown in the top-right corner when the details panel is collapsed. */
+@Composable
+private fun CollapsedDetailsPill(
+  entity: GeospatialEntityItem?,
+  submission: SubmissionPreviewItem?,
+  onExpand: () -> Unit,
+  onClose: () -> Unit,
+  modifier: Modifier = Modifier,
+) {
+  Surface(
+    modifier = modifier,
+    shape = CircleShape,
+    color = MaterialTheme.colorScheme.surfaceContainerLow,
+    shadowElevation = 4.dp,
+    tonalElevation = 2.dp,
+    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+  ) {
+    Row(
+      modifier =
+        Modifier.clickable { onExpand() }
+          .padding(start = 12.dp, end = 6.dp, top = 4.dp, bottom = 4.dp),
+      verticalAlignment = Alignment.CenterVertically,
+      horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+      Icon(
+        imageVector = Icons.Default.ExpandContent,
+        contentDescription = "Expand details",
+        tint = MaterialTheme.colorScheme.primary,
+        modifier = Modifier.size(20.dp),
+      )
+      if (entity != null) {
+        EntityGeometryIcon(entity = entity, size = 18.dp)
+        Text(
+          text = entity.label,
+          style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
+          color = MaterialTheme.colorScheme.onSurface,
+          maxLines = 1,
+          overflow = TextOverflow.Ellipsis,
+          modifier = Modifier.widthIn(max = 160.dp),
+        )
+      } else if (submission != null) {
+        Icon(
+          imageVector = Icons.Default.Description,
+          contentDescription = null,
+          tint = MaterialTheme.colorScheme.primary,
+          modifier = Modifier.size(18.dp),
+        )
+        Text(
+          text = submission.formTitle,
+          style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
+          color = MaterialTheme.colorScheme.onSurface,
+          maxLines = 1,
+          overflow = TextOverflow.Ellipsis,
+          modifier = Modifier.widthIn(max = 160.dp),
+        )
+      }
+      IconButton(onClick = onClose, modifier = Modifier.size(24.dp)) {
+        Icon(
+          imageVector = Icons.Default.Close,
+          contentDescription = "Close details",
+          tint = MaterialTheme.colorScheme.onSurfaceVariant,
+          modifier = Modifier.size(16.dp),
+        )
+      }
     }
   }
 }
@@ -448,6 +640,24 @@ private fun DashboardDataTablesPanel(
                 )
               },
             )
+          }
+        }
+        TooltipBox(
+          positionProvider =
+            TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
+          tooltip = { PlainTooltip { Text("Download CSV") } },
+          state = rememberTooltipState(),
+        ) {
+          IconButton(
+            onClick = {
+              downloadTextFile(
+                fileName = dashboardTableCsvFileName(table),
+                mimeType = "text/csv;charset=utf-8",
+                content = buildDashboardTableCsv(table),
+              )
+            }
+          ) {
+            Icon(imageVector = Icons.Default.Download, contentDescription = "Download CSV")
           }
         }
         IconButton(onClick = { state.toggleDashboardTableExpanded() }) {

@@ -34,6 +34,7 @@ import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Smartphone
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -156,11 +157,30 @@ internal fun WebTopToolbar(
 
       Spacer(modifier = Modifier.width(16.dp))
 
-      // Right: "Manage survey" button, Divider, and Clickable Avatar Icon
+      // Right: "Mobile prototype" link, "Manage survey" button, Divider, and Clickable Avatar Icon
       Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp),
       ) {
+        OutlinedButton(
+          onClick = { state.selectWorkbenchPage(PrototypeWorkbenchPage.MOBILE_PROTOTYPE) },
+          contentPadding = PaddingValues(horizontal = 14.dp, vertical = 6.dp),
+          modifier = Modifier.height(36.dp),
+        ) {
+          Icon(
+            imageVector = Icons.Filled.Smartphone,
+            contentDescription = null,
+            modifier = Modifier.size(16.dp),
+          )
+          Spacer(modifier = Modifier.width(6.dp))
+          Text(
+            text = "Mobile prototype",
+            style = MaterialTheme.typography.labelMedium,
+            fontWeight = FontWeight.SemiBold,
+            maxLines = 1,
+          )
+        }
+
         FilledTonalButton(
           onClick = onOpenSurveyEditor,
           contentPadding = PaddingValues(horizontal = 14.dp, vertical = 6.dp),

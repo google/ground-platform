@@ -177,8 +177,8 @@ fun MapboxBasemapView(
 ) {
   val density = LocalDensity.current.density
   val workbenchScroll = LocalWorkbenchScrollState.current
-  val scrollX = workbenchScroll?.horizontal?.value ?: 0
-  val scrollY = workbenchScroll?.vertical?.value ?: 0
+  val scrollX = (workbenchScroll?.horizontal?.value ?: 0) / density
+  val scrollY = (workbenchScroll?.vertical?.value ?: 0) / density
 
   var rawWindowLeft by remember { mutableStateOf<Float?>(null) }
   var rawWindowTop by remember { mutableStateOf<Float?>(null) }
@@ -237,9 +237,10 @@ fun MapboxBasemapView(
     }
   val selectedClusterId = state.selectedClusterId
 
+  val pendingUploadEntityIds = state.pendingUploadEntityIds
   val baseEntitiesJson =
-    remember(visibleEntities) {
-      serializeMapboxEntitiesJson(visibleEntities, selectedEntityId = null)
+    remember(visibleEntities, pendingUploadEntityIds) {
+      serializeMapboxEntitiesJson(visibleEntities, selectedEntityId = null, pendingUploadEntityIds)
     }
 
   val entitiesJsonWithSelection =
@@ -473,8 +474,8 @@ fun GeoPointFormMapboxViewport(
 ) {
   val density = LocalDensity.current.density
   val workbenchScroll = LocalWorkbenchScrollState.current
-  val scrollX = workbenchScroll?.horizontal?.value ?: 0
-  val scrollY = workbenchScroll?.vertical?.value ?: 0
+  val scrollX = (workbenchScroll?.horizontal?.value ?: 0) / density
+  val scrollY = (workbenchScroll?.vertical?.value ?: 0) / density
 
   var rawWindowLeft by remember { mutableStateOf<Float?>(null) }
   var rawWindowTop by remember { mutableStateOf<Float?>(null) }
@@ -510,11 +511,13 @@ fun GeoPointFormMapboxViewport(
   val userGpsY = state.userGpsNormalizedY
 
   val visibleEntities = state.visibleMapEntities
+  val pendingUploadEntityIds = state.pendingUploadEntityIds
   val baseEntitiesJson =
-    remember(visibleEntities, state.activeDataCollectionEntityId) {
+    remember(visibleEntities, state.activeDataCollectionEntityId, pendingUploadEntityIds) {
       serializeMapboxEntitiesJson(
         visibleEntities,
         selectedEntityId = state.activeDataCollectionEntityId,
+        pendingUploadEntityIds = pendingUploadEntityIds,
       )
     }
 
@@ -666,8 +669,8 @@ fun EntityRefFormMapboxViewport(
 ) {
   val density = LocalDensity.current.density
   val workbenchScroll = LocalWorkbenchScrollState.current
-  val scrollX = workbenchScroll?.horizontal?.value ?: 0
-  val scrollY = workbenchScroll?.vertical?.value ?: 0
+  val scrollX = (workbenchScroll?.horizontal?.value ?: 0) / density
+  val scrollY = (workbenchScroll?.vertical?.value ?: 0) / density
 
   var rawWindowLeft by remember { mutableStateOf<Float?>(null) }
   var rawWindowTop by remember { mutableStateOf<Float?>(null) }
@@ -704,9 +707,10 @@ fun EntityRefFormMapboxViewport(
   val datasetCandidates = state.allDatasetEntitiesForForm(form)
   val selectedEntityId = state.activeDataCollectionEntityId
 
+  val pendingUploadEntityIds = state.pendingUploadEntityIds
   val baseEntitiesJson =
-    remember(datasetCandidates) {
-      serializeMapboxEntitiesJson(datasetCandidates, selectedEntityId = null)
+    remember(datasetCandidates, pendingUploadEntityIds) {
+      serializeMapboxEntitiesJson(datasetCandidates, selectedEntityId = null, pendingUploadEntityIds)
     }
 
   val entitiesJsonWithSelection =
@@ -878,11 +882,17 @@ internal fun buildMapboxFeaturesPayloadJson(state: PrototypeAppState): String =
     clusters = state.mapFeatureClusters,
     selectedClusterId = state.selectedClusterId,
     activeEntitiesCountNoun = state.activeEntitiesCountNoun,
+    pendingUploadEntityIds = state.pendingUploadEntityIds,
   )
 
+/**
+ * Serializes [entities] for the Mapbox layer. `isPending` marks features with not-yet-uploaded
+ * changes ([pendingUploadEntityIds]), which the map draws with dashed outlines.
+ */
 private fun serializeMapboxEntitiesJson(
   entities: List<GeospatialEntityItem>,
   selectedEntityId: String?,
+  pendingUploadEntityIds: Set<String>,
 ): String =
   entities.joinToString(separator = ",") { ent ->
     val markerColor = escapeJsonString(ent.markerColorCss)
@@ -892,7 +902,8 @@ private fun serializeMapboxEntitiesJson(
     val selected = ent.id == selectedEntityId
     val shortLabel = escapeJsonString(ent.label.substringBefore(" •"))
     val statusSummary = escapeJsonString(ent.mapStatusSummaryBadge)
-    """{"id":"${ent.id}","selected":$selected,"label":"$shortLabel","badge":"$markerSymbol","markerSymbol":"$markerSymbol","markerColor":"$markerColor","strokeColor":"$strokeColor","fillColor":"$fillColor","statusSummary":"$statusSummary","submissionCount":${ent.submissionCount},"isCompleted":${ent.isCompleted},"isPending":${ent.isPending},"geometryType":"${ent.geometryTypeLabel}","nx":${ent.normalizedX},"ny":${ent.normalizedY},"color":"$markerColor"}"""
+    val isPending = ent.id in pendingUploadEntityIds
+    """{"id":"${ent.id}","selected":$selected,"label":"$shortLabel","badge":"$markerSymbol","markerSymbol":"$markerSymbol","markerColor":"$markerColor","strokeColor":"$strokeColor","fillColor":"$fillColor","statusSummary":"$statusSummary","submissionCount":${ent.submissionCount},"isCompleted":${ent.isCompleted},"isPending":$isPending,"geometryType":"${ent.geometryTypeLabel}","nx":${ent.normalizedX},"ny":${ent.normalizedY},"color":"$markerColor"}"""
   }
 
 private fun buildMapboxFeaturesPayloadJson(
@@ -907,9 +918,10 @@ private fun buildMapboxFeaturesPayloadJson(
   clusters: List<MapFeatureCluster> = emptyList(),
   selectedClusterId: String? = null,
   activeEntitiesCountNoun: String = "map features",
+  pendingUploadEntityIds: Set<String> = emptySet(),
 ): String =
   buildMapboxFeaturesPayloadJsonFromPrebuiltEntities(
-    entitiesJson = serializeMapboxEntitiesJson(entities, selectedEntityId),
+    entitiesJson = serializeMapboxEntitiesJson(entities, selectedEntityId, pendingUploadEntityIds),
     entityCount = entities.size,
     submissions = submissions,
     selectedEntityId = selectedEntityId,

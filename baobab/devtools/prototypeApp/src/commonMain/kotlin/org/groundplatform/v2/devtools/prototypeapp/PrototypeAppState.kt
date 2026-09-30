@@ -348,7 +348,29 @@ class PrototypeAppState(
   val isDashboardSidePanelExpanded: Boolean
     get() = isSidePanelExpanded
 
+  /**
+   * Whether the right-hand details panel in the web dashboard is expanded (`true`, default) or
+   * collapsed (`false`) to maximize visible map space.
+   */
+  var isDetailsPanelExpanded by mutableStateOf(true)
+    private set
+
+  /** Alias for [isDetailsPanelExpanded] with dashboard prefix. */
+  val isDashboardDetailsPanelExpanded: Boolean
+    get() = isDetailsPanelExpanded
+
+  /** Alias for [isDetailsPanelExpanded]. */
+  val isRightPanelExpanded: Boolean
+    get() = isDetailsPanelExpanded
+
   var selectedSubmissionId by mutableStateOf<String?>(null)
+    private set
+
+  /**
+   * Entity dataset ID of the map layer or data table selected in the web dashboard's left-hand
+   * panel, or `null`. Mutually exclusive with [selectedEntityId] and [selectedSubmissionId].
+   */
+  var selectedLayerDatasetId by mutableStateOf<String?>(null)
     private set
 
   /**
@@ -444,6 +466,10 @@ class PrototypeAppState(
   /** Number of not-yet-uploaded mutations (`isOutbox`) recorded for the entity with [entityId]. */
   fun pendingUploadCountForEntity(entityId: String): Int =
     mutations.count { it.entityId == entityId && it.isOutbox }
+
+  /** IDs of entities with at least one not-yet-uploaded mutation (`isOutbox`). */
+  val pendingUploadEntityIds: Set<String>
+    get() = mutations.filter { it.isOutbox }.mapTo(mutableSetOf()) { it.entityId }
 
   /**
    * Opens the `Uploads` screen filtered to the entity with [entityId], so a data collector can
@@ -587,8 +613,14 @@ class PrototypeAppState(
 
   private var lastSelectedPlace: SurveyPlaceItem? by mutableStateOf(null)
 
+  // Must match `SURVEY_COORDS` in the Mapbox bridge (`index.html`), which draws map features
+  // relative to the same anchors; otherwise framing targets a point away from the drawn feature.
   private fun activeSurveyBaseLngLat(): Pair<Double, Double> =
     when (activeSurveyId) {
+      "survey-single-point-land-use" -> 36.9498 to -0.4188
+      "survey-sample-plots-forest" -> 36.9506 to -0.4192
+      "survey-commodity-perimeter-center" -> 36.9510 to -0.4195
+      "survey-household-past-individuals" -> 36.9502 to -0.4190
       "survey-amazon-canopy" -> -62.2159 to -3.4653
       "survey-serengeti-corridor" -> 34.8328 to -2.3333
       "survey-mekong-mangroves" -> 106.3422 to 9.8249
@@ -1536,6 +1568,7 @@ class PrototypeAppState(
     mapLayers = mapLayersForSurvey(surveyId)
     selectedEntityId = null
     selectedSubmissionId = null
+    selectedLayerDatasetId = null
     activeDataCollectionEntityId = null
     activeDataCollectionFormId = null
     activeFormWizardController = null
@@ -1724,6 +1757,7 @@ class PrototypeAppState(
     clearSelectedPlace()
     selectedEntityId = entityId
     selectedSubmissionId = null
+    selectedLayerDatasetId = null
     entityDetailsPane = EntityDetailsPane.PROPERTIES
     isEntityBottomSheetExpanded = false
     mainViewMode = MainSurveyViewMode.MAP
@@ -1731,6 +1765,9 @@ class PrototypeAppState(
       isLayersSheetOpen = false
       entitySelectionEpoch++
       followSelectionInDashboardTable(entityId)
+      if (!isDashboardTableExpanded) {
+        isDetailsPanelExpanded = true
+      }
     }
   }
 
@@ -1743,12 +1780,16 @@ class PrototypeAppState(
     clearSelectedPlace()
     selectedEntityId = entityId
     selectedSubmissionId = null
+    selectedLayerDatasetId = null
     entityDetailsPane = EntityDetailsPane.PROPERTIES
     isEntityBottomSheetExpanded = false
     mainViewMode = MainSurveyViewMode.MAP
     isLayersSheetOpen = false
     entitySelectionEpoch++
     followSelectionInDashboardTable(entityId)
+    if (!isDashboardTableExpanded) {
+      isDetailsPanelExpanded = true
+    }
   }
 
   /** Switches the web dashboard's bottom table to the dataset of the entity with [entityId]. */
@@ -1769,12 +1810,50 @@ class PrototypeAppState(
 
   /** Expands or collapses the web dashboard's bottom data table. */
   fun updateDashboardTableExpanded(expanded: Boolean) {
+    val wasExpanded = isDashboardTableExpanded
     isDashboardTableExpanded = expanded
+    if (expanded && !wasExpanded) {
+      isDetailsPanelExpanded = false
+    } else if (
+      !expanded &&
+        wasExpanded &&
+        (selectedEntityId != null ||
+          selectedSubmissionId != null ||
+          selectedLayerDatasetId != null)
+    ) {
+      isDetailsPanelExpanded = true
+    }
+  }
+
+  /**
+   * Selects the map layer or data table of the entity dataset with [datasetId] in the web
+   * dashboard, opening its details card; `null` clears the layer selection. Selecting a layer
+   * clears any selected map feature, submission, or place.
+   */
+  fun selectLayer(datasetId: String?) {
+    selectedLayerDatasetId = datasetId
+    if (datasetId != null) {
+      clearSelectedPlace()
+      selectedEntityId = null
+      selectedSubmissionId = null
+      entityDetailsPane = EntityDetailsPane.PROPERTIES
+      dashboardTableDatasetId = datasetId
+      if (!isDashboardTableExpanded) {
+        isDetailsPanelExpanded = true
+      }
+    }
+  }
+
+  /** "Show in table": expands the web dashboard's bottom data table on the selected layer. */
+  fun showSelectedLayerInTable() {
+    val datasetId = selectedLayerDatasetId ?: return
+    selectDashboardTable(datasetId)
+    updateDashboardTableExpanded(true)
   }
 
   /** Toggles the web dashboard's bottom data table between expanded and collapsed. */
   fun toggleDashboardTableExpanded() {
-    isDashboardTableExpanded = !isDashboardTableExpanded
+    updateDashboardTableExpanded(!isDashboardTableExpanded)
   }
 
   /** Activates the bottom data table tab for the dataset with [datasetId]. */
@@ -1789,7 +1868,7 @@ class PrototypeAppState(
   fun showSelectedEntityInTable() {
     val entity = selectedEntity ?: return
     dashboardTableDatasetId = entity.datasetId
-    isDashboardTableExpanded = true
+    updateDashboardTableExpanded(true)
   }
 
   /**
@@ -1815,6 +1894,7 @@ class PrototypeAppState(
     selectedPlaceId = resolvedPlace.id
     selectedEntityId = null
     selectedSubmissionId = null
+    selectedLayerDatasetId = null
     isCameraFollowingUser = false
     locationLockState = LocationLockState.PANNED
     mapPanOffsetX = ((userGpsNormalizedX - 0.5f) + ((surveyLng - lng) / 0.014).toFloat())
@@ -1896,10 +1976,55 @@ class PrototypeAppState(
   /** Alias for [updateSidePanelExpanded]. */
   fun updateDashboardSidePanelExpanded(expanded: Boolean) = updateSidePanelExpanded(expanded)
 
+  /** Toggles the web dashboard's right-hand details panel between expanded and collapsed states. */
+  fun toggleDetailsPanel() {
+    isDetailsPanelExpanded = !isDetailsPanelExpanded
+  }
+
+  /** Expands the web dashboard's right-hand details panel. */
+  fun expandDetailsPanel() {
+    isDetailsPanelExpanded = true
+  }
+
+  /** Collapses the web dashboard's right-hand details panel. */
+  fun collapseDetailsPanel() {
+    isDetailsPanelExpanded = false
+  }
+
+  /** Explicitly expands or collapses the web dashboard's right-hand details panel. */
+  fun updateDetailsPanelExpanded(expanded: Boolean) {
+    isDetailsPanelExpanded = expanded
+  }
+
+  /** Alias for [toggleDetailsPanel]. */
+  fun toggleDashboardDetailsPanel() = toggleDetailsPanel()
+
+  /** Alias for [expandDetailsPanel]. */
+  fun expandDashboardDetailsPanel() = expandDetailsPanel()
+
+  /** Alias for [collapseDetailsPanel]. */
+  fun collapseDashboardDetailsPanel() = collapseDetailsPanel()
+
+  /** Alias for [updateDetailsPanelExpanded]. */
+  fun updateDashboardDetailsPanelExpanded(expanded: Boolean) = updateDetailsPanelExpanded(expanded)
+
+  /** Alias for [toggleDetailsPanel]. */
+  fun toggleRightPanel() = toggleDetailsPanel()
+
+  /** Alias for [expandDetailsPanel]. */
+  fun expandRightPanel() = expandDetailsPanel()
+
+  /** Alias for [collapseDetailsPanel]. */
+  fun collapseRightPanel() = collapseDetailsPanel()
+
+  /** Alias for [updateDetailsPanelExpanded]. */
+  fun updateRightPanelExpanded(expanded: Boolean) = updateDetailsPanelExpanded(expanded)
+
   /** Opens full details for a specific submission (from a 1:N entity bottom sheet or List view). */
   fun selectSubmissionDetail(submissionId: String?) {
     selectedSubmissionId = submissionId
     if (submissionId != null) {
+      selectedLayerDatasetId = null
       isEntityBottomSheetExpanded = true
       val parentEntity = entities.firstOrNull { e -> e.submissions.any { it.id == submissionId } }
       if (parentEntity != null && parentEntity.id != selectedEntityId) {
@@ -1910,6 +2035,9 @@ class PrototypeAppState(
       selectedEntityId = parentEntity?.id
       // Closing the submission returns to the list of the feature's submissions it came from.
       entityDetailsPane = EntityDetailsPane.SUBMISSIONS
+      if (!isDashboardTableExpanded) {
+        isDetailsPanelExpanded = true
+      }
     }
   }
 
@@ -3177,7 +3305,9 @@ class PrototypeAppState(
     selectedEntityId = null
     isEntityBottomSheetExpanded = false
     isSidePanelExpanded = true
+    isDetailsPanelExpanded = true
     selectedSubmissionId = null
+    selectedLayerDatasetId = null
     entityDetailsPane = EntityDetailsPane.PROPERTIES
     isDashboardTableExpanded = false
     dashboardTableDatasetId = null

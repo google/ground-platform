@@ -16,7 +16,6 @@ package org.groundplatform.v2.devtools.prototypeapp
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -38,10 +37,10 @@ import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.CloudOff
 import androidx.compose.material.icons.filled.CloudUpload
+import androidx.compose.material.icons.filled.CollapseContent
 import androidx.compose.material.icons.filled.Description
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Link
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Navigation
 import androidx.compose.material.icons.filled.Pentagon
 import androidx.compose.material.icons.filled.Place
@@ -51,6 +50,8 @@ import androidx.compose.material.icons.filled.TableRows
 import androidx.compose.material.icons.filled.Timeline
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FilterChip
@@ -73,6 +74,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -310,22 +312,25 @@ internal fun EntityListRow(
 }
 
 /**
- * Header of an entity's details surface: optional back button, geometry icon, label, status icon
- * and status text, optional [trailingActions], and a close button.
+ * Header of an entity's details surface: optional back button, geometry icon, label, status chip
+ * with an optional [statusAccessory] next to it, optional [trailingActions], an optional collapse
+ * button, and an optional close button (rendered only when [onClose] is non-null).
  */
 @Composable
 internal fun EntityDetailsHeader(
   entity: GeospatialEntityItem,
-  onClose: () -> Unit,
+  onClose: (() -> Unit)?,
   modifier: Modifier = Modifier,
   onBack: (() -> Unit)? = null,
   backContentDescription: String = "Back to all map features",
+  onCollapse: (() -> Unit)? = null,
+  statusAccessory: @Composable () -> Unit = {},
   trailingActions: @Composable () -> Unit = {},
 ) {
   Row(
     modifier = modifier.fillMaxWidth(),
     verticalAlignment = Alignment.CenterVertically,
-    horizontalArrangement = Arrangement.spacedBy(8.dp),
+    horizontalArrangement = Arrangement.spacedBy(4.dp),
   ) {
     if (onBack != null) {
       IconButton(onClick = onBack, modifier = Modifier.size(32.dp)) {
@@ -337,7 +342,7 @@ internal fun EntityDetailsHeader(
       }
     }
     EntityGeometryIcon(entity = entity, size = 22.dp)
-    Column(modifier = Modifier.weight(1f)) {
+    Column(modifier = Modifier.weight(1f).padding(horizontal = 4.dp)) {
       Text(
         text = entity.label,
         style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
@@ -345,16 +350,74 @@ internal fun EntityDetailsHeader(
         maxLines = 2,
         overflow = TextOverflow.Ellipsis,
       )
-      EntityStatusChip(entity = entity, modifier = Modifier.padding(top = 4.dp))
+      Row(
+        modifier = Modifier.padding(top = 4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
+      ) {
+        EntityStatusChip(entity = entity)
+        statusAccessory()
+      }
     }
     trailingActions()
-    IconButton(onClick = onClose, modifier = Modifier.size(32.dp)) {
+    if (onCollapse != null) {
+      IconButton(onClick = onCollapse, modifier = Modifier.size(32.dp)) {
+        Icon(
+          imageVector = Icons.Default.CollapseContent,
+          contentDescription = "Collapse details",
+          tint = MaterialTheme.colorScheme.onSurfaceVariant,
+          modifier = Modifier.size(22.dp),
+        )
+      }
+    }
+    if (onClose != null) {
+      IconButton(onClick = onClose, modifier = Modifier.size(32.dp)) {
+        Icon(
+          imageVector = Icons.Default.Close,
+          contentDescription = "Close details",
+          tint = MaterialTheme.colorScheme.onSurfaceVariant,
+          modifier = Modifier.size(20.dp),
+        )
+      }
+    }
+  }
+}
+
+/** An item of a details surface's overflow menu ([DetailsOverflowMenu]). */
+internal data class DetailsMenuAction(
+  val label: String,
+  val icon: ImageVector,
+  val onClick: () -> Unit,
+)
+
+/** "More" ( ⋮ ) button opening a menu of secondary actions, e.g. QR code and Share PDF. */
+@Composable
+internal fun DetailsOverflowMenu(
+  actions: List<DetailsMenuAction>,
+  modifier: Modifier = Modifier,
+  contentDescription: String = "More actions",
+) {
+  var isExpanded by remember { mutableStateOf(false) }
+  Box(modifier = modifier) {
+    IconButton(onClick = { isExpanded = true }, modifier = Modifier.size(32.dp)) {
       Icon(
-        imageVector = Icons.Default.Close,
-        contentDescription = "Close details",
+        imageVector = Icons.Default.MoreVert,
+        contentDescription = contentDescription,
         tint = MaterialTheme.colorScheme.onSurfaceVariant,
         modifier = Modifier.size(20.dp),
       )
+    }
+    DropdownMenu(expanded = isExpanded, onDismissRequest = { isExpanded = false }) {
+      actions.forEach { action ->
+        DropdownMenuItem(
+          text = { Text(action.label) },
+          leadingIcon = { Icon(imageVector = action.icon, contentDescription = null) },
+          onClick = {
+            isExpanded = false
+            action.onClick()
+          },
+        )
+      }
     }
   }
 }
@@ -424,8 +487,9 @@ private fun RelatedRecordLink(related: GeospatialEntityItem, onClick: () -> Unit
 /**
  * Entity properties pane: all data associated with the entity (its current state), arranged
  * vertically, with a click-through to its submissions.
- * - [isWeb]: shows the "Show in table" button and omits mobile-only field actions (`Navigate`, data
- * collection launchers, sync status, and `Uploads` links).
+ * - [isWeb]: shows the "Show in table" button at the bottom and omits the actions row (QR code and
+ * Share PDF live in the web header's overflow menu) and mobile-only field actions (`Navigate`, data
+ * collection launchers, and `Uploads` links). On mobile, sync status is a chip in the header.
  */
 @Composable
 internal fun EntityPropertiesPane(
@@ -434,9 +498,8 @@ internal fun EntityPropertiesPane(
   isWeb: Boolean,
 ) {
   Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-    EntityActionsRow(entity = entity, state = state, isWeb = isWeb)
-
     if (!isWeb) {
+      EntityActionsRow(entity = entity, state = state)
       EntityDataCollectionLaunchers(entity = entity, state = state)
     }
 
@@ -444,14 +507,6 @@ internal fun EntityPropertiesPane(
     DetailsFieldRow(label = "Layer", value = entity.datasetName)
     DetailsFieldRow(label = "Geometry", value = entityGeometrySummary(entity, state.unitSystem))
     DetailsFieldRow(label = "GeoID", value = entity.geoId)
-    if (!isWeb) {
-      DetailsFieldRow(label = "Sync") {
-        SyncStatusIndicatorBadge(
-          syncStatus = entity.syncStatus,
-          onClick = { state.cycleEntitySyncStatus(entity.id) },
-        )
-      }
-    }
 
     val properties = entity.displayProperties
     if (properties.isNotEmpty()) {
@@ -470,21 +525,7 @@ internal fun EntityPropertiesPane(
 
     HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
     EntitySubmissionsLink(entity = entity, state = state, isWeb = isWeb)
-  }
-}
 
-/** Row of entity actions: "Show in table" (web), `Navigate` (mobile), QR code, and Share PDF. */
-@Composable
-private fun EntityActionsRow(
-  entity: GeospatialEntityItem,
-  state: PrototypeAppState,
-  isWeb: Boolean
-) {
-  Row(
-    modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
-    horizontalArrangement = Arrangement.spacedBy(8.dp),
-    verticalAlignment = Alignment.CenterVertically,
-  ) {
     if (isWeb) {
       FilledTonalButton(onClick = { state.showSelectedEntityInTable() }) {
         Icon(
@@ -495,7 +536,29 @@ private fun EntityActionsRow(
         Spacer(modifier = Modifier.width(6.dp))
         Text("Show in table")
       }
-    } else if (entity.hasGeometry) {
+    }
+  }
+}
+
+/** Secondary entity actions shown in the web header's overflow menu. */
+private fun entityOverflowActions(
+  entity: GeospatialEntityItem,
+  state: PrototypeAppState,
+): List<DetailsMenuAction> =
+  listOf(
+    DetailsMenuAction("QR code", Icons.Default.QrCode) { state.openEntityQrCode(entity.id) },
+    DetailsMenuAction("Share PDF", Icons.Default.Share) { state.shareEntityPdf(entity.id) },
+  )
+
+/** Row of mobile entity actions: `Navigate`, QR code, Share PDF, and `Uploads`. */
+@Composable
+private fun EntityActionsRow(entity: GeospatialEntityItem, state: PrototypeAppState) {
+  Row(
+    modifier = Modifier.fillMaxWidth().horizontalScrollWithMouseDrag(rememberScrollState()),
+    horizontalArrangement = Arrangement.spacedBy(8.dp),
+    verticalAlignment = Alignment.CenterVertically,
+  ) {
+    if (entity.hasGeometry) {
       val isNavigating = state.isNavigatingToEntity(entity.id)
       val wayfinding = state.formattedWayfindingBadgeForEntity(entity.id)
       FilterChip(
@@ -543,30 +606,28 @@ private fun EntityActionsRow(
         )
       },
     )
-    if (!isWeb) {
-      val uploadCount = state.uploadCountForEntity(entity.id)
-      if (uploadCount > 0) {
-        val pendingCount = state.pendingUploadCountForEntity(entity.id)
-        AssistChip(
-          onClick = { state.openUploadsForEntity(entity.id) },
-          label = {
-            Text(
-              if (pendingCount > 0) {
-                "$pendingCount pending ${if (pendingCount == 1) "upload" else "uploads"}"
-              } else {
-                "Uploads ($uploadCount)"
-              }
-            )
-          },
-          leadingIcon = {
-            Icon(
-              imageVector = Icons.Default.CloudUpload,
-              contentDescription = null,
-              modifier = Modifier.size(16.dp),
-            )
-          },
-        )
-      }
+    val uploadCount = state.uploadCountForEntity(entity.id)
+    if (uploadCount > 0) {
+      val pendingCount = state.pendingUploadCountForEntity(entity.id)
+      AssistChip(
+        onClick = { state.openUploadsForEntity(entity.id) },
+        label = {
+          Text(
+            if (pendingCount > 0) {
+              "$pendingCount pending ${if (pendingCount == 1) "upload" else "uploads"}"
+            } else {
+              "Uploads ($uploadCount)"
+            }
+          )
+        },
+        leadingIcon = {
+          Icon(
+            imageVector = Icons.Default.CloudUpload,
+            contentDescription = null,
+            modifier = Modifier.size(16.dp),
+          )
+        },
+      )
     }
   }
 }
@@ -579,7 +640,7 @@ private fun EntityDataCollectionLaunchers(entity: GeospatialEntityItem, state: P
   Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
     DetailsSectionHeading("Collect data")
     Row(
-      modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+      modifier = Modifier.fillMaxWidth().horizontalScrollWithMouseDrag(rememberScrollState()),
       horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
       entityForms.forEach { form ->
@@ -746,7 +807,7 @@ internal fun EntitySubmissionsPane(
 
 /**
  * Mobile details surface for the selected entity, replacing the bottom sheet's list:
- * - Header with back (← to the list), status, expand/collapse, and close.
+ * - Header with back (← to the list), status, and a tappable sync status chip.
  * - Properties pane by default, the submissions pane one click away, and a document-style
  * submission view (← back to the submissions) when a submission is opened.
  */
@@ -766,25 +827,12 @@ internal fun EntityBottomSheetCard(
     EntityDetailsHeader(
       entity = entity,
       onBack = { state.returnToBottomSheetList() },
-      onClose = { state.selectEntity(null) },
-      trailingActions = {
-        IconButton(
-          onClick = { state.toggleEntityBottomSheetExpanded() },
-          modifier = Modifier.size(32.dp),
-        ) {
-          Icon(
-            imageVector =
-              if (state.isEntityBottomSheetExpanded) {
-                Icons.Default.KeyboardArrowDown
-              } else {
-                Icons.Default.KeyboardArrowUp
-              },
-            contentDescription =
-              if (state.isEntityBottomSheetExpanded) "Collapse details" else "Expand details",
-            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.size(20.dp),
-          )
-        }
+      onClose = null,
+      statusAccessory = {
+        SyncStatusIndicatorBadge(
+          syncStatus = entity.syncStatus,
+          onClick = { state.cycleEntitySyncStatus(entity.id) },
+        )
       },
     )
     HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
@@ -825,6 +873,7 @@ internal fun WebEntityDetailsCard(
   entity: GeospatialEntityItem,
   state: PrototypeAppState,
   modifier: Modifier = Modifier,
+  onCollapse: (() -> Unit)? = null,
 ) {
   val submission = state.selectedSubmission?.takeIf { it.entityId == entity.id }
   var selectedTab by
@@ -840,6 +889,13 @@ internal fun WebEntityDetailsCard(
       EntityDetailsHeader(
         entity = entity,
         onClose = { state.selectEntity(null) },
+        onCollapse = onCollapse,
+        trailingActions = {
+          DetailsOverflowMenu(
+            actions = entityOverflowActions(entity, state),
+            contentDescription = "More ${entity.singularTypeLabel.lowercase()} actions",
+          )
+        },
         modifier = Modifier.padding(start = 16.dp, end = 8.dp, top = 12.dp, bottom = 8.dp),
       )
 
@@ -856,28 +912,7 @@ internal fun WebEntityDetailsCard(
             selected = selectedTab == 1,
             onClick = { selectedTab = 1 },
             text = {
-              Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                  text = submission.formTitle,
-                  maxLines = 1,
-                  overflow = TextOverflow.Ellipsis,
-                  modifier = Modifier.weight(1f, fill = false),
-                )
-                Box(
-                  modifier =
-                    Modifier.padding(start = 4.dp)
-                      .size(20.dp)
-                      .clip(MaterialTheme.shapes.extraSmall)
-                      .clickable { state.selectSubmissionDetail(null) },
-                  contentAlignment = Alignment.Center,
-                ) {
-                  Icon(
-                    imageVector = Icons.Default.Close,
-                    contentDescription = "Close submission",
-                    modifier = Modifier.size(14.dp),
-                  )
-                }
-              }
+              Text(text = submission.formTitle, maxLines = 1, overflow = TextOverflow.Ellipsis)
             },
           )
         }
@@ -899,11 +934,12 @@ internal fun WebEntityDetailsCard(
               state = state,
               isDark = state.isDarkTheme,
               textColor = MaterialTheme.colorScheme.onSurface,
-              backLabel = "Close submission",
+              backLabel = "Back to submissions",
               onBack = { state.selectSubmissionDetail(null) },
               onSharePdf = { state.shareSubmissionPdf(submission.id) },
               isSidePanel = true,
-              showBackButton = false,
+              // The tab already shows the form title; keep only back and the overflow menu.
+              showTitle = false,
             )
           state.entityDetailsPane == EntityDetailsPane.SUBMISSIONS ->
             EntitySubmissionsPane(entity = entity, state = state, isWeb = true)
@@ -923,6 +959,7 @@ internal fun WebSubmissionDetailsCard(
   submission: SubmissionPreviewItem,
   state: PrototypeAppState,
   modifier: Modifier = Modifier,
+  onCollapse: (() -> Unit)? = null,
 ) {
   Surface(
     modifier = modifier,
@@ -930,17 +967,73 @@ internal fun WebSubmissionDetailsCard(
     color = MaterialTheme.colorScheme.surfaceContainerLow,
     shadowElevation = 6.dp,
   ) {
-    Column(modifier = Modifier.verticalScroll(rememberScrollState()).padding(16.dp)) {
-      SubmissionFullDetailsCard(
-        submission = submission,
-        state = state,
-        isDark = state.isDarkTheme,
-        textColor = MaterialTheme.colorScheme.onSurface,
-        backLabel = "Close submission",
-        onBack = { state.selectSubmissionDetail(null) },
-        onSharePdf = { state.shareSubmissionPdf(submission.id) },
-        isSidePanel = true,
-      )
+    Column {
+      Row(
+        modifier =
+          Modifier.fillMaxWidth().padding(start = 16.dp, end = 8.dp, top = 12.dp, bottom = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+      ) {
+        IconButton(
+          onClick = { state.selectSubmissionDetail(null) },
+          modifier = Modifier.size(32.dp),
+        ) {
+          Icon(
+            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+            contentDescription = "Back",
+            modifier = Modifier.size(20.dp),
+          )
+        }
+        Column(modifier = Modifier.weight(1f).padding(horizontal = 4.dp)) {
+          Text(
+            text = submission.formTitle,
+            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+            color = MaterialTheme.colorScheme.onSurface,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+          )
+          Text(
+            text = submission.timestamp,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+          )
+        }
+        DetailsOverflowMenu(
+          actions =
+            listOf(
+              DetailsMenuAction("Share PDF", Icons.Default.Share) {
+                state.shareSubmissionPdf(submission.id)
+              }
+            ),
+          contentDescription = "More submission actions",
+        )
+        if (onCollapse != null) {
+          IconButton(onClick = onCollapse, modifier = Modifier.size(32.dp)) {
+            Icon(
+              imageVector = Icons.Default.CollapseContent,
+              contentDescription = "Collapse details",
+              tint = MaterialTheme.colorScheme.onSurfaceVariant,
+              modifier = Modifier.size(22.dp),
+            )
+          }
+        }
+      }
+      HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+      Column(modifier = Modifier.verticalScroll(rememberScrollState()).padding(16.dp)) {
+        SubmissionFullDetailsCard(
+          submission = submission,
+          state = state,
+          isDark = state.isDarkTheme,
+          textColor = MaterialTheme.colorScheme.onSurface,
+          backLabel = "Back",
+          onBack = { state.selectSubmissionDetail(null) },
+          onSharePdf = { state.shareSubmissionPdf(submission.id) },
+          isSidePanel = true,
+          showHeader = false,
+        )
+      }
     }
   }
 }

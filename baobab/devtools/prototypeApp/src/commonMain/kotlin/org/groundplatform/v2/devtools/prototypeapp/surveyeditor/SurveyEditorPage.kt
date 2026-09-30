@@ -25,6 +25,7 @@ import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -60,6 +61,7 @@ import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Smartphone
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -131,6 +133,7 @@ import org.groundplatform.v2.devtools.prototypeapp.formeditor.FormEditorValidato
 import org.groundplatform.v2.devtools.prototypeapp.formeditor.SectionLabel
 import org.groundplatform.v2.devtools.prototypeapp.PrototypeAppState
 import org.groundplatform.v2.devtools.prototypeapp.PrototypeDebugToolsButton
+import org.groundplatform.v2.devtools.prototypeapp.PrototypeWorkbenchPage
 import org.groundplatform.v2.devtools.prototypeapp.formeditor.dragToReorder
 
 /**
@@ -236,6 +239,24 @@ private fun SurveyNavigation(
           )
         }
         if (appState != null) {
+          OutlinedButton(
+            onClick = { appState.selectWorkbenchPage(PrototypeWorkbenchPage.MOBILE_PROTOTYPE) },
+            contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
+            modifier = Modifier.height(32.dp),
+          ) {
+            Icon(
+              imageVector = Icons.Filled.Smartphone,
+              contentDescription = null,
+              modifier = Modifier.size(16.dp),
+            )
+            Spacer(modifier = Modifier.width(6.dp))
+            Text(
+              text = "Mobile prototype",
+              style = MaterialTheme.typography.labelSmall,
+              fontWeight = FontWeight.SemiBold,
+              maxLines = 1,
+            )
+          }
           PrototypeDebugToolsButton(state = appState)
         }
       }

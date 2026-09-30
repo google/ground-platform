@@ -17,7 +17,6 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -543,13 +542,30 @@ internal fun BottomSheetSearchableListContent(
 
         groupedEntities.forEach { group ->
           val layer = group.layer
+          val groupDatasetId = group.entities.first().datasetId
+          val isLayerSelected = isSidePanel && state.selectedLayerDatasetId == groupDatasetId
           Column(
             modifier = Modifier.fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(8.dp),
           ) {
-            // Layer Group Header Banner
+            // Layer Group Header Banner. In the web side panel, clicking it selects the layer.
             Row(
-              modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp, vertical = 2.dp),
+              modifier =
+                if (isSidePanel) {
+                  Modifier.fillMaxWidth()
+                    .clip(MaterialTheme.shapes.small)
+                    .background(
+                      if (isLayerSelected) {
+                        MaterialTheme.colorScheme.secondaryContainer
+                      } else {
+                        Color.Transparent
+                      }
+                    )
+                    .clickable { state.selectLayer(groupDatasetId) }
+                    .padding(start = 8.dp, end = 4.dp, top = 2.dp, bottom = 2.dp)
+                } else {
+                  Modifier.fillMaxWidth().padding(horizontal = 4.dp, vertical = 2.dp)
+                },
               horizontalArrangement = Arrangement.SpaceBetween,
               verticalAlignment = Alignment.CenterVertically,
             ) {
@@ -577,14 +593,23 @@ internal fun BottomSheetSearchableListContent(
                 Text(
                   text = layer?.label ?: group.datasetName,
                   style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
-                  color = MaterialTheme.colorScheme.onSurface,
+                  color =
+                    if (isLayerSelected) {
+                      MaterialTheme.colorScheme.onSecondaryContainer
+                    } else {
+                      layerNameColor(isVisible = layer?.isVisible ?: true)
+                    },
                 )
               }
 
-              GroundTonalBadge(
-                text = "${group.entities.size}",
-                tone = GroundBadgeTone.PRIMARY,
-              )
+              if (layer != null) {
+                LayerVisibilityToggle(layer = layer, state = state)
+              } else {
+                GroundTonalBadge(
+                  text = "${group.entities.size}",
+                  tone = GroundBadgeTone.PRIMARY,
+                )
+              }
             }
 
             // One single-line row per entity record: geometry icon, label, and status icon.
@@ -743,7 +768,8 @@ internal fun BottomSheetSearchableListContent(
                 }
 
                 Row(
-                  modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+                  modifier =
+                    Modifier.fillMaxWidth().horizontalScrollWithMouseDrag(rememberScrollState()),
                   horizontalArrangement = Arrangement.spacedBy(6.dp),
                   verticalAlignment = Alignment.CenterVertically,
                 ) {
@@ -823,42 +849,57 @@ internal fun SubmissionFullDetailsCard(
   onSharePdf: () -> Unit,
   isSidePanel: Boolean = false,
   showBackButton: Boolean = true,
+  showHeader: Boolean = true,
+  showTitle: Boolean = true,
 ) {
+  // The card uses the same container color as the answer blocks so the submission reads as one
+  // document-like surface, set apart from the surrounding panel by a subtle outline.
   OutlinedCard(
     modifier = Modifier.fillMaxWidth(),
     shape = MaterialTheme.shapes.medium,
-    border = BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary),
-    colors =
-      CardDefaults.outlinedCardColors(
-        containerColor = MaterialTheme.colorScheme.surfaceContainerLow
-      ),
+    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+    colors = CardDefaults.outlinedCardColors(containerColor = MaterialTheme.colorScheme.surface),
   ) {
     Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-      // Header: Simple back arrow navigation + Form Title
-      Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(6.dp),
-      ) {
-        if (showBackButton) {
-          IconButton(
-            onClick = { onBack() },
-            modifier = Modifier.size(28.dp),
-          ) {
-            Icon(
-              imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-              contentDescription = backLabel,
-              tint = MaterialTheme.colorScheme.onSurface,
-              modifier = Modifier.size(18.dp),
+      // Header: back arrow navigation, form title, and (side panel) overflow menu. Hosts that
+      // already show the form title and actions (e.g. a tab or their own header) hide it.
+      if (showHeader) {
+        Row(
+          modifier = Modifier.fillMaxWidth(),
+          verticalAlignment = Alignment.CenterVertically,
+          horizontalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+          if (showBackButton) {
+            IconButton(
+              onClick = { onBack() },
+              modifier = Modifier.size(28.dp),
+            ) {
+              Icon(
+                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                contentDescription = backLabel,
+                tint = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.size(18.dp),
+              )
+            }
+          }
+          if (showTitle) {
+            Text(
+              text = submission.formTitle,
+              style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+              color = MaterialTheme.colorScheme.onSurface,
+              modifier = Modifier.weight(1f),
+            )
+          } else {
+            Spacer(modifier = Modifier.weight(1f))
+          }
+          if (isSidePanel) {
+            DetailsOverflowMenu(
+              actions =
+                listOf(DetailsMenuAction("Share PDF", Icons.Default.Share, onClick = onSharePdf)),
+              contentDescription = "More submission actions",
             )
           }
         }
-        Text(
-          text = submission.formTitle,
-          style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
-          color = MaterialTheme.colorScheme.onSurface,
-          modifier = Modifier.weight(1f),
-        )
       }
 
       // Actions & Sync Status Row
@@ -867,36 +908,36 @@ internal fun SubmissionFullDetailsCard(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
       ) {
-        Row(
-          verticalAlignment = Alignment.CenterVertically,
-          horizontalArrangement = Arrangement.spacedBy(6.dp),
-        ) {
-          if (!isSidePanel) {
+        if (!isSidePanel) {
+          Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+          ) {
             SyncStatusIndicatorBadge(
               syncStatus = submission.syncStatus,
               onClick = { state.cycleSubmissionSyncStatus(submission.id) },
             )
-          }
 
-          AssistChip(
-            onClick = { onSharePdf() },
-            label = {
-              Text(
-                text = "Share PDF",
-                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                softWrap = false,
-              )
-            },
-            leadingIcon = {
-              Icon(
-                imageVector = Icons.Default.Share,
-                contentDescription = "Share Submission PDF",
-                modifier = Modifier.size(12.dp),
-              )
-            },
-          )
+            AssistChip(
+              onClick = { onSharePdf() },
+              label = {
+                Text(
+                  text = "Share PDF",
+                  style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                  maxLines = 1,
+                  overflow = TextOverflow.Ellipsis,
+                  softWrap = false,
+                )
+              },
+              leadingIcon = {
+                Icon(
+                  imageVector = Icons.Default.Share,
+                  contentDescription = "Share Submission PDF",
+                  modifier = Modifier.size(12.dp),
+                )
+              },
+            )
+          }
         }
 
         Text(

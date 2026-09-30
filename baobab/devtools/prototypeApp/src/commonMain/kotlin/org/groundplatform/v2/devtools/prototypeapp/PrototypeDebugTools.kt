@@ -128,67 +128,6 @@ fun PrototypeDebugToolsDropdown(
 
     HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
 
-    // View Switcher Section
-    Text(
-      text = "SWITCH VIEW",
-      style = MaterialTheme.typography.labelSmall,
-      color = MaterialTheme.colorScheme.primary,
-      fontWeight = FontWeight.Bold,
-      modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
-    )
-
-    DropdownMenuItem(
-      text = { Text("Mobile prototype") },
-      leadingIcon = {
-        Icon(
-          imageVector = Icons.Filled.Smartphone,
-          contentDescription = null,
-          modifier = Modifier.size(20.dp),
-        )
-      },
-      trailingIcon = {
-        if (state.activeWorkbenchPage == PrototypeWorkbenchPage.MOBILE_PROTOTYPE) {
-          Icon(
-            imageVector = Icons.Default.Check,
-            contentDescription = "Active view",
-            tint = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.size(18.dp),
-          )
-        }
-      },
-      onClick = {
-        state.selectWorkbenchPage(PrototypeWorkbenchPage.MOBILE_PROTOTYPE)
-        onDismissRequest()
-      },
-    )
-
-    DropdownMenuItem(
-      text = { Text("Web app") },
-      leadingIcon = {
-        Icon(
-          imageVector = Icons.Filled.Map,
-          contentDescription = null,
-          modifier = Modifier.size(20.dp),
-        )
-      },
-      trailingIcon = {
-        if (state.activeWorkbenchPage.isWebApp) {
-          Icon(
-            imageVector = Icons.Default.Check,
-            contentDescription = "Active view",
-            tint = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.size(18.dp),
-          )
-        }
-      },
-      onClick = {
-        state.selectWorkbenchPage(PrototypeWorkbenchPage.WEB_DASHBOARD)
-        onDismissRequest()
-      },
-    )
-
-    HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
-
     // Environment & Simulation
     Text(
       text = "ENVIRONMENT",

@@ -2097,5 +2097,24 @@ class PrototypeAppStateTest {
     assertEquals(PrototypeWorkbenchPage.MOBILE_PROTOTYPE, state.activeWorkbenchPage)
     assertEquals(PrototypeWorkbenchPage.MOBILE_PROTOTYPE, notifiedPage)
   }
+
+  @Test
+  fun mapboxPayload_marksOnlyEntitiesWithOutboxMutationsAsPending() {
+    val state = PrototypeAppState(initialScreen = PrototypeScreen.MAIN_SURVEY)
+    val pendingIds = state.pendingUploadEntityIds
+    val payloadJson = buildMapboxFeaturesPayloadJson(state)
+
+    val entities = state.visibleMapEntities
+    // The old logic keyed off the ○ workflow status, so these would have been drawn as synced.
+    assertTrue(entities.any { !it.isNotStarted && it.id in pendingIds })
+    entities.forEach { ent ->
+      val entityJson =
+        assertNotNull(Regex("""\{"id":"${Regex.escape(ent.id)}"[^}]*\}""").find(payloadJson)).value
+      assertTrue(
+        entityJson.contains("\"isPending\":${ent.id in pendingIds}"),
+        "Unexpected isPending for ${ent.id} (markerSymbol=${ent.markerSymbol}): $entityJson",
+      )
+    }
+  }
 }
 

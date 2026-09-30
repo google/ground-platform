@@ -1047,6 +1047,25 @@ public val Icons.Filled.ChevronRight: ImageVector
   }
 private var _chevronRight: ImageVector? = null
 
+public val Icons.Filled.ChevronLeft: ImageVector
+  get() {
+    if (_chevronLeft != null) return _chevronLeft!!
+    _chevronLeft =
+      materialIcon(name = "Filled.ChevronLeft") {
+        materialPath {
+          moveTo(15.41f, 7.41f)
+          lineTo(14.0f, 6.0f)
+          lineToRelative(-6.0f, 6.0f)
+          lineToRelative(6.0f, 6.0f)
+          lineToRelative(1.41f, -1.41f)
+          lineTo(10.83f, 12.0f)
+          close()
+        }
+      }
+    return _chevronLeft!!
+  }
+private var _chevronLeft: ImageVector? = null
+
 public val Icons.Filled.Link: ImageVector
   get() {
     if (_link != null) return _link!!
@@ -1361,3 +1380,67 @@ public val Icons.Filled.BugReport: ImageVector
   }
 private var _bugReport: ImageVector? = null
 
+
+/**
+ * Material Symbols `collapse_content`: two corner brackets pointing inward. Not available in
+ * material-icons-extended; paths converted from the 960×960 Material Symbols viewport to 24×24.
+ */
+public val Icons.Filled.CollapseContent: ImageVector
+  get() {
+    if (_collapseContent != null) return _collapseContent!!
+    _collapseContent =
+      materialIcon(name = "Filled.CollapseContent") {
+        materialPath {
+          moveTo(11.0f, 13.0f)
+          verticalLineToRelative(6.0f)
+          horizontalLineToRelative(-2.0f)
+          verticalLineToRelative(-4.0f)
+          horizontalLineTo(5.0f)
+          verticalLineToRelative(-2.0f)
+          horizontalLineToRelative(6.0f)
+          close()
+          moveTo(15.0f, 5.0f)
+          verticalLineToRelative(4.0f)
+          horizontalLineToRelative(4.0f)
+          verticalLineToRelative(2.0f)
+          horizontalLineTo(13.0f)
+          verticalLineToRelative(-6.0f)
+          horizontalLineToRelative(2.0f)
+          close()
+        }
+      }
+    return _collapseContent!!
+  }
+private var _collapseContent: ImageVector? = null
+
+/**
+ * Material Symbols `expand_content`: two corner brackets pointing outward. Not available in
+ * material-icons-extended; paths converted from the 960×960 Material Symbols viewport to 24×24.
+ */
+public val Icons.Filled.ExpandContent: ImageVector
+  get() {
+    if (_expandContent != null) return _expandContent!!
+    _expandContent =
+      materialIcon(name = "Filled.ExpandContent") {
+        materialPath {
+          moveTo(5.0f, 19.0f)
+          verticalLineToRelative(-6.0f)
+          horizontalLineToRelative(2.0f)
+          verticalLineToRelative(4.0f)
+          horizontalLineToRelative(4.0f)
+          verticalLineToRelative(2.0f)
+          horizontalLineTo(5.0f)
+          close()
+          moveTo(17.0f, 11.0f)
+          verticalLineToRelative(-4.0f)
+          horizontalLineTo(13.0f)
+          verticalLineToRelative(-2.0f)
+          horizontalLineToRelative(6.0f)
+          verticalLineToRelative(6.0f)
+          horizontalLineToRelative(-2.0f)
+          close()
+        }
+      }
+    return _expandContent!!
+  }
+private var _expandContent: ImageVector? = null
