@@ -13,10 +13,6 @@
  */
 package org.groundplatform.v2.devtools.prototypeapp
 
-import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.snap
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -25,11 +21,9 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -44,85 +38,49 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.filled.Logout
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.CloudDone
 import androidx.compose.material.icons.filled.CloudOff
 import androidx.compose.material.icons.filled.CloudUpload
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Download
-import androidx.compose.material.icons.filled.Explore
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.KeyboardArrowUp
-import androidx.compose.material.icons.filled.Layers
-import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Map
-import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.MyLocation
-import androidx.compose.material.icons.filled.Navigation
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PictureAsPdf
 import androidx.compose.material.icons.filled.QrCode
 import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.SatelliteAlt
-import androidx.compose.material.icons.filled.Schedule
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.SwapHoriz
-import androidx.compose.material3.AssistChip
-import androidx.compose.material3.BottomSheetDefaults
-import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FilledTonalButton
-import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.InputChip
+import androidx.compose.material3.InputChipDefaults
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.NavigationDrawerItemDefaults
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedCard
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.SegmentedButton
-import androidx.compose.material3.SegmentedButtonDefaults
-import androidx.compose.material3.SheetValue
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.rememberBottomSheetScaffoldState
-import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -132,13 +90,11 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import kotlin.math.roundToInt
 import org.groundplatform.v2.core.forms.ui.GroundAlertDialogOverlay
 import org.groundplatform.v2.core.forms.ui.GroundBadgeTone
 import org.groundplatform.v2.core.forms.ui.GroundModalBottomSheetOverlay
 import org.groundplatform.v2.core.forms.ui.GroundTonalBadge
 import org.groundplatform.v2.core.forms.ui.LocalGroundBrandFontFamily
-
 
 /**
  * Hamburger Navigation Drawer overlay providing options to:
@@ -528,6 +484,32 @@ internal fun UploadsMutationsSubScreen(state: PrototypeAppState) {
       }
     }
 
+    // Entity filter (opened from a map feature's details): removable chip naming the feature.
+    val entityFilter = state.uploadsEntityFilter
+    if (entityFilter != null) {
+      InputChip(
+        selected = true,
+        onClick = { state.clearUploadsEntityFilter() },
+        label = {
+          Text(
+            text = entityFilter.label,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+          )
+        },
+        leadingIcon = {
+          EntityGeometryIcon(entity = entityFilter, size = InputChipDefaults.IconSize)
+        },
+        trailingIcon = {
+          Icon(
+            imageVector = Icons.Default.Close,
+            contentDescription = "Show uploads for all map features",
+            modifier = Modifier.size(InputChipDefaults.IconSize),
+          )
+        },
+      )
+    }
+
     HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
     // Compact List of User-Friendly Upload Items
@@ -538,10 +520,10 @@ internal fun UploadsMutationsSubScreen(state: PrototypeAppState) {
       ) {
         Text(
           text =
-            if (activeFilter != null) {
-              "No ${activeFilter.label.lowercase()} uploads."
-            } else {
-              "No uploads yet."
+            when {
+              activeFilter != null -> "No ${activeFilter.label.lowercase()} uploads."
+              entityFilter != null -> "No uploads for this map feature."
+              else -> "No uploads yet."
             },
           style = MaterialTheme.typography.bodySmall,
           color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -560,8 +542,8 @@ internal fun UploadsMutationsSubScreen(state: PrototypeAppState) {
 
 /**
  * Compact, user-friendly row card for a [MutationLogItem] in `Uploads`, showing:
- * - Action label (`Form submitted`, `Form modified`, `Form deleted`, `Map feature modified`, etc.) and
- * form/feature title
+ * - Action label (`Form submitted`, `Form modified`, `Form deleted`, `Map feature modified`, etc.)
+ * and form/feature title
  * - Target entity label and concise timestamp
  * - Status badge (`Pending`, `In progress`, `Uploaded`, `Failed`) and inline retry/upload action
  */
@@ -1164,9 +1146,7 @@ internal fun ManageOfflineMapsSubScreen(state: PrototypeAppState) {
   }
 }
 
-/**
- * Confirmation prompt dialog shown before removing an offline map tile package from the device.
- */
+/** Confirmation prompt dialog shown before removing an offline map tile package from the device. */
 @Composable
 private fun RemoveOfflineTilePackageConfirmationDialog(state: PrototypeAppState) {
   val packageId = state.pendingRemovalTilePackageId ?: return
@@ -1204,9 +1184,7 @@ private fun RemoveOfflineTilePackageConfirmationDialog(state: PrototypeAppState)
             containerColor = MaterialTheme.colorScheme.error,
             contentColor = MaterialTheme.colorScheme.onError,
           ),
-      ) {
-        Text("Remove", fontWeight = FontWeight.Bold)
-      }
+      ) { Text("Remove", fontWeight = FontWeight.Bold) }
     },
     dismissButton = {
       OutlinedButton(onClick = { state.dismissRemoveOfflineTilePackage() }) { Text("Cancel") }
@@ -1284,7 +1262,8 @@ fun DeviceStorageBreakdownCard(
         modifier = Modifier.fillMaxWidth().height(16.dp),
       )
 
-      // Storage breakdown legend items (Downloaded imagery, Submitted forms, photos, etc., Free, and Other)
+      // Storage breakdown legend items (Downloaded imagery, Submitted forms, photos, etc., Free,
+      // and Other)
       Column(
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -1322,9 +1301,7 @@ fun DeviceStorageBreakdownCard(
   }
 }
 
-/**
- * Stacked horizontal proportional bar chart illustrating device storage distribution.
- */
+/** Stacked horizontal proportional bar chart illustrating device storage distribution. */
 @Composable
 fun DeviceStorageBreakdownChart(
   storage: DeviceStorageInfo,

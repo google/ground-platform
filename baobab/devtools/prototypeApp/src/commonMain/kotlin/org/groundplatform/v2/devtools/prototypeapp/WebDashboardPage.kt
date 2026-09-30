@@ -14,48 +14,46 @@
  */
 package org.groundplatform.v2.devtools.prototypeapp
 
-import androidx.compose.animation.animateContentSize
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.expandHorizontally
 import androidx.compose.animation.shrinkHorizontally
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.CornerSize
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
-import androidx.compose.material.icons.filled.Layers
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
+import androidx.compose.material.icons.filled.TableRows
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.PrimaryScrollableTabRow
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
@@ -68,6 +66,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -76,23 +75,28 @@ import androidx.compose.ui.unit.dp
 
 /** Kind of tabular view shown in the web dashboard's data table panel. */
 internal enum class DashboardDataTableKind {
-  /** All map features in the selected feature's map layer (`EntityDatasetDef` / `EntityRecord`). */
+  /** Records of a map layer (`EntityDatasetDef` with geometry / `EntityRecord`). */
   MAP_LAYER,
 
-  /** Submissions of one Form linked to the selected map feature (`SubmissionRecord`). */
-  FORM_SUBMISSIONS,
+  /** Records of a data table (`EntityDatasetDef` without geometry). */
+  DATA_TABLE,
 }
 
-/** One row of a [DashboardDataTable]; [id] is the map feature or submission ID. */
+/** One row of a [DashboardDataTable]; [id] is the entity record ID. */
 internal data class DashboardDataTableRow(
   val id: String,
   val cells: List<String>,
   val isSelected: Boolean = false,
 )
 
-/** A table rendered in the web dashboard's collapsible data table panel. */
+/**
+ * A table rendered in the web dashboard's collapsible data table panel, listing every record of one
+ * entity dataset. Submissions are never shown here: their data can be hierarchical, so they are
+ * only shown in a document-style view.
+ */
 internal data class DashboardDataTable(
   val id: String,
+  val datasetId: String,
   val title: String,
   val kind: DashboardDataTableKind,
   val columns: List<String>,
@@ -104,108 +108,76 @@ internal data class DashboardDataTable(
 }
 
 /**
- * `simplestyle-spec` presentation keys. They drive map styling and are already summarized by the
- * `Status` column, so they are left out of the map layer table.
- */
-private val simpleStylePropertyKeys =
-  setOf(
-    "marker-size",
-    "marker-symbol",
-    "marker-color",
-    "stroke",
-    "stroke-opacity",
-    "stroke-width",
-    "fill",
-    "fill-opacity",
-    "title",
-    "description",
-    "status",
-  )
-
-/**
- * Builds the data tables shown when [entity] is selected on the web dashboard:
- * - First, the map layer table listing every map feature in [datasetEntities], with [entity]'s row
- *   highlighted.
- * - Then one table per Form in [submissionGroups], listing that Form's submissions for [entity],
- *   with the [selectedSubmissionId] row highlighted.
+ * Builds the web dashboard's data tables: one per entity dataset in [entities] (in order of first
+ * appearance), with the [selectedEntityId] row highlighted. Presentation properties are summarized
+ * by the `Status` column and left out; property values that reference another record are shown as
+ * that record's label via [relatedLabel].
  */
 internal fun buildDashboardDataTables(
-  entity: GeospatialEntityItem,
-  datasetEntities: List<GeospatialEntityItem>,
-  submissionGroups: List<FormSubmissionsGroup>,
-  selectedSubmissionId: String?,
-): List<DashboardDataTable> {
-  val propertyKeys =
-    datasetEntities
-      .asSequence()
-      .flatMap { it.properties.keys.asSequence() }
-      .filter { it !in simpleStylePropertyKeys }
-      .distinct()
-      .toList()
-  val layerTable =
-    DashboardDataTable(
-      id = "layer:${entity.datasetId}",
-      title = entity.datasetName,
-      kind = DashboardDataTableKind.MAP_LAYER,
-      columns = listOf("Label", "Status", "Submissions", "Sync", "GeoID") + propertyKeys,
-      rows =
-        datasetEntities.map { feature ->
-          DashboardDataTableRow(
-            id = feature.id,
-            cells =
-              listOf(
-                feature.label,
-                feature.mapStatusSummaryBadge,
-                feature.submissionCount.toString(),
-                feature.syncStatus.label,
-                feature.geoId,
-              ) + propertyKeys.map { feature.properties[it].orEmpty() },
-            isSelected = feature.id == entity.id,
-          )
-        },
-    )
-
-  val submissionTables =
-    submissionGroups.map { group ->
-      val questions = group.submissions.flatMap { it.fields }.distinctBy { it.questionName }
+  entities: List<GeospatialEntityItem>,
+  selectedEntityId: String?,
+  relatedLabel: (entity: GeospatialEntityItem, value: String) -> String? = { _, _ -> null },
+): List<DashboardDataTable> =
+  entities
+    .groupBy { it.datasetId }
+    .map { (datasetId, datasetEntities) ->
+      val propertyKeys =
+        datasetEntities
+          .asSequence()
+          .flatMap { it.properties.keys.asSequence() }
+          .filter { it !in EntityPresentationPropertyKeys }
+          .distinct()
+          .toList()
       DashboardDataTable(
-        id = "form:${group.form.id}",
-        title = group.formTitle,
-        kind = DashboardDataTableKind.FORM_SUBMISSIONS,
-        columns = listOf("Submitted", "Data collector", "Sync") + questions.map { it.questionLabel },
+        id = "dataset:$datasetId",
+        datasetId = datasetId,
+        title = datasetEntities.first().datasetName,
+        kind =
+          if (datasetEntities.any { it.hasGeometry }) {
+            DashboardDataTableKind.MAP_LAYER
+          } else {
+            DashboardDataTableKind.DATA_TABLE
+          },
+        columns = listOf("Label", "Status", "Submissions", "Sync", "GeoID") + propertyKeys,
         rows =
-          group.submissions.map { submission ->
-            val answers = submission.fields.associateBy { it.questionName }
+          datasetEntities.map { entity ->
             DashboardDataTableRow(
-              id = submission.id,
+              id = entity.id,
               cells =
                 listOf(
-                  submission.timestamp,
-                  submission.collectorName,
-                  submission.syncStatus.label,
-                ) + questions.map { answers[it.questionName]?.answerValue.orEmpty() },
-              isSelected = submission.id == selectedSubmissionId,
+                  entity.label,
+                  entity.mapStatusSummaryBadge,
+                  entity.submissionCount.toString(),
+                  entity.syncStatus.label,
+                  entity.geoId,
+                ) +
+                  propertyKeys.map { key ->
+                    val value = entity.properties[key].orEmpty()
+                    relatedLabel(entity, value) ?: value
+                  },
+              isSelected = entity.id == selectedEntityId,
             )
           },
       )
     }
 
-  return listOf(layerTable) + submissionTables
-}
-
 private val DashboardSidePanelWidth = 400.dp
 private val DashboardFirstColumnWidth = 200.dp
 private val DashboardColumnWidth = 160.dp
 private val DashboardTableTabsHeight = 48.dp
+private val DashboardDetailsCardWidth = 380.dp
+private val DashboardOverlayMargin = 14.dp
 
 /**
  * Main page of the Ground web dashboard (`#dashboard`).
- * - **Left**: The mobile bottom sheet content ([SurveyPersistentBottomSheetContent]) as a collapsible side
- *   panel: the searchable list of map features and places, or the selected map feature's details and
- *   `1:N` submissions.
- * - **Main area**: The live survey map ([MapboxBasemapView]).
- * - **Bottom of the map**: When a map feature is selected, a collapsible panel of data tables
- *   ([DashboardDataTablesPanel]) for its map layer and linked Form submissions.
+ * - **Left**: A collapsible side panel with the searchable list of map features (one line per
+ * record) and places ([BottomSheetSearchableListContent]).
+ * - **Main area**: The live survey map ([MapboxBasemapView]). Selecting a map feature pans and
+ * zooms to it and opens its details in a floating card in the upper-right corner (
+ * [WebEntityDetailsCard]). A floating Map / Satellite toggle sits in the lower-left corner.
+ * - **Bottom of the map**: A collapsible panel of data tables, one per entity dataset (
+ * [DashboardDataTablesPanel]). It only expands on request: from its ▲ toggle or the card's "Show in
+ * table" button.
  */
 @Composable
 internal fun WebDashboardPage(
@@ -252,26 +224,17 @@ internal fun WebDashboardPage(
     if (activePdfSheet != null) {
       SharePdfToAppModalDialog(state = state, sheet = activePdfSheet)
     }
-    if (state.isLayersSheetOpen) {
-      LayersControlModalDialog(
-        state = state,
-        onDismiss = { state.updateLayersSheetOpen(false) },
-      )
-    }
   }
 }
 
-/**
- * Left-hand panel: shared bottom sheet content (searchable feature list or selected entity details)
- * in side-panel mode.
- */
+/** Left-hand panel: the searchable list of map features and places. */
 @Composable
 private fun DashboardSidePanel(
   state: PrototypeAppState,
   modifier: Modifier = Modifier,
 ) {
   Surface(modifier = modifier, color = MaterialTheme.colorScheme.surfaceContainerLow) {
-    SurveyPersistentBottomSheetContent(
+    BottomSheetSearchableListContent(
       state = state,
       modifier = Modifier.fillMaxSize().padding(top = 4.dp),
       isSidePanel = true,
@@ -279,37 +242,53 @@ private fun DashboardSidePanel(
   }
 }
 
-/** Map area: live basemap, cluster callout, scale bar, and the data table panel. */
+/**
+ * Map area: live basemap, floating details card (upper right), cluster callout (upper left),
+ * basemap toggle and scale bar (lower left), and the data table panel (bottom).
+ */
 @Composable
 private fun DashboardMapArea(state: PrototypeAppState, modifier: Modifier = Modifier) {
   val selectedEntity = state.selectedEntity
-  var isTableExpanded by remember(selectedEntity?.id) { mutableStateOf(selectedEntity != null) }
+  val selectedSubmission = state.selectedSubmission
+  val isTableExpanded = state.isDashboardTableExpanded
+  val hasTables = state.entities.isNotEmpty()
+  var lastFramedSelectionEpoch by remember { mutableStateOf(-1L) }
 
   BoxWithConstraints(modifier = modifier) {
     val expandedTableHeight = (maxHeight * 0.42f).coerceAtLeast(160.dp)
-
-    // When an entity is selected, automatically expand the bottom table and recenter the entity
-    // adjusting for the reduced visible area of the viewport above the expanded table.
-    LaunchedEffect(selectedEntity?.id, state.entitySelectionEpoch) {
-      if (selectedEntity != null) {
-        isTableExpanded = true
-        val tablePanelHeight = expandedTableHeight + DashboardTableTabsHeight
-        val visibleViewportHeight = (maxHeight - tablePanelHeight).coerceAtLeast(0.dp)
-        val targetScreenY =
-          if (maxHeight > 0.dp) {
-            ((visibleViewportHeight / 2) / maxHeight).coerceIn(0.10f, 0.50f)
-          } else {
-            0.50f
-          }
-        state.recenterMapOnEntity(selectedEntity, targetScreenY)
-
-        val (lng, lat) = state.resolveEntityLngLat(selectedEntity)
-        recenterPlatformMapboxOnEntity(
-          lng = lng,
-          lat = lat,
-          bottomPaddingCssPx = tablePanelHeight.value,
-        )
+    val tablePanelHeight =
+      when {
+        !hasTables -> 0.dp
+        isTableExpanded -> expandedTableHeight + DashboardTableTabsHeight
+        else -> DashboardTableTabsHeight
       }
+
+    // Fit a newly selected entity into the part of the map not covered by the floating card or the
+    // table. Expanding or collapsing the table re-centers without zooming. Records without geometry
+    // open the card without moving the map.
+    LaunchedEffect(selectedEntity?.id, state.entitySelectionEpoch, isTableExpanded) {
+      val entity = selectedEntity ?: return@LaunchedEffect
+      if (!entity.hasGeometry) return@LaunchedEffect
+      val isNewSelection = state.entitySelectionEpoch != lastFramedSelectionEpoch
+      lastFramedSelectionEpoch = state.entitySelectionEpoch
+      val visibleViewportHeight = (maxHeight - tablePanelHeight).coerceAtLeast(0.dp)
+      val targetScreenY =
+        if (maxHeight > 0.dp) {
+          ((visibleViewportHeight / 2) / maxHeight).coerceIn(0.10f, 0.50f)
+        } else {
+          0.50f
+        }
+      state.recenterMapOnEntity(entity, targetScreenY)
+
+      val fittedZoomDelta =
+        framePlatformMapboxOnEntity(
+          bounds = state.resolveEntityLngLatBounds(entity),
+          bottomPaddingCssPx = tablePanelHeight.value,
+          rightPaddingCssPx = (DashboardDetailsCardWidth + DashboardOverlayMargin * 2).value,
+          fitToBounds = isNewSelection,
+          maxZoom = entity.geometryKind.maxFramingZoom,
+        )
+      state.syncMapZoomDelta(fittedZoomDelta.toFloat())
     }
 
     MapboxBasemapView(
@@ -321,84 +300,105 @@ private fun DashboardMapArea(state: PrototypeAppState, modifier: Modifier = Modi
       showNavigationOverlay = false,
     )
 
+    // Basemap toggle in the top-left corner, with the cluster callout (if any) below it.
     Column(
-      modifier = Modifier.align(Alignment.TopEnd).padding(14.dp),
-      horizontalAlignment = Alignment.End,
-      verticalArrangement = Arrangement.spacedBy(10.dp),
+      modifier = Modifier.align(Alignment.TopStart).padding(DashboardOverlayMargin),
+      verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-      LayersFloatingActionButton(state = state)
-
+      BasemapToggle(state = state)
       if (state.isMapClusteringActive && state.selectedCluster != null) {
-        Box(modifier = Modifier.width(360.dp)) {
-          MapClusterBalloonsOverlay(state = state)
-        }
+        Box(modifier = Modifier.width(360.dp)) { MapClusterBalloonsOverlay(state = state) }
       }
+    }
+
+    // Floating details card, kept clear of the data table panel.
+    val cardModifier =
+      Modifier.align(Alignment.TopEnd)
+        .padding(DashboardOverlayMargin)
+        .width(DashboardDetailsCardWidth)
+        .heightIn(
+          max = (maxHeight - tablePanelHeight - DashboardOverlayMargin * 2).coerceAtLeast(160.dp)
+        )
+    when {
+      selectedEntity != null ->
+        WebEntityDetailsCard(entity = selectedEntity, state = state, modifier = cardModifier)
+      selectedSubmission != null ->
+        WebSubmissionDetailsCard(
+          submission = selectedSubmission,
+          state = state,
+          modifier = cardModifier,
+        )
     }
 
     // The scale bar sits on top of the data table panel so it stays visible when the panel opens.
     Column(modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth()) {
-      Box(modifier = Modifier.padding(12.dp)) {
-        GoogleMapsScaleBarWidget(
-          scaleSpec = state.mapScaleBarSpec,
-          isSatellite = state.selectedBasemapType == BasemapType.SATELLITE,
-        )
-      }
-      if (selectedEntity != null) {
-        DashboardDataTablesPanel(
-          state = state,
-          entity = selectedEntity,
-          expandedTableHeight = expandedTableHeight,
-          isExpanded = isTableExpanded,
-          onToggleExpand = { isTableExpanded = !isTableExpanded },
-          onExpand = { isTableExpanded = true },
-        )
+      GoogleMapsScaleBarWidget(
+        scaleSpec = state.mapScaleBarSpec,
+        isSatellite = state.selectedBasemapType == BasemapType.SATELLITE,
+        modifier = Modifier.padding(12.dp),
+      )
+      if (hasTables) {
+        DashboardDataTablesPanel(state = state, expandedTableHeight = expandedTableHeight)
       }
     }
   }
 }
 
 /**
- * Collapsible panel over the bottom of the map with one tab per [DashboardDataTable]. When an
- * entity is selected, it expands automatically to show its map layer and linked Form submissions.
+ * Floating Map / Satellite basemap toggle over the web dashboard's map. The segmented buttons draw
+ * their own outline, so they get an opaque fill and an unclipped shadow instead of a wrapping
+ * container (whose clip would cut off the outline's rounded ends).
+ */
+@Composable
+private fun BasemapToggle(state: PrototypeAppState) {
+  val types = BasemapType.entries
+  SingleChoiceSegmentedButtonRow(
+    modifier = Modifier.shadow(elevation = 3.dp, shape = CircleShape, clip = false)
+  ) {
+    types.forEachIndexed { index, type ->
+      SegmentedButton(
+        selected = state.selectedBasemapType == type,
+        onClick = { state.selectBasemapType(type) },
+        shape = SegmentedButtonDefaults.itemShape(index = index, count = types.size),
+        colors =
+          SegmentedButtonDefaults.colors(
+            inactiveContainerColor = MaterialTheme.colorScheme.surface
+          ),
+        label = { Text(type.label) },
+      )
+    }
+  }
+}
+
+/**
+ * Collapsible panel over the bottom of the map with one tab per entity dataset (
+ * [DashboardDataTable]). It stays collapsed until the user expands it (▲ toggle, a tab, or the
+ * details card's "Show in table" button), and follows the selected entity's dataset.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun DashboardDataTablesPanel(
   state: PrototypeAppState,
-  entity: GeospatialEntityItem,
   expandedTableHeight: Dp,
-  isExpanded: Boolean,
-  onToggleExpand: () -> Unit,
-  onExpand: () -> Unit,
   modifier: Modifier = Modifier,
 ) {
-  var selectedTableId by remember { mutableStateOf<String?>(null) }
-
   val allEntities = state.entities
-  val forms = state.forms
-  val selectedSubmission = state.selectedSubmission
-  val datasetEntities =
-    remember(allEntities, entity.datasetId) {
-      allEntities.filter { it.datasetId == entity.datasetId }
-    }
+  val selectedEntityId = state.selectedEntityId
+  val isExpanded = state.isDashboardTableExpanded
   val tables =
-    remember(entity, datasetEntities, forms, selectedSubmission?.id) {
+    remember(allEntities, selectedEntityId) {
       buildDashboardDataTables(
-        entity = entity,
-        datasetEntities = datasetEntities,
-        submissionGroups = state.groupedSubmissionsForEntity(entity),
-        selectedSubmissionId = selectedSubmission?.id,
+        entities = allEntities,
+        selectedEntityId = selectedEntityId,
+        relatedLabel = { entity, value ->
+          state.relatedEntityForPropertyValue(entity, value)?.label
+        },
       )
     }
+  if (tables.isEmpty()) return
 
-  // Opening a submission in the side panel switches to that Form's table.
-  LaunchedEffect(selectedSubmission?.id) {
-    if (selectedSubmission != null) {
-      selectedTableId = "form:${selectedSubmission.formId}"
-    }
-  }
-
-  val selectedIndex = tables.indexOfFirst { it.id == selectedTableId }.coerceAtLeast(0)
+  val selectedIndex =
+    tables.indexOfFirst { it.datasetId == state.dashboardTableDatasetId }.coerceAtLeast(0)
   val table = tables[selectedIndex]
 
   Surface(
@@ -413,11 +413,14 @@ private fun DashboardDataTablesPanel(
   ) {
     Column(modifier = Modifier.fillMaxWidth()) {
       Row(
-        modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 8.dp),
+        modifier =
+          Modifier.fillMaxWidth()
+            .height(DashboardTableTabsHeight)
+            .padding(start = 16.dp, end = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
       ) {
         Icon(
-          imageVector = Icons.AutoMirrored.Filled.List,
+          imageVector = Icons.Default.TableRows,
           contentDescription = null,
           tint = MaterialTheme.colorScheme.primary,
           modifier = Modifier.size(18.dp),
@@ -434,8 +437,8 @@ private fun DashboardDataTablesPanel(
             Tab(
               selected = index == selectedIndex,
               onClick = {
-                selectedTableId = tab.id
-                onExpand()
+                state.selectDashboardTable(tab.datasetId)
+                state.updateDashboardTableExpanded(true)
               },
               text = {
                 Text(
@@ -447,7 +450,7 @@ private fun DashboardDataTablesPanel(
             )
           }
         }
-        IconButton(onClick = onToggleExpand) {
+        IconButton(onClick = { state.toggleDashboardTableExpanded() }) {
           Icon(
             imageVector =
               if (isExpanded) Icons.Default.KeyboardArrowDown else Icons.Default.KeyboardArrowUp,
@@ -460,19 +463,13 @@ private fun DashboardDataTablesPanel(
         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
         DashboardDataTableView(
           table = table,
-          onRowClick = { row ->
-            when (table.kind) {
-              DashboardDataTableKind.MAP_LAYER -> state.selectEntity(row.id)
-              DashboardDataTableKind.FORM_SUBMISSIONS -> state.selectSubmissionDetail(row.id)
-            }
-          },
+          onRowClick = { row -> state.selectEntity(row.id) },
           modifier = Modifier.fillMaxWidth().height(expandedTableHeight),
         )
       }
     }
   }
 }
-
 /**
  * Spreadsheet-style view of a [DashboardDataTable] with a sticky header row. Rows are lazily
  * composed so map layers with thousands of features stay responsive, and the table scrolls
@@ -544,8 +541,7 @@ private fun DashboardDataTableView(
                 MaterialTheme.colorScheme.onSurface
               }
             Row(
-              modifier =
-                Modifier.fillMaxWidth().background(rowColor).clickable { onRowClick(row) }
+              modifier = Modifier.fillMaxWidth().background(rowColor).clickable { onRowClick(row) }
             ) {
               row.cells.forEachIndexed { cellIndex, cell ->
                 Text(
@@ -566,58 +562,4 @@ private fun DashboardDataTableView(
       }
     }
   }
-}
-
-/**
- * Modal dialog for selecting basemaps and toggling survey map layers on the web dashboard.
- */
-@Composable
-internal fun LayersControlModalDialog(
-  state: PrototypeAppState,
-  onDismiss: () -> Unit = { state.updateLayersSheetOpen(false) },
-) {
-  AlertDialog(
-    onDismissRequest = onDismiss,
-    icon = {
-      Icon(
-        imageVector = Icons.Default.Layers,
-        contentDescription = null,
-        tint = MaterialTheme.colorScheme.primary,
-      )
-    },
-    title = {
-      Text(
-        text = "Layers & Basemap",
-        style = MaterialTheme.typography.titleMedium,
-        fontWeight = FontWeight.Bold,
-      )
-    },
-    text = {
-      Column(
-        modifier =
-          Modifier.fillMaxWidth()
-            .widthIn(min = 360.dp, max = 460.dp)
-            .verticalScroll(rememberScrollState()),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-      ) {
-        Text(
-          text =
-            if (state.hasGeospatialEntities) {
-              "Select Map vs Satellite basemap and toggle survey map layers"
-            } else {
-              "Select Map vs Satellite basemap and offline tile overlays"
-            },
-          style = MaterialTheme.typography.bodySmall,
-          color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-
-        LayersSelectorContent(state = state)
-      }
-    },
-    confirmButton = {
-      Button(onClick = onDismiss) {
-        Text("Done")
-      }
-    },
-  )
 }

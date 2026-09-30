@@ -2481,32 +2481,96 @@
             } catch (e) {}
           },
 
-          recenterOnEntity: function (lng, lat, bottomPaddingCssPx) {
-            const targetLng = Number(lng);
-            const targetLat = Number(lat);
-            if (!isFinite(targetLng) || !isFinite(targetLat)) return;
+          // Frames a selected entity: fits its bounds [west, south, east, north] into the part of
+          // the viewport not covered by the details card (right) or sheet/table (bottom), zooming
+          // no further in than maxZoom, and returns the new zoom as a delta from the survey's
+          // default zoom. With fitToBounds false, only re-centers (keeping the zoom) and returns NaN.
+          frameEntity: function (
+            west,
+            south,
+            east,
+            north,
+            bottomPaddingCssPx,
+            rightPaddingCssPx,
+            fitToBounds,
+            maxZoom
+          ) {
+            const w = Number(west);
+            const s = Number(south);
+            const e = Number(east);
+            const n = Number(north);
+            if (!isFinite(w) || !isFinite(s) || !isFinite(e) || !isFinite(n)) return NaN;
             state.hasUserPanned = true;
             state.isLocationLocked = false;
             state.focusedPlace = null;
             if (window.__groundSelectedPlaceMarker) {
               try {
                 window.__groundSelectedPlaceMarker.remove();
-              } catch (e) {}
+              } catch (err) {}
               window.__groundSelectedPlaceMarker = null;
             }
             ensureMapInitialized();
             const targetMap = state.map || map;
-            if (targetMap && window.mapboxgl) {
-              try {
-                const padY = Math.max(0, Math.round(Number(bottomPaddingCssPx) || 0));
-                targetMap.flyTo({
-                  center: [targetLng, targetLat],
-                  offset: [0, -Math.round(padY / 2)],
-                  essential: true,
-                  duration: 400,
+            if (!targetMap || !window.mapboxgl) return NaN;
+            try {
+              const margin = 48;
+              const container = targetMap.getContainer();
+              const width = (container && container.clientWidth) || 0;
+              const height = (container && container.clientHeight) || 0;
+              // Scale padding down on small viewports so Mapbox can always fit the bounds.
+              const fitPair = function (a, b, total) {
+                const limit = Math.max(0, total * 0.8);
+                const sum = a + b;
+                if (sum <= limit || sum <= 0) return [a, b];
+                const k = limit / sum;
+                return [a * k, b * k];
+              };
+              const padX = Math.max(0, Math.round(Number(rightPaddingCssPx) || 0));
+              const padY = Math.max(0, Math.round(Number(bottomPaddingCssPx) || 0));
+              const horizontal = fitPair(margin, padX + margin, width);
+              const vertical = fitPair(margin, padY + margin, height);
+              const padding = {
+                left: horizontal[0],
+                right: horizontal[1],
+                top: vertical[0],
+                bottom: vertical[1],
+              };
+              const bounds = [
+                [w, s],
+                [e, n],
+              ];
+              if (fitToBounds) {
+                const zoomCap = Number(maxZoom) > 0 ? Number(maxZoom) : 17;
+                const camera = targetMap.cameraForBounds(bounds, {
+                  padding: padding,
+                  maxZoom: zoomCap,
                 });
-              } catch (e) {}
-            }
+                targetMap.fitBounds(bounds, {
+                  padding: padding,
+                  maxZoom: zoomCap,
+                  essential: true,
+                  duration: 700,
+                });
+                if (camera && isFinite(camera.zoom)) {
+                  const survey =
+                    SURVEY_COORDS[currentSurveyId] || SURVEY_COORDS['survey-kenya-coffee'];
+                  currentZoomDelta = camera.zoom - survey.zoom;
+                  lastAppliedZoomDelta = currentZoomDelta;
+                  return currentZoomDelta;
+                }
+                return NaN;
+              }
+              targetMap.easeTo({
+                center: [(w + e) / 2, (s + n) / 2],
+                offset: [
+                  Math.round((padding.left - padding.right) / 2),
+                  Math.round((padding.top - padding.bottom) / 2),
+                ],
+                essential: true,
+                duration: 400,
+              });
+            } catch (err) {}
+            return NaN;
           },
 
           getMapInstance: function () {

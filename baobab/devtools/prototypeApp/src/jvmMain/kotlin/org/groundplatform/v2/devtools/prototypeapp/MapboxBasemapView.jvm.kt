@@ -63,8 +63,10 @@ internal actual fun flyPlatformMapboxToPlace(
 
 internal actual fun clearPlatformMapboxPlace() = Unit
 
-internal actual fun recenterPlatformMapboxOnEntity(
-  lng: Double,
-  lat: Double,
+internal actual fun framePlatformMapboxOnEntity(
+  bounds: LngLatBounds,
   bottomPaddingCssPx: Float,
-) = Unit
+  rightPaddingCssPx: Float,
+  fitToBounds: Boolean,
+  maxZoom: Float,
+): Double = Double.NaN

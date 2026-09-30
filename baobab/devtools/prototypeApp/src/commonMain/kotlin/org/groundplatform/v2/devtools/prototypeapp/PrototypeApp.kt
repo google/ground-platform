@@ -93,6 +93,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -196,11 +197,17 @@ fun PrototypeApp(
       )
     }
   }
+  val isEntityRefMapShowing =
+    state.isDataCollectionFormOpen &&
+      state.isCurrentFormStepEntityRef &&
+      state.entityRefSelectorViewMode == MainSurveyViewMode.MAP
   val isMobileMapShowing =
     page == PrototypeWorkbenchPage.MOBILE_PROTOTYPE &&
       state.currentScreen == PrototypeScreen.MAIN_SURVEY &&
       state.activeDrawerSubView == MainDrawerSubView.NONE &&
-      (!state.isDataCollectionFormOpen || state.isCurrentFormStepGeoPoint)
+      (!state.isDataCollectionFormOpen ||
+        state.isCurrentFormStepGeoPoint ||
+        isEntityRefMapShowing)
   // The Mapbox basemap renders behind the Compose canvas, so the root surface must stay transparent
   // whenever a page shows it.
   val isMapShowing = isMobileMapShowing || page == PrototypeWorkbenchPage.WEB_DASHBOARD
@@ -263,27 +270,35 @@ private fun MobilePrototypePage(state: PrototypeAppState, isMapShowing: Boolean)
     horizontalArrangement = Arrangement.spacedBy(20.dp),
   ) {
     val previewStageWeight = if (state.effectiveFrameWidthDp >= 600) 1.55f else 1.15f
+    val verticalScrollState = rememberScrollState()
+    val horizontalScrollState = rememberScrollState()
+    val workbenchScrollState =
+      remember(verticalScrollState, horizontalScrollState) {
+        WorkbenchScrollState(vertical = verticalScrollState, horizontal = horizontalScrollState)
+      }
 
     // Left / Center stage: Embedded Mobile or Tablet Device Preview
-    Box(
-      modifier =
-        Modifier.weight(previewStageWeight)
-          .fillMaxHeight()
-          .verticalScroll(rememberScrollState())
-          .horizontalScroll(rememberScrollState()),
-      contentAlignment = Alignment.TopCenter,
-    ) {
-      MobileDevicePreviewFrame(
-        deviceTitle =
-          "Ground 2.0 ${state.deviceFormFactor.label} UI • Step ${state.currentScreen.stepNumber}/4: ${state.currentScreen.title}",
-        isDarkTheme = state.isDarkTheme,
-        isScreenTransparent = isMapShowing,
-        formFactor = state.deviceFormFactor,
-        orientation = state.deviceOrientation,
-        onSelectFormFactor = { state.selectDeviceFormFactor(it) },
-        onRotateDevice = { state.rotateDevice() },
+    CompositionLocalProvider(LocalWorkbenchScrollState provides workbenchScrollState) {
+      Box(
+        modifier =
+          Modifier.weight(previewStageWeight)
+            .fillMaxHeight()
+            .verticalScroll(verticalScrollState)
+            .horizontalScroll(horizontalScrollState),
+        contentAlignment = Alignment.TopCenter,
       ) {
-        MobileScreenHost(state)
+        MobileDevicePreviewFrame(
+          deviceTitle =
+            "Ground 2.0 ${state.deviceFormFactor.label} UI • Step ${state.currentScreen.stepNumber}/4: ${state.currentScreen.title}",
+          isDarkTheme = state.isDarkTheme,
+          isScreenTransparent = isMapShowing,
+          formFactor = state.deviceFormFactor,
+          orientation = state.deviceOrientation,
+          onSelectFormFactor = { state.selectDeviceFormFactor(it) },
+          onRotateDevice = { state.rotateDevice() },
+        ) {
+          MobileScreenHost(state)
+        }
       }
     }
 

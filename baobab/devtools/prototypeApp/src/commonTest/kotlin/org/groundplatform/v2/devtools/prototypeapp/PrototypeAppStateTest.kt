@@ -242,7 +242,8 @@ class PrototypeAppStateTest {
     assertEquals(-0.5012, parsedDecimal.first, 0.0001)
     assertEquals(36.9324, parsedDecimal.second, 0.0001)
 
-    // Selecting a place centers/zooms the map on the place's bounds, switches locationLockState to PANNED,
+    // Selecting a place centers/zooms the map on the place's bounds, switches locationLockState to
+    // PANNED,
     // and collapses the bottom sheet. A country zooms out much farther than a village/forest.
     state.selectPlace("place-kenya-country")
     val kenyaZoom = assertNotNull(state.selectedPlace).targetZoom
@@ -1044,7 +1045,8 @@ class PrototypeAppStateTest {
     assertEquals(2, shadeGroups[0].submissions.size)
     assertEquals(1, shadeGroups[1].submissions.size)
 
-    // 3. Layers sheet displays map layers (entityDatasetLayers); submissions are not shown as layers
+    // 3. Layers sheet displays map layers (entityDatasetLayers); submissions are not shown as
+    // layers
     assertTrue(state.hasGeospatialEntities)
     val siteLayers = state.entityDatasetLayers
     assertEquals(3, siteLayers.size)
@@ -1059,10 +1061,11 @@ class PrototypeAppStateTest {
     assertEquals(emptyList(), state.visibleSubmissionGeometries)
 
     // When a survey has no geospatial entities, map layers section in the Layers sheet is hidden
-    val noEntityState = PrototypeAppState().apply {
-      openSurvey("survey-single-point-land-use")
-      entities = emptyList()
-    }
+    val noEntityState =
+      PrototypeAppState().apply {
+        openSurvey("survey-single-point-land-use")
+        entities = emptyList()
+      }
     assertTrue(noEntityState.entities.isEmpty())
     assertFalse(noEntityState.hasGeospatialEntities)
     assertTrue(noEntityState.entityDatasetLayers.isEmpty())
@@ -1389,11 +1392,12 @@ class PrototypeAppStateTest {
     assertTrue(state.isEntityBottomSheetExpanded)
     assertEquals(null, state.selectedEntityId)
 
-    // Selecting an entity from the bottom sheet list keeps the sheet expanded to inspect it
-    // in-place
+    // Selecting an entity from the bottom sheet list replaces the list with the entity's details
+    // and lowers the sheet to its peek height so the map can frame the entity above it
     state.selectEntityFromList("entity-nyr-104")
     assertEquals("entity-nyr-104", state.selectedEntityId)
-    assertTrue(state.isEntityBottomSheetExpanded)
+    assertFalse(state.isEntityBottomSheetExpanded)
+    assertEquals(EntityDetailsPane.PROPERTIES, state.entityDetailsPane)
 
     // Returning to the bottom sheet list clears the selected entity while keeping the sheet
     // expanded
@@ -1408,7 +1412,8 @@ class PrototypeAppStateTest {
   fun unifiedUploadsDrawerView_supportsStatusFilterChipsAndUserFriendlyLabels() {
     val state = PrototypeAppState(initialScreen = PrototypeScreen.MAIN_SURVEY)
 
-    // Verify user-friendly operation labels (Form submitted / modified / deleted, Map feature modified)
+    // Verify user-friendly operation labels (Form submitted / modified / deleted, Map feature
+    // modified)
     assertEquals("Form submitted", MutationOperationKind.CREATE_SUBMISSION.label)
     assertEquals("Form modified", MutationOperationKind.UPDATE_SUBMISSION.label)
     assertEquals("Form deleted", MutationOperationKind.DELETE_SUBMISSION.label)
@@ -1477,17 +1482,21 @@ class PrototypeAppStateTest {
     assertEquals(5, state.visibleMapClusterFeatures.count { it.hasMarkerSymbol })
     assertEquals(0, state.visibleMapClusterFeatures.count { !it.hasMarkerSymbol })
 
-    // 2. Zoom out once (-0.75f): clustering activates and groups nearby features spatially
+    // 2. Zooming out up to 2.25 levels (about 13z) keeps features unclustered; zooming out once
+    // more (-3.0f) activates clustering and groups nearby features spatially
+    repeat(3) { state.zoomOutMap() }
+    assertEquals(-2.25f, state.mapZoomDelta)
+    assertFalse(state.isMapClusteringActive)
+    assertEquals(emptyList(), state.mapFeatureClusters)
     state.zoomOutMap()
-    assertEquals(-0.75f, state.mapZoomDelta)
+    assertEquals(-3.0f, state.mapZoomDelta)
     assertTrue(state.isMapClusteringActive)
     assertTrue(state.mapFeatureClusters.isNotEmpty())
     assertEquals(5, state.mapFeatureClusters.sumOf { it.totalCount })
 
-    // 3. Zoom out further (-2.25f) so all 5 entity features merge into a single cluster balloon
+    // 3. Zoom out further (-3.75f) so all 5 entity features merge into a single cluster balloon
     state.zoomOutMap()
-    state.zoomOutMap()
-    assertEquals(-2.25f, state.mapZoomDelta)
+    assertEquals(-3.75f, state.mapZoomDelta)
     assertEquals(1, state.mapFeatureClusters.size)
     val allCluster = state.mapFeatureClusters.first()
     assertEquals(5, allCluster.totalCount)
@@ -1560,7 +1569,7 @@ class PrototypeAppStateTest {
     // 7. Zooming into the cluster steps zoom back in, and resetting zoom exits clustering and
     // restores individual features
     state.zoomIntoCluster(allCluster.id)
-    assertEquals(-1.5f, state.mapZoomDelta)
+    assertEquals(-3.0f, state.mapZoomDelta)
     assertTrue(state.isMapClusteringActive)
     state.resetMapZoom()
     assertEquals(0f, state.mapZoomDelta)
@@ -1593,22 +1602,21 @@ class PrototypeAppStateTest {
 
     // Verify spatial clustering handles >10,000 features when zoomed out and merges over larger
     // areas as the user zooms out further to avoid overlapping cluster balloons
-    state.zoomOutMap() // -0.75f
+    repeat(3) { state.zoomOutMap() } // -2.25f: not yet clustered
+    assertFalse(state.isMapClusteringActive)
+    state.zoomOutMap() // -3.00f
     assertTrue(state.isMapClusteringActive)
     val clustersAtStep1 = state.mapFeatureClusters
     assertTrue(clustersAtStep1.isNotEmpty())
     assertEquals(state.visibleMapClusterFeatures.size, clustersAtStep1.sumOf { it.totalCount })
 
-    state.zoomOutMap() // -1.50f
-    state.zoomOutMap() // -2.25f
-    val clustersAtStep3 = state.mapFeatureClusters
-    assertTrue(clustersAtStep3.size < clustersAtStep1.size)
-    assertEquals(state.visibleMapClusterFeatures.size, clustersAtStep3.sumOf { it.totalCount })
-
-    // Zoom all the way out (-4.50f / -5.00f, e.g. 10.3z): all 10,005 features across [-2.2, 3.2]
-    // merge into a single non-overlapping cluster balloon, including LineString transects
-    state.zoomOutMap() // -3.00f
     state.zoomOutMap() // -3.75f
+    val clustersAtStep2 = state.mapFeatureClusters
+    assertTrue(clustersAtStep2.size < clustersAtStep1.size)
+    assertEquals(state.visibleMapClusterFeatures.size, clustersAtStep2.sumOf { it.totalCount })
+
+    // Zoom all the way out (-4.50f, e.g. 10.8z): all 10,005 features across [-2.2, 3.2] merge into
+    // a single non-overlapping cluster balloon, including LineString transects
     state.zoomOutMap() // -4.50f
     val clustersAtDeepZoomOut = state.mapFeatureClusters
     assertEquals(1, clustersAtDeepZoomOut.size)
@@ -1622,6 +1630,44 @@ class PrototypeAppStateTest {
   }
 
   @Test
+  fun resolveEntityLngLatBounds_coversLinesAndPolygonsAndCollapsesForPoints() {
+    val state = PrototypeAppState(initialScreen = PrototypeScreen.MAIN_SURVEY)
+    val kinds = state.entities.groupBy { it.geometryKind }
+
+    for (kind in listOf(EntityGeometryKind.POLYGON, EntityGeometryKind.LINE)) {
+      val entity = kinds.getValue(kind).first()
+      val bounds = state.resolveEntityLngLatBounds(entity)
+      val (lng, lat) = state.resolveEntityLngLat(entity)
+      assertTrue(bounds.west < lng && lng < bounds.east, "$kind bounds span its center longitude")
+      assertTrue(bounds.south < lat && lat < bounds.north, "$kind bounds span its center latitude")
+    }
+
+    kinds[EntityGeometryKind.POINT]?.firstOrNull()?.let { point ->
+      val bounds = state.resolveEntityLngLatBounds(point)
+      val (lng, lat) = state.resolveEntityLngLat(point)
+      assertEquals(LngLatBounds(west = lng, south = lat, east = lng, north = lat), bounds)
+    }
+  }
+
+  @Test
+  fun syncMapZoomDelta_followsFittedCameraAndExitsClustering() {
+    val state = PrototypeAppState(initialScreen = PrototypeScreen.MAIN_SURVEY)
+    repeat(4) { state.zoomOutMap() }
+    assertTrue(state.isMapClusteringActive)
+    state.selectCluster(state.mapFeatureClusters.first().id)
+
+    // Fitting a selected feature zooms the camera in; clustering follows the camera.
+    state.syncMapZoomDelta(1.2f)
+    assertEquals(1.2f, state.mapZoomDelta)
+    assertFalse(state.isMapClusteringActive)
+    assertEquals(null, state.selectedClusterId)
+
+    // NaN (no camera change, e.g. re-centering only) leaves the zoom untouched.
+    state.syncMapZoomDelta(Float.NaN)
+    assertEquals(1.2f, state.mapZoomDelta)
+  }
+
+  @Test
   fun selectWorkbenchExampleForm_swapsAndValidatesAllFiveExampleForms() {
     val state = PrototypeAppState(initialScreen = PrototypeScreen.MAIN_SURVEY)
     assertEquals(
@@ -1629,7 +1675,8 @@ class PrototypeAppStateTest {
       state.selectedWorkbenchExampleForm,
     )
 
-    // 1. Simple Single-Point & Land Use Survey (pan allowed via placement-map, 10m accuracy required, 3 entities via save_to, 0 standalone submissions)
+    // 1. Simple Single-Point & Land Use Survey (pan allowed via placement-map, 10m accuracy
+    // required, 3 entities via save_to, 0 standalone submissions)
     state.selectWorkbenchExampleForm(
       org.groundplatform.v2.core.forms.ui.WorkbenchExampleForm.SINGLE_POINT_LAND_USE,
       launchImmediately = true,
@@ -1654,7 +1701,8 @@ class PrototypeAppStateTest {
     assertTrue(samplePointCtrl.appearance.contains("placement-map"))
     assertEquals(10.0, samplePointCtrl.controlDef.geo_config?.accuracy_threshold_meters)
 
-    // 2. Predefined Sample Plots & Forest Assessment Survey (5 sample_plots entities, 3 preloaded assessments)
+    // 2. Predefined Sample Plots & Forest Assessment Survey (5 sample_plots entities, 3 preloaded
+    // assessments)
     state.selectWorkbenchExampleForm(
       org.groundplatform.v2.core.forms.ui.WorkbenchExampleForm.SAMPLE_PLOTS_FOREST_ASSESSMENT,
       launchImmediately = true,
@@ -1683,7 +1731,8 @@ class PrototypeAppStateTest {
     assertEquals(5, plotSelectCtrl.options.size)
     assertEquals("plot_sp01", plotSelectCtrl.options.first().value)
 
-    // 3. Commodity Plot Perimeter (walk + pan override) & Plot Center (no pan, <= 5m GPS accuracy, 3 entities via save_to, 0 standalone submissions)
+    // 3. Commodity Plot Perimeter (walk + pan override) & Plot Center (no pan, <= 5m GPS accuracy,
+    // 3 entities via save_to, 0 standalone submissions)
     state.selectWorkbenchExampleForm(
       org.groundplatform.v2.core.forms.ui.WorkbenchExampleForm.COMMODITY_PERIMETER_AND_CENTER,
       launchImmediately = true,
@@ -1842,7 +1891,10 @@ class PrototypeAppStateTest {
     assertTrue(storage.imageryFraction + storage.dataFraction + storage.otherUsedFraction <= 1.0f)
 
     // Labels should be non-empty and formatted
-    assertTrue(storage.downloadedImageryStorageLabel.contains("GB") || storage.downloadedImageryStorageLabel.contains("MB"))
+    assertTrue(
+      storage.downloadedImageryStorageLabel.contains("GB") ||
+        storage.downloadedImageryStorageLabel.contains("MB")
+    )
     assertTrue(storage.dataStorageLabel.contains("MB") || storage.dataStorageLabel.contains("GB"))
     assertTrue(storage.freeStorageLabel.contains("GB"))
     assertTrue(storage.totalStorageLabel.contains("GB"))
@@ -1925,5 +1977,103 @@ class PrototypeAppStateTest {
     assertEquals(null, state.pendingRemovalTilePackageId)
     assertTrue(state.offlineTilePackages.first { it.id == nonDownloadedPkg.id }.isDownloaded)
   }
-}
 
+  @Test
+  fun entityDetails_openOnPropertiesWithSubmissionsOneClickAway() {
+    val state = PrototypeAppState(initialScreen = PrototypeScreen.MAIN_SURVEY)
+    val entity = state.entities.first { it.submissions.isNotEmpty() }
+
+    state.selectEntity(entity.id)
+    assertEquals(EntityDetailsPane.PROPERTIES, state.entityDetailsPane)
+
+    state.showEntitySubmissions()
+    assertEquals(EntityDetailsPane.SUBMISSIONS, state.entityDetailsPane)
+
+    // Opening a submission keeps the submissions pane behind it, so closing it returns there.
+    val submission = entity.submissions.first()
+    state.selectSubmissionDetail(submission.id)
+    assertEquals(submission.id, state.selectedSubmissionId)
+    state.selectSubmissionDetail(null)
+    assertEquals(EntityDetailsPane.SUBMISSIONS, state.entityDetailsPane)
+
+    state.showEntityProperties()
+    assertEquals(EntityDetailsPane.PROPERTIES, state.entityDetailsPane)
+
+    // Selecting another entity always opens on its properties.
+    state.showEntitySubmissions()
+    state.selectEntity(state.entities.first { it.id != entity.id }.id)
+    assertEquals(EntityDetailsPane.PROPERTIES, state.entityDetailsPane)
+  }
+
+  @Test
+  fun openingSubmissionOfAnotherEntity_framesThatEntity() {
+    val state = PrototypeAppState(initialScreen = PrototypeScreen.MAIN_SURVEY)
+    val entities = state.entities.filter { it.submissions.isNotEmpty() }
+    state.selectEntity(entities[0].id)
+    val epoch = state.entitySelectionEpoch
+
+    state.selectSubmissionDetail(entities[1].submissions.first().id)
+
+    assertEquals(entities[1].id, state.selectedEntityId)
+    assertEquals(epoch + 1, state.entitySelectionEpoch)
+  }
+
+  @Test
+  fun relatedEntityForPropertyValue_resolvesReferencesToOtherRecords() {
+    val state = PrototypeAppState(initialScreen = PrototypeScreen.MAIN_SURVEY)
+    val parcel = state.entities.first { it.properties["Washing Station"] != null }
+    val station = state.entities.first { it.id == parcel.properties["Washing Station"] }
+
+    assertEquals(station, state.relatedEntityForPropertyValue(parcel, station.id))
+    assertEquals(station, state.relatedEntityForPropertyValue(parcel, station.geoId))
+    assertEquals(null, state.relatedEntityForPropertyValue(parcel, "Othaya Farmers Co-op"))
+    // A record never links to itself.
+    assertEquals(null, state.relatedEntityForPropertyValue(parcel, parcel.id))
+  }
+
+  @Test
+  fun availableSubmissions_offlineShowsOnlySubmissionsStoredOnDevice() {
+    val state = PrototypeAppState(initialScreen = PrototypeScreen.MAIN_SURVEY)
+    val entity =
+      state.entities.first { e ->
+        e.submissions.any { state.isSubmissionStoredOnDevice(it) } &&
+          e.submissions.any { !state.isSubmissionStoredOnDevice(it) }
+      }
+
+    assertEquals(
+      entity.submissions.size,
+      state.availableGroupedSubmissionsForEntity(entity).sumOf { it.submissions.size },
+    )
+
+    state.updateAirplaneMode(true)
+    val offline = state.availableGroupedSubmissionsForEntity(entity).flatMap { it.submissions }
+    assertTrue(offline.isNotEmpty())
+    assertTrue(offline.size < entity.submissions.size)
+    assertTrue(offline.all { state.isSubmissionStoredOnDevice(it) })
+  }
+
+  @Test
+  fun openUploadsForEntity_filtersUploadsToThatEntityUntilCleared() {
+    val state = PrototypeAppState(initialScreen = PrototypeScreen.MAIN_SURVEY)
+    val entityId = state.mutations.first().entityId
+    val expected = state.mutations.count { it.entityId == entityId }
+
+    state.openUploadsForEntity(entityId)
+    assertEquals(MainDrawerSubView.UPLOADS, state.activeDrawerSubView)
+    assertEquals(entityId, state.uploadsEntityFilter?.id)
+    assertEquals(expected, state.filteredUploadMutations.size)
+    assertEquals(expected, state.uploadCountForEntity(entityId))
+    assertTrue(state.filteredUploadMutations.all { it.entityId == entityId })
+
+    state.clearUploadsEntityFilter()
+    assertEquals(state.mutations.size, state.filteredUploadMutations.size)
+
+    // Leaving Uploads clears the filter, and opening it from the drawer shows everything.
+    state.openUploadsForEntity(entityId)
+    state.closeDrawerSubView()
+    assertEquals(null, state.uploadsEntityFilterId)
+    state.openUploadsForEntity(entityId)
+    state.drawerOpenUploads()
+    assertEquals(null, state.uploadsEntityFilterId)
+  }
+}

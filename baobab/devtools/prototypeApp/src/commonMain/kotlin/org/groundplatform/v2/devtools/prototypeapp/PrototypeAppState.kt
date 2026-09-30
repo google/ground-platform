@@ -18,16 +18,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import groundplatform.v2.forms.FormDef
 import groundplatform.v2.forms.RecordInstance
-import kotlin.math.PI
 import kotlin.math.abs
-import kotlin.math.atan2
-import kotlin.math.cos
 import kotlin.math.hypot
 import kotlin.math.pow
-import kotlin.math.roundToInt
 import kotlinx.coroutines.flow.StateFlow
 import org.groundplatform.v2.core.forms.model.EntityState
-import org.groundplatform.v2.core.forms.model.FinalizationResult
 import org.groundplatform.v2.core.forms.serialization.XFormsXmlSerializer
 import org.groundplatform.v2.core.forms.ui.FormWizardController
 import org.groundplatform.v2.core.forms.ui.WorkbenchExampleForm
@@ -37,12 +32,18 @@ import org.groundplatform.v2.devtools.prototypeapp.ui.state.PrototypeUiState
 import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.PrototypeAppViewModel
 
 /**
+ * `mapZoomDelta` (relative to the survey's default `15.3z`) at or below which map features are
+ * clustered: about `12.95z`.
+ */
+internal const val MapClusteringZoomDelta = -2.35f
+
+/**
  * State controller for the Ground 2.0 Mobile UI Prototype workbench (`devtools/prototypeApp`).
  *
- * Manages both the onboarding screens (`Sign In` -> `Terms of Service` -> `Download
- * survey`) and the **Main Survey UI** (`Map` view with geospatial entities, `Layers` filter
- * popover, `1:1` and `1:N` entity bottom sheets, `List` view with searchable forms, entities, and
- * submissions, and the Hamburger Navigation Drawer).
+ * Manages both the onboarding screens (`Sign In` -> `Terms of Service` -> `Download survey`) and
+ * the **Main Survey UI** (`Map` view with geospatial entities, `Layers` filter popover, `1:1` and
+ * `1:N` entity bottom sheets, `List` view with searchable forms, entities, and submissions, and the
+ * Hamburger Navigation Drawer).
  */
 class PrototypeAppState(
   initialScreen: PrototypeScreen = PrototypeScreen.SIGN_IN,
@@ -337,6 +338,35 @@ class PrototypeAppState(
   var selectedSubmissionId by mutableStateOf<String?>(null)
     private set
 
+  /**
+   * Which pane of the selected entity's details surface is showing: its properties (default) or its
+   * `1:N` submissions. Submissions are always one click away from the properties so the details
+   * surface opens on the entity's current state.
+   */
+  var entityDetailsPane by mutableStateOf(EntityDetailsPane.PROPERTIES)
+    private set
+
+  /**
+   * Whether the web dashboard's bottom data table is expanded. It never expands automatically; only
+   * the collapsed bar's toggle or the details card's "Show in table" button expand it.
+   */
+  var isDashboardTableExpanded by mutableStateOf(false)
+    private set
+
+  /**
+   * Entity dataset whose table is active in the web dashboard's bottom data table, or `null` for
+   * the first dataset. Follows the selected entity's dataset.
+   */
+  var dashboardTableDatasetId by mutableStateOf<String?>(null)
+    private set
+
+  /**
+   * Entity whose mutations the `Uploads` screen is filtered to (opened from an entity's details),
+   * or `null` to show uploads for every entity.
+   */
+  var uploadsEntityFilterId by mutableStateOf<String?>(null)
+    private set
+
   var listSearchQuery by mutableStateOf("")
     private set
 
@@ -358,8 +388,8 @@ class PrototypeAppState(
     private set
 
   /**
-   * All local mutations sorted in strict reverse chronological order
-   * ([MutationLogItem.operationTimestamp] descending).
+   * All local mutations sorted in strict reverse chronological order (
+   * [MutationLogItem.operationTimestamp] descending).
    */
   val allMutationsSorted: List<MutationLogItem>
     get() =
@@ -371,17 +401,51 @@ class PrototypeAppState(
 
   /**
    * Mutations displayed in the unified `Uploads` screen filtered by [selectedUploadStatusFilter]
-   * (or all mutations when [selectedUploadStatusFilter] is `null`), in reverse chronological order.
+   * (or all mutations when [selectedUploadStatusFilter] is `null`) and by [uploadsEntityFilterId]
+   * (when set), in reverse chronological order.
    */
   val filteredUploadMutations: List<MutationLogItem>
     get() {
-      val filter = selectedUploadStatusFilter ?: return allMutationsSorted
-      return allMutationsSorted.filter { it.uploadStatusFilter == filter }
+      val filter = selectedUploadStatusFilter
+      return allMutationsSorted.filter {
+        (filter == null || it.uploadStatusFilter == filter) && it.matchesUploadsEntityFilter()
+      }
     }
 
   /** Returns the total count of mutations matching [filter] on the `Uploads` screen. */
-  fun uploadCountForFilter(filter: UploadStatusFilter): Int = mutations.count {
-    it.uploadStatusFilter == filter
+  fun uploadCountForFilter(filter: UploadStatusFilter): Int =
+    mutations.count { it.uploadStatusFilter == filter && it.matchesUploadsEntityFilter() }
+
+  private fun MutationLogItem.matchesUploadsEntityFilter(): Boolean {
+    val entityId = uploadsEntityFilterId ?: return true
+    return this.entityId == entityId
+  }
+
+  /** Entity the `Uploads` screen is currently filtered to, if any. */
+  val uploadsEntityFilter: GeospatialEntityItem?
+    get() = uploadsEntityFilterId?.let { id -> entities.firstOrNull { it.id == id } }
+
+  /** Number of local mutations (any upload state) recorded for the entity with [entityId]. */
+  fun uploadCountForEntity(entityId: String): Int = mutations.count { it.entityId == entityId }
+
+  /** Number of not-yet-uploaded mutations (`isOutbox`) recorded for the entity with [entityId]. */
+  fun pendingUploadCountForEntity(entityId: String): Int =
+    mutations.count { it.entityId == entityId && it.isOutbox }
+
+  /**
+   * Opens the `Uploads` screen filtered to the entity with [entityId], so a data collector can
+   * check whether their changes to that map feature went through.
+   */
+  fun openUploadsForEntity(entityId: String) {
+    isDrawerOpen = false
+    selectedUploadStatusFilter = null
+    uploadsEntityFilterId = entityId
+    activeDrawerSubView = MainDrawerSubView.UPLOADS
+  }
+
+  /** Clears the entity filter on the `Uploads` screen. */
+  fun clearUploadsEntityFilter() {
+    uploadsEntityFilterId = null
   }
 
   /**
@@ -399,8 +463,8 @@ class PrototypeAppState(
         )
 
   /**
-   * Completed mutations (`isUploaded == true`), listed in strict reverse chronological order
-   * ([MutationLogItem.operationTimestamp] descending).
+   * Completed mutations (`isUploaded == true`), listed in strict reverse chronological order (
+   * [MutationLogItem.operationTimestamp] descending).
    */
   val uploadedMutations: List<MutationLogItem>
     get() =
@@ -453,22 +517,24 @@ class PrototypeAppState(
       )
 
   /**
-   * Device storage breakdown showing total device storage, free storage, storage occupied
-   * by downloaded imagery (vector & raster basemap tiles), and space taken up by data
-   * (surveys, forms, entities, submissions, mutations).
+   * Device storage breakdown showing total device storage, free storage, storage occupied by
+   * downloaded imagery (vector & raster basemap tiles), and space taken up by data (surveys, forms,
+   * entities, submissions, mutations).
    */
   val deviceStorageInfo: DeviceStorageInfo
     get() {
       // Calculate downloaded imagery size from downloaded tile packages
       val downloadedTilesBytes =
-        offlineTilePackages.filter { it.isDownloaded }.sumOf { pkg ->
-          when (pkg.id) {
-            "pkg-nyeri-satellite" -> 82_700_000L
-            "pkg-nyeri-topo" -> 14_200_000L
-            "pkg-kenya-regional" -> 168_000_000L
-            else -> 50_000_000L
+        offlineTilePackages
+          .filter { it.isDownloaded }
+          .sumOf { pkg ->
+            when (pkg.id) {
+              "pkg-nyeri-satellite" -> 82_700_000L
+              "pkg-nyeri-topo" -> 14_200_000L
+              "pkg-kenya-regional" -> 168_000_000L
+              else -> 50_000_000L
+            }
           }
-        }
       val baseImageryBytes = 1_850_000_000L // Baseline offline imagery cache
       val totalImageryBytes = baseImageryBytes + downloadedTilesBytes
       val totalDataBytes = 420_000_000L + (mutations.size * 15_000L) + (entities.size * 8_000L)
@@ -624,7 +690,8 @@ class PrototypeAppState(
 
   /**
    * Computes a [StraightLineVector] from the collector's current GPS position via
-   * [org.groundplatform.v2.devtools.prototypeapp.domain.usecase.ComputeWayfindingNavigationUseCase].
+   * [org.groundplatform.v2.devtools.prototypeapp.domain.usecase.ComputeWayfindingNavigationUseCase]
+   * .
    */
   fun computeStraightLineVector(
     targetNormalizedX: Float,
@@ -641,7 +708,8 @@ class PrototypeAppState(
   /**
    * Resolves the normalized map coordinates `(normalizedX, normalizedY)` and optional
    * [SubmissionGeometryPolygon] for any [SubmissionPreviewItem] via
-   * [org.groundplatform.v2.devtools.prototypeapp.domain.usecase.ComputeWayfindingNavigationUseCase].
+   * [org.groundplatform.v2.devtools.prototypeapp.domain.usecase.ComputeWayfindingNavigationUseCase]
+   * .
    */
   fun resolveSubmissionTargetGeometry(
     submissionId: String
@@ -665,7 +733,10 @@ class PrototypeAppState(
     return computeStraightLineVector(tx, ty)
   }
 
-  /** Resolves a [SurveyPlaceItem] by [placeId] across built-in places, API results, and active selection. */
+  /**
+   * Resolves a [SurveyPlaceItem] by [placeId] across built-in places, API results, and active
+   * selection.
+   */
   fun findPlaceById(placeId: String): SurveyPlaceItem? =
     (mapboxPlacesApiResults + places + filteredListPlaces + listOfNotNull(lastSelectedPlace))
       .firstOrNull { it.id == placeId }
@@ -696,7 +767,8 @@ class PrototypeAppState(
 
   /**
    * Returns `true` if [field] in [submissionId] represents a geometry question/field via
-   * [org.groundplatform.v2.devtools.prototypeapp.domain.usecase.ComputeWayfindingNavigationUseCase].
+   * [org.groundplatform.v2.devtools.prototypeapp.domain.usecase.ComputeWayfindingNavigationUseCase]
+   * .
    */
   fun isSubmissionFieldGeometry(submissionId: String, field: SubmissionFieldEntry): Boolean =
     viewModel.computeWayfindingNavigationUseCase.isSubmissionFieldGeometry(
@@ -714,10 +786,11 @@ class PrototypeAppState(
     field: SubmissionFieldEntry,
   ): String {
     if (!isSubmissionFieldGeometry(submissionId, field)) return ""
-    val geom = submissionGeometries.firstOrNull {
-      it.submissionId == submissionId &&
-        (it.fieldPath == field.questionName || it.questionLabel == field.questionLabel)
-    }
+    val geom =
+      submissionGeometries.firstOrNull {
+        it.submissionId == submissionId &&
+          (it.fieldPath == field.questionName || it.questionLabel == field.questionLabel)
+      }
     val vector =
       if (geom != null) {
         computeStraightLineVector(geom.normalizedX, geom.normalizedY)
@@ -741,7 +814,8 @@ class PrototypeAppState(
 
   /**
    * Currently active straight-line navigation session ([StraightLineNavigationState]) resolved via
-   * [org.groundplatform.v2.devtools.prototypeapp.domain.usecase.ComputeWayfindingNavigationUseCase].
+   * [org.groundplatform.v2.devtools.prototypeapp.domain.usecase.ComputeWayfindingNavigationUseCase]
+   * .
    */
   val activeNavigation: StraightLineNavigationState?
     get() =
@@ -760,8 +834,8 @@ class PrototypeAppState(
 
   // --- Data Collection Form & XForms FormDef Chrome State ---
   /**
-   * Currently selected swappable example form in the Prototype App Workbench
-   * ([WorkbenchExampleForm]), or `null` when custom XML has been manually edited.
+   * Currently selected swappable example form in the Prototype App Workbench (
+   * [WorkbenchExampleForm]), or `null` when custom XML has been manually edited.
    */
   var selectedWorkbenchExampleForm by
     mutableStateOf<WorkbenchExampleForm?>(WorkbenchExampleForm.ALL_FIELD_TYPES)
@@ -934,8 +1008,8 @@ class PrototypeAppState(
 
   /**
    * Layers backed by `LayerDef.entity_dataset_id` (rendered with solid outlines) when the survey
-   * has geospatial entities. Returns `emptyList()` when there are no geospatial entities so the
-   * map layers section of the `Layers` sheet is hidden.
+   * has geospatial entities. Returns `emptyList()` when there are no geospatial entities so the map
+   * layers section of the `Layers` sheet is hidden.
    */
   val entityDatasetLayers: List<MapLayerItem>
     get() =
@@ -948,9 +1022,7 @@ class PrototypeAppState(
         }
       }
 
-  /**
-   * True when the active survey has geospatial entities to display in the `Layers` sheet.
-   */
+  /** True when the active survey has geospatial entities to display in the `Layers` sheet. */
   val hasGeospatialEntities: Boolean
     get() = entities.isNotEmpty() && entityDatasetLayers.isNotEmpty()
 
@@ -969,7 +1041,7 @@ class PrototypeAppState(
   /**
    * User-facing plural category label for the `Map features` tab and list section header:
    * - When exactly 1 entity dataset layer is visible on the map, returns its plural domain label
-   *   (e.g. `"Coffee Parcels"`, `"Monitoring Plots"`, `"Washing Stations"`).
+   * (e.g. `"Coffee Parcels"`, `"Monitoring Plots"`, `"Washing Stations"`).
    * - When multiple entity dataset layers are visible (or none), falls back to `"Map features"`.
    */
   val activeEntitiesTabLabel: String
@@ -979,13 +1051,12 @@ class PrototypeAppState(
   /**
    * User-facing lowercase plural count noun for map counters, search hints, and empty states:
    * - When 1 entity dataset layer is visible, returns its lowercase plural domain label (e.g.
-   *   `"coffee parcels"`, `"monitoring plots"`, `"washing stations"`).
+   * `"coffee parcels"`, `"monitoring plots"`, `"washing stations"`).
    * - Otherwise falls back to `"map features"`.
    */
   val activeEntitiesCountNoun: String
     get() =
-      visibleEntityDatasetLayers.singleOrNull()?.pluralDomainLabel?.lowercase()
-        ?: "map features"
+      visibleEntityDatasetLayers.singleOrNull()?.pluralDomainLabel?.lowercase() ?: "map features"
 
   /**
    * Resolves the user-facing singular domain noun for [entityId] (e.g. `"Coffee Parcel"`, or
@@ -1013,12 +1084,12 @@ class PrototypeAppState(
     private set
 
   /**
-   * True when the map is zoomed out past the clustering threshold (`mapZoomDelta <= -0.35f`),
-   * causing visible map features (`visibleMapEntities`) to be grouped into spatial clusters with
-   * cluster balloons showing counts per marker symbol.
+   * True when the map is zoomed out past the clustering threshold ([MapClusteringZoomDelta], about
+   * z12.95), causing visible map features (`visibleMapEntities`) to be grouped into spatial
+   * clusters with cluster balloons showing counts per marker symbol.
    */
   val isMapClusteringActive: Boolean
-    get() = mapZoomDelta <= -0.35f
+    get() = mapZoomDelta <= MapClusteringZoomDelta
 
   /**
    * Normalized world-space clustering radius (`[0.20, 12.0]`) scaled exponentially as the user
@@ -1094,9 +1165,10 @@ class PrototypeAppState(
 
   /** The currently selected Geospatial Entity shown in the bottom sheet (if any). */
   val selectedEntity: GeospatialEntityItem?
-    get() = selectedEntityId?.let { id ->
-      entities.firstOrNull { it.id == id && it.layerId in visibleLayerIds }
-    }
+    get() =
+      selectedEntityId?.let { id ->
+        entities.firstOrNull { it.id == id && it.layerId in visibleLayerIds }
+      }
 
   /** All submissions (both entity-attached and standalone) in the active survey. */
   val allSubmissions: List<SubmissionPreviewItem>
@@ -1107,9 +1179,8 @@ class PrototypeAppState(
     get() = selectedSubmissionId?.let { id -> allSubmissions.firstOrNull { it.id == id } }
 
   /** Returns all forms in the active survey that request entities of [entity]'s dataset type. */
-  fun formsForEntity(entity: GeospatialEntityItem): List<FormPreviewItem> = forms.filter {
-    it.targetDatasetId == entity.datasetId
-  }
+  fun formsForEntity(entity: GeospatialEntityItem): List<FormPreviewItem> =
+    forms.filter { it.targetDatasetId == entity.datasetId }
 
   /**
    * Returns whether the organizer-defined action button for [form] is enabled on [entity]. Because
@@ -1146,8 +1217,8 @@ class PrototypeAppState(
    * Simulates device Airplane mode (`Offline`) in the UX Workbench.
    *
    * When `true`, Mapbox Places API search is disabled (`filteredListPlaces` returns `emptyList()`)
-   * and the bottom sheet shows an offline notice explaining that search is restricted to local
-   * map features and that Places search is not available offline.
+   * and the bottom sheet shows an offline notice explaining that search is restricted to local map
+   * features and that Places search is not available offline.
    */
   var isAirplaneMode by mutableStateOf(false)
     private set
@@ -1156,7 +1227,9 @@ class PrototypeAppState(
   val isPlacesSearchAvailable: Boolean
     get() = !isAirplaneMode
 
-  /** Live place results returned from `window.GroundMapboxBridge.searchPlaces` (Mapbox Places API). */
+  /**
+   * Live place results returned from `window.GroundMapboxBridge.searchPlaces` (Mapbox Places API).
+   */
   var mapboxPlacesApiResults by mutableStateOf<List<SurveyPlaceItem>>(emptyList())
     private set
 
@@ -1237,8 +1310,8 @@ class PrototypeAppState(
     get() = emptyList()
 
   /**
-   * Map features ([GeospatialEntityItem]s) in the Main Survey `List` view grouped by their
-   * entity dataset (`Map features` category).
+   * Map features ([GeospatialEntityItem]s) in the Main Survey `List` view grouped by their entity
+   * dataset (`Map features` category).
    */
   val groupedFilteredListEntities: List<EntityDatasetFeaturesGroup>
     get() {
@@ -1283,12 +1356,50 @@ class PrototypeAppState(
     }
   }
 
+  /**
+   * True when [submission] is stored on this device, i.e. it was recorded locally and appears in
+   * the local mutation log. Other collectors' submissions are only fetched when online.
+   */
+  fun isSubmissionStoredOnDevice(submission: SubmissionPreviewItem): Boolean =
+    mutations.any { it.submissionId == submission.id }
+
+  /**
+   * Submissions of [entity] available to show, grouped by form. Seeing the full list requires a
+   * connection: while offline ([isAirplaneMode]) only submissions stored on the device are listed.
+   */
+  fun availableGroupedSubmissionsForEntity(
+    entity: GeospatialEntityItem
+  ): List<FormSubmissionsGroup> {
+    val groups = groupedSubmissionsForEntity(entity)
+    if (!isAirplaneMode) return groups
+    return groups
+      .map { group ->
+        group.copy(submissions = group.submissions.filter(::isSubmissionStoredOnDevice))
+      }
+      .filter { it.submissions.isNotEmpty() }
+  }
+
+  /**
+   * Resolves a property [value] of [entity] that references another record in the survey (a foreign
+   * key holding that record's ID or GeoID), or `null` when the value isn't a reference. Related
+   * records are resolved regardless of whether they have geometry.
+   */
+  fun relatedEntityForPropertyValue(
+    entity: GeospatialEntityItem,
+    value: String,
+  ): GeospatialEntityItem? {
+    val key = value.trim()
+    if (key.isEmpty()) return null
+    return entities.firstOrNull {
+      it.id != entity.id && (it.id == key || it.geoId.equals(key, ignoreCase = true))
+    }
+  }
+
   /** Directly switches the active mobile screen (used by both flow buttons and UX workbench). */
   fun navigateTo(screen: PrototypeScreen) {
     if (screen == PrototypeScreen.DOWNLOAD_SURVEY) {
       downloadSurveyEntryOrigin =
-        if (
-          currentScreen == PrototypeScreen.MAIN_SURVEY &&
+        if (currentScreen == PrototypeScreen.MAIN_SURVEY &&
             activeDrawerSubView == MainDrawerSubView.SWITCH_SURVEYS
         ) {
           DownloadSurveyEntryOrigin.SURVEY_LIST
@@ -1342,7 +1453,7 @@ class PrototypeAppState(
    * Handles the Back escape hatch on the Download surveys screen:
    * - When accessed from the Survey list (`SURVEY_LIST`), returns the user to the Survey list.
    * - When shown after Terms of Service (`AFTER_TOS`), opens a confirmation prompt before signing
-   *   the user out.
+   * the user out.
    */
   fun navigateBackFromDownloadSurvey() {
     if (downloadSurveyEntryOrigin == DownloadSurveyEntryOrigin.SURVEY_LIST) {
@@ -1384,15 +1495,16 @@ class PrototypeAppState(
 
   /** Marks the specified survey as downloaded onto the device for offline field use. */
   fun downloadSurvey(surveyId: String) {
-    surveys = surveys.map { item ->
-      if (item.id == surveyId) {
-        activeSurveyNotice =
-          "Downloaded \"${item.title}\" (${item.offlineSizeLabel}) for offline use."
-        item.copy(isDownloaded = true)
-      } else {
-        item
+    surveys =
+      surveys.map { item ->
+        if (item.id == surveyId) {
+          activeSurveyNotice =
+            "Downloaded \"${item.title}\" (${item.offlineSizeLabel}) for offline use."
+          item.copy(isDownloaded = true)
+        } else {
+          item
+        }
       }
-    }
   }
 
   /** Opens a survey in the Main Survey UI (downloading it first if not already downloaded). */
@@ -1440,25 +1552,26 @@ class PrototypeAppState(
 
   /** Toggles the downloaded status of a survey (for UX prototyping & testing). */
   fun toggleSurveyDownloaded(surveyId: String) {
-    surveys = surveys.map { item ->
-      if (item.id == surveyId) {
-        val nextState = !item.isDownloaded
-        activeSurveyNotice =
-          if (nextState) {
-            "Downloaded \"${item.title}\" (${item.offlineSizeLabel}) for offline use."
-          } else {
-            "Removed offline copy of \"${item.title}\"."
-          }
-        item.copy(isDownloaded = nextState)
-      } else {
-        item
+    surveys =
+      surveys.map { item ->
+        if (item.id == surveyId) {
+          val nextState = !item.isDownloaded
+          activeSurveyNotice =
+            if (nextState) {
+              "Downloaded \"${item.title}\" (${item.offlineSizeLabel}) for offline use."
+            } else {
+              "Removed offline copy of \"${item.title}\"."
+            }
+          item.copy(isDownloaded = nextState)
+        } else {
+          item
+        }
       }
-    }
   }
 
   /**
-   * Prompts the user before removing a downloaded survey from the device.
-   * If the survey is not downloaded, downloads it immediately.
+   * Prompts the user before removing a downloaded survey from the device. If the survey is not
+   * downloaded, downloads it immediately.
    */
   fun promptRemoveDownloadedSurvey(surveyId: String) {
     val survey = surveys.firstOrNull { it.id == surveyId }
@@ -1474,14 +1587,15 @@ class PrototypeAppState(
     val surveyId = pendingRemovalSurveyId
     pendingRemovalSurveyId = null
     if (surveyId != null) {
-      surveys = surveys.map { item ->
-        if (item.id == surveyId) {
-          activeSurveyNotice = "Removed offline copy of \"${item.title}\"."
-          item.copy(isDownloaded = false)
-        } else {
-          item
+      surveys =
+        surveys.map { item ->
+          if (item.id == surveyId) {
+            activeSurveyNotice = "Removed offline copy of \"${item.title}\"."
+            item.copy(isDownloaded = false)
+          } else {
+            item
+          }
         }
-      }
     }
   }
 
@@ -1576,19 +1690,20 @@ class PrototypeAppState(
 
   /** Toggles visibility of a specific `LayerDef` on the survey map. */
   fun toggleLayerVisibility(layerId: String) {
-    mapLayers = mapLayers.map { layer ->
-      if (layer.id == layerId) {
-        val nextVisible = !layer.isVisible
-        if (!nextVisible && selectedEntity?.layerId == layerId) {
-          selectedEntityId = null
-          selectedSubmissionId = null
-          isEntityBottomSheetExpanded = false
+    mapLayers =
+      mapLayers.map { layer ->
+        if (layer.id == layerId) {
+          val nextVisible = !layer.isVisible
+          if (!nextVisible && selectedEntity?.layerId == layerId) {
+            selectedEntityId = null
+            selectedSubmissionId = null
+            isEntityBottomSheetExpanded = false
+          }
+          layer.copy(isVisible = nextVisible)
+        } else {
+          layer
         }
-        layer.copy(isVisible = nextVisible)
-      } else {
-        layer
       }
-    }
   }
 
   /** Selects a Geospatial Entity on the map to open its bottom sheet in collapsed/peek state. */
@@ -1596,26 +1711,72 @@ class PrototypeAppState(
     clearSelectedPlace()
     selectedEntityId = entityId
     selectedSubmissionId = null
+    entityDetailsPane = EntityDetailsPane.PROPERTIES
     isEntityBottomSheetExpanded = false
     mainViewMode = MainSurveyViewMode.MAP
     if (entityId != null) {
       isLayersSheetOpen = false
       entitySelectionEpoch++
+      followSelectionInDashboardTable(entityId)
     }
   }
 
   /**
-   * Selects a Geospatial Entity from the expanded bottom sheet list, keeping the bottom sheet
-   * expanded so the user can immediately inspect its properties, form actions, and 1:N submissions.
+   * Selects a Geospatial Entity from the bottom sheet list. The map pans and zooms to the entity,
+   * and the sheet settles at its peek height showing the entity's details, so both the framed
+   * entity and its details are visible. Dragging the sheet up reveals the rest of the details.
    */
   fun selectEntityFromList(entityId: String) {
     clearSelectedPlace()
     selectedEntityId = entityId
     selectedSubmissionId = null
-    isEntityBottomSheetExpanded = true
+    entityDetailsPane = EntityDetailsPane.PROPERTIES
+    isEntityBottomSheetExpanded = false
     mainViewMode = MainSurveyViewMode.MAP
     isLayersSheetOpen = false
     entitySelectionEpoch++
+    followSelectionInDashboardTable(entityId)
+  }
+
+  /** Switches the web dashboard's bottom table to the dataset of the entity with [entityId]. */
+  private fun followSelectionInDashboardTable(entityId: String) {
+    entities.firstOrNull { it.id == entityId }?.let { dashboardTableDatasetId = it.datasetId }
+  }
+
+  /** Shows the selected entity's `1:N` submissions in its details surface. */
+  fun showEntitySubmissions() {
+    entityDetailsPane = EntityDetailsPane.SUBMISSIONS
+  }
+
+  /** Returns the selected entity's details surface to its properties. */
+  fun showEntityProperties() {
+    entityDetailsPane = EntityDetailsPane.PROPERTIES
+    selectedSubmissionId = null
+  }
+
+  /** Expands or collapses the web dashboard's bottom data table. */
+  fun updateDashboardTableExpanded(expanded: Boolean) {
+    isDashboardTableExpanded = expanded
+  }
+
+  /** Toggles the web dashboard's bottom data table between expanded and collapsed. */
+  fun toggleDashboardTableExpanded() {
+    isDashboardTableExpanded = !isDashboardTableExpanded
+  }
+
+  /** Activates the bottom data table tab for the dataset with [datasetId]. */
+  fun selectDashboardTable(datasetId: String) {
+    dashboardTableDatasetId = datasetId
+  }
+
+  /**
+   * "Show in table": expands the web dashboard's bottom data table on the selected entity's
+   * dataset, where its row is highlighted and scrolled into view.
+   */
+  fun showSelectedEntityInTable() {
+    val entity = selectedEntity ?: return
+    dashboardTableDatasetId = entity.datasetId
+    isDashboardTableExpanded = true
   }
 
   /**
@@ -1630,11 +1791,12 @@ class PrototypeAppState(
     val hasDefaultFallbackCoords =
       kotlin.math.abs(place.longitude - 36.9512) < 1e-6 &&
         kotlin.math.abs(place.latitude - (-0.4198)) < 1e-6
-    val lat = if (hasDefaultFallbackCoords && parsedCoords != null) parsedCoords.first else place.latitude
-    val lng = if (hasDefaultFallbackCoords && parsedCoords != null) parsedCoords.second else place.longitude
+    val lat =
+      if (hasDefaultFallbackCoords && parsedCoords != null) parsedCoords.first else place.latitude
+    val lng =
+      if (hasDefaultFallbackCoords && parsedCoords != null) parsedCoords.second else place.longitude
     val (surveyLng, surveyLat) = activeSurveyBaseLngLat()
-    val resolvedZoom =
-      place.targetZoom.coerceIn(2.0f, 18.5f)
+    val resolvedZoom = place.targetZoom.coerceIn(2.0f, 18.5f)
     val resolvedPlace = place.copy(longitude = lng, latitude = lat, targetZoom = resolvedZoom)
     lastSelectedPlace = resolvedPlace
     selectedPlaceId = resolvedPlace.id
@@ -1673,6 +1835,7 @@ class PrototypeAppState(
   fun returnToBottomSheetList() {
     selectedEntityId = null
     selectedSubmissionId = null
+    entityDetailsPane = EntityDetailsPane.PROPERTIES
     isEntityBottomSheetExpanded = true
     mainViewMode = MainSurveyViewMode.LIST
     isLayersSheetOpen = false
@@ -1726,7 +1889,14 @@ class PrototypeAppState(
     if (submissionId != null) {
       isEntityBottomSheetExpanded = true
       val parentEntity = entities.firstOrNull { e -> e.submissions.any { it.id == submissionId } }
+      if (parentEntity != null && parentEntity.id != selectedEntityId) {
+        // Opening a submission of another map feature (e.g. from `Uploads`) frames that feature.
+        entitySelectionEpoch++
+        dashboardTableDatasetId = parentEntity.datasetId
+      }
       selectedEntityId = parentEntity?.id
+      // Closing the submission returns to the list of the feature's submissions it came from.
+      entityDetailsPane = EntityDetailsPane.SUBMISSIONS
     }
   }
 
@@ -1773,8 +1943,8 @@ class PrototypeAppState(
    * When enabled (`true`):
    * - Disables Mapbox Places API search (`filteredListPlaces` becomes empty).
    * - Switches [listFilterTab] away from [ListFilterTab.PLACES] if currently selected.
-   * - Shows a message in the bottom sheet that search is only in local map features and Places search is
-   *   not available offline.
+   * - Shows a message in the bottom sheet that search is only in local map features and Places
+   * search is not available offline.
    */
   fun updateAirplaneMode(enabled: Boolean) {
     isAirplaneMode = enabled
@@ -1825,7 +1995,9 @@ class PrototypeAppState(
     }
   }
 
-  /** Receives JSON place features from `window.GroundMapboxBridge.searchPlaces` (`mapbox.places`). */
+  /**
+   * Receives JSON place features from `window.GroundMapboxBridge.searchPlaces` (`mapbox.places`).
+   */
   internal fun onMapboxPlacesSearchResponse(query: String, resultsJson: String) {
     if (isAirplaneMode || listSearchQuery.trim() != query.trim()) {
       isMapboxPlacesSearching = false
@@ -1900,27 +2072,21 @@ class PrototypeAppState(
     activeDataCollectionEntityId = entity.id
     selectedEntityId = entity.id
     activeFormWizardController?.updateString(ENTITY_REF_FIELD_PATH, entity.id)
-    if (
-      activeFormWizardController
+    if (activeFormWizardController
         ?.formState
-        ?.fieldStates
-        ?.containsKey("/data/sample_plot_entity") == true
+        ?.fieldStates?.containsKey("/data/sample_plot_entity") == true
     ) {
       activeFormWizardController?.updateString("/data/sample_plot_entity", entity.id)
     }
-    if (
-      activeFormWizardController
+    if (activeFormWizardController
         ?.formState
-        ?.fieldStates
-        ?.containsKey("/data/past_individual_id") == true
+        ?.fieldStates?.containsKey("/data/past_individual_id") == true
     ) {
       activeFormWizardController?.updateString("/data/past_individual_id", entity.id)
     }
-    if (
-      activeFormWizardController
+    if (activeFormWizardController
         ?.formState
-        ?.fieldStates
-        ?.containsKey("/data/primary_respondent_id") == true
+        ?.fieldStates?.containsKey("/data/primary_respondent_id") == true
     ) {
       activeFormWizardController?.updateString("/data/primary_respondent_id", entity.id)
     }
@@ -2018,10 +2184,10 @@ class PrototypeAppState(
    *
    * Because no geospatial entity was selected on the map prior to triggering the form, if the form
    * requires a geospatial entity (`form.requiresEntity == true`), [activeDataCollectionEntityId]
-   * starts as `null` and the form wizard includes the required `entityref` step
-   * (`[ENTITY_REF_FIELD_PATH] = "/data/target_entity"`). At that step in the data collection
-   * process, the user is presented with the interactive **Map or List** selector to choose the
-   * target entity.
+   * starts as `null` and the form wizard includes the required `entityref` step (`
+   * [ENTITY_REF_FIELD_PATH] = "/data/target_entity"`). At that step in the data collection process,
+   * the user is presented with the interactive **Map or List** selector to choose the target
+   * entity.
    */
   fun launchFormFromFab(formId: String) {
     val form = forms.firstOrNull { it.id == formId } ?: return
@@ -2052,8 +2218,8 @@ class PrototypeAppState(
   }
 
   /**
-   * Launches the embedded [org.groundplatform.v2.core.forms.ui.MobileFormRunner]
-   * (`[FormWizardController]`) for [formId] on [entityId] when the organizer-defined form button
+   * Launches the embedded [org.groundplatform.v2.core.forms.ui.MobileFormRunner] (`
+   * [FormWizardController]`) for [formId] on [entityId] when the organizer-defined form button
    * (`ctaLabel`) is tapped in the entity bottom sheet or triggered from the UX Chrome tester.
    */
   fun launchFormForEntity(entityId: String, formId: String) {
@@ -2103,8 +2269,7 @@ class PrototypeAppState(
     }
     val currentEntity =
       selectedEntity
-        ?: entities.firstOrNull { it.id == "entity-shade-201" }
-        ?: entities.firstOrNull()
+        ?: entities.firstOrNull { it.id == "entity-shade-201" } ?: entities.firstOrNull()
     if (currentEntity != null) {
       val enabledFormOnCurrent =
         formsForEntity(currentEntity).firstOrNull { isFormButtonEnabled(currentEntity, it) }
@@ -2158,7 +2323,8 @@ class PrototypeAppState(
         userGpsCoordinatesLabel = userGpsCoordinatesLabel,
         userGpsNormalizedX = userGpsNormalizedX,
         userGpsNormalizedY = userGpsNormalizedY,
-      ) ?: return
+      )
+        ?: return
     pullRepositoryState()
     selectedEntityId = result.selectedEntityId
     if (result.updateSelectedSubmissionId) {
@@ -2173,19 +2339,20 @@ class PrototypeAppState(
    * submissions accordingly when marked [SyncStatus.SYNCED].
    */
   fun updateEntitySyncStatus(entityId: String, newStatus: SyncStatus) {
-    entities = entities.map { item ->
-      if (item.id == entityId) {
-        val updatedSubmissions =
-          if (newStatus == SyncStatus.SYNCED) {
-            item.submissions.map { sub -> sub.copy(syncStatus = SyncStatus.SYNCED) }
-          } else {
-            item.submissions
-          }
-        item.copy(submissions = updatedSubmissions, syncStatus = newStatus)
-      } else {
-        item
+    entities =
+      entities.map { item ->
+        if (item.id == entityId) {
+          val updatedSubmissions =
+            if (newStatus == SyncStatus.SYNCED) {
+              item.submissions.map { sub -> sub.copy(syncStatus = SyncStatus.SYNCED) }
+            } else {
+              item.submissions
+            }
+          item.copy(submissions = updatedSubmissions, syncStatus = newStatus)
+        } else {
+          item
+        }
       }
-    }
     val entity = entities.firstOrNull { it.id == entityId } ?: return
     activeSurveyNotice = "${entity.label}: Sync status set to ${newStatus.label}"
   }
@@ -2205,38 +2372,41 @@ class PrototypeAppState(
    */
   fun updateSubmissionSyncStatus(submissionId: String, newStatus: SyncStatus) {
     var updatedSubTitle: String? = null
-    entities = entities.map { item ->
-      val hasTarget = item.submissions.any { it.id == submissionId }
-      if (hasTarget) {
-        val updatedSubmissions =
-          item.submissions.map { sub ->
-            if (sub.id == submissionId) {
-              updatedSubTitle = sub.formTitle
-              sub.copy(syncStatus = newStatus)
-            } else {
-              sub
+    entities =
+      entities.map { item ->
+        val hasTarget = item.submissions.any { it.id == submissionId }
+        if (hasTarget) {
+          val updatedSubmissions =
+            item.submissions.map { sub ->
+              if (sub.id == submissionId) {
+                updatedSubTitle = sub.formTitle
+                sub.copy(syncStatus = newStatus)
+              } else {
+                sub
+              }
             }
-          }
-        item.copy(
-          submissions = updatedSubmissions,
-          syncStatus =
-            deriveEntitySyncStatus(
-              updatedSubmissions,
-              fallback = if (newStatus == SyncStatus.SYNCED) SyncStatus.SYNCED else item.syncStatus,
-            ),
-        )
-      } else {
-        item
+          item.copy(
+            submissions = updatedSubmissions,
+            syncStatus =
+              deriveEntitySyncStatus(
+                updatedSubmissions,
+                fallback =
+                  if (newStatus == SyncStatus.SYNCED) SyncStatus.SYNCED else item.syncStatus,
+              ),
+          )
+        } else {
+          item
+        }
       }
-    }
-    standaloneSubmissions = standaloneSubmissions.map { sub ->
-      if (sub.id == submissionId) {
-        updatedSubTitle = sub.formTitle
-        sub.copy(syncStatus = newStatus)
-      } else {
-        sub
+    standaloneSubmissions =
+      standaloneSubmissions.map { sub ->
+        if (sub.id == submissionId) {
+          updatedSubTitle = sub.formTitle
+          sub.copy(syncStatus = newStatus)
+        } else {
+          sub
+        }
       }
-    }
     if (updatedSubTitle != null) {
       activeSurveyNotice = "$updatedSubTitle: Sync status set to ${newStatus.label}"
     }
@@ -2320,6 +2490,7 @@ class PrototypeAppState(
   fun drawerOpenUploads(filter: UploadStatusFilter? = null) {
     isDrawerOpen = false
     selectedUploadStatusFilter = filter
+    uploadsEntityFilterId = null
     activeDrawerSubView = MainDrawerSubView.UPLOADS
   }
 
@@ -2414,6 +2585,7 @@ class PrototypeAppState(
    */
   fun closeDrawerSubView() {
     activeDrawerSubView = MainDrawerSubView.NONE
+    uploadsEntityFilterId = null
   }
 
   /** Drawer option 4: View Terms of Service. */
@@ -2438,14 +2610,15 @@ class PrototypeAppState(
 
   /** Toggles download status of an offline Mapbox basemap tile package. */
   fun toggleOfflineTilePackage(packageId: String) {
-    offlineTilePackages = offlineTilePackages.map { pkg ->
-      if (pkg.id == packageId) pkg.copy(isDownloaded = !pkg.isDownloaded) else pkg
-    }
+    offlineTilePackages =
+      offlineTilePackages.map { pkg ->
+        if (pkg.id == packageId) pkg.copy(isDownloaded = !pkg.isDownloaded) else pkg
+      }
   }
 
   /**
-   * Prompts the user before removing an offline map tile package from the device.
-   * If the package is not downloaded, downloads it immediately.
+   * Prompts the user before removing an offline map tile package from the device. If the package is
+   * not downloaded, downloads it immediately.
    */
   fun promptRemoveOfflineTilePackage(packageId: String) {
     val pkg = offlineTilePackages.firstOrNull { it.id == packageId }
@@ -2456,14 +2629,17 @@ class PrototypeAppState(
     }
   }
 
-  /** Confirms removal of the pending offline tile package from the device and dismisses the dialog. */
+  /**
+   * Confirms removal of the pending offline tile package from the device and dismisses the dialog.
+   */
   fun confirmRemoveOfflineTilePackage() {
     val packageId = pendingRemovalTilePackageId
     pendingRemovalTilePackageId = null
     if (packageId != null) {
-      offlineTilePackages = offlineTilePackages.map { pkg ->
-        if (pkg.id == packageId) pkg.copy(isDownloaded = false) else pkg
-      }
+      offlineTilePackages =
+        offlineTilePackages.map { pkg ->
+          if (pkg.id == packageId) pkg.copy(isDownloaded = false) else pkg
+        }
     }
   }
 
@@ -2480,18 +2656,19 @@ class PrototypeAppState(
   /**
    * Updates the active application & survey language using either a language code (e.g. `"en"`,
    * `"fr"`, `"es"`, `"pt"`, `"vi"`, `"th"`, `"lo"`, `"km"`, `"sw"`) or a formatted locale string
-   * (e.g. `"fr (Français)"`). Synchronizes both [selectedLanguageCode] and
-   * [selectedLanguageLocale].
+   * (e.g. `"fr (Français)"`). Synchronizes both [selectedLanguageCode] and [selectedLanguageLocale]
+   * .
    */
   fun updateSelectedLanguage(languageCodeOrLocale: String) {
     val trimmed = languageCodeOrLocale.trim()
     val codeCandidate = trimmed.substringBefore(" ").lowercase()
-    val matched = GROUND_LANGUAGE_OPTIONS.firstOrNull {
-      it.code.equals(trimmed, ignoreCase = true) ||
-        it.code.equals(codeCandidate, ignoreCase = true) ||
-        it.label.equals(trimmed, ignoreCase = true) ||
-        "${it.code} (${it.label})".equals(trimmed, ignoreCase = true)
-    }
+    val matched =
+      GROUND_LANGUAGE_OPTIONS.firstOrNull {
+        it.code.equals(trimmed, ignoreCase = true) ||
+          it.code.equals(codeCandidate, ignoreCase = true) ||
+          it.label.equals(trimmed, ignoreCase = true) ||
+          "${it.code} (${it.label})".equals(trimmed, ignoreCase = true)
+      }
     if (matched != null) {
       selectedLanguageCode = matched.code
       selectedLanguageLocale = "${matched.code} (${matched.label})"
@@ -2605,12 +2782,15 @@ class PrototypeAppState(
     locationLockState = LocationLockState.PANNED
     mapPanOffsetX = (userGpsNormalizedX - entity.normalizedX).coerceIn(-10000f, 10000f)
     mapPanOffsetY =
-      ((userGpsNormalizedY - entity.normalizedY) + (targetScreenY - 0.50f)).coerceIn(-10000f, 10000f)
+      ((userGpsNormalizedY - entity.normalizedY) + (targetScreenY - 0.50f)).coerceIn(
+        -10000f,
+        10000f
+      )
   }
 
   /**
-   * Recenters the map camera on the entity with [entityId], adjusting the normalized vertical screen
-   * center to [targetScreenY] (defaults to `0.50f` screen center).
+   * Recenters the map camera on the entity with [entityId], adjusting the normalized vertical
+   * screen center to [targetScreenY] (defaults to `0.50f` screen center).
    */
   fun recenterMapOnEntity(entityId: String, targetScreenY: Float = 0.50f) {
     val entity = entities.firstOrNull { it.id == entityId } ?: return
@@ -2623,6 +2803,48 @@ class PrototypeAppState(
     val lng = surveyLng + (entity.normalizedX - 0.5) * 0.014
     val lat = surveyLat - (entity.normalizedY - 0.5) * 0.018
     return lng to lat
+  }
+
+  /**
+   * Resolves the geographic bounds of [entity]'s geometry in the active survey. Lines and polygons
+   * mirror the vertex offsets around the entity's normalized center that the Mapbox bridge
+   * (`index.html`) draws; points have zero-size bounds.
+   */
+  internal fun resolveEntityLngLatBounds(entity: GeospatialEntityItem): LngLatBounds {
+    val cx = entity.normalizedX.toDouble()
+    val cy = entity.normalizedY.toDouble()
+    // Normalized extents (minX, maxX, minY, maxY) of the drawn geometry.
+    val (minX, maxX, minY, maxY) =
+      when (entity.geometryKind) {
+        EntityGeometryKind.POLYGON -> {
+          val isGenerated = entity.id.startsWith("entity-rnd-")
+          val width = if (isGenerated) 0.022 else 0.22
+          val height = if (isGenerated) 0.015 else 0.11
+          listOf(cx - width * 0.48, cx + width * 0.52, cy - height * 0.5, cy + height * 0.48)
+        }
+        EntityGeometryKind.LINE ->
+          listOf(cx - 0.24 * 0.52, cx + 0.24 * 0.52, cy - 0.12 * 0.42, cy + 0.12 * 0.44)
+        EntityGeometryKind.POINT, EntityGeometryKind.NONE -> listOf(cx, cx, cy, cy)
+      }
+    val (surveyLng, surveyLat) = activeSurveyBaseLngLat()
+    return LngLatBounds(
+      west = surveyLng + (minX - 0.5) * 0.014,
+      south = surveyLat - (maxY - 0.5) * 0.018,
+      east = surveyLng + (maxX - 0.5) * 0.014,
+      north = surveyLat - (minY - 0.5) * 0.018,
+    )
+  }
+
+  /**
+   * Syncs [mapZoomDelta] after the map camera changed its own zoom (e.g. fitting a selected map
+   * feature), so clustering and the scale bar follow the camera.
+   */
+  fun syncMapZoomDelta(zoomDelta: Float) {
+    if (zoomDelta.isNaN()) return
+    mapZoomDelta = zoomDelta.coerceIn(-13.0f, 3.7f)
+    if (!isMapClusteringActive) {
+      selectedClusterId = null
+    }
   }
 
   /** Adjusts the Mapbox zoom level by [deltaZoom] (clamped to `[-5.0f, +3.7f]`). */
@@ -2700,10 +2922,11 @@ class PrototypeAppState(
       mapPanOffsetY = (userGpsNormalizedY - target.normalizedY).coerceIn(-10000f, 10000f)
     }
     zoomInMap()
-    val refreshed = mapFeatureClusters.firstOrNull {
-      target != null &&
-        hypot(it.normalizedX - target.normalizedX, it.normalizedY - target.normalizedY) < 0.08f
-    }
+    val refreshed =
+      mapFeatureClusters.firstOrNull {
+        target != null &&
+          hypot(it.normalizedX - target.normalizedX, it.normalizedY - target.normalizedY) < 0.08f
+      }
     selectedClusterId = refreshed?.id
   }
 
@@ -2711,10 +2934,10 @@ class PrototypeAppState(
    * Updates the user's current GPS location (`userGpsNormalizedX`, `userGpsNormalizedY`).
    *
    * - When [isCameraFollowingUser] is `true` (default), [mapPanOffsetX] and [mapPanOffsetY] stay
-   *   `0f`, so the map automatically pans ([mapWorldToScreenShiftX], [mapWorldToScreenShiftY]) to
-   *   keep the user's GPS location at the exact center `(0.50f, 0.50f)` of the screen.
+   * `0f`, so the map automatically pans ([mapWorldToScreenShiftX], [mapWorldToScreenShiftY]) to
+   * keep the user's GPS location at the exact center `(0.50f, 0.50f)` of the screen.
    * - When [isCameraFollowingUser] is `false` (after the map has been manually dragged/panned), the
-   *   panned camera viewport remains stationary while the user's GPS blue dot moves across the map.
+   * panned camera viewport remains stationary while the user's GPS blue dot moves across the map.
    */
   fun updateUserGpsLocation(
     newNormalizedX: Float,
@@ -2745,9 +2968,10 @@ class PrototypeAppState(
    */
   fun startNavigationToEntity(entityId: String) {
     val entity = entities.firstOrNull { it.id == entityId } ?: return
-    mapLayers = mapLayers.map { layer ->
-      if (layer.id == entity.layerId) layer.copy(isVisible = true) else layer
-    }
+    mapLayers =
+      mapLayers.map { layer ->
+        if (layer.id == entity.layerId) layer.copy(isVisible = true) else layer
+      }
     navigationTargetKind = NavigationTargetKind.ENTITY
     navigationTargetId = entity.id
     selectedEntityId = entity.id
@@ -2773,13 +2997,14 @@ class PrototypeAppState(
   fun startNavigationToSubmission(submissionId: String) {
     val sub = allSubmissions.firstOrNull { it.id == submissionId } ?: return
     val parentEntity = entities.firstOrNull { it.id == sub.entityId }
-    mapLayers = mapLayers.map { layer ->
-      if (parentEntity != null && layer.id == parentEntity.layerId) {
-        layer.copy(isVisible = true)
-      } else {
-        layer
+    mapLayers =
+      mapLayers.map { layer ->
+        if (parentEntity != null && layer.id == parentEntity.layerId) {
+          layer.copy(isVisible = true)
+        } else {
+          layer
+        }
       }
-    }
     navigationTargetKind = NavigationTargetKind.SUBMISSION
     navigationTargetId = sub.id
     selectedEntityId = parentEntity?.id
@@ -2892,9 +3117,9 @@ class PrototypeAppState(
   }
 
   /**
-   * Randomly generates and appends [count] polygon map features (`GeospatialEntityItem`)
-   * across the active survey region to benchmark Mapbox GL WebGL polygon & marker scaling at 5,000,
-   * 10,000, 15,000+ map features.
+   * Randomly generates and appends [count] polygon map features (`GeospatialEntityItem`) across the
+   * active survey region to benchmark Mapbox GL WebGL polygon & marker scaling at 5,000, 10,000,
+   * 15,000+ map features.
    */
   fun addRandomSites(count: Int = 5_000) {
     if (count <= 0) return
@@ -2940,6 +3165,10 @@ class PrototypeAppState(
     isEntityBottomSheetExpanded = false
     isSidePanelExpanded = true
     selectedSubmissionId = null
+    entityDetailsPane = EntityDetailsPane.PROPERTIES
+    isDashboardTableExpanded = false
+    dashboardTableDatasetId = null
+    uploadsEntityFilterId = null
     navigationTargetKind = null
     navigationTargetId = null
     listSearchQuery = ""
@@ -2956,7 +3185,6 @@ class PrototypeAppState(
     resetDefaultXFormsXml()
   }
 
-
   companion object {
     /** Alias for [defaultSurveyPlaces]. */
     fun defaultPlaces(): List<SurveyPlaceItem> = PrototypeAppDataStore.defaultPlaces()
@@ -2967,7 +3195,10 @@ class PrototypeAppState(
      */
     fun defaultSurveyPlaces(): List<SurveyPlaceItem> = PrototypeAppDataStore.defaultSurveyPlaces()
 
-    /** Default sample surveys displayed in `devtools/prototypeApp`, sourced from [PrototypeAppDataStore]. */
+    /**
+     * Default sample surveys displayed in `devtools/prototypeApp`, sourced from
+     * [PrototypeAppDataStore].
+     */
     fun defaultSampleSurveys(): List<SurveyPreviewItem> =
       PrototypeAppDataStore.defaultSampleSurveys()
 
@@ -2999,7 +3230,9 @@ class PrototypeAppState(
     fun entitiesForSurvey(surveyId: String): List<GeospatialEntityItem> =
       PrototypeAppDataStore.entitiesForSurvey(surveyId)
 
-    /** Returns the standalone [SubmissionPreviewItem]s for [surveyId] from [PrototypeAppDataStore]. */
+    /**
+     * Returns the standalone [SubmissionPreviewItem]s for [surveyId] from [PrototypeAppDataStore].
+     */
     fun standaloneSubmissionsForSurvey(surveyId: String): List<SubmissionPreviewItem> =
       PrototypeAppDataStore.standaloneSubmissionsForSurvey(surveyId)
 
@@ -3040,9 +3273,7 @@ class PrototypeAppState(
 
 private val defaultClusterMapFeaturesUseCase = ClusterMapFeaturesUseCase()
 
-/**
- * Performs deterministic spatial clustering on [features] using [ClusterMapFeaturesUseCase].
- */
+/** Performs deterministic spatial clustering on [features] using [ClusterMapFeaturesUseCase]. */
 internal fun computeMapFeatureClusters(
   features: List<MapClusterFeatureItem>,
   radiusNormalized: Float,

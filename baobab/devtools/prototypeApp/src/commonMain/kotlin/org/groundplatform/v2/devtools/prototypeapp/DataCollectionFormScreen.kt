@@ -18,6 +18,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
@@ -517,128 +518,20 @@ private fun EntityRefStepMapOrListSelector(
         // Interactive Map Picker Canvas + Tappable Feature Chips for the Target Dataset
         OutlinedCard(modifier = Modifier.fillMaxWidth(), shape = MaterialTheme.shapes.medium) {
           Column(modifier = Modifier.fillMaxWidth()) {
-            Box(modifier = Modifier.fillMaxWidth().height(220.dp).background(Color(0xFF12281E))) {
-              Canvas(modifier = Modifier.fillMaxSize()) {
-                // Subtle survey terrain grid lines
-                val gridStepX = size.width / 6f
-                val gridStepY = size.height / 4f
-                for (i in 1..5) {
-                  drawLine(
-                    color = Color.White.copy(alpha = 0.08f),
-                    start = Offset(i * gridStepX, 0f),
-                    end = Offset(i * gridStepX, size.height),
-                    strokeWidth = 1f,
-                  )
-                }
-                for (j in 1..3) {
-                  drawLine(
-                    color = Color.White.copy(alpha = 0.08f),
-                    start = Offset(0f, j * gridStepY),
-                    end = Offset(size.width, j * gridStepY),
-                    strokeWidth = 1f,
-                  )
-                }
+            Box(
+              modifier =
+                Modifier.fillMaxWidth()
+                  .height(240.dp)
+                  .clip(MaterialTheme.shapes.medium)
+                  .background(Color.Transparent)
+            ) {
+              EntityRefFormMapboxViewport(
+                state = state,
+                form = form,
+                modifier = Modifier.fillMaxSize(),
+              )
 
-                // Draw user GPS dot
-                val gpsCenter =
-                  Offset(
-                    x = state.userGpsNormalizedX * size.width,
-                    y = state.userGpsNormalizedY * size.height,
-                  )
-                drawCircle(
-                  color = Color(0xFF42A5F5).copy(alpha = 0.25f),
-                  radius = 16.dp.toPx(),
-                  center = gpsCenter,
-                )
-                drawCircle(color = Color(0xFF2196F3), radius = 6.dp.toPx(), center = gpsCenter)
-
-                // Draw candidate entities in the target dataset (Point, LineString, Polygon)
-                allDatasetCandidates.take(300).forEach { candidate ->
-                  val isSelected = selectedEntity?.id == candidate.id
-                  val isPending = candidate.isPending
-                  val cx = candidate.normalizedX * size.width
-                  val cy = candidate.normalizedY * size.height
-                  val strokeColor =
-                    if (isSelected) {
-                      Color(0xFF00E676)
-                    } else {
-                      Color(candidate.markerColorHex)
-                    }
-                  when {
-                    candidate.geometryTypeLabel.equals("Point", ignoreCase = true) -> {
-                      drawCircle(
-                        color =
-                          strokeColor.copy(
-                            alpha =
-                              when {
-                                isSelected -> 0.45f
-                                isPending -> 0.14f
-                                else -> 0.28f
-                              }
-                          ),
-                        radius = if (isSelected) 22.dp.toPx() else 16.dp.toPx(),
-                        center = Offset(cx, cy),
-                      )
-                      drawCircle(color = strokeColor, radius = 8.dp.toPx(), center = Offset(cx, cy))
-                    }
-                    candidate.geometryTypeLabel.equals("LineString", ignoreCase = true) -> {
-                      val lineW = (0.24f * size.width).coerceAtLeast(48.dp.toPx())
-                      val lineH = (0.14f * size.height).coerceAtLeast(28.dp.toPx())
-                      val p1 = Offset(cx - lineW / 2f, cy + lineH / 2f)
-                      val p2 = Offset(cx, cy - lineH / 3f)
-                      val p3 = Offset(cx + lineW / 2f, cy - lineH / 2f)
-                      drawLine(
-                        color = strokeColor,
-                        start = p1,
-                        end = p2,
-                        strokeWidth = if (isSelected) 3.5.dp.toPx() else 2.5.dp.toPx(),
-                      )
-                      drawLine(
-                        color = strokeColor,
-                        start = p2,
-                        end = p3,
-                        strokeWidth = if (isSelected) 3.5.dp.toPx() else 2.5.dp.toPx(),
-                      )
-                      drawCircle(color = strokeColor, radius = 5.dp.toPx(), center = p2)
-                    }
-                    else -> {
-                      val boxW = (0.24f * size.width).coerceAtLeast(48.dp.toPx())
-                      val boxH = (0.16f * size.height).coerceAtLeast(34.dp.toPx())
-                      val topLeft = Offset(cx - boxW / 2f, cy - boxH / 2f)
-                      drawRect(
-                        color =
-                          strokeColor.copy(
-                            alpha =
-                              when {
-                                isSelected -> 0.35f
-                                isPending -> 0.10f
-                                else -> 0.22f
-                              }
-                          ),
-                        topLeft = topLeft,
-                        size = Size(boxW, boxH),
-                      )
-                      drawRect(
-                        color = strokeColor,
-                        topLeft = topLeft,
-                        size = Size(boxW, boxH),
-                        style =
-                          Stroke(
-                            width = if (isSelected) 3.dp.toPx() else 2.dp.toPx(),
-                            pathEffect =
-                              if (isPending) {
-                                PathEffect.dashPathEffect(floatArrayOf(8f, 6f))
-                              } else {
-                                null
-                              },
-                          ),
-                      )
-                    }
-                  }
-                }
-              }
-
-              // Top-left map badge
+              // Top-left map instructions badge
               Surface(
                 modifier = Modifier.align(Alignment.TopStart).padding(8.dp),
                 shape = MaterialTheme.shapes.small,

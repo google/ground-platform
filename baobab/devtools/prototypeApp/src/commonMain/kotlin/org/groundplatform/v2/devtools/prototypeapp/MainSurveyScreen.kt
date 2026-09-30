@@ -21,7 +21,6 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -29,7 +28,6 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -43,63 +41,30 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.CloudDone
-import androidx.compose.material.icons.filled.CloudOff
-import androidx.compose.material.icons.filled.CloudUpload
 import androidx.compose.material.icons.filled.Description
-import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Explore
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Layers
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.MyLocation
 import androidx.compose.material.icons.filled.Navigation
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.PictureAsPdf
-import androidx.compose.material.icons.filled.QrCode
-import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.SatelliteAlt
-import androidx.compose.material.icons.filled.Schedule
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.Share
-import androidx.compose.material.icons.filled.SwapHoriz
-import androidx.compose.material3.AssistChip
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
-import androidx.compose.material3.FilledTonalButton
-import androidx.compose.material3.FilledTonalIconButton
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.ModalDrawerSheet
-import androidx.compose.material3.NavigationDrawerItem
-import androidx.compose.material3.NavigationDrawerItemDefaults
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedCard
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SheetValue
@@ -115,28 +80,19 @@ import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import kotlin.math.roundToInt
-import org.groundplatform.v2.core.forms.ui.GroundAlertDialogOverlay
 import org.groundplatform.v2.core.forms.ui.GroundBadgeTone
 import org.groundplatform.v2.core.forms.ui.GroundModalBottomSheetOverlay
 import org.groundplatform.v2.core.forms.ui.GroundTonalBadge
-import org.groundplatform.v2.core.forms.ui.LocalGroundBrandFontFamily
 
 /**
  * 5. Main Survey UI screen (`PrototypeScreen.MAIN_SURVEY`) providing:
@@ -153,7 +109,7 @@ import org.groundplatform.v2.core.forms.ui.LocalGroundBrandFontFamily
  *     - When no map feature is selected, peeks at the bottom of the map with a Search bar and category
  *       filter chips (`All`, `Places`, `Map features`) and expands into the full
  *       searchable list of grouped map features and places.
-
+ *
  *     - When a map feature is selected (via map tap or list selection), transitions in-place to
  *       `EntityBottomSheetCard` showing its `simplestyle-spec` marker, baseline properties, form
  *       launchers, and `1:N` submission history.
@@ -318,178 +274,208 @@ internal fun SurveyMapView(state: PrototypeAppState) {
     }
   }
 
-  val peekHeight =
-    if (selectedEntity != null || state.selectedSubmission != null) {
-      152.dp
-    } else {
-      122.dp
-    }
-
-  BottomSheetScaffold(
-    scaffoldState = scaffoldState,
-    sheetPeekHeight = peekHeight,
-    sheetShape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
-    sheetContainerColor = MaterialTheme.colorScheme.surfaceContainerLow,
-    sheetTonalElevation = 0.dp,
-    sheetShadowElevation = 8.dp,
-    sheetSwipeEnabled = true,
-    sheetDragHandle = { BottomSheetDefaults.DragHandle() },
-    containerColor = Color.Transparent,
-    sheetContent = {
-      SurveyPersistentBottomSheetContent(
-        state = state,
-        modifier = Modifier.fillMaxWidth().fillMaxHeight(0.84f),
-      )
-    },
-  ) {
-    BoxWithConstraints(modifier = Modifier.fillMaxSize().background(Color.Transparent)) {
-      // Smoothly animate back to center when "Recenter" is tapped, or follow drag immediately
-      val shiftAnimSpec =
-        if (state.isCameraFollowingUser) {
-          tween<Float>(durationMillis = 280)
-        } else {
-          snap()
-        }
-      val animatedShiftX by
-        animateFloatAsState(
-          targetValue = state.mapWorldToScreenShiftX,
-          animationSpec = shiftAnimSpec,
-          label = "mapShiftX",
-        )
-      val animatedShiftY by
-        animateFloatAsState(
-          targetValue = state.mapWorldToScreenShiftY,
-          animationSpec = shiftAnimSpec,
-          label = "mapShiftY",
-        )
-
-      // 1. Real Mapbox GL JS Basemap (mapboxgl.Map via window.GroundMapboxBridge) + GeoJSON Layers
-      // & Mapbox Markers
-      MapboxBasemapView(
-        state = state,
-        animatedShiftX = animatedShiftX,
-        animatedShiftY = animatedShiftY,
-        modifier = Modifier.fillMaxSize(),
-      )
-
-      // 3. Top Map Overlay: Docked Navigation HUD Banner (flush with toolbar) + Floating Map Chips
-      Column(modifier = Modifier.align(Alignment.TopCenter).fillMaxWidth()) {
-        // Straight-Line Navigation HUD Banner docked to the top of the screen like Google Maps
-        val activeNav = state.activeNavigation
-        if (activeNav != null) {
-          StraightLineNavigationHudBanner(navState = activeNav, state = state)
-        }
-
-        // Floating Map Chips: GPS Accuracy Chip + "Layers" Button
-        Column(
-          modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 10.dp),
-          verticalArrangement = Arrangement.spacedBy(6.dp),
-        ) {
-          Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-          ) {
-            // Combined GPS Status / Auto-Center Chip over the map
-            Surface(
-              shape = MaterialTheme.shapes.large,
-              color = MaterialTheme.colorScheme.inverseSurface.copy(alpha = 0.92f),
-              contentColor = MaterialTheme.colorScheme.inverseOnSurface,
-              border =
-                BorderStroke(
-                  1.dp,
-                  if (state.isCameraFollowingUser) Color(0xFF4CAF50) else Color(0xFFFFCC80),
-                ),
-              shadowElevation = 2.dp,
-            ) {
-              Row(
-                modifier = Modifier.padding(horizontal = 11.dp, vertical = 6.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(5.dp),
-              ) {
-                Icon(
-                  imageVector =
-                    if (state.isCameraFollowingUser) {
-                      Icons.Default.SatelliteAlt
-                    } else {
-                      Icons.Default.MyLocation
-                    },
-                  contentDescription =
-                    if (state.isCameraFollowingUser) "GPS Auto-Center" else "Panned",
-                  tint =
-                    if (state.isCameraFollowingUser) Color(0xFF8BD6B1) else Color(0xFFFFCC80),
-                  modifier = Modifier.size(14.dp),
-                )
-                Text(
-                  text =
-                    if (state.isCameraFollowingUser) {
-                      "GPS: ${state.gnssStatusChipLabel}"
-                    } else {
-                      "Panned"
-                    },
-                  style = MaterialTheme.typography.labelSmall,
-                  color = MaterialTheme.colorScheme.inverseOnSurface,
-                  fontWeight = FontWeight.Bold,
-                )
-              }
-            }
-
-            // Layers FAB to control basemaps and map layers
-            LayersFloatingActionButton(state = state)
-          }
-
-          // Selected Cluster Balloon detail callout when a Mapbox cluster balloon is tapped
-          if (state.isMapClusteringActive && state.selectedCluster != null) {
-            MapClusterBalloonsOverlay(state = state)
-          }
-        }
+  BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+    // With a map feature selected, the sheet peeks at about half the screen: enough to show the
+    // feature's details while the map above frames the feature itself.
+    val peekHeight =
+      if (selectedEntity != null || state.selectedSubmission != null) {
+        (maxHeight * 0.45f).coerceAtLeast(152.dp)
+      } else {
+        122.dp
       }
 
-      // 5. Bottom Overlay Stack: Google Maps-style Horizontal Scale Widget in bottom-left,
-      //    optional "Recenter" button, and standard bottom-right Forms FAB
-      Row(
-        modifier =
-          Modifier.align(Alignment.BottomCenter)
-            .fillMaxWidth()
-            .padding(start = 14.dp, end = 14.dp, bottom = peekHeight + 10.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween,
-      ) {
-        Row(
-          verticalAlignment = Alignment.CenterVertically,
-          horizontalArrangement = Arrangement.spacedBy(10.dp),
+    // Fit a newly selected map feature into the map area above the sheet. Records without geometry
+    // replace the sheet's contents without moving the map.
+    LaunchedEffect(selectedEntity?.id, state.entitySelectionEpoch) {
+      val entity = selectedEntity ?: return@LaunchedEffect
+      if (!entity.hasGeometry) return@LaunchedEffect
+      val visibleHeight = (maxHeight - peekHeight).coerceAtLeast(0.dp)
+      val targetScreenY =
+        if (maxHeight > 0.dp) ((visibleHeight / 2) / maxHeight).coerceIn(0.10f, 0.50f) else 0.50f
+      state.recenterMapOnEntity(entity, targetScreenY)
+      val fittedZoomDelta =
+        framePlatformMapboxOnEntity(
+          bounds = state.resolveEntityLngLatBounds(entity),
+          bottomPaddingCssPx = peekHeight.value,
+          maxZoom = entity.geometryKind.maxFramingZoom,
+        )
+      state.syncMapZoomDelta(fittedZoomDelta.toFloat())
+    }
+
+    BottomSheetScaffold(
+      scaffoldState = scaffoldState,
+      sheetPeekHeight = peekHeight,
+      sheetShape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
+      sheetContainerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+      sheetTonalElevation = 0.dp,
+      sheetShadowElevation = 8.dp,
+      sheetSwipeEnabled = true,
+      sheetDragHandle = { BottomSheetDefaults.DragHandle() },
+      containerColor = Color.Transparent,
+      sheetContent = {
+        SurveyPersistentBottomSheetContent(
+          state = state,
+          modifier = Modifier.fillMaxWidth().fillMaxHeight(0.84f),
+        )
+      },
+    ) {
+      BoxWithConstraints(modifier = Modifier.fillMaxSize().background(Color.Transparent)) {
+        // Smoothly animate back to center when "Recenter" is tapped, or follow drag immediately
+        val shiftAnimSpec =
+          if (state.isCameraFollowingUser) {
+            tween<Float>(durationMillis = 280)
+          } else {
+            snap()
+          }
+        val animatedShiftX by
+          animateFloatAsState(
+            targetValue = state.mapWorldToScreenShiftX,
+            animationSpec = shiftAnimSpec,
+            label = "mapShiftX",
+          )
+        val animatedShiftY by
+          animateFloatAsState(
+            targetValue = state.mapWorldToScreenShiftY,
+            animationSpec = shiftAnimSpec,
+            label = "mapShiftY",
+          )
+
+        // 1. Real Mapbox GL JS Basemap (mapboxgl.Map via window.GroundMapboxBridge) + GeoJSON
+        // Layers
+        // & Mapbox Markers
+        MapboxBasemapView(
+          state = state,
+          animatedShiftX = animatedShiftX,
+          animatedShiftY = animatedShiftY,
+          modifier = Modifier.fillMaxSize(),
+        )
+
+        // 3. Top Map Overlay: Docked Navigation HUD Banner (flush with toolbar) + Floating Map
+        // Chips
+        Column(modifier = Modifier.align(Alignment.TopCenter).fillMaxWidth()) {
+          // Straight-Line Navigation HUD Banner docked to the top of the screen like Google Maps
+          val activeNav = state.activeNavigation
+          if (activeNav != null) {
+            StraightLineNavigationHudBanner(navState = activeNav, state = state)
+          }
+
+          // Floating Map Chips: GPS Accuracy Chip + "Layers" Button
+          Column(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 10.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp),
+          ) {
+            Row(
+              modifier = Modifier.fillMaxWidth(),
+              horizontalArrangement = Arrangement.SpaceBetween,
+              verticalAlignment = Alignment.CenterVertically,
+            ) {
+              // Combined GPS Status / Auto-Center Chip over the map
+              Surface(
+                shape = MaterialTheme.shapes.large,
+                color = MaterialTheme.colorScheme.inverseSurface.copy(alpha = 0.92f),
+                contentColor = MaterialTheme.colorScheme.inverseOnSurface,
+                border =
+                  BorderStroke(
+                    1.dp,
+                    if (state.isCameraFollowingUser) Color(0xFF4CAF50) else Color(0xFFFFCC80),
+                  ),
+                shadowElevation = 2.dp,
+              ) {
+                Row(
+                  modifier = Modifier.padding(horizontal = 11.dp, vertical = 6.dp),
+                  verticalAlignment = Alignment.CenterVertically,
+                  horizontalArrangement = Arrangement.spacedBy(5.dp),
+                ) {
+                  Icon(
+                    imageVector =
+                      if (state.isCameraFollowingUser) {
+                        Icons.Default.SatelliteAlt
+                      } else {
+                        Icons.Default.MyLocation
+                      },
+                    contentDescription =
+                      if (state.isCameraFollowingUser) "GPS Auto-Center" else "Panned",
+                    tint =
+                      if (state.isCameraFollowingUser) Color(0xFF8BD6B1) else Color(0xFFFFCC80),
+                    modifier = Modifier.size(14.dp),
+                  )
+                  Text(
+                    text =
+                      if (state.isCameraFollowingUser) {
+                        "GPS: ${state.gnssStatusChipLabel}"
+                      } else {
+                        "Panned"
+                      },
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.inverseOnSurface,
+                    fontWeight = FontWeight.Bold,
+                  )
+                }
+              }
+
+              // Layers FAB to control basemaps and map layers
+              LayersFloatingActionButton(state = state)
+            }
+
+            // Selected Cluster Balloon detail callout when a Mapbox cluster balloon is tapped
+            if (state.isMapClusteringActive && state.selectedCluster != null) {
+              MapClusterBalloonsOverlay(state = state)
+            }
+          }
+        }
+
+        // 5. Bottom Overlay Stack: Google Maps-style Horizontal Scale Widget in bottom-left,
+        //    bottom-center data collection FAB, and optional "Recenter" button in bottom-right
+        val isSheetExpanded =
+          state.isEntityBottomSheetExpanded || sheetState.targetValue == SheetValue.Expanded
+
+        // Scale bar in bottom-left
+        Box(
+          modifier =
+            Modifier.align(Alignment.BottomStart)
+              .padding(start = 14.dp, bottom = peekHeight + 10.dp),
         ) {
           GoogleMapsScaleBarWidget(
             scaleSpec = state.mapScaleBarSpec,
             isSatellite = state.selectedBasemapType == BasemapType.SATELLITE,
           )
-
-          if (!state.isCameraFollowingUser) {
-            ExtendedFloatingActionButton(
-              onClick = { state.recenterMapOnUser() },
-              icon = {
-                Icon(
-                  imageVector = Icons.Default.MyLocation,
-                  contentDescription = "Recenter map on GPS location",
-                  modifier = Modifier.size(18.dp),
-                )
-              },
-              text = {
-                Text(
-                  text = "Recenter",
-                  style = MaterialTheme.typography.labelLarge,
-                  fontWeight = FontWeight.Bold,
-                )
-              },
-              containerColor = MaterialTheme.colorScheme.primaryContainer,
-              contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-              modifier = Modifier.height(40.dp),
-            )
-          }
         }
 
-        // Standard bottom-right Floating Action Button to view available forms
-        DataCollectionFormsFab(state = state)
+        // Optional "Recenter" button in bottom-right when panned away from user
+        if (!isSheetExpanded && !state.isCameraFollowingUser) {
+          ExtendedFloatingActionButton(
+            onClick = { state.recenterMapOnUser() },
+            icon = {
+              Icon(
+                imageVector = Icons.Default.MyLocation,
+                contentDescription = "Recenter map on GPS location",
+                modifier = Modifier.size(18.dp),
+              )
+            },
+            text = {
+              Text(
+                text = "Recenter",
+                style = MaterialTheme.typography.labelLarge,
+                fontWeight = FontWeight.Bold,
+              )
+            },
+            containerColor = MaterialTheme.colorScheme.primaryContainer,
+            contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+            modifier =
+              Modifier.align(Alignment.BottomEnd)
+                .padding(end = 14.dp, bottom = peekHeight + 10.dp)
+                .height(40.dp),
+          )
+        }
+
+        // Bottom-centered data collection entry point FAB on mobile (only visible when sheet is
+        // collapsed)
+        if (!isSheetExpanded) {
+          Box(
+            modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = peekHeight + 10.dp),
+            contentAlignment = Alignment.Center,
+          ) { DataCollectionFormsFab(state = state) }
+        }
       }
     }
   }
@@ -637,23 +623,23 @@ internal fun SelectedClusterBalloonDetailCard(
 }
 
 /**
- * Floating Action Button (`FloatingActionButton`) on the Main Survey screen
- * that opens the [AvailableFormsModalSheet] list of available forms to
- * start data collection without requiring a geospatial entity to be pre-selected from the map.
+ * Floating Action Button (`FloatingActionButton`) on the Main Survey screen that opens the
+ * [AvailableFormsModalSheet] list of available forms to start data collection without requiring a
+ * geospatial entity to be pre-selected from the map.
  */
 @Composable
 internal fun DataCollectionFormsFab(state: PrototypeAppState, modifier: Modifier = Modifier) {
   val formsBg =
-    if (state.isAvailableFormsSheetOpen) {
-      Color(0xFF8BD6B1)
+    if (state.isDarkTheme) {
+      MaterialTheme.colorScheme.primary
     } else {
-      MaterialTheme.colorScheme.inverseSurface.copy(alpha = 0.93f)
+      MaterialTheme.colorScheme.primaryContainer
     }
   val formsContent =
-    if (state.isAvailableFormsSheetOpen) {
-      Color(0xFF003825)
+    if (state.isDarkTheme) {
+      MaterialTheme.colorScheme.onPrimary
     } else {
-      MaterialTheme.colorScheme.inverseOnSurface
+      MaterialTheme.colorScheme.onPrimaryContainer
     }
   FloatingActionButton(
     onClick = { state.openAvailableFormsSheet() },
@@ -662,8 +648,8 @@ internal fun DataCollectionFormsFab(state: PrototypeAppState, modifier: Modifier
     contentColor = formsContent,
   ) {
     Icon(
-      imageVector = Icons.Default.Description,
-      contentDescription = "Available forms",
+      imageVector = Icons.Default.Add,
+      contentDescription = "Collect data",
     )
   }
 }

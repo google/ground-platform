@@ -35,6 +35,9 @@ typealias PrototypeScreen = org.groundplatform.v2.devtools.prototypeapp.domain.m
 typealias MainSurveyViewMode =
   org.groundplatform.v2.devtools.prototypeapp.domain.model.MainSurveyViewMode
 
+typealias EntityDetailsPane =
+  org.groundplatform.v2.devtools.prototypeapp.domain.model.EntityDetailsPane
+
 typealias ListFilterTab = org.groundplatform.v2.devtools.prototypeapp.domain.model.ListFilterTab
 
 typealias LocationLockState =

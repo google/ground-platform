@@ -276,7 +276,8 @@ object PrototypeFakeEntitiesData {
                       SubmissionFieldEntry(
                         questionName = "deforestation_free_attestation",
                         questionLabel = "Post-2020 Deforestation-Free Verification",
-                        answerValue = "yes_verified (Confirmed No Forest Conversion Since Dec 31, 2020)",
+                        answerValue =
+                          "yes_verified (Confirmed No Forest Conversion Since Dec 31, 2020)",
                       ),
                     ),
                 ),
@@ -405,7 +406,8 @@ object PrototypeFakeEntitiesData {
                       SubmissionFieldEntry(
                         questionName = "plot_perimeter",
                         questionLabel = "Commodity Plot Perimeter Walk (Pan Override Allowed)",
-                        answerValue = "5 vertices walked (2.18 ha; pan override along stream ravine)",
+                        answerValue =
+                          "5 vertices walked (2.18 ha; pan override along stream ravine)",
                       ),
                       SubmissionFieldEntry(
                         questionName = "plot_center_point",
@@ -1032,15 +1034,14 @@ object PrototypeFakeEntitiesData {
     }
 
   /**
-   * Sample Geospatial Entities (`EntityRecord`s) across **Polygon**, **LineString**, and
-   * **Point** geometries showcasing the 3-stage `simplestyle-spec` marker progression driven by
-   * `save_to`:
+   * Sample Geospatial Entities (`EntityRecord`s) across **Polygon**, **LineString**, and **Point**
+   * geometries showcasing the 3-stage `simplestyle-spec` marker progression driven by `save_to`:
    * - Stage 1 (`"○"` Empty Circle, `#E65100` Orange): `entity-nyr-112` (Pending baseline, 0
-   *   submissions)
+   * submissions)
    * - Stage 2 (`"◐"` Half-Filled Circle, `#F9AB00` Amber): `entity-nyr-108` & `entity-station-01`
-   *   (In progress, 1st stage recorded)
+   * (In progress, 1st stage recorded)
    * - Stage 3 (`"✓"` Checkmark, `#1E8E3E` Green / `#1565C0` Blue): `entity-nyr-104` &
-   *   `entity-shade-201` (Completed)
+   * `entity-shade-201` (Completed)
    */
   fun defaultGeospatialEntities(): List<GeospatialEntityItem> =
     listOf(
@@ -1068,6 +1069,7 @@ object PrototypeFakeEntitiesData {
             "fill" to "#1E8E3E",
             "Farmer / Owner" to "Josephat Kamau",
             "Cooperative" to "Othaya Farmers Co-op",
+            "Washing Station" to "entity-station-01",
             "Primary Cultivar" to "SL28 & Ruiru 11",
             "Elevation" to "1,820 m",
           ),
@@ -1143,6 +1145,7 @@ object PrototypeFakeEntitiesData {
             "stroke" to "#1565C0",
             "fill" to "#1565C0",
             "Community Group" to "Chinga Restoration CFA",
+            "Adjacent Parcel" to "entity-nyr-104",
             "Target survival rate" to "85%",
             "Planting Cohort" to "2025 Long Rains",
             "Elevation" to "1,865 m",
@@ -1274,6 +1277,7 @@ object PrototypeFakeEntitiesData {
             "fill" to "#F9AB00",
             "Farmer / Owner" to "Beatrice Njeri",
             "Cooperative" to "Othaya Farmers Co-op",
+            "Washing Station" to "entity-station-01",
             "Primary Cultivar" to "Batian & SL34",
             "Elevation" to "1,795 m",
           ),
@@ -1342,6 +1346,7 @@ object PrototypeFakeEntitiesData {
             "fill" to "#E65100",
             "Farmer / Owner" to "Daniel Kariuki",
             "Cooperative" to "Othaya Farmers Co-op",
+            "Washing Station" to "entity-station-01",
             "Primary Cultivar" to "SL28 & Batian",
             "Elevation" to "1,845 m",
           ),

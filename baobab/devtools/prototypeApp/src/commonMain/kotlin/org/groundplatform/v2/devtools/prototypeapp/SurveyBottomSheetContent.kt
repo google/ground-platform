@@ -13,28 +13,17 @@
  */
 package org.groundplatform.v2.devtools.prototypeapp
 
-import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.snap
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -44,100 +33,49 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.automirrored.filled.Logout
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.CloudDone
 import androidx.compose.material.icons.filled.CloudOff
 import androidx.compose.material.icons.filled.CloudUpload
 import androidx.compose.material.icons.filled.Description
-import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Explore
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Layers
 import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material.icons.filled.Map
-import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.MyLocation
 import androidx.compose.material.icons.filled.Navigation
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.PictureAsPdf
-import androidx.compose.material.icons.filled.QrCode
-import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.SatelliteAlt
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Share
-import androidx.compose.material.icons.filled.SwapHoriz
 import androidx.compose.material3.AssistChip
-import androidx.compose.material3.BottomSheetDefaults
-import androidx.compose.material3.BottomSheetScaffold
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExtendedFloatingActionButton
-import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.ModalDrawerSheet
-import androidx.compose.material3.NavigationDrawerItem
-import androidx.compose.material3.NavigationDrawerItemDefaults
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.SegmentedButton
-import androidx.compose.material3.SegmentedButtonDefaults
-import androidx.compose.material3.SheetValue
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.rememberBottomSheetScaffoldState
-import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import kotlin.math.roundToInt
-import org.groundplatform.v2.core.forms.ui.GroundAlertDialogOverlay
 import org.groundplatform.v2.core.forms.ui.GroundBadgeTone
-import org.groundplatform.v2.core.forms.ui.GroundModalBottomSheetOverlay
 import org.groundplatform.v2.core.forms.ui.GroundTonalBadge
-import org.groundplatform.v2.core.forms.ui.LocalGroundBrandFontFamily
-
 
 /**
  * Unified Persistent Bottom Sheet content for [SurveyMapView] (Option A):
@@ -172,13 +110,13 @@ internal fun SurveyPersistentBottomSheetContent(
   val textColor = if (isDark) Color.White else Color(0xFF111827)
 
   when {
+    // The web dashboard's left-hand panel always lists map features; details open in the floating
+    // card on the right (`WebEntityDetailsCard`), so browsing and inspecting stay side by side.
+    isSidePanel -> {
+      BottomSheetSearchableListContent(state = state, modifier = modifier, isSidePanel = true)
+    }
     selectedEntity != null -> {
-      EntityBottomSheetCard(
-        entity = selectedEntity,
-        state = state,
-        modifier = modifier,
-        isSidePanel = isSidePanel,
-      )
+      EntityBottomSheetCard(entity = selectedEntity, state = state, modifier = modifier)
     }
     selectedSubmission != null -> {
       Column(
@@ -200,432 +138,11 @@ internal fun SurveyPersistentBottomSheetContent(
       }
     }
     else -> {
-      BottomSheetSearchableListContent(state = state, modifier = modifier, isSidePanel = isSidePanel)
-    }
-  }
-}
-
-/**
- * Shared Entity Summary Header used in both [EntityBottomSheetCard] and compact list cards in
- * [BottomSheetSearchableListContent].
- */
-@Composable
-internal fun EntitySummaryHeader(
-  entity: GeospatialEntityItem,
-  state: PrototypeAppState,
-  compact: Boolean = false,
-  trailingContent: @Composable RowScope.() -> Unit = {},
-) {
-  val areaFormatted =
-    if (state.unitSystem == MeasurementUnitSystem.METRIC) {
-      "${entity.areaHectares} ha"
-    } else {
-      val acres = ((entity.areaHectares * 2.47105) * 100.0).roundToInt() / 100.0
-      "$acres acres"
-    }
-  val perimeterFormatted =
-    if (state.unitSystem == MeasurementUnitSystem.METRIC) {
-      "${entity.perimeterMeters} m"
-    } else {
-      val feet = (entity.perimeterMeters * 3.28084).roundToInt()
-      "$feet ft"
-    }
-  val badgeSize = if (compact) 22.dp else 28.dp
-
-  Row(
-    modifier = Modifier.fillMaxWidth(),
-    horizontalArrangement = Arrangement.SpaceBetween,
-    verticalAlignment = Alignment.CenterVertically,
-  ) {
-    Row(
-      modifier = Modifier.weight(1f),
-      horizontalArrangement = Arrangement.spacedBy(8.dp),
-      verticalAlignment = Alignment.CenterVertically,
-    ) {
-      Box(
-        modifier =
-          Modifier.size(badgeSize).clip(CircleShape).background(Color(entity.markerColorHex)),
-        contentAlignment = Alignment.Center,
-      ) {
-        Text(
-          text = entity.markerSymbol,
-          style =
-            if (compact) {
-              MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.ExtraBold)
-            } else {
-              MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold)
-            },
-          color = Color.White,
-        )
-      }
-      Column(modifier = Modifier.weight(1f)) {
-        Text(
-          text = entity.label,
-          style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
-          color = MaterialTheme.colorScheme.onSurface,
-          maxLines = 1,
-          overflow = TextOverflow.Ellipsis,
-        )
-        Text(
-          text =
-            "${entity.datasetName} • ${entity.geometryTypeLabel} ($areaFormatted, $perimeterFormatted)",
-          style = MaterialTheme.typography.labelSmall,
-          color = MaterialTheme.colorScheme.onSurfaceVariant,
-          maxLines = 1,
-          overflow = TextOverflow.Ellipsis,
-        )
-      }
-    }
-
-    Row(
-      verticalAlignment = Alignment.CenterVertically,
-      horizontalArrangement = Arrangement.spacedBy(4.dp),
-      content = trailingContent,
-    )
-  }
-}
-
-/**
- * Shared row of `simplestyle-spec` workflow status, `1:N` submission count, `GeoID`, sync status,
- * live GNSS wayfinding badge, and quick action chips (`Navigate`, `QR Code`, `Share PDF`).
- */
-@Composable
-internal fun EntityMetadataAndActionsRow(
-  entity: GeospatialEntityItem,
-  state: PrototypeAppState,
-  showShareAndQrActions: Boolean,
-  showNavigateAction: Boolean = true,
-  showDistanceAndHeading: Boolean = showNavigateAction,
-  showSyncStatus: Boolean = true,
-) {
-  val entityWayfindingBadge = state.formattedWayfindingBadgeForEntity(entity.id)
-  val isNavigatingEntity = state.isNavigatingToEntity(entity.id)
-
-  Row(
-    modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
-    horizontalArrangement = Arrangement.spacedBy(6.dp),
-    verticalAlignment = Alignment.CenterVertically,
-  ) {
-    // Data-Driven Marker Symbol & Status Badge (○ Pending -> ◐ In progress -> ✓ Completed)
-    GroundTonalBadge(
-      text = entity.mapStatusSummaryBadge,
-      tone =
-        when (entity.markerSymbol) {
-          "✓" -> GroundBadgeTone.PRIMARY
-          "◐" -> GroundBadgeTone.TERTIARY
-          else -> GroundBadgeTone.WARNING
-        },
-    )
-
-    // 1:N Submission Count Badge
-    GroundTonalBadge(
-      text =
-        "${entity.submissionCount} ${if (entity.submissionCount == 1) "submission" else "submissions"}",
-      tone = GroundBadgeTone.SECONDARY,
-    )
-
-    // GeoID Badge
-    GroundTonalBadge(
-      text = "GeoID: ${entity.geoId}",
-      tone = GroundBadgeTone.SECONDARY,
-      monospace = true,
-    )
-
-    // Sync Status Indicator Badge
-    if (showSyncStatus) {
-      SyncStatusIndicatorBadge(
-        syncStatus = entity.syncStatus,
-        onClick = { state.cycleEntitySyncStatus(entity.id) },
+      BottomSheetSearchableListContent(
+        state = state,
+        modifier = modifier,
+        isSidePanel = isSidePanel
       )
-    }
-
-    // Live Distance & Compass Bearing Badge from User GPS
-    if (showDistanceAndHeading && entityWayfindingBadge.isNotEmpty()) {
-      GroundTonalBadge(
-        text = "➤ $entityWayfindingBadge",
-        tone = GroundBadgeTone.TERTIARY,
-        monospace = true,
-      )
-    }
-
-    // Straight-Line Navigation Toggle Button for Geospatial Entity
-    if (showNavigateAction) {
-      FilterChip(
-        selected = isNavigatingEntity,
-        onClick = { state.toggleNavigationToEntity(entity.id) },
-        label = {
-          Text(
-            text = if (isNavigatingEntity) "Stop Nav" else "Navigate",
-            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            softWrap = false,
-          )
-        },
-        leadingIcon = {
-          Icon(
-            imageVector = Icons.Default.Navigation,
-            contentDescription = "Straight-line navigate to entity",
-            modifier = Modifier.size(13.dp),
-          )
-        },
-      )
-    }
-
-    if (showShareAndQrActions) {
-      // QR Code Link
-      AssistChip(
-        onClick = { state.openEntityQrCode(entity.id) },
-        label = {
-          Text(
-            text = "QR Code",
-            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            softWrap = false,
-          )
-        },
-        leadingIcon = {
-          Icon(
-            imageVector = Icons.Default.QrCode,
-            contentDescription = "${entity.singularTypeLabel} QR Code",
-            modifier = Modifier.size(13.dp),
-          )
-        },
-      )
-
-      // Share PDF Link
-      AssistChip(
-        onClick = { state.shareEntityPdf(entity.id) },
-        label = {
-          Text(
-            text = "Share PDF",
-            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            softWrap = false,
-          )
-        },
-        leadingIcon = {
-          Icon(
-            imageVector = Icons.Default.Share,
-            contentDescription = "Share ${entity.singularTypeLabel} PDF",
-            modifier = Modifier.size(13.dp),
-          )
-        },
-      )
-    }
-  }
-}
-
-/**
- * Bottom Sheet detail card shown when a survey location is selected (from the map or the bottom
- * sheet list):
- * - Shows main location metadata via [EntitySummaryHeader] and [EntityMetadataAndActionsRow].
- * - Shows a `"All map features"` back pill to return directly to the searchable list in the bottom sheet.
- * - Shows available form collection buttons and the unified `1:N` list of submissions grouped by
- * form title via [FormGroupedSubmissionsSection].
- *
- * When [isSidePanel] is `true`, the sheet expansion toggle and mobile-only field actions (`Navigate`,
- * data collection launchers, sync status chips) are hidden.
- */
-@Composable
-internal fun EntityBottomSheetCard(
-  entity: GeospatialEntityItem,
-  state: PrototypeAppState,
-  modifier: Modifier = Modifier,
-  isSidePanel: Boolean = false,
-) {
-  val selectedSubmission = state.selectedSubmission
-  val isDark = state.isDarkTheme
-  val textColor = if (isDark) Color.White else Color(0xFF111827)
-
-  Column(
-    modifier = modifier.padding(horizontal = 16.dp, vertical = 4.dp),
-    verticalArrangement = Arrangement.spacedBy(8.dp),
-  ) {
-    // Shared Header + Back to All Map Features pill + Expand/Collapse + Close
-    EntitySummaryHeader(
-      entity = entity,
-      state = state,
-      compact = false,
-      trailingContent = {
-        Surface(
-          onClick = { state.returnToBottomSheetList() },
-          shape = MaterialTheme.shapes.small,
-          color = MaterialTheme.colorScheme.secondaryContainer,
-          contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-        ) {
-          Row(
-            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(3.dp),
-          ) {
-            Icon(
-              imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-              contentDescription = "Back to all map features list",
-              modifier = Modifier.size(12.dp),
-            )
-            Text(
-              text = "All map features",
-              style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-            )
-          }
-        }
-
-        if (!isSidePanel) {
-          IconButton(
-            onClick = { state.toggleEntityBottomSheetExpanded() },
-            modifier = Modifier.size(28.dp),
-          ) {
-            Icon(
-              imageVector =
-                if (state.isEntityBottomSheetExpanded) {
-                  Icons.Default.KeyboardArrowDown
-                } else {
-                  Icons.Default.KeyboardArrowUp
-                },
-              contentDescription = "Toggle Sheet Expansion",
-              tint = MaterialTheme.colorScheme.onSurfaceVariant,
-              modifier = Modifier.size(18.dp),
-            )
-          }
-        }
-
-        IconButton(onClick = { state.selectEntity(null) }, modifier = Modifier.size(28.dp)) {
-          Icon(
-            imageVector = Icons.Default.Close,
-            contentDescription = "Close Location Sheet",
-            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.size(18.dp),
-          )
-        }
-      },
-    )
-
-    // Shared Metadata Badges & Share/Navigate Actions Row
-    EntityMetadataAndActionsRow(
-      entity = entity,
-      state = state,
-      showShareAndQrActions = true,
-      showNavigateAction = !isSidePanel,
-      showDistanceAndHeading = !isSidePanel,
-      showSyncStatus = !isSidePanel,
-    )
-
-    // Organizer-defined Action Buttons for this dataset type (`form.targetDatasetId ==
-    // entity.datasetId`). Data collection happens on mobile, so the side panel omits them.
-    val entityForms = if (isSidePanel) emptyList() else state.formsForEntity(entity)
-    if (entityForms.isNotEmpty()) {
-      Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        Text(
-          text = "DATA COLLECTION FOR THIS ${entity.singularTypeLabel.uppercase()}",
-          style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-          color = MaterialTheme.colorScheme.primary,
-        )
-        Row(
-          modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
-          horizontalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-          entityForms.forEach { form ->
-            val isEnabled = state.isFormButtonEnabled(entity, form)
-            Button(
-              onClick = { state.launchFormForEntity(entity.id, form.id) },
-              enabled = isEnabled,
-              shape = MaterialTheme.shapes.small,
-            ) {
-              Icon(
-                imageVector =
-                  if (isEnabled) Icons.Default.Description else Icons.Default.CheckCircle,
-                contentDescription = null,
-                modifier = Modifier.size(14.dp),
-              )
-              Spacer(modifier = Modifier.width(5.dp))
-              Text(
-                text =
-                  if (isEnabled) {
-                    form.ctaLabel
-                  } else {
-                    "${form.ctaLabel} (Completed)"
-                  },
-                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-              )
-            }
-          }
-        }
-        val triggeredBanner = state.activeSurveyNotice
-        if (triggeredBanner != null) {
-          Text(
-            text = triggeredBanner,
-            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
-            color = MaterialTheme.colorScheme.primary,
-          )
-        }
-      }
-    }
-
-    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-
-    // Scrollable Body inside Bottom Sheet: Baseline Properties + Submission Data / History
-    Column(
-      modifier = Modifier.weight(1f).fillMaxWidth().verticalScroll(rememberScrollState()),
-      verticalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-      // Baseline Attributes (`EntityRecord.properties`)
-      Row(
-        modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-      ) {
-        entity.properties.forEach { (key, value) ->
-          Surface(
-            shape = MaterialTheme.shapes.small,
-            color = MaterialTheme.colorScheme.surfaceContainer,
-          ) {
-            Column(modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)) {
-              Text(
-                text = key,
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-              )
-              Text(
-                text = value,
-                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
-                color = MaterialTheme.colorScheme.onSurface,
-              )
-            }
-          }
-        }
-      }
-
-      // --- UNIFIED 1:N SUBMISSION DISPLAY LOGIC ---
-      if (selectedSubmission != null && selectedSubmission.entityId == entity.id) {
-        SubmissionFullDetailsCard(
-          submission = selectedSubmission,
-          state = state,
-          isDark = isDark,
-          textColor = textColor,
-          backLabel = "Back to all ${entity.submissions.size} submissions",
-          onBack = { state.selectSubmissionDetail(null) },
-          onSharePdf = { state.shareSubmissionPdf(selectedSubmission.id) },
-          isSidePanel = isSidePanel,
-        )
-      } else if (entity.submissions.isNotEmpty()) {
-        FormGroupedSubmissionsSection(
-          groups = state.groupedSubmissionsForEntity(entity),
-          state = state,
-          showTargetEntityLabel = false,
-          showFormActionSubtitle = false,
-          onSelectSubmission = { state.selectSubmissionDetail(it.id) },
-          showSyncStatus = !isSidePanel,
-        )
-      } else {
-        Text(
-          text =
-            "No submissions recorded yet for this ${entity.singularTypeLabel.lowercase()} (Marker: ${entity.markerSymbol} ${entity.workflowStatus}). Launch a form above to advance its marker via save_to (○ → ◐ → ✓).",
-          style = MaterialTheme.typography.bodySmall,
-          color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-      }
     }
   }
 }
@@ -811,11 +328,11 @@ internal fun FormGroupedSubmissionsSection(
 /**
  * Searchable List content embedded inside the unified persistent bottom sheet (
  * [SurveyPersistentBottomSheetContent]) when no specific entity or submission is selected:
- * - Peeks at the bottom of the map with the Search bar (`"Search..."`)
- *   and an Expand/Collapse sheet button.
+ * - Peeks at the bottom of the map with the Search bar (`"Search..."`) and an Expand/Collapse sheet
+ * button.
  * - Expands to display **Map layers** (grouped by spatial layer with un-nested entity records,
- *   reusing [EntitySummaryHeader] and [EntityMetadataAndActionsRow]), **Data tables** (tabular datasets),
- *   and **Places** (geographic places, landmarks, and coordinates in the survey region).
+ * reusing [EntitySummaryHeader] and [EntityMetadataAndActionsRow]), **Data tables** (tabular
+ * datasets), and **Places** (geographic places, landmarks, and coordinates in the survey region).
  *
  * When [isSidePanel] is `true`, the Expand/Collapse sheet button is hidden.
  */
@@ -930,8 +447,6 @@ internal fun BottomSheetSearchableListContent(
         }
       }
 
-
-
       // Offline / Airplane mode banner in the bottom sheet explaining that search is only in local
       // map features and that Places search is not available offline.
       if (isAirplaneMode) {
@@ -964,7 +479,8 @@ internal fun BottomSheetSearchableListContent(
                   color = MaterialTheme.colorScheme.onErrorContainer,
                 )
                 Text(
-                  text = "Search is only in local ${state.activeEntitiesCountNoun}. Places search is not available offline.",
+                  text =
+                    "Search is only in local ${state.activeEntitiesCountNoun}. Places search is not available offline.",
                   style = MaterialTheme.typography.labelSmall,
                   color = MaterialTheme.colorScheme.onErrorContainer.copy(alpha = 0.9f),
                 )
@@ -1060,8 +576,7 @@ internal fun BottomSheetSearchableListContent(
                 }
                 Text(
                   text = layer?.label ?: group.datasetName,
-                  style =
-                    MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+                  style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
                   color = MaterialTheme.colorScheme.onSurface,
                 )
               }
@@ -1072,64 +587,21 @@ internal fun BottomSheetSearchableListContent(
               )
             }
 
-            // Map features belonging to this dataset group elevated to direct list items (no outer card nesting)
-            val maxRenderedFeatures = 40
+            // One single-line row per entity record: geometry icon, label, and status icon.
+            val maxRenderedFeatures = 200
             val displayedFeatures =
               if (group.entities.size > maxRenderedFeatures) {
                 group.entities.take(maxRenderedFeatures)
               } else {
                 group.entities
               }
-            displayedFeatures.forEach { entity ->
-              OutlinedCard(
-                onClick = { state.selectEntityFromList(entity.id) },
-                modifier = Modifier.fillMaxWidth(),
-                shape = MaterialTheme.shapes.small,
-                colors =
-                  CardDefaults.outlinedCardColors(
-                    containerColor = MaterialTheme.colorScheme.surface
-                  ),
-              ) {
-                Column(
-                  modifier = Modifier.fillMaxWidth().padding(10.dp),
-                  verticalArrangement = Arrangement.spacedBy(6.dp),
-                ) {
-                  EntitySummaryHeader(
-                    entity = entity,
-                    state = state,
-                    compact = true,
-                    trailingContent = {
-                      Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(3.dp),
-                      ) {
-                        Text(
-                          text = "Inspect",
-                          style =
-                            MaterialTheme.typography.labelSmall.copy(
-                              fontWeight = FontWeight.Bold
-                            ),
-                          color = MaterialTheme.colorScheme.primary,
-                        )
-                        Icon(
-                          imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                          contentDescription = null,
-                          tint = MaterialTheme.colorScheme.primary,
-                          modifier = Modifier.size(12.dp),
-                        )
-                      }
-                    },
-                  )
-
-                  EntityMetadataAndActionsRow(
-                    entity = entity,
-                    state = state,
-                    showShareAndQrActions = false,
-                    showNavigateAction = !isSidePanel,
-                    showDistanceAndHeading = !isSidePanel,
-                    showSyncStatus = !isSidePanel,
-                  )
-                }
+            Column(modifier = Modifier.fillMaxWidth()) {
+              displayedFeatures.forEach { entity ->
+                EntityListRow(
+                  entity = entity,
+                  isSelected = entity.id == state.selectedEntityId,
+                  onClick = { state.selectEntityFromList(entity.id) },
+                )
               }
             }
             if (group.entities.size > maxRenderedFeatures) {
@@ -1152,7 +624,8 @@ internal fun BottomSheetSearchableListContent(
         }
       }
 
-      // 2. DATA TABLES SECTION — only displayed when tabular datasets exist and have matching entries
+      // 2. DATA TABLES SECTION — only displayed when tabular datasets exist and have matching
+      // entries
       // (Currently no non-spatial tabular datasets configured in the active survey)
 
       // 3. PLACES SECTION — only available when online (!isAirplaneMode) and entries match
@@ -1327,22 +800,13 @@ internal fun BottomSheetSearchableListContent(
               when {
                 isAirplaneMode ->
                   "No local map layers match \"${state.listSearchQuery}\". Places search is not available offline."
-                else ->
-                  "No map layers or places match \"${state.listSearchQuery}\"."
+                else -> "No map layers or places match \"${state.listSearchQuery}\"."
               },
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
           )
         }
       }
-    }
-
-    // Bottom-centered Floating Action Button inside the expanded sheet as well
-    if (!isSidePanel && state.isEntityBottomSheetExpanded) {
-      Box(
-        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
-        contentAlignment = Alignment.Center,
-      ) { DataCollectionFormsFab(state = state) }
     }
   }
 }
@@ -1358,6 +822,7 @@ internal fun SubmissionFullDetailsCard(
   onBack: () -> Unit,
   onSharePdf: () -> Unit,
   isSidePanel: Boolean = false,
+  showBackButton: Boolean = true,
 ) {
   OutlinedCard(
     modifier = Modifier.fillMaxWidth(),
@@ -1375,16 +840,18 @@ internal fun SubmissionFullDetailsCard(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(6.dp),
       ) {
-        IconButton(
-          onClick = { onBack() },
-          modifier = Modifier.size(28.dp),
-        ) {
-          Icon(
-            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-            contentDescription = backLabel,
-            tint = MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier.size(18.dp),
-          )
+        if (showBackButton) {
+          IconButton(
+            onClick = { onBack() },
+            modifier = Modifier.size(28.dp),
+          ) {
+            Icon(
+              imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+              contentDescription = backLabel,
+              tint = MaterialTheme.colorScheme.onSurface,
+              modifier = Modifier.size(18.dp),
+            )
+          }
         }
         Text(
           text = submission.formTitle,

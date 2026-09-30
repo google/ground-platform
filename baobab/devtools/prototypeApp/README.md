@@ -41,15 +41,19 @@ UX Co-Design Workbench for rapid iteration with UX designers.
         Replaces separate `Map | List` screens with a single multi-stage bottom
         sheet over the live Mapbox canvas:
         -   **Default / Peek State (No site selected)**: Peeks at the bottom of
-            the map with the **Search bar** and category filter chips (`All`,
-            `Places`, `Map features`) and expands into the
-            full searchable list (`BottomSheetSearchableListContent`).
+            the map with the **Search bar** and expands into the full
+            searchable list (`BottomSheetSearchableListContent`), with one line
+            per map feature (`EntityListRow`: geometry icon, label, and marker
+            circle, filled with the `marker-color` and holding the
+            `marker-symbol`; long-press for the status text).
         -   **Selected Site State (`EntityBottomSheetCard`)**: Tapping a site on
-            the map or selecting a site in the expanded list transitions the
-            bottom sheet in-place to `EntityBottomSheetCard` (with a `← All
-            sites` back pill), reusing shared `EntitySummaryHeader`,
-            `EntityMetadataAndActionsRow`, and `FormGroupedSubmissionsSection`
-            composables.
+            the map or in the list fits the whole feature into the map above the sheet and replaces
+            the sheet's contents with its details, at about half the screen's
+            height. The header shows a status chip (`marker-symbol` and status
+            text on the `marker-color`). Details open on the feature's properties; **Submissions
+            (n)** is one tap away, and a submission opens in a document-style
+            view. Offline, only submissions stored on the device are listed.
+            A **pending uploads** chip opens `Uploads` filtered to the feature.
     -   **Interactive Map View & `Layers` Drawer (`LayerDef`)**: Displays Ground
         geospatial entity geometries with a **`Layers`** control button
         (`LayersControlSheet`):
@@ -57,6 +61,8 @@ UX Co-Design Workbench for rapid iteration with UX designers.
             tables) representing target locations/features on the map (`#1`–`#4`
             with GNSS wayfinding HUD). Form submission geometries are not shown
             on the map or in cluster chips.
+        -   **Clustering**: Map features group into cluster balloons when zoomed
+            out below about 13z.
     -   **Site-First Entity Bottom Sheet & `simplestyle-spec` Marker Progression**:
         -   All forms linked to an entity dataset follow a unified **`1:N`
             relationship** with entities.
@@ -86,21 +92,30 @@ prototype, so selections and survey changes carry over.
     menu button to collapse or expand the left panel, the active survey title
     with its location below it, a **Manage survey** button to enter the
     **Survey editor**, and user profile controls.
--   **Left panel**: Shows the same content as the mobile bottom sheet in
-    side-panel mode: the searchable list of map features and places, or the
-    selected map feature's details and `1:N` submissions. Field-only actions
-    (data collection launchers, **Navigate**) are hidden. Can be smoothly
+-   **Left panel**: The searchable list of map features and places. Each map
+    feature is a single line: a geometry icon (point, line, polygon, or none
+    for data table records), its label, and its marker circle (filled
+    with the `marker-color`, holding the `marker-symbol`). Hover a row to see its status text. The panel can be
     collapsed or expanded using the navigation menu button in the top toolbar.
--   **Map**: The live survey map fills the main area. Click a map feature to
-    select it; click empty map to clear the selection.
--   **Data tables**: While a map feature is selected, a panel docks to the
-    bottom of the map. Collapsed, it shows one tab per table; pick a tab or use
-    the arrow button to expand it. Tabs are:
-    -   The map feature's **Map layer**, listing every feature in it with the
-        selected one highlighted. Click a row to select that feature.
-    -   One table per **Form** with submissions for the selected feature, with a
-        column per question. Click a row to open that submission in the left
-        panel.
+-   **Map**: The live survey map fills the main area. Selecting a map feature
+    (in the list, on the map, or in a table) fits the whole feature into the
+    uncovered part of the map (points stop at about 16z); records
+    without geometry don't move the map. Click empty map to clear the
+    selection. A floating **Map / Satellite** toggle sits in the upper-left
+    corner; the scale bar stays in the lower-left.
+-   **Details card**: The selected feature's details float in the upper-right
+    corner (`WebEntityDetailsCard`): a status chip (`marker-symbol` and status
+    text on the `marker-color`) under the label, then its properties arranged vertically, with
+    references to other records shown as links. **Show in table** opens the
+    bottom table on the feature's row. **Submissions (n)** lists its
+    submissions grouped by form; opening one shows it in a second tab of the
+    card, in a document-style view.
+-   **Data tables**: A collapsible panel docks to the bottom of the map with
+    one tab per entity dataset (map layers and data tables), with the selected
+    record highlighted. It never opens on its own: expand it with its arrow
+    button, a tab, or the card's **Show in table** button. Click a row to
+    select that record. Submissions are never shown in tables, since their data
+    can be hierarchical.
 
 Code lives in `WebDashboardPage.kt`.
 

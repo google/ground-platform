@@ -119,13 +119,25 @@ internal actual fun clearPlatformMapboxPlace() {
   }
 }
 
-internal actual fun recenterPlatformMapboxOnEntity(
-  lng: Double,
-  lat: Double,
+internal actual fun framePlatformMapboxOnEntity(
+  bounds: LngLatBounds,
   bottomPaddingCssPx: Float,
-) {
+  rightPaddingCssPx: Float,
+  fitToBounds: Boolean,
+  maxZoom: Float,
+): Double {
   val bridge = js("window.GroundMapboxBridge")
-  if (bridge != null && bridge != undefined && bridge.recenterOnEntity != undefined) {
-    bridge.recenterOnEntity(lng, lat, bottomPaddingCssPx)
-  }
+  if (bridge == null || bridge == undefined || bridge.frameEntity == undefined) return Double.NaN
+  val result =
+    bridge.frameEntity(
+      bounds.west,
+      bounds.south,
+      bounds.east,
+      bounds.north,
+      bottomPaddingCssPx,
+      rightPaddingCssPx,
+      fitToBounds,
+      maxZoom,
+    )
+  return (result as? Number)?.toDouble() ?: Double.NaN
 }

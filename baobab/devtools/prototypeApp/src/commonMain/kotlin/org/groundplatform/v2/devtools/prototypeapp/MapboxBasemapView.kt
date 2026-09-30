@@ -14,12 +14,14 @@
 package org.groundplatform.v2.devtools.prototypeapp
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -34,6 +36,19 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalDensity
+
+/**
+ * Scroll states for the outer mobile/tablet device preview stage within the UX design workbench.
+ * Allows embedded canvas overlays (such as [MapboxBasemapView]) to observe scrolling of the device
+ * preview frame and dynamically adjust their DOM viewport positions to match the mobile bezel in
+ * real time.
+ */
+data class WorkbenchScrollState(
+  val vertical: ScrollState,
+  val horizontal: ScrollState,
+)
+
+val LocalWorkbenchScrollState = compositionLocalOf<WorkbenchScrollState?> { null }
 
 /**
  * Synchronizes the DOM `#mapbox-basemap-container` viewport rectangle with the Compose
@@ -116,16 +131,30 @@ internal expect fun flyPlatformMapboxToPlace(
 /** Clears any active Mapbox Place search pin marker from the live `mapboxgl.Map`. */
 internal expect fun clearPlatformMapboxPlace()
 
-/**
- * Recenters the live `mapboxgl.Map` camera on the geographic coordinates `[lng, lat]` of an
- * entity, displacing the camera center upward by [bottomPaddingCssPx] / 2 so the entity is
- * vertically centered in the visible viewport above an expanded bottom sheet or table.
- */
-internal expect fun recenterPlatformMapboxOnEntity(
-  lng: Double,
-  lat: Double,
-  bottomPaddingCssPx: Float,
+/** Geographic bounds of a map feature, in degrees. Points have zero-size bounds. */
+internal data class LngLatBounds(
+  val west: Double,
+  val south: Double,
+  val east: Double,
+  val north: Double,
 )
+
+/**
+ * Frames a selected entity in the live `mapboxgl.Map`, keeping it clear of a floating details card
+ * ([rightPaddingCssPx]) and a bottom sheet or table ([bottomPaddingCssPx]).
+ *
+ * When [fitToBounds] is `true`, the camera fits the whole feature ([bounds]) into that part of the
+ * viewport, zooming no further in than [maxZoom], and returns the resulting zoom as a delta from
+ * the survey's default zoom (for `mapZoomDelta`). Otherwise it only re-centers on the feature,
+ * keeping the current zoom, and returns `NaN` (as it does when the map isn't available).
+ */
+internal expect fun framePlatformMapboxOnEntity(
+  bounds: LngLatBounds,
+  bottomPaddingCssPx: Float,
+  rightPaddingCssPx: Float = 0f,
+  fitToBounds: Boolean = true,
+  maxZoom: Float = 17f,
+): Double
 
 /**
  * Renders the real Mapbox GL JS basemap (`mapboxgl.Map`) inside `SurveyMapView` and delegates all
@@ -147,10 +176,33 @@ fun MapboxBasemapView(
   showNavigationOverlay: Boolean = true,
 ) {
   val density = LocalDensity.current.density
+  val workbenchScroll = LocalWorkbenchScrollState.current
+  val scrollX = workbenchScroll?.horizontal?.value ?: 0
+  val scrollY = workbenchScroll?.vertical?.value ?: 0
+
+  var rawWindowLeft by remember { mutableStateOf<Float?>(null) }
+  var rawWindowTop by remember { mutableStateOf<Float?>(null) }
   var viewportLeftCssPx by remember { mutableStateOf(0f) }
   var viewportTopCssPx by remember { mutableStateOf(0f) }
   var viewportWidthCssPx by remember { mutableStateOf(0f) }
   var viewportHeightCssPx by remember { mutableStateOf(0f) }
+
+  // React to scroll offset changes so viewportLeftCssPx and viewportTopCssPx update immediately
+  // as the device preview frame scrolls inside the mobile prototype workbench.
+  val baseLeft = rawWindowLeft
+  if (baseLeft != null) {
+    val adjustedLeft = baseLeft - scrollX
+    if (adjustedLeft != viewportLeftCssPx) {
+      viewportLeftCssPx = adjustedLeft
+    }
+  }
+  val baseTop = rawWindowTop
+  if (baseTop != null) {
+    val adjustedTop = baseTop - scrollY
+    if (adjustedTop != viewportTopCssPx) {
+      viewportTopCssPx = adjustedTop
+    }
+  }
 
   val activeSurveyId = state.activeSurveyId
   val selectedBasemapType = state.selectedBasemapType
@@ -282,7 +334,11 @@ fun MapboxBasemapView(
   }
 
   SideEffect {
-    val isVisible = viewportWidthCssPx > 4f && viewportHeightCssPx > 4f
+    val isVisible =
+      viewportWidthCssPx > 4f &&
+        viewportHeightCssPx > 4f &&
+        (viewportTopCssPx + viewportHeightCssPx) > 0f &&
+        (viewportLeftCssPx + viewportWidthCssPx) > 0f
     syncPlatformMapboxViewport(
       leftPx = viewportLeftCssPx,
       topPx = viewportTopCssPx,
@@ -314,8 +370,12 @@ fun MapboxBasemapView(
         .onGloballyPositioned { coordinates ->
           val pos = coordinates.positionInWindow()
           val sz = coordinates.size
-          viewportLeftCssPx = pos.x / density
-          viewportTopCssPx = pos.y / density
+          val currentLeft = pos.x / density
+          val currentTop = pos.y / density
+          viewportLeftCssPx = currentLeft
+          viewportTopCssPx = currentTop
+          rawWindowLeft = currentLeft + scrollX
+          rawWindowTop = currentTop + scrollY
           viewportWidthCssPx = sz.width / density
           viewportHeightCssPx = sz.height / density
         }
@@ -412,10 +472,33 @@ fun GeoPointFormMapboxViewport(
   modifier: Modifier = Modifier,
 ) {
   val density = LocalDensity.current.density
+  val workbenchScroll = LocalWorkbenchScrollState.current
+  val scrollX = workbenchScroll?.horizontal?.value ?: 0
+  val scrollY = workbenchScroll?.vertical?.value ?: 0
+
+  var rawWindowLeft by remember { mutableStateOf<Float?>(null) }
+  var rawWindowTop by remember { mutableStateOf<Float?>(null) }
   var viewportLeftCssPx by remember { mutableStateOf(0f) }
   var viewportTopCssPx by remember { mutableStateOf(0f) }
   var viewportWidthCssPx by remember { mutableStateOf(0f) }
   var viewportHeightCssPx by remember { mutableStateOf(0f) }
+
+  // React to scroll offset changes so viewportLeftCssPx and viewportTopCssPx update immediately
+  // as the device preview frame scrolls inside the mobile prototype workbench.
+  val baseLeft = rawWindowLeft
+  if (baseLeft != null) {
+    val adjustedLeft = baseLeft - scrollX
+    if (adjustedLeft != viewportLeftCssPx) {
+      viewportLeftCssPx = adjustedLeft
+    }
+  }
+  val baseTop = rawWindowTop
+  if (baseTop != null) {
+    val adjustedTop = baseTop - scrollY
+    if (adjustedTop != viewportTopCssPx) {
+      viewportTopCssPx = adjustedTop
+    }
+  }
   var prevPanOffsetLat by remember(viewportState.path) { mutableStateOf(0.0) }
   var prevPanOffsetLon by remember(viewportState.path) { mutableStateOf(0.0) }
   var prevZoomLevel by remember(viewportState.path) { mutableStateOf(viewportState.zoomLevel) }
@@ -472,8 +555,7 @@ fun GeoPointFormMapboxViewport(
     prevPanOffsetLon = viewportState.panOffsetLon
     if (!viewportState.isPanned) {
       state.recenterMapOnUser()
-    } else if (
-      viewportWidthCssPx > 4f &&
+    } else if (viewportWidthCssPx > 4f &&
         viewportHeightCssPx > 4f &&
         (kotlin.math.abs(dLat) > 0.00005 || kotlin.math.abs(dLon) > 0.00005)
     ) {
@@ -493,7 +575,11 @@ fun GeoPointFormMapboxViewport(
   }
 
   SideEffect {
-    val isVisible = viewportWidthCssPx > 4f && viewportHeightCssPx > 4f
+    val isVisible =
+      viewportWidthCssPx > 4f &&
+        viewportHeightCssPx > 4f &&
+        (viewportTopCssPx + viewportHeightCssPx) > 0f &&
+        (viewportLeftCssPx + viewportWidthCssPx) > 0f
     syncPlatformMapboxViewport(
       leftPx = viewportLeftCssPx,
       topPx = viewportTopCssPx,
@@ -525,8 +611,12 @@ fun GeoPointFormMapboxViewport(
         .onGloballyPositioned { coordinates ->
           val pos = coordinates.positionInWindow()
           val sz = coordinates.size
-          viewportLeftCssPx = pos.x / density
-          viewportTopCssPx = pos.y / density
+          val currentLeft = pos.x / density
+          val currentTop = pos.y / density
+          viewportLeftCssPx = currentLeft
+          viewportTopCssPx = currentTop
+          rawWindowLeft = currentLeft + scrollX
+          rawWindowTop = currentTop + scrollY
           viewportWidthCssPx = sz.width / density
           viewportHeightCssPx = sz.height / density
         }
@@ -559,9 +649,220 @@ fun GeoPointFormMapboxViewport(
             }
           }
         }
-  ) {
-    drawRect(color = Color.Transparent, blendMode = BlendMode.Clear)
+  ) { drawRect(color = Color.Transparent, blendMode = BlendMode.Clear) }
+}
+
+/**
+ * Renders the live Mapbox GL JS basemap (`#mapbox-basemap-container`) inside the
+ * `EntityRefStepMapOrListSelector` map viewport when selecting a target geospatial entity
+ * (`isCurrentFormStepEntityRef`) in [DataCollectionFormScreen].
+ */
+@OptIn(ExperimentalComposeUiApi::class)
+@Composable
+fun EntityRefFormMapboxViewport(
+  state: PrototypeAppState,
+  form: FormPreviewItem,
+  modifier: Modifier = Modifier,
+) {
+  val density = LocalDensity.current.density
+  val workbenchScroll = LocalWorkbenchScrollState.current
+  val scrollX = workbenchScroll?.horizontal?.value ?: 0
+  val scrollY = workbenchScroll?.vertical?.value ?: 0
+
+  var rawWindowLeft by remember { mutableStateOf<Float?>(null) }
+  var rawWindowTop by remember { mutableStateOf<Float?>(null) }
+  var viewportLeftCssPx by remember { mutableStateOf(0f) }
+  var viewportTopCssPx by remember { mutableStateOf(0f) }
+  var viewportWidthCssPx by remember { mutableStateOf(0f) }
+  var viewportHeightCssPx by remember { mutableStateOf(0f) }
+
+  val baseLeft = rawWindowLeft
+  if (baseLeft != null) {
+    val adjustedLeft = baseLeft - scrollX
+    if (adjustedLeft != viewportLeftCssPx) {
+      viewportLeftCssPx = adjustedLeft
+    }
   }
+  val baseTop = rawWindowTop
+  if (baseTop != null) {
+    val adjustedTop = baseTop - scrollY
+    if (adjustedTop != viewportTopCssPx) {
+      viewportTopCssPx = adjustedTop
+    }
+  }
+
+  val activeSurveyId = state.activeSurveyId
+  val selectedBasemapType = state.selectedBasemapType
+  val isOfflineBasemapVisible = state.isOfflineBasemapVisible
+  val userGpsX = state.userGpsNormalizedX
+  val userGpsY = state.userGpsNormalizedY
+  val isCameraFollowingUser = state.isCameraFollowingUser
+  val mapZoomDelta = state.mapZoomDelta
+  val panOffsetX = state.mapPanOffsetX
+  val panOffsetY = state.mapPanOffsetY
+
+  val datasetCandidates = state.allDatasetEntitiesForForm(form)
+  val selectedEntityId = state.activeDataCollectionEntityId
+
+  val baseEntitiesJson =
+    remember(datasetCandidates) {
+      serializeMapboxEntitiesJson(datasetCandidates, selectedEntityId = null)
+    }
+
+  val entitiesJsonWithSelection =
+    remember(baseEntitiesJson, selectedEntityId) {
+      if (selectedEntityId == null) {
+        baseEntitiesJson
+      } else {
+        baseEntitiesJson.replace(
+          "\"id\":\"$selectedEntityId\",\"selected\":false",
+          "\"id\":\"$selectedEntityId\",\"selected\":true",
+        )
+      }
+    }
+
+  val featuresPayloadJson =
+    remember(
+      entitiesJsonWithSelection,
+      datasetCandidates.size,
+      selectedEntityId,
+      isCameraFollowingUser,
+      mapZoomDelta,
+      state.activeEntitiesCountNoun,
+    ) {
+      buildMapboxFeaturesPayloadJsonFromPrebuiltEntities(
+        entitiesJson = entitiesJsonWithSelection,
+        entityCount = datasetCandidates.size,
+        submissions = emptyList(),
+        selectedEntityId = selectedEntityId,
+        selectedSubmissionId = null,
+        activeNavigation = null,
+        isCameraFollowingUser = isCameraFollowingUser,
+        zoomDelta = mapZoomDelta,
+        isClusteringActive = false,
+        clusters = emptyList(),
+        selectedClusterId = null,
+        activeEntitiesCountNoun = state.activeEntitiesCountNoun,
+      )
+    }
+
+  androidx.compose.runtime.LaunchedEffect(
+    activeSurveyId,
+    selectedBasemapType,
+    isOfflineBasemapVisible,
+    panOffsetX,
+    panOffsetY,
+    userGpsX,
+    userGpsY,
+    featuresPayloadJson,
+    viewportWidthCssPx,
+    viewportHeightCssPx,
+  ) {
+    if (viewportWidthCssPx > 4f && viewportHeightCssPx > 4f) {
+      syncPlatformMapboxBasemap(
+        surveyId = activeSurveyId,
+        basemapType = selectedBasemapType.name,
+        isOfflineVisible = isOfflineBasemapVisible,
+        panOffsetX = panOffsetX,
+        panOffsetY = panOffsetY,
+        userGpsX = userGpsX,
+        userGpsY = userGpsY,
+        featuresGeoJson = featuresPayloadJson,
+      )
+    }
+  }
+
+  SideEffect {
+    val isVisible =
+      viewportWidthCssPx > 4f &&
+        viewportHeightCssPx > 4f &&
+        (viewportTopCssPx + viewportHeightCssPx) > 0f &&
+        (viewportLeftCssPx + viewportWidthCssPx) > 0f
+    syncPlatformMapboxViewport(
+      leftPx = viewportLeftCssPx,
+      topPx = viewportTopCssPx,
+      widthPx = viewportWidthCssPx,
+      heightPx = viewportHeightCssPx,
+      borderRadiusPx = 12f,
+      visible = isVisible,
+    )
+    if (isVisible) {
+      syncPlatformMapboxBasemap(
+        surveyId = activeSurveyId,
+        basemapType = selectedBasemapType.name,
+        isOfflineVisible = isOfflineBasemapVisible,
+        panOffsetX = panOffsetX,
+        panOffsetY = panOffsetY,
+        userGpsX = userGpsX,
+        userGpsY = userGpsY,
+        featuresGeoJson = featuresPayloadJson,
+      )
+    }
+  }
+
+  DisposableEffect(Unit) { onDispose { hidePlatformMapboxBasemap() } }
+
+  Canvas(
+    modifier =
+      modifier
+        .fillMaxSize()
+        .onGloballyPositioned { coordinates ->
+          val pos = coordinates.positionInWindow()
+          val sz = coordinates.size
+          val currentLeft = pos.x / density
+          val currentTop = pos.y / density
+          viewportLeftCssPx = currentLeft
+          viewportTopCssPx = currentTop
+          rawWindowLeft = currentLeft + scrollX
+          rawWindowTop = currentTop + scrollY
+          viewportWidthCssPx = sz.width / density
+          viewportHeightCssPx = sz.height / density
+        }
+        .onPointerEvent(PointerEventType.Scroll) { event ->
+          val scrollDeltaY = event.changes.firstOrNull()?.scrollDelta?.y ?: 0f
+          if (scrollDeltaY != 0f) {
+            val step = (-scrollDeltaY * 0.35f).coerceIn(-1.2f, 1.2f)
+            state.zoomMapBy(step)
+            zoomPlatformMapboxBasemap(step)
+          }
+        }
+        .pointerInput(viewportWidthCssPx, viewportHeightCssPx, density) {
+          detectTapGestures { tapOffset ->
+            val clickXCssPx = tapOffset.x / density
+            val clickYCssPx = tapOffset.y / density
+            val hitResult = handlePlatformMapboxClick(clickXCssPx, clickYCssPx)
+            when {
+              hitResult.startsWith("entity:") -> {
+                val entityId = hitResult.removePrefix("entity:")
+                state.selectEntityRefForActiveForm(entityId)
+              }
+              hitResult == "control:zoom-in" -> {
+                state.zoomInMap()
+              }
+              hitResult == "control:zoom-out" -> {
+                state.zoomOutMap()
+              }
+              hitResult == "control:compass" -> {
+                state.resetMapZoom()
+              }
+            }
+          }
+        }
+        .pointerInput(viewportWidthCssPx, viewportHeightCssPx, density) {
+          detectDragGestures { change, dragAmount ->
+            change.consume()
+            val widthPx = size.width.toFloat()
+            val heightPx = size.height.toFloat()
+            if (widthPx > 0f && heightPx > 0f) {
+              state.panMap(
+                deltaNormalizedX = dragAmount.x / widthPx,
+                deltaNormalizedY = dragAmount.y / heightPx,
+              )
+              panPlatformMapboxBasemap(dxPx = dragAmount.x / density, dyPx = dragAmount.y / density)
+            }
+          }
+        }
+  ) { drawRect(color = Color.Transparent, blendMode = BlendMode.Clear) }
 }
 
 internal fun buildMapboxFeaturesPayloadJson(state: PrototypeAppState): String =

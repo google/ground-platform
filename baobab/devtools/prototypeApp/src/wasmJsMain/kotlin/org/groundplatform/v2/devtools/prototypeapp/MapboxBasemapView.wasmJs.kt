@@ -187,17 +187,37 @@ internal actual fun clearPlatformMapboxPlace() {
 }
 
 @JsFun(
-  "(lng, lat, bottomPaddingCssPx) => { " +
-    "if (window.GroundMapboxBridge && window.GroundMapboxBridge.recenterOnEntity) { " +
-    "window.GroundMapboxBridge.recenterOnEntity(lng, lat, bottomPaddingCssPx); " +
-    "} }"
+  "(west, south, east, north, bottomPaddingCssPx, rightPaddingCssPx, fitToBounds, maxZoom) => { " +
+    "if (!(window.GroundMapboxBridge && window.GroundMapboxBridge.frameEntity)) return NaN; " +
+    "const r = window.GroundMapboxBridge.frameEntity(west, south, east, north, " +
+    "bottomPaddingCssPx, rightPaddingCssPx, fitToBounds, maxZoom); " +
+    "return typeof r === 'number' ? r : NaN; }"
 )
-private external fun jsRecenterMapboxOnEntity(lng: Double, lat: Double, bottomPaddingCssPx: Float)
-
-internal actual fun recenterPlatformMapboxOnEntity(
-  lng: Double,
-  lat: Double,
+private external fun jsFrameMapboxOnEntity(
+  west: Double,
+  south: Double,
+  east: Double,
+  north: Double,
   bottomPaddingCssPx: Float,
-) {
-  jsRecenterMapboxOnEntity(lng, lat, bottomPaddingCssPx)
-}
+  rightPaddingCssPx: Float,
+  fitToBounds: Boolean,
+  maxZoom: Float,
+): Double
+
+internal actual fun framePlatformMapboxOnEntity(
+  bounds: LngLatBounds,
+  bottomPaddingCssPx: Float,
+  rightPaddingCssPx: Float,
+  fitToBounds: Boolean,
+  maxZoom: Float,
+): Double =
+  jsFrameMapboxOnEntity(
+    bounds.west,
+    bounds.south,
+    bounds.east,
+    bounds.north,
+    bottomPaddingCssPx,
+    rightPaddingCssPx,
+    fitToBounds,
+    maxZoom,
+  )

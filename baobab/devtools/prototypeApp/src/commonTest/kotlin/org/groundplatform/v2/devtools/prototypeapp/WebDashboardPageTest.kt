@@ -25,13 +25,14 @@ class WebDashboardPageTest {
   private val entity = state.entities.first { it.submissions.isNotEmpty() }
   private val datasetEntities = state.entities.filter { it.datasetId == entity.datasetId }
 
-  private fun buildTables(selectedSubmissionId: String? = null) =
+  private fun buildTables(selectedEntityId: String? = entity.id) =
     buildDashboardDataTables(
-      entity = entity,
-      datasetEntities = datasetEntities,
-      submissionGroups = state.groupedSubmissionsForEntity(entity),
-      selectedSubmissionId = selectedSubmissionId,
+      entities = state.entities,
+      selectedEntityId = selectedEntityId,
+      relatedLabel = { e, value -> state.relatedEntityForPropertyValue(e, value)?.label },
     )
+
+  private fun layerTable() = buildTables().first { it.datasetId == entity.datasetId }
 
   @Test
   fun fromHash_resolvesDashboardPage() {
@@ -73,7 +74,7 @@ class WebDashboardPageTest {
 
   @Test
   fun mapLayerTable_listsDatasetFeaturesAndHighlightsSelection() {
-    val layerTable = buildTables().first()
+    val layerTable = layerTable()
 
     assertEquals(DashboardDataTableKind.MAP_LAYER, layerTable.kind)
     assertEquals(entity.datasetName, layerTable.title)
@@ -84,7 +85,7 @@ class WebDashboardPageTest {
 
   @Test
   fun mapLayerTable_omitsSimpleStyleProperties() {
-    val columns = buildTables().first().columns
+    val columns = layerTable().columns
 
     assertFalse("marker-color" in columns)
     assertFalse("marker-symbol" in columns)
@@ -93,27 +94,61 @@ class WebDashboardPageTest {
   }
 
   @Test
-  fun submissionTables_oneTablePerFormWithAlignedCells() {
-    val submissionTables = buildTables().drop(1)
-    val groups = state.groupedSubmissionsForEntity(entity)
+  fun dataTables_oneTablePerDatasetAndNoSubmissionTables() {
+    val tables = buildTables()
 
-    assertEquals(groups.size, submissionTables.size)
-    submissionTables.zip(groups).forEach { (table, group) ->
-      assertEquals(DashboardDataTableKind.FORM_SUBMISSIONS, table.kind)
-      assertEquals(group.submissions.map { it.id }, table.rows.map { it.id })
-      assertTrue(table.rows.all { it.cells.size == table.columns.size })
-      assertEquals(-1, table.selectedRowIndex)
-    }
+    assertEquals(state.entities.map { it.datasetId }.distinct(), tables.map { it.datasetId })
+    assertTrue(tables.all { it.kind == DashboardDataTableKind.MAP_LAYER })
+    assertEquals(state.entities.size, tables.sumOf { it.rows.size })
+    tables.forEach { table -> assertTrue(table.rows.all { it.cells.size == table.columns.size }) }
   }
 
   @Test
-  fun submissionTables_highlightSelectedSubmission() {
-    val submission = entity.submissions.first()
-    val table = buildTables(selectedSubmissionId = submission.id).first {
-      it.id == "form:${submission.formId}"
-    }
+  fun dataTables_highlightOnlyTheSelectedEntity() {
+    assertEquals(1, buildTables().count { it.selectedRowIndex >= 0 })
+    assertTrue(buildTables(selectedEntityId = null).all { it.selectedRowIndex == -1 })
+  }
 
-    assertEquals(submission.id, table.rows[table.selectedRowIndex].id)
+  @Test
+  fun dataTables_recordsWithoutGeometryAreDataTables() {
+    val record = entity.copy(id = "record-1", datasetId = "farmers", geometryTypeLabel = "")
+
+    val table = buildDashboardDataTables(listOf(record), selectedEntityId = null).single()
+
+    assertEquals(DashboardDataTableKind.DATA_TABLE, table.kind)
+  }
+
+  @Test
+  fun dataTables_showRelatedRecordLabelsInsteadOfIds() {
+    val parcel = state.entities.first { it.properties["Washing Station"] != null }
+    val station = state.entities.first { it.id == parcel.properties["Washing Station"] }
+    val table = buildTables().first { it.datasetId == parcel.datasetId }
+    val column = table.columns.indexOf("Washing Station")
+
+    assertEquals(station.label, table.rows.first { it.id == parcel.id }.cells[column])
+  }
+
+  @Test
+  fun dashboardTable_staysCollapsedOnSelectionAndExpandsOnShowInTable() {
+    val testState = PrototypeAppState()
+    assertFalse(testState.isDashboardTableExpanded)
+
+    testState.selectEntity(entity.id)
+    assertFalse(testState.isDashboardTableExpanded)
+    assertEquals(entity.datasetId, testState.dashboardTableDatasetId)
+
+    testState.showSelectedEntityInTable()
+    assertTrue(testState.isDashboardTableExpanded)
+    assertEquals(entity.datasetId, testState.dashboardTableDatasetId)
+
+    // Once open, the table stays open and follows the selection to other datasets.
+    val other = testState.entities.first { it.datasetId != entity.datasetId }
+    testState.selectEntity(other.id)
+    assertTrue(testState.isDashboardTableExpanded)
+    assertEquals(other.datasetId, testState.dashboardTableDatasetId)
+
+    testState.toggleDashboardTableExpanded()
+    assertFalse(testState.isDashboardTableExpanded)
   }
 
   @Test
@@ -216,7 +251,6 @@ class WebDashboardPageTest {
     assertEquals(MainDrawerSubView.NONE, testState.activeDrawerSubView)
   }
 
-
   @Test
   fun layersSheet_togglesStateAndControlsBasemapAndLayerVisibility() {
     val testState = PrototypeAppState()
@@ -235,10 +269,12 @@ class WebDashboardPageTest {
     val firstLayer = testState.entityDatasetLayers.first()
     val initialLayerVisibility = firstLayer.isVisible
     testState.toggleLayerVisibility(firstLayer.id)
-    assertEquals(!initialLayerVisibility, testState.entityDatasetLayers.first { it.id == firstLayer.id }.isVisible)
+    assertEquals(
+      !initialLayerVisibility,
+      testState.entityDatasetLayers.first { it.id == firstLayer.id }.isVisible
+    )
 
     testState.updateLayersSheetOpen(false)
     assertFalse(testState.isLayersSheetOpen)
   }
 }
-

@@ -1161,10 +1161,6 @@ public val Icons.Filled.CloudOff: ImageVector
   }
 private var _cloudOff: ImageVector? = null
 
-
-
-
-
 public val Icons.Filled.Remove: ImageVector
   get() {
     if (_remove != null) return _remove!!
@@ -1246,3 +1242,56 @@ public val Icons.Filled.DragIndicator: ImageVector
     return _dragIndicator!!
   }
 private var _dragIndicator: ImageVector? = null
+
+/** Outlined pentagon, used as the geometry-type icon for polygon map features. */
+public val Icons.Filled.Pentagon: ImageVector
+  get() {
+    if (_pentagon != null) return _pentagon!!
+    _pentagon =
+      materialIcon(name = "Filled.Pentagon") {
+        materialPath {
+          moveTo(2.0f, 9.0f)
+          lineTo(12.0f, 2.0f)
+          lineTo(22.0f, 9.0f)
+          lineTo(18.0f, 22.0f)
+          horizontalLineTo(6.0f)
+          close()
+          moveTo(4.34f, 9.76f)
+          lineTo(7.51f, 20.0f)
+          horizontalLineTo(16.49f)
+          lineTo(19.66f, 9.76f)
+          lineTo(12.0f, 4.44f)
+          close()
+        }
+      }
+    return _pentagon!!
+  }
+private var _pentagon: ImageVector? = null
+
+/** Table rows, used as the geometry-type icon for records without geometry (data tables). */
+public val Icons.Filled.TableRows: ImageVector
+  get() {
+    if (_tableRows != null) return _tableRows!!
+    _tableRows =
+      materialIcon(name = "Filled.TableRows") {
+        materialPath {
+          moveTo(21.0f, 8.0f)
+          horizontalLineTo(3.0f)
+          verticalLineTo(4.0f)
+          horizontalLineToRelative(18.0f)
+          close()
+          moveTo(21.0f, 10.0f)
+          horizontalLineTo(3.0f)
+          verticalLineToRelative(4.0f)
+          horizontalLineToRelative(18.0f)
+          close()
+          moveTo(21.0f, 16.0f)
+          horizontalLineTo(3.0f)
+          verticalLineToRelative(4.0f)
+          horizontalLineToRelative(18.0f)
+          close()
+        }
+      }
+    return _tableRows!!
+  }
+private var _tableRows: ImageVector? = null

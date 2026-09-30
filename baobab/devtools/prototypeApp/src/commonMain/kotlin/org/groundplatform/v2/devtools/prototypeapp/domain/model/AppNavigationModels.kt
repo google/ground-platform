@@ -44,6 +44,16 @@ enum class MainSurveyViewMode(val label: String) {
 }
 
 /**
+ * Pane shown in a selected map feature's details surface (the web dashboard's floating card or the
+ * mobile bottom sheet): its properties (the entity's current state) or its `1:N` submissions (the
+ * entity's history).
+ */
+enum class EntityDetailsPane {
+  PROPERTIES,
+  SUBMISSIONS,
+}
+
+/**
  * Category filter tabs inside the Main Survey searchable bottom sheet (`All`, `Places`, and `Map
  * features`).
  */
