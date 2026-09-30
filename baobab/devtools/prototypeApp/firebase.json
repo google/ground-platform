@@ -1,0 +1,15 @@
+{
+  "hosting": {
+    "public": "build/dist/wasmJs/productionExecutable",
+    "ignore": [
+      "firebase.json",
+      "**/.*"
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
+  }
+}

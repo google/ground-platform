@@ -186,6 +186,13 @@ internal fun WebTopToolbar(
         )
 
         WebUserAvatarProfileWidget(state = state, onSignOut = onSignOut)
+
+        VerticalDivider(
+          modifier = Modifier.height(24.dp),
+          color = MaterialTheme.colorScheme.outlineVariant,
+        )
+
+        PrototypeDebugToolsButton(state = state)
       }
     }
   }

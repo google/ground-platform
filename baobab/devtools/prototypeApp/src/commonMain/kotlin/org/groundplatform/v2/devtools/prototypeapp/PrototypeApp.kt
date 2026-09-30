@@ -171,6 +171,20 @@ fun PrototypeApp(
   onPageChanged: (PrototypeWorkbenchPage) -> Unit = {},
 ) {
   var page by remember { mutableStateOf(initialPage) }
+  LaunchedEffect(initialPage) {
+    page = initialPage
+    state.selectWorkbenchPage(initialPage)
+  }
+  state.onWorkbenchPageChanged = { targetPage ->
+    page = targetPage
+    onPageChanged(targetPage)
+  }
+  LaunchedEffect(state.activeWorkbenchPage) {
+    if (page != state.activeWorkbenchPage) {
+      page = state.activeWorkbenchPage
+    }
+  }
+
   val surveyEditorState = remember {
     SurveyEditorState().apply {
       updateDetails {
@@ -222,37 +236,26 @@ fun PrototypeApp(
           MaterialTheme.colorScheme.surfaceContainerLowest
         },
     ) {
-      Column(modifier = Modifier.fillMaxSize()) {
-        PrototypeWorkbenchTopBar(
-          state = state,
-          page = page,
-          onSelectPage = {
-            page = it
-            onPageChanged(it)
-          },
-        )
-
+      Box(modifier = Modifier.fillMaxSize()) {
         when (page) {
           PrototypeWorkbenchPage.SURVEY_EDITOR ->
             SurveyEditorPage(
               state = surveyEditorState,
               isDarkTheme = state.isDarkTheme,
               onBackToDashboard = {
-                page = PrototypeWorkbenchPage.WEB_DASHBOARD
-                onPageChanged(PrototypeWorkbenchPage.WEB_DASHBOARD)
+                state.selectWorkbenchPage(PrototypeWorkbenchPage.WEB_DASHBOARD)
               },
+              appState = state,
             )
           PrototypeWorkbenchPage.WEB_DASHBOARD ->
             WebDashboardPage(
               state = state,
               onOpenSurveyEditor = {
-                page = PrototypeWorkbenchPage.SURVEY_EDITOR
-                onPageChanged(PrototypeWorkbenchPage.SURVEY_EDITOR)
+                state.selectWorkbenchPage(PrototypeWorkbenchPage.SURVEY_EDITOR)
               },
               onSignOut = {
                 state.signOut()
-                page = PrototypeWorkbenchPage.MOBILE_PROTOTYPE
-                onPageChanged(PrototypeWorkbenchPage.MOBILE_PROTOTYPE)
+                state.selectWorkbenchPage(PrototypeWorkbenchPage.MOBILE_PROTOTYPE)
               },
             )
           PrototypeWorkbenchPage.MOBILE_PROTOTYPE -> MobilePrototypePage(state, isMobileMapShowing)
@@ -296,6 +299,7 @@ private fun MobilePrototypePage(state: PrototypeAppState, isMapShowing: Boolean)
           orientation = state.deviceOrientation,
           onSelectFormFactor = { state.selectDeviceFormFactor(it) },
           onRotateDevice = { state.rotateDevice() },
+          state = state,
         ) {
           MobileScreenHost(state)
         }
@@ -304,229 +308,6 @@ private fun MobilePrototypePage(state: PrototypeAppState, isMapShowing: Boolean)
 
     // Right panel: UX Designer Flow & State Controls
     UxDesignerInspectorPanel(state = state, modifier = Modifier.weight(0.85f).fillMaxHeight())
-  }
-}
-
-/** Top navigation bar for the Web UX Prototype Workbench. */
-@Composable
-private fun PrototypeWorkbenchTopBar(
-  state: PrototypeAppState,
-  page: PrototypeWorkbenchPage,
-  onSelectPage: (PrototypeWorkbenchPage) -> Unit,
-) {
-  val assistColors =
-    androidx.compose.material3.AssistChipDefaults.assistChipColors(
-      containerColor = Color(0xFF1D5128),
-      labelColor = Color.White,
-      leadingIconContentColor = Color(0xFF9CD49F),
-    )
-  Surface(
-    modifier = Modifier.fillMaxWidth(),
-    color = MaterialTheme.colorScheme.inverseSurface,
-    contentColor = MaterialTheme.colorScheme.inverseOnSurface,
-    tonalElevation = 2.dp,
-    shadowElevation = 4.dp,
-  ) {
-    Row(
-      modifier =
-        Modifier.fillMaxWidth()
-          .padding(horizontal = 20.dp, vertical = 10.dp)
-          .horizontalScroll(rememberScrollState()),
-      horizontalArrangement = Arrangement.SpaceBetween,
-      verticalAlignment = Alignment.CenterVertically,
-    ) {
-      // Brand & Tool Title
-      Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
-      ) {
-        CloudAcaciaLogo(modifier = Modifier.size(38.dp))
-        Column {
-          Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-          ) {
-            val brandFont = LocalGroundBrandFontFamily.current
-            Text(
-              text =
-                buildAnnotatedString {
-                  withStyle(SpanStyle(fontFamily = brandFont, fontWeight = FontWeight.ExtraBold)) {
-                    append("Ground")
-                  }
-                  append(" 2.0 Mobile UI Prototype")
-                },
-              style = MaterialTheme.typography.titleMedium,
-              color = Color.White,
-              fontWeight = FontWeight.Bold,
-            )
-            Surface(shape = MaterialTheme.shapes.extraSmall, color = Color(0xFF36693E)) {
-              Text(
-                text = "devtools/prototypeApp",
-                style = MaterialTheme.typography.labelSmall,
-                color = Color(0xFFB7F1B9),
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
-              )
-            }
-          }
-          Text(
-            text = "Compose Multiplatform Mobile & Tablet UI Preview & UX Co-Design Workbench",
-            style = MaterialTheme.typography.labelSmall,
-            color = Color(0xFFC1C9BE),
-          )
-        }
-      }
-
-      Spacer(modifier = Modifier.width(16.dp))
-
-      // Global Workbench Controls
-      Row(
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-      ) {
-        // Page switcher: Mobile prototype | Web dashboard (unified with Survey editor)
-        PrototypeWorkbenchPage.topBarPages.forEach { entry ->
-          val isSelected =
-            if (entry == PrototypeWorkbenchPage.WEB_DASHBOARD) {
-              page.isWebApp
-            } else {
-              page == entry
-            }
-          FilterChip(
-            selected = isSelected,
-            onClick = { onSelectPage(entry) },
-            colors =
-              androidx.compose.material3.FilterChipDefaults.filterChipColors(
-                containerColor = Color(0xFF1D5128),
-                labelColor = Color.White,
-                selectedContainerColor = Color(0xFFB7F1B9),
-                selectedLabelColor = Color(0xFF002106),
-              ),
-            border =
-              androidx.compose.material3.FilterChipDefaults.filterChipBorder(
-                enabled = true,
-                selected = isSelected,
-                borderColor = Color(0xFF424940),
-                selectedBorderColor = Color(0xFFB7F1B9),
-              ),
-            label = {
-              Text(
-                text = entry.label,
-                maxLines = 1,
-                softWrap = false,
-                style = MaterialTheme.typography.labelMedium,
-                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-              )
-            },
-          )
-        }
-        Spacer(modifier = Modifier.width(8.dp))
-
-        // Theme toggle button
-        AssistChip(
-          onClick = { state.toggleDarkTheme() },
-          colors = assistColors,
-          border =
-            androidx.compose.material3.AssistChipDefaults.assistChipBorder(
-              enabled = true,
-              borderColor = Color(0xFF424940),
-            ),
-          leadingIcon = {
-            Icon(
-              imageVector =
-                if (state.isDarkTheme) Icons.Default.LightMode else Icons.Default.DarkMode,
-              contentDescription = null,
-              modifier = Modifier.size(15.dp),
-            )
-          },
-          label = {
-            Text(
-              text = if (state.isDarkTheme) "Light UI" else "Dark UI",
-              maxLines = 1,
-              overflow = TextOverflow.Ellipsis,
-              softWrap = false,
-              style = MaterialTheme.typography.labelMedium,
-            )
-          },
-        )
-
-        // Device offline (Offline simulator) toggle chip
-        FilterChip(
-          selected = state.isAirplaneMode,
-          onClick = { state.toggleAirplaneMode() },
-          colors =
-            androidx.compose.material3.FilterChipDefaults.filterChipColors(
-              containerColor = Color(0xFF1D5128),
-              labelColor = Color.White,
-              iconColor = Color.White,
-              selectedContainerColor = Color(0xFFFFB74D),
-              selectedLabelColor = Color(0xFF3E2723),
-              selectedLeadingIconColor = Color(0xFF3E2723),
-            ),
-          border =
-            androidx.compose.material3.FilterChipDefaults.filterChipBorder(
-              enabled = true,
-              selected = state.isAirplaneMode,
-              borderColor = Color(0xFF424940),
-              selectedBorderColor = Color(0xFFFFE082),
-            ),
-          leadingIcon = {
-            Icon(
-              imageVector =
-                if (state.isAirplaneMode) {
-                  Icons.Default.AirplanemodeActive
-                } else {
-                  Icons.Default.AirplanemodeInactive
-                },
-              contentDescription = "Toggle Device offline simulation",
-              modifier = Modifier.size(15.dp),
-            )
-          },
-          label = {
-            Text(
-              text =
-                if (state.isAirplaneMode) {
-                  "Device offline: ON"
-                } else {
-                  "Device offline"
-                },
-              maxLines = 1,
-              overflow = TextOverflow.Ellipsis,
-              softWrap = false,
-              style = MaterialTheme.typography.labelMedium,
-              fontWeight = if (state.isAirplaneMode) FontWeight.Bold else FontWeight.Medium,
-            )
-          },
-        )
-
-        // Reset Flow button
-        AssistChip(
-          onClick = { state.resetPrototypeFlow() },
-          colors = assistColors,
-          border =
-            androidx.compose.material3.AssistChipDefaults.assistChipBorder(
-              enabled = true,
-              borderColor = Color(0xFF424940),
-            ),
-          leadingIcon = {
-            Icon(
-              imageVector = Icons.Default.Refresh,
-              contentDescription = null,
-              modifier = Modifier.size(15.dp),
-            )
-          },
-          label = {
-            Text(
-              text = "Reset Flow",
-              maxLines = 1,
-              overflow = TextOverflow.Ellipsis,
-              softWrap = false,
-              style = MaterialTheme.typography.labelMedium,
-            )
-          },
-        )
-      }
-    }
   }
 }
 
@@ -542,6 +323,7 @@ fun MobileDevicePreviewFrame(
   orientation: DeviceOrientation = formFactor.defaultOrientation,
   onSelectFormFactor: (DeviceFormFactor) -> Unit = {},
   onRotateDevice: () -> Unit = {},
+  state: PrototypeAppState? = null,
   modifier: Modifier = Modifier,
   content: @Composable () -> Unit,
 ) {
@@ -643,6 +425,10 @@ fun MobileDevicePreviewFrame(
             )
           },
         )
+
+        if (state != null) {
+          PrototypeDebugToolsButton(state = state)
+        }
       }
     }
 

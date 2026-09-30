@@ -2076,4 +2076,26 @@ class PrototypeAppStateTest {
     state.drawerOpenUploads()
     assertEquals(null, state.uploadsEntityFilterId)
   }
+
+  @Test
+  fun selectWorkbenchPage_updatesActivePageAndNotifiesListener() {
+    val state = PrototypeAppState()
+    assertEquals(PrototypeWorkbenchPage.MOBILE_PROTOTYPE, state.activeWorkbenchPage)
+
+    var notifiedPage: PrototypeWorkbenchPage? = null
+    state.onWorkbenchPageChanged = { notifiedPage = it }
+
+    state.selectWorkbenchPage(PrototypeWorkbenchPage.WEB_DASHBOARD)
+    assertEquals(PrototypeWorkbenchPage.WEB_DASHBOARD, state.activeWorkbenchPage)
+    assertEquals(PrototypeWorkbenchPage.WEB_DASHBOARD, notifiedPage)
+
+    state.selectWorkbenchPage(PrototypeWorkbenchPage.SURVEY_EDITOR)
+    assertEquals(PrototypeWorkbenchPage.SURVEY_EDITOR, state.activeWorkbenchPage)
+    assertEquals(PrototypeWorkbenchPage.SURVEY_EDITOR, notifiedPage)
+
+    state.selectWorkbenchPage(PrototypeWorkbenchPage.MOBILE_PROTOTYPE)
+    assertEquals(PrototypeWorkbenchPage.MOBILE_PROTOTYPE, state.activeWorkbenchPage)
+    assertEquals(PrototypeWorkbenchPage.MOBILE_PROTOTYPE, notifiedPage)
+  }
 }
+

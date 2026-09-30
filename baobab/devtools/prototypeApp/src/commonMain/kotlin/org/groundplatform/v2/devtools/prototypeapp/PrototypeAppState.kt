@@ -167,6 +167,19 @@ class PrototypeAppState(
   var isDarkTheme by mutableStateOf(false)
     private set
 
+  /** Active page of the prototype workbench (`Mobile prototype`, `Web app`, `Survey editor`). */
+  var activeWorkbenchPage by mutableStateOf(PrototypeWorkbenchPage.MOBILE_PROTOTYPE)
+    private set
+
+  /** Listener invoked when the active workbench page changes. */
+  var onWorkbenchPageChanged: ((PrototypeWorkbenchPage) -> Unit)? = null
+
+  /** Switches the active workbench page and notifies listeners. */
+  fun selectWorkbenchPage(page: PrototypeWorkbenchPage) {
+    activeWorkbenchPage = page
+    onWorkbenchPageChanged?.invoke(page)
+  }
+
   /** Active hardware preview bezel form factor in the wrapper workbench (`Mobile` vs `Tablet`). */
   var deviceFormFactor by mutableStateOf(DeviceFormFactor.MOBILE)
     private set

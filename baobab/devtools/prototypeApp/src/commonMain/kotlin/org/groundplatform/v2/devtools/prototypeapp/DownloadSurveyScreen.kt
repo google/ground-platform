@@ -157,6 +157,7 @@ fun DownloadSurveyScreen(state: PrototypeAppState) {
           }
         },
         actions = {
+          PrototypeDebugToolsButton(state = state)
           Surface(
             shape = CircleShape,
             color = MaterialTheme.colorScheme.primaryContainer,

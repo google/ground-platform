@@ -129,6 +129,8 @@ import org.groundplatform.v2.devtools.prototypeapp.formeditor.DropdownSelector
 import org.groundplatform.v2.devtools.prototypeapp.formeditor.FormEditorPage
 import org.groundplatform.v2.devtools.prototypeapp.formeditor.FormEditorValidator
 import org.groundplatform.v2.devtools.prototypeapp.formeditor.SectionLabel
+import org.groundplatform.v2.devtools.prototypeapp.PrototypeAppState
+import org.groundplatform.v2.devtools.prototypeapp.PrototypeDebugToolsButton
 import org.groundplatform.v2.devtools.prototypeapp.formeditor.dragToReorder
 
 /**
@@ -141,12 +143,14 @@ fun SurveyEditorPage(
   isDarkTheme: Boolean,
   modifier: Modifier = Modifier,
   onBackToDashboard: (() -> Unit)? = null,
+  appState: PrototypeAppState? = null,
 ) {
   Row(modifier = modifier.fillMaxSize()) {
     SurveyNavigation(
       state = state,
       modifier = Modifier.width(280.dp).fillMaxHeight(),
       onBackToDashboard = onBackToDashboard,
+      appState = appState,
     )
     Box(modifier = Modifier.weight(1f).fillMaxHeight()) {
       when (val section = state.section) {
@@ -188,6 +192,7 @@ private fun SurveyNavigation(
   state: SurveyEditorState,
   modifier: Modifier = Modifier,
   onBackToDashboard: (() -> Unit)? = null,
+  appState: PrototypeAppState? = null,
 ) {
   Surface(modifier = modifier, color = MaterialTheme.colorScheme.surfaceContainerLow) {
     Column(
@@ -229,6 +234,9 @@ private fun SurveyNavigation(
             maxLines = 2,
             overflow = TextOverflow.Ellipsis,
           )
+        }
+        if (appState != null) {
+          PrototypeDebugToolsButton(state = appState)
         }
       }
 

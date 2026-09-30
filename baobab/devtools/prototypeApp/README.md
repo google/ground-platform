@@ -84,7 +84,7 @@ UX Co-Design Workbench for rapid iteration with UX designers.
 
 ## Web Dashboard Page (`#dashboard`)
 
-Switch to the web application with the **Web dashboard** chip in the top bar, or
+Switch to the web application via the **Web app** option in the debug tools menu (bug icon in the header), or
 deep-link to `http://localhost:8091/#dashboard`. It shares state with the mobile
 prototype, so selections and survey changes carry over.
 
@@ -123,7 +123,7 @@ Code lives in `WebDashboardPage.kt`.
 
 Open the survey editor from the web dashboard via the **Edit survey** button in
 the left-hand survey header (and return to the dashboard with the back arrow in
-the survey editor header or the **Web dashboard** top-bar chip), or deep-link
+the survey editor header or via the debug tools menu), or deep-link
 directly to `http://localhost:8091/#survey-editor` (`#form-editor` also works).
 The left-hand navigation lists:
 
@@ -242,3 +242,25 @@ the **WasmJS** or **JS (IR)** target (defaults to port `8091`):
 # Compile and verify JS and WasmJS targets:
 ./gradlew check compileKotlinJs compileKotlinWasmJs
 ```
+
+## Deploying to Firebase Hosting Preview Channels
+
+To create or update a temporary deployment on Firebase Hosting in `gnd-dev`, run the provided deploy script from `devtools/prototypeApp`:
+
+```bash
+# Build and update the default 'prototype-app' preview channel (7-day expiration):
+./scripts/deploy-preview.sh
+
+# Or specify a custom channel name or expiration period:
+./scripts/deploy-preview.sh --channel my-feature --expires 14d
+
+# Or skip the Gradle build if you have already run wasmJsBrowserDistribution:
+./scripts/deploy-preview.sh --skip-build
+```
+
+The script:
+1. Compiles the production Kotlin/Wasm bundle via `./gradlew wasmJsBrowserDistribution`.
+2. Mints a short-lived service account credential with automatic cleanup via `trap`.
+3. Deploys exclusively to the designated preview channel, keeping the live site untouched.
+4. Updates the preview URL in-place and extends its expiration window.
+

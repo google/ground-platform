@@ -150,6 +150,9 @@ fun TermsOfServiceScreen(state: PrototypeAppState) {
             Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
           }
         },
+        actions = {
+          PrototypeDebugToolsButton(state = state)
+        },
         colors =
           TopAppBarDefaults.topAppBarColors(
             containerColor = MaterialTheme.colorScheme.surface,

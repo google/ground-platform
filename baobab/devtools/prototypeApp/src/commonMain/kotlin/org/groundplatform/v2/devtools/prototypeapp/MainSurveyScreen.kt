@@ -221,6 +221,12 @@ internal fun MainSurveyTopAppBar(state: PrototypeAppState) {
         }
       }
     },
+    actions = {
+      PrototypeDebugToolsButton(
+        state = state,
+        iconTint = Color.White,
+      )
+    },
     colors =
       TopAppBarDefaults.topAppBarColors(
         containerColor = topBarContainer,
