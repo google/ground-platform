@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 The Ground Authors.
+ * Copyright 2026 The Ground Authors.
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -14,26 +14,17 @@
  * limitations under the License.
  */
 
+import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatListModule } from '@angular/material/list';
 import { MatMenuModule } from '@angular/material/menu';
-import { MatSnackBarModule } from '@angular/material/snack-bar';
-import { BrowserModule } from '@angular/platform-browser';
 
-import { JobListItemComponent } from './job-list-item.component';
+import { LanguageSwitcherComponent } from './language-switcher.component';
 
 @NgModule({
-  imports: [
-    BrowserModule,
-    MatButtonModule,
-    MatIconModule,
-    MatListModule,
-    MatMenuModule,
-    MatSnackBarModule,
-  ],
-  exports: [JobListItemComponent],
-  declarations: [JobListItemComponent],
+  declarations: [LanguageSwitcherComponent],
+  imports: [CommonModule, MatButtonModule, MatIconModule, MatMenuModule],
+  exports: [LanguageSwitcherComponent],
 })
-export class JobListItemModule {}
+export class LanguageSwitcherModule {}

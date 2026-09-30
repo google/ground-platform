@@ -15,7 +15,7 @@
 -->
 
 <div class="header">
-  <div>
+  <div class="header-left">
     <ng-content select="[beginning]"></ng-content>
     <img
       class="logo"
@@ -74,6 +74,8 @@
         <div class="header-divider"></div>
       </ng-container>
     </ng-container>
+
+    <ground-language-switcher></ground-language-switcher>
 
     <ng-container *ngIf="authService.getUser$() | async as user">
       <button mat-icon-button [matMenuTriggerFor]="infoMenu">

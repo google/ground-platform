@@ -54,6 +54,8 @@ task-button:hover {
 
     .edit-job-header-title {
       flex: 1;
+      min-width: 0;
+      overflow-wrap: anywhere;
     }
   }
 }

@@ -46,6 +46,8 @@ const d = registry.getFieldIds(Pb.TaskData);
 const mq = registry.getFieldIds(Pb.Task.MultipleChoiceQuestion);
 const op = registry.getFieldIds(Pb.Task.MultipleChoiceQuestion.Option);
 const cl = registry.getFieldIds(Pb.TaskData.CaptureLocationResult);
+const dg = registry.getFieldIds(Pb.Task.DrawGeometry);
+const dgr = registry.getFieldIds(Pb.TaskData.DrawGeometryResult);
 const a = registry.getFieldIds(Pb.AuditInfo);
 
 /**
@@ -101,6 +103,8 @@ describe('exportCsv()', () => {
     'https://firebasestorage.googleapis.com/v0/b/test-bucket/o/';
   const email = 'somebody@test.it';
   const userId = 'user5000';
+  const surveyId = 'survey001';
+  const host = 'ground.example.com';
   const survey = {
     [sv.name]: 'Test survey',
     [sv.acl]: {
@@ -178,6 +182,35 @@ describe('exportCsv()', () => {
       },
     ],
   };
+  const job2 = {
+    id: 'job456',
+    [j.name]: 'Location job',
+    [j.tasks]: [
+      {
+        [t.id]: 'task101',
+        [t.prompt]: 'Drop a pin at your location',
+        [t.drawGeometry]: {
+          [dg.allowedMethods]: [Pb.Task.DrawGeometry.Method.DROP_PIN],
+          [dg.requireDeviceLocation]: true,
+        },
+      },
+      {
+        [t.id]: 'task102',
+        [t.prompt]: 'Drop a pin anywhere',
+        [t.drawGeometry]: {
+          [dg.allowedMethods]: [Pb.Task.DrawGeometry.Method.DROP_PIN],
+        },
+      },
+      {
+        [t.id]: 'task103',
+        [t.prompt]: 'Walk the boundary',
+        [t.drawGeometry]: {
+          [dg.allowedMethods]: [Pb.Task.DrawGeometry.Method.DRAW_AREA],
+          [dg.requireDeviceLocation]: true,
+        },
+      },
+    ],
+  };
   const pointLoi1 = {
     id: 'loi100',
     [l.id]: 'loi100',
@@ -210,6 +243,19 @@ describe('exportCsv()', () => {
     [l.properties]: {
       name: { [pr.stringValue]: 'Luzern' },
     },
+  };
+  const pointLoi3 = {
+    id: 'loi300',
+    [l.id]: 'loi300',
+    [l.jobId]: job2.id,
+    [l.customTag]: 'POINT_003',
+    [l.geometry]: {
+      [g.point]: {
+        [p.coordinates]: { [c.latitude]: 10.5, [c.longitude]: 20.5 },
+      },
+    },
+    [l.submissionCount]: 0,
+    [l.source]: Pb.LocationOfInterest.Source.FIELD_DATA,
   };
   const submission1a = {
     id: '001a',
@@ -259,6 +305,16 @@ describe('exportCsv()', () => {
           },
         },
       },
+      {
+        [d.id]: 'data005b',
+        [d.taskId]: 'task005',
+        [d.captureLocationResult]: {
+          [cl.coordinates]: {
+            [c.latitude]: 10,
+            [c.longitude]: 20,
+          },
+        },
+      },
     ],
     [s.created]: auditInfo,
   };
@@ -286,13 +342,114 @@ describe('exportCsv()', () => {
             [c.latitude]: -123,
             [c.longitude]: 45,
           },
+          [cl.accuracy]: 4.5,
+          [cl.altitude]: 112.3,
         },
       },
       {
         [d.id]: 'data006b',
         [d.taskId]: 'task006',
         [d.takePhotoResult]: {
-          '1': 'http://photo/url',
+          '1': `user-media/surveys/${surveyId}/submissions/task006-4f8b1c2d-9a3e-4d71-b0c5-2e6a7f9d1834.jpg`,
+        },
+      },
+    ],
+  };
+  // A job with two photo tasks, used to check that each photo cell in a row
+  // gets a link of its own. Photo links are keyed by task, so a submission
+  // answering several photo tasks must yield several distinct URLs.
+  const photoJob = {
+    id: 'job456',
+    [j.name]: 'Photo job',
+    [j.tasks]: [
+      {
+        [t.id]: 'task006',
+        [t.prompt]: 'Take a photo',
+        [t.takePhoto]: {
+          ['1' /* min_heading_degrees */]: 0,
+          ['2' /* max_heading_degrees */]: 360,
+        },
+      },
+      {
+        [t.id]: 'task007',
+        [t.prompt]: 'Take another photo',
+        [t.takePhoto]: {
+          ['1' /* min_heading_degrees */]: 0,
+          ['2' /* max_heading_degrees */]: 360,
+        },
+      },
+    ],
+  };
+  const photoLoi = {
+    id: 'loi300',
+    [l.id]: 'loi300',
+    [l.jobId]: photoJob.id,
+    [l.customTag]: 'POINT_003',
+    [l.geometry]: {
+      [g.point]: {
+        [p.coordinates]: { [c.latitude]: 47.05, [c.longitude]: 8.3 },
+      },
+    },
+    [l.submissionCount]: 0,
+    [l.source]: Pb.LocationOfInterest.Source.FIELD_DATA,
+    [l.properties]: {
+      name: { [pr.stringValue]: 'Luzern' },
+    },
+  };
+  const photoSubmission = {
+    id: '003a',
+    [s.id]: '003a',
+    [s.loiId]: photoLoi.id,
+    [s.index]: 1,
+    [s.jobId]: photoJob.id,
+    [s.ownerId]: userId,
+    [s.taskData]: [
+      {
+        [d.id]: 'data006c',
+        [d.taskId]: 'task006',
+        [d.takePhotoResult]: {
+          '1': `user-media/surveys/${surveyId}/submissions/task006-4f8b1c2d-9a3e-4d71-b0c5-2e6a7f9d1834.jpg`,
+        },
+      },
+      {
+        [d.id]: 'data007a',
+        [d.taskId]: 'task007',
+        [d.takePhotoResult]: {
+          '1': `user-media/surveys/${surveyId}/submissions/task007-7c2e9b41-5d6a-4f83-a1b0-3e8d5c7f2941.jpg`,
+        },
+      },
+    ],
+  };
+  const submission3a = {
+    id: '003a',
+    [s.id]: '003a',
+    [s.loiId]: pointLoi3.id,
+    [s.index]: 1,
+    [s.jobId]: job2.id,
+    [s.ownerId]: userId,
+    [s.taskData]: [
+      {
+        [d.id]: 'data101',
+        [d.taskId]: 'task101',
+        [d.drawGeometryResult]: {
+          [dgr.geometry]: {
+            [g.point]: {
+              [p.coordinates]: { [c.latitude]: 10.5, [c.longitude]: 20.5 },
+            },
+          },
+          [dgr.accuracy]: 3.2,
+          [dgr.altitude]: 250,
+        },
+      },
+      {
+        [d.id]: 'data102',
+        [d.taskId]: 'task102',
+        [d.drawGeometryResult]: {
+          [dgr.geometry]: {
+            [g.point]: {
+              [p.coordinates]: { [c.latitude]: 1, [c.longitude]: 2 },
+            },
+          },
         },
       },
     ],
@@ -321,10 +478,10 @@ describe('exportCsv()', () => {
       submissions: [submission1a, submission1b, submission2a],
       expectedFilename: 'test-job.csv',
       expectedCsv: [
-        '"system:index","geometry","name","area","data:What is the meaning of life?","data:How much?","data:When?","data:Which ones?","data:Where are you now?","data:Take a photo","data:contributor_name","data:contributor_email","data:created_client_timestamp","data:created_server_timestamp"',
-        '"POINT_001","POINT (125.6 10.1)","Dinagat Islands",3.08,"Submission 1",42,,,,,,,"1970-01-01T00:00:00.000Z","1970-01-01T00:00:00.000Z"',
-        '"POINT_001","POINT (125.6 10.1)","Dinagat Islands",3.08,"Submission 2",,"2012-03-08T12:17:24.000Z",,,,"display_name","address@email.com","1970-01-01T00:00:01.000Z","1970-01-01T00:00:01.000Z"',
-        '"POINT_002","POINT (8.3 47.05)","Luzern",,,,,"AAA,BBB,Other: other","POINT (45 -123)","http://photo/url",,,"1970-01-01T00:00:00.000Z","1970-01-01T00:00:00.000Z"',
+        '"system:index","geometry","name","area","data:What is the meaning of life?","data:How much?","data:When?","data:Which ones?","data:Where are you now?","data:Where are you now?:accuracy","data:Where are you now?:altitude","data:Take a photo","data:contributor_name","data:contributor_email","data:created_client_timestamp","data:created_server_timestamp"',
+        '"POINT_001","POINT (125.6 10.1)","Dinagat Islands",3.08,"Submission 1",42,,,,,,,,,"1970-01-01T00:00:00.000Z","1970-01-01T00:00:00.000Z"',
+        '"POINT_001","POINT (125.6 10.1)","Dinagat Islands",3.08,"Submission 2",,"2012-03-08T12:17:24.000Z",,"POINT (20 10)",,,,"display_name","address@email.com","1970-01-01T00:00:01.000Z","1970-01-01T00:00:01.000Z"',
+        '"POINT_002","POINT (8.3 47.05)","Luzern",,,,,"AAA,BBB,Other: other","POINT (45 -123)",4.5,112.3,"https://ground.example.com/exportMedia?survey=survey001&submission=002a&task=task006",,,"1970-01-01T00:00:00.000Z","1970-01-01T00:00:00.000Z"',
       ],
     },
     {
@@ -336,10 +493,36 @@ describe('exportCsv()', () => {
       submissions: [submission1a, submission1b],
       expectedFilename: 'test-job.csv',
       expectedCsv: [
-        '"system:index","geometry","name","area","data:What is the meaning of life?","data:How much?","data:When?","data:Which ones?","data:Where are you now?","data:Take a photo","data:contributor_name","data:contributor_email","data:created_client_timestamp","data:created_server_timestamp"',
-        '"POINT_001","POINT (125.6 10.1)","Dinagat Islands",3.08,"Submission 1",42,,,,,,,"1970-01-01T00:00:00.000Z","1970-01-01T00:00:00.000Z"',
-        '"POINT_001","POINT (125.6 10.1)","Dinagat Islands",3.08,"Submission 2",,"2012-03-08T12:17:24.000Z",,,,"display_name","address@email.com","1970-01-01T00:00:01.000Z","1970-01-01T00:00:01.000Z"',
-        '"POINT_002","POINT (8.3 47.05)","Luzern",,,,,,,,,,,',
+        '"system:index","geometry","name","area","data:What is the meaning of life?","data:How much?","data:When?","data:Which ones?","data:Where are you now?","data:Where are you now?:accuracy","data:Where are you now?:altitude","data:Take a photo","data:contributor_name","data:contributor_email","data:created_client_timestamp","data:created_server_timestamp"',
+        '"POINT_001","POINT (125.6 10.1)","Dinagat Islands",3.08,"Submission 1",42,,,,,,,,,"1970-01-01T00:00:00.000Z","1970-01-01T00:00:00.000Z"',
+        '"POINT_001","POINT (125.6 10.1)","Dinagat Islands",3.08,"Submission 2",,"2012-03-08T12:17:24.000Z",,"POINT (20 10)",,,,"display_name","address@email.com","1970-01-01T00:00:01.000Z","1970-01-01T00:00:01.000Z"',
+        '"POINT_002","POINT (8.3 47.05)","Luzern",,,,,,,,,,,,,',
+      ],
+    },
+    {
+      desc: 'export accuracy and altitude of pins dropped at device location',
+      jobId: job2.id,
+      survey: survey,
+      jobs: [job2],
+      lois: [pointLoi3],
+      submissions: [submission3a],
+      expectedFilename: 'location-job.csv',
+      expectedCsv: [
+        '"system:index","geometry","data:Drop a pin at your location","data:Drop a pin at your location:accuracy","data:Drop a pin at your location:altitude","data:Drop a pin anywhere","data:Walk the boundary","data:contributor_name","data:contributor_email","data:created_client_timestamp","data:created_server_timestamp"',
+        '"POINT_003","POINT (20.5 10.5)","POINT (20.5 10.5)",3.2,250,"POINT (2 1)",,,,"1970-01-01T00:00:00.000Z","1970-01-01T00:00:00.000Z"',
+      ],
+    },
+    {
+      desc: 'links each photo task in a row separately',
+      jobId: photoJob.id,
+      survey: survey,
+      jobs: [photoJob],
+      lois: [photoLoi],
+      submissions: [photoSubmission],
+      expectedFilename: 'photo-job.csv',
+      expectedCsv: [
+        '"system:index","geometry","name","data:Take a photo","data:Take another photo","data:contributor_name","data:contributor_email","data:created_client_timestamp","data:created_server_timestamp"',
+        '"POINT_003","POINT (8.3 47.05)","Luzern","https://ground.example.com/exportMedia?survey=survey001&submission=003a&task=task006","https://ground.example.com/exportMedia?survey=survey001&submission=003a&task=task007",,,"1970-01-01T00:00:00.000Z","1970-01-01T00:00:00.000Z"',
       ],
     },
   ];
@@ -406,24 +589,25 @@ describe('exportCsv()', () => {
     }) =>
       it(desc, async () => {
         // Populate database.
-        mockFirestore.doc(`surveys/${survey.id}`).set(survey);
+        mockFirestore.doc(`surveys/${surveyId}`).set(survey);
         jobs?.forEach(({ id, ...job }) =>
-          mockFirestore.doc(`surveys/${survey.id}/jobs/${id}`).set(job)
+          mockFirestore.doc(`surveys/${surveyId}/jobs/${id}`).set(job)
         );
         lois?.forEach(({ id, ...loi }) =>
-          mockFirestore.doc(`surveys/${survey.id}/lois/${id}`).set(loi)
+          mockFirestore.doc(`surveys/${surveyId}/lois/${id}`).set(loi)
         );
         submissions?.forEach(({ id, ...submission }) =>
           mockFirestore
-            .doc(`surveys/${survey.id}/submissions/${id}`)
+            .doc(`surveys/${surveyId}/submissions/${id}`)
             .set(submission)
         );
 
         // Build mock request and response.
         const req = await createGetRequestSpy({
           url: '/exportCsv',
+          headers: { host, 'x-forwarded-proto': 'https' },
           query: {
-            survey: survey.id,
+            survey: surveyId,
             job: jobId,
           },
         });

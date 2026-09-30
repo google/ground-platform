@@ -29,16 +29,14 @@ limitations under the License.
   </div>
   <div
     *ngIf="
-      task().type === taskType.DROP_PIN || task().type === taskType.DRAW_AREA
+      !capturedCoord() &&
+      (task().type === taskType.DROP_PIN || task().type === taskType.DRAW_AREA)
     "
     class="submission-response-geometry-label"
   >
     {{ task().id }}
   </div>
-  <div
-    *ngIf="task().type === taskType.CAPTURE_LOCATION"
-    class="submission-response-geometry-label"
-  >
+  <div *ngIf="capturedCoord()" class="submission-response-geometry-label">
     {{ capturedCoord() }}
   </div>
 </div>

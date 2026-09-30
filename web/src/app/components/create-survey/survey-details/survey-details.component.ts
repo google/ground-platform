@@ -17,6 +17,11 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
+import {
+  SURVEY_DESCRIPTION_MAX_LENGTH,
+  SURVEY_TITLE_MAX_LENGTH,
+} from 'app/models/survey.model';
+
 @Component({
   selector: 'survey-details',
   templateUrl: './survey-details.component.html',
@@ -26,6 +31,8 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 export class SurveyDetailsComponent implements OnInit {
   readonly titleControlKey = 'title';
   readonly descriptionControlKey = 'description';
+  readonly titleMaxLength = SURVEY_TITLE_MAX_LENGTH;
+  readonly descriptionMaxLength = SURVEY_DESCRIPTION_MAX_LENGTH;
   formGroup!: FormGroup;
 
   @Input() title = '';
@@ -36,8 +43,14 @@ export class SurveyDetailsComponent implements OnInit {
 
   constructor(private formBuilder: FormBuilder) {
     this.formGroup = this.formBuilder.group({
-      [this.titleControlKey]: ['', Validators.required],
-      [this.descriptionControlKey]: '',
+      [this.titleControlKey]: [
+        '',
+        [Validators.required, Validators.maxLength(this.titleMaxLength)],
+      ],
+      [this.descriptionControlKey]: [
+        '',
+        Validators.maxLength(this.descriptionMaxLength),
+      ],
     });
 
     this.formGroup.statusChanges.subscribe(_ => {

@@ -34,6 +34,12 @@ import { SurveyService } from 'app/services/survey/survey.service';
   providedIn: 'root',
 })
 export class LocationOfInterestService {
+  /**
+   * Compares LOI display names. Reusing one collator is about twice as fast as
+   * calling `localeCompare()` on every comparison, and gives the same order.
+   */
+  private static readonly displayNameCollator = new Intl.Collator();
+
   constructor(
     private authService: AuthService,
     private dataStore: DataStoreService,
@@ -61,7 +67,12 @@ export class LocationOfInterestService {
             loi,
             name: LocationOfInterestService.getDisplayName(loi),
           }))
-          .sort((a, b) => a.name.localeCompare(b.name))
+          .sort((a, b) =>
+            LocationOfInterestService.displayNameCollator.compare(
+              a.name,
+              b.name
+            )
+          )
           .map(({ loi }) => loi)
       )
     );
