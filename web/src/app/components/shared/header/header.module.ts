@@ -23,12 +23,14 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 import { CurrentUserWidgetModule } from './current-user-widget/current-user-widget.module';
 import { HeaderComponent } from './header.component';
+import { LanguageSwitcherModule } from './language-switcher/language-switcher.module';
 
 @NgModule({
   declarations: [HeaderComponent],
   imports: [
     CommonModule,
     CurrentUserWidgetModule,
+    LanguageSwitcherModule,
     MatButtonModule,
     MatIconModule,
     MatMenuModule,

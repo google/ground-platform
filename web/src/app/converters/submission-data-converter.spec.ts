@@ -19,6 +19,8 @@ import { registry } from '@ground/lib';
 import { GroundProtos } from '@ground/proto';
 import { List, Map } from 'immutable';
 
+import { Coordinate } from 'app/models/geometry/coordinate';
+import { Point } from 'app/models/geometry/point';
 import { Job } from 'app/models/job.model';
 import { Submission } from 'app/models/submission/submission.model';
 import {
@@ -40,6 +42,10 @@ const td_tr = registry.getFieldIds(Pb.TaskData.TextResponse);
 const td_nr = registry.getFieldIds(Pb.TaskData.NumberResponse);
 const td_dr = registry.getFieldIds(Pb.TaskData.DateTimeResponse);
 const td_mcr = registry.getFieldIds(Pb.TaskData.MultipleChoiceResponses);
+const td_dgr = registry.getFieldIds(Pb.TaskData.DrawGeometryResult);
+const g = registry.getFieldIds(Pb.Geometry);
+const p = registry.getFieldIds(Pb.Point);
+const c = registry.getFieldIds(Pb.Coordinates);
 
 const job001: Job = new Job(
   /* id= */ 'job001',
@@ -148,8 +154,12 @@ const submission001 = {
 
 describe('submissionDocToModel_Error', () => {
   it('returns Error when created audit info is missing', () => {
-    const {[sb.created]: _, ...dataWithoutCreated} = submissionDoc001;
-    const result = submissionDocToModel(job001, 'submission001', dataWithoutCreated);
+    const { [sb.created]: _, ...dataWithoutCreated } = submissionDoc001;
+    const result = submissionDocToModel(
+      job001,
+      'submission001',
+      dataWithoutCreated
+    );
     expect(result instanceof Error).toBeTrue();
     expect((result as Error).message).toContain(
       'Missing created audit info in submission submission001'
@@ -157,8 +167,13 @@ describe('submissionDocToModel_Error', () => {
   });
 
   it('returns Error when last_modified audit info is missing', () => {
-    const {[sb.lastModified]: _, ...dataWithoutLastModified} = submissionDoc001;
-    const result = submissionDocToModel(job001, 'submission001', dataWithoutLastModified);
+    const { [sb.lastModified]: _, ...dataWithoutLastModified } =
+      submissionDoc001;
+    const result = submissionDocToModel(
+      job001,
+      'submission001',
+      dataWithoutLastModified
+    );
     expect(result instanceof Error).toBeTrue();
     expect((result as Error).message).toContain(
       'Missing last_modified audit info in submission submission001'
@@ -177,5 +192,72 @@ describe('submissionDocToModel', () => {
     );
 
     expect(submission001JS).toEqual(submission001);
+  });
+});
+
+describe('submissionDocToModel with draw geometry results', () => {
+  const job = new Job(
+    /* id= */ 'job002',
+    /* index= */ 0,
+    '#ffffff',
+    'Test job',
+    Map([
+      ['task001', new Task('task001', TaskType.DROP_PIN, '', true, 1)],
+      ['task002', new Task('task002', TaskType.DROP_PIN, '', true, 2)],
+    ])
+  );
+  const submissionDoc = {
+    ...submissionDoc001,
+    [sb.jobId]: 'job002',
+    [sb.taskData]: [
+      {
+        [td.taskId]: 'task001',
+        [td.drawGeometryResult]: {
+          [td_dgr.geometry]: {
+            [g.point]: {
+              [p.coordinates]: { [c.latitude]: 10, [c.longitude]: 20 },
+            },
+          },
+          [td_dgr.accuracy]: 3.2,
+          [td_dgr.altitude]: 250,
+        },
+      },
+      {
+        [td.taskId]: 'task002',
+        [td.drawGeometryResult]: {
+          [td_dgr.geometry]: {
+            [g.point]: {
+              [p.coordinates]: { [c.latitude]: 1, [c.longitude]: 2 },
+            },
+          },
+        },
+      },
+    ],
+  };
+
+  it('reads accuracy and altitude of pins dropped at the device location', () => {
+    const submission = submissionDocToModel(
+      job,
+      'submission002',
+      submissionDoc
+    ) as Submission;
+
+    const point = submission.data.get('task001')!.value as Point;
+    expect(point.coord).toEqual(new Coordinate(20, 10));
+    expect(point.accuracy).toBe(3.2);
+    expect(point.altitude).toBe(250);
+  });
+
+  it('leaves accuracy and altitude unset for pins placed manually', () => {
+    const submission = submissionDocToModel(
+      job,
+      'submission002',
+      submissionDoc
+    ) as Submission;
+
+    const point = submission.data.get('task002')!.value as Point;
+    expect(point.coord).toEqual(new Coordinate(2, 1));
+    expect(point.accuracy).toBeUndefined();
+    expect(point.altitude).toBeUndefined();
   });
 });

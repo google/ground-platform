@@ -75,6 +75,8 @@
       </ng-container>
     </ng-container>
 
+    <ground-language-switcher></ground-language-switcher>
+
     <ng-container *ngIf="authService.getUser$() | async as user">
       <button mat-icon-button [matMenuTriggerFor]="infoMenu">
         <mat-icon>info_outline_24px</mat-icon>
