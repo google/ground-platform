@@ -17,13 +17,18 @@
 div[left] {
   display: flex;
   align-items: center;
+  min-width: 0;
 
   .header-divider {
+    flex-shrink: 0;
     height: 32px;
     margin: 0 24px;
   }
 
   .survey-title {
     font-size: 16px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 }

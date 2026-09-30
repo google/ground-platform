@@ -72,4 +72,23 @@ describe('SurveyDetailsComponent', () => {
       newDescription,
     ]);
   });
+
+  it('is invalid when title or description is longer than the max length', () => {
+    const titleControl =
+      component.formGroup.controls[component.titleControlKey];
+    const descriptionControl =
+      component.formGroup.controls[component.descriptionControlKey];
+
+    titleControl.setValue('a'.repeat(component.titleMaxLength));
+    descriptionControl.setValue('a'.repeat(component.descriptionMaxLength));
+    expect(component.formGroup.valid).toBeTrue();
+
+    titleControl.setValue('a'.repeat(component.titleMaxLength + 1));
+    expect(titleControl.hasError('maxlength')).toBeTrue();
+
+    titleControl.setValue(title);
+    descriptionControl.setValue('a'.repeat(component.descriptionMaxLength + 1));
+    expect(descriptionControl.hasError('maxlength')).toBeTrue();
+    expect(component.formGroup.valid).toBeFalse();
+  });
 });

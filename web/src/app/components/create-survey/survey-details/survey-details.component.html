@@ -20,6 +20,7 @@
     <input
       matInput
       [formControlName]="titleControlKey"
+      [attr.maxlength]="titleMaxLength"
       placeholder="Ex. Regenerative agriculture survey"
       i18n-placeholder="@@app.forms.placeholders.surveyName"
     />
@@ -30,6 +31,7 @@
     <input
       matInput
       [formControlName]="descriptionControlKey"
+      [attr.maxlength]="descriptionMaxLength"
       placeholder="Ex. Self-reporting of community-led regenerative agriculture activities"
       i18n-placeholder="@@app.forms.placeholders.surveyDescription"
     />

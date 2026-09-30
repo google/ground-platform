@@ -26,6 +26,7 @@ import {
   getStorageBucket,
 } from './common/context';
 import { getTempFilePath } from './common/temp-storage';
+import { getExportMediaUrl, getRequestBaseUrl } from './common/media';
 import { DecodedIdToken } from 'firebase-admin/auth';
 import { QueryDocumentSnapshot } from 'firebase-admin/firestore';
 import { StatusCodes } from 'http-status-codes';
@@ -93,6 +94,10 @@ export async function exportCsvHandler(
 
   const tasks = job.tasks.sort((a, b) => a.index! - b.index!);
 
+  const baseUrl = getRequestBaseUrl(req);
+  const photoUrl: PhotoUrlFn = (submissionId, taskId) =>
+    getExportMediaUrl(baseUrl, surveyId, submissionId, taskId);
+
   const loiProperties = new Set<string>();
   let query = db.fetchPartialLocationsOfInterest(surveyId, jobId, 1000);
   let lastVisible = null;
@@ -142,9 +147,9 @@ export async function exportCsvHandler(
       if (isAccessibleLoi(loi, ownerIdFilter) && submissionDoc) {
         const submission = toMessage(submissionDoc.data(), Pb.Submission);
         if (submission instanceof Error) throw submission;
-        writeRow(csvStream, loiProperties, tasks, loi, submission);
+        writeRow(csvStream, loiProperties, tasks, loi, photoUrl, submission);
       } else {
-        writeRow(csvStream, loiProperties, tasks, loi);
+        writeRow(csvStream, loiProperties, tasks, loi, photoUrl);
       }
     } catch (e) {
       console.debug('Skipping row', e);
@@ -166,7 +171,7 @@ function getHeaders(tasks: Pb.ITask[], loiProperties: Set<string>): string[] {
     'system:index',
     'geometry',
     ...loiProperties,
-    ...tasks.map(task => `data:${task.prompt || ''}`),
+    ...tasks.flatMap(getTaskHeaders),
     'data:contributor_name',
     'data:contributor_email',
     'data:created_client_timestamp',
@@ -175,11 +180,46 @@ function getHeaders(tasks: Pb.ITask[], loiProperties: Set<string>): string[] {
   return headers.map(quote);
 }
 
+/**
+ * Returns the headers of the columns for a specific task. Tasks capturing the
+ * device location have additional columns for accuracy and altitude.
+ */
+function getTaskHeaders(task: Pb.ITask): string[] {
+  const header = `data:${task.prompt || ''}`;
+  if (capturesDeviceLocation(task)) {
+    return [header, `${header}:accuracy`, `${header}:altitude`];
+  }
+  return [header];
+}
+
+/**
+ * Returns true for "Capture location" tasks, and for "Drop pin" tasks
+ * requiring the pin to be placed at the device location.
+ */
+function capturesDeviceLocation(task: Pb.ITask): boolean {
+  const { captureLocation, drawGeometry } = task;
+  if (captureLocation) return true;
+  return (
+    !!drawGeometry?.requireDeviceLocation &&
+    !!drawGeometry.allowedMethods?.includes(
+      Pb.Task.DrawGeometry.Method.DROP_PIN
+    )
+  );
+}
+
+/**
+ * Returns the URL at which the photo submitted for a task can be fetched. The
+ * URL names the submission rather than the storage object, so it keeps working
+ * across re-exports and stays subject to the survey's access rules.
+ */
+type PhotoUrlFn = (submissionId: string, taskId: string) => string;
+
 function writeRow(
   csvStream: csv.CsvFormatterStream<csv.Row, csv.Row>,
   loiProperties: Set<string>,
   tasks: Pb.ITask[],
   loi: Pb.LocationOfInterest,
+  photoUrl: PhotoUrlFn,
   submission?: Pb.Submission
 ) {
   if (!loi.geometry) {
@@ -195,8 +235,11 @@ function writeRow(
   getPropertiesByName(loi, loiProperties).forEach(v => row.push(quote(v)));
   if (submission) {
     const { taskData: data } = submission;
-    // Header: One column for each task
-    tasks.forEach(task => row.push(quote(getValue(task, data))));
+    // Header: One or more columns for each task
+    const taskPhotoUrl = (taskId: string) => photoUrl(submission.id, taskId);
+    tasks.forEach(task =>
+      getTaskValues(task, data, taskPhotoUrl).forEach(v => row.push(quote(v)))
+    );
     // Header: contributor_username, contributor_email, created_client_timestamp, created_server_timestamp
     const { created } = submission;
     row.push(quote(created?.displayName));
@@ -207,8 +250,6 @@ function writeRow(
     row.push(
       quote(new Date(timestampToInt(created?.serverTimestamp)).toISOString())
     );
-  } else {
-    row.concat(new Array(tasks.length + 4).fill(''));
   }
   csvStream.write(row);
 }
@@ -229,13 +270,33 @@ function toWkt(geometry: Pb.IGeometry): string {
 }
 
 /**
- * Returns the string or number representation of a specific task element result.
+ * Returns the values of the columns for a specific task, in the same order as
+ * the headers returned by `getTaskHeaders()`.
+ */
+function getTaskValues(
+  task: Pb.ITask,
+  data: Pb.ITaskData[],
+  photoUrl: (taskId: string) => string
+): (string | number | null)[] {
+  const result = data.find(d => d.taskId === task.id);
+  const value = getValue(task, result, photoUrl);
+  if (!capturesDeviceLocation(task)) return [value];
+  const location = result?.skipped
+    ? null
+    : (result?.captureLocationResult ?? result?.drawGeometryResult);
+  // Unset accuracy and altitude are read as 0, so they are exported as empty.
+  return [value, location?.accuracy || null, location?.altitude || null];
+}
+
+/**
+ * Returns the string or number representation of a specific task element
+ * result.
  */
 function getValue(
   task: Pb.ITask,
-  data: Pb.ITaskData[]
+  result: Pb.ITaskData | undefined,
+  photoUrl: (taskId: string) => string
 ): string | number | null {
-  const result = data.find(d => d.taskId === task.id);
   if (!result || result.skipped) return null;
   const {
     textResponse,
@@ -255,7 +316,6 @@ function getValue(
     // TODO(#1248): Test when implementing other plot annotations feature.
     return toWkt(drawGeometryResult.geometry);
   } else if (captureLocationResult) {
-    // TODO(#1916): Include altitude and accuracy in separate columns.
     return toWkt(
       new Pb.Geometry({
         point: new Pb.Point({
@@ -263,7 +323,8 @@ function getValue(
         }),
       })
     );
-  } else if (takePhotoResult) return getPhotoUrlValue(takePhotoResult);
+  } else if (takePhotoResult)
+    return takePhotoResult.photoPath ? photoUrl(task.id!) : null;
   else return null;
 }
 
@@ -307,10 +368,6 @@ function getMultipleChoiceLabel(task: Pb.ITask, id: string): string | null {
       (o: Pb.Task.MultipleChoiceQuestion.IOption) => o.id === id
     )?.label ?? null
   );
-}
-
-function getPhotoUrlValue(result: Pb.TaskData.ITakePhotoResult): string | null {
-  return result?.photoPath || null;
 }
 
 /**
