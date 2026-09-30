@@ -39,8 +39,16 @@ export class SubmissionGeometryViewComponent {
 
   readonly capturedCoord = computed(() => {
     const task = this.task();
-    if (task.type !== TaskType.CAPTURE_LOCATION) return null;
-    return this.formatCaptureLocationCoord(this.geometry() as Point);
+    const geometry = this.geometry();
+    if (task.type === TaskType.CAPTURE_LOCATION)
+      return this.formatCaptureLocationCoord(geometry as Point);
+    if (
+      task.type === TaskType.DROP_PIN &&
+      geometry instanceof Point &&
+      geometry.accuracy
+    )
+      return this.formatCaptureLocationCoord(geometry);
+    return null;
   });
 
   onClick(): void {

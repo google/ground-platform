@@ -188,6 +188,14 @@
     "app.labels.roles.surveyOrganizer": "Organizador do inquérito",
     "app.labels.roles.viewer": "Visualizador",
     "app.labels.no": "Não",
-    "app.labels.yes": "Sim"
+    "app.labels.yes": "Sim",
+    "app.labels.changeLanguage": "Alterar idioma",
+    "app.labels.languages.en": "Inglês",
+    "app.labels.languages.es": "Espanhol",
+    "app.labels.languages.fr": "Francês",
+    "app.labels.languages.lo": "Laosiano",
+    "app.labels.languages.pt": "Português",
+    "app.labels.languages.th": "Tailandês",
+    "app.labels.languages.vi": "Vietnamita"
   }
 }

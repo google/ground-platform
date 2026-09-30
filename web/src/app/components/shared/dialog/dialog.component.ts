@@ -19,6 +19,8 @@ import '@angular/localize/init';
 import { Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
+import { JOB_NAME_MAX_LENGTH } from 'app/models/job.model';
+
 export enum DialogType {
   AddJob,
   RenameJob,
@@ -140,6 +142,8 @@ export interface DialogData {
 })
 export class DialogComponent {
   public static readonly JOB_NAME_FIELD_ID = 'job-name';
+
+  readonly jobNameMaxLength = JOB_NAME_MAX_LENGTH;
 
   readonly DialogType = DialogType;
 

@@ -36,9 +36,6 @@ catalogs:
     '@angular/material':
       specifier: ^20.2.14
       version: 20.2.14
-    '@angular/material-experimental':
-      specifier: ^20.2.14
-      version: 20.2.14
     '@angular/platform-browser':
       specifier: ^20.3.15
       version: 20.3.16
@@ -48,9 +45,6 @@ catalogs:
     '@angular/router':
       specifier: ^20.3.15
       version: 20.3.16
-    '@babel/runtime':
-      specifier: ^7.29.2
-      version: 7.29.2
     '@fast-csv/format':
       specifier: ^4.3.5
       version: 4.3.5
@@ -90,12 +84,6 @@ catalogs:
     firebase-functions:
       specifier: ^7.3.0
       version: 7.3.2
-    google-auth-library:
-      specifier: ^6.1.3
-      version: 6.1.3
-    googleapis:
-      specifier: ^64.0.0
-      version: 64.0.0
     http-status-codes:
       specifier: ^2.3.0
       version: 2.3.0
@@ -169,9 +157,6 @@ catalogs:
     '@eslint/eslintrc':
       specifier: ^3.3.5
       version: 3.3.5
-    '@jridgewell/source-map':
-      specifier: ^0.3.2
-      version: 0.3.11
     '@nx/angular':
       specifier: ^22.2.1
       version: 22.3.3
@@ -214,9 +199,6 @@ catalogs:
     '@types/terraformer__wkt':
       specifier: ^2.0.3
       version: 2.0.3
-    '@types/webpack-env':
-      specifier: ^1.15.3
-      version: 1.18.8
     '@typescript-eslint/eslint-plugin':
       specifier: ^8.55.0
       version: 8.55.0
@@ -464,12 +446,6 @@ importers:
       firebase-functions:
         specifier: 'catalog:'
         version: 7.3.2(firebase-admin@14.2.0(encoding@0.1.13))
-      google-auth-library:
-        specifier: 'catalog:'
-        version: 6.1.3(encoding@0.1.13)
-      googleapis:
-        specifier: 'catalog:'
-        version: 64.0.0(encoding@0.1.13)
       http-status-codes:
         specifier: 'catalog:'
         version: 2.3.0
@@ -614,9 +590,6 @@ importers:
       '@angular/material':
         specifier: 'catalog:'
         version: 20.2.14(ff268526924a3a6e1269aa7ae5f33043)
-      '@angular/material-experimental':
-        specifier: 'catalog:'
-        version: 20.2.14(b52db64a0e4859d19d55333896b96faa)
       '@angular/platform-browser':
         specifier: 'catalog:'
         version: 20.3.16(@angular/animations@20.3.16(@angular/core@20.3.25(@angular/compiler@20.3.25)(rxjs@7.8.2)(zone.js@0.15.1)))(@angular/common@20.3.25(@angular/core@20.3.25(@angular/compiler@20.3.25)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2))(@angular/core@20.3.25(@angular/compiler@20.3.25)(rxjs@7.8.2)(zone.js@0.15.1))
@@ -626,9 +599,6 @@ importers:
       '@angular/router':
         specifier: 'catalog:'
         version: 20.3.16(@angular/common@20.3.25(@angular/core@20.3.25(@angular/compiler@20.3.25)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2))(@angular/core@20.3.25(@angular/compiler@20.3.25)(rxjs@7.8.2)(zone.js@0.15.1))(@angular/platform-browser@20.3.16(@angular/animations@20.3.16(@angular/core@20.3.25(@angular/compiler@20.3.25)(rxjs@7.8.2)(zone.js@0.15.1)))(@angular/common@20.3.25(@angular/core@20.3.25(@angular/compiler@20.3.25)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2))(@angular/core@20.3.25(@angular/compiler@20.3.25)(rxjs@7.8.2)(zone.js@0.15.1)))(rxjs@7.8.2)
-      '@babel/runtime':
-        specifier: 'catalog:'
-        version: 7.29.2
       '@grpc/grpc-js':
         specifier: 'catalog:'
         version: 1.14.4
@@ -675,9 +645,6 @@ importers:
       '@angular/language-service':
         specifier: catalog:dev
         version: 20.3.16
-      '@jridgewell/source-map':
-        specifier: catalog:dev
-        version: 0.3.11
       '@nx/angular':
         specifier: catalog:dev
         version: 22.3.3(904de90a5e2458afddccc1ee4ca7817c)
@@ -690,9 +657,6 @@ importers:
       '@types/node':
         specifier: catalog:dev
         version: 20.19.30
-      '@types/webpack-env':
-        specifier: catalog:dev
-        version: 1.18.8
       karma:
         specifier: catalog:dev
         version: 6.4.4
@@ -952,12 +916,6 @@ packages:
       vitest:
         optional: true
 
-  '@angular/cdk-experimental@20.2.14':
-    resolution: {integrity: sha512-oTqd8fV9m8HfzIpd1GXJ9OOKhTV/2D3hPfhZjG4puTQ5JeWcljVR2T/fZHpWGnNRoHJL5MkIkQP6338uJbX22Q==}
-    peerDependencies:
-      '@angular/cdk': 20.2.14
-      '@angular/core': ^20.0.0 || ^21.0.0
-
   '@angular/cdk@20.2.14':
     resolution: {integrity: sha512-7bZxc01URbiPiIBWThQ69XwOxVduqEKN4PhpbF2AAyfMc/W8Hcr4VoIJOwL0O1Nkq5beS8pCAqoOeIgFyXd/kg==}
     peerDependencies:
@@ -1048,17 +1006,6 @@ packages:
     peerDependencies:
       '@angular/compiler': 20.3.16
       '@angular/compiler-cli': 20.3.16
-
-  '@angular/material-experimental@20.2.14':
-    resolution: {integrity: sha512-grAaF6iGVIirEr+alQ7MDwIcX19lNR5lBZtNf6Qw+8Xpij7scocrXYuTHS2pL8J4xCVEIH+PI0egYS0+DyER4Q==}
-    peerDependencies:
-      '@angular/cdk': 20.2.14
-      '@angular/cdk-experimental': 20.2.14
-      '@angular/common': ^20.0.0 || ^21.0.0
-      '@angular/core': ^20.0.0 || ^21.0.0
-      '@angular/forms': ^20.0.0 || ^21.0.0
-      '@angular/material': 20.2.14
-      '@angular/platform-browser': ^20.0.0 || ^21.0.0
 
   '@angular/material@20.2.14':
     resolution: {integrity: sha512-IbAgV6XLsvmHiJzxycVhcNC1PA4M30qi+ERCOir6cT333Bxm8vDV32gsOjfL52uzG5YRARroPC+8s1XqR2oxeA==}
@@ -4813,9 +4760,6 @@ packages:
   '@types/triple-beam@1.3.5':
     resolution: {integrity: sha512-6WaYesThRMCl19iryMYP7/x2OVgCtbIVflDGFpWnb9irXI3UjYE4AzmYuiUKY1AJstGijoY+MgUszMgRxIYTYw==}
 
-  '@types/webpack-env@1.18.8':
-    resolution: {integrity: sha512-G9eAoJRMLjcvN4I08wB5I7YofOb/kaJNd5uoCMX+LbKXTPCF+ZIHuqTnFaK9Jz1rgs035f9JUPUhNFtqgucy/A==}
-
   '@types/ws@8.18.1':
     resolution: {integrity: sha512-ThVF6DCVhA8kUGy+aazFQ4kXQ7E1Ty7A3ypFOe0IcJV8O/M511G99AW24irKrW56Wt44yG9+ij8FaqoBGkuBXg==}
 
@@ -6870,9 +6814,6 @@ packages:
   fast-safe-stringify@2.1.1:
     resolution: {integrity: sha512-W+KJc2dmILlPplD/H4K9l9LcAHAfPtP6BY84uVLXQ6Evcz9Lcg33Y2z1IVblT6xdY54PXYVHEv+0Wpq8Io6zkA==}
 
-  fast-text-encoding@1.0.6:
-    resolution: {integrity: sha512-VhXlQgj9ioXCqGstD37E/HBeqEGV/qOD/kmbVG8h5xKBYvM1L3lR1Zn4555cQ8GkYbJa8aJSipLPndE1k6zK2w==}
-
   fast-uri@3.1.2:
     resolution: {integrity: sha512-rVjf7ArG3LTk+FS6Yw81V1DLuZl1bRbNrev6Tmd/9RaroeeRRJhAt7jg/6YFxbvAQXUCavSoZhPPj6oOx+5KjQ==}
 
@@ -7170,10 +7111,6 @@ packages:
     resolution: {integrity: sha512-/gZffu4ykarLrCiP3Ygsa86UAo1E5vEVlvTrpkKywXSbP9Xhln3oSp9QSV57gEq3JFFpGJ4GZ+5zdEp3FcUh4w==}
     engines: {node: '>= 0.6.0'}
 
-  gaxios@4.3.3:
-    resolution: {integrity: sha512-gSaYYIO1Y3wUtdfHmjDUZ8LWaxJQpiavzbF5Kq53akSzvmVg0RfyOcFDbO1KJ/KCGRFz2qG+lS81F0nkr7cRJA==}
-    engines: {node: '>=10'}
-
   gaxios@6.7.1:
     resolution: {integrity: sha512-LDODD4TMYx7XXdpwxAVRAIAuB0bzv0s+ywFonY46k126qzQHT9ygyoa9tncmOiQmmDrik65UYsEkv3lbfqQ3yQ==}
     engines: {node: '>=14'}
@@ -7185,10 +7122,6 @@ packages:
   gaxios@7.2.0:
     resolution: {integrity: sha512-CUVb4wcYe+771XevyH6HtGmXFAGGKkIC3kswAP8Z1JCe0j80JMaTPZH930DWFrvo0atjh18Arc0pEyUCWa5bfg==}
     engines: {node: '>=18'}
-
-  gcp-metadata@4.3.1:
-    resolution: {integrity: sha512-x850LS5N7V1F3UcV7PoupzGsyD6iVwTVvsh3tbXfkctZnBnjW5yu5z1/3k3SehF7TyoTIe78rJs02GMMy+LF+A==}
-    engines: {node: '>=10'}
 
   gcp-metadata@6.1.1:
     resolution: {integrity: sha512-a4tiq7E0/5fTjxPAaH4jpjkSv/uCaU2p5KC6HVGrvl0cDjA8iBZv4vv1gyzlmK0ZUKqwpOyQMKzZQe3lTit77A==}
@@ -7335,10 +7268,6 @@ packages:
     resolution: {integrity: sha512-xtvUqvINPhTaBm7nXqlYPcrMHJPm1lCNdSovxnKKhTm+4JsvQ+KGVYJViLoH9Yxu8w+T0Qv5HubzYT9BLrppJg==}
     engines: {node: '>=18'}
 
-  google-auth-library@6.1.3:
-    resolution: {integrity: sha512-m9mwvY3GWbr7ZYEbl61isWmk+fvTmOt0YNUfPOUY2VH8K5pZlAIWJjxEi0PqR3OjMretyiQLI6GURMrPSwHQ2g==}
-    engines: {node: '>=10'}
-
   google-auth-library@9.15.1:
     resolution: {integrity: sha512-Jb6Z0+nvECVz+2lzSMt9u98UsoakXxA2HGHMCxh+so3n90XgYWkq5dur19JAJV7ONiJY22yBTyJB1TSkvPq9Ng==}
     engines: {node: '>=14'}
@@ -7359,23 +7288,9 @@ packages:
     resolution: {integrity: sha512-eAmLkjDjAFCVXg7A1unxHsLf961m6y17QFqXqAXGj/gVkKFrEICfStRfwUlGNfeCEjNRa32JEWOUTlYXPyyKvA==}
     engines: {node: '>=14'}
 
-  google-p12-pem@3.1.4:
-    resolution: {integrity: sha512-HHuHmkLgwjdmVRngf5+gSmpkyaRI6QmOg77J8tkNBHhNEI62sGHyw4/+UkgyZEI7h84NbWprXDJ+sa3xOYFvTg==}
-    engines: {node: '>=10'}
-    deprecated: Package is no longer maintained
-    hasBin: true
-
-  googleapis-common@4.4.3:
-    resolution: {integrity: sha512-W46WKCk3QtlCCfmZyQIH5zxmDOyeV5Qj+qs7nr2ox08eRkEJMWp6iwv542R/PsokXaGUSrmif4vCC4+rGzRSsQ==}
-    engines: {node: '>=10.10.0'}
-
   googleapis-common@8.0.1:
     resolution: {integrity: sha512-eCzNACUXPb1PW5l0ULTzMHaL/ltPRADoPgjBlT8jWsTbxkCp6siv+qKJ/1ldaybCthGwsYFYallF7u9AkU4L+A==}
     engines: {node: '>=18.0.0'}
-
-  googleapis@64.0.0:
-    resolution: {integrity: sha512-o8m4aRVv/LdvTVMgH4tLNeQvJZrXaa+62L9wPaKg6nHlCN3dBCKWWQKOklCwtg18xpWY4/vdNuTPHb/9Lnd00A==}
-    engines: {node: '>=10'}
 
   gopd@1.2.0:
     resolution: {integrity: sha512-ZUKRh6/kUFoAiTAtTYPZJ3hw9wNxx+BIBOijnlG9PnrJsCcSjs1wyyD6vJpaYtgnzDrKYRSqf3OO6Rfa93xsRg==}
@@ -7390,10 +7305,6 @@ packages:
   graceful-git@4.0.0:
     resolution: {integrity: sha512-zK/rCH/I0DMKpPBLCElXGI7za3EnXeQFdiK6CTP02Tt1N1L+bMLghZY7cXozlx9M2bx4Q0zrY9ADYP3eI8haIw==}
     engines: {node: '>=18.12'}
-
-  gtoken@5.3.2:
-    resolution: {integrity: sha512-gkvEKREW7dXWF8NV8pVrKfW7WqReAmjjkMBh6lNCCGOM4ucS0r0YyXXl0r/9Yj8wcW/32ISkfc8h5mPTDbtifQ==}
-    engines: {node: '>=10'}
 
   gtoken@7.1.0:
     resolution: {integrity: sha512-pCcEwRi+TKpMlxAQObHDQ56KawURgyAf6jtIY046fJ5tIv3zDe/LEIubckAO8fj6JnAxLdmWkUfNyulQ2iKdEw==}
@@ -12383,12 +12294,6 @@ snapshots:
       - yaml
     optional: true
 
-  '@angular/cdk-experimental@20.2.14(@angular/cdk@20.2.14(@angular/common@20.3.25(@angular/core@20.3.25(@angular/compiler@20.3.25)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2))(@angular/core@20.3.25(@angular/compiler@20.3.25)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2))(@angular/core@20.3.25(@angular/compiler@20.3.25)(rxjs@7.8.2)(zone.js@0.15.1))':
-    dependencies:
-      '@angular/cdk': 20.2.14(@angular/common@20.3.25(@angular/core@20.3.25(@angular/compiler@20.3.25)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2))(@angular/core@20.3.25(@angular/compiler@20.3.25)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2)
-      '@angular/core': 20.3.25(@angular/compiler@20.3.25)(rxjs@7.8.2)(zone.js@0.15.1)
-      tslib: 2.8.1
-
   '@angular/cdk@20.2.14(@angular/common@20.3.25(@angular/core@20.3.25(@angular/compiler@20.3.25)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2))(@angular/core@20.3.25(@angular/compiler@20.3.25)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2)':
     dependencies:
       '@angular/common': 20.3.25(@angular/core@20.3.25(@angular/compiler@20.3.25)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2)
@@ -12529,17 +12434,6 @@ snapshots:
       yargs: 18.0.0
     transitivePeerDependencies:
       - supports-color
-
-  '@angular/material-experimental@20.2.14(b52db64a0e4859d19d55333896b96faa)':
-    dependencies:
-      '@angular/cdk': 20.2.14(@angular/common@20.3.25(@angular/core@20.3.25(@angular/compiler@20.3.25)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2))(@angular/core@20.3.25(@angular/compiler@20.3.25)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2)
-      '@angular/cdk-experimental': 20.2.14(@angular/cdk@20.2.14(@angular/common@20.3.25(@angular/core@20.3.25(@angular/compiler@20.3.25)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2))(@angular/core@20.3.25(@angular/compiler@20.3.25)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2))(@angular/core@20.3.25(@angular/compiler@20.3.25)(rxjs@7.8.2)(zone.js@0.15.1))
-      '@angular/common': 20.3.25(@angular/core@20.3.25(@angular/compiler@20.3.25)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2)
-      '@angular/core': 20.3.25(@angular/compiler@20.3.25)(rxjs@7.8.2)(zone.js@0.15.1)
-      '@angular/forms': 20.3.16(@angular/common@20.3.25(@angular/core@20.3.25(@angular/compiler@20.3.25)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2))(@angular/core@20.3.25(@angular/compiler@20.3.25)(rxjs@7.8.2)(zone.js@0.15.1))(@angular/platform-browser@20.3.16(@angular/animations@20.3.16(@angular/core@20.3.25(@angular/compiler@20.3.25)(rxjs@7.8.2)(zone.js@0.15.1)))(@angular/common@20.3.25(@angular/core@20.3.25(@angular/compiler@20.3.25)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2))(@angular/core@20.3.25(@angular/compiler@20.3.25)(rxjs@7.8.2)(zone.js@0.15.1)))(rxjs@7.8.2)
-      '@angular/material': 20.2.14(ff268526924a3a6e1269aa7ae5f33043)
-      '@angular/platform-browser': 20.3.16(@angular/animations@20.3.16(@angular/core@20.3.25(@angular/compiler@20.3.25)(rxjs@7.8.2)(zone.js@0.15.1)))(@angular/common@20.3.25(@angular/core@20.3.25(@angular/compiler@20.3.25)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2))(@angular/core@20.3.25(@angular/compiler@20.3.25)(rxjs@7.8.2)(zone.js@0.15.1))
-      tslib: 2.8.1
 
   '@angular/material@20.2.14(ff268526924a3a6e1269aa7ae5f33043)':
     dependencies:
@@ -18379,8 +18273,6 @@ snapshots:
 
   '@types/triple-beam@1.3.5': {}
 
-  '@types/webpack-env@1.18.8': {}
-
   '@types/ws@8.18.1':
     dependencies:
       '@types/node': 25.5.0
@@ -20756,8 +20648,6 @@ snapshots:
 
   fast-safe-stringify@2.1.1: {}
 
-  fast-text-encoding@1.0.6: {}
-
   fast-uri@3.1.2: {}
 
   fast-xml-builder@1.3.0:
@@ -21317,17 +21207,6 @@ snapshots:
 
   fuzzy@0.1.3: {}
 
-  gaxios@4.3.3(encoding@0.1.13):
-    dependencies:
-      abort-controller: 3.0.0
-      extend: 3.0.2
-      https-proxy-agent: 5.0.1
-      is-stream: 2.0.1
-      node-fetch: 2.7.0(encoding@0.1.13)
-    transitivePeerDependencies:
-      - encoding
-      - supports-color
-
   gaxios@6.7.1(encoding@0.1.13):
     dependencies:
       extend: 3.0.2
@@ -21354,14 +21233,6 @@ snapshots:
       https-proxy-agent: 7.0.6
       node-fetch: 3.3.2
     transitivePeerDependencies:
-      - supports-color
-
-  gcp-metadata@4.3.1(encoding@0.1.13):
-    dependencies:
-      gaxios: 4.3.3(encoding@0.1.13)
-      json-bigint: 1.0.0
-    transitivePeerDependencies:
-      - encoding
       - supports-color
 
   gcp-metadata@6.1.1(encoding@0.1.13):
@@ -21559,21 +21430,6 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  google-auth-library@6.1.3(encoding@0.1.13):
-    dependencies:
-      arrify: 2.0.1
-      base64-js: 1.5.1
-      ecdsa-sig-formatter: 1.0.11
-      fast-text-encoding: 1.0.6
-      gaxios: 4.3.3(encoding@0.1.13)
-      gcp-metadata: 4.3.1(encoding@0.1.13)
-      gtoken: 5.3.2(encoding@0.1.13)
-      jws: 4.0.1
-      lru-cache: 6.0.0
-    transitivePeerDependencies:
-      - encoding
-      - supports-color
-
   google-auth-library@9.15.1(encoding@0.1.13):
     dependencies:
       base64-js: 1.5.1
@@ -21624,22 +21480,6 @@ snapshots:
 
   google-logging-utils@1.1.3: {}
 
-  google-p12-pem@3.1.4:
-    dependencies:
-      node-forge: 1.4.0
-
-  googleapis-common@4.4.3(encoding@0.1.13):
-    dependencies:
-      extend: 3.0.2
-      gaxios: 4.3.3(encoding@0.1.13)
-      google-auth-library: 6.1.3(encoding@0.1.13)
-      qs: 6.15.2
-      url-template: 2.0.8
-      uuid: 8.3.2
-    transitivePeerDependencies:
-      - encoding
-      - supports-color
-
   googleapis-common@8.0.1:
     dependencies:
       extend: 3.0.2
@@ -21648,14 +21488,6 @@ snapshots:
       qs: 6.15.2
       url-template: 2.0.8
     transitivePeerDependencies:
-      - supports-color
-
-  googleapis@64.0.0(encoding@0.1.13):
-    dependencies:
-      google-auth-library: 6.1.3(encoding@0.1.13)
-      googleapis-common: 4.4.3(encoding@0.1.13)
-    transitivePeerDependencies:
-      - encoding
       - supports-color
 
   gopd@1.2.0: {}
@@ -21668,15 +21500,6 @@ snapshots:
     dependencies:
       retry: 0.13.1
       safe-execa: 0.1.4
-
-  gtoken@5.3.2(encoding@0.1.13):
-    dependencies:
-      gaxios: 4.3.3(encoding@0.1.13)
-      google-p12-pem: 3.1.4
-      jws: 4.0.1
-    transitivePeerDependencies:
-      - encoding
-      - supports-color
 
   gtoken@7.1.0(encoding@0.1.13):
     dependencies:

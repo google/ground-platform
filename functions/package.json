@@ -88,8 +88,6 @@
     "cors": "catalog:",
     "firebase-admin": "catalog:",
     "firebase-functions": "catalog:",
-    "google-auth-library": "catalog:",
-    "googleapis": "catalog:",
     "http-status-codes": "catalog:",
     "immutable": "catalog:",
     "jsonstream-ts": "catalog:",

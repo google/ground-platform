@@ -124,9 +124,21 @@ message TaskData {
     bool other_selected = 3;
   }
 
+  // The values returned by the data collector's device when completing a
+  // "draw geometry" task.
   message DrawGeometryResult {
     // The geometry provided by the data collector.
     Geometry geometry = 1;
+
+    // The accuracy of `geometry` returned by the device, in meters. Only set
+    // when `geometry` is a point captured at the device's location, i.e. when
+    // `Task.DrawGeometry.require_device_location` is `true`.
+    double accuracy = 2;
+
+    // The altitude returned by the device, in meters. Only set when `geometry`
+    // is a point captured at the device's location, i.e. when
+    // `Task.DrawGeometry.require_device_location` is `true`.
+    double altitude = 3;
   }
 
   // The values returned by the data collector's device when completing a
@@ -138,7 +150,7 @@ message TaskData {
     // The accuracy of `coordinates` returned by the device, in meters.
     double accuracy = 2;
 
-    // The altitude captured by the device.
+    // The altitude returned by the device, in meters.
     double altitude = 3;
 
     // Required. The time reported by the device when the location was

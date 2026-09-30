@@ -1,5 +1,5 @@
 <!--
-  Copyright 2023 The Ground Authors.
+  Copyright 2026 The Ground Authors.
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -14,16 +14,23 @@
   limitations under the License.
 -->
 
-<form [formGroup]="formGroup">
-  <mat-form-field class="input" appearance="fill">
-    <mat-label i18n="@@app.forms.labels.jobName">Job name</mat-label>
+<button
+  mat-icon-button
+  [matMenuTriggerFor]="languageMenu"
+  i18n-aria-label="@@app.labels.changeLanguage"
+  aria-label="Change language"
+>
+  <mat-icon>translate</mat-icon>
+</button>
 
-    <input
-      matInput
-      placeholder="Ex. Map production areas"
-      i18n-placeholder="@@app.forms.placeholders.jobName"
-      [formControlName]="nameControlKey"
-      [attr.maxlength]="nameMaxLength"
-    />
-  </mat-form-field>
-</form>
+<mat-menu #languageMenu="matMenu">
+  @for (language of languages; track language.code) {
+    <button
+      mat-menu-item
+      [disabled]="language.code === currentLanguageCode"
+      (click)="onLanguageClick(language.code)"
+    >
+      {{ language.name }}
+    </button>
+  }
+</mat-menu>

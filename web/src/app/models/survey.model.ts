@@ -23,6 +23,9 @@ import { Copiable } from './copiable';
 import { Job } from './job.model';
 import { Role } from './role.model';
 
+export const SURVEY_TITLE_MAX_LENGTH = 255;
+export const SURVEY_DESCRIPTION_MAX_LENGTH = 255;
+
 /** Enum for type of data sharing terms. */
 export enum DataSharingType {
   PRIVATE = 1,
