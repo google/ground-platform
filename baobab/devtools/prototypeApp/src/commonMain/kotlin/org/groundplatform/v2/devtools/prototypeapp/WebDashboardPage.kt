@@ -100,7 +100,12 @@ internal data class DashboardDataTableRow(
   val id: String,
   val cells: List<String>,
   val isSelected: Boolean = false,
+  /** The record this row lists; used to render its [DashboardStatusColumn] cell as a chip. */
+  val entity: GeospatialEntityItem? = null,
 )
+
+/** Column holding the record's workflow status, rendered as the status chip. */
+internal const val DashboardStatusColumn = "Status"
 
 /**
  * A table rendered in the web dashboard's collapsible data table panel, listing every record of one
@@ -151,7 +156,7 @@ internal fun buildDashboardDataTables(
           } else {
             DashboardDataTableKind.DATA_TABLE
           },
-        columns = listOf("Label", "Submissions", "Sync", "GeoID") + propertyKeys,
+        columns = listOf("Label", DashboardStatusColumn, "Submissions", "GeoID") + propertyKeys,
         rows =
           datasetEntities.map { entity ->
             DashboardDataTableRow(
@@ -159,8 +164,8 @@ internal fun buildDashboardDataTables(
               cells =
                 listOf(
                   entity.label,
+                  entity.workflowStatus,
                   entity.submissionCount.toString(),
-                  entity.syncStatus.label,
                   entity.geoId,
                 ) +
                   propertyKeys.map { key ->
@@ -168,6 +173,7 @@ internal fun buildDashboardDataTables(
                     relatedLabel(entity, value) ?: value
                   },
               isSelected = entity.id == selectedEntityId,
+              entity = entity,
             )
           },
       )
@@ -750,21 +756,34 @@ private fun DashboardDataTableView(
               } else {
                 MaterialTheme.colorScheme.onSurface
               }
+            val statusColumnIndex = table.columns.indexOf(DashboardStatusColumn)
             Row(
-              modifier = Modifier.fillMaxWidth().background(rowColor).clickable { onRowClick(row) }
+              modifier = Modifier.fillMaxWidth().background(rowColor).clickable { onRowClick(row) },
+              verticalAlignment = Alignment.CenterVertically,
             ) {
               row.cells.forEachIndexed { cellIndex, cell ->
-                Text(
-                  text = cell,
-                  style = MaterialTheme.typography.bodySmall,
-                  fontWeight = if (row.isSelected) FontWeight.SemiBold else FontWeight.Normal,
-                  color = textColor,
-                  maxLines = 1,
-                  overflow = TextOverflow.Ellipsis,
-                  modifier =
-                    Modifier.width(columnWidths[cellIndex])
-                      .padding(horizontal = 12.dp, vertical = 8.dp),
-                )
+                val entity = row.entity
+                if (cellIndex == statusColumnIndex && entity != null) {
+                  Box(
+                    modifier =
+                      Modifier.width(columnWidths[cellIndex])
+                        .padding(horizontal = 12.dp, vertical = 4.dp)
+                  ) {
+                    EntityStatusChip(entity = entity)
+                  }
+                } else {
+                  Text(
+                    text = cell,
+                    style = MaterialTheme.typography.bodySmall,
+                    fontWeight = if (row.isSelected) FontWeight.SemiBold else FontWeight.Normal,
+                    color = textColor,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier =
+                      Modifier.width(columnWidths[cellIndex])
+                        .padding(horizontal = 12.dp, vertical = 8.dp),
+                  )
+                }
               }
             }
           }

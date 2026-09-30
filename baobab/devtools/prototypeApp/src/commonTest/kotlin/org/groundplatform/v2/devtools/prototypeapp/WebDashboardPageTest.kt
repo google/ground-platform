@@ -17,6 +17,7 @@ package org.groundplatform.v2.devtools.prototypeapp
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 class WebDashboardPageTest {
@@ -403,9 +404,22 @@ class WebDashboardPageTest {
     val table = layerTable()
     val lines = buildDashboardTableCsv(table).split("\r\n").filter { it.isNotEmpty() }
 
-    assertTrue(lines.first().startsWith("Label,Submissions,Sync,GeoID"))
-    assertFalse("Status" in table.columns)
+    assertTrue(lines.first().startsWith("Label,Status,Submissions,GeoID"))
+    assertFalse("Sync" in table.columns)
     assertTrue(lines.size >= table.rows.size + 1)
+  }
+
+  @Test
+  fun buildDashboardDataTables_statusCellHoldsWorkflowStatusAndRowEntity() {
+    val table = layerTable()
+    val statusIndex = table.columns.indexOf(DashboardStatusColumn)
+
+    assertEquals(1, statusIndex)
+    table.rows.forEach { row ->
+      val entity = assertNotNull(row.entity)
+      assertEquals(row.id, entity.id)
+      assertEquals(entity.workflowStatus, row.cells[statusIndex])
+    }
   }
 
   @Test
