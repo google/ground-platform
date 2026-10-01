@@ -183,158 +183,145 @@ internal fun FormGroupedSubmissionsSection(
   Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
     groups.forEach { group ->
       val form = group.form
-      OutlinedCard(
+      Column(
         modifier = Modifier.fillMaxWidth(),
-        shape = MaterialTheme.shapes.medium,
-        colors =
-          CardDefaults.outlinedCardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerLow
-          ),
+        verticalArrangement = Arrangement.spacedBy(6.dp),
       ) {
-        Column(
-          modifier = Modifier.padding(10.dp),
-          verticalArrangement = Arrangement.spacedBy(6.dp),
+        // Form Title Group Header
+        Row(
+          modifier = Modifier.fillMaxWidth(),
+          horizontalArrangement = Arrangement.SpaceBetween,
+          verticalAlignment = Alignment.CenterVertically,
         ) {
-          // Form Title Group Header
-          Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
+          Column(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(2.dp),
           ) {
-            Column(
-              modifier = Modifier.weight(1f),
-              verticalArrangement = Arrangement.spacedBy(2.dp),
+            Row(
+              verticalAlignment = Alignment.CenterVertically,
+              horizontalArrangement = Arrangement.spacedBy(5.dp),
             ) {
-              Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(5.dp),
-              ) {
-                Icon(
-                  imageVector = Icons.Outlined.Description,
-                  contentDescription = null,
-                  tint = MaterialTheme.colorScheme.primary,
-                  modifier = Modifier.size(13.dp),
-                )
-                Text(
-                  text = form.title,
-                  style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                  color = MaterialTheme.colorScheme.onSurface,
-                )
-              }
-              if (showFormActionSubtitle) {
-                Text(
-                  text = "Action: \"${form.ctaLabel}\" • ${form.version}",
-                  style =
-                    MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
-                  color = MaterialTheme.colorScheme.primary,
-                )
-              }
+              Icon(
+                imageVector = Icons.Outlined.Description,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(13.dp),
+              )
+              Text(
+                text = form.title,
+                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                color = MaterialTheme.colorScheme.onSurface,
+              )
             }
-            GroundTonalBadge(
-              text = "${group.submissions.size} submitted",
-              tone = GroundBadgeTone.PRIMARY,
-            )
+            if (showFormActionSubtitle) {
+              Text(
+                text = "Action: \"${form.ctaLabel}\" • ${form.version}",
+                style =
+                  MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
+                color = MaterialTheme.colorScheme.primary,
+              )
+            }
           }
+        }
 
-          group.submissions.forEachIndexed { index, sub ->
-            OutlinedCard(
-              onClick = { onSelectSubmission(sub) },
-              modifier = Modifier.fillMaxWidth(),
-              shape = MaterialTheme.shapes.small,
-              colors =
-                CardDefaults.outlinedCardColors(containerColor = MaterialTheme.colorScheme.surface),
+        group.submissions.forEachIndexed { index, sub ->
+          OutlinedCard(
+            onClick = { onSelectSubmission(sub) },
+            modifier = Modifier.fillMaxWidth(),
+            shape = MaterialTheme.shapes.small,
+            colors =
+              CardDefaults.outlinedCardColors(containerColor = MaterialTheme.colorScheme.surface),
+          ) {
+            Row(
+              modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 9.dp),
+              horizontalArrangement = Arrangement.SpaceBetween,
+              verticalAlignment = Alignment.CenterVertically,
             ) {
-              Row(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 9.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
+              Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(2.dp),
               ) {
-                Column(
-                  modifier = Modifier.weight(1f),
-                  verticalArrangement = Arrangement.spacedBy(2.dp),
-                ) {
-                  if (showTargetEntityLabel) {
-                    val targetDisplayLabel =
-                      if (sub.hasAttachedEntity) {
-                        "${sub.targetTypeLabel}: ${sub.entityLabel}"
-                      } else if (sub.coordinatesLabel.isNotBlank()) {
-                        "${sub.targetTypeLabel} • No attached map feature (${sub.coordinatesLabel.substringBefore(" (")})"
-                      } else {
-                        "${sub.targetTypeLabel} • No attached map feature"
-                      }
-                    Text(
-                      text = targetDisplayLabel,
-                      style =
-                        MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                      color = MaterialTheme.colorScheme.onSurface,
-                    )
-                  }
-                  Row(
-                    horizontalArrangement = Arrangement.spacedBy(5.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                  ) {
-                    Icon(
-                      imageVector = Icons.Outlined.Person,
-                      contentDescription = null,
-                      tint =
-                        if (showTargetEntityLabel) {
-                          MaterialTheme.colorScheme.onSurfaceVariant
-                        } else {
-                          MaterialTheme.colorScheme.onSurface
-                        },
-                      modifier = Modifier.size(13.dp),
-                    )
-                    Text(
-                      text = sub.collectorName,
-                      style =
-                        if (showTargetEntityLabel) {
-                          MaterialTheme.typography.labelSmall
-                        } else {
-                          MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold)
-                        },
-                      color =
-                        if (showTargetEntityLabel) {
-                          MaterialTheme.colorScheme.onSurfaceVariant
-                        } else {
-                          MaterialTheme.colorScheme.onSurface
-                        },
-                    )
-                    if (index == 0 && !showTargetEntityLabel) {
-                      GroundTonalBadge(text = "LATEST", tone = GroundBadgeTone.SECONDARY)
+                if (showTargetEntityLabel) {
+                  val targetDisplayLabel =
+                    if (sub.hasAttachedEntity) {
+                      "${sub.targetTypeLabel}: ${sub.entityLabel}"
+                    } else if (sub.coordinatesLabel.isNotBlank()) {
+                      "${sub.targetTypeLabel} • No attached map feature (${sub.coordinatesLabel.substringBefore(" (")})"
+                    } else {
+                      "${sub.targetTypeLabel} • No attached map feature"
                     }
-                    if (showSyncStatus) {
-                      SyncStatusIndicatorBadge(
-                        syncStatus = sub.syncStatus,
-                        onClick = { state.cycleSubmissionSyncStatus(sub.id) },
-                      )
-                    }
-                  }
-                  Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(4.dp),
-                  ) {
-                    Icon(
-                      imageVector = Icons.Outlined.Schedule,
-                      contentDescription = null,
-                      tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                      modifier = Modifier.size(11.dp),
-                    )
-                    Text(
-                      text = "${sub.timestamp} • ${sub.formVersion}",
-                      style = MaterialTheme.typography.labelSmall,
-                      color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                  }
-                }
-
-                IconButton(onClick = { onSelectSubmission(sub) }, modifier = Modifier.size(32.dp)) {
-                  Icon(
-                    imageVector = Icons.AutoMirrored.Outlined.KeyboardArrowRight,
-                    contentDescription = "Submission details",
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(20.dp),
+                  Text(
+                    text = targetDisplayLabel,
+                    style =
+                      MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                    color = MaterialTheme.colorScheme.onSurface,
                   )
                 }
+                Row(
+                  horizontalArrangement = Arrangement.spacedBy(5.dp),
+                  verticalAlignment = Alignment.CenterVertically,
+                ) {
+                  Icon(
+                    imageVector = Icons.Outlined.Person,
+                    contentDescription = null,
+                    tint =
+                      if (showTargetEntityLabel) {
+                        MaterialTheme.colorScheme.onSurfaceVariant
+                      } else {
+                        MaterialTheme.colorScheme.onSurface
+                      },
+                    modifier = Modifier.size(13.dp),
+                  )
+                  Text(
+                    text = sub.collectorName,
+                    style =
+                      if (showTargetEntityLabel) {
+                        MaterialTheme.typography.labelSmall
+                      } else {
+                        MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold)
+                      },
+                    color =
+                      if (showTargetEntityLabel) {
+                        MaterialTheme.colorScheme.onSurfaceVariant
+                      } else {
+                        MaterialTheme.colorScheme.onSurface
+                      },
+                  )
+                  if (index == 0 && !showTargetEntityLabel) {
+                    GroundTonalBadge(text = "LATEST", tone = GroundBadgeTone.SECONDARY)
+                  }
+                  if (showSyncStatus) {
+                    SyncStatusIndicatorBadge(
+                      syncStatus = sub.syncStatus,
+                      onClick = { state.cycleSubmissionSyncStatus(sub.id) },
+                    )
+                  }
+                }
+                Row(
+                  verticalAlignment = Alignment.CenterVertically,
+                  horizontalArrangement = Arrangement.spacedBy(4.dp),
+                ) {
+                  Icon(
+                    imageVector = Icons.Outlined.Schedule,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(11.dp),
+                  )
+                  Text(
+                    text = "${sub.timestamp} • ${sub.formVersion}",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                  )
+                }
+              }
+
+              IconButton(onClick = { onSelectSubmission(sub) }, modifier = Modifier.size(32.dp)) {
+                Icon(
+                  imageVector = Icons.AutoMirrored.Outlined.KeyboardArrowRight,
+                  contentDescription = "Submission details",
+                  tint = MaterialTheme.colorScheme.primary,
+                  modifier = Modifier.size(20.dp),
+                )
               }
             }
           }
