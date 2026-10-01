@@ -14,7 +14,8 @@
 package org.groundplatform.v2.devtools.prototypeapp.domain.model
 
 import kotlin.math.abs
-import kotlin.math.ln
+import org.groundplatform.v2.map.LatLng
+import org.groundplatform.v2.map.LngLatBounds
 
 /**
  * Parses a place coordinate string (such as `"0.5012° S, 36.9324° E"`, `"0.4160°S, 36.9465°E"`, or
@@ -56,10 +57,10 @@ fun parsePlaceCoordinates(coordinatesLabel: String): Pair<Double, Double>? {
 }
 
 /**
- * Computes an appropriate Mapbox camera target zoom level (`[2.2f, 16.8f]`) from a place's
- * geographic bounding box (`[bboxMinLng, bboxMinLat, bboxMaxLng, bboxMaxLat]`) or its
- * [categoryLabel] (e.g. a Country zooms out to ~`5.2f`, a Region/County to ~`9.5f`, a Town to
- * ~`12.5f`, a Village to ~`14.4f`, and a specific POI/Parcel to ~`16.2f`).
+ * Target zoom (`[PlaceFraming.MIN_ZOOM, PlaceFraming.MAX_ZOOM]`) for a place: from its geocoder
+ * bounding box when usable, otherwise from the extent [PlaceFraming] infers for its
+ * [categoryLabel]. Places of unknown category fall back to the default survey zoom plus
+ * [fallbackZoomDelta].
  */
 fun inferTargetZoomForPlace(
   categoryLabel: String,
@@ -69,42 +70,29 @@ fun inferTargetZoomForPlace(
   bboxMaxLat: Double? = null,
   fallbackZoomDelta: Float = 0.75f,
 ): Float {
-  if (bboxMinLng != null && bboxMinLat != null && bboxMaxLng != null && bboxMaxLat != null) {
-    val spanLng = abs(bboxMaxLng - bboxMinLng)
-    val spanLat = abs(bboxMaxLat - bboxMinLat)
-    val maxSpan = maxOf(spanLng, spanLat)
-    if (maxSpan > 0.0002) {
-      val computed = (ln(360.0 / maxSpan) / ln(2.0) - 0.65).toFloat()
-      return computed.coerceIn(2.2f, 16.8f)
+  val bbox =
+    if (bboxMinLng != null && bboxMinLat != null && bboxMaxLng != null && bboxMaxLat != null) {
+      LngLatBounds(
+        minOf(bboxMinLng, bboxMaxLng),
+        minOf(bboxMinLat, bboxMaxLat),
+        maxOf(bboxMinLng, bboxMaxLng),
+        maxOf(bboxMinLat, bboxMaxLat),
+      )
+    } else {
+      null
     }
-  }
-  val cat = categoryLabel.lowercase()
-  return when {
-    cat.contains("country") -> 5.2f
-    cat.contains("state") ||
-      cat.contains("province") ||
-      (cat.contains("region") && !cat.contains("regional hub")) -> 7.6f
-    cat.contains("county") || cat.contains("district") || cat.contains("national park") -> 9.6f
-    cat.contains("city") || cat.contains("regional hub") || cat.contains("municipality") -> 11.8f
-    cat.contains("town") || cat.contains("sub-county") -> 12.8f
-    cat.contains("forest") ||
-      cat.contains("reserve") ||
-      cat.contains("dam") ||
-      cat.contains("reservoir") ||
-      cat.contains("hydrology") -> 13.6f
-    cat.contains("village") ||
-      cat.contains("locality") ||
-      cat.contains("hamlet") ||
-      cat.contains("sub-location") ||
-      cat.contains("market") -> 14.4f
-    cat.contains("neighborhood") ||
-      cat.contains("suburb") ||
-      cat.contains("river") ||
-      cat.contains("crossing") ||
-      cat.contains("junction") -> 15.3f
-    else -> (15.3f + fallbackZoomDelta).coerceIn(2.2f, 16.8f)
-  }
+  // Zoom depends only on the extent's size, so any center works here.
+  val bounds =
+    PlaceFraming.bounds(
+      center = LatLng(0.0, 0.0),
+      category = categoryLabel,
+      bbox = bbox,
+      explicitZoom = DEFAULT_SURVEY_ZOOM + fallbackZoomDelta,
+    )
+  return PlaceFraming.zoom(bounds).toFloat()
 }
+
+private const val DEFAULT_SURVEY_ZOOM = 15.3
 
 /**
  * Represents a geographic place, landmark, town, road junction, or hydrology feature returned by

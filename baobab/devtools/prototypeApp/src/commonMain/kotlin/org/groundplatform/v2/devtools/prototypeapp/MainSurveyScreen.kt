@@ -14,8 +14,6 @@
 package org.groundplatform.v2.devtools.prototypeapp
 
 import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
@@ -92,12 +90,14 @@ import androidx.compose.ui.unit.sp
 import org.groundplatform.v2.core.forms.ui.GroundBadgeTone
 import org.groundplatform.v2.core.forms.ui.GroundModalBottomSheetOverlay
 import org.groundplatform.v2.core.forms.ui.GroundTonalBadge
+import org.groundplatform.v2.devtools.prototypeapp.map.framingInsets
+import org.groundplatform.v2.devtools.prototypeapp.map.rememberSurveyMapCamera
 
 /**
  * 5. Main Survey UI screen (`PrototypeScreen.MAIN_SURVEY`) providing:
  * - Top App Bar with Hamburger Menu and active survey title.
  * - **Map View**: Displays Ground geospatial entities on the map, a `"Layers"` button to toggle
- * layer visibility, and an interactive **Entity Bottom Sheet** when an entity is clicked:
+ *   layer visibility, and an interactive **Entity Bottom Sheet** when an entity is clicked:
  * ```
  *     - Displays `simplestyle-spec` marker symbols (`○`, `◐`, `✓`) and `marker-color` across entity
  *       points, lines, and polygons, and shows the unified chronological `1:N` list of submissions
@@ -114,7 +114,7 @@ import org.groundplatform.v2.core.forms.ui.GroundTonalBadge
  *       launchers, and `1:N` submission history.
  * ```
  * - **Hamburger Navigation Drawer**: Options for Surveys, Outbox, Uploaded, Offline maps, Change
- * settings, View Terms of Service, and Sign out.
+ *   settings, View Terms of Service, and Sign out.
  */
 @Composable
 fun MainSurveyScreen(state: PrototypeAppState) {
@@ -133,8 +133,9 @@ fun MainSurveyScreen(state: PrototypeAppState) {
       Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
         when (state.activeDrawerSubView) {
           MainDrawerSubView.SWITCH_SURVEYS -> SwitchDownloadedSurveysSubScreen(state)
-          MainDrawerSubView.UPLOADS, MainDrawerSubView.OUTBOX, MainDrawerSubView.UPLOADED ->
-            UploadsMutationsSubScreen(state)
+          MainDrawerSubView.UPLOADS,
+          MainDrawerSubView.OUTBOX,
+          MainDrawerSubView.UPLOADED -> UploadsMutationsSubScreen(state)
           MainDrawerSubView.MANAGE_OFFLINE_MAPS -> ManageOfflineMapsSubScreen(state)
           MainDrawerSubView.SETTINGS -> SurveySettingsSubScreen(state)
           MainDrawerSubView.NONE -> SurveyMapView(state)
@@ -220,12 +221,7 @@ internal fun MainSurveyTopAppBar(state: PrototypeAppState) {
         }
       }
     },
-    actions = {
-      PrototypeDebugToolsButton(
-        state = state,
-        iconTint = Color.White,
-      )
-    },
+    actions = { PrototypeDebugToolsButton(state = state, iconTint = Color.White) },
     colors =
       TopAppBarDefaults.topAppBarColors(
         containerColor = topBarContainer,
@@ -242,8 +238,8 @@ internal fun MainSurveyTopAppBar(state: PrototypeAppState) {
  * - Ground **Geospatial Entities** (`EntityType.GEOSPATIAL`, rendered with solid polygon outlines)
  * - A `"Layers"` button (`LayersControlSheet`) to toggle basemaps and map layers
  * - A unified persistent bottom sheet (`SurveyPersistentBottomSheetContent`) that peeks with a
- * search bar by default, expands into the searchable list of map layers, data tables, and places,
- * and transitions in-place to `EntityBottomSheetCard` when a map feature is selected.
+ *   search bar by default, expands into the searchable list of map layers, data tables, and places,
+ *   and transitions in-place to `EntityBottomSheetCard` when a map feature is selected.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -272,12 +268,15 @@ internal fun SurveyMapView(state: PrototypeAppState) {
   LaunchedEffect(state.selectedEntityId, state.isEntityBottomSheetExpanded) {
     if (state.isEntityBottomSheetExpanded && sheetState.currentValue != SheetValue.Expanded) {
       sheetState.expand()
-    } else if (!state.isEntityBottomSheetExpanded &&
-        sheetState.currentValue != SheetValue.PartiallyExpanded
+    } else if (
+      !state.isEntityBottomSheetExpanded && sheetState.currentValue != SheetValue.PartiallyExpanded
     ) {
       sheetState.partialExpand()
     }
   }
+
+  val mapCamera =
+    rememberSurveyMapCamera(desired = state::desiredMapCamera, onSettled = state::syncMapCamera)
 
   BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
     // With a map feature selected, the sheet peeks at about half the screen: enough to show the
@@ -299,14 +298,14 @@ internal fun SurveyMapView(state: PrototypeAppState) {
       val targetScreenY =
         if (maxHeight > 0.dp) ((visibleHeight / 2) / maxHeight).coerceIn(0.10f, 0.50f) else 0.50f
       state.recenterMapOnEntity(entity, targetScreenY)
-      val fittedZoomDelta =
-        framePlatformMapboxOnEntity(
-          bounds = state.resolveEntityLngLatBounds(entity),
-          bottomPaddingCssPx = peekHeight.value,
-          rightPaddingCssPx = 0f,
-          maxZoom = entity.geometryKind.maxFramingZoom,
+      val bounds = state.resolveEntityLngLatBounds(entity)
+      mapCamera.run {
+        it.fitBounds(
+          bounds,
+          framingInsets(it.viewportSize, bottom = peekHeight),
+          maxZoom = entity.geometryKind.maxFramingZoom.toDouble(),
         )
-      state.syncMapZoomDelta(fittedZoomDelta.toFloat())
+      }
     }
 
     BottomSheetScaffold(
@@ -327,35 +326,8 @@ internal fun SurveyMapView(state: PrototypeAppState) {
       },
     ) {
       BoxWithConstraints(modifier = Modifier.fillMaxSize().background(Color.Transparent)) {
-        // Smoothly animate back to center when "Recenter" is tapped, or follow drag immediately
-        val shiftAnimSpec =
-          if (state.isCameraFollowingUser) {
-            tween<Float>(durationMillis = 280)
-          } else {
-            snap()
-          }
-        val animatedShiftX by
-          animateFloatAsState(
-            targetValue = state.mapWorldToScreenShiftX,
-            animationSpec = shiftAnimSpec,
-            label = "mapShiftX",
-          )
-        val animatedShiftY by
-          animateFloatAsState(
-            targetValue = state.mapWorldToScreenShiftY,
-            animationSpec = shiftAnimSpec,
-            label = "mapShiftY",
-          )
-
-        // 1. Real Mapbox GL JS Basemap (mapboxgl.Map via window.GroundMapboxBridge) + GeoJSON
-        // Layers
-        // & Mapbox Markers
-        MapboxBasemapView(
-          state = state,
-          animatedShiftX = animatedShiftX,
-          animatedShiftY = animatedShiftY,
-          modifier = Modifier.fillMaxSize(),
-        )
+        // Survey map: native basemap and feature layers with Compose markers on top.
+        SurveyMainMap(state = state, camera = mapCamera, modifier = Modifier.fillMaxSize())
 
         // 3. Top Map Overlay: Docked Navigation HUD Banner (flush with toolbar) + Floating Map
         // Chips
@@ -440,7 +412,7 @@ internal fun SurveyMapView(state: PrototypeAppState) {
         Box(
           modifier =
             Modifier.align(Alignment.BottomStart)
-              .padding(start = 14.dp, bottom = peekHeight + 10.dp),
+              .padding(start = 14.dp, bottom = peekHeight + 10.dp)
         ) {
           GoogleMapsScaleBarWidget(
             scaleSpec = state.mapScaleBarSpec,
@@ -481,7 +453,9 @@ internal fun SurveyMapView(state: PrototypeAppState) {
           Box(
             modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = peekHeight + 10.dp),
             contentAlignment = Alignment.Center,
-          ) { DataCollectionFormsFab(state = state) }
+          ) {
+            DataCollectionFormsFab(state = state)
+          }
         }
       }
     }
@@ -498,10 +472,7 @@ internal fun MapClusterBalloonsOverlay(state: PrototypeAppState) {
   SelectedClusterBalloonDetailCard(
     sitesCountLabel = state.formatClusterSitesCountLabel(selectedCluster.siteCount),
     cluster = selectedCluster,
-    onZoomIn = {
-      state.zoomIntoCluster(selectedCluster.id)
-      zoomPlatformMapboxBasemap(0.75f)
-    },
+    onZoomIn = { state.zoomIntoCluster(selectedCluster.id) },
     onDismiss = { state.selectCluster(null) },
   )
 }
@@ -654,10 +625,7 @@ internal fun DataCollectionFormsFab(state: PrototypeAppState, modifier: Modifier
     containerColor = formsBg,
     contentColor = formsContent,
   ) {
-    Icon(
-      imageVector = Icons.Default.Add,
-      contentDescription = "Collect data",
-    )
+    Icon(imageVector = Icons.Default.Add, contentDescription = "Collect data")
   }
 }
 
@@ -1110,10 +1078,7 @@ internal fun GoogleMapsScaleBarWidget(
 
 /** Floating Action Button that toggles the map layers and basemap selector. */
 @Composable
-internal fun LayersFloatingActionButton(
-  state: PrototypeAppState,
-  modifier: Modifier = Modifier,
-) {
+internal fun LayersFloatingActionButton(state: PrototypeAppState, modifier: Modifier = Modifier) {
   val layersBg =
     if (state.isLayersSheetOpen) {
       Color(0xFF8BD6B1)
@@ -1132,10 +1097,7 @@ internal fun LayersFloatingActionButton(
     contentColor = layersContent,
     modifier = modifier,
   ) {
-    Icon(
-      imageVector = Icons.Default.Layers,
-      contentDescription = "Layers",
-    )
+    Icon(imageVector = Icons.Default.Layers, contentDescription = "Layers")
   }
 }
 
@@ -1146,14 +1108,8 @@ internal fun LayersFloatingActionButton(
  * 3. Map layers toggles for survey geospatial entities
  */
 @Composable
-internal fun LayersSelectorContent(
-  state: PrototypeAppState,
-  modifier: Modifier = Modifier,
-) {
-  Column(
-    modifier = modifier.fillMaxWidth(),
-    verticalArrangement = Arrangement.spacedBy(12.dp),
-  ) {
+internal fun LayersSelectorContent(state: PrototypeAppState, modifier: Modifier = Modifier) {
+  Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
     // Basemap section (Map vs Satellite + Offline Basemap Toggle)
     Text(
       text = "BASEMAP",
@@ -1202,9 +1158,7 @@ internal fun LayersSelectorContent(
       modifier = Modifier.fillMaxWidth(),
       shape = MaterialTheme.shapes.medium,
       colors =
-        CardDefaults.outlinedCardColors(
-          containerColor = MaterialTheme.colorScheme.surfaceContainer
-        ),
+        CardDefaults.outlinedCardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
     ) {
       Row(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),

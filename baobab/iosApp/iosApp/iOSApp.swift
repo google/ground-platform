@@ -12,10 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import GroundMobile
 import SwiftUI
 
 @main
 struct iOSApp: App {
+  init() {
+    // Lets GroundMap (shared/map) render with the Mapbox Maps SDK for iOS.
+    GroundMapIos.shared.viewFactory = GroundMapboxViewFactory()
+  }
+
   var body: some Scene {
     WindowGroup {
       ContentView()

@@ -151,12 +151,10 @@ val serializedSubmissionXml: String = XFormsXmlSerializer.serialize(
 
 ### Java Environment Requirement
 
-Gradle and the Kotlin toolchain require **Java 21**. If your system default Java
-version is newer than Java 21, set `JAVA_HOME` before invoking `./gradlew`:
-
-```bash
-export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
-```
+Gradle runs on **Java 21**, pinned in `gradle/gradle-daemon-jvm.properties`.
+Gradle uses an installed JDK 21 if it finds one and downloads one otherwise;
+`./gradlew` itself only needs a JDK on the `PATH` (or `JAVA_HOME`) to start. To
+change the version, run `./gradlew updateDaemonJvm --jvm-version=<version>`.
 
 ### Run JVM Unit and Round-Trip Tests
 

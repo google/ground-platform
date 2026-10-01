@@ -51,17 +51,4 @@ class PlaceRepositoryImpl(
       onResults = onResults,
     )
   }
-
-  override fun parseRemotePlacesPayload(
-    jsonPayload: String,
-    defaultRegionSubtitle: String,
-    centerLongitude: Double,
-    centerLatitude: Double,
-  ): List<SurveyPlaceItem> =
-    remoteDataSource.parsePlacesResultsJson(
-      json = jsonPayload,
-      defaultRegionSubtitle = defaultRegionSubtitle,
-      surveyLng = centerLongitude,
-      surveyLat = centerLatitude,
-    )
 }

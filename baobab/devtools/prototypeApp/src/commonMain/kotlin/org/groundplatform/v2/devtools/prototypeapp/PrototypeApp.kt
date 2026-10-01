@@ -14,10 +14,8 @@
 package org.groundplatform.v2.devtools.prototypeapp
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -32,34 +30,20 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.automirrored.filled.List
-import androidx.compose.material.icons.automirrored.filled.Logout
-import androidx.compose.material.icons.filled.AirplanemodeActive
-import androidx.compose.material.icons.filled.AirplanemodeInactive
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.CloudDone
-import androidx.compose.material.icons.filled.CloudOff
 import androidx.compose.material.icons.filled.CloudUpload
-import androidx.compose.material.icons.filled.DarkMode
-import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Layers
-import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.MyLocation
 import androidx.compose.material.icons.filled.Navigation
-import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.ScreenRotation
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
@@ -67,35 +51,22 @@ import androidx.compose.material.icons.filled.Smartphone
 import androidx.compose.material.icons.filled.Tablet
 import androidx.compose.material.icons.filled.Timeline
 import androidx.compose.material3.AssistChip
-import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ElevatedCard
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedCard
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -104,34 +75,17 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.CornerRadius
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import org.groundplatform.v2.core.forms.ui.GroundAlertDialogOverlay
 import org.groundplatform.v2.core.forms.ui.GroundBadgeTone
 import org.groundplatform.v2.core.forms.ui.GroundTheme
 import org.groundplatform.v2.core.forms.ui.GroundTonalBadge
-import org.groundplatform.v2.core.forms.ui.LocalGroundBrandFontFamily
-import org.groundplatform.v2.core.forms.ui.resources.Res
-import org.groundplatform.v2.core.forms.ui.resources.sign_in_with_google
 import org.groundplatform.v2.devtools.prototypeapp.surveyeditor.SurveyEditorPage
 import org.groundplatform.v2.devtools.prototypeapp.surveyeditor.SurveyEditorState
-import org.jetbrains.compose.resources.stringResource
 
 /** Top-level pages of the prototype web app, addressable via the URL hash (e.g. `#dashboard`). */
 enum class PrototypeWorkbenchPage(val label: String, val hash: String) {
@@ -190,19 +144,13 @@ fun PrototypeApp(
   val surveyEditorState = remember {
     SurveyEditorState().apply {
       updateDetails {
-        it.copy(
-          title = state.activeSurvey.title,
-          description = state.activeSurvey.description,
-        )
+        it.copy(title = state.activeSurvey.title, description = state.activeSurvey.description)
       }
     }
   }
   LaunchedEffect(state.activeSurveyId) {
     surveyEditorState.updateDetails {
-      it.copy(
-        title = state.activeSurvey.title,
-        description = state.activeSurvey.description,
-      )
+      it.copy(title = state.activeSurvey.title, description = state.activeSurvey.description)
     }
   }
   LaunchedEffect(surveyEditorState.details.title, surveyEditorState.details.description) {
@@ -221,9 +169,7 @@ fun PrototypeApp(
     page == PrototypeWorkbenchPage.MOBILE_PROTOTYPE &&
       state.currentScreen == PrototypeScreen.MAIN_SURVEY &&
       state.activeDrawerSubView == MainDrawerSubView.NONE &&
-      (!state.isDataCollectionFormOpen ||
-        state.isCurrentFormStepGeoPoint ||
-        isEntityRefMapShowing)
+      (!state.isDataCollectionFormOpen || state.isCurrentFormStepGeoPoint || isEntityRefMapShowing)
   // The Mapbox basemap renders behind the Compose canvas, so the root surface must stay transparent
   // whenever a page shows it.
   val isMapShowing = isMobileMapShowing || page == PrototypeWorkbenchPage.WEB_DASHBOARD
@@ -277,34 +223,28 @@ private fun MobilePrototypePage(state: PrototypeAppState, isMapShowing: Boolean)
     val previewStageWeight = if (state.effectiveFrameWidthDp >= 600) 1.55f else 1.15f
     val verticalScrollState = rememberScrollState()
     val horizontalScrollState = rememberScrollState()
-    val workbenchScrollState =
-      remember(verticalScrollState, horizontalScrollState) {
-        WorkbenchScrollState(vertical = verticalScrollState, horizontal = horizontalScrollState)
-      }
 
     // Left / Center stage: Embedded Mobile or Tablet Device Preview
-    CompositionLocalProvider(LocalWorkbenchScrollState provides workbenchScrollState) {
-      Box(
-        modifier =
-          Modifier.weight(previewStageWeight)
-            .fillMaxHeight()
-            .verticalScroll(verticalScrollState)
-            .horizontalScroll(horizontalScrollState),
-        contentAlignment = Alignment.TopCenter,
+    Box(
+      modifier =
+        Modifier.weight(previewStageWeight)
+          .fillMaxHeight()
+          .verticalScroll(verticalScrollState)
+          .horizontalScroll(horizontalScrollState),
+      contentAlignment = Alignment.TopCenter,
+    ) {
+      MobileDevicePreviewFrame(
+        deviceTitle =
+          "Ground 2.0 ${state.deviceFormFactor.label} UI • Step ${state.currentScreen.stepNumber}/4: ${state.currentScreen.title}",
+        isDarkTheme = state.isDarkTheme,
+        isScreenTransparent = isMapShowing,
+        formFactor = state.deviceFormFactor,
+        orientation = state.deviceOrientation,
+        onSelectFormFactor = { state.selectDeviceFormFactor(it) },
+        onRotateDevice = { state.rotateDevice() },
+        state = state,
       ) {
-        MobileDevicePreviewFrame(
-          deviceTitle =
-            "Ground 2.0 ${state.deviceFormFactor.label} UI • Step ${state.currentScreen.stepNumber}/4: ${state.currentScreen.title}",
-          isDarkTheme = state.isDarkTheme,
-          isScreenTransparent = isMapShowing,
-          formFactor = state.deviceFormFactor,
-          orientation = state.deviceOrientation,
-          onSelectFormFactor = { state.selectDeviceFormFactor(it) },
-          onRotateDevice = { state.rotateDevice() },
-          state = state,
-        ) {
-          MobileScreenHost(state)
-        }
+        MobileScreenHost(state)
       }
     }
 
@@ -361,7 +301,7 @@ fun MobileDevicePreviewFrame(
           overflow = TextOverflow.Ellipsis,
           style =
             MaterialTheme.typography.labelSmall.copy(
-              color = MaterialTheme.colorScheme.onSurfaceVariant,
+              color = MaterialTheme.colorScheme.onSurfaceVariant
             ),
         )
       }

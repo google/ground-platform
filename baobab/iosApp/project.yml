@@ -15,6 +15,11 @@
 name: iosApp
 options:
   bundleIdPrefix: org.groundplatform.v2
+packages:
+  # Renders GroundMap (shared/map); keep in step with the Android SDK in shared/map.
+  MapboxMaps:
+    url: https://github.com/mapbox/mapbox-maps-ios.git
+    exactVersion: 11.31.1
 targets:
   iosApp:
     type: application
@@ -25,7 +30,11 @@ targets:
     settings:
       INFOPLIST_FILE: iosApp/Info.plist
       ENABLE_USER_SCRIPT_SANDBOXING: NO
+      # Mapbox public access token (pk.…), read through Info.plist. Pass it on the command line or
+      # in a local, uncommitted build setting; without it maps use the preview renderer.
+      MAPBOX_ACCESS_TOKEN: ""
       FRAMEWORK_SEARCH_PATHS: "$(SRCROOT)/../shared/mobile/build/binaries/$(PLATFORM_NAME)/framework/"
     dependencies:
+      - package: MapboxMaps
       - framework: ../shared/mobile/build/binaries/iosSimulatorArm64/framework/GroundMobile.framework
         implicit: true

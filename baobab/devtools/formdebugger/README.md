@@ -55,8 +55,8 @@ converting, and debugging XForms XML definitions, ProtoForms `textproto` /
 
 ## Running the Local Development Web Server
 
-Ensure Java 21 is active (or rely on `org.gradle.java.home` configured in
-`gradle.properties`).
+Gradle runs on Java 21 (see `gradle/gradle-daemon-jvm.properties`); it uses an
+installed JDK 21 or downloads one.
 
 From the `devtools/formdebugger/` directory, start the local
 `webpack-dev-server` using either the **WasmJS** (recommended, faster runtime)

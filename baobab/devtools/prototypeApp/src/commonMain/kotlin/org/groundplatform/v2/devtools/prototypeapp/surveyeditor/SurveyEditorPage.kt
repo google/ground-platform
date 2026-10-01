@@ -16,7 +16,6 @@ package org.groundplatform.v2.devtools.prototypeapp.surveyeditor
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.spring
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.hoverable
@@ -79,17 +78,12 @@ import androidx.compose.material3.NavigationDrawerItemDefaults
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.foundation.ScrollState
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.SideEffect
-import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
@@ -97,11 +91,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.drawscope.DrawScope
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalDensity
@@ -117,9 +107,6 @@ import androidx.compose.ui.zIndex
 import org.groundplatform.v2.core.forms.ui.GroundBadgeTone
 import org.groundplatform.v2.core.forms.ui.GroundTonalBadge
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.BlendMode
-import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.layout.positionInWindow
 import kotlinx.coroutines.delay
 import org.groundplatform.v2.devtools.prototypeapp.data.datasource.remote.MapboxPlacesDataSource
 import org.groundplatform.v2.devtools.prototypeapp.data.datasource.local.PrototypeFakePlacesData
@@ -135,6 +122,20 @@ import org.groundplatform.v2.devtools.prototypeapp.PrototypeAppState
 import org.groundplatform.v2.devtools.prototypeapp.PrototypeDebugToolsButton
 import org.groundplatform.v2.devtools.prototypeapp.PrototypeWorkbenchPage
 import org.groundplatform.v2.devtools.prototypeapp.formeditor.dragToReorder
+import org.groundplatform.v2.devtools.prototypeapp.map.SurveyBasemaps
+import org.groundplatform.v2.map.CameraPosition
+import org.groundplatform.v2.map.FeatureFilter
+import org.groundplatform.v2.map.GeoJsonSource
+import org.groundplatform.v2.map.Geometry
+import org.groundplatform.v2.map.GeometryType
+import org.groundplatform.v2.map.GroundMap
+import org.groundplatform.v2.map.LngLatBounds
+import org.groundplatform.v2.map.MapCameraState
+import org.groundplatform.v2.map.MapContent
+import org.groundplatform.v2.map.MapFeature
+import org.groundplatform.v2.map.MapInsets
+import org.groundplatform.v2.map.MapLayer
+import org.groundplatform.v2.map.StyleValue
 
 /**
  * Survey editor page: a left-hand navigation list (Survey details, Sharing, Forms, Map layers, Data
@@ -488,30 +489,25 @@ private fun NavItem(
 // Survey details
 // ---------------------------------------------------------------------------------------------
 
-internal val LocalPaneScrollState = compositionLocalOf<ScrollState?> { null }
-
 @Composable
 internal fun PaneScaffold(
   title: String,
   subtitle: String,
   content: @Composable () -> Unit,
 ) {
-  val scrollState = rememberScrollState()
-  CompositionLocalProvider(LocalPaneScrollState provides scrollState) {
-    Column(
-      modifier = Modifier.fillMaxSize().verticalScroll(scrollState).padding(32.dp),
-      verticalArrangement = Arrangement.spacedBy(20.dp),
-    ) {
-      Column(modifier = Modifier.widthIn(max = 760.dp)) {
-        Text(title, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
-        Text(
-          subtitle,
-          style = MaterialTheme.typography.bodyMedium,
-          color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-      }
-      content()
+  Column(
+    modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(32.dp),
+    verticalArrangement = Arrangement.spacedBy(20.dp),
+  ) {
+    Column(modifier = Modifier.widthIn(max = 760.dp)) {
+      Text(title, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+      Text(
+        subtitle,
+        style = MaterialTheme.typography.bodyMedium,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+      )
     }
+    content()
   }
 }
 
@@ -851,156 +847,105 @@ private fun SurveyAreaSection(state: SurveyEditorState) {
 }
 
 /**
- * Small, static (strictly non-interactive: not pan-able or zoom-able) map thumbnail displaying
- * a real satellite basemap (on Web via Mapbox GL JS) with the survey area's boundary polygon
- * and center point rendered on top using Web Mercator projection.
+ * Small, static (not pan-able or zoom-able) map thumbnail showing a satellite basemap with the
+ * survey area's boundary polygon and center point on top.
  */
 @Composable
 private fun SurveyAreaThumbnail(
   area: SurveyArea,
   modifier: Modifier = Modifier,
 ) {
-  val colors = MaterialTheme.colorScheme
-  val boundaryColor = colors.primary
-  val boundaryFill = colors.primary.copy(alpha = 0.28f)
-  val gridColor = colors.outlineVariant.copy(alpha = 0.45f)
-  val scrollState = LocalPaneScrollState.current
-  val scrollValue = scrollState?.value ?: 0
-  var rawWindowTop by remember { mutableStateOf<Float?>(null) }
-  val density = LocalDensity.current.density
-
-  var viewW by remember { mutableStateOf(0.0) }
-  var viewH by remember { mutableStateOf(0.0) }
-  var windowLeft by remember { mutableStateOf(0f) }
-  var windowTop by remember { mutableStateOf(0f) }
-
-  val pts = if (area.boundaries.isNotEmpty()) area.boundaries else listOf(area.center)
-  val camera = remember(area, pts, viewW, viewH) {
-    if (viewW > 4 && viewH > 4) {
-      val minLng = pts.minOf { it.lng }
-      val maxLng = pts.maxOf { it.lng }
-      val lngSpan = maxLng - minLng
-      // If the bounding box spans > 180° longitude (e.g. whole countries across anti-meridian
-      // or world bounds), fitting raw Mercator coordinates incorrectly averages to the Prime
-      // Meridian (0° lon, Europe). In such broad cases or when area.zoom is calibrated, anchor
-      // on the true geographic center.
+  val boundaryColor = MaterialTheme.colorScheme.primary
+  val cameraState =
+    remember(area) { MapCameraState(CameraPosition(area.center.toMapLatLng(), area.zoom)) }
+  val viewport = cameraState.viewportSize
+  val viewportReady = viewport.width > 4.dp && viewport.height > 4.dp
+  LaunchedEffect(area, viewportReady) {
+    if (!viewportReady) return@LaunchedEffect
+    val pts = (area.boundaries.ifEmpty { listOf(area.center) }).map { it.toMapLatLng() }
+    val lngSpan = pts.maxOf { it.longitude } - pts.minOf { it.longitude }
+    // Bounds spanning > 180° longitude (e.g. across the antimeridian) would center on the wrong
+    // side of the world, so anchor on the area's own center and zoom instead.
+    val zoom =
       if (lngSpan >= 180.0) {
-        MapCamera(area.center, area.zoom)
+        area.zoom
       } else {
-        val fitted = MapCamera.fit(
-          points = pts,
-          width = viewW,
-          height = viewH,
-          padding = 16.0,
-        )
-        // Keep fitted zoom but guarantee the thumbnail centers directly over the surveyed place
-        fitted.copy(center = area.center)
+        val padding = MapInsets(16.dp, 16.dp, 16.dp, 16.dp)
+        cameraState.fitBounds(LngLatBounds.of(pts), padding, durationMs = 0).zoom
       }
-    } else {
-      MapCamera(area.center, area.zoom)
-    }
+    // Keep the fitted zoom but center directly over the surveyed place.
+    cameraState.move(CameraPosition(area.center.toMapLatLng(), zoom))
   }
-
-  // React to scroll offset changes so windowTop updates immediately as the page scrolls
-  val baseTop = rawWindowTop
-  if (baseTop != null) {
-    val adjustedTop = baseTop - scrollValue
-    if (adjustedTop != windowTop) {
-      windowTop = adjustedTop
-    }
-  }
-
-  val showBasemap = isLayerEditorBasemapSupported
-  SideEffect {
-    if (viewW > 4 && viewH > 4 && showBasemap && (windowTop + viewH.toFloat()) > 0f) {
-      syncLayerEditorBasemap(
-        leftPx = windowLeft,
-        topPx = windowTop,
-        widthPx = viewW.toFloat(),
-        heightPx = viewH.toFloat(),
-        borderRadiusPx = 8f,
-        centerLat = camera.center.lat,
-        centerLng = camera.center.lng,
-        zoom = camera.zoom,
-        basemap = "SATELLITE",
-      )
-    } else {
-      hideLayerEditorBasemap()
-    }
-  }
-  DisposableEffect(Unit) {
-    onDispose { hideLayerEditorBasemap() }
-  }
+  val content =
+    remember(area, boundaryColor) { surveyAreaThumbnailContent(area, boundaryColor) }
 
   Surface(
-    modifier =
-      modifier
-        .clip(RoundedCornerShape(8.dp))
-        .onGloballyPositioned { coords ->
-          val pos = coords.positionInWindow()
-          val currentTop = pos.y / density
-          windowLeft = pos.x / density
-          windowTop = currentTop
-          rawWindowTop = currentTop + (scrollState?.value ?: 0)
-          viewW = coords.size.width / density.toDouble()
-          viewH = coords.size.height / density.toDouble()
-        },
+    modifier = modifier.clip(RoundedCornerShape(8.dp)),
     shape = RoundedCornerShape(8.dp),
     color = Color.Transparent,
     shadowElevation = 1.dp,
   ) {
-    Canvas(modifier = Modifier.fillMaxSize()) {
-      if (showBasemap) {
-        // Punch a transparent hole so the real Mapbox basemap behind the Compose canvas shows.
-        drawRect(color = Color.Transparent, blendMode = BlendMode.Clear)
-      } else {
-        // Fallback for JVM: subtle background grid
-        drawRect(color = colors.surfaceContainerHigh)
-        val step = 24.dp.toPx()
-        var gx = 0f
-        while (gx < size.width) {
-          drawLine(gridColor, Offset(gx, 0f), Offset(gx, size.height), 1f)
-          gx += step
-        }
-        var gy = 0f
-        while (gy < size.height) {
-          drawLine(gridColor, Offset(0f, gy), Offset(size.width, gy), 1f)
-          gy += step
-        }
-      }
-
-      val w = size.width / density.toDouble()
-      val h = size.height / density.toDouble()
-      fun proj(p: LatLng): Offset {
-        val sp = camera.project(p, w, h)
-        return Offset((sp.x * density).toFloat(), (sp.y * density).toFloat())
-      }
-
-      // Draw boundary polygon (fill + stroke)
-      if (area.boundaries.size >= 3) {
-        val screenOffsets = area.boundaries.map(::proj)
-        val path =
-          Path().apply {
-            moveTo(screenOffsets.first().x, screenOffsets.first().y)
-            screenOffsets.drop(1).forEach { lineTo(it.x, it.y) }
-            close()
-          }
-        drawPath(path, color = boundaryFill)
-        drawPath(path, color = boundaryColor, style = Stroke(width = 2.5.dp.toPx()))
-
-        // Vertex handles
-        screenOffsets.forEach { pt ->
-          drawCircle(Color.White, radius = 3.5.dp.toPx(), center = pt)
-          drawCircle(boundaryColor, radius = 3.5.dp.toPx(), center = pt, style = Stroke(width = 1.5.dp.toPx()))
-        }
-      }
-
-      // Draw center marker
-      val centerOffset = proj(area.center)
-      drawCircle(Color.White, radius = 5.dp.toPx(), center = centerOffset)
-      drawCircle(boundaryColor, radius = 4.dp.toPx(), center = centerOffset)
-    }
+    GroundMap(
+      content = content,
+      cameraState = cameraState,
+      onEvent = {},
+      modifier = Modifier.fillMaxSize(),
+      gesturesEnabled = false,
+    )
   }
+}
+
+/** The survey area's boundary (fill, outline, vertices) and center over a satellite basemap. */
+internal fun surveyAreaThumbnailContent(area: SurveyArea, boundaryColor: Color): MapContent {
+  val src = "survey-area"
+  val boundary = area.boundaries.map { it.toMapLatLng() }
+  val features = buildList {
+    if (boundary.size >= 3) {
+      add(MapFeature("boundary", Geometry.Polygon(listOf(boundary))))
+      boundary.forEachIndexed { i, p ->
+        add(MapFeature("vertex-$i", Geometry.Point(p), mapOf("kind" to "vertex")))
+      }
+    }
+    add(MapFeature("center", Geometry.Point(area.center.toMapLatLng()), mapOf("kind" to "center")))
+  }
+  return MapContent(
+    basemap = SurveyBasemaps.Satellite,
+    sources = listOf(GeoJsonSource(src, features)),
+    layers =
+      listOf(
+        MapLayer.Fill(
+          id = "survey-area-fill",
+          sourceId = src,
+          color = StyleValue.Constant(boundaryColor),
+          opacity = StyleValue.Constant(0.28f),
+        ),
+        MapLayer.Line(
+          id = "survey-area-line",
+          sourceId = src,
+          filter = FeatureFilter.GeometryTypeIs(GeometryType.POLYGON),
+          color = StyleValue.Constant(boundaryColor),
+          width = StyleValue.Constant(2.5.dp),
+        ),
+        MapLayer.Circle(
+          id = "survey-area-vertices",
+          sourceId = src,
+          filter = FeatureFilter.Equals("kind", "vertex"),
+          color = StyleValue.Constant(Color.White),
+          radius = StyleValue.Constant(3.5.dp),
+          strokeColor = StyleValue.Constant(boundaryColor),
+          strokeWidth = 1.5.dp,
+        ),
+        MapLayer.Circle(
+          id = "survey-area-center",
+          sourceId = src,
+          filter = FeatureFilter.Equals("kind", "center"),
+          color = StyleValue.Constant(boundaryColor),
+          radius = StyleValue.Constant(4.dp),
+          strokeColor = StyleValue.Constant(Color.White),
+          strokeWidth = 1.dp,
+        ),
+      ),
+  )
 }
 
 /**

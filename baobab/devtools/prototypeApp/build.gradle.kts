@@ -26,27 +26,6 @@ val devServerPort = project.findProperty("port")?.toString()?.toIntOrNull() ?: 8
 kotlin {
   jvm { testRuns["test"].executionTask.configure { useJUnitPlatform() } }
 
-  js(IR) {
-    browser {
-      commonWebpackConfig {
-        outputFileName = "prototypeapp.js"
-        devServer =
-          (devServer
-              ?: org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpackConfig.DevServer())
-            .apply {
-              port = devServerPort
-              open = false
-            }
-      }
-    }
-    binaries.executable()
-    compilerOptions {
-      sourceMapEmbedSources.set(
-        org.jetbrains.kotlin.gradle.dsl.JsSourceMapEmbedMode.SOURCE_MAP_SOURCE_CONTENT_ALWAYS
-      )
-    }
-  }
-
   @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
   wasmJs {
     browser {
@@ -74,6 +53,7 @@ kotlin {
       dependencies {
         implementation("org.groundplatform.v2:protoforms:2.0.0-SNAPSHOT")
         implementation("org.groundplatform.v2:protoforms-ui:2.0.0-SNAPSHOT")
+        implementation("org.groundplatform.v2:map:2.0.0-SNAPSHOT")
         implementation(compose.runtime)
         implementation(compose.foundation)
         implementation(compose.material3)
@@ -81,8 +61,11 @@ kotlin {
         implementation("org.jetbrains.compose.material:material-icons-extended:1.7.3")
         implementation(compose.ui)
         implementation(compose.components.resources)
+        implementation("io.ktor:ktor-client-core:3.6.0")
+        implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.11.0")
       }
     }
+    val wasmJsMain by getting { dependencies { implementation("io.ktor:ktor-client-js:3.6.0") } }
     val commonTest by getting { dependencies { implementation(kotlin("test")) } }
     val jvmTest by getting { dependencies { implementation(kotlin("test-junit5")) } }
   }
@@ -94,7 +77,8 @@ tasks.withType<org.jetbrains.kotlin.gradle.targets.js.ir.KotlinJsIrLink>().confi
   )
   // Kotlin/Wasm's SourceMapGenerator currently ignores sourceMapEmbedSources and emits
   // `"sourcesContent": [null, ...]` with bare filenames for library modules. Hydrate `.wasm.map`
-  // with inline source content so Chrome DevTools displays `.kt` sources in `wasmJsBrowserDevelopmentRun`.
+  // with inline source content so Chrome DevTools displays `.kt` sources in
+  // `wasmJsBrowserDevelopmentRun`.
   val repoRoot = projectDir.resolve("../..").canonicalFile
   val appDir = projectDir.canonicalFile
   doLast {
@@ -104,15 +88,15 @@ tasks.withType<org.jetbrains.kotlin.gradle.targets.js.ir.KotlinJsIrLink>().confi
     val ktFilesByName = mutableMapOf<String, File>()
     listOf(appDir.resolve("src"), repoRoot.resolve("shared")).forEach { root ->
       if (root.exists()) {
-        root.walkTopDown().filter { it.isFile && it.extension == "kt" }.forEach { file ->
-          ktFilesByName.putIfAbsent(file.name, file)
-        }
+        root
+          .walkTopDown()
+          .filter { it.isFile && it.extension == "kt" }
+          .forEach { file -> ktFilesByName.putIfAbsent(file.name, file) }
       }
     }
     val slurper = groovy.json.JsonSlurper()
     for (mapFile in wasmMaps) {
-      @Suppress("UNCHECKED_CAST")
-      val json = slurper.parse(mapFile) as MutableMap<String, Any?>
+      @Suppress("UNCHECKED_CAST") val json = slurper.parse(mapFile) as MutableMap<String, Any?>
       @Suppress("UNCHECKED_CAST")
       val sources = (json["sources"] as? List<String>)?.toMutableList() ?: continue
       val sourcesContent = MutableList<String?>(sources.size) { null }

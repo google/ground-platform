@@ -34,6 +34,8 @@ kotlin {
     iosTarget.binaries.framework {
       baseName = "GroundMobile"
       isStatic = true
+      // iosApp implements GroundMap's Mapbox view (MapboxIosView) in Swift.
+      export("org.groundplatform.v2:map:2.0.0-SNAPSHOT")
     }
   }
 
@@ -48,6 +50,7 @@ kotlin {
         implementation(compose.ui)
       }
     }
+    iosMain.dependencies { api("org.groundplatform.v2:map:2.0.0-SNAPSHOT") }
     val commonTest by getting { dependencies { implementation(kotlin("test")) } }
     val jvmTest by getting { dependencies { implementation(kotlin("test-junit5")) } }
   }

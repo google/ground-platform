@@ -162,15 +162,17 @@ The left-hand navigation lists:
 
 Code lives in `surveyeditor/` (`SurveyEditorModels.kt`, `SurveyEditorState.kt`,
 `SurveyEditorPage.kt`, `EntityDatasetEditor.kt`, `InteractiveLayerMap.kt`,
-`MapCamera.kt`). Drag-to-reorder for the navigation and the flow canvas shares
+`LayerEditorGeometry.kt`). Drag-to-reorder for the navigation and the flow canvas shares
 `formeditor/DragReorder.kt`.
 
-The map's camera, gestures, hit-testing, and feature rendering are all in
-Compose. `MapCamera` uses the Mapbox GL JS Web Mercator conventions (a 512 px
-world at zoom 0). On web, a separate non-interactive `mapboxgl.Map`
-(`layer-editor-map.js`, `window.GroundLayerEditorMap`) follows that camera
-behind a transparent hole in the Compose canvas, so the two stay pixel-aligned.
-The JVM build shows a grid instead of a basemap.
+The layer editor map and the survey area thumbnail are `GroundMap`s from
+`shared/map`, like the survey map. Features are drawn as map style layers;
+vertex and midpoint handles, labels, and the in-progress drawing are a draw-only
+Compose overlay placed with `MapCameraState.project`. Vertex and feature drags
+are claimed through a `MapDragHandler`; all other drags pan the map. Click
+hit-testing stays in the editor (`hitTestFeature`) so polygons select by
+containment and lines and points by a 12 dp tolerance. Without a Mapbox renderer
+(JVM desktop) the map module's `PreviewMap` draws a grid instead of imagery.
 
 ### Form Editor
 
@@ -198,8 +200,8 @@ Selecting a Form opens the visual Form editor in `formeditor/`
 
 ## Running the Local Development Web Server
 
-From `devtools/prototypeApp/`, start the local `webpack-dev-server` using either
-the **WasmJS** or **JS (IR)** target (defaults to port `8091`):
+From `devtools/prototypeApp/`, start the local `webpack-dev-server` for the
+**WasmJS** target (defaults to port `8091`):
 
 ```bash
 # Start the WasmJS browser development server on port 8091:
@@ -207,25 +209,13 @@ the **WasmJS** or **JS (IR)** target (defaults to port `8091`):
 
 # Or with continuous live-reload on source code changes:
 ./gradlew wasmJsBrowserDevelopmentRun --continuous
-
-# Alternatively, start the JS (IR) browser development server:
-./gradlew jsBrowserDevelopmentRun
 ```
 
-### Choosing Between `wasmJsBrowserDevelopmentRun` and `jsBrowserDevelopmentRun`
-
--   **`wasmJsBrowserDevelopmentRun` (Kotlin/Wasm — Default)**: Compiles Kotlin
-    to WebAssembly GC (`*.wasm`). Provides near-native runtime performance, fast
-    incremental linking, and matches the primary production target. When
-    debugging in Chrome DevTools, enable **Settings → Preferences → Console →
-    Custom formatters** so Wasm GC `Struct` instances render as readable Kotlin
-    objects (note that local variable names in the **Scope** pane still include
-    a `$` prefix).
--   **`jsBrowserDevelopmentRun` (Kotlin/JS IR — Debugging & Fallback)**:
-    Compiles Kotlin to standard JavaScript (`*.js`). Best when stepping through
-    complex state or inspecting objects in Chrome DevTools, as Kotlin classes
-    and locals map directly to native JS objects and can be evaluated in the
-    DevTools Console without Wasm `$` wrappers.
+Kotlin/Wasm compiles to WebAssembly GC (`*.wasm`) and is the only web target.
+When debugging in Chrome DevTools, enable **Settings → Preferences → Console →
+Custom formatters** so Wasm GC `Struct` instances render as readable Kotlin
+objects (note that local variable names in the **Scope** pane still include a
+`$` prefix).
 
 ### Custom Port Override
 

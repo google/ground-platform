@@ -20,6 +20,10 @@ pluginManagement {
   }
 }
 
+// Lets Gradle download the JDKs named in gradle/gradle-daemon-jvm.properties when they aren't
+// installed locally.
+plugins { id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0" }
+
 dependencyResolutionManagement {
   repositories {
     google()
@@ -32,3 +36,6 @@ rootProject.name = "mobile"
 includeBuild("../core")
 
 includeBuild("../ui")
+
+// GroundMap for iOS; exported through the GroundMobile framework (see build.gradle.kts).
+includeBuild("../map")

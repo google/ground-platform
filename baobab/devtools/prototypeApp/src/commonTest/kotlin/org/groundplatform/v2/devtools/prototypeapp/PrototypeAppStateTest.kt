@@ -18,6 +18,11 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
+import org.groundplatform.v2.devtools.prototypeapp.map.SurveyMap
+import org.groundplatform.v2.devtools.prototypeapp.map.SurveyMapContent
+import org.groundplatform.v2.devtools.prototypeapp.map.SurveyMapIds
+import org.groundplatform.v2.devtools.prototypeapp.map.SurveyMarker
+import org.groundplatform.v2.map.LngLatBounds
 
 class PrototypeAppStateTest {
 
@@ -300,12 +305,24 @@ class PrototypeAppStateTest {
     assertEquals(5, state.filteredListEntities.size)
     state.selectListFilterTab(ListFilterTab.ALL)
 
-    // Mapbox Places API live search results parse and merge into filteredListPlaces
+    // Live Places search results merge into filteredListPlaces
     state.updateListSearchQuery("Aberdare National Park")
-    state.onMapboxPlacesSearchResponse(
+    state.onPlacesSearchResults(
       query = "Aberdare National Park",
-      resultsJson =
-        """[{"id":"place.aberdare.901","name":"Aberdare National Park","subtitle":"Nyeri County, Kenya","categoryLabel":"National Park","coordinatesLabel":"0.3833° S, 36.7000° E","lng":36.7000,"lat":-0.3833,"distanceMeters":24500,"bearingDegrees":282,"sourceLabel":"Places API"}]""",
+      results =
+        listOf(
+          SurveyPlaceItem(
+            id = "place.aberdare.901",
+            name = "Aberdare National Park",
+            categoryLabel = "National Park",
+            regionSubtitle = "Nyeri County, Kenya",
+            coordinatesLabel = "0.3833° S, 36.7000° E",
+            normalizedX = 0.05f,
+            normalizedY = 0.05f,
+            longitude = 36.7,
+            latitude = -0.3833,
+          )
+        ),
     )
     assertTrue(
       state.filteredListPlaces.any {
@@ -873,11 +890,13 @@ class PrototypeAppStateTest {
       entityNav.formattedDistance.endsWith("m") || entityNav.formattedDistance.endsWith("km")
     )
 
-    // Verify Mapbox JSON payload includes active straight-line navigation metadata
-    val entityPayloadJson = buildMapboxFeaturesPayloadJson(state)
-    assertTrue(entityPayloadJson.contains("\"navigation\":{\"active\":true"))
-    assertTrue(entityPayloadJson.contains("\"kind\":\"ENTITY\""))
-    assertTrue(entityPayloadJson.contains("\"targetId\":\"entity-nyr-104\""))
+    // Verify the survey map draws the navigation line, target, and distance pill
+    val entityNavMap = SurveyMapContent.main(state, showNavigation = true)
+    assertTrue(
+      entityNavMap.overlayIds().containsAll(listOf("navigation-line", "navigation-target"))
+    )
+    val navPill = entityNavMap.markers[SurveyMapIds.NAVIGATION] as SurveyMarker.NavigationPill
+    assertTrue(navPill.text.contains(entityNav.vector.formattedDistance))
 
     // Verify Imperial unit formatting on active straight-line navigation
     state.updateUnitSystem(MeasurementUnitSystem.IMPERIAL)
@@ -908,14 +927,16 @@ class PrototypeAppStateTest {
     assertFalse(state.isNavigatingToEntity("entity-nyr-104"))
     assertNotNull(state.formattedWayfindingBadgeForSubmission("sub-shade-201-wave3"))
 
-    val subPayloadJson = buildMapboxFeaturesPayloadJson(state)
-    assertTrue(subPayloadJson.contains("\"kind\":\"SUBMISSION\""))
-    assertTrue(subPayloadJson.contains("\"targetId\":\"sub-shade-201-wave3\""))
+    assertTrue(
+      "navigation-line" in SurveyMapContent.main(state, showNavigation = true).overlayIds()
+    )
 
     // 4. Toggle / Stop straight-line navigation
     state.toggleNavigationToSubmission("sub-shade-201-wave3")
     assertEquals(null, state.activeNavigation)
-    assertTrue(buildMapboxFeaturesPayloadJson(state).contains("\"navigation\":{\"active\":false}"))
+    val stoppedMap = SurveyMapContent.main(state, showNavigation = true)
+    assertFalse("navigation-line" in stoppedMap.overlayIds())
+    assertFalse(SurveyMapIds.NAVIGATION in stoppedMap.markers)
 
     // 5. Verify distance/wayfinding badge is computed ONLY for geometry fields in a submission
     val wave3Sub =
@@ -1541,30 +1562,26 @@ class PrototypeAppStateTest {
 
     // 5. Verify feature count + feature states with 0 form submission geometries
     assertEquals(5, allCluster.siteCount)
-    assertEquals(
-      "5 map features",
-      state.formatClusterSitesCountLabel(allCluster.siteCount),
-    )
+    assertEquals("5 map features", state.formatClusterSitesCountLabel(allCluster.siteCount))
     assertEquals(0, allCluster.submissionGeometryCount)
     assertEquals(listOf("✓", "◐", "○"), allCluster.siteSymbolGroups.map { it.markerSymbol })
     assertEquals("✓ 2 • ◐ 2 • ○ 1", allCluster.siteStatesSummaryLabel)
 
-    // 6. Selecting the cluster balloon and serializing the Mapbox bridge payload
+    // 6. Selecting the cluster balloon and building the survey map
     state.selectCluster(allCluster.id)
     assertEquals(allCluster.id, state.selectedClusterId)
     assertEquals(allCluster.id, state.selectedCluster?.id)
     assertEquals("5 map features", state.activeSurveyNotice)
 
-    val payloadJson = buildMapboxFeaturesPayloadJson(state)
-    assertTrue(payloadJson.contains("\"isClusteringActive\":true"))
-    assertTrue(payloadJson.contains("\"selectedClusterId\":\"${allCluster.id}\""))
-    assertTrue(payloadJson.contains("\"siteCount\":5"))
-    assertTrue(payloadJson.contains("\"siteCountLabel\":\"5 map features\""))
-    assertTrue(payloadJson.contains("\"submissionGeometryCount\":0"))
-    // When clustering is active, individual entities and submission geometries are omitted from the
-    // Mapbox payload
-    assertTrue(payloadJson.contains("\"entities\":[]"))
-    assertTrue(payloadJson.contains("\"submissions\":[]"))
+    val clusteredMap = SurveyMapContent.main(state, showNavigation = true)
+    val balloon =
+      clusteredMap.markers[SurveyMapIds.cluster(allCluster.id)] as SurveyMarker.ClusterBalloon
+    assertTrue(balloon.selected)
+    assertEquals("5 map features", balloon.header)
+    assertEquals(5, balloon.chips.sumOf { it.count })
+    // When clustering is active, individual entities are omitted from the map
+    assertTrue(clusteredMap.entityFeatures().isEmpty())
+    assertTrue(clusteredMap.markers.keys.none { SurveyMapIds.entityIdOf(it) != null })
 
     // 7. Zooming into the cluster steps zoom back in, and resetting zoom exits clustering and
     // restores individual features
@@ -1575,9 +1592,9 @@ class PrototypeAppStateTest {
     assertEquals(0f, state.mapZoomDelta)
     assertFalse(state.isMapClusteringActive)
     assertEquals(null, state.selectedClusterId)
-    val unclusteredPayloadJson = buildMapboxFeaturesPayloadJson(state)
-    assertTrue(unclusteredPayloadJson.contains("\"isClusteringActive\":false"))
-    assertFalse(unclusteredPayloadJson.contains("\"entities\":[]"))
+    val unclusteredMap = SurveyMapContent.main(state, showNavigation = true)
+    assertTrue(unclusteredMap.markers.keys.none { SurveyMapIds.clusterIdOf(it) != null })
+    assertTrue(unclusteredMap.entityFeatures().isNotEmpty())
   }
 
   @Test
@@ -1623,10 +1640,9 @@ class PrototypeAppStateTest {
     assertEquals(10_005, clustersAtDeepZoomOut.first().siteCount)
     assertTrue(clustersAtDeepZoomOut.first().features.any { it.id == "entity-shade-201" })
 
-    val clusteredPayload = buildMapboxFeaturesPayloadJson(state)
-    assertTrue(clusteredPayload.contains("\"isClusteringActive\":true"))
-    assertTrue(clusteredPayload.contains("\"entities\":[]"))
-    assertFalse(clusteredPayload.contains("\"geometryType\":\"LineString\""))
+    val clusteredMap = SurveyMapContent.main(state, showNavigation = true)
+    assertTrue(clusteredMap.entityFeatures().isEmpty())
+    assertTrue(clusteredMap.markers.keys.any { SurveyMapIds.clusterIdOf(it) != null })
   }
 
   @Test
@@ -2099,22 +2115,30 @@ class PrototypeAppStateTest {
   }
 
   @Test
-  fun mapboxPayload_marksOnlyEntitiesWithOutboxMutationsAsPending() {
+  fun surveyMap_marksOnlyEntitiesWithOutboxMutationsAsPending() {
     val state = PrototypeAppState(initialScreen = PrototypeScreen.MAIN_SURVEY)
     val pendingIds = state.pendingUploadEntityIds
-    val payloadJson = buildMapboxFeaturesPayloadJson(state)
+    val features =
+      SurveyMapContent.main(state, showNavigation = true).entityFeatures().associateBy { it.id }
 
     val entities = state.visibleMapEntities
     // The old logic keyed off the ○ workflow status, so these would have been drawn as synced.
     assertTrue(entities.any { !it.isNotStarted && it.id in pendingIds })
     entities.forEach { ent ->
-      val entityJson =
-        assertNotNull(Regex("""\{"id":"${Regex.escape(ent.id)}"[^}]*\}""").find(payloadJson)).value
-      assertTrue(
-        entityJson.contains("\"isPending\":${ent.id in pendingIds}"),
-        "Unexpected isPending for ${ent.id} (markerSymbol=${ent.markerSymbol}): $entityJson",
+      val feature = assertNotNull(features[SurveyMapIds.entity(ent.id)])
+      val variant = feature.properties.getValue(SurveyMapContent.PROP_VARIANT)
+      assertEquals(
+        ent.id in pendingIds,
+        variant == SurveyMapContent.Variant.PENDING ||
+          variant == SurveyMapContent.Variant.SELECTED_PENDING,
+        "Unexpected variant $variant for ${ent.id} (markerSymbol=${ent.markerSymbol})",
       )
     }
   }
-}
 
+  private fun SurveyMap.entityFeatures() =
+    content.sources.first { it.id == SurveyMapContent.ENTITY_SOURCE }.features
+
+  private fun SurveyMap.overlayIds() =
+    content.sources.first { it.id == SurveyMapContent.OVERLAY_SOURCE }.features.map { it.id }
+}

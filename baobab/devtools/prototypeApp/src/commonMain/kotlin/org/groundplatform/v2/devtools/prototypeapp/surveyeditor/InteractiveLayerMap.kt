@@ -16,8 +16,6 @@ package org.groundplatform.v2.devtools.prototypeapp.surveyeditor
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.gestures.detectDragGestures
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -49,12 +47,11 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -64,53 +61,66 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathEffect
-import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.onPointerEvent
-import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
-import kotlin.math.max
+import kotlinx.coroutines.launch
+import org.groundplatform.v2.devtools.prototypeapp.map.SurveyBasemaps
+import org.groundplatform.v2.map.Basemap
+import org.groundplatform.v2.map.CameraPosition
+import org.groundplatform.v2.map.FeatureFilter
+import org.groundplatform.v2.map.GeoJsonSource
+import org.groundplatform.v2.map.Geometry
+import org.groundplatform.v2.map.GeometryType
+import org.groundplatform.v2.map.GroundMap
+import org.groundplatform.v2.map.LatLng as MapLatLng
+import org.groundplatform.v2.map.LngLatBounds
+import org.groundplatform.v2.map.MapCameraState
+import org.groundplatform.v2.map.MapContent
+import org.groundplatform.v2.map.MapDrag
+import org.groundplatform.v2.map.MapDragHandler
+import org.groundplatform.v2.map.MapEvent
+import org.groundplatform.v2.map.MapFeature
+import org.groundplatform.v2.map.MapInsets
+import org.groundplatform.v2.map.MapLayer
+import org.groundplatform.v2.map.StyleValue
 
 private enum class MapTool {
   SELECT,
   DRAW,
 }
 
-/** What an in-progress drag gesture is manipulating. */
-private sealed interface MapDrag {
-  data object Pan : MapDrag
-
-  data class Vertex(val rowKey: String, val index: Int) : MapDrag
-
-  data class Feature(val rowKey: String, val start: LatLng, val original: List<LatLng>) : MapDrag
-}
-
 private const val VERTEX_HIT_PX = 12.0
 private const val MIDPOINT_HIT_PX = 10.0
 private const val LABEL_MIN_ZOOM = 13.0
+private const val MIN_ZOOM = 1.0
+private const val MAX_ZOOM = 20.0
+private const val ZOOM_BUTTON_MS = 250
+
+internal const val LAYER_EDITOR_SOURCE = "layer-editor-features"
+/** Feature property marking the selected row (`"true"` or `"false"`). */
+internal const val LAYER_EDITOR_SELECTED = "selected"
 
 /**
- * Interactive map for a Map layer: a live satellite/terrain basemap (web) with the layer's features
- * drawn on top in the layer style.
- *
- * - Drag to pan, scroll or double-click to zoom, or use the zoom/fit buttons.
+ * Interactive map for a Map layer: a [GroundMap] with a satellite/terrain basemap and the layer's
+ * features drawn in the layer style, plus Compose-drawn editing handles on top.
+ * - Drag to pan, scroll or pinch to zoom, or use the zoom/fit buttons.
  * - Click a feature to select it (synced with the feature table).
  * - Drag vertices of the selected feature to reshape it, drag its midpoint handles to insert a
  *   vertex, or drag the feature itself to move it.
- * - "Add feature" draws a new point, line or polygon by clicking on the map.
+ * - "Add feature" draws a new point, line or polygon by clicking on the map; clicking the last (or,
+ *   for polygons, the first) vertex again finishes it.
  */
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -126,31 +136,40 @@ internal fun InteractiveLayerMapCard(
   val textMeasurer = rememberTextMeasurer()
   val labelStyle =
     MaterialTheme.typography.labelSmall.copy(color = colors.onSurface, fontWeight = FontWeight.Bold)
+  val scope = rememberCoroutineScope()
 
-  var viewW by remember { mutableStateOf(0.0) }
-  var viewH by remember { mutableStateOf(0.0) }
-  var windowLeft by remember { mutableStateOf(0f) }
-  var windowTop by remember { mutableStateOf(0f) }
-  var camera by remember(dataset.key) { mutableStateOf<MapCamera?>(null) }
-  var basemap by remember {
-    mutableStateOf(
-      if (isLayerEditorBasemapSupported) EditorBasemap.SATELLITE else EditorBasemap.NONE
-    )
-  }
+  val cameraState = remember(dataset.key) { MapCameraState(DEFAULT_EDITOR_CAMERA) }
+  var fitted by remember(dataset.key) { mutableStateOf(false) }
+  var basemap by remember { mutableStateOf(EditorBasemap.SATELLITE) }
   var tool by remember(dataset.key) { mutableStateOf(MapTool.SELECT) }
   var draft by remember(dataset.key) { mutableStateOf(emptyList<LatLng>()) }
   var hover by remember { mutableStateOf<ScreenPoint?>(null) }
-  var drag by remember { mutableStateOf<MapDrag?>(null) }
 
-  // Gesture handlers outlive recompositions; always read the latest inputs.
+  // Map callbacks outlive recompositions; always read the latest inputs.
   val currentDataset by rememberUpdatedState(dataset)
   val currentSelected by rememberUpdatedState(selectedRow)
   val currentOnSelect by rememberUpdatedState(onSelectRow)
 
-  fun fitAll() {
-    if (viewW > 4) {
-      camera =
-        MapCamera.fit(currentDataset.rows.flatMap { it.geometry }, viewW, viewH, padding = 64.0)
+  fun screenOf(p: MapLatLng): ScreenPoint = cameraState.project(p).toScreenPoint()
+
+  fun project(p: LatLng): ScreenPoint = screenOf(p.toMapLatLng())
+
+  fun unproject(p: ScreenPoint): LatLng =
+    cameraState.unproject(DpOffset(p.x.toFloat().dp, p.y.toFloat().dp)).toEditorLatLng()
+
+  suspend fun fitAll(durationMs: Int = MapCameraState.DEFAULT_ANIMATION_MS) {
+    val points = currentDataset.rows.flatMap { it.geometry }.map { it.toMapLatLng() }
+    when {
+      points.isEmpty() -> cameraState.animateTo(DEFAULT_EDITOR_CAMERA, durationMs)
+      points.distinct().size == 1 ->
+        cameraState.animateTo(CameraPosition(points.first(), 16.0), durationMs)
+      else ->
+        cameraState.fitBounds(
+          LngLatBounds.of(points),
+          padding = MapInsets(64.dp, 64.dp, 64.dp, 64.dp),
+          maxZoom = 18.0,
+          durationMs = durationMs,
+        )
     }
   }
 
@@ -162,122 +181,114 @@ internal fun InteractiveLayerMapCard(
     tool = MapTool.SELECT
   }
 
-  fun toCss(o: Offset) = ScreenPoint(o.x / density.toDouble(), o.y / density.toDouble())
-
   fun handleTap(p: ScreenPoint) {
-    val cam = camera ?: return
     val ds = currentDataset
+    val kind = ds.geometryKind
     when (tool) {
       MapTool.DRAW -> {
-        val ll = cam.unproject(p, viewW, viewH)
+        val canFinish = draft.size >= kind.minVertices
         when {
-          ds.geometryKind == GeometryKind.POINT -> finishDraft(listOf(ll))
-          ds.geometryKind == GeometryKind.POLYGON &&
-            draft.size >= ds.geometryKind.minVertices &&
-            cam.project(draft.first(), viewW, viewH).distanceSquaredTo(p) <=
-              VERTEX_HIT_PX * VERTEX_HIT_PX -> finishDraft(draft)
-          else -> draft = draft + ll
+          kind == GeometryKind.POINT -> finishDraft(listOf(unproject(p)))
+          canFinish && project(draft.last()).isNear(p, VERTEX_HIT_PX) -> finishDraft(draft)
+          canFinish &&
+            kind == GeometryKind.POLYGON &&
+            project(draft.first()).isNear(p, VERTEX_HIT_PX) -> finishDraft(draft)
+          else -> draft = draft + unproject(p)
         }
       }
-      MapTool.SELECT -> currentOnSelect(hitTestFeature(ds, cam, viewW, viewH, p))
+      MapTool.SELECT -> currentOnSelect(hitTestFeature(ds, ::project, p))
     }
   }
 
-  fun pickDrag(p: ScreenPoint): MapDrag {
-    val cam = camera ?: return MapDrag.Pan
-    val ds = currentDataset
-    val sel = currentSelected
-    if (tool != MapTool.SELECT || sel == null) return MapDrag.Pan
-    val row = ds.rows.firstOrNull { it.key == sel } ?: return MapDrag.Pan
-    if (row.geometry.isEmpty()) return MapDrag.Pan
-    val pts = row.geometry.map { cam.project(it, viewW, viewH) }
-    val vertex = pts.indexOfFirst { it.distanceSquaredTo(p) <= VERTEX_HIT_PX * VERTEX_HIT_PX }
-    if (vertex >= 0) return MapDrag.Vertex(sel, vertex)
-    if (ds.geometryKind != GeometryKind.POINT) {
-      val mids = midpoints(pts, closed = ds.geometryKind == GeometryKind.POLYGON)
-      val mid = mids.indexOfFirst { it.distanceSquaredTo(p) <= MIDPOINT_HIT_PX * MIDPOINT_HIT_PX }
-      if (mid >= 0) {
-        val inserted =
-          row.geometry.toMutableList().apply {
-            add(mid + 1, cam.unproject(mids[mid], viewW, viewH))
-          }
-        state.updateGeometry(ds.key, sel, inserted)
-        return MapDrag.Vertex(sel, mid + 1)
-      }
-    }
-    if (hitTestFeature(ds, cam, viewW, viewH, p) == sel) {
-      return MapDrag.Feature(sel, cam.unproject(p, viewW, viewH), row.geometry)
-    }
-    return MapDrag.Pan
-  }
-
-  fun handleDrag(position: Offset, amount: Offset) {
-    val cam = camera ?: return
-    val ds = currentDataset
-    when (val d = drag) {
-      is MapDrag.Vertex -> {
-        val row = ds.rows.firstOrNull { it.key == d.rowKey } ?: return
-        if (d.index !in row.geometry.indices) return
+  fun vertexDrag(rowKey: String, index: Int): MapDrag =
+    object : MapDrag {
+      override fun onDrag(position: DpOffset) {
+        val ds = currentDataset
+        val row = ds.rows.firstOrNull { it.key == rowKey } ?: return
+        if (index !in row.geometry.indices) return
         val moved = row.geometry.toMutableList()
-        moved[d.index] = cam.unproject(toCss(position), viewW, viewH)
-        state.updateGeometry(ds.key, d.rowKey, moved)
+        moved[index] = unproject(position.toScreenPoint())
+        state.updateGeometry(ds.key, rowKey, moved)
       }
-      is MapDrag.Feature -> {
-        val now = cam.unproject(toCss(position), viewW, viewH)
-        val dLat = now.lat - d.start.lat
-        val dLng = now.lng - d.start.lng
+    }
+
+  fun featureDrag(rowKey: String, start: LatLng, original: List<LatLng>): MapDrag =
+    object : MapDrag {
+      override fun onDrag(position: DpOffset) {
+        val now = unproject(position.toScreenPoint())
+        val dLat = now.lat - start.lat
+        val dLng = now.lng - start.lng
         state.updateGeometry(
-          ds.key,
-          d.rowKey,
-          d.original.map { LatLng(it.lat + dLat, it.lng + dLng) },
+          currentDataset.key,
+          rowKey,
+          original.map { LatLng(it.lat + dLat, it.lng + dLng) },
         )
       }
-      else ->
-        camera =
-          cam.panBy(amount.x / density.toDouble(), amount.y / density.toDouble(), viewW, viewH)
     }
+
+  /** Claims drags on the selected feature's handles or body; anything else pans the map. */
+  fun pickDrag(p: ScreenPoint): MapDrag? {
+    val ds = currentDataset
+    val sel = currentSelected
+    if (tool != MapTool.SELECT || sel == null) return null
+    val row = ds.rows.firstOrNull { it.key == sel } ?: return null
+    if (row.geometry.isEmpty()) return null
+    val pts = row.geometry.map(::project)
+    val vertex = pts.indexOfFirst { it.isNear(p, VERTEX_HIT_PX) }
+    if (vertex >= 0) return vertexDrag(sel, vertex)
+    if (ds.geometryKind != GeometryKind.POINT) {
+      val mids = midpoints(pts, closed = ds.geometryKind == GeometryKind.POLYGON)
+      val mid = mids.indexOfFirst { it.isNear(p, MIDPOINT_HIT_PX) }
+      if (mid >= 0) {
+        val inserted = row.geometry.toMutableList().apply { add(mid + 1, unproject(mids[mid])) }
+        state.updateGeometry(ds.key, sel, inserted)
+        return vertexDrag(sel, mid + 1)
+      }
+    }
+    if (hitTestFeature(ds, ::project, p) == sel) {
+      return featureDrag(sel, unproject(p), row.geometry)
+    }
+    return null
   }
 
   // Fit to the layer's features once the viewport size is known (and when switching layers).
-  LaunchedEffect(dataset.key, viewW > 4) { if (camera == null) fitAll() }
+  val viewport = cameraState.viewportSize
+  val viewportReady = viewport.width > 4.dp && viewport.height > 4.dp
+  LaunchedEffect(dataset.key, viewportReady) {
+    if (viewportReady && !fitted) {
+      fitAll(durationMs = 0)
+      fitted = true
+    }
+  }
 
-  // Bring a feature selected from the table into view.
+  // Bring a feature selected from the table into view, zooming out only if it doesn't fit.
   LaunchedEffect(selectedRow) {
-    val cam = camera ?: return@LaunchedEffect
+    if (!fitted) return@LaunchedEffect
     val row = dataset.rows.firstOrNull { it.key == selectedRow } ?: return@LaunchedEffect
-    if (row.geometry.isEmpty() || viewW <= 4) return@LaunchedEffect
-    val onScreen =
-      row.geometry.all {
-        val s = cam.project(it, viewW, viewH)
-        s.x in 0.0..viewW && s.y in 0.0..viewH
-      }
+    if (row.geometry.isEmpty()) return@LaunchedEffect
+    val w = cameraState.viewportSize.width.value.toDouble()
+    val h = cameraState.viewportSize.height.value.toDouble()
+    val onScreen = row.geometry.all { project(it).let { s -> s.x in 0.0..w && s.y in 0.0..h } }
     if (!onScreen) {
-      val fitted =
-        MapCamera.fit(row.geometry, viewW, viewH, padding = 80.0, maxZoom = max(cam.zoom, 12.0))
-      camera = if (fitted.zoom < cam.zoom) fitted else cam.copy(center = fitted.center)
+      cameraState.fitBounds(
+        LngLatBounds.of(row.geometry.map { it.toMapLatLng() }),
+        padding = MapInsets(80.dp, 80.dp, 80.dp, 80.dp),
+        maxZoom = cameraState.position.zoom,
+      )
     }
   }
 
-  val cam = camera
-  val showBasemap = isLayerEditorBasemapSupported && basemap != EditorBasemap.NONE
-  SideEffect {
-    if (cam != null && viewW > 4 && showBasemap) {
-      syncLayerEditorBasemap(
-        leftPx = windowLeft,
-        topPx = windowTop,
-        widthPx = viewW.toFloat(),
-        heightPx = viewH.toFloat(),
-        borderRadiusPx = 12f,
-        centerLat = cam.center.lat,
-        centerLng = cam.center.lng,
-        zoom = cam.zoom,
-        basemap = basemap.name,
-      )
-    } else {
-      hideLayerEditorBasemap()
+  val layerColor = parseHexColor(dataset.style.colorHex)?.let { Color(it) } ?: colors.primary
+  val mapBasemap =
+    when (basemap) {
+      EditorBasemap.SATELLITE -> SurveyBasemaps.Satellite
+      EditorBasemap.TERRAIN -> SurveyBasemaps.Streets
+      EditorBasemap.NONE -> Basemap.None(colors.surfaceContainerHigh)
     }
-  }
-  DisposableEffect(Unit) { onDispose { hideLayerEditorBasemap() } }
+  val content =
+    remember(dataset, selectedRow, layerColor, mapBasemap) {
+      layerEditorContent(dataset, selectedRow, layerColor, mapBasemap)
+    }
 
   ElevatedCard(
     modifier = modifier,
@@ -305,123 +316,54 @@ internal fun InteractiveLayerMapCard(
           Modifier.fillMaxSize()
             .padding(start = 12.dp, end = 12.dp, bottom = 12.dp)
             .clip(MaterialTheme.shapes.medium)
-      ) {
-        Canvas(
-          modifier =
-            Modifier.fillMaxSize()
-              .onGloballyPositioned { coordinates ->
-                val pos = coordinates.positionInWindow()
-                windowLeft = pos.x / density
-                windowTop = pos.y / density
-                viewW = coordinates.size.width / density.toDouble()
-                viewH = coordinates.size.height / density.toDouble()
-              }
-              .onPointerEvent(PointerEventType.Scroll) { event ->
-                val change = event.changes.firstOrNull() ?: return@onPointerEvent
-                val dy = change.scrollDelta.y
-                val c = camera ?: return@onPointerEvent
-                if (dy != 0f) {
-                  val step = (-dy * 0.5).coerceIn(-1.0, 1.0)
-                  camera = c.zoomAround(step, toCss(change.position), viewW, viewH)
-                  change.consume()
+            // Observed here rather than on the map so hover never interferes with map gestures.
+            .onPointerEvent(PointerEventType.Move) { event ->
+              hover =
+                event.changes.firstOrNull()?.position?.let {
+                  ScreenPoint(it.x / density.toDouble(), it.y / density.toDouble())
                 }
-              }
-              .onPointerEvent(PointerEventType.Move) { event ->
-                hover = event.changes.firstOrNull()?.position?.let(::toCss)
-              }
-              .onPointerEvent(PointerEventType.Exit) { hover = null }
-              .pointerInput(dataset.key, density) {
-                detectTapGestures(
-                  onDoubleTap = { pos ->
-                    val p = toCss(pos)
-                    if (tool == MapTool.DRAW && currentDataset.geometryKind != GeometryKind.POINT) {
-                      val ll = camera?.unproject(p, viewW, viewH)
-                      finishDraft(if (ll != null) draft + ll else draft)
-                    } else {
-                      camera = camera?.zoomAround(1.0, p, viewW, viewH)
-                    }
-                  },
-                  onTap = { pos -> handleTap(toCss(pos)) },
-                )
-              }
-              .pointerInput(dataset.key, density) {
-                detectDragGestures(
-                  onDragStart = { pos -> drag = pickDrag(toCss(pos)) },
-                  onDragEnd = { drag = null },
-                  onDragCancel = { drag = null },
-                  onDrag = { change, amount ->
-                    change.consume()
-                    handleDrag(change.position, amount)
-                  },
-                )
-              }
-        ) {
-          val c = cam ?: return@Canvas
-          val w = size.width / density.toDouble()
-          val h = size.height / density.toDouble()
+            }
+            .onPointerEvent(PointerEventType.Exit) { hover = null }
+      ) {
+        GroundMap(
+          content = content,
+          cameraState = cameraState,
+          onEvent = { event ->
+            when (event) {
+              is MapEvent.FeatureTapped -> handleTap(screenOf(event.at))
+              is MapEvent.BackgroundTapped -> handleTap(screenOf(event.at))
+              else -> Unit
+            }
+          },
+          modifier = Modifier.fillMaxSize(),
+          dragHandler = MapDragHandler { pickDrag(it.toScreenPoint()) },
+        )
+
+        // Editing chrome. Draw-only (no pointer input), so gestures reach the map below.
+        Canvas(modifier = Modifier.fillMaxSize()) {
+          val zoom = cameraState.position.zoom // Redraw on every camera change.
           fun proj(p: LatLng): Offset =
-            c.project(p, w, h).let {
-              Offset((it.x * density).toFloat(), (it.y * density).toFloat())
-            }
+            project(p).let { Offset((it.x * density).toFloat(), (it.y * density).toFloat()) }
+          fun ScreenPoint.toOffset() = Offset((x * density).toFloat(), (y * density).toFloat())
 
-          if (showBasemap) {
-            // Punch a transparent hole so the Mapbox basemap behind the Compose canvas shows.
-            drawRect(color = Color.Transparent, blendMode = BlendMode.Clear)
-          } else {
-            drawRect(colors.surfaceContainerHigh)
-            drawGrid(colors.outlineVariant.copy(alpha = 0.5f), 48.dp.toPx())
-          }
-
-          val layerColor =
-            parseHexColor(dataset.style.colorHex)?.let { Color(it) } ?: colors.primary
-          val strokeWidth = dataset.style.strokeWidth.toFloat().dp.toPx()
-          val halo = Color.White.copy(alpha = 0.9f)
           val casing = Color.Black.copy(alpha = 0.35f)
-
-          // Unselected features first, selected on top.
-          val ordered = dataset.rows.sortedBy { it.key == selectedRow }
-          ordered.forEach { row ->
-            val pts = row.geometry.map(::proj)
-            if (pts.isEmpty()) return@forEach
-            val selected = row.key == selectedRow
-            when (dataset.geometryKind) {
-              GeometryKind.POINT -> {
-                val center = pts.first()
-                if (selected) drawCircle(halo, radius = 14.dp.toPx(), center = center)
-                drawCircle(casing, radius = 10.dp.toPx(), center = center)
-                drawCircle(Color.White, radius = 9.dp.toPx(), center = center)
-                drawCircle(layerColor, radius = 7.dp.toPx(), center = center)
-              }
-              GeometryKind.LINE -> {
-                val path = polyline(pts, closed = false)
-                if (selected) drawPath(path, halo, style = Stroke(strokeWidth + 6.dp.toPx()))
-                drawPath(path, casing, style = Stroke(strokeWidth + 2.dp.toPx()))
-                drawPath(path, layerColor, style = Stroke(strokeWidth))
-              }
-              GeometryKind.POLYGON -> {
-                val path = polyline(pts, closed = true)
-                drawPath(path, layerColor.copy(alpha = dataset.style.fillOpacity.toFloat()))
-                if (selected) drawPath(path, halo, style = Stroke(strokeWidth + 6.dp.toPx()))
-                drawPath(path, casing, style = Stroke(strokeWidth + 2.dp.toPx()))
-                drawPath(path, layerColor, style = Stroke(strokeWidth))
-              }
+          val selected = dataset.rows.firstOrNull { it.key == selectedRow }
+          if (selected != null && dataset.geometryKind != GeometryKind.POINT) {
+            val screen = selected.geometry.map(::project)
+            midpoints(screen, closed = dataset.geometryKind == GeometryKind.POLYGON).forEach {
+              val m = it.toOffset()
+              drawCircle(Color.White.copy(alpha = 0.75f), radius = 4.5.dp.toPx(), center = m)
+              drawCircle(layerColor, radius = 4.5.dp.toPx(), center = m, style = Stroke(1.5f))
             }
-            if (selected && dataset.geometryKind != GeometryKind.POINT) {
-              val screen = row.geometry.map { c.project(it, w, h) }
-              midpoints(screen, closed = dataset.geometryKind == GeometryKind.POLYGON).forEach {
-                val m = Offset((it.x * density).toFloat(), (it.y * density).toFloat())
-                drawCircle(Color.White.copy(alpha = 0.75f), radius = 4.5.dp.toPx(), center = m)
-                drawCircle(layerColor, radius = 4.5.dp.toPx(), center = m, style = Stroke(1.5f))
-              }
-              pts.forEach {
-                drawCircle(Color.White, radius = 6.dp.toPx(), center = it)
-                drawCircle(colors.primary, radius = 6.dp.toPx(), center = it, style = Stroke(2.5f))
-              }
+            screen.forEach {
+              val v = it.toOffset()
+              drawCircle(Color.White, radius = 6.dp.toPx(), center = v)
+              drawCircle(colors.primary, radius = 6.dp.toPx(), center = v, style = Stroke(2.5f))
             }
           }
 
           // Feature labels (pill backgrounds keep them legible over imagery).
-          if (c.zoom >= LABEL_MIN_ZOOM) {
+          if (zoom >= LABEL_MIN_ZOOM) {
             dataset.rows.forEach { row ->
               val pts = row.geometry.map(::proj)
               if (pts.isEmpty()) return@forEach
@@ -445,9 +387,7 @@ internal fun InteractiveLayerMapCard(
 
           // In-progress drawing.
           if (tool == MapTool.DRAW) {
-            val hoverOffset = hover?.let {
-              Offset((it.x * density).toFloat(), (it.y * density).toFloat())
-            }
+            val hoverOffset = hover?.toOffset()
             val pts = draft.map(::proj)
             if (pts.isNotEmpty()) {
               val preview = if (hoverOffset != null) pts + hoverOffset else pts
@@ -458,13 +398,10 @@ internal fun InteractiveLayerMapCard(
                 path,
                 Color.White,
                 style =
-                  Stroke(
-                    2.dp.toPx(),
-                    pathEffect = PathEffect.dashPathEffect(floatArrayOf(12f, 8f)),
-                  ),
+                  Stroke(2.dp.toPx(), pathEffect = PathEffect.dashPathEffect(floatArrayOf(12f, 8f))),
               )
               pts.forEachIndexed { i, p ->
-                val r = if (i == 0) 7.dp.toPx() else 5.dp.toPx()
+                val r = if (i == 0 || i == pts.lastIndex) 7.dp.toPx() else 5.dp.toPx()
                 drawCircle(Color.White, radius = r, center = p)
                 drawCircle(layerColor, radius = r, center = p, style = Stroke(2.5f))
               }
@@ -481,25 +418,127 @@ internal fun InteractiveLayerMapCard(
           }
         }
 
-        if (cam != null) {
-          MapOverlays(
-            camera = cam,
-            basemap = basemap,
-            onBasemap = { basemap = it },
-            hoverLatLng = hover?.let { cam.unproject(it, viewW, viewH) },
-            hint = hintFor(tool, dataset.geometryKind, selectedRow != null, draft.size),
-            onZoomIn = {
-              camera = cam.zoomAround(1.0, ScreenPoint(viewW / 2, viewH / 2), viewW, viewH)
-            },
-            onZoomOut = {
-              camera = cam.zoomAround(-1.0, ScreenPoint(viewW / 2, viewH / 2), viewW, viewH)
-            },
-            onFit = ::fitAll,
-          )
-        }
+        MapOverlays(
+          camera = cameraState.position,
+          basemap = basemap,
+          onBasemap = { basemap = it },
+          hoverLatLng = hover?.let(::unproject),
+          hint = hintFor(tool, dataset.geometryKind, selectedRow != null, draft.size),
+          onZoomIn = { scope.launch { cameraState.zoomBy(1.0) } },
+          onZoomOut = { scope.launch { cameraState.zoomBy(-1.0) } },
+          onFit = { scope.launch { fitAll() } },
+        )
       }
     }
   }
+}
+
+/**
+ * What [InteractiveLayerMapCard] draws with the map's style layers: every row of [dataset] as a
+ * feature styled like the layer, with the [selectedRow] haloed and on top.
+ */
+internal fun layerEditorContent(
+  dataset: EntityDataset,
+  selectedRow: String?,
+  layerColor: Color,
+  basemap: Basemap,
+): MapContent {
+  val features =
+    dataset.rows
+      .sortedBy { it.key == selectedRow }
+      .mapNotNull { row ->
+        val geometry = row.geometry.toMapGeometry(dataset.geometryKind) ?: return@mapNotNull null
+        MapFeature(
+          id = row.key,
+          geometry = geometry,
+          properties = mapOf(LAYER_EDITOR_SELECTED to (row.key == selectedRow).toString()),
+        )
+      }
+  val stroke = dataset.style.strokeWidth.toFloat().dp
+  val src = LAYER_EDITOR_SOURCE
+  val points = FeatureFilter.GeometryTypeIs(GeometryType.POINT)
+  val notPoints = FeatureFilter.Not(points)
+  val isSelected = FeatureFilter.Equals(LAYER_EDITOR_SELECTED, "true")
+  val casing = Color.Black.copy(alpha = 0.35f)
+  val halo = Color.White.copy(alpha = 0.9f)
+  return MapContent(
+    basemap = basemap,
+    sources = listOf(GeoJsonSource(src, features)),
+    layers =
+      listOf(
+        MapLayer.Fill(
+          id = "layer-editor-fill",
+          sourceId = src,
+          color = StyleValue.Constant(layerColor),
+          opacity = StyleValue.Constant(dataset.style.fillOpacity.toFloat()),
+        ),
+        MapLayer.Line(
+          id = "layer-editor-halo",
+          sourceId = src,
+          filter = FeatureFilter.All(listOf(notPoints, isSelected)),
+          color = StyleValue.Constant(halo),
+          width = StyleValue.Constant(stroke + 6.dp),
+        ),
+        MapLayer.Line(
+          id = "layer-editor-casing",
+          sourceId = src,
+          filter = notPoints,
+          color = StyleValue.Constant(casing),
+          width = StyleValue.Constant(stroke + 2.dp),
+        ),
+        MapLayer.Line(
+          id = "layer-editor-line",
+          sourceId = src,
+          filter = notPoints,
+          color = StyleValue.Constant(layerColor),
+          width = StyleValue.Constant(stroke),
+        ),
+        MapLayer.Circle(
+          id = "layer-editor-point-halo",
+          sourceId = src,
+          filter = FeatureFilter.All(listOf(points, isSelected)),
+          color = StyleValue.Constant(halo),
+          radius = StyleValue.Constant(14.dp),
+          strokeWidth = 0.dp,
+        ),
+        MapLayer.Circle(
+          id = "layer-editor-point-casing",
+          sourceId = src,
+          color = StyleValue.Constant(casing),
+          radius = StyleValue.Constant(10.dp),
+          strokeWidth = 0.dp,
+        ),
+        MapLayer.Circle(
+          id = "layer-editor-point",
+          sourceId = src,
+          color = StyleValue.Constant(layerColor),
+          radius = StyleValue.Constant(7.dp),
+          strokeColor = StyleValue.Constant(Color.White),
+          strokeWidth = 2.dp,
+        ),
+      ),
+  )
+}
+
+/**
+ * These vertices as a map geometry of [kind], or the simplest geometry they can form while still
+ * being drawn (e.g. a two-vertex polygon renders as a line).
+ */
+internal fun List<LatLng>.toMapGeometry(kind: GeometryKind): Geometry? {
+  val pts = map { it.toMapLatLng() }
+  return when {
+    pts.isEmpty() -> null
+    pts.size == 1 || kind == GeometryKind.POINT -> Geometry.Point(pts.first())
+    kind == GeometryKind.POLYGON && pts.size >= 3 -> Geometry.Polygon(listOf(pts))
+    else -> Geometry.LineString(pts)
+  }
+}
+
+private suspend fun MapCameraState.zoomBy(delta: Double) {
+  animateTo(
+    position.copy(zoom = (position.zoom + delta).coerceIn(MIN_ZOOM, MAX_ZOOM)),
+    ZOOM_BUTTON_MS,
+  )
 }
 
 @Composable
@@ -564,7 +603,7 @@ private fun MapToolbar(
 
 @Composable
 private fun MapOverlays(
-  camera: MapCamera,
+  camera: CameraPosition,
   basemap: EditorBasemap,
   onBasemap: (EditorBasemap) -> Unit,
   hoverLatLng: LatLng?,
@@ -576,7 +615,11 @@ private fun MapOverlays(
   val colors = MaterialTheme.colorScheme
   val pill = RoundedCornerShape(16.dp)
   val overlayColor = colors.surface.copy(alpha = 0.92f)
-  Box(modifier = Modifier.fillMaxSize().padding(10.dp)) {
+  // The extra bottom space keeps the map's attribution line uncovered.
+  Box(
+    modifier =
+      Modifier.fillMaxSize().padding(start = 10.dp, top = 10.dp, end = 10.dp, bottom = 26.dp)
+  ) {
     // Basemap picker.
     Surface(
       modifier = Modifier.align(Alignment.TopStart),
@@ -595,21 +638,12 @@ private fun MapOverlays(
           modifier = Modifier.size(16.dp),
           tint = colors.onSurfaceVariant,
         )
-        if (isLayerEditorBasemapSupported) {
-          EditorBasemap.entries.forEach { option ->
-            FilterChip(
-              selected = basemap == option,
-              onClick = { onBasemap(option) },
-              label = { Text(option.label, style = MaterialTheme.typography.labelSmall) },
-              modifier = Modifier.height(28.dp),
-            )
-          }
-        } else {
-          Text(
-            "Basemap available in the web build",
-            style = MaterialTheme.typography.labelSmall,
-            color = colors.onSurfaceVariant,
-            modifier = Modifier.padding(vertical = 6.dp),
+        EditorBasemap.entries.forEach { option ->
+          FilterChip(
+            selected = basemap == option,
+            onClick = { onBasemap(option) },
+            label = { Text(option.label, style = MaterialTheme.typography.labelSmall) },
+            modifier = Modifier.height(28.dp),
           )
         }
       }
@@ -708,14 +742,14 @@ private fun hintFor(tool: MapTool, kind: GeometryKind, hasSelection: Boolean, dr
     tool == MapTool.DRAW && kind == GeometryKind.POINT -> "Click the map to place the point"
     tool == MapTool.DRAW && kind == GeometryKind.LINE ->
       if (draftSize == 0) "Click to start the line"
-      else "Click to add vertices • Double-click to finish"
+      else "Click to add vertices • Click the last vertex again to finish"
     tool == MapTool.DRAW ->
       if (draftSize == 0) "Click to start the polygon"
-      else "Click to add vertices • Click the first vertex or double-click to finish"
+      else "Click to add vertices • Click the first or last vertex to finish"
     hasSelection && kind == GeometryKind.POINT -> "Drag the point to move it"
     hasSelection ->
       "Drag vertices to reshape • Drag ○ handles to add a vertex • Drag inside to move"
-    else -> "Drag to pan • Scroll or double-click to zoom • Click a feature to select it"
+    else -> "Drag to pan • Scroll or pinch to zoom • Click a feature to select it"
   }
 
 /** Midpoints of each segment, used as "insert vertex" handles. */
@@ -727,10 +761,12 @@ internal fun midpoints(pts: List<ScreenPoint>, closed: Boolean): List<ScreenPoin
   return segments.map { (a, b) -> ScreenPoint((a.x + b.x) / 2, (a.y + b.y) / 2) }
 }
 
-private fun ScreenPoint.distanceSquaredTo(o: ScreenPoint): Double {
+private fun DpOffset.toScreenPoint() = ScreenPoint(x.value.toDouble(), y.value.toDouble())
+
+private fun ScreenPoint.isNear(o: ScreenPoint, tolerance: Double): Boolean {
   val dx = x - o.x
   val dy = y - o.y
-  return dx * dx + dy * dy
+  return dx * dx + dy * dy <= tolerance * tolerance
 }
 
 private fun polyline(pts: List<Offset>, closed: Boolean) =
@@ -739,19 +775,6 @@ private fun polyline(pts: List<Offset>, closed: Boolean) =
     pts.drop(1).forEach { lineTo(it.x, it.y) }
     if (closed) close()
   }
-
-private fun DrawScope.drawGrid(color: Color, step: Float) {
-  var gx = 0f
-  while (gx < size.width) {
-    drawLine(color, Offset(gx, 0f), Offset(gx, size.height), 1f)
-    gx += step
-  }
-  var gy = 0f
-  while (gy < size.height) {
-    drawLine(color, Offset(0f, gy), Offset(size.width, gy), 1f)
-    gy += step
-  }
-}
 
 /** Formats [v] with exactly [decimals] fraction digits (no platform `String.format` in common). */
 internal fun formatFixed(v: Double, decimals: Int): String {

@@ -85,6 +85,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import org.groundplatform.v2.devtools.prototypeapp.map.framingInsets
+import org.groundplatform.v2.devtools.prototypeapp.map.rememberSurveyMapCamera
 
 /** Kind of tabular view shown in the web dashboard's data table panel. */
 internal enum class DashboardDataTableKind {
@@ -207,11 +209,9 @@ private fun escapeCsvField(field: String): String =
  */
 internal fun dashboardTableCsvFileName(table: DashboardDataTable): String {
   val baseName =
-    table.title
-      .replace(Regex("""[\\/:*?"<>|\x00-\x1F]"""), "_")
-      .trim()
-      .trim('.')
-      .ifEmpty { "table" }
+    table.title.replace(Regex("""[\\/:*?"<>|\x00-\x1F]"""), "_").trim().trim('.').ifEmpty {
+      "table"
+    }
   return "$baseName.csv"
 }
 
@@ -225,13 +225,13 @@ private val DashboardOverlayMargin = 14.dp
 /**
  * Main page of the Ground web dashboard (`#dashboard`).
  * - **Left**: A collapsible side panel with the searchable list of map features (one line per
- * record) and places ([BottomSheetSearchableListContent]).
- * - **Main area**: The live survey map ([MapboxBasemapView]). Selecting a map feature pans and
- * zooms to it and opens its details in a floating card in the upper-right corner (
- * [WebEntityDetailsCard]). A floating Map / Satellite toggle sits in the lower-left corner.
+ *   record) and places ([BottomSheetSearchableListContent]).
+ * - **Main area**: The live survey map ([SurveyMainMap]). Selecting a map feature pans and zooms to
+ *   it and opens its details in a floating card in the upper-right corner (
+ *   [WebEntityDetailsCard]). A floating Map / Satellite toggle sits in the lower-left corner.
  * - **Bottom of the map**: A collapsible panel of data tables, one per entity dataset (
- * [DashboardDataTablesPanel]). It only expands on request: from its ▲ toggle or the card's "Show in
- * table" button.
+ *   [DashboardDataTablesPanel]). It only expands on request: from its ▲ toggle or the card's "Show
+ *   in table" button.
  */
 @Composable
 internal fun WebDashboardPage(
@@ -245,11 +245,7 @@ internal fun WebDashboardPage(
 
   Box(modifier = Modifier.fillMaxSize()) {
     Column(modifier = Modifier.fillMaxSize()) {
-      WebTopToolbar(
-        state = state,
-        onOpenSurveyEditor = onOpenSurveyEditor,
-        onSignOut = onSignOut,
-      )
+      WebTopToolbar(state = state, onOpenSurveyEditor = onOpenSurveyEditor, onSignOut = onSignOut)
       HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
       Row(modifier = Modifier.fillMaxWidth().weight(1f)) {
         AnimatedVisibility(
@@ -265,10 +261,7 @@ internal fun WebDashboardPage(
             VerticalDivider(color = MaterialTheme.colorScheme.outlineVariant)
           }
         }
-        DashboardMapArea(
-          state = state,
-          modifier = Modifier.weight(1f).fillMaxHeight(),
-        )
+        DashboardMapArea(state = state, modifier = Modifier.weight(1f).fillMaxHeight())
       }
     }
 
@@ -283,10 +276,7 @@ internal fun WebDashboardPage(
 
 /** Left-hand panel: the searchable list of map features and places. */
 @Composable
-private fun DashboardSidePanel(
-  state: PrototypeAppState,
-  modifier: Modifier = Modifier,
-) {
+private fun DashboardSidePanel(state: PrototypeAppState, modifier: Modifier = Modifier) {
   Surface(modifier = modifier, color = MaterialTheme.colorScheme.surfaceContainerLow) {
     BottomSheetSearchableListContent(
       state = state,
@@ -307,6 +297,8 @@ private fun DashboardMapArea(state: PrototypeAppState, modifier: Modifier = Modi
   val isTableExpanded = state.isDashboardTableExpanded
   val hasTables = state.entities.isNotEmpty()
   var lastFramedSelectionEpoch by remember { mutableStateOf(-1L) }
+  val mapCamera =
+    rememberSurveyMapCamera(desired = state::desiredMapCamera, onSettled = state::syncMapCamera)
 
   BoxWithConstraints(modifier = modifier) {
     val expandedTableHeight = (maxHeight * 0.42f).coerceAtLeast(160.dp)
@@ -341,27 +333,26 @@ private fun DashboardMapArea(state: PrototypeAppState, modifier: Modifier = Modi
         }
       state.recenterMapOnEntity(entity, targetScreenY)
 
-      val rightPaddingCssPx =
+      val rightPanel =
         if (isDetailsExpanded) {
-          (DashboardDetailsCardWidth + DashboardOverlayMargin * 2).value
+          DashboardDetailsCardWidth + DashboardOverlayMargin * 2
         } else {
-          DashboardOverlayMargin.value
+          DashboardOverlayMargin
         }
-      val fittedZoomDelta =
-        framePlatformMapboxOnEntity(
-          bounds = state.resolveEntityLngLatBounds(entity),
-          bottomPaddingCssPx = tablePanelHeight.value,
-          rightPaddingCssPx = rightPaddingCssPx,
-          fitToBounds = isNewSelection,
-          maxZoom = entity.geometryKind.maxFramingZoom,
-        )
-      state.syncMapZoomDelta(fittedZoomDelta.toFloat())
+      val bounds = state.resolveEntityLngLatBounds(entity)
+      mapCamera.run {
+        val insets = framingInsets(it.viewportSize, bottom = tablePanelHeight, right = rightPanel)
+        if (isNewSelection) {
+          it.fitBounds(bounds, insets, maxZoom = entity.geometryKind.maxFramingZoom.toDouble())
+        } else {
+          it.centerOn(bounds.center, insets)
+        }
+      }
     }
 
-    MapboxBasemapView(
+    SurveyMainMap(
       state = state,
-      animatedShiftX = state.mapWorldToScreenShiftX,
-      animatedShiftY = state.mapWorldToScreenShiftY,
+      camera = mapCamera,
       modifier = Modifier.fillMaxSize(),
       collapseSheetOnBackgroundTap = false,
       showNavigationOverlay = false,
@@ -602,10 +593,7 @@ private fun DashboardDataTablesPanel(
   Surface(
     modifier = modifier.fillMaxWidth().animateContentSize(),
     shape =
-      MaterialTheme.shapes.large.copy(
-        bottomStart = CornerSize(0.dp),
-        bottomEnd = CornerSize(0.dp),
-      ),
+      MaterialTheme.shapes.large.copy(bottomStart = CornerSize(0.dp), bottomEnd = CornerSize(0.dp)),
     color = MaterialTheme.colorScheme.surfaceContainerLow,
     shadowElevation = 8.dp,
   ) {
@@ -686,6 +674,7 @@ private fun DashboardDataTablesPanel(
     }
   }
 }
+
 /**
  * Spreadsheet-style view of a [DashboardDataTable] with a sticky header row. Rows are lazily
  * composed so map layers with thousands of features stay responsive, and the table scrolls

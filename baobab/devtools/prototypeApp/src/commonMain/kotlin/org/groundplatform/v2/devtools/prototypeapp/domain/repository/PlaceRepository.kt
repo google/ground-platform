@@ -33,11 +33,4 @@ interface PlaceRepository {
     centerLatitude: Double,
     onResults: (List<SurveyPlaceItem>) -> Unit,
   )
-
-  fun parseRemotePlacesPayload(
-    jsonPayload: String,
-    defaultRegionSubtitle: String,
-    centerLongitude: Double,
-    centerLatitude: Double,
-  ): List<SurveyPlaceItem>
 }

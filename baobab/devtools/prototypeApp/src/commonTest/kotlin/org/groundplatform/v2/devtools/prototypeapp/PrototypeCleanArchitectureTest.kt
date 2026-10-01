@@ -25,9 +25,9 @@ import org.groundplatform.v2.core.forms.serialization.XFormsXmlSerializer
 import org.groundplatform.v2.core.forms.ui.WorkbenchExampleForm
 import org.groundplatform.v2.devtools.prototypeapp.client.auth.PrototypeAuthClient
 import org.groundplatform.v2.devtools.prototypeapp.client.location.LocationClient
+import org.groundplatform.v2.devtools.prototypeapp.client.places.PlacesResponseMapper
 import org.groundplatform.v2.devtools.prototypeapp.client.storage.OfflineTileStorageClient
 import org.groundplatform.v2.devtools.prototypeapp.data.datasource.local.PrototypeAppDataStore
-import org.groundplatform.v2.devtools.prototypeapp.data.mapper.PlaceJsonMapper
 import org.groundplatform.v2.devtools.prototypeapp.data.repository.LocationRepositoryImpl
 import org.groundplatform.v2.devtools.prototypeapp.data.repository.MutationRepositoryImpl
 import org.groundplatform.v2.devtools.prototypeapp.data.repository.PlaceRepositoryImpl
@@ -40,6 +40,7 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.MapFeatureKind
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.MeasurementUnitSystem
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.MutationSyncState
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.NavigationTargetKind
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyMapAnchor
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SyncStatus
 import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.ClusterMapFeaturesUseCase
 import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.ComputeWayfindingNavigationUseCase
@@ -55,7 +56,7 @@ import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.SurveyAppViewMod
  * `docs/technical/client/architecture.md`:
  * - Static / hardcoded [PrototypeAppDataStore]
  * - Client & Mapper layers ([PrototypeAuthClient], [LocationClient], [OfflineTileStorageClient],
- *   [PlaceJsonMapper])
+ *   [PlacesResponseMapper])
  * - Repository implementations ([SurveyRepositoryImpl], [MutationRepositoryImpl],
  *   [SettingsRepositoryImpl], [PlaceRepositoryImpl], [LocationRepositoryImpl])
  * - Domain Use Cases ([ClusterMapFeaturesUseCase], [ComputeWayfindingNavigationUseCase],
@@ -117,14 +118,13 @@ class PrototypeCleanArchitectureTest {
     assertTrue(pkg.isDownloaded)
     assertEquals(1, storageClient.evictUploadedMediaCache())
 
-    val mapper = PlaceJsonMapper()
     val mapped =
-      mapper.mapJsonToPlaces(
-        json =
-          """[{"id":"place-api-1","name":"Othaya Market","categoryLabel":"Town","coordinatesLabel":"0.5512° S, 36.9421° E"}]""",
-        defaultRegionSubtitle = "Nyeri County, Kenya",
-        surveyLng = 36.9512,
-        surveyLat = -0.4198,
+      PlacesResponseMapper.map(
+        body =
+          """{"type":"FeatureCollection","features":[{"id":"place-api-1","text":"Othaya Market","place_name":"Othaya Market, Nyeri County, Kenya","place_type":["locality"],"center":[36.9421,-0.5512]}]}""",
+        query = "Othaya",
+        near = SurveyMapAnchor.forSurvey(SurveyMapAnchor.DEFAULT_SURVEY_ID),
+        defaultSubtitle = "Nyeri County, Kenya",
       )
     assertEquals(1, mapped.size)
     assertEquals("Othaya Market", mapped.first().name)
@@ -304,7 +304,8 @@ class PrototypeCleanArchitectureTest {
     viewModel.addRandomSites(10)
     assertEquals(initialEntityCount + 10, viewModel.uiState.value.entities.size)
 
-    // Sync all outbox mutations for survey-kenya-coffee via ViewModel -> UseCase -> Repository -> StateFlow
+    // Sync all outbox mutations for survey-kenya-coffee via ViewModel -> UseCase -> Repository ->
+    // StateFlow
     viewModel.selectSurvey("survey-kenya-coffee")
     viewModel.syncAllOutboxMutations()
     assertTrue(viewModel.uiState.value.mutations.all { it.state == MutationSyncState.UPLOADED })

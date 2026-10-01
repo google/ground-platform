@@ -33,6 +33,8 @@
 	<string>2.0</string>
 	<key>CFBundleVersion</key>
 	<string>1</string>
+	<key>MBXAccessToken</key>
+	<string>$(MAPBOX_ACCESS_TOKEN)</string>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 </dict>

@@ -27,9 +27,14 @@ import org.groundplatform.v2.core.forms.serialization.XFormsXmlSerializer
 import org.groundplatform.v2.core.forms.ui.FormWizardController
 import org.groundplatform.v2.core.forms.ui.WorkbenchExampleForm
 import org.groundplatform.v2.devtools.prototypeapp.data.datasource.local.PrototypeAppDataStore
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyMapAnchor
 import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.ClusterMapFeaturesUseCase
+import org.groundplatform.v2.devtools.prototypeapp.map.EntityGeometry
 import org.groundplatform.v2.devtools.prototypeapp.ui.state.PrototypeUiState
 import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.PrototypeAppViewModel
+import org.groundplatform.v2.map.CameraPosition
+import org.groundplatform.v2.map.LatLng
+import org.groundplatform.v2.map.LngLatBounds
 
 /**
  * `mapZoomDelta` (relative to the survey's default `15.3z`) at or below which map features are
@@ -161,6 +166,7 @@ class PrototypeAppState(
     mutations = dataStore.mutations
     places = dataStore.places
   }
+
   var currentScreen by mutableStateOf(initialScreen)
     private set
 
@@ -613,21 +619,16 @@ class PrototypeAppState(
 
   private var lastSelectedPlace: SurveyPlaceItem? by mutableStateOf(null)
 
-  // Must match `SURVEY_COORDS` in the Mapbox bridge (`index.html`), which draws map features
-  // relative to the same anchors; otherwise framing targets a point away from the drawn feature.
+  /** Where the active survey sits on the map. */
+  private val activeSurveyAnchor: SurveyMapAnchor
+    get() = SurveyMapAnchor.forSurvey(activeSurveyId)
+
+  /** Where the active survey sits on the map, for the map content builders. */
+  internal val mapAnchor: SurveyMapAnchor
+    get() = activeSurveyAnchor
+
   private fun activeSurveyBaseLngLat(): Pair<Double, Double> =
-    when (activeSurveyId) {
-      "survey-single-point-land-use" -> 36.9498 to -0.4188
-      "survey-sample-plots-forest" -> 36.9506 to -0.4192
-      "survey-commodity-perimeter-center" -> 36.9510 to -0.4195
-      "survey-household-past-individuals" -> 36.9502 to -0.4190
-      "survey-amazon-canopy" -> -62.2159 to -3.4653
-      "survey-serengeti-corridor" -> 34.8328 to -2.3333
-      "survey-mekong-mangroves" -> 106.3422 to 9.8249
-      "survey-andean-watershed" -> -71.9675 to -13.5320
-      "survey-borneo-peatland" -> 113.9213 to -2.2136
-      else -> 36.9512 to -0.4198
-    }
+    activeSurveyAnchor.center.let { it.longitude to it.latitude }
 
   /** Normalized horizontal viewport offset applied when the user manually drags/pans the map. */
   var mapPanOffsetX by mutableStateOf(0f)
@@ -1086,7 +1087,7 @@ class PrototypeAppState(
   /**
    * User-facing plural category label for the `Map features` tab and list section header:
    * - When exactly 1 entity dataset layer is visible on the map, returns its plural domain label
-   * (e.g. `"Coffee Parcels"`, `"Monitoring Plots"`, `"Washing Stations"`).
+   *   (e.g. `"Coffee Parcels"`, `"Monitoring Plots"`, `"Washing Stations"`).
    * - When multiple entity dataset layers are visible (or none), falls back to `"Map features"`.
    */
   val activeEntitiesTabLabel: String
@@ -1096,7 +1097,7 @@ class PrototypeAppState(
   /**
    * User-facing lowercase plural count noun for map counters, search hints, and empty states:
    * - When 1 entity dataset layer is visible, returns its lowercase plural domain label (e.g.
-   * `"coffee parcels"`, `"monitoring plots"`, `"washing stations"`).
+   *   `"coffee parcels"`, `"monitoring plots"`, `"washing stations"`).
    * - Otherwise falls back to `"map features"`.
    */
   val activeEntitiesCountNoun: String
@@ -1272,9 +1273,7 @@ class PrototypeAppState(
   val isPlacesSearchAvailable: Boolean
     get() = !isAirplaneMode
 
-  /**
-   * Live place results returned from `window.GroundMapboxBridge.searchPlaces` (Mapbox Places API).
-   */
+  /** Live place results returned by [PlacesGeocoder] (Mapbox Geocoding or Nominatim). */
   var mapboxPlacesApiResults by mutableStateOf<List<SurveyPlaceItem>>(emptyList())
     private set
 
@@ -1444,7 +1443,8 @@ class PrototypeAppState(
   fun navigateTo(screen: PrototypeScreen) {
     if (screen == PrototypeScreen.DOWNLOAD_SURVEY) {
       downloadSurveyEntryOrigin =
-        if (currentScreen == PrototypeScreen.MAIN_SURVEY &&
+        if (
+          currentScreen == PrototypeScreen.MAIN_SURVEY &&
             activeDrawerSubView == MainDrawerSubView.SWITCH_SURVEYS
         ) {
           DownloadSurveyEntryOrigin.SURVEY_LIST
@@ -1498,7 +1498,7 @@ class PrototypeAppState(
    * Handles the Back escape hatch on the Download surveys screen:
    * - When accessed from the Survey list (`SURVEY_LIST`), returns the user to the Survey list.
    * - When shown after Terms of Service (`AFTER_TOS`), opens a confirmation prompt before signing
-   * the user out.
+   *   the user out.
    */
   fun navigateBackFromDownloadSurvey() {
     if (downloadSurveyEntryOrigin == DownloadSurveyEntryOrigin.SURVEY_LIST) {
@@ -1817,9 +1817,7 @@ class PrototypeAppState(
     } else if (
       !expanded &&
         wasExpanded &&
-        (selectedEntityId != null ||
-          selectedSubmissionId != null ||
-          selectedLayerDatasetId != null)
+        (selectedEntityId != null || selectedSubmissionId != null || selectedLayerDatasetId != null)
     ) {
       isDetailsPanelExpanded = true
     }
@@ -1887,7 +1885,6 @@ class PrototypeAppState(
       if (hasDefaultFallbackCoords && parsedCoords != null) parsedCoords.first else place.latitude
     val lng =
       if (hasDefaultFallbackCoords && parsedCoords != null) parsedCoords.second else place.longitude
-    val (surveyLng, surveyLat) = activeSurveyBaseLngLat()
     val resolvedZoom = place.targetZoom.coerceIn(2.0f, 18.5f)
     val resolvedPlace = place.copy(longitude = lng, latitude = lat, targetZoom = resolvedZoom)
     lastSelectedPlace = resolvedPlace
@@ -1897,20 +1894,13 @@ class PrototypeAppState(
     selectedLayerDatasetId = null
     isCameraFollowingUser = false
     locationLockState = LocationLockState.PANNED
-    mapPanOffsetX = ((userGpsNormalizedX - 0.5f) + ((surveyLng - lng) / 0.014).toFloat())
-    mapPanOffsetY = ((userGpsNormalizedY - 0.5f) + ((lat - surveyLat) / 0.018).toFloat())
-    mapZoomDelta = (resolvedZoom - 15.3f).coerceIn(-13.0f, 3.2f)
+    val (placeNx, placeNy) = activeSurveyAnchor.toNormalized(LatLng(lat, lng))
+    mapPanOffsetX = (userGpsNormalizedX - placeNx).toFloat()
+    mapPanOffsetY = (userGpsNormalizedY - placeNy).toFloat()
+    mapZoomDelta = (resolvedZoom - activeSurveyAnchor.zoom.toFloat()).coerceIn(-13.0f, 3.2f)
     isEntityBottomSheetExpanded = false
     mainViewMode = MainSurveyViewMode.MAP
     isLayersSheetOpen = false
-    flyPlatformMapboxToPlace(
-      lng = lng,
-      lat = lat,
-      zoom = resolvedZoom,
-      name = resolvedPlace.name,
-      category = resolvedPlace.categoryLabel,
-      coordinatesLabel = resolvedPlace.coordinatesLabel,
-    )
     activeSurveyNotice = "Centered map on ${resolvedPlace.name} (${resolvedPlace.coordinatesLabel})"
   }
 
@@ -1918,7 +1908,6 @@ class PrototypeAppState(
   fun clearSelectedPlace() {
     selectedPlaceId = null
     lastSelectedPlace = null
-    clearPlatformMapboxPlace()
   }
 
   /**
@@ -2085,7 +2074,7 @@ class PrototypeAppState(
    * - Disables Mapbox Places API search (`filteredListPlaces` becomes empty).
    * - Switches [listFilterTab] away from [ListFilterTab.PLACES] if currently selected.
    * - Shows a message in the bottom sheet that search is only in local map features and Places
-   * search is not available offline.
+   *   search is not available offline.
    */
   fun updateAirplaneMode(enabled: Boolean) {
     isAirplaneMode = enabled
@@ -2127,35 +2116,16 @@ class PrototypeAppState(
       centerLongitude = surveyLng,
       centerLatitude = surveyLat,
     ) { results ->
-      if (isAirplaneMode || listSearchQuery.trim() != query.trim()) {
-        isMapboxPlacesSearching = false
-      } else {
-        mapboxPlacesApiResults = results
-        isMapboxPlacesSearching = false
-      }
+      onPlacesSearchResults(query, results)
     }
   }
 
-  /**
-   * Receives JSON place features from `window.GroundMapboxBridge.searchPlaces` (`mapbox.places`).
-   */
-  internal fun onMapboxPlacesSearchResponse(query: String, resultsJson: String) {
-    if (isAirplaneMode || listSearchQuery.trim() != query.trim()) {
-      isMapboxPlacesSearching = false
-      return
+  /** Shows geocoder [results] for [query] unless the query changed or airplane mode is on. */
+  internal fun onPlacesSearchResults(query: String, results: List<SurveyPlaceItem>) {
+    if (!isAirplaneMode && listSearchQuery.trim() == query.trim()) {
+      mapboxPlacesApiResults = results
     }
-    mapboxPlacesApiResults = parseMapboxPlacesResultsJson(resultsJson)
     isMapboxPlacesSearching = false
-  }
-
-  private fun parseMapboxPlacesResultsJson(json: String): List<SurveyPlaceItem> {
-    val (surveyLng, surveyLat) = activeSurveyBaseLngLat()
-    return viewModel.placeRepository.parseRemotePlacesPayload(
-      jsonPayload = json,
-      defaultRegionSubtitle = activeSurvey.location,
-      centerLongitude = surveyLng,
-      centerLatitude = surveyLat,
-    )
   }
 
   /** Opens the Available Forms modal bottom sheet triggered by the bottom-centered FAB. */
@@ -2213,21 +2183,23 @@ class PrototypeAppState(
     activeDataCollectionEntityId = entity.id
     selectedEntityId = entity.id
     activeFormWizardController?.updateString(ENTITY_REF_FIELD_PATH, entity.id)
-    if (activeFormWizardController
-        ?.formState
-        ?.fieldStates?.containsKey("/data/sample_plot_entity") == true
+    if (
+      activeFormWizardController?.formState?.fieldStates?.containsKey("/data/sample_plot_entity") ==
+        true
     ) {
       activeFormWizardController?.updateString("/data/sample_plot_entity", entity.id)
     }
-    if (activeFormWizardController
-        ?.formState
-        ?.fieldStates?.containsKey("/data/past_individual_id") == true
+    if (
+      activeFormWizardController?.formState?.fieldStates?.containsKey("/data/past_individual_id") ==
+        true
     ) {
       activeFormWizardController?.updateString("/data/past_individual_id", entity.id)
     }
-    if (activeFormWizardController
+    if (
+      activeFormWizardController
         ?.formState
-        ?.fieldStates?.containsKey("/data/primary_respondent_id") == true
+        ?.fieldStates
+        ?.containsKey("/data/primary_respondent_id") == true
     ) {
       activeFormWizardController?.updateString("/data/primary_respondent_id", entity.id)
     }
@@ -2410,7 +2382,8 @@ class PrototypeAppState(
     }
     val currentEntity =
       selectedEntity
-        ?: entities.firstOrNull { it.id == "entity-shade-201" } ?: entities.firstOrNull()
+        ?: entities.firstOrNull { it.id == "entity-shade-201" }
+        ?: entities.firstOrNull()
     if (currentEntity != null) {
       val enabledFormOnCurrent =
         formsForEntity(currentEntity).firstOrNull { isFormButtonEnabled(currentEntity, it) }
@@ -2464,8 +2437,7 @@ class PrototypeAppState(
         userGpsCoordinatesLabel = userGpsCoordinatesLabel,
         userGpsNormalizedX = userGpsNormalizedX,
         userGpsNormalizedY = userGpsNormalizedY,
-      )
-        ?: return
+      ) ?: return
     pullRepositoryState()
     selectedEntityId = result.selectedEntityId
     if (result.updateSelectedSubmissionId) {
@@ -2925,7 +2897,7 @@ class PrototypeAppState(
     mapPanOffsetY =
       ((userGpsNormalizedY - entity.normalizedY) + (targetScreenY - 0.50f)).coerceIn(
         -10000f,
-        10000f
+        10000f,
       )
   }
 
@@ -2940,40 +2912,58 @@ class PrototypeAppState(
 
   /** Resolves the geographic coordinates `(lng, lat)` for [entity] in the active survey. */
   fun resolveEntityLngLat(entity: GeospatialEntityItem): Pair<Double, Double> {
-    val (surveyLng, surveyLat) = activeSurveyBaseLngLat()
-    val lng = surveyLng + (entity.normalizedX - 0.5) * 0.014
-    val lat = surveyLat - (entity.normalizedY - 0.5) * 0.018
-    return lng to lat
+    val position =
+      activeSurveyAnchor.toLatLng(entity.normalizedX.toDouble(), entity.normalizedY.toDouble())
+    return position.longitude to position.latitude
   }
 
   /**
-   * Resolves the geographic bounds of [entity]'s geometry in the active survey. Lines and polygons
-   * mirror the vertex offsets around the entity's normalized center that the Mapbox bridge
-   * (`index.html`) draws; points have zero-size bounds.
+   * Resolves the geographic bounds of [entity]'s geometry in the active survey (see
+   * [EntityGeometry]); points have zero-size bounds.
    */
-  internal fun resolveEntityLngLatBounds(entity: GeospatialEntityItem): LngLatBounds {
-    val cx = entity.normalizedX.toDouble()
-    val cy = entity.normalizedY.toDouble()
-    // Normalized extents (minX, maxX, minY, maxY) of the drawn geometry.
-    val (minX, maxX, minY, maxY) =
-      when (entity.geometryKind) {
-        EntityGeometryKind.POLYGON -> {
-          val isGenerated = entity.id.startsWith("entity-rnd-")
-          val width = if (isGenerated) 0.022 else 0.22
-          val height = if (isGenerated) 0.015 else 0.11
-          listOf(cx - width * 0.48, cx + width * 0.52, cy - height * 0.5, cy + height * 0.48)
-        }
-        EntityGeometryKind.LINE ->
-          listOf(cx - 0.24 * 0.52, cx + 0.24 * 0.52, cy - 0.12 * 0.42, cy + 0.12 * 0.44)
-        EntityGeometryKind.POINT, EntityGeometryKind.NONE -> listOf(cx, cx, cy, cy)
-      }
-    val (surveyLng, surveyLat) = activeSurveyBaseLngLat()
-    return LngLatBounds(
-      west = surveyLng + (minX - 0.5) * 0.014,
-      south = surveyLat - (maxY - 0.5) * 0.018,
-      east = surveyLng + (maxX - 0.5) * 0.014,
-      north = surveyLat - (minY - 0.5) * 0.018,
+  internal fun resolveEntityLngLatBounds(entity: GeospatialEntityItem): LngLatBounds =
+    EntityGeometry.bounds(entity, activeSurveyAnchor)
+
+  /**
+   * The camera the survey map should show: the user's GPS position shifted by the pan offset
+   * ([mapPanOffsetX], [mapPanOffsetY]), at the survey's zoom plus [mapZoomDelta].
+   */
+  fun desiredMapCamera(): CameraPosition {
+    val anchor = activeSurveyAnchor
+    val center =
+      anchor.toLatLng(
+        (userGpsNormalizedX - mapPanOffsetX).toDouble(),
+        (userGpsNormalizedY - mapPanOffsetY).toDouble(),
+      )
+    return CameraPosition(
+      center =
+        LatLng(
+          center.latitude.coerceIn(-MAX_MAP_LATITUDE, MAX_MAP_LATITUDE),
+          ((center.longitude + 540) % 360) - 180,
+        ),
+      zoom = anchor.zoom + mapZoomDelta,
     )
+  }
+
+  /**
+   * Updates the pan offset and zoom delta to match where the map [camera] settled after a gesture
+   * or an explicit camera move. Moving the center stops following the user's GPS location.
+   */
+  fun syncMapCamera(camera: CameraPosition) {
+    val anchor = activeSurveyAnchor
+    val (nx, ny) = anchor.toNormalized(camera.center)
+    val panX = (userGpsNormalizedX - nx).toFloat().coerceIn(-10000f, 10000f)
+    val panY = (userGpsNormalizedY - ny).toFloat().coerceIn(-10000f, 10000f)
+    val moved =
+      abs(panX - mapPanOffsetX) > MAP_SYNC_TOLERANCE ||
+        abs(panY - mapPanOffsetY) > MAP_SYNC_TOLERANCE
+    if (moved) {
+      isCameraFollowingUser = false
+      locationLockState = LocationLockState.PANNED
+      mapPanOffsetX = panX
+      mapPanOffsetY = panY
+    }
+    syncMapZoomDelta((camera.zoom - anchor.zoom).toFloat())
   }
 
   /**
@@ -3073,12 +3063,11 @@ class PrototypeAppState(
 
   /**
    * Updates the user's current GPS location (`userGpsNormalizedX`, `userGpsNormalizedY`).
-   *
    * - When [isCameraFollowingUser] is `true` (default), [mapPanOffsetX] and [mapPanOffsetY] stay
-   * `0f`, so the map automatically pans ([mapWorldToScreenShiftX], [mapWorldToScreenShiftY]) to
-   * keep the user's GPS location at the exact center `(0.50f, 0.50f)` of the screen.
+   *   `0f`, so the map automatically pans ([mapWorldToScreenShiftX], [mapWorldToScreenShiftY]) to
+   *   keep the user's GPS location at the exact center `(0.50f, 0.50f)` of the screen.
    * - When [isCameraFollowingUser] is `false` (after the map has been manually dragged/panned), the
-   * panned camera viewport remains stationary while the user's GPS blue dot moves across the map.
+   *   panned camera viewport remains stationary while the user's GPS blue dot moves across the map.
    */
   fun updateUserGpsLocation(
     newNormalizedX: Float,
@@ -3299,7 +3288,6 @@ class PrototypeAppState(
     isAirplaneMode = false
     mapboxPlacesApiResults = emptyList()
     isMapboxPlacesSearching = false
-    clearPlatformMapboxPlace()
     standaloneSubmissions = defaultStandaloneSubmissions()
     mutations = defaultMutations()
     selectedEntityId = null
@@ -3329,6 +3317,12 @@ class PrototypeAppState(
   }
 
   companion object {
+    /** Web Mercator's latitude limit, for camera centers. */
+    private const val MAX_MAP_LATITUDE = 85.0
+
+    /** Pan offset change (normalized) below which a settled camera counts as not moved. */
+    private const val MAP_SYNC_TOLERANCE = 1e-4f
+
     /** Alias for [defaultSurveyPlaces]. */
     fun defaultPlaces(): List<SurveyPlaceItem> = PrototypeAppDataStore.defaultPlaces()
 
