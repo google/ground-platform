@@ -29,12 +29,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Done
-import androidx.compose.material.icons.filled.Layers
-import androidx.compose.material.icons.filled.Remove
-import androidx.compose.material.icons.filled.ZoomOutMap
+import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.Close
+import androidx.compose.material.icons.outlined.Done
+import androidx.compose.material.icons.outlined.Layers
+import androidx.compose.material.icons.outlined.Remove
+import androidx.compose.material.icons.outlined.ZoomOutMap
 import androidx.compose.material3.Button
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
@@ -578,13 +578,13 @@ private fun MapToolbar(
         )
         TextButton(onClick = onUndo, enabled = draftSize > 0) { Text("Undo") }
         Button(onClick = onFinish, enabled = draftSize >= min) {
-          Icon(Icons.Default.Done, contentDescription = null, modifier = Modifier.size(16.dp))
+          Icon(Icons.Outlined.Done, contentDescription = null, modifier = Modifier.size(16.dp))
           Spacer(Modifier.width(6.dp))
           Text("Finish $noun")
         }
       }
       TextButton(onClick = onCancel) {
-        Icon(Icons.Default.Close, contentDescription = null, modifier = Modifier.size(16.dp))
+        Icon(Icons.Outlined.Close, contentDescription = null, modifier = Modifier.size(16.dp))
         Spacer(Modifier.width(4.dp))
         Text("Cancel")
       }
@@ -594,7 +594,7 @@ private fun MapToolbar(
         onClick = onStartDrawing,
         label = { Text("Add $noun") },
         leadingIcon = {
-          Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(16.dp))
+          Icon(Icons.Outlined.Add, contentDescription = null, modifier = Modifier.size(16.dp))
         },
       )
     }
@@ -633,7 +633,7 @@ private fun MapOverlays(
         horizontalArrangement = Arrangement.spacedBy(6.dp),
       ) {
         Icon(
-          Icons.Default.Layers,
+          Icons.Outlined.Layers,
           contentDescription = null,
           modifier = Modifier.size(16.dp),
           tint = colors.onSurfaceVariant,
@@ -658,12 +658,12 @@ private fun MapOverlays(
     ) {
       Column(horizontalAlignment = Alignment.CenterHorizontally) {
         IconButton(onClick = onZoomIn, modifier = Modifier.size(36.dp)) {
-          Icon(Icons.Default.Add, contentDescription = "Zoom in", modifier = Modifier.size(18.dp))
+          Icon(Icons.Outlined.Add, contentDescription = "Zoom in", modifier = Modifier.size(18.dp))
         }
         HorizontalDivider(modifier = Modifier.width(24.dp))
         IconButton(onClick = onZoomOut, modifier = Modifier.size(36.dp)) {
           Icon(
-            Icons.Default.Remove,
+            Icons.Outlined.Remove,
             contentDescription = "Zoom out",
             modifier = Modifier.size(18.dp),
           )
@@ -671,7 +671,7 @@ private fun MapOverlays(
         HorizontalDivider(modifier = Modifier.width(24.dp))
         IconButton(onClick = onFit, modifier = Modifier.size(36.dp)) {
           Icon(
-            Icons.Default.ZoomOutMap,
+            Icons.Outlined.ZoomOutMap,
             contentDescription = "Fit to features",
             modifier = Modifier.size(18.dp),
           )

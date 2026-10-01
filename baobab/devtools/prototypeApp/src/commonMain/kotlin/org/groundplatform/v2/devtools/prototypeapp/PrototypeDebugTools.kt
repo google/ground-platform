@@ -23,15 +23,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AirplanemodeActive
-import androidx.compose.material.icons.filled.AirplanemodeInactive
-import androidx.compose.material.icons.filled.BugReport
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.DarkMode
-import androidx.compose.material.icons.filled.LightMode
-import androidx.compose.material.icons.filled.Map
-import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.Smartphone
+import androidx.compose.material.icons.outlined.AirplanemodeActive
+import androidx.compose.material.icons.outlined.AirplanemodeInactive
+import androidx.compose.material.icons.outlined.BugReport
+import androidx.compose.material.icons.outlined.Check
+import androidx.compose.material.icons.outlined.DarkMode
+import androidx.compose.material.icons.outlined.LightMode
+import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
@@ -63,12 +61,9 @@ fun PrototypeDebugToolsButton(
   var isMenuOpen by remember { mutableStateOf(false) }
 
   Box(modifier = modifier) {
-    IconButton(
-      onClick = { isMenuOpen = !isMenuOpen },
-      modifier = Modifier.size(40.dp),
-    ) {
+    IconButton(onClick = { isMenuOpen = !isMenuOpen }, modifier = Modifier.size(40.dp)) {
       Icon(
-        imageVector = Icons.Filled.BugReport,
+        imageVector = Icons.Outlined.BugReport,
         contentDescription = "Debug tools",
         tint = iconTint,
       )
@@ -106,7 +101,7 @@ fun PrototypeDebugToolsDropdown(
       horizontalArrangement = Arrangement.spacedBy(10.dp),
     ) {
       Icon(
-        imageVector = Icons.Filled.BugReport,
+        imageVector = Icons.Outlined.BugReport,
         contentDescription = null,
         tint = MaterialTheme.colorScheme.primary,
         modifier = Modifier.size(22.dp),
@@ -138,33 +133,27 @@ fun PrototypeDebugToolsDropdown(
     )
 
     DropdownMenuItem(
-      text = {
-        Text(if (state.isDarkTheme) "Switch to Light UI" else "Switch to Dark UI")
-      },
+      text = { Text(if (state.isDarkTheme) "Switch to Light UI" else "Switch to Dark UI") },
       leadingIcon = {
         Icon(
           imageVector =
-            if (state.isDarkTheme) Icons.Default.LightMode else Icons.Default.DarkMode,
+            if (state.isDarkTheme) Icons.Outlined.LightMode else Icons.Outlined.DarkMode,
           contentDescription = null,
           modifier = Modifier.size(20.dp),
         )
       },
-      onClick = {
-        state.toggleDarkTheme()
-      },
+      onClick = { state.toggleDarkTheme() },
     )
 
     DropdownMenuItem(
-      text = {
-        Text(if (state.isAirplaneMode) "Airplane mode: ON" else "Airplane mode")
-      },
+      text = { Text(if (state.isAirplaneMode) "Airplane mode: ON" else "Airplane mode") },
       leadingIcon = {
         Icon(
           imageVector =
             if (state.isAirplaneMode) {
-              Icons.Default.AirplanemodeActive
+              Icons.Outlined.AirplanemodeActive
             } else {
-              Icons.Default.AirplanemodeInactive
+              Icons.Outlined.AirplanemodeInactive
             },
           contentDescription = null,
           tint =
@@ -179,16 +168,14 @@ fun PrototypeDebugToolsDropdown(
       trailingIcon = {
         if (state.isAirplaneMode) {
           Icon(
-            imageVector = Icons.Default.Check,
+            imageVector = Icons.Outlined.Check,
             contentDescription = "Active",
             tint = Color(0xFFFFB74D),
             modifier = Modifier.size(18.dp),
           )
         }
       },
-      onClick = {
-        state.toggleAirplaneMode()
-      },
+      onClick = { state.toggleAirplaneMode() },
     )
 
     HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
@@ -206,7 +193,7 @@ fun PrototypeDebugToolsDropdown(
       text = { Text("Reset Flow") },
       leadingIcon = {
         Icon(
-          imageVector = Icons.Default.Refresh,
+          imageVector = Icons.Outlined.Refresh,
           contentDescription = null,
           modifier = Modifier.size(20.dp),
         )

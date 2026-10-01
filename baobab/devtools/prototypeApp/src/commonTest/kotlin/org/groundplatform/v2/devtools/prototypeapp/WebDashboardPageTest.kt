@@ -41,10 +41,7 @@ class WebDashboardPageTest {
       PrototypeWorkbenchPage.WEB_DASHBOARD,
       PrototypeWorkbenchPage.fromHash("#dashboard"),
     )
-    assertEquals(
-      PrototypeWorkbenchPage.WEB_DASHBOARD,
-      PrototypeWorkbenchPage.fromHash("#web"),
-    )
+    assertEquals(PrototypeWorkbenchPage.WEB_DASHBOARD, PrototypeWorkbenchPage.fromHash("#web"))
   }
 
   @Test
@@ -272,7 +269,7 @@ class WebDashboardPageTest {
     testState.toggleLayerVisibility(firstLayer.id)
     assertEquals(
       !initialLayerVisibility,
-      testState.entityDatasetLayers.first { it.id == firstLayer.id }.isVisible
+      testState.entityDatasetLayers.first { it.id == firstLayer.id }.isVisible,
     )
 
     testState.updateLayersSheetOpen(false)
@@ -404,21 +401,23 @@ class WebDashboardPageTest {
     val table = layerTable()
     val lines = buildDashboardTableCsv(table).split("\r\n").filter { it.isNotEmpty() }
 
-    assertTrue(lines.first().startsWith("Label,Status,Submissions,GeoID"))
+    assertTrue(lines.first().startsWith("Status,Label,Submissions,GeoID"))
     assertFalse("Sync" in table.columns)
     assertTrue(lines.size >= table.rows.size + 1)
   }
 
   @Test
-  fun buildDashboardDataTables_statusCellHoldsWorkflowStatusAndRowEntity() {
+  fun buildDashboardDataTables_statusIsFirstColumnAndHoldsWorkflowStatusAndRowEntity() {
     val table = layerTable()
     val statusIndex = table.columns.indexOf(DashboardStatusColumn)
 
-    assertEquals(1, statusIndex)
+    assertEquals(0, statusIndex)
+    assertEquals(1, table.columns.indexOf(DashboardLabelColumn))
     table.rows.forEach { row ->
       val entity = assertNotNull(row.entity)
       assertEquals(row.id, entity.id)
       assertEquals(entity.workflowStatus, row.cells[statusIndex])
+      assertEquals(entity.label, row.cells[1])
     }
   }
 

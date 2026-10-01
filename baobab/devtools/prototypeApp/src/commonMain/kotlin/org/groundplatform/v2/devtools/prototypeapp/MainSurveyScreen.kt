@@ -38,17 +38,17 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Description
-import androidx.compose.material.icons.filled.Explore
-import androidx.compose.material.icons.filled.Layers
-import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material.icons.filled.Map
-import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.MyLocation
-import androidx.compose.material.icons.filled.Navigation
-import androidx.compose.material.icons.filled.SatelliteAlt
+import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.Close
+import androidx.compose.material.icons.outlined.Description
+import androidx.compose.material.icons.outlined.Explore
+import androidx.compose.material.icons.outlined.Layers
+import androidx.compose.material.icons.outlined.LocationOn
+import androidx.compose.material.icons.outlined.Map
+import androidx.compose.material.icons.outlined.Menu
+import androidx.compose.material.icons.outlined.MyLocation
+import androidx.compose.material.icons.outlined.Navigation
+import androidx.compose.material.icons.outlined.SatelliteAlt
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.Button
@@ -185,7 +185,7 @@ internal fun MainSurveyTopAppBar(state: PrototypeAppState) {
     navigationIcon = {
       IconButton(onClick = { state.updateDrawerOpen(true) }) {
         Icon(
-          imageVector = Icons.Default.Menu,
+          imageVector = Icons.Outlined.Menu,
           contentDescription = "Open Navigation Drawer",
           tint = Color.White,
         )
@@ -206,7 +206,7 @@ internal fun MainSurveyTopAppBar(state: PrototypeAppState) {
           horizontalArrangement = Arrangement.spacedBy(3.dp),
         ) {
           Icon(
-            imageVector = Icons.Default.LocationOn,
+            imageVector = Icons.Outlined.LocationOn,
             contentDescription = null,
             tint = Color(0xFFB7F1B9),
             modifier = Modifier.size(12.dp),
@@ -368,9 +368,9 @@ internal fun SurveyMapView(state: PrototypeAppState) {
                   Icon(
                     imageVector =
                       if (state.isCameraFollowingUser) {
-                        Icons.Default.SatelliteAlt
+                        Icons.Outlined.SatelliteAlt
                       } else {
-                        Icons.Default.MyLocation
+                        Icons.Outlined.MyLocation
                       },
                     contentDescription =
                       if (state.isCameraFollowingUser) "GPS Auto-Center" else "Panned",
@@ -426,7 +426,7 @@ internal fun SurveyMapView(state: PrototypeAppState) {
             onClick = { state.recenterMapOnUser() },
             icon = {
               Icon(
-                imageVector = Icons.Default.MyLocation,
+                imageVector = Icons.Outlined.MyLocation,
                 contentDescription = "Recenter map on GPS location",
                 modifier = Modifier.size(18.dp),
               )
@@ -532,7 +532,7 @@ internal fun SelectedClusterBalloonDetailCard(
           }
           IconButton(onClick = onDismiss, modifier = Modifier.size(22.dp)) {
             Icon(
-              imageVector = Icons.Default.Close,
+              imageVector = Icons.Outlined.Close,
               contentDescription = "Dismiss cluster balloon",
               tint = Color.White.copy(alpha = 0.8f),
               modifier = Modifier.size(14.dp),
@@ -625,7 +625,7 @@ internal fun DataCollectionFormsFab(state: PrototypeAppState, modifier: Modifier
     containerColor = formsBg,
     contentColor = formsContent,
   ) {
-    Icon(imageVector = Icons.Default.Add, contentDescription = "Collect data")
+    Icon(imageVector = Icons.Outlined.Add, contentDescription = "Collect data")
   }
 }
 
@@ -663,7 +663,7 @@ internal fun AvailableFormsModalSheet(state: PrototypeAppState) {
           )
         }
         IconButton(onClick = { state.closeAvailableFormsSheet() }) {
-          Icon(imageVector = Icons.Default.Close, contentDescription = "Close Available Forms")
+          Icon(imageVector = Icons.Outlined.Close, contentDescription = "Close Available Forms")
         }
       }
 
@@ -718,7 +718,7 @@ internal fun AvailableFormsModalSheet(state: PrototypeAppState) {
               modifier = Modifier.align(Alignment.End),
             ) {
               Icon(
-                imageVector = Icons.Default.Description,
+                imageVector = Icons.Outlined.Description,
                 contentDescription = null,
                 modifier = Modifier.size(16.dp),
               )
@@ -801,7 +801,7 @@ internal fun StraightLineNavigationHudBanner(
           ) {
             Box(contentAlignment = Alignment.Center) {
               Icon(
-                imageVector = Icons.Default.Navigation,
+                imageVector = Icons.Outlined.Navigation,
                 contentDescription = "Compass Bearing Arrow",
                 tint = accentColor,
                 modifier =
@@ -923,7 +923,7 @@ internal fun StraightLineNavigationHudBanner(
                   horizontalArrangement = Arrangement.spacedBy(5.dp),
                 ) {
                   Icon(
-                    imageVector = Icons.Default.Explore,
+                    imageVector = Icons.Outlined.Explore,
                     contentDescription = "Simulate walking closer to target",
                     tint = Color(0xFF8BD6B1),
                     modifier = Modifier.size(14.dp),
@@ -953,7 +953,7 @@ internal fun StraightLineNavigationHudBanner(
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
               ) {
                 Icon(
-                  imageVector = Icons.Default.Close,
+                  imageVector = Icons.Outlined.Close,
                   contentDescription = "Stop Straight-Line Navigation",
                   tint = Color.White,
                   modifier = Modifier.size(14.dp),
@@ -1097,7 +1097,7 @@ internal fun LayersFloatingActionButton(state: PrototypeAppState, modifier: Modi
     contentColor = layersContent,
     modifier = modifier,
   ) {
-    Icon(imageVector = Icons.Default.Layers, contentDescription = "Layers")
+    Icon(imageVector = Icons.Outlined.Layers, contentDescription = "Layers")
   }
 }
 
@@ -1133,9 +1133,9 @@ internal fun LayersSelectorContent(state: PrototypeAppState, modifier: Modifier 
             Icon(
               imageVector =
                 if (basemap == BasemapType.NORMAL) {
-                  Icons.Default.Map
+                  Icons.Outlined.Map
                 } else {
-                  Icons.Default.SatelliteAlt
+                  Icons.Outlined.SatelliteAlt
                 },
               contentDescription = null,
               modifier = Modifier.size(16.dp),
@@ -1281,7 +1281,7 @@ internal fun LayersControlSheet(state: PrototypeAppState) {
           )
         }
         IconButton(onClick = { state.updateLayersSheetOpen(false) }) {
-          Icon(imageVector = Icons.Default.Close, contentDescription = "Close layers")
+          Icon(imageVector = Icons.Outlined.Close, contentDescription = "Close layers")
         }
       }
 

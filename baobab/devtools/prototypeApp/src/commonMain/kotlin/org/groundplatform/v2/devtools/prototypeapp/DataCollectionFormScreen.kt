@@ -31,14 +31,14 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
-import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material.icons.automirrored.outlined.ArrowBack
+import androidx.compose.material.icons.automirrored.outlined.ArrowForward
+import androidx.compose.material.icons.automirrored.outlined.List
 import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material.icons.filled.Map
-import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.outlined.Close
+import androidx.compose.material.icons.outlined.LocationOn
+import androidx.compose.material.icons.outlined.Map
+import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
 import androidx.compose.material3.CardDefaults
@@ -231,7 +231,7 @@ fun DataCollectionFormScreen(state: PrototypeAppState) {
         ) {
           IconButton(onClick = { state.closeActiveFormRunner() }, modifier = Modifier.size(36.dp)) {
             Icon(
-              imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+              imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
               contentDescription = "Back to Survey",
               tint = Color.White,
               modifier = Modifier.size(18.dp),
@@ -244,7 +244,7 @@ fun DataCollectionFormScreen(state: PrototypeAppState) {
               horizontalArrangement = Arrangement.spacedBy(4.dp),
             ) {
               Icon(
-                imageVector = Icons.Default.LocationOn,
+                imageVector = Icons.Outlined.LocationOn,
                 contentDescription = null,
                 tint = Color(0xFF8BD6B1),
                 modifier = Modifier.size(14.dp),
@@ -306,7 +306,7 @@ fun DataCollectionFormScreen(state: PrototypeAppState) {
           },
           leadingIcon = {
             Icon(
-              imageVector = Icons.Default.Close,
+              imageVector = Icons.Outlined.Close,
               contentDescription = "Cancel Form",
               modifier = Modifier.size(14.dp),
             )
@@ -431,9 +431,9 @@ private fun EntityRefStepMapOrListSelector(
                   Icon(
                     imageVector =
                       if (mode == MainSurveyViewMode.MAP) {
-                        Icons.Default.Map
+                        Icons.Outlined.Map
                       } else {
-                        Icons.AutoMirrored.Filled.List
+                        Icons.AutoMirrored.Outlined.List
                       },
                     contentDescription = null,
                     modifier = Modifier.size(16.dp),
@@ -483,7 +483,7 @@ private fun EntityRefStepMapOrListSelector(
               horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
               Icon(
-                imageVector = Icons.Default.CheckCircle,
+                imageVector = Icons.Filled.CheckCircle, // Filled: indicates the selected state.
                 contentDescription = "Selected",
                 tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(20.dp),
@@ -570,7 +570,7 @@ private fun EntityRefStepMapOrListSelector(
           singleLine = true,
           leadingIcon = {
             Icon(
-              imageVector = Icons.Default.Search,
+              imageVector = Icons.Outlined.Search,
               contentDescription = "Search map features",
               modifier = Modifier.size(18.dp),
             )
@@ -579,7 +579,7 @@ private fun EntityRefStepMapOrListSelector(
             if (state.entityRefSearchQuery.isNotEmpty()) {
               IconButton(onClick = { state.clearEntityRefSearchQuery() }) {
                 Icon(
-                  imageVector = Icons.Default.Close,
+                  imageVector = Icons.Outlined.Close,
                   contentDescription = "Clear search",
                   modifier = Modifier.size(16.dp),
                 )
@@ -652,7 +652,7 @@ private fun EntityRefStepMapOrListSelector(
           )
           Spacer(modifier = Modifier.width(6.dp))
           Icon(
-            imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+            imageVector = Icons.AutoMirrored.Outlined.ArrowForward,
             contentDescription = null,
             modifier = Modifier.size(16.dp),
           )

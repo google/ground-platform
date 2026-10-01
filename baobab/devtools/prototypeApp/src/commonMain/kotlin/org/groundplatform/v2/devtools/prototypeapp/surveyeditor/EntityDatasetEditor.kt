@@ -34,12 +34,12 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Link
-import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.Close
+import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material.icons.outlined.Link
+import androidx.compose.material.icons.outlined.Warning
 import androidx.compose.material3.Button
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
@@ -167,7 +167,7 @@ private fun DatasetHeader(state: SurveyEditorState, dataset: EntityDataset, issu
       if (issueCount > 0) {
         Row(verticalAlignment = Alignment.CenterVertically) {
           Icon(
-            Icons.Default.Warning,
+            Icons.Outlined.Warning,
             contentDescription = null,
             tint = MaterialTheme.colorScheme.error,
             modifier = Modifier.size(18.dp),
@@ -182,16 +182,13 @@ private fun DatasetHeader(state: SurveyEditorState, dataset: EntityDataset, issu
       }
       TextButton(onClick = { state.deleteDataset(dataset.key) }) {
         Icon(
-          Icons.Default.Delete,
+          Icons.Outlined.Delete,
           contentDescription = null,
           tint = MaterialTheme.colorScheme.error,
           modifier = Modifier.size(18.dp),
         )
         Spacer(Modifier.width(4.dp))
-        Text(
-          "Delete ${dataset.kind.singular.lowercase()}",
-          color = MaterialTheme.colorScheme.error,
-        )
+        Text("Delete ${dataset.kind.singular.lowercase()}", color = MaterialTheme.colorScheme.error)
       }
     }
   }
@@ -229,7 +226,7 @@ private fun RowsTableCard(
           modifier = Modifier.weight(1f),
         )
         TextButton(onClick = { onSelectRow(state.addRow(dataset.key)) }) {
-          Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(18.dp))
+          Icon(Icons.Outlined.Add, contentDescription = null, modifier = Modifier.size(18.dp))
           Spacer(Modifier.width(4.dp))
           Text(if (isMap) "Add feature" else "Add row")
         }
@@ -339,7 +336,7 @@ private fun RowsTableCard(
                   modifier = Modifier.size(IndexCellWidth),
                 ) {
                   Icon(
-                    Icons.Default.Close,
+                    Icons.Outlined.Close,
                     contentDescription = "Delete",
                     modifier = Modifier.size(16.dp),
                   )
@@ -507,10 +504,13 @@ private fun DatasetSettingsPanel(
           shape = MaterialTheme.shapes.small,
           modifier = Modifier.fillMaxWidth(),
         ) {
-          Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+          Column(
+            modifier = Modifier.padding(12.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+          ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
               Icon(
-                Icons.Default.Link,
+                Icons.Outlined.Link,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(18.dp),
@@ -529,17 +529,21 @@ private fun DatasetSettingsPanel(
               color = MaterialTheme.colorScheme.onPrimaryContainer,
             )
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-              Button(
-                onClick = { state.select(SurveyEditorSection.Form(linkedForm.key)) },
-              ) {
-                Icon(Icons.Default.Edit, contentDescription = null, modifier = Modifier.size(16.dp))
+              Button(onClick = { state.select(SurveyEditorSection.Form(linkedForm.key)) }) {
+                Icon(
+                  Icons.Outlined.Edit,
+                  contentDescription = null,
+                  modifier = Modifier.size(16.dp),
+                )
                 Spacer(Modifier.width(4.dp))
                 Text("Edit form")
               }
-              OutlinedButton(
-                onClick = { state.unlinkDataset(key) },
-              ) {
-                Icon(Icons.Default.Close, contentDescription = null, modifier = Modifier.size(16.dp))
+              OutlinedButton(onClick = { state.unlinkDataset(key) }) {
+                Icon(
+                  Icons.Outlined.Close,
+                  contentDescription = null,
+                  modifier = Modifier.size(16.dp),
+                )
                 Spacer(Modifier.width(4.dp))
                 Text("Unlink form")
               }
@@ -552,16 +556,17 @@ private fun DatasetSettingsPanel(
           shape = MaterialTheme.shapes.small,
           modifier = Modifier.fillMaxWidth(),
         ) {
-          Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+          Column(
+            modifier = Modifier.padding(12.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+          ) {
             Text(
               "No form is linked to this ${dataset.kind.singular.lowercase()}. Data collectors can only view existing items.",
               style = MaterialTheme.typography.bodySmall,
               color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
-            Button(
-              onClick = { state.createFormForDataset(key) },
-            ) {
-              Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(16.dp))
+            Button(onClick = { state.createFormForDataset(key) }) {
+              Icon(Icons.Outlined.Add, contentDescription = null, modifier = Modifier.size(16.dp))
               Spacer(Modifier.width(4.dp))
               Text("Create form for ${dataset.kind.singular.lowercase()}")
             }
@@ -588,7 +593,7 @@ private fun DatasetSettingsPanel(
             verticalAlignment = Alignment.CenterVertically,
           ) {
             Icon(
-              Icons.Default.Link,
+              Icons.Outlined.Link,
               contentDescription = null,
               tint = MaterialTheme.colorScheme.primary,
               modifier = Modifier.size(16.dp),
@@ -613,7 +618,7 @@ private fun DatasetSettingsPanel(
       }
       if (!dataset.isLinkedToForm) {
         TextButton(onClick = { state.addProperty(key) }) {
-          Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(18.dp))
+          Icon(Icons.Outlined.Add, contentDescription = null, modifier = Modifier.size(18.dp))
           Spacer(Modifier.width(4.dp))
           Text("Add property")
         }
@@ -751,7 +756,7 @@ private fun PropertyEditor(
         Text("Required", style = MaterialTheme.typography.bodySmall)
         if (!readOnly) {
           IconButton(onClick = onRemove, enabled = canRemove) {
-            Icon(Icons.Default.Close, contentDescription = "Remove property")
+            Icon(Icons.Outlined.Close, contentDescription = "Remove property")
           }
         }
       }

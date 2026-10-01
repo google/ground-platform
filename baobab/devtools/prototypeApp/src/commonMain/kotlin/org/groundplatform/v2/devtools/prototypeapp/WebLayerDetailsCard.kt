@@ -30,10 +30,10 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.CollapseContent
-import androidx.compose.material.icons.filled.ExpandContent
-import androidx.compose.material.icons.filled.TableRows
+import androidx.compose.material.icons.outlined.Close
+import androidx.compose.material.icons.outlined.CollapseContent
+import androidx.compose.material.icons.outlined.ExpandContent
+import androidx.compose.material.icons.outlined.TableRows
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -162,7 +162,7 @@ internal fun WebLayerDetailsCard(
         if (onCollapse != null) {
           IconButton(onClick = onCollapse, modifier = Modifier.size(32.dp)) {
             Icon(
-              imageVector = Icons.Default.CollapseContent,
+              imageVector = Icons.Outlined.CollapseContent,
               contentDescription = "Collapse details",
               tint = MaterialTheme.colorScheme.onSurfaceVariant,
               modifier = Modifier.size(22.dp),
@@ -171,7 +171,7 @@ internal fun WebLayerDetailsCard(
         }
         IconButton(onClick = { state.selectLayer(null) }, modifier = Modifier.size(32.dp)) {
           Icon(
-            imageVector = Icons.Default.Close,
+            imageVector = Icons.Outlined.Close,
             contentDescription = "Close details",
             tint = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.size(20.dp),
@@ -213,7 +213,7 @@ internal fun WebLayerDetailsCard(
               verticalAlignment = Alignment.CenterVertically,
               horizontalArrangement = Arrangement.SpaceBetween,
             ) {
-              EntityStatusChip(entity = statusCount.example)
+              EntityStatusChip(entity = statusCount.example, compact = true)
               Text(
                 text = "${statusCount.count}",
                 style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
@@ -228,11 +228,14 @@ internal fun WebLayerDetailsCard(
           contentPadding = ButtonDefaults.ButtonWithIconContentPadding,
         ) {
           Icon(
-            imageVector = Icons.Default.TableRows,
+            imageVector = Icons.Outlined.TableRows,
             contentDescription = null,
             modifier = Modifier.size(ButtonDefaults.IconSize),
           )
-          Text(text = "Show in table", modifier = Modifier.padding(start = ButtonDefaults.IconSpacing))
+          Text(
+            text = "Show in table",
+            modifier = Modifier.padding(start = ButtonDefaults.IconSpacing),
+          )
         }
       }
     }
@@ -267,7 +270,7 @@ internal fun CollapsedLayerDetailsPill(
       horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
       Icon(
-        imageVector = Icons.Default.ExpandContent,
+        imageVector = Icons.Outlined.ExpandContent,
         contentDescription = "Expand details",
         tint = MaterialTheme.colorScheme.primary,
         modifier = Modifier.size(20.dp),
@@ -283,7 +286,7 @@ internal fun CollapsedLayerDetailsPill(
       )
       IconButton(onClick = onClose, modifier = Modifier.size(24.dp)) {
         Icon(
-          imageVector = Icons.Default.Close,
+          imageVector = Icons.Outlined.Close,
           contentDescription = "Close details",
           tint = MaterialTheme.colorScheme.onSurfaceVariant,
           modifier = Modifier.size(16.dp),

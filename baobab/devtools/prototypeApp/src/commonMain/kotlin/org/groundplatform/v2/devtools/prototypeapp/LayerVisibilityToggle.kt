@@ -16,32 +16,36 @@ package org.groundplatform.v2.devtools.prototypeapp
 
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material.icons.outlined.Visibility
+import androidx.compose.material.icons.outlined.VisibilityOff
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 /**
  * Eye / eye-with-slash button that shows or hides a map layer on the map. Shared by the web
- * dashboard's left-hand panel, the mobile searchable list, and the mobile `Layers` sheet.
+ * dashboard's left-hand panel, the mobile searchable list, and the mobile `Layers` sheet. The web
+ * dashboard's denser list passes a smaller [buttonSize] and [iconSize].
  */
 @Composable
 internal fun LayerVisibilityToggle(
   isVisible: Boolean,
   onToggle: () -> Unit,
   modifier: Modifier = Modifier,
+  buttonSize: Dp = 36.dp,
+  iconSize: Dp = 20.dp,
 ) {
-  IconButton(onClick = onToggle, modifier = modifier.size(36.dp)) {
+  IconButton(onClick = onToggle, modifier = modifier.size(buttonSize)) {
     Icon(
-      imageVector = if (isVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
+      imageVector = if (isVisible) Icons.Outlined.Visibility else Icons.Outlined.VisibilityOff,
       contentDescription = if (isVisible) "Hide layer" else "Show layer",
       tint = MaterialTheme.colorScheme.onSurfaceVariant,
-      modifier = Modifier.size(20.dp),
+      modifier = Modifier.size(iconSize),
     )
   }
 }
@@ -52,11 +56,15 @@ internal fun LayerVisibilityToggle(
   layer: MapLayerItem,
   state: PrototypeAppState,
   modifier: Modifier = Modifier,
+  buttonSize: Dp = 36.dp,
+  iconSize: Dp = 20.dp,
 ) {
   LayerVisibilityToggle(
     isVisible = layer.isVisible,
     onToggle = { state.toggleLayerVisibility(layer.id) },
     modifier = modifier,
+    buttonSize = buttonSize,
+    iconSize = iconSize,
   )
 }
 

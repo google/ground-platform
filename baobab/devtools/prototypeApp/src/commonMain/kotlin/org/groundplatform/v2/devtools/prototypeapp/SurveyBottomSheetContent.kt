@@ -17,39 +17,45 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.hoverable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.CloudDone
-import androidx.compose.material.icons.filled.CloudOff
-import androidx.compose.material.icons.filled.CloudUpload
-import androidx.compose.material.icons.filled.Description
-import androidx.compose.material.icons.filled.Explore
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.KeyboardArrowUp
-import androidx.compose.material.icons.filled.Layers
-import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material.icons.filled.Navigation
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Schedule
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.automirrored.outlined.ArrowBack
+import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowRight
+import androidx.compose.material.icons.outlined.Close
+import androidx.compose.material.icons.outlined.CloudDone
+import androidx.compose.material.icons.outlined.CloudOff
+import androidx.compose.material.icons.outlined.CloudUpload
+import androidx.compose.material.icons.outlined.Description
+import androidx.compose.material.icons.outlined.Explore
+import androidx.compose.material.icons.outlined.KeyboardArrowDown
+import androidx.compose.material.icons.outlined.KeyboardArrowUp
+import androidx.compose.material.icons.outlined.Layers
+import androidx.compose.material.icons.outlined.LocationOn
+import androidx.compose.material.icons.outlined.Navigation
+import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material.icons.outlined.Schedule
+import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
@@ -57,19 +63,24 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -79,15 +90,18 @@ import org.groundplatform.v2.core.forms.ui.GroundTonalBadge
 /**
  * Unified Persistent Bottom Sheet content for [SurveyMapView] (Option A):
  * 1. When a [GeospatialEntityItem] is selected (via map tap or list selection), renders
+ *
  * ```
  *    [EntityBottomSheetCard] with a `"All map features"` back pill, `simplestyle-spec` marker, baseline
  *    attributes, form launchers, and `1:N` submissions.
  * ```
  * 2. When a standalone [SubmissionPreviewItem] is selected from the searchable list, renders
+ *
  * ```
  *    [SubmissionFullDetailsCard] with a back button returning to the searchable list.
  * ```
  * 3. When no specific item is selected, renders [SurveyListView] — peeking at the bottom of the map
+ *
  * ```
  *    with a Search bar and category filter chips (`All`, `Places`, `Map features`) and expanding
  *    into the full grouped list.
@@ -140,7 +154,7 @@ internal fun SurveyPersistentBottomSheetContent(
       BottomSheetSearchableListContent(
         state = state,
         modifier = modifier,
-        isSidePanel = isSidePanel
+        isSidePanel = isSidePanel,
       )
     }
   }
@@ -190,7 +204,7 @@ internal fun FormGroupedSubmissionsSection(
                 horizontalArrangement = Arrangement.spacedBy(5.dp),
               ) {
                 Icon(
-                  imageVector = Icons.Default.Description,
+                  imageVector = Icons.Outlined.Description,
                   contentDescription = null,
                   tint = MaterialTheme.colorScheme.primary,
                   modifier = Modifier.size(13.dp),
@@ -254,7 +268,7 @@ internal fun FormGroupedSubmissionsSection(
                     verticalAlignment = Alignment.CenterVertically,
                   ) {
                     Icon(
-                      imageVector = Icons.Default.Person,
+                      imageVector = Icons.Outlined.Person,
                       contentDescription = null,
                       tint =
                         if (showTargetEntityLabel) {
@@ -294,7 +308,7 @@ internal fun FormGroupedSubmissionsSection(
                     horizontalArrangement = Arrangement.spacedBy(4.dp),
                   ) {
                     Icon(
-                      imageVector = Icons.Default.Schedule,
+                      imageVector = Icons.Outlined.Schedule,
                       contentDescription = null,
                       tint = MaterialTheme.colorScheme.onSurfaceVariant,
                       modifier = Modifier.size(11.dp),
@@ -309,7 +323,7 @@ internal fun FormGroupedSubmissionsSection(
 
                 IconButton(onClick = { onSelectSubmission(sub) }, modifier = Modifier.size(32.dp)) {
                   Icon(
-                    imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                    imageVector = Icons.AutoMirrored.Outlined.KeyboardArrowRight,
                     contentDescription = "Submission details",
                     tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(20.dp),
@@ -325,15 +339,135 @@ internal fun FormGroupedSubmissionsSection(
 }
 
 /**
+ * Height shared by entity dataset header rows and map feature rows in the web dashboard's left-hand
+ * panel list, so both kinds of rows have the same compact height.
+ */
+private val SidePanelListRowHeight = 36.dp
+
+/**
+ * Start indent of map feature rows in the web dashboard's left-hand panel list, lining their
+ * geometry icon up under the dataset header's color swatch (right of the collapse chevron).
+ */
+private val SidePanelEntityRowIndent = 30.dp
+
+/** Vertical content padding of the compact search field in the web dashboard's left-hand panel. */
+private val SidePanelSearchFieldVerticalPadding = 8.dp
+
+/**
+ * Search field at the top of the searchable list. Built from [BasicTextField] and
+ * [OutlinedTextFieldDefaults.DecorationBox] so the [compact] variant (web dashboard side panel) can
+ * use tighter vertical padding and `bodyMedium` text, about 48 dp tall (the icon slots' minimum)
+ * instead of the 56 dp default kept on mobile for touch.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ListSearchField(
+  query: String,
+  onQueryChange: (String) -> Unit,
+  onClear: () -> Unit,
+  compact: Boolean,
+  modifier: Modifier = Modifier,
+) {
+  val interactionSource = remember { MutableInteractionSource() }
+  val colors =
+    OutlinedTextFieldDefaults.colors(
+      focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+      unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+      focusedBorderColor = MaterialTheme.colorScheme.primary,
+      unfocusedBorderColor = Color.Transparent,
+    )
+  val shape = MaterialTheme.shapes.extraLarge
+  val textStyle =
+    if (compact) MaterialTheme.typography.bodyMedium else MaterialTheme.typography.bodyLarge
+  val contentPadding =
+    if (compact) {
+      OutlinedTextFieldDefaults.contentPadding(
+        top = SidePanelSearchFieldVerticalPadding,
+        bottom = SidePanelSearchFieldVerticalPadding,
+      )
+    } else {
+      OutlinedTextFieldDefaults.contentPadding()
+    }
+
+  BasicTextField(
+    value = query,
+    onValueChange = onQueryChange,
+    modifier = modifier,
+    singleLine = true,
+    textStyle = textStyle.copy(color = MaterialTheme.colorScheme.onSurface),
+    cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+    interactionSource = interactionSource,
+  ) { innerTextField ->
+    OutlinedTextFieldDefaults.DecorationBox(
+      value = query,
+      innerTextField = innerTextField,
+      enabled = true,
+      singleLine = true,
+      visualTransformation = VisualTransformation.None,
+      interactionSource = interactionSource,
+      placeholder = {
+        Text(
+          text = "Search...",
+          style =
+            if (compact) MaterialTheme.typography.bodyMedium
+            else MaterialTheme.typography.bodySmall,
+          color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+      },
+      leadingIcon = {
+        Icon(
+          imageVector = Icons.Outlined.Search,
+          contentDescription = "Search",
+          tint = MaterialTheme.colorScheme.onSurfaceVariant,
+          modifier = Modifier.size(18.dp),
+        )
+      },
+      trailingIcon =
+        if (query.isNotEmpty()) {
+          {
+            IconButton(onClick = onClear, modifier = Modifier.size(32.dp)) {
+              Icon(
+                imageVector = Icons.Outlined.Close,
+                contentDescription = "Clear Search",
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(16.dp),
+              )
+            }
+          }
+        } else {
+          null
+        },
+      colors = colors,
+      contentPadding = contentPadding,
+      container = {
+        OutlinedTextFieldDefaults.Container(
+          enabled = true,
+          isError = false,
+          interactionSource = interactionSource,
+          colors = colors,
+          shape = shape,
+        )
+      },
+    )
+  }
+}
+
+/**
  * Searchable List content embedded inside the unified persistent bottom sheet (
  * [SurveyPersistentBottomSheetContent]) when no specific entity or submission is selected:
  * - Peeks at the bottom of the map with the Search bar (`"Search..."`) and an Expand/Collapse sheet
- * button.
+ *   button.
  * - Expands to display **Map layers** (grouped by spatial layer with un-nested entity records,
- * reusing [EntitySummaryHeader] and [EntityMetadataAndActionsRow]), **Data tables** (tabular
- * datasets), and **Places** (geographic places, landmarks, and coordinates in the survey region).
+ *   reusing [EntitySummaryHeader] and [EntityMetadataAndActionsRow]), **Data tables** (tabular
+ *   datasets), and **Places** (geographic places, landmarks, and coordinates in the survey region).
  *
- * When [isSidePanel] is `true`, the Expand/Collapse sheet button is hidden.
+ * When [isSidePanel] is `true` (the web dashboard's left-hand panel), the Expand/Collapse sheet
+ * button is hidden and the list uses a denser, mouse-oriented layout: dataset header rows and map
+ * feature rows share one compact [SidePanelListRowHeight], each dataset header has a chevron left
+ * of its name that collapses or expands its map features
+ * ([PrototypeAppState.toggleListDatasetCollapsed]; all datasets show expanded while searching), and
+ * the layer visibility toggle appears only while the header row is hovered or focused, or while the
+ * layer is hidden.
  */
 @Composable
 internal fun BottomSheetSearchableListContent(
@@ -365,54 +499,17 @@ internal fun BottomSheetSearchableListContent(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
       ) {
-        OutlinedTextField(
-          value = state.listSearchQuery,
-          onValueChange = {
+        ListSearchField(
+          query = state.listSearchQuery,
+          onQueryChange = {
             state.updateListSearchQuery(it)
             if (it.isNotEmpty() && !state.isEntityBottomSheetExpanded) {
               state.updateEntityBottomSheetExpanded(true)
             }
           },
+          onClear = { state.clearListSearchQuery() },
+          compact = isSidePanel,
           modifier = Modifier.weight(1f),
-          singleLine = true,
-          placeholder = {
-            Text(
-              text = "Search...",
-              style = MaterialTheme.typography.bodySmall,
-              color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-          },
-          leadingIcon = {
-            Icon(
-              imageVector = Icons.Default.Search,
-              contentDescription = "Search",
-              tint = MaterialTheme.colorScheme.onSurfaceVariant,
-              modifier = Modifier.size(18.dp),
-            )
-          },
-          trailingIcon = {
-            if (state.listSearchQuery.isNotEmpty()) {
-              IconButton(
-                onClick = { state.clearListSearchQuery() },
-                modifier = Modifier.size(32.dp),
-              ) {
-                Icon(
-                  imageVector = Icons.Default.Close,
-                  contentDescription = "Clear Search",
-                  tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                  modifier = Modifier.size(16.dp),
-                )
-              }
-            }
-          },
-          shape = MaterialTheme.shapes.extraLarge,
-          colors =
-            OutlinedTextFieldDefaults.colors(
-              focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-              unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-              focusedBorderColor = MaterialTheme.colorScheme.primary,
-              unfocusedBorderColor = Color.Transparent,
-            ),
         )
 
         if (!isSidePanel) {
@@ -429,9 +526,9 @@ internal fun BottomSheetSearchableListContent(
             Icon(
               imageVector =
                 if (state.isEntityBottomSheetExpanded) {
-                  Icons.Default.KeyboardArrowDown
+                  Icons.Outlined.KeyboardArrowDown
                 } else {
-                  Icons.Default.KeyboardArrowUp
+                  Icons.Outlined.KeyboardArrowUp
                 },
               contentDescription =
                 if (state.isEntityBottomSheetExpanded) {
@@ -466,7 +563,7 @@ internal fun BottomSheetSearchableListContent(
               horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
               Icon(
-                imageVector = Icons.Default.CloudOff,
+                imageVector = Icons.Outlined.CloudOff,
                 contentDescription = "Device offline",
                 tint = MaterialTheme.colorScheme.onErrorContainer,
                 modifier = Modifier.size(16.dp),
@@ -507,14 +604,18 @@ internal fun BottomSheetSearchableListContent(
 
     HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
-    // Scrollable Searchable List of Map features (grouped by dataset) and Places
+    // Scrollable Searchable List of Map features (grouped by dataset) and Places. The web side
+    // panel uses a denser layout (mouse pointer) than the touch-first mobile sheet.
     Column(
       modifier =
         Modifier.weight(1f)
           .fillMaxWidth()
           .verticalScroll(rememberScrollState())
-          .padding(horizontal = 14.dp, vertical = 10.dp),
-      verticalArrangement = Arrangement.spacedBy(12.dp),
+          .padding(
+            horizontal = if (isSidePanel) 8.dp else 14.dp,
+            vertical = if (isSidePanel) 8.dp else 10.dp,
+          ),
+      verticalArrangement = Arrangement.spacedBy(if (isSidePanel) 8.dp else 12.dp),
     ) {
       // 1. MAP LAYERS SECTION
       if (groupedEntities.isNotEmpty()) {
@@ -524,7 +625,7 @@ internal fun BottomSheetSearchableListContent(
           horizontalArrangement = Arrangement.spacedBy(6.dp),
         ) {
           Icon(
-            imageVector = Icons.Default.Layers,
+            imageVector = Icons.Outlined.Layers,
             contentDescription = null,
             tint = MaterialTheme.colorScheme.primary,
             modifier = Modifier.size(15.dp),
@@ -544,105 +645,165 @@ internal fun BottomSheetSearchableListContent(
           val layer = group.layer
           val groupDatasetId = group.entities.first().datasetId
           val isLayerSelected = isSidePanel && state.selectedLayerDatasetId == groupDatasetId
-          Column(
-            modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-          ) {
-            // Layer Group Header Banner. In the web side panel, clicking it selects the layer.
-            Row(
-              modifier =
-                if (isSidePanel) {
-                  Modifier.fillMaxWidth()
-                    .clip(MaterialTheme.shapes.small)
-                    .background(
-                      if (isLayerSelected) {
-                        MaterialTheme.colorScheme.secondaryContainer
-                      } else {
-                        Color.Transparent
-                      }
-                    )
-                    .clickable { state.selectLayer(groupDatasetId) }
-                    .padding(start = 8.dp, end = 4.dp, top = 2.dp, bottom = 2.dp)
-                } else {
-                  Modifier.fillMaxWidth().padding(horizontal = 4.dp, vertical = 2.dp)
-                },
-              horizontalArrangement = Arrangement.SpaceBetween,
-              verticalAlignment = Alignment.CenterVertically,
+          // Collapsing a dataset's map features is only offered in the web side panel. While a
+          // search query is active every dataset is shown expanded (see
+          // PrototypeAppState.isListDatasetCollapsed) and the chevron is disabled.
+          val isCollapsed = isSidePanel && state.isListDatasetCollapsed(groupDatasetId)
+          key(groupDatasetId) {
+            val headerInteractionSource = remember { MutableInteractionSource() }
+            val isHeaderHovered by headerInteractionSource.collectIsHoveredAsState()
+            var isHeaderFocused by remember { mutableStateOf(false) }
+            Column(
+              modifier = Modifier.fillMaxWidth(),
+              verticalArrangement = Arrangement.spacedBy(if (isSidePanel) 0.dp else 8.dp),
             ) {
+              // Layer Group Header Banner. In the web side panel, clicking it selects the layer and
+              // the chevron left of the dataset name collapses or expands its map features.
               Row(
-                modifier = Modifier.weight(1f),
+                modifier =
+                  if (isSidePanel) {
+                    Modifier.fillMaxWidth()
+                      .height(SidePanelListRowHeight)
+                      .clip(MaterialTheme.shapes.small)
+                      .background(
+                        if (isLayerSelected) {
+                          MaterialTheme.colorScheme.secondaryContainer
+                        } else {
+                          Color.Transparent
+                        }
+                      )
+                      .hoverable(headerInteractionSource)
+                      .onFocusChanged { isHeaderFocused = it.hasFocus }
+                      .clickable { state.selectLayer(groupDatasetId) }
+                      .padding(start = 2.dp, end = 2.dp)
+                  } else {
+                    Modifier.fillMaxWidth().padding(horizontal = 4.dp, vertical = 2.dp)
+                  },
+                horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
               ) {
-                if (layer != null) {
-                  Box(
-                    modifier =
-                      Modifier.size(14.dp)
-                        .clip(MaterialTheme.shapes.extraSmall)
-                        .background(Color(layer.colorHex).copy(alpha = 0.25f))
-                        .border(2.dp, Color(layer.colorHex), MaterialTheme.shapes.extraSmall)
-                  )
-                } else {
-                  Icon(
-                    imageVector = Icons.Default.LocationOn,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(14.dp),
+                Row(
+                  modifier = Modifier.weight(1f),
+                  verticalAlignment = Alignment.CenterVertically,
+                  horizontalArrangement = Arrangement.spacedBy(if (isSidePanel) 6.dp else 8.dp),
+                ) {
+                  val datasetLabel = layer?.label ?: group.datasetName
+                  if (isSidePanel) {
+                    IconButton(
+                      onClick = { state.toggleListDatasetCollapsed(groupDatasetId) },
+                      enabled = state.listSearchQuery.isBlank(),
+                      modifier = Modifier.size(24.dp),
+                    ) {
+                      Icon(
+                        imageVector =
+                          if (isCollapsed) {
+                            Icons.AutoMirrored.Outlined.KeyboardArrowRight
+                          } else {
+                            Icons.Outlined.KeyboardArrowDown
+                          },
+                        contentDescription =
+                          if (isCollapsed) "Expand $datasetLabel" else "Collapse $datasetLabel",
+                        tint =
+                          MaterialTheme.colorScheme.onSurfaceVariant.copy(
+                            alpha = if (state.listSearchQuery.isBlank()) 1f else 0.38f
+                          ),
+                        modifier = Modifier.size(18.dp),
+                      )
+                    }
+                  }
+                  if (layer != null) {
+                    Box(
+                      modifier =
+                        Modifier.size(14.dp)
+                          .clip(MaterialTheme.shapes.extraSmall)
+                          .background(Color(layer.colorHex).copy(alpha = 0.25f))
+                          .border(2.dp, Color(layer.colorHex), MaterialTheme.shapes.extraSmall)
+                    )
+                  } else {
+                    Icon(
+                      imageVector = Icons.Outlined.LocationOn,
+                      contentDescription = null,
+                      tint = MaterialTheme.colorScheme.primary,
+                      modifier = Modifier.size(14.dp),
+                    )
+                  }
+                  Text(
+                    text = datasetLabel,
+                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+                    color =
+                      if (isLayerSelected) {
+                        MaterialTheme.colorScheme.onSecondaryContainer
+                      } else {
+                        layerNameColor(isVisible = layer?.isVisible ?: true)
+                      },
+                    maxLines = if (isSidePanel) 1 else Int.MAX_VALUE,
+                    overflow = TextOverflow.Ellipsis,
                   )
                 }
-                Text(
-                  text = layer?.label ?: group.datasetName,
-                  style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
-                  color =
-                    if (isLayerSelected) {
-                      MaterialTheme.colorScheme.onSecondaryContainer
-                    } else {
-                      layerNameColor(isVisible = layer?.isVisible ?: true)
-                    },
-                )
+
+                if (layer != null) {
+                  if (isSidePanel) {
+                    // Web: the eye toggle appears while the header row is hovered or focused, and
+                    // stays visible while the layer is hidden as a state indicator. Its space is
+                    // always reserved so the row does not jitter on hover.
+                    Box(
+                      modifier = Modifier.size(SidePanelListRowHeight - 4.dp),
+                      contentAlignment = Alignment.Center,
+                    ) {
+                      if (isHeaderHovered || isHeaderFocused || !layer.isVisible) {
+                        LayerVisibilityToggle(
+                          layer = layer,
+                          state = state,
+                          buttonSize = SidePanelListRowHeight - 4.dp,
+                          iconSize = 18.dp,
+                        )
+                      }
+                    }
+                  } else {
+                    LayerVisibilityToggle(layer = layer, state = state)
+                  }
+                } else {
+                  GroundTonalBadge(text = "${group.entities.size}", tone = GroundBadgeTone.PRIMARY)
+                }
               }
 
-              if (layer != null) {
-                LayerVisibilityToggle(layer = layer, state = state)
-              } else {
-                GroundTonalBadge(
-                  text = "${group.entities.size}",
-                  tone = GroundBadgeTone.PRIMARY,
-                )
-              }
-            }
-
-            // One single-line row per entity record: geometry icon, label, and status icon.
-            val maxRenderedFeatures = 200
-            val displayedFeatures =
-              if (group.entities.size > maxRenderedFeatures) {
-                group.entities.take(maxRenderedFeatures)
-              } else {
-                group.entities
-              }
-            Column(modifier = Modifier.fillMaxWidth()) {
-              displayedFeatures.forEach { entity ->
-                EntityListRow(
-                  entity = entity,
-                  isSelected = entity.id == state.selectedEntityId,
-                  onClick = { state.selectEntityFromList(entity.id) },
-                )
-              }
-            }
-            if (group.entities.size > maxRenderedFeatures) {
-              Surface(
-                shape = MaterialTheme.shapes.small,
-                color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.65f),
-                modifier = Modifier.fillMaxWidth(),
-              ) {
-                Text(
-                  text =
-                    "Showing first $maxRenderedFeatures of ${group.entities.size} ${layer?.pluralNoun ?: "features"} in ${group.datasetName}. Use the search bar above to filter all ${group.entities.size} ${layer?.pluralNoun ?: "features"}.",
-                  style = MaterialTheme.typography.labelSmall,
-                  color = MaterialTheme.colorScheme.onSecondaryContainer,
-                  fontWeight = FontWeight.Medium,
-                  modifier = Modifier.padding(horizontal = 10.dp, vertical = 8.dp),
-                )
+              if (!isCollapsed) {
+                // One single-line row per entity record: geometry icon, label, and status icon.
+                val maxRenderedFeatures = 200
+                val displayedFeatures =
+                  if (group.entities.size > maxRenderedFeatures) {
+                    group.entities.take(maxRenderedFeatures)
+                  } else {
+                    group.entities
+                  }
+                Column(modifier = Modifier.fillMaxWidth()) {
+                  displayedFeatures.forEach { entity ->
+                    EntityListRow(
+                      entity = entity,
+                      isSelected = entity.id == state.selectedEntityId,
+                      onClick = { state.selectEntityFromList(entity.id) },
+                      compact = isSidePanel,
+                      compactHeight = SidePanelListRowHeight,
+                      compactStartIndent = SidePanelEntityRowIndent,
+                    )
+                  }
+                }
+                if (group.entities.size > maxRenderedFeatures) {
+                  Surface(
+                    shape = MaterialTheme.shapes.small,
+                    color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.65f),
+                    modifier = Modifier.fillMaxWidth(),
+                  ) {
+                    Text(
+                      text =
+                        "Showing first $maxRenderedFeatures of ${group.entities.size} ${layer?.pluralNoun ?: "features"} in ${group.datasetName}. Use the search bar above to filter all ${group.entities.size} ${layer?.pluralNoun ?: "features"}.",
+                      style = MaterialTheme.typography.labelSmall,
+                      color = MaterialTheme.colorScheme.onSecondaryContainer,
+                      fontWeight = FontWeight.Medium,
+                      modifier = Modifier.padding(horizontal = 10.dp, vertical = 8.dp),
+                    )
+                  }
+                }
               }
             }
           }
@@ -665,7 +826,7 @@ internal fun BottomSheetSearchableListContent(
           horizontalArrangement = Arrangement.spacedBy(6.dp),
         ) {
           Icon(
-            imageVector = Icons.Default.Explore,
+            imageVector = Icons.Outlined.Explore,
             contentDescription = null,
             tint = MaterialTheme.colorScheme.primary,
             modifier = Modifier.size(15.dp),
@@ -681,7 +842,7 @@ internal fun BottomSheetSearchableListContent(
           )
         }
 
-        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Column(verticalArrangement = Arrangement.spacedBy(if (isSidePanel) 6.dp else 8.dp)) {
           matchedPlaces.forEach { place ->
             val isSelectedPlace = state.selectedPlaceId == place.id
             val isNavigatingPlace = state.isNavigatingToPlace(place.id)
@@ -708,8 +869,10 @@ internal fun BottomSheetSearchableListContent(
                 ),
             ) {
               Column(
-                modifier = Modifier.fillMaxWidth().padding(10.dp),
-                verticalArrangement = Arrangement.spacedBy(6.dp),
+                modifier =
+                  Modifier.fillMaxWidth()
+                    .padding(horizontal = 10.dp, vertical = if (isSidePanel) 8.dp else 10.dp),
+                verticalArrangement = Arrangement.spacedBy(if (isSidePanel) 4.dp else 6.dp),
               ) {
                 Row(
                   modifier = Modifier.fillMaxWidth(),
@@ -728,7 +891,7 @@ internal fun BottomSheetSearchableListContent(
                     ) {
                       Box(contentAlignment = Alignment.Center) {
                         Icon(
-                          imageVector = Icons.Default.Explore,
+                          imageVector = Icons.Outlined.Explore,
                           contentDescription = null,
                           tint = MaterialTheme.colorScheme.onTertiaryContainer,
                           modifier = Modifier.size(14.dp),
@@ -759,7 +922,7 @@ internal fun BottomSheetSearchableListContent(
                     modifier = Modifier.size(30.dp),
                   ) {
                     Icon(
-                      imageVector = Icons.Default.Explore,
+                      imageVector = Icons.Outlined.Explore,
                       contentDescription = "Fly to place on map",
                       tint = MaterialTheme.colorScheme.primary,
                       modifier = Modifier.size(16.dp),
@@ -802,7 +965,7 @@ internal fun BottomSheetSearchableListContent(
                       },
                       leadingIcon = {
                         Icon(
-                          imageVector = Icons.Default.Navigation,
+                          imageVector = Icons.Outlined.Navigation,
                           contentDescription = "Straight-line navigate to place",
                           modifier = Modifier.size(13.dp),
                         )
@@ -870,12 +1033,9 @@ internal fun SubmissionFullDetailsCard(
           horizontalArrangement = Arrangement.spacedBy(6.dp),
         ) {
           if (showBackButton) {
-            IconButton(
-              onClick = { onBack() },
-              modifier = Modifier.size(28.dp),
-            ) {
+            IconButton(onClick = { onBack() }, modifier = Modifier.size(28.dp)) {
               Icon(
-                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
                 contentDescription = backLabel,
                 tint = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.size(18.dp),
@@ -895,7 +1055,7 @@ internal fun SubmissionFullDetailsCard(
           if (isSidePanel) {
             DetailsOverflowMenu(
               actions =
-                listOf(DetailsMenuAction("Share PDF", Icons.Default.Share, onClick = onSharePdf)),
+                listOf(DetailsMenuAction("Share PDF", Icons.Outlined.Share, onClick = onSharePdf)),
               contentDescription = "More submission actions",
             )
           }
@@ -931,7 +1091,7 @@ internal fun SubmissionFullDetailsCard(
               },
               leadingIcon = {
                 Icon(
-                  imageVector = Icons.Default.Share,
+                  imageVector = Icons.Outlined.Share,
                   contentDescription = "Share Submission PDF",
                   modifier = Modifier.size(12.dp),
                 )
@@ -969,7 +1129,7 @@ internal fun SubmissionFullDetailsCard(
           horizontalArrangement = Arrangement.spacedBy(4.dp),
         ) {
           Icon(
-            imageVector = Icons.Default.Person,
+            imageVector = Icons.Outlined.Person,
             contentDescription = null,
             tint = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.size(12.dp),
@@ -985,7 +1145,7 @@ internal fun SubmissionFullDetailsCard(
           horizontalArrangement = Arrangement.spacedBy(4.dp),
         ) {
           Icon(
-            imageVector = Icons.Default.Schedule,
+            imageVector = Icons.Outlined.Schedule,
             contentDescription = null,
             tint = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.size(12.dp),
@@ -1061,7 +1221,7 @@ internal fun SyncStatusIndicatorBadge(
     when (syncStatus) {
       SyncStatus.UPLOADING ->
         SyncStatusVisualSpec(
-          icon = Icons.Default.CloudUpload,
+          icon = Icons.Outlined.CloudUpload,
           containerColor = MaterialTheme.colorScheme.tertiaryContainer,
           contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
           borderColor =
@@ -1069,7 +1229,7 @@ internal fun SyncStatusIndicatorBadge(
         )
       SyncStatus.SYNCED ->
         SyncStatusVisualSpec(
-          icon = Icons.Default.CloudDone,
+          icon = Icons.Outlined.CloudDone,
           containerColor = MaterialTheme.colorScheme.primaryContainer,
           contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
           borderColor =
@@ -1077,7 +1237,7 @@ internal fun SyncStatusIndicatorBadge(
         )
       SyncStatus.FAILED ->
         SyncStatusVisualSpec(
-          icon = Icons.Default.CloudOff,
+          icon = Icons.Outlined.CloudOff,
           containerColor = MaterialTheme.colorScheme.errorContainer,
           contentColor = MaterialTheme.colorScheme.onErrorContainer,
           borderColor =

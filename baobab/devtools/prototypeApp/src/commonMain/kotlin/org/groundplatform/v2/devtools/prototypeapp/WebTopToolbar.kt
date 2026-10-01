@@ -30,11 +30,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Logout
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.Smartphone
+import androidx.compose.material.icons.automirrored.outlined.Logout
+import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material.icons.outlined.LocationOn
+import androidx.compose.material.icons.outlined.Smartphone
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -42,7 +41,6 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
@@ -77,7 +75,6 @@ internal fun WebTopToolbar(
   state: PrototypeAppState,
   onOpenSurveyEditor: () -> Unit = {},
   onSignOut: () -> Unit = { state.signOut() },
-  onToggleSidePanel: () -> Unit = { state.toggleSidePanel() },
   modifier: Modifier = Modifier,
 ) {
   val brandFont = LocalGroundBrandFontFamily.current
@@ -93,23 +90,13 @@ internal fun WebTopToolbar(
       horizontalArrangement = Arrangement.SpaceBetween,
       verticalAlignment = Alignment.CenterVertically,
     ) {
-      // Left: Navigation Menu Toggle, Logo, App Name, Divider, and Survey Context (Title + Location)
+      // Left: Logo, App Name, Divider, and Survey Context (Title + Location). The side panel is
+      // toggled from the collapse tab on its right edge, not from the toolbar.
       Row(
         modifier = Modifier.weight(1f, fill = false),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
       ) {
-        IconButton(
-          onClick = onToggleSidePanel,
-          modifier = Modifier.size(40.dp),
-        ) {
-          Icon(
-            imageVector = Icons.Default.Menu,
-            contentDescription =
-              if (state.isSidePanelExpanded) "Collapse side panel" else "Expand side panel",
-            tint = MaterialTheme.colorScheme.onSurface,
-          )
-        }
         CloudAcaciaLogo(modifier = Modifier.size(32.dp))
         Text(
           text = "Ground",
@@ -139,7 +126,7 @@ internal fun WebTopToolbar(
             horizontalArrangement = Arrangement.spacedBy(4.dp),
           ) {
             Icon(
-              imageVector = Icons.Default.LocationOn,
+              imageVector = Icons.Outlined.LocationOn,
               contentDescription = null,
               tint = MaterialTheme.colorScheme.primary,
               modifier = Modifier.size(12.dp),
@@ -168,7 +155,7 @@ internal fun WebTopToolbar(
           modifier = Modifier.height(36.dp),
         ) {
           Icon(
-            imageVector = Icons.Filled.Smartphone,
+            imageVector = Icons.Outlined.Smartphone,
             contentDescription = null,
             modifier = Modifier.size(16.dp),
           )
@@ -187,7 +174,7 @@ internal fun WebTopToolbar(
           modifier = Modifier.height(36.dp),
         ) {
           Icon(
-            imageVector = Icons.Default.Edit,
+            imageVector = Icons.Outlined.Edit,
             contentDescription = null,
             modifier = Modifier.size(16.dp),
           )
@@ -218,9 +205,7 @@ internal fun WebTopToolbar(
   }
 }
 
-/**
- * Clickable user avatar icon that anchors and toggles the standard user profile card popup.
- */
+/** Clickable user avatar icon that anchors and toggles the standard user profile card popup. */
 @Composable
 internal fun WebUserAvatarProfileWidget(
   state: PrototypeAppState,
@@ -270,9 +255,7 @@ internal fun WebUserAvatarProfileWidget(
   }
 }
 
-/**
- * Standard user profile card showing avatar, user name, email, organization, and sign out link.
- */
+/** Standard user profile card showing avatar, user name, email, organization, and sign out link. */
 @Composable
 internal fun UserProfileCard(
   userName: String,
@@ -353,13 +336,10 @@ internal fun UserProfileCard(
         modifier = Modifier.fillMaxWidth().height(40.dp),
         shape = MaterialTheme.shapes.small,
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
-        colors =
-          ButtonDefaults.outlinedButtonColors(
-            contentColor = MaterialTheme.colorScheme.error,
-          ),
+        colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error),
       ) {
         Icon(
-          imageVector = Icons.AutoMirrored.Filled.Logout,
+          imageVector = Icons.AutoMirrored.Outlined.Logout,
           contentDescription = null,
           modifier = Modifier.size(16.dp),
           tint = MaterialTheme.colorScheme.error,

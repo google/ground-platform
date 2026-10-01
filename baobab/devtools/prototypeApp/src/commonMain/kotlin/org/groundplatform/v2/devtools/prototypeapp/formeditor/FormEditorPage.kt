@@ -43,27 +43,28 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
-import androidx.compose.material.icons.automirrored.filled.List
-import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.automirrored.outlined.ArrowBack
+import androidx.compose.material.icons.automirrored.outlined.ArrowForward
+import androidx.compose.material.icons.automirrored.outlined.List
 import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.DateRange
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Description
-import androidx.compose.material.icons.filled.DragIndicator
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.Layers
-import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material.icons.outlined.AccountCircle
+import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.Check
+import androidx.compose.material.icons.outlined.CheckCircle
+import androidx.compose.material.icons.outlined.Close
+import androidx.compose.material.icons.outlined.DateRange
+import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.icons.outlined.Description
+import androidx.compose.material.icons.outlined.DragIndicator
+import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material.icons.outlined.KeyboardArrowDown
+import androidx.compose.material.icons.outlined.Layers
+import androidx.compose.material.icons.outlined.LocationOn
+import androidx.compose.material.icons.outlined.MoreVert
+import androidx.compose.material.icons.outlined.PlayArrow
+import androidx.compose.material.icons.outlined.Refresh
+import androidx.compose.material.icons.outlined.Warning
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Button
@@ -220,25 +221,29 @@ private fun FormEditorToolbar(
       Spacer(Modifier.weight(1f))
       if (onCreateDataset != null) {
         OutlinedButton(onClick = onCreateDataset) {
-          Icon(Icons.Default.Layers, contentDescription = null, modifier = Modifier.size(18.dp))
+          Icon(Icons.Outlined.Layers, contentDescription = null, modifier = Modifier.size(18.dp))
           Spacer(Modifier.width(6.dp))
           Text("Create layer")
         }
       }
       Button(onClick = state::startPreview) {
-        Icon(Icons.Default.PlayArrow, contentDescription = null, modifier = Modifier.size(18.dp))
+        Icon(Icons.Outlined.PlayArrow, contentDescription = null, modifier = Modifier.size(18.dp))
         Spacer(Modifier.width(6.dp))
         Text("Preview")
       }
       Box {
         IconButton(onClick = { overflowExpanded = true }) {
-          Icon(Icons.Default.MoreVert, contentDescription = "More options")
+          Icon(Icons.Outlined.MoreVert, contentDescription = "More options")
         }
         DropdownMenu(expanded = overflowExpanded, onDismissRequest = { overflowExpanded = false }) {
           DropdownMenuItem(
             text = { Text("Export XForms XML") },
             leadingIcon = {
-              Icon(Icons.Default.Description, contentDescription = null, modifier = Modifier.size(18.dp))
+              Icon(
+                Icons.Outlined.Description,
+                contentDescription = null,
+                modifier = Modifier.size(18.dp),
+              )
             },
             onClick = {
               overflowExpanded = false
@@ -250,7 +255,7 @@ private fun FormEditorToolbar(
       if (onDelete != null) {
         TextButton(onClick = onDelete) {
           Icon(
-            Icons.Default.Delete,
+            Icons.Outlined.Delete,
             contentDescription = null,
             tint = MaterialTheme.colorScheme.error,
             modifier = Modifier.size(18.dp),
@@ -266,16 +271,16 @@ private fun FormEditorToolbar(
 /** Standard icon representing each [EditorQuestionType]. */
 internal fun questionTypeIcon(type: EditorQuestionType): ImageVector =
   when (type) {
-    EditorQuestionType.TEXT -> Icons.Default.Edit
-    EditorQuestionType.LONG_TEXT -> Icons.Default.Description
-    EditorQuestionType.INTEGER -> Icons.AutoMirrored.Filled.List
-    EditorQuestionType.DECIMAL -> Icons.AutoMirrored.Filled.List
-    EditorQuestionType.SELECT_ONE -> Icons.Default.CheckCircle
-    EditorQuestionType.SELECT_MULTIPLE -> Icons.Default.Check
-    EditorQuestionType.DATE -> Icons.Default.DateRange
-    EditorQuestionType.LOCATION -> Icons.Default.LocationOn
-    EditorQuestionType.PHOTO -> Icons.Default.AccountCircle
-    EditorQuestionType.NOTE -> Icons.Default.Info
+    EditorQuestionType.TEXT -> Icons.Outlined.Edit
+    EditorQuestionType.LONG_TEXT -> Icons.Outlined.Description
+    EditorQuestionType.INTEGER -> Icons.AutoMirrored.Outlined.List
+    EditorQuestionType.DECIMAL -> Icons.AutoMirrored.Outlined.List
+    EditorQuestionType.SELECT_ONE -> Icons.Outlined.CheckCircle
+    EditorQuestionType.SELECT_MULTIPLE -> Icons.Outlined.Check
+    EditorQuestionType.DATE -> Icons.Outlined.DateRange
+    EditorQuestionType.LOCATION -> Icons.Outlined.LocationOn
+    EditorQuestionType.PHOTO -> Icons.Outlined.AccountCircle
+    EditorQuestionType.NOTE -> Icons.Outlined.Info
   }
 
 /** Dropdown menu listing all question types with their icons for insertion at [atIndex]. */
@@ -373,7 +378,7 @@ private fun FlowCanvasPanel(state: FormEditorState, modifier: Modifier = Modifie
             label = { Text("${issues.size} ${if (issues.size == 1) "issue" else "issues"}") },
             leadingIcon = {
               Icon(
-                Icons.Default.Warning,
+                Icons.Outlined.Warning,
                 contentDescription = null,
                 modifier = Modifier.size(16.dp),
               )
@@ -416,7 +421,7 @@ private fun FlowHorizontalScrollBar(
       modifier
         .height(10.dp)
         .clip(CircleShape)
-        .background(colors.surfaceContainerHighest.copy(alpha = 0.5f)),
+        .background(colors.surfaceContainerHighest.copy(alpha = 0.5f))
   ) {
     androidx.compose.foundation.layout.BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
       val trackWidthPx = with(LocalDensity.current) { maxWidth.toPx() }
@@ -549,10 +554,7 @@ private fun FlowCanvas(
         }
       }
 
-      TerminalNode(
-        text = "Start",
-        modifier = Modifier.offset(layout.x(0), layout.top(0)),
-      )
+      TerminalNode(text = "Start", modifier = Modifier.offset(layout.x(0), layout.top(0)))
 
       // Hoverable "+" between Start and Q1 (or Q0)
       AddQuestionAffordance(
@@ -677,13 +679,14 @@ private fun AddQuestionAffordance(
         onClick = { menuExpanded = true },
         shape = CircleShape,
         color = if (alwaysVisible && !isHovered) colors.primaryContainer else colors.primary,
-        contentColor = if (alwaysVisible && !isHovered) colors.onPrimaryContainer else colors.onPrimary,
+        contentColor =
+          if (alwaysVisible && !isHovered) colors.onPrimaryContainer else colors.onPrimary,
         shadowElevation = if (isHovered || menuExpanded) 4.dp else 1.dp,
         modifier = Modifier.size(buttonSize),
       ) {
         Box(contentAlignment = Alignment.Center) {
           Icon(
-            Icons.Default.Add,
+            Icons.Outlined.Add,
             contentDescription = "Add question here",
             modifier = Modifier.size(18.dp),
           )
@@ -801,7 +804,7 @@ private fun ScreenPreviewCard(
         horizontalArrangement = Arrangement.spacedBy(6.dp),
       ) {
         Icon(
-          Icons.Default.DragIndicator,
+          Icons.Outlined.DragIndicator,
           contentDescription = "Drag to reorder",
           tint = if (isDragged) colors.primary else colors.onSurfaceVariant,
           modifier = Modifier.size(16.dp),
@@ -823,7 +826,7 @@ private fun ScreenPreviewCard(
         )
         if (hasIssues) {
           Icon(
-            Icons.Default.Warning,
+            Icons.Outlined.Warning,
             contentDescription = "Has issues",
             tint = colors.error,
             modifier = Modifier.size(14.dp),
@@ -938,7 +941,7 @@ private fun MiniWidget(question: EditorQuestion) {
     EditorQuestionType.LONG_TEXT -> MiniField("Answer", 52.dp)
     EditorQuestionType.INTEGER -> MiniField("123", 26.dp)
     EditorQuestionType.DECIMAL -> MiniField("1.5", 26.dp)
-    EditorQuestionType.DATE -> MiniField("YYYY-MM-DD", 26.dp, Icons.Default.DateRange)
+    EditorQuestionType.DATE -> MiniField("YYYY-MM-DD", 26.dp, Icons.Outlined.DateRange)
     EditorQuestionType.SELECT_ONE,
     EditorQuestionType.SELECT_MULTIPLE -> {
       val round = question.type == EditorQuestionType.SELECT_ONE
@@ -970,12 +973,12 @@ private fun MiniWidget(question: EditorQuestion) {
         )
       }
     }
-    EditorQuestionType.LOCATION -> MiniPlaceholder("Capture location", Icons.Default.LocationOn)
-    EditorQuestionType.PHOTO -> MiniPlaceholder("Take photo", Icons.Default.Add)
+    EditorQuestionType.LOCATION -> MiniPlaceholder("Capture location", Icons.Outlined.LocationOn)
+    EditorQuestionType.PHOTO -> MiniPlaceholder("Take photo", Icons.Outlined.Add)
     EditorQuestionType.NOTE ->
       Row(verticalAlignment = Alignment.CenterVertically) {
         Icon(
-          Icons.Default.Info,
+          Icons.Outlined.Info,
           contentDescription = null,
           tint = colors.onSurfaceVariant,
           modifier = Modifier.size(12.dp),
@@ -1103,19 +1106,19 @@ private fun QuestionProperties(state: FormEditorState, question: EditorQuestion)
       verticalAlignment = Alignment.CenterVertically,
     ) {
       IconButton(onClick = { state.moveQuestion(key, -1) }, enabled = index > 0) {
-        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Move earlier")
+        Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = "Move earlier")
       }
       IconButton(
         onClick = { state.moveQuestion(key, 1) },
         enabled = index < form.questions.lastIndex,
       ) {
-        Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = "Move later")
+        Icon(Icons.AutoMirrored.Outlined.ArrowForward, contentDescription = "Move later")
       }
       Spacer(Modifier.weight(1f))
       TextButton(onClick = { state.duplicateQuestion(key) }) { Text("Duplicate") }
       TextButton(onClick = { state.deleteQuestion(key) }) {
         Icon(
-          Icons.Default.Delete,
+          Icons.Outlined.Delete,
           contentDescription = null,
           tint = MaterialTheme.colorScheme.error,
           modifier = Modifier.size(18.dp),
@@ -1229,7 +1232,7 @@ private fun ChoicesEditor(state: FormEditorState, question: EditorQuestion) {
         )
         IconButton(onClick = { state.removeChoice(key, i) }, modifier = Modifier.size(32.dp)) {
           Icon(
-            Icons.Default.Close,
+            Icons.Outlined.Close,
             contentDescription = "Remove choice",
             modifier = Modifier.size(18.dp),
           )
@@ -1237,7 +1240,7 @@ private fun ChoicesEditor(state: FormEditorState, question: EditorQuestion) {
       }
     }
     TextButton(onClick = { state.addChoice(key) }) {
-      Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(18.dp))
+      Icon(Icons.Outlined.Add, contentDescription = null, modifier = Modifier.size(18.dp))
       Spacer(Modifier.width(4.dp))
       Text("Add choice")
     }
@@ -1385,7 +1388,7 @@ internal fun <T> DropdownSelector(
           overflow = TextOverflow.Ellipsis,
         )
       }
-      Icon(Icons.Default.KeyboardArrowDown, contentDescription = null)
+      Icon(Icons.Outlined.KeyboardArrowDown, contentDescription = null)
     }
     DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
       options.forEach { option ->
@@ -1492,7 +1495,7 @@ private fun PreviewSidePanel(state: FormEditorState) {
           modifier = Modifier.weight(1f),
         )
         IconButton(onClick = state::closePreview) {
-          Icon(Icons.Default.Close, contentDescription = "Close preview")
+          Icon(Icons.Outlined.Close, contentDescription = "Close preview")
         }
       }
       val error = state.previewError
@@ -1516,7 +1519,8 @@ private fun PreviewSidePanel(state: FormEditorState) {
               modifier = Modifier.fillMaxWidth().padding(10.dp),
               verticalAlignment = Alignment.CenterVertically,
             ) {
-              Icon(Icons.Default.CheckCircle, contentDescription = null, tint = colors.primary)
+              // Filled: indicates the validation-passed state.
+              Icon(Icons.Filled.CheckCircle, contentDescription = null, tint = colors.primary)
               Spacer(Modifier.width(8.dp))
               Text("Submission passed validation.", style = MaterialTheme.typography.bodyMedium)
             }
@@ -1553,7 +1557,7 @@ private fun PreviewSidePanel(state: FormEditorState) {
       }
       Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         OutlinedButton(onClick = state::restartPreview) {
-          Icon(Icons.Default.Refresh, contentDescription = null, modifier = Modifier.size(18.dp))
+          Icon(Icons.Outlined.Refresh, contentDescription = null, modifier = Modifier.size(18.dp))
           Spacer(Modifier.width(6.dp))
           Text("Restart")
         }
@@ -1596,7 +1600,7 @@ private fun XFormsXmlOverlay(state: FormEditorState) {
             )
           }
           IconButton(onClick = { state.isXmlViewerOpen = false }) {
-            Icon(Icons.Default.Close, contentDescription = "Close")
+            Icon(Icons.Outlined.Close, contentDescription = "Close")
           }
         }
         Spacer(Modifier.height(12.dp))

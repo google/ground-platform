@@ -1768,10 +1768,12 @@ class PrototypeAppStateTest {
         .steps
         .filterIsInstance<org.groundplatform.v2.core.forms.ui.FormWizardStep.QuestionStep>()
         .map { it.control }
-    val perimeterCtrl =
-      commodityQuestionControls.first { it.canonicalPath == "/data/plot_perimeter" }
-    val centerCtrl =
-      commodityQuestionControls.first { it.canonicalPath == "/data/plot_center_point" }
+    val perimeterCtrl = commodityQuestionControls.first {
+      it.canonicalPath == "/data/plot_perimeter"
+    }
+    val centerCtrl = commodityQuestionControls.first {
+      it.canonicalPath == "/data/plot_center_point"
+    }
     assertTrue(perimeterCtrl.appearance.contains("placement-map"))
     assertFalse(centerCtrl.appearance.contains("placement-map"))
     assertEquals(5.0, centerCtrl.controlDef.geo_config?.accuracy_threshold_meters)
@@ -2019,6 +2021,29 @@ class PrototypeAppStateTest {
     state.showEntitySubmissions()
     state.selectEntity(state.entities.first { it.id != entity.id }.id)
     assertEquals(EntityDetailsPane.PROPERTIES, state.entityDetailsPane)
+  }
+
+  @Test
+  fun webEntityDetailsTabs_openingSubmissionSelectsHistoryAndSwitchingTabsKeepsIt() {
+    val state = PrototypeAppState(initialScreen = PrototypeScreen.MAIN_SURVEY)
+    val entity = state.entities.first { it.submissions.isNotEmpty() }
+    val submission = entity.submissions.first()
+    state.selectEntity(entity.id)
+
+    state.selectEntityDetailsTab(EntityDetailsPane.SUBMISSIONS)
+    assertEquals(EntityDetailsPane.SUBMISSIONS, state.entityDetailsPane)
+
+    // Opening a submission (e.g. from `Uploads`) lands on the `History` tab.
+    state.selectEntityDetailsTab(EntityDetailsPane.PROPERTIES)
+    state.selectSubmissionDetail(submission.id)
+    assertEquals(EntityDetailsPane.SUBMISSIONS, state.entityDetailsPane)
+
+    // Switching to `Data` and back keeps the opened submission.
+    state.selectEntityDetailsTab(EntityDetailsPane.PROPERTIES)
+    assertEquals(EntityDetailsPane.PROPERTIES, state.entityDetailsPane)
+    assertEquals(submission.id, state.selectedSubmissionId)
+    state.selectEntityDetailsTab(EntityDetailsPane.SUBMISSIONS)
+    assertEquals(submission.id, state.selectedSubmissionId)
   }
 
   @Test

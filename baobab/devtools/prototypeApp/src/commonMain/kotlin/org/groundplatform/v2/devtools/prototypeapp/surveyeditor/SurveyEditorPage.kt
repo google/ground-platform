@@ -24,11 +24,11 @@ import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -45,35 +45,33 @@ import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.List
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Description
-import androidx.compose.material.icons.filled.DragIndicator
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.Language
-import androidx.compose.material.icons.filled.Layers
-import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material.icons.filled.Map
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Smartphone
-import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material.icons.automirrored.outlined.ArrowBack
+import androidx.compose.material.icons.automirrored.outlined.List
+import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.Close
+import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.icons.outlined.Description
+import androidx.compose.material.icons.outlined.DragIndicator
+import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material.icons.outlined.Language
+import androidx.compose.material.icons.outlined.Layers
+import androidx.compose.material.icons.outlined.LocationOn
+import androidx.compose.material.icons.outlined.Map
+import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material.icons.outlined.Smartphone
+import androidx.compose.material.icons.outlined.Warning
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.InputChip
-import androidx.compose.material3.InputChipDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationDrawerItem
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.NavigationDrawerItemDefaults
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedCard
@@ -91,6 +89,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -104,12 +103,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+import kotlinx.coroutines.delay
 import org.groundplatform.v2.core.forms.ui.GroundBadgeTone
 import org.groundplatform.v2.core.forms.ui.GroundTonalBadge
-import androidx.compose.ui.draw.clip
-import kotlinx.coroutines.delay
-import org.groundplatform.v2.devtools.prototypeapp.data.datasource.remote.MapboxPlacesDataSource
+import org.groundplatform.v2.devtools.prototypeapp.PrototypeAppState
+import org.groundplatform.v2.devtools.prototypeapp.PrototypeDebugToolsButton
+import org.groundplatform.v2.devtools.prototypeapp.PrototypeWorkbenchPage
 import org.groundplatform.v2.devtools.prototypeapp.data.datasource.local.PrototypeFakePlacesData
+import org.groundplatform.v2.devtools.prototypeapp.data.datasource.remote.MapboxPlacesDataSource
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyPlaceItem
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.parsePlaceCoordinates
 import org.groundplatform.v2.devtools.prototypeapp.formeditor.DragAxis
@@ -118,9 +119,6 @@ import org.groundplatform.v2.devtools.prototypeapp.formeditor.DropdownSelector
 import org.groundplatform.v2.devtools.prototypeapp.formeditor.FormEditorPage
 import org.groundplatform.v2.devtools.prototypeapp.formeditor.FormEditorValidator
 import org.groundplatform.v2.devtools.prototypeapp.formeditor.SectionLabel
-import org.groundplatform.v2.devtools.prototypeapp.PrototypeAppState
-import org.groundplatform.v2.devtools.prototypeapp.PrototypeDebugToolsButton
-import org.groundplatform.v2.devtools.prototypeapp.PrototypeWorkbenchPage
 import org.groundplatform.v2.devtools.prototypeapp.formeditor.dragToReorder
 import org.groundplatform.v2.devtools.prototypeapp.map.SurveyBasemaps
 import org.groundplatform.v2.map.CameraPosition
@@ -163,9 +161,7 @@ fun SurveyEditorPage(
         is SurveyEditorSection.Form -> {
           val entry = state.selectedForm
           if (entry != null) {
-            LaunchedEffect(entry.editor.form.questions) {
-              state.syncDatasetsLinkedToForm(entry)
-            }
+            LaunchedEffect(entry.editor.form.questions) { state.syncDatasetsLinkedToForm(entry) }
             key(entry.key) {
               FormEditorPage(
                 state = entry.editor,
@@ -218,7 +214,7 @@ private fun SurveyNavigation(
         if (onBackToDashboard != null) {
           IconButton(onClick = onBackToDashboard, modifier = Modifier.size(36.dp)) {
             Icon(
-              imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+              imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
               contentDescription = "Back to web dashboard",
               tint = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -246,7 +242,7 @@ private fun SurveyNavigation(
             modifier = Modifier.height(32.dp),
           ) {
             Icon(
-              imageVector = Icons.Filled.Smartphone,
+              imageVector = Icons.Outlined.Smartphone,
               contentDescription = null,
               modifier = Modifier.size(16.dp),
             )
@@ -264,13 +260,13 @@ private fun SurveyNavigation(
 
       NavItem(
         label = "Survey details",
-        icon = Icons.Default.Info,
+        icon = Icons.Outlined.Info,
         selected = state.section == SurveyEditorSection.Details,
         onClick = { state.select(SurveyEditorSection.Details) },
       )
       NavItem(
         label = "Sharing",
-        icon = Icons.Default.Person,
+        icon = Icons.Outlined.Person,
         selected = state.section == SurveyEditorSection.Sharing,
         onClick = { state.select(SurveyEditorSection.Sharing) },
         trailing = "${state.sharing.collaborators.size + 1}",
@@ -278,15 +274,13 @@ private fun SurveyNavigation(
 
       NavHeading("Forms", addDescription = "Add form", onAdd = state::addForm)
       if (state.forms.isEmpty()) NavEmpty("No forms yet")
-      ReorderableNavList(
-        items = state.forms,
-        keyOf = { it.key },
-        onMove = state::moveForm,
-      ) { entry, showHandle ->
+      ReorderableNavList(items = state.forms, keyOf = { it.key }, onMove = state::moveForm) {
+        entry,
+        showHandle ->
         val form = entry.editor.form
         NavItem(
           label = form.title.ifBlank { "Untitled form" },
-          icon = if (showHandle) Icons.Default.DragIndicator else Icons.Default.Description,
+          icon = if (showHandle) Icons.Outlined.DragIndicator else Icons.Outlined.Description,
           selected = state.section == SurveyEditorSection.Form(entry.key),
           onClick = { state.select(SurveyEditorSection.Form(entry.key)) },
           trailing = "${form.questions.size}",
@@ -295,12 +289,12 @@ private fun SurveyNavigation(
         )
       }
 
-      DatasetNavGroup(state, DatasetKind.MAP_LAYER, state.mapLayers, Icons.Default.Layers)
+      DatasetNavGroup(state, DatasetKind.MAP_LAYER, state.mapLayers, Icons.Outlined.Layers)
       DatasetNavGroup(
         state,
         DatasetKind.DATA_TABLE,
         state.dataTables,
-        Icons.AutoMirrored.Filled.List,
+        Icons.AutoMirrored.Outlined.List,
       )
     }
   }
@@ -319,14 +313,12 @@ private fun DatasetNavGroup(
     onAdd = { state.addDataset(kind) },
   )
   if (datasets.isEmpty()) NavEmpty("No ${kind.plural.lowercase()} yet")
-  ReorderableNavList(
-    items = datasets,
-    keyOf = { it.key },
-    onMove = state::moveDataset,
-  ) { dataset, showHandle ->
+  ReorderableNavList(items = datasets, keyOf = { it.key }, onMove = state::moveDataset) {
+    dataset,
+    showHandle ->
     NavItem(
       label = dataset.displayName.ifBlank { "Untitled" },
-      icon = if (showHandle) Icons.Default.DragIndicator else icon,
+      icon = if (showHandle) Icons.Outlined.DragIndicator else icon,
       selected = state.section == SurveyEditorSection.Dataset(dataset.key),
       onClick = { state.select(SurveyEditorSection.Dataset(dataset.key)) },
       trailing = "${dataset.rows.size}",
@@ -433,7 +425,7 @@ private fun NavHeading(text: String, addDescription: String, onAdd: () -> Unit) 
         color = MaterialTheme.colorScheme.onSurfaceVariant,
         modifier = Modifier.weight(1f),
       )
-      IconButton(onClick = onAdd) { Icon(Icons.Default.Add, contentDescription = addDescription) }
+      IconButton(onClick = onAdd) { Icon(Icons.Outlined.Add, contentDescription = addDescription) }
     }
   }
 }
@@ -467,7 +459,7 @@ private fun NavItem(
       Row(verticalAlignment = Alignment.CenterVertically) {
         if (hasIssues) {
           Icon(
-            Icons.Default.Warning,
+            Icons.Outlined.Warning,
             contentDescription = "Has issues",
             tint = MaterialTheme.colorScheme.error,
             modifier = Modifier.size(16.dp),
@@ -490,11 +482,7 @@ private fun NavItem(
 // ---------------------------------------------------------------------------------------------
 
 @Composable
-internal fun PaneScaffold(
-  title: String,
-  subtitle: String,
-  content: @Composable () -> Unit,
-) {
+internal fun PaneScaffold(title: String, subtitle: String, content: @Composable () -> Unit) {
   Column(
     modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(32.dp),
     verticalArrangement = Arrangement.spacedBy(20.dp),
@@ -593,19 +581,13 @@ private fun LanguageSelectorSection(state: SurveyEditorState) {
   if (showPicker) {
     LanguagePickerDialog(
       selectedCodes = supported.toSet(),
-      onAddLanguage = { lang ->
-        state.addSupportedLanguage(lang.code)
-      },
+      onAddLanguage = { lang -> state.addSupportedLanguage(lang.code) },
       onDismiss = { showPicker = false },
     )
   }
 
   Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-    Text(
-      "Languages",
-      style = MaterialTheme.typography.titleSmall,
-      fontWeight = FontWeight.SemiBold,
-    )
+    Text("Languages", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
     Text(
       "Choose the languages in which forms and survey questions can be authored and collected. The default language is shown when a specific translation is not available.",
       style = MaterialTheme.typography.bodySmall,
@@ -630,11 +612,7 @@ private fun LanguageSelectorSection(state: SurveyEditorState) {
           InputChip(
             selected = isDefault,
             onClick = { state.setDefaultLanguage(code) },
-            label = {
-              Text(
-                if (isDefault) "$displayName • Default" else displayName
-              )
-            },
+            label = { Text(if (isDefault) "$displayName • Default" else displayName) },
             trailingIcon = {
               if (supported.size > 1) {
                 IconButton(
@@ -642,7 +620,7 @@ private fun LanguageSelectorSection(state: SurveyEditorState) {
                   modifier = Modifier.size(18.dp),
                 ) {
                   Icon(
-                    Icons.Default.Close,
+                    Icons.Outlined.Close,
                     contentDescription = "Remove $displayName",
                     modifier = Modifier.size(14.dp),
                   )
@@ -651,11 +629,8 @@ private fun LanguageSelectorSection(state: SurveyEditorState) {
             },
           )
         }
-        OutlinedButton(
-          onClick = { showPicker = true },
-          shape = RoundedCornerShape(8.dp),
-        ) {
-          Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(16.dp))
+        OutlinedButton(onClick = { showPicker = true }, shape = RoundedCornerShape(8.dp)) {
+          Icon(Icons.Outlined.Add, contentDescription = null, modifier = Modifier.size(16.dp))
           Spacer(Modifier.width(6.dp))
           Text("Add language")
         }
@@ -671,12 +646,8 @@ private fun LanguageSelectorSection(state: SurveyEditorState) {
           label = "Default language",
           selectedText = defaultLabel,
           options = supported,
-          optionText = { code ->
-            IsoLanguages.findByCode(code)?.name ?: code
-          },
-          onSelect = { pickedCode ->
-            state.setDefaultLanguage(pickedCode)
-          },
+          optionText = { code -> IsoLanguages.findByCode(code)?.name ?: code },
+          onSelect = { pickedCode -> state.setDefaultLanguage(pickedCode) },
         )
       }
     }
@@ -694,9 +665,7 @@ private fun SurveyAreaSection(state: SurveyEditorState) {
       surveyLocationLabel = state.details.title.ifBlank { "Survey" },
       surveyCenter = area?.center ?: LatLng(-0.4198, 36.9512),
       currentAreaName = area?.name,
-      onSelectArea = { newArea ->
-        state.setSurveyArea(newArea)
-      },
+      onSelectArea = { newArea -> state.setSurveyArea(newArea) },
       onDismiss = { showSearchDialog = false },
     )
   }
@@ -722,10 +691,7 @@ private fun SurveyAreaSection(state: SurveyEditorState) {
     }
 
     if (area != null) {
-      OutlinedCard(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
-      ) {
+      OutlinedCard(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp)) {
         Row(
           modifier = Modifier.fillMaxWidth().padding(16.dp),
           horizontalArrangement = Arrangement.spacedBy(16.dp),
@@ -737,16 +703,13 @@ private fun SurveyAreaSection(state: SurveyEditorState) {
             modifier = Modifier.size(width = 160.dp, height = 120.dp),
           )
 
-          Column(
-            modifier = Modifier.weight(1f),
-            verticalArrangement = Arrangement.spacedBy(6.dp),
-          ) {
+          Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Row(
               verticalAlignment = Alignment.CenterVertically,
               horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
               Icon(
-                Icons.Default.LocationOn,
+                Icons.Outlined.LocationOn,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(20.dp),
@@ -773,7 +736,11 @@ private fun SurveyAreaSection(state: SurveyEditorState) {
                 onClick = { showSearchDialog = true },
                 shape = RoundedCornerShape(8.dp),
               ) {
-                Icon(Icons.Default.Search, contentDescription = null, modifier = Modifier.size(16.dp))
+                Icon(
+                  Icons.Outlined.Search,
+                  contentDescription = null,
+                  modifier = Modifier.size(16.dp),
+                )
                 Spacer(Modifier.width(6.dp))
                 Text("Change area")
               }
@@ -781,7 +748,11 @@ private fun SurveyAreaSection(state: SurveyEditorState) {
                 onClick = { state.setSurveyArea(null) },
                 shape = RoundedCornerShape(8.dp),
               ) {
-                Icon(Icons.Default.Delete, contentDescription = null, modifier = Modifier.size(16.dp))
+                Icon(
+                  Icons.Outlined.Delete,
+                  contentDescription = null,
+                  modifier = Modifier.size(16.dp),
+                )
                 Spacer(Modifier.width(6.dp))
                 Text("Remove")
               }
@@ -790,10 +761,7 @@ private fun SurveyAreaSection(state: SurveyEditorState) {
         }
       }
     } else {
-      OutlinedCard(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
-      ) {
+      OutlinedCard(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp)) {
         Row(
           modifier = Modifier.fillMaxWidth().padding(16.dp),
           horizontalArrangement = Arrangement.spacedBy(16.dp),
@@ -809,24 +777,22 @@ private fun SurveyAreaSection(state: SurveyEditorState) {
             contentAlignment = Alignment.Center,
           ) {
             Icon(
-              Icons.Default.Map,
+              Icons.Outlined.Map,
               contentDescription = null,
               tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
               modifier = Modifier.size(36.dp),
             )
           }
 
-          Column(
-            modifier = Modifier.weight(1f),
-            verticalArrangement = Arrangement.spacedBy(6.dp),
-          ) {
+          Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Text(
               text = "No survey area set",
               style = MaterialTheme.typography.titleSmall,
               fontWeight = FontWeight.SemiBold,
             )
             Text(
-              text = "Search for a location, town, region, or enter coordinates to set the survey boundary.",
+              text =
+                "Search for a location, town, region, or enter coordinates to set the survey boundary.",
               style = MaterialTheme.typography.bodySmall,
               color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -835,7 +801,11 @@ private fun SurveyAreaSection(state: SurveyEditorState) {
               shape = RoundedCornerShape(8.dp),
               modifier = Modifier.padding(top = 4.dp),
             ) {
-              Icon(Icons.Default.Search, contentDescription = null, modifier = Modifier.size(16.dp))
+              Icon(
+                Icons.Outlined.Search,
+                contentDescription = null,
+                modifier = Modifier.size(16.dp),
+              )
               Spacer(Modifier.width(6.dp))
               Text("Search and set area")
             }
@@ -851,10 +821,7 @@ private fun SurveyAreaSection(state: SurveyEditorState) {
  * survey area's boundary polygon and center point on top.
  */
 @Composable
-private fun SurveyAreaThumbnail(
-  area: SurveyArea,
-  modifier: Modifier = Modifier,
-) {
+private fun SurveyAreaThumbnail(area: SurveyArea, modifier: Modifier = Modifier) {
   val boundaryColor = MaterialTheme.colorScheme.primary
   val cameraState =
     remember(area) { MapCameraState(CameraPosition(area.center.toMapLatLng(), area.zoom)) }
@@ -876,8 +843,7 @@ private fun SurveyAreaThumbnail(
     // Keep the fitted zoom but center directly over the surveyed place.
     cameraState.move(CameraPosition(area.center.toMapLatLng(), zoom))
   }
-  val content =
-    remember(area, boundaryColor) { surveyAreaThumbnailContent(area, boundaryColor) }
+  val content = remember(area, boundaryColor) { surveyAreaThumbnailContent(area, boundaryColor) }
 
   Surface(
     modifier = modifier.clip(RoundedCornerShape(8.dp)),
@@ -949,8 +915,8 @@ internal fun surveyAreaThumbnailContent(area: SurveyArea, boundaryColor: Color):
 }
 
 /**
- * Dialog allowing the user to search the Mapbox Places API (or enter raw GPS coordinates)
- * to define the survey area boundary.
+ * Dialog allowing the user to search the Mapbox Places API (or enter raw GPS coordinates) to define
+ * the survey area boundary.
  */
 @Composable
 private fun SurveyAreaPickerDialog(
@@ -990,54 +956,54 @@ private fun SurveyAreaPickerDialog(
     }
   }
 
-  val matchingPlaces = remember(searchQuery, remotePlaces, localPlaces) {
-    val q = searchQuery.trim()
-    val directCoords = parsePlaceCoordinates(q)
-    val customPlace =
-      if (directCoords != null) {
-        val (lat, lng) = directCoords
-        SurveyPlaceItem(
-          id = "custom-coords",
-          name = "GPS: ${formatFixed(lat, 4)}°, ${formatFixed(lng, 4)}°",
-          categoryLabel = "Custom Coordinates",
-          regionSubtitle = "Direct coordinates input",
-          coordinatesLabel = "${formatFixed(lat, 4)}, ${formatFixed(lng, 4)}",
-          normalizedX = 0.5f,
-          normalizedY = 0.5f,
-          latitude = lat,
-          longitude = lng,
-          sourceLabel = "Coordinates",
-        )
-      } else {
-        null
-      }
+  val matchingPlaces =
+    remember(searchQuery, remotePlaces, localPlaces) {
+      val q = searchQuery.trim()
+      val directCoords = parsePlaceCoordinates(q)
+      val customPlace =
+        if (directCoords != null) {
+          val (lat, lng) = directCoords
+          SurveyPlaceItem(
+            id = "custom-coords",
+            name = "GPS: ${formatFixed(lat, 4)}°, ${formatFixed(lng, 4)}°",
+            categoryLabel = "Custom Coordinates",
+            regionSubtitle = "Direct coordinates input",
+            coordinatesLabel = "${formatFixed(lat, 4)}, ${formatFixed(lng, 4)}",
+            normalizedX = 0.5f,
+            normalizedY = 0.5f,
+            latitude = lat,
+            longitude = lng,
+            sourceLabel = "Coordinates",
+          )
+        } else {
+          null
+        }
 
-    if (q.isEmpty()) {
-      localPlaces
-    } else {
-      // Prioritize remote Mapbox Places API results, merged with matching local gazetteer entries
-      val combined = LinkedHashMap<String, SurveyPlaceItem>()
-      if (customPlace != null) {
-        combined[customPlace.id] = customPlace
-      }
-      for (apiPlace in remotePlaces) {
-        combined[apiPlace.id] = apiPlace
-      }
-      val filteredLocal =
-        localPlaces.filter { place ->
+      if (q.isEmpty()) {
+        localPlaces
+      } else {
+        // Prioritize remote Mapbox Places API results, merged with matching local gazetteer entries
+        val combined = LinkedHashMap<String, SurveyPlaceItem>()
+        if (customPlace != null) {
+          combined[customPlace.id] = customPlace
+        }
+        for (apiPlace in remotePlaces) {
+          combined[apiPlace.id] = apiPlace
+        }
+        val filteredLocal = localPlaces.filter { place ->
           place.name.contains(q, ignoreCase = true) ||
             place.categoryLabel.contains(q, ignoreCase = true) ||
             place.regionSubtitle.contains(q, ignoreCase = true) ||
             place.coordinatesLabel.contains(q, ignoreCase = true)
         }
-      for (localPlace in filteredLocal) {
-        if (combined.values.none { it.name.equals(localPlace.name, ignoreCase = true) }) {
-          combined[localPlace.id] = localPlace
+        for (localPlace in filteredLocal) {
+          if (combined.values.none { it.name.equals(localPlace.name, ignoreCase = true) }) {
+            combined[localPlace.id] = localPlace
+          }
         }
+        combined.values.toList()
       }
-      combined.values.toList()
     }
-  }
 
   AlertDialog(
     onDismissRequest = onDismiss,
@@ -1046,7 +1012,11 @@ private fun SurveyAreaPickerDialog(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
       ) {
-        Icon(Icons.Default.Map, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+        Icon(
+          Icons.Outlined.Map,
+          contentDescription = null,
+          tint = MaterialTheme.colorScheme.primary,
+        )
         Text("Select Survey Area")
       }
     },
@@ -1060,16 +1030,13 @@ private fun SurveyAreaPickerDialog(
           onValueChange = { searchQuery = it },
           label = { Text("Search places or enter coordinates") },
           placeholder = { Text("e.g. Nairobi, Othaya, Chinga Dam, or -0.419, 36.950") },
-          leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
+          leadingIcon = { Icon(Icons.Outlined.Search, contentDescription = null) },
           trailingIcon = {
             if (isSearching) {
-              CircularProgressIndicator(
-                modifier = Modifier.size(18.dp),
-                strokeWidth = 2.dp,
-              )
+              CircularProgressIndicator(modifier = Modifier.size(18.dp), strokeWidth = 2.dp)
             } else if (searchQuery.isNotEmpty()) {
               IconButton(onClick = { searchQuery = "" }) {
-                Icon(Icons.Default.Close, contentDescription = "Clear search")
+                Icon(Icons.Outlined.Close, contentDescription = "Clear search")
               }
             }
           },
@@ -1097,7 +1064,10 @@ private fun SurveyAreaPickerDialog(
           modifier = Modifier.weight(1f).fillMaxWidth(),
         ) {
           if (matchingPlaces.isEmpty()) {
-            Box(modifier = Modifier.fillMaxSize().padding(24.dp), contentAlignment = Alignment.Center) {
+            Box(
+              modifier = Modifier.fillMaxSize().padding(24.dp),
+              contentAlignment = Alignment.Center,
+            ) {
               Text(
                 if (isSearching) "Searching places..." else "No places matching “$searchQuery”",
                 style = MaterialTheme.typography.bodyMedium,
@@ -1107,7 +1077,8 @@ private fun SurveyAreaPickerDialog(
           } else {
             LazyColumn(modifier = Modifier.fillMaxSize()) {
               items(matchingPlaces, key = { it.id }) { place ->
-                val isSelected = currentAreaName != null && place.name.equals(currentAreaName, ignoreCase = true)
+                val isSelected =
+                  currentAreaName != null && place.name.equals(currentAreaName, ignoreCase = true)
                 Row(
                   modifier =
                     Modifier.fillMaxWidth()
@@ -1121,9 +1092,11 @@ private fun SurveyAreaPickerDialog(
                   horizontalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
                   Icon(
-                    Icons.Default.LocationOn,
+                    Icons.Outlined.LocationOn,
                     contentDescription = null,
-                    tint = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                    tint =
+                      if (isSelected) MaterialTheme.colorScheme.primary
+                      else MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.size(24.dp),
                   )
                   Column(modifier = Modifier.weight(1f)) {
@@ -1154,7 +1127,8 @@ private fun SurveyAreaPickerDialog(
                     )
                     Text(
                       text = place.coordinatesLabel,
-                      style = MaterialTheme.typography.labelSmall.copy(fontFamily = FontFamily.Monospace),
+                      style =
+                        MaterialTheme.typography.labelSmall.copy(fontFamily = FontFamily.Monospace),
                       color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
                     )
                   }
@@ -1173,7 +1147,9 @@ private fun SurveyAreaPickerDialog(
                     }
                   }
                 }
-                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+                HorizontalDivider(
+                  color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+                )
               }
             }
           }
@@ -1181,22 +1157,21 @@ private fun SurveyAreaPickerDialog(
       }
     },
     confirmButton = {},
-    dismissButton = {
-      TextButton(onClick = onDismiss) {
-        Text("Cancel")
-      }
-    },
+    dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } },
   )
 }
 
-/**
- * Converts a [SurveyPlaceItem] to a [SurveyArea] with appropriate polygon boundary vertices.
- */
+/** Converts a [SurveyPlaceItem] to a [SurveyArea] with appropriate polygon boundary vertices. */
 private fun placeToSurveyArea(place: SurveyPlaceItem): SurveyArea {
   val lat = place.latitude
   val lng = place.longitude
   val boundaries =
-    if (place.bboxMinLat != null && place.bboxMinLng != null && place.bboxMaxLat != null && place.bboxMaxLng != null) {
+    if (
+      place.bboxMinLat != null &&
+        place.bboxMinLng != null &&
+        place.bboxMaxLat != null &&
+        place.bboxMaxLng != null
+    ) {
       val minLng = place.bboxMinLng
       val maxLng = place.bboxMaxLng
       val minLat = place.bboxMinLat
@@ -1240,8 +1215,8 @@ private fun placeToSurveyArea(place: SurveyPlaceItem): SurveyArea {
 }
 
 /**
- * Searchable dialog allowing the user to search the full catalog of ISO 639-3 languages
- * by code or name and add them to the survey.
+ * Searchable dialog allowing the user to search the full catalog of ISO 639-3 languages by code or
+ * name and add them to the survey.
  */
 @Composable
 private fun LanguagePickerDialog(
@@ -1250,9 +1225,7 @@ private fun LanguagePickerDialog(
   onDismiss: () -> Unit,
 ) {
   var searchQuery by remember { mutableStateOf("") }
-  val searchResults = remember(searchQuery) {
-    IsoLanguages.search(searchQuery, limit = 40)
-  }
+  val searchResults = remember(searchQuery) { IsoLanguages.search(searchQuery, limit = 40) }
 
   AlertDialog(
     onDismissRequest = onDismiss,
@@ -1261,7 +1234,11 @@ private fun LanguagePickerDialog(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
       ) {
-        Icon(Icons.Default.Language, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+        Icon(
+          Icons.Outlined.Language,
+          contentDescription = null,
+          tint = MaterialTheme.colorScheme.primary,
+        )
         Text("Select Language")
       }
     },
@@ -1275,11 +1252,11 @@ private fun LanguagePickerDialog(
           onValueChange = { searchQuery = it },
           label = { Text("Search by language name") },
           placeholder = { Text("e.g. Swahili, English, Spanish, Amharic...") },
-          leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
+          leadingIcon = { Icon(Icons.Outlined.Search, contentDescription = null) },
           trailingIcon = {
             if (searchQuery.isNotEmpty()) {
               IconButton(onClick = { searchQuery = "" }) {
-                Icon(Icons.Default.Close, contentDescription = "Clear search")
+                Icon(Icons.Outlined.Close, contentDescription = "Clear search")
               }
             }
           },
@@ -1288,7 +1265,9 @@ private fun LanguagePickerDialog(
         )
 
         Text(
-          text = if (searchQuery.isBlank()) "Popular languages & catalog preview:" else "${searchResults.size} matches found:",
+          text =
+            if (searchQuery.isBlank()) "Popular languages & catalog preview:"
+            else "${searchResults.size} matches found:",
           style = MaterialTheme.typography.labelSmall,
           color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
@@ -1299,7 +1278,10 @@ private fun LanguagePickerDialog(
           modifier = Modifier.weight(1f).fillMaxWidth(),
         ) {
           if (searchResults.isEmpty()) {
-            Box(modifier = Modifier.fillMaxSize().padding(24.dp), contentAlignment = Alignment.Center) {
+            Box(
+              modifier = Modifier.fillMaxSize().padding(24.dp),
+              contentAlignment = Alignment.Center,
+            ) {
               Text(
                 "No languages matching “$searchQuery”",
                 style = MaterialTheme.typography.bodyMedium,
@@ -1309,16 +1291,17 @@ private fun LanguagePickerDialog(
           } else {
             LazyColumn(modifier = Modifier.fillMaxSize()) {
               items(searchResults, key = { it.id }) { lang ->
-                val isAlreadySelected =
-                  selectedCodes.any { it.equals(lang.code, ignoreCase = true) || it.equals(lang.id, ignoreCase = true) }
+                val isAlreadySelected = selectedCodes.any {
+                  it.equals(lang.code, ignoreCase = true) || it.equals(lang.id, ignoreCase = true)
+                }
                 Row(
-                  modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable(enabled = !isAlreadySelected) {
-                      onAddLanguage(lang)
-                      onDismiss()
-                    }
-                    .padding(horizontal = 14.dp, vertical = 10.dp),
+                  modifier =
+                    Modifier.fillMaxWidth()
+                      .clickable(enabled = !isAlreadySelected) {
+                        onAddLanguage(lang)
+                        onDismiss()
+                      }
+                      .padding(horizontal = 14.dp, vertical = 10.dp),
                   verticalAlignment = Alignment.CenterVertically,
                   horizontalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
@@ -1343,7 +1326,9 @@ private fun LanguagePickerDialog(
                     }
                   }
                 }
-                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+                HorizontalDivider(
+                  color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+                )
               }
             }
           }
@@ -1351,9 +1336,7 @@ private fun LanguagePickerDialog(
       }
     },
     confirmButton = {},
-    dismissButton = {
-      TextButton(onClick = onDismiss) { Text("Close") }
-    },
+    dismissButton = { TextButton(onClick = onDismiss) { Text("Close") } },
   )
 }
 
@@ -1442,7 +1425,7 @@ private fun SharingPane(state: SurveyEditorState) {
                   )
                 }
                 IconButton(onClick = { state.removeCollaborator(person.email) }) {
-                  Icon(Icons.Default.Close, contentDescription = "Remove ${person.displayName}")
+                  Icon(Icons.Outlined.Close, contentDescription = "Remove ${person.displayName}")
                 }
               }
             }
@@ -1502,10 +1485,7 @@ private fun InviteRow(state: SurveyEditorState) {
   var email by remember { mutableStateOf("") }
   var role by remember { mutableStateOf(CollaboratorRole.DATA_COLLECTOR) }
   var error by remember { mutableStateOf<String?>(null) }
-  Row(
-    horizontalArrangement = Arrangement.spacedBy(12.dp),
-    verticalAlignment = Alignment.Top,
-  ) {
+  Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.Top) {
     OutlinedTextField(
       value = email,
       onValueChange = {

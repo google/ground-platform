@@ -27,7 +27,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Link
+import androidx.compose.material.icons.outlined.Link
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
@@ -252,7 +252,7 @@ internal fun PendingInviteLinkRow(
       horizontalArrangement = Arrangement.spacedBy(6.dp),
     ) {
       Icon(
-        Icons.Default.Link,
+        Icons.Outlined.Link,
         contentDescription = null,
         modifier = Modifier.size(16.dp),
         tint = MaterialTheme.colorScheme.onSurfaceVariant,

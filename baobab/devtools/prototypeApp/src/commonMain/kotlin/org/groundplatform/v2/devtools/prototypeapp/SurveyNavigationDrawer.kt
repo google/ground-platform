@@ -36,22 +36,22 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.Logout
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.CloudOff
-import androidx.compose.material.icons.filled.CloudUpload
-import androidx.compose.material.icons.filled.Description
-import androidx.compose.material.icons.filled.Download
-import androidx.compose.material.icons.filled.Map
-import androidx.compose.material.icons.filled.PictureAsPdf
-import androidx.compose.material.icons.filled.QrCode
-import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.Share
-import androidx.compose.material.icons.filled.SwapHoriz
+import androidx.compose.material.icons.automirrored.outlined.ArrowBack
+import androidx.compose.material.icons.automirrored.outlined.Logout
+import androidx.compose.material.icons.outlined.Check
+import androidx.compose.material.icons.outlined.CheckCircle
+import androidx.compose.material.icons.outlined.Close
+import androidx.compose.material.icons.outlined.CloudOff
+import androidx.compose.material.icons.outlined.CloudUpload
+import androidx.compose.material.icons.outlined.Description
+import androidx.compose.material.icons.outlined.Download
+import androidx.compose.material.icons.outlined.Map
+import androidx.compose.material.icons.outlined.PictureAsPdf
+import androidx.compose.material.icons.outlined.QrCode
+import androidx.compose.material.icons.outlined.Refresh
+import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material.icons.outlined.Share
+import androidx.compose.material.icons.outlined.SwapHoriz
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -158,7 +158,7 @@ internal fun MainSurveyNavigationDrawerOverlay(state: PrototypeAppState) {
                   modifier = Modifier.size(32.dp),
                 ) {
                   Icon(
-                    imageVector = Icons.Default.Close,
+                    imageVector = Icons.Outlined.Close,
                     contentDescription = "Close Drawer",
                     tint = Color.White,
                     modifier = Modifier.size(18.dp),
@@ -235,14 +235,14 @@ internal fun MainSurveyNavigationDrawerOverlay(state: PrototypeAppState) {
             verticalArrangement = Arrangement.spacedBy(2.dp),
           ) {
             DrawerMenuItem(
-              icon = Icons.Default.SwapHoriz,
+              icon = Icons.Outlined.SwapHoriz,
               title = "Surveys",
               subtitle = "${state.downloadedSurveyCount} downloaded on device",
               selected = state.activeDrawerSubView == MainDrawerSubView.SWITCH_SURVEYS,
               onClick = { state.drawerSwitchSurveys() },
             )
             DrawerMenuItem(
-              icon = Icons.Default.CloudUpload,
+              icon = Icons.Outlined.CloudUpload,
               title = "Uploads",
               subtitle = null,
               badgeText =
@@ -255,21 +255,21 @@ internal fun MainSurveyNavigationDrawerOverlay(state: PrototypeAppState) {
               onClick = { state.drawerOpenUploads() },
             )
             DrawerMenuItem(
-              icon = Icons.Default.Map,
+              icon = Icons.Outlined.Map,
               title = "Offline maps",
               subtitle = "Vector & satellite raster tile cache",
               selected = state.activeDrawerSubView == MainDrawerSubView.MANAGE_OFFLINE_MAPS,
               onClick = { state.drawerManageOfflineMaps() },
             )
             DrawerMenuItem(
-              icon = Icons.Default.Settings,
+              icon = Icons.Outlined.Settings,
               title = "Settings",
               subtitle = "Units (${state.unitSystem.areaUnit}), language & media cache",
               selected = state.activeDrawerSubView == MainDrawerSubView.SETTINGS,
               onClick = { state.drawerOpenSettings() },
             )
             DrawerMenuItem(
-              icon = Icons.Default.Description,
+              icon = Icons.Outlined.Description,
               title = "Terms of Service",
               subtitle = "Platform data governance & privacy terms",
               selected = false,
@@ -282,7 +282,7 @@ internal fun MainSurveyNavigationDrawerOverlay(state: PrototypeAppState) {
             )
 
             DrawerMenuItem(
-              icon = Icons.AutoMirrored.Filled.Logout,
+              icon = Icons.AutoMirrored.Outlined.Logout,
               title = "Sign out",
               subtitle = "Disconnect ${state.signedInUserEmail}",
               selected = false,
@@ -392,7 +392,7 @@ internal fun UploadsMutationsSubScreen(state: PrototypeAppState) {
         horizontalArrangement = Arrangement.spacedBy(8.dp),
       ) {
         Icon(
-          imageVector = Icons.Default.CloudUpload,
+          imageVector = Icons.Outlined.CloudUpload,
           contentDescription = null,
           tint = MaterialTheme.colorScheme.primary,
           modifier = Modifier.size(20.dp),
@@ -415,7 +415,7 @@ internal fun UploadsMutationsSubScreen(state: PrototypeAppState) {
             contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
           ) {
             Icon(
-              imageVector = Icons.Default.CloudUpload,
+              imageVector = Icons.Outlined.CloudUpload,
               contentDescription = null,
               modifier = Modifier.size(13.dp),
             )
@@ -433,7 +433,7 @@ internal fun UploadsMutationsSubScreen(state: PrototypeAppState) {
           contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
         ) {
           Icon(
-            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+            imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
             contentDescription = null,
             modifier = Modifier.size(13.dp),
           )
@@ -471,7 +471,7 @@ internal fun UploadsMutationsSubScreen(state: PrototypeAppState) {
             if (isSelected) {
               {
                 Icon(
-                  imageVector = Icons.Default.Check,
+                  imageVector = Icons.Outlined.Check,
                   contentDescription = null,
                   modifier = Modifier.size(14.dp),
                 )
@@ -489,19 +489,13 @@ internal fun UploadsMutationsSubScreen(state: PrototypeAppState) {
       InputChip(
         selected = true,
         onClick = { state.clearUploadsEntityFilter() },
-        label = {
-          Text(
-            text = entityFilter.label,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-          )
-        },
+        label = { Text(text = entityFilter.label, maxLines = 1, overflow = TextOverflow.Ellipsis) },
         leadingIcon = {
           EntityGeometryIcon(entity = entityFilter, size = InputChipDefaults.IconSize)
         },
         trailingIcon = {
           Icon(
-            imageVector = Icons.Default.Close,
+            imageVector = Icons.Outlined.Close,
             contentDescription = "Show uploads for all map features",
             modifier = Modifier.size(InputChipDefaults.IconSize),
           )
@@ -542,7 +536,7 @@ internal fun UploadsMutationsSubScreen(state: PrototypeAppState) {
 /**
  * Compact, user-friendly row card for a [MutationLogItem] in `Uploads`, showing:
  * - Action label (`Form submitted`, `Form modified`, `Form deleted`, `Map feature modified`, etc.)
- * and form/feature title
+ *   and form/feature title
  * - Target entity label and concise timestamp
  * - Status badge (`Pending`, `In progress`, `Uploaded`, `Failed`) and inline retry/upload action
  */
@@ -646,9 +640,9 @@ internal fun UploadMutationRowCard(mutation: MutationLogItem, state: PrototypeAp
               Icon(
                 imageVector =
                   if (statusFilter == UploadStatusFilter.FAILED) {
-                    Icons.Default.Refresh
+                    Icons.Outlined.Refresh
                   } else {
-                    Icons.Default.CloudUpload
+                    Icons.Outlined.CloudUpload
                   },
                 contentDescription = null,
                 modifier = Modifier.size(11.dp),
@@ -705,7 +699,7 @@ internal fun SwitchDownloadedSurveysSubScreen(state: PrototypeAppState) {
         horizontalArrangement = Arrangement.spacedBy(6.dp),
       ) {
         Icon(
-          imageVector = Icons.Default.SwapHoriz,
+          imageVector = Icons.Outlined.SwapHoriz,
           contentDescription = null,
           tint = MaterialTheme.colorScheme.primary,
           modifier = Modifier.size(22.dp),
@@ -725,7 +719,7 @@ internal fun SwitchDownloadedSurveysSubScreen(state: PrototypeAppState) {
       }
       OutlinedButton(onClick = { state.closeDrawerSubView() }, shape = MaterialTheme.shapes.small) {
         Icon(
-          imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+          imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
           contentDescription = null,
           modifier = Modifier.size(14.dp),
         )
@@ -824,7 +818,7 @@ internal fun SwitchDownloadedSurveysSubScreen(state: PrototypeAppState) {
       shape = MaterialTheme.shapes.medium,
     ) {
       Icon(
-        imageVector = Icons.Default.Download,
+        imageVector = Icons.Outlined.Download,
         contentDescription = null,
         modifier = Modifier.size(16.dp),
       )
@@ -838,7 +832,7 @@ internal fun SwitchDownloadedSurveysSubScreen(state: PrototypeAppState) {
 }
 
 /**
- * Modal dialog displaying a scannable QR Code for a survey location (`Icons.Default.QrCode`),
+ * Modal dialog displaying a scannable QR Code for a survey location (`Icons.Outlined.QrCode`),
  * allowing offline field verification and rapid lookup of the location's `GeoID`.
  */
 @Composable
@@ -847,7 +841,7 @@ internal fun EntityQrCodeModalDialog(state: PrototypeAppState, entity: Geospatia
     onDismissRequest = { state.closeEntityQrCode() },
     icon = {
       Icon(
-        imageVector = Icons.Default.QrCode,
+        imageVector = Icons.Outlined.QrCode,
         contentDescription = null,
         tint = MaterialTheme.colorScheme.primary,
       )
@@ -873,7 +867,7 @@ internal fun EntityQrCodeModalDialog(state: PrototypeAppState, entity: Geospatia
         ) {
           Box(modifier = Modifier.padding(12.dp), contentAlignment = Alignment.Center) {
             Icon(
-              imageVector = Icons.Default.QrCode,
+              imageVector = Icons.Outlined.QrCode,
               contentDescription = "${entity.label} QR Matrix",
               tint = Color(0xFF111827),
               modifier = Modifier.size(116.dp),
@@ -908,7 +902,7 @@ internal fun EntityQrCodeModalDialog(state: PrototypeAppState, entity: Geospatia
         }
       ) {
         Icon(
-          imageVector = Icons.Default.Share,
+          imageVector = Icons.Outlined.Share,
           contentDescription = null,
           modifier = Modifier.size(14.dp),
         )
@@ -941,7 +935,7 @@ internal fun SharePdfToAppModalDialog(state: PrototypeAppState, sheet: SharedPdf
           horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
           Icon(
-            imageVector = Icons.Default.Share,
+            imageVector = Icons.Outlined.Share,
             contentDescription = null,
             tint = MaterialTheme.colorScheme.primary,
             modifier = Modifier.size(20.dp),
@@ -953,7 +947,7 @@ internal fun SharePdfToAppModalDialog(state: PrototypeAppState, sheet: SharedPdf
           )
         }
         IconButton(onClick = { state.closeSharePdfSheet() }) {
-          Icon(imageVector = Icons.Default.Close, contentDescription = "Close Share PDF Sheet")
+          Icon(imageVector = Icons.Outlined.Close, contentDescription = "Close Share PDF Sheet")
         }
       }
 
@@ -973,7 +967,7 @@ internal fun SharePdfToAppModalDialog(state: PrototypeAppState, sheet: SharedPdf
           horizontalArrangement = Arrangement.spacedBy(10.dp),
         ) {
           Icon(
-            imageVector = Icons.Default.PictureAsPdf,
+            imageVector = Icons.Outlined.PictureAsPdf,
             contentDescription = null,
             tint = MaterialTheme.colorScheme.error,
             modifier = Modifier.size(26.dp),
@@ -981,10 +975,7 @@ internal fun SharePdfToAppModalDialog(state: PrototypeAppState, sheet: SharedPdf
           Column(modifier = Modifier.weight(1f)) {
             Text(
               text = sheet.pdfFileName,
-              style =
-                MaterialTheme.typography.labelMedium.copy(
-                  fontWeight = FontWeight.Bold,
-                ),
+              style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
               color = MaterialTheme.colorScheme.onSurface,
             )
             Text(
@@ -1028,7 +1019,9 @@ internal fun SharePdfToAppModalDialog(state: PrototypeAppState, sheet: SharedPdf
         onClick = { state.closeSharePdfSheet() },
         modifier = Modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.medium,
-      ) { Text("Done") }
+      ) {
+        Text("Done")
+      }
     }
   }
 }
@@ -1053,7 +1046,7 @@ internal fun ManageOfflineMapsSubScreen(state: PrototypeAppState) {
         horizontalArrangement = Arrangement.spacedBy(6.dp),
       ) {
         Icon(
-          imageVector = Icons.Default.Map,
+          imageVector = Icons.Outlined.Map,
           contentDescription = null,
           tint = MaterialTheme.colorScheme.primary,
           modifier = Modifier.size(20.dp),
@@ -1066,7 +1059,7 @@ internal fun ManageOfflineMapsSubScreen(state: PrototypeAppState) {
       }
       OutlinedButton(onClick = { state.closeDrawerSubView() }, shape = MaterialTheme.shapes.small) {
         Icon(
-          imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+          imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
           contentDescription = null,
           modifier = Modifier.size(14.dp),
         )
@@ -1082,8 +1075,7 @@ internal fun ManageOfflineMapsSubScreen(state: PrototypeAppState) {
       OutlinedCard(
         modifier = Modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.medium,
-        colors =
-          CardDefaults.outlinedCardColors(containerColor = MaterialTheme.colorScheme.surface),
+        colors = CardDefaults.outlinedCardColors(containerColor = MaterialTheme.colorScheme.surface),
       ) {
         Row(
           modifier = Modifier.fillMaxWidth().padding(12.dp),
@@ -1108,7 +1100,7 @@ internal fun ManageOfflineMapsSubScreen(state: PrototypeAppState) {
               shape = MaterialTheme.shapes.large,
             ) {
               Icon(
-                imageVector = Icons.Default.Check,
+                imageVector = Icons.Outlined.Check,
                 contentDescription = null,
                 modifier = Modifier.size(14.dp),
               )
@@ -1124,7 +1116,7 @@ internal fun ManageOfflineMapsSubScreen(state: PrototypeAppState) {
               shape = MaterialTheme.shapes.large,
             ) {
               Icon(
-                imageVector = Icons.Default.Download,
+                imageVector = Icons.Outlined.Download,
                 contentDescription = null,
                 modifier = Modifier.size(14.dp),
               )
@@ -1155,7 +1147,7 @@ private fun RemoveOfflineTilePackageConfirmationDialog(state: PrototypeAppState)
     onDismissRequest = { state.dismissRemoveOfflineTilePackage() },
     icon = {
       Icon(
-        imageVector = Icons.Default.CloudOff,
+        imageVector = Icons.Outlined.CloudOff,
         contentDescription = null,
         tint = MaterialTheme.colorScheme.error,
       )
@@ -1183,7 +1175,9 @@ private fun RemoveOfflineTilePackageConfirmationDialog(state: PrototypeAppState)
             containerColor = MaterialTheme.colorScheme.error,
             contentColor = MaterialTheme.colorScheme.onError,
           ),
-      ) { Text("Remove", fontWeight = FontWeight.Bold) }
+      ) {
+        Text("Remove", fontWeight = FontWeight.Bold)
+      }
     },
     dismissButton = {
       OutlinedButton(onClick = { state.dismissRemoveOfflineTilePackage() }) { Text("Cancel") }
@@ -1209,23 +1203,15 @@ internal fun SurveySettingsSubScreen(state: PrototypeAppState) {
  * - Visual stacked horizontal proportional chart bar with color-coded legend
  */
 @Composable
-fun DeviceStorageBreakdownCard(
-  storage: DeviceStorageInfo,
-  modifier: Modifier = Modifier,
-) {
+fun DeviceStorageBreakdownCard(storage: DeviceStorageInfo, modifier: Modifier = Modifier) {
   Card(
     modifier = modifier.fillMaxWidth(),
     shape = MaterialTheme.shapes.medium,
     colors =
-      CardDefaults.cardColors(
-        containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
-      ),
+      CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
     border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
   ) {
-    Column(
-      modifier = Modifier.padding(14.dp),
-      verticalArrangement = Arrangement.spacedBy(12.dp),
-    ) {
+    Column(modifier = Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
       // Header row: Icon, Title & Free / Total headline
       Row(
         modifier = Modifier.fillMaxWidth(),
@@ -1237,7 +1223,7 @@ fun DeviceStorageBreakdownCard(
           horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
           Icon(
-            imageVector = Icons.Default.CheckCircle,
+            imageVector = Icons.Outlined.CheckCircle,
             contentDescription = null,
             tint = MaterialTheme.colorScheme.primary,
             modifier = Modifier.size(18.dp),
@@ -1263,10 +1249,7 @@ fun DeviceStorageBreakdownCard(
 
       // Storage breakdown legend items (Downloaded imagery, Submitted forms, photos, etc., Free,
       // and Other)
-      Column(
-        modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-      ) {
+      Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         StorageLegendRowItem(
           color = StorageChartColors.downloadedImageryColor,
           label = "Downloaded imagery",
@@ -1302,10 +1285,7 @@ fun DeviceStorageBreakdownCard(
 
 /** Stacked horizontal proportional bar chart illustrating device storage distribution. */
 @Composable
-fun DeviceStorageBreakdownChart(
-  storage: DeviceStorageInfo,
-  modifier: Modifier = Modifier,
-) {
+fun DeviceStorageBreakdownChart(storage: DeviceStorageInfo, modifier: Modifier = Modifier) {
   val imageryColor = StorageChartColors.downloadedImageryColor
   val dataColor = StorageChartColors.dataColor
   val otherColor = StorageChartColors.otherColor
@@ -1316,9 +1296,7 @@ fun DeviceStorageBreakdownChart(
   val otherFrac = storage.otherUsedFraction
   val freeFrac = storage.freeFraction
 
-  Box(
-    modifier = modifier.clip(RoundedCornerShape(8.dp)).background(freeColor),
-  ) {
+  Box(modifier = modifier.clip(RoundedCornerShape(8.dp)).background(freeColor)) {
     Canvas(modifier = Modifier.fillMaxSize()) {
       val canvasWidth = size.width
       val canvasHeight = size.height
@@ -1384,9 +1362,7 @@ private fun StorageLegendRowItem(
     verticalAlignment = Alignment.CenterVertically,
     horizontalArrangement = Arrangement.spacedBy(8.dp),
   ) {
-    Box(
-      modifier = Modifier.size(10.dp).clip(CircleShape).background(color),
-    )
+    Box(modifier = Modifier.size(10.dp).clip(CircleShape).background(color))
     Row(
       modifier = Modifier.weight(1f),
       horizontalArrangement = Arrangement.SpaceBetween,

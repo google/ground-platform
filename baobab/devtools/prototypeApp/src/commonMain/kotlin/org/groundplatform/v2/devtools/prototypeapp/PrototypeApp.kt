@@ -35,21 +35,22 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material.icons.automirrored.outlined.List
 import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.CloudUpload
-import androidx.compose.material.icons.filled.Layers
-import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material.icons.filled.Map
-import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.MyLocation
-import androidx.compose.material.icons.filled.Navigation
-import androidx.compose.material.icons.filled.ScreenRotation
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.Smartphone
-import androidx.compose.material.icons.filled.Tablet
-import androidx.compose.material.icons.filled.Timeline
+import androidx.compose.material.icons.outlined.CheckCircle
+import androidx.compose.material.icons.outlined.CloudUpload
+import androidx.compose.material.icons.outlined.Layers
+import androidx.compose.material.icons.outlined.LocationOn
+import androidx.compose.material.icons.outlined.Map
+import androidx.compose.material.icons.outlined.Menu
+import androidx.compose.material.icons.outlined.MyLocation
+import androidx.compose.material.icons.outlined.Navigation
+import androidx.compose.material.icons.outlined.ScreenRotation
+import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material.icons.outlined.Smartphone
+import androidx.compose.material.icons.outlined.Tablet
+import androidx.compose.material.icons.outlined.Timeline
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CardDefaults
@@ -316,9 +317,9 @@ fun MobileDevicePreviewFrame(
             val isSelected = formFactor == factor
             val icon =
               if (factor == DeviceFormFactor.MOBILE) {
-                Icons.Default.Smartphone
+                Icons.Outlined.Smartphone
               } else {
-                Icons.Default.Tablet
+                Icons.Outlined.Tablet
               }
             SegmentedButton(
               selected = isSelected,
@@ -353,7 +354,7 @@ fun MobileDevicePreviewFrame(
           onClick = { onRotateDevice() },
           leadingIcon = {
             Icon(
-              imageVector = Icons.Default.ScreenRotation,
+              imageVector = Icons.Outlined.ScreenRotation,
               contentDescription = "Rotate device",
               modifier = Modifier.size(14.dp),
             )
@@ -375,7 +376,7 @@ fun MobileDevicePreviewFrame(
             modifier = Modifier.height(32.dp),
           ) {
             Icon(
-              imageVector = Icons.Default.Map,
+              imageVector = Icons.Outlined.Map,
               contentDescription = null,
               modifier = Modifier.size(14.dp),
             )
@@ -624,7 +625,7 @@ private fun UxDesignerInspectorPanel(state: PrototypeAppState, modifier: Modifie
           contentPadding = ButtonDefaults.TextButtonContentPadding,
         ) {
           Icon(
-            imageVector = Icons.Default.Layers,
+            imageVector = Icons.Outlined.Layers,
             contentDescription = null,
             modifier = Modifier.size(13.dp),
           )
@@ -643,7 +644,7 @@ private fun UxDesignerInspectorPanel(state: PrototypeAppState, modifier: Modifie
         val mainShortcuts: List<Triple<ImageVector, String, () -> Unit>> =
           listOf(
             Triple(
-              Icons.Default.Map,
+              Icons.Outlined.Map,
               "○ Pending Parcel (NYR-112)",
               {
                 state.navigateTo(PrototypeScreen.MAIN_SURVEY)
@@ -652,7 +653,7 @@ private fun UxDesignerInspectorPanel(state: PrototypeAppState, modifier: Modifie
               },
             ),
             Triple(
-              Icons.Default.Map,
+              Icons.Outlined.Map,
               "◐ In Progress (NYR-108)",
               {
                 state.navigateTo(PrototypeScreen.MAIN_SURVEY)
@@ -661,7 +662,7 @@ private fun UxDesignerInspectorPanel(state: PrototypeAppState, modifier: Modifie
               },
             ),
             Triple(
-              Icons.Default.CheckCircle,
+              Icons.Filled.CheckCircle, // Filled: indicates the completed state.
               "✓ Completed (NYR-104)",
               {
                 state.navigateTo(PrototypeScreen.MAIN_SURVEY)
@@ -670,7 +671,7 @@ private fun UxDesignerInspectorPanel(state: PrototypeAppState, modifier: Modifie
               },
             ),
             Triple(
-              Icons.Default.Timeline,
+              Icons.Outlined.Timeline,
               "✓ Transect Line (SHD-201)",
               {
                 state.navigateTo(PrototypeScreen.MAIN_SURVEY)
@@ -679,7 +680,7 @@ private fun UxDesignerInspectorPanel(state: PrototypeAppState, modifier: Modifie
               },
             ),
             Triple(
-              Icons.Default.CheckCircle,
+              Icons.Outlined.CheckCircle,
               "Standalone Submission (No Feature)",
               {
                 state.navigateTo(PrototypeScreen.MAIN_SURVEY)
@@ -688,7 +689,7 @@ private fun UxDesignerInspectorPanel(state: PrototypeAppState, modifier: Modifie
               },
             ),
             Triple(
-              Icons.Default.Navigation,
+              Icons.Outlined.Navigation,
               "Navigate to Feature",
               {
                 state.navigateTo(PrototypeScreen.MAIN_SURVEY)
@@ -696,7 +697,7 @@ private fun UxDesignerInspectorPanel(state: PrototypeAppState, modifier: Modifie
               },
             ),
             Triple(
-              Icons.Default.Layers,
+              Icons.Outlined.Layers,
               "Layers Sheet",
               {
                 state.navigateTo(PrototypeScreen.MAIN_SURVEY)
@@ -705,7 +706,7 @@ private fun UxDesignerInspectorPanel(state: PrototypeAppState, modifier: Modifie
               },
             ),
             Triple(
-              Icons.AutoMirrored.Filled.List,
+              Icons.AutoMirrored.Outlined.List,
               "Searchable List View",
               {
                 state.navigateTo(PrototypeScreen.MAIN_SURVEY)
@@ -713,7 +714,7 @@ private fun UxDesignerInspectorPanel(state: PrototypeAppState, modifier: Modifie
               },
             ),
             Triple(
-              Icons.Default.Menu,
+              Icons.Outlined.Menu,
               "Navigation Drawer",
               {
                 state.navigateTo(PrototypeScreen.MAIN_SURVEY)
@@ -721,7 +722,7 @@ private fun UxDesignerInspectorPanel(state: PrototypeAppState, modifier: Modifie
               },
             ),
             Triple(
-              Icons.Default.CloudUpload,
+              Icons.Outlined.CloudUpload,
               "Uploads (${state.mutations.size})",
               {
                 state.navigateTo(PrototypeScreen.MAIN_SURVEY)
@@ -729,7 +730,7 @@ private fun UxDesignerInspectorPanel(state: PrototypeAppState, modifier: Modifie
               },
             ),
             Triple(
-              Icons.Default.Settings,
+              Icons.Outlined.Settings,
               "Settings Screen",
               {
                 state.navigateTo(PrototypeScreen.MAIN_SURVEY)
@@ -737,7 +738,7 @@ private fun UxDesignerInspectorPanel(state: PrototypeAppState, modifier: Modifie
               },
             ),
             Triple(
-              Icons.Default.Map,
+              Icons.Outlined.Map,
               "Offline Maps & Storage",
               {
                 state.navigateTo(PrototypeScreen.MAIN_SURVEY)
@@ -745,7 +746,7 @@ private fun UxDesignerInspectorPanel(state: PrototypeAppState, modifier: Modifie
               },
             ),
             Triple(
-              Icons.Default.MyLocation,
+              Icons.Outlined.MyLocation,
               if (state.isCameraFollowingUser) "Simulate Map Pan" else "Recenter GPS",
               {
                 state.navigateTo(PrototypeScreen.MAIN_SURVEY)
@@ -758,7 +759,7 @@ private fun UxDesignerInspectorPanel(state: PrototypeAppState, modifier: Modifie
               },
             ),
             Triple(
-              Icons.Default.LocationOn,
+              Icons.Outlined.LocationOn,
               "Simulate GPS Walk",
               {
                 state.navigateTo(PrototypeScreen.MAIN_SURVEY)
@@ -828,7 +829,7 @@ private fun UxDesignerInspectorPanel(state: PrototypeAppState, modifier: Modifie
               if (query.isNotEmpty()) {
                 {
                   Icon(
-                    imageVector = Icons.Default.Search,
+                    imageVector = Icons.Outlined.Search,
                     contentDescription = null,
                     modifier = Modifier.size(14.dp),
                   )

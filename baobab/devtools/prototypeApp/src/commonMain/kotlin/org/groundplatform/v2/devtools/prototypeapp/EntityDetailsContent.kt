@@ -14,6 +14,7 @@
 package org.groundplatform.v2.devtools.prototypeapp
 
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -22,6 +23,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -31,23 +33,23 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.ChevronRight
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.CloudOff
-import androidx.compose.material.icons.filled.CloudUpload
-import androidx.compose.material.icons.filled.CollapseContent
-import androidx.compose.material.icons.filled.Description
-import androidx.compose.material.icons.filled.Link
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.Navigation
-import androidx.compose.material.icons.filled.Pentagon
-import androidx.compose.material.icons.filled.Place
-import androidx.compose.material.icons.filled.QrCode
-import androidx.compose.material.icons.filled.Share
-import androidx.compose.material.icons.filled.TableRows
-import androidx.compose.material.icons.filled.Timeline
+import androidx.compose.material.icons.outlined.ChevronRight
+import androidx.compose.material.icons.outlined.Close
+import androidx.compose.material.icons.outlined.CloudOff
+import androidx.compose.material.icons.outlined.CloudUpload
+import androidx.compose.material.icons.outlined.CollapseContent
+import androidx.compose.material.icons.outlined.Description
+import androidx.compose.material.icons.outlined.Link
+import androidx.compose.material.icons.outlined.MoreVert
+import androidx.compose.material.icons.outlined.Navigation
+import androidx.compose.material.icons.outlined.Pentagon
+import androidx.compose.material.icons.outlined.Place
+import androidx.compose.material.icons.outlined.QrCode
+import androidx.compose.material.icons.outlined.Share
+import androidx.compose.material.icons.outlined.TableRows
+import androidx.compose.material.icons.outlined.Timeline
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
@@ -73,7 +75,6 @@ import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -147,7 +148,8 @@ internal val EntityGeometryKind.maxFramingZoom: Float
   get() =
     when (this) {
       EntityGeometryKind.POINT -> 16f
-      EntityGeometryKind.LINE, EntityGeometryKind.POLYGON -> 17f
+      EntityGeometryKind.LINE,
+      EntityGeometryKind.POLYGON -> 17f
       EntityGeometryKind.NONE -> 0f
     }
 
@@ -177,10 +179,10 @@ internal fun entityGeometrySummary(
 private val EntityGeometryKind.icon: ImageVector
   get() =
     when (this) {
-      EntityGeometryKind.POINT -> Icons.Default.Place
-      EntityGeometryKind.LINE -> Icons.Default.Timeline
-      EntityGeometryKind.POLYGON -> Icons.Default.Pentagon
-      EntityGeometryKind.NONE -> Icons.Default.TableRows
+      EntityGeometryKind.POINT -> Icons.Outlined.Place
+      EntityGeometryKind.LINE -> Icons.Outlined.Timeline
+      EntityGeometryKind.POLYGON -> Icons.Outlined.Pentagon
+      EntityGeometryKind.NONE -> Icons.Outlined.TableRows
     }
 
 /** Icon indicating whether [entity] has a point, line, polygon, or no geometry. */
@@ -227,32 +229,39 @@ internal fun EntityMarkerCircle(entity: GeospatialEntityItem, modifier: Modifier
 /**
  * Status chip for an entity's details: its `marker-symbol` and status text on a fill of its
  * `marker-color`.
+ * - [compact]: a smaller chip (tighter padding, `labelSmall` text) for dense web surfaces such as
+ *   the details card body and the data table. Mobile callers keep the default size.
  */
 @Composable
-internal fun EntityStatusChip(entity: GeospatialEntityItem, modifier: Modifier = Modifier) {
+internal fun EntityStatusChip(
+  entity: GeospatialEntityItem,
+  modifier: Modifier = Modifier,
+  compact: Boolean = false,
+) {
   val fill = Color(entity.markerColorHex)
   val content = contentColorOnMarker(fill)
+  val textStyle =
+    if (compact) MaterialTheme.typography.labelSmall else MaterialTheme.typography.labelLarge
   Surface(
     modifier = modifier,
-    shape = MaterialTheme.shapes.small,
+    shape = if (compact) MaterialTheme.shapes.extraSmall else MaterialTheme.shapes.small,
     color = fill,
     contentColor = content,
   ) {
     Row(
-      modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+      modifier =
+        if (compact) {
+          Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+        } else {
+          Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
+        },
       verticalAlignment = Alignment.CenterVertically,
-      horizontalArrangement = Arrangement.spacedBy(6.dp),
+      horizontalArrangement = Arrangement.spacedBy(if (compact) 4.dp else 6.dp),
     ) {
       if (entity.hasMarkerSymbol) {
-        Text(
-          text = entity.markerSymbol,
-          style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold),
-        )
+        Text(text = entity.markerSymbol, style = textStyle.copy(fontWeight = FontWeight.ExtraBold))
       }
-      Text(
-        text = entity.workflowStatus,
-        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
-      )
+      Text(text = entity.workflowStatus, style = textStyle.copy(fontWeight = FontWeight.SemiBold))
     }
   }
 }
@@ -261,6 +270,11 @@ internal fun EntityStatusChip(entity: GeospatialEntityItem, modifier: Modifier =
  * One-line row for an entity record in the searchable list: geometry icon, label, and marker
  * circle. Hovering (web) or long-pressing (mobile) shows the status text in a tooltip. The selected
  * row is highlighted and scrolled into view, including when it was selected on the map.
+ *
+ * When [compact] is `true` (the web dashboard's left-hand panel), the row is a dense
+ * [compactHeight]-tall row indented by [compactStartIndent] so it lines up under its dataset header
+ * row and matches that row's height; otherwise it is a Material 3 one-line [ListItem] with a
+ * touch-friendly height.
  */
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
@@ -269,6 +283,9 @@ internal fun EntityListRow(
   isSelected: Boolean,
   onClick: () -> Unit,
   modifier: Modifier = Modifier,
+  compact: Boolean = false,
+  compactHeight: Dp = 32.dp,
+  compactStartIndent: Dp = 8.dp,
 ) {
   val bringIntoViewRequester = remember { BringIntoViewRequester() }
   LaunchedEffect(isSelected) { if (isSelected) bringIntoViewRequester.bringIntoView() }
@@ -279,35 +296,69 @@ internal fun EntityListRow(
     state = rememberTooltipState(),
     modifier = modifier.bringIntoViewRequester(bringIntoViewRequester),
   ) {
-    ListItem(
-      headlineContent = {
+    if (compact) {
+      Row(
+        modifier =
+          Modifier.fillMaxWidth()
+            .height(compactHeight)
+            .clip(MaterialTheme.shapes.small)
+            .background(
+              if (isSelected) MaterialTheme.colorScheme.secondaryContainer else Color.Transparent
+            )
+            .clickable(onClick = onClick)
+            .semantics { stateDescription = entity.workflowStatus }
+            .padding(start = compactStartIndent, end = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
+      ) {
+        EntityGeometryIcon(entity = entity, size = 18.dp)
         Text(
           text = entity.label,
           style = MaterialTheme.typography.bodyMedium,
           fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
-          maxLines = 1,
-          overflow = TextOverflow.Ellipsis,
-        )
-      },
-      leadingContent = { EntityGeometryIcon(entity = entity) },
-      trailingContent = { EntityMarkerCircle(entity = entity) },
-      colors =
-        ListItemDefaults.colors(
-          containerColor =
-            if (isSelected) MaterialTheme.colorScheme.secondaryContainer else Color.Transparent,
-          headlineColor =
+          color =
             if (isSelected) {
               MaterialTheme.colorScheme.onSecondaryContainer
             } else {
               MaterialTheme.colorScheme.onSurface
             },
-        ),
-      modifier =
-        Modifier.fillMaxWidth()
-          .clip(MaterialTheme.shapes.small)
-          .clickable(onClick = onClick)
-          .semantics { stateDescription = entity.workflowStatus },
-    )
+          maxLines = 1,
+          overflow = TextOverflow.Ellipsis,
+          modifier = Modifier.weight(1f),
+        )
+        EntityMarkerCircle(entity = entity, modifier = Modifier.size(20.dp))
+      }
+    } else {
+      ListItem(
+        headlineContent = {
+          Text(
+            text = entity.label,
+            style = MaterialTheme.typography.bodyMedium,
+            fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+          )
+        },
+        leadingContent = { EntityGeometryIcon(entity = entity) },
+        trailingContent = { EntityMarkerCircle(entity = entity) },
+        colors =
+          ListItemDefaults.colors(
+            containerColor =
+              if (isSelected) MaterialTheme.colorScheme.secondaryContainer else Color.Transparent,
+            headlineColor =
+              if (isSelected) {
+                MaterialTheme.colorScheme.onSecondaryContainer
+              } else {
+                MaterialTheme.colorScheme.onSurface
+              },
+          ),
+        modifier =
+          Modifier.fillMaxWidth()
+            .clip(MaterialTheme.shapes.small)
+            .clickable(onClick = onClick)
+            .semantics { stateDescription = entity.workflowStatus },
+      )
+    }
   }
 }
 
@@ -315,6 +366,9 @@ internal fun EntityListRow(
  * Header of an entity's details surface: optional back button, geometry icon, label, status chip
  * with an optional [statusAccessory] next to it, optional [trailingActions], an optional collapse
  * button, and an optional close button (rendered only when [onClose] is non-null).
+ * - [showStatus]: whether to show the status row (status chip and [statusAccessory]) under the
+ *   label. The web details card turns it off and shows a compact status chip in its `Data` tab
+ *   body.
  */
 @Composable
 internal fun EntityDetailsHeader(
@@ -324,6 +378,7 @@ internal fun EntityDetailsHeader(
   onBack: (() -> Unit)? = null,
   backContentDescription: String = "Back to all map features",
   onCollapse: (() -> Unit)? = null,
+  showStatus: Boolean = true,
   statusAccessory: @Composable () -> Unit = {},
   trailingActions: @Composable () -> Unit = {},
 ) {
@@ -335,7 +390,7 @@ internal fun EntityDetailsHeader(
     if (onBack != null) {
       IconButton(onClick = onBack, modifier = Modifier.size(32.dp)) {
         Icon(
-          imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+          imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
           contentDescription = backContentDescription,
           modifier = Modifier.size(20.dp),
         )
@@ -350,20 +405,22 @@ internal fun EntityDetailsHeader(
         maxLines = 2,
         overflow = TextOverflow.Ellipsis,
       )
-      Row(
-        modifier = Modifier.padding(top = 4.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(6.dp),
-      ) {
-        EntityStatusChip(entity = entity)
-        statusAccessory()
+      if (showStatus) {
+        Row(
+          modifier = Modifier.padding(top = 4.dp),
+          verticalAlignment = Alignment.CenterVertically,
+          horizontalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+          EntityStatusChip(entity = entity)
+          statusAccessory()
+        }
       }
     }
     trailingActions()
     if (onCollapse != null) {
       IconButton(onClick = onCollapse, modifier = Modifier.size(32.dp)) {
         Icon(
-          imageVector = Icons.Default.CollapseContent,
+          imageVector = Icons.Outlined.CollapseContent,
           contentDescription = "Collapse details",
           tint = MaterialTheme.colorScheme.onSurfaceVariant,
           modifier = Modifier.size(22.dp),
@@ -373,7 +430,7 @@ internal fun EntityDetailsHeader(
     if (onClose != null) {
       IconButton(onClick = onClose, modifier = Modifier.size(32.dp)) {
         Icon(
-          imageVector = Icons.Default.Close,
+          imageVector = Icons.Outlined.Close,
           contentDescription = "Close details",
           tint = MaterialTheme.colorScheme.onSurfaceVariant,
           modifier = Modifier.size(20.dp),
@@ -401,7 +458,7 @@ internal fun DetailsOverflowMenu(
   Box(modifier = modifier) {
     IconButton(onClick = { isExpanded = true }, modifier = Modifier.size(32.dp)) {
       Icon(
-        imageVector = Icons.Default.MoreVert,
+        imageVector = Icons.Outlined.MoreVert,
         contentDescription = contentDescription,
         tint = MaterialTheme.colorScheme.onSurfaceVariant,
         modifier = Modifier.size(20.dp),
@@ -469,7 +526,7 @@ private fun RelatedRecordLink(related: GeospatialEntityItem, onClick: () -> Unit
     horizontalArrangement = Arrangement.spacedBy(6.dp),
   ) {
     Icon(
-      imageVector = Icons.Default.Link,
+      imageVector = Icons.Outlined.Link,
       contentDescription = null,
       tint = MaterialTheme.colorScheme.primary,
       modifier = Modifier.size(16.dp),
@@ -486,10 +543,14 @@ private fun RelatedRecordLink(related: GeospatialEntityItem, onClick: () -> Unit
 
 /**
  * Entity properties pane: all data associated with the entity (its current state), arranged
- * vertically, with a click-through to its submissions.
- * - [isWeb]: shows the "Show in table" button at the bottom and omits the actions row (QR code and
- * Share PDF live in the web header's overflow menu) and mobile-only field actions (`Navigate`, data
- * collection launchers, and `Uploads` links). On mobile, sync status is a chip in the header.
+ * vertically.
+ * - [isWeb]: the body of the web card's `Data` tab. Starts with a compact status chip (the web
+ *   header omits it), shows the "Show in table" button at the bottom, and omits the actions row (QR
+ *   code and Share PDF live in the web header's overflow menu), mobile-only field actions
+ *   (`Navigate`, data collection launchers, and `Uploads` links), and the submissions click-through
+ *   (submissions live in the web card's `History` tab).
+ * - On mobile, status and sync status are chips in the header, and the pane ends with a
+ *   click-through to the entity's submissions.
  */
 @Composable
 internal fun EntityPropertiesPane(
@@ -498,7 +559,9 @@ internal fun EntityPropertiesPane(
   isWeb: Boolean,
 ) {
   Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-    if (!isWeb) {
+    if (isWeb) {
+      EntityStatusChip(entity = entity, compact = true)
+    } else {
       EntityActionsRow(entity = entity, state = state)
       EntityDataCollectionLaunchers(entity = entity, state = state)
     }
@@ -523,13 +586,15 @@ internal fun EntityPropertiesPane(
       }
     }
 
-    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-    EntitySubmissionsLink(entity = entity, state = state, isWeb = isWeb)
+    if (!isWeb) {
+      HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+      EntitySubmissionsLink(entity = entity, state = state)
+    }
 
     if (isWeb) {
       FilledTonalButton(onClick = { state.showSelectedEntityInTable() }) {
         Icon(
-          imageVector = Icons.Default.TableRows,
+          imageVector = Icons.Outlined.TableRows,
           contentDescription = null,
           modifier = Modifier.size(16.dp),
         )
@@ -546,8 +611,8 @@ private fun entityOverflowActions(
   state: PrototypeAppState,
 ): List<DetailsMenuAction> =
   listOf(
-    DetailsMenuAction("QR code", Icons.Default.QrCode) { state.openEntityQrCode(entity.id) },
-    DetailsMenuAction("Share PDF", Icons.Default.Share) { state.shareEntityPdf(entity.id) },
+    DetailsMenuAction("QR code", Icons.Outlined.QrCode) { state.openEntityQrCode(entity.id) },
+    DetailsMenuAction("Share PDF", Icons.Outlined.Share) { state.shareEntityPdf(entity.id) },
   )
 
 /** Row of mobile entity actions: `Navigate`, QR code, Share PDF, and `Uploads`. */
@@ -577,7 +642,7 @@ private fun EntityActionsRow(entity: GeospatialEntityItem, state: PrototypeAppSt
         },
         leadingIcon = {
           Icon(
-            imageVector = Icons.Default.Navigation,
+            imageVector = Icons.Outlined.Navigation,
             contentDescription = null,
             modifier = Modifier.size(16.dp),
           )
@@ -589,7 +654,7 @@ private fun EntityActionsRow(entity: GeospatialEntityItem, state: PrototypeAppSt
       label = { Text("QR code") },
       leadingIcon = {
         Icon(
-          imageVector = Icons.Default.QrCode,
+          imageVector = Icons.Outlined.QrCode,
           contentDescription = null,
           modifier = Modifier.size(16.dp),
         )
@@ -600,7 +665,7 @@ private fun EntityActionsRow(entity: GeospatialEntityItem, state: PrototypeAppSt
       label = { Text("Share PDF") },
       leadingIcon = {
         Icon(
-          imageVector = Icons.Default.Share,
+          imageVector = Icons.Outlined.Share,
           contentDescription = null,
           modifier = Modifier.size(16.dp),
         )
@@ -622,7 +687,7 @@ private fun EntityActionsRow(entity: GeospatialEntityItem, state: PrototypeAppSt
         },
         leadingIcon = {
           Icon(
-            imageVector = Icons.Default.CloudUpload,
+            imageVector = Icons.Outlined.CloudUpload,
             contentDescription = null,
             modifier = Modifier.size(16.dp),
           )
@@ -651,7 +716,8 @@ private fun EntityDataCollectionLaunchers(entity: GeospatialEntityItem, state: P
           shape = MaterialTheme.shapes.small,
         ) {
           Icon(
-            imageVector = if (isEnabled) Icons.Default.Description else Icons.Default.CheckCircle,
+            // Filled check marks the completed state; outlined form icon marks actionable.
+            imageVector = if (isEnabled) Icons.Outlined.Description else Icons.Filled.CheckCircle,
             contentDescription = null,
             modifier = Modifier.size(16.dp),
           )
@@ -670,14 +736,13 @@ private fun EntityDataCollectionLaunchers(entity: GeospatialEntityItem, state: P
   }
 }
 
-/** Click-through from an entity's properties to its submissions ("Submissions (n) ›"). */
+/**
+ * Mobile click-through from an entity's properties to its submissions ("Submissions (n) ›"). On
+ * web, submissions are in the details card's `History` tab instead.
+ */
 @Composable
-private fun EntitySubmissionsLink(
-  entity: GeospatialEntityItem,
-  state: PrototypeAppState,
-  isWeb: Boolean,
-) {
-  val isOffline = !isWeb && state.isAirplaneMode
+private fun EntitySubmissionsLink(entity: GeospatialEntityItem, state: PrototypeAppState) {
+  val isOffline = state.isAirplaneMode
   val availableCount =
     if (isOffline) {
       state.availableGroupedSubmissionsForEntity(entity).sumOf { it.submissions.size }
@@ -686,10 +751,7 @@ private fun EntitySubmissionsLink(
     }
   ListItem(
     headlineContent = {
-      Text(
-        text = "Submissions ($availableCount)",
-        style = MaterialTheme.typography.titleSmall,
-      )
+      Text(text = "Submissions ($availableCount)", style = MaterialTheme.typography.titleSmall)
     },
     supportingContent = {
       Text(
@@ -703,8 +765,10 @@ private fun EntitySubmissionsLink(
         style = MaterialTheme.typography.bodySmall,
       )
     },
-    leadingContent = { Icon(imageVector = Icons.Default.Description, contentDescription = null) },
-    trailingContent = { Icon(imageVector = Icons.Default.ChevronRight, contentDescription = null) },
+    leadingContent = { Icon(imageVector = Icons.Outlined.Description, contentDescription = null) },
+    trailingContent = {
+      Icon(imageVector = Icons.Outlined.ChevronRight, contentDescription = null)
+    },
     colors = ListItemDefaults.colors(containerColor = Color.Transparent),
     modifier =
       Modifier.fillMaxWidth().clip(MaterialTheme.shapes.small).clickable {
@@ -714,8 +778,11 @@ private fun EntitySubmissionsLink(
 }
 
 /**
- * Entity submissions pane: the entity's `1:N` submissions grouped by form, one step away from its
- * properties. Submissions open in a document-style view ([SubmissionFullDetailsCard]).
+ * Entity submissions pane: the entity's `1:N` submissions grouped by form. Submissions open in a
+ * document-style view ([SubmissionFullDetailsCard]).
+ * - On mobile it is one step away from the properties, with a back button and a count heading.
+ * - On web ([isWeb]) it is the body of the details card's `History` tab, which already labels it,
+ *   so the back button and heading are omitted.
  *
  * Seeing the full list requires a connection, so on mobile while offline only submissions stored on
  * the device are listed, with a notice.
@@ -736,22 +803,24 @@ internal fun EntitySubmissionsPane(
   val count = groups.sumOf { it.submissions.size }
 
   Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-    Row(
-      verticalAlignment = Alignment.CenterVertically,
-      horizontalArrangement = Arrangement.spacedBy(4.dp),
-    ) {
-      IconButton(onClick = { state.showEntityProperties() }, modifier = Modifier.size(32.dp)) {
-        Icon(
-          imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-          contentDescription = "Back to details",
-          modifier = Modifier.size(20.dp),
+    if (!isWeb) {
+      Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+      ) {
+        IconButton(onClick = { state.showEntityProperties() }, modifier = Modifier.size(32.dp)) {
+          Icon(
+            imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
+            contentDescription = "Back to details",
+            modifier = Modifier.size(20.dp),
+          )
+        }
+        Text(
+          text = "Submissions ($count)",
+          style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+          color = MaterialTheme.colorScheme.onSurface,
         )
       }
-      Text(
-        text = "Submissions ($count)",
-        style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
-        color = MaterialTheme.colorScheme.onSurface,
-      )
     }
 
     if (isOffline) {
@@ -767,7 +836,7 @@ internal fun EntitySubmissionsPane(
           horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
           Icon(
-            imageVector = Icons.Default.CloudOff,
+            imageVector = Icons.Outlined.CloudOff,
             contentDescription = null,
             modifier = Modifier.size(16.dp),
           )
@@ -809,7 +878,7 @@ internal fun EntitySubmissionsPane(
  * Mobile details surface for the selected entity, replacing the bottom sheet's list:
  * - Header with back (← to the list), status, and a tappable sync status chip.
  * - Properties pane by default, the submissions pane one click away, and a document-style
- * submission view (← back to the submissions) when a submission is opened.
+ *   submission view (← back to the submissions) when a submission is opened.
  */
 @Composable
 internal fun EntityBottomSheetCard(
@@ -862,10 +931,13 @@ internal fun EntityBottomSheetCard(
 }
 
 /**
- * Web dashboard's floating details card (upper-right corner of the map) for the selected entity.
- * - Opens on the entity's properties; its submissions are one click away.
- * - An opened submission appears in a second tab next to the entity, in a document-style view, so
- * the user can switch between the entity and the submission.
+ * Web dashboard's floating details card (upper-right corner of the map) for the selected entity,
+ * with two tabs backed by [PrototypeAppState.entityDetailsPane]:
+ * - `Data` ([EntityDetailsPane.PROPERTIES], default): a compact status chip and the entity's
+ *   properties (its current state).
+ * - `History` ([EntityDetailsPane.SUBMISSIONS]): the entity's submissions. An opened submission
+ *   replaces the list in a document-style view, with back to the list. Opening a submission from
+ *   elsewhere (e.g. `Uploads`) selects this tab, and switching to `Data` and back keeps it open.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -876,8 +948,9 @@ internal fun WebEntityDetailsCard(
   onCollapse: (() -> Unit)? = null,
 ) {
   val submission = state.selectedSubmission?.takeIf { it.entityId == entity.id }
-  var selectedTab by
-    remember(submission?.id) { mutableIntStateOf(if (submission != null) 1 else 0) }
+  val pane = state.entityDetailsPane
+  // Each tab (and an opened submission) starts scrolled to the top.
+  val scrollState = remember(entity.id, pane, submission?.id) { ScrollState(initial = 0) }
 
   Surface(
     modifier = modifier,
@@ -890,45 +963,48 @@ internal fun WebEntityDetailsCard(
         entity = entity,
         onClose = { state.selectEntity(null) },
         onCollapse = onCollapse,
+        // The status chip is shown, compact, at the top of the `Data` tab body instead.
+        showStatus = false,
         trailingActions = {
           DetailsOverflowMenu(
             actions = entityOverflowActions(entity, state),
             contentDescription = "More ${entity.singularTypeLabel.lowercase()} actions",
           )
         },
-        modifier = Modifier.padding(start = 16.dp, end = 8.dp, top = 12.dp, bottom = 8.dp),
+        modifier = Modifier.padding(start = 16.dp, end = 8.dp, top = 12.dp, bottom = 4.dp),
       )
 
-      if (submission != null) {
-        PrimaryTabRow(selectedTabIndex = selectedTab, containerColor = Color.Transparent) {
+      PrimaryTabRow(selectedTabIndex = pane.ordinal, containerColor = Color.Transparent) {
+        EntityDetailsPane.entries.forEach { tabPane ->
           Tab(
-            selected = selectedTab == 0,
-            onClick = { selectedTab = 0 },
+            selected = pane == tabPane,
+            onClick = { state.selectEntityDetailsTab(tabPane) },
             text = {
-              Text(text = entity.singularTypeLabel, maxLines = 1, overflow = TextOverflow.Ellipsis)
-            },
-          )
-          Tab(
-            selected = selectedTab == 1,
-            onClick = { selectedTab = 1 },
-            text = {
-              Text(text = submission.formTitle, maxLines = 1, overflow = TextOverflow.Ellipsis)
+              Text(
+                text =
+                  when (tabPane) {
+                    EntityDetailsPane.PROPERTIES -> "Data"
+                    EntityDetailsPane.SUBMISSIONS -> "History"
+                  },
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+              )
             },
           )
         }
-      } else {
-        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
       }
 
       Column(
         modifier =
           Modifier.weight(1f, fill = false)
             .fillMaxWidth()
-            .verticalScroll(rememberScrollState())
+            .verticalScroll(scrollState)
             .padding(16.dp)
       ) {
         when {
-          submission != null && selectedTab == 1 ->
+          pane == EntityDetailsPane.PROPERTIES ->
+            EntityPropertiesPane(entity = entity, state = state, isWeb = true)
+          submission != null ->
             SubmissionFullDetailsCard(
               submission = submission,
               state = state,
@@ -938,12 +1014,8 @@ internal fun WebEntityDetailsCard(
               onBack = { state.selectSubmissionDetail(null) },
               onSharePdf = { state.shareSubmissionPdf(submission.id) },
               isSidePanel = true,
-              // The tab already shows the form title; keep only back and the overflow menu.
-              showTitle = false,
             )
-          state.entityDetailsPane == EntityDetailsPane.SUBMISSIONS ->
-            EntitySubmissionsPane(entity = entity, state = state, isWeb = true)
-          else -> EntityPropertiesPane(entity = entity, state = state, isWeb = true)
+          else -> EntitySubmissionsPane(entity = entity, state = state, isWeb = true)
         }
       }
     }
@@ -979,7 +1051,7 @@ internal fun WebSubmissionDetailsCard(
           modifier = Modifier.size(32.dp),
         ) {
           Icon(
-            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+            imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
             contentDescription = "Back",
             modifier = Modifier.size(20.dp),
           )
@@ -1003,7 +1075,7 @@ internal fun WebSubmissionDetailsCard(
         DetailsOverflowMenu(
           actions =
             listOf(
-              DetailsMenuAction("Share PDF", Icons.Default.Share) {
+              DetailsMenuAction("Share PDF", Icons.Outlined.Share) {
                 state.shareSubmissionPdf(submission.id)
               }
             ),
@@ -1012,7 +1084,7 @@ internal fun WebSubmissionDetailsCard(
         if (onCollapse != null) {
           IconButton(onClick = onCollapse, modifier = Modifier.size(32.dp)) {
             Icon(
-              imageVector = Icons.Default.CollapseContent,
+              imageVector = Icons.Outlined.CollapseContent,
               contentDescription = "Collapse details",
               tint = MaterialTheme.colorScheme.onSurfaceVariant,
               modifier = Modifier.size(22.dp),

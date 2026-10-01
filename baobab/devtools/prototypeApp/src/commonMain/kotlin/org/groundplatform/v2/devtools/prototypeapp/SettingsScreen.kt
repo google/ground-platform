@@ -30,13 +30,13 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.CloudUpload
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.Language
-import androidx.compose.material.icons.filled.OpenInNew
-import androidx.compose.material.icons.filled.Straighten
+import androidx.compose.material.icons.automirrored.outlined.ArrowBack
+import androidx.compose.material.icons.automirrored.outlined.OpenInNew
+import androidx.compose.material.icons.outlined.Check
+import androidx.compose.material.icons.outlined.CloudUpload
+import androidx.compose.material.icons.outlined.KeyboardArrowDown
+import androidx.compose.material.icons.outlined.Language
+import androidx.compose.material.icons.outlined.Straighten
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -80,20 +80,14 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.WEBSITE_URL
 import org.jetbrains.compose.resources.stringResource
 
 /** Option item for [SettingsSelectItem], matching `Option` in `ground-android`. */
-data class SettingsOption(
-  val label: String,
-  val value: String,
-)
+data class SettingsOption(val label: String, val value: String)
 
 /**
  * Settings screen ported from `org.groundplatform.android.ui.settings.SettingsScreen` in
  * `github.com/google/ground-android`.
  */
 @Composable
-fun SettingsScreen(
-  state: PrototypeAppState,
-  onBack: () -> Unit = { state.closeDrawerSubView() },
-) {
+fun SettingsScreen(state: PrototypeAppState, onBack: () -> Unit = { state.closeDrawerSubView() }) {
   SettingsScreen(
     settings = state.userSettings,
     storage = state.deviceStorageInfo,
@@ -153,10 +147,7 @@ fun SettingsScreen(
         title = { Text(text = stringResource(Res.string.settings_title)) },
         navigationIcon = {
           IconButton(onClick = onBack) {
-            Icon(
-              imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-              contentDescription = "Back",
-            )
+            Icon(imageVector = Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = "Back")
           }
         },
         colors =
@@ -169,16 +160,13 @@ fun SettingsScreen(
     }
   ) { innerPadding ->
     Column(
-      modifier =
-        Modifier.fillMaxSize()
-          .padding(innerPadding)
-          .verticalScroll(rememberScrollState())
+      modifier = Modifier.fillMaxSize().padding(innerPadding).verticalScroll(rememberScrollState())
     ) {
       // General Section
       SettingsCategory(title = stringResource(Res.string.general_title)) {
         // Upload Media (Over Wi-Fi only)
         SettingsSwitchItem(
-          icon = Icons.Filled.CloudUpload,
+          icon = Icons.Outlined.CloudUpload,
           title = stringResource(Res.string.upload_media_title),
           summary = stringResource(Res.string.over_wifi_summary),
           checked = settings.shouldUploadPhotosOnWifiOnly,
@@ -187,7 +175,7 @@ fun SettingsScreen(
 
         // Select Language
         SettingsSelectItem(
-          icon = Icons.Filled.Language,
+          icon = Icons.Outlined.Language,
           title = stringResource(Res.string.select_language_title),
           options = languageOptions,
           currentValue = settings.language,
@@ -196,7 +184,7 @@ fun SettingsScreen(
 
         // Measurement Units
         SettingsSelectItem(
-          icon = Icons.Filled.Straighten,
+          icon = Icons.Outlined.Straighten,
           title = stringResource(Res.string.select_units_title),
           options = lengthOptions,
           currentValue = settings.measurementUnits.name,
@@ -218,7 +206,7 @@ fun SettingsScreen(
       // Help Section
       SettingsCategory(title = stringResource(Res.string.help_title)) {
         SettingsItem(
-          icon = Icons.Filled.OpenInNew,
+          icon = Icons.AutoMirrored.Outlined.OpenInNew,
           title = stringResource(Res.string.visit_website_title),
           summary = WEBSITE_URL,
           onClick = onVisitWebsiteClick,
@@ -236,7 +224,7 @@ fun SettingsScreen(
             verticalAlignment = Alignment.CenterVertically,
           ) {
             Icon(
-              imageVector = Icons.Filled.Check,
+              imageVector = Icons.Outlined.Check,
               contentDescription = null,
               tint = MaterialTheme.colorScheme.onSecondaryContainer,
               modifier = Modifier.size(16.dp),
@@ -255,14 +243,11 @@ fun SettingsScreen(
 }
 
 /**
- * A composable that groups related settings under a labeled category.
- * Ported from `SettingsCategory.kt` in `github.com/google/ground-android`.
+ * A composable that groups related settings under a labeled category. Ported from
+ * `SettingsCategory.kt` in `github.com/google/ground-android`.
  */
 @Composable
-fun SettingsCategory(
-  title: String,
-  content: @Composable ColumnScope.() -> Unit,
-) {
+fun SettingsCategory(title: String, content: @Composable ColumnScope.() -> Unit) {
   Column(modifier = Modifier.fillMaxWidth()) {
     Text(
       text = title,
@@ -276,8 +261,8 @@ fun SettingsCategory(
 }
 
 /**
- * A reusable UI component representing a single row in a settings screen.
- * Ported from `SettingsItem.kt` in `github.com/google/ground-android`.
+ * A reusable UI component representing a single row in a settings screen. Ported from
+ * `SettingsItem.kt` in `github.com/google/ground-android`.
  */
 @Composable
 fun SettingsItem(
@@ -290,10 +275,7 @@ fun SettingsItem(
 ) {
   Row(
     modifier =
-      modifier
-        .fillMaxWidth()
-        .clickable(onClick = onClick, role = Role.Button)
-        .padding(16.dp),
+      modifier.fillMaxWidth().clickable(onClick = onClick, role = Role.Button).padding(16.dp),
     verticalAlignment = Alignment.CenterVertically,
   ) {
     Icon(
@@ -323,9 +305,9 @@ fun SettingsItem(
 }
 
 /**
- * A settings item that allows users to select a single value from a list of options.
- * When clicked, it displays a dropdown menu with options populated from [options].
- * Ported from `SettingsSelectItem.kt` in `github.com/google/ground-android`.
+ * A settings item that allows users to select a single value from a list of options. When clicked,
+ * it displays a dropdown menu with options populated from [options]. Ported from
+ * `SettingsSelectItem.kt` in `github.com/google/ground-android`.
  */
 @Composable
 fun SettingsSelectItem(
@@ -368,7 +350,7 @@ fun SettingsSelectItem(
             if (isSelected) {
               {
                 Icon(
-                  imageVector = Icons.Filled.Check,
+                  imageVector = Icons.Outlined.Check,
                   contentDescription = null,
                   tint = MaterialTheme.colorScheme.primary,
                   modifier = Modifier.size(18.dp),
@@ -388,8 +370,8 @@ fun SettingsSelectItem(
 }
 
 /**
- * A reusable settings item component with a title, optional summary, and a switch toggle.
- * Ported from `SettingsSwitchItem.kt` in `github.com/google/ground-android`.
+ * A reusable settings item component with a title, optional summary, and a switch toggle. Ported
+ * from `SettingsSwitchItem.kt` in `github.com/google/ground-android`.
  */
 @Composable
 fun SettingsSwitchItem(
@@ -433,15 +415,12 @@ fun SettingsSwitchItem(
 }
 
 /**
- * Language selector component for the Sign In / Login screen ([SignInScreen]), built using
- * the same [SettingsSelectItem] and `ic_language` icon ([Icons.Filled.Language]) as the
- * `ground-android` Settings screen.
+ * Language selector component for the Sign In / Login screen ([SignInScreen]), built using the same
+ * [SettingsSelectItem] and `ic_language` icon ([Icons.Outlined.Language]) as the `ground-android`
+ * Settings screen.
  */
 @Composable
-fun SignInLanguageSelector(
-  state: PrototypeAppState,
-  modifier: Modifier = Modifier,
-) {
+fun SignInLanguageSelector(state: PrototypeAppState, modifier: Modifier = Modifier) {
   val languageOptions = remember {
     LANGUAGE_OPTIONS.map { SettingsOption(label = it.label, value = it.code) }
   }
@@ -450,23 +429,19 @@ fun SignInLanguageSelector(
     modifier =
       modifier
         .fillMaxWidth()
-        .border(
-          1.dp,
-          MaterialTheme.colorScheme.outlineVariant,
-          MaterialTheme.shapes.medium,
-        ),
+        .border(1.dp, MaterialTheme.colorScheme.outlineVariant, MaterialTheme.shapes.medium),
     shape = MaterialTheme.shapes.medium,
     color = MaterialTheme.colorScheme.surfaceContainerLow,
   ) {
     SettingsSelectItem(
-      icon = Icons.Filled.Language,
+      icon = Icons.Outlined.Language,
       title = stringResource(Res.string.select_language_title),
       options = languageOptions,
       currentValue = state.selectedLanguageCode,
       onValueChanged = { state.updateSelectedLanguage(it) },
       trailingContent = {
         Icon(
-          imageVector = Icons.Default.KeyboardArrowDown,
+          imageVector = Icons.Outlined.KeyboardArrowDown,
           contentDescription = null,
           tint = MaterialTheme.colorScheme.onSurfaceVariant,
         )

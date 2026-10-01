@@ -80,7 +80,15 @@ internal external fun mapboxStyleReady(host: MapboxHost): Promise<JsAny?>
 )
 internal external fun mapboxSetStyle(host: MapboxHost, style: String)
 
-/** Positions the clip (`c*`) and map (`i*`) elements, in CSS px; resizes the map if needed. */
+/**
+ * Positions the clip (`c*`) and map (`i*`) elements, in CSS px; resizes the map if needed.
+ *
+ * Resizing the map resizes its WebGL canvas, which clears the drawing buffer, while Mapbox GL JS
+ * only repaints on its next animation frame. Left alone, the browser composites one blank frame per
+ * resize, so a map resized every frame (an animating or dragged side panel) flashes. The map is
+ * therefore redrawn synchronously right after the resize, in the same task as the Compose frame:
+ * `redraw()` where available (Mapbox GL JS v2+), else the same steps on v1's internal frame API.
+ */
 @JsFun(
   """(h, visible, cl, ct, cw, ch, il, it, iw, ih) => {
     const o = h.outer.style, i = h.inner.style;
@@ -89,7 +97,20 @@ internal external fun mapboxSetStyle(host: MapboxHost, style: String)
     i.left = il + 'px'; i.top = it + 'px'; i.width = iw + 'px'; i.height = ih + 'px';
     if (Math.abs(h.w - iw) > 0.5 || Math.abs(h.h - ih) > 0.5) {
       h.w = iw; h.h = ih;
-      h.map.resize();
+      const map = h.map;
+      map.resize();
+      if (iw < 1 || ih < 1 || !map.style) return;
+      try {
+        if (typeof map.redraw === 'function') {
+          map.redraw();
+        } else if (typeof map._render === 'function') {
+          if (map._frame) { map._frame.cancel(); map._frame = null; }
+          map._render(performance.now());
+        }
+      } catch (e) {
+        // Fall back to Mapbox's own repaint on the next animation frame.
+        map.triggerRepaint();
+      }
     }
   }"""
 )

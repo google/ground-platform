@@ -16,6 +16,7 @@ package org.groundplatform.v2.devtools.prototypeapp
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.expandHorizontally
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -23,7 +24,14 @@ import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.draggable
+import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.hoverable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsDraggedAsState
+import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -35,28 +43,35 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.CornerSize
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Description
-import androidx.compose.material.icons.filled.Download
-import androidx.compose.material.icons.filled.ExpandContent
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.KeyboardArrowUp
-import androidx.compose.material.icons.filled.TableRows
+import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowLeft
+import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowRight
+import androidx.compose.material.icons.outlined.Close
+import androidx.compose.material.icons.outlined.Description
+import androidx.compose.material.icons.outlined.Download
+import androidx.compose.material.icons.outlined.ExpandContent
+import androidx.compose.material.icons.outlined.KeyboardArrowDown
+import androidx.compose.material.icons.outlined.KeyboardArrowUp
+import androidx.compose.material.icons.outlined.TableRows
+import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalMinimumInteractiveComponentSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.PrimaryScrollableTabRow
@@ -69,18 +84,27 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TooltipAnchorPosition
 import androidx.compose.material3.TooltipBox
 import androidx.compose.material3.TooltipDefaults
-import androidx.compose.material3.VerticalDivider
+import androidx.compose.material3.VerticalDragHandle
 import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerHoverIcon
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
@@ -106,8 +130,14 @@ internal data class DashboardDataTableRow(
   val entity: GeospatialEntityItem? = null,
 )
 
-/** Column holding the record's workflow status, rendered as the status chip. */
+/** First column: the record's workflow status, rendered as a compact status chip. */
 internal const val DashboardStatusColumn = "Status"
+
+/** Column holding the record's label; it is wider than the other columns. */
+internal const val DashboardLabelColumn = "Label"
+
+/** Width of the [DashboardStatusColumn], which holds a compact status chip. */
+private val DashboardStatusColumnWidth = 140.dp
 
 /**
  * A table rendered in the web dashboard's collapsible data table panel, listing every record of one
@@ -129,9 +159,10 @@ internal data class DashboardDataTable(
 
 /**
  * Builds the web dashboard's data tables: one per entity dataset in [entities] (in order of first
- * appearance), with the [selectedEntityId] row highlighted. Presentation properties (marker and
- * stroke styling) are left out; property values that reference another record are shown as that
- * record's label via [relatedLabel].
+ * appearance), with the [selectedEntityId] row highlighted. Columns are [DashboardStatusColumn],
+ * [DashboardLabelColumn], `Submissions`, `GeoID`, then the dataset's properties. Presentation
+ * properties (marker and stroke styling) are left out; property values that reference another
+ * record are shown as that record's label via [relatedLabel].
  */
 internal fun buildDashboardDataTables(
   entities: List<GeospatialEntityItem>,
@@ -158,15 +189,17 @@ internal fun buildDashboardDataTables(
           } else {
             DashboardDataTableKind.DATA_TABLE
           },
-        columns = listOf("Label", DashboardStatusColumn, "Submissions", "GeoID") + propertyKeys,
+        columns =
+          listOf(DashboardStatusColumn, DashboardLabelColumn, "Submissions", "GeoID") +
+            propertyKeys,
         rows =
           datasetEntities.map { entity ->
             DashboardDataTableRow(
               id = entity.id,
               cells =
                 listOf(
-                  entity.label,
                   entity.workflowStatus,
+                  entity.label,
                   entity.submissionCount.toString(),
                   entity.geoId,
                 ) +
@@ -215,7 +248,14 @@ internal fun dashboardTableCsvFileName(table: DashboardDataTable): String {
   return "$baseName.csv"
 }
 
-private val DashboardSidePanelWidth = 300.dp
+/**
+ * Width of the separator between the side panel and the map. The whole separator is the drag target
+ * for resizing the panel, and holds the drag handle.
+ */
+private val DashboardSidePanelSeparatorWidth = 8.dp
+/** Size of the collapse / expand tab on the side panel's right border. */
+private val DashboardSidePanelTabWidth = 20.dp
+private val DashboardSidePanelTabHeight = 48.dp
 private val DashboardFirstColumnWidth = 200.dp
 private val DashboardColumnWidth = 160.dp
 private val DashboardTableTabsHeight = 48.dp
@@ -225,10 +265,13 @@ private val DashboardOverlayMargin = 14.dp
 /**
  * Main page of the Ground web dashboard (`#dashboard`).
  * - **Left**: A collapsible side panel with the searchable list of map features (one line per
- *   record) and places ([BottomSheetSearchableListContent]).
+ *   record) and places ([BottomSheetSearchableListContent]). Drag its right border to resize it
+ *   ([DashboardSidePanelSeparator], width kept in [PrototypeAppState.sidePanelWidthDp]); the tab
+ *   centered on that border collapses it, and the same tab at the map's left edge expands it again
+ *   ([DashboardSidePanelToggleTab]).
  * - **Main area**: The live survey map ([SurveyMainMap]). Selecting a map feature pans and zooms to
  *   it and opens its details in a floating card in the upper-right corner (
- *   [WebEntityDetailsCard]). A floating Map / Satellite toggle sits in the lower-left corner.
+ *   [WebEntityDetailsCard]). A floating Map / Satellite toggle sits in the upper-left corner.
  * - **Bottom of the map**: A collapsible panel of data tables, one per entity dataset (
  *   [DashboardDataTablesPanel]). It only expands on request: from its ▲ toggle or the card's "Show
  *   in table" button.
@@ -242,26 +285,48 @@ internal fun WebDashboardPage(
   val activeQrEntity = state.activeQrCodeEntity
   val activePdfSheet = state.activeSharedPdfSheet
   val isSidePanelExpanded = state.isSidePanelExpanded
+  // One animated fraction scales the user-chosen width, so collapsing, expanding, and dragging all
+  // drive the same layout and the panel's contents keep their full width while sliding.
+  val expandedFraction by
+    animateFloatAsState(
+      targetValue = if (isSidePanelExpanded) 1f else 0f,
+      label = "sidePanelExpandedFraction",
+    )
+  val fullPanelWidth = state.sidePanelWidthDp.dp
+  val panelWidth = fullPanelWidth * expandedFraction
+  val isPanelShown = expandedFraction > 0f
+  val borderEnd = if (isPanelShown) panelWidth + DashboardSidePanelSeparatorWidth else 0.dp
 
   Box(modifier = Modifier.fillMaxSize()) {
     Column(modifier = Modifier.fillMaxSize()) {
       WebTopToolbar(state = state, onOpenSurveyEditor = onOpenSurveyEditor, onSignOut = onSignOut)
       HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-      Row(modifier = Modifier.fillMaxWidth().weight(1f)) {
-        AnimatedVisibility(
-          visible = isSidePanelExpanded,
-          enter = expandHorizontally(),
-          exit = shrinkHorizontally(),
-        ) {
-          Row(modifier = Modifier.fillMaxHeight()) {
-            DashboardSidePanel(
-              state = state,
-              modifier = Modifier.width(DashboardSidePanelWidth).fillMaxHeight(),
+      Box(modifier = Modifier.fillMaxWidth().weight(1f)) {
+        Row(modifier = Modifier.fillMaxSize()) {
+          if (isPanelShown) {
+            Box(modifier = Modifier.width(panelWidth).fillMaxHeight().clipToBounds()) {
+              DashboardSidePanel(
+                state = state,
+                modifier =
+                  Modifier.wrapContentWidth(Alignment.End, unbounded = true)
+                    .width(fullPanelWidth)
+                    .fillMaxHeight(),
+              )
+            }
+            DashboardSidePanelSeparator(
+              widthDp = state.sidePanelWidthDp,
+              onWidthChange = state::updateSidePanelWidth,
+              enabled = isSidePanelExpanded,
+              modifier = Modifier.width(DashboardSidePanelSeparatorWidth).fillMaxHeight(),
             )
-            VerticalDivider(color = MaterialTheme.colorScheme.outlineVariant)
           }
+          DashboardMapArea(state = state, modifier = Modifier.weight(1f).fillMaxHeight())
         }
-        DashboardMapArea(state = state, modifier = Modifier.weight(1f).fillMaxHeight())
+        DashboardSidePanelToggleTab(
+          isExpanded = isSidePanelExpanded,
+          onToggle = { state.toggleSidePanel() },
+          modifier = Modifier.align(Alignment.CenterStart).offset(x = borderEnd),
+        )
       }
     }
 
@@ -283,6 +348,114 @@ private fun DashboardSidePanel(state: PrototypeAppState, modifier: Modifier = Mo
       modifier = Modifier.fillMaxSize().padding(top = 4.dp),
       isSidePanel = true,
     )
+  }
+}
+
+/**
+ * Separator between the side panel and the map, [DashboardSidePanelSeparatorWidth] wide, with an M3
+ * [VerticalDragHandle] centered vertically so it lines up with the collapse tab
+ * ([DashboardSidePanelToggleTab]) just to its right. When [enabled], the whole separator is the
+ * drag target: it shows a resize cursor and a darker fill while hovered or dragged, and dragging
+ * reports the new width through [onWidthChange], which clamps it. The unclamped drag position is
+ * tracked so the border only moves back once the pointer returns past the clamp limit.
+ */
+@Composable
+private fun DashboardSidePanelSeparator(
+  widthDp: Float,
+  onWidthChange: (Float) -> Unit,
+  enabled: Boolean,
+  modifier: Modifier = Modifier,
+) {
+  val density = LocalDensity.current
+  val interactionSource = remember { MutableInteractionSource() }
+  val isHovered by interactionSource.collectIsHoveredAsState()
+  val isDragged by interactionSource.collectIsDraggedAsState()
+  val isActive = enabled && (isHovered || isDragged)
+  val currentWidthDp by rememberUpdatedState(widthDp)
+  var unclampedWidthDp by remember { mutableStateOf(widthDp) }
+  val draggableState = rememberDraggableState { deltaPx ->
+    unclampedWidthDp += with(density) { deltaPx.toDp() }.value
+    onWidthChange(unclampedWidthDp)
+  }
+
+  DisposableEffect(isActive) {
+    if (isActive) showPlatformHorizontalResizeCursor(true)
+    onDispose { if (isActive) showPlatformHorizontalResizeCursor(false) }
+  }
+
+  Box(
+    modifier =
+      modifier
+        .background(
+          if (isActive) {
+            MaterialTheme.colorScheme.surfaceContainerHighest
+          } else {
+            MaterialTheme.colorScheme.surfaceContainerHigh
+          }
+        )
+        .then(
+          if (enabled) {
+            Modifier.pointerHoverIcon(HorizontalResizePointerIcon)
+              .hoverable(interactionSource)
+              .draggable(
+                state = draggableState,
+                orientation = Orientation.Horizontal,
+                interactionSource = interactionSource,
+                onDragStarted = { unclampedWidthDp = currentWidthDp },
+              )
+              .semantics { contentDescription = "Resize side panel" }
+          } else {
+            Modifier
+          }
+        ),
+    contentAlignment = Alignment.Center,
+  ) {
+    // The separator is the drag target, so the handle doesn't need its own 48 dp touch target
+    // (which would spill over the list and the map). It shares the interaction source to show its
+    // dragged state while resizing.
+    CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides 0.dp) {
+      VerticalDragHandle(interactionSource = interactionSource)
+    }
+  }
+}
+
+/**
+ * Small tab just right of the side panel's border, vertically centered: a left chevron collapses
+ * the panel; once collapsed, the tab rests at the map's left edge with a right chevron to expand
+ * it.
+ */
+@Composable
+private fun DashboardSidePanelToggleTab(
+  isExpanded: Boolean,
+  onToggle: () -> Unit,
+  modifier: Modifier = Modifier,
+) {
+  val label = if (isExpanded) "Collapse side panel" else "Expand side panel"
+  val shape = RoundedCornerShape(topEnd = 8.dp, bottomEnd = 8.dp)
+  Surface(
+    modifier = modifier.size(DashboardSidePanelTabWidth, DashboardSidePanelTabHeight),
+    shape = shape,
+    color = MaterialTheme.colorScheme.surfaceContainerLow,
+    contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+    border = BorderStroke(DividerDefaults.Thickness, MaterialTheme.colorScheme.outlineVariant),
+    shadowElevation = 1.dp,
+  ) {
+    Box(
+      modifier =
+        Modifier.fillMaxSize().clickable(onClickLabel = label, role = Role.Button) { onToggle() },
+      contentAlignment = Alignment.Center,
+    ) {
+      Icon(
+        imageVector =
+          if (isExpanded) {
+            Icons.AutoMirrored.Outlined.KeyboardArrowLeft
+          } else {
+            Icons.AutoMirrored.Outlined.KeyboardArrowRight
+          },
+        contentDescription = label,
+        modifier = Modifier.size(18.dp),
+      )
+    }
   }
 }
 
@@ -376,11 +549,10 @@ private fun DashboardMapArea(state: PrototypeAppState, modifier: Modifier = Modi
       remember(allEntities, selectedLayerDatasetId) {
         selectedLayerDatasetId?.let { buildDashboardLayerSummary(allEntities, it) }
       }
-    val summaryLayer =
-      layerSummary?.let { summary ->
-        val layerId = allEntities.firstOrNull { it.datasetId == summary.datasetId }?.layerId
-        state.mapLayers.firstOrNull { it.id == layerId }
-      }
+    val summaryLayer = layerSummary?.let { summary ->
+      val layerId = allEntities.firstOrNull { it.datasetId == summary.datasetId }?.layerId
+      state.mapLayers.firstOrNull { it.id == layerId }
+    }
     val hasDetails = selectedEntity != null || selectedSubmission != null || layerSummary != null
     val cardModifier =
       Modifier.padding(DashboardOverlayMargin)
@@ -516,7 +688,7 @@ private fun CollapsedDetailsPill(
       horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
       Icon(
-        imageVector = Icons.Default.ExpandContent,
+        imageVector = Icons.Outlined.ExpandContent,
         contentDescription = "Expand details",
         tint = MaterialTheme.colorScheme.primary,
         modifier = Modifier.size(20.dp),
@@ -533,7 +705,7 @@ private fun CollapsedDetailsPill(
         )
       } else if (submission != null) {
         Icon(
-          imageVector = Icons.Default.Description,
+          imageVector = Icons.Outlined.Description,
           contentDescription = null,
           tint = MaterialTheme.colorScheme.primary,
           modifier = Modifier.size(18.dp),
@@ -549,7 +721,7 @@ private fun CollapsedDetailsPill(
       }
       IconButton(onClick = onClose, modifier = Modifier.size(24.dp)) {
         Icon(
-          imageVector = Icons.Default.Close,
+          imageVector = Icons.Outlined.Close,
           contentDescription = "Close details",
           tint = MaterialTheme.colorScheme.onSurfaceVariant,
           modifier = Modifier.size(16.dp),
@@ -606,7 +778,7 @@ private fun DashboardDataTablesPanel(
         verticalAlignment = Alignment.CenterVertically,
       ) {
         Icon(
-          imageVector = Icons.Default.TableRows,
+          imageVector = Icons.Outlined.TableRows,
           contentDescription = null,
           tint = MaterialTheme.colorScheme.primary,
           modifier = Modifier.size(18.dp),
@@ -651,13 +823,13 @@ private fun DashboardDataTablesPanel(
               )
             }
           ) {
-            Icon(imageVector = Icons.Default.Download, contentDescription = "Download CSV")
+            Icon(imageVector = Icons.Outlined.Download, contentDescription = "Download CSV")
           }
         }
         IconButton(onClick = { state.toggleDashboardTableExpanded() }) {
           Icon(
             imageVector =
-              if (isExpanded) Icons.Default.KeyboardArrowDown else Icons.Default.KeyboardArrowUp,
+              if (isExpanded) Icons.Outlined.KeyboardArrowDown else Icons.Outlined.KeyboardArrowUp,
             contentDescription = if (isExpanded) "Collapse table" else "Expand table",
           )
         }
@@ -678,7 +850,8 @@ private fun DashboardDataTablesPanel(
 /**
  * Spreadsheet-style view of a [DashboardDataTable] with a sticky header row. Rows are lazily
  * composed so map layers with thousands of features stay responsive, and the table scrolls
- * horizontally when its columns don't fit.
+ * horizontally when its columns don't fit. The [DashboardStatusColumn] cells render a compact
+ * status chip, and the [DashboardLabelColumn] is wider than the other columns.
  */
 @Composable
 private fun DashboardDataTableView(
@@ -688,7 +861,13 @@ private fun DashboardDataTableView(
 ) {
   val columnWidths =
     remember(table.columns) {
-      table.columns.indices.map { if (it == 0) DashboardFirstColumnWidth else DashboardColumnWidth }
+      table.columns.map { column ->
+        when (column) {
+          DashboardStatusColumn -> DashboardStatusColumnWidth
+          DashboardLabelColumn -> DashboardFirstColumnWidth
+          else -> DashboardColumnWidth
+        }
+      }
     }
   val listState = remember(table.id) { LazyListState() }
   val selectedRowIndex = table.selectedRowIndex
@@ -756,9 +935,9 @@ private fun DashboardDataTableView(
                   Box(
                     modifier =
                       Modifier.width(columnWidths[cellIndex])
-                        .padding(horizontal = 12.dp, vertical = 4.dp)
+                        .padding(horizontal = 12.dp, vertical = 6.dp)
                   ) {
-                    EntityStatusChip(entity = entity)
+                    EntityStatusChip(entity = entity, compact = true)
                   }
                 } else {
                   Text(

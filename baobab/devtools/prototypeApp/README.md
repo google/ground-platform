@@ -14,7 +14,7 @@
   limitations under the License.
 -->
 
-# Ground 2.0 Mobile UI Prototype App (`devtools/prototypeApp`)
+# Ground 2.0 UI Prototype App (`devtools/prototypeApp`)
 
 A Kotlin Multiplatform (KMP) and Compose Multiplatform (CMP) web application
 that embeds a live mobile device preview of the Ground 2.0 Mobile UI alongside a
@@ -88,15 +88,17 @@ Switch to the web application via the **Web app** option in the debug tools menu
 deep-link to `http://localhost:8091/#dashboard`. It shares state with the mobile
 prototype, so selections and survey changes carry over.
 
--   **Top toolbar**: Displays Ground branding, the standard Material navigation
-    menu button to collapse or expand the left panel, the active survey title
+-   **Top toolbar**: Displays Ground branding, the active survey title
     with its location below it, a **Manage survey** button to enter the
     **Survey editor**, and user profile controls.
 -   **Left panel**: The searchable list of map features and places. Each map
     feature is a single line: a geometry icon (point, line, polygon, or none
     for data table records), its label, and its marker circle (filled
-    with the `marker-color`, holding the `marker-symbol`). Hover a row to see its status text. The panel can be
-    collapsed or expanded using the navigation menu button in the top toolbar.
+    with the `marker-color`, holding the `marker-symbol`). Hover a row to see its status text. A small
+    chevron tab centered on the panel's right edge collapses it; when collapsed,
+    the same tab at the map's left edge expands it. Drag the panel's right
+    separator (8 dp, with a drag handle beside the tab) to resize it (240–560 dp,
+    300 dp by default).
 -   **Map**: The live survey map fills the main area. Selecting a map feature
     (in the list, on the map, or in a table) fits the whole feature into the
     uncovered part of the map (points stop at about 16z); records
@@ -104,18 +106,18 @@ prototype, so selections and survey changes carry over.
     selection. A floating **Map / Satellite** toggle sits in the upper-left
     corner; the scale bar stays in the lower-left.
 -   **Details card**: The selected feature's details float in the upper-right
-    corner (`WebEntityDetailsCard`): a status chip (`marker-symbol` and status
-    text on the `marker-color`) under the label, then its properties arranged vertically, with
-    references to other records shown as links. **Show in table** opens the
-    bottom table on the feature's row. **Submissions (n)** lists its
-    submissions grouped by form; opening one shows it in a second tab of the
-    card, in a document-style view.
+    corner (`WebEntityDetailsCard`) in two tabs. **Data** shows a compact
+    status chip (`marker-symbol` and status text on the `marker-color`), then
+    its properties arranged vertically, with references to other records shown
+    as links. **Show in table** opens the bottom table on the feature's row.
+    **History** lists its submissions grouped by form; opening one shows it in
+    the tab, in a document-style view.
 -   **Data tables**: A collapsible panel docks to the bottom of the map with
     one tab per entity dataset (map layers and data tables), with the selected
-    record highlighted. It never opens on its own: expand it with its arrow
-    button, a tab, or the card's **Show in table** button. Click a row to
-    select that record. Submissions are never shown in tables, since their data
-    can be hierarchical.
+    record highlighted. The first column is a compact status chip. It never
+    opens on its own: expand it with its arrow button, a tab, or the card's
+    **Show in table** button. Click a row to select that record. Submissions
+    are never shown in tables, since their data can be hierarchical.
 
 Code lives in `WebDashboardPage.kt`.
 

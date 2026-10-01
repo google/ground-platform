@@ -14,49 +14,30 @@
 package org.groundplatform.v2.devtools.prototypeapp
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
-import androidx.compose.material.icons.automirrored.filled.List
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material.icons.filled.Map
-import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.AssistChip
+import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.SegmentedButton
-import androidx.compose.material3.SegmentedButtonDefaults
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -67,31 +48,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.PathEffect
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import groundplatform.v2.forms.FormDef
-import groundplatform.v2.forms.RecordInstance
-import org.groundplatform.v2.core.forms.engine.FormSession
-import org.groundplatform.v2.core.forms.model.FinalizationResult
-import org.groundplatform.v2.core.forms.model.FormState
 import org.groundplatform.v2.core.forms.serialization.ProtoJsonSerializer
 import org.groundplatform.v2.core.forms.serialization.TextProtoSerializer
 import org.groundplatform.v2.core.forms.serialization.XFormsXmlSerializer
-import org.groundplatform.v2.core.forms.ui.FormWizardController
-import org.groundplatform.v2.core.forms.ui.FormWizardStep
 import org.groundplatform.v2.core.forms.ui.GroundBadgeTone
 import org.groundplatform.v2.core.forms.ui.GroundTonalBadge
-import org.groundplatform.v2.core.forms.ui.MobileFormRunner
 import org.groundplatform.v2.core.forms.ui.WorkbenchExampleForm
-import org.groundplatform.v2.core.forms.ui.formatFieldValueForDisplay
-
 
 /**
  * Default rich XForms `<h:html>` definition used in `devtools/prototypeApp` for EUDR / Shade-Tree /
@@ -105,7 +72,6 @@ val DEFAULT_PROTOTYPE_XFORMS_XML: String = PrototypeAppDataStore.DEFAULT_PROTOTY
  * Secondary XForms sample preset for Baobab / Shade Tree Biometrics testing in the Chrome panel.
  *
  * Provided by [PrototypeAppDataStore.BAOBAB_BIOMETRICS_SAMPLE_XFORMS_XML].
-
  */
 const val BAOBAB_BIOMETRICS_SAMPLE_XFORMS_XML: String =
   PrototypeAppDataStore.BAOBAB_BIOMETRICS_SAMPLE_XFORMS_XML
@@ -123,7 +89,6 @@ fun builtInFallbackXFormsXmlForForm(form: FormPreviewItem): String =
 /** Parses the initial default XForms XML into a [FormDef] via [XFormsXmlSerializer]. */
 fun parseDefaultPrototypeFormDef(): FormDef =
   XFormsXmlSerializer.deserializeFormDef(DEFAULT_PROTOTYPE_XFORMS_XML)
-
 
 /**
  * Prominent section inside `UxDesignerInspectorPanel` (the Prototype App page Chrome) allowing an
@@ -195,11 +160,9 @@ fun PrototypeXFormsWorkbenchPanel(state: PrototypeAppState) {
         )
       }
 
-      // Swappable Example Surveys Selector (5 Workbench Example Surveys with preloaded entities & submissions)
-      Column(
-        modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(6.dp),
-      ) {
+      // Swappable Example Surveys Selector (5 Workbench Example Surveys with preloaded entities &
+      // submissions)
+      Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(6.dp)) {
         Text(
           text = "EXAMPLE SURVEYS (CLICK TO OPEN SURVEY)",
           style =
@@ -345,7 +308,7 @@ fun PrototypeXFormsWorkbenchPanel(state: PrototypeAppState) {
 
         OutlinedButton(onClick = { state.resetDefaultXFormsXml() }) {
           Icon(
-            imageVector = Icons.Default.Refresh,
+            imageVector = Icons.Outlined.Refresh,
             contentDescription = null,
             modifier = Modifier.size(14.dp),
           )
@@ -382,14 +345,11 @@ fun PrototypeXFormsWorkbenchPanel(state: PrototypeAppState) {
                 text = "Paste XForms <h:html>...</h:html> XML here to test in MobileFormRunner...",
                 style =
                   MaterialTheme.typography.bodySmall.copy(
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                   ),
               )
             },
-            textStyle =
-              MaterialTheme.typography.bodySmall.copy(
-                lineHeight = 16.sp,
-              ),
+            textStyle = MaterialTheme.typography.bodySmall.copy(lineHeight = 16.sp),
             isError = xmlError != null,
             colors =
               OutlinedTextFieldDefaults.colors(
@@ -414,7 +374,7 @@ fun PrototypeXFormsWorkbenchPanel(state: PrototypeAppState) {
             text = "XML Parse Error: $xmlError",
             style =
               MaterialTheme.typography.labelSmall.copy(
-                color = MaterialTheme.colorScheme.onErrorContainer,
+                color = MaterialTheme.colorScheme.onErrorContainer
               ),
             modifier = Modifier.padding(horizontal = 10.dp, vertical = 8.dp),
           )
@@ -496,10 +456,7 @@ fun PrototypeXFormsWorkbenchPanel(state: PrototypeAppState) {
             onValueChange = {},
             readOnly = true,
             modifier = Modifier.fillMaxWidth().height(120.dp),
-            textStyle =
-              MaterialTheme.typography.labelSmall.copy(
-                lineHeight = 15.sp,
-              ),
+            textStyle = MaterialTheme.typography.labelSmall.copy(lineHeight = 15.sp),
             colors =
               OutlinedTextFieldDefaults.colors(
                 focusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,

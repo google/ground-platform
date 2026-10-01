@@ -70,7 +70,10 @@ internal actual fun PlatformMap(
   // Content: apply the diff from what the map shows to the latest content, one op at a time.
   LaunchedEffect(renderer) { snapshotFlow { currentContent }.collect { renderer.show(it) } }
 
-  // Layout: follow this composable's window position, including scrolling ancestors.
+  // Layout: follow this composable's window position, including scrolling ancestors. The frame loop
+  // catches moves that don't re-dispatch positioning; onGloballyPositioned below aligns the map in
+  // the same frame as the layout change (the loop runs at frame start, before layout, so on its own
+  // it would trail a resizing layout by one frame and expose the page behind the canvas hole).
   LaunchedEffect(renderer) {
     while (true) {
       withFrameNanos {}
@@ -87,7 +90,10 @@ internal actual fun PlatformMap(
 
   Canvas(
     modifier
-      .onGloballyPositioned { renderer.coordinates = it }
+      .onGloballyPositioned {
+        renderer.coordinates = it
+        renderer.syncBounds()
+      }
       .mapGestures(cameraState, gestures) { tap ->
         val at = cameraState.unproject(tap)
         val hit =
