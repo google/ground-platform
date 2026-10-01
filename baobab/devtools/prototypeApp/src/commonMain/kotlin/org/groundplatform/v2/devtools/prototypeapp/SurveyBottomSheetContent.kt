@@ -340,9 +340,9 @@ internal fun FormGroupedSubmissionsSection(
 
 /**
  * Height shared by entity dataset header rows and map feature rows in the web dashboard's left-hand
- * panel list, so both kinds of rows have the same compact height.
+ * panel list, so both kinds of rows have the same height.
  */
-private val SidePanelListRowHeight = 36.dp
+private val SidePanelListRowHeight = 40.dp
 
 /**
  * Start indent of map feature rows in the web dashboard's left-hand panel list, lining their
