@@ -126,4 +126,8 @@ data class SharedPdfSheetState(
   val subtitle: String,
   val pdfFileName: String,
   val targetKindLabel: String,
+  /** Number of pages in the generated PDF. */
+  val pageCount: Int = 0,
+  /** Generated PDF size for display, e.g. `"14 KB"`. */
+  val fileSizeLabel: String = "",
 )

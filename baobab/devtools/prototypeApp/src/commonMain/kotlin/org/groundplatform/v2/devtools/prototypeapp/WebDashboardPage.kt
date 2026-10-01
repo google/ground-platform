@@ -331,11 +331,12 @@ internal fun WebDashboardPage(
     }
 
     if (activeQrEntity != null) {
-      EntityQrCodeModalDialog(state = state, entity = activeQrEntity)
+      EntityQrCodeModalDialog(state = state, entity = activeQrEntity, isWeb = true)
     }
     if (activePdfSheet != null) {
       SharePdfToAppModalDialog(state = state, sheet = activePdfSheet)
     }
+    PdfExportMessageSnackbar(state = state, modifier = Modifier.align(Alignment.BottomCenter))
   }
 }
 

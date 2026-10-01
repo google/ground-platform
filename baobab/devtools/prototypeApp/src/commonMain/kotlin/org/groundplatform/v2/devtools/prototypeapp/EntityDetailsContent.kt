@@ -41,6 +41,7 @@ import androidx.compose.material.icons.outlined.CloudOff
 import androidx.compose.material.icons.outlined.CloudUpload
 import androidx.compose.material.icons.outlined.CollapseContent
 import androidx.compose.material.icons.outlined.Description
+import androidx.compose.material.icons.outlined.Download
 import androidx.compose.material.icons.outlined.Link
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material.icons.outlined.Navigation
@@ -546,7 +547,7 @@ private fun RelatedRecordLink(related: GeospatialEntityItem, onClick: () -> Unit
  * vertically.
  * - [isWeb]: the body of the web card's `Data` tab. Starts with a compact status chip (the web
  *   header omits it), shows the "Show in table" button at the bottom, and omits the actions row (QR
- *   code and Share PDF live in the web header's overflow menu), mobile-only field actions
+ *   code and Download PDF live in the web header's overflow menu), mobile-only field actions
  *   (`Navigate`, data collection launchers, and `Uploads` links), and the submissions click-through
  *   (submissions live in the web card's `History` tab).
  * - On mobile, status and sync status are chips in the header, and the pane ends with a
@@ -605,6 +606,13 @@ internal fun EntityPropertiesPane(
   }
 }
 
+/**
+ * Web's `Download PDF` overflow menu item: generates the record's PDF on the device and saves it
+ * right away (no share sheet, unlike mobile's `Share PDF`).
+ */
+internal fun downloadPdfMenuAction(onClick: () -> Unit): DetailsMenuAction =
+  DetailsMenuAction("Download PDF", Icons.Outlined.Download, onClick = onClick)
+
 /** Secondary entity actions shown in the web header's overflow menu. */
 private fun entityOverflowActions(
   entity: GeospatialEntityItem,
@@ -612,7 +620,7 @@ private fun entityOverflowActions(
 ): List<DetailsMenuAction> =
   listOf(
     DetailsMenuAction("QR code", Icons.Outlined.QrCode) { state.openEntityQrCode(entity.id) },
-    DetailsMenuAction("Share PDF", Icons.Outlined.Share) { state.shareEntityPdf(entity.id) },
+    downloadPdfMenuAction { state.downloadEntityPdf(entity.id) },
   )
 
 /** Row of mobile entity actions: `Navigate`, QR code, Share PDF, and `Uploads`. */
@@ -1012,7 +1020,7 @@ internal fun WebEntityDetailsCard(
               textColor = MaterialTheme.colorScheme.onSurface,
               backLabel = "Back to submissions",
               onBack = { state.selectSubmissionDetail(null) },
-              onSharePdf = { state.shareSubmissionPdf(submission.id) },
+              onSharePdf = { state.downloadSubmissionPdf(submission.id) },
               isSidePanel = true,
             )
           else -> EntitySubmissionsPane(entity = entity, state = state, isWeb = true)
@@ -1073,12 +1081,7 @@ internal fun WebSubmissionDetailsCard(
           )
         }
         DetailsOverflowMenu(
-          actions =
-            listOf(
-              DetailsMenuAction("Share PDF", Icons.Outlined.Share) {
-                state.shareSubmissionPdf(submission.id)
-              }
-            ),
+          actions = listOf(downloadPdfMenuAction { state.downloadSubmissionPdf(submission.id) }),
           contentDescription = "More submission actions",
         )
         if (onCollapse != null) {
@@ -1101,7 +1104,7 @@ internal fun WebSubmissionDetailsCard(
           textColor = MaterialTheme.colorScheme.onSurface,
           backLabel = "Back",
           onBack = { state.selectSubmissionDetail(null) },
-          onSharePdf = { state.shareSubmissionPdf(submission.id) },
+          onSharePdf = { state.downloadSubmissionPdf(submission.id) },
           isSidePanel = true,
           showHeader = false,
         )

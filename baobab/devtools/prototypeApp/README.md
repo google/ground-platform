@@ -229,6 +229,39 @@ fresh on every page load; on mobile it will become the persistent offline store.
 -   **Backends**: `InMemoryLocalStore` is the only backend today. A persistent
     backend (Room on `androidx.sqlite`) must pass `LocalStoreContractTest`.
 
+## PDF Reports
+
+Map features and submissions can be exported as PDF reports. The PDFs are
+generated on the device, in shared Kotlin (`pdf/`), so they work offline and
+look the same on web and mobile.
+
+-   **Mobile**: **Share PDF** (entity actions row, QR code dialog, and the
+    submission view) opens a sheet with the generated file (page count and
+    size). Tap the file to preview it. **Share** opens the system share sheet
+    (WhatsApp, Gmail, Drive, Bluetooth, and others) through the Web Share API.
+    Where the browser can't share files, the sheet offers **Download** instead.
+-   **Web dashboard**: **Download PDF** saves the file right away, with no
+    share sheet. It's in the overflow menu (⋮) of the map feature card and of an
+    opened submission, and in the QR code dialog. A snackbar confirms the
+    download.
+-   **Map feature report**: Workflow status chip (`marker-symbol` drawn as a
+    vector shape on the `marker-color`), details, a location figure with a north arrow,
+    scale bar, and vertex coordinates, properties (references show the related
+    record's label), and every submission with its responses.
+-   **Submission report**: Map feature or coordinates, data collector, time,
+    form version, and every response, grouped by XForms group. Reports leave
+    out upload (sync) status and submission counts.
+-   **Implementation**: `PdfDocumentWriter` is a small PDF 1.4 writer with no
+    dependencies. It uses the standard Helvetica and Courier fonts, which don't
+    need embedding. `PdfReportLayout` handles text wrapping, page breaks, and
+    `Page n of N` footers. `RecordPdfReports` builds the two reports. Delivery is
+    the only platform-specific code (`PlatformPdfExport`): `pdf-export-bridge.js`
+    on web and the temp directory on the JVM.
+-   **Limitation**: The standard fonts only cover Windows-1252 (Western European)
+    characters. Common symbols are replaced with ASCII (`≤` → `<=`, `📷` →
+    `[photo]`); other scripts render as `?`. Embedding a Unicode font (for
+    example Noto Sans) is the next step.
+
 ## Running the Local Development Web Server
 
 From `devtools/prototypeApp/`, start the local `webpack-dev-server` for the

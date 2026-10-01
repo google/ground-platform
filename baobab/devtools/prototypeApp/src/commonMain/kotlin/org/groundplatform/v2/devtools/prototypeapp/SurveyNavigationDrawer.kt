@@ -52,6 +52,7 @@ import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material.icons.outlined.SwapHoriz
+import androidx.compose.material.icons.outlined.Visibility
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -70,10 +71,12 @@ import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.NavigationDrawerItemDefaults
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedCard
+import androidx.compose.material3.Snackbar
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -89,6 +92,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.delay
 import org.groundplatform.v2.core.forms.ui.GroundAlertDialogOverlay
 import org.groundplatform.v2.core.forms.ui.GroundBadgeTone
 import org.groundplatform.v2.core.forms.ui.GroundModalBottomSheetOverlay
@@ -833,10 +837,15 @@ internal fun SwitchDownloadedSurveysSubScreen(state: PrototypeAppState) {
 
 /**
  * Modal dialog displaying a scannable QR Code for a survey location (`Icons.Outlined.QrCode`),
- * allowing offline field verification and rapid lookup of the location's `GeoID`.
+ * allowing offline field verification and rapid lookup of the location's `GeoID`. Its PDF action is
+ * `Share PDF` on mobile and a direct `Download PDF` on the web dashboard ([isWeb]).
  */
 @Composable
-internal fun EntityQrCodeModalDialog(state: PrototypeAppState, entity: GeospatialEntityItem) {
+internal fun EntityQrCodeModalDialog(
+  state: PrototypeAppState,
+  entity: GeospatialEntityItem,
+  isWeb: Boolean = false,
+) {
   GroundAlertDialogOverlay(
     onDismissRequest = { state.closeEntityQrCode() },
     icon = {
@@ -898,16 +907,16 @@ internal fun EntityQrCodeModalDialog(state: PrototypeAppState, entity: Geospatia
       Button(
         onClick = {
           state.closeEntityQrCode()
-          state.shareEntityPdf(entity.id)
+          if (isWeb) state.downloadEntityPdf(entity.id) else state.shareEntityPdf(entity.id)
         }
       ) {
         Icon(
-          imageVector = Icons.Outlined.Share,
+          imageVector = if (isWeb) Icons.Outlined.Download else Icons.Outlined.Share,
           contentDescription = null,
           modifier = Modifier.size(14.dp),
         )
         Spacer(modifier = Modifier.width(6.dp))
-        Text("Share PDF")
+        Text(if (isWeb) "Download PDF" else "Share PDF")
       }
     },
     dismissButton = { TextButton(onClick = { state.closeEntityQrCode() }) { Text("Close") } },
@@ -915,11 +924,14 @@ internal fun EntityQrCodeModalDialog(state: PrototypeAppState, entity: Geospatia
 }
 
 /**
- * Modal bottom sheet allowing the user to share a generated offline PDF receipt for either a
- * Geospatial Entity or a Submission (`state.activeSharedPdfSheet`) to their preferred app.
+ * Modal bottom sheet for a PDF report of a map feature or a submission
+ * (`state.activeSharedPdfSheet`), generated on the device so it works offline. **Share** opens the
+ * system share sheet (WhatsApp, Gmail, Drive, Bluetooth, ...) where the platform supports sharing
+ * files; **Download** saves the file; tapping the file card previews it.
  */
 @Composable
 internal fun SharePdfToAppModalDialog(state: PrototypeAppState, sheet: SharedPdfSheetState) {
+  val canShare = state.canSharePdfFiles
   GroundModalBottomSheetOverlay(onDismissRequest = { state.closeSharePdfSheet() }) {
     Column(
       modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp).padding(bottom = 24.dp),
@@ -930,99 +942,140 @@ internal fun SharePdfToAppModalDialog(state: PrototypeAppState, sheet: SharedPdf
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
       ) {
-        Row(
-          verticalAlignment = Alignment.CenterVertically,
-          horizontalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-          Icon(
-            imageVector = Icons.Outlined.Share,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.size(20.dp),
-          )
-          Text(
-            text = "Share PDF to Preferred App",
-            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-            color = MaterialTheme.colorScheme.onSurface,
-          )
-        }
+        Text(
+          text = if (canShare) "Share PDF" else "Download PDF",
+          style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+          color = MaterialTheme.colorScheme.onSurface,
+        )
         IconButton(onClick = { state.closeSharePdfSheet() }) {
-          Icon(imageVector = Icons.Outlined.Close, contentDescription = "Close Share PDF Sheet")
+          Icon(imageVector = Icons.Outlined.Close, contentDescription = "Close")
         }
       }
 
-      // PDF attachment preview card
+      // The generated file. Tap to preview it.
       OutlinedCard(
+        onClick = { state.previewActivePdf() },
         modifier = Modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.medium,
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary),
-        colors =
-          CardDefaults.outlinedCardColors(
-            containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.4f)
-          ),
       ) {
         Row(
           modifier = Modifier.fillMaxWidth().padding(12.dp),
           verticalAlignment = Alignment.CenterVertically,
-          horizontalArrangement = Arrangement.spacedBy(10.dp),
+          horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
           Icon(
             imageVector = Icons.Outlined.PictureAsPdf,
             contentDescription = null,
             tint = MaterialTheme.colorScheme.error,
-            modifier = Modifier.size(26.dp),
+            modifier = Modifier.size(32.dp),
           )
-          Column(modifier = Modifier.weight(1f)) {
+          Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
             Text(
               text = sheet.pdfFileName,
-              style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+              style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
               color = MaterialTheme.colorScheme.onSurface,
+              maxLines = 1,
+              overflow = TextOverflow.Ellipsis,
             )
             Text(
-              text = "${sheet.title} • ${sheet.subtitle}",
-              style = MaterialTheme.typography.labelSmall,
+              text = sheet.subtitle,
+              style = MaterialTheme.typography.bodySmall,
               color = MaterialTheme.colorScheme.onSurfaceVariant,
+              maxLines = 2,
+              overflow = TextOverflow.Ellipsis,
             )
+            if (sheet.pageCount > 0) {
+              Text(
+                text =
+                  "${sheet.pageCount} ${if (sheet.pageCount == 1) "page" else "pages"} • " +
+                    sheet.fileSizeLabel,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+              )
+            }
           }
+          Icon(
+            imageVector = Icons.Outlined.Visibility,
+            contentDescription = "Preview PDF",
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.size(20.dp),
+          )
         }
       }
 
       Text(
-        text = "Select preferred application to send offline PDF receipt:",
-        style = MaterialTheme.typography.labelMedium,
+        text =
+          if (canShare) {
+            "Created on this device, so you can share it even when you're offline."
+          } else {
+            "Created on this device. To send it, download it, then attach it in any app."
+          },
+        style = MaterialTheme.typography.bodySmall,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
       )
 
-      Row(
-        modifier = Modifier.fillMaxWidth().horizontalScrollWithMouseDrag(rememberScrollState()),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-      ) {
-        listOf("WhatsApp", "Gmail", "Google Drive", "Bluetooth").forEachIndexed { index, appName ->
-          val isPreferred = index == 0
-          FilterChip(
-            selected = isPreferred,
-            onClick = { state.closeSharePdfSheet() },
-            label = {
-              Text(
-                text = appName,
-                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                softWrap = false,
-              )
-            },
+      if (canShare) {
+        Button(
+          onClick = { state.shareActivePdf() },
+          modifier = Modifier.fillMaxWidth(),
+          shape = MaterialTheme.shapes.medium,
+        ) {
+          Icon(
+            imageVector = Icons.Outlined.Share,
+            contentDescription = null,
+            modifier = Modifier.size(18.dp),
           )
+          Spacer(modifier = Modifier.width(8.dp))
+          Text("Share")
+        }
+        OutlinedButton(
+          onClick = { state.saveActivePdf() },
+          modifier = Modifier.fillMaxWidth(),
+          shape = MaterialTheme.shapes.medium,
+        ) {
+          Icon(
+            imageVector = Icons.Outlined.Download,
+            contentDescription = null,
+            modifier = Modifier.size(18.dp),
+          )
+          Spacer(modifier = Modifier.width(8.dp))
+          Text("Download")
+        }
+      } else {
+        Button(
+          onClick = { state.saveActivePdf() },
+          modifier = Modifier.fillMaxWidth(),
+          shape = MaterialTheme.shapes.medium,
+        ) {
+          Icon(
+            imageVector = Icons.Outlined.Download,
+            contentDescription = null,
+            modifier = Modifier.size(18.dp),
+          )
+          Spacer(modifier = Modifier.width(8.dp))
+          Text("Download")
         }
       }
-
-      Button(
-        onClick = { state.closeSharePdfSheet() },
-        modifier = Modifier.fillMaxWidth(),
-        shape = MaterialTheme.shapes.medium,
-      ) {
-        Text("Done")
-      }
     }
+  }
+}
+
+/**
+ * Confirmation or error after a PDF action (`state.pdfExportMessage`), shown as a snackbar that
+ * dismisses itself after a few seconds.
+ */
+@Composable
+internal fun PdfExportMessageSnackbar(state: PrototypeAppState, modifier: Modifier = Modifier) {
+  val message = state.pdfExportMessage ?: return
+  LaunchedEffect(message) {
+    delay(4_000)
+    state.dismissPdfExportMessage()
+  }
+  Snackbar(
+    modifier = modifier.padding(16.dp),
+    action = { TextButton(onClick = { state.dismissPdfExportMessage() }) { Text("OK") } },
+  ) {
+    Text(text = message, maxLines = 2, overflow = TextOverflow.Ellipsis)
   }
 }
 

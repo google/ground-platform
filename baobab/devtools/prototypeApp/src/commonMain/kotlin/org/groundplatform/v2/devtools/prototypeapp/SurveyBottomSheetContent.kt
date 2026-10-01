@@ -145,7 +145,13 @@ internal fun SurveyPersistentBottomSheetContent(
           textColor = textColor,
           backLabel = "Back to Searchable List",
           onBack = { state.returnToBottomSheetList() },
-          onSharePdf = { state.shareSubmissionPdf(selectedSubmission.id) },
+          onSharePdf = {
+            if (isSidePanel) {
+              state.downloadSubmissionPdf(selectedSubmission.id)
+            } else {
+              state.shareSubmissionPdf(selectedSubmission.id)
+            }
+          },
           isSidePanel = isSidePanel,
         )
       }
@@ -1009,6 +1015,9 @@ internal fun SubmissionFullDetailsCard(
   textColor: Color,
   backLabel: String,
   onBack: () -> Unit,
+  /**
+   * Shares the submission's PDF on mobile; downloads it from the web side panel's overflow menu.
+   */
   onSharePdf: () -> Unit,
   isSidePanel: Boolean = false,
   showBackButton: Boolean = true,
@@ -1054,8 +1063,7 @@ internal fun SubmissionFullDetailsCard(
           }
           if (isSidePanel) {
             DetailsOverflowMenu(
-              actions =
-                listOf(DetailsMenuAction("Share PDF", Icons.Outlined.Share, onClick = onSharePdf)),
+              actions = listOf(downloadPdfMenuAction(onSharePdf)),
               contentDescription = "More submission actions",
             )
           }

@@ -167,6 +167,8 @@ fun MainSurveyScreen(state: PrototypeAppState) {
     if (activePdfSheet != null) {
       SharePdfToAppModalDialog(state = state, sheet = activePdfSheet)
     }
+
+    PdfExportMessageSnackbar(state = state, modifier = Modifier.align(Alignment.BottomCenter))
   }
 }
 
@@ -1158,7 +1160,9 @@ internal fun LayersSelectorContent(state: PrototypeAppState, modifier: Modifier 
       modifier = Modifier.fillMaxWidth(),
       shape = MaterialTheme.shapes.medium,
       colors =
-        CardDefaults.outlinedCardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
+        CardDefaults.outlinedCardColors(
+          containerColor = MaterialTheme.colorScheme.surfaceContainer
+        ),
     ) {
       Row(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),

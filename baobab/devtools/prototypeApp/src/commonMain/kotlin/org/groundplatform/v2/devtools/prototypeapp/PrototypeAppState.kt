@@ -30,6 +30,8 @@ import org.groundplatform.v2.core.forms.ui.WorkbenchExampleForm
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyMapAnchor
 import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.ClusterMapFeaturesUseCase
 import org.groundplatform.v2.devtools.prototypeapp.map.EntityGeometry
+import org.groundplatform.v2.devtools.prototypeapp.pdf.GeneratedPdf
+import org.groundplatform.v2.devtools.prototypeapp.pdf.RecordPdfReports
 import org.groundplatform.v2.devtools.prototypeapp.surveyeditor.SurveyEditorDraft
 import org.groundplatform.v2.devtools.prototypeapp.ui.state.PrototypeUiState
 import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.AppData
@@ -732,6 +734,13 @@ class PrototypeAppState(
    * Active PDF export & app-sharing modal state for an entity or submission (`null` when closed).
    */
   var activeSharedPdfSheet by mutableStateOf<SharedPdfSheetState?>(null)
+    private set
+
+  /** The PDF generated for [activeSharedPdfSheet] (`null` when the sheet is closed). */
+  private var activePdf: GeneratedPdf? = null
+
+  /** Short confirmation or error after a PDF action (e.g. `"Saved …pdf"`), or `null`. */
+  var pdfExportMessage by mutableStateOf<String?>(null)
     private set
 
   // --- Straight-Line Wayfinding Navigation State (Entities & Submissions) ---
@@ -2619,36 +2628,134 @@ class PrototypeAppState(
     activeQrCodeEntityId = null
   }
 
-  /** Opens the Share PDF modal sheet to share a location's report PDF to a preferred app. */
-  fun shareEntityPdf(entityId: String) {
-    val entity = entities.firstOrNull { it.id == entityId } ?: return
-    val filePrefix = entity.singularTypeLabel.lowercase().replace(' ', '-')
-    activeSharedPdfSheet =
-      SharedPdfSheetState(
-        targetId = entity.id,
-        title = "Share ${entity.singularTypeLabel} PDF Report",
-        subtitle = "${entity.label} • GeoID ${entity.geoId}",
-        pdfFileName = "$filePrefix-${entity.geoId}.pdf",
-        targetKindLabel = "${entity.singularTypeLabel} Summary PDF",
-      )
+  /**
+   * Generates a PDF report for the map feature [entityId] on the device (offline): its status,
+   * details, location, properties, and submissions. Returns `null` for unknown IDs.
+   */
+  internal fun generateEntityPdf(entityId: String): GeneratedPdf? {
+    val entity = entities.firstOrNull { it.id == entityId } ?: return null
+    return RecordPdfReports.entityReport(
+      entity = entity,
+      surveyTitle = activeSurvey.title,
+      geometry = EntityGeometry.of(entity, activeSurveyAnchor),
+      unitSystem = unitSystem,
+      generatedAtEpochMillis = platformEpochMillis(),
+      relatedLabelFor = { value -> relatedEntityForPropertyValue(entity, value)?.label },
+    )
   }
 
-  /** Opens the Share PDF modal sheet to share a submission's report PDF to a preferred app. */
+  /** Generates a PDF report for the submission [submissionId] on the device (offline). */
+  internal fun generateSubmissionPdf(submissionId: String): GeneratedPdf? {
+    val submission = allSubmissions.firstOrNull { it.id == submissionId } ?: return null
+    return RecordPdfReports.submissionReport(
+      submission = submission,
+      surveyTitle = activeSurvey.title,
+      entity = entities.firstOrNull { it.id == submission.entityId },
+      generatedAtEpochMillis = platformEpochMillis(),
+    )
+  }
+
+  /**
+   * Generates the map feature's PDF and opens the Share PDF sheet to share, save, or preview it.
+   */
+  fun shareEntityPdf(entityId: String) {
+    val entity = entities.firstOrNull { it.id == entityId } ?: return
+    val pdf = generateEntityPdf(entityId) ?: return
+    openPdfSheet(
+      pdf,
+      SharedPdfSheetState(
+        targetId = entity.id,
+        title = "${entity.singularTypeLabel} report",
+        subtitle = "${entity.label} • GeoID ${entity.geoId}",
+        pdfFileName = pdf.fileName,
+        targetKindLabel = "${entity.singularTypeLabel} report",
+        pageCount = pdf.pageCount,
+        fileSizeLabel = pdf.sizeLabel,
+      ),
+    )
+  }
+
+  /** Generates the submission's PDF and opens the Share PDF sheet to share, save, or preview it. */
   fun shareSubmissionPdf(submissionId: String) {
     val sub = allSubmissions.firstOrNull { it.id == submissionId } ?: return
-    activeSharedPdfSheet =
+    val pdf = generateSubmissionPdf(submissionId) ?: return
+    openPdfSheet(
+      pdf,
       SharedPdfSheetState(
         targetId = sub.id,
-        title = "Share ${sub.formTitle} PDF Report",
-        subtitle = "${sub.formTitle} • ${sub.collectorName} (${sub.timestamp})",
-        pdfFileName = "${sub.id}.pdf",
-        targetKindLabel = "${sub.formTitle} PDF",
-      )
+        title = "${sub.formTitle} submission",
+        subtitle = "${sub.collectorName} • ${sub.timestamp}",
+        pdfFileName = pdf.fileName,
+        targetKindLabel = "${sub.formTitle} submission",
+        pageCount = pdf.pageCount,
+        fileSizeLabel = pdf.sizeLabel,
+      ),
+    )
+  }
+
+  /** Generates the map feature's PDF and saves it straight away (web dashboard). */
+  fun downloadEntityPdf(entityId: String) {
+    generateEntityPdf(entityId)?.let(::savePdf)
+  }
+
+  /** Generates the submission's PDF and saves it straight away (web dashboard). */
+  fun downloadSubmissionPdf(submissionId: String) {
+    generateSubmissionPdf(submissionId)?.let(::savePdf)
+  }
+
+  /** True when the platform can hand files to other apps via the system share sheet. */
+  val canSharePdfFiles: Boolean
+    get() = platformCanShareFiles()
+
+  /** Opens the system share sheet for the PDF in the Share PDF sheet. */
+  fun shareActivePdf() {
+    val pdf = activePdf ?: return
+    val title = activeSharedPdfSheet?.title ?: pdf.fileName
+    platformSharePdf(pdf.fileName, title, pdf.bytes) { result ->
+      when (result) {
+        PdfExportResult.SHARED -> closeSharePdfSheet()
+        PdfExportResult.SAVED -> {
+          closeSharePdfSheet()
+          pdfExportMessage = "Saved ${pdf.fileName}"
+        }
+        PdfExportResult.CANCELLED -> Unit
+        PdfExportResult.FAILED -> pdfExportMessage = "Couldn't share ${pdf.fileName}"
+      }
+    }
+  }
+
+  /** Saves the PDF in the Share PDF sheet to the device. */
+  fun saveActivePdf() {
+    val pdf = activePdf ?: return
+    savePdf(pdf)
+    closeSharePdfSheet()
+  }
+
+  /** Opens the PDF in the Share PDF sheet in the platform's viewer. */
+  fun previewActivePdf() {
+    val pdf = activePdf ?: return
+    platformPreviewPdf(pdf.fileName, pdf.bytes)
   }
 
   /** Closes the active Share PDF modal sheet. */
   fun closeSharePdfSheet() {
     activeSharedPdfSheet = null
+    activePdf = null
+  }
+
+  /** Clears [pdfExportMessage] once it has been shown. */
+  fun dismissPdfExportMessage() {
+    pdfExportMessage = null
+  }
+
+  private fun openPdfSheet(pdf: GeneratedPdf, sheet: SharedPdfSheetState) {
+    activePdf = pdf
+    activeSharedPdfSheet = sheet
+  }
+
+  private fun savePdf(pdf: GeneratedPdf) {
+    platformSavePdf(pdf.fileName, pdf.bytes)
+    pdfExportMessage = "Saved ${pdf.fileName} (${pdf.summaryLabel})"
   }
 
   // --- Hamburger Navigation Drawer Actions ---
