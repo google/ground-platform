@@ -13,19 +13,11 @@
  */
 package org.groundplatform.v2.devtools.prototypeapp.domain.repository
 
-import kotlinx.coroutines.flow.Flow
-import org.groundplatform.v2.devtools.prototypeapp.domain.model.MutationLogItem
+/** Loads the prototype's sample data into the local data store. */
+interface SampleDataRepository {
+  /** Writes the sample data unless the store already holds it. */
+  suspend fun seedIfNeeded()
 
-/** Domain repository contract for the local mutation log (`Uploads` outbox and history). */
-interface MutationRepository {
-  fun observeMutations(): Flow<List<MutationLogItem>>
-
-  suspend fun getMutations(): List<MutationLogItem>
-
-  suspend fun setMutations(mutations: List<MutationLogItem>)
-
-  /** Adds [newMutations] to the front of the log (newest first). */
-  suspend fun prependMutations(newMutations: List<MutationLogItem>)
-
-  suspend fun updateMutation(mutationId: String, transform: (MutationLogItem) -> MutationLogItem)
+  /** Replaces everything in the store with fresh sample data. */
+  suspend fun resetToSampleData()
 }

@@ -11,12 +11,12 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.groundplatform.v2.devtools.prototypeapp.data.datasource.local
+package org.groundplatform.v2.devtools.prototypeapp.data.seed
 
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyPlaceItem
 
 /** Hardcoded sample places gazetteer for the prototype app. */
-object PrototypeFakePlacesData {
+internal object PrototypeFakePlacesData {
   /** Alias for [defaultSurveyPlaces]. */
   fun defaultPlaces(): List<SurveyPlaceItem> = defaultSurveyPlaces()
 

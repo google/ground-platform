@@ -33,6 +33,7 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.SyncStatus
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.deriveEntitySyncStatus
 import org.groundplatform.v2.devtools.prototypeapp.domain.repository.MutationRepository
 import org.groundplatform.v2.devtools.prototypeapp.domain.repository.SurveyRepository
+import org.groundplatform.v2.devtools.prototypeapp.domain.repository.TransactionRunner
 
 /** Outcome of finalizing an active form submission via [CompleteFormSubmissionUseCase]. */
 data class FormSubmissionCompletionResult(
@@ -54,10 +55,49 @@ data class FormSubmissionCompletionResult(
 class CompleteFormSubmissionUseCase(
   private val surveyRepository: SurveyRepository,
   private val mutationRepository: MutationRepository,
+  private val transactionRunner: TransactionRunner,
   private val resolveFormDefForLaunchUseCase: ResolveFormDefForLaunchUseCase =
     ResolveFormDefForLaunchUseCase(),
 ) {
-  operator fun invoke(
+  /**
+   * Records the submission and queues its upload in one atomic change to the local data store.
+   * Returns null if the submission can't be completed.
+   */
+  suspend operator fun invoke(
+    recordInstance: RecordInstance,
+    entityStates: List<EntityState>,
+    controller: FormWizardController?,
+    customFormDef: FormDef?,
+    activeDataCollectionFormId: String?,
+    activeDataCollectionEntityId: String?,
+    selectedEntityId: String?,
+    wasFormLaunchedWithoutEntity: Boolean,
+    signedInUserName: String,
+    signedInUserEmail: String,
+    userGpsCoordinatesLabel: String,
+    userGpsNormalizedX: Float,
+    userGpsNormalizedY: Float,
+    gnssStatusChipLabel: String,
+  ): FormSubmissionCompletionResult? = transactionRunner {
+    complete(
+      recordInstance = recordInstance,
+      entityStates = entityStates,
+      controller = controller,
+      customFormDef = customFormDef,
+      activeDataCollectionFormId = activeDataCollectionFormId,
+      activeDataCollectionEntityId = activeDataCollectionEntityId,
+      selectedEntityId = selectedEntityId,
+      wasFormLaunchedWithoutEntity = wasFormLaunchedWithoutEntity,
+      signedInUserName = signedInUserName,
+      signedInUserEmail = signedInUserEmail,
+      userGpsCoordinatesLabel = userGpsCoordinatesLabel,
+      userGpsNormalizedX = userGpsNormalizedX,
+      userGpsNormalizedY = userGpsNormalizedY,
+      gnssStatusChipLabel = gnssStatusChipLabel,
+    )
+  }
+
+  private suspend fun complete(
     recordInstance: RecordInstance,
     entityStates: List<EntityState>,
     controller: FormWizardController?,
@@ -411,19 +451,15 @@ class CompleteFormSubmissionUseCase(
         put("fill", nextMarkerColor)
       }
 
-    surveyRepository.setEntities(
-      entities.map { item ->
-        if (item.id == entity.id) {
-          val updatedSubmissions = listOf(newSubmission) + item.submissions
-          item.copy(
-            properties = updatedProperties,
-            submissions = updatedSubmissions,
-            syncStatus = deriveEntitySyncStatus(updatedSubmissions, fallback = SyncStatus.UPLOADING),
-          )
-        } else {
-          item
-        }
-      }
+    val updatedSubmissions = listOf(newSubmission) + entity.submissions
+    surveyRepository.upsertEntities(
+      listOf(
+        entity.copy(
+          properties = updatedProperties,
+          submissions = updatedSubmissions,
+          syncStatus = deriveEntitySyncStatus(updatedSubmissions, fallback = SyncStatus.UPLOADING),
+        )
+      )
     )
 
     val nextSeq = mutations.size + 1

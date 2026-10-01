@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.groundplatform.v2.devtools.prototypeapp.data.datasource.local
+package org.groundplatform.v2.devtools.prototypeapp.data.seed
 
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SubmissionFieldEntry
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SubmissionGeometryPolygon
@@ -19,7 +19,7 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.SubmissionPrevie
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SyncStatus
 
 /** Hardcoded sample standalone submissions and submission geometries for the prototype app. */
-object PrototypeFakeSubmissionsData {
+internal object PrototypeFakeSubmissionsData {
   /** Returns the preloaded standalone [SubmissionPreviewItem] list for [surveyId]. */
   fun standaloneSubmissionsForSurvey(surveyId: String): List<SubmissionPreviewItem> =
     when (surveyId) {
@@ -271,8 +271,8 @@ object PrototypeFakeSubmissionsData {
   /**
    * Sample Submission Geometries (`SubmissionGeometryPolygon`) corresponding to geometry
    * questions/fields (`FormGeometrySource { form_id, field_path }`) in the survey's forms.
-   * Submissions are not shown as layers in the `Layers` sheet; these geometries are used to
-   * resolve coordinates and bounds when inspecting or navigating to a submission.
+   * Submissions are not shown as layers in the `Layers` sheet; these geometries are used to resolve
+   * coordinates and bounds when inspecting or navigating to a submission.
    */
   fun defaultSubmissionGeometries(): List<SubmissionGeometryPolygon> =
     listOf(
@@ -379,8 +379,8 @@ object PrototypeFakeSubmissionsData {
     )
 
   /**
-   * Sample standalone submissions (`entityId = ""`, `hasAttachedEntity == false`) recorded
-   * directly in the field without being attached to any `GeospatialEntityItem`.
+   * Sample standalone submissions (`entityId = ""`, `hasAttachedEntity == false`) recorded directly
+   * in the field without being attached to any `GeospatialEntityItem`.
    */
   fun defaultStandaloneSubmissions(): List<SubmissionPreviewItem> =
     listOf(

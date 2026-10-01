@@ -60,22 +60,6 @@ import org.groundplatform.v2.core.forms.ui.GroundBadgeTone
 import org.groundplatform.v2.core.forms.ui.GroundTonalBadge
 import org.groundplatform.v2.core.forms.ui.WorkbenchExampleForm
 
-/**
- * Default rich XForms `<h:html>` definition used in `devtools/prototypeApp` for EUDR / Shade-Tree /
- * Field Survey data collection and live XForms FormDef testing in the UX Chrome panel.
- *
- * Provided by [PrototypeAppDataStore.DEFAULT_PROTOTYPE_XFORMS_XML].
- */
-val DEFAULT_PROTOTYPE_XFORMS_XML: String = PrototypeAppDataStore.DEFAULT_PROTOTYPE_XFORMS_XML
-
-/**
- * Secondary XForms sample preset for Baobab / Shade Tree Biometrics testing in the Chrome panel.
- *
- * Provided by [PrototypeAppDataStore.BAOBAB_BIOMETRICS_SAMPLE_XFORMS_XML].
- */
-const val BAOBAB_BIOMETRICS_SAMPLE_XFORMS_XML: String =
-  PrototypeAppDataStore.BAOBAB_BIOMETRICS_SAMPLE_XFORMS_XML
-
 private val defaultResolveFormDefUseCase =
   org.groundplatform.v2.devtools.prototypeapp.domain.usecase.ResolveFormDefForLaunchUseCase()
 
@@ -84,7 +68,7 @@ private val defaultResolveFormDefUseCase =
  * [PrototypeAppState.customXFormsXml] is cleared/blank.
  */
 fun builtInFallbackXFormsXmlForForm(form: FormPreviewItem): String =
-  PrototypeAppDataStore.builtInFallbackXFormsXmlForForm(form)
+  defaultResolveFormDefUseCase.builtInFallbackXFormsXmlForForm(form)
 
 /** Parses the initial default XForms XML into a [FormDef] via [XFormsXmlSerializer]. */
 fun parseDefaultPrototypeFormDef(): FormDef =
@@ -173,12 +157,11 @@ fun PrototypeXFormsWorkbenchPanel(state: PrototypeAppState) {
             ),
         )
         WorkbenchExampleForm.entries.forEach { example ->
-          val surveyId = PrototypeAppState.surveyIdForExampleForm(example)
+          val surveyId = state.surveyIdForExampleForm(example) ?: return@forEach
           val isSelected =
             state.activeSurveyId == surveyId || state.selectedWorkbenchExampleForm == example
-          val preloadedEntityCount = PrototypeAppState.preloadedEntityCountForSurvey(surveyId)
-          val preloadedSubmissionCount =
-            PrototypeAppState.preloadedSubmissionCountForSurvey(surveyId)
+          val preloadedEntityCount = state.entityCountForSurvey(surveyId)
+          val preloadedSubmissionCount = state.submissionCountForSurvey(surveyId)
           OutlinedCard(
             onClick = { state.selectWorkbenchExampleForm(example, launchImmediately = false) },
             modifier = Modifier.fillMaxWidth(),

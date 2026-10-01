@@ -13,6 +13,7 @@
  */
 package org.groundplatform.v2.devtools.prototypeapp.domain.repository
 
+import kotlinx.coroutines.flow.Flow
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyPlaceItem
 
 /**
@@ -20,9 +21,11 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyPlaceItem
  * (`mapbox.places`).
  */
 interface PlaceRepository {
-  fun getLocalPlaces(): List<SurveyPlaceItem>
+  fun observeLocalPlaces(): Flow<List<SurveyPlaceItem>>
 
-  fun setLocalPlaces(places: List<SurveyPlaceItem>)
+  suspend fun getLocalPlaces(): List<SurveyPlaceItem>
+
+  suspend fun setLocalPlaces(places: List<SurveyPlaceItem>)
 
   fun searchRemotePlaces(
     surveyId: String,

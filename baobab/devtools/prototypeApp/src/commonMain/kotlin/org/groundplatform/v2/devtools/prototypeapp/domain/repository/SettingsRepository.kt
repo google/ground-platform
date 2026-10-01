@@ -13,29 +13,30 @@
  */
 package org.groundplatform.v2.devtools.prototypeapp.domain.repository
 
+import kotlinx.coroutines.flow.Flow
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.MeasurementUnitSystem
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.UserSettings
 
-/**
- * Domain repository contract for managing user settings (`UserSettings`: language, measurement unit
- * system, Wi-Fi photo upload preference) and uploaded media cache metadata.
- */
+/** Uploaded media cache usage shown in Settings. */
+data class MediaCacheInfo(val sizeLabel: String, val fileCount: Int)
+
+/** Domain repository contract for user settings and the uploaded media cache. */
 interface SettingsRepository {
-  fun getUserSettings(): UserSettings
+  fun observeUserSettings(): Flow<UserSettings>
 
-  fun setUserSettings(settings: UserSettings)
+  fun observeMediaCache(): Flow<MediaCacheInfo>
 
-  fun updateLanguage(languageCode: String): UserSettings
+  suspend fun getUserSettings(): UserSettings
 
-  fun updateMeasurementUnits(units: MeasurementUnitSystem): UserSettings
+  suspend fun setUserSettings(settings: UserSettings)
 
-  fun updateUploadPhotosOnWifiOnly(wifiOnly: Boolean): UserSettings
+  /** Sets the language if [languageCode] is supported; returns the resulting settings. */
+  suspend fun updateLanguage(languageCode: String): UserSettings
 
-  fun getUploadedMediaCacheSizeLabel(): String
+  suspend fun updateMeasurementUnits(units: MeasurementUnitSystem): UserSettings
 
-  fun getUploadedMediaFileCount(): Int
+  suspend fun updateUploadPhotosOnWifiOnly(wifiOnly: Boolean): UserSettings
 
-  fun evictUploadedMediaCache(): Pair<Int, String>
-
-  fun resetToDefaults()
+  /** Clears the uploaded media cache; returns what was evicted. */
+  suspend fun evictUploadedMediaCache(): MediaCacheInfo
 }

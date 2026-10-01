@@ -27,10 +27,13 @@ import org.groundplatform.v2.devtools.prototypeapp.client.auth.PrototypeAuthClie
 import org.groundplatform.v2.devtools.prototypeapp.client.location.LocationClient
 import org.groundplatform.v2.devtools.prototypeapp.client.places.PlacesResponseMapper
 import org.groundplatform.v2.devtools.prototypeapp.client.storage.OfflineTileStorageClient
-import org.groundplatform.v2.devtools.prototypeapp.data.datasource.local.PrototypeAppDataStore
+import org.groundplatform.v2.devtools.prototypeapp.data.datasource.local.store.runNow
+import org.groundplatform.v2.devtools.prototypeapp.data.datasource.local.store.seededStore
+import org.groundplatform.v2.devtools.prototypeapp.data.repository.LocalStoreTransactionRunner
 import org.groundplatform.v2.devtools.prototypeapp.data.repository.LocationRepositoryImpl
 import org.groundplatform.v2.devtools.prototypeapp.data.repository.MutationRepositoryImpl
 import org.groundplatform.v2.devtools.prototypeapp.data.repository.PlaceRepositoryImpl
+import org.groundplatform.v2.devtools.prototypeapp.data.repository.SampleDataRepositoryImpl
 import org.groundplatform.v2.devtools.prototypeapp.data.repository.SettingsRepositoryImpl
 import org.groundplatform.v2.devtools.prototypeapp.data.repository.SurveyRepositoryImpl
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.AppScreen
@@ -54,7 +57,7 @@ import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.SurveyAppViewMod
 /**
  * Unit tests verifying the Clean Architecture & MVVM layers of `devtools/prototypeApp` per
  * `docs/technical/client/architecture.md`:
- * - Static / hardcoded [PrototypeAppDataStore]
+ * - Local data store seeded with sample data, read and written through repositories
  * - Client & Mapper layers ([PrototypeAuthClient], [LocationClient], [OfflineTileStorageClient],
  *   [PlacesResponseMapper])
  * - Repository implementations ([SurveyRepositoryImpl], [MutationRepositoryImpl],
@@ -67,32 +70,32 @@ import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.SurveyAppViewMod
 class PrototypeCleanArchitectureTest {
 
   @Test
-  fun prototypeAppDataStore_providesAllStaticSampleDataAndSwitchesSurveyDatasets() {
-    val dataStore = PrototypeAppDataStore()
-    assertTrue(PrototypeAppDataStore.defaultSampleSurveys().size >= 5)
-    assertTrue(PrototypeAppDataStore.defaultSurveyPlaces().isNotEmpty())
-    assertTrue(PrototypeAppDataStore.defaultGeospatialEntities().isNotEmpty())
-    assertTrue(PrototypeAppDataStore.defaultForms().isNotEmpty())
-    assertTrue(PrototypeAppDataStore.defaultMutations().isNotEmpty())
-    assertTrue(PrototypeAppDataStore.defaultOfflineTilePackages().isNotEmpty())
+  fun localStore_seedsSampleDataAndKeepsEditsAcrossSurveySwitches() = runNow {
+    val store = seededStore()
+    val surveyRepo = SurveyRepositoryImpl(store)
+    val mutationRepo = MutationRepositoryImpl(store)
+    val placeRepo = PlaceRepositoryImpl(store)
+    assertTrue(surveyRepo.getSurveys().size >= 5)
+    assertTrue(placeRepo.getLocalPlaces().isNotEmpty())
+    assertTrue(surveyRepo.getEntities().isNotEmpty())
+    assertTrue(surveyRepo.getForms().isNotEmpty())
+    assertTrue(mutationRepo.getMutations().isNotEmpty())
+    assertTrue(surveyRepo.getOfflineTilePackages().isNotEmpty())
+    assertEquals("survey-kenya-coffee", surveyRepo.getActiveSurveyId())
 
-    assertEquals("survey-kenya-coffee", dataStore.activeSurveyId)
-    assertEquals(
-      PrototypeAppDataStore.entitiesForSurvey("survey-kenya-coffee").size,
-      dataStore.entities.size,
-    )
+    // Edit the active survey, switch away, and switch back: the edit is still there.
+    val kenyaEntities = surveyRepo.getEntities()
+    surveyRepo.setEntities(kenyaEntities.drop(1))
+    surveyRepo.setActiveSurveyId("survey-sample-plots-forest")
+    assertEquals("survey-sample-plots-forest", surveyRepo.getActiveSurveyId())
+    assertTrue(surveyRepo.getEntities().none { it.id == kenyaEntities.first().id })
+    surveyRepo.setActiveSurveyId("survey-kenya-coffee")
+    assertEquals(kenyaEntities.drop(1), surveyRepo.getEntities())
 
-    // Switch dataset to Tanzania mangrove survey
-    dataStore.loadSurveyDatasets("survey-tanzania-mangrove")
-    assertEquals("survey-tanzania-mangrove", dataStore.activeSurveyId)
-    assertEquals(
-      PrototypeAppDataStore.entitiesForSurvey("survey-tanzania-mangrove").size,
-      dataStore.entities.size,
-    )
-
-    // Reset back to defaults
-    dataStore.resetToDefaults()
-    assertEquals("survey-kenya-coffee", dataStore.activeSurveyId)
+    // Resetting reseeds the sample data.
+    SampleDataRepositoryImpl(store).resetToSampleData()
+    assertEquals("survey-kenya-coffee", surveyRepo.getActiveSurveyId())
+    assertEquals(kenyaEntities, surveyRepo.getEntities())
   }
 
   @Test
@@ -132,12 +135,12 @@ class PrototypeCleanArchitectureTest {
   }
 
   @Test
-  fun repositories_readAndMutateDataStoreCleanly() {
-    val dataStore = PrototypeAppDataStore()
-    val surveyRepo = SurveyRepositoryImpl(dataStore)
-    val mutationRepo = MutationRepositoryImpl(dataStore)
-    val settingsRepo = SettingsRepositoryImpl(dataStore)
-    val placeRepo = PlaceRepositoryImpl(dataStore)
+  fun repositories_readAndMutateLocalStoreCleanly() = runNow {
+    val store = seededStore()
+    val surveyRepo = SurveyRepositoryImpl(store)
+    val mutationRepo = MutationRepositoryImpl(store)
+    val settingsRepo = SettingsRepositoryImpl(store)
+    val placeRepo = PlaceRepositoryImpl(store)
     val locationRepo = LocationRepositoryImpl()
 
     // SurveyRepository CRUD
@@ -151,8 +154,9 @@ class PrototypeCleanArchitectureTest {
     assertEquals(MeasurementUnitSystem.IMPERIAL, settingsRepo.getUserSettings().measurementUnits)
     settingsRepo.updateLanguage("fr")
     assertEquals("fr", settingsRepo.getUserSettings().language)
-    settingsRepo.evictUploadedMediaCache()
-    assertEquals(0, settingsRepo.getUploadedMediaFileCount())
+    val evicted = settingsRepo.evictUploadedMediaCache()
+    assertTrue(evicted.fileCount > 0)
+    assertEquals(0, settingsRepo.evictUploadedMediaCache().fileCount)
 
     // MutationRepository CRUD
     assertTrue(
@@ -171,10 +175,12 @@ class PrototypeCleanArchitectureTest {
   }
 
   @Test
-  fun domainUseCases_executeClusteringWayfindingPlaceSearchSyncAndRandomSiteGeneration() {
-    val dataStore = PrototypeAppDataStore()
-    val surveyRepo = SurveyRepositoryImpl(dataStore)
-    val mutationRepo = MutationRepositoryImpl(dataStore)
+  fun domainUseCases_executeClusteringWayfindingPlaceSearchSyncAndRandomSiteGeneration() = runNow {
+    val store = seededStore()
+    val surveyRepo = SurveyRepositoryImpl(store)
+    val mutationRepo = MutationRepositoryImpl(store)
+    val placeRepo = PlaceRepositoryImpl(store)
+    val transactionRunner = LocalStoreTransactionRunner(store)
 
     // 1. ClusterMapFeaturesUseCase
     val clusterUseCase = ClusterMapFeaturesUseCase()
@@ -246,7 +252,7 @@ class PrototypeCleanArchitectureTest {
         query = "-0.4210, 36.9505",
         isAirplaneMode = false,
         listFilterTab = ListFilterTab.ALL,
-        localPlaces = dataStore.places,
+        localPlaces = placeRepo.getLocalPlaces(),
         remoteApiPlaces = emptyList(),
         surveyLocationLabel = "Nyeri County, Kenya",
         surveyBaseLng = 36.9512,
@@ -256,10 +262,15 @@ class PrototypeCleanArchitectureTest {
     assertEquals("place-coord-query", coordMatches.first().id)
 
     // 4. SyncMutationsUseCase
-    val syncUseCase = SyncMutationsUseCase(mutationRepo, surveyRepo)
+    val syncUseCase = SyncMutationsUseCase(mutationRepo, surveyRepo, transactionRunner)
     val notice = syncUseCase.syncAllOutboxMutations("survey-kenya-coffee")
     assertNotNull(notice)
-    assertTrue(mutationRepo.getMutations().all { it.state == MutationSyncState.UPLOADED })
+    assertTrue(
+      mutationRepo
+        .getMutations()
+        .filter { it.surveyId == "survey-kenya-coffee" }
+        .all { it.state == MutationSyncState.UPLOADED }
+    )
     assertTrue(surveyRepo.getEntities().all { it.syncStatus == SyncStatus.SYNCED })
 
     // 5. GeneratePrototypeRandomSitesUseCase
@@ -272,8 +283,7 @@ class PrototypeCleanArchitectureTest {
     val resolveFormUseCase = ResolveFormDefForLaunchUseCase()
     val formDef =
       resolveFormUseCase(
-        customFormDef =
-          PrototypeAppDataStore.cachedExampleFormDef(WorkbenchExampleForm.ALL_FIELD_TYPES),
+        customFormDef = XFormsParseCache.formDef(WorkbenchExampleForm.ALL_FIELD_TYPES),
         form = surveyRepo.getForms().first(),
         includeEntityRefStep = true,
       )
@@ -295,9 +305,9 @@ class PrototypeCleanArchitectureTest {
     assertTrue(viewModel.uiState.value.hasAcceptedTerms)
     assertEquals(AppScreen.DOWNLOAD_SURVEY, viewModel.uiState.value.currentScreen)
 
-    viewModel.selectSurvey("survey-tanzania-mangrove")
+    viewModel.selectSurvey("survey-sample-plots-forest")
     assertEquals(AppScreen.MAIN_SURVEY, viewModel.uiState.value.currentScreen)
-    assertEquals("survey-tanzania-mangrove", viewModel.uiState.value.activeSurveyId)
+    assertEquals("survey-sample-plots-forest", viewModel.uiState.value.activeSurveyId)
 
     // Add random sites via ViewModel -> UseCase -> Repository -> StateFlow
     val initialEntityCount = viewModel.uiState.value.entities.size
@@ -308,7 +318,11 @@ class PrototypeCleanArchitectureTest {
     // StateFlow
     viewModel.selectSurvey("survey-kenya-coffee")
     viewModel.syncAllOutboxMutations()
-    assertTrue(viewModel.uiState.value.mutations.all { it.state == MutationSyncState.UPLOADED })
+    assertTrue(
+      viewModel.uiState.value.mutations
+        .filter { it.surveyId == "survey-kenya-coffee" }
+        .all { it.state == MutationSyncState.UPLOADED }
+    )
 
     // Update settings via ViewModel -> Repository -> StateFlow
     viewModel.updateUnitSystem(MeasurementUnitSystem.IMPERIAL)
@@ -328,11 +342,12 @@ class PrototypeCleanArchitectureTest {
     val state = PrototypeAppState()
     state.signInWithGoogle()
     state.acceptTermsOfService()
-    state.openSurvey("survey-brazil-pasture")
+    state.openSurvey("survey-single-point-land-use")
 
     val snapshot: AppUiState = state.uiState.value
     assertEquals(AppScreen.MAIN_SURVEY, snapshot.currentScreen)
-    assertEquals("survey-brazil-pasture", snapshot.activeSurveyId)
+    assertEquals("survey-single-point-land-use", snapshot.activeSurveyId)
+    assertTrue(snapshot.entities.isNotEmpty())
     assertEquals(state.entities.size, snapshot.entities.size)
   }
 }

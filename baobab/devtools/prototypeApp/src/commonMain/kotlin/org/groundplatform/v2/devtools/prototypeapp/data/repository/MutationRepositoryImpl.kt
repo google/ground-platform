@@ -13,30 +13,31 @@
  */
 package org.groundplatform.v2.devtools.prototypeapp.data.repository
 
-import org.groundplatform.v2.devtools.prototypeapp.data.datasource.local.PrototypeAppDataStore
+import kotlinx.coroutines.flow.Flow
+import org.groundplatform.v2.devtools.prototypeapp.data.datasource.local.store.LocalStore
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.MutationLogItem
 import org.groundplatform.v2.devtools.prototypeapp.domain.repository.MutationRepository
 
-/**
- * Concrete [MutationRepository] implementation backed by [PrototypeAppDataStore].
- */
-class MutationRepositoryImpl(private val dataStore: PrototypeAppDataStore) : MutationRepository {
-  override fun getMutations(): List<MutationLogItem> = dataStore.mutations
+/** [MutationRepository] backed by the [LocalStore]. */
+class MutationRepositoryImpl(private val store: LocalStore) : MutationRepository {
+  override fun observeMutations(): Flow<List<MutationLogItem>> = store.observeMutations()
 
-  override fun setMutations(mutations: List<MutationLogItem>) {
-    dataStore.mutations = mutations
+  override suspend fun getMutations(): List<MutationLogItem> = store.transaction { mutations() }
+
+  override suspend fun setMutations(mutations: List<MutationLogItem>) {
+    store.transaction { putMutations(mutations) }
   }
 
-  override fun prependMutations(newMutations: List<MutationLogItem>) {
-    dataStore.mutations = newMutations + dataStore.mutations
+  override suspend fun prependMutations(newMutations: List<MutationLogItem>) {
+    store.transaction { putMutations(newMutations + mutations()) }
   }
 
-  override fun updateMutation(mutationId: String, transform: (MutationLogItem) -> MutationLogItem) {
-    dataStore.mutations =
-      dataStore.mutations.map { item -> if (item.id == mutationId) transform(item) else item }
-  }
-
-  override fun resetToDefaults() {
-    dataStore.mutations = PrototypeAppDataStore.defaultMutations()
+  override suspend fun updateMutation(
+    mutationId: String,
+    transform: (MutationLogItem) -> MutationLogItem,
+  ) {
+    store.transaction {
+      putMutations(mutations().map { if (it.id == mutationId) transform(it) else it })
+    }
   }
 }

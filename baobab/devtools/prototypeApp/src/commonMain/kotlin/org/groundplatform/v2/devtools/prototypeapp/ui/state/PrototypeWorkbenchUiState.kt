@@ -15,7 +15,8 @@ package org.groundplatform.v2.devtools.prototypeapp.ui.state
 
 import groundplatform.v2.forms.FormDef
 import org.groundplatform.v2.core.forms.ui.WorkbenchExampleForm
-import org.groundplatform.v2.devtools.prototypeapp.data.datasource.local.PrototypeAppDataStore
+import org.groundplatform.v2.devtools.prototypeapp.DEFAULT_PROTOTYPE_XFORMS_XML
+import org.groundplatform.v2.devtools.prototypeapp.XFormsParseCache
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.DeviceFormFactor
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.DeviceOrientation
 
@@ -28,13 +29,11 @@ data class PrototypeWorkbenchUiState(
   val deviceFormFactor: DeviceFormFactor = DeviceFormFactor.MOBILE,
   val deviceOrientation: DeviceOrientation = DeviceFormFactor.MOBILE.defaultOrientation,
   val isAirplaneMode: Boolean = false,
-  val customXFormsXml: String = PrototypeAppDataStore.DEFAULT_PROTOTYPE_XFORMS_XML,
+  val customXFormsXml: String = DEFAULT_PROTOTYPE_XFORMS_XML,
   val selectedWorkbenchExampleForm: WorkbenchExampleForm? = WorkbenchExampleForm.ALL_FIELD_TYPES,
-  val customFormDef: FormDef? =
-    PrototypeAppDataStore.cachedExampleFormDef(WorkbenchExampleForm.ALL_FIELD_TYPES),
+  val customFormDef: FormDef? = XFormsParseCache.formDef(WorkbenchExampleForm.ALL_FIELD_TYPES),
   val xformsXmlError: String? = null,
-  val uploadedMediaCacheSizeLabel: String =
-    PrototypeAppDataStore.DEFAULT_UPLOADED_MEDIA_CACHE_SIZE_LABEL,
-  val uploadedMediaFileCount: Int = PrototypeAppDataStore.DEFAULT_UPLOADED_MEDIA_FILE_COUNT,
+  val uploadedMediaCacheSizeLabel: String = "0 MB",
+  val uploadedMediaFileCount: Int = 0,
   val isWebsiteModalOpen: Boolean = false,
 )

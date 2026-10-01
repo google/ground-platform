@@ -13,23 +13,26 @@
  */
 package org.groundplatform.v2.devtools.prototypeapp.data.repository
 
-import org.groundplatform.v2.devtools.prototypeapp.data.datasource.local.PrototypeAppDataStore
+import kotlinx.coroutines.flow.Flow
+import org.groundplatform.v2.devtools.prototypeapp.data.datasource.local.store.LocalStore
 import org.groundplatform.v2.devtools.prototypeapp.data.datasource.remote.MapboxPlacesDataSource
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyPlaceItem
 import org.groundplatform.v2.devtools.prototypeapp.domain.repository.PlaceRepository
 
 /**
- * Concrete [PlaceRepository] implementation coordinating local places in [PrototypeAppDataStore]
- * and remote geocoding queries via [MapboxPlacesDataSource].
+ * Concrete [PlaceRepository] implementation coordinating local places in the [LocalStore] and
+ * remote geocoding queries via [MapboxPlacesDataSource].
  */
 class PlaceRepositoryImpl(
-  private val dataStore: PrototypeAppDataStore,
+  private val store: LocalStore,
   private val remoteDataSource: MapboxPlacesDataSource = MapboxPlacesDataSource(),
 ) : PlaceRepository {
-  override fun getLocalPlaces(): List<SurveyPlaceItem> = dataStore.places
+  override fun observeLocalPlaces(): Flow<List<SurveyPlaceItem>> = store.observePlaces()
 
-  override fun setLocalPlaces(places: List<SurveyPlaceItem>) {
-    dataStore.places = places
+  override suspend fun getLocalPlaces(): List<SurveyPlaceItem> = store.transaction { places() }
+
+  override suspend fun setLocalPlaces(places: List<SurveyPlaceItem>) {
+    store.transaction { putPlaces(places) }
   }
 
   override fun searchRemotePlaces(

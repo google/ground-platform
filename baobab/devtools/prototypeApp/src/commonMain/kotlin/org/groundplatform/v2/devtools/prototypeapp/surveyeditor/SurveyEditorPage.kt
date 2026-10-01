@@ -109,7 +109,6 @@ import org.groundplatform.v2.core.forms.ui.GroundTonalBadge
 import org.groundplatform.v2.devtools.prototypeapp.PrototypeAppState
 import org.groundplatform.v2.devtools.prototypeapp.PrototypeDebugToolsButton
 import org.groundplatform.v2.devtools.prototypeapp.PrototypeWorkbenchPage
-import org.groundplatform.v2.devtools.prototypeapp.data.datasource.local.PrototypeFakePlacesData
 import org.groundplatform.v2.devtools.prototypeapp.data.datasource.remote.MapboxPlacesDataSource
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyPlaceItem
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.parsePlaceCoordinates
@@ -156,7 +155,7 @@ fun SurveyEditorPage(
     )
     Box(modifier = Modifier.weight(1f).fillMaxHeight()) {
       when (val section = state.section) {
-        SurveyEditorSection.Details -> SurveyDetailsPane(state)
+        SurveyEditorSection.Details -> SurveyDetailsPane(state, appState?.places.orEmpty())
         SurveyEditorSection.Sharing -> SharingPane(state)
         is SurveyEditorSection.Form -> {
           val entry = state.selectedForm
@@ -500,7 +499,7 @@ internal fun PaneScaffold(title: String, subtitle: String, content: @Composable 
 }
 
 @Composable
-private fun SurveyDetailsPane(state: SurveyEditorState) {
+private fun SurveyDetailsPane(state: SurveyEditorState, localPlaces: List<SurveyPlaceItem>) {
   val details = state.details
   PaneScaffold(
     title = "Survey details",
@@ -535,7 +534,7 @@ private fun SurveyDetailsPane(state: SurveyEditorState) {
         modifier = Modifier.fillMaxWidth(),
       )
       LanguageSelectorSection(state = state)
-      SurveyAreaSection(state = state)
+      SurveyAreaSection(state = state, localPlaces = localPlaces)
     }
 
     SectionLabel("Contents")
@@ -655,7 +654,7 @@ private fun LanguageSelectorSection(state: SurveyEditorState) {
 }
 
 @Composable
-private fun SurveyAreaSection(state: SurveyEditorState) {
+private fun SurveyAreaSection(state: SurveyEditorState, localPlaces: List<SurveyPlaceItem>) {
   val area = state.details.surveyArea
   var showSearchDialog by remember { mutableStateOf(false) }
 
@@ -665,6 +664,7 @@ private fun SurveyAreaSection(state: SurveyEditorState) {
       surveyLocationLabel = state.details.title.ifBlank { "Survey" },
       surveyCenter = area?.center ?: LatLng(-0.4198, 36.9512),
       currentAreaName = area?.name,
+      localPlaces = localPlaces,
       onSelectArea = { newArea -> state.setSurveyArea(newArea) },
       onDismiss = { showSearchDialog = false },
     )
@@ -924,13 +924,13 @@ private fun SurveyAreaPickerDialog(
   surveyLocationLabel: String,
   surveyCenter: LatLng,
   currentAreaName: String?,
+  localPlaces: List<SurveyPlaceItem>,
   onSelectArea: (SurveyArea) -> Unit,
   onDismiss: () -> Unit,
 ) {
   var searchQuery by remember { mutableStateOf("") }
   var isSearching by remember { mutableStateOf(false) }
   var remotePlaces by remember { mutableStateOf<List<SurveyPlaceItem>>(emptyList()) }
-  val localPlaces = remember { PrototypeFakePlacesData.defaultSurveyPlaces() }
   val placesDataSource = remember { MapboxPlacesDataSource() }
 
   // Query live Mapbox Places API when user types a query (with debounce)

@@ -22,6 +22,7 @@ import kotlin.test.assertTrue
 import org.groundplatform.v2.core.forms.serialization.XFormsXmlSerializer
 import org.groundplatform.v2.core.forms.ui.FormWizardController
 import org.groundplatform.v2.core.forms.ui.FormWizardStep
+import org.groundplatform.v2.devtools.prototypeapp.data.seed.FormEditorSamples
 
 class FormEditorTest {
 
@@ -129,7 +130,7 @@ class FormEditorTest {
 
   @Test
   fun state_addDeleteAndReorderQuestions() {
-    val state = FormEditorState()
+    val state = FormEditorState(FormEditorSamples.shadeTreeVisit())
     val initialSize = state.form.questions.size
     state.select("q3")
     state.addQuestion(EditorQuestionType.SELECT_ONE)
@@ -148,7 +149,7 @@ class FormEditorTest {
 
   @Test
   fun state_deletingSourceClearsDependentDisplayLogic() {
-    val state = FormEditorState()
+    val state = FormEditorState(FormEditorSamples.shadeTreeVisit())
     state.deleteQuestion("q3") // has_shade_trees drives q4 and q5
     assertNull(state.form.find("q4")?.relevance)
     assertNull(state.form.find("q5")?.relevance)
@@ -157,7 +158,7 @@ class FormEditorTest {
 
   @Test
   fun state_renamingChoiceValueUpdatesDependents() {
-    val state = FormEditorState()
+    val state = FormEditorState(FormEditorSamples.shadeTreeVisit())
     state.updateChoiceLabel("q3", 0, "Yes, many")
     assertEquals("yes_many", state.form.find("q3")!!.choices[0].value)
     assertEquals("yes_many", state.form.find("q4")!!.relevance!!.value)
@@ -165,7 +166,7 @@ class FormEditorTest {
 
   @Test
   fun state_previewStartsForValidForm() {
-    val state = FormEditorState()
+    val state = FormEditorState(FormEditorSamples.shadeTreeVisit())
     state.startPreview()
     assertNotNull(state.previewController)
     assertNull(state.previewError)

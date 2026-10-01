@@ -11,18 +11,17 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.groundplatform.v2.devtools.prototypeapp.data.datasource.local
+package org.groundplatform.v2.devtools.prototypeapp.data.seed
 
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.MutationLogItem
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.MutationOperationKind
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.MutationSyncState
 
 /** Hardcoded sample mutation log records for the prototype app. */
-object PrototypeFakeMutationsData {
+internal object PrototypeFakeMutationsData {
   /**
    * Sample local mutations (`DataMutation` items) spanning `Pending`, `In progress`, `Uploaded`,
-   * and `Failed`, ordered in reverse chronological order with user-friendly operation
-   * descriptions.
+   * and `Failed`, ordered in reverse chronological order with user-friendly operation descriptions.
    */
   fun defaultMutations(): List<MutationLogItem> =
     listOf(

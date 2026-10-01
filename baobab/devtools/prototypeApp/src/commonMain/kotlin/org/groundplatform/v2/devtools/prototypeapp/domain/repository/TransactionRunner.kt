@@ -13,19 +13,10 @@
  */
 package org.groundplatform.v2.devtools.prototypeapp.domain.repository
 
-import kotlinx.coroutines.flow.Flow
-import org.groundplatform.v2.devtools.prototypeapp.domain.model.MutationLogItem
-
-/** Domain repository contract for the local mutation log (`Uploads` outbox and history). */
-interface MutationRepository {
-  fun observeMutations(): Flow<List<MutationLogItem>>
-
-  suspend fun getMutations(): List<MutationLogItem>
-
-  suspend fun setMutations(mutations: List<MutationLogItem>)
-
-  /** Adds [newMutations] to the front of the log (newest first). */
-  suspend fun prependMutations(newMutations: List<MutationLogItem>)
-
-  suspend fun updateMutation(mutationId: String, transform: (MutationLogItem) -> MutationLogItem)
+/**
+ * Groups repository calls into one atomic change. Use cases that update several repositories (for
+ * example adding a submission and queueing its upload) run inside [invoke].
+ */
+interface TransactionRunner {
+  suspend operator fun <R> invoke(block: suspend () -> R): R
 }

@@ -21,7 +21,7 @@ import org.groundplatform.v2.devtools.prototypeapp.formeditor.EditorChoice
 import org.groundplatform.v2.devtools.prototypeapp.formeditor.EditorForm
 import org.groundplatform.v2.devtools.prototypeapp.formeditor.EditorQuestion
 import org.groundplatform.v2.devtools.prototypeapp.formeditor.EditorQuestionType
-import org.groundplatform.v2.devtools.prototypeapp.formeditor.FormEditorSamples
+import org.groundplatform.v2.devtools.prototypeapp.formeditor.EditorFormTemplates
 import org.groundplatform.v2.devtools.prototypeapp.formeditor.FormEditorState
 import org.groundplatform.v2.devtools.prototypeapp.formeditor.moved
 import org.groundplatform.v2.devtools.prototypeapp.formeditor.slugify
@@ -43,35 +43,35 @@ class SurveyFormEntry(val key: String, val editor: FormEditorState)
 /**
  * Observable state for the Survey editor page: survey details, sharing, Forms, Map layers, and Data
  * tables, plus the currently selected section.
+ *
+ * Initialized from a [SurveyEditorDraft] loaded from the local data store; [toDraft] returns the
+ * current edits for saving back to the store.
  */
-class SurveyEditorState {
-  private var nextId = 100
+class SurveyEditorState(draft: SurveyEditorDraft = SurveyEditorDraft.blank(surveyId = "")) {
+  private var nextId by mutableStateOf(draft.nextKeyId)
 
-  var details: SurveyDetails by mutableStateOf(SurveyEditorSamples.details())
+  var details: SurveyDetails by mutableStateOf(draft.details)
     private set
 
-  var sharing: SharingSettings by mutableStateOf(SurveyEditorSamples.sharing())
+  var sharing: SharingSettings by mutableStateOf(draft.sharing)
     private set
 
   var forms: List<SurveyFormEntry> by
-    mutableStateOf(
-      listOf(
-        SurveyFormEntry("f1", FormEditorState(FormEditorSamples.shadeTreeVisit())),
-        SurveyFormEntry("f2", FormEditorState(FormEditorSamples.parcelBoundaryCheck())),
-      )
-    )
+    mutableStateOf(draft.forms.map { SurveyFormEntry(it.key, FormEditorState(it.form)) })
     private set
 
-  var datasets: List<EntityDataset> by
-    mutableStateOf(
-      listOf(
-        SurveyEditorSamples.coffeeParcels(),
-        SurveyEditorSamples.shadePlots(),
-        SurveyEditorSamples.farmers(),
-        SurveyEditorSamples.treeSpecies(),
-      )
-    )
+  var datasets: List<EntityDataset> by mutableStateOf(draft.datasets)
     private set
+
+  /** Snapshot of the current edits, for saving to the local data store. */
+  fun toDraft(): SurveyEditorDraft =
+    SurveyEditorDraft(
+      details = details,
+      sharing = sharing,
+      forms = forms.map { SurveyEditorForm(it.key, it.editor.form) },
+      datasets = datasets,
+      nextKeyId = nextId,
+    )
 
   var section: SurveyEditorSection by mutableStateOf(SurveyEditorSection.Details)
     private set
@@ -243,7 +243,7 @@ class SurveyEditorState {
     val formKey = newKey("f")
     val datasetKey = newKey("d")
 
-    val blankForm = FormEditorSamples.blank(formId, title)
+    val blankForm = EditorFormTemplates.blank(formId, title)
     val entry = SurveyFormEntry(formKey, FormEditorState(blankForm))
 
     // By default, create a linked entity (Map layer) for the new form.

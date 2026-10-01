@@ -80,7 +80,7 @@ import org.groundplatform.v2.core.forms.ui.MobileFormRunner
  * entity reference step (`select_one_from_file <dataset>.csv` / `appearance="map-select"`) when a
  * form requires a target geospatial entity.
  */
-const val ENTITY_REF_FIELD_PATH: String = PrototypeAppDataStore.ENTITY_REF_FIELD_PATH
+const val ENTITY_REF_FIELD_PATH: String = "/data/target_entity"
 
 private val defaultResolveFormDefUseCase =
   org.groundplatform.v2.devtools.prototypeapp.domain.usecase.ResolveFormDefForLaunchUseCase()

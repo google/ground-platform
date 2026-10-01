@@ -32,7 +32,7 @@ data class GenerateRandomSitesResult(
  * (`+5K Fake Sites`) and updates [SurveyRepository].
  */
 class GeneratePrototypeRandomSitesUseCase(private val surveyRepository: SurveyRepository) {
-  operator fun invoke(count: Int = 5_000): GenerateRandomSitesResult? {
+  suspend operator fun invoke(count: Int = 5_000): GenerateRandomSitesResult? {
     if (count <= 0) return null
     val existingEntities = surveyRepository.getEntities()
     val existingSize = existingEntities.size
@@ -100,13 +100,10 @@ class GeneratePrototypeRandomSitesUseCase(private val surveyRepository: SurveyRe
     }
 
     val updatedEntities = existingEntities + newFeatures
-    surveyRepository.setEntities(updatedEntities)
-    val activeSurveyId = surveyRepository.getActiveSurveyId()
-    surveyRepository.setSurveys(
-      surveyRepository.getSurveys().map { s ->
-        if (s.id == activeSurveyId) s.copy(entityCount = updatedEntities.size) else s
-      }
-    )
+    surveyRepository.upsertEntities(newFeatures)
+    surveyRepository.updateSurvey(surveyRepository.getActiveSurveyId()) {
+      it.copy(entityCount = updatedEntities.size)
+    }
     return GenerateRandomSitesResult(
       addedCount = count,
       totalEntityCount = updatedEntities.size,

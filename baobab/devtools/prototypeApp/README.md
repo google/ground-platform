@@ -200,6 +200,35 @@ Selecting a Form opens the visual Form editor in `formeditor/`
     `MobileFormRunner`. The side panel lists the current path, which updates as
     display logic changes.
 
+## Local Data Store
+
+All app data lives in a local data store, the single source of truth
+(`data/datasource/local/store/`). On web it is an in-memory cache that starts
+fresh on every page load; on mobile it will become the persistent offline store.
+
+-   **Reads**: `LocalStore` exposes a `Flow` per collection (surveys, forms, map
+    layers, map features with their submissions, standalone submissions,
+    geometries, survey configs and editor drafts, mutations, places, offline
+    tile packages, and preferences). `SurveyAppViewModel.appData` combines them
+    into one `StateFlow`; `PrototypeAppState` and the view model's `uiState`
+    read from it.
+-   **Writes**: Repositories (`data/repository/`) write through `suspend`
+    functions inside `LocalStore.transaction`, which is atomic and can be
+    nested. Use cases that touch several repositories run in one transaction via
+    `TransactionRunner`.
+-   **Sample data**: `data/seed/SampleDataSeeder` is the only code that reads the
+    hardcoded sample datasets (`PrototypeFake*Data`, `SurveyEditorSamples`,
+    `FormEditorSamples`). It fills the store on first launch and again on
+    **Reset**. `SampleDataGuardrailTest` keeps other code from reading them.
+-   **Survey switching**: Every survey's data is in the store, so switching
+    surveys keeps edits. Use **Reset** to go back to the sample data.
+-   **Survey editor**: The editor loads the active survey's draft
+    (`SurveyEditorDraft`) from the store and saves each change back. Generated
+    XForms are published to the survey's `SurveyConfig.formXmlById`, and the
+    title and description are shown in the survey list.
+-   **Backends**: `InMemoryLocalStore` is the only backend today. A persistent
+    backend (Room on `androidx.sqlite`) must pass `LocalStoreContractTest`.
+
 ## Running the Local Development Web Server
 
 From `devtools/prototypeApp/`, start the local `webpack-dev-server` for the

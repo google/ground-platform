@@ -22,6 +22,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import org.groundplatform.v2.devtools.prototypeapp.data.seed.SurveyEditorSamples
 import org.groundplatform.v2.map.Basemap
 import org.groundplatform.v2.map.CameraPosition
 import org.groundplatform.v2.map.Geometry
@@ -144,7 +145,7 @@ class LayerEditorGeometryTest {
 
   @Test
   fun addRow_usesDrawnGeometry() {
-    val state = SurveyEditorState()
+    val state = SurveyEditorState(SurveyEditorSamples.draft())
     val parcels = state.mapLayers.first { it.geometryKind == GeometryKind.POLYGON }
     val drawn = listOf(LatLng(-0.41, 36.95), LatLng(-0.41, 36.96), LatLng(-0.42, 36.955))
     val key = state.addRow(parcels.key, geometry = drawn)

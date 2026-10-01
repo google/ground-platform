@@ -144,9 +144,6 @@ typealias OfflineTilePackageItem =
 typealias DownloadSurveyEntryOrigin =
   org.groundplatform.v2.devtools.prototypeapp.domain.model.DownloadSurveyEntryOrigin
 
-typealias PrototypeAppDataStore =
-  org.groundplatform.v2.devtools.prototypeapp.data.datasource.local.PrototypeAppDataStore
-
 typealias AppUiState = org.groundplatform.v2.devtools.prototypeapp.ui.state.AppUiState
 
 typealias MapViewportUiState =

@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.groundplatform.v2.devtools.prototypeapp.data.datasource.local
+package org.groundplatform.v2.devtools.prototypeapp.data.seed
 
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.GeospatialEntityItem
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SubmissionFieldEntry
@@ -19,7 +19,7 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.SubmissionPrevie
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SyncStatus
 
 /** Hardcoded sample geospatial entities for the prototype app. */
-object PrototypeFakeEntitiesData {
+internal object PrototypeFakeEntitiesData {
   /** Returns the preloaded [GeospatialEntityItem] list for [surveyId]. */
   fun entitiesForSurvey(surveyId: String): List<GeospatialEntityItem> =
     when (surveyId) {
@@ -81,7 +81,7 @@ object PrototypeFakeEntitiesData {
                         answerValue = "Closed-canopy indigenous montane forest stand.",
                       ),
                     ),
-                ),
+                )
               ),
           ),
           GeospatialEntityItem(
@@ -140,7 +140,7 @@ object PrototypeFakeEntitiesData {
                         answerValue = "Terraced shade coffee intercropped with Cordia & Grevillea.",
                       ),
                     ),
-                ),
+                )
               ),
           ),
           GeospatialEntityItem(
@@ -199,7 +199,7 @@ object PrototypeFakeEntitiesData {
                         answerValue = "15m vegetated riparian buffer along Chania stream.",
                       ),
                     ),
-                ),
+                )
               ),
           ),
         )
@@ -280,7 +280,7 @@ object PrototypeFakeEntitiesData {
                           "yes_verified (Confirmed No Forest Conversion Since Dec 31, 2020)",
                       ),
                     ),
-                ),
+                )
               ),
           ),
           GeospatialEntityItem(
@@ -350,7 +350,7 @@ object PrototypeFakeEntitiesData {
                         answerValue = "0.95 ha",
                       ),
                     ),
-                ),
+                )
               ),
           ),
           GeospatialEntityItem(
@@ -415,7 +415,7 @@ object PrototypeFakeEntitiesData {
                         answerValue = "-0.417600 36.953200 1662.0 4.2 (±4.2m Hardware GPS Lock)",
                       ),
                     ),
-                ),
+                )
               ),
           ),
         )
@@ -1037,11 +1037,11 @@ object PrototypeFakeEntitiesData {
    * Sample Geospatial Entities (`EntityRecord`s) across **Polygon**, **LineString**, and **Point**
    * geometries showcasing the 3-stage `simplestyle-spec` marker progression driven by `save_to`:
    * - Stage 1 (`"○"` Empty Circle, `#E65100` Orange): `entity-nyr-112` (Pending baseline, 0
-   * submissions)
+   *   submissions)
    * - Stage 2 (`"◐"` Half-Filled Circle, `#F9AB00` Amber): `entity-nyr-108` & `entity-station-01`
-   * (In progress, 1st stage recorded)
+   *   (In progress, 1st stage recorded)
    * - Stage 3 (`"✓"` Checkmark, `#1E8E3E` Green / `#1565C0` Blue): `entity-nyr-104` &
-   * `entity-shade-201` (Completed)
+   *   `entity-shade-201` (Completed)
    */
   fun defaultGeospatialEntities(): List<GeospatialEntityItem> =
     listOf(

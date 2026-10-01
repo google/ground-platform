@@ -13,56 +13,60 @@
  */
 package org.groundplatform.v2.devtools.prototypeapp.data.repository
 
-import org.groundplatform.v2.devtools.prototypeapp.data.datasource.local.PrototypeAppDataStore
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
+import org.groundplatform.v2.devtools.prototypeapp.data.datasource.local.store.LocalStore
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.GROUND_LANGUAGE_OPTIONS
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.MeasurementUnitSystem
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.UserSettings
+import org.groundplatform.v2.devtools.prototypeapp.domain.repository.MediaCacheInfo
 import org.groundplatform.v2.devtools.prototypeapp.domain.repository.SettingsRepository
 
-/**
- * Concrete [SettingsRepository] implementation backed by [PrototypeAppDataStore].
- */
-class SettingsRepositoryImpl(private val dataStore: PrototypeAppDataStore) : SettingsRepository {
-  override fun getUserSettings(): UserSettings = dataStore.userSettings
+/** [SettingsRepository] backed by preferences in the [LocalStore]. */
+class SettingsRepositoryImpl(private val store: LocalStore) : SettingsRepository {
+  override fun observeUserSettings(): Flow<UserSettings> =
+    store.observePreferences().map { it.userSettings }.distinctUntilChanged()
 
-  override fun setUserSettings(settings: UserSettings) {
-    dataStore.userSettings = settings
+  override fun observeMediaCache(): Flow<MediaCacheInfo> =
+    store
+      .observePreferences()
+      .map { MediaCacheInfo(it.uploadedMediaCacheSizeLabel, it.uploadedMediaFileCount) }
+      .distinctUntilChanged()
+
+  override suspend fun getUserSettings(): UserSettings =
+    store.transaction { preferences().userSettings }
+
+  override suspend fun setUserSettings(settings: UserSettings) {
+    store.transaction { updatePreferences { it.copy(userSettings = settings) } }
   }
 
-  override fun updateLanguage(languageCode: String): UserSettings {
-    val validOption = GROUND_LANGUAGE_OPTIONS.firstOrNull { it.code == languageCode }
-    if (validOption != null) {
-      dataStore.userSettings = dataStore.userSettings.copy(language = validOption.code)
+  override suspend fun updateLanguage(languageCode: String): UserSettings {
+    val valid = GROUND_LANGUAGE_OPTIONS.any { it.code == languageCode }
+    return updateSettings { if (valid) it.copy(language = languageCode) else it }
+  }
+
+  override suspend fun updateMeasurementUnits(units: MeasurementUnitSystem): UserSettings =
+    updateSettings {
+      it.copy(measurementUnits = units)
     }
-    return dataStore.userSettings
-  }
 
-  override fun updateMeasurementUnits(units: MeasurementUnitSystem): UserSettings {
-    dataStore.userSettings = dataStore.userSettings.copy(measurementUnits = units)
-    return dataStore.userSettings
-  }
+  override suspend fun updateUploadPhotosOnWifiOnly(wifiOnly: Boolean): UserSettings =
+    updateSettings {
+      it.copy(shouldUploadPhotosOnWifiOnly = wifiOnly)
+    }
 
-  override fun updateUploadPhotosOnWifiOnly(wifiOnly: Boolean): UserSettings {
-    dataStore.userSettings = dataStore.userSettings.copy(shouldUploadPhotosOnWifiOnly = wifiOnly)
-    return dataStore.userSettings
-  }
+  override suspend fun evictUploadedMediaCache(): MediaCacheInfo =
+    store.transaction {
+      val before = preferences()
+      updatePreferences {
+        it.copy(uploadedMediaCacheSizeLabel = "0 MB", uploadedMediaFileCount = 0)
+      }
+      MediaCacheInfo(before.uploadedMediaCacheSizeLabel, before.uploadedMediaFileCount)
+    }
 
-  override fun getUploadedMediaCacheSizeLabel(): String = dataStore.uploadedMediaCacheSizeLabel
-
-  override fun getUploadedMediaFileCount(): Int = dataStore.uploadedMediaFileCount
-
-  override fun evictUploadedMediaCache(): Pair<Int, String> {
-    val evictedCount = dataStore.uploadedMediaFileCount
-    val evictedSize = dataStore.uploadedMediaCacheSizeLabel
-    dataStore.uploadedMediaFileCount = 0
-    dataStore.uploadedMediaCacheSizeLabel = "0 MB"
-    return evictedCount to evictedSize
-  }
-
-  override fun resetToDefaults() {
-    dataStore.userSettings = PrototypeAppDataStore.defaultUserSettings()
-    dataStore.uploadedMediaCacheSizeLabel =
-      PrototypeAppDataStore.DEFAULT_UPLOADED_MEDIA_CACHE_SIZE_LABEL
-    dataStore.uploadedMediaFileCount = PrototypeAppDataStore.DEFAULT_UPLOADED_MEDIA_FILE_COUNT
-  }
+  private suspend fun updateSettings(transform: (UserSettings) -> UserSettings): UserSettings =
+    store.transaction {
+      updatePreferences { it.copy(userSettings = transform(it.userSettings)) }.userSettings
+    }
 }

@@ -73,6 +73,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -82,6 +83,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.flow.drop
 import org.groundplatform.v2.core.forms.ui.GroundBadgeTone
 import org.groundplatform.v2.core.forms.ui.GroundTheme
 import org.groundplatform.v2.core.forms.ui.GroundTonalBadge
@@ -142,25 +144,17 @@ fun PrototypeApp(
     }
   }
 
-  val surveyEditorState = remember {
-    SurveyEditorState().apply {
-      updateDetails {
-        it.copy(title = state.activeSurvey.title, description = state.activeSurvey.description)
-      }
+  // The Survey editor edits the active survey's draft from the local data store, and saves every
+  // change back to it.
+  val activeSurveyId = state.activeSurveyId
+  val surveyEditorState =
+    remember(activeSurveyId, state.dataResetCount) {
+      SurveyEditorState(state.activeSurveyEditorDraft)
     }
-  }
-  LaunchedEffect(state.activeSurveyId) {
-    surveyEditorState.updateDetails {
-      it.copy(title = state.activeSurvey.title, description = state.activeSurvey.description)
-    }
-  }
-  LaunchedEffect(surveyEditorState.details.title, surveyEditorState.details.description) {
-    if (surveyEditorState.details.title.isNotBlank()) {
-      state.updateActiveSurveyDetails(
-        title = surveyEditorState.details.title,
-        description = surveyEditorState.details.description,
-      )
-    }
+  LaunchedEffect(surveyEditorState) {
+    snapshotFlow { surveyEditorState.toDraft() }
+      .drop(1)
+      .collect { draft -> state.saveSurveyEditorDraft(activeSurveyId, draft) }
   }
   val isEntityRefMapShowing =
     state.isDataCollectionFormOpen &&

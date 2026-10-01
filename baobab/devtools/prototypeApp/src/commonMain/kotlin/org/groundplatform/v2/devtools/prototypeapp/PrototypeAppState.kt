@@ -22,15 +22,17 @@ import kotlin.math.abs
 import kotlin.math.hypot
 import kotlin.math.pow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 import org.groundplatform.v2.core.forms.model.EntityState
 import org.groundplatform.v2.core.forms.serialization.XFormsXmlSerializer
 import org.groundplatform.v2.core.forms.ui.FormWizardController
 import org.groundplatform.v2.core.forms.ui.WorkbenchExampleForm
-import org.groundplatform.v2.devtools.prototypeapp.data.datasource.local.PrototypeAppDataStore
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyMapAnchor
 import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.ClusterMapFeaturesUseCase
 import org.groundplatform.v2.devtools.prototypeapp.map.EntityGeometry
+import org.groundplatform.v2.devtools.prototypeapp.surveyeditor.SurveyEditorDraft
 import org.groundplatform.v2.devtools.prototypeapp.ui.state.PrototypeUiState
+import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.AppData
 import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.PrototypeAppViewModel
 import org.groundplatform.v2.map.CameraPosition
 import org.groundplatform.v2.map.LatLng
@@ -52,11 +54,49 @@ internal const val MapClusteringZoomDelta = -2.35f
  */
 class PrototypeAppState(
   initialScreen: PrototypeScreen = PrototypeScreen.SIGN_IN,
-  initialSurveys: List<SurveyPreviewItem> = defaultSampleSurveys(),
-  val dataStore: PrototypeAppDataStore = PrototypeAppDataStore(initialSurveys = initialSurveys),
-  val viewModel: PrototypeAppViewModel =
-    PrototypeAppViewModel(initialScreen = initialScreen, dataStore = dataStore),
+  val viewModel: PrototypeAppViewModel = PrototypeAppViewModel(initialScreen = initialScreen),
 ) {
+  /**
+   * Latest snapshot of everything read from the local data store (the single source of truth for
+   * surveys, survey content, mutations, places, and settings). Kept current by collecting
+   * [PrototypeAppViewModel.appData]; all data properties below are read-only views over it, and all
+   * data changes are written through the repositories.
+   */
+  private var data by mutableStateOf(viewModel.appData.value)
+
+  init {
+    viewModel.scope.launch { viewModel.appData.collect { data = it } }
+  }
+
+  /** Writes [surveys] to the local data store (inserting or replacing by ID). */
+  private fun storeSurveys(surveys: List<SurveyPreviewItem>) {
+    viewModel.launch { viewModel.surveyRepository.setSurveys(surveys) }
+  }
+
+  /** Writes the active survey's [layers] to the local data store. */
+  private fun storeMapLayers(layers: List<MapLayerItem>) {
+    viewModel.launch { viewModel.surveyRepository.setMapLayers(layers) }
+  }
+
+  /** Writes the active survey's [entities] to the local data store. */
+  private fun storeEntities(entities: List<GeospatialEntityItem>) {
+    viewModel.launch { viewModel.surveyRepository.setEntities(entities) }
+  }
+
+  /** Writes the active survey's standalone [submissions] to the local data store. */
+  private fun storeStandaloneSubmissions(submissions: List<SubmissionPreviewItem>) {
+    viewModel.launch { viewModel.surveyRepository.setStandaloneSubmissions(submissions) }
+  }
+
+  /** Writes offline basemap tile [packages] to the local data store. */
+  private fun storeOfflineTilePackages(packages: List<OfflineTilePackageItem>) {
+    viewModel.launch { viewModel.surveyRepository.setOfflineTilePackages(packages) }
+  }
+
+  /** Writes [settings] to the local data store. */
+  private fun storeUserSettings(settings: UserSettings) {
+    viewModel.launch { viewModel.settingsRepository.setUserSettings(settings) }
+  }
   /**
    * Immutable [StateFlow] of [PrototypeUiState] exposed by the underlying MVVM
    * [PrototypeAppViewModel] per Section 6 of `docs/technical/client/architecture.md`.
@@ -67,19 +107,11 @@ class PrototypeAppState(
       return viewModel.uiState
     }
 
-  /** Synchronizes current state into [dataStore] and [viewModel]. */
+  /**
+   * Synchronizes session (non-persisted) state into [viewModel]. Data fields come from the local
+   * data store and are applied by the view model itself.
+   */
   fun syncViewModelState() {
-    dataStore.surveys = surveys
-    dataStore.activeSurveyId = activeSurveyId
-    dataStore.mapLayers = mapLayers
-    dataStore.forms = forms
-    dataStore.entities = entities
-    dataStore.standaloneSubmissions = standaloneSubmissions
-    dataStore.submissionGeometries = submissionGeometries
-    dataStore.offlineTilePackages = offlineTilePackages
-    dataStore.mutations = mutations
-    dataStore.places = places
-    dataStore.userSettings = userSettings
     viewModel.updateUiState { current ->
       current.copy(
         currentScreen = currentScreen,
@@ -91,8 +123,6 @@ class PrototypeAppState(
         downloadSurveyEntryOrigin = downloadSurveyEntryOrigin,
         isDownloadSurveySignOutPromptOpen = isDownloadSurveySignOutPromptOpen,
         searchQuery = searchQuery,
-        surveys = surveys,
-        activeSurveyId = activeSurveyId,
         activeSurveyNotice = activeSurveyNotice,
         isDarkTheme = isDarkTheme,
         deviceFormFactor = deviceFormFactor,
@@ -104,14 +134,6 @@ class PrototypeAppState(
         isDrawerOpen = isDrawerOpen,
         activeDrawerSubView = activeDrawerSubView,
         selectedUploadStatusFilter = selectedUploadStatusFilter,
-        mapLayers = mapLayers,
-        forms = forms,
-        entities = entities,
-        standaloneSubmissions = standaloneSubmissions,
-        submissionGeometries = submissionGeometries,
-        offlineTilePackages = offlineTilePackages,
-        mutations = mutations,
-        places = places,
         mapboxPlacesApiResults = mapboxPlacesApiResults,
         isMapboxPlacesSearching = isMapboxPlacesSearching,
         isAirplaneMode = isAirplaneMode,
@@ -137,7 +159,6 @@ class PrototypeAppState(
         activeSharedPdfSheet = activeSharedPdfSheet,
         navigationTargetKind = navigationTargetKind,
         navigationTargetId = navigationTargetId,
-        userSettings = userSettings,
         customXFormsXml = customXFormsXml,
         selectedWorkbenchExampleForm = selectedWorkbenchExampleForm,
         customFormDef = customFormDef,
@@ -151,20 +172,6 @@ class PrototypeAppState(
         entityRefSearchQuery = entityRefSearchQuery,
       )
     }
-  }
-
-  /** Pulls updated repository state from [dataStore] after domain use cases execute. */
-  private fun pullRepositoryState() {
-    surveys = dataStore.surveys
-    activeSurveyId = dataStore.activeSurveyId
-    mapLayers = dataStore.mapLayers
-    forms = dataStore.forms
-    entities = dataStore.entities
-    standaloneSubmissions = dataStore.standaloneSubmissions
-    submissionGeometries = dataStore.submissionGeometries
-    offlineTilePackages = dataStore.offlineTilePackages
-    mutations = dataStore.mutations
-    places = dataStore.places
   }
 
   var currentScreen by mutableStateOf(initialScreen)
@@ -271,15 +278,16 @@ class PrototypeAppState(
   var searchQuery by mutableStateOf("")
     private set
 
-  var surveys by mutableStateOf(initialSurveys)
-    private set
+  /** Surveys stored on the device (from the local data store). */
+  val surveys: List<SurveyPreviewItem>
+    get() = data.surveys
 
   var activeSurveyNotice by mutableStateOf<String?>(null)
     private set
 
   // --- Main Survey UI State ---
-  var activeSurveyId by mutableStateOf("survey-kenya-coffee")
-    private set
+  val activeSurveyId: String
+    get() = data.activeSurveyId
 
   var mainViewMode by mutableStateOf(MainSurveyViewMode.MAP)
     private set
@@ -302,21 +310,23 @@ class PrototypeAppState(
   var offlineBasemapStyle by mutableStateOf(OfflineBasemapStyle.SATELLITE_HYBRID)
     private set
 
-  var mapLayers by mutableStateOf(defaultMapLayers())
-    private set
+  val mapLayers: List<MapLayerItem>
+    get() = data.content.mapLayers
 
-  var submissionGeometries by mutableStateOf(defaultSubmissionGeometries())
-    private set
+  val submissionGeometries: List<SubmissionGeometryPolygon>
+    get() = data.content.submissionGeometries
 
-  var forms by mutableStateOf(defaultForms())
-    private set
+  val forms: List<FormPreviewItem>
+    get() = data.content.forms
 
-  var entities by mutableStateOf(defaultGeospatialEntities())
-    internal set
+  /** Map features in the active survey. Setting this writes them to the local data store. */
+  var entities: List<GeospatialEntityItem>
+    get() = data.content.entities
+    internal set(value) = storeEntities(value)
 
   /** Geographic places and landmarks searchable via Place search in the active survey region. */
-  var places by mutableStateOf(defaultSurveyPlaces())
-    private set
+  val places: List<SurveyPlaceItem>
+    get() = data.places
 
   /** ID of the currently selected [SurveyPlaceItem] from Place search (if any). */
   var selectedPlaceId by mutableStateOf<String?>(null)
@@ -325,8 +335,8 @@ class PrototypeAppState(
   /**
    * Standalone form submissions recorded without an attached Geospatial Entity (`entityId == ""`).
    */
-  var standaloneSubmissions by mutableStateOf(defaultStandaloneSubmissions())
-    private set
+  val standaloneSubmissions: List<SubmissionPreviewItem>
+    get() = data.content.standaloneSubmissions
 
   var selectedEntityId by mutableStateOf<String?>(null)
     private set
@@ -422,12 +432,12 @@ class PrototypeAppState(
   var listFilterTab by mutableStateOf(ListFilterTab.ALL)
     private set
 
-  var offlineTilePackages by mutableStateOf(defaultOfflineTilePackages())
-    private set
+  val offlineTilePackages: List<OfflineTilePackageItem>
+    get() = data.offlineTilePackages
 
   /** Local mutation log (`DataMutation` items across all upload states) for the active survey. */
-  var mutations by mutableStateOf(defaultMutations())
-    private set
+  val mutations: List<MutationLogItem>
+    get() = data.mutations
 
   /**
    * Active status filter chip on the unified `Uploads` screen (`Pending`, `In progress`,
@@ -539,17 +549,17 @@ class PrototypeAppState(
   val uploadedMutationCount: Int
     get() = uploadedMutations.size
 
-  var unitSystem by mutableStateOf(MeasurementUnitSystem.METRIC)
-    private set
+  val unitSystem: MeasurementUnitSystem
+    get() = data.userSettings.measurementUnits
 
-  var selectedLanguageCode by mutableStateOf("en")
-    private set
+  val selectedLanguageCode: String
+    get() = data.userSettings.language
 
   var selectedLanguageLocale by mutableStateOf("en (English)")
     private set
 
-  var shouldUploadPhotosOnWifiOnly by mutableStateOf(false)
-    private set
+  val shouldUploadPhotosOnWifiOnly: Boolean
+    get() = data.userSettings.shouldUploadPhotosOnWifiOnly
 
   var visitedWebsiteUrl by mutableStateOf<String?>(null)
     private set
@@ -564,12 +574,7 @@ class PrototypeAppState(
 
   /** Snapshot of user settings matching `UserSettings` in `github.com/google/ground-android`. */
   val userSettings: UserSettings
-    get() =
-      UserSettings(
-        language = selectedLanguageCode,
-        measurementUnits = unitSystem,
-        shouldUploadPhotosOnWifiOnly = shouldUploadPhotosOnWifiOnly,
-      )
+    get() = data.userSettings
 
   /**
    * Device storage breakdown showing total device storage, free storage, storage occupied by
@@ -1549,7 +1554,8 @@ class PrototypeAppState(
 
   /** Marks the specified survey as downloaded onto the device for offline field use. */
   fun downloadSurvey(surveyId: String) {
-    surveys = surveys.map { item ->
+    storeSurveys(
+      surveys.map { item ->
       if (item.id == surveyId) {
         activeSurveyNotice =
           "Downloaded \"${item.title}\" (${item.offlineSizeLabel}) for offline use."
@@ -1558,22 +1564,19 @@ class PrototypeAppState(
         item
       }
     }
+    )
   }
 
   /** Opens a survey in the Main Survey UI (downloading it first if not already downloaded). */
   fun openSurvey(surveyId: String) {
     downloadSurvey(surveyId)
-    activeSurveyId = surveyId
-    val exampleForm = exampleFormForSurveyId(surveyId)
-    selectedWorkbenchExampleForm = exampleForm
-    customXFormsXml = exampleForm.xformsXml
-    customFormDef = cachedExampleFormDef(exampleForm)
-    xformsXmlError = null
-    forms = formsForSurvey(surveyId)
-    entities = entitiesForSurvey(surveyId)
-    standaloneSubmissions = standaloneSubmissionsForSurvey(surveyId)
-    submissionGeometries = submissionGeometriesForSurvey(surveyId)
-    mapLayers = mapLayersForSurvey(surveyId)
+    viewModel.launch { viewModel.surveyRepository.setActiveSurveyId(surveyId) }
+    data.surveyConfigs[surveyId]?.primaryFormXml?.let { xml ->
+      selectedWorkbenchExampleForm = WorkbenchExampleForm.entries.firstOrNull { it.xformsXml == xml }
+      customXFormsXml = xml
+      customFormDef = XFormsParseCache.formDef(xml)
+      xformsXmlError = null
+    }
     selectedEntityId = null
     selectedSubmissionId = null
     selectedLayerDatasetId = null
@@ -1591,7 +1594,8 @@ class PrototypeAppState(
 
   /** Updates the title and description of the currently active survey. */
   fun updateActiveSurveyDetails(title: String, description: String) {
-    surveys = surveys.map { item ->
+    storeSurveys(
+      surveys.map { item ->
       if (item.id == activeSurveyId) {
         item.copy(
           title = title.ifBlank { item.title },
@@ -1601,11 +1605,13 @@ class PrototypeAppState(
         item
       }
     }
+    )
   }
 
   /** Toggles the downloaded status of a survey (for UX prototyping & testing). */
   fun toggleSurveyDownloaded(surveyId: String) {
-    surveys = surveys.map { item ->
+    storeSurveys(
+      surveys.map { item ->
       if (item.id == surveyId) {
         val nextState = !item.isDownloaded
         activeSurveyNotice =
@@ -1619,6 +1625,7 @@ class PrototypeAppState(
         item
       }
     }
+    )
   }
 
   /**
@@ -1639,14 +1646,16 @@ class PrototypeAppState(
     val surveyId = pendingRemovalSurveyId
     pendingRemovalSurveyId = null
     if (surveyId != null) {
-      surveys = surveys.map { item ->
-        if (item.id == surveyId) {
-          activeSurveyNotice = "Removed offline copy of \"${item.title}\"."
-          item.copy(isDownloaded = false)
-        } else {
-          item
+      storeSurveys(
+        surveys.map { item ->
+          if (item.id == surveyId) {
+            activeSurveyNotice = "Removed offline copy of \"${item.title}\"."
+            item.copy(isDownloaded = false)
+          } else {
+            item
+          }
         }
-      }
+      )
     }
   }
 
@@ -1741,7 +1750,8 @@ class PrototypeAppState(
 
   /** Toggles visibility of a specific `LayerDef` on the survey map. */
   fun toggleLayerVisibility(layerId: String) {
-    mapLayers = mapLayers.map { layer ->
+    storeMapLayers(
+      mapLayers.map { layer ->
       if (layer.id == layerId) {
         val nextVisible = !layer.isVisible
         if (!nextVisible && selectedEntity?.layerId == layerId) {
@@ -1754,6 +1764,7 @@ class PrototypeAppState(
         layer
       }
     }
+    )
   }
 
   /** Selects a Geospatial Entity on the map to open its bottom sheet in collapsed/peek state. */
@@ -2320,7 +2331,7 @@ class PrototypeAppState(
     example: WorkbenchExampleForm,
     launchImmediately: Boolean = false,
   ) {
-    val targetSurveyId = surveyIdForExampleForm(example)
+    val targetSurveyId = surveyIdForExampleForm(example) ?: return
     openSurvey(targetSurveyId)
     selectedWorkbenchExampleForm = example
     activeSurveyNotice =
@@ -2470,11 +2481,13 @@ class PrototypeAppState(
       activeFormWizardController?.formState?.entityStates ?: emptyList(),
   ) {
     syncViewModelState()
-    val result =
-      viewModel.completeFormSubmissionUseCase(
+    val controller = activeFormWizardController
+    viewModel.launch {
+      val result =
+        viewModel.completeFormSubmissionUseCase(
         recordInstance = recordInstance,
         entityStates = entityStates,
-        controller = activeFormWizardController,
+        controller = controller,
         activeDataCollectionFormId = activeDataCollectionFormId,
         activeDataCollectionEntityId = activeDataCollectionEntityId,
         wasFormLaunchedWithoutEntity = wasFormLaunchedWithoutEntity,
@@ -2486,14 +2499,14 @@ class PrototypeAppState(
         userGpsCoordinatesLabel = userGpsCoordinatesLabel,
         userGpsNormalizedX = userGpsNormalizedX,
         userGpsNormalizedY = userGpsNormalizedY,
-      ) ?: return
-    pullRepositoryState()
-    selectedEntityId = result.selectedEntityId
-    if (result.updateSelectedSubmissionId) {
-      selectedSubmissionId = result.selectedSubmissionId
+      ) ?: return@launch
+      selectedEntityId = result.selectedEntityId
+      if (result.updateSelectedSubmissionId) {
+        selectedSubmissionId = result.selectedSubmissionId
+      }
+      activeSurveyNotice = result.noticeMessage
+      closeActiveFormRunner()
     }
-    activeSurveyNotice = result.noticeMessage
-    closeActiveFormRunner()
   }
 
   /**
@@ -2501,7 +2514,8 @@ class PrototypeAppState(
    * submissions accordingly when marked [SyncStatus.SYNCED].
    */
   fun updateEntitySyncStatus(entityId: String, newStatus: SyncStatus) {
-    entities = entities.map { item ->
+    storeEntities(
+      entities.map { item ->
       if (item.id == entityId) {
         val updatedSubmissions =
           if (newStatus == SyncStatus.SYNCED) {
@@ -2514,6 +2528,7 @@ class PrototypeAppState(
         item
       }
     }
+    )
     val entity = entities.firstOrNull { it.id == entityId } ?: return
     activeSurveyNotice = "${entity.label}: Sync status set to ${newStatus.label}"
   }
@@ -2533,7 +2548,8 @@ class PrototypeAppState(
    */
   fun updateSubmissionSyncStatus(submissionId: String, newStatus: SyncStatus) {
     var updatedSubTitle: String? = null
-    entities = entities.map { item ->
+    storeEntities(
+      entities.map { item ->
       val hasTarget = item.submissions.any { it.id == submissionId }
       if (hasTarget) {
         val updatedSubmissions =
@@ -2557,13 +2573,18 @@ class PrototypeAppState(
         item
       }
     }
-    standaloneSubmissions = standaloneSubmissions.map { sub ->
-      if (sub.id == submissionId) {
-        updatedSubTitle = sub.formTitle
-        sub.copy(syncStatus = newStatus)
-      } else {
-        sub
-      }
+    )
+    if (standaloneSubmissions.any { it.id == submissionId }) {
+      storeStandaloneSubmissions(
+        standaloneSubmissions.map { sub ->
+          if (sub.id == submissionId) {
+            updatedSubTitle = sub.formTitle
+            sub.copy(syncStatus = newStatus)
+          } else {
+            sub
+          }
+        }
+      )
     }
     if (updatedSubTitle != null) {
       activeSurveyNotice = "$updatedSubTitle: Sync status set to ${newStatus.label}"
@@ -2686,14 +2707,10 @@ class PrototypeAppState(
    * [MutationSyncState.UPLOADED] with a completed timestamp and moving it into `Uploaded`.
    */
   fun syncMutationNow(mutationId: String) {
-    viewModel.mutationRepository.setMutations(mutations)
-    viewModel.surveyRepository.setEntities(entities)
-    viewModel.surveyRepository.setStandaloneSubmissions(standaloneSubmissions)
-    val notice = viewModel.syncMutationsUseCase.syncSingleMutation(mutationId) ?: return
-    mutations = viewModel.mutationRepository.getMutations()
-    entities = viewModel.surveyRepository.getEntities()
-    standaloneSubmissions = viewModel.surveyRepository.getStandaloneSubmissions()
-    activeSurveyNotice = notice
+    viewModel.launch {
+      val notice = viewModel.syncMutationsUseCase.syncSingleMutation(mutationId) ?: return@launch
+      activeSurveyNotice = notice
+    }
   }
 
   /**
@@ -2701,14 +2718,11 @@ class PrototypeAppState(
    * [MutationSyncState.UPLOADED] with completed timestamps.
    */
   fun syncAllOutboxMutations() {
-    viewModel.mutationRepository.setMutations(mutations)
-    viewModel.surveyRepository.setEntities(entities)
-    viewModel.surveyRepository.setStandaloneSubmissions(standaloneSubmissions)
-    val notice = viewModel.syncMutationsUseCase.syncAllOutboxMutations(activeSurveyId) ?: return
-    mutations = viewModel.mutationRepository.getMutations()
-    entities = viewModel.surveyRepository.getEntities()
-    standaloneSubmissions = viewModel.surveyRepository.getStandaloneSubmissions()
-    activeSurveyNotice = notice
+    val surveyId = activeSurveyId
+    viewModel.launch {
+      val notice = viewModel.syncMutationsUseCase.syncAllOutboxMutations(surveyId) ?: return@launch
+      activeSurveyNotice = notice
+    }
   }
 
   /** Navigates from the "Surveys" screen to the full "Download survey" directory screen. */
@@ -2768,9 +2782,11 @@ class PrototypeAppState(
 
   /** Toggles download status of an offline Mapbox basemap tile package. */
   fun toggleOfflineTilePackage(packageId: String) {
-    offlineTilePackages = offlineTilePackages.map { pkg ->
-      if (pkg.id == packageId) pkg.copy(isDownloaded = !pkg.isDownloaded) else pkg
-    }
+    storeOfflineTilePackages(
+      offlineTilePackages.map { pkg ->
+        if (pkg.id == packageId) pkg.copy(isDownloaded = !pkg.isDownloaded) else pkg
+      }
+    )
   }
 
   /**
@@ -2793,9 +2809,11 @@ class PrototypeAppState(
     val packageId = pendingRemovalTilePackageId
     pendingRemovalTilePackageId = null
     if (packageId != null) {
-      offlineTilePackages = offlineTilePackages.map { pkg ->
-        if (pkg.id == packageId) pkg.copy(isDownloaded = false) else pkg
-      }
+      storeOfflineTilePackages(
+        offlineTilePackages.map { pkg ->
+          if (pkg.id == packageId) pkg.copy(isDownloaded = false) else pkg
+        }
+      )
     }
   }
 
@@ -2806,7 +2824,7 @@ class PrototypeAppState(
 
   /** Updates the measurement unit preference (`METRIC` vs `IMPERIAL`). */
   fun updateUnitSystem(system: MeasurementUnitSystem) {
-    unitSystem = system
+    storeUserSettings(userSettings.copy(measurementUnits = system))
   }
 
   /**
@@ -2825,10 +2843,10 @@ class PrototypeAppState(
         "${it.code} (${it.label})".equals(trimmed, ignoreCase = true)
     }
     if (matched != null) {
-      selectedLanguageCode = matched.code
+      storeUserSettings(userSettings.copy(language = matched.code))
       selectedLanguageLocale = "${matched.code} (${matched.label})"
     } else {
-      selectedLanguageCode = codeCandidate.ifEmpty { "en" }
+      storeUserSettings(userSettings.copy(language = codeCandidate.ifEmpty { "en" }))
       selectedLanguageLocale = trimmed.ifEmpty { "en (English)" }
     }
   }
@@ -2843,7 +2861,7 @@ class PrototypeAppState(
    * `ground-android`).
    */
   fun updateUploadMediaOverUnmeteredConnectionOnly(enabled: Boolean) {
-    shouldUploadPhotosOnWifiOnly = enabled
+    storeUserSettings(userSettings.copy(shouldUploadPhotosOnWifiOnly = enabled))
   }
 
   /**
@@ -2858,6 +2876,7 @@ class PrototypeAppState(
   /** Evicts uploaded media attachments from local device cache (per `00-index.md`). */
   fun evictUploadedMediaCache() {
     mediaCacheCleared = true
+    viewModel.launch { viewModel.settingsRepository.evictUploadedMediaCache() }
   }
 
   /**
@@ -3139,9 +3158,9 @@ class PrototypeAppState(
    */
   fun startNavigationToEntity(entityId: String) {
     val entity = entities.firstOrNull { it.id == entityId } ?: return
-    mapLayers = mapLayers.map { layer ->
-      if (layer.id == entity.layerId) layer.copy(isVisible = true) else layer
-    }
+    storeMapLayers(
+      mapLayers.map { layer -> if (layer.id == entity.layerId) layer.copy(isVisible = true) else layer }
+    )
     navigationTargetKind = NavigationTargetKind.ENTITY
     navigationTargetId = entity.id
     selectedEntityId = entity.id
@@ -3167,13 +3186,15 @@ class PrototypeAppState(
   fun startNavigationToSubmission(submissionId: String) {
     val sub = allSubmissions.firstOrNull { it.id == submissionId } ?: return
     val parentEntity = entities.firstOrNull { it.id == sub.entityId }
-    mapLayers = mapLayers.map { layer ->
-      if (parentEntity != null && layer.id == parentEntity.layerId) {
-        layer.copy(isVisible = true)
-      } else {
-        layer
+    storeMapLayers(
+      mapLayers.map { layer ->
+        if (parentEntity != null && layer.id == parentEntity.layerId) {
+          layer.copy(isVisible = true)
+        } else {
+          layer
+        }
       }
-    }
+    )
     navigationTargetKind = NavigationTargetKind.SUBMISSION
     navigationTargetId = sub.id
     selectedEntityId = parentEntity?.id
@@ -3293,8 +3314,8 @@ class PrototypeAppState(
   fun addRandomSites(count: Int = 5_000) {
     if (count <= 0) return
     syncViewModelState()
-    val totalCount = viewModel.generateRandomSitesUseCase(count)
-    pullRepositoryState()
+    viewModel.launch { viewModel.generateRandomSitesUseCase(count) }
+    val totalCount = entities.size
     currentScreen = PrototypeScreen.MAIN_SURVEY
     mainViewMode = MainSurveyViewMode.MAP
     activeDrawerSubView = MainDrawerSubView.NONE
@@ -3318,17 +3339,13 @@ class PrototypeAppState(
     isAvailableFormsSheetOpen = false
     isOfflineBasemapVisible = true
     offlineBasemapStyle = OfflineBasemapStyle.SATELLITE_HYBRID
-    mapLayers = defaultMapLayers()
-    submissionGeometries = defaultSubmissionGeometries()
-    entities = defaultGeospatialEntities()
-    places = defaultSurveyPlaces()
+    viewModel.launch { viewModel.sampleDataRepository.resetToSampleData() }
+    dataResetCount++
     selectedPlaceId = null
     lastSelectedPlace = null
     isAirplaneMode = false
     mapboxPlacesApiResults = emptyList()
     isMapboxPlacesSearching = false
-    standaloneSubmissions = defaultStandaloneSubmissions()
-    mutations = defaultMutations()
     selectedEntityId = null
     isEntityBottomSheetExpanded = false
     isSidePanelExpanded = true
@@ -3351,7 +3368,6 @@ class PrototypeAppState(
     locationLockState = LocationLockState.LOCKED
     mapPanOffsetX = 0f
     mapPanOffsetY = 0f
-    surveys = defaultSampleSurveys()
     closeActiveFormRunner()
     resetDefaultXFormsXml()
   }
@@ -3372,89 +3388,39 @@ class PrototypeAppState(
     /** Widest the web dashboard's left-hand panel can be dragged, in dp. */
     const val MAX_SIDE_PANEL_WIDTH_DP = 560f
 
-    /** Alias for [defaultSurveyPlaces]. */
-    fun defaultPlaces(): List<SurveyPlaceItem> = PrototypeAppDataStore.defaultPlaces()
-
-    /**
-     * Default geographic places, towns, landmarks, road junctions, and hydrology features from the
-     * Mapbox Places API (`mapbox.places`) searchable via `"Search places or map features..."`.
-     */
-    fun defaultSurveyPlaces(): List<SurveyPlaceItem> = PrototypeAppDataStore.defaultSurveyPlaces()
-
-    /**
-     * Default sample surveys displayed in `devtools/prototypeApp`, sourced from
-     * [PrototypeAppDataStore].
-     */
-    fun defaultSampleSurveys(): List<SurveyPreviewItem> =
-      PrototypeAppDataStore.defaultSampleSurveys()
-
-    /** Returns a pre-parsed [FormDef] for [example] from [PrototypeAppDataStore]. */
-    fun cachedExampleFormDef(example: WorkbenchExampleForm): FormDef? =
-      PrototypeAppDataStore.cachedExampleFormDef(example)
-
-    /** Maps a [WorkbenchExampleForm] to its corresponding survey ID via [PrototypeAppDataStore]. */
-    fun surveyIdForExampleForm(example: WorkbenchExampleForm): String =
-      PrototypeAppDataStore.surveyIdForExampleForm(example)
-
-    /** Maps a survey ID to its corresponding [WorkbenchExampleForm] via [PrototypeAppDataStore]. */
-    fun exampleFormForSurveyId(surveyId: String): WorkbenchExampleForm =
-      PrototypeAppDataStore.exampleFormForSurveyId(surveyId)
-
-    /** Returns the count of preloaded entities for [surveyId] from [PrototypeAppDataStore]. */
-    fun preloadedEntityCountForSurvey(surveyId: String): Int =
-      PrototypeAppDataStore.preloadedEntityCountForSurvey(surveyId)
-
-    /** Returns the count of preloaded submissions for [surveyId] from [PrototypeAppDataStore]. */
-    fun preloadedSubmissionCountForSurvey(surveyId: String): Int =
-      PrototypeAppDataStore.preloadedSubmissionCountForSurvey(surveyId)
-
-    /** Returns the [FormPreviewItem]s for [surveyId] from [PrototypeAppDataStore]. */
-    fun formsForSurvey(surveyId: String): List<FormPreviewItem> =
-      PrototypeAppDataStore.formsForSurvey(surveyId)
-
-    /** Returns the [GeospatialEntityItem]s for [surveyId] from [PrototypeAppDataStore]. */
-    fun entitiesForSurvey(surveyId: String): List<GeospatialEntityItem> =
-      PrototypeAppDataStore.entitiesForSurvey(surveyId)
-
-    /**
-     * Returns the standalone [SubmissionPreviewItem]s for [surveyId] from [PrototypeAppDataStore].
-     */
-    fun standaloneSubmissionsForSurvey(surveyId: String): List<SubmissionPreviewItem> =
-      PrototypeAppDataStore.standaloneSubmissionsForSurvey(surveyId)
-
-    /** Returns the [SubmissionGeometryPolygon]s for [surveyId] from [PrototypeAppDataStore]. */
-    fun submissionGeometriesForSurvey(surveyId: String): List<SubmissionGeometryPolygon> =
-      PrototypeAppDataStore.submissionGeometriesForSurvey(surveyId)
-
-    /** Returns the [MapLayerItem]s for [surveyId] from [PrototypeAppDataStore]. */
-    fun mapLayersForSurvey(surveyId: String): List<MapLayerItem> =
-      PrototypeAppDataStore.mapLayersForSurvey(surveyId)
-
-    /** Default map layers for the primary survey from [PrototypeAppDataStore]. */
-    fun defaultMapLayers(): List<MapLayerItem> = PrototypeAppDataStore.defaultMapLayers()
-
-    /** Default submission geometries for the primary survey from [PrototypeAppDataStore]. */
-    fun defaultSubmissionGeometries(): List<SubmissionGeometryPolygon> =
-      PrototypeAppDataStore.defaultSubmissionGeometries()
-
-    /** Default forms for the primary survey from [PrototypeAppDataStore]. */
-    fun defaultForms(): List<FormPreviewItem> = PrototypeAppDataStore.defaultForms()
-
-    /** Default standalone submissions for the primary survey from [PrototypeAppDataStore]. */
-    fun defaultStandaloneSubmissions(): List<SubmissionPreviewItem> =
-      PrototypeAppDataStore.defaultStandaloneSubmissions()
-
-    /** Default geospatial entities for the primary survey from [PrototypeAppDataStore]. */
-    fun defaultGeospatialEntities(): List<GeospatialEntityItem> =
-      PrototypeAppDataStore.defaultGeospatialEntities()
-
-    /** Default offline basemap tile packages from [PrototypeAppDataStore]. */
-    fun defaultOfflineTilePackages(): List<OfflineTilePackageItem> =
-      PrototypeAppDataStore.defaultOfflineTilePackages()
-
-    /** Default mutation log items from [PrototypeAppDataStore]. */
-    fun defaultMutations(): List<MutationLogItem> = PrototypeAppDataStore.defaultMutations()
   }
+
+  /**
+   * ID of the stored survey whose primary XForms definition is [example]'s, or `null` if no stored
+   * survey uses it.
+   */
+  fun surveyIdForExampleForm(example: WorkbenchExampleForm): String? =
+    data.surveys.firstOrNull { data.surveyConfigs[it.id]?.primaryFormXml == example.xformsXml }?.id
+
+  /** Incremented when the sample data is reset, so views holding local copies reload them. */
+  var dataResetCount by mutableStateOf(0)
+    private set
+
+  /** The Survey editor's draft of the active survey, from the local data store. */
+  val activeSurveyEditorDraft: SurveyEditorDraft
+    get() =
+      SurveyEditorDraft.forSurvey(
+        surveyId = activeSurveyId,
+        stored = data.content.editorDraft,
+        survey = surveys.firstOrNull { it.id == activeSurveyId },
+      )
+
+  /** Saves the Survey editor's [draft] of [surveyId] to the local data store. */
+  fun saveSurveyEditorDraft(surveyId: String, draft: SurveyEditorDraft) {
+    viewModel.launch { viewModel.surveyEditorRepository.saveDraft(surveyId, draft) }
+  }
+
+  /** Number of map features stored for [surveyId]. */
+  fun entityCountForSurvey(surveyId: String): Int = data.surveyStats[surveyId]?.entityCount ?: 0
+
+  /** Number of submissions stored for [surveyId]. */
+  fun submissionCountForSurvey(surveyId: String): Int =
+    data.surveyStats[surveyId]?.submissionCount ?: 0
 }
 
 private val defaultClusterMapFeaturesUseCase = ClusterMapFeaturesUseCase()

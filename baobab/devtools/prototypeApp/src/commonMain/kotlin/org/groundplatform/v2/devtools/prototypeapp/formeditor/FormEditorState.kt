@@ -23,7 +23,9 @@ import org.groundplatform.v2.core.forms.ui.FormWizardController
  * Observable state holder for the Form editor page: the [EditorForm] under edit, the selected
  * screen, and the in-browser flow preview session.
  */
-class FormEditorState(initialForm: EditorForm = FormEditorSamples.shadeTreeVisit()) {
+class FormEditorState(
+  initialForm: EditorForm = EditorFormTemplates.blank(formId = "form", title = "Untitled form")
+) {
 
   var form: EditorForm by mutableStateOf(initialForm)
     private set

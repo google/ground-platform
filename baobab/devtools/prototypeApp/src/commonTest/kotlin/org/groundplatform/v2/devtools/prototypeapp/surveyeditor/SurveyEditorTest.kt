@@ -13,6 +13,7 @@
  */
 package org.groundplatform.v2.devtools.prototypeapp.surveyeditor
 
+import org.groundplatform.v2.devtools.prototypeapp.data.seed.SurveyEditorSamples
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -26,7 +27,7 @@ class SurveyEditorTest {
 
   @Test
   fun samples_areValid() {
-    val state = SurveyEditorState()
+    val state = SurveyEditorState(SurveyEditorSamples.draft())
     assertEquals(2, state.mapLayers.size)
     assertEquals(2, state.dataTables.size)
     state.datasets.forEach { assertEquals(emptyList(), state.datasetIssues(it), it.id) }
@@ -35,7 +36,7 @@ class SurveyEditorTest {
 
   @Test
   fun addAndDeleteForm_updatesSelection() {
-    val state = SurveyEditorState()
+    val state = SurveyEditorState(SurveyEditorSamples.draft())
     state.addForm()
     val added = assertNotNull(state.selectedForm)
     assertEquals("New form", added.editor.form.title)
@@ -49,7 +50,7 @@ class SurveyEditorTest {
 
   @Test
   fun addDataset_createsKindSpecificEntry() {
-    val state = SurveyEditorState()
+    val state = SurveyEditorState(SurveyEditorSamples.draft())
     state.addDataset(DatasetKind.MAP_LAYER)
     val layer = assertNotNull(state.selectedDataset)
     assertEquals(DatasetKind.MAP_LAYER, layer.kind)
@@ -64,14 +65,14 @@ class SurveyEditorTest {
 
   @Test
   fun deletingLastOfKind_returnsToDetails() {
-    val state = SurveyEditorState()
+    val state = SurveyEditorState(SurveyEditorSamples.draft())
     state.dataTables.map { it.key }.forEach { state.deleteDataset(it) }
     assertIs<SurveyEditorSection.Details>(state.section)
   }
 
   @Test
   fun renamingProperty_carriesValuesAndKey() {
-    val state = SurveyEditorState()
+    val state = SurveyEditorState(SurveyEditorSamples.draft())
     val farmers = state.dataTables.first { it.id == "farmers" }
     val index = farmers.properties.indexOfFirst { it.name == "farmer_id" }
     state.updateProperty(farmers.key, index, farmers.properties[index].copy(name = "member_id"))
@@ -84,7 +85,7 @@ class SurveyEditorTest {
 
   @Test
   fun addRow_onMapLayerGetsGeometryAtLocation() {
-    val state = SurveyEditorState()
+    val state = SurveyEditorState(SurveyEditorSamples.draft())
     val plots = state.mapLayers.first { it.geometryKind == GeometryKind.POINT }
     val rowKey = state.addRow(plots.key, LatLng(-0.5, 37.0))
     val row = state.datasets.first { it.key == plots.key }.rows.first { it.key == rowKey }
@@ -119,7 +120,7 @@ class SurveyEditorTest {
 
   @Test
   fun inviteCollaborator_validatesAndUpserts() {
-    val state = SurveyEditorState()
+    val state = SurveyEditorState(SurveyEditorSamples.draft())
     val before = state.sharing.collaborators.size
     assertNotNull(state.inviteCollaborator("not-an-email", CollaboratorRole.VIEWER))
     assertNotNull(state.inviteCollaborator("organizer@example.org", CollaboratorRole.VIEWER))
@@ -148,7 +149,7 @@ class SurveyEditorTest {
 
   @Test
   fun invite_issuesLinkAndAcceptCachesProfile() {
-    val state = SurveyEditorState()
+    val state = SurveyEditorState(SurveyEditorSamples.draft())
     assertNull(state.inviteCollaborator("wanjiku.mwangi@example.org", CollaboratorRole.VIEWER))
     val invited = state.sharing.collaborators.first { it.email == "wanjiku.mwangi@example.org" }
     assertEquals(InvitationStatus.PENDING, invited.status)
@@ -205,7 +206,7 @@ class SurveyEditorTest {
 
   @Test
   fun moveForm_reordersForms() {
-    val state = SurveyEditorState()
+    val state = SurveyEditorState(SurveyEditorSamples.draft())
     state.addForm()
     val keys = state.forms.map { it.key }
     state.moveForm(keys[2], 0)
@@ -214,7 +215,7 @@ class SurveyEditorTest {
 
   @Test
   fun moveDataset_reordersWithinKindOnly() {
-    val state = SurveyEditorState()
+    val state = SurveyEditorState(SurveyEditorSamples.draft())
     state.addDataset(DatasetKind.MAP_LAYER)
     val layers = state.mapLayers.map { it.key }
     val tables = state.dataTables.map { it.key }
@@ -260,7 +261,7 @@ class SurveyEditorTest {
 
   @Test
   fun languageSelection_addRemoveAndSetDefault() {
-    val state = SurveyEditorState()
+    val state = SurveyEditorState(SurveyEditorSamples.draft())
     assertEquals(listOf("en", "sw"), state.details.supportedLanguages)
     assertEquals("en", state.details.defaultLanguage)
 
@@ -290,7 +291,7 @@ class SurveyEditorTest {
 
   @Test
   fun surveyArea_setAndClear() {
-    val state = SurveyEditorState()
+    val state = SurveyEditorState(SurveyEditorSamples.draft())
     val initialArea = assertNotNull(state.details.surveyArea)
     assertEquals("Othaya Sub-County, Nyeri", initialArea.name)
     assertEquals(4, initialArea.boundaries.size)
@@ -323,7 +324,7 @@ class SurveyEditorTest {
 
   @Test
   fun addForm_createsLinkedMapLayerByDefault() {
-    val state = SurveyEditorState()
+    val state = SurveyEditorState(SurveyEditorSamples.draft())
     val initialLayersCount = state.mapLayers.size
     state.addForm()
 
@@ -338,7 +339,7 @@ class SurveyEditorTest {
 
   @Test
   fun createDatasetForForm_createsAndLinksDataset() {
-    val state = SurveyEditorState()
+    val state = SurveyEditorState(SurveyEditorSamples.draft())
     val form = state.forms.first()
     val initialLayers = state.mapLayers.size
 
@@ -354,7 +355,7 @@ class SurveyEditorTest {
 
   @Test
   fun createFormForDataset_createsAndLinksForm() {
-    val state = SurveyEditorState()
+    val state = SurveyEditorState(SurveyEditorSamples.draft())
     val parcels = state.mapLayers.first { it.id == "coffee_parcels" }
     assertFalse(parcels.isLinkedToForm)
 
@@ -372,7 +373,7 @@ class SurveyEditorTest {
 
   @Test
   fun syncDatasetsLinkedToForm_updatesDatasetProperties() {
-    val state = SurveyEditorState()
+    val state = SurveyEditorState(SurveyEditorSamples.draft())
     state.addForm()
     val formEntry = state.selectedForm!!
     val linkedLayer = state.mapLayers.first { it.linkedFormKey == formEntry.key }
@@ -390,7 +391,7 @@ class SurveyEditorTest {
 
   @Test
   fun unlinkDataset_clearsFormLink() {
-    val state = SurveyEditorState()
+    val state = SurveyEditorState(SurveyEditorSamples.draft())
     state.addForm()
     val formEntry = state.selectedForm!!
     val linkedLayer = state.mapLayers.first { it.linkedFormKey == formEntry.key }
@@ -404,7 +405,7 @@ class SurveyEditorTest {
 
   @Test
   fun deleteForm_unlinksAssociatedDatasets() {
-    val state = SurveyEditorState()
+    val state = SurveyEditorState(SurveyEditorSamples.draft())
     state.addForm()
     val formEntry = state.selectedForm!!
     val linkedLayer = state.mapLayers.first { it.linkedFormKey == formEntry.key }

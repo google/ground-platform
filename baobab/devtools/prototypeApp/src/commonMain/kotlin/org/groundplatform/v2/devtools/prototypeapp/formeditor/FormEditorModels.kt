@@ -387,8 +387,8 @@ fun slugify(text: String, fallback: String = "item"): String {
   }
 }
 
-/** Starter Form shown when the editor first opens. */
-object FormEditorSamples {
+/** Templates for new Forms created in the editor. */
+object EditorFormTemplates {
   /** A new Form with a single text question, used by "+" in the Survey editor. */
   fun blank(formId: String, title: String): EditorForm =
     EditorForm(
@@ -404,110 +404,4 @@ object FormEditorSamples {
           )
         ),
     )
-
-  fun parcelBoundaryCheck(): EditorForm =
-    EditorForm(
-      formId = "parcel_boundary_check",
-      title = "Parcel Boundary Check",
-      questions =
-        listOf(
-          EditorQuestion(
-            key = "q1",
-            name = "boundary_matches",
-            type = EditorQuestionType.SELECT_ONE,
-            label = "Does the mapped boundary match what you see?",
-            required = true,
-            choices = listOf(EditorChoice("yes", "Yes"), EditorChoice("no", "No")),
-          ),
-          EditorQuestion(
-            key = "q2",
-            name = "boundary_notes",
-            type = EditorQuestionType.LONG_TEXT,
-            label = "Describe what's different",
-            required = true,
-            relevance = EditorRelevance("q1", RelevanceOperator.EQUALS, "no"),
-          ),
-          EditorQuestion(
-            key = "q3",
-            name = "corner_location",
-            type = EditorQuestionType.LOCATION,
-            label = "Location of the nearest corner marker",
-          ),
-        ),
-    )
-
-  fun shadeTreeVisit(): EditorForm {
-    val yesNo = listOf(EditorChoice("yes", "Yes"), EditorChoice("no", "No"))
-    return EditorForm(
-      formId = "shade_tree_visit",
-      title = "Shade Tree Farm Visit",
-      questions =
-        listOf(
-          EditorQuestion(
-            key = "q1",
-            name = "visit_date",
-            type = EditorQuestionType.DATE,
-            label = "Visit date",
-            required = true,
-          ),
-          EditorQuestion(
-            key = "q2",
-            name = "farm_location",
-            type = EditorQuestionType.LOCATION,
-            label = "Farm location",
-            hint = "Stand near the center of the plot.",
-            required = true,
-          ),
-          EditorQuestion(
-            key = "q3",
-            name = "has_shade_trees",
-            type = EditorQuestionType.SELECT_ONE,
-            label = "Are shade trees present?",
-            required = true,
-            choices = yesNo,
-          ),
-          EditorQuestion(
-            key = "q4",
-            name = "shade_tree_count",
-            type = EditorQuestionType.INTEGER,
-            label = "How many shade trees?",
-            required = true,
-            relevance = EditorRelevance("q3", RelevanceOperator.EQUALS, "yes"),
-          ),
-          EditorQuestion(
-            key = "q5",
-            name = "canopy_photo",
-            type = EditorQuestionType.PHOTO,
-            label = "Canopy photo",
-            hint = "Point the camera straight up.",
-            relevance = EditorRelevance("q3", RelevanceOperator.EQUALS, "yes"),
-          ),
-          EditorQuestion(
-            key = "q6",
-            name = "observed_issues",
-            type = EditorQuestionType.SELECT_MULTIPLE,
-            label = "Observed issues",
-            choices =
-              listOf(
-                EditorChoice("pests", "Pests"),
-                EditorChoice("disease", "Disease"),
-                EditorChoice("erosion", "Erosion"),
-              ),
-          ),
-          EditorQuestion(
-            key = "q7",
-            name = "pest_notes",
-            type = EditorQuestionType.LONG_TEXT,
-            label = "Describe the pest damage",
-            relevance = EditorRelevance("q6", RelevanceOperator.INCLUDES, "pests"),
-          ),
-          EditorQuestion(
-            key = "q8",
-            name = "closing_note",
-            type = EditorQuestionType.NOTE,
-            label = "Thanks! Review your answers before submitting.",
-          ),
-        ),
-    )
-  }
 }

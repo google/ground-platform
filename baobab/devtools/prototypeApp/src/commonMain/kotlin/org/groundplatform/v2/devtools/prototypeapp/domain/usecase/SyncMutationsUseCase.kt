@@ -13,11 +13,11 @@
  */
 package org.groundplatform.v2.devtools.prototypeapp.domain.usecase
 
-import org.groundplatform.v2.devtools.prototypeapp.domain.model.MutationLogItem
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.MutationSyncState
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SyncStatus
 import org.groundplatform.v2.devtools.prototypeapp.domain.repository.MutationRepository
 import org.groundplatform.v2.devtools.prototypeapp.domain.repository.SurveyRepository
+import org.groundplatform.v2.devtools.prototypeapp.domain.repository.TransactionRunner
 
 /**
  * Multi-repository domain use case orchestrating [MutationRepository] and [SurveyRepository] to
@@ -27,15 +27,16 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.repository.SurveyRepos
 class SyncMutationsUseCase(
   private val mutationRepository: MutationRepository,
   private val surveyRepository: SurveyRepository,
+  private val transactionRunner: TransactionRunner,
 ) {
   /**
    * Synchronizes a single Outbox mutation ([mutationId]), transitioning its state to
    * [MutationSyncState.UPLOADED] and updating the target entity or submission [SyncStatus] to
    * [SyncStatus.SYNCED]. Returns the notice message if synchronized, or `null` if not found.
    */
-  fun syncSingleMutation(mutationId: String): String? {
+  suspend fun syncSingleMutation(mutationId: String): String? = transactionRunner tx@{
     val mutations = mutationRepository.getMutations()
-    val target = mutations.firstOrNull { it.id == mutationId } ?: return null
+    val target = mutations.firstOrNull { it.id == mutationId } ?: return@tx null
     val started = target.startedTimestamp ?: "2026-09-19 09:42:02 UTC"
     val completed = "2026-09-19 09:42:06 UTC"
     mutationRepository.updateMutation(mutationId) { item ->
@@ -52,7 +53,7 @@ class SyncMutationsUseCase(
     } else {
       surveyRepository.updateEntitySyncStatus(target.entityId, SyncStatus.SYNCED)
     }
-    return "Uploaded mutation \"${target.title}\" ($completed)"
+    "Uploaded mutation \"${target.title}\" ($completed)"
   }
 
   /**
@@ -61,14 +62,14 @@ class SyncMutationsUseCase(
    * submissions in [SurveyRepository] as [SyncStatus.SYNCED]. Returns the notice message if any
    * outbox mutations were synced, or `null` when outbox is empty.
    */
-  fun syncAllOutboxMutations(activeSurveyId: String): String? {
+  suspend fun syncAllOutboxMutations(activeSurveyId: String): String? = transactionRunner tx@{
     val allMutations = mutationRepository.getMutations()
     val outboxCount = allMutations.count { it.surveyId == activeSurveyId && it.isOutbox }
-    if (outboxCount == 0) return null
+    if (outboxCount == 0) return@tx null
     val completed = "2026-09-19 09:42:10 UTC"
     mutationRepository.setMutations(
       allMutations.map { item ->
-        if (item.isOutbox) {
+        if (item.isOutbox && item.surveyId == activeSurveyId) {
           item.copy(
             state = MutationSyncState.UPLOADED,
             stateDetail = "Synced to Ground Cloud • Batch commit rev #1055",
@@ -80,19 +81,7 @@ class SyncMutationsUseCase(
         }
       }
     )
-    surveyRepository.setEntities(
-      surveyRepository.getEntities().map { entity ->
-        entity.copy(
-          submissions = entity.submissions.map { sub -> sub.copy(syncStatus = SyncStatus.SYNCED) },
-          syncStatus = SyncStatus.SYNCED,
-        )
-      }
-    )
-    surveyRepository.setStandaloneSubmissions(
-      surveyRepository.getStandaloneSubmissions().map { sub ->
-        sub.copy(syncStatus = SyncStatus.SYNCED)
-      }
-    )
-    return "Uploaded all $outboxCount Outbox mutation(s) to Ground Cloud ($completed)"
+    surveyRepository.markAllSynced()
+    "Uploaded all $outboxCount Outbox mutation(s) to Ground Cloud ($completed)"
   }
 }

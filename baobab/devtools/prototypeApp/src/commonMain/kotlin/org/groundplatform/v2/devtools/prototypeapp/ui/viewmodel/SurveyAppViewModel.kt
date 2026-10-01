@@ -13,23 +13,50 @@
  */
 package org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel
 
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
-import org.groundplatform.v2.devtools.prototypeapp.data.datasource.local.PrototypeAppDataStore
+import kotlinx.coroutines.launch
+import org.groundplatform.v2.devtools.prototypeapp.data.datasource.local.store.InMemoryLocalStore
+import org.groundplatform.v2.devtools.prototypeapp.data.datasource.local.store.LocalStore
+import org.groundplatform.v2.devtools.prototypeapp.data.repository.LocalStoreTransactionRunner
 import org.groundplatform.v2.devtools.prototypeapp.data.repository.LocationRepositoryImpl
 import org.groundplatform.v2.devtools.prototypeapp.data.repository.MutationRepositoryImpl
 import org.groundplatform.v2.devtools.prototypeapp.data.repository.PlaceRepositoryImpl
+import org.groundplatform.v2.devtools.prototypeapp.data.repository.SampleDataRepositoryImpl
 import org.groundplatform.v2.devtools.prototypeapp.data.repository.SettingsRepositoryImpl
+import org.groundplatform.v2.devtools.prototypeapp.data.repository.SurveyEditorRepositoryImpl
 import org.groundplatform.v2.devtools.prototypeapp.data.repository.SurveyRepositoryImpl
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.AppScreen
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.MeasurementUnitSystem
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.MutationLogItem
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.OfflineTilePackageItem
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyConfig
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyPlaceItem
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyPreviewItem
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyStats
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.UserSettings
 import org.groundplatform.v2.devtools.prototypeapp.domain.repository.LocationRepository
+import org.groundplatform.v2.devtools.prototypeapp.domain.repository.MediaCacheInfo
 import org.groundplatform.v2.devtools.prototypeapp.domain.repository.MutationRepository
 import org.groundplatform.v2.devtools.prototypeapp.domain.repository.PlaceRepository
+import org.groundplatform.v2.devtools.prototypeapp.domain.repository.SampleDataRepository
 import org.groundplatform.v2.devtools.prototypeapp.domain.repository.SettingsRepository
+import org.groundplatform.v2.devtools.prototypeapp.domain.repository.SurveyContent
+import org.groundplatform.v2.devtools.prototypeapp.domain.repository.SurveyEditorRepository
 import org.groundplatform.v2.devtools.prototypeapp.domain.repository.SurveyRepository
+import org.groundplatform.v2.devtools.prototypeapp.domain.repository.TransactionRunner
 import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.ClusterMapFeaturesUseCase
 import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.CompleteFormSubmissionUseCase
 import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.ComputeWayfindingNavigationUseCase
@@ -40,36 +67,65 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.SyncMutationsU
 import org.groundplatform.v2.devtools.prototypeapp.ui.state.AppUiState
 
 /**
+ * Snapshot of everything the UI reads from the local data store: all surveys, the active survey's
+ * content, and device-level data. Derived from repository flows; never edited directly.
+ */
+data class AppData(
+  val surveys: List<SurveyPreviewItem> = emptyList(),
+  val activeSurveyId: String = "",
+  val content: SurveyContent = SurveyContent(),
+  val surveyStats: Map<String, SurveyStats> = emptyMap(),
+  val surveyConfigs: Map<String, SurveyConfig> = emptyMap(),
+  val offlineTilePackages: List<OfflineTilePackageItem> = emptyList(),
+  val mutations: List<MutationLogItem> = emptyList(),
+  val places: List<SurveyPlaceItem> = emptyList(),
+  val userSettings: UserSettings = UserSettings(),
+  val mediaCache: MediaCacheInfo = MediaCacheInfo(sizeLabel = "0 MB", fileCount = 0),
+)
+
+/**
  * Clean Architecture MVVM ViewModel (`SurveyAppViewModel`) per
  * `docs/technical/client/architecture.md`:
- * - Exposes a single immutable [StateFlow] of [AppUiState] (`uiState`).
+ * - The [LocalStore] is the single source of truth. [appData] is derived from repository flows, and
+ *   the data fields of [uiState] mirror it.
  * - Calls Domain Repository interfaces ([SurveyRepository], [MutationRepository],
  *   [SettingsRepository], [PlaceRepository], [LocationRepository]) directly for simple CRUD.
  * - Delegates complex business logic, geometric computations, and multi-repository orchestration to
  *   dedicated Domain Use Cases ([CompleteFormSubmissionUseCase], [SyncMutationsUseCase],
  *   [ComputeWayfindingNavigationUseCase], [ClusterMapFeaturesUseCase], [SearchPlacesUseCase],
  *   [GeneratePrototypeRandomSitesUseCase], [ResolveFormDefForLaunchUseCase]).
+ *
+ * Writes run in [scope]. By default it uses an immediate dispatcher, so writes to the in-memory
+ * store (which never suspend) complete, and their results reach [appData], before [launch] returns.
+ * With a persistent store, writes complete asynchronously and the UI updates when the store emits.
  */
+@OptIn(ExperimentalCoroutinesApi::class)
 class SurveyAppViewModel(
   initialScreen: AppScreen = AppScreen.SIGN_IN,
-  val dataStore: PrototypeAppDataStore = PrototypeAppDataStore(),
-  val surveyRepository: SurveyRepository = SurveyRepositoryImpl(dataStore),
-  val mutationRepository: MutationRepository = MutationRepositoryImpl(dataStore),
-  val settingsRepository: SettingsRepository = SettingsRepositoryImpl(dataStore),
-  val placeRepository: PlaceRepository = PlaceRepositoryImpl(dataStore),
+  val localStore: LocalStore = InMemoryLocalStore(),
+  val scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Unconfined),
+  val surveyRepository: SurveyRepository = SurveyRepositoryImpl(localStore),
+  val mutationRepository: MutationRepository = MutationRepositoryImpl(localStore),
+  val settingsRepository: SettingsRepository = SettingsRepositoryImpl(localStore),
+  val placeRepository: PlaceRepository = PlaceRepositoryImpl(localStore),
   val locationRepository: LocationRepository = LocationRepositoryImpl(),
+  val sampleDataRepository: SampleDataRepository = SampleDataRepositoryImpl(localStore),
+  val surveyEditorRepository: SurveyEditorRepository = SurveyEditorRepositoryImpl(localStore),
+  val transactionRunner: TransactionRunner = LocalStoreTransactionRunner(localStore),
   val resolveFormDefForLaunchUseCase: ResolveFormDefForLaunchUseCase =
     ResolveFormDefForLaunchUseCase(),
   val completeFormSubmissionUseCase: CompleteFormSubmissionUseCase =
     CompleteFormSubmissionUseCase(
       surveyRepository = surveyRepository,
       mutationRepository = mutationRepository,
+      transactionRunner = transactionRunner,
       resolveFormDefForLaunchUseCase = resolveFormDefForLaunchUseCase,
     ),
   val syncMutationsUseCase: SyncMutationsUseCase =
     SyncMutationsUseCase(
       mutationRepository = mutationRepository,
       surveyRepository = surveyRepository,
+      transactionRunner = transactionRunner,
     ),
   val computeWayfindingNavigationUseCase: ComputeWayfindingNavigationUseCase =
     ComputeWayfindingNavigationUseCase(),
@@ -78,70 +134,73 @@ class SurveyAppViewModel(
   val generateRandomSitesUseCase: GeneratePrototypeRandomSitesUseCase =
     GeneratePrototypeRandomSitesUseCase(surveyRepository = surveyRepository),
 ) {
+  init {
+    launch { sampleDataRepository.seedIfNeeded() }
+  }
+
+  /** Everything the UI reads from the local data store, kept current as the store changes. */
+  val appData: StateFlow<AppData> =
+    combine(
+        surveyRepository.observeSurveys(),
+        surveyRepository.observeActiveSurveyId().flatMapLatest { id ->
+          surveyRepository.observeSurveyContent(id).map { id to it }
+        },
+        combine(
+          surveyRepository.observeSurveyStats(),
+          surveyRepository.observeSurveyConfigs(),
+          surveyRepository.observeOfflineTilePackages(),
+          mutationRepository.observeMutations(),
+          ::DeviceData,
+        ),
+        placeRepository.observeLocalPlaces(),
+        combine(
+          settingsRepository.observeUserSettings(),
+          settingsRepository.observeMediaCache(),
+          ::Pair,
+        ),
+      ) {
+        surveys,
+        (activeId, content),
+        (stats, configs, tiles, mutations),
+        places,
+        (settings, media) ->
+        AppData(
+          surveys = surveys,
+          activeSurveyId = activeId,
+          content = content,
+          surveyStats = stats,
+          surveyConfigs = configs,
+          offlineTilePackages = tiles,
+          mutations = mutations,
+          places = places,
+          userSettings = settings,
+          mediaCache = media,
+        )
+      }
+      .stateIn(scope, SharingStarted.Eagerly, AppData())
+
   private val _uiState =
-    MutableStateFlow(
-      AppUiState(
-        currentScreen = initialScreen,
-        surveys = surveyRepository.getSurveys(),
-        activeSurveyId = surveyRepository.getActiveSurveyId(),
-        mapLayers = surveyRepository.getMapLayers(),
-        forms = surveyRepository.getForms(),
-        entities = surveyRepository.getEntities(),
-        standaloneSubmissions = surveyRepository.getStandaloneSubmissions(),
-        submissionGeometries = surveyRepository.getSubmissionGeometries(),
-        offlineTilePackages = surveyRepository.getOfflineTilePackages(),
-        mutations = mutationRepository.getMutations(),
-        places = placeRepository.getLocalPlaces(),
-        userSettings = settingsRepository.getUserSettings(),
-        uploadedMediaCacheSizeLabel = settingsRepository.getUploadedMediaCacheSizeLabel(),
-        uploadedMediaFileCount = settingsRepository.getUploadedMediaFileCount(),
-      )
-    )
+    MutableStateFlow(AppUiState(currentScreen = initialScreen).withData(appData.value))
 
   /** Single immutable stream of UI state observed by the Presentation Layer. */
   val uiState: StateFlow<AppUiState> = _uiState.asStateFlow()
 
-  /** Atomically updates [uiState] using [transform]. */
-  fun updateUiState(transform: (AppUiState) -> AppUiState) {
-    _uiState.update(transform)
+  init {
+    scope.launch { appData.collect { data -> _uiState.update { it.withData(data) } } }
   }
 
-  /** Synchronizes repository-backed collections into [uiState]. */
-  fun syncFromRepositories(extraTransform: (AppUiState) -> AppUiState = { it }) {
-    val locationSnapshot = locationRepository.getLocationSnapshot()
-    _uiState.update { current ->
-      extraTransform(
-        current.copy(
-          surveys = surveyRepository.getSurveys(),
-          activeSurveyId = surveyRepository.getActiveSurveyId(),
-          mapLayers = surveyRepository.getMapLayers(),
-          forms = surveyRepository.getForms(),
-          entities = surveyRepository.getEntities(),
-          standaloneSubmissions = surveyRepository.getStandaloneSubmissions(),
-          submissionGeometries = surveyRepository.getSubmissionGeometries(),
-          offlineTilePackages = surveyRepository.getOfflineTilePackages(),
-          mutations = mutationRepository.getMutations(),
-          places = placeRepository.getLocalPlaces(),
-          userSettings = settingsRepository.getUserSettings(),
-          uploadedMediaCacheSizeLabel = settingsRepository.getUploadedMediaCacheSizeLabel(),
-          uploadedMediaFileCount = settingsRepository.getUploadedMediaFileCount(),
-          userGpsNormalizedX = locationSnapshot.normalizedX,
-          userGpsNormalizedY = locationSnapshot.normalizedY,
-          userGpsCoordinatesLabel = locationSnapshot.coordinatesLabel,
-          gnssSatelliteCount = locationSnapshot.gnssSatelliteCount,
-          gnssAccuracyMeters = locationSnapshot.gnssAccuracyMeters,
-        )
-      )
-    }
+  /** Launches [block] (typically a repository write or use case) in [scope]. */
+  fun launch(block: suspend CoroutineScope.() -> Unit): Job = scope.launch(block = block)
+
+  /** Atomically updates the session (non-data) fields of [uiState] using [transform]. */
+  fun updateUiState(transform: (AppUiState) -> AppUiState) {
+    _uiState.update { transform(it).withData(appData.value) }
   }
 
   /** Completes Google Sign-In and advances `uiState.currentScreen` to Terms of Service. */
   fun signInWithGoogle() {
     _uiState.update { current ->
-      current.copy(
-        isSignedIn = true,
-        currentScreen = AppScreen.TERMS_OF_SERVICE,
-      )
+      current.copy(isSignedIn = true, currentScreen = AppScreen.TERMS_OF_SERVICE)
     }
   }
 
@@ -151,19 +210,16 @@ class SurveyAppViewModel(
       if (!current.termsCheckboxChecked) {
         current
       } else {
-        current.copy(
-          hasAcceptedTerms = true,
-          currentScreen = AppScreen.DOWNLOAD_SURVEY,
-        )
+        current.copy(hasAcceptedTerms = true, currentScreen = AppScreen.DOWNLOAD_SURVEY)
       }
     }
   }
 
-  /** Downloads and activates [surveyId] via [SurveyRepository], transitioning to Main Survey. */
-  fun selectSurvey(surveyId: String) {
-    surveyRepository.downloadSurvey(surveyId)
-    surveyRepository.loadSurveyDatasets(surveyId)
-    syncFromRepositories { current ->
+  /** Downloads and activates [surveyId], transitioning to Main Survey. */
+  fun selectSurvey(surveyId: String) = launch {
+    surveyRepository.setSurveyDownloaded(surveyId, downloaded = true)
+    surveyRepository.setActiveSurveyId(surveyId)
+    _uiState.update { current ->
       current.copy(
         currentScreen = AppScreen.MAIN_SURVEY,
         selectedEntityId = null,
@@ -172,72 +228,77 @@ class SurveyAppViewModel(
     }
   }
 
-  /** Toggles layer visibility via [SurveyRepository] and updates [uiState]. */
-  fun toggleLayerVisibility(layerId: String) {
+  /** Toggles layer visibility in the active survey. */
+  fun toggleLayerVisibility(layerId: String) = launch {
     surveyRepository.toggleLayerVisibility(layerId)
-    syncFromRepositories()
   }
 
-  /** Synchronizes a single Outbox mutation via [SyncMutationsUseCase] and updates [uiState]. */
-  fun syncMutationNow(mutationId: String) {
-    val notice = syncMutationsUseCase.syncSingleMutation(mutationId) ?: return
-    syncFromRepositories { it.copy(activeSurveyNotice = notice) }
+  /** Synchronizes a single Outbox mutation via [SyncMutationsUseCase]. */
+  fun syncMutationNow(mutationId: String) = launch {
+    val notice = syncMutationsUseCase.syncSingleMutation(mutationId) ?: return@launch
+    _uiState.update { it.copy(activeSurveyNotice = notice) }
   }
 
-  /** Synchronizes all Outbox mutations via [SyncMutationsUseCase] and updates [uiState]. */
-  fun syncAllOutboxMutations() {
+  /** Synchronizes all Outbox mutations in the active survey via [SyncMutationsUseCase]. */
+  fun syncAllOutboxMutations() = launch {
     val notice =
-      syncMutationsUseCase.syncAllOutboxMutations(_uiState.value.activeSurveyId) ?: return
-    syncFromRepositories { it.copy(activeSurveyNotice = notice) }
+      syncMutationsUseCase.syncAllOutboxMutations(appData.value.activeSurveyId) ?: return@launch
+    _uiState.update { it.copy(activeSurveyNotice = notice) }
   }
 
-  /** Generates and appends [count] random polygon sites via [GeneratePrototypeRandomSitesUseCase]. */
-  fun addRandomSites(count: Int = 5_000) {
-    if (count <= 0) return
-    val result = generateRandomSitesUseCase(count) ?: return
-    syncFromRepositories { current ->
-      current.copy(
-        currentScreen = AppScreen.MAIN_SURVEY,
-        activeSurveyNotice = result.noticeMessage,
-      )
+  /**
+   * Generates and appends [count] random polygon sites via [GeneratePrototypeRandomSitesUseCase].
+   */
+  fun addRandomSites(count: Int = 5_000) = launch {
+    if (count <= 0) return@launch
+    val result = generateRandomSitesUseCase(count) ?: return@launch
+    _uiState.update { current ->
+      current.copy(currentScreen = AppScreen.MAIN_SURVEY, activeSurveyNotice = result.noticeMessage)
     }
   }
 
-  /** Updates measurement unit system via [SettingsRepository] and updates [uiState]. */
-  fun updateUnitSystem(unitSystem: MeasurementUnitSystem) {
+  /** Updates the measurement unit system. */
+  fun updateUnitSystem(unitSystem: MeasurementUnitSystem) = launch {
     settingsRepository.updateMeasurementUnits(unitSystem)
-    syncFromRepositories()
   }
 
-  /** Updates selected language via [SettingsRepository] and updates [uiState]. */
-  fun updateSelectedLanguage(languageCode: String) {
+  /** Updates the selected language. */
+  fun updateSelectedLanguage(languageCode: String) = launch {
     settingsRepository.updateLanguage(languageCode)
-    syncFromRepositories()
   }
 
-  /** Resets repositories and [uiState] to defaults. */
-  fun resetPrototypeFlow() {
-    surveyRepository.resetToDefaults()
+  /** Resets the local data store to the sample data and [uiState] to the Sign In screen. */
+  fun resetPrototypeFlow() = launch {
+    sampleDataRepository.resetToSampleData()
     locationRepository.resetToDefaults()
-    _uiState.value =
-      AppUiState(
-        currentScreen = AppScreen.SIGN_IN,
-        surveys = surveyRepository.getSurveys(),
-        activeSurveyId = surveyRepository.getActiveSurveyId(),
-        mapLayers = surveyRepository.getMapLayers(),
-        forms = surveyRepository.getForms(),
-        entities = surveyRepository.getEntities(),
-        standaloneSubmissions = surveyRepository.getStandaloneSubmissions(),
-        submissionGeometries = surveyRepository.getSubmissionGeometries(),
-        offlineTilePackages = surveyRepository.getOfflineTilePackages(),
-        mutations = mutationRepository.getMutations(),
-        places = placeRepository.getLocalPlaces(),
-        userSettings = settingsRepository.getUserSettings(),
-        uploadedMediaCacheSizeLabel = settingsRepository.getUploadedMediaCacheSizeLabel(),
-        uploadedMediaFileCount = settingsRepository.getUploadedMediaFileCount(),
-      )
+    _uiState.value = AppUiState(currentScreen = AppScreen.SIGN_IN).withData(appData.value)
   }
 }
 
+/** Returns a copy of this state with its data fields taken from [data]. */
+fun AppUiState.withData(data: AppData): AppUiState =
+  copy(
+    surveys = data.surveys,
+    activeSurveyId = data.activeSurveyId,
+    mapLayers = data.content.mapLayers,
+    forms = data.content.forms,
+    entities = data.content.entities,
+    standaloneSubmissions = data.content.standaloneSubmissions,
+    submissionGeometries = data.content.submissionGeometries,
+    offlineTilePackages = data.offlineTilePackages,
+    mutations = data.mutations,
+    places = data.places,
+    userSettings = data.userSettings,
+    uploadedMediaCacheSizeLabel = data.mediaCache.sizeLabel,
+    uploadedMediaFileCount = data.mediaCache.fileCount,
+  )
+
 /** Backward-compatible alias for [SurveyAppViewModel]. */
 typealias PrototypeAppViewModel = SurveyAppViewModel
+
+private data class DeviceData(
+  val stats: Map<String, SurveyStats>,
+  val configs: Map<String, SurveyConfig>,
+  val tiles: List<OfflineTilePackageItem>,
+  val mutations: List<MutationLogItem>,
+)

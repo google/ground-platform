@@ -11,14 +11,14 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.groundplatform.v2.devtools.prototypeapp.data.datasource.local
+package org.groundplatform.v2.devtools.prototypeapp.data.seed
 
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.LayerSourceType
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.MapLayerItem
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.OfflineTilePackageItem
 
 /** Hardcoded sample map layers and offline tile packages for the prototype app. */
-object PrototypeFakeMapLayersData {
+internal object PrototypeFakeMapLayersData {
   /** Returns the preloaded [MapLayerItem] list for [surveyId]. */
   fun mapLayersForSurvey(surveyId: String): List<MapLayerItem> =
     when (surveyId) {
@@ -48,7 +48,7 @@ object PrototypeFakeMapLayersData {
             sourceType = LayerSourceType.ENTITY_DATASET,
             singularItemLabel = "sample plot",
             pluralItemLabel = "sample plots",
-          ),
+          )
         )
       "survey-commodity-perimeter-center" ->
         listOf(
@@ -76,7 +76,7 @@ object PrototypeFakeMapLayersData {
             sourceType = LayerSourceType.ENTITY_DATASET,
             singularItemLabel = "past individual",
             pluralItemLabel = "past individuals",
-          ),
+          )
         )
       else -> defaultMapLayers()
     }

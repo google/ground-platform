@@ -70,3 +70,14 @@ data class SurveyPreviewItem(
   val thumbnailTheme: MapThumbnailTheme,
   val entityCount: Int,
 )
+
+/** Survey-level form definitions stored alongside a survey's data. */
+data class SurveyConfig(
+  /** XForms XML of the survey's primary form, used by the form runner and workbench. */
+  val primaryFormXml: String,
+  /** XForms XML for each form in the survey, keyed by form ID. */
+  val formXmlById: Map<String, String> = emptyMap(),
+)
+
+/** Number of map features and submissions stored for a survey. */
+data class SurveyStats(val entityCount: Int, val submissionCount: Int)

@@ -11,69 +11,15 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.groundplatform.v2.devtools.prototypeapp.data.datasource.local
+package org.groundplatform.v2.devtools.prototypeapp.data.seed
 
-import groundplatform.v2.forms.FormDef
-import org.groundplatform.v2.core.forms.serialization.XFormsXmlSerializer
 import org.groundplatform.v2.core.forms.ui.WorkbenchExampleForm
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.FormPreviewItem
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.MapThumbnailTheme
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyPreviewItem
 
 /** Hardcoded sample surveys, forms, and XForms presets for the prototype app. */
-object PrototypeFakeSurveysData {
-  val DEFAULT_PROTOTYPE_XFORMS_XML: String = WorkbenchExampleForm.ALL_FIELD_TYPES.xformsXml
-
-  const val BAOBAB_BIOMETRICS_SAMPLE_XFORMS_XML: String =
-    """<h:html xmlns="http://www.w3.org/2002/xforms"
-      xmlns:h="http://www.w3.org/1999/xhtml"
-      xmlns:jr="http://openrosa.org/javarosa">
-  <h:head>
-  <h:title>Shade Tree &amp; Baobab Biometrics</h:title>
-  <model>
-    <instance>
-      <data id="baobab_biometrics" version="2026091901">
-        <meta>
-          <instanceID/>
-        </meta>
-        <species>Adansonia digitata</species>
-        <height_m>18.5</height_m>
-        <circumference_m>12.2</circumference_m>
-        <health_status>healthy</health_status>
-      </data>
-    </instance>
-    <bind nodeset="/data/meta/instanceID" type="string" jr:preload="uid"/>
-    <bind nodeset="/data/species" type="string" required="true()"/>
-    <bind nodeset="/data/height_m" type="decimal"/>
-    <bind nodeset="/data/circumference_m" type="decimal"/>
-    <bind nodeset="/data/health_status" type="string"/>
-  </model>
-  </h:head>
-  <h:body>
-  <input ref="/data/species">
-    <label>Tree Species</label>
-  </input>
-  <input ref="/data/height_m">
-    <label>Canopy Height (meters)</label>
-  </input>
-  <input ref="/data/circumference_m">
-    <label>Trunk Circumference (meters)</label>
-  </input>
-  <select1 ref="/data/health_status">
-    <label>Crown &amp; Bark Health Status</label>
-    <item>
-      <label>Healthy</label>
-      <value>healthy</value>
-    </item>
-    <item>
-      <label>Stressed</label>
-      <value>stressed</value>
-    </item>
-  </select1>
-  </h:body>
-</h:html>"""
-
-
+internal object PrototypeFakeSurveysData {
   fun builtInFallbackXFormsXmlForForm(form: FormPreviewItem): String {
     when (form.id) {
       "form-single-point-land-use" -> return WorkbenchExampleForm.SINGLE_POINT_LAND_USE.xformsXml
@@ -85,8 +31,7 @@ object PrototypeFakeSurveysData {
         return WorkbenchExampleForm.HOUSEHOLD_SURVEY_PAST_INDIVIDUALS.xformsXml
       "form-coffee-parcel" -> return WorkbenchExampleForm.ALL_FIELD_TYPES.xformsXml
     }
-    val escapedTitle =
-      form.title.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+    val escapedTitle = form.title.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
     val safeFormId = form.id.replace('-', '_')
     return """<h:html xmlns="http://www.w3.org/2002/xforms"
       xmlns:h="http://www.w3.org/1999/xhtml"
@@ -126,8 +71,8 @@ object PrototypeFakeSurveysData {
 
   /**
    * Default sample surveys shared with the user, including the 5 swappable Workbench Example
-   * Surveys (each with its own preloaded entities, sample submissions, geometries, map layers,
-   * and XForms definition) plus a remote undownloaded survey for offline download testing.
+   * Surveys (each with its own preloaded entities, sample submissions, geometries, map layers, and
+   * XForms definition) plus a remote undownloaded survey for offline download testing.
    */
   fun defaultSampleSurveys(): List<SurveyPreviewItem> =
     listOf(
@@ -205,26 +150,13 @@ object PrototypeFakeSurveysData {
       ),
     )
 
-  private val exampleFormDefCache = mutableMapOf<WorkbenchExampleForm, FormDef?>()
-
-  /** Returns a cached parsed [FormDef] for [example], parsing it at most once. */
-  fun cachedExampleFormDef(example: WorkbenchExampleForm): FormDef? =
-    exampleFormDefCache.getOrPut(example) {
-      try {
-        XFormsXmlSerializer.deserializeFormDef(example.xformsXml)
-      } catch (_: Exception) {
-        null
-      }
-    }
-
   /** Maps a [WorkbenchExampleForm] to its canonical Example Survey ID. */
   fun surveyIdForExampleForm(example: WorkbenchExampleForm): String =
     when (example) {
       WorkbenchExampleForm.SINGLE_POINT_LAND_USE -> "survey-single-point-land-use"
       WorkbenchExampleForm.SAMPLE_PLOTS_FOREST_ASSESSMENT -> "survey-sample-plots-forest"
       WorkbenchExampleForm.COMMODITY_PERIMETER_AND_CENTER -> "survey-commodity-perimeter-center"
-      WorkbenchExampleForm.HOUSEHOLD_SURVEY_PAST_INDIVIDUALS ->
-        "survey-household-past-individuals"
+      WorkbenchExampleForm.HOUSEHOLD_SURVEY_PAST_INDIVIDUALS -> "survey-household-past-individuals"
       WorkbenchExampleForm.ALL_FIELD_TYPES -> "survey-kenya-coffee"
     }
 
@@ -234,8 +166,7 @@ object PrototypeFakeSurveysData {
       "survey-single-point-land-use" -> WorkbenchExampleForm.SINGLE_POINT_LAND_USE
       "survey-sample-plots-forest" -> WorkbenchExampleForm.SAMPLE_PLOTS_FOREST_ASSESSMENT
       "survey-commodity-perimeter-center" -> WorkbenchExampleForm.COMMODITY_PERIMETER_AND_CENTER
-      "survey-household-past-individuals" ->
-        WorkbenchExampleForm.HOUSEHOLD_SURVEY_PAST_INDIVIDUALS
+      "survey-household-past-individuals" -> WorkbenchExampleForm.HOUSEHOLD_SURVEY_PAST_INDIVIDUALS
       else -> WorkbenchExampleForm.ALL_FIELD_TYPES
     }
 

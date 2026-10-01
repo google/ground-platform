@@ -16,7 +16,8 @@ package org.groundplatform.v2.devtools.prototypeapp.ui.state
 import groundplatform.v2.forms.FormDef
 import org.groundplatform.v2.core.forms.ui.FormWizardController
 import org.groundplatform.v2.core.forms.ui.WorkbenchExampleForm
-import org.groundplatform.v2.devtools.prototypeapp.data.datasource.local.PrototypeAppDataStore
+import org.groundplatform.v2.devtools.prototypeapp.DEFAULT_PROTOTYPE_XFORMS_XML
+import org.groundplatform.v2.devtools.prototypeapp.XFormsParseCache
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.AppScreen
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.BasemapType
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.DeviceFormFactor
@@ -45,6 +46,9 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.UserSettings
  * Pure, immutable UI state (`AppUiState`) exposed as a `StateFlow<AppUiState>` by
  * [org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.SurveyAppViewModel] per Section 6 of
  * `docs/technical/client/architecture.md`.
+ *
+ * Data fields (surveys, forms, map features, submissions, mutations, places, settings) are
+ * projections of the local data store and default to empty until the store emits.
  */
 data class AppUiState(
   val currentScreen: AppScreen = AppScreen.SIGN_IN,
@@ -57,8 +61,8 @@ data class AppUiState(
   val downloadSurveyEntryOrigin: DownloadSurveyEntryOrigin = DownloadSurveyEntryOrigin.AFTER_TOS,
   val isDownloadSurveySignOutPromptOpen: Boolean = false,
   val searchQuery: String = "",
-  val surveys: List<SurveyPreviewItem> = PrototypeAppDataStore.defaultSampleSurveys(),
-  val activeSurveyId: String = "survey-kenya-coffee",
+  val surveys: List<SurveyPreviewItem> = emptyList(),
+  val activeSurveyId: String = "",
   val activeSurveyNotice: String? = null,
   val isDarkTheme: Boolean = false,
   val deviceFormFactor: DeviceFormFactor = DeviceFormFactor.MOBILE,
@@ -70,17 +74,14 @@ data class AppUiState(
   val isDrawerOpen: Boolean = false,
   val activeDrawerSubView: MainDrawerSubView = MainDrawerSubView.NONE,
   val selectedUploadStatusFilter: UploadStatusFilter? = null,
-  val mapLayers: List<MapLayerItem> = PrototypeAppDataStore.defaultMapLayers(),
-  val forms: List<FormPreviewItem> = PrototypeAppDataStore.defaultForms(),
-  val entities: List<GeospatialEntityItem> = PrototypeAppDataStore.defaultGeospatialEntities(),
-  val standaloneSubmissions: List<SubmissionPreviewItem> =
-    PrototypeAppDataStore.defaultStandaloneSubmissions(),
-  val submissionGeometries: List<SubmissionGeometryPolygon> =
-    PrototypeAppDataStore.defaultSubmissionGeometries(),
-  val offlineTilePackages: List<OfflineTilePackageItem> =
-    PrototypeAppDataStore.defaultOfflineTilePackages(),
-  val mutations: List<MutationLogItem> = PrototypeAppDataStore.defaultMutations(),
-  val places: List<SurveyPlaceItem> = PrototypeAppDataStore.defaultSurveyPlaces(),
+  val mapLayers: List<MapLayerItem> = emptyList(),
+  val forms: List<FormPreviewItem> = emptyList(),
+  val entities: List<GeospatialEntityItem> = emptyList(),
+  val standaloneSubmissions: List<SubmissionPreviewItem> = emptyList(),
+  val submissionGeometries: List<SubmissionGeometryPolygon> = emptyList(),
+  val offlineTilePackages: List<OfflineTilePackageItem> = emptyList(),
+  val mutations: List<MutationLogItem> = emptyList(),
+  val places: List<SurveyPlaceItem> = emptyList(),
   val mapboxPlacesApiResults: List<SurveyPlaceItem> = emptyList(),
   val isMapboxPlacesSearching: Boolean = false,
   val isAirplaneMode: Boolean = false,
@@ -112,15 +113,13 @@ data class AppUiState(
   val activeSharedPdfSheet: SharedPdfSheetState? = null,
   val navigationTargetKind: NavigationTargetKind? = null,
   val navigationTargetId: String? = null,
-  val userSettings: UserSettings = PrototypeAppDataStore.defaultUserSettings(),
-  val uploadedMediaCacheSizeLabel: String =
-    PrototypeAppDataStore.DEFAULT_UPLOADED_MEDIA_CACHE_SIZE_LABEL,
-  val uploadedMediaFileCount: Int = PrototypeAppDataStore.DEFAULT_UPLOADED_MEDIA_FILE_COUNT,
+  val userSettings: UserSettings = UserSettings(),
+  val uploadedMediaCacheSizeLabel: String = "0 MB",
+  val uploadedMediaFileCount: Int = 0,
   val isWebsiteModalOpen: Boolean = false,
-  val customXFormsXml: String = PrototypeAppDataStore.DEFAULT_PROTOTYPE_XFORMS_XML,
+  val customXFormsXml: String = DEFAULT_PROTOTYPE_XFORMS_XML,
   val selectedWorkbenchExampleForm: WorkbenchExampleForm? = WorkbenchExampleForm.ALL_FIELD_TYPES,
-  val customFormDef: FormDef? =
-    PrototypeAppDataStore.cachedExampleFormDef(WorkbenchExampleForm.ALL_FIELD_TYPES),
+  val customFormDef: FormDef? = XFormsParseCache.formDef(WorkbenchExampleForm.ALL_FIELD_TYPES),
   val xformsXmlError: String? = null,
   val activeDataCollectionEntityId: String? = null,
   val activeDataCollectionFormId: String? = null,
