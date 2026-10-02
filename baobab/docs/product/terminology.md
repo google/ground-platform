@@ -58,17 +58,17 @@ flowchart TD
 ### Core User-Facing Principles
 
 1. **"Map layers" and "Data tables" Replace Bespoke Entities & Sites**:
-   * **Map layers** represent spatial datasets rendered directly on the map (e.g., preloaded sample plots, boundary polygons, or deforestation alert layers). In the Organizer Console, clicking a Map layer displays the map viewport, layer styling controls (marker symbols, stroke width, fill opacity), and feature attribute tables. On the Mobile App, users view, filter, and toggle **Map layers** in the map drawer and tap items on the map. We use **Map layers** consistently in both the web console and mobile UI without introducing extraneous terms.
+   * **Map layers** represent spatial datasets rendered directly on the map (e.g., preloaded sample plots, boundary polygons, or deforestation alert layers). In the Organizer Console, clicking a Map layer displays the map viewport, layer styling controls (marker symbols, stroke width, fill opacity), and feature attribute tables. On the Mobile App, users view, filter, and toggle **Map layers** in the map drawer and tap items on the map. We use **Map layers** consistently when referring to geospatial entities (while the layer and basemap selection sheet in the mobile app is referred to simply as the **"Layers"** dialog).
    * **Data tables** (or Lookup Data tables) represent non-spatial tabular datasets (e.g., farmer rosters, cooperative membership directories, species taxonomies). In the Organizer Console, clicking a Data table opens a clean spreadsheet view without map controls.
    * **"Data Collection Site" is completely retired**: Real-world geographical objects may be boundaries, rivers, assets, or sample plots—not all of which are "collection sites".
 2. **Relational Tables for Plots and Sub-Plots**:
-   * In statistical remote sensing (Collect Earth Online workflows), a campaign often evaluates **Plots** (e.g., $100\text{m} \times 100\text{m}$ squares) containing a grid of **Sub-Plot Sample Points** (e.g., 25 internal points).
+   * In statistical remote sensing (Collect Earth Online workflows), a campaign often evaluates **Plots** (e.g., 100m × 100m squares) containing a grid of **Sub-Plot Sample Points** (e.g., 25 internal points).
    * Rather than introducing specialized "SubPlot" primitives into the core data model, Ground 2.0 expresses this natively through **Relational Tables**: a child spatial table (`samples`) has a foreign key property (`plot_id`) referencing the parent spatial table (`plots`).
 3. **User-Defined Workflow Progression via `save_to`**:
    * Ground 2.0 does **not** hardcode a fixed enum of entity lifecycle states.
    * Instead, surveys track progress dynamically by storing `simplestyle-spec` properties (`marker-symbol`, `marker-color`, `stroke`, `fill`) and custom status properties (e.g., `status = "Needs Field Validation"`) on the entity, updated via XForms `save_to` bindings upon form submission.
-   * Typical field defaults: `○` (Pending) $\rightarrow$ `◐` (In Progress) $\rightarrow$ `✓` (Completed).
-   * Typical desk-to-field defaults: `○` (Unanalyzed) $\rightarrow$ `✓` (Consensus Reached) $\rightarrow$ `!` (Flagged for Field Validation) $\rightarrow$ `?` (Disputed / Needs SME Review).
+   * Typical field defaults: `○` (Pending) → `◐` (In Progress) → `✓` (Completed).
+   * Typical desk-to-field defaults: `○` (Unanalyzed) → `✓` (Consensus Reached) → `!` (Flagged for Field Validation) → `?` (Disputed / Needs SME Review).
 
 
 ## Cross-Platform Terminology Parity Matrix
@@ -120,7 +120,7 @@ The following matrix maps Ground 2.0 terminology against industry-standard data 
 * Instead of proprietary branding like "Geo-Dash", the historical satellite and spectral index analysis panel is simply called **"Time Series & Imagery"**.
 
 ### Sub-Plot Samples: Relational Tables vs. New Primitives
-* **The Confusion**: CEO uses a two-tier spatial hierarchy (Plot $\rightarrow$ Sample points) where fractional land cover (e.g. 70% Forest, 30% Agriculture) is calculated from sample points.
+* **The Confusion**: CEO uses a two-tier spatial hierarchy (Plot → Sample points) where fractional land cover (e.g. 70% Forest, 30% Agriculture) is calculated from sample points.
 * **Resolution**: Ground 2.0 avoids adding specialized "SubPlot" primitives to Protocol Buffers. Instead, the Sample Designer generates two standard linked tables: a parent `plots` layer and a child `samples` layer (with each sample point having a `plot_id` property). On the mobile form runner, sub-plots are simply handled as an XForms `begin repeat` loop over the points.
 
 ### Multi-Interpreter Disagreement vs. Offline Sync Conflict

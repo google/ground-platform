@@ -382,7 +382,7 @@ In the function signatures below:
 :                             :             : (defaults to `0`).               :
 | `pow(number base, number    | `number`    | Raises `base` to the power of    |
 : exp)`                       :             : `exp`.                           :
-| `log(number arg)`           | `number`    | Natural logarithm ($\ln$) of     |
+| `log(number arg)`           | `number`    | Natural logarithm (ln) of        |
 :                             :             : `arg`.                           :
 | `log10(number arg)`         | `number`    | Base-10 logarithm of `arg`.      |
 | `abs(number arg)`           | `number`    | Absolute value of `arg`.         |
@@ -395,12 +395,10 @@ In the function signatures below:
 | `atan2(number y, number x)` | `number`    | Two-argument arc tangent of `y / |
 :                             :             : x` in radians.                   :
 | `sqrt(number arg)`          | `number`    | Principal square root of `arg`.  |
-| `exp(number arg)`           | `number`    | Natural exponential              |
-:                             :             : $e^{\text{arg}}$.                :
-| `exp10(number arg)`         | `number`    | Base-10 exponential              |
-:                             :             : $10^{\text{arg}}$.               :
-| `pi()`                      | `number`    | Mathematical constant $\pi       |
-:                             :             : \approx 3.141592653589793$.      :
+| `exp(number arg)`           | `number`    | Natural exponential `e^arg`.      |
+| `exp10(number arg)`         | `number`    | Base-10 exponential `10^arg`.     |
+| `pi()`                      | `number`    | Mathematical constant π ≈         |
+:                             :             : 3.141592653589793.               :
 
 ### Node-set Functions
 

@@ -48,7 +48,7 @@ structures defined in the `groundplatform.v2.forms` schema:
     reactive form recalculations without full-form re-evaluation.
 
 -   **Indexed Equality Pushdown for Secondary Instances**: Provides a pluggable
-    `SecondaryInstanceProvider` SPI supporting $O(1)$ / $O(\log N)$ equality
+    `SecondaryInstanceProvider` SPI supporting O(1) / O(log N) equality
     predicate pushdown (`lookupByEquality`) for `pulldata()` and
     `instance('id')/root/item[key = val]` queries against large offline SQLite
     or IndexedDB Entity Datasets.

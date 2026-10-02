@@ -101,7 +101,7 @@ Every evaluation produces an immutable `FormState` containing:
 
 -   **`elementsByPath: Map<String, ElementState>`**: Flat lookup map indexed by
     canonical instance path (e.g., `"/data/household/head_age"` or
-    `"/data/plot[1]/tree[2]/height"`) for $O(1)$ access.
+    `"/data/plot[1]/tree[2]/height"`) for O(1) access.
 
 -   **`validationErrors: List<ValidationError>` & `isValid: Boolean`**:
     Aggregated `REQUIRED_MISSING` and `CONSTRAINT_VIOLATED` errors across all

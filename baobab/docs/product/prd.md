@@ -91,8 +91,8 @@ To support both single-visit surveys and multi-year monitoring campaigns (such a
 3.  **User-Defined Workflow Progression via `save_to`**:
     *   As forms are submitted against a map feature over time (`1:N` longitudinal history), the feature's marker and boundary styling update dynamically via standard `simplestyle-spec` properties (`marker-symbol`, `marker-color`, `stroke`, `fill`) and custom status fields managed by form `save_to` actions.
     *   *Configurable Template Defaults*: While Ground 2.0 does not hardcode an internal enum of workflow states, starter templates provide intuitive defaults:
-        *   *Field Surveys*: `○` (Pending) $\rightarrow$ `◐` (In Progress) $\rightarrow$ `✓` (Completed).
-        *   *Desk-to-Field Verification*: `○` (Unanalyzed) $\rightarrow$ `✓` (Consensus Reached) $\rightarrow$ `!` (Flagged for Field Validation) $\rightarrow$ `?` (Disputed / Needs SME Review).
+        *   *Field Surveys*: `○` (Pending) → `◐` (In Progress) → `✓` (Completed).
+        *   *Desk-to-Field Verification*: `○` (Unanalyzed) → `✓` (Consensus Reached) → `!` (Flagged for Field Validation) → `?` (Disputed / Needs SME Review).
 
 > **Cross-Platform Terminology & Parity**: See **[Terminology & Cross-Platform Parity](terminology.md)** for the complete master lexicon and parity matrix mapping Ground 2.0 across Collect Earth Online (CEO), ODK Central/Collect, KoboToolbox, XLSForm, ArcGIS Survey123, and Open Foris Arena.
 

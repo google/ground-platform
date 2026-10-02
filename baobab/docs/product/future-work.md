@@ -273,7 +273,7 @@ environmental uncertainty (Epistemic Foraging).
         generative model in near real-time.
     *   **Implementation**: Establish a translation pipeline that converts
         standard Ground V2 ingestion payloads (GeoJSON, offline map syncs) into
-        the specific Observation Space matrices ($O$) required by discrete-state
+        the specific Observation Space matrices (O) required by discrete-state
         or continuous POMDP (Partially Observable Markov Decision Process)
         models.
     *   **Mechanics**: As crowdsourced users complete tasks and upload
@@ -307,7 +307,7 @@ deadlines.
 |---|---|---|---|
 | **Epistemic Foraging Engine** | Identifies physical areas (e.g., shaded agroforestry) where satellite classification is ambiguous. | Calculates Expected Free Energy (EFE) to map "algorithmic blindspots" requiring ground truth. | **Resource Optimization**: Directs NGO and regulatory focus strictly to high-variance, undocumented regions. |
 | **Dynamic Task Dispatch** | Autonomously routes data-collection tasks to mobile users nearest to high-uncertainty zones. | Executes "Policies" by using human field users as a distributed sensory periphery. | **Supply Chain Inclusion**: Empowers smallholder farmers to actively prove compliance and avoid market exclusion. |
-| **GeoJSON Compliance Adapter** | Compiles verified field data into legally binding, timestamped polygon boundaries. | Translates Observation Space ($O$) inputs into strict regulatory reporting schemas. | **Market Premium**: Generates instant EUDR verification tokens, allowing cooperatives to guarantee zero deforestation. |
+| **GeoJSON Compliance Adapter** | Compiles verified field data into legally binding, timestamped polygon boundaries. | Translates Observation Space (O) inputs into strict regulatory reporting schemas. | **Market Premium**: Generates instant EUDR verification tokens, allowing cooperatives to guarantee zero deforestation. |
 | **Civic Intelligence Dashboards** | Surfaces predictive risk heatmaps, anomaly alerts, and regional compliance readiness on-device. | Visualizes the updated Generative Model state and flags high-urgency prediction errors ("surprise"). | **Land Sovereignty**: Equips local defenders to spot illegal incursions immediately via immutable evidence logging. |
 
 <!-- mdformat on -->
