@@ -143,9 +143,10 @@ object PlacesResponseMapper {
     val subtitle = placeName ?: props.string("display_name") ?: defaultSubtitle
     val position = LatLng(lat, lng)
     val bbox =
-      feature["bbox"].doubles().takeIf { it.size >= 4 }?.let { (w, s, e, n) ->
-        LngLatBounds(minOf(w, e), minOf(s, n), maxOf(w, e), maxOf(s, n))
-      }
+      feature["bbox"]
+        .doubles()
+        .takeIf { it.size >= 4 }
+        ?.let { (w, s, e, n) -> LngLatBounds(minOf(w, e), minOf(s, n), maxOf(w, e), maxOf(s, n)) }
     val bounds = PlaceFraming.bounds(position, category, bbox)
     val zoom = PlaceFraming.zoom(bounds).toFloat()
     val (nx, ny) = near.toNormalized(position)

@@ -216,8 +216,7 @@ internal fun FormGroupedSubmissionsSection(
             if (showFormActionSubtitle) {
               Text(
                 text = "Action: \"${form.ctaLabel}\" • ${form.version}",
-                style =
-                  MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
+                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
                 color = MaterialTheme.colorScheme.primary,
               )
             }
@@ -252,8 +251,7 @@ internal fun FormGroupedSubmissionsSection(
                     }
                   Text(
                     text = targetDisplayLabel,
-                    style =
-                      MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
                     color = MaterialTheme.colorScheme.onSurface,
                   )
                 }

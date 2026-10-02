@@ -13,9 +13,7 @@
  */
 package org.groundplatform.v2.devtools.prototypeapp.domain.repository
 
-/**
- * Domain snapshot of the collector's device GNSS location and satellite telemetry.
- */
+/** Domain snapshot of the collector's device GNSS location and satellite telemetry. */
 data class DeviceLocationSnapshot(
   val normalizedX: Float = 0.50f,
   val normalizedY: Float = 0.50f,

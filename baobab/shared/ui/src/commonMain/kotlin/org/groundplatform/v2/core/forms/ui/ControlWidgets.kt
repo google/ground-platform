@@ -243,7 +243,8 @@ fun QuestionControlCard(
               Spacer(modifier = Modifier.height(4.dp))
               Text(
                 text = guidanceText,
-                style = MaterialTheme.typography.bodySmall.copy(color = colors.onSecondaryContainer),
+                style =
+                  MaterialTheme.typography.bodySmall.copy(color = colors.onSecondaryContainer),
               )
             }
           }
@@ -1633,7 +1634,10 @@ private fun GeoPointFallbackCanvasMap(viewportState: GeoPointMapViewportState) {
       path = streamPath,
       color = Color(0xFF4FC3F7).copy(alpha = 0.28f),
       style =
-        Stroke(width = 2.5.dp.toPx(), pathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 6f))),
+        Stroke(
+          width = 2.5.dp.toPx(),
+          pathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 6f)),
+        ),
     )
 
     // User's live GPS blue dot + horizontal accuracy halo

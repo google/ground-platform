@@ -137,9 +137,7 @@ fun Modifier.dragToReorder(
         state.dragBy(if (axis == DragAxis.HORIZONTAL) amount.x else amount.y)
         autoScroll?.invoke()?.let { scrolled -> if (scrolled != 0f) state.dragBy(scrolled) }
       },
-      onDragEnd = {
-        state.end()?.let { (k, to) -> if (to >= 0 && to != index) onMove(k, to) }
-      },
+      onDragEnd = { state.end()?.let { (k, to) -> if (to >= 0 && to != index) onMove(k, to) } },
       onDragCancel = { state.cancel() },
     )
   }

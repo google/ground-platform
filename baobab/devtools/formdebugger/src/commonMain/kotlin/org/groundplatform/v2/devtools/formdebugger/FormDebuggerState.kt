@@ -345,28 +345,27 @@ class FormDebuggerState(loadInitialSample: Boolean = true) {
     }
   }
 
-  private fun formatXPathResult(expr: String, value: XPathValue): String =
-    buildString {
-        val stringRep = value.toXPathString()
-        appendLine("String Output: $stringRep")
-        appendLine("Result Type:   ${describeType(value)}")
-        appendLine("Boolean Value: ${value.toBoolean()}")
-        appendLine("Number Value:  ${XPathValue.formatXPathNumber(value.toNumber())}")
+  private fun formatXPathResult(expr: String, value: XPathValue): String = buildString {
+    val stringRep = value.toXPathString()
+    appendLine("String Output: $stringRep")
+    appendLine("Result Type:   ${describeType(value)}")
+    appendLine("Boolean Value: ${value.toBoolean()}")
+    appendLine("Number Value:  ${XPathValue.formatXPathNumber(value.toNumber())}")
 
-        if (value is XPathValue.NodeSet) {
-          appendLine()
-          if (value.nodes.isEmpty()) {
-            appendLine("Nodes (0): <empty node-set>")
-          } else {
-            appendLine("Matched Nodes (${value.nodes.size}):")
-            value.nodes.forEachIndexed { idx, node ->
-              val nodeVal = node.extractValue().toXPathString()
-              appendLine("  [${idx + 1}] ${formatNodePath(node)} = \"$nodeVal\"")
-            }
-          }
+    if (value is XPathValue.NodeSet) {
+      appendLine()
+      if (value.nodes.isEmpty()) {
+        appendLine("Nodes (0): <empty node-set>")
+      } else {
+        appendLine("Matched Nodes (${value.nodes.size}):")
+        value.nodes.forEachIndexed { idx, node ->
+          val nodeVal = node.extractValue().toXPathString()
+          appendLine("  [${idx + 1}] ${formatNodePath(node)} = \"$nodeVal\"")
         }
       }
-      .trimEnd()
+    }
+  }
+    .trimEnd()
 
   private fun describeType(value: XPathValue): String =
     when (value) {

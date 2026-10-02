@@ -16,9 +16,9 @@ package org.groundplatform.v2.devtools.prototypeapp.surveyeditor
 /**
  * An ISO 639-3 language descriptor.
  *
- * [id] is the 3-letter ISO 639-3 code (e.g. "eng", "swa", "fra").
- * [part1] is the 2-letter ISO 639-1 code if one exists (e.g. "en", "sw", "fr"), otherwise empty.
- * [name] is the reference language name (e.g. "English", "Swahili (macrolanguage)").
+ * [id] is the 3-letter ISO 639-3 code (e.g. "eng", "swa", "fra"). [part1] is the 2-letter ISO 639-1
+ * code if one exists (e.g. "en", "sw", "fr"), otherwise empty. [name] is the reference language
+ * name (e.g. "English", "Swahili (macrolanguage)").
  */
 data class IsoLanguage(
   val id: String,
@@ -74,12 +74,14 @@ object IsoLanguages {
     map
   }
 
-  /** Finds a language by its ISO 639-1 (2-letter) or ISO 639-3 (3-letter) code, case-insensitive. */
+  /**
+   * Finds a language by its ISO 639-1 (2-letter) or ISO 639-3 (3-letter) code, case-insensitive.
+   */
   fun findByCode(code: String): IsoLanguage? = byCodeMap[code.trim().lowercase()]
 
   /**
-   * Filters languages matching [query] by name, 2-letter code, or 3-letter code.
-   * If [query] is blank, returns the first [limit] languages (or common ones first).
+   * Filters languages matching [query] by name, 2-letter code, or 3-letter code. If [query] is
+   * blank, returns the first [limit] languages (or common ones first).
    */
   fun search(query: String, limit: Int = 50): List<IsoLanguage> {
     val q = query.trim().lowercase()
@@ -90,9 +92,10 @@ object IsoLanguages {
     for (lang in all) {
       if (matches.size >= limit) break
       if (matches.contains(lang)) continue
-      if (lang.id.lowercase().startsWith(q) ||
-        lang.part1.lowercase().startsWith(q) ||
-        lang.name.lowercase().contains(q)
+      if (
+        lang.id.lowercase().startsWith(q) ||
+          lang.part1.lowercase().startsWith(q) ||
+          lang.name.lowercase().contains(q)
       ) {
         matches.add(lang)
       }

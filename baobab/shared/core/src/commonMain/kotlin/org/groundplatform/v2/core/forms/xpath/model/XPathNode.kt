@@ -149,7 +149,8 @@ sealed interface XPathNode {
         recordNode = recordInstance.data_ ?: RecordNode(),
         metadata = recordInstance.metadata,
         schemaFields = schema?.fields ?: emptyList(),
-        aliases = setOf(rootName, "data", recordInstance.form_id).filter { it.isNotEmpty() }.toSet(),
+        aliases =
+          setOf(rootName, "data", recordInstance.form_id).filter { it.isNotEmpty() }.toSet(),
       )
     }
 

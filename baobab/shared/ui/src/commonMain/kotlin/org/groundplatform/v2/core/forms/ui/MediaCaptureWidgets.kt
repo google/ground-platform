@@ -354,26 +354,24 @@ internal fun retakeActionLabel(kind: MediaCaptureKind): String =
 /**
  * One-line summary of a question's capture constraints, e.g. `Accepts image/jpeg · Max 1024 px`.
  */
-internal fun describeMediaConstraints(spec: MediaCaptureSpec): String =
-  buildList {
-      add("Accepts ${spec.acceptedMediaType}")
-      spec.maxPixels?.let { add("Max $it px") }
-      if (spec.requireNewCapture) add("New capture only")
-      if (spec.preferFrontCamera) add("Front camera")
-    }
-    .joinToString(" · ")
+internal fun describeMediaConstraints(spec: MediaCaptureSpec): String = buildList {
+  add("Accepts ${spec.acceptedMediaType}")
+  spec.maxPixels?.let { add("Max $it px") }
+  if (spec.requireNewCapture) add("New capture only")
+  if (spec.preferFrontCamera) add("Front camera")
+}
+  .joinToString(" · ")
 
 /** One-line summary of an attachment, e.g. `leaf_1.jpg · 1.2 MB · 1600×1200`. */
-internal fun describeAttachment(attachment: MediaAttachment): String =
-  buildList {
-      add(attachment.fileName)
-      add(formatByteSize(attachment.sizeBytes))
-      attachment.durationMillis?.let { add(formatMediaDuration(it)) }
-      val w = attachment.widthPx
-      val h = attachment.heightPx
-      if (w != null && h != null) add("$w×$h")
-    }
-    .joinToString(" · ")
+internal fun describeAttachment(attachment: MediaAttachment): String = buildList {
+  add(attachment.fileName)
+  add(formatByteSize(attachment.sizeBytes))
+  attachment.durationMillis?.let { add(formatMediaDuration(it)) }
+  val w = attachment.widthPx
+  val h = attachment.heightPx
+  if (w != null && h != null) add("$w×$h")
+}
+  .joinToString(" · ")
 
 /** Formats a byte count as `B`, `KB`, or `MB` with one decimal place. */
 internal fun formatByteSize(bytes: Long): String {

@@ -13,7 +13,6 @@
  */
 package org.groundplatform.v2.devtools.prototypeapp.client.location
 
-import kotlin.math.abs
 import kotlin.math.roundToInt
 import org.groundplatform.v2.devtools.prototypeapp.domain.repository.DeviceLocationSnapshot
 

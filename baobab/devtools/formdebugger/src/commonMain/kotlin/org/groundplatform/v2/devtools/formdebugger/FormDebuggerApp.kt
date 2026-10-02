@@ -33,7 +33,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -41,7 +40,6 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -50,9 +48,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
@@ -602,7 +598,7 @@ private fun EmbeddedMobileFormRunnerPanel(
                     },
                   style =
                     MaterialTheme.typography.bodySmall.copy(
-                      color = if (fs.isRelevant) Color(0xFF1B5E20) else Color(0xFF9CA3AF),
+                      color = if (fs.isRelevant) Color(0xFF1B5E20) else Color(0xFF9CA3AF)
                     ),
                 )
               }
@@ -658,8 +654,7 @@ private fun EditorPane(
             ),
         )
       },
-      textStyle =
-        MaterialTheme.typography.bodySmall.copy(fontSize = 13.sp, lineHeight = 18.sp),
+      textStyle = MaterialTheme.typography.bodySmall.copy(fontSize = 13.sp, lineHeight = 18.sp),
       isError = error != null,
       colors =
         OutlinedTextFieldDefaults.colors(
@@ -823,7 +818,8 @@ private fun XPathEvaluatorSection(
               fontSize = 13.sp,
               lineHeight = 19.sp,
               color =
-                if (xpathOutput.startsWith("XPath Error:")) Color(0xFFB3261E) else Color(0xFF1B5E20),
+                if (xpathOutput.startsWith("XPath Error:")) Color(0xFFB3261E)
+                else Color(0xFF1B5E20),
             ),
           colors =
             OutlinedTextFieldDefaults.colors(

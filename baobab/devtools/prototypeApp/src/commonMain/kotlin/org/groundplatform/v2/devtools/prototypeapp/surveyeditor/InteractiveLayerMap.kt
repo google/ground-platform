@@ -398,7 +398,10 @@ internal fun InteractiveLayerMapCard(
                 path,
                 Color.White,
                 style =
-                  Stroke(2.dp.toPx(), pathEffect = PathEffect.dashPathEffect(floatArrayOf(12f, 8f))),
+                  Stroke(
+                    2.dp.toPx(),
+                    pathEffect = PathEffect.dashPathEffect(floatArrayOf(12f, 8f)),
+                  ),
               )
               pts.forEachIndexed { i, p ->
                 val r = if (i == 0 || i == pts.lastIndex) 7.dp.toPx() else 5.dp.toPx()

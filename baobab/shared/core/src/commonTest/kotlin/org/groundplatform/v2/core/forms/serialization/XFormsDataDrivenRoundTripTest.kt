@@ -114,7 +114,8 @@ class XFormsDataDrivenRoundTripTest {
       assertEquals(
         expected = xml1,
         actual = xml2,
-        message = "RecordInstance canonical XML idempotence mismatch in test case: ${testCase.name}",
+        message =
+          "RecordInstance canonical XML idempotence mismatch in test case: ${testCase.name}",
       )
     }
   }

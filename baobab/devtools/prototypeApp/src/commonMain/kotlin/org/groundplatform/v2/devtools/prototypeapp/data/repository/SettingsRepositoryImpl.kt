@@ -34,8 +34,9 @@ class SettingsRepositoryImpl(private val store: LocalStore) : SettingsRepository
       .map { MediaCacheInfo(it.uploadedMediaCacheSizeLabel, it.uploadedMediaFileCount) }
       .distinctUntilChanged()
 
-  override suspend fun getUserSettings(): UserSettings =
-    store.transaction { preferences().userSettings }
+  override suspend fun getUserSettings(): UserSettings = store.transaction {
+    preferences().userSettings
+  }
 
   override suspend fun setUserSettings(settings: UserSettings) {
     store.transaction { updatePreferences { it.copy(userSettings = settings) } }
@@ -56,14 +57,11 @@ class SettingsRepositoryImpl(private val store: LocalStore) : SettingsRepository
       it.copy(shouldUploadPhotosOnWifiOnly = wifiOnly)
     }
 
-  override suspend fun evictUploadedMediaCache(): MediaCacheInfo =
-    store.transaction {
-      val before = preferences()
-      updatePreferences {
-        it.copy(uploadedMediaCacheSizeLabel = "0 MB", uploadedMediaFileCount = 0)
-      }
-      MediaCacheInfo(before.uploadedMediaCacheSizeLabel, before.uploadedMediaFileCount)
-    }
+  override suspend fun evictUploadedMediaCache(): MediaCacheInfo = store.transaction {
+    val before = preferences()
+    updatePreferences { it.copy(uploadedMediaCacheSizeLabel = "0 MB", uploadedMediaFileCount = 0) }
+    MediaCacheInfo(before.uploadedMediaCacheSizeLabel, before.uploadedMediaFileCount)
+  }
 
   private suspend fun updateSettings(transform: (UserSettings) -> UserSettings): UserSettings =
     store.transaction {

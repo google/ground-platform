@@ -28,15 +28,16 @@ enum class LocationLockState(val label: String) {
  * - [ENTITY_DATASET]: `entity_dataset_id` (rendered with solid polygon/marker outlines)
  */
 enum class LayerSourceType(val badgeLabel: String) {
-  ENTITY_DATASET("Survey Layer"),
+  ENTITY_DATASET("Survey Layer")
 }
 
-/**
- * Primary map basemap mode selectable by the user in the `Layers` sheet (`Map` vs `Satellite`).
- */
+/** Primary map basemap mode selectable by the user in the `Layers` sheet (`Map` vs `Satellite`). */
 enum class BasemapType(val label: String, val description: String) {
   NORMAL(label = "Map", description = "Standard vector terrain, roads & contour basemap"),
-  SATELLITE(label = "Satellite", description = "Mapbox Standard Satellite imagery with reference labels"),
+  SATELLITE(
+    label = "Satellite",
+    description = "Mapbox Standard Satellite imagery with reference labels",
+  ),
 }
 
 /** Offline basemap rendering style toggleable in the `Layers` sheet. */

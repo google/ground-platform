@@ -245,7 +245,7 @@ fun MobileFormRunner(
                 if (res is FinalizationResult.Success) {
                   onSubmitted?.invoke(res)
                 }
-              },
+              }
             ) {
               Text("Submit", maxLines = 1, overflow = TextOverflow.Ellipsis, softWrap = false)
             }
@@ -256,9 +256,7 @@ fun MobileFormRunner(
               verticalAlignment = Alignment.CenterVertically,
             ) {
               if (controller.isCurrentStepOptional) {
-                OutlinedButton(
-                  onClick = { controller.nextStep(enforceValidation = false) },
-                ) {
+                OutlinedButton(onClick = { controller.nextStep(enforceValidation = false) }) {
                   Text("Skip", maxLines = 1, overflow = TextOverflow.Ellipsis, softWrap = false)
                 }
               }
@@ -558,10 +556,7 @@ private fun RepeatHubScreenContent(
                 )
                 Text(
                   text = instance.canonicalPath,
-                  style =
-                    MaterialTheme.typography.labelSmall.copy(
-                      color = colors.onSurfaceVariant,
-                    ),
+                  style = MaterialTheme.typography.labelSmall.copy(color = colors.onSurfaceVariant),
                 )
               }
               if (repeatGroup.canRemoveInstance) {
@@ -673,9 +668,7 @@ private fun FormSummaryScreenContent(controller: FormWizardController) {
                   text =
                     "Instance ID: ${subResult.recordInstance.metadata?.instance_id ?: "(generated)"}",
                   style =
-                    MaterialTheme.typography.labelSmall.copy(
-                      color = colors.onPrimaryContainer,
-                    ),
+                    MaterialTheme.typography.labelSmall.copy(color = colors.onPrimaryContainer),
                 )
               }
             }
@@ -702,9 +695,7 @@ private fun FormSummaryScreenContent(controller: FormWizardController) {
                   Text(
                     text = "• ${err.fieldPath}: ${err.message}",
                     style =
-                      MaterialTheme.typography.labelSmall.copy(
-                        color = colors.onErrorContainer,
-                      ),
+                      MaterialTheme.typography.labelSmall.copy(color = colors.onErrorContainer),
                     modifier = Modifier.clickable { controller.jumpToField(err.fieldPath) },
                   )
                 }
@@ -759,7 +750,7 @@ private fun FormSummaryScreenContent(controller: FormWizardController) {
                 text = formatFieldValueForDisplay(fieldState.value, fieldState.dataType),
                 style =
                   MaterialTheme.typography.bodySmall.copy(
-                    color = if (fieldState.isEmpty) colors.onSurfaceVariant else colors.primary,
+                    color = if (fieldState.isEmpty) colors.onSurfaceVariant else colors.primary
                   ),
               )
             }
@@ -804,9 +795,7 @@ private fun FormSummaryScreenContent(controller: FormWizardController) {
               Text(
                 text = "ID: ${entity.entityId} | Label: ${entity.label}",
                 style =
-                  MaterialTheme.typography.labelSmall.copy(
-                    color = colors.onSecondaryContainer,
-                  ),
+                  MaterialTheme.typography.labelSmall.copy(color = colors.onSecondaryContainer),
               )
             }
           }

@@ -122,8 +122,7 @@ class InMemorySecondaryInstanceProvider(
       if (trimmed.isEmpty()) return emptyList()
       if (trimmed.startsWith("<")) {
         try {
-          val rootEl =
-            org.groundplatform.v2.core.forms.serialization.xml.XmlParser.parse(trimmed)
+          val rootEl = org.groundplatform.v2.core.forms.serialization.xml.XmlParser.parse(trimmed)
           val itemElements =
             rootEl.childrenNamed("item").ifEmpty {
               if (rootEl.localName == "item") listOf(rootEl) else rootEl.childElements

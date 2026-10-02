@@ -220,16 +220,12 @@ private fun SurveyEditorTopBar(
       WebHeaderContext(title = state.details.title.ifBlank { "Untitled survey" }) {
         WebHeaderSupportingText("Survey editor", color = MaterialTheme.colorScheme.primary)
         WebHeaderSupportingText("·")
-        WebHeaderSupportingText(
-          if (hasChanges) "Unpublished changes" else "All changes published"
-        )
+        WebHeaderSupportingText(if (hasChanges) "Unpublished changes" else "All changes published")
       }
     },
     actions = {
       WebMobilePrototypeButton(appState)
-      TextButton(onClick = { isConfirmingDiscard = true }, enabled = hasChanges) {
-        Text("Discard")
-      }
+      TextButton(onClick = { isConfirmingDiscard = true }, enabled = hasChanges) { Text("Discard") }
       Button(onClick = onPublish, enabled = hasChanges) { Text("Publish changes") }
     },
   )

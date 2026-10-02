@@ -21,10 +21,9 @@ import org.groundplatform.v2.devtools.prototypeapp.surveyeditor.SurveyEditorDraf
 
 /** [SurveyEditorRepository] backed by the [LocalStore]. */
 class SurveyEditorRepositoryImpl(private val store: LocalStore) : SurveyEditorRepository {
-  override suspend fun getDraft(surveyId: String): SurveyEditorDraft =
-    store.transaction {
-      SurveyEditorDraft.forSurvey(surveyId, surveyEditorDraft(surveyId), survey(surveyId))
-    }
+  override suspend fun getDraft(surveyId: String): SurveyEditorDraft = store.transaction {
+    SurveyEditorDraft.forSurvey(surveyId, surveyEditorDraft(surveyId), survey(surveyId))
+  }
 
   override suspend fun saveDraft(surveyId: String, draft: SurveyEditorDraft) {
     store.transaction {

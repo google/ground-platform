@@ -63,13 +63,12 @@ internal class SurveyMapCameraController(
    */
   fun run(block: suspend (MapCameraState) -> Unit) {
     explicitMove?.cancel()
-    explicitMove =
-      scope.launch {
-        // Fitting needs the viewport size, which is zero until the map is laid out.
-        snapshotFlow { camera.viewportSize }.first { it.width > 0.dp && it.height > 0.dp }
-        block(camera)
-        onSettled(camera.position)
-      }
+    explicitMove = scope.launch {
+      // Fitting needs the viewport size, which is zero until the map is laid out.
+      snapshotFlow { camera.viewportSize }.first { it.width > 0.dp && it.height > 0.dp }
+      block(camera)
+      onSettled(camera.position)
+    }
   }
 
   /** Forward the map's [MapEvent.CameraIdle] events here. */

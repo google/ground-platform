@@ -77,8 +77,9 @@ class SurveyMapContentTest {
     state.selectEntity(target.id)
 
     val features = SurveyMapContent.main(state, showNavigation = true).entityFeatures()
-    val polygons =
-      features.filter { it.properties[SurveyMapContent.PROP_KIND] == SurveyMapContent.KIND_POLYGON }
+    val polygons = features.filter {
+      it.properties[SurveyMapContent.PROP_KIND] == SurveyMapContent.KIND_POLYGON
+    }
     assertEquals(SurveyMapIds.entity(target.id), polygons.last().id)
     val variant = polygons.last().properties.getValue(SurveyMapContent.PROP_VARIANT)
     assertTrue(variant.startsWith(SurveyMapContent.Variant.SELECTED))

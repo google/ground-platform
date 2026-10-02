@@ -65,7 +65,8 @@ tasks.withType<org.jetbrains.kotlin.gradle.targets.js.ir.KotlinJsIrLink>().confi
   )
   // Kotlin/Wasm's SourceMapGenerator currently ignores sourceMapEmbedSources and emits
   // `"sourcesContent": [null, ...]` with bare filenames for library modules. Hydrate `.wasm.map`
-  // with inline source content so Chrome DevTools displays `.kt` sources in `wasmJsBrowserDevelopmentRun`.
+  // with inline source content so Chrome DevTools displays `.kt` sources in
+  // `wasmJsBrowserDevelopmentRun`.
   val repoRoot = projectDir.resolve("..").canonicalFile
   val appDir = projectDir.canonicalFile
   doLast {
@@ -75,15 +76,15 @@ tasks.withType<org.jetbrains.kotlin.gradle.targets.js.ir.KotlinJsIrLink>().confi
     val ktFilesByName = mutableMapOf<String, File>()
     listOf(appDir.resolve("src"), repoRoot.resolve("shared")).forEach { root ->
       if (root.exists()) {
-        root.walkTopDown().filter { it.isFile && it.extension == "kt" }.forEach { file ->
-          ktFilesByName.putIfAbsent(file.name, file)
-        }
+        root
+          .walkTopDown()
+          .filter { it.isFile && it.extension == "kt" }
+          .forEach { file -> ktFilesByName.putIfAbsent(file.name, file) }
       }
     }
     val slurper = groovy.json.JsonSlurper()
     for (mapFile in wasmMaps) {
-      @Suppress("UNCHECKED_CAST")
-      val json = slurper.parse(mapFile) as MutableMap<String, Any?>
+      @Suppress("UNCHECKED_CAST") val json = slurper.parse(mapFile) as MutableMap<String, Any?>
       @Suppress("UNCHECKED_CAST")
       val sources = (json["sources"] as? List<String>)?.toMutableList() ?: continue
       val sourcesContent = MutableList<String?>(sources.size) { null }

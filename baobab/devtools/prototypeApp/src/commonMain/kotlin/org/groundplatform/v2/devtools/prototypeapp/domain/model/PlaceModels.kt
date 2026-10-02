@@ -47,7 +47,9 @@ fun parsePlaceCoordinates(coordinatesLabel: String): Pair<Double, Double>? {
   val first = parseComponent(parts[0]) ?: return null
   val second = parseComponent(parts[1]) ?: return null
   val (lat, lng) =
-    if (first.second == 'E' || first.second == 'W' || second.second == 'N' || second.second == 'S') {
+    if (
+      first.second == 'E' || first.second == 'W' || second.second == 'N' || second.second == 'S'
+    ) {
       second.first to first.first
     } else {
       first.first to second.first

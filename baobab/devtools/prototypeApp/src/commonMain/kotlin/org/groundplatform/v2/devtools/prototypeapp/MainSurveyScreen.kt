@@ -1204,8 +1204,8 @@ internal fun LayersControlSheet(state: PrototypeAppState) {
 }
 
 /**
- * Modal dialog opened by the web dashboard's [BasemapPreviewCard] to select the basemap type
- * (`Map` vs `Satellite`). Offline maps are a mobile-only feature, so their toggle is left out.
+ * Modal dialog opened by the web dashboard's [BasemapPreviewCard] to select the basemap type (`Map`
+ * vs `Satellite`). Offline maps are a mobile-only feature, so their toggle is left out.
  */
 @Composable
 internal fun LayersControlDialog(state: PrototypeAppState) {

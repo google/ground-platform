@@ -43,16 +43,15 @@ class SearchPlacesUseCase {
     val q = query.trim()
     if (q.isEmpty()) return emptyList()
     val tokens = q.split(Regex("\\s+")).filter { it.isNotEmpty() }
-    val localMatched =
-      localPlaces.filter { place ->
-        val hay =
-          "${place.name} ${place.categoryLabel} ${place.regionSubtitle} ${place.coordinatesLabel}"
-        place.name.contains(q, ignoreCase = true) ||
-          place.categoryLabel.contains(q, ignoreCase = true) ||
-          place.regionSubtitle.contains(q, ignoreCase = true) ||
-          place.coordinatesLabel.contains(q, ignoreCase = true) ||
-          (tokens.size > 1 && tokens.all { hay.contains(it, ignoreCase = true) })
-      }
+    val localMatched = localPlaces.filter { place ->
+      val hay =
+        "${place.name} ${place.categoryLabel} ${place.regionSubtitle} ${place.coordinatesLabel}"
+      place.name.contains(q, ignoreCase = true) ||
+        place.categoryLabel.contains(q, ignoreCase = true) ||
+        place.regionSubtitle.contains(q, ignoreCase = true) ||
+        place.coordinatesLabel.contains(q, ignoreCase = true) ||
+        (tokens.size > 1 && tokens.all { hay.contains(it, ignoreCase = true) })
+    }
     val combined = LinkedHashMap<String, SurveyPlaceItem>()
     for (apiItem in remoteApiPlaces) {
       combined[apiItem.id] = apiItem

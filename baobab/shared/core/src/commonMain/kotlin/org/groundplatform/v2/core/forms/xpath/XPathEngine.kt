@@ -20,8 +20,8 @@ import org.groundplatform.v2.core.forms.xpath.ast.XPathParser
 import org.groundplatform.v2.core.forms.xpath.model.XPathValue
 
 /**
- * Primary facade for compiling and evaluating XForms-compliant XPath expressions against
- * ProtoForms Protocol Buffer records (`groundplatform.v2.forms.RecordInstance` and
+ * Primary facade for compiling and evaluating XForms-compliant XPath expressions against ProtoForms
+ * Protocol Buffer records (`groundplatform.v2.forms.RecordInstance` and
  * `groundplatform.v2.forms.FormDef`).
  */
 object XPathEngine {

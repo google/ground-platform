@@ -78,8 +78,9 @@ class SurveyRepositoryImpl(private val store: LocalStore) : SurveyRepository {
     store.transaction { surveys.forEach { upsertSurvey(it) } }
   }
 
-  override suspend fun getActiveSurveyId(): String =
-    store.transaction { preferences().activeSurveyId }
+  override suspend fun getActiveSurveyId(): String = store.transaction {
+    preferences().activeSurveyId
+  }
 
   override suspend fun setActiveSurveyId(surveyId: String) {
     store.transaction { updatePreferences { it.copy(activeSurveyId = surveyId) } }
@@ -95,8 +96,9 @@ class SurveyRepositoryImpl(private val store: LocalStore) : SurveyRepository {
     downloaded: Boolean,
   ): SurveyPreviewItem? = updateSurvey(surveyId) { it.copy(isDownloaded = downloaded) }
 
-  override suspend fun getSurveyConfig(surveyId: String): SurveyConfig? =
-    store.transaction { surveyConfig(surveyId) }
+  override suspend fun getSurveyConfig(surveyId: String): SurveyConfig? = store.transaction {
+    surveyConfig(surveyId)
+  }
 
   override suspend fun setSurveyConfig(surveyId: String, config: SurveyConfig) {
     store.transaction { putSurveyConfig(surveyId, config) }
@@ -211,8 +213,9 @@ class SurveyRepositoryImpl(private val store: LocalStore) : SurveyRepository {
     )
   }
 
-  override suspend fun getOfflineTilePackages(): List<OfflineTilePackageItem> =
-    store.transaction { offlineTilePackages() }
+  override suspend fun getOfflineTilePackages(): List<OfflineTilePackageItem> = store.transaction {
+    offlineTilePackages()
+  }
 
   override suspend fun setOfflineTilePackages(packages: List<OfflineTilePackageItem>) {
     store.transaction { putOfflineTilePackages(packages) }
@@ -232,23 +235,24 @@ class SurveyRepositoryImpl(private val store: LocalStore) : SurveyRepository {
     regionName: String,
     zoomRangeLabel: String,
     sizeLabel: String,
-  ): OfflineTilePackageItem =
-    store.transaction {
-      val packages = offlineTilePackages()
-      val newPackage =
-        OfflineTilePackageItem(
-          id = "tile-custom-${packages.size + 1}",
-          regionName = regionName.ifBlank { "Custom Survey Viewport Area" },
-          tileTypeLabel = "Satellite + Vector Hybrid",
-          zoomRangeLabel = zoomRangeLabel,
-          sizeLabel = sizeLabel,
-          isDownloaded = true,
-        )
-      putOfflineTilePackages(listOf(newPackage) + packages)
-      newPackage
-    }
+  ): OfflineTilePackageItem = store.transaction {
+    val packages = offlineTilePackages()
+    val newPackage =
+      OfflineTilePackageItem(
+        id = "tile-custom-${packages.size + 1}",
+        regionName = regionName.ifBlank { "Custom Survey Viewport Area" },
+        tileTypeLabel = "Satellite + Vector Hybrid",
+        zoomRangeLabel = zoomRangeLabel,
+        sizeLabel = sizeLabel,
+        isDownloaded = true,
+      )
+    putOfflineTilePackages(listOf(newPackage) + packages)
+    newPackage
+  }
 
   /** Runs [block] in a transaction with the active survey's ID. */
   private suspend fun <R> active(block: LocalStoreTransaction.(surveyId: String) -> R): R =
-    store.transaction { block(preferences().activeSurveyId) }
+    store.transaction {
+      block(preferences().activeSurveyId)
+    }
 }

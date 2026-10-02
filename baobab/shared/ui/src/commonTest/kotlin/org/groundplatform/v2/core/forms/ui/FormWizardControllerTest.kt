@@ -278,9 +278,27 @@ class FormWizardControllerTest {
     val formDef = XFormsXmlSerializer.deserializeFormDef(geometryFormXml)
     val controller = FormWizardController(formDef = formDef)
 
-    val p1 = GeoPoint(latitude = -1.292066, longitude = 36.821946, altitude_meters = 1680.0, accuracy_meters = 3.2)
-    val p2 = GeoPoint(latitude = -1.293100, longitude = 36.822500, altitude_meters = 1682.0, accuracy_meters = 3.5)
-    val p3 = GeoPoint(latitude = -1.294200, longitude = 36.823800, altitude_meters = 1685.0, accuracy_meters = 4.0)
+    val p1 =
+      GeoPoint(
+        latitude = -1.292066,
+        longitude = 36.821946,
+        altitude_meters = 1680.0,
+        accuracy_meters = 3.2,
+      )
+    val p2 =
+      GeoPoint(
+        latitude = -1.293100,
+        longitude = 36.822500,
+        altitude_meters = 1682.0,
+        accuracy_meters = 3.5,
+      )
+    val p3 =
+      GeoPoint(
+        latitude = -1.294200,
+        longitude = 36.823800,
+        altitude_meters = 1685.0,
+        accuracy_meters = 4.0,
+      )
 
     // 1. Step 0: /data/trail_path (geotrace) requires at least 2 vertices
     assertEquals(0, controller.currentStepIndex)
@@ -324,4 +342,3 @@ class FormWizardControllerTest {
     assertEquals("/data/notes", step2.control.canonicalPath)
   }
 }
-

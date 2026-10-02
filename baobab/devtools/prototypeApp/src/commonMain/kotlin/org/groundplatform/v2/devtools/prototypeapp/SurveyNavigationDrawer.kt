@@ -1128,7 +1128,8 @@ internal fun ManageOfflineMapsSubScreen(state: PrototypeAppState) {
       OutlinedCard(
         modifier = Modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.medium,
-        colors = CardDefaults.outlinedCardColors(containerColor = MaterialTheme.colorScheme.surface),
+        colors =
+          CardDefaults.outlinedCardColors(containerColor = MaterialTheme.colorScheme.surface),
       ) {
         Row(
           modifier = Modifier.fillMaxWidth().padding(12.dp),

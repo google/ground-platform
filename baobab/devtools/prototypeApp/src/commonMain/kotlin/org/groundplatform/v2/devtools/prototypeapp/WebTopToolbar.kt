@@ -402,7 +402,8 @@ internal fun UserProfileCard(
         modifier = Modifier.fillMaxWidth().height(40.dp),
         shape = MaterialTheme.shapes.small,
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
-        colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error),
+        colors =
+          ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error),
       ) {
         Icon(
           imageVector = Icons.AutoMirrored.Outlined.Logout,

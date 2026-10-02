@@ -52,8 +52,10 @@ data class UserSettings(
  * Breakdown of device storage usage for offline map tiles, field data, and available space.
  *
  * @param totalBytes Total storage capacity of the device file system.
- * @param downloadedImageryBytes Space occupied by downloaded map tiles and satellite/aerial imagery.
- * @param dataBytes Space occupied by survey definitions, master data, form submissions, and pending mutations.
+ * @param downloadedImageryBytes Space occupied by downloaded map tiles and satellite/aerial
+ *   imagery.
+ * @param dataBytes Space occupied by survey definitions, master data, form submissions, and pending
+ *   mutations.
  * @param otherUsedBytes Space occupied by OS system files, other applications, and media.
  */
 data class DeviceStorageInfo(
@@ -68,19 +70,26 @@ data class DeviceStorageInfo(
 
   /** Fraction (0.0 to 1.0) of total storage occupied by downloaded imagery. */
   val imageryFraction: Float
-    get() = if (totalBytes > 0L) (downloadedImageryBytes.toFloat() / totalBytes.toFloat()).coerceIn(0f, 1f) else 0f
+    get() =
+      if (totalBytes > 0L)
+        (downloadedImageryBytes.toFloat() / totalBytes.toFloat()).coerceIn(0f, 1f)
+      else 0f
 
   /** Fraction (0.0 to 1.0) of total storage occupied by surveys and data. */
   val dataFraction: Float
-    get() = if (totalBytes > 0L) (dataBytes.toFloat() / totalBytes.toFloat()).coerceIn(0f, 1f) else 0f
+    get() =
+      if (totalBytes > 0L) (dataBytes.toFloat() / totalBytes.toFloat()).coerceIn(0f, 1f) else 0f
 
   /** Fraction (0.0 to 1.0) of total storage occupied by other system files and apps. */
   val otherUsedFraction: Float
-    get() = if (totalBytes > 0L) (otherUsedBytes.toFloat() / totalBytes.toFloat()).coerceIn(0f, 1f) else 0f
+    get() =
+      if (totalBytes > 0L) (otherUsedBytes.toFloat() / totalBytes.toFloat()).coerceIn(0f, 1f)
+      else 0f
 
   /** Fraction (0.0 to 1.0) of total storage that is free / available. */
   val freeFraction: Float
-    get() = if (totalBytes > 0L) (freeBytes.toFloat() / totalBytes.toFloat()).coerceIn(0f, 1f) else 0f
+    get() =
+      if (totalBytes > 0L) (freeBytes.toFloat() / totalBytes.toFloat()).coerceIn(0f, 1f) else 0f
 
   /** Formatted human-readable label for total storage (e.g. "64.0 GB"). */
   val totalStorageLabel: String

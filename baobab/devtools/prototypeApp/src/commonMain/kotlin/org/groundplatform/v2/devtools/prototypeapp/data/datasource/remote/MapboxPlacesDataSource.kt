@@ -24,8 +24,8 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyPlaceItem
 import org.groundplatform.v2.map.LatLng
 
 /**
- * Remote data source for place search. Runs [PlacesGeocoder] queries in the background and
- * delivers results through callbacks; a new search cancels the previous one.
+ * Remote data source for place search. Runs [PlacesGeocoder] queries in the background and delivers
+ * results through callbacks; a new search cancels the previous one.
  */
 class MapboxPlacesDataSource(
   private val geocoder: PlacesGeocoder = PlacesGeocoder(),

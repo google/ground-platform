@@ -33,9 +33,9 @@ data class PlaceFocus(
 )
 
 /**
- * Decides the extent and zoom for places from search results: a geocoder bounding box when there
- * is a usable one, otherwise an extent inferred from the place's category (a country spans
- * degrees, a village a few hundred metres).
+ * Decides the extent and zoom for places from search results: a geocoder bounding box when there is
+ * a usable one, otherwise an extent inferred from the place's category (a country spans degrees, a
+ * village a few hundred metres).
  */
 object PlaceFraming {
   const val MIN_ZOOM = 2.2

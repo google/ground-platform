@@ -17,9 +17,7 @@ import org.groundplatform.v2.devtools.prototypeapp.data.datasource.device.Device
 import org.groundplatform.v2.devtools.prototypeapp.domain.repository.DeviceLocationSnapshot
 import org.groundplatform.v2.devtools.prototypeapp.domain.repository.LocationRepository
 
-/**
- * Concrete [LocationRepository] implementation backed by [DeviceLocationDataSource].
- */
+/** Concrete [LocationRepository] implementation backed by [DeviceLocationDataSource]. */
 class LocationRepositoryImpl(
   private val deviceLocationDataSource: DeviceLocationDataSource = DeviceLocationDataSource()
 ) : LocationRepository {

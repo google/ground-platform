@@ -37,9 +37,9 @@ internal fun Modifier.horizontalScrollWithMouseDrag(state: ScrollState): Modifie
   mouseDragToScroll(state).horizontalScroll(state)
 
 /**
- * Scrolls [state] horizontally while a mouse drags over this element. Apply it before (outside)
- * the matching [horizontalScroll] so drag positions are measured in the fixed viewport rather than
- * the scrolling content.
+ * Scrolls [state] horizontally while a mouse drags over this element. Apply it before (outside) the
+ * matching [horizontalScroll] so drag positions are measured in the fixed viewport rather than the
+ * scrolling content.
  */
 internal fun Modifier.mouseDragToScroll(state: ScrollState): Modifier =
   pointerInput(state) {

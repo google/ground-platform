@@ -25,7 +25,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -65,19 +64,20 @@ import org.jetbrains.compose.resources.Font
 
 /**
  * Complete Material 3 Light ColorScheme using the exact tokens from the Figma Ground Design System:
- * - Primary (Key #34A853): `primary` #36693E, `onPrimary` #FFFFFF, `primaryContainer` #B7F1B9, `onPrimaryContainer` #1D5128, `inversePrimary` #9CD49F
- * - Secondary (Key #526350): `secondary` #516351, `onSecondary` #FFFFFF, `secondaryContainer` #D4E8D1, `onSecondaryContainer` #3A4B3A
- * - Tertiary (Key #39656B): `tertiary` #39656C, `onTertiary` #FFFFFF, `tertiaryContainer` #BDEAF3, `onTertiaryContainer` #1F4D54
- * - Neutral (Key #5D5F5B) & Neutral Variant (Key #596057):
- *     `background` #F7FBF2, `onBackground` #181D18,
- *     `surface` #F7FBF2, `onSurface` #181D18,
- *     `surfaceDim` #D7DBD3, `surfaceBright` #F7FBF2,
- *     `surfaceContainerLowest` #FFFFFF, `surfaceContainerLow` #F1F5EC,
- *     `surfaceContainer` #EBEFE7, `surfaceContainerHigh` #E5E9E1, `surfaceContainerHighest` #E0E4DB,
- *     `surfaceVariant` #DDE5D9, `onSurfaceVariant` #424940,
- *     `outline` #727970, `outlineVariant` #C1C9BE,
- *     `inverseSurface` #2D322C, `inverseOnSurface` #EEF2E9
- * - Error (Key #BA1A1A): `error` #BA1A1A, `onError` #FFFFFF, `errorContainer` #FFDAD6, `onErrorContainer` #93000A
+ * - Primary (Key #34A853): `primary` #36693E, `onPrimary` #FFFFFF, `primaryContainer` #B7F1B9,
+ *   `onPrimaryContainer` #1D5128, `inversePrimary` #9CD49F
+ * - Secondary (Key #526350): `secondary` #516351, `onSecondary` #FFFFFF,
+ *   `secondaryContainer` #D4E8D1, `onSecondaryContainer` #3A4B3A
+ * - Tertiary (Key #39656B): `tertiary` #39656C, `onTertiary` #FFFFFF, `tertiaryContainer` #BDEAF3,
+ *   `onTertiaryContainer` #1F4D54
+ * - Neutral (Key #5D5F5B) & Neutral Variant (Key #596057): `background` #F7FBF2,
+ *   `onBackground` #181D18, `surface` #F7FBF2, `onSurface` #181D18, `surfaceDim` #D7DBD3,
+ *   `surfaceBright` #F7FBF2, `surfaceContainerLowest` #FFFFFF, `surfaceContainerLow` #F1F5EC,
+ *   `surfaceContainer` #EBEFE7, `surfaceContainerHigh` #E5E9E1, `surfaceContainerHighest` #E0E4DB,
+ *   `surfaceVariant` #DDE5D9, `onSurfaceVariant` #424940, `outline` #727970,
+ *   `outlineVariant` #C1C9BE, `inverseSurface` #2D322C, `inverseOnSurface` #EEF2E9
+ * - Error (Key #BA1A1A): `error` #BA1A1A, `onError` #FFFFFF, `errorContainer` #FFDAD6,
+ *   `onErrorContainer` #93000A
  */
 val GroundLightColorScheme =
   lightColorScheme(
@@ -121,18 +121,18 @@ val GroundLightColorScheme =
 
 /**
  * Complete Material 3 Dark ColorScheme using the exact tokens from the Figma Ground Design System:
- * - Primary: `primary` #9CD49F, `onPrimary` #003914, `primaryContainer` #1D5128, `onPrimaryContainer` #B7F1B9, `inversePrimary` #36693E
- * - Secondary: `secondary` #B8CCB5, `onSecondary` #243425, `secondaryContainer` #3A4B3A, `onSecondaryContainer` #D4E8D1
- * - Tertiary: `tertiary` #A1CED7, `onTertiary` #00363D, `tertiaryContainer` #1F4D54, `onTertiaryContainer` #BDEAF3
- * - Neutral & Neutral Variant:
- *     `background` #101510, `onBackground` #E0E4DB,
- *     `surface` #101510, `onSurface` #E0E4DB,
- *     `surfaceDim` #101510, `surfaceBright` #363A35,
- *     `surfaceContainerLowest` #0B0F0B, `surfaceContainerLow` #181D18,
- *     `surfaceContainer` #1C211C, `surfaceContainerHigh` #272B26, `surfaceContainerHighest` #313630,
- *     `surfaceVariant` #424940, `onSurfaceVariant` #C1C9BE,
- *     `outline` #8B9389, `outlineVariant` #424940,
- *     `inverseSurface` #E0E4DB, `inverseOnSurface` #2D322C
+ * - Primary: `primary` #9CD49F, `onPrimary` #003914, `primaryContainer` #1D5128,
+ *   `onPrimaryContainer` #B7F1B9, `inversePrimary` #36693E
+ * - Secondary: `secondary` #B8CCB5, `onSecondary` #243425, `secondaryContainer` #3A4B3A,
+ *   `onSecondaryContainer` #D4E8D1
+ * - Tertiary: `tertiary` #A1CED7, `onTertiary` #00363D, `tertiaryContainer` #1F4D54,
+ *   `onTertiaryContainer` #BDEAF3
+ * - Neutral & Neutral Variant: `background` #101510, `onBackground` #E0E4DB, `surface` #101510,
+ *   `onSurface` #E0E4DB, `surfaceDim` #101510, `surfaceBright` #363A35,
+ *   `surfaceContainerLowest` #0B0F0B, `surfaceContainerLow` #181D18, `surfaceContainer` #1C211C,
+ *   `surfaceContainerHigh` #272B26, `surfaceContainerHighest` #313630, `surfaceVariant` #424940,
+ *   `onSurfaceVariant` #C1C9BE, `outline` #8B9389, `outlineVariant` #424940,
+ *   `inverseSurface` #E0E4DB, `inverseOnSurface` #2D322C
  * - Error: `error` #FFB4AB, `onError` #690005, `errorContainer` #93000A, `onErrorContainer` #FFDAD6
  */
 val GroundDarkColorScheme =
@@ -255,9 +255,7 @@ enum class GroundBadgeTone {
   NEUTRAL,
 }
 
-/**
- * Reusable Material 3 tonal pill badge backed by `MaterialTheme.colorScheme` container roles.
- */
+/** Reusable Material 3 tonal pill badge backed by `MaterialTheme.colorScheme` container roles. */
 @Composable
 fun GroundTonalBadge(
   text: String,
@@ -278,8 +276,7 @@ fun GroundTonalBadge(
         Triple(colors.tertiaryContainer, colors.onTertiaryContainer, colors.tertiary)
       GroundBadgeTone.WARNING ->
         Triple(colors.tertiaryContainer, colors.onTertiaryContainer, colors.tertiary)
-      GroundBadgeTone.ERROR ->
-        Triple(colors.errorContainer, colors.onErrorContainer, colors.error)
+      GroundBadgeTone.ERROR -> Triple(colors.errorContainer, colors.onErrorContainer, colors.error)
       GroundBadgeTone.NEUTRAL ->
         Triple(colors.surfaceContainerHigh, colors.onSurfaceVariant, colors.outlineVariant)
     }
@@ -340,10 +337,9 @@ fun GroundModalBottomSheetOverlay(
     // M3 Bottom Sheet Container
     Surface(
       modifier =
-        Modifier.align(Alignment.BottomCenter)
-          .fillMaxWidth()
-          .heightIn(max = 560.dp)
-          .clickable(enabled = false) {},
+        Modifier.align(Alignment.BottomCenter).fillMaxWidth().heightIn(max = 560.dp).clickable(
+          enabled = false
+        ) {},
       shape = BottomSheetDefaults.ExpandedShape,
       color = MaterialTheme.colorScheme.surfaceContainerLow,
       contentColor = MaterialTheme.colorScheme.onSurface,
@@ -389,9 +385,9 @@ fun GroundAlertDialogOverlay(
     // M3 Dialog Container
     Surface(
       modifier =
-        Modifier.padding(horizontal = 24.dp)
-          .widthIn(min = 280.dp, max = 340.dp)
-          .clickable(enabled = false) {},
+        Modifier.padding(horizontal = 24.dp).widthIn(min = 280.dp, max = 340.dp).clickable(
+          enabled = false
+        ) {},
       shape = MaterialTheme.shapes.extraLarge,
       color = MaterialTheme.colorScheme.surfaceContainerHigh,
       contentColor = MaterialTheme.colorScheme.onSurface,
@@ -403,16 +399,10 @@ fun GroundAlertDialogOverlay(
         horizontalAlignment = Alignment.CenterHorizontally,
       ) {
         if (icon != null) {
-          Box(modifier = Modifier.padding(bottom = 16.dp)) {
-            icon()
-          }
+          Box(modifier = Modifier.padding(bottom = 16.dp)) { icon() }
         }
-        Box(modifier = Modifier.padding(bottom = 16.dp)) {
-          title()
-        }
-        Box(modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp)) {
-          text()
-        }
+        Box(modifier = Modifier.padding(bottom = 16.dp)) { title() }
+        Box(modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp)) { text() }
         Row(
           modifier = Modifier.fillMaxWidth(),
           horizontalArrangement = Arrangement.End,
@@ -447,4 +437,3 @@ fun GroundTheme(darkTheme: Boolean = false, content: @Composable () -> Unit) {
     )
   }
 }
-

@@ -34,7 +34,6 @@ import org.groundplatform.v2.devtools.prototypeapp.pdf.GeneratedPdf
 import org.groundplatform.v2.devtools.prototypeapp.pdf.RecordPdfReports
 import org.groundplatform.v2.devtools.prototypeapp.surveyeditor.SurveyEditorDraft
 import org.groundplatform.v2.devtools.prototypeapp.ui.state.PrototypeUiState
-import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.AppData
 import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.PrototypeAppViewModel
 import org.groundplatform.v2.map.CameraPosition
 import org.groundplatform.v2.map.LatLng
@@ -99,6 +98,7 @@ class PrototypeAppState(
   private fun storeUserSettings(settings: UserSettings) {
     viewModel.launch { viewModel.settingsRepository.setUserSettings(settings) }
   }
+
   /**
    * Immutable [StateFlow] of [PrototypeUiState] exposed by the underlying MVVM
    * [PrototypeAppViewModel] per Section 6 of `docs/technical/client/architecture.md`.
@@ -1565,14 +1565,14 @@ class PrototypeAppState(
   fun downloadSurvey(surveyId: String) {
     storeSurveys(
       surveys.map { item ->
-      if (item.id == surveyId) {
-        activeSurveyNotice =
-          "Downloaded \"${item.title}\" (${item.offlineSizeLabel}) for offline use."
-        item.copy(isDownloaded = true)
-      } else {
-        item
+        if (item.id == surveyId) {
+          activeSurveyNotice =
+            "Downloaded \"${item.title}\" (${item.offlineSizeLabel}) for offline use."
+          item.copy(isDownloaded = true)
+        } else {
+          item
+        }
       }
-    }
     )
   }
 
@@ -1581,7 +1581,8 @@ class PrototypeAppState(
     downloadSurvey(surveyId)
     viewModel.launch { viewModel.surveyRepository.setActiveSurveyId(surveyId) }
     data.surveyConfigs[surveyId]?.primaryFormXml?.let { xml ->
-      selectedWorkbenchExampleForm = WorkbenchExampleForm.entries.firstOrNull { it.xformsXml == xml }
+      selectedWorkbenchExampleForm =
+        WorkbenchExampleForm.entries.firstOrNull { it.xformsXml == xml }
       customXFormsXml = xml
       customFormDef = XFormsParseCache.formDef(xml)
       xformsXmlError = null
@@ -1605,15 +1606,15 @@ class PrototypeAppState(
   fun updateActiveSurveyDetails(title: String, description: String) {
     storeSurveys(
       surveys.map { item ->
-      if (item.id == activeSurveyId) {
-        item.copy(
-          title = title.ifBlank { item.title },
-          description = description.ifBlank { item.description },
-        )
-      } else {
-        item
+        if (item.id == activeSurveyId) {
+          item.copy(
+            title = title.ifBlank { item.title },
+            description = description.ifBlank { item.description },
+          )
+        } else {
+          item
+        }
       }
-    }
     )
   }
 
@@ -1621,19 +1622,19 @@ class PrototypeAppState(
   fun toggleSurveyDownloaded(surveyId: String) {
     storeSurveys(
       surveys.map { item ->
-      if (item.id == surveyId) {
-        val nextState = !item.isDownloaded
-        activeSurveyNotice =
-          if (nextState) {
-            "Downloaded \"${item.title}\" (${item.offlineSizeLabel}) for offline use."
-          } else {
-            "Removed offline copy of \"${item.title}\"."
-          }
-        item.copy(isDownloaded = nextState)
-      } else {
-        item
+        if (item.id == surveyId) {
+          val nextState = !item.isDownloaded
+          activeSurveyNotice =
+            if (nextState) {
+              "Downloaded \"${item.title}\" (${item.offlineSizeLabel}) for offline use."
+            } else {
+              "Removed offline copy of \"${item.title}\"."
+            }
+          item.copy(isDownloaded = nextState)
+        } else {
+          item
+        }
       }
-    }
     )
   }
 
@@ -1761,18 +1762,18 @@ class PrototypeAppState(
   fun toggleLayerVisibility(layerId: String) {
     storeMapLayers(
       mapLayers.map { layer ->
-      if (layer.id == layerId) {
-        val nextVisible = !layer.isVisible
-        if (!nextVisible && selectedEntity?.layerId == layerId) {
-          selectedEntityId = null
-          selectedSubmissionId = null
-          isEntityBottomSheetExpanded = false
+        if (layer.id == layerId) {
+          val nextVisible = !layer.isVisible
+          if (!nextVisible && selectedEntity?.layerId == layerId) {
+            selectedEntityId = null
+            selectedSubmissionId = null
+            isEntityBottomSheetExpanded = false
+          }
+          layer.copy(isVisible = nextVisible)
+        } else {
+          layer
         }
-        layer.copy(isVisible = nextVisible)
-      } else {
-        layer
       }
-    }
     )
   }
 
@@ -2494,21 +2495,21 @@ class PrototypeAppState(
     viewModel.launch {
       val result =
         viewModel.completeFormSubmissionUseCase(
-        recordInstance = recordInstance,
-        entityStates = entityStates,
-        controller = controller,
-        activeDataCollectionFormId = activeDataCollectionFormId,
-        activeDataCollectionEntityId = activeDataCollectionEntityId,
-        wasFormLaunchedWithoutEntity = wasFormLaunchedWithoutEntity,
-        selectedEntityId = selectedEntityId,
-        customFormDef = customFormDef,
-        gnssStatusChipLabel = gnssStatusChipLabel,
-        signedInUserName = signedInUserName,
-        signedInUserEmail = signedInUserEmail,
-        userGpsCoordinatesLabel = userGpsCoordinatesLabel,
-        userGpsNormalizedX = userGpsNormalizedX,
-        userGpsNormalizedY = userGpsNormalizedY,
-      ) ?: return@launch
+          recordInstance = recordInstance,
+          entityStates = entityStates,
+          controller = controller,
+          activeDataCollectionFormId = activeDataCollectionFormId,
+          activeDataCollectionEntityId = activeDataCollectionEntityId,
+          wasFormLaunchedWithoutEntity = wasFormLaunchedWithoutEntity,
+          selectedEntityId = selectedEntityId,
+          customFormDef = customFormDef,
+          gnssStatusChipLabel = gnssStatusChipLabel,
+          signedInUserName = signedInUserName,
+          signedInUserEmail = signedInUserEmail,
+          userGpsCoordinatesLabel = userGpsCoordinatesLabel,
+          userGpsNormalizedX = userGpsNormalizedX,
+          userGpsNormalizedY = userGpsNormalizedY,
+        ) ?: return@launch
       selectedEntityId = result.selectedEntityId
       if (result.updateSelectedSubmissionId) {
         selectedSubmissionId = result.selectedSubmissionId
@@ -2525,18 +2526,18 @@ class PrototypeAppState(
   fun updateEntitySyncStatus(entityId: String, newStatus: SyncStatus) {
     storeEntities(
       entities.map { item ->
-      if (item.id == entityId) {
-        val updatedSubmissions =
-          if (newStatus == SyncStatus.SYNCED) {
-            item.submissions.map { sub -> sub.copy(syncStatus = SyncStatus.SYNCED) }
-          } else {
-            item.submissions
-          }
-        item.copy(submissions = updatedSubmissions, syncStatus = newStatus)
-      } else {
-        item
+        if (item.id == entityId) {
+          val updatedSubmissions =
+            if (newStatus == SyncStatus.SYNCED) {
+              item.submissions.map { sub -> sub.copy(syncStatus = SyncStatus.SYNCED) }
+            } else {
+              item.submissions
+            }
+          item.copy(submissions = updatedSubmissions, syncStatus = newStatus)
+        } else {
+          item
+        }
       }
-    }
     )
     val entity = entities.firstOrNull { it.id == entityId } ?: return
     activeSurveyNotice = "${entity.label}: Sync status set to ${newStatus.label}"
@@ -2559,29 +2560,30 @@ class PrototypeAppState(
     var updatedSubTitle: String? = null
     storeEntities(
       entities.map { item ->
-      val hasTarget = item.submissions.any { it.id == submissionId }
-      if (hasTarget) {
-        val updatedSubmissions =
-          item.submissions.map { sub ->
-            if (sub.id == submissionId) {
-              updatedSubTitle = sub.formTitle
-              sub.copy(syncStatus = newStatus)
-            } else {
-              sub
+        val hasTarget = item.submissions.any { it.id == submissionId }
+        if (hasTarget) {
+          val updatedSubmissions =
+            item.submissions.map { sub ->
+              if (sub.id == submissionId) {
+                updatedSubTitle = sub.formTitle
+                sub.copy(syncStatus = newStatus)
+              } else {
+                sub
+              }
             }
-          }
-        item.copy(
-          submissions = updatedSubmissions,
-          syncStatus =
-            deriveEntitySyncStatus(
-              updatedSubmissions,
-              fallback = if (newStatus == SyncStatus.SYNCED) SyncStatus.SYNCED else item.syncStatus,
-            ),
-        )
-      } else {
-        item
+          item.copy(
+            submissions = updatedSubmissions,
+            syncStatus =
+              deriveEntitySyncStatus(
+                updatedSubmissions,
+                fallback =
+                  if (newStatus == SyncStatus.SYNCED) SyncStatus.SYNCED else item.syncStatus,
+              ),
+          )
+        } else {
+          item
+        }
       }
-    }
     )
     if (standaloneSubmissions.any { it.id == submissionId }) {
       storeStandaloneSubmissions(
@@ -3266,7 +3268,9 @@ class PrototypeAppState(
   fun startNavigationToEntity(entityId: String) {
     val entity = entities.firstOrNull { it.id == entityId } ?: return
     storeMapLayers(
-      mapLayers.map { layer -> if (layer.id == entity.layerId) layer.copy(isVisible = true) else layer }
+      mapLayers.map { layer ->
+        if (layer.id == entity.layerId) layer.copy(isVisible = true) else layer
+      }
     )
     navigationTargetKind = NavigationTargetKind.ENTITY
     navigationTargetId = entity.id
@@ -3494,7 +3498,6 @@ class PrototypeAppState(
 
     /** Widest the web dashboard's left-hand panel can be dragged, in dp. */
     const val MAX_SIDE_PANEL_WIDTH_DP = 560f
-
   }
 
   /**
