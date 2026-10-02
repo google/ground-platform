@@ -209,15 +209,6 @@ private fun FormEditorToolbar(
         singleLine = true,
         modifier = Modifier.width(280.dp),
       )
-      OutlinedTextField(
-        value = state.form.formId,
-        onValueChange = state::updateFormId,
-        label = { Text("Form ID") },
-        singleLine = true,
-        isError = !FormEditorValidator.isValidName(state.form.formId),
-        textStyle = MaterialTheme.typography.bodyMedium.copy(fontFamily = FontFamily.Monospace),
-        modifier = Modifier.width(200.dp),
-      )
       Spacer(Modifier.weight(1f))
       if (onCreateDataset != null) {
         OutlinedButton(onClick = onCreateDataset) {

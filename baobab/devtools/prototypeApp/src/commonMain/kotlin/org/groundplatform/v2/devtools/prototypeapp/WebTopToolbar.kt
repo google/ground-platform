@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -55,6 +56,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.takeOrElse
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -62,13 +65,8 @@ import androidx.compose.ui.unit.sp
 import org.groundplatform.v2.core.forms.ui.LocalGroundBrandFontFamily
 
 /**
- * Top navigation and context toolbar for the Ground 2.0 Web application.
- *
- * Displays:
- * - Brand section: Ground logo ([CloudAcaciaLogo]) and app name ("Ground")
- * - Survey context: Name of the currently active survey
- * - Actions: Entry point to edit the survey ("Manage survey")
- * - User profile: Clickable avatar icon opening the standard user profile card with sign out
+ * Top navigation and context toolbar for the Ground 2.0 Web dashboard: the shared [WebAppHeader]
+ * showing the active survey and its location, with "Mobile prototype" and "Manage survey" actions.
  */
 @Composable
 internal fun WebTopToolbar(
@@ -76,6 +74,54 @@ internal fun WebTopToolbar(
   onOpenSurveyEditor: () -> Unit = {},
   onSignOut: () -> Unit = { state.signOut() },
   modifier: Modifier = Modifier,
+) {
+  WebAppHeader(
+    state = state,
+    onSignOut = onSignOut,
+    modifier = modifier,
+    context = {
+      WebHeaderContext(title = state.activeSurvey.title) {
+        Icon(
+          imageVector = Icons.Outlined.LocationOn,
+          contentDescription = null,
+          tint = MaterialTheme.colorScheme.primary,
+          modifier = Modifier.size(12.dp),
+        )
+        WebHeaderSupportingText(state.activeSurvey.location)
+      }
+    },
+    actions = {
+      WebMobilePrototypeButton(state)
+      WebHeaderButton(
+        text = "Manage survey",
+        icon = Icons.Outlined.Edit,
+        onClick = onOpenSurveyEditor,
+        tonal = true,
+      )
+    },
+  )
+}
+
+/**
+ * Header shared by every page of the Ground 2.0 Web application.
+ *
+ * Displays, left to right:
+ * - An optional [navigationIcon] (e.g. a Close button)
+ * - Brand section: Ground logo ([CloudAcaciaLogo]) and app name ("Ground")
+ * - Page [context], typically a [WebHeaderContext]
+ * - Page [actions]
+ * - User profile: clickable avatar opening the user profile card with sign out, shown only when
+ *   [onSignOut] is given
+ * - Prototype debug tools
+ */
+@Composable
+internal fun WebAppHeader(
+  state: PrototypeAppState,
+  modifier: Modifier = Modifier,
+  onSignOut: (() -> Unit)? = { state.signOut() },
+  navigationIcon: (@Composable () -> Unit)? = null,
+  context: @Composable () -> Unit = {},
+  actions: @Composable RowScope.() -> Unit = {},
 ) {
   val brandFont = LocalGroundBrandFontFamily.current
 
@@ -86,17 +132,20 @@ internal fun WebTopToolbar(
     shadowElevation = 1.dp,
   ) {
     Row(
-      modifier = Modifier.fillMaxWidth().height(60.dp).padding(horizontal = 16.dp),
+      modifier =
+        Modifier.fillMaxWidth()
+          .height(60.dp)
+          .padding(start = if (navigationIcon != null) 4.dp else 16.dp, end = 16.dp),
       horizontalArrangement = Arrangement.SpaceBetween,
       verticalAlignment = Alignment.CenterVertically,
     ) {
-      // Left: Logo, App Name, Divider, and Survey Context (Title + Location). The side panel is
-      // toggled from the collapse tab on its right edge, not from the toolbar.
+      // Left: optional navigation icon, logo, app name, divider, and page context.
       Row(
         modifier = Modifier.weight(1f, fill = false),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
       ) {
+        navigationIcon?.invoke()
         CloudAcaciaLogo(modifier = Modifier.size(32.dp))
         Text(
           text = "Ground",
@@ -112,97 +161,114 @@ internal fun WebTopToolbar(
           modifier = Modifier.height(28.dp).padding(horizontal = 4.dp),
           color = MaterialTheme.colorScheme.outlineVariant,
         )
-        Column(verticalArrangement = Arrangement.spacedBy(1.dp)) {
-          Text(
-            text = state.activeSurvey.title,
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.SemiBold,
-            color = MaterialTheme.colorScheme.onSurface,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-          )
-          Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(4.dp),
-          ) {
-            Icon(
-              imageVector = Icons.Outlined.LocationOn,
-              contentDescription = null,
-              tint = MaterialTheme.colorScheme.primary,
-              modifier = Modifier.size(12.dp),
-            )
-            Text(
-              text = state.activeSurvey.location,
-              style = MaterialTheme.typography.labelSmall,
-              color = MaterialTheme.colorScheme.onSurfaceVariant,
-              maxLines = 1,
-              overflow = TextOverflow.Ellipsis,
-            )
-          }
-        }
+        context()
       }
 
       Spacer(modifier = Modifier.width(16.dp))
 
-      // Right: "Mobile prototype" link, "Manage survey" button, Divider, and Clickable Avatar Icon
+      // Right: page actions, divider, optional avatar and divider, and debug tools.
       Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp),
       ) {
-        OutlinedButton(
-          onClick = { state.selectWorkbenchPage(PrototypeWorkbenchPage.MOBILE_PROTOTYPE) },
-          contentPadding = PaddingValues(horizontal = 14.dp, vertical = 6.dp),
-          modifier = Modifier.height(36.dp),
-        ) {
-          Icon(
-            imageVector = Icons.Outlined.Smartphone,
-            contentDescription = null,
-            modifier = Modifier.size(16.dp),
-          )
-          Spacer(modifier = Modifier.width(6.dp))
-          Text(
-            text = "Mobile prototype",
-            style = MaterialTheme.typography.labelMedium,
-            fontWeight = FontWeight.SemiBold,
-            maxLines = 1,
-          )
-        }
-
-        FilledTonalButton(
-          onClick = onOpenSurveyEditor,
-          contentPadding = PaddingValues(horizontal = 14.dp, vertical = 6.dp),
-          modifier = Modifier.height(36.dp),
-        ) {
-          Icon(
-            imageVector = Icons.Outlined.Edit,
-            contentDescription = null,
-            modifier = Modifier.size(16.dp),
-          )
-          Spacer(modifier = Modifier.width(6.dp))
-          Text(
-            text = "Manage survey",
-            style = MaterialTheme.typography.labelMedium,
-            fontWeight = FontWeight.SemiBold,
-            maxLines = 1,
-          )
-        }
+        actions()
 
         VerticalDivider(
           modifier = Modifier.height(24.dp),
           color = MaterialTheme.colorScheme.outlineVariant,
         )
 
-        WebUserAvatarProfileWidget(state = state, onSignOut = onSignOut)
+        if (onSignOut != null) {
+          WebUserAvatarProfileWidget(state = state, onSignOut = onSignOut)
 
-        VerticalDivider(
-          modifier = Modifier.height(24.dp),
-          color = MaterialTheme.colorScheme.outlineVariant,
-        )
+          VerticalDivider(
+            modifier = Modifier.height(24.dp),
+            color = MaterialTheme.colorScheme.outlineVariant,
+          )
+        }
 
         PrototypeDebugToolsButton(state = state)
       }
     }
   }
+}
+
+/** Page context for [WebAppHeader]: a [title] above a row of [supporting] content. */
+@Composable
+internal fun WebHeaderContext(title: String, supporting: @Composable RowScope.() -> Unit = {}) {
+  Column(verticalArrangement = Arrangement.spacedBy(1.dp)) {
+    Text(
+      text = title,
+      style = MaterialTheme.typography.titleMedium,
+      fontWeight = FontWeight.SemiBold,
+      color = MaterialTheme.colorScheme.onSurface,
+      maxLines = 1,
+      overflow = TextOverflow.Ellipsis,
+    )
+    Row(
+      verticalAlignment = Alignment.CenterVertically,
+      horizontalArrangement = Arrangement.spacedBy(4.dp),
+      content = supporting,
+    )
+  }
+}
+
+/** Small secondary text for the supporting row of a [WebHeaderContext]. */
+@Composable
+internal fun WebHeaderSupportingText(text: String, color: Color = Color.Unspecified) {
+  Text(
+    text = text,
+    style = MaterialTheme.typography.labelSmall,
+    color = color.takeOrElse { MaterialTheme.colorScheme.onSurfaceVariant },
+    maxLines = 1,
+    overflow = TextOverflow.Ellipsis,
+  )
+}
+
+/** Compact icon-and-label button for [WebAppHeader] actions; outlined, or filled tonal. */
+@Composable
+internal fun WebHeaderButton(
+  text: String,
+  icon: ImageVector,
+  onClick: () -> Unit,
+  tonal: Boolean = false,
+) {
+  val padding = PaddingValues(horizontal = 14.dp, vertical = 6.dp)
+  val content: @Composable RowScope.() -> Unit = {
+    Icon(imageVector = icon, contentDescription = null, modifier = Modifier.size(16.dp))
+    Spacer(modifier = Modifier.width(6.dp))
+    Text(
+      text = text,
+      style = MaterialTheme.typography.labelMedium,
+      fontWeight = FontWeight.SemiBold,
+      maxLines = 1,
+    )
+  }
+  if (tonal) {
+    FilledTonalButton(
+      onClick = onClick,
+      contentPadding = padding,
+      modifier = Modifier.height(36.dp),
+      content = content,
+    )
+  } else {
+    OutlinedButton(
+      onClick = onClick,
+      contentPadding = padding,
+      modifier = Modifier.height(36.dp),
+      content = content,
+    )
+  }
+}
+
+/** [WebAppHeader] action that switches the workbench to the mobile prototype. */
+@Composable
+internal fun WebMobilePrototypeButton(state: PrototypeAppState) {
+  WebHeaderButton(
+    text = "Mobile prototype",
+    icon = Icons.Outlined.Smartphone,
+    onClick = { state.selectWorkbenchPage(PrototypeWorkbenchPage.MOBILE_PROTOTYPE) },
+  )
 }
 
 /** Clickable user avatar icon that anchors and toggles the standard user profile card popup. */

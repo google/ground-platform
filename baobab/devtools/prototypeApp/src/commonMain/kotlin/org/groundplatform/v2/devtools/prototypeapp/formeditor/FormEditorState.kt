@@ -24,7 +24,8 @@ import org.groundplatform.v2.core.forms.ui.FormWizardController
  * screen, and the in-browser flow preview session.
  */
 class FormEditorState(
-  initialForm: EditorForm = EditorFormTemplates.blank(formId = "form", title = "Untitled form")
+  initialForm: EditorForm =
+    EditorFormTemplates.blank(formId = FormIds.newFormId(), title = "Untitled form")
 ) {
 
   var form: EditorForm by mutableStateOf(initialForm)
@@ -75,10 +76,6 @@ class FormEditorState(
 
   fun updateTitle(title: String) {
     form = form.copy(title = title)
-  }
-
-  fun updateFormId(formId: String) {
-    form = form.copy(formId = formId)
   }
 
   /**
@@ -197,9 +194,7 @@ class FormEditorState(
   }
 
   fun removeChoice(key: String, index: Int) {
-    updateQuestion(key) { q ->
-      q.copy(choices = q.choices.filterIndexed { i, _ -> i != index })
-    }
+    updateQuestion(key) { q -> q.copy(choices = q.choices.filterIndexed { i, _ -> i != index }) }
   }
 
   /** Changes the type of [key], seeding choices and dropping display logic that no longer fits. */

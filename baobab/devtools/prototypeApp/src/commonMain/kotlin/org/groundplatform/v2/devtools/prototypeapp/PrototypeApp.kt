@@ -73,7 +73,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -83,7 +82,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import kotlinx.coroutines.flow.drop
 import org.groundplatform.v2.core.forms.ui.GroundBadgeTone
 import org.groundplatform.v2.core.forms.ui.GroundTheme
 import org.groundplatform.v2.core.forms.ui.GroundTonalBadge
@@ -144,18 +142,13 @@ fun PrototypeApp(
     }
   }
 
-  // The Survey editor edits the active survey's draft from the local data store, and saves every
-  // change back to it.
+  // The Survey editor edits a draft of the active survey, loaded from the local data store. Edits
+  // are saved back to the store only when the user publishes them.
   val activeSurveyId = state.activeSurveyId
   val surveyEditorState =
     remember(activeSurveyId, state.dataResetCount) {
       SurveyEditorState(state.activeSurveyEditorDraft)
     }
-  LaunchedEffect(surveyEditorState) {
-    snapshotFlow { surveyEditorState.toDraft() }
-      .drop(1)
-      .collect { draft -> state.saveSurveyEditorDraft(activeSurveyId, draft) }
-  }
   val isEntityRefMapShowing =
     state.isDataCollectionFormOpen &&
       state.isCurrentFormStepEntityRef &&
@@ -184,11 +177,17 @@ fun PrototypeApp(
           PrototypeWorkbenchPage.SURVEY_EDITOR ->
             SurveyEditorPage(
               state = surveyEditorState,
+              appState = state,
               isDarkTheme = state.isDarkTheme,
-              onBackToDashboard = {
+              onPublish = {
+                state.saveSurveyEditorDraft(activeSurveyId, surveyEditorState.toDraft())
+                surveyEditorState.markPublished()
                 state.selectWorkbenchPage(PrototypeWorkbenchPage.WEB_DASHBOARD)
               },
-              appState = state,
+              onClose = {
+                surveyEditorState.discardChanges()
+                state.selectWorkbenchPage(PrototypeWorkbenchPage.WEB_DASHBOARD)
+              },
             )
           PrototypeWorkbenchPage.WEB_DASHBOARD ->
             WebDashboardPage(

@@ -19,10 +19,11 @@ import androidx.compose.runtime.setValue
 import kotlin.random.Random
 import org.groundplatform.v2.devtools.prototypeapp.formeditor.EditorChoice
 import org.groundplatform.v2.devtools.prototypeapp.formeditor.EditorForm
+import org.groundplatform.v2.devtools.prototypeapp.formeditor.EditorFormTemplates
 import org.groundplatform.v2.devtools.prototypeapp.formeditor.EditorQuestion
 import org.groundplatform.v2.devtools.prototypeapp.formeditor.EditorQuestionType
-import org.groundplatform.v2.devtools.prototypeapp.formeditor.EditorFormTemplates
 import org.groundplatform.v2.devtools.prototypeapp.formeditor.FormEditorState
+import org.groundplatform.v2.devtools.prototypeapp.formeditor.FormIds
 import org.groundplatform.v2.devtools.prototypeapp.formeditor.moved
 import org.groundplatform.v2.devtools.prototypeapp.formeditor.slugify
 
@@ -44,10 +45,14 @@ class SurveyFormEntry(val key: String, val editor: FormEditorState)
  * Observable state for the Survey editor page: survey details, sharing, Forms, Map layers, and Data
  * tables, plus the currently selected section.
  *
- * Initialized from a [SurveyEditorDraft] loaded from the local data store; [toDraft] returns the
- * current edits for saving back to the store.
+ * Initialized from the published [SurveyEditorDraft] loaded from the local data store. Edits are
+ * held here as an unpublished draft until [markPublished] is called (after [toDraft] has been saved
+ * to the store) or they are thrown away with [discardChanges].
  */
 class SurveyEditorState(draft: SurveyEditorDraft = SurveyEditorDraft.blank(surveyId = "")) {
+  /** The last published version of the survey, which unpublished edits are compared against. */
+  private var published: SurveyEditorDraft by mutableStateOf(draft)
+
   private var nextId by mutableStateOf(draft.nextKeyId)
 
   var details: SurveyDetails by mutableStateOf(draft.details)
@@ -56,8 +61,7 @@ class SurveyEditorState(draft: SurveyEditorDraft = SurveyEditorDraft.blank(surve
   var sharing: SharingSettings by mutableStateOf(draft.sharing)
     private set
 
-  var forms: List<SurveyFormEntry> by
-    mutableStateOf(draft.forms.map { SurveyFormEntry(it.key, FormEditorState(it.form)) })
+  var forms: List<SurveyFormEntry> by mutableStateOf(formEntries(draft))
     private set
 
   var datasets: List<EntityDataset> by mutableStateOf(draft.datasets)
@@ -72,6 +76,39 @@ class SurveyEditorState(draft: SurveyEditorDraft = SurveyEditorDraft.blank(surve
       datasets = datasets,
       nextKeyId = nextId,
     )
+
+  /**
+   * Whether the draft differs from the published survey. The key counter is ignored, so adding and
+   * then deleting an item doesn't count as a change.
+   */
+  val hasUnpublishedChanges: Boolean
+    get() = toDraft().copy(nextKeyId = 0) != published.copy(nextKeyId = 0)
+
+  /** Records the current draft as published. Call after saving [toDraft] to the data store. */
+  fun markPublished() {
+    published = toDraft()
+  }
+
+  /** Throws away unpublished edits, restoring the published survey. */
+  fun discardChanges() {
+    val draft = published
+    nextId = draft.nextKeyId
+    details = draft.details
+    sharing = draft.sharing
+    forms = formEntries(draft)
+    datasets = draft.datasets
+    val current = section
+    val stillExists =
+      when (current) {
+        is SurveyEditorSection.Form -> forms.any { it.key == current.key }
+        is SurveyEditorSection.Dataset -> datasets.any { it.key == current.key }
+        else -> true
+      }
+    if (!stillExists) section = SurveyEditorSection.Details
+  }
+
+  private fun formEntries(draft: SurveyEditorDraft): List<SurveyFormEntry> =
+    draft.forms.map { SurveyFormEntry(it.key, FormEditorState(it.form)) }
 
   var section: SurveyEditorSection by mutableStateOf(SurveyEditorSection.Details)
     private set
@@ -106,8 +143,8 @@ class SurveyEditorState(draft: SurveyEditorDraft = SurveyEditorDraft.blank(surve
   }
 
   /**
-   * Adds a language to the supported languages list if not already present.
-   * If [defaultLanguage] is currently empty, sets it to this language as well.
+   * Adds a language to the supported languages list if not already present. If [defaultLanguage] is
+   * currently empty, sets it to this language as well.
    */
   fun addSupportedLanguage(code: String) {
     val normalized = code.trim().lowercase()
@@ -121,9 +158,8 @@ class SurveyEditorState(draft: SurveyEditorDraft = SurveyEditorDraft.blank(surve
   }
 
   /**
-   * Removes a language from supported languages.
-   * If the removed language was the default language, resets default language
-   * to the first remaining supported language or empty string.
+   * Removes a language from supported languages. If the removed language was the default language,
+   * resets default language to the first remaining supported language or empty string.
    */
   fun removeSupportedLanguage(code: String) {
     val normalized = code.trim().lowercase()
@@ -139,9 +175,7 @@ class SurveyEditorState(draft: SurveyEditorDraft = SurveyEditorDraft.blank(surve
     }
   }
 
-  /**
-   * Sets the default language. Also ensures the language is included in [supportedLanguages].
-   */
+  /** Sets the default language. Also ensures the language is included in [supportedLanguages]. */
   fun setDefaultLanguage(code: String) {
     val normalized = code.trim().lowercase()
     if (normalized.isEmpty()) return
@@ -239,7 +273,7 @@ class SurveyEditorState(draft: SurveyEditorDraft = SurveyEditorDraft.blank(surve
 
   fun addForm() {
     val title = uniqueTitle("New form", forms.map { it.editor.form.title })
-    val formId = uniqueId(slugify(title), forms.map { it.editor.form.formId })
+    val formId = FormIds.newFormId()
     val formKey = newKey("f")
     val datasetKey = newKey("d")
 
@@ -257,20 +291,24 @@ class SurveyEditorState(draft: SurveyEditorDraft = SurveyEditorDraft.blank(surve
         keyProperty = "id",
         labelProperty = "id",
         linkedFormKey = formKey,
-        properties = listOf(EntityProperty("id", "ID", PropertyType.TEXT, required = true)) +
-          blankForm.questions.filter { it.type != EditorQuestionType.NOTE }.map { q ->
-            EntityProperty(
-              name = q.name,
-              label = q.label.ifBlank { q.name },
-              type = when {
-                q.type == EditorQuestionType.INTEGER -> PropertyType.INTEGER
-                q.type == EditorQuestionType.DECIMAL -> PropertyType.DECIMAL
-                q.type == EditorQuestionType.DATE -> PropertyType.DATE
-                else -> PropertyType.TEXT
+        properties =
+          listOf(EntityProperty("id", "ID", PropertyType.TEXT, required = true)) +
+            blankForm.questions
+              .filter { it.type != EditorQuestionType.NOTE }
+              .map { q ->
+                EntityProperty(
+                  name = q.name,
+                  label = q.label.ifBlank { q.name },
+                  type =
+                    when {
+                      q.type == EditorQuestionType.INTEGER -> PropertyType.INTEGER
+                      q.type == EditorQuestionType.DECIMAL -> PropertyType.DECIMAL
+                      q.type == EditorQuestionType.DATE -> PropertyType.DATE
+                      else -> PropertyType.TEXT
+                    },
+                  required = q.required,
+                )
               },
-              required = q.required,
-            )
-          },
       )
 
     datasets = datasets + linkedDataset
@@ -283,25 +321,34 @@ class SurveyEditorState(draft: SurveyEditorDraft = SurveyEditorDraft.blank(surve
     val formEntry = forms.firstOrNull { it.key == formKey } ?: return
     val form = formEntry.editor.form
     val datasetKey = newKey("d")
-    val title = uniqueTitle(form.title.ifBlank { "New ${kind.singular.lowercase()}" }, datasets.map { it.displayName })
+    val title =
+      uniqueTitle(
+        form.title.ifBlank { "New ${kind.singular.lowercase()}" },
+        datasets.map { it.displayName },
+      )
     val datasetId = uniqueId(slugify(title), datasets.map { it.id })
 
-    val formProps = form.questions.filter { it.type != EditorQuestionType.NOTE }.map { q ->
-      EntityProperty(
-        name = q.name,
-        label = q.label.ifBlank { q.name },
-        type = when {
-          q.type == EditorQuestionType.INTEGER -> PropertyType.INTEGER
-          q.type == EditorQuestionType.DECIMAL -> PropertyType.DECIMAL
-          q.type == EditorQuestionType.DATE -> PropertyType.DATE
-          else -> PropertyType.TEXT
-        },
-        required = q.required,
-      )
-    }
+    val formProps =
+      form.questions
+        .filter { it.type != EditorQuestionType.NOTE }
+        .map { q ->
+          EntityProperty(
+            name = q.name,
+            label = q.label.ifBlank { q.name },
+            type =
+              when {
+                q.type == EditorQuestionType.INTEGER -> PropertyType.INTEGER
+                q.type == EditorQuestionType.DECIMAL -> PropertyType.DECIMAL
+                q.type == EditorQuestionType.DATE -> PropertyType.DATE
+                else -> PropertyType.TEXT
+              },
+            required = q.required,
+          )
+        }
 
     val idProp = EntityProperty("id", "ID", PropertyType.TEXT, required = true)
-    val properties = if (formProps.any { it.name == "id" }) formProps else listOf(idProp) + formProps
+    val properties =
+      if (formProps.any { it.name == "id" }) formProps else listOf(idProp) + formProps
 
     val dataset =
       EntityDataset(
@@ -325,42 +372,46 @@ class SurveyEditorState(draft: SurveyEditorDraft = SurveyEditorDraft.blank(surve
     val dataset = datasets.firstOrNull { it.key == datasetKey } ?: return
     val formKey = newKey("f")
     val title = uniqueTitle("${dataset.displayName} form", forms.map { it.editor.form.title })
-    val formId = uniqueId(slugify(title), forms.map { it.editor.form.formId })
+    val formId = FormIds.newFormId()
 
     var questionIdx = 1
     val questions = mutableListOf<EditorQuestion>()
 
     if (dataset.kind == DatasetKind.MAP_LAYER) {
-      questions += EditorQuestion(
-        key = "q${questionIdx++}",
-        name = "location",
-        type = EditorQuestionType.LOCATION,
-        label = "Location",
-        required = true,
-      )
+      questions +=
+        EditorQuestion(
+          key = "q${questionIdx++}",
+          name = "location",
+          type = EditorQuestionType.LOCATION,
+          label = "Location",
+          required = true,
+        )
     }
 
     dataset.properties.forEach { prop ->
-      val qType = when (prop.type) {
-        PropertyType.INTEGER -> EditorQuestionType.INTEGER
-        PropertyType.DECIMAL -> EditorQuestionType.DECIMAL
-        PropertyType.DATE -> EditorQuestionType.DATE
-        PropertyType.BOOLEAN -> EditorQuestionType.SELECT_ONE
-        PropertyType.TEXT -> EditorQuestionType.TEXT
-      }
-      val choices = if (prop.type == PropertyType.BOOLEAN) {
-        listOf(EditorChoice("yes", "Yes"), EditorChoice("no", "No"))
-      } else {
-        emptyList()
-      }
-      questions += EditorQuestion(
-        key = "q${questionIdx++}",
-        name = prop.name,
-        type = qType,
-        label = prop.label,
-        required = prop.required,
-        choices = choices,
-      )
+      val qType =
+        when (prop.type) {
+          PropertyType.INTEGER -> EditorQuestionType.INTEGER
+          PropertyType.DECIMAL -> EditorQuestionType.DECIMAL
+          PropertyType.DATE -> EditorQuestionType.DATE
+          PropertyType.BOOLEAN -> EditorQuestionType.SELECT_ONE
+          PropertyType.TEXT -> EditorQuestionType.TEXT
+        }
+      val choices =
+        if (prop.type == PropertyType.BOOLEAN) {
+          listOf(EditorChoice("yes", "Yes"), EditorChoice("no", "No"))
+        } else {
+          emptyList()
+        }
+      questions +=
+        EditorQuestion(
+          key = "q${questionIdx++}",
+          name = prop.name,
+          type = qType,
+          label = prop.label,
+          required = prop.required,
+          choices = choices,
+        )
     }
 
     val form = EditorForm(formId = formId, title = title, questions = questions)
@@ -381,19 +432,23 @@ class SurveyEditorState(draft: SurveyEditorDraft = SurveyEditorDraft.blank(surve
   /** Synchronizes the schema of all datasets linked to [formEntry] with the form's questions. */
   fun syncDatasetsLinkedToForm(formEntry: SurveyFormEntry) {
     val form = formEntry.editor.form
-    val formProps = form.questions.filter { it.type != EditorQuestionType.NOTE }.map { q ->
-      EntityProperty(
-        name = q.name,
-        label = q.label.ifBlank { q.name },
-        type = when {
-          q.type == EditorQuestionType.INTEGER -> PropertyType.INTEGER
-          q.type == EditorQuestionType.DECIMAL -> PropertyType.DECIMAL
-          q.type == EditorQuestionType.DATE -> PropertyType.DATE
-          else -> PropertyType.TEXT
-        },
-        required = q.required,
-      )
-    }
+    val formProps =
+      form.questions
+        .filter { it.type != EditorQuestionType.NOTE }
+        .map { q ->
+          EntityProperty(
+            name = q.name,
+            label = q.label.ifBlank { q.name },
+            type =
+              when {
+                q.type == EditorQuestionType.INTEGER -> PropertyType.INTEGER
+                q.type == EditorQuestionType.DECIMAL -> PropertyType.DECIMAL
+                q.type == EditorQuestionType.DATE -> PropertyType.DATE
+                else -> PropertyType.TEXT
+              },
+            required = q.required,
+          )
+        }
 
     val linkedDatasets = datasets.filter { it.linkedFormKey == formEntry.key }
     if (linkedDatasets.isEmpty()) return
@@ -402,11 +457,16 @@ class SurveyEditorState(draft: SurveyEditorDraft = SurveyEditorDraft.blank(surve
       if (d.linkedFormKey != formEntry.key) d
       else {
         // Retain existing key property if not in form, or ensure at least one property exists
-        val idProp = d.properties.firstOrNull { it.name == d.keyProperty }
-          ?: EntityProperty("id", "ID", PropertyType.TEXT, required = true)
-        val combinedProps = if (formProps.any { it.name == idProp.name }) formProps else listOf(idProp) + formProps
-        val keyProp = if (combinedProps.any { it.name == d.keyProperty }) d.keyProperty else combinedProps.first().name
-        val labelProp = if (combinedProps.any { it.name == d.labelProperty }) d.labelProperty else keyProp
+        val idProp =
+          d.properties.firstOrNull { it.name == d.keyProperty }
+            ?: EntityProperty("id", "ID", PropertyType.TEXT, required = true)
+        val combinedProps =
+          if (formProps.any { it.name == idProp.name }) formProps else listOf(idProp) + formProps
+        val keyProp =
+          if (combinedProps.any { it.name == d.keyProperty }) d.keyProperty
+          else combinedProps.first().name
+        val labelProp =
+          if (combinedProps.any { it.name == d.labelProperty }) d.labelProperty else keyProp
 
         d.copy(
           properties = combinedProps,

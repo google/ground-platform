@@ -13,15 +13,17 @@
  */
 package org.groundplatform.v2.devtools.prototypeapp.surveyeditor
 
-import org.groundplatform.v2.devtools.prototypeapp.data.seed.SurveyEditorSamples
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertIs
+import kotlin.test.assertNotEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import org.groundplatform.v2.devtools.prototypeapp.PrototypeWorkbenchPage
+import org.groundplatform.v2.devtools.prototypeapp.data.seed.SurveyEditorSamples
+import org.groundplatform.v2.devtools.prototypeapp.formeditor.FormIds
 
 class SurveyEditorTest {
 
@@ -40,9 +42,11 @@ class SurveyEditorTest {
     state.addForm()
     val added = assertNotNull(state.selectedForm)
     assertEquals("New form", added.editor.form.title)
-    assertEquals("new_form", added.editor.form.formId)
+    assertTrue(added.editor.form.formId.startsWith(FormIds.PREFIX))
     state.addForm()
-    assertEquals("new_form_2", state.selectedForm!!.editor.form.formId)
+    val second = state.selectedForm!!.editor.form.formId
+    assertTrue(second.startsWith(FormIds.PREFIX))
+    assertNotEquals(added.editor.form.formId, second)
 
     state.deleteForm(state.selectedForm!!.key)
     assertEquals(added.key, state.selectedForm?.key)
@@ -253,7 +257,9 @@ class SurveyEditorTest {
 
     // Search functionality
     val swahiliMatches = IsoLanguages.search("swahili")
-    assertTrue(swahiliMatches.any { it.id == "swa" || it.name.contains("Swahili", ignoreCase = true) })
+    assertTrue(
+      swahiliMatches.any { it.id == "swa" || it.name.contains("Swahili", ignoreCase = true) }
+    )
 
     val spanishMatches = IsoLanguages.search("spa")
     assertTrue(spanishMatches.any { it.id == "spa" })
@@ -414,5 +420,65 @@ class SurveyEditorTest {
     val remainingLayer = state.mapLayers.first { it.key == linkedLayer.key }
     assertFalse(remainingLayer.isLinkedToForm)
     assertNull(remainingLayer.linkedFormKey)
+  }
+
+  @Test
+  fun newState_hasNoUnpublishedChanges() {
+    val state = SurveyEditorState(SurveyEditorSamples.draft())
+    assertFalse(state.hasUnpublishedChanges)
+  }
+
+  @Test
+  fun edit_marksDraftChanged_andPublishClearsIt() {
+    val state = SurveyEditorState(SurveyEditorSamples.draft())
+    state.updateDetails { it.copy(title = "Renamed survey") }
+    assertTrue(state.hasUnpublishedChanges)
+
+    state.markPublished()
+    assertFalse(state.hasUnpublishedChanges)
+    assertEquals("Renamed survey", state.details.title)
+  }
+
+  @Test
+  fun revertingAnEdit_leavesNoUnpublishedChanges() {
+    val state = SurveyEditorState(SurveyEditorSamples.draft())
+    state.addForm()
+    assertTrue(state.hasUnpublishedChanges)
+
+    val added = state.selectedForm!!
+    state.deleteForm(added.key)
+    state.deleteDataset(state.mapLayers.first { it.displayName == added.editor.form.title }.key)
+    assertFalse(state.hasUnpublishedChanges)
+  }
+
+  @Test
+  fun discardChanges_restoresPublishedSurvey() {
+    val published = SurveyEditorSamples.draft()
+    val state = SurveyEditorState(published)
+    state.updateDetails { it.copy(title = "Renamed survey") }
+    state.addForm()
+    val addedFormSection = state.section
+
+    state.discardChanges()
+
+    assertFalse(state.hasUnpublishedChanges)
+    assertEquals(published.details, state.details)
+    assertEquals(published.forms.map { it.key }, state.forms.map { it.key })
+    assertEquals(published.datasets, state.datasets)
+    assertNotEquals(addedFormSection, state.section)
+    assertEquals(SurveyEditorSection.Details, state.section)
+  }
+
+  @Test
+  fun discardChanges_afterPublish_keepsPublishedEdits() {
+    val state = SurveyEditorState(SurveyEditorSamples.draft())
+    state.updateDetails { it.copy(title = "Published title") }
+    state.markPublished()
+    state.updateDetails { it.copy(title = "Unpublished title") }
+
+    state.discardChanges()
+
+    assertEquals("Published title", state.details.title)
+    assertFalse(state.hasUnpublishedChanges)
   }
 }

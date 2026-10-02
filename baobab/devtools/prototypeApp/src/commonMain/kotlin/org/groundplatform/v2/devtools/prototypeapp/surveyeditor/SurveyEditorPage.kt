@@ -26,7 +26,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -45,7 +44,6 @@ import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.automirrored.outlined.List
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Close
@@ -59,7 +57,6 @@ import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.Map
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Search
-import androidx.compose.material.icons.outlined.Smartphone
 import androidx.compose.material.icons.outlined.Warning
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -107,8 +104,10 @@ import kotlinx.coroutines.delay
 import org.groundplatform.v2.core.forms.ui.GroundBadgeTone
 import org.groundplatform.v2.core.forms.ui.GroundTonalBadge
 import org.groundplatform.v2.devtools.prototypeapp.PrototypeAppState
-import org.groundplatform.v2.devtools.prototypeapp.PrototypeDebugToolsButton
-import org.groundplatform.v2.devtools.prototypeapp.PrototypeWorkbenchPage
+import org.groundplatform.v2.devtools.prototypeapp.WebAppHeader
+import org.groundplatform.v2.devtools.prototypeapp.WebHeaderContext
+import org.groundplatform.v2.devtools.prototypeapp.WebHeaderSupportingText
+import org.groundplatform.v2.devtools.prototypeapp.WebMobilePrototypeButton
 import org.groundplatform.v2.devtools.prototypeapp.data.datasource.remote.MapboxPlacesDataSource
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyPlaceItem
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.parsePlaceCoordinates
@@ -135,46 +134,50 @@ import org.groundplatform.v2.map.MapLayer
 import org.groundplatform.v2.map.StyleValue
 
 /**
- * Survey editor page: a left-hand navigation list (Survey details, Sharing, Forms, Map layers, Data
- * tables) and a content pane showing the editor for the selected item.
+ * Survey editor page: the shared [WebAppHeader] with publishing controls, a left-hand navigation
+ * list (Survey details, Sharing, Forms, Map layers, Data tables), and a content pane showing the
+ * editor for the selected item.
+ *
+ * Edits are kept as an unpublished draft in [state]. [onPublish] commits them; [onClose] throws
+ * them away (after the user confirms, if there are any). Both are expected to leave the editor.
  */
 @Composable
 fun SurveyEditorPage(
   state: SurveyEditorState,
+  appState: PrototypeAppState,
   isDarkTheme: Boolean,
   modifier: Modifier = Modifier,
-  onBackToDashboard: (() -> Unit)? = null,
-  appState: PrototypeAppState? = null,
+  onPublish: () -> Unit = state::markPublished,
+  onClose: () -> Unit = state::discardChanges,
 ) {
-  Row(modifier = modifier.fillMaxSize()) {
-    SurveyNavigation(
-      state = state,
-      modifier = Modifier.width(280.dp).fillMaxHeight(),
-      onBackToDashboard = onBackToDashboard,
-      appState = appState,
-    )
-    Box(modifier = Modifier.weight(1f).fillMaxHeight()) {
-      when (val section = state.section) {
-        SurveyEditorSection.Details -> SurveyDetailsPane(state, appState?.places.orEmpty())
-        SurveyEditorSection.Sharing -> SharingPane(state)
-        is SurveyEditorSection.Form -> {
-          val entry = state.selectedForm
-          if (entry != null) {
-            LaunchedEffect(entry.editor.form.questions) { state.syncDatasetsLinkedToForm(entry) }
-            key(entry.key) {
-              FormEditorPage(
-                state = entry.editor,
-                isDarkTheme = isDarkTheme,
-                onCreateDataset = { state.createDatasetForForm(entry.key) },
-                onDelete = { state.deleteForm(entry.key) },
-              )
+  Column(modifier = modifier.fillMaxSize()) {
+    SurveyEditorTopBar(state, onPublish, onClose, appState)
+    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+    Row(modifier = Modifier.weight(1f).fillMaxWidth()) {
+      SurveyNavigation(state = state, modifier = Modifier.width(280.dp).fillMaxHeight())
+      Box(modifier = Modifier.weight(1f).fillMaxHeight()) {
+        when (val section = state.section) {
+          SurveyEditorSection.Details -> SurveyDetailsPane(state, appState.places)
+          SurveyEditorSection.Sharing -> SharingPane(state)
+          is SurveyEditorSection.Form -> {
+            val entry = state.selectedForm
+            if (entry != null) {
+              LaunchedEffect(entry.editor.form.questions) { state.syncDatasetsLinkedToForm(entry) }
+              key(entry.key) {
+                FormEditorPage(
+                  state = entry.editor,
+                  isDarkTheme = isDarkTheme,
+                  onCreateDataset = { state.createDatasetForForm(entry.key) },
+                  onDelete = { state.deleteForm(entry.key) },
+                )
+              }
             }
           }
-        }
-        is SurveyEditorSection.Dataset -> {
-          val dataset = state.selectedDataset
-          if (dataset != null) {
-            key(section.key) { EntityDatasetEditor(state, dataset) }
+          is SurveyEditorSection.Dataset -> {
+            val dataset = state.selectedDataset
+            if (dataset != null) {
+              key(section.key) { EntityDatasetEditor(state, dataset) }
+            }
           }
         }
       }
@@ -183,80 +186,92 @@ fun SurveyEditorPage(
 }
 
 // ---------------------------------------------------------------------------------------------
+// Top bar
+// ---------------------------------------------------------------------------------------------
+
+/**
+ * Close button and survey title on the left; draft status, Discard, and Publish changes on the
+ * right. Close and Discard both run [onClose], asking for confirmation first if there are
+ * unpublished changes.
+ */
+@Composable
+private fun SurveyEditorTopBar(
+  state: SurveyEditorState,
+  onPublish: () -> Unit,
+  onClose: () -> Unit,
+  appState: PrototypeAppState,
+) {
+  val hasChanges = state.hasUnpublishedChanges
+  var isConfirmingDiscard by remember { mutableStateOf(false) }
+
+  WebAppHeader(
+    state = appState,
+    onSignOut = null,
+    navigationIcon = {
+      IconButton(onClick = { if (hasChanges) isConfirmingDiscard = true else onClose() }) {
+        Icon(
+          imageVector = Icons.Outlined.Close,
+          contentDescription = "Close survey editor",
+          tint = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+      }
+    },
+    context = {
+      WebHeaderContext(title = state.details.title.ifBlank { "Untitled survey" }) {
+        WebHeaderSupportingText("Survey editor", color = MaterialTheme.colorScheme.primary)
+        WebHeaderSupportingText("·")
+        WebHeaderSupportingText(
+          if (hasChanges) "Unpublished changes" else "All changes published"
+        )
+      }
+    },
+    actions = {
+      WebMobilePrototypeButton(appState)
+      TextButton(onClick = { isConfirmingDiscard = true }, enabled = hasChanges) {
+        Text("Discard")
+      }
+      Button(onClick = onPublish, enabled = hasChanges) { Text("Publish changes") }
+    },
+  )
+
+  if (isConfirmingDiscard) {
+    AlertDialog(
+      onDismissRequest = { isConfirmingDiscard = false },
+      title = { Text("Discard unpublished changes?") },
+      text = {
+        Text(
+          "Changes you've made since this survey was last published will be lost. Data " +
+            "collectors will keep seeing the published version."
+        )
+      },
+      confirmButton = {
+        TextButton(
+          onClick = {
+            isConfirmingDiscard = false
+            onClose()
+          }
+        ) {
+          Text("Discard")
+        }
+      },
+      dismissButton = {
+        TextButton(onClick = { isConfirmingDiscard = false }) { Text("Keep editing") }
+      },
+    )
+  }
+}
+
+// ---------------------------------------------------------------------------------------------
 // Navigation
 // ---------------------------------------------------------------------------------------------
 
 @Composable
-private fun SurveyNavigation(
-  state: SurveyEditorState,
-  modifier: Modifier = Modifier,
-  onBackToDashboard: (() -> Unit)? = null,
-  appState: PrototypeAppState? = null,
-) {
+private fun SurveyNavigation(state: SurveyEditorState, modifier: Modifier = Modifier) {
   Surface(modifier = modifier, color = MaterialTheme.colorScheme.surfaceContainerLow) {
     Column(
       modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(12.dp),
       verticalArrangement = Arrangement.spacedBy(2.dp),
     ) {
-      Row(
-        modifier =
-          Modifier.fillMaxWidth()
-            .padding(
-              start = if (onBackToDashboard != null) 4.dp else 16.dp,
-              end = 16.dp,
-              top = 8.dp,
-              bottom = 12.dp,
-            ),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(4.dp),
-      ) {
-        if (onBackToDashboard != null) {
-          IconButton(onClick = onBackToDashboard, modifier = Modifier.size(36.dp)) {
-            Icon(
-              imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
-              contentDescription = "Back to web dashboard",
-              tint = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-          }
-        }
-        Column(modifier = Modifier.weight(1f)) {
-          Text(
-            text = "Survey editor",
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.primary,
-            fontWeight = FontWeight.Bold,
-          )
-          Text(
-            text = state.details.title.ifBlank { "Untitled survey" },
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold,
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis,
-          )
-        }
-        if (appState != null) {
-          OutlinedButton(
-            onClick = { appState.selectWorkbenchPage(PrototypeWorkbenchPage.MOBILE_PROTOTYPE) },
-            contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
-            modifier = Modifier.height(32.dp),
-          ) {
-            Icon(
-              imageVector = Icons.Outlined.Smartphone,
-              contentDescription = null,
-              modifier = Modifier.size(16.dp),
-            )
-            Spacer(modifier = Modifier.width(6.dp))
-            Text(
-              text = "Mobile prototype",
-              style = MaterialTheme.typography.labelSmall,
-              fontWeight = FontWeight.SemiBold,
-              maxLines = 1,
-            )
-          }
-          PrototypeDebugToolsButton(state = appState)
-        }
-      }
-
       NavItem(
         label = "Survey details",
         icon = Icons.Outlined.Info,

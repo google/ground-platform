@@ -15,11 +15,16 @@ plugins {
   kotlin("multiplatform") version "2.4.20"
   id("org.jetbrains.compose") version "1.12.0"
   id("org.jetbrains.kotlin.plugin.compose") version "2.4.20"
+  id("com.ncorti.ktfmt.gradle") version "0.27.0"
 }
 
 group = "org.groundplatform.v2.devtools"
 
 version = "2.0.0-SNAPSHOT"
+
+// Formats Kotlin sources with ktfmt (Google style, 2-space indent).
+// Run `./gradlew ktfmtFormat` to format or `./gradlew ktfmtCheck` to verify.
+ktfmt { googleStyle() }
 
 val devServerPort = project.findProperty("port")?.toString()?.toIntOrNull() ?: 8091
 
