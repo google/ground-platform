@@ -84,6 +84,14 @@ class SurveyEditorState(draft: SurveyEditorDraft = SurveyEditorDraft.blank(surve
   val hasUnpublishedChanges: Boolean
     get() = toDraft().copy(nextKeyId = 0) != published.copy(nextKeyId = 0)
 
+  /** Number of validation issues across all Forms, Map layers, and Data tables in the draft. */
+  val issueCount: Int
+    get() = forms.sumOf { it.editor.issues.size } + datasets.sumOf { datasetIssues(it).size }
+
+  /** Whether the draft can be published: it has unpublished changes and no validation issues. */
+  val canPublish: Boolean
+    get() = hasUnpublishedChanges && issueCount == 0
+
   /** Records the current draft as published. Call after saving [toDraft] to the data store. */
   fun markPublished() {
     published = toDraft()

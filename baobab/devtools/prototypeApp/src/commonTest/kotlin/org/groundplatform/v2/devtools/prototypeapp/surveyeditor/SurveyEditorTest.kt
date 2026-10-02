@@ -440,6 +440,43 @@ class SurveyEditorTest {
   }
 
   @Test
+  fun canPublish_requiresChanges() {
+    val state = SurveyEditorState(SurveyEditorSamples.draft())
+    assertEquals(0, state.issueCount)
+    assertFalse(state.canPublish)
+
+    state.updateDetails { it.copy(title = "Renamed survey") }
+    assertTrue(state.canPublish)
+  }
+
+  @Test
+  fun formIssue_blocksPublish_untilFixed() {
+    val state = SurveyEditorState(SurveyEditorSamples.draft())
+    val editor = state.forms.first().editor
+    val question = editor.form.questions.first()
+
+    editor.updateQuestion(question.key) { it.copy(label = "") }
+    assertTrue(state.hasUnpublishedChanges)
+    assertEquals(1, state.issueCount)
+    assertFalse(state.canPublish)
+
+    editor.updateQuestion(question.key) { it.copy(label = "Fixed label") }
+    assertEquals(0, state.issueCount)
+    assertTrue(state.canPublish)
+  }
+
+  @Test
+  fun datasetIssue_blocksPublish() {
+    val state = SurveyEditorState(SurveyEditorSamples.draft())
+    val dataset = state.datasets.first()
+
+    state.updateDataset(dataset.key) { it.copy(displayName = "") }
+    assertTrue(state.hasUnpublishedChanges)
+    assertTrue(state.issueCount > 0)
+    assertFalse(state.canPublish)
+  }
+
+  @Test
   fun revertingAnEdit_leavesNoUnpublishedChanges() {
     val state = SurveyEditorState(SurveyEditorSamples.draft())
     state.addForm()

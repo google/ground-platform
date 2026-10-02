@@ -202,6 +202,7 @@ private fun SurveyEditorTopBar(
   appState: PrototypeAppState,
 ) {
   val hasChanges = state.hasUnpublishedChanges
+  val issueCount = state.issueCount
   var isConfirmingDiscard by remember { mutableStateOf(false) }
 
   WebAppHeader(
@@ -220,13 +221,21 @@ private fun SurveyEditorTopBar(
       WebHeaderContext(title = state.details.title.ifBlank { "Untitled survey" }) {
         WebHeaderSupportingText("Survey editor", color = MaterialTheme.colorScheme.primary)
         WebHeaderSupportingText("·")
-        WebHeaderSupportingText(if (hasChanges) "Unpublished changes" else "All changes published")
+        when {
+          issueCount > 0 ->
+            WebHeaderSupportingText(
+              "Fix $issueCount ${if (issueCount == 1) "issue" else "issues"} to publish",
+              color = MaterialTheme.colorScheme.error,
+            )
+          hasChanges -> WebHeaderSupportingText("Unpublished changes")
+          else -> WebHeaderSupportingText("All changes published")
+        }
       }
     },
     actions = {
       WebMobilePrototypeButton(appState)
       TextButton(onClick = { isConfirmingDiscard = true }, enabled = hasChanges) { Text("Discard") }
-      Button(onClick = onPublish, enabled = hasChanges) { Text("Publish changes") }
+      Button(onClick = onPublish, enabled = state.canPublish) { Text("Publish changes") }
     },
   )
 
