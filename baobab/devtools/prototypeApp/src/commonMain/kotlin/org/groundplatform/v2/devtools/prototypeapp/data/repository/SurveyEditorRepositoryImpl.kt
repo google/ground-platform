@@ -16,8 +16,8 @@ package org.groundplatform.v2.devtools.prototypeapp.data.repository
 import org.groundplatform.v2.devtools.prototypeapp.data.datasource.local.store.LocalStore
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyConfig
 import org.groundplatform.v2.devtools.prototypeapp.domain.repository.SurveyEditorRepository
-import org.groundplatform.v2.devtools.prototypeapp.formeditor.EditorXFormsGenerator
 import org.groundplatform.v2.devtools.prototypeapp.surveyeditor.SurveyEditorDraft
+import org.groundplatform.v2.devtools.prototypeapp.surveyeditor.publishedFormXml
 
 /** [SurveyEditorRepository] backed by the [LocalStore]. */
 class SurveyEditorRepositoryImpl(private val store: LocalStore) : SurveyEditorRepository {
@@ -31,8 +31,7 @@ class SurveyEditorRepositoryImpl(private val store: LocalStore) : SurveyEditorRe
       if (previous != draft) {
         putSurveyEditorDraft(surveyId, draft)
         val config = surveyConfig(surveyId) ?: SurveyConfig(primaryFormXml = "")
-        val editorXml =
-          draft.forms.associate { it.form.formId to EditorXFormsGenerator.toXml(it.form) }
+        val editorXml = draft.forms.associate { it.form.formId to draft.publishedFormXml(it) }
         val removedIds = previous?.forms.orEmpty().map { it.form.formId }.toSet() - editorXml.keys
         putSurveyConfig(
           surveyId,

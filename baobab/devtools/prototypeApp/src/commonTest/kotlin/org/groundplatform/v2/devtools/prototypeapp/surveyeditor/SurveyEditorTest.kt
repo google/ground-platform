@@ -23,7 +23,9 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import org.groundplatform.v2.devtools.prototypeapp.PrototypeWorkbenchPage
 import org.groundplatform.v2.devtools.prototypeapp.data.seed.SurveyEditorSamples
+import org.groundplatform.v2.devtools.prototypeapp.formeditor.EditorQuestionType
 import org.groundplatform.v2.devtools.prototypeapp.formeditor.FormIds
+import org.groundplatform.v2.devtools.prototypeapp.formeditor.SaveToMode
 
 class SurveyEditorTest {
 
@@ -329,14 +331,15 @@ class SurveyEditorTest {
   }
 
   @Test
-  fun addForm_createsLinkedMapLayerByDefault() {
+  fun addForm_createsLinkedDataTableByDefault() {
     val state = SurveyEditorState(SurveyEditorSamples.draft())
-    val initialLayersCount = state.mapLayers.size
+    val initialTablesCount = state.dataTables.size
     state.addForm()
 
-    assertEquals(initialLayersCount + 1, state.mapLayers.size)
+    // A blank form has no Location question, so it adds table rows.
+    assertEquals(initialTablesCount + 1, state.dataTables.size)
     val form = assertNotNull(state.selectedForm)
-    val linkedLayer = assertNotNull(state.mapLayers.firstOrNull { it.linkedFormKey == form.key })
+    val linkedLayer = assertNotNull(state.dataTables.firstOrNull { it.linkedFormKey == form.key })
     assertEquals("New form", linkedLayer.displayName)
     assertTrue(linkedLayer.isLinkedToForm)
     assertEquals(form.key, linkedLayer.linkedFormKey)
@@ -382,7 +385,7 @@ class SurveyEditorTest {
     val state = SurveyEditorState(SurveyEditorSamples.draft())
     state.addForm()
     val formEntry = state.selectedForm!!
-    val linkedLayer = state.mapLayers.first { it.linkedFormKey == formEntry.key }
+    val linkedLayer = state.datasets.first { it.linkedFormKey == formEntry.key }
 
     // Add a question to the form
     formEntry.editor.addQuestion(
@@ -391,7 +394,7 @@ class SurveyEditorTest {
     val addedQuestion = formEntry.editor.form.questions.last()
     state.syncDatasetsLinkedToForm(formEntry)
 
-    val updatedLayer = state.mapLayers.first { it.key == linkedLayer.key }
+    val updatedLayer = state.datasets.first { it.key == linkedLayer.key }
     assertTrue(updatedLayer.properties.any { it.name == addedQuestion.name })
   }
 
@@ -400,11 +403,11 @@ class SurveyEditorTest {
     val state = SurveyEditorState(SurveyEditorSamples.draft())
     state.addForm()
     val formEntry = state.selectedForm!!
-    val linkedLayer = state.mapLayers.first { it.linkedFormKey == formEntry.key }
+    val linkedLayer = state.datasets.first { it.linkedFormKey == formEntry.key }
     assertTrue(linkedLayer.isLinkedToForm)
 
     state.unlinkDataset(linkedLayer.key)
-    val unlinkedLayer = state.mapLayers.first { it.key == linkedLayer.key }
+    val unlinkedLayer = state.datasets.first { it.key == linkedLayer.key }
     assertFalse(unlinkedLayer.isLinkedToForm)
     assertNull(unlinkedLayer.linkedFormKey)
   }
@@ -414,10 +417,10 @@ class SurveyEditorTest {
     val state = SurveyEditorState(SurveyEditorSamples.draft())
     state.addForm()
     val formEntry = state.selectedForm!!
-    val linkedLayer = state.mapLayers.first { it.linkedFormKey == formEntry.key }
+    val linkedLayer = state.datasets.first { it.linkedFormKey == formEntry.key }
 
     state.deleteForm(formEntry.key)
-    val remainingLayer = state.mapLayers.first { it.key == linkedLayer.key }
+    val remainingLayer = state.datasets.first { it.key == linkedLayer.key }
     assertFalse(remainingLayer.isLinkedToForm)
     assertNull(remainingLayer.linkedFormKey)
   }
@@ -447,7 +450,7 @@ class SurveyEditorTest {
 
     val added = state.selectedForm!!
     state.deleteForm(added.key)
-    state.deleteDataset(state.mapLayers.first { it.displayName == added.editor.form.title }.key)
+    state.deleteDataset(state.datasets.first { it.displayName == added.editor.form.title }.key)
     assertFalse(state.hasUnpublishedChanges)
   }
 
@@ -480,5 +483,111 @@ class SurveyEditorTest {
 
     assertEquals("Published title", state.details.title)
     assertFalse(state.hasUnpublishedChanges)
+  }
+
+  @Test
+  fun linkedDatasetKind_followsFormGeometry() {
+    val state = SurveyEditorState(SurveyEditorSamples.draft())
+    state.addForm()
+    val entry = state.selectedForm!!
+    entry.editor.addQuestion(EditorQuestionType.LOCATION)
+    state.syncDatasetsLinkedToForm(entry)
+    assertEquals(
+      DatasetKind.MAP_LAYER,
+      state.datasets.first { it.linkedFormKey == entry.key }.kind,
+    )
+  }
+
+  @Test
+  fun createDatasetForForm_defaultsKindFromGeometry() {
+    val state = SurveyEditorState(SurveyEditorSamples.draft())
+    val withLocation = state.forms.first { it.editor.form.hasGeometry }
+    state.createDatasetForForm(withLocation.key)
+    assertEquals(DatasetKind.MAP_LAYER, state.selectedDataset?.kind)
+  }
+
+  @Test
+  fun setFormSaveToMode_update_deletesEmptyLinkedDataset() {
+    val state = SurveyEditorState(SurveyEditorSamples.draft())
+    state.addForm()
+    val entry = state.selectedForm!!
+    val linked = state.datasets.first { it.linkedFormKey == entry.key }
+
+    state.setFormSaveToMode(entry.key, SaveToMode.UPDATE)
+
+    assertTrue(state.datasets.none { it.key == linked.key })
+    val saveTo = entry.editor.form.saveTo
+    assertEquals(SaveToMode.UPDATE, saveTo.mode)
+    assertEquals("coffee_parcels", saveTo.targetDatasetId)
+    assertEquals(SurveyEditorSection.Form(entry.key), state.section)
+  }
+
+  @Test
+  fun setFormSaveToMode_update_unlinksDatasetWithFeatures() {
+    val state = SurveyEditorState(SurveyEditorSamples.draft())
+    state.addForm()
+    val entry = state.selectedForm!!
+    val linked = state.datasets.first { it.linkedFormKey == entry.key }
+    state.addRow(linked.key)
+
+    state.setFormSaveToMode(entry.key, SaveToMode.UPDATE)
+
+    val kept = state.datasets.first { it.key == linked.key }
+    assertNull(kept.linkedFormKey)
+    assertNotEquals(kept.id, entry.editor.form.saveTo.targetDatasetId)
+  }
+
+  @Test
+  fun setFormSaveToMode_create_relinksNewDatasetWithoutLeavingForm() {
+    val state = SurveyEditorState(SurveyEditorSamples.draft())
+    state.addForm()
+    val entry = state.selectedForm!!
+    state.setFormSaveToMode(entry.key, SaveToMode.UPDATE)
+    assertTrue(state.datasets.none { it.linkedFormKey == entry.key })
+
+    state.setFormSaveToMode(entry.key, SaveToMode.CREATE)
+
+    assertEquals(SaveToMode.CREATE, entry.editor.form.saveTo.mode)
+    assertEquals(1, state.datasets.count { it.linkedFormKey == entry.key })
+    assertEquals(SurveyEditorSection.Form(entry.key), state.section)
+  }
+
+  @Test
+  fun renamingTargetDatasetAndProperty_keepsUpdateFormPointedAtIt() {
+    val state = SurveyEditorState(SurveyEditorSamples.draft())
+    state.addForm()
+    val entry = state.selectedForm!!
+    entry.editor.addQuestion(EditorQuestionType.TEXT)
+    val question = entry.editor.form.questions.last()
+    state.setFormSaveToMode(entry.key, SaveToMode.UPDATE)
+    entry.editor.setMapping(question.key, "status")
+    val parcels = state.datasets.first { it.id == "coffee_parcels" }
+    assertEquals(listOf(entry.key), state.formsUpdating(parcels).map { it.key })
+
+    state.updateDataset(parcels.key) { it.copy(id = "parcels") }
+    assertEquals("parcels", entry.editor.form.saveTo.targetDatasetId)
+
+    val statusIndex = parcels.properties.indexOfFirst { it.name == "status" }
+    state.updateProperty(
+      parcels.key,
+      statusIndex,
+      parcels.properties[statusIndex].copy(name = "state"),
+    )
+    assertEquals("state", entry.editor.form.saveTo.propertyFor(question.key))
+  }
+
+  @Test
+  fun publishedFormXml_includesSaveToLogic() {
+    val state = SurveyEditorState(SurveyEditorSamples.draft())
+    state.addForm()
+    val entry = state.selectedForm!!
+    val createXml = state.toDraft().publishedFormXml(SurveyEditorForm(entry.key, entry.editor.form))
+    assertTrue(createXml.contains("create=\"1\""))
+
+    state.setFormSaveToMode(entry.key, SaveToMode.UPDATE)
+    val updateXml = state.toDraft().publishedFormXml(SurveyEditorForm(entry.key, entry.editor.form))
+    assertTrue(updateXml.contains("update=\"1\""))
+    assertTrue(updateXml.contains("<instance id=\"coffee_parcels\""))
+    assertTrue(updateXml.contains("<item>"))
   }
 }

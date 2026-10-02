@@ -40,6 +40,7 @@ import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Link
 import androidx.compose.material.icons.outlined.Warning
+import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
@@ -571,6 +572,24 @@ private fun DatasetSettingsPanel(
               Text("Create form for ${dataset.kind.singular.lowercase()}")
             }
           }
+        }
+      }
+
+      val updatingForms = state.formsUpdating(dataset)
+      if (updatingForms.isNotEmpty()) {
+        Text(
+          "Updated by",
+          style = MaterialTheme.typography.labelMedium,
+          color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        updatingForms.forEach { form ->
+          AssistChip(
+            onClick = { state.select(SurveyEditorSection.Form(form.key)) },
+            label = { Text(form.editor.form.title) },
+            leadingIcon = {
+              Icon(Icons.Outlined.Edit, contentDescription = null, modifier = Modifier.size(16.dp))
+            },
+          )
         }
       }
 

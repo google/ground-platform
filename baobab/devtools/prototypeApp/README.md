@@ -199,6 +199,24 @@ Selecting a Form opens the visual Form editor in `formeditor/`
 -   **Preview flow**: Runs the generated Form in a device frame with the shared
     `MobileFormRunner`. The side panel lists the current path, which updates as
     display logic changes.
+-   **Form properties**: Click `Start`, `Review & submit`, or empty canvas to
+    edit the Form itself. The **Advanced** section at the bottom holds the
+    Form's save-to logic (`FormSaveToModels.kt`, `FormSaveToEditor.kt`).
+    Advanced sections start collapsed (or open when customized or invalid).
+    Expanding or collapsing one does the same to all of them for the rest of
+    the session.
+-   **Save-to logic**: By default each submission adds a new map feature (if
+    the Form has a Location question) or table row to the Form's linked Map
+    layer or Data table. Choose **Update existing map feature / table row** to
+    pick another Map layer or Data table, how the feature is found (the feature
+    the Form was opened from, via `/data/target_entity`, or a question's answer
+    matched against a property), and which questions update which properties.
+    Switching to updates deletes the Form's linked dataset if it has no
+    features yet, otherwise it's kept and unlinked. The generator emits an ODK
+    XForms Entities declaration (`entities:entity` with `create="1"` or
+    `update="1"`, plus `entities:saveto` binds). Previews and published Forms
+    embed the target's features in its secondary instance; the exported XML
+    references `jr://file-csv/<dataset>.csv` instead.
 
 ## Local Data Store
 
