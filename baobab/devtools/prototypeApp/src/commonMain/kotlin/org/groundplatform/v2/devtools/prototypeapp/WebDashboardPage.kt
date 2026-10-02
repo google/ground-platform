@@ -75,9 +75,6 @@ import androidx.compose.material3.LocalMinimumInteractiveComponentSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.PrimaryScrollableTabRow
-import androidx.compose.material3.SegmentedButton
-import androidx.compose.material3.SegmentedButtonDefaults
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
@@ -98,7 +95,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.platform.LocalDensity
@@ -271,7 +267,8 @@ private val DashboardOverlayMargin = 14.dp
  *   ([DashboardSidePanelToggleTab]).
  * - **Main area**: The live survey map ([SurveyMainMap]). Selecting a map feature pans and zooms to
  *   it and opens its details in a floating card in the upper-right corner (
- *   [WebEntityDetailsCard]). A floating Map / Satellite toggle sits in the upper-left corner.
+ *   [WebEntityDetailsCard]). A basemap preview card in the upper-left corner ([BasemapPreviewCard])
+ *   opens the basemap selector in a modal dialog ([LayersControlDialog]).
  * - **Bottom of the map**: A collapsible panel of data tables, one per entity dataset (
  *   [DashboardDataTablesPanel]). It only expands on request: from its ▲ toggle or the card's "Show
  *   in table" button.
@@ -330,6 +327,9 @@ internal fun WebDashboardPage(
       }
     }
 
+    if (state.isLayersSheetOpen) {
+      LayersControlDialog(state = state)
+    }
     if (activeQrEntity != null) {
       EntityQrCodeModalDialog(state = state, entity = activeQrEntity, isWeb = true)
     }
@@ -532,12 +532,16 @@ private fun DashboardMapArea(state: PrototypeAppState, modifier: Modifier = Modi
       showNavigationOverlay = false,
     )
 
-    // Basemap toggle in the top-left corner, with the cluster callout (if any) below it.
+    // Basemap preview card in the top-left corner, with the cluster callout (if any) below it.
     Column(
       modifier = Modifier.align(Alignment.TopStart).padding(DashboardOverlayMargin),
       verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-      BasemapToggle(state = state)
+      BasemapPreviewCard(
+        selectedBasemapType = state.selectedBasemapType,
+        onClick = { state.updateLayersSheetOpen(true) },
+        size = 64.dp,
+      )
       if (state.isMapClusteringActive && state.selectedCluster != null) {
         Box(modifier = Modifier.width(360.dp)) { MapClusterBalloonsOverlay(state = state) }
       }
@@ -634,32 +638,6 @@ private fun DashboardMapArea(state: PrototypeAppState, modifier: Modifier = Modi
       if (hasTables) {
         DashboardDataTablesPanel(state = state, expandedTableHeight = expandedTableHeight)
       }
-    }
-  }
-}
-
-/**
- * Floating Map / Satellite basemap toggle over the web dashboard's map. The segmented buttons draw
- * their own outline, so they get an opaque fill and an unclipped shadow instead of a wrapping
- * container (whose clip would cut off the outline's rounded ends).
- */
-@Composable
-private fun BasemapToggle(state: PrototypeAppState) {
-  val types = BasemapType.entries
-  SingleChoiceSegmentedButtonRow(
-    modifier = Modifier.shadow(elevation = 3.dp, shape = CircleShape, clip = false)
-  ) {
-    types.forEachIndexed { index, type ->
-      SegmentedButton(
-        selected = state.selectedBasemapType == type,
-        onClick = { state.selectBasemapType(type) },
-        shape = SegmentedButtonDefaults.itemShape(index = index, count = types.size),
-        colors =
-          SegmentedButtonDefaults.colors(
-            inactiveContainerColor = MaterialTheme.colorScheme.surface
-          ),
-        label = { Text(type.label) },
-      )
     }
   }
 }

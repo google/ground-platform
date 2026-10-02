@@ -34,6 +34,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -42,9 +43,7 @@ import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.Description
 import androidx.compose.material.icons.outlined.Explore
-import androidx.compose.material.icons.outlined.Layers
 import androidx.compose.material.icons.outlined.LocationOn
-import androidx.compose.material.icons.outlined.Map
 import androidx.compose.material.icons.outlined.Menu
 import androidx.compose.material.icons.outlined.MyLocation
 import androidx.compose.material.icons.outlined.Navigation
@@ -60,12 +59,8 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedCard
-import androidx.compose.material3.SegmentedButton
-import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SheetValue
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -87,6 +82,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import org.groundplatform.v2.core.forms.ui.GroundAlertDialogOverlay
 import org.groundplatform.v2.core.forms.ui.GroundBadgeTone
 import org.groundplatform.v2.core.forms.ui.GroundModalBottomSheetOverlay
 import org.groundplatform.v2.core.forms.ui.GroundTonalBadge
@@ -96,8 +92,8 @@ import org.groundplatform.v2.devtools.prototypeapp.map.rememberSurveyMapCamera
 /**
  * 5. Main Survey UI screen (`PrototypeScreen.MAIN_SURVEY`) providing:
  * - Top App Bar with Hamburger Menu and active survey title.
- * - **Map View**: Displays Ground geospatial entities on the map, a `"Layers"` button to toggle
- *   layer visibility, and an interactive **Entity Bottom Sheet** when an entity is clicked:
+ * - **Map View**: Displays Ground geospatial entities on the map, a basemap preview card that opens
+ *   the basemap selector, and an interactive **Entity Bottom Sheet** when an entity is clicked:
  * ```
  *     - Displays `simplestyle-spec` marker symbols (`○`, `◐`, `✓`) and `marker-color` across entity
  *       points, lines, and polygons, and shows the unified chronological `1:N` list of submissions
@@ -238,7 +234,8 @@ internal fun MainSurveyTopAppBar(state: PrototypeAppState) {
  * Interactive Map View showing:
  * - Toggleable **Offline Basemap** (`Satellite + Contours` or `Vector Topographic`)
  * - Ground **Geospatial Entities** (`EntityType.GEOSPATIAL`, rendered with solid polygon outlines)
- * - A `"Layers"` button (`LayersControlSheet`) to toggle basemaps and map layers
+ * - A basemap preview card ([BasemapPreviewCard]) that opens the layers sheet
+ *   ([LayersControlSheet]) to select the basemap
  * - A unified persistent bottom sheet (`SurveyPersistentBottomSheetContent`) that peeks with a
  *   search bar by default, expands into the searchable list of map layers, data tables, and places,
  *   and transitions in-place to `EntityBottomSheetCard` when a map feature is selected.
@@ -394,8 +391,11 @@ internal fun SurveyMapView(state: PrototypeAppState) {
                 }
               }
 
-              // Layers FAB to control basemaps and map layers
-              LayersFloatingActionButton(state = state)
+              // Basemap preview card that opens the layers sheet
+              BasemapPreviewCard(
+                selectedBasemapType = state.selectedBasemapType,
+                onClick = { state.updateLayersSheetOpen(!state.isLayersSheetOpen) },
+              )
             }
 
             // Selected Cluster Balloon detail callout when a Mapbox cluster balloon is tapped
@@ -1078,169 +1078,79 @@ internal fun GoogleMapsScaleBarWidget(
   }
 }
 
-/** Floating Action Button that toggles the map layers and basemap selector. */
+/** Small uppercase primary-colored section heading in the basemap selector (`TYPE`, ...). */
 @Composable
-internal fun LayersFloatingActionButton(state: PrototypeAppState, modifier: Modifier = Modifier) {
-  val layersBg =
-    if (state.isLayersSheetOpen) {
-      Color(0xFF8BD6B1)
-    } else {
-      MaterialTheme.colorScheme.inverseSurface.copy(alpha = 0.93f)
-    }
-  val layersContent =
-    if (state.isLayersSheetOpen) {
-      Color(0xFF003825)
-    } else {
-      MaterialTheme.colorScheme.inverseOnSurface
-    }
-  FloatingActionButton(
-    onClick = { state.updateLayersSheetOpen(!state.isLayersSheetOpen) },
-    containerColor = layersBg,
-    contentColor = layersContent,
+private fun BasemapSectionHeading(text: String, modifier: Modifier = Modifier) {
+  Text(
+    text = text,
+    style =
+      MaterialTheme.typography.labelSmall.copy(
+        fontWeight = FontWeight.Bold,
+        color = MaterialTheme.colorScheme.primary,
+        letterSpacing = 0.5.sp,
+      ),
     modifier = modifier,
-  ) {
-    Icon(imageVector = Icons.Outlined.Layers, contentDescription = "Layers")
-  }
+  )
 }
 
 /**
- * Shared body of the layers & basemap selector:
- * 1. Basemap switcher (`Map` vs `Satellite`)
- * 2. Offline basemap tile package overlay toggle
- * 3. Map layers toggles for survey geospatial entities
+ * Shared body of the basemap selector, used by the mobile layers sheet ([LayersControlSheet]) and
+ * the web dashboard's dialog ([LayersControlDialog]). Map layer visibility is not set here: mobile
+ * toggles it in the bottom sheet and the web dashboard in its left-hand panel.
+ * 1. Basemap type options (`Satellite` and `Map`)
+ * 2. Downloaded (offline) basemap overlay toggle, when [showOfflineBasemap] (mobile only)
  */
 @Composable
-internal fun LayersSelectorContent(state: PrototypeAppState, modifier: Modifier = Modifier) {
+internal fun LayersSelectorContent(
+  state: PrototypeAppState,
+  modifier: Modifier = Modifier,
+  showOfflineBasemap: Boolean = true,
+) {
   Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-    // Basemap section (Map vs Satellite + Offline Basemap Toggle)
-    Text(
-      text = "BASEMAP",
-      style =
-        MaterialTheme.typography.labelSmall.copy(
-          fontWeight = FontWeight.Bold,
-          color = MaterialTheme.colorScheme.primary,
-          letterSpacing = 0.5.sp,
-        ),
-    )
-
-    SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
-      BasemapType.entries.forEachIndexed { index, basemap ->
-        val isSelected = state.selectedBasemapType == basemap
-        SegmentedButton(
-          selected = isSelected,
-          onClick = { state.selectBasemapType(basemap) },
-          shape =
-            SegmentedButtonDefaults.itemShape(index = index, count = BasemapType.entries.size),
-          icon = {
-            Icon(
-              imageVector =
-                if (basemap == BasemapType.NORMAL) {
-                  Icons.Outlined.Map
-                } else {
-                  Icons.Outlined.SatelliteAlt
-                },
-              contentDescription = null,
-              modifier = Modifier.size(16.dp),
-            )
-          },
-          label = {
-            Text(
-              text = basemap.label,
-              style = MaterialTheme.typography.labelMedium,
-              fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-            )
-          },
+    Column(modifier = Modifier.fillMaxWidth().selectableGroup()) {
+      BasemapSectionHeading(text = "TYPE", modifier = Modifier.padding(bottom = 4.dp))
+      BasemapOptionOrder.forEach { basemap ->
+        BasemapOptionRow(
+          type = basemap,
+          isSelected = state.selectedBasemapType == basemap,
+          onSelect = { state.selectBasemapType(basemap) },
         )
       }
     }
 
-    // Offline Basemap Tile Package Overlay Toggle
-    OutlinedCard(
-      onClick = { state.toggleOfflineBasemapVisibility() },
-      modifier = Modifier.fillMaxWidth(),
-      shape = MaterialTheme.shapes.medium,
-      colors =
-        CardDefaults.outlinedCardColors(
-          containerColor = MaterialTheme.colorScheme.surfaceContainer
-        ),
-    ) {
-      Row(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-      ) {
-        Column(modifier = Modifier.weight(1f)) {
-          Text(
-            text = "Offline Basemap Overlay (Nyeri Sector Tiles)",
-            style = MaterialTheme.typography.labelMedium,
-            fontWeight = FontWeight.SemiBold,
-          )
-          Text(
-            text = state.offlineBasemapStyle.tileDescription,
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-          )
-        }
-        Switch(
-          checked = state.isOfflineBasemapVisible,
-          onCheckedChange = { state.toggleOfflineBasemapVisibility() },
-        )
-      }
-    }
-
-    if (state.hasGeospatialEntities) {
-      HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-
-      // Section 2: Map layers (geospatial entities)
-      Text(
-        text = "MAP LAYERS",
-        style =
-          MaterialTheme.typography.labelSmall.copy(
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.primary,
-            letterSpacing = 0.5.sp,
+    if (showOfflineBasemap) {
+      BasemapSectionHeading(text = "DOWNLOADED BASEMAPS")
+      // Offline Basemap Tile Package Overlay Toggle
+      OutlinedCard(
+        onClick = { state.toggleOfflineBasemapVisibility() },
+        modifier = Modifier.fillMaxWidth(),
+        shape = MaterialTheme.shapes.medium,
+        colors =
+          CardDefaults.outlinedCardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainer
           ),
-      )
-
-      state.entityDatasetLayers.forEach { layer ->
-        val layerEntityCount = state.entities.count { it.layerId == layer.id }
-        OutlinedCard(
-          onClick = { state.toggleLayerVisibility(layer.id) },
-          modifier = Modifier.fillMaxWidth(),
-          shape = MaterialTheme.shapes.medium,
-          colors =
-            CardDefaults.outlinedCardColors(
-              containerColor = MaterialTheme.colorScheme.surfaceContainer
-            ),
+      ) {
+        Row(
+          modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
+          verticalAlignment = Alignment.CenterVertically,
+          horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-          Row(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
-          ) {
-            // Solid layer color swatch
-            Box(
-              modifier =
-                Modifier.size(16.dp)
-                  .clip(MaterialTheme.shapes.extraSmall)
-                  .background(Color(layer.colorHex).copy(alpha = 0.25f))
-                  .border(2.dp, Color(layer.colorHex), MaterialTheme.shapes.extraSmall)
+          Column(modifier = Modifier.weight(1f)) {
+            Text(
+              text = "Offline Basemap Overlay (Nyeri Sector Tiles)",
+              style = MaterialTheme.typography.labelMedium,
+              fontWeight = FontWeight.SemiBold,
             )
-            Column(modifier = Modifier.weight(1f)) {
-              Text(
-                text = layer.label,
-                style = MaterialTheme.typography.labelMedium,
-                fontWeight = FontWeight.SemiBold,
-                color = layerNameColor(layer.isVisible),
-              )
-              Text(
-                text = "${layer.geometryTypeLabel} • ${layer.formatCountLabel(layerEntityCount)}",
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-              )
-            }
-            LayerVisibilityToggle(layer = layer, state = state)
+            Text(
+              text = state.offlineBasemapStyle.tileDescription,
+              style = MaterialTheme.typography.labelSmall,
+              color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
           }
+          Switch(
+            checked = state.isOfflineBasemapVisible,
+            onCheckedChange = { state.toggleOfflineBasemapVisibility() },
+          )
         }
       }
     }
@@ -1248,9 +1158,9 @@ internal fun LayersSelectorContent(state: PrototypeAppState, modifier: Modifier 
 }
 
 /**
- * Material 3 [ModalBottomSheet] opened by the `"Layers"` button to select/toggle:
- * 1. **Basemap Type (`Map` vs `Satellite`)** & **Offline Basemap (`Mapbox Offline Tiles`)**
- * 2. **Map Features (`LayerDef.entity_dataset_id`)** — geospatial entity layers rendered on the map
+ * Material 3 modal bottom sheet opened by the mobile map's [BasemapPreviewCard] to select the
+ * **Basemap Type (`Map` vs `Satellite`)** and toggle the **Offline Basemap (`Mapbox Offline
+ * Tiles`)**.
  */
 @Composable
 internal fun LayersControlSheet(state: PrototypeAppState) {
@@ -1269,17 +1179,12 @@ internal fun LayersControlSheet(state: PrototypeAppState) {
       ) {
         Column {
           Text(
-            text = "Layers & Basemap",
+            text = "Basemap",
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold,
           )
           Text(
-            text =
-              if (state.hasGeospatialEntities) {
-                "Select Map vs Satellite basemap and toggle survey map layers"
-              } else {
-                "Select Map vs Satellite basemap and offline tile overlays"
-              },
+            text = "Select Map vs Satellite basemap and offline tile overlays",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
           )
@@ -1296,6 +1201,27 @@ internal fun LayersControlSheet(state: PrototypeAppState) {
       Spacer(modifier = Modifier.height(12.dp))
     }
   }
+}
+
+/**
+ * Modal dialog opened by the web dashboard's [BasemapPreviewCard] to select the basemap type
+ * (`Map` vs `Satellite`). Offline maps are a mobile-only feature, so their toggle is left out.
+ */
+@Composable
+internal fun LayersControlDialog(state: PrototypeAppState) {
+  GroundAlertDialogOverlay(
+    onDismissRequest = { state.updateLayersSheetOpen(false) },
+    title = {
+      Text(
+        text = "Basemap",
+        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+      )
+    },
+    text = { LayersSelectorContent(state = state, showOfflineBasemap = false) },
+    confirmButton = {
+      TextButton(onClick = { state.updateLayersSheetOpen(false) }) { Text("Done") }
+    },
+  )
 }
 
 /** Backward-compatible alias for [MainSurveyScreen]. */
