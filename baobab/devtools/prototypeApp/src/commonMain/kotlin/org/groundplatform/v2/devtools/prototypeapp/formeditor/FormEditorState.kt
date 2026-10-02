@@ -22,15 +22,20 @@ import org.groundplatform.v2.core.forms.ui.FormWizardController
 /**
  * Observable state holder for the Form editor page: the [EditorForm] under edit, the selected
  * screen, and the in-browser flow preview session.
+ *
+ * [datasetCatalog] lists the survey's Map layers and Data tables, which the Form's save-to logic
+ * adds features to or updates.
  */
 class FormEditorState(
   initialForm: EditorForm =
-    EditorFormTemplates.blank(formId = FormIds.newFormId(), title = "Untitled form")
+    EditorFormTemplates.blank(formId = FormIds.newFormId(), title = "Untitled form"),
+  private val datasetCatalog: () -> List<EditorDataset> = { emptyList() },
 ) {
 
   var form: EditorForm by mutableStateOf(initialForm)
     private set
 
+  /** Selected question, or `null` when the Form itself is selected (Form properties). */
   var selectedKey: String? by mutableStateOf(initialForm.questions.firstOrNull()?.key)
     private set
 
@@ -56,22 +61,52 @@ class FormEditorState(
   val selectedIndex: Int
     get() = selectedKey?.let { form.indexOf(it) } ?: -1
 
+  /** Whether the Form itself (rather than a question) is selected. */
+  val isFormSelected: Boolean
+    get() = selectedQuestion == null
+
   val flowEdges: List<FlowEdge>
     get() = FormFlowGraph.edges(form)
 
   val pathCount: Long
     get() = FormFlowGraph.countPaths(form)
 
-  val issues: List<EditorIssue>
-    get() = FormEditorValidator.validate(form)
+  /** The survey's Map layers and Data tables. */
+  val datasets: List<EditorDataset>
+    get() = datasetCatalog()
 
+  /** Dataset a submission adds a feature to or updates, if any. */
+  val saveTarget: EditorDataset?
+    get() = SaveToRules.saveTarget(form, datasets)
+
+  /** Datasets this Form can update: all but the one it adds features to. */
+  val updateTargets: List<EditorDataset>
+    get() = datasets.filterNot { it.isLinkedToThisForm }
+
+  val issues: List<EditorIssue>
+    get() = FormEditorValidator.validate(form) + SaveToValidator.validate(form, datasets)
+
+  /** Issues that aren't about a single question, shown in Form properties. */
+  val formIssues: List<EditorIssue>
+    get() = issues.filter { it.questionKey == null }
+
+  /** Exported XForms; updates reference the target's features as a CSV attachment. */
   val xformsXml: String
-    get() = EditorXFormsGenerator.toXml(form)
+    get() = EditorXFormsGenerator.toXml(form, saveTarget)
+
+  /** XForms run by the preview, with the target's features embedded. */
+  val previewXml: String
+    get() = EditorXFormsGenerator.toXml(form, saveTarget, inlineRows = true)
 
   fun issuesFor(key: String): List<EditorIssue> = issues.filter { it.questionKey == key }
 
   fun select(key: String?) {
     selectedKey = key?.takeIf { form.indexOf(it) >= 0 }
+  }
+
+  /** Selects the Form itself, showing Form properties. */
+  fun selectForm() {
+    selectedKey = null
   }
 
   fun updateTitle(title: String) {
@@ -116,7 +151,8 @@ class FormEditorState(
 
   /**
    * Removes [key]. Display logic on other questions that depended on it is cleared so the Form
-   * stays valid, and the selection moves to the nearest remaining neighbor.
+   * stays valid, save-to references to it are dropped, and the selection moves to the nearest
+   * remaining neighbor.
    */
   fun deleteQuestion(key: String) {
     val index = form.indexOf(key)
@@ -125,7 +161,7 @@ class FormEditorState(
       form.questions
         .filterNot { it.key == key }
         .map { if (it.relevance?.sourceQuestionKey == key) it.copy(relevance = null) else it }
-    form = form.copy(questions = remaining)
+    form = form.copy(questions = remaining, saveTo = form.saveTo.withoutQuestion(key))
     if (selectedKey == key) {
       selectedKey = remaining.getOrNull(index.coerceAtMost(remaining.lastIndex))?.key
     }
@@ -218,8 +254,124 @@ class FormEditorState(
             } else {
               q
             }
+          },
+        saveTo = saveToAfterTypeChange(form.saveTo, key, type),
+      )
+  }
+
+  private fun saveToAfterTypeChange(
+    saveTo: EditorSaveTo,
+    key: String,
+    type: EditorQuestionType,
+  ): EditorSaveTo =
+    when {
+      type == EditorQuestionType.NOTE -> saveTo.withoutQuestion(key)
+      type != EditorQuestionType.LOCATION &&
+        saveTo.propertyFor(key) == SaveToRules.GEOMETRY_PROPERTY -> saveTo.withMapping(key, null)
+      else -> saveTo
+    }
+
+  // Save-to logic ------------------------------------------------------------------------------
+
+  /**
+   * Switches between adding new features and updating existing ones. Switching to updates picks a
+   * default target, feature lookup, and field mapping unless a valid target is already set.
+   */
+  fun setSaveToMode(mode: SaveToMode) {
+    val saveTo = form.saveTo
+    if (saveTo.mode == mode) return
+    form =
+      form.copy(
+        saveTo =
+          if (mode == SaveToMode.UPDATE) withUpdateDefaults(saveTo.copy(mode = mode))
+          else saveTo.copy(mode = mode)
+      )
+  }
+
+  /** Updates features of the dataset with ID [datasetId], resetting lookup and mappings. */
+  fun setTargetDataset(datasetId: String) {
+    val target = datasets.firstOrNull { it.id == datasetId } ?: return
+    if (form.saveTo.targetDatasetId == datasetId) return
+    form = form.copy(saveTo = defaultsFor(form.saveTo, target))
+  }
+
+  fun setIdSource(source: EntityIdSource) {
+    val saveTo = form.saveTo
+    if (saveTo.idSource == source) return
+    val target = saveTarget
+    form =
+      form.copy(
+        saveTo =
+          if (source == EntityIdSource.QUESTION && target != null) {
+            val question =
+              form.find(saveTo.idQuestionKey) ?: SaveToRules.defaultIdQuestion(form, target)
+            saveTo.copy(
+              idSource = source,
+              idQuestionKey = question?.key,
+              idMatchProperty = saveTo.idMatchProperty ?: target.keyProperty,
+            )
+          } else {
+            saveTo.copy(idSource = source)
           }
       )
+  }
+
+  fun setIdQuestion(questionKey: String) {
+    form = form.copy(saveTo = form.saveTo.copy(idQuestionKey = questionKey))
+  }
+
+  fun setIdMatchProperty(property: String) {
+    form = form.copy(saveTo = form.saveTo.copy(idMatchProperty = property))
+  }
+
+  /** Saves the answer to [questionKey] into [property], or stops saving it when `null`. */
+  fun setMapping(questionKey: String, property: String?) {
+    form = form.copy(saveTo = form.saveTo.withMapping(questionKey, property))
+  }
+
+  /** Follows a rename of dataset [oldId] so this Form keeps updating it. */
+  fun renameTargetDataset(oldId: String, newId: String) {
+    val saveTo = form.saveTo
+    if (saveTo.targetDatasetId != oldId) return
+    form = form.copy(saveTo = saveTo.copy(targetDatasetId = newId))
+  }
+
+  /** Follows a rename of property [oldName] of dataset [datasetId] in lookup and mappings. */
+  fun renameTargetProperty(datasetId: String, oldName: String, newName: String) {
+    val saveTo = form.saveTo
+    if (saveTo.targetDatasetId != datasetId) return
+    form =
+      form.copy(
+        saveTo =
+          saveTo.copy(
+            idMatchProperty =
+              if (saveTo.idMatchProperty == oldName) newName else saveTo.idMatchProperty,
+            mappings =
+              saveTo.mappings.map {
+                if (it.property == oldName) it.copy(property = newName) else it
+              },
+          )
+      )
+  }
+
+  private fun withUpdateDefaults(saveTo: EditorSaveTo): EditorSaveTo {
+    val targets = updateTargets
+    if (targets.any { it.id == saveTo.targetDatasetId }) return saveTo
+    val target = targets.firstOrNull() ?: return saveTo.copy(targetDatasetId = null)
+    return defaultsFor(saveTo, target)
+  }
+
+  /** Map layers default to the feature selected on the map; Data tables to a question's answer. */
+  private fun defaultsFor(saveTo: EditorSaveTo, target: EditorDataset): EditorSaveTo {
+    val idQuestion = if (target.isMapLayer) null else SaveToRules.defaultIdQuestion(form, target)
+    return saveTo.copy(
+      targetDatasetId = target.id,
+      idSource =
+        if (target.isMapLayer) EntityIdSource.SELECTED_FEATURE else EntityIdSource.QUESTION,
+      idQuestionKey = idQuestion?.key,
+      idMatchProperty = target.keyProperty,
+      mappings = SaveToRules.autoMap(form, target, skipKey = idQuestion?.key),
+    )
   }
 
   /** Turns display logic on for [key] using the nearest earlier question as a default source. */
@@ -239,7 +391,7 @@ class FormEditorState(
     previewController =
       try {
         previewError = null
-        FormWizardController(formDef = XFormsXmlSerializer.deserializeFormDef(xformsXml))
+        FormWizardController(formDef = XFormsXmlSerializer.deserializeFormDef(previewXml))
       } catch (e: Exception) {
         previewError = e.message ?: e.toString()
         null

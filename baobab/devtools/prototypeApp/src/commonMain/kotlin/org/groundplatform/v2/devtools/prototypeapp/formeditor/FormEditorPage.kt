@@ -110,6 +110,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -148,16 +149,27 @@ fun FormEditorPage(
   modifier: Modifier = Modifier,
   onCreateDataset: (() -> Unit)? = null,
   onDelete: (() -> Unit)? = null,
+  onSaveToModeChange: ((SaveToMode) -> Unit)? = null,
+  onOpenDataset: ((String) -> Unit)? = null,
 ) {
   Box(modifier = modifier.fillMaxSize()) {
     Column(modifier = Modifier.fillMaxSize()) {
-      FormEditorToolbar(state, onCreateDataset, onDelete)
+      FormEditorToolbar(
+        state,
+        onCreateDataset.takeIf { state.form.saveTo.mode == SaveToMode.CREATE },
+        onDelete,
+      )
       Row(
         modifier = Modifier.fillMaxSize().padding(16.dp),
         horizontalArrangement = Arrangement.spacedBy(16.dp),
       ) {
         FlowCanvasPanel(state, Modifier.weight(1f).fillMaxHeight())
-        QuestionPropertiesPanel(state, Modifier.width(380.dp).fillMaxHeight())
+        QuestionPropertiesPanel(
+          state = state,
+          onSaveToModeChange = onSaveToModeChange ?: state::setSaveToMode,
+          onOpenDataset = onOpenDataset,
+          modifier = Modifier.width(380.dp).fillMaxHeight(),
+        )
       }
     }
 
@@ -214,7 +226,7 @@ private fun FormEditorToolbar(
         OutlinedButton(onClick = onCreateDataset) {
           Icon(Icons.Outlined.Layers, contentDescription = null, modifier = Modifier.size(18.dp))
           Spacer(Modifier.width(6.dp))
-          Text("Create layer")
+          Text(if (state.form.hasGeometry) "Create map layer" else "Create data table")
         }
       }
       Button(onClick = state::startPreview) {
@@ -364,7 +376,8 @@ private fun FlowCanvasPanel(state: FormEditorState, modifier: Modifier = Modifie
         if (issues.isNotEmpty()) {
           AssistChip(
             onClick = {
-              issues.firstOrNull { it.questionKey != null }?.let { state.select(it.questionKey) }
+              val firstKey = issues.first().questionKey
+              if (firstKey != null) state.select(firstKey) else state.selectForm()
             },
             label = { Text("${issues.size} ${if (issues.size == 1) "issue" else "issues"}") },
             leadingIcon = {
@@ -528,7 +541,17 @@ private fun FlowCanvas(
           }
         }
   ) {
-    Box(modifier = Modifier.width(layout.totalWidth).height(layout.totalHeight)) {
+    // Clicking empty canvas selects the Form itself, showing Form properties.
+    Box(
+      modifier =
+        Modifier.width(layout.totalWidth)
+          .height(layout.totalHeight)
+          .clickable(
+            indication = null,
+            interactionSource = remember { MutableInteractionSource() },
+            onClick = state::selectForm,
+          )
+    ) {
       Canvas(modifier = Modifier.fillMaxSize().graphicsLayer { alpha = edgeAlpha }) {
         edges.forEach { edge ->
           val highlighted =
@@ -545,7 +568,12 @@ private fun FlowCanvas(
         }
       }
 
-      TerminalNode(text = "Start", modifier = Modifier.offset(layout.x(0), layout.top(0)))
+      TerminalNode(
+        text = "Start",
+        isSelected = state.isFormSelected,
+        onClick = state::selectForm,
+        modifier = Modifier.offset(layout.x(0), layout.top(0)),
+      )
 
       // Hoverable "+" between Start and Q1 (or Q0)
       AddQuestionAffordance(
@@ -623,7 +651,21 @@ private fun FlowCanvas(
       }
       TerminalNode(
         text = "Review & submit",
+        isSelected = state.isFormSelected,
+        onClick = state::selectForm,
         modifier = Modifier.offset(layout.x(layout.endSlot), layout.top(layout.endSlot)),
+      )
+      Text(
+        text = SaveToRules.outcome(form, state.saveTarget),
+        style = MaterialTheme.typography.labelSmall,
+        color = colors.onSurfaceVariant,
+        textAlign = TextAlign.Center,
+        modifier =
+          Modifier.offset(
+              layout.x(layout.endSlot) - SlotGap / 2,
+              layout.top(layout.endSlot) + TerminalHeight + 8.dp,
+            )
+            .width(TerminalWidth + SlotGap),
       )
     }
   }
@@ -737,13 +779,22 @@ private fun DrawScope.drawArrowHead(tip: Offset, from: Offset, color: Color) {
   drawPath(path, color)
 }
 
+/** Start or end node of the flow; selecting either shows Form properties. */
 @Composable
-private fun TerminalNode(text: String, modifier: Modifier = Modifier) {
+private fun TerminalNode(
+  text: String,
+  isSelected: Boolean,
+  onClick: () -> Unit,
+  modifier: Modifier = Modifier,
+) {
+  val colors = MaterialTheme.colorScheme
   Surface(
+    onClick = onClick,
     modifier = modifier.width(TerminalWidth).height(TerminalHeight),
     shape = RoundedCornerShape(50),
-    color = MaterialTheme.colorScheme.secondaryContainer,
-    contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+    color = if (isSelected) colors.primaryContainer else colors.secondaryContainer,
+    contentColor = if (isSelected) colors.onPrimaryContainer else colors.onSecondaryContainer,
+    border = if (isSelected) BorderStroke(2.dp, colors.primary) else null,
   ) {
     Box(contentAlignment = Alignment.Center, modifier = Modifier.padding(horizontal = 10.dp)) {
       Text(
@@ -1042,8 +1093,14 @@ private fun MiniPlaceholder(text: String, icon: androidx.compose.ui.graphics.vec
 // Properties panel
 // ---------------------------------------------------------------------------------------------
 
+/** Properties of the selected question, or of the Form itself when no question is selected. */
 @Composable
-private fun QuestionPropertiesPanel(state: FormEditorState, modifier: Modifier = Modifier) {
+private fun QuestionPropertiesPanel(
+  state: FormEditorState,
+  onSaveToModeChange: (SaveToMode) -> Unit,
+  onOpenDataset: ((String) -> Unit)?,
+  modifier: Modifier = Modifier,
+) {
   ElevatedCard(
     modifier = modifier,
     shape = MaterialTheme.shapes.large,
@@ -1051,18 +1108,7 @@ private fun QuestionPropertiesPanel(state: FormEditorState, modifier: Modifier =
   ) {
     val question = state.selectedQuestion
     if (question == null) {
-      Box(modifier = Modifier.fillMaxSize().padding(24.dp), contentAlignment = Alignment.Center) {
-        Text(
-          text =
-            if (state.form.questions.isEmpty()) {
-              "This form has no questions yet. Use \"Add question\" to create one."
-            } else {
-              "Select a screen to edit its properties."
-            },
-          style = MaterialTheme.typography.bodyMedium,
-          color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-      }
+      FormProperties(state, onSaveToModeChange, onOpenDataset)
       return@ElevatedCard
     }
     key(question.key) { QuestionProperties(state, question) }

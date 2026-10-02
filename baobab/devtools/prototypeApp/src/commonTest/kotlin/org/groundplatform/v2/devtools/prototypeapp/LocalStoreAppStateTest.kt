@@ -17,9 +17,9 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import org.groundplatform.v2.devtools.prototypeapp.data.seed.SurveyEditorSamples
-import org.groundplatform.v2.devtools.prototypeapp.formeditor.EditorXFormsGenerator
 import org.groundplatform.v2.devtools.prototypeapp.surveyeditor.DatasetKind
 import org.groundplatform.v2.devtools.prototypeapp.surveyeditor.SurveyEditorState
+import org.groundplatform.v2.devtools.prototypeapp.surveyeditor.publishedFormXml
 
 /**
  * End-to-end checks that [PrototypeAppState] reads from and writes through the local data store,
@@ -115,8 +115,12 @@ class LocalStoreAppStateTest {
     // The title is shown in the survey list; generated XForms are published to the survey config.
     assertEquals("Renamed survey", state.activeSurvey.title)
     val config = state.viewModel.appData.value.content.config
-    val newForm = editor.forms.last().editor.form
-    assertEquals(EditorXFormsGenerator.toXml(newForm), config?.formXmlById?.get(newForm.formId))
+    val draft = editor.toDraft()
+    val newEntry = draft.forms.last()
+    val publishedXml = config?.formXmlById?.get(newEntry.form.formId)
+    assertEquals(draft.publishedFormXml(newEntry), publishedXml)
+    // New Forms add rows to their linked Data table by default.
+    assertTrue(publishedXml.orEmpty().contains("create=\"1\""))
 
     state.openSurvey("survey-sample-plots-forest")
     state.openSurvey("survey-kenya-coffee")

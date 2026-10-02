@@ -143,6 +143,7 @@ While automatic `1:1` form-to-entity syncing handles simple surveys effortlessly
     *   When adding an additional form to a survey that already has a Site Layer (`EntityDatasetDef`), the Designer prompts the organizer with two clear options:
         1.  **Follow up on existing sites (Default for Form 2+)**: Configures `EntityDeclaration(dataset = existing_dataset_id, action = UPDATE)` (or `UPSERT` if field collectors can also register new plots in the same form), auto-inserts the hidden site selector (`select_one_from_file <dataset_id>.csv`), and syncs any *new* questions added in Form 2 as additional columns on the shared `EntityDatasetDef`.
         2.  **Create a new map layer / site type**: Creates a separate `EntityDatasetDef` and `LayerDef` (e.g., mapping *Processing Mills* on a separate layer from *Farm Plots*).
+*   **Prototype status**: The prototype Form editor exposes this choice per Form under **Form properties → Advanced**. **Add new map feature** (Form has a Location question) or **Add new table row** (otherwise) is the default and writes `create="1"`. **Update existing map feature / table row** writes `update="1"` against a chosen Map layer or Data table, finds the feature either from the one the Form was opened from (`/data/target_entity`) or by matching a question's answer against a property, and only maps the questions the organizer picks to `entities:saveto`. Switching a Form to updates deletes its own linked dataset if empty, otherwise unlinks it.
 
 ### Forms with Multiple Spatial Questions
 

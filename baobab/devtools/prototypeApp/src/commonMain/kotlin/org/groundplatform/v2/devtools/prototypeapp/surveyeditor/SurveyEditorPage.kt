@@ -169,6 +169,12 @@ fun SurveyEditorPage(
                   isDarkTheme = isDarkTheme,
                   onCreateDataset = { state.createDatasetForForm(entry.key) },
                   onDelete = { state.deleteForm(entry.key) },
+                  onSaveToModeChange = { state.setFormSaveToMode(entry.key, it) },
+                  onOpenDataset = { id ->
+                    state.datasets
+                      .firstOrNull { it.id == id }
+                      ?.let { state.select(SurveyEditorSection.Dataset(it.key)) }
+                  },
                 )
               }
             }

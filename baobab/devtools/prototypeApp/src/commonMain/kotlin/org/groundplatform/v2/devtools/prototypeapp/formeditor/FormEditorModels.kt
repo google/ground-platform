@@ -121,10 +121,20 @@ data class EditorForm(
   val formId: String,
   val title: String,
   val questions: List<EditorQuestion>,
+  /** What a submission does to the survey's Map layers and Data tables. */
+  val saveTo: EditorSaveTo = EditorSaveTo(),
 ) {
   fun indexOf(key: String): Int = questions.indexOfFirst { it.key == key }
 
   fun find(key: String?): EditorQuestion? = questions.firstOrNull { it.key == key }
+
+  /** Location question whose answer becomes a new map feature's geometry. */
+  val primaryGeometryQuestion: EditorQuestion?
+    get() = questions.firstOrNull { it.type == EditorQuestionType.LOCATION }
+
+  /** Whether submissions capture a geometry, i.e. add map features rather than table rows. */
+  val hasGeometry: Boolean
+    get() = primaryGeometryQuestion != null
 
   /** Questions before [key] whose answers can drive display logic. */
   fun eligibleRelevanceSources(key: String): List<EditorQuestion> {
@@ -309,59 +319,231 @@ object EditorXFormsGenerator {
     }
   }
 
-  fun toXml(form: EditorForm): String = buildString {
-    appendLine("""<?xml version="1.0"?>""")
-    appendLine("""<h:html xmlns="http://www.w3.org/2002/xforms"""")
-    appendLine("""        xmlns:h="http://www.w3.org/1999/xhtml"""")
-    appendLine("""        xmlns:jr="http://openrosa.org/javarosa"""")
-    appendLine("""        xmlns:orx="http://openrosa.org/xforms">""")
-    appendLine("  <h:head>")
-    appendLine("    <h:title>${escape(form.title)}</h:title>")
-    appendLine("""    <model orx:xforms-version="1.0.0">""")
-    appendLine("      <instance>")
-    appendLine("""        <data id="${escape(form.formId)}" version="1">""")
-    form.questions.forEach { appendLine("          <${it.name}/>") }
-    appendLine("          <orx:meta>")
-    appendLine("            <orx:instanceID/>")
-    appendLine("          </orx:meta>")
-    appendLine("        </data>")
-    appendLine("      </instance>")
-    form.questions.forEach { question ->
-      val attrs = buildList {
-        add("""nodeset="/data/${question.name}"""")
-        add("""type="${question.type.bindType}"""")
-        if (question.required && !question.type.isReadOnly) add("""required="true()"""")
-        if (question.type.isReadOnly) add("""readonly="true()"""")
-        relevantExpression(form, question)?.let { add("""relevant="${escape(it)}"""") }
+  /**
+   * Entity declaration derived from a Form's save-to logic and its target dataset, following the
+   * ODK XForms Entities specification (version 2024.1.0).
+   *
+   * The ODK spec leaves `id`, `baseVersion`, and the label empty in the primary instance and fills
+   * them with `<bind calculate>` / `<setvalue>`. Ground's form engine evaluates those attributes
+   * (and the label text) directly as XPath, so the generator writes the expression in both places:
+   * ODK clients overwrite the instance default via the binds, and Ground evaluates it in place.
+   */
+  private class EntityPlan(form: EditorForm, val target: EditorDataset) {
+    val isUpdate = form.saveTo.mode == SaveToMode.UPDATE
+    val selectsTarget = isUpdate && form.saveTo.idSource == EntityIdSource.SELECTED_FEATURE
+    val idExpression: String =
+      if (isUpdate) SaveToRules.entityIdExpression(form, target).orEmpty() else "uuid()"
+    val baseVersionExpression: String =
+      if (isUpdate && idExpression.isNotEmpty()) {
+        "instance('${target.id}')/root/item[name = $idExpression]/__version"
+      } else {
+        ""
       }
-      appendLine("      <bind ${attrs.joinToString(" ")}/>")
-    }
-    appendLine("    </model>")
-    appendLine("  </h:head>")
-    appendLine("  <h:body>")
-    form.questions.forEach { question ->
-      val type = question.type
-      val attrs = buildList {
-        add("""ref="/data/${question.name}"""")
-        if (type.appearance.isNotEmpty()) add("""appearance="${type.appearance}"""")
-        if (type.mediaType.isNotEmpty()) add("""mediatype="${type.mediaType}"""")
+    val labelExpression: String? =
+      if (isUpdate) {
+        null
+      } else {
+        val labelQuestion =
+          form.questions.firstOrNull { it.name == target.labelProperty }
+            ?: form.questions.firstOrNull { it.type == EditorQuestionType.TEXT }
+        labelQuestion?.let { "/data/${it.name}" } ?: xpathStringLiteral(form.title)
       }
-      appendLine("    <${type.bodyElement} ${attrs.joinToString(" ")}>")
-      appendLine("      <label>${escape(question.label)}</label>")
-      if (question.hint.isNotBlank()) appendLine("      <hint>${escape(question.hint)}</hint>")
-      if (type.hasChoices) {
-        question.choices.forEach { choice ->
-          appendLine("      <item>")
-          appendLine("        <label>${escape(choice.label)}</label>")
-          appendLine("        <value>${escape(choice.value)}</value>")
-          appendLine("      </item>")
-        }
+
+    /** `entities:saveto` property per question key. */
+    val saveTo: Map<String, String> =
+      if (isUpdate) {
+        form.saveTo.mappings
+          .mapNotNull { m -> m.property?.let { m.questionKey to it } }
+          .filter { (key, _) ->
+            form.find(key)?.type?.let { it != EditorQuestionType.NOTE } == true
+          }
+          .toMap()
+      } else {
+        val geometryKey = form.primaryGeometryQuestion?.key
+        SaveToRules.savableQuestions(form)
+          .mapNotNull { q ->
+            when {
+              q.key == geometryKey && target.isMapLayer -> q.key to SaveToRules.GEOMETRY_PROPERTY
+              SaveToRules.isReservedProperty(q.name) -> null
+              else -> q.key to q.name
+            }
+          }
+          .toMap()
       }
-      appendLine("    </${type.bodyElement}>")
-    }
-    appendLine("  </h:body>")
-    append("</h:html>")
   }
+
+  /**
+   * Generates the XForms for [form]. When [target] is given, submissions add a feature to it or
+   * update one of its features, per [EditorForm.saveTo]. For updates, [inlineRows] embeds the
+   * target's current features in its secondary instance (for previews, where the
+   * `jr://file-csv/<dataset>.csv` attachment isn't available).
+   */
+  fun toXml(form: EditorForm, target: EditorDataset? = null, inlineRows: Boolean = false): String =
+    buildString {
+      val entity = target?.let { EntityPlan(form, it) }
+      appendLine("""<?xml version="1.0"?>""")
+      appendLine("""<h:html xmlns="http://www.w3.org/2002/xforms"""")
+      appendLine("""        xmlns:h="http://www.w3.org/1999/xhtml"""")
+      appendLine("""        xmlns:jr="http://openrosa.org/javarosa"""")
+      if (entity == null) {
+        appendLine("""        xmlns:orx="http://openrosa.org/xforms">""")
+      } else {
+        appendLine("""        xmlns:orx="http://openrosa.org/xforms"""")
+        appendLine("""        xmlns:entities="http://www.opendatakit.org/xforms/entities">""")
+      }
+      appendLine("  <h:head>")
+      appendLine("    <h:title>${escape(form.title)}</h:title>")
+      if (entity == null) {
+        appendLine("""    <model orx:xforms-version="1.0.0">""")
+      } else {
+        appendLine(
+          """    <model orx:xforms-version="1.0.0" entities:entities-version="2024.1.0">"""
+        )
+      }
+      appendLine("      <instance>")
+      appendLine("""        <data id="${escape(form.formId)}" version="1">""")
+      if (entity?.selectsTarget == true)
+        appendLine("          <${SaveToRules.TARGET_ENTITY_FIELD}/>")
+      form.questions.forEach { appendLine("          <${it.name}/>") }
+      appendLine("          <orx:meta>")
+      appendLine("            <orx:instanceID/>")
+      if (entity != null) appendEntityDeclaration(entity)
+      appendLine("          </orx:meta>")
+      appendLine("        </data>")
+      appendLine("      </instance>")
+      if (entity?.isUpdate == true) appendDatasetInstance(entity.target, inlineRows)
+      if (entity?.selectsTarget == true) {
+        appendLine(
+          """      <bind nodeset="/data/${SaveToRules.TARGET_ENTITY_FIELD}" type="string" required="true()"/>"""
+        )
+      }
+      form.questions.forEach { question ->
+        val attrs = buildList {
+          add("""nodeset="/data/${question.name}"""")
+          add("""type="${question.type.bindType}"""")
+          if (question.required && !question.type.isReadOnly) add("""required="true()"""")
+          if (question.type.isReadOnly) add("""readonly="true()"""")
+          relevantExpression(form, question)?.let { add("""relevant="${escape(it)}"""") }
+          entity?.saveTo?.get(question.key)?.let { add("""entities:saveto="${escape(it)}"""") }
+        }
+        appendLine("      <bind ${attrs.joinToString(" ")}/>")
+      }
+      if (entity != null) appendEntityBinds(entity)
+      appendLine("    </model>")
+      appendLine("  </h:head>")
+      appendLine("  <h:body>")
+      if (entity?.selectsTarget == true) appendTargetPicker(entity.target)
+      form.questions.forEach { question ->
+        val type = question.type
+        val attrs = buildList {
+          add("""ref="/data/${question.name}"""")
+          if (type.appearance.isNotEmpty()) add("""appearance="${type.appearance}"""")
+          if (type.mediaType.isNotEmpty()) add("""mediatype="${type.mediaType}"""")
+        }
+        appendLine("    <${type.bodyElement} ${attrs.joinToString(" ")}>")
+        appendLine("      <label>${escape(question.label)}</label>")
+        if (question.hint.isNotBlank()) appendLine("      <hint>${escape(question.hint)}</hint>")
+        if (type.hasChoices) {
+          question.choices.forEach { choice ->
+            appendLine("      <item>")
+            appendLine("        <label>${escape(choice.label)}</label>")
+            appendLine("        <value>${escape(choice.value)}</value>")
+            appendLine("      </item>")
+          }
+        }
+        appendLine("    </${type.bodyElement}>")
+      }
+      appendLine("  </h:body>")
+      append("</h:html>")
+    }
+
+  private fun StringBuilder.appendEntityDeclaration(entity: EntityPlan) {
+    val attrs = buildList {
+      add("""dataset="${escape(entity.target.id)}"""")
+      add("""id="${escape(entity.idExpression)}"""")
+      if (entity.isUpdate) {
+        add("""update="1"""")
+        add("""baseVersion="${escape(entity.baseVersionExpression)}"""")
+      } else {
+        add("""create="1"""")
+      }
+    }
+    val label = entity.labelExpression
+    if (label == null) {
+      appendLine("            <entities:entity ${attrs.joinToString(" ")}/>")
+    } else {
+      appendLine("            <entities:entity ${attrs.joinToString(" ")}>")
+      appendLine("              <entities:label>${escape(label)}</entities:label>")
+      appendLine("            </entities:entity>")
+    }
+  }
+
+  /** Secondary instance listing the target's features, in ODK Entities list form. */
+  private fun StringBuilder.appendDatasetInstance(target: EditorDataset, inlineRows: Boolean) {
+    val id = escape(target.id)
+    val src = "jr://file-csv/$id.csv"
+    if (!inlineRows) {
+      appendLine("""      <instance id="$id" src="$src"/>""")
+      return
+    }
+    val columns = target.updatableProperties.map { it.name }.filter { XML_NAME.matches(it) }
+    appendLine("""      <instance id="$id" src="$src">""")
+    appendLine("        <root>")
+    target.rows.forEach { row ->
+      appendLine("          <item>")
+      appendLine("            <name>${escape(row.name)}</name>")
+      appendLine("            <label>${escape(row.label)}</label>")
+      appendLine("            <__version>1</__version>")
+      columns.forEach { column ->
+        appendLine("            <$column>${escape(row.values[column].orEmpty())}</$column>")
+      }
+      appendLine("          </item>")
+    }
+    appendLine("        </root>")
+    appendLine("      </instance>")
+  }
+
+  private fun StringBuilder.appendEntityBinds(entity: EntityPlan) {
+    val path = "/data/orx:meta/entities:entity"
+    if (entity.isUpdate) {
+      appendLine(
+        """      <bind nodeset="$path/@id" type="string" readonly="true()" calculate="${escape(entity.idExpression)}"/>"""
+      )
+      appendLine(
+        """      <bind nodeset="$path/@baseVersion" type="string" readonly="true()" calculate="${escape(entity.baseVersionExpression)}"/>"""
+      )
+    } else {
+      // ODK XForms Entities spec: new entity IDs are set once, when the Form is first opened.
+      appendLine("""      <bind nodeset="$path/@id" type="string" readonly="true()"/>""")
+      appendLine(
+        """      <setvalue event="odk-instance-first-load" ref="$path/@id" value="uuid()"/>"""
+      )
+      entity.labelExpression?.let {
+        appendLine(
+          """      <bind nodeset="$path/entities:label" type="string" readonly="true()" calculate="${escape(it)}"/>"""
+        )
+      }
+    }
+  }
+
+  /** Picker for the feature to update; the app pre-fills it when opened from a map feature. */
+  private fun StringBuilder.appendTargetPicker(target: EditorDataset) {
+    val noun = if (target.isMapLayer) "Map feature" else "Row"
+    appendLine("""    <select1 ref="/data/${SaveToRules.TARGET_ENTITY_FIELD}">""")
+    appendLine("      <label>$noun to update</label>")
+    if (target.isMapLayer) {
+      appendLine(
+        "      <hint>Filled in automatically when the form is opened from a map feature.</hint>"
+      )
+    }
+    appendLine("""      <itemset nodeset="instance('${escape(target.id)}')/root/item">""")
+    appendLine("""        <value ref="name"/>""")
+    appendLine("""        <label ref="label"/>""")
+    appendLine("      </itemset>")
+    appendLine("    </select1>")
+  }
+
+  private val XML_NAME = Regex("^[A-Za-z_][A-Za-z0-9_.-]*$")
 
   /** XPath 1.0 section 3.7: literals may be delimited by either `'` or `"`. */
   private fun xpathStringLiteral(value: String): String =

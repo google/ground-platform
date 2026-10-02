@@ -18,12 +18,19 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import kotlin.random.Random
 import org.groundplatform.v2.devtools.prototypeapp.formeditor.EditorChoice
+import org.groundplatform.v2.devtools.prototypeapp.formeditor.EditorDataset
+import org.groundplatform.v2.devtools.prototypeapp.formeditor.EditorDatasetProperty
+import org.groundplatform.v2.devtools.prototypeapp.formeditor.EditorDatasetRow
 import org.groundplatform.v2.devtools.prototypeapp.formeditor.EditorForm
 import org.groundplatform.v2.devtools.prototypeapp.formeditor.EditorFormTemplates
+import org.groundplatform.v2.devtools.prototypeapp.formeditor.EditorPropertyKind
 import org.groundplatform.v2.devtools.prototypeapp.formeditor.EditorQuestion
 import org.groundplatform.v2.devtools.prototypeapp.formeditor.EditorQuestionType
+import org.groundplatform.v2.devtools.prototypeapp.formeditor.EditorXFormsGenerator
 import org.groundplatform.v2.devtools.prototypeapp.formeditor.FormEditorState
 import org.groundplatform.v2.devtools.prototypeapp.formeditor.FormIds
+import org.groundplatform.v2.devtools.prototypeapp.formeditor.SaveToMode
+import org.groundplatform.v2.devtools.prototypeapp.formeditor.SaveToRules
 import org.groundplatform.v2.devtools.prototypeapp.formeditor.moved
 import org.groundplatform.v2.devtools.prototypeapp.formeditor.slugify
 
@@ -116,7 +123,11 @@ class SurveyEditorState(draft: SurveyEditorDraft = SurveyEditorDraft.blank(surve
   }
 
   private fun formEntries(draft: SurveyEditorDraft): List<SurveyFormEntry> =
-    draft.forms.map { SurveyFormEntry(it.key, FormEditorState(it.form)) }
+    draft.forms.map { newFormEntry(it.key, it.form) }
+
+  /** Creates the editor for Form [key], whose save-to logic sees this survey's datasets. */
+  private fun newFormEntry(key: String, form: EditorForm): SurveyFormEntry =
+    SurveyFormEntry(key, FormEditorState(form) { datasets.map { it.toEditorDataset(key) } })
 
   var section: SurveyEditorSection by mutableStateOf(SurveyEditorSection.Details)
     private set
@@ -286,13 +297,14 @@ class SurveyEditorState(draft: SurveyEditorDraft = SurveyEditorDraft.blank(surve
     val datasetKey = newKey("d")
 
     val blankForm = EditorFormTemplates.blank(formId, title)
-    val entry = SurveyFormEntry(formKey, FormEditorState(blankForm))
+    val entry = newFormEntry(formKey, blankForm)
 
-    // By default, create a linked entity (Map layer) for the new form.
+    // By default, submissions add to a linked Map layer (if the form captures a location) or Data
+    // table (otherwise).
     val linkedDataset =
       EntityDataset(
         key = datasetKey,
-        kind = DatasetKind.MAP_LAYER,
+        kind = datasetKindFor(blankForm),
         id = uniqueId(slugify(title), datasets.map { it.id }),
         displayName = title,
         geometryKind = GeometryKind.POINT,
@@ -301,22 +313,7 @@ class SurveyEditorState(draft: SurveyEditorDraft = SurveyEditorDraft.blank(surve
         linkedFormKey = formKey,
         properties =
           listOf(EntityProperty("id", "ID", PropertyType.TEXT, required = true)) +
-            blankForm.questions
-              .filter { it.type != EditorQuestionType.NOTE }
-              .map { q ->
-                EntityProperty(
-                  name = q.name,
-                  label = q.label.ifBlank { q.name },
-                  type =
-                    when {
-                      q.type == EditorQuestionType.INTEGER -> PropertyType.INTEGER
-                      q.type == EditorQuestionType.DECIMAL -> PropertyType.DECIMAL
-                      q.type == EditorQuestionType.DATE -> PropertyType.DATE
-                      else -> PropertyType.TEXT
-                    },
-                  required = q.required,
-                )
-              },
+            formProperties(blankForm),
       )
 
     datasets = datasets + linkedDataset
@@ -324,35 +321,24 @@ class SurveyEditorState(draft: SurveyEditorDraft = SurveyEditorDraft.blank(surve
     section = SurveyEditorSection.Form(entry.key)
   }
 
-  /** Creates a new Map layer or Data table backed by and linked to [formKey]. */
-  fun createDatasetForForm(formKey: String, kind: DatasetKind = DatasetKind.MAP_LAYER) {
+  /**
+   * Creates a new Map layer or Data table backed by and linked to [formKey]. [kind] defaults to a
+   * Map layer if the form has a Location question, otherwise a Data table. When [open] is true, the
+   * new dataset is selected.
+   */
+  fun createDatasetForForm(formKey: String, kind: DatasetKind? = null, open: Boolean = true) {
     val formEntry = forms.firstOrNull { it.key == formKey } ?: return
     val form = formEntry.editor.form
+    val resolvedKind = kind ?: datasetKindFor(form)
     val datasetKey = newKey("d")
     val title =
       uniqueTitle(
-        form.title.ifBlank { "New ${kind.singular.lowercase()}" },
+        form.title.ifBlank { "New ${resolvedKind.singular.lowercase()}" },
         datasets.map { it.displayName },
       )
     val datasetId = uniqueId(slugify(title), datasets.map { it.id })
 
-    val formProps =
-      form.questions
-        .filter { it.type != EditorQuestionType.NOTE }
-        .map { q ->
-          EntityProperty(
-            name = q.name,
-            label = q.label.ifBlank { q.name },
-            type =
-              when {
-                q.type == EditorQuestionType.INTEGER -> PropertyType.INTEGER
-                q.type == EditorQuestionType.DECIMAL -> PropertyType.DECIMAL
-                q.type == EditorQuestionType.DATE -> PropertyType.DATE
-                else -> PropertyType.TEXT
-              },
-            required = q.required,
-          )
-        }
+    val formProps = formProperties(form)
 
     val idProp = EntityProperty("id", "ID", PropertyType.TEXT, required = true)
     val properties =
@@ -361,7 +347,7 @@ class SurveyEditorState(draft: SurveyEditorDraft = SurveyEditorDraft.blank(surve
     val dataset =
       EntityDataset(
         key = datasetKey,
-        kind = kind,
+        kind = resolvedKind,
         id = datasetId,
         displayName = title,
         geometryKind = GeometryKind.POINT,
@@ -372,7 +358,7 @@ class SurveyEditorState(draft: SurveyEditorDraft = SurveyEditorDraft.blank(surve
       )
 
     datasets = datasets + dataset
-    section = SurveyEditorSection.Dataset(dataset.key)
+    if (open) section = SurveyEditorSection.Dataset(dataset.key)
   }
 
   /** Creates a new Form backed by and linked to [datasetKey]. */
@@ -423,7 +409,7 @@ class SurveyEditorState(draft: SurveyEditorDraft = SurveyEditorDraft.blank(surve
     }
 
     val form = EditorForm(formId = formId, title = title, questions = questions)
-    val formEntry = SurveyFormEntry(formKey, FormEditorState(form))
+    val formEntry = newFormEntry(formKey, form)
 
     // Update dataset to link to this form
     updateDataset(datasetKey) { it.copy(linkedFormKey = formKey) }
@@ -437,26 +423,14 @@ class SurveyEditorState(draft: SurveyEditorDraft = SurveyEditorDraft.blank(surve
     updateDataset(datasetKey) { it.copy(linkedFormKey = null) }
   }
 
-  /** Synchronizes the schema of all datasets linked to [formEntry] with the form's questions. */
+  /**
+   * Synchronizes the schema of all datasets linked to [formEntry] with the form's questions. A
+   * linked dataset is a Map layer if the form has a Location question, otherwise a Data table.
+   */
   fun syncDatasetsLinkedToForm(formEntry: SurveyFormEntry) {
     val form = formEntry.editor.form
-    val formProps =
-      form.questions
-        .filter { it.type != EditorQuestionType.NOTE }
-        .map { q ->
-          EntityProperty(
-            name = q.name,
-            label = q.label.ifBlank { q.name },
-            type =
-              when {
-                q.type == EditorQuestionType.INTEGER -> PropertyType.INTEGER
-                q.type == EditorQuestionType.DECIMAL -> PropertyType.DECIMAL
-                q.type == EditorQuestionType.DATE -> PropertyType.DATE
-                else -> PropertyType.TEXT
-              },
-            required = q.required,
-          )
-        }
+    val formProps = formProperties(form)
+    val kind = datasetKindFor(form)
 
     val linkedDatasets = datasets.filter { it.linkedFormKey == formEntry.key }
     if (linkedDatasets.isEmpty()) return
@@ -477,12 +451,46 @@ class SurveyEditorState(draft: SurveyEditorDraft = SurveyEditorDraft.blank(surve
           if (combinedProps.any { it.name == d.labelProperty }) d.labelProperty else keyProp
 
         d.copy(
+          kind = kind,
           properties = combinedProps,
           keyProperty = keyProp,
           labelProperty = labelProp,
         )
       }
     }
+  }
+
+  /**
+   * Switches Form [formKey] between adding new features and updating existing ones.
+   *
+   * Switching to updates detaches the dataset the form was adding to: it's deleted if it has no
+   * features yet, otherwise kept but unlinked. Switching back to adding features creates a new
+   * linked dataset if none is linked.
+   */
+  fun setFormSaveToMode(formKey: String, mode: SaveToMode) {
+    val entry = forms.firstOrNull { it.key == formKey } ?: return
+    // Pick the update target while the form's own dataset is still linked, so it isn't chosen.
+    entry.editor.setSaveToMode(mode)
+    when (mode) {
+      SaveToMode.UPDATE -> {
+        val linked = datasets.filter { it.linkedFormKey == formKey }
+        val emptyKeys = linked.filter { it.rows.isEmpty() }.map { it.key }.toSet()
+        datasets =
+          datasets
+            .filterNot { it.key in emptyKeys }
+            .map { if (it.linkedFormKey == formKey) it.copy(linkedFormKey = null) else it }
+      }
+      SaveToMode.CREATE ->
+        if (datasets.none { it.linkedFormKey == formKey }) {
+          createDatasetForForm(formKey, open = false)
+        }
+    }
+  }
+
+  /** Forms whose submissions update features of [dataset]. */
+  fun formsUpdating(dataset: EntityDataset): List<SurveyFormEntry> = forms.filter {
+    val saveTo = it.editor.form.saveTo
+    saveTo.mode == SaveToMode.UPDATE && saveTo.targetDatasetId == dataset.id
   }
 
   fun deleteForm(key: String) {
@@ -532,7 +540,12 @@ class SurveyEditorState(draft: SurveyEditorDraft = SurveyEditorDraft.blank(surve
   }
 
   fun updateDataset(key: String, transform: (EntityDataset) -> EntityDataset) {
-    datasets = datasets.map { if (it.key == key) transform(it) else it }
+    val old = datasets.firstOrNull { it.key == key } ?: return
+    val updated = transform(old)
+    datasets = datasets.map { if (it.key == key) updated else it }
+    if (updated.id != old.id) {
+      forms.forEach { it.editor.renameTargetDataset(old.id, updated.id) }
+    }
   }
 
   /** Moves Form [key] to [toIndex] in the Forms list. */
@@ -558,8 +571,13 @@ class SurveyEditorState(draft: SurveyEditorDraft = SurveyEditorDraft.blank(surve
     }
   }
 
-  /** Updates property [index]; renaming it also renames the matching cell values in every row. */
+  /**
+   * Updates property [index]; renaming it also renames the matching cell values in every row and
+   * the property references of Forms that update the dataset.
+   */
   fun updateProperty(key: String, index: Int, property: EntityProperty) {
+    val dataset = datasets.firstOrNull { it.key == key } ?: return
+    val oldName = dataset.properties.getOrNull(index)?.name
     updateDataset(key) { d ->
       val old = d.properties.getOrNull(index) ?: return@updateDataset d
       val renamed = old.name != property.name
@@ -577,6 +595,9 @@ class SurveyEditorState(draft: SurveyEditorDraft = SurveyEditorDraft.blank(surve
               else row.copy(values = row.values - old.name + (property.name to value))
             },
       )
+    }
+    if (oldName != null && oldName != property.name) {
+      forms.forEach { it.editor.renameTargetProperty(dataset.id, oldName, property.name) }
     }
   }
 
@@ -639,6 +660,29 @@ class SurveyEditorState(draft: SurveyEditorDraft = SurveyEditorDraft.blank(surve
 
   // Helpers ----------------------------------------------------------------------------------
 
+  /** Dataset kind matching [form]: a Map layer if it captures a location, else a Data table. */
+  private fun datasetKindFor(form: EditorForm): DatasetKind =
+    if (form.hasGeometry) DatasetKind.MAP_LAYER else DatasetKind.DATA_TABLE
+
+  /** Dataset properties mirroring [form]'s questions (notes excluded). */
+  private fun formProperties(form: EditorForm): List<EntityProperty> =
+    form.questions
+      .filter { it.type != EditorQuestionType.NOTE }
+      .map { q ->
+        EntityProperty(
+          name = q.name,
+          label = q.label.ifBlank { q.name },
+          type =
+            when (q.type) {
+              EditorQuestionType.INTEGER -> PropertyType.INTEGER
+              EditorQuestionType.DECIMAL -> PropertyType.DECIMAL
+              EditorQuestionType.DATE -> PropertyType.DATE
+              else -> PropertyType.TEXT
+            },
+          required = q.required,
+        )
+      }
+
   private fun defaultGeometry(d: EntityDataset, at: LatLng?): List<LatLng> {
     val all = d.rows.flatMap { it.geometry }
     val c =
@@ -675,4 +719,51 @@ class SurveyEditorState(draft: SurveyEditorDraft = SurveyEditorDraft.blank(surve
     while ("${base}_$n" in taken) n++
     return "${base}_$n"
   }
+}
+
+/** The Form editor's view of this dataset, from the point of view of Form [formKey]. */
+internal fun EntityDataset.toEditorDataset(formKey: String): EditorDataset =
+  EditorDataset(
+    id = id,
+    displayName = displayName,
+    isMapLayer = kind == DatasetKind.MAP_LAYER,
+    keyProperty = keyProperty,
+    labelProperty = labelProperty,
+    properties =
+      properties.map { p ->
+        EditorDatasetProperty(
+          name = p.name,
+          label = p.label,
+          kind =
+            when (p.type) {
+              PropertyType.TEXT -> EditorPropertyKind.TEXT
+              PropertyType.INTEGER -> EditorPropertyKind.INTEGER
+              PropertyType.DECIMAL -> EditorPropertyKind.DECIMAL
+              PropertyType.BOOLEAN -> EditorPropertyKind.BOOLEAN
+              PropertyType.DATE -> EditorPropertyKind.DATE
+            },
+        )
+      },
+    rows =
+      rows.map { row ->
+        EditorDatasetRow(
+          name = row.values[keyProperty]?.takeIf { it.isNotBlank() } ?: row.key,
+          label = labelOf(row),
+          values = row.values,
+        )
+      },
+    isLinkedToThisForm = linkedFormKey == formKey,
+  )
+
+/**
+ * XForms published for [entry], including its save-to logic. Features of an updated dataset are
+ * embedded, since published Forms have no CSV attachments in this prototype.
+ */
+fun SurveyEditorDraft.publishedFormXml(entry: SurveyEditorForm): String {
+  val catalog = datasets.map { it.toEditorDataset(entry.key) }
+  return EditorXFormsGenerator.toXml(
+    entry.form,
+    SaveToRules.saveTarget(entry.form, catalog),
+    inlineRows = true,
+  )
 }
