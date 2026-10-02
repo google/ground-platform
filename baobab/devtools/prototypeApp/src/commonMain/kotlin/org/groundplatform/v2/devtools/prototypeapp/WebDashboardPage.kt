@@ -101,6 +101,8 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
@@ -132,6 +134,9 @@ internal const val DashboardStatusColumn = "Status"
 /** Column holding the record's label; it is wider than the other columns. */
 internal const val DashboardLabelColumn = "Label"
 
+/** Name of the column holding each record's GeoID, shown with a pending-sync icon until synced. */
+internal const val DashboardGeoIdColumn = "GeoID"
+
 /** Width of the [DashboardStatusColumn], which holds a compact status chip. */
 private val DashboardStatusColumnWidth = 140.dp
 
@@ -156,9 +161,9 @@ internal data class DashboardDataTable(
 /**
  * Builds the web dashboard's data tables: one per entity dataset in [entities] (in order of first
  * appearance), with the [selectedEntityId] row highlighted. Columns are [DashboardStatusColumn],
- * [DashboardLabelColumn], `Submissions`, `GeoID`, then the dataset's properties. Presentation
- * properties (marker and stroke styling) are left out; property values that reference another
- * record are shown as that record's label via [relatedLabel].
+ * [DashboardLabelColumn], `Submissions`, [DashboardGeoIdColumn], then the dataset's properties.
+ * Presentation properties (marker and stroke styling) are left out; property values that reference
+ * another record are shown as that record's label via [relatedLabel].
  */
 internal fun buildDashboardDataTables(
   entities: List<GeospatialEntityItem>,
@@ -186,7 +191,7 @@ internal fun buildDashboardDataTables(
             DashboardDataTableKind.DATA_TABLE
           },
         columns =
-          listOf(DashboardStatusColumn, DashboardLabelColumn, "Submissions", "GeoID") +
+          listOf(DashboardStatusColumn, DashboardLabelColumn, "Submissions", DashboardGeoIdColumn) +
             propertyKeys,
         rows =
           datasetEntities.map { entity ->
@@ -904,6 +909,7 @@ private fun DashboardDataTableView(
                 MaterialTheme.colorScheme.onSurface
               }
             val statusColumnIndex = table.columns.indexOf(DashboardStatusColumn)
+            val geoIdColumnIndex = table.columns.indexOf(DashboardGeoIdColumn)
             Row(
               modifier = Modifier.fillMaxWidth().background(rowColor).clickable { onRowClick(row) },
               verticalAlignment = Alignment.CenterVertically,
@@ -920,7 +926,13 @@ private fun DashboardDataTableView(
                   }
                 } else {
                   Text(
-                    text = cell,
+                    text =
+                      if (cellIndex == geoIdColumnIndex && entity != null) {
+                        buildAnnotatedString { appendGeoId(entity) }
+                      } else {
+                        AnnotatedString(cell)
+                      },
+                    inlineContent = geoIdInlineContent(tint = textColor),
                     style = MaterialTheme.typography.bodySmall,
                     fontWeight = if (row.isSelected) FontWeight.SemiBold else FontWeight.Normal,
                     color = textColor,

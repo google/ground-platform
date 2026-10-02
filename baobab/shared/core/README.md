@@ -38,6 +38,9 @@ dependencies** and compiles to **Android/JVM (`jvm`)**, **iOS (`iosArm64`,
     pipeline (`FormEngine`, `FormSession`, `CompiledForm`) supporting dynamic
     repeats, calculations, relevance, constraints, cascading `itemset`s,
     multilingual translations, and XForms Entities.
+-   **[`org.groundplatform.v2.core.geo.geoid`](src/commonMain/kotlin/org/groundplatform/v2/core/geo/geoid/README.md)**:
+    Offline, bit-exact computation of AgStack Asset Registry GeoIDs (SHA-256 of S2 cell tokens),
+    backed by a minimal pure-Kotlin S2 port in `org.groundplatform.v2.core.geo.s2`.
 
 ## Building and Running Tests
 

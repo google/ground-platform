@@ -570,7 +570,13 @@ internal fun EntityPropertiesPane(
     DetailsSectionHeading("Details")
     DetailsFieldRow(label = "Layer", value = entity.datasetName)
     DetailsFieldRow(label = "Geometry", value = entityGeometrySummary(entity, state.unitSystem))
-    DetailsFieldRow(label = "GeoID", value = entity.geoId)
+    DetailsFieldRow(label = "GeoID") {
+      GeoIdText(
+        entity = entity,
+        style = MaterialTheme.typography.bodyMedium,
+        color = MaterialTheme.colorScheme.onSurface,
+      )
+    }
 
     val properties = entity.displayProperties
     if (properties.isNotEmpty()) {

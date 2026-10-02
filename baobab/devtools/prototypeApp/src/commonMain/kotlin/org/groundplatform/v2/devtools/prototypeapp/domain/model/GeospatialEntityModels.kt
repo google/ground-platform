@@ -51,6 +51,15 @@ data class GeospatialEntityItem(
   val isFailed: Boolean
     get() = syncStatus == SyncStatus.FAILED
 
+  /**
+   * True while [geoId] is a locally computed candidate rather than the GeoID assigned by the
+   * AgStack Asset Registry. A field's registered GeoID depends on what the registry already holds
+   * (its level-13 hash, or the level-20 hash when that is taken), so it is only confirmed once the
+   * record has synced.
+   */
+  val isGeoIdPendingSync: Boolean
+    get() = !isSynced
+
   /** Total number of recorded form submissions linked to this map feature (`1:N`). */
   val submissionCount: Int
     get() = submissions.size

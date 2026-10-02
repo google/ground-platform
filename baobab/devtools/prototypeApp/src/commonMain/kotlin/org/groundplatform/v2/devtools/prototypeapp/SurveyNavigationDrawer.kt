@@ -889,11 +889,19 @@ internal fun EntityQrCodeModalDialog(
           style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
           color = MaterialTheme.colorScheme.onSurface,
         )
-        GroundTonalBadge(
-          text = "GeoID: ${entity.geoId}",
-          tone = GroundBadgeTone.PRIMARY,
-          monospace = true,
-        )
+        Row(
+          verticalAlignment = Alignment.CenterVertically,
+          horizontalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+          GroundTonalBadge(
+            text = "GeoID: ${entity.geoId}",
+            tone = GroundBadgeTone.PRIMARY,
+            monospace = true,
+          )
+          if (entity.isGeoIdPendingSync) {
+            GeoIdPendingSyncIcon(tint = MaterialTheme.colorScheme.onSurfaceVariant)
+          }
+        }
         Text(
           text =
             "Scan with Ground or any EUDR compliance reader to verify ${entity.singularTypeLabel.lowercase()} geometry & GeoID.",

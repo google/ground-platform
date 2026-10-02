@@ -62,6 +62,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -251,13 +252,19 @@ fun DataCollectionFormScreen(state: PrototypeAppState) {
               )
               Text(
                 text =
-                  if (entity != null) {
-                    "${entity.label} • ${entity.geoId}"
-                  } else if (form != null && !form.requiresEntity) {
-                    "Standalone Field Log • ${state.userGpsCoordinatesLabel}"
-                  } else {
-                    "Select ${form?.targetSingularTypeLabel ?: "Feature"} (${form?.targetDatasetName ?: "Required"})"
+                  buildAnnotatedString {
+                    if (entity != null) {
+                      append("${entity.label} • ")
+                      appendGeoId(entity)
+                    } else if (form != null && !form.requiresEntity) {
+                      append("Standalone Field Log • ${state.userGpsCoordinatesLabel}")
+                    } else {
+                      append(
+                        "Select ${form?.targetSingularTypeLabel ?: "Feature"} (${form?.targetDatasetName ?: "Required"})"
+                      )
+                    }
                   },
+                inlineContent = geoIdInlineContent(tint = Color(0xFF8BD6B1)),
                 style = MaterialTheme.typography.labelMedium,
                 color = Color(0xFF8BD6B1),
                 fontWeight = FontWeight.Bold,
@@ -495,9 +502,10 @@ private fun EntityRefStepMapOrListSelector(
                   fontWeight = FontWeight.Bold,
                   color = MaterialTheme.colorScheme.onSurface,
                 )
-                Text(
-                  text =
-                    "GeoID: ${selectedEntity.geoId} • ${state.formattedWayfindingBadgeForEntity(selectedEntity.id)}",
+                GeoIdText(
+                  entity = selectedEntity,
+                  prefix = "GeoID: ",
+                  suffix = " • ${state.formattedWayfindingBadgeForEntity(selectedEntity.id)}",
                   style = MaterialTheme.typography.labelSmall,
                   color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -730,8 +738,10 @@ private fun EntityRefCandidateOptionCard(
           )
           SyncStatusIndicatorBadge(syncStatus = candidate.syncStatus)
         }
-        Text(
-          text = "GeoID: ${candidate.geoId} • $wayfindingBadge",
+        GeoIdText(
+          entity = candidate,
+          prefix = "GeoID: ",
+          suffix = " • $wayfindingBadge",
           style = MaterialTheme.typography.labelSmall,
           color = MaterialTheme.colorScheme.primary,
         )
