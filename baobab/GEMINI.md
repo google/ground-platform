@@ -99,6 +99,6 @@ ProtoForms ([`shared/protos/forms/`](shared/protos/forms/), package `groundplatf
 
 ## Code Formatting (`ktformat` & `buf`)
 
-* **Kotlin Code (`ktformat`)**: All Kotlin source and Gradle script files (`.kt`, `.kts`) **must** be formatted using `ktformat` (`ktfmt` / Google style with 2-space indentation). Run `ktformat` on any new or modified Kotlin files before completing changes.
-* **Protocol Buffers (`buf`)**: All `proto3` schema files (`.proto` under [`shared/protos/`](shared/protos/)) **must** be formatted using `buf` (`buf format -w`). Run `buf format` whenever creating or modifying `.proto` definitions.
+* **Kotlin Code (`ktformat`)**: All Kotlin source and Gradle script files (`.kt`, `.kts`) **must** be formatted using `ktformat` (`ktfmt` / Google style with 2-space indentation). Run `ktformat` on any new or modified Kotlin files before completing changes. The canonical check is [`scripts/ktfmt.sh`](scripts/ktfmt.sh), which pins the ktfmt version and runs across every baobab Gradle build: run `scripts/ktfmt.sh --fix` to format and `scripts/ktfmt.sh` to verify. CI and `nx lint baobab` fail on unformatted files.
+* **Protocol Buffers (`buf`)**: All `proto3` schema files (`.proto` under [`shared/protos/`](shared/protos/)) **must** be formatted using `buf` (`buf format -w`). Run `buf format` whenever creating or modifying `.proto` definitions. The canonical check is [`scripts/buf-format.sh`](scripts/buf-format.sh), which pins the buf version: run `scripts/buf-format.sh --fix` to format and `scripts/buf-format.sh` to verify. CI and `nx lint baobab` fail on unformatted files.
 

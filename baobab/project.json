@@ -1,0 +1,31 @@
+{
+  "$schema": "../node_modules/nx/schemas/project-schema.json",
+  "name": "baobab",
+  "targets": {
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{projectRoot}",
+        "commands": ["bash scripts/ktfmt.sh --check", "bash scripts/buf-format.sh --check"],
+        "parallel": false
+      }
+    },
+    "format:check": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{projectRoot}",
+        "commands": ["bash scripts/ktfmt.sh --check", "bash scripts/buf-format.sh --check"],
+        "parallel": false
+      }
+    },
+    "format": {
+      "executor": "nx:run-commands",
+      "cache": false,
+      "options": {
+        "cwd": "{projectRoot}",
+        "commands": ["bash scripts/ktfmt.sh --fix", "bash scripts/buf-format.sh --fix"],
+        "parallel": false
+      }
+    }
+  }
+}

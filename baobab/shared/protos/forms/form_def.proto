@@ -18,9 +18,9 @@ syntax = "proto3";
 
 package groundplatform.v2.forms;
 
+import "google/protobuf/any.proto";
 import "shared/protos/forms/record_instance.proto";
 import "shared/protos/forms/types.proto";
-import "google/protobuf/any.proto";
 
 // Automated preload calculation providers for populating system metadata,
 // device identifiers, and timestamps without requiring manual user input.
