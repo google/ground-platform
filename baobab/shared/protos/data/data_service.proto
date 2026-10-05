@@ -288,8 +288,7 @@ message SubmissionFieldPatch {
 
     // Sets `SubmissionRecord.encrypted_manifest` (when
     // `key == "encrypted_manifest"`).
-    groundplatform.v2.forms.EncryptedSubmissionManifest
-        encrypted_manifest_value = 9;
+    groundplatform.v2.forms.EncryptedSubmissionManifest encrypted_manifest_value = 9;
   }
 }
 

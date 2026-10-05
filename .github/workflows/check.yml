@@ -30,6 +30,7 @@ jobs:
   changes:
     runs-on: ubuntu-latest
     outputs:
+      baobab: ${{ steps.filter.outputs.baobab }}
       functions: ${{ steps.filter.outputs.functions }}
       lib: ${{ steps.filter.outputs.lib }}
       proto: ${{ steps.filter.outputs.proto }}
@@ -44,6 +45,9 @@ jobs:
         id: filter
         with:
           filters: |
+            baobab:
+              - 'baobab/**'
+              - '.github/workflows/check.yml'
             functions:
               - 'functions/**'
               - 'package*.json'
@@ -68,6 +72,24 @@ jobs:
               - 'nx.json'
               - '.github/workflows/check.yml'
               - '.github/actions/setup/**'
+
+  baobab:
+    needs: changes
+    if: ${{ needs.changes.outputs.baobab == 'true' }}
+    name: baobab
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+        with:
+          persist-credentials: false
+
+      - name: Check Kotlin formatting (ktfmt)
+        run: bash baobab/scripts/ktfmt.sh --check
+
+      - name: Check proto formatting (buf)
+        if: ${{ !cancelled() }}
+        run: bash baobab/scripts/buf-format.sh --check
 
   functions:
     needs: changes

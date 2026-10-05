@@ -18,9 +18,9 @@ syntax = "proto3";
 
 package groundplatform.v2.forms;
 
+import "google/protobuf/timestamp.proto";
 import "shared/protos/forms/audit_log.proto";
 import "shared/protos/forms/types.proto";
-import "google/protobuf/timestamp.proto";
 
 // Standard form metadata header tracking submission provenance, timestamps,
 // device identity, and audit references.

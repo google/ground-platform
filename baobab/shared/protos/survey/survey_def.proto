@@ -18,10 +18,10 @@ syntax = "proto3";
 
 package groundplatform.v2.survey;
 
+import "google/protobuf/any.proto";
 import "shared/protos/data/audit_record.proto";
 import "shared/protos/forms/form_def.proto";
 import "shared/protos/forms/types.proto";
-import "google/protobuf/any.proto";
 
 // Top-level Ground 2.0 Survey Definition.
 //

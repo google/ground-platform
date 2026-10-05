@@ -18,8 +18,8 @@ syntax = "proto3";
 
 package groundplatform.v2.data;
 
-import "shared/protos/survey/acl.proto";
 import "google/protobuf/timestamp.proto";
+import "shared/protos/survey/acl.proto";
 
 // Audit metadata recording creation and modification details for a resource.
 message AuditInfo {

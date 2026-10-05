@@ -18,8 +18,8 @@ syntax = "proto3";
 
 package groundplatform.v2.forms;
 
-import "shared/protos/forms/types.proto";
 import "google/protobuf/timestamp.proto";
+import "shared/protos/forms/types.proto";
 
 // Client audit logging configuration defining telemetry collection policies,
 // background GPS sampling rates, and change-tracking behavior.
