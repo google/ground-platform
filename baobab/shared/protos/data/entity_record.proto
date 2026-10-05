@@ -38,7 +38,8 @@ message EntityRecord {
   // Spatial geometry associated with this geospatial entity (if type is
   // GEOSPATIAL). Exposed to XForms / ProtoForms XPath expressions and
   // `entity_saveto` bindings under the reserved system property name
-  // `"geometry"`. Topological guardrail: Maximum 50 vertices per polygon.
+  // `"geometry"`. Polygon vertex counts are limited by the per-tier
+  // `QuotaLimits.max_area_vertices` quota, not by a fixed schema rule.
   oneof geometry {
     groundplatform.v2.forms.GeoPoint point = 5;
     groundplatform.v2.forms.GeoTrace trace = 6;
@@ -56,4 +57,14 @@ message EntityRecord {
 
   // Soft deletion status flag.
   bool is_deleted = 11;
+
+  // S2 cell token (`S2CellId::ToToken`: hex cell ID with trailing zeros
+  // removed) of the level-13 cell
+  // (about 1 km²) containing the geometry's representative point: the point
+  // itself, the first vertex of a trace, or the vertex average of a shape's
+  // ring. Empty for entities without geometry. Written alongside every
+  // geometry change and indexed by the backend so bounding-box queries
+  // (`ListEntitiesRequest.bbox`) can be answered from a cell range scan on any
+  // key-value store. Servers recompute it rather than trusting clients.
+  string s2_cell_token = 12;
 }

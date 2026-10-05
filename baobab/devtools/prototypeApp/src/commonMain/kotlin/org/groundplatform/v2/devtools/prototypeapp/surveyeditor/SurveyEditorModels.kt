@@ -16,22 +16,27 @@ package org.groundplatform.v2.devtools.prototypeapp.surveyeditor
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.MapLayerItem
 import org.groundplatform.v2.devtools.prototypeapp.formeditor.FormEditorValidator
 
-/** Defines the geographic survey area and boundaries for the survey. */
+/**
+ * Defines the geographic survey area for the survey: one or more polygon parts (e.g. a mainland and
+ * its islands), mirroring `SurveyArea.parts` (`repeated GeoShape`). Each part is an open ring (the
+ * first vertex isn't repeated at the end). Holes aren't supported.
+ *
+ * [center] and [zoom] default to the bounding box of all parts.
+ */
 data class SurveyArea(
   val name: String,
-  val boundaries: List<LatLng>,
-  val center: LatLng =
-    if (boundaries.isNotEmpty()) {
-      LatLng(
-        lat = boundaries.map { it.lat }.average(),
-        lng = boundaries.map { it.lng }.average(),
-      )
-    } else {
-      LatLng(0.0, 0.0)
-    },
-  val zoom: Double = 12.0,
+  val parts: List<List<LatLng>>,
+  val center: LatLng = SurveyAreaGeometry.boundsCenter(parts) ?: LatLng(0.0, 0.0),
+  val zoom: Double = SurveyAreaGeometry.zoomToFit(parts),
   val sourceLabel: String = "Selected boundary",
-)
+) {
+  /** Every vertex of every part. */
+  val allVertices: List<LatLng>
+    get() = parts.flatten()
+
+  val vertexCount: Int
+    get() = parts.sumOf { it.size }
+}
 
 /** Survey-level metadata (mirrors the descriptive fields of `SurveyDef`). */
 data class SurveyDetails(
@@ -236,9 +241,18 @@ data class EntityDataset(
   val properties: List<EntityProperty>,
   val rows: List<EntityRow> = emptyList(),
   val style: LayerStyle = LayerStyle(),
+  /**
+   * How this Map layer's features were generated (`EntityDatasetDef.generator`), or `null` for
+   * hand-made and imported layers. Generated layers have their geometry locked.
+   */
+  val generator: SampleDesignConfig? = null,
 ) {
   val isLinkedToForm: Boolean
     get() = linkedFormKey != null
+
+  /** Whether features are generated sample plots, whose geometry can't be edited by hand. */
+  val isGenerated: Boolean
+    get() = generator != null
 
   fun property(name: String): EntityProperty? = properties.firstOrNull { it.name == name }
 

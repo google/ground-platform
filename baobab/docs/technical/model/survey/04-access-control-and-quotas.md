@@ -92,3 +92,22 @@ Quota Limit                           | Basic Tier | Sponsored Tier
 `max_surveys_per_user`                | 5          | 100
 `max_adhoc_entities_per_user`         | 100        | 200
 `max_submissions_per_entity_per_user` | 10         | 50
+`max_generated_entities`              | 10,000     | 100,000
+`max_area_vertices`                   | 5,000      | 50,000
+
+### Generated Entities and Polygon Vertices
+
+*   **`max_generated_entities`** caps the plots a sample design may generate
+    into one dataset (see
+    [Generated Datasets](02-entity-datasets.md#generated-datasets-sample-designs)).
+    Generated plots are counted separately from `max_predefined_entities`, so
+    a CEO-scale design (100,000 plots) fits the Sponsored tier. The server
+    enforces it when generated plots are published.
+*   **`max_area_vertices`** caps the vertices of each polygon ring: survey area
+    parts (`SurveyArea.parts`) and polygon entity geometries
+    (`EntityRecord.shape`). It replaces the former fixed 50-vertex guardrail on
+    entity polygons, which was a schema rule; as a per-tier quota it lets
+    organizers upload country boundaries while keeping hand-drawn field
+    geometries small on the Basic tier.
+
+The Basic tier values for these two quotas are proposed defaults.

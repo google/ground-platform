@@ -78,6 +78,126 @@ following reserved system properties mapped from `EntityRecord`:
 > `SurveyDef.map_config.layers` via `LayerDef`. See
 > [Maps and Layer Styling](docs/model/survey/03-maps.md).
 
+## Generated Datasets (Sample Designs)
+
+A dataset records how its entities were produced in the `generator` oneof:
+
+```protobuf
+message EntityDatasetDef {
+  // ... fields 1–9 above ...
+  oneof generator {
+    SamplingDesign sampling = 10;
+    ImportProvenance imported = 11;
+  }
+}
+```
+
+*   **`sampling`**: the entities are sample plots produced by the
+    deterministic sampling engine in `shared/core`
+    (`org.groundplatform.v2.core.sampling`).
+*   **`imported`**: the entities came from an uploaded file (`file_name`,
+    `format`, `imported_at`, `input_hash`, `feature_count`).
+
+Either way the entities are stored as ordinary `EntityRecord`s with real
+geometry. The generator is provenance: it makes the dataset auditable, and lets
+organizers regenerate it while no submissions reference it. Nothing recomputes
+geometry at runtime.
+
+### Sampling Design (`SamplingDesign`)
+
+| Field | Meaning |
+| :--- | :--- |
+| `method` | `SYSTEMATIC_GRID`, `SIMPLE_RANDOM`, `STRATIFIED_RANDOM` or `CLUSTER` |
+| `area_ref` | `survey_area` (the survey area's parts form one unnamed stratum) or `strata_layer` (a polygon dataset ID plus the property holding the stratum ID) |
+| `spacing_m` | Distance between plot centers for grids |
+| `count` | Number of plots, or of clusters for `CLUSTER` |
+| `min_distance_m` | Minimum distance between plot (or cluster) centers; 0 disables it |
+| `allocation`, `custom_counts` | `EQUAL`, `PROPORTIONAL` (to stratum area) or `CUSTOM` counts per stratum ID; counts are rounded with the largest-remainder method so they always sum to `count` |
+| `cluster_plots_per_side`, `cluster_plot_spacing_m` | Square pattern of plots around each cluster center; plots outside the area are dropped |
+| `plot_shape`, `plot_size_m` | `SQUARE` (side) or `CIRCLE` (diameter) stored as polygons, or `POINT` |
+| `shuffle` | Shuffle `sample_order` with a seeded Fisher–Yates shuffle |
+| `seed`, `engine_version` | Same inputs, seed and engine version give identical plots on every platform |
+| `sub_plot` | `SubPlotDesign`: `NONE`, `CENTER`, `GRID` (`grid_n` × `grid_n`, `spacing_m` apart), `RANDOM` (`count` points inside the plot, seeded per plot) or `USER_DRAWN` (`allowed_geometry_types`) |
+| `generated_at`, `input_hash`, `feature_count` | Detect stale designs: a hash mismatch with the current area, strata and parameters means the plots no longer match the design |
+
+How the engine works:
+
+*   Plot centers are laid out in a Lambert azimuthal equal-area projection
+    centered on the area, so grids are in true meters near the center and
+    random designs are uniform on the ground.
+*   Coordinates are rounded to 1e-7° (about 1 cm).
+*   A plot belongs to the first stratum whose polygon contains its center.
+*   Randomness comes from a pinned SplitMix64 generator, not the platform's
+    random API.
+
+### Reserved Plot Properties
+
+Generated plots carry these properties. Uploaded and migrated plots use the same
+names, so clients treat all plots alike:
+
+| Property | Content |
+| :--- | :--- |
+| `plot_id` | Stable plot ID unique within the design (`P000001`, …); the dataset `key_property` |
+| `stratum` | Stratum ID; empty for unstratified designs |
+| `sample_order` | 1-based visiting order, shuffled when `shuffle` is set |
+| `inclusion_weight` | Hectares represented by the plot: stratum area ÷ plots in the stratum |
+| `cluster_id` | Cluster ID for `CLUSTER` designs (`C000001`, …); empty otherwise |
+| `samples` | Sub-plot sample points in ODK geotrace format (see below) |
+| `sample_ids` | Optional space-separated sample IDs, one per point in `samples` |
+
+Plot geometry is a `GeoShape` closed ring: 5 coordinates for squares, and 25
+for circles (24 vertices plus the closing one). `POINT` plots use a
+`GeoPoint`.
+
+**`samples` encoding**: points separated by `;` with no surrounding spaces. Each
+point is exactly four space-separated numbers, `lat lng altitude accuracy`, with
+altitude and accuracy set to 0 and at most 7 decimals:
+
+```text
+-1.0001234 37.0004321 0 0;-1.0002 37.0005 0 0;-1.0003 37.0006 0 0
+```
+
+`SampleEncoding` in `shared/core` writes and reads this format
+byte-identically on every platform.
+
+*   A plot holds at most 100 samples. Larger designs use a separate point
+    dataset linked by `plot_id`.
+*   `samples` is left out of map tiles and default list responses
+    (`ListEntitiesRequest.field_mask`).
+
+### Interpretation Form Template
+
+Desk labels for sample points are **repeat instances** in the interpretation
+submission, one per sample point, keyed by `sample_id`. The template uses only
+standard ODK XForms constructs, so it behaves the same in Ground, ODK Collect
+and Enketo:
+
+| type | name | label | calculation / repeat_count | read_only |
+| :--- | :--- | :--- | :--- | :--- |
+| select_one_from_file plots.csv | `plot` | Plot | | |
+| calculate | `samples` | | `instance('plots')/root/item[name=${plot}]/samples` | |
+| calculate | `sample_ids` | | `instance('plots')/root/item[name=${plot}]/sample_ids` | |
+| calculate | `sample_count` | | `if(string-length(${samples}) = 0, 0, string-length(${samples}) - string-length(translate(${samples}, ';', '')) + 1)` | |
+| begin repeat | `sample` | Sample | repeat_count: `${sample_count}` | |
+| calculate | `sample_id` | | `if(string-length(${sample_ids}) = 0, position(..), selected-at(${sample_ids}, position(..) - 1))` | |
+| geopoint | `location` | Sample location | `concat(selected-at(translate(${samples}, ';', ' '), 4 * (position(..) - 1)), ' ', selected-at(translate(${samples}, ';', ' '), 4 * (position(..) - 1) + 1), ' 0 0')` | yes |
+| select_one land_cover | `land_cover` | Land cover | | |
+| end repeat | | | | |
+
+*   **Why `translate()`**: `selected-at()` splits its argument on spaces, while
+    geotrace points are separated by `;` and contain spaces themselves.
+    `translate(samples, ';', ' ')` flattens the geotrace into one
+    space-separated list. Because every point has exactly four numbers, point
+    *i* starts at token `4 × (i − 1)`.
+*   **Launching from a plot**: when the form is launched from a plot
+    (`FormLaunchConfig.target_entity_dataset_id`), Ground is expected to
+    pre-fill `plot` with the plot entity's `name`. Interpretation clients
+    still have to implement this.
+*   **Tests**: the XForms equivalent of this template is
+    `InterpretationFormTemplateTest` in `shared/core`. The test checks that the
+    shared form engine creates one pre-filled repeat instance per sample, and
+    that the form round-trips XML → proto → XML unchanged.
+
 ## Example: Geospatial Plot Dataset
 
 ```textproto

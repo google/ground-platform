@@ -27,6 +27,9 @@ import org.groundplatform.v2.map.Basemap
 import org.groundplatform.v2.map.CameraPosition
 import org.groundplatform.v2.map.Geometry
 import org.groundplatform.v2.map.LatLng as MapLatLng
+import org.groundplatform.v2.map.MapContent
+import org.groundplatform.v2.map.MapLayer
+import org.groundplatform.v2.map.StyleValue
 
 class LayerEditorGeometryTest {
   private val w = 800.0
@@ -112,14 +115,37 @@ class LayerEditorGeometryTest {
   }
 
   @Test
-  fun surveyAreaThumbnailContent_hasBoundaryVerticesAndCenter() {
+  fun surveyAreaThumbnailContent_hasPartsVerticesAndCenter() {
     val area =
       SurveyArea(
         name = "Plot",
-        boundaries = listOf(LatLng(0.0, 0.0), LatLng(0.0, 1.0), LatLng(1.0, 1.0)),
+        parts =
+          listOf(
+            listOf(LatLng(0.0, 0.0), LatLng(0.0, 1.0), LatLng(1.0, 1.0)),
+            listOf(LatLng(2.0, 2.0), LatLng(2.0, 3.0), LatLng(3.0, 3.0)),
+          ),
       )
     val ids = surveyAreaThumbnailContent(area, Color.Blue).sources.single().features.map { it.id }
-    assertEquals(listOf("boundary", "vertex-0", "vertex-1", "vertex-2", "center"), ids)
+    assertEquals(
+      listOf("part-0", "part-1") + (0 until 6).map { "vertex-$it" } + "center",
+      ids,
+    )
+  }
+
+  @Test
+  fun surveyAreaThumbnailContent_skipsVertexDotsForDetailedAreas() {
+    val ring =
+      (0 until 300).map { i ->
+        val a = 2 * kotlin.math.PI * i / 300
+        LatLng(kotlin.math.sin(a), kotlin.math.cos(a))
+      }
+    val ids =
+      surveyAreaThumbnailContent(SurveyArea("Circle", listOf(ring)), Color.Blue)
+        .sources
+        .single()
+        .features
+        .map { it.id }
+    assertEquals(listOf("part-0", "center"), ids)
   }
 
   @Test
@@ -151,5 +177,24 @@ class LayerEditorGeometryTest {
     val key = state.addRow(parcels.key, geometry = drawn)
     val row = state.datasets.first { it.key == parcels.key }.rows.first { it.key == key }
     assertEquals(drawn, row.geometry)
+  }
+
+  @Test
+  fun samplePointsOverlay_drawsHollowRings() {
+    val samples = listOf(LatLng(-0.42, 36.95), LatLng(-0.421, 36.951))
+    val content = withSamplePointsOverlay(MapContent(), samples, Color.Red)
+
+    val rings = content.layers.filterIsInstance<MapLayer.Circle>()
+    assertEquals(2, rings.size)
+    rings.forEach { ring ->
+      assertEquals(StyleValue.Constant(Color.Transparent), ring.color, "${ring.id} is filled")
+    }
+    assertEquals(StyleValue.Constant(Color.Red), rings.last().strokeColor)
+  }
+
+  @Test
+  fun samplePointsOverlay_noSamples_returnsContentUnchanged() {
+    val content = MapContent()
+    assertEquals(content, withSamplePointsOverlay(content, emptyList(), Color.Red))
   }
 }

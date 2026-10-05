@@ -50,6 +50,7 @@ import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Description
 import androidx.compose.material.icons.outlined.DragIndicator
+import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Language
 import androidx.compose.material.icons.outlined.Layers
@@ -61,7 +62,6 @@ import androidx.compose.material.icons.outlined.Warning
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -100,7 +100,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
-import kotlinx.coroutines.delay
 import org.groundplatform.v2.core.forms.ui.GroundBadgeTone
 import org.groundplatform.v2.core.forms.ui.GroundTonalBadge
 import org.groundplatform.v2.devtools.prototypeapp.PrototypeAppState
@@ -108,9 +107,7 @@ import org.groundplatform.v2.devtools.prototypeapp.WebAppHeader
 import org.groundplatform.v2.devtools.prototypeapp.WebHeaderContext
 import org.groundplatform.v2.devtools.prototypeapp.WebHeaderSupportingText
 import org.groundplatform.v2.devtools.prototypeapp.WebMobilePrototypeButton
-import org.groundplatform.v2.devtools.prototypeapp.data.datasource.remote.MapboxPlacesDataSource
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyPlaceItem
-import org.groundplatform.v2.devtools.prototypeapp.domain.model.parsePlaceCoordinates
 import org.groundplatform.v2.devtools.prototypeapp.formeditor.DragAxis
 import org.groundplatform.v2.devtools.prototypeapp.formeditor.DragReorderState
 import org.groundplatform.v2.devtools.prototypeapp.formeditor.DropdownSelector
@@ -332,10 +329,14 @@ private fun DatasetNavGroup(
   datasets: List<EntityDataset>,
   icon: ImageVector,
 ) {
+  var showAddMapLayer by remember { mutableStateOf(false) }
+  if (showAddMapLayer) AddMapLayerDialog(state, onDismiss = { showAddMapLayer = false })
   NavHeading(
     kind.plural,
     addDescription = "Add ${kind.singular.lowercase()}",
-    onAdd = { state.addDataset(kind) },
+    onAdd = {
+      if (kind == DatasetKind.MAP_LAYER) showAddMapLayer = true else state.addDataset(kind)
+    },
   )
   if (datasets.isEmpty()) NavEmpty("No ${kind.plural.lowercase()} yet")
   ReorderableNavList(items = datasets, keyOf = { it.key }, onMove = state::moveDataset) {
@@ -682,17 +683,16 @@ private fun LanguageSelectorSection(state: SurveyEditorState) {
 @Composable
 private fun SurveyAreaSection(state: SurveyEditorState, localPlaces: List<SurveyPlaceItem>) {
   val area = state.details.surveyArea
-  var showSearchDialog by remember { mutableStateOf(false) }
+  var showEditor by remember { mutableStateOf(false) }
 
-  if (showSearchDialog) {
-    SurveyAreaPickerDialog(
+  if (showEditor) {
+    SurveyAreaEditorDialog(
       surveyId = state.details.surveyId,
       surveyLocationLabel = state.details.title.ifBlank { "Survey" },
-      surveyCenter = area?.center ?: LatLng(-0.4198, 36.9512),
-      currentAreaName = area?.name,
+      current = area,
       localPlaces = localPlaces,
-      onSelectArea = { newArea -> state.setSurveyArea(newArea) },
-      onDismiss = { showSearchDialog = false },
+      onSave = { newArea -> state.setSurveyArea(newArea) },
+      onDismiss = { showEditor = false },
     )
   }
 
@@ -748,9 +748,14 @@ private fun SurveyAreaSection(state: SurveyEditorState, localPlaces: List<Survey
                 overflow = TextOverflow.Ellipsis,
               )
             }
+            val summary = remember(area) { areaSummary(area) }
             Text(
-              text =
-                "Center: ${formatFixed(area.center.lat, 4)}°, ${formatFixed(area.center.lng, 4)}° • ${area.boundaries.size} boundary vertices",
+              text = summary,
+              style = MaterialTheme.typography.bodySmall,
+              color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Text(
+              text = "Source: ${area.sourceLabel}",
               style = MaterialTheme.typography.bodySmall,
               color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -759,16 +764,16 @@ private fun SurveyAreaSection(state: SurveyEditorState, localPlaces: List<Survey
               modifier = Modifier.padding(top = 4.dp),
             ) {
               OutlinedButton(
-                onClick = { showSearchDialog = true },
+                onClick = { showEditor = true },
                 shape = RoundedCornerShape(8.dp),
               ) {
                 Icon(
-                  Icons.Outlined.Search,
+                  Icons.Outlined.Edit,
                   contentDescription = null,
                   modifier = Modifier.size(16.dp),
                 )
                 Spacer(Modifier.width(6.dp))
-                Text("Change area")
+                Text("Edit survey area")
               }
               OutlinedButton(
                 onClick = { state.setSurveyArea(null) },
@@ -818,22 +823,22 @@ private fun SurveyAreaSection(state: SurveyEditorState, localPlaces: List<Survey
             )
             Text(
               text =
-                "Search for a location, town, region, or enter coordinates to set the survey boundary.",
+                "Search for a place, draw a boundary on the map, or upload a GeoJSON or KML file.",
               style = MaterialTheme.typography.bodySmall,
               color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             OutlinedButton(
-              onClick = { showSearchDialog = true },
+              onClick = { showEditor = true },
               shape = RoundedCornerShape(8.dp),
               modifier = Modifier.padding(top = 4.dp),
             ) {
               Icon(
-                Icons.Outlined.Search,
+                Icons.Outlined.Map,
                 contentDescription = null,
                 modifier = Modifier.size(16.dp),
               )
               Spacer(Modifier.width(6.dp))
-              Text("Search and set area")
+              Text("Set survey area")
             }
           }
         }
@@ -844,10 +849,10 @@ private fun SurveyAreaSection(state: SurveyEditorState, localPlaces: List<Survey
 
 /**
  * Small, static (not pan-able or zoom-able) map thumbnail showing a satellite basemap with the
- * survey area's boundary polygon and center point on top.
+ * survey area's parts and center point on top.
  */
 @Composable
-private fun SurveyAreaThumbnail(area: SurveyArea, modifier: Modifier = Modifier) {
+internal fun SurveyAreaThumbnail(area: SurveyArea, modifier: Modifier = Modifier) {
   val boundaryColor = MaterialTheme.colorScheme.primary
   val cameraState =
     remember(area) { MapCameraState(CameraPosition(area.center.toMapLatLng(), area.zoom)) }
@@ -855,7 +860,7 @@ private fun SurveyAreaThumbnail(area: SurveyArea, modifier: Modifier = Modifier)
   val viewportReady = viewport.width > 4.dp && viewport.height > 4.dp
   LaunchedEffect(area, viewportReady) {
     if (!viewportReady) return@LaunchedEffect
-    val pts = (area.boundaries.ifEmpty { listOf(area.center) }).map { it.toMapLatLng() }
+    val pts = (area.allVertices.ifEmpty { listOf(area.center) }).map { it.toMapLatLng() }
     val lngSpan = pts.maxOf { it.longitude } - pts.minOf { it.longitude }
     // Bounds spanning > 180° longitude (e.g. across the antimeridian) would center on the wrong
     // side of the world, so anchor on the area's own center and zoom instead.
@@ -866,7 +871,6 @@ private fun SurveyAreaThumbnail(area: SurveyArea, modifier: Modifier = Modifier)
         val padding = MapInsets(16.dp, 16.dp, 16.dp, 16.dp)
         cameraState.fitBounds(LngLatBounds.of(pts), padding, durationMs = 0).zoom
       }
-    // Keep the fitted zoom but center directly over the surveyed place.
     cameraState.move(CameraPosition(area.center.toMapLatLng(), zoom))
   }
   val content = remember(area, boundaryColor) { surveyAreaThumbnailContent(area, boundaryColor) }
@@ -887,15 +891,32 @@ private fun SurveyAreaThumbnail(area: SurveyArea, modifier: Modifier = Modifier)
   }
 }
 
-/** The survey area's boundary (fill, outline, vertices) and center over a satellite basemap. */
+/** Vertex dots are only drawn when the simplified area has at most this many vertices. */
+internal const val THUMBNAIL_MAX_VERTEX_DOTS = 200
+
+/**
+ * The survey area's parts (fill, outline and, for simple areas, vertices) and center over a
+ * satellite basemap. Parts are simplified for display, so large uploaded boundaries stay cheap.
+ */
 internal fun surveyAreaThumbnailContent(area: SurveyArea, boundaryColor: Color): MapContent {
   val src = "survey-area"
-  val boundary = area.boundaries.map { it.toMapLatLng() }
+  val parts =
+    SurveyAreaGeometry.displayParts(area.parts)
+      .filter { it.size >= 3 }
+      .map { part ->
+        part.map { it.toMapLatLng() }
+      }
+  val showVertices = parts.sumOf { it.size } <= THUMBNAIL_MAX_VERTEX_DOTS
   val features = buildList {
-    if (boundary.size >= 3) {
-      add(MapFeature("boundary", Geometry.Polygon(listOf(boundary))))
-      boundary.forEachIndexed { i, p ->
-        add(MapFeature("vertex-$i", Geometry.Point(p), mapOf("kind" to "vertex")))
+    parts.forEachIndexed { i, part ->
+      add(MapFeature("part-$i", Geometry.Polygon(listOf(part))))
+    }
+    if (showVertices) {
+      var v = 0
+      parts.forEach { part ->
+        part.forEach { p ->
+          add(MapFeature("vertex-${v++}", Geometry.Point(p), mapOf("kind" to "vertex")))
+        }
       }
     }
     add(MapFeature("center", Geometry.Point(area.center.toMapLatLng()), mapOf("kind" to "center")))
@@ -937,306 +958,6 @@ internal fun surveyAreaThumbnailContent(area: SurveyArea, boundaryColor: Color):
           strokeWidth = 1.dp,
         ),
       ),
-  )
-}
-
-/**
- * Dialog allowing the user to search the Mapbox Places API (or enter raw GPS coordinates) to define
- * the survey area boundary.
- */
-@Composable
-private fun SurveyAreaPickerDialog(
-  surveyId: String,
-  surveyLocationLabel: String,
-  surveyCenter: LatLng,
-  currentAreaName: String?,
-  localPlaces: List<SurveyPlaceItem>,
-  onSelectArea: (SurveyArea) -> Unit,
-  onDismiss: () -> Unit,
-) {
-  var searchQuery by remember { mutableStateOf("") }
-  var isSearching by remember { mutableStateOf(false) }
-  var remotePlaces by remember { mutableStateOf<List<SurveyPlaceItem>>(emptyList()) }
-  val placesDataSource = remember { MapboxPlacesDataSource() }
-
-  // Query live Mapbox Places API when user types a query (with debounce)
-  LaunchedEffect(searchQuery, surveyId) {
-    val q = searchQuery.trim()
-    if (q.isBlank()) {
-      remotePlaces = emptyList()
-      isSearching = false
-      return@LaunchedEffect
-    }
-    isSearching = true
-    delay(250) // Debounce rapid keystrokes
-    placesDataSource.searchPlaces(
-      surveyId = surveyId,
-      query = q,
-      isAirplaneMode = false,
-      defaultRegionSubtitle = surveyLocationLabel,
-      centerLongitude = surveyCenter.lng,
-      centerLatitude = surveyCenter.lat,
-    ) { results ->
-      remotePlaces = results
-      isSearching = false
-    }
-  }
-
-  val matchingPlaces =
-    remember(searchQuery, remotePlaces, localPlaces) {
-      val q = searchQuery.trim()
-      val directCoords = parsePlaceCoordinates(q)
-      val customPlace =
-        if (directCoords != null) {
-          val (lat, lng) = directCoords
-          SurveyPlaceItem(
-            id = "custom-coords",
-            name = "GPS: ${formatFixed(lat, 4)}°, ${formatFixed(lng, 4)}°",
-            categoryLabel = "Custom Coordinates",
-            regionSubtitle = "Direct coordinates input",
-            coordinatesLabel = "${formatFixed(lat, 4)}, ${formatFixed(lng, 4)}",
-            normalizedX = 0.5f,
-            normalizedY = 0.5f,
-            latitude = lat,
-            longitude = lng,
-            sourceLabel = "Coordinates",
-          )
-        } else {
-          null
-        }
-
-      if (q.isEmpty()) {
-        localPlaces
-      } else {
-        // Prioritize remote Mapbox Places API results, merged with matching local gazetteer entries
-        val combined = LinkedHashMap<String, SurveyPlaceItem>()
-        if (customPlace != null) {
-          combined[customPlace.id] = customPlace
-        }
-        for (apiPlace in remotePlaces) {
-          combined[apiPlace.id] = apiPlace
-        }
-        val filteredLocal = localPlaces.filter { place ->
-          place.name.contains(q, ignoreCase = true) ||
-            place.categoryLabel.contains(q, ignoreCase = true) ||
-            place.regionSubtitle.contains(q, ignoreCase = true) ||
-            place.coordinatesLabel.contains(q, ignoreCase = true)
-        }
-        for (localPlace in filteredLocal) {
-          if (combined.values.none { it.name.equals(localPlace.name, ignoreCase = true) }) {
-            combined[localPlace.id] = localPlace
-          }
-        }
-        combined.values.toList()
-      }
-    }
-
-  AlertDialog(
-    onDismissRequest = onDismiss,
-    title = {
-      Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-      ) {
-        Icon(
-          Icons.Outlined.Map,
-          contentDescription = null,
-          tint = MaterialTheme.colorScheme.primary,
-        )
-        Text("Select Survey Area")
-      }
-    },
-    text = {
-      Column(
-        modifier = Modifier.fillMaxWidth().heightIn(min = 360.dp, max = 520.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-      ) {
-        OutlinedTextField(
-          value = searchQuery,
-          onValueChange = { searchQuery = it },
-          label = { Text("Search places or enter coordinates") },
-          placeholder = { Text("e.g. Nairobi, Othaya, Chinga Dam, or -0.419, 36.950") },
-          leadingIcon = { Icon(Icons.Outlined.Search, contentDescription = null) },
-          trailingIcon = {
-            if (isSearching) {
-              CircularProgressIndicator(modifier = Modifier.size(18.dp), strokeWidth = 2.dp)
-            } else if (searchQuery.isNotEmpty()) {
-              IconButton(onClick = { searchQuery = "" }) {
-                Icon(Icons.Outlined.Close, contentDescription = "Clear search")
-              }
-            }
-          },
-          singleLine = true,
-          modifier = Modifier.fillMaxWidth(),
-        )
-
-        Row(
-          modifier = Modifier.fillMaxWidth(),
-          horizontalArrangement = Arrangement.SpaceBetween,
-          verticalAlignment = Alignment.CenterVertically,
-        ) {
-          Text(
-            text =
-              if (searchQuery.isBlank()) "Suggested survey locations:"
-              else "${matchingPlaces.size} locations found:",
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-          )
-        }
-
-        Surface(
-          shape = RoundedCornerShape(8.dp),
-          color = MaterialTheme.colorScheme.surfaceContainerLow,
-          modifier = Modifier.weight(1f).fillMaxWidth(),
-        ) {
-          if (matchingPlaces.isEmpty()) {
-            Box(
-              modifier = Modifier.fillMaxSize().padding(24.dp),
-              contentAlignment = Alignment.Center,
-            ) {
-              Text(
-                if (isSearching) "Searching places..." else "No places matching “$searchQuery”",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-              )
-            }
-          } else {
-            LazyColumn(modifier = Modifier.fillMaxSize()) {
-              items(matchingPlaces, key = { it.id }) { place ->
-                val isSelected =
-                  currentAreaName != null && place.name.equals(currentAreaName, ignoreCase = true)
-                Row(
-                  modifier =
-                    Modifier.fillMaxWidth()
-                      .clickable(enabled = !isSelected) {
-                        val area = placeToSurveyArea(place)
-                        onSelectArea(area)
-                        onDismiss()
-                      }
-                      .padding(horizontal = 14.dp, vertical = 10.dp),
-                  verticalAlignment = Alignment.CenterVertically,
-                  horizontalArrangement = Arrangement.spacedBy(12.dp),
-                ) {
-                  Icon(
-                    Icons.Outlined.LocationOn,
-                    contentDescription = null,
-                    tint =
-                      if (isSelected) MaterialTheme.colorScheme.primary
-                      else MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.size(24.dp),
-                  )
-                  Column(modifier = Modifier.weight(1f)) {
-                    Row(
-                      verticalAlignment = Alignment.CenterVertically,
-                      horizontalArrangement = Arrangement.spacedBy(6.dp),
-                    ) {
-                      Text(
-                        text = place.name,
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.Medium,
-                      )
-                      val cleanSource =
-                        if (place.sourceLabel.equals("Places API", ignoreCase = true)) "Online"
-                        else place.sourceLabel
-                      if (cleanSource.isNotBlank()) {
-                        Text(
-                          text = "• $cleanSource",
-                          style = MaterialTheme.typography.labelSmall,
-                          color = MaterialTheme.colorScheme.primary,
-                        )
-                      }
-                    }
-                    Text(
-                      text = "${place.categoryLabel} • ${place.regionSubtitle}",
-                      style = MaterialTheme.typography.bodySmall,
-                      color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                    Text(
-                      text = place.coordinatesLabel,
-                      style =
-                        MaterialTheme.typography.labelSmall.copy(fontFamily = FontFamily.Monospace),
-                      color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
-                    )
-                  }
-                  if (isSelected) {
-                    GroundTonalBadge(text = "Selected", tone = GroundBadgeTone.PRIMARY)
-                  } else {
-                    OutlinedButton(
-                      onClick = {
-                        val area = placeToSurveyArea(place)
-                        onSelectArea(area)
-                        onDismiss()
-                      },
-                      shape = RoundedCornerShape(6.dp),
-                    ) {
-                      Text("Select")
-                    }
-                  }
-                }
-                HorizontalDivider(
-                  color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
-                )
-              }
-            }
-          }
-        }
-      }
-    },
-    confirmButton = {},
-    dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } },
-  )
-}
-
-/** Converts a [SurveyPlaceItem] to a [SurveyArea] with appropriate polygon boundary vertices. */
-private fun placeToSurveyArea(place: SurveyPlaceItem): SurveyArea {
-  val lat = place.latitude
-  val lng = place.longitude
-  val boundaries =
-    if (
-      place.bboxMinLat != null &&
-        place.bboxMinLng != null &&
-        place.bboxMaxLat != null &&
-        place.bboxMaxLng != null
-    ) {
-      val minLng = place.bboxMinLng
-      val maxLng = place.bboxMaxLng
-      val minLat = place.bboxMinLat
-      val maxLat = place.bboxMaxLat
-      // If a country bounding box spans global bounds [-180, 180], restrict the boundary
-      // polygon to reasonable geographic extent centered around the place center
-      // so it does not wrap the whole globe into an invalid full-world box.
-      if (maxLng - minLng >= 350.0) {
-        val spanLat = (maxLat - minLat).coerceAtLeast(10.0)
-        val halfLng = (spanLat * 1.4).coerceAtMost(35.0)
-        listOf(
-          LatLng(maxLat, lng - halfLng),
-          LatLng(maxLat, lng + halfLng),
-          LatLng(minLat, lng + halfLng),
-          LatLng(minLat, lng - halfLng),
-        )
-      } else {
-        listOf(
-          LatLng(maxLat, minLng),
-          LatLng(maxLat, maxLng),
-          LatLng(minLat, maxLng),
-          LatLng(minLat, minLng),
-        )
-      }
-    } else {
-      val delta = 0.015
-      listOf(
-        LatLng(lat + delta, lng - delta),
-        LatLng(lat + delta, lng + delta),
-        LatLng(lat - delta, lng + delta),
-        LatLng(lat - delta, lng - delta),
-      )
-    }
-  return SurveyArea(
-    name = place.name,
-    boundaries = boundaries,
-    center = LatLng(lat, lng),
-    zoom = place.targetZoom.toDouble(),
-    sourceLabel = place.sourceLabel,
   )
 }
 

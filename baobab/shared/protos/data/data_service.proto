@@ -101,6 +101,45 @@ message ListEntitiesRequest {
 
   // Whether to include soft-deleted entities (`is_deleted == true`).
   bool include_deleted = 5;
+
+  // Optional spatial filter: only entities whose representative point
+  // (`EntityRecord.s2_cell_token`) lies inside this box. Answered from the S2
+  // cell index, so results may include entities up to one level-13 cell
+  // (about 1 km) outside the box; clients filter exactly if they need to.
+  GeoBoundingBox bbox = 6;
+
+  // Optional property-equality filter: only entities whose
+  // `EntityRecord.properties[key]`, rendered as a string, equals the value for
+  // every entry (e.g. {"status": "needs_field_validation", "stratum":
+  // "forest"}). An empty value matches entities without the property.
+  map<string, string> filter = 7;
+
+  // Optional projection: names of the `EntityRecord.properties` entries to
+  // return. `entity_id`, `dataset_id`, `revision`, `label` and `is_deleted`
+  // are always returned. Two reserved names control geometry:
+  //   - "geometry": return the full geometry.
+  //   - "centroid": return only the geometry's representative point as
+  //     `EntityRecord.point`.
+  // Geometry is omitted when neither is listed. For example, ["centroid",
+  // "status"] gives a lightweight response for map overviews, leaving out
+  // large properties such as "samples". An empty list returns full records.
+  repeated string field_mask = 8;
+}
+
+// Axis-aligned latitude/longitude box in WGS 84 decimal degrees. Boxes
+// crossing the antimeridian have `min_longitude` > `max_longitude`.
+message GeoBoundingBox {
+  // Southern edge, between -90.0 and +90.0.
+  double min_latitude = 1;
+
+  // Western edge, between -180.0 and +180.0.
+  double min_longitude = 2;
+
+  // Northern edge, between -90.0 and +90.0.
+  double max_latitude = 3;
+
+  // Eastern edge, between -180.0 and +180.0.
+  double max_longitude = 4;
 }
 
 // Response containing matching entity records.

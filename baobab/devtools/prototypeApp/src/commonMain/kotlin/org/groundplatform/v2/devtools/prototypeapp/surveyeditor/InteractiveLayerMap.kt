@@ -33,6 +33,7 @@ import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.Done
 import androidx.compose.material.icons.outlined.Layers
+import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material.icons.outlined.Remove
 import androidx.compose.material.icons.outlined.ZoomOutMap
 import androidx.compose.material3.Button
@@ -127,6 +128,15 @@ internal const val LAYER_EDITOR_SELECTED = "selected"
  *   vertex, or drag the feature itself to move it.
  * - "Add feature" draws a new point, line or polygon by clicking on the map; clicking the last (or,
  *   for polygons, the first) vertex again finishes it.
+ *
+ * When [geometryEditable] is false (generated sample plots), features can only be selected: the
+ * drawing tool and vertex handles are hidden. The selected feature's sample points (its `samples`
+ * property) are drawn on top.
+ *
+ * @param featureNoun what the toolbar calls a new feature (e.g. "part"); defaults to the geometry
+ *   type.
+ * @param showLabels whether to draw feature labels when zoomed in.
+ * @param emptyCamera where the map starts when the layer has no features yet.
  */
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -136,6 +146,10 @@ internal fun InteractiveLayerMapCard(
   selectedRow: String?,
   onSelectRow: (String?) -> Unit,
   modifier: Modifier = Modifier,
+  geometryEditable: Boolean = !dataset.isGenerated,
+  featureNoun: String? = null,
+  showLabels: Boolean = true,
+  emptyCamera: CameraPosition = DEFAULT_EDITOR_CAMERA,
 ) {
   val colors = MaterialTheme.colorScheme
   val density = LocalDensity.current.density
@@ -144,7 +158,7 @@ internal fun InteractiveLayerMapCard(
     MaterialTheme.typography.labelSmall.copy(color = colors.onSurface, fontWeight = FontWeight.Bold)
   val scope = rememberCoroutineScope()
 
-  val cameraState = remember(dataset.key) { MapCameraState(DEFAULT_EDITOR_CAMERA) }
+  val cameraState = remember(dataset.key) { MapCameraState(emptyCamera) }
   var fitted by remember(dataset.key) { mutableStateOf(false) }
   var basemap by remember { mutableStateOf(EditorBasemap.SATELLITE) }
   var tool by remember(dataset.key) { mutableStateOf(MapTool.SELECT) }
@@ -155,6 +169,7 @@ internal fun InteractiveLayerMapCard(
   val currentDataset by rememberUpdatedState(dataset)
   val currentSelected by rememberUpdatedState(selectedRow)
   val currentOnSelect by rememberUpdatedState(onSelectRow)
+  val currentEditable by rememberUpdatedState(geometryEditable)
 
   fun screenOf(p: MapLatLng): ScreenPoint = cameraState.project(p).toScreenPoint()
 
@@ -166,7 +181,7 @@ internal fun InteractiveLayerMapCard(
   suspend fun fitAll(durationMs: Int = MapCameraState.DEFAULT_ANIMATION_MS) {
     val points = currentDataset.rows.flatMap { it.geometry }.map { it.toMapLatLng() }
     when {
-      points.isEmpty() -> cameraState.animateTo(DEFAULT_EDITOR_CAMERA, durationMs)
+      points.isEmpty() -> cameraState.animateTo(emptyCamera, durationMs)
       points.distinct().size == 1 ->
         cameraState.animateTo(CameraPosition(points.first(), 16.0), durationMs)
       else ->
@@ -236,7 +251,7 @@ internal fun InteractiveLayerMapCard(
   fun pickDrag(p: ScreenPoint): MapDrag? {
     val ds = currentDataset
     val sel = currentSelected
-    if (tool != MapTool.SELECT || sel == null) return null
+    if (!currentEditable || tool != MapTool.SELECT || sel == null) return null
     val row = ds.rows.firstOrNull { it.key == sel } ?: return null
     if (row.geometry.isEmpty()) return null
     val pts = row.geometry.map(::project)
@@ -291,9 +306,26 @@ internal fun InteractiveLayerMapCard(
       EditorBasemap.TERRAIN -> SurveyBasemaps.Streets
       EditorBasemap.NONE -> Basemap.None(colors.surfaceContainerHigh)
     }
-  val content =
+  val baseContent =
     remember(dataset, selectedRow, layerColor, mapBasemap) {
       layerEditorContent(dataset, selectedRow, layerColor, mapBasemap)
+    }
+  // Sample points of the selected plot go in a small overlay source, so they cost O(samples).
+  val selectedSamples =
+    remember(dataset.rows, selectedRow) {
+      dataset.rows
+        .firstOrNull { it.key == selectedRow }
+        ?.values
+        ?.get(SamplePlotProperties.SAMPLES)
+        .orEmpty()
+    }
+  val content =
+    remember(baseContent, selectedSamples, layerColor) {
+      withSamplePointsOverlay(
+        baseContent,
+        SamplePlotProperties.parseGeotrace(selectedSamples),
+        layerColor,
+      )
     }
 
   ElevatedCard(
@@ -303,6 +335,8 @@ internal fun InteractiveLayerMapCard(
     Column(modifier = Modifier.fillMaxSize()) {
       MapToolbar(
         dataset = dataset,
+        editable = geometryEditable,
+        featureNoun = featureNoun,
         tool = tool,
         draftSize = draft.size,
         onStartDrawing = {
@@ -354,7 +388,7 @@ internal fun InteractiveLayerMapCard(
 
           val casing = Color.Black.copy(alpha = 0.35f)
           val selected = dataset.rows.firstOrNull { it.key == selectedRow }
-          if (selected != null && dataset.geometryKind != GeometryKind.POINT) {
+          if (geometryEditable && selected != null && dataset.geometryKind != GeometryKind.POINT) {
             val screen = selected.geometry.map(::project)
             midpoints(screen, closed = dataset.geometryKind == GeometryKind.POLYGON).forEach {
               val m = it.toOffset()
@@ -369,17 +403,21 @@ internal fun InteractiveLayerMapCard(
           }
 
           // Feature labels on pills of the layer color, like the survey map's feature chips.
-          if (zoom >= LABEL_MIN_ZOOM) {
+          if (showLabels && zoom >= LABEL_MIN_ZOOM) {
             val onLayerColor =
               Color(contentColorOnArgb(layerColor.toArgb().toLong() and 0xFFFFFFFFL))
             dataset.rows.forEach { row ->
               val pts = row.geometry.map(::proj)
               if (pts.isEmpty()) return@forEach
+              val anchorX = pts.map { it.x }.average().toFloat()
+              val anchorY = pts.maxOf { it.y } + 10.dp.toPx()
+              // Skip off-screen features before the (comparatively costly) text measurement.
+              if (anchorX !in -200f..size.width + 200f || anchorY !in -50f..size.height + 50f) {
+                return@forEach
+              }
               val label = dataset.labelOf(row)
               if (label.isBlank()) return@forEach
               val measured = textMeasurer.measure(label, labelStyle)
-              val anchorX = pts.map { it.x }.average().toFloat()
-              val anchorY = pts.maxOf { it.y } + 10.dp.toPx()
               val padX = 6.dp.toPx()
               val padY = 2.dp.toPx()
               val topLeft = Offset(anchorX - measured.size.width / 2f, anchorY)
@@ -434,7 +472,10 @@ internal fun InteractiveLayerMapCard(
           basemap = basemap,
           onBasemap = { basemap = it },
           hoverLatLng = hover?.let(::unproject),
-          hint = hintFor(tool, dataset.geometryKind, selectedRow != null, draft.size),
+          hint =
+            if (geometryEditable)
+              hintFor(tool, dataset.geometryKind, selectedRow != null, draft.size)
+            else LOCKED_HINT,
           onZoomIn = { scope.launch { cameraState.zoomBy(1.0) } },
           onZoomOut = { scope.launch { cameraState.zoomBy(-1.0) } },
           onFit = { scope.launch { fitAll() } },
@@ -527,6 +568,53 @@ internal fun layerEditorContent(
   )
 }
 
+internal const val LAYER_EDITOR_SAMPLES_SOURCE = "layer-editor-samples"
+
+/**
+ * [content] plus [samples] (the selected plot's sample points) drawn above everything else. Returns
+ * [content] unchanged when there are none.
+ *
+ * Sample points are hollow rings, so interpreters can see the imagery inside each one: a ring in
+ * [layerColor] over a slightly wider white halo, which keeps it legible on both dark and bright
+ * imagery.
+ */
+internal fun withSamplePointsOverlay(
+  content: MapContent,
+  samples: List<LatLng>,
+  layerColor: Color,
+): MapContent {
+  if (samples.isEmpty()) return content
+  val features = samples.mapIndexed { i, p ->
+    MapFeature(id = "sample-${i + 1}", geometry = Geometry.Point(p.toMapLatLng()))
+  }
+  return content.copy(
+    sources = content.sources + GeoJsonSource(LAYER_EDITOR_SAMPLES_SOURCE, features),
+    layers =
+      content.layers +
+        listOf(
+          MapLayer.Circle(
+            id = "layer-editor-samples-halo",
+            sourceId = LAYER_EDITOR_SAMPLES_SOURCE,
+            color = StyleValue.Constant(Color.Transparent),
+            radius = StyleValue.Constant(SAMPLE_RING_RADIUS),
+            strokeColor = StyleValue.Constant(Color.White),
+            strokeWidth = 3.5.dp,
+          ),
+          MapLayer.Circle(
+            id = "layer-editor-samples",
+            sourceId = LAYER_EDITOR_SAMPLES_SOURCE,
+            color = StyleValue.Constant(Color.Transparent),
+            radius = StyleValue.Constant(SAMPLE_RING_RADIUS + 1.dp),
+            strokeColor = StyleValue.Constant(layerColor),
+            strokeWidth = 1.5.dp,
+          ),
+        ),
+  )
+}
+
+/** Inner radius of a sample point ring; the ring itself is drawn outside it. */
+private val SAMPLE_RING_RADIUS = 5.dp
+
 /**
  * These vertices as a map geometry of [kind], or the simplest geometry they can form while still
  * being drawn (e.g. a two-vertex polygon renders as a line).
@@ -551,6 +639,8 @@ private suspend fun MapCameraState.zoomBy(delta: Double) {
 @Composable
 private fun MapToolbar(
   dataset: EntityDataset,
+  editable: Boolean,
+  featureNoun: String?,
   tool: MapTool,
   draftSize: Int,
   onStartDrawing: () -> Unit,
@@ -559,11 +649,12 @@ private fun MapToolbar(
   onCancel: () -> Unit,
 ) {
   val noun =
-    when (dataset.geometryKind) {
-      GeometryKind.POINT -> "point"
-      GeometryKind.LINE -> "line"
-      GeometryKind.POLYGON -> "polygon"
-    }
+    featureNoun
+      ?: when (dataset.geometryKind) {
+        GeometryKind.POINT -> "point"
+        GeometryKind.LINE -> "line"
+        GeometryKind.POLYGON -> "polygon"
+      }
   Row(
     modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
     verticalAlignment = Alignment.CenterVertically,
@@ -575,7 +666,19 @@ private fun MapToolbar(
       fontWeight = FontWeight.Bold,
       modifier = Modifier.weight(1f),
     )
-    if (tool == MapTool.DRAW) {
+    if (!editable) {
+      Icon(
+        Icons.Outlined.Lock,
+        contentDescription = null,
+        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = Modifier.size(16.dp),
+      )
+      Text(
+        "Generated geometry can't be edited",
+        style = MaterialTheme.typography.labelMedium,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+      )
+    } else if (tool == MapTool.DRAW) {
       val min = dataset.geometryKind.minVertices
       if (dataset.geometryKind != GeometryKind.POINT) {
         Text(
@@ -743,6 +846,9 @@ private fun MapOverlays(
     }
   }
 }
+
+private const val LOCKED_HINT =
+  "Drag to pan • Scroll or pinch to zoom • Click a plot to see its sample points"
 
 private fun hintFor(tool: MapTool, kind: GeometryKind, hasSelection: Boolean, draftSize: Int) =
   when {

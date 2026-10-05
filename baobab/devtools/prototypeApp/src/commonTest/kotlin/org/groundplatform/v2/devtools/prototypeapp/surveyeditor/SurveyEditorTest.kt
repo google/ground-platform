@@ -378,7 +378,7 @@ class SurveyEditorTest {
     val state = SurveyEditorState(SurveyEditorSamples.draft())
     val initialArea = assertNotNull(state.details.surveyArea)
     assertEquals("Othaya Sub-County, Nyeri", initialArea.name)
-    assertEquals(4, initialArea.boundaries.size)
+    assertEquals(4, initialArea.vertexCount)
 
     // Clear survey area
     state.setSurveyArea(null)
@@ -388,12 +388,14 @@ class SurveyEditorTest {
     val customArea =
       SurveyArea(
         name = "Chinga Dam & Reservoir",
-        boundaries =
+        parts =
           listOf(
-            LatLng(-0.4130, 36.9430),
-            LatLng(-0.4130, 36.9720),
-            LatLng(-0.4380, 36.9720),
-            LatLng(-0.4380, 36.9430),
+            listOf(
+              LatLng(-0.4130, 36.9430),
+              LatLng(-0.4130, 36.9720),
+              LatLng(-0.4380, 36.9720),
+              LatLng(-0.4380, 36.9430),
+            )
           ),
         center = LatLng(-0.4258, 36.9574),
         zoom = 13.0,
@@ -401,9 +403,25 @@ class SurveyEditorTest {
     state.setSurveyArea(customArea)
     val updated = assertNotNull(state.details.surveyArea)
     assertEquals("Chinga Dam & Reservoir", updated.name)
-    assertEquals(4, updated.boundaries.size)
+    assertEquals(4, updated.vertexCount)
     assertEquals(-0.4258, updated.center.lat)
     assertEquals(36.9574, updated.center.lng)
+  }
+
+  @Test
+  fun surveyArea_multiPartDefaultsToBoundingBoxCenter() {
+    val area =
+      SurveyArea(
+        name = "Islands",
+        parts =
+          listOf(
+            listOf(LatLng(0.0, 0.0), LatLng(0.0, 1.0), LatLng(1.0, 1.0)),
+            listOf(LatLng(3.0, 3.0), LatLng(3.0, 4.0), LatLng(4.0, 4.0)),
+          ),
+      )
+    assertEquals(LatLng(2.0, 2.0), area.center)
+    assertEquals(6, area.vertexCount)
+    assertTrue(area.zoom in 1.0..16.0)
   }
 
   @Test

@@ -19,6 +19,7 @@ syntax = "proto3";
 package groundplatform.v2.survey;
 
 import "google/protobuf/any.proto";
+import "google/protobuf/timestamp.proto";
 import "shared/protos/data/audit_record.proto";
 import "shared/protos/forms/form_def.proto";
 import "shared/protos/forms/types.proto";
@@ -200,6 +201,239 @@ message EntityDatasetDef {
   // TYPE_GEOTRACE, or TYPE_GEOSHAPE). Exposed to XPath/ProtoForms under the
   // reserved "geometry" property.
   groundplatform.v2.forms.DataType geometry_type = 9;
+
+  // Provenance of the dataset's entities: how they were produced. Entities are
+  // always stored as ordinary `EntityRecord`s with real geometry; the generator
+  // is recorded so the dataset can be audited, and regenerated while no
+  // submissions reference it. Unset for datasets edited by hand.
+  oneof generator {
+    // Entities are sample plots produced by the sampling engine.
+    SamplingDesign sampling = 10;
+
+    // Entities were imported from an uploaded file.
+    ImportProvenance imported = 11;
+  }
+}
+
+// Reproducible description of a statistical sample design whose output (one
+// entity per plot) populates a GEOSPATIAL Entity Dataset.
+//
+// Generated plots are ordinary entities. Their geometry is the plot boundary
+// (`GeoShape`: a closed 5-coordinate ring for SQUARE, a closed 25-coordinate
+// ring, 24 vertices plus the closing one, for CIRCLE) or the plot center
+// (`GeoPoint`) for POINT. The generator writes these reserved properties:
+//   - "plot_id": Stable plot identifier unique within the design (e.g.
+//     "P000123"); also the dataset `key_property`.
+//   - "stratum": Stratum identifier, or empty for unstratified designs.
+//   - "sample_order": 1-based visiting order (shuffled when `shuffle` is set).
+//   - "inclusion_weight": Area represented by the plot in hectares (stratum
+//     area ÷ plots in the stratum), for later area estimation.
+//   - "cluster_id": Cluster identifier for CLUSTER designs (e.g. "C000007").
+//   - "samples": Sub-plot sample points in ODK geotrace format, i.e. points
+//     separated by ";" without surrounding spaces, each point exactly four
+//     space-separated numbers "lat lng altitude accuracy" (altitude and
+//     accuracy are 0), e.g. "-1.0001 37.0002 0 0;-1.0003 37.0004 0 0".
+//     Uploaded and migrated sample points use the same property. At most 100
+//     points per plot; larger designs use a separate point dataset linked by
+//     "plot_id".
+//   - "sample_ids": Optional space-separated sample identifiers, one per point
+//     in "samples" and in the same order (default: "1 2 3 ...").
+// Desk interpretation labels are repeat instances in the interpretation
+// submission, one per sample point, keyed by sample identifier. "samples" is
+// kept out of map tiles and default list responses (see
+// `ListEntitiesRequest.field_mask`).
+message SamplingDesign {
+  // Method used to place plots.
+  enum Method {
+    // Unspecified method.
+    METHOD_UNSPECIFIED = 0;
+
+    // Regular grid with `spacing_m` between plot centers and a seeded random
+    // origin offset, clipped to the area.
+    SYSTEMATIC_GRID = 1;
+
+    // `count` plots placed uniformly at random, at least `min_distance_m`
+    // apart.
+    SIMPLE_RANDOM = 2;
+
+    // `count` plots split across strata by `allocation`, then placed at random
+    // within each stratum.
+    STRATIFIED_RANDOM = 3;
+
+    // `count` cluster centers placed at random, each holding a square pattern
+    // of `cluster_plots_per_side` × `cluster_plots_per_side` plots spaced
+    // `cluster_plot_spacing_m` apart; plots outside the area are dropped.
+    CLUSTER = 4;
+  }
+
+  // How plots are split across strata in STRATIFIED_RANDOM designs.
+  enum Allocation {
+    // Unspecified allocation (treated as PROPORTIONAL).
+    ALLOCATION_UNSPECIFIED = 0;
+
+    // The same number of plots in every stratum.
+    EQUAL = 1;
+
+    // Plot counts proportional to stratum area.
+    PROPORTIONAL = 2;
+
+    // Explicit counts per stratum from `custom_counts`.
+    CUSTOM = 3;
+  }
+
+  // Geometry of each plot.
+  enum PlotShape {
+    // Unspecified shape (treated as SQUARE).
+    PLOT_SHAPE_UNSPECIFIED = 0;
+
+    // Axis-aligned square of side `plot_size_m`.
+    SQUARE = 1;
+
+    // Circle of diameter `plot_size_m`, stored as a 24-vertex polygon.
+    CIRCLE = 2;
+
+    // Plot center only; the entity geometry is a `GeoPoint`.
+    POINT = 3;
+  }
+
+  // Polygon dataset whose features define the strata.
+  message StrataLayerRef {
+    // Strata dataset identifier (`EntityDatasetDef.id`).
+    string entity_dataset_id = 1;
+
+    // Property of the strata features holding the stratum identifier. Several
+    // features sharing a value form one stratum with several parts.
+    string stratum_property = 2;
+  }
+
+  // Method used to place plots.
+  Method method = 1;
+
+  // Area plots are drawn from.
+  oneof area_ref {
+    // Use the survey area (`MapConfig.survey_area`); all parts form a single
+    // unnamed stratum.
+    bool survey_area = 2;
+
+    // Use the features of a polygon dataset as strata.
+    StrataLayerRef strata_layer = 3;
+  }
+
+  // Distance between plot centers in meters (SYSTEMATIC_GRID).
+  double spacing_m = 4;
+
+  // Number of plots (SIMPLE_RANDOM, STRATIFIED_RANDOM) or clusters (CLUSTER).
+  int32 count = 5;
+
+  // Minimum distance between plot centers (or cluster centers) in meters; 0
+  // disables the check.
+  double min_distance_m = 6;
+
+  // Allocation across strata (STRATIFIED_RANDOM).
+  Allocation allocation = 7;
+
+  // Plot count per stratum identifier when `allocation` is CUSTOM; strata not
+  // listed get no plots.
+  map<string, int32> custom_counts = 8;
+
+  // Plots per side of each cluster's square pattern (CLUSTER).
+  int32 cluster_plots_per_side = 9;
+
+  // Distance between plots within a cluster in meters (CLUSTER).
+  double cluster_plot_spacing_m = 10;
+
+  // Geometry of each plot.
+  PlotShape plot_shape = 11;
+
+  // Square side or circle diameter in meters.
+  double plot_size_m = 12;
+
+  // Whether `sample_order` is shuffled (seeded Fisher–Yates) so interpreters
+  // don't visit neighboring plots in sequence.
+  bool shuffle = 13;
+
+  // Seed of the deterministic random number generator.
+  int64 seed = 14;
+
+  // Version of the generation algorithms that produced the plots. The same
+  // inputs, seed and engine version always produce identical plots on every
+  // platform.
+  int32 engine_version = 15;
+
+  // Placement of sample points inside each plot.
+  SubPlotDesign sub_plot = 16;
+
+  // When the plots were generated.
+  google.protobuf.Timestamp generated_at = 17;
+
+  // Opaque hash of the inputs (survey area or strata geometry, plus every
+  // field above except `generated_at`, `input_hash` and `feature_count`).
+  // A mismatch with the current inputs marks the design as stale.
+  string input_hash = 18;
+
+  // Number of plots produced.
+  int64 feature_count = 19;
+}
+
+// Placement of sub-plot sample points inside each generated plot.
+message SubPlotDesign {
+  // How sample points are placed.
+  enum Mode {
+    // Unspecified mode (treated as NONE).
+    MODE_UNSPECIFIED = 0;
+
+    // No sample points.
+    NONE = 1;
+
+    // A single sample point at the plot center.
+    CENTER = 2;
+
+    // A `grid_n` × `grid_n` grid centered in the plot, `spacing_m` apart, in
+    // reading order (north to south, west to east).
+    GRID = 3;
+
+    // `count` points placed uniformly at random inside the plot boundary,
+    // seeded per plot from the design seed and "plot_id".
+    RANDOM = 4;
+
+    // Interpreters draw their own sample geometries of the
+    // `allowed_geometry_types`.
+    USER_DRAWN = 5;
+  }
+
+  // How sample points are placed.
+  Mode mode = 1;
+
+  // Grid size per side (GRID).
+  int32 grid_n = 2;
+
+  // Number of random points (RANDOM).
+  int32 count = 3;
+
+  // Distance between grid points in meters (GRID).
+  double spacing_m = 4;
+
+  // Geometry types interpreters may draw (USER_DRAWN): TYPE_GEOPOINT,
+  // TYPE_GEOTRACE or TYPE_GEOSHAPE.
+  repeated groundplatform.v2.forms.DataType allowed_geometry_types = 5;
+}
+
+// Provenance of entities imported from an uploaded file.
+message ImportProvenance {
+  // Name of the uploaded file (e.g. "plots.geojson").
+  string file_name = 1;
+
+  // File format: "geojson", "kml" or "csv".
+  string format = 2;
+
+  // When the file was imported.
+  google.protobuf.Timestamp imported_at = 3;
+
+  // Opaque hash of the file contents.
+  string input_hash = 4;
+
+  // Number of entities imported.
+  int64 feature_count = 5;
 }
 
 // Schema definition for an individual property in an Entity Dataset.
@@ -238,15 +472,39 @@ message GeometryStyle {
 // Map visualization, default viewport, and layer stack configuration for the
 // survey.
 message MapConfig {
-  // Default initial map center coordinate.
+  // Default initial map center coordinate. When unset, clients derive it from
+  // the bounding box of `survey_area`; an explicit value overrides it.
   groundplatform.v2.forms.GeoPoint initial_center = 1;
 
-  // Default initial map zoom level.
+  // Default initial map zoom level. When unset, clients fit the bounding box
+  // of `survey_area`; an explicit value overrides it.
   double initial_zoom = 2;
 
   // Ordered stack of visual layers rendered on the survey map (bottom-to-top
   // z-order).
   repeated LayerDef layers = 3;
+
+  // Geographic extent of the survey: the default area for sample designs,
+  // the initial camera, and the mobile offline download area.
+  SurveyArea survey_area = 4;
+}
+
+// Geographic extent of a survey, made of one or more polygon parts (e.g. a
+// mainland and its islands).
+//
+// Each part is a single closed ring (`GeoShape`). Holes are not supported:
+// importers drop interior rings with a visible warning. Parts should not
+// overlap. Vertex counts are bounded by the `QuotaLimits.max_area_vertices`
+// quota rather than by a schema rule, so country-scale boundaries fit.
+message SurveyArea {
+  // Human-readable name (e.g. a place name or the uploaded file name).
+  string name = 1;
+
+  // Polygon parts, each a closed ring.
+  repeated groundplatform.v2.forms.GeoShape parts = 2;
+
+  // How the area was defined: "search", "drawn" or "uploaded:<filename>".
+  string source = 3;
 }
 
 // Definition of a visual map layer in the survey map view.

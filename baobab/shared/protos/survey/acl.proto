@@ -161,4 +161,13 @@ message QuotaLimits {
   // Maximum submissions per predefined entity per user (Basic: 10, Sponsored:
   // 50).
   int32 max_submissions_per_entity_per_user = 10;
+
+  // Maximum entities a sample design may generate into one dataset (Sponsored:
+  // 100,000). Counted separately from `max_predefined_entities`.
+  int32 max_generated_entities = 11;
+
+  // Maximum vertices per polygon ring, for survey area parts and entity
+  // geometries. This per-tier quota replaces the former fixed 50-vertex
+  // schema rule so that uploaded country boundaries fit (Sponsored: 50,000).
+  int32 max_area_vertices = 12;
 }

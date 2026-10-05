@@ -16,7 +16,15 @@ package org.groundplatform.v2.devtools.prototypeapp.surveyeditor
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import kotlin.coroutines.cancellation.CancellationException
 import kotlin.random.Random
+import kotlinx.coroutines.yield
+import org.groundplatform.v2.core.sampling.GeneratedPlot
+import org.groundplatform.v2.core.sampling.SampleEstimate
+import org.groundplatform.v2.core.sampling.SamplingArea
+import org.groundplatform.v2.core.sampling.SamplingEngine
+import org.groundplatform.v2.core.sampling.SamplingException
+import org.groundplatform.v2.core.sampling.Stratum
 import org.groundplatform.v2.devtools.prototypeapp.formeditor.EditorChoice
 import org.groundplatform.v2.devtools.prototypeapp.formeditor.EditorDataset
 import org.groundplatform.v2.devtools.prototypeapp.formeditor.EditorDatasetProperty
@@ -33,6 +41,7 @@ import org.groundplatform.v2.devtools.prototypeapp.formeditor.SaveToMode
 import org.groundplatform.v2.devtools.prototypeapp.formeditor.SaveToRules
 import org.groundplatform.v2.devtools.prototypeapp.formeditor.moved
 import org.groundplatform.v2.devtools.prototypeapp.formeditor.slugify
+import org.groundplatform.v2.devtools.prototypeapp.platformEpochMillis
 
 /** Which pane of the Survey editor is showing. */
 sealed interface SurveyEditorSection {
@@ -55,8 +64,22 @@ class SurveyFormEntry(val key: String, val editor: FormEditorState)
  * Initialized from the published [SurveyEditorDraft] loaded from the local data store. Edits are
  * held here as an unpublished draft until [markPublished] is called (after [toDraft] has been saved
  * to the store) or they are thrown away with [discardChanges].
+ *
+ * Sample plot layers are generated with [samplingEngine] (by default [SamplingEngine.Default]).
+ * [submissionCount] returns how many submissions reference the features of a dataset (by dataset
+ * ID), which blocks regenerating its sample plots. Between generated chunks the state calls
+ * [yieldBetweenChunks] so single-threaded platforms (WasmJS) stay responsive.
  */
-class SurveyEditorState(draft: SurveyEditorDraft = SurveyEditorDraft.blank(surveyId = "")) {
+class SurveyEditorState(
+  draft: SurveyEditorDraft = SurveyEditorDraft.blank(surveyId = ""),
+  samplingEngine: SamplingEngine? = null,
+  private val submissionCount: (datasetId: String) -> Int = { 0 },
+  private val yieldBetweenChunks: suspend () -> Unit = { yield() },
+  private val now: () -> String = { isoUtc(platformEpochMillis()) },
+) {
+  /** Resolved on first use, so creating an editor never depends on the engine. */
+  private val engine: SamplingEngine by lazy { samplingEngine ?: SamplingEngine.Default }
+
   /** The last published version of the survey, which unpublished edits are compared against. */
   private var published: SurveyEditorDraft by mutableStateOf(draft)
 
@@ -73,6 +96,15 @@ class SurveyEditorState(draft: SurveyEditorDraft = SurveyEditorDraft.blank(surve
 
   var datasets: List<EntityDataset> by mutableStateOf(draft.datasets)
     private set
+
+  /** The sample generation in progress, if any. */
+  var generation: SampleGenerationProgress? by mutableStateOf(null)
+    private set
+
+  /** Last generation error per dataset key, shown as a dataset issue until the next attempt. */
+  private var generationErrors: Map<String, String> by mutableStateOf(emptyMap())
+
+  private var cancelRequested = false
 
   /** Snapshot of the current edits, for saving to the local data store. */
   fun toDraft(): SurveyEditorDraft =
@@ -112,6 +144,7 @@ class SurveyEditorState(draft: SurveyEditorDraft = SurveyEditorDraft.blank(surve
     sharing = draft.sharing
     forms = formEntries(draft)
     datasets = draft.datasets
+    generationErrors = emptyMap()
     val current = section
     val stillExists =
       when (current) {
@@ -152,8 +185,11 @@ class SurveyEditorState(draft: SurveyEditorDraft = SurveyEditorDraft.blank(surve
     this.section = section
   }
 
-  fun datasetIssues(dataset: EntityDataset): List<DatasetIssue> =
-    EntityDatasetValidator.validate(dataset, datasets.map { it.id })
+  fun datasetIssues(dataset: EntityDataset): List<DatasetIssue> {
+    val issues = EntityDatasetValidator.validate(dataset, datasets.map { it.id })
+    val error = generationErrors[dataset.key] ?: return issues
+    return issues + DatasetIssue(error)
+  }
 
   // Survey details & sharing ------------------------------------------------------------------
 
@@ -648,14 +684,325 @@ class SurveyEditorState(draft: SurveyEditorDraft = SurveyEditorDraft.blank(surve
     }
   }
 
+  /**
+   * Replaces a feature's vertices. Ignored for generated sample plots, whose geometry is locked.
+   */
   fun updateGeometry(key: String, rowKey: String, geometry: List<LatLng>) {
     updateDataset(key) { d ->
-      d.copy(rows = d.rows.map { if (it.key == rowKey) it.copy(geometry = geometry) else it })
+      if (d.isGenerated) d
+      else d.copy(rows = d.rows.map { if (it.key == rowKey) it.copy(geometry = geometry) else it })
     }
   }
 
   fun removeRow(key: String, rowKey: String) {
     updateDataset(key) { d -> d.copy(rows = d.rows.filterNot { it.key == rowKey }) }
+  }
+
+  // Map layer import ---------------------------------------------------------------------------
+
+  /** Creates a Map layer from [plan] (see [MapLayerImporter]) and opens it. Returns its key. */
+  fun importMapLayer(plan: MapLayerImportPlan): String {
+    val title = uniqueTitle(plan.name, datasets.map { it.displayName })
+    val datasetKey = newKey("d")
+    val dataset =
+      EntityDataset(
+        key = datasetKey,
+        kind = DatasetKind.MAP_LAYER,
+        id = uniqueId(slugify(title), datasets.map { it.id }),
+        displayName = title,
+        geometryKind = plan.geometryKind,
+        keyProperty = plan.keyProperty,
+        labelProperty = plan.labelProperty,
+        properties = plan.properties,
+        rows = plan.rows.map { (values, geometry) -> EntityRow(newKey("r"), values, geometry) },
+      )
+    datasets = datasets + dataset
+    section = SurveyEditorSection.Dataset(datasetKey)
+    return datasetKey
+  }
+
+  // Sample plots -------------------------------------------------------------------------------
+
+  /** Polygon Map layers that can provide strata (generated sample plots can't). */
+  val strataLayers: List<EntityDataset>
+    get() = mapLayers.filter { it.geometryKind == GeometryKind.POLYGON && !it.isGenerated }
+
+  /** Whether sample plots can be generated: there's a survey area or a polygon Map layer. */
+  val canGenerateSamplePlots: Boolean
+    get() = !details.surveyArea?.parts.isNullOrEmpty() || strataLayers.isNotEmpty()
+
+  /**
+   * Adds an empty sample plots Map layer with a default design and opens it. The design uses the
+   * survey area if there is one, otherwise the first polygon Map layer as strata.
+   */
+  fun addSamplePlotsLayer(): String {
+    val title = uniqueTitle("Sample plots", datasets.map { it.displayName })
+    val strata = strataLayers.firstOrNull()
+    val design =
+      if (!details.surveyArea?.parts.isNullOrEmpty() || strata == null) {
+        SampleDesignConfig()
+      } else {
+        SampleDesignConfig(
+          method = SampleMethod.STRATIFIED_RANDOM,
+          areaSource = SampleAreaSource.StrataLayer(strata.key, strata.labelProperty),
+        )
+      }
+    val dataset =
+      EntityDataset(
+        key = newKey("d"),
+        kind = DatasetKind.MAP_LAYER,
+        id = uniqueId(slugify(title), datasets.map { it.id }),
+        displayName = title,
+        description = "Sample plots generated from a statistical sample design.",
+        geometryKind = design.geometryKind,
+        keyProperty = SamplePlotProperties.PLOT_ID,
+        labelProperty = SamplePlotProperties.PLOT_ID,
+        properties = SamplePlotProperties.schema,
+        style = LayerStyle(colorHex = "#F9A825", fillOpacity = 0.15),
+        generator = design,
+      )
+    datasets = datasets + dataset
+    section = SurveyEditorSection.Dataset(dataset.key)
+    return dataset.key
+  }
+
+  /** Edits the sample design of generated layer [key]. */
+  fun updateSampleDesign(key: String, transform: (SampleDesignConfig) -> SampleDesignConfig) {
+    updateDataset(key) { d -> d.generator?.let { d.copy(generator = transform(it)) } ?: d }
+  }
+
+  /** Picks a new random seed for generated layer [key]. */
+  fun rerollSeed(key: String) {
+    updateSampleDesign(key) { it.copy(seed = Random.nextLong(1, 1_000_000)) }
+  }
+
+  /** The area [config] draws plots from, or why it isn't available. */
+  fun samplingArea(config: SampleDesignConfig): SamplingAreaResult =
+    when (val source = config.areaSource) {
+      SampleAreaSource.SurveyArea -> {
+        val parts = details.surveyArea?.parts.orEmpty().filter { it.size >= 3 }
+        if (parts.isEmpty()) {
+          SamplingAreaResult.Unavailable(
+            "Set a survey area in Survey details, or use a polygon map layer as strata."
+          )
+        } else {
+          SamplingAreaResult.Ready(
+            SamplingArea.fromSurveyArea(parts.map { part -> part.map { it.toGeoCoord() } })
+          )
+        }
+      }
+      is SampleAreaSource.StrataLayer -> {
+        val layer = datasets.firstOrNull { it.key == source.datasetKey }
+        val polygons = layer?.rows.orEmpty().filter { it.geometry.size >= 3 }
+        when {
+          layer == null ->
+            SamplingAreaResult.Unavailable("The strata map layer was deleted. Choose another one.")
+          layer.geometryKind != GeometryKind.POLYGON ->
+            SamplingAreaResult.Unavailable("Strata must come from a polygon map layer.")
+          polygons.isEmpty() ->
+            SamplingAreaResult.Unavailable(
+              "\"${layer.displayName}\" has no polygons yet. Add polygons to use it as strata."
+            )
+          else ->
+            SamplingAreaResult.Ready(
+              SamplingArea(
+                polygons.map { row ->
+                  Stratum(
+                    id = stratumId(layer, row, source.stratumProperty),
+                    ring = row.geometry.map { it.toGeoCoord() },
+                  )
+                }
+              )
+            )
+        }
+      }
+    }
+
+  /** Distinct stratum IDs of [config]'s strata layer, in order of first appearance. */
+  fun strataIds(config: SampleDesignConfig): List<String> {
+    val source = config.areaSource as? SampleAreaSource.StrataLayer ?: return emptyList()
+    val layer = datasets.firstOrNull { it.key == source.datasetKey } ?: return emptyList()
+    return layer.rows
+      .filter { it.geometry.size >= 3 }
+      .map { stratumId(layer, it, source.stratumProperty) }
+      .distinct()
+  }
+
+  private fun stratumId(layer: EntityDataset, row: EntityRow, property: String): String =
+    row.values[property]?.trim()?.takeIf { it.isNotEmpty() }
+      ?: row.values[layer.keyProperty]?.trim()?.takeIf { it.isNotEmpty() }
+      ?: row.key
+
+  /**
+   * Live estimate (area and approximate plot count) for generated layer [key], or `null` if the
+   * area isn't available or the engine can't estimate.
+   */
+  fun estimateSample(key: String): SampleEstimate? {
+    val config = datasets.firstOrNull { it.key == key }?.generator ?: return null
+    val area = (samplingArea(config) as? SamplingAreaResult.Ready)?.area ?: return null
+    return try {
+      engine.estimate(area, config.toSampleDesign())
+    } catch (e: CancellationException) {
+      throw e
+    } catch (e: Throwable) {
+      // NotImplementedError while the default engine is being built, or bad parameters.
+      null
+    }
+  }
+
+  private class HashCacheEntry(
+    val areaRef: Any?,
+    val property: String?,
+    val design: SampleDesignConfig,
+    val hash: String?,
+  )
+
+  /** Per-dataset cache so the hash is only recomputed when its inputs change (by identity). */
+  private val hashCache = mutableMapOf<String, HashCacheEntry>()
+
+  /**
+   * Fingerprint of generated layer [dataset]'s current inputs (area and design), or `null` if the
+   * area isn't available. Cached, so calling it on every recomposition is cheap.
+   */
+  fun currentInputHash(dataset: EntityDataset): String? {
+    val config = dataset.generator ?: return null
+    val design = config.withoutProvenance()
+    val (areaRef, property) =
+      when (val source = config.areaSource) {
+        SampleAreaSource.SurveyArea -> details.surveyArea?.parts to null
+        is SampleAreaSource.StrataLayer ->
+          datasets.firstOrNull { it.key == source.datasetKey }?.rows to source.stratumProperty
+      }
+    hashCache[dataset.key]?.let { c ->
+      if (c.areaRef === areaRef && c.property == property && c.design == design) return c.hash
+    }
+    val hash =
+      (samplingArea(config) as? SamplingAreaResult.Ready)?.let {
+        SampleDesignInputs.hash(it.area, config)
+      }
+    hashCache[dataset.key] = HashCacheEntry(areaRef, property, design, hash)
+    return hash
+  }
+
+  /**
+   * Whether [dataset]'s sample plots were generated from a different area or design than the
+   * current one, so they should be regenerated.
+   */
+  fun isDesignStale(dataset: EntityDataset): Boolean {
+    val lastRun = dataset.generator?.lastRun ?: return false
+    return currentInputHash(dataset) != lastRun.inputHash
+  }
+
+  /** Number of submissions that reference [dataset]'s features. */
+  fun submissionsReferencing(dataset: EntityDataset): Int = submissionCount(dataset.id)
+
+  /** Why [dataset]'s sample plots can't be regenerated, or `null` if they can. */
+  fun regenerateBlockedReason(dataset: EntityDataset): String? {
+    if (dataset.generator?.lastRun == null) return null
+    val n = submissionsReferencing(dataset)
+    if (n == 0) return null
+    return "Regenerating is turned off because $n ${if (n == 1) "submission references" else "submissions reference"} " +
+      "these sample plots. To try a different design, add a new sample plots map layer."
+  }
+
+  /** The last generation error for dataset [key], if any. */
+  fun generationError(key: String): String? = generationErrors[key]
+
+  /**
+   * Generates the sample plots of layer [datasetKey] from its design, replacing its features.
+   *
+   * Plots are produced in chunks; between chunks progress is published in [generation] and
+   * [yieldBetweenChunks] runs. Features are only replaced once generation succeeds, so cancelling
+   * ([cancelGeneration]) or a failure leaves the previous plots untouched. Failures are also
+   * reported as a dataset issue until the next attempt.
+   */
+  suspend fun generateSample(datasetKey: String): SampleGenerationOutcome {
+    if (generation != null) {
+      return SampleGenerationOutcome.Failed("Sample plots are already being generated.")
+    }
+    val dataset =
+      datasets.firstOrNull { it.key == datasetKey }
+        ?: return SampleGenerationOutcome.Failed("This map layer no longer exists.")
+    val config =
+      dataset.generator
+        ?: return SampleGenerationOutcome.Failed("This map layer doesn't have a sample design.")
+    regenerateBlockedReason(dataset)?.let {
+      return SampleGenerationOutcome.Blocked(it)
+    }
+    val area =
+      when (val result = samplingArea(config)) {
+        is SamplingAreaResult.Unavailable -> return fail(datasetKey, result.message)
+        is SamplingAreaResult.Ready -> result.area
+      }
+    val design = config.toSampleDesign()
+    val inputHash = SampleDesignInputs.hash(area, config)
+    generationErrors = generationErrors - datasetKey
+    cancelRequested = false
+    val expected =
+      try {
+        engine.estimate(area, design).estimatedPlotCount
+      } catch (e: CancellationException) {
+        throw e
+      } catch (e: Throwable) {
+        0
+      }
+    val plots = ArrayList<GeneratedPlot>()
+    generation = SampleGenerationProgress(datasetKey, 0, expected)
+    try {
+      yieldBetweenChunks()
+      val chunks = engine.generateChunks(area, design).iterator()
+      while (true) {
+        if (cancelRequested) return SampleGenerationOutcome.Cancelled
+        if (!chunks.hasNext()) break
+        plots.addAll(chunks.next())
+        generation = SampleGenerationProgress(datasetKey, plots.size, expected)
+        yieldBetweenChunks()
+      }
+      if (cancelRequested) return SampleGenerationOutcome.Cancelled
+    } catch (e: CancellationException) {
+      throw e
+    } catch (e: SamplingException) {
+      // The design can't be satisfied (e.g. too many plots, or they can't fit that far apart).
+      val message = e.message.orEmpty().ifBlank { "This design can't be generated" }
+      return fail(datasetKey, if (message.endsWith('.')) message else "$message.")
+    } catch (e: Throwable) {
+      return fail(
+        datasetKey,
+        e.message?.takeIf { it.isNotBlank() }?.let { "Couldn't generate sample plots: $it" }
+          ?: "Couldn't generate sample plots. Check the design and try again.",
+      )
+    } finally {
+      generation = null
+    }
+    if (plots.isEmpty()) {
+      return fail(
+        datasetKey,
+        "No sample plots fit in the area. Try a smaller spacing or plot size, or a larger area.",
+      )
+    }
+    updateDataset(datasetKey) { d ->
+      d.copy(
+        rows = SamplePlotRows.toRows(datasetKey, plots, previous = d.rows),
+        geometryKind = config.geometryKind,
+        generator =
+          (d.generator ?: config).copy(lastRun = GenerationRecord(now(), inputHash, plots.size)),
+      )
+    }
+    return SampleGenerationOutcome.Generated(plots.size)
+  }
+
+  /** Same as [generateSample]; reads better at call sites that replace existing plots. */
+  suspend fun regenerateSample(datasetKey: String): SampleGenerationOutcome =
+    generateSample(datasetKey)
+
+  /** Stops the running generation at the next chunk boundary, keeping the previous plots. */
+  fun cancelGeneration() {
+    if (generation != null) cancelRequested = true
+  }
+
+  private fun fail(datasetKey: String, message: String): SampleGenerationOutcome.Failed {
+    generationErrors = generationErrors + (datasetKey to message)
+    return SampleGenerationOutcome.Failed(message)
   }
 
   // Helpers ----------------------------------------------------------------------------------

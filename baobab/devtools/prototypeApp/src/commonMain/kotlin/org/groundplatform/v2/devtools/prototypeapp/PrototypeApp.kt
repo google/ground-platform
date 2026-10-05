@@ -147,7 +147,13 @@ fun PrototypeApp(
   val activeSurveyId = state.activeSurveyId
   val surveyEditorState =
     remember(activeSurveyId, state.dataResetCount) {
-      SurveyEditorState(state.activeSurveyEditorDraft)
+      SurveyEditorState(
+        state.activeSurveyEditorDraft,
+        // Submissions on features of a dataset block regenerating its sample plots.
+        submissionCount = { datasetId ->
+          state.entities.filter { it.datasetId == datasetId }.sumOf { it.submissions.size }
+        },
+      )
     }
   val isEntityRefMapShowing =
     state.isDataCollectionFormOpen &&

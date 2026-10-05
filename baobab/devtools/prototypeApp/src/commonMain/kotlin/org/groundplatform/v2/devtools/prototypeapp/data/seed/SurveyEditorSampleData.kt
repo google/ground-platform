@@ -65,12 +65,14 @@ internal object SurveyEditorSamples {
           name = "Othaya Sub-County, Nyeri",
           center = LatLng(-0.4192, 36.9498),
           zoom = 12.5,
-          boundaries =
+          parts =
             listOf(
-              LatLng(-0.3960, 36.9220),
-              LatLng(-0.3960, 36.9780),
-              LatLng(-0.4420, 36.9780),
-              LatLng(-0.4420, 36.9220),
+              listOf(
+                LatLng(-0.3960, 36.9220),
+                LatLng(-0.3960, 36.9780),
+                LatLng(-0.4420, 36.9780),
+                LatLng(-0.4420, 36.9220),
+              )
             ),
         ),
     )

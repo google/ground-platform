@@ -226,10 +226,12 @@ private fun RowsTableCard(
           fontWeight = FontWeight.Bold,
           modifier = Modifier.weight(1f),
         )
-        TextButton(onClick = { onSelectRow(state.addRow(dataset.key)) }) {
-          Icon(Icons.Outlined.Add, contentDescription = null, modifier = Modifier.size(18.dp))
-          Spacer(Modifier.width(4.dp))
-          Text(if (isMap) "Add feature" else "Add row")
+        if (!dataset.isGenerated) {
+          TextButton(onClick = { onSelectRow(state.addRow(dataset.key)) }) {
+            Icon(Icons.Outlined.Add, contentDescription = null, modifier = Modifier.size(18.dp))
+            Spacer(Modifier.width(4.dp))
+            Text(if (isMap) "Add feature" else "Add row")
+          }
         }
       }
       if (issues.isNotEmpty()) {
@@ -283,7 +285,11 @@ private fun RowsTableCard(
           }
           if (dataset.rows.isEmpty()) {
             Text(
-              if (isMap) "No features yet. Add one here or on the map." else "No rows yet.",
+              when {
+                dataset.isGenerated -> "No sample plots yet. Generate them from the sample design."
+                isMap -> "No features yet. Add one here or on the map."
+                else -> "No rows yet."
+              },
               style = MaterialTheme.typography.bodySmall,
               color = colors.onSurfaceVariant,
               modifier = Modifier.padding(12.dp),
@@ -315,7 +321,13 @@ private fun RowsTableCard(
                 }
                 dataset.properties.forEach { p ->
                   val value = row.values[p.name].orEmpty()
-                  if (p.type == PropertyType.BOOLEAN) {
+                  val reserved = dataset.isGenerated && p.name in SamplePlotProperties.all
+                  if (reserved) {
+                    ReadOnlyCell(
+                      if (p.name == SamplePlotProperties.SAMPLES) samplesSummary(value) else value,
+                      onClick = { onSelectRow(row.key) },
+                    )
+                  } else if (p.type == PropertyType.BOOLEAN) {
                     BooleanCell(value) { state.updateCell(dataset.key, row.key, p.name, it) }
                   } else {
                     TextCell(
@@ -329,18 +341,29 @@ private fun RowsTableCard(
                     )
                   }
                 }
-                if (isMap) {
+                if (isMap && dataset.isGenerated) {
+                  ReadOnlyCell(
+                    GeometryText.format(row.geometry),
+                    width = GeometryCellWidth,
+                    monospace = true,
+                    onClick = { onSelectRow(row.key) },
+                  )
+                } else if (isMap) {
                   GeometryCell(dataset, row) { state.updateGeometry(dataset.key, row.key, it) }
                 }
-                IconButton(
-                  onClick = { state.removeRow(dataset.key, row.key) },
-                  modifier = Modifier.size(IndexCellWidth),
-                ) {
-                  Icon(
-                    Icons.Outlined.Close,
-                    contentDescription = "Delete",
-                    modifier = Modifier.size(16.dp),
-                  )
+                if (dataset.isGenerated) {
+                  Spacer(Modifier.width(IndexCellWidth))
+                } else {
+                  IconButton(
+                    onClick = { state.removeRow(dataset.key, row.key) },
+                    modifier = Modifier.size(IndexCellWidth),
+                  ) {
+                    Icon(
+                      Icons.Outlined.Close,
+                      contentDescription = "Delete",
+                      modifier = Modifier.size(16.dp),
+                    )
+                  }
                 }
               }
             }
@@ -399,6 +422,46 @@ private fun TextCell(
         .padding(horizontal = 8.dp, vertical = 10.dp),
   )
 }
+
+/** A table cell that shows [text] without letting it be edited (generated values). */
+@Composable
+private fun ReadOnlyCell(
+  text: String,
+  width: Dp = CellWidth,
+  monospace: Boolean = false,
+  onClick: () -> Unit = {},
+) {
+  val colors = MaterialTheme.colorScheme
+  Box(
+    modifier =
+      Modifier.width(width)
+        .height(CellHeight)
+        .background(colors.surfaceContainerLow)
+        .border(0.5.dp, colors.outlineVariant)
+        .clickable(onClick = onClick)
+        .padding(horizontal = 8.dp),
+    contentAlignment = Alignment.CenterStart,
+  ) {
+    Text(
+      text,
+      style =
+        MaterialTheme.typography.bodySmall.let {
+          if (monospace) it.copy(fontFamily = FontFamily.Monospace) else it
+        },
+      color = colors.onSurfaceVariant,
+      maxLines = 1,
+      overflow = TextOverflow.Ellipsis,
+    )
+  }
+}
+
+/** "25 points", for a plot's `samples` geotrace. */
+private fun samplesSummary(geotrace: String): String =
+  when (val n = SamplePlotProperties.geotraceSize(geotrace)) {
+    0 -> "None"
+    1 -> "1 point"
+    else -> "$n points"
+  }
 
 @Composable
 private fun BooleanCell(value: String, onValueChange: (String) -> Unit) {
@@ -474,7 +537,7 @@ private fun DatasetSettingsPanel(
         minLines = 2,
         modifier = Modifier.fillMaxWidth(),
       )
-      if (isMap) {
+      if (isMap && !dataset.isGenerated) {
         DropdownSelector(
           label = "Geometry type",
           selectedText = dataset.geometryKind.label,
@@ -482,6 +545,10 @@ private fun DatasetSettingsPanel(
           optionText = { it.label },
           onSelect = { g -> state.updateDataset(key) { it.copy(geometryKind = g) } },
         )
+      }
+      if (dataset.generator != null) {
+        SectionLabel("Sample design")
+        SamplingDesignPanel(state, dataset)
       }
       DropdownSelector(
         label = "Key property (unique ID)",
@@ -627,10 +694,11 @@ private fun DatasetSettingsPanel(
         }
       }
       dataset.properties.forEachIndexed { index, property ->
+        val reserved = dataset.isGenerated && property.name in SamplePlotProperties.all
         PropertyEditor(
           property = property,
-          readOnly = dataset.isLinkedToForm,
-          canRemove = !dataset.isLinkedToForm && dataset.properties.size > 1,
+          readOnly = dataset.isLinkedToForm || reserved,
+          canRemove = !dataset.isLinkedToForm && !reserved && dataset.properties.size > 1,
           onChange = { state.updateProperty(key, index, it) },
           onRemove = { state.removeProperty(key, index) },
         )

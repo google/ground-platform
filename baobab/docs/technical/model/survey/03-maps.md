@@ -30,14 +30,15 @@ stacks (`LayerDef`), and visual geometry styling (`GeometryStyle`) inside
 ## Map Configuration & Layer Stack (`MapConfig` and `LayerDef`)
 
 `MapConfig` defines the default initial viewport center coordinate, zoom level,
-and the ordered stack of map layers (`LayerDef`, rendered in bottom-to-top
-z-order):
+the survey area, and the ordered stack of map layers (`LayerDef`, rendered in
+bottom-to-top z-order):
 
 ```protobuf
 message MapConfig {
   groundplatform.v2.forms.GeoPoint initial_center = 1;
   double initial_zoom = 2;
   repeated LayerDef layers = 3;
+  SurveyArea survey_area = 4;
 }
 
 message LayerDef {
@@ -57,6 +58,43 @@ message FormGeometrySource {
   string field_path = 2;
 }
 ```
+
+## Survey Area (`SurveyArea`)
+
+The survey area is the geographic extent of the survey. It is the default area
+that sample designs draw plots from (see
+[Generated Datasets](02-entity-datasets.md#generated-datasets-sample-designs)),
+it frames the initial camera, and it bounds the mobile offline download area.
+
+```protobuf
+message SurveyArea {
+  // Human-readable name (e.g. a place name or the uploaded file name).
+  string name = 1;
+
+  // Polygon parts, each a closed ring.
+  repeated groundplatform.v2.forms.GeoShape parts = 2;
+
+  // How the area was defined: "search", "drawn" or "uploaded:<filename>".
+  string source = 3;
+}
+```
+
+*   **One ring format everywhere**: every part is an ordinary
+    `forms.GeoShape`, the same closed-ring type used by form geoshape answers
+    and entity geometries. No separate polygon type exists.
+*   **Several parts**: a country with islands, or two disjoint project sites,
+    is expressed as several `parts`. Parts should not overlap.
+*   **No holes**: interior rings are out of scope. Importers drop them and show
+    a visible warning.
+*   **Large boundaries**: vertex counts are limited by the per-tier
+    `QuotaLimits.max_area_vertices` quota (see
+    [Access Control & Quotas](04-access-control-and-quotas.md)), not by a schema
+    rule, so uploaded country boundaries with tens of thousands of vertices fit.
+    Clients simplify the geometry for display and keep full precision for
+    sampling.
+*   **Camera defaults**: when `initial_center` or `initial_zoom` is unset,
+    clients derive them from the bounding box of all parts. Explicit values
+    still override.
 
 ## Map Geometry Styling (`GeometryStyle`)
 
