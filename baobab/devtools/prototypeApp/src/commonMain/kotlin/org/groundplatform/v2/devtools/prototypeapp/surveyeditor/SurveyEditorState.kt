@@ -165,6 +165,23 @@ class SurveyEditorState(
   var section: SurveyEditorSection by mutableStateOf(SurveyEditorSection.Details)
     private set
 
+  /**
+   * Width of the Survey editor's left-hand navigation panel, in dp. Adjusted by dragging the
+   * panel's right border ([updateSidePanelWidth]); always within [MIN_SIDE_PANEL_WIDTH_DP] and
+   * [MAX_SIDE_PANEL_WIDTH_DP].
+   */
+  var sidePanelWidthDp by mutableStateOf(DEFAULT_SIDE_PANEL_WIDTH_DP)
+    private set
+
+  /**
+   * Sets the Survey editor's left-hand navigation panel width to [widthDp], clamped to
+   * [MIN_SIDE_PANEL_WIDTH_DP]..[MAX_SIDE_PANEL_WIDTH_DP]. Non-finite values are ignored.
+   */
+  fun updateSidePanelWidth(widthDp: Float) {
+    if (!widthDp.isFinite()) return
+    sidePanelWidthDp = widthDp.coerceIn(MIN_SIDE_PANEL_WIDTH_DP, MAX_SIDE_PANEL_WIDTH_DP)
+  }
+
   val mapLayers: List<EntityDataset>
     get() = datasets.filter { it.kind == DatasetKind.MAP_LAYER }
 
@@ -1065,6 +1082,17 @@ class SurveyEditorState(
     var n = 2
     while ("${base}_$n" in taken) n++
     return "${base}_$n"
+  }
+
+  companion object {
+    /** Default width of the Survey editor's left-hand navigation panel, in dp. */
+    const val DEFAULT_SIDE_PANEL_WIDTH_DP = 280f
+
+    /** Narrowest the Survey editor's left-hand navigation panel can be dragged, in dp. */
+    const val MIN_SIDE_PANEL_WIDTH_DP = 240f
+
+    /** Widest the Survey editor's left-hand navigation panel can be dragged, in dp. */
+    const val MAX_SIDE_PANEL_WIDTH_DP = 560f
   }
 }
 

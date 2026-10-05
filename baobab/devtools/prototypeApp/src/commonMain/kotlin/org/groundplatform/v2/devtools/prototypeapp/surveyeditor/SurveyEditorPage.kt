@@ -103,6 +103,8 @@ import androidx.compose.ui.zIndex
 import org.groundplatform.v2.core.forms.ui.GroundBadgeTone
 import org.groundplatform.v2.core.forms.ui.GroundTonalBadge
 import org.groundplatform.v2.devtools.prototypeapp.PrototypeAppState
+import org.groundplatform.v2.devtools.prototypeapp.SidePanelSeparator
+import org.groundplatform.v2.devtools.prototypeapp.SidePanelSeparatorWidth
 import org.groundplatform.v2.devtools.prototypeapp.WebAppHeader
 import org.groundplatform.v2.devtools.prototypeapp.WebHeaderContext
 import org.groundplatform.v2.devtools.prototypeapp.WebHeaderSupportingText
@@ -131,9 +133,10 @@ import org.groundplatform.v2.map.MapLayer
 import org.groundplatform.v2.map.StyleValue
 
 /**
- * Survey editor page: the shared [WebAppHeader] with publishing controls, a left-hand navigation
- * list (Survey details, Sharing, Forms, Map layers, Data tables), and a content pane showing the
- * editor for the selected item.
+ * Survey editor page: the shared [WebAppHeader] with publishing controls, a resizable left-hand
+ * navigation list (Survey details, Sharing, Forms, Map layers, Data tables; drag its right border
+ * to resize it via [SidePanelSeparator]), and a content pane showing the editor for the selected
+ * item.
  *
  * Edits are kept as an unpublished draft in [state]. [onPublish] commits them; [onClose] throws
  * them away (after the user confirms, if there are any). Both are expected to leave the editor.
@@ -151,7 +154,15 @@ fun SurveyEditorPage(
     SurveyEditorTopBar(state, onPublish, onClose, appState)
     HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
     Row(modifier = Modifier.weight(1f).fillMaxWidth()) {
-      SurveyNavigation(state = state, modifier = Modifier.width(280.dp).fillMaxHeight())
+      SurveyNavigation(
+        state = state,
+        modifier = Modifier.width(state.sidePanelWidthDp.dp).fillMaxHeight(),
+      )
+      SidePanelSeparator(
+        widthDp = state.sidePanelWidthDp,
+        onWidthChange = state::updateSidePanelWidth,
+        modifier = Modifier.width(SidePanelSeparatorWidth).fillMaxHeight(),
+      )
       Box(modifier = Modifier.weight(1f).fillMaxHeight()) {
         when (val section = state.section) {
           SurveyEditorSection.Details -> SurveyDetailsPane(state, appState.places)

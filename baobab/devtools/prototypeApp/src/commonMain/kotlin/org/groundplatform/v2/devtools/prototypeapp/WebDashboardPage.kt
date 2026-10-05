@@ -250,10 +250,10 @@ internal fun dashboardTableCsvFileName(table: DashboardDataTable): String {
 }
 
 /**
- * Width of the separator between the side panel and the map. The whole separator is the drag target
- * for resizing the panel, and holds the drag handle.
+ * Width of the separator between a resizable left-hand side panel and the main content area. The
+ * whole separator is the drag target for resizing the panel, and holds the drag handle.
  */
-private val DashboardSidePanelSeparatorWidth = 8.dp
+internal val SidePanelSeparatorWidth = 8.dp
 /** Size of the collapse / expand tab on the side panel's right border. */
 private val DashboardSidePanelTabWidth = 20.dp
 private val DashboardSidePanelTabHeight = 48.dp
@@ -267,8 +267,8 @@ private val DashboardOverlayMargin = 14.dp
  * Main page of the Ground web dashboard (`#dashboard`).
  * - **Left**: A collapsible side panel with the searchable list of map features (one line per
  *   record) and places ([BottomSheetSearchableListContent]). Drag its right border to resize it
- *   ([DashboardSidePanelSeparator], width kept in [PrototypeAppState.sidePanelWidthDp]); the tab
- *   centered on that border collapses it, and the same tab at the map's left edge expands it again
+ *   ([SidePanelSeparator], width kept in [PrototypeAppState.sidePanelWidthDp]); the tab centered on
+ *   that border collapses it, and the same tab at the map's left edge expands it again
  *   ([DashboardSidePanelToggleTab]).
  * - **Main area**: The live survey map ([SurveyMainMap]). Selecting a map feature pans and zooms to
  *   it and opens its details in a floating card in the upper-right corner (
@@ -297,7 +297,7 @@ internal fun WebDashboardPage(
   val fullPanelWidth = state.sidePanelWidthDp.dp
   val panelWidth = fullPanelWidth * expandedFraction
   val isPanelShown = expandedFraction > 0f
-  val borderEnd = if (isPanelShown) panelWidth + DashboardSidePanelSeparatorWidth else 0.dp
+  val borderEnd = if (isPanelShown) panelWidth + SidePanelSeparatorWidth else 0.dp
 
   Box(modifier = Modifier.fillMaxSize()) {
     Column(modifier = Modifier.fillMaxSize()) {
@@ -315,11 +315,11 @@ internal fun WebDashboardPage(
                     .fillMaxHeight(),
               )
             }
-            DashboardSidePanelSeparator(
+            SidePanelSeparator(
               widthDp = state.sidePanelWidthDp,
               onWidthChange = state::updateSidePanelWidth,
               enabled = isSidePanelExpanded,
-              modifier = Modifier.width(DashboardSidePanelSeparatorWidth).fillMaxHeight(),
+              modifier = Modifier.width(SidePanelSeparatorWidth).fillMaxHeight(),
             )
           }
           DashboardMapArea(state = state, modifier = Modifier.weight(1f).fillMaxHeight())
@@ -358,18 +358,17 @@ private fun DashboardSidePanel(state: PrototypeAppState, modifier: Modifier = Mo
 }
 
 /**
- * Separator between the side panel and the map, [DashboardSidePanelSeparatorWidth] wide, with an M3
- * [VerticalDragHandle] centered vertically so it lines up with the collapse tab
- * ([DashboardSidePanelToggleTab]) just to its right. When [enabled], the whole separator is the
- * drag target: it shows a resize cursor and a darker fill while hovered or dragged, and dragging
- * reports the new width through [onWidthChange], which clamps it. The unclamped drag position is
- * tracked so the border only moves back once the pointer returns past the clamp limit.
+ * Separator on the right border of a resizable left-hand side panel, [SidePanelSeparatorWidth]
+ * wide, with an M3 [VerticalDragHandle] centered vertically. When [enabled], the whole separator is
+ * the drag target: it shows a resize cursor and a darker fill while hovered or dragged, and
+ * dragging reports the new width through [onWidthChange], which clamps it. The unclamped drag
+ * position is tracked so the border only moves back once the pointer returns past the clamp limit.
  */
 @Composable
-private fun DashboardSidePanelSeparator(
+internal fun SidePanelSeparator(
   widthDp: Float,
   onWidthChange: (Float) -> Unit,
-  enabled: Boolean,
+  enabled: Boolean = true,
   modifier: Modifier = Modifier,
 ) {
   val density = LocalDensity.current
