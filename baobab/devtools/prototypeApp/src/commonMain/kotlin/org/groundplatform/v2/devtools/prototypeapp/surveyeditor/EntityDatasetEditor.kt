@@ -463,8 +463,8 @@ private fun DatasetSettingsPanel(
         onValueChange = { v -> state.updateDataset(key) { it.copy(id = v.trim()) } },
         label = { Text("ID") },
         singleLine = true,
-        supportingText = { Text("Used in Forms, e.g. instance('${dataset.id}')") },
-        textStyle = MaterialTheme.typography.bodyMedium.copy(fontFamily = FontFamily.Monospace),
+        supportingText = { Text("Forms use this ID to look up records from this dataset.") },
+        textStyle = MaterialTheme.typography.bodyLarge.copy(fontFamily = FontFamily.Monospace),
         modifier = Modifier.fillMaxWidth(),
       )
       OutlinedTextField(
@@ -673,9 +673,17 @@ private fun LayerStyleEditor(dataset: EntityDataset, update: ((LayerStyle) -> La
       label = { Text("Color") },
       singleLine = true,
       isError = parseHexColor(style.colorHex) == null,
-      textStyle = MaterialTheme.typography.bodyMedium.copy(fontFamily = FontFamily.Monospace),
+      textStyle = MaterialTheme.typography.bodyLarge.copy(fontFamily = FontFamily.Monospace),
       modifier = Modifier.fillMaxWidth(),
     )
+    if (dataset.geometryKind == GeometryKind.POINT) {
+      LayerIconPicker(
+        selectedIconName = style.iconName,
+        layerColor =
+          parseHexColor(style.colorHex)?.let { Color(it) } ?: MaterialTheme.colorScheme.primary,
+        onSelect = { name -> update { it.copy(iconName = name) } },
+      )
+    }
     if (dataset.geometryKind != GeometryKind.POINT) {
       Text(
         "Stroke width: ${style.strokeWidth.toInt()} px",
@@ -740,7 +748,7 @@ private fun PropertyEditor(
           label = { Text("Name") },
           singleLine = true,
           enabled = !readOnly,
-          textStyle = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
+          textStyle = MaterialTheme.typography.bodyLarge.copy(fontFamily = FontFamily.Monospace),
           modifier = Modifier.width(120.dp),
         )
       }

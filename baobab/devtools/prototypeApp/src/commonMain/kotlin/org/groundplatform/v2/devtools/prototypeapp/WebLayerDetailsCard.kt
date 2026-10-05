@@ -47,9 +47,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import org.groundplatform.v2.devtools.prototypeapp.map.LayerIcons
+import org.groundplatform.v2.devtools.prototypeapp.map.contentColorOnArgb
 
 /** Number of map features in a layer sharing one status; [example] provides the chip styling. */
 internal data class DashboardLayerStatusCount(val example: GeospatialEntityItem, val count: Int) {
@@ -105,10 +108,28 @@ internal fun buildDashboardLayerSummary(
   )
 }
 
-/** Color swatch of a map layer, matching the left-hand panel's layer group headers. */
+/**
+ * Swatch of a map layer: its pin icon on a circle of the layer color (matching its map pins) when
+ * the layer has an icon, otherwise a color square matching the left-hand panel's layer headers.
+ */
 @Composable
-private fun LayerSwatch(colorHex: Long?, size: Int) {
-  val color = colorHex?.let { Color(it) } ?: MaterialTheme.colorScheme.primary
+private fun LayerSwatch(layer: MapLayerItem?, size: Int) {
+  val color = layer?.colorHex?.let { Color(it) } ?: MaterialTheme.colorScheme.primary
+  val icon = LayerIcons.forName(layer?.pinIconName)
+  if (icon != null) {
+    Box(
+      modifier = Modifier.size((size + 4).dp).background(color, CircleShape),
+      contentAlignment = Alignment.Center,
+    ) {
+      Icon(
+        imageVector = icon.vector,
+        contentDescription = null,
+        tint = Color(contentColorOnArgb(color.toArgb().toLong() and 0xFFFFFFFFL)),
+        modifier = Modifier.size((size - 2).dp),
+      )
+    }
+    return
+  }
   Box(
     modifier =
       Modifier.size(size.dp)
@@ -144,7 +165,7 @@ internal fun WebLayerDetailsCard(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(4.dp),
       ) {
-        LayerSwatch(colorHex = layer?.colorHex, size = 18)
+        LayerSwatch(layer = layer, size = 18)
         Column(modifier = Modifier.weight(1f).padding(horizontal = 4.dp)) {
           Text(
             text = layer?.label ?: summary.title,
@@ -275,7 +296,7 @@ internal fun CollapsedLayerDetailsPill(
         tint = MaterialTheme.colorScheme.primary,
         modifier = Modifier.size(20.dp),
       )
-      LayerSwatch(colorHex = layer?.colorHex, size = 14)
+      LayerSwatch(layer = layer, size = 14)
       Text(
         text = layer?.label ?: title,
         style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),

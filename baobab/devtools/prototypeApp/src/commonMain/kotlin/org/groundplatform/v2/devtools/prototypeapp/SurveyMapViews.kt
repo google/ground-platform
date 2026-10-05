@@ -18,6 +18,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import kotlin.math.abs
 import org.groundplatform.v2.core.forms.ui.GeoPointMapViewportState
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.PlaceFraming
@@ -26,6 +27,7 @@ import org.groundplatform.v2.devtools.prototypeapp.map.SurveyMapCameraController
 import org.groundplatform.v2.devtools.prototypeapp.map.SurveyMapContent
 import org.groundplatform.v2.devtools.prototypeapp.map.SurveyMapIds
 import org.groundplatform.v2.devtools.prototypeapp.map.SurveyMarkerView
+import org.groundplatform.v2.devtools.prototypeapp.map.framingInsets
 import org.groundplatform.v2.devtools.prototypeapp.map.rememberSurveyMapCamera
 import org.groundplatform.v2.map.CameraPosition
 import org.groundplatform.v2.map.GroundMap
@@ -108,7 +110,12 @@ internal fun GeoPointFormMap(
   ) {}
 }
 
-/** The map in a form's entity-reference step; tapping a candidate selects it. */
+/**
+ * The map in a form's entity-reference step; tapping a candidate selects it. The selected map
+ * feature (preselected when the form opens, or picked on the map or from the list) is fitted into
+ * the map, the same way the main map frames a selection. Clearing the selection leaves the camera
+ * where it is.
+ */
 @Composable
 internal fun EntityRefFormMap(
   state: PrototypeAppState,
@@ -117,6 +124,19 @@ internal fun EntityRefFormMap(
 ) {
   val camera =
     rememberSurveyMapCamera(desired = state::desiredMapCamera, onSettled = state::syncMapCamera)
+  val selected = state.activeDataCollectionEntity
+  LaunchedEffect(selected?.id, state.entityRefFramingEpoch) {
+    val entity = selected ?: return@LaunchedEffect
+    if (!entity.hasGeometry) return@LaunchedEffect
+    val bounds = state.resolveEntityLngLatBounds(entity)
+    camera.run {
+      it.fitBounds(
+        bounds,
+        framingInsets(it.viewportSize, bottom = 0.dp),
+        maxZoom = entity.geometryKind.maxFramingZoom.toDouble(),
+      )
+    }
+  }
   SurveyGroundMap(
     map = SurveyMapContent.entityRefForm(state, form),
     camera = camera,

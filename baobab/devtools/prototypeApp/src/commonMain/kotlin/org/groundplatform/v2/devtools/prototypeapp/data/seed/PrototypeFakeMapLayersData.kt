@@ -34,6 +34,8 @@ internal object PrototypeFakeMapLayersData {
             sourceType = LayerSourceType.ENTITY_DATASET,
             singularItemLabel = "land-use observation",
             pluralItemLabel = "land-use observations",
+            datasetId = "land_use_observations",
+            iconName = "landscape",
           )
         )
       "survey-sample-plots-forest" ->
@@ -48,6 +50,8 @@ internal object PrototypeFakeMapLayersData {
             sourceType = LayerSourceType.ENTITY_DATASET,
             singularItemLabel = "sample plot",
             pluralItemLabel = "sample plots",
+            datasetId = "sample_plots",
+            iconName = "forest",
           )
         )
       "survey-commodity-perimeter-center" ->
@@ -62,6 +66,8 @@ internal object PrototypeFakeMapLayersData {
             sourceType = LayerSourceType.ENTITY_DATASET,
             singularItemLabel = "commodity plot",
             pluralItemLabel = "commodity plots",
+            datasetId = "commodity_plots",
+            iconName = "agriculture",
           )
         )
       "survey-household-past-individuals" ->
@@ -76,6 +82,8 @@ internal object PrototypeFakeMapLayersData {
             sourceType = LayerSourceType.ENTITY_DATASET,
             singularItemLabel = "past individual",
             pluralItemLabel = "past individuals",
+            datasetId = "past_individuals",
+            iconName = "person",
           )
         )
       else -> defaultMapLayers()
@@ -92,34 +100,40 @@ internal object PrototypeFakeMapLayersData {
         id = "layer-coffee-parcels",
         label = "Smallholder Coffee Parcels",
         sourceDescription = "Dataset: coffee_parcels (Polygon)",
-        colorHex = 0xFF2E7D32,
+        colorHex = 0xFF6D4C41,
         geometryTypeLabel = "Polygon",
         isVisible = true,
         sourceType = LayerSourceType.ENTITY_DATASET,
         singularItemLabel = "coffee parcel",
         pluralItemLabel = "coffee parcels",
+        datasetId = "coffee_parcels",
+        iconName = "eco",
       ),
       MapLayerItem(
         id = "layer-shade-transects",
         label = "Shade Tree Monitoring Plots",
         sourceDescription = "Dataset: shade_monitoring_plots (LineString)",
-        colorHex = 0xFF1565C0,
+        colorHex = 0xFF2E7D32,
         geometryTypeLabel = "LineString",
         isVisible = true,
         sourceType = LayerSourceType.ENTITY_DATASET,
         singularItemLabel = "monitoring plot",
         pluralItemLabel = "monitoring plots",
+        datasetId = "shade_monitoring_plots",
+        iconName = "park",
       ),
       MapLayerItem(
         id = "layer-water-points",
         label = "Cooperative Washing Stations",
         sourceDescription = "Dataset: washing_stations (Point)",
-        colorHex = 0xFFEF6C00,
+        colorHex = 0xFF0277BD,
         geometryTypeLabel = "Point",
         isVisible = true,
         sourceType = LayerSourceType.ENTITY_DATASET,
         singularItemLabel = "washing station",
         pluralItemLabel = "washing stations",
+        datasetId = "washing_stations",
+        iconName = "water_drop",
       ),
     )
 

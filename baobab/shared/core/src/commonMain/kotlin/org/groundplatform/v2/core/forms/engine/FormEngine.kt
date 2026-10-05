@@ -1551,10 +1551,18 @@ object FormEngine {
 
       val rawLabelRef =
         if (itemset.label_ref.isNotEmpty()) {
-          if (itemset.label_ref.startsWith("jr:itext(")) {
-            val expr = compiled.compileExpression(itemset.label_ref)
+          if (itemset.label_ref.startsWith("jr:itext(") && itemset.label_ref.endsWith(")")) {
+            // ODK XForms spec, "Itemsets": in `<label ref="jr:itext(itextId)"/>` the argument is
+            // evaluated relative to each item and yields an itext id (pyxform emits this for media
+            // choices). Resolve only the argument here so the translation lookup below keeps the
+            // entry's media (e.g. choice images); evaluating the whole call would return the
+            // already-resolved text and drop them.
+            val argExpr =
+              compiled.compileExpression(
+                itemset.label_ref.removePrefix("jr:itext(").removeSuffix(")").trim()
+              )
             val itemCtx = controlContext.withContextNode(itemNode)
-            expr?.evaluateString(itemCtx) ?: valStr
+            argExpr?.evaluateString(itemCtx)?.takeIf { it.isNotEmpty() } ?: valStr
           } else {
             val cellStr =
               itemNode.children(itemset.label_ref).firstOrNull()?.extractValue()?.toXPathString()

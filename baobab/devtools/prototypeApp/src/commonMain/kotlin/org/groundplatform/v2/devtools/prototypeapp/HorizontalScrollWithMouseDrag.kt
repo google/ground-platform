@@ -16,13 +16,15 @@ package org.groundplatform.v2.devtools.prototypeapp
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
-import androidx.compose.foundation.gestures.awaitHorizontalTouchSlopOrCancellation
 import androidx.compose.foundation.gestures.horizontalDrag
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.PointerType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.positionChange
+import org.groundplatform.v2.devtools.prototypeapp.formeditor.DragAxis
+import org.groundplatform.v2.devtools.prototypeapp.formeditor.awaitDragPastSlop
+import org.groundplatform.v2.devtools.prototypeapp.formeditor.dragSlopFor
 
 /**
  * [horizontalScroll] that can also be dragged with a mouse.
@@ -31,7 +33,7 @@ import androidx.compose.ui.input.pointer.positionChange
  * trackpad), so chip rows in the device preview, which stands in for a touch screen, can't be
  * dragged with a mouse. This adds a mouse-only horizontal drag on top of the regular scroll
  * behavior: touch drags, wheel, and Shift+wheel are still handled by [horizontalScroll], and taps
- * on children still click (a drag only starts past the touch slop, then consumes the gesture).
+ * on children still click (a drag only starts past [dragSlopFor], then consumes the gesture).
  */
 internal fun Modifier.horizontalScrollWithMouseDrag(state: ScrollState): Modifier =
   mouseDragToScroll(state).horizontalScroll(state)
@@ -46,11 +48,11 @@ internal fun Modifier.mouseDragToScroll(state: ScrollState): Modifier =
     awaitEachGesture {
       val down = awaitFirstDown(requireUnconsumed = false)
       if (down.type != PointerType.Mouse) return@awaitEachGesture
-      val drag =
-        awaitHorizontalTouchSlopOrCancellation(down.id) { change, overSlop ->
-          change.consume()
-          state.dispatchRawDelta(-overSlop)
-        } ?: return@awaitEachGesture
+      // Not awaitHorizontalTouchSlopOrCancellation: its mouse slop is ~0.125 dp, so a click with a
+      // slightly moving mouse became a scroll and the chip's click was cancelled.
+      val (drag, travel) =
+        awaitDragPastSlop(down, dragSlopFor(down), DragAxis.HORIZONTAL) ?: return@awaitEachGesture
+      state.dispatchRawDelta(-travel.x)
       horizontalDrag(drag.id) { change ->
         state.dispatchRawDelta(-change.positionChange().x)
         change.consume()

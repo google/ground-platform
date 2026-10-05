@@ -277,7 +277,7 @@ private fun SurveyEditorTopBar(
 // ---------------------------------------------------------------------------------------------
 
 @Composable
-private fun SurveyNavigation(state: SurveyEditorState, modifier: Modifier = Modifier) {
+internal fun SurveyNavigation(state: SurveyEditorState, modifier: Modifier = Modifier) {
   Surface(modifier = modifier, color = MaterialTheme.colorScheme.surfaceContainerLow) {
     Column(
       modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(12.dp),
@@ -556,7 +556,7 @@ private fun SurveyDetailsPane(state: SurveyEditorState, localPlaces: List<Survey
         label = { Text("Survey ID") },
         singleLine = true,
         isError = !FormEditorValidator.isValidName(details.surveyId),
-        textStyle = MaterialTheme.typography.bodyMedium.copy(fontFamily = FontFamily.Monospace),
+        textStyle = MaterialTheme.typography.bodyLarge.copy(fontFamily = FontFamily.Monospace),
         modifier = Modifier.fillMaxWidth(),
       )
       LanguageSelectorSection(state = state)

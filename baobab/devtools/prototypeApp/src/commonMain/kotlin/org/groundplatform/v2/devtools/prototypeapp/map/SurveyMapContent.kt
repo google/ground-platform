@@ -22,9 +22,11 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.BasemapType
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.FormPreviewItem
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.GeospatialEntityItem
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.MapFeatureCluster
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.MapLayerItem
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.StraightLineNavigationState
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyMapAnchor
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyPlaceItem
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.formatHexColorCss
 import org.groundplatform.v2.devtools.prototypeapp.geometryKind
 import org.groundplatform.v2.map.FeatureFilter
 import org.groundplatform.v2.map.GeoJsonSource
@@ -43,23 +45,31 @@ internal data class SurveyMap(val content: MapContent, val markers: Map<String, 
 
 /** Compose-drawn map annotations; see `SurveyMapMarkers.kt` for their UI. */
 internal sealed interface SurveyMarker {
-  /** Name pill at the middle of a line or polygon. */
+  /**
+   * Name pill at the middle of a line or polygon, filled with its layer's [color], with the
+   * geometry glyph before the label and a [status] badge after it. Layer pin icons are only for
+   * points.
+   */
   data class GeometryPill(
     val label: String,
     val kind: EntityGeometryKind,
-    val symbol: String,
     val color: Color,
     val selected: Boolean,
     val pending: Boolean,
+    val status: StatusBadge? = null,
   ) : SurveyMarker
 
-  /** Name chip just below a point's pin. */
+  /** Name chip just below a point's pin, filled with its layer's [color], with a [status] badge. */
   data class PinLabel(
     val label: String,
     val color: Color,
     val selected: Boolean,
     val pending: Boolean,
+    val status: StatusBadge? = null,
   ) : SurveyMarker
+
+  /** A feature's workflow status (`marker-symbol`) on a disc of its status (`marker-color`). */
+  data class StatusBadge(val symbol: String, val color: Color)
 
   /** A zoomed-out group of features, with a chip per marker symbol. */
   data class ClusterBalloon(
@@ -118,8 +128,6 @@ internal object SurveyMapContent {
   /** Most cluster balloons drawn at once, to keep the marker layer light. */
   private const val MAX_CLUSTER_MARKERS = 60
 
-  private const val DEFAULT_PIN_COLOR = "#2E7D32"
-
   /** The main survey map (mobile and web dashboard). */
   fun main(state: PrototypeAppState, showNavigation: Boolean): SurveyMap =
     build(
@@ -136,6 +144,7 @@ internal object SurveyMapContent {
       userGps = state.userGpsNormalizedX to state.userGpsNormalizedY,
       isFollowingUser = state.isCameraFollowingUser,
       place = state.selectedPlace,
+      layers = state.mapLayers,
     )
 
   /** The map in a form's entity-reference step, listing the form's candidate entities. */
@@ -154,6 +163,7 @@ internal object SurveyMapContent {
       userGps = state.userGpsNormalizedX to state.userGpsNormalizedY,
       isFollowingUser = state.isCameraFollowingUser,
       place = null,
+      layers = state.mapLayers,
     )
 
   /** The map behind a GeoPoint question. */
@@ -172,11 +182,14 @@ internal object SurveyMapContent {
       userGps = state.userGpsNormalizedX to state.userGpsNormalizedY,
       isFollowingUser = isFollowingUser,
       place = null,
+      layers = state.mapLayers,
     )
 
   /**
    * @param clusters the clusters to draw instead of individual features, or `null` when the map
    *   isn't clustering.
+   * @param layers the survey's map layers; each feature is drawn in its layer's color, and points
+   *   show the layer's icon.
    */
   fun build(
     anchor: SurveyMapAnchor,
@@ -192,9 +205,11 @@ internal object SurveyMapContent {
     userGps: Pair<Float, Float>,
     isFollowingUser: Boolean,
     place: SurveyPlaceItem?,
+    layers: List<MapLayerItem> = emptyList(),
   ): SurveyMap {
     val satellite = basemapType == BasemapType.SATELLITE
     fun at(nx: Float, ny: Float) = anchor.toLatLng(nx.toDouble(), ny.toDouble())
+    val layersById = layers.associateBy { it.id }
 
     val palette = linkedMapOf<String, Color>()
     fun colorKey(hex: Long): String {
@@ -222,16 +237,16 @@ internal object SurveyMapContent {
           generated -> Variant.GENERATED
           else -> Variant.NORMAL
         }
-      val stroke =
-        if (selected && satellite) colorKey(0xFFFFFF) else colorKey(entity.strokeColorHex)
+      val layer = layersById[entity.layerId]
+      val layerColor = entity.mapColorHex(layer)
+      val iconName = layer?.iconName
+      val stroke = if (selected && satellite) colorKey(0xFFFFFF) else colorKey(layerColor)
       val common = mapOf(PROP_VARIANT to variant, PROP_STROKE to stroke)
       when (geometry) {
         is Geometry.Point -> {
-          val pinColor = entity.markerColorCss.ifEmpty { DEFAULT_PIN_COLOR }
-          val pinId = GroundPin.iconId(pinColor, entity.markerSymbol, pending)
-          icons.getOrPut(pinId) {
-            MapIcon(pinId, GroundPin.svg(pinColor, entity.markerSymbol, pending))
-          }
+          val pinColor = formatHexColorCss(layerColor)
+          val pinId = GroundPin.iconId(pinColor, iconName, pending)
+          icons.getOrPut(pinId) { MapIcon(pinId, GroundPin.svg(pinColor, iconName, pending)) }
           entityFeatures +=
             MapFeature(
               SurveyMapIds.entity(entity.id),
@@ -249,7 +264,7 @@ internal object SurveyMapContent {
               common +
                 mapOf(
                   PROP_KIND to if (isPolygon) KIND_POLYGON else KIND_LINE,
-                  PROP_FILL to colorKey(entity.fillColorHex),
+                  PROP_FILL to colorKey(layerColor),
                 ),
             )
           if (!generated || selected) {
@@ -267,7 +282,13 @@ internal object SurveyMapContent {
       }
       if (generated && !selected) continue
       val label = entity.label.substringBefore(" •").ifBlank { entity.id }
-      val color = Color(0xFF000000 or (entity.markerColorHex and 0xFFFFFF))
+      val color = Color(layerColor)
+      val status =
+        if (entity.hasMarkerSymbol) {
+          SurveyMarker.StatusBadge(entity.markerSymbol, Color(entity.markerColorHex))
+        } else {
+          null
+        }
       entityMarkers +=
         if (geometry is Geometry.Point) {
           MapMarker(
@@ -275,7 +296,7 @@ internal object SurveyMapContent {
             geometry.position,
             MarkerAnchor.TOP,
             DpOffset(0.dp, 6.dp),
-          ) to SurveyMarker.PinLabel(label, color, selected, pending)
+          ) to SurveyMarker.PinLabel(label, color, selected, pending, status)
         } else {
           MapMarker(
             SurveyMapIds.entity(entity.id),
@@ -285,10 +306,10 @@ internal object SurveyMapContent {
             SurveyMarker.GeometryPill(
               label,
               entity.geometryKind,
-              entity.markerSymbol.ifEmpty { "○" },
               color,
               selected,
               pending,
+              status,
             )
         }
     }

@@ -13,6 +13,7 @@
  */
 package org.groundplatform.v2.devtools.prototypeapp.map
 
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import kotlin.math.abs
@@ -24,7 +25,9 @@ import kotlin.test.assertTrue
 import org.groundplatform.v2.devtools.prototypeapp.EntityGeometryKind
 import org.groundplatform.v2.devtools.prototypeapp.PrototypeAppState
 import org.groundplatform.v2.devtools.prototypeapp.PrototypeScreen
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.formatHexColorCss
 import org.groundplatform.v2.devtools.prototypeapp.geometryKind
+import org.groundplatform.v2.devtools.prototypeapp.surveyeditor.SurveyEditorState
 import org.groundplatform.v2.map.CameraPosition
 import org.groundplatform.v2.map.Geometry
 import org.groundplatform.v2.map.LatLng
@@ -45,9 +48,10 @@ class SurveyMapContentTest {
     val expectedIds =
       points
         .map { ent ->
+          val layer = state.mapLayerFor(ent)
           GroundPin.iconId(
-            ent.markerColorCss.ifEmpty { "#2E7D32" },
-            ent.markerSymbol,
+            formatHexColorCss(ent.mapColorHex(layer)),
+            layer?.iconName,
             ent.id in state.pendingUploadEntityIds,
           )
         }
@@ -58,6 +62,140 @@ class SurveyMapContentTest {
       .entityFeatures()
       .filter { it.properties[SurveyMapContent.PROP_KIND] == SurveyMapContent.KIND_POINT }
       .forEach { assertTrue(it.properties.getValue("pin") in expectedIds) }
+  }
+
+  @Test
+  fun main_drawsFeaturesInTheirLayerColor_notTheirStatusColor() {
+    val map = SurveyMapContent.main(state, showNavigation = true)
+    val entitiesById = state.visibleMapEntities.associateBy { it.id }
+    val shapes =
+      map.entityFeatures().filter {
+        it.properties[SurveyMapContent.PROP_KIND] != SurveyMapContent.KIND_VERTEX
+      }
+    assertTrue(shapes.isNotEmpty())
+    // The sample data has features whose status color differs from their layer's color.
+    assertTrue(
+      shapes.any { feature ->
+        val entity = entitiesById.getValue(SurveyMapIds.entityIdOf(feature.id)!!)
+        entity.markerColorHex != entity.mapColorHex(state.mapLayerFor(entity))
+      }
+    )
+    shapes.forEach { feature ->
+      val entity = entitiesById.getValue(SurveyMapIds.entityIdOf(feature.id)!!)
+      val layer = assertNotNull(state.mapLayerFor(entity), "no layer for ${entity.id}")
+      val layerCss = formatHexColorCss(layer.colorHex)
+      assertEquals(layerCss, feature.properties["stroke"], entity.id)
+      if (feature.properties[SurveyMapContent.PROP_KIND] == SurveyMapContent.KIND_POLYGON) {
+        assertEquals(layerCss, feature.properties["fill"], entity.id)
+      }
+    }
+  }
+
+  @Test
+  fun main_pinsShowTheirLayerIcon() {
+    val layer = state.mapLayers.first { it.geometryTypeLabel == "Point" && it.iconName != null }
+    val layerEntityIds =
+      state.visibleMapEntities.filter { it.layerId == layer.id }.map { it.id }.toSet()
+    val map = SurveyMapContent.main(state, showNavigation = true)
+    val pins =
+      map.entityFeatures().filter {
+        it.properties[SurveyMapContent.PROP_KIND] == SurveyMapContent.KIND_POINT &&
+          SurveyMapIds.entityIdOf(it.id) in layerEntityIds
+      }
+    assertTrue(pins.isNotEmpty())
+    pins.forEach { assertTrue("|${layer.iconName}|" in it.properties.getValue("pin")) }
+  }
+
+  @Test
+  fun main_labelsUseTheLayerColor() {
+    val map = SurveyMapContent.main(state, showNavigation = true)
+    val entitiesById = state.visibleMapEntities.associateBy { it.id }
+    map.markers.forEach { (id, marker) ->
+      val entity = SurveyMapIds.entityIdOf(id)?.let { entitiesById[it] } ?: return@forEach
+      val expected = Color(entity.mapColorHex(state.mapLayerFor(entity)))
+      val expectedStatus =
+        if (entity.hasMarkerSymbol) {
+          SurveyMarker.StatusBadge(entity.markerSymbol, Color(entity.markerColorHex))
+        } else {
+          null
+        }
+      when (marker) {
+        is SurveyMarker.PinLabel -> {
+          assertEquals(expected, marker.color)
+          assertEquals(expectedStatus, marker.status)
+        }
+        is SurveyMarker.GeometryPill -> {
+          assertEquals(expected, marker.color)
+          assertEquals(expectedStatus, marker.status)
+        }
+        else -> {}
+      }
+    }
+  }
+
+  @Test
+  fun main_chipsShowStatusInTheStatusColorOnTheLayerColor() {
+    val map = SurveyMapContent.main(state, showNavigation = true)
+    val badges =
+      map.markers.values.mapNotNull {
+        when (it) {
+          is SurveyMarker.PinLabel -> it.color to it.status
+          is SurveyMarker.GeometryPill -> it.color to it.status
+          else -> null
+        }
+      }
+    assertTrue(badges.any { (_, status) -> status != null }, "sample data has status symbols")
+    // Chip and badge colors differ for at least one feature: layer color vs. status color.
+    assertTrue(badges.any { (chip, status) -> status != null && status.color != chip })
+  }
+
+  @Test
+  fun build_fallsBackToTheEntityColorWithoutItsLayer() {
+    val entity = state.visibleMapEntities.first { it.geometryKind == EntityGeometryKind.POINT }
+    val map =
+      SurveyMapContent.build(
+        anchor = state.mapAnchor,
+        basemapType = state.selectedBasemapType,
+        showOfflineSector = false,
+        entities = listOf(entity),
+        selectedEntityId = null,
+        pendingIds = emptySet(),
+        clusters = null,
+        selectedClusterId = null,
+        clusterHeader = { "" },
+        navigation = null,
+        userGps = 0.5f to 0.5f,
+        isFollowingUser = false,
+        place = null,
+        layers = emptyList(),
+      )
+    val pin = map.entityFeatures().single().properties.getValue("pin")
+    assertEquals(GroundPin.iconId(formatHexColorCss(entity.colorHex), null, isPending = false), pin)
+  }
+
+  @Test
+  fun main_usesThePublishedSurveyEditorLayerStyle() {
+    val editor = SurveyEditorState(state.activeSurveyEditorDraft)
+    val plots = editor.mapLayers.first { it.id == "shade_monitoring_plots" }
+    editor.updateDataset(plots.key) {
+      it.copy(style = it.style.copy(colorHex = "#AD1457", iconName = "flag"))
+    }
+    state.saveSurveyEditorDraft(state.activeSurveyId, editor.toDraft())
+
+    val layer = state.mapLayers.first { it.datasetId == "shade_monitoring_plots" }
+    assertEquals(0xFFAD1457, layer.colorHex)
+    assertEquals("flag", layer.iconName)
+    val layerEntityIds =
+      state.visibleMapEntities.filter { it.layerId == layer.id }.map { it.id }.toSet()
+    assertTrue(layerEntityIds.isNotEmpty())
+    val map = SurveyMapContent.main(state, showNavigation = true)
+    map
+      .entityFeatures()
+      .filter {
+        SurveyMapIds.entityIdOf(it.id) in layerEntityIds &&
+          it.properties[SurveyMapContent.PROP_KIND] != SurveyMapContent.KIND_VERTEX
+      }
+      .forEach { assertEquals("#AD1457", it.properties["stroke"]) }
   }
 
   @Test

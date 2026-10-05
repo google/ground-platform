@@ -59,8 +59,75 @@ enum class EditorQuestionType(
   NOTE("Note", "note", bindType = "string", bodyElement = "input", isReadOnly = true),
 }
 
-/** A single `<item>` of a `select1` / `select` question. */
-data class EditorChoice(val value: String, val label: String)
+/**
+ * A single `<item>` of a `select1` / `select` question.
+ *
+ * @property image optional picture shown next to the label; exported as an XForms itext `image`
+ *   form (XLSForm `media::image` column).
+ * @property colorHex optional `#RRGGBB` display color. Ground-specific, so it is never written to
+ *   XForms.
+ */
+data class EditorChoice(
+  val value: String,
+  val label: String,
+  val image: EditorChoiceImage? = null,
+  val colorHex: String? = null,
+)
+
+/** A small image attached to an [EditorChoice], stored inline as base64. */
+data class EditorChoiceImage(val mimeType: String, val base64: String) {
+  /** Approximate decoded size in bytes. */
+  val sizeBytes: Int
+    get() = base64.length / 4 * 3 - base64.takeLast(2).count { it == '=' }
+
+  /** File extension used for the exported media file name. */
+  val fileExtension: String
+    get() =
+      when (mimeType.lowercase()) {
+        "image/png" -> "png"
+        "image/jpeg",
+        "image/jpg" -> "jpg"
+        "image/gif" -> "gif"
+        "image/webp" -> "webp"
+        "image/svg+xml" -> "svg"
+        else -> "img"
+      }
+
+  companion object {
+    /** Long-edge limit, in pixels, applied when picking a choice image. */
+    const val MAX_PIXELS = 256
+
+    /** Largest accepted choice image, in bytes, so Forms stay light for offline download. */
+    const val MAX_BYTES = 200 * 1024
+  }
+}
+
+/** Preset choice colors offered by the Form editor, as `name` to `#RRGGBB`. */
+object ChoiceColors {
+  val palette: List<Pair<String, String>> =
+    listOf(
+      "Red" to "#D93025",
+      "Orange" to "#F29900",
+      "Yellow" to "#FDD663",
+      "Green" to "#1E8E3E",
+      "Teal" to "#129EAF",
+      "Blue" to "#1A73E8",
+      "Purple" to "#9334E6",
+      "Pink" to "#E52592",
+      "Brown" to "#8D6E63",
+      "Gray" to "#80868B",
+    )
+
+  private val HEX_PATTERN = Regex("^#[0-9A-Fa-f]{6}$")
+
+  fun isValidHex(hex: String): Boolean = HEX_PATTERN.matches(hex)
+
+  /** Parses `#RRGGBB` into an opaque ARGB value, or `null` if malformed. */
+  fun argb(hex: String?): Long? =
+    hex?.takeIf(::isValidHex)?.substring(1)?.toLongOrNull(16)?.let { 0xFF000000 or it }
+
+  fun nameOf(hex: String?): String? = palette.firstOrNull { it.second.equals(hex, true) }?.first
+}
 
 /** Comparison used by a question's display (skip) logic. */
 enum class RelevanceOperator(
@@ -111,6 +178,8 @@ data class EditorQuestion(
   val required: Boolean = false,
   val choices: List<EditorChoice> = emptyList(),
   val relevance: EditorRelevance? = null,
+  /** Answer validation, exported as the bind `constraint` / `jr:constraintMsg`. */
+  val validation: EditorValidation? = null,
 ) {
   val isConditional: Boolean
     get() = relevance != null
@@ -141,6 +210,23 @@ data class EditorForm(
     val index = indexOf(key)
     if (index <= 0) return emptyList()
     return questions.subList(0, index).filter { it.type != EditorQuestionType.NOTE }
+  }
+
+  /**
+   * Plain-language sentence for [question]'s display logic, using question labels rather than data
+   * names, e.g. `Shown only if "Are shade trees present?" equals Yes.`
+   */
+  fun relevanceSummary(question: EditorQuestion): String? {
+    val relevance = question.relevance ?: return null
+    val source = find(relevance.sourceQuestionKey) ?: return "Refers to a deleted question."
+    val title = "\"${source.label.ifBlank { source.name }}\""
+    if (!relevance.operator.needsValue) return "Shown only if $title is answered."
+    val value =
+      source.choices.firstOrNull { it.value == relevance.value }?.label
+        ?: relevance.value.ifBlank {
+          return null
+        }
+    return "Shown only if $title ${relevance.operator.label} $value."
   }
 
   /** Short human description of [question]'s display logic, e.g. `if has_shade = yes`. */
@@ -287,6 +373,7 @@ object FormEditorValidator {
             issues += EditorIssue(key, "Display logic value must be a number.")
         }
       }
+      issues += ValidationRules.issues(question).map { EditorIssue(key, it) }
     }
     return issues
   }
@@ -318,6 +405,31 @@ object EditorXFormsGenerator {
       RelevanceOperator.IS_ANSWERED -> "string-length($ref) > 0"
     }
   }
+
+  /** Media file name referenced by [choice]'s image, unique within the Form. */
+  fun choiceImageFileName(question: EditorQuestion, choice: EditorChoice): String? =
+    choice.image?.let { "${question.name}-${choice.value}.${it.fileExtension}" }
+
+  /** Element name of the extra choices column carrying [EditorChoice.colorHex]. */
+  const val CHOICE_COLOR_COLUMN = "color"
+
+  /**
+   * Whether [question]'s choices are exported as an internal secondary instance plus `itemset`
+   * rather than inline `<item>`s: needed as soon as any choice carries extra columns (color) or
+   * media (image).
+   */
+  fun usesChoiceInstance(question: EditorQuestion): Boolean =
+    question.type.hasChoices && question.choices.any { it.colorHex != null || it.image != null }
+
+  /** Secondary instance id (XLSForm `list_name`) for [question]'s choices. */
+  fun choiceListName(question: EditorQuestion): String = question.name
+
+  /** Whether [question]'s choice labels go through itext (`itextId`) because of media. */
+  private fun choicesRequireItext(question: EditorQuestion): Boolean =
+    question.choices.any { it.image != null }
+
+  /** pyxform's positional itext id for choice [index] of [listName], e.g. `fruits-0`. */
+  private fun choiceTextId(listName: String, index: Int): String = "$listName-$index"
 
   /**
    * Entity declaration derived from a Form's save-to logic and its target dataset, following the
@@ -381,6 +493,8 @@ object EditorXFormsGenerator {
   fun toXml(form: EditorForm, target: EditorDataset? = null, inlineRows: Boolean = false): String =
     buildString {
       val entity = target?.let { EntityPlan(form, it) }
+      val choiceInstances = form.questions.filter(::usesChoiceInstance)
+      val itextQuestions = choiceInstances.filter(::choicesRequireItext)
       appendLine("""<?xml version="1.0"?>""")
       appendLine("""<h:html xmlns="http://www.w3.org/2002/xforms"""")
       appendLine("""        xmlns:h="http://www.w3.org/1999/xhtml"""")
@@ -400,6 +514,28 @@ object EditorXFormsGenerator {
           """    <model orx:xforms-version="1.0.0" entities:entities-version="2024.1.0">"""
         )
       }
+      if (itextQuestions.isNotEmpty()) {
+        // ODK XForms spec, "Languages" / "Media": choice labels reference itext entries whose
+        // `image` form points at a form attachment (XLSForm `media::image`). Ids follow pyxform's
+        // positional `<list_name>-<index>` scheme.
+        appendLine("      <itext>")
+        appendLine("""        <translation default="true()" lang="default">""")
+        itextQuestions.forEach { question ->
+          val listName = choiceListName(question)
+          question.choices.forEachIndexed { index, choice ->
+            appendLine("""          <text id="${escape(choiceTextId(listName, index))}">""")
+            appendLine("            <value>${escape(choice.label)}</value>")
+            choiceImageFileName(question, choice)?.let { fileName ->
+              appendLine(
+                """            <value form="image">jr://images/${escape(fileName)}</value>"""
+              )
+            }
+            appendLine("          </text>")
+          }
+        }
+        appendLine("        </translation>")
+        appendLine("      </itext>")
+      }
       appendLine("      <instance>")
       appendLine("""        <data id="${escape(form.formId)}" version="1">""")
       if (entity?.selectsTarget == true)
@@ -412,6 +548,30 @@ object EditorXFormsGenerator {
       appendLine("        </data>")
       appendLine("      </instance>")
       if (entity?.isUpdate == true) appendDatasetInstance(entity.target, inlineRows)
+      // Internal secondary instances, shaped like pyxform's output for an XLSForm choices sheet:
+      // one <item> per row with <name>, <label> (or <itextId>), then any extra columns. Extra
+      // columns such as `color` are ordinary instance data that other clients ignore.
+      choiceInstances.forEach { question ->
+        val requiresItext = choicesRequireItext(question)
+        val listName = choiceListName(question)
+        appendLine("""      <instance id="${escape(listName)}">""")
+        appendLine("        <root>")
+        question.choices.forEachIndexed { index, choice ->
+          appendLine("          <item>")
+          appendLine("            <name>${escape(choice.value)}</name>")
+          if (requiresItext) {
+            appendLine("            <itextId>${escape(choiceTextId(listName, index))}</itextId>")
+          } else {
+            appendLine("            <label>${escape(choice.label)}</label>")
+          }
+          choice.colorHex?.let { color ->
+            appendLine("            <$CHOICE_COLOR_COLUMN>${escape(color)}</$CHOICE_COLOR_COLUMN>")
+          }
+          appendLine("          </item>")
+        }
+        appendLine("        </root>")
+        appendLine("      </instance>")
+      }
       if (entity?.selectsTarget == true) {
         appendLine(
           """      <bind nodeset="/data/${SaveToRules.TARGET_ENTITY_FIELD}" type="string" required="true()"/>"""
@@ -424,6 +584,15 @@ object EditorXFormsGenerator {
           if (question.required && !question.type.isReadOnly) add("""required="true()"""")
           if (question.type.isReadOnly) add("""readonly="true()"""")
           relevantExpression(form, question)?.let { add("""relevant="${escape(it)}"""") }
+          // ODK XForms spec, "Bindings": `constraint` and `jr:constraintMsg`.
+          if (!question.type.isReadOnly) {
+            ValidationRules.constraintExpression(question.type, question.validation)?.let {
+              add("""constraint="${escape(it)}"""")
+              ValidationRules.message(question.type, question.validation)?.let { msg ->
+                add("""jr:constraintMsg="${escape(msg)}"""")
+              }
+            }
+          }
           entity?.saveTo?.get(question.key)?.let { add("""entities:saveto="${escape(it)}"""") }
         }
         appendLine("      <bind ${attrs.joinToString(" ")}/>")
@@ -443,7 +612,14 @@ object EditorXFormsGenerator {
         appendLine("    <${type.bodyElement} ${attrs.joinToString(" ")}>")
         appendLine("      <label>${escape(question.label)}</label>")
         if (question.hint.isNotBlank()) appendLine("      <hint>${escape(question.hint)}</hint>")
-        if (type.hasChoices) {
+        if (usesChoiceInstance(question)) {
+          val nodeset = "instance('${choiceListName(question)}')/root/item"
+          val labelRef = if (choicesRequireItext(question)) "jr:itext(itextId)" else "label"
+          appendLine("""      <itemset nodeset="${escape(nodeset)}">""")
+          appendLine("""        <value ref="name"/>""")
+          appendLine("""        <label ref="${escape(labelRef)}"/>""")
+          appendLine("      </itemset>")
+        } else if (type.hasChoices) {
           question.choices.forEach { choice ->
             appendLine("      <item>")
             appendLine("        <label>${escape(choice.label)}</label>")

@@ -85,7 +85,8 @@ data class GeospatialEntityItem(
 
   /**
    * Per-entity `simplestyle-spec` marker color CSS string (`properties["marker-color"]`), falling
-   * back to `stroke`, `fill`, or the layer default [colorHex].
+   * back to `stroke`, `fill`, or the layer default [colorHex]. Updated with the workflow status, so
+   * it colors the status chip; map features use their layer's color instead ([mapColorHex]).
    */
   val markerColorCss: String
     get() =
@@ -117,6 +118,15 @@ data class GeospatialEntityItem(
   /** Per-entity `simplestyle-spec` fill color parsed as a Compose ARGB `Long`. */
   val fillColorHex: Long
     get() = parseHexColorOrDefault(properties["fill"] ?: properties["marker-color"], colorHex)
+
+  /**
+   * Color this feature is drawn with on the map and in list-row markers: the color of its map
+   * [layer] (the layer that owns [layerId]), falling back to the entity's layer default [colorHex]
+   * when the layer isn't known. Per-entity `marker-color` / `stroke` / `fill` properties reflect
+   * workflow status and are only used by the status chip ([markerColorHex]).
+   */
+  fun mapColorHex(layer: MapLayerItem?): Long =
+    0xFF000000L or ((layer?.takeIf { it.id == layerId }?.colorHex ?: colorHex) and 0xFFFFFFL)
 
   /**
    * Organizer-defined workflow status label stored in `properties["status"]` (updated via

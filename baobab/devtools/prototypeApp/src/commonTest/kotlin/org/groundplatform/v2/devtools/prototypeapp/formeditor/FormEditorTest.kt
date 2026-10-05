@@ -175,10 +175,349 @@ class FormEditorTest {
   }
 
   @Test
+  fun state_formSettingsSelectionClearsQuestionSelection() {
+    val state = FormEditorState(FormEditorSamples.shadeTreeVisit())
+    state.select("q3")
+    assertFalse(state.isFormSettingsSelected)
+    state.selectFormSettings()
+    assertTrue(state.isFormSettingsSelected)
+    assertNull(state.selectedQuestion)
+    state.updateTitle("Renamed")
+    assertEquals("Renamed", state.form.title)
+  }
+
+  @Test
+  fun state_setChoiceColorValidatesAndClears() {
+    val state = FormEditorState(FormEditorSamples.shadeTreeVisit())
+    state.setChoiceColor("q3", 0, "#1a73e8")
+    assertEquals("#1A73E8", state.form.find("q3")!!.choices[0].colorHex)
+    state.setChoiceColor("q3", 0, "blue")
+    assertEquals("#1A73E8", state.form.find("q3")!!.choices[0].colorHex)
+    state.setChoiceColor("q3", 0, null)
+    assertNull(state.form.find("q3")!!.choices[0].colorHex)
+  }
+
+  @Test
+  fun state_setChoiceImageEnforcesSizeLimit() {
+    val state = FormEditorState(FormEditorSamples.shadeTreeVisit())
+    val small = EditorChoiceImage("image/png", "iVBORw0KGgo=")
+    assertTrue(state.setChoiceImage("q3", 1, small))
+    assertEquals(small, state.form.find("q3")!!.choices[1].image)
+
+    val tooBigBase64 = "A".repeat(EditorChoiceImage.MAX_BYTES / 3 * 4 + 8)
+    val tooBig = EditorChoiceImage("image/png", tooBigBase64)
+    assertFalse(state.setChoiceImage("q3", 1, tooBig))
+    assertFalse(state.setChoiceImage("q3", 1, EditorChoiceImage("text/plain", "AAAA")))
+    assertFalse(state.setChoiceImage("q3", 9, small))
+    assertEquals(small, state.form.find("q3")!!.choices[1].image)
+
+    assertTrue(state.setChoiceImage("q3", 1, null))
+    assertNull(state.form.find("q3")!!.choices[1].image)
+  }
+
+  @Test
+  fun state_labelEditsKeepChoiceImageAndColor() {
+    val state = FormEditorState(FormEditorSamples.shadeTreeVisit())
+    state.setChoiceColor("q3", 0, "#1E8E3E")
+    state.setChoiceImage("q3", 0, EditorChoiceImage("image/png", "iVBORw0KGgo="))
+    state.updateChoiceLabel("q3", 0, "Yes, many")
+    val choice = state.form.find("q3")!!.choices[0]
+    assertEquals("#1E8E3E", choice.colorHex)
+    assertNotNull(choice.image)
+  }
+
+  private fun shadeTreeStep(controller: FormWizardController) =
+    controller.steps.filterIsInstance<FormWizardStep.QuestionStep>().first {
+      it.control.canonicalPath.endsWith("/has_shade_trees")
+    }
+
+  @Test
+  fun xforms_choiceColorIsExportedAsSecondaryInstanceColumn() {
+    val state = FormEditorState(FormEditorSamples.shadeTreeVisit())
+    state.setChoiceColor("q3", 0, "#1E8E3E")
+    val xml = state.xformsXml
+
+    // pyxform shape: <instance id="list"><root><item><name/><label/><extra/></item></root>.
+    assertTrue("""<instance id="has_shade_trees">""" in xml)
+    assertTrue("<name>yes</name>" in xml)
+    assertTrue("<label>Yes</label>" in xml)
+    assertTrue("<color>#1E8E3E</color>" in xml)
+    assertTrue("""<itemset nodeset="instance('has_shade_trees')/root/item">""" in xml)
+    assertTrue("""<value ref="name"/>""" in xml)
+    assertTrue("""<label ref="label"/>""" in xml)
+    assertFalse("<itext>" in xml)
+    // No Ground-only attributes or namespaces: color exists only as instance data.
+    assertFalse("color=" in xml)
+    assertEquals(4, Regex("xmlns").findAll(xml).count())
+
+    val formDef = XFormsXmlSerializer.deserializeFormDef(xml)
+    assertTrue(formDef.model!!.secondary_instances.any { it.id == "has_shade_trees" })
+    state.startPreview()
+    assertNull(state.previewError)
+    val options = shadeTreeStep(assertNotNull(state.previewController)).control.options
+    assertEquals(listOf("yes", "no"), options.map { it.value })
+    assertEquals(listOf("Yes", "No"), options.map { it.label.text })
+    assertEquals("#1E8E3E", options[0].properties["color"])
+    assertNull(options[1].properties["color"])
+  }
+
+  @Test
+  fun xforms_choiceImagesUseItextIdLikePyxform() {
+    val state = FormEditorState(FormEditorSamples.shadeTreeVisit())
+    state.setChoiceImage("q3", 0, EditorChoiceImage("image/jpeg", "/9j/4AAQ"))
+    val xml = state.xformsXml
+
+    assertTrue("<itextId>has_shade_trees-0</itextId>" in xml)
+    assertTrue("<itextId>has_shade_trees-1</itextId>" in xml)
+    assertTrue("""<text id="has_shade_trees-0">""" in xml)
+    assertTrue("""<value form="image">jr://images/has_shade_trees-yes.jpg</value>""" in xml)
+    assertTrue("""<label ref="jr:itext(itextId)"/>""" in xml)
+    assertFalse("<label>Yes</label>" in xml)
+
+    state.startPreview()
+    assertNull(state.previewError)
+    val options = shadeTreeStep(assertNotNull(state.previewController)).control.options
+    assertEquals(listOf("Yes", "No"), options.map { it.label.text })
+    assertEquals("jr://images/has_shade_trees-yes.jpg", options[0].label.media?.image_uri)
+    assertNull(options[1].label.media?.image_uri?.takeIf { it.isNotEmpty() })
+  }
+
+  @Test
+  fun xforms_listsWithoutColorOrImageKeepInlineItems() {
+    val form = FormEditorSamples.shadeTreeVisit()
+    val before = EditorXFormsGenerator.toXml(form)
+    assertFalse("<itemset" in before)
+    assertFalse("<instance id=" in before)
+    assertTrue("<item>" in before)
+
+    // Coloring one list leaves every other list's inline items byte-for-byte unchanged.
+    val state = FormEditorState(form)
+    state.setChoiceColor("q3", 0, "#1E8E3E")
+    val after = state.xformsXml
+    fun bodyAfterQ3(xml: String) =
+      xml.substringAfter("""<select1 ref="/data/has_shade_trees">""").substringAfter("</select1>")
+    assertEquals(bodyAfterQ3(before), bodyAfterQ3(after))
+  }
+
+  @Test
   fun slugify_producesValidNames() {
     assertEquals("yes_many", slugify("Yes, many!"))
     assertEquals("_2nd_visit", slugify("2nd visit"))
     assertEquals("item", slugify("***"))
     assertTrue(FormEditorValidator.isValidName(slugify("Árbol grande")))
+  }
+
+  // Validation rules (Advanced section): XForms bind `constraint` + `jr:constraintMsg`.
+
+  @Test
+  fun validation_compilesEachRuleKindToXPathAndSummary() {
+    val int = EditorQuestionType.INTEGER
+    val range = EditorValidation(min = "0", max = "120")
+    assertEquals(". >= 0 and . <= 120", ValidationRules.constraintExpression(int, range))
+    assertEquals("Must be between 0 and 120.", ValidationRules.summary(int, range))
+    assertEquals(
+      ". <= 5.5",
+      ValidationRules.constraintExpression(
+        EditorQuestionType.DECIMAL,
+        EditorValidation(max = "5.5"),
+      ),
+    )
+
+    val text = EditorValidation(min = "3", max = "40", pattern = TextPattern.DIGITS)
+    assertEquals(
+      "string-length(.) >= 3 and string-length(.) <= 40 and regex(., '^[0-9]+$')",
+      ValidationRules.constraintExpression(EditorQuestionType.TEXT, text),
+    )
+    assertEquals(
+      "Must be 3–40 characters long and contain only digits.",
+      ValidationRules.summary(EditorQuestionType.TEXT, text),
+    )
+
+    val date = EditorQuestionType.DATE
+    assertEquals(
+      ". <= today()",
+      ValidationRules.constraintExpression(
+        date,
+        EditorValidation(dateRule = DateRule.NOT_IN_FUTURE),
+      ),
+    )
+    assertEquals(
+      ". >= date('2026-01-01') and . <= date('2026-12-31')",
+      ValidationRules.constraintExpression(
+        date,
+        EditorValidation(dateRule = DateRule.BETWEEN, min = "2026-01-01", max = "2026-12-31"),
+      ),
+    )
+
+    val multi = EditorQuestionType.SELECT_MULTIPLE
+    val count = EditorValidation(min = "1")
+    assertEquals("count-selected(.) >= 1", ValidationRules.constraintExpression(multi, count))
+    assertEquals("Select at least 1 option.", ValidationRules.summary(multi, count))
+
+    // Types without rules and empty rules produce nothing.
+    assertNull(ValidationRules.constraintExpression(EditorQuestionType.PHOTO, range))
+    assertNull(ValidationRules.constraintExpression(int, EditorValidation()))
+    // A custom message replaces the generated one.
+    assertEquals(
+      "Too many trees",
+      ValidationRules.message(int, range.copy(message = " Too many trees ")),
+    )
+    assertEquals("Must be between 0 and 120.", ValidationRules.message(int, range))
+  }
+
+  @Test
+  fun validation_badInputsAreValidatorIssues() {
+    val state = FormEditorState(FormEditorSamples.shadeTreeVisit())
+    fun issues(key: String) =
+      FormEditorValidator.validate(state.form).filter { it.questionKey == key }.map { it.message }
+
+    state.updateValidation("q4") { it.copy(min = "10", max = "2") }
+    assertTrue("Minimum can't be more than maximum." in issues("q4"))
+    state.updateValidation("q4") { it.copy(min = "ten", max = "1e3") }
+    assertTrue("Minimum must be a number." in issues("q4"))
+    assertTrue("Maximum must be a number." in issues("q4"))
+    assertNull(
+      ValidationRules.constraintExpression(
+        EditorQuestionType.INTEGER,
+        state.form.find("q4")!!.validation,
+      )
+    )
+
+    state.updateValidation("q7") { it.copy(pattern = TextPattern.CUSTOM, customPattern = "[a-") }
+    assertTrue("Custom pattern isn't valid." in issues("q7"))
+
+    state.updateValidation("q1") { it.copy(dateRule = DateRule.BETWEEN) }
+    assertTrue("Pick an earliest or latest date." in issues("q1"))
+    state.updateValidation("q1") { it.copy(min = "2026-12-31", max = "2026-01-01") }
+    assertTrue("Earliest date can't be after latest date." in issues("q1"))
+
+    state.updateValidation("q6") { it.copy(min = "5") }
+    assertTrue("Minimum number of selections is more than the number of choices." in issues("q6"))
+
+    // Clearing every setting removes the rule entirely.
+    state.updateValidation("q6") { EditorValidation() }
+    assertNull(state.form.find("q6")!!.validation)
+  }
+
+  @Test
+  fun validation_changeTypeDropsRulesThatNoLongerApply() {
+    val state = FormEditorState(FormEditorSamples.shadeTreeVisit())
+    state.updateValidation("q4") { it.copy(min = "0", max = "120") }
+    state.changeType("q4", EditorQuestionType.DECIMAL)
+    assertEquals(EditorValidation(min = "0", max = "120"), state.form.find("q4")!!.validation)
+    state.changeType("q4", EditorQuestionType.TEXT)
+    assertNull(state.form.find("q4")!!.validation)
+  }
+
+  @Test
+  fun xforms_exportsEscapedConstraintAndMessage() {
+    val state = FormEditorState(FormEditorSamples.shadeTreeVisit())
+    state.updateValidation("q4") {
+      it.copy(min = "0", max = "120", message = "Count <= 120 & \"real\"")
+    }
+    val bind = state.xformsXml.lines().first { "/data/shade_tree_count\"" in it && "<bind" in it }
+    assertTrue("""constraint=". &gt;= 0 and . &lt;= 120"""" in bind, bind)
+    assertTrue("""jr:constraintMsg="Count &lt;= 120 &amp; &quot;real&quot;"""" in bind, bind)
+
+    // Without a custom message, the generated summary is exported.
+    state.updateValidation("q4") { it.copy(message = "") }
+    assertTrue("""jr:constraintMsg="Must be between 0 and 120."""" in state.xformsXml)
+    // Questions without rules export no constraint.
+    assertEquals(1, Regex("constraint=").findAll(state.xformsXml).count())
+  }
+
+  @Test
+  fun preview_enforcesNumberRangeConstraint() {
+    val state = FormEditorState(FormEditorSamples.shadeTreeVisit())
+    state.updateValidation("q4") { it.copy(min = "0", max = "120") }
+    state.startPreview()
+    assertNull(state.previewError)
+    val controller = assertNotNull(state.previewController)
+    val path = "/data/shade_tree_count"
+    controller.updateString("/data/has_shade_trees", "yes")
+    controller.jumpToField(path)
+
+    controller.updateInt(path, 500)
+    val error = controller.currentStepErrors.single()
+    assertEquals(path, error.fieldPath)
+    assertEquals("Must be between 0 and 120.", error.message)
+    assertFalse(controller.nextStep())
+
+    controller.updateInt(path, 50)
+    assertTrue(controller.currentStepErrors.isEmpty())
+    assertTrue(controller.nextStep())
+  }
+
+  @Test
+  fun preview_enforcesDateTextAndSelectionConstraints() {
+    val state = FormEditorState(FormEditorSamples.shadeTreeVisit())
+    state.updateValidation("q1") { it.copy(dateRule = DateRule.NOT_IN_FUTURE) }
+    state.updateValidation("q6") { it.copy(max = "2", message = "Pick up to two") }
+    state.updateValidation("q7") { it.copy(min = "5") }
+    state.startPreview()
+    assertNull(state.previewError)
+    val controller = assertNotNull(state.previewController)
+
+    controller.jumpToField("/data/visit_date")
+    controller.updateDate("/data/visit_date", 2999, 1, 1)
+    assertEquals("Must not be in the future.", controller.currentStepErrors.single().message)
+    controller.updateDate("/data/visit_date", 2000, 1, 1)
+    assertTrue(controller.currentStepErrors.isEmpty())
+
+    controller.jumpToField("/data/observed_issues")
+    controller.updateMultiSelect("/data/observed_issues", listOf("pests", "disease", "erosion"))
+    assertEquals("Pick up to two", controller.currentStepErrors.single().message)
+    controller.updateMultiSelect("/data/observed_issues", listOf("pests"))
+    assertTrue(controller.currentStepErrors.isEmpty())
+
+    controller.jumpToField("/data/pest_notes")
+    controller.updateString("/data/pest_notes", "ants")
+    assertEquals(
+      "Must be at least 5 characters long.",
+      controller.currentStepErrors.single().message,
+    )
+    controller.updateString("/data/pest_notes", "aphids")
+    assertTrue(controller.currentStepErrors.isEmpty())
+  }
+
+  @Test
+  fun dates_convertBetweenIsoAndDatePickerUtcMillis() {
+    assertEquals(0L, isoDateToUtcMillis("1970-01-01"))
+    assertEquals(1_772_668_800_000L, isoDateToUtcMillis("2026-03-05"))
+    assertEquals("2026-03-05", utcMillisToIsoDate(1_772_668_800_000L))
+    // Any instant within the UTC day maps back to that day (no time-zone off-by-one).
+    assertEquals("2026-03-05", utcMillisToIsoDate(1_772_668_800_000L + 86_399_999L))
+    assertEquals("1969-12-31", utcMillisToIsoDate(-1L))
+    assertEquals("2024-02-29", utcMillisToIsoDate(isoDateToUtcMillis("2024-02-29")!!))
+    assertNull(isoDateToUtcMillis("2026-02-29"))
+    assertNull(isoDateToUtcMillis("2026-13-01"))
+    assertEquals("Mar 5, 2026", friendlyDate("2026-03-05"))
+    assertEquals(
+      "Must be on or after Jan 1, 2026.",
+      ValidationRules.summary(
+        EditorQuestionType.DATE,
+        EditorValidation(dateRule = DateRule.BETWEEN, min = "2026-01-01"),
+      ),
+    )
+  }
+
+  @Test
+  fun displayLogic_plainLanguageSummaryUsesLabels() {
+    val form = FormEditorSamples.shadeTreeVisit()
+    val q3 = form.find("q3")!!
+    assertEquals(
+      "Shown only if \"${q3.label}\" equals Yes.",
+      form.relevanceSummary(form.find("q4")!!),
+    )
+    assertNull(form.relevanceSummary(q3))
+  }
+
+  @Test
+  fun state_advancedExpansionPersistsAcrossSelection() {
+    val state = FormEditorState(FormEditorSamples.shadeTreeVisit())
+    assertFalse(state.isAdvancedExpanded)
+    state.isAdvancedExpanded = true
+    state.select("q5")
+    assertTrue(state.isAdvancedExpanded)
   }
 }

@@ -278,7 +278,11 @@ internal object XPathFunctionRegistry {
         val pattern = args[1].toXPathString()
         val matches =
           try {
-            Regex(pattern).matches(target)
+            // ODK XForms spec, regex(): the expression string becomes a regular expression that is
+            // tested against the value. JavaRosa uses Matcher.find() and Enketo uses RegExp.test(),
+            // both substring (unanchored) matches, so use containsMatchIn rather than a full-string
+            // match. Authors anchor with ^...$ when they need the whole value to match.
+            Regex(pattern).containsMatchIn(target)
           } catch (e: Exception) {
             false
           }

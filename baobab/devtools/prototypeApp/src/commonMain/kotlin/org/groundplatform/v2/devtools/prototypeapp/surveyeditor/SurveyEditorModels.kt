@@ -13,6 +13,7 @@
  */
 package org.groundplatform.v2.devtools.prototypeapp.surveyeditor
 
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.MapLayerItem
 import org.groundplatform.v2.devtools.prototypeapp.formeditor.FormEditorValidator
 
 /** Defines the geographic survey area and boundaries for the survey. */
@@ -192,7 +193,31 @@ data class LayerStyle(
   val strokeWidth: Double = 2.0,
   val fillOpacity: Double = 0.3,
   val visibleByDefault: Boolean = true,
+  /**
+   * Icon drawn inside the layer's point pins (a Material Symbols name such as `"park"`; see
+   * `map/LayerIcons.kt`), or `null` for a plain pin. Only used by Point layers.
+   */
+  val iconName: String? = null,
 )
+
+/**
+ * Applies the Survey editor's Map layer styles in [datasets] to these runtime map layers where they
+ * show the same entity dataset (matched by [MapLayerItem.datasetId]), so features are drawn with
+ * the color and pin icon chosen in the editor. Layers without a matching Map layer are unchanged,
+ * as is the color when the editor's color isn't a valid `#RRGGBB`.
+ */
+fun List<MapLayerItem>.withEditorLayerStyles(datasets: List<EntityDataset>): List<MapLayerItem> {
+  val stylesByDatasetId =
+    datasets.filter { it.kind == DatasetKind.MAP_LAYER }.associate { it.id to it.style }
+  if (stylesByDatasetId.isEmpty()) return this
+  return map { layer ->
+    val style = layer.datasetId?.let { stylesByDatasetId[it] } ?: return@map layer
+    layer.copy(
+      colorHex = parseHexColor(style.colorHex) ?: layer.colorHex,
+      iconName = style.iconName,
+    )
+  }
+}
 
 /**
  * An entity dataset (`EntityDatasetDef`) plus its entities, editable as a Map layer or Data table.

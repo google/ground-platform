@@ -33,6 +33,7 @@ import org.groundplatform.v2.devtools.prototypeapp.map.EntityGeometry
 import org.groundplatform.v2.devtools.prototypeapp.pdf.GeneratedPdf
 import org.groundplatform.v2.devtools.prototypeapp.pdf.RecordPdfReports
 import org.groundplatform.v2.devtools.prototypeapp.surveyeditor.SurveyEditorDraft
+import org.groundplatform.v2.devtools.prototypeapp.surveyeditor.withEditorLayerStyles
 import org.groundplatform.v2.devtools.prototypeapp.ui.state.PrototypeUiState
 import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.PrototypeAppViewModel
 import org.groundplatform.v2.map.CameraPosition
@@ -312,8 +313,18 @@ class PrototypeAppState(
   var offlineBasemapStyle by mutableStateOf(OfflineBasemapStyle.SATELLITE_HYBRID)
     private set
 
+  /**
+   * The survey's map layers, styled with the color and pin icon of the matching Map layer in the
+   * published Survey editor draft (if any).
+   */
   val mapLayers: List<MapLayerItem>
-    get() = data.content.mapLayers
+    get() =
+      data.content.mapLayers.withEditorLayerStyles(data.content.editorDraft?.datasets.orEmpty())
+
+  /** The map layer that owns [entity] (by `layerId`), whose style the entity is drawn with. */
+  fun mapLayerFor(entity: GeospatialEntityItem): MapLayerItem? = mapLayers.firstOrNull {
+    it.id == entity.layerId
+  }
 
   val submissionGeometries: List<SubmissionGeometryPolygon>
     get() = data.content.submissionGeometries
@@ -988,6 +999,13 @@ class PrototypeAppState(
 
   /** Search query used to filter candidate entities in the `entityref` step's `List` mode. */
   var entityRefSearchQuery by mutableStateOf("")
+    private set
+
+  /**
+   * Incremented each time a map feature is picked at the `entityref` step, so the step's map frames
+   * it again even when the same feature is picked twice.
+   */
+  var entityRefFramingEpoch by mutableStateOf(0L)
     private set
 
   /**
@@ -2241,7 +2259,9 @@ class PrototypeAppState(
    * during data collection when the form was launched without a pre-selected entity from the map.
    *
    * Updates [activeDataCollectionEntityId], [selectedEntityId], and populates
-   * [ENTITY_REF_FIELD_PATH] (`/data/target_entity`) in [activeFormWizardController].
+   * [ENTITY_REF_FIELD_PATH] (`/data/target_entity`) in [activeFormWizardController]. When the map
+   * feature has geometry, the map camera is centered on it and [entityRefFramingEpoch] is bumped so
+   * the step's map pans and zooms to fit the feature.
    */
   fun selectEntityRefForActiveForm(entityId: String) {
     val entity = entities.firstOrNull { it.id == entityId } ?: return
@@ -2251,6 +2271,10 @@ class PrototypeAppState(
     }
     activeDataCollectionEntityId = entity.id
     selectedEntityId = entity.id
+    if (entity.hasGeometry) {
+      recenterMapOnEntity(entity)
+      entityRefFramingEpoch++
+    }
     activeFormWizardController?.updateString(ENTITY_REF_FIELD_PATH, entity.id)
     if (
       activeFormWizardController?.formState?.fieldStates?.containsKey("/data/sample_plot_entity") ==

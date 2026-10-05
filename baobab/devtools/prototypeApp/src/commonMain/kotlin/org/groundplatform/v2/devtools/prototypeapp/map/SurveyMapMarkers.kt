@@ -21,8 +21,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.defaultMinSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
@@ -41,6 +39,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
@@ -87,18 +86,7 @@ internal fun SurveyMarkerView(marker: SurveyMarker) {
 
 @Composable
 private fun GeometryPill(pill: SurveyMarker.GeometryPill) {
-  val (background, textColor) =
-    when {
-      pill.selected -> Color.White to Color(0xFF111827)
-      pill.pending -> Color(0xEB0E2219) to Color.White
-      else -> pill.color to Color.White
-    }
-  val (borderColor, borderWidth) =
-    when {
-      pill.selected -> pill.color to 2.dp
-      pill.pending -> pill.color to 1.5.dp
-      else -> Color.White to 1.5.dp
-    }
+  val onLayerColor = Color(contentColorOnArgb(pill.color.toArgbLong()))
   val prefix =
     when (pill.kind) {
       EntityGeometryKind.POLYGON -> "▱ "
@@ -106,62 +94,89 @@ private fun GeometryPill(pill: SurveyMarker.GeometryPill) {
       else -> "● "
     }
   Row(
-    Modifier.markerSurface(background, borderColor, borderWidth, 16.dp, dashed = pill.pending)
-      .padding(start = 8.dp, top = 3.dp, end = 5.dp, bottom = 3.dp),
-    horizontalArrangement = Arrangement.spacedBy(5.dp),
+    Modifier.layerChipSurface(pill.color, onLayerColor, pill.selected, pill.pending, 16.dp, 3.dp)
+      .padding(
+        start = 8.dp,
+        top = 3.dp,
+        end = if (pill.status != null) 4.dp else 8.dp,
+        bottom = 3.dp,
+      ),
+    horizontalArrangement = Arrangement.spacedBy(4.dp),
     verticalAlignment = Alignment.CenterVertically,
   ) {
-    MarkerText(prefix + pill.label, textColor, 10.sp, FontWeight.Bold)
-    if (pill.symbol.isNotEmpty()) {
-      val (badgeBackground, badgeText) =
-        when {
-          pill.selected && pill.pending -> Color(0x1F0E2219) to pill.color
-          pill.selected -> pill.color to Color.White
-          pill.pending -> Color(0x24FFFFFF) to pill.color
-          else -> Color.White to pill.color
-        }
-      Box(
-        Modifier.defaultMinSize(minWidth = 16.dp)
-          .height(16.dp)
-          .background(badgeBackground, CircleShape)
-          .then(
-            if (pill.pending) {
-              Modifier.outline(pill.color, if (pill.selected) 1.5.dp else 1.dp, 8.dp, dashed = true)
-            } else {
-              Modifier
-            }
-          )
-          .padding(horizontal = 4.5.dp),
-        contentAlignment = Alignment.Center,
-      ) {
-        MarkerText(pill.symbol, badgeText, 9.5.sp, FontWeight.ExtraBold)
-      }
-    }
+    MarkerText(prefix + pill.label, onLayerColor, 10.sp, FontWeight.Bold)
+    pill.status?.let { StatusBadge(it, outline = onLayerColor) }
   }
 }
 
 @Composable
 private fun PinLabel(label: SurveyMarker.PinLabel) {
-  Box(
-    Modifier.widthIn(max = 140.dp)
-      .markerSurface(
-        background = Color.White,
-        border = if (label.selected) label.color else Color(0xFFC4C7C5),
-        borderWidth = if (label.selected) 1.5.dp else 1.dp,
-        radius = 8.dp,
-        dashed = label.pending,
-        elevation = 1.dp,
+  val onLayerColor = Color(contentColorOnArgb(label.color.toArgbLong()))
+  Row(
+    Modifier.widthIn(max = 160.dp)
+      .layerChipSurface(label.color, onLayerColor, label.selected, label.pending, 8.dp, 1.dp)
+      .padding(
+        start = 8.dp,
+        top = 2.dp,
+        end = if (label.status != null) 3.dp else 8.dp,
+        bottom = 2.dp,
+      ),
+    horizontalArrangement = Arrangement.spacedBy(4.dp),
+    verticalAlignment = Alignment.CenterVertically,
+  ) {
+    Box(Modifier.weight(1f, fill = false)) {
+      MarkerText(
+        label.label,
+        onLayerColor,
+        11.sp,
+        if (label.selected) FontWeight.Bold else FontWeight.Medium,
       )
-      .padding(horizontal = 8.dp, vertical = 2.dp)
+    }
+    label.status?.let { StatusBadge(it, outline = onLayerColor) }
+  }
+}
+
+/**
+ * Surface of a feature's on-map chip: filled with its layer [color]. Selected chips get a thicker
+ * border in the chip's [onColor]; pending (unsynced) chips a dashed one; others a white rim.
+ */
+private fun Modifier.layerChipSurface(
+  color: Color,
+  onColor: Color,
+  selected: Boolean,
+  pending: Boolean,
+  radius: Dp,
+  elevation: Dp,
+): Modifier =
+  markerSurface(
+    background = color,
+    border = if (selected || pending) onColor else Color.White,
+    borderWidth = if (selected) 2.dp else 1.dp,
+    radius = radius,
+    dashed = pending,
+    elevation = if (selected) elevation + 2.dp else elevation,
+  )
+
+/**
+ * A feature's workflow status symbol on a disc of its status color, with a thin [outline] (the
+ * chip's on-color) so it stays visible when the status and layer colors are similar.
+ */
+@Composable
+private fun StatusBadge(badge: SurveyMarker.StatusBadge, outline: Color) {
+  Box(
+    Modifier.size(16.dp).background(badge.color, CircleShape).border(1.dp, outline, CircleShape),
+    contentAlignment = Alignment.Center,
   ) {
     MarkerText(
-      label.label,
-      Color(0xFF1F1F1F),
-      11.sp,
-      if (label.selected) FontWeight.Bold else FontWeight.Medium,
+      badge.symbol,
+      Color(contentColorOnArgb(badge.color.toArgbLong())),
+      9.sp,
+      FontWeight.ExtraBold,
     )
   }
 }
+
+private fun Color.toArgbLong(): Long = toArgb().toLong() and 0xFFFFFFFFL
 
 @Composable
 private fun ClusterBalloon(balloon: SurveyMarker.ClusterBalloon) {

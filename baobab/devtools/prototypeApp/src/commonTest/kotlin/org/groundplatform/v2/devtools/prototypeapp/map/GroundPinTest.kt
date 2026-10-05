@@ -21,8 +21,8 @@ import kotlin.test.assertTrue
 
 class GroundPinTest {
   @Test
-  fun svg_fillsWithMarkerColor() {
-    val svg = GroundPin.svg("#1565C0", "A", isPending = false)
+  fun svg_fillsWithLayerColor() {
+    val svg = GroundPin.svg("#1565C0", "park", isPending = false)
 
     assertTrue(svg.startsWith("<svg"))
     assertContains(svg, """fill="#1565C0"""")
@@ -31,39 +31,47 @@ class GroundPinTest {
 
   @Test
   fun svg_pendingPinHasDashedEdge() {
-    assertContains(GroundPin.svg("#1565C0", "A", isPending = true), "stroke-dasharray")
+    assertContains(GroundPin.svg("#1565C0", "park", isPending = true), "stroke-dasharray")
   }
 
   @Test
-  fun svg_showsSymbolOrSquare() {
-    val withSymbol = GroundPin.svg("#1565C0", "A", isPending = false)
-    val withoutSymbol = GroundPin.svg("#1565C0", "", isPending = false)
+  fun svg_drawsLayerIconOrSquare_neverAStatusSymbol() {
+    val withIcon = GroundPin.svg("#1565C0", "park", isPending = false)
+    val withoutIcon = GroundPin.svg("#1565C0", null, isPending = false)
+    val unknownIcon = GroundPin.svg("#1565C0", "not-an-icon", isPending = false)
 
-    assertContains(withSymbol, ">A</text>")
-    assertContains(withSymbol, """font-size="9.5"""")
-    assertContains(withoutSymbol, "<rect")
-    assertFalse(withoutSymbol.contains("<text"))
+    assertContains(withIcon, "<g transform=")
+    assertContains(withIcon, """<path d="M""")
+    assertFalse(withIcon.contains("<text"))
+    assertContains(withoutIcon, "<rect")
+    assertFalse(withoutIcon.contains("<text"))
+    assertContains(unknownIcon, "<rect")
   }
 
   @Test
-  fun svg_usesSmallerFontForMultiCharacterSymbols() {
-    assertContains(GroundPin.svg("#1565C0", "AB", isPending = false), """font-size="6.5"""")
+  fun svg_iconContrastsWithLayerColor() {
+    // White icons on dark layer colors, near-black icons on light ones.
+    val onDark = GroundPin.svg("#1565C0", "park", isPending = false)
+    val onLight = GroundPin.svg("#FFEB3B", "park", isPending = false)
+
+    assertContains(onDark, """fill="#FFFFFF" fill-rule""")
+    assertContains(onLight, """fill="#1F1F1F" fill-rule""")
   }
 
   @Test
   fun svg_escapesXml() {
-    val svg = GroundPin.svg("\"red\"", "<", isPending = false)
+    val svg = GroundPin.svg("\"red\"", null, isPending = false)
 
     assertContains(svg, "&quot;red&quot;")
-    assertContains(svg, ">&lt;</text>")
   }
 
   @Test
   fun iconId_distinguishesEveryInput() {
-    val base = GroundPin.iconId("#1565C0", "A", isPending = false)
+    val base = GroundPin.iconId("#1565C0", "park", isPending = false)
 
-    assertNotEquals(base, GroundPin.iconId("#2E7D32", "A", isPending = false))
-    assertNotEquals(base, GroundPin.iconId("#1565C0", "B", isPending = false))
-    assertNotEquals(base, GroundPin.iconId("#1565C0", "A", isPending = true))
+    assertNotEquals(base, GroundPin.iconId("#2E7D32", "park", isPending = false))
+    assertNotEquals(base, GroundPin.iconId("#1565C0", "flag", isPending = false))
+    assertNotEquals(base, GroundPin.iconId("#1565C0", null, isPending = false))
+    assertNotEquals(base, GroundPin.iconId("#1565C0", "park", isPending = true))
   }
 }

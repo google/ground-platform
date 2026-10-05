@@ -13,14 +13,25 @@
  */
 package org.groundplatform.v2.devtools.prototypeapp.formeditor
 
-import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.drag
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.input.pointer.AwaitPointerEventScope
+import androidx.compose.ui.input.pointer.PointerInputChange
+import androidx.compose.ui.input.pointer.PointerInputScope
+import androidx.compose.ui.input.pointer.PointerType
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.input.pointer.positionChange
+import androidx.compose.ui.unit.dp
+import kotlin.coroutines.cancellation.CancellationException
+import kotlin.math.abs
 import kotlin.math.roundToInt
 
 /** Axis along which a [DragReorderState] list is laid out. */
@@ -115,9 +126,57 @@ fun <T> List<T>.moved(from: Int, to: Int): List<T> {
 }
 
 /**
+ * Mouse travel needed before a press turns into a drag.
+ *
+ * Compose's own drag detectors use a mouse slop of only 0.125 dp (`mouseSlop` in foundation's
+ * `DragGestureDetector.kt`, applied as `touchSlop * mouseSlop / 18.dp` for `PointerType.Mouse`), so
+ * the pixel or two a hand moves during an ordinary click starts a drag. The drag consumes the
+ * pointer movement, which cancels the `clickable` underneath, and the click is lost: the user has
+ * to click again holding the mouse perfectly still. Clickable items that can also be dragged use
+ * this larger slop instead.
+ */
+val MouseDragSlop = 8.dp
+
+/** Distance the pointer that went [down] must travel before a drag starts. */
+fun PointerInputScope.dragSlopFor(down: PointerInputChange): Float =
+  if (down.type == PointerType.Mouse) MouseDragSlop.toPx() else viewConfiguration.touchSlop
+
+/**
+ * Waits until the pointer that went [down] travels past [slopPx] (measured along [axis], or in any
+ * direction when `null`), without consuming anything before then so clicks underneath still
+ * register. Returns the change that crossed the slop and the travel so far, or `null` if the
+ * pointer was released or another gesture consumed the movement first.
+ */
+suspend fun AwaitPointerEventScope.awaitDragPastSlop(
+  down: PointerInputChange,
+  slopPx: Float,
+  axis: DragAxis? = null,
+): Pair<PointerInputChange, Offset>? {
+  var travel = Offset.Zero
+  while (true) {
+    val change = awaitPointerEvent().changes.firstOrNull { it.id == down.id } ?: return null
+    if (!change.pressed || change.isConsumed) return null
+    travel += change.positionChange()
+    val distance =
+      when (axis) {
+        DragAxis.HORIZONTAL -> abs(travel.x)
+        DragAxis.VERTICAL -> abs(travel.y)
+        null -> travel.getDistance()
+      }
+    if (distance > slopPx) {
+      change.consume()
+      return change to travel
+    }
+  }
+}
+
+/**
  * Makes this item draggable within a [DragReorderState] list. [onMove] receives the item key and
  * its drop index. [autoScroll] is called after each drag step and returns how many pixels the
  * surrounding container scrolled, so the dragged item stays under the pointer.
+ *
+ * A drag only starts past [dragSlopFor] (see [MouseDragSlop]), so a click with a slightly moving
+ * mouse still reaches the item's `clickable`.
  */
 fun Modifier.dragToReorder(
   state: DragReorderState,
@@ -130,14 +189,30 @@ fun Modifier.dragToReorder(
   autoScroll: (() -> Float)? = null,
 ): Modifier =
   pointerInput(key, index, count, pitchPx) {
-    detectDragGestures(
-      onDragStart = { state.start(key, index, count, pitchPx) },
-      onDrag = { change, amount ->
-        change.consume()
-        state.dragBy(if (axis == DragAxis.HORIZONTAL) amount.x else amount.y)
-        autoScroll?.invoke()?.let { scrolled -> if (scrolled != 0f) state.dragBy(scrolled) }
-      },
-      onDragEnd = { state.end()?.let { (k, to) -> if (to >= 0 && to != index) onMove(k, to) } },
-      onDragCancel = { state.cancel() },
-    )
+    fun along(offset: Offset) = if (axis == DragAxis.HORIZONTAL) offset.x else offset.y
+    fun step(delta: Float) {
+      state.dragBy(delta)
+      autoScroll?.invoke()?.let { scrolled -> if (scrolled != 0f) state.dragBy(scrolled) }
+    }
+    awaitEachGesture {
+      val down = awaitFirstDown(requireUnconsumed = false)
+      val (start, travel) = awaitDragPastSlop(down, dragSlopFor(down)) ?: return@awaitEachGesture
+      state.start(key, index, count, pitchPx)
+      try {
+        step(along(travel))
+        val released =
+          drag(start.id) { change ->
+            step(along(change.positionChange()))
+            change.consume()
+          }
+        if (released) {
+          state.end()?.let { (k, to) -> if (to >= 0 && to != index) onMove(k, to) }
+        } else {
+          state.cancel()
+        }
+      } catch (e: CancellationException) {
+        state.cancel()
+        throw e
+      }
+    }
   }

@@ -72,7 +72,15 @@ kotlin {
     }
     val wasmJsMain by getting { dependencies { implementation("io.ktor:ktor-client-js:3.6.0") } }
     val commonTest by getting { dependencies { implementation(kotlin("test")) } }
-    val jvmTest by getting { dependencies { implementation(kotlin("test-junit5")) } }
+    val jvmTest by getting {
+      dependencies {
+        implementation(kotlin("test-junit5"))
+        // Headless Compose UI tests (runComposeUiTest) for interaction regressions.
+        @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
+        implementation(compose.uiTest)
+        implementation(compose.desktop.currentOs)
+      }
+    }
   }
 }
 

@@ -93,6 +93,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import kotlin.math.roundToInt
+import org.groundplatform.v2.devtools.prototypeapp.map.LayerIcons
 
 /** Geometry kind of a map feature, shown as the leading icon of list rows and details headers. */
 internal enum class EntityGeometryKind(val label: String) {
@@ -208,23 +209,30 @@ private fun contentColorOnMarker(markerColor: Color): Color =
   if (markerColor.luminance() > 0.6f) Color(0xFF1F1F1F) else Color.White
 
 /**
- * The entity's marker circle: a circle filled with its `simplestyle-spec` `marker-color`,
- * containing its `marker-symbol`. Renders nothing when the entity has no marker symbol.
+ * The entity's layer marker: a bare icon tinted with its map [layer]'s color — the layer's pin icon
+ * for points, or the entity's geometry icon (polygon, line, or point) for lines, polygons, and
+ * layers without an icon. Workflow status isn't shown here; see [EntityStatusBalloon].
  */
 @Composable
-internal fun EntityMarkerCircle(entity: GeospatialEntityItem, modifier: Modifier = Modifier) {
-  if (!entity.hasMarkerSymbol) return
-  val fill = Color(entity.markerColorHex)
-  Box(
-    modifier = modifier.size(24.dp).background(fill, CircleShape),
-    contentAlignment = Alignment.Center,
-  ) {
-    Text(
-      text = entity.markerSymbol,
-      style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold),
-      color = contentColorOnMarker(fill),
+internal fun EntityLayerMarker(
+  entity: GeospatialEntityItem,
+  layer: MapLayerItem?,
+  modifier: Modifier = Modifier,
+  size: Dp = 24.dp,
+) {
+  // Pin icons are only for points; lines and polygons show their geometry icon.
+  val icon =
+    LayerIcons.forName(
+      layer
+        ?.takeIf { it.id == entity.layerId && entity.geometryKind == EntityGeometryKind.POINT }
+        ?.iconName
     )
-  }
+  Icon(
+    imageVector = icon?.vector ?: entity.geometryKind.icon,
+    contentDescription = icon?.label ?: entity.geometryKind.label,
+    tint = Color(entity.mapColorHex(layer)),
+    modifier = modifier.size(size),
+  )
 }
 
 /**
@@ -268,9 +276,37 @@ internal fun EntityStatusChip(
 }
 
 /**
- * One-line row for an entity record in the searchable list: geometry icon, label, and marker
- * circle. Hovering (web) or long-pressing (mobile) shows the status text in a tooltip. The selected
- * row is highlighted and scrolled into view, including when it was selected on the map.
+ * Compact status balloon for list rows: a small circle filled with the entity's `marker-color`
+ * holding its `marker-symbol` (an empty dot when it has none). The status text itself isn't shown;
+ * list rows expose it through their tooltip and `stateDescription`.
+ */
+@Composable
+internal fun EntityStatusBalloon(
+  entity: GeospatialEntityItem,
+  modifier: Modifier = Modifier,
+  size: Dp = 20.dp,
+) {
+  val fill = Color(entity.markerColorHex)
+  Box(
+    modifier = modifier.size(size).background(fill, CircleShape),
+    contentAlignment = Alignment.Center,
+  ) {
+    if (entity.hasMarkerSymbol) {
+      Text(
+        text = entity.markerSymbol,
+        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.ExtraBold),
+        color = contentColorOnMarker(fill),
+        maxLines = 1,
+      )
+    }
+  }
+}
+
+/**
+ * One-line row for an entity record in the searchable list: layer marker (the entity's [layer]
+ * color and icon, matching its map pin), label, and status balloon (`marker-symbol` on
+ * `marker-color`). Hovering (web) or long-pressing (mobile) shows the status text in a tooltip. The
+ * selected row is highlighted and scrolled into view, including when it was selected on the map.
  *
  * When [compact] is `true` (the web dashboard's left-hand panel), the row is a dense
  * [compactHeight]-tall row indented by [compactStartIndent] so it lines up under its dataset header
@@ -287,6 +323,7 @@ internal fun EntityListRow(
   compact: Boolean = false,
   compactHeight: Dp = 32.dp,
   compactStartIndent: Dp = 8.dp,
+  layer: MapLayerItem? = null,
 ) {
   val bringIntoViewRequester = remember { BringIntoViewRequester() }
   LaunchedEffect(isSelected) { if (isSelected) bringIntoViewRequester.bringIntoView() }
@@ -312,7 +349,7 @@ internal fun EntityListRow(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(10.dp),
       ) {
-        EntityGeometryIcon(entity = entity, size = 18.dp)
+        EntityLayerMarker(entity = entity, layer = layer, size = 18.dp)
         Text(
           text = entity.label,
           style = MaterialTheme.typography.bodyMedium,
@@ -327,7 +364,7 @@ internal fun EntityListRow(
           overflow = TextOverflow.Ellipsis,
           modifier = Modifier.weight(1f),
         )
-        EntityMarkerCircle(entity = entity, modifier = Modifier.size(20.dp))
+        EntityStatusBalloon(entity = entity, size = 18.dp)
       }
     } else {
       ListItem(
@@ -340,8 +377,8 @@ internal fun EntityListRow(
             overflow = TextOverflow.Ellipsis,
           )
         },
-        leadingContent = { EntityGeometryIcon(entity = entity) },
-        trailingContent = { EntityMarkerCircle(entity = entity) },
+        leadingContent = { EntityLayerMarker(entity = entity, layer = layer) },
+        trailingContent = { EntityStatusBalloon(entity = entity) },
         colors =
           ListItemDefaults.colors(
             containerColor =
@@ -364,9 +401,10 @@ internal fun EntityListRow(
 }
 
 /**
- * Header of an entity's details surface: optional back button, geometry icon, label, status chip
- * with an optional [statusAccessory] next to it, optional [trailingActions], an optional collapse
- * button, and an optional close button (rendered only when [onClose] is non-null).
+ * Header of an entity's details surface: optional back button, layer marker (the entity's [layer]
+ * color and icon, or its geometry icon when [layer] is `null`), label, status chip with an optional
+ * [statusAccessory] next to it, optional [trailingActions], an optional collapse button, and an
+ * optional close button (rendered only when [onClose] is non-null).
  * - [showStatus]: whether to show the status row (status chip and [statusAccessory]) under the
  *   label. The web details card turns it off and shows a compact status chip in its `Data` tab
  *   body.
@@ -382,6 +420,7 @@ internal fun EntityDetailsHeader(
   showStatus: Boolean = true,
   statusAccessory: @Composable () -> Unit = {},
   trailingActions: @Composable () -> Unit = {},
+  layer: MapLayerItem? = null,
 ) {
   Row(
     modifier = modifier.fillMaxWidth(),
@@ -397,7 +436,11 @@ internal fun EntityDetailsHeader(
         )
       }
     }
-    EntityGeometryIcon(entity = entity, size = 22.dp)
+    if (layer != null) {
+      EntityLayerMarker(entity = entity, layer = layer, size = 24.dp)
+    } else {
+      EntityGeometryIcon(entity = entity, size = 22.dp)
+    }
     Column(modifier = Modifier.weight(1f).padding(horizontal = 4.dp)) {
       Text(
         text = entity.label,
@@ -911,6 +954,7 @@ internal fun EntityBottomSheetCard(
       entity = entity,
       onBack = { state.returnToBottomSheetList() },
       onClose = null,
+      layer = state.mapLayerFor(entity),
       statusAccessory = {
         SyncStatusIndicatorBadge(
           syncStatus = entity.syncStatus,
@@ -977,6 +1021,7 @@ internal fun WebEntityDetailsCard(
         entity = entity,
         onClose = { state.selectEntity(null) },
         onCollapse = onCollapse,
+        layer = state.mapLayerFor(entity),
         // The status chip is shown, compact, at the top of the `Data` tab body instead.
         showStatus = false,
         trailingActions = {

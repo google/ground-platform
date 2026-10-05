@@ -163,7 +163,8 @@ internal object SurveyEditorSamples {
             square(-0.4120, 36.9620, 0.003),
           ),
         ),
-      style = LayerStyle(colorHex = "#6D4C41", strokeWidth = 2.0, fillOpacity = 0.25),
+      style =
+        LayerStyle(colorHex = "#6D4C41", strokeWidth = 2.0, fillOpacity = 0.25, iconName = "eco"),
     )
 
   fun shadePlots() =
@@ -206,7 +207,7 @@ internal object SurveyEditorSamples {
             listOf(LatLng(-0.4252, 36.9470)),
           ),
         ),
-      style = LayerStyle(colorHex = "#2E7D32"),
+      style = LayerStyle(colorHex = "#2E7D32", iconName = "park"),
     )
 
   fun farmers() =

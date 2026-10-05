@@ -759,7 +759,7 @@ internal fun BottomSheetSearchableListContent(
               }
 
               if (!isCollapsed) {
-                // One single-line row per entity record: geometry icon, label, and status icon.
+                // One single-line row per entity record: layer marker, label, and status chip.
                 val maxRenderedFeatures = 200
                 val displayedFeatures =
                   if (group.entities.size > maxRenderedFeatures) {
@@ -776,6 +776,7 @@ internal fun BottomSheetSearchableListContent(
                       compact = isSidePanel,
                       compactHeight = SidePanelListRowHeight,
                       compactStartIndent = SidePanelEntityRowIndent,
+                      layer = layer,
                     )
                   }
                 }

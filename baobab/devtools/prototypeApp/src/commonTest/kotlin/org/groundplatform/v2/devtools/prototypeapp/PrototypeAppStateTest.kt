@@ -1180,6 +1180,41 @@ class PrototypeAppStateTest {
   }
 
   @Test
+  fun selectEntityRefForActiveForm_framesSelectedMapFeatureOnMap() {
+    val state = PrototypeAppState(initialScreen = PrototypeScreen.MAIN_SURVEY)
+    state.selectEntity(null)
+    state.launchFormFromFab("form-eudr-baseline")
+    assertTrue(state.isCurrentFormStepEntityRef)
+    val form = assertNotNull(state.activeDataCollectionForm)
+    val epochBefore = state.entityRefFramingEpoch
+
+    state.selectEntityRefForActiveForm("entity-nyr-108")
+
+    // The camera target moves onto the picked map feature and stops following GPS.
+    val entity = state.entities.first { it.id == "entity-nyr-108" }
+    assertTrue(entity.hasGeometry)
+    assertEquals(epochBefore + 1, state.entityRefFramingEpoch)
+    assertFalse(state.isCameraFollowingUser)
+    val (lng, lat) = state.resolveEntityLngLat(entity)
+    val camera = state.desiredMapCamera()
+    assertEquals(lat, camera.center.latitude, 1e-4)
+    assertEquals(lng, camera.center.longitude, 1e-4)
+
+    // Picking the same map feature again frames it again.
+    state.selectEntityRefForActiveForm("entity-nyr-108")
+    assertEquals(epochBefore + 2, state.entityRefFramingEpoch)
+
+    // A map feature from another data table is rejected and leaves the camera where it was.
+    val other = state.entities.firstOrNull { it.datasetId != form.targetDatasetId }
+    if (other != null) {
+      state.selectEntityRefForActiveForm(other.id)
+      assertEquals(epochBefore + 2, state.entityRefFramingEpoch)
+      assertEquals("entity-nyr-108", state.activeDataCollectionEntityId)
+      assertEquals(camera.center, state.desiredMapCamera().center)
+    }
+  }
+
+  @Test
   fun syncStatusIndicators_showUploadingSyncedAndFailedOnEntitiesAndSubmissionsInLists() {
     val state = PrototypeAppState(initialScreen = PrototypeScreen.MAIN_SURVEY)
     state.setMainSurveyViewMode(MainSurveyViewMode.LIST)

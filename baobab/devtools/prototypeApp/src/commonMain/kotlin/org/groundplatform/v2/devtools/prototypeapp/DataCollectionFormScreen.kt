@@ -13,6 +13,7 @@
  */
 package org.groundplatform.v2.devtools.prototypeapp
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -42,7 +43,6 @@ import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -385,13 +385,11 @@ private fun EntityRefStepMapOrListSelector(
         Modifier.weight(1f).fillMaxWidth().verticalScroll(rememberScrollState()).padding(14.dp),
       verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
-      // Step Header Card
+      // Step Header Card: shares the selector's background so only its outline sets it apart.
       OutlinedCard(
         modifier = Modifier.fillMaxWidth(),
         colors =
-          CardDefaults.outlinedCardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerLow
-          ),
+          CardDefaults.outlinedCardColors(containerColor = MaterialTheme.colorScheme.surface),
       ) {
         Column(
           modifier = Modifier.fillMaxWidth().padding(12.dp),
@@ -464,20 +462,15 @@ private fun EntityRefStepMapOrListSelector(
         }
       }
 
-      // Currently selected entity summary banner (if chosen)
+      // Currently selected map feature (if chosen): an outlined card on the selector's own
+      // background (`surface`), with a primary outline marking the selection.
       if (selectedEntity != null) {
-        ElevatedCard(
-          modifier =
-            Modifier.fillMaxWidth()
-              .border(
-                width = 1.5.dp,
-                color = MaterialTheme.colorScheme.primary,
-                shape = MaterialTheme.shapes.medium,
-              ),
+        OutlinedCard(
+          modifier = Modifier.fillMaxWidth(),
+          shape = MaterialTheme.shapes.medium,
           colors =
-            CardDefaults.elevatedCardColors(
-              containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.45f)
-            ),
+            CardDefaults.outlinedCardColors(containerColor = MaterialTheme.colorScheme.surface),
+          border = BorderStroke(width = 1.5.dp, color = MaterialTheme.colorScheme.primary),
         ) {
           Row(
             modifier = Modifier.fillMaxWidth().padding(12.dp),

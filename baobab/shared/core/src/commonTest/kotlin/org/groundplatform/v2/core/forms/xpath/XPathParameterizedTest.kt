@@ -530,6 +530,11 @@ class XPathParameterizedTest {
           expectedBoolean = true,
         ),
         ParameterizedCase(
+          name = "regex() unanchored pattern matches a substring (JavaRosa find semantics)",
+          expression = "regex('abc123', '[0-9]+') and not(regex('abc123', '^[0-9]+$'))",
+          expectedBoolean = true,
+        ),
+        ParameterizedCase(
           name = "digest() MD5 hex calculation",
           expression = "digest('hello world', 'MD5', 'hex')",
           expectedString = "5eb63bbbe01eeed093cb22bb8f5acdc3",

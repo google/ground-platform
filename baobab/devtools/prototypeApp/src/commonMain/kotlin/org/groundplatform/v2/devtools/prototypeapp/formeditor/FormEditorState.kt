@@ -53,6 +53,12 @@ class FormEditorState(
 
   var isXmlViewerOpen: Boolean by mutableStateOf(false)
 
+  /**
+   * Whether the question panel's "Advanced" section is open. Kept here, like the app's other panel
+   * expansion flags, so it stays open or closed as the author moves between questions.
+   */
+  var isAdvancedExpanded: Boolean by mutableStateOf(false)
+
   private var nextKeyId = initialForm.questions.size + 1
 
   val selectedQuestion: EditorQuestion?
@@ -198,7 +204,7 @@ class FormEditorState(
     val old = question.choices.getOrNull(index) ?: return
     val newValue =
       if (old.value == slugify(old.label, old.value)) slugify(label, old.value) else old.value
-    updateChoice(key, index, EditorChoice(newValue, label))
+    updateChoice(key, index, old.copy(value = newValue, label = label))
   }
 
   fun updateChoice(key: String, index: Int, choice: EditorChoice) {
@@ -233,13 +239,55 @@ class FormEditorState(
     updateQuestion(key) { q -> q.copy(choices = q.choices.filterIndexed { i, _ -> i != index }) }
   }
 
-  /** Changes the type of [key], seeding choices and dropping display logic that no longer fits. */
+  /** Sets (or with `null`, clears) the display color of choice [index] of [key]. */
+  fun setChoiceColor(key: String, index: Int, colorHex: String?) {
+    val color = colorHex?.uppercase()?.takeIf(ChoiceColors::isValidHex)
+    if (colorHex != null && color == null) return
+    updateChoiceAt(key, index) { it.copy(colorHex = color) }
+  }
+
+  /**
+   * Attaches [image] to choice [index] of [key], or removes it when `null`. Returns `false` (and
+   * changes nothing) if the image exceeds [EditorChoiceImage.MAX_BYTES] or isn't an image.
+   */
+  fun setChoiceImage(key: String, index: Int, image: EditorChoiceImage?): Boolean {
+    if (
+      image != null &&
+        (image.sizeBytes > EditorChoiceImage.MAX_BYTES || !image.mimeType.startsWith("image/"))
+    ) {
+      return false
+    }
+    if (form.find(key)?.choices?.getOrNull(index) == null) return false
+    updateChoiceAt(key, index) { it.copy(image = image) }
+    return true
+  }
+
+  private fun updateChoiceAt(key: String, index: Int, transform: (EditorChoice) -> EditorChoice) {
+    updateQuestion(key) { q ->
+      q.copy(choices = q.choices.mapIndexed { i, c -> if (i == index) transform(c) else c })
+    }
+  }
+
+  /** Shows the Form settings (title, ID) in the properties panel instead of a question. */
+  fun selectFormSettings() {
+    selectedKey = null
+  }
+
+  /** Whether the properties panel shows Form settings rather than a question. */
+  val isFormSettingsSelected: Boolean
+    get() = selectedQuestion == null
+
+  /**
+   * Changes the type of [key], seeding choices and dropping display logic and validation rules that
+   * no longer fit.
+   */
   fun changeType(key: String, type: EditorQuestionType) {
     updateQuestion(key) { q ->
       q.copy(
         type = type,
         choices = if (type.hasChoices && q.choices.isEmpty()) defaultChoices() else q.choices,
         required = q.required && !type.isReadOnly,
+        validation = ValidationRules.adaptToType(q.type, type, q.validation),
       )
     }
     // Dependents whose operator is incompatible with the new type fall back to "is answered".
@@ -372,6 +420,17 @@ class FormEditorState(
       idMatchProperty = target.keyProperty,
       mappings = SaveToRules.autoMap(form, target, skipKey = idQuestion?.key),
     )
+  }
+
+  /**
+   * Updates the validation rule of [key]. A rule with no settings is stored as `null` so the
+   * question exports without a `constraint`.
+   */
+  fun updateValidation(key: String, transform: (EditorValidation) -> EditorValidation) {
+    updateQuestion(key) { q ->
+      val updated = transform(q.validation ?: EditorValidation())
+      q.copy(validation = updated.takeIf { it != EditorValidation() })
+    }
   }
 
   /** Turns display logic on for [key] using the nearest earlier question as a default source. */

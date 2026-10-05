@@ -13,9 +13,12 @@
  */
 package org.groundplatform.v2.devtools.prototypeapp.map
 
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.parseHexColorOrDefault
+
 /**
- * The Ground map pin: a white-rimmed squircle filled with the feature's marker color, showing its
- * marker symbol, with its tip on the location.
+ * The Ground map pin: a white-rimmed squircle filled with the feature's layer color, showing the
+ * layer's icon (see [LayerIcons]), with its tip on the location. Workflow status is not shown on
+ * the pin; it appears in the feature's status chip.
  */
 object GroundPin {
   const val WIDTH = 22
@@ -24,15 +27,22 @@ object GroundPin {
   /** Tip of the pin in viewBox units; the shadow below it extends to the bottom edge. */
   const val TIP_Y = 20.6667
 
-  /** Stable id for the pin image of a (color, symbol, pending) combination. */
-  fun iconId(color: String, symbol: String, isPending: Boolean): String =
-    "pin|$color|$symbol|${if (isPending) 1 else 0}"
+  /** Size of the icon drawn inside the pin, in viewBox units. */
+  private const val ICON_SIZE = 11.0
+
+  /** Assumed fill when [svg]'s color isn't a `#RRGGBB` string, for picking the icon color. */
+  private const val DEFAULT_COLOR = 0xFF2E7D32
+
+  /** Stable id for the pin image of a (color, icon, pending) combination. */
+  fun iconId(color: String, iconName: String?, isPending: Boolean): String =
+    "pin|$color|${iconName.orEmpty()}|${if (isPending) 1 else 0}"
 
   /**
-   * Renders the pin SVG. Pending (unsynced) features get a lighter fill with a dashed edge;
-   * features without a marker symbol keep the pin's small white square.
+   * Renders the pin SVG filled with the CSS [color]. Pending (unsynced) features get a lighter fill
+   * with a dashed edge. The [iconName] icon is drawn inside in white, or near-black on light
+   * colors; pins without a known icon keep the pin's small square.
    */
-  fun svg(color: String, symbol: String, isPending: Boolean): String {
+  fun svg(color: String, iconName: String?, isPending: Boolean): String {
     val safeColor = escapeXml(color)
     val mask =
       if (isPending) {
@@ -41,14 +51,17 @@ object GroundPin {
       } else {
         """<path d="$MASK_PATH" fill="$safeColor"></path>"""
       }
+    val argb = parseHexColorOrDefault(color, DEFAULT_COLOR)
+    val content = if (contentColorOnArgb(argb) == 0xFFFFFFFFL) "#FFFFFF" else "#1F1F1F"
+    val icon = LayerIcons.forName(iconName)
     val glyph =
-      if (symbol.isNotEmpty()) {
-        val fontSize = if (codePointCount(symbol) > 1) "6.5" else "9.5"
-        """<text x="8" y="8.4" fill="#FFFFFF" font-family="Roboto, Arial, sans-serif" """ +
-          """font-size="$fontSize" font-weight="700" text-anchor="middle" """ +
-          """dominant-baseline="central">${escapeXml(symbol)}</text>"""
+      if (icon != null) {
+        val offset = 8 - ICON_SIZE / 2
+        """<g transform="translate($offset $offset) scale(${ICON_SIZE / 24})">""" +
+          LayerIcons.svgPathElements(icon, content) +
+          "</g>"
       } else {
-        """<rect fill="#FFFFFF" x="6" y="6" width="4" height="4" rx="0.666666667"></rect>"""
+        """<rect fill="$content" x="6" y="6" width="4" height="4" rx="0.666666667"></rect>"""
       }
     return """<svg width="22px" height="24px" viewBox="0 0 22 24" version="1.1" """ +
       """xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">""" +
@@ -81,17 +94,6 @@ object GroundPin {
       "</g>" +
       "</g>" +
       "</svg>"
-  }
-
-  /** Counts Unicode code points, so an emoji or a single non-BMP symbol counts as one. */
-  private fun codePointCount(s: String): Int {
-    var count = 0
-    var i = 0
-    while (i < s.length) {
-      i += if (s[i].isHighSurrogate() && i + 1 < s.length && s[i + 1].isLowSurrogate()) 2 else 1
-      count++
-    }
-    return count
   }
 
   private fun escapeXml(value: String): String =

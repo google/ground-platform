@@ -65,6 +65,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.onPointerEvent
 import androidx.compose.ui.platform.LocalDensity
@@ -76,7 +77,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.formatHexColorCss
+import org.groundplatform.v2.devtools.prototypeapp.map.GroundPin
 import org.groundplatform.v2.devtools.prototypeapp.map.SurveyBasemaps
+import org.groundplatform.v2.devtools.prototypeapp.map.contentColorOnArgb
 import org.groundplatform.v2.map.Basemap
 import org.groundplatform.v2.map.CameraPosition
 import org.groundplatform.v2.map.FeatureFilter
@@ -92,8 +96,10 @@ import org.groundplatform.v2.map.MapDrag
 import org.groundplatform.v2.map.MapDragHandler
 import org.groundplatform.v2.map.MapEvent
 import org.groundplatform.v2.map.MapFeature
+import org.groundplatform.v2.map.MapIcon
 import org.groundplatform.v2.map.MapInsets
 import org.groundplatform.v2.map.MapLayer
+import org.groundplatform.v2.map.MarkerAnchor
 import org.groundplatform.v2.map.StyleValue
 
 private enum class MapTool {
@@ -362,8 +368,10 @@ internal fun InteractiveLayerMapCard(
             }
           }
 
-          // Feature labels (pill backgrounds keep them legible over imagery).
+          // Feature labels on pills of the layer color, like the survey map's feature chips.
           if (zoom >= LABEL_MIN_ZOOM) {
+            val onLayerColor =
+              Color(contentColorOnArgb(layerColor.toArgb().toLong() and 0xFFFFFFFFL))
             dataset.rows.forEach { row ->
               val pts = row.geometry.map(::proj)
               if (pts.isEmpty()) return@forEach
@@ -376,12 +384,12 @@ internal fun InteractiveLayerMapCard(
               val padY = 2.dp.toPx()
               val topLeft = Offset(anchorX - measured.size.width / 2f, anchorY)
               drawRoundRect(
-                color = colors.surface.copy(alpha = 0.88f),
+                color = layerColor,
                 topLeft = Offset(topLeft.x - padX, topLeft.y - padY),
                 size = Size(measured.size.width + 2 * padX, measured.size.height + 2 * padY),
                 cornerRadius = CornerRadius(8.dp.toPx()),
               )
-              drawText(measured, topLeft = topLeft)
+              drawText(measured, color = onLayerColor, topLeft = topLeft)
             }
           }
 
@@ -464,6 +472,13 @@ internal fun layerEditorContent(
   val isSelected = FeatureFilter.Equals(LAYER_EDITOR_SELECTED, "true")
   val casing = Color.Black.copy(alpha = 0.35f)
   val halo = Color.White.copy(alpha = 0.9f)
+  val pinColor = formatHexColorCss(layerColor.toArgb().toLong())
+  val iconName = dataset.style.iconName
+  val pin =
+    MapIcon(
+      GroundPin.iconId(pinColor, iconName, isPending = false),
+      GroundPin.svg(pinColor, iconName, isPending = false),
+    )
   return MapContent(
     basemap = basemap,
     sources = listOf(GeoJsonSource(src, features)),
@@ -496,30 +511,19 @@ internal fun layerEditorContent(
           color = StyleValue.Constant(layerColor),
           width = StyleValue.Constant(stroke),
         ),
-        MapLayer.Circle(
-          id = "layer-editor-point-halo",
-          sourceId = src,
-          filter = FeatureFilter.All(listOf(points, isSelected)),
-          color = StyleValue.Constant(halo),
-          radius = StyleValue.Constant(14.dp),
-          strokeWidth = 0.dp,
-        ),
-        MapLayer.Circle(
-          id = "layer-editor-point-casing",
-          sourceId = src,
-          color = StyleValue.Constant(casing),
-          radius = StyleValue.Constant(10.dp),
-          strokeWidth = 0.dp,
-        ),
-        MapLayer.Circle(
+        // Points are drawn as the same Ground pin the survey map uses: layer color and icon.
+        MapLayer.Symbol(
           id = "layer-editor-point",
           sourceId = src,
-          color = StyleValue.Constant(layerColor),
-          radius = StyleValue.Constant(7.dp),
-          strokeColor = StyleValue.Constant(Color.White),
-          strokeWidth = 2.dp,
+          filter = points,
+          iconId = StyleValue.Constant(pin.id),
+          iconSize = StyleValue.Match(LAYER_EDITOR_SELECTED, mapOf("true" to 1.85f), 1.5f),
+          iconAnchor = MarkerAnchor.BOTTOM,
+          // Moves the pin down so its tip, not the bottom of its shadow, sits on the location.
+          iconOffset = DpOffset(0.dp, (GroundPin.HEIGHT - GroundPin.TIP_Y).toFloat().dp),
         ),
       ),
+    icons = listOf(pin),
   )
 }
 

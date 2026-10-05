@@ -285,9 +285,8 @@ class CompleteFormSubmissionUseCase(
         saveToProps.toMutableMap().apply {
           put("status", "Completed")
           put("marker-symbol", "✓")
+          // Status color for the status chip; the map draws features in their layer's color.
           put("marker-color", "#1E8E3E")
-          put("stroke", "#1E8E3E")
-          put("fill", "#1E8E3E")
         }
 
       val newEntity =
@@ -446,9 +445,9 @@ class CompleteFormSubmissionUseCase(
         putAll(saveToProps)
         put("status", nextStatus)
         put("marker-symbol", nextMarkerSymbol)
+        // Status color for the status chip only: map features keep their layer's color, so the
+        // geometry `stroke` / `fill` styling isn't changed with the status.
         put("marker-color", nextMarkerColor)
-        put("stroke", nextMarkerColor)
-        put("fill", nextMarkerColor)
       }
 
     val updatedSubmissions = listOf(newSubmission) + entity.submissions

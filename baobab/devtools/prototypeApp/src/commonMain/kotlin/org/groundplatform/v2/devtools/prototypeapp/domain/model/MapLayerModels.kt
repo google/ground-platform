@@ -52,11 +52,20 @@ enum class OfflineBasemapStyle(val label: String, val tileDescription: String) {
   ),
 }
 
-/** Represents a toggleable map layer (`LayerDef` in `SurveyDef.map_config.layers`). */
+/**
+ * Represents a toggleable map layer (`LayerDef` in `SurveyDef.map_config.layers`).
+ *
+ * The layer's style ([colorHex], [iconName]) is how its map features are drawn: pins are filled
+ * with [colorHex] and show [iconName] inside, and lines and polygons are stroked and filled with
+ * [colorHex]. A feature's workflow status is shown in its status chip, not on the map.
+ */
 data class MapLayerItem(
   val id: String,
   val label: String,
   val sourceDescription: String,
+  /**
+   * Layer color (`GeometryStyle.color`) as an ARGB `Long`, used for all of the layer's features.
+   */
   val colorHex: Long,
   val geometryTypeLabel: String,
   val isVisible: Boolean,
@@ -66,6 +75,13 @@ data class MapLayerItem(
   val fieldPath: String? = null,
   val singularItemLabel: String = "location",
   val pluralItemLabel: String = "locations",
+  /** ID of the entity dataset this layer shows (`LayerDef.entity_dataset_id`), if known. */
+  val datasetId: String? = null,
+  /**
+   * Name of the icon drawn inside this layer's point pins (a Material Symbols name such as
+   * `"park"`), or `null` for a plain pin. See `map/LayerIcons.kt` for the available icons.
+   */
+  val iconName: String? = null,
   val pluralDomainLabel: String =
     when (id) {
       "layer-coffee-parcels" -> "Coffee Parcels"
@@ -88,6 +104,13 @@ data class MapLayerItem(
       else -> pluralItemLabel
     },
 ) {
+  /**
+   * The icon to display for this layer: [iconName] for point layers, `null` for line and polygon
+   * layers, whose features have no pins (their chips and list markers use the geometry glyph).
+   */
+  val pinIconName: String?
+    get() = iconName.takeIf { geometryTypeLabel.endsWith("Point", ignoreCase = true) }
+
   /** Formats a user-friendly domain item count for this layer (e.g. `"2 parcels"`, `"1 plot"`). */
   fun itemCountLabel(count: Int): String = "$count ${if (count == 1) singularNoun else pluralNoun}"
 

@@ -18,15 +18,20 @@ import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.foundation.gestures.horizontalDrag
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -37,6 +42,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -49,6 +55,7 @@ import androidx.compose.material.icons.automirrored.outlined.List
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.outlined.AccountCircle
 import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.AddPhotoAlternate
 import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.outlined.Close
@@ -57,21 +64,32 @@ import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Description
 import androidx.compose.material.icons.outlined.DragIndicator
 import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material.icons.outlined.ExpandLess
+import androidx.compose.material.icons.outlined.ExpandMore
+import androidx.compose.material.icons.outlined.FormatColorReset
 import androidx.compose.material.icons.outlined.Info
-import androidx.compose.material.icons.outlined.KeyboardArrowDown
 import androidx.compose.material.icons.outlined.Layers
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.MoreVert
+import androidx.compose.material.icons.outlined.Photo
 import androidx.compose.material.icons.outlined.PlayArrow
 import androidx.compose.material.icons.outlined.Refresh
+import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.Warning
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuAnchorType
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -81,11 +99,13 @@ import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SelectableDates
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -99,6 +119,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.DrawScope
@@ -107,7 +128,11 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.input.pointer.positionChange
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -115,9 +140,12 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+import kotlin.io.encoding.Base64
+import kotlin.io.encoding.ExperimentalEncodingApi
 import kotlin.math.atan2
 import kotlin.math.cos
 import kotlin.math.sin
+import org.groundplatform.v2.core.forms.media.MediaCapture
 import org.groundplatform.v2.core.forms.serialization.XFormsXmlSerializer
 import org.groundplatform.v2.core.forms.ui.FormWizardStep
 import org.groundplatform.v2.core.forms.ui.GroundBadgeTone
@@ -126,6 +154,11 @@ import org.groundplatform.v2.core.forms.ui.MobileFormRunner
 import org.groundplatform.v2.devtools.prototypeapp.DeviceFormFactor
 import org.groundplatform.v2.devtools.prototypeapp.DeviceOrientation
 import org.groundplatform.v2.devtools.prototypeapp.MobileDevicePreviewFrame
+import org.groundplatform.v2.devtools.prototypeapp.PlatformPickResult
+import org.groundplatform.v2.devtools.prototypeapp.isPlatformMediaPickerAvailable
+import org.groundplatform.v2.devtools.prototypeapp.openPlatformMediaPicker
+import org.jetbrains.compose.resources.ExperimentalResourceApi
+import org.jetbrains.compose.resources.decodeToImageBitmap
 
 private val CardWidth = 184.dp
 private val CardHeight = 312.dp
@@ -202,25 +235,25 @@ private fun FormEditorToolbar(
       horizontalArrangement = Arrangement.spacedBy(12.dp),
       verticalAlignment = Alignment.CenterVertically,
     ) {
-      Column(modifier = Modifier.width(200.dp)) {
+      Column(modifier = Modifier.widthIn(max = 320.dp)) {
         Text(
-          text = "Form",
+          text = state.form.title.ifBlank { "Untitled form" },
           style = MaterialTheme.typography.titleMedium,
           fontWeight = FontWeight.Bold,
+          maxLines = 1,
+          overflow = TextOverflow.Ellipsis,
         )
         Text(
-          text = "Design questions, display logic, and flows. Generates XForms.",
+          text = "Design questions, display logic, and flows.",
           style = MaterialTheme.typography.bodySmall,
           color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
       }
-      OutlinedTextField(
-        value = state.form.title,
-        onValueChange = state::updateTitle,
-        label = { Text("Form title") },
-        singleLine = true,
-        modifier = Modifier.width(280.dp),
-      )
+      FilledTonalButton(onClick = state::selectFormSettings) {
+        Icon(Icons.Outlined.Settings, contentDescription = null, modifier = Modifier.size(18.dp))
+        Spacer(Modifier.width(6.dp))
+        Text("Form settings")
+      }
       Spacer(Modifier.weight(1f))
       if (onCreateDataset != null) {
         OutlinedButton(onClick = onCreateDataset) {
@@ -363,38 +396,52 @@ private fun FlowCanvasPanel(state: FormEditorState, modifier: Modifier = Modifie
       ),
   ) {
     Column(modifier = Modifier.fillMaxSize()) {
-      Row(
+      // FlowRow so the legend moves to its own line when the header is too narrow (e.g. when the
+      // issues chip is shown) rather than squeezing labels into one-character-wide columns.
+      FlowRow(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
-        verticalAlignment = Alignment.CenterVertically,
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+        itemVerticalAlignment = Alignment.CenterVertically,
       ) {
-        Text(
-          text = "${form.questions.size} screens • ${state.pathCount} potential paths",
-          style = MaterialTheme.typography.titleSmall,
-          fontWeight = FontWeight.Bold,
-        )
-        if (issues.isNotEmpty()) {
-          AssistChip(
-            onClick = {
-              val firstKey = issues.first().questionKey
-              if (firstKey != null) state.select(firstKey) else state.selectForm()
-            },
-            label = { Text("${issues.size} ${if (issues.size == 1) "issue" else "issues"}") },
-            leadingIcon = {
-              Icon(
-                Icons.Outlined.Warning,
-                contentDescription = null,
-                modifier = Modifier.size(16.dp),
-              )
-            },
-            colors =
-              AssistChipDefaults.assistChipColors(
-                containerColor = MaterialTheme.colorScheme.errorContainer,
-                labelColor = MaterialTheme.colorScheme.onErrorContainer,
-                leadingIconContentColor = MaterialTheme.colorScheme.onErrorContainer,
-              ),
-            border = null,
+        Row(
+          horizontalArrangement = Arrangement.spacedBy(12.dp),
+          verticalAlignment = Alignment.CenterVertically,
+        ) {
+          Text(
+            text = "${form.questions.size} screens • ${state.pathCount} potential paths",
+            style = MaterialTheme.typography.titleSmall,
+            fontWeight = FontWeight.Bold,
+            softWrap = false,
           )
+          if (issues.isNotEmpty()) {
+            AssistChip(
+              onClick = {
+                val firstKey = issues.first().questionKey
+                if (firstKey != null) state.select(firstKey) else state.selectForm()
+              },
+              label = {
+                Text(
+                  "${issues.size} ${if (issues.size == 1) "issue" else "issues"}",
+                  softWrap = false,
+                )
+              },
+              leadingIcon = {
+                Icon(
+                  Icons.Outlined.Warning,
+                  contentDescription = null,
+                  modifier = Modifier.size(16.dp),
+                )
+              },
+              colors =
+                AssistChipDefaults.assistChipColors(
+                  containerColor = MaterialTheme.colorScheme.errorContainer,
+                  labelColor = MaterialTheme.colorScheme.onErrorContainer,
+                  leadingIconContentColor = MaterialTheme.colorScheme.onErrorContainer,
+                ),
+              border = null,
+            )
+          }
         }
         Spacer(Modifier.weight(1f))
         FlowLegend()
@@ -463,9 +510,10 @@ private fun FlowHorizontalScrollBar(
 @Composable
 private fun FlowLegend() {
   val colors = MaterialTheme.colorScheme
-  Row(
+  FlowRow(
     horizontalArrangement = Arrangement.spacedBy(14.dp),
-    verticalAlignment = Alignment.CenterVertically,
+    verticalArrangement = Arrangement.spacedBy(4.dp),
+    itemVerticalAlignment = Alignment.CenterVertically,
   ) {
     LegendItem("Always next", colors.outline, dashed = false)
     LegendItem("If condition is true", colors.primary, dashed = true)
@@ -490,6 +538,7 @@ private fun LegendItem(text: String, color: Color, dashed: Boolean) {
       text = text,
       style = MaterialTheme.typography.labelSmall,
       color = MaterialTheme.colorScheme.onSurfaceVariant,
+      softWrap = false,
     )
   }
 }
@@ -507,16 +556,18 @@ private fun FlowCanvas(
   val selectedSlot =
     if (state.selectedIndex >= 0) FormFlowGraph.questionSlot(state.selectedIndex) else -1
 
-  // Keep the selected screen in view (e.g. after adding or reordering).
+  // Keep the selected screen in view (e.g. after adding or reordering). This jumps rather than
+  // animating: while an animated scroll is in progress the scroll container consumes the next
+  // pointer down to stop it, which swallowed the user's next click on a screen card.
   LaunchedEffect(selectedSlot, layout.slotCount) {
     if (selectedSlot >= 0) {
       val left = with(density) { (layout.x(selectedSlot) - SlotGap).roundToPx() }
       val right = with(density) { (layout.x(selectedSlot) + CardWidth + SlotGap).roundToPx() }
       val viewportEnd = horizontalScroll.value + horizontalScroll.viewportSize
       when {
-        left < horizontalScroll.value -> horizontalScroll.animateScrollTo(left.coerceAtLeast(0))
+        left < horizontalScroll.value -> horizontalScroll.scrollTo(left.coerceAtLeast(0))
         right > viewportEnd && horizontalScroll.viewportSize > 0 ->
-          horizontalScroll.animateScrollTo(right - horizontalScroll.viewportSize)
+          horizontalScroll.scrollTo(right - horizontalScroll.viewportSize)
       }
     }
   }
@@ -533,10 +584,20 @@ private fun FlowCanvas(
         .horizontalScroll(horizontalScroll)
         .verticalScroll(rememberScrollState())
         .pointerInput(drag.isDragging) {
+          // Pans the canvas. Like screen reordering, a pan only starts past [MouseDragSlop]:
+          // Compose's default mouse slop (0.125 dp) turned slightly-moving clicks on screen cards
+          // into pans that cancelled the click.
           if (!drag.isDragging) {
-            detectHorizontalDragGestures { change, dragAmount ->
-              change.consume()
-              horizontalScroll.dispatchRawDelta(-dragAmount)
+            awaitEachGesture {
+              val down = awaitFirstDown(requireUnconsumed = false)
+              val (start, travel) =
+                awaitDragPastSlop(down, dragSlopFor(down), DragAxis.HORIZONTAL)
+                  ?: return@awaitEachGesture
+              horizontalScroll.dispatchRawDelta(-travel.x)
+              horizontalDrag(start.id) { change ->
+                horizontalScroll.dispatchRawDelta(-change.positionChange().x)
+                change.consume()
+              }
             }
           }
         }
@@ -570,9 +631,9 @@ private fun FlowCanvas(
 
       TerminalNode(
         text = "Start",
+        modifier = Modifier.offset(layout.x(0), layout.top(0)),
         isSelected = state.isFormSelected,
         onClick = state::selectForm,
-        modifier = Modifier.offset(layout.x(0), layout.top(0)),
       )
 
       // Hoverable "+" between Start and Q1 (or Q0)
@@ -706,32 +767,32 @@ private fun AddQuestionAffordance(
         },
     contentAlignment = Alignment.Center,
   ) {
+    // The button is always composed and hit-testable, only transparent until hovered. Touch input
+    // has no hover, so composing it on hover alone meant the first tap merely revealed it.
     val visible = alwaysVisible || isHovered || menuExpanded
-    if (visible) {
-      Surface(
-        onClick = { menuExpanded = true },
-        shape = CircleShape,
-        color = if (alwaysVisible && !isHovered) colors.primaryContainer else colors.primary,
-        contentColor =
-          if (alwaysVisible && !isHovered) colors.onPrimaryContainer else colors.onPrimary,
-        shadowElevation = if (isHovered || menuExpanded) 4.dp else 1.dp,
-        modifier = Modifier.size(buttonSize),
-      ) {
-        Box(contentAlignment = Alignment.Center) {
-          Icon(
-            Icons.Outlined.Add,
-            contentDescription = "Add question here",
-            modifier = Modifier.size(18.dp),
-          )
-        }
+    Surface(
+      onClick = { menuExpanded = true },
+      shape = CircleShape,
+      color = if (alwaysVisible && !isHovered) colors.secondaryContainer else colors.secondary,
+      contentColor =
+        if (alwaysVisible && !isHovered) colors.onSecondaryContainer else colors.onSecondary,
+      shadowElevation = if (isHovered || menuExpanded) 4.dp else if (visible) 1.dp else 0.dp,
+      modifier = Modifier.size(buttonSize).graphicsLayer { alpha = if (visible) 1f else 0f },
+    ) {
+      Box(contentAlignment = Alignment.Center) {
+        Icon(
+          Icons.Outlined.Add,
+          contentDescription = "Add question here",
+          modifier = Modifier.size(18.dp),
+        )
       }
-      AddQuestionMenu(
-        expanded = menuExpanded,
-        onDismiss = { menuExpanded = false },
-        onAdd = onAdd,
-        atIndex = atIndex,
-      )
     }
+    AddQuestionMenu(
+      expanded = menuExpanded,
+      onDismiss = { menuExpanded = false },
+      onAdd = onAdd,
+      atIndex = atIndex,
+    )
   }
 }
 
@@ -783,19 +844,12 @@ private fun DrawScope.drawArrowHead(tip: Offset, from: Offset, color: Color) {
 @Composable
 private fun TerminalNode(
   text: String,
-  isSelected: Boolean,
-  onClick: () -> Unit,
   modifier: Modifier = Modifier,
+  isSelected: Boolean = false,
+  onClick: (() -> Unit)? = null,
 ) {
   val colors = MaterialTheme.colorScheme
-  Surface(
-    onClick = onClick,
-    modifier = modifier.width(TerminalWidth).height(TerminalHeight),
-    shape = RoundedCornerShape(50),
-    color = if (isSelected) colors.primaryContainer else colors.secondaryContainer,
-    contentColor = if (isSelected) colors.onPrimaryContainer else colors.onSecondaryContainer,
-    border = if (isSelected) BorderStroke(2.dp, colors.primary) else null,
-  ) {
+  val content: @Composable () -> Unit = {
     Box(contentAlignment = Alignment.Center, modifier = Modifier.padding(horizontal = 10.dp)) {
       Text(
         text = text,
@@ -804,6 +858,29 @@ private fun TerminalNode(
         maxLines = 2,
       )
     }
+  }
+  val sized = modifier.width(TerminalWidth).height(TerminalHeight)
+  val shape = RoundedCornerShape(50)
+  val border = if (isSelected) BorderStroke(2.dp, colors.secondary) else null
+  if (onClick != null) {
+    Surface(
+      onClick = onClick,
+      modifier = sized,
+      shape = shape,
+      color = colors.secondaryContainer,
+      contentColor = colors.onSecondaryContainer,
+      border = border,
+      content = content,
+    )
+  } else {
+    Surface(
+      modifier = sized,
+      shape = shape,
+      color = colors.secondaryContainer,
+      contentColor = colors.onSecondaryContainer,
+      border = border,
+      content = content,
+    )
   }
 }
 
@@ -819,22 +896,24 @@ private fun ScreenPreviewCard(
   modifier: Modifier = Modifier,
 ) {
   val colors = MaterialTheme.colorScheme
+  // Subtle selection using GroundTheme's muted secondary roles (the same treatment as selected
+  // list rows elsewhere in the app) rather than the bright primaryContainer accent.
   OutlinedCard(
     onClick = onClick,
     modifier = modifier.width(CardWidth).height(CardHeight),
     shape = MaterialTheme.shapes.medium,
     colors =
       CardDefaults.outlinedCardColors(
-        containerColor = if (isSelected) colors.primaryContainer else colors.surface
+        containerColor = if (isSelected) colors.secondaryContainer else colors.surface
       ),
     border =
       BorderStroke(
         width = if (isSelected || isDragged) 2.dp else 1.dp,
         color =
           when {
-            isDragged -> colors.primary
+            isDragged -> colors.outline
             hasIssues -> colors.error
-            isSelected -> colors.primary
+            isSelected -> colors.secondary
             else -> colors.outlineVariant
           },
       ),
@@ -848,10 +927,10 @@ private fun ScreenPreviewCard(
         Icon(
           Icons.Outlined.DragIndicator,
           contentDescription = "Drag to reorder",
-          tint = if (isDragged) colors.primary else colors.onSurfaceVariant,
+          tint = if (isDragged) colors.onSurface else colors.onSurfaceVariant,
           modifier = Modifier.size(16.dp),
         )
-        GroundTonalBadge(text = "Q${index + 1}", tone = GroundBadgeTone.PRIMARY)
+        GroundTonalBadge(text = "Q${index + 1}", tone = GroundBadgeTone.NEUTRAL)
         Icon(
           questionTypeIcon(question.type),
           contentDescription = null,
@@ -999,6 +1078,21 @@ private fun MiniWidget(question: EditorQuestion) {
                 )
           )
           Spacer(Modifier.width(6.dp))
+          if (choice.colorHex != null) {
+            ColorDot(colorHex = choice.colorHex, contentDescription = null, size = 8.dp)
+            Spacer(Modifier.width(4.dp))
+          }
+          choice.image?.let { image ->
+            rememberChoiceImageBitmap(image)?.let { bitmap ->
+              Image(
+                bitmap = bitmap,
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.size(14.dp).clip(RoundedCornerShape(2.dp)),
+              )
+              Spacer(Modifier.width(4.dp))
+            }
+          }
           Text(
             text = choice.label.ifBlank { choice.value },
             style = MaterialTheme.typography.labelSmall,
@@ -1131,11 +1225,6 @@ private fun QuestionProperties(state: FormEditorState, question: EditorQuestion)
         style = MaterialTheme.typography.titleMedium,
         fontWeight = FontWeight.Bold,
       )
-      Text(
-        text = "/data/${question.name}",
-        style = MaterialTheme.typography.labelSmall.copy(fontFamily = FontFamily.Monospace),
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-      )
     }
     Row(
       modifier = Modifier.fillMaxWidth(),
@@ -1203,16 +1292,6 @@ private fun QuestionProperties(state: FormEditorState, question: EditorQuestion)
       label = { Text("Hint (optional)") },
       modifier = Modifier.fillMaxWidth(),
     )
-    OutlinedTextField(
-      value = question.name,
-      onValueChange = { v -> state.updateQuestion(key) { it.copy(name = v.trim()) } },
-      label = { Text("Name") },
-      singleLine = true,
-      isError = !FormEditorValidator.isValidName(question.name),
-      supportingText = { Text("Data column name. Letters, digits, _ . -") },
-      textStyle = MaterialTheme.typography.bodyMedium.copy(fontFamily = FontFamily.Monospace),
-      modifier = Modifier.fillMaxWidth(),
-    )
 
     Row(verticalAlignment = Alignment.CenterVertically) {
       Column(modifier = Modifier.weight(1f)) {
@@ -1239,19 +1318,291 @@ private fun QuestionProperties(state: FormEditorState, question: EditorQuestion)
 
     HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
     DisplayLogicEditor(state, question)
+
+    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+    AdvancedSection(state, question)
+  }
+}
+
+/**
+ * Collapsible section for settings most form authors don't need: the data column name and
+ * validation rules. Collapsed by default; expands automatically when it contains an error.
+ */
+@Composable
+private fun AdvancedSection(state: FormEditorState, question: EditorQuestion) {
+  val key = question.key
+  val nameInvalid = !FormEditorValidator.isValidName(question.name)
+  val hasError = nameInvalid || ValidationRules.issues(question).isNotEmpty()
+  // Open/closed lives in the editor state so it persists across question selection.
+  val expanded = state.isAdvancedExpanded
+  LaunchedEffect(key, hasError) { if (hasError) state.isAdvancedExpanded = true }
+  Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+    Row(
+      modifier =
+        Modifier.fillMaxWidth()
+          .clip(MaterialTheme.shapes.small)
+          .clickable { state.isAdvancedExpanded = !expanded }
+          .padding(vertical = 4.dp),
+      verticalAlignment = Alignment.CenterVertically,
+      horizontalArrangement = Arrangement.spacedBy(6.dp),
+    ) {
+      SectionLabel("Advanced")
+      if (hasError) {
+        Icon(
+          Icons.Outlined.Warning,
+          contentDescription = "Advanced settings have errors",
+          tint = MaterialTheme.colorScheme.error,
+          modifier = Modifier.size(16.dp),
+        )
+      }
+      Spacer(Modifier.weight(1f))
+      Icon(
+        if (expanded) Icons.Outlined.ExpandLess else Icons.Outlined.ExpandMore,
+        contentDescription = if (expanded) "Collapse advanced" else "Expand advanced",
+        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+      )
+    }
+    if (expanded) {
+      OutlinedTextField(
+        value = question.name,
+        onValueChange = { v -> state.updateQuestion(key) { it.copy(name = v.trim()) } },
+        label = { Text("Name") },
+        singleLine = true,
+        isError = nameInvalid,
+        supportingText = { Text("Data column name. Letters, digits, _ . -") },
+        textStyle = MaterialTheme.typography.bodyLarge.copy(fontFamily = FontFamily.Monospace),
+        modifier = Modifier.fillMaxWidth(),
+      )
+      ValidationEditor(state, question)
+    }
+  }
+}
+
+/**
+ * Structured validation rules, compiled to the XForms bind `constraint` and `jr:constraintMsg` (ODK
+ * XForms spec, "Bindings"). Only rules that apply to the question type are offered.
+ */
+@Composable
+private fun ValidationEditor(state: FormEditorState, question: EditorQuestion) {
+  val key = question.key
+  val type = question.type
+  val validation = question.validation ?: EditorValidation()
+  fun update(transform: (EditorValidation) -> EditorValidation) =
+    state.updateValidation(key, transform)
+  Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    Text("Validation", style = MaterialTheme.typography.titleSmall)
+    when (ValidationKind.of(type)) {
+      null ->
+        Text(
+          text = "No validation rules for this question type.",
+          style = MaterialTheme.typography.bodySmall,
+          color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+      ValidationKind.NUMBER_RANGE -> MinMaxFields("Minimum", "Maximum", validation, ::update)
+      ValidationKind.TEXT -> {
+        MinMaxFields("Min length", "Max length", validation, ::update)
+        DropdownSelector(
+          label = "Pattern",
+          selectedText = validation.pattern?.label ?: "None",
+          options = listOf<TextPattern?>(null) + TextPattern.entries,
+          optionText = { it?.label ?: "None" },
+          onSelect = { p -> update { it.copy(pattern = p) } },
+          modifier = Modifier.fillMaxWidth(),
+        )
+        if (validation.pattern == TextPattern.CUSTOM) {
+          OutlinedTextField(
+            value = validation.customPattern,
+            onValueChange = { v -> update { it.copy(customPattern = v) } },
+            label = { Text("Regular expression") },
+            singleLine = true,
+            textStyle = MaterialTheme.typography.bodyLarge.copy(fontFamily = FontFamily.Monospace),
+            modifier = Modifier.fillMaxWidth(),
+          )
+        }
+      }
+      ValidationKind.DATE -> {
+        DropdownSelector(
+          label = "Allowed dates",
+          selectedText = validation.dateRule?.label ?: "Any date",
+          options = listOf<DateRule?>(null) + DateRule.entries,
+          optionText = { it?.label ?: "Any date" },
+          onSelect = { r ->
+            update {
+              if (r == DateRule.BETWEEN) it.copy(dateRule = r)
+              else it.copy(dateRule = r, min = "", max = "")
+            }
+          },
+          modifier = Modifier.fillMaxWidth(),
+        )
+        if (validation.dateRule == DateRule.BETWEEN) {
+          DateRangeFields(validation, ::update)
+        }
+      }
+      ValidationKind.SELECTION_COUNT ->
+        MinMaxFields("Minimum selections", "Maximum selections", validation, ::update)
+    }
+    if (ValidationRules.isActive(type, question.validation)) {
+      val summary = ValidationRules.summary(type, question.validation).orEmpty()
+      Text(
+        text = summary,
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+      )
+      OutlinedTextField(
+        value = validation.message,
+        onValueChange = { v -> update { it.copy(message = v) } },
+        label = { Text("Error message (optional)") },
+        placeholder = { Text(summary) },
+        singleLine = true,
+        modifier = Modifier.fillMaxWidth(),
+      )
+    }
+  }
+}
+
+/**
+ * Earliest / latest date for [DateRule.BETWEEN], chosen with M3 date pickers. Values are stored as
+ * ISO `YYYY-MM-DD` (what XForms `date()` expects) and shown in a friendly format.
+ */
+@Composable
+private fun DateRangeFields(
+  validation: EditorValidation,
+  update: ((EditorValidation) -> EditorValidation) -> Unit,
+) {
+  val minMillis = isoDateToUtcMillis(validation.min)
+  val maxMillis = isoDateToUtcMillis(validation.max)
+  Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    DatePickerField(
+      label = "Earliest date",
+      iso = validation.min,
+      // Keep earliest ≤ latest.
+      isSelectable = { maxMillis == null || it <= maxMillis },
+      onPick = { v -> update { it.copy(min = v) } },
+    )
+    DatePickerField(
+      label = "Latest date",
+      iso = validation.max,
+      isSelectable = { minMillis == null || it >= minMillis },
+      onPick = { v -> update { it.copy(max = v) } },
+    )
+  }
+}
+
+/**
+ * Read-only field showing [iso] as e.g. "Mar 5, 2026"; the calendar icon opens a [DatePickerDialog]
+ * and the clear icon unsets the date. [onPick] receives ISO `YYYY-MM-DD`, or "" when cleared.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun DatePickerField(
+  label: String,
+  iso: String,
+  isSelectable: (utcMillis: Long) -> Boolean,
+  onPick: (String) -> Unit,
+) {
+  var open by remember { mutableStateOf(false) }
+  OutlinedTextField(
+    value = if (iso.isEmpty()) "" else friendlyDate(iso),
+    onValueChange = {},
+    readOnly = true,
+    singleLine = true,
+    label = { Text(label) },
+    placeholder = { Text("Not set") },
+    trailingIcon = {
+      Row {
+        if (iso.isNotEmpty()) {
+          IconButton(onClick = { onPick("") }) {
+            Icon(Icons.Outlined.Close, contentDescription = "Clear $label")
+          }
+        }
+        IconButton(onClick = { open = true }) {
+          Icon(Icons.Outlined.DateRange, contentDescription = "Pick $label")
+        }
+      }
+    },
+    modifier = Modifier.fillMaxWidth(),
+  )
+  if (open) {
+    val pickerState =
+      rememberDatePickerState(
+        initialSelectedDateMillis = isoDateToUtcMillis(iso),
+        selectableDates =
+          object : SelectableDates {
+            override fun isSelectableDate(utcTimeMillis: Long) = isSelectable(utcTimeMillis)
+          },
+      )
+    DatePickerDialog(
+      onDismissRequest = { open = false },
+      confirmButton = {
+        TextButton(
+          onClick = {
+            // DatePicker reports the selection as UTC midnight of the chosen day.
+            pickerState.selectedDateMillis?.let { onPick(utcMillisToIsoDate(it)) }
+            open = false
+          },
+          enabled = pickerState.selectedDateMillis != null,
+        ) {
+          Text("OK")
+        }
+      },
+      dismissButton = { TextButton(onClick = { open = false }) { Text("Cancel") } },
+    ) {
+      DatePicker(state = pickerState)
+    }
+  }
+}
+
+/** A pair of side-by-side fields editing [EditorValidation.min] and [EditorValidation.max]. */
+@Composable
+private fun MinMaxFields(
+  minLabel: String,
+  maxLabel: String,
+  validation: EditorValidation,
+  update: ((EditorValidation) -> EditorValidation) -> Unit,
+) {
+  Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+    OutlinedTextField(
+      value = validation.min,
+      onValueChange = { v -> update { it.copy(min = v.trim()) } },
+      label = { Text(minLabel) },
+      singleLine = true,
+      modifier = Modifier.weight(1f),
+    )
+    OutlinedTextField(
+      value = validation.max,
+      onValueChange = { v -> update { it.copy(max = v.trim()) } },
+      label = { Text(maxLabel) },
+      singleLine = true,
+      modifier = Modifier.weight(1f),
+    )
   }
 }
 
 @Composable
 private fun ChoicesEditor(state: FormEditorState, question: EditorQuestion) {
   val key = question.key
+  var imageError by remember { mutableStateOf<String?>(null) }
   Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
     SectionLabel("Choices")
     question.choices.forEachIndexed { i, choice ->
       Row(
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(6.dp),
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
       ) {
+        ChoiceColorButton(
+          colorHex = choice.colorHex,
+          onSelect = { state.setChoiceColor(key, i, it) },
+        )
+        ChoiceImageButton(
+          image = choice.image,
+          onPicked = { image ->
+            imageError =
+              if (state.setChoiceImage(key, i, image)) null
+              else "Choose an image file under ${EditorChoiceImage.MAX_BYTES / 1024} KB."
+          },
+          onRemove = { state.setChoiceImage(key, i, null) },
+          onError = { imageError = it },
+        )
         OutlinedTextField(
           value = choice.label,
           onValueChange = { state.updateChoiceLabel(key, i, it) },
@@ -1264,8 +1615,8 @@ private fun ChoicesEditor(state: FormEditorState, question: EditorQuestion) {
           onValueChange = { state.updateChoice(key, i, choice.copy(value = it.trim())) },
           label = { Text("Value") },
           singleLine = true,
-          textStyle = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
-          modifier = Modifier.width(110.dp),
+          textStyle = MaterialTheme.typography.bodyLarge.copy(fontFamily = FontFamily.Monospace),
+          modifier = Modifier.width(96.dp),
         )
         IconButton(onClick = { state.removeChoice(key, i) }, modifier = Modifier.size(32.dp)) {
           Icon(
@@ -1276,6 +1627,13 @@ private fun ChoicesEditor(state: FormEditorState, question: EditorQuestion) {
         }
       }
     }
+    imageError?.let {
+      Text(
+        text = it,
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.error,
+      )
+    }
     TextButton(onClick = { state.addChoice(key) }) {
       Icon(Icons.Outlined.Add, contentDescription = null, modifier = Modifier.size(18.dp))
       Spacer(Modifier.width(4.dp))
@@ -1283,6 +1641,197 @@ private fun ChoicesEditor(state: FormEditorState, question: EditorQuestion) {
     }
   }
 }
+
+/** Color dot for a choice; opens a compact palette with a "No color" option. */
+@Composable
+private fun ChoiceColorButton(colorHex: String?, onSelect: (String?) -> Unit) {
+  var expanded by remember { mutableStateOf(false) }
+  val colors = MaterialTheme.colorScheme
+  Box {
+    IconButton(onClick = { expanded = true }, modifier = Modifier.size(32.dp)) {
+      ColorDot(
+        colorHex = colorHex,
+        contentDescription = "Choice color: ${ChoiceColors.nameOf(colorHex) ?: colorHex ?: "none"}",
+      )
+    }
+    DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+      Text(
+        text = "Choice color",
+        style = MaterialTheme.typography.labelMedium,
+        color = colors.onSurfaceVariant,
+        modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
+      )
+      ChoiceColors.palette.chunked(5).forEach { row ->
+        Row(
+          modifier = Modifier.padding(horizontal = 8.dp),
+          horizontalArrangement = Arrangement.spacedBy(2.dp),
+        ) {
+          row.forEach { (name, hex) ->
+            IconButton(
+              onClick = {
+                onSelect(hex)
+                expanded = false
+              },
+              modifier = Modifier.size(36.dp),
+            ) {
+              ColorDot(
+                colorHex = hex,
+                contentDescription = name,
+                isSelected = hex.equals(colorHex, ignoreCase = true),
+              )
+            }
+          }
+        }
+      }
+      DropdownMenuItem(
+        text = { Text("No color") },
+        leadingIcon = { Icon(Icons.Outlined.FormatColorReset, contentDescription = null) },
+        enabled = colorHex != null,
+        onClick = {
+          onSelect(null)
+          expanded = false
+        },
+      )
+    }
+  }
+}
+
+/** Filled swatch for [colorHex], or an outlined empty circle when there is no color. */
+@Composable
+internal fun ColorDot(
+  colorHex: String?,
+  contentDescription: String?,
+  modifier: Modifier = Modifier,
+  isSelected: Boolean = false,
+  size: Dp = 20.dp,
+) {
+  val colors = MaterialTheme.colorScheme
+  val fill = ChoiceColors.argb(colorHex)?.let { Color(it) }
+  Box(
+    modifier =
+      modifier
+        .size(size)
+        .clip(CircleShape)
+        .background(fill ?: Color.Transparent)
+        .border(
+          width = if (isSelected) 2.dp else 1.dp,
+          color = if (isSelected) colors.onSurface else colors.outline,
+          shape = CircleShape,
+        )
+        .semantics { contentDescription?.let { this.contentDescription = it } },
+    contentAlignment = Alignment.Center,
+  ) {
+    if (isSelected) {
+      Icon(
+        Icons.Outlined.Check,
+        contentDescription = null,
+        tint = Color.White,
+        modifier = Modifier.size(size * 0.7f),
+      )
+    }
+  }
+}
+
+/**
+ * Attaches a small image to a choice using the platform picker (downscaled to
+ * [EditorChoiceImage.MAX_PIXELS] on the long edge). Shows a thumbnail with Replace / Remove once
+ * set.
+ */
+@Composable
+private fun ChoiceImageButton(
+  image: EditorChoiceImage?,
+  onPicked: (EditorChoiceImage) -> Unit,
+  onRemove: () -> Unit,
+  onError: (String) -> Unit,
+) {
+  var menuExpanded by remember { mutableStateOf(false) }
+  val pick = {
+    openPlatformMediaPicker(
+      accept = "image/*",
+      capture = "",
+      maxPixels = EditorChoiceImage.MAX_PIXELS,
+    ) { result ->
+      when (result) {
+        is PlatformPickResult.Picked -> {
+          val file = result.file
+          val mimeType =
+            file.mimeType.ifBlank { MediaCapture.mimeTypeForFileName(file.fileName).orEmpty() }
+          onPicked(EditorChoiceImage(mimeType, file.base64))
+        }
+        is PlatformPickResult.Failed -> onError(result.message)
+        PlatformPickResult.Cancelled -> Unit
+      }
+    }
+  }
+  if (image == null) {
+    IconButton(
+      onClick = pick,
+      enabled = isPlatformMediaPickerAvailable,
+      modifier = Modifier.size(32.dp),
+    ) {
+      Icon(
+        Icons.Outlined.AddPhotoAlternate,
+        contentDescription = "Add choice image",
+        modifier = Modifier.size(20.dp),
+      )
+    }
+    return
+  }
+  Box {
+    val bitmap = rememberChoiceImageBitmap(image)
+    Surface(
+      onClick = { menuExpanded = true },
+      shape = MaterialTheme.shapes.extraSmall,
+      color = MaterialTheme.colorScheme.surfaceContainerHigh,
+      border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+      modifier = Modifier.size(32.dp),
+    ) {
+      if (bitmap != null) {
+        Image(
+          bitmap = bitmap,
+          contentDescription = "Choice image",
+          contentScale = ContentScale.Crop,
+          modifier = Modifier.fillMaxSize(),
+        )
+      } else {
+        Box(contentAlignment = Alignment.Center) {
+          Icon(
+            Icons.Outlined.Photo,
+            contentDescription = "Choice image",
+            modifier = Modifier.size(18.dp),
+          )
+        }
+      }
+    }
+    DropdownMenu(expanded = menuExpanded, onDismissRequest = { menuExpanded = false }) {
+      DropdownMenuItem(
+        text = { Text("Replace image") },
+        leadingIcon = { Icon(Icons.Outlined.AddPhotoAlternate, contentDescription = null) },
+        enabled = isPlatformMediaPickerAvailable,
+        onClick = {
+          menuExpanded = false
+          pick()
+        },
+      )
+      DropdownMenuItem(
+        text = { Text("Remove image") },
+        leadingIcon = { Icon(Icons.Outlined.Delete, contentDescription = null) },
+        onClick = {
+          menuExpanded = false
+          onRemove()
+        },
+      )
+    }
+  }
+}
+
+/** Decodes [image] for display, or `null` if the bytes aren't a decodable bitmap. */
+@OptIn(ExperimentalResourceApi::class, ExperimentalEncodingApi::class)
+@Composable
+internal fun rememberChoiceImageBitmap(image: EditorChoiceImage): ImageBitmap? =
+  remember(image) {
+    runCatching { Base64.decode(image.base64).decodeToImageBitmap() }.getOrNull()
+  }
 
 @Composable
 private fun DisplayLogicEditor(state: FormEditorState, question: EditorQuestion) {
@@ -1367,18 +1916,12 @@ private fun DisplayLogicEditor(state: FormEditorState, question: EditorQuestion)
           }
         }
       }
-      EditorXFormsGenerator.relevantExpression(form, question)?.let { xpath ->
-        Surface(
-          color = MaterialTheme.colorScheme.surfaceContainerHigh,
-          shape = MaterialTheme.shapes.small,
-          modifier = Modifier.fillMaxWidth(),
-        ) {
-          Text(
-            text = "relevant=\"$xpath\"",
-            style = MaterialTheme.typography.labelSmall.copy(fontFamily = FontFamily.Monospace),
-            modifier = Modifier.padding(8.dp),
-          )
-        }
+      form.relevanceSummary(question)?.let { summary ->
+        Text(
+          text = summary,
+          style = MaterialTheme.typography.bodySmall,
+          color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
       }
     }
   }
@@ -1394,6 +1937,7 @@ internal fun SectionLabel(text: String) {
   )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun <T> DropdownSelector(
   label: String,
@@ -1405,29 +1949,24 @@ internal fun <T> DropdownSelector(
   optionIcon: ((T) -> ImageVector)? = null,
 ) {
   var expanded by remember { mutableStateOf(false) }
-  Box(modifier = modifier.fillMaxWidth()) {
-    OutlinedButton(
-      onClick = { expanded = true },
-      modifier = Modifier.fillMaxWidth(),
-      shape = MaterialTheme.shapes.extraSmall,
-    ) {
-      Column(modifier = Modifier.weight(1f)) {
-        Text(
-          text = label,
-          style = MaterialTheme.typography.labelSmall,
-          color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        Text(
-          text = selectedText,
-          style = MaterialTheme.typography.bodyMedium,
-          color = MaterialTheme.colorScheme.onSurface,
-          maxLines = 1,
-          overflow = TextOverflow.Ellipsis,
-        )
-      }
-      Icon(Icons.Outlined.KeyboardArrowDown, contentDescription = null)
-    }
-    DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+  // Standard M3 exposed dropdown: a read-only OutlinedTextField, so the label and value use the
+  // same typography as every other input in the editors.
+  ExposedDropdownMenuBox(
+    expanded = expanded,
+    onExpandedChange = { expanded = it },
+    modifier = modifier.fillMaxWidth(),
+  ) {
+    OutlinedTextField(
+      value = selectedText,
+      onValueChange = {},
+      readOnly = true,
+      singleLine = true,
+      label = { Text(label) },
+      trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+      modifier =
+        Modifier.fillMaxWidth().menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable),
+    )
+    ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
       options.forEach { option ->
         DropdownMenuItem(
           text = { Text(optionText(option), maxLines = 1, overflow = TextOverflow.Ellipsis) },

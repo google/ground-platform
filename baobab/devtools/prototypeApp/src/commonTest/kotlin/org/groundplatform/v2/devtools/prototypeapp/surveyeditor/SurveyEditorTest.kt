@@ -23,6 +23,7 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import org.groundplatform.v2.devtools.prototypeapp.PrototypeWorkbenchPage
 import org.groundplatform.v2.devtools.prototypeapp.data.seed.SurveyEditorSamples
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.MapLayerItem
 import org.groundplatform.v2.devtools.prototypeapp.formeditor.EditorQuestionType
 import org.groundplatform.v2.devtools.prototypeapp.formeditor.FormIds
 import org.groundplatform.v2.devtools.prototypeapp.formeditor.SaveToMode
@@ -36,6 +37,81 @@ class SurveyEditorTest {
     assertEquals(2, state.dataTables.size)
     state.datasets.forEach { assertEquals(emptyList(), state.datasetIssues(it), it.id) }
     assertTrue(state.forms.all { it.editor.issues.isEmpty() })
+  }
+
+  @Test
+  fun layerStyle_pinIconIsKeptInTheDraft() {
+    val state = SurveyEditorState(SurveyEditorSamples.draft())
+    val plots = state.mapLayers.first { it.geometryKind == GeometryKind.POINT }
+    state.updateDataset(plots.key) { it.copy(style = it.style.copy(iconName = "flag")) }
+
+    assertTrue(state.hasUnpublishedChanges)
+    val draft = state.toDraft()
+    assertEquals("flag", draft.datasets.first { it.key == plots.key }.style.iconName)
+    assertEquals(draft, SurveyEditorState(draft).toDraft())
+
+    state.updateDataset(plots.key) { it.copy(style = it.style.copy(iconName = null)) }
+    assertNull(state.toDraft().datasets.first { it.key == plots.key }.style.iconName)
+  }
+
+  @Test
+  fun withEditorLayerStyles_appliesMapLayerColorAndIconByDatasetId() {
+    val layers =
+      listOf(
+        MapLayerItem(
+          id = "layer-plots",
+          label = "Plots",
+          sourceDescription = "",
+          colorHex = 0xFF000000,
+          geometryTypeLabel = "Point",
+          isVisible = true,
+          datasetId = "shade_monitoring_plots",
+        ),
+        MapLayerItem(
+          id = "layer-other",
+          label = "Other",
+          sourceDescription = "",
+          colorHex = 0xFF123456,
+          geometryTypeLabel = "Point",
+          isVisible = true,
+          datasetId = "other",
+          iconName = "star",
+        ),
+      )
+    val datasets =
+      SurveyEditorSamples.draft().datasets.map {
+        if (it.id == "shade_monitoring_plots") {
+          it.copy(style = it.style.copy(colorHex = "#AD1457", iconName = "flag"))
+        } else {
+          it
+        }
+      }
+
+    val styled = layers.withEditorLayerStyles(datasets)
+
+    assertEquals(0xFFAD1457, styled[0].colorHex)
+    assertEquals("flag", styled[0].iconName)
+    assertEquals(layers[1], styled[1])
+  }
+
+  @Test
+  fun withEditorLayerStyles_keepsLayerColorWhenEditorColorIsInvalid() {
+    val layer =
+      MapLayerItem(
+        id = "layer-plots",
+        label = "Plots",
+        sourceDescription = "",
+        colorHex = 0xFF2E7D32,
+        geometryTypeLabel = "Point",
+        isVisible = true,
+        datasetId = "shade_monitoring_plots",
+      )
+    val datasets =
+      SurveyEditorSamples.draft().datasets.map {
+        it.copy(style = it.style.copy(colorHex = "not a color"))
+      }
+
+    assertEquals(0xFF2E7D32, listOf(layer).withEditorLayerStyles(datasets).single().colorHex)
   }
 
   @Test
