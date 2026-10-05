@@ -16,12 +16,13 @@
 document.addEventListener("DOMContentLoaded", () => {
   // 1. Sticky Header Elevation on Scroll
   const header = document.getElementById("site-header");
+  let isScrolled = false;
   const onScroll = () => {
     if (!header) return;
-    if (window.scrollY > 12) {
-      header.classList.add("scrolled");
-    } else {
-      header.classList.remove("scrolled");
+    const scrolled = window.scrollY > 12;
+    if (scrolled !== isScrolled) {
+      isScrolled = scrolled;
+      header.classList.toggle("scrolled", isScrolled);
     }
   };
   window.addEventListener("scroll", onScroll, { passive: true });
@@ -57,9 +58,11 @@ document.addEventListener("DOMContentLoaded", () => {
       showcaseTabs.forEach((t) => {
         t.classList.remove("active");
         t.setAttribute("aria-selected", "false");
+        t.setAttribute("tabindex", "-1");
       });
       tab.classList.add("active");
       tab.setAttribute("aria-selected", "true");
+      tab.setAttribute("tabindex", "0");
 
       showcasePanels.forEach((panel) => {
         if (panel.getAttribute("data-showcase-panel") === target) {
@@ -91,7 +94,7 @@ document.addEventListener("DOMContentLoaded", () => {
       btn.setAttribute("aria-pressed", "true");
 
       deploymentCards.forEach((card) => {
-        const categories = (card.getAttribute("data-categories") || "").split(" ");
+        const categories = card.getAttribute("data-categories")?.trim().split(/\s+/).filter(Boolean) || [];
         if (selectedFilter === "all" || categories.includes(selectedFilter)) {
           card.classList.remove("hidden");
         } else {
@@ -112,9 +115,11 @@ document.addEventListener("DOMContentLoaded", () => {
       workflowBtns.forEach((b) => {
         b.classList.remove("active");
         b.setAttribute("aria-selected", "false");
+        b.setAttribute("tabindex", "-1");
       });
       btn.classList.add("active");
       btn.setAttribute("aria-selected", "true");
+      btn.setAttribute("tabindex", "0");
 
       workflowPanes.forEach((pane) => {
         if (pane.getAttribute("data-workflow-pane") === step) {
