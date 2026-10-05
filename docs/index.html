@@ -1,0 +1,1092 @@
+<!DOCTYPE html>
+<!--
+  Copyright 2026 The Ground Authors.
+
+  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+  in compliance with the License. You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ground — Map-first data collection for environmental and community impact</title>
+    <meta
+      name="description"
+      content="Ground is an open-source, map-first data collection platform built with the UN FAO (Open Foris) and Google to empower local communities, smallholder farmers, conservationists, and researchers."
+    />
+    <meta name="theme-color" content="#36693e" />
+    <link rel="canonical" href="https://groundplatform.org/" />
+
+    <!-- Open Graph Metadata -->
+    <meta property="og:title" content="Ground — Map-first data collection platform" />
+    <meta
+      property="og:description"
+      content="Open-source, offline-capable geospatial data collection built for smallholder supply chains, forest protection, ecosystem restoration, and ground-truth Earth observation."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://groundplatform.org/" />
+    <meta property="og:image" content="https://groundplatform.org/assets/images/web-screenshot.png" />
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="assets/images/ground-logo.png" />
+
+    <!-- Google Fonts: Google Sans Flex & Inter fallback -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:opsz,wght@6..144,400..800&family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="assets/css/style.css" />
+  </head>
+  <body>
+    <a id="skip-to-content" class="skip-link" href="#main-content">Skip to main content</a>
+
+    <!-- Sticky Site Header -->
+    <header id="site-header" class="site-header" role="banner">
+      <div class="container header-inner">
+        <a id="brand-home-link" href="#" class="brand-link" aria-label="Ground home">
+          <img
+            src="assets/images/ground-logo.png"
+            alt="Ground logo"
+            class="brand-logo"
+            width="40"
+            height="40"
+          />
+          <span class="brand-text-group">
+            <span class="brand-name">Ground</span>
+            <span class="brand-sub">Open Foris &amp; Google</span>
+          </span>
+        </a>
+
+        <nav id="primary-nav" class="primary-nav" aria-label="Primary navigation">
+          <a id="nav-goals" href="#goals" class="nav-link">Goals &amp; mission</a>
+          <a id="nav-impact" href="#impact" class="nav-link">Global impact</a>
+          <a id="nav-platform" href="#platform" class="nav-link">How it works</a>
+          <a id="nav-community" href="#community" class="nav-link">Open source</a>
+        </nav>
+
+        <div class="header-actions">
+          <a
+            id="header-announcements-btn"
+            href="https://groups.google.com/g/ground-announcements"
+            class="btn btn-outline btn-sm"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Join announcements
+          </a>
+          <a
+            id="header-github-btn"
+            href="https://github.com/google/ground-platform"
+            class="btn btn-primary btn-sm"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            View on GitHub
+          </a>
+          <button
+            id="mobile-menu-toggle"
+            class="mobile-menu-toggle"
+            type="button"
+            aria-label="Toggle navigation menu"
+            aria-expanded="false"
+            aria-controls="primary-nav"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path d="M4 6h16M4 12h16M4 18h16" stroke-linecap="round" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main id="main-content" role="main">
+      <!-- Hero Section -->
+      <section id="hero" class="hero">
+        <div class="container">
+          <div class="hero-grid">
+            <div class="hero-copy">
+              <span class="hero-eyebrow">Open-source geospatial platform</span>
+              <h1 class="hero-title">
+                Map-first data collection for communities protecting the planet
+              </h1>
+              <p class="hero-lead">
+                Ground is an open-source, offline-capable field data collection platform built in
+                collaboration with the
+                <strong>Food and Agriculture Organization of the United Nations (FAO)</strong> under
+                the <strong>Open Foris</strong> initiative, <strong>Google</strong>, and global
+                non-profit partners. Designed for non-technical users with little to no special
+                training, Ground connects frontline community observations with cloud-based mapping
+                and sustainability analytics.
+              </p>
+
+              <div class="hero-actions">
+                <a id="hero-cta-impact" href="#impact" class="btn btn-primary">
+                  Explore global impact →
+                </a>
+                <a
+                  id="hero-cta-github"
+                  href="https://github.com/google/ground-platform"
+                  class="btn btn-tonal"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Explore GitHub repositories
+                </a>
+                <a
+                  id="hero-cta-openforis"
+                  href="https://openforis.org/solutions/ground/"
+                  class="btn btn-outline"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Open Foris Ground
+                </a>
+              </div>
+
+              <div class="hero-collaborators">
+                <p class="collaborators-label">
+                  Deployed alongside international agencies, research institutes, and farmer cooperatives
+                </p>
+                <div class="collaborator-tags" aria-label="Collaborating organizations">
+                  <span class="collab-tag">UN FAO / Open Foris</span>
+                  <span class="collab-tag">World Resources Institute</span>
+                  <span class="collab-tag">International Trade Centre</span>
+                  <span class="collab-tag">SERVIR West Africa</span>
+                  <span class="collab-tag">CERSGIS &amp; University of Ghana</span>
+                  <span class="collab-tag">YouthMappers</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Interactive Product Preview Showcase -->
+            <div class="hero-showcase" aria-label="Ground web and mobile interface preview">
+              <div class="showcase-controls">
+                <div class="showcase-tabs" role="tablist" aria-label="Platform view switcher">
+                  <button
+                    id="showcase-tab-web"
+                    type="button"
+                    role="tab"
+                    class="showcase-tab active"
+                    aria-selected="true"
+                    data-showcase-target="web"
+                    data-showcase-caption="Web survey console: Organizers design surveys, manage team access, and inspect geotagged field submissions over high-resolution satellite imagery."
+                  >
+                    Web survey console
+                  </button>
+                  <button
+                    id="showcase-tab-mobile"
+                    type="button"
+                    role="tab"
+                    class="showcase-tab"
+                    aria-selected="false"
+                    data-showcase-target="mobile"
+                    data-showcase-caption="Android field app: Collectors walk or draw parcel boundaries offline over cached satellite basemaps and capture structured answers and photos."
+                  >
+                    Android field app
+                  </button>
+                </div>
+                <span class="showcase-status">Offline-ready sync</span>
+              </div>
+
+              <div class="showcase-stage">
+                <div
+                  id="showcase-panel-web"
+                  class="showcase-panel active"
+                  role="tabpanel"
+                  aria-labelledby="showcase-tab-web"
+                  data-showcase-panel="web"
+                >
+                  <img
+                    src="assets/images/web-screenshot.png"
+                    alt="Ground web console displaying field restoration submissions and photos for Oloolua Forest Conservation Centre on a satellite map"
+                    class="showcase-img-web"
+                  />
+                </div>
+                <div
+                  id="showcase-panel-mobile"
+                  class="showcase-panel"
+                  role="tabpanel"
+                  aria-labelledby="showcase-tab-mobile"
+                  data-showcase-panel="mobile"
+                >
+                  <div class="showcase-mobile-stage">
+                    <img
+                      src="assets/images/mobile-screenshot.png"
+                      alt="Ground Android mobile app showing a polygon boundary being drawn around a restoration area on satellite imagery"
+                      class="showcase-img-mobile"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div class="showcase-caption">
+                <p id="showcase-caption-text">
+                  Web survey console: Organizers design surveys, manage team access, and inspect
+                  geotagged field submissions over high-resolution satellite imagery.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Verified Global Impact Metrics Bar -->
+          <div class="metrics-strip" aria-label="Verified Ground field impact metrics">
+            <article class="metric-card">
+              <div class="metric-value">59,000+</div>
+              <div class="metric-label">Plots &amp; polygons mapped</div>
+              <p class="metric-context">
+                Georeferenced smallholder parcels and restoration boundaries across Africa and
+                Southeast Asia.
+              </p>
+            </article>
+            <article class="metric-card">
+              <div class="metric-value">30,000+</div>
+              <div class="metric-label">Coffee plots in Burundi</div>
+              <p class="metric-context">
+                Registered under extreme rural connectivity constraints with ADISCO and the
+                International Trade Centre.
+              </p>
+            </article>
+            <article class="metric-card">
+              <div class="metric-value">21,031</div>
+              <div class="metric-label">Cocoa polygons in Ghana</div>
+              <p class="metric-context">
+                Collected with CERSGIS, SERVIR West Africa, WRI, and YouthMappers to train open
+                climate and crop models.
+              </p>
+            </article>
+            <article class="metric-card">
+              <div class="metric-value">30+</div>
+              <div class="metric-label">Global training workshops</div>
+              <p class="metric-context">
+                Over 300 cooperative leaders, forest rangers, and ministry staff trained to run
+                independent campaigns.
+              </p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <!-- Current Goals & Strategic Pillars Section -->
+      <section id="goals" class="section">
+        <div class="container">
+          <div class="section-header">
+            <span class="section-kicker">Current goals &amp; strategic focus</span>
+            <h2 class="section-title">
+              Closing the gap between satellite observation and reality on the ground
+            </h2>
+            <p class="section-subtitle">
+              Remote sensing and planetary models can detect landscape change from orbit, but
+              protecting forests, restoring ecosystems, and securing smallholder livelihoods require
+              trusted verification on the ground. Ground provides a "just right" geospatial platform
+              so frontline communities and institutions can collect rigorous field data without
+              specialized GIS training.
+            </p>
+          </div>
+
+          <!-- MAP Framework Pillars (Mitigation, Adaptation, Protection) -->
+          <div class="map-pillars-banner" aria-label="Mitigation, Adaptation, and Protection pillars">
+            <article class="map-pillar-box">
+              <span class="map-pillar-tag tag-mitigation">Mitigation</span>
+              <h3 class="map-pillar-title">Reduce emissions &amp; restore carbon sinks</h3>
+              <p class="map-pillar-desc">
+                Document reforestation boundaries, agroforestry shade-tree cover, and ecosystem
+                recovery to verify climate mitigation outcomes on the ground.
+              </p>
+            </article>
+            <article class="map-pillar-box">
+              <span class="map-pillar-tag tag-adaptation">Adaptation</span>
+              <h3 class="map-pillar-title">Strengthen smallholder &amp; cooperative resilience</h3>
+              <p class="map-pillar-desc">
+                Equip smallholder farmers and local cooperatives to map their own parcels, safeguard
+                market access, and build climate-resilient livelihoods.
+              </p>
+            </article>
+            <article class="map-pillar-box">
+              <span class="map-pillar-tag tag-protection">Protection</span>
+              <h3 class="map-pillar-title">Conserve forests &amp; community land stewardship</h3>
+              <p class="map-pillar-desc">
+                Provide transparent plot-level georeferencing for deforestation-free supply chains
+                and community-led monitoring of standing forests.
+              </p>
+            </article>
+          </div>
+
+          <!-- Detailed Goals Grid -->
+          <div class="goals-grid">
+            <article class="goal-card">
+              <div>
+                <div class="goal-header">
+                  <div class="goal-icon" aria-hidden="true">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 class="goal-title">
+                      Enable deforestation-free, traceable smallholder supply chains
+                    </h3>
+                    <p class="goal-body">
+                      Global regulations such as the EU Deforestation Regulation (EUDR) and
+                      voluntary forest conservation frameworks (jREDD, Tropical Forest Forever
+                      Facility) require plot-level georeferencing for forest-risk commodities like
+                      cocoa, coffee, rubber, and timber. Ground enables cooperatives and field teams
+                      to map farm perimeters and points offline so smallholders aren't excluded from
+                      international markets.
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <ul class="goal-outcomes" aria-label="Focus areas">
+                <li class="goal-outcome-chip">EUDR smallholder compliance</li>
+                <li class="goal-outcome-chip">Timber &amp; commodity traceability</li>
+                <li class="goal-outcome-chip">Open Foris WHISP integration</li>
+              </ul>
+            </article>
+
+            <article class="goal-card">
+              <div>
+                <div class="goal-header">
+                  <div class="goal-icon" aria-hidden="true">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 class="goal-title">
+                      Empower Indigenous Peoples, local communities &amp; cooperatives
+                    </h3>
+                    <p class="goal-body">
+                      Instead of relying on external GIS contractors, Ground is designed so farmer
+                      cooperatives, Indigenous Peoples, and local community organizers can design and
+                      manage their own mapping campaigns. By putting spatial data ownership directly
+                      in community hands, local producers strengthen land stewardship and unlock new
+                      economic opportunities.
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <ul class="goal-outcomes" aria-label="Focus areas">
+                <li class="goal-outcome-chip">Cooperative-led campaigns</li>
+                <li class="goal-outcome-chip">Community land management</li>
+                <li class="goal-outcome-chip">Zero GIS training required</li>
+              </ul>
+            </article>
+
+            <article class="goal-card">
+              <div>
+                <div class="goal-header">
+                  <div class="goal-icon" aria-hidden="true">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M3 12a9 9 0 1 0 18 0 9 9 0 0 0-18 0z" />
+                      <path d="M3.6 9h16.8M3.6 15h16.8M11.5 3a17 17 0 0 0 0 18M12.5 3a17 17 0 0 1 0 18" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 class="goal-title">
+                      Monitor ecosystem restoration &amp; conservation outcomes
+                    </h3>
+                    <p class="goal-body">
+                      Conservation practitioners and national ministries use Ground to delineate
+                      restoration areas, record IUCN ecosystem biome classifications, and capture
+                      geotagged photo evidence over time—supporting transparent reporting to the UN
+                      Decade on Ecosystem Restoration Monitoring (FERM) and national forestry
+                      initiatives.
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <ul class="goal-outcomes" aria-label="Focus areas">
+                <li class="goal-outcome-chip">UN FERM restoration reporting</li>
+                <li class="goal-outcome-chip">IUCN biome documentation</li>
+                <li class="goal-outcome-chip">Geotagged field photo evidence</li>
+              </ul>
+            </article>
+
+            <article class="goal-card">
+              <div>
+                <div class="goal-header">
+                  <div class="goal-icon" aria-hidden="true">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <polygon points="12 2 2 7 12 12 22 7 12 2" />
+                      <polyline points="2 17 12 22 22 17" />
+                      <polyline points="2 12 12 17 22 12" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 class="goal-title">
+                      Generate high-quality training &amp; validation data for Earth AI
+                    </h3>
+                    <p class="goal-body">
+                      Accurate land-use and land-cover maps depend on verified ground truth—especially
+                      for shaded agroforestry systems and smallholder mosaics that look ambiguous
+                      from satellite imagery alone. Ground collects GPS-verified polygons with
+                      explicit location accuracy and altitude metadata to train and validate machine
+                      learning models for the Forest Data Partnership and FAO geospatial teams.
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <ul class="goal-outcomes" aria-label="Focus areas">
+                <li class="goal-outcome-chip">ML training &amp; validation sets</li>
+                <li class="goal-outcome-chip">Forest Data Partnership models</li>
+                <li class="goal-outcome-chip">CC-BY 4.0 open science datasets</li>
+              </ul>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <!-- Positive Impact & Field Deployments Section -->
+      <section id="impact" class="section section-tonal">
+        <div class="container">
+          <div class="section-header">
+            <span class="section-kicker">Positive impact in the field</span>
+            <h2 class="section-title">
+              Proven at scale with farmers, cooperatives, and conservation teams
+            </h2>
+            <p class="section-subtitle">
+              From national smallholder registries in East Africa to open-science agroforestry
+              campaigns in West Africa and multi-commodity traceability pilots in Southeast Asia,
+              Ground is delivering measurable environmental and economic impact today.
+            </p>
+          </div>
+
+          <!-- Interactive Deployment Category Filters -->
+          <div class="filter-bar" role="toolbar" aria-label="Filter field impact stories">
+            <button
+              id="filter-all"
+              type="button"
+              class="filter-btn active"
+              aria-pressed="true"
+              data-filter="all"
+            >
+              All deployments
+            </button>
+            <button
+              id="filter-supply-chain"
+              type="button"
+              class="filter-btn"
+              aria-pressed="false"
+              data-filter="supply-chain"
+            >
+              Sustainable supply chains
+            </button>
+            <button
+              id="filter-cooperative"
+              type="button"
+              class="filter-btn"
+              aria-pressed="false"
+              data-filter="cooperative"
+            >
+              Cooperative autonomy
+            </button>
+            <button
+              id="filter-open-science"
+              type="button"
+              class="filter-btn"
+              aria-pressed="false"
+              data-filter="open-science"
+            >
+              Open science &amp; Earth AI
+            </button>
+          </div>
+
+          <!-- Case Studies Grid -->
+          <div id="deployments" class="deployments-grid">
+            <!-- Case Study 1: Burundi Coffee Registry -->
+            <article
+              class="deployment-card"
+              data-categories="supply-chain cooperative"
+            >
+              <div>
+                <div class="deployment-meta">
+                  <span class="deployment-region">Burundi · East Africa</span>
+                  <span class="deployment-period">May – August 2025</span>
+                </div>
+                <h3 class="deployment-title">
+                  Burundi Coffee Registry: National-scale offline mapping for market access
+                </h3>
+                <p class="deployment-summary">
+                  Led by the Association pour l'Entraide et le Développement Communautaire (ADISCO)
+                  and the International Trade Centre (ITC), field teams deployed Ground across rural
+                  coffee-growing provinces operating under severe connectivity constraints. Reliable
+                  offline data capture and background synchronization enabled rapid registration of
+                  smallholder growers to safeguard their access to global export markets.
+                </p>
+                <div class="deployment-stats">
+                  <div>
+                    <div class="stat-item-val">30,000+</div>
+                    <div class="stat-item-lbl">Smallholder coffee plots mapped</div>
+                  </div>
+                  <div>
+                    <div class="stat-item-val">100%</div>
+                    <div class="stat-item-lbl">Offline field operation capability</div>
+                  </div>
+                </div>
+              </div>
+              <div class="deployment-partners">
+                <strong>Partners:</strong> ADISCO, International Trade Centre (ITC), Open Foris / FAO
+              </div>
+            </article>
+
+            <!-- Case Study 2: Ghana Cocoa Campaign -->
+            <article
+              class="deployment-card"
+              data-categories="open-science supply-chain"
+            >
+              <div>
+                <div class="deployment-meta">
+                  <span class="deployment-region">Ghana · West Africa</span>
+                  <span class="deployment-period">Sept 2024 – March 2025</span>
+                </div>
+                <h3 class="deployment-title">
+                  Ghana Cocoa Campaign: Reference polygons for climate &amp; forest AI models
+                </h3>
+                <p class="deployment-summary">
+                  During the Lacuna Fund Climate &amp; Forests project, a consortium of ~30
+                  enumerators—including CERSGIS staff, University of Ghana students, and
+                  YouthMappers from the University of Ghana and University of Cape Coast—mapped
+                  cocoa farms alongside shade-tree and management attributes. The data trained and
+                  validated Forest Data Partnership (FDaP) cocoa models, with an open CC-BY 4.0
+                  subset published on Zenodo.
+                </p>
+                <div class="deployment-stats">
+                  <div>
+                    <div class="stat-item-val">21,031</div>
+                    <div class="stat-item-lbl">Cocoa farm polygons collected</div>
+                  </div>
+                  <div>
+                    <div class="stat-item-val">2,000+</div>
+                    <div class="stat-item-lbl">Zenodo open dataset views (280+ downloads)</div>
+                  </div>
+                </div>
+              </div>
+              <div class="deployment-partners">
+                <strong>Partners:</strong> CERSGIS, SERVIR West Africa, University of Ghana,
+                University of Cape Coast YouthMappers, World Resources Institute (WRI), Lacuna Fund
+              </div>
+            </article>
+
+            <!-- Case Study 3: Kenya Coffee Pilots & Cooperative Success -->
+            <article
+              class="deployment-card"
+              data-categories="cooperative supply-chain"
+            >
+              <div>
+                <div class="deployment-meta">
+                  <span class="deployment-region">Nandi &amp; Embu Counties · Kenya</span>
+                  <span class="deployment-period">2025 Campaign</span>
+                </div>
+                <h3 class="deployment-title">
+                  Kenya Coffee Cooperatives: From pilot training to independent farmer-led mapping
+                </h3>
+                <p class="deployment-summary">
+                  Following initial pilots with Agrisolutions Enterprises Ltd (ASEL), Palladium
+                  Group, and ITC that mapped 6,000 coffee plots, an FAO workshop in Nandi County
+                  trained local cooperative representatives to design and coordinate their own
+                  surveys. Within two months, four selected coordinators independently mapped over
+                  2,000 additional plots—reaching ~60% coverage of Toroton (1,400/2,100 plots) and
+                  Meteitei Set Kobor (400/700 plots) Farmers Cooperative Societies.
+                </p>
+                <div class="deployment-stats">
+                  <div>
+                    <div class="stat-item-val">8,000+</div>
+                    <div class="stat-item-lbl">Total coffee plots mapped in Kenya</div>
+                  </div>
+                  <div>
+                    <div class="stat-item-val">~60%</div>
+                    <div class="stat-item-lbl">Cooperative coverage achieved in &lt;2 months</div>
+                  </div>
+                </div>
+              </div>
+              <div class="deployment-partners">
+                <strong>Partners:</strong> Toroton FCS, Meteitei Set Kobor FCS, FAO, ASEL, Palladium
+                Group, International Trade Centre (ITC)
+              </div>
+            </article>
+
+            <!-- Case Study 4: Viet Nam & Global WHISP Integration -->
+            <article
+              class="deployment-card"
+              data-categories="supply-chain open-science"
+            >
+              <div>
+                <div class="deployment-meta">
+                  <span class="deployment-region">Viet Nam &amp; Global</span>
+                  <span class="deployment-period">Active Pilots</span>
+                </div>
+                <h3 class="deployment-title">
+                  Viet Nam multi-commodity pilots &amp; Open Foris WHISP risk analysis
+                </h3>
+                <p class="deployment-summary">
+                  In Viet Nam, FAO, local forest rangers, enterprises (Duc Hien Co., Quang Tri
+                  Trading Corp.), and cooperatives (Bon Phuong, Phat Loc, Hiep Phat) are running
+                  Training of Trainers (ToT) and georeferencing campaigns across coffee (41 plots),
+                  timber (38 plots), and rubber (25 plots). Globally, field geometries collected in
+                  Ground feed directly into Open Foris WHISP to evaluate deforestation risk across
+                  millions of smallholder parcels.
+                </p>
+                <div class="deployment-stats">
+                  <div>
+                    <div class="stat-item-val">3 commodities</div>
+                    <div class="stat-item-lbl">Coffee, rubber &amp; timber georeferenced</div>
+                  </div>
+                  <div>
+                    <div class="stat-item-val">4.1M+ plots</div>
+                    <div class="stat-item-lbl">Analyzed across the Open Foris WHISP ecosystem</div>
+                  </div>
+                </div>
+              </div>
+              <div class="deployment-partners">
+                <strong>Partners:</strong> FAO Viet Nam, Forest Rangers, Bon Phuong, Phat Loc &amp;
+                Hiep Phat Cooperatives, Open Foris WHISP
+              </div>
+            </article>
+          </div>
+
+          <!-- Global Capacity Building & Institutional Pipeline Banner -->
+          <div class="capacity-panel">
+            <div class="capacity-grid">
+              <div>
+                <span class="section-kicker">Capacity building &amp; institutional adoption</span>
+                <h3 class="deployment-title">
+                  Building lasting local expertise across 30+ global training sessions
+                </h3>
+                <p class="deployment-summary" style="margin-bottom: 0;">
+                  Ground's training-of-trainers model transfers survey design and geospatial data
+                  management skills directly to national ministries, university chapters, and farmer
+                  unions—with expanding institutional collaborations across Kenya (DRSRS), Sierra
+                  Leone (Produce Monitoring Board &amp; European Forest Institute), Colombia
+                  (AgroComodities), and Cameroon (CICC &amp; EFI).
+                </p>
+              </div>
+              <div class="capacity-highlights">
+                <div class="capacity-box">
+                  <div class="capacity-num">120</div>
+                  <div class="capacity-loc">Nigeria</div>
+                  <p class="capacity-detail">
+                    Trainees equipped in national forestry monitoring workshops.
+                  </p>
+                </div>
+                <div class="capacity-box">
+                  <div class="capacity-num">111</div>
+                  <div class="capacity-loc">Nandi County, Kenya</div>
+                  <p class="capacity-detail">
+                    Cooperative representatives trained in survey creation and coordination.
+                  </p>
+                </div>
+                <div class="capacity-box">
+                  <div class="capacity-num">65</div>
+                  <div class="capacity-loc">Embu County, Kenya</div>
+                  <p class="capacity-detail">
+                    Ministerial staff and cooperative union leaders trained for multi-county rollout.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- How Ground Works Section (Current Platform Capabilities) -->
+      <section id="platform" class="section">
+        <div class="container">
+          <div class="section-header">
+            <span class="section-kicker">Platform overview</span>
+            <h2 class="section-title">
+              Designed for the realities of disconnected fieldwork
+            </h2>
+            <p class="section-subtitle">
+              Ground combines a web application for survey creation and data management with an
+              Android app built for fast, accurate map-based data collection in remote environments.
+            </p>
+          </div>
+
+          <div class="workflow-layout">
+            <!-- Step Selector -->
+            <div class="workflow-steps" role="tablist" aria-label="Ground workflow steps">
+              <button
+                id="workflow-btn-1"
+                type="button"
+                role="tab"
+                class="workflow-step-btn active"
+                aria-selected="true"
+                data-workflow-step="design"
+              >
+                <span class="step-badge">1</span>
+                <div>
+                  <div class="step-title">Organize surveys and sites on the web</div>
+                  <p class="step-desc">
+                    Define structured questions, configure geospatial collection tasks, preload
+                    known sites via GeoJSON or CSV, and manage role-based team permissions in
+                    multiple languages.
+                  </p>
+                </div>
+              </button>
+
+              <button
+                id="workflow-btn-2"
+                type="button"
+                role="tab"
+                class="workflow-step-btn"
+                aria-selected="false"
+                data-workflow-step="collect"
+              >
+                <span class="step-badge">2</span>
+                <div>
+                  <div class="step-title">Map boundaries and collect data offline</div>
+                  <p class="step-desc">
+                    Download cloud-free Sentinel-2 satellite imagery before heading into the field.
+                    Walk farm perimeters with GPS, drop location pins, and record answers and photos
+                    with zero internet connection.
+                  </p>
+                </div>
+              </button>
+
+              <button
+                id="workflow-btn-3"
+                type="button"
+                role="tab"
+                class="workflow-step-btn"
+                aria-selected="false"
+                data-workflow-step="analyze"
+              >
+                <span class="step-badge">3</span>
+                <div>
+                  <div class="step-title">Synchronize automatically and export open data</div>
+                  <p class="step-desc">
+                    Submissions sync in the background as soon as connectivity returns. Inspect
+                    geometries and photos on the web map and export CSV and GeoJSON files with
+                    location accuracy and altitude columns.
+                  </p>
+                </div>
+              </button>
+            </div>
+
+            <!-- Step Preview Panel -->
+            <div class="workflow-preview-card">
+              <!-- Pane 1: Design & Web Console -->
+              <div
+                id="workflow-pane-design"
+                class="workflow-pane active"
+                role="tabpanel"
+                aria-labelledby="workflow-btn-1"
+                data-workflow-pane="design"
+              >
+                <div class="workflow-figure">
+                  <img
+                    src="assets/images/web-screenshot.png"
+                    alt="Ground web survey console showing map sites and structured survey responses"
+                  />
+                </div>
+                <ul class="workflow-feature-list">
+                  <li class="workflow-feature-item">
+                    <strong>Pre-defined &amp; opportunistic sites</strong>
+                    Import target collection locations in advance or let collectors add new sites in
+                    the field.
+                  </li>
+                  <li class="workflow-feature-item">
+                    <strong>Multi-language web console</strong>
+                    Switch interface languages directly from the web header to collaborate across
+                    global teams.
+                  </li>
+                </ul>
+              </div>
+
+              <!-- Pane 2: Offline Field Collection -->
+              <div
+                id="workflow-pane-collect"
+                class="workflow-pane"
+                role="tabpanel"
+                aria-labelledby="workflow-btn-2"
+                data-workflow-pane="collect"
+              >
+                <div class="workflow-figure workflow-figure-mobile">
+                  <img
+                    src="assets/images/mobile-screenshot.png"
+                    alt="Ground Android app showing offline polygon boundary mapping over satellite imagery"
+                  />
+                </div>
+                <ul class="workflow-feature-list">
+                  <li class="workflow-feature-item">
+                    <strong>Offline Sentinel-2 basemaps</strong>
+                    Cache cloud-free satellite imagery tiles to navigate accurately under remote
+                    canopy.
+                  </li>
+                  <li class="workflow-feature-item">
+                    <strong>GPS points &amp; walked polygons</strong>
+                    Capture hand-drawn or GPS-walked boundaries alongside photos and structured form
+                    inputs.
+                  </li>
+                </ul>
+              </div>
+
+              <!-- Pane 3: Sync & Export -->
+              <div
+                id="workflow-pane-analyze"
+                class="workflow-pane"
+                role="tabpanel"
+                aria-labelledby="workflow-btn-3"
+                data-workflow-pane="analyze"
+              >
+                <div class="workflow-figure">
+                  <img
+                    src="assets/images/web-screenshot.png"
+                    alt="Ground web console inspecting synced field photos and ecosystem attributes"
+                  />
+                </div>
+                <ul class="workflow-feature-list">
+                  <li class="workflow-feature-item">
+                    <strong>Accuracy &amp; altitude exports</strong>
+                    CSV exports include dedicated GPS accuracy and altitude columns for scientific
+                    quality control.
+                  </li>
+                  <li class="workflow-feature-item">
+                    <strong>Resilient background sync</strong>
+                    Local data persists safely across app restarts and uploads automatically when back
+                    online.
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <!-- Core Feature Highlights -->
+          <div class="capabilities-grid">
+            <article class="capability-item">
+              <h3 class="capability-title">Geospatial &amp; structured data</h3>
+              <p class="capability-text">
+                First-class support for GPS points and walked or hand-drawn polygons paired with
+                text, numeric, multiple-choice, date/time, and photo capture tasks.
+              </p>
+            </article>
+            <article class="capability-item">
+              <h3 class="capability-title">Built on Material Design 3</h3>
+              <p class="capability-text">
+                Crafted using Google's Material Design 3 system for high-contrast legibility in
+                bright sunlight and intuitive navigation with minimal training.
+              </p>
+            </article>
+            <article class="capability-item">
+              <h3 class="capability-title">Open standards &amp; self-hostable</h3>
+              <p class="capability-text">
+                Export clean GeoJSON and CSV datasets for downstream GIS, WHISP, or Earth Engine
+                workflows, and deploy on your own Firebase and Google Cloud project.
+              </p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <!-- Open Source & Community Section -->
+      <section id="community" class="section section-tonal">
+        <div class="container">
+          <div class="section-header">
+            <span class="section-kicker">Open source &amp; community</span>
+            <h2 class="section-title">
+              Built in the open for global sustainability impact
+            </h2>
+            <p class="section-subtitle">
+              Ground is released under the Apache 2.0 License as part of the Open Foris initiative.
+              We welcome contributions from developers, researchers, and conservation practitioners
+              worldwide.
+            </p>
+          </div>
+
+          <div class="community-grid">
+            <article class="repo-card">
+              <div>
+                <span class="repo-badge">Web &amp; Cloud Backend</span>
+                <h3 class="repo-title">ground-platform</h3>
+                <p class="repo-desc">
+                  Contains Ground's hosted components, including the Angular web survey console,
+                  Firebase Cloud Functions, Firestore security rules, and shared TypeScript and
+                  Protocol Buffer schemas.
+                </p>
+              </div>
+              <a
+                id="repo-link-platform"
+                href="https://github.com/google/ground-platform"
+                class="repo-link"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Explore google/ground-platform →
+              </a>
+            </article>
+
+            <article class="repo-card">
+              <div>
+                <span class="repo-badge">Android Client</span>
+                <h3 class="repo-title">ground-android</h3>
+                <p class="repo-desc">
+                  Contains the native Android application for offline-first map navigation, GPS point
+                  and polygon boundary capture, offline satellite tile caching, and background
+                  synchronization.
+                </p>
+              </div>
+              <a
+                id="repo-link-android"
+                href="https://github.com/google/ground-android"
+                class="repo-link"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Explore google/ground-android →
+              </a>
+            </article>
+
+            <article class="repo-card">
+              <div>
+                <span class="repo-badge">Community &amp; Updates</span>
+                <h3 class="repo-title">Stay informed &amp; contribute</h3>
+                <p class="repo-desc">
+                  Join the Ground announcements mailing list for updates on field deployments and
+                  releases, or read the Developer's Guide to set up a local emulator and contribute
+                  pull requests.
+                </p>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                <a
+                  id="link-announcements-group"
+                  href="https://groups.google.com/g/ground-announcements"
+                  class="repo-link"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Join ground-announcements →
+                </a>
+                <a
+                  id="link-developer-guide"
+                  href="https://github.com/google/ground-platform/wiki/Ground-Developer's-Guide"
+                  class="repo-link"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Read the Developer's Guide →
+                </a>
+              </div>
+            </article>
+          </div>
+
+          <div class="disclaimer-banner" role="note">
+            <span>
+              <strong>Note:</strong> Ground is not an officially supported Google product. It is
+              developed and maintained on a best-effort basis in collaboration with the Open Foris
+              community.
+            </span>
+            <a
+              id="link-contributing-guide"
+              href="https://github.com/google/ground-platform/blob/master/CONTRIBUTING.md"
+              target="_blank"
+              rel="noopener noreferrer"
+              style="font-weight: 600;"
+            >
+              Read contributing guidelines →
+            </a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Site Footer -->
+    <footer class="site-footer" role="contentinfo">
+      <div class="container">
+        <div class="footer-grid">
+          <div>
+            <a href="#" class="brand-link" style="color: #ffffff;">
+              <img
+                src="assets/images/ground-logo.png"
+                alt="Ground logo"
+                class="brand-logo"
+                width="36"
+                height="36"
+              />
+              <span class="brand-name" style="color: #ffffff;">Ground</span>
+            </a>
+            <p class="footer-brand-desc">
+              An open-source, map-first data collection platform empowering frontline communities,
+              smallholder farmers, and conservation partners to drive sustainability impact at scale.
+            </p>
+          </div>
+
+          <div>
+            <h2 class="footer-heading">Platform</h2>
+            <ul class="footer-links">
+              <li><a href="#goals">Goals &amp; mission</a></li>
+              <li><a href="#impact">Global impact</a></li>
+              <li><a href="#deployments">Field case studies</a></li>
+              <li><a href="#platform">How Ground works</a></li>
+            </ul>
+          </div>
+
+          <div>
+            <h2 class="footer-heading">Open source</h2>
+            <ul class="footer-links">
+              <li>
+                <a href="https://github.com/google/ground-platform" target="_blank" rel="noopener noreferrer">
+                  ground-platform (Web &amp; Cloud)
+                </a>
+              </li>
+              <li>
+                <a href="https://github.com/google/ground-android" target="_blank" rel="noopener noreferrer">
+                  ground-android (Android app)
+                </a>
+              </li>
+              <li>
+                <a href="https://github.com/google/ground-platform/blob/master/CONTRIBUTING.md" target="_blank" rel="noopener noreferrer">
+                  Contributing guidelines
+                </a>
+              </li>
+              <li>
+                <a href="https://github.com/google/ground-platform/wiki/Ground-Developer's-Guide" target="_blank" rel="noopener noreferrer">
+                  Developer's guide
+                </a>
+              </li>
+            </ul>
+          </div>
+
+          <div>
+            <h2 class="footer-heading">Ecosystem</h2>
+            <ul class="footer-links">
+              <li>
+                <a href="https://openforis.org/solutions/ground/" target="_blank" rel="noopener noreferrer">
+                  Open Foris Ground
+                </a>
+              </li>
+              <li>
+                <a href="https://whisp.openforis.org/" target="_blank" rel="noopener noreferrer">
+                  Open Foris WHISP
+                </a>
+              </li>
+              <li>
+                <a href="https://groups.google.com/g/ground-announcements" target="_blank" rel="noopener noreferrer">
+                  Announcements mailing list
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="footer-bottom">
+          <span>Licensed under the Apache License, Version 2.0.</span>
+          <span>Maintained by the Ground authors and Open Foris community.</span>
+        </div>
+      </div>
+    </footer>
+
+    <script src="assets/js/main.js"></script>
+  </body>
+</html>
