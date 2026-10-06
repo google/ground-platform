@@ -52,7 +52,7 @@ internal fun WebSignInPage(state: PrototypeAppState, onSignIn: () -> Unit) {
     )
     HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-      ElevatedCard(modifier = Modifier.width(420.dp)) {
+      ElevatedCard(modifier = Modifier.width(460.dp)) {
         Column(
           modifier = Modifier.fillMaxWidth().padding(32.dp),
           horizontalAlignment = Alignment.CenterHorizontally,
@@ -65,8 +65,16 @@ internal fun WebSignInPage(state: PrototypeAppState, onSignIn: () -> Unit) {
             fontWeight = FontWeight.Bold,
           )
           Text(
-            text = "Sign in to see the surveys and organizations shared with your account.",
+            text =
+              "Map ecosystems, design field surveys, and verify ground observations with your organization.",
             style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
+          )
+          GroundMissionGraphic(modifier = Modifier.fillMaxWidth().height(164.dp))
+          Text(
+            text = "Sign in to see the surveys and organizations shared with your account.",
+            style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,
           )
