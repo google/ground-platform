@@ -13,6 +13,18 @@
  */
 package org.groundplatform.v2.devtools.prototypeapp.formeditor
 
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.FormAvailability
+
+/**
+ * Platform the Form editor's canvas and **Preview** reproduce. Mobile shows the one-question-per-
+ * screen flow; web shows the dashboard's compact layout, where every question is a collapsible card
+ * stacked in the right-hand panel.
+ */
+enum class FormPreviewTarget(val label: String) {
+  MOBILE("Mobile"),
+  WEB("Web"),
+}
+
 /**
  * Question types offered by the visual Form editor, each mapped to the XForms bind `type` and body
  * control element it generates (per the ODK XForms specification, "Bind attributes" and "Body
@@ -192,6 +204,11 @@ data class EditorForm(
   val questions: List<EditorQuestion>,
   /** What a submission does to the survey's Map layers and Data tables. */
   val saveTo: EditorSaveTo = EditorSaveTo(),
+  /**
+   * Where collectors can open the Form. New Forms start mobile-only; designers turn on **Available
+   * on web** in Form settings to offer the Form in the web dashboard too.
+   */
+  val availability: FormAvailability = FormAvailability.MOBILE,
 ) {
   fun indexOf(key: String): Int = questions.indexOfFirst { it.key == key }
 

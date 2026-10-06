@@ -52,6 +52,22 @@ and **Web (`js`, `wasmJs`)**.
     Wraps `MobileFormRunner` in a mobile viewport frame (`400×720`) so web and
     desktop applications (such as `devtools/formdebugger`) can execute mobile
     forms inline with bidirectional live record synchronization.
+-   **Compact Web Layout
+    ([`CompactFormRunner`](src/commonMain/kotlin/org/groundplatform/v2/core/forms/ui/CompactFormRunner.kt))**:
+    Renders the same `FormWizardController` session as a vertical stack of
+    collapsible question cards (`CompactQuestionCard`) that fits a web side
+    panel. Each card shows a status icon (answered ✓, skipped ⊘, pending ○, or
+    needs attention !), reuses `ControlWidget` for its input, and optional
+    questions can be skipped. Every card starts expanded; in interactive
+    sessions a card collapses on its own once its question becomes answered
+    (deferred while the collector is still typing in it), and manual toggles or
+    **Expand all** / **Collapse all** always win afterwards. The wizard's final
+    "Review & Submit" step is never rendered as a card: the footer's Submit
+    button and validation banner cover it, and progress counts exclude it. A
+    `readOnly` mode renders the inputs without reacting and keeps all cards
+    expanded, for form designers' previews. Expansion, skip marks and the
+    auto-collapse bookkeeping live in a `CompactFormLayoutState`, beside the
+    form data.
 
 See the detailed package design and API reference in
 [`src/commonMain/kotlin/org/groundplatform/v2/core/forms/ui/README.md`](src/commonMain/kotlin/org/groundplatform/v2/core/forms/ui/README.md).

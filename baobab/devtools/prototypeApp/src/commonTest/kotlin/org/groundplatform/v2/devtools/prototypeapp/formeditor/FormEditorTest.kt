@@ -20,9 +20,12 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import org.groundplatform.v2.core.forms.serialization.XFormsXmlSerializer
+import org.groundplatform.v2.core.forms.ui.CompactFormItem
 import org.groundplatform.v2.core.forms.ui.FormWizardController
 import org.groundplatform.v2.core.forms.ui.FormWizardStep
+import org.groundplatform.v2.core.forms.ui.buildCompactFormItems
 import org.groundplatform.v2.devtools.prototypeapp.data.seed.FormEditorSamples
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.FormAvailability
 
 class FormEditorTest {
 
@@ -519,5 +522,76 @@ class FormEditorTest {
     state.isAdvancedExpanded = true
     state.select("q5")
     assertTrue(state.isAdvancedExpanded)
+  }
+
+  @Test
+  fun availability_defaultsToMobileOnlyAndTogglesIndependently() {
+    val state = FormEditorState(FormEditorSamples.shadeTreeVisit())
+    assertEquals(FormAvailability.MOBILE, state.form.availability)
+    assertTrue(state.isEnabledOnPreviewTarget)
+    state.selectPreviewTarget(FormPreviewTarget.WEB)
+    assertFalse(state.isEnabledOnPreviewTarget)
+    state.selectPreviewTarget(FormPreviewTarget.MOBILE)
+
+    // Turning web on makes the form available on both platforms.
+    state.updateAvailability(state.form.availability.withWeb(true))
+    assertEquals(FormAvailability.BOTH, state.form.availability)
+
+    // Switching mobile off leaves web on; the mobile canvas now shows the banner.
+    state.updateAvailability(state.form.availability.withMobile(false))
+    assertEquals(FormAvailability.WEB, state.form.availability)
+    assertFalse(state.isEnabledOnPreviewTarget)
+    state.selectPreviewTarget(FormPreviewTarget.WEB)
+    assertTrue(state.isEnabledOnPreviewTarget)
+
+    // Both off is allowed (hidden everywhere); the banner's Enable restores the previewed one.
+    state.updateAvailability(state.form.availability.withWeb(false))
+    assertEquals(FormAvailability.NONE, state.form.availability)
+    assertFalse(state.isEnabledOnPreviewTarget)
+    state.enableOnPreviewTarget()
+    assertEquals(FormAvailability.WEB, state.form.availability)
+
+    assertEquals(FormAvailability.BOTH, FormAvailability.of(mobile = true, web = true))
+    assertEquals(FormAvailability.MOBILE, FormAvailability.NONE.withMobile(true))
+  }
+
+  @Test
+  fun previewTarget_defaultsToMobileAndToggles() {
+    val state = FormEditorState(FormEditorSamples.shadeTreeVisit())
+    assertEquals(FormPreviewTarget.MOBILE, state.previewTarget)
+    state.selectPreviewTarget(FormPreviewTarget.WEB)
+    assertEquals(FormPreviewTarget.WEB, state.previewTarget)
+    // The Preview overlay is driven by the same session regardless of target.
+    state.startPreview()
+    assertNotNull(state.previewController)
+    state.closePreview()
+    assertEquals(FormPreviewTarget.WEB, state.previewTarget)
+  }
+
+  @Test
+  fun webCanvas_parsesCurrentFormAndMapsCardsToQuestions() {
+    val state = FormEditorState(FormEditorSamples.shadeTreeVisit())
+    val controller = state.parsePreviewController().getOrThrow()
+    val cardPaths =
+      buildCompactFormItems(controller.steps).filterIsInstance<CompactFormItem.Question>().map {
+        it.step.stepKey
+      }
+
+    // Every relevant editor question has a card, and each card maps back to its question.
+    val firstKey = state.form.questions.first().key
+    val firstPath = assertNotNull(state.pathOf(firstKey))
+    assertTrue(firstPath in cardPaths)
+    assertEquals(firstKey, state.keyForPath(firstPath))
+    assertNull(state.keyForPath("/data/not_a_question"))
+
+    // Edits are reflected after re-parsing.
+    state.select(firstKey)
+    state.updateQuestion(firstKey) { it.copy(label = "Renamed question") }
+    val renamed = state.parsePreviewController().getOrThrow()
+    val card =
+      buildCompactFormItems(renamed.steps).filterIsInstance<CompactFormItem.Question>().first {
+        it.step.stepKey == firstPath
+      }
+    assertEquals("Renamed question", card.step.title)
   }
 }

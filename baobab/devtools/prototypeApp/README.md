@@ -107,11 +107,31 @@ prototype, so selections and survey changes carry over.
     corner; the scale bar stays in the lower-left.
 -   **Details card**: The selected feature's details float in the upper-right
     corner (`WebEntityDetailsCard`) in two tabs. **Data** shows a compact
-    status chip (`marker-symbol` and status text on the `marker-color`), then
-    its properties arranged vertically, with references to other records shown
-    as links. **Show in table** opens the bottom table on the feature's row.
-    **History** lists its submissions grouped by form; opening one shows it in
-    the tab, in a document-style view.
+    status chip (`marker-symbol` and status text on the `marker-color`), the
+    feature's **Collect data** buttons (one per form linked to its dataset,
+    disabled once completed), then its properties arranged vertically, with
+    references to other records shown as links. **Show in table** opens the
+    bottom table on the feature's row. **History** lists its submissions
+    grouped by form; opening one shows it in the tab, in a document-style view.
+-   **Data collection on web** (`WebDataCollectionCard.kt`): The mobile entry
+    points are adapted to the web paradigm. **Collect data** in the top toolbar
+    (the counterpart of the mobile `+` FAB) lists the survey's forms; a
+    feature's card has the same **Collect data** buttons as the mobile sheet.
+    Either opens the form in the right-hand panel, in place of the details
+    card, using the compact layout (`shared/ui` `CompactFormRunner`): every
+    question is a collapsible card stacked vertically, with an icon at the left
+    showing whether it is answered (✓), skipped (⊘), pending (○), or needs
+    attention (!). All cards start expanded; a card collapses on its own once
+    its question is answered (once focus leaves it, for typed answers) or
+    skipped, and can be re-opened at any time. Optional questions have a
+    **Skip** action, the header shows `n of m answered` with **Expand all** /
+    **Collapse all**, and **Submit** in the footer runs the same validation and
+    submission flow as mobile; the mobile wizard's "Review & Submit" step is
+    not shown as a card and is not counted in the progress. A form opened from
+    the toolbar that needs a target feature first shows a picker: click a
+    matching feature on the map, in the left-hand list, or in the picker's own
+    searchable list; the questions then appear and the target step is left out
+    of the stack.
 -   **Data tables**: A collapsible panel docks to the bottom of the map with
     one tab per entity dataset (map layers and data tables), with the selected
     record highlighted. The first column is a compact status chip. It never
@@ -196,15 +216,39 @@ Selecting a Form opens the visual Form editor in `formeditor/`
     buttons on the selected card also move it one step.
 -   **XForms XML**: Shows the generated ODK-compatible XForms and confirms it
     parses with the Ground form engine.
+-   **Mobile / Web toggle**: The toolbar's segmented toggle switches the
+    canvas between the mobile flow above and the **Web** layout
+    (`FormWebPreview.kt`): the Form as collectors see it in the web dashboard's
+    right-hand panel, i.e. a read-only stack of the compact question cards,
+    rebuilt from the generated XForms on every edit. Clicking a card selects
+    that question in the properties panel (the selected card is outlined);
+    clicking the empty canvas selects the Form.
 -   **Preview flow**: Runs the generated Form in a device frame with the shared
-    `MobileFormRunner`. The side panel lists the current path, which updates as
-    display logic changes.
--   **Form properties**: Click `Start`, `Review & submit`, or empty canvas to
-    edit the Form itself. The **Advanced** section at the bottom holds the
-    Form's save-to logic (`FormSaveToModels.kt`, `FormSaveToEditor.kt`).
-    Advanced sections start collapsed (or open when customized or invalid).
-    Expanding or collapsing one does the same to all of them for the rest of
-    the session.
+    `MobileFormRunner`, or, with **Web** selected, in a browser-like frame with
+    the interactive compact layout in the right-hand panel. The side panel
+    lists the current path, which updates as display logic changes.
+-   **Form properties**: Click `Start`, `Review & submit`, or empty canvas
+    (or **Form settings** in the toolbar) to edit the Form itself.
+    **Availability** has two switches, **Available on mobile** and **Available
+    on web**, for where collectors can open the Form from that platform's data
+    collection entry points; each row's caption spells out the effect
+    ("Collectors can open this form in the web dashboard" / "Hidden from
+    collectors in the mobile app"). New Forms start mobile-only
+    (`FormAvailability.MOBILE` in `domain/model/FormModels.kt`); turn on
+    **Available on web** to offer the Form in the web dashboard too. Turning
+    both off is allowed and shows a
+    warning. While the Form is off for the platform the canvas is previewing, a
+    **Not available on …** banner appears above the canvas with an **Enable**
+    action, and the preview area is greyed out and non-interactive.
+    On the dashboard, the **Collect data** menu and the feature cards' buttons
+    only list forms available on web; the mobile `+` FAB sheet and bottom-sheet
+    buttons only list forms available on mobile (`PrototypeAppState.webForms` /
+    `mobileForms`). The choice is applied to the running survey's forms by form
+    ID from the saved editor draft, like Map layer styles. The **Advanced**
+    section at the bottom holds the Form's save-to logic
+    (`FormSaveToModels.kt`, `FormSaveToEditor.kt`). Advanced sections start
+    collapsed (or open when customized or invalid). Expanding or collapsing one
+    does the same to all of them for the rest of the session.
 -   **Save-to logic**: By default each submission adds a new map feature (if
     the Form has a Location question) or table row to the Form's linked Map
     layer or Data table. Choose **Update existing map feature / table row** to

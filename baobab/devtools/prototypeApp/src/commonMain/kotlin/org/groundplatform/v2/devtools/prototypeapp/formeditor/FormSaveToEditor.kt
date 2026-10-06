@@ -25,6 +25,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.OpenInNew
@@ -45,6 +46,7 @@ import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -52,11 +54,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.FormAvailability
 
 /**
  * Whether "Advanced" sections are expanded, shared by every Advanced section in the editor.
@@ -118,6 +122,9 @@ internal fun FormProperties(
     }
     if (formIssues.isNotEmpty()) IssueList(formIssues)
 
+    SectionLabel("Availability")
+    AvailabilityToggles(state)
+
     SectionLabel("Submissions")
     Text(
       text = submissionDescription(form, target),
@@ -152,6 +159,90 @@ internal fun FormProperties(
     ) {
       SaveToEditor(state, onSaveToModeChange)
     }
+  }
+}
+
+/**
+ * Two switches, one per platform, for where collectors can open the Form. Each row's caption spells
+ * out the current effect; a warning appears when both are off.
+ */
+@Composable
+private fun AvailabilityToggles(state: FormEditorState) {
+  val availability = state.form.availability
+  OutlinedCard(modifier = Modifier.fillMaxWidth()) {
+    AvailabilityToggleRow(
+      icon = previewTargetIcon(FormPreviewTarget.MOBILE),
+      title = "Available on mobile",
+      platform = FormPreviewTarget.MOBILE.sentenceName(),
+      checked = availability.includesMobile,
+      onCheckedChange = { state.updateAvailability(availability.withMobile(it)) },
+    )
+    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+    AvailabilityToggleRow(
+      icon = previewTargetIcon(FormPreviewTarget.WEB),
+      title = "Available on web",
+      platform = FormPreviewTarget.WEB.sentenceName(),
+      checked = availability.includesWeb,
+      onCheckedChange = { state.updateAvailability(availability.withWeb(it)) },
+    )
+  }
+  if (availability == FormAvailability.NONE) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+      Icon(
+        Icons.Outlined.Warning,
+        contentDescription = null,
+        tint = MaterialTheme.colorScheme.tertiary,
+        modifier = Modifier.size(16.dp),
+      )
+      Spacer(Modifier.width(6.dp))
+      Text(
+        text = "Collectors can't open this form anywhere until one of these is turned on.",
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.tertiary,
+      )
+    }
+  }
+}
+
+/** One platform's row in [AvailabilityToggles]: icon, title, effect caption, and switch. */
+@Composable
+private fun AvailabilityToggleRow(
+  icon: ImageVector,
+  title: String,
+  platform: String,
+  checked: Boolean,
+  onCheckedChange: (Boolean) -> Unit,
+) {
+  val colors = MaterialTheme.colorScheme
+  Row(
+    modifier =
+      Modifier.fillMaxWidth()
+        .toggleable(value = checked, role = Role.Switch, onValueChange = onCheckedChange)
+        .padding(horizontal = 14.dp, vertical = 10.dp),
+    horizontalArrangement = Arrangement.spacedBy(12.dp),
+    verticalAlignment = Alignment.CenterVertically,
+  ) {
+    Icon(
+      imageVector = icon,
+      contentDescription = null,
+      tint = if (checked) colors.primary else colors.onSurfaceVariant,
+      modifier = Modifier.size(20.dp),
+    )
+    Column(modifier = Modifier.weight(1f)) {
+      Text(
+        text = title,
+        style = MaterialTheme.typography.bodyMedium,
+        fontWeight = FontWeight.Medium,
+      )
+      Text(
+        text =
+          if (checked) "Collectors can open this form in $platform."
+          else "Hidden from collectors in $platform.",
+        style = MaterialTheme.typography.bodySmall,
+        color = if (checked) colors.onSurfaceVariant else colors.tertiary,
+      )
+    }
+    Switch(checked = checked, onCheckedChange = null)
   }
 }
 

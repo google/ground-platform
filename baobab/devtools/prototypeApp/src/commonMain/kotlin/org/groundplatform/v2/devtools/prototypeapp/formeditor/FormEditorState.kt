@@ -18,6 +18,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import org.groundplatform.v2.core.forms.serialization.XFormsXmlSerializer
 import org.groundplatform.v2.core.forms.ui.FormWizardController
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.FormAvailability
 
 /**
  * Observable state holder for the Form editor page: the [EditorForm] under edit, the selected
@@ -58,6 +59,38 @@ class FormEditorState(
    * expansion flags, so it stays open or closed as the author moves between questions.
    */
   var isAdvancedExpanded: Boolean by mutableStateOf(false)
+
+  /**
+   * Which platform the editor's canvas and **Preview** reproduce: the mobile
+   * one-question-per-screen flow, or the web dashboard's stacked read-only fields
+   * ([FormPreviewTarget.WEB]).
+   */
+  var previewTarget: FormPreviewTarget by mutableStateOf(FormPreviewTarget.MOBILE)
+    private set
+
+  /** Switches the canvas and **Preview** between the mobile flow and the web layout. */
+  fun selectPreviewTarget(target: FormPreviewTarget) {
+    previewTarget = target
+  }
+
+  /**
+   * Parses the current [previewXml] into a fresh [FormWizardController] for the web canvas and the
+   * preview. Returns the parse error message instead when the generated XForms don't load. Callers
+   * cache the result per XML (e.g. `remember(previewXml)`), so the canvas tracks every edit.
+   */
+  fun parsePreviewController(): Result<FormWizardController> = runCatching {
+    FormWizardController(formDef = XFormsXmlSerializer.deserializeFormDef(previewXml))
+  }
+
+  /**
+   * Instance path (`/data/<name>`) of question [key] in the generated XForms, used to match the
+   * compact web cards to editor questions.
+   */
+  fun pathOf(key: String): String? = form.find(key)?.let { "/data/${it.name}" }
+
+  /** Editor question whose generated instance node is [path], if any. */
+  fun keyForPath(path: String): String? =
+    form.questions.firstOrNull { "/data/${it.name}" == path }?.key
 
   private var nextKeyId = initialForm.questions.size + 1
 
@@ -117,6 +150,29 @@ class FormEditorState(
 
   fun updateTitle(title: String) {
     form = form.copy(title = title)
+  }
+
+  /** Sets where collectors can open this Form (mobile, web, both, or neither). */
+  fun updateAvailability(availability: FormAvailability) {
+    form = form.copy(availability = availability)
+  }
+
+  /** Whether collectors can open this Form on the platform the canvas is previewing. */
+  val isEnabledOnPreviewTarget: Boolean
+    get() =
+      when (previewTarget) {
+        FormPreviewTarget.MOBILE -> form.availability.includesMobile
+        FormPreviewTarget.WEB -> form.availability.includesWeb
+      }
+
+  /** Makes the Form available on the platform the canvas is previewing (the banner's action). */
+  fun enableOnPreviewTarget() {
+    updateAvailability(
+      when (previewTarget) {
+        FormPreviewTarget.MOBILE -> form.availability.withMobile(true)
+        FormPreviewTarget.WEB -> form.availability.withWeb(true)
+      }
+    )
   }
 
   /**

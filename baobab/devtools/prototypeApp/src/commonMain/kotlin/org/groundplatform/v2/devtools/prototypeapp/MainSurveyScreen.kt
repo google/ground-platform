@@ -671,7 +671,7 @@ internal fun AvailableFormsModalSheet(state: PrototypeAppState) {
 
       HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
-      state.forms.forEach { form ->
+      state.mobileForms.forEach { form ->
         val eligibleCount = state.eligibleEntitiesForForm(form).size
         val canLaunch = !form.requiresEntity || eligibleCount > 0
 

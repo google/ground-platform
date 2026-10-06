@@ -13,6 +13,39 @@
  */
 package org.groundplatform.v2.devtools.prototypeapp.domain.model
 
+/**
+ * Where collectors can open a Form: the mobile app, the web dashboard, both, or neither. Set by the
+ * survey designer with the two per-platform **Available on** switches in the Form editor's Form
+ * settings; Forms designed in the editor start as [MOBILE].
+ */
+enum class FormAvailability(val includesMobile: Boolean, val includesWeb: Boolean) {
+  /** Collectors can open the Form in the mobile app only. */
+  MOBILE(includesMobile = true, includesWeb = false),
+  /** Collectors can open the Form in the web dashboard only. */
+  WEB(includesMobile = false, includesWeb = true),
+  /** Collectors can open the Form in the mobile app and the web dashboard. */
+  BOTH(includesMobile = true, includesWeb = true),
+  /** Collectors can't open the Form anywhere; it's hidden from every entry point. */
+  NONE(includesMobile = false, includesWeb = false);
+
+  /** This availability with the mobile app switched on or off. */
+  fun withMobile(enabled: Boolean): FormAvailability = of(mobile = enabled, web = includesWeb)
+
+  /** This availability with the web dashboard switched on or off. */
+  fun withWeb(enabled: Boolean): FormAvailability = of(mobile = includesMobile, web = enabled)
+
+  companion object {
+    /** The availability matching the two per-platform toggles. */
+    fun of(mobile: Boolean, web: Boolean): FormAvailability =
+      when {
+        mobile && web -> BOTH
+        mobile -> MOBILE
+        web -> WEB
+        else -> NONE
+      }
+  }
+}
+
 /** Represents a hierarchical Form (`FormDef` + `FormLaunchConfig`) in the active survey. */
 data class FormPreviewItem(
   val id: String,
@@ -24,6 +57,8 @@ data class FormPreviewItem(
   val questionCount: Int,
   val ctaLabel: String,
   val requiresEntity: Boolean = targetDatasetId.isNotBlank(),
+  /** Platforms the Form can be collected on. */
+  val availability: FormAvailability = FormAvailability.BOTH,
 ) {
 
   /**

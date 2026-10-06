@@ -66,7 +66,8 @@ import org.groundplatform.v2.core.forms.ui.LocalGroundBrandFontFamily
 
 /**
  * Top navigation and context toolbar for the Ground 2.0 Web dashboard: the shared [WebAppHeader]
- * showing the active survey and its location, with "Mobile prototype" and "Manage survey" actions.
+ * showing the active survey and its location, with "Mobile prototype", "Manage survey", and
+ * "Collect data" ([WebCollectDataMenuButton]) actions.
  */
 @Composable
 internal fun WebTopToolbar(
@@ -96,8 +97,8 @@ internal fun WebTopToolbar(
         text = "Manage survey",
         icon = Icons.Outlined.Edit,
         onClick = onOpenSurveyEditor,
-        tonal = true,
       )
+      WebCollectDataMenuButton(state)
     },
   )
 }

@@ -13,6 +13,7 @@
  */
 package org.groundplatform.v2.devtools.prototypeapp.surveyeditor
 
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.FormPreviewItem
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.MapLayerItem
 import org.groundplatform.v2.devtools.prototypeapp.formeditor.FormEditorValidator
 
@@ -221,6 +222,21 @@ fun List<MapLayerItem>.withEditorLayerStyles(datasets: List<EntityDataset>): Lis
       colorHex = parseHexColor(style.colorHex) ?: layer.colorHex,
       iconName = style.iconName,
     )
+  }
+}
+
+/**
+ * Copies the availability (mobile, web, or both) chosen in the Survey editor onto the runtime forms
+ * with the same form ID. Forms the editor doesn't know about keep their own availability.
+ */
+fun List<FormPreviewItem>.withEditorFormAvailability(
+  editorForms: List<SurveyEditorForm>
+): List<FormPreviewItem> {
+  val availabilityByFormId = editorForms.associate { it.form.formId to it.form.availability }
+  if (availabilityByFormId.isEmpty()) return this
+  return map { form ->
+    val availability = availabilityByFormId[form.id] ?: return@map form
+    if (availability == form.availability) form else form.copy(availability = availability)
   }
 }
 

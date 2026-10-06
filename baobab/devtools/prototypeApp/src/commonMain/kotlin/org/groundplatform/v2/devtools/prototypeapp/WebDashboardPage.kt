@@ -272,8 +272,9 @@ private val DashboardOverlayMargin = 14.dp
  *   ([DashboardSidePanelToggleTab]).
  * - **Main area**: The live survey map ([SurveyMainMap]). Selecting a map feature pans and zooms to
  *   it and opens its details in a floating card in the upper-right corner (
- *   [WebEntityDetailsCard]). A basemap preview card in the upper-left corner ([BasemapPreviewCard])
- *   opens the basemap selector in a modal dialog ([LayersControlDialog]).
+ *   [WebEntityDetailsCard]). While a form is being filled in, that corner holds the data collection
+ *   panel instead ([WebDataCollectionCard]). A basemap preview card in the upper-left corner (
+ *   [BasemapPreviewCard]) opens the basemap selector in a modal dialog ([LayersControlDialog]).
  * - **Bottom of the map**: A collapsible panel of data tables, one per entity dataset (
  *   [DashboardDataTablesPanel]). It only expands on request: from its ▲ toggle or the card's "Show
  *   in table" button.
@@ -497,6 +498,7 @@ private fun DashboardMapArea(state: PrototypeAppState, modifier: Modifier = Modi
       state.entitySelectionEpoch,
       isTableExpanded,
       isDetailsExpanded,
+      state.isDataCollectionFormOpen,
     ) {
       val entity = selectedEntity ?: return@LaunchedEffect
       if (!entity.hasGeometry) return@LaunchedEffect
@@ -512,10 +514,10 @@ private fun DashboardMapArea(state: PrototypeAppState, modifier: Modifier = Modi
       state.recenterMapOnEntity(entity, targetScreenY)
 
       val rightPanel =
-        if (isDetailsExpanded) {
-          DashboardDetailsCardWidth + DashboardOverlayMargin * 2
-        } else {
-          DashboardOverlayMargin
+        when {
+          state.isDataCollectionFormOpen -> WebFormPanelWidth + DashboardOverlayMargin * 2
+          isDetailsExpanded -> DashboardDetailsCardWidth + DashboardOverlayMargin * 2
+          else -> DashboardOverlayMargin
         }
       val bounds = state.resolveEntityLngLatBounds(entity)
       mapCamera.run {
@@ -563,14 +565,31 @@ private fun DashboardMapArea(state: PrototypeAppState, modifier: Modifier = Modi
       state.mapLayers.firstOrNull { it.id == layerId }
     }
     val hasDetails = selectedEntity != null || selectedSubmission != null || layerSummary != null
+    val isFormOpen = state.isDataCollectionFormOpen
+    val cardMaxHeight =
+      (maxHeight - tablePanelHeight - DashboardOverlayMargin * 2).coerceAtLeast(160.dp)
     val cardModifier =
       Modifier.padding(DashboardOverlayMargin)
         .width(DashboardDetailsCardWidth)
-        .heightIn(
-          max = (maxHeight - tablePanelHeight - DashboardOverlayMargin * 2).coerceAtLeast(160.dp)
-        )
+        .heightIn(max = cardMaxHeight)
+    // An open form takes over the right-hand panel from the details card until it is submitted or
+    // closed; map clicks keep working underneath (they also pick the form's target feature).
     AnimatedVisibility(
-      visible = isDetailsExpanded && hasDetails,
+      visible = isFormOpen,
+      enter = expandHorizontally(expandFrom = Alignment.End) + fadeIn(),
+      exit = shrinkHorizontally(shrinkTowards = Alignment.End) + fadeOut(),
+      modifier = Modifier.align(Alignment.TopEnd),
+    ) {
+      WebDataCollectionCard(
+        state = state,
+        modifier =
+          Modifier.padding(DashboardOverlayMargin)
+            .width(WebFormPanelWidth)
+            .heightIn(max = cardMaxHeight),
+      )
+    }
+    AnimatedVisibility(
+      visible = !isFormOpen && isDetailsExpanded && hasDetails,
       enter = expandHorizontally(expandFrom = Alignment.End) + fadeIn(),
       exit = shrinkHorizontally(shrinkTowards = Alignment.End) + fadeOut(),
       modifier = Modifier.align(Alignment.TopEnd),
@@ -602,7 +621,7 @@ private fun DashboardMapArea(state: PrototypeAppState, modifier: Modifier = Modi
     }
 
     AnimatedVisibility(
-      visible = !isDetailsExpanded && hasDetails,
+      visible = !isFormOpen && !isDetailsExpanded && hasDetails,
       enter = fadeIn(),
       exit = fadeOut(),
       modifier = Modifier.align(Alignment.TopEnd),

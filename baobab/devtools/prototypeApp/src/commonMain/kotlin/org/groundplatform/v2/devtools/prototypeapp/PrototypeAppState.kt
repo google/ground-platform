@@ -33,6 +33,7 @@ import org.groundplatform.v2.devtools.prototypeapp.map.EntityGeometry
 import org.groundplatform.v2.devtools.prototypeapp.pdf.GeneratedPdf
 import org.groundplatform.v2.devtools.prototypeapp.pdf.RecordPdfReports
 import org.groundplatform.v2.devtools.prototypeapp.surveyeditor.SurveyEditorDraft
+import org.groundplatform.v2.devtools.prototypeapp.surveyeditor.withEditorFormAvailability
 import org.groundplatform.v2.devtools.prototypeapp.surveyeditor.withEditorLayerStyles
 import org.groundplatform.v2.devtools.prototypeapp.ui.state.PrototypeUiState
 import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.PrototypeAppViewModel
@@ -329,8 +330,20 @@ class PrototypeAppState(
   val submissionGeometries: List<SubmissionGeometryPolygon>
     get() = data.content.submissionGeometries
 
+  /**
+   * The survey's forms, with the availability (mobile, web, or both) chosen for the matching Form
+   * in the published Survey editor draft (if any).
+   */
   val forms: List<FormPreviewItem>
-    get() = data.content.forms
+    get() = data.content.forms.withEditorFormAvailability(data.content.editorDraft?.forms.orEmpty())
+
+  /** Forms collectors can start from the mobile app's entry points. */
+  val mobileForms: List<FormPreviewItem>
+    get() = forms.filter { it.availability.includesMobile }
+
+  /** Forms collectors can start from the web dashboard's entry points. */
+  val webForms: List<FormPreviewItem>
+    get() = forms.filter { it.availability.includesWeb }
 
   /** Map features in the active survey. Setting this writes them to the local data store. */
   var entities: List<GeospatialEntityItem>
@@ -1263,10 +1276,15 @@ class PrototypeAppState(
   val selectedSubmission: SubmissionPreviewItem?
     get() = selectedSubmissionId?.let { id -> allSubmissions.firstOrNull { it.id == id } }
 
-  /** Returns all forms in the active survey that request entities of [entity]'s dataset type. */
-  fun formsForEntity(entity: GeospatialEntityItem): List<FormPreviewItem> = forms.filter {
-    it.targetDatasetId == entity.datasetId
-  }
+  /**
+   * Returns the forms in the active survey that request entities of [entity]'s dataset type and are
+   * available on the asking platform: the web dashboard when [onWeb], otherwise the mobile app.
+   */
+  fun formsForEntity(
+    entity: GeospatialEntityItem,
+    onWeb: Boolean = false,
+  ): List<FormPreviewItem> =
+    (if (onWeb) webForms else mobileForms).filter { it.targetDatasetId == entity.datasetId }
 
   /**
    * Returns whether the organizer-defined action button for [form] is enabled on [entity]. Because

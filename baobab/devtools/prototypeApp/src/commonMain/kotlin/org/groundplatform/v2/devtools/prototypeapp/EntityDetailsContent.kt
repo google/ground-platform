@@ -605,9 +605,10 @@ internal fun EntityPropertiesPane(
   Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
     if (isWeb) {
       EntityStatusChip(entity = entity, compact = true)
+      EntityDataCollectionLaunchers(entity = entity, state = state, isWeb = true)
     } else {
       EntityActionsRow(entity = entity, state = state)
-      EntityDataCollectionLaunchers(entity = entity, state = state)
+      EntityDataCollectionLaunchers(entity = entity, state = state, isWeb = false)
     }
 
     DetailsSectionHeading("Details")
@@ -754,10 +755,19 @@ private fun EntityActionsRow(entity: GeospatialEntityItem, state: PrototypeAppSt
   }
 }
 
-/** Organizer-defined data collection buttons for this entity's dataset (mobile only). */
+/**
+ * Organizer-defined data collection buttons for this entity's dataset, limited to the forms the
+ * survey designer made available on the current platform. On mobile they open the
+ * one-question-per-screen runner over the map; on web they open the same form in the right-hand
+ * panel's compact layout ([WebDataCollectionCard]).
+ */
 @Composable
-private fun EntityDataCollectionLaunchers(entity: GeospatialEntityItem, state: PrototypeAppState) {
-  val entityForms = state.formsForEntity(entity)
+private fun EntityDataCollectionLaunchers(
+  entity: GeospatialEntityItem,
+  state: PrototypeAppState,
+  isWeb: Boolean,
+) {
+  val entityForms = state.formsForEntity(entity, onWeb = isWeb)
   if (entityForms.isEmpty()) return
   Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
     DetailsSectionHeading("Collect data")

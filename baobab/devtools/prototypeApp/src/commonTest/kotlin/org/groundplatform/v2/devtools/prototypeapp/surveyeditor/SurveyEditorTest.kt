@@ -23,6 +23,8 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import org.groundplatform.v2.devtools.prototypeapp.PrototypeWorkbenchPage
 import org.groundplatform.v2.devtools.prototypeapp.data.seed.SurveyEditorSamples
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.FormAvailability
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.FormPreviewItem
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.MapLayerItem
 import org.groundplatform.v2.devtools.prototypeapp.formeditor.EditorQuestionType
 import org.groundplatform.v2.devtools.prototypeapp.formeditor.FormIds
@@ -112,6 +114,39 @@ class SurveyEditorTest {
       }
 
     assertEquals(0xFF2E7D32, listOf(layer).withEditorLayerStyles(datasets).single().colorHex)
+  }
+
+  @Test
+  fun withEditorFormAvailability_appliesDesignerChoiceByFormId() {
+    fun runtimeForm(id: String) =
+      FormPreviewItem(
+        id = id,
+        title = id,
+        description = "",
+        version = "1",
+        targetDatasetId = "",
+        targetDatasetName = "",
+        questionCount = 0,
+        ctaLabel = id,
+      )
+    val forms = listOf(runtimeForm("shade_tree_visit"), runtimeForm("form-other"))
+    assertTrue(forms.all { it.availability == FormAvailability.BOTH })
+
+    val editorForms =
+      SurveyEditorSamples.draft().forms.map {
+        if (it.form.formId == "shade_tree_visit") {
+          it.copy(form = it.form.copy(availability = FormAvailability.WEB))
+        } else {
+          it
+        }
+      }
+    val overlaid = forms.withEditorFormAvailability(editorForms)
+
+    assertEquals(FormAvailability.WEB, overlaid[0].availability)
+    assertFalse(overlaid[0].availability.includesMobile)
+    assertTrue(overlaid[0].availability.includesWeb)
+    assertEquals(forms[1], overlaid[1])
+    assertEquals(forms, forms.withEditorFormAvailability(emptyList()))
   }
 
   @Test

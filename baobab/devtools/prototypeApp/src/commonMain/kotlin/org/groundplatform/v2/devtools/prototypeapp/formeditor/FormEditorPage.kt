@@ -196,7 +196,10 @@ fun FormEditorPage(
         modifier = Modifier.fillMaxSize().padding(16.dp),
         horizontalArrangement = Arrangement.spacedBy(16.dp),
       ) {
-        FlowCanvasPanel(state, Modifier.weight(1f).fillMaxHeight())
+        when (state.previewTarget) {
+          FormPreviewTarget.MOBILE -> FlowCanvasPanel(state, Modifier.weight(1f).fillMaxHeight())
+          FormPreviewTarget.WEB -> WebLayoutCanvasPanel(state, Modifier.weight(1f).fillMaxHeight())
+        }
         QuestionPropertiesPanel(
           state = state,
           onSaveToModeChange = onSaveToModeChange ?: state::setSaveToMode,
@@ -254,6 +257,7 @@ private fun FormEditorToolbar(
         Spacer(Modifier.width(6.dp))
         Text("Form settings")
       }
+      PreviewTargetToggle(state)
       Spacer(Modifier.weight(1f))
       if (onCreateDataset != null) {
         OutlinedButton(onClick = onCreateDataset) {
@@ -447,7 +451,10 @@ private fun FlowCanvasPanel(state: FormEditorState, modifier: Modifier = Modifie
         FlowLegend()
       }
       HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-      FlowCanvas(state, edges, horizontalScroll, Modifier.weight(1f).fillMaxWidth())
+      PlatformDisabledBanner(state)
+      UnavailablePreviewArea(state, Modifier.weight(1f).fillMaxWidth()) {
+        FlowCanvas(state, edges, horizontalScroll, Modifier.fillMaxSize())
+      }
       FlowHorizontalScrollBar(
         scrollState = horizontalScroll,
         modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
@@ -2026,7 +2033,9 @@ private fun FormPreviewOverlay(state: FormEditorState, isDarkTheme: Boolean) {
       horizontalArrangement = Arrangement.spacedBy(24.dp, Alignment.CenterHorizontally),
       verticalAlignment = Alignment.Top,
     ) {
-      if (controller != null) {
+      if (controller != null && state.previewTarget == FormPreviewTarget.WEB) {
+        WebPreviewBrowserFrame(state = state, controller = controller)
+      } else if (controller != null) {
         MobileDevicePreviewFrame(
           deviceTitle = "Preview • ${state.form.title}",
           isDarkTheme = isDarkTheme,
@@ -2085,7 +2094,11 @@ private fun PreviewSidePanel(state: FormEditorState) {
       if (controller != null) {
         Text(
           text =
-            "Screens update live as you answer: conditional questions appear or disappear based on display logic.",
+            if (state.previewTarget == FormPreviewTarget.WEB) {
+              "Questions update live as you answer: conditional cards appear or disappear based on display logic."
+            } else {
+              "Screens update live as you answer: conditional questions appear or disappear based on display logic."
+            },
           style = MaterialTheme.typography.bodySmall,
           color = colors.onSurfaceVariant,
         )
