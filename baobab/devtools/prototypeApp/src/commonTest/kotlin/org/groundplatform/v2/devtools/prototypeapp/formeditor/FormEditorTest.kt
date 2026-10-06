@@ -594,4 +594,124 @@ class FormEditorTest {
       }
     assertEquals("Renamed question", card.step.title)
   }
+
+  private fun geometryQuestion(
+    key: String,
+    type: EditorQuestionType,
+    capture: GeometryCapture = GeometryCapture.GPS_ONLY,
+  ) = EditorQuestion(key = key, name = key, type = type, label = "Where is it?", capture = capture)
+
+  @Test
+  fun geometry_lineAndPolygonBindToGeotraceAndGeoshape() {
+    val form =
+      EditorForm(
+        "f",
+        "F",
+        listOf(
+          geometryQuestion("pt", EditorQuestionType.LOCATION),
+          geometryQuestion("ln", EditorQuestionType.LINE),
+          geometryQuestion("pg", EditorQuestionType.POLYGON),
+        ),
+      )
+    val xml = EditorXFormsGenerator.toXml(form)
+    assertTrue("""nodeset="/data/pt" type="geopoint"""" in xml)
+    assertTrue("""nodeset="/data/ln" type="geotrace"""" in xml)
+    assertTrue("""nodeset="/data/pg" type="geoshape"""" in xml)
+    // GPS only is the default and adds no appearance, so existing output is unchanged.
+    assertFalse("placement-map" in xml)
+    assertTrue(
+      EditorQuestionType.entries.filter { it.isGeometry }.all { it.bindType.startsWith("geo") }
+    )
+    assertTrue(form.hasGeometry)
+    assertEquals("pt", form.primaryGeometryQuestion?.key)
+    // The generated XForms load in the form engine.
+    XFormsXmlSerializer.deserializeFormDef(xml)
+  }
+
+  @Test
+  fun geometry_isGeometryDrivesHasGeometryAndRelevanceOperators() {
+    val lineOnly =
+      EditorForm("f", "F", listOf(q("a"), geometryQuestion("ln", EditorQuestionType.LINE)))
+    assertTrue(lineOnly.hasGeometry)
+    assertEquals("ln", lineOnly.primaryGeometryQuestion?.key)
+    assertFalse(EditorForm("f", "F", listOf(q("a"))).hasGeometry)
+    EditorQuestionType.entries
+      .filter { it.isGeometry }
+      .forEach {
+        assertEquals(listOf(RelevanceOperator.IS_ANSWERED), RelevanceOperator.availableFor(it))
+      }
+  }
+
+  @Test
+  fun geometry_gpsOrMapCaptureEmitsPlacementMapAppearance() {
+    val form =
+      EditorForm(
+        "f",
+        "F",
+        listOf(
+          geometryQuestion("pt", EditorQuestionType.LOCATION, GeometryCapture.GPS_OR_MAP),
+          geometryQuestion("pg", EditorQuestionType.POLYGON, GeometryCapture.GPS_OR_MAP),
+        ),
+      )
+    val xml = EditorXFormsGenerator.toXml(form)
+    assertTrue("""<input ref="/data/pt" appearance="placement-map">""" in xml)
+    assertTrue("""<input ref="/data/pg" appearance="placement-map">""" in xml)
+    XFormsXmlSerializer.deserializeFormDef(xml)
+    // Capture is ignored for non-geometry types.
+    val text = q("a").copy(capture = GeometryCapture.GPS_OR_MAP)
+    assertFalse("placement-map" in EditorXFormsGenerator.toXml(EditorForm("f", "F", listOf(text))))
+    assertNull(EditorXFormsGenerator.bodyAppearance(text))
+  }
+
+  @Test
+  fun geometry_gpsOnlyIsAnErrorOnlyWhenAvailableOnWeb() {
+    val mobileOnly =
+      EditorForm("f", "F", listOf(q("a"), geometryQuestion("pt", EditorQuestionType.LOCATION)))
+    assertTrue(mobileOnly.webIncompatibleGeometryQuestions().isEmpty())
+    assertTrue(FormEditorValidator.validate(mobileOnly).isEmpty())
+
+    val onWeb = mobileOnly.copy(availability = FormAvailability.BOTH)
+    assertEquals(listOf("pt"), onWeb.webIncompatibleGeometryQuestions().map { it.key })
+    val issue = FormEditorValidator.validate(onWeb).single()
+    assertEquals("pt", issue.questionKey)
+    assertTrue("GPS only" in issue.message && "Where is it?" in issue.message, issue.message)
+
+    // GPS or draw on map is fine on web.
+    val drawable =
+      onWeb.copy(questions = onWeb.questions.map { it.copy(capture = GeometryCapture.GPS_OR_MAP) })
+    assertTrue(FormEditorValidator.validate(drawable).isEmpty())
+  }
+
+  @Test
+  fun state_makeGeometryQuestionsWebCompatibleClearsTheError() {
+    val state = FormEditorState(FormEditorSamples.shadeTreeVisit())
+    val geometryKey = assertNotNull(state.form.primaryGeometryQuestion).key
+    assertTrue(state.issues.isEmpty())
+
+    state.updateAvailability(state.form.availability.withWeb(true))
+    assertEquals(listOf(geometryKey), state.webIncompatibleGeometryQuestions.map { it.key })
+    assertEquals(1, state.issuesFor(geometryKey).size)
+
+    state.makeGeometryQuestionsWebCompatible()
+    assertTrue(state.webIncompatibleGeometryQuestions.isEmpty())
+    assertTrue(state.issues.isEmpty())
+    assertEquals(GeometryCapture.GPS_OR_MAP, state.form.find(geometryKey)?.capture)
+    assertTrue("placement-map" in state.xformsXml)
+
+    // updateCapture round-trips and the error returns while web stays on.
+    state.updateCapture(geometryKey, GeometryCapture.GPS_ONLY)
+    assertEquals(1, state.issuesFor(geometryKey).size)
+    state.updateAvailability(state.form.availability.withWeb(false))
+    assertTrue(state.issues.isEmpty())
+  }
+
+  @Test
+  fun state_changeTypeBetweenGeometryTypesKeepsGeometryMapping() {
+    val state = FormEditorState(FormEditorSamples.shadeTreeVisit())
+    val key = assertNotNull(state.form.primaryGeometryQuestion).key
+    state.changeType(key, EditorQuestionType.POLYGON)
+    assertEquals(EditorQuestionType.POLYGON, state.form.find(key)?.type)
+    assertEquals(key, state.form.primaryGeometryQuestion?.key)
+    assertTrue("geoshape" in state.xformsXml)
+  }
 }

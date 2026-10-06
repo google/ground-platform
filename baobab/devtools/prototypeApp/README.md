@@ -131,7 +131,17 @@ prototype, so selections and survey changes carry over.
     the toolbar that needs a target feature first shows a picker: click a
     matching feature on the map, in the left-hand list, or in the picker's own
     searchable list; the questions then appear and the target step is left out
-    of the stack.
+    of the stack. There is no field GPS in a browser, so every geometry question
+    (`geopoint`, `geotrace`, `geoshape`, "GPS only" or not) is answered by
+    drawing on the main map (`WebMapDrawing.kt`): **Draw on map** in the
+    question's card routes map clicks to it (`PrototypeAppState.webMapDrawing`,
+    the `CompactMapDrawingHost`), a floating chip at the top of the map shows
+    the progress (`2 of at least 3`) with **Undo**, **Done**, and **Cancel
+    drawing**, and the in-progress vertices, line, or polygon are drawn above
+    the map features in the draft style (`SurveyMapContent.draftGeometry`).
+    One click places a point; lines and polygons collect vertices until
+    **Done**. While drawing, clicks on features add vertices instead of
+    selecting them.
 -   **Data tables**: A collapsible panel docks to the bottom of the map with
     one tab per entity dataset (map layers and data tables), with the selected
     record highlighted. The first column is a compact status chip. It never
@@ -209,6 +219,22 @@ Selecting a Form opens the visual Form editor in `formeditor/`
     Form has.
 -   **Properties panel**: Edits the selected question's type, label, hint,
     name, required flag, choices, and display logic (`relevant`).
+-   **Geometry questions**: **Point**, **Line**, and **Polygon** question types
+    (`EditorQuestionType.isGeometry`) bind to XForms `geopoint`, `geotrace`,
+    and `geoshape`. The first geometry question becomes a new map feature's
+    geometry, and its type sets the linked Map layer's point / line / polygon
+    kind. Each geometry question has a **Capture** setting
+    (`GeometryCapture`): **GPS only** (the default; no body `appearance`, so
+    the shared form runner locks the answer to the device's GPS fix or walk)
+    or **GPS or draw on map** (`appearance="placement-map"`, letting
+    collectors place or draw the geometry on the map as well). The web
+    dashboard can only draw on the map, so a Form that is **Available on web**
+    with a GPS-only geometry question is invalid: the validator emits a
+    per-question error, the question's Capture field and the **Available on
+    web** row in Form settings explain it, and the web canvas shows an error
+    banner. **Fix all** (`makeGeometryQuestionsWebCompatible`) switches every
+    GPS-only question to **GPS or draw on map**. Like other issues, this blocks
+    publishing until it's resolved.
 -   **Add / delete / duplicate / reorder**: Use **Add question**, which inserts
     after the selected screen, plus the actions in the panel. Drag a screen
     card along the canvas to reorder it: other screens slide aside to show
@@ -220,7 +246,9 @@ Selecting a Form opens the visual Form editor in `formeditor/`
     canvas between the mobile flow above and the **Web** layout
     (`FormWebPreview.kt`): the Form as collectors see it in the web dashboard's
     right-hand panel, i.e. a read-only stack of the compact question cards,
-    rebuilt from the generated XForms on every edit. Clicking a card selects
+    rebuilt from the generated XForms on every edit. Geometry questions render
+    as the dashboard's "draw on the map" request cards
+    (`CompactGeometryInput.MapDrawing`). Clicking a card selects
     that question in the properties panel (the selected card is outlined);
     clicking the empty canvas selects the Form.
 -   **Preview flow**: Runs the generated Form in a device frame with the shared
@@ -250,7 +278,7 @@ Selecting a Form opens the visual Form editor in `formeditor/`
     collapsed (or open when customized or invalid). Expanding or collapsing one
     does the same to all of them for the rest of the session.
 -   **Save-to logic**: By default each submission adds a new map feature (if
-    the Form has a Location question) or table row to the Form's linked Map
+    the Form has a Point, Line, or Polygon question) or table row to the Form's linked Map
     layer or Data table. Choose **Update existing map feature / table row** to
     pick another Map layer or Data table, how the feature is found (the feature
     the Form was opened from, via `/data/target_entity`, or a question's answer

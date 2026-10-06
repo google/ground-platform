@@ -29,6 +29,7 @@ import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.OpenInNew
+import androidx.compose.material.icons.outlined.ErrorOutline
 import androidx.compose.material.icons.outlined.KeyboardArrowDown
 import androidx.compose.material.icons.outlined.KeyboardArrowUp
 import androidx.compose.material.icons.outlined.Layers
@@ -48,6 +49,7 @@ import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -164,7 +166,8 @@ internal fun FormProperties(
 
 /**
  * Two switches, one per platform, for where collectors can open the Form. Each row's caption spells
- * out the current effect; a warning appears when both are off.
+ * out the current effect; a warning appears when both are off, and an error with a **Fix all**
+ * action when the Form is on for web but has GPS-only geometry questions web can't capture.
  */
 @Composable
 private fun AvailabilityToggles(state: FormEditorState) {
@@ -185,6 +188,14 @@ private fun AvailabilityToggles(state: FormEditorState) {
       checked = availability.includesWeb,
       onCheckedChange = { state.updateAvailability(availability.withWeb(it)) },
     )
+    val incompatible = state.webIncompatibleGeometryQuestions
+    if (incompatible.isNotEmpty()) {
+      WebIncompatibleGeometryRow(
+        count = incompatible.size,
+        onFixAll = state::makeGeometryQuestionsWebCompatible,
+        modifier = Modifier.padding(start = 14.dp, end = 6.dp, bottom = 6.dp),
+      )
+    }
   }
   if (availability == FormAvailability.NONE) {
     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -202,6 +213,45 @@ private fun AvailabilityToggles(state: FormEditorState) {
       )
     }
   }
+}
+
+/**
+ * Error line under **Available on web** when [count] geometry questions are GPS only, which the web
+ * dashboard can't capture. **Fix all** switches them to [GeometryCapture.GPS_OR_MAP].
+ */
+@Composable
+internal fun WebIncompatibleGeometryRow(
+  count: Int,
+  onFixAll: () -> Unit,
+  modifier: Modifier = Modifier,
+) {
+  val colors = MaterialTheme.colorScheme
+  Row(
+    modifier = modifier.fillMaxWidth(),
+    horizontalArrangement = Arrangement.spacedBy(6.dp),
+    verticalAlignment = Alignment.CenterVertically,
+  ) {
+    Icon(
+      Icons.Outlined.ErrorOutline,
+      contentDescription = null,
+      tint = colors.error,
+      modifier = Modifier.size(16.dp),
+    )
+    Text(
+      text = webIncompatibleSummary(count),
+      style = MaterialTheme.typography.bodySmall,
+      color = colors.error,
+      modifier = Modifier.weight(1f),
+    )
+    TextButton(onClick = onFixAll) { Text("Fix all") }
+  }
+}
+
+/** Plain-language summary of [count] GPS-only geometry questions in a web-enabled Form. */
+internal fun webIncompatibleSummary(count: Int): String {
+  val subject = if (count == 1) "1 geometry question is" else "$count geometry questions are"
+  return "$subject GPS only and can't be answered on web. " +
+    "Switch them to \"${GeometryCapture.GPS_OR_MAP.label}\"."
 }
 
 /** One platform's row in [AvailabilityToggles]: icon, title, effect caption, and switch. */

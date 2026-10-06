@@ -18,7 +18,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -55,9 +54,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import org.groundplatform.v2.core.forms.model.FinalizationResult
 import org.groundplatform.v2.core.forms.ui.CompactFormRunner
+import org.groundplatform.v2.core.forms.ui.CompactGeometryInput
 import org.groundplatform.v2.core.forms.ui.GroundBadgeTone
 import org.groundplatform.v2.core.forms.ui.GroundTonalBadge
-import org.groundplatform.v2.core.forms.ui.LocalGeoPointMapViewport
 import org.groundplatform.v2.core.forms.ui.LocalMediaCaptureHandler
 
 /**
@@ -72,6 +71,9 @@ import org.groundplatform.v2.core.forms.ui.LocalMediaCaptureHandler
  *   the picker's list fills the form's `entityref` and reveals the questions. That step is then
  *   left out of the stack.
  * - Forms opened from a map feature's card (**Collect data** buttons) go straight to the questions.
+ * - Geometry questions (`geopoint`, `geotrace`, `geoshape`) are drawn on the main map through
+ *   [PrototypeAppState.webMapDrawing] instead of captured from a device GPS: **Draw on map** routes
+ *   map clicks to the question until the point is placed or the collector clicks **Done**.
  *
  * Submitting runs the same [PrototypeAppState.completeActiveFormSubmission] as mobile, which adds
  * the submission to the feature's history and closes the panel.
@@ -126,17 +128,7 @@ internal fun WebDataCollectionCard(state: PrototypeAppState, modifier: Modifier 
         WebEntityRefPicker(state = state, form = form)
       } else {
         val mediaCaptureHandler = remember { PrototypeMediaCaptureHandler() }
-        CompositionLocalProvider(
-          LocalGeoPointMapViewport provides
-            { viewportState ->
-              GeoPointFormMap(
-                state = state,
-                viewportState = viewportState,
-                modifier = Modifier.fillMaxSize(),
-              )
-            },
-          LocalMediaCaptureHandler provides mediaCaptureHandler,
-        ) {
+        CompositionLocalProvider(LocalMediaCaptureHandler provides mediaCaptureHandler) {
           CompactFormRunner(
             controller = controller,
             onCancel = { state.closeActiveFormRunner() },
@@ -145,6 +137,8 @@ internal fun WebDataCollectionCard(state: PrototypeAppState, modifier: Modifier 
             },
             // The target feature is picked on the map or in the lists, not in a card.
             questionFilter = { step -> !isWizardStepEntityRef(step) },
+            // No field GPS in a browser: every geometry question is drawn on the main map.
+            geometryInput = CompactGeometryInput.MapDrawing(host = state.webMapDrawing),
           )
         }
       }

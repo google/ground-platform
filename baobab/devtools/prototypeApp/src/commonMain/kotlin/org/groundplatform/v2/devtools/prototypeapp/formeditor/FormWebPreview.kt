@@ -33,6 +33,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Computer
+import androidx.compose.material.icons.outlined.ErrorOutline
 import androidx.compose.material.icons.outlined.Smartphone
 import androidx.compose.material.icons.outlined.VisibilityOff
 import androidx.compose.material3.CardDefaults
@@ -53,17 +54,26 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import org.groundplatform.v2.core.forms.ui.CompactFormRunner
+import org.groundplatform.v2.core.forms.ui.CompactGeometryInput
 import org.groundplatform.v2.core.forms.ui.FormWizardController
 import org.groundplatform.v2.core.forms.ui.GroundBadgeTone
 import org.groundplatform.v2.core.forms.ui.GroundTonalBadge
 import org.groundplatform.v2.devtools.prototypeapp.WebFormPanelChrome
 import org.groundplatform.v2.devtools.prototypeapp.WebFormPanelWidth
+
+/**
+ * Geometry input of the editor's web canvas and web preview: like the dashboard, geometry questions
+ * are answered by drawing on the map, so they render as "draw on the map" request cards. The editor
+ * has no map to draw on, hence no host.
+ */
+private val WebPreviewGeometryInput: CompactGeometryInput = CompactGeometryInput.MapDrawing()
 
 /** Icon of each [FormPreviewTarget] in the editor's toggle. */
 internal fun previewTargetIcon(target: FormPreviewTarget): ImageVector =
@@ -111,36 +121,80 @@ internal fun PlatformDisabledBanner(state: FormEditorState, modifier: Modifier =
   if (state.isEnabledOnPreviewTarget) return
   val target = state.previewTarget
   val colors = MaterialTheme.colorScheme
-  Surface(modifier = modifier.fillMaxWidth(), color = colors.tertiaryContainer) {
+  CanvasBanner(
+    icon = Icons.Outlined.VisibilityOff,
+    title = "Not available on ${target.label.lowercase()}",
+    body =
+      "Collectors won't find this form in ${target.sentenceName()}. Enable it to offer it " +
+        "there (also in Form settings).",
+    actionLabel = "Enable",
+    onAction = state::enableOnPreviewTarget,
+    containerColor = colors.tertiaryContainer,
+    contentColor = colors.onTertiaryContainer,
+    modifier = modifier,
+  )
+}
+
+/**
+ * Error banner shown above the web canvas when the Form is on for web but has GPS-only geometry
+ * questions, which the web dashboard can't capture. **Fix all** switches them to
+ * [GeometryCapture.GPS_OR_MAP]. Only shown while the Form is enabled on web, after
+ * [PlatformDisabledBanner]'s check.
+ */
+@Composable
+internal fun WebIncompatibleGeometryBanner(state: FormEditorState, modifier: Modifier = Modifier) {
+  if (state.previewTarget != FormPreviewTarget.WEB || !state.isEnabledOnPreviewTarget) return
+  val incompatible = state.webIncompatibleGeometryQuestions
+  if (incompatible.isEmpty()) return
+  val colors = MaterialTheme.colorScheme
+  CanvasBanner(
+    icon = Icons.Outlined.ErrorOutline,
+    title = "Can't be used on web yet",
+    body =
+      "This form can't be used on web until its GPS-only questions allow drawing on the map. " +
+        webIncompatibleSummary(incompatible.size),
+    actionLabel = "Fix all",
+    onAction = state::makeGeometryQuestionsWebCompatible,
+    containerColor = colors.errorContainer,
+    contentColor = colors.onErrorContainer,
+    modifier = modifier,
+  )
+}
+
+/** Full-width notice above a canvas preview: icon, title, body, and one text action. */
+@Composable
+private fun CanvasBanner(
+  icon: ImageVector,
+  title: String,
+  body: String,
+  actionLabel: String,
+  onAction: () -> Unit,
+  containerColor: Color,
+  contentColor: Color,
+  modifier: Modifier = Modifier,
+) {
+  Surface(modifier = modifier.fillMaxWidth(), color = containerColor) {
     Row(
       modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
       horizontalArrangement = Arrangement.spacedBy(10.dp),
       verticalAlignment = Alignment.CenterVertically,
     ) {
       Icon(
-        imageVector = Icons.Outlined.VisibilityOff,
+        imageVector = icon,
         contentDescription = null,
-        tint = colors.onTertiaryContainer,
+        tint = contentColor,
         modifier = Modifier.size(18.dp),
       )
       Column(modifier = Modifier.weight(1f)) {
         Text(
-          text = "Not available on ${target.label.lowercase()}",
+          text = title,
           style = MaterialTheme.typography.labelLarge,
           fontWeight = FontWeight.SemiBold,
-          color = colors.onTertiaryContainer,
+          color = contentColor,
         )
-        Text(
-          text =
-            "Collectors won't find this form in ${target.sentenceName()}. Enable it to offer it " +
-              "there (also in Form settings).",
-          style = MaterialTheme.typography.bodySmall,
-          color = colors.onTertiaryContainer,
-        )
+        Text(text = body, style = MaterialTheme.typography.bodySmall, color = contentColor)
       }
-      TextButton(onClick = state::enableOnPreviewTarget) {
-        Text("Enable", color = colors.onTertiaryContainer)
-      }
+      TextButton(onClick = onAction) { Text(actionLabel, color = contentColor) }
     }
   }
 }
@@ -220,6 +274,7 @@ internal fun WebLayoutCanvasPanel(state: FormEditorState, modifier: Modifier = M
       }
       HorizontalDivider(color = colors.outlineVariant)
       PlatformDisabledBanner(state)
+      WebIncompatibleGeometryBanner(state)
       UnavailablePreviewArea(state, Modifier.weight(1f).fillMaxWidth()) {
         Box(
           modifier =
@@ -247,6 +302,7 @@ internal fun WebLayoutCanvasPanel(state: FormEditorState, modifier: Modifier = M
                     readOnly = true,
                     selectedPath = state.selectedKey?.let(state::pathOf),
                     onSelectQuestion = { path -> state.keyForPath(path)?.let(state::select) },
+                    geometryInput = WebPreviewGeometryInput,
                   )
                 }
               } else {
@@ -348,6 +404,7 @@ internal fun WebPreviewBrowserFrame(
                   controller = controller,
                   onCancel = state::closePreview,
                   onSubmitted = { state.markPreviewSubmitted() },
+                  geometryInput = WebPreviewGeometryInput,
                 )
               }
             }

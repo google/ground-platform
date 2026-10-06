@@ -67,7 +67,16 @@ and **Web (`js`, `wasmJs`)**.
     `readOnly` mode renders the inputs without reacting and keeps all cards
     expanded, for form designers' previews. Expansion, skip marks and the
     auto-collapse bookkeeping live in a `CompactFormLayoutState`, beside the
-    form data.
+    form data. Geometry questions (`geopoint`, `geotrace`, `geoshape`) take
+    their input through `CompactGeometryInput`: `Device` keeps the mobile GPS
+    widgets, while `MapDrawing` renders a "draw on the map" request
+    ([`CompactMapDrawing.kt`](src/commonMain/kotlin/org/groundplatform/v2/core/forms/ui/CompactMapDrawing.kt))
+    with **Draw on map** / **Done** / **Undo** / **Clear** actions; the host
+    implements `CompactMapDrawingHost` to route its map clicks into the
+    question with `addMapDrawingVertex` (a point is placed by one click, lines
+    and polygons collect vertices until **Done**). The web dashboard uses this
+    for every geometry question, "GPS only" or not, since a browser has no
+    field GPS; a `null` host renders the request inert for read-only previews.
 
 See the detailed package design and API reference in
 [`src/commonMain/kotlin/org/groundplatform/v2/core/forms/ui/README.md`](src/commonMain/kotlin/org/groundplatform/v2/core/forms/ui/README.md).

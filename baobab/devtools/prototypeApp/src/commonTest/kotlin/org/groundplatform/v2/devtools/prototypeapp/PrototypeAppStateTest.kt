@@ -17,11 +17,16 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import org.groundplatform.v2.core.forms.ui.MapDrawingKind
+import org.groundplatform.v2.core.forms.ui.mapDrawingVertices
+import org.groundplatform.v2.core.forms.ui.setMapDrawingVertices
 import org.groundplatform.v2.devtools.prototypeapp.map.SurveyMap
 import org.groundplatform.v2.devtools.prototypeapp.map.SurveyMapContent
 import org.groundplatform.v2.devtools.prototypeapp.map.SurveyMapIds
 import org.groundplatform.v2.devtools.prototypeapp.map.SurveyMarker
+import org.groundplatform.v2.map.LatLng
 import org.groundplatform.v2.map.LngLatBounds
 
 class PrototypeAppStateTest {
@@ -2201,4 +2206,116 @@ class PrototypeAppStateTest {
 
   private fun SurveyMap.overlayIds() =
     content.sources.first { it.id == SurveyMapContent.OVERLAY_SOURCE }.features.map { it.id }
+
+  @Test
+  fun webMapDrawing_pointIsPlacedByOneClick_andDrawingStopsWithTheForm() {
+    val state = PrototypeAppState(initialScreen = PrototypeScreen.MAIN_SURVEY)
+    val host = state.webMapDrawing
+    assertFalse(host.isDrawing)
+
+    // Clicks do nothing until a question asks to be drawn.
+    state.addWebMapDrawingVertex(LatLng(-1.29, 36.82))
+    assertNull(state.webMapDraftGeometry)
+
+    state.launchFormForEntity(entityId = "entity-shade-201", formId = "form-shade-canopy-audit")
+    val controller = assertNotNull(state.activeFormWizardController)
+    val path = "/data/plot_center_gps"
+    assertTrue(controller.formState.fieldStates.containsKey(path))
+
+    host.startDrawing(path, MapDrawingKind.POINT)
+    assertTrue(host.isDrawing)
+    assertEquals(path, host.activeDrawingPath)
+    assertEquals(MapDrawingKind.POINT, host.activeDrawingKind)
+    assertEquals(MapDrawingKind.POINT, state.webMapDraftGeometry?.kind)
+
+    state.addWebMapDrawingVertex(LatLng(-1.29, 36.82))
+    val placed =
+      mapDrawingVertices(controller.formState.fieldStates.getValue(path), MapDrawingKind.POINT)
+    assertEquals(1, placed.size)
+    assertEquals(-1.29, placed.single().latitude)
+    assertEquals(36.82, placed.single().longitude)
+    // One click places a point and ends the drawing.
+    assertFalse(host.isDrawing)
+    assertNull(state.webMapDraftGeometry)
+
+    // Closing the form while a line is being drawn cancels the drawing.
+    host.startDrawing("/data/riparian_transect", MapDrawingKind.LINE)
+    assertTrue(host.isDrawing)
+    state.closeActiveFormRunner()
+    assertFalse(host.isDrawing)
+    assertNull(state.webMapDraftGeometry)
+  }
+
+  @Test
+  fun webMapDrawing_polygonCollectsVertices_rendersDraftOverlay_andRoutesAroundSelection() {
+    val state = PrototypeAppState(initialScreen = PrototypeScreen.MAIN_SURVEY)
+    state.launchFormForEntity(entityId = "entity-shade-201", formId = "form-shade-canopy-audit")
+    val controller = assertNotNull(state.activeFormWizardController)
+    val path = "/data/plot_boundary"
+    val host = state.webMapDrawing
+    val before =
+      mapDrawingVertices(controller.formState.fieldStates.getValue(path), MapDrawingKind.POLYGON)
+
+    // Redrawing starts from the stored answer; Clear in the widget empties it first.
+    host.startDrawing(path, MapDrawingKind.POLYGON)
+    controller.setMapDrawingVertices(path, MapDrawingKind.POLYGON, emptyList())
+    assertEquals(0, state.webMapDraftGeometry?.vertices?.size)
+
+    state.addWebMapDrawingVertex(LatLng(0.0, 0.0))
+    state.addWebMapDrawingVertex(LatLng(0.0, 1.0))
+    assertTrue(host.isDrawing)
+    val twoVertices = assertNotNull(state.webMapDraftGeometry)
+    assertEquals(2, twoVertices.vertices.size)
+    assertFalse(twoVertices.isComplete)
+    // Two vertices draw as a line, not a polygon.
+    val lineOverlay = SurveyMapContent.main(state, showNavigation = false).overlayIds()
+    assertTrue(SurveyMapContent.DRAFT_SHAPE_ID in lineOverlay)
+    assertEquals(
+      SurveyMapContent.KIND_DRAFT_LINE,
+      SurveyMapContent.draftFeatures(twoVertices)
+        .first { it.id == SurveyMapContent.DRAFT_SHAPE_ID }
+        .properties[SurveyMapContent.PROP_KIND],
+    )
+
+    state.addWebMapDrawingVertex(LatLng(1.0, 1.0))
+    val threeVertices = assertNotNull(state.webMapDraftGeometry)
+    assertTrue(threeVertices.isComplete)
+    val draft = SurveyMapContent.draftFeatures(threeVertices)
+    assertEquals(
+      SurveyMapContent.KIND_DRAFT_POLYGON,
+      draft
+        .first { it.id == SurveyMapContent.DRAFT_SHAPE_ID }
+        .properties[SurveyMapContent.PROP_KIND],
+    )
+    assertEquals(
+      3,
+      draft.count {
+        it.properties[SurveyMapContent.PROP_KIND] == SurveyMapContent.KIND_DRAFT_VERTEX
+      },
+    )
+    val overlayIds = SurveyMapContent.main(state, showNavigation = false).overlayIds()
+    assertTrue(SurveyMapContent.draftVertexId(2) in overlayIds)
+
+    host.undoVertex()
+    assertEquals(2, state.webMapDraftGeometry?.vertices?.size)
+
+    // Cancelling puts the question back the way it was before drawing started.
+    host.cancelDrawing()
+    assertFalse(host.isDrawing)
+    assertEquals(
+      before,
+      mapDrawingVertices(controller.formState.fieldStates.getValue(path), MapDrawingKind.POLYGON),
+    )
+
+    // Done keeps what was drawn.
+    host.startDrawing(path, MapDrawingKind.POLYGON)
+    state.addWebMapDrawingVertex(LatLng(5.0, 5.0))
+    host.stopDrawing()
+    assertFalse(host.isDrawing)
+    assertEquals(
+      before.size + 1,
+      mapDrawingVertices(controller.formState.fieldStates.getValue(path), MapDrawingKind.POLYGON)
+        .size,
+    )
+  }
 }

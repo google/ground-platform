@@ -304,6 +304,10 @@ fun compactFormProgress(
  *   highlights that card.
  * - [questionFilter] drops questions the host answers elsewhere (e.g. the web dashboard fills the
  *   target map feature from a map click rather than a card).
+ * - [geometryInput] chooses how `geopoint` / `geotrace` / `geoshape` questions are answered: the
+ *   device GPS widgets, or a request to draw on the host's map ([CompactGeometryInput.MapDrawing],
+ *   what the web dashboard uses). A card whose geometry is being drawn doesn't auto-collapse until
+ *   the collector finishes drawing.
  */
 @Composable
 fun CompactFormRunner(
@@ -320,8 +324,10 @@ fun CompactFormRunner(
   onSubmitted: ((FinalizationResult.Success) -> Unit)? = null,
   contentPadding: PaddingValues = PaddingValues(0.dp),
   questionFilter: (FormWizardStep.QuestionStep) -> Boolean = { true },
+  geometryInput: CompactGeometryInput = CompactGeometryInput.Device,
 ) {
   val state = controller.formState
+  val drawingHost = (geometryInput as? CompactGeometryInput.MapDrawing)?.host
   val items =
     buildCompactFormItems(controller.steps).filter {
       it !is CompactFormItem.Question || questionFilter(it.step)
@@ -364,10 +370,12 @@ fun CompactFormRunner(
           key(path) {
             // Whether an input inside the card has keyboard focus. Status changes are reported to
             // the layout state only while the card is not being edited, so a text answer
-            // auto-collapses once the collector moves on rather than at the first keystroke.
+            // auto-collapses once the collector moves on rather than at the first keystroke. A
+            // geometry being drawn on the host's map counts as being edited too.
             var hasFocus by remember { mutableStateOf(false) }
-            LaunchedEffect(status, hasFocus) {
-              if (!hasFocus) layoutState.onStatusChanged(path, status)
+            val isDrawing = drawingHost?.activeDrawingPath == path
+            LaunchedEffect(status, hasFocus, isDrawing) {
+              if (!hasFocus && !isDrawing) layoutState.onStatusChanged(path, status)
             }
             CompactQuestionCard(
               step = item.step,
@@ -390,6 +398,7 @@ fun CompactFormRunner(
               readOnly = readOnly,
               isSelected = selectedPath == path,
               showValidationErrors = submitAttempted,
+              geometryInput = geometryInput,
             )
           }
         }
@@ -525,11 +534,16 @@ fun CompactQuestionCard(
   readOnly: Boolean = false,
   isSelected: Boolean = false,
   showValidationErrors: Boolean = false,
+  geometryInput: CompactGeometryInput = CompactGeometryInput.Device,
 ) {
   val colors = MaterialTheme.colorScheme
   val control = step.control
   val fieldState = control.fieldState
   val hintText = control.hint?.text?.takeIf { it.isNotBlank() }
+  val mapDrawing =
+    (geometryInput as? CompactGeometryInput.MapDrawing)?.takeIf {
+      !fieldState.isReadOnly && mapDrawingKindOf(fieldState.dataType) != null
+    }
   val borderColor =
     when {
       isSelected -> colors.primary
@@ -615,10 +629,16 @@ fun CompactQuestionCard(
               color = colors.onSurfaceVariant,
             )
           }
-          if (readOnly) {
-            ReadOnlyInputs { ControlWidget(control = control, controller = controller) }
-          } else {
-            ControlWidget(control = control, controller = controller)
+          when {
+            mapDrawing != null ->
+              MapDrawingRequestWidget(
+                control = control,
+                controller = controller,
+                host = mapDrawing.host,
+                readOnly = readOnly,
+              )
+            readOnly -> ReadOnlyInputs { ControlWidget(control = control, controller = controller) }
+            else -> ControlWidget(control = control, controller = controller)
           }
           val validation = fieldState.validationStatus
           if (

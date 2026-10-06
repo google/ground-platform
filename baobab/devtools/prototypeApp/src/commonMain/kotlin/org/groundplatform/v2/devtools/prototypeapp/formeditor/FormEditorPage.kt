@@ -71,10 +71,12 @@ import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Layers
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.MoreVert
+import androidx.compose.material.icons.outlined.Pentagon
 import androidx.compose.material.icons.outlined.Photo
 import androidx.compose.material.icons.outlined.PlayArrow
 import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material.icons.outlined.Timeline
 import androidx.compose.material.icons.outlined.Warning
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
@@ -319,6 +321,8 @@ internal fun questionTypeIcon(type: EditorQuestionType): ImageVector =
     EditorQuestionType.SELECT_MULTIPLE -> Icons.Outlined.Check
     EditorQuestionType.DATE -> Icons.Outlined.DateRange
     EditorQuestionType.LOCATION -> Icons.Outlined.LocationOn
+    EditorQuestionType.LINE -> Icons.Outlined.Timeline
+    EditorQuestionType.POLYGON -> Icons.Outlined.Pentagon
     EditorQuestionType.PHOTO -> Icons.Outlined.AccountCircle
     EditorQuestionType.NOTE -> Icons.Outlined.Info
   }
@@ -1116,7 +1120,12 @@ private fun MiniWidget(question: EditorQuestion) {
         )
       }
     }
-    EditorQuestionType.LOCATION -> MiniPlaceholder("Capture location", Icons.Outlined.LocationOn)
+    EditorQuestionType.LOCATION ->
+      MiniPlaceholder(geometryPlaceholderText(question, "Capture point"), Icons.Outlined.LocationOn)
+    EditorQuestionType.LINE ->
+      MiniPlaceholder(geometryPlaceholderText(question, "Walk line"), Icons.Outlined.Timeline)
+    EditorQuestionType.POLYGON ->
+      MiniPlaceholder(geometryPlaceholderText(question, "Walk polygon"), Icons.Outlined.Pentagon)
     EditorQuestionType.PHOTO -> MiniPlaceholder("Take photo", Icons.Outlined.Add)
     EditorQuestionType.NOTE ->
       Row(verticalAlignment = Alignment.CenterVertically) {
@@ -1167,6 +1176,16 @@ private fun MiniField(
     }
   }
 }
+
+/**
+ * Caption of a geometry question's mini widget: [gpsAction] when locked to GPS, or the map
+ * alternative when collectors may also draw on the map.
+ */
+private fun geometryPlaceholderText(question: EditorQuestion, gpsAction: String): String =
+  when (question.capture) {
+    GeometryCapture.GPS_ONLY -> "$gpsAction (GPS)"
+    GeometryCapture.GPS_OR_MAP -> "$gpsAction or draw on map"
+  }
 
 @Composable
 private fun MiniPlaceholder(text: String, icon: androidx.compose.ui.graphics.vector.ImageVector) {
@@ -1286,6 +1305,10 @@ private fun QuestionProperties(state: FormEditorState, question: EditorQuestion)
       onSelect = { state.changeType(key, it) },
     )
 
+    if (question.type.isGeometry) {
+      GeometryCaptureSelector(state, question)
+    }
+
     OutlinedTextField(
       value = question.label,
       onValueChange = { v -> state.updateQuestion(key) { it.copy(label = v) } },
@@ -1328,6 +1351,39 @@ private fun QuestionProperties(state: FormEditorState, question: EditorQuestion)
 
     HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
     AdvancedSection(state, question)
+  }
+}
+
+/**
+ * **Capture** setting of a geometry question: GPS only, or GPS or draw on the map. Shows the chosen
+ * mode's description and, when GPS only would leave the Form unanswerable in the web dashboard, the
+ * incompatibility error (also listed in the question's issues).
+ */
+@Composable
+private fun GeometryCaptureSelector(state: FormEditorState, question: EditorQuestion) {
+  val colors = MaterialTheme.colorScheme
+  Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+    DropdownSelector(
+      label = "Capture",
+      selectedText = question.capture.label,
+      options = GeometryCapture.entries,
+      optionText = { it.label },
+      onSelect = { state.updateCapture(question.key, it) },
+    )
+    Text(
+      text = question.capture.description,
+      style = MaterialTheme.typography.bodySmall,
+      color = colors.onSurfaceVariant,
+      modifier = Modifier.padding(horizontal = 16.dp),
+    )
+    if (question.isWebIncompatible && state.form.availability.includesWeb) {
+      Text(
+        text = FormEditorValidator.webIncompatibleMessage(question),
+        style = MaterialTheme.typography.bodySmall,
+        color = colors.error,
+        modifier = Modifier.padding(horizontal = 16.dp),
+      )
+    }
   }
 }
 

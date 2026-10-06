@@ -183,10 +183,10 @@ object SaveToRules {
   fun savableQuestions(form: EditorForm): List<EditorQuestion> =
     form.questions.filter { it.type != EditorQuestionType.NOTE }
 
-  /** Properties [question] can update in [target]; geometry first for Location questions. */
+  /** Properties [question] can update in [target]; geometry first for geometry questions. */
   fun propertyOptions(question: EditorQuestion, target: EditorDataset): List<String> {
     val geometry =
-      if (target.isMapLayer && question.type == EditorQuestionType.LOCATION) {
+      if (target.isMapLayer && question.type.isGeometry) {
         listOf(GEOMETRY_PROPERTY)
       } else {
         emptyList()
@@ -222,7 +222,7 @@ object SaveToRules {
 
   /**
    * Default mappings for updating [target]: questions map to properties with the same name, and the
-   * first Location question updates a map feature's geometry. [skipKey] (e.g. the question that
+   * first geometry question updates a map feature's geometry. [skipKey] (e.g. the question that
    * identifies the feature) is left out.
    */
   fun autoMap(
@@ -331,11 +331,11 @@ object SaveToValidator {
       mappedCount++
       when {
         property == SaveToRules.GEOMETRY_PROPERTY -> {
-          if (!target.isMapLayer || question.type != EditorQuestionType.LOCATION) {
+          if (!target.isMapLayer || !question.type.isGeometry) {
             issues +=
               EditorIssue(
                 question.key,
-                "Only a Location question can update a map feature's geometry.",
+                "Only a Point, Line, or Polygon question can update a map feature's geometry.",
               )
           }
         }

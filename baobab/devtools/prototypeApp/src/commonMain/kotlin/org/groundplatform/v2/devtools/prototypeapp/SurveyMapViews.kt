@@ -62,7 +62,13 @@ internal fun SurveyMainMap(
     map = SurveyMapContent.main(state, showNavigationOverlay),
     camera = camera,
     modifier = modifier,
-  ) { tappedId ->
+  ) { tappedId, at ->
+    // While a form's geometry is being drawn (web dashboard), every click on the map, feature or
+    // not, is a vertex; the selection stays as it is. Markers report no position and are ignored.
+    if (state.webMapDrawing.isDrawing) {
+      if (at != null) state.addWebMapDrawingVertex(at)
+      return@SurveyGroundMap
+    }
     val entityId = tappedId?.let(SurveyMapIds::entityIdOf)
     val clusterId = tappedId?.let(SurveyMapIds::clusterIdOf)
     when {
@@ -107,7 +113,8 @@ internal fun GeoPointFormMap(
     map = SurveyMapContent.geoPointForm(state, isFollowingUser = !viewportState.isPanned),
     camera = camera,
     modifier = modifier,
-  ) {}
+  ) { _, _ ->
+  }
 }
 
 /**
@@ -141,21 +148,22 @@ internal fun EntityRefFormMap(
     map = SurveyMapContent.entityRefForm(state, form),
     camera = camera,
     modifier = modifier,
-  ) { tappedId ->
+  ) { tappedId, _ ->
     tappedId?.let(SurveyMapIds::entityIdOf)?.let(state::selectEntityRefForActiveForm)
   }
 }
 
 /**
  * A [GroundMap] showing [map] with the survey marker UI. [onTap] gets the tapped feature or marker
- * id, or `null` for the empty map.
+ * id, or `null` for the empty map, plus where the map was tapped (`null` for markers, which don't
+ * report a position).
  */
 @Composable
 private fun SurveyGroundMap(
   map: SurveyMap,
   camera: SurveyMapCameraController,
   modifier: Modifier,
-  onTap: (String?) -> Unit,
+  onTap: (id: String?, at: LatLng?) -> Unit,
 ) {
   GroundMap(
     content = map.content,
@@ -163,9 +171,9 @@ private fun SurveyGroundMap(
     onEvent = { event ->
       when (event) {
         is MapEvent.CameraIdle -> camera.onCameraIdle(event)
-        is MapEvent.FeatureTapped -> onTap(event.featureId)
-        is MapEvent.MarkerTapped -> onTap(event.markerId)
-        is MapEvent.BackgroundTapped -> onTap(null)
+        is MapEvent.FeatureTapped -> onTap(event.featureId, event.at)
+        is MapEvent.MarkerTapped -> onTap(event.markerId, null)
+        is MapEvent.BackgroundTapped -> onTap(null, event.at)
       }
     },
     modifier = modifier,

@@ -673,6 +673,56 @@ class SurveyEditorTest {
   }
 
   @Test
+  fun linkedLayerGeometryKind_followsPrimaryGeometryQuestionType() {
+    val state = SurveyEditorState(SurveyEditorSamples.draft())
+    state.addForm()
+    val entry = state.selectedForm!!
+    entry.editor.addQuestion(EditorQuestionType.POLYGON)
+    state.syncDatasetsLinkedToForm(entry)
+    val linked = state.datasets.first { it.linkedFormKey == entry.key }
+    assertEquals(DatasetKind.MAP_LAYER, linked.kind)
+    assertEquals(GeometryKind.POLYGON, linked.geometryKind)
+
+    // A new layer created for the form takes the same kind; a line form makes a line layer.
+    state.createDatasetForForm(entry.key)
+    assertEquals(GeometryKind.POLYGON, state.selectedDataset?.geometryKind)
+    val polygonKey = entry.editor.form.primaryGeometryQuestion!!.key
+    entry.editor.changeType(polygonKey, EditorQuestionType.LINE)
+    state.syncDatasetsLinkedToForm(entry)
+    assertTrue(
+      state.datasets
+        .filter { it.linkedFormKey == entry.key }
+        .all {
+          it.geometryKind == GeometryKind.LINE
+        }
+    )
+  }
+
+  @Test
+  fun createFormForDataset_geometryQuestionMatchesLayerKind() {
+    val state = SurveyEditorState(SurveyEditorSamples.draft())
+    val polygons = state.mapLayers.first { it.geometryKind == GeometryKind.POLYGON }
+    state.createFormForDataset(polygons.key)
+    val form = state.selectedForm!!.editor.form
+    assertEquals(EditorQuestionType.POLYGON, form.primaryGeometryQuestion?.type)
+  }
+
+  @Test
+  fun canPublish_blockedByGpsOnlyGeometryOnWeb() {
+    val state = SurveyEditorState(SurveyEditorSamples.draft())
+    val entry = state.forms.first { it.editor.form.hasGeometry }
+    state.markPublished()
+    entry.editor.updateAvailability(entry.editor.form.availability.withWeb(true))
+    assertTrue(entry.editor.issues.isNotEmpty())
+    assertTrue(state.hasUnpublishedChanges)
+    assertFalse(state.canPublish)
+
+    entry.editor.makeGeometryQuestionsWebCompatible()
+    assertTrue(entry.editor.issues.isEmpty())
+    assertTrue(state.canPublish)
+  }
+
+  @Test
   fun setFormSaveToMode_update_deletesEmptyLinkedDataset() {
     val state = SurveyEditorState(SurveyEditorSamples.draft())
     state.addForm()

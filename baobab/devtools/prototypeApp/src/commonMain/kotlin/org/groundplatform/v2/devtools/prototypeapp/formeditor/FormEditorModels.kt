@@ -40,6 +40,12 @@ enum class EditorQuestionType(
   val isReadOnly: Boolean = false,
   val hasChoices: Boolean = false,
   val isNumeric: Boolean = false,
+  /**
+   * Whether the answer is a geometry (`geopoint`, `geotrace`, or `geoshape`). The first geometry
+   * question becomes a new map feature's geometry; see [EditorQuestion.capture] for how collectors
+   * record it.
+   */
+  val isGeometry: Boolean = false,
 ) {
   TEXT("Text", "text", bindType = "string", bodyElement = "input"),
   LONG_TEXT(
@@ -66,9 +72,25 @@ enum class EditorQuestionType(
     hasChoices = true,
   ),
   DATE("Date", "date", bindType = "date", bodyElement = "input"),
-  LOCATION("Location", "location", bindType = "geopoint", bodyElement = "input"),
+  LOCATION("Point", "location", bindType = "geopoint", bodyElement = "input", isGeometry = true),
+  LINE("Line", "line", bindType = "geotrace", bodyElement = "input", isGeometry = true),
+  POLYGON("Polygon", "polygon", bindType = "geoshape", bodyElement = "input", isGeometry = true),
   PHOTO("Photo", "photo", bindType = "binary", bodyElement = "upload", mediaType = "image/*"),
   NOTE("Note", "note", bindType = "string", bodyElement = "input", isReadOnly = true),
+}
+
+/**
+ * How collectors record a geometry question's answer. Mirrors the shared form runner's reading of
+ * the body `appearance`: without `placement-map` a `geopoint` is locked to the device's live GPS
+ * fix and a `geotrace` / `geoshape` to a GPS walk, neither of which the web dashboard can do.
+ */
+enum class GeometryCapture(val label: String, val description: String, val appearance: String) {
+  GPS_ONLY("GPS only", "Collectors record their device's GPS position. Not available on web.", ""),
+  GPS_OR_MAP(
+    "GPS or draw on map",
+    "Collectors can use their GPS position or place it on the map. Required for web.",
+    "placement-map",
+  ),
 }
 
 /**
@@ -158,6 +180,7 @@ enum class RelevanceOperator(
     /** Operators that make sense when comparing against an answer of [type]. */
     fun availableFor(type: EditorQuestionType): List<RelevanceOperator> =
       when {
+        type.isGeometry -> listOf(IS_ANSWERED)
         type == EditorQuestionType.SELECT_MULTIPLE -> listOf(INCLUDES, IS_ANSWERED)
         type.isNumeric -> listOf(EQUALS, NOT_EQUALS, GREATER_THAN, LESS_THAN, IS_ANSWERED)
         type == EditorQuestionType.SELECT_ONE ||
@@ -192,9 +215,18 @@ data class EditorQuestion(
   val relevance: EditorRelevance? = null,
   /** Answer validation, exported as the bind `constraint` / `jr:constraintMsg`. */
   val validation: EditorValidation? = null,
+  /**
+   * How collectors record the answer of a geometry question ([EditorQuestionType.isGeometry]);
+   * ignored for other types. Exported as the body `appearance`.
+   */
+  val capture: GeometryCapture = GeometryCapture.GPS_ONLY,
 ) {
   val isConditional: Boolean
     get() = relevance != null
+
+  /** Whether this is a geometry question that the web dashboard can't answer (GPS only). */
+  val isWebIncompatible: Boolean
+    get() = type.isGeometry && capture == GeometryCapture.GPS_ONLY
 }
 
 /** The whole Form being edited. */
@@ -214,13 +246,23 @@ data class EditorForm(
 
   fun find(key: String?): EditorQuestion? = questions.firstOrNull { it.key == key }
 
-  /** Location question whose answer becomes a new map feature's geometry. */
+  /**
+   * First geometry (Point, Line, or Polygon) question; its answer becomes a new map feature's
+   * geometry.
+   */
   val primaryGeometryQuestion: EditorQuestion?
-    get() = questions.firstOrNull { it.type == EditorQuestionType.LOCATION }
+    get() = questions.firstOrNull { it.type.isGeometry }
 
   /** Whether submissions capture a geometry, i.e. add map features rather than table rows. */
   val hasGeometry: Boolean
     get() = primaryGeometryQuestion != null
+
+  /**
+   * Geometry questions collectors can't answer in the web dashboard because they are
+   * [GeometryCapture.GPS_ONLY]. Only a problem when the Form is available on web.
+   */
+  fun webIncompatibleGeometryQuestions(): List<EditorQuestion> =
+    if (availability.includesWeb) questions.filter { it.isWebIncompatible } else emptyList()
 
   /** Questions before [key] whose answers can drive display logic. */
   fun eligibleRelevanceSources(key: String): List<EditorQuestion> {
@@ -392,8 +434,16 @@ object FormEditorValidator {
       }
       issues += ValidationRules.issues(question).map { EditorIssue(key, it) }
     }
+    form.webIncompatibleGeometryQuestions().forEach { question ->
+      issues += EditorIssue(question.key, webIncompatibleMessage(question))
+    }
     return issues
   }
+
+  /** Error shown for a GPS-only geometry question in a Form that is available on web. */
+  fun webIncompatibleMessage(question: EditorQuestion): String =
+    "\"${question.label.ifBlank { question.name }}\" is GPS only, which web can't capture. " +
+      "Choose \"${GeometryCapture.GPS_OR_MAP.label}\" or turn off Available on web."
 }
 
 /** Generates ODK-compatible XForms XML from an [EditorForm]. */
@@ -623,7 +673,7 @@ object EditorXFormsGenerator {
         val type = question.type
         val attrs = buildList {
           add("""ref="/data/${question.name}"""")
-          if (type.appearance.isNotEmpty()) add("""appearance="${type.appearance}"""")
+          bodyAppearance(question)?.let { add("""appearance="${escape(it)}"""") }
           if (type.mediaType.isNotEmpty()) add("""mediatype="${type.mediaType}"""")
         }
         appendLine("    <${type.bodyElement} ${attrs.joinToString(" ")}>")
@@ -737,6 +787,20 @@ object EditorXFormsGenerator {
   }
 
   private val XML_NAME = Regex("^[A-Za-z_][A-Za-z0-9_.-]*$")
+
+  /**
+   * Body `appearance` of [question]: the type's own appearance (e.g. `multiline`) plus, for
+   * geometry questions, the capture mode's (`placement-map`), space-separated per the ODK XForms
+   * spec. `null` when neither applies.
+   */
+  fun bodyAppearance(question: EditorQuestion): String? =
+    listOf(
+        question.type.appearance,
+        if (question.type.isGeometry) question.capture.appearance else "",
+      )
+      .filter { it.isNotEmpty() }
+      .joinToString(" ")
+      .ifEmpty { null }
 
   /** XPath 1.0 section 3.7: literals may be delimited by either `'` or `"`. */
   private fun xpathStringLiteral(value: String): String =

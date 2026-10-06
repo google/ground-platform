@@ -29,6 +29,7 @@ import org.groundplatform.v2.core.forms.ui.FormWizardController
 import org.groundplatform.v2.core.forms.ui.WorkbenchExampleForm
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyMapAnchor
 import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.ClusterMapFeaturesUseCase
+import org.groundplatform.v2.devtools.prototypeapp.map.DraftGeometry
 import org.groundplatform.v2.devtools.prototypeapp.map.EntityGeometry
 import org.groundplatform.v2.devtools.prototypeapp.pdf.GeneratedPdf
 import org.groundplatform.v2.devtools.prototypeapp.pdf.RecordPdfReports
@@ -961,8 +962,32 @@ class PrototypeAppState(
    * [org.groundplatform.v2.core.forms.ui.MobileFormRunner] when data collection is triggered for a
    * Geospatial Entity (`null` when closed).
    */
-  var activeFormWizardController by mutableStateOf<FormWizardController?>(null)
-    private set
+  var activeFormWizardController: FormWizardController?
+    get() = activeFormWizardControllerState
+    private set(value) {
+      // Opening, replacing, or closing a form ends any map drawing started for the previous one.
+      if (value !== activeFormWizardControllerState) webMapDrawing.stopDrawing()
+      activeFormWizardControllerState = value
+    }
+
+  private var activeFormWizardControllerState by mutableStateOf<FormWizardController?>(null)
+
+  /**
+   * Web dashboard's "draw on the map" host for the compact form runner's geometry questions. Mobile
+   * never starts drawing (its widgets capture the device GPS), so [WebMapDrawingHost.isDrawing]
+   * stays `false` there. See [addWebMapDrawingVertex] and [webMapDraftGeometry].
+   */
+  val webMapDrawing = WebMapDrawingHost { activeFormWizardController }
+
+  /**
+   * Adds a main-map click at [latLng] to the geometry question being drawn (no-op when nothing is
+   * being drawn). A `geopoint` is placed by its first click, which also stops the drawing.
+   */
+  fun addWebMapDrawingVertex(latLng: LatLng) = webMapDrawing.addVertex(latLng)
+
+  /** The geometry being drawn on the main map, for its overlay, or `null` when not drawing. */
+  val webMapDraftGeometry: DraftGeometry?
+    get() = webMapDrawing.draftGeometry
 
   /**
    * Target Geospatial Entity ID for the currently active data collection form (`null` when closed).

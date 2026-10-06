@@ -370,10 +370,33 @@ class FormEditorState(
   ): EditorSaveTo =
     when {
       type == EditorQuestionType.NOTE -> saveTo.withoutQuestion(key)
-      type != EditorQuestionType.LOCATION &&
-        saveTo.propertyFor(key) == SaveToRules.GEOMETRY_PROPERTY -> saveTo.withMapping(key, null)
+      !type.isGeometry && saveTo.propertyFor(key) == SaveToRules.GEOMETRY_PROPERTY ->
+        saveTo.withMapping(key, null)
       else -> saveTo
     }
+
+  /** Sets how collectors record the geometry answer of [key] (ignored for non-geometry types). */
+  fun updateCapture(key: String, capture: GeometryCapture) {
+    updateQuestion(key) { it.copy(capture = capture) }
+  }
+
+  /** Geometry questions the web dashboard can't answer while the Form is available on web. */
+  val webIncompatibleGeometryQuestions: List<EditorQuestion>
+    get() = form.webIncompatibleGeometryQuestions()
+
+  /**
+   * Switches every GPS-only geometry question to [GeometryCapture.GPS_OR_MAP] so the Form can be
+   * answered in the web dashboard (the "Fix all" action).
+   */
+  fun makeGeometryQuestionsWebCompatible() {
+    form =
+      form.copy(
+        questions =
+          form.questions.map {
+            if (it.isWebIncompatible) it.copy(capture = GeometryCapture.GPS_OR_MAP) else it
+          }
+      )
+  }
 
   // Save-to logic ------------------------------------------------------------------------------
 

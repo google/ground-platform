@@ -16,6 +16,7 @@ package org.groundplatform.v2.devtools.prototypeapp.map
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
+import org.groundplatform.v2.core.forms.ui.MapDrawingKind
 import org.groundplatform.v2.devtools.prototypeapp.EntityGeometryKind
 import org.groundplatform.v2.devtools.prototypeapp.PrototypeAppState
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.BasemapType
@@ -42,6 +43,17 @@ import org.groundplatform.v2.map.StyleValue
 
 /** What a survey map shows: native [content] plus the Compose UI for each marker, by id. */
 internal data class SurveyMap(val content: MapContent, val markers: Map<String, SurveyMarker>)
+
+/**
+ * A geometry being drawn on the map for a form question (web dashboard): the [vertices] clicked so
+ * far, in order, and the [kind] they are meant to form. Drawn above the entities in the draft
+ * style; see [SurveyMapContent.build].
+ */
+data class DraftGeometry(val kind: MapDrawingKind, val vertices: List<LatLng>) {
+  /** True once there are enough vertices for a valid geometry of [kind]. */
+  val isComplete: Boolean
+    get() = vertices.size >= kind.minVertices
+}
 
 /** Compose-drawn map annotations; see `SurveyMapMarkers.kt` for their UI. */
 internal sealed interface SurveyMarker {
@@ -145,6 +157,7 @@ internal object SurveyMapContent {
       isFollowingUser = state.isCameraFollowingUser,
       place = state.selectedPlace,
       layers = state.mapLayers,
+      draftGeometry = state.webMapDraftGeometry,
     )
 
   /** The map in a form's entity-reference step, listing the form's candidate entities. */
@@ -190,6 +203,9 @@ internal object SurveyMapContent {
    *   isn't clustering.
    * @param layers the survey's map layers; each feature is drawn in its layer's color, and points
    *   show the layer's icon.
+   * @param draftGeometry a geometry being drawn for a form question, drawn above everything else in
+   *   the draft style: its vertices, the line through them, and (for a polygon with at least 3
+   *   vertices) the closed shape.
    */
   fun build(
     anchor: SurveyMapAnchor,
@@ -206,6 +222,7 @@ internal object SurveyMapContent {
     isFollowingUser: Boolean,
     place: SurveyPlaceItem?,
     layers: List<MapLayerItem> = emptyList(),
+    draftGeometry: DraftGeometry? = null,
   ): SurveyMap {
     val satellite = basemapType == BasemapType.SATELLITE
     fun at(nx: Float, ny: Float) = anchor.toLatLng(nx.toDouble(), ny.toDouble())
@@ -346,6 +363,7 @@ internal object SurveyMapContent {
           DpOffset(0.dp, (-10).dp),
         ) to SurveyMarker.NavigationPill((if (v.hasArrived) "✓ Arrived • " else "➤ ") + distance)
     }
+    if (draftGeometry != null) overlayFeatures += draftFeatures(draftGeometry)
 
     val clusterMarkers =
       clusters
@@ -407,6 +425,42 @@ internal object SurveyMapContent {
       )
     return SurveyMap(content, allMarkers.associate { (marker, ui) -> marker.id to ui })
   }
+
+  /**
+   * Overlay features for a [draft] being drawn: every vertex, the line through them (also the
+   * outline of a polygon that is still short of 3 vertices), and the closed polygon once complete.
+   */
+  internal fun draftFeatures(draft: DraftGeometry): List<MapFeature> {
+    val vertices = draft.vertices
+    val features = mutableListOf<MapFeature>()
+    when {
+      draft.kind == MapDrawingKind.POLYGON && vertices.size >= 3 ->
+        features +=
+          MapFeature(
+            DRAFT_SHAPE_ID,
+            Geometry.Polygon(listOf(vertices)),
+            mapOf(PROP_KIND to KIND_DRAFT_POLYGON),
+          )
+      draft.kind != MapDrawingKind.POINT && vertices.size >= 2 ->
+        features +=
+          MapFeature(
+            DRAFT_SHAPE_ID,
+            Geometry.LineString(vertices),
+            mapOf(PROP_KIND to KIND_DRAFT_LINE),
+          )
+    }
+    vertices.forEachIndexed { i, vertex ->
+      features +=
+        MapFeature(draftVertexId(i), Geometry.Point(vertex), mapOf(PROP_KIND to KIND_DRAFT_VERTEX))
+    }
+    return features
+  }
+
+  /** Feature id of the draft's line or polygon. */
+  const val DRAFT_SHAPE_ID = "draft-shape"
+
+  /** Feature id of the draft's [index]th vertex. */
+  fun draftVertexId(index: Int) = "draft-vertex-$index"
 
   /** Always the same layers, so content changes only update source data and paint. */
   private fun layers(
@@ -537,8 +591,36 @@ internal object SurveyMapContent {
         // Moves the pin down so its tip, not the bottom of its shadow, sits on the location.
         iconOffset = DpOffset(0.dp, (GroundPin.HEIGHT - GroundPin.TIP_Y).toFloat().dp),
       ),
+      // The geometry being drawn for a form question sits above every entity.
+      MapLayer.Fill(
+        id = "draft-fill",
+        sourceId = OVERLAY_SOURCE,
+        filter = kind(KIND_DRAFT_POLYGON),
+        color = StyleValue.Constant(draftColor),
+        opacity = StyleValue.Constant(0.3f),
+      ),
+      MapLayer.Line(
+        id = "draft-outline",
+        sourceId = OVERLAY_SOURCE,
+        filter = FeatureFilter.In(PROP_KIND, setOf(KIND_DRAFT_LINE, KIND_DRAFT_POLYGON)),
+        color = StyleValue.Constant(draftColor),
+        width = StyleValue.Constant(3.4.dp),
+        dashPattern = listOf(2.2f, 1.3f),
+      ),
+      MapLayer.Circle(
+        id = "draft-vertices",
+        sourceId = OVERLAY_SOURCE,
+        filter = kind(KIND_DRAFT_VERTEX),
+        color = StyleValue.Constant(Color.White),
+        radius = StyleValue.Constant(5.dp),
+        strokeColor = StyleValue.Constant(draftColor),
+        strokeWidth = 2.5.dp,
+      ),
     )
   }
+
+  /** Stroke and fill of a geometry being drawn; legible on streets and satellite basemaps. */
+  private val draftColor = Color(0xFFFF8F00)
 
   private fun kind(kind: String) = FeatureFilter.Equals(PROP_KIND, kind)
 
@@ -571,6 +653,9 @@ internal object SurveyMapContent {
   private const val KIND_SECTOR = "sector"
   private const val KIND_NAV = "navigation"
   private const val KIND_NAV_TARGET = "navigation-target"
+  const val KIND_DRAFT_LINE = "draft-line"
+  const val KIND_DRAFT_POLYGON = "draft-polygon"
+  const val KIND_DRAFT_VERTEX = "draft-vertex"
 
   /** How a feature is emphasized. */
   object Variant {

@@ -376,7 +376,7 @@ class SurveyEditorState(
 
   /**
    * Creates a new Map layer or Data table backed by and linked to [formKey]. [kind] defaults to a
-   * Map layer if the form has a Location question, otherwise a Data table. When [open] is true, the
+   * Map layer if the form has a geometry question, otherwise a Data table. When [open] is true, the
    * new dataset is selected.
    */
   fun createDatasetForForm(formKey: String, kind: DatasetKind? = null, open: Boolean = true) {
@@ -403,7 +403,7 @@ class SurveyEditorState(
         kind = resolvedKind,
         id = datasetId,
         displayName = title,
-        geometryKind = GeometryKind.POINT,
+        geometryKind = geometryKindFor(form),
         keyProperty = properties.first().name,
         labelProperty = properties.getOrNull(1)?.name ?: properties.first().name,
         linkedFormKey = formKey,
@@ -425,11 +425,18 @@ class SurveyEditorState(
     val questions = mutableListOf<EditorQuestion>()
 
     if (dataset.kind == DatasetKind.MAP_LAYER) {
+      // The geometry question matches the layer's features: a point, line, or polygon.
+      val geometryType =
+        when (dataset.geometryKind) {
+          GeometryKind.POINT -> EditorQuestionType.LOCATION
+          GeometryKind.LINE -> EditorQuestionType.LINE
+          GeometryKind.POLYGON -> EditorQuestionType.POLYGON
+        }
       questions +=
         EditorQuestion(
           key = "q${questionIdx++}",
           name = "location",
-          type = EditorQuestionType.LOCATION,
+          type = geometryType,
           label = "Location",
           required = true,
         )
@@ -478,7 +485,8 @@ class SurveyEditorState(
 
   /**
    * Synchronizes the schema of all datasets linked to [formEntry] with the form's questions. A
-   * linked dataset is a Map layer if the form has a Location question, otherwise a Data table.
+   * linked dataset is a Map layer if the form has a geometry question (whose type sets the layer's
+   * point / line / polygon kind), otherwise a Data table.
    */
   fun syncDatasetsLinkedToForm(formEntry: SurveyFormEntry) {
     val form = formEntry.editor.form
@@ -505,6 +513,9 @@ class SurveyEditorState(
 
         d.copy(
           kind = kind,
+          // Generated layers take their geometry from the sample design, not the form.
+          geometryKind =
+            if (form.hasGeometry && !d.isGenerated) geometryKindFor(form) else d.geometryKind,
           properties = combinedProps,
           keyProperty = keyProp,
           labelProperty = labelProp,
@@ -1024,9 +1035,20 @@ class SurveyEditorState(
 
   // Helpers ----------------------------------------------------------------------------------
 
-  /** Dataset kind matching [form]: a Map layer if it captures a location, else a Data table. */
+  /** Dataset kind matching [form]: a Map layer if it captures a geometry, else a Data table. */
   private fun datasetKindFor(form: EditorForm): DatasetKind =
     if (form.hasGeometry) DatasetKind.MAP_LAYER else DatasetKind.DATA_TABLE
+
+  /**
+   * Geometry kind of a Map layer fed by [form]: that of its primary geometry question (Point, Line,
+   * or Polygon), defaulting to points when the form has none.
+   */
+  private fun geometryKindFor(form: EditorForm): GeometryKind =
+    when (form.primaryGeometryQuestion?.type) {
+      EditorQuestionType.LINE -> GeometryKind.LINE
+      EditorQuestionType.POLYGON -> GeometryKind.POLYGON
+      else -> GeometryKind.POINT
+    }
 
   /** Dataset properties mirroring [form]'s questions (notes excluded). */
   private fun formProperties(form: EditorForm): List<EntityProperty> =

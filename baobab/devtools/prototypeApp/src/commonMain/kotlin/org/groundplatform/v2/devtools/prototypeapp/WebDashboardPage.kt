@@ -538,6 +538,18 @@ private fun DashboardMapArea(state: PrototypeAppState, modifier: Modifier = Modi
       showNavigationOverlay = false,
     )
 
+    // Floating instructions while a form's geometry question is being drawn on the map.
+    val draft = state.webMapDraftGeometry
+    if (draft != null) {
+      WebMapDrawingHint(
+        draft = draft,
+        onUndo = { state.webMapDrawing.undoVertex() },
+        onDone = { state.webMapDrawing.stopDrawing() },
+        onCancel = { state.webMapDrawing.cancelDrawing() },
+        modifier = Modifier.align(Alignment.TopCenter).padding(DashboardOverlayMargin),
+      )
+    }
+
     // Basemap preview card in the top-left corner, with the cluster callout (if any) below it.
     Column(
       modifier = Modifier.align(Alignment.TopStart).padding(DashboardOverlayMargin),
