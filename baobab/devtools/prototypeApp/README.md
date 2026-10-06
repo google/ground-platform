@@ -218,12 +218,28 @@ the survey editor header or via the debug tools menu), or deep-link
 directly to `http://localhost:8091/#survey-editor` (`#form-editor` also works).
 The left-hand navigation lists:
 
--   **Survey details**: Title, description, survey ID, and languages, plus
-    summary cards that link to each section.
+-   **Survey details**: Title, description, survey ID, organization, and
+    languages, plus summary cards that link to each section.
+    -   **Organization** moves the survey into one of the organizations the
+        signed-in user belongs to, or keeps it personal. The owner stays the
+        owner; Managers of the organization inherit Survey organizer access.
+        Clearing the organization while general access is "Anyone in the
+        organization" falls back to Restricted and says so.
 -   **Sharing**: Invite people by email with a role (Viewer, Data collector,
     Survey organizer), change or remove roles, and set general access
-    (Restricted, Anyone with the link, Public) and what data collectors can
-    see. These mirror `acl.proto`.
+    (Restricted, Anyone in the organization, Anyone with the link, Public) and
+    what data collectors can see. These mirror `acl.proto`.
+    -   **Anyone in the organization** is only available for surveys that
+        belong to an organization; choosing it without one is a publish-blocking
+        issue flagged in the navigation.
+    -   For organization surveys, a read-only **Organization managers** card
+        lists the people who inherit Survey organizer access from the
+        organization.
+    -   Who may open the editor is resolved by `surveyeditor/SurveyAccess.kt`
+        (owner → accepted access list → organization Manager → organization
+        member under the organization policy → anyone under link/public). The
+        dashboard only shows **Manage survey** to people who can manage the
+        active survey.
     -   Each new invite gets an invite link (`https://ground.example.org/join/…`)
         with **Copy link** and **New link** actions. Until it's accepted, the
         person is listed by email with an **Invited** badge.

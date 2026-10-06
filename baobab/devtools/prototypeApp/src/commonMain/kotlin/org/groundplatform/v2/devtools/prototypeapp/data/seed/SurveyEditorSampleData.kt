@@ -108,6 +108,31 @@ internal object SurveyEditorSamples {
         ),
     )
 
+  /** ID of the sample survey shared with everyone in its organization. */
+  const val ORGANIZATION_SHARED_SURVEY_ID: String = "survey-serengeti-corridor"
+
+  /**
+   * A minimal draft for [ORGANIZATION_SHARED_SURVEY_ID]: owned by a Mekong Mangrove Alliance member
+   * and open to everyone in that organization ([SharingPolicy.ORGANIZATION]). Its title,
+   * description, and organization come from the survey list when the editor opens it.
+   */
+  fun organizationSharedDraft(): SurveyEditorDraft =
+    SurveyEditorDraft.blank(ORGANIZATION_SHARED_SURVEY_ID).let { draft ->
+      draft.copy(
+        details =
+          draft.details.copy(
+            organizationId = PrototypeFakeOrganizationsData.MEKONG_MANGROVE_ALLIANCE
+          ),
+        sharing =
+          SharingSettings(
+            ownerEmail =
+              PrototypeFakeOrganizationsData.ownerEmailForSurvey(ORGANIZATION_SHARED_SURVEY_ID),
+            ownerProfile = CachedProfile("Linh Tran", "avatar:6", "2026-02-11"),
+            policy = SharingPolicy.ORGANIZATION,
+          ),
+      )
+    }
+
   private fun square(lat: Double, lng: Double, d: Double) =
     listOf(
       LatLng(lat, lng),

@@ -82,6 +82,11 @@ data class Collaborator(
 /** Mirrors `groundplatform.v2.survey.SharingPolicy`. */
 enum class SharingPolicy(val label: String, val description: String) {
   RESTRICTED("Restricted", "Only people added below can open the survey."),
+  /** Only valid when the survey belongs to an organization ([SurveyDetails.organizationId]). */
+  ORGANIZATION(
+    "Anyone in the organization",
+    "Members of the survey's organization can collect data. Managers can also edit the survey.",
+  ),
   ANYONE_WITH_LINK("Anyone with the link", "Anyone with the link or QR code can collect data."),
   PUBLIC("Public", "Listed in the public directory. Anyone can collect data."),
 }

@@ -189,12 +189,16 @@ fun PrototypeApp(
         },
     ) {
       Box(modifier = Modifier.fillMaxSize()) {
-        // A survey page without an openable active survey falls back to the surveys list.
+        // A survey page without an openable active survey falls back to the surveys list, and the
+        // Survey editor falls back to the dashboard for people who can't manage the survey.
         val resolvedPage =
-          if (page.needsActiveSurvey && !state.hasOpenableActiveSurvey) {
-            PrototypeWorkbenchPage.WEB_SURVEYS
-          } else {
-            page
+          when {
+            page.needsActiveSurvey && !state.hasOpenableActiveSurvey ->
+              PrototypeWorkbenchPage.WEB_SURVEYS
+            page == PrototypeWorkbenchPage.SURVEY_EDITOR &&
+              state.isSignedIn &&
+              !state.canManageActiveSurvey -> PrototypeWorkbenchPage.WEB_DASHBOARD
+            else -> page
           }
         LaunchedEffect(resolvedPage) {
           if (resolvedPage != page) state.selectWorkbenchPage(resolvedPage)

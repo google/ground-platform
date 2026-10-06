@@ -110,6 +110,7 @@ import org.groundplatform.v2.devtools.prototypeapp.WebHeaderContext
 import org.groundplatform.v2.devtools.prototypeapp.WebHeaderSupportingText
 import org.groundplatform.v2.devtools.prototypeapp.WebMobilePrototypeButton
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.InvitationStatus
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.Organization
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyPlaceItem
 import org.groundplatform.v2.devtools.prototypeapp.formeditor.DragAxis
 import org.groundplatform.v2.devtools.prototypeapp.formeditor.DragReorderState
@@ -166,8 +167,8 @@ fun SurveyEditorPage(
       )
       Box(modifier = Modifier.weight(1f).fillMaxHeight()) {
         when (val section = state.section) {
-          SurveyEditorSection.Details -> SurveyDetailsPane(state, appState.places)
-          SurveyEditorSection.Sharing -> SharingPane(state)
+          SurveyEditorSection.Details -> SurveyDetailsPane(state, appState)
+          SurveyEditorSection.Sharing -> SharingPane(state, appState)
           is SurveyEditorSection.Form -> {
             val entry = state.selectedForm
             if (entry != null) {
@@ -308,6 +309,7 @@ internal fun SurveyNavigation(state: SurveyEditorState, modifier: Modifier = Mod
         selected = state.section == SurveyEditorSection.Sharing,
         onClick = { state.select(SurveyEditorSection.Sharing) },
         trailing = "${state.sharing.collaborators.size + 1}",
+        hasIssues = state.sharingIssues.isNotEmpty(),
       )
 
       NavHeading("Forms", addDescription = "Add form", onAdd = state::addForm)
@@ -542,7 +544,7 @@ internal fun PaneScaffold(title: String, subtitle: String, content: @Composable 
 }
 
 @Composable
-private fun SurveyDetailsPane(state: SurveyEditorState, localPlaces: List<SurveyPlaceItem>) {
+private fun SurveyDetailsPane(state: SurveyEditorState, appState: PrototypeAppState) {
   val details = state.details
   PaneScaffold(
     title = "Survey details",
@@ -576,8 +578,9 @@ private fun SurveyDetailsPane(state: SurveyEditorState, localPlaces: List<Survey
         textStyle = MaterialTheme.typography.bodyLarge.copy(fontFamily = FontFamily.Monospace),
         modifier = Modifier.fillMaxWidth(),
       )
+      OrganizationSection(state = state, appState = appState)
       LanguageSelectorSection(state = state)
-      SurveyAreaSection(state = state, localPlaces = localPlaces)
+      SurveyAreaSection(state = state, localPlaces = appState.places)
     }
 
     SectionLabel("Contents")
@@ -608,6 +611,81 @@ private fun SummaryCard(label: String, count: Int, onClick: () -> Unit) {
         style = MaterialTheme.typography.bodyMedium,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
       )
+    }
+  }
+}
+
+/** Sentinel for the "None (personal survey)" entry of the organization dropdown. */
+private val NoOrganization = Organization(id = "", name = "None (personal survey)")
+
+/**
+ * Lets the owner move the survey into one of the organizations they belong to, or keep it personal.
+ * An organization the survey already belongs to stays selectable even if the signed-in user isn't a
+ * member, so opening the editor never silently changes it.
+ */
+@Composable
+private fun OrganizationSection(state: SurveyEditorState, appState: PrototypeAppState) {
+  val selectedId = state.details.organizationId
+  val current = appState.organization(selectedId)
+  val options =
+    remember(appState.signedInUserOrganizations, current) {
+      buildList {
+        add(NoOrganization)
+        addAll(appState.signedInUserOrganizations)
+        if (current != null && none { it.id == current.id }) add(current)
+      }
+    }
+  Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+    Text(
+      "Organization",
+      style = MaterialTheme.typography.titleSmall,
+      fontWeight = FontWeight.SemiBold,
+    )
+    Text(
+      "Optionally run this survey on behalf of an organization you belong to. You stay the " +
+        "owner. Managers of the organization can also edit the survey, manage sharing, and export " +
+        "data, and its members can find the survey in their list.",
+      style = MaterialTheme.typography.bodySmall,
+      color = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
+    Box(modifier = Modifier.widthIn(max = 380.dp)) {
+      DropdownSelector(
+        label = "Organization",
+        selectedText =
+          current?.name ?: selectedId?.let { "Unknown organization ($it)" } ?: NoOrganization.name,
+        options = options,
+        optionText = { it.name },
+        onSelect = { state.setOrganization(it.id.ifBlank { null }) },
+      )
+    }
+    if (selectedId != null && current == null) {
+      Text(
+        "This organization no longer exists. Choose another one or make the survey personal.",
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.error,
+      )
+    }
+    state.organizationNotice?.let { notice ->
+      Surface(
+        color = MaterialTheme.colorScheme.secondaryContainer,
+        shape = MaterialTheme.shapes.medium,
+      ) {
+        Row(
+          modifier = Modifier.padding(start = 16.dp, end = 4.dp, top = 4.dp, bottom = 4.dp),
+          verticalAlignment = Alignment.CenterVertically,
+          horizontalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+          Icon(Icons.Outlined.Info, contentDescription = null, modifier = Modifier.size(18.dp))
+          Text(
+            notice,
+            style = MaterialTheme.typography.bodySmall,
+            modifier = Modifier.weight(1f).padding(vertical = 8.dp),
+          )
+          IconButton(onClick = state::dismissOrganizationNotice) {
+            Icon(Icons.Outlined.Close, contentDescription = "Dismiss")
+          }
+        }
+      }
     }
   }
 }
@@ -1108,8 +1186,9 @@ private fun LanguagePickerDialog(
 // ---------------------------------------------------------------------------------------------
 
 @Composable
-private fun SharingPane(state: SurveyEditorState) {
+private fun SharingPane(state: SurveyEditorState, appState: PrototypeAppState) {
   val sharing = state.sharing
+  val organization = appState.organization(state.details.organizationId)
   var acceptingEmail by remember { mutableStateOf<String?>(null) }
   sharing.collaborators
     .firstOrNull { it.email == acceptingEmail && it.status == InvitationStatus.PENDING }
@@ -1202,6 +1281,8 @@ private fun SharingPane(state: SurveyEditorState) {
         }
       }
 
+      if (organization != null) InheritedManagersCard(organization)
+
       ElevatedCard(
         colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.surface)
       ) {
@@ -1210,11 +1291,39 @@ private fun SharingPane(state: SurveyEditorState) {
           verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
           SectionLabel("General access")
+          state.sharingIssues.forEach { issue ->
+            Row(
+              verticalAlignment = Alignment.CenterVertically,
+              horizontalArrangement = Arrangement.spacedBy(8.dp),
+              modifier = Modifier.padding(bottom = 8.dp),
+            ) {
+              Icon(
+                Icons.Outlined.Warning,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.error,
+                modifier = Modifier.size(18.dp),
+              )
+              Text(
+                issue,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.error,
+              )
+            }
+          }
           SharingPolicy.entries.forEach { policy ->
+            val isOrganizationPolicy = policy == SharingPolicy.ORGANIZATION
             RadioOption(
-              title = policy.label,
-              description = policy.description,
+              title =
+                if (isOrganizationPolicy && organization != null) "Anyone in ${organization.name}"
+                else policy.label,
+              description =
+                if (isOrganizationPolicy && organization == null) {
+                  "Available once the survey belongs to an organization (see Survey details)."
+                } else {
+                  policy.description
+                },
               selected = sharing.policy == policy,
+              enabled = !isOrganizationPolicy || organization != null,
               onSelect = { state.updateSharing { it.copy(policy = policy) } },
             )
           }
@@ -1289,23 +1398,79 @@ private fun RadioOption(
   description: String,
   selected: Boolean,
   onSelect: () -> Unit,
+  enabled: Boolean = true,
 ) {
+  val textColor =
+    if (enabled) MaterialTheme.colorScheme.onSurface
+    else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
   Row(
     modifier =
       Modifier.fillMaxWidth()
-        .selectable(selected = selected, onClick = onSelect, role = Role.RadioButton)
+        .selectable(
+          selected = selected,
+          enabled = enabled,
+          onClick = onSelect,
+          role = Role.RadioButton,
+        )
         .padding(vertical = 6.dp),
     verticalAlignment = Alignment.CenterVertically,
   ) {
-    RadioButton(selected = selected, onClick = null)
+    RadioButton(selected = selected, onClick = null, enabled = enabled)
     Spacer(Modifier.width(12.dp))
     Column {
-      Text(title, style = MaterialTheme.typography.bodyLarge)
+      Text(title, style = MaterialTheme.typography.bodyLarge, color = textColor)
       Text(
         description,
         style = MaterialTheme.typography.bodySmall,
+        color =
+          if (enabled) MaterialTheme.colorScheme.onSurfaceVariant
+          else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.38f),
+      )
+    }
+  }
+}
+
+/**
+ * Read-only list of the people who can manage this survey because they manage [organization]. They
+ * aren't on the survey's own access list, so they can't be removed here.
+ */
+@Composable
+private fun InheritedManagersCard(organization: Organization) {
+  ElevatedCard(
+    colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.surface)
+  ) {
+    Column(modifier = Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+      SectionLabel("Organization managers")
+      Text(
+        "Inherited from ${organization.name}. Managers can edit this survey, manage sharing, and " +
+          "export data. Change who manages the organization from its Members page.",
+        style = MaterialTheme.typography.bodySmall,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
       )
+      if (organization.managers.isEmpty()) {
+        Text(
+          "No managers yet.",
+          style = MaterialTheme.typography.bodyMedium,
+          color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+      }
+      organization.managers.forEach { manager ->
+        key(manager.email) {
+          PersonRow(
+            displayName = manager.displayName,
+            email = manager.email,
+            photoUrl = manager.profile?.photoUrl,
+            detail = "Manager of ${organization.name}",
+          ) {
+            Text(
+              CollaboratorRole.SURVEY_ORGANIZER.label,
+              style = MaterialTheme.typography.labelLarge,
+              color = MaterialTheme.colorScheme.onSurfaceVariant,
+              modifier = Modifier.padding(top = 10.dp, end = 12.dp),
+            )
+          }
+        }
+      }
     }
   }
 }

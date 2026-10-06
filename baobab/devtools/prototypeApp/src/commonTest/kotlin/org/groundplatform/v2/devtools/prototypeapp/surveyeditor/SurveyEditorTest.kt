@@ -29,6 +29,8 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.FormPreviewItem
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.InvitationStatus
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.InviteLinks
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.MapLayerItem
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.MapThumbnailTheme
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyPreviewItem
 import org.groundplatform.v2.devtools.prototypeapp.formeditor.EditorQuestionType
 import org.groundplatform.v2.devtools.prototypeapp.formeditor.FormIds
 import org.groundplatform.v2.devtools.prototypeapp.formeditor.SaveToMode
@@ -808,5 +810,94 @@ class SurveyEditorTest {
     assertTrue(updateXml.contains("update=\"1\""))
     assertTrue(updateXml.contains("<instance id=\"coffee_parcels\""))
     assertTrue(updateXml.contains("<item>"))
+  }
+
+  // Organizations -----------------------------------------------------------------------------
+
+  @Test
+  fun organizationPolicy_withoutOrganization_isAnIssueThatBlocksPublishing() {
+    val state = SurveyEditorState(SurveyEditorSamples.draft())
+    state.setOrganization(null)
+    state.updateSharing { it.copy(policy = SharingPolicy.ORGANIZATION) }
+
+    assertEquals(1, state.sharingIssues.size)
+    assertEquals(1, state.issueCount)
+    assertTrue(state.hasUnpublishedChanges)
+    assertFalse(state.canPublish)
+
+    state.setOrganization("org-1")
+    assertEquals(emptyList(), state.sharingIssues)
+    assertTrue(state.canPublish)
+  }
+
+  @Test
+  fun clearingOrganization_downgradesOrganizationPolicy_andExplainsWhy() {
+    val state = SurveyEditorState(SurveyEditorSamples.draft())
+    state.updateSharing { it.copy(policy = SharingPolicy.ORGANIZATION) }
+    assertNull(state.organizationNotice)
+
+    state.setOrganization("")
+
+    assertNull(state.details.organizationId)
+    assertEquals(SharingPolicy.RESTRICTED, state.sharing.policy)
+    assertNotNull(state.organizationNotice)
+    state.dismissOrganizationNotice()
+    assertNull(state.organizationNotice)
+  }
+
+  @Test
+  fun clearingOrganization_keepsOtherPolicies() {
+    val state = SurveyEditorState(SurveyEditorSamples.draft())
+    state.updateSharing { it.copy(policy = SharingPolicy.PUBLIC) }
+    state.setOrganization(null)
+    assertEquals(SharingPolicy.PUBLIC, state.sharing.policy)
+    assertNull(state.organizationNotice)
+  }
+
+  @Test
+  fun discardChanges_restoresOrganizationAndClearsNotice() {
+    val state = SurveyEditorState(SurveyEditorSamples.draft())
+    val original = state.details.organizationId
+    state.updateSharing { it.copy(policy = SharingPolicy.ORGANIZATION) }
+    state.setOrganization(null)
+    state.discardChanges()
+    assertEquals(original, state.details.organizationId)
+    assertEquals(SharingPolicy.RESTRICTED, state.sharing.policy)
+    assertNull(state.organizationNotice)
+    assertFalse(state.hasUnpublishedChanges)
+  }
+
+  @Test
+  fun forSurvey_copiesOwnerFromSurveyListOnlyWhenDraftHasNone() {
+    val survey =
+      SurveyPreviewItem(
+        id = "s1",
+        title = "Survey",
+        description = "",
+        location = "",
+        coordinatesLabel = "",
+        offlineSizeLabel = "",
+        isDownloaded = false,
+        thumbnailTheme = MapThumbnailTheme.entries.first(),
+        entityCount = 0,
+        ownerEmail = "list.owner@example.org",
+        organizationId = "org-1",
+      )
+    val blank = SurveyEditorDraft.forSurvey("s1", stored = null, survey = survey)
+    assertEquals("list.owner@example.org", blank.sharing.ownerEmail)
+    assertEquals("org-1", blank.details.organizationId)
+
+    val stored = SurveyEditorSamples.draft()
+    val kept = SurveyEditorDraft.forSurvey("s1", stored = stored, survey = survey)
+    assertEquals(stored.sharing.ownerEmail, kept.sharing.ownerEmail)
+  }
+
+  @Test
+  fun organizationSharedSample_isValidAndOpenToTheOrganization() {
+    val draft = SurveyEditorSamples.organizationSharedDraft()
+    val state = SurveyEditorState(draft)
+    assertEquals(SharingPolicy.ORGANIZATION, state.sharing.policy)
+    assertNotNull(state.details.organizationId)
+    assertEquals(0, state.issueCount)
   }
 }

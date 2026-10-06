@@ -43,7 +43,7 @@ class SampleDataSeeder(private val store: LocalStore) {
 
   companion object {
     /** Bump when the sample data changes shape, so existing stores are reseeded. */
-    const val SEED_VERSION: Int = 3
+    const val SEED_VERSION: Int = 4
 
     /** Survey opened by default on first launch. */
     const val DEFAULT_ACTIVE_SURVEY_ID: String = "survey-kenya-coffee"
@@ -79,6 +79,10 @@ class SampleDataSeeder(private val store: LocalStore) {
         )
       }
       putSurveyEditorDraft(DEFAULT_ACTIVE_SURVEY_ID, SurveyEditorSamples.draft())
+      putSurveyEditorDraft(
+        SurveyEditorSamples.ORGANIZATION_SHARED_SURVEY_ID,
+        SurveyEditorSamples.organizationSharedDraft(),
+      )
       putMutations(PrototypeFakeMutationsData.defaultMutations())
       putPlaces(PrototypeFakePlacesData.defaultSurveyPlaces())
       putOfflineTilePackages(PrototypeFakeMapLayersData.defaultOfflineTilePackages())

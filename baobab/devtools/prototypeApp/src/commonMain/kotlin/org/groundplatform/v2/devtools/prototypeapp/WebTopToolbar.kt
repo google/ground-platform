@@ -102,11 +102,13 @@ internal fun WebTopToolbar(
     },
     actions = {
       WebMobilePrototypeButton(state)
-      WebHeaderButton(
-        text = "Manage survey",
-        icon = Icons.Outlined.Edit,
-        onClick = onOpenSurveyEditor,
-      )
+      if (state.canManageActiveSurvey) {
+        WebHeaderButton(
+          text = "Manage survey",
+          icon = Icons.Outlined.Edit,
+          onClick = onOpenSurveyEditor,
+        )
+      }
       WebCollectDataMenuButton(state)
     },
   )

@@ -125,9 +125,21 @@ class SurveyEditorState(
   val hasUnpublishedChanges: Boolean
     get() = toDraft().copy(nextKeyId = 0) != published.copy(nextKeyId = 0)
 
-  /** Number of validation issues across all Forms, Map layers, and Data tables in the draft. */
+  /**
+   * Problems in the sharing settings (e.g. an organization-only policy without an organization).
+   */
+  val sharingIssues: List<String>
+    get() = SurveyAccess.issues(sharing, details.organizationId)
+
+  /**
+   * Number of validation issues across sharing and all Forms, Map layers, and Data tables in the
+   * draft.
+   */
   val issueCount: Int
-    get() = forms.sumOf { it.editor.issues.size } + datasets.sumOf { datasetIssues(it).size }
+    get() =
+      sharingIssues.size +
+        forms.sumOf { it.editor.issues.size } +
+        datasets.sumOf { datasetIssues(it).size }
 
   /** Whether the draft can be published: it has unpublished changes and no validation issues. */
   val canPublish: Boolean
@@ -147,6 +159,7 @@ class SurveyEditorState(
     forms = formEntries(draft)
     datasets = draft.datasets
     generationErrors = emptyMap()
+    organizationNotice = null
     val current = section
     val stillExists =
       when (current) {
@@ -263,6 +276,34 @@ class SurveyEditorState(
   /** Sets or clears the survey area and boundaries. */
   fun setSurveyArea(area: SurveyArea?) {
     updateDetails { it.copy(surveyArea = area) }
+  }
+
+  /**
+   * Notice about a side effect of the last [setOrganization] call (the general access policy was
+   * changed back to "Restricted"), or `null`. Cleared with [dismissOrganizationNotice].
+   */
+  var organizationNotice: String? by mutableStateOf(null)
+    private set
+
+  fun dismissOrganizationNotice() {
+    organizationNotice = null
+  }
+
+  /**
+   * Moves the survey into [organizationId], or makes it a personal survey when `null`. Clearing the
+   * organization while general access is [SharingPolicy.ORGANIZATION] falls back to
+   * [SharingPolicy.RESTRICTED] and sets [organizationNotice], since nobody could use that policy.
+   */
+  fun setOrganization(organizationId: String?) {
+    val normalized = organizationId?.takeIf { it.isNotBlank() }
+    organizationNotice = null
+    updateDetails { it.copy(organizationId = normalized) }
+    if (normalized == null && sharing.policy == SharingPolicy.ORGANIZATION) {
+      sharing = sharing.copy(policy = SharingPolicy.RESTRICTED)
+      organizationNotice =
+        "General access was changed to \"${SharingPolicy.RESTRICTED.label}\" because the survey " +
+          "no longer belongs to an organization."
+    }
   }
 
   fun updateSharing(transform: (SharingSettings) -> SharingSettings) {

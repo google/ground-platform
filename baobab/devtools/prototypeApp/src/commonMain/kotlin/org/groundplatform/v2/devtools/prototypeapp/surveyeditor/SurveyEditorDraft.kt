@@ -42,7 +42,8 @@ data class SurveyEditorDraft(
 
     /**
      * The editor draft of a survey: its [stored] draft (or a blank one) showing the [survey]'s
-     * current title, description, and organization, which the survey list owns.
+     * current title, description, organization, and (when the draft has none) owner, which the
+     * survey list owns.
      */
     fun forSurvey(
       surveyId: String,
@@ -57,7 +58,10 @@ data class SurveyEditorDraft(
             title = survey.title,
             description = survey.description,
             organizationId = survey.organizationId,
-          )
+          ),
+        sharing =
+          if (base.sharing.ownerEmail.isBlank()) base.sharing.copy(ownerEmail = survey.ownerEmail)
+          else base.sharing,
       )
     }
   }

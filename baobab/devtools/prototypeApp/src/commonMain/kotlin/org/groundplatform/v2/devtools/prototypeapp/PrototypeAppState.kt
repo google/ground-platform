@@ -35,6 +35,7 @@ import org.groundplatform.v2.devtools.prototypeapp.map.EntityGeometry
 import org.groundplatform.v2.devtools.prototypeapp.map.FormGeometryOverlay
 import org.groundplatform.v2.devtools.prototypeapp.pdf.GeneratedPdf
 import org.groundplatform.v2.devtools.prototypeapp.pdf.RecordPdfReports
+import org.groundplatform.v2.devtools.prototypeapp.surveyeditor.SurveyAccess
 import org.groundplatform.v2.devtools.prototypeapp.surveyeditor.SurveyEditorDraft
 import org.groundplatform.v2.devtools.prototypeapp.surveyeditor.withEditorFormAvailability
 import org.groundplatform.v2.devtools.prototypeapp.surveyeditor.withEditorLayerStyles
@@ -299,6 +300,20 @@ class PrototypeAppState(
   /** The organization the active survey belongs to, if any. */
   val activeSurveyOrganization: Organization?
     get() = organization(activeSurvey.organizationId)
+
+  /**
+   * Whether the signed-in user may open the Survey editor for the active survey: they own it, are
+   * an accepted Survey organizer on its access list, or manage its organization (see
+   * [SurveyAccess]).
+   */
+  val canManageActiveSurvey: Boolean
+    get() =
+      isSignedIn &&
+        SurveyAccess.canManage(
+          email = signedInUserEmail,
+          sharing = activeSurveyEditorDraft.sharing,
+          organization = activeSurveyOrganization,
+        )
 
   var termsCheckboxChecked by mutableStateOf(true)
     private set
