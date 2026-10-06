@@ -37,11 +37,41 @@ import org.groundplatform.v2.core.forms.ui.CompactMapDrawingHost
 import org.groundplatform.v2.core.forms.ui.FormWizardController
 import org.groundplatform.v2.core.forms.ui.MapDrawingKind
 import org.groundplatform.v2.core.forms.ui.addMapDrawingVertex
+import org.groundplatform.v2.core.forms.ui.mapDrawingKindOf
 import org.groundplatform.v2.core.forms.ui.mapDrawingVertices
 import org.groundplatform.v2.core.forms.ui.setMapDrawingVertices
 import org.groundplatform.v2.core.forms.ui.undoMapDrawingVertex
 import org.groundplatform.v2.devtools.prototypeapp.map.DraftGeometry
+import org.groundplatform.v2.devtools.prototypeapp.map.FormGeometryOverlay
 import org.groundplatform.v2.map.LatLng
+
+/**
+ * A request to bring the question at [path] into view in the web form panel; [token] increases with
+ * every request so the same question can be requested twice in a row.
+ */
+data class FormFocusRequest(val path: String, val token: Long)
+
+/**
+ * The geometry answers held by [controller]'s form, in field order: every `geopoint` / `geotrace` /
+ * `geoshape` field with at least one vertex, except [excludePath] (the question being drawn, which
+ * the draft overlay shows instead).
+ */
+fun formGeometryOverlays(
+  controller: FormWizardController,
+  excludePath: String? = null,
+): List<FormGeometryOverlay> =
+  controller.formState.fieldStates.mapNotNull { (path, fieldState) ->
+    if (path == excludePath) return@mapNotNull null
+    val kind = mapDrawingKindOf(fieldState.dataType) ?: return@mapNotNull null
+    val vertices = mapDrawingVertices(fieldState, kind)
+    if (vertices.isEmpty()) return@mapNotNull null
+    FormGeometryOverlay(
+      path = path,
+      title = controller.questionTitleFor(path),
+      kind = kind,
+      vertices = vertices.map { LatLng(it.latitude, it.longitude) },
+    )
+  }
 
 /**
  * The web dashboard's "draw on the map" host ([CompactMapDrawingHost]) for the compact form

@@ -55,6 +55,19 @@ data class DraftGeometry(val kind: MapDrawingKind, val vertices: List<LatLng>) {
     get() = vertices.size >= kind.minVertices
 }
 
+/**
+ * A geometry answer held by the form open in the web dashboard panel (any `geopoint`, `geotrace`,
+ * or `geoshape` field with a value): the question's canonical [path] and [title], the geometry
+ * [kind], and its [vertices]. Drawn above the entities in the "in-flow" style, between them and the
+ * draft being drawn; clicking one jumps to its question. See [SurveyMapContent.build].
+ */
+data class FormGeometryOverlay(
+  val path: String,
+  val title: String,
+  val kind: MapDrawingKind,
+  val vertices: List<LatLng>,
+)
+
 /** Compose-drawn map annotations; see `SurveyMapMarkers.kt` for their UI. */
 internal sealed interface SurveyMarker {
   /**
@@ -101,6 +114,12 @@ internal sealed interface SurveyMarker {
 
   /** A place picked from search; tapping it dismisses it. */
   data class Place(val name: String) : SurveyMarker
+
+  /**
+   * The question title over a geometry answer of the form open in the web dashboard panel; tapping
+   * it jumps to the question.
+   */
+  data class FormQuestion(val title: String, val kind: MapDrawingKind) : SurveyMarker
 }
 
 /** Feature and marker ids on survey maps, and how taps map back to domain ids. */
@@ -108,6 +127,7 @@ internal object SurveyMapIds {
   private const val ENTITY = "entity:"
   private const val CLUSTER = "cluster:"
   private const val PLACE = "place:"
+  private const val FORM_GEOMETRY = "form-geometry:"
   const val USER = "user"
   const val NAVIGATION = "navigation"
 
@@ -119,6 +139,11 @@ internal object SurveyMapIds {
 
   fun place(id: String) = PLACE + id
 
+  /** Feature and marker id of the open form's geometry answer at [path] (e.g. `/data/plot`). */
+  fun formGeometry(path: String) = FORM_GEOMETRY + path
+
+  fun formGeometryVertex(path: String, index: Int) = "$FORM_GEOMETRY$path#v$index"
+
   /** The entity a feature or marker id belongs to, if any (vertices map to their entity). */
   fun entityIdOf(id: String): String? =
     if (id.startsWith(ENTITY)) id.removePrefix(ENTITY).substringBefore('#') else null
@@ -127,6 +152,10 @@ internal object SurveyMapIds {
     if (id.startsWith(CLUSTER)) id.removePrefix(CLUSTER) else null
 
   fun isPlace(id: String) = id.startsWith(PLACE)
+
+  /** The question path a form-geometry feature or marker id belongs to, if any. */
+  fun formGeometryPathOf(id: String): String? =
+    if (id.startsWith(FORM_GEOMETRY)) id.removePrefix(FORM_GEOMETRY).substringBefore('#') else null
 }
 
 /**
@@ -158,6 +187,7 @@ internal object SurveyMapContent {
       place = state.selectedPlace,
       layers = state.mapLayers,
       draftGeometry = state.webMapDraftGeometry,
+      formGeometries = state.webFormGeometries,
     )
 
   /** The map in a form's entity-reference step, listing the form's candidate entities. */
@@ -206,6 +236,8 @@ internal object SurveyMapContent {
    * @param draftGeometry a geometry being drawn for a form question, drawn above everything else in
    *   the draft style: its vertices, the line through them, and (for a polygon with at least 3
    *   vertices) the closed shape.
+   * @param formGeometries the geometry answers already held by the open form, drawn in the in-flow
+   *   style above the entities and below [draftGeometry], each labelled with its question title.
    */
   fun build(
     anchor: SurveyMapAnchor,
@@ -223,6 +255,7 @@ internal object SurveyMapContent {
     place: SurveyPlaceItem?,
     layers: List<MapLayerItem> = emptyList(),
     draftGeometry: DraftGeometry? = null,
+    formGeometries: List<FormGeometryOverlay> = emptyList(),
   ): SurveyMap {
     val satellite = basemapType == BasemapType.SATELLITE
     fun at(nx: Float, ny: Float) = anchor.toLatLng(nx.toDouble(), ny.toDouble())
@@ -364,6 +397,10 @@ internal object SurveyMapContent {
         ) to SurveyMarker.NavigationPill((if (v.hasArrived) "✓ Arrived • " else "➤ ") + distance)
     }
     if (draftGeometry != null) overlayFeatures += draftFeatures(draftGeometry)
+    for (formGeometry in formGeometries) {
+      overlayFeatures += formGeometryFeatures(formGeometry)
+      formGeometryMarker(formGeometry)?.let { otherMarkers += it }
+    }
 
     val clusterMarkers =
       clusters
@@ -461,6 +498,67 @@ internal object SurveyMapContent {
 
   /** Feature id of the draft's [index]th vertex. */
   fun draftVertexId(index: Int) = "draft-vertex-$index"
+
+  /**
+   * Overlay features for a geometry answer of the open form: the shape (a point, a line, or a
+   * closed polygon; a polygon short of 3 vertices draws as a line) plus a circle per vertex of
+   * lines and polygons. All ids map back to the question with [SurveyMapIds.formGeometryPathOf].
+   */
+  internal fun formGeometryFeatures(overlay: FormGeometryOverlay): List<MapFeature> {
+    val vertices = overlay.vertices
+    if (vertices.isEmpty()) return emptyList()
+    val shapeId = SurveyMapIds.formGeometry(overlay.path)
+    val features = mutableListOf<MapFeature>()
+    when {
+      overlay.kind == MapDrawingKind.POINT ->
+        features +=
+          MapFeature(shapeId, Geometry.Point(vertices.first()), mapOf(PROP_KIND to KIND_FORM_POINT))
+      overlay.kind == MapDrawingKind.POLYGON && vertices.size >= 3 ->
+        features +=
+          MapFeature(
+            shapeId,
+            Geometry.Polygon(listOf(vertices)),
+            mapOf(PROP_KIND to KIND_FORM_POLYGON),
+          )
+      vertices.size >= 2 ->
+        features +=
+          MapFeature(shapeId, Geometry.LineString(vertices), mapOf(PROP_KIND to KIND_FORM_LINE))
+    }
+    if (overlay.kind != MapDrawingKind.POINT) {
+      vertices.forEachIndexed { i, vertex ->
+        features +=
+          MapFeature(
+            SurveyMapIds.formGeometryVertex(overlay.path, i),
+            Geometry.Point(vertex),
+            mapOf(PROP_KIND to KIND_FORM_VERTEX),
+          )
+      }
+    }
+    return features
+  }
+
+  /**
+   * The question-title label of a form geometry answer: under a point, at the vertex centroid of a
+   * line or polygon. `null` for an empty answer.
+   */
+  internal fun formGeometryMarker(overlay: FormGeometryOverlay): Pair<MapMarker, SurveyMarker>? {
+    val vertices = overlay.vertices
+    if (vertices.isEmpty()) return null
+    val id = SurveyMapIds.formGeometry(overlay.path)
+    val label = SurveyMarker.FormQuestion(overlay.title.ifBlank { overlay.path }, overlay.kind)
+    val marker =
+      if (overlay.kind == MapDrawingKind.POINT) {
+        MapMarker(id, vertices.first(), MarkerAnchor.TOP, DpOffset(0.dp, 8.dp))
+      } else {
+        val center =
+          LatLng(
+            vertices.sumOf { it.latitude } / vertices.size,
+            vertices.sumOf { it.longitude } / vertices.size,
+          )
+        MapMarker(id, center, MarkerAnchor.CENTER)
+      }
+    return marker to label
+  }
 
   /** Always the same layers, so content changes only update source data and paint. */
   private fun layers(
@@ -591,6 +689,39 @@ internal object SurveyMapContent {
         // Moves the pin down so its tip, not the bottom of its shadow, sits on the location.
         iconOffset = DpOffset(0.dp, (GroundPin.HEIGHT - GroundPin.TIP_Y).toFloat().dp),
       ),
+      // Geometry answers already held by the open form: settled in-flow style, above the entities.
+      MapLayer.Fill(
+        id = "form-geometry-fill",
+        sourceId = OVERLAY_SOURCE,
+        filter = kind(KIND_FORM_POLYGON),
+        color = StyleValue.Constant(draftColor),
+        opacity = StyleValue.Constant(0.18f),
+      ),
+      MapLayer.Line(
+        id = "form-geometry-outline",
+        sourceId = OVERLAY_SOURCE,
+        filter = FeatureFilter.In(PROP_KIND, setOf(KIND_FORM_LINE, KIND_FORM_POLYGON)),
+        color = StyleValue.Constant(draftColor),
+        width = StyleValue.Constant(2.5.dp),
+      ),
+      MapLayer.Circle(
+        id = "form-geometry-vertices",
+        sourceId = OVERLAY_SOURCE,
+        filter = kind(KIND_FORM_VERTEX),
+        color = StyleValue.Constant(Color.White),
+        radius = StyleValue.Constant(3.6.dp),
+        strokeColor = StyleValue.Constant(draftColor),
+        strokeWidth = 2.dp,
+      ),
+      MapLayer.Circle(
+        id = "form-geometry-points",
+        sourceId = OVERLAY_SOURCE,
+        filter = kind(KIND_FORM_POINT),
+        color = StyleValue.Constant(Color.White),
+        radius = StyleValue.Constant(6.dp),
+        strokeColor = StyleValue.Constant(draftColor),
+        strokeWidth = 3.dp,
+      ),
       // The geometry being drawn for a form question sits above every entity.
       MapLayer.Fill(
         id = "draft-fill",
@@ -656,6 +787,10 @@ internal object SurveyMapContent {
   const val KIND_DRAFT_LINE = "draft-line"
   const val KIND_DRAFT_POLYGON = "draft-polygon"
   const val KIND_DRAFT_VERTEX = "draft-vertex"
+  const val KIND_FORM_POINT = "form-point"
+  const val KIND_FORM_LINE = "form-line"
+  const val KIND_FORM_POLYGON = "form-polygon"
+  const val KIND_FORM_VERTEX = "form-vertex"
 
   /** How a feature is emphasized. */
   object Variant {

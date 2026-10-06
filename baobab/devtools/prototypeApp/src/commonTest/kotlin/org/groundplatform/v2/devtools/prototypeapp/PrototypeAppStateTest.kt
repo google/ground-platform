@@ -2318,4 +2318,113 @@ class PrototypeAppStateTest {
         .size,
     )
   }
+
+  @Test
+  fun webFormGeometries_followTheOpenForm_andSkipTheOneBeingDrawn() {
+    val state = PrototypeAppState(initialScreen = PrototypeScreen.MAIN_SURVEY)
+    assertTrue(state.webFormGeometries.isEmpty())
+
+    // The sample form opens with a point, a line, and a polygon already answered.
+    state.launchFormForEntity(entityId = "entity-shade-201", formId = "form-shade-canopy-audit")
+    val controller = assertNotNull(state.activeFormWizardController)
+    val byPath = state.webFormGeometries.associateBy { it.path }
+    val point = assertNotNull(byPath["/data/plot_center_gps"])
+    val line = assertNotNull(byPath["/data/riparian_transect"])
+    val polygon = assertNotNull(byPath["/data/plot_boundary"])
+    assertEquals(MapDrawingKind.POINT, point.kind)
+    assertEquals(MapDrawingKind.LINE, line.kind)
+    assertEquals(MapDrawingKind.POLYGON, polygon.kind)
+    assertEquals(1, point.vertices.size)
+    assertEquals(LatLng(-1.292066, 36.821946), point.vertices.single())
+    assertEquals(2, line.vertices.size)
+    assertTrue(polygon.vertices.size >= 3)
+    assertEquals(controller.questionTitleFor("/data/plot_boundary"), polygon.title)
+    assertTrue(polygon.title.isNotBlank())
+
+    // Only geometry fields with a value are listed.
+    controller.setMapDrawingVertices("/data/riparian_transect", MapDrawingKind.LINE, emptyList())
+    assertEquals(
+      setOf("/data/plot_center_gps", "/data/plot_boundary"),
+      state.webFormGeometries.map { it.path }.toSet(),
+    )
+
+    // The question being drawn is left to the draft overlay, and comes back after Done.
+    state.webMapDrawing.startDrawing("/data/plot_boundary", MapDrawingKind.POLYGON)
+    assertEquals(listOf("/data/plot_center_gps"), state.webFormGeometries.map { it.path })
+    state.webMapDrawing.stopDrawing()
+    assertEquals(
+      setOf("/data/plot_center_gps", "/data/plot_boundary"),
+      state.webFormGeometries.map { it.path }.toSet(),
+    )
+
+    // The main map shows them as form-geometry features (above entities) with a title label.
+    val map = SurveyMapContent.main(state, showNavigation = false)
+    val overlay =
+      map.content.sources
+        .first { it.id == SurveyMapContent.OVERLAY_SOURCE }
+        .features
+        .associateBy {
+          it.id
+        }
+    val pointFeature = assertNotNull(overlay[SurveyMapIds.formGeometry("/data/plot_center_gps")])
+    assertEquals(
+      SurveyMapContent.KIND_FORM_POINT,
+      pointFeature.properties[SurveyMapContent.PROP_KIND],
+    )
+    val polygonFeature = assertNotNull(overlay[SurveyMapIds.formGeometry("/data/plot_boundary")])
+    assertEquals(
+      SurveyMapContent.KIND_FORM_POLYGON,
+      polygonFeature.properties[SurveyMapContent.PROP_KIND],
+    )
+    assertNotNull(overlay[SurveyMapIds.formGeometryVertex("/data/plot_boundary", 0)])
+    val label = map.markers[SurveyMapIds.formGeometry("/data/plot_boundary")]
+    assertEquals(SurveyMarker.FormQuestion(polygon.title, MapDrawingKind.POLYGON), label)
+    val layerIds = map.content.layers.map { it.id }
+    assertTrue(layerIds.indexOf("form-geometry-outline") > layerIds.indexOf("entity-pins"))
+    assertTrue(layerIds.indexOf("form-geometry-outline") < layerIds.indexOf("draft-outline"))
+
+    // Closing the form clears the overlay.
+    state.closeActiveFormRunner()
+    assertTrue(state.webFormGeometries.isEmpty())
+  }
+
+  @Test
+  fun focusWebFormQuestion_issuesRequestsWithIncreasingTokens_andClearsWithTheForm() {
+    val state = PrototypeAppState(initialScreen = PrototypeScreen.MAIN_SURVEY)
+    state.launchFormForEntity(entityId = "entity-shade-201", formId = "form-shade-canopy-audit")
+    assertNull(state.webFormFocusRequest)
+
+    state.focusWebFormQuestion("/data/plot_boundary")
+    val first = assertNotNull(state.webFormFocusRequest)
+    assertEquals("/data/plot_boundary", first.path)
+
+    // Clicking the same geometry again re-fires with a new token.
+    state.focusWebFormQuestion("/data/plot_boundary")
+    val second = assertNotNull(state.webFormFocusRequest)
+    assertEquals(first.path, second.path)
+    assertTrue(second.token > first.token)
+
+    state.consumeWebFormFocusRequest()
+    assertNull(state.webFormFocusRequest)
+
+    state.focusWebFormQuestion("/data/plot_center_gps")
+    assertNotNull(state.webFormFocusRequest)
+    state.closeActiveFormRunner()
+    assertNull(state.webFormFocusRequest)
+  }
+
+  @Test
+  fun surveyMapIds_formGeometryIdsRoundTrip_andDontCollideWithOtherIds() {
+    val path = "/data/site/plot_boundary"
+    val id = SurveyMapIds.formGeometry(path)
+    assertEquals(path, SurveyMapIds.formGeometryPathOf(id))
+    assertEquals(path, SurveyMapIds.formGeometryPathOf(SurveyMapIds.formGeometryVertex(path, 3)))
+    assertNull(SurveyMapIds.entityIdOf(id))
+    assertNull(SurveyMapIds.clusterIdOf(id))
+    assertFalse(SurveyMapIds.isPlace(id))
+    assertNull(SurveyMapIds.formGeometryPathOf(SurveyMapIds.entity("form-geometry:x")))
+    assertNull(SurveyMapIds.formGeometryPathOf(SurveyMapIds.cluster("c1")))
+    assertNull(SurveyMapIds.formGeometryPathOf(SurveyMapContent.DRAFT_SHAPE_ID))
+    assertNull(SurveyMapIds.formGeometryPathOf(SurveyMapIds.USER))
+  }
 }

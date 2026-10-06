@@ -53,6 +53,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import org.groundplatform.v2.core.forms.model.FinalizationResult
+import org.groundplatform.v2.core.forms.ui.CompactFocusRequest
 import org.groundplatform.v2.core.forms.ui.CompactFormRunner
 import org.groundplatform.v2.core.forms.ui.CompactGeometryInput
 import org.groundplatform.v2.core.forms.ui.GroundBadgeTone
@@ -73,7 +74,10 @@ import org.groundplatform.v2.core.forms.ui.LocalMediaCaptureHandler
  * - Forms opened from a map feature's card (**Collect data** buttons) go straight to the questions.
  * - Geometry questions (`geopoint`, `geotrace`, `geoshape`) are drawn on the main map through
  *   [PrototypeAppState.webMapDrawing] instead of captured from a device GPS: **Draw on map** routes
- *   map clicks to the question until the point is placed or the collector clicks **Done**.
+ *   map clicks to the question until the point is placed or the collector clicks **Done**. All of
+ *   the form's geometry answers stay on the map in the in-flow style
+ *   ([PrototypeAppState.webFormGeometries]); clicking one scrolls to and highlights its card
+ *   ([PrototypeAppState.webFormFocusRequest]).
  *
  * Submitting runs the same [PrototypeAppState.completeActiveFormSubmission] as mobile, which adds
  * the submission to the feature's history and closes the panel.
@@ -139,6 +143,10 @@ internal fun WebDataCollectionCard(state: PrototypeAppState, modifier: Modifier 
             questionFilter = { step -> !isWizardStepEntityRef(step) },
             // No field GPS in a browser: every geometry question is drawn on the main map.
             geometryInput = CompactGeometryInput.MapDrawing(host = state.webMapDrawing),
+            // Clicking one of the form's geometries on the map jumps to its question. The request
+            // keeps its token, so the runner handles each click once without it being consumed.
+            focusRequest =
+              state.webFormFocusRequest?.let { CompactFocusRequest(it.path, it.token) },
           )
         }
       }

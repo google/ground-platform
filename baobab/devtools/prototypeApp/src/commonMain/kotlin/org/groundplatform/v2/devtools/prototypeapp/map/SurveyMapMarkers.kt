@@ -46,6 +46,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import org.groundplatform.v2.core.forms.ui.MapDrawingKind
 import org.groundplatform.v2.devtools.prototypeapp.EntityGeometryKind
 
 private val MapInk = Color(0xFF0E2219)
@@ -81,6 +82,24 @@ internal fun SurveyMarkerView(marker: SurveyMarker) {
         padding = PaddingValues(horizontal = 8.dp, vertical = 3.dp),
       )
     is SurveyMarker.Place -> PlaceChip(marker)
+    is SurveyMarker.FormQuestion -> {
+      val glyph =
+        when (marker.kind) {
+          MapDrawingKind.POLYGON -> "▱ "
+          MapDrawingKind.LINE -> "╱ "
+          MapDrawingKind.POINT -> "● "
+        }
+      Chip(
+        text = glyph + marker.title,
+        background = Color(0xEBFFF3E0),
+        border = Color(0xFFFF8F00),
+        borderWidth = 1.5.dp,
+        textColor = Color(0xFF4E2600),
+        fontSize = 9.sp,
+        radius = 12.dp,
+        padding = PaddingValues(horizontal = 8.dp, vertical = 3.dp),
+      )
+    }
   }
 }
 

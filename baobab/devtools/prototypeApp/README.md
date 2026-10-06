@@ -144,7 +144,13 @@ prototype, so selections and survey changes carry over.
     the map features in the draft style (`SurveyMapContent.draftGeometry`).
     One click places a point; lines and polygons collect vertices until
     **Done**. While drawing, clicks on features add vertices instead of
-    selecting them.
+    selecting them. Every geometry answer the open form already holds stays on
+    the map in a settled "in-flow" style (`PrototypeAppState.webFormGeometries`:
+    same amber hue as the draft but solid outlines, light fill, white vertex
+    discs, and a chip with the question title); clicking one of them, or its
+    chip, scrolls the panel to that question and highlights its card for a
+    moment (`PrototypeAppState.focusWebFormQuestion` → the runner's
+    `focusRequest`).
 -   **Media capture on web** (`PrototypeMediaCapture.kt`,
     `src/commonMain/resources/media-capture-bridge.js`): Photo, video, and
     audio questions use the shared `MediaCaptureWidget` with the prototype's

@@ -16,6 +16,7 @@ package org.groundplatform.v2.core.forms.ui
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.layout.Arrangement
@@ -28,6 +29,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.relocation.BringIntoViewRequester
+import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
@@ -58,6 +61,7 @@ import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -74,9 +78,23 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.delay
 import org.groundplatform.v2.core.forms.model.ComponentState
 import org.groundplatform.v2.core.forms.model.FinalizationResult
 import org.groundplatform.v2.core.forms.model.ValidationStatus
+
+/**
+ * A host's request that [CompactFormRunner] bring the question at [path] into view (see its
+ * `focusRequest` parameter). [token] must change between requests, so asking for the same question
+ * twice in a row works; hosts typically count up.
+ */
+data class CompactFocusRequest(val path: String, val token: Long) {
+  /** True when this request is for the card at [cardPath]. */
+  fun targets(cardPath: String): Boolean = path == cardPath
+}
+
+/** How long a card stays highlighted after a [CompactFocusRequest] brought it into view. */
+internal const val FOCUS_FLASH_MILLIS = 1500L
 
 /**
  * Completion state of one question in the compact (web) form layout, shown as the icon at the left
@@ -312,7 +330,12 @@ fun compactFormProgress(
  *   device GPS widgets, or a request to draw on the host's map ([CompactGeometryInput.MapDrawing],
  *   what the web dashboard uses). A card whose geometry is being drawn doesn't auto-collapse until
  *   the collector finishes drawing.
+ * - [focusRequest] brings a question into view on the host's behalf (e.g. after its geometry was
+ *   clicked on the web dashboard's map): the card expands, scrolls into view through the enclosing
+ *   scroll container, and is highlighted for a moment. A new [CompactFocusRequest.token] re-fires
+ *   the same path.
  */
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun CompactFormRunner(
   controller: FormWizardController,
@@ -329,6 +352,7 @@ fun CompactFormRunner(
   contentPadding: PaddingValues = PaddingValues(0.dp),
   questionFilter: (FormWizardStep.QuestionStep) -> Boolean = { true },
   geometryInput: CompactGeometryInput = CompactGeometryInput.Device,
+  focusRequest: CompactFocusRequest? = null,
 ) {
   val state = controller.formState
   val drawingHost = (geometryInput as? CompactGeometryInput.MapDrawing)?.host
@@ -384,13 +408,30 @@ fun CompactFormRunner(
               LaunchedEffect(status, hasFocus, isDrawing) {
                 if (!hasFocus && !isDrawing) layoutState.onStatusChanged(path, status)
               }
+              // A host focus request for this card: expand, scroll into view, flash the border.
+              val bringIntoView = remember { BringIntoViewRequester() }
+              var flashToken by remember { mutableStateOf<Long?>(null) }
+              LaunchedEffect(focusRequest) {
+                val request = focusRequest?.takeIf { it.targets(path) } ?: return@LaunchedEffect
+                layoutState.setExpanded(path, true)
+                flashToken = request.token
+                // Let the expanded card lay out before measuring where to scroll to.
+                withFrameNanos {}
+                withFrameNanos {}
+                bringIntoView.bringIntoView()
+                delay(FOCUS_FLASH_MILLIS)
+                if (flashToken == request.token) flashToken = null
+              }
               CompactQuestionCard(
                 step = item.step,
                 controller = controller,
                 status = status,
                 expanded = layoutState.isExpanded(path),
                 onToggle = { layoutState.toggle(path) },
-                modifier = Modifier.onFocusChanged { hasFocus = it.hasFocus }.focusGroup(),
+                modifier =
+                  Modifier.bringIntoViewRequester(bringIntoView)
+                    .onFocusChanged { hasFocus = it.hasFocus }
+                    .focusGroup(),
                 // With a selection host, a header click selects the question instead of
                 // collapsing it.
                 onHeaderClick = {
@@ -403,7 +444,7 @@ fun CompactFormRunner(
                     null
                   },
                 readOnly = readOnly,
-                isSelected = selectedPath == path,
+                isSelected = selectedPath == path || flashToken != null,
                 showValidationErrors = submitAttempted,
                 geometryInput = geometryInput,
               )

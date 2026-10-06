@@ -77,6 +77,11 @@ and **Web (`js`, `wasmJs`)**.
     and polygons collect vertices until **Done**). The web dashboard uses this
     for every geometry question, "GPS only" or not, since a browser has no
     field GPS; a `null` host renders the request inert for read-only previews.
+    A host can also bring a question into view with `focusRequest`
+    (`CompactFocusRequest(path, token)`): the card expands, scrolls into view
+    through the enclosing scroll container, and is highlighted for a moment; a
+    new token re-fires the same path (the web dashboard uses this when one of
+    the form's geometries is clicked on the map).
 -   **Form Density
     ([`FormDensity` / `LocalFormDensity`](src/commonMain/kotlin/org/groundplatform/v2/core/forms/ui/FormDensity.kt))**:
     A composition local that tells the shared widgets which layout hosts them.

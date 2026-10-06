@@ -69,6 +69,12 @@ internal fun SurveyMainMap(
       if (at != null) state.addWebMapDrawingVertex(at)
       return@SurveyGroundMap
     }
+    // A geometry answer of the open form (web dashboard) jumps to its question.
+    val formPath = tappedId?.let(SurveyMapIds::formGeometryPathOf)
+    if (formPath != null && state.isDataCollectionFormOpen) {
+      state.focusWebFormQuestion(formPath)
+      return@SurveyGroundMap
+    }
     val entityId = tappedId?.let(SurveyMapIds::entityIdOf)
     val clusterId = tappedId?.let(SurveyMapIds::clusterIdOf)
     when {

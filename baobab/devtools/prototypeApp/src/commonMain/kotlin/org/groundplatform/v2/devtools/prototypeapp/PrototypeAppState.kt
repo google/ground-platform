@@ -31,6 +31,7 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyMapAnchor
 import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.ClusterMapFeaturesUseCase
 import org.groundplatform.v2.devtools.prototypeapp.map.DraftGeometry
 import org.groundplatform.v2.devtools.prototypeapp.map.EntityGeometry
+import org.groundplatform.v2.devtools.prototypeapp.map.FormGeometryOverlay
 import org.groundplatform.v2.devtools.prototypeapp.pdf.GeneratedPdf
 import org.groundplatform.v2.devtools.prototypeapp.pdf.RecordPdfReports
 import org.groundplatform.v2.devtools.prototypeapp.surveyeditor.SurveyEditorDraft
@@ -965,8 +966,12 @@ class PrototypeAppState(
   var activeFormWizardController: FormWizardController?
     get() = activeFormWizardControllerState
     private set(value) {
-      // Opening, replacing, or closing a form ends any map drawing started for the previous one.
-      if (value !== activeFormWizardControllerState) webMapDrawing.stopDrawing()
+      // Opening, replacing, or closing a form ends any map drawing started for the previous one,
+      // and drops a pending jump to one of its questions.
+      if (value !== activeFormWizardControllerState) {
+        webMapDrawing.stopDrawing()
+        webFormFocusRequest = null
+      }
       activeFormWizardControllerState = value
     }
 
@@ -988,6 +993,38 @@ class PrototypeAppState(
   /** The geometry being drawn on the main map, for its overlay, or `null` when not drawing. */
   val webMapDraftGeometry: DraftGeometry?
     get() = webMapDrawing.draftGeometry
+
+  /**
+   * Every geometry answer held by the open form (web dashboard), for the main map's in-flow
+   * overlay: each `geopoint` / `geotrace` / `geoshape` field with a value, except the one being
+   * drawn right now (the draft overlay shows that one). Empty when no form is open.
+   */
+  val webFormGeometries: List<FormGeometryOverlay>
+    get() {
+      val controller = activeFormWizardController ?: return emptyList()
+      return formGeometryOverlays(controller, excludePath = webMapDrawing.activeDrawingPath)
+    }
+
+  /**
+   * The question the web form panel should scroll to and highlight, after its geometry was clicked
+   * on the main map ([focusWebFormQuestion]). Each request carries a fresh token, so clicking the
+   * same geometry again re-fires it.
+   */
+  var webFormFocusRequest by mutableStateOf<FormFocusRequest?>(null)
+    private set
+
+  private var webFormFocusToken = 0L
+
+  /** Asks the web form panel to bring the question at [path] into view and highlight it. */
+  fun focusWebFormQuestion(path: String) {
+    webFormFocusToken += 1
+    webFormFocusRequest = FormFocusRequest(path, webFormFocusToken)
+  }
+
+  /** Clears [webFormFocusRequest] once the form panel has handled it. */
+  fun consumeWebFormFocusRequest() {
+    webFormFocusRequest = null
+  }
 
   /**
    * Target Geospatial Entity ID for the currently active data collection form (`null` when closed).
