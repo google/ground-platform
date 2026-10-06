@@ -582,12 +582,20 @@ private fun SurveyListItemCard(
   }
 }
 
-/** Stylized map thumbnail placeholder rendered with Compose Canvas for each survey card. */
+/**
+ * Stylized map thumbnail placeholder rendered with Compose Canvas for each survey card, on mobile
+ * and on the web surveys page.
+ */
 @Composable
-private fun SurveyMapThumbnail(theme: MapThumbnailTheme, isDownloaded: Boolean) {
+internal fun SurveyMapThumbnail(
+  theme: MapThumbnailTheme,
+  isDownloaded: Boolean,
+  modifier: Modifier = Modifier,
+) {
   Box(
     modifier =
-      Modifier.size(80.dp)
+      modifier
+        .size(80.dp)
         .clip(MaterialTheme.shapes.medium)
         .background(Color(theme.primaryTerrainHex))
         .border(1.dp, MaterialTheme.colorScheme.outlineVariant, MaterialTheme.shapes.medium)

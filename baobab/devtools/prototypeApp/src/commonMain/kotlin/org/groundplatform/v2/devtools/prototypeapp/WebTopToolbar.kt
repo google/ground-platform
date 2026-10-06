@@ -31,14 +31,19 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.List
 import androidx.compose.material.icons.automirrored.outlined.Logout
+import androidx.compose.material.icons.outlined.ArrowDropDown
+import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.LocationOn
+import androidx.compose.material.icons.outlined.Map
 import androidx.compose.material.icons.outlined.Smartphone
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -66,8 +71,8 @@ import org.groundplatform.v2.core.forms.ui.LocalGroundBrandFontFamily
 
 /**
  * Top navigation and context toolbar for the Ground 2.0 Web dashboard: the shared [WebAppHeader]
- * showing the active survey and its location, with "Mobile prototype", "Manage survey", and
- * "Collect data" ([WebCollectDataMenuButton]) actions.
+ * showing the active survey (a [WebSurveySwitcher] dropdown) with its organization and location,
+ * and "Mobile prototype", "Manage survey", and "Collect data" ([WebCollectDataMenuButton]) actions.
  */
 @Composable
 internal fun WebTopToolbar(
@@ -81,7 +86,11 @@ internal fun WebTopToolbar(
     onSignOut = onSignOut,
     modifier = modifier,
     context = {
-      WebHeaderContext(title = state.activeSurvey.title) {
+      WebSurveySwitcher(state = state) {
+        state.activeSurveyOrganization?.let { organization ->
+          WebHeaderSupportingText(organization.name, color = MaterialTheme.colorScheme.primary)
+          WebHeaderSupportingText("·")
+        }
         Icon(
           imageVector = Icons.Outlined.LocationOn,
           contentDescription = null,
@@ -101,6 +110,86 @@ internal fun WebTopToolbar(
       WebCollectDataMenuButton(state)
     },
   )
+}
+
+/**
+ * Header context for survey pages: the active survey's title with a dropdown arrow. Clicking it
+ * lists the other surveys the user can open, grouped by organization, and a link to the full
+ * surveys page.
+ */
+@Composable
+internal fun WebSurveySwitcher(
+  state: PrototypeAppState,
+  supporting: @Composable RowScope.() -> Unit = {},
+) {
+  var isOpen by remember { mutableStateOf(false) }
+  Box {
+    Row(
+      modifier =
+        Modifier.clip(MaterialTheme.shapes.small)
+          .clickable { isOpen = !isOpen }
+          .padding(horizontal = 6.dp, vertical = 2.dp),
+      verticalAlignment = Alignment.CenterVertically,
+      horizontalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
+      WebHeaderContext(title = state.activeSurvey.title, supporting = supporting)
+      Icon(
+        imageVector = Icons.Outlined.ArrowDropDown,
+        contentDescription = "Switch survey",
+        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+      )
+    }
+    DropdownMenu(
+      expanded = isOpen,
+      onDismissRequest = { isOpen = false },
+      modifier = Modifier.width(360.dp),
+    ) {
+      val sections = WebSurveysList.sections(state.surveys, state.organizations)
+      sections.forEach { section ->
+        Text(
+          text = section.title,
+          style = MaterialTheme.typography.labelSmall,
+          color = MaterialTheme.colorScheme.onSurfaceVariant,
+          modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
+        )
+        section.surveys.forEach { survey ->
+          val isActive = survey.id == state.activeSurveyId
+          DropdownMenuItem(
+            text = {
+              Text(
+                text = survey.title,
+                fontWeight = if (isActive) FontWeight.Bold else FontWeight.Normal,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+              )
+            },
+            leadingIcon = {
+              Icon(
+                imageVector = if (isActive) Icons.Outlined.Check else Icons.Outlined.Map,
+                contentDescription = null,
+                tint =
+                  if (isActive) MaterialTheme.colorScheme.primary
+                  else MaterialTheme.colorScheme.onSurfaceVariant,
+              )
+            },
+            onClick = {
+              isOpen = false
+              if (!isActive) state.openSurveyOnWeb(survey.id)
+            },
+          )
+        }
+      }
+      HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+      DropdownMenuItem(
+        text = { Text("All surveys…") },
+        leadingIcon = { Icon(Icons.AutoMirrored.Outlined.List, contentDescription = null) },
+        onClick = {
+          isOpen = false
+          state.selectWorkbenchPage(PrototypeWorkbenchPage.WEB_SURVEYS)
+        },
+      )
+    }
+  }
 }
 
 /**

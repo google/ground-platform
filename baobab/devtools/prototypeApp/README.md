@@ -82,15 +82,40 @@ UX Co-Design Workbench for rapid iteration with UX designers.
         (Metric/Imperial units, in-app language locale switcher, device storage chart, and
         uploaded media cache eviction), **Terms of Service**, and **Sign out**.
 
+## Web Surveys Page (`#surveys`)
+
+The web application's landing page. Switch to it via the **Web app** button in
+the device frame or the debug tools menu (bug icon in the header), or deep-link
+to `http://localhost:8091/#surveys`. Web pages are gated behind a simple
+**Sign in with Google** card while the user is signed out.
+
+-   **Survey cards**: Every survey the signed-in user can open, grouped into a
+    section per **Organization** (with its logo and the user's role: *You
+    manage* or *Member*) followed by **Personal surveys**. Each card shows the
+    map thumbnail, title, location, description, an access chip (*Owner*,
+    *Organization manager*, *Organization member*, or *Shared with you*), and
+    the feature count. Clicking a card opens it in the Web dashboard.
+-   **Search and filters**: Free-text search over title, description,
+    location, and organization name, plus filter chips for **All**, **My
+    surveys**, and one chip per organization the user belongs to.
+-   **Create survey**: Opens a dialog for the title and an optional
+    organization (any organization the user is a member of; Managers of that
+    organization inherit survey organizer access), then opens the new, empty
+    survey in the **Survey editor**.
+-   The Web dashboard and Survey editor redirect here when there is no survey
+    to open, and **Sign out** from any web page returns here.
+
 ## Web Dashboard Page (`#dashboard`)
 
-Switch to the web application via the **Web app** option in the debug tools menu (bug icon in the header), or
-deep-link to `http://localhost:8091/#dashboard`. It shares state with the mobile
+Open a survey from the **Surveys** page, or deep-link to
+`http://localhost:8091/#dashboard`. It shares state with the mobile
 prototype, so selections and survey changes carry over.
 
--   **Top toolbar**: Displays Ground branding, the active survey title
-    with its location below it, a **Manage survey** button to enter the
-    **Survey editor**, and user profile controls.
+-   **Top toolbar**: Displays Ground branding and the active survey title as a
+    **survey switcher** dropdown (other surveys grouped by organization, plus
+    **All surveys…**), with its organization and location below it, a
+    **Manage survey** button to enter the **Survey editor**, and user profile
+    controls.
 -   **Left panel**: The searchable list of map features and places. Each map
     feature is a single line: a geometry icon (point, line, polygon, or none
     for data table records), its label, and its marker circle (filled

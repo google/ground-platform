@@ -236,6 +236,10 @@ private fun SurveyEditorTopBar(
       WebHeaderContext(title = state.details.title.ifBlank { "Untitled survey" }) {
         WebHeaderSupportingText("Survey editor", color = MaterialTheme.colorScheme.primary)
         WebHeaderSupportingText("·")
+        appState.organization(state.details.organizationId)?.let { organization ->
+          WebHeaderSupportingText(organization.name)
+          WebHeaderSupportingText("·")
+        }
         when {
           issueCount > 0 ->
             WebHeaderSupportingText(

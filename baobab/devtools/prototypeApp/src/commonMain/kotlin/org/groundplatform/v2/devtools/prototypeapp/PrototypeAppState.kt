@@ -27,6 +27,7 @@ import org.groundplatform.v2.core.forms.model.EntityState
 import org.groundplatform.v2.core.forms.serialization.XFormsXmlSerializer
 import org.groundplatform.v2.core.forms.ui.FormWizardController
 import org.groundplatform.v2.core.forms.ui.WorkbenchExampleForm
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.CachedProfile
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyMapAnchor
 import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.ClusterMapFeaturesUseCase
 import org.groundplatform.v2.devtools.prototypeapp.map.DraftGeometry
@@ -1720,6 +1721,27 @@ class PrototypeAppState(
   /** Opens a survey in the Main Survey UI (downloading it first if not already downloaded). */
   fun openSurvey(surveyId: String) {
     downloadSurvey(surveyId)
+    activateSurvey(surveyId)
+    currentScreen = PrototypeScreen.MAIN_SURVEY
+    isDrawerOpen = false
+    activeDrawerSubView = MainDrawerSubView.NONE
+    activeSurveyNotice =
+      "Loaded survey \"${activeSurvey.title}\" (${entities.size} entities, ${allSubmissions.size} preloaded submissions)."
+  }
+
+  /**
+   * Opens a survey in the web app (dashboard and Survey editor). Unlike [openSurvey], this doesn't
+   * download the survey for offline use or move the mobile preview to the Main Survey UI.
+   */
+  fun openSurveyOnWeb(surveyId: String) {
+    if (surveys.none { it.id == surveyId }) return
+    activateSurvey(surveyId)
+    dashboardTableDatasetId = null
+    isDashboardTableExpanded = false
+  }
+
+  /** Makes [surveyId] the active survey and clears every selection scoped to the previous one. */
+  private fun activateSurvey(surveyId: String) {
     viewModel.launch { viewModel.surveyRepository.setActiveSurveyId(surveyId) }
     data.surveyConfigs[surveyId]?.primaryFormXml?.let { xml ->
       selectedWorkbenchExampleForm =
@@ -1736,11 +1758,72 @@ class PrototypeAppState(
     activeFormWizardController = null
     isAvailableFormsSheetOpen = false
     isEntityBottomSheetExpanded = false
-    currentScreen = PrototypeScreen.MAIN_SURVEY
-    isDrawerOpen = false
-    activeDrawerSubView = MainDrawerSubView.NONE
-    activeSurveyNotice =
-      "Loaded survey \"${activeSurvey.title}\" (${entities.size} entities, ${allSubmissions.size} preloaded submissions)."
+  }
+
+  /** Whether the active survey exists in the store, so survey pages can open it. */
+  val hasOpenableActiveSurvey: Boolean
+    get() = surveys.any { it.id == activeSurveyId }
+
+  /**
+   * Creates a new, empty survey owned by the signed-in user, optionally in [organizationId], makes
+   * it active, and returns its ID. The caller normally opens the Survey editor next.
+   */
+  fun createSurvey(title: String, organizationId: String? = null): String {
+    val trimmedTitle = title.trim().ifBlank { "Untitled survey" }
+    val surveyId = uniqueSurveyId(trimmedTitle)
+    val organization = organization(organizationId)
+    val survey =
+      SurveyPreviewItem(
+        id = surveyId,
+        title = trimmedTitle,
+        description = "",
+        location = organization?.name ?: "No survey area yet",
+        coordinatesLabel = "",
+        offlineSizeLabel = "0 MB",
+        isDownloaded = false,
+        thumbnailTheme = MapThumbnailTheme.entries[surveys.size % MapThumbnailTheme.entries.size],
+        entityCount = 0,
+        ownerEmail = signedInUserEmail,
+        organizationId = organization?.id,
+      )
+    viewModel.launch {
+      viewModel.transactionRunner {
+        viewModel.surveyRepository.setSurveys(surveys + survey)
+        viewModel.surveyEditorRepository.saveDraft(
+          surveyId,
+          SurveyEditorDraft.blank(surveyId, title = trimmedTitle).let { draft ->
+            draft.copy(
+              details = draft.details.copy(organizationId = organization?.id),
+              sharing =
+                draft.sharing.copy(
+                  ownerEmail = signedInUserEmail,
+                  ownerProfile = CachedProfile(signedInUserName),
+                ),
+            )
+          },
+        )
+      }
+    }
+    activateSurvey(surveyId)
+    activeSurveyNotice = "Created survey \"$trimmedTitle\"."
+    return surveyId
+  }
+
+  /** A survey ID derived from [title] (`survey-<slug>`), made unique with a numeric suffix. */
+  private fun uniqueSurveyId(title: String): String {
+    val slug =
+      title
+        .lowercase()
+        .map { if (it.isLetterOrDigit()) it else '-' }
+        .joinToString("")
+        .trim('-')
+        .replace(Regex("-+"), "-")
+        .ifBlank { "survey" }
+    val base = "survey-$slug"
+    if (surveys.none { it.id == base }) return base
+    var n = 2
+    while (surveys.any { it.id == "$base-$n" }) n++
+    return "$base-$n"
   }
 
   /** Updates the title and description of the currently active survey. */

@@ -91,16 +91,25 @@ import org.groundplatform.v2.devtools.prototypeapp.surveyeditor.SurveyEditorStat
 /** Top-level pages of the prototype web app, addressable via the URL hash (e.g. `#dashboard`). */
 enum class PrototypeWorkbenchPage(val label: String, val hash: String) {
   MOBILE_PROTOTYPE("Mobile prototype", "prototype"),
+  /** Web landing page: the surveys the signed-in user can open, grouped by organization. */
+  WEB_SURVEYS("Surveys", "surveys"),
   WEB_DASHBOARD("Web dashboard", "dashboard"),
   SURVEY_EDITOR("Survey editor", "survey-editor");
 
-  /** Whether this page belongs to the unified web application (dashboard + survey editor). */
+  /** Whether this page belongs to the unified web application (surveys, dashboard, editor). */
   val isWebApp: Boolean
+    get() = this != MOBILE_PROTOTYPE
+
+  /** Whether this page shows one survey, and so needs an active survey to open. */
+  val needsActiveSurvey: Boolean
     get() = this == WEB_DASHBOARD || this == SURVEY_EDITOR
 
   companion object {
-    /** Top-level switcher tabs shown in the workbench top bar. */
-    val topBarPages: List<PrototypeWorkbenchPage> = listOf(MOBILE_PROTOTYPE, WEB_DASHBOARD)
+    /**
+     * Top-level switcher tabs shown in the workbench top bar. The web app opens on its landing
+     * page.
+     */
+    val topBarPages: List<PrototypeWorkbenchPage> = listOf(MOBILE_PROTOTYPE, WEB_SURVEYS)
 
     /** Legacy hashes kept working after pages were renamed. */
     private val aliases = mapOf("form-editor" to SURVEY_EDITOR, "web" to WEB_DASHBOARD)
@@ -117,9 +126,9 @@ enum class PrototypeWorkbenchPage(val label: String, val hash: String) {
  *
  * Renders an interactive UX design workbench that embeds a live Mobile or Tablet device preview of
  * the Ground 2.0 Compose Multiplatform UI (`Sign In` -> `Terms of Service` -> `Download survey` ->
- * `Main Survey UI`) and a unified web application combining the [WebDashboardPage] (survey map and
- * data tables) with the [SurveyEditorPage] (for designing surveys, Forms, Map layers, and Data
- * tables).
+ * `Main Survey UI`) and a unified web application: the [WebSurveysPage] landing page (surveys the
+ * user can open, grouped by organization), the [WebDashboardPage] (survey map and data tables), and
+ * the [SurveyEditorPage] (for designing surveys, Forms, Map layers, and Data tables).
  */
 @Composable
 fun PrototypeApp(
@@ -166,7 +175,8 @@ fun PrototypeApp(
       (!state.isDataCollectionFormOpen || state.isCurrentFormStepGeoPoint || isEntityRefMapShowing)
   // The Mapbox basemap renders behind the Compose canvas, so the root surface must stay transparent
   // whenever a page shows it.
-  val isMapShowing = isMobileMapShowing || page == PrototypeWorkbenchPage.WEB_DASHBOARD
+  val isMapShowing =
+    isMobileMapShowing || (page == PrototypeWorkbenchPage.WEB_DASHBOARD && state.isSignedIn)
 
   GroundTheme(darkTheme = state.isDarkTheme) {
     Surface(
@@ -179,8 +189,36 @@ fun PrototypeApp(
         },
     ) {
       Box(modifier = Modifier.fillMaxSize()) {
-        when (page) {
-          PrototypeWorkbenchPage.SURVEY_EDITOR ->
+        // A survey page without an openable active survey falls back to the surveys list.
+        val resolvedPage =
+          if (page.needsActiveSurvey && !state.hasOpenableActiveSurvey) {
+            PrototypeWorkbenchPage.WEB_SURVEYS
+          } else {
+            page
+          }
+        LaunchedEffect(resolvedPage) {
+          if (resolvedPage != page) state.selectWorkbenchPage(resolvedPage)
+        }
+        when {
+          resolvedPage.isWebApp && !state.isSignedIn ->
+            WebSignInPage(state = state, onSignIn = { state.signInWithGoogle() })
+          resolvedPage == PrototypeWorkbenchPage.WEB_SURVEYS ->
+            WebSurveysPage(
+              state = state,
+              onOpenSurvey = { surveyId ->
+                state.openSurveyOnWeb(surveyId)
+                state.selectWorkbenchPage(PrototypeWorkbenchPage.WEB_DASHBOARD)
+              },
+              onCreateSurvey = { title, organizationId ->
+                state.createSurvey(title = title, organizationId = organizationId)
+                state.selectWorkbenchPage(PrototypeWorkbenchPage.SURVEY_EDITOR)
+              },
+              onSignOut = {
+                state.signOut()
+                state.selectWorkbenchPage(PrototypeWorkbenchPage.WEB_SURVEYS)
+              },
+            )
+          resolvedPage == PrototypeWorkbenchPage.SURVEY_EDITOR ->
             SurveyEditorPage(
               state = surveyEditorState,
               appState = state,
@@ -195,7 +233,7 @@ fun PrototypeApp(
                 state.selectWorkbenchPage(PrototypeWorkbenchPage.WEB_DASHBOARD)
               },
             )
-          PrototypeWorkbenchPage.WEB_DASHBOARD ->
+          resolvedPage == PrototypeWorkbenchPage.WEB_DASHBOARD ->
             WebDashboardPage(
               state = state,
               onOpenSurveyEditor = {
@@ -203,10 +241,10 @@ fun PrototypeApp(
               },
               onSignOut = {
                 state.signOut()
-                state.selectWorkbenchPage(PrototypeWorkbenchPage.MOBILE_PROTOTYPE)
+                state.selectWorkbenchPage(PrototypeWorkbenchPage.WEB_SURVEYS)
               },
             )
-          PrototypeWorkbenchPage.MOBILE_PROTOTYPE -> MobilePrototypePage(state, isMobileMapShowing)
+          else -> MobilePrototypePage(state, isMobileMapShowing)
         }
       }
     }
@@ -370,7 +408,7 @@ fun MobileDevicePreviewFrame(
 
         if (state != null) {
           OutlinedButton(
-            onClick = { state.selectWorkbenchPage(PrototypeWorkbenchPage.WEB_DASHBOARD) },
+            onClick = { state.selectWorkbenchPage(PrototypeWorkbenchPage.WEB_SURVEYS) },
             contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
             modifier = Modifier.height(32.dp),
           ) {

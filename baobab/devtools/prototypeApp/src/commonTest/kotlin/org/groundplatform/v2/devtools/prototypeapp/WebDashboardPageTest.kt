@@ -45,12 +45,13 @@ class WebDashboardPageTest {
   }
 
   @Test
-  fun webAppPages_combineDashboardAndSurveyEditorUnderWebTopBarTab() {
+  fun webAppPages_combineSurveysDashboardAndSurveyEditorUnderWebTopBarTab() {
     assertEquals(
-      listOf(PrototypeWorkbenchPage.MOBILE_PROTOTYPE, PrototypeWorkbenchPage.WEB_DASHBOARD),
+      listOf(PrototypeWorkbenchPage.MOBILE_PROTOTYPE, PrototypeWorkbenchPage.WEB_SURVEYS),
       PrototypeWorkbenchPage.topBarPages,
     )
     assertFalse(PrototypeWorkbenchPage.MOBILE_PROTOTYPE.isWebApp)
+    assertTrue(PrototypeWorkbenchPage.WEB_SURVEYS.isWebApp)
     assertTrue(PrototypeWorkbenchPage.WEB_DASHBOARD.isWebApp)
     assertTrue(PrototypeWorkbenchPage.SURVEY_EDITOR.isWebApp)
   }
