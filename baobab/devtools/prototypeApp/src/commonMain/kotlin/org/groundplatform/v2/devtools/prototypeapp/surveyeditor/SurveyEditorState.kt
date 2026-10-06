@@ -25,6 +25,8 @@ import org.groundplatform.v2.core.sampling.SamplingArea
 import org.groundplatform.v2.core.sampling.SamplingEngine
 import org.groundplatform.v2.core.sampling.SamplingException
 import org.groundplatform.v2.core.sampling.Stratum
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.CachedProfile
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.InvitationStatus
 import org.groundplatform.v2.devtools.prototypeapp.formeditor.EditorChoice
 import org.groundplatform.v2.devtools.prototypeapp.formeditor.EditorDataset
 import org.groundplatform.v2.devtools.prototypeapp.formeditor.EditorDatasetProperty

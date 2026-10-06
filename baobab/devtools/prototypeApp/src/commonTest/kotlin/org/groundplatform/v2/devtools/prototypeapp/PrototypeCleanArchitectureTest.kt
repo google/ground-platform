@@ -32,10 +32,12 @@ import org.groundplatform.v2.devtools.prototypeapp.data.datasource.local.store.s
 import org.groundplatform.v2.devtools.prototypeapp.data.repository.LocalStoreTransactionRunner
 import org.groundplatform.v2.devtools.prototypeapp.data.repository.LocationRepositoryImpl
 import org.groundplatform.v2.devtools.prototypeapp.data.repository.MutationRepositoryImpl
+import org.groundplatform.v2.devtools.prototypeapp.data.repository.OrganizationRepositoryImpl
 import org.groundplatform.v2.devtools.prototypeapp.data.repository.PlaceRepositoryImpl
 import org.groundplatform.v2.devtools.prototypeapp.data.repository.SampleDataRepositoryImpl
 import org.groundplatform.v2.devtools.prototypeapp.data.repository.SettingsRepositoryImpl
 import org.groundplatform.v2.devtools.prototypeapp.data.repository.SurveyRepositoryImpl
+import org.groundplatform.v2.devtools.prototypeapp.data.seed.PrototypeFakeOrganizationsData
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.AppScreen
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.ListFilterTab
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.MapClusterFeatureItem
@@ -61,7 +63,8 @@ import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.SurveyAppViewMod
  * - Client & Mapper layers ([PrototypeAuthClient], [LocationClient], [OfflineTileStorageClient],
  *   [PlacesResponseMapper])
  * - Repository implementations ([SurveyRepositoryImpl], [MutationRepositoryImpl],
- *   [SettingsRepositoryImpl], [PlaceRepositoryImpl], [LocationRepositoryImpl])
+ *   [SettingsRepositoryImpl], [PlaceRepositoryImpl], [LocationRepositoryImpl],
+ *   [OrganizationRepositoryImpl])
  * - Domain Use Cases ([ClusterMapFeaturesUseCase], [ComputeWayfindingNavigationUseCase],
  *   [SearchPlacesUseCase], [GeneratePrototypeRandomSitesUseCase], [SyncMutationsUseCase],
  *   [ResolveFormDefForLaunchUseCase])
@@ -75,7 +78,14 @@ class PrototypeCleanArchitectureTest {
     val surveyRepo = SurveyRepositoryImpl(store)
     val mutationRepo = MutationRepositoryImpl(store)
     val placeRepo = PlaceRepositoryImpl(store)
+    val organizationRepo = OrganizationRepositoryImpl(store)
     assertTrue(surveyRepo.getSurveys().size >= 5)
+    assertTrue(organizationRepo.getOrganizations().size >= 3)
+    val memberships =
+      organizationRepo.getOrganizationsFor(PrototypeFakeOrganizationsData.SIGNED_IN_EMAIL)
+    assertTrue(memberships.any { it.id == PrototypeFakeOrganizationsData.KENYA_FOREST_SERVICE })
+    assertTrue(surveyRepo.getSurveys().any { it.organizationId != null })
+    assertTrue(surveyRepo.getSurveys().any { it.organizationId == null })
     assertTrue(placeRepo.getLocalPlaces().isNotEmpty())
     assertTrue(surveyRepo.getEntities().isNotEmpty())
     assertTrue(surveyRepo.getForms().isNotEmpty())

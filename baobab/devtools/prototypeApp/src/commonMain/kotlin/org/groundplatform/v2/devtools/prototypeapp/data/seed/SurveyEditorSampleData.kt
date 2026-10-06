@@ -13,13 +13,14 @@
  */
 package org.groundplatform.v2.devtools.prototypeapp.data.seed
 
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.CachedProfile
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.InvitationStatus
 import org.groundplatform.v2.devtools.prototypeapp.formeditor.EditorChoice
 import org.groundplatform.v2.devtools.prototypeapp.formeditor.EditorForm
 import org.groundplatform.v2.devtools.prototypeapp.formeditor.EditorQuestion
 import org.groundplatform.v2.devtools.prototypeapp.formeditor.EditorQuestionType
 import org.groundplatform.v2.devtools.prototypeapp.formeditor.EditorRelevance
 import org.groundplatform.v2.devtools.prototypeapp.formeditor.RelevanceOperator
-import org.groundplatform.v2.devtools.prototypeapp.surveyeditor.CachedProfile
 import org.groundplatform.v2.devtools.prototypeapp.surveyeditor.Collaborator
 import org.groundplatform.v2.devtools.prototypeapp.surveyeditor.CollaboratorRole
 import org.groundplatform.v2.devtools.prototypeapp.surveyeditor.DatasetKind
@@ -27,7 +28,6 @@ import org.groundplatform.v2.devtools.prototypeapp.surveyeditor.EntityDataset
 import org.groundplatform.v2.devtools.prototypeapp.surveyeditor.EntityProperty
 import org.groundplatform.v2.devtools.prototypeapp.surveyeditor.EntityRow
 import org.groundplatform.v2.devtools.prototypeapp.surveyeditor.GeometryKind
-import org.groundplatform.v2.devtools.prototypeapp.surveyeditor.InvitationStatus
 import org.groundplatform.v2.devtools.prototypeapp.surveyeditor.LatLng
 import org.groundplatform.v2.devtools.prototypeapp.surveyeditor.LayerStyle
 import org.groundplatform.v2.devtools.prototypeapp.surveyeditor.PropertyType
@@ -60,6 +60,7 @@ internal object SurveyEditorSamples {
       description =
         "Monitor shade tree cover and parcel boundaries across smallholder coffee farms.",
       supportedLanguages = listOf("en", "sw"),
+      organizationId = PrototypeFakeOrganizationsData.KENYA_FOREST_SERVICE,
       surveyArea =
         SurveyArea(
           name = "Othaya Sub-County, Nyeri",

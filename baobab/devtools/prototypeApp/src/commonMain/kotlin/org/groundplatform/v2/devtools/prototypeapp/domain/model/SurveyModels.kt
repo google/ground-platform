@@ -69,6 +69,10 @@ data class SurveyPreviewItem(
   val isDownloaded: Boolean,
   val thumbnailTheme: MapThumbnailTheme,
   val entityCount: Int,
+  /** Email of the survey's owner (`SurveyDef.owner_id`), or empty if unknown. */
+  val ownerEmail: String = "",
+  /** Organization the survey belongs to (`SurveyDef.organization_id`), or `null` if personal. */
+  val organizationId: String? = null,
 )
 
 /** Survey-level form definitions stored alongside a survey's data. */

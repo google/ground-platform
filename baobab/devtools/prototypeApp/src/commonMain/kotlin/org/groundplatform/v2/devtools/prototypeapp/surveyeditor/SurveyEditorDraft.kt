@@ -42,7 +42,7 @@ data class SurveyEditorDraft(
 
     /**
      * The editor draft of a survey: its [stored] draft (or a blank one) showing the [survey]'s
-     * current title and description, which the survey list owns.
+     * current title, description, and organization, which the survey list owns.
      */
     fun forSurvey(
       surveyId: String,
@@ -52,7 +52,12 @@ data class SurveyEditorDraft(
       val base = stored ?: blank(surveyId)
       if (survey == null) return base
       return base.copy(
-        details = base.details.copy(title = survey.title, description = survey.description)
+        details =
+          base.details.copy(
+            title = survey.title,
+            description = survey.description,
+            organizationId = survey.organizationId,
+          )
       )
     }
   }

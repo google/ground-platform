@@ -19,6 +19,7 @@ import kotlin.coroutines.startCoroutine
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import kotlinx.coroutines.CoroutineScope
@@ -34,6 +35,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import org.groundplatform.v2.devtools.prototypeapp.data.seed.PrototypeFakeEntitiesData
+import org.groundplatform.v2.devtools.prototypeapp.data.seed.PrototypeFakeOrganizationsData
 import org.groundplatform.v2.devtools.prototypeapp.data.seed.PrototypeFakeSubmissionsData
 import org.groundplatform.v2.devtools.prototypeapp.data.seed.PrototypeFakeSurveysData
 import org.groundplatform.v2.devtools.prototypeapp.data.seed.SampleDataSeeder
@@ -87,6 +89,7 @@ abstract class LocalStoreContractTest {
     runNow {
       store.transaction {
         assertEquals(surveys, surveys())
+        assertEquals(PrototypeFakeOrganizationsData.defaultOrganizations(), organizations())
         for (survey in surveys) {
           assertEquals(PrototypeFakeEntitiesData.entitiesForSurvey(survey.id), entities(survey.id))
           assertEquals(PrototypeFakeSurveysData.formsForSurvey(survey.id), forms(survey.id))
@@ -102,6 +105,45 @@ abstract class LocalStoreContractTest {
           SurveyEditorSamples.draft(),
           surveyEditorDraft(SampleDataSeeder.DEFAULT_ACTIVE_SURVEY_ID),
         )
+      }
+    }
+  }
+
+  @Test
+  fun deleteOrganization_makesItsSurveysPersonal() {
+    val store = seededStore()
+    val orgId = PrototypeFakeOrganizationsData.KENYA_FOREST_SERVICE
+    runNow {
+      store.transaction {
+        assertTrue(surveys().any { it.organizationId == orgId })
+        deleteOrganization(orgId)
+        assertNull(organization(orgId))
+        assertTrue(surveys().none { it.organizationId == orgId })
+        // Other organizations and their surveys are untouched.
+        assertNotNull(organization(PrototypeFakeOrganizationsData.MEKONG_MANGROVE_ALLIANCE))
+        assertTrue(
+          surveys().any {
+            it.organizationId == PrototypeFakeOrganizationsData.MEKONG_MANGROVE_ALLIANCE
+          }
+        )
+      }
+    }
+  }
+
+  @Test
+  fun upsertOrganization_appendsNewAndReplacesExisting() {
+    val store = seededStore()
+    runNow {
+      store.transaction {
+        val before = organizations()
+        val renamed = before.first().copy(name = "Renamed")
+        upsertOrganization(renamed)
+        assertEquals(renamed, organizations().first())
+        assertEquals(before.size, organizations().size)
+        val added = renamed.copy(id = "org-new", name = "New org")
+        upsertOrganization(added)
+        assertEquals(added, organizations().last())
+        assertEquals(before.size + 1, organizations().size)
       }
     }
   }

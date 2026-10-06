@@ -33,6 +33,7 @@ import org.groundplatform.v2.devtools.prototypeapp.data.datasource.local.store.L
 import org.groundplatform.v2.devtools.prototypeapp.data.repository.LocalStoreTransactionRunner
 import org.groundplatform.v2.devtools.prototypeapp.data.repository.LocationRepositoryImpl
 import org.groundplatform.v2.devtools.prototypeapp.data.repository.MutationRepositoryImpl
+import org.groundplatform.v2.devtools.prototypeapp.data.repository.OrganizationRepositoryImpl
 import org.groundplatform.v2.devtools.prototypeapp.data.repository.PlaceRepositoryImpl
 import org.groundplatform.v2.devtools.prototypeapp.data.repository.SampleDataRepositoryImpl
 import org.groundplatform.v2.devtools.prototypeapp.data.repository.SettingsRepositoryImpl
@@ -42,6 +43,7 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.AppScreen
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.MeasurementUnitSystem
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.MutationLogItem
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.OfflineTilePackageItem
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.Organization
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyConfig
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyPlaceItem
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyPreviewItem
@@ -50,6 +52,7 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.UserSettings
 import org.groundplatform.v2.devtools.prototypeapp.domain.repository.LocationRepository
 import org.groundplatform.v2.devtools.prototypeapp.domain.repository.MediaCacheInfo
 import org.groundplatform.v2.devtools.prototypeapp.domain.repository.MutationRepository
+import org.groundplatform.v2.devtools.prototypeapp.domain.repository.OrganizationRepository
 import org.groundplatform.v2.devtools.prototypeapp.domain.repository.PlaceRepository
 import org.groundplatform.v2.devtools.prototypeapp.domain.repository.SampleDataRepository
 import org.groundplatform.v2.devtools.prototypeapp.domain.repository.SettingsRepository
@@ -72,6 +75,7 @@ import org.groundplatform.v2.devtools.prototypeapp.ui.state.AppUiState
  */
 data class AppData(
   val surveys: List<SurveyPreviewItem> = emptyList(),
+  val organizations: List<Organization> = emptyList(),
   val activeSurveyId: String = "",
   val content: SurveyContent = SurveyContent(),
   val surveyStats: Map<String, SurveyStats> = emptyMap(),
@@ -89,7 +93,8 @@ data class AppData(
  * - The [LocalStore] is the single source of truth. [appData] is derived from repository flows, and
  *   the data fields of [uiState] mirror it.
  * - Calls Domain Repository interfaces ([SurveyRepository], [MutationRepository],
- *   [SettingsRepository], [PlaceRepository], [LocationRepository]) directly for simple CRUD.
+ *   [SettingsRepository], [PlaceRepository], [LocationRepository], [OrganizationRepository])
+ *   directly for simple CRUD.
  * - Delegates complex business logic, geometric computations, and multi-repository orchestration to
  *   dedicated Domain Use Cases ([CompleteFormSubmissionUseCase], [SyncMutationsUseCase],
  *   [ComputeWayfindingNavigationUseCase], [ClusterMapFeaturesUseCase], [SearchPlacesUseCase],
@@ -108,6 +113,7 @@ class SurveyAppViewModel(
   val mutationRepository: MutationRepository = MutationRepositoryImpl(localStore),
   val settingsRepository: SettingsRepository = SettingsRepositoryImpl(localStore),
   val placeRepository: PlaceRepository = PlaceRepositoryImpl(localStore),
+  val organizationRepository: OrganizationRepository = OrganizationRepositoryImpl(localStore),
   val locationRepository: LocationRepository = LocationRepositoryImpl(),
   val sampleDataRepository: SampleDataRepository = SampleDataRepositoryImpl(localStore),
   val surveyEditorRepository: SurveyEditorRepository = SurveyEditorRepositoryImpl(localStore),
@@ -150,6 +156,7 @@ class SurveyAppViewModel(
           surveyRepository.observeSurveyConfigs(),
           surveyRepository.observeOfflineTilePackages(),
           mutationRepository.observeMutations(),
+          organizationRepository.observeOrganizations(),
           ::DeviceData,
         ),
         placeRepository.observeLocalPlaces(),
@@ -161,11 +168,12 @@ class SurveyAppViewModel(
       ) {
         surveys,
         (activeId, content),
-        (stats, configs, tiles, mutations),
+        (stats, configs, tiles, mutations, organizations),
         places,
         (settings, media) ->
         AppData(
           surveys = surveys,
+          organizations = organizations,
           activeSurveyId = activeId,
           content = content,
           surveyStats = stats,
@@ -279,6 +287,7 @@ class SurveyAppViewModel(
 fun AppUiState.withData(data: AppData): AppUiState =
   copy(
     surveys = data.surveys,
+    organizations = data.organizations,
     activeSurveyId = data.activeSurveyId,
     mapLayers = data.content.mapLayers,
     forms = data.content.forms,
@@ -301,4 +310,5 @@ private data class DeviceData(
   val configs: Map<String, SurveyConfig>,
   val tiles: List<OfflineTilePackageItem>,
   val mutations: List<MutationLogItem>,
+  val organizations: List<Organization>,
 )

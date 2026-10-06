@@ -34,6 +34,7 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.MutationLogItem
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.NavigationTargetKind
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.OfflineBasemapStyle
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.OfflineTilePackageItem
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.Organization
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SharedPdfSheetState
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SubmissionGeometryPolygon
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SubmissionPreviewItem
@@ -62,6 +63,7 @@ data class AppUiState(
   val isDownloadSurveySignOutPromptOpen: Boolean = false,
   val searchQuery: String = "",
   val surveys: List<SurveyPreviewItem> = emptyList(),
+  val organizations: List<Organization> = emptyList(),
   val activeSurveyId: String = "",
   val activeSurveyNotice: String? = null,
   val isDarkTheme: Boolean = false,

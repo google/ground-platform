@@ -38,11 +38,12 @@ class SurveyEditorRepositoryImpl(private val store: LocalStore) : SurveyEditorRe
           config.copy(formXmlById = config.formXmlById - removedIds + editorXml),
         )
       }
-      // The survey list owns the title and description; copy non-blank edits there.
+      // The survey list owns the title, description, and organization; copy edits there.
       updateSurvey(surveyId) { item ->
         item.copy(
           title = draft.details.title.ifBlank { item.title },
           description = draft.details.description.ifBlank { item.description },
+          organizationId = draft.details.organizationId,
         )
       }
     }

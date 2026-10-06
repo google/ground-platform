@@ -28,6 +28,7 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.GeospatialEntity
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.MapLayerItem
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.MutationLogItem
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.OfflineTilePackageItem
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.Organization
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SubmissionGeometryPolygon
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SubmissionPreviewItem
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyConfig
@@ -49,6 +50,9 @@ class InMemoryLocalStore : LocalStore {
 
   override fun observeSurveys(): Flow<List<SurveyPreviewItem>> =
     state.map { it.surveys }.distinctUntilChanged { a, b -> a === b }
+
+  override fun observeOrganizations(): Flow<List<Organization>> =
+    state.map { it.organizations }.distinctUntilChanged { a, b -> a === b }
 
   override fun observeForms(surveyId: String): Flow<List<FormPreviewItem>> =
     observeSurvey(surveyId) { it.forms }
@@ -141,6 +145,7 @@ class InMemoryLocalStore : LocalStore {
   private data class StoreState(
     val surveys: List<SurveyPreviewItem> = emptyList(),
     val surveyData: Map<String, SurveyData> = emptyMap(),
+    val organizations: List<Organization> = emptyList(),
     val mutations: List<MutationLogItem> = emptyList(),
     val places: List<SurveyPlaceItem> = emptyList(),
     val offlineTilePackages: List<OfflineTilePackageItem> = emptyList(),
@@ -191,6 +196,30 @@ class InMemoryLocalStore : LocalStore {
           working.surveys.toMutableList().also { it[index] = survey }
         }
       working = working.copy(surveys = updated)
+    }
+
+    override fun organizations(): List<Organization> = working.organizations
+
+    override fun upsertOrganization(organization: Organization) {
+      val index = working.organizations.indexOfFirst { it.id == organization.id }
+      val updated =
+        if (index < 0) {
+          working.organizations + organization
+        } else {
+          working.organizations.toMutableList().also { it[index] = organization }
+        }
+      working = working.copy(organizations = updated)
+    }
+
+    override fun deleteOrganization(organizationId: String) {
+      working =
+        working.copy(
+          organizations = working.organizations.filterNot { it.id == organizationId },
+          surveys =
+            working.surveys.map {
+              if (it.organizationId == organizationId) it.copy(organizationId = null) else it
+            },
+        )
     }
 
     override fun surveyConfig(surveyId: String): SurveyConfig? = data(surveyId).config

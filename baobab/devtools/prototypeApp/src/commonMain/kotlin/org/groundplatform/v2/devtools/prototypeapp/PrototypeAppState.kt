@@ -272,8 +272,32 @@ class PrototypeAppState(
   val isDownloadSurveyAccessedFromSurveyList: Boolean
     get() = downloadSurveyEntryOrigin == DownloadSurveyEntryOrigin.SURVEY_LIST
 
-  var signedInOrganization by mutableStateOf("Open Foris • East Africa Field Team")
-    private set
+  /** All organizations in the local data store, in display order. */
+  val organizations: List<Organization>
+    get() = data.organizations
+
+  /** Organizations the signed-in user is an active member of. */
+  val signedInUserOrganizations: List<Organization>
+    get() = organizations.filter { it.isMember(signedInUserEmail) }
+
+  /** Organizations the signed-in user manages. */
+  val signedInUserManagedOrganizations: List<Organization>
+    get() = organizations.filter { it.isManager(signedInUserEmail) }
+
+  /**
+   * Short affiliation line for profile cards: the user's organizations joined with " • ", or empty
+   * if they belong to none.
+   */
+  val signedInOrganization: String
+    get() = signedInUserOrganizations.joinToString(" • ") { it.name }
+
+  fun organization(organizationId: String?): Organization? = organizationId?.let { id ->
+    organizations.firstOrNull { it.id == id }
+  }
+
+  /** The organization the active survey belongs to, if any. */
+  val activeSurveyOrganization: Organization?
+    get() = organization(activeSurvey.organizationId)
 
   var termsCheckboxChecked by mutableStateOf(true)
     private set

@@ -19,6 +19,7 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.GeospatialEntity
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.MapLayerItem
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.MutationLogItem
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.OfflineTilePackageItem
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.Organization
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SubmissionGeometryPolygon
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SubmissionPreviewItem
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyConfig
@@ -45,6 +46,11 @@ import org.groundplatform.v2.devtools.prototypeapp.surveyeditor.SurveyEditorDraf
 interface LocalStore {
   /** All surveys shared with the user, in display order. */
   fun observeSurveys(): Flow<List<SurveyPreviewItem>>
+
+  /**
+   * All organizations known to the user (ones they belong to or can discover), in display order.
+   */
+  fun observeOrganizations(): Flow<List<Organization>>
 
   /** Forms in [surveyId]. */
   fun observeForms(surveyId: String): Flow<List<FormPreviewItem>>
@@ -126,6 +132,30 @@ interface LocalStoreTransaction {
   fun surveyEditorDraft(surveyId: String): SurveyEditorDraft?
 
   fun putSurveyEditorDraft(surveyId: String, draft: SurveyEditorDraft)
+
+  // Organizations -------------------------------------------------------------------------------
+
+  fun organizations(): List<Organization>
+
+  fun organization(organizationId: String): Organization? =
+    organizations().firstOrNull { it.id == organizationId }
+
+  /** Inserts or replaces an organization. New organizations are appended. */
+  fun upsertOrganization(organization: Organization)
+
+  /** Replaces the organization with [organizationId] with `transform(existing)`; returns it. */
+  fun updateOrganization(
+    organizationId: String,
+    transform: (Organization) -> Organization,
+  ): Organization? {
+    val existing = organization(organizationId) ?: return null
+    val updated = transform(existing)
+    upsertOrganization(updated)
+    return updated
+  }
+
+  /** Deletes an organization. Surveys that belonged to it become personal surveys. */
+  fun deleteOrganization(organizationId: String)
 
   // Forms ---------------------------------------------------------------------------------------
 

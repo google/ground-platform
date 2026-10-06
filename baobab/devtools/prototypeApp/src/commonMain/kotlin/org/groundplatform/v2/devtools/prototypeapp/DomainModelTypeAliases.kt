@@ -84,6 +84,17 @@ typealias MapThumbnailTheme =
 typealias SurveyPreviewItem =
   org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyPreviewItem
 
+typealias Organization = org.groundplatform.v2.devtools.prototypeapp.domain.model.Organization
+
+typealias OrganizationMember =
+  org.groundplatform.v2.devtools.prototypeapp.domain.model.OrganizationMember
+
+typealias OrganizationRole =
+  org.groundplatform.v2.devtools.prototypeapp.domain.model.OrganizationRole
+
+typealias MembershipStatus =
+  org.groundplatform.v2.devtools.prototypeapp.domain.model.MembershipStatus
+
 typealias LayerSourceType = org.groundplatform.v2.devtools.prototypeapp.domain.model.LayerSourceType
 
 typealias BasemapType = org.groundplatform.v2.devtools.prototypeapp.domain.model.BasemapType

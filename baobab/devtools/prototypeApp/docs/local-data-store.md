@@ -33,9 +33,12 @@ works today and how a persistent backend and a sync engine plug in later.
     `SampleDataSeeder.SEED_VERSION`, and again on **Reset**. It is the only code
     that reads the hardcoded sample datasets.
 -   Stored models are today's domain models (`SurveyPreviewItem`,
-    `GeospatialEntityItem`, `SurveyEditorDraft`, …). They move to proto-aligned
-    records (`SurveyDef`, `EntityRecord`, `SubmissionRecord`) when the sync
-    engine lands.
+    `GeospatialEntityItem`, `SurveyEditorDraft`, `Organization`, …). They move
+    to proto-aligned records (`SurveyDef`, `EntityRecord`, `SubmissionRecord`)
+    when the sync engine lands.
+-   Organizations are a top-level collection. A survey points at its
+    organization by ID (`SurveyPreviewItem.organizationId`); deleting an
+    organization clears that pointer on its surveys in the same transaction.
 
 ## Persistent Backend
 

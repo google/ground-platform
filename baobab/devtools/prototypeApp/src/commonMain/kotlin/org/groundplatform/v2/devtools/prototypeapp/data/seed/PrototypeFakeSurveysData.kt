@@ -72,83 +72,90 @@ internal object PrototypeFakeSurveysData {
   /**
    * Default sample surveys shared with the user, including the 5 swappable Workbench Example
    * Surveys (each with its own preloaded entities, sample submissions, geometries, map layers, and
-   * XForms definition) plus a remote undownloaded survey for offline download testing.
+   * XForms definition) plus a remote undownloaded survey for offline download testing. Each is
+   * owned by a person and optionally belongs to an organization ([PrototypeFakeOrganizationsData]).
    */
   fun defaultSampleSurveys(): List<SurveyPreviewItem> =
     listOf(
-      SurveyPreviewItem(
-        id = "survey-single-point-land-use",
-        title = "Simple Point & Land Use Survey",
-        description =
-          "Single GPS point (map pan allowed, <= 10m accuracy required) and land-use classification. Forms auto-create land_use_observations entities via save_to.",
-        location = "Arusha, Tanzania",
-        coordinatesLabel = "3.38°S, 36.68°E",
-        offlineSizeLabel = "4.2 MB",
-        isDownloaded = true,
-        thumbnailTheme = MapThumbnailTheme.SAVANNA,
-        entityCount = 3,
-      ),
-      SurveyPreviewItem(
-        id = "survey-sample-plots-forest",
-        title = "Sample Plot Forest Assessment Survey",
-        description =
-          "Predefined permanent sample plot entities (SP-01 to SP-05) with forest stand assessment form: selecting the sample plot entity, taking a canopy photo, canopy cover %, and basal area.",
-        location = "Pará, Brazil",
-        coordinatesLabel = "3.46°S, 62.21°W",
-        offlineSizeLabel = "14.8 MB",
-        isDownloaded = true,
-        thumbnailTheme = MapThumbnailTheme.RAINFOREST,
-        entityCount = 5,
-      ),
-      SurveyPreviewItem(
-        id = "survey-commodity-perimeter-center",
-        title = "Commodity Plot Perimeter & Center Mapping (EUDR)",
-        description =
-          "Walk forest-risk commodity plot boundary (GPS override / manual pan allowed while walking) and capture the plot center point. Forms auto-create commodity_plots entities via save_to.",
-        location = "Ashanti Region, Ghana",
-        coordinatesLabel = "6.69°N, 1.62°W",
-        offlineSizeLabel = "11.5 MB",
-        isDownloaded = true,
-        thumbnailTheme = MapThumbnailTheme.WATERSHED,
-        entityCount = 3,
-      ),
-      SurveyPreviewItem(
-        id = "survey-household-past-individuals",
-        title = "Household Panel Survey (Past Individuals)",
-        description =
-          "Household longitudinal survey using a preloaded roster of past household individuals (IND-101 to IND-106) for residency reconciliation, occupation updates, and new member enrollment.",
-        location = "Kakamega, Western Province",
-        coordinatesLabel = "0.28°N, 34.75°E",
-        offlineSizeLabel = "8.4 MB",
-        isDownloaded = true,
-        thumbnailTheme = MapThumbnailTheme.COASTAL_DELTA,
-        entityCount = 6,
-      ),
-      SurveyPreviewItem(
-        id = "survey-kenya-coffee",
-        title = "All Form Field Types Showcase (Kenya Coffee)",
-        description =
-          "EUDR traceability polygon mapping, shade-tree biodiversity inventory, and all 20+ XForms field types showcase for cooperative coffee growers.",
-        location = "Nyeri County, Kenya",
-        coordinatesLabel = "0.42°S, 36.95°E",
-        offlineSizeLabel = "9.6 MB",
-        isDownloaded = true,
-        thumbnailTheme = MapThumbnailTheme.HIGHLAND_AGRI,
-        entityCount = 5,
-      ),
-      SurveyPreviewItem(
-        id = "survey-serengeti-corridor",
-        title = "Mekong Delta Mangrove Restoration",
-        description =
-          "Coastal shoreline erosion monitoring and sapling survival rate audits across intertidal restoration zones.",
-        location = "Cần Thơ, Vietnam",
-        coordinatesLabel = "9.82°N, 106.34°E",
-        offlineSizeLabel = "12.8 MB",
-        isDownloaded = false,
-        thumbnailTheme = MapThumbnailTheme.PEATLAND,
-        entityCount = 204,
-      ),
-    )
+        SurveyPreviewItem(
+          id = "survey-single-point-land-use",
+          title = "Simple Point & Land Use Survey",
+          description =
+            "Single GPS point (map pan allowed, <= 10m accuracy required) and land-use classification. Forms auto-create land_use_observations entities via save_to.",
+          location = "Arusha, Tanzania",
+          coordinatesLabel = "3.38°S, 36.68°E",
+          offlineSizeLabel = "4.2 MB",
+          isDownloaded = true,
+          thumbnailTheme = MapThumbnailTheme.SAVANNA,
+          entityCount = 3,
+        ),
+        SurveyPreviewItem(
+          id = "survey-sample-plots-forest",
+          title = "Sample Plot Forest Assessment Survey",
+          description =
+            "Predefined permanent sample plot entities (SP-01 to SP-05) with forest stand assessment form: selecting the sample plot entity, taking a canopy photo, canopy cover %, and basal area.",
+          location = "Pará, Brazil",
+          coordinatesLabel = "3.46°S, 62.21°W",
+          offlineSizeLabel = "14.8 MB",
+          isDownloaded = true,
+          thumbnailTheme = MapThumbnailTheme.RAINFOREST,
+          entityCount = 5,
+        ),
+        SurveyPreviewItem(
+          id = "survey-commodity-perimeter-center",
+          title = "Commodity Plot Perimeter & Center Mapping (EUDR)",
+          description =
+            "Walk forest-risk commodity plot boundary (GPS override / manual pan allowed while walking) and capture the plot center point. Forms auto-create commodity_plots entities via save_to.",
+          location = "Ashanti Region, Ghana",
+          coordinatesLabel = "6.69°N, 1.62°W",
+          offlineSizeLabel = "11.5 MB",
+          isDownloaded = true,
+          thumbnailTheme = MapThumbnailTheme.WATERSHED,
+          entityCount = 3,
+        ),
+        SurveyPreviewItem(
+          id = "survey-household-past-individuals",
+          title = "Household Panel Survey (Past Individuals)",
+          description =
+            "Household longitudinal survey using a preloaded roster of past household individuals (IND-101 to IND-106) for residency reconciliation, occupation updates, and new member enrollment.",
+          location = "Kakamega, Western Province",
+          coordinatesLabel = "0.28°N, 34.75°E",
+          offlineSizeLabel = "8.4 MB",
+          isDownloaded = true,
+          thumbnailTheme = MapThumbnailTheme.COASTAL_DELTA,
+          entityCount = 6,
+        ),
+        SurveyPreviewItem(
+          id = "survey-kenya-coffee",
+          title = "All Form Field Types Showcase (Kenya Coffee)",
+          description =
+            "EUDR traceability polygon mapping, shade-tree biodiversity inventory, and all 20+ XForms field types showcase for cooperative coffee growers.",
+          location = "Nyeri County, Kenya",
+          coordinatesLabel = "0.42°S, 36.95°E",
+          offlineSizeLabel = "9.6 MB",
+          isDownloaded = true,
+          thumbnailTheme = MapThumbnailTheme.HIGHLAND_AGRI,
+          entityCount = 5,
+        ),
+        SurveyPreviewItem(
+          id = "survey-serengeti-corridor",
+          title = "Mekong Delta Mangrove Restoration",
+          description =
+            "Coastal shoreline erosion monitoring and sapling survival rate audits across intertidal restoration zones.",
+          location = "Cần Thơ, Vietnam",
+          coordinatesLabel = "9.82°N, 106.34°E",
+          offlineSizeLabel = "12.8 MB",
+          isDownloaded = false,
+          thumbnailTheme = MapThumbnailTheme.PEATLAND,
+          entityCount = 204,
+        ),
+      )
+      .map { survey ->
+        survey.copy(
+          ownerEmail = PrototypeFakeOrganizationsData.ownerEmailForSurvey(survey.id),
+          organizationId = PrototypeFakeOrganizationsData.organizationIdForSurvey(survey.id),
+        )
+      }
 
   /** Maps a [WorkbenchExampleForm] to its canonical Example Survey ID. */
   fun surveyIdForExampleForm(example: WorkbenchExampleForm): String =

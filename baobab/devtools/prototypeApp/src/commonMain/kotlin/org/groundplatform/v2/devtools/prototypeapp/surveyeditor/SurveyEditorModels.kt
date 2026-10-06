@@ -13,7 +13,9 @@
  */
 package org.groundplatform.v2.devtools.prototypeapp.surveyeditor
 
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.CachedProfile
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.FormPreviewItem
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.InvitationStatus
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.MapLayerItem
 import org.groundplatform.v2.devtools.prototypeapp.formeditor.FormEditorValidator
 
@@ -47,6 +49,11 @@ data class SurveyDetails(
   val defaultLanguage: String = "en",
   val supportedLanguages: List<String> = listOf("en"),
   val surveyArea: SurveyArea? = null,
+  /**
+   * Organization this survey belongs to (`SurveyDef.organization_id`), or `null` for a personal
+   * survey. Managers of the organization inherit survey organizer access.
+   */
+  val organizationId: String? = null,
 )
 
 /** Collaborator roles (mirrors `groundplatform.v2.survey.Role`). */
@@ -56,25 +63,7 @@ enum class CollaboratorRole(val label: String, val description: String) {
   SURVEY_ORGANIZER("Survey organizer", "Can edit Forms, manage sharing, and export data."),
 }
 
-/** Mirrors `AclEntry.InvitationStatus`. */
-enum class InvitationStatus(val label: String) {
-  PENDING("Invited"),
-  ACCEPTED("Joined"),
-}
-
-/**
- * Name and photo copied from the invitee's account when they accept the invite link, so the Sharing
- * pane can show people by name without querying the identity provider every time.
- *
- * [photoUrl] is normally an HTTPS URL. The prototype uses `avatar:<n>` placeholders, which are
- * drawn as illustrated portraits (see [ProfileAvatar]).
- */
-data class CachedProfile(
-  val displayName: String,
-  val photoUrl: String? = null,
-  val cachedOn: String = "",
-)
-
+/** A person on a survey's access control list (mirrors `AclEntry`). */
 data class Collaborator(
   val email: String,
   val role: CollaboratorRole,
@@ -110,32 +99,6 @@ data class SharingSettings(
   val collaborators: List<Collaborator> = emptyList(),
   val ownerProfile: CachedProfile? = null,
 )
-
-/** Invite links and the name suggested on the (simulated) acceptance screen. */
-object InviteLinks {
-  const val BASE_URL = "https://ground.example.org/join/"
-
-  fun url(token: String) = BASE_URL + token
-
-  /** Guesses a display name from an email local part, e.g. `grace.njeri@…` → "Grace Njeri". */
-  fun suggestedName(email: String): String =
-    email
-      .substringBefore('@')
-      .split('.', '_', '-', '+')
-      .filter { it.isNotBlank() }
-      .joinToString(" ") { part -> part.replaceFirstChar { it.uppercaseChar() } }
-
-  /** Up to two initials from a full name or email. */
-  fun initials(nameOrEmail: String): String {
-    val base = if ('@' in nameOrEmail) suggestedName(nameOrEmail) else nameOrEmail
-    val words = base.split(' ').filter { it.isNotBlank() }
-    return when {
-      words.isEmpty() -> "?"
-      words.size == 1 -> words[0].take(1).uppercase()
-      else -> (words.first().take(1) + words.last().take(1)).uppercase()
-    }
-  }
-}
 
 /** Whether an entity dataset is a spatial Map layer or a non-spatial Data table. */
 enum class DatasetKind(val singular: String, val plural: String) {

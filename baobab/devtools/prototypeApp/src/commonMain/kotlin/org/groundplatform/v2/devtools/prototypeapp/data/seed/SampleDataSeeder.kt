@@ -43,13 +43,14 @@ class SampleDataSeeder(private val store: LocalStore) {
 
   companion object {
     /** Bump when the sample data changes shape, so existing stores are reseeded. */
-    const val SEED_VERSION: Int = 2
+    const val SEED_VERSION: Int = 3
 
     /** Survey opened by default on first launch. */
     const val DEFAULT_ACTIVE_SURVEY_ID: String = "survey-kenya-coffee"
 
     /** Writes all sample data inside an existing transaction. */
     fun LocalStoreTransaction.writeSampleData() {
+      PrototypeFakeOrganizationsData.defaultOrganizations().forEach { upsertOrganization(it) }
       val surveys = PrototypeFakeSurveysData.defaultSampleSurveys()
       surveys.forEach { upsertSurvey(it) }
       for (survey in surveys) {
