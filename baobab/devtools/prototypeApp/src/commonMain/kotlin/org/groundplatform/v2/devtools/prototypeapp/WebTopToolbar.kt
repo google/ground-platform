@@ -36,6 +36,7 @@ import androidx.compose.material.icons.automirrored.outlined.Logout
 import androidx.compose.material.icons.outlined.ArrowDropDown
 import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material.icons.outlined.Groups
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.Map
 import androidx.compose.material.icons.outlined.Smartphone
@@ -404,6 +405,10 @@ internal fun WebUserAvatarProfileWidget(
         userEmail = state.signedInUserEmail,
         userInitials = state.signedInUserInitials,
         organization = state.signedInOrganization,
+        onOpenOrganizations = {
+          isProfileOpen = false
+          state.openOrganizations()
+        },
         onSignOut = {
           isProfileOpen = false
           onSignOut()
@@ -413,7 +418,10 @@ internal fun WebUserAvatarProfileWidget(
   }
 }
 
-/** Standard user profile card showing avatar, user name, email, organization, and sign out link. */
+/**
+ * Standard user profile card showing avatar, user name, email, organizations (a link to the
+ * organizations page when [onOpenOrganizations] is given), and sign out link.
+ */
 @Composable
 internal fun UserProfileCard(
   userName: String,
@@ -422,6 +430,7 @@ internal fun UserProfileCard(
   organization: String,
   onSignOut: () -> Unit,
   modifier: Modifier = Modifier,
+  onOpenOrganizations: (() -> Unit)? = null,
 ) {
   Card(
     modifier = modifier.fillMaxWidth(),
@@ -482,6 +491,26 @@ internal fun UserProfileCard(
             modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
+          )
+        }
+      }
+
+      if (onOpenOrganizations != null) {
+        OutlinedButton(
+          onClick = onOpenOrganizations,
+          modifier = Modifier.fillMaxWidth().height(40.dp),
+          shape = MaterialTheme.shapes.small,
+          border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+        ) {
+          Icon(
+            imageVector = Icons.Outlined.Groups,
+            contentDescription = null,
+            modifier = Modifier.size(16.dp),
+          )
+          Spacer(modifier = Modifier.width(8.dp))
+          Text(
+            text = "Manage organizations",
+            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
           )
         }
       }

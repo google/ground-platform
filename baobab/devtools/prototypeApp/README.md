@@ -105,6 +105,37 @@ to `http://localhost:8091/#surveys`. Web pages are gated behind a simple
 -   The Web dashboard and Survey editor redirect here when there is no survey
     to open, and **Sign out** from any web page returns here.
 
+## Organizations Pages (`#organizations`, `#organization/<id>`)
+
+Open from **Manage organizations** in the user profile card (avatar in the web
+header), or deep-link to `http://localhost:8091/#organizations`. Organizations
+are the Ground 2.0 counterpart of Collect Earth Online institutions: a survey
+can optionally belong to one, and the organization's **Managers** inherit
+Survey organizer access to all of its surveys while **Members** can create
+surveys in it and find them in their list.
+
+-   **Organizations list**: *Your organizations* (Managers first, with member,
+    survey, and pending-request counts) and *Other organizations* (listed ones
+    you can **Request to join**; unlisted organizations are invite-only), with
+    search and a **Create organization** dialog (name, description, directory
+    listing; the creator becomes its first Manager).
+-   **Organization page**: Tabs for **Surveys** (cards like the Surveys page,
+    plus **Create survey** for members), **Members**, and, for Managers,
+    **Settings**.
+    -   **Members**: Managers see *Requests to join* (**Approve** / **Decline**),
+        can invite people by email as Member or Manager (each invite gets an
+        invite link with **Copy link**, **New link**, and **Open as invitee**
+        to simulate acceptance, as on the Sharing page), change roles, and
+        remove people. Anyone can **Leave organization**. The last Manager
+        can't be demoted, removed, or leave; the page says why.
+    -   **Settings**: Edit the profile (name, description, website, directory
+        listing) with **Save** / **Discard**, and **Delete organization** (its
+        surveys become personal surveys of their owners; no data is deleted).
+
+Code lives in `organization/` (`OrganizationPages.kt` for the pure list and
+member-grouping logic, `OrganizationsPage.kt`, `OrganizationPage.kt`); the
+actions on `PrototypeAppState` delegate to `OrganizationRepository`.
+
 ## Web Dashboard Page (`#dashboard`)
 
 Open a survey from the **Surveys** page, or deep-link to

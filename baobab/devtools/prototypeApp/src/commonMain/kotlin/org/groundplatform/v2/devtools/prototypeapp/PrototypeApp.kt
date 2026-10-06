@@ -85,6 +85,8 @@ import androidx.compose.ui.unit.sp
 import org.groundplatform.v2.core.forms.ui.GroundBadgeTone
 import org.groundplatform.v2.core.forms.ui.GroundTheme
 import org.groundplatform.v2.core.forms.ui.GroundTonalBadge
+import org.groundplatform.v2.devtools.prototypeapp.organization.OrganizationPage
+import org.groundplatform.v2.devtools.prototypeapp.organization.OrganizationsPage
 import org.groundplatform.v2.devtools.prototypeapp.surveyeditor.SurveyEditorPage
 import org.groundplatform.v2.devtools.prototypeapp.surveyeditor.SurveyEditorState
 
@@ -94,7 +96,11 @@ enum class PrototypeWorkbenchPage(val label: String, val hash: String) {
   /** Web landing page: the surveys the signed-in user can open, grouped by organization. */
   WEB_SURVEYS("Surveys", "surveys"),
   WEB_DASHBOARD("Web dashboard", "dashboard"),
-  SURVEY_EDITOR("Survey editor", "survey-editor");
+  SURVEY_EDITOR("Survey editor", "survey-editor"),
+  /** The organizations the signed-in user belongs to, and listed ones they can ask to join. */
+  ORGANIZATIONS("Organizations", "organizations"),
+  /** One organization's surveys, members, and settings (`#organization/<id>`). */
+  ORGANIZATION("Organization", "organization");
 
   /** Whether this page belongs to the unified web application (surveys, dashboard, editor). */
   val isWebApp: Boolean
@@ -114,10 +120,23 @@ enum class PrototypeWorkbenchPage(val label: String, val hash: String) {
     /** Legacy hashes kept working after pages were renamed. */
     private val aliases = mapOf("form-editor" to SURVEY_EDITOR, "web" to WEB_DASHBOARD)
 
+    /** The page for a URL hash, ignoring any `/<id>` suffix (see [organizationIdFromHash]). */
     fun fromHash(hash: String?): PrototypeWorkbenchPage {
-      val h = hash?.removePrefix("#")
+      val h = hash?.removePrefix("#")?.substringBefore('/')
       return entries.firstOrNull { it.hash == h } ?: aliases[h] ?: MOBILE_PROTOTYPE
     }
+
+    /** The organization ID in an `#organization/<id>` hash, or `null` for any other hash. */
+    fun organizationIdFromHash(hash: String?): String? {
+      val h = hash?.removePrefix("#") ?: return null
+      if (fromHash(h) != ORGANIZATION) return null
+      return h.substringAfter('/', "").takeIf { it.isNotBlank() }
+    }
+
+    /** The URL hash for [page], including the organization ID for the organization page. */
+    fun hashFor(page: PrototypeWorkbenchPage, organizationId: String?): String =
+      if (page == ORGANIZATION && !organizationId.isNullOrBlank()) "${page.hash}/$organizationId"
+      else page.hash
   }
 }
 
@@ -134,16 +153,21 @@ enum class PrototypeWorkbenchPage(val label: String, val hash: String) {
 fun PrototypeApp(
   state: PrototypeAppState = remember { PrototypeAppState() },
   initialPage: PrototypeWorkbenchPage = PrototypeWorkbenchPage.MOBILE_PROTOTYPE,
-  onPageChanged: (PrototypeWorkbenchPage) -> Unit = {},
+  initialOrganizationId: String? = null,
+  onHashChanged: (String) -> Unit = {},
 ) {
   var page by remember { mutableStateOf(initialPage) }
-  LaunchedEffect(initialPage) {
+  LaunchedEffect(initialPage, initialOrganizationId) {
     page = initialPage
-    state.selectWorkbenchPage(initialPage)
+    if (initialPage == PrototypeWorkbenchPage.ORGANIZATION && initialOrganizationId != null) {
+      state.openOrganization(initialOrganizationId)
+    } else {
+      state.selectWorkbenchPage(initialPage)
+    }
   }
   state.onWorkbenchPageChanged = { targetPage ->
     page = targetPage
-    onPageChanged(targetPage)
+    onHashChanged(PrototypeWorkbenchPage.hashFor(targetPage, state.openOrganizationId))
   }
   LaunchedEffect(state.activeWorkbenchPage) {
     if (page != state.activeWorkbenchPage) {
@@ -206,6 +230,30 @@ fun PrototypeApp(
         when {
           resolvedPage.isWebApp && !state.isSignedIn ->
             WebSignInPage(state = state, onSignIn = { state.signInWithGoogle() })
+          resolvedPage == PrototypeWorkbenchPage.ORGANIZATIONS ->
+            OrganizationsPage(
+              state = state,
+              onSignOut = {
+                state.signOut()
+                state.selectWorkbenchPage(PrototypeWorkbenchPage.WEB_SURVEYS)
+              },
+            )
+          resolvedPage == PrototypeWorkbenchPage.ORGANIZATION ->
+            OrganizationPage(
+              state = state,
+              onOpenSurvey = { surveyId ->
+                state.openSurveyOnWeb(surveyId)
+                state.selectWorkbenchPage(PrototypeWorkbenchPage.WEB_DASHBOARD)
+              },
+              onCreateSurvey = { title, organizationId ->
+                state.createSurvey(title = title, organizationId = organizationId)
+                state.selectWorkbenchPage(PrototypeWorkbenchPage.SURVEY_EDITOR)
+              },
+              onSignOut = {
+                state.signOut()
+                state.selectWorkbenchPage(PrototypeWorkbenchPage.WEB_SURVEYS)
+              },
+            )
           resolvedPage == PrototypeWorkbenchPage.WEB_SURVEYS ->
             WebSurveysPage(
               state = state,

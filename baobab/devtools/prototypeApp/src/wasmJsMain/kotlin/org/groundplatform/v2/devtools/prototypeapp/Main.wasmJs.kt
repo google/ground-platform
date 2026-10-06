@@ -24,7 +24,8 @@ fun main() {
   ComposeViewport(container) {
     PrototypeApp(
       initialPage = PrototypeWorkbenchPage.fromHash(window.location.hash),
-      onPageChanged = { window.location.hash = it.hash },
+      initialOrganizationId = PrototypeWorkbenchPage.organizationIdFromHash(window.location.hash),
+      onHashChanged = { window.location.hash = it },
     )
   }
 }

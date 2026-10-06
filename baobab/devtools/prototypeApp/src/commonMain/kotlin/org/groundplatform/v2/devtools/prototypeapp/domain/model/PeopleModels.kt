@@ -43,6 +43,13 @@ object InviteLinks {
 
   fun url(token: String) = BASE_URL + token
 
+  /** A fresh random invite token such as `k7q2-mx4p` (no ambiguous characters). */
+  fun newToken(): String {
+    val alphabet = "abcdefghjkmnpqrstuvwxyz23456789"
+    fun chunk() = (1..4).map { alphabet[kotlin.random.Random.nextInt(alphabet.length)] }
+    return "${chunk().joinToString("")}-${chunk().joinToString("")}"
+  }
+
   /** Guesses a display name from an email local part, e.g. `grace.njeri@…` → "Grace Njeri". */
   fun suggestedName(email: String): String =
     email

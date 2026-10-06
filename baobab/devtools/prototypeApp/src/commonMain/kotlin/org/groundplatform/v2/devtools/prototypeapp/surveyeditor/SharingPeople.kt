@@ -299,19 +299,43 @@ internal fun AcceptInviteDialog(
   onAccept: (displayName: String, photoUrl: String?) -> String?,
   onDismiss: () -> Unit,
 ) {
-  var name by remember(invitee.email) { mutableStateOf(InviteLinks.suggestedName(invitee.email)) }
+  AcceptInviteDialog(
+    title = surveyTitle,
+    inviteeEmail = invitee.email,
+    roleLabel = invitee.role.label,
+    peopleListName = "Sharing page",
+    onAccept = onAccept,
+    onDismiss = onDismiss,
+  )
+}
+
+/**
+ * [AcceptInviteDialog] for any invite: joining [title] (a survey or an organization) as
+ * [inviteeEmail] with [roleLabel]. [peopleListName] names the list where organizers will see the
+ * cached name and photo.
+ */
+@Composable
+internal fun AcceptInviteDialog(
+  title: String,
+  inviteeEmail: String,
+  roleLabel: String,
+  peopleListName: String,
+  onAccept: (displayName: String, photoUrl: String?) -> String?,
+  onDismiss: () -> Unit,
+) {
+  var name by remember(inviteeEmail) { mutableStateOf(InviteLinks.suggestedName(inviteeEmail)) }
   var photo by
-    remember(invitee.email) {
-      mutableStateOf<String?>(AVATAR_SCHEME + invitee.email.hashCode().mod(PortraitCount))
+    remember(inviteeEmail) {
+      mutableStateOf<String?>(AVATAR_SCHEME + inviteeEmail.hashCode().mod(PortraitCount))
     }
   var error by remember { mutableStateOf<String?>(null) }
   AlertDialog(
     onDismissRequest = onDismiss,
-    title = { Text("Join “$surveyTitle”") },
+    title = { Text("Join “$title”") },
     text = {
       Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
         Text(
-          "Preview of what ${invitee.email} sees after opening their invite link and signing in.",
+          "Preview of what $inviteeEmail sees after opening their invite link and signing in.",
           style = MaterialTheme.typography.bodySmall,
           color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
@@ -319,19 +343,15 @@ internal fun AcceptInviteDialog(
           verticalAlignment = Alignment.CenterVertically,
           horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-          ProfileAvatar(
-            nameOrEmail = name.ifBlank { invitee.email },
-            photoUrl = photo,
-            size = 56.dp,
-          )
+          ProfileAvatar(nameOrEmail = name.ifBlank { inviteeEmail }, photoUrl = photo, size = 56.dp)
           Column {
             Text(
-              name.ifBlank { invitee.email },
+              name.ifBlank { inviteeEmail },
               style = MaterialTheme.typography.titleMedium,
               fontWeight = FontWeight.Medium,
             )
             Text(
-              "Signed in as ${invitee.email} • ${invitee.role.label}",
+              "Signed in as $inviteeEmail • $roleLabel",
               style = MaterialTheme.typography.bodySmall,
               color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -359,15 +379,15 @@ internal fun AcceptInviteDialog(
           }
           PhotoChoice(selected = photo == null, onClick = { photo = null }) {
             ProfileAvatar(
-              nameOrEmail = name.ifBlank { invitee.email },
+              nameOrEmail = name.ifBlank { inviteeEmail },
               photoUrl = null,
               size = 36.dp,
             )
           }
         }
         Text(
-          "Ground saves your name and photo so survey organizers can recognize you on the " +
-            "Sharing page. They're refreshed whenever you sign in.",
+          "Ground saves your name and photo so organizers can recognize you on the " +
+            "$peopleListName. They're refreshed whenever you sign in.",
           style = MaterialTheme.typography.bodySmall,
           color = MaterialTheme.colorScheme.onSurfaceVariant,
         )

@@ -27,6 +27,7 @@ import org.groundplatform.v2.core.sampling.SamplingException
 import org.groundplatform.v2.core.sampling.Stratum
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.CachedProfile
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.InvitationStatus
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.InviteLinks
 import org.groundplatform.v2.devtools.prototypeapp.formeditor.EditorChoice
 import org.groundplatform.v2.devtools.prototypeapp.formeditor.EditorDataset
 import org.groundplatform.v2.devtools.prototypeapp.formeditor.EditorDatasetProperty
@@ -378,11 +379,7 @@ class SurveyEditorState(
       )
   }
 
-  private fun newInviteToken(): String {
-    val alphabet = "abcdefghjkmnpqrstuvwxyz23456789"
-    fun chunk() = (1..4).map { alphabet[Random.nextInt(alphabet.length)] }.joinToString("")
-    return "${chunk()}-${chunk()}"
-  }
+  private fun newInviteToken(): String = InviteLinks.newToken()
 
   // Forms ------------------------------------------------------------------------------------
 

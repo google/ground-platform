@@ -28,6 +28,7 @@ import org.groundplatform.v2.core.forms.serialization.XFormsXmlSerializer
 import org.groundplatform.v2.core.forms.ui.FormWizardController
 import org.groundplatform.v2.core.forms.ui.WorkbenchExampleForm
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.CachedProfile
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.InviteLinks
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyMapAnchor
 import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.ClusterMapFeaturesUseCase
 import org.groundplatform.v2.devtools.prototypeapp.map.DraftGeometry
@@ -314,6 +315,227 @@ class PrototypeAppState(
           sharing = activeSurveyEditorDraft.sharing,
           organization = activeSurveyOrganization,
         )
+
+  // --- Organizations (web `#organizations` and `#organization/<id>` pages) ---
+
+  /** ID of the organization shown on the web organization page, or `null`. */
+  var openOrganizationId by mutableStateOf<String?>(null)
+    private set
+
+  /** The organization shown on the web organization page, if it still exists. */
+  val openOrganization: Organization?
+    get() = organization(openOrganizationId)
+
+  /** Notice from the last organization action (e.g. a refused change), shown on the page. */
+  var organizationNotice by mutableStateOf<String?>(null)
+    private set
+
+  fun dismissOrganizationNotice() {
+    organizationNotice = null
+  }
+
+  /** Shows [organizationId] on the web organization page. */
+  fun openOrganization(organizationId: String) {
+    openOrganizationId = organizationId
+    organizationNotice = null
+    selectWorkbenchPage(PrototypeWorkbenchPage.ORGANIZATION)
+  }
+
+  /** Shows the list of organizations. */
+  fun openOrganizations() {
+    organizationNotice = null
+    selectWorkbenchPage(PrototypeWorkbenchPage.ORGANIZATIONS)
+  }
+
+  /** Surveys that belong to [organizationId]. */
+  fun surveysInOrganization(organizationId: String): List<SurveyPreviewItem> = surveys.filter {
+    it.organizationId == organizationId
+  }
+
+  /** Whether the signed-in user manages [organization]. */
+  fun managesOrganization(organization: Organization): Boolean =
+    isSignedIn && organization.isManager(signedInUserEmail)
+
+  private val signedInProfile: CachedProfile
+    get() = CachedProfile(signedInUserName, "avatar:2", "")
+
+  /**
+   * Creates an organization managed by the signed-in user, opens it, and returns its ID. The ID is
+   * a slug of [name], made unique with a numeric suffix.
+   */
+  fun createOrganization(name: String, description: String, isListed: Boolean): String {
+    val trimmedName = name.trim().ifBlank { "Untitled organization" }
+    val id = uniqueOrganizationId(trimmedName)
+    viewModel.launch {
+      viewModel.organizationRepository.createOrganization(
+        Organization(
+          id = id,
+          name = trimmedName,
+          description = description.trim(),
+          isListed = isListed,
+          logoUrl = "avatar:${organizations.size % 9}",
+        ),
+        creatorEmail = signedInUserEmail,
+        creatorProfile = signedInProfile,
+      )
+      // Open it only once it's in the store, so the organization page never sees it missing.
+      openOrganization(id)
+      organizationNotice = "Created organization \"$trimmedName\"."
+    }
+    return id
+  }
+
+  private fun uniqueOrganizationId(name: String): String {
+    val slug =
+      name
+        .lowercase()
+        .replace(Regex("[^a-z0-9]+"), "-")
+        .trim('-')
+        .ifBlank { "organization" }
+        .take(40)
+    val base = "org-$slug"
+    val taken = organizations.map { it.id }.toSet()
+    if (base !in taken) return base
+    var n = 2
+    while ("$base-$n" in taken) n++
+    return "$base-$n"
+  }
+
+  /** Saves the organization's profile fields. Only Managers may call this. */
+  fun updateOrganization(organizationId: String, transform: (Organization) -> Organization) {
+    viewModel.launch {
+      viewModel.organizationRepository.updateOrganization(organizationId, transform)
+    }
+  }
+
+  /** Deletes the organization; its surveys become personal surveys. Returns to the list. */
+  fun deleteOrganization(organizationId: String) {
+    val name = organization(organizationId)?.name
+    viewModel.launch { viewModel.organizationRepository.deleteOrganization(organizationId) }
+    openOrganizationId = null
+    selectWorkbenchPage(PrototypeWorkbenchPage.ORGANIZATIONS)
+    organizationNotice = name?.let { "Deleted organization \"$it\"." }
+  }
+
+  /**
+   * Invites [email] to [organizationId] with [role]. Returns an error message for an invalid or
+   * already-present address, or `null` when the invite was sent.
+   */
+  fun inviteOrganizationMember(
+    organizationId: String,
+    email: String,
+    role: OrganizationRole,
+  ): String? {
+    val normalized = email.trim().lowercase()
+    if (!Regex("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$").matches(normalized)) {
+      return "Enter a valid email address."
+    }
+    val organization = organization(organizationId) ?: return "Organization not found."
+    val existing = organization.member(normalized)
+    if (existing != null) {
+      return when (existing.status) {
+        MembershipStatus.ACTIVE -> "${existing.displayName} is already a member."
+        MembershipStatus.INVITED -> "${existing.email} has already been invited."
+        MembershipStatus.REQUESTED ->
+          "${existing.displayName} has asked to join. Approve their request instead."
+      }
+    }
+    viewModel.launch {
+      viewModel.organizationRepository.inviteMember(
+        organizationId,
+        normalized,
+        role,
+        token = InviteLinks.newToken(),
+      )
+    }
+    return null
+  }
+
+  /** Issues a new invite link for a pending invite, invalidating the old one. */
+  fun resetOrganizationInviteLink(organizationId: String, email: String) {
+    viewModel.launch {
+      viewModel.organizationRepository.updateOrganization(organizationId) { org ->
+        org.copy(
+          members =
+            org.members.map {
+              if (it.email == email && it.status == MembershipStatus.INVITED) {
+                it.copy(inviteToken = InviteLinks.newToken())
+              } else {
+                it
+              }
+            }
+        )
+      }
+    }
+  }
+
+  /**
+   * Simulates the invitee opening their link and accepting. Returns an error message, or `null`.
+   */
+  fun acceptOrganizationInvite(
+    organizationId: String,
+    email: String,
+    displayName: String,
+    photoUrl: String?,
+  ): String? {
+    val name = displayName.trim()
+    if (name.isEmpty()) return "Enter a name."
+    viewModel.launch {
+      viewModel.organizationRepository.acceptInvite(
+        organizationId,
+        email,
+        userId = "uid-${email.substringBefore('@').replace('.', '-')}",
+        profile = CachedProfile(name, photoUrl, ""),
+      )
+    }
+    return null
+  }
+
+  /** Asks to join a listed organization as the signed-in user. */
+  fun requestToJoinOrganization(organizationId: String) {
+    viewModel.launch {
+      viewModel.organizationRepository.requestToJoin(
+        organizationId,
+        signedInUserEmail,
+        signedInProfile,
+      )
+    }
+  }
+
+  fun approveOrganizationRequest(organizationId: String, email: String) {
+    viewModel.launch { viewModel.organizationRepository.approveRequest(organizationId, email) }
+  }
+
+  /** Changes a member's role. Refusals (demoting the last Manager) surface as a notice. */
+  fun setOrganizationMemberRole(organizationId: String, email: String, role: OrganizationRole) {
+    viewModel.launch {
+      val updated = viewModel.organizationRepository.setMemberRole(organizationId, email, role)
+      if (updated == null) {
+        organizationNotice =
+          "An organization needs at least one Manager. Make someone else a Manager first."
+      }
+    }
+  }
+
+  /**
+   * Removes a member, declines a join request, or revokes an invite. Refusals (removing the last
+   * Manager) surface as a notice. Removing yourself returns to the list of organizations.
+   */
+  fun removeOrganizationMember(organizationId: String, email: String) {
+    val isSelf = email.equals(signedInUserEmail, ignoreCase = true)
+    viewModel.launch {
+      val updated = viewModel.organizationRepository.removeMember(organizationId, email)
+      if (updated == null) {
+        organizationNotice =
+          "An organization needs at least one Manager. Make someone else a Manager before " +
+            "leaving."
+      } else if (isSelf) {
+        openOrganizationId = null
+        selectWorkbenchPage(PrototypeWorkbenchPage.ORGANIZATIONS)
+        organizationNotice = "You left \"${updated.name}\"."
+      }
+    }
+  }
 
   var termsCheckboxChecked by mutableStateOf(true)
     private set
