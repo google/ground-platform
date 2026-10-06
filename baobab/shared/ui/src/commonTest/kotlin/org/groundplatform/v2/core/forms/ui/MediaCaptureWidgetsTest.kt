@@ -129,7 +129,7 @@ class MediaCaptureWidgetsTest {
     assertEquals("0:05", formatMediaDuration(4_600))
     assertEquals("1:02:03", formatMediaDuration(3_723_000))
     assertEquals(
-      "Accepts image/* · Max 1024 px · New capture only · Front camera",
+      "Accepts image/* · Max 1024 px · Capture only · Front camera",
       describeMediaConstraints(
         MediaCaptureSpec(
           kind = MediaCaptureKind.PHOTO,
@@ -139,6 +139,20 @@ class MediaCaptureWidgetsTest {
           preferFrontCamera = true,
         )
       ),
+    )
+    assertEquals(
+      "Accepts video/*",
+      describeMediaConstraints(MediaCaptureSpec(MediaCaptureKind.VIDEO, "video/*")),
+    )
+    assertEquals("Capture only", mediaSourceModeLabel(captureOnly = true))
+    assertEquals("Capture or upload", mediaSourceModeLabel(captureOnly = false))
+    assertEquals(
+      "This question needs a live audio recording, which this device/browser can't capture.",
+      captureUnavailableMessage(MediaCaptureKind.AUDIO, captureOnly = true),
+    )
+    assertEquals(
+      "This device can't capture or choose a photo.",
+      captureUnavailableMessage(MediaCaptureKind.PHOTO, captureOnly = false),
     )
     assertEquals(
       "a.jpg · 3 B · 4×3",

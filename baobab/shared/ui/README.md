@@ -77,6 +77,25 @@ and **Web (`js`, `wasmJs`)**.
     and polygons collect vertices until **Done**). The web dashboard uses this
     for every geometry question, "GPS only" or not, since a browser has no
     field GPS; a `null` host renders the request inert for read-only previews.
+-   **Media Capture Questions
+    ([`MediaCaptureWidget`](src/commonMain/kotlin/org/groundplatform/v2/core/forms/ui/MediaCaptureWidgets.kt))**:
+    Photo, video, and audio questions (`<upload mediatype="image/*|video/*|audio/*">`)
+    render one card on mobile and in the compact web layout. Capture is
+    delegated to the host's `LocalMediaCaptureHandler`
+    ([`MediaCaptureHost.kt`](src/commonMain/kotlin/org/groundplatform/v2/core/forms/ui/MediaCaptureHost.kt));
+    the default `SimulatedMediaCaptureHandler` answers with placeholder
+    media so forms stay answerable in tests and previews. The organizer's
+    source mode is explicit in the UI: a question with the ODK `new` /
+    `new-front` appearance (`MediaCaptureSpec.requireNewCapture`) is badged
+    **Capture only** with a lock, offers only the live capture action and live
+    retakes, and shows "This question needs a live photo, which this
+    device/browser can't capture." when the handler reports no capture
+    support; otherwise the card is badged **Capture or upload** with the
+    primary **Take photo** / **Record video** / **Record audio** action and a
+    secondary **Choose from device** upload (plus **Upload** next to the retake
+    action once answered). Hosts decide availability per kind and source
+    through `MediaCaptureHandler.supports(kind, source)`; a capture request is
+    never silently served by a file picker.
 
 See the detailed package design and API reference in
 [`src/commonMain/kotlin/org/groundplatform/v2/core/forms/ui/README.md`](src/commonMain/kotlin/org/groundplatform/v2/core/forms/ui/README.md).

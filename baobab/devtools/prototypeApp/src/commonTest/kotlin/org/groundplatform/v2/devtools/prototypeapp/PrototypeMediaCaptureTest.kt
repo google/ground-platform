@@ -16,6 +16,7 @@ package org.groundplatform.v2.devtools.prototypeapp
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertIs
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
@@ -65,6 +66,108 @@ class PrototypeMediaCaptureTest {
     }
     val captured = assertIs<MediaCaptureResult.Captured>(result)
     assertEquals("audio/mp4", captured.attachment.mimeType)
+  }
+
+  @Test
+  fun chooseCapturePath_neverDegradesCaptureToFilePicker() {
+    val capture = MediaCaptureSource.CAPTURE
+    val existing = MediaCaptureSource.EXISTING_FILE
+    val photo = MediaCaptureKind.PHOTO
+
+    // Mobile browser: HTML Media Capture opens the native camera.
+    assertEquals(
+      CapturePath.FILE_INPUT_CAPTURE,
+      chooseCapturePath(capture, photo, prefersFileInput = true, liveAvailable = true, true),
+    )
+    // Desktop browser with getUserMedia: in-page live overlay.
+    assertEquals(
+      CapturePath.LIVE_CAPTURE,
+      chooseCapturePath(capture, photo, prefersFileInput = false, liveAvailable = true, true),
+    )
+    // Desktop browser without getUserMedia: fail rather than open a file picker.
+    assertEquals(
+      CapturePath.UNAVAILABLE,
+      chooseCapturePath(capture, photo, prefersFileInput = false, liveAvailable = false, true),
+    )
+    // Mobile UA but no picker bridge at all: live capture if possible.
+    assertEquals(
+      CapturePath.LIVE_CAPTURE,
+      chooseCapturePath(capture, photo, prefersFileInput = true, liveAvailable = true, false),
+    )
+    // Generic files are never captured live.
+    assertEquals(
+      CapturePath.UNAVAILABLE,
+      chooseCapturePath(capture, MediaCaptureKind.FILE, false, liveAvailable = true, true),
+    )
+    // Existing files always go through the picker when one exists.
+    for (kind in MediaCaptureKind.entries) {
+      assertEquals(
+        CapturePath.FILE_PICKER,
+        chooseCapturePath(existing, kind, prefersFileInput = false, liveAvailable = false, true),
+      )
+      assertEquals(
+        CapturePath.UNAVAILABLE,
+        chooseCapturePath(existing, kind, prefersFileInput = true, liveAvailable = true, false),
+      )
+    }
+  }
+
+  @Test
+  fun handler_supportsReflectsCapturePaths() {
+    val desktopNoCamera =
+      PrototypeMediaCaptureHandler(
+        pickerAvailable = true,
+        liveAvailable = false,
+        prefersFileInput = false,
+      )
+    assertFalse(desktopNoCamera.supports(MediaCaptureKind.PHOTO, MediaCaptureSource.CAPTURE))
+    assertTrue(desktopNoCamera.supports(MediaCaptureKind.PHOTO, MediaCaptureSource.EXISTING_FILE))
+
+    val desktopWithCamera =
+      PrototypeMediaCaptureHandler(
+        pickerAvailable = true,
+        liveAvailable = true,
+        prefersFileInput = false,
+      )
+    assertTrue(desktopWithCamera.supports(MediaCaptureKind.VIDEO, MediaCaptureSource.CAPTURE))
+    assertFalse(desktopWithCamera.supports(MediaCaptureKind.FILE, MediaCaptureSource.CAPTURE))
+    assertTrue(desktopWithCamera.supports(MediaCaptureKind.FILE, MediaCaptureSource.EXISTING_FILE))
+
+    val mobile =
+      PrototypeMediaCaptureHandler(
+        pickerAvailable = true,
+        liveAvailable = false,
+        prefersFileInput = true,
+      )
+    assertTrue(mobile.supports(MediaCaptureKind.AUDIO, MediaCaptureSource.CAPTURE))
+  }
+
+  @Test
+  fun handler_failsCaptureOnlyRequestWhenBrowserCannotCapture() {
+    val handler =
+      PrototypeMediaCaptureHandler(
+        pickerAvailable = true,
+        liveAvailable = false,
+        prefersFileInput = false,
+      )
+    var result: MediaCaptureResult? = null
+    handler.launch(
+      MediaCaptureRequest(
+        fieldPath = "/data/leaf_voucher_photo",
+        spec =
+          MediaCaptureSpec(
+            kind = MediaCaptureKind.PHOTO,
+            acceptedMediaType = "image/*",
+            requireNewCapture = true,
+          ),
+        source = MediaCaptureSource.CAPTURE,
+        suggestedFileName = "leaf_voucher_photo_1.jpg",
+      )
+    ) {
+      result = it
+    }
+    val failed = assertIs<MediaCaptureResult.Failed>(result)
+    assertEquals("This browser can't capture a photo directly.", failed.message)
   }
 
   @Test

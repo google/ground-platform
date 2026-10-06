@@ -142,6 +142,28 @@ prototype, so selections and survey changes carry over.
     One click places a point; lines and polygons collect vertices until
     **Done**. While drawing, clicks on features add vertices instead of
     selecting them.
+-   **Media capture on web** (`PrototypeMediaCapture.kt`,
+    `src/commonMain/resources/media-capture-bridge.js`): Photo, video, and
+    audio questions use the shared `MediaCaptureWidget` with the prototype's
+    `PrototypeMediaCaptureHandler`, which honours the organizer's per-question
+    source mode (**Capture only** vs **Capture or upload**, the ODK `new`
+    appearance). A **capture** request is served by, in order: the native
+    camera / recorder app via HTML Media Capture (`<input type="file"
+    capture>`) on mobile browsers (`prefersFileInputCapture()`: coarse pointer
+    or Android / iOS user agent); otherwise an in-page live capture overlay
+    (`openLive()`: `getUserMedia` + `MediaRecorder`) on desktop browsers, with
+    a live camera preview, **Capture** / **Start recording** → **Stop**,
+    **Switch camera** when several cameras exist, an audio level meter and
+    elapsed time for recordings, and a **Use** / **Retake** confirm step
+    (photos are JPEG, downscaled to `orx:max-pixels`; clips are `webm`, or
+    whatever `MediaRecorder.isTypeSupported` allows); otherwise the request
+    fails with "This browser can't capture a photo directly." A capture
+    request is never degraded to a file picker, so **Capture only** holds on
+    desktop browsers where the `capture` attribute is ignored. The plain file
+    picker (`open()` without `capture`) is used only for **Choose from device**
+    on questions that allow uploads. `chooseCapturePath` is the pure decision
+    function; off the web (JVM tests) the handler falls back to the shared
+    `SimulatedMediaCaptureHandler`.
 -   **Data tables**: A collapsible panel docks to the bottom of the map with
     one tab per entity dataset (map layers and data tables), with the selected
     record highlighted. The first column is a compact status chip. It never
@@ -235,6 +257,15 @@ Selecting a Form opens the visual Form editor in `formeditor/`
     banner. **Fix all** (`makeGeometryQuestionsWebCompatible`) switches every
     GPS-only question to **GPS or draw on map**. Like other issues, this blocks
     publishing until it's resolved.
+-   **Media questions**: **Photo**, **Video**, and **Audio** question types
+    (`EditorQuestionType.isMedia`) bind to XForms `binary` and render as an
+    `<upload mediatype="image/*" | "video/*" | "audio/*">` control. Each media
+    question has a **Media source** setting (`MediaSource`): **Capture or
+    upload** (the ODK default; no body `appearance`, so the shared form runner
+    offers the camera / microphone and "Choose from device") or **Capture
+    only** (`appearance="new"`, so collectors must take a fresh photo, video,
+    or recording and can't upload an existing file). Switching between media
+    types keeps the setting; switching to any other type resets it.
 -   **Add / delete / duplicate / reorder**: Use **Add question**, which inserts
     after the selected screen, plus the actions in the panel. Drag a screen
     card along the canvas to reorder it: other screens slide aside to show

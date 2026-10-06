@@ -86,6 +86,10 @@ interface MediaCaptureHandler {
 class SimulatedMediaCaptureHandler : MediaCaptureHandler {
   override val displayName: String = "Simulated capture (no camera available)"
 
+  /** Simulates both live capture and existing files; generic files can only be "chosen". */
+  override fun supports(kind: MediaCaptureKind, source: MediaCaptureSource): Boolean =
+    source == MediaCaptureSource.EXISTING_FILE || kind != MediaCaptureKind.FILE
+
   override fun launch(request: MediaCaptureRequest, onResult: (MediaCaptureResult) -> Unit) {
     val spec = request.spec
     val mimeType = simulatedMimeType(spec)

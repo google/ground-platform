@@ -70,6 +70,7 @@ import androidx.compose.material.icons.outlined.FormatColorReset
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Layers
 import androidx.compose.material.icons.outlined.LocationOn
+import androidx.compose.material.icons.outlined.Mic
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material.icons.outlined.Pentagon
 import androidx.compose.material.icons.outlined.Photo
@@ -77,6 +78,7 @@ import androidx.compose.material.icons.outlined.PlayArrow
 import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.Timeline
+import androidx.compose.material.icons.outlined.Videocam
 import androidx.compose.material.icons.outlined.Warning
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
@@ -324,6 +326,8 @@ internal fun questionTypeIcon(type: EditorQuestionType): ImageVector =
     EditorQuestionType.LINE -> Icons.Outlined.Timeline
     EditorQuestionType.POLYGON -> Icons.Outlined.Pentagon
     EditorQuestionType.PHOTO -> Icons.Outlined.AccountCircle
+    EditorQuestionType.VIDEO -> Icons.Outlined.Videocam
+    EditorQuestionType.AUDIO -> Icons.Outlined.Mic
     EditorQuestionType.NOTE -> Icons.Outlined.Info
   }
 
@@ -1126,7 +1130,12 @@ private fun MiniWidget(question: EditorQuestion) {
       MiniPlaceholder(geometryPlaceholderText(question, "Walk line"), Icons.Outlined.Timeline)
     EditorQuestionType.POLYGON ->
       MiniPlaceholder(geometryPlaceholderText(question, "Walk polygon"), Icons.Outlined.Pentagon)
-    EditorQuestionType.PHOTO -> MiniPlaceholder("Take photo", Icons.Outlined.Add)
+    EditorQuestionType.PHOTO ->
+      MiniPlaceholder(mediaPlaceholderText(question, "Take photo"), Icons.Outlined.Add)
+    EditorQuestionType.VIDEO ->
+      MiniPlaceholder(mediaPlaceholderText(question, "Record video"), Icons.Outlined.Videocam)
+    EditorQuestionType.AUDIO ->
+      MiniPlaceholder(mediaPlaceholderText(question, "Record audio"), Icons.Outlined.Mic)
     EditorQuestionType.NOTE ->
       Row(verticalAlignment = Alignment.CenterVertically) {
         Icon(
@@ -1185,6 +1194,16 @@ private fun geometryPlaceholderText(question: EditorQuestion, gpsAction: String)
   when (question.capture) {
     GeometryCapture.GPS_ONLY -> "$gpsAction (GPS)"
     GeometryCapture.GPS_OR_MAP -> "$gpsAction or draw on map"
+  }
+
+/**
+ * Caption of a media question's mini widget: [captureAction] alone when collectors must capture a
+ * fresh file, or the upload alternative when they may also pick one from their device.
+ */
+private fun mediaPlaceholderText(question: EditorQuestion, captureAction: String): String =
+  when (question.mediaSource) {
+    MediaSource.CAPTURE_ONLY -> captureAction
+    MediaSource.CAPTURE_OR_UPLOAD -> "$captureAction or upload"
   }
 
 @Composable
@@ -1308,6 +1327,9 @@ private fun QuestionProperties(state: FormEditorState, question: EditorQuestion)
     if (question.type.isGeometry) {
       GeometryCaptureSelector(state, question)
     }
+    if (question.type.isMedia) {
+      MediaSourceSelector(state, question)
+    }
 
     OutlinedTextField(
       value = question.label,
@@ -1384,6 +1406,29 @@ private fun GeometryCaptureSelector(state: FormEditorState, question: EditorQues
         modifier = Modifier.padding(horizontal = 16.dp),
       )
     }
+  }
+}
+
+/**
+ * **Media source** setting of a photo, video, or audio question: capture or upload (the ODK
+ * default), or capture only (the `new` appearance). Shows the chosen mode's description.
+ */
+@Composable
+private fun MediaSourceSelector(state: FormEditorState, question: EditorQuestion) {
+  Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+    DropdownSelector(
+      label = "Media source",
+      selectedText = question.mediaSource.label,
+      options = MediaSource.entries,
+      optionText = { it.label },
+      onSelect = { state.updateMediaSource(question.key, it) },
+    )
+    Text(
+      text = question.mediaSource.description,
+      style = MaterialTheme.typography.bodySmall,
+      color = MaterialTheme.colorScheme.onSurfaceVariant,
+      modifier = Modifier.padding(horizontal = 16.dp),
+    )
   }
 }
 

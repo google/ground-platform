@@ -66,6 +66,12 @@ import org.jetbrains.compose.resources.decodeToImageBitmap
  *
  * Capture itself is delegated to the host's [LocalMediaCaptureHandler]; this widget renders the
  * question's constraints, the capture / choose-file actions, and a preview of the current answer.
+ *
+ * The organizer's source mode is made explicit: with the ODK `new` appearance
+ * ([MediaCaptureSpec.requireNewCapture]) the card is badged **Capture only**, offers only live
+ * capture (and only live retakes), and shows an error when the host can't capture; otherwise it is
+ * badged **Capture or upload** and offers both the primary capture action and a secondary "Choose
+ * from device" upload. The same widget serves the mobile runner and the compact web layout.
  */
 @Composable
 internal fun MediaCaptureWidget(
@@ -111,10 +117,15 @@ internal fun MediaCaptureWidget(
     }
   }
 
+  // "Capture only" (ODK `new` appearance) locks the question to live camera / microphone capture;
+  // otherwise collectors may capture or upload an existing file. Generic file questions only pick.
+  val captureOnly = spec.requireNewCapture && spec.kind != MediaCaptureKind.FILE
   val canCapture =
     spec.kind != MediaCaptureKind.FILE && handler.supports(spec.kind, MediaCaptureSource.CAPTURE)
   val canPick =
-    spec.allowsExistingFile && handler.supports(spec.kind, MediaCaptureSource.EXISTING_FILE)
+    !captureOnly &&
+      spec.allowsExistingFile &&
+      handler.supports(spec.kind, MediaCaptureSource.EXISTING_FILE)
 
   OutlinedCard(
     modifier = Modifier.fillMaxWidth(),
@@ -132,7 +143,9 @@ internal fun MediaCaptureWidget(
         fileName != null ->
           Text(
             text =
-              "$fileName\nThis file isn't available on this device. Capture it again to replace it.",
+              "$fileName\nThis file isn't available on this device. " +
+                (if (canCapture) "Capture it again to replace it."
+                else "Choose it again to replace it."),
             style = MaterialTheme.typography.bodySmall.copy(color = colors.onSurfaceVariant),
           )
         else -> Unit
@@ -174,7 +187,7 @@ internal fun MediaCaptureWidget(
         }
         if (!canCapture && !canPick) {
           Text(
-            text = "This device can't capture a ${spec.kind.noun}.",
+            text = captureUnavailableMessage(spec.kind, captureOnly),
             style = MaterialTheme.typography.bodySmall.copy(color = colors.error),
           )
         }
@@ -188,19 +201,33 @@ internal fun MediaCaptureWidget(
           horizontalArrangement = Arrangement.spacedBy(8.dp),
           verticalAlignment = Alignment.CenterVertically,
         ) {
+          // Capture-only questions may only be retaken live; never offer a file replace there.
           val retakeSource =
-            if (canCapture) MediaCaptureSource.CAPTURE else MediaCaptureSource.EXISTING_FILE
-          if (canCapture || canPick) {
+            when {
+              canCapture -> MediaCaptureSource.CAPTURE
+              canPick -> MediaCaptureSource.EXISTING_FILE
+              else -> null
+            }
+          if (retakeSource != null) {
             OutlinedButton(
               onClick = { launch(retakeSource) },
               enabled = !isCapturing,
               modifier = Modifier.weight(1f),
             ) {
               Text(
-                if (canCapture) retakeActionLabel(spec.kind) else "Replace file",
+                if (retakeSource == MediaCaptureSource.CAPTURE) retakeActionLabel(spec.kind)
+                else "Replace file",
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
               )
+            }
+          }
+          if (canCapture && canPick) {
+            TextButton(
+              onClick = { launch(MediaCaptureSource.EXISTING_FILE) },
+              enabled = !isCapturing,
+            ) {
+              Text("Upload", maxLines = 1)
             }
           }
           TextButton(
@@ -246,7 +273,7 @@ private fun MediaCaptureHeader(spec: MediaCaptureSpec) {
         )
       }
     }
-    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+    Column(verticalArrangement = Arrangement.spacedBy(2.dp), modifier = Modifier.weight(1f)) {
       Text(
         text = mediaKindTitle(spec.kind),
         style =
@@ -258,6 +285,41 @@ private fun MediaCaptureHeader(spec: MediaCaptureSpec) {
       Text(
         text = describeMediaConstraints(spec),
         style = MaterialTheme.typography.labelSmall.copy(color = colors.onSurfaceVariant),
+      )
+    }
+    if (spec.kind != MediaCaptureKind.FILE) MediaSourceBadge(spec.requireNewCapture)
+  }
+}
+
+/** "Capture only" (locked) or "Capture or upload" badge, so collectors see the mode up front. */
+@Composable
+private fun MediaSourceBadge(captureOnly: Boolean) {
+  val colors = MaterialTheme.colorScheme
+  Surface(
+    shape = MaterialTheme.shapes.small,
+    color = if (captureOnly) colors.tertiaryContainer else colors.surfaceContainerHigh,
+  ) {
+    Row(
+      modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+      verticalAlignment = Alignment.CenterVertically,
+      horizontalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
+      if (captureOnly) {
+        Icon(
+          imageVector = LockIcon,
+          contentDescription = null,
+          tint = colors.onTertiaryContainer,
+          modifier = Modifier.size(12.dp),
+        )
+      }
+      Text(
+        text = mediaSourceModeLabel(captureOnly),
+        style =
+          MaterialTheme.typography.labelSmall.copy(
+            color = if (captureOnly) colors.onTertiaryContainer else colors.onSurfaceVariant,
+            fontWeight = FontWeight.Medium,
+          ),
+        maxLines = 1,
       )
     }
   }
@@ -351,13 +413,28 @@ internal fun retakeActionLabel(kind: MediaCaptureKind): String =
     MediaCaptureKind.FILE -> "Replace file"
   }
 
+/** Badge label for a media question's source mode (ODK `new` appearance ⇒ capture only). */
+internal fun mediaSourceModeLabel(captureOnly: Boolean): String =
+  if (captureOnly) "Capture only" else "Capture or upload"
+
+/**
+ * Error shown on a capture-only question when the host can't capture live media, so collectors
+ * learn why there is no action rather than seeing an empty card.
+ */
+internal fun captureUnavailableMessage(kind: MediaCaptureKind, captureOnly: Boolean): String =
+  if (captureOnly) {
+    "This question needs a live ${kind.noun}, which this device/browser can't capture."
+  } else {
+    "This device can't capture or choose a ${kind.noun}."
+  }
+
 /**
  * One-line summary of a question's capture constraints, e.g. `Accepts image/jpeg · Max 1024 px`.
  */
 internal fun describeMediaConstraints(spec: MediaCaptureSpec): String = buildList {
   add("Accepts ${spec.acceptedMediaType}")
   spec.maxPixels?.let { add("Max $it px") }
-  if (spec.requireNewCapture) add("New capture only")
+  if (spec.requireNewCapture) add("Capture only")
   if (spec.preferFrontCamera) add("Front camera")
 }
   .joinToString(" · ")
@@ -453,6 +530,15 @@ private val AttachFileIcon: ImageVector by lazy {
       "s2.5,1.12 2.5,2.5v10.5c0,0.55 -0.45,1 -1,1s-1,-0.45 -1,-1V6H10v9.5c0,1.38 1.12,2.5 2.5,2.5" +
       "s2.5,-1.12 2.5,-2.5V5c0,-2.21 -1.79,-4 -4,-4S7,2.79 7,5v12.5c0,3.04 2.46,5.5 5.5,5.5" +
       "s5.5,-2.46 5.5,-5.5V6h-1.5z",
+  )
+}
+
+private val LockIcon: ImageVector by lazy {
+  materialIcon(
+    "Ground.Lock",
+    "M18,8h-1V6c0,-2.76 -2.24,-5 -5,-5S7,3.24 7,6v2H6c-1.1,0 -2,0.9 -2,2v10c0,1.1 0.9,2 2,2h12" +
+      "c1.1,0 2,-0.9 2,-2V10c0,-1.1 -0.9,-2 -2,-2zM12,17c-1.1,0 -2,-0.9 -2,-2s0.9,-2 2,-2 2,0.9 2,2" +
+      " -0.9,2 -2,2zM15.1,8H8.9V6c0,-1.71 1.39,-3.1 3.1,-3.1 1.71,0 3.1,1.39 3.1,3.1v2z",
   )
 }
 

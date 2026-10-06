@@ -14,8 +14,14 @@
  */
 package org.groundplatform.v2.devtools.prototypeapp
 
+import org.groundplatform.v2.core.forms.media.MediaCaptureKind
+
 /** The JVM target backs unit tests only; capture falls back to simulated media. */
 internal actual val isPlatformMediaPickerAvailable: Boolean = false
+
+internal actual val isPlatformLiveCaptureAvailable: Boolean = false
+
+internal actual val platformPrefersFileInputCapture: Boolean = false
 
 internal actual fun platformEpochMillis(): Long = System.currentTimeMillis()
 
@@ -26,4 +32,13 @@ internal actual fun openPlatformMediaPicker(
   onResult: (PlatformPickResult) -> Unit,
 ) {
   onResult(PlatformPickResult.Failed("No camera or file picker on this platform"))
+}
+
+internal actual fun openPlatformLiveCapture(
+  kind: MediaCaptureKind,
+  facing: String,
+  maxPixels: Int,
+  onResult: (PlatformPickResult) -> Unit,
+) {
+  onResult(PlatformPickResult.Failed("No camera or microphone on this platform"))
 }

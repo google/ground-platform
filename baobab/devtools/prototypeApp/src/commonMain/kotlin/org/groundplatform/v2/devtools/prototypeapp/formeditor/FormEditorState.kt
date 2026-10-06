@@ -334,8 +334,8 @@ class FormEditorState(
     get() = selectedQuestion == null
 
   /**
-   * Changes the type of [key], seeding choices and dropping display logic and validation rules that
-   * no longer fit.
+   * Changes the type of [key], seeding choices and dropping display logic, validation rules, and
+   * type-specific settings (geometry capture, media source) that no longer fit.
    */
   fun changeType(key: String, type: EditorQuestionType) {
     updateQuestion(key) { q ->
@@ -344,6 +344,8 @@ class FormEditorState(
         choices = if (type.hasChoices && q.choices.isEmpty()) defaultChoices() else q.choices,
         required = q.required && !type.isReadOnly,
         validation = ValidationRules.adaptToType(q.type, type, q.validation),
+        capture = if (type.isGeometry) q.capture else GeometryCapture.GPS_ONLY,
+        mediaSource = if (type.isMedia) q.mediaSource else MediaSource.CAPTURE_OR_UPLOAD,
       )
     }
     // Dependents whose operator is incompatible with the new type fall back to "is answered".
@@ -378,6 +380,11 @@ class FormEditorState(
   /** Sets how collectors record the geometry answer of [key] (ignored for non-geometry types). */
   fun updateCapture(key: String, capture: GeometryCapture) {
     updateQuestion(key) { it.copy(capture = capture) }
+  }
+
+  /** Sets how collectors provide the media answer of [key] (ignored for non-media types). */
+  fun updateMediaSource(key: String, source: MediaSource) {
+    updateQuestion(key) { it.copy(mediaSource = source) }
   }
 
   /** Geometry questions the web dashboard can't answer while the Form is available on web. */

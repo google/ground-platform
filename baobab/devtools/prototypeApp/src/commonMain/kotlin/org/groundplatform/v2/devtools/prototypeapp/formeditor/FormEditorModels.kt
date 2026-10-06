@@ -76,7 +76,35 @@ enum class EditorQuestionType(
   LINE("Line", "line", bindType = "geotrace", bodyElement = "input", isGeometry = true),
   POLYGON("Polygon", "polygon", bindType = "geoshape", bodyElement = "input", isGeometry = true),
   PHOTO("Photo", "photo", bindType = "binary", bodyElement = "upload", mediaType = "image/*"),
-  NOTE("Note", "note", bindType = "string", bodyElement = "input", isReadOnly = true),
+  VIDEO("Video", "video", bindType = "binary", bodyElement = "upload", mediaType = "video/*"),
+  AUDIO("Audio", "audio", bindType = "binary", bodyElement = "upload", mediaType = "audio/*"),
+  NOTE("Note", "note", bindType = "string", bodyElement = "input", isReadOnly = true);
+
+  /**
+   * Whether the answer is a media file (photo, video, or audio) collected through an XForms
+   * `<upload mediatype="…">` control; see [EditorQuestion.mediaSource] for how collectors provide
+   * it.
+   */
+  val isMedia: Boolean
+    get() = bodyElement == "upload"
+}
+
+/**
+ * How collectors provide a media question's answer. Mirrors the shared form runner's reading of the
+ * ODK `new` appearance: with it, collectors must capture a fresh photo / video / recording; without
+ * it they may also pick an existing file from their device.
+ */
+enum class MediaSource(val label: String, val description: String, val appearance: String) {
+  CAPTURE_OR_UPLOAD(
+    "Capture or upload",
+    "Collectors can use the camera or microphone, or upload an existing file from their device.",
+    "",
+  ),
+  CAPTURE_ONLY(
+    "Capture only",
+    "Collectors must take a new photo, video, or recording. Uploading existing files is not allowed.",
+    "new",
+  ),
 }
 
 /**
@@ -220,6 +248,11 @@ data class EditorQuestion(
    * ignored for other types. Exported as the body `appearance`.
    */
   val capture: GeometryCapture = GeometryCapture.GPS_ONLY,
+  /**
+   * How collectors provide the answer of a media question ([EditorQuestionType.isMedia]); ignored
+   * for other types. Exported as the body `appearance` (`new` for capture only).
+   */
+  val mediaSource: MediaSource = MediaSource.CAPTURE_OR_UPLOAD,
 ) {
   val isConditional: Boolean
     get() = relevance != null
@@ -790,14 +823,16 @@ object EditorXFormsGenerator {
 
   /**
    * Body `appearance` of [question]: the type's own appearance (e.g. `multiline`) plus, for
-   * geometry questions, the capture mode's (`placement-map`), space-separated per the ODK XForms
-   * spec. `null` when neither applies.
+   * geometry questions, the capture mode's (`placement-map`) and, for media questions, the media
+   * source's (`new`), space-separated per the ODK XForms spec. `null` when none applies.
    */
   fun bodyAppearance(question: EditorQuestion): String? =
     listOf(
         question.type.appearance,
         if (question.type.isGeometry) question.capture.appearance else "",
+        if (question.type.isMedia) question.mediaSource.appearance else "",
       )
+      .map { it.trim() }
       .filter { it.isNotEmpty() }
       .joinToString(" ")
       .ifEmpty { null }

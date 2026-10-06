@@ -714,4 +714,99 @@ class FormEditorTest {
     assertEquals(key, state.form.primaryGeometryQuestion?.key)
     assertTrue("geoshape" in state.xformsXml)
   }
+
+  private fun mediaQuestion(
+    key: String,
+    type: EditorQuestionType,
+    source: MediaSource = MediaSource.CAPTURE_OR_UPLOAD,
+  ) = EditorQuestion(key = key, name = key, type = type, label = "Show it", mediaSource = source)
+
+  @Test
+  fun media_photoVideoAndAudioBindToBinaryUploads() {
+    val form =
+      EditorForm(
+        "f",
+        "F",
+        listOf(
+          mediaQuestion("ph", EditorQuestionType.PHOTO),
+          mediaQuestion("vd", EditorQuestionType.VIDEO),
+          mediaQuestion("au", EditorQuestionType.AUDIO),
+        ),
+      )
+    val xml = EditorXFormsGenerator.toXml(form)
+    assertTrue("""nodeset="/data/ph" type="binary"""" in xml)
+    assertTrue("""nodeset="/data/vd" type="binary"""" in xml)
+    assertTrue("""nodeset="/data/au" type="binary"""" in xml)
+    assertTrue("""<upload ref="/data/ph" mediatype="image/*">""" in xml)
+    assertTrue("""<upload ref="/data/vd" mediatype="video/*">""" in xml)
+    assertTrue("""<upload ref="/data/au" mediatype="audio/*">""" in xml)
+    // Capture or upload is the ODK default and adds no appearance, so existing output is unchanged.
+    assertFalse("appearance" in xml)
+    assertEquals(
+      setOf(EditorQuestionType.PHOTO, EditorQuestionType.VIDEO, EditorQuestionType.AUDIO),
+      EditorQuestionType.entries.filter { it.isMedia }.toSet(),
+    )
+    assertTrue(EditorQuestionType.entries.filter { it.isMedia }.all { it.bindType == "binary" })
+    XFormsXmlSerializer.deserializeFormDef(xml)
+  }
+
+  @Test
+  fun media_captureOnlyEmitsNewAppearance() {
+    val form =
+      EditorForm(
+        "f",
+        "F",
+        listOf(
+          mediaQuestion("ph", EditorQuestionType.PHOTO, MediaSource.CAPTURE_ONLY),
+          mediaQuestion("vd", EditorQuestionType.VIDEO, MediaSource.CAPTURE_ONLY),
+          mediaQuestion("au", EditorQuestionType.AUDIO),
+        ),
+      )
+    val xml = EditorXFormsGenerator.toXml(form)
+    assertTrue("""<upload ref="/data/ph" appearance="new" mediatype="image/*">""" in xml)
+    assertTrue("""<upload ref="/data/vd" appearance="new" mediatype="video/*">""" in xml)
+    assertTrue("""<upload ref="/data/au" mediatype="audio/*">""" in xml)
+    XFormsXmlSerializer.deserializeFormDef(xml)
+    // Media source is ignored for non-media types.
+    val text = q("a").copy(mediaSource = MediaSource.CAPTURE_ONLY)
+    assertNull(EditorXFormsGenerator.bodyAppearance(text))
+    assertFalse("appearance" in EditorXFormsGenerator.toXml(EditorForm("f", "F", listOf(text))))
+  }
+
+  @Test
+  fun media_captureOnlyVideoRendersInPreview() {
+    val state =
+      FormEditorState(
+        EditorForm(
+          "f",
+          "F",
+          listOf(q("a"), mediaQuestion("vd", EditorQuestionType.VIDEO, MediaSource.CAPTURE_ONLY)),
+        )
+      )
+    assertTrue(state.issues.isEmpty())
+    val controller = state.parsePreviewController().getOrThrow()
+    val path = assertNotNull(state.pathOf("vd"))
+    assertTrue(
+      buildCompactFormItems(controller.steps).filterIsInstance<CompactFormItem.Question>().any {
+        it.step.stepKey == path
+      }
+    )
+  }
+
+  @Test
+  fun state_changeTypeKeepsMediaSourceOnlyBetweenMediaTypes() {
+    val state =
+      FormEditorState(EditorForm("f", "F", listOf(mediaQuestion("m", EditorQuestionType.PHOTO))))
+    state.updateMediaSource("m", MediaSource.CAPTURE_ONLY)
+    assertTrue("""appearance="new"""" in state.xformsXml)
+
+    state.changeType("m", EditorQuestionType.VIDEO)
+    assertEquals(MediaSource.CAPTURE_ONLY, state.form.find("m")?.mediaSource)
+    assertTrue("""mediatype="video/*"""" in state.xformsXml)
+    assertTrue("""appearance="new"""" in state.xformsXml)
+
+    state.changeType("m", EditorQuestionType.TEXT)
+    assertEquals(MediaSource.CAPTURE_OR_UPLOAD, state.form.find("m")?.mediaSource)
+    assertFalse("appearance" in state.xformsXml)
+  }
 }
