@@ -113,6 +113,10 @@ The following matrix maps Ground 2.0 terminology against industry-standard data 
     3. **Places**: Regional geographic places and landmarks.
   * Headings omit trailing type chips or badges (e.g. no trailing "Layer", "Table", or "Mapbox" labels), and category filter chips are omitted from the search bar to keep multi-layer search direct and uncluttered. Sections without entries (such as "Data tables" when none are configured or no matches exist) are omitted from the list view rather than rendering empty placeholders. On mobile, data collectors toggle map layer visibility in the map drawer and search across all datasets seamlessly.
 
+### "Organization" vs. "Institution"
+* **The Confusion**: CEO groups projects under an **Institution** whose **Admins** control every project and whose **Members** can see them; there is no per-project access list. Ground 1.0 had no tenant at all, only per-survey sharing.
+* **Resolution**: Ground 2.0 calls the tenant an **Organization** and keeps per-survey sharing. A survey optionally *belongs to* an organization; it still has an **owner** and its own access list. Organization roles are **Manager** (CEO *Admin*: edits the organization, manages members, and inherits **Survey organizer** access to all of its surveys) and **Member** (CEO *Member*: sees the organization's surveys, can create new ones, and can collect data in surveys shared with **Anyone in the organization**). People join by invite link or by **requesting to join** a *listed* organization; there is no domain auto-join. UI copy says *"You stay the owner. Managers of ‹organization› can also edit this survey, manage sharing, and export data."* rather than implying a transfer of ownership.
+
 ### Survey Area
 * Ground surveys use **"Survey Area"** everywhere to describe the geographic scope (place name and bounding coordinates, e.g. "Nandi County, Kenya"), ensuring collectors are not artificially boxed into hard polygon perimeters. The term **Area of Interest (AOI)** is reserved strictly for the mathematical polygon bounding the probabilistic sample design generator.
 

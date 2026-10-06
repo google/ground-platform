@@ -1,0 +1,110 @@
+/*
+ * Copyright 2026 The Ground Authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto3";
+
+package groundplatform.v2.survey;
+
+import "google/protobuf/timestamp.proto";
+
+// Multi-tenant organization that surveys can optionally belong to
+// (`SurveyDef.organization_id`): a ministry, university lab, NGO, or community
+// of practice. The Ground 2.0 counterpart of a Collect Earth Online
+// institution.
+//
+// Organizations are a convenience and governance layer on top of per-survey
+// ACLs (`SurveyAcl`): a survey keeps its owner and explicit collaborators, and
+// additionally every active `MANAGER` of its organization has
+// `SURVEY_ORGANIZER` access to it. There is no separate organization owner;
+// any active Manager administers the organization, and the last Manager cannot
+// be demoted or removed.
+message Organization {
+  // Client-generated unique identifier (RFC 4122 v4 UUID).
+  string organization_id = 1;
+
+  // Display name shown in survey lists, headers, and the directory.
+  string name = 2;
+
+  // Short description shown in the directory and on the organization page.
+  string description = 3;
+
+  // Public website.
+  string website_url = 4;
+
+  // Logo image URL.
+  string logo_url = 5;
+
+  // Whether the organization appears in the directory, where any signed-in
+  // user can ask to join. Unlisted organizations are reachable by invite only.
+  bool listed = 6;
+
+  // Memberships, including pending invites and join requests.
+  repeated OrganizationMember members = 7;
+
+  // Creation time.
+  google.protobuf.Timestamp created_at = 8;
+}
+
+// Role of a person in an organization.
+enum OrganizationRole {
+  // Unspecified role.
+  ORGANIZATION_ROLE_UNSPECIFIED = 0;
+
+  // Member: Listed as affiliated, can see the organization's surveys in their
+  // survey list, open surveys shared with `SharingPolicy.ORGANIZATION`, and
+  // create new surveys in the organization (becoming their owner).
+  MEMBER = 1;
+
+  // Manager: Can edit the organization, manage members and join requests, and
+  // has `SURVEY_ORGANIZER` access to every survey in the organization.
+  MANAGER = 2;
+}
+
+// Lifecycle of one person's membership in an organization.
+enum MembershipStatus {
+  // Unspecified status.
+  MEMBERSHIP_STATUS_UNSPECIFIED = 0;
+
+  // A Manager sent an invite link; waiting for the person to accept it.
+  INVITED = 1;
+
+  // The person asked to join a listed organization; waiting for a Manager to
+  // approve.
+  REQUESTED = 2;
+
+  // Full member with the given role.
+  ACTIVE = 3;
+}
+
+// One person's membership in an organization. Mirrors `AclEntry`, with the
+// addition of join requests.
+message OrganizationMember {
+  // Unique identifier of the user (e.g., Firebase Auth UID). Empty for invites
+  // that have not been accepted yet; the invite is matched by email instead.
+  string user_id = 1;
+
+  // Email address the invite was sent to, or that the join request came from.
+  string email = 2;
+
+  // Role once (or if) the membership is active.
+  OrganizationRole role = 3;
+
+  // Whether the person is invited, has requested to join, or is active.
+  MembershipStatus status = 4;
+
+  // Time the invite, request, or membership was last changed.
+  google.protobuf.Timestamp updated_at = 5;
+}

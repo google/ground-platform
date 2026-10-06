@@ -1442,7 +1442,8 @@ class PrototypeAppState(
         survey.title.contains(trimmed, ignoreCase = true) ||
           survey.description.contains(trimmed, ignoreCase = true) ||
           survey.location.contains(trimmed, ignoreCase = true) ||
-          survey.coordinatesLabel.contains(trimmed, ignoreCase = true)
+          survey.coordinatesLabel.contains(trimmed, ignoreCase = true) ||
+          organization(survey.organizationId)?.name?.contains(trimmed, ignoreCase = true) == true
       }
     }
 

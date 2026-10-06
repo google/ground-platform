@@ -70,6 +70,11 @@ distinction between stateful master tables and immutable encounter logs:
     -   `acl.proto`: Access control lists (`SurveyAcl`, `AclEntry`, `Role`),
         survey access policies (`SharingPolicy`, `PeerDataVisibility`), and
         organization quota definitions (`QuotaTier`, `QuotaLimits`).
+    -   `organization.proto`: Multi-tenant `Organization` (the counterpart of a
+        Collect Earth Online institution) and its memberships
+        (`OrganizationMember`, `OrganizationRole`, `MembershipStatus`).
+        Surveys reference one via `SurveyDef.organization_id`; its Managers
+        inherit `SURVEY_ORGANIZER` access to every survey in it.
     -   `survey_service.proto`: `SurveyService` gRPC definition for survey
         discovery, offline definition retrieval, ACL queries, and idempotent
         batched survey mutations (`MutateSurvey`).

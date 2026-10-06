@@ -41,7 +41,9 @@ message SurveyDef {
   string description = 3;
 
   // Multi-tenant organization identifier governing ownership, billing, and
-  // pooled quotas.
+  // pooled quotas (`Organization.organization_id` in `organization.proto`).
+  // Empty for a personal survey. Managers of the organization have
+  // `SURVEY_ORGANIZER` access to the survey in addition to its ACL.
   string organization_id = 4;
 
   // User ID (e.g., Firebase Auth UID) of the primary survey owner/creator.

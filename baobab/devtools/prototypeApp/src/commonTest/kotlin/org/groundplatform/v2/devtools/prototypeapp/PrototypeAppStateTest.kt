@@ -75,7 +75,7 @@ class PrototypeAppStateTest {
   }
 
   @Test
-  fun searchQuery_filtersSurveysByNameAndLocation() {
+  fun searchQuery_filtersSurveysByNameLocationAndOrganization() {
     val state = PrototypeAppState(initialScreen = PrototypeScreen.DOWNLOAD_SURVEY)
 
     // Search by survey title keyword
@@ -84,9 +84,14 @@ class PrototypeAppStateTest {
     assertEquals("Mekong Delta Mangrove Restoration", state.filteredSurveys.first().title)
 
     // Search by location (Country / Region)
-    state.updateSearchQuery("Kenya")
+    state.updateSearchQuery("Nyeri")
     assertEquals(1, state.filteredSurveys.size)
     assertEquals("Nyeri County, Kenya", state.filteredSurveys.first().location)
+
+    // Search by organization name (Kenya Forest Service runs three sample surveys)
+    state.updateSearchQuery("Forest Service")
+    assertEquals(3, state.filteredSurveys.size)
+    assertTrue(state.filteredSurveys.all { it.organizationId == "org-kenya-forest-service" })
 
     // Search by another location
     state.updateSearchQuery("Brazil")

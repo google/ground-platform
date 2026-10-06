@@ -75,6 +75,44 @@ entries {
 }
 ```
 
+## General Access (`SharingPolicy`) and Organizations
+
+Beyond the explicit ACL, `SurveyAcl.sharing_policy` grants general access in
+the Google Drive sharing style:
+
+| Policy             | Who can open the survey and collect data                  |
+| ------------------ | --------------------------------------------------------- |
+| `RESTRICTED`       | Only the owner and accepted ACL entries.                  |
+| `ORGANIZATION`     | Additionally every active member of the survey's          |
+:                    : organization. Invalid when `organization_id` is empty.    :
+| `ANYONE_WITH_LINK` | Anyone with the survey link or QR code.                   |
+| `PUBLIC`           | Anyone; the survey is listed in the public directory.     |
+
+A survey may optionally belong to an **Organization** (`organization.proto`),
+the counterpart of a Collect Earth Online institution. Organizations layer on
+top of per-survey ACLs rather than replacing them:
+
+*   The survey keeps its `owner_id` and ACL. The owner is always a
+    `SURVEY_ORGANIZER`.
+*   Every active `MANAGER` of the organization has `SURVEY_ORGANIZER` access to
+    every survey in it (edit forms, manage sharing, export data). They are not
+    copied into the ACL; clients show them as inherited, read-only entries.
+*   `MEMBER`s see the organization's surveys in their survey list, can open the
+    ones shared with `ORGANIZATION` policy as `DATA_COLLECTOR`s, and can create
+    new surveys in the organization (becoming their owner).
+*   Memberships are `INVITED` (a Manager sent an invite link), `REQUESTED` (the
+    person asked to join a listed organization), or `ACTIVE`. Only `ACTIVE`
+    memberships grant access.
+*   There is no organization owner. The last Manager cannot be demoted or
+    removed. Deleting an organization clears `organization_id` on its surveys,
+    which become personal surveys of their owners; no survey data is deleted.
+
+A person's effective role in a survey is the strongest of: owner →
+`SURVEY_ORGANIZER`; accepted ACL role; organization Manager →
+`SURVEY_ORGANIZER`; organization member under `ORGANIZATION` policy →
+`DATA_COLLECTOR`; anyone under `ANYONE_WITH_LINK` / `PUBLIC` →
+`DATA_COLLECTOR`.
+
 ## Tiered Resource Quotas (`QuotaTier` and `QuotaLimits`)
 
 Ground 2.0 enforces administrative and operational field collection limits

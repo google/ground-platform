@@ -40,6 +40,7 @@ import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.CloudOff
 import androidx.compose.material.icons.outlined.Download
+import androidx.compose.material.icons.outlined.Groups
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.Map
 import androidx.compose.material.icons.outlined.Search
@@ -149,7 +150,7 @@ fun DownloadSurveyScreen(state: PrototypeAppState) {
           singleLine = true,
           placeholder = {
             Text(
-              text = "Search by name or location...",
+              text = "Search by name, location, or organization...",
               style = MaterialTheme.typography.bodySmall,
               color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -284,6 +285,7 @@ fun DownloadSurveyScreen(state: PrototypeAppState) {
           filtered.forEach { survey ->
             SurveyListItemCard(
               survey = survey,
+              organizationName = state.organization(survey.organizationId)?.name,
               isDarkTheme = state.isDarkTheme,
               onDownloadClick = { state.downloadSurvey(survey.id) },
               onToggleDownloadClick = { state.promptRemoveDownloadedSurvey(survey.id) },
@@ -406,6 +408,7 @@ private fun DownloadSurveySignOutPromptDialog(state: PrototypeAppState) {
  * - Map thumbnail placeholder (`SurveyMapThumbnail`)
  * - Survey title
  * - Survey location & coordinates
+ * - Organization the survey belongs to, if any
  * - Survey description
  * - Indicator badge on surveys that have already been downloaded (`Downloaded`) or a Download CTA
  * - Action to open the survey in the Main Survey UI (`Open`)
@@ -413,6 +416,7 @@ private fun DownloadSurveySignOutPromptDialog(state: PrototypeAppState) {
 @Composable
 private fun SurveyListItemCard(
   survey: SurveyPreviewItem,
+  organizationName: String?,
   isDarkTheme: Boolean,
   onDownloadClick: () -> Unit,
   onToggleDownloadClick: () -> Unit,
@@ -482,6 +486,27 @@ private fun SurveyListItemCard(
               style = MaterialTheme.typography.labelSmall,
               color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
+          }
+
+          if (organizationName != null) {
+            Row(
+              verticalAlignment = Alignment.CenterVertically,
+              horizontalArrangement = Arrangement.spacedBy(3.dp),
+            ) {
+              Icon(
+                imageVector = Icons.Outlined.Groups,
+                contentDescription = "Organization",
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(12.dp),
+              )
+              Text(
+                text = organizationName,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+              )
+            }
           }
 
           Text(

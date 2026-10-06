@@ -48,6 +48,10 @@ metadata), and `groundplatform.v2.data` (user data records):
     access control and quota models (`SurveyAcl`, `AclEntry`, `Role`,
     `QuotaTier`, `QuotaLimits`) using unique user identifiers (e.g., Firebase
     Auth UIDs).
+*   **`survey/organization.proto`** (`groundplatform.v2.survey`): Defines
+    `Organization`, the optional multi-tenant owner of surveys
+    (`SurveyDef.organization_id`), and its memberships (`OrganizationMember`
+    with `OrganizationRole` Member / Manager and `MembershipStatus`).
 *   **`data/entity_record.proto`** (`groundplatform.v2.data`): Defines
     `EntityRecord`, representing a persistent, versioned tabular or geospatial
     entity instance within an Entity Dataset.

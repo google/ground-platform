@@ -32,8 +32,10 @@ UX Co-Design Workbench for rapid iteration with UX designers.
 3.  **Download Survey Screen (`PrototypeScreen.DOWNLOAD_SURVEY`)**
     -   Displays the list of all surveys shared with the signed-in user.
     -   Includes a live **Search bar** to filter surveys by **name** (title or
-        description) or **location** (region, country, or coordinates).
-    -   Each survey item displays a **title**, **location**, **description**,
+        description), **location** (region, country, or coordinates), or
+        **organization** name.
+    -   Each survey item displays a **title**, **location**, **organization**
+        (when the survey belongs to one), **description**,
         **map thumbnail** (stylized placeholder), and a **`✓ Downloaded`**
         indicator badge on surveys already downloaded for offline use.
 4.  **Main Survey UI (`PrototypeScreen.MAIN_SURVEY` in `MainSurveyScreen.kt`)**

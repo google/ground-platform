@@ -76,6 +76,13 @@ enum SharingPolicy {
   // Public: Discoverable in the public directory; anyone can open and
   // collect data.
   PUBLIC = 3;
+
+  // Anyone in the organization: Every active member of the survey's
+  // organization (`SurveyDef.organization_id`) can open the survey and
+  // collect data without being on the ACL. Invalid for surveys with no
+  // organization. Organization managers can manage the survey under every
+  // policy (see `organization.proto`).
+  ORGANIZATION = 4;
 }
 
 // Peer data visibility controls for mobile field collectors.
@@ -102,7 +109,7 @@ message SurveyAcl {
   repeated AclEntry entries = 2;
 
   // Sharing policy controlling general access to the survey (Restricted,
-  // Anyone with Link / QR Code, Public).
+  // Anyone in the organization, Anyone with Link / QR Code, Public).
   SharingPolicy sharing_policy = 3;
 
   // Peer data visibility configuration controlling whether data collectors can

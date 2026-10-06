@@ -29,5 +29,6 @@ This directory contains standalone developer and inspection tools for Ground
 -   **[`prototypeApp/`](prototypeApp/)**: Interactive Compose Multiplatform Web
     UX prototyping workbench that embeds a live mobile phone preview of the
     Ground 2.0 Mobile UI (`Sign In`, `Terms of Service`, and `Download survey`
-    screens) for co-designing workflows with UX designers.
+    screens) and the web app (Surveys list, Organizations, Web dashboard, and
+    Survey editor) for co-designing workflows with UX designers.
 
