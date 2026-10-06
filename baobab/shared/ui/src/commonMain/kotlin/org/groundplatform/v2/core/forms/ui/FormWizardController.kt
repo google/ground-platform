@@ -261,18 +261,35 @@ class FormWizardController(
 
   /** Jumps to the step containing the control with [canonicalPath]. */
   fun jumpToField(canonicalPath: String) {
-    val idx = steps.indexOfFirst { step ->
-      when (step) {
-        is FormWizardStep.QuestionStep -> step.control.canonicalPath == canonicalPath
-        is FormWizardStep.FieldListGroupStep ->
-          step.controls.any { it.canonicalPath == canonicalPath }
-        else -> false
-      }
-    }
+    val idx = steps.indexOfFirst { step -> stepContainsField(step, canonicalPath) }
     if (idx >= 0) {
       jumpToStep(idx)
     }
   }
+
+  /**
+   * Collector-facing title of the question at [canonicalPath] (its label), for messages that refer
+   * to a field. Falls back to the step title, never to the internal data name.
+   */
+  fun questionTitleFor(canonicalPath: String): String {
+    val step = steps.firstOrNull { stepContainsField(it, canonicalPath) }
+    val control =
+      when (step) {
+        is FormWizardStep.QuestionStep -> step.control
+        is FormWizardStep.FieldListGroupStep ->
+          step.controls.firstOrNull { it.canonicalPath == canonicalPath }
+        else -> null
+      }
+    return control?.label?.text?.takeIf { it.isNotBlank() } ?: step?.title ?: "This question"
+  }
+
+  private fun stepContainsField(step: FormWizardStep, canonicalPath: String): Boolean =
+    when (step) {
+      is FormWizardStep.QuestionStep -> step.control.canonicalPath == canonicalPath
+      is FormWizardStep.FieldListGroupStep ->
+        step.controls.any { it.canonicalPath == canonicalPath }
+      else -> false
+    }
 
   // ---------------------------------------------------------------------------
   // Field & Repeat Mutation Actions

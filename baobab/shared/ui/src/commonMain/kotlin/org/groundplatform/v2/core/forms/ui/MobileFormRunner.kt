@@ -545,20 +545,15 @@ private fun RepeatHubScreenContent(
               horizontalArrangement = Arrangement.SpaceBetween,
               verticalAlignment = Alignment.CenterVertically,
             ) {
-              Column(modifier = Modifier.weight(1f)) {
-                Text(
-                  text = instTitle,
-                  style =
-                    MaterialTheme.typography.bodyMedium.copy(
-                      fontWeight = FontWeight.SemiBold,
-                      color = colors.onSurface,
-                    ),
-                )
-                Text(
-                  text = instance.canonicalPath,
-                  style = MaterialTheme.typography.labelSmall.copy(color = colors.onSurfaceVariant),
-                )
-              }
+              Text(
+                text = instTitle,
+                style =
+                  MaterialTheme.typography.bodyMedium.copy(
+                    fontWeight = FontWeight.SemiBold,
+                    color = colors.onSurface,
+                  ),
+                modifier = Modifier.weight(1f),
+              )
               if (repeatGroup.canRemoveInstance) {
                 TextButton(
                   onClick = {
@@ -693,7 +688,7 @@ private fun FormSummaryScreenContent(controller: FormWizardController) {
                 )
                 subResult.errors.forEach { err ->
                   Text(
-                    text = "• ${err.fieldPath}: ${err.message}",
+                    text = "• ${controller.questionTitleFor(err.fieldPath)}: ${err.message}",
                     style =
                       MaterialTheme.typography.labelSmall.copy(color = colors.onErrorContainer),
                     modifier = Modifier.clickable { controller.jumpToField(err.fieldPath) },

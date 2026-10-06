@@ -166,22 +166,14 @@ fun QuestionControlCard(
       modifier = Modifier.fillMaxWidth().padding(16.dp),
       verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-      // Top metadata badges (path, required, read-only / calculated)
-      Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically,
-      ) {
-        Text(
-          text = control.canonicalPath,
-          style = MaterialTheme.typography.labelSmall.copy(color = colors.onSurfaceVariant),
-          maxLines = 1,
-          overflow = TextOverflow.Ellipsis,
-          softWrap = false,
-          modifier = Modifier.weight(1f, fill = false),
-        )
-        Spacer(modifier = Modifier.width(6.dp))
-        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+      // Top metadata badges (required, read-only / calculated). The field's data name is internal
+      // and never shown to collectors.
+      if (fieldState.isRequired || fieldState.isCalculated || fieldState.isReadOnly) {
+        Row(
+          modifier = Modifier.fillMaxWidth(),
+          horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.End),
+          verticalAlignment = Alignment.CenterVertically,
+        ) {
           if (fieldState.isRequired) {
             GroundTonalBadge(text = "Required *", tone = GroundBadgeTone.ERROR)
           }
@@ -2445,13 +2437,6 @@ private fun ChoiceCardRow(
             MaterialTheme.typography.bodyMedium.copy(
               fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
               color = if (isSelected) colors.onPrimaryContainer else colors.onSurface,
-            ),
-        )
-        Text(
-          text = "value: ${option.value}",
-          style =
-            MaterialTheme.typography.labelSmall.copy(
-              color = if (isSelected) colors.onPrimaryContainer else colors.onSurfaceVariant
             ),
         )
       }
