@@ -57,7 +57,6 @@ import androidx.compose.material3.AssistChip
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalIconButton
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -942,7 +941,7 @@ internal fun BottomSheetSearchableListContent(
                     )
                   }
                   if (!isSidePanel) {
-                    FilterChip(
+                    GroundFilterChip(
                       selected = isNavigatingPlace,
                       onClick = { state.toggleNavigationToPlace(place.id) },
                       label = {

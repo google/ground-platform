@@ -39,7 +39,6 @@ import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -188,7 +187,7 @@ private fun SurveysToolbar(
     )
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
       chips.forEach { chip ->
-        FilterChip(
+        GroundFilterChip(
           selected = chip == selected,
           onClick = { onSelect(chip) },
           label = { Text(chip.label) },

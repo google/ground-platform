@@ -58,7 +58,6 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilledTonalButton
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -456,7 +455,7 @@ internal fun UploadsMutationsSubScreen(state: PrototypeAppState) {
       UploadStatusFilter.entries.forEach { filter ->
         val isSelected = activeFilter == filter
         val count = state.uploadCountForFilter(filter)
-        FilterChip(
+        GroundFilterChip(
           selected = isSelected,
           onClick = { state.toggleUploadStatusFilter(filter) },
           label = {

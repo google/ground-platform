@@ -39,7 +39,6 @@ import androidx.compose.material.icons.outlined.ZoomOutMap
 import androidx.compose.material3.Button
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -78,6 +77,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
+import org.groundplatform.v2.devtools.prototypeapp.GroundFilterChip
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.formatHexColorCss
 import org.groundplatform.v2.devtools.prototypeapp.map.GroundPin
 import org.groundplatform.v2.devtools.prototypeapp.map.SurveyBasemaps
@@ -699,7 +699,7 @@ private fun MapToolbar(
         Text("Cancel")
       }
     } else {
-      FilterChip(
+      GroundFilterChip(
         selected = false,
         onClick = onStartDrawing,
         label = { Text("Add $noun") },
@@ -749,7 +749,7 @@ private fun MapOverlays(
           tint = colors.onSurfaceVariant,
         )
         EditorBasemap.entries.forEach { option ->
-          FilterChip(
+          GroundFilterChip(
             selected = basemap == option,
             onClick = { onBasemap(option) },
             label = { Text(option.label, style = MaterialTheme.typography.labelSmall) },

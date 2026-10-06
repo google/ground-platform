@@ -56,7 +56,6 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.FilledTonalButton
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -438,7 +437,7 @@ fun MobileDevicePreviewFrame(
         }
 
         // Rotate Device Widget right next to the Form Factor switcher
-        FilterChip(
+        GroundFilterChip(
           selected = isRotated,
           onClick = { onRotateDevice() },
           leadingIcon = {
@@ -908,7 +907,7 @@ private fun UxDesignerInspectorPanel(state: PrototypeAppState, modifier: Modifie
           )
         sampleQueries.forEach { (label, query) ->
           val selected = state.searchQuery == query
-          FilterChip(
+          GroundFilterChip(
             selected = selected,
             onClick = {
               state.navigateTo(PrototypeScreen.DOWNLOAD_SURVEY)

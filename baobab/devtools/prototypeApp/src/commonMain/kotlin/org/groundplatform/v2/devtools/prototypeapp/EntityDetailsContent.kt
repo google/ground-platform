@@ -57,7 +57,6 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -684,7 +683,7 @@ private fun EntityActionsRow(entity: GeospatialEntityItem, state: PrototypeAppSt
     if (entity.hasGeometry) {
       val isNavigating = state.isNavigatingToEntity(entity.id)
       val wayfinding = state.formattedWayfindingBadgeForEntity(entity.id)
-      FilterChip(
+      GroundFilterChip(
         selected = isNavigating,
         onClick = { state.toggleNavigationToEntity(entity.id) },
         label = {
