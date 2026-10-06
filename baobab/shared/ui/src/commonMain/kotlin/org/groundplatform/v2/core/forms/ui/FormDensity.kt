@@ -23,7 +23,7 @@ import androidx.compose.runtime.compositionLocalOf
  * - [COMFORTABLE]: the mobile one-question-per-screen runner ([MobileFormRunner]), where a single
  *   question owns the screen and touch targets are generous. This is the default.
  * - [COMPACT]: the stacked web layout ([CompactFormRunner]), where many question cards share a side
- *   panel and a pointer is the usual input. Numeric questions drop their stepper buttons
+ *   panel and a pointer is the usual input. Numeric and range questions drop their stepper buttons
  *   ([showNumericSteppers]) and free-text fields are slightly shorter ([GroundOutlinedTextField]);
  *   everything else renders exactly as on mobile.
  *
@@ -43,8 +43,9 @@ val LocalFormDensity: ProvidableCompositionLocal<FormDensity> = compositionLocal
 
 /**
  * Whether numeric questions show stepper buttons (`-1` / `+1`, `-0.5` / `+0.5`) beside the text
- * field. They are a touch convenience, so only the [FormDensity.COMFORTABLE] mobile layout shows
- * them; the compact web layout keeps just the text field.
+ * field, and range questions the `- step` / `+ step` buttons under the slider. They are a touch
+ * convenience, so only the [FormDensity.COMFORTABLE] mobile layout shows them; the compact web
+ * layout keeps just the text field or slider.
  */
 fun showNumericSteppers(density: FormDensity): Boolean = density == FormDensity.COMFORTABLE
 

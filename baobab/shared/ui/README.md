@@ -84,8 +84,9 @@ and **Web (`js`, `wasmJs`)**.
     provides `COMPACT` around its whole stack (interactive and read-only alike,
     so the Form designer's web preview matches the live web form). The compact
     density changes exactly two things: numeric questions drop their `-1` /
-    `+1` and `-0.5` / `+0.5` stepper buttons and keep just the full-width text
-    field (`showNumericSteppers`), and free-text fields (string, integer,
+    `+1` and `-0.5` / `+0.5` stepper buttons (range sliders their `- step` /
+    `+ step` buttons) and keep just the text field or slider
+    (`showNumericSteppers`), and free-text fields (string, integer,
     decimal, date, time) use the slightly shorter `GroundOutlinedTextField`
     ([`GroundOutlinedTextField.kt`](src/commonMain/kotlin/org/groundplatform/v2/core/forms/ui/GroundOutlinedTextField.kt):
     `bodyMedium` text, ~48 dp minimum height instead of Material's 56 dp, a

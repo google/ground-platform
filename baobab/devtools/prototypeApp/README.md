@@ -123,8 +123,8 @@ prototype, so selections and survey changes carry over.
     showing whether it is answered (✓), skipped (⊘), pending (○), or needs
     attention (!). The cards render at the compact density
     (`FormDensity.COMPACT`), which keeps the mobile widgets as they are except
-    that numeric questions have no `-1` / `+1` steppers and text fields are
-    slightly shorter. All cards start expanded; a card collapses on its own once
+    that numeric questions and range sliders have no stepper buttons and text
+    fields are slightly shorter. All cards start expanded; a card collapses on its own once
     its question is answered (once focus leaves it, for typed answers) or
     skipped, and can be re-opened at any time. Optional questions have a
     **Skip** action, the header shows `n of m answered` with **Expand all** /

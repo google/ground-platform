@@ -2496,12 +2496,15 @@ private fun RangeControlWidget(
       onValueChange = { applyRangeVal(it.toDouble()) },
       valueRange = min.toFloat()..max.toFloat(),
     )
-    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-      OutlinedButton(onClick = { applyRangeVal(currentVal - step) }) {
-        Text("- $step", maxLines = 1, overflow = TextOverflow.Ellipsis, softWrap = false)
-      }
-      OutlinedButton(onClick = { applyRangeVal(currentVal + step) }) {
-        Text("+ $step", maxLines = 1, overflow = TextOverflow.Ellipsis, softWrap = false)
+    // Like the number fields, the compact web layout relies on the slider alone.
+    if (showNumericSteppers(LocalFormDensity.current)) {
+      Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+        OutlinedButton(onClick = { applyRangeVal(currentVal - step) }) {
+          Text("- $step", maxLines = 1, overflow = TextOverflow.Ellipsis, softWrap = false)
+        }
+        OutlinedButton(onClick = { applyRangeVal(currentVal + step) }) {
+          Text("+ $step", maxLines = 1, overflow = TextOverflow.Ellipsis, softWrap = false)
+        }
       }
     }
   }
