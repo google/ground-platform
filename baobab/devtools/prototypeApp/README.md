@@ -121,18 +121,21 @@ surveys in it and find them in their list.
     you can **Request to join**; unlisted organizations are invite-only), with
     search and a **Create organization** dialog (name, description, directory
     listing; the creator becomes its first Manager).
--   **Organization page**: Tabs for **Surveys** (cards like the Surveys page,
-    plus **Create survey** for members), **Members**, and, for Managers,
-    **Settings**.
+-   **Organization page**: Laid out like the survey editor, with a resizable
+    left panel that switches between **Organization details**, **Surveys**
+    (cards like the Surveys page, plus **Create survey** for members), and
+    **Members**. Each pane opens with a heading that explains what it is for,
+    and the header labels the page as an *Organization*.
+    -   **Organization details**: Name, description, website, and directory
+        listing. Managers edit them in place with **Save** / **Discard** and
+        can **Delete organization** (its surveys become personal surveys of
+        their owners; no data is deleted); everyone else sees them read-only.
     -   **Members**: Managers see *Requests to join* (**Approve** / **Decline**),
         can invite people by email as Member or Manager (each invite gets an
         invite link with **Copy link**, **New link**, and **Open as invitee**
         to simulate acceptance, as on the Sharing page), change roles, and
         remove people. Anyone can **Leave organization**. The last Manager
         can't be demoted, removed, or leave; the page says why.
-    -   **Settings**: Edit the profile (name, description, website, directory
-        listing) with **Save** / **Discard**, and **Delete organization** (its
-        surveys become personal surveys of their owners; no data is deleted).
 
 Code lives in `organization/` (`OrganizationPages.kt` for the pure list and
 member-grouping logic, `OrganizationsPage.kt`, `OrganizationPage.kt`); the

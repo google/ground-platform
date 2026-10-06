@@ -104,12 +104,14 @@ class OrganizationPagesTest {
   }
 
   @Test
-  fun tabs_settingsOnlyForManagers() {
-    assertEquals(OrganizationTab.entries, OrganizationPages.tabsFor(managed, me))
-    assertEquals(
-      listOf(OrganizationTab.SURVEYS, OrganizationTab.MEMBERS),
-      OrganizationPages.tabsFor(joined, me),
-    )
+  fun canEditDetails_onlyForManagers() {
+    assertEquals(true, OrganizationPages.canEditDetails(managed, me))
+    assertEquals(false, OrganizationPages.canEditDetails(joined, me))
+  }
+
+  @Test
+  fun tabs_detailsComesFirst() {
+    assertEquals(OrganizationTab.DETAILS, OrganizationTab.entries.first())
   }
 
   @Test

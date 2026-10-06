@@ -18,11 +18,14 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.Organization
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.OrganizationMember
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.OrganizationRole
 
-/** Tabs of the web organization page. Settings is only shown to Managers. */
+/**
+ * Sections of the web organization page, in the order they appear in its left panel. Everyone sees
+ * all three; Details is read-only for anyone who isn't a Manager.
+ */
 enum class OrganizationTab(val label: String) {
+  DETAILS("Organization details"),
   SURVEYS("Surveys"),
   MEMBERS("Members"),
-  SETTINGS("Settings"),
 }
 
 /** How the signed-in user relates to an organization on the organizations list. */
@@ -77,10 +80,9 @@ object OrganizationPages {
     }
   }
 
-  /** Tabs [email] can see: Settings only for Managers. */
-  fun tabsFor(organization: Organization, email: String): List<OrganizationTab> =
-    if (organization.isManager(email)) OrganizationTab.entries
-    else listOf(OrganizationTab.SURVEYS, OrganizationTab.MEMBERS)
+  /** Whether [email] can edit the organization's details and delete it. */
+  fun canEditDetails(organization: Organization, email: String): Boolean =
+    organization.isManager(email)
 
   /**
    * Members grouped for display: pending join requests (Managers only), pending invites (Managers

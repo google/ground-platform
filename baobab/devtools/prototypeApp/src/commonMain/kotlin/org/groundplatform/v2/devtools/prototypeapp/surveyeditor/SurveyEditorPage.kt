@@ -484,8 +484,12 @@ private fun NavEmpty(text: String) {
   )
 }
 
+/**
+ * One row of a left-hand navigation panel: icon, label, optional trailing count, and an issue
+ * marker. Shared by the survey editor and the organization page so both panels look the same.
+ */
 @Composable
-private fun NavItem(
+internal fun NavItem(
   label: String,
   icon: ImageVector,
   selected: Boolean,

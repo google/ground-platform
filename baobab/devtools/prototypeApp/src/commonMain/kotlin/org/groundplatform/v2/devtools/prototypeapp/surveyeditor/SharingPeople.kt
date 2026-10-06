@@ -194,6 +194,7 @@ internal fun PersonRow(
   photoUrl: String?,
   detail: String,
   pending: Boolean = false,
+  pendingLabel: String = "Invited",
   footer: (@Composable () -> Unit)? = null,
   actions: @Composable () -> Unit,
 ) {
@@ -221,7 +222,7 @@ internal fun PersonRow(
           overflow = TextOverflow.Ellipsis,
           modifier = Modifier.weight(1f, fill = false),
         )
-        if (pending) GroundTonalBadge(text = "Invited", tone = GroundBadgeTone.PRIMARY)
+        if (pending) GroundTonalBadge(text = pendingLabel, tone = GroundBadgeTone.PRIMARY)
       }
       val secondary = if (displayName == email) detail else "$email • $detail"
       Text(

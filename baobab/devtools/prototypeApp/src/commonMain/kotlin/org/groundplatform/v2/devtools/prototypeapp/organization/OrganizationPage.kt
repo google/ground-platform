@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -32,6 +33,9 @@ import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.Close
+import androidx.compose.material.icons.outlined.Group
+import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material.icons.outlined.Map
 import androidx.compose.material.icons.outlined.PersonAdd
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -45,8 +49,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Tab
-import androidx.compose.material3.TabRow
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -60,6 +63,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import org.groundplatform.v2.devtools.prototypeapp.PrototypeAppState
+import org.groundplatform.v2.devtools.prototypeapp.SidePanelSeparator
+import org.groundplatform.v2.devtools.prototypeapp.SidePanelSeparatorWidth
 import org.groundplatform.v2.devtools.prototypeapp.WebAppHeader
 import org.groundplatform.v2.devtools.prototypeapp.WebHeaderButton
 import org.groundplatform.v2.devtools.prototypeapp.WebHeaderContext
@@ -73,14 +78,18 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.OrganizationRole
 import org.groundplatform.v2.devtools.prototypeapp.formeditor.DropdownSelector
 import org.groundplatform.v2.devtools.prototypeapp.formeditor.SectionLabel
 import org.groundplatform.v2.devtools.prototypeapp.surveyeditor.AcceptInviteDialog
+import org.groundplatform.v2.devtools.prototypeapp.surveyeditor.NavItem
+import org.groundplatform.v2.devtools.prototypeapp.surveyeditor.PaneScaffold
 import org.groundplatform.v2.devtools.prototypeapp.surveyeditor.PendingInviteLinkRow
 import org.groundplatform.v2.devtools.prototypeapp.surveyeditor.PersonRow
 import org.groundplatform.v2.devtools.prototypeapp.surveyeditor.ProfileAvatar
 
 /**
- * One organization: its surveys, members, and (for Managers) settings. Members can create surveys
- * in it; Managers can invite people, approve join requests, change roles, remove members, edit the
- * profile, and delete the organization. The last Manager can't be demoted or removed.
+ * One organization, laid out like the survey editor: a resizable left panel switches between
+ * Organization details, Surveys, and Members, and the content pane shows the selected section.
+ * Members can create surveys in it; Managers can also edit and delete the organization, invite
+ * people, approve join requests, change roles, and remove members. The last Manager can't be
+ * demoted or removed.
  */
 @Composable
 internal fun OrganizationPage(
@@ -93,9 +102,7 @@ internal fun OrganizationPage(
   val email = state.signedInUserEmail
   val isManager = organization != null && state.managesOrganization(organization)
   val isMember = organization != null && organization.isMember(email)
-  val tabs = organization?.let { OrganizationPages.tabsFor(it, email) }.orEmpty()
-  var tab by remember(organization?.id) { mutableStateOf(OrganizationTab.SURVEYS) }
-  if (tab !in tabs && tabs.isNotEmpty()) tab = tabs.first()
+  var tab by remember(organization?.id) { mutableStateOf(OrganizationTab.DETAILS) }
   var isCreatingSurvey by remember { mutableStateOf(false) }
 
   Column(modifier = Modifier.fillMaxSize()) {
@@ -119,6 +126,8 @@ internal fun OrganizationPage(
               size = 32.dp,
             )
             WebHeaderContext(title = organization.name) {
+              WebHeaderSupportingText("Organization", color = MaterialTheme.colorScheme.primary)
+              WebHeaderSupportingText("·")
               WebHeaderSupportingText(
                 "${organization.activeMembers.size} members · " +
                   "${state.surveysInOrganization(organization.id).size} surveys" +
@@ -149,45 +158,62 @@ internal fun OrganizationPage(
       return@Column
     }
 
-    TabRow(
-      selectedTabIndex = tabs.indexOf(tab).coerceAtLeast(0),
-      modifier = Modifier.widthIn(max = 560.dp),
-    ) {
-      tabs.forEach { t ->
-        Tab(
-          selected = t == tab,
-          onClick = { tab = t },
-          text = {
-            val count =
-              when (t) {
-                OrganizationTab.SURVEYS -> state.surveysInOrganization(organization.id).size
-                OrganizationTab.MEMBERS ->
-                  organization.activeMembers.size +
-                    (if (isManager) organization.pendingRequests.size else 0)
-                OrganizationTab.SETTINGS -> null
-              }
-            Text(if (count != null) "${t.label} · $count" else t.label)
-          },
-        )
-      }
-    }
-
-    Box(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
-      Column(
-        modifier =
-          Modifier.widthIn(max = OrganizationPageMaxWidth)
-            .align(Alignment.TopCenter)
-            .padding(horizontal = 32.dp, vertical = 24.dp),
-        verticalArrangement = Arrangement.spacedBy(20.dp),
-      ) {
-        state.organizationNotice?.let { notice ->
-          OrganizationNotice(notice, onDismiss = state::dismissOrganizationNotice)
-        }
+    Row(modifier = Modifier.weight(1f).fillMaxWidth()) {
+      OrganizationNavigation(
+        state = state,
+        organization = organization,
+        isManager = isManager,
+        selected = tab,
+        onSelect = { tab = it },
+        modifier = Modifier.width(state.sidePanelWidthDp.dp).fillMaxHeight(),
+      )
+      SidePanelSeparator(
+        widthDp = state.sidePanelWidthDp,
+        onWidthChange = state::updateSidePanelWidth,
+        modifier = Modifier.width(SidePanelSeparatorWidth).fillMaxHeight(),
+      )
+      Box(modifier = Modifier.weight(1f).fillMaxHeight()) {
         when (tab) {
+          OrganizationTab.DETAILS ->
+            PaneScaffold(
+              title = "Organization details",
+              subtitle =
+                if (isManager) {
+                  "How ${organization.name} appears to members and in the directory. Only " +
+                    "Managers can change these."
+                } else {
+                  "How ${organization.name} appears to members and in the directory. Ask a " +
+                    "Manager to change these."
+                },
+            ) {
+              NoticeSlot(state)
+              DetailsPane(state, organization, isManager)
+            }
           OrganizationTab.SURVEYS ->
-            SurveysTab(state, organization, isMember, onOpenSurvey) { isCreatingSurvey = true }
-          OrganizationTab.MEMBERS -> MembersTab(state, organization, isManager)
-          OrganizationTab.SETTINGS -> SettingsTab(state, organization)
+            PaneScaffold(
+              title = "Surveys",
+              subtitle =
+                if (isManager) {
+                  "Surveys run on behalf of ${organization.name}. As a Manager you can edit " +
+                    "every one of them, manage its sharing, and export its data."
+                } else {
+                  "Surveys run on behalf of ${organization.name}. Open one to see what you can " +
+                    "do in it."
+                },
+            ) {
+              NoticeSlot(state)
+              SurveysPane(state, organization, isMember, onOpenSurvey) { isCreatingSurvey = true }
+            }
+          OrganizationTab.MEMBERS ->
+            PaneScaffold(
+              title = "Members",
+              subtitle =
+                "People affiliated with ${organization.name}. Managers run the organization " +
+                  "and all of its surveys; Members can create surveys in it.",
+            ) {
+              NoticeSlot(state)
+              MembersPane(state, organization, isManager)
+            }
         }
       }
     }
@@ -204,6 +230,59 @@ internal fun OrganizationPage(
     )
   }
 }
+
+/** Shows the pending organization notice, if any, at the top of a pane. */
+@Composable
+private fun NoticeSlot(state: PrototypeAppState) {
+  state.organizationNotice?.let { notice ->
+    Box(modifier = Modifier.widthIn(max = OrganizationPaneMaxWidth)) {
+      OrganizationNotice(notice, onDismiss = state::dismissOrganizationNotice)
+    }
+  }
+}
+
+/** Left panel listing the page's sections, styled like the survey editor's navigation. */
+@Composable
+private fun OrganizationNavigation(
+  state: PrototypeAppState,
+  organization: Organization,
+  isManager: Boolean,
+  selected: OrganizationTab,
+  onSelect: (OrganizationTab) -> Unit,
+  modifier: Modifier = Modifier,
+) {
+  val memberCount =
+    organization.activeMembers.size + (if (isManager) organization.pendingRequests.size else 0)
+  Surface(modifier = modifier, color = MaterialTheme.colorScheme.surfaceContainerLow) {
+    Column(
+      modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(12.dp),
+      verticalArrangement = Arrangement.spacedBy(2.dp),
+    ) {
+      NavItem(
+        label = OrganizationTab.DETAILS.label,
+        icon = Icons.Outlined.Info,
+        selected = selected == OrganizationTab.DETAILS,
+        onClick = { onSelect(OrganizationTab.DETAILS) },
+      )
+      NavItem(
+        label = OrganizationTab.SURVEYS.label,
+        icon = Icons.Outlined.Map,
+        selected = selected == OrganizationTab.SURVEYS,
+        onClick = { onSelect(OrganizationTab.SURVEYS) },
+        trailing = "${state.surveysInOrganization(organization.id).size}",
+      )
+      NavItem(
+        label = OrganizationTab.MEMBERS.label,
+        icon = Icons.Outlined.Group,
+        selected = selected == OrganizationTab.MEMBERS,
+        onClick = { onSelect(OrganizationTab.MEMBERS) },
+        trailing = "$memberCount",
+      )
+    }
+  }
+}
+
+private val OrganizationPaneMaxWidth = 760.dp
 
 @Composable
 private fun MissingOrganization(onBack: () -> Unit) {
@@ -228,7 +307,7 @@ private fun MissingOrganization(onBack: () -> Unit) {
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun SurveysTab(
+private fun SurveysPane(
   state: PrototypeAppState,
   organization: Organization,
   isMember: Boolean,
@@ -246,15 +325,6 @@ private fun SurveysTab(
     if (isMember) OutlinedButton(onClick = onCreateSurvey) { Text("Create survey") }
     return
   }
-  Text(
-    if (state.managesOrganization(organization)) {
-      "As a Manager you can edit every survey here, manage its sharing, and export its data."
-    } else {
-      "Surveys run on behalf of ${organization.name}. Open one to see what you can do in it."
-    },
-    style = MaterialTheme.typography.bodyMedium,
-    color = MaterialTheme.colorScheme.onSurfaceVariant,
-  )
   FlowRow(
     horizontalArrangement = Arrangement.spacedBy(16.dp),
     verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -309,7 +379,7 @@ private fun CreateSurveyInOrganizationDialog(
 // ---------------------------------------------------------------------------------------------
 
 @Composable
-private fun MembersTab(state: PrototypeAppState, organization: Organization, isManager: Boolean) {
+private fun MembersPane(state: PrototypeAppState, organization: Organization, isManager: Boolean) {
   val email = state.signedInUserEmail
   val view = OrganizationPages.membersView(organization, email)
   var acceptingEmail by remember { mutableStateOf<String?>(null) }
@@ -356,7 +426,7 @@ private fun MembersTab(state: PrototypeAppState, organization: Organization, isM
   }
 
   Column(
-    modifier = Modifier.widthIn(max = 760.dp),
+    modifier = Modifier.widthIn(max = OrganizationPaneMaxWidth),
     verticalArrangement = Arrangement.spacedBy(20.dp),
   ) {
     if (isManager && view.requests.isNotEmpty()) {
@@ -374,6 +444,7 @@ private fun MembersTab(state: PrototypeAppState, organization: Organization, isM
               photoUrl = person.profile?.photoUrl,
               detail = "Asked to join",
               pending = true,
+              pendingLabel = "Requested",
             ) {
               OutlinedButton(
                 onClick = { state.removeOrganizationMember(organization.id, person.email) }
@@ -547,11 +618,30 @@ private fun InviteMemberRow(state: PrototypeAppState, organization: Organization
 }
 
 // ---------------------------------------------------------------------------------------------
-// Settings
+// Details
 // ---------------------------------------------------------------------------------------------
 
+/**
+ * Name, description, website, and directory listing. Managers edit them in place and **Save** (or
+ * **Discard**) their changes, and can delete the organization; everyone else sees them read-only.
+ */
 @Composable
-private fun SettingsTab(state: PrototypeAppState, organization: Organization) {
+private fun DetailsPane(state: PrototypeAppState, organization: Organization, isManager: Boolean) {
+  Column(
+    modifier = Modifier.widthIn(max = OrganizationPaneMaxWidth),
+    verticalArrangement = Arrangement.spacedBy(20.dp),
+  ) {
+    if (isManager) {
+      EditableDetailsCard(state, organization)
+      DangerZoneCard(state, organization)
+    } else {
+      ReadOnlyDetailsCard(organization)
+    }
+  }
+}
+
+@Composable
+private fun EditableDetailsCard(state: PrototypeAppState, organization: Organization) {
   var name by remember(organization.id, organization.name) { mutableStateOf(organization.name) }
   var description by
     remember(organization.id, organization.description) { mutableStateOf(organization.description) }
@@ -559,12 +649,120 @@ private fun SettingsTab(state: PrototypeAppState, organization: Organization) {
     remember(organization.id, organization.websiteUrl) { mutableStateOf(organization.websiteUrl) }
   var isListed by
     remember(organization.id, organization.isListed) { mutableStateOf(organization.isListed) }
-  var confirmingDelete by remember { mutableStateOf(false) }
   val isDirty =
     name != organization.name ||
       description != organization.description ||
       websiteUrl != organization.websiteUrl ||
       isListed != organization.isListed
+
+  DetailsCard("Profile") {
+    OutlinedTextField(
+      value = name,
+      onValueChange = { name = it },
+      label = { Text("Organization name") },
+      singleLine = true,
+      isError = name.isBlank(),
+      supportingText = if (name.isBlank()) ({ Text("Enter a name") }) else null,
+      modifier = Modifier.fillMaxWidth(),
+    )
+    OutlinedTextField(
+      value = description,
+      onValueChange = { description = it },
+      label = { Text("Description") },
+      supportingText = { Text("Shown in the directory and on the Surveys page.") },
+      minLines = 3,
+      modifier = Modifier.fillMaxWidth(),
+    )
+    OutlinedTextField(
+      value = websiteUrl,
+      onValueChange = { websiteUrl = it },
+      label = { Text("Website") },
+      singleLine = true,
+      modifier = Modifier.fillMaxWidth(),
+    )
+    Row(verticalAlignment = Alignment.CenterVertically) {
+      Checkbox(checked = isListed, onCheckedChange = { isListed = it })
+      Spacer(Modifier.width(4.dp))
+      Column {
+        Text("List in the directory", style = MaterialTheme.typography.bodyMedium)
+        Text(
+          "Anyone can find the organization and ask to join. Unlisted organizations are " +
+            "invite-only.",
+          style = MaterialTheme.typography.bodySmall,
+          color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+      }
+    }
+    Row(
+      horizontalArrangement = Arrangement.spacedBy(12.dp),
+      verticalAlignment = Alignment.CenterVertically,
+    ) {
+      Button(
+        onClick = {
+          state.updateOrganization(organization.id) {
+            it.copy(
+              name = name.trim(),
+              description = description.trim(),
+              websiteUrl = websiteUrl.trim(),
+              isListed = isListed,
+            )
+          }
+        },
+        enabled = isDirty && name.isNotBlank(),
+      ) {
+        Text("Save")
+      }
+      TextButton(
+        onClick = {
+          name = organization.name
+          description = organization.description
+          websiteUrl = organization.websiteUrl
+          isListed = organization.isListed
+        },
+        enabled = isDirty,
+      ) {
+        Text("Discard")
+      }
+      if (isDirty) {
+        Text(
+          "Unsaved changes",
+          style = MaterialTheme.typography.bodySmall,
+          color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+      }
+    }
+  }
+}
+
+@Composable
+private fun ReadOnlyDetailsCard(organization: Organization) {
+  DetailsCard("Profile") {
+    DetailRow("Name", organization.name)
+    DetailRow("Description", organization.description.ifBlank { "No description yet." })
+    DetailRow("Website", organization.websiteUrl.ifBlank { "Not provided." })
+    DetailRow(
+      "Directory",
+      if (organization.isListed) "Listed · anyone can find it and ask to join"
+      else "Unlisted · invite-only",
+    )
+  }
+}
+
+@Composable
+private fun DetailRow(label: String, value: String) {
+  Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+    Text(
+      label,
+      style = MaterialTheme.typography.labelMedium,
+      color = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
+    Text(value, style = MaterialTheme.typography.bodyMedium)
+  }
+}
+
+@Composable
+private fun DangerZoneCard(state: PrototypeAppState, organization: Organization) {
+  var confirmingDelete by remember { mutableStateOf(false) }
 
   if (confirmingDelete) {
     val surveyCount = state.surveysInOrganization(organization.id).size
@@ -596,106 +794,30 @@ private fun SettingsTab(state: PrototypeAppState, organization: Organization) {
     )
   }
 
-  Column(
-    modifier = Modifier.widthIn(max = 760.dp),
-    verticalArrangement = Arrangement.spacedBy(20.dp),
-  ) {
-    ElevatedCard(
-      colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.surface)
+  DetailsCard("Danger zone") {
+    Text(
+      "Deleting the organization removes everyone's affiliation. Its surveys become personal " +
+        "surveys of their owners and keep all their data.",
+      style = MaterialTheme.typography.bodyMedium,
+      color = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
+    OutlinedButton(
+      onClick = { confirmingDelete = true },
+      colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error),
     ) {
-      Column(
-        modifier = Modifier.padding(20.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-      ) {
-        SectionLabel("Profile")
-        OutlinedTextField(
-          value = name,
-          onValueChange = { name = it },
-          label = { Text("Organization name") },
-          singleLine = true,
-          isError = name.isBlank(),
-          modifier = Modifier.fillMaxWidth(),
-        )
-        OutlinedTextField(
-          value = description,
-          onValueChange = { description = it },
-          label = { Text("Description") },
-          minLines = 3,
-          modifier = Modifier.fillMaxWidth(),
-        )
-        OutlinedTextField(
-          value = websiteUrl,
-          onValueChange = { websiteUrl = it },
-          label = { Text("Website") },
-          singleLine = true,
-          modifier = Modifier.fillMaxWidth(),
-        )
-        Row(verticalAlignment = Alignment.CenterVertically) {
-          Checkbox(checked = isListed, onCheckedChange = { isListed = it })
-          Spacer(Modifier.width(4.dp))
-          Column {
-            Text("List in the directory", style = MaterialTheme.typography.bodyMedium)
-            Text(
-              "Anyone can find the organization and ask to join. Unlisted organizations are " +
-                "invite-only.",
-              style = MaterialTheme.typography.bodySmall,
-              color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-          }
-        }
-        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-          Button(
-            onClick = {
-              state.updateOrganization(organization.id) {
-                it.copy(
-                  name = name.trim(),
-                  description = description.trim(),
-                  websiteUrl = websiteUrl.trim(),
-                  isListed = isListed,
-                )
-              }
-            },
-            enabled = isDirty && name.isNotBlank(),
-          ) {
-            Text("Save")
-          }
-          TextButton(
-            onClick = {
-              name = organization.name
-              description = organization.description
-              websiteUrl = organization.websiteUrl
-              isListed = organization.isListed
-            },
-            enabled = isDirty,
-          ) {
-            Text("Discard")
-          }
-        }
-      }
+      Text("Delete organization", fontWeight = FontWeight.SemiBold)
     }
+  }
+}
 
-    ElevatedCard(
-      colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.surface)
-    ) {
-      Column(
-        modifier = Modifier.padding(20.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-      ) {
-        SectionLabel("Danger zone")
-        Text(
-          "Deleting the organization removes everyone's affiliation. Its surveys become personal " +
-            "surveys of their owners and keep all their data.",
-          style = MaterialTheme.typography.bodyMedium,
-          color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        OutlinedButton(
-          onClick = { confirmingDelete = true },
-          colors =
-            ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error),
-        ) {
-          Text("Delete organization", fontWeight = FontWeight.SemiBold)
-        }
-      }
+@Composable
+private fun DetailsCard(title: String, content: @Composable () -> Unit) {
+  ElevatedCard(
+    colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.surface)
+  ) {
+    Column(modifier = Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+      SectionLabel(title)
+      content()
     }
   }
 }
