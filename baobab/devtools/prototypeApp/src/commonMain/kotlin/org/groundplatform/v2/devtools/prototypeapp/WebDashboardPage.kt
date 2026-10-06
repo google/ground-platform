@@ -530,6 +530,20 @@ private fun DashboardMapArea(state: PrototypeAppState, modifier: Modifier = Modi
       }
     }
 
+    // Zoom to fit from a geometry question card: centre the geometry in the part of the map not
+    // covered by the form panel or the table, the way a selected feature is framed.
+    val framingRequest = state.webMapFramingRequest
+    LaunchedEffect(framingRequest) {
+      val request = framingRequest ?: return@LaunchedEffect
+      val rightPanel =
+        if (state.isDataCollectionFormOpen) WebFormPanelWidth + DashboardOverlayMargin * 2
+        else DashboardOverlayMargin
+      mapCamera.run {
+        val insets = framingInsets(it.viewportSize, bottom = tablePanelHeight, right = rightPanel)
+        it.fitBounds(request.bounds, insets, maxZoom = request.maxZoom)
+      }
+    }
+
     SurveyMainMap(
       state = state,
       camera = mapCamera,

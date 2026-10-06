@@ -13,6 +13,7 @@
  */
 package org.groundplatform.v2.devtools.prototypeapp
 
+import groundplatform.v2.forms.GeoPoint
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -2426,5 +2427,71 @@ class PrototypeAppStateTest {
     assertNull(SurveyMapIds.formGeometryPathOf(SurveyMapIds.cluster("c1")))
     assertNull(SurveyMapIds.formGeometryPathOf(SurveyMapContent.DRAFT_SHAPE_ID))
     assertNull(SurveyMapIds.formGeometryPathOf(SurveyMapIds.USER))
+  }
+
+  @Test
+  fun frameGeometry_requestsBoundsContainingEveryVertex_withIncreasingTokens() {
+    val state = PrototypeAppState(initialScreen = PrototypeScreen.MAIN_SURVEY)
+    val host = state.webMapDrawing
+    assertTrue(host.canFrameGeometry)
+    assertNull(state.webMapFramingRequest)
+
+    // No form open: nothing to frame.
+    host.frameGeometry("/data/plot_boundary", MapDrawingKind.POLYGON)
+    assertNull(state.webMapFramingRequest)
+
+    state.launchFormForEntity(entityId = "entity-shade-201", formId = "form-shade-canopy-audit")
+    val controller = assertNotNull(state.activeFormWizardController)
+    val polygonVertices =
+      mapDrawingVertices(
+        controller.formState.fieldStates.getValue("/data/plot_boundary"),
+        MapDrawingKind.POLYGON,
+      )
+    assertTrue(polygonVertices.size >= 3)
+
+    host.frameGeometry("/data/plot_boundary", MapDrawingKind.POLYGON)
+    val polygonRequest = assertNotNull(state.webMapFramingRequest)
+    polygonVertices.forEach { vertex ->
+      assertTrue(LatLng(vertex.latitude, vertex.longitude) in polygonRequest.bounds, "$vertex")
+    }
+    assertEquals(17.0, polygonRequest.maxZoom)
+    assertTrue(polygonRequest.bounds.north > polygonRequest.bounds.south)
+
+    // A point frames as zero-size bounds at the point, zoomed in less far.
+    host.frameGeometry("/data/plot_center_gps", MapDrawingKind.POINT)
+    val pointRequest = assertNotNull(state.webMapFramingRequest)
+    assertTrue(pointRequest.token > polygonRequest.token)
+    assertEquals(LatLng(-1.292066, 36.821946), pointRequest.bounds.center)
+    assertEquals(16.0, pointRequest.maxZoom)
+
+    // Framing the same geometry again re-fires with a new token.
+    host.frameGeometry("/data/plot_center_gps", MapDrawingKind.POINT)
+    val again = assertNotNull(state.webMapFramingRequest)
+    assertTrue(again.token > pointRequest.token)
+    assertEquals(pointRequest.bounds, again.bounds)
+
+    // An empty answer has nothing to frame and leaves the last request alone.
+    controller.setMapDrawingVertices("/data/riparian_transect", MapDrawingKind.LINE, emptyList())
+    host.frameGeometry("/data/riparian_transect", MapDrawingKind.LINE)
+    assertEquals(again, state.webMapFramingRequest)
+  }
+
+  @Test
+  fun formGeometryBounds_coverAllVertices_andAreNullWhenEmpty() {
+    assertNull(formGeometryBounds(emptyList()))
+    val bounds =
+      assertNotNull(
+        formGeometryBounds(
+          listOf(
+            GeoPoint(latitude = 1.0, longitude = 10.0),
+            GeoPoint(latitude = -2.0, longitude = 12.0),
+            GeoPoint(latitude = 0.5, longitude = 8.0),
+          )
+        )
+      )
+    assertEquals(LngLatBounds(west = 8.0, south = -2.0, east = 12.0, north = 1.0), bounds)
+    assertEquals(16.0, MapDrawingKind.POINT.maxFramingZoom)
+    assertEquals(17.0, MapDrawingKind.LINE.maxFramingZoom)
+    assertEquals(17.0, MapDrawingKind.POLYGON.maxFramingZoom)
   }
 }

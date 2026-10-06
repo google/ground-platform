@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -26,16 +27,27 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TooltipAnchorPosition
+import androidx.compose.material3.TooltipBox
+import androidx.compose.material3.TooltipDefaults
+import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
 import groundplatform.v2.forms.DataType
 import groundplatform.v2.forms.GeoPoint
@@ -77,6 +89,16 @@ interface CompactMapDrawingHost {
 
   /** Stops routing map clicks to the active question, keeping whatever was drawn. */
   fun stopDrawing()
+
+  /** True when the host can centre a question's geometry in its map ([frameGeometry]). */
+  val canFrameGeometry: Boolean
+    get() = false
+
+  /**
+   * Frames the geometry currently stored for the question at [path] in the host's map ("Zoom to
+   * fit"). Only offered when [canFrameGeometry] is `true`; the default does nothing.
+   */
+  fun frameGeometry(path: String, kind: MapDrawingKind) {}
 }
 
 /**
@@ -175,7 +197,9 @@ fun mapDrawingSummary(kind: MapDrawingKind, vertexCount: Int): String =
  * The compact layout's input for a geometry question when the host provides map drawing
  * ([CompactGeometryInput.MapDrawing]): an instruction to click the map, the drawing status, and
  * **Draw on map** / **Done** / **Undo** / **Clear** actions. Vertices themselves arrive through the
- * host ([CompactMapDrawingHost]), which calls [addMapDrawingVertex] for each map click.
+ * host ([CompactMapDrawingHost]), which calls [addMapDrawingVertex] for each map click. Hosts that
+ * can frame geometry ([CompactMapDrawingHost.canFrameGeometry]) also get a **Zoom to fit** button
+ * once something is drawn.
  *
  * With a `null` [host] or [readOnly], the actions are disabled: the card documents the interaction
  * for the Form designer's web preview without a live map.
@@ -292,6 +316,84 @@ fun MapDrawingRequestWidget(
           Text("Clear")
         }
       }
+      // Zoom to fit: centre whatever has been drawn in the host's map, for any geometry kind (a
+      // point or line can be off-screen just as easily as a polygon).
+      if (host != null && !readOnly && host.canFrameGeometry && vertices.isNotEmpty()) {
+        Spacer(modifier = Modifier.weight(1f))
+        @OptIn(ExperimentalMaterial3Api::class)
+        TooltipBox(
+          positionProvider =
+            TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
+          tooltip = { PlainTooltip { Text("Zoom to fit") } },
+          state = rememberTooltipState(),
+        ) {
+          IconButton(onClick = { host.frameGeometry(path, kind) }) {
+            Icon(imageVector = FitScreenIcon, contentDescription = "Zoom to fit")
+          }
+        }
+      }
     }
   }
+}
+
+/**
+ * Material Symbols `center_focus_strong` (Apache 2.0): a filled disc inside four corner brackets,
+ * used for the **Zoom to fit** action. Built by hand because `shared/ui` ships only the core
+ * Material icon set.
+ */
+val FitScreenIcon: ImageVector by lazy {
+  ImageVector.Builder(
+      name = "FitScreen",
+      defaultWidth = 24.dp,
+      defaultHeight = 24.dp,
+      viewportWidth = 24f,
+      viewportHeight = 24f,
+    )
+    .apply {
+      path(fill = SolidColor(Color.Black)) {
+        moveTo(12f, 8f)
+        curveToRelative(-2.21f, 0f, -4f, 1.79f, -4f, 4f)
+        reflectiveCurveToRelative(1.79f, 4f, 4f, 4f)
+        reflectiveCurveToRelative(4f, -1.79f, 4f, -4f)
+        reflectiveCurveToRelative(-1.79f, -4f, -4f, -4f)
+        close()
+        moveTo(5f, 15f)
+        horizontalLineTo(3f)
+        verticalLineToRelative(4f)
+        curveToRelative(0f, 1.1f, 0.9f, 2f, 2f, 2f)
+        horizontalLineToRelative(4f)
+        verticalLineToRelative(-2f)
+        horizontalLineTo(5f)
+        verticalLineToRelative(-4f)
+        close()
+        moveTo(5f, 5f)
+        horizontalLineToRelative(4f)
+        verticalLineTo(3f)
+        horizontalLineTo(5f)
+        curveToRelative(-1.1f, 0f, -2f, 0.9f, -2f, 2f)
+        verticalLineToRelative(4f)
+        horizontalLineToRelative(2f)
+        verticalLineTo(5f)
+        close()
+        moveTo(19f, 3f)
+        horizontalLineToRelative(-4f)
+        verticalLineToRelative(2f)
+        horizontalLineToRelative(4f)
+        verticalLineToRelative(4f)
+        horizontalLineToRelative(2f)
+        verticalLineTo(5f)
+        curveToRelative(0f, -1.1f, -0.9f, -2f, -2f, -2f)
+        close()
+        moveTo(19f, 19f)
+        horizontalLineToRelative(-4f)
+        verticalLineToRelative(2f)
+        horizontalLineToRelative(4f)
+        curveToRelative(1.1f, 0f, 2f, -0.9f, 2f, -2f)
+        verticalLineToRelative(-4f)
+        horizontalLineToRelative(-2f)
+        verticalLineToRelative(4f)
+        close()
+      }
+    }
+    .build()
 }

@@ -44,6 +44,7 @@ import org.groundplatform.v2.core.forms.ui.undoMapDrawingVertex
 import org.groundplatform.v2.devtools.prototypeapp.map.DraftGeometry
 import org.groundplatform.v2.devtools.prototypeapp.map.FormGeometryOverlay
 import org.groundplatform.v2.map.LatLng
+import org.groundplatform.v2.map.LngLatBounds
 
 /**
  * A request to bring the question at [path] into view in the web form panel; [token] increases with
@@ -74,6 +75,29 @@ fun formGeometryOverlays(
   }
 
 /**
+ * A request to frame [bounds] in the web dashboard's main map, zooming in no further than
+ * [maxZoom]; [token] increases with every request so the same bounds can be requested twice.
+ */
+data class MapFramingRequest(val bounds: LngLatBounds, val maxZoom: Double, val token: Long)
+
+/**
+ * How far in the map may zoom when framing a form geometry of this kind: a point has no extent and
+ * a small line or polygon shouldn't fill the screen (matches the entity framing zooms).
+ */
+val MapDrawingKind.maxFramingZoom: Double
+  get() =
+    when (this) {
+      MapDrawingKind.POINT -> 16.0
+      MapDrawingKind.LINE,
+      MapDrawingKind.POLYGON -> 17.0
+    }
+
+/** The bounds of a geometry answer's [vertices], or `null` when nothing has been drawn. */
+fun formGeometryBounds(vertices: List<GeoPoint>): LngLatBounds? =
+  if (vertices.isEmpty()) null
+  else LngLatBounds.of(vertices.map { LatLng(it.latitude, it.longitude) })
+
+/**
  * The web dashboard's "draw on the map" host ([CompactMapDrawingHost]) for the compact form
  * runner's geometry questions: a browser has no field GPS, so every `geopoint`, `geotrace`, and
  * `geoshape` question is answered by clicking the dashboard's main map.
@@ -81,10 +105,13 @@ fun formGeometryOverlays(
  * While [activeDrawingPath] is set, the main map routes its clicks to [addVertex], which writes the
  * vertex into the question through [controller]; a point is finished by its first click, lines and
  * polygons keep collecting vertices until the collector clicks **Done** ([stopDrawing]). The
- * in-progress geometry is read back from the form as [draftGeometry] for the map overlay.
+ * in-progress geometry is read back from the form as [draftGeometry] for the map overlay. **Zoom to
+ * fit** ([frameGeometry]) asks the main map to frame a question's geometry through [onFrame].
  */
-class WebMapDrawingHost(private val controller: () -> FormWizardController?) :
-  CompactMapDrawingHost {
+class WebMapDrawingHost(
+  private val controller: () -> FormWizardController?,
+  private val onFrame: (bounds: LngLatBounds, maxZoom: Double) -> Unit = { _, _ -> },
+) : CompactMapDrawingHost {
 
   override var activeDrawingPath by mutableStateOf<String?>(null)
     private set
@@ -124,6 +151,16 @@ class WebMapDrawingHost(private val controller: () -> FormWizardController?) :
     val kind = activeDrawingKind ?: return
     controller()?.setMapDrawingVertices(path, kind, verticesAtStart)
     stopDrawing()
+  }
+
+  override val canFrameGeometry: Boolean
+    get() = true
+
+  /** Frames the question's geometry in the main map; nothing happens for an empty answer. */
+  override fun frameGeometry(path: String, kind: MapDrawingKind) {
+    val fieldState = controller()?.formState?.fieldStates?.get(path) ?: return
+    val bounds = formGeometryBounds(mapDrawingVertices(fieldState, kind)) ?: return
+    onFrame(bounds, kind.maxFramingZoom)
   }
 
   /**

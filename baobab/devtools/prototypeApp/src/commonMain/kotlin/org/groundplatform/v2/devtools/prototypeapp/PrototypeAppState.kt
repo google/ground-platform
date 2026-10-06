@@ -982,7 +982,26 @@ class PrototypeAppState(
    * never starts drawing (its widgets capture the device GPS), so [WebMapDrawingHost.isDrawing]
    * stays `false` there. See [addWebMapDrawingVertex] and [webMapDraftGeometry].
    */
-  val webMapDrawing = WebMapDrawingHost { activeFormWizardController }
+  val webMapDrawing =
+    WebMapDrawingHost(
+      controller = { activeFormWizardController },
+      onFrame = { bounds, maxZoom -> requestWebMapFraming(bounds, maxZoom) },
+    )
+
+  /**
+   * Bounds the web dashboard's main map should frame next (a question card's **Zoom to fit**), or
+   * `null`. Each request carries a fresh token, so framing the same geometry twice re-fires.
+   */
+  var webMapFramingRequest by mutableStateOf<MapFramingRequest?>(null)
+    private set
+
+  private var webMapFramingToken = 0L
+
+  /** Asks the main map to centre [bounds] in its visible area, zooming in at most to [maxZoom]. */
+  fun requestWebMapFraming(bounds: LngLatBounds, maxZoom: Double) {
+    webMapFramingToken += 1
+    webMapFramingRequest = MapFramingRequest(bounds, maxZoom, webMapFramingToken)
+  }
 
   /**
    * Adds a main-map click at [latLng] to the geometry question being drawn (no-op when nothing is

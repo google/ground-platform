@@ -77,6 +77,9 @@ and **Web (`js`, `wasmJs`)**.
     and polygons collect vertices until **Done**). The web dashboard uses this
     for every geometry question, "GPS only" or not, since a browser has no
     field GPS; a `null` host renders the request inert for read-only previews.
+    Hosts that report `canFrameGeometry` also get a **Zoom to fit** icon button
+    on the card once something is drawn, which calls `frameGeometry(path,
+    kind)` so the host can centre the geometry in its map.
     A host can also bring a question into view with `focusRequest`
     (`CompactFocusRequest(path, token)`): the card expands, scrolls into view
     through the enclosing scroll container, and is highlighted for a moment; a

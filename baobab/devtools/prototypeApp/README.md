@@ -150,7 +150,10 @@ prototype, so selections and survey changes carry over.
     discs, and a chip with the question title); clicking one of them, or its
     chip, scrolls the panel to that question and highlights its card for a
     moment (`PrototypeAppState.focusWebFormQuestion` → the runner's
-    `focusRequest`).
+    `focusRequest`). Each geometry card also has a **Zoom to fit** button (any
+    kind: point, line, or polygon) that centres that question's geometry in the
+    visible part of the map, clear of the form panel and the table
+    (`PrototypeAppState.webMapFramingRequest`).
 -   **Media capture on web** (`PrototypeMediaCapture.kt`,
     `src/commonMain/resources/media-capture-bridge.js`): Photo, video, and
     audio questions use the shared `MediaCaptureWidget` with the prototype's
