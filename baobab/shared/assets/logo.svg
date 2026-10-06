@@ -14,75 +14,109 @@
   limitations under the License.
 -->
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%" fill="none">
+  <!--
+    Ground 2.0 Modern Bichromatic App Icon (Variant T2-Medium — "Windswept Savanna Cloud-Acacia")
+    - Strict 2-Color Palette: Deep Botanical Forest (#1B4D2E) + Warm Amber Gold (#E59A0C)
+    - Medium (+35%) variable-width tapered calligraphic strokes
+    - Sweeping S-curve acacia trunk, asymmetric 2-dome cloud canopy, and crescent earth & sun
+  -->
   <defs>
-    <clipPath id="gm-pin-clip">
-      <path d="M256 64 C160 64, 94 134, 94 224 C94 318, 204 392, 243 422 C250 428, 262 428, 269 422 C308 392, 418 318, 418 224 C418 134, 352 64, 256 64 Z" />
-    </clipPath>
+    <!-- Curved negative-space moat matching the Medium S-curve trunk and concave earth horizon -->
+    <mask id="ground-t2-medium-sun-mask">
+      <rect width="512" height="512" fill="white" />
+      <!-- Exclude below the concave earth horizon (with a 15px curved breathing moat above) -->
+      <path d="M0 368 L84 368 C180 402, 340 400, 432 364 L512 364 L512 512 L0 512 Z" fill="black" />
+      <!-- Exclude a curved, tapered channel around the Medium S-curve trunk and root flare -->
+      <path
+        d="M191 406
+           C211 362, 227 316, 233 244
+           L291 244
+           C285 316, 281 362, 301 406
+           Z"
+        fill="black"
+      />
+    </mask>
   </defs>
 
-  <!-- 1. Solid Deep Forest Pebble Container -->
-  <rect x="24" y="24" width="464" height="464" rx="128" fill="#0F3828" />
-
-  <!-- 2. Solid Crisp Mint-Emerald Droplet Sky -->
-  <path
-    d="M256 64 C160 64, 94 134, 94 224 C94 318, 204 392, 243 422 C250 428, 262 428, 269 422 C308 392, 418 318, 418 224 C418 134, 352 64, 256 64 Z"
-    fill="#52D69A"
+  <!-- 1. Accent Color (#E59A0C): Off-Center Horizon Sunrise Dome (Split by Curved Moat) -->
+  <circle
+    cx="268"
+    cy="386"
+    r="99"
+    fill="#E59A0C"
+    mask="url(#ground-t2-medium-sun-mask)"
   />
 
-  <!-- Clipped Savanna Landscape Inside the Droplet -->
-  <g clip-path="url(#gm-pin-clip)">
-    <!-- 3. Solid Radiant Gold Sunrise Disc -->
-    <circle cx="256" cy="244" r="104" fill="#FDE047" />
-
-    <!-- 4. Solid Ultra-Deep Pine Cloud Acacia Canopy (3 Golden-Ratio Lobes) -->
-    <path
-      d="M164 182
-         C162 158, 190 146, 218 154
-         C234 134, 278 132, 298 152
-         C332 142, 374 156, 376 182
-         C378 200, 348 204, 308 198
-         C274 192, 238 192, 204 196
-         C178 198, 165 194, 164 182 Z"
-      fill="#071F16"
-    />
-
-    <!-- Lower-Left Cloud Bough (22px Clear Sky Channel for Small-Size Legibility) -->
-    <path
-      d="M118 230
-         C116 210, 142 200, 170 208
-         C190 202, 216 210, 218 226
-         C220 238, 196 242, 166 240
-         C138 242, 119 238, 118 230 Z"
-      fill="#071F16"
-    />
-
-    <!-- Calligraphic Trunk with Grounded Root Flare & Open Branch Window -->
-    <path
-      d="M200 354
-         C228 324, 241 288, 243 252
-         C243 238, 215 232, 180 230
-         L202 218
-         C226 220, 243 228, 249 242
-         L249 186
-         L267 186
-         C267 210, 268 232, 269 252
-         C271 288, 284 324, 312 354
-         Z"
-      fill="#071F16"
-    />
-
-    <!-- Low-Horizon Rolling Earth Mound -->
-    <path d="M94 344 C190 312, 322 312, 418 344 L256 440 Z" fill="#071F16" />
-  </g>
-
-  <!-- 5. Solid Persimmon-Orange Geopoint Circle at Zenith -->
-  <circle cx="256" cy="114" r="24" fill="#F97316" />
-
-  <!-- Bold Rounded Concentric Horizon Arc -->
+  <!-- 2. Accent Color (#E59A0C): Medium Tapered Crescent Community Underline -->
   <path
-    d="M142 440 C200 412, 312 412, 370 440"
-    stroke="#52D69A"
-    stroke-width="16"
+    d="M150 438
+       C146 437, 146 433, 150 433
+       C224 450, 308 448, 376 428
+       C380 427, 381 431, 378 433
+       C308 468, 220 470, 150 438 Z"
+    fill="#E59A0C"
+    stroke="#E59A0C"
+    stroke-width="3"
+    stroke-linejoin="round"
+    stroke-linecap="round"
+  />
+
+  <!-- 3. Primary Color (#1B4D2E): Asymmetric 2-Dome Windswept Cloud-Canopy Ribbon (Medium Weight) -->
+  <path
+    d="M118 264
+       C74 256, 48 218, 56 172
+       C64 128, 106 98, 156 106
+       C188 56, 250 34, 314 48
+       C380 62, 436 112, 450 176
+       C458 214, 436 248, 398 254
+       C393 255, 391 249, 396 247
+       C424 236, 436 208, 428 176
+       C416 124, 368 82, 308 70
+       C252 58, 196 78, 170 124
+       C167 129, 160 131, 154 129
+       C114 118, 82 140, 76 176
+       C70 212, 92 244, 122 256
+       C127 258, 124 265, 118 264 Z"
+    fill="#1B4D2E"
+    stroke="#1B4D2E"
+    stroke-width="4"
+    stroke-linejoin="round"
+    stroke-linecap="round"
+  />
+
+  <!-- 4. Primary Color (#1B4D2E): S-Curve Acacia Trunk & Asymmetric Branches (Medium Weight) -->
+  <path
+    d="M214 402
+       C232 362, 248 316, 252 268
+       C228 248, 192 224, 158 188
+       C154 184, 159 179, 164 183
+       C198 212, 230 232, 254 246
+       C262 204, 286 164, 326 128
+       C330 124, 336 129, 332 134
+       C298 170, 278 206, 270 242
+       C296 226, 326 208, 358 184
+       C362 181, 367 186, 363 190
+       C332 218, 300 240, 268 258
+       C264 310, 266 360, 280 402
+       Z"
+    fill="#1B4D2E"
+    stroke="#1B4D2E"
+    stroke-width="4"
+    stroke-linejoin="round"
+    stroke-linecap="round"
+  />
+
+  <!-- 5. Primary Color (#1B4D2E): Asymmetric Tapered Crescent Earth Horizon (Medium Weight) -->
+  <path
+    d="M78 390
+       C74 388, 76 383, 80 384
+       C176 410, 338 406, 432 376
+       C436 375, 438 380, 434 382
+       C340 430, 174 434, 78 390 Z"
+    fill="#1B4D2E"
+    stroke="#1B4D2E"
+    stroke-width="4"
+    stroke-linejoin="round"
     stroke-linecap="round"
   />
 </svg>
