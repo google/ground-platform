@@ -29,7 +29,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.LocationOn
@@ -389,22 +388,7 @@ fun SignInScreen(state: PrototypeAppState) {
           verticalAlignment = Alignment.CenterVertically,
           horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-          // Google 'G' Badge
-          Surface(
-            modifier = Modifier.size(26.dp),
-            shape = CircleShape,
-            color = MaterialTheme.colorScheme.surfaceContainerHigh,
-            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
-          ) {
-            Box(contentAlignment = Alignment.Center) {
-              Text(
-                text = "G",
-                style = MaterialTheme.typography.titleSmall,
-                color = Color(0xFF4285F4),
-                fontWeight = FontWeight.ExtraBold,
-              )
-            }
-          }
+          GoogleLogoIcon(size = 20.dp)
           Text(
             text = stringResource(Res.string.sign_in_with_google),
             style = MaterialTheme.typography.titleSmall,
