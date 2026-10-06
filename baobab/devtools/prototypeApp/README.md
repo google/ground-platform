@@ -121,7 +121,10 @@ prototype, so selections and survey changes carry over.
     card, using the compact layout (`shared/ui` `CompactFormRunner`): every
     question is a collapsible card stacked vertically, with an icon at the left
     showing whether it is answered (✓), skipped (⊘), pending (○), or needs
-    attention (!). All cards start expanded; a card collapses on its own once
+    attention (!). The cards render at the compact density
+    (`FormDensity.COMPACT`), which keeps the mobile widgets as they are except
+    that numeric questions have no `-1` / `+1` steppers and text fields are
+    slightly shorter. All cards start expanded; a card collapses on its own once
     its question is answered (once focus leaves it, for typed answers) or
     skipped, and can be re-opened at any time. Optional questions have a
     **Skip** action, the header shows `n of m answered` with **Expand all** /
@@ -276,8 +279,10 @@ Selecting a Form opens the visual Form editor in `formeditor/`
 -   **Mobile / Web toggle**: The toolbar's segmented toggle switches the
     canvas between the mobile flow above and the **Web** layout
     (`FormWebPreview.kt`): the Form as collectors see it in the web dashboard's
-    right-hand panel, i.e. a read-only stack of the compact question cards,
-    rebuilt from the generated XForms on every edit. Geometry questions render
+    right-hand panel, i.e. a read-only stack of the compact question cards at
+    the same compact density as the live web form (no numeric steppers,
+    slightly shorter text fields), rebuilt from the generated XForms on every
+    edit. Geometry questions render
     as the dashboard's "draw on the map" request cards
     (`CompactGeometryInput.MapDrawing`). Clicking a card selects
     that question in the properties panel (the selected card is outlined);

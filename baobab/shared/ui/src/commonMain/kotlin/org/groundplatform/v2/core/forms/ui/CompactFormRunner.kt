@@ -50,6 +50,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
@@ -286,7 +287,10 @@ fun compactFormProgress(
  * Compact form runner for web: every relevant question of [controller]'s form, vertically stacked
  * as collapsible cards ([CompactQuestionCard]) so a whole form fits a side panel, with a progress
  * footer and a Submit button. Questions use the same widgets as the mobile one-question-per-screen
- * runner ([ControlWidget]); only the chrome differs.
+ * runner ([ControlWidget]); only the chrome differs. The widgets render at [FormDensity.COMPACT]
+ * (provided through [LocalFormDensity] around the whole stack, in both interactive and [readOnly]
+ * mode), which hides the numeric stepper buttons and makes free-text fields slightly shorter; the
+ * mobile runner keeps the default [FormDensity.COMFORTABLE].
  *
  * - Each card shows its [CompactQuestionStatus] icon at the left and expands or collapses on click.
  * - Every card starts expanded. In interactive mode a card collapses on its own once its question
@@ -341,87 +345,91 @@ fun CompactFormRunner(
       ?: state.formDef.form_id.takeIf { it.isNotBlank() }
       ?: "Form"
 
-  Column(
-    modifier = modifier.padding(contentPadding),
-    verticalArrangement = Arrangement.spacedBy(8.dp),
-  ) {
-    if (showHeader) {
-      CompactFormHeader(
-        title = formTitle,
-        progress = progress,
-        languages = state.availableLanguages,
-        activeLanguage = state.activeLanguage,
-        onLanguage = if (readOnly) null else controller::setLanguage,
-        onExpandAll = { layoutState.expandAll(questionPaths) },
-        onCollapseAll = { layoutState.collapseAll(questionPaths) },
-      )
-    }
+  // Both the live web form and the designer's read-only preview render at compact density (no
+  // numeric steppers, slightly shorter text fields), so the preview matches what collectors get.
+  CompositionLocalProvider(LocalFormDensity provides FormDensity.COMPACT) {
+    Column(
+      modifier = modifier.padding(contentPadding),
+      verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+      if (showHeader) {
+        CompactFormHeader(
+          title = formTitle,
+          progress = progress,
+          languages = state.availableLanguages,
+          activeLanguage = state.activeLanguage,
+          onLanguage = if (readOnly) null else controller::setLanguage,
+          onExpandAll = { layoutState.expandAll(questionPaths) },
+          onCollapseAll = { layoutState.collapseAll(questionPaths) },
+        )
+      }
 
-    items.forEach { item ->
-      when (item) {
-        is CompactFormItem.GroupHeading ->
-          CompactSectionHeading(text = item.step.title, breadcrumbs = item.step.breadcrumbs)
-        is CompactFormItem.RepeatHub ->
-          CompactRepeatHub(step = item.step, controller = controller, readOnly = readOnly)
-        is CompactFormItem.Question -> {
-          val path = item.step.stepKey
-          val control = item.step.control
-          val status = compactQuestionStatus(control, layoutState.isSkipped(path))
-          key(path) {
-            // Whether an input inside the card has keyboard focus. Status changes are reported to
-            // the layout state only while the card is not being edited, so a text answer
-            // auto-collapses once the collector moves on rather than at the first keystroke. A
-            // geometry being drawn on the host's map counts as being edited too.
-            var hasFocus by remember { mutableStateOf(false) }
-            val isDrawing = drawingHost?.activeDrawingPath == path
-            LaunchedEffect(status, hasFocus, isDrawing) {
-              if (!hasFocus && !isDrawing) layoutState.onStatusChanged(path, status)
-            }
-            CompactQuestionCard(
-              step = item.step,
-              controller = controller,
-              status = status,
-              expanded = layoutState.isExpanded(path),
-              onToggle = { layoutState.toggle(path) },
-              modifier = Modifier.onFocusChanged { hasFocus = it.hasFocus }.focusGroup(),
-              // With a selection host, a header click selects the question instead of collapsing
-              // it.
-              onHeaderClick = {
-                if (onSelectQuestion != null) onSelectQuestion(path) else layoutState.toggle(path)
-              },
-              onSkip =
-                if (!readOnly && isStepOptional(item.step) && control.fieldState.isEmpty) {
-                  { layoutState.skip(path) }
-                } else {
-                  null
+      items.forEach { item ->
+        when (item) {
+          is CompactFormItem.GroupHeading ->
+            CompactSectionHeading(text = item.step.title, breadcrumbs = item.step.breadcrumbs)
+          is CompactFormItem.RepeatHub ->
+            CompactRepeatHub(step = item.step, controller = controller, readOnly = readOnly)
+          is CompactFormItem.Question -> {
+            val path = item.step.stepKey
+            val control = item.step.control
+            val status = compactQuestionStatus(control, layoutState.isSkipped(path))
+            key(path) {
+              // Whether an input inside the card has keyboard focus. Status changes are reported
+              // to the layout state only while the card is not being edited, so a text answer
+              // auto-collapses once the collector moves on rather than at the first keystroke. A
+              // geometry being drawn on the host's map counts as being edited too.
+              var hasFocus by remember { mutableStateOf(false) }
+              val isDrawing = drawingHost?.activeDrawingPath == path
+              LaunchedEffect(status, hasFocus, isDrawing) {
+                if (!hasFocus && !isDrawing) layoutState.onStatusChanged(path, status)
+              }
+              CompactQuestionCard(
+                step = item.step,
+                controller = controller,
+                status = status,
+                expanded = layoutState.isExpanded(path),
+                onToggle = { layoutState.toggle(path) },
+                modifier = Modifier.onFocusChanged { hasFocus = it.hasFocus }.focusGroup(),
+                // With a selection host, a header click selects the question instead of
+                // collapsing it.
+                onHeaderClick = {
+                  if (onSelectQuestion != null) onSelectQuestion(path) else layoutState.toggle(path)
                 },
-              readOnly = readOnly,
-              isSelected = selectedPath == path,
-              showValidationErrors = submitAttempted,
-              geometryInput = geometryInput,
-            )
+                onSkip =
+                  if (!readOnly && isStepOptional(item.step) && control.fieldState.isEmpty) {
+                    { layoutState.skip(path) }
+                  } else {
+                    null
+                  },
+                readOnly = readOnly,
+                isSelected = selectedPath == path,
+                showValidationErrors = submitAttempted,
+                geometryInput = geometryInput,
+              )
+            }
           }
         }
       }
-    }
 
-    if (showFooter) {
-      CompactFormFooter(
-        progress = progress,
-        isValid = state.isValid,
-        submissionResult = submissionResult,
-        onCancel = onCancel,
-        onSubmit = {
-          submitAttempted = true
-          val result = controller.finalizeForm()
-          if (result is FinalizationResult.Success) {
-            onSubmitted?.invoke(result)
-          } else if (result is FinalizationResult.ValidationFailure) {
-            // Open the offending cards so the errors are visible.
-            result.errors.forEach { layoutState.setExpanded(it.fieldPath, true) }
-          }
-        },
-      )
+      if (showFooter) {
+        CompactFormFooter(
+          progress = progress,
+          isValid = state.isValid,
+          submissionResult = submissionResult,
+          onCancel = onCancel,
+          onSubmit = {
+            submitAttempted = true
+            val result = controller.finalizeForm()
+            if (result is FinalizationResult.Success) {
+              onSubmitted?.invoke(result)
+            } else if (result is FinalizationResult.ValidationFailure) {
+              // Open the offending cards so the errors are visible.
+              result.errors.forEach { layoutState.setExpanded(it.fieldPath, true) }
+            }
+          },
+        )
+      }
     }
   }
 }

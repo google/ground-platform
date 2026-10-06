@@ -77,6 +77,20 @@ and **Web (`js`, `wasmJs`)**.
     and polygons collect vertices until **Done**). The web dashboard uses this
     for every geometry question, "GPS only" or not, since a browser has no
     field GPS; a `null` host renders the request inert for read-only previews.
+-   **Form Density
+    ([`FormDensity` / `LocalFormDensity`](src/commonMain/kotlin/org/groundplatform/v2/core/forms/ui/FormDensity.kt))**:
+    A composition local that tells the shared widgets which layout hosts them.
+    The mobile runner uses the default `COMFORTABLE` density; `CompactFormRunner`
+    provides `COMPACT` around its whole stack (interactive and read-only alike,
+    so the Form designer's web preview matches the live web form). The compact
+    density changes exactly two things: numeric questions drop their `-1` /
+    `+1` and `-0.5` / `+0.5` stepper buttons and keep just the full-width text
+    field (`showNumericSteppers`), and free-text fields (string, integer,
+    decimal, date, time) use the slightly shorter `GroundOutlinedTextField`
+    ([`GroundOutlinedTextField.kt`](src/commonMain/kotlin/org/groundplatform/v2/core/forms/ui/GroundOutlinedTextField.kt):
+    `bodyMedium` text, ~48 dp minimum height instead of Material's 56 dp, a
+    plain `OutlinedTextField` on mobile). Every other widget, card and chrome
+    dimension is identical in both densities.
 -   **Media Capture Questions
     ([`MediaCaptureWidget`](src/commonMain/kotlin/org/groundplatform/v2/core/forms/ui/MediaCaptureWidgets.kt))**:
     Photo, video, and audio questions (`<upload mediatype="image/*|video/*|audio/*">`)

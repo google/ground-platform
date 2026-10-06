@@ -55,7 +55,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.OutlinedIconButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
@@ -407,7 +406,7 @@ private fun StringInputWidget(
   }
 
   Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-    OutlinedTextField(
+    GroundOutlinedTextField(
       value = text,
       onValueChange = { newText ->
         text = newText
@@ -440,13 +439,74 @@ private fun StringInputWidget(
   }
 }
 
+/**
+ * Shared layout of the integer and decimal inputs: a single-line text field
+ * ([GroundOutlinedTextField]), flanked by decrement / increment stepper buttons when
+ * [showNumericSteppers] allows (the mobile layout), and the parse error underneath. Under
+ * [FormDensity.COMPACT] there are no steppers and the text field takes the full width.
+ */
+@Composable
+private fun NumberField(
+  text: String,
+  onValueChange: (String) -> Unit,
+  placeholder: String,
+  parseError: String?,
+  decrementLabel: String,
+  onDecrement: () -> Unit,
+  incrementLabel: String,
+  onIncrement: () -> Unit,
+) {
+  val colors = MaterialTheme.colorScheme
+  val steppers = showNumericSteppers(LocalFormDensity.current)
+  Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    Row(
+      modifier = Modifier.fillMaxWidth(),
+      horizontalArrangement = Arrangement.spacedBy(8.dp),
+      verticalAlignment = Alignment.CenterVertically,
+    ) {
+      if (steppers) {
+        NumberStepperButton(label = decrementLabel, onClick = onDecrement)
+      }
+      GroundOutlinedTextField(
+        value = text,
+        onValueChange = onValueChange,
+        modifier = Modifier.weight(1f),
+        singleLine = true,
+        isError = parseError != null,
+        placeholder = { Text(placeholder) },
+      )
+      if (steppers) {
+        NumberStepperButton(label = incrementLabel, onClick = onIncrement)
+      }
+    }
+    if (parseError != null) {
+      Text(
+        text = parseError,
+        style = MaterialTheme.typography.labelSmall.copy(color = colors.error),
+      )
+    }
+  }
+}
+
+@Composable
+private fun NumberStepperButton(label: String, onClick: () -> Unit) {
+  FilledTonalButton(onClick = onClick, modifier = Modifier.height(52.dp)) {
+    Text(
+      label,
+      fontWeight = FontWeight.Bold,
+      maxLines = 1,
+      overflow = TextOverflow.Ellipsis,
+      softWrap = false,
+    )
+  }
+}
+
 @Composable
 private fun IntegerInputWidget(
   path: String,
   fieldState: FieldState,
   controller: FormWizardController,
 ) {
-  val colors = MaterialTheme.colorScheme
   val scalar = fieldState.value?.scalar_value
   val initialNumber: Long? = scalar?.int64_value ?: scalar?.int32_value?.toLong()
   var text by remember(path, initialNumber) { mutableStateOf(initialNumber?.toString() ?: "") }
@@ -462,71 +522,35 @@ private fun IntegerInputWidget(
     }
   }
 
-  Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-    Row(
-      modifier = Modifier.fillMaxWidth(),
-      horizontalArrangement = Arrangement.spacedBy(8.dp),
-      verticalAlignment = Alignment.CenterVertically,
-    ) {
-      FilledTonalButton(
-        onClick = { applyNumber((initialNumber ?: 0L) - 1L) },
-        modifier = Modifier.height(52.dp),
-      ) {
-        Text(
-          "-1",
-          fontWeight = FontWeight.Bold,
-          maxLines = 1,
-          overflow = TextOverflow.Ellipsis,
-          softWrap = false,
-        )
-      }
-      OutlinedTextField(
-        value = text,
-        onValueChange = { raw ->
-          text = raw
-          when (val parsed = parseIntegerInput(raw, fieldState.dataType)) {
-            is IntegerInput.Empty -> {
-              parseError = null
-              controller.clearField(path)
-            }
-            is IntegerInput.Invalid -> {
-              parseError = parsed.message
-            }
-            is IntegerInput.Valid -> {
-              parseError = null
-              if (fieldState.dataType == DataType.TYPE_INT64) {
-                controller.updateLong(path, parsed.value)
-              } else {
-                controller.updateInt(path, parsed.value.toInt())
-              }
-            }
+  NumberField(
+    text = text,
+    onValueChange = { raw ->
+      text = raw
+      when (val parsed = parseIntegerInput(raw, fieldState.dataType)) {
+        is IntegerInput.Empty -> {
+          parseError = null
+          controller.clearField(path)
+        }
+        is IntegerInput.Invalid -> {
+          parseError = parsed.message
+        }
+        is IntegerInput.Valid -> {
+          parseError = null
+          if (fieldState.dataType == DataType.TYPE_INT64) {
+            controller.updateLong(path, parsed.value)
+          } else {
+            controller.updateInt(path, parsed.value.toInt())
           }
-        },
-        modifier = Modifier.weight(1f),
-        singleLine = true,
-        isError = parseError != null,
-        placeholder = { Text("0") },
-      )
-      FilledTonalButton(
-        onClick = { applyNumber((initialNumber ?: 0L) + 1L) },
-        modifier = Modifier.height(52.dp),
-      ) {
-        Text(
-          "+1",
-          fontWeight = FontWeight.Bold,
-          maxLines = 1,
-          overflow = TextOverflow.Ellipsis,
-          softWrap = false,
-        )
+        }
       }
-    }
-    if (parseError != null) {
-      Text(
-        text = parseError!!,
-        style = MaterialTheme.typography.labelSmall.copy(color = colors.error),
-      )
-    }
-  }
+    },
+    placeholder = "0",
+    parseError = parseError,
+    decrementLabel = "-1",
+    onDecrement = { applyNumber((initialNumber ?: 0L) - 1L) },
+    incrementLabel = "+1",
+    onIncrement = { applyNumber((initialNumber ?: 0L) + 1L) },
+  )
 }
 
 @Composable
@@ -535,7 +559,6 @@ private fun DecimalInputWidget(
   fieldState: FieldState,
   controller: FormWizardController,
 ) {
-  val colors = MaterialTheme.colorScheme
   val initialDouble: Double? = fieldState.value?.scalar_value?.double_value
   var text by remember(path) { mutableStateOf(initialDouble?.toString() ?: "") }
   var parseError by remember(path) { mutableStateOf<String?>(null) }
@@ -549,76 +572,37 @@ private fun DecimalInputWidget(
     }
   }
 
-  Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-    Row(
-      modifier = Modifier.fillMaxWidth(),
-      horizontalArrangement = Arrangement.spacedBy(8.dp),
-      verticalAlignment = Alignment.CenterVertically,
-    ) {
-      FilledTonalButton(
-        onClick = {
-          val next = (((initialDouble ?: 0.0) - 0.5) * 100.0).roundToInt() / 100.0
-          text = next.toString()
-          parseError = null
-          controller.updateDouble(path, next)
-        },
-        modifier = Modifier.height(52.dp),
-      ) {
-        Text(
-          "-0.5",
-          fontWeight = FontWeight.Bold,
-          maxLines = 1,
-          overflow = TextOverflow.Ellipsis,
-          softWrap = false,
-        )
-      }
-      OutlinedTextField(
-        value = text,
-        onValueChange = { raw ->
-          text = raw
-          if (raw.isBlank()) {
-            parseError = null
-            controller.clearField(path)
-          } else {
-            val parsed = raw.trim().toDoubleOrNull()
-            if (parsed != null) {
-              parseError = null
-              controller.updateDouble(path, parsed)
-            } else {
-              parseError = "Enter a valid decimal number"
-            }
-          }
-        },
-        modifier = Modifier.weight(1f),
-        singleLine = true,
-        isError = parseError != null,
-        placeholder = { Text("0.0") },
-      )
-      FilledTonalButton(
-        onClick = {
-          val next = (((initialDouble ?: 0.0) + 0.5) * 100.0).roundToInt() / 100.0
-          text = next.toString()
-          parseError = null
-          controller.updateDouble(path, next)
-        },
-        modifier = Modifier.height(52.dp),
-      ) {
-        Text(
-          "+0.5",
-          fontWeight = FontWeight.Bold,
-          maxLines = 1,
-          overflow = TextOverflow.Ellipsis,
-          softWrap = false,
-        )
-      }
-    }
-    if (parseError != null) {
-      Text(
-        text = parseError!!,
-        style = MaterialTheme.typography.labelSmall.copy(color = colors.error),
-      )
-    }
+  fun step(delta: Double) {
+    val next = (((initialDouble ?: 0.0) + delta) * 100.0).roundToInt() / 100.0
+    text = next.toString()
+    parseError = null
+    controller.updateDouble(path, next)
   }
+
+  NumberField(
+    text = text,
+    onValueChange = { raw ->
+      text = raw
+      if (raw.isBlank()) {
+        parseError = null
+        controller.clearField(path)
+      } else {
+        val parsed = raw.trim().toDoubleOrNull()
+        if (parsed != null) {
+          parseError = null
+          controller.updateDouble(path, parsed)
+        } else {
+          parseError = "Enter a valid decimal number"
+        }
+      }
+    },
+    placeholder = "0.0",
+    parseError = parseError,
+    decrementLabel = "-0.5",
+    onDecrement = { step(-0.5) },
+    incrementLabel = "+0.5",
+    onIncrement = { step(0.5) },
+  )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -674,7 +658,7 @@ private fun DateInputWidget(
       horizontalArrangement = Arrangement.spacedBy(8.dp),
       verticalAlignment = Alignment.CenterVertically,
     ) {
-      OutlinedTextField(
+      GroundOutlinedTextField(
         value = text,
         onValueChange = { raw ->
           text = raw
@@ -774,7 +758,7 @@ private fun TimeInputWidget(
     horizontalArrangement = Arrangement.spacedBy(8.dp),
     verticalAlignment = Alignment.CenterVertically,
   ) {
-    OutlinedTextField(
+    GroundOutlinedTextField(
       value = text,
       onValueChange = { raw ->
         text = raw
