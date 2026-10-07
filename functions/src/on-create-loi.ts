@@ -32,6 +32,21 @@ import { toLoiPbProperties } from './import-geojson';
 
 import Pb = GroundProtos.ground.v1beta1;
 
+/**
+ * Fills in a newly created Location of Interest with generated properties and
+ * corrects the server timestamps its client could only guess at.
+ *
+ * That fix-up is itself a write, which `onUpdateLoi` announces - so the
+ * broadcast is left to it, and clients never see the half-populated document.
+ * When there is nothing to fix up no update follows, so this announces the LOI
+ * itself. Between them the two handlers announce a created LOI exactly once.
+ *
+ * Imported LOIs are the exception, and are announced by neither handler:
+ * `importGeoJson` sends a single message for the whole batch once the import
+ * finishes. Their audit info is left alone too - the import stamps it just
+ * before writing, so there is nothing to correct. Their properties are still
+ * generated like everyone else's; that write simply goes unannounced.
+ */
 export async function onCreateLoiHandler(
   event: FirestoreEvent<DocumentSnapshot | undefined>
 ) {
@@ -43,8 +58,10 @@ export async function onCreateLoiHandler(
   const loiPb = toMessage(data, Pb.LocationOfInterest) as Pb.LocationOfInterest;
   const db = getDatastore();
 
+  const isImported = loiPb.source === Pb.LocationOfInterest.Source.IMPORTED;
+
   const properties = await regenerateLoiProperties(db, surveyId, loiId, loiPb);
-  const auditInfo = correctedAuditInfo(loiPb, event.time);
+  const auditInfo = isImported ? {} : correctedAuditInfo(loiPb, event.time);
   const propertiesChanged = !propertiesEqual(
     propertiesPbToObject(loiPb.properties),
     properties
@@ -65,6 +82,9 @@ export async function onCreateLoiHandler(
     // onUpdateLoi announces the write just made.
     return;
   }
+
+  // importGeoJson announces the batch this LOI came in.
+  if (isImported) return;
 
   return broadcastUpdate(
     { type: 'loi', surveyId, loiId, deleted: false },

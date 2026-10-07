@@ -122,6 +122,18 @@ describe('onCreateLoiHandler()', () => {
     );
   });
 
+  it('leaves an imported LOI to be announced by the import itself', async () => {
+    mockFirestore.doc(JOB_PATH).set({});
+    const importedLoi = {
+      ...loiDoc,
+      [l.source]: Pb.LocationOfInterest.Source.IMPORTED,
+    };
+
+    await onCreateLoiHandler(createdEvent(importedLoi));
+
+    expect(broadcastSpy).not.toHaveBeenCalled();
+  });
+
   it('runs property generator and updates LOI properties when integration is enabled', async () => {
     mockFirestore.doc(JOB_PATH).set({
       [j.enabledIntegrations]: [{ [intgr.id]: 'whisp' }],
