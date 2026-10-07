@@ -57,6 +57,7 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
@@ -90,6 +91,8 @@ import org.groundplatform.v2.devtools.prototypeapp.surveyeditor.PaneScaffold
 import org.groundplatform.v2.devtools.prototypeapp.surveyeditor.PendingInviteLinkRow
 import org.groundplatform.v2.devtools.prototypeapp.surveyeditor.PersonRow
 import org.groundplatform.v2.devtools.prototypeapp.surveyeditor.ProfileAvatar
+import org.groundplatform.v2.devtools.prototypeapp.ui.state.OrganizationUiState
+import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.OrganizationActions
 
 /**
  * One organization, laid out like the survey editor: a resizable left panel switches between
@@ -105,86 +108,125 @@ internal fun OrganizationPage(
   onCreateSurvey: (title: String, organizationId: String) -> Unit,
   onSignOut: () -> Unit = { state.signOut() },
 ) {
-  val organization = state.openOrganization
-  val email = state.signedInUserEmail
-  val isManager = organization != null && state.managesOrganization(organization)
-  val isMember = organization != null && organization.isMember(email)
+  val uiState by state.organization.uiState.collectAsState()
+  val dashboardState by state.dashboard.uiState.collectAsState()
+  OrganizationPage(
+    uiState = uiState,
+    actions = state.organization,
+    sidePanelWidthDp = dashboardState.sidePanelWidthDp,
+    onSidePanelWidthChange = state.dashboard::updateSidePanelWidth,
+    onOpenSurvey = onOpenSurvey,
+    onCreateSurvey = onCreateSurvey,
+    header = { onCreateSurveyClick ->
+      val organization = uiState.openOrganization
+      WebAppHeader(
+        state = state,
+        onSignOut = onSignOut,
+        navigationIcon = {
+          IconButton(onClick = { state.organization.openOrganizations() }) {
+            Icon(
+              Icons.AutoMirrored.Outlined.ArrowBack,
+              contentDescription = "Back to organizations",
+            )
+          }
+        },
+        context = {
+          if (organization != null) {
+            OrganizationHeaderContext(
+              organization = organization,
+              surveyCount = uiState.surveyCountInOrganization(organization.id),
+            )
+          } else {
+            WebHeaderContext(title = "Organization")
+          }
+        },
+        actions = {
+          WebMobilePrototypeButton(state)
+          if (organization != null && uiState.isMemberOf(organization)) {
+            WebHeaderButton(
+              text = "Create survey",
+              icon = Icons.Outlined.Add,
+              onClick = onCreateSurveyClick,
+              tonal = true,
+            )
+          }
+        },
+      )
+    },
+  )
+}
+
+/** The organization's logo, name, and summary line in the web header. */
+@Composable
+private fun OrganizationHeaderContext(organization: Organization, surveyCount: Int) {
+  Row(
+    verticalAlignment = Alignment.CenterVertically,
+    horizontalArrangement = Arrangement.spacedBy(10.dp),
+  ) {
+    ProfileAvatar(nameOrEmail = organization.name, photoUrl = organization.logoUrl, size = 32.dp)
+    WebHeaderContext(title = organization.name) {
+      WebHeaderSupportingText(
+        if (organization.isSynthetic) "Synthetic organization" else "Organization",
+        color = MaterialTheme.colorScheme.primary,
+      )
+      WebHeaderSupportingText("·")
+      WebHeaderSupportingText(
+        if (organization.isSynthetic) {
+          val count = organization.imagerySources.size
+          "Shared across all surveys · $count imagery ${if (count == 1) "source" else "sources"}"
+        } else {
+          "${organization.activeMembers.size} members · $surveyCount surveys" +
+            if (!organization.isListed) " · Unlisted" else ""
+        }
+      )
+    }
+  }
+}
+
+/**
+ * Stateless organization page: the open organization of [uiState] with its navigation panel,
+ * section panes, notice banner, and "Create survey" dialog.
+ *
+ * @param sidePanelWidthDp width of the left panel, shared with the dashboard and Survey editor.
+ * @param header the page header; it receives the click handler of its "Create survey" button.
+ */
+@Composable
+internal fun OrganizationPage(
+  uiState: OrganizationUiState,
+  actions: OrganizationActions,
+  sidePanelWidthDp: Float,
+  onSidePanelWidthChange: (Float) -> Unit,
+  onOpenSurvey: (surveyId: String) -> Unit,
+  onCreateSurvey: (title: String, organizationId: String) -> Unit,
+  header: @Composable (onCreateSurveyClick: () -> Unit) -> Unit,
+) {
+  val organization = uiState.openOrganization
+  val isManager = organization != null && uiState.managesOrganization(organization)
+  val isMember = organization != null && uiState.isMemberOf(organization)
   var tab by remember(organization?.id) { mutableStateOf(OrganizationTab.DETAILS) }
   var isCreatingSurvey by remember { mutableStateOf(false) }
 
   Column(modifier = Modifier.fillMaxSize()) {
-    WebAppHeader(
-      state = state,
-      onSignOut = onSignOut,
-      navigationIcon = {
-        IconButton(onClick = { state.openOrganizations() }) {
-          Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = "Back to organizations")
-        }
-      },
-      context = {
-        if (organization != null) {
-          Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
-          ) {
-            ProfileAvatar(
-              nameOrEmail = organization.name,
-              photoUrl = organization.logoUrl,
-              size = 32.dp,
-            )
-            WebHeaderContext(title = organization.name) {
-              WebHeaderSupportingText(
-                if (organization.isSynthetic) "Synthetic organization" else "Organization",
-                color = MaterialTheme.colorScheme.primary,
-              )
-              WebHeaderSupportingText("·")
-              WebHeaderSupportingText(
-                if (organization.isSynthetic) {
-                  val count = organization.imagerySources.size
-                  "Shared across all surveys · $count imagery ${if (count == 1) "source" else "sources"}"
-                } else {
-                  "${organization.activeMembers.size} members · " +
-                    "${state.surveysInOrganization(organization.id).size} surveys" +
-                    if (!organization.isListed) " · Unlisted" else ""
-                }
-              )
-            }
-          }
-        } else {
-          WebHeaderContext(title = "Organization")
-        }
-      },
-      actions = {
-        WebMobilePrototypeButton(state)
-        if (isMember) {
-          WebHeaderButton(
-            text = "Create survey",
-            icon = Icons.Outlined.Add,
-            onClick = { isCreatingSurvey = true },
-            tonal = true,
-          )
-        }
-      },
-    )
+    header { isCreatingSurvey = true }
     HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
     if (organization == null) {
-      MissingOrganization(onBack = { state.openOrganizations() })
+      MissingOrganization(onBack = actions::openOrganizations)
       return@Column
     }
 
     Row(modifier = Modifier.weight(1f).fillMaxWidth()) {
       OrganizationNavigation(
-        state = state,
         organization = organization,
+        surveyCount = uiState.surveyCountInOrganization(organization.id),
         isManager = isManager,
         selected = tab,
         onSelect = { tab = it },
-        modifier = Modifier.width(state.sidePanelWidthDp.dp).fillMaxHeight(),
+        modifier = Modifier.width(sidePanelWidthDp.dp).fillMaxHeight(),
       )
       SidePanelSeparator(
-        widthDp = state.sidePanelWidthDp,
-        onWidthChange = state::updateSidePanelWidth,
+        widthDp = sidePanelWidthDp,
+        onWidthChange = onSidePanelWidthChange,
         modifier = Modifier.width(SidePanelSeparatorWidth).fillMaxHeight(),
       )
       Box(modifier = Modifier.weight(1f).fillMaxHeight()) {
@@ -201,8 +243,8 @@ internal fun OrganizationPage(
                     "Manager to change these."
                 },
             ) {
-              NoticeSlot(state)
-              DetailsPane(state, organization, isManager)
+              NoticeSlot(uiState, actions)
+              DetailsPane(uiState, actions, organization, isManager)
             }
           OrganizationTab.SURVEYS ->
             PaneScaffold(
@@ -216,8 +258,10 @@ internal fun OrganizationPage(
                     "do in it."
                 },
             ) {
-              NoticeSlot(state)
-              SurveysPane(state, organization, isMember, onOpenSurvey) { isCreatingSurvey = true }
+              NoticeSlot(uiState, actions)
+              SurveysPane(uiState, organization, isMember, onOpenSurvey) {
+                isCreatingSurvey = true
+              }
             }
           OrganizationTab.MEMBERS ->
             PaneScaffold(
@@ -226,8 +270,8 @@ internal fun OrganizationPage(
                 "People affiliated with ${organization.name}. Managers run the organization " +
                   "and all of its surveys; Members can create surveys in it.",
             ) {
-              NoticeSlot(state)
-              MembersPane(state, organization, isManager)
+              NoticeSlot(uiState, actions)
+              MembersPane(uiState, actions, organization, isManager)
             }
           OrganizationTab.IMAGERY_SOURCES ->
             PaneScaffold(
@@ -244,8 +288,8 @@ internal fun OrganizationPage(
                     "Ask a Manager to add or change imagery sources."
                 },
             ) {
-              NoticeSlot(state)
-              ImagerySourcesPane(state, organization, isManager)
+              NoticeSlot(uiState, actions)
+              ImagerySourcesPane(actions, organization, isManager)
             }
         }
       }
@@ -266,10 +310,10 @@ internal fun OrganizationPage(
 
 /** Shows the pending organization notice, if any, at the top of a pane. */
 @Composable
-private fun NoticeSlot(state: PrototypeAppState) {
-  state.organizationNotice?.let { notice ->
+private fun NoticeSlot(uiState: OrganizationUiState, actions: OrganizationActions) {
+  uiState.notice?.let { notice ->
     Box(modifier = Modifier.widthIn(max = OrganizationPaneMaxWidth)) {
-      OrganizationNotice(notice, onDismiss = state::dismissOrganizationNotice)
+      OrganizationNotice(notice, onDismiss = actions::dismissNotice)
     }
   }
 }
@@ -277,8 +321,8 @@ private fun NoticeSlot(state: PrototypeAppState) {
 /** Left panel listing the page's sections, styled like the survey editor's navigation. */
 @Composable
 private fun OrganizationNavigation(
-  state: PrototypeAppState,
   organization: Organization,
+  surveyCount: Int,
   isManager: Boolean,
   selected: OrganizationTab,
   onSelect: (OrganizationTab) -> Unit,
@@ -302,7 +346,7 @@ private fun OrganizationNavigation(
         icon = Icons.Outlined.Map,
         selected = selected == OrganizationTab.SURVEYS,
         onClick = { onSelect(OrganizationTab.SURVEYS) },
-        trailing = "${state.surveysInOrganization(organization.id).size}",
+        trailing = "$surveyCount",
       )
       NavItem(
         label = OrganizationTab.MEMBERS.label,
@@ -348,13 +392,13 @@ private fun MissingOrganization(onBack: () -> Unit) {
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun SurveysPane(
-  state: PrototypeAppState,
+  uiState: OrganizationUiState,
   organization: Organization,
   isMember: Boolean,
   onOpenSurvey: (String) -> Unit,
   onCreateSurvey: () -> Unit,
 ) {
-  val surveys = state.surveysInOrganization(organization.id)
+  val surveys = uiState.surveysInOrganization(organization.id)
   if (surveys.isEmpty()) {
     Text(
       if (isMember) "No surveys yet. Create the first one for ${organization.name}."
@@ -372,8 +416,9 @@ private fun SurveysPane(
     surveys.forEach { survey ->
       WebSurveyCard(
         survey = survey,
-        access = WebSurveysList.accessLabel(survey, state.organizations, state.signedInUserEmail),
-        isActive = survey.id == state.activeSurveyId,
+        access =
+          WebSurveysList.accessLabel(survey, uiState.organizations, uiState.signedInUserEmail),
+        isActive = survey.id == uiState.activeSurveyId,
         onClick = { onOpenSurvey(survey.id) },
       )
     }
@@ -419,9 +464,14 @@ private fun CreateSurveyInOrganizationDialog(
 // ---------------------------------------------------------------------------------------------
 
 @Composable
-private fun MembersPane(state: PrototypeAppState, organization: Organization, isManager: Boolean) {
-  val email = state.signedInUserEmail
-  val view = OrganizationPages.membersView(organization, email)
+private fun MembersPane(
+  uiState: OrganizationUiState,
+  actions: OrganizationActions,
+  organization: Organization,
+  isManager: Boolean,
+) {
+  val email = uiState.signedInUserEmail
+  val view = uiState.membersView(organization)
   var acceptingEmail by remember { mutableStateOf<String?>(null) }
   var leaving by remember { mutableStateOf(false) }
 
@@ -435,7 +485,7 @@ private fun MembersPane(state: PrototypeAppState, organization: Organization, is
         roleLabel = invitee.role.label,
         peopleListName = "Members page",
         onAccept = { name, photo ->
-          state.acceptOrganizationInvite(organization.id, invitee.email, name, photo)
+          actions.acceptInvite(organization.id, invitee.email, name, photo)
         },
         onDismiss = { acceptingEmail = null },
       )
@@ -454,7 +504,7 @@ private fun MembersPane(state: PrototypeAppState, organization: Organization, is
         Button(
           onClick = {
             leaving = false
-            state.removeOrganizationMember(organization.id, email)
+            actions.removeMember(organization.id, email)
           },
           colors =
             ButtonDefaults.buttonColors(
@@ -490,15 +540,11 @@ private fun MembersPane(state: PrototypeAppState, organization: Organization, is
               pending = true,
               pendingLabel = "Requested",
             ) {
-              OutlinedButton(
-                onClick = { state.removeOrganizationMember(organization.id, person.email) }
-              ) {
+              OutlinedButton(onClick = { actions.removeMember(organization.id, person.email) }) {
                 Text("Decline")
               }
               Spacer(Modifier.width(8.dp))
-              Button(
-                onClick = { state.approveOrganizationRequest(organization.id, person.email) }
-              ) {
+              Button(onClick = { actions.approveRequest(organization.id, person.email) }) {
                 Icon(Icons.Outlined.Check, contentDescription = null)
                 Spacer(Modifier.width(6.dp))
                 Text("Approve")
@@ -510,11 +556,11 @@ private fun MembersPane(state: PrototypeAppState, organization: Organization, is
     }
 
     MembersCard("Members") {
-      if (isManager) InviteMemberRow(state, organization)
+      if (isManager) InviteMemberRow(actions, organization)
       view.active.forEach { person ->
         key(person.email) {
-          val isSelf = person.email.equals(email, ignoreCase = true)
-          val canChange = OrganizationPages.canChange(organization, person)
+          val isSelf = uiState.isSelf(person.email)
+          val canChange = uiState.canChangeMember(organization, person)
           PersonRow(
             displayName = person.displayName + if (isSelf) " (you)" else "",
             email = person.email,
@@ -530,12 +576,12 @@ private fun MembersPane(state: PrototypeAppState, organization: Organization, is
                   selectedText = person.role.label,
                   options = OrganizationRole.entries,
                   optionText = { it.label },
-                  onSelect = { state.setOrganizationMemberRole(organization.id, person.email, it) },
+                  onSelect = { actions.setMemberRole(organization.id, person.email, it) },
                 )
               }
               if (!isSelf) {
                 IconButton(
-                  onClick = { state.removeOrganizationMember(organization.id, person.email) },
+                  onClick = { actions.removeMember(organization.id, person.email) },
                   enabled = canChange,
                 ) {
                   Icon(Icons.Outlined.Close, contentDescription = "Remove ${person.displayName}")
@@ -578,16 +624,14 @@ private fun MembersPane(state: PrototypeAppState, organization: Organization, is
                     PendingInviteLinkRow(
                       token = token,
                       onResetLink = {
-                        state.resetOrganizationInviteLink(organization.id, person.email)
+                        actions.resetInviteLink(organization.id, person.email)
                       },
                       onOpenAsInvitee = { acceptingEmail = person.email },
                     )
                   }
                 },
             ) {
-              IconButton(
-                onClick = { state.removeOrganizationMember(organization.id, person.email) }
-              ) {
+              IconButton(onClick = { actions.removeMember(organization.id, person.email) }) {
                 Icon(Icons.Outlined.Close, contentDescription = "Revoke invite for ${person.email}")
               }
             }
@@ -620,7 +664,7 @@ private fun MembersCard(title: String, content: @Composable () -> Unit) {
 }
 
 @Composable
-private fun InviteMemberRow(state: PrototypeAppState, organization: Organization) {
+private fun InviteMemberRow(actions: OrganizationActions, organization: Organization) {
   var email by remember { mutableStateOf("") }
   var role by remember { mutableStateOf(OrganizationRole.MEMBER) }
   var error by remember { mutableStateOf<String?>(null) }
@@ -648,7 +692,7 @@ private fun InviteMemberRow(state: PrototypeAppState, organization: Organization
     }
     Button(
       onClick = {
-        error = state.inviteOrganizationMember(organization.id, email, role)
+        error = actions.inviteMember(organization.id, email, role)
         if (error == null) email = ""
       },
       enabled = email.isNotBlank(),
@@ -670,15 +714,24 @@ private fun InviteMemberRow(state: PrototypeAppState, organization: Organization
  * **Discard**) their changes, and can delete the organization; everyone else sees them read-only.
  */
 @Composable
-private fun DetailsPane(state: PrototypeAppState, organization: Organization, isManager: Boolean) {
+private fun DetailsPane(
+  uiState: OrganizationUiState,
+  actions: OrganizationActions,
+  organization: Organization,
+  isManager: Boolean,
+) {
   Column(
     modifier = Modifier.widthIn(max = OrganizationPaneMaxWidth),
     verticalArrangement = Arrangement.spacedBy(20.dp),
   ) {
     if (isManager) {
-      EditableDetailsCard(state, organization)
+      EditableDetailsCard(actions, organization)
       if (!organization.isSynthetic) {
-        DangerZoneCard(state, organization)
+        DangerZoneCard(
+          actions = actions,
+          organization = organization,
+          surveyCount = uiState.surveyCountInOrganization(organization.id),
+        )
       }
     } else {
       ReadOnlyDetailsCard(organization)
@@ -692,7 +745,7 @@ private fun DetailsPane(state: PrototypeAppState, organization: Organization, is
 
 @Composable
 private fun ImagerySourcesPane(
-  state: PrototypeAppState,
+  actions: OrganizationActions,
   organization: Organization,
   isManager: Boolean,
 ) {
@@ -719,7 +772,7 @@ private fun ImagerySourcesPane(
           organization.imagerySources.forEach { source ->
             key(source.id) {
               ImagerySourceRow(
-                state = state,
+                actions = actions,
                 organization = organization,
                 source = source,
                 isManager = isManager,
@@ -734,14 +787,14 @@ private fun ImagerySourcesPane(
     }
 
     if (isManager) {
-      AddImagerySourceCard(state = state, organization = organization)
+      AddImagerySourceCard(actions = actions, organization = organization)
     }
   }
 }
 
 @Composable
 private fun ImagerySourceRow(
-  state: PrototypeAppState,
+  actions: OrganizationActions,
   organization: Organization,
   source: ImagerySource,
   isManager: Boolean,
@@ -820,7 +873,7 @@ private fun ImagerySourceRow(
           Button(
             onClick = {
               val err =
-                state.updateOrganizationImagerySource(
+                actions.updateImagerySource(
                   organizationId = organization.id,
                   sourceId = source.id,
                   name = editName,
@@ -892,7 +945,7 @@ private fun ImagerySourceRow(
               }
               IconButton(
                 onClick = {
-                  state.removeOrganizationImagerySource(organization.id, source.id)
+                  actions.removeImagerySource(organization.id, source.id)
                 }
               ) {
                 Icon(Icons.Outlined.Close, contentDescription = "Remove ${source.name}")
@@ -926,7 +979,7 @@ private fun ImagerySourceRow(
             Switch(
               checked = source.allowOfflineDownload,
               onCheckedChange = { allowed ->
-                state.setOrganizationImagerySourceOfflineAllowed(
+                actions.setImagerySourceOfflineAllowed(
                   organizationId = organization.id,
                   sourceId = source.id,
                   allowOfflineDownload = allowed,
@@ -947,7 +1000,7 @@ private fun ImagerySourceRow(
 }
 
 @Composable
-private fun AddImagerySourceCard(state: PrototypeAppState, organization: Organization) {
+private fun AddImagerySourceCard(actions: OrganizationActions, organization: Organization) {
   var name by remember(organization.id) { mutableStateOf("") }
   var urlTemplate by remember(organization.id) { mutableStateOf("") }
   var sourceType by remember(organization.id) { mutableStateOf(ImagerySourceType.XYZ_TILES) }
@@ -1022,7 +1075,7 @@ private fun AddImagerySourceCard(state: PrototypeAppState, organization: Organiz
     Button(
       onClick = {
         val validationError =
-          state.addOrganizationImagerySource(
+          actions.addImagerySource(
             organizationId = organization.id,
             name = name,
             urlTemplate = urlTemplate,
@@ -1048,7 +1101,7 @@ private fun AddImagerySourceCard(state: PrototypeAppState, organization: Organiz
 }
 
 @Composable
-private fun EditableDetailsCard(state: PrototypeAppState, organization: Organization) {
+private fun EditableDetailsCard(actions: OrganizationActions, organization: Organization) {
   var name by remember(organization.id, organization.name) { mutableStateOf(organization.name) }
   var description by
     remember(organization.id, organization.description) { mutableStateOf(organization.description) }
@@ -1106,14 +1159,13 @@ private fun EditableDetailsCard(state: PrototypeAppState, organization: Organiza
     ) {
       Button(
         onClick = {
-          state.updateOrganization(organization.id) {
-            it.copy(
-              name = name.trim(),
-              description = description.trim(),
-              websiteUrl = websiteUrl.trim(),
-              isListed = isListed,
-            )
-          }
+          actions.updateOrganizationDetails(
+            organizationId = organization.id,
+            name = name,
+            description = description,
+            websiteUrl = websiteUrl,
+            isListed = isListed,
+          )
         },
         enabled = isDirty && name.isNotBlank(),
       ) {
@@ -1168,11 +1220,14 @@ private fun DetailRow(label: String, value: String) {
 }
 
 @Composable
-private fun DangerZoneCard(state: PrototypeAppState, organization: Organization) {
+private fun DangerZoneCard(
+  actions: OrganizationActions,
+  organization: Organization,
+  surveyCount: Int,
+) {
   var confirmingDelete by remember { mutableStateOf(false) }
 
   if (confirmingDelete) {
-    val surveyCount = state.surveysInOrganization(organization.id).size
     AlertDialog(
       onDismissRequest = { confirmingDelete = false },
       title = { Text("Delete ${organization.name}?") },
@@ -1190,7 +1245,7 @@ private fun DangerZoneCard(state: PrototypeAppState, organization: Organization)
         Button(
           onClick = {
             confirmingDelete = false
-            state.deleteOrganization(organization.id)
+            actions.deleteOrganization(organization.id)
           },
           colors =
             ButtonDefaults.buttonColors(

@@ -137,9 +137,12 @@ surveys in it and find them in their list.
         remove people. Anyone can **Leave organization**. The last Manager
         can't be demoted, removed, or leave; the page says why.
 
-Code lives in `organization/` (`OrganizationPages.kt` for the pure list and
-member-grouping logic, `OrganizationsPage.kt`, `OrganizationPage.kt`); the
-actions on `PrototypeAppState` delegate to `OrganizationRepository`.
+Code lives in `organization/` (`OrganizationsPage.kt`, `OrganizationPage.kt`,
+and `OrganizationPages.kt` for the page's tabs). Both pages are stateless
+`(uiState, actions)` screens driven by `OrganizationViewModel`
+(`ui/viewmodel/`); the directory, relation, and member-grouping rules live in
+`domain/model/OrganizationDirectory.kt`, and the matching methods on
+`PrototypeAppState` are one-line delegates to the view model.
 
 ## Web Dashboard Page (`#dashboard`)
 
@@ -474,7 +477,17 @@ fresh on every page load; on mobile it will become the persistent offline store.
     `MutationRepository`; it creates surveys with `CreateSurveyUseCase` and
     uploads with `SyncMutationsUseCase`. Switching the active survey, showing
     the `Uploads` sub-screen, and notices are `DashboardEvent`s the shell
-    applies.
+    applies. `OrganizationViewModel` (the web organizations directory and the
+    organization page's details, surveys, members, and imagery sources)
+    observes organizations through `OrganizationRepository`, surveys through
+    `SurveyRepository`, and the signed-in user through `AuthRepository`; it
+    creates organizations with `CreateOrganizationUseCase`, invites people
+    with `InviteOrganizationMemberUseCase`, and edits imagery sources with
+    `ManageImagerySourcesUseCase`, while simple membership changes pass
+    straight to the repository. Page switches and turning a removed imagery
+    source off on the map are `OrganizationEvent`s the shell applies; the
+    resizable left panel's width stays with `DashboardViewModel`, shared with
+    the dashboard and Survey editor.
 -   **Survey switching**: Every survey's data is in the store, so switching
     surveys keeps edits. Use **Reset** to go back to the sample data.
 -   **Survey editor**: The editor loads the active survey's draft

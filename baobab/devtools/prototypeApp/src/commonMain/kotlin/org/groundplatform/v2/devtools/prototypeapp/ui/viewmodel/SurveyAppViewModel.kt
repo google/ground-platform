@@ -65,8 +65,11 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.repository.Transaction
 import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.ClusterMapFeaturesUseCase
 import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.CompleteFormSubmissionUseCase
 import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.ComputeWayfindingNavigationUseCase
+import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.CreateOrganizationUseCase
 import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.CreateSurveyUseCase
 import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.GeneratePrototypeRandomSitesUseCase
+import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.InviteOrganizationMemberUseCase
+import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.ManageImagerySourcesUseCase
 import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.ResolveFormDefForLaunchUseCase
 import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.SearchPlacesUseCase
 import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.SyncMutationsUseCase
@@ -143,6 +146,12 @@ class SurveyAppViewModel(
       surveyEditorRepository = surveyEditorRepository,
       transactionRunner = transactionRunner,
     ),
+  val createOrganizationUseCase: CreateOrganizationUseCase =
+    CreateOrganizationUseCase(organizationRepository),
+  val inviteOrganizationMemberUseCase: InviteOrganizationMemberUseCase =
+    InviteOrganizationMemberUseCase(organizationRepository),
+  val manageImagerySourcesUseCase: ManageImagerySourcesUseCase =
+    ManageImagerySourcesUseCase(organizationRepository),
   val computeWayfindingNavigationUseCase: ComputeWayfindingNavigationUseCase =
     ComputeWayfindingNavigationUseCase(),
   val clusterMapFeaturesUseCase: ClusterMapFeaturesUseCase = ClusterMapFeaturesUseCase(),

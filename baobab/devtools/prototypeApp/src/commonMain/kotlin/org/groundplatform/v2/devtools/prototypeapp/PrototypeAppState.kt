@@ -24,8 +24,6 @@ import org.groundplatform.v2.core.forms.model.EntityState
 import org.groundplatform.v2.core.forms.serialization.XFormsXmlSerializer
 import org.groundplatform.v2.core.forms.ui.FormWizardController
 import org.groundplatform.v2.core.forms.ui.WorkbenchExampleForm
-import org.groundplatform.v2.devtools.prototypeapp.domain.model.CachedProfile
-import org.groundplatform.v2.devtools.prototypeapp.domain.model.InviteLinks
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyMapAnchor
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SurveyEditorDraft
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.withEditorFormAvailability
@@ -42,12 +40,14 @@ import org.groundplatform.v2.devtools.prototypeapp.surveyeditor.SurveyAccess
 import org.groundplatform.v2.devtools.prototypeapp.ui.state.DashboardEvent
 import org.groundplatform.v2.devtools.prototypeapp.ui.state.DashboardUiState
 import org.groundplatform.v2.devtools.prototypeapp.ui.state.OnboardingEvent
+import org.groundplatform.v2.devtools.prototypeapp.ui.state.OrganizationEvent
 import org.groundplatform.v2.devtools.prototypeapp.ui.state.PrototypeUiState
 import org.groundplatform.v2.devtools.prototypeapp.ui.state.SettingsEvent
 import org.groundplatform.v2.devtools.prototypeapp.ui.state.SurveyMapEvent
 import org.groundplatform.v2.devtools.prototypeapp.ui.state.SurveyMapUiState
 import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.DashboardViewModel
 import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.OnboardingViewModel
+import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.OrganizationViewModel
 import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.PrototypeAppViewModel
 import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.SettingsViewModel
 import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.SurveyMapViewModel
@@ -147,6 +147,24 @@ class PrototypeAppState(
 
   private var dashboardState by mutableStateOf(dashboard.uiState.value)
 
+  /**
+   * ViewModel of the web organizations directory and organization page (details, surveys, members,
+   * imagery sources). Its pages observe [OrganizationViewModel.uiState] directly; this class
+   * mirrors it for the rest of the UI and applies its [OrganizationEvent]s to the app shell.
+   */
+  val organization: OrganizationViewModel =
+    OrganizationViewModel(
+      organizationRepository = viewModel.organizationRepository,
+      surveyRepository = viewModel.surveyRepository,
+      authRepository = viewModel.authRepository,
+      createOrganizationUseCase = viewModel.createOrganizationUseCase,
+      inviteMemberUseCase = viewModel.inviteOrganizationMemberUseCase,
+      manageImagerySourcesUseCase = viewModel.manageImagerySourcesUseCase,
+      scope = viewModel.scope,
+    )
+
+  private var organizationState by mutableStateOf(organization.uiState.value)
+
   init {
     viewModel.scope.launch { viewModel.appData.collect { data = it } }
     viewModel.scope.launch { onboarding.uiState.collect { onboardingState = it } }
@@ -163,6 +181,20 @@ class PrototypeAppState(
     viewModel.scope.launch { surveyMap.events.collect(::onSurveyMapEvent) }
     viewModel.scope.launch { dashboard.uiState.collect { dashboardState = it } }
     viewModel.scope.launch { dashboard.events.collect(::onDashboardEvent) }
+    viewModel.scope.launch { organization.uiState.collect { organizationState = it } }
+    viewModel.scope.launch { organization.events.collect(::onOrganizationEvent) }
+  }
+
+  /** Applies an organization outcome to the rest of the app shell (page switch, map imagery). */
+  private fun onOrganizationEvent(event: OrganizationEvent) {
+    when (event) {
+      is OrganizationEvent.OrganizationOpened ->
+        selectWorkbenchPage(PrototypeWorkbenchPage.ORGANIZATION)
+      OrganizationEvent.OrganizationsOpened ->
+        selectWorkbenchPage(PrototypeWorkbenchPage.ORGANIZATIONS)
+      is OrganizationEvent.ImagerySourceRemoved ->
+        if (isImagerySourceEnabled(event.sourceId)) surveyMap.toggleImagerySource(event.sourceId)
+    }
   }
 
   /** Applies a dashboard outcome to the rest of the app shell (survey switch, drawer, notices). */
@@ -503,103 +535,46 @@ class PrototypeAppState(
   // --- Organizations (web `#organizations` and `#organization/<id>` pages) ---
 
   /** ID of the organization shown on the web organization page, or `null`. */
-  var openOrganizationId by mutableStateOf<String?>(null)
-    private set
+  val openOrganizationId: String?
+    get() = organizationState.openOrganizationId
 
   /** The organization shown on the web organization page, if it still exists. */
   val openOrganization: Organization?
-    get() = organization(openOrganizationId)
+    get() = organizationState.openOrganization
 
   /** Notice from the last organization action (e.g. a refused change), shown on the page. */
-  var organizationNotice by mutableStateOf<String?>(null)
-    private set
+  val organizationNotice: String?
+    get() = organizationState.notice
 
-  fun dismissOrganizationNotice() {
-    organizationNotice = null
-  }
+  fun dismissOrganizationNotice() = organization.dismissNotice()
 
   /** Shows [organizationId] on the web organization page. */
-  fun openOrganization(organizationId: String) {
-    openOrganizationId = organizationId
-    organizationNotice = null
-    selectWorkbenchPage(PrototypeWorkbenchPage.ORGANIZATION)
-  }
+  fun openOrganization(organizationId: String) = organization.openOrganization(organizationId)
 
   /** Shows the list of organizations. */
-  fun openOrganizations() {
-    organizationNotice = null
-    selectWorkbenchPage(PrototypeWorkbenchPage.ORGANIZATIONS)
-  }
+  fun openOrganizations() = organization.openOrganizations()
 
   /** Surveys that belong to [organizationId]. */
-  fun surveysInOrganization(organizationId: String): List<SurveyPreviewItem> = surveys.filter {
-    it.organizationId == organizationId
-  }
+  fun surveysInOrganization(organizationId: String): List<SurveyPreviewItem> =
+    organizationState.surveysInOrganization(organizationId)
 
   /** Whether the signed-in user manages [organization]. */
   fun managesOrganization(organization: Organization): Boolean =
-    isSignedIn && organization.isManager(signedInUserEmail)
-
-  private val signedInProfile: CachedProfile
-    get() = CachedProfile(signedInUserName, "avatar:2", "")
+    organizationState.managesOrganization(organization)
 
   /**
    * Creates an organization managed by the signed-in user, opens it, and returns its ID. The ID is
    * a slug of [name], made unique with a numeric suffix.
    */
-  fun createOrganization(name: String, description: String, isListed: Boolean): String {
-    val trimmedName = name.trim().ifBlank { "Untitled organization" }
-    val id = uniqueOrganizationId(trimmedName)
-    viewModel.launch {
-      viewModel.organizationRepository.createOrganization(
-        Organization(
-          id = id,
-          name = trimmedName,
-          description = description.trim(),
-          isListed = isListed,
-          logoUrl = "avatar:${organizations.size % 9}",
-        ),
-        creatorEmail = signedInUserEmail,
-        creatorProfile = signedInProfile,
-      )
-      // Open it only once it's in the store, so the organization page never sees it missing.
-      openOrganization(id)
-      organizationNotice = "Created organization \"$trimmedName\"."
-    }
-    return id
-  }
-
-  private fun uniqueOrganizationId(name: String): String {
-    val slug =
-      name
-        .lowercase()
-        .replace(Regex("[^a-z0-9]+"), "-")
-        .trim('-')
-        .ifBlank { "organization" }
-        .take(40)
-    val base = "org-$slug"
-    val taken = organizations.map { it.id }.toSet()
-    if (base !in taken) return base
-    var n = 2
-    while ("$base-$n" in taken) n++
-    return "$base-$n"
-  }
+  fun createOrganization(name: String, description: String, isListed: Boolean): String =
+    organization.createOrganization(name, description, isListed)
 
   /** Saves the organization's profile fields. Only Managers may call this. */
-  fun updateOrganization(organizationId: String, transform: (Organization) -> Organization) {
-    viewModel.launch {
-      viewModel.organizationRepository.updateOrganization(organizationId, transform)
-    }
-  }
+  fun updateOrganization(organizationId: String, transform: (Organization) -> Organization) =
+    organization.updateOrganization(organizationId, transform)
 
   /** Deletes the organization; its surveys become personal surveys. Returns to the list. */
-  fun deleteOrganization(organizationId: String) {
-    val name = organization(organizationId)?.name
-    viewModel.launch { viewModel.organizationRepository.deleteOrganization(organizationId) }
-    openOrganizationId = null
-    selectWorkbenchPage(PrototypeWorkbenchPage.ORGANIZATIONS)
-    organizationNotice = name?.let { "Deleted organization \"$it\"." }
-  }
+  fun deleteOrganization(organizationId: String) = organization.deleteOrganization(organizationId)
 
   /**
    * Invites [email] to [organizationId] with [role]. Returns an error message for an invalid or
@@ -609,49 +584,11 @@ class PrototypeAppState(
     organizationId: String,
     email: String,
     role: OrganizationRole,
-  ): String? {
-    val normalized = email.trim().lowercase()
-    if (!Regex("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$").matches(normalized)) {
-      return "Enter a valid email address."
-    }
-    val organization = organization(organizationId) ?: return "Organization not found."
-    val existing = organization.member(normalized)
-    if (existing != null) {
-      return when (existing.status) {
-        MembershipStatus.ACTIVE -> "${existing.displayName} is already a member."
-        MembershipStatus.INVITED -> "${existing.email} has already been invited."
-        MembershipStatus.REQUESTED ->
-          "${existing.displayName} has asked to join. Approve their request instead."
-      }
-    }
-    viewModel.launch {
-      viewModel.organizationRepository.inviteMember(
-        organizationId,
-        normalized,
-        role,
-        token = InviteLinks.newToken(),
-      )
-    }
-    return null
-  }
+  ): String? = organization.inviteMember(organizationId, email, role)
 
   /** Issues a new invite link for a pending invite, invalidating the old one. */
-  fun resetOrganizationInviteLink(organizationId: String, email: String) {
-    viewModel.launch {
-      viewModel.organizationRepository.updateOrganization(organizationId) { org ->
-        org.copy(
-          members =
-            org.members.map {
-              if (it.email == email && it.status == MembershipStatus.INVITED) {
-                it.copy(inviteToken = InviteLinks.newToken())
-              } else {
-                it
-              }
-            }
-        )
-      }
-    }
-  }
+  fun resetOrganizationInviteLink(organizationId: String, email: String) =
+    organization.resetInviteLink(organizationId, email)
 
   /**
    * Simulates the invitee opening their link and accepting. Returns an error message, or `null`.
@@ -661,65 +598,24 @@ class PrototypeAppState(
     email: String,
     displayName: String,
     photoUrl: String?,
-  ): String? {
-    val name = displayName.trim()
-    if (name.isEmpty()) return "Enter a name."
-    viewModel.launch {
-      viewModel.organizationRepository.acceptInvite(
-        organizationId,
-        email,
-        userId = "uid-${email.substringBefore('@').replace('.', '-')}",
-        profile = CachedProfile(name, photoUrl, ""),
-      )
-    }
-    return null
-  }
+  ): String? = organization.acceptInvite(organizationId, email, displayName, photoUrl)
 
   /** Asks to join a listed organization as the signed-in user. */
-  fun requestToJoinOrganization(organizationId: String) {
-    viewModel.launch {
-      viewModel.organizationRepository.requestToJoin(
-        organizationId,
-        signedInUserEmail,
-        signedInProfile,
-      )
-    }
-  }
+  fun requestToJoinOrganization(organizationId: String) = organization.requestToJoin(organizationId)
 
-  fun approveOrganizationRequest(organizationId: String, email: String) {
-    viewModel.launch { viewModel.organizationRepository.approveRequest(organizationId, email) }
-  }
+  fun approveOrganizationRequest(organizationId: String, email: String) =
+    organization.approveRequest(organizationId, email)
 
   /** Changes a member's role. Refusals (demoting the last Manager) surface as a notice. */
-  fun setOrganizationMemberRole(organizationId: String, email: String, role: OrganizationRole) {
-    viewModel.launch {
-      val updated = viewModel.organizationRepository.setMemberRole(organizationId, email, role)
-      if (updated == null) {
-        organizationNotice =
-          "An organization needs at least one Manager. Make someone else a Manager first."
-      }
-    }
-  }
+  fun setOrganizationMemberRole(organizationId: String, email: String, role: OrganizationRole) =
+    organization.setMemberRole(organizationId, email, role)
 
   /**
    * Removes a member, declines a join request, or revokes an invite. Refusals (removing the last
    * Manager) surface as a notice. Removing yourself returns to the list of organizations.
    */
-  fun removeOrganizationMember(organizationId: String, email: String) {
-    val isSelf = email.equals(signedInUserEmail, ignoreCase = true)
-    viewModel.launch {
-      val updated = viewModel.organizationRepository.removeMember(organizationId, email)
-      if (updated == null) {
-        organizationNotice =
-          "An organization needs at least one Manager. Make someone else a Manager before " +
-            "leaving."
-      } else if (isSelf) {
-        openOrganizationId = null
-        selectWorkbenchPage(PrototypeWorkbenchPage.ORGANIZATIONS)
-        organizationNotice = "You left \"${updated.name}\"."
-      }
-    }
-  }
+  fun removeOrganizationMember(organizationId: String, email: String) =
+    organization.removeMember(organizationId, email)
 
   /**
    * Adds an [ImagerySource] to [organizationId]. Returns a validation error message, or `null` when
@@ -731,30 +627,8 @@ class PrototypeAppState(
     urlTemplate: String,
     type: ImagerySourceType = ImagerySourceType.XYZ_TILES,
     allowOfflineDownload: Boolean = false,
-  ): String? {
-    val trimmedName = name.trim()
-    if (trimmedName.isEmpty()) return "Enter a name for the imagery source."
-    val trimmedUrl = urlTemplate.trim()
-    if (type == ImagerySourceType.XYZ_TILES && !ImagerySource.isValidXyzUrlTemplate(trimmedUrl)) {
-      return "Enter an http(s):// XYZ tile URL containing {z}, {x}, and {y}."
-    }
-    val org = organization(organizationId) ?: return "Organization not found."
-    val sourceId = uniqueImagerySourceId(org, trimmedName)
-    updateOrganization(organizationId) { current ->
-      current.copy(
-        imagerySources =
-          current.imagerySources +
-            ImagerySource(
-              id = sourceId,
-              name = trimmedName,
-              urlTemplate = trimmedUrl,
-              type = type,
-              allowOfflineDownload = allowOfflineDownload,
-            )
-      )
-    }
-    return null
-  }
+  ): String? =
+    organization.addImagerySource(organizationId, name, urlTemplate, type, allowOfflineDownload)
 
   /**
    * Updates an existing [ImagerySource] on [organizationId]. Returns a validation error message, or
@@ -766,66 +640,25 @@ class PrototypeAppState(
     name: String,
     urlTemplate: String,
     allowOfflineDownload: Boolean,
-  ): String? {
-    val trimmedName = name.trim()
-    if (trimmedName.isEmpty()) return "Enter a name for the imagery source."
-    val trimmedUrl = urlTemplate.trim()
-    if (!ImagerySource.isValidXyzUrlTemplate(trimmedUrl)) {
-      return "Enter an http(s):// XYZ tile URL containing {z}, {x}, and {y}."
-    }
-    updateOrganization(organizationId) { current ->
-      current.copy(
-        imagerySources =
-          current.imagerySources.map { src ->
-            if (src.id == sourceId) {
-              src.copy(
-                name = trimmedName,
-                urlTemplate = trimmedUrl,
-                allowOfflineDownload = allowOfflineDownload,
-              )
-            } else {
-              src
-            }
-          }
-      )
-    }
-    return null
-  }
+  ): String? =
+    organization.updateImagerySource(
+      organizationId,
+      sourceId,
+      name,
+      urlTemplate,
+      allowOfflineDownload,
+    )
 
   /** Toggles whether offline download on mobile is permitted for [sourceId] in [organizationId]. */
   fun setOrganizationImagerySourceOfflineAllowed(
     organizationId: String,
     sourceId: String,
     allowOfflineDownload: Boolean,
-  ) {
-    updateOrganization(organizationId) { current ->
-      current.copy(
-        imagerySources =
-          current.imagerySources.map { src ->
-            if (src.id == sourceId) src.copy(allowOfflineDownload = allowOfflineDownload) else src
-          }
-      )
-    }
-  }
+  ) = organization.setImagerySourceOfflineAllowed(organizationId, sourceId, allowOfflineDownload)
 
   /** Removes the imagery source with [sourceId] from [organizationId]. */
-  fun removeOrganizationImagerySource(organizationId: String, sourceId: String) {
-    if (isImagerySourceEnabled(sourceId)) surveyMap.toggleImagerySource(sourceId)
-    updateOrganization(organizationId) { current ->
-      current.copy(imagerySources = current.imagerySources.filterNot { it.id == sourceId })
-    }
-  }
-
-  private fun uniqueImagerySourceId(organization: Organization, name: String): String {
-    val slug =
-      name.lowercase().replace(Regex("[^a-z0-9]+"), "-").trim('-').ifBlank { "source" }.take(32)
-    val base = "imagery-${organization.id.removePrefix("org-")}-$slug"
-    val taken = organizations.flatMap { it.imagerySources }.map { it.id }.toSet()
-    if (base !in taken) return base
-    var n = 2
-    while ("$base-$n" in taken) n++
-    return "$base-$n"
-  }
+  fun removeOrganizationImagerySource(organizationId: String, sourceId: String) =
+    organization.removeImagerySource(organizationId, sourceId)
 
   val termsCheckboxChecked: Boolean
     get() = onboardingState.termsCheckboxChecked

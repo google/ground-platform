@@ -23,8 +23,16 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.CachedProfile
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.MembershipStatus
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.Organization
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.OrganizationMember
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.OrganizationRelation
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.OrganizationRole
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.canChangeMember
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.discoverableBy
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.membersViewFor
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.organizationsOf
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.relationTo
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.searchOrganizations
 
+/** The directory and member-grouping rules live in `domain/model/OrganizationDirectory.kt`. */
 class OrganizationPagesTest {
   private val me = "me@example.org"
 
@@ -73,40 +81,40 @@ class OrganizationPagesTest {
 
   @Test
   fun mine_managersFirstThenByName() {
-    assertEquals(listOf("managed", "joined"), OrganizationPages.mine(all, me).map { it.id })
+    assertEquals(listOf("managed", "joined"), all.organizationsOf(me).map { it.id })
   }
 
   @Test
   fun discoverable_listedNonMembersOnly_includingPendingRequests() {
     assertEquals(
       listOf("listed", "requested"),
-      OrganizationPages.discoverable(all, me).map { it.id },
+      all.discoverableBy(me).map { it.id },
     )
   }
 
   @Test
   fun relation_coversEveryMembershipState() {
-    assertEquals(OrganizationRelation.MANAGER, OrganizationPages.relationOf(managed, me))
-    assertEquals(OrganizationRelation.MEMBER, OrganizationPages.relationOf(joined, me))
-    assertEquals(OrganizationRelation.REQUESTED, OrganizationPages.relationOf(requested, me))
-    assertEquals(OrganizationRelation.NONE, OrganizationPages.relationOf(listed, me))
+    assertEquals(OrganizationRelation.MANAGER, managed.relationTo(me))
+    assertEquals(OrganizationRelation.MEMBER, joined.relationTo(me))
+    assertEquals(OrganizationRelation.REQUESTED, requested.relationTo(me))
+    assertEquals(OrganizationRelation.NONE, listed.relationTo(me))
     assertEquals(
       OrganizationRelation.INVITED,
-      OrganizationPages.relationOf(managed, "inv@example.org"),
+      managed.relationTo("inv@example.org"),
     )
   }
 
   @Test
   fun search_matchesNameAndDescription() {
-    assertEquals(listOf(listed), OrganizationPages.search(all, "mangrove"))
-    assertEquals(listOf(joined), OrganizationPages.search(all, "ALPHA"))
-    assertEquals(all, OrganizationPages.search(all, "  "))
+    assertEquals(listOf(listed), all.searchOrganizations("mangrove"))
+    assertEquals(listOf(joined), all.searchOrganizations("ALPHA"))
+    assertEquals(all, all.searchOrganizations("  "))
   }
 
   @Test
   fun canEditDetails_onlyForManagers() {
-    assertEquals(true, OrganizationPages.canEditDetails(managed, me))
-    assertEquals(false, OrganizationPages.canEditDetails(joined, me))
+    assertEquals(true, managed.isManager(me))
+    assertEquals(false, joined.isManager(me))
   }
 
   @Test
@@ -127,17 +135,15 @@ class OrganizationPagesTest {
     val withAllUsers = all + allUsers
     assertEquals(
       listOf(Organization.ALL_USERS_ID, "managed", "joined"),
-      OrganizationPages.mine(withAllUsers, me).map { it.id },
+      withAllUsers.organizationsOf(me).map { it.id },
     )
-    assertFalse(
-      OrganizationPages.discoverable(withAllUsers, me).any { it.id == Organization.ALL_USERS_ID }
-    )
-    assertEquals(OrganizationRelation.MANAGER, OrganizationPages.relationOf(allUsers, me))
+    assertFalse(withAllUsers.discoverableBy(me).any { it.id == Organization.ALL_USERS_ID })
+    assertEquals(OrganizationRelation.MANAGER, allUsers.relationTo(me))
   }
 
   @Test
   fun membersView_groupsAndOrders_forManagers() {
-    val view = OrganizationPages.membersView(managed, me)
+    val view = managed.membersViewFor(me)
     assertEquals(listOf("req@example.org"), view.requests.map { it.email })
     assertEquals(listOf("inv@example.org"), view.invited.map { it.email })
     // Managers first with the viewer at the top, then members by name.
@@ -146,7 +152,7 @@ class OrganizationPagesTest {
 
   @Test
   fun membersView_hidesPendingPeopleFromMembers() {
-    val view = OrganizationPages.membersView(managed, "zed@example.org")
+    val view = managed.membersViewFor("zed@example.org")
     assertTrue(view.requests.isEmpty())
     assertTrue(view.invited.isEmpty())
     assertEquals(3, view.active.size)
@@ -155,10 +161,10 @@ class OrganizationPagesTest {
   @Test
   fun canChange_protectsTheLastManager() {
     val onlyManager = managed.member("amy@example.org")!!
-    assertTrue(OrganizationPages.canChange(managed, onlyManager))
+    assertTrue(managed.canChangeMember(onlyManager))
     val soleManagerOrg = joined
-    assertFalse(OrganizationPages.canChange(soleManagerOrg, soleManagerOrg.managers.single()))
-    assertTrue(OrganizationPages.canChange(soleManagerOrg, soleManagerOrg.member(me)!!))
+    assertFalse(soleManagerOrg.canChangeMember(soleManagerOrg.managers.single()))
+    assertTrue(soleManagerOrg.canChangeMember(soleManagerOrg.member(me)!!))
   }
 
   @Test
