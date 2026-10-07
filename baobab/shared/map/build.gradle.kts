@@ -58,7 +58,14 @@ kotlin {
       }
     }
     val commonTest by getting { dependencies { implementation(kotlin("test")) } }
-    val jvmTest by getting { dependencies { implementation(kotlin("test-junit5")) } }
+    val jvmTest by getting {
+      dependencies {
+        implementation(kotlin("test-junit5"))
+        @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
+        implementation(compose.uiTest)
+        implementation(compose.desktop.currentOs)
+      }
+    }
   }
 }
 

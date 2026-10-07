@@ -215,6 +215,7 @@ fun MobileFormRunner(
       Surface(
         modifier = Modifier.fillMaxWidth(),
         color = colors.surfaceContainer,
+        contentColor = colors.onSurface,
         tonalElevation = 3.dp,
       ) {
         Row(
@@ -343,7 +344,11 @@ fun MobileFormRunner(
         ) {
           Card(
             modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.cardColors(containerColor = colors.errorContainer),
+            colors =
+              CardDefaults.cardColors(
+                containerColor = colors.errorContainer,
+                contentColor = colors.onErrorContainer,
+              ),
             shape = MaterialTheme.shapes.medium,
           ) {
             Row(
@@ -367,7 +372,12 @@ fun MobileFormRunner(
               )
               if (controller.isCurrentStepOptional) {
                 Spacer(modifier = Modifier.width(8.dp))
-                OutlinedButton(onClick = { controller.nextStep(enforceValidation = false) }) {
+                OutlinedButton(
+                  onClick = { controller.nextStep(enforceValidation = false) },
+                  colors =
+                    ButtonDefaults.outlinedButtonColors(contentColor = colors.onErrorContainer),
+                  border = BorderStroke(1.dp, colors.onErrorContainer.copy(alpha = 0.5f)),
+                ) {
                   Text(
                     "Skip →",
                     style = MaterialTheme.typography.labelSmall,
@@ -395,7 +405,11 @@ private fun BreadcrumbBar(
   Card(
     modifier = Modifier.fillMaxWidth(),
     shape = MaterialTheme.shapes.medium,
-    colors = CardDefaults.cardColors(containerColor = colors.secondaryContainer),
+    colors =
+      CardDefaults.cardColors(
+        containerColor = colors.secondaryContainer,
+        contentColor = colors.onSecondaryContainer,
+      ),
   ) {
     Column(
       modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 10.dp),
@@ -645,7 +659,11 @@ private fun FormSummaryScreenContent(controller: FormWizardController) {
             Card(
               modifier = Modifier.fillMaxWidth(),
               shape = MaterialTheme.shapes.medium,
-              colors = CardDefaults.cardColors(containerColor = colors.primaryContainer),
+              colors =
+                CardDefaults.cardColors(
+                  containerColor = colors.primaryContainer,
+                  contentColor = colors.onPrimaryContainer,
+                ),
             ) {
               Column(
                 modifier = Modifier.fillMaxWidth().padding(12.dp),
@@ -672,7 +690,11 @@ private fun FormSummaryScreenContent(controller: FormWizardController) {
             Card(
               modifier = Modifier.fillMaxWidth(),
               shape = MaterialTheme.shapes.medium,
-              colors = CardDefaults.cardColors(containerColor = colors.errorContainer),
+              colors =
+                CardDefaults.cardColors(
+                  containerColor = colors.errorContainer,
+                  contentColor = colors.onErrorContainer,
+                ),
             ) {
               Column(
                 modifier = Modifier.fillMaxWidth().padding(12.dp),
@@ -711,9 +733,8 @@ private fun FormSummaryScreenContent(controller: FormWizardController) {
           shape = MaterialTheme.shapes.medium,
           colors =
             CardDefaults.outlinedCardColors(
-              containerColor =
-                if (isInvalid) colors.errorContainer.copy(alpha = 0.4f)
-                else colors.surfaceContainerLow
+              containerColor = if (isInvalid) colors.errorContainer else colors.surfaceContainerLow,
+              contentColor = if (isInvalid) colors.onErrorContainer else colors.onSurface,
             ),
           border =
             BorderStroke(
@@ -730,7 +751,12 @@ private fun FormSummaryScreenContent(controller: FormWizardController) {
               if (qStep.breadcrumbs.isNotEmpty()) {
                 Text(
                   text = qStep.breadcrumbs.joinToString(" › "),
-                  style = MaterialTheme.typography.labelSmall.copy(color = colors.onSurfaceVariant),
+                  style =
+                    MaterialTheme.typography.labelSmall.copy(
+                      color =
+                        if (isInvalid) colors.onErrorContainer.copy(alpha = 0.85f)
+                        else colors.onSurfaceVariant
+                    ),
                 )
               }
               Text(
@@ -738,14 +764,19 @@ private fun FormSummaryScreenContent(controller: FormWizardController) {
                 style =
                   MaterialTheme.typography.bodyMedium.copy(
                     fontWeight = FontWeight.SemiBold,
-                    color = colors.onSurface,
+                    color = if (isInvalid) colors.onErrorContainer else colors.onSurface,
                   ),
               )
               Text(
                 text = formatFieldValueForDisplay(fieldState.value, fieldState.dataType),
                 style =
                   MaterialTheme.typography.bodySmall.copy(
-                    color = if (fieldState.isEmpty) colors.onSurfaceVariant else colors.primary
+                    color =
+                      when {
+                        isInvalid -> colors.onErrorContainer.copy(alpha = 0.85f)
+                        fieldState.isEmpty -> colors.onSurfaceVariant
+                        else -> colors.primary
+                      }
                   ),
               )
             }
@@ -772,7 +803,11 @@ private fun FormSummaryScreenContent(controller: FormWizardController) {
           OutlinedCard(
             modifier = Modifier.fillMaxWidth(),
             shape = MaterialTheme.shapes.medium,
-            colors = CardDefaults.outlinedCardColors(containerColor = colors.secondaryContainer),
+            colors =
+              CardDefaults.outlinedCardColors(
+                containerColor = colors.secondaryContainer,
+                contentColor = colors.onSecondaryContainer,
+              ),
           ) {
             Column(
               modifier = Modifier.fillMaxWidth().padding(12.dp),
@@ -824,7 +859,8 @@ private fun StepOverviewPanel(controller: FormWizardController, modifier: Modifi
         colors =
           CardDefaults.outlinedCardColors(
             containerColor =
-              if (isCurrent) colors.primaryContainer else colors.surfaceContainerLowest
+              if (isCurrent) colors.primaryContainer else colors.surfaceContainerLowest,
+            contentColor = if (isCurrent) colors.onPrimaryContainer else colors.onSurface,
           ),
         border =
           BorderStroke(

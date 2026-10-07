@@ -263,7 +263,12 @@ private fun MediaCaptureHeader(spec: MediaCaptureSpec) {
     verticalAlignment = Alignment.CenterVertically,
     horizontalArrangement = Arrangement.spacedBy(12.dp),
   ) {
-    Surface(shape = CircleShape, color = colors.primaryContainer, modifier = Modifier.size(40.dp)) {
+    Surface(
+      shape = CircleShape,
+      color = colors.primaryContainer,
+      contentColor = colors.onPrimaryContainer,
+      modifier = Modifier.size(40.dp),
+    ) {
       Box(contentAlignment = Alignment.Center) {
         Icon(
           imageVector = mediaKindIcon(spec.kind),
@@ -298,6 +303,7 @@ private fun MediaSourceBadge(captureOnly: Boolean) {
   Surface(
     shape = MaterialTheme.shapes.small,
     color = if (captureOnly) colors.tertiaryContainer else colors.surfaceContainerHigh,
+    contentColor = if (captureOnly) colors.onTertiaryContainer else colors.onSurfaceVariant,
   ) {
     Row(
       modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
@@ -350,6 +356,7 @@ private fun MediaAttachmentPreview(attachment: MediaAttachment) {
       Surface(
         shape = MaterialTheme.shapes.medium,
         color = colors.secondaryContainer,
+        contentColor = colors.onSecondaryContainer,
         modifier = Modifier.fillMaxWidth(),
       ) {
         Row(

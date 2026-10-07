@@ -119,7 +119,7 @@ internal fun SurveyPersistentBottomSheetContent(
   val selectedEntity = state.selectedEntity
   val selectedSubmission = state.selectedSubmission
   val isDark = state.isDarkTheme
-  val textColor = if (isDark) Color.White else Color(0xFF111827)
+  val textColor = MaterialTheme.colorScheme.onSurface
 
   when {
     // The web dashboard's left-hand panel always lists map features; details open in the floating
@@ -539,6 +539,7 @@ internal fun BottomSheetSearchableListContent(
         Surface(
           shape = MaterialTheme.shapes.small,
           color = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.85f),
+          contentColor = MaterialTheme.colorScheme.onErrorContainer,
           border = BorderStroke(1.dp, MaterialTheme.colorScheme.error.copy(alpha = 0.45f)),
           modifier = Modifier.fillMaxWidth(),
         ) {
@@ -694,9 +695,12 @@ internal fun BottomSheetSearchableListContent(
                         contentDescription =
                           if (isCollapsed) "Expand $datasetLabel" else "Collapse $datasetLabel",
                         tint =
-                          MaterialTheme.colorScheme.onSurfaceVariant.copy(
-                            alpha = if (state.listSearchQuery.isBlank()) 1f else 0.38f
-                          ),
+                          (if (isLayerSelected) {
+                              MaterialTheme.colorScheme.onSecondaryContainer
+                            } else {
+                              MaterialTheme.colorScheme.onSurfaceVariant
+                            })
+                            .copy(alpha = if (state.listSearchQuery.isBlank()) 1f else 0.38f),
                         modifier = Modifier.size(18.dp),
                       )
                     }
@@ -713,7 +717,12 @@ internal fun BottomSheetSearchableListContent(
                     Icon(
                       imageVector = Icons.Outlined.LocationOn,
                       contentDescription = null,
-                      tint = MaterialTheme.colorScheme.primary,
+                      tint =
+                        if (isLayerSelected) {
+                          MaterialTheme.colorScheme.onSecondaryContainer
+                        } else {
+                          MaterialTheme.colorScheme.primary
+                        },
                       modifier = Modifier.size(14.dp),
                     )
                   }
@@ -783,6 +792,7 @@ internal fun BottomSheetSearchableListContent(
                   Surface(
                     shape = MaterialTheme.shapes.small,
                     color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.65f),
+                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
                     modifier = Modifier.fillMaxWidth(),
                   ) {
                     Text(
@@ -853,10 +863,16 @@ internal fun BottomSheetSearchableListContent(
                 CardDefaults.outlinedCardColors(
                   containerColor =
                     if (isSelectedPlace) {
-                      MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.25f)
+                      MaterialTheme.colorScheme.secondaryContainer
                     } else {
                       MaterialTheme.colorScheme.surface
-                    }
+                    },
+                  contentColor =
+                    if (isSelectedPlace) {
+                      MaterialTheme.colorScheme.onSecondaryContainer
+                    } else {
+                      MaterialTheme.colorScheme.onSurface
+                    },
                 ),
             ) {
               Column(
@@ -879,6 +895,7 @@ internal fun BottomSheetSearchableListContent(
                       modifier = Modifier.size(24.dp),
                       shape = CircleShape,
                       color = MaterialTheme.colorScheme.tertiaryContainer,
+                      contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
                     ) {
                       Box(contentAlignment = Alignment.Center) {
                         Icon(
@@ -894,14 +911,24 @@ internal fun BottomSheetSearchableListContent(
                         text = place.name,
                         style =
                           MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
-                        color = MaterialTheme.colorScheme.onSurface,
+                        color =
+                          if (isSelectedPlace) {
+                            MaterialTheme.colorScheme.onSecondaryContainer
+                          } else {
+                            MaterialTheme.colorScheme.onSurface
+                          },
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                       )
                       Text(
                         text = "${place.categoryLabel} • ${place.regionSubtitle}",
                         style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        color =
+                          if (isSelectedPlace) {
+                            MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.85f)
+                          } else {
+                            MaterialTheme.colorScheme.onSurfaceVariant
+                          },
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                       )
@@ -1160,6 +1187,7 @@ internal fun SubmissionFullDetailsCard(
           modifier = Modifier.fillMaxWidth(),
           shape = MaterialTheme.shapes.small,
           color = MaterialTheme.colorScheme.surface,
+          contentColor = MaterialTheme.colorScheme.onSurface,
         ) {
           Column(
             modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),

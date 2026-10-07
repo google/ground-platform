@@ -178,6 +178,12 @@ internal fun MainSurveyTopAppBar(state: PrototypeAppState) {
     } else {
       MaterialTheme.colorScheme.primary
     }
+  val onTopBarContainer =
+    if (state.isDarkTheme) {
+      MaterialTheme.colorScheme.onPrimaryContainer
+    } else {
+      MaterialTheme.colorScheme.onPrimary
+    }
 
   TopAppBar(
     navigationIcon = {
@@ -185,7 +191,7 @@ internal fun MainSurveyTopAppBar(state: PrototypeAppState) {
         Icon(
           imageVector = Icons.Outlined.Menu,
           contentDescription = "Open Navigation Drawer",
-          tint = Color.White,
+          tint = onTopBarContainer,
         )
       }
     },
@@ -194,7 +200,7 @@ internal fun MainSurveyTopAppBar(state: PrototypeAppState) {
         Text(
           text = state.activeSurvey.title,
           style = MaterialTheme.typography.titleSmall,
-          color = Color.White,
+          color = onTopBarContainer,
           fontWeight = FontWeight.Bold,
           maxLines = 1,
           overflow = TextOverflow.Ellipsis,
@@ -206,26 +212,26 @@ internal fun MainSurveyTopAppBar(state: PrototypeAppState) {
           Icon(
             imageVector = Icons.Outlined.LocationOn,
             contentDescription = null,
-            tint = Color(0xFFB7F1B9),
+            tint = onTopBarContainer.copy(alpha = 0.85f),
             modifier = Modifier.size(12.dp),
           )
           Text(
             text = state.activeSurvey.location,
             style = MaterialTheme.typography.labelSmall,
-            color = Color(0xFFB7F1B9),
+            color = onTopBarContainer.copy(alpha = 0.85f),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
           )
         }
       }
     },
-    actions = { PrototypeDebugToolsButton(state = state, iconTint = Color.White) },
+    actions = { PrototypeDebugToolsButton(state = state, iconTint = onTopBarContainer) },
     colors =
       TopAppBarDefaults.topAppBarColors(
         containerColor = topBarContainer,
-        titleContentColor = Color.White,
-        navigationIconContentColor = Color.White,
-        actionIconContentColor = Color.White,
+        titleContentColor = onTopBarContainer,
+        navigationIconContentColor = onTopBarContainer,
+        actionIconContentColor = onTopBarContainer,
       ),
   )
 }
@@ -355,7 +361,11 @@ internal fun SurveyMapView(state: PrototypeAppState) {
                 border =
                   BorderStroke(
                     1.dp,
-                    if (state.isCameraFollowingUser) Color(0xFF4CAF50) else Color(0xFFFFCC80),
+                    if (state.isCameraFollowingUser) {
+                      MaterialTheme.colorScheme.inversePrimary
+                    } else {
+                      MaterialTheme.colorScheme.inverseOnSurface.copy(alpha = 0.55f)
+                    },
                   ),
                 shadowElevation = 2.dp,
               ) {
@@ -374,7 +384,11 @@ internal fun SurveyMapView(state: PrototypeAppState) {
                     contentDescription =
                       if (state.isCameraFollowingUser) "GPS Auto-Center" else "Panned",
                     tint =
-                      if (state.isCameraFollowingUser) Color(0xFF8BD6B1) else Color(0xFFFFCC80),
+                      if (state.isCameraFollowingUser) {
+                        MaterialTheme.colorScheme.inversePrimary
+                      } else {
+                        MaterialTheme.colorScheme.inverseOnSurface
+                      },
                     modifier = Modifier.size(14.dp),
                   )
                   Text(
@@ -494,7 +508,7 @@ internal fun SelectedClusterBalloonDetailCard(
     shape = MaterialTheme.shapes.medium,
     color = MaterialTheme.colorScheme.inverseSurface.copy(alpha = 0.96f),
     contentColor = MaterialTheme.colorScheme.inverseOnSurface,
-    border = BorderStroke(1.5.dp, Color(0xFF8BD6B1)),
+    border = BorderStroke(1.5.dp, MaterialTheme.colorScheme.inversePrimary),
     shadowElevation = 6.dp,
     modifier = Modifier.fillMaxWidth(),
   ) {
@@ -510,7 +524,7 @@ internal fun SelectedClusterBalloonDetailCard(
         Text(
           text = sitesCountLabel,
           style = MaterialTheme.typography.labelMedium,
-          color = Color(0xFF8BD6B1),
+          color = MaterialTheme.colorScheme.inversePrimary,
           fontWeight = FontWeight.Bold,
         )
         Row(
@@ -525,7 +539,7 @@ internal fun SelectedClusterBalloonDetailCard(
             Text(
               text = "Zoom in +",
               style = MaterialTheme.typography.labelSmall,
-              color = Color(0xFF8BD6B1),
+              color = MaterialTheme.colorScheme.inversePrimary,
               fontWeight = FontWeight.Bold,
               maxLines = 1,
               overflow = TextOverflow.Ellipsis,
@@ -536,7 +550,7 @@ internal fun SelectedClusterBalloonDetailCard(
             Icon(
               imageVector = Icons.Outlined.Close,
               contentDescription = "Dismiss cluster balloon",
-              tint = Color.White.copy(alpha = 0.8f),
+              tint = MaterialTheme.colorScheme.inverseOnSurface.copy(alpha = 0.8f),
               modifier = Modifier.size(14.dp),
             )
           }
@@ -553,7 +567,8 @@ internal fun SelectedClusterBalloonDetailCard(
             val groupColor = Color(group.colorHex)
             Surface(
               shape = RoundedCornerShape(10.dp),
-              color = Color.White.copy(alpha = 0.10f),
+              color = MaterialTheme.colorScheme.inverseOnSurface.copy(alpha = 0.10f),
+              contentColor = MaterialTheme.colorScheme.inverseOnSurface,
               border = BorderStroke(1.dp, groupColor.copy(alpha = 0.85f)),
             ) {
               Row(
@@ -577,7 +592,7 @@ internal fun SelectedClusterBalloonDetailCard(
                     Text(
                       text = group.markerSymbol,
                       style = MaterialTheme.typography.labelSmall.copy(fontSize = 8.5.sp),
-                      color = Color.White,
+                      color = contentColorOnArgb(group.colorHex),
                       fontWeight = FontWeight.ExtraBold,
                     )
                   }
@@ -590,7 +605,7 @@ internal fun SelectedClusterBalloonDetailCard(
                       "${group.statusLabel}: ${group.count}"
                     },
                   style = MaterialTheme.typography.labelSmall,
-                  color = Color.White,
+                  color = MaterialTheme.colorScheme.inverseOnSurface,
                   fontWeight = FontWeight.SemiBold,
                 )
               }
@@ -600,6 +615,14 @@ internal fun SelectedClusterBalloonDetailCard(
       }
     }
   }
+}
+
+private fun contentColorOnArgb(argb: Long): Color {
+  val r = ((argb shr 16) and 0xFF) / 255f
+  val g = ((argb shr 8) and 0xFF) / 255f
+  val b = (argb and 0xFF) / 255f
+  val luminance = 0.299f * r + 0.587f * g + 0.114f * b
+  return if (luminance > 0.6f) Color(0xFF181D18) else Color.White
 }
 
 /**
@@ -752,17 +775,24 @@ internal fun StraightLineNavigationHudBanner(
   navState: StraightLineNavigationState,
   state: PrototypeAppState,
 ) {
+  val colors = MaterialTheme.colorScheme
   val topBarContainer =
     if (state.isDarkTheme) {
-      MaterialTheme.colorScheme.primaryContainer
+      colors.primaryContainer
     } else {
-      MaterialTheme.colorScheme.primary
+      colors.primary
+    }
+  val onTopBarContainer =
+    if (state.isDarkTheme) {
+      colors.onPrimaryContainer
+    } else {
+      colors.onPrimary
     }
   val accentColor =
     when (navState.targetKind) {
-      NavigationTargetKind.ENTITY -> Color(0xFF80DEEA)
-      NavigationTargetKind.PLACE -> Color(0xFFA7FFEB)
-      NavigationTargetKind.SUBMISSION -> Color(0xFFFFD54F)
+      NavigationTargetKind.ENTITY -> colors.tertiaryContainer
+      NavigationTargetKind.PLACE -> colors.secondaryContainer
+      NavigationTargetKind.SUBMISSION -> colors.inversePrimary
     }
   val kindLabel =
     when (navState.targetKind) {
@@ -776,12 +806,12 @@ internal fun StraightLineNavigationHudBanner(
     modifier = Modifier.fillMaxWidth(),
     shape = RoundedCornerShape(bottomStart = 16.dp, bottomEnd = 16.dp),
     color = topBarContainer,
-    contentColor = Color.White,
+    contentColor = onTopBarContainer,
     shadowElevation = 6.dp,
   ) {
     Column(modifier = Modifier.fillMaxWidth()) {
       // Subtle top divider separating the docked navigation banner from the top toolbar
-      HorizontalDivider(color = Color.White.copy(alpha = 0.16f))
+      HorizontalDivider(color = onTopBarContainer.copy(alpha = 0.16f))
 
       Column(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 10.dp),
@@ -798,14 +828,15 @@ internal fun StraightLineNavigationHudBanner(
           Surface(
             modifier = Modifier.size(38.dp),
             shape = CircleShape,
-            color = Color(0xFF11422E),
-            border = BorderStroke(1.5.dp, accentColor),
+            color = colors.secondaryContainer,
+            contentColor = colors.onSecondaryContainer,
+            border = BorderStroke(1.5.dp, colors.outlineVariant),
           ) {
             Box(contentAlignment = Alignment.Center) {
               Icon(
                 imageVector = Icons.Outlined.Navigation,
                 contentDescription = "Compass Bearing Arrow",
-                tint = accentColor,
+                tint = colors.onSecondaryContainer,
                 modifier =
                   Modifier.size(19.dp)
                     .graphicsLayer(rotationZ = navState.vector.bearingDegrees.toFloat()),
@@ -817,13 +848,13 @@ internal fun StraightLineNavigationHudBanner(
           Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
             Surface(
               shape = CircleShape,
-              color = Color(0xFF11422E),
-              border = BorderStroke(1.dp, accentColor.copy(alpha = 0.65f)),
+              color = colors.secondaryContainer,
+              contentColor = colors.onSecondaryContainer,
             ) {
               Text(
                 text = kindLabel,
                 style = MaterialTheme.typography.labelSmall,
-                color = accentColor,
+                color = colors.onSecondaryContainer,
                 fontWeight = FontWeight.Bold,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
@@ -834,7 +865,7 @@ internal fun StraightLineNavigationHudBanner(
             Text(
               text = navState.targetTitle,
               style = MaterialTheme.typography.titleSmall,
-              color = Color.White,
+              color = onTopBarContainer,
               fontWeight = FontWeight.Bold,
               maxLines = 1,
               overflow = TextOverflow.Ellipsis,
@@ -843,7 +874,7 @@ internal fun StraightLineNavigationHudBanner(
             Text(
               text = navState.targetSubtitle,
               style = MaterialTheme.typography.labelSmall,
-              color = Color(0xFFC8E6C9),
+              color = onTopBarContainer.copy(alpha = 0.85f),
               maxLines = 1,
               overflow = TextOverflow.Ellipsis,
             )
@@ -859,7 +890,7 @@ internal fun StraightLineNavigationHudBanner(
               style =
                 MaterialTheme.typography.titleMedium.copy(
                   fontWeight = FontWeight.ExtraBold,
-                  color = Color.White,
+                  color = onTopBarContainer,
                 ),
               maxLines = 1,
               softWrap = false,
@@ -868,7 +899,7 @@ internal fun StraightLineNavigationHudBanner(
               text = "Bearing ${navState.vector.formattedBearing}",
               style =
                 MaterialTheme.typography.labelSmall.copy(
-                  color = accentColor,
+                  color = onTopBarContainer,
                   fontWeight = FontWeight.Bold,
                 ),
               maxLines = 1,
@@ -882,7 +913,7 @@ internal fun StraightLineNavigationHudBanner(
                   "~${navState.vector.estimatedWalkMinutes} min walk"
                 },
               style = MaterialTheme.typography.labelSmall,
-              color = Color(0xFFC8E6C9),
+              color = onTopBarContainer.copy(alpha = 0.85f),
               fontWeight = FontWeight.SemiBold,
               maxLines = 1,
               softWrap = false,
@@ -890,7 +921,7 @@ internal fun StraightLineNavigationHudBanner(
           }
         }
 
-        HorizontalDivider(color = Color.White.copy(alpha = 0.14f))
+        HorizontalDivider(color = onTopBarContainer.copy(alpha = 0.14f))
 
         // Bottom Control Strip: Geodesic Vector Status + High-Contrast "Walk Closer" & "Stop" Pills
         Row(
@@ -901,7 +932,7 @@ internal fun StraightLineNavigationHudBanner(
           Text(
             text = "Straight-line geodesic vector from your GPS location",
             style = MaterialTheme.typography.labelSmall,
-            color = Color(0xFFC8E6C9),
+            color = onTopBarContainer.copy(alpha = 0.85f),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.weight(1f),
@@ -915,9 +946,9 @@ internal fun StraightLineNavigationHudBanner(
               Surface(
                 onClick = { state.stepUserTowardNavigationTarget() },
                 shape = CircleShape,
-                color = Color(0xFF11422E),
-                contentColor = Color.White,
-                border = BorderStroke(1.dp, Color(0xFF8BD6B1)),
+                color = colors.secondaryContainer,
+                contentColor = colors.onSecondaryContainer,
+                border = BorderStroke(1.dp, colors.outlineVariant),
               ) {
                 Row(
                   modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
@@ -927,13 +958,13 @@ internal fun StraightLineNavigationHudBanner(
                   Icon(
                     imageVector = Icons.Outlined.Explore,
                     contentDescription = "Simulate walking closer to target",
-                    tint = Color(0xFF8BD6B1),
+                    tint = colors.onSecondaryContainer,
                     modifier = Modifier.size(14.dp),
                   )
                   Text(
                     text = "Walk Closer",
                     style = MaterialTheme.typography.labelSmall,
-                    color = Color.White,
+                    color = colors.onSecondaryContainer,
                     fontWeight = FontWeight.Bold,
                     maxLines = 1,
                     softWrap = false,
@@ -945,9 +976,9 @@ internal fun StraightLineNavigationHudBanner(
             Surface(
               onClick = { state.stopNavigation() },
               shape = CircleShape,
-              color = Color(0xFFB3261E),
-              contentColor = Color.White,
-              border = BorderStroke(1.dp, Color(0xFFFFCDD2).copy(alpha = 0.75f)),
+              color = colors.errorContainer,
+              contentColor = colors.onErrorContainer,
+              border = BorderStroke(1.dp, colors.error.copy(alpha = 0.6f)),
             ) {
               Row(
                 modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
@@ -957,13 +988,13 @@ internal fun StraightLineNavigationHudBanner(
                 Icon(
                   imageVector = Icons.Outlined.Close,
                   contentDescription = "Stop Straight-Line Navigation",
-                  tint = Color.White,
+                  tint = colors.onErrorContainer,
                   modifier = Modifier.size(14.dp),
                 )
                 Text(
                   text = "Stop",
                   style = MaterialTheme.typography.labelSmall,
-                  color = Color.White,
+                  color = colors.onErrorContainer,
                   fontWeight = FontWeight.Bold,
                   maxLines = 1,
                   softWrap = false,
@@ -1098,7 +1129,8 @@ private fun BasemapSectionHeading(text: String, modifier: Modifier = Modifier) {
  * the web dashboard's dialog ([LayersControlDialog]). Map layer visibility is not set here: mobile
  * toggles it in the bottom sheet and the web dashboard in its left-hand panel.
  * 1. Basemap type options (`Satellite` and `Map`)
- * 2. Downloaded (offline) basemap overlay toggle, when [showOfflineBasemap] (mobile only)
+ * 2. `"All users"` and survey-specific organization imagery layers (XYZ tile URLs)
+ * 3. Downloaded (offline) basemap overlay toggle, when [showOfflineBasemap] (mobile only)
  */
 @Composable
 internal fun LayersSelectorContent(
@@ -1106,6 +1138,11 @@ internal fun LayersSelectorContent(
   modifier: Modifier = Modifier,
   showOfflineBasemap: Boolean = true,
 ) {
+  val allUsersSources = state.allUsersImagerySources
+  val surveyOrg =
+    state.activeSurveyOrganization?.takeIf { !it.isSynthetic && it.id != Organization.ALL_USERS_ID }
+  val surveyOrgSources = state.activeSurveyOrganizationImagerySources
+
   Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
     Column(modifier = Modifier.fillMaxWidth().selectableGroup()) {
       BasemapSectionHeading(text = "TYPE", modifier = Modifier.padding(bottom = 4.dp))
@@ -1115,6 +1152,36 @@ internal fun LayersSelectorContent(
           isSelected = state.selectedBasemapType == basemap,
           onSelect = { state.selectBasemapType(basemap) },
         )
+      }
+    }
+
+    if (allUsersSources.isNotEmpty()) {
+      Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        BasemapSectionHeading(text = "IMAGERY · ALL USERS")
+        allUsersSources.forEach { source ->
+          ImagerySourceLayerCard(
+            source = source,
+            organizationName = "All users",
+            isEnabled = state.isImagerySourceEnabled(source.id),
+            isMobile = showOfflineBasemap,
+            onToggle = { state.toggleImagerySource(source.id) },
+          )
+        }
+      }
+    }
+
+    if (surveyOrg != null && surveyOrgSources.isNotEmpty()) {
+      Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        BasemapSectionHeading(text = "IMAGERY · ${surveyOrg.name.uppercase()}")
+        surveyOrgSources.forEach { source ->
+          ImagerySourceLayerCard(
+            source = source,
+            organizationName = surveyOrg.name,
+            isEnabled = state.isImagerySourceEnabled(source.id),
+            isMobile = showOfflineBasemap,
+            onToggle = { state.toggleImagerySource(source.id) },
+          )
+        }
       }
     }
 
@@ -1157,10 +1224,56 @@ internal fun LayersSelectorContent(
   }
 }
 
+@Composable
+private fun ImagerySourceLayerCard(
+  source: ImagerySource,
+  organizationName: String,
+  isEnabled: Boolean,
+  isMobile: Boolean,
+  onToggle: () -> Unit,
+) {
+  val subtitle =
+    if (isMobile) {
+      val offlineStatus =
+        if (source.allowOfflineDownload) "Offline download permitted"
+        else "Online only · offline download disabled"
+      "$organizationName · $offlineStatus"
+    } else {
+      "$organizationName · ${source.type.label}"
+    }
+  OutlinedCard(
+    onClick = onToggle,
+    modifier = Modifier.fillMaxWidth(),
+    shape = MaterialTheme.shapes.medium,
+    colors =
+      CardDefaults.outlinedCardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
+  ) {
+    Row(
+      modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
+      verticalAlignment = Alignment.CenterVertically,
+      horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+      Column(modifier = Modifier.weight(1f)) {
+        Text(
+          text = source.name,
+          style = MaterialTheme.typography.labelMedium,
+          fontWeight = FontWeight.SemiBold,
+        )
+        Text(
+          text = subtitle,
+          style = MaterialTheme.typography.labelSmall,
+          color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+      }
+      Switch(checked = isEnabled, onCheckedChange = { onToggle() })
+    }
+  }
+}
+
 /**
  * Material 3 modal bottom sheet opened by the mobile map's [BasemapPreviewCard] to select the
- * **Basemap Type (`Map` vs `Satellite`)** and toggle the **Offline Basemap (`Mapbox Offline
- * Tiles`)**.
+ * **Basemap Type (`Map` vs `Satellite`)**, toggle organization imagery layers, and toggle the
+ * **Offline Basemap (`Mapbox Offline Tiles`)**.
  */
 @Composable
 internal fun LayersControlSheet(state: PrototypeAppState) {
@@ -1184,7 +1297,7 @@ internal fun LayersControlSheet(state: PrototypeAppState) {
             fontWeight = FontWeight.Bold,
           )
           Text(
-            text = "Select Map vs Satellite basemap and offline tile overlays",
+            text = "Select basemap type, organization imagery, and offline tile overlays",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
           )
@@ -1205,7 +1318,8 @@ internal fun LayersControlSheet(state: PrototypeAppState) {
 
 /**
  * Modal dialog opened by the web dashboard's [BasemapPreviewCard] to select the basemap type (`Map`
- * vs `Satellite`). Offline maps are a mobile-only feature, so their toggle is left out.
+ * vs `Satellite`) and toggle `"All users"` and survey-specific organization imagery layers. Offline
+ * maps are a mobile-only feature, so their toggle is left out.
  */
 @Composable
 internal fun LayersControlDialog(state: PrototypeAppState) {
@@ -1217,7 +1331,11 @@ internal fun LayersControlDialog(state: PrototypeAppState) {
         style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
       )
     },
-    text = { LayersSelectorContent(state = state, showOfflineBasemap = false) },
+    text = {
+      Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+        LayersSelectorContent(state = state, showOfflineBasemap = false)
+      }
+    },
     confirmButton = {
       TextButton(onClick = { state.updateLayersSheetOpen(false) }) { Text("Done") }
     },

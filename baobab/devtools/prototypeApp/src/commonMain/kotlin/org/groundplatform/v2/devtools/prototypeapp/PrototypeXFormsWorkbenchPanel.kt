@@ -169,10 +169,16 @@ fun PrototypeXFormsWorkbenchPanel(state: PrototypeAppState) {
               CardDefaults.outlinedCardColors(
                 containerColor =
                   if (isSelected) {
-                    MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.38f)
+                    MaterialTheme.colorScheme.secondaryContainer
                   } else {
                     MaterialTheme.colorScheme.surface
-                  }
+                  },
+                contentColor =
+                  if (isSelected) {
+                    MaterialTheme.colorScheme.onSecondaryContainer
+                  } else {
+                    MaterialTheme.colorScheme.onSurface
+                  },
               ),
             border =
               BorderStroke(
@@ -200,7 +206,7 @@ fun PrototypeXFormsWorkbenchPanel(state: PrototypeAppState) {
                   fontWeight = FontWeight.Bold,
                   color =
                     if (isSelected) {
-                      MaterialTheme.colorScheme.primary
+                      MaterialTheme.colorScheme.onSecondaryContainer
                     } else {
                       MaterialTheme.colorScheme.onSurface
                     },
@@ -220,7 +226,12 @@ fun PrototypeXFormsWorkbenchPanel(state: PrototypeAppState) {
               Text(
                 text = example.subtitle,
                 style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                color =
+                  if (isSelected) {
+                    MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.85f)
+                  } else {
+                    MaterialTheme.colorScheme.onSurfaceVariant
+                  },
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
               )
@@ -266,7 +277,13 @@ fun PrototypeXFormsWorkbenchPanel(state: PrototypeAppState) {
                   MaterialTheme.colorScheme.error
                 } else {
                   MaterialTheme.colorScheme.primary
-                }
+                },
+              contentColor =
+                if (state.isDataCollectionFormOpen) {
+                  MaterialTheme.colorScheme.onError
+                } else {
+                  MaterialTheme.colorScheme.onPrimary
+                },
             ),
         ) {
           Text(

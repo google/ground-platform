@@ -15,7 +15,6 @@
 package org.groundplatform.v2.devtools.prototypeapp
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.expandHorizontally
 import androidx.compose.animation.fadeIn
@@ -48,6 +47,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
@@ -766,7 +766,7 @@ private fun CollapsedDetailsPill(
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun DashboardDataTablesPanel(
+internal fun DashboardDataTablesPanel(
   state: PrototypeAppState,
   expandedTableHeight: Dp,
   modifier: Modifier = Modifier,
@@ -789,9 +789,16 @@ private fun DashboardDataTablesPanel(
   val selectedIndex =
     tables.indexOfFirst { it.datasetId == state.dashboardTableDatasetId }.coerceAtLeast(0)
   val table = tables[selectedIndex]
+  val expandedFraction by
+    animateFloatAsState(
+      targetValue = if (isExpanded) 1f else 0f,
+      label = "tableExpandedFraction",
+    )
+  val tableHeight = expandedTableHeight * expandedFraction
+  val isTableShown = expandedFraction > 0f
 
   Surface(
-    modifier = modifier.fillMaxWidth().animateContentSize(),
+    modifier = modifier.fillMaxWidth(),
     shape =
       MaterialTheme.shapes.large.copy(bottomStart = CornerSize(0.dp), bottomEnd = CornerSize(0.dp)),
     color = MaterialTheme.colorScheme.surfaceContainerLow,
@@ -863,13 +870,22 @@ private fun DashboardDataTablesPanel(
         }
       }
 
-      if (isExpanded) {
-        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-        DashboardDataTableView(
-          table = table,
-          onRowClick = { row -> state.selectEntity(row.id) },
-          modifier = Modifier.fillMaxWidth().height(expandedTableHeight),
-        )
+      if (isTableShown) {
+        Box(modifier = Modifier.fillMaxWidth().height(tableHeight).clipToBounds()) {
+          Column(
+            modifier =
+              Modifier.wrapContentHeight(Alignment.Top, unbounded = true)
+                .fillMaxWidth()
+                .height(expandedTableHeight)
+          ) {
+            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+            DashboardDataTableView(
+              table = table,
+              onRowClick = { row -> state.selectEntity(row.id) },
+              modifier = Modifier.fillMaxWidth().weight(1f),
+            )
+          }
+        }
       }
     }
   }
@@ -919,6 +935,7 @@ private fun DashboardDataTableView(
             Text(
               text = column,
               style = MaterialTheme.typography.labelMedium,
+              color = MaterialTheme.colorScheme.onSurface,
               fontWeight = FontWeight.Bold,
               maxLines = 1,
               overflow = TextOverflow.Ellipsis,

@@ -13,6 +13,7 @@
  */
 package org.groundplatform.v2.devtools.prototypeapp.surveyeditor
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -42,6 +43,7 @@ import androidx.compose.material.icons.outlined.Link
 import androidx.compose.material.icons.outlined.Warning
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ElevatedCard
@@ -81,7 +83,7 @@ private val IndexCellWidth = 44.dp
 private val CellHeight = 38.dp
 
 private val PresetColors =
-  listOf("#2E7D32", "#1565C0", "#6D4C41", "#C62828", "#F9A825", "#6A1B9A", "#00838F", "#37474F")
+  listOf("#F37C22", "#D13135", "#7A279F", "#2278CF", "#3C8D40", "#F9BF40", "#2E7D32", "#6D4C41")
 
 /**
  * Entity editor for a Map layer (map preview + feature table + style) or a Data table (spreadsheet
@@ -315,10 +317,16 @@ private fun RowsTableCard(
                   Text(
                     "${index + 1}",
                     style = MaterialTheme.typography.labelMedium,
-                    color = if (row.key in rowIssues) colors.error else colors.onSurfaceVariant,
+                    color =
+                      when {
+                        row.key in rowIssues -> colors.error
+                        selected -> colors.onSecondaryContainer
+                        else -> colors.onSurfaceVariant
+                      },
                     fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
                   )
                 }
+                val cellTextColor = if (selected) colors.onSecondaryContainer else colors.onSurface
                 dataset.properties.forEach { p ->
                   val value = row.values[p.name].orEmpty()
                   val reserved = dataset.isGenerated && p.name in SamplePlotProperties.all
@@ -337,6 +345,7 @@ private fun RowsTableCard(
                       isError =
                         !p.type.accepts(value) ||
                           (value.isBlank() && (p.required || p.name == dataset.keyProperty)),
+                      textColor = cellTextColor,
                       onFocus = { onSelectRow(row.key) },
                     )
                   }
@@ -349,7 +358,9 @@ private fun RowsTableCard(
                     onClick = { onSelectRow(row.key) },
                   )
                 } else if (isMap) {
-                  GeometryCell(dataset, row) { state.updateGeometry(dataset.key, row.key, it) }
+                  GeometryCell(dataset, row, textColor = cellTextColor) {
+                    state.updateGeometry(dataset.key, row.key, it)
+                  }
                 }
                 if (dataset.isGenerated) {
                   Spacer(Modifier.width(IndexCellWidth))
@@ -361,6 +372,7 @@ private fun RowsTableCard(
                     Icon(
                       Icons.Outlined.Close,
                       contentDescription = "Delete",
+                      tint = if (selected) colors.onSecondaryContainer else colors.onSurfaceVariant,
                       modifier = Modifier.size(16.dp),
                     )
                   }
@@ -387,6 +399,7 @@ private fun HeaderCell(text: String, width: Dp) {
     Text(
       text,
       style = MaterialTheme.typography.labelMedium,
+      color = MaterialTheme.colorScheme.onSurface,
       fontWeight = FontWeight.Bold,
       maxLines = 1,
       overflow = TextOverflow.Ellipsis,
@@ -401,10 +414,11 @@ private fun TextCell(
   width: Dp,
   isError: Boolean,
   monospace: Boolean = false,
+  textColor: Color = MaterialTheme.colorScheme.onSurface,
   onFocus: () -> Unit = {},
 ) {
   val colors = MaterialTheme.colorScheme
-  val style = MaterialTheme.typography.bodySmall.copy(color = colors.onSurface)
+  val style = MaterialTheme.typography.bodySmall.copy(color = textColor)
   BasicTextField(
     value = value,
     onValueChange = onValueChange,
@@ -478,7 +492,12 @@ private fun BooleanCell(value: String, onValueChange: (String) -> Unit) {
 }
 
 @Composable
-private fun GeometryCell(dataset: EntityDataset, row: EntityRow, onChange: (List<LatLng>) -> Unit) {
+private fun GeometryCell(
+  dataset: EntityDataset,
+  row: EntityRow,
+  textColor: Color = MaterialTheme.colorScheme.onSurface,
+  onChange: (List<LatLng>) -> Unit,
+) {
   var text by remember(row.key, row.geometry) { mutableStateOf(GeometryText.format(row.geometry)) }
   val parsed = GeometryText.parse(text)
   TextCell(
@@ -490,6 +509,7 @@ private fun GeometryCell(dataset: EntityDataset, row: EntityRow, onChange: (List
     width = GeometryCellWidth,
     isError = parsed == null || parsed.size < dataset.geometryKind.minVertices,
     monospace = true,
+    textColor = textColor,
   )
 }
 
@@ -569,6 +589,7 @@ private fun DatasetSettingsPanel(
       if (linkedForm != null) {
         Surface(
           color = MaterialTheme.colorScheme.primaryContainer,
+          contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
           shape = MaterialTheme.shapes.small,
           modifier = Modifier.fillMaxWidth(),
         ) {
@@ -580,7 +601,7 @@ private fun DatasetSettingsPanel(
               Icon(
                 Icons.Outlined.Link,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
+                tint = MaterialTheme.colorScheme.onPrimaryContainer,
                 modifier = Modifier.size(18.dp),
               )
               Spacer(Modifier.width(6.dp))
@@ -606,7 +627,18 @@ private fun DatasetSettingsPanel(
                 Spacer(Modifier.width(4.dp))
                 Text("Edit form")
               }
-              OutlinedButton(onClick = { state.unlinkDataset(key) }) {
+              OutlinedButton(
+                onClick = { state.unlinkDataset(key) },
+                colors =
+                  ButtonDefaults.outlinedButtonColors(
+                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                  ),
+                border =
+                  BorderStroke(
+                    1.dp,
+                    MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.5f),
+                  ),
+              ) {
                 Icon(
                   Icons.Outlined.Close,
                   contentDescription = null,
@@ -621,6 +653,7 @@ private fun DatasetSettingsPanel(
       } else {
         Surface(
           color = MaterialTheme.colorScheme.surfaceContainerLow,
+          contentColor = MaterialTheme.colorScheme.onSurface,
           shape = MaterialTheme.shapes.small,
           modifier = Modifier.fillMaxWidth(),
         ) {
@@ -794,6 +827,7 @@ private fun PropertyEditor(
 ) {
   Surface(
     color = MaterialTheme.colorScheme.surfaceContainerLow,
+    contentColor = MaterialTheme.colorScheme.onSurface,
     shape = MaterialTheme.shapes.small,
     modifier = Modifier.fillMaxWidth(),
   ) {

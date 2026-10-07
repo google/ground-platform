@@ -49,6 +49,13 @@ class OrganizationRepositoryTest {
     // Pending requests and invites don't count as membership.
     assertTrue(repo.getOrganizationsFor("james.otieno@example.org").isEmpty())
     assertTrue(repo.getOrganizationsFor("wanjiku.m@example.org").isEmpty())
+
+    // The synthetic "All users" organization is seeded with a real XYZ tile URL.
+    val allUsers = assertNotNull(repo.getOrganization(PrototypeFakeOrganizationsData.ALL_USERS))
+    assertEquals("All users", allUsers.name)
+    assertTrue(allUsers.isSynthetic)
+    assertTrue(allUsers.imagerySources.isNotEmpty())
+    assertTrue(allUsers.imagerySources.first().isValidXyzUrl)
   }
 
   @Test

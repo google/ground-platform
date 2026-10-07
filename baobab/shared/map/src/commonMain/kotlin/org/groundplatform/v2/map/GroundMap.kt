@@ -25,6 +25,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.layout
@@ -68,7 +69,7 @@ fun GroundMap(
       )
     }
   Box(
-    modifier.onSizeChanged {
+    modifier.clipToBounds().onSizeChanged {
       with(density) { cameraState.viewportSize = DpSize(it.width.toDp(), it.height.toDp()) }
     }
   ) {
@@ -130,7 +131,16 @@ private fun MarkerSlot(
               MarkerAnchor.TOP -> 0
               MarkerAnchor.BOTTOM -> placeable.height
             }
-        layout(placeable.width, placeable.height) { placeable.place(x, y) }
+        val inBounds =
+          x + placeable.width > 0 &&
+            x < constraints.maxWidth &&
+            y + placeable.height > 0 &&
+            y < constraints.maxHeight
+        layout(placeable.width, placeable.height) {
+          if (inBounds) {
+            placeable.place(x, y)
+          }
+        }
       }
       .then(
         if (tappable) {

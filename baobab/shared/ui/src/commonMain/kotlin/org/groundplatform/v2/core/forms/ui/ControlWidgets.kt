@@ -47,6 +47,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
@@ -56,6 +57,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.RadioButton
+import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
@@ -218,6 +220,7 @@ fun QuestionControlCard(
           modifier = Modifier.fillMaxWidth(),
           shape = MaterialTheme.shapes.small,
           color = colors.secondaryContainer,
+          contentColor = colors.onSecondaryContainer,
         ) {
           Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp)) {
             Text(
@@ -270,7 +273,11 @@ fun QuestionControlCard(
         Card(
           modifier = Modifier.fillMaxWidth(),
           shape = MaterialTheme.shapes.medium,
-          colors = CardDefaults.cardColors(containerColor = colors.errorContainer),
+          colors =
+            CardDefaults.cardColors(
+              containerColor = colors.errorContainer,
+              contentColor = colors.onErrorContainer,
+            ),
         ) {
           Column(
             modifier = Modifier.fillMaxWidth().padding(12.dp),
@@ -1037,6 +1044,7 @@ private fun GeoPointInputWidget(
         modifier = Modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.small,
         color = colors.surfaceContainerHighest.copy(alpha = 0.65f),
+        contentColor = colors.onSurface,
         border = BorderStroke(1.dp, colors.outlineVariant.copy(alpha = 0.6f)),
       ) {
         Column(
@@ -2117,6 +2125,7 @@ private fun GeoGeometryDrawingWidget(
         modifier = Modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.small,
         color = colors.surfaceContainer,
+        contentColor = colors.onSurface,
         border = BorderStroke(1.dp, colors.outlineVariant.copy(alpha = 0.5f)),
       ) {
         Column(
@@ -2307,7 +2316,8 @@ private fun SelectOneWidget(
           colors =
             CardDefaults.outlinedCardColors(
               containerColor =
-                if (isSelected) colors.primaryContainer else colors.surfaceContainerLow
+                if (isSelected) colors.primaryContainer else colors.surfaceContainerLow,
+              contentColor = if (isSelected) colors.onPrimaryContainer else colors.onSurface,
             ),
           border =
             BorderStroke(
@@ -2325,6 +2335,11 @@ private fun SelectOneWidget(
                 controller.updateString(path, option.value)
                 if (isQuick) controller.nextStep()
               },
+              colors =
+                RadioButtonDefaults.colors(
+                  selectedColor = colors.onPrimaryContainer,
+                  unselectedColor = colors.onSurfaceVariant,
+                ),
             )
             Text(
               text = option.label.text,
@@ -2412,7 +2427,8 @@ private fun ChoiceCardRow(
     shape = MaterialTheme.shapes.medium,
     colors =
       CardDefaults.outlinedCardColors(
-        containerColor = if (isSelected) colors.primaryContainer else colors.surfaceContainerLow
+        containerColor = if (isSelected) colors.primaryContainer else colors.surfaceContainerLow,
+        contentColor = if (isSelected) colors.onPrimaryContainer else colors.onSurface,
       ),
     border =
       BorderStroke(
@@ -2426,9 +2442,26 @@ private fun ChoiceCardRow(
       horizontalArrangement = Arrangement.spacedBy(10.dp),
     ) {
       if (isMultiSelect) {
-        Checkbox(checked = isSelected, onCheckedChange = { onClick() })
+        Checkbox(
+          checked = isSelected,
+          onCheckedChange = { onClick() },
+          colors =
+            CheckboxDefaults.colors(
+              checkedColor = colors.onPrimaryContainer,
+              checkmarkColor = colors.primaryContainer,
+              uncheckedColor = colors.onSurfaceVariant,
+            ),
+        )
       } else {
-        RadioButton(selected = isSelected, onClick = onClick)
+        RadioButton(
+          selected = isSelected,
+          onClick = onClick,
+          colors =
+            RadioButtonDefaults.colors(
+              selectedColor = colors.onPrimaryContainer,
+              unselectedColor = colors.onSurfaceVariant,
+            ),
+        )
       }
       Column(modifier = Modifier.weight(1f)) {
         Text(

@@ -140,6 +140,7 @@ class PrototypeAppState(
         isLayersSheetOpen = isLayersSheetOpen,
         selectedBasemapType = selectedBasemapType,
         selectedOfflineBasemapStyle = offlineBasemapStyle,
+        enabledImagerySourceIds = enabledImagerySourceIds,
         isDrawerOpen = isDrawerOpen,
         activeDrawerSubView = activeDrawerSubView,
         selectedUploadStatusFilter = selectedUploadStatusFilter,
@@ -301,6 +302,56 @@ class PrototypeAppState(
   /** The organization the active survey belongs to, if any. */
   val activeSurveyOrganization: Organization?
     get() = organization(activeSurvey.organizationId)
+
+  /** The synthetic `"All users"` organization, holding platform-wide imagery sources. */
+  val allUsersOrganization: Organization?
+    get() = organization(Organization.ALL_USERS_ID) ?: organizations.firstOrNull { it.isSynthetic }
+
+  /** Imagery sources configured on the synthetic `"All users"` organization. */
+  val allUsersImagerySources: List<ImagerySource>
+    get() = allUsersOrganization?.imagerySources.orEmpty()
+
+  /**
+   * Imagery sources configured on the active survey's organization (excluding the synthetic `"All
+   * users"` organization so sources are never duplicated).
+   */
+  val activeSurveyOrganizationImagerySources: List<ImagerySource>
+    get() =
+      activeSurveyOrganization
+        ?.takeIf { !it.isSynthetic && it.id != Organization.ALL_USERS_ID }
+        ?.imagerySources
+        .orEmpty()
+
+  /**
+   * All organization imagery sources available to toggle in the basemap layers dialog for the
+   * active survey: `"All users"` sources followed by survey-specific organization sources.
+   */
+  val availableImagerySources: List<ImagerySource>
+    get() = allUsersImagerySources + activeSurveyOrganizationImagerySources
+
+  /** IDs of organization imagery sources currently toggled ON in the basemap layers dialog. */
+  var enabledImagerySourceIds by mutableStateOf<Set<String>>(emptySet())
+    private set
+
+  /** Returns whether the organization imagery source with [sourceId] is currently toggled ON. */
+  fun isImagerySourceEnabled(sourceId: String): Boolean = sourceId in enabledImagerySourceIds
+
+  /** Toggles visibility of the organization imagery source with [sourceId] on the map. */
+  fun toggleImagerySource(sourceId: String) {
+    enabledImagerySourceIds =
+      if (sourceId in enabledImagerySourceIds) {
+        enabledImagerySourceIds - sourceId
+      } else {
+        enabledImagerySourceIds + sourceId
+      }
+  }
+
+  /**
+   * Currently enabled [ImagerySource]s for the active survey (in layer order: `"All users"` sources
+   * first, then survey-specific organization sources).
+   */
+  val enabledImagerySources: List<ImagerySource>
+    get() = availableImagerySources.filter { it.id in enabledImagerySourceIds }
 
   /**
    * Whether the signed-in user may open the Survey editor for the active survey: they own it, are
@@ -535,6 +586,112 @@ class PrototypeAppState(
         organizationNotice = "You left \"${updated.name}\"."
       }
     }
+  }
+
+  /**
+   * Adds an [ImagerySource] to [organizationId]. Returns a validation error message, or `null` when
+   * the imagery source was added.
+   */
+  fun addOrganizationImagerySource(
+    organizationId: String,
+    name: String,
+    urlTemplate: String,
+    type: ImagerySourceType = ImagerySourceType.XYZ_TILES,
+    allowOfflineDownload: Boolean = false,
+  ): String? {
+    val trimmedName = name.trim()
+    if (trimmedName.isEmpty()) return "Enter a name for the imagery source."
+    val trimmedUrl = urlTemplate.trim()
+    if (type == ImagerySourceType.XYZ_TILES && !ImagerySource.isValidXyzUrlTemplate(trimmedUrl)) {
+      return "Enter an http(s):// XYZ tile URL containing {z}, {x}, and {y}."
+    }
+    val org = organization(organizationId) ?: return "Organization not found."
+    val sourceId = uniqueImagerySourceId(org, trimmedName)
+    updateOrganization(organizationId) { current ->
+      current.copy(
+        imagerySources =
+          current.imagerySources +
+            ImagerySource(
+              id = sourceId,
+              name = trimmedName,
+              urlTemplate = trimmedUrl,
+              type = type,
+              allowOfflineDownload = allowOfflineDownload,
+            )
+      )
+    }
+    return null
+  }
+
+  /**
+   * Updates an existing [ImagerySource] on [organizationId]. Returns a validation error message, or
+   * `null` when saved.
+   */
+  fun updateOrganizationImagerySource(
+    organizationId: String,
+    sourceId: String,
+    name: String,
+    urlTemplate: String,
+    allowOfflineDownload: Boolean,
+  ): String? {
+    val trimmedName = name.trim()
+    if (trimmedName.isEmpty()) return "Enter a name for the imagery source."
+    val trimmedUrl = urlTemplate.trim()
+    if (!ImagerySource.isValidXyzUrlTemplate(trimmedUrl)) {
+      return "Enter an http(s):// XYZ tile URL containing {z}, {x}, and {y}."
+    }
+    updateOrganization(organizationId) { current ->
+      current.copy(
+        imagerySources =
+          current.imagerySources.map { src ->
+            if (src.id == sourceId) {
+              src.copy(
+                name = trimmedName,
+                urlTemplate = trimmedUrl,
+                allowOfflineDownload = allowOfflineDownload,
+              )
+            } else {
+              src
+            }
+          }
+      )
+    }
+    return null
+  }
+
+  /** Toggles whether offline download on mobile is permitted for [sourceId] in [organizationId]. */
+  fun setOrganizationImagerySourceOfflineAllowed(
+    organizationId: String,
+    sourceId: String,
+    allowOfflineDownload: Boolean,
+  ) {
+    updateOrganization(organizationId) { current ->
+      current.copy(
+        imagerySources =
+          current.imagerySources.map { src ->
+            if (src.id == sourceId) src.copy(allowOfflineDownload = allowOfflineDownload) else src
+          }
+      )
+    }
+  }
+
+  /** Removes the imagery source with [sourceId] from [organizationId]. */
+  fun removeOrganizationImagerySource(organizationId: String, sourceId: String) {
+    enabledImagerySourceIds = enabledImagerySourceIds - sourceId
+    updateOrganization(organizationId) { current ->
+      current.copy(imagerySources = current.imagerySources.filterNot { it.id == sourceId })
+    }
+  }
+
+  private fun uniqueImagerySourceId(organization: Organization, name: String): String {
+    val slug =
+      name.lowercase().replace(Regex("[^a-z0-9]+"), "-").trim('-').ifBlank { "source" }.take(32)
+    val base = "imagery-${organization.id.removePrefix("org-")}-$slug"
+    val taken = organizations.flatMap { it.imagerySources }.map { it.id }.toSet()
+    if (base !in taken) return base
+    var n = 2
+    while ("$base-$n" in taken) n++
+    return "$base-$n"
   }
 
   var termsCheckboxChecked by mutableStateOf(true)
@@ -3918,6 +4075,7 @@ class PrototypeAppState(
     isAvailableFormsSheetOpen = false
     isOfflineBasemapVisible = true
     offlineBasemapStyle = OfflineBasemapStyle.SATELLITE_HYBRID
+    enabledImagerySourceIds = emptySet()
     viewModel.launch { viewModel.sampleDataRepository.resetToSampleData() }
     dataResetCount++
     selectedPlaceId = null

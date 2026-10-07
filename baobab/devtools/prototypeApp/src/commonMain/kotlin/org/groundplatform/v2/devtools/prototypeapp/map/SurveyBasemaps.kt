@@ -14,6 +14,7 @@
 package org.groundplatform.v2.devtools.prototypeapp.map
 
 import androidx.compose.ui.graphics.Color
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.ImagerySource
 import org.groundplatform.v2.map.Basemap
 import org.groundplatform.v2.map.RasterTileLayer
 
@@ -49,4 +50,19 @@ internal object SurveyBasemaps {
       attribution = "Powered by Esri · Esri, Maxar, Earthstar Geographics",
       backgroundColor = Color(0xFF142E21),
     )
+
+  /**
+   * Appends any enabled organization [imagerySources] (`"All users"` and survey-specific
+   * organization XYZ tile URLs) on top of [base] so they render as raster tile layers.
+   */
+  fun withImagerySources(
+    base: Basemap.RasterTiles,
+    imagerySources: List<ImagerySource>,
+  ): Basemap.RasterTiles {
+    if (imagerySources.isEmpty()) return base
+    val extraLayers = imagerySources.map { source ->
+      RasterTileLayer(urlTemplate = source.urlTemplate, opacity = 0.88f)
+    }
+    return base.copy(layers = base.layers + extraLayers)
+  }
 }

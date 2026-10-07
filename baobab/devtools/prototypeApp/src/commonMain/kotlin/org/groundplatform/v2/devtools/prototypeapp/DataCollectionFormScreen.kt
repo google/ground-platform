@@ -234,7 +234,7 @@ fun DataCollectionFormScreen(state: PrototypeAppState) {
             Icon(
               imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
               contentDescription = "Back to Survey",
-              tint = Color.White,
+              tint = MaterialTheme.colorScheme.inverseOnSurface,
               modifier = Modifier.size(18.dp),
             )
           }
@@ -247,7 +247,7 @@ fun DataCollectionFormScreen(state: PrototypeAppState) {
               Icon(
                 imageVector = Icons.Outlined.LocationOn,
                 contentDescription = null,
-                tint = Color(0xFF8BD6B1),
+                tint = MaterialTheme.colorScheme.inversePrimary,
                 modifier = Modifier.size(14.dp),
               )
               Text(
@@ -264,9 +264,9 @@ fun DataCollectionFormScreen(state: PrototypeAppState) {
                       )
                     }
                   },
-                inlineContent = geoIdInlineContent(tint = Color(0xFF8BD6B1)),
+                inlineContent = geoIdInlineContent(tint = MaterialTheme.colorScheme.inversePrimary),
                 style = MaterialTheme.typography.labelMedium,
-                color = Color(0xFF8BD6B1),
+                color = MaterialTheme.colorScheme.inversePrimary,
                 fontWeight = FontWeight.Bold,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
@@ -280,7 +280,7 @@ fun DataCollectionFormScreen(state: PrototypeAppState) {
                   resolvedTitle
                 },
               style = MaterialTheme.typography.labelSmall,
-              color = Color.White.copy(alpha = 0.88f),
+              color = MaterialTheme.colorScheme.inverseOnSurface.copy(alpha = 0.88f),
               maxLines = 1,
               overflow = TextOverflow.Ellipsis,
             )
@@ -293,14 +293,14 @@ fun DataCollectionFormScreen(state: PrototypeAppState) {
           onClick = { state.closeActiveFormRunner() },
           colors =
             androidx.compose.material3.AssistChipDefaults.assistChipColors(
-              containerColor = Color(0xFF1E563D),
-              labelColor = Color.White,
-              leadingIconContentColor = Color.White,
+              containerColor = MaterialTheme.colorScheme.secondaryContainer,
+              labelColor = MaterialTheme.colorScheme.onSecondaryContainer,
+              leadingIconContentColor = MaterialTheme.colorScheme.onSecondaryContainer,
             ),
           border =
             androidx.compose.material3.AssistChipDefaults.assistChipBorder(
               enabled = true,
-              borderColor = Color(0xFF386B52),
+              borderColor = MaterialTheme.colorScheme.outlineVariant,
             ),
           label = {
             Text(
@@ -527,13 +527,14 @@ private fun EntityRefStepMapOrListSelector(
               Surface(
                 modifier = Modifier.align(Alignment.TopStart).padding(8.dp),
                 shape = MaterialTheme.shapes.small,
-                color = Color(0xFF0E2219).copy(alpha = 0.90f),
+                color = MaterialTheme.colorScheme.inverseSurface.copy(alpha = 0.90f),
+                contentColor = MaterialTheme.colorScheme.inverseOnSurface,
               ) {
                 Text(
                   text =
                     "Tap a ${form.targetSingularTypeLabel.lowercase()} on map or below to select",
                   style = MaterialTheme.typography.labelSmall,
-                  color = Color(0xFF8BD6B1),
+                  color = MaterialTheme.colorScheme.inverseOnSurface,
                   modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                 )
               }
@@ -694,10 +695,16 @@ private fun EntityRefCandidateOptionCard(
       CardDefaults.outlinedCardColors(
         containerColor =
           if (isSelected) {
-            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.30f)
+            MaterialTheme.colorScheme.secondaryContainer
           } else {
             MaterialTheme.colorScheme.surface
-          }
+          },
+        contentColor =
+          if (isSelected) {
+            MaterialTheme.colorScheme.onSecondaryContainer
+          } else {
+            MaterialTheme.colorScheme.onSurface
+          },
       ),
   ) {
     Row(
@@ -715,7 +722,12 @@ private fun EntityRefCandidateOptionCard(
             text = "${candidate.markerSymbol} ${candidate.label}",
             style = MaterialTheme.typography.labelLarge,
             fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onSurface,
+            color =
+              if (isSelected) {
+                MaterialTheme.colorScheme.onSecondaryContainer
+              } else {
+                MaterialTheme.colorScheme.onSurface
+              },
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             softWrap = false,
@@ -736,13 +748,23 @@ private fun EntityRefCandidateOptionCard(
           prefix = "GeoID: ",
           suffix = " • $wayfindingBadge",
           style = MaterialTheme.typography.labelSmall,
-          color = MaterialTheme.colorScheme.primary,
+          color =
+            if (isSelected) {
+              MaterialTheme.colorScheme.onSecondaryContainer
+            } else {
+              MaterialTheme.colorScheme.primary
+            },
         )
         Text(
           text =
             "${candidate.geometryTypeLabel} • ${candidate.submissionCount} ${if (candidate.submissionCount == 1) "submission" else "submissions"}",
           style = MaterialTheme.typography.labelSmall,
-          color = MaterialTheme.colorScheme.onSurfaceVariant,
+          color =
+            if (isSelected) {
+              MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.85f)
+            } else {
+              MaterialTheme.colorScheme.onSurfaceVariant
+            },
         )
       }
 

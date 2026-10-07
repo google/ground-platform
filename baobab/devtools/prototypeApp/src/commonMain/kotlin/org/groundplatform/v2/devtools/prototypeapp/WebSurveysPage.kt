@@ -271,6 +271,7 @@ private fun SectionHeading(section: SurveyListSection, userEmail: String) {
       Surface(
         shape = MaterialTheme.shapes.extraSmall,
         color = MaterialTheme.colorScheme.secondaryContainer,
+        contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
       ) {
         Text(
           text = if (role == OrganizationRole.MANAGER) "You manage" else "Member",
@@ -362,15 +363,21 @@ internal fun WebSurveyCard(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
       ) {
+        val isOwner = access == SurveyAccessLabel.OWNER
+        val badgeContentColor =
+          if (isOwner) MaterialTheme.colorScheme.onPrimaryContainer
+          else MaterialTheme.colorScheme.onSurfaceVariant
         Surface(
           shape = MaterialTheme.shapes.extraSmall,
           color =
-            if (access == SurveyAccessLabel.OWNER) MaterialTheme.colorScheme.primaryContainer
+            if (isOwner) MaterialTheme.colorScheme.primaryContainer
             else MaterialTheme.colorScheme.surfaceContainerHigh,
+          contentColor = badgeContentColor,
         ) {
           Text(
             text = access.label,
             style = MaterialTheme.typography.labelSmall,
+            color = badgeContentColor,
             fontWeight = FontWeight.Medium,
             modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
           )

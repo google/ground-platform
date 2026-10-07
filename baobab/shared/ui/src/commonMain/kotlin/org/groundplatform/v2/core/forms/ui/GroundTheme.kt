@@ -175,6 +175,52 @@ val GroundDarkColorScheme =
     surfaceContainerHighest = Color(0xFF313630),
   )
 
+/**
+ * Material 3 Fixed color roles from the Ground Design System specification. Fixed roles maintain
+ * constant tone and contrast across both Light and Dark themes.
+ */
+object GroundFixedColors {
+  val primaryFixed = Color(0xFFB7F1B9)
+  val primaryFixedDim = Color(0xFF9CD49F)
+  val onPrimaryFixed = Color(0xFF002108)
+  val onPrimaryFixedVariant = Color(0xFF1D5128)
+
+  val secondaryFixed = Color(0xFFD4E8D1)
+  val secondaryFixedDim = Color(0xFFB8CCB5)
+  val onSecondaryFixed = Color(0xFF0F1F11)
+  val onSecondaryFixedVariant = Color(0xFF3A4B3A)
+
+  val tertiaryFixed = Color(0xFFBDEAF3)
+  val tertiaryFixedDim = Color(0xFFA1CED7)
+  val onTertiaryFixed = Color(0xFF001F24)
+  val onTertiaryFixedVariant = Color(0xFF1F4D54)
+}
+
+/**
+ * Static categorical/semantic accent colors from the Ground Design System specification (`Static
+ * Colors`), used for map layer pins, choice badges, and status indicators.
+ */
+object GroundStaticColors {
+  val Orange = Color(0xFFF37C22)
+  val Red = Color(0xFFD13135)
+  val Purple = Color(0xFF7A279F)
+  val Blue = Color(0xFF2278CF)
+  val Green = Color(0xFF3C8D40)
+  val Yellow = Color(0xFFF9BF40)
+
+  val palette: List<Pair<String, String>> =
+    listOf(
+      "Orange" to "#F37C22",
+      "Red" to "#D13135",
+      "Purple" to "#7A279F",
+      "Blue" to "#2278CF",
+      "Green" to "#3C8D40",
+      "Yellow" to "#F9BF40",
+    )
+
+  val hexList: List<String> = palette.map { it.second }
+}
+
 /** Standard Material Design 3 5-tier shape scale (`extraSmall` 4dp through `extraLarge` 28dp). */
 val GroundShapes =
   Shapes(

@@ -56,6 +56,39 @@ message Organization {
 
   // Creation time.
   google.protobuf.Timestamp created_at = 8;
+
+  // Custom imagery sources configured for this organization (or the synthetic
+  // "All users" organization) that may be toggled in the basemap layers dialog.
+  repeated ImagerySource imagery_sources = 9;
+}
+
+// Kind of imagery source an organization can configure.
+enum ImagerySourceType {
+  // Unspecified imagery source type.
+  IMAGERY_SOURCE_TYPE_UNSPECIFIED = 0;
+
+  // Web Mercator XYZ raster tile URL template (e.g.,
+  // `https://tile.opentopomap.org/{z}/{x}/{y}.png`).
+  XYZ_TILES = 1;
+}
+
+// A custom imagery layer configured on an `Organization`.
+message ImagerySource {
+  // Client-generated unique identifier.
+  string imagery_source_id = 1;
+
+  // Display name shown in the organization editor and basemap layers dialog.
+  string name = 2;
+
+  // Kind of imagery source.
+  ImagerySourceType type = 3;
+
+  // XYZ tile URL template containing `{z}`, `{x}`, and `{y}` placeholders.
+  string url_template = 4;
+
+  // Whether collectors on mobile are permitted to download tiles from this
+  // source for offline field use.
+  bool allow_offline_download = 5;
 }
 
 // Role of a person in an organization.

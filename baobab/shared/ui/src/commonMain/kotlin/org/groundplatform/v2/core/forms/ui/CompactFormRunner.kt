@@ -811,6 +811,7 @@ private fun CompactRepeatHub(
     modifier = Modifier.fillMaxWidth(),
     shape = MaterialTheme.shapes.medium,
     color = colors.surfaceContainer,
+    contentColor = colors.onSurface,
   ) {
     Row(
       modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),

@@ -22,6 +22,7 @@ import org.groundplatform.v2.devtools.prototypeapp.PrototypeAppState
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.BasemapType
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.FormPreviewItem
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.GeospatialEntityItem
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.ImagerySource
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.MapFeatureCluster
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.MapLayerItem
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.StraightLineNavigationState
@@ -188,6 +189,7 @@ internal object SurveyMapContent {
       layers = state.mapLayers,
       draftGeometry = state.webMapDraftGeometry,
       formGeometries = state.webFormGeometries,
+      imagerySources = state.enabledImagerySources,
     )
 
   /** The map in a form's entity-reference step, listing the form's candidate entities. */
@@ -207,6 +209,7 @@ internal object SurveyMapContent {
       isFollowingUser = state.isCameraFollowingUser,
       place = null,
       layers = state.mapLayers,
+      imagerySources = state.enabledImagerySources,
     )
 
   /** The map behind a GeoPoint question. */
@@ -226,6 +229,7 @@ internal object SurveyMapContent {
       isFollowingUser = isFollowingUser,
       place = null,
       layers = state.mapLayers,
+      imagerySources = state.enabledImagerySources,
     )
 
   /**
@@ -238,6 +242,8 @@ internal object SurveyMapContent {
    *   vertices) the closed shape.
    * @param formGeometries the geometry answers already held by the open form, drawn in the in-flow
    *   style above the entities and below [draftGeometry], each labelled with its question title.
+   * @param imagerySources enabled organization imagery sources (`"All users"` and survey-specific
+   *   organization XYZ tile URLs) rendered on top of the selected basemap.
    */
   fun build(
     anchor: SurveyMapAnchor,
@@ -256,6 +262,7 @@ internal object SurveyMapContent {
     layers: List<MapLayerItem> = emptyList(),
     draftGeometry: DraftGeometry? = null,
     formGeometries: List<FormGeometryOverlay> = emptyList(),
+    imagerySources: List<ImagerySource> = emptyList(),
   ): SurveyMap {
     val satellite = basemapType == BasemapType.SATELLITE
     fun at(nx: Float, ny: Float) = anchor.toLatLng(nx.toDouble(), ny.toDouble())
@@ -447,9 +454,10 @@ internal object SurveyMapContent {
     }
 
     val allMarkers = entityMarkers + clusterMarkers + otherMarkers
+    val baseTiles = if (satellite) SurveyBasemaps.Satellite else SurveyBasemaps.Streets
     val content =
       MapContent(
-        basemap = if (satellite) SurveyBasemaps.Satellite else SurveyBasemaps.Streets,
+        basemap = SurveyBasemaps.withImagerySources(baseTiles, imagerySources),
         sources =
           listOf(
             GeoJsonSource(OVERLAY_SOURCE, overlayFeatures),

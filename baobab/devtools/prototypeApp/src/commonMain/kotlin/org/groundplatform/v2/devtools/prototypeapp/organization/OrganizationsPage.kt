@@ -188,6 +188,7 @@ internal fun OrganizationsPage(
 internal fun OrganizationNotice(text: String, onDismiss: () -> Unit) {
   Surface(
     color = MaterialTheme.colorScheme.secondaryContainer,
+    contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
     shape = MaterialTheme.shapes.medium,
     modifier = Modifier.widthIn(max = 760.dp),
   ) {
@@ -300,17 +301,29 @@ private fun OrganizationCard(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
       ) {
+        val summaryText =
+          if (organization.isSynthetic) {
+            val count = organization.imagerySources.size
+            "All users · $count imagery ${if (count == 1) "source" else "sources"}"
+          } else {
+            "${organization.activeMembers.size} members · $surveyCount surveys" +
+              (if (organization.imagerySources.isNotEmpty())
+                " · ${organization.imagerySources.size} imagery"
+              else "") +
+              (if (
+                relation == OrganizationRelation.MANAGER &&
+                  organization.pendingRequests.isNotEmpty()
+              )
+                " · ${organization.pendingRequests.size} requests"
+              else "")
+          }
         Text(
-          "${organization.activeMembers.size} members · $surveyCount surveys" +
-            (if (
-              relation == OrganizationRelation.MANAGER && organization.pendingRequests.isNotEmpty()
-            )
-              " · ${organization.pendingRequests.size} requests"
-            else ""),
+          summaryText,
           style = MaterialTheme.typography.labelSmall,
           color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         when {
+          organization.isSynthetic -> SyntheticOrgBadge()
           isMember -> RelationBadge(relation)
           relation == OrganizationRelation.REQUESTED || relation == OrganizationRelation.INVITED ->
             RelationBadge(relation)
@@ -325,16 +338,39 @@ private fun OrganizationCard(
 }
 
 @Composable
+private fun SyntheticOrgBadge() {
+  Surface(
+    shape = MaterialTheme.shapes.extraSmall,
+    color = MaterialTheme.colorScheme.tertiaryContainer,
+    contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
+  ) {
+    Text(
+      "Synthetic",
+      style = MaterialTheme.typography.labelSmall,
+      color = MaterialTheme.colorScheme.onTertiaryContainer,
+      fontWeight = FontWeight.Medium,
+      modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+    )
+  }
+}
+
+@Composable
 internal fun RelationBadge(relation: OrganizationRelation) {
+  val isManager = relation == OrganizationRelation.MANAGER
+  val contentColor =
+    if (isManager) MaterialTheme.colorScheme.onPrimaryContainer
+    else MaterialTheme.colorScheme.onSurfaceVariant
   Surface(
     shape = MaterialTheme.shapes.extraSmall,
     color =
-      if (relation == OrganizationRelation.MANAGER) MaterialTheme.colorScheme.primaryContainer
+      if (isManager) MaterialTheme.colorScheme.primaryContainer
       else MaterialTheme.colorScheme.surfaceContainerHigh,
+    contentColor = contentColor,
   ) {
     Text(
       relation.label,
       style = MaterialTheme.typography.labelSmall,
+      color = contentColor,
       fontWeight = FontWeight.Medium,
       modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
     )

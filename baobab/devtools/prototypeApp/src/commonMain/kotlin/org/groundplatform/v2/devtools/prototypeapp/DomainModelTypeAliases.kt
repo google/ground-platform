@@ -86,6 +86,11 @@ typealias SurveyPreviewItem =
 
 typealias Organization = org.groundplatform.v2.devtools.prototypeapp.domain.model.Organization
 
+typealias ImagerySource = org.groundplatform.v2.devtools.prototypeapp.domain.model.ImagerySource
+
+typealias ImagerySourceType =
+  org.groundplatform.v2.devtools.prototypeapp.domain.model.ImagerySourceType
+
 typealias OrganizationMember =
   org.groundplatform.v2.devtools.prototypeapp.domain.model.OrganizationMember
 

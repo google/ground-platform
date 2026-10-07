@@ -110,8 +110,29 @@ class OrganizationPagesTest {
   }
 
   @Test
-  fun tabs_detailsComesFirst() {
+  fun tabs_detailsComesFirstAndIncludesImagerySources() {
     assertEquals(OrganizationTab.DETAILS, OrganizationTab.entries.first())
+    assertTrue(OrganizationTab.IMAGERY_SOURCES in OrganizationTab.entries)
+  }
+
+  @Test
+  fun syntheticAllUsers_isIncludedFirstInMineAndExcludedFromDiscoverable() {
+    val allUsers =
+      Organization(
+        id = Organization.ALL_USERS_ID,
+        name = "All users",
+        isListed = false,
+        isSynthetic = true,
+      )
+    val withAllUsers = all + allUsers
+    assertEquals(
+      listOf(Organization.ALL_USERS_ID, "managed", "joined"),
+      OrganizationPages.mine(withAllUsers, me).map { it.id },
+    )
+    assertFalse(
+      OrganizationPages.discoverable(withAllUsers, me).any { it.id == Organization.ALL_USERS_ID }
+    )
+    assertEquals(OrganizationRelation.MANAGER, OrganizationPages.relationOf(allUsers, me))
   }
 
   @Test

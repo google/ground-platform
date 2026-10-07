@@ -477,4 +477,38 @@ class WebDashboardPageTest {
     testState.updateDashboardTableExpanded(false)
     assertTrue(testState.isDetailsPanelExpanded)
   }
+
+  @Test
+  fun dataTables_titlesNeverIncludeInternalDatasetIdsAcrossAllSurveys() {
+    val testState = PrototypeAppState()
+    for (survey in testState.surveys) {
+      testState.openSurvey(survey.id)
+      val tables =
+        buildDashboardDataTables(
+          entities = testState.entities,
+          selectedEntityId = null,
+          relatedLabel = { e, value -> testState.relatedEntityForPropertyValue(e, value)?.label },
+        )
+      tables.forEach { table ->
+        assertFalse(
+          "(${table.datasetId})" in table.title,
+          "Data table title '${table.title}' for survey '${survey.id}' should not include internal dataset ID '${table.datasetId}'",
+        )
+      }
+      testState.entities.forEach { surveyEntity ->
+        assertFalse(
+          "(${surveyEntity.datasetId})" in surveyEntity.datasetName,
+          "Entity datasetName '${surveyEntity.datasetName}' should not include internal datasetId '${surveyEntity.datasetId}'",
+        )
+      }
+      testState.forms.forEach { form ->
+        if (form.targetDatasetId.isNotEmpty()) {
+          assertFalse(
+            "(${form.targetDatasetId})" in form.targetDatasetName,
+            "Form targetDatasetName '${form.targetDatasetName}' should not include internal targetDatasetId '${form.targetDatasetId}'",
+          )
+        }
+      }
+    }
+  }
 }

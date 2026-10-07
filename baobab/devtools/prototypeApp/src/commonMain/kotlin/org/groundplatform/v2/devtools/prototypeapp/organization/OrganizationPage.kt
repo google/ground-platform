@@ -33,8 +33,10 @@ import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.Close
+import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Group
 import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material.icons.outlined.Layers
 import androidx.compose.material.icons.outlined.Map
 import androidx.compose.material.icons.outlined.PersonAdd
 import androidx.compose.material3.AlertDialog
@@ -48,8 +50,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -60,6 +64,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import org.groundplatform.v2.devtools.prototypeapp.PrototypeAppState
@@ -72,6 +77,8 @@ import org.groundplatform.v2.devtools.prototypeapp.WebHeaderSupportingText
 import org.groundplatform.v2.devtools.prototypeapp.WebMobilePrototypeButton
 import org.groundplatform.v2.devtools.prototypeapp.WebSurveyCard
 import org.groundplatform.v2.devtools.prototypeapp.WebSurveysList
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.ImagerySource
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.ImagerySourceType
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.MembershipStatus
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.Organization
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.OrganizationRole
@@ -126,12 +133,20 @@ internal fun OrganizationPage(
               size = 32.dp,
             )
             WebHeaderContext(title = organization.name) {
-              WebHeaderSupportingText("Organization", color = MaterialTheme.colorScheme.primary)
+              WebHeaderSupportingText(
+                if (organization.isSynthetic) "Synthetic organization" else "Organization",
+                color = MaterialTheme.colorScheme.primary,
+              )
               WebHeaderSupportingText("·")
               WebHeaderSupportingText(
-                "${organization.activeMembers.size} members · " +
-                  "${state.surveysInOrganization(organization.id).size} surveys" +
-                  if (!organization.isListed) " · Unlisted" else ""
+                if (organization.isSynthetic) {
+                  val count = organization.imagerySources.size
+                  "Shared across all surveys · $count imagery ${if (count == 1) "source" else "sources"}"
+                } else {
+                  "${organization.activeMembers.size} members · " +
+                    "${state.surveysInOrganization(organization.id).size} surveys" +
+                    if (!organization.isListed) " · Unlisted" else ""
+                }
               )
             }
           }
@@ -214,6 +229,24 @@ internal fun OrganizationPage(
               NoticeSlot(state)
               MembersPane(state, organization, isManager)
             }
+          OrganizationTab.IMAGERY_SOURCES ->
+            PaneScaffold(
+              title = "Imagery sources",
+              subtitle =
+                if (organization.isSynthetic) {
+                  "Custom basemap imagery layers available to all Ground users across every " +
+                    "survey in the basemap layers dialog on mobile and web."
+                } else if (isManager) {
+                  "Custom basemap imagery layers available in the basemap layers dialog on " +
+                    "mobile and web for surveys in ${organization.name}."
+                } else {
+                  "Custom basemap imagery layers configured for surveys in ${organization.name}. " +
+                    "Ask a Manager to add or change imagery sources."
+                },
+            ) {
+              NoticeSlot(state)
+              ImagerySourcesPane(state, organization, isManager)
+            }
         }
       }
     }
@@ -277,6 +310,13 @@ private fun OrganizationNavigation(
         selected = selected == OrganizationTab.MEMBERS,
         onClick = { onSelect(OrganizationTab.MEMBERS) },
         trailing = "$memberCount",
+      )
+      NavItem(
+        label = OrganizationTab.IMAGERY_SOURCES.label,
+        icon = Icons.Outlined.Layers,
+        selected = selected == OrganizationTab.IMAGERY_SOURCES,
+        onClick = { onSelect(OrganizationTab.IMAGERY_SOURCES) },
+        trailing = "${organization.imagerySources.size}",
       )
     }
   }
@@ -416,7 +456,11 @@ private fun MembersPane(state: PrototypeAppState, organization: Organization, is
             leaving = false
             state.removeOrganizationMember(organization.id, email)
           },
-          colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
+          colors =
+            ButtonDefaults.buttonColors(
+              containerColor = MaterialTheme.colorScheme.error,
+              contentColor = MaterialTheme.colorScheme.onError,
+            ),
         ) {
           Text("Leave")
         }
@@ -633,9 +677,372 @@ private fun DetailsPane(state: PrototypeAppState, organization: Organization, is
   ) {
     if (isManager) {
       EditableDetailsCard(state, organization)
-      DangerZoneCard(state, organization)
+      if (!organization.isSynthetic) {
+        DangerZoneCard(state, organization)
+      }
     } else {
       ReadOnlyDetailsCard(organization)
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------------------------
+// Imagery sources
+// ---------------------------------------------------------------------------------------------
+
+@Composable
+private fun ImagerySourcesPane(
+  state: PrototypeAppState,
+  organization: Organization,
+  isManager: Boolean,
+) {
+  var editingSourceId by remember(organization.id) { mutableStateOf<String?>(null) }
+
+  Column(
+    modifier = Modifier.widthIn(max = OrganizationPaneMaxWidth),
+    verticalArrangement = Arrangement.spacedBy(20.dp),
+  ) {
+    DetailsCard("Configured imagery sources") {
+      if (organization.imagerySources.isEmpty()) {
+        Text(
+          if (isManager) {
+            "No imagery sources configured yet. Add an XYZ tile URL below to make it " +
+              "toggleable in the basemap layers dialog."
+          } else {
+            "No imagery sources configured for ${organization.name}."
+          },
+          style = MaterialTheme.typography.bodyMedium,
+          color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+      } else {
+        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+          organization.imagerySources.forEach { source ->
+            key(source.id) {
+              ImagerySourceRow(
+                state = state,
+                organization = organization,
+                source = source,
+                isManager = isManager,
+                isEditing = editingSourceId == source.id,
+                onStartEdit = { editingSourceId = source.id },
+                onDoneEdit = { editingSourceId = null },
+              )
+            }
+          }
+        }
+      }
+    }
+
+    if (isManager) {
+      AddImagerySourceCard(state = state, organization = organization)
+    }
+  }
+}
+
+@Composable
+private fun ImagerySourceRow(
+  state: PrototypeAppState,
+  organization: Organization,
+  source: ImagerySource,
+  isManager: Boolean,
+  isEditing: Boolean,
+  onStartEdit: () -> Unit,
+  onDoneEdit: () -> Unit,
+) {
+  var editName by remember(source.id, source.name) { mutableStateOf(source.name) }
+  var editUrl by remember(source.id, source.urlTemplate) { mutableStateOf(source.urlTemplate) }
+  var editOffline by
+    remember(source.id, source.allowOfflineDownload) {
+      mutableStateOf(source.allowOfflineDownload)
+    }
+  var editError by remember(source.id) { mutableStateOf<String?>(null) }
+
+  OutlinedCard(
+    modifier = Modifier.fillMaxWidth(),
+    colors =
+      CardDefaults.outlinedCardColors(
+        containerColor = MaterialTheme.colorScheme.surfaceContainerLow
+      ),
+  ) {
+    Column(
+      modifier = Modifier.fillMaxWidth().padding(16.dp),
+      verticalArrangement = Arrangement.spacedBy(10.dp),
+    ) {
+      if (isEditing && isManager) {
+        OutlinedTextField(
+          value = editName,
+          onValueChange = {
+            editName = it
+            editError = null
+          },
+          label = { Text("Source name") },
+          singleLine = true,
+          modifier = Modifier.fillMaxWidth(),
+        )
+        OutlinedTextField(
+          value = editUrl,
+          onValueChange = {
+            editUrl = it
+            editError = null
+          },
+          label = { Text("XYZ tile URL") },
+          placeholder = { Text("https://tile.opentopomap.org/{z}/{x}/{y}.png") },
+          singleLine = true,
+          isError = editError != null,
+          supportingText =
+            editError?.let { { Text(it) } }
+              ?: {
+                Text("Must include {z}, {x}, and {y} tile placeholders.")
+              },
+          textStyle = MaterialTheme.typography.bodyMedium.copy(fontFamily = FontFamily.Monospace),
+          modifier = Modifier.fillMaxWidth(),
+        )
+        Row(
+          modifier = Modifier.fillMaxWidth(),
+          horizontalArrangement = Arrangement.SpaceBetween,
+          verticalAlignment = Alignment.CenterVertically,
+        ) {
+          Column(modifier = Modifier.weight(1f)) {
+            Text(
+              "Permit offline download on mobile",
+              style = MaterialTheme.typography.bodyMedium,
+              fontWeight = FontWeight.Medium,
+            )
+            Text(
+              "Allow collectors to download tiles from this source for offline field use.",
+              style = MaterialTheme.typography.bodySmall,
+              color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+          }
+          Switch(checked = editOffline, onCheckedChange = { editOffline = it })
+        }
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+          Button(
+            onClick = {
+              val err =
+                state.updateOrganizationImagerySource(
+                  organizationId = organization.id,
+                  sourceId = source.id,
+                  name = editName,
+                  urlTemplate = editUrl,
+                  allowOfflineDownload = editOffline,
+                )
+              if (err == null) {
+                onDoneEdit()
+              } else {
+                editError = err
+              }
+            }
+          ) {
+            Text("Save")
+          }
+          TextButton(
+            onClick = {
+              editName = source.name
+              editUrl = source.urlTemplate
+              editOffline = source.allowOfflineDownload
+              editError = null
+              onDoneEdit()
+            }
+          ) {
+            Text("Cancel")
+          }
+        }
+      } else {
+        Row(
+          modifier = Modifier.fillMaxWidth(),
+          horizontalArrangement = Arrangement.SpaceBetween,
+          verticalAlignment = Alignment.Top,
+        ) {
+          Column(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+          ) {
+            Row(
+              verticalAlignment = Alignment.CenterVertically,
+              horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+              Text(
+                source.name,
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.Bold,
+              )
+              Surface(
+                shape = MaterialTheme.shapes.extraSmall,
+                color = MaterialTheme.colorScheme.secondaryContainer,
+                contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+              ) {
+                Text(
+                  source.type.label,
+                  style = MaterialTheme.typography.labelSmall,
+                  modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                )
+              }
+            }
+            Text(
+              source.urlTemplate,
+              style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
+              color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+          }
+          if (isManager) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+              IconButton(onClick = onStartEdit) {
+                Icon(Icons.Outlined.Edit, contentDescription = "Edit ${source.name}")
+              }
+              IconButton(
+                onClick = {
+                  state.removeOrganizationImagerySource(organization.id, source.id)
+                }
+              ) {
+                Icon(Icons.Outlined.Close, contentDescription = "Remove ${source.name}")
+              }
+            }
+          }
+        }
+        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+        Row(
+          modifier = Modifier.fillMaxWidth(),
+          horizontalArrangement = Arrangement.SpaceBetween,
+          verticalAlignment = Alignment.CenterVertically,
+        ) {
+          Column(modifier = Modifier.weight(1f)) {
+            Text(
+              "Permit offline download on mobile",
+              style = MaterialTheme.typography.bodySmall,
+              fontWeight = FontWeight.Medium,
+            )
+            Text(
+              if (source.allowOfflineDownload) {
+                "Collectors can download tiles from this source onto their mobile device."
+              } else {
+                "Online streaming only; offline tile download is disabled on mobile."
+              },
+              style = MaterialTheme.typography.labelSmall,
+              color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+          }
+          if (isManager) {
+            Switch(
+              checked = source.allowOfflineDownload,
+              onCheckedChange = { allowed ->
+                state.setOrganizationImagerySourceOfflineAllowed(
+                  organizationId = organization.id,
+                  sourceId = source.id,
+                  allowOfflineDownload = allowed,
+                )
+              },
+            )
+          } else {
+            Text(
+              if (source.allowOfflineDownload) "Permitted" else "Not permitted",
+              style = MaterialTheme.typography.labelMedium,
+              color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+          }
+        }
+      }
+    }
+  }
+}
+
+@Composable
+private fun AddImagerySourceCard(state: PrototypeAppState, organization: Organization) {
+  var name by remember(organization.id) { mutableStateOf("") }
+  var urlTemplate by remember(organization.id) { mutableStateOf("") }
+  var sourceType by remember(organization.id) { mutableStateOf(ImagerySourceType.XYZ_TILES) }
+  var allowOfflineDownload by remember(organization.id) { mutableStateOf(true) }
+  var error by remember(organization.id) { mutableStateOf<String?>(null) }
+
+  DetailsCard("Add imagery source") {
+    Text(
+      "Add a raster tile service that collectors and organizers can toggle on in the basemap " +
+        "layers dialog.",
+      style = MaterialTheme.typography.bodySmall,
+      color = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
+    Box(modifier = Modifier.widthIn(max = 280.dp)) {
+      DropdownSelector(
+        label = "Source type",
+        selectedText = sourceType.label,
+        options = ImagerySourceType.entries,
+        optionText = { it.label },
+        onSelect = { sourceType = it },
+      )
+    }
+    OutlinedTextField(
+      value = name,
+      onValueChange = {
+        name = it
+        error = null
+      },
+      label = { Text("Source name") },
+      placeholder = { Text("e.g. OpenTopoMap Contours") },
+      singleLine = true,
+      modifier = Modifier.fillMaxWidth(),
+    )
+    OutlinedTextField(
+      value = urlTemplate,
+      onValueChange = {
+        urlTemplate = it
+        error = null
+      },
+      label = { Text("XYZ tile URL") },
+      placeholder = { Text("https://tile.opentopomap.org/{z}/{x}/{y}.png") },
+      singleLine = true,
+      isError = error != null,
+      supportingText =
+        error?.let { { Text(it) } }
+          ?: {
+            Text("Web Mercator raster tile URL template containing {z}, {x}, and {y} placeholders.")
+          },
+      textStyle = MaterialTheme.typography.bodyMedium.copy(fontFamily = FontFamily.Monospace),
+      modifier = Modifier.fillMaxWidth(),
+    )
+    Row(
+      modifier = Modifier.fillMaxWidth(),
+      horizontalArrangement = Arrangement.SpaceBetween,
+      verticalAlignment = Alignment.CenterVertically,
+    ) {
+      Column(modifier = Modifier.weight(1f)) {
+        Text(
+          "Permit offline download on mobile",
+          style = MaterialTheme.typography.bodyMedium,
+          fontWeight = FontWeight.Medium,
+        )
+        Text(
+          "Allow collectors on mobile devices to download tiles from this XYZ source for " +
+            "offline field use.",
+          style = MaterialTheme.typography.bodySmall,
+          color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+      }
+      Switch(checked = allowOfflineDownload, onCheckedChange = { allowOfflineDownload = it })
+    }
+    Button(
+      onClick = {
+        val validationError =
+          state.addOrganizationImagerySource(
+            organizationId = organization.id,
+            name = name,
+            urlTemplate = urlTemplate,
+            type = sourceType,
+            allowOfflineDownload = allowOfflineDownload,
+          )
+        if (validationError == null) {
+          name = ""
+          urlTemplate = ""
+          allowOfflineDownload = true
+          error = null
+        } else {
+          error = validationError
+        }
+      },
+      enabled = name.isNotBlank() && urlTemplate.isNotBlank(),
+    ) {
+      Icon(Icons.Outlined.Add, contentDescription = null)
+      Spacer(Modifier.width(6.dp))
+      Text("Add imagery source")
     }
   }
 }
@@ -785,7 +1192,11 @@ private fun DangerZoneCard(state: PrototypeAppState, organization: Organization)
             confirmingDelete = false
             state.deleteOrganization(organization.id)
           },
-          colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
+          colors =
+            ButtonDefaults.buttonColors(
+              containerColor = MaterialTheme.colorScheme.error,
+              contentColor = MaterialTheme.colorScheme.onError,
+            ),
         ) {
           Text("Delete organization")
         }

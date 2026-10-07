@@ -335,6 +335,53 @@ class SurveyMapContentTest {
     }
   }
 
+  @Test
+  fun imagerySources_fromAllUsersAndSurveyOrgCanBeToggledAndRenderedOnBasemap() {
+    val allUsersSource = state.allUsersImagerySources.single()
+    val surveyOrgSource = state.activeSurveyOrganizationImagerySources.single()
+    assertTrue(allUsersSource.isValidXyzUrl)
+    assertTrue(surveyOrgSource.isValidXyzUrl)
+
+    val beforeBasemap =
+      SurveyMapContent.main(state, showNavigation = false).content.basemap
+        as org.groundplatform.v2.map.Basemap.RasterTiles
+    val baseLayerCount = beforeBasemap.layers.size
+
+    // Toggle both "All users" and survey-specific Organization imagery layers on.
+    state.toggleImagerySource(allUsersSource.id)
+    state.toggleImagerySource(surveyOrgSource.id)
+    assertTrue(state.isImagerySourceEnabled(allUsersSource.id))
+    assertTrue(state.isImagerySourceEnabled(surveyOrgSource.id))
+
+    val afterBasemap =
+      SurveyMapContent.main(state, showNavigation = false).content.basemap
+        as org.groundplatform.v2.map.Basemap.RasterTiles
+    assertEquals(baseLayerCount + 2, afterBasemap.layers.size)
+    assertEquals(
+      listOf(allUsersSource.urlTemplate, surveyOrgSource.urlTemplate),
+      afterBasemap.layers.takeLast(2).map { it.urlTemplate },
+    )
+
+    // Add a new XYZ tile source to "All users" with offline download permitted toggled off.
+    val err =
+      state.addOrganizationImagerySource(
+        organizationId = state.allUsersOrganization!!.id,
+        name = "USGS Topo",
+        urlTemplate =
+          "https://basemap.nationalmap.gov/arcgis/rest/services/USGSTopo/MapServer/tile/{z}/{y}/{x}",
+        allowOfflineDownload = false,
+      )
+    assertEquals(null, err)
+    val added = state.allUsersImagerySources.first { it.name == "USGS Topo" }
+    assertFalse(added.allowOfflineDownload)
+    state.setOrganizationImagerySourceOfflineAllowed(
+      organizationId = state.allUsersOrganization!!.id,
+      sourceId = added.id,
+      allowOfflineDownload = true,
+    )
+    assertTrue(state.allUsersImagerySources.first { it.id == added.id }.allowOfflineDownload)
+  }
+
   private fun assertNear(expected: Double, actual: Double, tolerance: Double = 1e-9) =
     assertTrue(abs(expected - actual) <= tolerance, "expected $expected but was $actual")
 }

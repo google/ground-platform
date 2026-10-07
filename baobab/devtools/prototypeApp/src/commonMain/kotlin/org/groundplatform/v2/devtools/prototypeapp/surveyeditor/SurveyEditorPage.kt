@@ -672,6 +672,7 @@ private fun OrganizationSection(state: SurveyEditorState, appState: PrototypeApp
     state.organizationNotice?.let { notice ->
       Surface(
         color = MaterialTheme.colorScheme.secondaryContainer,
+        contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
         shape = MaterialTheme.shapes.medium,
       ) {
         Row(

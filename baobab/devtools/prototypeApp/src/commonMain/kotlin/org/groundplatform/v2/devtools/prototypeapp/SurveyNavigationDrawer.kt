@@ -128,8 +128,8 @@ internal fun MainSurveyNavigationDrawerOverlay(state: PrototypeAppState) {
           // User Profile & Organization Header
           Surface(
             modifier = Modifier.fillMaxWidth(),
-            color = Color(0xFF1D5128),
-            contentColor = Color.White,
+            color = MaterialTheme.colorScheme.primaryContainer,
+            contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
           ) {
             Column(
               modifier = Modifier.padding(horizontal = 18.dp, vertical = 20.dp),
@@ -153,7 +153,7 @@ internal fun MainSurveyNavigationDrawerOverlay(state: PrototypeAppState) {
                         fontWeight = FontWeight.ExtraBold,
                         letterSpacing = 0.5.sp,
                       ),
-                    color = Color.White,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer,
                   )
                 }
                 IconButton(
@@ -163,7 +163,7 @@ internal fun MainSurveyNavigationDrawerOverlay(state: PrototypeAppState) {
                   Icon(
                     imageVector = Icons.Outlined.Close,
                     contentDescription = "Close Drawer",
-                    tint = Color.White,
+                    tint = MaterialTheme.colorScheme.onPrimaryContainer,
                     modifier = Modifier.size(18.dp),
                   )
                 }
@@ -174,32 +174,35 @@ internal fun MainSurveyNavigationDrawerOverlay(state: PrototypeAppState) {
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
               ) {
                 Box(
-                  modifier = Modifier.size(40.dp).clip(CircleShape).background(Color(0xFF9CD49F)),
+                  modifier =
+                    Modifier.size(40.dp)
+                      .clip(CircleShape)
+                      .background(MaterialTheme.colorScheme.primary),
                   contentAlignment = Alignment.Center,
                 ) {
                   Text(
                     text = "ML",
                     style =
                       MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.ExtraBold),
-                    color = Color(0xFF003914),
+                    color = MaterialTheme.colorScheme.onPrimary,
                   )
                 }
                 Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                   Text(
                     text = state.signedInUserName,
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                    color = Color.White,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer,
                   )
                   Text(
                     text = state.signedInUserEmail,
                     style = MaterialTheme.typography.labelSmall,
-                    color = Color(0xFFB7F1B9),
+                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.85f),
                   )
                   Text(
                     text = state.signedInOrganization,
                     style =
                       MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
-                    color = Color(0xFF9CD49F),
+                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.85f),
                   )
                 }
               }
@@ -210,6 +213,7 @@ internal fun MainSurveyNavigationDrawerOverlay(state: PrototypeAppState) {
           Surface(
             modifier = Modifier.fillMaxWidth(),
             color = MaterialTheme.colorScheme.surfaceContainer,
+            contentColor = MaterialTheme.colorScheme.onSurface,
           ) {
             Column(
               modifier = Modifier.padding(horizontal = 18.dp, vertical = 10.dp),
@@ -752,10 +756,16 @@ internal fun SwitchDownloadedSurveysSubScreen(state: PrototypeAppState) {
           CardDefaults.outlinedCardColors(
             containerColor =
               if (isActive) {
-                MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.35f)
+                MaterialTheme.colorScheme.secondaryContainer
               } else {
                 MaterialTheme.colorScheme.surface
-              }
+              },
+            contentColor =
+              if (isActive) {
+                MaterialTheme.colorScheme.onSecondaryContainer
+              } else {
+                MaterialTheme.colorScheme.onSurface
+              },
           ),
       ) {
         Row(
@@ -771,7 +781,12 @@ internal fun SwitchDownloadedSurveysSubScreen(state: PrototypeAppState) {
               Text(
                 text = survey.title,
                 style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
-                color = MaterialTheme.colorScheme.onSurface,
+                color =
+                  if (isActive) {
+                    MaterialTheme.colorScheme.onSecondaryContainer
+                  } else {
+                    MaterialTheme.colorScheme.onSurface
+                  },
               )
               if (isActive) {
                 GroundTonalBadge(text = "ACTIVE", tone = GroundBadgeTone.PRIMARY)
@@ -781,12 +796,22 @@ internal fun SwitchDownloadedSurveysSubScreen(state: PrototypeAppState) {
               text =
                 "${survey.location} • ${survey.entityCount} locations • ${survey.offlineSizeLabel}",
               style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
-              color = MaterialTheme.colorScheme.primary,
+              color =
+                if (isActive) {
+                  MaterialTheme.colorScheme.onSecondaryContainer
+                } else {
+                  MaterialTheme.colorScheme.primary
+                },
             )
             Text(
               text = survey.description,
               style = MaterialTheme.typography.bodySmall,
-              color = MaterialTheme.colorScheme.onSurfaceVariant,
+              color =
+                if (isActive) {
+                  MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.85f)
+                } else {
+                  MaterialTheme.colorScheme.onSurfaceVariant
+                },
               maxLines = 2,
               overflow = TextOverflow.Ellipsis,
             )

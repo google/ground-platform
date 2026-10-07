@@ -129,6 +129,7 @@ import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.pointerInput
@@ -919,7 +920,8 @@ private fun ScreenPreviewCard(
     shape = MaterialTheme.shapes.medium,
     colors =
       CardDefaults.outlinedCardColors(
-        containerColor = if (isSelected) colors.secondaryContainer else colors.surface
+        containerColor = if (isSelected) colors.secondaryContainer else colors.surface,
+        contentColor = if (isSelected) colors.onSecondaryContainer else colors.onSurface,
       ),
     border =
       BorderStroke(
@@ -942,7 +944,12 @@ private fun ScreenPreviewCard(
         Icon(
           Icons.Outlined.DragIndicator,
           contentDescription = "Drag to reorder",
-          tint = if (isDragged) colors.onSurface else colors.onSurfaceVariant,
+          tint =
+            when {
+              isSelected -> colors.onSecondaryContainer
+              isDragged -> colors.onSurface
+              else -> colors.onSurfaceVariant
+            },
           modifier = Modifier.size(16.dp),
         )
         GroundTonalBadge(text = "Q${index + 1}", tone = GroundBadgeTone.NEUTRAL)
@@ -950,12 +957,12 @@ private fun ScreenPreviewCard(
           questionTypeIcon(question.type),
           contentDescription = null,
           modifier = Modifier.size(14.dp),
-          tint = colors.onSurfaceVariant,
+          tint = if (isSelected) colors.onSecondaryContainer else colors.onSurfaceVariant,
         )
         Text(
           text = question.type.label,
           style = MaterialTheme.typography.labelSmall,
-          color = colors.onSurfaceVariant,
+          color = if (isSelected) colors.onSecondaryContainer else colors.onSurfaceVariant,
           modifier = Modifier.weight(1f),
           maxLines = 1,
           overflow = TextOverflow.Ellipsis,
@@ -972,7 +979,12 @@ private fun ScreenPreviewCard(
       Text(
         text = form.describeRelevance(question) ?: "Always shown",
         style = MaterialTheme.typography.labelSmall,
-        color = if (question.isConditional) colors.primary else colors.onSurfaceVariant,
+        color =
+          when {
+            isSelected -> colors.onSecondaryContainer
+            question.isConditional -> colors.primary
+            else -> colors.onSurfaceVariant
+          },
         fontWeight = if (question.isConditional) FontWeight.Bold else FontWeight.Normal,
         maxLines = 1,
         overflow = TextOverflow.Ellipsis,
@@ -984,7 +996,7 @@ private fun ScreenPreviewCard(
       Text(
         text = question.name + if (question.required) " *" else "",
         style = MaterialTheme.typography.labelSmall.copy(fontFamily = FontFamily.Monospace),
-        color = colors.onSurfaceVariant,
+        color = if (isSelected) colors.onSecondaryContainer else colors.onSurfaceVariant,
         maxLines = 1,
         overflow = TextOverflow.Ellipsis,
         modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
@@ -997,56 +1009,59 @@ private fun ScreenPreviewCard(
 @Composable
 private fun MiniScreen(question: EditorQuestion, formTitle: String, modifier: Modifier = Modifier) {
   val colors = MaterialTheme.colorScheme
-  Column(
-    modifier =
-      modifier
-        .clip(RoundedCornerShape(10.dp))
-        .background(colors.surfaceContainerLowest)
-        .border(1.dp, colors.outlineVariant, RoundedCornerShape(10.dp))
+  Surface(
+    modifier = modifier,
+    shape = RoundedCornerShape(10.dp),
+    color = colors.surfaceContainerLowest,
+    contentColor = colors.onSurface,
+    border = BorderStroke(1.dp, colors.outlineVariant),
   ) {
-    Box(
-      modifier =
-        Modifier.fillMaxWidth()
-          .background(colors.primary)
-          .padding(horizontal = 8.dp, vertical = 5.dp)
-    ) {
-      Text(
-        text = formTitle.ifBlank { "Untitled form" },
-        style = MaterialTheme.typography.labelSmall,
-        color = colors.onPrimary,
-        maxLines = 1,
-        overflow = TextOverflow.Ellipsis,
-      )
-    }
-    Column(
-      modifier = Modifier.weight(1f).fillMaxWidth().padding(8.dp),
-      verticalArrangement = Arrangement.spacedBy(4.dp),
-    ) {
-      Text(
-        text = question.label.ifBlank { "(no label)" } + if (question.required) " *" else "",
-        style = MaterialTheme.typography.labelLarge,
-        fontWeight = FontWeight.Bold,
-        maxLines = 3,
-        overflow = TextOverflow.Ellipsis,
-      )
-      if (question.hint.isNotBlank()) {
+    Column(modifier = Modifier.fillMaxSize()) {
+      Box(
+        modifier =
+          Modifier.fillMaxWidth()
+            .background(colors.primary)
+            .padding(horizontal = 8.dp, vertical = 5.dp)
+      ) {
         Text(
-          text = question.hint,
+          text = formTitle.ifBlank { "Untitled form" },
           style = MaterialTheme.typography.labelSmall,
-          color = colors.onSurfaceVariant,
-          maxLines = 2,
+          color = colors.onPrimary,
+          maxLines = 1,
           overflow = TextOverflow.Ellipsis,
         )
       }
-      Spacer(Modifier.height(2.dp))
-      MiniWidget(question)
-    }
-    Row(
-      modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 6.dp),
-      horizontalArrangement = Arrangement.SpaceBetween,
-    ) {
-      MiniButton("Back", filled = false)
-      MiniButton("Next", filled = true)
+      Column(
+        modifier = Modifier.weight(1f).fillMaxWidth().padding(8.dp),
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+      ) {
+        Text(
+          text = question.label.ifBlank { "(no label)" } + if (question.required) " *" else "",
+          style = MaterialTheme.typography.labelLarge,
+          color = colors.onSurface,
+          fontWeight = FontWeight.Bold,
+          maxLines = 3,
+          overflow = TextOverflow.Ellipsis,
+        )
+        if (question.hint.isNotBlank()) {
+          Text(
+            text = question.hint,
+            style = MaterialTheme.typography.labelSmall,
+            color = colors.onSurfaceVariant,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
+          )
+        }
+        Spacer(Modifier.height(2.dp))
+        MiniWidget(question)
+      }
+      Row(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 6.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+      ) {
+        MiniButton("Back", filled = false)
+        MiniButton("Next", filled = true)
+      }
     }
   }
 }
@@ -1830,10 +1845,16 @@ internal fun ColorDot(
     contentAlignment = Alignment.Center,
   ) {
     if (isSelected) {
+      val checkTint =
+        when {
+          fill == null -> colors.onSurface
+          fill.luminance() > 0.6f -> Color(0xFF181D18)
+          else -> Color.White
+        }
       Icon(
         Icons.Outlined.Check,
         contentDescription = null,
-        tint = Color.White,
+        tint = checkTint,
         modifier = Modifier.size(size * 0.7f),
       )
     }
@@ -2204,15 +2225,27 @@ private fun PreviewSidePanel(state: FormEditorState) {
           color = colors.onSurfaceVariant,
         )
         if (state.previewSubmitted) {
-          Surface(color = colors.primaryContainer, shape = MaterialTheme.shapes.small) {
+          Surface(
+            color = colors.primaryContainer,
+            contentColor = colors.onPrimaryContainer,
+            shape = MaterialTheme.shapes.small,
+          ) {
             Row(
               modifier = Modifier.fillMaxWidth().padding(10.dp),
               verticalAlignment = Alignment.CenterVertically,
             ) {
               // Filled: indicates the validation-passed state.
-              Icon(Icons.Filled.CheckCircle, contentDescription = null, tint = colors.primary)
+              Icon(
+                Icons.Filled.CheckCircle,
+                contentDescription = null,
+                tint = colors.onPrimaryContainer,
+              )
               Spacer(Modifier.width(8.dp))
-              Text("Submission passed validation.", style = MaterialTheme.typography.bodyMedium)
+              Text(
+                "Submission passed validation.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = colors.onPrimaryContainer,
+              )
             }
           }
         }
@@ -2232,12 +2265,13 @@ private fun PreviewSidePanel(state: FormEditorState) {
               text = if (step is FormWizardStep.SummaryStep) "✓" else "${i + 1}",
               style = MaterialTheme.typography.labelMedium,
               fontWeight = FontWeight.Bold,
-              color = colors.primary,
+              color = if (isCurrent) colors.onSecondaryContainer else colors.primary,
               modifier = Modifier.width(24.dp),
             )
             Text(
               text = step.title,
               style = MaterialTheme.typography.bodySmall,
+              color = if (isCurrent) colors.onSecondaryContainer else colors.onSurface,
               fontWeight = if (isCurrent) FontWeight.Bold else FontWeight.Normal,
               maxLines = 1,
               overflow = TextOverflow.Ellipsis,

@@ -14,17 +14,20 @@
 package org.groundplatform.v2.devtools.prototypeapp.data.seed
 
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.CachedProfile
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.ImagerySource
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.ImagerySourceType
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.MembershipStatus
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.Organization
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.OrganizationMember
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.OrganizationRole
 
 /**
- * Sample organizations for the prototype. The signed-in user (`maya.lin@groundplatform.org`) is a
- * Manager of [KENYA_FOREST_SERVICE], a Member of [MEKONG_MANGROVE_ALLIANCE], and not (yet) part of
- * the listed [OPEN_FORIS_COMMUNITY].
+ * Sample organizations for the prototype. Includes the synthetic [ALL_USERS] organization (whose
+ * imagery sources are available across all surveys), plus [KENYA_FOREST_SERVICE],
+ * [MEKONG_MANGROVE_ALLIANCE], and the listed [OPEN_FORIS_COMMUNITY].
  */
 internal object PrototypeFakeOrganizationsData {
+  const val ALL_USERS = Organization.ALL_USERS_ID
   const val KENYA_FOREST_SERVICE = "org-kenya-forest-service"
   const val MEKONG_MANGROVE_ALLIANCE = "org-mekong-mangrove-alliance"
   const val OPEN_FORIS_COMMUNITY = "org-open-foris-community"
@@ -37,6 +40,27 @@ internal object PrototypeFakeOrganizationsData {
   fun defaultOrganizations(): List<Organization> =
     listOf(
       Organization(
+        id = ALL_USERS,
+        name = "All users",
+        description =
+          "Synthetic platform-wide organization providing shared imagery sources to every " +
+            "Ground user across all surveys.",
+        logoUrl = "avatar:2",
+        isListed = false,
+        isSynthetic = true,
+        createdOn = "2025-01-01",
+        imagerySources =
+          listOf(
+            ImagerySource(
+              id = "imagery-all-users-opentopomap",
+              name = "OpenTopoMap Contours",
+              urlTemplate = "https://tile.opentopomap.org/{z}/{x}/{y}.png",
+              type = ImagerySourceType.XYZ_TILES,
+              allowOfflineDownload = true,
+            )
+          ),
+      ),
+      Organization(
         id = KENYA_FOREST_SERVICE,
         name = "Kenya Forest Service",
         description =
@@ -46,6 +70,17 @@ internal object PrototypeFakeOrganizationsData {
         logoUrl = "avatar:0",
         isListed = true,
         createdOn = "2026-01-12",
+        imagerySources =
+          listOf(
+            ImagerySource(
+              id = "imagery-kfs-hillshade",
+              name = "Kenya Forest Hillshade",
+              urlTemplate =
+                "https://server.arcgisonline.com/ArcGIS/rest/services/Elevation/World_Hillshade/MapServer/tile/{z}/{y}/{x}",
+              type = ImagerySourceType.XYZ_TILES,
+              allowOfflineDownload = true,
+            )
+          ),
         members =
           listOf(
             OrganizationMember(
@@ -96,6 +131,16 @@ internal object PrototypeFakeOrganizationsData {
         logoUrl = "avatar:4",
         isListed = true,
         createdOn = "2025-11-03",
+        imagerySources =
+          listOf(
+            ImagerySource(
+              id = "imagery-mma-osm",
+              name = "Mekong Delta OpenStreetMap",
+              urlTemplate = "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+              type = ImagerySourceType.XYZ_TILES,
+              allowOfflineDownload = false,
+            )
+          ),
         members =
           listOf(
             OrganizationMember(

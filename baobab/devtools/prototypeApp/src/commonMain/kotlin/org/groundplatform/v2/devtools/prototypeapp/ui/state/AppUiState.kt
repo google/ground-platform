@@ -73,6 +73,7 @@ data class AppUiState(
   val isLayersSheetOpen: Boolean = false,
   val selectedBasemapType: BasemapType = BasemapType.NORMAL,
   val selectedOfflineBasemapStyle: OfflineBasemapStyle = OfflineBasemapStyle.SATELLITE_HYBRID,
+  val enabledImagerySourceIds: Set<String> = emptySet(),
   val isDrawerOpen: Boolean = false,
   val activeDrawerSubView: MainDrawerSubView = MainDrawerSubView.NONE,
   val selectedUploadStatusFilter: UploadStatusFilter? = null,

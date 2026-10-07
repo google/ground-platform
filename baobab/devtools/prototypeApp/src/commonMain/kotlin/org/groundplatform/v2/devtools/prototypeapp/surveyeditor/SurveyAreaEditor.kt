@@ -671,14 +671,28 @@ private fun DrawTab(editor: SurveyAreaEditorState, center: LatLng, zoom: Double)
           verticalAlignment = Alignment.CenterVertically,
         ) {
           Column(modifier = Modifier.weight(1f)) {
-            Text("Part ${index + 1}", style = MaterialTheme.typography.bodyMedium)
+            Text(
+              "Part ${index + 1}",
+              style = MaterialTheme.typography.bodyMedium,
+              color =
+                if (selected) {
+                  MaterialTheme.colorScheme.onSecondaryContainer
+                } else {
+                  MaterialTheme.colorScheme.onSurface
+                },
+            )
             Text(
               "${row.geometry.size} vertices • " +
                 SurveyAreaGeometry.formatArea(
                   SurveyAreaGeometry.ringAreaSquareMeters(row.geometry)
                 ),
               style = MaterialTheme.typography.bodySmall,
-              color = MaterialTheme.colorScheme.onSurfaceVariant,
+              color =
+                if (selected) {
+                  MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.85f)
+                } else {
+                  MaterialTheme.colorScheme.onSurfaceVariant
+                },
             )
           }
           IconButton(
@@ -687,7 +701,16 @@ private fun DrawTab(editor: SurveyAreaEditorState, center: LatLng, zoom: Double)
               editor.deleteDrawnPart(index)
             }
           ) {
-            Icon(Icons.Outlined.Delete, contentDescription = "Delete part ${index + 1}")
+            Icon(
+              Icons.Outlined.Delete,
+              contentDescription = "Delete part ${index + 1}",
+              tint =
+                if (selected) {
+                  MaterialTheme.colorScheme.onSecondaryContainer
+                } else {
+                  MaterialTheme.colorScheme.onSurfaceVariant
+                },
+            )
           }
         }
       }

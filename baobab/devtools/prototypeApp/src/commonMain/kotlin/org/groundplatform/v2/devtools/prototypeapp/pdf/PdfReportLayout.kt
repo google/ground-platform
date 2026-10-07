@@ -39,11 +39,11 @@ internal class GeneratedPdf(val fileName: String, val bytes: ByteArray, val page
 /** Palette used by Ground reports, aligned with `GroundTheme`'s light color scheme. */
 internal object PdfPalette {
   val primary = PdfColor.fromArgb(0xFF36693E)
-  val onSurface = PdfColor.fromArgb(0xFF1A1C19)
+  val onSurface = PdfColor.fromArgb(0xFF181D18)
   val onSurfaceVariant = PdfColor.fromArgb(0xFF424940)
-  val outline = PdfColor.fromArgb(0xFF72796F)
-  val outlineVariant = PdfColor.fromArgb(0xFFC2C9BD)
-  val surfaceContainer = PdfColor.fromArgb(0xFFF0F1EB)
+  val outline = PdfColor.fromArgb(0xFF727970)
+  val outlineVariant = PdfColor.fromArgb(0xFFC1C9BE)
+  val surfaceContainer = PdfColor.fromArgb(0xFFEBEFE7)
   val error = PdfColor.fromArgb(0xFFBA1A1A)
   val tertiary = PdfColor.fromArgb(0xFF39656C)
 }

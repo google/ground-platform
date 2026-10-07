@@ -20,12 +20,13 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.OrganizationRole
 
 /**
  * Sections of the web organization page, in the order they appear in its left panel. Everyone sees
- * all three; Details is read-only for anyone who isn't a Manager.
+ * all tabs; Details and Imagery sources are read-only for anyone who isn't a Manager.
  */
 enum class OrganizationTab(val label: String) {
   DETAILS("Organization details"),
   SURVEYS("Surveys"),
   MEMBERS("Members"),
+  IMAGERY_SOURCES("Imagery sources"),
 }
 
 /** How the signed-in user relates to an organization on the organizations list. */
@@ -48,6 +49,7 @@ data class OrganizationMembersView(
 object OrganizationPages {
 
   fun relationOf(organization: Organization, email: String): OrganizationRelation {
+    if (organization.isSynthetic) return OrganizationRelation.MANAGER
     val member = organization.member(email) ?: return OrganizationRelation.NONE
     return when (member.status) {
       MembershipStatus.ACTIVE ->
@@ -58,18 +60,23 @@ object OrganizationPages {
     }
   }
 
-  /** Organizations [email] is an active member of, Managers first, then by name. */
+  /**
+   * Organizations [email] is an active member of (plus the synthetic `"All users"` organization if
+   * present), with synthetic first, then Managers, then by name.
+   */
   fun mine(organizations: List<Organization>, email: String): List<Organization> =
     organizations
-      .filter { it.isMember(email) }
-      .sortedWith(compareBy({ !it.isManager(email) }, { it.name.lowercase() }))
+      .filter { it.isSynthetic || it.isMember(email) }
+      .sortedWith(compareBy({ !it.isSynthetic }, { !it.isManager(email) }, { it.name.lowercase() }))
 
   /**
    * Listed organizations [email] isn't an active member of (including ones they've been invited to
-   * or asked to join), by name. Unlisted organizations are only reachable by invite.
+   * or asked to join), by name. Unlisted and synthetic organizations are excluded.
    */
   fun discoverable(organizations: List<Organization>, email: String): List<Organization> =
-    organizations.filter { it.isListed && !it.isMember(email) }.sortedBy { it.name.lowercase() }
+    organizations
+      .filter { !it.isSynthetic && it.isListed && !it.isMember(email) }
+      .sortedBy { it.name.lowercase() }
 
   /** Case-insensitive match on name and description. */
   fun search(organizations: List<Organization>, query: String): List<Organization> {

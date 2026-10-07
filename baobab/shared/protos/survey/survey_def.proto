@@ -235,9 +235,7 @@ message EntityDatasetDef {
 //     separated by ";" without surrounding spaces, each point exactly four
 //     space-separated numbers "lat lng altitude accuracy" (altitude and
 //     accuracy are 0), e.g. "-1.0001 37.0002 0 0;-1.0003 37.0004 0 0".
-//     Uploaded and migrated sample points use the same property. At most 100
-//     points per plot; larger designs use a separate point dataset linked by
-//     "plot_id".
+//     Uploaded and migrated sample points use the same property.
 //   - "sample_ids": Optional space-separated sample identifiers, one per point
 //     in "samples" and in the same order (default: "1 2 3 ...").
 // Desk interpretation labels are repeat instances in the interpretation
