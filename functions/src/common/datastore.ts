@@ -22,6 +22,7 @@ import {
   FieldValue,
   Firestore,
   GeoPoint,
+  QuerySnapshot,
 } from 'firebase-admin/firestore';
 import type { Geometry } from 'geojson';
 import { registry, toDocumentData } from '@ground/lib';
@@ -37,6 +38,9 @@ const ai = registry.getFieldIds(Pb.AuditInfo);
 
 /** gRPC status code returned by Firestore when a document doesn't exist. */
 const GRPC_STATUS_NOT_FOUND = 5;
+
+/** How long cached property generator configs are reused before re-reading. */
+const PROPERTY_GENERATORS_TTL_MS = 5 * 60 * 60 * 1000;
 
 /**
  *
@@ -113,6 +117,8 @@ export const mailTemplate = (templateId: string) =>
 
 export class Datastore {
   private db_: Firestore;
+  private propertyGenerators_?: QuerySnapshot;
+  private propertyGeneratorsExpiry_ = 0;
 
   constructor(db: Firestore) {
     this.db_ = db;
@@ -150,8 +156,20 @@ export class Datastore {
     return this.db_.collection(path).get();
   }
 
-  fetchPropertyGenerators() {
-    return this.db_.collection(integrations() + '/propertyGenerators').get();
+  /**
+   * Returns the property generator configs, caching the result for up to
+   * PROPERTY_GENERATORS_TTL_MS. These are global configs which change rarely,
+   * and which would otherwise be re-read once per created LOI.
+   */
+  async fetchPropertyGenerators(): Promise<QuerySnapshot> {
+    const now = Date.now();
+    if (!this.propertyGenerators_ || now > this.propertyGeneratorsExpiry_) {
+      this.propertyGenerators_ = await this.db_
+        .collection(integrations() + '/propertyGenerators')
+        .get();
+      this.propertyGeneratorsExpiry_ = now + PROPERTY_GENERATORS_TTL_MS;
+    }
+    return this.propertyGenerators_;
   }
 
   fetchMailConfig() {
@@ -243,16 +261,25 @@ export class Datastore {
     await this.db_.doc(survey(surveyId)).collection('lois').add(loiDoc);
   }
 
+  /**
+   * Bulk-inserts `loiDocs`, returning the id of the last one created so that
+   * callers can name it when announcing the batch. Returns null when there was
+   * nothing to insert.
+   */
   async insertLocationsOfInterest(
     surveyId: string,
     loiDocs: DocumentData[]
-  ): Promise<void> {
+  ): Promise<string | null> {
     const bulkWriter = this.db_.bulkWriter();
     const collectionRef = this.db_.collection(lois(surveyId));
+    let lastId: string | null = null;
     for (const loiDoc of loiDocs) {
-      bulkWriter.create(collectionRef.doc(), loiDoc);
+      const docRef = collectionRef.doc();
+      bulkWriter.create(docRef, loiDoc);
+      lastId = docRef.id;
     }
     await bulkWriter.close();
+    return lastId;
   }
 
   async countSubmissionsForLoi(
