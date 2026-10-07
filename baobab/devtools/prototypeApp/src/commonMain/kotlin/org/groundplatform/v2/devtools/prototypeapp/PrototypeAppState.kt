@@ -18,9 +18,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import groundplatform.v2.forms.FormDef
 import groundplatform.v2.forms.RecordInstance
-import kotlin.math.abs
-import kotlin.math.hypot
-import kotlin.math.pow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import org.groundplatform.v2.core.forms.model.EntityState
@@ -33,7 +30,8 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyMapAnchor
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SurveyEditorDraft
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.withEditorFormAvailability
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.withEditorLayerStyles
-import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.ClusterMapFeaturesUseCase
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.singularTypeLabelOf
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.toClusterFeatures
 import org.groundplatform.v2.devtools.prototypeapp.map.DraftGeometry
 import org.groundplatform.v2.devtools.prototypeapp.map.EntityGeometry
 import org.groundplatform.v2.devtools.prototypeapp.map.FormGeometryOverlay
@@ -43,18 +41,15 @@ import org.groundplatform.v2.devtools.prototypeapp.surveyeditor.SurveyAccess
 import org.groundplatform.v2.devtools.prototypeapp.ui.state.OnboardingEvent
 import org.groundplatform.v2.devtools.prototypeapp.ui.state.PrototypeUiState
 import org.groundplatform.v2.devtools.prototypeapp.ui.state.SettingsEvent
+import org.groundplatform.v2.devtools.prototypeapp.ui.state.SurveyMapEvent
+import org.groundplatform.v2.devtools.prototypeapp.ui.state.SurveyMapUiState
 import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.OnboardingViewModel
 import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.PrototypeAppViewModel
 import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.SettingsViewModel
+import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.SurveyMapViewModel
 import org.groundplatform.v2.map.CameraPosition
 import org.groundplatform.v2.map.LatLng
 import org.groundplatform.v2.map.LngLatBounds
-
-/**
- * `mapZoomDelta` (relative to the survey's default `15.3z`) at or below which map features are
- * clustered: about `12.95z`.
- */
-internal const val MapClusteringZoomDelta = -2.35f
 
 /**
  * State controller for the Ground 2.0 UI Prototype workbench (`devtools/prototypeApp`).
@@ -105,6 +100,30 @@ class PrototypeAppState(
 
   private var settingsState by mutableStateOf(settings.uiState.value)
 
+  /**
+   * ViewModel of the survey map viewport (camera, GPS, basemap and imagery, clustering, wayfinding,
+   * and the selected map feature, cluster, or place). The map views observe
+   * [SurveyMapViewModel.uiState] directly; this class mirrors it for the rest of the UI and applies
+   * its [SurveyMapEvent]s to the app shell.
+   */
+  val surveyMap: SurveyMapViewModel =
+    SurveyMapViewModel(
+      surveyRepository = viewModel.surveyRepository,
+      organizationRepository = viewModel.organizationRepository,
+      settingsRepository = viewModel.settingsRepository,
+      locationRepository = viewModel.locationRepository,
+      placeRepository = viewModel.placeRepository,
+      scope = viewModel.scope,
+      clusterMapFeatures = viewModel.clusterMapFeaturesUseCase,
+      computeWayfindingNavigation = viewModel.computeWayfindingNavigationUseCase,
+    )
+
+  private var mapState by mutableStateOf(surveyMap.uiState.value)
+
+  /** Latest [SurveyMapUiState], for views that build the map from the app shell. */
+  val surveyMapUiState: SurveyMapUiState
+    get() = mapState
+
   init {
     viewModel.scope.launch { viewModel.appData.collect { data = it } }
     viewModel.scope.launch { onboarding.uiState.collect { onboardingState = it } }
@@ -116,6 +135,51 @@ class PrototypeAppState(
           is SettingsEvent.Notice -> activeSurveyNotice = event.message
         }
       }
+    }
+    viewModel.scope.launch { surveyMap.uiState.collect { mapState = it } }
+    viewModel.scope.launch { surveyMap.events.collect(::onSurveyMapEvent) }
+  }
+
+  /** Applies a map outcome to the rest of the app shell (list selection, drawer, notices). */
+  private fun onSurveyMapEvent(event: SurveyMapEvent) {
+    when (event) {
+      is SurveyMapEvent.EntitySelected -> {
+        selectedSubmissionId = null
+        selectedLayerDatasetId = null
+        entityDetailsPane = EntityDetailsPane.PROPERTIES
+        mainViewMode = MainSurveyViewMode.MAP
+        val entityId = event.entityId
+        if (entityId != null) {
+          followSelectionInDashboardTable(entityId)
+          if (!isDashboardTableExpanded) {
+            isDetailsPanelExpanded = true
+          }
+        }
+      }
+      is SurveyMapEvent.PlaceSelected -> {
+        selectedSubmissionId = null
+        selectedLayerDatasetId = null
+        mainViewMode = MainSurveyViewMode.MAP
+        activeSurveyNotice = "Centered map on ${event.place.name} (${event.place.coordinatesLabel})"
+      }
+      is SurveyMapEvent.ClusterSelected -> {
+        selectedSubmissionId = null
+        activeSurveyNotice =
+          surveyMap.uiState.value.formatClusterSitesCountLabel(event.cluster.siteCount)
+      }
+      SurveyMapEvent.SelectionCleared -> selectedSubmissionId = null
+      is SurveyMapEvent.NavigationStarted -> {
+        selectedSubmissionId = event.submissionId
+        isDrawerOpen = false
+        activeDrawerSubView = MainDrawerSubView.NONE
+        mainViewMode = MainSurveyViewMode.MAP
+        if (currentScreen != PrototypeScreen.MAIN_SURVEY) {
+          currentScreen = PrototypeScreen.MAIN_SURVEY
+        }
+        activeSurveyNotice = event.notice
+      }
+      SurveyMapEvent.NavigationStopped -> activeSurveyNotice = null
+      is SurveyMapEvent.Notice -> activeSurveyNotice = event.message
     }
   }
 
@@ -155,11 +219,6 @@ class PrototypeAppState(
   /** Writes [surveys] to the local data store (inserting or replacing by ID). */
   private fun storeSurveys(surveys: List<SurveyPreviewItem>) {
     viewModel.launch { viewModel.surveyRepository.setSurveys(surveys) }
-  }
-
-  /** Writes the active survey's [layers] to the local data store. */
-  private fun storeMapLayers(layers: List<MapLayerItem>) {
-    viewModel.launch { viewModel.surveyRepository.setMapLayers(layers) }
   }
 
   /** Writes the active survey's [entities] to the local data store. */
@@ -216,7 +275,7 @@ class PrototypeAppState(
         selectedEntityId = selectedEntityId,
         selectedClusterId = selectedClusterId,
         selectedPlaceId = selectedPlaceId,
-        lastSelectedPlace = lastSelectedPlace,
+        lastSelectedPlace = selectedPlace,
         isEntityBottomSheetExpanded = isEntityBottomSheetExpanded,
         selectedSubmissionId = selectedSubmissionId,
         listSearchQuery = listSearchQuery,
@@ -365,49 +424,38 @@ class PrototypeAppState(
 
   /** Imagery sources configured on the synthetic `"All users"` organization. */
   val allUsersImagerySources: List<ImagerySource>
-    get() = allUsersOrganization?.imagerySources.orEmpty()
+    get() = mapState.allUsersImagerySources
 
   /**
    * Imagery sources configured on the active survey's organization (excluding the synthetic `"All
    * users"` organization so sources are never duplicated).
    */
   val activeSurveyOrganizationImagerySources: List<ImagerySource>
-    get() =
-      activeSurveyOrganization
-        ?.takeIf { !it.isSynthetic && it.id != Organization.ALL_USERS_ID }
-        ?.imagerySources
-        .orEmpty()
+    get() = mapState.activeSurveyOrganizationImagerySources
 
   /**
    * All organization imagery sources available to toggle in the basemap layers dialog for the
    * active survey: `"All users"` sources followed by survey-specific organization sources.
    */
   val availableImagerySources: List<ImagerySource>
-    get() = allUsersImagerySources + activeSurveyOrganizationImagerySources
+    get() = mapState.availableImagerySources
 
   /** IDs of organization imagery sources currently toggled ON in the basemap layers dialog. */
-  var enabledImagerySourceIds by mutableStateOf<Set<String>>(emptySet())
-    private set
+  val enabledImagerySourceIds: Set<String>
+    get() = mapState.enabledImagerySourceIds
 
   /** Returns whether the organization imagery source with [sourceId] is currently toggled ON. */
-  fun isImagerySourceEnabled(sourceId: String): Boolean = sourceId in enabledImagerySourceIds
+  fun isImagerySourceEnabled(sourceId: String): Boolean = mapState.isImagerySourceEnabled(sourceId)
 
   /** Toggles visibility of the organization imagery source with [sourceId] on the map. */
-  fun toggleImagerySource(sourceId: String) {
-    enabledImagerySourceIds =
-      if (sourceId in enabledImagerySourceIds) {
-        enabledImagerySourceIds - sourceId
-      } else {
-        enabledImagerySourceIds + sourceId
-      }
-  }
+  fun toggleImagerySource(sourceId: String) = surveyMap.toggleImagerySource(sourceId)
 
   /**
    * Currently enabled [ImagerySource]s for the active survey (in layer order: `"All users"` sources
    * first, then survey-specific organization sources).
    */
   val enabledImagerySources: List<ImagerySource>
-    get() = availableImagerySources.filter { it.id in enabledImagerySourceIds }
+    get() = mapState.enabledImagerySources
 
   /**
    * Whether the signed-in user may open the Survey editor for the active survey: they own it, are
@@ -733,7 +781,7 @@ class PrototypeAppState(
 
   /** Removes the imagery source with [sourceId] from [organizationId]. */
   fun removeOrganizationImagerySource(organizationId: String, sourceId: String) {
-    enabledImagerySourceIds = enabledImagerySourceIds - sourceId
+    if (isImagerySourceEnabled(sourceId)) surveyMap.toggleImagerySource(sourceId)
     updateOrganization(organizationId) { current ->
       current.copy(imagerySources = current.imagerySources.filterNot { it.id == sourceId })
     }
@@ -779,17 +827,17 @@ class PrototypeAppState(
   var activeDrawerSubView by mutableStateOf(MainDrawerSubView.NONE)
     private set
 
-  var isLayersSheetOpen by mutableStateOf(false)
-    private set
+  val isLayersSheetOpen: Boolean
+    get() = mapState.isLayersSheetOpen
 
-  var selectedBasemapType by mutableStateOf(BasemapType.SATELLITE)
-    private set
+  val selectedBasemapType: BasemapType
+    get() = mapState.selectedBasemapType
 
-  var isOfflineBasemapVisible by mutableStateOf(true)
-    private set
+  val isOfflineBasemapVisible: Boolean
+    get() = mapState.isOfflineBasemapVisible
 
-  var offlineBasemapStyle by mutableStateOf(OfflineBasemapStyle.SATELLITE_HYBRID)
-    private set
+  val offlineBasemapStyle: OfflineBasemapStyle
+    get() = mapState.offlineBasemapStyle
 
   /**
    * The survey's map layers, styled with the color and pin icon of the matching Map layer in the
@@ -832,8 +880,8 @@ class PrototypeAppState(
     get() = data.places
 
   /** ID of the currently selected [SurveyPlaceItem] from Place search (if any). */
-  var selectedPlaceId by mutableStateOf<String?>(null)
-    private set
+  val selectedPlaceId: String?
+    get() = mapState.selectedPlace?.id
 
   /**
    * Standalone form submissions recorded without an attached Geospatial Entity (`entityId == ""`).
@@ -841,20 +889,20 @@ class PrototypeAppState(
   val standaloneSubmissions: List<SubmissionPreviewItem>
     get() = data.content.standaloneSubmissions
 
-  var selectedEntityId by mutableStateOf<String?>(null)
-    private set
+  val selectedEntityId: String?
+    get() = mapState.selectedEntityId
 
   /** Monotonically increasing counter incremented every time an entity is selected. */
-  var entitySelectionEpoch by mutableStateOf(0L)
-    private set
+  val entitySelectionEpoch: Long
+    get() = mapState.entitySelectionEpoch
 
   /**
    * Whether the Entity Bottom Sheet is expanded (`true`) to show full properties/submissions or
    * collapsed (`false`, default) into a compact single-row peek bar at the bottom of the map so it
    * does not obscure the map viewport.
    */
-  var isEntityBottomSheetExpanded by mutableStateOf(false)
-    private set
+  val isEntityBottomSheetExpanded: Boolean
+    get() = mapState.isEntityBottomSheetExpanded
 
   /**
    * Whether the left-hand panel in the web dashboard is expanded (`true`, default) or collapsed
@@ -1087,18 +1135,18 @@ class PrototypeAppState(
   val deviceStorageInfo: DeviceStorageInfo
     get() = settingsState.storage
 
-  // --- User GPS Location & Auto-Centering Map Camera State ---
+  // --- User GPS Location & Auto-Centering Map Camera State (see [SurveyMapViewModel]) ---
   /** Normalized world X coordinate `[0, 1]` of the collector's current GPS location. */
-  var userGpsNormalizedX by mutableStateOf(0.50f)
-    private set
+  val userGpsNormalizedX: Float
+    get() = mapState.userGpsNormalizedX
 
   /** Normalized world Y coordinate `[0, 1]` of the collector's current GPS location. */
-  var userGpsNormalizedY by mutableStateOf(0.50f)
-    private set
+  val userGpsNormalizedY: Float
+    get() = mapState.userGpsNormalizedY
 
   /** Formatted GPS coordinates & accuracy badge for the user's current field position. */
-  var userGpsCoordinatesLabel by mutableStateOf("-0.4198°, 36.9512° (±3.2m GPS)")
-    private set
+  val userGpsCoordinatesLabel: String
+    get() = mapState.userGpsCoordinatesLabel
 
   /**
    * Whether the map camera automatically pans to keep the user's current GPS location at the center
@@ -1106,18 +1154,16 @@ class PrototypeAppState(
    * a place, which sets [locationLockState] to [LocationLockState.PANNED] and reveals the Google
    * Maps-style `"Recenter"` button.
    */
-  var isCameraFollowingUser by mutableStateOf(true)
-    private set
+  val isCameraFollowingUser: Boolean
+    get() = mapState.isCameraFollowingUser
 
   /** Current map camera lock state (`LOCKED`, `LOCKED_3D`, or `PANNED`). */
-  var locationLockState by mutableStateOf(LocationLockState.LOCKED)
-    private set
-
-  private var lastSelectedPlace: SurveyPlaceItem? by mutableStateOf(null)
+  val locationLockState: LocationLockState
+    get() = mapState.locationLockState
 
   /** Where the active survey sits on the map. */
   private val activeSurveyAnchor: SurveyMapAnchor
-    get() = SurveyMapAnchor.forSurvey(activeSurveyId)
+    get() = mapState.anchor
 
   /** Where the active survey sits on the map, for the map content builders. */
   internal val mapAnchor: SurveyMapAnchor
@@ -1127,31 +1173,27 @@ class PrototypeAppState(
     activeSurveyAnchor.center.let { it.longitude to it.latitude }
 
   /** Normalized horizontal viewport offset applied when the user manually drags/pans the map. */
-  var mapPanOffsetX by mutableStateOf(0f)
-    private set
+  val mapPanOffsetX: Float
+    get() = mapState.mapPanOffsetX
 
   /** Normalized vertical viewport offset applied when the user manually drags/pans the map. */
-  var mapPanOffsetY by mutableStateOf(0f)
-    private set
+  val mapPanOffsetY: Float
+    get() = mapState.mapPanOffsetY
 
   /** Zoom delta relative to the active survey's default Mapbox zoom level (`[-5.0f, +3.7f]`). */
-  var mapZoomDelta by mutableStateOf(0f)
-    private set
+  val mapZoomDelta: Float
+    get() = mapState.mapZoomDelta
 
   /** Formatted current Mapbox zoom level badge (e.g. `"15.3z"`). */
   val effectiveMapZoomLabel: String
-    get() {
-      val rawZoom = (15.3f + mapZoomDelta).coerceIn(10.0f, 19.0f)
-      val tenths = (rawZoom * 10f + 0.5f).toInt()
-      return "${tenths / 10}.${tenths % 10}z"
-    }
+    get() = mapState.effectiveMapZoomLabel
 
   /**
-   * Computes a Google Maps-style horizontal scale bar specification (`label`, `distanceMeters`,
-   * `barWidthDp`) via [ClusterMapFeaturesUseCase.computeScaleBarSpec].
+   * Google Maps-style horizontal scale bar specification (`label`, `distanceMeters`, `barWidthDp`)
+   * computed by `ClusterMapFeaturesUseCase.computeScaleBarSpec`.
    */
   val mapScaleBarSpec: MapScaleBarSpec
-    get() = viewModel.clusterMapFeaturesUseCase.computeScaleBarSpec(activeSurveyId, mapZoomDelta)
+    get() = mapState.mapScaleBarSpec
 
   /**
    * Total horizontal world-to-viewport shift (`(0.50f - userGpsNormalizedX) + mapPanOffsetX`).
@@ -1159,7 +1201,7 @@ class PrototypeAppState(
    * whenever [isCameraFollowingUser] is `true` (`mapPanOffsetX == 0f`).
    */
   val mapWorldToScreenShiftX: Float
-    get() = (0.50f - userGpsNormalizedX) + mapPanOffsetX
+    get() = mapState.mapWorldToScreenShiftX
 
   /**
    * Total vertical world-to-viewport shift (`(0.50f - userGpsNormalizedY) + mapPanOffsetY`).
@@ -1167,37 +1209,31 @@ class PrototypeAppState(
    * whenever [isCameraFollowingUser] is `true` (`mapPanOffsetY == 0f`).
    */
   val mapWorldToScreenShiftY: Float
-    get() = (0.50f - userGpsNormalizedY) + mapPanOffsetY
+    get() = mapState.mapWorldToScreenShiftY
 
   /** Normalized screen X coordinate of the user's GPS blue dot (`0.50f` when centered). */
   val userScreenNormalizedX: Float
-    get() = 0.50f + mapPanOffsetX
+    get() = mapState.userScreenNormalizedX
 
   /** Normalized screen Y coordinate of the user's GPS blue dot (`0.50f` when centered). */
   val userScreenNormalizedY: Float
-    get() = 0.50f + mapPanOffsetY
+    get() = mapState.userScreenNormalizedY
 
   /** Number of GNSS (GPS/Galileo/GLONASS) satellites currently locked by the device receiver. */
-  var gnssSatelliteCount by mutableStateOf(18)
-    private set
+  val gnssSatelliteCount: Int
+    get() = mapState.gnssSatelliteCount
 
   /** Current horizontal GNSS accuracy in meters (`±2.1 m`). */
-  var gnssAccuracyMeters by mutableStateOf(2.1)
-    private set
+  val gnssAccuracyMeters: Double
+    get() = mapState.gnssAccuracyMeters
 
   /** Formatted horizontal GNSS accuracy (`±2.1 m` or `±6.8 ft`). */
   val gnssAccuracyFormatted: String
-    get() =
-      if (unitSystem == MeasurementUnitSystem.METRIC) {
-        "±$gnssAccuracyMeters m"
-      } else {
-        val feet = ((gnssAccuracyMeters * 3.28084) * 10.0).toInt() / 10.0
-        "±$feet ft"
-      }
+    get() = mapState.gnssAccuracyFormatted
 
   /** Formatted GPS accuracy badge displayed on the chip over the map (`±2.1 m` or `±6.8 ft`). */
   val gnssStatusChipLabel: String
-    get() = gnssAccuracyFormatted
+    get() = mapState.gnssStatusChipLabel
 
   /**
    * Entity ID whose scannable GeoID QR code modal dialog is currently open (`null` when closed).
@@ -1222,109 +1258,71 @@ class PrototypeAppState(
   var pdfExportMessage by mutableStateOf<String?>(null)
     private set
 
-  // --- Straight-Line Wayfinding Navigation State (Entities & Submissions) ---
+  // --- Straight-Line Wayfinding Navigation State (see [SurveyMapViewModel]) ---
   /**
-   * Target kind (`ENTITY` or `SUBMISSION`) for active straight-line navigation (`null` when
-   * inactive).
+   * Target kind (`ENTITY`, `SUBMISSION`, or `PLACE`) for active straight-line navigation (`null`
+   * when inactive).
    */
-  var navigationTargetKind by mutableStateOf<NavigationTargetKind?>(null)
-    private set
+  val navigationTargetKind: NavigationTargetKind?
+    get() = mapState.navigationTargetKind
 
   /**
-   * Target ID (`entityId` or `submissionId`) for active straight-line navigation (`null` when
-   * inactive).
+   * Target ID (`entityId`, `submissionId`, or `placeId`) for active straight-line navigation
+   * (`null` when inactive).
    */
-  var navigationTargetId by mutableStateOf<String?>(null)
-    private set
+  val navigationTargetId: String?
+    get() = mapState.navigationTargetId
 
-  /**
-   * Computes a [StraightLineVector] from the collector's current GPS position via
-   * [org.groundplatform.v2.devtools.prototypeapp.domain.usecase.ComputeWayfindingNavigationUseCase]
-   * .
-   */
+  /** Computes a [StraightLineVector] from the collector's current GPS position. */
   fun computeStraightLineVector(
     targetNormalizedX: Float,
     targetNormalizedY: Float,
-  ): StraightLineVector =
-    viewModel.computeWayfindingNavigationUseCase(
-      fromNormalizedX = userGpsNormalizedX,
-      fromNormalizedY = userGpsNormalizedY,
-      targetNormalizedX = targetNormalizedX,
-      targetNormalizedY = targetNormalizedY,
-      unitSystem = unitSystem,
-    )
+  ): StraightLineVector = surveyMap.computeStraightLineVector(targetNormalizedX, targetNormalizedY)
 
   /**
    * Resolves the normalized map coordinates `(normalizedX, normalizedY)` and optional
-   * [SubmissionGeometryPolygon] for any [SubmissionPreviewItem] via
-   * [org.groundplatform.v2.devtools.prototypeapp.domain.usecase.ComputeWayfindingNavigationUseCase]
-   * .
+   * [SubmissionGeometryPolygon] for any [SubmissionPreviewItem].
    */
   fun resolveSubmissionTargetGeometry(
     submissionId: String
   ): Triple<Float, Float, SubmissionGeometryPolygon?>? =
-    viewModel.computeWayfindingNavigationUseCase.resolveSubmissionTargetGeometry(
-      submissionId = submissionId,
-      allSubmissions = allSubmissions,
-      submissionGeometries = submissionGeometries,
-      entities = entities,
-    )
+    surveyMap.resolveSubmissionTargetGeometry(submissionId)
 
   /** Returns the live [StraightLineVector] from the user's GPS position to [entityId]. */
-  fun distanceAndBearingToEntity(entityId: String): StraightLineVector? {
-    val entity = entities.firstOrNull { it.id == entityId } ?: return null
-    return computeStraightLineVector(entity.normalizedX, entity.normalizedY)
-  }
+  fun distanceAndBearingToEntity(entityId: String): StraightLineVector? =
+    surveyMap.distanceAndBearingToEntity(entityId)
 
   /** Returns the live [StraightLineVector] from the user's GPS position to [submissionId]. */
-  fun distanceAndBearingToSubmission(submissionId: String): StraightLineVector? {
-    val (tx, ty, _) = resolveSubmissionTargetGeometry(submissionId) ?: return null
-    return computeStraightLineVector(tx, ty)
-  }
+  fun distanceAndBearingToSubmission(submissionId: String): StraightLineVector? =
+    surveyMap.distanceAndBearingToSubmission(submissionId)
 
   /**
-   * Resolves a [SurveyPlaceItem] by [placeId] across built-in places, API results, and active
-   * selection.
+   * Resolves a [SurveyPlaceItem] by [placeId] across live API results, built-in places, list search
+   * results, and the place selected or navigated to on the map.
    */
   fun findPlaceById(placeId: String): SurveyPlaceItem? =
-    (mapboxPlacesApiResults + places + filteredListPlaces + listOfNotNull(lastSelectedPlace))
-      .firstOrNull { it.id == placeId }
+    (mapboxPlacesApiResults + places + filteredListPlaces).firstOrNull { it.id == placeId }
+      ?: surveyMap.findPlaceById(placeId)
 
   /** Returns the live [StraightLineVector] from the user's GPS position to [placeId]. */
-  fun distanceAndBearingToPlace(placeId: String): StraightLineVector? {
-    val place = findPlaceById(placeId) ?: return null
-    return computeStraightLineVector(place.normalizedX, place.normalizedY)
-  }
+  fun distanceAndBearingToPlace(placeId: String): StraightLineVector? =
+    findPlaceById(placeId)?.let(surveyMap::distanceAndBearingToPlace)
 
   /** Formatted distance & compass bearing badge for [entityId] (e.g. `"495 m • 319° NW"`). */
-  fun formattedWayfindingBadgeForEntity(entityId: String): String {
-    val v = distanceAndBearingToEntity(entityId) ?: return ""
-    return "${v.formattedDistance} • ${v.bearingDegrees}° ${v.cardinalDirection}"
-  }
+  fun formattedWayfindingBadgeForEntity(entityId: String): String =
+    surveyMap.formattedWayfindingBadgeForEntity(entityId)
 
   /** Formatted distance & compass bearing badge for [placeId] (e.g. `"340 m • 142° SE"`). */
-  fun formattedWayfindingBadgeForPlace(placeId: String): String {
-    val v = distanceAndBearingToPlace(placeId) ?: return ""
-    return "${v.formattedDistance} • ${v.bearingDegrees}° ${v.cardinalDirection}"
-  }
+  fun formattedWayfindingBadgeForPlace(placeId: String): String =
+    distanceAndBearingToPlace(placeId)?.formattedBadge.orEmpty()
 
   /** Formatted distance & compass bearing badge for [submissionId] (e.g. `"452 m • 321° NW"`). */
-  fun formattedWayfindingBadgeForSubmission(submissionId: String): String {
-    val v = distanceAndBearingToSubmission(submissionId) ?: return ""
-    return "${v.formattedDistance} • ${v.bearingDegrees}° ${v.cardinalDirection}"
-  }
+  fun formattedWayfindingBadgeForSubmission(submissionId: String): String =
+    surveyMap.formattedWayfindingBadgeForSubmission(submissionId)
 
-  /**
-   * Returns `true` if [field] in [submissionId] represents a geometry question/field via
-   * [org.groundplatform.v2.devtools.prototypeapp.domain.usecase.ComputeWayfindingNavigationUseCase]
-   * .
-   */
+  /** Returns `true` if [field] in [submissionId] represents a geometry question/field. */
   fun isSubmissionFieldGeometry(submissionId: String, field: SubmissionFieldEntry): Boolean =
-    viewModel.computeWayfindingNavigationUseCase.isSubmissionFieldGeometry(
-      submissionId = submissionId,
-      field = field,
-      submissionGeometries = submissionGeometries,
-    )
+    surveyMap.isSubmissionFieldGeometry(submissionId, field)
 
   /**
    * Formatted distance & compass bearing badge for a geometry [field] inside [submissionId] (e.g.
@@ -1333,52 +1331,21 @@ class PrototypeAppState(
   fun formattedWayfindingBadgeForSubmissionField(
     submissionId: String,
     field: SubmissionFieldEntry,
-  ): String {
-    if (!isSubmissionFieldGeometry(submissionId, field)) return ""
-    val geom = submissionGeometries.firstOrNull {
-      it.submissionId == submissionId &&
-        (it.fieldPath == field.questionName || it.questionLabel == field.questionLabel)
-    }
-    val vector =
-      if (geom != null) {
-        computeStraightLineVector(geom.normalizedX, geom.normalizedY)
-      } else {
-        distanceAndBearingToSubmission(submissionId) ?: return ""
-      }
-    return "${vector.formattedDistance} • ${vector.bearingDegrees}° ${vector.cardinalDirection}"
-  }
+  ): String = surveyMap.formattedWayfindingBadgeForSubmissionField(submissionId, field)
 
   /** True when straight-line navigation is currently active and targeting [entityId]. */
-  fun isNavigatingToEntity(entityId: String): Boolean =
-    navigationTargetKind == NavigationTargetKind.ENTITY && navigationTargetId == entityId
+  fun isNavigatingToEntity(entityId: String): Boolean = mapState.isNavigatingToEntity(entityId)
 
   /** True when straight-line navigation is currently active and targeting [submissionId]. */
   fun isNavigatingToSubmission(submissionId: String): Boolean =
-    navigationTargetKind == NavigationTargetKind.SUBMISSION && navigationTargetId == submissionId
+    mapState.isNavigatingToSubmission(submissionId)
 
   /** True when straight-line navigation is currently active and targeting [placeId]. */
-  fun isNavigatingToPlace(placeId: String): Boolean =
-    navigationTargetKind == NavigationTargetKind.PLACE && navigationTargetId == placeId
+  fun isNavigatingToPlace(placeId: String): Boolean = mapState.isNavigatingToPlace(placeId)
 
-  /**
-   * Currently active straight-line navigation session ([StraightLineNavigationState]) resolved via
-   * [org.groundplatform.v2.devtools.prototypeapp.domain.usecase.ComputeWayfindingNavigationUseCase]
-   * .
-   */
+  /** Currently active straight-line navigation session ([StraightLineNavigationState]). */
   val activeNavigation: StraightLineNavigationState?
-    get() =
-      viewModel.computeWayfindingNavigationUseCase.resolveActiveNavigationState(
-        navigationTargetKind = navigationTargetKind,
-        navigationTargetId = navigationTargetId,
-        fromNormalizedX = userGpsNormalizedX,
-        fromNormalizedY = userGpsNormalizedY,
-        unitSystem = unitSystem,
-        userGpsCoordinatesLabel = userGpsCoordinatesLabel,
-        entities = entities,
-        allSubmissions = allSubmissions,
-        submissionGeometries = submissionGeometries,
-        findPlaceById = ::findPlaceById,
-      )
+    get() = mapState.activeNavigation
 
   // --- Data Collection Form & XForms FormDef Chrome State ---
   /**
@@ -1657,7 +1624,7 @@ class PrototypeAppState(
 
   /** Geospatial entities currently visible on the map according to active layer visibility. */
   val visibleMapEntities: List<GeospatialEntityItem>
-    get() = entities.filter { it.layerId in visibleLayerIds }
+    get() = mapState.visibleMapEntities
 
   /** Currently visible entity dataset layers (`LayerSourceType.ENTITY_DATASET`). */
   val visibleEntityDatasetLayers: List<MapLayerItem>
@@ -1680,15 +1647,13 @@ class PrototypeAppState(
    * - Otherwise falls back to `"map features"`.
    */
   val activeEntitiesCountNoun: String
-    get() =
-      visibleEntityDatasetLayers.singleOrNull()?.pluralDomainLabel?.lowercase() ?: "map features"
+    get() = mapState.activeEntitiesCountNoun
 
   /**
    * Resolves the user-facing singular domain noun for [entityId] (e.g. `"Coffee Parcel"`, or
    * `"Location"`).
    */
-  fun entitySingularTypeLabel(entityId: String?): String =
-    entityId?.let { id -> entities.firstOrNull { it.id == id }?.singularTypeLabel } ?: "Location"
+  fun entitySingularTypeLabel(entityId: String?): String = entities.singularTypeLabelOf(entityId)
 
   /** Resolves the dynamic display label for a [ListFilterTab] chip. */
   fun tabLabelFor(tab: ListFilterTab): String =
@@ -1705,54 +1670,31 @@ class PrototypeAppState(
     get() = emptyList()
 
   /** ID of the currently selected map feature cluster when the map is zoomed out. */
-  var selectedClusterId by mutableStateOf<String?>(null)
-    private set
+  val selectedClusterId: String?
+    get() = mapState.selectedClusterId
 
   /**
-   * True when the map is zoomed out past the clustering threshold ([MapClusteringZoomDelta], about
-   * z12.95), causing visible map features (`visibleMapEntities`) to be grouped into spatial
-   * clusters with cluster balloons showing counts per marker symbol.
+   * True when the map is zoomed out past the clustering threshold (about z12.95), causing visible
+   * map features (`visibleMapEntities`) to be grouped into spatial clusters with cluster balloons
+   * showing counts per marker symbol.
    */
   val isMapClusteringActive: Boolean
-    get() = mapZoomDelta <= MapClusteringZoomDelta
+    get() = mapState.isMapClusteringActive
 
   /**
    * Normalized world-space clustering radius (`[0.20, 12.0]`) scaled exponentially as the user
    * zooms out (`2^(-mapZoomDelta)`). Returns `0f` when clustering is inactive.
    */
   val mapClusterRadiusNormalized: Float
-    get() =
-      if (!isMapClusteringActive) {
-        0f
-      } else {
-        (0.175f * 2.0.pow(-mapZoomDelta.toDouble()).toFloat()).coerceIn(0.20f, 12.0f)
-      }
+    get() = viewModel.clusterMapFeaturesUseCase.clusterRadiusNormalized(mapZoomDelta)
 
   /**
    * All visible map features (`visibleMapEntities`) normalized into [MapClusterFeatureItem]
-   * instances for clustering.
-   *
-   * Geospatial entities carry their `simplestyle-spec` `marker-symbol` (`"✓"`, `"◐"`, `"○"`, or
-   * `""` if no marker symbol is set). Form submission geometries are not displayed on the map or in
-   * cluster chips.
+   * instances for clustering. Form submission geometries are not displayed on the map or in cluster
+   * chips.
    */
   val visibleMapClusterFeatures: List<MapClusterFeatureItem>
-    get() = visibleMapEntities.map { ent ->
-      MapClusterFeatureItem(
-        id = ent.id,
-        kind = MapFeatureKind.ENTITY,
-        label = ent.label.substringBefore(" •"),
-        markerSymbol = ent.rawMarkerSymbol,
-        colorHex = ent.markerColorHex,
-        colorCss = ent.markerColorCss,
-        normalizedX = ent.normalizedX,
-        normalizedY = ent.normalizedY,
-        entityId = ent.id,
-      )
-    }
-
-  private var cachedClustersKey: String = ""
-  private var cachedClustersResult: List<MapFeatureCluster> = emptyList()
+    get() = visibleMapEntities.toClusterFeatures()
 
   /**
    * Spatial clusters of visible map features when [isMapClusteringActive] is `true`.
@@ -1762,36 +1704,15 @@ class PrototypeAppState(
    * and `""` for no marker symbol) so the cluster balloon displays the count of each group.
    */
   val mapFeatureClusters: List<MapFeatureCluster>
-    get() {
-      if (!isMapClusteringActive) return emptyList()
-      val key = "${entities.hashCode()}:${visibleLayerIds.hashCode()}:$mapZoomDelta"
-      if (key == cachedClustersKey) {
-        return cachedClustersResult
-      }
-      val computed =
-        computeMapFeatureClusters(
-          features = visibleMapClusterFeatures,
-          radiusNormalized = mapClusterRadiusNormalized,
-        )
-      cachedClustersKey = key
-      cachedClustersResult = computed
-      return computed
-    }
+    get() = mapState.mapFeatureClusters
 
   /** Currently selected [MapFeatureCluster] (if any and if clustering is active). */
   val selectedCluster: MapFeatureCluster?
-    get() =
-      if (!isMapClusteringActive) {
-        null
-      } else {
-        selectedClusterId?.let { id -> mapFeatureClusters.firstOrNull { it.id == id } }
-      }
+    get() = mapState.selectedCluster
 
   /** The currently selected Geospatial Entity shown in the bottom sheet (if any). */
   val selectedEntity: GeospatialEntityItem?
-    get() = selectedEntityId?.let { id ->
-      entities.firstOrNull { it.id == id && it.layerId in visibleLayerIds }
-    }
+    get() = mapState.selectedEntity
 
   /** All submissions (both entity-attached and standalone) in the active survey. */
   val allSubmissions: List<SubmissionPreviewItem>
@@ -1849,12 +1770,12 @@ class PrototypeAppState(
    * and the bottom sheet shows an offline notice explaining that search is restricted to local map
    * features and that Places search is not available offline.
    */
-  var isAirplaneMode by mutableStateOf(false)
-    private set
+  val isAirplaneMode: Boolean
+    get() = mapState.isAirplaneMode
 
   /** Whether online Mapbox Places API search is currently available (`!isAirplaneMode`). */
   val isPlacesSearchAvailable: Boolean
-    get() = !isAirplaneMode
+    get() = mapState.isPlacesSearchAvailable
 
   /** Live place results returned by [PlacesGeocoder] (Mapbox Geocoding or Nominatim). */
   var mapboxPlacesApiResults by mutableStateOf<List<SurveyPlaceItem>>(emptyList())
@@ -1866,7 +1787,7 @@ class PrototypeAppState(
 
   /** Currently selected [SurveyPlaceItem] from Mapbox Places search (if any). */
   val selectedPlace: SurveyPlaceItem?
-    get() = selectedPlaceId?.let { id -> findPlaceById(id) }
+    get() = mapState.selectedPlace
 
   /**
    * Filtered Places ([SurveyPlaceItem]s) in the Main Survey searchable bottom sheet returned by the
@@ -2102,14 +2023,14 @@ class PrototypeAppState(
       customFormDef = XFormsParseCache.formDef(xml)
       xformsXmlError = null
     }
-    selectedEntityId = null
+    surveyMap.setSelectedEntity(null)
     selectedSubmissionId = null
     selectedLayerDatasetId = null
     activeDataCollectionEntityId = null
     activeDataCollectionFormId = null
     activeFormWizardController = null
     isAvailableFormsSheetOpen = false
-    isEntityBottomSheetExpanded = false
+    surveyMap.updateEntityBottomSheetExpanded(false)
   }
 
   /** Whether the active survey exists in the store, so survey pages can open it. */
@@ -2234,12 +2155,12 @@ class PrototypeAppState(
     mainViewMode = mode
     activeDrawerSubView = MainDrawerSubView.NONE
     if (mode == MainSurveyViewMode.LIST) {
-      selectedEntityId = null
+      surveyMap.setSelectedEntity(null)
       selectedSubmissionId = null
-      isEntityBottomSheetExpanded = true
-      isLayersSheetOpen = false
+      surveyMap.updateEntityBottomSheetExpanded(true)
+      surveyMap.updateLayersSheetOpen(false)
     } else {
-      isEntityBottomSheetExpanded = false
+      surveyMap.updateEntityBottomSheetExpanded(false)
     }
   }
 
@@ -2249,51 +2170,23 @@ class PrototypeAppState(
   }
 
   /** Toggles the "Layers" visibility popover sheet on the Map view. */
-  fun updateLayersSheetOpen(open: Boolean) {
-    isLayersSheetOpen = open
-  }
+  fun updateLayersSheetOpen(open: Boolean) = surveyMap.updateLayersSheetOpen(open)
 
   /**
    * Selects between `Normal` (`BasemapType.NORMAL`) and `Satellite` (`BasemapType.SATELLITE`)
    * basemap.
    */
-  fun selectBasemapType(type: BasemapType) {
-    selectedBasemapType = type
-    offlineBasemapStyle =
-      if (type == BasemapType.SATELLITE) {
-        OfflineBasemapStyle.SATELLITE_HYBRID
-      } else {
-        OfflineBasemapStyle.VECTOR_TOPO
-      }
-  }
+  fun selectBasemapType(type: BasemapType) = surveyMap.selectBasemapType(type)
 
   /** Toggles between `Normal` and `Satellite` basemap. */
-  fun toggleBasemapType() {
-    selectBasemapType(
-      if (selectedBasemapType == BasemapType.SATELLITE) {
-        BasemapType.NORMAL
-      } else {
-        BasemapType.SATELLITE
-      }
-    )
-  }
+  fun toggleBasemapType() = surveyMap.toggleBasemapType()
 
   /** Toggles visibility of the downloaded Mapbox offline basemap in the `Layers` dialog. */
-  fun toggleOfflineBasemapVisibility() {
-    isOfflineBasemapVisible = !isOfflineBasemapVisible
-  }
+  fun toggleOfflineBasemapVisibility() = surveyMap.toggleOfflineBasemapVisibility()
 
   /** Updates the offline basemap rendering style (`SATELLITE_HYBRID` vs `VECTOR_TOPO`). */
-  fun updateOfflineBasemapStyle(style: OfflineBasemapStyle) {
-    offlineBasemapStyle = style
-    selectedBasemapType =
-      if (style == OfflineBasemapStyle.SATELLITE_HYBRID) {
-        BasemapType.SATELLITE
-      } else {
-        BasemapType.NORMAL
-      }
-    isOfflineBasemapVisible = true
-  }
+  fun updateOfflineBasemapStyle(style: OfflineBasemapStyle) =
+    surveyMap.updateOfflineBasemapStyle(style)
 
   /**
    * Selects a submission geometry polygon on the map and opens its submission (and parent entity if
@@ -2302,70 +2195,31 @@ class PrototypeAppState(
   fun selectSubmissionGeometry(geometryId: String) {
     val geom = submissionGeometries.firstOrNull { it.id == geometryId } ?: return
     clearSelectedPlace()
-    selectedEntityId = geom.entityId.takeIf { it.isNotBlank() }
+    surveyMap.setSelectedEntity(geom.entityId.takeIf { it.isNotBlank() })
     selectedSubmissionId = geom.submissionId
-    isEntityBottomSheetExpanded = true
-    isLayersSheetOpen = false
+    surveyMap.updateEntityBottomSheetExpanded(true)
+    surveyMap.updateLayersSheetOpen(false)
   }
 
-  /** Toggles visibility of a specific `LayerDef` on the survey map. */
-  fun toggleLayerVisibility(layerId: String) {
-    storeMapLayers(
-      mapLayers.map { layer ->
-        if (layer.id == layerId) {
-          val nextVisible = !layer.isVisible
-          if (!nextVisible && selectedEntity?.layerId == layerId) {
-            selectedEntityId = null
-            selectedSubmissionId = null
-            isEntityBottomSheetExpanded = false
-          }
-          layer.copy(isVisible = nextVisible)
-        } else {
-          layer
-        }
-      }
-    )
-  }
+  /**
+   * Toggles visibility of a specific `LayerDef` on the survey map. Hiding the selected map
+   * feature's layer clears the selection (see [onSurveyMapEvent]).
+   */
+  fun toggleLayerVisibility(layerId: String) = surveyMap.toggleLayerVisibility(layerId)
 
-  /** Selects a Geospatial Entity on the map to open its bottom sheet in collapsed/peek state. */
-  fun selectEntity(entityId: String?) {
-    clearSelectedPlace()
-    selectedEntityId = entityId
-    selectedSubmissionId = null
-    selectedLayerDatasetId = null
-    entityDetailsPane = EntityDetailsPane.PROPERTIES
-    isEntityBottomSheetExpanded = false
-    mainViewMode = MainSurveyViewMode.MAP
-    if (entityId != null) {
-      isLayersSheetOpen = false
-      entitySelectionEpoch++
-      followSelectionInDashboardTable(entityId)
-      if (!isDashboardTableExpanded) {
-        isDetailsPanelExpanded = true
-      }
-    }
-  }
+  /**
+   * Selects a Geospatial Entity on the map to open its bottom sheet in collapsed/peek state. The
+   * rest of the shell (list selection, details pane, dashboard table) follows via
+   * [SurveyMapEvent.EntitySelected].
+   */
+  fun selectEntity(entityId: String?) = surveyMap.selectEntity(entityId)
 
   /**
    * Selects a Geospatial Entity from the bottom sheet list. The map pans and zooms to the entity,
    * and the sheet settles at its peek height showing the entity's details, so both the framed
    * entity and its details are visible. Dragging the sheet up reveals the rest of the details.
    */
-  fun selectEntityFromList(entityId: String) {
-    clearSelectedPlace()
-    selectedEntityId = entityId
-    selectedSubmissionId = null
-    selectedLayerDatasetId = null
-    entityDetailsPane = EntityDetailsPane.PROPERTIES
-    isEntityBottomSheetExpanded = false
-    mainViewMode = MainSurveyViewMode.MAP
-    isLayersSheetOpen = false
-    entitySelectionEpoch++
-    followSelectionInDashboardTable(entityId)
-    if (!isDashboardTableExpanded) {
-      isDetailsPanelExpanded = true
-    }
-  }
+  fun selectEntityFromList(entityId: String) = surveyMap.selectEntity(entityId)
 
   /** Switches the web dashboard's bottom table to the dataset of the entity with [entityId]. */
   private fun followSelectionInDashboardTable(entityId: String) {
@@ -2442,7 +2296,7 @@ class PrototypeAppState(
     selectedLayerDatasetId = datasetId
     if (datasetId != null) {
       clearSelectedPlace()
-      selectedEntityId = null
+      surveyMap.setSelectedEntity(null)
       selectedSubmissionId = null
       entityDetailsPane = EntityDetailsPane.PROPERTIES
       dashboardTableDatasetId = datasetId
@@ -2487,61 +2341,31 @@ class PrototypeAppState(
    */
   fun selectPlace(placeId: String) {
     val place = findPlaceById(placeId) ?: return
-    val parsedCoords = parsePlaceCoordinates(place.coordinatesLabel)
-    val hasDefaultFallbackCoords =
-      kotlin.math.abs(place.longitude - 36.9512) < 1e-6 &&
-        kotlin.math.abs(place.latitude - (-0.4198)) < 1e-6
-    val lat =
-      if (hasDefaultFallbackCoords && parsedCoords != null) parsedCoords.first else place.latitude
-    val lng =
-      if (hasDefaultFallbackCoords && parsedCoords != null) parsedCoords.second else place.longitude
-    val resolvedZoom = place.targetZoom.coerceIn(2.0f, 18.5f)
-    val resolvedPlace = place.copy(longitude = lng, latitude = lat, targetZoom = resolvedZoom)
-    lastSelectedPlace = resolvedPlace
-    selectedPlaceId = resolvedPlace.id
-    selectedEntityId = null
-    selectedSubmissionId = null
-    selectedLayerDatasetId = null
-    isCameraFollowingUser = false
-    locationLockState = LocationLockState.PANNED
-    val (placeNx, placeNy) = activeSurveyAnchor.toNormalized(LatLng(lat, lng))
-    mapPanOffsetX = (userGpsNormalizedX - placeNx).toFloat()
-    mapPanOffsetY = (userGpsNormalizedY - placeNy).toFloat()
-    mapZoomDelta = (resolvedZoom - activeSurveyAnchor.zoom.toFloat()).coerceIn(-13.0f, 3.2f)
-    isEntityBottomSheetExpanded = false
-    mainViewMode = MainSurveyViewMode.MAP
-    isLayersSheetOpen = false
-    activeSurveyNotice = "Centered map on ${resolvedPlace.name} (${resolvedPlace.coordinatesLabel})"
+    surveyMap.selectPlace(place)
   }
 
   /** Clears the currently selected place on the map. */
-  fun clearSelectedPlace() {
-    selectedPlaceId = null
-    lastSelectedPlace = null
-  }
+  fun clearSelectedPlace() = surveyMap.clearSelectedPlace()
 
   /**
    * Clears the selected entity or submission and returns to the expanded searchable list inside the
    * persistent bottom sheet.
    */
   fun returnToBottomSheetList() {
-    selectedEntityId = null
+    surveyMap.setSelectedEntity(null)
     selectedSubmissionId = null
     entityDetailsPane = EntityDetailsPane.PROPERTIES
-    isEntityBottomSheetExpanded = true
+    surveyMap.updateEntityBottomSheetExpanded(true)
     mainViewMode = MainSurveyViewMode.LIST
-    isLayersSheetOpen = false
+    surveyMap.updateLayersSheetOpen(false)
   }
 
   /** Toggles the Entity Bottom Sheet between expanded and collapsed (peek) state. */
-  fun toggleEntityBottomSheetExpanded() {
-    isEntityBottomSheetExpanded = !isEntityBottomSheetExpanded
-  }
+  fun toggleEntityBottomSheetExpanded() = surveyMap.toggleEntityBottomSheetExpanded()
 
   /** Explicitly expands or collapses the Entity Bottom Sheet. */
-  fun updateEntityBottomSheetExpanded(expanded: Boolean) {
-    isEntityBottomSheetExpanded = expanded
-  }
+  fun updateEntityBottomSheetExpanded(expanded: Boolean) =
+    surveyMap.updateEntityBottomSheetExpanded(expanded)
 
   /** Toggles the web dashboard's left-hand side panel between expanded and collapsed states. */
   fun toggleSidePanel() {
@@ -2633,14 +2457,14 @@ class PrototypeAppState(
     selectedSubmissionId = submissionId
     if (submissionId != null) {
       selectedLayerDatasetId = null
-      isEntityBottomSheetExpanded = true
+      surveyMap.updateEntityBottomSheetExpanded(true)
       val parentEntity = entities.firstOrNull { e -> e.submissions.any { it.id == submissionId } }
-      if (parentEntity != null && parentEntity.id != selectedEntityId) {
-        // Opening a submission of another map feature (e.g. from `Uploads`) frames that feature.
-        entitySelectionEpoch++
-        dashboardTableDatasetId = parentEntity.datasetId
+      // Opening a submission of another map feature (e.g. from `Uploads`) frames that feature.
+      val framesOtherEntity = parentEntity != null && parentEntity.id != selectedEntityId
+      if (framesOtherEntity) {
+        dashboardTableDatasetId = parentEntity?.datasetId
       }
-      selectedEntityId = parentEntity?.id
+      surveyMap.setSelectedEntity(parentEntity?.id, bumpSelectionEpoch = framesOtherEntity)
       // Closing the submission returns to the list of the feature's submissions it came from.
       entityDetailsPane = EntityDetailsPane.SUBMISSIONS
       if (!isDashboardTableExpanded) {
@@ -2696,7 +2520,7 @@ class PrototypeAppState(
    *   search is not available offline.
    */
   fun updateAirplaneMode(enabled: Boolean) {
-    isAirplaneMode = enabled
+    surveyMap.updateAirplaneMode(enabled)
     if (enabled) {
       isMapboxPlacesSearching = false
       mapboxPlacesApiResults = emptyList()
@@ -2727,13 +2551,15 @@ class PrototypeAppState(
     }
     isMapboxPlacesSearching = true
     val (surveyLng, surveyLat) = activeSurveyBaseLngLat()
-    viewModel.placeRepository.searchRemotePlaces(
+    searchPlaces(
       surveyId = activeSurveyId,
       query = query,
-      isAirplaneMode = isAirplaneMode,
-      defaultRegionSubtitle = activeSurvey.location,
-      centerLongitude = surveyLng,
-      centerLatitude = surveyLat,
+      regionSubtitle = activeSurvey.location,
+      center =
+        org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.LatLng(
+          lat = surveyLat,
+          lng = surveyLng,
+        ),
     ) { results ->
       onPlacesSearchResults(query, results)
     }
@@ -2749,17 +2575,7 @@ class PrototypeAppState(
     regionSubtitle: String,
     center: org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.LatLng,
     onResults: (List<SurveyPlaceItem>) -> Unit,
-  ) {
-    viewModel.placeRepository.searchRemotePlaces(
-      surveyId = surveyId,
-      query = query,
-      isAirplaneMode = isAirplaneMode,
-      defaultRegionSubtitle = regionSubtitle,
-      centerLongitude = center.lng,
-      centerLatitude = center.lat,
-      onResults = onResults,
-    )
-  }
+  ) = surveyMap.searchPlaces(surveyId, query, regionSubtitle, center, onResults)
 
   /** Shows geocoder [results] for [query] unless the query changed or airplane mode is on. */
   internal fun onPlacesSearchResults(query: String, results: List<SurveyPlaceItem>) {
@@ -2772,7 +2588,7 @@ class PrototypeAppState(
   /** Opens the Available Forms modal bottom sheet triggered by the bottom-centered FAB. */
   fun openAvailableFormsSheet() {
     isAvailableFormsSheetOpen = true
-    isLayersSheetOpen = false
+    surveyMap.updateLayersSheetOpen(false)
     isDrawerOpen = false
   }
 
@@ -2824,7 +2640,7 @@ class PrototypeAppState(
       if (entity.datasetId != form.targetDatasetId || !isFormButtonEnabled(entity, form)) return
     }
     activeDataCollectionEntityId = entity.id
-    selectedEntityId = entity.id
+    surveyMap.setSelectedEntity(entity.id)
     if (entity.hasGeometry) {
       recenterMapOnEntity(entity)
       entityRefFramingEpoch++
@@ -2969,7 +2785,7 @@ class PrototypeAppState(
     activeDataCollectionEntityId = null
     activeDataCollectionFormId = form.id
     activeFormWizardController = controller
-    isLayersSheetOpen = false
+    surveyMap.updateLayersSheetOpen(false)
     isDrawerOpen = false
     activeDrawerSubView = MainDrawerSubView.NONE
     if (currentScreen != PrototypeScreen.MAIN_SURVEY) {
@@ -3004,11 +2820,11 @@ class PrototypeAppState(
 
     isAvailableFormsSheetOpen = false
     wasFormLaunchedWithoutEntity = false
-    selectedEntityId = entity.id
+    surveyMap.setSelectedEntity(entity.id)
     activeDataCollectionEntityId = entity.id
     activeDataCollectionFormId = form.id
     activeFormWizardController = controller
-    isLayersSheetOpen = false
+    surveyMap.updateLayersSheetOpen(false)
     isDrawerOpen = false
     activeDrawerSubView = MainDrawerSubView.NONE
     if (currentScreen != PrototypeScreen.MAIN_SURVEY) {
@@ -3088,7 +2904,7 @@ class PrototypeAppState(
           userGpsNormalizedX = userGpsNormalizedX,
           userGpsNormalizedY = userGpsNormalizedY,
         ) ?: return@launch
-      selectedEntityId = result.selectedEntityId
+      surveyMap.setSelectedEntity(result.selectedEntityId)
       if (result.updateSelectedSubmissionId) {
         selectedSubmissionId = result.selectedSubmissionId
       }
@@ -3555,57 +3371,34 @@ class PrototypeAppState(
    * [locationLockState] = [LocationLockState.PANNED]), causing the Google Maps-style `"Recenter"`
    * button to appear on the map.
    */
-  fun panMap(deltaNormalizedX: Float, deltaNormalizedY: Float) {
-    if (deltaNormalizedX == 0f && deltaNormalizedY == 0f) return
-    isCameraFollowingUser = false
-    locationLockState = LocationLockState.PANNED
-    mapPanOffsetX = (mapPanOffsetX + deltaNormalizedX).coerceIn(-10000f, 10000f)
-    mapPanOffsetY = (mapPanOffsetY + deltaNormalizedY).coerceIn(-10000f, 10000f)
-  }
+  fun panMap(deltaNormalizedX: Float, deltaNormalizedY: Float) =
+    surveyMap.panMap(deltaNormalizedX, deltaNormalizedY)
 
   /**
    * Recenters the map camera on the user's current GPS location (`(0.50f, 0.50f)` screen center)
    * and re-enables automatic GPS camera following ([isCameraFollowingUser] = `true`,
    * [locationLockState] = [LocationLockState.LOCKED]).
    */
-  fun recenterMapOnUser() {
-    isCameraFollowingUser = true
-    locationLockState = LocationLockState.LOCKED
-    mapPanOffsetX = 0f
-    mapPanOffsetY = 0f
-  }
+  fun recenterMapOnUser() = surveyMap.recenterMapOnUser()
 
   /**
    * Recenters the map camera on [entity], adjusting the normalized vertical screen center to
    * [targetScreenY] (defaults to `0.50f` screen center) to account for reduced visible viewport
    * area (such as an expanded bottom table in the web dashboard).
    */
-  fun recenterMapOnEntity(entity: GeospatialEntityItem, targetScreenY: Float = 0.50f) {
-    isCameraFollowingUser = false
-    locationLockState = LocationLockState.PANNED
-    mapPanOffsetX = (userGpsNormalizedX - entity.normalizedX).coerceIn(-10000f, 10000f)
-    mapPanOffsetY =
-      ((userGpsNormalizedY - entity.normalizedY) + (targetScreenY - 0.50f)).coerceIn(
-        -10000f,
-        10000f,
-      )
-  }
+  fun recenterMapOnEntity(entity: GeospatialEntityItem, targetScreenY: Float = 0.50f) =
+    surveyMap.recenterMapOnEntity(entity, targetScreenY)
 
   /**
    * Recenters the map camera on the entity with [entityId], adjusting the normalized vertical
    * screen center to [targetScreenY] (defaults to `0.50f` screen center).
    */
-  fun recenterMapOnEntity(entityId: String, targetScreenY: Float = 0.50f) {
-    val entity = entities.firstOrNull { it.id == entityId } ?: return
-    recenterMapOnEntity(entity, targetScreenY)
-  }
+  fun recenterMapOnEntity(entityId: String, targetScreenY: Float = 0.50f) =
+    surveyMap.recenterMapOnEntity(entityId, targetScreenY)
 
   /** Resolves the geographic coordinates `(lng, lat)` for [entity] in the active survey. */
-  fun resolveEntityLngLat(entity: GeospatialEntityItem): Pair<Double, Double> {
-    val position =
-      activeSurveyAnchor.toLatLng(entity.normalizedX.toDouble(), entity.normalizedY.toDouble())
-    return position.longitude to position.latitude
-  }
+  fun resolveEntityLngLat(entity: GeospatialEntityItem): Pair<Double, Double> =
+    surveyMap.resolveEntityLngLat(entity)
 
   /**
    * Resolves the geographic bounds of [entity]'s geometry in the active survey (see
@@ -3618,137 +3411,51 @@ class PrototypeAppState(
    * The camera the survey map should show: the user's GPS position shifted by the pan offset
    * ([mapPanOffsetX], [mapPanOffsetY]), at the survey's zoom plus [mapZoomDelta].
    */
-  fun desiredMapCamera(): CameraPosition {
-    val anchor = activeSurveyAnchor
-    val center =
-      anchor.toLatLng(
-        (userGpsNormalizedX - mapPanOffsetX).toDouble(),
-        (userGpsNormalizedY - mapPanOffsetY).toDouble(),
-      )
-    return CameraPosition(
-      center =
-        LatLng(
-          center.latitude.coerceIn(-MAX_MAP_LATITUDE, MAX_MAP_LATITUDE),
-          ((center.longitude + 540) % 360) - 180,
-        ),
-      zoom = anchor.zoom + mapZoomDelta,
-    )
-  }
+  fun desiredMapCamera(): CameraPosition = surveyMap.desiredMapCamera()
 
   /**
    * Updates the pan offset and zoom delta to match where the map [camera] settled after a gesture
    * or an explicit camera move. Moving the center stops following the user's GPS location.
    */
-  fun syncMapCamera(camera: CameraPosition) {
-    val anchor = activeSurveyAnchor
-    val (nx, ny) = anchor.toNormalized(camera.center)
-    val panX = (userGpsNormalizedX - nx).toFloat().coerceIn(-10000f, 10000f)
-    val panY = (userGpsNormalizedY - ny).toFloat().coerceIn(-10000f, 10000f)
-    val moved =
-      abs(panX - mapPanOffsetX) > MAP_SYNC_TOLERANCE ||
-        abs(panY - mapPanOffsetY) > MAP_SYNC_TOLERANCE
-    if (moved) {
-      isCameraFollowingUser = false
-      locationLockState = LocationLockState.PANNED
-      mapPanOffsetX = panX
-      mapPanOffsetY = panY
-    }
-    syncMapZoomDelta((camera.zoom - anchor.zoom).toFloat())
-  }
+  fun syncMapCamera(camera: CameraPosition) = surveyMap.syncMapCamera(camera)
 
   /**
    * Syncs [mapZoomDelta] after the map camera changed its own zoom (e.g. fitting a selected map
    * feature), so clustering and the scale bar follow the camera.
    */
-  fun syncMapZoomDelta(zoomDelta: Float) {
-    if (zoomDelta.isNaN()) return
-    mapZoomDelta = zoomDelta.coerceIn(-13.0f, 3.7f)
-    if (!isMapClusteringActive) {
-      selectedClusterId = null
-    }
-  }
+  fun syncMapZoomDelta(zoomDelta: Float) = surveyMap.syncMapZoomDelta(zoomDelta)
 
   /** Adjusts the Mapbox zoom level by [deltaZoom] (clamped to `[-5.0f, +3.7f]`). */
-  fun zoomMapBy(deltaZoom: Float) {
-    if (deltaZoom == 0f) return
-    mapZoomDelta = (mapZoomDelta + deltaZoom).coerceIn(-5.0f, 3.7f)
-    if (!isMapClusteringActive) {
-      selectedClusterId = null
-    }
-  }
+  fun zoomMapBy(deltaZoom: Float) = surveyMap.zoomMapBy(deltaZoom)
 
   /** Zooms the Mapbox map in by one step (`+0.75` zoom levels). */
-  fun zoomInMap() {
-    zoomMapBy(0.75f)
-  }
+  fun zoomInMap() = surveyMap.zoomInMap()
 
   /** Zooms the Mapbox map out by one step (`-0.75` zoom levels). */
-  fun zoomOutMap() {
-    zoomMapBy(-0.75f)
-  }
+  fun zoomOutMap() = surveyMap.zoomOutMap()
 
   /** Resets the Mapbox zoom level to the active survey's default (`15.3z`). */
-  fun resetMapZoom() {
-    mapZoomDelta = 0f
-    selectedClusterId = null
-  }
+  fun resetMapZoom() = surveyMap.resetMapZoom()
 
   /**
    * Formats the count of map features in a cluster using the active domain noun (e.g. `"5 map
    * features"`, `"1 map feature"`, or `"5 coffee parcels"`).
    */
-  fun formatClusterSitesCountLabel(siteCount: Int): String {
-    val noun =
-      if (siteCount == 1) {
-        activeEntitiesCountNoun.removeSuffix("s")
-      } else {
-        activeEntitiesCountNoun
-      }
-    return "$siteCount $noun"
-  }
+  fun formatClusterSitesCountLabel(siteCount: Int): String =
+    mapState.formatClusterSitesCountLabel(siteCount)
 
   /**
    * Selects a zoomed-out [MapFeatureCluster] balloon by [clusterId] (or clears selection when
    * `null`). If the same cluster is tapped a second time while already selected, zooms in toward
    * that cluster.
    */
-  fun selectCluster(clusterId: String?) {
-    if (clusterId == null) {
-      selectedClusterId = null
-      return
-    }
-    if (selectedClusterId == clusterId) {
-      zoomIntoCluster(clusterId)
-      return
-    }
-    val target = mapFeatureClusters.firstOrNull { it.id == clusterId }
-    selectedClusterId = clusterId
-    if (target != null) {
-      selectedEntityId = null
-      selectedSubmissionId = null
-      activeSurveyNotice = formatClusterSitesCountLabel(target.siteCount)
-    }
-  }
+  fun selectCluster(clusterId: String?) = surveyMap.selectCluster(clusterId)
 
   /**
    * Centers the map viewport on the specified [clusterId] and zooms in one step (`+0.75z`) to
    * expand the cluster.
    */
-  fun zoomIntoCluster(clusterId: String) {
-    val target = mapFeatureClusters.firstOrNull { it.id == clusterId }
-    if (target != null) {
-      isCameraFollowingUser = false
-      locationLockState = LocationLockState.PANNED
-      mapPanOffsetX = (userGpsNormalizedX - target.normalizedX).coerceIn(-10000f, 10000f)
-      mapPanOffsetY = (userGpsNormalizedY - target.normalizedY).coerceIn(-10000f, 10000f)
-    }
-    zoomInMap()
-    val refreshed = mapFeatureClusters.firstOrNull {
-      target != null &&
-        hypot(it.normalizedX - target.normalizedX, it.normalizedY - target.normalizedY) < 0.08f
-    }
-    selectedClusterId = refreshed?.id
-  }
+  fun zoomIntoCluster(clusterId: String) = surveyMap.zoomIntoCluster(clusterId)
 
   /**
    * Updates the user's current GPS location (`userGpsNormalizedX`, `userGpsNormalizedY`).
@@ -3762,107 +3469,31 @@ class PrototypeAppState(
     newNormalizedX: Float,
     newNormalizedY: Float,
     coordinatesLabel: String? = null,
-  ) {
-    val clampedX = newNormalizedX.coerceIn(0.10f, 0.90f)
-    val clampedY = newNormalizedY.coerceIn(0.10f, 0.90f)
-    val dx = clampedX - userGpsNormalizedX
-    val dy = clampedY - userGpsNormalizedY
-    userGpsNormalizedX = clampedX
-    userGpsNormalizedY = clampedY
-    if (coordinatesLabel != null) {
-      userGpsCoordinatesLabel = coordinatesLabel
-    }
-    if (!isCameraFollowingUser) {
-      mapPanOffsetX = (mapPanOffsetX + dx).coerceIn(-10000f, 10000f)
-      mapPanOffsetY = (mapPanOffsetY + dy).coerceIn(-10000f, 10000f)
-    }
-  }
+  ) = surveyMap.updateUserGpsLocation(newNormalizedX, newNormalizedY, coordinatesLabel)
 
-  // --- Straight-Line Wayfinding Navigation Actions ---
+  // --- Straight-Line Wayfinding Navigation Actions (see [SurveyMapViewModel]) ---
 
   /**
    * Starts straight-line navigation from the collector's current GPS position to [entityId],
    * ensuring its layer is visible, selecting the entity in collapsed bottom-sheet peek mode, and
    * switching to the Map view with GPS auto-centering enabled.
    */
-  fun startNavigationToEntity(entityId: String) {
-    val entity = entities.firstOrNull { it.id == entityId } ?: return
-    storeMapLayers(
-      mapLayers.map { layer ->
-        if (layer.id == entity.layerId) layer.copy(isVisible = true) else layer
-      }
-    )
-    navigationTargetKind = NavigationTargetKind.ENTITY
-    navigationTargetId = entity.id
-    selectedEntityId = entity.id
-    selectedSubmissionId = null
-    isEntityBottomSheetExpanded = false
-    isLayersSheetOpen = false
-    isDrawerOpen = false
-    activeDrawerSubView = MainDrawerSubView.NONE
-    mainViewMode = MainSurveyViewMode.MAP
-    if (currentScreen != PrototypeScreen.MAIN_SURVEY) {
-      currentScreen = PrototypeScreen.MAIN_SURVEY
-    }
-    recenterMapOnUser()
-    val badge = formattedWayfindingBadgeForEntity(entity.id)
-    activeSurveyNotice = "Straight-line navigation to ${entity.label} ($badge)"
-  }
+  fun startNavigationToEntity(entityId: String) = surveyMap.startNavigationToEntity(entityId)
 
   /**
    * Starts straight-line navigation from the collector's current GPS position to [submissionId]
    * (targeting its recorded geometry polygon or parent entity location), ensuring the parent
    * entity's map layer is visible, selecting the submission, and switching to Map view.
    */
-  fun startNavigationToSubmission(submissionId: String) {
-    val sub = allSubmissions.firstOrNull { it.id == submissionId } ?: return
-    val parentEntity = entities.firstOrNull { it.id == sub.entityId }
-    storeMapLayers(
-      mapLayers.map { layer ->
-        if (parentEntity != null && layer.id == parentEntity.layerId) {
-          layer.copy(isVisible = true)
-        } else {
-          layer
-        }
-      }
-    )
-    navigationTargetKind = NavigationTargetKind.SUBMISSION
-    navigationTargetId = sub.id
-    selectedEntityId = parentEntity?.id
-    selectedSubmissionId = sub.id
-    isEntityBottomSheetExpanded = false
-    isLayersSheetOpen = false
-    isDrawerOpen = false
-    activeDrawerSubView = MainDrawerSubView.NONE
-    mainViewMode = MainSurveyViewMode.MAP
-    if (currentScreen != PrototypeScreen.MAIN_SURVEY) {
-      currentScreen = PrototypeScreen.MAIN_SURVEY
-    }
-    recenterMapOnUser()
-    val badge = formattedWayfindingBadgeForSubmission(sub.id)
-    val contextLabel =
-      parentEntity?.label?.substringBefore(" •")
-        ?: sub.coordinatesLabel.ifBlank { "Standalone Field Log" }
-    activeSurveyNotice = "Straight-line navigation to ${sub.formTitle} • $contextLabel ($badge)"
-  }
+  fun startNavigationToSubmission(submissionId: String) =
+    surveyMap.startNavigationToSubmission(submissionId)
 
   /** Toggles straight-line navigation to [entityId] on or off. */
-  fun toggleNavigationToEntity(entityId: String) {
-    if (isNavigatingToEntity(entityId)) {
-      stopNavigation()
-    } else {
-      startNavigationToEntity(entityId)
-    }
-  }
+  fun toggleNavigationToEntity(entityId: String) = surveyMap.toggleNavigationToEntity(entityId)
 
   /** Toggles straight-line navigation to [submissionId] on or off. */
-  fun toggleNavigationToSubmission(submissionId: String) {
-    if (isNavigatingToSubmission(submissionId)) {
-      stopNavigation()
-    } else {
-      startNavigationToSubmission(submissionId)
-    }
-  }
+  fun toggleNavigationToSubmission(submissionId: String) =
+    surveyMap.toggleNavigationToSubmission(submissionId)
 
   /**
    * Starts straight-line navigation from the collector's current GPS position to [placeId] and
@@ -3870,23 +3501,7 @@ class PrototypeAppState(
    */
   fun startNavigationToPlace(placeId: String) {
     val place = findPlaceById(placeId) ?: return
-    navigationTargetKind = NavigationTargetKind.PLACE
-    navigationTargetId = place.id
-    selectedPlaceId = place.id
-    lastSelectedPlace = place
-    selectedEntityId = null
-    selectedSubmissionId = null
-    isEntityBottomSheetExpanded = false
-    isLayersSheetOpen = false
-    isDrawerOpen = false
-    activeDrawerSubView = MainDrawerSubView.NONE
-    mainViewMode = MainSurveyViewMode.MAP
-    if (currentScreen != PrototypeScreen.MAIN_SURVEY) {
-      currentScreen = PrototypeScreen.MAIN_SURVEY
-    }
-    recenterMapOnUser()
-    val badge = formattedWayfindingBadgeForPlace(place.id)
-    activeSurveyNotice = "Straight-line navigation to ${place.name} ($badge)"
+    surveyMap.startNavigationToPlace(place)
   }
 
   /** Toggles straight-line navigation to [placeId] on or off. */
@@ -3899,38 +3514,15 @@ class PrototypeAppState(
   }
 
   /** Stops active straight-line navigation and clears the navigation line & HUD banner. */
-  fun stopNavigation() {
-    navigationTargetKind = null
-    navigationTargetId = null
-    activeSurveyNotice = null
-  }
+  fun stopNavigation() = surveyMap.stopNavigation()
 
   /**
    * Advances the collector's simulated GPS blue dot along the active straight-line navigation
    * vector toward the target entity or submission by [stepFraction] (`0.40f` by default, snapping
    * directly onto the destination when within `12` meters).
    */
-  fun stepUserTowardNavigationTarget(stepFraction: Float = 0.40f) {
-    val nav = activeNavigation ?: return
-    val targetX = nav.vector.toNormalizedX
-    val targetY = nav.vector.toNormalizedY
-    val dx = targetX - userGpsNormalizedX
-    val dy = targetY - userGpsNormalizedY
-    val fraction = stepFraction.coerceIn(0.10f, 1.0f)
-    val nextX =
-      if (nav.vector.distanceMeters <= 18) {
-        targetX
-      } else {
-        userGpsNormalizedX + dx * fraction
-      }
-    val nextY =
-      if (nav.vector.distanceMeters <= 18) {
-        targetY
-      } else {
-        userGpsNormalizedY + dy * fraction
-      }
-    updateUserGpsLocation(nextX, nextY)
-  }
+  fun stepUserTowardNavigationTarget(stepFraction: Float = 0.40f) =
+    surveyMap.stepUserTowardNavigationTarget(stepFraction)
 
   /** Toggles between Light and Dark Ground Material 3 themes. */
   fun toggleDarkTheme() = settings.toggleDarkTheme()
@@ -3956,24 +3548,16 @@ class PrototypeAppState(
     currentScreen = PrototypeScreen.SIGN_IN
     onboarding.reset()
     settings.reset()
+    surveyMap.reset()
     activeSurveyNotice = null
     mainViewMode = MainSurveyViewMode.MAP
     isDrawerOpen = false
     activeDrawerSubView = MainDrawerSubView.NONE
-    isLayersSheetOpen = false
     isAvailableFormsSheetOpen = false
-    isOfflineBasemapVisible = true
-    offlineBasemapStyle = OfflineBasemapStyle.SATELLITE_HYBRID
-    enabledImagerySourceIds = emptySet()
     viewModel.launch { viewModel.sampleDataRepository.resetToSampleData() }
     dataResetCount++
-    selectedPlaceId = null
-    lastSelectedPlace = null
-    isAirplaneMode = false
     mapboxPlacesApiResults = emptyList()
     isMapboxPlacesSearching = false
-    selectedEntityId = null
-    isEntityBottomSheetExpanded = false
     isSidePanelExpanded = true
     sidePanelWidthDp = DEFAULT_SIDE_PANEL_WIDTH_DP
     isDetailsPanelExpanded = true
@@ -3983,28 +3567,13 @@ class PrototypeAppState(
     isDashboardTableExpanded = false
     dashboardTableDatasetId = null
     uploadsEntityFilterId = null
-    navigationTargetKind = null
-    navigationTargetId = null
     listSearchQuery = ""
     listFilterTab = ListFilterTab.ALL
-    userGpsNormalizedX = 0.50f
-    userGpsNormalizedY = 0.50f
-    userGpsCoordinatesLabel = "-0.4198°, 36.9512° (±3.2m GPS)"
-    isCameraFollowingUser = true
-    locationLockState = LocationLockState.LOCKED
-    mapPanOffsetX = 0f
-    mapPanOffsetY = 0f
     closeActiveFormRunner()
     resetDefaultXFormsXml()
   }
 
   companion object {
-    /** Web Mercator's latitude limit, for camera centers. */
-    private const val MAX_MAP_LATITUDE = 85.0
-
-    /** Pan offset change (normalized) below which a settled camera counts as not moved. */
-    private const val MAP_SYNC_TOLERANCE = 1e-4f
-
     /** Default width of the web dashboard's left-hand panel, in dp. */
     const val DEFAULT_SIDE_PANEL_WIDTH_DP = 300f
 
@@ -4047,11 +3616,3 @@ class PrototypeAppState(
   fun submissionCountForSurvey(surveyId: String): Int =
     data.surveyStats[surveyId]?.submissionCount ?: 0
 }
-
-private val defaultClusterMapFeaturesUseCase = ClusterMapFeaturesUseCase()
-
-/** Performs deterministic spatial clustering on [features] using [ClusterMapFeaturesUseCase]. */
-internal fun computeMapFeatureClusters(
-  features: List<MapClusterFeatureItem>,
-  radiusNormalized: Float,
-): List<MapFeatureCluster> = defaultClusterMapFeaturesUseCase(features, radiusNormalized)

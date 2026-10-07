@@ -87,6 +87,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -334,7 +335,8 @@ internal fun WebDashboardPage(
     }
 
     if (state.isLayersSheetOpen) {
-      LayersControlDialog(state = state)
+      val mapUiState by state.surveyMap.uiState.collectAsState()
+      LayersControlDialog(uiState = mapUiState, actions = state.surveyMap)
     }
     if (activeQrEntity != null) {
       EntityQrCodeModalDialog(state = state, entity = activeQrEntity, isWeb = true)
@@ -575,7 +577,9 @@ private fun DashboardMapArea(state: PrototypeAppState, modifier: Modifier = Modi
         size = 64.dp,
       )
       if (state.isMapClusteringActive && state.selectedCluster != null) {
-        Box(modifier = Modifier.width(360.dp)) { MapClusterBalloonsOverlay(state = state) }
+        Box(modifier = Modifier.width(360.dp)) {
+          MapClusterBalloonsOverlay(uiState = state.surveyMapUiState, actions = state.surveyMap)
+        }
       }
     }
 

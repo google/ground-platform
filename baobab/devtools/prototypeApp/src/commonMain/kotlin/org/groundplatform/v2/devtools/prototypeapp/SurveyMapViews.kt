@@ -15,6 +15,7 @@ package org.groundplatform.v2.devtools.prototypeapp
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
@@ -29,6 +30,8 @@ import org.groundplatform.v2.devtools.prototypeapp.map.SurveyMapIds
 import org.groundplatform.v2.devtools.prototypeapp.map.SurveyMarkerView
 import org.groundplatform.v2.devtools.prototypeapp.map.framingInsets
 import org.groundplatform.v2.devtools.prototypeapp.map.rememberSurveyMapCamera
+import org.groundplatform.v2.devtools.prototypeapp.ui.state.SurveyMapUiState
+import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.SurveyMapActions
 import org.groundplatform.v2.map.CameraPosition
 import org.groundplatform.v2.map.GroundMap
 import org.groundplatform.v2.map.LatLng
@@ -55,51 +58,87 @@ internal fun SurveyMainMap(
   collapseSheetOnBackgroundTap: Boolean = true,
   showNavigationOverlay: Boolean = true,
 ) {
-  val place = state.selectedPlace
+  val uiState by state.surveyMap.uiState.collectAsState()
+  SurveyMainMap(
+    uiState = uiState,
+    actions = state.surveyMap,
+    map = SurveyMapContent.main(state, showNavigationOverlay),
+    camera = camera,
+    modifier = modifier,
+    collapseSheetOnBackgroundTap = collapseSheetOnBackgroundTap,
+    onDrawingTap =
+      if (state.webMapDrawing.isDrawing) {
+        { at -> state.addWebMapDrawingVertex(at) }
+      } else {
+        null
+      },
+    onFormGeometryTap =
+      if (state.isDataCollectionFormOpen) {
+        { path -> state.focusWebFormQuestion(path) }
+      } else {
+        null
+      },
+  )
+}
+
+/**
+ * Stateless main survey map: shows [map] and routes taps to the map viewport's [actions].
+ *
+ * @param onDrawingTap when non-null, a form's geometry is being drawn (web dashboard) and every
+ *   click on the map, feature or not, is a vertex at the tapped position; the selection stays as it
+ *   is. Markers report no position and are ignored.
+ * @param onFormGeometryTap when non-null, tapping a geometry answer of the open form (web
+ *   dashboard) reports its question path instead of changing the selection.
+ */
+@Composable
+internal fun SurveyMainMap(
+  uiState: SurveyMapUiState,
+  actions: SurveyMapActions,
+  map: SurveyMap,
+  camera: SurveyMapCameraController,
+  modifier: Modifier = Modifier,
+  collapseSheetOnBackgroundTap: Boolean = true,
+  onDrawingTap: ((LatLng) -> Unit)? = null,
+  onFormGeometryTap: ((path: String) -> Unit)? = null,
+) {
+  val place = uiState.selectedPlace
   LaunchedEffect(place?.id, place?.latitude, place?.longitude, place?.targetZoom) {
     if (place == null) return@LaunchedEffect
     val focus = PlaceFraming.focus(place)
     camera.run { it.fitBounds(focus.bounds, PlaceFocusPadding, focus.maxZoom) }
   }
 
-  SurveyGroundMap(
-    map = SurveyMapContent.main(state, showNavigationOverlay),
-    camera = camera,
-    modifier = modifier,
-  ) { tappedId, at ->
-    // While a form's geometry is being drawn (web dashboard), every click on the map, feature or
-    // not, is a vertex; the selection stays as it is. Markers report no position and are ignored.
-    if (state.webMapDrawing.isDrawing) {
-      if (at != null) state.addWebMapDrawingVertex(at)
+  SurveyGroundMap(map = map, camera = camera, modifier = modifier) { tappedId, at ->
+    if (onDrawingTap != null) {
+      if (at != null) onDrawingTap(at)
       return@SurveyGroundMap
     }
-    // A geometry answer of the open form (web dashboard) jumps to its question.
     val formPath = tappedId?.let(SurveyMapIds::formGeometryPathOf)
-    if (formPath != null && state.isDataCollectionFormOpen) {
-      state.focusWebFormQuestion(formPath)
+    if (formPath != null && onFormGeometryTap != null) {
+      onFormGeometryTap(formPath)
       return@SurveyGroundMap
     }
     val entityId = tappedId?.let(SurveyMapIds::entityIdOf)
     val clusterId = tappedId?.let(SurveyMapIds::clusterIdOf)
     when {
       tappedId == SurveyMapIds.USER || tappedId == SurveyMapIds.NAVIGATION -> {}
-      tappedId != null && SurveyMapIds.isPlace(tappedId) -> state.clearSelectedPlace()
+      tappedId != null && SurveyMapIds.isPlace(tappedId) -> actions.clearSelectedPlace()
       clusterId != null -> {
-        state.clearSelectedPlace()
-        state.selectCluster(clusterId)
+        actions.clearSelectedPlace()
+        actions.selectCluster(clusterId)
       }
       entityId != null -> {
-        state.clearSelectedPlace()
-        state.selectEntity(entityId)
+        actions.clearSelectedPlace()
+        actions.selectEntity(entityId)
       }
       else -> {
-        state.clearSelectedPlace()
-        state.updateLayersSheetOpen(false)
-        state.selectCluster(null)
-        if (collapseSheetOnBackgroundTap && state.isEntityBottomSheetExpanded) {
-          state.updateEntityBottomSheetExpanded(false)
+        actions.clearSelectedPlace()
+        actions.updateLayersSheetOpen(false)
+        actions.selectCluster(null)
+        if (collapseSheetOnBackgroundTap && uiState.isEntityBottomSheetExpanded) {
+          actions.updateEntityBottomSheetExpanded(false)
         } else {
-          state.selectEntity(null)
+          actions.selectEntity(null)
         }
       }
     }

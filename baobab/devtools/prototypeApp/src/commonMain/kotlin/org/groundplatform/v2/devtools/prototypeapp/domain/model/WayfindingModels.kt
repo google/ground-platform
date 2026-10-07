@@ -44,6 +44,10 @@ data class StraightLineVector(
 
   val formattedBearing: String
     get() = "${bearingDegrees}° $cardinalDirection"
+
+  /** Formatted distance & compass bearing badge (e.g. `"495 m • 319° NW"`). */
+  val formattedBadge: String
+    get() = "$formattedDistance • $formattedBearing"
 }
 
 /**

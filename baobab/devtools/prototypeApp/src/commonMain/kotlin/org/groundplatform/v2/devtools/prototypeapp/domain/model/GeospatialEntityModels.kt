@@ -178,3 +178,10 @@ data class EntityDatasetFeaturesGroup(
   val datasetName: String,
   val entities: List<GeospatialEntityItem>,
 )
+
+/**
+ * Resolves the user-facing singular domain noun of the entity with [entityId] (e.g. `"Coffee
+ * Parcel"`), or `"Location"` when [entityId] is `null` or unknown.
+ */
+fun List<GeospatialEntityItem>.singularTypeLabelOf(entityId: String?): String =
+  entityId?.let { id -> firstOrNull { it.id == id }?.singularTypeLabel } ?: "Location"

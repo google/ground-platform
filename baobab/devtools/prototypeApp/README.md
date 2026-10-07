@@ -456,7 +456,15 @@ fresh on every page load; on mobile it will become the persistent offline store.
     reads and writes preferences through `SettingsRepository`, tile packages
     through `SurveyRepository`, and models the device storage breakdown with
     `EstimateDeviceStorageUseCase`; the light/dark theme is session state it
-    owns.
+    owns. `SurveyMapViewModel` (the survey map viewport: camera and GPS
+    following, basemap and organization imagery, zoomed-out clustering,
+    straight-line wayfinding, and the selected map feature, cluster, or place)
+    observes survey content and organizations through `SurveyRepository` and
+    `OrganizationRepository`, writes the device location through
+    `LocationRepository`, searches places through `PlaceRepository`, and
+    models clustering with `ClusterMapFeaturesUseCase` and wayfinding with
+    `ComputeWayfindingNavigationUseCase`; outcomes beyond the map (list
+    selection, drawer, notices) are `SurveyMapEvent`s the app shell applies.
 -   **Survey switching**: Every survey's data is in the store, so switching
     surveys keeps edits. Use **Reset** to go back to the sample data.
 -   **Survey editor**: The editor loads the active survey's draft
