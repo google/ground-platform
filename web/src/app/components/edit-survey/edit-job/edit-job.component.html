@@ -56,7 +56,7 @@
     <div *ngSwitchCase="EditJobSection.TASKS">
       <task-editor
         [tasks]="tasks"
-        [typeLocked]="typeLocked"
+        [typeLockedTaskIds]="typeLockedTaskIds"
         (onValueChanges)="onTasksChange($event)"
         #tasksEditor
       >
