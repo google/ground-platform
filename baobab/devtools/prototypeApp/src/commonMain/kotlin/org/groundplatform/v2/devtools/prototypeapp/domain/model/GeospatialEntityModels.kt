@@ -185,3 +185,35 @@ data class EntityDatasetFeaturesGroup(
  */
 fun List<GeospatialEntityItem>.singularTypeLabelOf(entityId: String?): String =
   entityId?.let { id -> firstOrNull { it.id == id }?.singularTypeLabel } ?: "Location"
+
+/**
+ * Resolves a property [value] of [entity] that references another record in this list (a foreign
+ * key holding that record's ID or GeoID), or `null` when the value isn't a reference. Related
+ * records are resolved regardless of whether they have geometry.
+ */
+fun List<GeospatialEntityItem>.relatedEntityForPropertyValue(
+  entity: GeospatialEntityItem,
+  value: String,
+): GeospatialEntityItem? {
+  val key = value.trim()
+  if (key.isEmpty()) return null
+  return firstOrNull {
+    it.id != entity.id && (it.id == key || it.geoId.equals(key, ignoreCase = true))
+  }
+}
+
+/**
+ * The entity dataset layers ([LayerSourceType.ENTITY_DATASET]) among [layers] that own at least one
+ * of these map features, or an empty list when there are no map features (so the map layers section
+ * of the `Layers` sheet is hidden).
+ */
+fun List<GeospatialEntityItem>.entityDatasetLayersIn(
+  layers: List<MapLayerItem>
+): List<MapLayerItem> =
+  if (isEmpty()) {
+    emptyList()
+  } else {
+    layers.filter { layer ->
+      layer.sourceType == LayerSourceType.ENTITY_DATASET && any { it.layerId == layer.id }
+    }
+  }

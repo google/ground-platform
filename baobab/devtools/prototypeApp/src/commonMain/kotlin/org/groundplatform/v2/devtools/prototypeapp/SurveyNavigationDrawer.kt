@@ -98,7 +98,9 @@ import org.groundplatform.v2.core.forms.ui.GroundBadgeTone
 import org.groundplatform.v2.core.forms.ui.GroundModalBottomSheetOverlay
 import org.groundplatform.v2.core.forms.ui.GroundTonalBadge
 import org.groundplatform.v2.core.forms.ui.LocalGroundBrandFontFamily
+import org.groundplatform.v2.devtools.prototypeapp.ui.state.DashboardUiState
 import org.groundplatform.v2.devtools.prototypeapp.ui.state.SettingsUiState
+import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.DashboardActions
 import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.SettingsActions
 
 /**
@@ -383,8 +385,40 @@ internal fun DrawerMenuItem(
  */
 @Composable
 internal fun UploadsMutationsSubScreen(state: PrototypeAppState) {
-  val filteredMutations = state.filteredUploadMutations
-  val activeFilter = state.selectedUploadStatusFilter
+  val uiState by state.dashboard.uiState.collectAsState()
+  UploadsMutationsSubScreen(
+    uiState = uiState,
+    actions = state.dashboard,
+    onBack = { state.closeDrawerSubView() },
+    onOpenSubmission = { submissionId ->
+      state.selectSubmissionDetail(submissionId)
+      state.closeDrawerSubView()
+    },
+    onOpenEntity = { entityId ->
+      state.selectEntity(entityId)
+      state.closeDrawerSubView()
+    },
+  )
+}
+
+/**
+ * Stateless `Uploads` screen: the status filter chips, the optional map feature filter chip, and
+ * the filtered mutation cards from [uiState]; filter and sync intents go to [actions].
+ *
+ * @param onBack closes the sub-screen.
+ * @param onOpenSubmission opens the submission a card stands for (and leaves the screen).
+ * @param onOpenEntity opens the map feature a card without a submission stands for.
+ */
+@Composable
+internal fun UploadsMutationsSubScreen(
+  uiState: DashboardUiState,
+  actions: DashboardActions,
+  onBack: () -> Unit,
+  onOpenSubmission: (submissionId: String) -> Unit,
+  onOpenEntity: (entityId: String) -> Unit,
+) {
+  val filteredMutations = uiState.filteredUploadMutations
+  val activeFilter = uiState.selectedUploadStatusFilter
 
   Column(
     modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(14.dp),
@@ -418,9 +452,9 @@ internal fun UploadsMutationsSubScreen(state: PrototypeAppState) {
         horizontalArrangement = Arrangement.spacedBy(6.dp),
         verticalAlignment = Alignment.CenterVertically,
       ) {
-        if (state.outboxMutationCount > 0) {
+        if (uiState.outboxMutationCount > 0) {
           FilledTonalButton(
-            onClick = { state.syncAllOutboxMutations() },
+            onClick = { actions.syncAllOutboxMutations() },
             shape = MaterialTheme.shapes.small,
             contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
           ) {
@@ -431,14 +465,14 @@ internal fun UploadsMutationsSubScreen(state: PrototypeAppState) {
             )
             Spacer(modifier = Modifier.width(4.dp))
             Text(
-              text = "Sync all (${state.outboxMutationCount})",
+              text = "Sync all (${uiState.outboxMutationCount})",
               style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
             )
           }
         }
 
         OutlinedButton(
-          onClick = { state.closeDrawerSubView() },
+          onClick = onBack,
           shape = MaterialTheme.shapes.small,
           contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
         ) {
@@ -461,10 +495,10 @@ internal fun UploadsMutationsSubScreen(state: PrototypeAppState) {
     ) {
       UploadStatusFilter.entries.forEach { filter ->
         val isSelected = activeFilter == filter
-        val count = state.uploadCountForFilter(filter)
+        val count = uiState.uploadCountForFilter(filter)
         GroundFilterChip(
           selected = isSelected,
-          onClick = { state.toggleUploadStatusFilter(filter) },
+          onClick = { actions.toggleUploadStatusFilter(filter) },
           label = {
             Text(
               text = "${filter.label} ($count)",
@@ -494,11 +528,11 @@ internal fun UploadsMutationsSubScreen(state: PrototypeAppState) {
     }
 
     // Entity filter (opened from a map feature's details): removable chip naming the feature.
-    val entityFilter = state.uploadsEntityFilter
+    val entityFilter = uiState.uploadsEntityFilter
     if (entityFilter != null) {
       InputChip(
         selected = true,
-        onClick = { state.clearUploadsEntityFilter() },
+        onClick = { actions.clearUploadsEntityFilter() },
         label = { Text(text = entityFilter.label, maxLines = 1, overflow = TextOverflow.Ellipsis) },
         leadingIcon = {
           EntityGeometryIcon(entity = entityFilter, size = InputChipDefaults.IconSize)
@@ -536,7 +570,20 @@ internal fun UploadsMutationsSubScreen(state: PrototypeAppState) {
     } else {
       Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
         filteredMutations.forEach { mutation ->
-          UploadMutationRowCard(mutation = mutation, state = state)
+          UploadMutationRowCard(
+            mutation = mutation,
+            onOpen = {
+              val submissionId = mutation.submissionId
+              if (submissionId != null) {
+                onOpenSubmission(submissionId)
+              } else if (mutation.entityId.isNotBlank()) {
+                onOpenEntity(mutation.entityId)
+              } else {
+                onBack()
+              }
+            },
+            onSyncNow = { actions.syncMutationNow(mutation.id) },
+          )
         }
       }
     }
@@ -551,7 +598,11 @@ internal fun UploadsMutationsSubScreen(state: PrototypeAppState) {
  * - Status badge (`Pending`, `In progress`, `Uploaded`, `Failed`) and inline retry/upload action
  */
 @Composable
-internal fun UploadMutationRowCard(mutation: MutationLogItem, state: PrototypeAppState) {
+internal fun UploadMutationRowCard(
+  mutation: MutationLogItem,
+  onOpen: () -> Unit,
+  onSyncNow: () -> Unit,
+) {
   val statusFilter = mutation.uploadStatusFilter
   val badgeTone =
     when (statusFilter) {
@@ -562,14 +613,7 @@ internal fun UploadMutationRowCard(mutation: MutationLogItem, state: PrototypeAp
     }
 
   OutlinedCard(
-    onClick = {
-      if (mutation.submissionId != null) {
-        state.selectSubmissionDetail(mutation.submissionId)
-      } else if (mutation.entityId.isNotBlank()) {
-        state.selectEntity(mutation.entityId)
-      }
-      state.closeDrawerSubView()
-    },
+    onClick = onOpen,
     modifier = Modifier.fillMaxWidth(),
     shape = MaterialTheme.shapes.small,
     border =
@@ -637,7 +681,7 @@ internal fun UploadMutationRowCard(mutation: MutationLogItem, state: PrototypeAp
 
         if (mutation.isOutbox) {
           Surface(
-            onClick = { state.syncMutationNow(mutation.id) },
+            onClick = onSyncNow,
             shape = RoundedCornerShape(4.dp),
             color = MaterialTheme.colorScheme.secondaryContainer,
             contentColor = MaterialTheme.colorScheme.onSecondaryContainer,

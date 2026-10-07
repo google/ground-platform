@@ -465,6 +465,16 @@ fresh on every page load; on mobile it will become the persistent offline store.
     models clustering with `ClusterMapFeaturesUseCase` and wayfinding with
     `ComputeWayfindingNavigationUseCase`; outcomes beyond the map (list
     selection, drawer, notices) are `SurveyMapEvent`s the app shell applies.
+    `DashboardViewModel` (the web dashboard's panel layout, data tables, layer
+    selection, and entity details pane; the web Surveys page; the searchable
+    list's filter tabs and collapsed datasets; and the `Uploads` drawer
+    sub-screen) observes surveys, map features, and layers through
+    `SurveyRepository`, organizations through `OrganizationRepository`, the
+    signed-in user through `AuthRepository`, and the mutation log through
+    `MutationRepository`; it creates surveys with `CreateSurveyUseCase` and
+    uploads with `SyncMutationsUseCase`. Switching the active survey, showing
+    the `Uploads` sub-screen, and notices are `DashboardEvent`s the shell
+    applies.
 -   **Survey switching**: Every survey's data is in the store, so switching
     surveys keeps edits. Use **Reset** to go back to the sample data.
 -   **Survey editor**: The editor loads the active survey's draft

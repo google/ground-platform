@@ -111,3 +111,51 @@ data class MutationLogItem(
         }
       }
 }
+
+/**
+ * All mutations in strict reverse chronological order ([MutationLogItem.operationTimestamp]
+ * descending, then the completed or started time, then ID), as listed on the `Uploads` screen.
+ */
+fun List<MutationLogItem>.newestFirst(): List<MutationLogItem> =
+  sortedWith(
+    compareByDescending<MutationLogItem> { it.operationTimestamp }
+      .thenByDescending { it.completedTimestamp ?: it.startedTimestamp ?: "" }
+      .thenByDescending { it.id }
+  )
+
+/**
+ * Pending, in-progress, or failed mutations ([MutationLogItem.isOutbox]) in strict reverse
+ * chronological order ([MutationLogItem.operationTimestamp] descending).
+ */
+fun List<MutationLogItem>.outboxNewestFirst(): List<MutationLogItem> = filter {
+  it.isOutbox
+}
+  .sortedWith(
+    compareByDescending<MutationLogItem> { it.operationTimestamp }
+      .thenByDescending { it.startedTimestamp ?: "" }
+      .thenByDescending { it.id }
+  )
+
+/**
+ * Completed mutations ([MutationLogItem.isUploaded]) in strict reverse chronological order (
+ * [MutationLogItem.operationTimestamp] descending).
+ */
+fun List<MutationLogItem>.uploadedNewestFirst(): List<MutationLogItem> = filter {
+  it.isUploaded
+}
+  .sortedWith(
+    compareByDescending<MutationLogItem> { it.operationTimestamp }
+      .thenByDescending { it.completedTimestamp ?: "" }
+      .thenByDescending { it.id }
+  )
+
+/**
+ * Whether this mutation passes the `Uploads` screen filters: its status chip is [statusFilter] (or
+ * [statusFilter] is `null`) and, when [entityId] is set, it targets that map feature.
+ */
+fun MutationLogItem.matchesUploadsFilters(
+  statusFilter: UploadStatusFilter?,
+  entityId: String?,
+): Boolean =
+  (statusFilter == null || uploadStatusFilter == statusFilter) &&
+    (entityId == null || this.entityId == entityId)

@@ -30,6 +30,7 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyMapAnchor
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SurveyEditorDraft
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.withEditorFormAvailability
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.withEditorLayerStyles
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.relatedEntityForPropertyValue
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.singularTypeLabelOf
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.toClusterFeatures
 import org.groundplatform.v2.devtools.prototypeapp.map.DraftGeometry
@@ -38,11 +39,14 @@ import org.groundplatform.v2.devtools.prototypeapp.map.FormGeometryOverlay
 import org.groundplatform.v2.devtools.prototypeapp.pdf.GeneratedPdf
 import org.groundplatform.v2.devtools.prototypeapp.pdf.RecordPdfReports
 import org.groundplatform.v2.devtools.prototypeapp.surveyeditor.SurveyAccess
+import org.groundplatform.v2.devtools.prototypeapp.ui.state.DashboardEvent
+import org.groundplatform.v2.devtools.prototypeapp.ui.state.DashboardUiState
 import org.groundplatform.v2.devtools.prototypeapp.ui.state.OnboardingEvent
 import org.groundplatform.v2.devtools.prototypeapp.ui.state.PrototypeUiState
 import org.groundplatform.v2.devtools.prototypeapp.ui.state.SettingsEvent
 import org.groundplatform.v2.devtools.prototypeapp.ui.state.SurveyMapEvent
 import org.groundplatform.v2.devtools.prototypeapp.ui.state.SurveyMapUiState
+import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.DashboardViewModel
 import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.OnboardingViewModel
 import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.PrototypeAppViewModel
 import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.SettingsViewModel
@@ -124,6 +128,25 @@ class PrototypeAppState(
   val surveyMapUiState: SurveyMapUiState
     get() = mapState
 
+  /**
+   * ViewModel of the web dashboard (panel layout, data tables, layer selection, entity details
+   * pane), the web Surveys page, the searchable list's filters, and the `Uploads` drawer sub-screen
+   * (mutation log and sync). Its screens observe [DashboardViewModel.uiState] directly; this class
+   * mirrors it for the rest of the UI and applies its [DashboardEvent]s to the app shell.
+   */
+  val dashboard: DashboardViewModel =
+    DashboardViewModel(
+      surveyRepository = viewModel.surveyRepository,
+      organizationRepository = viewModel.organizationRepository,
+      authRepository = viewModel.authRepository,
+      mutationRepository = viewModel.mutationRepository,
+      createSurveyUseCase = viewModel.createSurveyUseCase,
+      syncMutationsUseCase = viewModel.syncMutationsUseCase,
+      scope = viewModel.scope,
+    )
+
+  private var dashboardState by mutableStateOf(dashboard.uiState.value)
+
   init {
     viewModel.scope.launch { viewModel.appData.collect { data = it } }
     viewModel.scope.launch { onboarding.uiState.collect { onboardingState = it } }
@@ -138,6 +161,20 @@ class PrototypeAppState(
     }
     viewModel.scope.launch { surveyMap.uiState.collect { mapState = it } }
     viewModel.scope.launch { surveyMap.events.collect(::onSurveyMapEvent) }
+    viewModel.scope.launch { dashboard.uiState.collect { dashboardState = it } }
+    viewModel.scope.launch { dashboard.events.collect(::onDashboardEvent) }
+  }
+
+  /** Applies a dashboard outcome to the rest of the app shell (survey switch, drawer, notices). */
+  private fun onDashboardEvent(event: DashboardEvent) {
+    when (event) {
+      is DashboardEvent.SurveyActivated -> clearSelectionsForActivatedSurvey(event.surveyId)
+      DashboardEvent.UploadsOpened -> {
+        isDrawerOpen = false
+        activeDrawerSubView = MainDrawerSubView.UPLOADS
+      }
+      is DashboardEvent.Notice -> activeSurveyNotice = event.message
+    }
   }
 
   /** Applies a map outcome to the rest of the app shell (list selection, drawer, notices). */
@@ -145,20 +182,12 @@ class PrototypeAppState(
     when (event) {
       is SurveyMapEvent.EntitySelected -> {
         selectedSubmissionId = null
-        selectedLayerDatasetId = null
-        entityDetailsPane = EntityDetailsPane.PROPERTIES
         mainViewMode = MainSurveyViewMode.MAP
-        val entityId = event.entityId
-        if (entityId != null) {
-          followSelectionInDashboardTable(entityId)
-          if (!isDashboardTableExpanded) {
-            isDetailsPanelExpanded = true
-          }
-        }
+        dashboard.onEntitySelected(event.entityId)
       }
       is SurveyMapEvent.PlaceSelected -> {
         selectedSubmissionId = null
-        selectedLayerDatasetId = null
+        dashboard.selectLayer(null)
         mainViewMode = MainSurveyViewMode.MAP
         activeSurveyNotice = "Centered map on ${event.place.name} (${event.place.coordinatesLabel})"
       }
@@ -904,12 +933,18 @@ class PrototypeAppState(
   val isEntityBottomSheetExpanded: Boolean
     get() = mapState.isEntityBottomSheetExpanded
 
+  // --- Web dashboard, searchable list filters & Uploads (see [DashboardViewModel]) ---
+
+  /** Latest [DashboardUiState], for views that build the dashboard from the app shell. */
+  val dashboardUiState: DashboardUiState
+    get() = dashboardState
+
   /**
    * Whether the left-hand panel in the web dashboard is expanded (`true`, default) or collapsed
    * (`false`) to provide a full-width map view.
    */
-  var isSidePanelExpanded by mutableStateOf(true)
-    private set
+  val isSidePanelExpanded: Boolean
+    get() = dashboardState.isSidePanelExpanded
 
   /** Alias for [isSidePanelExpanded] with dashboard prefix. */
   val isDashboardSidePanelExpanded: Boolean
@@ -920,15 +955,15 @@ class PrototypeAppState(
    * panel's right border ([updateSidePanelWidth]); always within [MIN_SIDE_PANEL_WIDTH_DP] and
    * [MAX_SIDE_PANEL_WIDTH_DP], and kept while the panel is collapsed.
    */
-  var sidePanelWidthDp by mutableStateOf(DEFAULT_SIDE_PANEL_WIDTH_DP)
-    private set
+  val sidePanelWidthDp: Float
+    get() = dashboardState.sidePanelWidthDp
 
   /**
    * Whether the right-hand details panel in the web dashboard is expanded (`true`, default) or
    * collapsed (`false`) to maximize visible map space.
    */
-  var isDetailsPanelExpanded by mutableStateOf(true)
-    private set
+  val isDetailsPanelExpanded: Boolean
+    get() = dashboardState.isDetailsPanelExpanded
 
   /** Alias for [isDetailsPanelExpanded] with dashboard prefix. */
   val isDashboardDetailsPanelExpanded: Boolean
@@ -945,43 +980,43 @@ class PrototypeAppState(
    * Entity dataset ID of the map layer or data table selected in the web dashboard's left-hand
    * panel, or `null`. Mutually exclusive with [selectedEntityId] and [selectedSubmissionId].
    */
-  var selectedLayerDatasetId by mutableStateOf<String?>(null)
-    private set
+  val selectedLayerDatasetId: String?
+    get() = dashboardState.selectedLayerDatasetId
 
   /**
    * Which pane of the selected entity's details surface is showing: its properties (default) or its
    * `1:N` submissions. Submissions are always one click away from the properties so the details
    * surface opens on the entity's current state.
    */
-  var entityDetailsPane by mutableStateOf(EntityDetailsPane.PROPERTIES)
-    private set
+  val entityDetailsPane: EntityDetailsPane
+    get() = dashboardState.entityDetailsPane
 
   /**
    * Whether the web dashboard's bottom data table is expanded. It never expands automatically; only
    * the collapsed bar's toggle or the details card's "Show in table" button expand it.
    */
-  var isDashboardTableExpanded by mutableStateOf(false)
-    private set
+  val isDashboardTableExpanded: Boolean
+    get() = dashboardState.isDashboardTableExpanded
 
   /**
    * Entity dataset whose table is active in the web dashboard's bottom data table, or `null` for
    * the first dataset. Follows the selected entity's dataset.
    */
-  var dashboardTableDatasetId by mutableStateOf<String?>(null)
-    private set
+  val dashboardTableDatasetId: String?
+    get() = dashboardState.dashboardTableDatasetId
 
   /**
    * Entity whose mutations the `Uploads` screen is filtered to (opened from an entity's details),
    * or `null` to show uploads for every entity.
    */
-  var uploadsEntityFilterId by mutableStateOf<String?>(null)
-    private set
+  val uploadsEntityFilterId: String?
+    get() = dashboardState.uploadsEntityFilterId
 
-  var listSearchQuery by mutableStateOf("")
-    private set
+  val listSearchQuery: String
+    get() = dashboardState.listSearchQuery
 
-  var listFilterTab by mutableStateOf(ListFilterTab.ALL)
-    private set
+  val listFilterTab: ListFilterTab
+    get() = dashboardState.listFilterTab
 
   val offlineTilePackages: List<OfflineTilePackageItem>
     get() = data.offlineTilePackages
@@ -994,20 +1029,15 @@ class PrototypeAppState(
    * Active status filter chip on the unified `Uploads` screen (`Pending`, `In progress`,
    * `Uploaded`, or `Failed`), or `null` when all uploads are shown.
    */
-  var selectedUploadStatusFilter by mutableStateOf<UploadStatusFilter?>(null)
-    private set
+  val selectedUploadStatusFilter: UploadStatusFilter?
+    get() = dashboardState.selectedUploadStatusFilter
 
   /**
    * All local mutations sorted in strict reverse chronological order (
    * [MutationLogItem.operationTimestamp] descending).
    */
   val allMutationsSorted: List<MutationLogItem>
-    get() =
-      mutations.sortedWith(
-        compareByDescending<MutationLogItem> { it.operationTimestamp }
-          .thenByDescending { it.completedTimestamp ?: it.startedTimestamp ?: "" }
-          .thenByDescending { it.id }
-      )
+    get() = dashboardState.allMutationsSorted
 
   /**
    * Mutations displayed in the unified `Uploads` screen filtered by [selectedUploadStatusFilter]
@@ -1015,90 +1045,57 @@ class PrototypeAppState(
    * (when set), in reverse chronological order.
    */
   val filteredUploadMutations: List<MutationLogItem>
-    get() {
-      val filter = selectedUploadStatusFilter
-      return allMutationsSorted.filter {
-        (filter == null || it.uploadStatusFilter == filter) && it.matchesUploadsEntityFilter()
-      }
-    }
+    get() = dashboardState.filteredUploadMutations
 
   /** Returns the total count of mutations matching [filter] on the `Uploads` screen. */
-  fun uploadCountForFilter(filter: UploadStatusFilter): Int = mutations.count {
-    it.uploadStatusFilter == filter && it.matchesUploadsEntityFilter()
-  }
-
-  private fun MutationLogItem.matchesUploadsEntityFilter(): Boolean {
-    val entityId = uploadsEntityFilterId ?: return true
-    return this.entityId == entityId
-  }
+  fun uploadCountForFilter(filter: UploadStatusFilter): Int =
+    dashboardState.uploadCountForFilter(filter)
 
   /** Entity the `Uploads` screen is currently filtered to, if any. */
   val uploadsEntityFilter: GeospatialEntityItem?
-    get() = uploadsEntityFilterId?.let { id -> entities.firstOrNull { it.id == id } }
+    get() = dashboardState.uploadsEntityFilter
 
   /** Number of local mutations (any upload state) recorded for the entity with [entityId]. */
-  fun uploadCountForEntity(entityId: String): Int = mutations.count { it.entityId == entityId }
+  fun uploadCountForEntity(entityId: String): Int = dashboardState.uploadCountForEntity(entityId)
 
   /** Number of not-yet-uploaded mutations (`isOutbox`) recorded for the entity with [entityId]. */
-  fun pendingUploadCountForEntity(entityId: String): Int = mutations.count {
-    it.entityId == entityId && it.isOutbox
-  }
+  fun pendingUploadCountForEntity(entityId: String): Int =
+    dashboardState.pendingUploadCountForEntity(entityId)
 
   /** IDs of entities with at least one not-yet-uploaded mutation (`isOutbox`). */
   val pendingUploadEntityIds: Set<String>
-    get() = mutations.filter { it.isOutbox }.mapTo(mutableSetOf()) { it.entityId }
+    get() = dashboardState.pendingUploadEntityIds
 
   /**
    * Opens the `Uploads` screen filtered to the entity with [entityId], so a data collector can
    * check whether their changes to that map feature went through.
    */
-  fun openUploadsForEntity(entityId: String) {
-    isDrawerOpen = false
-    selectedUploadStatusFilter = null
-    uploadsEntityFilterId = entityId
-    activeDrawerSubView = MainDrawerSubView.UPLOADS
-  }
+  fun openUploadsForEntity(entityId: String) = dashboard.openUploadsForEntity(entityId)
 
   /** Clears the entity filter on the `Uploads` screen. */
-  fun clearUploadsEntityFilter() {
-    uploadsEntityFilterId = null
-  }
+  fun clearUploadsEntityFilter() = dashboard.clearUploadsEntityFilter()
 
   /**
    * Pending, in-progress, or failed mutations (`isOutbox == true`), listed in strict reverse
    * chronological order ([MutationLogItem.operationTimestamp] descending).
    */
   val outboxMutations: List<MutationLogItem>
-    get() =
-      mutations
-        .filter { it.isOutbox }
-        .sortedWith(
-          compareByDescending<MutationLogItem> { it.operationTimestamp }
-            .thenByDescending { it.startedTimestamp ?: "" }
-            .thenByDescending { it.id }
-        )
+    get() = dashboardState.outboxMutations
 
   /**
    * Completed mutations (`isUploaded == true`), listed in strict reverse chronological order (
    * [MutationLogItem.operationTimestamp] descending).
    */
   val uploadedMutations: List<MutationLogItem>
-    get() =
-      mutations
-        .filter { it.isUploaded }
-        .sortedWith(
-          compareByDescending<MutationLogItem> { it.operationTimestamp }
-            .thenByDescending { it.completedTimestamp ?: "" }
-            .thenByDescending { it.id }
-        )
+    get() = dashboardState.uploadedMutations
 
   /** Total count of pending/active/failed mutations not yet uploaded. */
   val outboxMutationCount: Int
-    get() = outboxMutations.size
+    get() = dashboardState.outboxMutationCount
 
   /** Total count of completed mutations in the `Uploaded` state. */
   val uploadedMutationCount: Int
-    get() = uploadedMutations.size
+    get() = dashboardState.uploadedMutationCount
 
   val unitSystem: MeasurementUnitSystem
     get() = data.userSettings.measurementUnits
@@ -1604,15 +1601,7 @@ class PrototypeAppState(
    * layers section of the `Layers` sheet is hidden.
    */
   val entityDatasetLayers: List<MapLayerItem>
-    get() =
-      if (entities.isEmpty()) {
-        emptyList()
-      } else {
-        mapLayers.filter { layer ->
-          layer.sourceType == LayerSourceType.ENTITY_DATASET &&
-            entities.any { it.layerId == layer.id }
-        }
-      }
+    get() = dashboardState.entityDatasetLayers
 
   /** True when the active survey has geospatial entities to display in the `Layers` sheet. */
   val hasGeospatialEntities: Boolean
@@ -1628,7 +1617,7 @@ class PrototypeAppState(
 
   /** Currently visible entity dataset layers (`LayerSourceType.ENTITY_DATASET`). */
   val visibleEntityDatasetLayers: List<MapLayerItem>
-    get() = entityDatasetLayers.filter { it.isVisible }
+    get() = dashboardState.visibleEntityDatasetLayers
 
   /**
    * User-facing plural category label for the `Map features` tab and list section header:
@@ -1637,8 +1626,7 @@ class PrototypeAppState(
    * - When multiple entity dataset layers are visible (or none), falls back to `"Map features"`.
    */
   val activeEntitiesTabLabel: String
-    get() =
-      visibleEntityDatasetLayers.singleOrNull()?.pluralDomainLabel ?: ListFilterTab.ENTITIES.label
+    get() = dashboardState.activeEntitiesTabLabel
 
   /**
    * User-facing lowercase plural count noun for map counters, search hints, and empty states:
@@ -1656,11 +1644,7 @@ class PrototypeAppState(
   fun entitySingularTypeLabel(entityId: String?): String = entities.singularTypeLabelOf(entityId)
 
   /** Resolves the dynamic display label for a [ListFilterTab] chip. */
-  fun tabLabelFor(tab: ListFilterTab): String =
-    when (tab) {
-      ListFilterTab.ENTITIES -> activeEntitiesTabLabel
-      else -> tab.label
-    }
+  fun tabLabelFor(tab: ListFilterTab): String = dashboardState.tabLabelFor(tab)
 
   /**
    * Form submission geometries are not displayed on the map; only entity geometries (map features)
@@ -1908,9 +1892,8 @@ class PrototypeAppState(
    * True when [submission] is stored on this device, i.e. it was recorded locally and appears in
    * the local mutation log. Other collectors' submissions are only fetched when online.
    */
-  fun isSubmissionStoredOnDevice(submission: SubmissionPreviewItem): Boolean = mutations.any {
-    it.submissionId == submission.id
-  }
+  fun isSubmissionStoredOnDevice(submission: SubmissionPreviewItem): Boolean =
+    dashboardState.isSubmissionStoredOnDevice(submission)
 
   /**
    * Submissions of [entity] available to show, grouped by form. Seeing the full list requires a
@@ -1936,13 +1919,7 @@ class PrototypeAppState(
   fun relatedEntityForPropertyValue(
     entity: GeospatialEntityItem,
     value: String,
-  ): GeospatialEntityItem? {
-    val key = value.trim()
-    if (key.isEmpty()) return null
-    return entities.firstOrNull {
-      it.id != entity.id && (it.id == key || it.geoId.equals(key, ignoreCase = true))
-    }
-  }
+  ): GeospatialEntityItem? = entities.relatedEntityForPropertyValue(entity, value)
 
   /** Directly switches the active mobile screen (used by both flow buttons and UX workbench). */
   fun navigateTo(screen: PrototypeScreen) {
@@ -2006,16 +1983,20 @@ class PrototypeAppState(
    * Opens a survey in the web app (dashboard and Survey editor). Unlike [openSurvey], this doesn't
    * download the survey for offline use or move the mobile preview to the Main Survey UI.
    */
-  fun openSurveyOnWeb(surveyId: String) {
-    if (surveys.none { it.id == surveyId }) return
-    activateSurvey(surveyId)
-    dashboardTableDatasetId = null
-    isDashboardTableExpanded = false
-  }
+  fun openSurveyOnWeb(surveyId: String) = dashboard.openSurveyOnWeb(surveyId)
 
   /** Makes [surveyId] the active survey and clears every selection scoped to the previous one. */
   private fun activateSurvey(surveyId: String) {
     viewModel.launch { viewModel.surveyRepository.setActiveSurveyId(surveyId) }
+    dashboard.clearLayerSelection()
+    clearSelectionsForActivatedSurvey(surveyId)
+  }
+
+  /**
+   * Clears every shell selection scoped to the survey active before [surveyId] (map feature,
+   * submission, open form) and loads the survey's primary form into the XForms workbench.
+   */
+  private fun clearSelectionsForActivatedSurvey(surveyId: String) {
     data.surveyConfigs[surveyId]?.primaryFormXml?.let { xml ->
       selectedWorkbenchExampleForm =
         WorkbenchExampleForm.entries.firstOrNull { it.xformsXml == xml }
@@ -2025,7 +2006,6 @@ class PrototypeAppState(
     }
     surveyMap.setSelectedEntity(null)
     selectedSubmissionId = null
-    selectedLayerDatasetId = null
     activeDataCollectionEntityId = null
     activeDataCollectionFormId = null
     activeFormWizardController = null
@@ -2035,69 +2015,14 @@ class PrototypeAppState(
 
   /** Whether the active survey exists in the store, so survey pages can open it. */
   val hasOpenableActiveSurvey: Boolean
-    get() = surveys.any { it.id == activeSurveyId }
+    get() = dashboardState.hasOpenableActiveSurvey
 
   /**
    * Creates a new, empty survey owned by the signed-in user, optionally in [organizationId], makes
    * it active, and returns its ID. The caller normally opens the Survey editor next.
    */
-  fun createSurvey(title: String, organizationId: String? = null): String {
-    val trimmedTitle = title.trim().ifBlank { "Untitled survey" }
-    val surveyId = uniqueSurveyId(trimmedTitle)
-    val organization = organization(organizationId)
-    val survey =
-      SurveyPreviewItem(
-        id = surveyId,
-        title = trimmedTitle,
-        description = "",
-        location = organization?.name ?: "No survey area yet",
-        coordinatesLabel = "",
-        offlineSizeLabel = "0 MB",
-        isDownloaded = false,
-        thumbnailTheme = MapThumbnailTheme.entries[surveys.size % MapThumbnailTheme.entries.size],
-        entityCount = 0,
-        ownerEmail = signedInUserEmail,
-        organizationId = organization?.id,
-      )
-    viewModel.launch {
-      viewModel.transactionRunner {
-        viewModel.surveyRepository.setSurveys(surveys + survey)
-        viewModel.surveyEditorRepository.saveDraft(
-          surveyId,
-          SurveyEditorDraft.blank(surveyId, title = trimmedTitle).let { draft ->
-            draft.copy(
-              details = draft.details.copy(organizationId = organization?.id),
-              sharing =
-                draft.sharing.copy(
-                  ownerEmail = signedInUserEmail,
-                  ownerProfile = CachedProfile(signedInUserName),
-                ),
-            )
-          },
-        )
-      }
-    }
-    activateSurvey(surveyId)
-    activeSurveyNotice = "Created survey \"$trimmedTitle\"."
-    return surveyId
-  }
-
-  /** A survey ID derived from [title] (`survey-<slug>`), made unique with a numeric suffix. */
-  private fun uniqueSurveyId(title: String): String {
-    val slug =
-      title
-        .lowercase()
-        .map { if (it.isLetterOrDigit()) it else '-' }
-        .joinToString("")
-        .trim('-')
-        .replace(Regex("-+"), "-")
-        .ifBlank { "survey" }
-    val base = "survey-$slug"
-    if (surveys.none { it.id == base }) return base
-    var n = 2
-    while (surveys.any { it.id == "$base-$n" }) n++
-    return "$base-$n"
-  }
+  fun createSurvey(title: String, organizationId: String? = null): String =
+    dashboard.createSurvey(title, organizationId)
 
   /** Updates the title and description of the currently active survey. */
   fun updateActiveSurveyDetails(title: String, description: String) {
@@ -2221,19 +2146,12 @@ class PrototypeAppState(
    */
   fun selectEntityFromList(entityId: String) = surveyMap.selectEntity(entityId)
 
-  /** Switches the web dashboard's bottom table to the dataset of the entity with [entityId]. */
-  private fun followSelectionInDashboardTable(entityId: String) {
-    entities.firstOrNull { it.id == entityId }?.let { dashboardTableDatasetId = it.datasetId }
-  }
-
   /** Shows the selected entity's `1:N` submissions in its details surface. */
-  fun showEntitySubmissions() {
-    entityDetailsPane = EntityDetailsPane.SUBMISSIONS
-  }
+  fun showEntitySubmissions() = dashboard.showEntitySubmissions()
 
   /** Returns the selected entity's details surface to its properties. */
   fun showEntityProperties() {
-    entityDetailsPane = EntityDetailsPane.PROPERTIES
+    dashboard.showEntityProperties()
     selectedSubmissionId = null
   }
 
@@ -2243,41 +2161,26 @@ class PrototypeAppState(
    * [showEntityProperties], an opened submission stays open, so switching back to `History` shows
    * it again.
    */
-  fun selectEntityDetailsTab(pane: EntityDetailsPane) {
-    entityDetailsPane = pane
-  }
+  fun selectEntityDetailsTab(pane: EntityDetailsPane) = dashboard.selectEntityDetailsTab(pane)
+
+  /** Whether a map feature or submission is selected, so collapsing the table shows its details. */
+  private val hasSelectedRecord: Boolean
+    get() = selectedEntityId != null || selectedSubmissionId != null
 
   /** Expands or collapses the web dashboard's bottom data table. */
-  fun updateDashboardTableExpanded(expanded: Boolean) {
-    val wasExpanded = isDashboardTableExpanded
-    isDashboardTableExpanded = expanded
-    if (expanded && !wasExpanded) {
-      isDetailsPanelExpanded = false
-    } else if (
-      !expanded &&
-        wasExpanded &&
-        (selectedEntityId != null || selectedSubmissionId != null || selectedLayerDatasetId != null)
-    ) {
-      isDetailsPanelExpanded = true
-    }
-  }
+  fun updateDashboardTableExpanded(expanded: Boolean) =
+    dashboard.updateDashboardTableExpanded(expanded, hasSelection = hasSelectedRecord)
 
   /**
    * Entity dataset IDs whose map features are collapsed (hidden) under their dataset header row in
    * the web dashboard's left-hand panel list. Toggled with the chevron left of the dataset name.
    */
-  var collapsedListDatasetIds by mutableStateOf<Set<String>>(emptySet())
-    private set
+  val collapsedListDatasetIds: Set<String>
+    get() = dashboardState.collapsedListDatasetIds
 
   /** Collapses or expands the map features of the entity dataset with [datasetId] in the list. */
-  fun toggleListDatasetCollapsed(datasetId: String) {
-    collapsedListDatasetIds =
-      if (datasetId in collapsedListDatasetIds) {
-        collapsedListDatasetIds - datasetId
-      } else {
-        collapsedListDatasetIds + datasetId
-      }
-  }
+  fun toggleListDatasetCollapsed(datasetId: String) =
+    dashboard.toggleListDatasetCollapsed(datasetId)
 
   /**
    * Whether the map features of the entity dataset with [datasetId] are currently hidden in the
@@ -2285,7 +2188,7 @@ class PrototypeAppState(
    * hidden; the stored collapsed state is restored once the query is cleared.
    */
   fun isListDatasetCollapsed(datasetId: String): Boolean =
-    listSearchQuery.isBlank() && datasetId in collapsedListDatasetIds
+    dashboardState.isListDatasetCollapsed(datasetId)
 
   /**
    * Selects the map layer or data table of the entity dataset with [datasetId] in the web
@@ -2293,35 +2196,23 @@ class PrototypeAppState(
    * clears any selected map feature, submission, or place.
    */
   fun selectLayer(datasetId: String?) {
-    selectedLayerDatasetId = datasetId
+    dashboard.selectLayer(datasetId)
     if (datasetId != null) {
       clearSelectedPlace()
       surveyMap.setSelectedEntity(null)
       selectedSubmissionId = null
-      entityDetailsPane = EntityDetailsPane.PROPERTIES
-      dashboardTableDatasetId = datasetId
-      if (!isDashboardTableExpanded) {
-        isDetailsPanelExpanded = true
-      }
     }
   }
 
   /** "Show in table": expands the web dashboard's bottom data table on the selected layer. */
-  fun showSelectedLayerInTable() {
-    val datasetId = selectedLayerDatasetId ?: return
-    selectDashboardTable(datasetId)
-    updateDashboardTableExpanded(true)
-  }
+  fun showSelectedLayerInTable() = dashboard.showSelectedLayerInTable()
 
   /** Toggles the web dashboard's bottom data table between expanded and collapsed. */
-  fun toggleDashboardTableExpanded() {
-    updateDashboardTableExpanded(!isDashboardTableExpanded)
-  }
+  fun toggleDashboardTableExpanded() =
+    dashboard.toggleDashboardTableExpanded(hasSelection = hasSelectedRecord)
 
   /** Activates the bottom data table tab for the dataset with [datasetId]. */
-  fun selectDashboardTable(datasetId: String) {
-    dashboardTableDatasetId = datasetId
-  }
+  fun selectDashboardTable(datasetId: String) = dashboard.selectDashboardTable(datasetId)
 
   /**
    * "Show in table": expands the web dashboard's bottom data table on the selected entity's
@@ -2329,8 +2220,7 @@ class PrototypeAppState(
    */
   fun showSelectedEntityInTable() {
     val entity = selectedEntity ?: return
-    dashboardTableDatasetId = entity.datasetId
-    updateDashboardTableExpanded(true)
+    dashboard.showDatasetInTable(entity.datasetId)
   }
 
   /**
@@ -2354,7 +2244,7 @@ class PrototypeAppState(
   fun returnToBottomSheetList() {
     surveyMap.setSelectedEntity(null)
     selectedSubmissionId = null
-    entityDetailsPane = EntityDetailsPane.PROPERTIES
+    dashboard.showEntityProperties()
     surveyMap.updateEntityBottomSheetExpanded(true)
     mainViewMode = MainSurveyViewMode.LIST
     surveyMap.updateLayersSheetOpen(false)
@@ -2368,24 +2258,16 @@ class PrototypeAppState(
     surveyMap.updateEntityBottomSheetExpanded(expanded)
 
   /** Toggles the web dashboard's left-hand side panel between expanded and collapsed states. */
-  fun toggleSidePanel() {
-    isSidePanelExpanded = !isSidePanelExpanded
-  }
+  fun toggleSidePanel() = dashboard.toggleSidePanel()
 
   /** Expands the web dashboard's left-hand side panel. */
-  fun expandSidePanel() {
-    isSidePanelExpanded = true
-  }
+  fun expandSidePanel() = dashboard.expandSidePanel()
 
   /** Collapses the web dashboard's left-hand side panel. */
-  fun collapseSidePanel() {
-    isSidePanelExpanded = false
-  }
+  fun collapseSidePanel() = dashboard.collapseSidePanel()
 
   /** Explicitly expands or collapses the web dashboard's left-hand side panel. */
-  fun updateSidePanelExpanded(expanded: Boolean) {
-    isSidePanelExpanded = expanded
-  }
+  fun updateSidePanelExpanded(expanded: Boolean) = dashboard.updateSidePanelExpanded(expanded)
 
   /** Alias for [toggleSidePanel]. */
   fun toggleDashboardSidePanel() = toggleSidePanel()
@@ -2403,30 +2285,19 @@ class PrototypeAppState(
    * Sets the web dashboard's left-hand panel width to [widthDp], clamped to
    * [MIN_SIDE_PANEL_WIDTH_DP]..[MAX_SIDE_PANEL_WIDTH_DP]. Non-finite values are ignored.
    */
-  fun updateSidePanelWidth(widthDp: Float) {
-    if (!widthDp.isFinite()) return
-    sidePanelWidthDp = widthDp.coerceIn(MIN_SIDE_PANEL_WIDTH_DP, MAX_SIDE_PANEL_WIDTH_DP)
-  }
+  fun updateSidePanelWidth(widthDp: Float) = dashboard.updateSidePanelWidth(widthDp)
 
   /** Toggles the web dashboard's right-hand details panel between expanded and collapsed states. */
-  fun toggleDetailsPanel() {
-    isDetailsPanelExpanded = !isDetailsPanelExpanded
-  }
+  fun toggleDetailsPanel() = dashboard.toggleDetailsPanel()
 
   /** Expands the web dashboard's right-hand details panel. */
-  fun expandDetailsPanel() {
-    isDetailsPanelExpanded = true
-  }
+  fun expandDetailsPanel() = dashboard.expandDetailsPanel()
 
   /** Collapses the web dashboard's right-hand details panel. */
-  fun collapseDetailsPanel() {
-    isDetailsPanelExpanded = false
-  }
+  fun collapseDetailsPanel() = dashboard.collapseDetailsPanel()
 
   /** Explicitly expands or collapses the web dashboard's right-hand details panel. */
-  fun updateDetailsPanelExpanded(expanded: Boolean) {
-    isDetailsPanelExpanded = expanded
-  }
+  fun updateDetailsPanelExpanded(expanded: Boolean) = dashboard.updateDetailsPanelExpanded(expanded)
 
   /** Alias for [toggleDetailsPanel]. */
   fun toggleDashboardDetailsPanel() = toggleDetailsPanel()
@@ -2456,20 +2327,14 @@ class PrototypeAppState(
   fun selectSubmissionDetail(submissionId: String?) {
     selectedSubmissionId = submissionId
     if (submissionId != null) {
-      selectedLayerDatasetId = null
       surveyMap.updateEntityBottomSheetExpanded(true)
       val parentEntity = entities.firstOrNull { e -> e.submissions.any { it.id == submissionId } }
       // Opening a submission of another map feature (e.g. from `Uploads`) frames that feature.
       val framesOtherEntity = parentEntity != null && parentEntity.id != selectedEntityId
-      if (framesOtherEntity) {
-        dashboardTableDatasetId = parentEntity?.datasetId
-      }
+      dashboard.onSubmissionOpened(
+        tableDatasetId = if (framesOtherEntity) parentEntity?.datasetId else null
+      )
       surveyMap.setSelectedEntity(parentEntity?.id, bumpSelectionEpoch = framesOtherEntity)
-      // Closing the submission returns to the list of the feature's submissions it came from.
-      entityDetailsPane = EntityDetailsPane.SUBMISSIONS
-      if (!isDashboardTableExpanded) {
-        isDetailsPanelExpanded = true
-      }
     }
   }
 
@@ -2478,7 +2343,7 @@ class PrototypeAppState(
    * Places API (`mapbox.places`) when online (`!isAirplaneMode`).
    */
   fun updateListSearchQuery(query: String) {
-    listSearchQuery = query
+    dashboard.updateListSearchQuery(query)
     val trimmed = query.trim()
     if (isAirplaneMode || trimmed.isEmpty()) {
       isMapboxPlacesSearching = false
@@ -2490,7 +2355,7 @@ class PrototypeAppState(
 
   /** Clears the search query in the Main Survey `List` view. */
   fun clearListSearchQuery() {
-    listSearchQuery = ""
+    dashboard.clearListSearchQuery()
     isMapboxPlacesSearching = false
     mapboxPlacesApiResults = emptyList()
   }
@@ -2507,7 +2372,7 @@ class PrototypeAppState(
         "Device offline: Places search is not available offline. Searching local $activeEntitiesCountNoun only."
       return
     }
-    listFilterTab = tab
+    dashboard.selectListFilterTab(tab)
   }
 
   /**
@@ -2525,7 +2390,7 @@ class PrototypeAppState(
       isMapboxPlacesSearching = false
       mapboxPlacesApiResults = emptyList()
       if (listFilterTab == ListFilterTab.PLACES) {
-        listFilterTab = ListFilterTab.ALL
+        dashboard.selectListFilterTab(ListFilterTab.ALL)
       }
       activeSurveyNotice =
         "Device offline: Places search disabled. Searching local $activeEntitiesCountNoun only."
@@ -3169,39 +3034,27 @@ class PrototypeAppState(
    * Drawer option: "Uploads" — opens the unified screen listing all mutations with status filter
    * chips (`Pending`, `In progress`, `Uploaded`, `Failed`).
    */
-  fun drawerOpenUploads(filter: UploadStatusFilter? = null) {
-    isDrawerOpen = false
-    selectedUploadStatusFilter = filter
-    uploadsEntityFilterId = null
-    activeDrawerSubView = MainDrawerSubView.UPLOADS
-  }
+  fun drawerOpenUploads(filter: UploadStatusFilter? = null) = dashboard.showUploads(filter)
 
   /** Selects or clears the active [UploadStatusFilter] chip on the `Uploads` screen. */
-  fun selectUploadStatusFilter(filter: UploadStatusFilter?) {
-    selectedUploadStatusFilter = filter
-  }
+  fun selectUploadStatusFilter(filter: UploadStatusFilter?) =
+    dashboard.selectUploadStatusFilter(filter)
 
   /** Toggles [filter] on the `Uploads` screen (selecting it, or clearing it if already active). */
-  fun toggleUploadStatusFilter(filter: UploadStatusFilter) {
-    selectedUploadStatusFilter =
-      if (selectedUploadStatusFilter == filter) {
-        null
-      } else {
-        filter
-      }
-  }
+  fun toggleUploadStatusFilter(filter: UploadStatusFilter) =
+    dashboard.toggleUploadStatusFilter(filter)
 
   /** Legacy helper: opens the `Outbox` sub-view (rendered by the unified `Uploads` screen). */
   fun drawerOpenOutbox() {
     isDrawerOpen = false
-    selectedUploadStatusFilter = null
+    dashboard.selectUploadStatusFilter(null)
     activeDrawerSubView = MainDrawerSubView.OUTBOX
   }
 
   /** Legacy helper: opens the `Uploaded` sub-view (rendered by the unified `Uploads` screen). */
   fun drawerOpenUploaded() {
     isDrawerOpen = false
-    selectedUploadStatusFilter = UploadStatusFilter.UPLOADED
+    dashboard.selectUploadStatusFilter(UploadStatusFilter.UPLOADED)
     activeDrawerSubView = MainDrawerSubView.UPLOADED
   }
 
@@ -3209,24 +3062,13 @@ class PrototypeAppState(
    * Synchronizes a single Outbox mutation ([mutationId]), transitioning its state to
    * [MutationSyncState.UPLOADED] with a completed timestamp and moving it into `Uploaded`.
    */
-  fun syncMutationNow(mutationId: String) {
-    viewModel.launch {
-      val notice = viewModel.syncMutationsUseCase.syncSingleMutation(mutationId) ?: return@launch
-      activeSurveyNotice = notice
-    }
-  }
+  fun syncMutationNow(mutationId: String) = dashboard.syncMutationNow(mutationId)
 
   /**
    * Synchronizes all currently pending/in-progress mutations in the `Outbox`, transitioning them to
    * [MutationSyncState.UPLOADED] with completed timestamps.
    */
-  fun syncAllOutboxMutations() {
-    val surveyId = activeSurveyId
-    viewModel.launch {
-      val notice = viewModel.syncMutationsUseCase.syncAllOutboxMutations(surveyId) ?: return@launch
-      activeSurveyNotice = notice
-    }
-  }
+  fun syncAllOutboxMutations() = dashboard.syncAllOutboxMutations()
 
   /** Navigates from the "Surveys" screen to the full "Download survey" directory screen. */
   fun openDownloadMoreSurveysScreen() {
@@ -3259,7 +3101,7 @@ class PrototypeAppState(
    */
   fun closeDrawerSubView() {
     activeDrawerSubView = MainDrawerSubView.NONE
-    uploadsEntityFilterId = null
+    dashboard.clearUploadsEntityFilter()
   }
 
   /** Drawer option 4: View Terms of Service. */
@@ -3549,6 +3391,7 @@ class PrototypeAppState(
     onboarding.reset()
     settings.reset()
     surveyMap.reset()
+    dashboard.reset()
     activeSurveyNotice = null
     mainViewMode = MainSurveyViewMode.MAP
     isDrawerOpen = false
@@ -3558,30 +3401,20 @@ class PrototypeAppState(
     dataResetCount++
     mapboxPlacesApiResults = emptyList()
     isMapboxPlacesSearching = false
-    isSidePanelExpanded = true
-    sidePanelWidthDp = DEFAULT_SIDE_PANEL_WIDTH_DP
-    isDetailsPanelExpanded = true
     selectedSubmissionId = null
-    selectedLayerDatasetId = null
-    entityDetailsPane = EntityDetailsPane.PROPERTIES
-    isDashboardTableExpanded = false
-    dashboardTableDatasetId = null
-    uploadsEntityFilterId = null
-    listSearchQuery = ""
-    listFilterTab = ListFilterTab.ALL
     closeActiveFormRunner()
     resetDefaultXFormsXml()
   }
 
   companion object {
     /** Default width of the web dashboard's left-hand panel, in dp. */
-    const val DEFAULT_SIDE_PANEL_WIDTH_DP = 300f
+    const val DEFAULT_SIDE_PANEL_WIDTH_DP = DashboardUiState.DEFAULT_SIDE_PANEL_WIDTH_DP
 
     /** Narrowest the web dashboard's left-hand panel can be dragged, in dp. */
-    const val MIN_SIDE_PANEL_WIDTH_DP = 240f
+    const val MIN_SIDE_PANEL_WIDTH_DP = DashboardUiState.MIN_SIDE_PANEL_WIDTH_DP
 
     /** Widest the web dashboard's left-hand panel can be dragged, in dp. */
-    const val MAX_SIDE_PANEL_WIDTH_DP = 560f
+    const val MAX_SIDE_PANEL_WIDTH_DP = DashboardUiState.MAX_SIDE_PANEL_WIDTH_DP
   }
 
   /**

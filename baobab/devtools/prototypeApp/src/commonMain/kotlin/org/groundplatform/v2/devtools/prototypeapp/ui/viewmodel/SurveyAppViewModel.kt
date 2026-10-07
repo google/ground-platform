@@ -65,6 +65,7 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.repository.Transaction
 import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.ClusterMapFeaturesUseCase
 import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.CompleteFormSubmissionUseCase
 import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.ComputeWayfindingNavigationUseCase
+import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.CreateSurveyUseCase
 import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.GeneratePrototypeRandomSitesUseCase
 import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.ResolveFormDefForLaunchUseCase
 import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.SearchPlacesUseCase
@@ -134,6 +135,12 @@ class SurveyAppViewModel(
     SyncMutationsUseCase(
       mutationRepository = mutationRepository,
       surveyRepository = surveyRepository,
+      transactionRunner = transactionRunner,
+    ),
+  val createSurveyUseCase: CreateSurveyUseCase =
+    CreateSurveyUseCase(
+      surveyRepository = surveyRepository,
+      surveyEditorRepository = surveyEditorRepository,
       transactionRunner = transactionRunner,
     ),
   val computeWayfindingNavigationUseCase: ComputeWayfindingNavigationUseCase =
