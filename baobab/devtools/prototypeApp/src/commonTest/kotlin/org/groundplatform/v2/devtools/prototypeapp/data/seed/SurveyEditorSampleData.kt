@@ -13,10 +13,6 @@
  */
 package org.groundplatform.v2.devtools.prototypeapp.data.seed
 
-import org.groundplatform.v2.devtools.prototypeapp.domain.model.CachedProfile
-import org.groundplatform.v2.devtools.prototypeapp.domain.model.InvitationStatus
-import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.Collaborator
-import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.CollaboratorRole
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.DatasetKind
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EditorChoice
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EditorForm
@@ -32,13 +28,11 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.LayerStyl
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.PropertyType
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.RelevanceOperator
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SharingPolicy
-import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SharingSettings
-import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SurveyArea
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SurveyDetails
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SurveyEditorDraft
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SurveyEditorForm
 
-/** Starter survey shown when the Survey editor first opens (fictional sample data). */
+/** Hand-authored Survey editor fixtures used by tests (fictional sample data). */
 internal object SurveyEditorSamples {
   /** The sample survey as a complete editor draft. */
   fun draft(): SurveyEditorDraft =
@@ -61,77 +55,23 @@ internal object SurveyEditorSamples {
         "Monitor shade tree cover and parcel boundaries across smallholder coffee farms.",
       supportedLanguages = listOf("en", "sw"),
       organizationId = PrototypeFakeOrganizationsData.KENYA_FOREST_SERVICE,
-      surveyArea =
-        SurveyArea(
-          name = "Othaya Sub-County, Nyeri",
-          center = LatLng(-0.4192, 36.9498),
-          zoom = 12.5,
-          parts =
-            listOf(
-              listOf(
-                LatLng(-0.3960, 36.9220),
-                LatLng(-0.3960, 36.9780),
-                LatLng(-0.4420, 36.9780),
-                LatLng(-0.4420, 36.9220),
-              )
-            ),
-        ),
+      surveyArea = PrototypeFakeSurveyEditorData.kenyaSurveyArea(),
     )
 
-  fun sharing() =
-    SharingSettings(
-      ownerEmail = "organizer@example.org",
-      ownerProfile = CachedProfile("Amina Wanjiru", "avatar:3", "2026-03-02"),
-      policy = SharingPolicy.RESTRICTED,
-      collaborators =
-        listOf(
-          Collaborator(
-            "field.lead@example.org",
-            CollaboratorRole.SURVEY_ORGANIZER,
-            InvitationStatus.ACCEPTED,
-            userId = "uid-field-lead",
-            profile = CachedProfile("Daniel Kiprop", "avatar:0", "2026-03-04"),
-          ),
-          Collaborator(
-            "collector.one@example.org",
-            CollaboratorRole.DATA_COLLECTOR,
-            InvitationStatus.ACCEPTED,
-            userId = "uid-collector-one",
-            profile = CachedProfile("Grace Njeri", "avatar:5", "2026-03-06"),
-          ),
-          Collaborator(
-            "collector.two@example.org",
-            CollaboratorRole.DATA_COLLECTOR,
-            inviteToken = "k7q2-mx4p",
-          ),
-          Collaborator("reviewer@example.org", CollaboratorRole.VIEWER, inviteToken = "r9w3-bt6d"),
-        ),
-    )
+  fun sharing() = PrototypeFakeSurveyEditorData.kenyaSharing()
 
   /** ID of the sample survey shared with everyone in its organization. */
-  const val ORGANIZATION_SHARED_SURVEY_ID: String = "survey-serengeti-corridor"
+  const val ORGANIZATION_SHARED_SURVEY_ID: String =
+    PrototypeFakeSurveyEditorData.ORGANIZATION_SHARED_SURVEY_ID
 
   /**
    * A minimal draft for [ORGANIZATION_SHARED_SURVEY_ID]: owned by a Mekong Mangrove Alliance member
-   * and open to everyone in that organization ([SharingPolicy.ORGANIZATION]). Its title,
-   * description, and organization come from the survey list when the editor opens it.
+   * and open to everyone in that organization ([SharingPolicy.ORGANIZATION]).
    */
   fun organizationSharedDraft(): SurveyEditorDraft =
-    SurveyEditorDraft.blank(ORGANIZATION_SHARED_SURVEY_ID).let { draft ->
-      draft.copy(
-        details =
-          draft.details.copy(
-            organizationId = PrototypeFakeOrganizationsData.MEKONG_MANGROVE_ALLIANCE
-          ),
-        sharing =
-          SharingSettings(
-            ownerEmail =
-              PrototypeFakeOrganizationsData.ownerEmailForSurvey(ORGANIZATION_SHARED_SURVEY_ID),
-            ownerProfile = CachedProfile("Linh Tran", "avatar:6", "2026-02-11"),
-            policy = SharingPolicy.ORGANIZATION,
-          ),
-      )
-    }
+    PrototypeFakeSurveyEditorData.organizationSharedDraft(
+      SurveyEditorDraft.blank(ORGANIZATION_SHARED_SURVEY_ID)
+    )
 
   private fun square(lat: Double, lng: Double, d: Double) =
     listOf(
@@ -238,115 +178,9 @@ internal object SurveyEditorSamples {
       style = LayerStyle(colorHex = "#2E7D32", iconName = "park"),
     )
 
-  fun farmers() =
-    EntityDataset(
-      key = "d3",
-      kind = DatasetKind.DATA_TABLE,
-      id = "farmers",
-      displayName = "Farmers",
-      description = "Cooperative member roster (fictional sample data).",
-      keyProperty = "farmer_id",
-      labelProperty = "name",
-      fieldCreationEnabled = true,
-      properties =
-        listOf(
-          EntityProperty("farmer_id", "Farmer ID", PropertyType.TEXT, required = true),
-          EntityProperty("name", "Name", PropertyType.TEXT, required = true),
-          EntityProperty("cooperative", "Cooperative", PropertyType.TEXT),
-          EntityProperty("member_since", "Member since", PropertyType.DATE),
-          EntityProperty("certified", "Certified", PropertyType.BOOLEAN),
-        ),
-      rows =
-        listOf(
-          EntityRow(
-            "r1",
-            mapOf(
-              "farmer_id" to "F-001",
-              "name" to "Farmer A",
-              "cooperative" to "Gatura",
-              "member_since" to "2019-06-01",
-              "certified" to "yes",
-            ),
-          ),
-          EntityRow(
-            "r2",
-            mapOf(
-              "farmer_id" to "F-002",
-              "name" to "Farmer B",
-              "cooperative" to "Gatura",
-              "member_since" to "2021-02-15",
-              "certified" to "no",
-            ),
-          ),
-          EntityRow(
-            "r3",
-            mapOf(
-              "farmer_id" to "F-003",
-              "name" to "Farmer C",
-              "cooperative" to "Mathira",
-              "member_since" to "2018-09-30",
-              "certified" to "yes",
-            ),
-          ),
-        ),
-    )
+  fun farmers() = PrototypeFakeSurveyEditorData.farmers()
 
-  fun treeSpecies() =
-    EntityDataset(
-      key = "d4",
-      kind = DatasetKind.DATA_TABLE,
-      id = "tree_species",
-      displayName = "Tree species",
-      description = "Shade tree species lookup list.",
-      keyProperty = "code",
-      labelProperty = "common_name",
-      properties =
-        listOf(
-          EntityProperty("code", "Code", PropertyType.TEXT, required = true),
-          EntityProperty("scientific_name", "Scientific name", PropertyType.TEXT, required = true),
-          EntityProperty("common_name", "Common name", PropertyType.TEXT),
-          EntityProperty("native", "Native", PropertyType.BOOLEAN),
-        ),
-      rows =
-        listOf(
-          EntityRow(
-            "r1",
-            mapOf(
-              "code" to "GRRO",
-              "scientific_name" to "Grevillea robusta",
-              "common_name" to "Silky oak",
-              "native" to "no",
-            ),
-          ),
-          EntityRow(
-            "r2",
-            mapOf(
-              "code" to "COAF",
-              "scientific_name" to "Cordia africana",
-              "common_name" to "Large-leaved cordia",
-              "native" to "yes",
-            ),
-          ),
-          EntityRow(
-            "r3",
-            mapOf(
-              "code" to "CRME",
-              "scientific_name" to "Croton megalocarpus",
-              "common_name" to "Croton",
-              "native" to "yes",
-            ),
-          ),
-          EntityRow(
-            "r4",
-            mapOf(
-              "code" to "MAIN",
-              "scientific_name" to "Macadamia integrifolia",
-              "common_name" to "Macadamia",
-              "native" to "no",
-            ),
-          ),
-        ),
-    )
+  fun treeSpecies() = PrototypeFakeSurveyEditorData.treeSpecies()
 }
 
 /** Sample Forms for the Survey editor (fictional sample data). */

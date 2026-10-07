@@ -26,8 +26,6 @@ import org.groundplatform.v2.core.forms.ui.FormWizardController
 import org.groundplatform.v2.core.forms.ui.WorkbenchExampleForm
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyMapAnchor
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SurveyEditorDraft
-import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.withEditorFormAvailability
-import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.withEditorLayerStyles
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.relatedEntityForPropertyValue
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.singularTypeLabelOf
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.toClusterFeatures
@@ -701,13 +699,9 @@ class PrototypeAppState(
   val offlineBasemapStyle: OfflineBasemapStyle
     get() = mapState.offlineBasemapStyle
 
-  /**
-   * The survey's map layers, styled with the color and pin icon of the matching Map layer in the
-   * published Survey editor draft (if any).
-   */
+  /** The survey's map layers (the Survey editor publishes layer styles straight to them). */
   val mapLayers: List<MapLayerItem>
-    get() =
-      data.content.mapLayers.withEditorLayerStyles(data.content.editorDraft?.datasets.orEmpty())
+    get() = data.content.mapLayers
 
   /** The map layer that owns [entity] (by `layerId`), whose style the entity is drawn with. */
   fun mapLayerFor(entity: GeospatialEntityItem): MapLayerItem? = mapLayers.firstOrNull {
@@ -717,12 +711,9 @@ class PrototypeAppState(
   val submissionGeometries: List<SubmissionGeometryPolygon>
     get() = data.content.submissionGeometries
 
-  /**
-   * The survey's forms, with the availability (mobile, web, or both) chosen for the matching Form
-   * in the published Survey editor draft (if any).
-   */
+  /** The survey's forms (the Survey editor publishes Form availability straight to them). */
   val forms: List<FormPreviewItem>
-    get() = data.content.forms.withEditorFormAvailability(data.content.editorDraft?.forms.orEmpty())
+    get() = data.content.forms
 
   /** Forms collectors can start from the mobile app's entry points. */
   val mobileForms: List<FormPreviewItem>
@@ -3261,14 +3252,12 @@ class PrototypeAppState(
   var dataResetCount by mutableStateOf(0)
     private set
 
-  /** The Survey editor's draft of the active survey, from the local data store. */
+  /**
+   * The Survey editor's draft of the active survey: its stored draft, or one derived from the
+   * survey's Forms, Map layers, and map features when it has never been edited.
+   */
   val activeSurveyEditorDraft: SurveyEditorDraft
-    get() =
-      SurveyEditorDraft.forSurvey(
-        surveyId = activeSurveyId,
-        stored = data.content.editorDraft,
-        survey = surveys.firstOrNull { it.id == activeSurveyId },
-      )
+    get() = data.editorDraft
 
   /** Saves the Survey editor's [draft] of [surveyId] to the local data store. */
   fun saveSurveyEditorDraft(surveyId: String, draft: SurveyEditorDraft) {

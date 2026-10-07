@@ -24,11 +24,8 @@ import kotlin.test.assertTrue
 import org.groundplatform.v2.devtools.prototypeapp.PrototypeWorkbenchPage
 import org.groundplatform.v2.devtools.prototypeapp.data.seed.SurveyEditorSamples
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.CachedProfile
-import org.groundplatform.v2.devtools.prototypeapp.domain.model.FormAvailability
-import org.groundplatform.v2.devtools.prototypeapp.domain.model.FormPreviewItem
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.InvitationStatus
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.InviteLinks
-import org.groundplatform.v2.devtools.prototypeapp.domain.model.MapLayerItem
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.MapThumbnailTheme
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyPreviewItem
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.CollaboratorRole
@@ -46,8 +43,6 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SurveyAre
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SurveyEditorDraft
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SurveyEditorForm
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.publishedFormXml
-import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.withEditorFormAvailability
-import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.withEditorLayerStyles
 
 class SurveyEditorTest {
 
@@ -73,99 +68,6 @@ class SurveyEditorTest {
 
     state.updateDataset(plots.key) { it.copy(style = it.style.copy(iconName = null)) }
     assertNull(state.toDraft().datasets.first { it.key == plots.key }.style.iconName)
-  }
-
-  @Test
-  fun withEditorLayerStyles_appliesMapLayerColorAndIconByDatasetId() {
-    val layers =
-      listOf(
-        MapLayerItem(
-          id = "layer-plots",
-          label = "Plots",
-          sourceDescription = "",
-          colorHex = 0xFF000000,
-          geometryTypeLabel = "Point",
-          isVisible = true,
-          datasetId = "shade_monitoring_plots",
-        ),
-        MapLayerItem(
-          id = "layer-other",
-          label = "Other",
-          sourceDescription = "",
-          colorHex = 0xFF123456,
-          geometryTypeLabel = "Point",
-          isVisible = true,
-          datasetId = "other",
-          iconName = "star",
-        ),
-      )
-    val datasets =
-      SurveyEditorSamples.draft().datasets.map {
-        if (it.id == "shade_monitoring_plots") {
-          it.copy(style = it.style.copy(colorHex = "#AD1457", iconName = "flag"))
-        } else {
-          it
-        }
-      }
-
-    val styled = layers.withEditorLayerStyles(datasets)
-
-    assertEquals(0xFFAD1457, styled[0].colorHex)
-    assertEquals("flag", styled[0].iconName)
-    assertEquals(layers[1], styled[1])
-  }
-
-  @Test
-  fun withEditorLayerStyles_keepsLayerColorWhenEditorColorIsInvalid() {
-    val layer =
-      MapLayerItem(
-        id = "layer-plots",
-        label = "Plots",
-        sourceDescription = "",
-        colorHex = 0xFF2E7D32,
-        geometryTypeLabel = "Point",
-        isVisible = true,
-        datasetId = "shade_monitoring_plots",
-      )
-    val datasets =
-      SurveyEditorSamples.draft().datasets.map {
-        it.copy(style = it.style.copy(colorHex = "not a color"))
-      }
-
-    assertEquals(0xFF2E7D32, listOf(layer).withEditorLayerStyles(datasets).single().colorHex)
-  }
-
-  @Test
-  fun withEditorFormAvailability_appliesDesignerChoiceByFormId() {
-    fun runtimeForm(id: String) =
-      FormPreviewItem(
-        id = id,
-        title = id,
-        description = "",
-        version = "1",
-        targetDatasetId = "",
-        targetDatasetName = "",
-        questionCount = 0,
-        ctaLabel = id,
-      )
-    val forms = listOf(runtimeForm("shade_tree_visit"), runtimeForm("form-other"))
-    assertTrue(forms.all { it.availability == FormAvailability.BOTH })
-
-    val editorForms =
-      SurveyEditorSamples.draft().forms.map {
-        if (it.form.formId == "shade_tree_visit") {
-          it.copy(form = it.form.copy(availability = FormAvailability.WEB))
-        } else {
-          it
-        }
-      }
-    val overlaid = forms.withEditorFormAvailability(editorForms)
-
-    assertEquals(FormAvailability.WEB, overlaid[0].availability)
-    assertFalse(overlaid[0].availability.includesMobile)
-    assertTrue(overlaid[0].availability.includesWeb)
-    assertEquals(forms[1], overlaid[1])
-    assertEquals(forms, forms.withEditorFormAvailability(emptyList()))
   }
 
   @Test

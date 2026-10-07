@@ -35,7 +35,6 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.MutationLogItem
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.Organization
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyPreviewItem
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.UploadStatusFilter
-import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.withEditorLayerStyles
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.matchesUploadsFilters
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.newestFirst
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.outboxNewestFirst
@@ -258,8 +257,7 @@ class DashboardViewModel(
       organizations = data.organizations,
       signedInUserEmail = data.profile.email,
       entities = data.content.entities,
-      mapLayers =
-        data.content.mapLayers.withEditorLayerStyles(data.content.editorDraft?.datasets.orEmpty()),
+      mapLayers = data.content.mapLayers,
       mutations = mutations,
       isSidePanelExpanded = session.isSidePanelExpanded,
       sidePanelWidthDp = session.sidePanelWidthDp,

@@ -48,7 +48,6 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyMapAnchor
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyPlaceItem
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyPreviewItem
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.LatLng
-import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.withEditorLayerStyles
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.toClusterFeatures
 import org.groundplatform.v2.devtools.prototypeapp.domain.repository.DeviceLocationSnapshot
 import org.groundplatform.v2.devtools.prototypeapp.domain.repository.LocationRepository
@@ -207,7 +206,7 @@ class SurveyMapViewModel(
       get() = content.entities
 
     val mapLayers: List<MapLayerItem>
-      get() = content.mapLayers.withEditorLayerStyles(content.editorDraft?.datasets.orEmpty())
+      get() = content.mapLayers
 
     val visibleLayerIds: Set<String>
       get() = content.mapLayers.filter { it.isVisible }.map { it.id }.toSet()

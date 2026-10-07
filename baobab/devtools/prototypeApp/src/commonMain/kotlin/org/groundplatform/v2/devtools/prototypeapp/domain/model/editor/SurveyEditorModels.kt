@@ -14,9 +14,7 @@
 package org.groundplatform.v2.devtools.prototypeapp.domain.model.editor
 
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.CachedProfile
-import org.groundplatform.v2.devtools.prototypeapp.domain.model.FormPreviewItem
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.InvitationStatus
-import org.groundplatform.v2.devtools.prototypeapp.domain.model.MapLayerItem
 
 /**
  * Defines the geographic survey area for the survey: one or more polygon parts (e.g. a mainland and
@@ -172,40 +170,6 @@ data class LayerStyle(
    */
   val iconName: String? = null,
 )
-
-/**
- * Applies the Survey editor's Map layer styles in [datasets] to these runtime map layers where they
- * show the same entity dataset (matched by [MapLayerItem.datasetId]), so features are drawn with
- * the color and pin icon chosen in the editor. Layers without a matching Map layer are unchanged,
- * as is the color when the editor's color isn't a valid `#RRGGBB`.
- */
-fun List<MapLayerItem>.withEditorLayerStyles(datasets: List<EntityDataset>): List<MapLayerItem> {
-  val stylesByDatasetId =
-    datasets.filter { it.kind == DatasetKind.MAP_LAYER }.associate { it.id to it.style }
-  if (stylesByDatasetId.isEmpty()) return this
-  return map { layer ->
-    val style = layer.datasetId?.let { stylesByDatasetId[it] } ?: return@map layer
-    layer.copy(
-      colorHex = parseHexColor(style.colorHex) ?: layer.colorHex,
-      iconName = style.iconName,
-    )
-  }
-}
-
-/**
- * Copies the availability (mobile, web, or both) chosen in the Survey editor onto the runtime forms
- * with the same form ID. Forms the editor doesn't know about keep their own availability.
- */
-fun List<FormPreviewItem>.withEditorFormAvailability(
-  editorForms: List<SurveyEditorForm>
-): List<FormPreviewItem> {
-  val availabilityByFormId = editorForms.associate { it.form.formId to it.form.availability }
-  if (availabilityByFormId.isEmpty()) return this
-  return map { form ->
-    val availability = availabilityByFormId[form.id] ?: return@map form
-    if (availability == form.availability) form else form.copy(availability = availability)
-  }
-}
 
 /**
  * An entity dataset (`EntityDatasetDef`) plus its entities, editable as a Map layer or Data table.

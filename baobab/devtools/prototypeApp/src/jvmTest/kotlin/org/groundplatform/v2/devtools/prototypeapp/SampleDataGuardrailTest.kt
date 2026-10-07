@@ -27,7 +27,7 @@ class SampleDataGuardrailTest {
     val mainRoot = File("src/commonMain/kotlin")
     assertTrue(mainRoot.isDirectory, "Run from the prototypeApp project directory")
     val seedDir = "/data/seed/"
-    val sampleData = Regex("""\b(PrototypeFake\w+Data|SurveyEditorSamples|FormEditorSamples)\b""")
+    val sampleData = Regex("""\b(PrototypeFake\w+Data)\b""")
     val offenders =
       mainRoot
         .walkTopDown()

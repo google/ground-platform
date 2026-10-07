@@ -16,7 +16,7 @@ package org.groundplatform.v2.devtools.prototypeapp
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
-import org.groundplatform.v2.devtools.prototypeapp.data.seed.SurveyEditorSamples
+import org.groundplatform.v2.devtools.prototypeapp.data.seed.PrototypeFakeSurveyEditorData
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.DatasetKind
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.publishedFormXml
 import org.groundplatform.v2.devtools.prototypeapp.surveyeditor.SurveyEditorState
@@ -93,20 +93,33 @@ class LocalStoreAppStateTest {
     val state = PrototypeAppState(initialScreen = PrototypeScreen.MAIN_SURVEY)
     val editor = SurveyEditorState(state.activeSurveyEditorDraft)
     assertEquals(state.activeSurvey.title, editor.details.title)
-    assertEquals(SurveyEditorSamples.draft().datasets, editor.datasets)
-    assertEquals(2, editor.forms.size)
+    // Forms and Map layers are derived from the survey data; Data tables come from the seed.
+    assertEquals(state.forms.map { it.id }, editor.toDraft().forms.map { it.form.formId })
+    assertEquals(
+      state.mapLayers.map { it.datasetId ?: it.id },
+      editor.mapLayers.map { it.id },
+    )
+    assertEquals(
+      PrototypeFakeSurveyEditorData.farmers().id to PrototypeFakeSurveyEditorData.treeSpecies().id,
+      editor.dataTables.map { it.id }.let { it[0] to it[1] },
+    )
+    assertEquals(PrototypeFakeSurveyEditorData.kenyaSharing(), editor.sharing)
 
+    // Surveys without a stored draft still open with their Forms and Map layers.
     val other = PrototypeAppState(initialScreen = PrototypeScreen.MAIN_SURVEY)
     other.openSurvey("survey-sample-plots-forest")
-    val blank = SurveyEditorState(other.activeSurveyEditorDraft)
-    assertEquals(other.activeSurvey.title, blank.details.title)
-    assertTrue(blank.datasets.isEmpty())
+    val derived = SurveyEditorState(other.activeSurveyEditorDraft)
+    assertEquals(other.activeSurvey.title, derived.details.title)
+    assertEquals(other.forms.map { it.id }, derived.toDraft().forms.map { it.form.formId })
+    assertEquals(other.mapLayers.size, derived.mapLayers.size)
+    assertTrue(derived.dataTables.isEmpty())
   }
 
   @Test
   fun surveyEditor_editsAreSavedToStoreAndSurviveSurveySwitches() {
     val state = PrototypeAppState(initialScreen = PrototypeScreen.MAIN_SURVEY)
-    val editor = SurveyEditorState(state.activeSurveyEditorDraft)
+    val initial = state.activeSurveyEditorDraft
+    val editor = SurveyEditorState(initial)
     editor.updateDetails { it.copy(title = "Renamed survey") }
     editor.addDataset(DatasetKind.DATA_TABLE)
     editor.addForm()
@@ -128,6 +141,6 @@ class LocalStoreAppStateTest {
     assertEquals(editor.toDraft(), reopened.toDraft())
 
     state.resetPrototypeFlow()
-    assertEquals(SurveyEditorSamples.draft().datasets, state.activeSurveyEditorDraft.datasets)
+    assertEquals(initial.datasets, state.activeSurveyEditorDraft.datasets)
   }
 }

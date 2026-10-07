@@ -19,6 +19,8 @@ import org.groundplatform.v2.devtools.prototypeapp.data.datasource.local.store.S
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.MeasurementUnitSystem
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyConfig
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.UserSettings
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SurveyEditorDerivation
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SurveyEditorDraft
 
 /**
  * Fills a [LocalStore] with the prototype's sample data.
@@ -43,7 +45,7 @@ class SampleDataSeeder(private val store: LocalStore) {
 
   companion object {
     /** Bump when the sample data changes shape, so existing stores are reseeded. */
-    const val SEED_VERSION: Int = 6
+    const val SEED_VERSION: Int = 7
 
     /** Survey opened by default on first launch. */
     const val DEFAULT_ACTIVE_SURVEY_ID: String = "survey-kenya-coffee"
@@ -78,10 +80,17 @@ class SampleDataSeeder(private val store: LocalStore) {
           ),
         )
       }
-      putSurveyEditorDraft(DEFAULT_ACTIVE_SURVEY_ID, SurveyEditorSamples.draft())
+      // Survey editor drafts are derived from the survey data above; only the two surveys with
+      // extras that cannot be derived (sharing people, survey area, Data tables) store one.
       putSurveyEditorDraft(
-        SurveyEditorSamples.ORGANIZATION_SHARED_SURVEY_ID,
-        SurveyEditorSamples.organizationSharedDraft(),
+        DEFAULT_ACTIVE_SURVEY_ID,
+        PrototypeFakeSurveyEditorData.kenyaCoffeeDraft(deriveEditorDraft(DEFAULT_ACTIVE_SURVEY_ID)),
+      )
+      putSurveyEditorDraft(
+        PrototypeFakeSurveyEditorData.ORGANIZATION_SHARED_SURVEY_ID,
+        PrototypeFakeSurveyEditorData.organizationSharedDraft(
+          deriveEditorDraft(PrototypeFakeSurveyEditorData.ORGANIZATION_SHARED_SURVEY_ID)
+        ),
       )
       putMutations(PrototypeFakeMutationsData.defaultMutations())
       putPlaces(PrototypeFakePlacesData.defaultSurveyPlaces())
@@ -99,6 +108,22 @@ class SampleDataSeeder(private val store: LocalStore) {
           uploadedMediaFileCount = 27,
           seedVersion = SEED_VERSION,
         )
+      )
+    }
+
+    /** Derives the Survey editor draft for [surveyId] from the data already written. */
+    private fun LocalStoreTransaction.deriveEditorDraft(surveyId: String): SurveyEditorDraft {
+      val forms = PrototypeFakeSurveysData.formsForSurvey(surveyId)
+      val formXml = forms.associate {
+        it.id to PrototypeFakeSurveysData.builtInFallbackXFormsXmlForForm(it)
+      }
+      return SurveyEditorDerivation.derive(
+        surveyId = surveyId,
+        survey = PrototypeFakeSurveysData.defaultSampleSurveys().firstOrNull { it.id == surveyId },
+        forms = forms,
+        formXml = { formXml[it.id] },
+        mapLayers = PrototypeFakeMapLayersData.mapLayersForSurvey(surveyId),
+        entities = PrototypeFakeEntitiesData.entitiesForSurvey(surveyId),
       )
     }
   }

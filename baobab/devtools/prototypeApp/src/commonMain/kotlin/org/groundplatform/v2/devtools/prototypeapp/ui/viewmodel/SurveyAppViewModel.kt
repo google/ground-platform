@@ -24,7 +24,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -50,6 +49,7 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyPlaceItem
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyPreviewItem
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyStats
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.UserSettings
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SurveyEditorDraft
 import org.groundplatform.v2.devtools.prototypeapp.domain.repository.AuthRepository
 import org.groundplatform.v2.devtools.prototypeapp.domain.repository.LocationRepository
 import org.groundplatform.v2.devtools.prototypeapp.domain.repository.MediaCacheInfo
@@ -84,6 +84,8 @@ data class AppData(
   val organizations: List<Organization> = emptyList(),
   val activeSurveyId: String = "",
   val content: SurveyContent = SurveyContent(),
+  /** The Survey editor's draft of the active survey (stored, or derived from [content]). */
+  val editorDraft: SurveyEditorDraft = SurveyEditorDraft.blank(surveyId = ""),
   val surveyStats: Map<String, SurveyStats> = emptyMap(),
   val surveyConfigs: Map<String, SurveyConfig> = emptyMap(),
   val offlineTilePackages: List<OfflineTilePackageItem> = emptyList(),
@@ -168,7 +170,12 @@ class SurveyAppViewModel(
     combine(
         surveyRepository.observeSurveys(),
         surveyRepository.observeActiveSurveyId().flatMapLatest { id ->
-          surveyRepository.observeSurveyContent(id).map { id to it }
+          combine(
+            surveyRepository.observeSurveyContent(id),
+            surveyEditorRepository.observeDraft(id),
+          ) { content, draft ->
+            Triple(id, content, draft)
+          }
         },
         combine(
           surveyRepository.observeSurveyStats(),
@@ -186,7 +193,7 @@ class SurveyAppViewModel(
         ),
       ) {
         surveys,
-        (activeId, content),
+        (activeId, content, draft),
         (stats, configs, tiles, mutations, organizations),
         places,
         (settings, media) ->
@@ -195,6 +202,7 @@ class SurveyAppViewModel(
           organizations = organizations,
           activeSurveyId = activeId,
           content = content,
+          editorDraft = draft,
           surveyStats = stats,
           surveyConfigs = configs,
           offlineTilePackages = tiles,

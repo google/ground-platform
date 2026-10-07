@@ -306,10 +306,26 @@ The left-hand navigation lists:
         in the field) and property schema editing. They mirror
         `EntityDatasetDef` / `EntityRecord`.
 
+The editor edits the same survey the rest of the app runs on. The Forms, Map
+layers, and map features it shows are **derived** from the survey's runtime data
+(`domain/model/editor/SurveyEditorDerivation.kt`): each `FormPreviewItem` is
+imported back from its published XForms XML (`FormImport.kt`), each
+`MapLayerItem` becomes a Map layer dataset whose rows are the layer's map
+features (row key = map feature ID, with `id` and `label` properties plus the
+feature's other properties). Surveys never edited before therefore open with
+all their Forms and layers. Saving **projects** the draft back
+(`SurveyEditorProjection.kt`): Forms, Map layer styles, and map features are
+written to the store in one transaction, keeping each map feature's Submissions
+and removing only the rows the editor deleted since the draft was opened. The
+saved draft is stored per survey for what the runtime does not hold (sharing
+people, survey area, languages, Data tables); when it is reopened its Map layer
+rows are refreshed from the current map features so field edits show up too.
+
 The editor's models are pure Kotlin in `domain/model/editor/`
 (`SurveyEditorDraft.kt`, `SurveyEditorModels.kt`, `SampleDesignModels.kt`,
-`SurveyAreaGeometry.kt`, `FormPublishing.kt`), so repositories and the local
-data store depend only on the domain. The Compose state holders and screens live
+`SurveyAreaGeometry.kt`, `FormPublishing.kt`, `FormImport.kt`,
+`SurveyEditorDerivation.kt`, `SurveyEditorProjection.kt`), so repositories and
+the local data store depend only on the domain. The Compose state holders and screens live
 in `surveyeditor/` (`SurveyEditorState.kt`, `SurveyEditorPage.kt`,
 `EntityDatasetEditor.kt`, `InteractiveLayerMap.kt`, `LayerEditorGeometry.kt`).
 Drag-to-reorder for the navigation and the flow canvas shares
@@ -490,10 +506,16 @@ fresh on every page load; on mobile it will become the persistent offline store.
     the dashboard and Survey editor.
 -   **Survey switching**: Every survey's data is in the store, so switching
     surveys keeps edits. Use **Reset** to go back to the sample data.
--   **Survey editor**: The editor loads the active survey's draft
-    (`SurveyEditorDraft`) from the store and saves each change back. Generated
-    XForms are published to the survey's `SurveyConfig.formXmlById`, and the
-    title and description are shown in the survey list.
+-   **Survey editor**: `SurveyEditorRepositoryImpl` serves the stored draft
+    (`SurveyEditorDraft`) when there is one, refreshed from the survey's current
+    map features, and otherwise derives one from the survey's Forms, Map layers,
+    and map features. Saving stores the draft and projects it onto the survey
+    in the same transaction: Forms (and their XForms in
+    `SurveyConfig.formXmlById`), Map layer styles, map features (Submissions
+    kept), and the title and description shown in the survey list. The seed
+    only stores drafts for the two sample surveys with extras that cannot be
+    derived (`PrototypeFakeSurveyEditorData`: sharing people, survey area,
+    languages, Data tables).
 -   **Backends**: `InMemoryLocalStore` is the only backend today. A persistent
     backend (Room on `androidx.sqlite`) must pass `LocalStoreContractTest`.
 

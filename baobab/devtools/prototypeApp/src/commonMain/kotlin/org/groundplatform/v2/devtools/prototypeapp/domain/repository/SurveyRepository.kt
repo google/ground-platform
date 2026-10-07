@@ -24,7 +24,6 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyConfig
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyPreviewItem
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyStats
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SyncStatus
-import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SurveyEditorDraft
 
 /** Everything stored for one survey. */
 data class SurveyContent(
@@ -34,8 +33,6 @@ data class SurveyContent(
   val standaloneSubmissions: List<SubmissionPreviewItem> = emptyList(),
   val submissionGeometries: List<SubmissionGeometryPolygon> = emptyList(),
   val config: SurveyConfig? = null,
-  /** The Survey editor's draft of this survey, or `null` if it has never been edited. */
-  val editorDraft: SurveyEditorDraft? = null,
 )
 
 /**
