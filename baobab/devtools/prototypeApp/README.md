@@ -452,6 +452,11 @@ fresh on every page load; on mobile it will become the persistent offline store.
     `AuthRepository` (over `PrototypeAuthClient`) and the survey directory from
     `SurveyRepository` and `OrganizationRepository`, and publishes navigation
     and notices as `OnboardingEvent`s that the app shell applies.
+    `SettingsViewModel` (Settings, Sign In language selector, Offline maps)
+    reads and writes preferences through `SettingsRepository`, tile packages
+    through `SurveyRepository`, and models the device storage breakdown with
+    `EstimateDeviceStorageUseCase`; the light/dark theme is session state it
+    owns.
 -   **Survey switching**: Every survey's data is in the store, so switching
     surveys keeps edits. Use **Reset** to go back to the sample data.
 -   **Survey editor**: The editor loads the active survey's draft

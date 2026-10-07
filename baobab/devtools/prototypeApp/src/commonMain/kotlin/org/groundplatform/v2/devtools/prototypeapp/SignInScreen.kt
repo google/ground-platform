@@ -85,11 +85,17 @@ fun MobileScreenHost(state: PrototypeAppState) {
   }
   val onboarding = state.onboarding
   val onboardingUiState by onboarding.uiState.collectAsState()
+  val settingsUiState by state.settings.uiState.collectAsState()
   when (state.currentScreen) {
     AppScreen.SIGN_IN ->
       SignInScreen(
         onSignIn = onboarding::signInWithGoogle,
-        languageSelector = { SignInLanguageSelector(state = state) },
+        languageSelector = {
+          SignInLanguageSelector(
+            languageCode = settingsUiState.languageCode,
+            onLanguageChange = state.settings::updateLanguage,
+          )
+        },
       )
     AppScreen.TERMS_OF_SERVICE ->
       TermsOfServiceScreen(
@@ -988,8 +994,14 @@ fun GroundCloudAcaciaLogo(modifier: Modifier = Modifier) {
 /** Backward-compatible alias for [SignInScreen]. */
 @Composable
 fun GroundSignInScreen(state: PrototypeAppState) {
+  val settingsUiState by state.settings.uiState.collectAsState()
   SignInScreen(
     onSignIn = state.onboarding::signInWithGoogle,
-    languageSelector = { SignInLanguageSelector(state = state) },
+    languageSelector = {
+      SignInLanguageSelector(
+        languageCode = settingsUiState.languageCode,
+        onLanguageChange = state.settings::updateLanguage,
+      )
+    },
   )
 }

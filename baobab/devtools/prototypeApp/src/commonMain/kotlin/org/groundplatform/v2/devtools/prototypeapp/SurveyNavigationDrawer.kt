@@ -76,6 +76,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -97,6 +98,8 @@ import org.groundplatform.v2.core.forms.ui.GroundBadgeTone
 import org.groundplatform.v2.core.forms.ui.GroundModalBottomSheetOverlay
 import org.groundplatform.v2.core.forms.ui.GroundTonalBadge
 import org.groundplatform.v2.core.forms.ui.LocalGroundBrandFontFamily
+import org.groundplatform.v2.devtools.prototypeapp.ui.state.SettingsUiState
+import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.SettingsActions
 
 /**
  * Hamburger Navigation Drawer overlay providing options to:
@@ -1117,6 +1120,21 @@ internal fun PdfExportMessageSnackbar(state: PrototypeAppState, modifier: Modifi
  */
 @Composable
 internal fun ManageOfflineMapsSubScreen(state: PrototypeAppState) {
+  val uiState by state.settings.uiState.collectAsState()
+  ManageOfflineMapsSubScreen(
+    uiState = uiState,
+    actions = state.settings,
+    onBack = state::closeDrawerSubView,
+  )
+}
+
+/** Stateless Offline maps sub-screen rendering [uiState] and forwarding intents to [actions]. */
+@Composable
+internal fun ManageOfflineMapsSubScreen(
+  uiState: SettingsUiState,
+  actions: SettingsActions,
+  onBack: () -> Unit,
+) {
   Column(
     modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),
     verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -1142,7 +1160,7 @@ internal fun ManageOfflineMapsSubScreen(state: PrototypeAppState) {
           color = MaterialTheme.colorScheme.onSurface,
         )
       }
-      OutlinedButton(onClick = { state.closeDrawerSubView() }, shape = MaterialTheme.shapes.small) {
+      OutlinedButton(onClick = onBack, shape = MaterialTheme.shapes.small) {
         Icon(
           imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
           contentDescription = null,
@@ -1154,9 +1172,9 @@ internal fun ManageOfflineMapsSubScreen(state: PrototypeAppState) {
     }
 
     // Clear, user-friendly device storage breakdown chart
-    DeviceStorageBreakdownCard(storage = state.deviceStorageInfo)
+    DeviceStorageBreakdownCard(storage = uiState.storage)
 
-    state.offlineTilePackages.forEach { pkg ->
+    uiState.offlineTilePackages.forEach { pkg ->
       OutlinedCard(
         modifier = Modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.medium,
@@ -1182,7 +1200,7 @@ internal fun ManageOfflineMapsSubScreen(state: PrototypeAppState) {
           }
           if (pkg.isDownloaded) {
             FilledTonalButton(
-              onClick = { state.promptRemoveOfflineTilePackage(pkg.id) },
+              onClick = { actions.promptRemoveOfflineTilePackage(pkg.id) },
               shape = MaterialTheme.shapes.large,
             ) {
               Icon(
@@ -1198,7 +1216,7 @@ internal fun ManageOfflineMapsSubScreen(state: PrototypeAppState) {
             }
           } else {
             Button(
-              onClick = { state.toggleOfflineTilePackage(pkg.id) },
+              onClick = { actions.toggleOfflineTilePackage(pkg.id) },
               shape = MaterialTheme.shapes.large,
             ) {
               Icon(
@@ -1217,20 +1235,23 @@ internal fun ManageOfflineMapsSubScreen(state: PrototypeAppState) {
       }
     }
 
-    if (state.pendingRemovalTilePackageId != null) {
-      RemoveOfflineTilePackageConfirmationDialog(state)
+    if (uiState.pendingRemovalTilePackageId != null) {
+      RemoveOfflineTilePackageConfirmationDialog(uiState, actions)
     }
   }
 }
 
 /** Confirmation prompt dialog shown before removing an offline map tile package from the device. */
 @Composable
-private fun RemoveOfflineTilePackageConfirmationDialog(state: PrototypeAppState) {
-  val packageId = state.pendingRemovalTilePackageId ?: return
-  val pkg = state.offlineTilePackages.firstOrNull { it.id == packageId } ?: return
+private fun RemoveOfflineTilePackageConfirmationDialog(
+  uiState: SettingsUiState,
+  actions: SettingsActions,
+) {
+  val packageId = uiState.pendingRemovalTilePackageId ?: return
+  val pkg = uiState.offlineTilePackages.firstOrNull { it.id == packageId } ?: return
 
   GroundAlertDialogOverlay(
-    onDismissRequest = { state.dismissRemoveOfflineTilePackage() },
+    onDismissRequest = { actions.dismissRemoveOfflineTilePackage() },
     icon = {
       Icon(
         imageVector = Icons.Outlined.CloudOff,
@@ -1255,7 +1276,7 @@ private fun RemoveOfflineTilePackageConfirmationDialog(state: PrototypeAppState)
     },
     confirmButton = {
       Button(
-        onClick = { state.confirmRemoveOfflineTilePackage() },
+        onClick = { actions.confirmRemoveOfflineTilePackage() },
         colors =
           ButtonDefaults.buttonColors(
             containerColor = MaterialTheme.colorScheme.error,
@@ -1266,7 +1287,7 @@ private fun RemoveOfflineTilePackageConfirmationDialog(state: PrototypeAppState)
       }
     },
     dismissButton = {
-      OutlinedButton(onClick = { state.dismissRemoveOfflineTilePackage() }) { Text("Cancel") }
+      OutlinedButton(onClick = { actions.dismissRemoveOfflineTilePackage() }) { Text("Cancel") }
     },
   )
 }
@@ -1277,7 +1298,8 @@ private fun RemoveOfflineTilePackageConfirmationDialog(state: PrototypeAppState)
  */
 @Composable
 internal fun SurveySettingsSubScreen(state: PrototypeAppState) {
-  SettingsScreen(state = state)
+  val uiState by state.settings.uiState.collectAsState()
+  SettingsScreen(uiState = uiState, actions = state.settings, onBack = state::closeDrawerSubView)
 }
 
 /**

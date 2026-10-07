@@ -42,8 +42,10 @@ import org.groundplatform.v2.devtools.prototypeapp.pdf.RecordPdfReports
 import org.groundplatform.v2.devtools.prototypeapp.surveyeditor.SurveyAccess
 import org.groundplatform.v2.devtools.prototypeapp.ui.state.OnboardingEvent
 import org.groundplatform.v2.devtools.prototypeapp.ui.state.PrototypeUiState
+import org.groundplatform.v2.devtools.prototypeapp.ui.state.SettingsEvent
 import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.OnboardingViewModel
 import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.PrototypeAppViewModel
+import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.SettingsViewModel
 import org.groundplatform.v2.map.CameraPosition
 import org.groundplatform.v2.map.LatLng
 import org.groundplatform.v2.map.LngLatBounds
@@ -89,10 +91,32 @@ class PrototypeAppState(
 
   private var onboardingState by mutableStateOf(onboarding.uiState.value)
 
+  /**
+   * ViewModel of user settings, the session theme, and offline tile packages. Its screens observe
+   * [SettingsViewModel.uiState] directly; this class mirrors it for the rest of the UI.
+   */
+  val settings: SettingsViewModel =
+    SettingsViewModel(
+      settingsRepository = viewModel.settingsRepository,
+      surveyRepository = viewModel.surveyRepository,
+      mutationRepository = viewModel.mutationRepository,
+      scope = viewModel.scope,
+    )
+
+  private var settingsState by mutableStateOf(settings.uiState.value)
+
   init {
     viewModel.scope.launch { viewModel.appData.collect { data = it } }
     viewModel.scope.launch { onboarding.uiState.collect { onboardingState = it } }
     viewModel.scope.launch { onboarding.events.collect(::onOnboardingEvent) }
+    viewModel.scope.launch { settings.uiState.collect { settingsState = it } }
+    viewModel.scope.launch {
+      settings.events.collect { event ->
+        when (event) {
+          is SettingsEvent.Notice -> activeSurveyNotice = event.message
+        }
+      }
+    }
   }
 
   /** Applies an onboarding outcome to the app shell (screen, drawer, notices). */
@@ -146,16 +170,6 @@ class PrototypeAppState(
   /** Writes the active survey's standalone [submissions] to the local data store. */
   private fun storeStandaloneSubmissions(submissions: List<SubmissionPreviewItem>) {
     viewModel.launch { viewModel.surveyRepository.setStandaloneSubmissions(submissions) }
-  }
-
-  /** Writes offline basemap tile [packages] to the local data store. */
-  private fun storeOfflineTilePackages(packages: List<OfflineTilePackageItem>) {
-    viewModel.launch { viewModel.surveyRepository.setOfflineTilePackages(packages) }
-  }
-
-  /** Writes [settings] to the local data store. */
-  private fun storeUserSettings(settings: UserSettings) {
-    viewModel.launch { viewModel.settingsRepository.setUserSettings(settings) }
   }
 
   /**
@@ -239,8 +253,8 @@ class PrototypeAppState(
   var currentScreen by mutableStateOf(initialScreen)
     private set
 
-  var isDarkTheme by mutableStateOf(false)
-    private set
+  val isDarkTheme: Boolean
+    get() = settingsState.isDarkTheme
 
   /** Active page of the prototype workbench (`Mobile prototype`, `Web app`, `Survey editor`). */
   var activeWorkbenchPage by mutableStateOf(PrototypeWorkbenchPage.MOBILE_PROTOTYPE)
@@ -311,8 +325,8 @@ class PrototypeAppState(
     get() = onboardingState.pendingRemovalSurveyId
 
   /** ID of an offline tile package pending confirmation to remove from the device, or null. */
-  var pendingRemovalTilePackageId by mutableStateOf<String?>(null)
-    private set
+  val pendingRemovalTilePackageId: String?
+    get() = settingsState.pendingRemovalTilePackageId
 
   /** True when the Download surveys screen was opened from the Downloaded Surveys list. */
   val isDownloadSurveyAccessedFromSurveyList: Boolean
@@ -1044,17 +1058,17 @@ class PrototypeAppState(
   val selectedLanguageCode: String
     get() = data.userSettings.language
 
-  var selectedLanguageLocale by mutableStateOf("en (English)")
-    private set
+  val selectedLanguageLocale: String
+    get() = settingsState.selectedLanguageLocale
 
   val shouldUploadPhotosOnWifiOnly: Boolean
     get() = data.userSettings.shouldUploadPhotosOnWifiOnly
 
-  var visitedWebsiteUrl by mutableStateOf<String?>(null)
-    private set
+  val visitedWebsiteUrl: String?
+    get() = settingsState.visitedWebsiteUrl
 
-  var mediaCacheCleared by mutableStateOf(false)
-    private set
+  val mediaCacheCleared: Boolean
+    get() = settingsState.mediaCacheCleared
 
   /** Display label of the currently selected language (e.g. `"English"`, `"Français"`). */
   val selectedLanguageDisplayName: String
@@ -1071,29 +1085,7 @@ class PrototypeAppState(
    * entities, submissions, mutations).
    */
   val deviceStorageInfo: DeviceStorageInfo
-    get() {
-      // Calculate downloaded imagery size from downloaded tile packages
-      val downloadedTilesBytes =
-        offlineTilePackages
-          .filter { it.isDownloaded }
-          .sumOf { pkg ->
-            when (pkg.id) {
-              "pkg-nyeri-satellite" -> 82_700_000L
-              "pkg-nyeri-topo" -> 14_200_000L
-              "pkg-kenya-regional" -> 168_000_000L
-              else -> 50_000_000L
-            }
-          }
-      val baseImageryBytes = 1_850_000_000L // Baseline offline imagery cache
-      val totalImageryBytes = baseImageryBytes + downloadedTilesBytes
-      val totalDataBytes = 420_000_000L + (mutations.size * 15_000L) + (entities.size * 8_000L)
-      return DeviceStorageInfo(
-        totalBytes = 64L * 1024L * 1024L * 1024L,
-        downloadedImageryBytes = totalImageryBytes,
-        dataBytes = totalDataBytes,
-        otherUsedBytes = 18_200_000_000L,
-      )
-    }
+    get() = settingsState.storage
 
   // --- User GPS Location & Auto-Centering Map Camera State ---
   /** Normalized world X coordinate `[0, 1]` of the collector's current GPS location. */
@@ -3475,103 +3467,46 @@ class PrototypeAppState(
   }
 
   /** Toggles download status of an offline Mapbox basemap tile package. */
-  fun toggleOfflineTilePackage(packageId: String) {
-    storeOfflineTilePackages(
-      offlineTilePackages.map { pkg ->
-        if (pkg.id == packageId) pkg.copy(isDownloaded = !pkg.isDownloaded) else pkg
-      }
-    )
-  }
+  fun toggleOfflineTilePackage(packageId: String) = settings.toggleOfflineTilePackage(packageId)
 
   /**
    * Prompts the user before removing an offline map tile package from the device. If the package is
    * not downloaded, downloads it immediately.
    */
-  fun promptRemoveOfflineTilePackage(packageId: String) {
-    val pkg = offlineTilePackages.firstOrNull { it.id == packageId }
-    if (pkg != null && pkg.isDownloaded) {
-      pendingRemovalTilePackageId = packageId
-    } else {
-      toggleOfflineTilePackage(packageId)
-    }
-  }
+  fun promptRemoveOfflineTilePackage(packageId: String) =
+    settings.promptRemoveOfflineTilePackage(packageId)
 
   /**
    * Confirms removal of the pending offline tile package from the device and dismisses the dialog.
    */
-  fun confirmRemoveOfflineTilePackage() {
-    val packageId = pendingRemovalTilePackageId
-    pendingRemovalTilePackageId = null
-    if (packageId != null) {
-      storeOfflineTilePackages(
-        offlineTilePackages.map { pkg ->
-          if (pkg.id == packageId) pkg.copy(isDownloaded = false) else pkg
-        }
-      )
-    }
-  }
+  fun confirmRemoveOfflineTilePackage() = settings.confirmRemoveOfflineTilePackage()
 
   /** Dismisses/cancels the pending offline tile package removal dialog. */
-  fun dismissRemoveOfflineTilePackage() {
-    pendingRemovalTilePackageId = null
-  }
+  fun dismissRemoveOfflineTilePackage() = settings.dismissRemoveOfflineTilePackage()
 
   /** Updates the measurement unit preference (`METRIC` vs `IMPERIAL`). */
-  fun updateUnitSystem(system: MeasurementUnitSystem) {
-    storeUserSettings(userSettings.copy(measurementUnits = system))
-  }
+  fun updateUnitSystem(system: MeasurementUnitSystem) = settings.updateMeasurementUnits(system)
 
   /**
    * Updates the active application & survey language using either a language code (e.g. `"en"`,
-   * `"fr"`, `"es"`, `"pt"`, `"vi"`, `"th"`, `"lo"`, `"km"`, `"sw"`) or a formatted locale string
-   * (e.g. `"fr (Français)"`). Synchronizes both [selectedLanguageCode] and [selectedLanguageLocale]
-   * .
+   * `"fr"`) or a formatted locale string (e.g. `"fr (Français)"`). Synchronizes both
+   * [selectedLanguageCode] and [selectedLanguageLocale].
    */
-  fun updateSelectedLanguage(languageCodeOrLocale: String) {
-    val trimmed = languageCodeOrLocale.trim()
-    val codeCandidate = trimmed.substringBefore(" ").lowercase()
-    val matched = GROUND_LANGUAGE_OPTIONS.firstOrNull {
-      it.code.equals(trimmed, ignoreCase = true) ||
-        it.code.equals(codeCandidate, ignoreCase = true) ||
-        it.label.equals(trimmed, ignoreCase = true) ||
-        "${it.code} (${it.label})".equals(trimmed, ignoreCase = true)
-    }
-    if (matched != null) {
-      storeUserSettings(userSettings.copy(language = matched.code))
-      selectedLanguageLocale = "${matched.code} (${matched.label})"
-    } else {
-      storeUserSettings(userSettings.copy(language = codeCandidate.ifEmpty { "en" }))
-      selectedLanguageLocale = trimmed.ifEmpty { "en (English)" }
-    }
-  }
+  fun updateSelectedLanguage(languageCodeOrLocale: String) =
+    settings.updateLanguage(languageCodeOrLocale)
 
   /** Updates the active in-app language locale (delegates to [updateSelectedLanguage]). */
-  fun updateLanguageLocale(locale: String) {
-    updateSelectedLanguage(locale)
-  }
+  fun updateLanguageLocale(locale: String) = updateSelectedLanguage(locale)
 
-  /**
-   * Updates the "Upload photos over Wi-Fi only" preference (matching `SettingsViewModel` in
-   * `ground-android`).
-   */
-  fun updateUploadMediaOverUnmeteredConnectionOnly(enabled: Boolean) {
-    storeUserSettings(userSettings.copy(shouldUploadPhotosOnWifiOnly = enabled))
-  }
+  /** Updates the "Upload photos over Wi-Fi only" preference. */
+  fun updateUploadMediaOverUnmeteredConnectionOnly(enabled: Boolean) =
+    settings.updateUploadMediaOverUnmeteredConnectionOnly(enabled)
 
-  /**
-   * Records a click on "Visit website" (`https://groundplatform.org/`) in the Settings Help
-   * section.
-   */
-  fun visitGroundWebsite(url: String = GROUND_WEBSITE_URL) {
-    visitedWebsiteUrl = url
-    activeSurveyNotice = "Opened $url"
-  }
+  /** Records a click on "Visit website" (`https://groundplatform.org/`) in Settings > Help. */
+  fun visitGroundWebsite(url: String = GROUND_WEBSITE_URL) = settings.visitWebsite(url)
 
   /** Evicts uploaded media attachments from local device cache (per `00-index.md`). */
-  fun evictUploadedMediaCache() {
-    mediaCacheCleared = true
-    viewModel.launch { viewModel.settingsRepository.evictUploadedMediaCache() }
-  }
+  fun evictUploadedMediaCache() = settings.evictUploadedMediaCache()
 
   /**
    * Selects the device preview form factor (`Mobile` vs `Tablet`) in the prototype wrapper page.
@@ -3998,9 +3933,7 @@ class PrototypeAppState(
   }
 
   /** Toggles between Light and Dark Ground Material 3 themes. */
-  fun toggleDarkTheme() {
-    isDarkTheme = !isDarkTheme
-  }
+  fun toggleDarkTheme() = settings.toggleDarkTheme()
 
   /**
    * Randomly generates and appends [count] polygon map features (`GeospatialEntityItem`) across the
@@ -4022,6 +3955,7 @@ class PrototypeAppState(
   fun resetPrototypeFlow() {
     currentScreen = PrototypeScreen.SIGN_IN
     onboarding.reset()
+    settings.reset()
     activeSurveyNotice = null
     mainViewMode = MainSurveyViewMode.MAP
     isDrawerOpen = false

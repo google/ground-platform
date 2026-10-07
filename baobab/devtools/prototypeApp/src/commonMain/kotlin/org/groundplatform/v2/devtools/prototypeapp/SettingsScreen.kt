@@ -51,6 +51,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -77,6 +78,8 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.LANGUAGE_OPTIONS
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.MeasurementUnitSystem
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.UserSettings
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.WEBSITE_URL
+import org.groundplatform.v2.devtools.prototypeapp.ui.state.SettingsUiState
+import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.SettingsActions
 import org.jetbrains.compose.resources.stringResource
 
 /** Option item for [SettingsSelectItem], matching `Option` in `ground-android`. */
@@ -87,28 +90,28 @@ data class SettingsOption(val label: String, val value: String)
  * `github.com/google/ground-android`.
  */
 @Composable
-fun SettingsScreen(state: PrototypeAppState, onBack: () -> Unit = { state.closeDrawerSubView() }) {
+fun SettingsScreen(uiState: SettingsUiState, actions: SettingsActions, onBack: () -> Unit) {
   SettingsScreen(
-    settings = state.userSettings,
-    storage = state.deviceStorageInfo,
-    onUploadMediaOverUnmeteredConnectionOnlyChange = {
-      state.updateUploadMediaOverUnmeteredConnectionOnly(it)
-    },
-    onLanguageChange = { state.updateSelectedLanguage(it) },
-    onMeasurementUnitsChange = { state.updateUnitSystem(it) },
-    onVisitWebsiteClick = { state.visitGroundWebsite(WEBSITE_URL) },
+    settings = uiState.settings,
+    storage = uiState.storage,
+    onUploadMediaOverUnmeteredConnectionOnlyChange =
+      actions::updateUploadMediaOverUnmeteredConnectionOnly,
+    onLanguageChange = actions::updateLanguage,
+    onMeasurementUnitsChange = actions::updateMeasurementUnits,
+    onVisitWebsiteClick = { actions.visitWebsite(WEBSITE_URL) },
     onBack = onBack,
-    visitedWebsiteNotice = state.visitedWebsiteUrl,
+    visitedWebsiteNotice = uiState.visitedWebsiteUrl,
   )
 }
 
-/** Backward-compatible alias for [SettingsScreen]. */
+/** Backward-compatible alias for [SettingsScreen] bound to the app shell. */
 @Composable
 fun GroundSettingsScreen(
   state: PrototypeAppState,
   onBack: () -> Unit = { state.closeDrawerSubView() },
 ) {
-  SettingsScreen(state = state, onBack = onBack)
+  val uiState by state.settings.uiState.collectAsState()
+  SettingsScreen(uiState = uiState, actions = state.settings, onBack = onBack)
 }
 
 /**
@@ -420,7 +423,11 @@ fun SettingsSwitchItem(
  * Settings screen.
  */
 @Composable
-fun SignInLanguageSelector(state: PrototypeAppState, modifier: Modifier = Modifier) {
+fun SignInLanguageSelector(
+  languageCode: String,
+  onLanguageChange: (String) -> Unit,
+  modifier: Modifier = Modifier,
+) {
   val languageOptions = remember {
     LANGUAGE_OPTIONS.map { SettingsOption(label = it.label, value = it.code) }
   }
@@ -437,8 +444,8 @@ fun SignInLanguageSelector(state: PrototypeAppState, modifier: Modifier = Modifi
       icon = Icons.Outlined.Language,
       title = stringResource(Res.string.select_language_title),
       options = languageOptions,
-      currentValue = state.selectedLanguageCode,
-      onValueChanged = { state.updateSelectedLanguage(it) },
+      currentValue = languageCode,
+      onValueChanged = onLanguageChange,
       trailingContent = {
         Icon(
           imageVector = Icons.Outlined.KeyboardArrowDown,
