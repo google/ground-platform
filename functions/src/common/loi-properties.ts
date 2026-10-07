@@ -39,7 +39,7 @@ export async function regenerateLoiProperties(
 ): Promise<Properties> {
   const geometry = toGeoJsonGeometry(loiPb.geometry!);
 
-  let properties = propertiesPbToObject(loiPb.properties) || {};
+  let properties = propertiesPbToObject(loiPb.properties);
 
   const jobDoc = await db.fetchJob(surveyId, loiPb.jobId);
   const jobPb = toMessage(jobDoc.data()!, Pb.Job) as Pb.Job;
@@ -94,7 +94,7 @@ export function propertiesPbToObject(pb: {
 }): Properties {
   const properties: { [k: string]: string | number } = {};
   for (const k of Object.keys(pb).sort()) {
-    const v = pb[k].stringValue || pb[k].numericValue;
+    const v = pb[k].stringValue ?? pb[k].numericValue;
     if (v !== null && v !== undefined) {
       properties[k] = v;
     }
