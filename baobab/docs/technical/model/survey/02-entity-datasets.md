@@ -160,10 +160,9 @@ altitude and accuracy set to 0 and at most 7 decimals:
 `SampleEncoding` in `shared/core` writes and reads this format
 byte-identically on every platform.
 
-*   A plot holds at most 100 samples. Larger designs use a separate point
-    dataset linked by `plot_id`.
 *   `samples` is left out of map tiles and default list responses
-    (`ListEntitiesRequest.field_mask`).
+    (`ListEntitiesRequest.field_mask`), avoiding a 25× entity record explosion
+    while keeping all pre-defined sample points on the plot entity.
 
 ### Interpretation Form Template
 
@@ -197,6 +196,61 @@ and Enketo:
     `InterpretationFormTemplateTest` in `shared/core`. The test checks that the
     shared form engine creates one pre-filled repeat instance per sample, and
     that the form round-trips XML → proto → XML unchanged.
+
+### Client Map Rendering & Active Question Coloring
+
+Once `plot` is set on `FormSession`, the repeat instances `/data/sample[1..M]`
+become the single client-side source of truth for both sample geometry and
+answers:
+
+*   **Geometry & Selection**: the client renders each repeat instance's first
+    spatial field (`location`) on the map. Clicking or box-selecting points on
+    the map selects the corresponding repeat indices in `FormSession`. In
+    `USER_DRAWN` mode (`no_add_remove = false`, no `repeat_count`), drawing a
+    feature on the map appends a repeat instance and populates its spatial
+    field, using the same rendering and selection path.
+*   **Active Question Swatch Coloring**: sample points are colored according to
+    the **currently focused question** inside the repeat (defaulting to the
+    first question in the repeat when the plot opens):
+    *   **Not relevant (`!fieldState.isRelevant`)**: when a conditional child
+        question is focused (e.g. `forest_type` with
+        `relevant = "../land_cover = 'tree'"`), sample points where the
+        question is not relevant are dimmed and non-selectable.
+    *   **Unanswered (`fieldState.isEmpty`)**: rendered in the neutral
+        unanswered style.
+    *   **Answered Choice (`SELECT_ONE` / `SELECT_MULTIPLE`)**: colored using
+        `ResolvedChoiceOption.properties["color"]` (populated from
+        `ChoiceItem.properties["color"]` or the `color` column of an
+        `<itemset>` secondary instance).
+    *   **Answered Input (`CONTROL_INPUT` / `CONTROL_RANGE`)**: colored using a
+        single answered accent swatch.
+
+### Sample-to-Plot Aggregation
+
+Each interpreter's pass over a plot is stored as a single `SubmissionRecord`
+(`entity_id = plot.entity_id`) containing plot-level fields at the root of
+`RecordInstance.data` (`confidence`, `flagged`, `flagged_reason`, and any
+plot-level questions) and sample-level answers in
+`fields["sample"].repeat_value.nodes`:
+
+*   **In-Form XPath Rollups**: real-time percentages, cross-question validation
+    rules (e.g. sum-to-100% or incompatible plot/sample answers), and
+    single-interpreter `entity_saveto` bindings use standard XPath 1.0 over
+    `/data/sample` (e.g.
+    `round(100 * count(/data/sample[land_cover = 'tree']) div /data/sample_count, 2)`).
+*   **Schema-Driven Plot Summary Export**: for plot-level CSV exports without
+    requiring per-option calculated fields in `FormDef`, the aggregator walks
+    the controls inside `RepeatDef`:
+    *   `SELECT_ONE` / `SELECT_MULTIPLE`: emits `<question>:<option>` columns
+        with `100 × matchCount ÷ sampleCount`.
+    *   Numeric inputs (`TYPE_INT32`, `TYPE_DOUBLE`): emits plot summary
+        statistics (`mean`, `sum`, `min`, `max`).
+    *   Text inputs (`TYPE_STRING`): joins distinct non-empty answers with `;`.
+*   **Multi-Interpreter Consensus (`K > 1` submissions per plot)**: groups
+    repeat nodes across non-quarantined `SubmissionRecord`s for the plot by
+    `sample_id`, computes the modal answer per sample question (or `null` on a
+    tie) and disagreement rate, and rolls the consensus sample labels up to the
+    plot's canonical summary and `EntityRecord.properties["status"]`.
 
 ## Example: Geospatial Plot Dataset
 
