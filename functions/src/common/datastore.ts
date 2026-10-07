@@ -24,14 +24,16 @@ import {
   GeoPoint,
 } from 'firebase-admin/firestore';
 import type { Geometry } from 'geojson';
-import { registry } from '@ground/lib';
+import { registry, toDocumentData } from '@ground/lib';
 import { GroundProtos } from '@ground/proto';
 
 import Pb = GroundProtos.ground.v1beta1;
+import { toTimestampPb } from './audit-info';
 import { QueryIterator, leftOuterJoinSorted } from './query-iterator';
 
 const l = registry.getFieldIds(Pb.LocationOfInterest);
 const sb = registry.getFieldIds(Pb.Submission);
+const ai = registry.getFieldIds(Pb.AuditInfo);
 
 /** gRPC status code returned by Firestore when a document doesn't exist. */
 const GRPC_STATUS_NOT_FOUND = 5;
@@ -268,9 +270,6 @@ export class Datastore {
     try {
       await loiRef.update({ [l.submissionCount]: count });
     } catch (e) {
-      // Deleting an LOI also deletes its submissions, so the resulting
-      // submission write events can arrive after the LOI itself is gone. There
-      // is no count left to update in that case.
       if ((e as { code?: number }).code === GRPC_STATUS_NOT_FOUND) return;
       throw e;
     }
@@ -278,12 +277,18 @@ export class Datastore {
 
   async adjustSubmissionCount(surveyId: string, loiId: string, delta: number) {
     const loiRef = this.db_.doc(loi(surveyId, loiId));
-    try {
-      await loiRef.update({ [l.submissionCount]: FieldValue.increment(delta) });
-    } catch (e) {
-      if ((e as { code?: number }).code === GRPC_STATUS_NOT_FOUND) return;
-      throw e;
-    }
+    await this.db_.runTransaction(async tx => {
+      const loiDoc = (await tx.get(loiRef)).data();
+      if (!loiDoc) return;
+      const lastModified = loiDoc[l.lastModified] ?? loiDoc[l.created] ?? {};
+      tx.update(loiRef, {
+        [l.submissionCount]: FieldValue.increment(delta),
+        [l.lastModified]: {
+          ...lastModified,
+          [ai.serverTimestamp]: toDocumentData(toTimestampPb(Date.now())),
+        },
+      });
+    });
   }
 
   async updateLoiProperties(
