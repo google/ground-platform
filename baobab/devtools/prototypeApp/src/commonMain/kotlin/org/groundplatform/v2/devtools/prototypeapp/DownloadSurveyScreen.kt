@@ -64,6 +64,8 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -78,6 +80,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.groundplatform.v2.core.forms.ui.GroundAlertDialogOverlay
+import org.groundplatform.v2.devtools.prototypeapp.ui.state.OnboardingUiState
+import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.OnboardingActions
 
 /**
  * 3. "Download survey" screen where users can see a list of all surveys shared with them, or search
@@ -86,9 +90,16 @@ import org.groundplatform.v2.core.forms.ui.GroundAlertDialogOverlay
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DownloadSurveyScreen(state: PrototypeAppState) {
+fun DownloadSurveyScreen(
+  uiState: OnboardingUiState,
+  actions: OnboardingActions,
+  notice: String?,
+  isDarkTheme: Boolean,
+  /** Prototype-only tools shown in the top bar (none in production). */
+  debugTools: @Composable () -> Unit = {},
+) {
   val onSurfaceColor = MaterialTheme.colorScheme.onSurface
-  val filtered = state.filteredSurveys
+  val filtered = uiState.filteredSurveys
 
   Scaffold(
     topBar = {
@@ -102,19 +113,19 @@ fun DownloadSurveyScreen(state: PrototypeAppState) {
             )
             Text(
               text =
-                "${state.surveys.size} shared with you • ${state.downloadedSurveyCount} downloaded",
+                "${uiState.surveys.size} shared with you • ${uiState.downloadedSurveyCount} downloaded",
               style = MaterialTheme.typography.labelSmall,
               color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
           }
         },
         navigationIcon = {
-          IconButton(onClick = { state.navigateBackFromDownloadSurvey() }) {
+          IconButton(onClick = { actions.navigateBackFromDownloadSurvey() }) {
             Icon(imageVector = Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = "Back")
           }
         },
         actions = {
-          PrototypeDebugToolsButton(state = state)
+          debugTools()
           Surface(
             shape = CircleShape,
             color = MaterialTheme.colorScheme.primaryContainer,
@@ -144,8 +155,8 @@ fun DownloadSurveyScreen(state: PrototypeAppState) {
       // Search Bar for filtering by survey name or location
       Box(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)) {
         OutlinedTextField(
-          value = state.searchQuery,
-          onValueChange = { state.updateSearchQuery(it) },
+          value = uiState.searchQuery,
+          onValueChange = { actions.updateSearchQuery(it) },
           modifier = Modifier.fillMaxWidth(),
           singleLine = true,
           placeholder = {
@@ -164,8 +175,8 @@ fun DownloadSurveyScreen(state: PrototypeAppState) {
             )
           },
           trailingIcon = {
-            if (state.searchQuery.isNotEmpty()) {
-              IconButton(onClick = { state.clearSearchQuery() }) {
+            if (uiState.searchQuery.isNotEmpty()) {
+              IconButton(onClick = { actions.clearSearchQuery() }) {
                 Icon(
                   imageVector = Icons.Outlined.Close,
                   contentDescription = "Clear Search",
@@ -186,7 +197,7 @@ fun DownloadSurveyScreen(state: PrototypeAppState) {
       }
 
       // Optional feedback toast banner when downloading/toggling a survey
-      state.activeSurveyNotice?.let { notice ->
+      notice?.let { notice ->
         Surface(
           color = MaterialTheme.colorScheme.secondaryContainer,
           contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
@@ -221,10 +232,10 @@ fun DownloadSurveyScreen(state: PrototypeAppState) {
       ) {
         Text(
           text =
-            if (state.searchQuery.isBlank()) {
+            if (uiState.searchQuery.isBlank()) {
               "SURVEYS SHARED WITH YOU (${filtered.size})"
             } else {
-              "MATCHING SURVEYS (${filtered.size} OF ${state.surveys.size})"
+              "MATCHING SURVEYS (${filtered.size} OF ${uiState.surveys.size})"
             },
           style =
             MaterialTheme.typography.labelSmall.copy(
@@ -233,8 +244,8 @@ fun DownloadSurveyScreen(state: PrototypeAppState) {
               letterSpacing = 0.6.sp,
             ),
         )
-        if (state.searchQuery.isNotBlank()) {
-          TextButton(onClick = { state.clearSearchQuery() }) {
+        if (uiState.searchQuery.isNotBlank()) {
+          TextButton(onClick = { actions.clearSearchQuery() }) {
             Text(
               text = "Clear search",
               style = MaterialTheme.typography.labelSmall,
@@ -258,7 +269,7 @@ fun DownloadSurveyScreen(state: PrototypeAppState) {
               modifier = Modifier.size(36.dp),
             )
             Text(
-              text = "No surveys match \"${state.searchQuery}\"",
+              text = "No surveys match \"${uiState.searchQuery}\"",
               style = MaterialTheme.typography.titleSmall,
               color = onSurfaceColor,
               fontWeight = FontWeight.Bold,
@@ -285,11 +296,11 @@ fun DownloadSurveyScreen(state: PrototypeAppState) {
           filtered.forEach { survey ->
             SurveyListItemCard(
               survey = survey,
-              organizationName = state.organization(survey.organizationId)?.name,
-              isDarkTheme = state.isDarkTheme,
-              onDownloadClick = { state.downloadSurvey(survey.id) },
-              onToggleDownloadClick = { state.promptRemoveDownloadedSurvey(survey.id) },
-              onOpenSurveyClick = { state.openSurvey(survey.id) },
+              organizationName = uiState.organizationNames[survey.organizationId],
+              isDarkTheme = isDarkTheme,
+              onDownloadClick = { actions.downloadSurvey(survey.id) },
+              onToggleDownloadClick = { actions.promptRemoveDownloadedSurvey(survey.id) },
+              onOpenSurveyClick = { actions.openSurvey(survey.id) },
             )
           }
           Spacer(modifier = Modifier.height(12.dp))
@@ -297,24 +308,27 @@ fun DownloadSurveyScreen(state: PrototypeAppState) {
       }
     }
 
-    if (state.isDownloadSurveySignOutPromptOpen) {
-      DownloadSurveySignOutPromptDialog(state)
+    if (uiState.isSignOutPromptOpen) {
+      DownloadSurveySignOutPromptDialog(uiState, actions)
     }
 
-    if (state.pendingRemovalSurveyId != null) {
-      RemoveDownloadedSurveyConfirmationDialog(state)
+    if (uiState.pendingRemovalSurveyId != null) {
+      RemoveDownloadedSurveyConfirmationDialog(uiState, actions)
     }
   }
 }
 
 /** Confirmation prompt dialog shown before removing a downloaded survey from the device. */
 @Composable
-private fun RemoveDownloadedSurveyConfirmationDialog(state: PrototypeAppState) {
-  val surveyId = state.pendingRemovalSurveyId ?: return
-  val survey = state.surveys.firstOrNull { it.id == surveyId } ?: return
+private fun RemoveDownloadedSurveyConfirmationDialog(
+  uiState: OnboardingUiState,
+  actions: OnboardingActions,
+) {
+  val surveyId = uiState.pendingRemovalSurveyId ?: return
+  val survey = uiState.surveys.firstOrNull { it.id == surveyId } ?: return
 
   GroundAlertDialogOverlay(
-    onDismissRequest = { state.dismissRemoveDownloadedSurvey() },
+    onDismissRequest = { actions.dismissRemoveDownloadedSurvey() },
     icon = {
       Icon(
         imageVector = Icons.Outlined.CloudOff,
@@ -339,7 +353,7 @@ private fun RemoveDownloadedSurveyConfirmationDialog(state: PrototypeAppState) {
     },
     confirmButton = {
       Button(
-        onClick = { state.confirmRemoveDownloadedSurvey() },
+        onClick = { actions.confirmRemoveDownloadedSurvey() },
         colors =
           ButtonDefaults.buttonColors(
             containerColor = MaterialTheme.colorScheme.error,
@@ -350,7 +364,7 @@ private fun RemoveDownloadedSurveyConfirmationDialog(state: PrototypeAppState) {
       }
     },
     dismissButton = {
-      OutlinedButton(onClick = { state.dismissRemoveDownloadedSurvey() }) { Text("Cancel") }
+      OutlinedButton(onClick = { actions.dismissRemoveDownloadedSurvey() }) { Text("Cancel") }
     },
   )
 }
@@ -360,9 +374,12 @@ private fun RemoveDownloadedSurveyConfirmationDialog(state: PrototypeAppState) {
  * accepting the Terms of Service, confirming before signing the user out.
  */
 @Composable
-private fun DownloadSurveySignOutPromptDialog(state: PrototypeAppState) {
+private fun DownloadSurveySignOutPromptDialog(
+  uiState: OnboardingUiState,
+  actions: OnboardingActions,
+) {
   GroundAlertDialogOverlay(
-    onDismissRequest = { state.dismissDownloadSurveySignOutPrompt() },
+    onDismissRequest = { actions.dismissSignOutPrompt() },
     icon = {
       Icon(
         imageVector = Icons.AutoMirrored.Outlined.Logout,
@@ -380,14 +397,14 @@ private fun DownloadSurveySignOutPromptDialog(state: PrototypeAppState) {
     text = {
       Text(
         text =
-          "Going back will sign out ${state.signedInUserEmail} and return to the Sign In screen.",
+          "Going back will sign out ${uiState.profile.email} and return to the Sign In screen.",
         style = MaterialTheme.typography.bodySmall,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
       )
     },
     confirmButton = {
       Button(
-        onClick = { state.confirmDownloadSurveySignOut() },
+        onClick = { actions.confirmSignOut() },
         colors =
           ButtonDefaults.buttonColors(
             containerColor = MaterialTheme.colorScheme.error,
@@ -398,7 +415,7 @@ private fun DownloadSurveySignOutPromptDialog(state: PrototypeAppState) {
       }
     },
     dismissButton = {
-      OutlinedButton(onClick = { state.dismissDownloadSurveySignOutPrompt() }) { Text("Cancel") }
+      OutlinedButton(onClick = { actions.dismissSignOutPrompt() }) { Text("Cancel") }
     },
   )
 }
@@ -716,5 +733,12 @@ internal fun SurveyMapThumbnail(
 /** Backward-compatible alias for [DownloadSurveyScreen]. */
 @Composable
 fun GroundDownloadSurveyScreen(state: PrototypeAppState) {
-  DownloadSurveyScreen(state)
+  val uiState by state.onboarding.uiState.collectAsState()
+  DownloadSurveyScreen(
+    uiState = uiState,
+    actions = state.onboarding,
+    notice = state.activeSurveyNotice,
+    isDarkTheme = state.isDarkTheme,
+    debugTools = { PrototypeDebugToolsButton(state = state) },
+  )
 }

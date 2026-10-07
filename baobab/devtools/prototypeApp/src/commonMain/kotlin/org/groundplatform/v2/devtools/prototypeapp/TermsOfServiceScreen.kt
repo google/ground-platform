@@ -42,17 +42,26 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import org.groundplatform.v2.devtools.prototypeapp.ui.state.OnboardingUiState
+import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.OnboardingActions
 
 /** 2. Terms of Service screen. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TermsOfServiceScreen(state: PrototypeAppState) {
+fun TermsOfServiceScreen(
+  uiState: OnboardingUiState,
+  actions: OnboardingActions,
+  /** Prototype-only tools shown in the top bar (none in production). */
+  debugTools: @Composable () -> Unit = {},
+) {
   val onSurfaceColor = MaterialTheme.colorScheme.onSurface
 
   Scaffold(
@@ -66,18 +75,18 @@ fun TermsOfServiceScreen(state: PrototypeAppState) {
               fontWeight = FontWeight.Bold,
             )
             Text(
-              text = "Signed in as ${state.signedInUserEmail}",
+              text = "Signed in as ${uiState.profile.email}",
               style = MaterialTheme.typography.labelSmall,
               color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
           }
         },
         navigationIcon = {
-          IconButton(onClick = { state.declineTermsOfService() }) {
+          IconButton(onClick = { actions.declineTermsOfService() }) {
             Icon(imageVector = Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = "Back")
           }
         },
-        actions = { PrototypeDebugToolsButton(state = state) },
+        actions = { debugTools() },
         colors =
           TopAppBarDefaults.topAppBarColors(
             containerColor = MaterialTheme.colorScheme.surface,
@@ -98,15 +107,15 @@ fun TermsOfServiceScreen(state: PrototypeAppState) {
           horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
           OutlinedButton(
-            onClick = { state.declineTermsOfService() },
+            onClick = { actions.declineTermsOfService() },
             modifier = Modifier.weight(0.42f),
             shape = MaterialTheme.shapes.medium,
           ) {
             Text("Decline")
           }
           Button(
-            onClick = { state.acceptTermsOfService() },
-            enabled = state.termsCheckboxChecked,
+            onClick = { actions.acceptTermsOfService() },
+            enabled = uiState.termsCheckboxChecked,
             modifier = Modifier.weight(0.58f),
             shape = MaterialTheme.shapes.medium,
           ) {
@@ -184,13 +193,13 @@ fun TermsOfServiceScreen(state: PrototypeAppState) {
         modifier =
           Modifier.fillMaxWidth()
             .clip(MaterialTheme.shapes.medium)
-            .clickable { state.setTermsChecked(!state.termsCheckboxChecked) }
+            .clickable { actions.setTermsChecked(!uiState.termsCheckboxChecked) }
             .padding(vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
       ) {
         Checkbox(
-          checked = state.termsCheckboxChecked,
-          onCheckedChange = { state.setTermsChecked(it) },
+          checked = uiState.termsCheckboxChecked,
+          onCheckedChange = { actions.setTermsChecked(it) },
         )
         Spacer(modifier = Modifier.width(6.dp))
         Text(
@@ -224,5 +233,10 @@ private fun TermsSectionItem(number: String, title: String, body: String) {
 /** Backward-compatible alias for [TermsOfServiceScreen]. */
 @Composable
 fun GroundTermsOfServiceScreen(state: PrototypeAppState) {
-  TermsOfServiceScreen(state)
+  val uiState by state.onboarding.uiState.collectAsState()
+  TermsOfServiceScreen(
+    uiState = uiState,
+    actions = state.onboarding,
+    debugTools = { PrototypeDebugToolsButton(state = state) },
+  )
 }

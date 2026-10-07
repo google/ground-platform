@@ -37,6 +37,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -81,10 +83,28 @@ fun MobileScreenHost(state: PrototypeAppState) {
     DataCollectionFormScreen(state)
     return
   }
+  val onboarding = state.onboarding
+  val onboardingUiState by onboarding.uiState.collectAsState()
   when (state.currentScreen) {
-    AppScreen.SIGN_IN -> SignInScreen(state)
-    AppScreen.TERMS_OF_SERVICE -> TermsOfServiceScreen(state)
-    AppScreen.DOWNLOAD_SURVEY -> DownloadSurveyScreen(state)
+    AppScreen.SIGN_IN ->
+      SignInScreen(
+        onSignIn = onboarding::signInWithGoogle,
+        languageSelector = { SignInLanguageSelector(state = state) },
+      )
+    AppScreen.TERMS_OF_SERVICE ->
+      TermsOfServiceScreen(
+        uiState = onboardingUiState,
+        actions = onboarding,
+        debugTools = { PrototypeDebugToolsButton(state = state) },
+      )
+    AppScreen.DOWNLOAD_SURVEY ->
+      DownloadSurveyScreen(
+        uiState = onboardingUiState,
+        actions = onboarding,
+        notice = state.activeSurveyNotice,
+        isDarkTheme = state.isDarkTheme,
+        debugTools = { PrototypeDebugToolsButton(state = state) },
+      )
     AppScreen.MAIN_SURVEY -> MainSurveyScreen(state)
   }
 }
@@ -213,7 +233,11 @@ fun CloudAcaciaLogo(modifier: Modifier = Modifier) {
  * 1. Sign In screen (Sign in with Google + Language selector matching Ground SettingsSelectItem).
  */
 @Composable
-fun SignInScreen(state: PrototypeAppState) {
+fun SignInScreen(
+  onSignIn: () -> Unit,
+  /** Language selector shown above the sign-in button. */
+  languageSelector: @Composable () -> Unit = {},
+) {
   val surfaceColor = MaterialTheme.colorScheme.surface
   val onSurfaceColor = MaterialTheme.colorScheme.onSurface
   val brandFont = LocalGroundBrandFontFamily.current
@@ -299,10 +323,10 @@ fun SignInScreen(state: PrototypeAppState) {
       horizontalAlignment = Alignment.CenterHorizontally,
       verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-      SignInLanguageSelector(state = state)
+      languageSelector()
 
       OutlinedButton(
-        onClick = { state.signInWithGoogle() },
+        onClick = onSignIn,
         modifier = Modifier.fillMaxWidth().height(52.dp),
         shape = MaterialTheme.shapes.extraLarge,
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
@@ -964,5 +988,8 @@ fun GroundCloudAcaciaLogo(modifier: Modifier = Modifier) {
 /** Backward-compatible alias for [SignInScreen]. */
 @Composable
 fun GroundSignInScreen(state: PrototypeAppState) {
-  SignInScreen(state)
+  SignInScreen(
+    onSignIn = state.onboarding::signInWithGoogle,
+    languageSelector = { SignInLanguageSelector(state = state) },
+  )
 }

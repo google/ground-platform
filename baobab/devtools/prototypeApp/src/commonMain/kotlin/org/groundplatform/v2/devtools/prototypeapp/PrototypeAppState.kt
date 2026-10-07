@@ -40,7 +40,9 @@ import org.groundplatform.v2.devtools.prototypeapp.map.FormGeometryOverlay
 import org.groundplatform.v2.devtools.prototypeapp.pdf.GeneratedPdf
 import org.groundplatform.v2.devtools.prototypeapp.pdf.RecordPdfReports
 import org.groundplatform.v2.devtools.prototypeapp.surveyeditor.SurveyAccess
+import org.groundplatform.v2.devtools.prototypeapp.ui.state.OnboardingEvent
 import org.groundplatform.v2.devtools.prototypeapp.ui.state.PrototypeUiState
+import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.OnboardingViewModel
 import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.PrototypeAppViewModel
 import org.groundplatform.v2.map.CameraPosition
 import org.groundplatform.v2.map.LatLng
@@ -72,8 +74,58 @@ class PrototypeAppState(
    */
   private var data by mutableStateOf(viewModel.appData.value)
 
+  /**
+   * ViewModel of the onboarding flow (Sign In → Terms of Service → Download survey). Its screens
+   * observe [OnboardingViewModel.uiState] directly; this class mirrors it for the rest of the UI
+   * and applies its navigation [OnboardingEvent]s to the app shell.
+   */
+  val onboarding: OnboardingViewModel =
+    OnboardingViewModel(
+      authRepository = viewModel.authRepository,
+      surveyRepository = viewModel.surveyRepository,
+      organizationRepository = viewModel.organizationRepository,
+      scope = viewModel.scope,
+    )
+
+  private var onboardingState by mutableStateOf(onboarding.uiState.value)
+
   init {
     viewModel.scope.launch { viewModel.appData.collect { data = it } }
+    viewModel.scope.launch { onboarding.uiState.collect { onboardingState = it } }
+    viewModel.scope.launch { onboarding.events.collect(::onOnboardingEvent) }
+  }
+
+  /** Applies an onboarding outcome to the app shell (screen, drawer, notices). */
+  private fun onOnboardingEvent(event: OnboardingEvent) {
+    when (event) {
+      is OnboardingEvent.ShowScreen -> {
+        currentScreen = event.screen
+        if (event.screen == PrototypeScreen.SIGN_IN) {
+          isDrawerOpen = false
+          activeDrawerSubView = MainDrawerSubView.NONE
+          activeSurveyNotice = null
+        }
+      }
+      is OnboardingEvent.SurveyOpened -> {
+        activateSurvey(event.surveyId)
+        currentScreen = PrototypeScreen.MAIN_SURVEY
+        isDrawerOpen = false
+        activeDrawerSubView = MainDrawerSubView.NONE
+        activeSurveyNotice = event.notice
+      }
+      OnboardingEvent.ReturnToSurveyList -> {
+        isDrawerOpen = false
+        activeSurveyNotice = null
+        currentScreen = PrototypeScreen.MAIN_SURVEY
+        activeDrawerSubView = MainDrawerSubView.SWITCH_SURVEYS
+      }
+      OnboardingEvent.SignedOut -> {
+        isDrawerOpen = false
+        activeDrawerSubView = MainDrawerSubView.NONE
+        activeSurveyNotice = null
+      }
+      is OnboardingEvent.Notice -> activeSurveyNotice = event.message
+    }
   }
 
   /** Writes [surveys] to the local data store (inserting or replacing by ID). */
@@ -233,40 +285,30 @@ class PrototypeAppState(
   val effectiveDimensionsLabel: String
     get() = deviceFormFactor.dimensionsLabelForOrientation(deviceOrientation)
 
-  var isSignedIn by mutableStateOf(false)
-    private set
+  val isSignedIn: Boolean
+    get() = onboardingState.isSignedIn
 
-  var signedInUserName by mutableStateOf("Maya Lin")
-    private set
+  val signedInUserName: String
+    get() = onboardingState.profile.displayName
 
-  /**
-   * Two-letter initials derived from [signedInUserName] for user avatar badges (e.g. `"ML"` for
-   * `"Maya Lin"`).
-   */
+  /** Two-letter initials of the signed-in user for avatar badges (`"ML"` for `"Maya Lin"`). */
   val signedInUserInitials: String
-    get() {
-      val parts = signedInUserName.trim().split("\\s+".toRegex()).filter { it.isNotEmpty() }
-      return when {
-        parts.isEmpty() -> "U"
-        parts.size == 1 -> parts[0].take(2).uppercase()
-        else -> "${parts.first().first()}${parts.last().first()}".uppercase()
-      }
-    }
+    get() = onboardingState.profile.initials
 
-  var signedInUserEmail by mutableStateOf("maya.lin@groundplatform.org")
-    private set
+  val signedInUserEmail: String
+    get() = onboardingState.profile.email
 
   /** Tracks whether the Download surveys screen was reached after ToS or from the Survey list. */
-  var downloadSurveyEntryOrigin by mutableStateOf(DownloadSurveyEntryOrigin.AFTER_TOS)
-    private set
+  val downloadSurveyEntryOrigin: DownloadSurveyEntryOrigin
+    get() = onboardingState.entryOrigin
 
   /** True when the sign-out confirmation prompt is open on the Download surveys screen. */
-  var isDownloadSurveySignOutPromptOpen by mutableStateOf(false)
-    private set
+  val isDownloadSurveySignOutPromptOpen: Boolean
+    get() = onboardingState.isSignOutPromptOpen
 
   /** ID of a downloaded survey pending confirmation to remove from the device, or null. */
-  var pendingRemovalSurveyId by mutableStateOf<String?>(null)
-    private set
+  val pendingRemovalSurveyId: String?
+    get() = onboardingState.pendingRemovalSurveyId
 
   /** ID of an offline tile package pending confirmation to remove from the device, or null. */
   var pendingRemovalTilePackageId by mutableStateOf<String?>(null)
@@ -694,14 +736,14 @@ class PrototypeAppState(
     return "$base-$n"
   }
 
-  var termsCheckboxChecked by mutableStateOf(true)
-    private set
+  val termsCheckboxChecked: Boolean
+    get() = onboardingState.termsCheckboxChecked
 
-  var hasAcceptedTerms by mutableStateOf(false)
-    private set
+  val hasAcceptedTerms: Boolean
+    get() = onboardingState.hasAcceptedTerms
 
-  var searchQuery by mutableStateOf("")
-    private set
+  val searchQuery: String
+    get() = onboardingState.searchQuery
 
   /** Surveys stored on the device (from the local data store). */
   val surveys: List<SurveyPreviewItem>
@@ -1592,20 +1634,10 @@ class PrototypeAppState(
    * description, or location.
    */
   val filteredSurveys: List<SurveyPreviewItem>
-    get() {
-      val trimmed = searchQuery.trim()
-      if (trimmed.isEmpty()) return surveys
-      return surveys.filter { survey ->
-        survey.title.contains(trimmed, ignoreCase = true) ||
-          survey.description.contains(trimmed, ignoreCase = true) ||
-          survey.location.contains(trimmed, ignoreCase = true) ||
-          survey.coordinatesLabel.contains(trimmed, ignoreCase = true) ||
-          organization(survey.organizationId)?.name?.contains(trimmed, ignoreCase = true) == true
-      }
-    }
+    get() = onboardingState.filteredSurveys
 
   val downloadedSurveyCount: Int
-    get() = surveys.count { it.isDownloaded }
+    get() = onboardingState.downloadedSurveyCount
 
   /**
    * Layers backed by `LayerDef.entity_dataset_id` (rendered with solid outlines) when the survey
@@ -2002,7 +2034,7 @@ class PrototypeAppState(
   /** Directly switches the active mobile screen (used by both flow buttons and UX workbench). */
   fun navigateTo(screen: PrototypeScreen) {
     if (screen == PrototypeScreen.DOWNLOAD_SURVEY) {
-      downloadSurveyEntryOrigin =
+      onboarding.setEntryOrigin(
         if (
           currentScreen == PrototypeScreen.MAIN_SURVEY &&
             activeDrawerSubView == MainDrawerSubView.SWITCH_SURVEYS
@@ -2011,8 +2043,10 @@ class PrototypeAppState(
         } else {
           DownloadSurveyEntryOrigin.AFTER_TOS
         }
+      )
+    } else {
+      onboarding.dismissSignOutPrompt()
     }
-    isDownloadSurveySignOutPromptOpen = false
     currentScreen = screen
     activeSurveyNotice = null
     isDrawerOpen = false
@@ -2020,109 +2054,40 @@ class PrototypeAppState(
   }
 
   /** Authenticates with Google and advances to the Terms of Service screen. */
-  fun signInWithGoogle() {
-    isSignedIn = true
-    isDownloadSurveySignOutPromptOpen = false
-    currentScreen =
-      if (hasAcceptedTerms) {
-        downloadSurveyEntryOrigin = DownloadSurveyEntryOrigin.AFTER_TOS
-        PrototypeScreen.DOWNLOAD_SURVEY
-      } else {
-        PrototypeScreen.TERMS_OF_SERVICE
-      }
-  }
+  fun signInWithGoogle() = onboarding.signInWithGoogle()
 
   /** Updates the Terms of Service agreement checkbox state. */
-  fun setTermsChecked(checked: Boolean) {
-    termsCheckboxChecked = checked
-  }
+  fun setTermsChecked(checked: Boolean) = onboarding.setTermsChecked(checked)
 
   /** Accepts the Terms of Service and advances to the Download Survey screen. */
-  fun acceptTermsOfService() {
-    termsCheckboxChecked = true
-    hasAcceptedTerms = true
-    downloadSurveyEntryOrigin = DownloadSurveyEntryOrigin.AFTER_TOS
-    isDownloadSurveySignOutPromptOpen = false
-    currentScreen = PrototypeScreen.DOWNLOAD_SURVEY
-  }
+  fun acceptTermsOfService() = onboarding.acceptTermsOfService()
 
   /** Declines the Terms of Service and returns to the Sign In page. */
-  fun declineTermsOfService() {
-    isSignedIn = false
-    hasAcceptedTerms = false
-    isDownloadSurveySignOutPromptOpen = false
-    currentScreen = PrototypeScreen.SIGN_IN
-  }
+  fun declineTermsOfService() = onboarding.declineTermsOfService()
 
   /**
-   * Handles the Back escape hatch on the Download surveys screen:
-   * - When accessed from the Survey list (`SURVEY_LIST`), returns the user to the Survey list.
-   * - When shown after Terms of Service (`AFTER_TOS`), opens a confirmation prompt before signing
-   *   the user out.
+   * Handles the Back escape hatch on the Download surveys screen: returns to the Survey list when
+   * opened from there, otherwise asks for confirmation before signing out.
    */
-  fun navigateBackFromDownloadSurvey() {
-    if (downloadSurveyEntryOrigin == DownloadSurveyEntryOrigin.SURVEY_LIST) {
-      isDownloadSurveySignOutPromptOpen = false
-      isDrawerOpen = false
-      activeSurveyNotice = null
-      currentScreen = PrototypeScreen.MAIN_SURVEY
-      activeDrawerSubView = MainDrawerSubView.SWITCH_SURVEYS
-    } else {
-      isDownloadSurveySignOutPromptOpen = true
-    }
-  }
+  fun navigateBackFromDownloadSurvey() = onboarding.navigateBackFromDownloadSurvey()
 
   /** Confirms signing out from the Download surveys screen back-action confirmation prompt. */
-  fun confirmDownloadSurveySignOut() {
-    isDownloadSurveySignOutPromptOpen = false
-    isDrawerOpen = false
-    activeDrawerSubView = MainDrawerSubView.NONE
-    activeSurveyNotice = null
-    isSignedIn = false
-    hasAcceptedTerms = false
-    currentScreen = PrototypeScreen.SIGN_IN
-  }
+  fun confirmDownloadSurveySignOut() = onboarding.confirmSignOut()
 
   /** Cancels/dismisses the sign-out confirmation prompt on the Download surveys screen. */
-  fun dismissDownloadSurveySignOutPrompt() {
-    isDownloadSurveySignOutPromptOpen = false
-  }
+  fun dismissDownloadSurveySignOutPrompt() = onboarding.dismissSignOutPrompt()
 
   /** Updates the search bar query used to filter surveys by name or location. */
-  fun updateSearchQuery(query: String) {
-    searchQuery = query
-  }
+  fun updateSearchQuery(query: String) = onboarding.updateSearchQuery(query)
 
   /** Clears the search bar query to show all shared surveys. */
-  fun clearSearchQuery() {
-    searchQuery = ""
-  }
+  fun clearSearchQuery() = onboarding.clearSearchQuery()
 
   /** Marks the specified survey as downloaded onto the device for offline field use. */
-  fun downloadSurvey(surveyId: String) {
-    storeSurveys(
-      surveys.map { item ->
-        if (item.id == surveyId) {
-          activeSurveyNotice =
-            "Downloaded \"${item.title}\" (${item.offlineSizeLabel}) for offline use."
-          item.copy(isDownloaded = true)
-        } else {
-          item
-        }
-      }
-    )
-  }
+  fun downloadSurvey(surveyId: String) = onboarding.downloadSurvey(surveyId)
 
   /** Opens a survey in the Main Survey UI (downloading it first if not already downloaded). */
-  fun openSurvey(surveyId: String) {
-    downloadSurvey(surveyId)
-    activateSurvey(surveyId)
-    currentScreen = PrototypeScreen.MAIN_SURVEY
-    isDrawerOpen = false
-    activeDrawerSubView = MainDrawerSubView.NONE
-    activeSurveyNotice =
-      "Loaded survey \"${activeSurvey.title}\" (${entities.size} entities, ${allSubmissions.size} preloaded submissions)."
-  }
+  fun openSurvey(surveyId: String) = onboarding.openSurvey(surveyId)
 
   /**
    * Opens a survey in the web app (dashboard and Survey editor). Unlike [openSurvey], this doesn't
@@ -2257,41 +2222,15 @@ class PrototypeAppState(
     )
   }
 
-  /**
-   * Prompts the user before removing a downloaded survey from the device. If the survey is not
-   * downloaded, downloads it immediately.
-   */
-  fun promptRemoveDownloadedSurvey(surveyId: String) {
-    val survey = surveys.firstOrNull { it.id == surveyId }
-    if (survey != null && survey.isDownloaded) {
-      pendingRemovalSurveyId = surveyId
-    } else {
-      downloadSurvey(surveyId)
-    }
-  }
+  /** Asks before removing [surveyId]'s offline copy; downloads it instead if not downloaded. */
+  fun promptRemoveDownloadedSurvey(surveyId: String) =
+    onboarding.promptRemoveDownloadedSurvey(surveyId)
 
   /** Confirms removal of the pending downloaded survey from the device and dismisses the dialog. */
-  fun confirmRemoveDownloadedSurvey() {
-    val surveyId = pendingRemovalSurveyId
-    pendingRemovalSurveyId = null
-    if (surveyId != null) {
-      storeSurveys(
-        surveys.map { item ->
-          if (item.id == surveyId) {
-            activeSurveyNotice = "Removed offline copy of \"${item.title}\"."
-            item.copy(isDownloaded = false)
-          } else {
-            item
-          }
-        }
-      )
-    }
-  }
+  fun confirmRemoveDownloadedSurvey() = onboarding.confirmRemoveDownloadedSurvey()
 
-  /** Dismisses/cancels the pending downloaded survey removal dialog. */
-  fun dismissRemoveDownloadedSurvey() {
-    pendingRemovalSurveyId = null
-  }
+  /** Dismisses the remove-downloaded-survey confirmation dialog without changes. */
+  fun dismissRemoveDownloadedSurvey() = onboarding.dismissRemoveDownloadedSurvey()
 
   // --- Main Survey UI Actions ---
 
@@ -3485,8 +3424,7 @@ class PrototypeAppState(
   fun openDownloadMoreSurveysScreen() {
     isDrawerOpen = false
     activeDrawerSubView = MainDrawerSubView.NONE
-    downloadSurveyEntryOrigin = DownloadSurveyEntryOrigin.SURVEY_LIST
-    isDownloadSurveySignOutPromptOpen = false
+    onboarding.setEntryOrigin(DownloadSurveyEntryOrigin.SURVEY_LIST)
     currentScreen = PrototypeScreen.DOWNLOAD_SURVEY
   }
 
@@ -3527,7 +3465,7 @@ class PrototypeAppState(
   fun drawerSignOut() {
     isDrawerOpen = false
     activeDrawerSubView = MainDrawerSubView.NONE
-    isSignedIn = false
+    onboarding.signOut()
     currentScreen = PrototypeScreen.SIGN_IN
   }
 
@@ -4083,12 +4021,7 @@ class PrototypeAppState(
   /** Resets the onboarding and prototype state back to the initial Sign In screen. */
   fun resetPrototypeFlow() {
     currentScreen = PrototypeScreen.SIGN_IN
-    isSignedIn = false
-    hasAcceptedTerms = false
-    downloadSurveyEntryOrigin = DownloadSurveyEntryOrigin.AFTER_TOS
-    isDownloadSurveySignOutPromptOpen = false
-    termsCheckboxChecked = true
-    searchQuery = ""
+    onboarding.reset()
     activeSurveyNotice = null
     mainViewMode = MainSurveyViewMode.MAP
     isDrawerOpen = false

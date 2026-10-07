@@ -30,6 +30,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.groundplatform.v2.devtools.prototypeapp.data.datasource.local.store.InMemoryLocalStore
 import org.groundplatform.v2.devtools.prototypeapp.data.datasource.local.store.LocalStore
+import org.groundplatform.v2.devtools.prototypeapp.data.repository.AuthRepositoryImpl
 import org.groundplatform.v2.devtools.prototypeapp.data.repository.LocalStoreTransactionRunner
 import org.groundplatform.v2.devtools.prototypeapp.data.repository.LocationRepositoryImpl
 import org.groundplatform.v2.devtools.prototypeapp.data.repository.MutationRepositoryImpl
@@ -49,6 +50,7 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyPlaceItem
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyPreviewItem
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyStats
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.UserSettings
+import org.groundplatform.v2.devtools.prototypeapp.domain.repository.AuthRepository
 import org.groundplatform.v2.devtools.prototypeapp.domain.repository.LocationRepository
 import org.groundplatform.v2.devtools.prototypeapp.domain.repository.MediaCacheInfo
 import org.groundplatform.v2.devtools.prototypeapp.domain.repository.MutationRepository
@@ -115,6 +117,7 @@ class SurveyAppViewModel(
   val placeRepository: PlaceRepository = PlaceRepositoryImpl(localStore),
   val organizationRepository: OrganizationRepository = OrganizationRepositoryImpl(localStore),
   val locationRepository: LocationRepository = LocationRepositoryImpl(),
+  val authRepository: AuthRepository = AuthRepositoryImpl(),
   val sampleDataRepository: SampleDataRepository = SampleDataRepositoryImpl(localStore),
   val surveyEditorRepository: SurveyEditorRepository = SurveyEditorRepositoryImpl(localStore),
   val transactionRunner: TransactionRunner = LocalStoreTransactionRunner(localStore),

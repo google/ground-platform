@@ -443,6 +443,15 @@ fresh on every page load; on mobile it will become the persistent offline store.
     outside the domain and shared core, `data/` never imports presentation
     packages, and only `data/` and `ui/viewmodel/` may import `data/` or
     `client/` packages.
+-   **Feature view models**: Screens are being moved from the shared
+    `PrototypeAppState` to per-feature view models in `ui/viewmodel/`, each
+    exposing a `StateFlow` of an immutable UI state (`ui/state/`) plus an
+    actions interface the screen calls. Screens take `(uiState, actions)` and
+    hold no state of their own. `OnboardingViewModel` (Sign In → Terms of
+    Service → Download survey) is the first; it reads the account from
+    `AuthRepository` (over `PrototypeAuthClient`) and the survey directory from
+    `SurveyRepository` and `OrganizationRepository`, and publishes navigation
+    and notices as `OnboardingEvent`s that the app shell applies.
 -   **Survey switching**: Every survey's data is in the store, so switching
     surveys keeps edits. Use **Reset** to go back to the sample data.
 -   **Survey editor**: The editor loads the active survey's draft
