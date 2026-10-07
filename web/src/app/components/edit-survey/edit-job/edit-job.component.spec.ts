@@ -34,7 +34,7 @@ import { TaskEditorModule } from 'app/components/shared/task-editor/task-editor.
 import { Job } from 'app/models/job.model';
 import { LocationOfInterest } from 'app/models/loi.model';
 import { Role } from 'app/models/role.model';
-import { DataSharingType, Survey } from 'app/models/survey.model';
+import { DataSharingType, Survey, SurveyState } from 'app/models/survey.model';
 import { AuthService } from 'app/services/auth/auth.service';
 import { DataStoreService } from 'app/services/data-store/data-store.service';
 import { DialogService } from 'app/services/dialog/dialog.service';
@@ -72,10 +72,12 @@ describe('EditJobComponent', () => {
     '',
     { type: DataSharingType.PRIVATE }
   );
+  let currentSurvey = survey;
   const jobId = 'job-123';
   const user$ = new Subject<User | null>();
 
   beforeEach(async () => {
+    currentSurvey = survey;
     await TestBed.configureTestingModule({
       declarations: [EditJobComponent, MockLoiEditorComponent],
       imports: [
@@ -98,8 +100,8 @@ describe('EditJobComponent', () => {
         {
           provide: DraftSurveyService,
           useValue: {
-            getSurvey$: () => of(survey),
-            getSurvey: () => survey,
+            getSurvey$: () => of(currentSurvey),
+            getSurvey: () => currentSurvey,
           },
         },
         {
@@ -133,5 +135,20 @@ describe('EditJobComponent', () => {
     sitesButton.click();
     fixture.detectChanges();
     expect(fixture.componentInstance.loiEditor).toBeDefined();
+  });
+
+  function createWithState(state: SurveyState): EditJobComponent {
+    currentSurvey = survey.copyWith({ state });
+    fixture = TestBed.createComponent(EditJobComponent);
+    fixture.detectChanges();
+    return fixture.componentInstance;
+  }
+
+  it('locks task types once the survey is published', () => {
+    expect(createWithState(SurveyState.READY).typeLocked).toBeTrue();
+  });
+
+  it('lets task types change while the survey is a draft', () => {
+    expect(createWithState(SurveyState.DRAFT).typeLocked).toBeFalse();
   });
 });

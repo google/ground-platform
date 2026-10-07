@@ -41,6 +41,7 @@
       [formGroup]="formGroup"
       [formGroupIndex]="i"
       [isCreationMode]="isCreationMode()"
+      [typeLocked]="typeLocked()"
       [expanded]="expandedIndex() === i"
       (expand)="expandedIndex.set(i)"
       (delete)="onTaskDelete(i)"

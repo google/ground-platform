@@ -103,6 +103,7 @@ export class TaskEditorComponent {
 
   tasks = input<List<Task>>();
   isCreationMode = input<boolean>(false);
+  typeLocked = input<boolean>(false);
 
   @Output() onValidationChanges: EventEmitter<boolean> =
     new EventEmitter<boolean>();

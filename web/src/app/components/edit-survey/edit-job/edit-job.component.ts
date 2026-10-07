@@ -23,6 +23,7 @@ import { LoiEditorComponent } from 'app/components/shared/loi-editor/loi-editor.
 import { TaskEditorComponent } from 'app/components/shared/task-editor/task-editor.component';
 import { DataCollectionStrategy, Job } from 'app/models/job.model';
 import { LocationOfInterest } from 'app/models/loi.model';
+import { SurveyState } from 'app/models/survey.model';
 import { Task } from 'app/models/task/task.model';
 import { DraftSurveyService } from 'app/services/draft-survey/draft-survey.service';
 import { LocationOfInterestService } from 'app/services/loi/loi.service';
@@ -53,6 +54,7 @@ export class EditJobComponent {
   job?: Job;
   tasks?: List<Task>;
   addLoiTaskId?: string;
+  typeLocked = false;
   lois!: List<LocationOfInterest>;
 
   EditJobSection = EditJobSection;
@@ -98,6 +100,9 @@ export class EditJobComponent {
     this.job = this.draftSurveyService.getSurvey().getJob(this.jobId!);
 
     this.addLoiTaskId = this.job?.tasks?.find(task => !!task.addLoiTask)?.id;
+
+    this.typeLocked =
+      this.draftSurveyService.getSurvey().state === SurveyState.READY;
 
     if (!this.job) return;
 
