@@ -11,13 +11,10 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.groundplatform.v2.devtools.prototypeapp.surveyeditor
+package org.groundplatform.v2.devtools.prototypeapp.domain.model.editor
 
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.InvitationStatus
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.Organization
-import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.CollaboratorRole
-import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SharingPolicy
-import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SharingSettings
 
 /**
  * Resolves what a person may do in a survey from its sharing settings and the organization it

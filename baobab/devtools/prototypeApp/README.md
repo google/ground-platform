@@ -274,7 +274,7 @@ The left-hand navigation lists:
     -   For organization surveys, a read-only **Organization managers** card
         lists the people who inherit Survey organizer access from the
         organization.
-    -   Who may open the editor is resolved by `surveyeditor/SurveyAccess.kt`
+    -   Who may open the editor is resolved by `domain/model/editor/SurveyAccess.kt`
         (owner → accepted access list → organization Manager → organization
         member under the organization policy → anyone under link/public). The
         dashboard only shows **Manage survey** to people who can manage the
@@ -324,12 +324,35 @@ rows are refreshed from the current map features so field edits show up too.
 The editor's models are pure Kotlin in `domain/model/editor/`
 (`SurveyEditorDraft.kt`, `SurveyEditorModels.kt`, `SampleDesignModels.kt`,
 `SurveyAreaGeometry.kt`, `FormPublishing.kt`, `FormImport.kt`,
-`SurveyEditorDerivation.kt`, `SurveyEditorProjection.kt`), so repositories and
-the local data store depend only on the domain. The Compose state holders and screens live
-in `surveyeditor/` (`SurveyEditorState.kt`, `SurveyEditorPage.kt`,
-`EntityDatasetEditor.kt`, `InteractiveLayerMap.kt`, `LayerEditorGeometry.kt`).
-Drag-to-reorder for the navigation and the flow canvas shares
-`formeditor/DragReorder.kt`.
+`SurveyEditorDerivation.kt`, `SurveyEditorProjection.kt`, `SurveyAccess.kt`,
+`SampleGeneration.kt`, `MapLayerImporter.kt`, `FormDatasetLinks.kt`), so
+repositories and the local data store depend only on the domain. The page is
+driven by `SurveyEditorViewModel` (`ui/viewmodel/`), which exposes a `StateFlow`
+of `SurveyEditorUiState` (`ui/state/`) and implements `SurveyEditorActions`;
+the Compose screens in `surveyeditor/` (`SurveyEditorPage.kt`,
+`EntityDatasetEditor.kt`, `SamplingDesignPanel.kt`, `SurveyAreaEditor.kt`,
+`InteractiveLayerMap.kt`, `LayerEditorGeometry.kt`) take `(uiState, actions)`
+and hold only transient UI state such as dialogs and the selected table row.
+`SurveyEditorPage(state: PrototypeAppState, …)` is the thin shell that collects
+the view model and renders the shared `WebAppHeader`. Drag-to-reorder for the
+navigation and the flow canvas shares `formeditor/DragReorder.kt`.
+
+The view model observes the active survey's draft through
+`SurveyEditorRepository` and shows it live until the first edit, after which the
+session holds the working copy (`isDirty`), so edits made elsewhere do not
+overwrite in-progress work. **Publish changes** saves the working copy with
+`saveDraft(surveyId, draft, previous = opened)` and emits
+`SurveyEditorEvent.Published`; **Discard** / close throws it away and emits
+`SurveyEditorEvent.Closed`; the app shell returns to the dashboard on both.
+Switching the active survey resets the session. Sample plot generation runs in
+the view model's scope through `GenerateSamplePlotsUseCase` (progress and
+per-layer errors are part of the UI state; map features with Submissions block
+regenerating, counted from `SurveyRepository`), invites go through
+`InviteCollaboratorUseCase`, and place search for the survey area uses
+`PlaceRepository` directly. The map inside the Map layer editor and the survey
+area **Draw** tab only need `MapFeatureEditor` (add a feature, replace its
+vertices), which `SurveyEditorActions` extends and the Draw tab backs with a
+scratch `DrawnPartsEditor`.
 
 The layer editor map and the survey area thumbnail are `GroundMap`s from
 `shared/map`, like the survey map. Features are drawn as map style layers;
@@ -343,9 +366,19 @@ containment and lines and points by a 12 dp tolerance. Without a Mapbox renderer
 ### Form Editor
 
 Selecting a Form opens the visual Form editor in `formeditor/`
-(`FormEditorState.kt`, `FormEditorPage.kt`); its models, validation rules, and
-XForms generator are pure Kotlin in `domain/model/editor/`
-(`FormEditorModels.kt`, `FormValidationRules.kt`, `FormIds.kt`):
+(`FormEditorPage.kt`, `FormSaveToEditor.kt`, `FormWebPreview.kt`); its models,
+validation rules, and XForms generator are pure Kotlin in `domain/model/editor/`
+(`FormEditorModels.kt`, `FormValidationRules.kt`, `FormIds.kt`). The screens
+take `(uiState: FormEditorUiState, actions: FormEditorActions)`, provided by a
+`FormEditorViewModel` per Form that `SurveyEditorViewModel.formEditor(key)`
+creates over the survey draft (and caches until the survey changes). Edits to a
+Form's questions are written back into the draft, and the view model keeps the
+Form's linked Map layer or Data table in step with its questions
+(`FormDatasetLinks`); selection, preview target, the running preview
+(`FormWizardController`, the one non-domain value in the UI state), and the
+XML viewer / Advanced-section toggles are editor session state.
+`FormEditorViewModel.standalone(form, datasets)` builds one over a plain Form
+for tests:
 
 -   **Flow canvas**: Shows a mini preview of every question screen, from
     `Start` to `Review & submit`. Arrows show each possible transition. Solid
@@ -503,7 +536,17 @@ fresh on every page load; on mobile it will become the persistent offline store.
     straight to the repository. Page switches and turning a removed imagery
     source off on the map are `OrganizationEvent`s the shell applies; the
     resizable left panel's width stays with `DashboardViewModel`, shared with
-    the dashboard and Survey editor.
+    the dashboard. `SurveyEditorViewModel` (the Survey editor: the working
+    draft, section navigation and panel width, publishing and discarding,
+    sharing, Map layer / Data table editing, sample plot generation) observes
+    the active survey's draft through `SurveyEditorRepository`, Submission
+    counts through `SurveyRepository`, organizations through
+    `OrganizationRepository`, and the signed-in user through `AuthRepository`;
+    it generates sample plots with `GenerateSamplePlotsUseCase` and handles
+    invites with `InviteCollaboratorUseCase`, and hands each Form to a
+    `FormEditorViewModel` (`FormEditorUiState` / `FormEditorActions`). Leaving
+    the editor after publishing or discarding is a `SurveyEditorEvent` the
+    shell applies.
 -   **Survey switching**: Every survey's data is in the store, so switching
     surveys keeps edits. Use **Reset** to go back to the sample data.
 -   **Survey editor**: `SurveyEditorRepositoryImpl` serves the stored draft

@@ -186,6 +186,8 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.isoDateTo
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.utcMillisToIsoDate
 import org.groundplatform.v2.devtools.prototypeapp.isPlatformMediaPickerAvailable
 import org.groundplatform.v2.devtools.prototypeapp.openPlatformMediaPicker
+import org.groundplatform.v2.devtools.prototypeapp.ui.state.FormEditorUiState
+import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.FormEditorActions
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.decodeToImageBitmap
 
@@ -206,7 +208,8 @@ private fun arcRise(span: Int): Dp = 36.dp + 24.dp * (span - 2).coerceIn(0, 6)
  */
 @Composable
 fun FormEditorPage(
-  state: FormEditorState,
+  uiState: FormEditorUiState,
+  actions: FormEditorActions,
   isDarkTheme: Boolean,
   modifier: Modifier = Modifier,
   onCreateDataset: (() -> Unit)? = null,
@@ -217,39 +220,44 @@ fun FormEditorPage(
   Box(modifier = modifier.fillMaxSize()) {
     Column(modifier = Modifier.fillMaxSize()) {
       FormEditorToolbar(
-        state,
-        onCreateDataset.takeIf { state.form.saveTo.mode == SaveToMode.CREATE },
+        uiState,
+        actions,
+        onCreateDataset.takeIf { uiState.form.saveTo.mode == SaveToMode.CREATE },
         onDelete,
       )
       Row(
         modifier = Modifier.fillMaxSize().padding(16.dp),
         horizontalArrangement = Arrangement.spacedBy(16.dp),
       ) {
-        when (state.previewTarget) {
-          FormPreviewTarget.MOBILE -> FlowCanvasPanel(state, Modifier.weight(1f).fillMaxHeight())
-          FormPreviewTarget.WEB -> WebLayoutCanvasPanel(state, Modifier.weight(1f).fillMaxHeight())
+        when (uiState.previewTarget) {
+          FormPreviewTarget.MOBILE ->
+            FlowCanvasPanel(uiState, actions, Modifier.weight(1f).fillMaxHeight())
+          FormPreviewTarget.WEB ->
+            WebLayoutCanvasPanel(uiState, actions, Modifier.weight(1f).fillMaxHeight())
         }
         QuestionPropertiesPanel(
-          state = state,
-          onSaveToModeChange = onSaveToModeChange ?: state::setSaveToMode,
+          uiState = uiState,
+          actions = actions,
+          onSaveToModeChange = onSaveToModeChange ?: actions::setSaveToMode,
           onOpenDataset = onOpenDataset,
           modifier = Modifier.width(380.dp).fillMaxHeight(),
         )
       }
     }
 
-    if (state.previewController != null || state.previewError != null) {
-      FormPreviewOverlay(state, isDarkTheme)
+    if (uiState.previewController != null || uiState.previewError != null) {
+      FormPreviewOverlay(uiState, actions, isDarkTheme)
     }
-    if (state.isXmlViewerOpen) {
-      XFormsXmlOverlay(state)
+    if (uiState.isXmlViewerOpen) {
+      XFormsXmlOverlay(uiState, actions)
     }
   }
 }
 
 @Composable
 private fun FormEditorToolbar(
-  state: FormEditorState,
+  uiState: FormEditorUiState,
+  actions: FormEditorActions,
   onCreateDataset: (() -> Unit)?,
   onDelete: (() -> Unit)?,
 ) {
@@ -269,7 +277,7 @@ private fun FormEditorToolbar(
     ) {
       Column(modifier = Modifier.widthIn(max = 320.dp)) {
         Text(
-          text = state.form.title.ifBlank { "Untitled form" },
+          text = uiState.form.title.ifBlank { "Untitled form" },
           style = MaterialTheme.typography.titleMedium,
           fontWeight = FontWeight.Bold,
           maxLines = 1,
@@ -281,21 +289,21 @@ private fun FormEditorToolbar(
           color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
       }
-      FilledTonalButton(onClick = state::selectFormSettings) {
+      FilledTonalButton(onClick = actions::selectFormSettings) {
         Icon(Icons.Outlined.Settings, contentDescription = null, modifier = Modifier.size(18.dp))
         Spacer(Modifier.width(6.dp))
         Text("Form settings")
       }
-      PreviewTargetToggle(state)
+      PreviewTargetToggle(uiState, actions)
       Spacer(Modifier.weight(1f))
       if (onCreateDataset != null) {
         OutlinedButton(onClick = onCreateDataset) {
           Icon(Icons.Outlined.Layers, contentDescription = null, modifier = Modifier.size(18.dp))
           Spacer(Modifier.width(6.dp))
-          Text(if (state.form.hasGeometry) "Create map layer" else "Create data table")
+          Text(if (uiState.form.hasGeometry) "Create map layer" else "Create data table")
         }
       }
-      Button(onClick = state::startPreview) {
+      Button(onClick = actions::startPreview) {
         Icon(Icons.Outlined.PlayArrow, contentDescription = null, modifier = Modifier.size(18.dp))
         Spacer(Modifier.width(6.dp))
         Text("Preview")
@@ -316,7 +324,7 @@ private fun FormEditorToolbar(
             },
             onClick = {
               overflowExpanded = false
-              state.isXmlViewerOpen = true
+              actions.setXmlViewerOpen(true)
             },
           )
         }
@@ -419,10 +427,14 @@ private class FlowLayout(questionCount: Int, edges: List<FlowEdge>) {
 }
 
 @Composable
-private fun FlowCanvasPanel(state: FormEditorState, modifier: Modifier = Modifier) {
-  val form = state.form
-  val edges = state.flowEdges
-  val issues = state.issues
+private fun FlowCanvasPanel(
+  uiState: FormEditorUiState,
+  actions: FormEditorActions,
+  modifier: Modifier = Modifier,
+) {
+  val form = uiState.form
+  val edges = uiState.flowEdges
+  val issues = uiState.issues
   val horizontalScroll = rememberScrollState()
   ElevatedCard(
     modifier = modifier,
@@ -446,7 +458,7 @@ private fun FlowCanvasPanel(state: FormEditorState, modifier: Modifier = Modifie
           verticalAlignment = Alignment.CenterVertically,
         ) {
           Text(
-            text = "${form.questions.size} screens • ${state.pathCount} potential paths",
+            text = "${form.questions.size} screens • ${uiState.pathCount} potential paths",
             style = MaterialTheme.typography.titleSmall,
             fontWeight = FontWeight.Bold,
             softWrap = false,
@@ -455,7 +467,7 @@ private fun FlowCanvasPanel(state: FormEditorState, modifier: Modifier = Modifie
             AssistChip(
               onClick = {
                 val firstKey = issues.first().questionKey
-                if (firstKey != null) state.select(firstKey) else state.selectForm()
+                if (firstKey != null) actions.select(firstKey) else actions.selectForm()
               },
               label = {
                 Text(
@@ -484,9 +496,9 @@ private fun FlowCanvasPanel(state: FormEditorState, modifier: Modifier = Modifie
         FlowLegend()
       }
       HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-      PlatformDisabledBanner(state)
-      UnavailablePreviewArea(state, Modifier.weight(1f).fillMaxWidth()) {
-        FlowCanvas(state, edges, horizontalScroll, Modifier.fillMaxSize())
+      PlatformDisabledBanner(uiState, actions)
+      UnavailablePreviewArea(uiState, actions, Modifier.weight(1f).fillMaxWidth()) {
+        FlowCanvas(uiState, actions, edges, horizontalScroll, Modifier.fillMaxSize())
       }
       FlowHorizontalScrollBar(
         scrollState = horizontalScroll,
@@ -585,16 +597,17 @@ private fun LegendItem(text: String, color: Color, dashed: Boolean) {
 
 @Composable
 private fun FlowCanvas(
-  state: FormEditorState,
+  uiState: FormEditorUiState,
+  actions: FormEditorActions,
   edges: List<FlowEdge>,
   horizontalScroll: androidx.compose.foundation.ScrollState,
   modifier: Modifier,
 ) {
-  val form = state.form
+  val form = uiState.form
   val layout = remember(form.questions.size, edges) { FlowLayout(form.questions.size, edges) }
   val density = LocalDensity.current
   val selectedSlot =
-    if (state.selectedIndex >= 0) FormFlowGraph.questionSlot(state.selectedIndex) else -1
+    if (uiState.selectedIndex >= 0) FormFlowGraph.questionSlot(uiState.selectedIndex) else -1
 
   // Keep the selected screen in view (e.g. after adding or reordering). This jumps rather than
   // animating: while an animated scroll is in progress the scroll container consumes the next
@@ -650,7 +663,7 @@ private fun FlowCanvas(
           .clickable(
             indication = null,
             interactionSource = remember { MutableInteractionSource() },
-            onClick = state::selectForm,
+            onClick = actions::selectForm,
           )
     ) {
       Canvas(modifier = Modifier.fillMaxSize().graphicsLayer { alpha = edgeAlpha }) {
@@ -672,8 +685,8 @@ private fun FlowCanvas(
       TerminalNode(
         text = "Start",
         modifier = Modifier.offset(layout.x(0), layout.top(0)),
-        isSelected = state.isFormSelected,
-        onClick = state::selectForm,
+        isSelected = uiState.isFormSelected,
+        onClick = actions::selectForm,
       )
 
       // Hoverable "+" between Start and Q1 (or Q0)
@@ -681,7 +694,7 @@ private fun FlowCanvas(
         centerX = layout.x(0) + layout.width(0) + SlotGap / 2,
         centerY = layout.midY,
         atIndex = 0,
-        onAdd = state::addQuestion,
+        onAdd = actions::addQuestion,
         alwaysVisible = false,
       )
 
@@ -699,10 +712,10 @@ private fun FlowCanvas(
             index = index,
             question = question,
             form = form,
-            isSelected = question.key == state.selectedKey,
-            hasIssues = state.issuesFor(question.key).isNotEmpty(),
+            isSelected = question.key == uiState.selectedKey,
+            hasIssues = uiState.issuesFor(question.key).isNotEmpty(),
             isDragged = isDragged,
-            onClick = { state.select(question.key) },
+            onClick = { actions.select(question.key) },
             modifier =
               Modifier.offset(layout.x(slot), layout.top(slot))
                 .zIndex(if (isDragged) 1f else 0f)
@@ -721,8 +734,8 @@ private fun FlowCanvas(
                   pitchPx = pitchPx,
                   axis = DragAxis.HORIZONTAL,
                   onMove = { key, to ->
-                    state.moveQuestionTo(key, to)
-                    state.select(key)
+                    actions.moveQuestionTo(key, to)
+                    actions.select(key)
                   },
                   autoScroll = {
                     val left = slotLeftPx + drag.offset - horizontalScroll.value
@@ -745,19 +758,19 @@ private fun FlowCanvas(
             centerX = layout.x(slot) + layout.width(slot) + SlotGap / 2,
             centerY = layout.midY,
             atIndex = index + 1,
-            onAdd = state::addQuestion,
+            onAdd = actions::addQuestion,
             alwaysVisible = isLastQuestion,
           )
         }
       }
       TerminalNode(
         text = "Review & submit",
-        isSelected = state.isFormSelected,
-        onClick = state::selectForm,
+        isSelected = uiState.isFormSelected,
+        onClick = actions::selectForm,
         modifier = Modifier.offset(layout.x(layout.endSlot), layout.top(layout.endSlot)),
       )
       Text(
-        text = SaveToRules.outcome(form, state.saveTarget),
+        text = SaveToRules.outcome(form, uiState.saveTarget),
         style = MaterialTheme.typography.labelSmall,
         color = colors.onSurfaceVariant,
         textAlign = TextAlign.Center,
@@ -1274,7 +1287,8 @@ private fun MiniPlaceholder(text: String, icon: androidx.compose.ui.graphics.vec
 /** Properties of the selected question, or of the Form itself when no question is selected. */
 @Composable
 private fun QuestionPropertiesPanel(
-  state: FormEditorState,
+  uiState: FormEditorUiState,
+  actions: FormEditorActions,
   onSaveToModeChange: (SaveToMode) -> Unit,
   onOpenDataset: ((String) -> Unit)?,
   modifier: Modifier = Modifier,
@@ -1284,21 +1298,25 @@ private fun QuestionPropertiesPanel(
     shape = MaterialTheme.shapes.large,
     colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.surface),
   ) {
-    val question = state.selectedQuestion
+    val question = uiState.selectedQuestion
     if (question == null) {
-      FormProperties(state, onSaveToModeChange, onOpenDataset)
+      FormProperties(uiState, actions, onSaveToModeChange, onOpenDataset)
       return@ElevatedCard
     }
-    key(question.key) { QuestionProperties(state, question) }
+    key(question.key) { QuestionProperties(uiState, actions, question) }
   }
 }
 
 @Composable
-private fun QuestionProperties(state: FormEditorState, question: EditorQuestion) {
-  val form = state.form
-  val index = state.selectedIndex
+private fun QuestionProperties(
+  uiState: FormEditorUiState,
+  actions: FormEditorActions,
+  question: EditorQuestion,
+) {
+  val form = uiState.form
+  val index = uiState.selectedIndex
   val key = question.key
-  val issues = state.issuesFor(key)
+  val issues = uiState.issuesFor(key)
   Column(
     modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(20.dp),
     verticalArrangement = Arrangement.spacedBy(14.dp),
@@ -1315,18 +1333,18 @@ private fun QuestionProperties(state: FormEditorState, question: EditorQuestion)
       horizontalArrangement = Arrangement.spacedBy(4.dp),
       verticalAlignment = Alignment.CenterVertically,
     ) {
-      IconButton(onClick = { state.moveQuestion(key, -1) }, enabled = index > 0) {
+      IconButton(onClick = { actions.moveQuestion(key, -1) }, enabled = index > 0) {
         Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = "Move earlier")
       }
       IconButton(
-        onClick = { state.moveQuestion(key, 1) },
+        onClick = { actions.moveQuestion(key, 1) },
         enabled = index < form.questions.lastIndex,
       ) {
         Icon(Icons.AutoMirrored.Outlined.ArrowForward, contentDescription = "Move later")
       }
       Spacer(Modifier.weight(1f))
-      TextButton(onClick = { state.duplicateQuestion(key) }) { Text("Duplicate") }
-      TextButton(onClick = { state.deleteQuestion(key) }) {
+      TextButton(onClick = { actions.duplicateQuestion(key) }) { Text("Duplicate") }
+      TextButton(onClick = { actions.deleteQuestion(key) }) {
         Icon(
           Icons.Outlined.Delete,
           contentDescription = null,
@@ -1360,26 +1378,26 @@ private fun QuestionProperties(state: FormEditorState, question: EditorQuestion)
       options = EditorQuestionType.entries,
       optionText = { it.label },
       optionIcon = { questionTypeIcon(it) },
-      onSelect = { state.changeType(key, it) },
+      onSelect = { actions.changeType(key, it) },
     )
 
     if (question.type.isGeometry) {
-      GeometryCaptureSelector(state, question)
+      GeometryCaptureSelector(uiState, actions, question)
     }
     if (question.type.isMedia) {
-      MediaSourceSelector(state, question)
+      MediaSourceSelector(uiState, actions, question)
     }
 
     OutlinedTextField(
       value = question.label,
-      onValueChange = { v -> state.updateQuestion(key) { it.copy(label = v) } },
+      onValueChange = { v -> actions.updateQuestion(key) { it.copy(label = v) } },
       label = { Text(if (question.type == EditorQuestionType.NOTE) "Note text" else "Label") },
       minLines = 2,
       modifier = Modifier.fillMaxWidth(),
     )
     OutlinedTextField(
       value = question.hint,
-      onValueChange = { v -> state.updateQuestion(key) { it.copy(hint = v) } },
+      onValueChange = { v -> actions.updateQuestion(key) { it.copy(hint = v) } },
       label = { Text("Hint (optional)") },
       modifier = Modifier.fillMaxWidth(),
     )
@@ -1398,20 +1416,20 @@ private fun QuestionProperties(state: FormEditorState, question: EditorQuestion)
       Switch(
         checked = question.required,
         enabled = !question.type.isReadOnly,
-        onCheckedChange = { v -> state.updateQuestion(key) { it.copy(required = v) } },
+        onCheckedChange = { v -> actions.updateQuestion(key) { it.copy(required = v) } },
       )
     }
 
     if (question.type.hasChoices) {
       HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-      ChoicesEditor(state, question)
+      ChoicesEditor(uiState, actions, question)
     }
 
     HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-    DisplayLogicEditor(state, question)
+    DisplayLogicEditor(uiState, actions, question)
 
     HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-    AdvancedSection(state, question)
+    AdvancedSection(uiState, actions, question)
   }
 }
 
@@ -1421,7 +1439,11 @@ private fun QuestionProperties(state: FormEditorState, question: EditorQuestion)
  * incompatibility error (also listed in the question's issues).
  */
 @Composable
-private fun GeometryCaptureSelector(state: FormEditorState, question: EditorQuestion) {
+private fun GeometryCaptureSelector(
+  uiState: FormEditorUiState,
+  actions: FormEditorActions,
+  question: EditorQuestion,
+) {
   val colors = MaterialTheme.colorScheme
   Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
     DropdownSelector(
@@ -1429,7 +1451,7 @@ private fun GeometryCaptureSelector(state: FormEditorState, question: EditorQues
       selectedText = question.capture.label,
       options = GeometryCapture.entries,
       optionText = { it.label },
-      onSelect = { state.updateCapture(question.key, it) },
+      onSelect = { actions.updateCapture(question.key, it) },
     )
     Text(
       text = question.capture.description,
@@ -1437,7 +1459,7 @@ private fun GeometryCaptureSelector(state: FormEditorState, question: EditorQues
       color = colors.onSurfaceVariant,
       modifier = Modifier.padding(horizontal = 16.dp),
     )
-    if (question.isWebIncompatible && state.form.availability.includesWeb) {
+    if (question.isWebIncompatible && uiState.form.availability.includesWeb) {
       Text(
         text = FormEditorValidator.webIncompatibleMessage(question),
         style = MaterialTheme.typography.bodySmall,
@@ -1453,14 +1475,18 @@ private fun GeometryCaptureSelector(state: FormEditorState, question: EditorQues
  * default), or capture only (the `new` appearance). Shows the chosen mode's description.
  */
 @Composable
-private fun MediaSourceSelector(state: FormEditorState, question: EditorQuestion) {
+private fun MediaSourceSelector(
+  uiState: FormEditorUiState,
+  actions: FormEditorActions,
+  question: EditorQuestion,
+) {
   Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
     DropdownSelector(
       label = "Media source",
       selectedText = question.mediaSource.label,
       options = MediaSource.entries,
       optionText = { it.label },
-      onSelect = { state.updateMediaSource(question.key, it) },
+      onSelect = { actions.updateMediaSource(question.key, it) },
     )
     Text(
       text = question.mediaSource.description,
@@ -1476,19 +1502,23 @@ private fun MediaSourceSelector(state: FormEditorState, question: EditorQuestion
  * validation rules. Collapsed by default; expands automatically when it contains an error.
  */
 @Composable
-private fun AdvancedSection(state: FormEditorState, question: EditorQuestion) {
+private fun AdvancedSection(
+  uiState: FormEditorUiState,
+  actions: FormEditorActions,
+  question: EditorQuestion,
+) {
   val key = question.key
   val nameInvalid = !FormEditorValidator.isValidName(question.name)
   val hasError = nameInvalid || ValidationRules.issues(question).isNotEmpty()
   // Open/closed lives in the editor state so it persists across question selection.
-  val expanded = state.isAdvancedExpanded
-  LaunchedEffect(key, hasError) { if (hasError) state.isAdvancedExpanded = true }
+  val expanded = uiState.isAdvancedExpanded
+  LaunchedEffect(key, hasError) { if (hasError) actions.setAdvancedExpanded(true) }
   Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
     Row(
       modifier =
         Modifier.fillMaxWidth()
           .clip(MaterialTheme.shapes.small)
-          .clickable { state.isAdvancedExpanded = !expanded }
+          .clickable { actions.setAdvancedExpanded(!expanded) }
           .padding(vertical = 4.dp),
       verticalAlignment = Alignment.CenterVertically,
       horizontalArrangement = Arrangement.spacedBy(6.dp),
@@ -1512,7 +1542,7 @@ private fun AdvancedSection(state: FormEditorState, question: EditorQuestion) {
     if (expanded) {
       OutlinedTextField(
         value = question.name,
-        onValueChange = { v -> state.updateQuestion(key) { it.copy(name = v.trim()) } },
+        onValueChange = { v -> actions.updateQuestion(key) { it.copy(name = v.trim()) } },
         label = { Text("Name") },
         singleLine = true,
         isError = nameInvalid,
@@ -1520,7 +1550,7 @@ private fun AdvancedSection(state: FormEditorState, question: EditorQuestion) {
         textStyle = MaterialTheme.typography.bodyLarge.copy(fontFamily = FontFamily.Monospace),
         modifier = Modifier.fillMaxWidth(),
       )
-      ValidationEditor(state, question)
+      ValidationEditor(uiState, actions, question)
     }
   }
 }
@@ -1530,12 +1560,16 @@ private fun AdvancedSection(state: FormEditorState, question: EditorQuestion) {
  * XForms spec, "Bindings"). Only rules that apply to the question type are offered.
  */
 @Composable
-private fun ValidationEditor(state: FormEditorState, question: EditorQuestion) {
+private fun ValidationEditor(
+  uiState: FormEditorUiState,
+  actions: FormEditorActions,
+  question: EditorQuestion,
+) {
   val key = question.key
   val type = question.type
   val validation = question.validation ?: EditorValidation()
   fun update(transform: (EditorValidation) -> EditorValidation) =
-    state.updateValidation(key, transform)
+    actions.updateValidation(key, transform)
   Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
     Text("Validation", style = MaterialTheme.typography.titleSmall)
     when (ValidationKind.of(type)) {
@@ -1726,7 +1760,11 @@ private fun MinMaxFields(
 }
 
 @Composable
-private fun ChoicesEditor(state: FormEditorState, question: EditorQuestion) {
+private fun ChoicesEditor(
+  uiState: FormEditorUiState,
+  actions: FormEditorActions,
+  question: EditorQuestion,
+) {
   val key = question.key
   var imageError by remember { mutableStateOf<String?>(null) }
   Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -1738,34 +1776,34 @@ private fun ChoicesEditor(state: FormEditorState, question: EditorQuestion) {
       ) {
         ChoiceColorButton(
           colorHex = choice.colorHex,
-          onSelect = { state.setChoiceColor(key, i, it) },
+          onSelect = { actions.setChoiceColor(key, i, it) },
         )
         ChoiceImageButton(
           image = choice.image,
           onPicked = { image ->
             imageError =
-              if (state.setChoiceImage(key, i, image)) null
+              if (actions.setChoiceImage(key, i, image)) null
               else "Choose an image file under ${EditorChoiceImage.MAX_BYTES / 1024} KB."
           },
-          onRemove = { state.setChoiceImage(key, i, null) },
+          onRemove = { actions.setChoiceImage(key, i, null) },
           onError = { imageError = it },
         )
         OutlinedTextField(
           value = choice.label,
-          onValueChange = { state.updateChoiceLabel(key, i, it) },
+          onValueChange = { actions.updateChoiceLabel(key, i, it) },
           label = { Text("Label") },
           singleLine = true,
           modifier = Modifier.weight(1f),
         )
         OutlinedTextField(
           value = choice.value,
-          onValueChange = { state.updateChoice(key, i, choice.copy(value = it.trim())) },
+          onValueChange = { actions.updateChoice(key, i, choice.copy(value = it.trim())) },
           label = { Text("Value") },
           singleLine = true,
           textStyle = MaterialTheme.typography.bodyLarge.copy(fontFamily = FontFamily.Monospace),
           modifier = Modifier.width(96.dp),
         )
-        IconButton(onClick = { state.removeChoice(key, i) }, modifier = Modifier.size(32.dp)) {
+        IconButton(onClick = { actions.removeChoice(key, i) }, modifier = Modifier.size(32.dp)) {
           Icon(
             Icons.Outlined.Close,
             contentDescription = "Remove choice",
@@ -1781,7 +1819,7 @@ private fun ChoicesEditor(state: FormEditorState, question: EditorQuestion) {
         color = MaterialTheme.colorScheme.error,
       )
     }
-    TextButton(onClick = { state.addChoice(key) }) {
+    TextButton(onClick = { actions.addChoice(key) }) {
       Icon(Icons.Outlined.Add, contentDescription = null, modifier = Modifier.size(18.dp))
       Spacer(Modifier.width(4.dp))
       Text("Add choice")
@@ -1987,8 +2025,12 @@ internal fun rememberChoiceImageBitmap(image: EditorChoiceImage): ImageBitmap? =
   }
 
 @Composable
-private fun DisplayLogicEditor(state: FormEditorState, question: EditorQuestion) {
-  val form = state.form
+private fun DisplayLogicEditor(
+  uiState: FormEditorUiState,
+  actions: FormEditorActions,
+  question: EditorQuestion,
+) {
+  val form = uiState.form
   val key = question.key
   val sources = form.eligibleRelevanceSources(key)
   val relevance = question.relevance
@@ -1997,13 +2039,13 @@ private fun DisplayLogicEditor(state: FormEditorState, question: EditorQuestion)
     SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
       SegmentedButton(
         selected = relevance == null,
-        onClick = { state.disableRelevance(key) },
+        onClick = { actions.disableRelevance(key) },
         shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2),
         label = { Text("Always show") },
       )
       SegmentedButton(
         selected = relevance != null,
-        onClick = { if (relevance == null) state.enableRelevance(key) },
+        onClick = { if (relevance == null) actions.enableRelevance(key) },
         enabled = sources.isNotEmpty() || relevance != null,
         shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2),
         label = { Text("Show only if…") },
@@ -2028,7 +2070,7 @@ private fun DisplayLogicEditor(state: FormEditorState, question: EditorQuestion)
             relevance.operator.takeIf { it in RelevanceOperator.availableFor(picked.type) }
               ?: RelevanceOperator.availableFor(picked.type).first()
           val value = picked.choices.firstOrNull()?.value.orEmpty()
-          state.updateQuestion(key) {
+          actions.updateQuestion(key) {
             it.copy(relevance = EditorRelevance(picked.key, operator, value))
           }
         },
@@ -2040,7 +2082,7 @@ private fun DisplayLogicEditor(state: FormEditorState, question: EditorQuestion)
           options = RelevanceOperator.availableFor(source.type),
           optionText = { it.label },
           onSelect = { op ->
-            state.updateQuestion(key) { it.copy(relevance = relevance.copy(operator = op)) }
+            actions.updateQuestion(key) { it.copy(relevance = relevance.copy(operator = op)) }
           },
         )
         if (relevance.operator.needsValue) {
@@ -2053,14 +2095,14 @@ private fun DisplayLogicEditor(state: FormEditorState, question: EditorQuestion)
               options = source.choices,
               optionText = { "${it.label} (${it.value})" },
               onSelect = { c ->
-                state.updateQuestion(key) { it.copy(relevance = relevance.copy(value = c.value)) }
+                actions.updateQuestion(key) { it.copy(relevance = relevance.copy(value = c.value)) }
               },
             )
           } else {
             OutlinedTextField(
               value = relevance.value,
               onValueChange = { v ->
-                state.updateQuestion(key) { it.copy(relevance = relevance.copy(value = v)) }
+                actions.updateQuestion(key) { it.copy(relevance = relevance.copy(value = v)) }
               },
               label = { Text("Value") },
               singleLine = true,
@@ -2165,8 +2207,12 @@ private fun ModalScrim(content: @Composable () -> Unit) {
 }
 
 @Composable
-private fun FormPreviewOverlay(state: FormEditorState, isDarkTheme: Boolean) {
-  val controller = state.previewController
+private fun FormPreviewOverlay(
+  uiState: FormEditorUiState,
+  actions: FormEditorActions,
+  isDarkTheme: Boolean,
+) {
+  val controller = uiState.previewController
   var formFactor by remember { mutableStateOf(DeviceFormFactor.MOBILE) }
   var orientation by remember { mutableStateOf(DeviceFormFactor.MOBILE.defaultOrientation) }
   ModalScrim {
@@ -2179,11 +2225,11 @@ private fun FormPreviewOverlay(state: FormEditorState, isDarkTheme: Boolean) {
       horizontalArrangement = Arrangement.spacedBy(24.dp, Alignment.CenterHorizontally),
       verticalAlignment = Alignment.Top,
     ) {
-      if (controller != null && state.previewTarget == FormPreviewTarget.WEB) {
-        WebPreviewBrowserFrame(state = state, controller = controller)
+      if (controller != null && uiState.previewTarget == FormPreviewTarget.WEB) {
+        WebPreviewBrowserFrame(uiState = uiState, actions = actions, controller = controller)
       } else if (controller != null) {
         MobileDevicePreviewFrame(
-          deviceTitle = "Preview • ${state.form.title}",
+          deviceTitle = "Preview • ${uiState.form.title}",
           isDarkTheme = isDarkTheme,
           formFactor = formFactor,
           orientation = orientation,
@@ -2201,20 +2247,20 @@ private fun FormPreviewOverlay(state: FormEditorState, isDarkTheme: Boolean) {
             MobileFormRunner(
               controller = controller,
               modifier = Modifier.fillMaxSize(),
-              onClose = state::closePreview,
-              onSubmitted = { state.markPreviewSubmitted() },
+              onClose = actions::closePreview,
+              onSubmitted = { actions.markPreviewSubmitted() },
             )
           }
         }
       }
-      PreviewSidePanel(state)
+      PreviewSidePanel(uiState, actions)
     }
   }
 }
 
 @Composable
-private fun PreviewSidePanel(state: FormEditorState) {
-  val controller = state.previewController
+private fun PreviewSidePanel(uiState: FormEditorUiState, actions: FormEditorActions) {
+  val controller = uiState.previewController
   val colors = MaterialTheme.colorScheme
   ElevatedCard(modifier = Modifier.width(340.dp)) {
     Column(modifier = Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -2225,11 +2271,11 @@ private fun PreviewSidePanel(state: FormEditorState) {
           fontWeight = FontWeight.Bold,
           modifier = Modifier.weight(1f),
         )
-        IconButton(onClick = state::closePreview) {
+        IconButton(onClick = actions::closePreview) {
           Icon(Icons.Outlined.Close, contentDescription = "Close preview")
         }
       }
-      val error = state.previewError
+      val error = uiState.previewError
       if (error != null) {
         Text(
           text = "The generated XForms couldn't be loaded:\n$error",
@@ -2240,7 +2286,7 @@ private fun PreviewSidePanel(state: FormEditorState) {
       if (controller != null) {
         Text(
           text =
-            if (state.previewTarget == FormPreviewTarget.WEB) {
+            if (uiState.previewTarget == FormPreviewTarget.WEB) {
               "Questions update live as you answer: conditional cards appear or disappear based on display logic."
             } else {
               "Screens update live as you answer: conditional questions appear or disappear based on display logic."
@@ -2248,7 +2294,7 @@ private fun PreviewSidePanel(state: FormEditorState) {
           style = MaterialTheme.typography.bodySmall,
           color = colors.onSurfaceVariant,
         )
-        if (state.previewSubmitted) {
+        if (uiState.previewSubmitted) {
           Surface(
             color = colors.primaryContainer,
             contentColor = colors.onPrimaryContainer,
@@ -2258,7 +2304,7 @@ private fun PreviewSidePanel(state: FormEditorState) {
               modifier = Modifier.fillMaxWidth().padding(10.dp),
               verticalAlignment = Alignment.CenterVertically,
             ) {
-              // Filled: indicates the validation-passed state.
+              // Filled: indicates the validation-passed uiState.
               Icon(
                 Icons.Filled.CheckCircle,
                 contentDescription = null,
@@ -2304,20 +2350,20 @@ private fun PreviewSidePanel(state: FormEditorState) {
         }
       }
       Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        OutlinedButton(onClick = state::restartPreview) {
+        OutlinedButton(onClick = actions::restartPreview) {
           Icon(Icons.Outlined.Refresh, contentDescription = null, modifier = Modifier.size(18.dp))
           Spacer(Modifier.width(6.dp))
           Text("Restart")
         }
-        Button(onClick = state::closePreview) { Text("Back to editor") }
+        Button(onClick = actions::closePreview) { Text("Back to editor") }
       }
     }
   }
 }
 
 @Composable
-private fun XFormsXmlOverlay(state: FormEditorState) {
-  val xml = state.xformsXml
+private fun XFormsXmlOverlay(uiState: FormEditorUiState, actions: FormEditorActions) {
+  val xml = uiState.xformsXml
   val parseError =
     remember(xml) {
       try {
@@ -2347,7 +2393,7 @@ private fun XFormsXmlOverlay(state: FormEditorState) {
                 else MaterialTheme.colorScheme.onSurfaceVariant,
             )
           }
-          IconButton(onClick = { state.isXmlViewerOpen = false }) {
+          IconButton(onClick = { actions.setXmlViewerOpen(false) }) {
             Icon(Icons.Outlined.Close, contentDescription = "Close")
           }
         }

@@ -21,7 +21,8 @@ import org.groundplatform.v2.devtools.prototypeapp.data.seed.PrototypeFakeEntiti
 import org.groundplatform.v2.devtools.prototypeapp.data.seed.PrototypeFakeMapLayersData
 import org.groundplatform.v2.devtools.prototypeapp.data.seed.PrototypeFakeSurveysData
 import org.groundplatform.v2.devtools.prototypeapp.data.seed.SurveyEditorSamples
-import org.groundplatform.v2.devtools.prototypeapp.surveyeditor.SurveyEditorState
+import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.surveyEditorViewModel
+import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.ui
 
 class SurveyEditorDerivationTest {
   private fun derive(surveyId: String): SurveyEditorDraft {
@@ -51,11 +52,13 @@ class SurveyEditorDerivationTest {
         survey.id,
       )
       assertEquals(survey.title, draft.details.title, survey.id)
-      val state = SurveyEditorState(draft)
+      val state = surveyEditorViewModel(draft)
       val issues =
-        state.sharingIssues +
-          state.forms.flatMap { f -> f.editor.issues.map { "${f.key}: $it" } } +
-          state.datasets.flatMap { d -> state.datasetIssues(d).map { "${d.id}: $it" } }
+        state.ui.sharingIssues +
+          state.ui.forms.flatMap { f ->
+            state.formEditor(f.key).ui.issues.map { "${f.key}: $it" }
+          } +
+          state.ui.datasets.flatMap { d -> state.ui.datasetIssues(d).map { "${d.id}: $it" } }
       assertEquals(emptyList(), issues, "${survey.id} derives a valid draft")
     }
   }

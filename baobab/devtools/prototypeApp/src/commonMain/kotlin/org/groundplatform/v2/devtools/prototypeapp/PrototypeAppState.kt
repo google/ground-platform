@@ -25,6 +25,7 @@ import org.groundplatform.v2.core.forms.serialization.XFormsXmlSerializer
 import org.groundplatform.v2.core.forms.ui.FormWizardController
 import org.groundplatform.v2.core.forms.ui.WorkbenchExampleForm
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyMapAnchor
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SurveyAccess
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SurveyEditorDraft
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.relatedEntityForPropertyValue
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.singularTypeLabelOf
@@ -34,13 +35,13 @@ import org.groundplatform.v2.devtools.prototypeapp.map.EntityGeometry
 import org.groundplatform.v2.devtools.prototypeapp.map.FormGeometryOverlay
 import org.groundplatform.v2.devtools.prototypeapp.pdf.GeneratedPdf
 import org.groundplatform.v2.devtools.prototypeapp.pdf.RecordPdfReports
-import org.groundplatform.v2.devtools.prototypeapp.surveyeditor.SurveyAccess
 import org.groundplatform.v2.devtools.prototypeapp.ui.state.DashboardEvent
 import org.groundplatform.v2.devtools.prototypeapp.ui.state.DashboardUiState
 import org.groundplatform.v2.devtools.prototypeapp.ui.state.OnboardingEvent
 import org.groundplatform.v2.devtools.prototypeapp.ui.state.OrganizationEvent
 import org.groundplatform.v2.devtools.prototypeapp.ui.state.PrototypeUiState
 import org.groundplatform.v2.devtools.prototypeapp.ui.state.SettingsEvent
+import org.groundplatform.v2.devtools.prototypeapp.ui.state.SurveyEditorEvent
 import org.groundplatform.v2.devtools.prototypeapp.ui.state.SurveyMapEvent
 import org.groundplatform.v2.devtools.prototypeapp.ui.state.SurveyMapUiState
 import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.DashboardViewModel
@@ -48,6 +49,7 @@ import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.OnboardingViewMo
 import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.OrganizationViewModel
 import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.PrototypeAppViewModel
 import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.SettingsViewModel
+import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.SurveyEditorViewModel
 import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.SurveyMapViewModel
 import org.groundplatform.v2.map.CameraPosition
 import org.groundplatform.v2.map.LatLng
@@ -163,6 +165,27 @@ class PrototypeAppState(
 
   private var organizationState by mutableStateOf(organization.uiState.value)
 
+  /**
+   * ViewModel of the Survey editor (survey details, sharing, Forms, Map layers, Data tables, and
+   * sample plots of the active survey). Its pages observe [SurveyEditorViewModel.uiState] directly;
+   * this class mirrors it for the rest of the UI and applies its [SurveyEditorEvent]s to the app
+   * shell.
+   */
+  val surveyEditor: SurveyEditorViewModel =
+    SurveyEditorViewModel(
+      surveyRepository = viewModel.surveyRepository,
+      surveyEditorRepository = viewModel.surveyEditorRepository,
+      organizationRepository = viewModel.organizationRepository,
+      authRepository = viewModel.authRepository,
+      placeRepository = viewModel.placeRepository,
+      generateSamplePlots = viewModel.generateSamplePlotsUseCase,
+      inviteCollaboratorUseCase = viewModel.inviteCollaboratorUseCase,
+      isAirplaneMode = { mapState.isAirplaneMode },
+      scope = viewModel.scope,
+    )
+
+  private var surveyEditorState by mutableStateOf(surveyEditor.uiState.value)
+
   init {
     viewModel.scope.launch { viewModel.appData.collect { data = it } }
     viewModel.scope.launch { onboarding.uiState.collect { onboardingState = it } }
@@ -181,6 +204,18 @@ class PrototypeAppState(
     viewModel.scope.launch { dashboard.events.collect(::onDashboardEvent) }
     viewModel.scope.launch { organization.uiState.collect { organizationState = it } }
     viewModel.scope.launch { organization.events.collect(::onOrganizationEvent) }
+    viewModel.scope.launch { surveyEditor.uiState.collect { surveyEditorState = it } }
+    viewModel.scope.launch { surveyEditor.events.collect(::onSurveyEditorEvent) }
+  }
+
+  /**
+   * Applies a Survey editor outcome to the app shell: leaving the editor returns to the dashboard.
+   */
+  private fun onSurveyEditorEvent(event: SurveyEditorEvent) {
+    when (event) {
+      SurveyEditorEvent.Published,
+      SurveyEditorEvent.Closed -> selectWorkbenchPage(PrototypeWorkbenchPage.WEB_DASHBOARD)
+    }
   }
 
   /** Applies an organization outcome to the rest of the app shell (page switch, map imagery). */
@@ -3216,6 +3251,7 @@ class PrototypeAppState(
     settings.reset()
     surveyMap.reset()
     dashboard.reset()
+    surveyEditor.reset()
     activeSurveyNotice = null
     mainViewMode = MainSurveyViewMode.MAP
     isDrawerOpen = false

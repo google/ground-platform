@@ -14,6 +14,8 @@
 package org.groundplatform.v2.devtools.prototypeapp.formeditor
 
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertCountEquals
@@ -37,15 +39,25 @@ import org.groundplatform.v2.devtools.prototypeapp.data.seed.FormEditorSamples
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.DateRule
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EditorQuestionType
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.friendlyDate
+import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.FormEditorViewModel
+import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.formEditorViewModel
+import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.ui
 
 /** Every interactive element of the Form editor must respond to a single click or tap. */
 @OptIn(ExperimentalTestApi::class)
 class FormEditorClickTest {
 
-  private fun withEditor(block: androidx.compose.ui.test.ComposeUiTest.(FormEditorState) -> Unit) =
+  private fun withEditor(
+    block: androidx.compose.ui.test.ComposeUiTest.(FormEditorViewModel) -> Unit
+  ) =
     runDesktopComposeUiTest(width = 1600, height = 1000) {
-      val state = FormEditorState(FormEditorSamples.shadeTreeVisit())
-      setContent { MaterialTheme { FormEditorPage(state = state, isDarkTheme = false) } }
+      val state = formEditorViewModel(FormEditorSamples.shadeTreeVisit())
+      setContent {
+        MaterialTheme {
+          val uiState by state.uiState.collectAsState()
+          FormEditorPage(uiState = uiState, actions = state, isDarkTheme = false)
+        }
+      }
       block(state)
     }
 
@@ -55,34 +67,34 @@ class FormEditorClickTest {
       .onFirst()
       .performClick()
     waitForIdle()
-    assertEquals("q3", state.selectedKey)
+    assertEquals("q3", state.ui.selectedKey)
   }
 
   @Test
   fun singleClickOnStartNodeOpensFormSettings() = withEditor { state ->
     onNodeWithText("Start").performClick()
     waitForIdle()
-    assertTrue(state.isFormSettingsSelected)
+    assertTrue(state.ui.isFormSettingsSelected)
   }
 
   @Test
   fun singleClickOnFormSettingsButtonOpensFormSettings() = withEditor { state ->
     onNodeWithText("Form settings").performClick()
     waitForIdle()
-    assertTrue(state.isFormSettingsSelected)
+    assertTrue(state.ui.isFormSettingsSelected)
   }
 
   @Test
   fun singleTapOnAddQuestionAffordanceOpensMenu() = withEditor { state ->
     // Touch input has no hover, so every "+" must already be hit-testable before the first tap.
     onAllNodesWithContentDescription("Add question here")
-      .assertCountEquals(state.form.questions.size + 1)
+      .assertCountEquals(state.ui.form.questions.size + 1)
     onAllNodesWithContentDescription("Add question here").onFirst().performTouchInput { click() }
     waitForIdle()
     // The menu popup is composed last; earlier matches are screen cards.
     onAllNodesWithText("Long text").onLast().performClick()
     waitForIdle()
-    assertEquals(EditorQuestionType.LONG_TEXT, state.form.questions.first().type)
+    assertEquals(EditorQuestionType.LONG_TEXT, state.ui.form.questions.first().type)
   }
 
   @Test
@@ -98,7 +110,7 @@ class FormEditorClickTest {
       .onFirst()
       .performTouchInput { click() }
     mainClock.advanceTimeBy(1_000)
-    assertEquals("q6", state.selectedKey)
+    assertEquals("q6", state.ui.selectedKey)
   }
 
   @Test
@@ -109,7 +121,7 @@ class FormEditorClickTest {
     mainClock.advanceTimeByFrame()
     onNodeWithText("Form settings").performClick()
     mainClock.advanceTimeBy(1_000)
-    assertTrue(state.isFormSettingsSelected)
+    assertTrue(state.ui.isFormSettingsSelected)
   }
 
   @Test
@@ -119,7 +131,7 @@ class FormEditorClickTest {
     waitForIdle()
     onNodeWithContentDescription("Blue").performClick()
     waitForIdle()
-    assertEquals("#1A73E8", state.form.find("q3")!!.choices[0].colorHex)
+    assertEquals("#1A73E8", state.ui.form.find("q3")!!.choices[0].colorHex)
   }
 
   @Test
@@ -157,7 +169,7 @@ class FormEditorClickTest {
     waitForIdle()
     onNodeWithContentDescription("Expand advanced").performScrollTo().performClick()
     waitForIdle()
-    assertTrue(state.isAdvancedExpanded)
+    assertTrue(state.ui.isAdvancedExpanded)
     runOnIdle { state.select("q5") }
     waitForIdle()
     onNodeWithText("Name").assertExists()
@@ -168,7 +180,7 @@ class FormEditorClickTest {
   fun datePickerStoresIsoDateAndShowsFriendlyDate() = withEditor { state ->
     runOnIdle {
       state.select("q1")
-      state.isAdvancedExpanded = true
+      state.setAdvancedExpanded(true)
       state.updateValidation("q1") { it.copy(dateRule = DateRule.BETWEEN) }
     }
     waitForIdle()
@@ -179,12 +191,12 @@ class FormEditorClickTest {
     onNodeWithText("OK").performClick()
     waitForIdle()
     val expected = java.time.LocalDate.now().withDayOfMonth(15).toString()
-    assertEquals(expected, state.form.find("q1")!!.validation?.min)
+    assertEquals(expected, state.ui.form.find("q1")!!.validation?.min)
     onNodeWithText(friendlyDate(expected), useUnmergedTree = true).assertExists()
 
     onNodeWithContentDescription("Clear Earliest date").performClick()
     waitForIdle()
-    assertEquals(null, state.form.find("q1")!!.validation?.min?.ifEmpty { null })
+    assertEquals(null, state.ui.form.find("q1")!!.validation?.min?.ifEmpty { null })
   }
 
   @Test
@@ -199,7 +211,7 @@ class FormEditorClickTest {
         release()
       }
     waitForIdle()
-    assertEquals("q3", state.selectedKey)
+    assertEquals("q3", state.ui.selectedKey)
   }
 
   @Test
@@ -213,13 +225,17 @@ class FormEditorClickTest {
       .onFirst()
       .performClick()
     waitForIdle()
-    assertEquals("q3", state.selectedKey)
+    assertEquals("q3", state.ui.selectedKey)
   }
 
   @Test
   fun dragPastSlopStillReordersScreens() = withEditor { state ->
-    val firstKey = state.form.questions.first().key
-    onAllNodesWithText(state.form.questions.first().label, substring = true, useUnmergedTree = true)
+    val firstKey = state.ui.form.questions.first().key
+    onAllNodesWithText(
+        state.ui.form.questions.first().label,
+        substring = true,
+        useUnmergedTree = true,
+      )
       .onFirst()
       .performMouseInput {
         moveTo(center)
@@ -229,7 +245,7 @@ class FormEditorClickTest {
       }
     waitForIdle()
     // The first screen moved later.
-    assertTrue(state.form.questions.indexOfFirst { it.key == firstKey } > 0)
+    assertTrue(state.ui.form.questions.indexOfFirst { it.key == firstKey } > 0)
   }
 
   @Test
@@ -239,17 +255,17 @@ class FormEditorClickTest {
       state.selectForm()
     }
     waitForIdle()
-    assertTrue(!state.form.saveTo.status.enabled)
+    assertTrue(!state.ui.form.saveTo.status.enabled)
     onNodeWithText("Set status marker").performScrollTo().performClick()
     waitForIdle()
-    assertTrue(state.form.saveTo.status.enabled)
-    assertEquals(1, state.form.saveTo.status.rules.size)
-    assertEquals("Surveyed", state.form.saveTo.status.rules.single().badge.label)
-    assertEquals("Pending", state.form.saveTo.status.defaultBadge.label)
+    assertTrue(state.ui.form.saveTo.status.enabled)
+    assertEquals(1, state.ui.form.saveTo.status.rules.size)
+    assertEquals("Surveyed", state.ui.form.saveTo.status.rules.single().badge.label)
+    assertEquals("Pending", state.ui.form.saveTo.status.defaultBadge.label)
 
     onNodeWithText("Add status rule").performScrollTo().performClick()
     waitForIdle()
-    assertEquals(2, state.form.saveTo.status.rules.size)
+    assertEquals(2, state.ui.form.saveTo.status.rules.size)
     runOnIdle { AdvancedDisclosure.expanded = null }
   }
 }

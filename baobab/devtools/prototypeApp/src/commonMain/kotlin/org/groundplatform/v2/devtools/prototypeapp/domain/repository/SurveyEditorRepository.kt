@@ -40,6 +40,14 @@ interface SurveyEditorRepository {
    * XForms XML goes to the survey's config, Forms and Map layers replace the survey's Forms and map
    * layers, Map layer rows add, update, or remove map features (keeping collected submissions), and
    * a non-blank title and description are copied to the survey list.
+   *
+   * Map layer rows are removed relative to [previous], the draft the editor opened (so map features
+   * collected since then are kept); when `null`, relative to the last stored draft or, before the
+   * first save, the survey's current data.
    */
-  suspend fun saveDraft(surveyId: String, draft: SurveyEditorDraft)
+  suspend fun saveDraft(
+    surveyId: String,
+    draft: SurveyEditorDraft,
+    previous: SurveyEditorDraft? = null,
+  )
 }

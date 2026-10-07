@@ -88,6 +88,7 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.formatHexColorCs
 import org.groundplatform.v2.devtools.prototypeapp.map.GroundPin
 import org.groundplatform.v2.devtools.prototypeapp.map.SurveyBasemaps
 import org.groundplatform.v2.devtools.prototypeapp.map.contentColorOnArgb
+import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.MapFeatureEditor
 import org.groundplatform.v2.map.Basemap
 import org.groundplatform.v2.map.CameraPosition
 import org.groundplatform.v2.map.FeatureFilter
@@ -147,7 +148,7 @@ internal const val LAYER_EDITOR_SELECTED = "selected"
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 internal fun InteractiveLayerMapCard(
-  state: SurveyEditorState,
+  editor: MapFeatureEditor,
   dataset: EntityDataset,
   selectedRow: String?,
   onSelectRow: (String?) -> Unit,
@@ -203,7 +204,7 @@ internal fun InteractiveLayerMapCard(
   fun finishDraft(points: List<LatLng>) {
     val ds = currentDataset
     if (points.size < ds.geometryKind.minVertices) return
-    currentOnSelect(state.addRow(ds.key, geometry = points))
+    currentOnSelect(editor.addRow(ds.key, geometry = points))
     draft = emptyList()
     tool = MapTool.SELECT
   }
@@ -235,7 +236,7 @@ internal fun InteractiveLayerMapCard(
         if (index !in row.geometry.indices) return
         val moved = row.geometry.toMutableList()
         moved[index] = unproject(position.toScreenPoint())
-        state.updateGeometry(ds.key, rowKey, moved)
+        editor.updateGeometry(ds.key, rowKey, moved)
       }
     }
 
@@ -245,7 +246,7 @@ internal fun InteractiveLayerMapCard(
         val now = unproject(position.toScreenPoint())
         val dLat = now.lat - start.lat
         val dLng = now.lng - start.lng
-        state.updateGeometry(
+        editor.updateGeometry(
           currentDataset.key,
           rowKey,
           original.map { LatLng(it.lat + dLat, it.lng + dLng) },
@@ -268,7 +269,7 @@ internal fun InteractiveLayerMapCard(
       val mid = mids.indexOfFirst { it.isNear(p, MIDPOINT_HIT_PX) }
       if (mid >= 0) {
         val inserted = row.geometry.toMutableList().apply { add(mid + 1, unproject(mids[mid])) }
-        state.updateGeometry(ds.key, sel, inserted)
+        editor.updateGeometry(ds.key, sel, inserted)
         return vertexDrag(sel, mid + 1)
       }
     }

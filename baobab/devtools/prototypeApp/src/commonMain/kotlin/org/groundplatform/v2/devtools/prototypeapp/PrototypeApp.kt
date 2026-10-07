@@ -87,7 +87,6 @@ import org.groundplatform.v2.core.forms.ui.GroundTonalBadge
 import org.groundplatform.v2.devtools.prototypeapp.organization.OrganizationPage
 import org.groundplatform.v2.devtools.prototypeapp.organization.OrganizationsPage
 import org.groundplatform.v2.devtools.prototypeapp.surveyeditor.SurveyEditorPage
-import org.groundplatform.v2.devtools.prototypeapp.surveyeditor.SurveyEditorState
 
 /** Top-level pages of the prototype web app, addressable via the URL hash (e.g. `#dashboard`). */
 enum class PrototypeWorkbenchPage(val label: String, val hash: String) {
@@ -174,19 +173,6 @@ fun PrototypeApp(
     }
   }
 
-  // The Survey editor edits a draft of the active survey, loaded from the local data store. Edits
-  // are saved back to the store only when the user publishes them.
-  val activeSurveyId = state.activeSurveyId
-  val surveyEditorState =
-    remember(activeSurveyId, state.dataResetCount) {
-      SurveyEditorState(
-        state.activeSurveyEditorDraft,
-        // Submissions on features of a dataset block regenerating its sample plots.
-        submissionCount = { datasetId ->
-          state.entities.filter { it.datasetId == datasetId }.sumOf { it.submissions.size }
-        },
-      )
-    }
   val isEntityRefMapShowing =
     state.isDataCollectionFormOpen &&
       state.isCurrentFormStepEntityRef &&
@@ -270,20 +256,7 @@ fun PrototypeApp(
               },
             )
           resolvedPage == PrototypeWorkbenchPage.SURVEY_EDITOR ->
-            SurveyEditorPage(
-              state = surveyEditorState,
-              appState = state,
-              isDarkTheme = state.isDarkTheme,
-              onPublish = {
-                state.saveSurveyEditorDraft(activeSurveyId, surveyEditorState.toDraft())
-                surveyEditorState.markPublished()
-                state.selectWorkbenchPage(PrototypeWorkbenchPage.WEB_DASHBOARD)
-              },
-              onClose = {
-                surveyEditorState.discardChanges()
-                state.selectWorkbenchPage(PrototypeWorkbenchPage.WEB_DASHBOARD)
-              },
-            )
+            SurveyEditorPage(state = state, isDarkTheme = state.isDarkTheme)
           resolvedPage == PrototypeWorkbenchPage.WEB_DASHBOARD ->
             WebDashboardPage(
               state = state,

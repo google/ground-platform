@@ -27,7 +27,8 @@ import org.groundplatform.v2.devtools.prototypeapp.PrototypeAppState
 import org.groundplatform.v2.devtools.prototypeapp.PrototypeScreen
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.formatHexColorCss
 import org.groundplatform.v2.devtools.prototypeapp.geometryKind
-import org.groundplatform.v2.devtools.prototypeapp.surveyeditor.SurveyEditorState
+import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.surveyEditorViewModel
+import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.ui
 import org.groundplatform.v2.map.CameraPosition
 import org.groundplatform.v2.map.Geometry
 import org.groundplatform.v2.map.LatLng
@@ -175,12 +176,12 @@ class SurveyMapContentTest {
 
   @Test
   fun main_usesThePublishedSurveyEditorLayerStyle() {
-    val editor = SurveyEditorState(state.activeSurveyEditorDraft)
-    val plots = editor.mapLayers.first { it.id == "shade_monitoring_plots" }
+    val editor = surveyEditorViewModel(state.activeSurveyEditorDraft)
+    val plots = editor.ui.mapLayers.first { it.id == "shade_monitoring_plots" }
     editor.updateDataset(plots.key) {
       it.copy(style = it.style.copy(colorHex = "#AD1457", iconName = "flag"))
     }
-    state.saveSurveyEditorDraft(state.activeSurveyId, editor.toDraft())
+    state.saveSurveyEditorDraft(state.activeSurveyId, editor.ui.draft)
 
     val layer = state.mapLayers.first { it.datasetId == "shade_monitoring_plots" }
     assertEquals(0xFFAD1457, layer.colorHex)

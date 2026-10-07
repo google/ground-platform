@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.groundplatform.v2.devtools.prototypeapp.surveyeditor
+package org.groundplatform.v2.devtools.prototypeapp.domain.model.editor
 
 import org.groundplatform.v2.core.sampling.Allocation
 import org.groundplatform.v2.core.sampling.GeneratedPlot
@@ -20,11 +20,7 @@ import org.groundplatform.v2.core.sampling.SAMPLING_ENGINE_VERSION
 import org.groundplatform.v2.core.sampling.SampleDesign
 import org.groundplatform.v2.core.sampling.SampleEncoding
 import org.groundplatform.v2.core.sampling.SamplingArea
-import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EntityRow
-import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SampleDesignConfig
-import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SamplePlotProperties
-import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.formatFixed
-import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.toLatLng
+import org.groundplatform.v2.core.sampling.Stratum
 
 /** Progress of a running sample generation, for the progress bar. */
 data class SampleGenerationProgress(
@@ -40,11 +36,11 @@ data class SampleGenerationProgress(
       else (plotsSoFar.toFloat() / maxOf(expectedPlots, plotsSoFar)).coerceIn(0f, 1f)
 }
 
-/** Result of [SurveyEditorState.generateSample]. */
+/** Result of sample plot generation. */
 sealed interface SampleGenerationOutcome {
   data class Generated(val plotCount: Int) : SampleGenerationOutcome
 
-  /** Stopped by [SurveyEditorState.cancelGeneration]; existing plots are unchanged. */
+  /** Stopped by a cancel request; existing plots are unchanged. */
   data object Cancelled : SampleGenerationOutcome
 
   /** The design couldn't be generated; existing plots are unchanged. */
@@ -194,4 +190,69 @@ internal fun isoUtc(epochMillis: Long): String {
   val m = (secondsOfDay % 3600) / 60
   val s = secondsOfDay % 60
   return "$year-${two(month)}-${two(day)}T${two(h)}:${two(m)}:${two(s)}Z"
+}
+
+/** Resolves the area a sample design draws plots from out of the survey's draft. */
+object SamplingAreas {
+
+  /** The area [config] draws plots from, given the survey's [surveyArea] and [datasets]. */
+  fun samplingArea(
+    config: SampleDesignConfig,
+    surveyArea: SurveyArea?,
+    datasets: List<EntityDataset>,
+  ): SamplingAreaResult =
+    when (val source = config.areaSource) {
+      SampleAreaSource.SurveyArea -> {
+        val parts = surveyArea?.parts.orEmpty().filter { it.size >= 3 }
+        if (parts.isEmpty()) {
+          SamplingAreaResult.Unavailable(
+            "Set a survey area in Survey details, or use a polygon map layer as strata."
+          )
+        } else {
+          SamplingAreaResult.Ready(
+            SamplingArea.fromSurveyArea(parts.map { part -> part.map { it.toGeoCoord() } })
+          )
+        }
+      }
+      is SampleAreaSource.StrataLayer -> {
+        val layer = datasets.firstOrNull { it.key == source.datasetKey }
+        val polygons = layer?.rows.orEmpty().filter { it.geometry.size >= 3 }
+        when {
+          layer == null ->
+            SamplingAreaResult.Unavailable("The strata map layer was deleted. Choose another one.")
+          layer.geometryKind != GeometryKind.POLYGON ->
+            SamplingAreaResult.Unavailable("Strata must come from a polygon map layer.")
+          polygons.isEmpty() ->
+            SamplingAreaResult.Unavailable(
+              "\"${layer.displayName}\" has no polygons yet. Add polygons to use it as strata."
+            )
+          else ->
+            SamplingAreaResult.Ready(
+              SamplingArea(
+                polygons.map { row ->
+                  Stratum(
+                    id = stratumId(layer, row, source.stratumProperty),
+                    ring = row.geometry.map { it.toGeoCoord() },
+                  )
+                }
+              )
+            )
+        }
+      }
+    }
+
+  /** Distinct stratum IDs of [config]'s strata layer, in order of first appearance. */
+  fun strataIds(config: SampleDesignConfig, datasets: List<EntityDataset>): List<String> {
+    val source = config.areaSource as? SampleAreaSource.StrataLayer ?: return emptyList()
+    val layer = datasets.firstOrNull { it.key == source.datasetKey } ?: return emptyList()
+    return layer.rows
+      .filter { it.geometry.size >= 3 }
+      .map { stratumId(layer, it, source.stratumProperty) }
+      .distinct()
+  }
+
+  private fun stratumId(layer: EntityDataset, row: EntityRow, property: String): String =
+    row.values[property]?.trim()?.takeIf { it.isNotEmpty() }
+      ?: row.values[layer.keyProperty]?.trim()?.takeIf { it.isNotEmpty() }
+      ?: row.key
 }

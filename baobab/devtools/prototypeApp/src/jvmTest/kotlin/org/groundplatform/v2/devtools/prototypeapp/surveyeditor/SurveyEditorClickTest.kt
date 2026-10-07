@@ -16,6 +16,8 @@ package org.groundplatform.v2.devtools.prototypeapp.surveyeditor
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.test.ComposeUiTest
@@ -27,18 +29,26 @@ import androidx.compose.ui.test.runDesktopComposeUiTest
 import androidx.compose.ui.unit.dp
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import org.groundplatform.v2.devtools.prototypeapp.data.seed.SurveyEditorSamples
+import org.groundplatform.v2.devtools.prototypeapp.ui.state.SurveyEditorSection
+import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.SurveyEditorViewModel
+import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.surveyEditorViewModel
+import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.ui
 
 /** Every item in the survey editor's left-hand navigation must select on a single click. */
 @OptIn(ExperimentalTestApi::class)
 class SurveyEditorClickTest {
 
-  private fun withNavigation(block: ComposeUiTest.(SurveyEditorState) -> Unit) =
+  private fun withNavigation(block: ComposeUiTest.(SurveyEditorViewModel) -> Unit) =
     runDesktopComposeUiTest(width = 600, height = 1000) {
-      val state = SurveyEditorState(SurveyEditorSamples.draft())
+      val state = surveyEditorViewModel()
       setContent {
         MaterialTheme {
-          SurveyNavigation(state = state, modifier = Modifier.width(280.dp).fillMaxHeight())
+          val uiState by state.uiState.collectAsState()
+          SurveyNavigation(
+            uiState = uiState,
+            actions = state,
+            modifier = Modifier.width(280.dp).fillMaxHeight(),
+          )
         }
       }
       block(state)
@@ -46,23 +56,21 @@ class SurveyEditorClickTest {
 
   @Test
   fun clickWithSlightMouseMovementSelectsForm() = withNavigation { state ->
-    val entry = state.forms.first()
+    val entry = state.ui.forms.first()
     // A real click rarely keeps the mouse perfectly still between press and release.
-    onAllNodesWithText(entry.editor.form.title, useUnmergedTree = true)
-      .onFirst()
-      .performMouseInput {
-        moveTo(center)
-        press()
-        moveBy(Offset(2f, 1f))
-        release()
-      }
+    onAllNodesWithText(entry.form.title, useUnmergedTree = true).onFirst().performMouseInput {
+      moveTo(center)
+      press()
+      moveBy(Offset(2f, 1f))
+      release()
+    }
     waitForIdle()
-    assertEquals(SurveyEditorSection.Form(entry.key), state.section)
+    assertEquals(SurveyEditorSection.Form(entry.key), state.ui.section)
   }
 
   @Test
   fun clickWithSlightMouseMovementSelectsDataset() = withNavigation { state ->
-    val dataset = (state.mapLayers + state.dataTables).first()
+    val dataset = (state.ui.mapLayers + state.ui.dataTables).first()
     onAllNodesWithText(dataset.displayName, useUnmergedTree = true).onFirst().performMouseInput {
       moveTo(center)
       press()
@@ -70,23 +78,21 @@ class SurveyEditorClickTest {
       release()
     }
     waitForIdle()
-    assertEquals(SurveyEditorSection.Dataset(dataset.key), state.section)
+    assertEquals(SurveyEditorSection.Dataset(dataset.key), state.ui.section)
   }
 
   @Test
   fun dragPastSlopStillReorders() = withNavigation { state ->
-    val first = state.forms.first()
-    if (state.forms.size < 2) return@withNavigation
-    onAllNodesWithText(first.editor.form.title, useUnmergedTree = true)
-      .onFirst()
-      .performMouseInput {
-        moveTo(center)
-        press()
-        repeat(10) { moveBy(Offset(0f, 12f)) }
-        release()
-      }
+    val first = state.ui.forms.first()
+    if (state.ui.forms.size < 2) return@withNavigation
+    onAllNodesWithText(first.form.title, useUnmergedTree = true).onFirst().performMouseInput {
+      moveTo(center)
+      press()
+      repeat(10) { moveBy(Offset(0f, 12f)) }
+      release()
+    }
     waitForIdle()
-    assertEquals(SurveyEditorSection.Details, state.section)
-    assertEquals(first.key, state.forms[1].key)
+    assertEquals(SurveyEditorSection.Details, state.ui.section)
+    assertEquals(first.key, state.ui.forms[1].key)
   }
 }

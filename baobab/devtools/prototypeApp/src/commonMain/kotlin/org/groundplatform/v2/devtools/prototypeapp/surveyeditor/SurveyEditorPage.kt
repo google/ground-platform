@@ -79,6 +79,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
@@ -127,6 +128,9 @@ import org.groundplatform.v2.devtools.prototypeapp.formeditor.FormEditorPage
 import org.groundplatform.v2.devtools.prototypeapp.formeditor.SectionLabel
 import org.groundplatform.v2.devtools.prototypeapp.formeditor.dragToReorder
 import org.groundplatform.v2.devtools.prototypeapp.map.SurveyBasemaps
+import org.groundplatform.v2.devtools.prototypeapp.ui.state.SurveyEditorSection
+import org.groundplatform.v2.devtools.prototypeapp.ui.state.SurveyEditorUiState
+import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.SurveyEditorActions
 import org.groundplatform.v2.map.CameraPosition
 import org.groundplatform.v2.map.FeatureFilter
 import org.groundplatform.v2.map.GeoJsonSource
@@ -142,64 +146,104 @@ import org.groundplatform.v2.map.MapLayer
 import org.groundplatform.v2.map.StyleValue
 
 /**
- * Survey editor page: the shared [WebAppHeader] with publishing controls, a resizable left-hand
- * navigation list (Survey details, Sharing, Forms, Map layers, Data tables; drag its right border
- * to resize it via [SidePanelSeparator]), and a content pane showing the editor for the selected
- * item.
- *
- * Edits are kept as an unpublished draft in [state]. [onPublish] commits them; [onClose] throws
- * them away (after the user confirms, if there are any). Both are expected to leave the editor.
+ * Survey editor page for the active survey, driven by [PrototypeAppState.surveyEditor]: collects
+ * its state and renders the stateless overload below with the shared [WebAppHeader].
  */
 @Composable
 fun SurveyEditorPage(
-  state: SurveyEditorState,
-  appState: PrototypeAppState,
+  state: PrototypeAppState,
   isDarkTheme: Boolean,
   modifier: Modifier = Modifier,
-  onPublish: () -> Unit = state::markPublished,
-  onClose: () -> Unit = state::discardChanges,
+) {
+  val uiState by state.surveyEditor.uiState.collectAsState()
+  SurveyEditorPage(
+    uiState = uiState,
+    actions = state.surveyEditor,
+    isDarkTheme = isDarkTheme,
+    modifier = modifier,
+    header = { navigationIcon, context, headerActions ->
+      WebAppHeader(
+        state = state,
+        onSignOut = null,
+        navigationIcon = navigationIcon,
+        context = context,
+        actions = {
+          WebMobilePrototypeButton(state)
+          headerActions()
+        },
+      )
+    },
+  )
+}
+
+/**
+ * Survey editor page: the app header with publishing controls, a resizable left-hand navigation
+ * list (Survey details, Sharing, Forms, Map layers, Data tables; drag its right border to resize it
+ * via [SidePanelSeparator]), and a content pane showing the editor for the selected item.
+ *
+ * Edits are kept as an unpublished draft in [uiState]. [SurveyEditorActions.publish] commits them;
+ * [SurveyEditorActions.close] throws them away (after the user confirms, if there are any). Both
+ * are expected to leave the editor. [header] renders the page header around the editor's navigation
+ * icon, title context, and publishing actions.
+ */
+@Composable
+fun SurveyEditorPage(
+  uiState: SurveyEditorUiState,
+  actions: SurveyEditorActions,
+  isDarkTheme: Boolean,
+  modifier: Modifier = Modifier,
+  header:
+    @Composable
+    (
+      navigationIcon: @Composable () -> Unit,
+      context: @Composable () -> Unit,
+      headerActions: @Composable () -> Unit,
+    ) -> Unit,
 ) {
   Column(modifier = modifier.fillMaxSize()) {
-    SurveyEditorTopBar(state, onPublish, onClose, appState)
+    SurveyEditorTopBar(uiState, actions, header)
     HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
     Row(modifier = Modifier.weight(1f).fillMaxWidth()) {
       SurveyNavigation(
-        state = state,
-        modifier = Modifier.width(state.sidePanelWidthDp.dp).fillMaxHeight(),
+        uiState = uiState,
+        actions = actions,
+        modifier = Modifier.width(uiState.sidePanelWidthDp.dp).fillMaxHeight(),
       )
       SidePanelSeparator(
-        widthDp = state.sidePanelWidthDp,
-        onWidthChange = state::updateSidePanelWidth,
+        widthDp = uiState.sidePanelWidthDp,
+        onWidthChange = actions::updateSidePanelWidth,
         modifier = Modifier.width(SidePanelSeparatorWidth).fillMaxHeight(),
       )
       Box(modifier = Modifier.weight(1f).fillMaxHeight()) {
-        when (val section = state.section) {
-          SurveyEditorSection.Details -> SurveyDetailsPane(state, appState)
-          SurveyEditorSection.Sharing -> SharingPane(state, appState)
+        when (val section = uiState.section) {
+          SurveyEditorSection.Details -> SurveyDetailsPane(uiState, actions)
+          SurveyEditorSection.Sharing -> SharingPane(uiState, actions)
           is SurveyEditorSection.Form -> {
-            val entry = state.selectedForm
+            val entry = uiState.selectedForm
             if (entry != null) {
-              LaunchedEffect(entry.editor.form.questions) { state.syncDatasetsLinkedToForm(entry) }
               key(entry.key) {
+                val formEditor = remember(entry.key) { actions.formEditor(entry.key) }
+                val formState by formEditor.uiState.collectAsState()
                 FormEditorPage(
-                  state = entry.editor,
+                  uiState = formState,
+                  actions = formEditor,
                   isDarkTheme = isDarkTheme,
-                  onCreateDataset = { state.createDatasetForForm(entry.key) },
-                  onDelete = { state.deleteForm(entry.key) },
-                  onSaveToModeChange = { state.setFormSaveToMode(entry.key, it) },
+                  onCreateDataset = { actions.createDatasetForForm(entry.key) },
+                  onDelete = { actions.deleteForm(entry.key) },
+                  onSaveToModeChange = { actions.setFormSaveToMode(entry.key, it) },
                   onOpenDataset = { id ->
-                    state.datasets
+                    uiState.datasets
                       .firstOrNull { it.id == id }
-                      ?.let { state.select(SurveyEditorSection.Dataset(it.key)) }
+                      ?.let { actions.select(SurveyEditorSection.Dataset(it.key)) }
                   },
                 )
               }
             }
           }
           is SurveyEditorSection.Dataset -> {
-            val dataset = state.selectedDataset
+            val dataset = uiState.selectedDataset
             if (dataset != null) {
-              key(section.key) { EntityDatasetEditor(state, dataset) }
+              key(section.key) { EntityDatasetEditor(uiState, actions, dataset) }
             }
           }
         }
@@ -214,25 +258,28 @@ fun SurveyEditorPage(
 
 /**
  * Close button and survey title on the left; draft status, Discard, and Publish changes on the
- * right. Close and Discard both run [onClose], asking for confirmation first if there are
- * unpublished changes.
+ * right. Close and Discard both run [SurveyEditorActions.close], asking for confirmation first if
+ * there are unpublished changes.
  */
 @Composable
 private fun SurveyEditorTopBar(
-  state: SurveyEditorState,
-  onPublish: () -> Unit,
-  onClose: () -> Unit,
-  appState: PrototypeAppState,
+  uiState: SurveyEditorUiState,
+  actions: SurveyEditorActions,
+  header:
+    @Composable
+    (
+      navigationIcon: @Composable () -> Unit,
+      context: @Composable () -> Unit,
+      headerActions: @Composable () -> Unit,
+    ) -> Unit,
 ) {
-  val hasChanges = state.hasUnpublishedChanges
-  val issueCount = state.issueCount
+  val hasChanges = uiState.hasUnpublishedChanges
+  val issueCount = uiState.issueCount
   var isConfirmingDiscard by remember { mutableStateOf(false) }
 
-  WebAppHeader(
-    state = appState,
-    onSignOut = null,
-    navigationIcon = {
-      IconButton(onClick = { if (hasChanges) isConfirmingDiscard = true else onClose() }) {
+  header(
+    {
+      IconButton(onClick = { if (hasChanges) isConfirmingDiscard = true else actions.close() }) {
         Icon(
           imageVector = Icons.Outlined.Close,
           contentDescription = "Close survey editor",
@@ -240,11 +287,11 @@ private fun SurveyEditorTopBar(
         )
       }
     },
-    context = {
-      WebHeaderContext(title = state.details.title.ifBlank { "Untitled survey" }) {
+    {
+      WebHeaderContext(title = uiState.details.title.ifBlank { "Untitled survey" }) {
         WebHeaderSupportingText("Survey editor", color = MaterialTheme.colorScheme.primary)
         WebHeaderSupportingText("·")
-        appState.organization(state.details.organizationId)?.let { organization ->
+        uiState.organization(uiState.details.organizationId)?.let { organization ->
           WebHeaderSupportingText(organization.name)
           WebHeaderSupportingText("·")
         }
@@ -259,10 +306,9 @@ private fun SurveyEditorTopBar(
         }
       }
     },
-    actions = {
-      WebMobilePrototypeButton(appState)
+    {
       TextButton(onClick = { isConfirmingDiscard = true }, enabled = hasChanges) { Text("Discard") }
-      Button(onClick = onPublish, enabled = state.canPublish) { Text("Publish changes") }
+      Button(onClick = actions::publish, enabled = uiState.canPublish) { Text("Publish changes") }
     },
   )
 
@@ -280,7 +326,7 @@ private fun SurveyEditorTopBar(
         TextButton(
           onClick = {
             isConfirmingDiscard = false
-            onClose()
+            actions.close()
           }
         ) {
           Text("Discard")
@@ -298,7 +344,11 @@ private fun SurveyEditorTopBar(
 // ---------------------------------------------------------------------------------------------
 
 @Composable
-internal fun SurveyNavigation(state: SurveyEditorState, modifier: Modifier = Modifier) {
+internal fun SurveyNavigation(
+  uiState: SurveyEditorUiState,
+  actions: SurveyEditorActions,
+  modifier: Modifier = Modifier,
+) {
   Surface(modifier = modifier, color = MaterialTheme.colorScheme.surfaceContainerLow) {
     Column(
       modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(12.dp),
@@ -307,40 +357,47 @@ internal fun SurveyNavigation(state: SurveyEditorState, modifier: Modifier = Mod
       NavItem(
         label = "Survey details",
         icon = Icons.Outlined.Info,
-        selected = state.section == SurveyEditorSection.Details,
-        onClick = { state.select(SurveyEditorSection.Details) },
+        selected = uiState.section == SurveyEditorSection.Details,
+        onClick = { actions.select(SurveyEditorSection.Details) },
       )
       NavItem(
         label = "Sharing",
         icon = Icons.Outlined.Person,
-        selected = state.section == SurveyEditorSection.Sharing,
-        onClick = { state.select(SurveyEditorSection.Sharing) },
-        trailing = "${state.sharing.collaborators.size + 1}",
-        hasIssues = state.sharingIssues.isNotEmpty(),
+        selected = uiState.section == SurveyEditorSection.Sharing,
+        onClick = { actions.select(SurveyEditorSection.Sharing) },
+        trailing = "${uiState.sharing.collaborators.size + 1}",
+        hasIssues = uiState.sharingIssues.isNotEmpty(),
       )
 
-      NavHeading("Forms", addDescription = "Add form", onAdd = state::addForm)
-      if (state.forms.isEmpty()) NavEmpty("No forms yet")
-      ReorderableNavList(items = state.forms, keyOf = { it.key }, onMove = state::moveForm) {
+      NavHeading("Forms", addDescription = "Add form", onAdd = actions::addForm)
+      if (uiState.forms.isEmpty()) NavEmpty("No forms yet")
+      ReorderableNavList(items = uiState.forms, keyOf = { it.key }, onMove = actions::moveForm) {
         entry,
         showHandle ->
-        val form = entry.editor.form
+        val form = entry.form
         NavItem(
           label = form.title.ifBlank { "Untitled form" },
           icon = if (showHandle) Icons.Outlined.DragIndicator else Icons.Outlined.Description,
-          selected = state.section == SurveyEditorSection.Form(entry.key),
-          onClick = { state.select(SurveyEditorSection.Form(entry.key)) },
+          selected = uiState.section == SurveyEditorSection.Form(entry.key),
+          onClick = { actions.select(SurveyEditorSection.Form(entry.key)) },
           trailing = "${form.questions.size}",
-          hasIssues = entry.editor.issues.isNotEmpty(),
+          hasIssues = uiState.formIssues(entry).isNotEmpty(),
           nested = true,
         )
       }
 
-      DatasetNavGroup(state, DatasetKind.MAP_LAYER, state.mapLayers, Icons.Outlined.Layers)
       DatasetNavGroup(
-        state,
+        uiState,
+        actions,
+        DatasetKind.MAP_LAYER,
+        uiState.mapLayers,
+        Icons.Outlined.Layers,
+      )
+      DatasetNavGroup(
+        uiState,
+        actions,
         DatasetKind.DATA_TABLE,
-        state.dataTables,
+        uiState.dataTables,
         Icons.AutoMirrored.Outlined.List,
       )
     }
@@ -349,31 +406,32 @@ internal fun SurveyNavigation(state: SurveyEditorState, modifier: Modifier = Mod
 
 @Composable
 private fun DatasetNavGroup(
-  state: SurveyEditorState,
+  uiState: SurveyEditorUiState,
+  actions: SurveyEditorActions,
   kind: DatasetKind,
   datasets: List<EntityDataset>,
   icon: ImageVector,
 ) {
   var showAddMapLayer by remember { mutableStateOf(false) }
-  if (showAddMapLayer) AddMapLayerDialog(state, onDismiss = { showAddMapLayer = false })
+  if (showAddMapLayer) AddMapLayerDialog(uiState, actions, onDismiss = { showAddMapLayer = false })
   NavHeading(
     kind.plural,
     addDescription = "Add ${kind.singular.lowercase()}",
     onAdd = {
-      if (kind == DatasetKind.MAP_LAYER) showAddMapLayer = true else state.addDataset(kind)
+      if (kind == DatasetKind.MAP_LAYER) showAddMapLayer = true else actions.addDataset(kind)
     },
   )
   if (datasets.isEmpty()) NavEmpty("No ${kind.plural.lowercase()} yet")
-  ReorderableNavList(items = datasets, keyOf = { it.key }, onMove = state::moveDataset) {
+  ReorderableNavList(items = datasets, keyOf = { it.key }, onMove = actions::moveDataset) {
     dataset,
     showHandle ->
     NavItem(
       label = dataset.displayName.ifBlank { "Untitled" },
       icon = if (showHandle) Icons.Outlined.DragIndicator else icon,
-      selected = state.section == SurveyEditorSection.Dataset(dataset.key),
-      onClick = { state.select(SurveyEditorSection.Dataset(dataset.key)) },
+      selected = uiState.section == SurveyEditorSection.Dataset(dataset.key),
+      onClick = { actions.select(SurveyEditorSection.Dataset(dataset.key)) },
       trailing = "${dataset.rows.size}",
-      hasIssues = state.datasetIssues(dataset).isNotEmpty(),
+      hasIssues = uiState.datasetIssues(dataset).isNotEmpty(),
       nested = true,
     )
   }
@@ -555,8 +613,8 @@ internal fun PaneScaffold(title: String, subtitle: String, content: @Composable 
 }
 
 @Composable
-private fun SurveyDetailsPane(state: SurveyEditorState, appState: PrototypeAppState) {
-  val details = state.details
+private fun SurveyDetailsPane(uiState: SurveyEditorUiState, actions: SurveyEditorActions) {
+  val details = uiState.details
   PaneScaffold(
     title = "Survey details",
     subtitle = "Basic information shown to data collectors when they open the survey.",
@@ -567,7 +625,7 @@ private fun SurveyDetailsPane(state: SurveyEditorState, appState: PrototypeAppSt
     ) {
       OutlinedTextField(
         value = details.title,
-        onValueChange = { v -> state.updateDetails { it.copy(title = v) } },
+        onValueChange = { v -> actions.updateDetails { it.copy(title = v) } },
         label = { Text("Survey title") },
         singleLine = true,
         isError = details.title.isBlank(),
@@ -575,42 +633,45 @@ private fun SurveyDetailsPane(state: SurveyEditorState, appState: PrototypeAppSt
       )
       OutlinedTextField(
         value = details.description,
-        onValueChange = { v -> state.updateDetails { it.copy(description = v) } },
+        onValueChange = { v -> actions.updateDetails { it.copy(description = v) } },
         label = { Text("Description") },
         minLines = 3,
         modifier = Modifier.fillMaxWidth(),
       )
       OutlinedTextField(
         value = details.surveyId,
-        onValueChange = { v -> state.updateDetails { it.copy(surveyId = v.trim()) } },
+        onValueChange = { v -> actions.updateDetails { it.copy(surveyId = v.trim()) } },
         label = { Text("Survey ID") },
         singleLine = true,
         isError = !FormEditorValidator.isValidName(details.surveyId),
         textStyle = MaterialTheme.typography.bodyLarge.copy(fontFamily = FontFamily.Monospace),
         modifier = Modifier.fillMaxWidth(),
       )
-      OrganizationSection(state = state, appState = appState)
-      LanguageSelectorSection(state = state)
+      OrganizationSection(uiState = uiState, actions = actions)
+      LanguageSelectorSection(uiState = uiState, actions = actions)
       SurveyAreaSection(
-        state = state,
-        localPlaces = appState.places,
-        searchPlaces = appState::searchPlaces,
+        uiState = uiState,
+        actions = actions,
+        localPlaces = uiState.localPlaces,
+        searchPlaces = actions::searchPlaces,
       )
     }
 
     SectionLabel("Contents")
     Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-      SummaryCard("Forms", state.forms.size) {
-        state.forms.firstOrNull()?.let { state.select(SurveyEditorSection.Form(it.key)) }
+      SummaryCard("Forms", uiState.forms.size) {
+        uiState.forms.firstOrNull()?.let { actions.select(SurveyEditorSection.Form(it.key)) }
       }
-      SummaryCard("Map layers", state.mapLayers.size) {
-        state.mapLayers.firstOrNull()?.let { state.select(SurveyEditorSection.Dataset(it.key)) }
+      SummaryCard("Map layers", uiState.mapLayers.size) {
+        uiState.mapLayers.firstOrNull()?.let { actions.select(SurveyEditorSection.Dataset(it.key)) }
       }
-      SummaryCard("Data tables", state.dataTables.size) {
-        state.dataTables.firstOrNull()?.let { state.select(SurveyEditorSection.Dataset(it.key)) }
+      SummaryCard("Data tables", uiState.dataTables.size) {
+        uiState.dataTables.firstOrNull()?.let {
+          actions.select(SurveyEditorSection.Dataset(it.key))
+        }
       }
-      SummaryCard("People", state.sharing.collaborators.size + 1) {
-        state.select(SurveyEditorSection.Sharing)
+      SummaryCard("People", uiState.sharing.collaborators.size + 1) {
+        actions.select(SurveyEditorSection.Sharing)
       }
     }
   }
@@ -639,14 +700,14 @@ private val NoOrganization = Organization(id = "", name = "None (personal survey
  * member, so opening the editor never silently changes it.
  */
 @Composable
-private fun OrganizationSection(state: SurveyEditorState, appState: PrototypeAppState) {
-  val selectedId = state.details.organizationId
-  val current = appState.organization(selectedId)
+private fun OrganizationSection(uiState: SurveyEditorUiState, actions: SurveyEditorActions) {
+  val selectedId = uiState.details.organizationId
+  val current = uiState.organization(selectedId)
   val options =
-    remember(appState.signedInUserOrganizations, current) {
+    remember(uiState.signedInUserOrganizations, current) {
       buildList {
         add(NoOrganization)
-        addAll(appState.signedInUserOrganizations)
+        addAll(uiState.signedInUserOrganizations)
         if (current != null && none { it.id == current.id }) add(current)
       }
     }
@@ -670,7 +731,7 @@ private fun OrganizationSection(state: SurveyEditorState, appState: PrototypeApp
           current?.name ?: selectedId?.let { "Unknown organization ($it)" } ?: NoOrganization.name,
         options = options,
         optionText = { it.name },
-        onSelect = { state.setOrganization(it.id.ifBlank { null }) },
+        onSelect = { actions.setOrganization(it.id.ifBlank { null }) },
       )
     }
     if (selectedId != null && current == null) {
@@ -680,7 +741,7 @@ private fun OrganizationSection(state: SurveyEditorState, appState: PrototypeApp
         color = MaterialTheme.colorScheme.error,
       )
     }
-    state.organizationNotice?.let { notice ->
+    uiState.organizationNotice?.let { notice ->
       Surface(
         color = MaterialTheme.colorScheme.secondaryContainer,
         contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
@@ -697,7 +758,7 @@ private fun OrganizationSection(state: SurveyEditorState, appState: PrototypeApp
             style = MaterialTheme.typography.bodySmall,
             modifier = Modifier.weight(1f).padding(vertical = 8.dp),
           )
-          IconButton(onClick = state::dismissOrganizationNotice) {
+          IconButton(onClick = actions::dismissOrganizationNotice) {
             Icon(Icons.Outlined.Close, contentDescription = "Dismiss")
           }
         }
@@ -708,8 +769,8 @@ private fun OrganizationSection(state: SurveyEditorState, appState: PrototypeApp
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun LanguageSelectorSection(state: SurveyEditorState) {
-  val details = state.details
+private fun LanguageSelectorSection(uiState: SurveyEditorUiState, actions: SurveyEditorActions) {
+  val details = uiState.details
   val supported = details.supportedLanguages
   val defaultLang = details.defaultLanguage
   var showPicker by remember { mutableStateOf(false) }
@@ -717,7 +778,7 @@ private fun LanguageSelectorSection(state: SurveyEditorState) {
   if (showPicker) {
     LanguagePickerDialog(
       selectedCodes = supported.toSet(),
-      onAddLanguage = { lang -> state.addSupportedLanguage(lang.code) },
+      onAddLanguage = { lang -> actions.addSupportedLanguage(lang.code) },
       onDismiss = { showPicker = false },
     )
   }
@@ -747,12 +808,12 @@ private fun LanguageSelectorSection(state: SurveyEditorState) {
           val isDefault = code.equals(defaultLang, ignoreCase = true)
           InputChip(
             selected = isDefault,
-            onClick = { state.setDefaultLanguage(code) },
+            onClick = { actions.setDefaultLanguage(code) },
             label = { Text(if (isDefault) "$displayName • Default" else displayName) },
             trailingIcon = {
               if (supported.size > 1) {
                 IconButton(
-                  onClick = { state.removeSupportedLanguage(code) },
+                  onClick = { actions.removeSupportedLanguage(code) },
                   modifier = Modifier.size(18.dp),
                 ) {
                   Icon(
@@ -783,7 +844,7 @@ private fun LanguageSelectorSection(state: SurveyEditorState) {
           selectedText = defaultLabel,
           options = supported,
           optionText = { code -> IsoLanguages.findByCode(code)?.name ?: code },
-          onSelect = { pickedCode -> state.setDefaultLanguage(pickedCode) },
+          onSelect = { pickedCode -> actions.setDefaultLanguage(pickedCode) },
         )
       }
     }
@@ -792,21 +853,22 @@ private fun LanguageSelectorSection(state: SurveyEditorState) {
 
 @Composable
 private fun SurveyAreaSection(
-  state: SurveyEditorState,
+  uiState: SurveyEditorUiState,
+  actions: SurveyEditorActions,
   localPlaces: List<SurveyPlaceItem>,
   searchPlaces: PlaceSearch,
 ) {
-  val area = state.details.surveyArea
+  val area = uiState.details.surveyArea
   var showEditor by remember { mutableStateOf(false) }
 
   if (showEditor) {
     SurveyAreaEditorDialog(
-      surveyId = state.details.surveyId,
-      surveyLocationLabel = state.details.title.ifBlank { "Survey" },
+      surveyId = uiState.details.surveyId,
+      surveyLocationLabel = uiState.details.title.ifBlank { "Survey" },
       current = area,
       localPlaces = localPlaces,
       searchPlaces = searchPlaces,
-      onSave = { newArea -> state.setSurveyArea(newArea) },
+      onSave = { newArea -> actions.setSurveyArea(newArea) },
       onDismiss = { showEditor = false },
     )
   }
@@ -891,7 +953,7 @@ private fun SurveyAreaSection(
                 Text("Edit survey area")
               }
               OutlinedButton(
-                onClick = { state.setSurveyArea(null) },
+                onClick = { actions.setSurveyArea(null) },
                 shape = RoundedCornerShape(8.dp),
               ) {
                 Icon(
@@ -1207,17 +1269,17 @@ private fun LanguagePickerDialog(
 // ---------------------------------------------------------------------------------------------
 
 @Composable
-private fun SharingPane(state: SurveyEditorState, appState: PrototypeAppState) {
-  val sharing = state.sharing
-  val organization = appState.organization(state.details.organizationId)
+private fun SharingPane(uiState: SurveyEditorUiState, actions: SurveyEditorActions) {
+  val sharing = uiState.sharing
+  val organization = uiState.organization(uiState.details.organizationId)
   var acceptingEmail by remember { mutableStateOf<String?>(null) }
   sharing.collaborators
     .firstOrNull { it.email == acceptingEmail && it.status == InvitationStatus.PENDING }
     ?.let { invitee ->
       AcceptInviteDialog(
-        surveyTitle = state.details.title,
+        surveyTitle = uiState.details.title,
         invitee = invitee,
-        onAccept = { name, photo -> state.acceptInvite(invitee.email, name, photo) },
+        onAccept = { name, photo -> actions.acceptInvite(invitee.email, name, photo) },
         onDismiss = { acceptingEmail = null },
       )
     }
@@ -1237,7 +1299,7 @@ private fun SharingPane(state: SurveyEditorState, appState: PrototypeAppState) {
           verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
           SectionLabel("People with access")
-          InviteRow(state)
+          InviteRow(uiState, actions)
           PersonRow(
             displayName = sharing.ownerProfile?.displayName ?: sharing.ownerEmail,
             email = sharing.ownerEmail,
@@ -1272,7 +1334,7 @@ private fun SharingPane(state: SurveyEditorState, appState: PrototypeAppState) {
                       {
                         PendingInviteLinkRow(
                           token = token,
-                          onResetLink = { state.resetInviteLink(person.email) },
+                          onResetLink = { actions.resetInviteLink(person.email) },
                           onOpenAsInvitee = { acceptingEmail = person.email },
                         )
                       }
@@ -1284,10 +1346,10 @@ private fun SharingPane(state: SurveyEditorState, appState: PrototypeAppState) {
                     selectedText = person.role.label,
                     options = CollaboratorRole.entries,
                     optionText = { it.label },
-                    onSelect = { state.setCollaboratorRole(person.email, it) },
+                    onSelect = { actions.setCollaboratorRole(person.email, it) },
                   )
                 }
-                IconButton(onClick = { state.removeCollaborator(person.email) }) {
+                IconButton(onClick = { actions.removeCollaborator(person.email) }) {
                   Icon(Icons.Outlined.Close, contentDescription = "Remove ${person.displayName}")
                 }
               }
@@ -1312,7 +1374,7 @@ private fun SharingPane(state: SurveyEditorState, appState: PrototypeAppState) {
           verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
           SectionLabel("General access")
-          state.sharingIssues.forEach { issue ->
+          uiState.sharingIssues.forEach { issue ->
             Row(
               verticalAlignment = Alignment.CenterVertically,
               horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -1345,7 +1407,7 @@ private fun SharingPane(state: SurveyEditorState, appState: PrototypeAppState) {
                 },
               selected = sharing.policy == policy,
               enabled = !isOrganizationPolicy || organization != null,
-              onSelect = { state.updateSharing { it.copy(policy = policy) } },
+              onSelect = { actions.updateSharing { it.copy(policy = policy) } },
             )
           }
         }
@@ -1364,7 +1426,7 @@ private fun SharingPane(state: SurveyEditorState, appState: PrototypeAppState) {
               title = visibility.label,
               description = visibility.description,
               selected = sharing.peerDataVisibility == visibility,
-              onSelect = { state.updateSharing { it.copy(peerDataVisibility = visibility) } },
+              onSelect = { actions.updateSharing { it.copy(peerDataVisibility = visibility) } },
             )
           }
         }
@@ -1374,7 +1436,7 @@ private fun SharingPane(state: SurveyEditorState, appState: PrototypeAppState) {
 }
 
 @Composable
-private fun InviteRow(state: SurveyEditorState) {
+private fun InviteRow(uiState: SurveyEditorUiState, actions: SurveyEditorActions) {
   var email by remember { mutableStateOf("") }
   var role by remember { mutableStateOf(CollaboratorRole.DATA_COLLECTOR) }
   var error by remember { mutableStateOf<String?>(null) }
@@ -1402,7 +1464,7 @@ private fun InviteRow(state: SurveyEditorState) {
     }
     Button(
       onClick = {
-        error = state.inviteCollaborator(email, role)
+        error = actions.inviteCollaborator(email, role)
         if (error == null) email = ""
       },
       enabled = email.isNotBlank(),

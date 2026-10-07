@@ -43,7 +43,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -51,16 +50,18 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.launch
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.AllocationMode
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EntityDataset
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.PlotShapeOption
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SampleAreaSource
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SampleDesignConfig
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SampleMethod
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SamplingAreaResult
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SubPlotMode
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SurveyAreaGeometry
 import org.groundplatform.v2.devtools.prototypeapp.formeditor.DropdownSelector
+import org.groundplatform.v2.devtools.prototypeapp.ui.state.SurveyEditorUiState
+import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.SurveyEditorActions
 
 /** Above this many plots the prototype warns that generating and editing may be slow. */
 private const val LARGE_DESIGN_PLOTS = 20_000
@@ -74,25 +75,26 @@ private const val MAX_CUSTOM_STRATA_SHOWN = 30
  * Generate / Regenerate with progress and Cancel.
  */
 @Composable
-internal fun SamplingDesignPanel(state: SurveyEditorState, dataset: EntityDataset) {
+internal fun SamplingDesignPanel(
+  uiState: SurveyEditorUiState,
+  actions: SurveyEditorActions,
+  dataset: EntityDataset,
+) {
   val config = dataset.generator ?: return
   val key = dataset.key
-  val scope = rememberCoroutineScope()
   fun update(transform: (SampleDesignConfig) -> SampleDesignConfig) =
-    state.updateSampleDesign(key, transform)
+    actions.updateSampleDesign(key, transform)
 
-  val progress = state.generation?.takeIf { it.datasetKey == key }
-  val busy = state.generation != null
+  val progress = uiState.generation?.takeIf { it.datasetKey == key }
+  val busy = uiState.generation != null
   val lastRun = config.lastRun
-  val stale = state.isDesignStale(dataset)
-  val blockedReason = state.regenerateBlockedReason(dataset)
-  val error = state.generationError(key)
-  val areaResult = state.samplingArea(config)
+  val stale = actions.isDesignStale(dataset)
+  val blockedReason = uiState.regenerateBlockedReason(dataset)
+  val error = uiState.generationError(key)
+  val areaResult = actions.samplingArea(config)
   var confirmRegenerate by remember { mutableStateOf(false) }
 
-  fun generate() {
-    scope.launch { state.generateSample(key) }
-  }
+  fun generate() = actions.generateSamplePlots(key)
 
   Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
     if (stale && blockedReason == null) {
@@ -123,7 +125,7 @@ internal fun SamplingDesignPanel(state: SurveyEditorState, dataset: EntityDatase
       )
     }
 
-    AreaSourceSelector(state, config, ::update)
+    AreaSourceSelector(uiState, actions, config, ::update)
     if (areaResult is SamplingAreaResult.Unavailable) {
       Text(
         areaResult.message,
@@ -144,7 +146,7 @@ internal fun SamplingDesignPanel(state: SurveyEditorState, dataset: EntityDatase
       style = MaterialTheme.typography.bodySmall,
       color = MaterialTheme.colorScheme.onSurfaceVariant,
     )
-    MethodParameters(state, config, ::update)
+    MethodParameters(uiState, actions, config, ::update)
 
     DropdownSelector(
       label = "Plot shape",
@@ -220,12 +222,12 @@ internal fun SamplingDesignPanel(state: SurveyEditorState, dataset: EntityDatase
         onValue = { v -> update { it.copy(seed = v) } },
         modifier = Modifier.weight(1f),
       )
-      IconButton(onClick = { state.rerollSeed(key) }, enabled = !busy) {
+      IconButton(onClick = { actions.rerollSeed(key) }, enabled = !busy) {
         Icon(Icons.Outlined.Casino, contentDescription = "Pick a new random seed")
       }
     }
 
-    EstimateLine(state, dataset, config, areaResult)
+    EstimateLine(uiState, actions, dataset, config, areaResult)
 
     if (progress != null) {
       val fraction = progress.fraction
@@ -248,7 +250,7 @@ internal fun SamplingDesignPanel(state: SurveyEditorState, dataset: EntityDatase
           style = MaterialTheme.typography.bodySmall,
           modifier = Modifier.weight(1f),
         )
-        OutlinedButton(onClick = state::cancelGeneration) { Text("Cancel") }
+        OutlinedButton(onClick = actions::cancelGeneration) { Text("Cancel") }
       }
     } else {
       Button(
@@ -302,11 +304,12 @@ internal fun SamplingDesignPanel(state: SurveyEditorState, dataset: EntityDatase
 /** Survey area or a polygon Map layer (plus the property that names each stratum). */
 @Composable
 private fun AreaSourceSelector(
-  state: SurveyEditorState,
+  uiState: SurveyEditorUiState,
+  actions: SurveyEditorActions,
   config: SampleDesignConfig,
   update: ((SampleDesignConfig) -> SampleDesignConfig) -> Unit,
 ) {
-  val strataLayers = state.strataLayers
+  val strataLayers = uiState.strataLayers
   val options: List<SampleAreaSource> =
     listOf(SampleAreaSource.SurveyArea) +
       strataLayers.map { layer ->
@@ -339,7 +342,7 @@ private fun AreaSourceSelector(
     optionText = { "${it.label} (${it.name})" },
     onSelect = { p -> update { it.copy(areaSource = source.copy(stratumProperty = p.name)) } },
   )
-  val strata = state.strataIds(config)
+  val strata = actions.strataIds(config)
   Text(
     "${strata.size} ${if (strata.size == 1) "stratum" else "strata"}: " +
       strata.take(5).joinToString(", ") +
@@ -351,7 +354,8 @@ private fun AreaSourceSelector(
 
 @Composable
 private fun MethodParameters(
-  state: SurveyEditorState,
+  uiState: SurveyEditorUiState,
+  actions: SurveyEditorActions,
   config: SampleDesignConfig,
   update: ((SampleDesignConfig) -> SampleDesignConfig) -> Unit,
 ) {
@@ -399,7 +403,7 @@ private fun MethodParameters(
         onSelect = { a -> update { it.copy(allocation = a) } },
       )
       if (config.allocation == AllocationMode.CUSTOM) {
-        val strata = state.strataIds(config).ifEmpty { listOf("") }
+        val strata = actions.strataIds(config).ifEmpty { listOf("") }
         strata.take(MAX_CUSTOM_STRATA_SHOWN).forEach { id ->
           IntegerField(
             label = "Plots in ${id.ifBlank { "survey area" }}",
@@ -455,7 +459,8 @@ private fun MethodParameters(
 
 @Composable
 private fun EstimateLine(
-  state: SurveyEditorState,
+  uiState: SurveyEditorUiState,
+  actions: SurveyEditorActions,
   dataset: EntityDataset,
   config: SampleDesignConfig,
   areaResult: SamplingAreaResult,
@@ -464,11 +469,12 @@ private fun EstimateLine(
   // Recompute only when the design or the area itself changes, not on every edit elsewhere.
   val areaRef: Any? =
     when (val source = config.areaSource) {
-      SampleAreaSource.SurveyArea -> state.details.surveyArea
+      SampleAreaSource.SurveyArea -> uiState.details.surveyArea
       is SampleAreaSource.StrataLayer ->
-        state.datasets.firstOrNull { it.key == source.datasetKey }?.rows
+        uiState.datasets.firstOrNull { it.key == source.datasetKey }?.rows
     }
-  val estimate = remember(config.withoutProvenance(), areaRef) { state.estimateSample(dataset.key) }
+  val estimate =
+    remember(config.withoutProvenance(), areaRef) { actions.estimateSample(dataset.key) }
   val text =
     if (estimate == null) {
       "Estimate not available yet."

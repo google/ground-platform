@@ -48,6 +48,8 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.friendlyD
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.isoDateToUtcMillis
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.slugify
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.utcMillisToIsoDate
+import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.formEditorViewModel
+import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.ui
 
 class FormEditorTest {
 
@@ -155,98 +157,98 @@ class FormEditorTest {
 
   @Test
   fun state_addDeleteAndReorderQuestions() {
-    val state = FormEditorState(FormEditorSamples.shadeTreeVisit())
-    val initialSize = state.form.questions.size
+    val state = formEditorViewModel(FormEditorSamples.shadeTreeVisit())
+    val initialSize = state.ui.form.questions.size
     state.select("q3")
     state.addQuestion(EditorQuestionType.SELECT_ONE)
-    val added = assertNotNull(state.selectedQuestion)
-    assertEquals(3, state.selectedIndex)
-    assertEquals(initialSize + 1, state.form.questions.size)
+    val added = assertNotNull(state.ui.selectedQuestion)
+    assertEquals(3, state.ui.selectedIndex)
+    assertEquals(initialSize + 1, state.ui.form.questions.size)
     assertEquals(2, added.choices.size)
 
     state.moveQuestion(added.key, -1)
-    assertEquals(2, state.form.indexOf(added.key))
+    assertEquals(2, state.ui.form.indexOf(added.key))
 
     state.deleteQuestion(added.key)
-    assertEquals(initialSize, state.form.questions.size)
-    assertEquals(-1, state.form.indexOf(added.key))
+    assertEquals(initialSize, state.ui.form.questions.size)
+    assertEquals(-1, state.ui.form.indexOf(added.key))
   }
 
   @Test
   fun state_deletingSourceClearsDependentDisplayLogic() {
-    val state = FormEditorState(FormEditorSamples.shadeTreeVisit())
+    val state = formEditorViewModel(FormEditorSamples.shadeTreeVisit())
     state.deleteQuestion("q3") // has_shade_trees drives q4 and q5
-    assertNull(state.form.find("q4")?.relevance)
-    assertNull(state.form.find("q5")?.relevance)
-    assertEquals(emptyList(), state.issues)
+    assertNull(state.ui.form.find("q4")?.relevance)
+    assertNull(state.ui.form.find("q5")?.relevance)
+    assertEquals(emptyList(), state.ui.issues)
   }
 
   @Test
   fun state_renamingChoiceValueUpdatesDependents() {
-    val state = FormEditorState(FormEditorSamples.shadeTreeVisit())
+    val state = formEditorViewModel(FormEditorSamples.shadeTreeVisit())
     state.updateChoiceLabel("q3", 0, "Yes, many")
-    assertEquals("yes_many", state.form.find("q3")!!.choices[0].value)
-    assertEquals("yes_many", state.form.find("q4")!!.relevance!!.value)
+    assertEquals("yes_many", state.ui.form.find("q3")!!.choices[0].value)
+    assertEquals("yes_many", state.ui.form.find("q4")!!.relevance!!.value)
   }
 
   @Test
   fun state_previewStartsForValidForm() {
-    val state = FormEditorState(FormEditorSamples.shadeTreeVisit())
+    val state = formEditorViewModel(FormEditorSamples.shadeTreeVisit())
     state.startPreview()
-    assertNotNull(state.previewController)
-    assertNull(state.previewError)
+    assertNotNull(state.ui.previewController)
+    assertNull(state.ui.previewError)
     state.closePreview()
-    assertNull(state.previewController)
+    assertNull(state.ui.previewController)
   }
 
   @Test
   fun state_formSettingsSelectionClearsQuestionSelection() {
-    val state = FormEditorState(FormEditorSamples.shadeTreeVisit())
+    val state = formEditorViewModel(FormEditorSamples.shadeTreeVisit())
     state.select("q3")
-    assertFalse(state.isFormSettingsSelected)
+    assertFalse(state.ui.isFormSettingsSelected)
     state.selectFormSettings()
-    assertTrue(state.isFormSettingsSelected)
-    assertNull(state.selectedQuestion)
+    assertTrue(state.ui.isFormSettingsSelected)
+    assertNull(state.ui.selectedQuestion)
     state.updateTitle("Renamed")
-    assertEquals("Renamed", state.form.title)
+    assertEquals("Renamed", state.ui.form.title)
   }
 
   @Test
   fun state_setChoiceColorValidatesAndClears() {
-    val state = FormEditorState(FormEditorSamples.shadeTreeVisit())
+    val state = formEditorViewModel(FormEditorSamples.shadeTreeVisit())
     state.setChoiceColor("q3", 0, "#1a73e8")
-    assertEquals("#1A73E8", state.form.find("q3")!!.choices[0].colorHex)
+    assertEquals("#1A73E8", state.ui.form.find("q3")!!.choices[0].colorHex)
     state.setChoiceColor("q3", 0, "blue")
-    assertEquals("#1A73E8", state.form.find("q3")!!.choices[0].colorHex)
+    assertEquals("#1A73E8", state.ui.form.find("q3")!!.choices[0].colorHex)
     state.setChoiceColor("q3", 0, null)
-    assertNull(state.form.find("q3")!!.choices[0].colorHex)
+    assertNull(state.ui.form.find("q3")!!.choices[0].colorHex)
   }
 
   @Test
   fun state_setChoiceImageEnforcesSizeLimit() {
-    val state = FormEditorState(FormEditorSamples.shadeTreeVisit())
+    val state = formEditorViewModel(FormEditorSamples.shadeTreeVisit())
     val small = EditorChoiceImage("image/png", "iVBORw0KGgo=")
     assertTrue(state.setChoiceImage("q3", 1, small))
-    assertEquals(small, state.form.find("q3")!!.choices[1].image)
+    assertEquals(small, state.ui.form.find("q3")!!.choices[1].image)
 
     val tooBigBase64 = "A".repeat(EditorChoiceImage.MAX_BYTES / 3 * 4 + 8)
     val tooBig = EditorChoiceImage("image/png", tooBigBase64)
     assertFalse(state.setChoiceImage("q3", 1, tooBig))
     assertFalse(state.setChoiceImage("q3", 1, EditorChoiceImage("text/plain", "AAAA")))
     assertFalse(state.setChoiceImage("q3", 9, small))
-    assertEquals(small, state.form.find("q3")!!.choices[1].image)
+    assertEquals(small, state.ui.form.find("q3")!!.choices[1].image)
 
     assertTrue(state.setChoiceImage("q3", 1, null))
-    assertNull(state.form.find("q3")!!.choices[1].image)
+    assertNull(state.ui.form.find("q3")!!.choices[1].image)
   }
 
   @Test
   fun state_labelEditsKeepChoiceImageAndColor() {
-    val state = FormEditorState(FormEditorSamples.shadeTreeVisit())
+    val state = formEditorViewModel(FormEditorSamples.shadeTreeVisit())
     state.setChoiceColor("q3", 0, "#1E8E3E")
     state.setChoiceImage("q3", 0, EditorChoiceImage("image/png", "iVBORw0KGgo="))
     state.updateChoiceLabel("q3", 0, "Yes, many")
-    val choice = state.form.find("q3")!!.choices[0]
+    val choice = state.ui.form.find("q3")!!.choices[0]
     assertEquals("#1E8E3E", choice.colorHex)
     assertNotNull(choice.image)
   }
@@ -258,9 +260,9 @@ class FormEditorTest {
 
   @Test
   fun xforms_choiceColorIsExportedAsSecondaryInstanceColumn() {
-    val state = FormEditorState(FormEditorSamples.shadeTreeVisit())
+    val state = formEditorViewModel(FormEditorSamples.shadeTreeVisit())
     state.setChoiceColor("q3", 0, "#1E8E3E")
-    val xml = state.xformsXml
+    val xml = state.ui.xformsXml
 
     // pyxform shape: <instance id="list"><root><item><name/><label/><extra/></item></root>.
     assertTrue("""<instance id="has_shade_trees">""" in xml)
@@ -278,8 +280,8 @@ class FormEditorTest {
     val formDef = XFormsXmlSerializer.deserializeFormDef(xml)
     assertTrue(formDef.model!!.secondary_instances.any { it.id == "has_shade_trees" })
     state.startPreview()
-    assertNull(state.previewError)
-    val options = shadeTreeStep(assertNotNull(state.previewController)).control.options
+    assertNull(state.ui.previewError)
+    val options = shadeTreeStep(assertNotNull(state.ui.previewController)).control.options
     assertEquals(listOf("yes", "no"), options.map { it.value })
     assertEquals(listOf("Yes", "No"), options.map { it.label.text })
     assertEquals("#1E8E3E", options[0].properties["color"])
@@ -288,9 +290,9 @@ class FormEditorTest {
 
   @Test
   fun xforms_choiceImagesUseItextIdLikePyxform() {
-    val state = FormEditorState(FormEditorSamples.shadeTreeVisit())
+    val state = formEditorViewModel(FormEditorSamples.shadeTreeVisit())
     state.setChoiceImage("q3", 0, EditorChoiceImage("image/jpeg", "/9j/4AAQ"))
-    val xml = state.xformsXml
+    val xml = state.ui.xformsXml
 
     assertTrue("<itextId>has_shade_trees-0</itextId>" in xml)
     assertTrue("<itextId>has_shade_trees-1</itextId>" in xml)
@@ -300,8 +302,8 @@ class FormEditorTest {
     assertFalse("<label>Yes</label>" in xml)
 
     state.startPreview()
-    assertNull(state.previewError)
-    val options = shadeTreeStep(assertNotNull(state.previewController)).control.options
+    assertNull(state.ui.previewError)
+    val options = shadeTreeStep(assertNotNull(state.ui.previewController)).control.options
     assertEquals(listOf("Yes", "No"), options.map { it.label.text })
     assertEquals("jr://images/has_shade_trees-yes.jpg", options[0].label.media?.image_uri)
     assertNull(options[1].label.media?.image_uri?.takeIf { it.isNotEmpty() })
@@ -316,9 +318,9 @@ class FormEditorTest {
     assertTrue("<item>" in before)
 
     // Coloring one list leaves every other list's inline items byte-for-byte unchanged.
-    val state = FormEditorState(form)
+    val state = formEditorViewModel(form)
     state.setChoiceColor("q3", 0, "#1E8E3E")
-    val after = state.xformsXml
+    val after = state.ui.xformsXml
     fun bodyAfterQ3(xml: String) =
       xml.substringAfter("""<select1 ref="/data/has_shade_trees">""").substringAfter("</select1>")
     assertEquals(bodyAfterQ3(before), bodyAfterQ3(after))
@@ -392,9 +394,11 @@ class FormEditorTest {
 
   @Test
   fun validation_badInputsAreValidatorIssues() {
-    val state = FormEditorState(FormEditorSamples.shadeTreeVisit())
+    val state = formEditorViewModel(FormEditorSamples.shadeTreeVisit())
     fun issues(key: String) =
-      FormEditorValidator.validate(state.form).filter { it.questionKey == key }.map { it.message }
+      FormEditorValidator.validate(state.ui.form)
+        .filter { it.questionKey == key }
+        .map { it.message }
 
     state.updateValidation("q4") { it.copy(min = "10", max = "2") }
     assertTrue("Minimum can't be more than maximum." in issues("q4"))
@@ -404,7 +408,7 @@ class FormEditorTest {
     assertNull(
       ValidationRules.constraintExpression(
         EditorQuestionType.INTEGER,
-        state.form.find("q4")!!.validation,
+        state.ui.form.find("q4")!!.validation,
       )
     )
 
@@ -421,43 +425,44 @@ class FormEditorTest {
 
     // Clearing every setting removes the rule entirely.
     state.updateValidation("q6") { EditorValidation() }
-    assertNull(state.form.find("q6")!!.validation)
+    assertNull(state.ui.form.find("q6")!!.validation)
   }
 
   @Test
   fun validation_changeTypeDropsRulesThatNoLongerApply() {
-    val state = FormEditorState(FormEditorSamples.shadeTreeVisit())
+    val state = formEditorViewModel(FormEditorSamples.shadeTreeVisit())
     state.updateValidation("q4") { it.copy(min = "0", max = "120") }
     state.changeType("q4", EditorQuestionType.DECIMAL)
-    assertEquals(EditorValidation(min = "0", max = "120"), state.form.find("q4")!!.validation)
+    assertEquals(EditorValidation(min = "0", max = "120"), state.ui.form.find("q4")!!.validation)
     state.changeType("q4", EditorQuestionType.TEXT)
-    assertNull(state.form.find("q4")!!.validation)
+    assertNull(state.ui.form.find("q4")!!.validation)
   }
 
   @Test
   fun xforms_exportsEscapedConstraintAndMessage() {
-    val state = FormEditorState(FormEditorSamples.shadeTreeVisit())
+    val state = formEditorViewModel(FormEditorSamples.shadeTreeVisit())
     state.updateValidation("q4") {
       it.copy(min = "0", max = "120", message = "Count <= 120 & \"real\"")
     }
-    val bind = state.xformsXml.lines().first { "/data/shade_tree_count\"" in it && "<bind" in it }
+    val bind =
+      state.ui.xformsXml.lines().first { "/data/shade_tree_count\"" in it && "<bind" in it }
     assertTrue("""constraint=". &gt;= 0 and . &lt;= 120"""" in bind, bind)
     assertTrue("""jr:constraintMsg="Count &lt;= 120 &amp; &quot;real&quot;"""" in bind, bind)
 
     // Without a custom message, the generated summary is exported.
     state.updateValidation("q4") { it.copy(message = "") }
-    assertTrue("""jr:constraintMsg="Must be between 0 and 120."""" in state.xformsXml)
+    assertTrue("""jr:constraintMsg="Must be between 0 and 120."""" in state.ui.xformsXml)
     // Questions without rules export no constraint.
-    assertEquals(1, Regex("constraint=").findAll(state.xformsXml).count())
+    assertEquals(1, Regex("constraint=").findAll(state.ui.xformsXml).count())
   }
 
   @Test
   fun preview_enforcesNumberRangeConstraint() {
-    val state = FormEditorState(FormEditorSamples.shadeTreeVisit())
+    val state = formEditorViewModel(FormEditorSamples.shadeTreeVisit())
     state.updateValidation("q4") { it.copy(min = "0", max = "120") }
     state.startPreview()
-    assertNull(state.previewError)
-    val controller = assertNotNull(state.previewController)
+    assertNull(state.ui.previewError)
+    val controller = assertNotNull(state.ui.previewController)
     val path = "/data/shade_tree_count"
     controller.updateString("/data/has_shade_trees", "yes")
     controller.jumpToField(path)
@@ -475,13 +480,13 @@ class FormEditorTest {
 
   @Test
   fun preview_enforcesDateTextAndSelectionConstraints() {
-    val state = FormEditorState(FormEditorSamples.shadeTreeVisit())
+    val state = formEditorViewModel(FormEditorSamples.shadeTreeVisit())
     state.updateValidation("q1") { it.copy(dateRule = DateRule.NOT_IN_FUTURE) }
     state.updateValidation("q6") { it.copy(max = "2", message = "Pick up to two") }
     state.updateValidation("q7") { it.copy(min = "5") }
     state.startPreview()
-    assertNull(state.previewError)
-    val controller = assertNotNull(state.previewController)
+    assertNull(state.ui.previewError)
+    val controller = assertNotNull(state.ui.previewController)
 
     controller.jumpToField("/data/visit_date")
     controller.updateDate("/data/visit_date", 2999, 1, 1)
@@ -539,39 +544,39 @@ class FormEditorTest {
 
   @Test
   fun state_advancedExpansionPersistsAcrossSelection() {
-    val state = FormEditorState(FormEditorSamples.shadeTreeVisit())
-    assertFalse(state.isAdvancedExpanded)
-    state.isAdvancedExpanded = true
+    val state = formEditorViewModel(FormEditorSamples.shadeTreeVisit())
+    assertFalse(state.ui.isAdvancedExpanded)
+    state.setAdvancedExpanded(true)
     state.select("q5")
-    assertTrue(state.isAdvancedExpanded)
+    assertTrue(state.ui.isAdvancedExpanded)
   }
 
   @Test
   fun availability_defaultsToMobileOnlyAndTogglesIndependently() {
-    val state = FormEditorState(FormEditorSamples.shadeTreeVisit())
-    assertEquals(FormAvailability.MOBILE, state.form.availability)
-    assertTrue(state.isEnabledOnPreviewTarget)
+    val state = formEditorViewModel(FormEditorSamples.shadeTreeVisit())
+    assertEquals(FormAvailability.MOBILE, state.ui.form.availability)
+    assertTrue(state.ui.isEnabledOnPreviewTarget)
     state.selectPreviewTarget(FormPreviewTarget.WEB)
-    assertFalse(state.isEnabledOnPreviewTarget)
+    assertFalse(state.ui.isEnabledOnPreviewTarget)
     state.selectPreviewTarget(FormPreviewTarget.MOBILE)
 
     // Turning web on makes the form available on both platforms.
-    state.updateAvailability(state.form.availability.withWeb(true))
-    assertEquals(FormAvailability.BOTH, state.form.availability)
+    state.updateAvailability(state.ui.form.availability.withWeb(true))
+    assertEquals(FormAvailability.BOTH, state.ui.form.availability)
 
     // Switching mobile off leaves web on; the mobile canvas now shows the banner.
-    state.updateAvailability(state.form.availability.withMobile(false))
-    assertEquals(FormAvailability.WEB, state.form.availability)
-    assertFalse(state.isEnabledOnPreviewTarget)
+    state.updateAvailability(state.ui.form.availability.withMobile(false))
+    assertEquals(FormAvailability.WEB, state.ui.form.availability)
+    assertFalse(state.ui.isEnabledOnPreviewTarget)
     state.selectPreviewTarget(FormPreviewTarget.WEB)
-    assertTrue(state.isEnabledOnPreviewTarget)
+    assertTrue(state.ui.isEnabledOnPreviewTarget)
 
     // Both off is allowed (hidden everywhere); the banner's Enable restores the previewed one.
-    state.updateAvailability(state.form.availability.withWeb(false))
-    assertEquals(FormAvailability.NONE, state.form.availability)
-    assertFalse(state.isEnabledOnPreviewTarget)
+    state.updateAvailability(state.ui.form.availability.withWeb(false))
+    assertEquals(FormAvailability.NONE, state.ui.form.availability)
+    assertFalse(state.ui.isEnabledOnPreviewTarget)
     state.enableOnPreviewTarget()
-    assertEquals(FormAvailability.WEB, state.form.availability)
+    assertEquals(FormAvailability.WEB, state.ui.form.availability)
 
     assertEquals(FormAvailability.BOTH, FormAvailability.of(mobile = true, web = true))
     assertEquals(FormAvailability.MOBILE, FormAvailability.NONE.withMobile(true))
@@ -579,37 +584,37 @@ class FormEditorTest {
 
   @Test
   fun previewTarget_defaultsToMobileAndToggles() {
-    val state = FormEditorState(FormEditorSamples.shadeTreeVisit())
-    assertEquals(FormPreviewTarget.MOBILE, state.previewTarget)
+    val state = formEditorViewModel(FormEditorSamples.shadeTreeVisit())
+    assertEquals(FormPreviewTarget.MOBILE, state.ui.previewTarget)
     state.selectPreviewTarget(FormPreviewTarget.WEB)
-    assertEquals(FormPreviewTarget.WEB, state.previewTarget)
+    assertEquals(FormPreviewTarget.WEB, state.ui.previewTarget)
     // The Preview overlay is driven by the same session regardless of target.
     state.startPreview()
-    assertNotNull(state.previewController)
+    assertNotNull(state.ui.previewController)
     state.closePreview()
-    assertEquals(FormPreviewTarget.WEB, state.previewTarget)
+    assertEquals(FormPreviewTarget.WEB, state.ui.previewTarget)
   }
 
   @Test
   fun webCanvas_parsesCurrentFormAndMapsCardsToQuestions() {
-    val state = FormEditorState(FormEditorSamples.shadeTreeVisit())
-    val controller = state.parsePreviewController().getOrThrow()
+    val state = formEditorViewModel(FormEditorSamples.shadeTreeVisit())
+    val controller = state.ui.parsePreviewController().getOrThrow()
     val cardPaths =
       buildCompactFormItems(controller.steps).filterIsInstance<CompactFormItem.Question>().map {
         it.step.stepKey
       }
 
     // Every relevant editor question has a card, and each card maps back to its question.
-    val firstKey = state.form.questions.first().key
-    val firstPath = assertNotNull(state.pathOf(firstKey))
+    val firstKey = state.ui.form.questions.first().key
+    val firstPath = assertNotNull(state.ui.pathOf(firstKey))
     assertTrue(firstPath in cardPaths)
-    assertEquals(firstKey, state.keyForPath(firstPath))
-    assertNull(state.keyForPath("/data/not_a_question"))
+    assertEquals(firstKey, state.ui.keyForPath(firstPath))
+    assertNull(state.ui.keyForPath("/data/not_a_question"))
 
     // Edits are reflected after re-parsing.
     state.select(firstKey)
     state.updateQuestion(firstKey) { it.copy(label = "Renamed question") }
-    val renamed = state.parsePreviewController().getOrThrow()
+    val renamed = state.ui.parsePreviewController().getOrThrow()
     val card =
       buildCompactFormItems(renamed.steps).filterIsInstance<CompactFormItem.Question>().first {
         it.step.stepKey == firstPath
@@ -706,35 +711,35 @@ class FormEditorTest {
 
   @Test
   fun state_makeGeometryQuestionsWebCompatibleClearsTheError() {
-    val state = FormEditorState(FormEditorSamples.shadeTreeVisit())
-    val geometryKey = assertNotNull(state.form.primaryGeometryQuestion).key
-    assertTrue(state.issues.isEmpty())
+    val state = formEditorViewModel(FormEditorSamples.shadeTreeVisit())
+    val geometryKey = assertNotNull(state.ui.form.primaryGeometryQuestion).key
+    assertTrue(state.ui.issues.isEmpty())
 
-    state.updateAvailability(state.form.availability.withWeb(true))
-    assertEquals(listOf(geometryKey), state.webIncompatibleGeometryQuestions.map { it.key })
-    assertEquals(1, state.issuesFor(geometryKey).size)
+    state.updateAvailability(state.ui.form.availability.withWeb(true))
+    assertEquals(listOf(geometryKey), state.ui.webIncompatibleGeometryQuestions.map { it.key })
+    assertEquals(1, state.ui.issuesFor(geometryKey).size)
 
     state.makeGeometryQuestionsWebCompatible()
-    assertTrue(state.webIncompatibleGeometryQuestions.isEmpty())
-    assertTrue(state.issues.isEmpty())
-    assertEquals(GeometryCapture.GPS_OR_MAP, state.form.find(geometryKey)?.capture)
-    assertTrue("placement-map" in state.xformsXml)
+    assertTrue(state.ui.webIncompatibleGeometryQuestions.isEmpty())
+    assertTrue(state.ui.issues.isEmpty())
+    assertEquals(GeometryCapture.GPS_OR_MAP, state.ui.form.find(geometryKey)?.capture)
+    assertTrue("placement-map" in state.ui.xformsXml)
 
     // updateCapture round-trips and the error returns while web stays on.
     state.updateCapture(geometryKey, GeometryCapture.GPS_ONLY)
-    assertEquals(1, state.issuesFor(geometryKey).size)
-    state.updateAvailability(state.form.availability.withWeb(false))
-    assertTrue(state.issues.isEmpty())
+    assertEquals(1, state.ui.issuesFor(geometryKey).size)
+    state.updateAvailability(state.ui.form.availability.withWeb(false))
+    assertTrue(state.ui.issues.isEmpty())
   }
 
   @Test
   fun state_changeTypeBetweenGeometryTypesKeepsGeometryMapping() {
-    val state = FormEditorState(FormEditorSamples.shadeTreeVisit())
-    val key = assertNotNull(state.form.primaryGeometryQuestion).key
+    val state = formEditorViewModel(FormEditorSamples.shadeTreeVisit())
+    val key = assertNotNull(state.ui.form.primaryGeometryQuestion).key
     state.changeType(key, EditorQuestionType.POLYGON)
-    assertEquals(EditorQuestionType.POLYGON, state.form.find(key)?.type)
-    assertEquals(key, state.form.primaryGeometryQuestion?.key)
-    assertTrue("geoshape" in state.xformsXml)
+    assertEquals(EditorQuestionType.POLYGON, state.ui.form.find(key)?.type)
+    assertEquals(key, state.ui.form.primaryGeometryQuestion?.key)
+    assertTrue("geoshape" in state.ui.xformsXml)
   }
 
   private fun mediaQuestion(
@@ -798,16 +803,16 @@ class FormEditorTest {
   @Test
   fun media_captureOnlyVideoRendersInPreview() {
     val state =
-      FormEditorState(
+      formEditorViewModel(
         EditorForm(
           "f",
           "F",
           listOf(q("a"), mediaQuestion("vd", EditorQuestionType.VIDEO, MediaSource.CAPTURE_ONLY)),
         )
       )
-    assertTrue(state.issues.isEmpty())
-    val controller = state.parsePreviewController().getOrThrow()
-    val path = assertNotNull(state.pathOf("vd"))
+    assertTrue(state.ui.issues.isEmpty())
+    val controller = state.ui.parsePreviewController().getOrThrow()
+    val path = assertNotNull(state.ui.pathOf("vd"))
     assertTrue(
       buildCompactFormItems(controller.steps).filterIsInstance<CompactFormItem.Question>().any {
         it.step.stepKey == path
@@ -818,17 +823,19 @@ class FormEditorTest {
   @Test
   fun state_changeTypeKeepsMediaSourceOnlyBetweenMediaTypes() {
     val state =
-      FormEditorState(EditorForm("f", "F", listOf(mediaQuestion("m", EditorQuestionType.PHOTO))))
+      formEditorViewModel(
+        EditorForm("f", "F", listOf(mediaQuestion("m", EditorQuestionType.PHOTO)))
+      )
     state.updateMediaSource("m", MediaSource.CAPTURE_ONLY)
-    assertTrue("""appearance="new"""" in state.xformsXml)
+    assertTrue("""appearance="new"""" in state.ui.xformsXml)
 
     state.changeType("m", EditorQuestionType.VIDEO)
-    assertEquals(MediaSource.CAPTURE_ONLY, state.form.find("m")?.mediaSource)
-    assertTrue("""mediatype="video/*"""" in state.xformsXml)
-    assertTrue("""appearance="new"""" in state.xformsXml)
+    assertEquals(MediaSource.CAPTURE_ONLY, state.ui.form.find("m")?.mediaSource)
+    assertTrue("""mediatype="video/*"""" in state.ui.xformsXml)
+    assertTrue("""appearance="new"""" in state.ui.xformsXml)
 
     state.changeType("m", EditorQuestionType.TEXT)
-    assertEquals(MediaSource.CAPTURE_OR_UPLOAD, state.form.find("m")?.mediaSource)
-    assertFalse("appearance" in state.xformsXml)
+    assertEquals(MediaSource.CAPTURE_OR_UPLOAD, state.ui.form.find("m")?.mediaSource)
+    assertFalse("appearance" in state.ui.xformsXml)
   }
 }

@@ -58,11 +58,16 @@ class SurveyEditorRepositoryImpl(
       }
       .distinctUntilChanged()
 
-  override suspend fun saveDraft(surveyId: String, draft: SurveyEditorDraft) {
+  override suspend fun saveDraft(
+    surveyId: String,
+    draft: SurveyEditorDraft,
+    previous: SurveyEditorDraft?,
+  ) {
     store.transaction {
-      // Rows are removed relative to the last saved draft (or, before the first save, the current
-      // map features), so map features collected since then are kept.
-      val previous = surveyEditorDraft(surveyId) ?: currentDraft(surveyId)
+      // Rows are removed relative to the draft the editor opened, or else the last saved draft (or,
+      // before the first save, the current map features), so map features collected since then are
+      // kept.
+      val previous = previous ?: surveyEditorDraft(surveyId) ?: currentDraft(surveyId)
       putSurveyEditorDraft(surveyId, draft)
 
       // Publish each Form's XForms; Forms removed from the draft lose theirs.

@@ -43,90 +43,93 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SurveyAre
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SurveyEditorDraft
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SurveyEditorForm
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.publishedFormXml
+import org.groundplatform.v2.devtools.prototypeapp.ui.state.SurveyEditorSection
+import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.surveyEditorViewModel
+import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.ui
 
 class SurveyEditorTest {
 
   @Test
   fun samples_areValid() {
-    val state = SurveyEditorState(SurveyEditorSamples.draft())
-    assertEquals(2, state.mapLayers.size)
-    assertEquals(2, state.dataTables.size)
-    state.datasets.forEach { assertEquals(emptyList(), state.datasetIssues(it), it.id) }
-    assertTrue(state.forms.all { it.editor.issues.isEmpty() })
+    val state = surveyEditorViewModel()
+    assertEquals(2, state.ui.mapLayers.size)
+    assertEquals(2, state.ui.dataTables.size)
+    state.ui.datasets.forEach { assertEquals(emptyList(), state.ui.datasetIssues(it), it.id) }
+    assertTrue(state.ui.forms.all { state.formEditor(it.key).ui.issues.isEmpty() })
   }
 
   @Test
   fun layerStyle_pinIconIsKeptInTheDraft() {
-    val state = SurveyEditorState(SurveyEditorSamples.draft())
-    val plots = state.mapLayers.first { it.geometryKind == GeometryKind.POINT }
+    val state = surveyEditorViewModel()
+    val plots = state.ui.mapLayers.first { it.geometryKind == GeometryKind.POINT }
     state.updateDataset(plots.key) { it.copy(style = it.style.copy(iconName = "flag")) }
 
-    assertTrue(state.hasUnpublishedChanges)
-    val draft = state.toDraft()
+    assertTrue(state.ui.hasUnpublishedChanges)
+    val draft = state.ui.draft
     assertEquals("flag", draft.datasets.first { it.key == plots.key }.style.iconName)
-    assertEquals(draft, SurveyEditorState(draft).toDraft())
+    assertEquals(draft, surveyEditorViewModel(draft).ui.draft)
 
     state.updateDataset(plots.key) { it.copy(style = it.style.copy(iconName = null)) }
-    assertNull(state.toDraft().datasets.first { it.key == plots.key }.style.iconName)
+    assertNull(state.ui.draft.datasets.first { it.key == plots.key }.style.iconName)
   }
 
   @Test
   fun addAndDeleteForm_updatesSelection() {
-    val state = SurveyEditorState(SurveyEditorSamples.draft())
+    val state = surveyEditorViewModel()
     state.addForm()
-    val added = assertNotNull(state.selectedForm)
-    assertEquals("New form", added.editor.form.title)
-    assertTrue(added.editor.form.formId.startsWith(FormIds.PREFIX))
+    val added = assertNotNull(state.ui.selectedForm)
+    assertEquals("New form", state.formEditor(added.key).ui.form.title)
+    assertTrue(state.formEditor(added.key).ui.form.formId.startsWith(FormIds.PREFIX))
     state.addForm()
-    val second = state.selectedForm!!.editor.form.formId
+    val second = state.formEditor(state.ui.selectedForm!!.key).ui.form.formId
     assertTrue(second.startsWith(FormIds.PREFIX))
-    assertNotEquals(added.editor.form.formId, second)
+    assertNotEquals(state.formEditor(added.key).ui.form.formId, second)
 
-    state.deleteForm(state.selectedForm!!.key)
-    assertEquals(added.key, state.selectedForm?.key)
+    state.deleteForm(state.ui.selectedForm!!.key)
+    assertEquals(added.key, state.ui.selectedForm?.key)
   }
 
   @Test
   fun addDataset_createsKindSpecificEntry() {
-    val state = SurveyEditorState(SurveyEditorSamples.draft())
+    val state = surveyEditorViewModel()
     state.addDataset(DatasetKind.MAP_LAYER)
-    val layer = assertNotNull(state.selectedDataset)
+    val layer = assertNotNull(state.ui.selectedDataset)
     assertEquals(DatasetKind.MAP_LAYER, layer.kind)
-    assertEquals(3, state.mapLayers.size)
+    assertEquals(3, state.ui.mapLayers.size)
     state.addDataset(DatasetKind.DATA_TABLE)
-    assertEquals(3, state.dataTables.size)
+    assertEquals(3, state.ui.dataTables.size)
 
-    state.deleteDataset(state.selectedDataset!!.key)
+    state.deleteDataset(state.ui.selectedDataset!!.key)
     // Selection falls back to a sibling of the same kind.
-    assertEquals(DatasetKind.DATA_TABLE, state.selectedDataset?.kind)
+    assertEquals(DatasetKind.DATA_TABLE, state.ui.selectedDataset?.kind)
   }
 
   @Test
   fun deletingLastOfKind_returnsToDetails() {
-    val state = SurveyEditorState(SurveyEditorSamples.draft())
-    state.dataTables.map { it.key }.forEach { state.deleteDataset(it) }
-    assertIs<SurveyEditorSection.Details>(state.section)
+    val state = surveyEditorViewModel()
+    state.ui.dataTables.map { it.key }.forEach { state.deleteDataset(it) }
+    assertIs<SurveyEditorSection.Details>(state.ui.section)
   }
 
   @Test
   fun renamingProperty_carriesValuesAndKey() {
-    val state = SurveyEditorState(SurveyEditorSamples.draft())
-    val farmers = state.dataTables.first { it.id == "farmers" }
+    val state = surveyEditorViewModel()
+    val farmers = state.ui.dataTables.first { it.id == "farmers" }
     val index = farmers.properties.indexOfFirst { it.name == "farmer_id" }
     state.updateProperty(farmers.key, index, farmers.properties[index].copy(name = "member_id"))
-    val updated = state.datasets.first { it.key == farmers.key }
+    val updated = state.ui.datasets.first { it.key == farmers.key }
     assertEquals("member_id", updated.keyProperty)
     assertEquals("F-001", updated.rows.first().values["member_id"])
     assertNull(updated.rows.first().values["farmer_id"])
-    assertEquals(emptyList(), state.datasetIssues(updated))
+    assertEquals(emptyList(), state.ui.datasetIssues(updated))
   }
 
   @Test
   fun addRow_onMapLayerGetsGeometryAtLocation() {
-    val state = SurveyEditorState(SurveyEditorSamples.draft())
-    val plots = state.mapLayers.first { it.geometryKind == GeometryKind.POINT }
+    val state = surveyEditorViewModel()
+    val plots = state.ui.mapLayers.first { it.geometryKind == GeometryKind.POINT }
     val rowKey = state.addRow(plots.key, LatLng(-0.5, 37.0))
-    val row = state.datasets.first { it.key == plots.key }.rows.first { it.key == rowKey }
+    val row = state.ui.datasets.first { it.key == plots.key }.rows.first { it.key == rowKey }
     assertEquals(listOf(LatLng(-0.5, 37.0)), row.geometry)
     assertTrue(row.values[plots.keyProperty]!!.isNotBlank())
   }
@@ -158,17 +161,17 @@ class SurveyEditorTest {
 
   @Test
   fun inviteCollaborator_validatesAndUpserts() {
-    val state = SurveyEditorState(SurveyEditorSamples.draft())
-    val before = state.sharing.collaborators.size
+    val state = surveyEditorViewModel()
+    val before = state.ui.sharing.collaborators.size
     assertNotNull(state.inviteCollaborator("not-an-email", CollaboratorRole.VIEWER))
     assertNotNull(state.inviteCollaborator("organizer@example.org", CollaboratorRole.VIEWER))
     assertNull(state.inviteCollaborator("New.Person@Example.org", CollaboratorRole.VIEWER))
-    assertEquals(before + 1, state.sharing.collaborators.size)
+    assertEquals(before + 1, state.ui.sharing.collaborators.size)
     assertNull(state.inviteCollaborator("new.person@example.org", CollaboratorRole.DATA_COLLECTOR))
-    assertEquals(before + 1, state.sharing.collaborators.size)
+    assertEquals(before + 1, state.ui.sharing.collaborators.size)
     assertEquals(
       CollaboratorRole.DATA_COLLECTOR,
-      state.sharing.collaborators.first { it.email == "new.person@example.org" }.role,
+      state.ui.sharing.collaborators.first { it.email == "new.person@example.org" }.role,
     )
   }
 
@@ -187,21 +190,21 @@ class SurveyEditorTest {
 
   @Test
   fun invite_issuesLinkAndAcceptCachesProfile() {
-    val state = SurveyEditorState(SurveyEditorSamples.draft())
+    val state = surveyEditorViewModel()
     assertNull(state.inviteCollaborator("wanjiku.mwangi@example.org", CollaboratorRole.VIEWER))
-    val invited = state.sharing.collaborators.first { it.email == "wanjiku.mwangi@example.org" }
+    val invited = state.ui.sharing.collaborators.first { it.email == "wanjiku.mwangi@example.org" }
     assertEquals(InvitationStatus.PENDING, invited.status)
     val token = assertNotNull(invited.inviteToken)
     assertTrue(Regex("^[a-z0-9]{4}-[a-z0-9]{4}$").matches(token))
     assertEquals("wanjiku.mwangi@example.org", invited.displayName)
 
     state.resetInviteLink(invited.email)
-    val reset = state.sharing.collaborators.first { it.email == invited.email }.inviteToken
+    val reset = state.ui.sharing.collaborators.first { it.email == invited.email }.inviteToken
     assertNotNull(reset)
 
     assertEquals("Enter a name.", state.acceptInvite(invited.email, "  ", null))
     assertNull(state.acceptInvite(invited.email, "Wanjiku Mwangi", "avatar:2", "2026-09-27"))
-    val joined = state.sharing.collaborators.first { it.email == invited.email }
+    val joined = state.ui.sharing.collaborators.first { it.email == invited.email }
     assertEquals(InvitationStatus.ACCEPTED, joined.status)
     assertNull(joined.inviteToken)
     assertNotNull(joined.userId)
@@ -213,7 +216,7 @@ class SurveyEditorTest {
     state.setCollaboratorRole(invited.email, CollaboratorRole.DATA_COLLECTOR)
     assertEquals(
       "Wanjiku Mwangi",
-      state.sharing.collaborators.first { it.email == invited.email }.displayName,
+      state.ui.sharing.collaborators.first { it.email == invited.email }.displayName,
     )
   }
 
@@ -244,26 +247,26 @@ class SurveyEditorTest {
 
   @Test
   fun moveForm_reordersForms() {
-    val state = SurveyEditorState(SurveyEditorSamples.draft())
+    val state = surveyEditorViewModel()
     state.addForm()
-    val keys = state.forms.map { it.key }
+    val keys = state.ui.forms.map { it.key }
     state.moveForm(keys[2], 0)
-    assertEquals(listOf(keys[2], keys[0], keys[1]), state.forms.map { it.key })
+    assertEquals(listOf(keys[2], keys[0], keys[1]), state.ui.forms.map { it.key })
   }
 
   @Test
   fun moveDataset_reordersWithinKindOnly() {
-    val state = SurveyEditorState(SurveyEditorSamples.draft())
+    val state = surveyEditorViewModel()
     state.addDataset(DatasetKind.MAP_LAYER)
-    val layers = state.mapLayers.map { it.key }
-    val tables = state.dataTables.map { it.key }
-    val kinds = state.datasets.map { it.kind }
+    val layers = state.ui.mapLayers.map { it.key }
+    val tables = state.ui.dataTables.map { it.key }
+    val kinds = state.ui.datasets.map { it.kind }
 
     state.moveDataset(layers.last(), 0)
 
-    assertEquals(listOf(layers[2], layers[0], layers[1]), state.mapLayers.map { it.key })
-    assertEquals(tables, state.dataTables.map { it.key })
-    assertEquals(kinds, state.datasets.map { it.kind })
+    assertEquals(listOf(layers[2], layers[0], layers[1]), state.ui.mapLayers.map { it.key })
+    assertEquals(tables, state.ui.dataTables.map { it.key })
+    assertEquals(kinds, state.ui.datasets.map { it.kind })
   }
 
   @Test
@@ -301,44 +304,44 @@ class SurveyEditorTest {
 
   @Test
   fun languageSelection_addRemoveAndSetDefault() {
-    val state = SurveyEditorState(SurveyEditorSamples.draft())
-    assertEquals(listOf("en", "sw"), state.details.supportedLanguages)
-    assertEquals("en", state.details.defaultLanguage)
+    val state = surveyEditorViewModel()
+    assertEquals(listOf("en", "sw"), state.ui.details.supportedLanguages)
+    assertEquals("en", state.ui.details.defaultLanguage)
 
     // Add a new supported language
     state.addSupportedLanguage("fra")
-    assertEquals(listOf("en", "sw", "fra"), state.details.supportedLanguages)
-    assertEquals("en", state.details.defaultLanguage)
+    assertEquals(listOf("en", "sw", "fra"), state.ui.details.supportedLanguages)
+    assertEquals("en", state.ui.details.defaultLanguage)
 
     // Set new default language
     state.setDefaultLanguage("sw")
-    assertEquals("sw", state.details.defaultLanguage)
+    assertEquals("sw", state.ui.details.defaultLanguage)
 
     // Set default language to a language not yet in supported languages
     state.setDefaultLanguage("deu")
-    assertEquals("deu", state.details.defaultLanguage)
-    assertTrue(state.details.supportedLanguages.contains("deu"))
+    assertEquals("deu", state.ui.details.defaultLanguage)
+    assertTrue(state.ui.details.supportedLanguages.contains("deu"))
 
     // Remove the current default language; falls back to first remaining
     state.removeSupportedLanguage("deu")
-    assertFalse(state.details.supportedLanguages.contains("deu"))
-    assertEquals("en", state.details.defaultLanguage)
+    assertFalse(state.ui.details.supportedLanguages.contains("deu"))
+    assertEquals("en", state.ui.details.defaultLanguage)
 
     // Adding existing language doesn't duplicate
     state.addSupportedLanguage("en")
-    assertEquals(listOf("en", "sw", "fra"), state.details.supportedLanguages)
+    assertEquals(listOf("en", "sw", "fra"), state.ui.details.supportedLanguages)
   }
 
   @Test
   fun surveyArea_setAndClear() {
-    val state = SurveyEditorState(SurveyEditorSamples.draft())
-    val initialArea = assertNotNull(state.details.surveyArea)
+    val state = surveyEditorViewModel()
+    val initialArea = assertNotNull(state.ui.details.surveyArea)
     assertEquals("Othaya Sub-County, Nyeri", initialArea.name)
     assertEquals(4, initialArea.vertexCount)
 
     // Clear survey area
     state.setSurveyArea(null)
-    assertNull(state.details.surveyArea)
+    assertNull(state.ui.details.surveyArea)
 
     // Set a new survey area
     val customArea =
@@ -357,7 +360,7 @@ class SurveyEditorTest {
         zoom = 13.0,
       )
     state.setSurveyArea(customArea)
-    val updated = assertNotNull(state.details.surveyArea)
+    val updated = assertNotNull(state.ui.details.surveyArea)
     assertEquals("Chinga Dam & Reservoir", updated.name)
     assertEquals(4, updated.vertexCount)
     assertEquals(-0.4258, updated.center.lat)
@@ -382,14 +385,15 @@ class SurveyEditorTest {
 
   @Test
   fun addForm_createsLinkedDataTableByDefault() {
-    val state = SurveyEditorState(SurveyEditorSamples.draft())
-    val initialTablesCount = state.dataTables.size
+    val state = surveyEditorViewModel()
+    val initialTablesCount = state.ui.dataTables.size
     state.addForm()
 
     // A blank form has no Location question, so it adds table rows.
-    assertEquals(initialTablesCount + 1, state.dataTables.size)
-    val form = assertNotNull(state.selectedForm)
-    val linkedLayer = assertNotNull(state.dataTables.firstOrNull { it.linkedFormKey == form.key })
+    assertEquals(initialTablesCount + 1, state.ui.dataTables.size)
+    val form = assertNotNull(state.ui.selectedForm)
+    val linkedLayer =
+      assertNotNull(state.ui.dataTables.firstOrNull { it.linkedFormKey == form.key })
     assertEquals("New form", linkedLayer.displayName)
     assertTrue(linkedLayer.isLinkedToForm)
     assertEquals(form.key, linkedLayer.linkedFormKey)
@@ -398,13 +402,13 @@ class SurveyEditorTest {
 
   @Test
   fun createDatasetForForm_createsAndLinksDataset() {
-    val state = SurveyEditorState(SurveyEditorSamples.draft())
-    val form = state.forms.first()
-    val initialLayers = state.mapLayers.size
+    val state = surveyEditorViewModel()
+    val form = state.ui.forms.first()
+    val initialLayers = state.ui.mapLayers.size
 
     state.createDatasetForForm(form.key, DatasetKind.MAP_LAYER)
-    assertEquals(initialLayers + 1, state.mapLayers.size)
-    val dataset = assertNotNull(state.selectedDataset)
+    assertEquals(initialLayers + 1, state.ui.mapLayers.size)
+    val dataset = assertNotNull(state.ui.selectedDataset)
     assertEquals(form.key, dataset.linkedFormKey)
     assertTrue(dataset.isLinkedToForm)
     // Check that form questions were mapped to dataset properties
@@ -414,204 +418,206 @@ class SurveyEditorTest {
 
   @Test
   fun createFormForDataset_createsAndLinksForm() {
-    val state = SurveyEditorState(SurveyEditorSamples.draft())
-    val parcels = state.mapLayers.first { it.id == "coffee_parcels" }
+    val state = surveyEditorViewModel()
+    val parcels = state.ui.mapLayers.first { it.id == "coffee_parcels" }
     assertFalse(parcels.isLinkedToForm)
 
     state.createFormForDataset(parcels.key)
-    val form = assertNotNull(state.selectedForm)
-    val updatedParcels = state.datasets.first { it.key == parcels.key }
+    val form = assertNotNull(state.ui.selectedForm)
+    val updatedParcels = state.ui.datasets.first { it.key == parcels.key }
     assertTrue(updatedParcels.isLinkedToForm)
     assertEquals(form.key, updatedParcels.linkedFormKey)
     // Map layer form includes location question
-    assertTrue(form.editor.form.questions.any { it.name == "location" })
+    assertTrue(state.formEditor(form.key).ui.form.questions.any { it.name == "location" })
     // Map layer form includes parcel properties
-    assertTrue(form.editor.form.questions.any { it.name == "parcel_id" })
-    assertTrue(form.editor.form.questions.any { it.name == "parcel_name" })
+    assertTrue(state.formEditor(form.key).ui.form.questions.any { it.name == "parcel_id" })
+    assertTrue(state.formEditor(form.key).ui.form.questions.any { it.name == "parcel_name" })
   }
 
   @Test
   fun syncDatasetsLinkedToForm_updatesDatasetProperties() {
-    val state = SurveyEditorState(SurveyEditorSamples.draft())
+    val state = surveyEditorViewModel()
     state.addForm()
-    val formEntry = state.selectedForm!!
-    val linkedLayer = state.datasets.first { it.linkedFormKey == formEntry.key }
+    val formEntry = state.ui.selectedForm!!
+    val linkedLayer = state.ui.datasets.first { it.linkedFormKey == formEntry.key }
 
     // Add a question to the form
-    formEntry.editor.addQuestion(
-      org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EditorQuestionType.INTEGER
-    )
-    val addedQuestion = formEntry.editor.form.questions.last()
-    state.syncDatasetsLinkedToForm(formEntry)
+    state
+      .formEditor(formEntry.key)
+      .addQuestion(
+        org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EditorQuestionType.INTEGER
+      )
+    val addedQuestion = state.formEditor(formEntry.key).ui.form.questions.last()
+    state.syncDatasetsLinkedToForm(formEntry.key)
 
-    val updatedLayer = state.datasets.first { it.key == linkedLayer.key }
+    val updatedLayer = state.ui.datasets.first { it.key == linkedLayer.key }
     assertTrue(updatedLayer.properties.any { it.name == addedQuestion.name })
   }
 
   @Test
   fun unlinkDataset_clearsFormLink() {
-    val state = SurveyEditorState(SurveyEditorSamples.draft())
+    val state = surveyEditorViewModel()
     state.addForm()
-    val formEntry = state.selectedForm!!
-    val linkedLayer = state.datasets.first { it.linkedFormKey == formEntry.key }
+    val formEntry = state.ui.selectedForm!!
+    val linkedLayer = state.ui.datasets.first { it.linkedFormKey == formEntry.key }
     assertTrue(linkedLayer.isLinkedToForm)
 
     state.unlinkDataset(linkedLayer.key)
-    val unlinkedLayer = state.datasets.first { it.key == linkedLayer.key }
+    val unlinkedLayer = state.ui.datasets.first { it.key == linkedLayer.key }
     assertFalse(unlinkedLayer.isLinkedToForm)
     assertNull(unlinkedLayer.linkedFormKey)
   }
 
   @Test
   fun deleteForm_unlinksAssociatedDatasets() {
-    val state = SurveyEditorState(SurveyEditorSamples.draft())
+    val state = surveyEditorViewModel()
     state.addForm()
-    val formEntry = state.selectedForm!!
-    val linkedLayer = state.datasets.first { it.linkedFormKey == formEntry.key }
+    val formEntry = state.ui.selectedForm!!
+    val linkedLayer = state.ui.datasets.first { it.linkedFormKey == formEntry.key }
 
     state.deleteForm(formEntry.key)
-    val remainingLayer = state.datasets.first { it.key == linkedLayer.key }
+    val remainingLayer = state.ui.datasets.first { it.key == linkedLayer.key }
     assertFalse(remainingLayer.isLinkedToForm)
     assertNull(remainingLayer.linkedFormKey)
   }
 
   @Test
   fun newState_hasNoUnpublishedChanges() {
-    val state = SurveyEditorState(SurveyEditorSamples.draft())
-    assertFalse(state.hasUnpublishedChanges)
+    val state = surveyEditorViewModel()
+    assertFalse(state.ui.hasUnpublishedChanges)
   }
 
   @Test
   fun edit_marksDraftChanged_andPublishClearsIt() {
-    val state = SurveyEditorState(SurveyEditorSamples.draft())
+    val state = surveyEditorViewModel()
     state.updateDetails { it.copy(title = "Renamed survey") }
-    assertTrue(state.hasUnpublishedChanges)
+    assertTrue(state.ui.hasUnpublishedChanges)
 
-    state.markPublished()
-    assertFalse(state.hasUnpublishedChanges)
-    assertEquals("Renamed survey", state.details.title)
+    state.publish()
+    assertFalse(state.ui.hasUnpublishedChanges)
+    assertEquals("Renamed survey", state.ui.details.title)
   }
 
   @Test
   fun canPublish_requiresChanges() {
-    val state = SurveyEditorState(SurveyEditorSamples.draft())
-    assertEquals(0, state.issueCount)
-    assertFalse(state.canPublish)
+    val state = surveyEditorViewModel()
+    assertEquals(0, state.ui.issueCount)
+    assertFalse(state.ui.canPublish)
 
     state.updateDetails { it.copy(title = "Renamed survey") }
-    assertTrue(state.canPublish)
+    assertTrue(state.ui.canPublish)
   }
 
   @Test
   fun formIssue_blocksPublish_untilFixed() {
-    val state = SurveyEditorState(SurveyEditorSamples.draft())
-    val editor = state.forms.first().editor
-    val question = editor.form.questions.first()
+    val state = surveyEditorViewModel()
+    val editor = state.formEditor(state.ui.forms.first().key)
+    val question = editor.ui.form.questions.first()
 
     editor.updateQuestion(question.key) { it.copy(label = "") }
-    assertTrue(state.hasUnpublishedChanges)
-    assertEquals(1, state.issueCount)
-    assertFalse(state.canPublish)
+    assertTrue(state.ui.hasUnpublishedChanges)
+    assertEquals(1, state.ui.issueCount)
+    assertFalse(state.ui.canPublish)
 
     editor.updateQuestion(question.key) { it.copy(label = "Fixed label") }
-    assertEquals(0, state.issueCount)
-    assertTrue(state.canPublish)
+    assertEquals(0, state.ui.issueCount)
+    assertTrue(state.ui.canPublish)
   }
 
   @Test
   fun datasetIssue_blocksPublish() {
-    val state = SurveyEditorState(SurveyEditorSamples.draft())
-    val dataset = state.datasets.first()
+    val state = surveyEditorViewModel()
+    val dataset = state.ui.datasets.first()
 
     state.updateDataset(dataset.key) { it.copy(displayName = "") }
-    assertTrue(state.hasUnpublishedChanges)
-    assertTrue(state.issueCount > 0)
-    assertFalse(state.canPublish)
+    assertTrue(state.ui.hasUnpublishedChanges)
+    assertTrue(state.ui.issueCount > 0)
+    assertFalse(state.ui.canPublish)
   }
 
   @Test
   fun revertingAnEdit_leavesNoUnpublishedChanges() {
-    val state = SurveyEditorState(SurveyEditorSamples.draft())
+    val state = surveyEditorViewModel()
     state.addForm()
-    assertTrue(state.hasUnpublishedChanges)
+    assertTrue(state.ui.hasUnpublishedChanges)
 
-    val added = state.selectedForm!!
+    val added = state.ui.selectedForm!!
     state.deleteForm(added.key)
-    state.deleteDataset(state.datasets.first { it.displayName == added.editor.form.title }.key)
-    assertFalse(state.hasUnpublishedChanges)
+    state.deleteDataset(state.ui.datasets.first { it.displayName == added.form.title }.key)
+    assertFalse(state.ui.hasUnpublishedChanges)
   }
 
   @Test
   fun discardChanges_restoresPublishedSurvey() {
     val published = SurveyEditorSamples.draft()
-    val state = SurveyEditorState(published)
+    val state = surveyEditorViewModel(published)
     state.updateDetails { it.copy(title = "Renamed survey") }
     state.addForm()
-    val addedFormSection = state.section
+    val addedFormSection = state.ui.section
 
     state.discardChanges()
 
-    assertFalse(state.hasUnpublishedChanges)
-    assertEquals(published.details, state.details)
-    assertEquals(published.forms.map { it.key }, state.forms.map { it.key })
-    assertEquals(published.datasets, state.datasets)
-    assertNotEquals(addedFormSection, state.section)
-    assertEquals(SurveyEditorSection.Details, state.section)
+    assertFalse(state.ui.hasUnpublishedChanges)
+    assertEquals(published.details, state.ui.details)
+    assertEquals(published.forms.map { it.key }, state.ui.forms.map { it.key })
+    assertEquals(published.datasets, state.ui.datasets)
+    assertNotEquals(addedFormSection, state.ui.section)
+    assertEquals(SurveyEditorSection.Details, state.ui.section)
   }
 
   @Test
   fun discardChanges_afterPublish_keepsPublishedEdits() {
-    val state = SurveyEditorState(SurveyEditorSamples.draft())
+    val state = surveyEditorViewModel()
     state.updateDetails { it.copy(title = "Published title") }
-    state.markPublished()
+    state.publish()
     state.updateDetails { it.copy(title = "Unpublished title") }
 
     state.discardChanges()
 
-    assertEquals("Published title", state.details.title)
-    assertFalse(state.hasUnpublishedChanges)
+    assertEquals("Published title", state.ui.details.title)
+    assertFalse(state.ui.hasUnpublishedChanges)
   }
 
   @Test
   fun linkedDatasetKind_followsFormGeometry() {
-    val state = SurveyEditorState(SurveyEditorSamples.draft())
+    val state = surveyEditorViewModel()
     state.addForm()
-    val entry = state.selectedForm!!
-    entry.editor.addQuestion(EditorQuestionType.LOCATION)
-    state.syncDatasetsLinkedToForm(entry)
+    val entry = state.ui.selectedForm!!
+    state.formEditor(entry.key).addQuestion(EditorQuestionType.LOCATION)
+    state.syncDatasetsLinkedToForm(entry.key)
     assertEquals(
       DatasetKind.MAP_LAYER,
-      state.datasets.first { it.linkedFormKey == entry.key }.kind,
+      state.ui.datasets.first { it.linkedFormKey == entry.key }.kind,
     )
   }
 
   @Test
   fun createDatasetForForm_defaultsKindFromGeometry() {
-    val state = SurveyEditorState(SurveyEditorSamples.draft())
-    val withLocation = state.forms.first { it.editor.form.hasGeometry }
+    val state = surveyEditorViewModel()
+    val withLocation = state.ui.forms.first { state.formEditor(it.key).ui.form.hasGeometry }
     state.createDatasetForForm(withLocation.key)
-    assertEquals(DatasetKind.MAP_LAYER, state.selectedDataset?.kind)
+    assertEquals(DatasetKind.MAP_LAYER, state.ui.selectedDataset?.kind)
   }
 
   @Test
   fun linkedLayerGeometryKind_followsPrimaryGeometryQuestionType() {
-    val state = SurveyEditorState(SurveyEditorSamples.draft())
+    val state = surveyEditorViewModel()
     state.addForm()
-    val entry = state.selectedForm!!
-    entry.editor.addQuestion(EditorQuestionType.POLYGON)
-    state.syncDatasetsLinkedToForm(entry)
-    val linked = state.datasets.first { it.linkedFormKey == entry.key }
+    val entry = state.ui.selectedForm!!
+    state.formEditor(entry.key).addQuestion(EditorQuestionType.POLYGON)
+    state.syncDatasetsLinkedToForm(entry.key)
+    val linked = state.ui.datasets.first { it.linkedFormKey == entry.key }
     assertEquals(DatasetKind.MAP_LAYER, linked.kind)
     assertEquals(GeometryKind.POLYGON, linked.geometryKind)
 
     // A new layer created for the form takes the same kind; a line form makes a line layer.
     state.createDatasetForForm(entry.key)
-    assertEquals(GeometryKind.POLYGON, state.selectedDataset?.geometryKind)
-    val polygonKey = entry.editor.form.primaryGeometryQuestion!!.key
-    entry.editor.changeType(polygonKey, EditorQuestionType.LINE)
-    state.syncDatasetsLinkedToForm(entry)
+    assertEquals(GeometryKind.POLYGON, state.ui.selectedDataset?.geometryKind)
+    val polygonKey = state.formEditor(entry.key).ui.form.primaryGeometryQuestion!!.key
+    state.formEditor(entry.key).changeType(polygonKey, EditorQuestionType.LINE)
+    state.syncDatasetsLinkedToForm(entry.key)
     assertTrue(
-      state.datasets
+      state.ui.datasets
         .filter { it.linkedFormKey == entry.key }
         .all {
           it.geometryKind == GeometryKind.LINE
@@ -621,88 +627,90 @@ class SurveyEditorTest {
 
   @Test
   fun createFormForDataset_geometryQuestionMatchesLayerKind() {
-    val state = SurveyEditorState(SurveyEditorSamples.draft())
-    val polygons = state.mapLayers.first { it.geometryKind == GeometryKind.POLYGON }
+    val state = surveyEditorViewModel()
+    val polygons = state.ui.mapLayers.first { it.geometryKind == GeometryKind.POLYGON }
     state.createFormForDataset(polygons.key)
-    val form = state.selectedForm!!.editor.form
+    val form = state.formEditor(state.ui.selectedForm!!.key).ui.form
     assertEquals(EditorQuestionType.POLYGON, form.primaryGeometryQuestion?.type)
   }
 
   @Test
   fun canPublish_blockedByGpsOnlyGeometryOnWeb() {
-    val state = SurveyEditorState(SurveyEditorSamples.draft())
-    val entry = state.forms.first { it.editor.form.hasGeometry }
-    state.markPublished()
-    entry.editor.updateAvailability(entry.editor.form.availability.withWeb(true))
-    assertTrue(entry.editor.issues.isNotEmpty())
-    assertTrue(state.hasUnpublishedChanges)
-    assertFalse(state.canPublish)
+    val state = surveyEditorViewModel()
+    val entry = state.ui.forms.first { state.formEditor(it.key).ui.form.hasGeometry }
+    state.publish()
+    state
+      .formEditor(entry.key)
+      .updateAvailability(state.formEditor(entry.key).ui.form.availability.withWeb(true))
+    assertTrue(state.formEditor(entry.key).ui.issues.isNotEmpty())
+    assertTrue(state.ui.hasUnpublishedChanges)
+    assertFalse(state.ui.canPublish)
 
-    entry.editor.makeGeometryQuestionsWebCompatible()
-    assertTrue(entry.editor.issues.isEmpty())
-    assertTrue(state.canPublish)
+    state.formEditor(entry.key).makeGeometryQuestionsWebCompatible()
+    assertTrue(state.formEditor(entry.key).ui.issues.isEmpty())
+    assertTrue(state.ui.canPublish)
   }
 
   @Test
   fun setFormSaveToMode_update_deletesEmptyLinkedDataset() {
-    val state = SurveyEditorState(SurveyEditorSamples.draft())
+    val state = surveyEditorViewModel()
     state.addForm()
-    val entry = state.selectedForm!!
-    val linked = state.datasets.first { it.linkedFormKey == entry.key }
+    val entry = state.ui.selectedForm!!
+    val linked = state.ui.datasets.first { it.linkedFormKey == entry.key }
 
     state.setFormSaveToMode(entry.key, SaveToMode.UPDATE)
 
-    assertTrue(state.datasets.none { it.key == linked.key })
-    val saveTo = entry.editor.form.saveTo
+    assertTrue(state.ui.datasets.none { it.key == linked.key })
+    val saveTo = state.formEditor(entry.key).ui.form.saveTo
     assertEquals(SaveToMode.UPDATE, saveTo.mode)
     assertEquals("coffee_parcels", saveTo.targetDatasetId)
-    assertEquals(SurveyEditorSection.Form(entry.key), state.section)
+    assertEquals(SurveyEditorSection.Form(entry.key), state.ui.section)
   }
 
   @Test
   fun setFormSaveToMode_update_unlinksDatasetWithFeatures() {
-    val state = SurveyEditorState(SurveyEditorSamples.draft())
+    val state = surveyEditorViewModel()
     state.addForm()
-    val entry = state.selectedForm!!
-    val linked = state.datasets.first { it.linkedFormKey == entry.key }
+    val entry = state.ui.selectedForm!!
+    val linked = state.ui.datasets.first { it.linkedFormKey == entry.key }
     state.addRow(linked.key)
 
     state.setFormSaveToMode(entry.key, SaveToMode.UPDATE)
 
-    val kept = state.datasets.first { it.key == linked.key }
+    val kept = state.ui.datasets.first { it.key == linked.key }
     assertNull(kept.linkedFormKey)
-    assertNotEquals(kept.id, entry.editor.form.saveTo.targetDatasetId)
+    assertNotEquals(kept.id, state.formEditor(entry.key).ui.form.saveTo.targetDatasetId)
   }
 
   @Test
   fun setFormSaveToMode_create_relinksNewDatasetWithoutLeavingForm() {
-    val state = SurveyEditorState(SurveyEditorSamples.draft())
+    val state = surveyEditorViewModel()
     state.addForm()
-    val entry = state.selectedForm!!
+    val entry = state.ui.selectedForm!!
     state.setFormSaveToMode(entry.key, SaveToMode.UPDATE)
-    assertTrue(state.datasets.none { it.linkedFormKey == entry.key })
+    assertTrue(state.ui.datasets.none { it.linkedFormKey == entry.key })
 
     state.setFormSaveToMode(entry.key, SaveToMode.CREATE)
 
-    assertEquals(SaveToMode.CREATE, entry.editor.form.saveTo.mode)
-    assertEquals(1, state.datasets.count { it.linkedFormKey == entry.key })
-    assertEquals(SurveyEditorSection.Form(entry.key), state.section)
+    assertEquals(SaveToMode.CREATE, state.formEditor(entry.key).ui.form.saveTo.mode)
+    assertEquals(1, state.ui.datasets.count { it.linkedFormKey == entry.key })
+    assertEquals(SurveyEditorSection.Form(entry.key), state.ui.section)
   }
 
   @Test
   fun renamingTargetDatasetAndProperty_keepsUpdateFormPointedAtIt() {
-    val state = SurveyEditorState(SurveyEditorSamples.draft())
+    val state = surveyEditorViewModel()
     state.addForm()
-    val entry = state.selectedForm!!
-    entry.editor.addQuestion(EditorQuestionType.TEXT)
-    val question = entry.editor.form.questions.last()
+    val entry = state.ui.selectedForm!!
+    state.formEditor(entry.key).addQuestion(EditorQuestionType.TEXT)
+    val question = state.formEditor(entry.key).ui.form.questions.last()
     state.setFormSaveToMode(entry.key, SaveToMode.UPDATE)
-    entry.editor.setMapping(question.key, "status")
-    val parcels = state.datasets.first { it.id == "coffee_parcels" }
-    assertEquals(listOf(entry.key), state.formsUpdating(parcels).map { it.key })
+    state.formEditor(entry.key).setMapping(question.key, "status")
+    val parcels = state.ui.datasets.first { it.id == "coffee_parcels" }
+    assertEquals(listOf(entry.key), state.ui.formsUpdating(parcels).map { it.key })
 
     state.updateDataset(parcels.key) { it.copy(id = "parcels") }
-    assertEquals("parcels", entry.editor.form.saveTo.targetDatasetId)
+    assertEquals("parcels", state.formEditor(entry.key).ui.form.saveTo.targetDatasetId)
 
     val statusIndex = parcels.properties.indexOfFirst { it.name == "status" }
     state.updateProperty(
@@ -710,19 +718,25 @@ class SurveyEditorTest {
       statusIndex,
       parcels.properties[statusIndex].copy(name = "state"),
     )
-    assertEquals("state", entry.editor.form.saveTo.propertyFor(question.key))
+    assertEquals("state", state.formEditor(entry.key).ui.form.saveTo.propertyFor(question.key))
   }
 
   @Test
   fun publishedFormXml_includesSaveToLogic() {
-    val state = SurveyEditorState(SurveyEditorSamples.draft())
+    val state = surveyEditorViewModel()
     state.addForm()
-    val entry = state.selectedForm!!
-    val createXml = state.toDraft().publishedFormXml(SurveyEditorForm(entry.key, entry.editor.form))
+    val entry = state.ui.selectedForm!!
+    val createXml =
+      state.ui.draft.publishedFormXml(
+        SurveyEditorForm(entry.key, state.formEditor(entry.key).ui.form)
+      )
     assertTrue(createXml.contains("create=\"1\""))
 
     state.setFormSaveToMode(entry.key, SaveToMode.UPDATE)
-    val updateXml = state.toDraft().publishedFormXml(SurveyEditorForm(entry.key, entry.editor.form))
+    val updateXml =
+      state.ui.draft.publishedFormXml(
+        SurveyEditorForm(entry.key, state.formEditor(entry.key).ui.form)
+      )
     assertTrue(updateXml.contains("update=\"1\""))
     assertTrue(updateXml.contains("<instance id=\"coffee_parcels\""))
     assertTrue(updateXml.contains("<item>"))
@@ -732,55 +746,55 @@ class SurveyEditorTest {
 
   @Test
   fun organizationPolicy_withoutOrganization_isAnIssueThatBlocksPublishing() {
-    val state = SurveyEditorState(SurveyEditorSamples.draft())
+    val state = surveyEditorViewModel()
     state.setOrganization(null)
     state.updateSharing { it.copy(policy = SharingPolicy.ORGANIZATION) }
 
-    assertEquals(1, state.sharingIssues.size)
-    assertEquals(1, state.issueCount)
-    assertTrue(state.hasUnpublishedChanges)
-    assertFalse(state.canPublish)
+    assertEquals(1, state.ui.sharingIssues.size)
+    assertEquals(1, state.ui.issueCount)
+    assertTrue(state.ui.hasUnpublishedChanges)
+    assertFalse(state.ui.canPublish)
 
     state.setOrganization("org-1")
-    assertEquals(emptyList(), state.sharingIssues)
-    assertTrue(state.canPublish)
+    assertEquals(emptyList(), state.ui.sharingIssues)
+    assertTrue(state.ui.canPublish)
   }
 
   @Test
   fun clearingOrganization_downgradesOrganizationPolicy_andExplainsWhy() {
-    val state = SurveyEditorState(SurveyEditorSamples.draft())
+    val state = surveyEditorViewModel()
     state.updateSharing { it.copy(policy = SharingPolicy.ORGANIZATION) }
-    assertNull(state.organizationNotice)
+    assertNull(state.ui.organizationNotice)
 
     state.setOrganization("")
 
-    assertNull(state.details.organizationId)
-    assertEquals(SharingPolicy.RESTRICTED, state.sharing.policy)
-    assertNotNull(state.organizationNotice)
+    assertNull(state.ui.details.organizationId)
+    assertEquals(SharingPolicy.RESTRICTED, state.ui.sharing.policy)
+    assertNotNull(state.ui.organizationNotice)
     state.dismissOrganizationNotice()
-    assertNull(state.organizationNotice)
+    assertNull(state.ui.organizationNotice)
   }
 
   @Test
   fun clearingOrganization_keepsOtherPolicies() {
-    val state = SurveyEditorState(SurveyEditorSamples.draft())
+    val state = surveyEditorViewModel()
     state.updateSharing { it.copy(policy = SharingPolicy.PUBLIC) }
     state.setOrganization(null)
-    assertEquals(SharingPolicy.PUBLIC, state.sharing.policy)
-    assertNull(state.organizationNotice)
+    assertEquals(SharingPolicy.PUBLIC, state.ui.sharing.policy)
+    assertNull(state.ui.organizationNotice)
   }
 
   @Test
   fun discardChanges_restoresOrganizationAndClearsNotice() {
-    val state = SurveyEditorState(SurveyEditorSamples.draft())
-    val original = state.details.organizationId
+    val state = surveyEditorViewModel()
+    val original = state.ui.details.organizationId
     state.updateSharing { it.copy(policy = SharingPolicy.ORGANIZATION) }
     state.setOrganization(null)
     state.discardChanges()
-    assertEquals(original, state.details.organizationId)
-    assertEquals(SharingPolicy.RESTRICTED, state.sharing.policy)
-    assertNull(state.organizationNotice)
-    assertFalse(state.hasUnpublishedChanges)
+    assertEquals(original, state.ui.details.organizationId)
+    assertEquals(SharingPolicy.RESTRICTED, state.ui.sharing.policy)
+    assertNull(state.ui.organizationNotice)
+    assertFalse(state.ui.hasUnpublishedChanges)
   }
 
   @Test
@@ -811,9 +825,9 @@ class SurveyEditorTest {
   @Test
   fun organizationSharedSample_isValidAndOpenToTheOrganization() {
     val draft = SurveyEditorSamples.organizationSharedDraft()
-    val state = SurveyEditorState(draft)
-    assertEquals(SharingPolicy.ORGANIZATION, state.sharing.policy)
-    assertNotNull(state.details.organizationId)
-    assertEquals(0, state.issueCount)
+    val state = surveyEditorViewModel(draft)
+    assertEquals(SharingPolicy.ORGANIZATION, state.ui.sharing.policy)
+    assertNotNull(state.ui.details.organizationId)
+    assertEquals(0, state.ui.issueCount)
   }
 }

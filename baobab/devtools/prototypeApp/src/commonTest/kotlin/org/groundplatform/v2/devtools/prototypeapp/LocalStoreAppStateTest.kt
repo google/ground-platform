@@ -19,7 +19,8 @@ import kotlin.test.assertTrue
 import org.groundplatform.v2.devtools.prototypeapp.data.seed.PrototypeFakeSurveyEditorData
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.DatasetKind
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.publishedFormXml
-import org.groundplatform.v2.devtools.prototypeapp.surveyeditor.SurveyEditorState
+import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.surveyEditorViewModel
+import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.ui
 
 /**
  * End-to-end checks that [PrototypeAppState] reads from and writes through the local data store,
@@ -91,44 +92,44 @@ class LocalStoreAppStateTest {
   @Test
   fun surveyEditor_loadsSampleDraftFromStore() {
     val state = PrototypeAppState(initialScreen = PrototypeScreen.MAIN_SURVEY)
-    val editor = SurveyEditorState(state.activeSurveyEditorDraft)
-    assertEquals(state.activeSurvey.title, editor.details.title)
+    val editor = surveyEditorViewModel(state.activeSurveyEditorDraft)
+    assertEquals(state.activeSurvey.title, editor.ui.details.title)
     // Forms and Map layers are derived from the survey data; Data tables come from the seed.
-    assertEquals(state.forms.map { it.id }, editor.toDraft().forms.map { it.form.formId })
+    assertEquals(state.forms.map { it.id }, editor.ui.draft.forms.map { it.form.formId })
     assertEquals(
       state.mapLayers.map { it.datasetId ?: it.id },
-      editor.mapLayers.map { it.id },
+      editor.ui.mapLayers.map { it.id },
     )
     assertEquals(
       PrototypeFakeSurveyEditorData.farmers().id to PrototypeFakeSurveyEditorData.treeSpecies().id,
-      editor.dataTables.map { it.id }.let { it[0] to it[1] },
+      editor.ui.dataTables.map { it.id }.let { it[0] to it[1] },
     )
-    assertEquals(PrototypeFakeSurveyEditorData.kenyaSharing(), editor.sharing)
+    assertEquals(PrototypeFakeSurveyEditorData.kenyaSharing(), editor.ui.sharing)
 
     // Surveys without a stored draft still open with their Forms and Map layers.
     val other = PrototypeAppState(initialScreen = PrototypeScreen.MAIN_SURVEY)
     other.openSurvey("survey-sample-plots-forest")
-    val derived = SurveyEditorState(other.activeSurveyEditorDraft)
-    assertEquals(other.activeSurvey.title, derived.details.title)
-    assertEquals(other.forms.map { it.id }, derived.toDraft().forms.map { it.form.formId })
-    assertEquals(other.mapLayers.size, derived.mapLayers.size)
-    assertTrue(derived.dataTables.isEmpty())
+    val derived = surveyEditorViewModel(other.activeSurveyEditorDraft)
+    assertEquals(other.activeSurvey.title, derived.ui.details.title)
+    assertEquals(other.forms.map { it.id }, derived.ui.draft.forms.map { it.form.formId })
+    assertEquals(other.mapLayers.size, derived.ui.mapLayers.size)
+    assertTrue(derived.ui.dataTables.isEmpty())
   }
 
   @Test
   fun surveyEditor_editsAreSavedToStoreAndSurviveSurveySwitches() {
     val state = PrototypeAppState(initialScreen = PrototypeScreen.MAIN_SURVEY)
     val initial = state.activeSurveyEditorDraft
-    val editor = SurveyEditorState(initial)
+    val editor = surveyEditorViewModel(initial)
     editor.updateDetails { it.copy(title = "Renamed survey") }
     editor.addDataset(DatasetKind.DATA_TABLE)
     editor.addForm()
-    state.saveSurveyEditorDraft("survey-kenya-coffee", editor.toDraft())
+    state.saveSurveyEditorDraft("survey-kenya-coffee", editor.ui.draft)
 
     // The title is shown in the survey list; generated XForms are published to the survey config.
     assertEquals("Renamed survey", state.activeSurvey.title)
     val config = state.viewModel.appData.value.content.config
-    val draft = editor.toDraft()
+    val draft = editor.ui.draft
     val newEntry = draft.forms.last()
     val publishedXml = config?.formXmlById?.get(newEntry.form.formId)
     assertEquals(draft.publishedFormXml(newEntry), publishedXml)
@@ -137,8 +138,8 @@ class LocalStoreAppStateTest {
 
     state.openSurvey("survey-sample-plots-forest")
     state.openSurvey("survey-kenya-coffee")
-    val reopened = SurveyEditorState(state.activeSurveyEditorDraft)
-    assertEquals(editor.toDraft(), reopened.toDraft())
+    val reopened = surveyEditorViewModel(state.activeSurveyEditorDraft)
+    assertEquals(editor.ui.draft, reopened.ui.draft)
 
     state.resetPrototypeFlow()
     assertEquals(initial.datasets, state.activeSurveyEditorDraft.datasets)

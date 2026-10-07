@@ -68,6 +68,8 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.ComputeWayfind
 import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.CreateOrganizationUseCase
 import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.CreateSurveyUseCase
 import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.GeneratePrototypeRandomSitesUseCase
+import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.GenerateSamplePlotsUseCase
+import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.InviteCollaboratorUseCase
 import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.InviteOrganizationMemberUseCase
 import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.ManageImagerySourcesUseCase
 import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.ResolveFormDefForLaunchUseCase
@@ -160,6 +162,8 @@ class SurveyAppViewModel(
   val searchPlacesUseCase: SearchPlacesUseCase = SearchPlacesUseCase(),
   val generateRandomSitesUseCase: GeneratePrototypeRandomSitesUseCase =
     GeneratePrototypeRandomSitesUseCase(surveyRepository = surveyRepository),
+  val generateSamplePlotsUseCase: GenerateSamplePlotsUseCase = GenerateSamplePlotsUseCase(),
+  val inviteCollaboratorUseCase: InviteCollaboratorUseCase = InviteCollaboratorUseCase(),
 ) {
   init {
     launch { sampleDataRepository.seedIfNeeded() }

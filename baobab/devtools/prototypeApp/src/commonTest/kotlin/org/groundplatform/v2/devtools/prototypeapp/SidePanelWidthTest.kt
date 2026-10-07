@@ -19,7 +19,9 @@ import kotlin.test.assertFalse
 import org.groundplatform.v2.devtools.prototypeapp.PrototypeAppState.Companion.DEFAULT_SIDE_PANEL_WIDTH_DP
 import org.groundplatform.v2.devtools.prototypeapp.PrototypeAppState.Companion.MAX_SIDE_PANEL_WIDTH_DP
 import org.groundplatform.v2.devtools.prototypeapp.PrototypeAppState.Companion.MIN_SIDE_PANEL_WIDTH_DP
-import org.groundplatform.v2.devtools.prototypeapp.surveyeditor.SurveyEditorState
+import org.groundplatform.v2.devtools.prototypeapp.ui.state.SurveyEditorUiState
+import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.surveyEditorViewModel
+import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.ui
 
 /** Width of the web dashboard's and Survey editor's resizable left-hand panels. */
 class SidePanelWidthTest {
@@ -85,27 +87,27 @@ class SidePanelWidthTest {
   @Test
   fun surveyEditorSidePanelWidth_startsAtDefault() {
     assertEquals(
-      SurveyEditorState.DEFAULT_SIDE_PANEL_WIDTH_DP,
-      SurveyEditorState().sidePanelWidthDp,
+      SurveyEditorUiState.DEFAULT_SIDE_PANEL_WIDTH_DP,
+      surveyEditorViewModel().ui.sidePanelWidthDp,
     )
   }
 
   @Test
   fun surveyEditorUpdateSidePanelWidth_acceptsAndClampsWidth() {
-    val state = SurveyEditorState()
+    val state = surveyEditorViewModel()
 
     state.updateSidePanelWidth(380f)
-    assertEquals(380f, state.sidePanelWidthDp)
+    assertEquals(380f, state.ui.sidePanelWidthDp)
 
-    state.updateSidePanelWidth(SurveyEditorState.MIN_SIDE_PANEL_WIDTH_DP - 100f)
-    assertEquals(SurveyEditorState.MIN_SIDE_PANEL_WIDTH_DP, state.sidePanelWidthDp)
+    state.updateSidePanelWidth(SurveyEditorUiState.MIN_SIDE_PANEL_WIDTH_DP - 100f)
+    assertEquals(SurveyEditorUiState.MIN_SIDE_PANEL_WIDTH_DP, state.ui.sidePanelWidthDp)
 
-    state.updateSidePanelWidth(SurveyEditorState.MAX_SIDE_PANEL_WIDTH_DP + 100f)
-    assertEquals(SurveyEditorState.MAX_SIDE_PANEL_WIDTH_DP, state.sidePanelWidthDp)
+    state.updateSidePanelWidth(SurveyEditorUiState.MAX_SIDE_PANEL_WIDTH_DP + 100f)
+    assertEquals(SurveyEditorUiState.MAX_SIDE_PANEL_WIDTH_DP, state.ui.sidePanelWidthDp)
 
     state.updateSidePanelWidth(Float.NaN)
     state.updateSidePanelWidth(Float.NEGATIVE_INFINITY)
-    assertEquals(SurveyEditorState.MAX_SIDE_PANEL_WIDTH_DP, state.sidePanelWidthDp)
-    assertFalse(state.hasUnpublishedChanges)
+    assertEquals(SurveyEditorUiState.MAX_SIDE_PANEL_WIDTH_DP, state.ui.sidePanelWidthDp)
+    assertFalse(state.ui.hasUnpublishedChanges)
   }
 }
