@@ -278,7 +278,25 @@ class FormEditorState(
                 q.copy(relevance = relevance.copy(value = choice.value))
               else -> q
             }
-          }
+          },
+        saveTo =
+          form.saveTo.copy(
+            status =
+              form.saveTo.status.copy(
+                rules =
+                  form.saveTo.status.rules.map { rule ->
+                    if (
+                      rule.subject == StatusConditionSubject.QUESTION &&
+                        rule.questionKey == key &&
+                        rule.value == old.value
+                    ) {
+                      rule.copy(value = choice.value)
+                    } else {
+                      rule
+                    }
+                  }
+              )
+          ),
       )
   }
 
@@ -369,13 +387,33 @@ class FormEditorState(
     saveTo: EditorSaveTo,
     key: String,
     type: EditorQuestionType,
-  ): EditorSaveTo =
-    when {
-      type == EditorQuestionType.NOTE -> saveTo.withoutQuestion(key)
-      !type.isGeometry && saveTo.propertyFor(key) == SaveToRules.GEOMETRY_PROPERTY ->
+  ): EditorSaveTo {
+    if (type == EditorQuestionType.NOTE) return saveTo.withoutQuestion(key)
+    val allowed = RelevanceOperator.availableFor(type)
+    val updatedMapping =
+      if (!type.isGeometry && saveTo.propertyFor(key) == SaveToRules.GEOMETRY_PROPERTY) {
         saveTo.withMapping(key, null)
-      else -> saveTo
-    }
+      } else {
+        saveTo
+      }
+    return updatedMapping.copy(
+      status =
+        updatedMapping.status.copy(
+          rules =
+            updatedMapping.status.rules.map { rule ->
+              if (
+                rule.subject == StatusConditionSubject.QUESTION &&
+                  rule.questionKey == key &&
+                  rule.operator !in allowed
+              ) {
+                rule.copy(operator = allowed.first(), value = "")
+              } else {
+                rule
+              }
+            }
+        )
+    )
+  }
 
   /** Sets how collectors record the geometry answer of [key] (ignored for non-geometry types). */
   fun updateCapture(key: String, capture: GeometryCapture) {
@@ -470,10 +508,13 @@ class FormEditorState(
     form = form.copy(saveTo = saveTo.copy(targetDatasetId = newId))
   }
 
-  /** Follows a rename of property [oldName] of dataset [datasetId] in lookup and mappings. */
+  /**
+   * Follows a rename of property [oldName] of dataset [datasetId] in lookup, mappings, and status
+   * rules.
+   */
   fun renameTargetProperty(datasetId: String, oldName: String, newName: String) {
     val saveTo = form.saveTo
-    if (saveTo.targetDatasetId != datasetId) return
+    if (saveTo.targetDatasetId != datasetId && saveTarget?.id != datasetId) return
     form =
       form.copy(
         saveTo =
@@ -484,7 +525,105 @@ class FormEditorState(
               saveTo.mappings.map {
                 if (it.property == oldName) it.copy(property = newName) else it
               },
+            status =
+              saveTo.status.copy(
+                rules =
+                  saveTo.status.rules.map { rule ->
+                    if (
+                      rule.subject == StatusConditionSubject.ENTITY_PROPERTY &&
+                        rule.property == oldName
+                    ) {
+                      rule.copy(property = newName)
+                    } else {
+                      rule
+                    }
+                  }
+              ),
           )
+      )
+  }
+
+  /** Turns conditional status marker rules on or off, seeding sensible defaults when empty. */
+  fun setStatusEnabled(enabled: Boolean) {
+    val current = form.saveTo.status
+    val rules =
+      if (enabled && current.rules.isEmpty()) EditorStatusConfig.defaultRules() else current.rules
+    form =
+      form.copy(saveTo = form.saveTo.copy(status = current.copy(enabled = enabled, rules = rules)))
+  }
+
+  /**
+   * Adds a new status rule. If the last rule is the default catch-all ("When form is submitted"),
+   * inserts the new rule right before it so specific conditions are evaluated first.
+   */
+  fun addStatusRule() {
+    val current = form.saveTo.status
+    val savable = SaveToRules.savableQuestions(form)
+    val defaultQuestion = savable.firstOrNull { it.type.hasChoices } ?: savable.firstOrNull()
+    val newRule =
+      if (defaultQuestion != null) {
+        val op = RelevanceOperator.availableFor(defaultQuestion.type).first()
+        val valDefault =
+          if (op.needsValue) {
+            defaultQuestion.choices.firstOrNull()?.value
+              ?: if (defaultQuestion.type.isNumeric) "1" else "yes"
+          } else {
+            ""
+          }
+        EditorStatusRule(
+          subject = StatusConditionSubject.QUESTION,
+          questionKey = defaultQuestion.key,
+          operator = op,
+          value = valDefault,
+          badge = EditorStatusBadge.IN_PROGRESS,
+        )
+      } else {
+        EditorStatusRule(
+          subject = StatusConditionSubject.SUBMISSIONS,
+          minSubmissions = 2,
+          badge = EditorStatusBadge.SURVEYED,
+        )
+      }
+    val list = current.rules.toMutableList()
+    val lastIsCatchAll =
+      list.lastOrNull()?.let {
+        it.subject == StatusConditionSubject.SUBMISSIONS && it.minSubmissions <= 1
+      } == true
+    val insertIndex = if (lastIsCatchAll) list.lastIndex else list.size
+    list.add(insertIndex, newRule)
+    form = form.copy(saveTo = form.saveTo.copy(status = current.copy(rules = list)))
+  }
+
+  fun updateStatusRule(index: Int, transform: (EditorStatusRule) -> EditorStatusRule) {
+    val current = form.saveTo.status
+    if (index !in current.rules.indices) return
+    val updated = current.rules.mapIndexed { i, r -> if (i == index) transform(r) else r }
+    form = form.copy(saveTo = form.saveTo.copy(status = current.copy(rules = updated)))
+  }
+
+  fun removeStatusRule(index: Int) {
+    val current = form.saveTo.status
+    if (index !in current.rules.indices) return
+    val updated = current.rules.filterIndexed { i, _ -> i != index }
+    form = form.copy(saveTo = form.saveTo.copy(status = current.copy(rules = updated)))
+  }
+
+  fun moveStatusRule(index: Int, delta: Int) {
+    val current = form.saveTo.status
+    val targetIndex = index + delta
+    if (index !in current.rules.indices || targetIndex !in current.rules.indices) return
+    val list = current.rules.toMutableList()
+    val item = list.removeAt(index)
+    list.add(targetIndex, item)
+    form = form.copy(saveTo = form.saveTo.copy(status = current.copy(rules = list)))
+  }
+
+  fun updateDefaultStatusBadge(transform: (EditorStatusBadge) -> EditorStatusBadge) {
+    val current = form.saveTo.status
+    form =
+      form.copy(
+        saveTo =
+          form.saveTo.copy(status = current.copy(defaultBadge = transform(current.defaultBadge)))
       )
   }
 

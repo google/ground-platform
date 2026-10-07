@@ -228,4 +228,25 @@ class FormEditorClickTest {
     // The first screen moved later.
     assertTrue(state.form.questions.indexOfFirst { it.key == firstKey } > 0)
   }
+
+  @Test
+  fun advancedStatusMarkerToggleAndAddRuleWorkInFormProperties() = withEditor { state ->
+    runOnIdle {
+      AdvancedDisclosure.expanded = true
+      state.selectForm()
+    }
+    waitForIdle()
+    assertTrue(!state.form.saveTo.status.enabled)
+    onNodeWithText("Set status marker").performScrollTo().performClick()
+    waitForIdle()
+    assertTrue(state.form.saveTo.status.enabled)
+    assertEquals(1, state.form.saveTo.status.rules.size)
+    assertEquals("Surveyed", state.form.saveTo.status.rules.single().badge.label)
+    assertEquals("Pending", state.form.saveTo.status.defaultBadge.label)
+
+    onNodeWithText("Add status rule").performScrollTo().performClick()
+    waitForIdle()
+    assertEquals(2, state.form.saveTo.status.rules.size)
+    runOnIdle { AdvancedDisclosure.expanded = null }
+  }
 }

@@ -334,4 +334,168 @@ class FormSaveToTest {
     assertFalse(AdvancedDisclosure.isExpanded(autoExpand = true))
     AdvancedDisclosure.expanded = null
   }
+
+  @Test
+  fun statusMarker_disabledByDefault_andSensibleDefaultsWhenEnabled() {
+    val linked = plots.copy(isLinkedToThisForm = true)
+    val state = stateWith(datasets = listOf(linked, farmers))
+    assertFalse(state.form.saveTo.status.enabled)
+    assertFalse(state.form.saveTo.isCustomized)
+    assertFalse(state.xformsXml.contains(SaveToRules.STATUS_FIELD))
+
+    state.setStatusEnabled(true)
+    assertTrue(state.form.saveTo.status.enabled)
+    assertTrue(state.form.saveTo.isCustomized)
+    assertTrue(state.issues.isEmpty(), state.issues.toString())
+
+    val result = finalize(state.xformsXml) { it.updateString("/data/notes", "Checked") }
+    val entityState = assertIs<FinalizationResult.Success>(result).entityStates.single()
+    assertEquals("Surveyed", entityState.properties["status"]?.string_value)
+    assertEquals("✓", entityState.properties["marker-symbol"]?.string_value)
+    assertEquals("#3C8D40", entityState.properties["marker-color"]?.string_value)
+  }
+
+  @Test
+  fun statusMarker_conditionalRules_evaluateQuestionPropertyAndSubmissionCountInOrder() {
+    val plotsWithVersion =
+      plots.copy(
+        rows =
+          listOf(
+            EditorDatasetRow(
+              "P-1",
+              "North plot",
+              mapOf("plot_id" to "P-1", "canopy_pct" to "10", "notes" to "ok", "__version" to "1"),
+            ),
+            EditorDatasetRow(
+              "P-2",
+              "South plot",
+              mapOf(
+                "plot_id" to "P-2",
+                "canopy_pct" to "20",
+                "notes" to "flagged",
+                "__version" to "1",
+              ),
+            ),
+            EditorDatasetRow(
+              "P-3",
+              "East plot",
+              mapOf("plot_id" to "P-3", "canopy_pct" to "30", "notes" to "ok", "__version" to "2"),
+            ),
+          )
+      )
+    val form =
+      visitForm.copy(
+        saveTo =
+          EditorSaveTo(
+            mode = SaveToMode.UPDATE,
+            targetDatasetId = "plots",
+            mappings = listOf(EditorFieldMapping("q2", "canopy_pct")),
+            status =
+              EditorStatusConfig(
+                enabled = true,
+                rules =
+                  listOf(
+                    EditorStatusRule(
+                      subject = StatusConditionSubject.QUESTION,
+                      questionKey = "q2",
+                      operator = RelevanceOperator.LESS_THAN,
+                      value = "15",
+                      badge = EditorStatusBadge.NEEDS_REVIEW,
+                    ),
+                    EditorStatusRule(
+                      subject = StatusConditionSubject.ENTITY_PROPERTY,
+                      property = "notes",
+                      operator = RelevanceOperator.EQUALS,
+                      value = "flagged",
+                      badge = EditorStatusBadge.FLAGGED,
+                    ),
+                    EditorStatusRule(
+                      subject = StatusConditionSubject.SUBMISSIONS,
+                      minSubmissions = 2,
+                      badge = EditorStatusBadge.SURVEYED,
+                    ),
+                  ),
+                defaultBadge = EditorStatusBadge.IN_PROGRESS,
+              ),
+          )
+      )
+    assertTrue(SaveToValidator.validate(form, listOf(plotsWithVersion)).isEmpty())
+    val xml = EditorXFormsGenerator.toXml(form, plotsWithVersion, inlineRows = true)
+
+    // 1. Question condition matches (canopy_pct < 15) -> Needs review (!)
+    val r1 =
+      finalize(xml) {
+        it.updateString("/data/target_entity", "P-1")
+        it.updateInt("/data/canopy_pct", 10)
+      }
+    val s1 = assertIs<FinalizationResult.Success>(r1).entityStates.single()
+    assertEquals("Needs review", s1.properties["status"]?.string_value)
+    assertEquals("!", s1.properties["marker-symbol"]?.string_value)
+    assertEquals("#F37C22", s1.properties["marker-color"]?.string_value)
+
+    // 2. Entity property matches (notes = 'flagged' on P-2) -> Flagged (✕)
+    val r2 =
+      finalize(xml) {
+        it.updateString("/data/target_entity", "P-2")
+        it.updateInt("/data/canopy_pct", 40)
+      }
+    val s2 = assertIs<FinalizationResult.Success>(r2).entityStates.single()
+    assertEquals("Flagged", s2.properties["status"]?.string_value)
+    assertEquals("✕", s2.properties["marker-symbol"]?.string_value)
+    assertEquals("#D13135", s2.properties["marker-color"]?.string_value)
+
+    // 3. Submission count matches (__version >= 2 on P-3) -> Surveyed (✓)
+    val r3 =
+      finalize(xml) {
+        it.updateString("/data/target_entity", "P-3")
+        it.updateInt("/data/canopy_pct", 40)
+      }
+    val s3 = assertIs<FinalizationResult.Success>(r3).entityStates.single()
+    assertEquals("Surveyed", s3.properties["status"]?.string_value)
+    assertEquals("✓", s3.properties["marker-symbol"]?.string_value)
+    assertEquals("#3C8D40", s3.properties["marker-color"]?.string_value)
+
+    // 4. Fallback ("Otherwise") when no rule matches (P-1 with canopy_pct = 40, __version = 1) ->
+    // In progress (◐)
+    val r4 =
+      finalize(xml) {
+        it.updateString("/data/target_entity", "P-1")
+        it.updateInt("/data/canopy_pct", 40)
+      }
+    val s4 = assertIs<FinalizationResult.Success>(r4).entityStates.single()
+    assertEquals("In progress", s4.properties["status"]?.string_value)
+    assertEquals("◐", s4.properties["marker-symbol"]?.string_value)
+    assertEquals("#F9BF40", s4.properties["marker-color"]?.string_value)
+  }
+
+  @Test
+  fun statusMarker_mutationsAndValidation_stayInSync() {
+    val state = stateWith()
+    state.setSaveToMode(SaveToMode.UPDATE)
+    state.setStatusEnabled(true)
+    assertEquals(1, state.form.saveTo.status.rules.size)
+
+    // Adding a rule inserts it before the trailing catch-all submission rule.
+    state.addStatusRule()
+    assertEquals(2, state.form.saveTo.status.rules.size)
+    assertEquals(StatusConditionSubject.QUESTION, state.form.saveTo.status.rules[0].subject)
+    assertEquals(StatusConditionSubject.SUBMISSIONS, state.form.saveTo.status.rules[1].subject)
+
+    // Reordering and updating rules works cleanly.
+    state.moveStatusRule(0, 1)
+    assertEquals(StatusConditionSubject.SUBMISSIONS, state.form.saveTo.status.rules[0].subject)
+    state.updateStatusRule(1) {
+      it.copy(
+        subject = StatusConditionSubject.ENTITY_PROPERTY,
+        property = "notes",
+        operator = RelevanceOperator.IS_ANSWERED,
+      )
+    }
+    state.renameTargetProperty("plots", "notes", "plot_notes")
+    assertEquals("plot_notes", state.form.saveTo.status.rules[1].property)
+
+    // Blank default label is flagged by validator.
+    state.updateDefaultStatusBadge { it.copy(label = "") }
+    assertTrue(state.issues.any { it.message.contains("default status label") })
+  }
 }

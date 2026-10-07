@@ -168,13 +168,13 @@ data class EditorChoiceImage(val mimeType: String, val base64: String) {
 object ChoiceColors {
   val palette: List<Pair<String, String>> =
     listOf(
-      "Red" to "#D93025",
-      "Orange" to "#F29900",
-      "Yellow" to "#FDD663",
-      "Green" to "#1E8E3E",
+      "Orange" to "#F37C22",
+      "Red" to "#D13135",
+      "Purple" to "#7A279F",
+      "Blue" to "#2278CF",
+      "Green" to "#3C8D40",
+      "Yellow" to "#F9BF40",
       "Teal" to "#129EAF",
-      "Blue" to "#1A73E8",
-      "Purple" to "#9334E6",
       "Pink" to "#E52592",
       "Brown" to "#8D6E63",
       "Gray" to "#80868B",
@@ -540,8 +540,9 @@ object EditorXFormsGenerator {
    * (and the label text) directly as XPath, so the generator writes the expression in both places:
    * ODK clients overwrite the instance default via the binds, and Ground evaluates it in place.
    */
-  private class EntityPlan(form: EditorForm, val target: EditorDataset) {
+  private class EntityPlan(val form: EditorForm, val target: EditorDataset) {
     val isUpdate = form.saveTo.mode == SaveToMode.UPDATE
+    val hasStatus = form.saveTo.status.enabled
     val selectsTarget = isUpdate && form.saveTo.idSource == EntityIdSource.SELECTED_FEATURE
     val idExpression: String =
       if (isUpdate) SaveToRules.entityIdExpression(form, target).orEmpty() else "uuid()"
@@ -566,8 +567,9 @@ object EditorXFormsGenerator {
       if (isUpdate) {
         form.saveTo.mappings
           .mapNotNull { m -> m.property?.let { m.questionKey to it } }
-          .filter { (key, _) ->
-            form.find(key)?.type?.let { it != EditorQuestionType.NOTE } == true
+          .filter { (key, prop) ->
+            form.find(key)?.type?.let { it != EditorQuestionType.NOTE } == true &&
+              (!hasStatus || prop !in SaveToRules.STATUS_PROPERTIES)
           }
           .toMap()
       } else {
@@ -577,6 +579,7 @@ object EditorXFormsGenerator {
             when {
               q.key == geometryKey && target.isMapLayer -> q.key to SaveToRules.GEOMETRY_PROPERTY
               SaveToRules.isReservedProperty(q.name) -> null
+              hasStatus && q.name in SaveToRules.STATUS_PROPERTIES -> null
               else -> q.key to q.name
             }
           }
@@ -641,6 +644,11 @@ object EditorXFormsGenerator {
       if (entity?.selectsTarget == true)
         appendLine("          <${SaveToRules.TARGET_ENTITY_FIELD}/>")
       form.questions.forEach { appendLine("          <${it.name}/>") }
+      if (entity?.hasStatus == true) {
+        appendLine("          <${SaveToRules.STATUS_FIELD}/>")
+        appendLine("          <${SaveToRules.MARKER_SYMBOL_FIELD}/>")
+        appendLine("          <${SaveToRules.MARKER_COLOR_FIELD}/>")
+      }
       appendLine("          <orx:meta>")
       appendLine("            <orx:instanceID/>")
       if (entity != null) appendEntityDeclaration(entity)
@@ -766,10 +774,11 @@ object EditorXFormsGenerator {
     appendLine("""      <instance id="$id" src="$src">""")
     appendLine("        <root>")
     target.rows.forEach { row ->
+      val version = row.values["__version"] ?: "1"
       appendLine("          <item>")
       appendLine("            <name>${escape(row.name)}</name>")
       appendLine("            <label>${escape(row.label)}</label>")
-      appendLine("            <__version>1</__version>")
+      appendLine("            <__version>${escape(version)}</__version>")
       columns.forEach { column ->
         appendLine("            <$column>${escape(row.values[column].orEmpty())}</$column>")
       }
@@ -780,6 +789,23 @@ object EditorXFormsGenerator {
   }
 
   private fun StringBuilder.appendEntityBinds(entity: EntityPlan) {
+    if (entity.hasStatus) {
+      val statusCalc =
+        SaveToRules.statusCalculateExpression(entity.form, entity.target) { it.label }
+      val symbolCalc =
+        SaveToRules.statusCalculateExpression(entity.form, entity.target) { it.symbol.symbol }
+      val colorCalc =
+        SaveToRules.statusCalculateExpression(entity.form, entity.target) { it.colorHex }
+      appendLine(
+        """      <bind nodeset="/data/${SaveToRules.STATUS_FIELD}" type="string" readonly="true()" calculate="${escape(statusCalc)}" entities:saveto="${SaveToRules.STATUS_PROPERTY}"/>"""
+      )
+      appendLine(
+        """      <bind nodeset="/data/${SaveToRules.MARKER_SYMBOL_FIELD}" type="string" readonly="true()" calculate="${escape(symbolCalc)}" entities:saveto="${SaveToRules.MARKER_SYMBOL_PROPERTY}"/>"""
+      )
+      appendLine(
+        """      <bind nodeset="/data/${SaveToRules.MARKER_COLOR_FIELD}" type="string" readonly="true()" calculate="${escape(colorCalc)}" entities:saveto="${SaveToRules.MARKER_COLOR_PROPERTY}"/>"""
+      )
+    }
     val path = "/data/orx:meta/entities:entity"
     if (entity.isUpdate) {
       appendLine(

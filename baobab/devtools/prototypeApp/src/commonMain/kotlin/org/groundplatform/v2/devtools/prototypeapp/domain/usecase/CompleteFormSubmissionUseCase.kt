@@ -281,12 +281,15 @@ class CompleteFormSubmissionUseCase(
           extractedFields.any { it.questionName.contains("perimeter") }
       val geomTypeLabel = if (isPolygonGeom) "Polygon" else "Point"
 
+      val createdStatus = saveToProps["status"] ?: "Completed"
+      val createdSymbol = saveToProps["marker-symbol"] ?: "✓"
+      val createdColor = saveToProps["marker-color"] ?: "#1E8E3E"
       val entityProps =
         saveToProps.toMutableMap().apply {
-          put("status", "Completed")
-          put("marker-symbol", "✓")
+          put("status", createdStatus)
+          put("marker-symbol", createdSymbol)
           // Status color for the status chip; the map draws features in their layer's color.
-          put("marker-color", "#1E8E3E")
+          put("marker-color", createdColor)
         }
 
       val newEntity =
@@ -434,12 +437,15 @@ class CompleteFormSubmissionUseCase(
       )
 
     val previousMarkerSymbol = entity.markerSymbol
-    val (nextMarkerSymbol, nextMarkerColor, nextStatus) =
+    val (fallbackMarkerSymbol, fallbackMarkerColor, fallbackStatus) =
       when (previousMarkerSymbol) {
         "○" -> Triple("◐", "#F9AB00", "In progress")
         "◐" -> Triple("✓", "#1E8E3E", "Completed")
         else -> Triple("✓", "#1E8E3E", "Completed")
       }
+    val nextStatus = saveToProps["status"] ?: fallbackStatus
+    val nextMarkerSymbol = saveToProps["marker-symbol"] ?: fallbackMarkerSymbol
+    val nextMarkerColor = saveToProps["marker-color"] ?: fallbackMarkerColor
     val updatedProperties =
       entity.properties.toMutableMap().apply {
         putAll(saveToProps)
@@ -556,6 +562,7 @@ class CompleteFormSubmissionUseCase(
         val isMetaOrEntityRefField =
           fs.relativePath == "meta/instanceID" ||
             fs.relativePath.startsWith("meta/") ||
+            fs.relativePath.startsWith("__") ||
             fs.canonicalPath.endsWith("/meta/instanceID") ||
             fs.canonicalPath == ENTITY_REF_FIELD_PATH ||
             fs.relativePath == "target_entity"

@@ -39,6 +39,89 @@ enum class EntityIdSource {
 /** Saves the answer to question [questionKey] into dataset property [property] (`null` = skip). */
 data class EditorFieldMapping(val questionKey: String, val property: String?)
 
+/** Symbol displayed inside a map feature or table row's status marker and status chip. */
+enum class StatusMarkerSymbol(val symbol: String, val label: String) {
+  OPEN("○", "Open circle"),
+  HALF("◐", "Half circle"),
+  CHECK("✓", "Checkmark"),
+  ALERT("!", "Exclamation"),
+  CROSS("✕", "Cross");
+
+  companion object {
+    fun fromSymbol(symbol: String): StatusMarkerSymbol =
+      entries.firstOrNull { it.symbol == symbol } ?: CHECK
+  }
+}
+
+/**
+ * Bundled status outcome written to an entity's `marker-symbol`, `marker-color`, and `status`
+ * properties when a condition matches (or as the fallback when none match).
+ */
+data class EditorStatusBadge(
+  val symbol: StatusMarkerSymbol = StatusMarkerSymbol.CHECK,
+  val colorHex: String = "#3C8D40",
+  val label: String = "Surveyed",
+) {
+  companion object {
+    val SURVEYED = EditorStatusBadge(StatusMarkerSymbol.CHECK, "#3C8D40", "Surveyed")
+    val IN_PROGRESS = EditorStatusBadge(StatusMarkerSymbol.HALF, "#F9BF40", "In progress")
+    val NEEDS_REVIEW = EditorStatusBadge(StatusMarkerSymbol.ALERT, "#F37C22", "Needs review")
+    val FLAGGED = EditorStatusBadge(StatusMarkerSymbol.CROSS, "#D13135", "Flagged")
+    val PENDING = EditorStatusBadge(StatusMarkerSymbol.OPEN, "#80868B", "Pending")
+  }
+}
+
+/** What a status rule condition inspects when determining a feature's status. */
+enum class StatusConditionSubject(val label: String) {
+  /** Matches when the form is submitted (`minSubmissions == 1`) or after `N` submissions. */
+  SUBMISSIONS("Submission count"),
+  /** Compares an answer to a question in this Form. */
+  QUESTION("Question answer"),
+  /** Compares a property on the target Map layer or Data table. */
+  ENTITY_PROPERTY("Feature property"),
+}
+
+/**
+ * One conditional status rule, evaluated top-to-bottom. The first rule whose condition holds sets
+ * the feature's status marker symbol, color, and label to [badge].
+ */
+data class EditorStatusRule(
+  val subject: StatusConditionSubject = StatusConditionSubject.SUBMISSIONS,
+  /**
+   * Minimum number of submissions required when [subject] is [StatusConditionSubject.SUBMISSIONS].
+   */
+  val minSubmissions: Int = 1,
+  /** Question compared when [subject] is [StatusConditionSubject.QUESTION]. */
+  val questionKey: String? = null,
+  /** Dataset property compared when [subject] is [StatusConditionSubject.ENTITY_PROPERTY]. */
+  val property: String? = null,
+  val operator: RelevanceOperator = RelevanceOperator.EQUALS,
+  val value: String = "",
+  val badge: EditorStatusBadge = EditorStatusBadge.SURVEYED,
+)
+
+/**
+ * Optional status marker rules for the Map layer or Data table this Form writes to. Disabled by
+ * default; when enabled, defaults to marking features as `✓ Surveyed` on submission and `○ Pending`
+ * otherwise.
+ */
+data class EditorStatusConfig(
+  val enabled: Boolean = false,
+  val rules: List<EditorStatusRule> = defaultRules(),
+  val defaultBadge: EditorStatusBadge = EditorStatusBadge.PENDING,
+) {
+  companion object {
+    fun defaultRules(): List<EditorStatusRule> =
+      listOf(
+        EditorStatusRule(
+          subject = StatusConditionSubject.SUBMISSIONS,
+          minSubmissions = 1,
+          badge = EditorStatusBadge.SURVEYED,
+        )
+      )
+  }
+}
+
 /** Form-level "save to" logic, edited in the Form properties' Advanced section. */
 data class EditorSaveTo(
   val mode: SaveToMode = SaveToMode.CREATE,
@@ -51,10 +134,12 @@ data class EditorSaveTo(
   val idMatchProperty: String? = null,
   /** Question to property mappings used in [SaveToMode.UPDATE]. */
   val mappings: List<EditorFieldMapping> = emptyList(),
+  /** Conditional status marker and label rules, off by default. */
+  val status: EditorStatusConfig = EditorStatusConfig(),
 ) {
   /** Whether the Form does anything other than the default (add a new feature or row). */
   val isCustomized: Boolean
-    get() = mode != SaveToMode.CREATE
+    get() = mode != SaveToMode.CREATE || status.enabled
 
   fun propertyFor(questionKey: String): String? =
     mappings.firstOrNull { it.questionKey == questionKey }?.property
@@ -71,6 +156,13 @@ data class EditorSaveTo(
     copy(
       idQuestionKey = idQuestionKey.takeIf { it != questionKey },
       mappings = mappings.filterNot { it.questionKey == questionKey },
+      status =
+        status.copy(
+          rules =
+            status.rules.filterNot {
+              it.subject == StatusConditionSubject.QUESTION && it.questionKey == questionKey
+            }
+        ),
     )
 }
 
@@ -144,6 +236,18 @@ object SaveToRules {
 
   /** Field the app pre-fills with the ID of the feature a Form was opened from. */
   const val TARGET_ENTITY_FIELD = "target_entity"
+
+  /** Entity properties written when status marker rules are enabled. */
+  const val STATUS_PROPERTY = "status"
+  const val MARKER_SYMBOL_PROPERTY = "marker-symbol"
+  const val MARKER_COLOR_PROPERTY = "marker-color"
+  val STATUS_PROPERTIES: Set<String> =
+    setOf(STATUS_PROPERTY, MARKER_SYMBOL_PROPERTY, MARKER_COLOR_PROPERTY)
+
+  /** Calculated instance nodes holding the evaluated status label, marker symbol, and color. */
+  const val STATUS_FIELD = "__status"
+  const val MARKER_SYMBOL_FIELD = "__marker_symbol"
+  const val MARKER_COLOR_FIELD = "__marker_color"
 
   /**
    * ODK XForms Entities spec: `saveto` may not be `name` or `label` (case-insensitive) or start
@@ -278,82 +382,329 @@ object SaveToRules {
       }
     }
   }
+
+  /** Comparison operators supported for a dataset property of [kind]. */
+  fun operatorsForProperty(kind: EditorPropertyKind): List<RelevanceOperator> =
+    when (kind) {
+      EditorPropertyKind.INTEGER,
+      EditorPropertyKind.DECIMAL,
+      EditorPropertyKind.DATE ->
+        listOf(
+          RelevanceOperator.EQUALS,
+          RelevanceOperator.NOT_EQUALS,
+          RelevanceOperator.GREATER_THAN,
+          RelevanceOperator.LESS_THAN,
+          RelevanceOperator.IS_ANSWERED,
+        )
+      EditorPropertyKind.TEXT,
+      EditorPropertyKind.BOOLEAN ->
+        listOf(
+          RelevanceOperator.EQUALS,
+          RelevanceOperator.NOT_EQUALS,
+          RelevanceOperator.IS_ANSWERED,
+        )
+    }
+
+  /** XPath comparison expression for [ref] using [operator] and [value]. */
+  fun comparisonExpression(
+    ref: String,
+    operator: RelevanceOperator,
+    value: String,
+    isNumeric: Boolean,
+  ): String {
+    val literal =
+      if (isNumeric && value.toDoubleOrNull() != null) {
+        value.trim()
+      } else {
+        xpathStringLiteral(value)
+      }
+    return when (operator) {
+      RelevanceOperator.EQUALS -> "$ref = $literal"
+      RelevanceOperator.NOT_EQUALS -> "$ref != $literal"
+      RelevanceOperator.GREATER_THAN -> "$ref > $literal"
+      RelevanceOperator.LESS_THAN -> "$ref < $literal"
+      RelevanceOperator.INCLUDES -> "selected($ref, $literal)"
+      RelevanceOperator.IS_ANSWERED -> "string-length($ref) > 0"
+    }
+  }
+
+  /**
+   * XPath boolean expression for [rule], or `null` if the rule's condition is incomplete.
+   *
+   * For [StatusConditionSubject.SUBMISSIONS]:
+   * - `minSubmissions == 1` evaluates to `true()` because finalizing the form creates at least 1
+   *   submission.
+   * - `minSubmissions > 1` checks `number(instance('<dataset>')/root/item[name = <id>]/__version)`
+   *   in [SaveToMode.UPDATE] (and `false()` in [SaveToMode.CREATE], since a newly created feature
+   *   has only 1 submission).
+   */
+  fun statusConditionExpression(
+    form: EditorForm,
+    target: EditorDataset?,
+    rule: EditorStatusRule,
+  ): String? =
+    when (rule.subject) {
+      StatusConditionSubject.SUBMISSIONS ->
+        when {
+          rule.minSubmissions < 1 -> null
+          rule.minSubmissions == 1 -> "true()"
+          form.saveTo.mode == SaveToMode.UPDATE && target != null -> {
+            val idExpr = entityIdExpression(form, target)?.takeIf { it.isNotEmpty() } ?: return null
+            "number(instance('${target.id}')/root/item[name = $idExpr]/__version) >= ${rule.minSubmissions}"
+          }
+          else -> "false()"
+        }
+      StatusConditionSubject.QUESTION -> {
+        val question =
+          form.find(rule.questionKey)?.takeIf { it.type != EditorQuestionType.NOTE } ?: return null
+        if (rule.operator !in RelevanceOperator.availableFor(question.type)) return null
+        if (rule.operator.needsValue && rule.value.isBlank()) return null
+        if (
+          question.type.isNumeric && rule.operator.needsValue && rule.value.toDoubleOrNull() == null
+        ) {
+          return null
+        }
+        comparisonExpression(
+          ref = "/data/${question.name}",
+          operator = rule.operator,
+          value = rule.value,
+          isNumeric = question.type.isNumeric,
+        )
+      }
+      StatusConditionSubject.ENTITY_PROPERTY -> {
+        val dataset = target ?: return null
+        val prop = dataset.property(rule.property) ?: return null
+        val column = dataset.columnFor(rule.property) ?: return null
+        if (rule.operator !in operatorsForProperty(prop.kind)) return null
+        if (rule.operator.needsValue && rule.value.isBlank()) return null
+        val isNumeric =
+          prop.kind == EditorPropertyKind.INTEGER || prop.kind == EditorPropertyKind.DECIMAL
+        if (isNumeric && rule.operator.needsValue && rule.value.toDoubleOrNull() == null) {
+          return null
+        }
+        val ref =
+          if (form.saveTo.mode == SaveToMode.UPDATE) {
+            val idExpr =
+              entityIdExpression(form, dataset)?.takeIf { it.isNotEmpty() } ?: return null
+            "instance('${dataset.id}')/root/item[name = $idExpr]/$column"
+          } else {
+            val q =
+              form.questions.firstOrNull {
+                it.name == prop.name && it.type != EditorQuestionType.NOTE
+              } ?: return null
+            "/data/${q.name}"
+          }
+        comparisonExpression(ref, rule.operator, rule.value, isNumeric)
+      }
+    }
+
+  /**
+   * Nested `if(cond, then, else)` XPath `calculate` expression evaluating [EditorStatusConfig]
+   * top-to-bottom and falling back to [EditorStatusConfig.defaultBadge].
+   */
+  fun statusCalculateExpression(
+    form: EditorForm,
+    target: EditorDataset?,
+    selector: (EditorStatusBadge) -> String,
+  ): String {
+    val status = form.saveTo.status
+    val fallback = xpathStringLiteral(selector(status.defaultBadge))
+    return status.rules.foldRight(fallback) { rule, elseBranch ->
+      val cond = statusConditionExpression(form, target, rule) ?: return@foldRight elseBranch
+      val thenBranch = xpathStringLiteral(selector(rule.badge))
+      "if($cond, $thenBranch, $elseBranch)"
+    }
+  }
+
+  /** Human-readable summary of [rule]'s condition. */
+  fun statusRuleSummary(form: EditorForm, target: EditorDataset?, rule: EditorStatusRule): String =
+    when (rule.subject) {
+      StatusConditionSubject.SUBMISSIONS ->
+        if (rule.minSubmissions <= 1) "When form is submitted"
+        else "At least ${rule.minSubmissions} submissions"
+      StatusConditionSubject.QUESTION -> {
+        val q = form.find(rule.questionKey)
+        if (q == null) "Missing question"
+        else if (!rule.operator.needsValue) "${q.name} ${rule.operator.label}"
+        else "${q.name} ${rule.operator.label} \"${rule.value}\""
+      }
+      StatusConditionSubject.ENTITY_PROPERTY -> {
+        val propName = target?.property(rule.property)?.name ?: rule.property ?: "property"
+        if (!rule.operator.needsValue) "$propName ${rule.operator.label}"
+        else "$propName ${rule.operator.label} \"${rule.value}\""
+      }
+    }
+
+  private fun xpathStringLiteral(value: String): String =
+    if (value.contains('\'')) "\"$value\"" else "'$value'"
 }
 
 /** Form-level validation of [EditorSaveTo] against the survey's Map layers and Data tables. */
 object SaveToValidator {
   fun validate(form: EditorForm, datasets: List<EditorDataset>): List<EditorIssue> {
     val saveTo = form.saveTo
-    if (saveTo.mode != SaveToMode.UPDATE) return emptyList()
     val issues = mutableListOf<EditorIssue>()
-    val target = datasets.firstOrNull { it.id == saveTo.targetDatasetId }
-    if (target == null) {
-      issues +=
-        EditorIssue(
-          null,
-          if (saveTo.targetDatasetId == null)
-            "Choose the map layer or data table this form updates."
-          else "The map layer or data table \"${saveTo.targetDatasetId}\" no longer exists.",
-        )
-      return issues
-    }
-    when (saveTo.idSource) {
-      EntityIdSource.SELECTED_FEATURE ->
-        form.questions
-          .filter { it.name == SaveToRules.TARGET_ENTITY_FIELD }
-          .forEach {
+    val target = SaveToRules.saveTarget(form, datasets)
+    if (saveTo.mode == SaveToMode.UPDATE) {
+      if (target == null) {
+        issues +=
+          EditorIssue(
+            null,
+            if (saveTo.targetDatasetId == null)
+              "Choose the map layer or data table this form updates."
+            else "The map layer or data table \"${saveTo.targetDatasetId}\" no longer exists.",
+          )
+        return issues
+      }
+      when (saveTo.idSource) {
+        EntityIdSource.SELECTED_FEATURE ->
+          form.questions
+            .filter { it.name == SaveToRules.TARGET_ENTITY_FIELD }
+            .forEach {
+              issues +=
+                EditorIssue(
+                  it.key,
+                  "Name \"${SaveToRules.TARGET_ENTITY_FIELD}\" is reserved for the ${target.featureNoun} being updated.",
+                )
+            }
+        EntityIdSource.QUESTION -> {
+          val question = form.find(saveTo.idQuestionKey)
+          if (question == null || question.type == EditorQuestionType.NOTE) {
             issues +=
               EditorIssue(
-                it.key,
-                "Name \"${SaveToRules.TARGET_ENTITY_FIELD}\" is reserved for the ${target.featureNoun} being updated.",
+                null,
+                "Choose the question that identifies the ${target.featureNoun} to update.",
               )
           }
-      EntityIdSource.QUESTION -> {
-        val question = form.find(saveTo.idQuestionKey)
-        if (question == null || question.type == EditorQuestionType.NOTE) {
-          issues +=
-            EditorIssue(
-              null,
-              "Choose the question that identifies the ${target.featureNoun} to update.",
-            )
-        }
-        if (target.columnFor(saveTo.idMatchProperty) == null) {
-          issues += EditorIssue(null, "Choose the property the answer is matched against.")
+          if (target.columnFor(saveTo.idMatchProperty) == null) {
+            issues += EditorIssue(null, "Choose the property the answer is matched against.")
+          }
         }
       }
-    }
-    val claimed = mutableSetOf<String>()
-    var mappedCount = 0
-    saveTo.mappings.forEach { mapping ->
-      val question = form.find(mapping.questionKey) ?: return@forEach
-      val property = mapping.property ?: return@forEach
-      if (question.type == EditorQuestionType.NOTE) return@forEach
-      mappedCount++
-      when {
-        property == SaveToRules.GEOMETRY_PROPERTY -> {
-          if (!target.isMapLayer || !question.type.isGeometry) {
+      val claimed = mutableSetOf<String>()
+      var mappedCount = 0
+      saveTo.mappings.forEach { mapping ->
+        val question = form.find(mapping.questionKey) ?: return@forEach
+        val property = mapping.property ?: return@forEach
+        if (question.type == EditorQuestionType.NOTE) return@forEach
+        mappedCount++
+        when {
+          property == SaveToRules.GEOMETRY_PROPERTY -> {
+            if (!target.isMapLayer || !question.type.isGeometry) {
+              issues +=
+                EditorIssue(
+                  question.key,
+                  "Only a Point, Line, or Polygon question can update a map feature's geometry.",
+                )
+            }
+          }
+          target.property(property) == null ->
             issues +=
               EditorIssue(
                 question.key,
-                "Only a Point, Line, or Polygon question can update a map feature's geometry.",
+                "Updates \"$property\", which isn't a property of ${target.displayName}.",
               )
-          }
+          target.updatableProperties.none { it.name == property } ->
+            issues += EditorIssue(question.key, "\"$property\" can't be updated by a form.")
         }
-        target.property(property) == null ->
-          issues +=
-            EditorIssue(
-              question.key,
-              "Updates \"$property\", which isn't a property of ${target.displayName}.",
-            )
-        target.updatableProperties.none { it.name == property } ->
-          issues += EditorIssue(question.key, "\"$property\" can't be updated by a form.")
+        if (!claimed.add(property)) {
+          issues += EditorIssue(question.key, "Another question already updates \"$property\".")
+        }
       }
-      if (!claimed.add(property)) {
-        issues += EditorIssue(question.key, "Another question already updates \"$property\".")
+      if (mappedCount == 0 && !saveTo.status.enabled) {
+        issues += EditorIssue(null, "Choose at least one field to update.")
       }
     }
-    if (mappedCount == 0) {
-      issues += EditorIssue(null, "Choose at least one field to update.")
+    if (saveTo.status.enabled) {
+      issues += validateStatus(form, target)
+    }
+    return issues
+  }
+
+  private fun validateStatus(form: EditorForm, target: EditorDataset?): List<EditorIssue> {
+    val status = form.saveTo.status
+    val issues = mutableListOf<EditorIssue>()
+    if (status.defaultBadge.label.isBlank()) {
+      issues += EditorIssue(null, "Enter a default status label.")
+    }
+    status.rules.forEach { rule ->
+      if (rule.badge.label.isBlank()) {
+        issues += EditorIssue(null, "Every status rule needs a status label.")
+      }
+      when (rule.subject) {
+        StatusConditionSubject.SUBMISSIONS -> {
+          if (rule.minSubmissions < 1) {
+            issues += EditorIssue(null, "Submission count must be at least 1.")
+          }
+        }
+        StatusConditionSubject.QUESTION -> {
+          val question = form.find(rule.questionKey)
+          when {
+            question == null || question.type == EditorQuestionType.NOTE ->
+              issues += EditorIssue(null, "Choose a question for the status rule.")
+            rule.operator !in RelevanceOperator.availableFor(question.type) ->
+              issues +=
+                EditorIssue(
+                  question.key,
+                  "\"${rule.operator.label}\" doesn't apply to ${question.type.label} in status rule.",
+                )
+            rule.operator.needsValue && rule.value.isBlank() ->
+              issues +=
+                EditorIssue(
+                  question.key,
+                  "Status rule for \"${question.name}\" needs a value to compare against.",
+                )
+            question.type.isNumeric &&
+              rule.operator.needsValue &&
+              rule.value.toDoubleOrNull() == null ->
+              issues +=
+                EditorIssue(
+                  question.key,
+                  "Status rule value for \"${question.name}\" must be a number.",
+                )
+          }
+        }
+        StatusConditionSubject.ENTITY_PROPERTY -> {
+          val prop = target?.property(rule.property)
+          val isNumeric =
+            prop?.kind == EditorPropertyKind.INTEGER || prop?.kind == EditorPropertyKind.DECIMAL
+          when {
+            target == null || prop == null || target.columnFor(rule.property) == null ->
+              issues +=
+                EditorIssue(
+                  null,
+                  "Choose a ${target?.featureNoun ?: "feature"} property for the status rule.",
+                )
+            form.saveTo.mode == SaveToMode.CREATE &&
+              form.questions.none {
+                it.name == prop.name && it.type != EditorQuestionType.NOTE
+              } ->
+              issues +=
+                EditorIssue(
+                  null,
+                  "No question writes to property \"${prop.name}\" for the status rule.",
+                )
+            rule.operator !in SaveToRules.operatorsForProperty(prop.kind) ->
+              issues +=
+                EditorIssue(
+                  null,
+                  "\"${rule.operator.label}\" doesn't apply to ${prop.kind.label.lowercase()} property \"${prop.name}\".",
+                )
+            rule.operator.needsValue && rule.value.isBlank() ->
+              issues +=
+                EditorIssue(
+                  null,
+                  "Status rule for property \"${prop.name}\" needs a value to compare against.",
+                )
+            isNumeric && rule.operator.needsValue && rule.value.toDoubleOrNull() == null ->
+              issues +=
+                EditorIssue(
+                  null,
+                  "Status rule value for property \"${prop.name}\" must be a number.",
+                )
+          }
+        }
+      }
     }
     return issues
   }

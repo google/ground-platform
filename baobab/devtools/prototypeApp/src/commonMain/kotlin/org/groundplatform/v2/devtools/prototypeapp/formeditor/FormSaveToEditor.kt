@@ -15,6 +15,7 @@ package org.groundplatform.v2.devtools.prototypeapp.formeditor
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -26,10 +27,14 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.toggleable
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.OpenInNew
+import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.ErrorOutline
+import androidx.compose.material.icons.outlined.Flag
 import androidx.compose.material.icons.outlined.KeyboardArrowDown
 import androidx.compose.material.icons.outlined.KeyboardArrowUp
 import androidx.compose.material.icons.outlined.Layers
@@ -37,8 +42,10 @@ import androidx.compose.material.icons.outlined.TableChart
 import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.material.icons.outlined.Warning
 import androidx.compose.material3.AssistChip
+import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.OutlinedTextField
@@ -53,15 +60,19 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.FormAvailability
 
 /**
@@ -392,6 +403,8 @@ private fun SaveToEditor(state: FormEditorState, onSaveToModeChange: (SaveToMode
     style = MaterialTheme.typography.bodySmall,
     color = MaterialTheme.colorScheme.onSurfaceVariant,
   )
+  HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+  StatusMarkerEditor(state)
 }
 
 @Composable
@@ -592,6 +605,486 @@ private fun FieldMappingRow(
   }
 }
 
+/**
+ * Conditional status marker and label rules, configured in Form properties → Advanced.
+ *
+ * Off by default. When turned on, defaults to marking the feature as `✓ Surveyed` when this form is
+ * submitted and `○ Pending` otherwise; organizers can add or reorder rules based on submission
+ * count, question answers, or feature properties.
+ */
+@Composable
+private fun StatusMarkerEditor(state: FormEditorState) {
+  val form = state.form
+  val status = form.saveTo.status
+  val target = state.saveTarget
+  val noun = target?.featureNoun ?: if (form.hasGeometry) "map feature" else "table row"
+  val colors = MaterialTheme.colorScheme
+
+  SectionLabel("Status marker")
+  OutlinedCard(modifier = Modifier.fillMaxWidth()) {
+    Row(
+      modifier =
+        Modifier.fillMaxWidth()
+          .toggleable(
+            value = status.enabled,
+            role = Role.Switch,
+            onValueChange = state::setStatusEnabled,
+          )
+          .padding(horizontal = 14.dp, vertical = 10.dp),
+      horizontalArrangement = Arrangement.spacedBy(12.dp),
+      verticalAlignment = Alignment.CenterVertically,
+    ) {
+      Icon(
+        imageVector = Icons.Outlined.Flag,
+        contentDescription = null,
+        tint = if (status.enabled) colors.primary else colors.onSurfaceVariant,
+        modifier = Modifier.size(20.dp),
+      )
+      Column(modifier = Modifier.weight(1f)) {
+        Text(
+          text = "Set status marker",
+          style = MaterialTheme.typography.bodyMedium,
+          fontWeight = FontWeight.Medium,
+        )
+        Text(
+          text =
+            if (status.enabled) {
+              "Sets the $noun's status marker symbol, color, and label when submitted."
+            } else {
+              "Off by default. Turn on to mark ${noun}s (for example, ✓ Surveyed or ○ Pending)."
+            },
+          style = MaterialTheme.typography.bodySmall,
+          color = colors.onSurfaceVariant,
+        )
+      }
+      Switch(checked = status.enabled, onCheckedChange = null)
+    }
+  }
+
+  if (!status.enabled) return
+
+  HelperText(
+    "Rules are checked in order. The first matching rule sets the status marker and label."
+  )
+
+  status.rules.forEachIndexed { index, rule ->
+    StatusRuleCard(
+      state = state,
+      index = index,
+      totalRules = status.rules.size,
+      rule = rule,
+      target = target,
+    )
+  }
+
+  TextButton(onClick = state::addStatusRule) {
+    Icon(Icons.Outlined.Add, contentDescription = null, modifier = Modifier.size(18.dp))
+    Spacer(Modifier.width(4.dp))
+    Text("Add status rule")
+  }
+
+  OutlinedCard(modifier = Modifier.fillMaxWidth()) {
+    Column(
+      modifier = Modifier.padding(12.dp),
+      verticalArrangement = Arrangement.spacedBy(10.dp),
+    ) {
+      Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+      ) {
+        Column(modifier = Modifier.weight(1f)) {
+          Text(
+            text = "Otherwise",
+            style = MaterialTheme.typography.labelLarge,
+            fontWeight = FontWeight.SemiBold,
+          )
+          Text(
+            text = "Default status when no rule above matches.",
+            style = MaterialTheme.typography.bodySmall,
+            color = colors.onSurfaceVariant,
+          )
+        }
+        StatusBadgeChip(status.defaultBadge)
+      }
+      StatusBadgeEditor(
+        badge = status.defaultBadge,
+        colorDescription = "Default status color",
+        onUpdate = state::updateDefaultStatusBadge,
+      )
+    }
+  }
+}
+
+@Composable
+private fun StatusRuleCard(
+  state: FormEditorState,
+  index: Int,
+  totalRules: Int,
+  rule: EditorStatusRule,
+  target: EditorDataset?,
+) {
+  val form = state.form
+  val savableQuestions = SaveToRules.savableQuestions(form)
+  val propertyNoun = if (target?.isMapLayer == false) "Row property" else "Feature property"
+  val subjectOptions = buildList {
+    add(StatusConditionSubject.SUBMISSIONS)
+    if (savableQuestions.isNotEmpty() || rule.subject == StatusConditionSubject.QUESTION) {
+      add(StatusConditionSubject.QUESTION)
+    }
+    if (target != null || rule.subject == StatusConditionSubject.ENTITY_PROPERTY) {
+      add(StatusConditionSubject.ENTITY_PROPERTY)
+    }
+  }
+  fun subjectLabel(subject: StatusConditionSubject): String =
+    when (subject) {
+      StatusConditionSubject.SUBMISSIONS -> "Submission count"
+      StatusConditionSubject.QUESTION -> "Question answer"
+      StatusConditionSubject.ENTITY_PROPERTY -> propertyNoun
+    }
+
+  OutlinedCard(modifier = Modifier.fillMaxWidth()) {
+    Column(
+      modifier = Modifier.padding(12.dp),
+      verticalArrangement = Arrangement.spacedBy(10.dp),
+    ) {
+      Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
+      ) {
+        Text(
+          text = "Rule ${index + 1}",
+          style = MaterialTheme.typography.labelLarge,
+          fontWeight = FontWeight.SemiBold,
+        )
+        Spacer(Modifier.weight(1f))
+        StatusBadgeChip(rule.badge)
+        if (totalRules > 1) {
+          IconButton(
+            onClick = { state.moveStatusRule(index, -1) },
+            enabled = index > 0,
+            modifier = Modifier.size(28.dp),
+          ) {
+            Icon(
+              Icons.Outlined.KeyboardArrowUp,
+              contentDescription = "Move status rule ${index + 1} up",
+              modifier = Modifier.size(18.dp),
+            )
+          }
+          IconButton(
+            onClick = { state.moveStatusRule(index, 1) },
+            enabled = index < totalRules - 1,
+            modifier = Modifier.size(28.dp),
+          ) {
+            Icon(
+              Icons.Outlined.KeyboardArrowDown,
+              contentDescription = "Move status rule ${index + 1} down",
+              modifier = Modifier.size(18.dp),
+            )
+          }
+        }
+        IconButton(
+          onClick = { state.removeStatusRule(index) },
+          modifier = Modifier.size(28.dp),
+        ) {
+          Icon(
+            Icons.Outlined.Close,
+            contentDescription = "Remove status rule ${index + 1}",
+            modifier = Modifier.size(18.dp),
+          )
+        }
+      }
+
+      DropdownSelector(
+        label = "When",
+        selectedText = subjectLabel(rule.subject),
+        options = subjectOptions,
+        optionText = ::subjectLabel,
+        onSelect = { picked ->
+          state.updateStatusRule(index) { current ->
+            when (picked) {
+              StatusConditionSubject.SUBMISSIONS ->
+                current.copy(
+                  subject = picked,
+                  minSubmissions = current.minSubmissions.coerceAtLeast(1),
+                )
+              StatusConditionSubject.QUESTION -> {
+                val q =
+                  form.find(current.questionKey)
+                    ?: savableQuestions.firstOrNull { it.type.hasChoices }
+                    ?: savableQuestions.firstOrNull()
+                val op =
+                  q?.let { RelevanceOperator.availableFor(it.type).first() }
+                    ?: RelevanceOperator.EQUALS
+                val v = q?.choices?.firstOrNull()?.value.orEmpty()
+                current.copy(
+                  subject = picked,
+                  questionKey = q?.key,
+                  operator = op,
+                  value = v,
+                )
+              }
+              StatusConditionSubject.ENTITY_PROPERTY -> {
+                val prop =
+                  target?.property(current.property) ?: target?.matchableProperties?.firstOrNull()
+                val op =
+                  prop?.let { SaveToRules.operatorsForProperty(it.kind).first() }
+                    ?: RelevanceOperator.EQUALS
+                current.copy(
+                  subject = picked,
+                  property = prop?.name,
+                  operator = op,
+                )
+              }
+            }
+          }
+        },
+      )
+
+      when (rule.subject) {
+        StatusConditionSubject.SUBMISSIONS -> {
+          OutlinedTextField(
+            value = rule.minSubmissions.toString(),
+            onValueChange = { text ->
+              val parsed = text.trim().toIntOrNull()
+              if (parsed != null) {
+                state.updateStatusRule(index) { it.copy(minSubmissions = parsed) }
+              } else if (text.isEmpty()) {
+                state.updateStatusRule(index) { it.copy(minSubmissions = 1) }
+              }
+            },
+            label = { Text("At least (submissions)") },
+            supportingText = {
+              Text(
+                if (rule.minSubmissions <= 1) {
+                  "Matches when this form is submitted."
+                } else {
+                  "Matches when the ${target?.featureNoun ?: "feature"} has at least ${rule.minSubmissions} submissions."
+                }
+              )
+            },
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth(),
+          )
+        }
+        StatusConditionSubject.QUESTION -> {
+          val question = form.find(rule.questionKey)
+          DropdownSelector(
+            label = "Question",
+            selectedText = question?.let { "${it.name} — ${it.label}" } ?: "Choose",
+            options = savableQuestions,
+            optionText = { "${it.name} — ${it.label}" },
+            optionIcon = { questionTypeIcon(it.type) },
+            onSelect = { picked ->
+              val op =
+                rule.operator.takeIf { it in RelevanceOperator.availableFor(picked.type) }
+                  ?: RelevanceOperator.availableFor(picked.type).first()
+              val v = picked.choices.firstOrNull()?.value.orEmpty()
+              state.updateStatusRule(index) {
+                it.copy(questionKey = picked.key, operator = op, value = v)
+              }
+            },
+          )
+          if (question != null) {
+            DropdownSelector(
+              label = "Condition",
+              selectedText = rule.operator.label,
+              options = RelevanceOperator.availableFor(question.type),
+              optionText = { it.label },
+              onSelect = { op ->
+                state.updateStatusRule(index) { it.copy(operator = op) }
+              },
+            )
+            if (rule.operator.needsValue) {
+              if (question.type.hasChoices) {
+                DropdownSelector(
+                  label = "Value",
+                  selectedText =
+                    question.choices.firstOrNull { it.value == rule.value }?.label
+                      ?: rule.value.ifBlank { "Pick a choice" },
+                  options = question.choices,
+                  optionText = { "${it.label} (${it.value})" },
+                  onSelect = { c ->
+                    state.updateStatusRule(index) { it.copy(value = c.value) }
+                  },
+                )
+              } else {
+                OutlinedTextField(
+                  value = rule.value,
+                  onValueChange = { v ->
+                    state.updateStatusRule(index) { it.copy(value = v) }
+                  },
+                  label = { Text("Value") },
+                  singleLine = true,
+                  modifier = Modifier.fillMaxWidth(),
+                )
+              }
+            }
+          }
+        }
+        StatusConditionSubject.ENTITY_PROPERTY -> {
+          val prop = target?.property(rule.property)
+          val properties = target?.matchableProperties.orEmpty()
+          DropdownSelector(
+            label = propertyNoun,
+            selectedText = prop?.let(::propertyText) ?: "Choose",
+            options = properties,
+            optionText = ::propertyText,
+            onSelect = { picked ->
+              val op =
+                rule.operator.takeIf { it in SaveToRules.operatorsForProperty(picked.kind) }
+                  ?: SaveToRules.operatorsForProperty(picked.kind).first()
+              state.updateStatusRule(index) { it.copy(property = picked.name, operator = op) }
+            },
+          )
+          if (prop != null) {
+            DropdownSelector(
+              label = "Condition",
+              selectedText = rule.operator.label,
+              options = SaveToRules.operatorsForProperty(prop.kind),
+              optionText = { it.label },
+              onSelect = { op ->
+                state.updateStatusRule(index) { it.copy(operator = op) }
+              },
+            )
+            if (rule.operator.needsValue) {
+              OutlinedTextField(
+                value = rule.value,
+                onValueChange = { v ->
+                  state.updateStatusRule(index) { it.copy(value = v) }
+                },
+                label = { Text("Value") },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth(),
+              )
+            }
+          }
+        }
+      }
+
+      StatusBadgeEditor(
+        badge = rule.badge,
+        colorDescription = "Status color for rule ${index + 1}",
+        onUpdate = { transform ->
+          state.updateStatusRule(index) { it.copy(badge = transform(it.badge)) }
+        },
+      )
+    }
+  }
+}
+
+/** Edits a status outcome's color swatch, marker symbol, and status label. */
+@Composable
+private fun StatusBadgeEditor(
+  badge: EditorStatusBadge,
+  colorDescription: String,
+  onUpdate: ((EditorStatusBadge) -> EditorStatusBadge) -> Unit,
+) {
+  Row(
+    modifier = Modifier.fillMaxWidth(),
+    verticalAlignment = Alignment.CenterVertically,
+    horizontalArrangement = Arrangement.spacedBy(8.dp),
+  ) {
+    StatusColorButton(
+      colorHex = badge.colorHex,
+      contentDescription = colorDescription,
+      onSelect = { hex -> onUpdate { it.copy(colorHex = hex) } },
+    )
+    DropdownSelector(
+      label = "Symbol",
+      selectedText = "${badge.symbol.symbol} ${badge.symbol.label}",
+      options = StatusMarkerSymbol.entries,
+      optionText = { "${it.symbol} ${it.label}" },
+      onSelect = { sym -> onUpdate { it.copy(symbol = sym) } },
+      modifier = Modifier.weight(0.45f),
+    )
+    OutlinedTextField(
+      value = badge.label,
+      onValueChange = { text -> onUpdate { it.copy(label = text) } },
+      label = { Text("Status label") },
+      singleLine = true,
+      modifier = Modifier.weight(0.55f),
+    )
+  }
+}
+
+/** Color swatch button for a status badge; opens [ChoiceColors.palette]. */
+@Composable
+private fun StatusColorButton(
+  colorHex: String,
+  contentDescription: String,
+  onSelect: (String) -> Unit,
+) {
+  var expanded by remember { mutableStateOf(false) }
+  val colors = MaterialTheme.colorScheme
+  Box {
+    IconButton(onClick = { expanded = true }, modifier = Modifier.size(36.dp)) {
+      ColorDot(
+        colorHex = colorHex,
+        contentDescription = "$contentDescription: ${ChoiceColors.nameOf(colorHex) ?: colorHex}",
+        size = 24.dp,
+      )
+    }
+    DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+      Text(
+        text = "Marker color",
+        style = MaterialTheme.typography.labelMedium,
+        color = colors.onSurfaceVariant,
+        modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
+      )
+      ChoiceColors.palette.chunked(5).forEach { row ->
+        Row(
+          modifier = Modifier.padding(horizontal = 8.dp),
+          horizontalArrangement = Arrangement.spacedBy(2.dp),
+        ) {
+          row.forEach { (name, hex) ->
+            IconButton(
+              onClick = {
+                onSelect(hex)
+                expanded = false
+              },
+              modifier = Modifier.size(36.dp),
+            ) {
+              ColorDot(
+                colorHex = hex,
+                contentDescription = name,
+                isSelected = hex.equals(colorHex, ignoreCase = true),
+              )
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Live status pill preview matching `EntityStatusChip`: filled with [EditorStatusBadge.colorHex]
+ * and showing `[symbol] [label]` in a contrasting foreground color.
+ */
+@Composable
+internal fun StatusBadgeChip(badge: EditorStatusBadge, modifier: Modifier = Modifier) {
+  val bg = ChoiceColors.argb(badge.colorHex)?.let { Color(it) } ?: MaterialTheme.colorScheme.primary
+  val fg = if (bg.luminance() > 0.6f) Color(0xFF181D18) else Color.White
+  val text = listOf(badge.symbol.symbol, badge.label.trim().ifEmpty { "Status" }).joinToString(" ")
+  Surface(
+    shape = RoundedCornerShape(999.dp),
+    color = bg,
+    modifier = modifier,
+  ) {
+    Text(
+      text = text,
+      style = MaterialTheme.typography.labelSmall.copy(fontSize = 11.sp),
+      fontWeight = FontWeight.SemiBold,
+      color = fg,
+      maxLines = 1,
+      overflow = TextOverflow.Ellipsis,
+      modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
+    )
+  }
+}
+
 @Composable
 private fun IssueList(issues: List<EditorIssue>) {
   Surface(
@@ -635,9 +1128,19 @@ private fun submissionDescription(form: EditorForm, target: EditorDataset?): Str
     else -> "Each submission adds a new ${target.featureNoun} to:"
   }
 
-private fun saveToSummary(form: EditorForm, target: EditorDataset?): String =
-  when (form.saveTo.mode) {
-    SaveToMode.CREATE -> SaveToRules.createLabel(form.hasGeometry)
-    SaveToMode.UPDATE ->
-      SaveToRules.updateLabel(target) + (target?.let { " in ${it.displayName}" } ?: "")
-  }
+private fun saveToSummary(form: EditorForm, target: EditorDataset?): String {
+  val base =
+    when (form.saveTo.mode) {
+      SaveToMode.CREATE -> SaveToRules.createLabel(form.hasGeometry)
+      SaveToMode.UPDATE ->
+        SaveToRules.updateLabel(target) + (target?.let { " in ${it.displayName}" } ?: "")
+    }
+  val status = form.saveTo.status
+  if (!status.enabled) return base
+  val badges =
+    (status.rules.map { "${it.badge.symbol.symbol} ${it.badge.label}" } +
+        "${status.defaultBadge.symbol.symbol} ${status.defaultBadge.label}")
+      .distinct()
+      .joinToString(" / ")
+  return "$base • Status: $badges"
+}
