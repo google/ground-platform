@@ -65,7 +65,8 @@ export class DraftSurveyService {
    * hold submissions that depend on the type.
    */
   getTypeLockedTaskIds(jobId: string): ReadonlySet<string> {
-    if (this.originalSurvey.state !== SurveyState.READY) return new Set();
+    if (!this.originalSurvey || this.originalSurvey.state !== SurveyState.READY)
+      return new Set();
 
     return new Set(
       this.originalSurvey.getJob(jobId)?.tasks?.keySeq().toArray() ?? []
