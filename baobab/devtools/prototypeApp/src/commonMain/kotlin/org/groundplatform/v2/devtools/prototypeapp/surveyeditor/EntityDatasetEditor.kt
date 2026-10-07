@@ -74,6 +74,18 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.DatasetIssue
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.DatasetKind
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EntityDataset
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EntityProperty
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EntityRow
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.GeometryKind
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.GeometryText
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.LatLng
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.LayerStyle
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.PropertyType
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SamplePlotProperties
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.parseHexColor
 import org.groundplatform.v2.devtools.prototypeapp.formeditor.DropdownSelector
 import org.groundplatform.v2.devtools.prototypeapp.formeditor.SectionLabel
 

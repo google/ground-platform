@@ -17,6 +17,11 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EditorFormTemplates
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EditorQuestionType
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EditorXFormsGenerator
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.FormEditorValidator
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.FormIds
 
 class FormIdsTest {
 

@@ -30,6 +30,9 @@ import org.groundplatform.v2.core.forms.ui.WorkbenchExampleForm
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.CachedProfile
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.InviteLinks
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyMapAnchor
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SurveyEditorDraft
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.withEditorFormAvailability
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.withEditorLayerStyles
 import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.ClusterMapFeaturesUseCase
 import org.groundplatform.v2.devtools.prototypeapp.map.DraftGeometry
 import org.groundplatform.v2.devtools.prototypeapp.map.EntityGeometry
@@ -37,9 +40,6 @@ import org.groundplatform.v2.devtools.prototypeapp.map.FormGeometryOverlay
 import org.groundplatform.v2.devtools.prototypeapp.pdf.GeneratedPdf
 import org.groundplatform.v2.devtools.prototypeapp.pdf.RecordPdfReports
 import org.groundplatform.v2.devtools.prototypeapp.surveyeditor.SurveyAccess
-import org.groundplatform.v2.devtools.prototypeapp.surveyeditor.SurveyEditorDraft
-import org.groundplatform.v2.devtools.prototypeapp.surveyeditor.withEditorFormAvailability
-import org.groundplatform.v2.devtools.prototypeapp.surveyeditor.withEditorLayerStyles
 import org.groundplatform.v2.devtools.prototypeapp.ui.state.PrototypeUiState
 import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.PrototypeAppViewModel
 import org.groundplatform.v2.map.CameraPosition
@@ -2806,6 +2806,28 @@ class PrototypeAppState(
     ) { results ->
       onPlacesSearchResults(query, results)
     }
+  }
+
+  /**
+   * Looks up places matching [query] near [center] for [surveyId] through the place repository, for
+   * callers outside the main list search (such as the Survey editor's area picker).
+   */
+  fun searchPlaces(
+    surveyId: String,
+    query: String,
+    regionSubtitle: String,
+    center: org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.LatLng,
+    onResults: (List<SurveyPlaceItem>) -> Unit,
+  ) {
+    viewModel.placeRepository.searchRemotePlaces(
+      surveyId = surveyId,
+      query = query,
+      isAirplaneMode = isAirplaneMode,
+      defaultRegionSubtitle = regionSubtitle,
+      centerLongitude = center.lng,
+      centerLatitude = center.lat,
+      onResults = onResults,
+    )
   }
 
   /** Shows geocoder [results] for [query] unless the query changed or airplane mode is on. */

@@ -15,28 +15,28 @@ package org.groundplatform.v2.devtools.prototypeapp.data.seed
 
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.CachedProfile
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.InvitationStatus
-import org.groundplatform.v2.devtools.prototypeapp.formeditor.EditorChoice
-import org.groundplatform.v2.devtools.prototypeapp.formeditor.EditorForm
-import org.groundplatform.v2.devtools.prototypeapp.formeditor.EditorQuestion
-import org.groundplatform.v2.devtools.prototypeapp.formeditor.EditorQuestionType
-import org.groundplatform.v2.devtools.prototypeapp.formeditor.EditorRelevance
-import org.groundplatform.v2.devtools.prototypeapp.formeditor.RelevanceOperator
-import org.groundplatform.v2.devtools.prototypeapp.surveyeditor.Collaborator
-import org.groundplatform.v2.devtools.prototypeapp.surveyeditor.CollaboratorRole
-import org.groundplatform.v2.devtools.prototypeapp.surveyeditor.DatasetKind
-import org.groundplatform.v2.devtools.prototypeapp.surveyeditor.EntityDataset
-import org.groundplatform.v2.devtools.prototypeapp.surveyeditor.EntityProperty
-import org.groundplatform.v2.devtools.prototypeapp.surveyeditor.EntityRow
-import org.groundplatform.v2.devtools.prototypeapp.surveyeditor.GeometryKind
-import org.groundplatform.v2.devtools.prototypeapp.surveyeditor.LatLng
-import org.groundplatform.v2.devtools.prototypeapp.surveyeditor.LayerStyle
-import org.groundplatform.v2.devtools.prototypeapp.surveyeditor.PropertyType
-import org.groundplatform.v2.devtools.prototypeapp.surveyeditor.SharingPolicy
-import org.groundplatform.v2.devtools.prototypeapp.surveyeditor.SharingSettings
-import org.groundplatform.v2.devtools.prototypeapp.surveyeditor.SurveyArea
-import org.groundplatform.v2.devtools.prototypeapp.surveyeditor.SurveyDetails
-import org.groundplatform.v2.devtools.prototypeapp.surveyeditor.SurveyEditorDraft
-import org.groundplatform.v2.devtools.prototypeapp.surveyeditor.SurveyEditorForm
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.Collaborator
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.CollaboratorRole
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.DatasetKind
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EditorChoice
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EditorForm
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EditorQuestion
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EditorQuestionType
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EditorRelevance
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EntityDataset
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EntityProperty
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EntityRow
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.GeometryKind
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.LatLng
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.LayerStyle
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.PropertyType
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.RelevanceOperator
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SharingPolicy
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SharingSettings
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SurveyArea
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SurveyDetails
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SurveyEditorDraft
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SurveyEditorForm
 
 /** Starter survey shown when the Survey editor first opens (fictional sample data). */
 internal object SurveyEditorSamples {

@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.groundplatform.v2.devtools.prototypeapp.formeditor
+package org.groundplatform.v2.devtools.prototypeapp.domain.model.editor
 
 /** Family of validation rules that applies to a question type. */
 enum class ValidationKind {

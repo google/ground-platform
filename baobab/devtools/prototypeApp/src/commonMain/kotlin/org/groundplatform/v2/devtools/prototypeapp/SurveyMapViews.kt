@@ -33,6 +33,10 @@ import org.groundplatform.v2.map.CameraPosition
 import org.groundplatform.v2.map.GroundMap
 import org.groundplatform.v2.map.LatLng
 import org.groundplatform.v2.map.MapEvent
+import org.groundplatform.v2.map.MapInsets
+
+/** Keeps a focused place clear of the floating search bar (top) and bottom sheet peek (bottom). */
+private val PlaceFocusPadding = MapInsets(left = 40.dp, top = 68.dp, right = 40.dp, bottom = 108.dp)
 
 /**
  * The main survey map (mobile map view and web dashboard): the visible map features, clusters,
@@ -55,7 +59,7 @@ internal fun SurveyMainMap(
   LaunchedEffect(place?.id, place?.latitude, place?.longitude, place?.targetZoom) {
     if (place == null) return@LaunchedEffect
     val focus = PlaceFraming.focus(place)
-    camera.run { it.fitBounds(focus.bounds, focus.padding, focus.maxZoom) }
+    camera.run { it.fitBounds(focus.bounds, PlaceFocusPadding, focus.maxZoom) }
   }
 
   SurveyGroundMap(

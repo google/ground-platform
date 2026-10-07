@@ -28,22 +28,41 @@ import org.groundplatform.v2.core.sampling.Stratum
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.CachedProfile
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.InvitationStatus
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.InviteLinks
-import org.groundplatform.v2.devtools.prototypeapp.formeditor.EditorChoice
-import org.groundplatform.v2.devtools.prototypeapp.formeditor.EditorDataset
-import org.groundplatform.v2.devtools.prototypeapp.formeditor.EditorDatasetProperty
-import org.groundplatform.v2.devtools.prototypeapp.formeditor.EditorDatasetRow
-import org.groundplatform.v2.devtools.prototypeapp.formeditor.EditorForm
-import org.groundplatform.v2.devtools.prototypeapp.formeditor.EditorFormTemplates
-import org.groundplatform.v2.devtools.prototypeapp.formeditor.EditorPropertyKind
-import org.groundplatform.v2.devtools.prototypeapp.formeditor.EditorQuestion
-import org.groundplatform.v2.devtools.prototypeapp.formeditor.EditorQuestionType
-import org.groundplatform.v2.devtools.prototypeapp.formeditor.EditorXFormsGenerator
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.Collaborator
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.CollaboratorRole
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.DatasetIssue
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.DatasetKind
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EditorChoice
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EditorForm
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EditorFormTemplates
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EditorQuestion
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EditorQuestionType
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EntityDataset
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EntityDatasetValidator
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EntityProperty
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EntityRow
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.FormIds
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.GenerationRecord
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.GeometryKind
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.LatLng
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.LayerStyle
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.PropertyType
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SampleAreaSource
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SampleDesignConfig
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SampleMethod
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SamplePlotProperties
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SaveToMode
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SharingPolicy
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SharingSettings
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SurveyArea
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SurveyDetails
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SurveyEditorDraft
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SurveyEditorForm
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.slugify
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.toEditorDataset
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.toGeoCoord
 import org.groundplatform.v2.devtools.prototypeapp.formeditor.FormEditorState
-import org.groundplatform.v2.devtools.prototypeapp.formeditor.FormIds
-import org.groundplatform.v2.devtools.prototypeapp.formeditor.SaveToMode
-import org.groundplatform.v2.devtools.prototypeapp.formeditor.SaveToRules
 import org.groundplatform.v2.devtools.prototypeapp.formeditor.moved
-import org.groundplatform.v2.devtools.prototypeapp.formeditor.slugify
 import org.groundplatform.v2.devtools.prototypeapp.platformEpochMillis
 
 /** Which pane of the Survey editor is showing. */
@@ -1156,51 +1175,4 @@ class SurveyEditorState(
     /** Widest the Survey editor's left-hand navigation panel can be dragged, in dp. */
     const val MAX_SIDE_PANEL_WIDTH_DP = 560f
   }
-}
-
-/** The Form editor's view of this dataset, from the point of view of Form [formKey]. */
-internal fun EntityDataset.toEditorDataset(formKey: String): EditorDataset =
-  EditorDataset(
-    id = id,
-    displayName = displayName,
-    isMapLayer = kind == DatasetKind.MAP_LAYER,
-    keyProperty = keyProperty,
-    labelProperty = labelProperty,
-    properties =
-      properties.map { p ->
-        EditorDatasetProperty(
-          name = p.name,
-          label = p.label,
-          kind =
-            when (p.type) {
-              PropertyType.TEXT -> EditorPropertyKind.TEXT
-              PropertyType.INTEGER -> EditorPropertyKind.INTEGER
-              PropertyType.DECIMAL -> EditorPropertyKind.DECIMAL
-              PropertyType.BOOLEAN -> EditorPropertyKind.BOOLEAN
-              PropertyType.DATE -> EditorPropertyKind.DATE
-            },
-        )
-      },
-    rows =
-      rows.map { row ->
-        EditorDatasetRow(
-          name = row.values[keyProperty]?.takeIf { it.isNotBlank() } ?: row.key,
-          label = labelOf(row),
-          values = row.values,
-        )
-      },
-    isLinkedToThisForm = linkedFormKey == formKey,
-  )
-
-/**
- * XForms published for [entry], including its save-to logic. Features of an updated dataset are
- * embedded, since published Forms have no CSV attachments in this prototype.
- */
-fun SurveyEditorDraft.publishedFormXml(entry: SurveyEditorForm): String {
-  val catalog = datasets.map { it.toEditorDataset(entry.key) }
-  return EditorXFormsGenerator.toXml(
-    entry.form,
-    SaveToRules.saveTarget(entry.form, catalog),
-    inlineRows = true,
-  )
 }

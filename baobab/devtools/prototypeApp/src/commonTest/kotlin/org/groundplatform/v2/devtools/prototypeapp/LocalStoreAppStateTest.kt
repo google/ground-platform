@@ -17,9 +17,9 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import org.groundplatform.v2.devtools.prototypeapp.data.seed.SurveyEditorSamples
-import org.groundplatform.v2.devtools.prototypeapp.surveyeditor.DatasetKind
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.DatasetKind
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.publishedFormXml
 import org.groundplatform.v2.devtools.prototypeapp.surveyeditor.SurveyEditorState
-import org.groundplatform.v2.devtools.prototypeapp.surveyeditor.publishedFormXml
 
 /**
  * End-to-end checks that [PrototypeAppState] reads from and writes through the local data store,

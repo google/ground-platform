@@ -19,6 +19,8 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import org.groundplatform.v2.devtools.prototypeapp.TextFilePickResult
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.LatLng
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SurveyArea
 
 class SurveyAreaEditorStateTest {
   private val multiPolygon =

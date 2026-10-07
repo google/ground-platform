@@ -112,11 +112,18 @@ import org.groundplatform.v2.devtools.prototypeapp.WebMobilePrototypeButton
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.InvitationStatus
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.Organization
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyPlaceItem
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.CollaboratorRole
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.DatasetKind
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EntityDataset
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.FormEditorValidator
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.PeerDataVisibility
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SharingPolicy
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SurveyArea
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SurveyAreaGeometry
 import org.groundplatform.v2.devtools.prototypeapp.formeditor.DragAxis
 import org.groundplatform.v2.devtools.prototypeapp.formeditor.DragReorderState
 import org.groundplatform.v2.devtools.prototypeapp.formeditor.DropdownSelector
 import org.groundplatform.v2.devtools.prototypeapp.formeditor.FormEditorPage
-import org.groundplatform.v2.devtools.prototypeapp.formeditor.FormEditorValidator
 import org.groundplatform.v2.devtools.prototypeapp.formeditor.SectionLabel
 import org.groundplatform.v2.devtools.prototypeapp.formeditor.dragToReorder
 import org.groundplatform.v2.devtools.prototypeapp.map.SurveyBasemaps
@@ -584,7 +591,11 @@ private fun SurveyDetailsPane(state: SurveyEditorState, appState: PrototypeAppSt
       )
       OrganizationSection(state = state, appState = appState)
       LanguageSelectorSection(state = state)
-      SurveyAreaSection(state = state, localPlaces = appState.places)
+      SurveyAreaSection(
+        state = state,
+        localPlaces = appState.places,
+        searchPlaces = appState::searchPlaces,
+      )
     }
 
     SectionLabel("Contents")
@@ -780,7 +791,11 @@ private fun LanguageSelectorSection(state: SurveyEditorState) {
 }
 
 @Composable
-private fun SurveyAreaSection(state: SurveyEditorState, localPlaces: List<SurveyPlaceItem>) {
+private fun SurveyAreaSection(
+  state: SurveyEditorState,
+  localPlaces: List<SurveyPlaceItem>,
+  searchPlaces: PlaceSearch,
+) {
   val area = state.details.surveyArea
   var showEditor by remember { mutableStateOf(false) }
 
@@ -790,6 +805,7 @@ private fun SurveyAreaSection(state: SurveyEditorState, localPlaces: List<Survey
       surveyLocationLabel = state.details.title.ifBlank { "Survey" },
       current = area,
       localPlaces = localPlaces,
+      searchPlaces = searchPlaces,
       onSave = { newArea -> state.setSurveyArea(newArea) },
       onDismiss = { showEditor = false },
     )

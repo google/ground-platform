@@ -35,7 +35,7 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyConfig
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyPlaceItem
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyPreviewItem
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyStats
-import org.groundplatform.v2.devtools.prototypeapp.surveyeditor.SurveyEditorDraft
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SurveyEditorDraft
 
 /**
  * Ephemeral, in-memory [LocalStore] used on web (as a cache) and in tests.

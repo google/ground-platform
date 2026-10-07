@@ -23,6 +23,10 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import org.groundplatform.v2.devtools.prototypeapp.data.seed.SurveyEditorSamples
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.GeometryKind
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.LatLng
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SurveyArea
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.formatFixed
 import org.groundplatform.v2.map.Basemap
 import org.groundplatform.v2.map.CameraPosition
 import org.groundplatform.v2.map.Geometry

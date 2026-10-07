@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.groundplatform.v2.devtools.prototypeapp.surveyeditor
+package org.groundplatform.v2.devtools.prototypeapp.domain.model.editor
 
 import org.groundplatform.v2.core.sampling.Allocation
 import org.groundplatform.v2.core.sampling.PlotLayout

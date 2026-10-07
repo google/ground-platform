@@ -26,6 +26,28 @@ import org.groundplatform.v2.core.forms.ui.FormWizardStep
 import org.groundplatform.v2.core.forms.ui.buildCompactFormItems
 import org.groundplatform.v2.devtools.prototypeapp.data.seed.FormEditorSamples
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.FormAvailability
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.DateRule
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EditorChoiceImage
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EditorForm
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EditorQuestion
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EditorQuestionType
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EditorRelevance
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EditorValidation
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EditorXFormsGenerator
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.FlowEdge
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.FlowEdgeKind
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.FormEditorValidator
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.FormFlowGraph
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.FormPreviewTarget
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.GeometryCapture
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.MediaSource
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.RelevanceOperator
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.TextPattern
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.ValidationRules
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.friendlyDate
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.isoDateToUtcMillis
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.slugify
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.utcMillisToIsoDate
 
 class FormEditorTest {
 

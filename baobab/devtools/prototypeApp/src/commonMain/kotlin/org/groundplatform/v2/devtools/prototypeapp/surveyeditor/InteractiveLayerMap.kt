@@ -78,6 +78,12 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import org.groundplatform.v2.devtools.prototypeapp.GroundFilterChip
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EntityDataset
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.GeometryKind
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.LatLng
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SamplePlotProperties
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.formatFixed
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.parseHexColor
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.formatHexColorCss
 import org.groundplatform.v2.devtools.prototypeapp.map.GroundPin
 import org.groundplatform.v2.devtools.prototypeapp.map.SurveyBasemaps
@@ -888,14 +894,3 @@ private fun polyline(pts: List<Offset>, closed: Boolean) =
     pts.drop(1).forEach { lineTo(it.x, it.y) }
     if (closed) close()
   }
-
-/** Formats [v] with exactly [decimals] fraction digits (no platform `String.format` in common). */
-internal fun formatFixed(v: Double, decimals: Int): String {
-  var factor = 1L
-  repeat(decimals) { factor *= 10 }
-  val scaled = kotlin.math.round(kotlin.math.abs(v) * factor).toLong()
-  val whole = scaled / factor
-  val frac = (scaled % factor).toString().padStart(decimals, '0')
-  val sign = if (v < 0 && scaled != 0L) "-" else ""
-  return if (decimals == 0) "$sign$whole" else "$sign$whole.$frac"
-}

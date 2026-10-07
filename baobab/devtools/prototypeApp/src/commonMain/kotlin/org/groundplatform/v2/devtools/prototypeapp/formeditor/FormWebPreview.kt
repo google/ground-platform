@@ -67,6 +67,8 @@ import org.groundplatform.v2.core.forms.ui.GroundBadgeTone
 import org.groundplatform.v2.core.forms.ui.GroundTonalBadge
 import org.groundplatform.v2.devtools.prototypeapp.WebFormPanelChrome
 import org.groundplatform.v2.devtools.prototypeapp.WebFormPanelWidth
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.FormPreviewTarget
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.GeometryCapture
 
 /**
  * Geometry input of the editor's web canvas and web preview: like the dashboard, geometry questions

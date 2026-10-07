@@ -30,6 +30,17 @@ import org.groundplatform.v2.core.sampling.SamplingException
 import org.groundplatform.v2.core.sampling.SamplingResult
 import org.groundplatform.v2.devtools.prototypeapp.data.datasource.local.store.runDirect
 import org.groundplatform.v2.devtools.prototypeapp.data.seed.SurveyEditorSamples
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.DatasetKind
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EntityProperty
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.GenerationRecord
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.GeometryKind
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.LatLng
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.PlotShapeOption
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SampleAreaSource
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SampleDesignConfig
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SamplePlotProperties
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SubPlotMode
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.toGeoCoord
 
 class SampleGenerationTest {
   private val now = "2026-01-02T03:04:05Z"

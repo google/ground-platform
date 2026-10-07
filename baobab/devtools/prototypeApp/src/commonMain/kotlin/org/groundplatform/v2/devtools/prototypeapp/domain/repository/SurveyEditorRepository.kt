@@ -13,7 +13,7 @@
  */
 package org.groundplatform.v2.devtools.prototypeapp.domain.repository
 
-import org.groundplatform.v2.devtools.prototypeapp.surveyeditor.SurveyEditorDraft
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SurveyEditorDraft
 
 /** Loads and saves the Survey editor's per-survey drafts in the local data store. */
 interface SurveyEditorRepository {

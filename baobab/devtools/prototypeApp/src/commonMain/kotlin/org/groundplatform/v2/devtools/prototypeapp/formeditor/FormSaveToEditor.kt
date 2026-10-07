@@ -74,6 +74,22 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.FormAvailability
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.ChoiceColors
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EditorDataset
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EditorDatasetProperty
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EditorForm
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EditorIssue
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EditorQuestion
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EditorStatusBadge
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EditorStatusRule
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EntityIdSource
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.FormPreviewTarget
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.GeometryCapture
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.RelevanceOperator
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SaveToMode
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SaveToRules
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.StatusConditionSubject
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.StatusMarkerSymbol
 
 /**
  * Whether "Advanced" sections are expanded, shared by every Advanced section in the editor.

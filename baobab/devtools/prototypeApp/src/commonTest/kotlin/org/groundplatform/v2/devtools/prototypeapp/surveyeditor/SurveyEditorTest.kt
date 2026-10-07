@@ -31,9 +31,23 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.InviteLinks
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.MapLayerItem
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.MapThumbnailTheme
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyPreviewItem
-import org.groundplatform.v2.devtools.prototypeapp.formeditor.EditorQuestionType
-import org.groundplatform.v2.devtools.prototypeapp.formeditor.FormIds
-import org.groundplatform.v2.devtools.prototypeapp.formeditor.SaveToMode
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.CollaboratorRole
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.DatasetKind
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EditorQuestionType
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EntityDatasetValidator
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EntityRow
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.FormIds
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.GeometryKind
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.GeometryText
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.LatLng
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SaveToMode
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SharingPolicy
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SurveyArea
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SurveyEditorDraft
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SurveyEditorForm
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.publishedFormXml
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.withEditorFormAvailability
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.withEditorLayerStyles
 
 class SurveyEditorTest {
 
@@ -523,7 +537,7 @@ class SurveyEditorTest {
 
     // Add a question to the form
     formEntry.editor.addQuestion(
-      org.groundplatform.v2.devtools.prototypeapp.formeditor.EditorQuestionType.INTEGER
+      org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EditorQuestionType.INTEGER
     )
     val addedQuestion = formEntry.editor.form.questions.last()
     state.syncDatasetsLinkedToForm(formEntry)

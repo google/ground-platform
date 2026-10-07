@@ -41,7 +41,7 @@ import org.groundplatform.v2.devtools.prototypeapp.data.seed.PrototypeFakeSurvey
 import org.groundplatform.v2.devtools.prototypeapp.data.seed.SampleDataSeeder
 import org.groundplatform.v2.devtools.prototypeapp.data.seed.SurveyEditorSamples
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SyncStatus
-import org.groundplatform.v2.devtools.prototypeapp.surveyeditor.SurveyEditorDraft
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SurveyEditorDraft
 
 /** Runs [block] to completion on an immediate dispatcher, as the app does for store writes. */
 internal fun <T> runNow(block: suspend () -> T): T {

@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.groundplatform.v2.devtools.prototypeapp.surveyeditor
+package org.groundplatform.v2.devtools.prototypeapp.domain.model.editor
 
 import kotlin.math.PI
 import kotlin.math.abs
@@ -99,3 +99,14 @@ object SurveyAreaGeometry {
 internal fun LatLng.toGeoCoord() = GeoCoord(lat = lat, lng = lng)
 
 internal fun GeoCoord.toLatLng() = LatLng(lat = lat, lng = lng)
+
+/** Formats [v] with exactly [decimals] fraction digits (no platform `String.format` in common). */
+internal fun formatFixed(v: Double, decimals: Int): String {
+  var factor = 1L
+  repeat(decimals) { factor *= 10 }
+  val scaled = kotlin.math.round(kotlin.math.abs(v) * factor).toLong()
+  val whole = scaled / factor
+  val frac = (scaled % factor).toString().padStart(decimals, '0')
+  val sign = if (v < 0 && scaled != 0L) "-" else ""
+  return if (decimals == 0) "$sign$whole" else "$sign$whole.$frac"
+}

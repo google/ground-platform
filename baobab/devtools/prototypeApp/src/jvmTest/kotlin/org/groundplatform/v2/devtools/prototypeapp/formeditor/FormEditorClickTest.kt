@@ -34,6 +34,9 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import org.groundplatform.v2.devtools.prototypeapp.data.seed.FormEditorSamples
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.DateRule
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EditorQuestionType
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.friendlyDate
 
 /** Every interactive element of the Form editor must respond to a single click or tap. */
 @OptIn(ExperimentalTestApi::class)

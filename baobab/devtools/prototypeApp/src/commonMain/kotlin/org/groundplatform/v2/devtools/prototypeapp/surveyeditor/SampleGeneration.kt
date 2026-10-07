@@ -20,6 +20,11 @@ import org.groundplatform.v2.core.sampling.SAMPLING_ENGINE_VERSION
 import org.groundplatform.v2.core.sampling.SampleDesign
 import org.groundplatform.v2.core.sampling.SampleEncoding
 import org.groundplatform.v2.core.sampling.SamplingArea
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EntityRow
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SampleDesignConfig
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SamplePlotProperties
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.formatFixed
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.toLatLng
 
 /** Progress of a running sample generation, for the progress bar. */
 data class SampleGenerationProgress(

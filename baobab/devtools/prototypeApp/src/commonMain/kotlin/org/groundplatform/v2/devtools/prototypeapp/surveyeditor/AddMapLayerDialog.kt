@@ -47,6 +47,7 @@ import org.groundplatform.v2.core.geo.io.GeoFileReader
 import org.groundplatform.v2.core.geo.io.GeoReadResult
 import org.groundplatform.v2.devtools.prototypeapp.TextFilePickResult
 import org.groundplatform.v2.devtools.prototypeapp.TextFilePicker
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.DatasetKind
 import org.groundplatform.v2.devtools.prototypeapp.openPlatformTextFilePicker
 
 /** A file read for import as a Map layer, with its plan (`null` if nothing can be imported). */

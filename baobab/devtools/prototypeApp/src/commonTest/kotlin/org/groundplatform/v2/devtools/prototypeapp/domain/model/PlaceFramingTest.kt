@@ -87,6 +87,5 @@ class PlaceFramingTest {
 
     assertEquals(LatLng(-0.5512, 36.9421), focus.center)
     assertEquals((focus.zoom + 0.6).coerceIn(2.5, PlaceFraming.MAX_ZOOM), focus.maxZoom, 1e-9)
-    assertEquals(PlaceFraming.FOCUS_PADDING, focus.padding)
   }
 }

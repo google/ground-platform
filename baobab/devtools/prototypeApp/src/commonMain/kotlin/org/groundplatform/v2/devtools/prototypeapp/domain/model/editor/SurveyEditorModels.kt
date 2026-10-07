@@ -11,13 +11,12 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.groundplatform.v2.devtools.prototypeapp.surveyeditor
+package org.groundplatform.v2.devtools.prototypeapp.domain.model.editor
 
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.CachedProfile
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.FormPreviewItem
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.InvitationStatus
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.MapLayerItem
-import org.groundplatform.v2.devtools.prototypeapp.formeditor.FormEditorValidator
 
 /**
  * Defines the geographic survey area for the survey: one or more polygon parts (e.g. a mainland and

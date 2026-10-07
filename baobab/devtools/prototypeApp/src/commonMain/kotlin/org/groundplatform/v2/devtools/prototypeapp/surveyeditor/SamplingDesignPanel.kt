@@ -52,6 +52,14 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.AllocationMode
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EntityDataset
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.PlotShapeOption
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SampleAreaSource
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SampleDesignConfig
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SampleMethod
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SubPlotMode
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SurveyAreaGeometry
 import org.groundplatform.v2.devtools.prototypeapp.formeditor.DropdownSelector
 
 /** Above this many plots the prototype warns that generating and editing may be slow. */

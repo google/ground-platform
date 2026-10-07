@@ -79,8 +79,19 @@ import org.groundplatform.v2.core.geo.io.GeoIssueSeverity
 import org.groundplatform.v2.core.geo.io.GeoReadResult
 import org.groundplatform.v2.devtools.prototypeapp.TextFilePickResult
 import org.groundplatform.v2.devtools.prototypeapp.TextFilePicker
-import org.groundplatform.v2.devtools.prototypeapp.data.datasource.remote.MapboxPlacesDataSource
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyPlaceItem
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.DatasetKind
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EntityDataset
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EntityProperty
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EntityRow
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.GeometryKind
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.LatLng
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.LayerStyle
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SurveyArea
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SurveyAreaGeometry
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SurveyEditorDraft
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.formatFixed
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.toLatLng
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.parsePlaceCoordinates
 import org.groundplatform.v2.devtools.prototypeapp.openPlatformTextFilePicker
 import org.groundplatform.v2.map.CameraPosition
@@ -255,6 +266,7 @@ internal fun SurveyAreaEditorDialog(
   surveyLocationLabel: String,
   current: SurveyArea?,
   localPlaces: List<SurveyPlaceItem>,
+  searchPlaces: PlaceSearch,
   onSave: (SurveyArea) -> Unit,
   onDismiss: () -> Unit,
   pickTextFile: TextFilePicker = ::openPlatformTextFilePicker,
@@ -315,6 +327,7 @@ internal fun SurveyAreaEditorDialog(
                 surveyCenter = surveyCenter,
                 currentAreaName = current?.name,
                 localPlaces = localPlaces,
+                searchPlaces = searchPlaces,
                 onSelect = { place ->
                   onSave(placeToSurveyArea(place))
                   onDismiss()
@@ -367,7 +380,22 @@ internal fun areaSummary(area: SurveyArea): String {
 // Search
 // ---------------------------------------------------------------------------------------------
 
-/** Mapbox places search (or raw coordinates) plus the local gazetteer, as before. */
+/**
+ * Looks up places matching [query] near [center] for [surveyId]; [regionSubtitle] labels results
+ * without a region of their own. Results are delivered to [onResults], which may be called after
+ * this returns.
+ */
+internal fun interface PlaceSearch {
+  fun search(
+    surveyId: String,
+    query: String,
+    regionSubtitle: String,
+    center: LatLng,
+    onResults: (List<SurveyPlaceItem>) -> Unit,
+  )
+}
+
+/** Remote places search (or raw coordinates) plus the local gazetteer, as before. */
 @Composable
 private fun SearchTab(
   surveyId: String,
@@ -375,12 +403,12 @@ private fun SearchTab(
   surveyCenter: LatLng,
   currentAreaName: String?,
   localPlaces: List<SurveyPlaceItem>,
+  searchPlaces: PlaceSearch,
   onSelect: (SurveyPlaceItem) -> Unit,
 ) {
   var searchQuery by remember { mutableStateOf("") }
   var isSearching by remember { mutableStateOf(false) }
   var remotePlaces by remember { mutableStateOf<List<SurveyPlaceItem>>(emptyList()) }
-  val placesDataSource = remember { MapboxPlacesDataSource() }
 
   // Query live Mapbox Places API when user types a query (with debounce)
   LaunchedEffect(searchQuery, surveyId) {
@@ -392,14 +420,7 @@ private fun SearchTab(
     }
     isSearching = true
     delay(250) // Debounce rapid keystrokes
-    placesDataSource.searchPlaces(
-      surveyId = surveyId,
-      query = q,
-      isAirplaneMode = false,
-      defaultRegionSubtitle = surveyLocationLabel,
-      centerLongitude = surveyCenter.lng,
-      centerLatitude = surveyCenter.lat,
-    ) { results ->
+    searchPlaces.search(surveyId, q, surveyLocationLabel, surveyCenter) { results ->
       remotePlaces = results
       isSearching = false
     }

@@ -303,9 +303,13 @@ The left-hand navigation lists:
         in the field) and property schema editing. They mirror
         `EntityDatasetDef` / `EntityRecord`.
 
-Code lives in `surveyeditor/` (`SurveyEditorModels.kt`, `SurveyEditorState.kt`,
-`SurveyEditorPage.kt`, `EntityDatasetEditor.kt`, `InteractiveLayerMap.kt`,
-`LayerEditorGeometry.kt`). Drag-to-reorder for the navigation and the flow canvas shares
+The editor's models are pure Kotlin in `domain/model/editor/`
+(`SurveyEditorDraft.kt`, `SurveyEditorModels.kt`, `SampleDesignModels.kt`,
+`SurveyAreaGeometry.kt`, `FormPublishing.kt`), so repositories and the local
+data store depend only on the domain. The Compose state holders and screens live
+in `surveyeditor/` (`SurveyEditorState.kt`, `SurveyEditorPage.kt`,
+`EntityDatasetEditor.kt`, `InteractiveLayerMap.kt`, `LayerEditorGeometry.kt`).
+Drag-to-reorder for the navigation and the flow canvas shares
 `formeditor/DragReorder.kt`.
 
 The layer editor map and the survey area thumbnail are `GroundMap`s from
@@ -320,7 +324,9 @@ containment and lines and points by a 12 dp tolerance. Without a Mapbox renderer
 ### Form Editor
 
 Selecting a Form opens the visual Form editor in `formeditor/`
-(`FormEditorModels.kt`, `FormEditorState.kt`, `FormEditorPage.kt`):
+(`FormEditorState.kt`, `FormEditorPage.kt`); its models, validation rules, and
+XForms generator are pure Kotlin in `domain/model/editor/`
+(`FormEditorModels.kt`, `FormValidationRules.kt`, `FormIds.kt`):
 
 -   **Flow canvas**: Shows a mini preview of every question screen, from
     `Start` to `Review & submit`. Arrows show each possible transition. Solid
@@ -396,7 +402,7 @@ Selecting a Form opens the visual Form editor in `formeditor/`
     `mobileForms`). The choice is applied to the running survey's forms by form
     ID from the saved editor draft, like Map layer styles. The **Advanced**
     section at the bottom holds the Form's save-to logic
-    (`FormSaveToModels.kt`, `FormSaveToEditor.kt`). Advanced sections start
+    (`domain/model/editor/FormSaveToModels.kt`, `FormSaveToEditor.kt`). Advanced sections start
     collapsed (or open when customized or invalid). Expanding or collapsing one
     does the same to all of them for the rest of the session.
 -   **Save-to logic**: By default each submission adds a new map feature (if
@@ -432,6 +438,11 @@ fresh on every page load; on mobile it will become the persistent offline store.
     hardcoded sample datasets (`PrototypeFake*Data`, `SurveyEditorSamples`,
     `FormEditorSamples`). It fills the store on first launch and again on
     **Reset**. `SampleDataGuardrailTest` keeps other code from reading them.
+-   **Layering**: `LayerDependencyGuardrailTest` checks imports against
+    `docs/technical/client/architecture.md`: `domain/` depends on nothing
+    outside the domain and shared core, `data/` never imports presentation
+    packages, and only `data/` and `ui/viewmodel/` may import `data/` or
+    `client/` packages.
 -   **Survey switching**: Every survey's data is in the store, so switching
     surveys keeps edits. Use **Reset** to go back to the sample data.
 -   **Survey editor**: The editor loads the active survey's draft

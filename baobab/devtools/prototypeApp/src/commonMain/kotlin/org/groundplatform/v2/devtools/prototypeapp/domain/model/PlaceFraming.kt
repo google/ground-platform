@@ -13,13 +13,11 @@
  */
 package org.groundplatform.v2.devtools.prototypeapp.domain.model
 
-import androidx.compose.ui.unit.dp
 import kotlin.math.abs
 import kotlin.math.ln
 import kotlin.math.pow
 import org.groundplatform.v2.map.LatLng
 import org.groundplatform.v2.map.LngLatBounds
-import org.groundplatform.v2.map.MapInsets
 
 /** How the map frames a selected [SurveyPlaceItem]. */
 data class PlaceFocus(
@@ -29,7 +27,6 @@ data class PlaceFocus(
   val zoom: Double,
   /** Closest zoom the camera may reach while fitting [bounds]. */
   val maxZoom: Double,
-  val padding: MapInsets,
 )
 
 /**
@@ -40,9 +37,6 @@ data class PlaceFocus(
 object PlaceFraming {
   const val MIN_ZOOM = 2.2
   const val MAX_ZOOM = 16.8
-
-  /** Keeps the place clear of the floating search bar (top) and bottom sheet peek (bottom). */
-  val FOCUS_PADDING = MapInsets(left = 40.dp, top = 68.dp, right = 40.dp, bottom = 108.dp)
 
   /** Bounding boxes smaller than this in both dimensions are treated as points. */
   private const val MIN_BBOX_SPAN_DEGREES = 0.0002
@@ -120,7 +114,6 @@ object PlaceFraming {
       bounds = bounds,
       zoom = zoom,
       maxZoom = (zoom + 0.6).coerceIn(2.5, MAX_ZOOM),
-      padding = FOCUS_PADDING,
     )
   }
 
