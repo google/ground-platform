@@ -26,6 +26,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 import { EditOptionModule } from './edit-option/edit-option.module';
 import { TaskFormComponent } from './task-form.component';
@@ -43,6 +44,7 @@ import { TaskFormComponent } from './task-form.component';
     MatInputModule,
     MatDividerModule,
     MatMenuModule,
+    MatTooltipModule,
     CommonModule,
     EditOptionModule,
     DragDropModule,

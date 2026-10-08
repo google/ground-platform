@@ -41,6 +41,7 @@
       [formGroup]="formGroup"
       [formGroupIndex]="i"
       [isCreationMode]="isCreationMode()"
+      [typeLocked]="typeLockedTaskIds().has(formGroup.get('id')?.value)"
       [expanded]="expandedIndex() === i"
       (expand)="expandedIndex.set(i)"
       (delete)="onTaskDelete(i)"

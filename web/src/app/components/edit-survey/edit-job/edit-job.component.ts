@@ -53,6 +53,7 @@ export class EditJobComponent {
   job?: Job;
   tasks?: List<Task>;
   addLoiTaskId?: string;
+  typeLockedTaskIds: ReadonlySet<string> = new Set();
   lois!: List<LocationOfInterest>;
 
   EditJobSection = EditJobSection;
@@ -98,6 +99,10 @@ export class EditJobComponent {
     this.job = this.draftSurveyService.getSurvey().getJob(this.jobId!);
 
     this.addLoiTaskId = this.job?.tasks?.find(task => !!task.addLoiTask)?.id;
+
+    this.typeLockedTaskIds = this.draftSurveyService.getTypeLockedTaskIds(
+      this.jobId!
+    );
 
     if (!this.job) return;
 

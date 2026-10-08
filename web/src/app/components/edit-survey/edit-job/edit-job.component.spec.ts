@@ -72,10 +72,12 @@ describe('EditJobComponent', () => {
     '',
     { type: DataSharingType.PRIVATE }
   );
+  let lockedTaskIds: ReadonlySet<string> = new Set();
   const jobId = 'job-123';
   const user$ = new Subject<User | null>();
 
   beforeEach(async () => {
+    lockedTaskIds = new Set();
     await TestBed.configureTestingModule({
       declarations: [EditJobComponent, MockLoiEditorComponent],
       imports: [
@@ -100,6 +102,7 @@ describe('EditJobComponent', () => {
           useValue: {
             getSurvey$: () => of(survey),
             getSurvey: () => survey,
+            getTypeLockedTaskIds: () => lockedTaskIds,
           },
         },
         {
@@ -133,5 +136,15 @@ describe('EditJobComponent', () => {
     sitesButton.click();
     fixture.detectChanges();
     expect(fixture.componentInstance.loiEditor).toBeDefined();
+  });
+
+  it('passes the locked task ids to the task editor', () => {
+    lockedTaskIds = new Set(['task1']);
+    fixture = TestBed.createComponent(EditJobComponent);
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.typeLockedTaskIds).toEqual(
+      new Set(['task1'])
+    );
   });
 });

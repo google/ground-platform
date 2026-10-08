@@ -190,6 +190,7 @@
     "app.taskEditor.instructions.label": "Instructions",
     "app.taskEditor.instructions.placeholder": "Instructions",
     "app.taskEditor.instructions.requiredMessage": "Instructions are required",
+    "app.taskEditor.typeLocked": "The type of a task can't be changed once the survey is published. Delete the task and add a new one instead.",
     "app.labels.other": "Other...",
     "app.labels.agreeWithTermsOfService": "I have read and agree with terms of service.",
     "app.cards.dataSharingTerms.private.description": "Data collectors must agree to share data with survey organizers",
