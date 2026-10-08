@@ -59,10 +59,12 @@ import org.groundplatform.v2.core.forms.ui.CompactGeometryInput
 import org.groundplatform.v2.core.forms.ui.GroundBadgeTone
 import org.groundplatform.v2.core.forms.ui.GroundTonalBadge
 import org.groundplatform.v2.core.forms.ui.LocalMediaCaptureHandler
+import org.groundplatform.v2.devtools.prototypeapp.ui.state.DataCollectionUiState
+import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.DataCollectionActions
 
 /**
  * Web dashboard's data collection panel: the floating right-hand card that hosts the active form (
- * [PrototypeAppState.activeFormWizardController]) in the compact stacked layout
+ * [DataCollectionUiState.activeFormWizardController]) in the compact stacked layout
  * ([CompactFormRunner]) instead of mobile's one-question-per-screen runner.
  *
  * Web adaptation of the mobile entry points:
@@ -73,20 +75,28 @@ import org.groundplatform.v2.core.forms.ui.LocalMediaCaptureHandler
  *   left out of the stack.
  * - Forms opened from a map feature's card (**Collect data** buttons) go straight to the questions.
  * - Geometry questions (`geopoint`, `geotrace`, `geoshape`) are drawn on the main map through
- *   [PrototypeAppState.webMapDrawing] instead of captured from a device GPS: **Draw on map** routes
- *   map clicks to the question until the point is placed or the collector clicks **Done**. All of
- *   the form's geometry answers stay on the map in the in-flow style
- *   ([PrototypeAppState.webFormGeometries]); clicking one scrolls to and highlights its card
- *   ([PrototypeAppState.webFormFocusRequest]).
+ *   [DataCollectionUiState.webMapDrawing] instead of captured from a device GPS: **Draw on map**
+ *   routes map clicks to the question until the point is placed or the collector clicks **Done**.
+ *   All of the form's geometry answers stay on the map in the in-flow style
+ *   ([DataCollectionUiState.webFormGeometries]); clicking one scrolls to and highlights its card
+ *   ([DataCollectionUiState.webFormFocusRequest]).
  *
- * Submitting runs the same [PrototypeAppState.completeActiveFormSubmission] as mobile, which adds
- * the submission to the feature's history and closes the panel.
+ * Submitting runs the same [DataCollectionActions.completeActiveFormSubmission] as mobile, which
+ * adds the submission to the feature's history and closes the panel.
+ *
+ * [userGpsCoordinatesLabel] is the collector's current GPS position, shown in the subtitle of a
+ * standalone form (one that needs no target feature).
  */
 @Composable
-internal fun WebDataCollectionCard(state: PrototypeAppState, modifier: Modifier = Modifier) {
-  val controller = state.activeFormWizardController ?: return
-  val form = state.activeDataCollectionForm
-  val entity = state.activeDataCollectionEntity
+internal fun WebDataCollectionCard(
+  uiState: DataCollectionUiState,
+  actions: DataCollectionActions,
+  userGpsCoordinatesLabel: String,
+  modifier: Modifier = Modifier,
+) {
+  val controller = uiState.activeFormWizardController ?: return
+  val form = uiState.activeDataCollectionForm
+  val entity = uiState.activeDataCollectionEntity
   val needsEntity = form != null && form.requiresEntity && entity == null
   val title =
     controller.formState.formDef.title.takeIf { it.isNotBlank() } ?: form?.title ?: "Collect data"
@@ -94,8 +104,8 @@ internal fun WebDataCollectionCard(state: PrototypeAppState, modifier: Modifier 
   // Picking a map feature anywhere in the dashboard while the form waits for its target answers the
   // `entityref` step, the way the mobile Map or List selector does. The feature that happened to be
   // selected when the form opened doesn't count: the collector has to pick one deliberately.
-  val selected = state.selectedEntity
-  val selectionWhenOpened = remember(controller) { state.selectedEntityId }
+  val selected = uiState.selectedEntity
+  val selectionWhenOpened = remember(controller) { uiState.selectedEntityId }
   LaunchedEffect(selected?.id, needsEntity) {
     val target = selected ?: return@LaunchedEffect
     if (
@@ -103,9 +113,9 @@ internal fun WebDataCollectionCard(state: PrototypeAppState, modifier: Modifier 
         target.id != selectionWhenOpened &&
         form != null &&
         target.datasetId == form.targetDatasetId &&
-        state.isFormButtonEnabled(target, form)
+        uiState.isFormButtonEnabled(target, form)
     ) {
-      state.selectEntityRefForActiveForm(target.id)
+      actions.selectEntityRefForActiveForm(target.id)
     }
   }
 
@@ -114,11 +124,11 @@ internal fun WebDataCollectionCard(state: PrototypeAppState, modifier: Modifier 
     subtitle =
       when {
         entity != null -> "${entity.label} • ${entity.datasetName}"
-        form != null && !form.requiresEntity -> "New record • ${state.userGpsCoordinatesLabel}"
+        form != null && !form.requiresEntity -> "New record • $userGpsCoordinatesLabel"
         form != null -> "Select ${form.targetSingularTypeLabel.lowercase()} to begin"
         else -> null
       },
-    onClose = { state.closeActiveFormRunner() },
+    onClose = { actions.closeActiveFormRunner() },
     modifier = modifier,
   ) {
     Column(
@@ -129,24 +139,24 @@ internal fun WebDataCollectionCard(state: PrototypeAppState, modifier: Modifier 
           .padding(16.dp)
     ) {
       if (needsEntity && form != null) {
-        WebEntityRefPicker(state = state, form = form)
+        WebEntityRefPicker(uiState = uiState, actions = actions, form = form)
       } else {
         val mediaCaptureHandler = remember { PrototypeMediaCaptureHandler() }
         CompositionLocalProvider(LocalMediaCaptureHandler provides mediaCaptureHandler) {
           CompactFormRunner(
             controller = controller,
-            onCancel = { state.closeActiveFormRunner() },
+            onCancel = { actions.closeActiveFormRunner() },
             onSubmitted = { result: FinalizationResult.Success ->
-              state.completeActiveFormSubmission(result.recordInstance, result.entityStates)
+              actions.completeActiveFormSubmission(result.recordInstance, result.entityStates)
             },
             // The target feature is picked on the map or in the lists, not in a card.
             questionFilter = { step -> !isWizardStepEntityRef(step) },
             // No field GPS in a browser: every geometry question is drawn on the main map.
-            geometryInput = CompactGeometryInput.MapDrawing(host = state.webMapDrawing),
+            geometryInput = CompactGeometryInput.MapDrawing(host = uiState.webMapDrawing),
             // Clicking one of the form's geometries on the map jumps to its question. The request
             // keeps its token, so the runner handles each click once without it being consumed.
             focusRequest =
-              state.webFormFocusRequest?.let { CompactFocusRequest(it.path, it.token) },
+              uiState.webFormFocusRequest?.let { CompactFocusRequest(it.path, it.token) },
           )
         }
       }
@@ -159,9 +169,13 @@ internal fun WebDataCollectionCard(state: PrototypeAppState, modifier: Modifier 
  * matching feature on the map or in the left-hand list, plus a searchable list of candidates.
  */
 @Composable
-private fun WebEntityRefPicker(state: PrototypeAppState, form: FormPreviewItem) {
-  val candidates = state.filteredEntityRefCandidates
-  val total = state.allDatasetEntitiesForForm(form).size
+private fun WebEntityRefPicker(
+  uiState: DataCollectionUiState,
+  actions: DataCollectionActions,
+  form: FormPreviewItem,
+) {
+  val candidates = uiState.filteredEntityRefCandidates
+  val total = uiState.allDatasetEntitiesForForm(form).size
   Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
     Surface(
       shape = MaterialTheme.shapes.small,
@@ -187,8 +201,8 @@ private fun WebEntityRefPicker(state: PrototypeAppState, form: FormPreviewItem) 
       }
     }
     OutlinedTextField(
-      value = state.entityRefSearchQuery,
-      onValueChange = { state.updateEntityRefSearchQuery(it) },
+      value = uiState.entityRefSearchQuery,
+      onValueChange = { actions.updateEntityRefSearchQuery(it) },
       modifier = Modifier.fillMaxWidth(),
       singleLine = true,
       leadingIcon = {
@@ -199,8 +213,8 @@ private fun WebEntityRefPicker(state: PrototypeAppState, form: FormPreviewItem) 
         )
       },
       trailingIcon = {
-        if (state.entityRefSearchQuery.isNotEmpty()) {
-          IconButton(onClick = { state.clearEntityRefSearchQuery() }) {
+        if (uiState.entityRefSearchQuery.isNotEmpty()) {
+          IconButton(onClick = { actions.clearEntityRefSearchQuery() }) {
             Icon(
               imageVector = Icons.Outlined.Close,
               contentDescription = "Clear search",
@@ -224,9 +238,9 @@ private fun WebEntityRefPicker(state: PrototypeAppState, form: FormPreviewItem) 
       )
     }
     candidates.take(40).forEach { candidate ->
-      val isEligible = state.isFormButtonEnabled(candidate, form)
+      val isEligible = uiState.isFormButtonEnabled(candidate, form)
       OutlinedCard(
-        onClick = { state.selectEntityRefForActiveForm(candidate.id) },
+        onClick = { actions.selectEntityRefForActiveForm(candidate.id) },
         enabled = isEligible,
         modifier = Modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.small,
@@ -273,11 +287,14 @@ private fun WebEntityRefPicker(state: PrototypeAppState, form: FormPreviewItem) 
 /**
  * **Collect data** action for the web dashboard's toolbar: the counterpart of mobile's bottom FAB
  * and its Available Forms sheet. Opens a menu of the survey's forms; choosing one starts it in the
- * right-hand panel via [PrototypeAppState.launchFormFromFab]. Forms whose features are all
+ * right-hand panel via [DataCollectionActions.launchFormFromFab]. Forms whose features are all
  * completed are listed but disabled.
  */
 @Composable
-internal fun WebCollectDataMenuButton(state: PrototypeAppState) {
+internal fun WebCollectDataMenuButton(
+  uiState: DataCollectionUiState,
+  actions: DataCollectionActions,
+) {
   var expanded by remember { mutableStateOf(false) }
   Box {
     WebHeaderButton(
@@ -297,8 +314,8 @@ internal fun WebCollectDataMenuButton(state: PrototypeAppState) {
         color = MaterialTheme.colorScheme.onSurfaceVariant,
         modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
       )
-      state.webForms.forEach { form ->
-        val eligibleCount = state.eligibleEntitiesForForm(form).size
+      uiState.webForms.forEach { form ->
+        val eligibleCount = uiState.eligibleEntitiesForForm(form).size
         val canLaunch = !form.requiresEntity || eligibleCount > 0
         DropdownMenuItem(
           enabled = canLaunch,
@@ -336,14 +353,14 @@ internal fun WebCollectDataMenuButton(state: PrototypeAppState) {
           },
           onClick = {
             expanded = false
-            state.launchFormFromFab(form.id)
+            actions.launchFormFromFab(form.id)
           },
         )
       }
-      if (state.webForms.isEmpty()) {
+      if (uiState.webForms.isEmpty()) {
         Text(
           text =
-            if (state.forms.isEmpty()) "This survey has no forms yet."
+            if (uiState.forms.isEmpty()) "This survey has no forms yet."
             else "No forms in this survey are available on web.",
           style = MaterialTheme.typography.bodySmall,
           color = MaterialTheme.colorScheme.onSurfaceVariant,

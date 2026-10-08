@@ -311,8 +311,8 @@ internal fun WebDashboardPage(
   onOpenSurveyEditor: () -> Unit = {},
   onSignOut: () -> Unit = { state.signOut() },
 ) {
-  val activeQrEntity = state.activeQrCodeEntity
-  val activePdfSheet = state.activeSharedPdfSheet
+  val activeQrEntity = state.dataCollectionUiState.activeQrCodeEntity
+  val activePdfSheet = state.dataCollectionUiState.activeSharedPdfSheet
   val isSidePanelExpanded = uiState.isSidePanelExpanded
   // One animated fraction scales the user-chosen width, so collapsing, expanding, and dragging all
   // drive the same layout and the panel's contents keep their full width while sliding.
@@ -369,12 +369,20 @@ internal fun WebDashboardPage(
       LayersControlDialog(uiState = mapUiState, actions = state.surveyMap)
     }
     if (activeQrEntity != null) {
-      EntityQrCodeModalDialog(state = state, entity = activeQrEntity, isWeb = true)
+      EntityQrCodeModalDialog(actions = state.dataCollection, entity = activeQrEntity, isWeb = true)
     }
     if (activePdfSheet != null) {
-      SharePdfToAppModalDialog(state = state, sheet = activePdfSheet)
+      SharePdfToAppModalDialog(
+        uiState = state.dataCollectionUiState,
+        actions = state.dataCollection,
+        sheet = activePdfSheet,
+      )
     }
-    PdfExportMessageSnackbar(state = state, modifier = Modifier.align(Alignment.BottomCenter))
+    PdfExportMessageSnackbar(
+      uiState = state.dataCollectionUiState,
+      actions = state.dataCollection,
+      modifier = Modifier.align(Alignment.BottomCenter),
+    )
   }
 }
 
@@ -508,9 +516,11 @@ private fun DashboardMapArea(
   state: PrototypeAppState,
   modifier: Modifier = Modifier,
 ) {
-  val selectedEntity = state.selectedEntity
-  val selectedSubmission = state.selectedSubmission
+  val dataCollectionUiState = state.dataCollectionUiState
+  val selectedEntity = dataCollectionUiState.selectedEntity
+  val selectedSubmission = dataCollectionUiState.selectedSubmission
   val hasSelection = selectedEntity != null || selectedSubmission != null
+  val isFormOpen = dataCollectionUiState.isDataCollectionFormOpen
   val isTableExpanded = uiState.isDashboardTableExpanded
   val hasTables = uiState.entities.isNotEmpty()
   var lastFramedSelectionEpoch by remember { mutableStateOf(-1L) }
@@ -536,7 +546,7 @@ private fun DashboardMapArea(
       state.entitySelectionEpoch,
       isTableExpanded,
       isDetailsExpanded,
-      state.isDataCollectionFormOpen,
+      isFormOpen,
     ) {
       val entity = selectedEntity ?: return@LaunchedEffect
       if (!entity.hasGeometry) return@LaunchedEffect
@@ -553,7 +563,7 @@ private fun DashboardMapArea(
 
       val rightPanel =
         when {
-          state.isDataCollectionFormOpen -> WebFormPanelWidth + DashboardOverlayMargin * 2
+          isFormOpen -> WebFormPanelWidth + DashboardOverlayMargin * 2
           isDetailsExpanded -> DashboardDetailsCardWidth + DashboardOverlayMargin * 2
           else -> DashboardOverlayMargin
         }
@@ -570,12 +580,11 @@ private fun DashboardMapArea(
 
     // Zoom to fit from a geometry question card: centre the geometry in the part of the map not
     // covered by the form panel or the table, the way a selected feature is framed.
-    val framingRequest = state.webMapFramingRequest
+    val framingRequest = dataCollectionUiState.webMapFramingRequest
     LaunchedEffect(framingRequest) {
       val request = framingRequest ?: return@LaunchedEffect
       val rightPanel =
-        if (state.isDataCollectionFormOpen) WebFormPanelWidth + DashboardOverlayMargin * 2
-        else DashboardOverlayMargin
+        if (isFormOpen) WebFormPanelWidth + DashboardOverlayMargin * 2 else DashboardOverlayMargin
       mapCamera.run {
         val insets = framingInsets(it.viewportSize, bottom = tablePanelHeight, right = rightPanel)
         it.fitBounds(request.bounds, insets, maxZoom = request.maxZoom)
@@ -591,13 +600,14 @@ private fun DashboardMapArea(
     )
 
     // Floating instructions while a form's geometry question is being drawn on the map.
-    val draft = state.webMapDraftGeometry
-    if (draft != null) {
+    val webMapDrawing = dataCollectionUiState.webMapDrawing
+    val draft = dataCollectionUiState.webMapDraftGeometry
+    if (draft != null && webMapDrawing != null) {
       WebMapDrawingHint(
         draft = draft,
-        onUndo = { state.webMapDrawing.undoVertex() },
-        onDone = { state.webMapDrawing.stopDrawing() },
-        onCancel = { state.webMapDrawing.cancelDrawing() },
+        onUndo = { webMapDrawing.undoVertex() },
+        onDone = { webMapDrawing.stopDrawing() },
+        onCancel = { webMapDrawing.cancelDrawing() },
         modifier = Modifier.align(Alignment.TopCenter).padding(DashboardOverlayMargin),
       )
     }
@@ -631,7 +641,6 @@ private fun DashboardMapArea(
       uiState.mapLayers.firstOrNull { it.id == layerId }
     }
     val hasDetails = selectedEntity != null || selectedSubmission != null || layerSummary != null
-    val isFormOpen = state.isDataCollectionFormOpen
     val cardMaxHeight =
       (maxHeight - tablePanelHeight - DashboardOverlayMargin * 2).coerceAtLeast(160.dp)
     val cardModifier =
@@ -647,7 +656,9 @@ private fun DashboardMapArea(
       modifier = Modifier.align(Alignment.TopEnd),
     ) {
       WebDataCollectionCard(
-        state = state,
+        uiState = dataCollectionUiState,
+        actions = state.dataCollection,
+        userGpsCoordinatesLabel = state.userGpsCoordinatesLabel,
         modifier =
           Modifier.padding(DashboardOverlayMargin)
             .width(WebFormPanelWidth)
@@ -707,7 +718,7 @@ private fun DashboardMapArea(
           onExpand = { actions.expandDetailsPanel() },
           onClose = {
             if (selectedSubmission != null && selectedEntity == null) {
-              state.selectSubmissionDetail(null)
+              state.dataCollection.selectSubmissionDetail(null)
             } else {
               state.selectEntity(null)
             }
@@ -818,11 +829,12 @@ internal fun DashboardDataTablesPanel(
   modifier: Modifier = Modifier,
 ) {
   val uiState by state.dashboard.uiState.collectAsState()
+  val dataCollectionUiState = state.dataCollectionUiState
   DashboardDataTablesPanel(
     uiState = uiState,
     actions = state.dashboard,
-    selectedEntityId = state.selectedEntityId,
-    hasSelection = state.selectedEntityId != null || state.selectedSubmissionId != null,
+    selectedEntityId = dataCollectionUiState.selectedEntityId,
+    hasSelection = dataCollectionUiState.hasSelectedRecord,
     onRowClick = { row -> state.selectEntity(row.id) },
     expandedTableHeight = expandedTableHeight,
     modifier = modifier,

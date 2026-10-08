@@ -80,7 +80,7 @@ fun parseDefaultPrototypeFormDef(): FormDef =
  */
 @Composable
 fun PrototypeXFormsWorkbenchPanel(state: PrototypeAppState) {
-  val parsedFormDef = state.customFormDef
+  val parsedFormDef = state.dataCollectionUiState.customFormDef
   val xmlError = state.xformsXmlError
   val fieldCount = parsedFormDef?.model?.bindings?.size ?: 0
   var showRawXmlEditor by remember { mutableStateOf(false) }
@@ -261,25 +261,26 @@ fun PrototypeXFormsWorkbenchPanel(state: PrototypeAppState) {
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically,
       ) {
+        val isFormOpen = state.dataCollectionUiState.isDataCollectionFormOpen
         Button(
           onClick = {
-            if (state.isDataCollectionFormOpen) {
-              state.closeActiveFormRunner()
+            if (isFormOpen) {
+              state.dataCollection.closeActiveFormRunner()
             } else {
-              state.launchActiveOrDefaultFormForTesting()
+              state.dataCollection.launchActiveOrDefaultFormForTesting()
             }
           },
           enabled = xmlError == null,
           colors =
             ButtonDefaults.buttonColors(
               containerColor =
-                if (state.isDataCollectionFormOpen) {
+                if (isFormOpen) {
                   MaterialTheme.colorScheme.error
                 } else {
                   MaterialTheme.colorScheme.primary
                 },
               contentColor =
-                if (state.isDataCollectionFormOpen) {
+                if (isFormOpen) {
                   MaterialTheme.colorScheme.onError
                 } else {
                   MaterialTheme.colorScheme.onPrimary
@@ -288,7 +289,7 @@ fun PrototypeXFormsWorkbenchPanel(state: PrototypeAppState) {
         ) {
           Text(
             text =
-              if (state.isDataCollectionFormOpen) {
+              if (isFormOpen) {
                 "■ Close Active Form Runner"
               } else {
                 "▶ Test / Launch Form Now"

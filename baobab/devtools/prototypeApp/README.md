@@ -200,24 +200,24 @@ prototype, so selections and survey changes carry over.
     searchable list; the questions then appear and the target step is left out
     of the stack. There is no field GPS in a browser, so every geometry question
     (`geopoint`, `geotrace`, `geoshape`, "GPS only" or not) is answered by
-    drawing on the main map (`WebMapDrawing.kt`): **Draw on map** in the
-    question's card routes map clicks to it (`PrototypeAppState.webMapDrawing`,
-    the `CompactMapDrawingHost`), a floating chip at the top of the map shows
+    drawing on the main map (`ui/state/WebMapDrawingHost.kt`): **Draw on map**
+    in the question's card routes map clicks to it
+    (`DataCollectionViewModel.webMapDrawing`, the `CompactMapDrawingHost`), a floating chip at the top of the map shows
     the progress (`2 of at least 3`) with **Undo**, **Done**, and **Cancel
     drawing**, and the in-progress vertices, line, or polygon are drawn above
     the map features in the draft style (`SurveyMapContent.draftGeometry`).
     One click places a point; lines and polygons collect vertices until
     **Done**. While drawing, clicks on features add vertices instead of
     selecting them. Every geometry answer the open form already holds stays on
-    the map in a settled "in-flow" style (`PrototypeAppState.webFormGeometries`:
+    the map in a settled "in-flow" style (`DataCollectionUiState.webFormGeometries`:
     same amber hue as the draft but solid outlines, light fill, white vertex
     discs, and a chip with the question title); clicking one of them, or its
     chip, scrolls the panel to that question and highlights its card for a
-    moment (`PrototypeAppState.focusWebFormQuestion` → the runner's
+    moment (`DataCollectionActions.focusWebFormQuestion` → the runner's
     `focusRequest`). Each geometry card also has a **Zoom to fit** button (any
     kind: point, line, or polygon) that centres that question's geometry in the
     visible part of the map, clear of the form panel and the table
-    (`PrototypeAppState.webMapFramingRequest`).
+    (`DataCollectionUiState.webMapFramingRequest`).
 -   **Media capture on web** (`PrototypeMediaCapture.kt`,
     `src/commonMain/resources/media-capture-bridge.js`): Photo, video, and
     audio questions use the shared `MediaCaptureWidget` with the prototype's
@@ -450,9 +450,10 @@ for tests:
     action, and the preview area is greyed out and non-interactive.
     On the dashboard, the **Collect data** menu and the feature cards' buttons
     only list forms available on web; the mobile `+` FAB sheet and bottom-sheet
-    buttons only list forms available on mobile (`PrototypeAppState.webForms` /
-    `mobileForms`). The choice is applied to the running survey's forms by form
-    ID from the saved editor draft, like Map layer styles. The **Advanced**
+    buttons only list forms available on mobile
+    (`DataCollectionUiState.webForms` / `mobileForms`). The choice is applied to
+    the running survey's forms by form ID from the saved editor draft, like Map
+    layer styles. The **Advanced**
     section at the bottom holds the Form's save-to logic
     (`domain/model/editor/FormSaveToModels.kt`, `FormSaveToEditor.kt`). Advanced sections start
     collapsed (or open when customized or invalid). Expanding or collapsing one
@@ -546,7 +547,23 @@ fresh on every page load; on mobile it will become the persistent offline store.
     invites with `InviteCollaboratorUseCase`, and hands each Form to a
     `FormEditorViewModel` (`FormEditorUiState` / `FormEditorActions`). Leaving
     the editor after publishing or discarding is a `SurveyEditorEvent` the
-    shell applies.
+    shell applies. `DataCollectionViewModel` (data collection: the selected
+    record shown in the entity bottom sheet and the dashboard's details card,
+    the open Form and its `entityref` picker step, the web dashboard's
+    draw-on-map session, and the GeoID QR code and PDF export dialogs)
+    observes survey content through `SurveyRepository`, the collector through
+    `AuthRepository`, units through `SettingsRepository`, and the GPS fix
+    through `LocationRepository`; it opens Forms with `LaunchFormUseCase`
+    (resolves the `FormDef`, adds the `entityref` step, pre-fills
+    entity-reference questions) and records them with
+    `CompleteFormSubmissionUseCase`. It is the one owner of record selection
+    (`selectedEntityId` / `selectedSubmissionId`): `SurveyMapViewModel` keeps
+    only the highlighted feature, updated from `DataCollectionEvent`s, and
+    selections made on the map flow back through the shell. Three pieces of UI
+    infrastructure are allowed in its state and dependencies by exception:
+    the shared `FormWizardController` (Compose snapshot state), the
+    `WebMapDrawingHost` (`ui/state/`) that edits it while drawing, and
+    `PdfExportClient` (`client/pdf/`), the platform file delivery.
 -   **Survey switching**: Every survey's data is in the store, so switching
     surveys keeps edits. Use **Reset** to go back to the sample data.
 -   **Survey editor**: `SurveyEditorRepositoryImpl` serves the stored draft
@@ -587,9 +604,10 @@ look the same on web and mobile.
 -   **Implementation**: `PdfDocumentWriter` is a small PDF 1.4 writer with no
     dependencies. It uses the standard Helvetica and Courier fonts, which don't
     need embedding. `PdfReportLayout` handles text wrapping, page breaks, and
-    `Page n of N` footers. `RecordPdfReports` builds the two reports. Delivery is
-    the only platform-specific code (`PlatformPdfExport`): `pdf-export-bridge.js`
-    on web and the temp directory on the JVM.
+    `Page n of N` footers. `RecordPdfReports` builds the two reports.
+    `DataCollectionViewModel` generates them and hands them to
+    `PdfExportClient` (`client/pdf/`), the only platform-specific code:
+    `pdf-export-bridge.js` on web and the temp directory on the JVM.
 -   **Limitation**: The standard fonts only cover Windows-1252 (Western European)
     characters. Common symbols are replaced with ASCII (`≤` → `<=`, `📷` →
     `[photo]`); other scripts render as `?`. Embedding a Unicode font (for

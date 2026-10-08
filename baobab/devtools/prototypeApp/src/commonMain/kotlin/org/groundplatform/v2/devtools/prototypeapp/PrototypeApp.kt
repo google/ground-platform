@@ -173,15 +173,18 @@ fun PrototypeApp(
     }
   }
 
+  val dataCollectionUiState = state.dataCollectionUiState
   val isEntityRefMapShowing =
-    state.isDataCollectionFormOpen &&
-      state.isCurrentFormStepEntityRef &&
-      state.entityRefSelectorViewMode == MainSurveyViewMode.MAP
+    dataCollectionUiState.isDataCollectionFormOpen &&
+      dataCollectionUiState.isCurrentFormStepEntityRef &&
+      dataCollectionUiState.entityRefSelectorViewMode == MainSurveyViewMode.MAP
   val isMobileMapShowing =
     page == PrototypeWorkbenchPage.MOBILE_PROTOTYPE &&
       state.currentScreen == PrototypeScreen.MAIN_SURVEY &&
       state.activeDrawerSubView == MainDrawerSubView.NONE &&
-      (!state.isDataCollectionFormOpen || state.isCurrentFormStepGeoPoint || isEntityRefMapShowing)
+      (!dataCollectionUiState.isDataCollectionFormOpen ||
+        dataCollectionUiState.isCurrentFormStepGeoPoint ||
+        isEntityRefMapShowing)
   // The Mapbox basemap renders behind the Compose canvas, so the root surface must stay transparent
   // whenever a page shows it.
   val isMapShowing =
@@ -746,7 +749,7 @@ private fun UxDesignerInspectorPanel(state: PrototypeAppState, modifier: Modifie
               {
                 state.navigateTo(PrototypeScreen.MAIN_SURVEY)
                 state.setMainSurveyViewMode(MainSurveyViewMode.MAP)
-                state.selectSubmissionDetail("sub-standalone-pest-01")
+                state.dataCollection.selectSubmissionDetail("sub-standalone-pest-01")
               },
             ),
             Triple(

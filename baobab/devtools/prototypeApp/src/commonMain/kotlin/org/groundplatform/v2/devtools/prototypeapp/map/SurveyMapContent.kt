@@ -30,6 +30,7 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyMapAnchor
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyPlaceItem
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.formatHexColorCss
 import org.groundplatform.v2.devtools.prototypeapp.geometryKind
+import org.groundplatform.v2.devtools.prototypeapp.ui.state.DataCollectionUiState
 import org.groundplatform.v2.devtools.prototypeapp.ui.state.SurveyMapUiState
 import org.groundplatform.v2.map.FeatureFilter
 import org.groundplatform.v2.map.GeoJsonSource
@@ -171,14 +172,34 @@ internal object SurveyMapContent {
   /** Most cluster balloons drawn at once, to keep the marker layer light. */
   private const val MAX_CLUSTER_MARKERS = 60
 
-  /** The main survey map (mobile and web dashboard). */
+  /** The main survey map (mobile and web dashboard), built from the app shell. */
   fun main(state: PrototypeAppState, showNavigation: Boolean): SurveyMap =
     main(
       uiState = state.surveyMapUiState,
+      dataCollection = state.dataCollectionUiState,
       pendingIds = state.pendingUploadEntityIds,
       showNavigation = showNavigation,
-      draftGeometry = state.webMapDraftGeometry,
-      formGeometries = state.webFormGeometries,
+    )
+
+  /**
+   * The main survey map (mobile and web dashboard) from the map viewport's [uiState] and the open
+   * form's [dataCollection] state: the geometry being drawn and the form's geometry answers (web
+   * dashboard).
+   *
+   * @param pendingIds entities with pending uploads, drawn in the pending style.
+   */
+  fun main(
+    uiState: SurveyMapUiState,
+    dataCollection: DataCollectionUiState,
+    pendingIds: Set<String>,
+    showNavigation: Boolean,
+  ): SurveyMap =
+    main(
+      uiState = uiState,
+      pendingIds = pendingIds,
+      showNavigation = showNavigation,
+      draftGeometry = dataCollection.webMapDraftGeometry,
+      formGeometries = dataCollection.webFormGeometries,
     )
 
   /**
@@ -215,13 +236,23 @@ internal object SurveyMapContent {
       imagerySources = uiState.enabledImagerySources,
     )
 
-  /** The map in a form's entity-reference step, listing the form's candidate entities. */
-  fun entityRefForm(state: PrototypeAppState, form: FormPreviewItem): SurveyMap =
+  /**
+   * The map in a form's `entityref` step, listing [form]'s candidate map features from the open
+   * form's [dataCollection] state and highlighting its target feature.
+   *
+   * @param pendingIds entities with pending uploads, drawn in the pending style.
+   */
+  fun entityRefForm(
+    uiState: SurveyMapUiState,
+    dataCollection: DataCollectionUiState,
+    form: FormPreviewItem,
+    pendingIds: Set<String>,
+  ): SurveyMap =
     entityRefForm(
-      uiState = state.surveyMapUiState,
-      entities = state.allDatasetEntitiesForForm(form),
-      selectedEntityId = state.activeDataCollectionEntityId,
-      pendingIds = state.pendingUploadEntityIds,
+      uiState = uiState,
+      entities = dataCollection.allDatasetEntitiesForForm(form),
+      selectedEntityId = dataCollection.activeDataCollectionEntityId,
+      pendingIds = pendingIds,
     )
 
   /** The map in a form's entity-reference step, showing the form's candidate [entities]. */
@@ -249,12 +280,31 @@ internal object SurveyMapContent {
       imagerySources = uiState.enabledImagerySources,
     )
 
-  /** The map behind a GeoPoint question. */
+  /** The map behind a GeoPoint question, built from the app shell. */
   fun geoPointForm(state: PrototypeAppState, isFollowingUser: Boolean): SurveyMap =
     geoPointForm(
       uiState = state.surveyMapUiState,
-      selectedEntityId = state.activeDataCollectionEntityId,
+      dataCollection = state.dataCollectionUiState,
       pendingIds = state.pendingUploadEntityIds,
+      isFollowingUser = isFollowingUser,
+    )
+
+  /**
+   * The map behind a GeoPoint question, highlighting the open form's target feature from its
+   * [dataCollection] state.
+   *
+   * @param pendingIds entities with pending uploads, drawn in the pending style.
+   */
+  fun geoPointForm(
+    uiState: SurveyMapUiState,
+    dataCollection: DataCollectionUiState,
+    pendingIds: Set<String>,
+    isFollowingUser: Boolean,
+  ): SurveyMap =
+    geoPointForm(
+      uiState = uiState,
+      selectedEntityId = dataCollection.activeDataCollectionEntityId,
+      pendingIds = pendingIds,
       isFollowingUser = isFollowingUser,
     )
 

@@ -79,7 +79,11 @@ import org.jetbrains.compose.resources.stringResource
  */
 @Composable
 fun MobileScreenHost(state: PrototypeAppState) {
-  if (state.isDataCollectionFormOpen && state.activeFormWizardController != null) {
+  val dataCollectionUiState = state.dataCollectionUiState
+  if (
+    dataCollectionUiState.isDataCollectionFormOpen &&
+      dataCollectionUiState.activeFormWizardController != null
+  ) {
     DataCollectionFormScreen(state)
     return
   }

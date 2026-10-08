@@ -89,7 +89,9 @@ import org.groundplatform.v2.core.forms.ui.GroundModalBottomSheetOverlay
 import org.groundplatform.v2.core.forms.ui.GroundTonalBadge
 import org.groundplatform.v2.devtools.prototypeapp.map.framingInsets
 import org.groundplatform.v2.devtools.prototypeapp.map.rememberSurveyMapCamera
+import org.groundplatform.v2.devtools.prototypeapp.ui.state.DataCollectionUiState
 import org.groundplatform.v2.devtools.prototypeapp.ui.state.SurveyMapUiState
+import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.DataCollectionActions
 import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.SurveyMapActions
 
 /**
@@ -119,8 +121,9 @@ import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.SurveyMapActions
 fun MainSurveyScreen(state: PrototypeAppState) {
   val isMapShowing = state.activeDrawerSubView == MainDrawerSubView.NONE
   val surfaceColor = if (isMapShowing) Color.Transparent else MaterialTheme.colorScheme.surface
-  val activeQrEntity = state.activeQrCodeEntity
-  val activePdfSheet = state.activeSharedPdfSheet
+  val dataCollectionUiState = state.dataCollectionUiState
+  val activeQrEntity = dataCollectionUiState.activeQrCodeEntity
+  val activePdfSheet = dataCollectionUiState.activeSharedPdfSheet
 
   Box(modifier = Modifier.fillMaxSize().background(surfaceColor)) {
     Column(modifier = Modifier.fillMaxSize()) {
@@ -149,8 +152,8 @@ fun MainSurveyScreen(state: PrototypeAppState) {
     }
 
     // Available Forms Modal Bottom Sheet (triggered by the bottom-centered FAB)
-    if (state.isAvailableFormsSheetOpen) {
-      AvailableFormsModalSheet(state = state)
+    if (dataCollectionUiState.isAvailableFormsSheetOpen) {
+      AvailableFormsModalSheet(uiState = dataCollectionUiState, actions = state.dataCollection)
     }
 
     // Slide-over Hamburger Navigation Drawer Overlay
@@ -160,15 +163,23 @@ fun MainSurveyScreen(state: PrototypeAppState) {
 
     // Scannable Entity GeoID QR Code Modal Overlay
     if (activeQrEntity != null) {
-      EntityQrCodeModalDialog(state = state, entity = activeQrEntity)
+      EntityQrCodeModalDialog(actions = state.dataCollection, entity = activeQrEntity)
     }
 
     // Share PDF to Preferred App Modal Overlay (for both Entities and Submissions)
     if (activePdfSheet != null) {
-      SharePdfToAppModalDialog(state = state, sheet = activePdfSheet)
+      SharePdfToAppModalDialog(
+        uiState = state.dataCollectionUiState,
+        actions = state.dataCollection,
+        sheet = activePdfSheet,
+      )
     }
 
-    PdfExportMessageSnackbar(state = state, modifier = Modifier.align(Alignment.BottomCenter))
+    PdfExportMessageSnackbar(
+      uiState = state.dataCollectionUiState,
+      actions = state.dataCollection,
+      modifier = Modifier.align(Alignment.BottomCenter),
+    )
   }
 }
 
@@ -294,7 +305,7 @@ internal fun SurveyMapView(state: PrototypeAppState) {
     // With a map feature selected, the sheet peeks at about half the screen: enough to show the
     // feature's details while the map above frames the feature itself.
     val peekHeight =
-      if (selectedEntity != null || state.selectedSubmission != null) {
+      if (selectedEntity != null || state.dataCollectionUiState.selectedSubmission != null) {
         (maxHeight * 0.45f).coerceAtLeast(152.dp)
       } else {
         122.dp
@@ -339,7 +350,15 @@ internal fun SurveyMapView(state: PrototypeAppState) {
     ) {
       BoxWithConstraints(modifier = Modifier.fillMaxSize().background(Color.Transparent)) {
         // Survey map: native basemap and feature layers with Compose markers on top.
-        SurveyMainMap(state = state, camera = mapCamera, modifier = Modifier.fillMaxSize())
+        SurveyMainMap(
+          uiState = uiState,
+          actions = actions,
+          dataCollection = state.dataCollectionUiState,
+          formMap = state.dataCollection,
+          pendingIds = state.pendingUploadEntityIds,
+          camera = mapCamera,
+          modifier = Modifier.fillMaxSize(),
+        )
 
         // 3. Top Map Overlay: Docked Navigation HUD Banner (flush with toolbar) + Floating Map
         // Chips
@@ -436,7 +455,7 @@ internal fun SurveyMapView(state: PrototypeAppState) {
             modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = peekHeight + 10.dp),
             contentAlignment = Alignment.Center,
           ) {
-            DataCollectionFormsFab(state = state)
+            DataCollectionFormsFab(actions = state.dataCollection, isDarkTheme = state.isDarkTheme)
           }
         }
       }
@@ -641,25 +660,30 @@ private fun contentColorOnArgb(argb: Long): Color {
 
 /**
  * Floating Action Button (`FloatingActionButton`) on the Main Survey screen that opens the
- * [AvailableFormsModalSheet] list of available forms to start data collection without requiring a
- * geospatial entity to be pre-selected from the map.
+ * [AvailableFormsModalSheet] list of available forms
+ * ([DataCollectionActions.openAvailableFormsSheet]) to start data collection without requiring a
+ * geospatial entity to be pre-selected from the map. [isDarkTheme] picks the FAB's colors.
  */
 @Composable
-internal fun DataCollectionFormsFab(state: PrototypeAppState, modifier: Modifier = Modifier) {
+internal fun DataCollectionFormsFab(
+  actions: DataCollectionActions,
+  isDarkTheme: Boolean,
+  modifier: Modifier = Modifier,
+) {
   val formsBg =
-    if (state.isDarkTheme) {
+    if (isDarkTheme) {
       MaterialTheme.colorScheme.primary
     } else {
       MaterialTheme.colorScheme.primaryContainer
     }
   val formsContent =
-    if (state.isDarkTheme) {
+    if (isDarkTheme) {
       MaterialTheme.colorScheme.onPrimary
     } else {
       MaterialTheme.colorScheme.onPrimaryContainer
     }
   FloatingActionButton(
-    onClick = { state.openAvailableFormsSheet() },
+    onClick = { actions.openAvailableFormsSheet() },
     modifier = modifier,
     containerColor = formsBg,
     contentColor = formsContent,
@@ -670,13 +694,16 @@ internal fun DataCollectionFormsFab(state: PrototypeAppState, modifier: Modifier
 
 /**
  * Modal bottom sheet opened by the bottom-centered [DataCollectionFormsFab] listing all available
- * forms in the active survey. Selecting a form launches data collection via
- * [PrototypeAppState.launchFormFromFab], which presents the Map or List entity selector at the step
- * in the data collection process where an `entityref` is required.
+ * forms in the active survey ([DataCollectionUiState.mobileForms]). Selecting a form launches data
+ * collection via [DataCollectionActions.launchFormFromFab], which presents the Map or List entity
+ * selector at the step in the data collection process where an `entityref` is required.
  */
 @Composable
-internal fun AvailableFormsModalSheet(state: PrototypeAppState) {
-  GroundModalBottomSheetOverlay(onDismissRequest = { state.closeAvailableFormsSheet() }) {
+internal fun AvailableFormsModalSheet(
+  uiState: DataCollectionUiState,
+  actions: DataCollectionActions,
+) {
+  GroundModalBottomSheetOverlay(onDismissRequest = { actions.closeAvailableFormsSheet() }) {
     Column(
       modifier =
         Modifier.fillMaxWidth()
@@ -701,19 +728,19 @@ internal fun AvailableFormsModalSheet(state: PrototypeAppState) {
             color = MaterialTheme.colorScheme.onSurfaceVariant,
           )
         }
-        IconButton(onClick = { state.closeAvailableFormsSheet() }) {
+        IconButton(onClick = { actions.closeAvailableFormsSheet() }) {
           Icon(imageVector = Icons.Outlined.Close, contentDescription = "Close Available Forms")
         }
       }
 
       HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
-      state.mobileForms.forEach { form ->
-        val eligibleCount = state.eligibleEntitiesForForm(form).size
+      uiState.mobileForms.forEach { form ->
+        val eligibleCount = uiState.eligibleEntitiesForForm(form).size
         val canLaunch = !form.requiresEntity || eligibleCount > 0
 
         OutlinedCard(
-          onClick = { if (canLaunch) state.launchFormFromFab(form.id) },
+          onClick = { if (canLaunch) actions.launchFormFromFab(form.id) },
           enabled = canLaunch,
           modifier = Modifier.fillMaxWidth(),
           shape = MaterialTheme.shapes.medium,
@@ -752,7 +779,7 @@ internal fun AvailableFormsModalSheet(state: PrototypeAppState) {
             )
 
             Button(
-              onClick = { state.launchFormFromFab(form.id) },
+              onClick = { actions.launchFormFromFab(form.id) },
               enabled = canLaunch,
               modifier = Modifier.align(Alignment.End),
             ) {

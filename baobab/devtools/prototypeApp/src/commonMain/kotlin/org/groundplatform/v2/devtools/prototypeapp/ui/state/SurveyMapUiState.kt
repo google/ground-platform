@@ -147,13 +147,7 @@ data class SurveyMapUiState(
 
   /** Formatted horizontal GNSS accuracy (`±2.1 m` or `±6.8 ft`). */
   val gnssAccuracyFormatted: String
-    get() =
-      if (unitSystem == MeasurementUnitSystem.METRIC) {
-        "±$gnssAccuracyMeters m"
-      } else {
-        val feet = ((gnssAccuracyMeters * 3.28084) * 10.0).toInt() / 10.0
-        "±$feet ft"
-      }
+    get() = unitSystem.formatGnssAccuracy(gnssAccuracyMeters)
 
   /** GPS accuracy badge shown on the chip over the map. */
   val gnssStatusChipLabel: String

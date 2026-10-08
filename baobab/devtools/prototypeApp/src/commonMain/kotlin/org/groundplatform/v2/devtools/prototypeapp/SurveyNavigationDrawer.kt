@@ -99,8 +99,10 @@ import org.groundplatform.v2.core.forms.ui.GroundModalBottomSheetOverlay
 import org.groundplatform.v2.core.forms.ui.GroundTonalBadge
 import org.groundplatform.v2.core.forms.ui.LocalGroundBrandFontFamily
 import org.groundplatform.v2.devtools.prototypeapp.ui.state.DashboardUiState
+import org.groundplatform.v2.devtools.prototypeapp.ui.state.DataCollectionUiState
 import org.groundplatform.v2.devtools.prototypeapp.ui.state.SettingsUiState
 import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.DashboardActions
+import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.DataCollectionActions
 import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.SettingsActions
 
 /**
@@ -391,7 +393,7 @@ internal fun UploadsMutationsSubScreen(state: PrototypeAppState) {
     actions = state.dashboard,
     onBack = { state.closeDrawerSubView() },
     onOpenSubmission = { submissionId ->
-      state.selectSubmissionDetail(submissionId)
+      state.dataCollection.selectSubmissionDetail(submissionId)
       state.closeDrawerSubView()
     },
     onOpenEntity = { entityId ->
@@ -909,16 +911,17 @@ internal fun SwitchDownloadedSurveysSubScreen(state: PrototypeAppState) {
 /**
  * Modal dialog displaying a scannable QR Code for a survey location (`Icons.Outlined.QrCode`),
  * allowing offline field verification and rapid lookup of the location's `GeoID`. Its PDF action is
- * `Share PDF` on mobile and a direct `Download PDF` on the web dashboard ([isWeb]).
+ * `Share PDF` on mobile and a direct `Download PDF` on the web dashboard ([isWeb]). Closing the
+ * dialog and the PDF action go to [actions].
  */
 @Composable
 internal fun EntityQrCodeModalDialog(
-  state: PrototypeAppState,
+  actions: DataCollectionActions,
   entity: GeospatialEntityItem,
   isWeb: Boolean = false,
 ) {
   GroundAlertDialogOverlay(
-    onDismissRequest = { state.closeEntityQrCode() },
+    onDismissRequest = { actions.closeEntityQrCode() },
     icon = {
       Icon(
         imageVector = Icons.Outlined.QrCode,
@@ -985,8 +988,8 @@ internal fun EntityQrCodeModalDialog(
     confirmButton = {
       Button(
         onClick = {
-          state.closeEntityQrCode()
-          if (isWeb) state.downloadEntityPdf(entity.id) else state.shareEntityPdf(entity.id)
+          actions.closeEntityQrCode()
+          if (isWeb) actions.downloadEntityPdf(entity.id) else actions.shareEntityPdf(entity.id)
         }
       ) {
         Icon(
@@ -998,20 +1001,25 @@ internal fun EntityQrCodeModalDialog(
         Text(if (isWeb) "Download PDF" else "Share PDF")
       }
     },
-    dismissButton = { TextButton(onClick = { state.closeEntityQrCode() }) { Text("Close") } },
+    dismissButton = { TextButton(onClick = { actions.closeEntityQrCode() }) { Text("Close") } },
   )
 }
 
 /**
  * Modal bottom sheet for a PDF report of a map feature or a submission
- * (`state.activeSharedPdfSheet`), generated on the device so it works offline. **Share** opens the
- * system share sheet (WhatsApp, Gmail, Drive, Bluetooth, ...) where the platform supports sharing
- * files; **Download** saves the file; tapping the file card previews it.
+ * ([DataCollectionUiState.activeSharedPdfSheet]), generated on the device so it works offline.
+ * **Share** opens the system share sheet (WhatsApp, Gmail, Drive, Bluetooth, ...) where the
+ * platform supports sharing files ([DataCollectionUiState.canSharePdfFiles]); **Download** saves
+ * the file; tapping the file card previews it. All actions go to [actions].
  */
 @Composable
-internal fun SharePdfToAppModalDialog(state: PrototypeAppState, sheet: SharedPdfSheetState) {
-  val canShare = state.canSharePdfFiles
-  GroundModalBottomSheetOverlay(onDismissRequest = { state.closeSharePdfSheet() }) {
+internal fun SharePdfToAppModalDialog(
+  uiState: DataCollectionUiState,
+  actions: DataCollectionActions,
+  sheet: SharedPdfSheetState,
+) {
+  val canShare = uiState.canSharePdfFiles
+  GroundModalBottomSheetOverlay(onDismissRequest = { actions.closeSharePdfSheet() }) {
     Column(
       modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp).padding(bottom = 24.dp),
       verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -1026,14 +1034,14 @@ internal fun SharePdfToAppModalDialog(state: PrototypeAppState, sheet: SharedPdf
           style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
           color = MaterialTheme.colorScheme.onSurface,
         )
-        IconButton(onClick = { state.closeSharePdfSheet() }) {
+        IconButton(onClick = { actions.closeSharePdfSheet() }) {
           Icon(imageVector = Icons.Outlined.Close, contentDescription = "Close")
         }
       }
 
       // The generated file. Tap to preview it.
       OutlinedCard(
-        onClick = { state.previewActivePdf() },
+        onClick = { actions.previewActivePdf() },
         modifier = Modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.medium,
       ) {
@@ -1095,7 +1103,7 @@ internal fun SharePdfToAppModalDialog(state: PrototypeAppState, sheet: SharedPdf
 
       if (canShare) {
         Button(
-          onClick = { state.shareActivePdf() },
+          onClick = { actions.shareActivePdf() },
           modifier = Modifier.fillMaxWidth(),
           shape = MaterialTheme.shapes.medium,
         ) {
@@ -1108,7 +1116,7 @@ internal fun SharePdfToAppModalDialog(state: PrototypeAppState, sheet: SharedPdf
           Text("Share")
         }
         OutlinedButton(
-          onClick = { state.saveActivePdf() },
+          onClick = { actions.saveActivePdf() },
           modifier = Modifier.fillMaxWidth(),
           shape = MaterialTheme.shapes.medium,
         ) {
@@ -1122,7 +1130,7 @@ internal fun SharePdfToAppModalDialog(state: PrototypeAppState, sheet: SharedPdf
         }
       } else {
         Button(
-          onClick = { state.saveActivePdf() },
+          onClick = { actions.saveActivePdf() },
           modifier = Modifier.fillMaxWidth(),
           shape = MaterialTheme.shapes.medium,
         ) {
@@ -1140,19 +1148,23 @@ internal fun SharePdfToAppModalDialog(state: PrototypeAppState, sheet: SharedPdf
 }
 
 /**
- * Confirmation or error after a PDF action (`state.pdfExportMessage`), shown as a snackbar that
- * dismisses itself after a few seconds.
+ * Confirmation or error after a PDF action ([DataCollectionUiState.pdfExportMessage]), shown as a
+ * snackbar that dismisses itself after a few seconds (through [actions]).
  */
 @Composable
-internal fun PdfExportMessageSnackbar(state: PrototypeAppState, modifier: Modifier = Modifier) {
-  val message = state.pdfExportMessage ?: return
+internal fun PdfExportMessageSnackbar(
+  uiState: DataCollectionUiState,
+  actions: DataCollectionActions,
+  modifier: Modifier = Modifier,
+) {
+  val message = uiState.pdfExportMessage ?: return
   LaunchedEffect(message) {
     delay(4_000)
-    state.dismissPdfExportMessage()
+    actions.dismissPdfExportMessage()
   }
   Snackbar(
     modifier = modifier.padding(16.dp),
-    action = { TextButton(onClick = { state.dismissPdfExportMessage() }) { Text("OK") } },
+    action = { TextButton(onClick = { actions.dismissPdfExportMessage() }) { Text("OK") } },
   ) {
     Text(text = message, maxLines = 2, overflow = TextOverflow.Ellipsis)
   }

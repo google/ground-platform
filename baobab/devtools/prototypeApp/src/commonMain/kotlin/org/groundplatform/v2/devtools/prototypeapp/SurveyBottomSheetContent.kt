@@ -116,8 +116,10 @@ internal fun SurveyPersistentBottomSheetContent(
   modifier: Modifier = Modifier,
   isSidePanel: Boolean = false,
 ) {
-  val selectedEntity = state.selectedEntity
-  val selectedSubmission = state.selectedSubmission
+  val dataCollectionUiState = state.dataCollectionUiState
+  val dataCollection = state.dataCollection
+  val selectedEntity = dataCollectionUiState.selectedEntity
+  val selectedSubmission = dataCollectionUiState.selectedSubmission
   val isDark = state.isDarkTheme
   val textColor = MaterialTheme.colorScheme.onSurface
 
@@ -143,12 +145,12 @@ internal fun SurveyPersistentBottomSheetContent(
           isDark = isDark,
           textColor = textColor,
           backLabel = "Back to Searchable List",
-          onBack = { state.returnToBottomSheetList() },
+          onBack = { dataCollection.returnToBottomSheetList() },
           onSharePdf = {
             if (isSidePanel) {
-              state.downloadSubmissionPdf(selectedSubmission.id)
+              dataCollection.downloadSubmissionPdf(selectedSubmission.id)
             } else {
-              state.shareSubmissionPdf(selectedSubmission.id)
+              dataCollection.shareSubmissionPdf(selectedSubmission.id)
             }
           },
           isSidePanel = isSidePanel,
@@ -779,7 +781,7 @@ internal fun BottomSheetSearchableListContent(
                   displayedFeatures.forEach { entity ->
                     EntityListRow(
                       entity = entity,
-                      isSelected = entity.id == state.selectedEntityId,
+                      isSelected = entity.id == state.dataCollectionUiState.selectedEntityId,
                       onClick = { state.selectEntityFromList(entity.id) },
                       compact = isSidePanel,
                       compactHeight = SidePanelListRowHeight,

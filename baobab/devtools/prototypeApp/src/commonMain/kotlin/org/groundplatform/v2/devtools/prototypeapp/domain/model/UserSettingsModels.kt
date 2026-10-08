@@ -26,7 +26,16 @@ enum class MeasurementUnitSystem(
   val distanceUnit: String,
 ) {
   METRIC("Metric (ha, m)", "Metric", "ha", "m"),
-  IMPERIAL("Imperial (acres, ft)", "Imperial", "acres", "ft"),
+  IMPERIAL("Imperial (acres, ft)", "Imperial", "acres", "ft");
+
+  /** Formats a horizontal GNSS accuracy of [meters] in this unit system (`±2.1 m` or `±6.8 ft`). */
+  fun formatGnssAccuracy(meters: Double): String =
+    if (this == METRIC) {
+      "±$meters m"
+    } else {
+      val feet = ((meters * 3.28084) * 10.0).toInt() / 10.0
+      "±$feet ft"
+    }
 }
 
 /**

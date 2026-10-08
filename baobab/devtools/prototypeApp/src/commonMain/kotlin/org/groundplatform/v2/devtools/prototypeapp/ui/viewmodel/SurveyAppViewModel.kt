@@ -71,6 +71,7 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.GenerateProtot
 import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.GenerateSamplePlotsUseCase
 import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.InviteCollaboratorUseCase
 import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.InviteOrganizationMemberUseCase
+import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.LaunchFormUseCase
 import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.ManageImagerySourcesUseCase
 import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.ResolveFormDefForLaunchUseCase
 import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.SearchPlacesUseCase
@@ -131,6 +132,7 @@ class SurveyAppViewModel(
   val transactionRunner: TransactionRunner = LocalStoreTransactionRunner(localStore),
   val resolveFormDefForLaunchUseCase: ResolveFormDefForLaunchUseCase =
     ResolveFormDefForLaunchUseCase(),
+  val launchFormUseCase: LaunchFormUseCase = LaunchFormUseCase(resolveFormDefForLaunchUseCase),
   val completeFormSubmissionUseCase: CompleteFormSubmissionUseCase =
     CompleteFormSubmissionUseCase(
       surveyRepository = surveyRepository,

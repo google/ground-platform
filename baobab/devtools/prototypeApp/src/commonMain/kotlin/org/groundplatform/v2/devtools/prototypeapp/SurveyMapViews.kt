@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import kotlin.math.abs
 import org.groundplatform.v2.core.forms.ui.GeoPointMapViewportState
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.PlaceFraming
+import org.groundplatform.v2.devtools.prototypeapp.map.EntityGeometry
 import org.groundplatform.v2.devtools.prototypeapp.map.SurveyMap
 import org.groundplatform.v2.devtools.prototypeapp.map.SurveyMapCameraController
 import org.groundplatform.v2.devtools.prototypeapp.map.SurveyMapContent
@@ -30,7 +31,10 @@ import org.groundplatform.v2.devtools.prototypeapp.map.SurveyMapIds
 import org.groundplatform.v2.devtools.prototypeapp.map.SurveyMarkerView
 import org.groundplatform.v2.devtools.prototypeapp.map.framingInsets
 import org.groundplatform.v2.devtools.prototypeapp.map.rememberSurveyMapCamera
+import org.groundplatform.v2.devtools.prototypeapp.ui.state.DataCollectionUiState
 import org.groundplatform.v2.devtools.prototypeapp.ui.state.SurveyMapUiState
+import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.DataCollectionActions
+import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.FormMapInteraction
 import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.SurveyMapActions
 import org.groundplatform.v2.map.CameraPosition
 import org.groundplatform.v2.map.GroundMap
@@ -42,13 +46,8 @@ import org.groundplatform.v2.map.MapInsets
 private val PlaceFocusPadding = MapInsets(left = 40.dp, top = 68.dp, right = 40.dp, bottom = 108.dp)
 
 /**
- * The main survey map (mobile map view and web dashboard): the visible map features, clusters,
- * navigation, GPS location, and a place picked from search.
- *
- * [camera] is hoisted so screens can frame selections with it. When [collapseSheetOnBackgroundTap]
- * is `true` (mobile bottom sheet host), tapping the empty map first collapses an expanded sheet
- * before clearing the selection. Hosts without a bottom sheet (the web dashboard) pass `false` so a
- * background tap clears the selection immediately.
+ * The main survey map (mobile map view and web dashboard) built from the app shell; see the
+ * overload taking the map viewport's and data collection's state.
  */
 @Composable
 internal fun SurveyMainMap(
@@ -62,19 +61,64 @@ internal fun SurveyMainMap(
   SurveyMainMap(
     uiState = uiState,
     actions = state.surveyMap,
-    map = SurveyMapContent.main(state, showNavigationOverlay),
+    dataCollection = state.dataCollectionUiState,
+    formMap = state.dataCollection,
+    pendingIds = state.pendingUploadEntityIds,
+    camera = camera,
+    modifier = modifier,
+    collapseSheetOnBackgroundTap = collapseSheetOnBackgroundTap,
+    showNavigationOverlay = showNavigationOverlay,
+  )
+}
+
+/**
+ * The main survey map (mobile map view and web dashboard): the visible map features, clusters,
+ * navigation, GPS location, a place picked from search, and (web dashboard) the open form's
+ * geometry answers and the geometry being drawn, from [dataCollection].
+ *
+ * [camera] is hoisted so screens can frame selections with it. When [collapseSheetOnBackgroundTap]
+ * is `true` (mobile bottom sheet host), tapping the empty map first collapses an expanded sheet
+ * before clearing the selection. Hosts without a bottom sheet (the web dashboard) pass `false` so a
+ * background tap clears the selection immediately.
+ *
+ * @param formMap the open form's hooks: map clicks become vertices while drawing, and tapping a
+ *   geometry answer focuses its question.
+ * @param pendingIds entities with pending uploads, drawn in the pending style.
+ */
+@Composable
+internal fun SurveyMainMap(
+  uiState: SurveyMapUiState,
+  actions: SurveyMapActions,
+  dataCollection: DataCollectionUiState,
+  formMap: FormMapInteraction,
+  pendingIds: Set<String>,
+  camera: SurveyMapCameraController,
+  modifier: Modifier = Modifier,
+  collapseSheetOnBackgroundTap: Boolean = true,
+  showNavigationOverlay: Boolean = true,
+) {
+  SurveyMainMap(
+    uiState = uiState,
+    actions = actions,
+    map =
+      SurveyMapContent.main(
+        uiState = uiState,
+        dataCollection = dataCollection,
+        pendingIds = pendingIds,
+        showNavigation = showNavigationOverlay,
+      ),
     camera = camera,
     modifier = modifier,
     collapseSheetOnBackgroundTap = collapseSheetOnBackgroundTap,
     onDrawingTap =
-      if (state.webMapDrawing.isDrawing) {
-        { at -> state.addWebMapDrawingVertex(at) }
+      if (dataCollection.isWebMapDrawing) {
+        { at -> formMap.addWebMapDrawingVertex(at) }
       } else {
         null
       },
     onFormGeometryTap =
-      if (state.isDataCollectionFormOpen) {
-        { path -> state.focusWebFormQuestion(path) }
+      if (dataCollection.isDataCollectionFormOpen) {
+        { path -> formMap.focusWebFormQuestion(path) }
       } else {
         null
       },
@@ -145,46 +189,106 @@ internal fun SurveyMainMap(
   }
 }
 
-/** The map behind a form's GeoPoint question, following the question's pan and zoom. */
+/** The map behind a form's GeoPoint question, built from the app shell. */
 @Composable
 internal fun GeoPointFormMap(
   state: PrototypeAppState,
   viewportState: GeoPointMapViewportState,
   modifier: Modifier = Modifier,
 ) {
+  GeoPointFormMap(
+    mapUiState = state.surveyMapUiState,
+    uiState = state.dataCollectionUiState,
+    pendingIds = state.pendingUploadEntityIds,
+    viewportState = viewportState,
+    modifier = modifier,
+  )
+}
+
+/**
+ * The map behind a form's GeoPoint question, following the question's pan and zoom. The camera
+ * starts at the collector's GPS location from [mapUiState]; the open form's target feature from
+ * [uiState] is highlighted.
+ *
+ * @param pendingIds entities with pending uploads, drawn in the pending style.
+ */
+@Composable
+internal fun GeoPointFormMap(
+  mapUiState: SurveyMapUiState,
+  uiState: DataCollectionUiState,
+  pendingIds: Set<String>,
+  viewportState: GeoPointMapViewportState,
+  modifier: Modifier = Modifier,
+) {
   val viewport by rememberUpdatedState(viewportState)
   val camera =
     rememberSurveyMapCamera(
-      desired = { geoPointCamera(state, viewport) },
-      onSettled = { writeBackGeoPointCamera(state, viewport, it) },
+      desired = { geoPointCamera(mapUiState, viewport) },
+      onSettled = { writeBackGeoPointCamera(mapUiState, viewport, it) },
     )
   SurveyGroundMap(
-    map = SurveyMapContent.geoPointForm(state, isFollowingUser = !viewportState.isPanned),
+    map =
+      SurveyMapContent.geoPointForm(
+        uiState = mapUiState,
+        dataCollection = uiState,
+        pendingIds = pendingIds,
+        isFollowingUser = !viewportState.isPanned,
+      ),
     camera = camera,
     modifier = modifier,
   ) { _, _ ->
   }
 }
 
-/**
- * The map in a form's entity-reference step; tapping a candidate selects it. The selected map
- * feature (preselected when the form opens, or picked on the map or from the list) is fitted into
- * the map, the same way the main map frames a selection. Clearing the selection leaves the camera
- * where it is.
- */
+/** The map in a form's `entityref` step, built from the app shell. */
 @Composable
 internal fun EntityRefFormMap(
   state: PrototypeAppState,
   form: FormPreviewItem,
   modifier: Modifier = Modifier,
 ) {
+  EntityRefFormMap(
+    mapUiState = state.surveyMapUiState,
+    mapActions = state.surveyMap,
+    uiState = state.dataCollectionUiState,
+    actions = state.dataCollection,
+    form = form,
+    pendingIds = state.pendingUploadEntityIds,
+    modifier = modifier,
+  )
+}
+
+/**
+ * The map in a form's `entityref` step, showing [form]'s candidate map features; tapping a
+ * candidate picks it ([DataCollectionActions.selectEntityRefForActiveForm]). The open form's target
+ * feature (preselected when the form opens, or picked on the map or from the list) is fitted into
+ * the map, the same way the main map frames a selection. Clearing the selection leaves the camera
+ * where it is.
+ *
+ * The camera follows the map viewport ([mapUiState], [mapActions]) like the main map.
+ *
+ * @param pendingIds entities with pending uploads, drawn in the pending style.
+ */
+@Composable
+internal fun EntityRefFormMap(
+  mapUiState: SurveyMapUiState,
+  mapActions: SurveyMapActions,
+  uiState: DataCollectionUiState,
+  actions: DataCollectionActions,
+  form: FormPreviewItem,
+  pendingIds: Set<String>,
+  modifier: Modifier = Modifier,
+) {
   val camera =
-    rememberSurveyMapCamera(desired = state::desiredMapCamera, onSettled = state::syncMapCamera)
-  val selected = state.activeDataCollectionEntity
-  LaunchedEffect(selected?.id, state.entityRefFramingEpoch) {
+    rememberSurveyMapCamera(
+      desired = mapActions::desiredMapCamera,
+      onSettled = mapActions::syncMapCamera,
+    )
+  val selected = uiState.activeDataCollectionEntity
+  LaunchedEffect(selected?.id, uiState.entityRefFramingEpoch) {
     val entity = selected ?: return@LaunchedEffect
     if (!entity.hasGeometry) return@LaunchedEffect
-    val bounds = state.resolveEntityLngLatBounds(entity)
+    val bounds = EntityGeometry.bounds(entity, mapUiState.anchor)
     camera.run {
       it.fitBounds(
         bounds,
@@ -194,11 +298,17 @@ internal fun EntityRefFormMap(
     }
   }
   SurveyGroundMap(
-    map = SurveyMapContent.entityRefForm(state, form),
+    map =
+      SurveyMapContent.entityRefForm(
+        uiState = mapUiState,
+        dataCollection = uiState,
+        form = form,
+        pendingIds = pendingIds,
+      ),
     camera = camera,
     modifier = modifier,
   ) { tappedId, _ ->
-    tappedId?.let(SurveyMapIds::entityIdOf)?.let(state::selectEntityRefForActiveForm)
+    tappedId?.let(SurveyMapIds::entityIdOf)?.let(actions::selectEntityRefForActiveForm)
   }
 }
 
@@ -235,10 +345,10 @@ private fun SurveyGroundMap(
  * degrees), at the question's zoom.
  */
 private fun geoPointCamera(
-  state: PrototypeAppState,
+  mapUiState: SurveyMapUiState,
   viewport: GeoPointMapViewportState,
 ): CameraPosition {
-  val gps = gpsLatLng(state)
+  val gps = gpsLatLng(mapUiState)
   return CameraPosition(
     center = LatLng(gps.latitude + viewport.panOffsetLat, gps.longitude + viewport.panOffsetLon),
     zoom = viewport.zoomLevel.toDouble(),
@@ -250,11 +360,11 @@ private fun geoPointCamera(
  * callback takes pixel deltas; passing a 1×1 viewport makes them fractions of its span.
  */
 private fun writeBackGeoPointCamera(
-  state: PrototypeAppState,
+  mapUiState: SurveyMapUiState,
   viewport: GeoPointMapViewportState,
   camera: CameraPosition,
 ) {
-  val expected = geoPointCamera(state, viewport)
+  val expected = geoPointCamera(mapUiState, viewport)
   val dLat = camera.center.latitude - expected.center.latitude
   val dLon = camera.center.longitude - expected.center.longitude
   if (viewport.panAllowed && (abs(dLat) > 1e-7 || abs(dLon) > 1e-7)) {
@@ -271,5 +381,9 @@ private fun writeBackGeoPointCamera(
   if (abs(dZoom) > 0.01) viewport.onZoomDelta(dZoom.toFloat())
 }
 
-private fun gpsLatLng(state: PrototypeAppState): LatLng =
-  state.mapAnchor.toLatLng(state.userGpsNormalizedX.toDouble(), state.userGpsNormalizedY.toDouble())
+/** The collector's GPS location on the map viewport's survey anchor. */
+private fun gpsLatLng(mapUiState: SurveyMapUiState): LatLng =
+  mapUiState.anchor.toLatLng(
+    mapUiState.userGpsNormalizedX.toDouble(),
+    mapUiState.userGpsNormalizedY.toDouble(),
+  )

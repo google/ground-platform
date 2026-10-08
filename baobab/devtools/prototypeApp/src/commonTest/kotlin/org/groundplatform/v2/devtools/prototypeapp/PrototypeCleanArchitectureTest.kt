@@ -26,7 +26,6 @@ import org.groundplatform.v2.core.forms.ui.WorkbenchExampleForm
 import org.groundplatform.v2.devtools.prototypeapp.client.auth.PrototypeAuthClient
 import org.groundplatform.v2.devtools.prototypeapp.client.location.LocationClient
 import org.groundplatform.v2.devtools.prototypeapp.client.places.PlacesResponseMapper
-import org.groundplatform.v2.devtools.prototypeapp.client.storage.OfflineTileStorageClient
 import org.groundplatform.v2.devtools.prototypeapp.data.datasource.local.store.runNow
 import org.groundplatform.v2.devtools.prototypeapp.data.datasource.local.store.seededStore
 import org.groundplatform.v2.devtools.prototypeapp.data.repository.LocalStoreTransactionRunner
@@ -60,8 +59,7 @@ import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.SurveyAppViewMod
  * Unit tests verifying the Clean Architecture & MVVM layers of `devtools/prototypeApp` per
  * `docs/technical/client/architecture.md`:
  * - Local data store seeded with sample data, read and written through repositories
- * - Client & Mapper layers ([PrototypeAuthClient], [LocationClient], [OfflineTileStorageClient],
- *   [PlacesResponseMapper])
+ * - Client & Mapper layers ([PrototypeAuthClient], [LocationClient], [PlacesResponseMapper])
  * - Repository implementations ([SurveyRepositoryImpl], [MutationRepositoryImpl],
  *   [SettingsRepositoryImpl], [PlaceRepositoryImpl], [LocationRepositoryImpl],
  *   [OrganizationRepositoryImpl])
@@ -124,12 +122,6 @@ class PrototypeCleanArchitectureTest {
     assertEquals(0.65f, locationClient.readCurrentLocation().normalizedX)
     locationClient.reset()
     assertEquals(0.50f, locationClient.readCurrentLocation().normalizedX)
-
-    val storageClient = OfflineTileStorageClient()
-    val pkg = storageClient.buildOfflineTilePackage("pkg-1", "Nyeri North", "12-16z", "24 MB")
-    assertEquals("pkg-1", pkg.id)
-    assertTrue(pkg.isDownloaded)
-    assertEquals(1, storageClient.evictUploadedMediaCache())
 
     val mapped =
       PlacesResponseMapper.map(

@@ -27,6 +27,8 @@ import org.groundplatform.v2.devtools.prototypeapp.map.SurveyMap
 import org.groundplatform.v2.devtools.prototypeapp.map.SurveyMapContent
 import org.groundplatform.v2.devtools.prototypeapp.map.SurveyMapIds
 import org.groundplatform.v2.devtools.prototypeapp.map.SurveyMarker
+import org.groundplatform.v2.devtools.prototypeapp.ui.state.formGeometryBounds
+import org.groundplatform.v2.devtools.prototypeapp.ui.state.maxFramingZoom
 import org.groundplatform.v2.map.LatLng
 import org.groundplatform.v2.map.LngLatBounds
 
