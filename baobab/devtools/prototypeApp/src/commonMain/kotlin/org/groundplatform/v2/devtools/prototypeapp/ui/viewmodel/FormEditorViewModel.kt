@@ -72,6 +72,13 @@ interface FormEditorActions {
 
   fun setAdvancedExpanded(expanded: Boolean)
 
+  /**
+   * Sets the editor's right-hand properties panel width to [widthDp], clamped to
+   * [FormEditorUiState.MIN_SIDE_PANEL_WIDTH_DP]..[FormEditorUiState.MAX_SIDE_PANEL_WIDTH_DP].
+   * Non-finite values are ignored.
+   */
+  fun updateSidePanelWidth(widthDp: Float)
+
   // --- Form ---
 
   fun updateTitle(title: String)
@@ -236,6 +243,7 @@ class FormEditorViewModel(
     val previewSubmitted: Boolean = false,
     val isXmlViewerOpen: Boolean = false,
     val isAdvancedExpanded: Boolean = false,
+    val sidePanelWidthDp: Float = FormEditorUiState.DEFAULT_SIDE_PANEL_WIDTH_DP,
   )
 
   private val session =
@@ -255,6 +263,7 @@ class FormEditorViewModel(
           previewSubmitted = session.previewSubmitted,
           isXmlViewerOpen = session.isXmlViewerOpen,
           isAdvancedExpanded = session.isAdvancedExpanded,
+          sidePanelWidthDp = session.sidePanelWidthDp,
         )
       }
       .stateIn(
@@ -304,6 +313,19 @@ class FormEditorViewModel(
 
   override fun setAdvancedExpanded(expanded: Boolean) {
     session.update { it.copy(isAdvancedExpanded = expanded) }
+  }
+
+  override fun updateSidePanelWidth(widthDp: Float) {
+    if (!widthDp.isFinite()) return
+    session.update {
+      it.copy(
+        sidePanelWidthDp =
+          widthDp.coerceIn(
+            FormEditorUiState.MIN_SIDE_PANEL_WIDTH_DP,
+            FormEditorUiState.MAX_SIDE_PANEL_WIDTH_DP,
+          )
+      )
+    }
   }
 
   // --- Form ---

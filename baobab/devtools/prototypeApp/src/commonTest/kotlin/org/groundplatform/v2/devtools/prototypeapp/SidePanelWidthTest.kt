@@ -19,11 +19,13 @@ import kotlin.test.assertFalse
 import org.groundplatform.v2.devtools.prototypeapp.PrototypeAppState.Companion.DEFAULT_SIDE_PANEL_WIDTH_DP
 import org.groundplatform.v2.devtools.prototypeapp.PrototypeAppState.Companion.MAX_SIDE_PANEL_WIDTH_DP
 import org.groundplatform.v2.devtools.prototypeapp.PrototypeAppState.Companion.MIN_SIDE_PANEL_WIDTH_DP
+import org.groundplatform.v2.devtools.prototypeapp.ui.state.FormEditorUiState
 import org.groundplatform.v2.devtools.prototypeapp.ui.state.SurveyEditorUiState
+import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.formEditorViewModel
 import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.surveyEditorViewModel
 import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.ui
 
-/** Width of the web dashboard's and Survey editor's resizable left-hand panels. */
+/** Width of the web dashboard's, Survey editor's, and Form editor's resizable side panels. */
 class SidePanelWidthTest {
 
   @Test
@@ -109,5 +111,31 @@ class SidePanelWidthTest {
     state.updateSidePanelWidth(Float.NEGATIVE_INFINITY)
     assertEquals(SurveyEditorUiState.MAX_SIDE_PANEL_WIDTH_DP, state.ui.sidePanelWidthDp)
     assertFalse(state.ui.hasUnpublishedChanges)
+  }
+
+  @Test
+  fun formEditorSidePanelWidth_startsAtDefault() {
+    assertEquals(
+      FormEditorUiState.DEFAULT_SIDE_PANEL_WIDTH_DP,
+      formEditorViewModel().ui.sidePanelWidthDp,
+    )
+  }
+
+  @Test
+  fun formEditorUpdateSidePanelWidth_acceptsAndClampsWidth() {
+    val state = formEditorViewModel()
+
+    state.updateSidePanelWidth(480f)
+    assertEquals(480f, state.ui.sidePanelWidthDp)
+
+    state.updateSidePanelWidth(FormEditorUiState.MIN_SIDE_PANEL_WIDTH_DP - 100f)
+    assertEquals(FormEditorUiState.MIN_SIDE_PANEL_WIDTH_DP, state.ui.sidePanelWidthDp)
+
+    state.updateSidePanelWidth(FormEditorUiState.MAX_SIDE_PANEL_WIDTH_DP + 100f)
+    assertEquals(FormEditorUiState.MAX_SIDE_PANEL_WIDTH_DP, state.ui.sidePanelWidthDp)
+
+    state.updateSidePanelWidth(Float.NaN)
+    state.updateSidePanelWidth(Float.NEGATIVE_INFINITY)
+    assertEquals(FormEditorUiState.MAX_SIDE_PANEL_WIDTH_DP, state.ui.sidePanelWidthDp)
   }
 }

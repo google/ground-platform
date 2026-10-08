@@ -268,4 +268,35 @@ class FormEditorClickTest {
     assertEquals(2, state.ui.form.saveTo.status.rules.size)
     runOnIdle { AdvancedDisclosure.expanded = null }
   }
+
+  @Test
+  fun draggingSeparatorResizesRightHandPropertiesPanel() = withEditor { state ->
+    val initialWidth = state.ui.sidePanelWidthDp
+    // Dragging the separator left widens the right-hand panel.
+    onNodeWithContentDescription("Resize side panel").performMouseInput {
+      moveTo(center)
+      press()
+      repeat(5) { moveBy(Offset(-20f, 0f)) }
+      release()
+    }
+    waitForIdle()
+    val widenedWidth = state.ui.sidePanelWidthDp
+    assertTrue(
+      widenedWidth > initialWidth,
+      "Expected dragging left to widen right-hand panel ($initialWidth -> $widenedWidth)",
+    )
+
+    // Dragging the separator right narrows the right-hand panel.
+    onNodeWithContentDescription("Resize side panel").performMouseInput {
+      moveTo(center)
+      press()
+      repeat(5) { moveBy(Offset(20f, 0f)) }
+      release()
+    }
+    waitForIdle()
+    assertTrue(
+      state.ui.sidePanelWidthDp < widenedWidth,
+      "Expected dragging right to narrow right-hand panel ($widenedWidth -> ${state.ui.sidePanelWidthDp})",
+    )
+  }
 }

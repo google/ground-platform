@@ -399,17 +399,21 @@ private fun DashboardSidePanel(state: PrototypeAppState, modifier: Modifier = Mo
 }
 
 /**
- * Separator on the right border of a resizable left-hand side panel, [SidePanelSeparatorWidth]
- * wide, with an M3 [VerticalDragHandle] centered vertically. When [enabled], the whole separator is
- * the drag target: it shows a resize cursor and a darker fill while hovered or dragged, and
- * dragging reports the new width through [onWidthChange], which clamps it. The unclamped drag
- * position is tracked so the border only moves back once the pointer returns past the clamp limit.
+ * Separator on the inner border of a resizable side panel, [SidePanelSeparatorWidth] wide, with an
+ * M3 [VerticalDragHandle] centered vertically. When [enabled], the whole separator is the drag
+ * target: it shows a resize cursor and a darker fill while hovered or dragged, and dragging reports
+ * the new width through [onWidthChange], which clamps it. The unclamped drag position is tracked so
+ * the border only moves back once the pointer returns past the clamp limit.
+ *
+ * When [panelOnRight] is `true`, the separator sits on the left border of a right-hand panel, so
+ * dragging left widens the panel and dragging right narrows it.
  */
 @Composable
 internal fun SidePanelSeparator(
   widthDp: Float,
   onWidthChange: (Float) -> Unit,
   enabled: Boolean = true,
+  panelOnRight: Boolean = false,
   modifier: Modifier = Modifier,
 ) {
   val density = LocalDensity.current
@@ -419,8 +423,9 @@ internal fun SidePanelSeparator(
   val isActive = enabled && (isHovered || isDragged)
   val currentWidthDp by rememberUpdatedState(widthDp)
   var unclampedWidthDp by remember { mutableStateOf(widthDp) }
+  val direction = if (panelOnRight) -1f else 1f
   val draggableState = rememberDraggableState { deltaPx ->
-    unclampedWidthDp += with(density) { deltaPx.toDp() }.value
+    unclampedWidthDp += direction * with(density) { deltaPx.toDp() }.value
     onWidthChange(unclampedWidthDp)
   }
 

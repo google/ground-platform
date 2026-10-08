@@ -68,6 +68,11 @@ data class FormEditorUiState(
    * expansion flags, so it stays open or closed as the author moves between questions.
    */
   val isAdvancedExpanded: Boolean = false,
+  /**
+   * Width of the editor's right-hand properties panel, in dp; always within
+   * [MIN_SIDE_PANEL_WIDTH_DP]..[MAX_SIDE_PANEL_WIDTH_DP].
+   */
+  val sidePanelWidthDp: Float = DEFAULT_SIDE_PANEL_WIDTH_DP,
 ) {
   val selectedQuestion: EditorQuestion?
     get() = form.find(selectedKey)
@@ -144,4 +149,15 @@ data class FormEditorUiState(
   /** Geometry questions the web dashboard can't answer while the Form is available on web. */
   val webIncompatibleGeometryQuestions: List<EditorQuestion>
     get() = form.webIncompatibleGeometryQuestions()
+
+  companion object {
+    /** Default width of the Form editor's right-hand properties panel, in dp. */
+    const val DEFAULT_SIDE_PANEL_WIDTH_DP = 380f
+
+    /** Narrowest the Form editor's right-hand properties panel can be dragged, in dp. */
+    const val MIN_SIDE_PANEL_WIDTH_DP = 280f
+
+    /** Widest the Form editor's right-hand properties panel can be dragged, in dp. */
+    const val MAX_SIDE_PANEL_WIDTH_DP = 640f
+  }
 }

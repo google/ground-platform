@@ -160,6 +160,8 @@ import org.groundplatform.v2.devtools.prototypeapp.DeviceFormFactor
 import org.groundplatform.v2.devtools.prototypeapp.DeviceOrientation
 import org.groundplatform.v2.devtools.prototypeapp.MobileDevicePreviewFrame
 import org.groundplatform.v2.devtools.prototypeapp.PlatformPickResult
+import org.groundplatform.v2.devtools.prototypeapp.SidePanelSeparator
+import org.groundplatform.v2.devtools.prototypeapp.SidePanelSeparatorWidth
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.ChoiceColors
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.DateRule
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EditorChoiceImage
@@ -227,7 +229,7 @@ fun FormEditorPage(
       )
       Row(
         modifier = Modifier.fillMaxSize().padding(16.dp),
-        horizontalArrangement = Arrangement.spacedBy(16.dp),
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
       ) {
         when (uiState.previewTarget) {
           FormPreviewTarget.MOBILE ->
@@ -235,12 +237,21 @@ fun FormEditorPage(
           FormPreviewTarget.WEB ->
             WebLayoutCanvasPanel(uiState, actions, Modifier.weight(1f).fillMaxHeight())
         }
+        SidePanelSeparator(
+          widthDp = uiState.sidePanelWidthDp,
+          onWidthChange = actions::updateSidePanelWidth,
+          panelOnRight = true,
+          modifier =
+            Modifier.width(SidePanelSeparatorWidth)
+              .fillMaxHeight()
+              .clip(MaterialTheme.shapes.extraSmall),
+        )
         QuestionPropertiesPanel(
           uiState = uiState,
           actions = actions,
           onSaveToModeChange = onSaveToModeChange ?: actions::setSaveToMode,
           onOpenDataset = onOpenDataset,
-          modifier = Modifier.width(380.dp).fillMaxHeight(),
+          modifier = Modifier.width(uiState.sidePanelWidthDp.dp).fillMaxHeight(),
         )
       }
     }
