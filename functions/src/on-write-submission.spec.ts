@@ -25,16 +25,24 @@ import { GroundProtos } from '@ground/proto';
 import { onWriteSubmissionHandler } from './on-write-submission';
 
 import Pb = GroundProtos.ground.v1beta1;
+const l = registry.getFieldIds(Pb.LocationOfInterest);
 const sb = registry.getFieldIds(Pb.Submission);
+const ai = registry.getFieldIds(Pb.AuditInfo);
+const ts = registry.getFieldIds(GroundProtos.google.protobuf.Timestamp);
 
 describe('onWriteSubmission()', () => {
   let mockFirestore: Firestore;
   const SURVEY_ID = 'survey1';
   const LOI_ID = 'loi1';
+  const LOI_PATH = `surveys/${SURVEY_ID}/lois/${LOI_ID}`;
+  const NOW = Date.UTC(2026, 8, 10);
+  const NOW_TIMESTAMP = { [ts.seconds]: NOW / 1000, [ts.nanos]: 0 };
+  const EARLIER_TIMESTAMP = { [ts.seconds]: Date.UTC(2026, 0, 2) / 1000 };
 
   beforeEach(() => {
     mockFirestore = createMockFirestore();
     stubAdminApi(mockFirestore);
+    spyOn(Date, 'now').and.returnValue(NOW);
   });
 
   afterEach(() => {
@@ -126,5 +134,58 @@ describe('onWriteSubmission()', () => {
         params: { surveyId: SURVEY_ID },
       } as any)
     ).toBeRejectedWithError('Test error');
+  });
+
+  describe('adjustSubmissionCount()', () => {
+    it('moves the last modified server timestamp along with the count', async () => {
+      await mockFirestore.doc(LOI_PATH).set({
+        [l.lastModified]: {
+          [ai.userId]: 'user1',
+          [ai.serverTimestamp]: EARLIER_TIMESTAMP,
+        },
+        [l.submissionCount]: 1,
+      });
+
+      await getDatastore().adjustSubmissionCount(SURVEY_ID, LOI_ID, 1);
+
+      const loi = await mockFirestore.doc(LOI_PATH).get();
+      expect(loi.data()).toEqual({
+        [l.lastModified]: {
+          [ai.userId]: 'user1',
+          [ai.serverTimestamp]: NOW_TIMESTAMP,
+        },
+        [l.submissionCount]: jasmine.anything(),
+      });
+    });
+
+    it('starts last modified from created when the LOI was never modified', async () => {
+      const created = {
+        [ai.userId]: 'user1',
+        [ai.serverTimestamp]: EARLIER_TIMESTAMP,
+      };
+      await mockFirestore.doc(LOI_PATH).set({
+        [l.created]: created,
+        [l.submissionCount]: 1,
+      });
+
+      await getDatastore().adjustSubmissionCount(SURVEY_ID, LOI_ID, -1);
+
+      const loi = await mockFirestore.doc(LOI_PATH).get();
+      expect(loi.data()).toEqual({
+        [l.created]: created,
+        [l.lastModified]: {
+          [ai.userId]: 'user1',
+          [ai.serverTimestamp]: NOW_TIMESTAMP,
+        },
+        [l.submissionCount]: jasmine.anything(),
+      });
+    });
+
+    it('does nothing when the LOI is gone', async () => {
+      await getDatastore().adjustSubmissionCount(SURVEY_ID, LOI_ID, -1);
+
+      const loi = await mockFirestore.doc(LOI_PATH).get();
+      expect(loi.exists).toBeFalse();
+    });
   });
 });

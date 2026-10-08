@@ -189,6 +189,38 @@ describe('LocationOfInterestPanelComponent', () => {
     );
   }));
 
+  it('does not reload submissions when the LOI is re-emitted unchanged', fakeAsync(() => {
+    setupPanelWithLoi();
+    expect(submissionServiceSpy.getSubmissions$).toHaveBeenCalledTimes(1);
+
+    fixture.componentRef.setInput(
+      'selectedLoi',
+      new LocationOfInterest(
+        mockLoi.id,
+        mockLoi.jobId,
+        mockLoi.geometry,
+        Map({ name: 'renamed' })
+      )
+    );
+    fixture.detectChanges();
+    tick(100);
+
+    expect(submissionServiceSpy.getSubmissions$).toHaveBeenCalledTimes(1);
+  }));
+
+  it('reloads submissions when another LOI is selected', fakeAsync(() => {
+    setupPanelWithLoi();
+
+    fixture.componentRef.setInput(
+      'selectedLoi',
+      new LocationOfInterest('loi2', mockLoi.jobId, mockLoi.geometry, Map())
+    );
+    fixture.detectChanges();
+    tick(100);
+
+    expect(submissionServiceSpy.getSubmissions$).toHaveBeenCalledTimes(2);
+  }));
+
   it('should clear LOI on close', () => {
     component.onClosePanel();
     expect(navigationServiceSpy.clearLocationOfInterestId).toHaveBeenCalled();

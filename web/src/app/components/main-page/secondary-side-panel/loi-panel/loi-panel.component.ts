@@ -17,7 +17,14 @@
 import { Component, computed, inject, input, signal } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { MatDialog } from '@angular/material/dialog';
-import { combineLatest, concat, delay, of, switchMap } from 'rxjs';
+import {
+  combineLatest,
+  concat,
+  delay,
+  distinctUntilChanged,
+  of,
+  switchMap,
+} from 'rxjs';
 
 import {
   DialogComponent,
@@ -90,6 +97,12 @@ export class LocationOfInterestPanelComponent {
       toObservable(this.activeSurvey),
       toObservable(this.selectedLoi),
     ]).pipe(
+      distinctUntilChanged(
+        ([survey1, loi1], [survey2, loi2]) =>
+          survey1 === survey2 &&
+          loi1?.id === loi2?.id &&
+          loi1?.jobId === loi2?.jobId
+      ),
       switchMap(([survey, loi]) => {
         if (survey && loi) {
           return concat(

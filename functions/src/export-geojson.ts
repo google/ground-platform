@@ -24,7 +24,7 @@ import {
 } from './common/context';
 import { getTempFilePath } from './common/temp-storage';
 import { isAccessibleLoi } from './common/utils';
-import { propertiesPbToObject } from './on-create-loi';
+import { propertiesPbToObject } from './common/loi-properties';
 import { DecodedIdToken } from 'firebase-admin/auth';
 import { StatusCodes } from 'http-status-codes';
 import { toMessage } from '@ground/lib';
