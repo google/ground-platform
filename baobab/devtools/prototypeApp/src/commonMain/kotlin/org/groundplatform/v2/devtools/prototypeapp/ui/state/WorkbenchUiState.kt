@@ -15,8 +15,6 @@ package org.groundplatform.v2.devtools.prototypeapp.ui.state
 
 import groundplatform.v2.forms.FormDef
 import org.groundplatform.v2.core.forms.ui.WorkbenchExampleForm
-import org.groundplatform.v2.devtools.prototypeapp.DEFAULT_PROTOTYPE_XFORMS_XML
-import org.groundplatform.v2.devtools.prototypeapp.XFormsParseCache
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.DeviceFormFactor
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.DeviceOrientation
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.GeospatialEntityItem
@@ -24,6 +22,8 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.SubmissionPrevie
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyConfig
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyPreviewItem
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyStats
+import org.groundplatform.v2.devtools.prototypeapp.ui.workbench.DEFAULT_PROTOTYPE_XFORMS_XML
+import org.groundplatform.v2.devtools.prototypeapp.ui.workbench.XFormsParseCache
 
 /**
  * Immutable UI state for the prototype workbench chrome: the simulated device frame (`Mobile` vs

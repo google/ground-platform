@@ -31,6 +31,7 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SharingPo
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SurveyDetails
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SurveyEditorDraft
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SurveyEditorForm
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.geometryKind
 
 /** Hand-authored Survey editor fixtures used by tests (fictional sample data). */
 internal object SurveyEditorSamples {

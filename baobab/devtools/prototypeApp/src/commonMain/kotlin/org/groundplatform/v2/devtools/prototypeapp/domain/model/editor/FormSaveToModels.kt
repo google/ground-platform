@@ -13,6 +13,8 @@
  */
 package org.groundplatform.v2.devtools.prototypeapp.domain.model.editor
 
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.hasGeometry
+
 /**
  * What a submitted Form does to its Map layer or Data table, compiled to an ODK XForms Entities
  * declaration (`<entities:entity create="1">` or `<entities:entity update="1">`, per the ODK XForms
@@ -201,9 +203,28 @@ data class EditorDataset(
   val rows: List<EditorDatasetRow> = emptyList(),
   /** Whether this dataset is the one the Form being edited adds features to. */
   val isLinkedToThisForm: Boolean = false,
+  /** Stable editor-only key in the Survey editor (`EntityDataset.key`). */
+  val key: String = "",
+  /** Key of the Form whose submissions add new features/rows to this dataset, if any. */
+  val linkedFormKey: String? = null,
+  /** Display title of the Form whose submissions add new features/rows to this dataset, if any. */
+  val linkedFormTitle: String? = null,
+  /** Whether this dataset's features are generated from a statistical sample design. */
+  val isGenerated: Boolean = false,
 ) {
   val featureNoun: String
     get() = if (isMapLayer) "map feature" else "table row"
+
+  val featureNounPlural: String
+    get() = if (isMapLayer) "map features" else "table rows"
+
+  /** Whether another Form in the survey adds new features/rows to this dataset. */
+  val hasCreationForm: Boolean
+    get() = linkedFormKey != null && !isLinkedToThisForm
+
+  /** Whether a new Form can be generated to add features/rows to this dataset. */
+  val canCreateForm: Boolean
+    get() = linkedFormKey == null && !isGenerated
 
   fun property(name: String?): EditorDatasetProperty? = properties.firstOrNull { it.name == name }
 

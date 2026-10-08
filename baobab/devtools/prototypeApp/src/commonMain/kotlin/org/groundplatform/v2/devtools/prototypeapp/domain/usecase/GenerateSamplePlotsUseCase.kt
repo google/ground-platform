@@ -28,8 +28,7 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SamplePlo
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SamplingAreaResult
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SamplingAreas
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SurveyArea
-import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.isoUtc
-import org.groundplatform.v2.devtools.prototypeapp.platformEpochMillis
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.geometryKind
 
 /**
  * Generates the sample plots of a generated Map layer from its sample design with a
@@ -42,7 +41,7 @@ import org.groundplatform.v2.devtools.prototypeapp.platformEpochMillis
 class GenerateSamplePlotsUseCase(
   samplingEngine: SamplingEngine? = null,
   private val yieldBetweenChunks: suspend () -> Unit = { yield() },
-  private val now: () -> String = { isoUtc(platformEpochMillis()) },
+  private val now: () -> String = { "2026-01-01T00:00:00Z" },
 ) {
   private val engine: SamplingEngine by lazy { samplingEngine ?: SamplingEngine.Default }
 

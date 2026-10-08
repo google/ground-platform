@@ -252,6 +252,10 @@ object FormImport {
           required = isTrue(binding?.required_expression),
           choices = if (type.hasChoices) choices else emptyList(),
           choiceDatasetId = if (type.hasChoices) choiceDatasetId else null,
+          allowAddEntity =
+            type.hasChoices &&
+              choiceDatasetId != null &&
+              EditorXFormsGenerator.ADD_ENTITY_APPEARANCE in appearance,
           validation = validation,
           capture =
             if (type.isGeometry && GeometryCapture.GPS_OR_MAP.appearance in appearance) {

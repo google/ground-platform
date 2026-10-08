@@ -28,6 +28,7 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SampleDes
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SamplePlotProperties
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SamplingAreaResult
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SubPlotMode
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.geometryKind
 import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.GenerateSamplePlotsUseCase.Result
 
 class GenerateSamplePlotsUseCaseTest {

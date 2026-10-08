@@ -33,6 +33,7 @@ import kotlinx.serialization.json.jsonObject
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.PlaceFraming
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyMapAnchor
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyPlaceItem
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.bbox
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.roundTo
 import org.groundplatform.v2.map.LatLng
 import org.groundplatform.v2.map.LngLatBounds

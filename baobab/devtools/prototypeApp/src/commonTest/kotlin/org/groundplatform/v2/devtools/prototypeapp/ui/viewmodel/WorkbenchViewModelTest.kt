@@ -24,7 +24,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import org.groundplatform.v2.core.forms.ui.WorkbenchExampleForm
-import org.groundplatform.v2.devtools.prototypeapp.DEFAULT_PROTOTYPE_XFORMS_XML
 import org.groundplatform.v2.devtools.prototypeapp.data.datasource.local.store.runNow
 import org.groundplatform.v2.devtools.prototypeapp.data.datasource.local.store.seededStore
 import org.groundplatform.v2.devtools.prototypeapp.data.repository.SampleDataRepositoryImpl
@@ -34,6 +33,7 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.DeviceOrientatio
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SyncStatus
 import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.GeneratePrototypeRandomSitesUseCase
 import org.groundplatform.v2.devtools.prototypeapp.ui.state.WorkbenchEvent
+import org.groundplatform.v2.devtools.prototypeapp.ui.workbench.DEFAULT_PROTOTYPE_XFORMS_XML
 
 /** See [OnboardingViewModelTest] for why fixtures are built outside `runNow`. */
 class WorkbenchViewModelTest {

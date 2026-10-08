@@ -20,6 +20,7 @@ import kotlin.test.assertNull
 import org.groundplatform.v2.devtools.prototypeapp.data.seed.FormEditorSamples
 import org.groundplatform.v2.devtools.prototypeapp.data.seed.PrototypeFakeSurveysData
 import org.groundplatform.v2.devtools.prototypeapp.data.seed.SurveyEditorSamples
+import org.groundplatform.v2.devtools.prototypeapp.ui.workbench.builtInFallbackXFormsXmlForForm
 
 /** `EditorForm` → published XForms XML → [FormImport] → the same Form. */
 class FormImportRoundTripTest {
@@ -41,6 +42,10 @@ class FormImportRoundTripTest {
     assertEquals(
       expected.questions.map { it.choiceDatasetId },
       actual.questions.map { it.choiceDatasetId },
+    )
+    assertEquals(
+      expected.questions.map { it.allowAddEntity },
+      actual.questions.map { it.allowAddEntity },
     )
     assertEquals(
       expected.questions.map { q -> q.choices.map { it.value to it.label } },
@@ -93,7 +98,8 @@ class FormImportRoundTripTest {
         questions =
           base.questions.map { q ->
             when (q.name) {
-              "has_shade_trees" -> q.copy(choiceDatasetId = "farmers", choices = emptyList())
+              "has_shade_trees" ->
+                q.copy(choiceDatasetId = "farmers", allowAddEntity = true, choices = emptyList())
               "observed_issues" -> q.copy(choiceDatasetId = "tree_species", choices = emptyList())
               else -> q
             }
@@ -105,11 +111,13 @@ class FormImportRoundTripTest {
     val imported = assertNotNull(FormImport.fromXml(xml, withDatasetChoices.formId)).form
     val byName = imported.questions.associateBy { it.name }
     assertEquals("farmers", byName.getValue("has_shade_trees").choiceDatasetId)
+    assertEquals(true, byName.getValue("has_shade_trees").allowAddEntity)
     assertEquals(
       ChoiceSource.DATA_TABLE,
       byName.getValue("has_shade_trees").effectiveChoiceSource(catalog),
     )
     assertEquals("tree_species", byName.getValue("observed_issues").choiceDatasetId)
+    assertEquals(false, byName.getValue("observed_issues").allowAddEntity)
     assertEquals(
       ChoiceSource.DATA_TABLE,
       byName.getValue("observed_issues").effectiveChoiceSource(catalog),

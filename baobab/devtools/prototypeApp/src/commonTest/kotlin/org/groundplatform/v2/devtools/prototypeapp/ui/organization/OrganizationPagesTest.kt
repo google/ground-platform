@@ -1,0 +1,193 @@
+/*
+ * Copyright 2026 The Ground Authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
+ */
+package org.groundplatform.v2.devtools.prototypeapp.ui.organization
+
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertNull
+import kotlin.test.assertTrue
+import org.groundplatform.v2.devtools.prototypeapp.PrototypeWorkbenchPage
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.CachedProfile
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.MembershipStatus
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.Organization
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.OrganizationMember
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.OrganizationRelation
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.OrganizationRole
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.canChangeMember
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.discoverableBy
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.membersViewFor
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.organizationsOf
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.relationTo
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.searchOrganizations
+
+/** The directory and member-grouping rules live in `domain/model/OrganizationDirectory.kt`. */
+class OrganizationPagesTest {
+  private val me = "me@example.org"
+
+  private fun member(
+    email: String,
+    role: OrganizationRole = OrganizationRole.MEMBER,
+    status: MembershipStatus = MembershipStatus.ACTIVE,
+    name: String? = null,
+  ) = OrganizationMember(email, role, status, profile = name?.let { CachedProfile(it) })
+
+  private val managed =
+    Organization(
+      id = "managed",
+      name = "Zeta Lab",
+      members =
+        listOf(
+          member("zed@example.org", name = "Zed"),
+          member(me, OrganizationRole.MANAGER, name = "Me"),
+          member("amy@example.org", OrganizationRole.MANAGER, name = "Amy"),
+          member("req@example.org", status = MembershipStatus.REQUESTED, name = "Req"),
+          member("inv@example.org", status = MembershipStatus.INVITED),
+        ),
+    )
+  private val joined =
+    Organization(
+      id = "joined",
+      name = "Alpha NGO",
+      members = listOf(member("boss@example.org", OrganizationRole.MANAGER), member(me)),
+    )
+  private val listed =
+    Organization(
+      id = "listed",
+      name = "Open Group",
+      description = "Mangroves",
+      members = emptyList(),
+    )
+  private val requested =
+    Organization(
+      id = "requested",
+      name = "Pending Org",
+      members = listOf(member(me, status = MembershipStatus.REQUESTED)),
+    )
+  private val unlisted =
+    Organization(id = "unlisted", name = "Secret", isListed = false, members = emptyList())
+  private val all = listOf(listed, joined, unlisted, managed, requested)
+
+  @Test
+  fun mine_managersFirstThenByName() {
+    assertEquals(listOf("managed", "joined"), all.organizationsOf(me).map { it.id })
+  }
+
+  @Test
+  fun discoverable_listedNonMembersOnly_includingPendingRequests() {
+    assertEquals(
+      listOf("listed", "requested"),
+      all.discoverableBy(me).map { it.id },
+    )
+  }
+
+  @Test
+  fun relation_coversEveryMembershipState() {
+    assertEquals(OrganizationRelation.MANAGER, managed.relationTo(me))
+    assertEquals(OrganizationRelation.MEMBER, joined.relationTo(me))
+    assertEquals(OrganizationRelation.REQUESTED, requested.relationTo(me))
+    assertEquals(OrganizationRelation.NONE, listed.relationTo(me))
+    assertEquals(
+      OrganizationRelation.INVITED,
+      managed.relationTo("inv@example.org"),
+    )
+  }
+
+  @Test
+  fun search_matchesNameAndDescription() {
+    assertEquals(listOf(listed), all.searchOrganizations("mangrove"))
+    assertEquals(listOf(joined), all.searchOrganizations("ALPHA"))
+    assertEquals(all, all.searchOrganizations("  "))
+  }
+
+  @Test
+  fun canEditDetails_onlyForManagers() {
+    assertEquals(true, managed.isManager(me))
+    assertEquals(false, joined.isManager(me))
+  }
+
+  @Test
+  fun tabs_detailsComesFirstAndIncludesImagerySources() {
+    assertEquals(OrganizationTab.DETAILS, OrganizationTab.entries.first())
+    assertTrue(OrganizationTab.IMAGERY_SOURCES in OrganizationTab.entries)
+  }
+
+  @Test
+  fun syntheticAllUsers_isIncludedFirstInMineAndExcludedFromDiscoverable() {
+    val allUsers =
+      Organization(
+        id = Organization.ALL_USERS_ID,
+        name = "All users",
+        isListed = false,
+        isSynthetic = true,
+      )
+    val withAllUsers = all + allUsers
+    assertEquals(
+      listOf(Organization.ALL_USERS_ID, "managed", "joined"),
+      withAllUsers.organizationsOf(me).map { it.id },
+    )
+    assertFalse(withAllUsers.discoverableBy(me).any { it.id == Organization.ALL_USERS_ID })
+    assertEquals(OrganizationRelation.MANAGER, allUsers.relationTo(me))
+  }
+
+  @Test
+  fun membersView_groupsAndOrders_forManagers() {
+    val view = managed.membersViewFor(me)
+    assertEquals(listOf("req@example.org"), view.requests.map { it.email })
+    assertEquals(listOf("inv@example.org"), view.invited.map { it.email })
+    // Managers first with the viewer at the top, then members by name.
+    assertEquals(listOf(me, "amy@example.org", "zed@example.org"), view.active.map { it.email })
+  }
+
+  @Test
+  fun membersView_hidesPendingPeopleFromMembers() {
+    val view = managed.membersViewFor("zed@example.org")
+    assertTrue(view.requests.isEmpty())
+    assertTrue(view.invited.isEmpty())
+    assertEquals(3, view.active.size)
+  }
+
+  @Test
+  fun canChange_protectsTheLastManager() {
+    val onlyManager = managed.member("amy@example.org")!!
+    assertTrue(managed.canChangeMember(onlyManager))
+    val soleManagerOrg = joined
+    assertFalse(soleManagerOrg.canChangeMember(soleManagerOrg.managers.single()))
+    assertTrue(soleManagerOrg.canChangeMember(soleManagerOrg.member(me)!!))
+  }
+
+  @Test
+  fun hashes_roundTripOrganizationPages() {
+    assertEquals(
+      PrototypeWorkbenchPage.ORGANIZATIONS,
+      PrototypeWorkbenchPage.fromHash("#organizations"),
+    )
+    assertEquals(
+      PrototypeWorkbenchPage.ORGANIZATION,
+      PrototypeWorkbenchPage.fromHash("#organization/org-kfs"),
+    )
+    assertEquals("org-kfs", PrototypeWorkbenchPage.organizationIdFromHash("#organization/org-kfs"))
+    assertNull(PrototypeWorkbenchPage.organizationIdFromHash("#organization"))
+    assertNull(PrototypeWorkbenchPage.organizationIdFromHash("#surveys"))
+    assertEquals(
+      "organization/org-kfs",
+      PrototypeWorkbenchPage.hashFor(PrototypeWorkbenchPage.ORGANIZATION, "org-kfs"),
+    )
+    assertEquals("surveys", PrototypeWorkbenchPage.hashFor(PrototypeWorkbenchPage.WEB_SURVEYS, "x"))
+    assertEquals(
+      PrototypeWorkbenchPage.WEB_DASHBOARD,
+      PrototypeWorkbenchPage.fromHash("#dashboard"),
+    )
+  }
+}

@@ -21,6 +21,7 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.MapLayerItem
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyMapAnchor
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyPreviewItem
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.formatHexColorCss
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.geometryKind
 
 /**
  * Builds the Survey editor's draft of a survey from the survey's runtime data (its Forms, Map

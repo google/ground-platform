@@ -31,8 +31,6 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.groundplatform.v2.core.forms.serialization.XFormsXmlSerializer
 import org.groundplatform.v2.core.forms.ui.WorkbenchExampleForm
-import org.groundplatform.v2.devtools.prototypeapp.DEFAULT_PROTOTYPE_XFORMS_XML
-import org.groundplatform.v2.devtools.prototypeapp.XFormsParseCache
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.DeviceFormFactor
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.DeviceOrientation
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyConfig
@@ -46,6 +44,8 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.repository.SurveyRepos
 import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.GeneratePrototypeRandomSitesUseCase
 import org.groundplatform.v2.devtools.prototypeapp.ui.state.WorkbenchEvent
 import org.groundplatform.v2.devtools.prototypeapp.ui.state.WorkbenchUiState
+import org.groundplatform.v2.devtools.prototypeapp.ui.workbench.DEFAULT_PROTOTYPE_XFORMS_XML
+import org.groundplatform.v2.devtools.prototypeapp.ui.workbench.XFormsParseCache
 
 /**
  * User intents for the prototype workbench chrome (device preview bezel, XForms `<h:html>` editor &

@@ -16,6 +16,7 @@ package org.groundplatform.v2.devtools.prototypeapp.domain.model.editor
 import org.groundplatform.v2.core.geo.io.GeoFeature
 import org.groundplatform.v2.core.geo.io.GeoGeometry
 import org.groundplatform.v2.core.geo.io.GeoReadResult
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.geometryKind
 
 /**
  * A Map layer ready to be created from an uploaded GeoJSON or KML file: one geometry type, a

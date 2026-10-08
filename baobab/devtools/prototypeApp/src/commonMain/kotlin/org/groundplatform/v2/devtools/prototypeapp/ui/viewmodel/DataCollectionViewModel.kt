@@ -32,9 +32,11 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.groundplatform.v2.core.forms.model.EntityState
 import org.groundplatform.v2.core.forms.ui.FormWizardController
+import org.groundplatform.v2.devtools.prototypeapp.client.pdf.GeneratedPdf
 import org.groundplatform.v2.devtools.prototypeapp.client.pdf.PdfExportClient
 import org.groundplatform.v2.devtools.prototypeapp.client.pdf.PdfExportResult
 import org.groundplatform.v2.devtools.prototypeapp.client.pdf.PlatformPdfExportClient
+import org.groundplatform.v2.devtools.prototypeapp.client.pdf.RecordPdfReports
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.AuthProfile
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.GeospatialEntityItem
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.MainSurveyViewMode
@@ -42,6 +44,7 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.MeasurementUnitS
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SharedPdfSheetState
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyMapAnchor
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyPreviewItem
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.hasGeometry
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.relatedEntityForPropertyValue
 import org.groundplatform.v2.devtools.prototypeapp.domain.repository.AuthRepository
 import org.groundplatform.v2.devtools.prototypeapp.domain.repository.LocationRepository
@@ -50,11 +53,9 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.repository.SurveyConte
 import org.groundplatform.v2.devtools.prototypeapp.domain.repository.SurveyRepository
 import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.CompleteFormSubmissionUseCase
 import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.LaunchFormUseCase
-import org.groundplatform.v2.devtools.prototypeapp.hasGeometry
-import org.groundplatform.v2.devtools.prototypeapp.map.EntityGeometry
-import org.groundplatform.v2.devtools.prototypeapp.pdf.GeneratedPdf
-import org.groundplatform.v2.devtools.prototypeapp.pdf.RecordPdfReports
-import org.groundplatform.v2.devtools.prototypeapp.platformEpochMillis
+import org.groundplatform.v2.devtools.prototypeapp.ui.common.platformEpochMillis
+import org.groundplatform.v2.devtools.prototypeapp.ui.datacollection.ENTITY_REF_FIELD_PATH
+import org.groundplatform.v2.devtools.prototypeapp.ui.map.EntityGeometry
 import org.groundplatform.v2.devtools.prototypeapp.ui.state.DataCollectionEvent
 import org.groundplatform.v2.devtools.prototypeapp.ui.state.DataCollectionUiState
 import org.groundplatform.v2.devtools.prototypeapp.ui.state.FormFocusRequest

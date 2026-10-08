@@ -15,6 +15,7 @@ package org.groundplatform.v2.devtools.prototypeapp.domain.model
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.toLatLng
 import org.groundplatform.v2.map.LatLng
 
 class SurveyMapAnchorTest {

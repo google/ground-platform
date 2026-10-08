@@ -137,7 +137,7 @@ surveys in it and find them in their list.
         remove people. Anyone can **Leave organization**. The last Manager
         can't be demoted, removed, or leave; the page says why.
 
-Code lives in `organization/` (`OrganizationsPage.kt`, `OrganizationPage.kt`,
+Code lives in `ui/organization/` (`OrganizationsPage.kt`, `OrganizationPage.kt`,
 and `OrganizationPages.kt` for the page's tabs). Both pages are stateless
 `(uiState, actions)` screens driven by `OrganizationViewModel`
 (`ui/viewmodel/`); the directory, relation, and member-grouping rules live in
@@ -177,7 +177,7 @@ prototype, so selections and survey changes carry over.
     references to other records shown as links. **Show in table** opens the
     bottom table on the feature's row. **History** lists its submissions
     grouped by form; opening one shows it in the tab, in a document-style view.
--   **Data collection on web** (`WebDataCollectionCard.kt`): The mobile entry
+-   **Data collection on web** (`ui/datacollection/WebDataCollectionCard.kt`): The mobile entry
     points are adapted to the web paradigm. **Collect data** in the top toolbar
     (the counterpart of the mobile `+` FAB) lists the survey's forms; a
     feature's card has the same **Collect data** buttons as the mobile sheet.
@@ -218,7 +218,7 @@ prototype, so selections and survey changes carry over.
     kind: point, line, or polygon) that centres that question's geometry in the
     visible part of the map, clear of the form panel and the table
     (`DataCollectionUiState.webMapFramingRequest`).
--   **Media capture on web** (`PrototypeMediaCapture.kt`,
+-   **Media capture on web** (`ui/common/PrototypeMediaCapture.kt`,
     `src/commonMain/resources/media-capture-bridge.js`): Photo, video, and
     audio questions use the shared `MediaCaptureWidget` with the prototype's
     `PrototypeMediaCaptureHandler`, which honours the organizer's per-question
@@ -247,7 +247,7 @@ prototype, so selections and survey changes carry over.
     **Show in table** button. Click a row to select that record. Submissions
     are never shown in tables, since their data can be hierarchical.
 
-Code lives in `WebDashboardPage.kt`.
+Code lives in `ui/dashboard/WebDashboardPage.kt`.
 
 ## Survey Editor Page (`#survey-editor`)
 
@@ -329,13 +329,13 @@ The editor's models are pure Kotlin in `domain/model/editor/`
 repositories and the local data store depend only on the domain. The page is
 driven by `SurveyEditorViewModel` (`ui/viewmodel/`), which exposes a `StateFlow`
 of `SurveyEditorUiState` (`ui/state/`) and implements `SurveyEditorActions`;
-the Compose screens in `surveyeditor/` (`SurveyEditorPage.kt`,
+the Compose screens in `ui/surveyeditor/` (`SurveyEditorPage.kt`,
 `EntityDatasetEditor.kt`, `SamplingDesignPanel.kt`, `SurveyAreaEditor.kt`,
 `InteractiveLayerMap.kt`, `LayerEditorGeometry.kt`) take `(uiState, actions)`
 and hold only transient UI state such as dialogs and the selected table row.
 `SurveyEditorPage(state: PrototypeAppState, …)` is the thin shell that collects
 the view model and renders the shared `WebAppHeader`. Drag-to-reorder for the
-navigation and the flow canvas shares `formeditor/DragReorder.kt`.
+navigation and the flow canvas shares `ui/formeditor/DragReorder.kt`.
 
 The view model observes the active survey's draft through
 `SurveyEditorRepository` and shows it live until the first edit, after which the
@@ -365,7 +365,7 @@ containment and lines and points by a 12 dp tolerance. Without a Mapbox renderer
 
 ### Form Editor
 
-Selecting a Form opens the visual Form editor in `formeditor/`
+Selecting a Form opens the visual Form editor in `ui/formeditor/`
 (`FormEditorPage.kt`, `FormSaveToEditor.kt`, `FormWebPreview.kt`); its models,
 validation rules, and XForms generator are pure Kotlin in `domain/model/editor/`
 (`FormEditorModels.kt`, `FormValidationRules.kt`, `FormIds.kt`). The screens
@@ -493,13 +493,18 @@ fresh on every page load; on mobile it will become the persistent offline store.
     **Reset**. `SampleDataGuardrailTest` keeps other code from reading them.
 -   **Layering**: `LayerDependencyGuardrailTest` checks imports against
     `docs/technical/client/architecture.md`: `domain/` depends on nothing
-    outside the domain and shared core, `data/` never imports presentation
-    packages, and only `data/` and `ui/viewmodel/` may import `data/` or
+    outside the domain and shared core, `data/` never imports `di/` or
+    presentation packages, only `data/` and `di/` (`AppDataHolder`) may import
+    `data.*`, and Views (`ui/` outside `ui/viewmodel/`) never import `data/` or
     `client/` packages.
--   **Feature view models**: Screens observe per-feature view models in
-    `ui/viewmodel/` (wired by `AppDataHolder`), each exposing a `StateFlow` of
-    an immutable UI state (`ui/state/`) plus an actions interface the screen
-    calls. Screens take `(uiState, actions)` and hold no state of their own.
+-   **Feature view models**: Screens in `ui/<feature>/` (`ui/onboarding/`,
+    `ui/settings/`, `ui/map/`, `ui/dashboard/`, `ui/organization/`,
+    `ui/surveyeditor/`, `ui/formeditor/`, `ui/datacollection/`,
+    `ui/navigation/`, `ui/workbench/`, `ui/common/`) observe per-feature view
+    models in `ui/viewmodel/` (wired by `di/AppDataHolder`), each exposing a
+    `StateFlow` of an immutable UI state (`ui/state/`) plus an actions interface
+    the screen calls. Screens take `(uiState, actions)` and hold no state of
+    their own.
     `OnboardingViewModel` (Sign In → Terms of Service → Download survey) reads
     the account from `AuthRepository` (over `PrototypeAuthClient`) and the
     survey directory from `SurveyRepository` and `OrganizationRepository`, and
@@ -589,8 +594,8 @@ fresh on every page load; on mobile it will become the persistent offline store.
 ## PDF Reports
 
 Map features and submissions can be exported as PDF reports. The PDFs are
-generated on the device, in shared Kotlin (`pdf/`), so they work offline and
-look the same on web and mobile.
+generated on the device, in shared Kotlin (`client/pdf/`), so they work offline
+and look the same on web and mobile.
 
 -   **Mobile**: **Share PDF** (entity actions row, QR code dialog, and the
     submission view) opens a sheet with the generated file (page count and

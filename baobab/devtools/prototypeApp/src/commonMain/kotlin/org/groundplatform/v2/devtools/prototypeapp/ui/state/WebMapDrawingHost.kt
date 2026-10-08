@@ -25,8 +25,8 @@ import org.groundplatform.v2.core.forms.ui.mapDrawingKindOf
 import org.groundplatform.v2.core.forms.ui.mapDrawingVertices
 import org.groundplatform.v2.core.forms.ui.setMapDrawingVertices
 import org.groundplatform.v2.core.forms.ui.undoMapDrawingVertex
-import org.groundplatform.v2.devtools.prototypeapp.map.DraftGeometry
-import org.groundplatform.v2.devtools.prototypeapp.map.FormGeometryOverlay
+import org.groundplatform.v2.devtools.prototypeapp.ui.map.DraftGeometry
+import org.groundplatform.v2.devtools.prototypeapp.ui.map.FormGeometryOverlay
 import org.groundplatform.v2.map.LatLng
 import org.groundplatform.v2.map.LngLatBounds
 

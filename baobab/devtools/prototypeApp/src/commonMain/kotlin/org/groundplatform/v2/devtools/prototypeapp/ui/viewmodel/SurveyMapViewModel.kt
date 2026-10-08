@@ -48,6 +48,7 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyMapAnchor
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyPlaceItem
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyPreviewItem
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.LatLng
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.toLatLng
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.toClusterFeatures
 import org.groundplatform.v2.devtools.prototypeapp.domain.repository.DeviceLocationSnapshot
 import org.groundplatform.v2.devtools.prototypeapp.domain.repository.LocationRepository
@@ -58,6 +59,7 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.repository.SurveyConte
 import org.groundplatform.v2.devtools.prototypeapp.domain.repository.SurveyRepository
 import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.ClusterMapFeaturesUseCase
 import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.ComputeWayfindingNavigationUseCase
+import org.groundplatform.v2.devtools.prototypeapp.ui.formeditor.moved
 import org.groundplatform.v2.devtools.prototypeapp.ui.state.SurveyMapEvent
 import org.groundplatform.v2.devtools.prototypeapp.ui.state.SurveyMapUiState
 import org.groundplatform.v2.map.CameraPosition

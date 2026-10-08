@@ -156,6 +156,12 @@ interface FormEditorActions {
   fun setChoiceDataset(key: String, datasetId: String?)
 
   /**
+   * Sets whether data collectors may add a new map feature or table row inline while answering
+   * dataset-backed choice question [key].
+   */
+  fun setAllowAddEntity(key: String, allow: Boolean)
+
+  /**
    * Replaces the label of choice [index] of [key]. If the choice value was derived from its label,
    * it follows label edits; dependents comparing against the old value are rewritten to the new
    * one.
@@ -443,6 +449,7 @@ class FormEditorViewModel(
         choices = if (type.hasChoices && q.choices.isEmpty()) defaultChoices() else q.choices,
         choiceDatasetId = if (type.hasChoices) q.choiceDatasetId else null,
         choiceSource = if (type.hasChoices) q.choiceSource else ChoiceSource.MANUAL,
+        allowAddEntity = if (type.hasChoices) q.allowAddEntity else false,
         required = q.required && !type.isReadOnly,
         validation = ValidationRules.adaptToType(q.type, type, q.validation),
         capture = if (type.isGeometry) q.capture else GeometryCapture.GPS_ONLY,
@@ -531,6 +538,7 @@ class FormEditorViewModel(
           q.copy(
             choiceSource = ChoiceSource.MANUAL,
             choiceDatasetId = null,
+            allowAddEntity = false,
             choices = if (q.choices.isEmpty()) defaultChoices() else q.choices,
           )
         ChoiceSource.MAP_LAYER,
@@ -541,9 +549,17 @@ class FormEditorViewModel(
               .filter { it.isMapLayer == wantMapLayer }
               .ifEmpty { datasets.filter { it.isMapLayer == wantMapLayer } }
           val currentId = q.choiceDatasetId?.takeIf { id -> candidates.any { it.id == id } }
+          val nextId = currentId ?: candidates.firstOrNull()?.id.orEmpty()
+          val nextDataset = candidates.firstOrNull { it.id == nextId }
+          val keepAllowAdd =
+            q.allowAddEntity &&
+              nextDataset != null &&
+              !nextDataset.isGenerated &&
+              (nextDataset.hasCreationForm || nextDataset.key.isEmpty())
           q.copy(
             choiceSource = source,
-            choiceDatasetId = currentId ?: candidates.firstOrNull()?.id.orEmpty(),
+            choiceDatasetId = nextId,
+            allowAddEntity = keepAllowAdd,
           )
         }
       }
@@ -560,7 +576,21 @@ class FormEditorViewModel(
           q.choiceSource.isDataset -> q.choiceSource
           else -> ChoiceSource.MAP_LAYER
         }
-      q.copy(choiceSource = source, choiceDatasetId = datasetId)
+      val keepAllowAdd =
+        q.allowAddEntity &&
+          datasetId != null &&
+          (dataset == null ||
+            (!dataset.isGenerated && (dataset.hasCreationForm || dataset.key.isEmpty())))
+      q.copy(
+        choiceSource = source,
+        choiceDatasetId = datasetId,
+        allowAddEntity = keepAllowAdd,
+      )
+    }
+
+  override fun setAllowAddEntity(key: String, allow: Boolean) =
+    updateQuestion(key) { q ->
+      if (!q.type.hasChoices || !q.usesDatasetChoices) q else q.copy(allowAddEntity = allow)
     }
 
   override fun updateChoiceLabel(key: String, index: Int, label: String) {

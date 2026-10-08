@@ -23,6 +23,7 @@ import org.groundplatform.v2.devtools.prototypeapp.data.seed.PrototypeFakeSurvey
 import org.groundplatform.v2.devtools.prototypeapp.data.seed.SurveyEditorSamples
 import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.surveyEditorViewModel
 import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.ui
+import org.groundplatform.v2.devtools.prototypeapp.ui.workbench.builtInFallbackXFormsXmlForForm
 
 class SurveyEditorDerivationTest {
   private fun derive(surveyId: String): SurveyEditorDraft {

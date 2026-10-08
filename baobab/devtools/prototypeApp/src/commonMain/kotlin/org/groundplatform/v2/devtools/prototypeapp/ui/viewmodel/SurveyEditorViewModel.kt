@@ -65,10 +65,12 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SurveyAre
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SurveyDetails
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SurveyEditorDraft
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SurveyEditorForm
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.isoUtc
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.slugify
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.toEditorDataset
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.withRenamedTargetDataset
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.withRenamedTargetProperty
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.geometryKind
 import org.groundplatform.v2.devtools.prototypeapp.domain.repository.AuthRepository
 import org.groundplatform.v2.devtools.prototypeapp.domain.repository.OrganizationRepository
 import org.groundplatform.v2.devtools.prototypeapp.domain.repository.PlaceRepository
@@ -76,6 +78,8 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.repository.SurveyEdito
 import org.groundplatform.v2.devtools.prototypeapp.domain.repository.SurveyRepository
 import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.GenerateSamplePlotsUseCase
 import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.InviteCollaboratorUseCase
+import org.groundplatform.v2.devtools.prototypeapp.ui.common.platformEpochMillis
+import org.groundplatform.v2.devtools.prototypeapp.ui.formeditor.moved
 import org.groundplatform.v2.devtools.prototypeapp.ui.state.SurveyEditorEvent
 import org.groundplatform.v2.devtools.prototypeapp.ui.state.SurveyEditorSection
 import org.groundplatform.v2.devtools.prototypeapp.ui.state.SurveyEditorUiState
@@ -209,8 +213,11 @@ interface SurveyEditorActions : MapFeatureEditor {
    */
   fun createDatasetForForm(formKey: String, kind: DatasetKind? = null, open: Boolean = true)
 
-  /** Creates a new Form backed by and linked to [datasetKey]. */
-  fun createFormForDataset(datasetKey: String)
+  /**
+   * Creates a new Form backed by and linked to [datasetKey]. When [open] is true, the new Form is
+   * selected in the Survey editor.
+   */
+  fun createFormForDataset(datasetKey: String, open: Boolean = true)
 
   /**
    * Switches Form [formKey] between adding new features and updating existing ones.
@@ -326,7 +333,8 @@ class SurveyEditorViewModel(
   organizationRepository: OrganizationRepository,
   authRepository: AuthRepository,
   private val placeRepository: PlaceRepository,
-  private val generateSamplePlots: GenerateSamplePlotsUseCase = GenerateSamplePlotsUseCase(),
+  private val generateSamplePlots: GenerateSamplePlotsUseCase =
+    GenerateSamplePlotsUseCase(now = { isoUtc(platformEpochMillis()) }),
   private val inviteCollaboratorUseCase: InviteCollaboratorUseCase = InviteCollaboratorUseCase(),
   /** Whether the prototype's simulated Airplane mode is on, which disables remote place search. */
   private val isAirplaneMode: () -> Boolean = { false },
@@ -492,7 +500,7 @@ class SurveyEditorViewModel(
     fun dataset(key: String): EntityDataset? = datasets.firstOrNull { it.key == key }
 
     /** The survey's datasets as seen by the save-to logic of Form [formKey]. */
-    fun catalog(formKey: String) = datasets.map { it.toEditorDataset(formKey) }
+    fun catalog(formKey: String) = datasets.map { it.toEditorDataset(formKey, forms) }
 
     fun updateDataset(key: String, transform: (EntityDataset) -> EntityDataset) {
       val old = dataset(key) ?: return
@@ -842,7 +850,7 @@ class SurveyEditorViewModel(
     createDatasetForForm(formKey, kind, open)
   }
 
-  override fun createFormForDataset(datasetKey: String) = edit {
+  override fun createFormForDataset(datasetKey: String, open: Boolean) = edit {
     val dataset = dataset(datasetKey) ?: return@edit
     val formKey = newKey("f")
     val title =
@@ -856,7 +864,7 @@ class SurveyEditorViewModel(
     // Update dataset to link to this form.
     updateDataset(datasetKey) { it.copy(linkedFormKey = formKey) }
     forms = forms + SurveyEditorForm(formKey, form)
-    section = SurveyEditorSection.Form(formKey)
+    if (open) section = SurveyEditorSection.Form(formKey)
   }
 
   override fun setFormSaveToMode(formKey: String, mode: SaveToMode) {

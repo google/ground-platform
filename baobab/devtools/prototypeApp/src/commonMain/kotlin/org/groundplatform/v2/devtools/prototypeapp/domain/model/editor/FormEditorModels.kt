@@ -262,6 +262,11 @@ data class EditorQuestion(
   /** Where this question's choices come from when [EditorQuestionType.hasChoices] is true. */
   val choiceSource: ChoiceSource =
     if (choiceDatasetId != null) ChoiceSource.MAP_LAYER else ChoiceSource.MANUAL,
+  /**
+   * Whether data collectors may add a new map feature or table row inline while answering this
+   * question, using the dataset's creation Form.
+   */
+  val allowAddEntity: Boolean = false,
   val relevance: EditorRelevance? = null,
   /** Answer validation, exported as the bind `constraint` / `jr:constraintMsg`. */
   val validation: EditorValidation? = null,
@@ -501,14 +506,30 @@ object FormEditorValidator {
               "map layer"
             }
           val choiceDatasetId = question.choiceDatasetId.orEmpty()
+          val dataset = datasets.firstOrNull { it.id == choiceDatasetId }
           when {
             choiceDatasetId.isBlank() ->
               issues += EditorIssue(key, "Choose a $kindLabel for the options.")
-            datasets.isNotEmpty() && datasets.none { it.id == choiceDatasetId } ->
+            datasets.isNotEmpty() && dataset == null ->
               issues +=
                 EditorIssue(
                   key,
                   "Map layer or data table \"$choiceDatasetId\" no longer exists.",
+                )
+            question.allowAddEntity && dataset != null && dataset.isGenerated ->
+              issues +=
+                EditorIssue(
+                  key,
+                  "Sample plots in \"${dataset.displayName}\" are generated and can't be added by collectors.",
+                )
+            question.allowAddEntity &&
+              dataset != null &&
+              (dataset.key.isNotEmpty() || dataset.linkedFormKey != null) &&
+              !dataset.hasCreationForm ->
+              issues +=
+                EditorIssue(
+                  key,
+                  "\"${dataset.displayName}\" has no form to add new ${dataset.featureNounPlural}.",
                 )
           }
         } else {
@@ -595,6 +616,12 @@ object EditorXFormsGenerator {
 
   /** Element name of the extra choices column carrying [EditorChoice.colorHex]. */
   const val CHOICE_COLOR_COLUMN = "color"
+
+  /**
+   * Body `appearance` token indicating that data collectors can add a new map feature or table row
+   * inline while selecting from a dataset-backed choice list.
+   */
+  const val ADD_ENTITY_APPEARANCE = "add-entity"
 
   /**
    * Whether [question]'s choices are exported as an internal secondary instance plus `itemset`
@@ -997,6 +1024,11 @@ object EditorXFormsGenerator {
         question.type.appearance,
         if (question.type.isGeometry) question.capture.appearance else "",
         if (question.type.isMedia) question.mediaSource.appearance else "",
+        if (question.type.hasChoices && question.usesDatasetChoices && question.allowAddEntity) {
+          ADD_ENTITY_APPEARANCE
+        } else {
+          ""
+        },
       )
       .map { it.trim() }
       .filter { it.isNotEmpty() }

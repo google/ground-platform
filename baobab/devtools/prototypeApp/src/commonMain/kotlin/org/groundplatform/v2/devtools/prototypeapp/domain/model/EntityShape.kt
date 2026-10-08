@@ -13,6 +13,7 @@
  */
 package org.groundplatform.v2.devtools.prototypeapp.domain.model
 
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.toLatLng
 import org.groundplatform.v2.map.LatLng
 
 /** Shape of a map feature's geometry. */

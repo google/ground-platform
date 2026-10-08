@@ -23,6 +23,7 @@ import org.groundplatform.v2.devtools.prototypeapp.data.datasource.local.store.s
 import org.groundplatform.v2.devtools.prototypeapp.data.repository.SurveyRepositoryImpl
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.FormPreviewItem
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.GeospatialEntityItem
+import org.groundplatform.v2.devtools.prototypeapp.ui.datacollection.ENTITY_REF_FIELD_PATH
 
 class LaunchFormUseCaseTest {
   private val useCase = LaunchFormUseCase()

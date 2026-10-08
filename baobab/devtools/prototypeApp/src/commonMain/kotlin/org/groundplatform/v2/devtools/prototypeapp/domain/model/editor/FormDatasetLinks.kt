@@ -13,6 +13,9 @@
  */
 package org.groundplatform.v2.devtools.prototypeapp.domain.model.editor
 
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.geometryKind
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.hasGeometry
+
 /**
  * Rules tying a Form to the Map layer or Data table its submissions add features to: which kind of
  * dataset a Form feeds, the schema it implies, and the Form implied by a dataset's schema.

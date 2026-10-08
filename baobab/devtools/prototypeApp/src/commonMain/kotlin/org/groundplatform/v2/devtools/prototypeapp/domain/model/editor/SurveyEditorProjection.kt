@@ -19,6 +19,7 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.GeospatialEntity
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.LayerSourceType
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.MapLayerItem
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyMapAnchor
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.geometryKind
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.roundTo
 
 /** The runtime collections of a survey after publishing a Survey editor draft. */

@@ -21,6 +21,7 @@ import org.groundplatform.v2.core.sampling.SampleDesign
 import org.groundplatform.v2.core.sampling.SampleEncoding
 import org.groundplatform.v2.core.sampling.SamplingArea
 import org.groundplatform.v2.core.sampling.Stratum
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.geometryKind
 
 /** Progress of a running sample generation, for the progress bar. */
 data class SampleGenerationProgress(

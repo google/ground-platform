@@ -32,6 +32,7 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SurveyDet
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SurveyEditorDraft
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SurveyEditorForm
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.toEditorDataset
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.geometryKind
 
 /** Which pane of the Survey editor is showing. */
 sealed interface SurveyEditorSection {
@@ -143,7 +144,7 @@ data class SurveyEditorUiState(
 
   /** The survey's Map layers and Data tables as seen by the save-to logic of Form [formKey]. */
   fun datasetCatalog(formKey: String): List<EditorDataset> = datasets.map {
-    it.toEditorDataset(formKey)
+    it.toEditorDataset(formKey, forms)
   }
 
   /** Validation issues of [entry]'s Form, including its save-to logic. */

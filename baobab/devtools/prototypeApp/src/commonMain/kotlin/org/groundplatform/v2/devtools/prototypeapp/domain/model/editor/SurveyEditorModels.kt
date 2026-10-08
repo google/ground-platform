@@ -15,6 +15,7 @@ package org.groundplatform.v2.devtools.prototypeapp.domain.model.editor
 
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.CachedProfile
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.InvitationStatus
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.geometryKind
 
 /**
  * Defines the geographic survey area for the survey: one or more polygon parts (e.g. a mainland and

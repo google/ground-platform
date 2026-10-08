@@ -13,6 +13,8 @@
  */
 package org.groundplatform.v2.devtools.prototypeapp.domain.model
 
+import kotlin.math.roundToInt
+
 /**
  * Represents a Ground 2.0 Geospatial Entity (`EntityRecord` in an `EntityDatasetDef` with
  * `EntityType.GEOSPATIAL`) displayed on the map and in the searchable list view.
@@ -217,3 +219,86 @@ fun List<GeospatialEntityItem>.entityDatasetLayersIn(
       layer.sourceType == LayerSourceType.ENTITY_DATASET && any { it.layerId == layer.id }
     }
   }
+
+/** Geometry kind of a map feature, shown as the leading icon of list rows and details headers. */
+enum class EntityGeometryKind(val label: String) {
+  POINT("Point"),
+  LINE("Line"),
+  POLYGON("Polygon"),
+
+  /** A record without geometry, i.e. a row in a Data table. */
+  NONE("No geometry"),
+}
+
+/** Geometry kind derived from [GeospatialEntityItem.geometryTypeLabel]. */
+val GeospatialEntityItem.geometryKind: EntityGeometryKind
+  get() =
+    when {
+      geometryTypeLabel.contains("polygon", ignoreCase = true) -> EntityGeometryKind.POLYGON
+      geometryTypeLabel.contains("line", ignoreCase = true) -> EntityGeometryKind.LINE
+      geometryTypeLabel.contains("point", ignoreCase = true) -> EntityGeometryKind.POINT
+      else -> EntityGeometryKind.NONE
+    }
+
+/** True when the record has a geometry the map can pan and zoom to. */
+val GeospatialEntityItem.hasGeometry: Boolean
+  get() = geometryKind != EntityGeometryKind.NONE
+
+/**
+ * `simplestyle-spec` presentation keys and the workflow `status`. They drive map styling and the
+ * status icon, so they are left out of property listings and the map layer table.
+ */
+val EntityPresentationPropertyKeys =
+  setOf(
+    "marker-size",
+    "marker-symbol",
+    "marker-color",
+    "stroke",
+    "stroke-opacity",
+    "stroke-width",
+    "fill",
+    "fill-opacity",
+    "title",
+    "description",
+    "status",
+  )
+
+/** Organizer-defined properties of the entity, excluding presentation keys. */
+val GeospatialEntityItem.displayProperties: List<Pair<String, String>>
+  get() = properties.filterKeys { it !in EntityPresentationPropertyKeys }.toList()
+
+/**
+ * Maximum map camera zoom used when fitting a selected entity of this geometry kind into view, so
+ * small features (and points, which have no extent) aren't framed too close.
+ */
+val EntityGeometryKind.maxFramingZoom: Float
+  get() =
+    when (this) {
+      EntityGeometryKind.POINT -> 16f
+      EntityGeometryKind.LINE,
+      EntityGeometryKind.POLYGON -> 17f
+      EntityGeometryKind.NONE -> 0f
+    }
+
+/** Human-readable geometry summary (kind plus measurements in the user's unit system). */
+fun entityGeometrySummary(
+  entity: GeospatialEntityItem,
+  unitSystem: MeasurementUnitSystem,
+): String {
+  val isMetric = unitSystem == MeasurementUnitSystem.METRIC
+  fun length(meters: Int) = if (isMetric) "$meters m" else "${(meters * 3.28084).roundToInt()} ft"
+  return when (entity.geometryKind) {
+    EntityGeometryKind.POLYGON -> {
+      val area =
+        if (isMetric) {
+          "${entity.areaHectares} ha"
+        } else {
+          "${((entity.areaHectares * 2.47105) * 100.0).roundToInt() / 100.0} acres"
+        }
+      "Polygon • $area, ${length(entity.perimeterMeters)} perimeter"
+    }
+    EntityGeometryKind.LINE -> "Line • ${length(entity.perimeterMeters)}"
+    EntityGeometryKind.POINT -> "Point • ${entity.coordinatesLabel}"
+    EntityGeometryKind.NONE -> EntityGeometryKind.NONE.label
+  }
+}

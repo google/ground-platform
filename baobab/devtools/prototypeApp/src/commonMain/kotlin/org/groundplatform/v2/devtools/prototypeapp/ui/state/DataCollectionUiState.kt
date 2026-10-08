@@ -22,8 +22,8 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.SharedPdfSheetSt
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SubmissionGeometryPolygon
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SubmissionPreviewItem
 import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.LaunchFormUseCase
-import org.groundplatform.v2.devtools.prototypeapp.map.DraftGeometry
-import org.groundplatform.v2.devtools.prototypeapp.map.FormGeometryOverlay
+import org.groundplatform.v2.devtools.prototypeapp.ui.map.DraftGeometry
+import org.groundplatform.v2.devtools.prototypeapp.ui.map.FormGeometryOverlay
 
 /**
  * Outcomes of data collection actions that reach beyond the slice, applied by the app shell to the

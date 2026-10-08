@@ -19,7 +19,10 @@ package org.groundplatform.v2.devtools.prototypeapp.domain.model.editor
  */
 
 /** The Form editor's view of this dataset, from the point of view of Form [formKey]. */
-internal fun EntityDataset.toEditorDataset(formKey: String): EditorDataset =
+internal fun EntityDataset.toEditorDataset(
+  formKey: String,
+  forms: List<SurveyEditorForm> = emptyList(),
+): EditorDataset =
   EditorDataset(
     id = id,
     displayName = displayName,
@@ -50,6 +53,10 @@ internal fun EntityDataset.toEditorDataset(formKey: String): EditorDataset =
         )
       },
     isLinkedToThisForm = linkedFormKey == formKey,
+    key = key,
+    linkedFormKey = linkedFormKey,
+    linkedFormTitle = linkedFormKey?.let { fk -> forms.firstOrNull { it.key == fk }?.form?.title },
+    isGenerated = isGenerated,
   )
 
 /**
@@ -57,7 +64,7 @@ internal fun EntityDataset.toEditorDataset(formKey: String): EditorDataset =
  * embedded, since published Forms have no CSV attachments in this prototype.
  */
 fun SurveyEditorDraft.publishedFormXml(entry: SurveyEditorForm): String {
-  val catalog = datasets.map { it.toEditorDataset(entry.key) }
+  val catalog = datasets.map { it.toEditorDataset(entry.key, forms) }
   return EditorXFormsGenerator.toXml(
     entry.form,
     SaveToRules.saveTarget(entry.form, catalog),

@@ -84,9 +84,22 @@ import androidx.compose.ui.unit.sp
 import org.groundplatform.v2.core.forms.ui.GroundBadgeTone
 import org.groundplatform.v2.core.forms.ui.GroundTheme
 import org.groundplatform.v2.core.forms.ui.GroundTonalBadge
-import org.groundplatform.v2.devtools.prototypeapp.organization.OrganizationPage
-import org.groundplatform.v2.devtools.prototypeapp.organization.OrganizationsPage
-import org.groundplatform.v2.devtools.prototypeapp.surveyeditor.SurveyEditorPage
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.DeviceFormFactor
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.DeviceOrientation
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.MainDrawerSubView
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.MainSurveyViewMode
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.PrototypeScreen
+import org.groundplatform.v2.devtools.prototypeapp.ui.common.GroundFilterChip
+import org.groundplatform.v2.devtools.prototypeapp.ui.common.horizontalScrollWithMouseDrag
+import org.groundplatform.v2.devtools.prototypeapp.ui.dashboard.WebDashboardPage
+import org.groundplatform.v2.devtools.prototypeapp.ui.dashboard.WebSurveysPage
+import org.groundplatform.v2.devtools.prototypeapp.ui.onboarding.MobileScreenHost
+import org.groundplatform.v2.devtools.prototypeapp.ui.onboarding.WebSignInPage
+import org.groundplatform.v2.devtools.prototypeapp.ui.organization.OrganizationPage
+import org.groundplatform.v2.devtools.prototypeapp.ui.organization.OrganizationsPage
+import org.groundplatform.v2.devtools.prototypeapp.ui.surveyeditor.SurveyEditorPage
+import org.groundplatform.v2.devtools.prototypeapp.ui.workbench.PrototypeDebugToolsButton
+import org.groundplatform.v2.devtools.prototypeapp.ui.workbench.PrototypeXFormsWorkbenchPanel
 
 /** Top-level pages of the prototype web app, addressable via the URL hash (e.g. `#dashboard`). */
 enum class PrototypeWorkbenchPage(val label: String, val hash: String) {

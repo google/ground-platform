@@ -160,7 +160,10 @@ typealias OfflineTilePackageItem =
 typealias DownloadSurveyEntryOrigin =
   org.groundplatform.v2.devtools.prototypeapp.domain.model.DownloadSurveyEntryOrigin
 
-typealias AppDataHolder = org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.AppDataHolder
+typealias AppDataHolder = org.groundplatform.v2.devtools.prototypeapp.di.AppDataHolder
+
+typealias EntityGeometryKind =
+  org.groundplatform.v2.devtools.prototypeapp.domain.model.EntityGeometryKind
 
 typealias WorkbenchUiState = org.groundplatform.v2.devtools.prototypeapp.ui.state.WorkbenchUiState
 

@@ -24,12 +24,13 @@ import kotlin.test.assertTrue
 import org.groundplatform.v2.core.forms.ui.FormWizardController
 import org.groundplatform.v2.core.forms.ui.MapDrawingKind
 import org.groundplatform.v2.core.forms.ui.WorkbenchExampleForm
-import org.groundplatform.v2.devtools.prototypeapp.XFormsParseCache
 import org.groundplatform.v2.devtools.prototypeapp.client.pdf.PdfExportResult
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.MainSurveyViewMode
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SyncStatus
 import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.LaunchFormUseCase
+import org.groundplatform.v2.devtools.prototypeapp.ui.datacollection.ENTITY_REF_FIELD_PATH
 import org.groundplatform.v2.devtools.prototypeapp.ui.state.DataCollectionEvent
+import org.groundplatform.v2.devtools.prototypeapp.ui.workbench.XFormsParseCache
 
 /** See [OnboardingViewModelTest] for why fixtures are built outside `runNow`. */
 class DataCollectionViewModelTest {
