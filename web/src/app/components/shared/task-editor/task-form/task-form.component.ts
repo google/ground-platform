@@ -162,6 +162,7 @@ export class TaskFormComponent {
   @Input() formGroup!: FormGroup;
   @Input() formGroupIndex!: number;
   isCreationMode = input<boolean>(false);
+  typeLocked = input<boolean>(false);
 
   expanded = input<boolean>(false);
 
@@ -185,6 +186,8 @@ export class TaskFormComponent {
   TaskGroup = TaskGroup;
 
   TaskType = TaskType;
+
+  typeLockedMessage = $localize`:@@app.taskEditor.typeLocked:The type of a task can't be changed once the survey is published. Delete the task and add a new one instead.`;
 
   TaskTypeOptions = TaskTypeOptions;
 
@@ -286,6 +289,8 @@ export class TaskFormComponent {
   }
 
   onTaskTypeSelect(taskTypeOption: TaskTypeOption): void {
+    if (this.typeLocked()) return;
+
     this.taskTypeOption = taskTypeOption;
 
     const { type, cardinality } = this.taskTypeOption;
@@ -299,6 +304,8 @@ export class TaskFormComponent {
   }
 
   onTaskGroupSelect(taskGroup: TaskGroup): void {
+    if (this.typeLocked()) return;
+
     const taskType = taskGroupToTypes.get(taskGroup)?.first();
 
     this.typeControl.setValue(taskType);
