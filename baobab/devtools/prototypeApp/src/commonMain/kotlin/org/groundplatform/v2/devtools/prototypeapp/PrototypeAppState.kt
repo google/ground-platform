@@ -18,7 +18,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import groundplatform.v2.forms.FormDef
 import groundplatform.v2.forms.RecordInstance
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import org.groundplatform.v2.core.forms.model.EntityState
 import org.groundplatform.v2.core.forms.serialization.XFormsXmlSerializer
@@ -42,43 +41,48 @@ import org.groundplatform.v2.devtools.prototypeapp.ui.state.FormFocusRequest
 import org.groundplatform.v2.devtools.prototypeapp.ui.state.MapFramingRequest
 import org.groundplatform.v2.devtools.prototypeapp.ui.state.OnboardingEvent
 import org.groundplatform.v2.devtools.prototypeapp.ui.state.OrganizationEvent
-import org.groundplatform.v2.devtools.prototypeapp.ui.state.PrototypeUiState
 import org.groundplatform.v2.devtools.prototypeapp.ui.state.SettingsEvent
 import org.groundplatform.v2.devtools.prototypeapp.ui.state.SurveyEditorEvent
 import org.groundplatform.v2.devtools.prototypeapp.ui.state.SurveyMapEvent
 import org.groundplatform.v2.devtools.prototypeapp.ui.state.SurveyMapUiState
 import org.groundplatform.v2.devtools.prototypeapp.ui.state.WebMapDrawingHost
+import org.groundplatform.v2.devtools.prototypeapp.ui.state.WorkbenchEvent
+import org.groundplatform.v2.devtools.prototypeapp.ui.state.WorkbenchUiState
+import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.AppDataHolder
 import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.DashboardViewModel
 import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.DataCollectionViewModel
 import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.OnboardingViewModel
 import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.OrganizationViewModel
-import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.PrototypeAppViewModel
 import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.SettingsViewModel
 import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.SurveyEditorViewModel
 import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.SurveyMapViewModel
+import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.WorkbenchViewModel
 import org.groundplatform.v2.map.CameraPosition
 import org.groundplatform.v2.map.LatLng
 import org.groundplatform.v2.map.LngLatBounds
 
 /**
- * State controller for the Ground 2.0 UI Prototype workbench (`devtools/prototypeApp`).
+ * Application shell and navigation coordinator for the Ground 2.0 UI Prototype
+ * (`devtools/prototypeApp`).
  *
- * Manages both the onboarding screens (`Sign In` -> `Terms of Service` -> `Download survey`) and
- * the **Main Survey UI** (`Map` view with geospatial entities, `Layers` filter popover, `1:1` and
- * `1:N` entity bottom sheets, `List` view with searchable forms, entities, and submissions, and the
- * Hamburger Navigation Drawer).
+ * Wires the shared [AppDataHolder] (owning `LocalStore`, domain repositories, and use cases) to all
+ * feature ViewModels (`OnboardingViewModel`, `SettingsViewModel`, `SurveyMapViewModel`,
+ * `DashboardViewModel`, `OrganizationViewModel`, `SurveyEditorViewModel`,
+ * `DataCollectionViewModel`, `WorkbenchViewModel`), routes cross-feature events between them, and
+ * owns app-shell navigation state (`currentScreen`, `activeWorkbenchPage`, `mainViewMode`,
+ * `isDrawerOpen`, `activeDrawerSubView`, `activeSurveyNotice`).
  */
 class PrototypeAppState(
   initialScreen: PrototypeScreen = PrototypeScreen.SIGN_IN,
-  val viewModel: PrototypeAppViewModel = PrototypeAppViewModel(initialScreen = initialScreen),
+  val dataHolder: AppDataHolder = AppDataHolder(),
 ) {
   /**
    * Latest snapshot of everything read from the local data store (the single source of truth for
    * surveys, survey content, mutations, places, and settings). Kept current by collecting
-   * [PrototypeAppViewModel.appData]; all data properties below are read-only views over it, and all
-   * data changes are written through the repositories.
+   * [AppDataHolder.appData]; all data properties below are read-only views over it, and all data
+   * changes are written through the repositories.
    */
-  private var data by mutableStateOf(viewModel.appData.value)
+  private var data by mutableStateOf(dataHolder.appData.value)
 
   /**
    * ViewModel of the onboarding flow (Sign In → Terms of Service → Download survey). Its screens
@@ -87,10 +91,10 @@ class PrototypeAppState(
    */
   val onboarding: OnboardingViewModel =
     OnboardingViewModel(
-      authRepository = viewModel.authRepository,
-      surveyRepository = viewModel.surveyRepository,
-      organizationRepository = viewModel.organizationRepository,
-      scope = viewModel.scope,
+      authRepository = dataHolder.authRepository,
+      surveyRepository = dataHolder.surveyRepository,
+      organizationRepository = dataHolder.organizationRepository,
+      scope = dataHolder.scope,
     )
 
   private var onboardingState by mutableStateOf(onboarding.uiState.value)
@@ -101,10 +105,10 @@ class PrototypeAppState(
    */
   val settings: SettingsViewModel =
     SettingsViewModel(
-      settingsRepository = viewModel.settingsRepository,
-      surveyRepository = viewModel.surveyRepository,
-      mutationRepository = viewModel.mutationRepository,
-      scope = viewModel.scope,
+      settingsRepository = dataHolder.settingsRepository,
+      surveyRepository = dataHolder.surveyRepository,
+      mutationRepository = dataHolder.mutationRepository,
+      scope = dataHolder.scope,
     )
 
   private var settingsState by mutableStateOf(settings.uiState.value)
@@ -117,14 +121,14 @@ class PrototypeAppState(
    */
   val surveyMap: SurveyMapViewModel =
     SurveyMapViewModel(
-      surveyRepository = viewModel.surveyRepository,
-      organizationRepository = viewModel.organizationRepository,
-      settingsRepository = viewModel.settingsRepository,
-      locationRepository = viewModel.locationRepository,
-      placeRepository = viewModel.placeRepository,
-      scope = viewModel.scope,
-      clusterMapFeatures = viewModel.clusterMapFeaturesUseCase,
-      computeWayfindingNavigation = viewModel.computeWayfindingNavigationUseCase,
+      surveyRepository = dataHolder.surveyRepository,
+      organizationRepository = dataHolder.organizationRepository,
+      settingsRepository = dataHolder.settingsRepository,
+      locationRepository = dataHolder.locationRepository,
+      placeRepository = dataHolder.placeRepository,
+      scope = dataHolder.scope,
+      clusterMapFeatures = dataHolder.clusterMapFeaturesUseCase,
+      computeWayfindingNavigation = dataHolder.computeWayfindingNavigationUseCase,
     )
 
   private var mapState by mutableStateOf(surveyMap.uiState.value)
@@ -141,13 +145,13 @@ class PrototypeAppState(
    */
   val dashboard: DashboardViewModel =
     DashboardViewModel(
-      surveyRepository = viewModel.surveyRepository,
-      organizationRepository = viewModel.organizationRepository,
-      authRepository = viewModel.authRepository,
-      mutationRepository = viewModel.mutationRepository,
-      createSurveyUseCase = viewModel.createSurveyUseCase,
-      syncMutationsUseCase = viewModel.syncMutationsUseCase,
-      scope = viewModel.scope,
+      surveyRepository = dataHolder.surveyRepository,
+      organizationRepository = dataHolder.organizationRepository,
+      authRepository = dataHolder.authRepository,
+      mutationRepository = dataHolder.mutationRepository,
+      createSurveyUseCase = dataHolder.createSurveyUseCase,
+      syncMutationsUseCase = dataHolder.syncMutationsUseCase,
+      scope = dataHolder.scope,
     )
 
   private var dashboardState by mutableStateOf(dashboard.uiState.value)
@@ -159,13 +163,13 @@ class PrototypeAppState(
    */
   val organization: OrganizationViewModel =
     OrganizationViewModel(
-      organizationRepository = viewModel.organizationRepository,
-      surveyRepository = viewModel.surveyRepository,
-      authRepository = viewModel.authRepository,
-      createOrganizationUseCase = viewModel.createOrganizationUseCase,
-      inviteMemberUseCase = viewModel.inviteOrganizationMemberUseCase,
-      manageImagerySourcesUseCase = viewModel.manageImagerySourcesUseCase,
-      scope = viewModel.scope,
+      organizationRepository = dataHolder.organizationRepository,
+      surveyRepository = dataHolder.surveyRepository,
+      authRepository = dataHolder.authRepository,
+      createOrganizationUseCase = dataHolder.createOrganizationUseCase,
+      inviteMemberUseCase = dataHolder.inviteOrganizationMemberUseCase,
+      manageImagerySourcesUseCase = dataHolder.manageImagerySourcesUseCase,
+      scope = dataHolder.scope,
     )
 
   private var organizationState by mutableStateOf(organization.uiState.value)
@@ -178,15 +182,15 @@ class PrototypeAppState(
    */
   val surveyEditor: SurveyEditorViewModel =
     SurveyEditorViewModel(
-      surveyRepository = viewModel.surveyRepository,
-      surveyEditorRepository = viewModel.surveyEditorRepository,
-      organizationRepository = viewModel.organizationRepository,
-      authRepository = viewModel.authRepository,
-      placeRepository = viewModel.placeRepository,
-      generateSamplePlots = viewModel.generateSamplePlotsUseCase,
-      inviteCollaboratorUseCase = viewModel.inviteCollaboratorUseCase,
+      surveyRepository = dataHolder.surveyRepository,
+      surveyEditorRepository = dataHolder.surveyEditorRepository,
+      organizationRepository = dataHolder.organizationRepository,
+      authRepository = dataHolder.authRepository,
+      placeRepository = dataHolder.placeRepository,
+      generateSamplePlots = dataHolder.generateSamplePlotsUseCase,
+      inviteCollaboratorUseCase = dataHolder.inviteCollaboratorUseCase,
       isAirplaneMode = { mapState.isAirplaneMode },
-      scope = viewModel.scope,
+      scope = dataHolder.scope,
     )
 
   private var surveyEditorState by mutableStateOf(surveyEditor.uiState.value)
@@ -200,13 +204,13 @@ class PrototypeAppState(
    */
   val dataCollection: DataCollectionViewModel =
     DataCollectionViewModel(
-      surveyRepository = viewModel.surveyRepository,
-      settingsRepository = viewModel.settingsRepository,
-      authRepository = viewModel.authRepository,
-      locationRepository = viewModel.locationRepository,
-      completeFormSubmission = viewModel.completeFormSubmissionUseCase,
-      launchForm = viewModel.launchFormUseCase,
-      scope = viewModel.scope,
+      surveyRepository = dataHolder.surveyRepository,
+      settingsRepository = dataHolder.settingsRepository,
+      authRepository = dataHolder.authRepository,
+      locationRepository = dataHolder.locationRepository,
+      completeFormSubmission = dataHolder.completeFormSubmissionUseCase,
+      launchForm = dataHolder.launchFormUseCase,
+      scope = dataHolder.scope,
     )
 
   private var dataCollectionState by mutableStateOf(dataCollection.uiState.value)
@@ -215,29 +219,91 @@ class PrototypeAppState(
   val dataCollectionUiState: DataCollectionUiState
     get() = dataCollectionState
 
+  /**
+   * ViewModel of the prototype workbench chrome: simulated device form factor & orientation, the
+   * live XForms `<h:html>` editor & example survey switcher, and prototype simulation/reset tools.
+   */
+  val workbench: WorkbenchViewModel =
+    WorkbenchViewModel(
+      surveyRepository = dataHolder.surveyRepository,
+      sampleDataRepository = dataHolder.sampleDataRepository,
+      generateRandomSitesUseCase = dataHolder.generateRandomSitesUseCase,
+      scope = dataHolder.scope,
+    )
+
+  private var workbenchState by mutableStateOf(workbench.uiState.value)
+
+  /** Latest [WorkbenchUiState], for views that build the workbench chrome from the app shell. */
+  val workbenchUiState: WorkbenchUiState
+    get() = workbenchState
+
   init {
-    viewModel.scope.launch { viewModel.appData.collect { data = it } }
-    viewModel.scope.launch { onboarding.uiState.collect { onboardingState = it } }
-    viewModel.scope.launch { onboarding.events.collect(::onOnboardingEvent) }
-    viewModel.scope.launch { settings.uiState.collect { settingsState = it } }
-    viewModel.scope.launch {
+    dataHolder.scope.launch { dataHolder.appData.collect { data = it } }
+    dataHolder.scope.launch { onboarding.uiState.collect { onboardingState = it } }
+    dataHolder.scope.launch { onboarding.events.collect(::onOnboardingEvent) }
+    dataHolder.scope.launch { settings.uiState.collect { settingsState = it } }
+    dataHolder.scope.launch {
       settings.events.collect { event ->
         when (event) {
           is SettingsEvent.Notice -> activeSurveyNotice = event.message
         }
       }
     }
-    viewModel.scope.launch { surveyMap.uiState.collect { mapState = it } }
-    viewModel.scope.launch { surveyMap.events.collect(::onSurveyMapEvent) }
-    viewModel.scope.launch { dashboard.uiState.collect { dashboardState = it } }
-    viewModel.scope.launch { dashboard.events.collect(::onDashboardEvent) }
-    viewModel.scope.launch { organization.uiState.collect { organizationState = it } }
-    viewModel.scope.launch { organization.events.collect(::onOrganizationEvent) }
-    viewModel.scope.launch { surveyEditor.uiState.collect { surveyEditorState = it } }
-    viewModel.scope.launch { surveyEditor.events.collect(::onSurveyEditorEvent) }
-    viewModel.scope.launch { dataCollection.uiState.collect { dataCollectionState = it } }
-    viewModel.scope.launch { dataCollection.events.collect(::onDataCollectionEvent) }
+    dataHolder.scope.launch { surveyMap.uiState.collect { mapState = it } }
+    dataHolder.scope.launch { surveyMap.events.collect(::onSurveyMapEvent) }
+    dataHolder.scope.launch { dashboard.uiState.collect { dashboardState = it } }
+    dataHolder.scope.launch { dashboard.events.collect(::onDashboardEvent) }
+    dataHolder.scope.launch { organization.uiState.collect { organizationState = it } }
+    dataHolder.scope.launch { organization.events.collect(::onOrganizationEvent) }
+    dataHolder.scope.launch { surveyEditor.uiState.collect { surveyEditorState = it } }
+    dataHolder.scope.launch { surveyEditor.events.collect(::onSurveyEditorEvent) }
+    dataHolder.scope.launch { dataCollection.uiState.collect { dataCollectionState = it } }
+    dataHolder.scope.launch { dataCollection.events.collect(::onDataCollectionEvent) }
+    dataHolder.scope.launch { workbench.uiState.collect { workbenchState = it } }
+    dataHolder.scope.launch { workbench.events.collect(::onWorkbenchEvent) }
     dataCollection.updateCustomFormDef(parseDefaultPrototypeFormDef(), isPreset = true)
+  }
+
+  /** Applies a workbench outcome to other feature ViewModels and the app shell. */
+  private fun onWorkbenchEvent(event: WorkbenchEvent) {
+    when (event) {
+      is WorkbenchEvent.CustomFormDefChanged ->
+        dataCollection.updateCustomFormDef(
+          formDef = event.formDef,
+          isPreset = event.isPreset,
+          relaunchOpenForm = event.relaunchOpenForm,
+        )
+      is WorkbenchEvent.ExampleSurveySelected -> {
+        openSurvey(event.surveyId)
+        if (event.launchImmediately) {
+          launchActiveOrDefaultFormForTesting()
+        }
+      }
+      is WorkbenchEvent.DefaultSurveyRestored -> openSurvey(event.surveyId)
+      is WorkbenchEvent.RandomSitesAdded -> {
+        currentScreen = PrototypeScreen.MAIN_SURVEY
+        mainViewMode = MainSurveyViewMode.MAP
+        activeDrawerSubView = MainDrawerSubView.NONE
+        activeSurveyNotice = event.noticeMessage
+      }
+      WorkbenchEvent.PrototypeReset -> {
+        currentScreen = PrototypeScreen.SIGN_IN
+        onboarding.reset()
+        settings.reset()
+        surveyMap.reset()
+        dashboard.reset()
+        organization.reset()
+        surveyEditor.reset()
+        dataCollection.reset()
+        activeSurveyNotice = null
+        mainViewMode = MainSurveyViewMode.MAP
+        isDrawerOpen = false
+        activeDrawerSubView = MainDrawerSubView.NONE
+        mapboxPlacesApiResults = emptyList()
+        isMapboxPlacesSearching = false
+      }
+      is WorkbenchEvent.Notice -> activeSurveyNotice = event.message
+    }
   }
 
   /**
@@ -373,97 +439,9 @@ class PrototypeAppState(
     }
   }
 
-  /** Writes [surveys] to the local data store (inserting or replacing by ID). */
-  private fun storeSurveys(surveys: List<SurveyPreviewItem>) {
-    viewModel.launch { viewModel.surveyRepository.setSurveys(surveys) }
-  }
-
   /** Writes the active survey's [entities] to the local data store. */
   private fun storeEntities(entities: List<GeospatialEntityItem>) {
-    viewModel.launch { viewModel.surveyRepository.setEntities(entities) }
-  }
-
-  /** Writes the active survey's standalone [submissions] to the local data store. */
-  private fun storeStandaloneSubmissions(submissions: List<SubmissionPreviewItem>) {
-    viewModel.launch { viewModel.surveyRepository.setStandaloneSubmissions(submissions) }
-  }
-
-  /**
-   * Immutable [StateFlow] of [PrototypeUiState] exposed by the underlying MVVM
-   * [PrototypeAppViewModel] per Section 6 of `docs/technical/client/architecture.md`.
-   */
-  val uiState: StateFlow<PrototypeUiState>
-    get() {
-      syncViewModelState()
-      return viewModel.uiState
-    }
-
-  /**
-   * Synchronizes session (non-persisted) state into [viewModel]. Data fields come from the local
-   * data store and are applied by the view model itself.
-   */
-  fun syncViewModelState() {
-    viewModel.updateUiState { current ->
-      current.copy(
-        currentScreen = currentScreen,
-        isSignedIn = isSignedIn,
-        signedInUserEmail = signedInUserEmail,
-        signedInUserName = signedInUserName,
-        termsCheckboxChecked = termsCheckboxChecked,
-        hasAcceptedTerms = hasAcceptedTerms,
-        downloadSurveyEntryOrigin = downloadSurveyEntryOrigin,
-        isDownloadSurveySignOutPromptOpen = isDownloadSurveySignOutPromptOpen,
-        searchQuery = searchQuery,
-        activeSurveyNotice = activeSurveyNotice,
-        isDarkTheme = isDarkTheme,
-        deviceFormFactor = deviceFormFactor,
-        deviceOrientation = deviceOrientation,
-        mainViewMode = mainViewMode,
-        isLayersSheetOpen = isLayersSheetOpen,
-        selectedBasemapType = selectedBasemapType,
-        selectedOfflineBasemapStyle = offlineBasemapStyle,
-        enabledImagerySourceIds = enabledImagerySourceIds,
-        isDrawerOpen = isDrawerOpen,
-        activeDrawerSubView = activeDrawerSubView,
-        selectedUploadStatusFilter = selectedUploadStatusFilter,
-        mapboxPlacesApiResults = mapboxPlacesApiResults,
-        isMapboxPlacesSearching = isMapboxPlacesSearching,
-        isAirplaneMode = isAirplaneMode,
-        selectedEntityId = selectedEntityId,
-        selectedClusterId = selectedClusterId,
-        selectedPlaceId = selectedPlaceId,
-        lastSelectedPlace = selectedPlace,
-        isEntityBottomSheetExpanded = isEntityBottomSheetExpanded,
-        selectedSubmissionId = selectedSubmissionId,
-        listSearchQuery = listSearchQuery,
-        listFilterTab = listFilterTab,
-        userGpsNormalizedX = userGpsNormalizedX,
-        userGpsNormalizedY = userGpsNormalizedY,
-        userGpsCoordinatesLabel = userGpsCoordinatesLabel,
-        gnssSatelliteCount = gnssSatelliteCount,
-        gnssAccuracyMeters = gnssAccuracyMeters,
-        isCameraFollowingUser = isCameraFollowingUser,
-        locationLockState = locationLockState,
-        mapZoomDelta = mapZoomDelta,
-        mapPanOffsetX = mapPanOffsetX,
-        mapPanOffsetY = mapPanOffsetY,
-        activeQrCodeEntityId = activeQrCodeEntityId,
-        activeSharedPdfSheet = activeSharedPdfSheet,
-        navigationTargetKind = navigationTargetKind,
-        navigationTargetId = navigationTargetId,
-        customXFormsXml = customXFormsXml,
-        selectedWorkbenchExampleForm = selectedWorkbenchExampleForm,
-        customFormDef = customFormDef,
-        xformsXmlError = xformsXmlError,
-        activeDataCollectionEntityId = activeDataCollectionEntityId,
-        activeDataCollectionFormId = activeDataCollectionFormId,
-        activeFormWizardController = activeFormWizardController,
-        isAvailableFormsSheetOpen = isAvailableFormsSheetOpen,
-        wasFormLaunchedWithoutEntity = wasFormLaunchedWithoutEntity,
-        entityRefSelectorViewMode = entityRefSelectorViewMode,
-        entityRefSearchQuery = entityRefSearchQuery,
-      )
-    }
+    dataHolder.launch { dataHolder.surveyRepository.setEntities(entities) }
   }
 
   var currentScreen by mutableStateOf(initialScreen)
@@ -486,34 +464,34 @@ class PrototypeAppState(
   }
 
   /** Active hardware preview bezel form factor in the wrapper workbench (`Mobile` vs `Tablet`). */
-  var deviceFormFactor by mutableStateOf(DeviceFormFactor.MOBILE)
-    private set
+  val deviceFormFactor: DeviceFormFactor
+    get() = workbenchState.deviceFormFactor
 
   /** Active screen orientation of the hardware preview bezel (`Portrait` vs `Landscape`). */
-  var deviceOrientation by mutableStateOf(deviceFormFactor.defaultOrientation)
-    private set
+  val deviceOrientation: DeviceOrientation
+    get() = workbenchState.deviceOrientation
 
   /** True when the active device is rotated away from its form factor's default orientation. */
   val isDeviceRotated: Boolean
-    get() = deviceOrientation != deviceFormFactor.defaultOrientation
+    get() = workbenchState.isDeviceRotated
 
   /**
    * Effective width in `dp` of the hardware bezel for the current [deviceFormFactor] and
    * [deviceOrientation].
    */
   val effectiveFrameWidthDp: Int
-    get() = deviceFormFactor.widthForOrientation(deviceOrientation)
+    get() = workbenchState.effectiveFrameWidthDp
 
   /**
    * Effective height in `dp` of the hardware bezel for the current [deviceFormFactor] and
    * [deviceOrientation].
    */
   val effectiveFrameHeightDp: Int
-    get() = deviceFormFactor.heightForOrientation(deviceOrientation)
+    get() = workbenchState.effectiveFrameHeightDp
 
   /** Formatted `W × H dp` label for the current [deviceFormFactor] and [deviceOrientation]. */
   val effectiveDimensionsLabel: String
-    get() = deviceFormFactor.dimensionsLabelForOrientation(deviceOrientation)
+    get() = workbenchState.effectiveDimensionsLabel
 
   val isSignedIn: Boolean
     get() = onboardingState.isSignedIn
@@ -1275,24 +1253,23 @@ class PrototypeAppState(
    * Currently selected swappable example form in the Prototype App Workbench (
    * [WorkbenchExampleForm]), or `null` when custom XML has been manually edited.
    */
-  var selectedWorkbenchExampleForm by
-    mutableStateOf<WorkbenchExampleForm?>(WorkbenchExampleForm.ALL_FIELD_TYPES)
-    private set
+  val selectedWorkbenchExampleForm: WorkbenchExampleForm?
+    get() = workbenchState.selectedWorkbenchExampleForm
 
   /**
    * Custom XForms `<h:html>` definition editable in the Prototype App Chrome
    * (`UxDesignerInspectorPanel`). Initialized to a rich EUDR / Shade-Tree Field Survey XForms XML
    * that parses cleanly with [XFormsXmlSerializer.deserializeFormDef].
    */
-  var customXFormsXml by mutableStateOf(DEFAULT_PROTOTYPE_XFORMS_XML)
-    private set
+  val customXFormsXml: String
+    get() = workbenchState.customXFormsXml
 
   /**
    * Parse error message from [XFormsXmlSerializer.deserializeFormDef] when [customXFormsXml] is
    * invalid, or `null` when valid.
    */
-  var xformsXmlError by mutableStateOf<String?>(null)
-    private set
+  val xformsXmlError: String?
+    get() = workbenchState.xformsXmlError
 
   /**
    * Parsed [FormDef] from [customXFormsXml] (`null` when [customXFormsXml] is blank or invalid;
@@ -1552,7 +1529,7 @@ class PrototypeAppState(
    * zooms out (`2^(-mapZoomDelta)`). Returns `0f` when clustering is inactive.
    */
   val mapClusterRadiusNormalized: Float
-    get() = viewModel.clusterMapFeaturesUseCase.clusterRadiusNormalized(mapZoomDelta)
+    get() = dataHolder.clusterMapFeaturesUseCase.clusterRadiusNormalized(mapZoomDelta)
 
   /**
    * All visible map features (`visibleMapEntities`) normalized into [MapClusterFeatureItem]
@@ -1664,7 +1641,7 @@ class PrototypeAppState(
   val filteredListPlaces: List<SurveyPlaceItem>
     get() {
       val (surveyLng, surveyLat) = activeSurveyBaseLngLat()
-      return viewModel.searchPlacesUseCase(
+      return dataHolder.searchPlacesUseCase(
         query = listSearchQuery,
         isAirplaneMode = isAirplaneMode,
         listFilterTab = listFilterTab,
@@ -1690,7 +1667,7 @@ class PrototypeAppState(
    */
   private fun parseCoordinateQueryToPlace(query: String): SurveyPlaceItem? {
     val (surveyLng, surveyLat) = activeSurveyBaseLngLat()
-    return viewModel.searchPlacesUseCase.parseCoordinateQueryToPlace(
+    return dataHolder.searchPlacesUseCase.parseCoordinateQueryToPlace(
       query = query,
       surveyBaseLng = surveyLng,
       surveyBaseLat = surveyLat,
@@ -1868,7 +1845,7 @@ class PrototypeAppState(
 
   /** Makes [surveyId] the active survey and clears every selection scoped to the previous one. */
   private fun activateSurvey(surveyId: String) {
-    viewModel.launch { viewModel.surveyRepository.setActiveSurveyId(surveyId) }
+    dataHolder.launch { dataHolder.surveyRepository.setActiveSurveyId(surveyId) }
     dashboard.clearLayerSelection()
     clearSelectionsForActivatedSurvey(surveyId)
   }
@@ -1879,16 +1856,7 @@ class PrototypeAppState(
    */
   private fun clearSelectionsForActivatedSurvey(surveyId: String) {
     dataCollection.onSurveyActivated()
-    data.surveyConfigs[surveyId]?.primaryFormXml?.let { xml ->
-      selectedWorkbenchExampleForm =
-        WorkbenchExampleForm.entries.firstOrNull { it.xformsXml == xml }
-      customXFormsXml = xml
-      xformsXmlError = null
-      dataCollection.updateCustomFormDef(
-        XFormsParseCache.formDef(xml),
-        isPreset = selectedWorkbenchExampleForm != null,
-      )
-    }
+    workbench.onSurveyActivated(surveyId)
   }
 
   /** Whether the active survey exists in the store, so survey pages can open it. */
@@ -1903,40 +1871,11 @@ class PrototypeAppState(
     dashboard.createSurvey(title, organizationId)
 
   /** Updates the title and description of the currently active survey. */
-  fun updateActiveSurveyDetails(title: String, description: String) {
-    storeSurveys(
-      surveys.map { item ->
-        if (item.id == activeSurveyId) {
-          item.copy(
-            title = title.ifBlank { item.title },
-            description = description.ifBlank { item.description },
-          )
-        } else {
-          item
-        }
-      }
-    )
-  }
+  fun updateActiveSurveyDetails(title: String, description: String) =
+    workbench.updateActiveSurveyDetails(title, description)
 
   /** Toggles the downloaded status of a survey (for UX prototyping & testing). */
-  fun toggleSurveyDownloaded(surveyId: String) {
-    storeSurveys(
-      surveys.map { item ->
-        if (item.id == surveyId) {
-          val nextState = !item.isDownloaded
-          activeSurveyNotice =
-            if (nextState) {
-              "Downloaded \"${item.title}\" (${item.offlineSizeLabel}) for offline use."
-            } else {
-              "Removed offline copy of \"${item.title}\"."
-            }
-          item.copy(isDownloaded = nextState)
-        } else {
-          item
-        }
-      }
-    )
-  }
+  fun toggleSurveyDownloaded(surveyId: String) = workbench.toggleSurveyDownloaded(surveyId)
 
   /** Asks before removing [surveyId]'s offline copy; downloads it instead if not downloaded. */
   fun promptRemoveDownloadedSurvey(surveyId: String) =
@@ -2333,32 +2272,7 @@ class PrototypeAppState(
    * updates [customFormDef] and [xformsXmlError]. If a form runner is currently open and the new
    * [FormDef] is valid, [DataCollectionViewModel] refreshes [activeFormWizardController] with it.
    */
-  fun updateCustomXFormsXml(xml: String) {
-    customXFormsXml = xml
-    selectedWorkbenchExampleForm =
-      WorkbenchExampleForm.entries.firstOrNull { it.xformsXml.trim() == xml.trim() }
-        ?: if (xml.trim() == DEFAULT_PROTOTYPE_XFORMS_XML.trim()) {
-          WorkbenchExampleForm.ALL_FIELD_TYPES
-        } else {
-          null
-        }
-    if (xml.isBlank()) {
-      xformsXmlError = null
-      dataCollection.updateCustomFormDef(null, isPreset = false)
-      return
-    }
-    try {
-      val parsed = XFormsXmlSerializer.deserializeFormDef(xml)
-      xformsXmlError = null
-      dataCollection.updateCustomFormDef(
-        parsed,
-        isPreset = selectedWorkbenchExampleForm != null,
-      )
-    } catch (e: Exception) {
-      xformsXmlError = e.message ?: "Invalid XForms XML"
-      dataCollection.updateCustomFormDef(null, isPreset = false, relaunchOpenForm = false)
-    }
-  }
+  fun updateCustomXFormsXml(xml: String) = workbench.updateCustomXFormsXml(xml)
 
   /**
    * Swaps the active example survey & form in the workbench to [example], switching to the
@@ -2369,25 +2283,10 @@ class PrototypeAppState(
   fun selectWorkbenchExampleForm(
     example: WorkbenchExampleForm,
     launchImmediately: Boolean = false,
-  ) {
-    val targetSurveyId = surveyIdForExampleForm(example) ?: return
-    openSurvey(targetSurveyId)
-    selectedWorkbenchExampleForm = example
-    activeSurveyNotice =
-      "Switched to survey \"${activeSurvey.title}\" (${entities.size} entities, ${allSubmissions.size} preloaded submissions)."
-    if (launchImmediately) {
-      launchActiveOrDefaultFormForTesting()
-    }
-  }
+  ) = workbench.selectWorkbenchExampleForm(example, launchImmediately)
 
   /** Restores the default sample XForms XML definition (`DEFAULT_PROTOTYPE_XFORMS_XML`). */
-  fun resetDefaultXFormsXml() {
-    if (activeSurveyId != "survey-kenya-coffee") {
-      openSurvey("survey-kenya-coffee")
-    }
-    updateCustomXFormsXml(DEFAULT_PROTOTYPE_XFORMS_XML)
-    selectedWorkbenchExampleForm = WorkbenchExampleForm.ALL_FIELD_TYPES
-  }
+  fun resetDefaultXFormsXml() = workbench.resetDefaultXFormsXml()
 
   /**
    * Launches data collection for [formId] from the bottom-centered Floating Action Button (FAB)
@@ -2421,102 +2320,34 @@ class PrototypeAppState(
   fun completeActiveFormSubmission(
     recordInstance: RecordInstance? = null,
     entityStates: List<EntityState>? = null,
-  ) {
-    syncViewModelState()
-    dataCollection.completeActiveFormSubmission(recordInstance, entityStates)
-  }
+  ) = dataCollection.completeActiveFormSubmission(recordInstance, entityStates)
 
   /**
    * Updates the [SyncStatus] of a specific [GeospatialEntityItem] ([entityId]) and synchronizes its
    * submissions accordingly when marked [SyncStatus.SYNCED].
    */
-  fun updateEntitySyncStatus(entityId: String, newStatus: SyncStatus) {
-    storeEntities(
-      entities.map { item ->
-        if (item.id == entityId) {
-          val updatedSubmissions =
-            if (newStatus == SyncStatus.SYNCED) {
-              item.submissions.map { sub -> sub.copy(syncStatus = SyncStatus.SYNCED) }
-            } else {
-              item.submissions
-            }
-          item.copy(submissions = updatedSubmissions, syncStatus = newStatus)
-        } else {
-          item
-        }
-      }
-    )
-    val entity = entities.firstOrNull { it.id == entityId } ?: return
-    activeSurveyNotice = "${entity.label}: Sync status set to ${newStatus.label}"
-  }
+  fun updateEntitySyncStatus(entityId: String, newStatus: SyncStatus) =
+    workbench.updateEntitySyncStatus(entityId, newStatus)
 
   /**
    * Cycles the [SyncStatus] of a specific [GeospatialEntityItem] ([entityId]) (`Uploading` ->
    * `Synced` -> `Failed` -> `Uploading`), or retries failed uploads immediately.
    */
-  fun cycleEntitySyncStatus(entityId: String) {
-    val entity = entities.firstOrNull { it.id == entityId } ?: return
-    updateEntitySyncStatus(entityId, entity.syncStatus.next())
-  }
+  fun cycleEntitySyncStatus(entityId: String) = workbench.cycleEntitySyncStatus(entityId)
 
   /**
    * Updates the [SyncStatus] of a specific [SubmissionPreviewItem] ([submissionId]) and recomputes
    * the parent entity's aggregate [SyncStatus] (or updates [standaloneSubmissions]).
    */
-  fun updateSubmissionSyncStatus(submissionId: String, newStatus: SyncStatus) {
-    var updatedSubTitle: String? = null
-    storeEntities(
-      entities.map { item ->
-        val hasTarget = item.submissions.any { it.id == submissionId }
-        if (hasTarget) {
-          val updatedSubmissions =
-            item.submissions.map { sub ->
-              if (sub.id == submissionId) {
-                updatedSubTitle = sub.formTitle
-                sub.copy(syncStatus = newStatus)
-              } else {
-                sub
-              }
-            }
-          item.copy(
-            submissions = updatedSubmissions,
-            syncStatus =
-              deriveEntitySyncStatus(
-                updatedSubmissions,
-                fallback =
-                  if (newStatus == SyncStatus.SYNCED) SyncStatus.SYNCED else item.syncStatus,
-              ),
-          )
-        } else {
-          item
-        }
-      }
-    )
-    if (standaloneSubmissions.any { it.id == submissionId }) {
-      storeStandaloneSubmissions(
-        standaloneSubmissions.map { sub ->
-          if (sub.id == submissionId) {
-            updatedSubTitle = sub.formTitle
-            sub.copy(syncStatus = newStatus)
-          } else {
-            sub
-          }
-        }
-      )
-    }
-    if (updatedSubTitle != null) {
-      activeSurveyNotice = "$updatedSubTitle: Sync status set to ${newStatus.label}"
-    }
-  }
+  fun updateSubmissionSyncStatus(submissionId: String, newStatus: SyncStatus) =
+    workbench.updateSubmissionSyncStatus(submissionId, newStatus)
 
   /**
    * Cycles the [SyncStatus] of a specific [SubmissionPreviewItem] ([submissionId]) (`Uploading` ->
    * `Synced` -> `Failed` -> `Uploading`).
    */
-  fun cycleSubmissionSyncStatus(submissionId: String) {
-    val submission = allSubmissions.firstOrNull { it.id == submissionId } ?: return
-    updateSubmissionSyncStatus(submissionId, submission.syncStatus.next())
-  }
+  fun cycleSubmissionSyncStatus(submissionId: String) =
+    workbench.cycleSubmissionSyncStatus(submissionId)
 
   /** Closes the active `MobileFormRunner` and returns to the survey map/list screen. */
   fun closeActiveFormRunner() = dataCollection.closeActiveFormRunner()
@@ -2722,41 +2553,21 @@ class PrototypeAppState(
   /**
    * Selects the device preview form factor (`Mobile` vs `Tablet`) in the prototype wrapper page.
    */
-  fun selectDeviceFormFactor(formFactor: DeviceFormFactor) {
-    deviceFormFactor = formFactor
-    deviceOrientation = formFactor.defaultOrientation
-  }
+  fun selectDeviceFormFactor(formFactor: DeviceFormFactor) =
+    workbench.selectDeviceFormFactor(formFactor)
 
   /** Toggles between `Mobile` and `Tablet` form factors in the prototype wrapper page. */
-  fun toggleDeviceFormFactor() {
-    val nextFormFactor =
-      if (deviceFormFactor == DeviceFormFactor.MOBILE) {
-        DeviceFormFactor.TABLET
-      } else {
-        DeviceFormFactor.MOBILE
-      }
-    selectDeviceFormFactor(nextFormFactor)
-  }
+  fun toggleDeviceFormFactor() = workbench.toggleDeviceFormFactor()
 
   /** Rotates the simulated device between `Portrait` and `Landscape` orientation (`90°` swap). */
-  fun rotateDevice() {
-    deviceOrientation =
-      if (deviceOrientation == DeviceOrientation.PORTRAIT) {
-        DeviceOrientation.LANDSCAPE
-      } else {
-        DeviceOrientation.PORTRAIT
-      }
-  }
+  fun rotateDevice() = workbench.rotateDevice()
 
   /** Alias for [rotateDevice]: toggles between `Portrait` and `Landscape` device orientation. */
-  fun toggleDeviceOrientation() {
-    rotateDevice()
-  }
+  fun toggleDeviceOrientation() = workbench.toggleDeviceOrientation()
 
   /** Explicitly sets the simulated device orientation (`Portrait` or `Landscape`). */
-  fun selectDeviceOrientation(orientation: DeviceOrientation) {
-    deviceOrientation = orientation
-  }
+  fun selectDeviceOrientation(orientation: DeviceOrientation) =
+    workbench.selectDeviceOrientation(orientation)
 
   /**
    * Pans (drags) the survey map viewport by normalized deltas `(deltaNormalizedX,
@@ -2927,36 +2738,10 @@ class PrototypeAppState(
    * active survey region to benchmark Mapbox GL WebGL polygon & marker scaling at 5,000, 10,000,
    * 15,000+ map features.
    */
-  fun addRandomSites(count: Int = 5_000) {
-    if (count <= 0) return
-    syncViewModelState()
-    viewModel.launch { viewModel.generateRandomSitesUseCase(count) }
-    val totalCount = entities.size
-    currentScreen = PrototypeScreen.MAIN_SURVEY
-    mainViewMode = MainSurveyViewMode.MAP
-    activeDrawerSubView = MainDrawerSubView.NONE
-    activeSurveyNotice = "Added $count random polygon features ($totalCount total map features)"
-  }
+  fun addRandomSites(count: Int = 5_000) = workbench.addRandomSites(count)
 
   /** Resets the onboarding and prototype state back to the initial Sign In screen. */
-  fun resetPrototypeFlow() {
-    currentScreen = PrototypeScreen.SIGN_IN
-    onboarding.reset()
-    settings.reset()
-    surveyMap.reset()
-    dashboard.reset()
-    surveyEditor.reset()
-    dataCollection.reset()
-    activeSurveyNotice = null
-    mainViewMode = MainSurveyViewMode.MAP
-    isDrawerOpen = false
-    activeDrawerSubView = MainDrawerSubView.NONE
-    viewModel.launch { viewModel.sampleDataRepository.resetToSampleData() }
-    dataResetCount++
-    mapboxPlacesApiResults = emptyList()
-    isMapboxPlacesSearching = false
-    resetDefaultXFormsXml()
-  }
+  fun resetPrototypeFlow() = workbench.resetPrototypeFlow()
 
   companion object {
     /** Default width of the web dashboard's left-hand panel, in dp. */
@@ -2974,11 +2759,11 @@ class PrototypeAppState(
    * survey uses it.
    */
   fun surveyIdForExampleForm(example: WorkbenchExampleForm): String? =
-    data.surveys.firstOrNull { data.surveyConfigs[it.id]?.primaryFormXml == example.xformsXml }?.id
+    workbenchState.surveyIdForExampleForm(example)
 
   /** Incremented when the sample data is reset, so views holding local copies reload them. */
-  var dataResetCount by mutableStateOf(0)
-    private set
+  val dataResetCount: Int
+    get() = workbenchState.dataResetCount
 
   /**
    * The Survey editor's draft of the active survey: its stored draft, or one derived from the
@@ -2989,13 +2774,13 @@ class PrototypeAppState(
 
   /** Saves the Survey editor's [draft] of [surveyId] to the local data store. */
   fun saveSurveyEditorDraft(surveyId: String, draft: SurveyEditorDraft) {
-    viewModel.launch { viewModel.surveyEditorRepository.saveDraft(surveyId, draft) }
+    dataHolder.launch { dataHolder.surveyEditorRepository.saveDraft(surveyId, draft) }
   }
 
   /** Number of map features stored for [surveyId]. */
-  fun entityCountForSurvey(surveyId: String): Int = data.surveyStats[surveyId]?.entityCount ?: 0
+  fun entityCountForSurvey(surveyId: String): Int = workbenchState.entityCountForSurvey(surveyId)
 
   /** Number of submissions stored for [surveyId]. */
   fun submissionCountForSurvey(surveyId: String): Int =
-    data.surveyStats[surveyId]?.submissionCount ?: 0
+    workbenchState.submissionCountForSurvey(surveyId)
 }

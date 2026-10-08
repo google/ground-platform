@@ -480,9 +480,9 @@ fresh on every page load; on mobile it will become the persistent offline store.
 -   **Reads**: `LocalStore` exposes a `Flow` per collection (surveys, forms, map
     layers, map features with their submissions, standalone submissions,
     geometries, survey configs and editor drafts, mutations, places, offline
-    tile packages, and preferences). `SurveyAppViewModel.appData` combines them
-    into one `StateFlow`; `PrototypeAppState` and the view model's `uiState`
-    read from it.
+    tile packages, and preferences). `AppDataHolder.appData` combines them into
+    one `StateFlow`; `PrototypeAppState` and the feature view models read from
+    the repositories it wires.
 -   **Writes**: Repositories (`data/repository/`) write through `suspend`
     functions inside `LocalStore.transaction`, which is atomic and can be
     nested. Use cases that touch several repositories run in one transaction via
@@ -496,20 +496,19 @@ fresh on every page load; on mobile it will become the persistent offline store.
     outside the domain and shared core, `data/` never imports presentation
     packages, and only `data/` and `ui/viewmodel/` may import `data/` or
     `client/` packages.
--   **Feature view models**: Screens are being moved from the shared
-    `PrototypeAppState` to per-feature view models in `ui/viewmodel/`, each
-    exposing a `StateFlow` of an immutable UI state (`ui/state/`) plus an
-    actions interface the screen calls. Screens take `(uiState, actions)` and
-    hold no state of their own. `OnboardingViewModel` (Sign In → Terms of
-    Service → Download survey) is the first; it reads the account from
-    `AuthRepository` (over `PrototypeAuthClient`) and the survey directory from
-    `SurveyRepository` and `OrganizationRepository`, and publishes navigation
-    and notices as `OnboardingEvent`s that the app shell applies.
-    `SettingsViewModel` (Settings, Sign In language selector, Offline maps)
-    reads and writes preferences through `SettingsRepository`, tile packages
-    through `SurveyRepository`, and models the device storage breakdown with
-    `EstimateDeviceStorageUseCase`; the light/dark theme is session state it
-    owns. `SurveyMapViewModel` (the survey map viewport: camera and GPS
+-   **Feature view models**: Screens observe per-feature view models in
+    `ui/viewmodel/` (wired by `AppDataHolder`), each exposing a `StateFlow` of
+    an immutable UI state (`ui/state/`) plus an actions interface the screen
+    calls. Screens take `(uiState, actions)` and hold no state of their own.
+    `OnboardingViewModel` (Sign In → Terms of Service → Download survey) reads
+    the account from `AuthRepository` (over `PrototypeAuthClient`) and the
+    survey directory from `SurveyRepository` and `OrganizationRepository`, and
+    publishes navigation and notices as `OnboardingEvent`s that the app shell
+    applies. `SettingsViewModel` (Settings, Sign In language selector, Offline
+    maps) reads and writes preferences through `SettingsRepository`, tile
+    packages through `SurveyRepository`, and models the device storage breakdown
+    with `EstimateDeviceStorageUseCase`; the light/dark theme is session state
+    it owns. `SurveyMapViewModel` (the survey map viewport: camera and GPS
     following, basemap and organization imagery, zoomed-out clustering,
     straight-line wayfinding, and the selected map feature, cluster, or place)
     observes survey content and organizations through `SurveyRepository` and
@@ -564,6 +563,14 @@ fresh on every page load; on mobile it will become the persistent offline store.
     the shared `FormWizardController` (Compose snapshot state), the
     `WebMapDrawingHost` (`ui/state/`) that edits it while drawing, and
     `PdfExportClient` (`client/pdf/`), the platform file delivery.
+    `WorkbenchViewModel` (the prototype workbench chrome: simulated device form
+    factor and orientation, the XForms `<h:html>` editor and example survey
+    switcher, and debug/simulation tools such as adding 5,000 random polygon
+    features, cycling sync status, and resetting the prototype flow) observes
+    surveys and survey content through `SurveyRepository`, reseeds via
+    `SampleDataRepository`, and generates benchmark features with
+    `GeneratePrototypeRandomSitesUseCase`; cross-feature outcomes are published
+    as `WorkbenchEvent`s that the shell applies.
 -   **Survey switching**: Every survey's data is in the store, so switching
     surveys keeps edits. Use **Reset** to go back to the sample data.
 -   **Survey editor**: `SurveyEditorRepositoryImpl` serves the stored draft

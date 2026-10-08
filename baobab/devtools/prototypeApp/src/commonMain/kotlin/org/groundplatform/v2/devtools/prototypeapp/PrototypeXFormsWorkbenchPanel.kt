@@ -14,7 +14,6 @@
 package org.groundplatform.v2.devtools.prototypeapp
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.border
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -41,6 +40,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -58,13 +58,15 @@ import org.groundplatform.v2.core.forms.serialization.XFormsXmlSerializer
 import org.groundplatform.v2.core.forms.ui.GroundBadgeTone
 import org.groundplatform.v2.core.forms.ui.GroundTonalBadge
 import org.groundplatform.v2.core.forms.ui.WorkbenchExampleForm
+import org.groundplatform.v2.devtools.prototypeapp.ui.state.WorkbenchUiState
+import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.WorkbenchActions
 
 private val defaultResolveFormDefUseCase =
   org.groundplatform.v2.devtools.prototypeapp.domain.usecase.ResolveFormDefForLaunchUseCase()
 
 /**
  * Built-in fallback XForms `<h:html>` XML definitions keyed by [FormPreviewItem.id], used when
- * [PrototypeAppState.customXFormsXml] is cleared/blank.
+ * [WorkbenchUiState.customXFormsXml] is cleared/blank.
  */
 fun builtInFallbackXFormsXmlForForm(form: FormPreviewItem): String =
   defaultResolveFormDefUseCase.builtInFallbackXFormsXmlForForm(form)
@@ -80,8 +82,32 @@ fun parseDefaultPrototypeFormDef(): FormDef =
  */
 @Composable
 fun PrototypeXFormsWorkbenchPanel(state: PrototypeAppState) {
-  val parsedFormDef = state.dataCollectionUiState.customFormDef
-  val xmlError = state.xformsXmlError
+  val uiState by state.workbench.uiState.collectAsState()
+  val isFormOpen = state.dataCollectionUiState.isDataCollectionFormOpen
+  PrototypeXFormsWorkbenchPanel(
+    uiState = uiState,
+    actions = state.workbench,
+    isFormOpen = isFormOpen,
+    onLaunchOrCloseForm = {
+      if (isFormOpen) {
+        state.dataCollection.closeActiveFormRunner()
+      } else {
+        state.dataCollection.launchActiveOrDefaultFormForTesting()
+      }
+    },
+  )
+}
+
+/** Stateless XForms workbench panel driven by [WorkbenchUiState] and [WorkbenchActions]. */
+@Composable
+fun PrototypeXFormsWorkbenchPanel(
+  uiState: WorkbenchUiState,
+  actions: WorkbenchActions,
+  isFormOpen: Boolean,
+  onLaunchOrCloseForm: () -> Unit,
+) {
+  val parsedFormDef = uiState.customFormDef
+  val xmlError = uiState.xformsXmlError
   val fieldCount = parsedFormDef?.model?.bindings?.size ?: 0
   var showRawXmlEditor by remember { mutableStateOf(false) }
   var showProtoPreview by remember { mutableStateOf(false) }
@@ -156,13 +182,13 @@ fun PrototypeXFormsWorkbenchPanel(state: PrototypeAppState) {
             ),
         )
         WorkbenchExampleForm.entries.forEach { example ->
-          val surveyId = state.surveyIdForExampleForm(example) ?: return@forEach
+          val surveyId = uiState.surveyIdForExampleForm(example) ?: return@forEach
           val isSelected =
-            state.activeSurveyId == surveyId || state.selectedWorkbenchExampleForm == example
-          val preloadedEntityCount = state.entityCountForSurvey(surveyId)
-          val preloadedSubmissionCount = state.submissionCountForSurvey(surveyId)
+            uiState.activeSurveyId == surveyId || uiState.selectedWorkbenchExampleForm == example
+          val preloadedEntityCount = uiState.entityCountForSurvey(surveyId)
+          val preloadedSubmissionCount = uiState.submissionCountForSurvey(surveyId)
           OutlinedCard(
-            onClick = { state.selectWorkbenchExampleForm(example, launchImmediately = false) },
+            onClick = { actions.selectWorkbenchExampleForm(example, launchImmediately = false) },
             modifier = Modifier.fillMaxWidth(),
             shape = MaterialTheme.shapes.small,
             colors =
@@ -261,15 +287,8 @@ fun PrototypeXFormsWorkbenchPanel(state: PrototypeAppState) {
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically,
       ) {
-        val isFormOpen = state.dataCollectionUiState.isDataCollectionFormOpen
         Button(
-          onClick = {
-            if (isFormOpen) {
-              state.dataCollection.closeActiveFormRunner()
-            } else {
-              state.dataCollection.launchActiveOrDefaultFormForTesting()
-            }
-          },
+          onClick = onLaunchOrCloseForm,
           enabled = xmlError == null,
           colors =
             ButtonDefaults.buttonColors(
@@ -306,7 +325,7 @@ fun PrototypeXFormsWorkbenchPanel(state: PrototypeAppState) {
           )
         }
 
-        OutlinedButton(onClick = { state.resetDefaultXFormsXml() }) {
+        OutlinedButton(onClick = { actions.resetDefaultXFormsXml() }) {
           Icon(
             imageVector = Icons.Outlined.Refresh,
             contentDescription = null,
@@ -325,20 +344,20 @@ fun PrototypeXFormsWorkbenchPanel(state: PrototypeAppState) {
           verticalAlignment = Alignment.CenterVertically,
         ) {
           OutlinedButton(
-            onClick = { state.updateCustomXFormsXml(BAOBAB_BIOMETRICS_SAMPLE_XFORMS_XML) }
+            onClick = { actions.updateCustomXFormsXml(BAOBAB_BIOMETRICS_SAMPLE_XFORMS_XML) }
           ) {
             Text(text = "Baobab Preset", style = MaterialTheme.typography.labelSmall)
           }
 
-          OutlinedButton(onClick = { state.updateCustomXFormsXml("") }) {
+          OutlinedButton(onClick = { actions.updateCustomXFormsXml("") }) {
             Text(text = "Clear XML", style = MaterialTheme.typography.labelSmall)
           }
         }
 
-        androidx.compose.runtime.key(state.activeSurveyId, state.selectedWorkbenchExampleForm) {
+        androidx.compose.runtime.key(uiState.activeSurveyId, uiState.selectedWorkbenchExampleForm) {
           OutlinedTextField(
-            value = state.customXFormsXml,
-            onValueChange = { state.updateCustomXFormsXml(it) },
+            value = uiState.customXFormsXml,
+            onValueChange = { actions.updateCustomXFormsXml(it) },
             modifier = Modifier.fillMaxWidth().height(195.dp),
             placeholder = {
               Text(

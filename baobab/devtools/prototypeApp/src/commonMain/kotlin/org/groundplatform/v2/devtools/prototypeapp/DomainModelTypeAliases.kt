@@ -160,24 +160,12 @@ typealias OfflineTilePackageItem =
 typealias DownloadSurveyEntryOrigin =
   org.groundplatform.v2.devtools.prototypeapp.domain.model.DownloadSurveyEntryOrigin
 
-typealias AppUiState = org.groundplatform.v2.devtools.prototypeapp.ui.state.AppUiState
+typealias AppDataHolder = org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.AppDataHolder
 
-typealias MapViewportUiState =
-  org.groundplatform.v2.devtools.prototypeapp.ui.state.MapViewportUiState
+typealias WorkbenchUiState = org.groundplatform.v2.devtools.prototypeapp.ui.state.WorkbenchUiState
 
-typealias FormCollectionUiState =
-  org.groundplatform.v2.devtools.prototypeapp.ui.state.FormCollectionUiState
-
-typealias PrototypeWorkbenchUiState =
-  org.groundplatform.v2.devtools.prototypeapp.ui.state.PrototypeWorkbenchUiState
-
-typealias PrototypeUiState = org.groundplatform.v2.devtools.prototypeapp.ui.state.AppUiState
-
-typealias SurveyAppViewModel =
-  org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.SurveyAppViewModel
-
-typealias PrototypeAppViewModel =
-  org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.SurveyAppViewModel
+typealias WorkbenchViewModel =
+  org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.WorkbenchViewModel
 
 const val WEBSITE_URL = DOMAIN_WEBSITE_URL
 

@@ -52,8 +52,7 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.GenerateProtot
 import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.ResolveFormDefForLaunchUseCase
 import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.SearchPlacesUseCase
 import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.SyncMutationsUseCase
-import org.groundplatform.v2.devtools.prototypeapp.ui.state.AppUiState
-import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.SurveyAppViewModel
+import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.AppDataHolder
 
 /**
  * Unit tests verifying the Clean Architecture & MVVM layers of `devtools/prototypeApp` per
@@ -66,7 +65,7 @@ import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.SurveyAppViewMod
  * - Domain Use Cases ([ClusterMapFeaturesUseCase], [ComputeWayfindingNavigationUseCase],
  *   [SearchPlacesUseCase], [GeneratePrototypeRandomSitesUseCase], [SyncMutationsUseCase],
  *   [ResolveFormDefForLaunchUseCase])
- * - Presentation ViewModel ([SurveyAppViewModel] & `uiState: StateFlow<AppUiState>`)
+ * - Presentation feature ViewModels & [AppDataHolder] (`appData: StateFlow<AppData>`)
  */
 class PrototypeCleanArchitectureTest {
 
@@ -293,63 +292,63 @@ class PrototypeCleanArchitectureTest {
   }
 
   @Test
-  fun surveyAppViewModel_exposesImmutableStateFlowAndOrchestratesMvvmStateTransitions() {
-    val viewModel = SurveyAppViewModel()
-    assertEquals(AppScreen.SIGN_IN, viewModel.uiState.value.currentScreen)
-    assertFalse(viewModel.uiState.value.isSignedIn)
+  fun featureViewModels_exposeImmutableStateFlowsAndOrchestrateMvvmStateTransitions() {
+    val state = PrototypeAppState()
+    assertEquals(AppScreen.SIGN_IN, state.currentScreen)
+    assertFalse(state.onboarding.uiState.value.isSignedIn)
 
-    // Onboarding flow via ViewModel
-    viewModel.signInWithGoogle()
-    assertTrue(viewModel.uiState.value.isSignedIn)
-    assertEquals(AppScreen.TERMS_OF_SERVICE, viewModel.uiState.value.currentScreen)
+    // Onboarding flow via OnboardingViewModel
+    state.onboarding.signInWithGoogle()
+    assertTrue(state.onboarding.uiState.value.isSignedIn)
+    assertEquals(AppScreen.TERMS_OF_SERVICE, state.currentScreen)
 
-    viewModel.acceptTermsOfService()
-    assertTrue(viewModel.uiState.value.hasAcceptedTerms)
-    assertEquals(AppScreen.DOWNLOAD_SURVEY, viewModel.uiState.value.currentScreen)
+    state.onboarding.acceptTermsOfService()
+    assertTrue(state.onboarding.uiState.value.hasAcceptedTerms)
+    assertEquals(AppScreen.DOWNLOAD_SURVEY, state.currentScreen)
 
-    viewModel.selectSurvey("survey-sample-plots-forest")
-    assertEquals(AppScreen.MAIN_SURVEY, viewModel.uiState.value.currentScreen)
-    assertEquals("survey-sample-plots-forest", viewModel.uiState.value.activeSurveyId)
+    state.onboarding.openSurvey("survey-sample-plots-forest")
+    assertEquals(AppScreen.MAIN_SURVEY, state.currentScreen)
+    assertEquals("survey-sample-plots-forest", state.dataHolder.appData.value.activeSurveyId)
 
-    // Add random sites via ViewModel -> UseCase -> Repository -> StateFlow
-    val initialEntityCount = viewModel.uiState.value.entities.size
-    viewModel.addRandomSites(10)
-    assertEquals(initialEntityCount + 10, viewModel.uiState.value.entities.size)
+    // Add random sites via WorkbenchViewModel -> UseCase -> Repository -> StateFlow
+    val initialEntityCount = state.workbench.uiState.value.entities.size
+    state.workbench.addRandomSites(10)
+    assertEquals(initialEntityCount + 10, state.workbench.uiState.value.entities.size)
 
-    // Sync all outbox mutations for survey-kenya-coffee via ViewModel -> UseCase -> Repository ->
-    // StateFlow
-    viewModel.selectSurvey("survey-kenya-coffee")
-    viewModel.syncAllOutboxMutations()
+    // Sync all outbox mutations for survey-kenya-coffee via DashboardViewModel -> UseCase ->
+    // Repository -> StateFlow
+    state.onboarding.openSurvey("survey-kenya-coffee")
+    state.dashboard.syncAllOutboxMutations()
     assertTrue(
-      viewModel.uiState.value.mutations
+      state.dashboard.uiState.value.mutations
         .filter { it.surveyId == "survey-kenya-coffee" }
         .all { it.state == MutationSyncState.UPLOADED }
     )
 
-    // Update settings via ViewModel -> Repository -> StateFlow
-    viewModel.updateUnitSystem(MeasurementUnitSystem.IMPERIAL)
+    // Update settings via SettingsViewModel -> Repository -> StateFlow
+    state.settings.updateMeasurementUnits(MeasurementUnitSystem.IMPERIAL)
     assertEquals(
       MeasurementUnitSystem.IMPERIAL,
-      viewModel.uiState.value.userSettings.measurementUnits,
+      state.settings.uiState.value.unitSystem,
     )
 
-    // Reset flow
-    viewModel.resetPrototypeFlow()
-    assertEquals(AppScreen.SIGN_IN, viewModel.uiState.value.currentScreen)
-    assertNull(viewModel.uiState.value.activeSurveyNotice)
+    // Reset flow via WorkbenchViewModel
+    state.workbench.resetPrototypeFlow()
+    assertEquals(AppScreen.SIGN_IN, state.currentScreen)
+    assertNull(state.activeSurveyNotice)
   }
 
   @Test
-  fun prototypeAppState_exposesSynchronizedViewModelUiStateFlow() {
+  fun prototypeAppState_exposesSynchronizedFeatureViewModelsAndAppDataHolder() {
     val state = PrototypeAppState()
     state.signInWithGoogle()
     state.acceptTermsOfService()
     state.openSurvey("survey-single-point-land-use")
 
-    val snapshot: AppUiState = state.uiState.value
-    assertEquals(AppScreen.MAIN_SURVEY, snapshot.currentScreen)
-    assertEquals("survey-single-point-land-use", snapshot.activeSurveyId)
-    assertTrue(snapshot.entities.isNotEmpty())
-    assertEquals(state.entities.size, snapshot.entities.size)
+    val appData = state.dataHolder.appData.value
+    assertEquals(AppScreen.MAIN_SURVEY, state.currentScreen)
+    assertEquals("survey-single-point-land-use", appData.activeSurveyId)
+    assertTrue(appData.content.entities.isNotEmpty())
+    assertEquals(state.entities.size, appData.content.entities.size)
   }
 }

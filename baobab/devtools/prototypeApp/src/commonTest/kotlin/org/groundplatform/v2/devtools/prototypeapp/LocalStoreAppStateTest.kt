@@ -46,13 +46,13 @@ class LocalStoreAppStateTest {
   }
 
   @Test
-  fun viewModelUiState_mirrorsStoreData() {
+  fun dataHolderAppData_mirrorsStoreData() {
     val state = PrototypeAppState(initialScreen = PrototypeScreen.MAIN_SURVEY)
     state.addRandomSites(count = 25)
-    val ui = state.uiState.value
-    assertEquals(state.entities, ui.entities)
-    assertEquals(state.mutations, ui.mutations)
-    assertEquals(state.activeSurveyId, ui.activeSurveyId)
+    val appData = state.dataHolder.appData.value
+    assertEquals(state.entities, appData.content.entities)
+    assertEquals(state.mutations, appData.mutations)
+    assertEquals(state.activeSurveyId, appData.activeSurveyId)
   }
 
   @Test
@@ -63,7 +63,7 @@ class LocalStoreAppStateTest {
     state.updateUploadMediaOverUnmeteredConnectionOnly(true)
     assertEquals(
       UserSettings("fr", MeasurementUnitSystem.IMPERIAL, shouldUploadPhotosOnWifiOnly = true),
-      state.viewModel.appData.value.userSettings,
+      state.dataHolder.appData.value.userSettings,
     )
   }
 
@@ -128,7 +128,7 @@ class LocalStoreAppStateTest {
 
     // The title is shown in the survey list; generated XForms are published to the survey config.
     assertEquals("Renamed survey", state.activeSurvey.title)
-    val config = state.viewModel.appData.value.content.config
+    val config = state.dataHolder.appData.value.content.config
     val draft = editor.ui.draft
     val newEntry = draft.forms.last()
     val publishedXml = config?.formXmlById?.get(newEntry.form.formId)

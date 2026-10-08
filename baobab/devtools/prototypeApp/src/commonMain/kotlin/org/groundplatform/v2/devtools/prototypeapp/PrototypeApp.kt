@@ -305,8 +305,8 @@ private fun MobilePrototypePage(state: PrototypeAppState, isMapShowing: Boolean)
         isScreenTransparent = isMapShowing,
         formFactor = state.deviceFormFactor,
         orientation = state.deviceOrientation,
-        onSelectFormFactor = { state.selectDeviceFormFactor(it) },
-        onRotateDevice = { state.rotateDevice() },
+        onSelectFormFactor = state.workbench::selectDeviceFormFactor,
+        onRotateDevice = state.workbench::rotateDevice,
         state = state,
       ) {
         MobileScreenHost(state)
@@ -684,7 +684,7 @@ private fun UxDesignerInspectorPanel(state: PrototypeAppState, modifier: Modifie
             ),
         )
         FilledTonalButton(
-          onClick = { state.addRandomSites(5_000) },
+          onClick = { state.workbench.addRandomSites(5_000) },
           modifier = Modifier.height(30.dp),
           contentPadding = ButtonDefaults.TextButtonContentPadding,
         ) {
@@ -937,7 +937,7 @@ private fun UxDesignerInspectorPanel(state: PrototypeAppState, modifier: Modifie
         OutlinedCard(
           onClick = {
             state.navigateTo(PrototypeScreen.DOWNLOAD_SURVEY)
-            state.toggleSurveyDownloaded(survey.id)
+            state.workbench.toggleSurveyDownloaded(survey.id)
           },
           modifier = Modifier.fillMaxWidth(),
           shape = MaterialTheme.shapes.small,

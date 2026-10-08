@@ -18,14 +18,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.groundplatform.v2.devtools.prototypeapp.data.datasource.local.store.InMemoryLocalStore
 import org.groundplatform.v2.devtools.prototypeapp.data.datasource.local.store.LocalStore
@@ -39,8 +36,6 @@ import org.groundplatform.v2.devtools.prototypeapp.data.repository.SampleDataRep
 import org.groundplatform.v2.devtools.prototypeapp.data.repository.SettingsRepositoryImpl
 import org.groundplatform.v2.devtools.prototypeapp.data.repository.SurveyEditorRepositoryImpl
 import org.groundplatform.v2.devtools.prototypeapp.data.repository.SurveyRepositoryImpl
-import org.groundplatform.v2.devtools.prototypeapp.domain.model.AppScreen
-import org.groundplatform.v2.devtools.prototypeapp.domain.model.MeasurementUnitSystem
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.MutationLogItem
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.OfflineTilePackageItem
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.Organization
@@ -76,7 +71,6 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.ManageImageryS
 import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.ResolveFormDefForLaunchUseCase
 import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.SearchPlacesUseCase
 import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.SyncMutationsUseCase
-import org.groundplatform.v2.devtools.prototypeapp.ui.state.AppUiState
 
 /**
  * Snapshot of everything the UI reads from the local data store: all surveys, the active survey's
@@ -99,25 +93,21 @@ data class AppData(
 )
 
 /**
- * Clean Architecture MVVM ViewModel (`SurveyAppViewModel`) per
+ * Dependency container and reactive data holder for `devtools/prototypeApp` per
  * `docs/technical/client/architecture.md`:
- * - The [LocalStore] is the single source of truth. [appData] is derived from repository flows, and
- *   the data fields of [uiState] mirror it.
- * - Calls Domain Repository interfaces ([SurveyRepository], [MutationRepository],
- *   [SettingsRepository], [PlaceRepository], [LocationRepository], [OrganizationRepository])
- *   directly for simple CRUD.
- * - Delegates complex business logic, geometric computations, and multi-repository orchestration to
- *   dedicated Domain Use Cases ([CompleteFormSubmissionUseCase], [SyncMutationsUseCase],
- *   [ComputeWayfindingNavigationUseCase], [ClusterMapFeaturesUseCase], [SearchPlacesUseCase],
- *   [GeneratePrototypeRandomSitesUseCase], [ResolveFormDefForLaunchUseCase]).
+ * - Owns the [LocalStore] (single source of truth), Domain Repository instances, Domain Use Cases,
+ *   and the shared [scope].
+ * - Combines repository flows into a single immutable [appData] [StateFlow].
+ * - Holds no UI session state; each feature ViewModel (`OnboardingViewModel`, `SettingsViewModel`,
+ *   `SurveyMapViewModel`, `DashboardViewModel`, `OrganizationViewModel`, `SurveyEditorViewModel`,
+ *   `DataCollectionViewModel`, `WorkbenchViewModel`) owns its own session state and exposes its own
+ *   `uiState` [StateFlow].
  *
  * Writes run in [scope]. By default it uses an immediate dispatcher, so writes to the in-memory
  * store (which never suspend) complete, and their results reach [appData], before [launch] returns.
- * With a persistent store, writes complete asynchronously and the UI updates when the store emits.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
-class SurveyAppViewModel(
-  initialScreen: AppScreen = AppScreen.SIGN_IN,
+class AppDataHolder(
   val localStore: LocalStore = InMemoryLocalStore(),
   val scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Unconfined),
   val surveyRepository: SurveyRepository = SurveyRepositoryImpl(localStore),
@@ -220,123 +210,9 @@ class SurveyAppViewModel(
       }
       .stateIn(scope, SharingStarted.Eagerly, AppData())
 
-  private val _uiState =
-    MutableStateFlow(AppUiState(currentScreen = initialScreen).withData(appData.value))
-
-  /** Single immutable stream of UI state observed by the Presentation Layer. */
-  val uiState: StateFlow<AppUiState> = _uiState.asStateFlow()
-
-  init {
-    scope.launch { appData.collect { data -> _uiState.update { it.withData(data) } } }
-  }
-
   /** Launches [block] (typically a repository write or use case) in [scope]. */
   fun launch(block: suspend CoroutineScope.() -> Unit): Job = scope.launch(block = block)
-
-  /** Atomically updates the session (non-data) fields of [uiState] using [transform]. */
-  fun updateUiState(transform: (AppUiState) -> AppUiState) {
-    _uiState.update { transform(it).withData(appData.value) }
-  }
-
-  /** Completes Google Sign-In and advances `uiState.currentScreen` to Terms of Service. */
-  fun signInWithGoogle() {
-    _uiState.update { current ->
-      current.copy(isSignedIn = true, currentScreen = AppScreen.TERMS_OF_SERVICE)
-    }
-  }
-
-  /** Accepts Terms of Service and advances `uiState.currentScreen` to Download Survey. */
-  fun acceptTermsOfService() {
-    _uiState.update { current ->
-      if (!current.termsCheckboxChecked) {
-        current
-      } else {
-        current.copy(hasAcceptedTerms = true, currentScreen = AppScreen.DOWNLOAD_SURVEY)
-      }
-    }
-  }
-
-  /** Downloads and activates [surveyId], transitioning to Main Survey. */
-  fun selectSurvey(surveyId: String) = launch {
-    surveyRepository.setSurveyDownloaded(surveyId, downloaded = true)
-    surveyRepository.setActiveSurveyId(surveyId)
-    _uiState.update { current ->
-      current.copy(
-        currentScreen = AppScreen.MAIN_SURVEY,
-        selectedEntityId = null,
-        selectedSubmissionId = null,
-      )
-    }
-  }
-
-  /** Toggles layer visibility in the active survey. */
-  fun toggleLayerVisibility(layerId: String) = launch {
-    surveyRepository.toggleLayerVisibility(layerId)
-  }
-
-  /** Synchronizes a single Outbox mutation via [SyncMutationsUseCase]. */
-  fun syncMutationNow(mutationId: String) = launch {
-    val notice = syncMutationsUseCase.syncSingleMutation(mutationId) ?: return@launch
-    _uiState.update { it.copy(activeSurveyNotice = notice) }
-  }
-
-  /** Synchronizes all Outbox mutations in the active survey via [SyncMutationsUseCase]. */
-  fun syncAllOutboxMutations() = launch {
-    val notice =
-      syncMutationsUseCase.syncAllOutboxMutations(appData.value.activeSurveyId) ?: return@launch
-    _uiState.update { it.copy(activeSurveyNotice = notice) }
-  }
-
-  /**
-   * Generates and appends [count] random polygon sites via [GeneratePrototypeRandomSitesUseCase].
-   */
-  fun addRandomSites(count: Int = 5_000) = launch {
-    if (count <= 0) return@launch
-    val result = generateRandomSitesUseCase(count) ?: return@launch
-    _uiState.update { current ->
-      current.copy(currentScreen = AppScreen.MAIN_SURVEY, activeSurveyNotice = result.noticeMessage)
-    }
-  }
-
-  /** Updates the measurement unit system. */
-  fun updateUnitSystem(unitSystem: MeasurementUnitSystem) = launch {
-    settingsRepository.updateMeasurementUnits(unitSystem)
-  }
-
-  /** Updates the selected language. */
-  fun updateSelectedLanguage(languageCode: String) = launch {
-    settingsRepository.updateLanguage(languageCode)
-  }
-
-  /** Resets the local data store to the sample data and [uiState] to the Sign In screen. */
-  fun resetPrototypeFlow() = launch {
-    sampleDataRepository.resetToSampleData()
-    locationRepository.resetToDefaults()
-    _uiState.value = AppUiState(currentScreen = AppScreen.SIGN_IN).withData(appData.value)
-  }
 }
-
-/** Returns a copy of this state with its data fields taken from [data]. */
-fun AppUiState.withData(data: AppData): AppUiState =
-  copy(
-    surveys = data.surveys,
-    organizations = data.organizations,
-    activeSurveyId = data.activeSurveyId,
-    mapLayers = data.content.mapLayers,
-    forms = data.content.forms,
-    entities = data.content.entities,
-    standaloneSubmissions = data.content.standaloneSubmissions,
-    submissionGeometries = data.content.submissionGeometries,
-    offlineTilePackages = data.offlineTilePackages,
-    mutations = data.mutations,
-    places = data.places,
-    userSettings = data.userSettings,
-    uploadedMediaCacheSizeLabel = data.mediaCache.sizeLabel,
-    uploadedMediaFileCount = data.mediaCache.fileCount,
-  )
-
-/** Backward-compatible alias for [SurveyAppViewModel]. */
-typealias PrototypeAppViewModel = SurveyAppViewModel
 
 private data class DeviceData(
   val stats: Map<String, SurveyStats>,
