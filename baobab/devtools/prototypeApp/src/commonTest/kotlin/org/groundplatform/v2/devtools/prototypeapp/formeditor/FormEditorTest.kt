@@ -26,9 +26,14 @@ import org.groundplatform.v2.core.forms.ui.FormWizardStep
 import org.groundplatform.v2.core.forms.ui.buildCompactFormItems
 import org.groundplatform.v2.devtools.prototypeapp.data.seed.FormEditorSamples
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.FormAvailability
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.ChoiceSource
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.DateRule
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EditorChoiceImage
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EditorDataset
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EditorDatasetProperty
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EditorDatasetRow
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EditorForm
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EditorPropertyKind
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EditorQuestion
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EditorQuestionType
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EditorRelevance
@@ -837,5 +842,82 @@ class FormEditorTest {
     state.changeType("m", EditorQuestionType.TEXT)
     assertEquals(MediaSource.CAPTURE_OR_UPLOAD, state.ui.form.find("m")?.mediaSource)
     assertFalse("appearance" in state.ui.xformsXml)
+  }
+
+  @Test
+  fun choiceSource_switchesBetweenManualAndDatasetAndExportsItemset() {
+    val plotsDataset =
+      EditorDataset(
+        id = "sample_plots",
+        displayName = "Sample plots",
+        isMapLayer = true,
+        keyProperty = "plot_id",
+        labelProperty = "plot_name",
+        properties =
+          listOf(
+            EditorDatasetProperty("plot_id", "Plot ID", EditorPropertyKind.TEXT),
+            EditorDatasetProperty("plot_name", "Plot name", EditorPropertyKind.TEXT),
+          ),
+        rows =
+          listOf(
+            EditorDatasetRow("P-01", "Plot 01 — Ridge"),
+            EditorDatasetRow("P-02", "Plot 02 — Valley"),
+          ),
+      )
+    val speciesDataset =
+      EditorDataset(
+        id = "tree_species",
+        displayName = "Tree species",
+        isMapLayer = false,
+        keyProperty = "code",
+        labelProperty = "common_name",
+        properties =
+          listOf(
+            EditorDatasetProperty("code", "Code", EditorPropertyKind.TEXT),
+            EditorDatasetProperty("common_name", "Common name", EditorPropertyKind.TEXT),
+          ),
+        rows =
+          listOf(
+            EditorDatasetRow("grevillea", "Silky oak"),
+            EditorDatasetRow("cordia", "Cordia"),
+          ),
+      )
+    val state =
+      formEditorViewModel(
+        form = FormEditorSamples.shadeTreeVisit(),
+        datasets = listOf(plotsDataset, speciesDataset),
+      )
+
+    // Switch q3 (SELECT_ONE) to Map layer and q6 (SELECT_MULTIPLE) to Data table.
+    state.setChoiceSource("q3", ChoiceSource.MAP_LAYER)
+    assertEquals(ChoiceSource.MAP_LAYER, state.ui.form.find("q3")?.choiceSource)
+    assertEquals("sample_plots", state.ui.form.find("q3")?.choiceDatasetId)
+    assertEquals(listOf(plotsDataset), state.ui.choiceDatasetsFor(ChoiceSource.MAP_LAYER))
+
+    state.setChoiceSource("q6", ChoiceSource.DATA_TABLE)
+    assertEquals(ChoiceSource.DATA_TABLE, state.ui.form.find("q6")?.choiceSource)
+    assertEquals("tree_species", state.ui.form.find("q6")?.choiceDatasetId)
+    assertEquals(listOf(speciesDataset), state.ui.choiceDatasetsFor(ChoiceSource.DATA_TABLE))
+
+    // Exported XML has external secondary instances and itemset controls.
+    val xml = state.ui.xformsXml
+    assertTrue("""<instance id="sample_plots" src="jr://file-csv/sample_plots.csv"/>""" in xml, xml)
+    assertTrue("""<instance id="tree_species" src="jr://file-csv/tree_species.csv"/>""" in xml, xml)
+    assertTrue("""<itemset nodeset="instance('sample_plots')/root/item">""" in xml, xml)
+    assertTrue("""<itemset nodeset="instance('tree_species')/root/item">""" in xml, xml)
+
+    // Preview XML embeds dataset rows so the form engine can evaluate itemset options.
+    state.startPreview()
+    assertNull(state.ui.previewError)
+    assertNotNull(state.ui.previewController)
+
+    // Renaming a dataset updates choiceDatasetId on questions referencing it.
+    state.renameTargetDataset("tree_species", "shade_species")
+    assertEquals("shade_species", state.ui.form.find("q6")?.choiceDatasetId)
+
+    // Switching back to manual clears choiceDatasetId.
+    state.setChoiceSource("q3", ChoiceSource.MANUAL)
+    assertEquals(ChoiceSource.MANUAL, state.ui.form.find("q3")?.choiceSource)
+    assertNull(state.ui.form.find("q3")?.choiceDatasetId)
   }
 }

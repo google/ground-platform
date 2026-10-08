@@ -216,11 +216,18 @@ object FormImport {
             colorHex = choice.properties[EditorXFormsGenerator.CHOICE_COLOR_COLUMN],
           )
         }
+      var choiceDatasetId: String? = null
       if (choices.isEmpty()) {
-        control.itemset?.let { choices = choicesFromInstance(it.instance_id) }
+        control.itemset?.let { itemset ->
+          choices = choicesFromInstance(itemset.instance_id)
+          val instance = instances[itemset.instance_id]
+          if (itemset.instance_id.isNotBlank() && (instance == null || instance.uri.isNotBlank())) {
+            choiceDatasetId = itemset.instance_id
+          }
+        }
       }
       var type = typeOf(control, binding, appearance, label ?: name)
-      if (type.hasChoices && choices.isEmpty()) {
+      if (type.hasChoices && choices.isEmpty() && choiceDatasetId == null) {
         when {
           control.type == ControlType.CONTROL_TRIGGER -> choices = listOf(EditorChoice("OK", "OK"))
           binding?.type == DataType.TYPE_BOOLEAN ->
@@ -244,6 +251,7 @@ object FormImport {
           hint = text(control.hint).orEmpty(),
           required = isTrue(binding?.required_expression),
           choices = if (type.hasChoices) choices else emptyList(),
+          choiceDatasetId = if (type.hasChoices) choiceDatasetId else null,
           validation = validation,
           capture =
             if (type.isGeometry && GeometryCapture.GPS_OR_MAP.appearance in appearance) {

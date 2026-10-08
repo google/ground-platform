@@ -77,6 +77,7 @@ import androidx.compose.material.icons.outlined.Photo
 import androidx.compose.material.icons.outlined.PlayArrow
 import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material.icons.outlined.TableChart
 import androidx.compose.material.icons.outlined.Timeline
 import androidx.compose.material.icons.outlined.Videocam
 import androidx.compose.material.icons.outlined.Warning
@@ -163,8 +164,10 @@ import org.groundplatform.v2.devtools.prototypeapp.PlatformPickResult
 import org.groundplatform.v2.devtools.prototypeapp.SidePanelSeparator
 import org.groundplatform.v2.devtools.prototypeapp.SidePanelSeparatorWidth
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.ChoiceColors
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.ChoiceSource
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.DateRule
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EditorChoiceImage
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EditorDataset
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EditorForm
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EditorQuestion
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EditorQuestionType
@@ -723,6 +726,7 @@ private fun FlowCanvas(
             index = index,
             question = question,
             form = form,
+            datasets = uiState.datasets,
             isSelected = question.key == uiState.selectedKey,
             hasIssues = uiState.issuesFor(question.key).isNotEmpty(),
             isDragged = isDragged,
@@ -953,6 +957,7 @@ private fun ScreenPreviewCard(
   index: Int,
   question: EditorQuestion,
   form: EditorForm,
+  datasets: List<EditorDataset>,
   isSelected: Boolean,
   hasIssues: Boolean,
   isDragged: Boolean,
@@ -1025,7 +1030,7 @@ private fun ScreenPreviewCard(
         }
       }
       Text(
-        text = form.describeRelevance(question) ?: "Always shown",
+        text = form.describeRelevance(question, datasets) ?: "Always shown",
         style = MaterialTheme.typography.labelSmall,
         color =
           when {
@@ -1039,7 +1044,7 @@ private fun ScreenPreviewCard(
         modifier = Modifier.padding(top = 4.dp, bottom = 6.dp),
       )
 
-      MiniScreen(question, form.title, Modifier.weight(1f).fillMaxWidth())
+      MiniScreen(question, form.title, datasets, Modifier.weight(1f).fillMaxWidth())
 
       Text(
         text = question.name + if (question.required) " *" else "",
@@ -1055,7 +1060,12 @@ private fun ScreenPreviewCard(
 
 /** Static, scaled-down mock of how the question screen looks on a device. */
 @Composable
-private fun MiniScreen(question: EditorQuestion, formTitle: String, modifier: Modifier = Modifier) {
+private fun MiniScreen(
+  question: EditorQuestion,
+  formTitle: String,
+  datasets: List<EditorDataset>,
+  modifier: Modifier = Modifier,
+) {
   val colors = MaterialTheme.colorScheme
   Surface(
     modifier = modifier,
@@ -1101,7 +1111,7 @@ private fun MiniScreen(question: EditorQuestion, formTitle: String, modifier: Mo
           )
         }
         Spacer(Modifier.height(2.dp))
-        MiniWidget(question)
+        MiniWidget(question, datasets)
       }
       Row(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 6.dp),
@@ -1133,7 +1143,7 @@ private fun MiniButton(text: String, filled: Boolean) {
 }
 
 @Composable
-private fun MiniWidget(question: EditorQuestion) {
+private fun MiniWidget(question: EditorQuestion, datasets: List<EditorDataset>) {
   val colors = MaterialTheme.colorScheme
   when (question.type) {
     EditorQuestionType.TEXT -> MiniField("Answer", 26.dp)
@@ -1144,7 +1154,39 @@ private fun MiniWidget(question: EditorQuestion) {
     EditorQuestionType.SELECT_ONE,
     EditorQuestionType.SELECT_MULTIPLE -> {
       val round = question.type == EditorQuestionType.SELECT_ONE
-      question.choices.take(4).forEach { choice ->
+      val effectiveSource = question.effectiveChoiceSource(datasets)
+      val datasetId = question.choiceDatasetId
+      val dataset = datasetId?.let { id -> datasets.firstOrNull { it.id == id } }
+      if (question.usesDatasetChoices) {
+        val fallbackLabel =
+          if (effectiveSource == ChoiceSource.DATA_TABLE) "Choose data table"
+          else "Choose map layer"
+        val defaultIcon =
+          if (effectiveSource == ChoiceSource.DATA_TABLE) Icons.Outlined.TableChart
+          else Icons.Outlined.Layers
+        Row(
+          verticalAlignment = Alignment.CenterVertically,
+          horizontalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
+          Icon(
+            dataset?.let(::datasetIcon) ?: defaultIcon,
+            contentDescription = null,
+            tint = colors.primary,
+            modifier = Modifier.size(12.dp),
+          )
+          Text(
+            text = dataset?.displayName ?: datasetId.orEmpty().ifBlank { fallbackLabel },
+            style = MaterialTheme.typography.labelSmall,
+            color = colors.primary,
+            fontWeight = FontWeight.SemiBold,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+          )
+        }
+      }
+      val previewChoices = question.resolvedChoices(datasets)
+      val maxItems = if (question.usesDatasetChoices) 3 else 4
+      previewChoices.take(maxItems).forEach { choice ->
         Row(verticalAlignment = Alignment.CenterVertically) {
           Box(
             modifier =
@@ -1179,9 +1221,9 @@ private fun MiniWidget(question: EditorQuestion) {
           )
         }
       }
-      if (question.choices.size > 4) {
+      if (previewChoices.size > maxItems) {
         Text(
-          text = "+${question.choices.size - 4} more",
+          text = "+${previewChoices.size - maxItems} more",
           style = MaterialTheme.typography.labelSmall,
           color = colors.onSurfaceVariant,
         )
@@ -1314,7 +1356,7 @@ private fun QuestionPropertiesPanel(
       FormProperties(uiState, actions, onSaveToModeChange, onOpenDataset)
       return@ElevatedCard
     }
-    key(question.key) { QuestionProperties(uiState, actions, question) }
+    key(question.key) { QuestionProperties(uiState, actions, question, onOpenDataset) }
   }
 }
 
@@ -1323,6 +1365,7 @@ private fun QuestionProperties(
   uiState: FormEditorUiState,
   actions: FormEditorActions,
   question: EditorQuestion,
+  onOpenDataset: ((String) -> Unit)? = null,
 ) {
   val form = uiState.form
   val index = uiState.selectedIndex
@@ -1433,7 +1476,7 @@ private fun QuestionProperties(
 
     if (question.type.hasChoices) {
       HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-      ChoicesEditor(uiState, actions, question)
+      ChoicesEditor(uiState, actions, question, onOpenDataset)
     }
 
     HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
@@ -1775,65 +1818,149 @@ private fun ChoicesEditor(
   uiState: FormEditorUiState,
   actions: FormEditorActions,
   question: EditorQuestion,
+  onOpenDataset: ((String) -> Unit)? = null,
 ) {
   val key = question.key
+  val colors = MaterialTheme.colorScheme
+  val effectiveSource = uiState.choiceSourceFor(question)
   var imageError by remember { mutableStateOf<String?>(null) }
   Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
     SectionLabel("Choices")
-    question.choices.forEachIndexed { i, choice ->
-      Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(4.dp),
-      ) {
-        ChoiceColorButton(
-          colorHex = choice.colorHex,
-          onSelect = { actions.setChoiceColor(key, i, it) },
+    SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
+      ChoiceSource.entries.forEachIndexed { index, source ->
+        SegmentedButton(
+          selected = effectiveSource == source,
+          onClick = { actions.setChoiceSource(key, source) },
+          shape =
+            SegmentedButtonDefaults.itemShape(index = index, count = ChoiceSource.entries.size),
+          label = { Text(source.label) },
         )
-        ChoiceImageButton(
-          image = choice.image,
-          onPicked = { image ->
-            imageError =
-              if (actions.setChoiceImage(key, i, image)) null
-              else "Choose an image file under ${EditorChoiceImage.MAX_BYTES / 1024} KB."
-          },
-          onRemove = { actions.setChoiceImage(key, i, null) },
-          onError = { imageError = it },
-        )
-        OutlinedTextField(
-          value = choice.label,
-          onValueChange = { actions.updateChoiceLabel(key, i, it) },
-          label = { Text("Label") },
-          singleLine = true,
-          modifier = Modifier.weight(1f),
-        )
-        OutlinedTextField(
-          value = choice.value,
-          onValueChange = { actions.updateChoice(key, i, choice.copy(value = it.trim())) },
-          label = { Text("Value") },
-          singleLine = true,
-          textStyle = MaterialTheme.typography.bodyLarge.copy(fontFamily = FontFamily.Monospace),
-          modifier = Modifier.width(96.dp),
-        )
-        IconButton(onClick = { actions.removeChoice(key, i) }, modifier = Modifier.size(32.dp)) {
-          Icon(
-            Icons.Outlined.Close,
-            contentDescription = "Remove choice",
-            modifier = Modifier.size(18.dp),
-          )
-        }
       }
     }
-    imageError?.let {
-      Text(
-        text = it,
-        style = MaterialTheme.typography.bodySmall,
-        color = MaterialTheme.colorScheme.error,
-      )
-    }
-    TextButton(onClick = { actions.addChoice(key) }) {
-      Icon(Icons.Outlined.Add, contentDescription = null, modifier = Modifier.size(18.dp))
-      Spacer(Modifier.width(4.dp))
-      Text("Add choice")
+    when (effectiveSource) {
+      ChoiceSource.MANUAL -> {
+        question.choices.forEachIndexed { i, choice ->
+          Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+          ) {
+            ChoiceColorButton(
+              colorHex = choice.colorHex,
+              onSelect = { actions.setChoiceColor(key, i, it) },
+            )
+            ChoiceImageButton(
+              image = choice.image,
+              onPicked = { image ->
+                imageError =
+                  if (actions.setChoiceImage(key, i, image)) null
+                  else "Choose an image file under ${EditorChoiceImage.MAX_BYTES / 1024} KB."
+              },
+              onRemove = { actions.setChoiceImage(key, i, null) },
+              onError = { imageError = it },
+            )
+            OutlinedTextField(
+              value = choice.label,
+              onValueChange = { actions.updateChoiceLabel(key, i, it) },
+              label = { Text("Label") },
+              singleLine = true,
+              modifier = Modifier.weight(1f),
+            )
+            OutlinedTextField(
+              value = choice.value,
+              onValueChange = { actions.updateChoice(key, i, choice.copy(value = it.trim())) },
+              label = { Text("Value") },
+              singleLine = true,
+              textStyle =
+                MaterialTheme.typography.bodyLarge.copy(fontFamily = FontFamily.Monospace),
+              modifier = Modifier.width(96.dp),
+            )
+            IconButton(
+              onClick = { actions.removeChoice(key, i) },
+              modifier = Modifier.size(32.dp),
+            ) {
+              Icon(
+                Icons.Outlined.Close,
+                contentDescription = "Remove choice",
+                modifier = Modifier.size(18.dp),
+              )
+            }
+          }
+        }
+        imageError?.let {
+          Text(
+            text = it,
+            style = MaterialTheme.typography.bodySmall,
+            color = colors.error,
+          )
+        }
+        TextButton(onClick = { actions.addChoice(key) }) {
+          Icon(Icons.Outlined.Add, contentDescription = null, modifier = Modifier.size(18.dp))
+          Spacer(Modifier.width(4.dp))
+          Text("Add choice")
+        }
+      }
+      ChoiceSource.MAP_LAYER,
+      ChoiceSource.DATA_TABLE -> {
+        val availableDatasets = uiState.choiceDatasetsFor(effectiveSource)
+        val selectedDataset =
+          uiState.choiceDatasetFor(question)?.takeIf {
+            it.isMapLayer == (effectiveSource == ChoiceSource.MAP_LAYER)
+          }
+        val pluralKind =
+          if (effectiveSource == ChoiceSource.MAP_LAYER) "map layers" else "data tables"
+        if (availableDatasets.isEmpty() && question.choiceDatasetId.isNullOrBlank()) {
+          Text(
+            text = "No $pluralKind are available in this survey yet.",
+            style = MaterialTheme.typography.bodySmall,
+            color = colors.onSurfaceVariant,
+          )
+        } else {
+          if (availableDatasets.isNotEmpty()) {
+            DropdownSelector(
+              label = effectiveSource.label,
+              selectedText =
+                selectedDataset?.displayName
+                  ?: question.choiceDatasetId?.takeIf { it.isNotBlank() }
+                  ?: "Choose",
+              options = availableDatasets,
+              optionText = { "${it.displayName} (${it.id})" },
+              optionIcon = ::datasetIcon,
+              onSelect = { actions.setChoiceDataset(key, it.id) },
+            )
+          }
+          if (selectedDataset != null) {
+            val count = selectedDataset.rows.size
+            val noun =
+              if (count == 1) selectedDataset.featureNoun else "${selectedDataset.featureNoun}s"
+            Text(
+              text =
+                "Collectors choose from $count $noun in ${selectedDataset.displayName} " +
+                  "(value: ${selectedDataset.keyProperty}, label: ${selectedDataset.labelProperty}).",
+              style = MaterialTheme.typography.bodySmall,
+              color = colors.onSurfaceVariant,
+            )
+            if (onOpenDataset != null) {
+              AssistChip(
+                onClick = { onOpenDataset(selectedDataset.id) },
+                label = { Text(selectedDataset.displayName) },
+                leadingIcon = {
+                  Icon(
+                    datasetIcon(selectedDataset),
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp),
+                  )
+                },
+              )
+            }
+          } else if (!question.choiceDatasetId.isNullOrBlank()) {
+            Text(
+              text = "Choices are loaded from external list \"${question.choiceDatasetId}\".",
+              style = MaterialTheme.typography.bodySmall,
+              color = colors.onSurfaceVariant,
+            )
+          }
+        }
+      }
     }
   }
 }
@@ -2080,7 +2207,7 @@ private fun DisplayLogicEditor(
           val operator =
             relevance.operator.takeIf { it in RelevanceOperator.availableFor(picked.type) }
               ?: RelevanceOperator.availableFor(picked.type).first()
-          val value = picked.choices.firstOrNull()?.value.orEmpty()
+          val value = picked.resolvedChoices(uiState.datasets).firstOrNull()?.value.orEmpty()
           actions.updateQuestion(key) {
             it.copy(relevance = EditorRelevance(picked.key, operator, value))
           }
@@ -2097,13 +2224,14 @@ private fun DisplayLogicEditor(
           },
         )
         if (relevance.operator.needsValue) {
-          if (source.type.hasChoices) {
+          val sourceChoices = source.resolvedChoices(uiState.datasets)
+          if (source.type.hasChoices && sourceChoices.isNotEmpty()) {
             DropdownSelector(
               label = "Value",
               selectedText =
-                source.choices.firstOrNull { it.value == relevance.value }?.label
+                sourceChoices.firstOrNull { it.value == relevance.value }?.label
                   ?: relevance.value.ifBlank { "Pick a choice" },
-              options = source.choices,
+              options = sourceChoices,
               optionText = { "${it.label} (${it.value})" },
               onSelect = { c ->
                 actions.updateQuestion(key) { it.copy(relevance = relevance.copy(value = c.value)) }
@@ -2122,7 +2250,7 @@ private fun DisplayLogicEditor(
           }
         }
       }
-      form.relevanceSummary(question)?.let { summary ->
+      form.relevanceSummary(question, uiState.datasets)?.let { summary ->
         Text(
           text = summary,
           style = MaterialTheme.typography.bodySmall,

@@ -24,6 +24,7 @@ import org.groundplatform.v2.core.forms.serialization.XFormsXmlSerializer
 import org.groundplatform.v2.core.forms.ui.FormWizardController
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.FormAvailability
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.ChoiceColors
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.ChoiceSource
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EditorChoice
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EditorChoiceImage
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EditorDataset
@@ -145,6 +146,14 @@ interface FormEditorActions {
   fun disableRelevance(key: String)
 
   // --- Choices ---
+
+  /**
+   * Switches [key] between a manual choice list and choices pulled from a Map layer or Data table.
+   */
+  fun setChoiceSource(key: String, source: ChoiceSource)
+
+  /** Sets the dataset ID that [key] pulls choices from (or clears it when `null`). */
+  fun setChoiceDataset(key: String, datasetId: String?)
 
   /**
    * Replaces the label of choice [index] of [key]. If the choice value was derived from its label,
@@ -432,6 +441,8 @@ class FormEditorViewModel(
       q.copy(
         type = type,
         choices = if (type.hasChoices && q.choices.isEmpty()) defaultChoices() else q.choices,
+        choiceDatasetId = if (type.hasChoices) q.choiceDatasetId else null,
+        choiceSource = if (type.hasChoices) q.choiceSource else ChoiceSource.MANUAL,
         required = q.required && !type.isReadOnly,
         validation = ValidationRules.adaptToType(q.type, type, q.validation),
         capture = if (type.isGeometry) q.capture else GeometryCapture.GPS_ONLY,
@@ -503,13 +514,54 @@ class FormEditorViewModel(
   override fun enableRelevance(key: String) {
     val source = form.eligibleRelevanceSources(key).lastOrNull() ?: return
     val operator = RelevanceOperator.availableFor(source.type).first()
-    val value = if (operator.needsValue) source.choices.firstOrNull()?.value.orEmpty() else ""
+    val value =
+      if (operator.needsValue) source.resolvedChoices(datasets).firstOrNull()?.value.orEmpty()
+      else ""
     updateQuestion(key) { it.copy(relevance = EditorRelevance(source.key, operator, value)) }
   }
 
   override fun disableRelevance(key: String) = updateQuestion(key) { it.copy(relevance = null) }
 
   // --- Choices ---
+
+  override fun setChoiceSource(key: String, source: ChoiceSource) =
+    updateQuestion(key) { q ->
+      when (source) {
+        ChoiceSource.MANUAL ->
+          q.copy(
+            choiceSource = ChoiceSource.MANUAL,
+            choiceDatasetId = null,
+            choices = if (q.choices.isEmpty()) defaultChoices() else q.choices,
+          )
+        ChoiceSource.MAP_LAYER,
+        ChoiceSource.DATA_TABLE -> {
+          val wantMapLayer = source == ChoiceSource.MAP_LAYER
+          val candidates =
+            updateTargets
+              .filter { it.isMapLayer == wantMapLayer }
+              .ifEmpty { datasets.filter { it.isMapLayer == wantMapLayer } }
+          val currentId = q.choiceDatasetId?.takeIf { id -> candidates.any { it.id == id } }
+          q.copy(
+            choiceSource = source,
+            choiceDatasetId = currentId ?: candidates.firstOrNull()?.id.orEmpty(),
+          )
+        }
+      }
+    }
+
+  override fun setChoiceDataset(key: String, datasetId: String?) =
+    updateQuestion(key) { q ->
+      val dataset = datasetId?.let { id -> datasets.firstOrNull { it.id == id } }
+      val source =
+        when {
+          datasetId == null -> ChoiceSource.MANUAL
+          dataset != null ->
+            if (dataset.isMapLayer) ChoiceSource.MAP_LAYER else ChoiceSource.DATA_TABLE
+          q.choiceSource.isDataset -> q.choiceSource
+          else -> ChoiceSource.MAP_LAYER
+        }
+      q.copy(choiceSource = source, choiceDatasetId = datasetId)
+    }
 
   override fun updateChoiceLabel(key: String, index: Int, label: String) {
     val question = form.find(key) ?: return
@@ -670,7 +722,7 @@ class FormEditorViewModel(
         val op = RelevanceOperator.availableFor(defaultQuestion.type).first()
         val valDefault =
           if (op.needsValue) {
-            defaultQuestion.choices.firstOrNull()?.value
+            defaultQuestion.resolvedChoices(datasets).firstOrNull()?.value
               ?: if (defaultQuestion.type.isNumeric) "1" else "yes"
           } else {
             ""

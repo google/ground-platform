@@ -147,9 +147,11 @@ data class SurveyEditorUiState(
   }
 
   /** Validation issues of [entry]'s Form, including its save-to logic. */
-  fun formIssues(entry: SurveyEditorForm): List<EditorIssue> =
-    FormEditorValidator.validate(entry.form) +
-      SaveToValidator.validate(entry.form, datasetCatalog(entry.key))
+  fun formIssues(entry: SurveyEditorForm): List<EditorIssue> {
+    val catalog = datasetCatalog(entry.key)
+    return FormEditorValidator.validate(entry.form, catalog) +
+      SaveToValidator.validate(entry.form, catalog)
+  }
 
   /** Validation issues of [dataset], plus its last sample generation error, if any. */
   fun datasetIssues(dataset: EntityDataset): List<DatasetIssue> {

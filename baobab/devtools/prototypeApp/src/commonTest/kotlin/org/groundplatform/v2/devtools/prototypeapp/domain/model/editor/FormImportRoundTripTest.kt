@@ -39,6 +39,10 @@ class FormImportRoundTripTest {
     assertEquals(expected.questions.map { it.type }, actual.questions.map { it.type })
     assertEquals(expected.questions.map { it.required }, actual.questions.map { it.required })
     assertEquals(
+      expected.questions.map { it.choiceDatasetId },
+      actual.questions.map { it.choiceDatasetId },
+    )
+    assertEquals(
       expected.questions.map { q -> q.choices.map { it.value to it.label } },
       actual.questions.map { q -> q.choices.map { it.value to it.label } },
     )
@@ -78,5 +82,37 @@ class FormImportRoundTripTest {
         assertSameQuestions(imported, roundTrip(imported))
       }
     }
+  }
+
+  @Test
+  fun datasetBackedSelectOneAndSelectMultiple_importWithChoiceDatasetIdAndRoundTrip() {
+    val draft = SurveyEditorSamples.draft()
+    val base = FormEditorSamples.shadeTreeVisit()
+    val withDatasetChoices =
+      base.copy(
+        questions =
+          base.questions.map { q ->
+            when (q.name) {
+              "has_shade_trees" -> q.copy(choiceDatasetId = "farmers", choices = emptyList())
+              "observed_issues" -> q.copy(choiceDatasetId = "tree_species", choices = emptyList())
+              else -> q
+            }
+          }
+      )
+    val entry = SurveyEditorForm("f1", withDatasetChoices)
+    val catalog = draft.datasets.map { it.toEditorDataset(entry.key) }
+    val xml = draft.copy(forms = listOf(entry)).publishedFormXml(entry)
+    val imported = assertNotNull(FormImport.fromXml(xml, withDatasetChoices.formId)).form
+    val byName = imported.questions.associateBy { it.name }
+    assertEquals("farmers", byName.getValue("has_shade_trees").choiceDatasetId)
+    assertEquals(
+      ChoiceSource.DATA_TABLE,
+      byName.getValue("has_shade_trees").effectiveChoiceSource(catalog),
+    )
+    assertEquals("tree_species", byName.getValue("observed_issues").choiceDatasetId)
+    assertEquals(
+      ChoiceSource.DATA_TABLE,
+      byName.getValue("observed_issues").effectiveChoiceSource(catalog),
+    )
   }
 }

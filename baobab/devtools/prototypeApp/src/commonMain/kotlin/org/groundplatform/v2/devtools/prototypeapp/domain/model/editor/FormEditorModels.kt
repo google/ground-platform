@@ -229,6 +229,19 @@ data class EditorRelevance(
   val value: String = "",
 )
 
+/**
+ * Where a [EditorQuestionType.SELECT_ONE] or [EditorQuestionType.SELECT_MULTIPLE] question gets its
+ * options: a manual list of [EditorChoice]s, a survey Map layer, or a survey Data table.
+ */
+enum class ChoiceSource(val label: String) {
+  MANUAL("Manual list"),
+  MAP_LAYER("Map layer"),
+  DATA_TABLE("Data table");
+
+  val isDataset: Boolean
+    get() = this != MANUAL
+}
+
 /** One screen (question) in the editor. */
 data class EditorQuestion(
   /** Stable editor-only identity; never emitted to XForms. */
@@ -240,6 +253,15 @@ data class EditorQuestion(
   val hint: String = "",
   val required: Boolean = false,
   val choices: List<EditorChoice> = emptyList(),
+  /**
+   * Dataset ID (`<instance id="…" src="jr://file-csv/….csv">`) supplying dynamic options for a
+   * [EditorQuestionType.SELECT_ONE] or [EditorQuestionType.SELECT_MULTIPLE] question, or `null`
+   * when the question uses its manual [choices] list.
+   */
+  val choiceDatasetId: String? = null,
+  /** Where this question's choices come from when [EditorQuestionType.hasChoices] is true. */
+  val choiceSource: ChoiceSource =
+    if (choiceDatasetId != null) ChoiceSource.MAP_LAYER else ChoiceSource.MANUAL,
   val relevance: EditorRelevance? = null,
   /** Answer validation, exported as the bind `constraint` / `jr:constraintMsg`. */
   val validation: EditorValidation? = null,
@@ -256,6 +278,40 @@ data class EditorQuestion(
 ) {
   val isConditional: Boolean
     get() = relevance != null
+
+  /**
+   * Whether this question pulls its choices from a Map layer or Data table rather than [choices].
+   */
+  val usesDatasetChoices: Boolean
+    get() = choiceSource.isDataset || choiceDatasetId != null
+
+  /**
+   * Effective [ChoiceSource] for this question, inferring [ChoiceSource.MAP_LAYER] vs
+   * [ChoiceSource.DATA_TABLE] from [datasets] when [choiceDatasetId] is set.
+   */
+  fun effectiveChoiceSource(datasets: List<EditorDataset> = emptyList()): ChoiceSource {
+    val datasetId = choiceDatasetId
+    if (datasetId != null) {
+      val dataset = datasets.firstOrNull { it.id == datasetId }
+      if (dataset != null) {
+        return if (dataset.isMapLayer) ChoiceSource.MAP_LAYER else ChoiceSource.DATA_TABLE
+      }
+      return if (choiceSource.isDataset) choiceSource else ChoiceSource.MAP_LAYER
+    }
+    return choiceSource
+  }
+
+  /**
+   * Effective choices for this question: rows from the linked [EditorDataset] when
+   * [choiceDatasetId] is set (falling back to [choices] when the dataset is not in [datasets]), or
+   * [choices] when using a manual list.
+   */
+  fun resolvedChoices(datasets: List<EditorDataset> = emptyList()): List<EditorChoice> {
+    val datasetId = choiceDatasetId ?: return choices
+    if (datasetId.isBlank()) return emptyList()
+    val dataset = datasets.firstOrNull { it.id == datasetId } ?: return choices
+    return dataset.rows.map { EditorChoice(value = it.name, label = it.label) }
+  }
 
   /** Whether this is a geometry question that the web dashboard can't answer (GPS only). */
   val isWebIncompatible: Boolean
@@ -308,13 +364,16 @@ data class EditorForm(
    * Plain-language sentence for [question]'s display logic, using question labels rather than data
    * names, e.g. `Shown only if "Are shade trees present?" equals Yes.`
    */
-  fun relevanceSummary(question: EditorQuestion): String? {
+  fun relevanceSummary(
+    question: EditorQuestion,
+    datasets: List<EditorDataset> = emptyList(),
+  ): String? {
     val relevance = question.relevance ?: return null
     val source = find(relevance.sourceQuestionKey) ?: return "Refers to a deleted question."
     val title = "\"${source.label.ifBlank { source.name }}\""
     if (!relevance.operator.needsValue) return "Shown only if $title is answered."
     val value =
-      source.choices.firstOrNull { it.value == relevance.value }?.label
+      source.resolvedChoices(datasets).firstOrNull { it.value == relevance.value }?.label
         ?: relevance.value.ifBlank {
           return null
         }
@@ -322,12 +381,16 @@ data class EditorForm(
   }
 
   /** Short human description of [question]'s display logic, e.g. `if has_shade = yes`. */
-  fun describeRelevance(question: EditorQuestion): String? {
+  fun describeRelevance(
+    question: EditorQuestion,
+    datasets: List<EditorDataset> = emptyList(),
+  ): String? {
     val relevance = question.relevance ?: return null
     val source = find(relevance.sourceQuestionKey) ?: return "if (missing question)"
     return if (relevance.operator.needsValue) {
       val shownValue =
-        source.choices.firstOrNull { it.value == relevance.value }?.label ?: relevance.value
+        source.resolvedChoices(datasets).firstOrNull { it.value == relevance.value }?.label
+          ?: relevance.value
       "if ${source.name} ${relevance.operator.symbol} ${shownValue.ifBlank { "…" }}"
     } else {
       "if ${source.name} is answered"
@@ -409,7 +472,7 @@ object FormEditorValidator {
 
   fun isValidName(name: String): Boolean = NAME_PATTERN.matches(name) && name !in RESERVED_NAMES
 
-  fun validate(form: EditorForm): List<EditorIssue> {
+  fun validate(form: EditorForm, datasets: List<EditorDataset> = emptyList()): List<EditorIssue> {
     val issues = mutableListOf<EditorIssue>()
     // Form IDs are opaque: generated by FormIds or preserved verbatim from imported XForms.
     if (form.formId.isBlank()) {
@@ -430,15 +493,35 @@ object FormEditorValidator {
         issues += EditorIssue(key, "Label is empty.")
       }
       if (question.type.hasChoices) {
-        if (question.choices.isEmpty()) {
-          issues += EditorIssue(key, "Add at least one choice.")
-        }
-        val values = question.choices.map { it.value }
-        if (values.any { it.isBlank() || it.any(Char::isWhitespace) }) {
-          issues += EditorIssue(key, "Choice values must be non-empty and contain no spaces.")
-        }
-        if (values.toSet().size != values.size) {
-          issues += EditorIssue(key, "Choice values must be unique.")
+        if (question.usesDatasetChoices) {
+          val kindLabel =
+            if (question.effectiveChoiceSource(datasets) == ChoiceSource.DATA_TABLE) {
+              "data table"
+            } else {
+              "map layer"
+            }
+          val choiceDatasetId = question.choiceDatasetId.orEmpty()
+          when {
+            choiceDatasetId.isBlank() ->
+              issues += EditorIssue(key, "Choose a $kindLabel for the options.")
+            datasets.isNotEmpty() && datasets.none { it.id == choiceDatasetId } ->
+              issues +=
+                EditorIssue(
+                  key,
+                  "Map layer or data table \"$choiceDatasetId\" no longer exists.",
+                )
+          }
+        } else {
+          if (question.choices.isEmpty()) {
+            issues += EditorIssue(key, "Add at least one choice.")
+          }
+          val values = question.choices.map { it.value }
+          if (values.any { it.isBlank() || it.any(Char::isWhitespace) }) {
+            issues += EditorIssue(key, "Choice values must be non-empty and contain no spaces.")
+          }
+          if (values.toSet().size != values.size) {
+            issues += EditorIssue(key, "Choice values must be unique.")
+          }
         }
       }
       val relevance = question.relevance
@@ -516,10 +599,12 @@ object EditorXFormsGenerator {
   /**
    * Whether [question]'s choices are exported as an internal secondary instance plus `itemset`
    * rather than inline `<item>`s: needed as soon as any choice carries extra columns (color) or
-   * media (image).
+   * media (image) when the choices are defined manually on the question.
    */
   fun usesChoiceInstance(question: EditorQuestion): Boolean =
-    question.type.hasChoices && question.choices.any { it.colorHex != null || it.image != null }
+    question.type.hasChoices &&
+      !question.usesDatasetChoices &&
+      question.choices.any { it.colorHex != null || it.image != null }
 
   /** Secondary instance id (XLSForm `list_name`) for [question]'s choices. */
   fun choiceListName(question: EditorQuestion): String = question.name
@@ -589,157 +674,185 @@ object EditorXFormsGenerator {
 
   /**
    * Generates the XForms for [form]. When [target] is given, submissions add a feature to it or
-   * update one of its features, per [EditorForm.saveTo]. For updates, [inlineRows] embeds the
-   * target's current features in its secondary instance (for previews, where the
-   * `jr://file-csv/<dataset>.csv` attachment isn't available).
+   * update one of its features, per [EditorForm.saveTo]. For updates or dataset-backed choice
+   * questions, [inlineRows] embeds the dataset's current features in its secondary instance (for
+   * previews, where the `jr://file-csv/<dataset>.csv` attachment isn't available).
    */
-  fun toXml(form: EditorForm, target: EditorDataset? = null, inlineRows: Boolean = false): String =
-    buildString {
-      val entity = target?.let { EntityPlan(form, it) }
-      val choiceInstances = form.questions.filter(::usesChoiceInstance)
-      val itextQuestions = choiceInstances.filter(::choicesRequireItext)
-      appendLine("""<?xml version="1.0"?>""")
-      appendLine("""<h:html xmlns="http://www.w3.org/2002/xforms"""")
-      appendLine("""        xmlns:h="http://www.w3.org/1999/xhtml"""")
-      appendLine("""        xmlns:jr="http://openrosa.org/javarosa"""")
-      if (entity == null) {
-        appendLine("""        xmlns:orx="http://openrosa.org/xforms">""")
-      } else {
-        appendLine("""        xmlns:orx="http://openrosa.org/xforms"""")
-        appendLine("""        xmlns:entities="http://www.opendatakit.org/xforms/entities">""")
-      }
-      appendLine("  <h:head>")
-      appendLine("    <h:title>${escape(form.title)}</h:title>")
-      if (entity == null) {
-        appendLine("""    <model orx:xforms-version="1.0.0">""")
-      } else {
-        appendLine(
-          """    <model orx:xforms-version="1.0.0" entities:entities-version="2024.1.0">"""
-        )
-      }
-      if (itextQuestions.isNotEmpty()) {
-        // ODK XForms spec, "Languages" / "Media": choice labels reference itext entries whose
-        // `image` form points at a form attachment (XLSForm `media::image`). Ids follow pyxform's
-        // positional `<list_name>-<index>` scheme.
-        appendLine("      <itext>")
-        appendLine("""        <translation default="true()" lang="default">""")
-        itextQuestions.forEach { question ->
-          val listName = choiceListName(question)
-          question.choices.forEachIndexed { index, choice ->
-            appendLine("""          <text id="${escape(choiceTextId(listName, index))}">""")
-            appendLine("            <value>${escape(choice.label)}</value>")
-            choiceImageFileName(question, choice)?.let { fileName ->
-              appendLine(
-                """            <value form="image">jr://images/${escape(fileName)}</value>"""
-              )
-            }
-            appendLine("          </text>")
-          }
-        }
-        appendLine("        </translation>")
-        appendLine("      </itext>")
-      }
-      appendLine("      <instance>")
-      appendLine("""        <data id="${escape(form.formId)}" version="1">""")
-      if (entity?.selectsTarget == true)
-        appendLine("          <${SaveToRules.TARGET_ENTITY_FIELD}/>")
-      form.questions.forEach { appendLine("          <${it.name}/>") }
-      if (entity?.hasStatus == true) {
-        appendLine("          <${SaveToRules.STATUS_FIELD}/>")
-        appendLine("          <${SaveToRules.MARKER_SYMBOL_FIELD}/>")
-        appendLine("          <${SaveToRules.MARKER_COLOR_FIELD}/>")
-      }
-      appendLine("          <orx:meta>")
-      appendLine("            <orx:instanceID/>")
-      if (entity != null) appendEntityDeclaration(entity)
-      appendLine("          </orx:meta>")
-      appendLine("        </data>")
-      appendLine("      </instance>")
-      if (entity?.isUpdate == true) appendDatasetInstance(entity.target, inlineRows)
-      // Internal secondary instances, shaped like pyxform's output for an XLSForm choices sheet:
-      // one <item> per row with <name>, <label> (or <itextId>), then any extra columns. Extra
-      // columns such as `color` are ordinary instance data that other clients ignore.
-      choiceInstances.forEach { question ->
-        val requiresItext = choicesRequireItext(question)
-        val listName = choiceListName(question)
-        appendLine("""      <instance id="${escape(listName)}">""")
-        appendLine("        <root>")
-        question.choices.forEachIndexed { index, choice ->
-          appendLine("          <item>")
-          appendLine("            <name>${escape(choice.value)}</name>")
-          if (requiresItext) {
-            appendLine("            <itextId>${escape(choiceTextId(listName, index))}</itextId>")
-          } else {
-            appendLine("            <label>${escape(choice.label)}</label>")
-          }
-          choice.colorHex?.let { color ->
-            appendLine("            <$CHOICE_COLOR_COLUMN>${escape(color)}</$CHOICE_COLOR_COLUMN>")
-          }
-          appendLine("          </item>")
-        }
-        appendLine("        </root>")
-        appendLine("      </instance>")
-      }
-      if (entity?.selectsTarget == true) {
-        appendLine(
-          """      <bind nodeset="/data/${SaveToRules.TARGET_ENTITY_FIELD}" type="string" required="true()"/>"""
-        )
-      }
-      form.questions.forEach { question ->
-        val attrs = buildList {
-          add("""nodeset="/data/${question.name}"""")
-          add("""type="${question.type.bindType}"""")
-          if (question.required && !question.type.isReadOnly) add("""required="true()"""")
-          if (question.type.isReadOnly) add("""readonly="true()"""")
-          relevantExpression(form, question)?.let { add("""relevant="${escape(it)}"""") }
-          // ODK XForms spec, "Bindings": `constraint` and `jr:constraintMsg`.
-          if (!question.type.isReadOnly) {
-            ValidationRules.constraintExpression(question.type, question.validation)?.let {
-              add("""constraint="${escape(it)}"""")
-              ValidationRules.message(question.type, question.validation)?.let { msg ->
-                add("""jr:constraintMsg="${escape(msg)}"""")
-              }
-            }
-          }
-          entity?.saveTo?.get(question.key)?.let { add("""entities:saveto="${escape(it)}"""") }
-        }
-        appendLine("      <bind ${attrs.joinToString(" ")}/>")
-      }
-      if (entity != null) appendEntityBinds(entity)
-      appendLine("    </model>")
-      appendLine("  </h:head>")
-      appendLine("  <h:body>")
-      if (entity?.selectsTarget == true) appendTargetPicker(entity.target)
-      form.questions.forEach { question ->
-        val type = question.type
-        val attrs = buildList {
-          add("""ref="/data/${question.name}"""")
-          bodyAppearance(question)?.let { add("""appearance="${escape(it)}"""") }
-          if (type.mediaType.isNotEmpty()) add("""mediatype="${type.mediaType}"""")
-        }
-        appendLine("    <${type.bodyElement} ${attrs.joinToString(" ")}>")
-        appendLine("      <label>${escape(question.label)}</label>")
-        if (question.hint.isNotBlank()) appendLine("      <hint>${escape(question.hint)}</hint>")
-        if (usesChoiceInstance(question)) {
-          val nodeset = "instance('${choiceListName(question)}')/root/item"
-          val labelRef = if (choicesRequireItext(question)) "jr:itext(itextId)" else "label"
-          appendLine("""      <itemset nodeset="${escape(nodeset)}">""")
-          appendLine("""        <value ref="name"/>""")
-          appendLine("""        <label ref="${escape(labelRef)}"/>""")
-          appendLine("      </itemset>")
-        } else if (type.hasChoices) {
-          question.choices.forEach { choice ->
-            appendLine("      <item>")
-            appendLine("        <label>${escape(choice.label)}</label>")
-            appendLine("        <value>${escape(choice.value)}</value>")
-            appendLine("      </item>")
-          }
-        }
-        appendLine("    </${type.bodyElement}>")
-      }
-      appendLine("  </h:body>")
-      append("</h:html>")
+  fun toXml(
+    form: EditorForm,
+    target: EditorDataset? = null,
+    inlineRows: Boolean = false,
+    datasets: List<EditorDataset> = emptyList(),
+  ): String = buildString {
+    val entity = target?.let { EntityPlan(form, it) }
+    val choiceInstances = form.questions.filter(::usesChoiceInstance)
+    val itextQuestions = choiceInstances.filter(::choicesRequireItext)
+    appendLine("""<?xml version="1.0"?>""")
+    appendLine("""<h:html xmlns="http://www.w3.org/2002/xforms"""")
+    appendLine("""        xmlns:h="http://www.w3.org/1999/xhtml"""")
+    appendLine("""        xmlns:jr="http://openrosa.org/javarosa"""")
+    if (entity == null) {
+      appendLine("""        xmlns:orx="http://openrosa.org/xforms">""")
+    } else {
+      appendLine("""        xmlns:orx="http://openrosa.org/xforms"""")
+      appendLine("""        xmlns:entities="http://www.opendatakit.org/xforms/entities">""")
     }
+    appendLine("  <h:head>")
+    appendLine("    <h:title>${escape(form.title)}</h:title>")
+    if (entity == null) {
+      appendLine("""    <model orx:xforms-version="1.0.0">""")
+    } else {
+      appendLine("""    <model orx:xforms-version="1.0.0" entities:entities-version="2024.1.0">""")
+    }
+    if (itextQuestions.isNotEmpty()) {
+      // ODK XForms spec, "Languages" / "Media": choice labels reference itext entries whose
+      // `image` form points at a form attachment (XLSForm `media::image`). Ids follow pyxform's
+      // positional `<list_name>-<index>` scheme.
+      appendLine("      <itext>")
+      appendLine("""        <translation default="true()" lang="default">""")
+      itextQuestions.forEach { question ->
+        val listName = choiceListName(question)
+        question.choices.forEachIndexed { index, choice ->
+          appendLine("""          <text id="${escape(choiceTextId(listName, index))}">""")
+          appendLine("            <value>${escape(choice.label)}</value>")
+          choiceImageFileName(question, choice)?.let { fileName ->
+            appendLine(
+              """            <value form="image">jr://images/${escape(fileName)}</value>"""
+            )
+          }
+          appendLine("          </text>")
+        }
+      }
+      appendLine("        </translation>")
+      appendLine("      </itext>")
+    }
+    appendLine("      <instance>")
+    appendLine("""        <data id="${escape(form.formId)}" version="1">""")
+    if (entity?.selectsTarget == true) appendLine("          <${SaveToRules.TARGET_ENTITY_FIELD}/>")
+    form.questions.forEach { appendLine("          <${it.name}/>") }
+    if (entity?.hasStatus == true) {
+      appendLine("          <${SaveToRules.STATUS_FIELD}/>")
+      appendLine("          <${SaveToRules.MARKER_SYMBOL_FIELD}/>")
+      appendLine("          <${SaveToRules.MARKER_COLOR_FIELD}/>")
+    }
+    appendLine("          <orx:meta>")
+    appendLine("            <orx:instanceID/>")
+    if (entity != null) appendEntityDeclaration(entity)
+    appendLine("          </orx:meta>")
+    appendLine("        </data>")
+    appendLine("      </instance>")
+    val emittedDatasetIds = mutableSetOf<String>()
+    if (entity?.isUpdate == true) {
+      appendDatasetInstance(entity.target, inlineRows)
+      emittedDatasetIds += entity.target.id
+    }
+    form.questions.forEach { question ->
+      val datasetId =
+        question.choiceDatasetId?.takeIf { question.type.hasChoices && it.isNotBlank() }
+      if (datasetId != null && emittedDatasetIds.add(datasetId)) {
+        val dataset =
+          datasets.firstOrNull { it.id == datasetId } ?: target?.takeIf { it.id == datasetId }
+        if (dataset != null) {
+          appendDatasetInstance(dataset, inlineRows)
+        } else {
+          appendFallbackDatasetInstance(datasetId, question.choices, inlineRows)
+        }
+      }
+    }
+    // Internal secondary instances, shaped like pyxform's output for an XLSForm choices sheet:
+    // one <item> per row with <name>, <label> (or <itextId>), then any extra columns. Extra
+    // columns such as `color` are ordinary instance data that other clients ignore.
+    choiceInstances.forEach { question ->
+      val requiresItext = choicesRequireItext(question)
+      val listName = choiceListName(question)
+      appendLine("""      <instance id="${escape(listName)}">""")
+      appendLine("        <root>")
+      question.choices.forEachIndexed { index, choice ->
+        appendLine("          <item>")
+        appendLine("            <name>${escape(choice.value)}</name>")
+        if (requiresItext) {
+          appendLine("            <itextId>${escape(choiceTextId(listName, index))}</itextId>")
+        } else {
+          appendLine("            <label>${escape(choice.label)}</label>")
+        }
+        choice.colorHex?.let { color ->
+          appendLine("            <$CHOICE_COLOR_COLUMN>${escape(color)}</$CHOICE_COLOR_COLUMN>")
+        }
+        appendLine("          </item>")
+      }
+      appendLine("        </root>")
+      appendLine("      </instance>")
+    }
+    if (entity?.selectsTarget == true) {
+      appendLine(
+        """      <bind nodeset="/data/${SaveToRules.TARGET_ENTITY_FIELD}" type="string" required="true()"/>"""
+      )
+    }
+    form.questions.forEach { question ->
+      val attrs = buildList {
+        add("""nodeset="/data/${question.name}"""")
+        add("""type="${question.type.bindType}"""")
+        if (question.required && !question.type.isReadOnly) add("""required="true()"""")
+        if (question.type.isReadOnly) add("""readonly="true()"""")
+        relevantExpression(form, question)?.let { add("""relevant="${escape(it)}"""") }
+        // ODK XForms spec, "Bindings": `constraint` and `jr:constraintMsg`.
+        if (!question.type.isReadOnly) {
+          ValidationRules.constraintExpression(question.type, question.validation)?.let {
+            add("""constraint="${escape(it)}"""")
+            ValidationRules.message(question.type, question.validation)?.let { msg ->
+              add("""jr:constraintMsg="${escape(msg)}"""")
+            }
+          }
+        }
+        entity?.saveTo?.get(question.key)?.let { add("""entities:saveto="${escape(it)}"""") }
+      }
+      appendLine("      <bind ${attrs.joinToString(" ")}/>")
+    }
+    if (entity != null) appendEntityBinds(entity)
+    appendLine("    </model>")
+    appendLine("  </h:head>")
+    appendLine("  <h:body>")
+    if (entity?.selectsTarget == true) appendTargetPicker(entity.target)
+    form.questions.forEach { question ->
+      val type = question.type
+      val attrs = buildList {
+        add("""ref="/data/${question.name}"""")
+        bodyAppearance(question)?.let { add("""appearance="${escape(it)}"""") }
+        if (type.mediaType.isNotEmpty()) add("""mediatype="${type.mediaType}"""")
+      }
+      appendLine("    <${type.bodyElement} ${attrs.joinToString(" ")}>")
+      appendLine("      <label>${escape(question.label)}</label>")
+      if (question.hint.isNotBlank()) appendLine("      <hint>${escape(question.hint)}</hint>")
+      val choiceDatasetId =
+        question.choiceDatasetId?.takeIf {
+          type.hasChoices && question.usesDatasetChoices && it.isNotBlank()
+        }
+      if (choiceDatasetId != null) {
+        val nodeset = "instance('${escape(choiceDatasetId)}')/root/item"
+        appendLine("""      <itemset nodeset="$nodeset">""")
+        appendLine("""        <value ref="name"/>""")
+        appendLine("""        <label ref="label"/>""")
+        appendLine("      </itemset>")
+      } else if (usesChoiceInstance(question)) {
+        val nodeset = "instance('${choiceListName(question)}')/root/item"
+        val labelRef = if (choicesRequireItext(question)) "jr:itext(itextId)" else "label"
+        appendLine("""      <itemset nodeset="${escape(nodeset)}">""")
+        appendLine("""        <value ref="name"/>""")
+        appendLine("""        <label ref="${escape(labelRef)}"/>""")
+        appendLine("      </itemset>")
+      } else if (type.hasChoices && !question.usesDatasetChoices) {
+        question.choices.forEach { choice ->
+          appendLine("      <item>")
+          appendLine("        <label>${escape(choice.label)}</label>")
+          appendLine("        <value>${escape(choice.value)}</value>")
+          appendLine("      </item>")
+        }
+      }
+      appendLine("    </${type.bodyElement}>")
+    }
+    appendLine("  </h:body>")
+    append("</h:html>")
+  }
 
   private fun StringBuilder.appendEntityDeclaration(entity: EntityPlan) {
     val attrs = buildList {
@@ -782,6 +895,33 @@ object EditorXFormsGenerator {
       columns.forEach { column ->
         appendLine("            <$column>${escape(row.values[column].orEmpty())}</$column>")
       }
+      appendLine("          </item>")
+    }
+    appendLine("        </root>")
+    appendLine("      </instance>")
+  }
+
+  /**
+   * Secondary instance for a dataset-backed choice question when the dataset is not in the active
+   * survey catalog (e.g., an imported standalone XForm).
+   */
+  private fun StringBuilder.appendFallbackDatasetInstance(
+    datasetId: String,
+    choices: List<EditorChoice>,
+    inlineRows: Boolean,
+  ) {
+    val id = escape(datasetId)
+    val src = "jr://file-csv/$id.csv"
+    if (!inlineRows || choices.isEmpty()) {
+      appendLine("""      <instance id="$id" src="$src"/>""")
+      return
+    }
+    appendLine("""      <instance id="$id" src="$src">""")
+    appendLine("        <root>")
+    choices.forEach { choice ->
+      appendLine("          <item>")
+      appendLine("            <name>${escape(choice.value)}</name>")
+      appendLine("            <label>${escape(choice.label)}</label>")
       appendLine("          </item>")
     }
     appendLine("        </root>")

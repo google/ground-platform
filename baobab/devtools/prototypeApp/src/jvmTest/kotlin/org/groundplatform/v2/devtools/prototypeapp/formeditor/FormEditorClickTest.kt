@@ -36,7 +36,10 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import org.groundplatform.v2.devtools.prototypeapp.data.seed.FormEditorSamples
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.ChoiceSource
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.DateRule
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EditorDataset
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EditorDatasetRow
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EditorQuestionType
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.friendlyDate
 import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.FormEditorViewModel
@@ -48,10 +51,11 @@ import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.ui
 class FormEditorClickTest {
 
   private fun withEditor(
-    block: androidx.compose.ui.test.ComposeUiTest.(FormEditorViewModel) -> Unit
+    datasets: List<EditorDataset> = emptyList(),
+    block: androidx.compose.ui.test.ComposeUiTest.(FormEditorViewModel) -> Unit,
   ) =
     runDesktopComposeUiTest(width = 1600, height = 1000) {
-      val state = formEditorViewModel(FormEditorSamples.shadeTreeVisit())
+      val state = formEditorViewModel(FormEditorSamples.shadeTreeVisit(), datasets = datasets)
       setContent {
         MaterialTheme {
           val uiState by state.uiState.collectAsState()
@@ -299,4 +303,49 @@ class FormEditorClickTest {
       "Expected dragging right to narrow right-hand panel ($widenedWidth -> ${state.ui.sidePanelWidthDp})",
     )
   }
+
+  @Test
+  fun choiceSourceSegmentedButtonsSwitchBetweenManualMapLayerAndDataTable() =
+    withEditor(
+      datasets =
+        listOf(
+          EditorDataset(
+            id = "sample_plots",
+            displayName = "Sample plots",
+            isMapLayer = true,
+            keyProperty = "plot_id",
+            labelProperty = "plot_name",
+            properties = emptyList(),
+            rows = listOf(EditorDatasetRow("P-1", "Plot 1")),
+          ),
+          EditorDataset(
+            id = "tree_species",
+            displayName = "Tree species",
+            isMapLayer = false,
+            keyProperty = "code",
+            labelProperty = "common_name",
+            properties = emptyList(),
+            rows = listOf(EditorDatasetRow("grevillea", "Silky oak")),
+          ),
+        )
+    ) { state ->
+      runOnIdle { state.select("q3") }
+      waitForIdle()
+      assertEquals(ChoiceSource.MANUAL, state.ui.form.find("q3")?.choiceSource)
+
+      onNodeWithText("Map layer").performScrollTo().performClick()
+      waitForIdle()
+      assertEquals(ChoiceSource.MAP_LAYER, state.ui.form.find("q3")?.choiceSource)
+      assertEquals("sample_plots", state.ui.form.find("q3")?.choiceDatasetId)
+
+      onNodeWithText("Data table").performScrollTo().performClick()
+      waitForIdle()
+      assertEquals(ChoiceSource.DATA_TABLE, state.ui.form.find("q3")?.choiceSource)
+      assertEquals("tree_species", state.ui.form.find("q3")?.choiceDatasetId)
+
+      onNodeWithText("Manual list").performScrollTo().performClick()
+      waitForIdle()
+      assertEquals(ChoiceSource.MANUAL, state.ui.form.find("q3")?.choiceSource)
+      assertEquals(null, state.ui.form.find("q3")?.choiceDatasetId)
+    }
 }

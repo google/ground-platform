@@ -848,7 +848,7 @@ private fun StatusRuleCard(
                 val op =
                   q?.let { RelevanceOperator.availableFor(it.type).first() }
                     ?: RelevanceOperator.EQUALS
-                val v = q?.choices?.firstOrNull()?.value.orEmpty()
+                val v = q?.resolvedChoices(uiState.datasets)?.firstOrNull()?.value.orEmpty()
                 current.copy(
                   subject = picked,
                   questionKey = q?.key,
@@ -911,7 +911,7 @@ private fun StatusRuleCard(
               val op =
                 rule.operator.takeIf { it in RelevanceOperator.availableFor(picked.type) }
                   ?: RelevanceOperator.availableFor(picked.type).first()
-              val v = picked.choices.firstOrNull()?.value.orEmpty()
+              val v = picked.resolvedChoices(uiState.datasets).firstOrNull()?.value.orEmpty()
               actions.updateStatusRule(index) {
                 it.copy(questionKey = picked.key, operator = op, value = v)
               }
@@ -928,13 +928,14 @@ private fun StatusRuleCard(
               },
             )
             if (rule.operator.needsValue) {
-              if (question.type.hasChoices) {
+              val questionChoices = question.resolvedChoices(uiState.datasets)
+              if (question.type.hasChoices && questionChoices.isNotEmpty()) {
                 DropdownSelector(
                   label = "Value",
                   selectedText =
-                    question.choices.firstOrNull { it.value == rule.value }?.label
+                    questionChoices.firstOrNull { it.value == rule.value }?.label
                       ?: rule.value.ifBlank { "Pick a choice" },
-                  options = question.choices,
+                  options = questionChoices,
                   optionText = { "${it.label} (${it.value})" },
                   onSelect = { c ->
                     actions.updateStatusRule(index) { it.copy(value = c.value) }
@@ -1139,7 +1140,7 @@ private fun HelperText(text: String) {
   )
 }
 
-private fun datasetIcon(dataset: EditorDataset) =
+internal fun datasetIcon(dataset: EditorDataset) =
   if (dataset.isMapLayer) Icons.Outlined.Layers else Icons.Outlined.TableChart
 
 private fun propertyText(property: EditorDatasetProperty): String =

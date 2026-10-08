@@ -15,6 +15,7 @@ package org.groundplatform.v2.devtools.prototypeapp.ui.state
 
 import org.groundplatform.v2.core.forms.serialization.XFormsXmlSerializer
 import org.groundplatform.v2.core.forms.ui.FormWizardController
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.ChoiceSource
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EditorDataset
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EditorForm
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EditorFormTemplates
@@ -102,8 +103,34 @@ data class FormEditorUiState(
   val updateTargets: List<EditorDataset>
     get() = datasets.filterNot { it.isLinkedToThisForm }
 
+  /**
+   * Datasets a select question can pull choices from: all but the one this Form adds features to.
+   */
+  val choiceDatasets: List<EditorDataset>
+    get() = datasets.filterNot { it.isLinkedToThisForm }
+
+  /** Datasets matching [source] (Map layers or Data tables) that a select question can use. */
+  fun choiceDatasetsFor(source: ChoiceSource): List<EditorDataset> =
+    when (source) {
+      ChoiceSource.MANUAL -> emptyList()
+      ChoiceSource.MAP_LAYER -> choiceDatasets.filter { it.isMapLayer }
+      ChoiceSource.DATA_TABLE -> choiceDatasets.filterNot { it.isMapLayer }
+    }
+
+  /** Effective [ChoiceSource] for [question] resolved against [datasets]. */
+  fun choiceSourceFor(question: EditorQuestion): ChoiceSource =
+    question.effectiveChoiceSource(datasets)
+
+  /** Dataset backing [question]'s choices, if any. */
+  fun choiceDatasetFor(question: EditorQuestion): EditorDataset? =
+    question.choiceDatasetId
+      ?.takeIf { it.isNotBlank() }
+      ?.let { id ->
+        datasets.firstOrNull { it.id == id }
+      }
+
   val issues: List<EditorIssue>
-    get() = FormEditorValidator.validate(form) + SaveToValidator.validate(form, datasets)
+    get() = FormEditorValidator.validate(form, datasets) + SaveToValidator.validate(form, datasets)
 
   /** Issues that aren't about a single question, shown in Form properties. */
   val formIssues: List<EditorIssue>
@@ -113,11 +140,11 @@ data class FormEditorUiState(
 
   /** Exported XForms; updates reference the target's features as a CSV attachment. */
   val xformsXml: String
-    get() = EditorXFormsGenerator.toXml(form, saveTarget)
+    get() = EditorXFormsGenerator.toXml(form, saveTarget, datasets = datasets)
 
   /** XForms run by the preview, with the target's features embedded. */
   val previewXml: String
-    get() = EditorXFormsGenerator.toXml(form, saveTarget, inlineRows = true)
+    get() = EditorXFormsGenerator.toXml(form, saveTarget, inlineRows = true, datasets = datasets)
 
   /**
    * Parses the current [previewXml] into a fresh [FormWizardController] for the web canvas and the

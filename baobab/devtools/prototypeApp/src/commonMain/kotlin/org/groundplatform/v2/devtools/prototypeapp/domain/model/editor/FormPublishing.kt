@@ -62,5 +62,6 @@ fun SurveyEditorDraft.publishedFormXml(entry: SurveyEditorForm): String {
     entry.form,
     SaveToRules.saveTarget(entry.form, catalog),
     inlineRows = true,
+    datasets = catalog,
   )
 }

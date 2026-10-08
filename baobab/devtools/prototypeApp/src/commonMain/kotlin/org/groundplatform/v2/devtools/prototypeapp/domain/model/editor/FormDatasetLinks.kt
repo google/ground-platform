@@ -183,9 +183,18 @@ object FormDatasetLinks {
   }
 }
 
-/** This Form's save-to logic after dataset [oldId] was renamed to [newId]. */
+/**
+ * This Form's save-to logic and dataset-backed choice questions after dataset [oldId] was renamed
+ * to [newId].
+ */
 fun EditorForm.withRenamedTargetDataset(oldId: String, newId: String): EditorForm =
-  if (saveTo.targetDatasetId != oldId) this else copy(saveTo = saveTo.copy(targetDatasetId = newId))
+  copy(
+    saveTo = if (saveTo.targetDatasetId == oldId) saveTo.copy(targetDatasetId = newId) else saveTo,
+    questions =
+      questions.map { q ->
+        if (q.choiceDatasetId == oldId) q.copy(choiceDatasetId = newId) else q
+      },
+  )
 
 /**
  * This Form's save-to logic after property [oldName] of dataset [datasetId] was renamed to

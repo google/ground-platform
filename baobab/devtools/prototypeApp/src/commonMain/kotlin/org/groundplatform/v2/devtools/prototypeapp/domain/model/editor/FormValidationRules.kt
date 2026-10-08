@@ -150,7 +150,12 @@ object ValidationRules {
         if (lo != null && hi != null && lo > hi) {
           issues += "Minimum $noun can't be more than maximum."
         }
-        if (kind == ValidationKind.SELECTION_COUNT && lo != null && lo > question.choices.size) {
+        if (
+          kind == ValidationKind.SELECTION_COUNT &&
+            !question.usesDatasetChoices &&
+            lo != null &&
+            lo > question.choices.size
+        ) {
           issues += "Minimum number of selections is more than the number of choices."
         }
         if (kind == ValidationKind.TEXT && validation.pattern == TextPattern.CUSTOM) {
