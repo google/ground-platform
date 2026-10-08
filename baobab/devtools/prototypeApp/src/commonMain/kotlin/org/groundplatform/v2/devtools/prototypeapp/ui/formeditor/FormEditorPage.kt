@@ -69,6 +69,7 @@ import androidx.compose.material.icons.outlined.ExpandMore
 import androidx.compose.material.icons.outlined.FormatColorReset
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Layers
+import androidx.compose.material.icons.outlined.Link
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.Mic
 import androidx.compose.material.icons.outlined.MoreVert
@@ -222,16 +223,23 @@ fun FormEditorPage(
   onDelete: (() -> Unit)? = null,
   onSaveToModeChange: ((SaveToMode) -> Unit)? = null,
   onOpenDataset: ((String) -> Unit)? = null,
+  onUnlinkDataset: ((String) -> Unit)? = null,
   onCreateFormForDataset: ((String) -> Unit)? = null,
   onOpenForm: ((String) -> Unit)? = null,
 ) {
+  val linkedDataset = uiState.datasets.firstOrNull { it.isLinkedToThisForm }
   Box(modifier = modifier.fillMaxSize()) {
     Column(modifier = Modifier.fillMaxSize()) {
       FormEditorToolbar(
-        uiState,
-        actions,
-        onCreateDataset.takeIf { uiState.form.saveTo.mode == SaveToMode.CREATE },
-        onDelete,
+        uiState = uiState,
+        actions = actions,
+        linkedDataset = linkedDataset,
+        onOpenDataset = onOpenDataset,
+        onCreateDataset =
+          onCreateDataset.takeIf {
+            uiState.form.saveTo.mode == SaveToMode.CREATE && linkedDataset == null
+          },
+        onDelete = onDelete,
       )
       Row(
         modifier = Modifier.fillMaxSize().padding(16.dp),
@@ -257,6 +265,11 @@ fun FormEditorPage(
           actions = actions,
           onSaveToModeChange = onSaveToModeChange ?: actions::setSaveToMode,
           onOpenDataset = onOpenDataset,
+          onCreateDataset =
+            onCreateDataset.takeIf {
+              uiState.form.saveTo.mode == SaveToMode.CREATE && linkedDataset == null
+            },
+          onUnlinkDataset = onUnlinkDataset,
           onCreateFormForDataset = onCreateFormForDataset,
           onOpenForm = onOpenForm,
           modifier = Modifier.width(uiState.sidePanelWidthDp.dp).fillMaxHeight(),
@@ -277,6 +290,8 @@ fun FormEditorPage(
 private fun FormEditorToolbar(
   uiState: FormEditorUiState,
   actions: FormEditorActions,
+  linkedDataset: EditorDataset?,
+  onOpenDataset: ((String) -> Unit)?,
   onCreateDataset: (() -> Unit)?,
   onDelete: (() -> Unit)?,
 ) {
@@ -315,7 +330,18 @@ private fun FormEditorToolbar(
       }
       PreviewTargetToggle(uiState, actions)
       Spacer(Modifier.weight(1f))
-      if (onCreateDataset != null) {
+      if (uiState.form.saveTo.mode == SaveToMode.CREATE && linkedDataset != null) {
+        FilledTonalButton(
+          onClick = {
+            if (onOpenDataset != null) onOpenDataset(linkedDataset.id)
+            else actions.selectFormSettings()
+          }
+        ) {
+          Icon(Icons.Outlined.Link, contentDescription = null, modifier = Modifier.size(18.dp))
+          Spacer(Modifier.width(6.dp))
+          Text("Linked to ${linkedDataset.displayName}")
+        }
+      } else if (onCreateDataset != null) {
         OutlinedButton(onClick = onCreateDataset) {
           Icon(Icons.Outlined.Layers, contentDescription = null, modifier = Modifier.size(18.dp))
           Spacer(Modifier.width(6.dp))
@@ -1357,6 +1383,8 @@ private fun QuestionPropertiesPanel(
   actions: FormEditorActions,
   onSaveToModeChange: (SaveToMode) -> Unit,
   onOpenDataset: ((String) -> Unit)?,
+  onCreateDataset: (() -> Unit)? = null,
+  onUnlinkDataset: ((String) -> Unit)? = null,
   onCreateFormForDataset: ((String) -> Unit)? = null,
   onOpenForm: ((String) -> Unit)? = null,
   modifier: Modifier = Modifier,
@@ -1368,7 +1396,14 @@ private fun QuestionPropertiesPanel(
   ) {
     val question = uiState.selectedQuestion
     if (question == null) {
-      FormProperties(uiState, actions, onSaveToModeChange, onOpenDataset)
+      FormProperties(
+        uiState = uiState,
+        actions = actions,
+        onSaveToModeChange = onSaveToModeChange,
+        onOpenDataset = onOpenDataset,
+        onCreateDataset = onCreateDataset,
+        onUnlinkDataset = onUnlinkDataset,
+      )
       return@ElevatedCard
     }
     key(question.key) {

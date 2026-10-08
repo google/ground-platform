@@ -236,6 +236,7 @@ fun SurveyEditorPage(
                       .firstOrNull { it.id == id }
                       ?.let { actions.select(SurveyEditorSection.Dataset(it.key)) }
                   },
+                  onUnlinkDataset = { datasetKey -> actions.unlinkDataset(datasetKey) },
                   onCreateFormForDataset = { datasetKey ->
                     actions.createFormForDataset(datasetKey, open = false)
                   },

@@ -100,6 +100,7 @@ import org.groundplatform.v2.core.forms.media.MediaCapture
 import org.groundplatform.v2.core.forms.model.ComponentState
 import org.groundplatform.v2.core.forms.model.FieldState
 import org.groundplatform.v2.core.forms.model.ResolvedChoiceOption
+import org.groundplatform.v2.core.forms.model.ResolvedLabel
 import org.groundplatform.v2.core.forms.model.ValidationStatus
 
 /**
@@ -2291,10 +2292,14 @@ private fun SelectOneWidget(
   val colors = MaterialTheme.colorScheme
   val path = control.canonicalPath
   val selectedValue = control.fieldState.value?.scalar_value?.string_value ?: ""
-  val isQuick = control.appearance.split(' ').contains("quick")
-  val isLikert = control.appearance.split(' ').contains("likert")
+  val appearanceTokens = control.appearance.split(' ')
+  val isQuick = appearanceTokens.contains("quick")
+  val isLikert = appearanceTokens.contains("likert")
+  val allowAddEntity = appearanceTokens.contains("add-entity")
+  var addedOptions by remember(path) { mutableStateOf<List<ResolvedChoiceOption>>(emptyList()) }
+  val allOptions = control.options + addedOptions
 
-  if (control.options.isEmpty()) {
+  if (allOptions.isEmpty() && !allowAddEntity) {
     Text(
       text = "(No selectable options match the current filter)",
       style = MaterialTheme.typography.bodySmall.copy(color = colors.onSurfaceVariant),
@@ -2302,59 +2307,64 @@ private fun SelectOneWidget(
     return
   }
 
-  if (isLikert) {
-    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-      control.options.forEach { option ->
-        val isSelected = selectedValue == option.value
-        OutlinedCard(
-          onClick = {
-            controller.updateString(path, option.value)
-            if (isQuick) controller.nextStep()
-          },
-          modifier = Modifier.weight(1f),
-          shape = MaterialTheme.shapes.medium,
-          colors =
-            CardDefaults.outlinedCardColors(
-              containerColor =
-                if (isSelected) colors.primaryContainer else colors.surfaceContainerLow,
-              contentColor = if (isSelected) colors.onPrimaryContainer else colors.onSurface,
-            ),
-          border =
-            BorderStroke(
-              width = if (isSelected) 2.dp else 1.dp,
-              color = if (isSelected) colors.primary else colors.outlineVariant,
-            ),
-        ) {
-          Column(
-            modifier = Modifier.fillMaxWidth().padding(8.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
+  Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    if (allOptions.isEmpty()) {
+      Text(
+        text = "(No selectable options match the current filter)",
+        style = MaterialTheme.typography.bodySmall.copy(color = colors.onSurfaceVariant),
+      )
+    } else if (isLikert) {
+      Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+        allOptions.forEach { option ->
+          val isSelected = selectedValue == option.value
+          OutlinedCard(
+            onClick = {
+              controller.updateString(path, option.value)
+              if (isQuick) controller.nextStep()
+            },
+            modifier = Modifier.weight(1f),
+            shape = MaterialTheme.shapes.medium,
+            colors =
+              CardDefaults.outlinedCardColors(
+                containerColor =
+                  if (isSelected) colors.primaryContainer else colors.surfaceContainerLow,
+                contentColor = if (isSelected) colors.onPrimaryContainer else colors.onSurface,
+              ),
+            border =
+              BorderStroke(
+                width = if (isSelected) 2.dp else 1.dp,
+                color = if (isSelected) colors.primary else colors.outlineVariant,
+              ),
           ) {
-            RadioButton(
-              selected = isSelected,
-              onClick = {
-                controller.updateString(path, option.value)
-                if (isQuick) controller.nextStep()
-              },
-              colors =
-                RadioButtonDefaults.colors(
-                  selectedColor = colors.onPrimaryContainer,
-                  unselectedColor = colors.onSurfaceVariant,
-                ),
-            )
-            Text(
-              text = option.label.text,
-              style =
-                MaterialTheme.typography.labelSmall.copy(
-                  color = if (isSelected) colors.onPrimaryContainer else colors.onSurface
-                ),
-            )
+            Column(
+              modifier = Modifier.fillMaxWidth().padding(8.dp),
+              horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+              RadioButton(
+                selected = isSelected,
+                onClick = {
+                  controller.updateString(path, option.value)
+                  if (isQuick) controller.nextStep()
+                },
+                colors =
+                  RadioButtonDefaults.colors(
+                    selectedColor = colors.onPrimaryContainer,
+                    unselectedColor = colors.onSurfaceVariant,
+                  ),
+              )
+              Text(
+                text = option.label.text,
+                style =
+                  MaterialTheme.typography.labelSmall.copy(
+                    color = if (isSelected) colors.onPrimaryContainer else colors.onSurface
+                  ),
+              )
+            }
           }
         }
       }
-    }
-  } else {
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-      control.options.forEach { option ->
+    } else {
+      allOptions.forEach { option ->
         val isSelected = selectedValue == option.value
         ChoiceCardRow(
           option = option,
@@ -2366,6 +2376,15 @@ private fun SelectOneWidget(
           },
         )
       }
+    }
+    if (allowAddEntity) {
+      AddInlineEntitySection(
+        existingValues = allOptions.map { it.value }.toSet(),
+        onAdd = { added ->
+          addedOptions = addedOptions + added
+          controller.updateString(path, added.value)
+        },
+      )
     }
   }
 }
@@ -2383,8 +2402,11 @@ private fun SelectMultipleWidget(
         it.isNotBlank()
       }
       ?: emptyList()
+  val allowAddEntity = control.appearance.split(' ').contains("add-entity")
+  var addedOptions by remember(path) { mutableStateOf<List<ResolvedChoiceOption>>(emptyList()) }
+  val allOptions = control.options + addedOptions
 
-  if (control.options.isEmpty()) {
+  if (allOptions.isEmpty() && !allowAddEntity) {
     Text(
       text = "(No selectable options match the current filter)",
       style = MaterialTheme.typography.bodySmall.copy(color = colors.onSurfaceVariant),
@@ -2393,7 +2415,13 @@ private fun SelectMultipleWidget(
   }
 
   Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-    control.options.forEach { option ->
+    if (allOptions.isEmpty()) {
+      Text(
+        text = "(No selectable options match the current filter)",
+        style = MaterialTheme.typography.bodySmall.copy(color = colors.onSurfaceVariant),
+      )
+    }
+    allOptions.forEach { option ->
       val isSelected = option.value in selectedValues
       ChoiceCardRow(
         option = option,
@@ -2409,6 +2437,86 @@ private fun SelectMultipleWidget(
           controller.updateMultiSelect(path, nextList)
         },
       )
+    }
+    if (allowAddEntity) {
+      AddInlineEntitySection(
+        existingValues = allOptions.map { it.value }.toSet(),
+        onAdd = { added ->
+          addedOptions = addedOptions + added
+          controller.updateMultiSelect(path, selectedValues + added.value)
+        },
+      )
+    }
+  }
+}
+
+@Composable
+private fun AddInlineEntitySection(
+  existingValues: Set<String>,
+  onAdd: (ResolvedChoiceOption) -> Unit,
+) {
+  var isAdding by remember { mutableStateOf(false) }
+  var label by remember { mutableStateOf("") }
+  if (!isAdding) {
+    OutlinedButton(
+      onClick = { isAdding = true },
+      modifier = Modifier.fillMaxWidth(),
+    ) {
+      Text("+ Add new")
+    }
+    return
+  }
+  OutlinedCard(
+    modifier = Modifier.fillMaxWidth(),
+    shape = MaterialTheme.shapes.medium,
+  ) {
+    Column(
+      modifier = Modifier.fillMaxWidth().padding(12.dp),
+      verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+      GroundOutlinedTextField(
+        value = label,
+        onValueChange = { label = it },
+        modifier = Modifier.fillMaxWidth(),
+        singleLine = true,
+        placeholder = { Text("New item label") },
+      )
+      Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
+      ) {
+        TextButton(
+          onClick = {
+            label = ""
+            isAdding = false
+          }
+        ) {
+          Text("Cancel")
+        }
+        Button(
+          enabled = label.isNotBlank(),
+          onClick = {
+            val trimmed = label.trim()
+            val baseValue =
+              trimmed
+                .lowercase()
+                .map { if (it.isLetterOrDigit()) it else '_' }
+                .joinToString("")
+                .trim('_')
+                .ifEmpty { "new_item" }
+            var candidate = baseValue
+            var suffix = 2
+            while (candidate in existingValues) {
+              candidate = "${baseValue}_${suffix++}"
+            }
+            onAdd(ResolvedChoiceOption(value = candidate, label = ResolvedLabel(text = trimmed)))
+            label = ""
+            isAdding = false
+          },
+        ) {
+          Text("Add")
+        }
+      }
     }
   }
 }

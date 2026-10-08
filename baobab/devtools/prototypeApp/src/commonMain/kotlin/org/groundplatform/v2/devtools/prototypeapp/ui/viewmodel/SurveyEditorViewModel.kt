@@ -526,18 +526,25 @@ class SurveyEditorViewModel(
     fun createDatasetForForm(formKey: String, kind: DatasetKind?, open: Boolean) {
       val form = form(formKey)?.form ?: return
       val resolvedKind = kind ?: FormDatasetLinks.datasetKindFor(form)
+      // Unlink any dataset previously linked to this form (and drop it if it has no features yet).
+      val previouslyLinked = datasets.filter { it.linkedFormKey == formKey }
+      val emptyLinkedKeys = previouslyLinked.filter { it.rows.isEmpty() }.map { it.key }.toSet()
+      val remainingDatasets =
+        datasets
+          .filterNot { it.key in emptyLinkedKeys }
+          .map { if (it.linkedFormKey == formKey) it.copy(linkedFormKey = null) else it }
       val datasetKey = newKey("d")
       val title =
         FormDatasetLinks.uniqueTitle(
           form.title.ifBlank { "New ${resolvedKind.singular.lowercase()}" },
-          datasets.map { it.displayName },
+          remainingDatasets.map { it.displayName },
         )
       val properties = FormDatasetLinks.linkedProperties(form)
       val dataset =
         EntityDataset(
           key = datasetKey,
           kind = resolvedKind,
-          id = FormDatasetLinks.uniqueId(slugify(title), datasets.map { it.id }),
+          id = FormDatasetLinks.uniqueId(slugify(title), remainingDatasets.map { it.id }),
           displayName = title,
           geometryKind = FormDatasetLinks.geometryKindFor(form),
           keyProperty = properties.first().name,
@@ -545,7 +552,7 @@ class SurveyEditorViewModel(
           linkedFormKey = formKey,
           properties = properties,
         )
-      datasets = datasets + dataset
+      datasets = remainingDatasets + dataset
       if (open) section = SurveyEditorSection.Dataset(dataset.key)
     }
   }

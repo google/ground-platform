@@ -13,6 +13,7 @@
  */
 package org.groundplatform.v2.devtools.prototypeapp.ui.formeditor
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -38,15 +39,19 @@ import androidx.compose.material.icons.outlined.Flag
 import androidx.compose.material.icons.outlined.KeyboardArrowDown
 import androidx.compose.material.icons.outlined.KeyboardArrowUp
 import androidx.compose.material.icons.outlined.Layers
+import androidx.compose.material.icons.outlined.Link
 import androidx.compose.material.icons.outlined.TableChart
 import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.material.icons.outlined.Warning
 import androidx.compose.material3.AssistChip
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
@@ -119,10 +124,13 @@ internal fun FormProperties(
   actions: FormEditorActions,
   onSaveToModeChange: (SaveToMode) -> Unit,
   onOpenDataset: ((String) -> Unit)?,
+  onCreateDataset: (() -> Unit)? = null,
+  onUnlinkDataset: ((String) -> Unit)? = null,
 ) {
   val form = uiState.form
   val formIssues = uiState.formIssues
   val target = uiState.saveTarget
+  val linkedDataset = uiState.datasets.firstOrNull { it.isLinkedToThisForm }
   Column(
     modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(20.dp),
     verticalArrangement = Arrangement.spacedBy(14.dp),
@@ -159,31 +167,130 @@ internal fun FormProperties(
     AvailabilityToggles(uiState, actions)
 
     SectionLabel("Submissions")
-    Text(
-      text = submissionDescription(form, target),
-      style = MaterialTheme.typography.bodyMedium,
-    )
-    if (target != null) {
-      AssistChip(
-        onClick = { onOpenDataset?.invoke(target.id) },
-        enabled = onOpenDataset != null,
-        label = { Text(target.displayName) },
-        leadingIcon = {
-          Icon(datasetIcon(target), contentDescription = null, modifier = Modifier.size(16.dp))
-        },
-        trailingIcon =
-          if (onOpenDataset != null) {
-            {
-              Icon(
-                Icons.AutoMirrored.Outlined.OpenInNew,
-                contentDescription = "Open ${target.displayName}",
-                modifier = Modifier.size(16.dp),
-              )
+    if (form.saveTo.mode == SaveToMode.CREATE && linkedDataset != null) {
+      val kindLabel = if (linkedDataset.isMapLayer) "map layer" else "data table"
+      Surface(
+        color = MaterialTheme.colorScheme.primaryContainer,
+        contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+        shape = MaterialTheme.shapes.small,
+        modifier = Modifier.fillMaxWidth(),
+      ) {
+        Column(
+          modifier = Modifier.padding(12.dp),
+          verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+          Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(
+              Icons.Outlined.Link,
+              contentDescription = null,
+              tint = MaterialTheme.colorScheme.onPrimaryContainer,
+              modifier = Modifier.size(18.dp),
+            )
+            Spacer(Modifier.width(6.dp))
+            Text(
+              "Linked to ${linkedDataset.displayName}",
+              style = MaterialTheme.typography.titleSmall,
+              color = MaterialTheme.colorScheme.onPrimaryContainer,
+              fontWeight = FontWeight.Bold,
+            )
+          }
+          Text(
+            "Each submission adds a new ${linkedDataset.featureNoun} to this $kindLabel. Schema properties stay in sync with form questions.",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onPrimaryContainer,
+          )
+          if (
+            onOpenDataset != null || (onUnlinkDataset != null && linkedDataset.key.isNotBlank())
+          ) {
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+              if (onOpenDataset != null) {
+                Button(onClick = { onOpenDataset(linkedDataset.id) }) {
+                  Icon(
+                    datasetIcon(linkedDataset),
+                    contentDescription = null,
+                    modifier = Modifier.size(16.dp),
+                  )
+                  Spacer(Modifier.width(4.dp))
+                  Text("Edit $kindLabel")
+                }
+              }
+              if (onUnlinkDataset != null && linkedDataset.key.isNotBlank()) {
+                OutlinedButton(
+                  onClick = { onUnlinkDataset(linkedDataset.key) },
+                  colors =
+                    ButtonDefaults.outlinedButtonColors(
+                      contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                    ),
+                  border =
+                    BorderStroke(
+                      1.dp,
+                      MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.5f),
+                    ),
+                ) {
+                  Icon(
+                    Icons.Outlined.Close,
+                    contentDescription = null,
+                    modifier = Modifier.size(16.dp),
+                  )
+                  Spacer(Modifier.width(4.dp))
+                  Text("Unlink $kindLabel")
+                }
+              }
             }
-          } else {
-            null
-          },
+          }
+        }
+      }
+    } else if (form.saveTo.mode == SaveToMode.CREATE && onCreateDataset != null) {
+      val kindLabel = if (form.hasGeometry) "map layer" else "data table"
+      Surface(
+        color = MaterialTheme.colorScheme.surfaceContainerLow,
+        contentColor = MaterialTheme.colorScheme.onSurface,
+        shape = MaterialTheme.shapes.small,
+        modifier = Modifier.fillMaxWidth(),
+      ) {
+        Column(
+          modifier = Modifier.padding(12.dp),
+          verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+          Text(
+            submissionDescription(form, target),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+          )
+          Button(onClick = onCreateDataset) {
+            Icon(Icons.Outlined.Add, contentDescription = null, modifier = Modifier.size(16.dp))
+            Spacer(Modifier.width(4.dp))
+            Text("Create $kindLabel for form")
+          }
+        }
+      }
+    } else {
+      Text(
+        text = submissionDescription(form, target),
+        style = MaterialTheme.typography.bodyMedium,
       )
+      if (target != null) {
+        AssistChip(
+          onClick = { onOpenDataset?.invoke(target.id) },
+          enabled = onOpenDataset != null,
+          label = { Text(target.displayName) },
+          leadingIcon = {
+            Icon(datasetIcon(target), contentDescription = null, modifier = Modifier.size(16.dp))
+          },
+          trailingIcon =
+            if (onOpenDataset != null) {
+              {
+                Icon(
+                  Icons.AutoMirrored.Outlined.OpenInNew,
+                  contentDescription = "Open ${target.displayName}",
+                  modifier = Modifier.size(16.dp),
+                )
+              }
+            } else {
+              null
+            },
+        )
+      }
     }
 
     AdvancedSection(

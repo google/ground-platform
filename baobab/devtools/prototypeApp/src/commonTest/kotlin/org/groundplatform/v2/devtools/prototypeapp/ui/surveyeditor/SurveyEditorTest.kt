@@ -429,11 +429,14 @@ class SurveyEditorTest {
     val updatedParcels = state.ui.datasets.first { it.key == parcels.key }
     assertTrue(updatedParcels.isLinkedToForm)
     assertEquals(form.key, updatedParcels.linkedFormKey)
+    val formEditorState = state.formEditor(form.key).ui
+    assertEquals("coffee_parcels", formEditorState.saveTarget?.id)
+    assertTrue(formEditorState.saveTarget?.isLinkedToThisForm == true)
     // Map layer form includes location question
-    assertTrue(state.formEditor(form.key).ui.form.questions.any { it.name == "location" })
+    assertTrue(formEditorState.form.questions.any { it.name == "location" })
     // Map layer form includes parcel properties
-    assertTrue(state.formEditor(form.key).ui.form.questions.any { it.name == "parcel_id" })
-    assertTrue(state.formEditor(form.key).ui.form.questions.any { it.name == "parcel_name" })
+    assertTrue(formEditorState.form.questions.any { it.name == "parcel_id" })
+    assertTrue(formEditorState.form.questions.any { it.name == "parcel_name" })
   }
 
   @Test

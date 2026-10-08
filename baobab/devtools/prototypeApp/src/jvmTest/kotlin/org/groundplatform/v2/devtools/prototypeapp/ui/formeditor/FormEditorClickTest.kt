@@ -135,7 +135,7 @@ class FormEditorClickTest {
     waitForIdle()
     onNodeWithContentDescription("Blue").performClick()
     waitForIdle()
-    assertEquals("#1A73E8", state.ui.form.find("q3")!!.choices[0].colorHex)
+    assertEquals("#2278CF", state.ui.form.find("q3")!!.choices[0].colorHex)
   }
 
   @Test
@@ -404,5 +404,71 @@ class FormEditorClickTest {
       waitForIdle()
       assertEquals("d_species", createdDatasetKey)
       assertEquals(true, state.ui.form.find("q3")?.allowAddEntity)
+    }
+
+  @Test
+  fun formCreatedFromMapLayerShowsLinkedInToolbarAndFormProperties() =
+    runDesktopComposeUiTest(width = 1600, height = 1000) {
+      var openedDatasetId: String? = null
+      var unlinkedDatasetKey: String? = null
+      val datasetsFlow =
+        kotlinx.coroutines.flow.MutableStateFlow(
+          listOf(
+            EditorDataset(
+              id = "coffee_parcels",
+              displayName = "Coffee parcels",
+              isMapLayer = true,
+              keyProperty = "parcel_id",
+              labelProperty = "parcel_name",
+              properties = emptyList(),
+              rows = listOf(EditorDatasetRow("NYR-104", "Gatura Ridge")),
+              isLinkedToThisForm = true,
+              key = "d1",
+              linkedFormKey = "f1",
+              linkedFormTitle = "Coffee parcels form",
+            )
+          )
+        )
+      val state =
+        formEditorViewModel(FormEditorSamples.shadeTreeVisit(), datasets = datasetsFlow.value)
+      setContent {
+        MaterialTheme {
+          val uiState by state.uiState.collectAsState()
+          val datasets by datasetsFlow.collectAsState()
+          FormEditorPage(
+            uiState = uiState.copy(datasets = datasets),
+            actions = state,
+            isDarkTheme = false,
+            onCreateDataset = {},
+            onOpenDataset = { id -> openedDatasetId = id },
+            onUnlinkDataset = { dsKey ->
+              unlinkedDatasetKey = dsKey
+              datasetsFlow.value =
+                datasetsFlow.value.map {
+                  if (it.key == dsKey) it.copy(isLinkedToThisForm = false, linkedFormKey = null)
+                  else it
+                }
+            },
+          )
+        }
+      }
+      waitForIdle()
+      // Toolbar shows "Linked to Coffee parcels" instead of "Create map layer".
+      onNodeWithText("Create map layer").assertDoesNotExist()
+      onAllNodesWithText("Linked to Coffee parcels").onFirst().performClick()
+      waitForIdle()
+      assertEquals("coffee_parcels", openedDatasetId)
+
+      // Form properties shows the linked card with "Edit map layer" and "Unlink map layer".
+      runOnIdle { state.selectFormSettings() }
+      waitForIdle()
+      onNodeWithText("Edit map layer").performScrollTo().performClick()
+      waitForIdle()
+      assertEquals("coffee_parcels", openedDatasetId)
+
+      onNodeWithText("Unlink map layer").performScrollTo().performClick()
+      waitForIdle()
+      assertEquals("d1", unlinkedDatasetKey)
+      onNodeWithText("Create map layer").assertExists()
     }
 }
