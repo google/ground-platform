@@ -37,11 +37,11 @@ import kotlinx.coroutines.launch
 import org.groundplatform.v2.devtools.prototypeapp.data.seed.PrototypeFakeEntitiesData
 import org.groundplatform.v2.devtools.prototypeapp.data.seed.PrototypeFakeOrganizationsData
 import org.groundplatform.v2.devtools.prototypeapp.data.seed.PrototypeFakeSubmissionsData
+import org.groundplatform.v2.devtools.prototypeapp.data.seed.PrototypeFakeSurveyEditorData
 import org.groundplatform.v2.devtools.prototypeapp.data.seed.PrototypeFakeSurveysData
 import org.groundplatform.v2.devtools.prototypeapp.data.seed.SampleDataSeeder
-import org.groundplatform.v2.devtools.prototypeapp.data.seed.SurveyEditorSamples
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SyncStatus
-import org.groundplatform.v2.devtools.prototypeapp.surveyeditor.SurveyEditorDraft
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SurveyEditorDraft
 
 /** Runs [block] to completion on an immediate dispatcher, as the app does for store writes. */
 internal fun <T> runNow(block: suspend () -> T): T {
@@ -101,10 +101,12 @@ abstract class LocalStoreContractTest {
         }
         assertEquals(SampleDataSeeder.DEFAULT_ACTIVE_SURVEY_ID, preferences().activeSurveyId)
         assertEquals(SampleDataSeeder.SEED_VERSION, preferences().seedVersion)
+        val kenyaDraft = surveyEditorDraft(SampleDataSeeder.DEFAULT_ACTIVE_SURVEY_ID)!!
         assertEquals(
-          SurveyEditorSamples.draft(),
-          surveyEditorDraft(SampleDataSeeder.DEFAULT_ACTIVE_SURVEY_ID),
+          forms(SampleDataSeeder.DEFAULT_ACTIVE_SURVEY_ID).map { it.id },
+          kenyaDraft.forms.map { it.form.formId },
         )
+        assertEquals(PrototypeFakeSurveyEditorData.kenyaSharing(), kenyaDraft.sharing)
       }
     }
   }
@@ -257,9 +259,13 @@ abstract class LocalStoreContractTest {
     assertNull(runNow { store.transaction { surveyEditorDraft(forest) } })
     runNow { store.transaction { putSurveyEditorDraft(forest, draft) } }
     assertEquals(draft, runNow { store.observeSurveyEditorDraft(forest).first() })
-    assertEquals(
-      SurveyEditorSamples.draft(),
-      runNow { store.transaction { surveyEditorDraft(SampleDataSeeder.DEFAULT_ACTIVE_SURVEY_ID) } },
+    val kenyaDraft =
+      runNow {
+        store.transaction { surveyEditorDraft(SampleDataSeeder.DEFAULT_ACTIVE_SURVEY_ID) }
+      }!!
+    assertTrue(
+      kenyaDraft.datasets.any { it.id == PrototypeFakeSurveyEditorData.farmers().id },
+      "seeded Kenya draft keeps its Data tables",
     )
   }
 

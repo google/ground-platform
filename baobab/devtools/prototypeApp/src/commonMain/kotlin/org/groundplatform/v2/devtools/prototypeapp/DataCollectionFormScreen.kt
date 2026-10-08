@@ -72,16 +72,20 @@ import org.groundplatform.v2.core.forms.model.FinalizationResult
 import org.groundplatform.v2.core.forms.model.FormState
 import org.groundplatform.v2.core.forms.ui.FormWizardController
 import org.groundplatform.v2.core.forms.ui.FormWizardStep
+import org.groundplatform.v2.core.forms.ui.GeoPointMapViewportState
 import org.groundplatform.v2.core.forms.ui.GroundBadgeTone
 import org.groundplatform.v2.core.forms.ui.GroundTonalBadge
 import org.groundplatform.v2.core.forms.ui.MobileFormRunner
+import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.LaunchFormUseCase
+import org.groundplatform.v2.devtools.prototypeapp.ui.state.DataCollectionUiState
+import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.DataCollectionActions
 
 /**
  * Canonical XForms `entityref` nodeset path (`/data/target_entity`) representing the geospatial
  * entity reference step (`select_one_from_file <dataset>.csv` / `appearance="map-select"`) when a
- * form requires a target geospatial entity.
+ * form requires a target geospatial entity. Alias of [LaunchFormUseCase.ENTITY_REF_FIELD_PATH].
  */
-const val ENTITY_REF_FIELD_PATH: String = "/data/target_entity"
+const val ENTITY_REF_FIELD_PATH: String = LaunchFormUseCase.ENTITY_REF_FIELD_PATH
 
 private val defaultResolveFormDefUseCase =
   org.groundplatform.v2.devtools.prototypeapp.domain.usecase.ResolveFormDefForLaunchUseCase()
@@ -125,49 +129,15 @@ fun resolveFormDefForLaunch(
   )
 
 /**
- * Returns `true` if [step] represents an `entityref` question step (e.g. bound to
- * [ENTITY_REF_FIELD_PATH] `/data/target_entity`, `/data/entity_id`, or configured with
- * `appearance="map-select"` / `"entityref"`).
+ * Returns `true` if [step] is an `entityref` question step; see
+ * [LaunchFormUseCase.isEntityRefStep].
  */
-fun isWizardStepEntityRef(step: FormWizardStep?): Boolean {
-  if (step == null) return false
-  val controls =
-    when (step) {
-      is FormWizardStep.QuestionStep -> listOf(step.control)
-      is FormWizardStep.FieldListGroupStep -> step.controls
-      else -> emptyList()
-    }
-  return controls.any { ctrl ->
-    ctrl.canonicalPath == ENTITY_REF_FIELD_PATH ||
-      ctrl.canonicalPath.endsWith("/target_entity") ||
-      ctrl.canonicalPath.endsWith("/entity_id") ||
-      ctrl.canonicalPath.endsWith("/sample_plot_entity") ||
-      ctrl.canonicalPath.endsWith("/past_individual_id") ||
-      ctrl.canonicalPath.endsWith("/primary_respondent_id") ||
-      ctrl.appearance.contains("map-select", ignoreCase = true) ||
-      ctrl.appearance.contains("entityref", ignoreCase = true)
-  }
-}
+fun isWizardStepEntityRef(step: FormWizardStep?): Boolean = LaunchFormUseCase.isEntityRefStep(step)
 
 /**
- * Returns `true` if [step] contains a geometry (`geopoint`, `geotrace`, or `geoshape`) question
- * control.
+ * Returns `true` if [step] contains a geometry question; see [LaunchFormUseCase.isGeometryStep].
  */
-fun isWizardStepGeoPoint(step: FormWizardStep?): Boolean {
-  if (step == null) return false
-  val controls =
-    when (step) {
-      is FormWizardStep.QuestionStep -> listOf(step.control)
-      is FormWizardStep.FieldListGroupStep -> step.controls
-      else -> emptyList()
-    }
-  return controls.any {
-    val dt = it.fieldState.dataType
-    dt == groundplatform.v2.forms.DataType.TYPE_GEOPOINT ||
-      dt == groundplatform.v2.forms.DataType.TYPE_GEOTRACE ||
-      dt == groundplatform.v2.forms.DataType.TYPE_GEOSHAPE
-  }
-}
+fun isWizardStepGeoPoint(step: FormWizardStep?): Boolean = LaunchFormUseCase.isGeometryStep(step)
 
 /**
  * Extracts all answered fields from [recordInstance] (and [controller]'s [FormState]) into a list
@@ -205,9 +175,37 @@ fun extractSubmissionFieldsFromRecord(
  */
 @Composable
 fun DataCollectionFormScreen(state: PrototypeAppState) {
-  val controller = state.activeFormWizardController ?: return
-  val entity = state.activeDataCollectionEntity
-  val form = state.activeDataCollectionForm
+  DataCollectionFormScreen(
+    uiState = state.dataCollectionUiState,
+    actions = state.dataCollection,
+    userGpsCoordinatesLabel = state.userGpsCoordinatesLabel,
+    wayfindingBadgeForEntity = state::formattedWayfindingBadgeForEntity,
+    geoPointMap = { viewportState, modifier ->
+      GeoPointFormMap(state = state, viewportState = viewportState, modifier = modifier)
+    },
+    entityRefMap = { form, modifier ->
+      EntityRefFormMap(state = state, form = form, modifier = modifier)
+    },
+  )
+}
+
+/**
+ * [DataCollectionFormScreen] over the data collection [uiState] and [actions]. The map pieces come
+ * from the host: [userGpsCoordinatesLabel] and [wayfindingBadgeForEntity] (device GPS), the
+ * `geopoint` question's [geoPointMap], and the `entityref` step's [entityRefMap].
+ */
+@Composable
+fun DataCollectionFormScreen(
+  uiState: DataCollectionUiState,
+  actions: DataCollectionActions,
+  userGpsCoordinatesLabel: String,
+  wayfindingBadgeForEntity: (entityId: String) -> String,
+  geoPointMap: @Composable (viewportState: GeoPointMapViewportState, modifier: Modifier) -> Unit,
+  entityRefMap: @Composable (form: FormPreviewItem, modifier: Modifier) -> Unit,
+) {
+  val controller = uiState.activeFormWizardController ?: return
+  val entity = uiState.activeDataCollectionEntity
+  val form = uiState.activeDataCollectionForm
   val resolvedTitle =
     controller.formState.formDef.title.takeIf { it.isNotBlank() }
       ?: form?.title
@@ -230,7 +228,10 @@ fun DataCollectionFormScreen(state: PrototypeAppState) {
           verticalAlignment = Alignment.CenterVertically,
           horizontalArrangement = Arrangement.spacedBy(4.dp),
         ) {
-          IconButton(onClick = { state.closeActiveFormRunner() }, modifier = Modifier.size(36.dp)) {
+          IconButton(
+            onClick = { actions.closeActiveFormRunner() },
+            modifier = Modifier.size(36.dp),
+          ) {
             Icon(
               imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
               contentDescription = "Back to Survey",
@@ -257,7 +258,7 @@ fun DataCollectionFormScreen(state: PrototypeAppState) {
                       append("${entity.label} • ")
                       appendGeoId(entity)
                     } else if (form != null && !form.requiresEntity) {
-                      append("Standalone Field Log • ${state.userGpsCoordinatesLabel}")
+                      append("Standalone Field Log • $userGpsCoordinatesLabel")
                     } else {
                       append(
                         "Select ${form?.targetSingularTypeLabel ?: "Feature"} (${form?.targetDatasetName ?: "Required"})"
@@ -290,7 +291,7 @@ fun DataCollectionFormScreen(state: PrototypeAppState) {
         Spacer(modifier = Modifier.width(8.dp))
 
         AssistChip(
-          onClick = { state.closeActiveFormRunner() },
+          onClick = { actions.closeActiveFormRunner() },
           colors =
             androidx.compose.material3.AssistChipDefaults.assistChipColors(
               containerColor = MaterialTheme.colorScheme.secondaryContainer,
@@ -323,11 +324,14 @@ fun DataCollectionFormScreen(state: PrototypeAppState) {
       }
     }
 
-    if (state.isCurrentFormStepEntityRef && form != null) {
+    if (uiState.isCurrentFormStepEntityRef && form != null) {
       EntityRefStepMapOrListSelector(
-        state = state,
+        uiState = uiState,
+        actions = actions,
         form = form,
         controller = controller,
+        wayfindingBadgeForEntity = wayfindingBadgeForEntity,
+        entityRefMap = entityRefMap,
         modifier = Modifier.weight(1f).fillMaxWidth(),
       )
     } else {
@@ -336,20 +340,16 @@ fun DataCollectionFormScreen(state: PrototypeAppState) {
       androidx.compose.runtime.CompositionLocalProvider(
         org.groundplatform.v2.core.forms.ui.LocalGeoPointMapViewport provides
           { viewportState ->
-            GeoPointFormMap(
-              state = state,
-              viewportState = viewportState,
-              modifier = Modifier.fillMaxSize(),
-            )
+            geoPointMap(viewportState, Modifier.fillMaxSize())
           },
         org.groundplatform.v2.core.forms.ui.LocalMediaCaptureHandler provides mediaCaptureHandler,
       ) {
         Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
           MobileFormRunner(
             controller = controller,
-            onClose = { state.closeActiveFormRunner() },
+            onClose = { actions.closeActiveFormRunner() },
             onSubmitted = { result: FinalizationResult.Success ->
-              state.completeActiveFormSubmission(result.recordInstance, result.entityStates)
+              actions.completeActiveFormSubmission(result.recordInstance, result.entityStates)
             },
           )
         }
@@ -365,14 +365,17 @@ fun DataCollectionFormScreen(state: PrototypeAppState) {
  */
 @Composable
 private fun EntityRefStepMapOrListSelector(
-  state: PrototypeAppState,
+  uiState: DataCollectionUiState,
+  actions: DataCollectionActions,
   form: FormPreviewItem,
   controller: FormWizardController,
+  wayfindingBadgeForEntity: (entityId: String) -> String,
+  entityRefMap: @Composable (form: FormPreviewItem, modifier: Modifier) -> Unit,
   modifier: Modifier = Modifier,
 ) {
-  val selectedEntity = state.activeDataCollectionEntity
-  val allDatasetCandidates = state.allDatasetEntitiesForForm(form)
-  val filteredCandidates = state.filteredEntityRefCandidates
+  val selectedEntity = uiState.activeDataCollectionEntity
+  val allDatasetCandidates = uiState.allDatasetEntitiesForForm(form)
+  val filteredCandidates = uiState.filteredEntityRefCandidates
   val currentStepNum = controller.currentStepIndex + 1
   val totalSteps = controller.steps.size.coerceAtLeast(1)
 
@@ -423,10 +426,10 @@ private fun EntityRefStepMapOrListSelector(
           // Segmented Toggle: Map vs List selector
           SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
             MainSurveyViewMode.entries.forEachIndexed { idx, mode ->
-              val isSelected = state.entityRefSelectorViewMode == mode
+              val isSelected = uiState.entityRefSelectorViewMode == mode
               SegmentedButton(
                 selected = isSelected,
-                onClick = { state.updateEntityRefSelectorViewMode(mode) },
+                onClick = { actions.updateEntityRefSelectorViewMode(mode) },
                 shape =
                   SegmentedButtonDefaults.itemShape(
                     index = idx,
@@ -498,7 +501,7 @@ private fun EntityRefStepMapOrListSelector(
                 GeoIdText(
                   entity = selectedEntity,
                   prefix = "GeoID: ",
-                  suffix = " • ${state.formattedWayfindingBadgeForEntity(selectedEntity.id)}",
+                  suffix = " • ${wayfindingBadgeForEntity(selectedEntity.id)}",
                   style = MaterialTheme.typography.labelSmall,
                   color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -510,7 +513,7 @@ private fun EntityRefStepMapOrListSelector(
       }
 
       // MAP MODE vs LIST MODE
-      if (state.entityRefSelectorViewMode == MainSurveyViewMode.MAP) {
+      if (uiState.entityRefSelectorViewMode == MainSurveyViewMode.MAP) {
         // Interactive Map Picker Canvas + Tappable Feature Chips for the Target Dataset
         OutlinedCard(modifier = Modifier.fillMaxWidth(), shape = MaterialTheme.shapes.medium) {
           Column(modifier = Modifier.fillMaxWidth()) {
@@ -521,7 +524,7 @@ private fun EntityRefStepMapOrListSelector(
                   .clip(MaterialTheme.shapes.medium)
                   .background(Color.Transparent)
             ) {
-              EntityRefFormMap(state = state, form = form, modifier = Modifier.fillMaxSize())
+              entityRefMap(form, Modifier.fillMaxSize())
 
               // Top-left map instructions badge
               Surface(
@@ -553,11 +556,11 @@ private fun EntityRefStepMapOrListSelector(
               )
               allDatasetCandidates.take(40).forEach { candidate ->
                 EntityRefCandidateOptionCard(
-                  state = state,
-                  form = form,
+                  isEligible = uiState.isFormButtonEnabled(candidate, form),
+                  wayfindingBadge = wayfindingBadgeForEntity(candidate.id),
                   candidate = candidate,
                   isSelected = selectedEntity?.id == candidate.id,
-                  onSelect = { state.selectEntityRefForActiveForm(candidate.id) },
+                  onSelect = { actions.selectEntityRefForActiveForm(candidate.id) },
                 )
               }
             }
@@ -566,8 +569,8 @@ private fun EntityRefStepMapOrListSelector(
       } else {
         // LIST MODE: Searchable list of candidate entities for the target dataset
         OutlinedTextField(
-          value = state.entityRefSearchQuery,
-          onValueChange = { state.updateEntityRefSearchQuery(it) },
+          value = uiState.entityRefSearchQuery,
+          onValueChange = { actions.updateEntityRefSearchQuery(it) },
           modifier = Modifier.fillMaxWidth(),
           singleLine = true,
           leadingIcon = {
@@ -578,8 +581,8 @@ private fun EntityRefStepMapOrListSelector(
             )
           },
           trailingIcon = {
-            if (state.entityRefSearchQuery.isNotEmpty()) {
-              IconButton(onClick = { state.clearEntityRefSearchQuery() }) {
+            if (uiState.entityRefSearchQuery.isNotEmpty()) {
+              IconButton(onClick = { actions.clearEntityRefSearchQuery() }) {
                 Icon(
                   imageVector = Icons.Outlined.Close,
                   contentDescription = "Clear search",
@@ -608,11 +611,11 @@ private fun EntityRefStepMapOrListSelector(
         } else {
           filteredCandidates.take(40).forEach { candidate ->
             EntityRefCandidateOptionCard(
-              state = state,
-              form = form,
+              isEligible = uiState.isFormButtonEnabled(candidate, form),
+              wayfindingBadge = wayfindingBadgeForEntity(candidate.id),
               candidate = candidate,
               isSelected = selectedEntity?.id == candidate.id,
-              onSelect = { state.selectEntityRefForActiveForm(candidate.id) },
+              onSelect = { actions.selectEntityRefForActiveForm(candidate.id) },
             )
           }
         }
@@ -630,7 +633,7 @@ private fun EntityRefStepMapOrListSelector(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
       ) {
-        TextButton(onClick = { state.closeActiveFormRunner() }) {
+        TextButton(onClick = { actions.closeActiveFormRunner() }) {
           Text("Cancel", maxLines = 1, overflow = TextOverflow.Ellipsis, softWrap = false)
         }
 
@@ -666,14 +669,12 @@ private fun EntityRefStepMapOrListSelector(
 
 @Composable
 private fun EntityRefCandidateOptionCard(
-  state: PrototypeAppState,
-  form: FormPreviewItem,
+  isEligible: Boolean,
+  wayfindingBadge: String,
   candidate: GeospatialEntityItem,
   isSelected: Boolean,
   onSelect: () -> Unit,
 ) {
-  val isEligible = state.isFormButtonEnabled(candidate, form)
-  val wayfindingBadge = state.formattedWayfindingBadgeForEntity(candidate.id)
   OutlinedCard(
     onClick = { if (isEligible) onSelect() },
     enabled = isEligible,

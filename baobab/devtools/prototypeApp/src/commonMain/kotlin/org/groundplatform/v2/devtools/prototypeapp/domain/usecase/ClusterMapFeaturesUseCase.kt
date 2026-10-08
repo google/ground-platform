@@ -29,6 +29,23 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.groupClusterFeat
  * viewport scale bar specification.
  */
 class ClusterMapFeaturesUseCase {
+  /**
+   * True when the map is zoomed out past the clustering threshold ([CLUSTERING_ZOOM_DELTA], about
+   * z12.95), causing visible map features to be grouped into spatial clusters.
+   */
+  fun isClusteringActive(mapZoomDelta: Float): Boolean = mapZoomDelta <= CLUSTERING_ZOOM_DELTA
+
+  /**
+   * Normalized world-space clustering radius (`[0.20, 12.0]`) scaled exponentially as the user
+   * zooms out (`2^(-mapZoomDelta)`). Returns `0f` when clustering is inactive.
+   */
+  fun clusterRadiusNormalized(mapZoomDelta: Float): Float =
+    if (!isClusteringActive(mapZoomDelta)) {
+      0f
+    } else {
+      (0.175f * 2.0.pow(-mapZoomDelta.toDouble()).toFloat()).coerceIn(0.20f, 12.0f)
+    }
+
   operator fun invoke(
     features: List<MapClusterFeatureItem>,
     radiusNormalized: Float,
@@ -156,5 +173,13 @@ class ClusterMapFeaturesUseCase {
         "$chosenMeters m"
       }
     return MapScaleBarSpec(label = label, distanceMeters = chosenMeters, barWidthDp = barWidthDp)
+  }
+
+  companion object {
+    /**
+     * `mapZoomDelta` (relative to the survey's default `15.3z`) at or below which map features are
+     * clustered: about `12.95z`.
+     */
+    const val CLUSTERING_ZOOM_DELTA = -2.35f
   }
 }

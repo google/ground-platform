@@ -109,8 +109,10 @@ data class SurveyPlaceItem(
   val normalizedX: Float,
   val normalizedY: Float,
   val zoomDelta: Float = 0.75f,
-  val longitude: Double = parsePlaceCoordinates(coordinatesLabel)?.second ?: 36.9512,
-  val latitude: Double = parsePlaceCoordinates(coordinatesLabel)?.first ?: -0.4198,
+  val longitude: Double =
+    parsePlaceCoordinates(coordinatesLabel)?.second ?: DEFAULT_FALLBACK_LONGITUDE,
+  val latitude: Double =
+    parsePlaceCoordinates(coordinatesLabel)?.first ?: DEFAULT_FALLBACK_LATITUDE,
   val bboxMinLng: Double? = null,
   val bboxMinLat: Double? = null,
   val bboxMaxLng: Double? = null,
@@ -126,4 +128,28 @@ data class SurveyPlaceItem(
     ),
   val mapboxPlaceId: String = id,
   val sourceLabel: String = "Places API",
-)
+) {
+  /**
+   * This place with coordinates and zoom fit for centering the map on it: when [longitude] and
+   * [latitude] are the default fallback (no usable geocoder coordinates), they are re-parsed from
+   * [coordinatesLabel]; [targetZoom] is clamped to `[2.0, 18.5]`.
+   */
+  fun resolvedForSelection(): SurveyPlaceItem {
+    val parsedCoords = parsePlaceCoordinates(coordinatesLabel)
+    val hasDefaultFallbackCoords =
+      abs(longitude - DEFAULT_FALLBACK_LONGITUDE) < 1e-6 &&
+        abs(latitude - DEFAULT_FALLBACK_LATITUDE) < 1e-6
+    val lat = if (hasDefaultFallbackCoords && parsedCoords != null) parsedCoords.first else latitude
+    val lng =
+      if (hasDefaultFallbackCoords && parsedCoords != null) parsedCoords.second else longitude
+    return copy(longitude = lng, latitude = lat, targetZoom = targetZoom.coerceIn(2.0f, 18.5f))
+  }
+
+  companion object {
+    /** Longitude a place gets when its [coordinatesLabel] cannot be parsed. */
+    const val DEFAULT_FALLBACK_LONGITUDE = 36.9512
+
+    /** Latitude a place gets when its [coordinatesLabel] cannot be parsed. */
+    const val DEFAULT_FALLBACK_LATITUDE = -0.4198
+  }
+}

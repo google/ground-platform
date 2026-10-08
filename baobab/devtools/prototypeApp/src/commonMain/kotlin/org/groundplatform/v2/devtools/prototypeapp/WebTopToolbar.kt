@@ -110,7 +110,10 @@ internal fun WebTopToolbar(
           onClick = onOpenSurveyEditor,
         )
       }
-      WebCollectDataMenuButton(state)
+      WebCollectDataMenuButton(
+        uiState = state.dataCollectionUiState,
+        actions = state.dataCollection,
+      )
     },
   )
 }

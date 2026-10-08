@@ -137,9 +137,12 @@ surveys in it and find them in their list.
         remove people. Anyone can **Leave organization**. The last Manager
         can't be demoted, removed, or leave; the page says why.
 
-Code lives in `organization/` (`OrganizationPages.kt` for the pure list and
-member-grouping logic, `OrganizationsPage.kt`, `OrganizationPage.kt`); the
-actions on `PrototypeAppState` delegate to `OrganizationRepository`.
+Code lives in `organization/` (`OrganizationsPage.kt`, `OrganizationPage.kt`,
+and `OrganizationPages.kt` for the page's tabs). Both pages are stateless
+`(uiState, actions)` screens driven by `OrganizationViewModel`
+(`ui/viewmodel/`); the directory, relation, and member-grouping rules live in
+`domain/model/OrganizationDirectory.kt`, and the matching methods on
+`PrototypeAppState` are one-line delegates to the view model.
 
 ## Web Dashboard Page (`#dashboard`)
 
@@ -197,24 +200,24 @@ prototype, so selections and survey changes carry over.
     searchable list; the questions then appear and the target step is left out
     of the stack. There is no field GPS in a browser, so every geometry question
     (`geopoint`, `geotrace`, `geoshape`, "GPS only" or not) is answered by
-    drawing on the main map (`WebMapDrawing.kt`): **Draw on map** in the
-    question's card routes map clicks to it (`PrototypeAppState.webMapDrawing`,
-    the `CompactMapDrawingHost`), a floating chip at the top of the map shows
+    drawing on the main map (`ui/state/WebMapDrawingHost.kt`): **Draw on map**
+    in the question's card routes map clicks to it
+    (`DataCollectionViewModel.webMapDrawing`, the `CompactMapDrawingHost`), a floating chip at the top of the map shows
     the progress (`2 of at least 3`) with **Undo**, **Done**, and **Cancel
     drawing**, and the in-progress vertices, line, or polygon are drawn above
     the map features in the draft style (`SurveyMapContent.draftGeometry`).
     One click places a point; lines and polygons collect vertices until
     **Done**. While drawing, clicks on features add vertices instead of
     selecting them. Every geometry answer the open form already holds stays on
-    the map in a settled "in-flow" style (`PrototypeAppState.webFormGeometries`:
+    the map in a settled "in-flow" style (`DataCollectionUiState.webFormGeometries`:
     same amber hue as the draft but solid outlines, light fill, white vertex
     discs, and a chip with the question title); clicking one of them, or its
     chip, scrolls the panel to that question and highlights its card for a
-    moment (`PrototypeAppState.focusWebFormQuestion` → the runner's
+    moment (`DataCollectionActions.focusWebFormQuestion` → the runner's
     `focusRequest`). Each geometry card also has a **Zoom to fit** button (any
     kind: point, line, or polygon) that centres that question's geometry in the
     visible part of the map, clear of the form panel and the table
-    (`PrototypeAppState.webMapFramingRequest`).
+    (`DataCollectionUiState.webMapFramingRequest`).
 -   **Media capture on web** (`PrototypeMediaCapture.kt`,
     `src/commonMain/resources/media-capture-bridge.js`): Photo, video, and
     audio questions use the shared `MediaCaptureWidget` with the prototype's
@@ -271,7 +274,7 @@ The left-hand navigation lists:
     -   For organization surveys, a read-only **Organization managers** card
         lists the people who inherit Survey organizer access from the
         organization.
-    -   Who may open the editor is resolved by `surveyeditor/SurveyAccess.kt`
+    -   Who may open the editor is resolved by `domain/model/editor/SurveyAccess.kt`
         (owner → accepted access list → organization Manager → organization
         member under the organization policy → anyone under link/public). The
         dashboard only shows **Manage survey** to people who can manage the
@@ -303,10 +306,53 @@ The left-hand navigation lists:
         in the field) and property schema editing. They mirror
         `EntityDatasetDef` / `EntityRecord`.
 
-Code lives in `surveyeditor/` (`SurveyEditorModels.kt`, `SurveyEditorState.kt`,
-`SurveyEditorPage.kt`, `EntityDatasetEditor.kt`, `InteractiveLayerMap.kt`,
-`LayerEditorGeometry.kt`). Drag-to-reorder for the navigation and the flow canvas shares
-`formeditor/DragReorder.kt`.
+The editor edits the same survey the rest of the app runs on. The Forms, Map
+layers, and map features it shows are **derived** from the survey's runtime data
+(`domain/model/editor/SurveyEditorDerivation.kt`): each `FormPreviewItem` is
+imported back from its published XForms XML (`FormImport.kt`), each
+`MapLayerItem` becomes a Map layer dataset whose rows are the layer's map
+features (row key = map feature ID, with `id` and `label` properties plus the
+feature's other properties). Surveys never edited before therefore open with
+all their Forms and layers. Saving **projects** the draft back
+(`SurveyEditorProjection.kt`): Forms, Map layer styles, and map features are
+written to the store in one transaction, keeping each map feature's Submissions
+and removing only the rows the editor deleted since the draft was opened. The
+saved draft is stored per survey for what the runtime does not hold (sharing
+people, survey area, languages, Data tables); when it is reopened its Map layer
+rows are refreshed from the current map features so field edits show up too.
+
+The editor's models are pure Kotlin in `domain/model/editor/`
+(`SurveyEditorDraft.kt`, `SurveyEditorModels.kt`, `SampleDesignModels.kt`,
+`SurveyAreaGeometry.kt`, `FormPublishing.kt`, `FormImport.kt`,
+`SurveyEditorDerivation.kt`, `SurveyEditorProjection.kt`, `SurveyAccess.kt`,
+`SampleGeneration.kt`, `MapLayerImporter.kt`, `FormDatasetLinks.kt`), so
+repositories and the local data store depend only on the domain. The page is
+driven by `SurveyEditorViewModel` (`ui/viewmodel/`), which exposes a `StateFlow`
+of `SurveyEditorUiState` (`ui/state/`) and implements `SurveyEditorActions`;
+the Compose screens in `surveyeditor/` (`SurveyEditorPage.kt`,
+`EntityDatasetEditor.kt`, `SamplingDesignPanel.kt`, `SurveyAreaEditor.kt`,
+`InteractiveLayerMap.kt`, `LayerEditorGeometry.kt`) take `(uiState, actions)`
+and hold only transient UI state such as dialogs and the selected table row.
+`SurveyEditorPage(state: PrototypeAppState, …)` is the thin shell that collects
+the view model and renders the shared `WebAppHeader`. Drag-to-reorder for the
+navigation and the flow canvas shares `formeditor/DragReorder.kt`.
+
+The view model observes the active survey's draft through
+`SurveyEditorRepository` and shows it live until the first edit, after which the
+session holds the working copy (`isDirty`), so edits made elsewhere do not
+overwrite in-progress work. **Publish changes** saves the working copy with
+`saveDraft(surveyId, draft, previous = opened)` and emits
+`SurveyEditorEvent.Published`; **Discard** / close throws it away and emits
+`SurveyEditorEvent.Closed`; the app shell returns to the dashboard on both.
+Switching the active survey resets the session. Sample plot generation runs in
+the view model's scope through `GenerateSamplePlotsUseCase` (progress and
+per-layer errors are part of the UI state; map features with Submissions block
+regenerating, counted from `SurveyRepository`), invites go through
+`InviteCollaboratorUseCase`, and place search for the survey area uses
+`PlaceRepository` directly. The map inside the Map layer editor and the survey
+area **Draw** tab only need `MapFeatureEditor` (add a feature, replace its
+vertices), which `SurveyEditorActions` extends and the Draw tab backs with a
+scratch `DrawnPartsEditor`.
 
 The layer editor map and the survey area thumbnail are `GroundMap`s from
 `shared/map`, like the survey map. Features are drawn as map style layers;
@@ -320,7 +366,19 @@ containment and lines and points by a 12 dp tolerance. Without a Mapbox renderer
 ### Form Editor
 
 Selecting a Form opens the visual Form editor in `formeditor/`
-(`FormEditorModels.kt`, `FormEditorState.kt`, `FormEditorPage.kt`):
+(`FormEditorPage.kt`, `FormSaveToEditor.kt`, `FormWebPreview.kt`); its models,
+validation rules, and XForms generator are pure Kotlin in `domain/model/editor/`
+(`FormEditorModels.kt`, `FormValidationRules.kt`, `FormIds.kt`). The screens
+take `(uiState: FormEditorUiState, actions: FormEditorActions)`, provided by a
+`FormEditorViewModel` per Form that `SurveyEditorViewModel.formEditor(key)`
+creates over the survey draft (and caches until the survey changes). Edits to a
+Form's questions are written back into the draft, and the view model keeps the
+Form's linked Map layer or Data table in step with its questions
+(`FormDatasetLinks`); selection, preview target, the running preview
+(`FormWizardController`, the one non-domain value in the UI state), and the
+XML viewer / Advanced-section toggles are editor session state.
+`FormEditorViewModel.standalone(form, datasets)` builds one over a plain Form
+for tests:
 
 -   **Flow canvas**: Shows a mini preview of every question screen, from
     `Start` to `Review & submit`. Arrows show each possible transition. Solid
@@ -392,11 +450,12 @@ Selecting a Form opens the visual Form editor in `formeditor/`
     action, and the preview area is greyed out and non-interactive.
     On the dashboard, the **Collect data** menu and the feature cards' buttons
     only list forms available on web; the mobile `+` FAB sheet and bottom-sheet
-    buttons only list forms available on mobile (`PrototypeAppState.webForms` /
-    `mobileForms`). The choice is applied to the running survey's forms by form
-    ID from the saved editor draft, like Map layer styles. The **Advanced**
+    buttons only list forms available on mobile
+    (`DataCollectionUiState.webForms` / `mobileForms`). The choice is applied to
+    the running survey's forms by form ID from the saved editor draft, like Map
+    layer styles. The **Advanced**
     section at the bottom holds the Form's save-to logic
-    (`FormSaveToModels.kt`, `FormSaveToEditor.kt`). Advanced sections start
+    (`domain/model/editor/FormSaveToModels.kt`, `FormSaveToEditor.kt`). Advanced sections start
     collapsed (or open when customized or invalid). Expanding or collapsing one
     does the same to all of them for the rest of the session.
 -   **Save-to logic**: By default each submission adds a new map feature (if
@@ -421,9 +480,9 @@ fresh on every page load; on mobile it will become the persistent offline store.
 -   **Reads**: `LocalStore` exposes a `Flow` per collection (surveys, forms, map
     layers, map features with their submissions, standalone submissions,
     geometries, survey configs and editor drafts, mutations, places, offline
-    tile packages, and preferences). `SurveyAppViewModel.appData` combines them
-    into one `StateFlow`; `PrototypeAppState` and the view model's `uiState`
-    read from it.
+    tile packages, and preferences). `AppDataHolder.appData` combines them into
+    one `StateFlow`; `PrototypeAppState` and the feature view models read from
+    the repositories it wires.
 -   **Writes**: Repositories (`data/repository/`) write through `suspend`
     functions inside `LocalStore.transaction`, which is atomic and can be
     nested. Use cases that touch several repositories run in one transaction via
@@ -432,12 +491,98 @@ fresh on every page load; on mobile it will become the persistent offline store.
     hardcoded sample datasets (`PrototypeFake*Data`, `SurveyEditorSamples`,
     `FormEditorSamples`). It fills the store on first launch and again on
     **Reset**. `SampleDataGuardrailTest` keeps other code from reading them.
+-   **Layering**: `LayerDependencyGuardrailTest` checks imports against
+    `docs/technical/client/architecture.md`: `domain/` depends on nothing
+    outside the domain and shared core, `data/` never imports presentation
+    packages, and only `data/` and `ui/viewmodel/` may import `data/` or
+    `client/` packages.
+-   **Feature view models**: Screens observe per-feature view models in
+    `ui/viewmodel/` (wired by `AppDataHolder`), each exposing a `StateFlow` of
+    an immutable UI state (`ui/state/`) plus an actions interface the screen
+    calls. Screens take `(uiState, actions)` and hold no state of their own.
+    `OnboardingViewModel` (Sign In → Terms of Service → Download survey) reads
+    the account from `AuthRepository` (over `PrototypeAuthClient`) and the
+    survey directory from `SurveyRepository` and `OrganizationRepository`, and
+    publishes navigation and notices as `OnboardingEvent`s that the app shell
+    applies. `SettingsViewModel` (Settings, Sign In language selector, Offline
+    maps) reads and writes preferences through `SettingsRepository`, tile
+    packages through `SurveyRepository`, and models the device storage breakdown
+    with `EstimateDeviceStorageUseCase`; the light/dark theme is session state
+    it owns. `SurveyMapViewModel` (the survey map viewport: camera and GPS
+    following, basemap and organization imagery, zoomed-out clustering,
+    straight-line wayfinding, and the selected map feature, cluster, or place)
+    observes survey content and organizations through `SurveyRepository` and
+    `OrganizationRepository`, writes the device location through
+    `LocationRepository`, searches places through `PlaceRepository`, and
+    models clustering with `ClusterMapFeaturesUseCase` and wayfinding with
+    `ComputeWayfindingNavigationUseCase`; outcomes beyond the map (list
+    selection, drawer, notices) are `SurveyMapEvent`s the app shell applies.
+    `DashboardViewModel` (the web dashboard's panel layout, data tables, layer
+    selection, and entity details pane; the web Surveys page; the searchable
+    list's filter tabs and collapsed datasets; and the `Uploads` drawer
+    sub-screen) observes surveys, map features, and layers through
+    `SurveyRepository`, organizations through `OrganizationRepository`, the
+    signed-in user through `AuthRepository`, and the mutation log through
+    `MutationRepository`; it creates surveys with `CreateSurveyUseCase` and
+    uploads with `SyncMutationsUseCase`. Switching the active survey, showing
+    the `Uploads` sub-screen, and notices are `DashboardEvent`s the shell
+    applies. `OrganizationViewModel` (the web organizations directory and the
+    organization page's details, surveys, members, and imagery sources)
+    observes organizations through `OrganizationRepository`, surveys through
+    `SurveyRepository`, and the signed-in user through `AuthRepository`; it
+    creates organizations with `CreateOrganizationUseCase`, invites people
+    with `InviteOrganizationMemberUseCase`, and edits imagery sources with
+    `ManageImagerySourcesUseCase`, while simple membership changes pass
+    straight to the repository. Page switches and turning a removed imagery
+    source off on the map are `OrganizationEvent`s the shell applies; the
+    resizable left panel's width stays with `DashboardViewModel`, shared with
+    the dashboard. `SurveyEditorViewModel` (the Survey editor: the working
+    draft, section navigation and panel width, publishing and discarding,
+    sharing, Map layer / Data table editing, sample plot generation) observes
+    the active survey's draft through `SurveyEditorRepository`, Submission
+    counts through `SurveyRepository`, organizations through
+    `OrganizationRepository`, and the signed-in user through `AuthRepository`;
+    it generates sample plots with `GenerateSamplePlotsUseCase` and handles
+    invites with `InviteCollaboratorUseCase`, and hands each Form to a
+    `FormEditorViewModel` (`FormEditorUiState` / `FormEditorActions`). Leaving
+    the editor after publishing or discarding is a `SurveyEditorEvent` the
+    shell applies. `DataCollectionViewModel` (data collection: the selected
+    record shown in the entity bottom sheet and the dashboard's details card,
+    the open Form and its `entityref` picker step, the web dashboard's
+    draw-on-map session, and the GeoID QR code and PDF export dialogs)
+    observes survey content through `SurveyRepository`, the collector through
+    `AuthRepository`, units through `SettingsRepository`, and the GPS fix
+    through `LocationRepository`; it opens Forms with `LaunchFormUseCase`
+    (resolves the `FormDef`, adds the `entityref` step, pre-fills
+    entity-reference questions) and records them with
+    `CompleteFormSubmissionUseCase`. It is the one owner of record selection
+    (`selectedEntityId` / `selectedSubmissionId`): `SurveyMapViewModel` keeps
+    only the highlighted feature, updated from `DataCollectionEvent`s, and
+    selections made on the map flow back through the shell. Three pieces of UI
+    infrastructure are allowed in its state and dependencies by exception:
+    the shared `FormWizardController` (Compose snapshot state), the
+    `WebMapDrawingHost` (`ui/state/`) that edits it while drawing, and
+    `PdfExportClient` (`client/pdf/`), the platform file delivery.
+    `WorkbenchViewModel` (the prototype workbench chrome: simulated device form
+    factor and orientation, the XForms `<h:html>` editor and example survey
+    switcher, and debug/simulation tools such as adding 5,000 random polygon
+    features, cycling sync status, and resetting the prototype flow) observes
+    surveys and survey content through `SurveyRepository`, reseeds via
+    `SampleDataRepository`, and generates benchmark features with
+    `GeneratePrototypeRandomSitesUseCase`; cross-feature outcomes are published
+    as `WorkbenchEvent`s that the shell applies.
 -   **Survey switching**: Every survey's data is in the store, so switching
     surveys keeps edits. Use **Reset** to go back to the sample data.
--   **Survey editor**: The editor loads the active survey's draft
-    (`SurveyEditorDraft`) from the store and saves each change back. Generated
-    XForms are published to the survey's `SurveyConfig.formXmlById`, and the
-    title and description are shown in the survey list.
+-   **Survey editor**: `SurveyEditorRepositoryImpl` serves the stored draft
+    (`SurveyEditorDraft`) when there is one, refreshed from the survey's current
+    map features, and otherwise derives one from the survey's Forms, Map layers,
+    and map features. Saving stores the draft and projects it onto the survey
+    in the same transaction: Forms (and their XForms in
+    `SurveyConfig.formXmlById`), Map layer styles, map features (Submissions
+    kept), and the title and description shown in the survey list. The seed
+    only stores drafts for the two sample surveys with extras that cannot be
+    derived (`PrototypeFakeSurveyEditorData`: sharing people, survey area,
+    languages, Data tables).
 -   **Backends**: `InMemoryLocalStore` is the only backend today. A persistent
     backend (Room on `androidx.sqlite`) must pass `LocalStoreContractTest`.
 
@@ -466,9 +611,10 @@ look the same on web and mobile.
 -   **Implementation**: `PdfDocumentWriter` is a small PDF 1.4 writer with no
     dependencies. It uses the standard Helvetica and Courier fonts, which don't
     need embedding. `PdfReportLayout` handles text wrapping, page breaks, and
-    `Page n of N` footers. `RecordPdfReports` builds the two reports. Delivery is
-    the only platform-specific code (`PlatformPdfExport`): `pdf-export-bridge.js`
-    on web and the temp directory on the JVM.
+    `Page n of N` footers. `RecordPdfReports` builds the two reports.
+    `DataCollectionViewModel` generates them and hands them to
+    `PdfExportClient` (`client/pdf/`), the only platform-specific code:
+    `pdf-export-bridge.js` on web and the temp directory on the JVM.
 -   **Limitation**: The standard fonts only cover Windows-1252 (Western European)
     characters. Common symbols are replaced with ASCII (`≤` → `<=`, `📷` →
     `[photo]`); other scripts render as `?`. Embedding a Unicode font (for

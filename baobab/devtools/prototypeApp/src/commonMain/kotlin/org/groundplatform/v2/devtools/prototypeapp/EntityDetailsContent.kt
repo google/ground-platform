@@ -93,6 +93,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import kotlin.math.roundToInt
 import org.groundplatform.v2.devtools.prototypeapp.map.LayerIcons
+import org.groundplatform.v2.devtools.prototypeapp.ui.state.DataCollectionUiState
+import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.DataCollectionActions
 
 /** Geometry kind of a map feature, shown as the leading icon of list rows and details headers. */
 internal enum class EntityGeometryKind(val label: String) {
@@ -604,10 +606,22 @@ internal fun EntityPropertiesPane(
   Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
     if (isWeb) {
       EntityStatusChip(entity = entity, compact = true)
-      EntityDataCollectionLaunchers(entity = entity, state = state, isWeb = true)
+      EntityDataCollectionLaunchers(
+        entity = entity,
+        uiState = state.dataCollectionUiState,
+        actions = state.dataCollection,
+        isWeb = true,
+        notice = state.activeSurveyNotice,
+      )
     } else {
       EntityActionsRow(entity = entity, state = state)
-      EntityDataCollectionLaunchers(entity = entity, state = state, isWeb = false)
+      EntityDataCollectionLaunchers(
+        entity = entity,
+        uiState = state.dataCollectionUiState,
+        actions = state.dataCollection,
+        isWeb = false,
+        notice = state.activeSurveyNotice,
+      )
     }
 
     DetailsSectionHeading("Details")
@@ -662,14 +676,14 @@ internal fun EntityPropertiesPane(
 internal fun downloadPdfMenuAction(onClick: () -> Unit): DetailsMenuAction =
   DetailsMenuAction("Download PDF", Icons.Outlined.Download, onClick = onClick)
 
-/** Secondary entity actions shown in the web header's overflow menu. */
+/** Secondary entity actions shown in the web header's overflow menu, sent to [actions]. */
 private fun entityOverflowActions(
   entity: GeospatialEntityItem,
-  state: PrototypeAppState,
+  actions: DataCollectionActions,
 ): List<DetailsMenuAction> =
   listOf(
-    DetailsMenuAction("QR code", Icons.Outlined.QrCode) { state.openEntityQrCode(entity.id) },
-    downloadPdfMenuAction { state.downloadEntityPdf(entity.id) },
+    DetailsMenuAction("QR code", Icons.Outlined.QrCode) { actions.openEntityQrCode(entity.id) },
+    downloadPdfMenuAction { actions.downloadEntityPdf(entity.id) },
   )
 
 /** Row of mobile entity actions: `Navigate`, QR code, Share PDF, and `Uploads`. */
@@ -707,7 +721,7 @@ private fun EntityActionsRow(entity: GeospatialEntityItem, state: PrototypeAppSt
       )
     }
     AssistChip(
-      onClick = { state.openEntityQrCode(entity.id) },
+      onClick = { state.dataCollection.openEntityQrCode(entity.id) },
       label = { Text("QR code") },
       leadingIcon = {
         Icon(
@@ -718,7 +732,7 @@ private fun EntityActionsRow(entity: GeospatialEntityItem, state: PrototypeAppSt
       },
     )
     AssistChip(
-      onClick = { state.shareEntityPdf(entity.id) },
+      onClick = { state.dataCollection.shareEntityPdf(entity.id) },
       label = { Text("Share PDF") },
       leadingIcon = {
         Icon(
@@ -756,17 +770,20 @@ private fun EntityActionsRow(entity: GeospatialEntityItem, state: PrototypeAppSt
 
 /**
  * Organizer-defined data collection buttons for this entity's dataset, limited to the forms the
- * survey designer made available on the current platform. On mobile they open the
+ * survey designer made available on the current platform ([uiState]). On mobile they open the
  * one-question-per-screen runner over the map; on web they open the same form in the right-hand
- * panel's compact layout ([WebDataCollectionCard]).
+ * panel's compact layout ([WebDataCollectionCard]), both through [actions]. The optional [notice]
+ * (the active survey notice) is shown under the buttons.
  */
 @Composable
 private fun EntityDataCollectionLaunchers(
   entity: GeospatialEntityItem,
-  state: PrototypeAppState,
+  uiState: DataCollectionUiState,
+  actions: DataCollectionActions,
   isWeb: Boolean,
+  notice: String? = null,
 ) {
-  val entityForms = state.formsForEntity(entity, onWeb = isWeb)
+  val entityForms = uiState.formsForEntity(entity, onWeb = isWeb)
   if (entityForms.isEmpty()) return
   Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
     DetailsSectionHeading("Collect data")
@@ -775,9 +792,9 @@ private fun EntityDataCollectionLaunchers(
       horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
       entityForms.forEach { form ->
-        val isEnabled = state.isFormButtonEnabled(entity, form)
+        val isEnabled = uiState.isFormButtonEnabled(entity, form)
         Button(
-          onClick = { state.launchFormForEntity(entity.id, form.id) },
+          onClick = { actions.launchFormForEntity(entity.id, form.id) },
           enabled = isEnabled,
           shape = MaterialTheme.shapes.small,
         ) {
@@ -792,9 +809,9 @@ private fun EntityDataCollectionLaunchers(
         }
       }
     }
-    state.activeSurveyNotice?.let { notice ->
+    notice?.let {
       Text(
-        text = notice,
+        text = it,
         style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
         color = MaterialTheme.colorScheme.primary,
       )
@@ -874,7 +891,10 @@ internal fun EntitySubmissionsPane(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(4.dp),
       ) {
-        IconButton(onClick = { state.showEntityProperties() }, modifier = Modifier.size(32.dp)) {
+        IconButton(
+          onClick = { state.dataCollection.showEntityProperties() },
+          modifier = Modifier.size(32.dp),
+        ) {
           Icon(
             imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
             contentDescription = "Back to details",
@@ -933,7 +953,7 @@ internal fun EntitySubmissionsPane(
         state = state,
         showTargetEntityLabel = false,
         showFormActionSubtitle = false,
-        onSelectSubmission = { state.selectSubmissionDetail(it.id) },
+        onSelectSubmission = { state.dataCollection.selectSubmissionDetail(it.id) },
         showSyncStatus = !isWeb,
       )
     }
@@ -952,7 +972,8 @@ internal fun EntityBottomSheetCard(
   state: PrototypeAppState,
   modifier: Modifier = Modifier,
 ) {
-  val selectedSubmission = state.selectedSubmission?.takeIf { it.entityId == entity.id }
+  val selectedSubmission =
+    state.dataCollectionUiState.selectedSubmission?.takeIf { it.entityId == entity.id }
   val isDark = state.isDarkTheme
 
   Column(
@@ -961,7 +982,7 @@ internal fun EntityBottomSheetCard(
   ) {
     EntityDetailsHeader(
       entity = entity,
-      onBack = { state.returnToBottomSheetList() },
+      onBack = { state.dataCollection.returnToBottomSheetList() },
       onClose = null,
       layer = state.mapLayerFor(entity),
       statusAccessory = {
@@ -985,8 +1006,8 @@ internal fun EntityBottomSheetCard(
             isDark = isDark,
             textColor = MaterialTheme.colorScheme.onSurface,
             backLabel = "Back to submissions",
-            onBack = { state.selectSubmissionDetail(null) },
-            onSharePdf = { state.shareSubmissionPdf(selectedSubmission.id) },
+            onBack = { state.dataCollection.selectSubmissionDetail(null) },
+            onSharePdf = { state.dataCollection.shareSubmissionPdf(selectedSubmission.id) },
           )
         state.entityDetailsPane == EntityDetailsPane.SUBMISSIONS ->
           EntitySubmissionsPane(entity = entity, state = state, isWeb = false)
@@ -1014,7 +1035,8 @@ internal fun WebEntityDetailsCard(
   modifier: Modifier = Modifier,
   onCollapse: (() -> Unit)? = null,
 ) {
-  val submission = state.selectedSubmission?.takeIf { it.entityId == entity.id }
+  val submission =
+    state.dataCollectionUiState.selectedSubmission?.takeIf { it.entityId == entity.id }
   val pane = state.entityDetailsPane
   // Each tab (and an opened submission) starts scrolled to the top.
   val scrollState = remember(entity.id, pane, submission?.id) { ScrollState(initial = 0) }
@@ -1035,7 +1057,7 @@ internal fun WebEntityDetailsCard(
         showStatus = false,
         trailingActions = {
           DetailsOverflowMenu(
-            actions = entityOverflowActions(entity, state),
+            actions = entityOverflowActions(entity, state.dataCollection),
             contentDescription = "More ${entity.singularTypeLabel.lowercase()} actions",
           )
         },
@@ -1079,8 +1101,8 @@ internal fun WebEntityDetailsCard(
               isDark = state.isDarkTheme,
               textColor = MaterialTheme.colorScheme.onSurface,
               backLabel = "Back to submissions",
-              onBack = { state.selectSubmissionDetail(null) },
-              onSharePdf = { state.downloadSubmissionPdf(submission.id) },
+              onBack = { state.dataCollection.selectSubmissionDetail(null) },
+              onSharePdf = { state.dataCollection.downloadSubmissionPdf(submission.id) },
               isSidePanel = true,
             )
           else -> EntitySubmissionsPane(entity = entity, state = state, isWeb = true)
@@ -1115,7 +1137,7 @@ internal fun WebSubmissionDetailsCard(
         horizontalArrangement = Arrangement.spacedBy(4.dp),
       ) {
         IconButton(
-          onClick = { state.selectSubmissionDetail(null) },
+          onClick = { state.dataCollection.selectSubmissionDetail(null) },
           modifier = Modifier.size(32.dp),
         ) {
           Icon(
@@ -1141,7 +1163,10 @@ internal fun WebSubmissionDetailsCard(
           )
         }
         DetailsOverflowMenu(
-          actions = listOf(downloadPdfMenuAction { state.downloadSubmissionPdf(submission.id) }),
+          actions =
+            listOf(
+              downloadPdfMenuAction { state.dataCollection.downloadSubmissionPdf(submission.id) }
+            ),
           contentDescription = "More submission actions",
         )
         if (onCollapse != null) {
@@ -1163,8 +1188,8 @@ internal fun WebSubmissionDetailsCard(
           isDark = state.isDarkTheme,
           textColor = MaterialTheme.colorScheme.onSurface,
           backLabel = "Back",
-          onBack = { state.selectSubmissionDetail(null) },
-          onSharePdf = { state.downloadSubmissionPdf(submission.id) },
+          onBack = { state.dataCollection.selectSubmissionDetail(null) },
+          onSharePdf = { state.dataCollection.downloadSubmissionPdf(submission.id) },
           isSidePanel = true,
           showHeader = false,
         )

@@ -47,7 +47,12 @@ import org.groundplatform.v2.core.geo.io.GeoFileReader
 import org.groundplatform.v2.core.geo.io.GeoReadResult
 import org.groundplatform.v2.devtools.prototypeapp.TextFilePickResult
 import org.groundplatform.v2.devtools.prototypeapp.TextFilePicker
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.DatasetKind
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.MapLayerImportPlan
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.MapLayerImporter
 import org.groundplatform.v2.devtools.prototypeapp.openPlatformTextFilePicker
+import org.groundplatform.v2.devtools.prototypeapp.ui.state.SurveyEditorUiState
+import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.SurveyEditorActions
 
 /** A file read for import as a Map layer, with its plan (`null` if nothing can be imported). */
 data class MapLayerImportPreview(
@@ -72,7 +77,8 @@ internal const val SAMPLE_PLOTS_NEED_AREA = "Set a survey area or add a polygon 
  */
 @Composable
 internal fun AddMapLayerDialog(
-  state: SurveyEditorState,
+  uiState: SurveyEditorUiState,
+  actions: SurveyEditorActions,
   onDismiss: () -> Unit,
   pickTextFile: TextFilePicker = ::openPlatformTextFilePicker,
 ) {
@@ -84,7 +90,7 @@ internal fun AddMapLayerDialog(
     ImportPreviewDialog(
       preview = current,
       onImport = { plan ->
-        state.importMapLayer(plan)
+        actions.importMapLayer(plan)
         onDismiss()
       },
       onBack = { preview = null },
@@ -105,7 +111,7 @@ internal fun AddMapLayerDialog(
           title = "Empty map layer",
           body = "Add features by drawing them on the map or entering them in the table.",
           onClick = {
-            state.addDataset(DatasetKind.MAP_LAYER)
+            actions.addDataset(DatasetKind.MAP_LAYER)
             onDismiss()
           },
         )
@@ -125,7 +131,7 @@ internal fun AddMapLayerDialog(
             }
           },
         )
-        val canGenerate = state.canGenerateSamplePlots
+        val canGenerate = uiState.canGenerateSamplePlots
         AddOption(
           icon = Icons.Outlined.GridOn,
           title = "Generate sample plots",
@@ -134,7 +140,7 @@ internal fun AddMapLayerDialog(
             else SAMPLE_PLOTS_NEED_AREA,
           enabled = canGenerate,
           onClick = {
-            state.addSamplePlotsLayer()
+            actions.addSamplePlotsLayer()
             onDismiss()
           },
         )

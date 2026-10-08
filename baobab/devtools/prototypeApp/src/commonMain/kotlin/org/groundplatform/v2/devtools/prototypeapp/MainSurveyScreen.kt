@@ -71,6 +71,7 @@ import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -88,6 +89,10 @@ import org.groundplatform.v2.core.forms.ui.GroundModalBottomSheetOverlay
 import org.groundplatform.v2.core.forms.ui.GroundTonalBadge
 import org.groundplatform.v2.devtools.prototypeapp.map.framingInsets
 import org.groundplatform.v2.devtools.prototypeapp.map.rememberSurveyMapCamera
+import org.groundplatform.v2.devtools.prototypeapp.ui.state.DataCollectionUiState
+import org.groundplatform.v2.devtools.prototypeapp.ui.state.SurveyMapUiState
+import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.DataCollectionActions
+import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.SurveyMapActions
 
 /**
  * 5. Main Survey UI screen (`PrototypeScreen.MAIN_SURVEY`) providing:
@@ -116,8 +121,9 @@ import org.groundplatform.v2.devtools.prototypeapp.map.rememberSurveyMapCamera
 fun MainSurveyScreen(state: PrototypeAppState) {
   val isMapShowing = state.activeDrawerSubView == MainDrawerSubView.NONE
   val surfaceColor = if (isMapShowing) Color.Transparent else MaterialTheme.colorScheme.surface
-  val activeQrEntity = state.activeQrCodeEntity
-  val activePdfSheet = state.activeSharedPdfSheet
+  val dataCollectionUiState = state.dataCollectionUiState
+  val activeQrEntity = dataCollectionUiState.activeQrCodeEntity
+  val activePdfSheet = dataCollectionUiState.activeSharedPdfSheet
 
   Box(modifier = Modifier.fillMaxSize().background(surfaceColor)) {
     Column(modifier = Modifier.fillMaxSize()) {
@@ -141,12 +147,13 @@ fun MainSurveyScreen(state: PrototypeAppState) {
 
     // Layers Modal Bottom Sheet (confined inside the mobile device frame)
     if (state.isLayersSheetOpen) {
-      LayersControlSheet(state = state)
+      val mapUiState by state.surveyMap.uiState.collectAsState()
+      LayersControlSheet(uiState = mapUiState, actions = state.surveyMap)
     }
 
     // Available Forms Modal Bottom Sheet (triggered by the bottom-centered FAB)
-    if (state.isAvailableFormsSheetOpen) {
-      AvailableFormsModalSheet(state = state)
+    if (dataCollectionUiState.isAvailableFormsSheetOpen) {
+      AvailableFormsModalSheet(uiState = dataCollectionUiState, actions = state.dataCollection)
     }
 
     // Slide-over Hamburger Navigation Drawer Overlay
@@ -156,15 +163,23 @@ fun MainSurveyScreen(state: PrototypeAppState) {
 
     // Scannable Entity GeoID QR Code Modal Overlay
     if (activeQrEntity != null) {
-      EntityQrCodeModalDialog(state = state, entity = activeQrEntity)
+      EntityQrCodeModalDialog(actions = state.dataCollection, entity = activeQrEntity)
     }
 
     // Share PDF to Preferred App Modal Overlay (for both Entities and Submissions)
     if (activePdfSheet != null) {
-      SharePdfToAppModalDialog(state = state, sheet = activePdfSheet)
+      SharePdfToAppModalDialog(
+        uiState = state.dataCollectionUiState,
+        actions = state.dataCollection,
+        sheet = activePdfSheet,
+      )
     }
 
-    PdfExportMessageSnackbar(state = state, modifier = Modifier.align(Alignment.BottomCenter))
+    PdfExportMessageSnackbar(
+      uiState = state.dataCollectionUiState,
+      actions = state.dataCollection,
+      modifier = Modifier.align(Alignment.BottomCenter),
+    )
   }
 }
 
@@ -249,12 +264,14 @@ internal fun MainSurveyTopAppBar(state: PrototypeAppState) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun SurveyMapView(state: PrototypeAppState) {
-  val selectedEntity = state.selectedEntity
+  val uiState by state.surveyMap.uiState.collectAsState()
+  val actions: SurveyMapActions = state.surveyMap
+  val selectedEntity = uiState.selectedEntity
 
   val sheetState =
     rememberStandardBottomSheetState(
       initialValue =
-        if (state.isEntityBottomSheetExpanded) {
+        if (uiState.isEntityBottomSheetExpanded) {
           SheetValue.Expanded
         } else {
           SheetValue.PartiallyExpanded
@@ -265,29 +282,30 @@ internal fun SurveyMapView(state: PrototypeAppState) {
 
   LaunchedEffect(sheetState.currentValue) {
     val expanded = sheetState.currentValue == SheetValue.Expanded
-    if (state.isEntityBottomSheetExpanded != expanded) {
-      state.updateEntityBottomSheetExpanded(expanded)
+    if (uiState.isEntityBottomSheetExpanded != expanded) {
+      actions.updateEntityBottomSheetExpanded(expanded)
     }
   }
 
-  LaunchedEffect(state.selectedEntityId, state.isEntityBottomSheetExpanded) {
-    if (state.isEntityBottomSheetExpanded && sheetState.currentValue != SheetValue.Expanded) {
+  LaunchedEffect(uiState.selectedEntityId, uiState.isEntityBottomSheetExpanded) {
+    if (uiState.isEntityBottomSheetExpanded && sheetState.currentValue != SheetValue.Expanded) {
       sheetState.expand()
     } else if (
-      !state.isEntityBottomSheetExpanded && sheetState.currentValue != SheetValue.PartiallyExpanded
+      !uiState.isEntityBottomSheetExpanded &&
+        sheetState.currentValue != SheetValue.PartiallyExpanded
     ) {
       sheetState.partialExpand()
     }
   }
 
   val mapCamera =
-    rememberSurveyMapCamera(desired = state::desiredMapCamera, onSettled = state::syncMapCamera)
+    rememberSurveyMapCamera(desired = actions::desiredMapCamera, onSettled = actions::syncMapCamera)
 
   BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
     // With a map feature selected, the sheet peeks at about half the screen: enough to show the
     // feature's details while the map above frames the feature itself.
     val peekHeight =
-      if (selectedEntity != null || state.selectedSubmission != null) {
+      if (selectedEntity != null || state.dataCollectionUiState.selectedSubmission != null) {
         (maxHeight * 0.45f).coerceAtLeast(152.dp)
       } else {
         122.dp
@@ -296,13 +314,13 @@ internal fun SurveyMapView(state: PrototypeAppState) {
     // Fit a newly selected map feature into the map area above the sheet. Mobile has no side
     // details panel, so only the sheet is compensated for (vertically); the feature stays centered
     // horizontally. Records without geometry replace the sheet's contents without moving the map.
-    LaunchedEffect(selectedEntity?.id, state.entitySelectionEpoch) {
+    LaunchedEffect(selectedEntity?.id, uiState.entitySelectionEpoch) {
       val entity = selectedEntity ?: return@LaunchedEffect
       if (!entity.hasGeometry) return@LaunchedEffect
       val visibleHeight = (maxHeight - peekHeight).coerceAtLeast(0.dp)
       val targetScreenY =
         if (maxHeight > 0.dp) ((visibleHeight / 2) / maxHeight).coerceIn(0.10f, 0.50f) else 0.50f
-      state.recenterMapOnEntity(entity, targetScreenY)
+      actions.recenterMapOnEntity(entity, targetScreenY)
       val bounds = state.resolveEntityLngLatBounds(entity)
       mapCamera.run {
         it.fitBounds(
@@ -332,15 +350,28 @@ internal fun SurveyMapView(state: PrototypeAppState) {
     ) {
       BoxWithConstraints(modifier = Modifier.fillMaxSize().background(Color.Transparent)) {
         // Survey map: native basemap and feature layers with Compose markers on top.
-        SurveyMainMap(state = state, camera = mapCamera, modifier = Modifier.fillMaxSize())
+        SurveyMainMap(
+          uiState = uiState,
+          actions = actions,
+          dataCollection = state.dataCollectionUiState,
+          formMap = state.dataCollection,
+          pendingIds = state.pendingUploadEntityIds,
+          camera = mapCamera,
+          modifier = Modifier.fillMaxSize(),
+        )
 
         // 3. Top Map Overlay: Docked Navigation HUD Banner (flush with toolbar) + Floating Map
         // Chips
         Column(modifier = Modifier.align(Alignment.TopCenter).fillMaxWidth()) {
           // Straight-Line Navigation HUD Banner docked to the top of the screen like Google Maps
-          val activeNav = state.activeNavigation
+          val activeNav = uiState.activeNavigation
           if (activeNav != null) {
-            StraightLineNavigationHudBanner(navState = activeNav, state = state)
+            StraightLineNavigationHudBanner(
+              navState = activeNav,
+              targetTypeLabel = uiState.entitySingularTypeLabel(activeNav.targetId),
+              isDarkTheme = state.isDarkTheme,
+              actions = actions,
+            )
           }
 
           // Floating Map Chips: GPS Accuracy Chip + "Layers" Button
@@ -354,67 +385,21 @@ internal fun SurveyMapView(state: PrototypeAppState) {
               verticalAlignment = Alignment.CenterVertically,
             ) {
               // Combined GPS Status / Auto-Center Chip over the map
-              Surface(
-                shape = MaterialTheme.shapes.large,
-                color = MaterialTheme.colorScheme.inverseSurface.copy(alpha = 0.92f),
-                contentColor = MaterialTheme.colorScheme.inverseOnSurface,
-                border =
-                  BorderStroke(
-                    1.dp,
-                    if (state.isCameraFollowingUser) {
-                      MaterialTheme.colorScheme.inversePrimary
-                    } else {
-                      MaterialTheme.colorScheme.inverseOnSurface.copy(alpha = 0.55f)
-                    },
-                  ),
-                shadowElevation = 2.dp,
-              ) {
-                Row(
-                  modifier = Modifier.padding(horizontal = 11.dp, vertical = 6.dp),
-                  verticalAlignment = Alignment.CenterVertically,
-                  horizontalArrangement = Arrangement.spacedBy(5.dp),
-                ) {
-                  Icon(
-                    imageVector =
-                      if (state.isCameraFollowingUser) {
-                        Icons.Outlined.SatelliteAlt
-                      } else {
-                        Icons.Outlined.MyLocation
-                      },
-                    contentDescription =
-                      if (state.isCameraFollowingUser) "GPS Auto-Center" else "Panned",
-                    tint =
-                      if (state.isCameraFollowingUser) {
-                        MaterialTheme.colorScheme.inversePrimary
-                      } else {
-                        MaterialTheme.colorScheme.inverseOnSurface
-                      },
-                    modifier = Modifier.size(14.dp),
-                  )
-                  Text(
-                    text =
-                      if (state.isCameraFollowingUser) {
-                        "GPS: ${state.gnssStatusChipLabel}"
-                      } else {
-                        "Panned"
-                      },
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.inverseOnSurface,
-                    fontWeight = FontWeight.Bold,
-                  )
-                }
-              }
+              GnssStatusChip(
+                isFollowingUser = uiState.isCameraFollowingUser,
+                gnssStatusLabel = uiState.gnssStatusChipLabel,
+              )
 
               // Basemap preview card that opens the layers sheet
               BasemapPreviewCard(
-                selectedBasemapType = state.selectedBasemapType,
-                onClick = { state.updateLayersSheetOpen(!state.isLayersSheetOpen) },
+                selectedBasemapType = uiState.selectedBasemapType,
+                onClick = { actions.updateLayersSheetOpen(!uiState.isLayersSheetOpen) },
               )
             }
 
             // Selected Cluster Balloon detail callout when a Mapbox cluster balloon is tapped
-            if (state.isMapClusteringActive && state.selectedCluster != null) {
-              MapClusterBalloonsOverlay(state = state)
+            if (uiState.isMapClusteringActive && uiState.selectedCluster != null) {
+              MapClusterBalloonsOverlay(uiState = uiState, actions = actions)
             }
           }
         }
@@ -422,7 +407,7 @@ internal fun SurveyMapView(state: PrototypeAppState) {
         // 5. Bottom Overlay Stack: Google Maps-style Horizontal Scale Widget in bottom-left,
         //    bottom-center data collection FAB, and optional "Recenter" button in bottom-right
         val isSheetExpanded =
-          state.isEntityBottomSheetExpanded || sheetState.targetValue == SheetValue.Expanded
+          uiState.isEntityBottomSheetExpanded || sheetState.targetValue == SheetValue.Expanded
 
         // Scale bar in bottom-left
         Box(
@@ -431,15 +416,15 @@ internal fun SurveyMapView(state: PrototypeAppState) {
               .padding(start = 14.dp, bottom = peekHeight + 10.dp)
         ) {
           GoogleMapsScaleBarWidget(
-            scaleSpec = state.mapScaleBarSpec,
-            isSatellite = state.selectedBasemapType == BasemapType.SATELLITE,
+            scaleSpec = uiState.mapScaleBarSpec,
+            isSatellite = uiState.selectedBasemapType == BasemapType.SATELLITE,
           )
         }
 
         // Optional "Recenter" button in bottom-right when panned away from user
-        if (!isSheetExpanded && !state.isCameraFollowingUser) {
+        if (!isSheetExpanded && !uiState.isCameraFollowingUser) {
           ExtendedFloatingActionButton(
-            onClick = { state.recenterMapOnUser() },
+            onClick = { actions.recenterMapOnUser() },
             icon = {
               Icon(
                 imageVector = Icons.Outlined.MyLocation,
@@ -470,10 +455,58 @@ internal fun SurveyMapView(state: PrototypeAppState) {
             modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = peekHeight + 10.dp),
             contentAlignment = Alignment.Center,
           ) {
-            DataCollectionFormsFab(state = state)
+            DataCollectionFormsFab(actions = state.dataCollection, isDarkTheme = state.isDarkTheme)
           }
         }
       }
+    }
+  }
+}
+
+/**
+ * Combined GPS status / auto-center chip over the map: the GNSS fix ([gnssStatusLabel]) while the
+ * camera follows the user, or "Panned" once the map was dragged away.
+ */
+@Composable
+internal fun GnssStatusChip(isFollowingUser: Boolean, gnssStatusLabel: String) {
+  Surface(
+    shape = MaterialTheme.shapes.large,
+    color = MaterialTheme.colorScheme.inverseSurface.copy(alpha = 0.92f),
+    contentColor = MaterialTheme.colorScheme.inverseOnSurface,
+    border =
+      BorderStroke(
+        1.dp,
+        if (isFollowingUser) {
+          MaterialTheme.colorScheme.inversePrimary
+        } else {
+          MaterialTheme.colorScheme.inverseOnSurface.copy(alpha = 0.55f)
+        },
+      ),
+    shadowElevation = 2.dp,
+  ) {
+    Row(
+      modifier = Modifier.padding(horizontal = 11.dp, vertical = 6.dp),
+      verticalAlignment = Alignment.CenterVertically,
+      horizontalArrangement = Arrangement.spacedBy(5.dp),
+    ) {
+      Icon(
+        imageVector =
+          if (isFollowingUser) Icons.Outlined.SatelliteAlt else Icons.Outlined.MyLocation,
+        contentDescription = if (isFollowingUser) "GPS Auto-Center" else "Panned",
+        tint =
+          if (isFollowingUser) {
+            MaterialTheme.colorScheme.inversePrimary
+          } else {
+            MaterialTheme.colorScheme.inverseOnSurface
+          },
+        modifier = Modifier.size(14.dp),
+      )
+      Text(
+        text = if (isFollowingUser) "GPS: $gnssStatusLabel" else "Panned",
+        style = MaterialTheme.typography.labelSmall,
+        color = MaterialTheme.colorScheme.inverseOnSurface,
+        fontWeight = FontWeight.Bold,
+      )
     }
   }
 }
@@ -483,13 +516,13 @@ internal fun SurveyMapView(state: PrototypeAppState) {
  * geographically pinned Mapbox cluster balloon is tapped on the map.
  */
 @Composable
-internal fun MapClusterBalloonsOverlay(state: PrototypeAppState) {
-  val selectedCluster = state.selectedCluster ?: return
+internal fun MapClusterBalloonsOverlay(uiState: SurveyMapUiState, actions: SurveyMapActions) {
+  val selectedCluster = uiState.selectedCluster ?: return
   SelectedClusterBalloonDetailCard(
-    sitesCountLabel = state.formatClusterSitesCountLabel(selectedCluster.siteCount),
+    sitesCountLabel = uiState.formatClusterSitesCountLabel(selectedCluster.siteCount),
     cluster = selectedCluster,
-    onZoomIn = { state.zoomIntoCluster(selectedCluster.id) },
-    onDismiss = { state.selectCluster(null) },
+    onZoomIn = { actions.zoomIntoCluster(selectedCluster.id) },
+    onDismiss = { actions.selectCluster(null) },
   )
 }
 
@@ -627,25 +660,30 @@ private fun contentColorOnArgb(argb: Long): Color {
 
 /**
  * Floating Action Button (`FloatingActionButton`) on the Main Survey screen that opens the
- * [AvailableFormsModalSheet] list of available forms to start data collection without requiring a
- * geospatial entity to be pre-selected from the map.
+ * [AvailableFormsModalSheet] list of available forms
+ * ([DataCollectionActions.openAvailableFormsSheet]) to start data collection without requiring a
+ * geospatial entity to be pre-selected from the map. [isDarkTheme] picks the FAB's colors.
  */
 @Composable
-internal fun DataCollectionFormsFab(state: PrototypeAppState, modifier: Modifier = Modifier) {
+internal fun DataCollectionFormsFab(
+  actions: DataCollectionActions,
+  isDarkTheme: Boolean,
+  modifier: Modifier = Modifier,
+) {
   val formsBg =
-    if (state.isDarkTheme) {
+    if (isDarkTheme) {
       MaterialTheme.colorScheme.primary
     } else {
       MaterialTheme.colorScheme.primaryContainer
     }
   val formsContent =
-    if (state.isDarkTheme) {
+    if (isDarkTheme) {
       MaterialTheme.colorScheme.onPrimary
     } else {
       MaterialTheme.colorScheme.onPrimaryContainer
     }
   FloatingActionButton(
-    onClick = { state.openAvailableFormsSheet() },
+    onClick = { actions.openAvailableFormsSheet() },
     modifier = modifier,
     containerColor = formsBg,
     contentColor = formsContent,
@@ -656,13 +694,16 @@ internal fun DataCollectionFormsFab(state: PrototypeAppState, modifier: Modifier
 
 /**
  * Modal bottom sheet opened by the bottom-centered [DataCollectionFormsFab] listing all available
- * forms in the active survey. Selecting a form launches data collection via
- * [PrototypeAppState.launchFormFromFab], which presents the Map or List entity selector at the step
- * in the data collection process where an `entityref` is required.
+ * forms in the active survey ([DataCollectionUiState.mobileForms]). Selecting a form launches data
+ * collection via [DataCollectionActions.launchFormFromFab], which presents the Map or List entity
+ * selector at the step in the data collection process where an `entityref` is required.
  */
 @Composable
-internal fun AvailableFormsModalSheet(state: PrototypeAppState) {
-  GroundModalBottomSheetOverlay(onDismissRequest = { state.closeAvailableFormsSheet() }) {
+internal fun AvailableFormsModalSheet(
+  uiState: DataCollectionUiState,
+  actions: DataCollectionActions,
+) {
+  GroundModalBottomSheetOverlay(onDismissRequest = { actions.closeAvailableFormsSheet() }) {
     Column(
       modifier =
         Modifier.fillMaxWidth()
@@ -687,19 +728,19 @@ internal fun AvailableFormsModalSheet(state: PrototypeAppState) {
             color = MaterialTheme.colorScheme.onSurfaceVariant,
           )
         }
-        IconButton(onClick = { state.closeAvailableFormsSheet() }) {
+        IconButton(onClick = { actions.closeAvailableFormsSheet() }) {
           Icon(imageVector = Icons.Outlined.Close, contentDescription = "Close Available Forms")
         }
       }
 
       HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
-      state.mobileForms.forEach { form ->
-        val eligibleCount = state.eligibleEntitiesForForm(form).size
+      uiState.mobileForms.forEach { form ->
+        val eligibleCount = uiState.eligibleEntitiesForForm(form).size
         val canLaunch = !form.requiresEntity || eligibleCount > 0
 
         OutlinedCard(
-          onClick = { if (canLaunch) state.launchFormFromFab(form.id) },
+          onClick = { if (canLaunch) actions.launchFormFromFab(form.id) },
           enabled = canLaunch,
           modifier = Modifier.fillMaxWidth(),
           shape = MaterialTheme.shapes.medium,
@@ -738,7 +779,7 @@ internal fun AvailableFormsModalSheet(state: PrototypeAppState) {
             )
 
             Button(
-              onClick = { state.launchFormFromFab(form.id) },
+              onClick = { actions.launchFormFromFab(form.id) },
               enabled = canLaunch,
               modifier = Modifier.align(Alignment.End),
             ) {
@@ -773,17 +814,19 @@ internal fun AvailableFormsModalSheet(state: PrototypeAppState) {
 @Composable
 internal fun StraightLineNavigationHudBanner(
   navState: StraightLineNavigationState,
-  state: PrototypeAppState,
+  targetTypeLabel: String,
+  isDarkTheme: Boolean,
+  actions: SurveyMapActions,
 ) {
   val colors = MaterialTheme.colorScheme
   val topBarContainer =
-    if (state.isDarkTheme) {
+    if (isDarkTheme) {
       colors.primaryContainer
     } else {
       colors.primary
     }
   val onTopBarContainer =
-    if (state.isDarkTheme) {
+    if (isDarkTheme) {
       colors.onPrimaryContainer
     } else {
       colors.onPrimary
@@ -796,8 +839,7 @@ internal fun StraightLineNavigationHudBanner(
     }
   val kindLabel =
     when (navState.targetKind) {
-      NavigationTargetKind.ENTITY ->
-        "${state.entitySingularTypeLabel(navState.targetId).uppercase()} WAYFINDING"
+      NavigationTargetKind.ENTITY -> "${targetTypeLabel.uppercase()} WAYFINDING"
       NavigationTargetKind.PLACE -> "PLACE WAYFINDING"
       NavigationTargetKind.SUBMISSION -> "SUBMISSION WAYFINDING"
     }
@@ -944,7 +986,7 @@ internal fun StraightLineNavigationHudBanner(
           ) {
             if (!navState.vector.isArrived) {
               Surface(
-                onClick = { state.stepUserTowardNavigationTarget() },
+                onClick = { actions.stepUserTowardNavigationTarget() },
                 shape = CircleShape,
                 color = colors.secondaryContainer,
                 contentColor = colors.onSecondaryContainer,
@@ -974,7 +1016,7 @@ internal fun StraightLineNavigationHudBanner(
             }
 
             Surface(
-              onClick = { state.stopNavigation() },
+              onClick = { actions.stopNavigation() },
               shape = CircleShape,
               color = colors.errorContainer,
               contentColor = colors.onErrorContainer,
@@ -1134,14 +1176,14 @@ private fun BasemapSectionHeading(text: String, modifier: Modifier = Modifier) {
  */
 @Composable
 internal fun LayersSelectorContent(
-  state: PrototypeAppState,
+  uiState: SurveyMapUiState,
+  actions: SurveyMapActions,
   modifier: Modifier = Modifier,
   showOfflineBasemap: Boolean = true,
 ) {
-  val allUsersSources = state.allUsersImagerySources
-  val surveyOrg =
-    state.activeSurveyOrganization?.takeIf { !it.isSynthetic && it.id != Organization.ALL_USERS_ID }
-  val surveyOrgSources = state.activeSurveyOrganizationImagerySources
+  val allUsersSources = uiState.allUsersImagerySources
+  val surveyOrgName = uiState.activeSurveyOrganizationName
+  val surveyOrgSources = uiState.activeSurveyOrganizationImagerySources
 
   Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
     Column(modifier = Modifier.fillMaxWidth().selectableGroup()) {
@@ -1149,8 +1191,8 @@ internal fun LayersSelectorContent(
       BasemapOptionOrder.forEach { basemap ->
         BasemapOptionRow(
           type = basemap,
-          isSelected = state.selectedBasemapType == basemap,
-          onSelect = { state.selectBasemapType(basemap) },
+          isSelected = uiState.selectedBasemapType == basemap,
+          onSelect = { actions.selectBasemapType(basemap) },
         )
       }
     }
@@ -1162,24 +1204,24 @@ internal fun LayersSelectorContent(
           ImagerySourceLayerCard(
             source = source,
             organizationName = "All users",
-            isEnabled = state.isImagerySourceEnabled(source.id),
+            isEnabled = uiState.isImagerySourceEnabled(source.id),
             isMobile = showOfflineBasemap,
-            onToggle = { state.toggleImagerySource(source.id) },
+            onToggle = { actions.toggleImagerySource(source.id) },
           )
         }
       }
     }
 
-    if (surveyOrg != null && surveyOrgSources.isNotEmpty()) {
+    if (surveyOrgName != null && surveyOrgSources.isNotEmpty()) {
       Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        BasemapSectionHeading(text = "IMAGERY · ${surveyOrg.name.uppercase()}")
+        BasemapSectionHeading(text = "IMAGERY · ${surveyOrgName.uppercase()}")
         surveyOrgSources.forEach { source ->
           ImagerySourceLayerCard(
             source = source,
-            organizationName = surveyOrg.name,
-            isEnabled = state.isImagerySourceEnabled(source.id),
+            organizationName = surveyOrgName,
+            isEnabled = uiState.isImagerySourceEnabled(source.id),
             isMobile = showOfflineBasemap,
-            onToggle = { state.toggleImagerySource(source.id) },
+            onToggle = { actions.toggleImagerySource(source.id) },
           )
         }
       }
@@ -1189,7 +1231,7 @@ internal fun LayersSelectorContent(
       BasemapSectionHeading(text = "DOWNLOADED BASEMAPS")
       // Offline Basemap Tile Package Overlay Toggle
       OutlinedCard(
-        onClick = { state.toggleOfflineBasemapVisibility() },
+        onClick = { actions.toggleOfflineBasemapVisibility() },
         modifier = Modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.medium,
         colors =
@@ -1209,14 +1251,14 @@ internal fun LayersSelectorContent(
               fontWeight = FontWeight.SemiBold,
             )
             Text(
-              text = state.offlineBasemapStyle.tileDescription,
+              text = uiState.offlineBasemapStyle.tileDescription,
               style = MaterialTheme.typography.labelSmall,
               color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
           }
           Switch(
-            checked = state.isOfflineBasemapVisible,
-            onCheckedChange = { state.toggleOfflineBasemapVisibility() },
+            checked = uiState.isOfflineBasemapVisible,
+            onCheckedChange = { actions.toggleOfflineBasemapVisibility() },
           )
         }
       }
@@ -1276,8 +1318,8 @@ private fun ImagerySourceLayerCard(
  * **Offline Basemap (`Mapbox Offline Tiles`)**.
  */
 @Composable
-internal fun LayersControlSheet(state: PrototypeAppState) {
-  GroundModalBottomSheetOverlay(onDismissRequest = { state.updateLayersSheetOpen(false) }) {
+internal fun LayersControlSheet(uiState: SurveyMapUiState, actions: SurveyMapActions) {
+  GroundModalBottomSheetOverlay(onDismissRequest = { actions.updateLayersSheetOpen(false) }) {
     Column(
       modifier =
         Modifier.fillMaxWidth()
@@ -1302,14 +1344,14 @@ internal fun LayersControlSheet(state: PrototypeAppState) {
             color = MaterialTheme.colorScheme.onSurfaceVariant,
           )
         }
-        IconButton(onClick = { state.updateLayersSheetOpen(false) }) {
+        IconButton(onClick = { actions.updateLayersSheetOpen(false) }) {
           Icon(imageVector = Icons.Outlined.Close, contentDescription = "Close layers")
         }
       }
 
       HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
-      LayersSelectorContent(state = state)
+      LayersSelectorContent(uiState = uiState, actions = actions)
 
       Spacer(modifier = Modifier.height(12.dp))
     }
@@ -1322,9 +1364,9 @@ internal fun LayersControlSheet(state: PrototypeAppState) {
  * maps are a mobile-only feature, so their toggle is left out.
  */
 @Composable
-internal fun LayersControlDialog(state: PrototypeAppState) {
+internal fun LayersControlDialog(uiState: SurveyMapUiState, actions: SurveyMapActions) {
   GroundAlertDialogOverlay(
-    onDismissRequest = { state.updateLayersSheetOpen(false) },
+    onDismissRequest = { actions.updateLayersSheetOpen(false) },
     title = {
       Text(
         text = "Basemap",
@@ -1333,11 +1375,11 @@ internal fun LayersControlDialog(state: PrototypeAppState) {
     },
     text = {
       Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-        LayersSelectorContent(state = state, showOfflineBasemap = false)
+        LayersSelectorContent(uiState = uiState, actions = actions, showOfflineBasemap = false)
       }
     },
     confirmButton = {
-      TextButton(onClick = { state.updateLayersSheetOpen(false) }) { Text("Done") }
+      TextButton(onClick = { actions.updateLayersSheetOpen(false) }) { Text("Done") }
     },
   )
 }

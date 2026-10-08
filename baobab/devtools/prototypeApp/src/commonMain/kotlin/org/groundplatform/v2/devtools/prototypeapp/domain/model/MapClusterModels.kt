@@ -163,3 +163,30 @@ data class MapFeatureCluster(
   val balloonSummaryLabel: String
     get() = symbolGroups.joinToString(" • ") { it.balloonSegmentLabel }
 }
+
+/**
+ * Normalizes map features into [MapClusterFeatureItem]s for clustering. Geospatial entities carry
+ * their `simplestyle-spec` `marker-symbol` (`"✓"`, `"◐"`, `"○"`, or `""` if none is set).
+ */
+fun List<GeospatialEntityItem>.toClusterFeatures(): List<MapClusterFeatureItem> = map { ent ->
+  MapClusterFeatureItem(
+    id = ent.id,
+    kind = MapFeatureKind.ENTITY,
+    label = ent.label.substringBefore(" •"),
+    markerSymbol = ent.rawMarkerSymbol,
+    colorHex = ent.markerColorHex,
+    colorCss = ent.markerColorCss,
+    normalizedX = ent.normalizedX,
+    normalizedY = ent.normalizedY,
+    entityId = ent.id,
+  )
+}
+
+/**
+ * Formats the count of map features in a cluster using the active lowercase plural domain noun
+ * [pluralCountNoun] (e.g. `"5 map features"`, `"1 map feature"`, or `"5 coffee parcels"`).
+ */
+fun formatClusterSitesCountLabel(siteCount: Int, pluralCountNoun: String): String {
+  val noun = if (siteCount == 1) pluralCountNoun.removeSuffix("s") else pluralCountNoun
+  return "$siteCount $noun"
+}

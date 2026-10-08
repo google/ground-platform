@@ -74,8 +74,23 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.DatasetIssue
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.DatasetKind
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EntityDataset
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EntityProperty
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EntityRow
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.GeometryKind
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.GeometryText
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.LatLng
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.LayerStyle
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.PropertyType
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SamplePlotProperties
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.parseHexColor
 import org.groundplatform.v2.devtools.prototypeapp.formeditor.DropdownSelector
 import org.groundplatform.v2.devtools.prototypeapp.formeditor.SectionLabel
+import org.groundplatform.v2.devtools.prototypeapp.ui.state.SurveyEditorSection
+import org.groundplatform.v2.devtools.prototypeapp.ui.state.SurveyEditorUiState
+import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.SurveyEditorActions
 
 private val CellWidth = 160.dp
 private val GeometryCellWidth = 280.dp
@@ -90,13 +105,17 @@ private val PresetColors =
  * of rows). Both share the schema (properties) and dataset settings panel.
  */
 @Composable
-internal fun EntityDatasetEditor(state: SurveyEditorState, dataset: EntityDataset) {
+internal fun EntityDatasetEditor(
+  uiState: SurveyEditorUiState,
+  actions: SurveyEditorActions,
+  dataset: EntityDataset,
+) {
   var selectedRow by remember { mutableStateOf<String?>(null) }
-  val issues = state.datasetIssues(dataset)
+  val issues = uiState.datasetIssues(dataset)
   val isMap = dataset.kind == DatasetKind.MAP_LAYER
 
   Column(modifier = Modifier.fillMaxSize()) {
-    DatasetHeader(state, dataset, issues.size)
+    DatasetHeader(uiState, actions, dataset, issues.size)
     Row(
       modifier = Modifier.fillMaxSize().padding(16.dp),
       horizontalArrangement = Arrangement.spacedBy(16.dp),
@@ -107,7 +126,7 @@ internal fun EntityDatasetEditor(state: SurveyEditorState, dataset: EntityDatase
       ) {
         if (isMap) {
           InteractiveLayerMapCard(
-            state = state,
+            editor = actions,
             dataset = dataset,
             selectedRow = selectedRow,
             onSelectRow = { selectedRow = it },
@@ -115,7 +134,8 @@ internal fun EntityDatasetEditor(state: SurveyEditorState, dataset: EntityDatase
           )
         }
         RowsTableCard(
-          state = state,
+          uiState = uiState,
+          actions = actions,
           dataset = dataset,
           issues = issues,
           selectedRow = selectedRow,
@@ -123,13 +143,18 @@ internal fun EntityDatasetEditor(state: SurveyEditorState, dataset: EntityDatase
           modifier = Modifier.fillMaxWidth().weight(1f),
         )
       }
-      DatasetSettingsPanel(state, dataset, Modifier.width(380.dp).fillMaxHeight())
+      DatasetSettingsPanel(uiState, actions, dataset, Modifier.width(380.dp).fillMaxHeight())
     }
   }
 }
 
 @Composable
-private fun DatasetHeader(state: SurveyEditorState, dataset: EntityDataset, issueCount: Int) {
+private fun DatasetHeader(
+  uiState: SurveyEditorUiState,
+  actions: SurveyEditorActions,
+  dataset: EntityDataset,
+  issueCount: Int,
+) {
   val itemsLabel = if (dataset.kind == DatasetKind.MAP_LAYER) "features" else "rows"
   Surface(
     modifier = Modifier.fillMaxWidth(),
@@ -183,7 +208,7 @@ private fun DatasetHeader(state: SurveyEditorState, dataset: EntityDataset, issu
           )
         }
       }
-      TextButton(onClick = { state.deleteDataset(dataset.key) }) {
+      TextButton(onClick = { actions.deleteDataset(dataset.key) }) {
         Icon(
           Icons.Outlined.Delete,
           contentDescription = null,
@@ -203,7 +228,8 @@ private fun DatasetHeader(state: SurveyEditorState, dataset: EntityDataset, issu
 
 @Composable
 private fun RowsTableCard(
-  state: SurveyEditorState,
+  uiState: SurveyEditorUiState,
+  actions: SurveyEditorActions,
   dataset: EntityDataset,
   issues: List<DatasetIssue>,
   selectedRow: String?,
@@ -229,7 +255,7 @@ private fun RowsTableCard(
           modifier = Modifier.weight(1f),
         )
         if (!dataset.isGenerated) {
-          TextButton(onClick = { onSelectRow(state.addRow(dataset.key)) }) {
+          TextButton(onClick = { onSelectRow(actions.addRow(dataset.key)) }) {
             Icon(Icons.Outlined.Add, contentDescription = null, modifier = Modifier.size(18.dp))
             Spacer(Modifier.width(4.dp))
             Text(if (isMap) "Add feature" else "Add row")
@@ -336,11 +362,11 @@ private fun RowsTableCard(
                       onClick = { onSelectRow(row.key) },
                     )
                   } else if (p.type == PropertyType.BOOLEAN) {
-                    BooleanCell(value) { state.updateCell(dataset.key, row.key, p.name, it) }
+                    BooleanCell(value) { actions.updateCell(dataset.key, row.key, p.name, it) }
                   } else {
                     TextCell(
                       value = value,
-                      onValueChange = { state.updateCell(dataset.key, row.key, p.name, it) },
+                      onValueChange = { actions.updateCell(dataset.key, row.key, p.name, it) },
                       width = CellWidth,
                       isError =
                         !p.type.accepts(value) ||
@@ -359,14 +385,14 @@ private fun RowsTableCard(
                   )
                 } else if (isMap) {
                   GeometryCell(dataset, row, textColor = cellTextColor) {
-                    state.updateGeometry(dataset.key, row.key, it)
+                    actions.updateGeometry(dataset.key, row.key, it)
                   }
                 }
                 if (dataset.isGenerated) {
                   Spacer(Modifier.width(IndexCellWidth))
                 } else {
                   IconButton(
-                    onClick = { state.removeRow(dataset.key, row.key) },
+                    onClick = { actions.removeRow(dataset.key, row.key) },
                     modifier = Modifier.size(IndexCellWidth),
                   ) {
                     Icon(
@@ -519,7 +545,8 @@ private fun GeometryCell(
 
 @Composable
 private fun DatasetSettingsPanel(
-  state: SurveyEditorState,
+  uiState: SurveyEditorUiState,
+  actions: SurveyEditorActions,
   dataset: EntityDataset,
   modifier: Modifier = Modifier,
 ) {
@@ -536,14 +563,14 @@ private fun DatasetSettingsPanel(
       SectionLabel("Settings")
       OutlinedTextField(
         value = dataset.displayName,
-        onValueChange = { v -> state.updateDataset(key) { it.copy(displayName = v) } },
+        onValueChange = { v -> actions.updateDataset(key) { it.copy(displayName = v) } },
         label = { Text("Name") },
         singleLine = true,
         modifier = Modifier.fillMaxWidth(),
       )
       OutlinedTextField(
         value = dataset.id,
-        onValueChange = { v -> state.updateDataset(key) { it.copy(id = v.trim()) } },
+        onValueChange = { v -> actions.updateDataset(key) { it.copy(id = v.trim()) } },
         label = { Text("ID") },
         singleLine = true,
         supportingText = { Text("Forms use this ID to look up records from this dataset.") },
@@ -552,7 +579,7 @@ private fun DatasetSettingsPanel(
       )
       OutlinedTextField(
         value = dataset.description,
-        onValueChange = { v -> state.updateDataset(key) { it.copy(description = v) } },
+        onValueChange = { v -> actions.updateDataset(key) { it.copy(description = v) } },
         label = { Text("Description") },
         minLines = 2,
         modifier = Modifier.fillMaxWidth(),
@@ -563,29 +590,29 @@ private fun DatasetSettingsPanel(
           selectedText = dataset.geometryKind.label,
           options = GeometryKind.entries,
           optionText = { it.label },
-          onSelect = { g -> state.updateDataset(key) { it.copy(geometryKind = g) } },
+          onSelect = { g -> actions.updateDataset(key) { it.copy(geometryKind = g) } },
         )
       }
       if (dataset.generator != null) {
         SectionLabel("Sample design")
-        SamplingDesignPanel(state, dataset)
+        SamplingDesignPanel(uiState, actions, dataset)
       }
       DropdownSelector(
         label = "Key property (unique ID)",
         selectedText = dataset.property(dataset.keyProperty)?.label ?: "Choose…",
         options = dataset.properties,
         optionText = { "${it.label} (${it.name})" },
-        onSelect = { p -> state.updateDataset(key) { it.copy(keyProperty = p.name) } },
+        onSelect = { p -> actions.updateDataset(key) { it.copy(keyProperty = p.name) } },
       )
       DropdownSelector(
         label = "Label property (shown in lists)",
         selectedText = dataset.property(dataset.labelProperty)?.label ?: "Choose…",
         options = dataset.properties,
         optionText = { "${it.label} (${it.name})" },
-        onSelect = { p -> state.updateDataset(key) { it.copy(labelProperty = p.name) } },
+        onSelect = { p -> actions.updateDataset(key) { it.copy(labelProperty = p.name) } },
       )
       SectionLabel("Field collection & Form")
-      val linkedForm = state.forms.firstOrNull { it.key == dataset.linkedFormKey }
+      val linkedForm = uiState.forms.firstOrNull { it.key == dataset.linkedFormKey }
       if (linkedForm != null) {
         Surface(
           color = MaterialTheme.colorScheme.primaryContainer,
@@ -606,7 +633,7 @@ private fun DatasetSettingsPanel(
               )
               Spacer(Modifier.width(6.dp))
               Text(
-                "Linked to ${linkedForm.editor.form.title}",
+                "Linked to ${linkedForm.form.title}",
                 style = MaterialTheme.typography.titleSmall,
                 color = MaterialTheme.colorScheme.onPrimaryContainer,
                 fontWeight = FontWeight.Bold,
@@ -618,7 +645,7 @@ private fun DatasetSettingsPanel(
               color = MaterialTheme.colorScheme.onPrimaryContainer,
             )
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-              Button(onClick = { state.select(SurveyEditorSection.Form(linkedForm.key)) }) {
+              Button(onClick = { actions.select(SurveyEditorSection.Form(linkedForm.key)) }) {
                 Icon(
                   Icons.Outlined.Edit,
                   contentDescription = null,
@@ -628,7 +655,7 @@ private fun DatasetSettingsPanel(
                 Text("Edit form")
               }
               OutlinedButton(
-                onClick = { state.unlinkDataset(key) },
+                onClick = { actions.unlinkDataset(key) },
                 colors =
                   ButtonDefaults.outlinedButtonColors(
                     contentColor = MaterialTheme.colorScheme.onPrimaryContainer
@@ -666,7 +693,7 @@ private fun DatasetSettingsPanel(
               style = MaterialTheme.typography.bodySmall,
               color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
-            Button(onClick = { state.createFormForDataset(key) }) {
+            Button(onClick = { actions.createFormForDataset(key) }) {
               Icon(Icons.Outlined.Add, contentDescription = null, modifier = Modifier.size(16.dp))
               Spacer(Modifier.width(4.dp))
               Text("Create form for ${dataset.kind.singular.lowercase()}")
@@ -675,7 +702,7 @@ private fun DatasetSettingsPanel(
         }
       }
 
-      val updatingForms = state.formsUpdating(dataset)
+      val updatingForms = uiState.formsUpdating(dataset)
       if (updatingForms.isNotEmpty()) {
         Text(
           "Updated by",
@@ -684,8 +711,8 @@ private fun DatasetSettingsPanel(
         )
         updatingForms.forEach { form ->
           AssistChip(
-            onClick = { state.select(SurveyEditorSection.Form(form.key)) },
-            label = { Text(form.editor.form.title) },
+            onClick = { actions.select(SurveyEditorSection.Form(form.key)) },
+            label = { Text(form.form.title) },
             leadingIcon = {
               Icon(Icons.Outlined.Edit, contentDescription = null, modifier = Modifier.size(16.dp))
             },
@@ -696,7 +723,7 @@ private fun DatasetSettingsPanel(
       if (isMap) {
         SectionLabel("Map style")
         LayerStyleEditor(dataset) { transform ->
-          state.updateDataset(key) { it.copy(style = transform(it.style)) }
+          actions.updateDataset(key) { it.copy(style = transform(it.style)) }
         }
       }
 
@@ -732,12 +759,12 @@ private fun DatasetSettingsPanel(
           property = property,
           readOnly = dataset.isLinkedToForm || reserved,
           canRemove = !dataset.isLinkedToForm && !reserved && dataset.properties.size > 1,
-          onChange = { state.updateProperty(key, index, it) },
-          onRemove = { state.removeProperty(key, index) },
+          onChange = { actions.updateProperty(key, index, it) },
+          onRemove = { actions.removeProperty(key, index) },
         )
       }
       if (!dataset.isLinkedToForm) {
-        TextButton(onClick = { state.addProperty(key) }) {
+        TextButton(onClick = { actions.addProperty(key) }) {
           Icon(Icons.Outlined.Add, contentDescription = null, modifier = Modifier.size(18.dp))
           Spacer(Modifier.width(4.dp))
           Text("Add property")

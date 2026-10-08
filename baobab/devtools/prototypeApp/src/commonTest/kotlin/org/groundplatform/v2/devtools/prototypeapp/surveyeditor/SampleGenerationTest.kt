@@ -21,6 +21,11 @@ import kotlin.test.assertNotEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import org.groundplatform.v2.core.sampling.GeneratedPlot
 import org.groundplatform.v2.core.sampling.SampleDesign
 import org.groundplatform.v2.core.sampling.SampleEstimate
@@ -28,27 +33,58 @@ import org.groundplatform.v2.core.sampling.SamplingArea
 import org.groundplatform.v2.core.sampling.SamplingEngine
 import org.groundplatform.v2.core.sampling.SamplingException
 import org.groundplatform.v2.core.sampling.SamplingResult
+import org.groundplatform.v2.devtools.prototypeapp.data.datasource.local.store.InMemoryLocalStore
 import org.groundplatform.v2.devtools.prototypeapp.data.datasource.local.store.runDirect
-import org.groundplatform.v2.devtools.prototypeapp.data.seed.SurveyEditorSamples
+import org.groundplatform.v2.devtools.prototypeapp.data.repository.SurveyRepositoryImpl
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.DatasetKind
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EntityProperty
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.GenerationRecord
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.GeometryKind
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.LatLng
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.PlotShapeOption
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SampleAreaSource
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SampleDesignConfig
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SampleDesignInputs
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SampleGenerationOutcome
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SamplePlotProperties
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SubPlotMode
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.toGeoCoord
+import org.groundplatform.v2.devtools.prototypeapp.ui.state.SurveyEditorSection
+import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.EntitiesOverrideSurveyRepository
+import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.SurveyEditorViewModel
+import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.fakeEntityWithSubmissions
+import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.surveyEditorViewModel
+import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.testScope
+import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.ui
 
 class SampleGenerationTest {
   private val now = "2026-01-02T03:04:05Z"
 
   private fun newState(
     engine: SamplingEngine? = null,
-    submissions: () -> Int = { 0 },
+    submissions: StateFlow<Pair<String, Int>?> = MutableStateFlow(null),
     yieldBetweenChunks: suspend () -> Unit = {},
-  ) =
-    SurveyEditorState(
-      SurveyEditorSamples.draft(),
+  ): SurveyEditorViewModel {
+    val store = InMemoryLocalStore()
+    // Submissions on the plots of (dataset ID, count), as seen through the survey repository.
+    val entities =
+      submissions
+        .map {
+          it?.let { (datasetId, count) -> listOf(fakeEntityWithSubmissions(datasetId, count)) }
+            ?: emptyList()
+        }
+        .stateIn(testScope(), SharingStarted.Eagerly, emptyList())
+    return surveyEditorViewModel(
+      store = store,
+      surveyRepository = EntitiesOverrideSurveyRepository(SurveyRepositoryImpl(store), entities),
       samplingEngine = engine,
-      submissionCount = { submissions() },
       yieldBetweenChunks = yieldBetweenChunks,
       now = { now },
     )
+  }
 
   /** Adds a sample plots layer with a coarse grid and 2×2 sub-plots over the seed survey area. */
-  private fun SurveyEditorState.addGridLayer(): String {
+  private fun SurveyEditorViewModel.addGridLayer(): String {
     val key = addSamplePlotsLayer()
     updateSampleDesign(key) {
       it.copy(gridSpacingM = 1000.0, subPlot = SubPlotMode.GRID, subPlotGridN = 2)
@@ -56,15 +92,15 @@ class SampleGenerationTest {
     return key
   }
 
-  private fun SurveyEditorState.dataset(key: String) = datasets.first { it.key == key }
+  private fun SurveyEditorViewModel.dataset(key: String) = ui.datasets.first { it.key == key }
 
   @Test
   fun addSamplePlotsLayer_usesSurveyAreaAndReservedSchema() {
     val state = newState()
-    assertTrue(state.canGenerateSamplePlots)
+    assertTrue(state.ui.canGenerateSamplePlots)
     val key = state.addSamplePlotsLayer()
     val dataset = state.dataset(key)
-    assertEquals(SurveyEditorSection.Dataset(key), state.section)
+    assertEquals(SurveyEditorSection.Dataset(key), state.ui.section)
     assertTrue(dataset.isGenerated)
     assertEquals(SampleAreaSource.SurveyArea, dataset.generator?.areaSource)
     assertEquals(SamplePlotProperties.PLOT_ID, dataset.keyProperty)
@@ -101,8 +137,8 @@ class SampleGenerationTest {
     assertEquals(outcome.plotCount, lastRun.featureCount)
     assertEquals(state.currentInputHash(dataset), lastRun.inputHash)
     assertFalse(state.isDesignStale(dataset))
-    assertNull(state.generation)
-    assertTrue(state.datasetIssues(dataset).none { it.message.contains("generate") })
+    assertNull(state.ui.generation)
+    assertTrue(state.ui.datasetIssues(dataset).none { it.message.contains("generate") })
   }
 
   @Test
@@ -165,7 +201,7 @@ class SampleGenerationTest {
     state.updateSampleDesign(key) { it.copy(gridSpacingM = 1000.0) }
     assertFalse(state.isDesignStale(state.dataset(key)))
 
-    val area = assertNotNull(state.details.surveyArea)
+    val area = assertNotNull(state.ui.details.surveyArea)
     state.setSurveyArea(
       area.copy(parts = listOf(area.parts.single().map { LatLng(it.lat + 0.01, it.lng) }))
     )
@@ -184,14 +220,14 @@ class SampleGenerationTest {
 
   @Test
   fun regenerate_isBlockedOnceSubmissionsReferenceThePlots() {
-    var submissions = 0
-    val state = newState(submissions = { submissions })
+    val submissions = MutableStateFlow<Pair<String, Int>?>(null)
+    val state = newState(submissions = submissions)
     val key = state.addGridLayer()
     runDirect { state.generateSample(key) }
     val before = state.dataset(key).rows
-    submissions = 2
+    submissions.value = state.dataset(key).id to 2
 
-    assertNotNull(state.regenerateBlockedReason(state.dataset(key)))
+    assertNotNull(state.ui.regenerateBlockedReason(state.dataset(key)))
     val outcome = runDirect { state.regenerateSample(key) }
 
     assertIs<SampleGenerationOutcome.Blocked>(outcome)
@@ -201,7 +237,7 @@ class SampleGenerationTest {
 
   @Test
   fun cancelGeneration_keepsPreviousPlots() {
-    lateinit var state: SurveyEditorState
+    lateinit var state: SurveyEditorViewModel
     state = newState(yieldBetweenChunks = { state.cancelGeneration() })
     val key = state.addGridLayer()
 
@@ -210,7 +246,7 @@ class SampleGenerationTest {
     assertEquals(SampleGenerationOutcome.Cancelled, outcome)
     assertTrue(state.dataset(key).rows.isEmpty())
     assertNull(state.dataset(key).generator?.lastRun)
-    assertNull(state.generation)
+    assertNull(state.ui.generation)
   }
 
   @Test
@@ -221,10 +257,12 @@ class SampleGenerationTest {
     val outcome = runDirect { state.generateSample(key) }
 
     assertEquals(SampleGenerationOutcome.Failed("Can't fit 50 plots 900 m apart."), outcome)
-    assertEquals("Can't fit 50 plots 900 m apart.", state.generationError(key))
-    assertTrue(state.datasetIssues(state.dataset(key)).any { it.message.startsWith("Can't fit") })
+    assertEquals("Can't fit 50 plots 900 m apart.", state.ui.generationError(key))
+    assertTrue(
+      state.ui.datasetIssues(state.dataset(key)).any { it.message.startsWith("Can't fit") }
+    )
     assertTrue(state.dataset(key).rows.isEmpty())
-    assertNull(state.generation)
+    assertNull(state.ui.generation)
   }
 
   @Test
@@ -280,9 +318,9 @@ class SampleGenerationTest {
     assertEquals(DatasetKind.MAP_LAYER, dataset.kind)
     assertEquals(2, dataset.rows.size)
     assertEquals(3, dataset.rows.first().geometry.size)
-    assertEquals(SurveyEditorSection.Dataset(key), state.section)
+    assertEquals(SurveyEditorSection.Dataset(key), state.ui.section)
     // The imported polygons can now provide strata.
-    assertTrue(state.strataLayers.any { it.key == key })
+    assertTrue(state.ui.strataLayers.any { it.key == key })
   }
 
   @Test

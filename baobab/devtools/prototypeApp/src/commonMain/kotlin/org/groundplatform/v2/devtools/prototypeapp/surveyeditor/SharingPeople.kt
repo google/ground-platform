@@ -58,6 +58,7 @@ import androidx.compose.ui.unit.sp
 import org.groundplatform.v2.core.forms.ui.GroundBadgeTone
 import org.groundplatform.v2.core.forms.ui.GroundTonalBadge
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.InviteLinks
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.Collaborator
 
 /** Prefix of the placeholder photo URLs the prototype draws as illustrated portraits. */
 internal const val AVATAR_SCHEME = "avatar:"

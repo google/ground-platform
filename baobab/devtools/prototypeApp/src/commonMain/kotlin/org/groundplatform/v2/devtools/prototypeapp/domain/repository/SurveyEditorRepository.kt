@@ -13,19 +13,41 @@
  */
 package org.groundplatform.v2.devtools.prototypeapp.domain.repository
 
-import org.groundplatform.v2.devtools.prototypeapp.surveyeditor.SurveyEditorDraft
+import kotlinx.coroutines.flow.Flow
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SurveyEditorDraft
 
-/** Loads and saves the Survey editor's per-survey drafts in the local data store. */
+/**
+ * Loads and saves the Survey editor's per-survey drafts.
+ *
+ * The survey's runtime data (its Forms, Map layers, and map features) is the source of truth. A
+ * survey that was never edited has no stored draft: its draft is derived from the runtime data. A
+ * saved draft is stored (it also holds what the runtime data can't: Data tables, sharing people,
+ * the survey area, sample designs) and its Map layer rows are refreshed from the runtime map
+ * features whenever it's read.
+ */
 interface SurveyEditorRepository {
-  /**
-   * Returns the stored draft of [surveyId] (or a blank draft if it has never been edited), showing
-   * the survey's current title and description.
-   */
+  /** The current draft of [surveyId]: its stored draft, refreshed, or one derived from its data. */
   suspend fun getDraft(surveyId: String): SurveyEditorDraft
 
   /**
-   * Saves [draft] for [surveyId]. Also publishes each Form's generated XForms XML to the survey's
-   * config, and copies a non-blank title and description to the survey list.
+   * Emits the current draft of [surveyId] (see [getDraft]) whenever the stored draft or data
+   * changes.
    */
-  suspend fun saveDraft(surveyId: String, draft: SurveyEditorDraft)
+  fun observeDraft(surveyId: String): Flow<SurveyEditorDraft>
+
+  /**
+   * Saves [draft] for [surveyId] and publishes it to the survey's data: each Form's generated
+   * XForms XML goes to the survey's config, Forms and Map layers replace the survey's Forms and map
+   * layers, Map layer rows add, update, or remove map features (keeping collected submissions), and
+   * a non-blank title and description are copied to the survey list.
+   *
+   * Map layer rows are removed relative to [previous], the draft the editor opened (so map features
+   * collected since then are kept); when `null`, relative to the last stored draft or, before the
+   * first save, the survey's current data.
+   */
+  suspend fun saveDraft(
+    surveyId: String,
+    draft: SurveyEditorDraft,
+    previous: SurveyEditorDraft? = null,
+  )
 }

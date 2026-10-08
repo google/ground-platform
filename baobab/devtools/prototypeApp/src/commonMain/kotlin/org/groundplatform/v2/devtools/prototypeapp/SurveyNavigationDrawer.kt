@@ -76,6 +76,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -97,6 +98,12 @@ import org.groundplatform.v2.core.forms.ui.GroundBadgeTone
 import org.groundplatform.v2.core.forms.ui.GroundModalBottomSheetOverlay
 import org.groundplatform.v2.core.forms.ui.GroundTonalBadge
 import org.groundplatform.v2.core.forms.ui.LocalGroundBrandFontFamily
+import org.groundplatform.v2.devtools.prototypeapp.ui.state.DashboardUiState
+import org.groundplatform.v2.devtools.prototypeapp.ui.state.DataCollectionUiState
+import org.groundplatform.v2.devtools.prototypeapp.ui.state.SettingsUiState
+import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.DashboardActions
+import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.DataCollectionActions
+import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.SettingsActions
 
 /**
  * Hamburger Navigation Drawer overlay providing options to:
@@ -380,8 +387,40 @@ internal fun DrawerMenuItem(
  */
 @Composable
 internal fun UploadsMutationsSubScreen(state: PrototypeAppState) {
-  val filteredMutations = state.filteredUploadMutations
-  val activeFilter = state.selectedUploadStatusFilter
+  val uiState by state.dashboard.uiState.collectAsState()
+  UploadsMutationsSubScreen(
+    uiState = uiState,
+    actions = state.dashboard,
+    onBack = { state.closeDrawerSubView() },
+    onOpenSubmission = { submissionId ->
+      state.dataCollection.selectSubmissionDetail(submissionId)
+      state.closeDrawerSubView()
+    },
+    onOpenEntity = { entityId ->
+      state.selectEntity(entityId)
+      state.closeDrawerSubView()
+    },
+  )
+}
+
+/**
+ * Stateless `Uploads` screen: the status filter chips, the optional map feature filter chip, and
+ * the filtered mutation cards from [uiState]; filter and sync intents go to [actions].
+ *
+ * @param onBack closes the sub-screen.
+ * @param onOpenSubmission opens the submission a card stands for (and leaves the screen).
+ * @param onOpenEntity opens the map feature a card without a submission stands for.
+ */
+@Composable
+internal fun UploadsMutationsSubScreen(
+  uiState: DashboardUiState,
+  actions: DashboardActions,
+  onBack: () -> Unit,
+  onOpenSubmission: (submissionId: String) -> Unit,
+  onOpenEntity: (entityId: String) -> Unit,
+) {
+  val filteredMutations = uiState.filteredUploadMutations
+  val activeFilter = uiState.selectedUploadStatusFilter
 
   Column(
     modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(14.dp),
@@ -415,9 +454,9 @@ internal fun UploadsMutationsSubScreen(state: PrototypeAppState) {
         horizontalArrangement = Arrangement.spacedBy(6.dp),
         verticalAlignment = Alignment.CenterVertically,
       ) {
-        if (state.outboxMutationCount > 0) {
+        if (uiState.outboxMutationCount > 0) {
           FilledTonalButton(
-            onClick = { state.syncAllOutboxMutations() },
+            onClick = { actions.syncAllOutboxMutations() },
             shape = MaterialTheme.shapes.small,
             contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
           ) {
@@ -428,14 +467,14 @@ internal fun UploadsMutationsSubScreen(state: PrototypeAppState) {
             )
             Spacer(modifier = Modifier.width(4.dp))
             Text(
-              text = "Sync all (${state.outboxMutationCount})",
+              text = "Sync all (${uiState.outboxMutationCount})",
               style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
             )
           }
         }
 
         OutlinedButton(
-          onClick = { state.closeDrawerSubView() },
+          onClick = onBack,
           shape = MaterialTheme.shapes.small,
           contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
         ) {
@@ -458,10 +497,10 @@ internal fun UploadsMutationsSubScreen(state: PrototypeAppState) {
     ) {
       UploadStatusFilter.entries.forEach { filter ->
         val isSelected = activeFilter == filter
-        val count = state.uploadCountForFilter(filter)
+        val count = uiState.uploadCountForFilter(filter)
         GroundFilterChip(
           selected = isSelected,
-          onClick = { state.toggleUploadStatusFilter(filter) },
+          onClick = { actions.toggleUploadStatusFilter(filter) },
           label = {
             Text(
               text = "${filter.label} ($count)",
@@ -491,11 +530,11 @@ internal fun UploadsMutationsSubScreen(state: PrototypeAppState) {
     }
 
     // Entity filter (opened from a map feature's details): removable chip naming the feature.
-    val entityFilter = state.uploadsEntityFilter
+    val entityFilter = uiState.uploadsEntityFilter
     if (entityFilter != null) {
       InputChip(
         selected = true,
-        onClick = { state.clearUploadsEntityFilter() },
+        onClick = { actions.clearUploadsEntityFilter() },
         label = { Text(text = entityFilter.label, maxLines = 1, overflow = TextOverflow.Ellipsis) },
         leadingIcon = {
           EntityGeometryIcon(entity = entityFilter, size = InputChipDefaults.IconSize)
@@ -533,7 +572,20 @@ internal fun UploadsMutationsSubScreen(state: PrototypeAppState) {
     } else {
       Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
         filteredMutations.forEach { mutation ->
-          UploadMutationRowCard(mutation = mutation, state = state)
+          UploadMutationRowCard(
+            mutation = mutation,
+            onOpen = {
+              val submissionId = mutation.submissionId
+              if (submissionId != null) {
+                onOpenSubmission(submissionId)
+              } else if (mutation.entityId.isNotBlank()) {
+                onOpenEntity(mutation.entityId)
+              } else {
+                onBack()
+              }
+            },
+            onSyncNow = { actions.syncMutationNow(mutation.id) },
+          )
         }
       }
     }
@@ -548,7 +600,11 @@ internal fun UploadsMutationsSubScreen(state: PrototypeAppState) {
  * - Status badge (`Pending`, `In progress`, `Uploaded`, `Failed`) and inline retry/upload action
  */
 @Composable
-internal fun UploadMutationRowCard(mutation: MutationLogItem, state: PrototypeAppState) {
+internal fun UploadMutationRowCard(
+  mutation: MutationLogItem,
+  onOpen: () -> Unit,
+  onSyncNow: () -> Unit,
+) {
   val statusFilter = mutation.uploadStatusFilter
   val badgeTone =
     when (statusFilter) {
@@ -559,14 +615,7 @@ internal fun UploadMutationRowCard(mutation: MutationLogItem, state: PrototypeAp
     }
 
   OutlinedCard(
-    onClick = {
-      if (mutation.submissionId != null) {
-        state.selectSubmissionDetail(mutation.submissionId)
-      } else if (mutation.entityId.isNotBlank()) {
-        state.selectEntity(mutation.entityId)
-      }
-      state.closeDrawerSubView()
-    },
+    onClick = onOpen,
     modifier = Modifier.fillMaxWidth(),
     shape = MaterialTheme.shapes.small,
     border =
@@ -634,7 +683,7 @@ internal fun UploadMutationRowCard(mutation: MutationLogItem, state: PrototypeAp
 
         if (mutation.isOutbox) {
           Surface(
-            onClick = { state.syncMutationNow(mutation.id) },
+            onClick = onSyncNow,
             shape = RoundedCornerShape(4.dp),
             color = MaterialTheme.colorScheme.secondaryContainer,
             contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
@@ -862,16 +911,17 @@ internal fun SwitchDownloadedSurveysSubScreen(state: PrototypeAppState) {
 /**
  * Modal dialog displaying a scannable QR Code for a survey location (`Icons.Outlined.QrCode`),
  * allowing offline field verification and rapid lookup of the location's `GeoID`. Its PDF action is
- * `Share PDF` on mobile and a direct `Download PDF` on the web dashboard ([isWeb]).
+ * `Share PDF` on mobile and a direct `Download PDF` on the web dashboard ([isWeb]). Closing the
+ * dialog and the PDF action go to [actions].
  */
 @Composable
 internal fun EntityQrCodeModalDialog(
-  state: PrototypeAppState,
+  actions: DataCollectionActions,
   entity: GeospatialEntityItem,
   isWeb: Boolean = false,
 ) {
   GroundAlertDialogOverlay(
-    onDismissRequest = { state.closeEntityQrCode() },
+    onDismissRequest = { actions.closeEntityQrCode() },
     icon = {
       Icon(
         imageVector = Icons.Outlined.QrCode,
@@ -938,8 +988,8 @@ internal fun EntityQrCodeModalDialog(
     confirmButton = {
       Button(
         onClick = {
-          state.closeEntityQrCode()
-          if (isWeb) state.downloadEntityPdf(entity.id) else state.shareEntityPdf(entity.id)
+          actions.closeEntityQrCode()
+          if (isWeb) actions.downloadEntityPdf(entity.id) else actions.shareEntityPdf(entity.id)
         }
       ) {
         Icon(
@@ -951,20 +1001,25 @@ internal fun EntityQrCodeModalDialog(
         Text(if (isWeb) "Download PDF" else "Share PDF")
       }
     },
-    dismissButton = { TextButton(onClick = { state.closeEntityQrCode() }) { Text("Close") } },
+    dismissButton = { TextButton(onClick = { actions.closeEntityQrCode() }) { Text("Close") } },
   )
 }
 
 /**
  * Modal bottom sheet for a PDF report of a map feature or a submission
- * (`state.activeSharedPdfSheet`), generated on the device so it works offline. **Share** opens the
- * system share sheet (WhatsApp, Gmail, Drive, Bluetooth, ...) where the platform supports sharing
- * files; **Download** saves the file; tapping the file card previews it.
+ * ([DataCollectionUiState.activeSharedPdfSheet]), generated on the device so it works offline.
+ * **Share** opens the system share sheet (WhatsApp, Gmail, Drive, Bluetooth, ...) where the
+ * platform supports sharing files ([DataCollectionUiState.canSharePdfFiles]); **Download** saves
+ * the file; tapping the file card previews it. All actions go to [actions].
  */
 @Composable
-internal fun SharePdfToAppModalDialog(state: PrototypeAppState, sheet: SharedPdfSheetState) {
-  val canShare = state.canSharePdfFiles
-  GroundModalBottomSheetOverlay(onDismissRequest = { state.closeSharePdfSheet() }) {
+internal fun SharePdfToAppModalDialog(
+  uiState: DataCollectionUiState,
+  actions: DataCollectionActions,
+  sheet: SharedPdfSheetState,
+) {
+  val canShare = uiState.canSharePdfFiles
+  GroundModalBottomSheetOverlay(onDismissRequest = { actions.closeSharePdfSheet() }) {
     Column(
       modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp).padding(bottom = 24.dp),
       verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -979,14 +1034,14 @@ internal fun SharePdfToAppModalDialog(state: PrototypeAppState, sheet: SharedPdf
           style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
           color = MaterialTheme.colorScheme.onSurface,
         )
-        IconButton(onClick = { state.closeSharePdfSheet() }) {
+        IconButton(onClick = { actions.closeSharePdfSheet() }) {
           Icon(imageVector = Icons.Outlined.Close, contentDescription = "Close")
         }
       }
 
       // The generated file. Tap to preview it.
       OutlinedCard(
-        onClick = { state.previewActivePdf() },
+        onClick = { actions.previewActivePdf() },
         modifier = Modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.medium,
       ) {
@@ -1048,7 +1103,7 @@ internal fun SharePdfToAppModalDialog(state: PrototypeAppState, sheet: SharedPdf
 
       if (canShare) {
         Button(
-          onClick = { state.shareActivePdf() },
+          onClick = { actions.shareActivePdf() },
           modifier = Modifier.fillMaxWidth(),
           shape = MaterialTheme.shapes.medium,
         ) {
@@ -1061,7 +1116,7 @@ internal fun SharePdfToAppModalDialog(state: PrototypeAppState, sheet: SharedPdf
           Text("Share")
         }
         OutlinedButton(
-          onClick = { state.saveActivePdf() },
+          onClick = { actions.saveActivePdf() },
           modifier = Modifier.fillMaxWidth(),
           shape = MaterialTheme.shapes.medium,
         ) {
@@ -1075,7 +1130,7 @@ internal fun SharePdfToAppModalDialog(state: PrototypeAppState, sheet: SharedPdf
         }
       } else {
         Button(
-          onClick = { state.saveActivePdf() },
+          onClick = { actions.saveActivePdf() },
           modifier = Modifier.fillMaxWidth(),
           shape = MaterialTheme.shapes.medium,
         ) {
@@ -1093,19 +1148,23 @@ internal fun SharePdfToAppModalDialog(state: PrototypeAppState, sheet: SharedPdf
 }
 
 /**
- * Confirmation or error after a PDF action (`state.pdfExportMessage`), shown as a snackbar that
- * dismisses itself after a few seconds.
+ * Confirmation or error after a PDF action ([DataCollectionUiState.pdfExportMessage]), shown as a
+ * snackbar that dismisses itself after a few seconds (through [actions]).
  */
 @Composable
-internal fun PdfExportMessageSnackbar(state: PrototypeAppState, modifier: Modifier = Modifier) {
-  val message = state.pdfExportMessage ?: return
+internal fun PdfExportMessageSnackbar(
+  uiState: DataCollectionUiState,
+  actions: DataCollectionActions,
+  modifier: Modifier = Modifier,
+) {
+  val message = uiState.pdfExportMessage ?: return
   LaunchedEffect(message) {
     delay(4_000)
-    state.dismissPdfExportMessage()
+    actions.dismissPdfExportMessage()
   }
   Snackbar(
     modifier = modifier.padding(16.dp),
-    action = { TextButton(onClick = { state.dismissPdfExportMessage() }) { Text("OK") } },
+    action = { TextButton(onClick = { actions.dismissPdfExportMessage() }) { Text("OK") } },
   ) {
     Text(text = message, maxLines = 2, overflow = TextOverflow.Ellipsis)
   }
@@ -1117,6 +1176,21 @@ internal fun PdfExportMessageSnackbar(state: PrototypeAppState, modifier: Modifi
  */
 @Composable
 internal fun ManageOfflineMapsSubScreen(state: PrototypeAppState) {
+  val uiState by state.settings.uiState.collectAsState()
+  ManageOfflineMapsSubScreen(
+    uiState = uiState,
+    actions = state.settings,
+    onBack = state::closeDrawerSubView,
+  )
+}
+
+/** Stateless Offline maps sub-screen rendering [uiState] and forwarding intents to [actions]. */
+@Composable
+internal fun ManageOfflineMapsSubScreen(
+  uiState: SettingsUiState,
+  actions: SettingsActions,
+  onBack: () -> Unit,
+) {
   Column(
     modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),
     verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -1142,7 +1216,7 @@ internal fun ManageOfflineMapsSubScreen(state: PrototypeAppState) {
           color = MaterialTheme.colorScheme.onSurface,
         )
       }
-      OutlinedButton(onClick = { state.closeDrawerSubView() }, shape = MaterialTheme.shapes.small) {
+      OutlinedButton(onClick = onBack, shape = MaterialTheme.shapes.small) {
         Icon(
           imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
           contentDescription = null,
@@ -1154,9 +1228,9 @@ internal fun ManageOfflineMapsSubScreen(state: PrototypeAppState) {
     }
 
     // Clear, user-friendly device storage breakdown chart
-    DeviceStorageBreakdownCard(storage = state.deviceStorageInfo)
+    DeviceStorageBreakdownCard(storage = uiState.storage)
 
-    state.offlineTilePackages.forEach { pkg ->
+    uiState.offlineTilePackages.forEach { pkg ->
       OutlinedCard(
         modifier = Modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.medium,
@@ -1182,7 +1256,7 @@ internal fun ManageOfflineMapsSubScreen(state: PrototypeAppState) {
           }
           if (pkg.isDownloaded) {
             FilledTonalButton(
-              onClick = { state.promptRemoveOfflineTilePackage(pkg.id) },
+              onClick = { actions.promptRemoveOfflineTilePackage(pkg.id) },
               shape = MaterialTheme.shapes.large,
             ) {
               Icon(
@@ -1198,7 +1272,7 @@ internal fun ManageOfflineMapsSubScreen(state: PrototypeAppState) {
             }
           } else {
             Button(
-              onClick = { state.toggleOfflineTilePackage(pkg.id) },
+              onClick = { actions.toggleOfflineTilePackage(pkg.id) },
               shape = MaterialTheme.shapes.large,
             ) {
               Icon(
@@ -1217,20 +1291,23 @@ internal fun ManageOfflineMapsSubScreen(state: PrototypeAppState) {
       }
     }
 
-    if (state.pendingRemovalTilePackageId != null) {
-      RemoveOfflineTilePackageConfirmationDialog(state)
+    if (uiState.pendingRemovalTilePackageId != null) {
+      RemoveOfflineTilePackageConfirmationDialog(uiState, actions)
     }
   }
 }
 
 /** Confirmation prompt dialog shown before removing an offline map tile package from the device. */
 @Composable
-private fun RemoveOfflineTilePackageConfirmationDialog(state: PrototypeAppState) {
-  val packageId = state.pendingRemovalTilePackageId ?: return
-  val pkg = state.offlineTilePackages.firstOrNull { it.id == packageId } ?: return
+private fun RemoveOfflineTilePackageConfirmationDialog(
+  uiState: SettingsUiState,
+  actions: SettingsActions,
+) {
+  val packageId = uiState.pendingRemovalTilePackageId ?: return
+  val pkg = uiState.offlineTilePackages.firstOrNull { it.id == packageId } ?: return
 
   GroundAlertDialogOverlay(
-    onDismissRequest = { state.dismissRemoveOfflineTilePackage() },
+    onDismissRequest = { actions.dismissRemoveOfflineTilePackage() },
     icon = {
       Icon(
         imageVector = Icons.Outlined.CloudOff,
@@ -1255,7 +1332,7 @@ private fun RemoveOfflineTilePackageConfirmationDialog(state: PrototypeAppState)
     },
     confirmButton = {
       Button(
-        onClick = { state.confirmRemoveOfflineTilePackage() },
+        onClick = { actions.confirmRemoveOfflineTilePackage() },
         colors =
           ButtonDefaults.buttonColors(
             containerColor = MaterialTheme.colorScheme.error,
@@ -1266,7 +1343,7 @@ private fun RemoveOfflineTilePackageConfirmationDialog(state: PrototypeAppState)
       }
     },
     dismissButton = {
-      OutlinedButton(onClick = { state.dismissRemoveOfflineTilePackage() }) { Text("Cancel") }
+      OutlinedButton(onClick = { actions.dismissRemoveOfflineTilePackage() }) { Text("Cancel") }
     },
   )
 }
@@ -1277,7 +1354,8 @@ private fun RemoveOfflineTilePackageConfirmationDialog(state: PrototypeAppState)
  */
 @Composable
 internal fun SurveySettingsSubScreen(state: PrototypeAppState) {
-  SettingsScreen(state = state)
+  val uiState by state.settings.uiState.collectAsState()
+  SettingsScreen(uiState = uiState, actions = state.settings, onBack = state::closeDrawerSubView)
 }
 
 /**

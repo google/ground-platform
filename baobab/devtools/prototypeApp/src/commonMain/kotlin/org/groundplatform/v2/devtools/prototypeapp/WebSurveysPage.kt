@@ -49,6 +49,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -63,6 +64,7 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.Organization
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyPreviewItem
 import org.groundplatform.v2.devtools.prototypeapp.formeditor.DropdownSelector
 import org.groundplatform.v2.devtools.prototypeapp.surveyeditor.ProfileAvatar
+import org.groundplatform.v2.devtools.prototypeapp.ui.state.DashboardUiState
 
 private val SurveyCardWidth = 320.dp
 private val PageMaxWidth = 1240.dp
@@ -80,37 +82,61 @@ internal fun WebSurveysPage(
   onCreateSurvey: (title: String, organizationId: String?) -> Unit,
   onSignOut: () -> Unit = { state.signOut() },
 ) {
+  val uiState by state.dashboard.uiState.collectAsState()
+  WebSurveysPage(
+    uiState = uiState,
+    onOpenSurvey = onOpenSurvey,
+    onCreateSurvey = onCreateSurvey,
+    header = { onCreateSurveyClick ->
+      WebAppHeader(
+        state = state,
+        onSignOut = onSignOut,
+        context = {
+          WebHeaderContext(title = "Surveys") {
+            WebHeaderSupportingText(
+              "${uiState.surveys.size} surveys · ${uiState.signedInUserOrganizations.size} organizations"
+            )
+          }
+        },
+        actions = {
+          WebMobilePrototypeButton(state)
+          WebHeaderButton(
+            text = "Create survey",
+            icon = Icons.Outlined.Add,
+            onClick = onCreateSurveyClick,
+            tonal = true,
+          )
+        },
+      )
+    },
+  )
+}
+
+/**
+ * Stateless Surveys landing page: the survey cards grouped by organization from [uiState], with
+ * search and filter chips and the "Create survey" dialog.
+ *
+ * @param header the page header; it receives the click handler of its "Create survey" button.
+ */
+@Composable
+internal fun WebSurveysPage(
+  uiState: DashboardUiState,
+  onOpenSurvey: (surveyId: String) -> Unit,
+  onCreateSurvey: (title: String, organizationId: String?) -> Unit,
+  header: @Composable (onCreateSurveyClick: () -> Unit) -> Unit,
+) {
   var filter by remember { mutableStateOf<SurveyListFilter>(SurveyListFilter.All) }
   var query by remember { mutableStateOf("") }
   var isCreating by remember { mutableStateOf(false) }
 
-  val userEmail = state.signedInUserEmail
-  val organizations = state.organizations
+  val userEmail = uiState.signedInUserEmail
+  val organizations = uiState.organizations
   val chips = SurveyListFilter.chipsFor(organizations, userEmail)
-  val visible = WebSurveysList.filter(state.surveys, organizations, userEmail, filter, query)
+  val visible = WebSurveysList.filter(uiState.surveys, organizations, userEmail, filter, query)
   val sections = WebSurveysList.sections(visible, organizations)
 
   Column(modifier = Modifier.fillMaxSize()) {
-    WebAppHeader(
-      state = state,
-      onSignOut = onSignOut,
-      context = {
-        WebHeaderContext(title = "Surveys") {
-          WebHeaderSupportingText(
-            "${state.surveys.size} surveys · ${state.signedInUserOrganizations.size} organizations"
-          )
-        }
-      },
-      actions = {
-        WebMobilePrototypeButton(state)
-        WebHeaderButton(
-          text = "Create survey",
-          icon = Icons.Outlined.Add,
-          onClick = { isCreating = true },
-          tonal = true,
-        )
-      },
-    )
+    header { isCreating = true }
     HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
     Box(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
@@ -138,7 +164,7 @@ internal fun WebSurveysPage(
             section = section,
             userEmail = userEmail,
             organizations = organizations,
-            activeSurveyId = state.activeSurveyId,
+            activeSurveyId = uiState.activeSurveyId,
             onOpenSurvey = onOpenSurvey,
           )
         }
@@ -148,7 +174,7 @@ internal fun WebSurveysPage(
 
   if (isCreating) {
     CreateSurveyDialog(
-      organizations = state.signedInUserOrganizations,
+      organizations = uiState.signedInUserOrganizations,
       onCreate = { title, organizationId ->
         isCreating = false
         onCreateSurvey(title, organizationId)

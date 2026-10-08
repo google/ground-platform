@@ -23,6 +23,11 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.MembershipStatus
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.Organization
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.OrganizationMember
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.OrganizationRole
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.Collaborator
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.CollaboratorRole
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SharingPolicy
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SharingSettings
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SurveyAccess
 
 class SurveyAccessTest {
   private val owner = "owner@example.org"

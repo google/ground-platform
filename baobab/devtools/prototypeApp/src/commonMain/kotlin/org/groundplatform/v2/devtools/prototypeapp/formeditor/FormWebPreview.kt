@@ -67,6 +67,10 @@ import org.groundplatform.v2.core.forms.ui.GroundBadgeTone
 import org.groundplatform.v2.core.forms.ui.GroundTonalBadge
 import org.groundplatform.v2.devtools.prototypeapp.WebFormPanelChrome
 import org.groundplatform.v2.devtools.prototypeapp.WebFormPanelWidth
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.FormPreviewTarget
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.GeometryCapture
+import org.groundplatform.v2.devtools.prototypeapp.ui.state.FormEditorUiState
+import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.FormEditorActions
 
 /**
  * Geometry input of the editor's web canvas and web preview: like the dashboard, geometry questions
@@ -84,12 +88,16 @@ internal fun previewTargetIcon(target: FormPreviewTarget): ImageVector =
 
 /** Segmented Mobile / Web toggle for the Form editor toolbar. */
 @Composable
-internal fun PreviewTargetToggle(state: FormEditorState, modifier: Modifier = Modifier) {
+internal fun PreviewTargetToggle(
+  uiState: FormEditorUiState,
+  actions: FormEditorActions,
+  modifier: Modifier = Modifier,
+) {
   SingleChoiceSegmentedButtonRow(modifier = modifier.height(36.dp)) {
     FormPreviewTarget.entries.forEachIndexed { index, target ->
       SegmentedButton(
-        selected = state.previewTarget == target,
-        onClick = { state.selectPreviewTarget(target) },
+        selected = uiState.previewTarget == target,
+        onClick = { actions.selectPreviewTarget(target) },
         shape =
           SegmentedButtonDefaults.itemShape(index = index, count = FormPreviewTarget.entries.size),
         icon = {
@@ -117,9 +125,13 @@ internal fun FormPreviewTarget.sentenceName(): String =
  * **Enable** turns it on for that platform; the same switches live in Form settings.
  */
 @Composable
-internal fun PlatformDisabledBanner(state: FormEditorState, modifier: Modifier = Modifier) {
-  if (state.isEnabledOnPreviewTarget) return
-  val target = state.previewTarget
+internal fun PlatformDisabledBanner(
+  uiState: FormEditorUiState,
+  actions: FormEditorActions,
+  modifier: Modifier = Modifier,
+) {
+  if (uiState.isEnabledOnPreviewTarget) return
+  val target = uiState.previewTarget
   val colors = MaterialTheme.colorScheme
   CanvasBanner(
     icon = Icons.Outlined.VisibilityOff,
@@ -128,7 +140,7 @@ internal fun PlatformDisabledBanner(state: FormEditorState, modifier: Modifier =
       "Collectors won't find this form in ${target.sentenceName()}. Enable it to offer it " +
         "there (also in Form settings).",
     actionLabel = "Enable",
-    onAction = state::enableOnPreviewTarget,
+    onAction = actions::enableOnPreviewTarget,
     containerColor = colors.tertiaryContainer,
     contentColor = colors.onTertiaryContainer,
     modifier = modifier,
@@ -142,9 +154,13 @@ internal fun PlatformDisabledBanner(state: FormEditorState, modifier: Modifier =
  * [PlatformDisabledBanner]'s check.
  */
 @Composable
-internal fun WebIncompatibleGeometryBanner(state: FormEditorState, modifier: Modifier = Modifier) {
-  if (state.previewTarget != FormPreviewTarget.WEB || !state.isEnabledOnPreviewTarget) return
-  val incompatible = state.webIncompatibleGeometryQuestions
+internal fun WebIncompatibleGeometryBanner(
+  uiState: FormEditorUiState,
+  actions: FormEditorActions,
+  modifier: Modifier = Modifier,
+) {
+  if (uiState.previewTarget != FormPreviewTarget.WEB || !uiState.isEnabledOnPreviewTarget) return
+  val incompatible = uiState.webIncompatibleGeometryQuestions
   if (incompatible.isEmpty()) return
   val colors = MaterialTheme.colorScheme
   CanvasBanner(
@@ -154,7 +170,7 @@ internal fun WebIncompatibleGeometryBanner(state: FormEditorState, modifier: Mod
       "This form can't be used on web until its GPS-only questions allow drawing on the map. " +
         webIncompatibleSummary(incompatible.size),
     actionLabel = "Fix all",
-    onAction = state::makeGeometryQuestionsWebCompatible,
+    onAction = actions::makeGeometryQuestionsWebCompatible,
     containerColor = colors.errorContainer,
     contentColor = colors.onErrorContainer,
     modifier = modifier,
@@ -206,11 +222,12 @@ private fun CanvasBanner(
  */
 @Composable
 internal fun UnavailablePreviewArea(
-  state: FormEditorState,
+  uiState: FormEditorUiState,
+  actions: FormEditorActions,
   modifier: Modifier = Modifier,
   content: @Composable () -> Unit,
 ) {
-  val enabled = state.isEnabledOnPreviewTarget
+  val enabled = uiState.isEnabledOnPreviewTarget
   Box(modifier = modifier) {
     Box(modifier = Modifier.fillMaxSize().alpha(if (enabled) 1f else 0.4f)) { content() }
     if (!enabled) {
@@ -238,10 +255,14 @@ internal fun UnavailablePreviewArea(
  * edit, so labels, hints, choices, and display logic are always current.
  */
 @Composable
-internal fun WebLayoutCanvasPanel(state: FormEditorState, modifier: Modifier = Modifier) {
-  val form = state.form
-  val xml = state.previewXml
-  val parsed = remember(xml) { state.parsePreviewController() }
+internal fun WebLayoutCanvasPanel(
+  uiState: FormEditorUiState,
+  actions: FormEditorActions,
+  modifier: Modifier = Modifier,
+) {
+  val form = uiState.form
+  val xml = uiState.previewXml
+  val parsed = remember(xml) { uiState.parsePreviewController() }
   val controller = parsed.getOrNull()
   val error = parsed.exceptionOrNull()?.let { it.message ?: it.toString() }
   val colors = MaterialTheme.colorScheme
@@ -273,9 +294,9 @@ internal fun WebLayoutCanvasPanel(state: FormEditorState, modifier: Modifier = M
         )
       }
       HorizontalDivider(color = colors.outlineVariant)
-      PlatformDisabledBanner(state)
-      WebIncompatibleGeometryBanner(state)
-      UnavailablePreviewArea(state, Modifier.weight(1f).fillMaxWidth()) {
+      PlatformDisabledBanner(uiState, actions)
+      WebIncompatibleGeometryBanner(uiState, actions)
+      UnavailablePreviewArea(uiState, actions, Modifier.weight(1f).fillMaxWidth()) {
         Box(
           modifier =
             Modifier.fillMaxSize()
@@ -283,7 +304,7 @@ internal fun WebLayoutCanvasPanel(state: FormEditorState, modifier: Modifier = M
               .clickable(
                 indication = null,
                 interactionSource = remember { MutableInteractionSource() },
-                onClick = state::selectForm,
+                onClick = actions::selectForm,
               )
               .verticalScroll(rememberScrollState())
               .padding(24.dp),
@@ -300,8 +321,8 @@ internal fun WebLayoutCanvasPanel(state: FormEditorState, modifier: Modifier = M
                   CompactFormRunner(
                     controller = controller,
                     readOnly = true,
-                    selectedPath = state.selectedKey?.let(state::pathOf),
-                    onSelectQuestion = { path -> state.keyForPath(path)?.let(state::select) },
+                    selectedPath = uiState.selectedKey?.let(uiState::pathOf),
+                    onSelectQuestion = { path -> uiState.keyForPath(path)?.let(actions::select) },
                     geometryInput = WebPreviewGeometryInput,
                   )
                 }
@@ -327,14 +348,15 @@ internal fun WebLayoutCanvasPanel(state: FormEditorState, modifier: Modifier = M
  */
 @Composable
 internal fun WebPreviewBrowserFrame(
-  state: FormEditorState,
+  uiState: FormEditorUiState,
+  actions: FormEditorActions,
   controller: FormWizardController,
   modifier: Modifier = Modifier,
 ) {
   val colors = MaterialTheme.colorScheme
   Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
     Text(
-      text = "Preview • ${state.form.title} • Web",
+      text = "Preview • ${uiState.form.title} • Web",
       style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
       color = colors.onSurfaceVariant,
       modifier = Modifier.padding(bottom = 8.dp),
@@ -383,9 +405,9 @@ internal fun WebPreviewBrowserFrame(
             modifier = Modifier.align(Alignment.Center),
           )
           WebFormPanelChrome(
-            title = state.form.title.ifBlank { "Untitled form" },
+            title = uiState.form.title.ifBlank { "Untitled form" },
             subtitle = "Collect data",
-            onClose = state::closePreview,
+            onClose = actions::closePreview,
             modifier =
               Modifier.align(Alignment.TopEnd)
                 .padding(14.dp)
@@ -402,8 +424,8 @@ internal fun WebPreviewBrowserFrame(
               key(controller) {
                 CompactFormRunner(
                   controller = controller,
-                  onCancel = state::closePreview,
-                  onSubmitted = { state.markPreviewSubmitted() },
+                  onCancel = actions::closePreview,
+                  onSubmitted = { actions.markPreviewSubmitted() },
                   geometryInput = WebPreviewGeometryInput,
                 )
               }

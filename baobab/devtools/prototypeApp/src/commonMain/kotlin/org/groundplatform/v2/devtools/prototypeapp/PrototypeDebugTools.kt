@@ -49,12 +49,34 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 
 /**
- * Reusable debug tools button with the bug icon that pops out the workbench tools (view switcher,
- * theme toggle, offline simulation, and reset flow) previously shown in the top workbench header.
+ * Reusable debug tools button with the bug icon that pops out the workbench tools (theme toggle,
+ * offline simulation, and reset flow) previously shown in the top workbench header.
  */
 @Composable
 fun PrototypeDebugToolsButton(
   state: PrototypeAppState,
+  modifier: Modifier = Modifier,
+  iconTint: Color = MaterialTheme.colorScheme.onSurface,
+) {
+  PrototypeDebugToolsButton(
+    isDarkTheme = state.isDarkTheme,
+    isAirplaneMode = state.isAirplaneMode,
+    onToggleDarkTheme = state::toggleDarkTheme,
+    onToggleAirplaneMode = state::toggleAirplaneMode,
+    onResetFlow = state.workbench::resetPrototypeFlow,
+    modifier = modifier,
+    iconTint = iconTint,
+  )
+}
+
+/** Stateless debug tools button driven by explicit state and callbacks. */
+@Composable
+fun PrototypeDebugToolsButton(
+  isDarkTheme: Boolean,
+  isAirplaneMode: Boolean,
+  onToggleDarkTheme: () -> Unit,
+  onToggleAirplaneMode: () -> Unit,
+  onResetFlow: () -> Unit,
   modifier: Modifier = Modifier,
   iconTint: Color = MaterialTheme.colorScheme.onSurface,
 ) {
@@ -70,7 +92,11 @@ fun PrototypeDebugToolsButton(
     }
 
     PrototypeDebugToolsDropdown(
-      state = state,
+      isDarkTheme = isDarkTheme,
+      isAirplaneMode = isAirplaneMode,
+      onToggleDarkTheme = onToggleDarkTheme,
+      onToggleAirplaneMode = onToggleAirplaneMode,
+      onResetFlow = onResetFlow,
       expanded = isMenuOpen,
       onDismissRequest = { isMenuOpen = false },
     )
@@ -81,6 +107,30 @@ fun PrototypeDebugToolsButton(
 @Composable
 fun PrototypeDebugToolsDropdown(
   state: PrototypeAppState,
+  expanded: Boolean,
+  onDismissRequest: () -> Unit,
+  modifier: Modifier = Modifier,
+) {
+  PrototypeDebugToolsDropdown(
+    isDarkTheme = state.isDarkTheme,
+    isAirplaneMode = state.isAirplaneMode,
+    onToggleDarkTheme = state::toggleDarkTheme,
+    onToggleAirplaneMode = state::toggleAirplaneMode,
+    onResetFlow = state.workbench::resetPrototypeFlow,
+    expanded = expanded,
+    onDismissRequest = onDismissRequest,
+    modifier = modifier,
+  )
+}
+
+/** Stateless popout menu displaying the prototype workbench tools. */
+@Composable
+fun PrototypeDebugToolsDropdown(
+  isDarkTheme: Boolean,
+  isAirplaneMode: Boolean,
+  onToggleDarkTheme: () -> Unit,
+  onToggleAirplaneMode: () -> Unit,
+  onResetFlow: () -> Unit,
   expanded: Boolean,
   onDismissRequest: () -> Unit,
   modifier: Modifier = Modifier,
@@ -133,31 +183,30 @@ fun PrototypeDebugToolsDropdown(
     )
 
     DropdownMenuItem(
-      text = { Text(if (state.isDarkTheme) "Switch to Light UI" else "Switch to Dark UI") },
+      text = { Text(if (isDarkTheme) "Switch to Light UI" else "Switch to Dark UI") },
       leadingIcon = {
         Icon(
-          imageVector =
-            if (state.isDarkTheme) Icons.Outlined.LightMode else Icons.Outlined.DarkMode,
+          imageVector = if (isDarkTheme) Icons.Outlined.LightMode else Icons.Outlined.DarkMode,
           contentDescription = null,
           modifier = Modifier.size(20.dp),
         )
       },
-      onClick = { state.toggleDarkTheme() },
+      onClick = onToggleDarkTheme,
     )
 
     DropdownMenuItem(
-      text = { Text(if (state.isAirplaneMode) "Airplane mode: ON" else "Airplane mode") },
+      text = { Text(if (isAirplaneMode) "Airplane mode: ON" else "Airplane mode") },
       leadingIcon = {
         Icon(
           imageVector =
-            if (state.isAirplaneMode) {
+            if (isAirplaneMode) {
               Icons.Outlined.AirplanemodeActive
             } else {
               Icons.Outlined.AirplanemodeInactive
             },
           contentDescription = null,
           tint =
-            if (state.isAirplaneMode) {
+            if (isAirplaneMode) {
               Color(0xFFFFB74D)
             } else {
               MaterialTheme.colorScheme.onSurfaceVariant
@@ -166,7 +215,7 @@ fun PrototypeDebugToolsDropdown(
         )
       },
       trailingIcon = {
-        if (state.isAirplaneMode) {
+        if (isAirplaneMode) {
           Icon(
             imageVector = Icons.Outlined.Check,
             contentDescription = "Active",
@@ -175,7 +224,7 @@ fun PrototypeDebugToolsDropdown(
           )
         }
       },
-      onClick = { state.toggleAirplaneMode() },
+      onClick = onToggleAirplaneMode,
     )
 
     HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
@@ -199,7 +248,7 @@ fun PrototypeDebugToolsDropdown(
         )
       },
       onClick = {
-        state.resetPrototypeFlow()
+        onResetFlow()
         onDismissRequest()
       },
     )

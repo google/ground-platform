@@ -30,6 +30,8 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyMapAnchor
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyPlaceItem
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.formatHexColorCss
 import org.groundplatform.v2.devtools.prototypeapp.geometryKind
+import org.groundplatform.v2.devtools.prototypeapp.ui.state.DataCollectionUiState
+import org.groundplatform.v2.devtools.prototypeapp.ui.state.SurveyMapUiState
 import org.groundplatform.v2.map.FeatureFilter
 import org.groundplatform.v2.map.GeoJsonSource
 import org.groundplatform.v2.map.Geometry
@@ -170,66 +172,165 @@ internal object SurveyMapContent {
   /** Most cluster balloons drawn at once, to keep the marker layer light. */
   private const val MAX_CLUSTER_MARKERS = 60
 
-  /** The main survey map (mobile and web dashboard). */
+  /** The main survey map (mobile and web dashboard), built from the app shell. */
   fun main(state: PrototypeAppState, showNavigation: Boolean): SurveyMap =
-    build(
-      anchor = state.mapAnchor,
-      basemapType = state.selectedBasemapType,
-      showOfflineSector = state.isOfflineBasemapVisible,
-      entities = state.visibleMapEntities,
-      selectedEntityId = state.selectedEntity?.id,
+    main(
+      uiState = state.surveyMapUiState,
+      dataCollection = state.dataCollectionUiState,
       pendingIds = state.pendingUploadEntityIds,
-      clusters = if (state.isMapClusteringActive) state.mapFeatureClusters else null,
-      selectedClusterId = state.selectedClusterId,
-      clusterHeader = { state.formatClusterSitesCountLabel(it.siteCount) },
-      navigation = if (showNavigation) state.activeNavigation else null,
-      userGps = state.userGpsNormalizedX to state.userGpsNormalizedY,
-      isFollowingUser = state.isCameraFollowingUser,
-      place = state.selectedPlace,
-      layers = state.mapLayers,
-      draftGeometry = state.webMapDraftGeometry,
-      formGeometries = state.webFormGeometries,
-      imagerySources = state.enabledImagerySources,
+      showNavigation = showNavigation,
     )
 
-  /** The map in a form's entity-reference step, listing the form's candidate entities. */
-  fun entityRefForm(state: PrototypeAppState, form: FormPreviewItem): SurveyMap =
+  /**
+   * The main survey map (mobile and web dashboard) from the map viewport's [uiState] and the open
+   * form's [dataCollection] state: the geometry being drawn and the form's geometry answers (web
+   * dashboard).
+   *
+   * @param pendingIds entities with pending uploads, drawn in the pending style.
+   */
+  fun main(
+    uiState: SurveyMapUiState,
+    dataCollection: DataCollectionUiState,
+    pendingIds: Set<String>,
+    showNavigation: Boolean,
+  ): SurveyMap =
+    main(
+      uiState = uiState,
+      pendingIds = pendingIds,
+      showNavigation = showNavigation,
+      draftGeometry = dataCollection.webMapDraftGeometry,
+      formGeometries = dataCollection.webFormGeometries,
+    )
+
+  /**
+   * The main survey map (mobile and web dashboard) from the map viewport's [uiState].
+   *
+   * @param pendingIds entities with pending uploads, drawn in the pending style.
+   * @param draftGeometry the geometry being drawn for a form question, if any (web dashboard).
+   * @param formGeometries geometry answers held by the open form, if any (web dashboard).
+   */
+  fun main(
+    uiState: SurveyMapUiState,
+    pendingIds: Set<String>,
+    showNavigation: Boolean,
+    draftGeometry: DraftGeometry? = null,
+    formGeometries: List<FormGeometryOverlay> = emptyList(),
+  ): SurveyMap =
     build(
-      anchor = state.mapAnchor,
-      basemapType = state.selectedBasemapType,
-      showOfflineSector = state.isOfflineBasemapVisible,
-      entities = state.allDatasetEntitiesForForm(form),
-      selectedEntityId = state.activeDataCollectionEntityId,
-      pendingIds = state.pendingUploadEntityIds,
+      anchor = uiState.anchor,
+      basemapType = uiState.selectedBasemapType,
+      showOfflineSector = uiState.isOfflineBasemapVisible,
+      entities = uiState.visibleMapEntities,
+      selectedEntityId = uiState.selectedEntity?.id,
+      pendingIds = pendingIds,
+      clusters = if (uiState.isMapClusteringActive) uiState.mapFeatureClusters else null,
+      selectedClusterId = uiState.selectedClusterId,
+      clusterHeader = { uiState.formatClusterSitesCountLabel(it.siteCount) },
+      navigation = if (showNavigation) uiState.activeNavigation else null,
+      userGps = uiState.userGpsNormalizedX to uiState.userGpsNormalizedY,
+      isFollowingUser = uiState.isCameraFollowingUser,
+      place = uiState.selectedPlace,
+      layers = uiState.mapLayers,
+      draftGeometry = draftGeometry,
+      formGeometries = formGeometries,
+      imagerySources = uiState.enabledImagerySources,
+    )
+
+  /**
+   * The map in a form's `entityref` step, listing [form]'s candidate map features from the open
+   * form's [dataCollection] state and highlighting its target feature.
+   *
+   * @param pendingIds entities with pending uploads, drawn in the pending style.
+   */
+  fun entityRefForm(
+    uiState: SurveyMapUiState,
+    dataCollection: DataCollectionUiState,
+    form: FormPreviewItem,
+    pendingIds: Set<String>,
+  ): SurveyMap =
+    entityRefForm(
+      uiState = uiState,
+      entities = dataCollection.allDatasetEntitiesForForm(form),
+      selectedEntityId = dataCollection.activeDataCollectionEntityId,
+      pendingIds = pendingIds,
+    )
+
+  /** The map in a form's entity-reference step, showing the form's candidate [entities]. */
+  fun entityRefForm(
+    uiState: SurveyMapUiState,
+    entities: List<GeospatialEntityItem>,
+    selectedEntityId: String?,
+    pendingIds: Set<String>,
+  ): SurveyMap =
+    build(
+      anchor = uiState.anchor,
+      basemapType = uiState.selectedBasemapType,
+      showOfflineSector = uiState.isOfflineBasemapVisible,
+      entities = entities,
+      selectedEntityId = selectedEntityId,
+      pendingIds = pendingIds,
       clusters = null,
       selectedClusterId = null,
       clusterHeader = { "" },
       navigation = null,
-      userGps = state.userGpsNormalizedX to state.userGpsNormalizedY,
-      isFollowingUser = state.isCameraFollowingUser,
+      userGps = uiState.userGpsNormalizedX to uiState.userGpsNormalizedY,
+      isFollowingUser = uiState.isCameraFollowingUser,
       place = null,
-      layers = state.mapLayers,
-      imagerySources = state.enabledImagerySources,
+      layers = uiState.mapLayers,
+      imagerySources = uiState.enabledImagerySources,
     )
 
-  /** The map behind a GeoPoint question. */
+  /** The map behind a GeoPoint question, built from the app shell. */
   fun geoPointForm(state: PrototypeAppState, isFollowingUser: Boolean): SurveyMap =
-    build(
-      anchor = state.mapAnchor,
-      basemapType = state.selectedBasemapType,
-      showOfflineSector = state.isOfflineBasemapVisible,
-      entities = state.visibleMapEntities,
-      selectedEntityId = state.activeDataCollectionEntityId,
+    geoPointForm(
+      uiState = state.surveyMapUiState,
+      dataCollection = state.dataCollectionUiState,
       pendingIds = state.pendingUploadEntityIds,
+      isFollowingUser = isFollowingUser,
+    )
+
+  /**
+   * The map behind a GeoPoint question, highlighting the open form's target feature from its
+   * [dataCollection] state.
+   *
+   * @param pendingIds entities with pending uploads, drawn in the pending style.
+   */
+  fun geoPointForm(
+    uiState: SurveyMapUiState,
+    dataCollection: DataCollectionUiState,
+    pendingIds: Set<String>,
+    isFollowingUser: Boolean,
+  ): SurveyMap =
+    geoPointForm(
+      uiState = uiState,
+      selectedEntityId = dataCollection.activeDataCollectionEntityId,
+      pendingIds = pendingIds,
+      isFollowingUser = isFollowingUser,
+    )
+
+  /** The map behind a GeoPoint question, highlighting the form's [selectedEntityId]. */
+  fun geoPointForm(
+    uiState: SurveyMapUiState,
+    selectedEntityId: String?,
+    pendingIds: Set<String>,
+    isFollowingUser: Boolean,
+  ): SurveyMap =
+    build(
+      anchor = uiState.anchor,
+      basemapType = uiState.selectedBasemapType,
+      showOfflineSector = uiState.isOfflineBasemapVisible,
+      entities = uiState.visibleMapEntities,
+      selectedEntityId = selectedEntityId,
+      pendingIds = pendingIds,
       clusters = null,
       selectedClusterId = null,
       clusterHeader = { "" },
       navigation = null,
-      userGps = state.userGpsNormalizedX to state.userGpsNormalizedY,
+      userGps = uiState.userGpsNormalizedX to uiState.userGpsNormalizedY,
       isFollowingUser = isFollowingUser,
       place = null,
-      layers = state.mapLayers,
-      imagerySources = state.enabledImagerySources,
+      layers = uiState.mapLayers,
+      imagerySources = uiState.enabledImagerySources,
     )
 
   /**

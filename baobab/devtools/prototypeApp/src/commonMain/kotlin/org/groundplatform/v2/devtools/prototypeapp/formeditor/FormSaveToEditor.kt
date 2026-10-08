@@ -74,6 +74,24 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.FormAvailability
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.ChoiceColors
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EditorDataset
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EditorDatasetProperty
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EditorForm
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EditorIssue
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EditorQuestion
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EditorStatusBadge
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EditorStatusRule
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EntityIdSource
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.FormPreviewTarget
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.GeometryCapture
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.RelevanceOperator
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SaveToMode
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SaveToRules
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.StatusConditionSubject
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.StatusMarkerSymbol
+import org.groundplatform.v2.devtools.prototypeapp.ui.state.FormEditorUiState
+import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.FormEditorActions
 
 /**
  * Whether "Advanced" sections are expanded, shared by every Advanced section in the editor.
@@ -96,13 +114,14 @@ object AdvancedDisclosure {
 /** Form-level properties, shown when the Form itself (or no question) is selected. */
 @Composable
 internal fun FormProperties(
-  state: FormEditorState,
+  uiState: FormEditorUiState,
+  actions: FormEditorActions,
   onSaveToModeChange: (SaveToMode) -> Unit,
   onOpenDataset: ((String) -> Unit)?,
 ) {
-  val form = state.form
-  val formIssues = state.formIssues
-  val target = state.saveTarget
+  val form = uiState.form
+  val formIssues = uiState.formIssues
+  val target = uiState.saveTarget
   Column(
     modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(20.dp),
     verticalArrangement = Arrangement.spacedBy(14.dp),
@@ -114,14 +133,14 @@ internal fun FormProperties(
         fontWeight = FontWeight.Bold,
       )
       Text(
-        text = "${form.questions.size} questions • ${state.pathCount} potential paths",
+        text = "${form.questions.size} questions • ${uiState.pathCount} potential paths",
         style = MaterialTheme.typography.labelSmall,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
       )
     }
     OutlinedTextField(
       value = form.title,
-      onValueChange = state::updateTitle,
+      onValueChange = actions::updateTitle,
       label = { Text("Form title") },
       singleLine = true,
       modifier = Modifier.fillMaxWidth(),
@@ -136,7 +155,7 @@ internal fun FormProperties(
     if (formIssues.isNotEmpty()) IssueList(formIssues)
 
     SectionLabel("Availability")
-    AvailabilityToggles(state)
+    AvailabilityToggles(uiState, actions)
 
     SectionLabel("Submissions")
     Text(
@@ -170,7 +189,7 @@ internal fun FormProperties(
       summary = saveToSummary(form, target),
       autoExpand = form.saveTo.isCustomized || formIssues.isNotEmpty(),
     ) {
-      SaveToEditor(state, onSaveToModeChange)
+      SaveToEditor(uiState, actions, onSaveToModeChange)
     }
   }
 }
@@ -181,15 +200,15 @@ internal fun FormProperties(
  * action when the Form is on for web but has GPS-only geometry questions web can't capture.
  */
 @Composable
-private fun AvailabilityToggles(state: FormEditorState) {
-  val availability = state.form.availability
+private fun AvailabilityToggles(uiState: FormEditorUiState, actions: FormEditorActions) {
+  val availability = uiState.form.availability
   OutlinedCard(modifier = Modifier.fillMaxWidth()) {
     AvailabilityToggleRow(
       icon = previewTargetIcon(FormPreviewTarget.MOBILE),
       title = "Available on mobile",
       platform = FormPreviewTarget.MOBILE.sentenceName(),
       checked = availability.includesMobile,
-      onCheckedChange = { state.updateAvailability(availability.withMobile(it)) },
+      onCheckedChange = { actions.updateAvailability(availability.withMobile(it)) },
     )
     HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
     AvailabilityToggleRow(
@@ -197,13 +216,13 @@ private fun AvailabilityToggles(state: FormEditorState) {
       title = "Available on web",
       platform = FormPreviewTarget.WEB.sentenceName(),
       checked = availability.includesWeb,
-      onCheckedChange = { state.updateAvailability(availability.withWeb(it)) },
+      onCheckedChange = { actions.updateAvailability(availability.withWeb(it)) },
     )
-    val incompatible = state.webIncompatibleGeometryQuestions
+    val incompatible = uiState.webIncompatibleGeometryQuestions
     if (incompatible.isNotEmpty()) {
       WebIncompatibleGeometryRow(
         count = incompatible.size,
-        onFixAll = state::makeGeometryQuestionsWebCompatible,
+        onFixAll = actions::makeGeometryQuestionsWebCompatible,
         modifier = Modifier.padding(start = 14.dp, end = 6.dp, bottom = 6.dp),
       )
     }
@@ -366,12 +385,16 @@ internal fun AdvancedSection(
 
 /** Chooses between adding new features and updating existing ones, and how updates work. */
 @Composable
-private fun SaveToEditor(state: FormEditorState, onSaveToModeChange: (SaveToMode) -> Unit) {
-  val form = state.form
+private fun SaveToEditor(
+  uiState: FormEditorUiState,
+  actions: FormEditorActions,
+  onSaveToModeChange: (SaveToMode) -> Unit,
+) {
+  val form = uiState.form
   val saveTo = form.saveTo
-  val targets = state.updateTargets
-  val linked = state.datasets.firstOrNull { it.isLinkedToThisForm }
-  val updateTarget = if (saveTo.mode == SaveToMode.UPDATE) state.saveTarget else null
+  val targets = uiState.updateTargets
+  val linked = uiState.datasets.firstOrNull { it.isLinkedToThisForm }
+  val updateTarget = if (saveTo.mode == SaveToMode.UPDATE) uiState.saveTarget else null
 
   SectionLabel("When the form is submitted")
   Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -397,14 +420,14 @@ private fun SaveToEditor(state: FormEditorState, onSaveToModeChange: (SaveToMode
       onClick = { onSaveToModeChange(SaveToMode.UPDATE) },
     )
   }
-  if (saveTo.mode == SaveToMode.UPDATE) UpdateSettings(state, targets)
+  if (saveTo.mode == SaveToMode.UPDATE) UpdateSettings(uiState, actions, targets)
   Text(
     text = "Submissions are always kept, so every change has a record of who made it and when.",
     style = MaterialTheme.typography.bodySmall,
     color = MaterialTheme.colorScheme.onSurfaceVariant,
   )
   HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-  StatusMarkerEditor(state)
+  StatusMarkerEditor(uiState, actions)
 }
 
 @Composable
@@ -447,17 +470,21 @@ private fun SaveToOption(
 
 /** Target dataset, feature lookup, and field mapping for [SaveToMode.UPDATE]. */
 @Composable
-private fun UpdateSettings(state: FormEditorState, targets: List<EditorDataset>) {
-  val form = state.form
+private fun UpdateSettings(
+  uiState: FormEditorUiState,
+  actions: FormEditorActions,
+  targets: List<EditorDataset>,
+) {
+  val form = uiState.form
   val saveTo = form.saveTo
-  val target = state.saveTarget
+  val target = uiState.saveTarget
   DropdownSelector(
     label = "Map layer or data table to update",
     selectedText = target?.displayName ?: "Choose",
     options = targets,
     optionText = { "${it.displayName} (${if (it.isMapLayer) "Map layer" else "Data table"})" },
     optionIcon = { datasetIcon(it) },
-    onSelect = { state.setTargetDataset(it.id) },
+    onSelect = { actions.setTargetDataset(it.id) },
   )
   if (target == null) return
 
@@ -465,13 +492,13 @@ private fun UpdateSettings(state: FormEditorState, targets: List<EditorDataset>)
   SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
     SegmentedButton(
       selected = saveTo.idSource == EntityIdSource.SELECTED_FEATURE,
-      onClick = { state.setIdSource(EntityIdSource.SELECTED_FEATURE) },
+      onClick = { actions.setIdSource(EntityIdSource.SELECTED_FEATURE) },
       shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2),
       label = { Text(if (target.isMapLayer) "Selected on map" else "Picked from list") },
     )
     SegmentedButton(
       selected = saveTo.idSource == EntityIdSource.QUESTION,
-      onClick = { state.setIdSource(EntityIdSource.QUESTION) },
+      onClick = { actions.setIdSource(EntityIdSource.QUESTION) },
       shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2),
       label = { Text("Question answer") },
     )
@@ -495,14 +522,14 @@ private fun UpdateSettings(state: FormEditorState, targets: List<EditorDataset>)
         options = SaveToRules.savableQuestions(form),
         optionText = { "${it.name} — ${it.label}" },
         optionIcon = { questionTypeIcon(it.type) },
-        onSelect = { state.setIdQuestion(it.key) },
+        onSelect = { actions.setIdQuestion(it.key) },
       )
       DropdownSelector(
         label = "Matches property",
         selectedText = target.property(saveTo.idMatchProperty)?.let(::propertyText) ?: "Choose",
         options = target.matchableProperties,
         optionText = ::propertyText,
-        onSelect = { state.setIdMatchProperty(it.name) },
+        onSelect = { actions.setIdMatchProperty(it.name) },
       )
     }
   }
@@ -528,23 +555,25 @@ private fun UpdateSettings(state: FormEditorState, targets: List<EditorDataset>)
   if (questions.isEmpty()) {
     HelperText("Add questions to choose which properties they update.")
   }
-  questions.forEach { question -> FieldMappingRow(state, question, target) }
+  questions.forEach { question -> FieldMappingRow(uiState, actions, question, target) }
 }
 
 /** One question and the property its answer updates. */
 @Composable
 private fun FieldMappingRow(
-  state: FormEditorState,
+  uiState: FormEditorUiState,
+  actions: FormEditorActions,
   question: EditorQuestion,
   target: EditorDataset,
 ) {
-  val saveTo = state.form.saveTo
+  val saveTo = uiState.form.saveTo
   val property = saveTo.propertyFor(question.key)
   val options: List<String?> = listOf(null) + SaveToRules.propertyOptions(question, target)
   val isDuplicate =
     property != null &&
-      saveTo.mappings.count { it.property == property && state.form.find(it.questionKey) != null } >
-        1
+      saveTo.mappings.count {
+        it.property == property && uiState.form.find(it.questionKey) != null
+      } > 1
   val warning =
     when {
       isDuplicate -> "Another question already updates \"$property\"."
@@ -582,7 +611,7 @@ private fun FieldMappingRow(
         selectedText = property?.let { mappingText(it, target) } ?: "Don't update",
         options = options,
         optionText = { option -> option?.let { mappingText(it, target) } ?: "Don't update" },
-        onSelect = { state.setMapping(question.key, it) },
+        onSelect = { actions.setMapping(question.key, it) },
         modifier = Modifier.weight(0.55f),
       )
     }
@@ -613,10 +642,10 @@ private fun FieldMappingRow(
  * count, question answers, or feature properties.
  */
 @Composable
-private fun StatusMarkerEditor(state: FormEditorState) {
-  val form = state.form
+private fun StatusMarkerEditor(uiState: FormEditorUiState, actions: FormEditorActions) {
+  val form = uiState.form
   val status = form.saveTo.status
-  val target = state.saveTarget
+  val target = uiState.saveTarget
   val noun = target?.featureNoun ?: if (form.hasGeometry) "map feature" else "table row"
   val colors = MaterialTheme.colorScheme
 
@@ -628,7 +657,7 @@ private fun StatusMarkerEditor(state: FormEditorState) {
           .toggleable(
             value = status.enabled,
             role = Role.Switch,
-            onValueChange = state::setStatusEnabled,
+            onValueChange = actions::setStatusEnabled,
           )
           .padding(horizontal = 14.dp, vertical = 10.dp),
       horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -669,7 +698,8 @@ private fun StatusMarkerEditor(state: FormEditorState) {
 
   status.rules.forEachIndexed { index, rule ->
     StatusRuleCard(
-      state = state,
+      uiState = uiState,
+      actions = actions,
       index = index,
       totalRules = status.rules.size,
       rule = rule,
@@ -677,7 +707,7 @@ private fun StatusMarkerEditor(state: FormEditorState) {
     )
   }
 
-  TextButton(onClick = state::addStatusRule) {
+  TextButton(onClick = actions::addStatusRule) {
     Icon(Icons.Outlined.Add, contentDescription = null, modifier = Modifier.size(18.dp))
     Spacer(Modifier.width(4.dp))
     Text("Add status rule")
@@ -710,7 +740,7 @@ private fun StatusMarkerEditor(state: FormEditorState) {
       StatusBadgeEditor(
         badge = status.defaultBadge,
         colorDescription = "Default status color",
-        onUpdate = state::updateDefaultStatusBadge,
+        onUpdate = actions::updateDefaultStatusBadge,
       )
     }
   }
@@ -718,13 +748,14 @@ private fun StatusMarkerEditor(state: FormEditorState) {
 
 @Composable
 private fun StatusRuleCard(
-  state: FormEditorState,
+  uiState: FormEditorUiState,
+  actions: FormEditorActions,
   index: Int,
   totalRules: Int,
   rule: EditorStatusRule,
   target: EditorDataset?,
 ) {
-  val form = state.form
+  val form = uiState.form
   val savableQuestions = SaveToRules.savableQuestions(form)
   val propertyNoun = if (target?.isMapLayer == false) "Row property" else "Feature property"
   val subjectOptions = buildList {
@@ -762,7 +793,7 @@ private fun StatusRuleCard(
         StatusBadgeChip(rule.badge)
         if (totalRules > 1) {
           IconButton(
-            onClick = { state.moveStatusRule(index, -1) },
+            onClick = { actions.moveStatusRule(index, -1) },
             enabled = index > 0,
             modifier = Modifier.size(28.dp),
           ) {
@@ -773,7 +804,7 @@ private fun StatusRuleCard(
             )
           }
           IconButton(
-            onClick = { state.moveStatusRule(index, 1) },
+            onClick = { actions.moveStatusRule(index, 1) },
             enabled = index < totalRules - 1,
             modifier = Modifier.size(28.dp),
           ) {
@@ -785,7 +816,7 @@ private fun StatusRuleCard(
           }
         }
         IconButton(
-          onClick = { state.removeStatusRule(index) },
+          onClick = { actions.removeStatusRule(index) },
           modifier = Modifier.size(28.dp),
         ) {
           Icon(
@@ -802,7 +833,7 @@ private fun StatusRuleCard(
         options = subjectOptions,
         optionText = ::subjectLabel,
         onSelect = { picked ->
-          state.updateStatusRule(index) { current ->
+          actions.updateStatusRule(index) { current ->
             when (picked) {
               StatusConditionSubject.SUBMISSIONS ->
                 current.copy(
@@ -849,9 +880,9 @@ private fun StatusRuleCard(
             onValueChange = { text ->
               val parsed = text.trim().toIntOrNull()
               if (parsed != null) {
-                state.updateStatusRule(index) { it.copy(minSubmissions = parsed) }
+                actions.updateStatusRule(index) { it.copy(minSubmissions = parsed) }
               } else if (text.isEmpty()) {
-                state.updateStatusRule(index) { it.copy(minSubmissions = 1) }
+                actions.updateStatusRule(index) { it.copy(minSubmissions = 1) }
               }
             },
             label = { Text("At least (submissions)") },
@@ -881,7 +912,7 @@ private fun StatusRuleCard(
                 rule.operator.takeIf { it in RelevanceOperator.availableFor(picked.type) }
                   ?: RelevanceOperator.availableFor(picked.type).first()
               val v = picked.choices.firstOrNull()?.value.orEmpty()
-              state.updateStatusRule(index) {
+              actions.updateStatusRule(index) {
                 it.copy(questionKey = picked.key, operator = op, value = v)
               }
             },
@@ -893,7 +924,7 @@ private fun StatusRuleCard(
               options = RelevanceOperator.availableFor(question.type),
               optionText = { it.label },
               onSelect = { op ->
-                state.updateStatusRule(index) { it.copy(operator = op) }
+                actions.updateStatusRule(index) { it.copy(operator = op) }
               },
             )
             if (rule.operator.needsValue) {
@@ -906,14 +937,14 @@ private fun StatusRuleCard(
                   options = question.choices,
                   optionText = { "${it.label} (${it.value})" },
                   onSelect = { c ->
-                    state.updateStatusRule(index) { it.copy(value = c.value) }
+                    actions.updateStatusRule(index) { it.copy(value = c.value) }
                   },
                 )
               } else {
                 OutlinedTextField(
                   value = rule.value,
                   onValueChange = { v ->
-                    state.updateStatusRule(index) { it.copy(value = v) }
+                    actions.updateStatusRule(index) { it.copy(value = v) }
                   },
                   label = { Text("Value") },
                   singleLine = true,
@@ -935,7 +966,7 @@ private fun StatusRuleCard(
               val op =
                 rule.operator.takeIf { it in SaveToRules.operatorsForProperty(picked.kind) }
                   ?: SaveToRules.operatorsForProperty(picked.kind).first()
-              state.updateStatusRule(index) { it.copy(property = picked.name, operator = op) }
+              actions.updateStatusRule(index) { it.copy(property = picked.name, operator = op) }
             },
           )
           if (prop != null) {
@@ -945,14 +976,14 @@ private fun StatusRuleCard(
               options = SaveToRules.operatorsForProperty(prop.kind),
               optionText = { it.label },
               onSelect = { op ->
-                state.updateStatusRule(index) { it.copy(operator = op) }
+                actions.updateStatusRule(index) { it.copy(operator = op) }
               },
             )
             if (rule.operator.needsValue) {
               OutlinedTextField(
                 value = rule.value,
                 onValueChange = { v ->
-                  state.updateStatusRule(index) { it.copy(value = v) }
+                  actions.updateStatusRule(index) { it.copy(value = v) }
                 },
                 label = { Text("Value") },
                 singleLine = true,
@@ -967,7 +998,7 @@ private fun StatusRuleCard(
         badge = rule.badge,
         colorDescription = "Status color for rule ${index + 1}",
         onUpdate = { transform ->
-          state.updateStatusRule(index) { it.copy(badge = transform(it.badge)) }
+          actions.updateStatusRule(index) { it.copy(badge = transform(it.badge)) }
         },
       )
     }

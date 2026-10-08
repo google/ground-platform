@@ -18,177 +18,437 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import groundplatform.v2.forms.FormDef
 import groundplatform.v2.forms.RecordInstance
-import kotlin.math.abs
-import kotlin.math.hypot
-import kotlin.math.pow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import org.groundplatform.v2.core.forms.model.EntityState
 import org.groundplatform.v2.core.forms.serialization.XFormsXmlSerializer
 import org.groundplatform.v2.core.forms.ui.FormWizardController
 import org.groundplatform.v2.core.forms.ui.WorkbenchExampleForm
-import org.groundplatform.v2.devtools.prototypeapp.domain.model.CachedProfile
-import org.groundplatform.v2.devtools.prototypeapp.domain.model.InviteLinks
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyMapAnchor
-import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.ClusterMapFeaturesUseCase
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SurveyAccess
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SurveyEditorDraft
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.relatedEntityForPropertyValue
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.singularTypeLabelOf
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.toClusterFeatures
 import org.groundplatform.v2.devtools.prototypeapp.map.DraftGeometry
 import org.groundplatform.v2.devtools.prototypeapp.map.EntityGeometry
 import org.groundplatform.v2.devtools.prototypeapp.map.FormGeometryOverlay
 import org.groundplatform.v2.devtools.prototypeapp.pdf.GeneratedPdf
-import org.groundplatform.v2.devtools.prototypeapp.pdf.RecordPdfReports
-import org.groundplatform.v2.devtools.prototypeapp.surveyeditor.SurveyAccess
-import org.groundplatform.v2.devtools.prototypeapp.surveyeditor.SurveyEditorDraft
-import org.groundplatform.v2.devtools.prototypeapp.surveyeditor.withEditorFormAvailability
-import org.groundplatform.v2.devtools.prototypeapp.surveyeditor.withEditorLayerStyles
-import org.groundplatform.v2.devtools.prototypeapp.ui.state.PrototypeUiState
-import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.PrototypeAppViewModel
+import org.groundplatform.v2.devtools.prototypeapp.ui.state.DashboardEvent
+import org.groundplatform.v2.devtools.prototypeapp.ui.state.DashboardUiState
+import org.groundplatform.v2.devtools.prototypeapp.ui.state.DataCollectionEvent
+import org.groundplatform.v2.devtools.prototypeapp.ui.state.DataCollectionUiState
+import org.groundplatform.v2.devtools.prototypeapp.ui.state.FormFocusRequest
+import org.groundplatform.v2.devtools.prototypeapp.ui.state.MapFramingRequest
+import org.groundplatform.v2.devtools.prototypeapp.ui.state.OnboardingEvent
+import org.groundplatform.v2.devtools.prototypeapp.ui.state.OrganizationEvent
+import org.groundplatform.v2.devtools.prototypeapp.ui.state.SettingsEvent
+import org.groundplatform.v2.devtools.prototypeapp.ui.state.SurveyEditorEvent
+import org.groundplatform.v2.devtools.prototypeapp.ui.state.SurveyMapEvent
+import org.groundplatform.v2.devtools.prototypeapp.ui.state.SurveyMapUiState
+import org.groundplatform.v2.devtools.prototypeapp.ui.state.WebMapDrawingHost
+import org.groundplatform.v2.devtools.prototypeapp.ui.state.WorkbenchEvent
+import org.groundplatform.v2.devtools.prototypeapp.ui.state.WorkbenchUiState
+import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.AppDataHolder
+import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.DashboardViewModel
+import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.DataCollectionViewModel
+import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.OnboardingViewModel
+import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.OrganizationViewModel
+import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.SettingsViewModel
+import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.SurveyEditorViewModel
+import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.SurveyMapViewModel
+import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.WorkbenchViewModel
 import org.groundplatform.v2.map.CameraPosition
 import org.groundplatform.v2.map.LatLng
 import org.groundplatform.v2.map.LngLatBounds
 
 /**
- * `mapZoomDelta` (relative to the survey's default `15.3z`) at or below which map features are
- * clustered: about `12.95z`.
- */
-internal const val MapClusteringZoomDelta = -2.35f
-
-/**
- * State controller for the Ground 2.0 UI Prototype workbench (`devtools/prototypeApp`).
+ * Application shell and navigation coordinator for the Ground 2.0 UI Prototype
+ * (`devtools/prototypeApp`).
  *
- * Manages both the onboarding screens (`Sign In` -> `Terms of Service` -> `Download survey`) and
- * the **Main Survey UI** (`Map` view with geospatial entities, `Layers` filter popover, `1:1` and
- * `1:N` entity bottom sheets, `List` view with searchable forms, entities, and submissions, and the
- * Hamburger Navigation Drawer).
+ * Wires the shared [AppDataHolder] (owning `LocalStore`, domain repositories, and use cases) to all
+ * feature ViewModels (`OnboardingViewModel`, `SettingsViewModel`, `SurveyMapViewModel`,
+ * `DashboardViewModel`, `OrganizationViewModel`, `SurveyEditorViewModel`,
+ * `DataCollectionViewModel`, `WorkbenchViewModel`), routes cross-feature events between them, and
+ * owns app-shell navigation state (`currentScreen`, `activeWorkbenchPage`, `mainViewMode`,
+ * `isDrawerOpen`, `activeDrawerSubView`, `activeSurveyNotice`).
  */
 class PrototypeAppState(
   initialScreen: PrototypeScreen = PrototypeScreen.SIGN_IN,
-  val viewModel: PrototypeAppViewModel = PrototypeAppViewModel(initialScreen = initialScreen),
+  val dataHolder: AppDataHolder = AppDataHolder(),
 ) {
   /**
    * Latest snapshot of everything read from the local data store (the single source of truth for
    * surveys, survey content, mutations, places, and settings). Kept current by collecting
-   * [PrototypeAppViewModel.appData]; all data properties below are read-only views over it, and all
-   * data changes are written through the repositories.
+   * [AppDataHolder.appData]; all data properties below are read-only views over it, and all data
+   * changes are written through the repositories.
    */
-  private var data by mutableStateOf(viewModel.appData.value)
+  private var data by mutableStateOf(dataHolder.appData.value)
+
+  /**
+   * ViewModel of the onboarding flow (Sign In → Terms of Service → Download survey). Its screens
+   * observe [OnboardingViewModel.uiState] directly; this class mirrors it for the rest of the UI
+   * and applies its navigation [OnboardingEvent]s to the app shell.
+   */
+  val onboarding: OnboardingViewModel =
+    OnboardingViewModel(
+      authRepository = dataHolder.authRepository,
+      surveyRepository = dataHolder.surveyRepository,
+      organizationRepository = dataHolder.organizationRepository,
+      scope = dataHolder.scope,
+    )
+
+  private var onboardingState by mutableStateOf(onboarding.uiState.value)
+
+  /**
+   * ViewModel of user settings, the session theme, and offline tile packages. Its screens observe
+   * [SettingsViewModel.uiState] directly; this class mirrors it for the rest of the UI.
+   */
+  val settings: SettingsViewModel =
+    SettingsViewModel(
+      settingsRepository = dataHolder.settingsRepository,
+      surveyRepository = dataHolder.surveyRepository,
+      mutationRepository = dataHolder.mutationRepository,
+      scope = dataHolder.scope,
+    )
+
+  private var settingsState by mutableStateOf(settings.uiState.value)
+
+  /**
+   * ViewModel of the survey map viewport (camera, GPS, basemap and imagery, clustering, wayfinding,
+   * and the selected map feature, cluster, or place). The map views observe
+   * [SurveyMapViewModel.uiState] directly; this class mirrors it for the rest of the UI and applies
+   * its [SurveyMapEvent]s to the app shell.
+   */
+  val surveyMap: SurveyMapViewModel =
+    SurveyMapViewModel(
+      surveyRepository = dataHolder.surveyRepository,
+      organizationRepository = dataHolder.organizationRepository,
+      settingsRepository = dataHolder.settingsRepository,
+      locationRepository = dataHolder.locationRepository,
+      placeRepository = dataHolder.placeRepository,
+      scope = dataHolder.scope,
+      clusterMapFeatures = dataHolder.clusterMapFeaturesUseCase,
+      computeWayfindingNavigation = dataHolder.computeWayfindingNavigationUseCase,
+    )
+
+  private var mapState by mutableStateOf(surveyMap.uiState.value)
+
+  /** Latest [SurveyMapUiState], for views that build the map from the app shell. */
+  val surveyMapUiState: SurveyMapUiState
+    get() = mapState
+
+  /**
+   * ViewModel of the web dashboard (panel layout, data tables, layer selection, entity details
+   * pane), the web Surveys page, the searchable list's filters, and the `Uploads` drawer sub-screen
+   * (mutation log and sync). Its screens observe [DashboardViewModel.uiState] directly; this class
+   * mirrors it for the rest of the UI and applies its [DashboardEvent]s to the app shell.
+   */
+  val dashboard: DashboardViewModel =
+    DashboardViewModel(
+      surveyRepository = dataHolder.surveyRepository,
+      organizationRepository = dataHolder.organizationRepository,
+      authRepository = dataHolder.authRepository,
+      mutationRepository = dataHolder.mutationRepository,
+      createSurveyUseCase = dataHolder.createSurveyUseCase,
+      syncMutationsUseCase = dataHolder.syncMutationsUseCase,
+      scope = dataHolder.scope,
+    )
+
+  private var dashboardState by mutableStateOf(dashboard.uiState.value)
+
+  /**
+   * ViewModel of the web organizations directory and organization page (details, surveys, members,
+   * imagery sources). Its pages observe [OrganizationViewModel.uiState] directly; this class
+   * mirrors it for the rest of the UI and applies its [OrganizationEvent]s to the app shell.
+   */
+  val organization: OrganizationViewModel =
+    OrganizationViewModel(
+      organizationRepository = dataHolder.organizationRepository,
+      surveyRepository = dataHolder.surveyRepository,
+      authRepository = dataHolder.authRepository,
+      createOrganizationUseCase = dataHolder.createOrganizationUseCase,
+      inviteMemberUseCase = dataHolder.inviteOrganizationMemberUseCase,
+      manageImagerySourcesUseCase = dataHolder.manageImagerySourcesUseCase,
+      scope = dataHolder.scope,
+    )
+
+  private var organizationState by mutableStateOf(organization.uiState.value)
+
+  /**
+   * ViewModel of the Survey editor (survey details, sharing, Forms, Map layers, Data tables, and
+   * sample plots of the active survey). Its pages observe [SurveyEditorViewModel.uiState] directly;
+   * this class mirrors it for the rest of the UI and applies its [SurveyEditorEvent]s to the app
+   * shell.
+   */
+  val surveyEditor: SurveyEditorViewModel =
+    SurveyEditorViewModel(
+      surveyRepository = dataHolder.surveyRepository,
+      surveyEditorRepository = dataHolder.surveyEditorRepository,
+      organizationRepository = dataHolder.organizationRepository,
+      authRepository = dataHolder.authRepository,
+      placeRepository = dataHolder.placeRepository,
+      generateSamplePlots = dataHolder.generateSamplePlotsUseCase,
+      inviteCollaboratorUseCase = dataHolder.inviteCollaboratorUseCase,
+      isAirplaneMode = { mapState.isAirplaneMode },
+      scope = dataHolder.scope,
+    )
+
+  private var surveyEditorState by mutableStateOf(surveyEditor.uiState.value)
+
+  /**
+   * ViewModel of data collection: the selected record (map feature and / or submission), the open
+   * form and its `entityref` step, the web dashboard's draw-on-map session, and the GeoID QR code
+   * and PDF export dialogs. It is the one owner of record selection; the map viewport mirrors it.
+   * Its screens observe [DataCollectionViewModel.uiState] directly; this class mirrors it for the
+   * rest of the UI and applies its [DataCollectionEvent]s to the app shell.
+   */
+  val dataCollection: DataCollectionViewModel =
+    DataCollectionViewModel(
+      surveyRepository = dataHolder.surveyRepository,
+      settingsRepository = dataHolder.settingsRepository,
+      authRepository = dataHolder.authRepository,
+      locationRepository = dataHolder.locationRepository,
+      completeFormSubmission = dataHolder.completeFormSubmissionUseCase,
+      launchForm = dataHolder.launchFormUseCase,
+      scope = dataHolder.scope,
+    )
+
+  private var dataCollectionState by mutableStateOf(dataCollection.uiState.value)
+
+  /** Latest [DataCollectionUiState], for views that build data collection from the app shell. */
+  val dataCollectionUiState: DataCollectionUiState
+    get() = dataCollectionState
+
+  /**
+   * ViewModel of the prototype workbench chrome: simulated device form factor & orientation, the
+   * live XForms `<h:html>` editor & example survey switcher, and prototype simulation/reset tools.
+   */
+  val workbench: WorkbenchViewModel =
+    WorkbenchViewModel(
+      surveyRepository = dataHolder.surveyRepository,
+      sampleDataRepository = dataHolder.sampleDataRepository,
+      generateRandomSitesUseCase = dataHolder.generateRandomSitesUseCase,
+      scope = dataHolder.scope,
+    )
+
+  private var workbenchState by mutableStateOf(workbench.uiState.value)
+
+  /** Latest [WorkbenchUiState], for views that build the workbench chrome from the app shell. */
+  val workbenchUiState: WorkbenchUiState
+    get() = workbenchState
 
   init {
-    viewModel.scope.launch { viewModel.appData.collect { data = it } }
+    dataHolder.scope.launch { dataHolder.appData.collect { data = it } }
+    dataHolder.scope.launch { onboarding.uiState.collect { onboardingState = it } }
+    dataHolder.scope.launch { onboarding.events.collect(::onOnboardingEvent) }
+    dataHolder.scope.launch { settings.uiState.collect { settingsState = it } }
+    dataHolder.scope.launch {
+      settings.events.collect { event ->
+        when (event) {
+          is SettingsEvent.Notice -> activeSurveyNotice = event.message
+        }
+      }
+    }
+    dataHolder.scope.launch { surveyMap.uiState.collect { mapState = it } }
+    dataHolder.scope.launch { surveyMap.events.collect(::onSurveyMapEvent) }
+    dataHolder.scope.launch { dashboard.uiState.collect { dashboardState = it } }
+    dataHolder.scope.launch { dashboard.events.collect(::onDashboardEvent) }
+    dataHolder.scope.launch { organization.uiState.collect { organizationState = it } }
+    dataHolder.scope.launch { organization.events.collect(::onOrganizationEvent) }
+    dataHolder.scope.launch { surveyEditor.uiState.collect { surveyEditorState = it } }
+    dataHolder.scope.launch { surveyEditor.events.collect(::onSurveyEditorEvent) }
+    dataHolder.scope.launch { dataCollection.uiState.collect { dataCollectionState = it } }
+    dataHolder.scope.launch { dataCollection.events.collect(::onDataCollectionEvent) }
+    dataHolder.scope.launch { workbench.uiState.collect { workbenchState = it } }
+    dataHolder.scope.launch { workbench.events.collect(::onWorkbenchEvent) }
+    dataCollection.updateCustomFormDef(parseDefaultPrototypeFormDef(), isPreset = true)
   }
 
-  /** Writes [surveys] to the local data store (inserting or replacing by ID). */
-  private fun storeSurveys(surveys: List<SurveyPreviewItem>) {
-    viewModel.launch { viewModel.surveyRepository.setSurveys(surveys) }
+  /** Applies a workbench outcome to other feature ViewModels and the app shell. */
+  private fun onWorkbenchEvent(event: WorkbenchEvent) {
+    when (event) {
+      is WorkbenchEvent.CustomFormDefChanged ->
+        dataCollection.updateCustomFormDef(
+          formDef = event.formDef,
+          isPreset = event.isPreset,
+          relaunchOpenForm = event.relaunchOpenForm,
+        )
+      is WorkbenchEvent.ExampleSurveySelected -> {
+        openSurvey(event.surveyId)
+        if (event.launchImmediately) {
+          launchActiveOrDefaultFormForTesting()
+        }
+      }
+      is WorkbenchEvent.DefaultSurveyRestored -> openSurvey(event.surveyId)
+      is WorkbenchEvent.RandomSitesAdded -> {
+        currentScreen = PrototypeScreen.MAIN_SURVEY
+        mainViewMode = MainSurveyViewMode.MAP
+        activeDrawerSubView = MainDrawerSubView.NONE
+        activeSurveyNotice = event.noticeMessage
+      }
+      WorkbenchEvent.PrototypeReset -> {
+        currentScreen = PrototypeScreen.SIGN_IN
+        onboarding.reset()
+        settings.reset()
+        surveyMap.reset()
+        dashboard.reset()
+        organization.reset()
+        surveyEditor.reset()
+        dataCollection.reset()
+        activeSurveyNotice = null
+        mainViewMode = MainSurveyViewMode.MAP
+        isDrawerOpen = false
+        activeDrawerSubView = MainDrawerSubView.NONE
+        mapboxPlacesApiResults = emptyList()
+        isMapboxPlacesSearching = false
+      }
+      is WorkbenchEvent.Notice -> activeSurveyNotice = event.message
+    }
   }
 
-  /** Writes the active survey's [layers] to the local data store. */
-  private fun storeMapLayers(layers: List<MapLayerItem>) {
-    viewModel.launch { viewModel.surveyRepository.setMapLayers(layers) }
+  /**
+   * Applies a data collection outcome to the rest of the app shell (map highlight and framing,
+   * bottom sheet, dashboard panes, drawer, screen, notices).
+   */
+  private fun onDataCollectionEvent(event: DataCollectionEvent) {
+    when (event) {
+      is DataCollectionEvent.EntityHighlighted ->
+        surveyMap.setSelectedEntity(event.entityId, bumpSelectionEpoch = event.frameAgain)
+      is DataCollectionEvent.MapRecenteredOnEntity -> surveyMap.recenterMapOnEntity(event.entity)
+      is DataCollectionEvent.EntityBottomSheetExpanded ->
+        surveyMap.updateEntityBottomSheetExpanded(event.expanded)
+      DataCollectionEvent.LayersSheetClosed -> surveyMap.updateLayersSheetOpen(false)
+      DataCollectionEvent.PlaceSelectionCleared -> surveyMap.clearSelectedPlace()
+      DataCollectionEvent.FormsSheetOpened -> isDrawerOpen = false
+      is DataCollectionEvent.SubmissionOpened -> dashboard.onSubmissionOpened(event.tableDatasetId)
+      DataCollectionEvent.DetailsReturnedToProperties -> dashboard.showEntityProperties()
+      DataCollectionEvent.ListShown -> mainViewMode = MainSurveyViewMode.LIST
+      DataCollectionEvent.FormOpened -> {
+        isDrawerOpen = false
+        activeDrawerSubView = MainDrawerSubView.NONE
+        if (currentScreen != PrototypeScreen.MAIN_SURVEY) {
+          currentScreen = PrototypeScreen.MAIN_SURVEY
+        }
+      }
+      is DataCollectionEvent.Notice -> activeSurveyNotice = event.message
+    }
+  }
+
+  /**
+   * Applies a Survey editor outcome to the app shell: leaving the editor returns to the dashboard.
+   */
+  private fun onSurveyEditorEvent(event: SurveyEditorEvent) {
+    when (event) {
+      SurveyEditorEvent.Published,
+      SurveyEditorEvent.Closed -> selectWorkbenchPage(PrototypeWorkbenchPage.WEB_DASHBOARD)
+    }
+  }
+
+  /** Applies an organization outcome to the rest of the app shell (page switch, map imagery). */
+  private fun onOrganizationEvent(event: OrganizationEvent) {
+    when (event) {
+      is OrganizationEvent.OrganizationOpened ->
+        selectWorkbenchPage(PrototypeWorkbenchPage.ORGANIZATION)
+      OrganizationEvent.OrganizationsOpened ->
+        selectWorkbenchPage(PrototypeWorkbenchPage.ORGANIZATIONS)
+      is OrganizationEvent.ImagerySourceRemoved ->
+        if (isImagerySourceEnabled(event.sourceId)) surveyMap.toggleImagerySource(event.sourceId)
+    }
+  }
+
+  /** Applies a dashboard outcome to the rest of the app shell (survey switch, drawer, notices). */
+  private fun onDashboardEvent(event: DashboardEvent) {
+    when (event) {
+      is DashboardEvent.SurveyActivated -> clearSelectionsForActivatedSurvey(event.surveyId)
+      DashboardEvent.UploadsOpened -> {
+        isDrawerOpen = false
+        activeDrawerSubView = MainDrawerSubView.UPLOADS
+      }
+      is DashboardEvent.Notice -> activeSurveyNotice = event.message
+    }
+  }
+
+  /** Applies a map outcome to the rest of the app shell (record selection, drawer, notices). */
+  private fun onSurveyMapEvent(event: SurveyMapEvent) {
+    when (event) {
+      is SurveyMapEvent.EntitySelected -> {
+        dataCollection.onEntitySelected(event.entityId)
+        mainViewMode = MainSurveyViewMode.MAP
+        dashboard.onEntitySelected(event.entityId)
+      }
+      is SurveyMapEvent.PlaceSelected -> {
+        dataCollection.onEntitySelected(null)
+        dashboard.selectLayer(null)
+        mainViewMode = MainSurveyViewMode.MAP
+        activeSurveyNotice = "Centered map on ${event.place.name} (${event.place.coordinatesLabel})"
+      }
+      is SurveyMapEvent.ClusterSelected -> {
+        dataCollection.onEntitySelected(null)
+        activeSurveyNotice =
+          surveyMap.uiState.value.formatClusterSitesCountLabel(event.cluster.siteCount)
+      }
+      SurveyMapEvent.SelectionCleared -> dataCollection.onEntitySelected(null)
+      is SurveyMapEvent.NavigationStarted -> {
+        dataCollection.onNavigationStarted(
+          entityId = surveyMap.uiState.value.selectedEntityId,
+          submissionId = event.submissionId,
+        )
+        isDrawerOpen = false
+        activeDrawerSubView = MainDrawerSubView.NONE
+        mainViewMode = MainSurveyViewMode.MAP
+        if (currentScreen != PrototypeScreen.MAIN_SURVEY) {
+          currentScreen = PrototypeScreen.MAIN_SURVEY
+        }
+        activeSurveyNotice = event.notice
+      }
+      SurveyMapEvent.NavigationStopped -> activeSurveyNotice = null
+      is SurveyMapEvent.Notice -> activeSurveyNotice = event.message
+    }
+  }
+
+  /** Applies an onboarding outcome to the app shell (screen, drawer, notices). */
+  private fun onOnboardingEvent(event: OnboardingEvent) {
+    when (event) {
+      is OnboardingEvent.ShowScreen -> {
+        currentScreen = event.screen
+        if (event.screen == PrototypeScreen.SIGN_IN) {
+          isDrawerOpen = false
+          activeDrawerSubView = MainDrawerSubView.NONE
+          activeSurveyNotice = null
+        }
+      }
+      is OnboardingEvent.SurveyOpened -> {
+        activateSurvey(event.surveyId)
+        currentScreen = PrototypeScreen.MAIN_SURVEY
+        isDrawerOpen = false
+        activeDrawerSubView = MainDrawerSubView.NONE
+        activeSurveyNotice = event.notice
+      }
+      OnboardingEvent.ReturnToSurveyList -> {
+        isDrawerOpen = false
+        activeSurveyNotice = null
+        currentScreen = PrototypeScreen.MAIN_SURVEY
+        activeDrawerSubView = MainDrawerSubView.SWITCH_SURVEYS
+      }
+      OnboardingEvent.SignedOut -> {
+        isDrawerOpen = false
+        activeDrawerSubView = MainDrawerSubView.NONE
+        activeSurveyNotice = null
+      }
+      is OnboardingEvent.Notice -> activeSurveyNotice = event.message
+    }
   }
 
   /** Writes the active survey's [entities] to the local data store. */
   private fun storeEntities(entities: List<GeospatialEntityItem>) {
-    viewModel.launch { viewModel.surveyRepository.setEntities(entities) }
-  }
-
-  /** Writes the active survey's standalone [submissions] to the local data store. */
-  private fun storeStandaloneSubmissions(submissions: List<SubmissionPreviewItem>) {
-    viewModel.launch { viewModel.surveyRepository.setStandaloneSubmissions(submissions) }
-  }
-
-  /** Writes offline basemap tile [packages] to the local data store. */
-  private fun storeOfflineTilePackages(packages: List<OfflineTilePackageItem>) {
-    viewModel.launch { viewModel.surveyRepository.setOfflineTilePackages(packages) }
-  }
-
-  /** Writes [settings] to the local data store. */
-  private fun storeUserSettings(settings: UserSettings) {
-    viewModel.launch { viewModel.settingsRepository.setUserSettings(settings) }
-  }
-
-  /**
-   * Immutable [StateFlow] of [PrototypeUiState] exposed by the underlying MVVM
-   * [PrototypeAppViewModel] per Section 6 of `docs/technical/client/architecture.md`.
-   */
-  val uiState: StateFlow<PrototypeUiState>
-    get() {
-      syncViewModelState()
-      return viewModel.uiState
-    }
-
-  /**
-   * Synchronizes session (non-persisted) state into [viewModel]. Data fields come from the local
-   * data store and are applied by the view model itself.
-   */
-  fun syncViewModelState() {
-    viewModel.updateUiState { current ->
-      current.copy(
-        currentScreen = currentScreen,
-        isSignedIn = isSignedIn,
-        signedInUserEmail = signedInUserEmail,
-        signedInUserName = signedInUserName,
-        termsCheckboxChecked = termsCheckboxChecked,
-        hasAcceptedTerms = hasAcceptedTerms,
-        downloadSurveyEntryOrigin = downloadSurveyEntryOrigin,
-        isDownloadSurveySignOutPromptOpen = isDownloadSurveySignOutPromptOpen,
-        searchQuery = searchQuery,
-        activeSurveyNotice = activeSurveyNotice,
-        isDarkTheme = isDarkTheme,
-        deviceFormFactor = deviceFormFactor,
-        deviceOrientation = deviceOrientation,
-        mainViewMode = mainViewMode,
-        isLayersSheetOpen = isLayersSheetOpen,
-        selectedBasemapType = selectedBasemapType,
-        selectedOfflineBasemapStyle = offlineBasemapStyle,
-        enabledImagerySourceIds = enabledImagerySourceIds,
-        isDrawerOpen = isDrawerOpen,
-        activeDrawerSubView = activeDrawerSubView,
-        selectedUploadStatusFilter = selectedUploadStatusFilter,
-        mapboxPlacesApiResults = mapboxPlacesApiResults,
-        isMapboxPlacesSearching = isMapboxPlacesSearching,
-        isAirplaneMode = isAirplaneMode,
-        selectedEntityId = selectedEntityId,
-        selectedClusterId = selectedClusterId,
-        selectedPlaceId = selectedPlaceId,
-        lastSelectedPlace = lastSelectedPlace,
-        isEntityBottomSheetExpanded = isEntityBottomSheetExpanded,
-        selectedSubmissionId = selectedSubmissionId,
-        listSearchQuery = listSearchQuery,
-        listFilterTab = listFilterTab,
-        userGpsNormalizedX = userGpsNormalizedX,
-        userGpsNormalizedY = userGpsNormalizedY,
-        userGpsCoordinatesLabel = userGpsCoordinatesLabel,
-        gnssSatelliteCount = gnssSatelliteCount,
-        gnssAccuracyMeters = gnssAccuracyMeters,
-        isCameraFollowingUser = isCameraFollowingUser,
-        locationLockState = locationLockState,
-        mapZoomDelta = mapZoomDelta,
-        mapPanOffsetX = mapPanOffsetX,
-        mapPanOffsetY = mapPanOffsetY,
-        activeQrCodeEntityId = activeQrCodeEntityId,
-        activeSharedPdfSheet = activeSharedPdfSheet,
-        navigationTargetKind = navigationTargetKind,
-        navigationTargetId = navigationTargetId,
-        customXFormsXml = customXFormsXml,
-        selectedWorkbenchExampleForm = selectedWorkbenchExampleForm,
-        customFormDef = customFormDef,
-        xformsXmlError = xformsXmlError,
-        activeDataCollectionEntityId = activeDataCollectionEntityId,
-        activeDataCollectionFormId = activeDataCollectionFormId,
-        activeFormWizardController = activeFormWizardController,
-        isAvailableFormsSheetOpen = isAvailableFormsSheetOpen,
-        wasFormLaunchedWithoutEntity = wasFormLaunchedWithoutEntity,
-        entityRefSelectorViewMode = entityRefSelectorViewMode,
-        entityRefSearchQuery = entityRefSearchQuery,
-      )
-    }
+    dataHolder.launch { dataHolder.surveyRepository.setEntities(entities) }
   }
 
   var currentScreen by mutableStateOf(initialScreen)
     private set
 
-  var isDarkTheme by mutableStateOf(false)
-    private set
+  val isDarkTheme: Boolean
+    get() = settingsState.isDarkTheme
 
   /** Active page of the prototype workbench (`Mobile prototype`, `Web app`, `Survey editor`). */
   var activeWorkbenchPage by mutableStateOf(PrototypeWorkbenchPage.MOBILE_PROTOTYPE)
@@ -204,73 +464,63 @@ class PrototypeAppState(
   }
 
   /** Active hardware preview bezel form factor in the wrapper workbench (`Mobile` vs `Tablet`). */
-  var deviceFormFactor by mutableStateOf(DeviceFormFactor.MOBILE)
-    private set
+  val deviceFormFactor: DeviceFormFactor
+    get() = workbenchState.deviceFormFactor
 
   /** Active screen orientation of the hardware preview bezel (`Portrait` vs `Landscape`). */
-  var deviceOrientation by mutableStateOf(deviceFormFactor.defaultOrientation)
-    private set
+  val deviceOrientation: DeviceOrientation
+    get() = workbenchState.deviceOrientation
 
   /** True when the active device is rotated away from its form factor's default orientation. */
   val isDeviceRotated: Boolean
-    get() = deviceOrientation != deviceFormFactor.defaultOrientation
+    get() = workbenchState.isDeviceRotated
 
   /**
    * Effective width in `dp` of the hardware bezel for the current [deviceFormFactor] and
    * [deviceOrientation].
    */
   val effectiveFrameWidthDp: Int
-    get() = deviceFormFactor.widthForOrientation(deviceOrientation)
+    get() = workbenchState.effectiveFrameWidthDp
 
   /**
    * Effective height in `dp` of the hardware bezel for the current [deviceFormFactor] and
    * [deviceOrientation].
    */
   val effectiveFrameHeightDp: Int
-    get() = deviceFormFactor.heightForOrientation(deviceOrientation)
+    get() = workbenchState.effectiveFrameHeightDp
 
   /** Formatted `W × H dp` label for the current [deviceFormFactor] and [deviceOrientation]. */
   val effectiveDimensionsLabel: String
-    get() = deviceFormFactor.dimensionsLabelForOrientation(deviceOrientation)
+    get() = workbenchState.effectiveDimensionsLabel
 
-  var isSignedIn by mutableStateOf(false)
-    private set
+  val isSignedIn: Boolean
+    get() = onboardingState.isSignedIn
 
-  var signedInUserName by mutableStateOf("Maya Lin")
-    private set
+  val signedInUserName: String
+    get() = onboardingState.profile.displayName
 
-  /**
-   * Two-letter initials derived from [signedInUserName] for user avatar badges (e.g. `"ML"` for
-   * `"Maya Lin"`).
-   */
+  /** Two-letter initials of the signed-in user for avatar badges (`"ML"` for `"Maya Lin"`). */
   val signedInUserInitials: String
-    get() {
-      val parts = signedInUserName.trim().split("\\s+".toRegex()).filter { it.isNotEmpty() }
-      return when {
-        parts.isEmpty() -> "U"
-        parts.size == 1 -> parts[0].take(2).uppercase()
-        else -> "${parts.first().first()}${parts.last().first()}".uppercase()
-      }
-    }
+    get() = onboardingState.profile.initials
 
-  var signedInUserEmail by mutableStateOf("maya.lin@groundplatform.org")
-    private set
+  val signedInUserEmail: String
+    get() = onboardingState.profile.email
 
   /** Tracks whether the Download surveys screen was reached after ToS or from the Survey list. */
-  var downloadSurveyEntryOrigin by mutableStateOf(DownloadSurveyEntryOrigin.AFTER_TOS)
-    private set
+  val downloadSurveyEntryOrigin: DownloadSurveyEntryOrigin
+    get() = onboardingState.entryOrigin
 
   /** True when the sign-out confirmation prompt is open on the Download surveys screen. */
-  var isDownloadSurveySignOutPromptOpen by mutableStateOf(false)
-    private set
+  val isDownloadSurveySignOutPromptOpen: Boolean
+    get() = onboardingState.isSignOutPromptOpen
 
   /** ID of a downloaded survey pending confirmation to remove from the device, or null. */
-  var pendingRemovalSurveyId by mutableStateOf<String?>(null)
-    private set
+  val pendingRemovalSurveyId: String?
+    get() = onboardingState.pendingRemovalSurveyId
 
   /** ID of an offline tile package pending confirmation to remove from the device, or null. */
-  var pendingRemovalTilePackageId by mutableStateOf<String?>(null)
-    private set
+  val pendingRemovalTilePackageId: String?
+    get() = settingsState.pendingRemovalTilePackageId
 
   /** True when the Download surveys screen was opened from the Downloaded Surveys list. */
   val isDownloadSurveyAccessedFromSurveyList: Boolean
@@ -309,49 +559,38 @@ class PrototypeAppState(
 
   /** Imagery sources configured on the synthetic `"All users"` organization. */
   val allUsersImagerySources: List<ImagerySource>
-    get() = allUsersOrganization?.imagerySources.orEmpty()
+    get() = mapState.allUsersImagerySources
 
   /**
    * Imagery sources configured on the active survey's organization (excluding the synthetic `"All
    * users"` organization so sources are never duplicated).
    */
   val activeSurveyOrganizationImagerySources: List<ImagerySource>
-    get() =
-      activeSurveyOrganization
-        ?.takeIf { !it.isSynthetic && it.id != Organization.ALL_USERS_ID }
-        ?.imagerySources
-        .orEmpty()
+    get() = mapState.activeSurveyOrganizationImagerySources
 
   /**
    * All organization imagery sources available to toggle in the basemap layers dialog for the
    * active survey: `"All users"` sources followed by survey-specific organization sources.
    */
   val availableImagerySources: List<ImagerySource>
-    get() = allUsersImagerySources + activeSurveyOrganizationImagerySources
+    get() = mapState.availableImagerySources
 
   /** IDs of organization imagery sources currently toggled ON in the basemap layers dialog. */
-  var enabledImagerySourceIds by mutableStateOf<Set<String>>(emptySet())
-    private set
+  val enabledImagerySourceIds: Set<String>
+    get() = mapState.enabledImagerySourceIds
 
   /** Returns whether the organization imagery source with [sourceId] is currently toggled ON. */
-  fun isImagerySourceEnabled(sourceId: String): Boolean = sourceId in enabledImagerySourceIds
+  fun isImagerySourceEnabled(sourceId: String): Boolean = mapState.isImagerySourceEnabled(sourceId)
 
   /** Toggles visibility of the organization imagery source with [sourceId] on the map. */
-  fun toggleImagerySource(sourceId: String) {
-    enabledImagerySourceIds =
-      if (sourceId in enabledImagerySourceIds) {
-        enabledImagerySourceIds - sourceId
-      } else {
-        enabledImagerySourceIds + sourceId
-      }
-  }
+  fun toggleImagerySource(sourceId: String) = surveyMap.toggleImagerySource(sourceId)
 
   /**
    * Currently enabled [ImagerySource]s for the active survey (in layer order: `"All users"` sources
    * first, then survey-specific organization sources).
    */
   val enabledImagerySources: List<ImagerySource>
-    get() = availableImagerySources.filter { it.id in enabledImagerySourceIds }
+    get() = mapState.enabledImagerySources
 
   /**
    * Whether the signed-in user may open the Survey editor for the active survey: they own it, are
@@ -370,103 +609,46 @@ class PrototypeAppState(
   // --- Organizations (web `#organizations` and `#organization/<id>` pages) ---
 
   /** ID of the organization shown on the web organization page, or `null`. */
-  var openOrganizationId by mutableStateOf<String?>(null)
-    private set
+  val openOrganizationId: String?
+    get() = organizationState.openOrganizationId
 
   /** The organization shown on the web organization page, if it still exists. */
   val openOrganization: Organization?
-    get() = organization(openOrganizationId)
+    get() = organizationState.openOrganization
 
   /** Notice from the last organization action (e.g. a refused change), shown on the page. */
-  var organizationNotice by mutableStateOf<String?>(null)
-    private set
+  val organizationNotice: String?
+    get() = organizationState.notice
 
-  fun dismissOrganizationNotice() {
-    organizationNotice = null
-  }
+  fun dismissOrganizationNotice() = organization.dismissNotice()
 
   /** Shows [organizationId] on the web organization page. */
-  fun openOrganization(organizationId: String) {
-    openOrganizationId = organizationId
-    organizationNotice = null
-    selectWorkbenchPage(PrototypeWorkbenchPage.ORGANIZATION)
-  }
+  fun openOrganization(organizationId: String) = organization.openOrganization(organizationId)
 
   /** Shows the list of organizations. */
-  fun openOrganizations() {
-    organizationNotice = null
-    selectWorkbenchPage(PrototypeWorkbenchPage.ORGANIZATIONS)
-  }
+  fun openOrganizations() = organization.openOrganizations()
 
   /** Surveys that belong to [organizationId]. */
-  fun surveysInOrganization(organizationId: String): List<SurveyPreviewItem> = surveys.filter {
-    it.organizationId == organizationId
-  }
+  fun surveysInOrganization(organizationId: String): List<SurveyPreviewItem> =
+    organizationState.surveysInOrganization(organizationId)
 
   /** Whether the signed-in user manages [organization]. */
   fun managesOrganization(organization: Organization): Boolean =
-    isSignedIn && organization.isManager(signedInUserEmail)
-
-  private val signedInProfile: CachedProfile
-    get() = CachedProfile(signedInUserName, "avatar:2", "")
+    organizationState.managesOrganization(organization)
 
   /**
    * Creates an organization managed by the signed-in user, opens it, and returns its ID. The ID is
    * a slug of [name], made unique with a numeric suffix.
    */
-  fun createOrganization(name: String, description: String, isListed: Boolean): String {
-    val trimmedName = name.trim().ifBlank { "Untitled organization" }
-    val id = uniqueOrganizationId(trimmedName)
-    viewModel.launch {
-      viewModel.organizationRepository.createOrganization(
-        Organization(
-          id = id,
-          name = trimmedName,
-          description = description.trim(),
-          isListed = isListed,
-          logoUrl = "avatar:${organizations.size % 9}",
-        ),
-        creatorEmail = signedInUserEmail,
-        creatorProfile = signedInProfile,
-      )
-      // Open it only once it's in the store, so the organization page never sees it missing.
-      openOrganization(id)
-      organizationNotice = "Created organization \"$trimmedName\"."
-    }
-    return id
-  }
-
-  private fun uniqueOrganizationId(name: String): String {
-    val slug =
-      name
-        .lowercase()
-        .replace(Regex("[^a-z0-9]+"), "-")
-        .trim('-')
-        .ifBlank { "organization" }
-        .take(40)
-    val base = "org-$slug"
-    val taken = organizations.map { it.id }.toSet()
-    if (base !in taken) return base
-    var n = 2
-    while ("$base-$n" in taken) n++
-    return "$base-$n"
-  }
+  fun createOrganization(name: String, description: String, isListed: Boolean): String =
+    organization.createOrganization(name, description, isListed)
 
   /** Saves the organization's profile fields. Only Managers may call this. */
-  fun updateOrganization(organizationId: String, transform: (Organization) -> Organization) {
-    viewModel.launch {
-      viewModel.organizationRepository.updateOrganization(organizationId, transform)
-    }
-  }
+  fun updateOrganization(organizationId: String, transform: (Organization) -> Organization) =
+    organization.updateOrganization(organizationId, transform)
 
   /** Deletes the organization; its surveys become personal surveys. Returns to the list. */
-  fun deleteOrganization(organizationId: String) {
-    val name = organization(organizationId)?.name
-    viewModel.launch { viewModel.organizationRepository.deleteOrganization(organizationId) }
-    openOrganizationId = null
-    selectWorkbenchPage(PrototypeWorkbenchPage.ORGANIZATIONS)
-    organizationNotice = name?.let { "Deleted organization \"$it\"." }
-  }
+  fun deleteOrganization(organizationId: String) = organization.deleteOrganization(organizationId)
 
   /**
    * Invites [email] to [organizationId] with [role]. Returns an error message for an invalid or
@@ -476,49 +658,11 @@ class PrototypeAppState(
     organizationId: String,
     email: String,
     role: OrganizationRole,
-  ): String? {
-    val normalized = email.trim().lowercase()
-    if (!Regex("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$").matches(normalized)) {
-      return "Enter a valid email address."
-    }
-    val organization = organization(organizationId) ?: return "Organization not found."
-    val existing = organization.member(normalized)
-    if (existing != null) {
-      return when (existing.status) {
-        MembershipStatus.ACTIVE -> "${existing.displayName} is already a member."
-        MembershipStatus.INVITED -> "${existing.email} has already been invited."
-        MembershipStatus.REQUESTED ->
-          "${existing.displayName} has asked to join. Approve their request instead."
-      }
-    }
-    viewModel.launch {
-      viewModel.organizationRepository.inviteMember(
-        organizationId,
-        normalized,
-        role,
-        token = InviteLinks.newToken(),
-      )
-    }
-    return null
-  }
+  ): String? = organization.inviteMember(organizationId, email, role)
 
   /** Issues a new invite link for a pending invite, invalidating the old one. */
-  fun resetOrganizationInviteLink(organizationId: String, email: String) {
-    viewModel.launch {
-      viewModel.organizationRepository.updateOrganization(organizationId) { org ->
-        org.copy(
-          members =
-            org.members.map {
-              if (it.email == email && it.status == MembershipStatus.INVITED) {
-                it.copy(inviteToken = InviteLinks.newToken())
-              } else {
-                it
-              }
-            }
-        )
-      }
-    }
-  }
+  fun resetOrganizationInviteLink(organizationId: String, email: String) =
+    organization.resetInviteLink(organizationId, email)
 
   /**
    * Simulates the invitee opening their link and accepting. Returns an error message, or `null`.
@@ -528,65 +672,24 @@ class PrototypeAppState(
     email: String,
     displayName: String,
     photoUrl: String?,
-  ): String? {
-    val name = displayName.trim()
-    if (name.isEmpty()) return "Enter a name."
-    viewModel.launch {
-      viewModel.organizationRepository.acceptInvite(
-        organizationId,
-        email,
-        userId = "uid-${email.substringBefore('@').replace('.', '-')}",
-        profile = CachedProfile(name, photoUrl, ""),
-      )
-    }
-    return null
-  }
+  ): String? = organization.acceptInvite(organizationId, email, displayName, photoUrl)
 
   /** Asks to join a listed organization as the signed-in user. */
-  fun requestToJoinOrganization(organizationId: String) {
-    viewModel.launch {
-      viewModel.organizationRepository.requestToJoin(
-        organizationId,
-        signedInUserEmail,
-        signedInProfile,
-      )
-    }
-  }
+  fun requestToJoinOrganization(organizationId: String) = organization.requestToJoin(organizationId)
 
-  fun approveOrganizationRequest(organizationId: String, email: String) {
-    viewModel.launch { viewModel.organizationRepository.approveRequest(organizationId, email) }
-  }
+  fun approveOrganizationRequest(organizationId: String, email: String) =
+    organization.approveRequest(organizationId, email)
 
   /** Changes a member's role. Refusals (demoting the last Manager) surface as a notice. */
-  fun setOrganizationMemberRole(organizationId: String, email: String, role: OrganizationRole) {
-    viewModel.launch {
-      val updated = viewModel.organizationRepository.setMemberRole(organizationId, email, role)
-      if (updated == null) {
-        organizationNotice =
-          "An organization needs at least one Manager. Make someone else a Manager first."
-      }
-    }
-  }
+  fun setOrganizationMemberRole(organizationId: String, email: String, role: OrganizationRole) =
+    organization.setMemberRole(organizationId, email, role)
 
   /**
    * Removes a member, declines a join request, or revokes an invite. Refusals (removing the last
    * Manager) surface as a notice. Removing yourself returns to the list of organizations.
    */
-  fun removeOrganizationMember(organizationId: String, email: String) {
-    val isSelf = email.equals(signedInUserEmail, ignoreCase = true)
-    viewModel.launch {
-      val updated = viewModel.organizationRepository.removeMember(organizationId, email)
-      if (updated == null) {
-        organizationNotice =
-          "An organization needs at least one Manager. Make someone else a Manager before " +
-            "leaving."
-      } else if (isSelf) {
-        openOrganizationId = null
-        selectWorkbenchPage(PrototypeWorkbenchPage.ORGANIZATIONS)
-        organizationNotice = "You left \"${updated.name}\"."
-      }
-    }
-  }
+  fun removeOrganizationMember(organizationId: String, email: String) =
+    organization.removeMember(organizationId, email)
 
   /**
    * Adds an [ImagerySource] to [organizationId]. Returns a validation error message, or `null` when
@@ -598,30 +701,8 @@ class PrototypeAppState(
     urlTemplate: String,
     type: ImagerySourceType = ImagerySourceType.XYZ_TILES,
     allowOfflineDownload: Boolean = false,
-  ): String? {
-    val trimmedName = name.trim()
-    if (trimmedName.isEmpty()) return "Enter a name for the imagery source."
-    val trimmedUrl = urlTemplate.trim()
-    if (type == ImagerySourceType.XYZ_TILES && !ImagerySource.isValidXyzUrlTemplate(trimmedUrl)) {
-      return "Enter an http(s):// XYZ tile URL containing {z}, {x}, and {y}."
-    }
-    val org = organization(organizationId) ?: return "Organization not found."
-    val sourceId = uniqueImagerySourceId(org, trimmedName)
-    updateOrganization(organizationId) { current ->
-      current.copy(
-        imagerySources =
-          current.imagerySources +
-            ImagerySource(
-              id = sourceId,
-              name = trimmedName,
-              urlTemplate = trimmedUrl,
-              type = type,
-              allowOfflineDownload = allowOfflineDownload,
-            )
-      )
-    }
-    return null
-  }
+  ): String? =
+    organization.addImagerySource(organizationId, name, urlTemplate, type, allowOfflineDownload)
 
   /**
    * Updates an existing [ImagerySource] on [organizationId]. Returns a validation error message, or
@@ -633,75 +714,34 @@ class PrototypeAppState(
     name: String,
     urlTemplate: String,
     allowOfflineDownload: Boolean,
-  ): String? {
-    val trimmedName = name.trim()
-    if (trimmedName.isEmpty()) return "Enter a name for the imagery source."
-    val trimmedUrl = urlTemplate.trim()
-    if (!ImagerySource.isValidXyzUrlTemplate(trimmedUrl)) {
-      return "Enter an http(s):// XYZ tile URL containing {z}, {x}, and {y}."
-    }
-    updateOrganization(organizationId) { current ->
-      current.copy(
-        imagerySources =
-          current.imagerySources.map { src ->
-            if (src.id == sourceId) {
-              src.copy(
-                name = trimmedName,
-                urlTemplate = trimmedUrl,
-                allowOfflineDownload = allowOfflineDownload,
-              )
-            } else {
-              src
-            }
-          }
-      )
-    }
-    return null
-  }
+  ): String? =
+    organization.updateImagerySource(
+      organizationId,
+      sourceId,
+      name,
+      urlTemplate,
+      allowOfflineDownload,
+    )
 
   /** Toggles whether offline download on mobile is permitted for [sourceId] in [organizationId]. */
   fun setOrganizationImagerySourceOfflineAllowed(
     organizationId: String,
     sourceId: String,
     allowOfflineDownload: Boolean,
-  ) {
-    updateOrganization(organizationId) { current ->
-      current.copy(
-        imagerySources =
-          current.imagerySources.map { src ->
-            if (src.id == sourceId) src.copy(allowOfflineDownload = allowOfflineDownload) else src
-          }
-      )
-    }
-  }
+  ) = organization.setImagerySourceOfflineAllowed(organizationId, sourceId, allowOfflineDownload)
 
   /** Removes the imagery source with [sourceId] from [organizationId]. */
-  fun removeOrganizationImagerySource(organizationId: String, sourceId: String) {
-    enabledImagerySourceIds = enabledImagerySourceIds - sourceId
-    updateOrganization(organizationId) { current ->
-      current.copy(imagerySources = current.imagerySources.filterNot { it.id == sourceId })
-    }
-  }
+  fun removeOrganizationImagerySource(organizationId: String, sourceId: String) =
+    organization.removeImagerySource(organizationId, sourceId)
 
-  private fun uniqueImagerySourceId(organization: Organization, name: String): String {
-    val slug =
-      name.lowercase().replace(Regex("[^a-z0-9]+"), "-").trim('-').ifBlank { "source" }.take(32)
-    val base = "imagery-${organization.id.removePrefix("org-")}-$slug"
-    val taken = organizations.flatMap { it.imagerySources }.map { it.id }.toSet()
-    if (base !in taken) return base
-    var n = 2
-    while ("$base-$n" in taken) n++
-    return "$base-$n"
-  }
+  val termsCheckboxChecked: Boolean
+    get() = onboardingState.termsCheckboxChecked
 
-  var termsCheckboxChecked by mutableStateOf(true)
-    private set
+  val hasAcceptedTerms: Boolean
+    get() = onboardingState.hasAcceptedTerms
 
-  var hasAcceptedTerms by mutableStateOf(false)
-    private set
-
-  var searchQuery by mutableStateOf("")
-    private set
+  val searchQuery: String
+    get() = onboardingState.searchQuery
 
   /** Surveys stored on the device (from the local data store). */
   val surveys: List<SurveyPreviewItem>
@@ -723,25 +763,21 @@ class PrototypeAppState(
   var activeDrawerSubView by mutableStateOf(MainDrawerSubView.NONE)
     private set
 
-  var isLayersSheetOpen by mutableStateOf(false)
-    private set
+  val isLayersSheetOpen: Boolean
+    get() = mapState.isLayersSheetOpen
 
-  var selectedBasemapType by mutableStateOf(BasemapType.SATELLITE)
-    private set
+  val selectedBasemapType: BasemapType
+    get() = mapState.selectedBasemapType
 
-  var isOfflineBasemapVisible by mutableStateOf(true)
-    private set
+  val isOfflineBasemapVisible: Boolean
+    get() = mapState.isOfflineBasemapVisible
 
-  var offlineBasemapStyle by mutableStateOf(OfflineBasemapStyle.SATELLITE_HYBRID)
-    private set
+  val offlineBasemapStyle: OfflineBasemapStyle
+    get() = mapState.offlineBasemapStyle
 
-  /**
-   * The survey's map layers, styled with the color and pin icon of the matching Map layer in the
-   * published Survey editor draft (if any).
-   */
+  /** The survey's map layers (the Survey editor publishes layer styles straight to them). */
   val mapLayers: List<MapLayerItem>
-    get() =
-      data.content.mapLayers.withEditorLayerStyles(data.content.editorDraft?.datasets.orEmpty())
+    get() = data.content.mapLayers
 
   /** The map layer that owns [entity] (by `layerId`), whose style the entity is drawn with. */
   fun mapLayerFor(entity: GeospatialEntityItem): MapLayerItem? = mapLayers.firstOrNull {
@@ -751,20 +787,17 @@ class PrototypeAppState(
   val submissionGeometries: List<SubmissionGeometryPolygon>
     get() = data.content.submissionGeometries
 
-  /**
-   * The survey's forms, with the availability (mobile, web, or both) chosen for the matching Form
-   * in the published Survey editor draft (if any).
-   */
+  /** The survey's forms (the Survey editor publishes Form availability straight to them). */
   val forms: List<FormPreviewItem>
-    get() = data.content.forms.withEditorFormAvailability(data.content.editorDraft?.forms.orEmpty())
+    get() = data.content.forms
 
   /** Forms collectors can start from the mobile app's entry points. */
   val mobileForms: List<FormPreviewItem>
-    get() = forms.filter { it.availability.includesMobile }
+    get() = dataCollectionState.mobileForms
 
   /** Forms collectors can start from the web dashboard's entry points. */
   val webForms: List<FormPreviewItem>
-    get() = forms.filter { it.availability.includesWeb }
+    get() = dataCollectionState.webForms
 
   /** Map features in the active survey. Setting this writes them to the local data store. */
   var entities: List<GeospatialEntityItem>
@@ -776,8 +809,8 @@ class PrototypeAppState(
     get() = data.places
 
   /** ID of the currently selected [SurveyPlaceItem] from Place search (if any). */
-  var selectedPlaceId by mutableStateOf<String?>(null)
-    private set
+  val selectedPlaceId: String?
+    get() = mapState.selectedPlace?.id
 
   /**
    * Standalone form submissions recorded without an attached Geospatial Entity (`entityId == ""`).
@@ -785,27 +818,37 @@ class PrototypeAppState(
   val standaloneSubmissions: List<SubmissionPreviewItem>
     get() = data.content.standaloneSubmissions
 
-  var selectedEntityId by mutableStateOf<String?>(null)
-    private set
+  /**
+   * ID of the selected map feature, owned by [DataCollectionViewModel] (the map viewport mirrors it
+   * as its highlighted feature).
+   */
+  val selectedEntityId: String?
+    get() = dataCollectionState.selectedEntityId
 
   /** Monotonically increasing counter incremented every time an entity is selected. */
-  var entitySelectionEpoch by mutableStateOf(0L)
-    private set
+  val entitySelectionEpoch: Long
+    get() = mapState.entitySelectionEpoch
 
   /**
    * Whether the Entity Bottom Sheet is expanded (`true`) to show full properties/submissions or
    * collapsed (`false`, default) into a compact single-row peek bar at the bottom of the map so it
    * does not obscure the map viewport.
    */
-  var isEntityBottomSheetExpanded by mutableStateOf(false)
-    private set
+  val isEntityBottomSheetExpanded: Boolean
+    get() = mapState.isEntityBottomSheetExpanded
+
+  // --- Web dashboard, searchable list filters & Uploads (see [DashboardViewModel]) ---
+
+  /** Latest [DashboardUiState], for views that build the dashboard from the app shell. */
+  val dashboardUiState: DashboardUiState
+    get() = dashboardState
 
   /**
    * Whether the left-hand panel in the web dashboard is expanded (`true`, default) or collapsed
    * (`false`) to provide a full-width map view.
    */
-  var isSidePanelExpanded by mutableStateOf(true)
-    private set
+  val isSidePanelExpanded: Boolean
+    get() = dashboardState.isSidePanelExpanded
 
   /** Alias for [isSidePanelExpanded] with dashboard prefix. */
   val isDashboardSidePanelExpanded: Boolean
@@ -816,15 +859,15 @@ class PrototypeAppState(
    * panel's right border ([updateSidePanelWidth]); always within [MIN_SIDE_PANEL_WIDTH_DP] and
    * [MAX_SIDE_PANEL_WIDTH_DP], and kept while the panel is collapsed.
    */
-  var sidePanelWidthDp by mutableStateOf(DEFAULT_SIDE_PANEL_WIDTH_DP)
-    private set
+  val sidePanelWidthDp: Float
+    get() = dashboardState.sidePanelWidthDp
 
   /**
    * Whether the right-hand details panel in the web dashboard is expanded (`true`, default) or
    * collapsed (`false`) to maximize visible map space.
    */
-  var isDetailsPanelExpanded by mutableStateOf(true)
-    private set
+  val isDetailsPanelExpanded: Boolean
+    get() = dashboardState.isDetailsPanelExpanded
 
   /** Alias for [isDetailsPanelExpanded] with dashboard prefix. */
   val isDashboardDetailsPanelExpanded: Boolean
@@ -834,50 +877,51 @@ class PrototypeAppState(
   val isRightPanelExpanded: Boolean
     get() = isDetailsPanelExpanded
 
-  var selectedSubmissionId by mutableStateOf<String?>(null)
-    private set
+  /** ID of the submission open in the details surfaces, owned by [DataCollectionViewModel]. */
+  val selectedSubmissionId: String?
+    get() = dataCollectionState.selectedSubmissionId
 
   /**
    * Entity dataset ID of the map layer or data table selected in the web dashboard's left-hand
    * panel, or `null`. Mutually exclusive with [selectedEntityId] and [selectedSubmissionId].
    */
-  var selectedLayerDatasetId by mutableStateOf<String?>(null)
-    private set
+  val selectedLayerDatasetId: String?
+    get() = dashboardState.selectedLayerDatasetId
 
   /**
    * Which pane of the selected entity's details surface is showing: its properties (default) or its
    * `1:N` submissions. Submissions are always one click away from the properties so the details
    * surface opens on the entity's current state.
    */
-  var entityDetailsPane by mutableStateOf(EntityDetailsPane.PROPERTIES)
-    private set
+  val entityDetailsPane: EntityDetailsPane
+    get() = dashboardState.entityDetailsPane
 
   /**
    * Whether the web dashboard's bottom data table is expanded. It never expands automatically; only
    * the collapsed bar's toggle or the details card's "Show in table" button expand it.
    */
-  var isDashboardTableExpanded by mutableStateOf(false)
-    private set
+  val isDashboardTableExpanded: Boolean
+    get() = dashboardState.isDashboardTableExpanded
 
   /**
    * Entity dataset whose table is active in the web dashboard's bottom data table, or `null` for
    * the first dataset. Follows the selected entity's dataset.
    */
-  var dashboardTableDatasetId by mutableStateOf<String?>(null)
-    private set
+  val dashboardTableDatasetId: String?
+    get() = dashboardState.dashboardTableDatasetId
 
   /**
    * Entity whose mutations the `Uploads` screen is filtered to (opened from an entity's details),
    * or `null` to show uploads for every entity.
    */
-  var uploadsEntityFilterId by mutableStateOf<String?>(null)
-    private set
+  val uploadsEntityFilterId: String?
+    get() = dashboardState.uploadsEntityFilterId
 
-  var listSearchQuery by mutableStateOf("")
-    private set
+  val listSearchQuery: String
+    get() = dashboardState.listSearchQuery
 
-  var listFilterTab by mutableStateOf(ListFilterTab.ALL)
-    private set
+  val listFilterTab: ListFilterTab
+    get() = dashboardState.listFilterTab
 
   val offlineTilePackages: List<OfflineTilePackageItem>
     get() = data.offlineTilePackages
@@ -890,20 +934,15 @@ class PrototypeAppState(
    * Active status filter chip on the unified `Uploads` screen (`Pending`, `In progress`,
    * `Uploaded`, or `Failed`), or `null` when all uploads are shown.
    */
-  var selectedUploadStatusFilter by mutableStateOf<UploadStatusFilter?>(null)
-    private set
+  val selectedUploadStatusFilter: UploadStatusFilter?
+    get() = dashboardState.selectedUploadStatusFilter
 
   /**
    * All local mutations sorted in strict reverse chronological order (
    * [MutationLogItem.operationTimestamp] descending).
    */
   val allMutationsSorted: List<MutationLogItem>
-    get() =
-      mutations.sortedWith(
-        compareByDescending<MutationLogItem> { it.operationTimestamp }
-          .thenByDescending { it.completedTimestamp ?: it.startedTimestamp ?: "" }
-          .thenByDescending { it.id }
-      )
+    get() = dashboardState.allMutationsSorted
 
   /**
    * Mutations displayed in the unified `Uploads` screen filtered by [selectedUploadStatusFilter]
@@ -911,90 +950,57 @@ class PrototypeAppState(
    * (when set), in reverse chronological order.
    */
   val filteredUploadMutations: List<MutationLogItem>
-    get() {
-      val filter = selectedUploadStatusFilter
-      return allMutationsSorted.filter {
-        (filter == null || it.uploadStatusFilter == filter) && it.matchesUploadsEntityFilter()
-      }
-    }
+    get() = dashboardState.filteredUploadMutations
 
   /** Returns the total count of mutations matching [filter] on the `Uploads` screen. */
-  fun uploadCountForFilter(filter: UploadStatusFilter): Int = mutations.count {
-    it.uploadStatusFilter == filter && it.matchesUploadsEntityFilter()
-  }
-
-  private fun MutationLogItem.matchesUploadsEntityFilter(): Boolean {
-    val entityId = uploadsEntityFilterId ?: return true
-    return this.entityId == entityId
-  }
+  fun uploadCountForFilter(filter: UploadStatusFilter): Int =
+    dashboardState.uploadCountForFilter(filter)
 
   /** Entity the `Uploads` screen is currently filtered to, if any. */
   val uploadsEntityFilter: GeospatialEntityItem?
-    get() = uploadsEntityFilterId?.let { id -> entities.firstOrNull { it.id == id } }
+    get() = dashboardState.uploadsEntityFilter
 
   /** Number of local mutations (any upload state) recorded for the entity with [entityId]. */
-  fun uploadCountForEntity(entityId: String): Int = mutations.count { it.entityId == entityId }
+  fun uploadCountForEntity(entityId: String): Int = dashboardState.uploadCountForEntity(entityId)
 
   /** Number of not-yet-uploaded mutations (`isOutbox`) recorded for the entity with [entityId]. */
-  fun pendingUploadCountForEntity(entityId: String): Int = mutations.count {
-    it.entityId == entityId && it.isOutbox
-  }
+  fun pendingUploadCountForEntity(entityId: String): Int =
+    dashboardState.pendingUploadCountForEntity(entityId)
 
   /** IDs of entities with at least one not-yet-uploaded mutation (`isOutbox`). */
   val pendingUploadEntityIds: Set<String>
-    get() = mutations.filter { it.isOutbox }.mapTo(mutableSetOf()) { it.entityId }
+    get() = dashboardState.pendingUploadEntityIds
 
   /**
    * Opens the `Uploads` screen filtered to the entity with [entityId], so a data collector can
    * check whether their changes to that map feature went through.
    */
-  fun openUploadsForEntity(entityId: String) {
-    isDrawerOpen = false
-    selectedUploadStatusFilter = null
-    uploadsEntityFilterId = entityId
-    activeDrawerSubView = MainDrawerSubView.UPLOADS
-  }
+  fun openUploadsForEntity(entityId: String) = dashboard.openUploadsForEntity(entityId)
 
   /** Clears the entity filter on the `Uploads` screen. */
-  fun clearUploadsEntityFilter() {
-    uploadsEntityFilterId = null
-  }
+  fun clearUploadsEntityFilter() = dashboard.clearUploadsEntityFilter()
 
   /**
    * Pending, in-progress, or failed mutations (`isOutbox == true`), listed in strict reverse
    * chronological order ([MutationLogItem.operationTimestamp] descending).
    */
   val outboxMutations: List<MutationLogItem>
-    get() =
-      mutations
-        .filter { it.isOutbox }
-        .sortedWith(
-          compareByDescending<MutationLogItem> { it.operationTimestamp }
-            .thenByDescending { it.startedTimestamp ?: "" }
-            .thenByDescending { it.id }
-        )
+    get() = dashboardState.outboxMutations
 
   /**
    * Completed mutations (`isUploaded == true`), listed in strict reverse chronological order (
    * [MutationLogItem.operationTimestamp] descending).
    */
   val uploadedMutations: List<MutationLogItem>
-    get() =
-      mutations
-        .filter { it.isUploaded }
-        .sortedWith(
-          compareByDescending<MutationLogItem> { it.operationTimestamp }
-            .thenByDescending { it.completedTimestamp ?: "" }
-            .thenByDescending { it.id }
-        )
+    get() = dashboardState.uploadedMutations
 
   /** Total count of pending/active/failed mutations not yet uploaded. */
   val outboxMutationCount: Int
-    get() = outboxMutations.size
+    get() = dashboardState.outboxMutationCount
 
   /** Total count of completed mutations in the `Uploaded` state. */
   val uploadedMutationCount: Int
-    get() = uploadedMutations.size
+    get() = dashboardState.uploadedMutationCount
 
   val unitSystem: MeasurementUnitSystem
     get() = data.userSettings.measurementUnits
@@ -1002,17 +1008,17 @@ class PrototypeAppState(
   val selectedLanguageCode: String
     get() = data.userSettings.language
 
-  var selectedLanguageLocale by mutableStateOf("en (English)")
-    private set
+  val selectedLanguageLocale: String
+    get() = settingsState.selectedLanguageLocale
 
   val shouldUploadPhotosOnWifiOnly: Boolean
     get() = data.userSettings.shouldUploadPhotosOnWifiOnly
 
-  var visitedWebsiteUrl by mutableStateOf<String?>(null)
-    private set
+  val visitedWebsiteUrl: String?
+    get() = settingsState.visitedWebsiteUrl
 
-  var mediaCacheCleared by mutableStateOf(false)
-    private set
+  val mediaCacheCleared: Boolean
+    get() = settingsState.mediaCacheCleared
 
   /** Display label of the currently selected language (e.g. `"English"`, `"Français"`). */
   val selectedLanguageDisplayName: String
@@ -1029,42 +1035,20 @@ class PrototypeAppState(
    * entities, submissions, mutations).
    */
   val deviceStorageInfo: DeviceStorageInfo
-    get() {
-      // Calculate downloaded imagery size from downloaded tile packages
-      val downloadedTilesBytes =
-        offlineTilePackages
-          .filter { it.isDownloaded }
-          .sumOf { pkg ->
-            when (pkg.id) {
-              "pkg-nyeri-satellite" -> 82_700_000L
-              "pkg-nyeri-topo" -> 14_200_000L
-              "pkg-kenya-regional" -> 168_000_000L
-              else -> 50_000_000L
-            }
-          }
-      val baseImageryBytes = 1_850_000_000L // Baseline offline imagery cache
-      val totalImageryBytes = baseImageryBytes + downloadedTilesBytes
-      val totalDataBytes = 420_000_000L + (mutations.size * 15_000L) + (entities.size * 8_000L)
-      return DeviceStorageInfo(
-        totalBytes = 64L * 1024L * 1024L * 1024L,
-        downloadedImageryBytes = totalImageryBytes,
-        dataBytes = totalDataBytes,
-        otherUsedBytes = 18_200_000_000L,
-      )
-    }
+    get() = settingsState.storage
 
-  // --- User GPS Location & Auto-Centering Map Camera State ---
+  // --- User GPS Location & Auto-Centering Map Camera State (see [SurveyMapViewModel]) ---
   /** Normalized world X coordinate `[0, 1]` of the collector's current GPS location. */
-  var userGpsNormalizedX by mutableStateOf(0.50f)
-    private set
+  val userGpsNormalizedX: Float
+    get() = mapState.userGpsNormalizedX
 
   /** Normalized world Y coordinate `[0, 1]` of the collector's current GPS location. */
-  var userGpsNormalizedY by mutableStateOf(0.50f)
-    private set
+  val userGpsNormalizedY: Float
+    get() = mapState.userGpsNormalizedY
 
   /** Formatted GPS coordinates & accuracy badge for the user's current field position. */
-  var userGpsCoordinatesLabel by mutableStateOf("-0.4198°, 36.9512° (±3.2m GPS)")
-    private set
+  val userGpsCoordinatesLabel: String
+    get() = mapState.userGpsCoordinatesLabel
 
   /**
    * Whether the map camera automatically pans to keep the user's current GPS location at the center
@@ -1072,18 +1056,16 @@ class PrototypeAppState(
    * a place, which sets [locationLockState] to [LocationLockState.PANNED] and reveals the Google
    * Maps-style `"Recenter"` button.
    */
-  var isCameraFollowingUser by mutableStateOf(true)
-    private set
+  val isCameraFollowingUser: Boolean
+    get() = mapState.isCameraFollowingUser
 
   /** Current map camera lock state (`LOCKED`, `LOCKED_3D`, or `PANNED`). */
-  var locationLockState by mutableStateOf(LocationLockState.LOCKED)
-    private set
-
-  private var lastSelectedPlace: SurveyPlaceItem? by mutableStateOf(null)
+  val locationLockState: LocationLockState
+    get() = mapState.locationLockState
 
   /** Where the active survey sits on the map. */
   private val activeSurveyAnchor: SurveyMapAnchor
-    get() = SurveyMapAnchor.forSurvey(activeSurveyId)
+    get() = mapState.anchor
 
   /** Where the active survey sits on the map, for the map content builders. */
   internal val mapAnchor: SurveyMapAnchor
@@ -1093,31 +1075,27 @@ class PrototypeAppState(
     activeSurveyAnchor.center.let { it.longitude to it.latitude }
 
   /** Normalized horizontal viewport offset applied when the user manually drags/pans the map. */
-  var mapPanOffsetX by mutableStateOf(0f)
-    private set
+  val mapPanOffsetX: Float
+    get() = mapState.mapPanOffsetX
 
   /** Normalized vertical viewport offset applied when the user manually drags/pans the map. */
-  var mapPanOffsetY by mutableStateOf(0f)
-    private set
+  val mapPanOffsetY: Float
+    get() = mapState.mapPanOffsetY
 
   /** Zoom delta relative to the active survey's default Mapbox zoom level (`[-5.0f, +3.7f]`). */
-  var mapZoomDelta by mutableStateOf(0f)
-    private set
+  val mapZoomDelta: Float
+    get() = mapState.mapZoomDelta
 
   /** Formatted current Mapbox zoom level badge (e.g. `"15.3z"`). */
   val effectiveMapZoomLabel: String
-    get() {
-      val rawZoom = (15.3f + mapZoomDelta).coerceIn(10.0f, 19.0f)
-      val tenths = (rawZoom * 10f + 0.5f).toInt()
-      return "${tenths / 10}.${tenths % 10}z"
-    }
+    get() = mapState.effectiveMapZoomLabel
 
   /**
-   * Computes a Google Maps-style horizontal scale bar specification (`label`, `distanceMeters`,
-   * `barWidthDp`) via [ClusterMapFeaturesUseCase.computeScaleBarSpec].
+   * Google Maps-style horizontal scale bar specification (`label`, `distanceMeters`, `barWidthDp`)
+   * computed by `ClusterMapFeaturesUseCase.computeScaleBarSpec`.
    */
   val mapScaleBarSpec: MapScaleBarSpec
-    get() = viewModel.clusterMapFeaturesUseCase.computeScaleBarSpec(activeSurveyId, mapZoomDelta)
+    get() = mapState.mapScaleBarSpec
 
   /**
    * Total horizontal world-to-viewport shift (`(0.50f - userGpsNormalizedX) + mapPanOffsetX`).
@@ -1125,7 +1103,7 @@ class PrototypeAppState(
    * whenever [isCameraFollowingUser] is `true` (`mapPanOffsetX == 0f`).
    */
   val mapWorldToScreenShiftX: Float
-    get() = (0.50f - userGpsNormalizedX) + mapPanOffsetX
+    get() = mapState.mapWorldToScreenShiftX
 
   /**
    * Total vertical world-to-viewport shift (`(0.50f - userGpsNormalizedY) + mapPanOffsetY`).
@@ -1133,164 +1111,119 @@ class PrototypeAppState(
    * whenever [isCameraFollowingUser] is `true` (`mapPanOffsetY == 0f`).
    */
   val mapWorldToScreenShiftY: Float
-    get() = (0.50f - userGpsNormalizedY) + mapPanOffsetY
+    get() = mapState.mapWorldToScreenShiftY
 
   /** Normalized screen X coordinate of the user's GPS blue dot (`0.50f` when centered). */
   val userScreenNormalizedX: Float
-    get() = 0.50f + mapPanOffsetX
+    get() = mapState.userScreenNormalizedX
 
   /** Normalized screen Y coordinate of the user's GPS blue dot (`0.50f` when centered). */
   val userScreenNormalizedY: Float
-    get() = 0.50f + mapPanOffsetY
+    get() = mapState.userScreenNormalizedY
 
   /** Number of GNSS (GPS/Galileo/GLONASS) satellites currently locked by the device receiver. */
-  var gnssSatelliteCount by mutableStateOf(18)
-    private set
+  val gnssSatelliteCount: Int
+    get() = mapState.gnssSatelliteCount
 
   /** Current horizontal GNSS accuracy in meters (`±2.1 m`). */
-  var gnssAccuracyMeters by mutableStateOf(2.1)
-    private set
+  val gnssAccuracyMeters: Double
+    get() = mapState.gnssAccuracyMeters
 
   /** Formatted horizontal GNSS accuracy (`±2.1 m` or `±6.8 ft`). */
   val gnssAccuracyFormatted: String
-    get() =
-      if (unitSystem == MeasurementUnitSystem.METRIC) {
-        "±$gnssAccuracyMeters m"
-      } else {
-        val feet = ((gnssAccuracyMeters * 3.28084) * 10.0).toInt() / 10.0
-        "±$feet ft"
-      }
+    get() = mapState.gnssAccuracyFormatted
 
   /** Formatted GPS accuracy badge displayed on the chip over the map (`±2.1 m` or `±6.8 ft`). */
   val gnssStatusChipLabel: String
-    get() = gnssAccuracyFormatted
+    get() = mapState.gnssStatusChipLabel
+
+  // --- GeoID QR code & PDF export dialogs (see [DataCollectionViewModel]) ---
 
   /**
    * Entity ID whose scannable GeoID QR code modal dialog is currently open (`null` when closed).
    */
-  var activeQrCodeEntityId by mutableStateOf<String?>(null)
-    private set
+  val activeQrCodeEntityId: String?
+    get() = dataCollectionState.activeQrCodeEntityId
 
   /** The [GeospatialEntityItem] whose QR code modal dialog is currently open (if any). */
   val activeQrCodeEntity: GeospatialEntityItem?
-    get() = activeQrCodeEntityId?.let { id -> entities.firstOrNull { it.id == id } }
+    get() = dataCollectionState.activeQrCodeEntity
 
   /**
    * Active PDF export & app-sharing modal state for an entity or submission (`null` when closed).
    */
-  var activeSharedPdfSheet by mutableStateOf<SharedPdfSheetState?>(null)
-    private set
-
-  /** The PDF generated for [activeSharedPdfSheet] (`null` when the sheet is closed). */
-  private var activePdf: GeneratedPdf? = null
+  val activeSharedPdfSheet: SharedPdfSheetState?
+    get() = dataCollectionState.activeSharedPdfSheet
 
   /** Short confirmation or error after a PDF action (e.g. `"Saved …pdf"`), or `null`. */
-  var pdfExportMessage by mutableStateOf<String?>(null)
-    private set
+  val pdfExportMessage: String?
+    get() = dataCollectionState.pdfExportMessage
 
-  // --- Straight-Line Wayfinding Navigation State (Entities & Submissions) ---
+  // --- Straight-Line Wayfinding Navigation State (see [SurveyMapViewModel]) ---
   /**
-   * Target kind (`ENTITY` or `SUBMISSION`) for active straight-line navigation (`null` when
-   * inactive).
+   * Target kind (`ENTITY`, `SUBMISSION`, or `PLACE`) for active straight-line navigation (`null`
+   * when inactive).
    */
-  var navigationTargetKind by mutableStateOf<NavigationTargetKind?>(null)
-    private set
-
-  /**
-   * Target ID (`entityId` or `submissionId`) for active straight-line navigation (`null` when
-   * inactive).
-   */
-  var navigationTargetId by mutableStateOf<String?>(null)
-    private set
+  val navigationTargetKind: NavigationTargetKind?
+    get() = mapState.navigationTargetKind
 
   /**
-   * Computes a [StraightLineVector] from the collector's current GPS position via
-   * [org.groundplatform.v2.devtools.prototypeapp.domain.usecase.ComputeWayfindingNavigationUseCase]
-   * .
+   * Target ID (`entityId`, `submissionId`, or `placeId`) for active straight-line navigation
+   * (`null` when inactive).
    */
+  val navigationTargetId: String?
+    get() = mapState.navigationTargetId
+
+  /** Computes a [StraightLineVector] from the collector's current GPS position. */
   fun computeStraightLineVector(
     targetNormalizedX: Float,
     targetNormalizedY: Float,
-  ): StraightLineVector =
-    viewModel.computeWayfindingNavigationUseCase(
-      fromNormalizedX = userGpsNormalizedX,
-      fromNormalizedY = userGpsNormalizedY,
-      targetNormalizedX = targetNormalizedX,
-      targetNormalizedY = targetNormalizedY,
-      unitSystem = unitSystem,
-    )
+  ): StraightLineVector = surveyMap.computeStraightLineVector(targetNormalizedX, targetNormalizedY)
 
   /**
    * Resolves the normalized map coordinates `(normalizedX, normalizedY)` and optional
-   * [SubmissionGeometryPolygon] for any [SubmissionPreviewItem] via
-   * [org.groundplatform.v2.devtools.prototypeapp.domain.usecase.ComputeWayfindingNavigationUseCase]
-   * .
+   * [SubmissionGeometryPolygon] for any [SubmissionPreviewItem].
    */
   fun resolveSubmissionTargetGeometry(
     submissionId: String
   ): Triple<Float, Float, SubmissionGeometryPolygon?>? =
-    viewModel.computeWayfindingNavigationUseCase.resolveSubmissionTargetGeometry(
-      submissionId = submissionId,
-      allSubmissions = allSubmissions,
-      submissionGeometries = submissionGeometries,
-      entities = entities,
-    )
+    surveyMap.resolveSubmissionTargetGeometry(submissionId)
 
   /** Returns the live [StraightLineVector] from the user's GPS position to [entityId]. */
-  fun distanceAndBearingToEntity(entityId: String): StraightLineVector? {
-    val entity = entities.firstOrNull { it.id == entityId } ?: return null
-    return computeStraightLineVector(entity.normalizedX, entity.normalizedY)
-  }
+  fun distanceAndBearingToEntity(entityId: String): StraightLineVector? =
+    surveyMap.distanceAndBearingToEntity(entityId)
 
   /** Returns the live [StraightLineVector] from the user's GPS position to [submissionId]. */
-  fun distanceAndBearingToSubmission(submissionId: String): StraightLineVector? {
-    val (tx, ty, _) = resolveSubmissionTargetGeometry(submissionId) ?: return null
-    return computeStraightLineVector(tx, ty)
-  }
+  fun distanceAndBearingToSubmission(submissionId: String): StraightLineVector? =
+    surveyMap.distanceAndBearingToSubmission(submissionId)
 
   /**
-   * Resolves a [SurveyPlaceItem] by [placeId] across built-in places, API results, and active
-   * selection.
+   * Resolves a [SurveyPlaceItem] by [placeId] across live API results, built-in places, list search
+   * results, and the place selected or navigated to on the map.
    */
   fun findPlaceById(placeId: String): SurveyPlaceItem? =
-    (mapboxPlacesApiResults + places + filteredListPlaces + listOfNotNull(lastSelectedPlace))
-      .firstOrNull { it.id == placeId }
+    (mapboxPlacesApiResults + places + filteredListPlaces).firstOrNull { it.id == placeId }
+      ?: surveyMap.findPlaceById(placeId)
 
   /** Returns the live [StraightLineVector] from the user's GPS position to [placeId]. */
-  fun distanceAndBearingToPlace(placeId: String): StraightLineVector? {
-    val place = findPlaceById(placeId) ?: return null
-    return computeStraightLineVector(place.normalizedX, place.normalizedY)
-  }
+  fun distanceAndBearingToPlace(placeId: String): StraightLineVector? =
+    findPlaceById(placeId)?.let(surveyMap::distanceAndBearingToPlace)
 
   /** Formatted distance & compass bearing badge for [entityId] (e.g. `"495 m • 319° NW"`). */
-  fun formattedWayfindingBadgeForEntity(entityId: String): String {
-    val v = distanceAndBearingToEntity(entityId) ?: return ""
-    return "${v.formattedDistance} • ${v.bearingDegrees}° ${v.cardinalDirection}"
-  }
+  fun formattedWayfindingBadgeForEntity(entityId: String): String =
+    surveyMap.formattedWayfindingBadgeForEntity(entityId)
 
   /** Formatted distance & compass bearing badge for [placeId] (e.g. `"340 m • 142° SE"`). */
-  fun formattedWayfindingBadgeForPlace(placeId: String): String {
-    val v = distanceAndBearingToPlace(placeId) ?: return ""
-    return "${v.formattedDistance} • ${v.bearingDegrees}° ${v.cardinalDirection}"
-  }
+  fun formattedWayfindingBadgeForPlace(placeId: String): String =
+    distanceAndBearingToPlace(placeId)?.formattedBadge.orEmpty()
 
   /** Formatted distance & compass bearing badge for [submissionId] (e.g. `"452 m • 321° NW"`). */
-  fun formattedWayfindingBadgeForSubmission(submissionId: String): String {
-    val v = distanceAndBearingToSubmission(submissionId) ?: return ""
-    return "${v.formattedDistance} • ${v.bearingDegrees}° ${v.cardinalDirection}"
-  }
+  fun formattedWayfindingBadgeForSubmission(submissionId: String): String =
+    surveyMap.formattedWayfindingBadgeForSubmission(submissionId)
 
-  /**
-   * Returns `true` if [field] in [submissionId] represents a geometry question/field via
-   * [org.groundplatform.v2.devtools.prototypeapp.domain.usecase.ComputeWayfindingNavigationUseCase]
-   * .
-   */
+  /** Returns `true` if [field] in [submissionId] represents a geometry question/field. */
   fun isSubmissionFieldGeometry(submissionId: String, field: SubmissionFieldEntry): Boolean =
-    viewModel.computeWayfindingNavigationUseCase.isSubmissionFieldGeometry(
-      submissionId = submissionId,
-      field = field,
-      submissionGeometries = submissionGeometries,
-    )
+    surveyMap.isSubmissionFieldGeometry(submissionId, field)
 
   /**
    * Formatted distance & compass bearing badge for a geometry [field] inside [submissionId] (e.g.
@@ -1299,282 +1232,206 @@ class PrototypeAppState(
   fun formattedWayfindingBadgeForSubmissionField(
     submissionId: String,
     field: SubmissionFieldEntry,
-  ): String {
-    if (!isSubmissionFieldGeometry(submissionId, field)) return ""
-    val geom = submissionGeometries.firstOrNull {
-      it.submissionId == submissionId &&
-        (it.fieldPath == field.questionName || it.questionLabel == field.questionLabel)
-    }
-    val vector =
-      if (geom != null) {
-        computeStraightLineVector(geom.normalizedX, geom.normalizedY)
-      } else {
-        distanceAndBearingToSubmission(submissionId) ?: return ""
-      }
-    return "${vector.formattedDistance} • ${vector.bearingDegrees}° ${vector.cardinalDirection}"
-  }
+  ): String = surveyMap.formattedWayfindingBadgeForSubmissionField(submissionId, field)
 
   /** True when straight-line navigation is currently active and targeting [entityId]. */
-  fun isNavigatingToEntity(entityId: String): Boolean =
-    navigationTargetKind == NavigationTargetKind.ENTITY && navigationTargetId == entityId
+  fun isNavigatingToEntity(entityId: String): Boolean = mapState.isNavigatingToEntity(entityId)
 
   /** True when straight-line navigation is currently active and targeting [submissionId]. */
   fun isNavigatingToSubmission(submissionId: String): Boolean =
-    navigationTargetKind == NavigationTargetKind.SUBMISSION && navigationTargetId == submissionId
+    mapState.isNavigatingToSubmission(submissionId)
 
   /** True when straight-line navigation is currently active and targeting [placeId]. */
-  fun isNavigatingToPlace(placeId: String): Boolean =
-    navigationTargetKind == NavigationTargetKind.PLACE && navigationTargetId == placeId
+  fun isNavigatingToPlace(placeId: String): Boolean = mapState.isNavigatingToPlace(placeId)
 
-  /**
-   * Currently active straight-line navigation session ([StraightLineNavigationState]) resolved via
-   * [org.groundplatform.v2.devtools.prototypeapp.domain.usecase.ComputeWayfindingNavigationUseCase]
-   * .
-   */
+  /** Currently active straight-line navigation session ([StraightLineNavigationState]). */
   val activeNavigation: StraightLineNavigationState?
-    get() =
-      viewModel.computeWayfindingNavigationUseCase.resolveActiveNavigationState(
-        navigationTargetKind = navigationTargetKind,
-        navigationTargetId = navigationTargetId,
-        fromNormalizedX = userGpsNormalizedX,
-        fromNormalizedY = userGpsNormalizedY,
-        unitSystem = unitSystem,
-        userGpsCoordinatesLabel = userGpsCoordinatesLabel,
-        entities = entities,
-        allSubmissions = allSubmissions,
-        submissionGeometries = submissionGeometries,
-        findPlaceById = ::findPlaceById,
-      )
+    get() = mapState.activeNavigation
 
   // --- Data Collection Form & XForms FormDef Chrome State ---
   /**
    * Currently selected swappable example form in the Prototype App Workbench (
    * [WorkbenchExampleForm]), or `null` when custom XML has been manually edited.
    */
-  var selectedWorkbenchExampleForm by
-    mutableStateOf<WorkbenchExampleForm?>(WorkbenchExampleForm.ALL_FIELD_TYPES)
-    private set
+  val selectedWorkbenchExampleForm: WorkbenchExampleForm?
+    get() = workbenchState.selectedWorkbenchExampleForm
 
   /**
    * Custom XForms `<h:html>` definition editable in the Prototype App Chrome
    * (`UxDesignerInspectorPanel`). Initialized to a rich EUDR / Shade-Tree Field Survey XForms XML
    * that parses cleanly with [XFormsXmlSerializer.deserializeFormDef].
    */
-  var customXFormsXml by mutableStateOf(DEFAULT_PROTOTYPE_XFORMS_XML)
-    private set
+  val customXFormsXml: String
+    get() = workbenchState.customXFormsXml
 
   /**
    * Parse error message from [XFormsXmlSerializer.deserializeFormDef] when [customXFormsXml] is
    * invalid, or `null` when valid.
    */
-  var xformsXmlError by mutableStateOf<String?>(null)
-    private set
+  val xformsXmlError: String?
+    get() = workbenchState.xformsXmlError
 
   /**
    * Parsed [FormDef] from [customXFormsXml] (`null` when [customXFormsXml] is blank or invalid;
-   * when blank, built-in fallback XForms [FormDef]s per form ID are used automatically).
+   * when blank, built-in fallback XForms [FormDef]s per form ID are used automatically). Held by
+   * [DataCollectionViewModel], which re-launches the open form when it changes.
    */
-  var customFormDef by mutableStateOf<FormDef?>(parseDefaultPrototypeFormDef())
-    private set
+  val customFormDef: FormDef?
+    get() = dataCollectionState.customFormDef
+
+  // --- Data collection (see [DataCollectionViewModel]) ---
 
   /**
    * Active [FormWizardController] driving the embedded
    * [org.groundplatform.v2.core.forms.ui.MobileFormRunner] when data collection is triggered for a
    * Geospatial Entity (`null` when closed).
    */
-  var activeFormWizardController: FormWizardController?
-    get() = activeFormWizardControllerState
-    private set(value) {
-      // Opening, replacing, or closing a form ends any map drawing started for the previous one,
-      // and drops a pending jump to one of its questions.
-      if (value !== activeFormWizardControllerState) {
-        webMapDrawing.stopDrawing()
-        webFormFocusRequest = null
-      }
-      activeFormWizardControllerState = value
-    }
-
-  private var activeFormWizardControllerState by mutableStateOf<FormWizardController?>(null)
+  val activeFormWizardController: FormWizardController?
+    get() = dataCollectionState.activeFormWizardController
 
   /**
-   * Web dashboard's "draw on the map" host for the compact form runner's geometry questions. Mobile
-   * never starts drawing (its widgets capture the device GPS), so [WebMapDrawingHost.isDrawing]
-   * stays `false` there. See [addWebMapDrawingVertex] and [webMapDraftGeometry].
+   * Web dashboard's "draw on the map" host for the compact form runner's geometry questions. See
+   * [addWebMapDrawingVertex] and [webMapDraftGeometry].
    */
-  val webMapDrawing =
-    WebMapDrawingHost(
-      controller = { activeFormWizardController },
-      onFrame = { bounds, maxZoom -> requestWebMapFraming(bounds, maxZoom) },
-    )
+  val webMapDrawing: WebMapDrawingHost
+    get() = dataCollection.webMapDrawing
 
   /**
    * Bounds the web dashboard's main map should frame next (a question card's **Zoom to fit**), or
    * `null`. Each request carries a fresh token, so framing the same geometry twice re-fires.
    */
-  var webMapFramingRequest by mutableStateOf<MapFramingRequest?>(null)
-    private set
-
-  private var webMapFramingToken = 0L
+  val webMapFramingRequest: MapFramingRequest?
+    get() = dataCollectionState.webMapFramingRequest
 
   /** Asks the main map to centre [bounds] in its visible area, zooming in at most to [maxZoom]. */
-  fun requestWebMapFraming(bounds: LngLatBounds, maxZoom: Double) {
-    webMapFramingToken += 1
-    webMapFramingRequest = MapFramingRequest(bounds, maxZoom, webMapFramingToken)
-  }
+  fun requestWebMapFraming(bounds: LngLatBounds, maxZoom: Double) =
+    dataCollection.requestWebMapFraming(bounds, maxZoom)
 
   /**
    * Adds a main-map click at [latLng] to the geometry question being drawn (no-op when nothing is
    * being drawn). A `geopoint` is placed by its first click, which also stops the drawing.
    */
-  fun addWebMapDrawingVertex(latLng: LatLng) = webMapDrawing.addVertex(latLng)
+  fun addWebMapDrawingVertex(latLng: LatLng) = dataCollection.addWebMapDrawingVertex(latLng)
 
   /** The geometry being drawn on the main map, for its overlay, or `null` when not drawing. */
   val webMapDraftGeometry: DraftGeometry?
-    get() = webMapDrawing.draftGeometry
+    get() = dataCollectionState.webMapDraftGeometry
 
   /**
    * Every geometry answer held by the open form (web dashboard), for the main map's in-flow
-   * overlay: each `geopoint` / `geotrace` / `geoshape` field with a value, except the one being
-   * drawn right now (the draft overlay shows that one). Empty when no form is open.
+   * overlay. Empty when no form is open.
    */
   val webFormGeometries: List<FormGeometryOverlay>
-    get() {
-      val controller = activeFormWizardController ?: return emptyList()
-      return formGeometryOverlays(controller, excludePath = webMapDrawing.activeDrawingPath)
-    }
+    get() = dataCollectionState.webFormGeometries
 
   /**
    * The question the web form panel should scroll to and highlight, after its geometry was clicked
-   * on the main map ([focusWebFormQuestion]). Each request carries a fresh token, so clicking the
-   * same geometry again re-fires it.
+   * on the main map ([focusWebFormQuestion]).
    */
-  var webFormFocusRequest by mutableStateOf<FormFocusRequest?>(null)
-    private set
-
-  private var webFormFocusToken = 0L
+  val webFormFocusRequest: FormFocusRequest?
+    get() = dataCollectionState.webFormFocusRequest
 
   /** Asks the web form panel to bring the question at [path] into view and highlight it. */
-  fun focusWebFormQuestion(path: String) {
-    webFormFocusToken += 1
-    webFormFocusRequest = FormFocusRequest(path, webFormFocusToken)
-  }
+  fun focusWebFormQuestion(path: String) = dataCollection.focusWebFormQuestion(path)
 
   /** Clears [webFormFocusRequest] once the form panel has handled it. */
-  fun consumeWebFormFocusRequest() {
-    webFormFocusRequest = null
-  }
+  fun consumeWebFormFocusRequest() = dataCollection.consumeWebFormFocusRequest()
 
   /**
    * Target Geospatial Entity ID for the currently active data collection form (`null` when closed).
    */
-  var activeDataCollectionEntityId by mutableStateOf<String?>(null)
-    private set
+  val activeDataCollectionEntityId: String?
+    get() = dataCollectionState.activeDataCollectionEntityId
 
   /** Target Form ID for the currently active data collection form (`null` when closed). */
-  var activeDataCollectionFormId by mutableStateOf<String?>(null)
-    private set
+  val activeDataCollectionFormId: String?
+    get() = dataCollectionState.activeDataCollectionFormId
 
   /** True when the embedded [org.groundplatform.v2.core.forms.ui.MobileFormRunner] is open. */
   val isDataCollectionFormOpen: Boolean
-    get() = activeFormWizardController != null
+    get() = dataCollectionState.isDataCollectionFormOpen
 
   /**
    * The target [GeospatialEntityItem] for the currently active data collection session (if any).
    */
   val activeDataCollectionEntity: GeospatialEntityItem?
-    get() = activeDataCollectionEntityId?.let { id -> entities.firstOrNull { it.id == id } }
+    get() = dataCollectionState.activeDataCollectionEntity
 
   /** The target [FormPreviewItem] for the currently active data collection session (if any). */
   val activeDataCollectionForm: FormPreviewItem?
-    get() = activeDataCollectionFormId?.let { id -> forms.firstOrNull { it.id == id } }
+    get() = dataCollectionState.activeDataCollectionForm
 
   /**
    * True when the Available Forms modal bottom sheet (triggered by the bottom-centered floating
    * action button on the Main Survey screen) is currently open.
    */
-  var isAvailableFormsSheetOpen by mutableStateOf(false)
-    private set
+  val isAvailableFormsSheetOpen: Boolean
+    get() = dataCollectionState.isAvailableFormsSheetOpen
 
   /**
    * True when the active data collection form was launched from the bottom-centered FAB without
    * pre-selecting a geospatial entity on the map (`activeDataCollectionEntityId` starts `null`, and
    * the `entityref` step presents the Map or List selector).
    */
-  var wasFormLaunchedWithoutEntity by mutableStateOf(false)
-    private set
+  val wasFormLaunchedWithoutEntity: Boolean
+    get() = dataCollectionState.wasFormLaunchedWithoutEntity
 
   /**
    * Active view mode (`MainSurveyViewMode.MAP` vs `MainSurveyViewMode.LIST`) for the in-form
    * `entityref` step selector when a form is launched without a pre-selected geospatial entity.
    */
-  var entityRefSelectorViewMode by mutableStateOf(MainSurveyViewMode.MAP)
-    private set
+  val entityRefSelectorViewMode: MainSurveyViewMode
+    get() = dataCollectionState.entityRefSelectorViewMode
 
   /** Search query used to filter candidate entities in the `entityref` step's `List` mode. */
-  var entityRefSearchQuery by mutableStateOf("")
-    private set
+  val entityRefSearchQuery: String
+    get() = dataCollectionState.entityRefSearchQuery
 
   /**
    * Incremented each time a map feature is picked at the `entityref` step, so the step's map frames
    * it again even when the same feature is picked twice.
    */
-  var entityRefFramingEpoch by mutableStateOf(0L)
-    private set
+  val entityRefFramingEpoch: Long
+    get() = dataCollectionState.entityRefFramingEpoch
 
   /**
    * Returns all [GeospatialEntityItem]s in the active survey belonging to [form]'s target dataset
    * (`form.targetDatasetId`).
    */
   fun allDatasetEntitiesForForm(form: FormPreviewItem): List<GeospatialEntityItem> =
-    if (form.requiresEntity) {
-      entities.filter { it.datasetId == form.targetDatasetId }
-    } else {
-      emptyList()
-    }
+    dataCollectionState.allDatasetEntitiesForForm(form)
 
   /**
    * Returns the eligible [GeospatialEntityItem]s in [form]'s target dataset that can accept a new
    * submission for [form] (`isFormButtonEnabled(entity, form) == true`).
    */
   fun eligibleEntitiesForForm(form: FormPreviewItem): List<GeospatialEntityItem> =
-    allDatasetEntitiesForForm(form).filter { isFormButtonEnabled(it, form) }
+    dataCollectionState.eligibleEntitiesForForm(form)
 
   /** Eligible [GeospatialEntityItem]s for the currently active data collection form. */
   val eligibleEntitiesForActiveForm: List<GeospatialEntityItem>
-    get() = activeDataCollectionForm?.let { eligibleEntitiesForForm(it) } ?: emptyList()
+    get() = dataCollectionState.eligibleEntitiesForActiveForm
 
   /**
    * Candidate entities for the active form's target dataset filtered by [entityRefSearchQuery] when
    * the collector is using the `List` view at the `entityref` step.
    */
   val filteredEntityRefCandidates: List<GeospatialEntityItem>
-    get() {
-      val form = activeDataCollectionForm ?: return emptyList()
-      val base = allDatasetEntitiesForForm(form)
-      val q = entityRefSearchQuery.trim()
-      if (q.isEmpty()) return base
-      return base.filter { entity ->
-        entity.label.contains(q, ignoreCase = true) ||
-          entity.geoId.contains(q, ignoreCase = true) ||
-          entity.datasetName.contains(q, ignoreCase = true) ||
-          entity.properties.values.any { it.contains(q, ignoreCase = true) }
-      }
-    }
+    get() = dataCollectionState.filteredEntityRefCandidates
 
   /**
    * True when the embedded form runner is open and the current step in [activeFormWizardController]
-   * is an `entityref` step (`/data/target_entity` / `appearance="map-select"`) requiring the user
-   * to select a geospatial entity via Map or List.
+   * is an `entityref` step requiring the user to select a geospatial entity via Map or List.
    */
   val isCurrentFormStepEntityRef: Boolean
-    get() = isWizardStepEntityRef(activeFormWizardController?.currentStep)
+    get() = dataCollectionState.isCurrentFormStepEntityRef
 
   /**
    * True when the embedded form runner is open and the current step in [activeFormWizardController]
    * contains a `geopoint` (`DataType.TYPE_GEOPOINT`) question.
    */
   val isCurrentFormStepGeoPoint: Boolean
-    get() = isWizardStepGeoPoint(activeFormWizardController?.currentStep)
+    get() = dataCollectionState.isCurrentFormStepGeoPoint
 
   /** The currently active survey loaded in the Main Survey UI. */
   val activeSurvey: SurveyPreviewItem
@@ -1592,20 +1449,10 @@ class PrototypeAppState(
    * description, or location.
    */
   val filteredSurveys: List<SurveyPreviewItem>
-    get() {
-      val trimmed = searchQuery.trim()
-      if (trimmed.isEmpty()) return surveys
-      return surveys.filter { survey ->
-        survey.title.contains(trimmed, ignoreCase = true) ||
-          survey.description.contains(trimmed, ignoreCase = true) ||
-          survey.location.contains(trimmed, ignoreCase = true) ||
-          survey.coordinatesLabel.contains(trimmed, ignoreCase = true) ||
-          organization(survey.organizationId)?.name?.contains(trimmed, ignoreCase = true) == true
-      }
-    }
+    get() = onboardingState.filteredSurveys
 
   val downloadedSurveyCount: Int
-    get() = surveys.count { it.isDownloaded }
+    get() = onboardingState.downloadedSurveyCount
 
   /**
    * Layers backed by `LayerDef.entity_dataset_id` (rendered with solid outlines) when the survey
@@ -1613,15 +1460,7 @@ class PrototypeAppState(
    * layers section of the `Layers` sheet is hidden.
    */
   val entityDatasetLayers: List<MapLayerItem>
-    get() =
-      if (entities.isEmpty()) {
-        emptyList()
-      } else {
-        mapLayers.filter { layer ->
-          layer.sourceType == LayerSourceType.ENTITY_DATASET &&
-            entities.any { it.layerId == layer.id }
-        }
-      }
+    get() = dashboardState.entityDatasetLayers
 
   /** True when the active survey has geospatial entities to display in the `Layers` sheet. */
   val hasGeospatialEntities: Boolean
@@ -1633,11 +1472,11 @@ class PrototypeAppState(
 
   /** Geospatial entities currently visible on the map according to active layer visibility. */
   val visibleMapEntities: List<GeospatialEntityItem>
-    get() = entities.filter { it.layerId in visibleLayerIds }
+    get() = mapState.visibleMapEntities
 
   /** Currently visible entity dataset layers (`LayerSourceType.ENTITY_DATASET`). */
   val visibleEntityDatasetLayers: List<MapLayerItem>
-    get() = entityDatasetLayers.filter { it.isVisible }
+    get() = dashboardState.visibleEntityDatasetLayers
 
   /**
    * User-facing plural category label for the `Map features` tab and list section header:
@@ -1646,8 +1485,7 @@ class PrototypeAppState(
    * - When multiple entity dataset layers are visible (or none), falls back to `"Map features"`.
    */
   val activeEntitiesTabLabel: String
-    get() =
-      visibleEntityDatasetLayers.singleOrNull()?.pluralDomainLabel ?: ListFilterTab.ENTITIES.label
+    get() = dashboardState.activeEntitiesTabLabel
 
   /**
    * User-facing lowercase plural count noun for map counters, search hints, and empty states:
@@ -1656,22 +1494,16 @@ class PrototypeAppState(
    * - Otherwise falls back to `"map features"`.
    */
   val activeEntitiesCountNoun: String
-    get() =
-      visibleEntityDatasetLayers.singleOrNull()?.pluralDomainLabel?.lowercase() ?: "map features"
+    get() = mapState.activeEntitiesCountNoun
 
   /**
    * Resolves the user-facing singular domain noun for [entityId] (e.g. `"Coffee Parcel"`, or
    * `"Location"`).
    */
-  fun entitySingularTypeLabel(entityId: String?): String =
-    entityId?.let { id -> entities.firstOrNull { it.id == id }?.singularTypeLabel } ?: "Location"
+  fun entitySingularTypeLabel(entityId: String?): String = entities.singularTypeLabelOf(entityId)
 
   /** Resolves the dynamic display label for a [ListFilterTab] chip. */
-  fun tabLabelFor(tab: ListFilterTab): String =
-    when (tab) {
-      ListFilterTab.ENTITIES -> activeEntitiesTabLabel
-      else -> tab.label
-    }
+  fun tabLabelFor(tab: ListFilterTab): String = dashboardState.tabLabelFor(tab)
 
   /**
    * Form submission geometries are not displayed on the map; only entity geometries (map features)
@@ -1681,54 +1513,31 @@ class PrototypeAppState(
     get() = emptyList()
 
   /** ID of the currently selected map feature cluster when the map is zoomed out. */
-  var selectedClusterId by mutableStateOf<String?>(null)
-    private set
+  val selectedClusterId: String?
+    get() = mapState.selectedClusterId
 
   /**
-   * True when the map is zoomed out past the clustering threshold ([MapClusteringZoomDelta], about
-   * z12.95), causing visible map features (`visibleMapEntities`) to be grouped into spatial
-   * clusters with cluster balloons showing counts per marker symbol.
+   * True when the map is zoomed out past the clustering threshold (about z12.95), causing visible
+   * map features (`visibleMapEntities`) to be grouped into spatial clusters with cluster balloons
+   * showing counts per marker symbol.
    */
   val isMapClusteringActive: Boolean
-    get() = mapZoomDelta <= MapClusteringZoomDelta
+    get() = mapState.isMapClusteringActive
 
   /**
    * Normalized world-space clustering radius (`[0.20, 12.0]`) scaled exponentially as the user
    * zooms out (`2^(-mapZoomDelta)`). Returns `0f` when clustering is inactive.
    */
   val mapClusterRadiusNormalized: Float
-    get() =
-      if (!isMapClusteringActive) {
-        0f
-      } else {
-        (0.175f * 2.0.pow(-mapZoomDelta.toDouble()).toFloat()).coerceIn(0.20f, 12.0f)
-      }
+    get() = dataHolder.clusterMapFeaturesUseCase.clusterRadiusNormalized(mapZoomDelta)
 
   /**
    * All visible map features (`visibleMapEntities`) normalized into [MapClusterFeatureItem]
-   * instances for clustering.
-   *
-   * Geospatial entities carry their `simplestyle-spec` `marker-symbol` (`"✓"`, `"◐"`, `"○"`, or
-   * `""` if no marker symbol is set). Form submission geometries are not displayed on the map or in
-   * cluster chips.
+   * instances for clustering. Form submission geometries are not displayed on the map or in cluster
+   * chips.
    */
   val visibleMapClusterFeatures: List<MapClusterFeatureItem>
-    get() = visibleMapEntities.map { ent ->
-      MapClusterFeatureItem(
-        id = ent.id,
-        kind = MapFeatureKind.ENTITY,
-        label = ent.label.substringBefore(" •"),
-        markerSymbol = ent.rawMarkerSymbol,
-        colorHex = ent.markerColorHex,
-        colorCss = ent.markerColorCss,
-        normalizedX = ent.normalizedX,
-        normalizedY = ent.normalizedY,
-        entityId = ent.id,
-      )
-    }
-
-  private var cachedClustersKey: String = ""
-  private var cachedClustersResult: List<MapFeatureCluster> = emptyList()
+    get() = visibleMapEntities.toClusterFeatures()
 
   /**
    * Spatial clusters of visible map features when [isMapClusteringActive] is `true`.
@@ -1738,44 +1547,23 @@ class PrototypeAppState(
    * and `""` for no marker symbol) so the cluster balloon displays the count of each group.
    */
   val mapFeatureClusters: List<MapFeatureCluster>
-    get() {
-      if (!isMapClusteringActive) return emptyList()
-      val key = "${entities.hashCode()}:${visibleLayerIds.hashCode()}:$mapZoomDelta"
-      if (key == cachedClustersKey) {
-        return cachedClustersResult
-      }
-      val computed =
-        computeMapFeatureClusters(
-          features = visibleMapClusterFeatures,
-          radiusNormalized = mapClusterRadiusNormalized,
-        )
-      cachedClustersKey = key
-      cachedClustersResult = computed
-      return computed
-    }
+    get() = mapState.mapFeatureClusters
 
   /** Currently selected [MapFeatureCluster] (if any and if clustering is active). */
   val selectedCluster: MapFeatureCluster?
-    get() =
-      if (!isMapClusteringActive) {
-        null
-      } else {
-        selectedClusterId?.let { id -> mapFeatureClusters.firstOrNull { it.id == id } }
-      }
+    get() = mapState.selectedCluster
 
   /** The currently selected Geospatial Entity shown in the bottom sheet (if any). */
   val selectedEntity: GeospatialEntityItem?
-    get() = selectedEntityId?.let { id ->
-      entities.firstOrNull { it.id == id && it.layerId in visibleLayerIds }
-    }
+    get() = dataCollectionState.selectedEntity
 
   /** All submissions (both entity-attached and standalone) in the active survey. */
   val allSubmissions: List<SubmissionPreviewItem>
-    get() = entities.flatMap { it.submissions } + standaloneSubmissions
+    get() = dataCollectionState.allSubmissions
 
   /** The currently selected individual submission for full submission detail inspection. */
   val selectedSubmission: SubmissionPreviewItem?
-    get() = selectedSubmissionId?.let { id -> allSubmissions.firstOrNull { it.id == id } }
+    get() = dataCollectionState.selectedSubmission
 
   /**
    * Returns the forms in the active survey that request entities of [entity]'s dataset type and are
@@ -1784,15 +1572,14 @@ class PrototypeAppState(
   fun formsForEntity(
     entity: GeospatialEntityItem,
     onWeb: Boolean = false,
-  ): List<FormPreviewItem> =
-    (if (onWeb) webForms else mobileForms).filter { it.targetDatasetId == entity.datasetId }
+  ): List<FormPreviewItem> = dataCollectionState.formsForEntity(entity, onWeb)
 
   /**
    * Returns whether the organizer-defined action button for [form] is enabled on [entity]. Because
    * all forms are `1:N` with entities, any form targeting [entity]'s dataset is enabled.
    */
   fun isFormButtonEnabled(entity: GeospatialEntityItem, form: FormPreviewItem): Boolean =
-    !form.requiresEntity || entity.datasetId == form.targetDatasetId
+    dataCollectionState.isFormButtonEnabled(entity, form)
 
   /** Number of entities currently in [SyncStatus.UPLOADING] state. */
   val uploadingEntityCount: Int
@@ -1825,12 +1612,12 @@ class PrototypeAppState(
    * and the bottom sheet shows an offline notice explaining that search is restricted to local map
    * features and that Places search is not available offline.
    */
-  var isAirplaneMode by mutableStateOf(false)
-    private set
+  val isAirplaneMode: Boolean
+    get() = mapState.isAirplaneMode
 
   /** Whether online Mapbox Places API search is currently available (`!isAirplaneMode`). */
   val isPlacesSearchAvailable: Boolean
-    get() = !isAirplaneMode
+    get() = mapState.isPlacesSearchAvailable
 
   /** Live place results returned by [PlacesGeocoder] (Mapbox Geocoding or Nominatim). */
   var mapboxPlacesApiResults by mutableStateOf<List<SurveyPlaceItem>>(emptyList())
@@ -1842,7 +1629,7 @@ class PrototypeAppState(
 
   /** Currently selected [SurveyPlaceItem] from Mapbox Places search (if any). */
   val selectedPlace: SurveyPlaceItem?
-    get() = selectedPlaceId?.let { id -> findPlaceById(id) }
+    get() = mapState.selectedPlace
 
   /**
    * Filtered Places ([SurveyPlaceItem]s) in the Main Survey searchable bottom sheet returned by the
@@ -1854,7 +1641,7 @@ class PrototypeAppState(
   val filteredListPlaces: List<SurveyPlaceItem>
     get() {
       val (surveyLng, surveyLat) = activeSurveyBaseLngLat()
-      return viewModel.searchPlacesUseCase(
+      return dataHolder.searchPlacesUseCase(
         query = listSearchQuery,
         isAirplaneMode = isAirplaneMode,
         listFilterTab = listFilterTab,
@@ -1880,7 +1667,7 @@ class PrototypeAppState(
    */
   private fun parseCoordinateQueryToPlace(query: String): SurveyPlaceItem? {
     val (surveyLng, surveyLat) = activeSurveyBaseLngLat()
-    return viewModel.searchPlacesUseCase.parseCoordinateQueryToPlace(
+    return dataHolder.searchPlacesUseCase.parseCoordinateQueryToPlace(
       query = query,
       surveyBaseLng = surveyLng,
       surveyBaseLat = surveyLat,
@@ -1963,9 +1750,8 @@ class PrototypeAppState(
    * True when [submission] is stored on this device, i.e. it was recorded locally and appears in
    * the local mutation log. Other collectors' submissions are only fetched when online.
    */
-  fun isSubmissionStoredOnDevice(submission: SubmissionPreviewItem): Boolean = mutations.any {
-    it.submissionId == submission.id
-  }
+  fun isSubmissionStoredOnDevice(submission: SubmissionPreviewItem): Boolean =
+    dashboardState.isSubmissionStoredOnDevice(submission)
 
   /**
    * Submissions of [entity] available to show, grouped by form. Seeing the full list requires a
@@ -1991,18 +1777,12 @@ class PrototypeAppState(
   fun relatedEntityForPropertyValue(
     entity: GeospatialEntityItem,
     value: String,
-  ): GeospatialEntityItem? {
-    val key = value.trim()
-    if (key.isEmpty()) return null
-    return entities.firstOrNull {
-      it.id != entity.id && (it.id == key || it.geoId.equals(key, ignoreCase = true))
-    }
-  }
+  ): GeospatialEntityItem? = entities.relatedEntityForPropertyValue(entity, value)
 
   /** Directly switches the active mobile screen (used by both flow buttons and UX workbench). */
   fun navigateTo(screen: PrototypeScreen) {
     if (screen == PrototypeScreen.DOWNLOAD_SURVEY) {
-      downloadSurveyEntryOrigin =
+      onboarding.setEntryOrigin(
         if (
           currentScreen == PrototypeScreen.MAIN_SURVEY &&
             activeDrawerSubView == MainDrawerSubView.SWITCH_SURVEYS
@@ -2011,8 +1791,10 @@ class PrototypeAppState(
         } else {
           DownloadSurveyEntryOrigin.AFTER_TOS
         }
+      )
+    } else {
+      onboarding.dismissSignOutPrompt()
     }
-    isDownloadSurveySignOutPromptOpen = false
     currentScreen = screen
     activeSurveyNotice = null
     isDrawerOpen = false
@@ -2020,278 +1802,90 @@ class PrototypeAppState(
   }
 
   /** Authenticates with Google and advances to the Terms of Service screen. */
-  fun signInWithGoogle() {
-    isSignedIn = true
-    isDownloadSurveySignOutPromptOpen = false
-    currentScreen =
-      if (hasAcceptedTerms) {
-        downloadSurveyEntryOrigin = DownloadSurveyEntryOrigin.AFTER_TOS
-        PrototypeScreen.DOWNLOAD_SURVEY
-      } else {
-        PrototypeScreen.TERMS_OF_SERVICE
-      }
-  }
+  fun signInWithGoogle() = onboarding.signInWithGoogle()
 
   /** Updates the Terms of Service agreement checkbox state. */
-  fun setTermsChecked(checked: Boolean) {
-    termsCheckboxChecked = checked
-  }
+  fun setTermsChecked(checked: Boolean) = onboarding.setTermsChecked(checked)
 
   /** Accepts the Terms of Service and advances to the Download Survey screen. */
-  fun acceptTermsOfService() {
-    termsCheckboxChecked = true
-    hasAcceptedTerms = true
-    downloadSurveyEntryOrigin = DownloadSurveyEntryOrigin.AFTER_TOS
-    isDownloadSurveySignOutPromptOpen = false
-    currentScreen = PrototypeScreen.DOWNLOAD_SURVEY
-  }
+  fun acceptTermsOfService() = onboarding.acceptTermsOfService()
 
   /** Declines the Terms of Service and returns to the Sign In page. */
-  fun declineTermsOfService() {
-    isSignedIn = false
-    hasAcceptedTerms = false
-    isDownloadSurveySignOutPromptOpen = false
-    currentScreen = PrototypeScreen.SIGN_IN
-  }
+  fun declineTermsOfService() = onboarding.declineTermsOfService()
 
   /**
-   * Handles the Back escape hatch on the Download surveys screen:
-   * - When accessed from the Survey list (`SURVEY_LIST`), returns the user to the Survey list.
-   * - When shown after Terms of Service (`AFTER_TOS`), opens a confirmation prompt before signing
-   *   the user out.
+   * Handles the Back escape hatch on the Download surveys screen: returns to the Survey list when
+   * opened from there, otherwise asks for confirmation before signing out.
    */
-  fun navigateBackFromDownloadSurvey() {
-    if (downloadSurveyEntryOrigin == DownloadSurveyEntryOrigin.SURVEY_LIST) {
-      isDownloadSurveySignOutPromptOpen = false
-      isDrawerOpen = false
-      activeSurveyNotice = null
-      currentScreen = PrototypeScreen.MAIN_SURVEY
-      activeDrawerSubView = MainDrawerSubView.SWITCH_SURVEYS
-    } else {
-      isDownloadSurveySignOutPromptOpen = true
-    }
-  }
+  fun navigateBackFromDownloadSurvey() = onboarding.navigateBackFromDownloadSurvey()
 
   /** Confirms signing out from the Download surveys screen back-action confirmation prompt. */
-  fun confirmDownloadSurveySignOut() {
-    isDownloadSurveySignOutPromptOpen = false
-    isDrawerOpen = false
-    activeDrawerSubView = MainDrawerSubView.NONE
-    activeSurveyNotice = null
-    isSignedIn = false
-    hasAcceptedTerms = false
-    currentScreen = PrototypeScreen.SIGN_IN
-  }
+  fun confirmDownloadSurveySignOut() = onboarding.confirmSignOut()
 
   /** Cancels/dismisses the sign-out confirmation prompt on the Download surveys screen. */
-  fun dismissDownloadSurveySignOutPrompt() {
-    isDownloadSurveySignOutPromptOpen = false
-  }
+  fun dismissDownloadSurveySignOutPrompt() = onboarding.dismissSignOutPrompt()
 
   /** Updates the search bar query used to filter surveys by name or location. */
-  fun updateSearchQuery(query: String) {
-    searchQuery = query
-  }
+  fun updateSearchQuery(query: String) = onboarding.updateSearchQuery(query)
 
   /** Clears the search bar query to show all shared surveys. */
-  fun clearSearchQuery() {
-    searchQuery = ""
-  }
+  fun clearSearchQuery() = onboarding.clearSearchQuery()
 
   /** Marks the specified survey as downloaded onto the device for offline field use. */
-  fun downloadSurvey(surveyId: String) {
-    storeSurveys(
-      surveys.map { item ->
-        if (item.id == surveyId) {
-          activeSurveyNotice =
-            "Downloaded \"${item.title}\" (${item.offlineSizeLabel}) for offline use."
-          item.copy(isDownloaded = true)
-        } else {
-          item
-        }
-      }
-    )
-  }
+  fun downloadSurvey(surveyId: String) = onboarding.downloadSurvey(surveyId)
 
   /** Opens a survey in the Main Survey UI (downloading it first if not already downloaded). */
-  fun openSurvey(surveyId: String) {
-    downloadSurvey(surveyId)
-    activateSurvey(surveyId)
-    currentScreen = PrototypeScreen.MAIN_SURVEY
-    isDrawerOpen = false
-    activeDrawerSubView = MainDrawerSubView.NONE
-    activeSurveyNotice =
-      "Loaded survey \"${activeSurvey.title}\" (${entities.size} entities, ${allSubmissions.size} preloaded submissions)."
-  }
+  fun openSurvey(surveyId: String) = onboarding.openSurvey(surveyId)
 
   /**
    * Opens a survey in the web app (dashboard and Survey editor). Unlike [openSurvey], this doesn't
    * download the survey for offline use or move the mobile preview to the Main Survey UI.
    */
-  fun openSurveyOnWeb(surveyId: String) {
-    if (surveys.none { it.id == surveyId }) return
-    activateSurvey(surveyId)
-    dashboardTableDatasetId = null
-    isDashboardTableExpanded = false
-  }
+  fun openSurveyOnWeb(surveyId: String) = dashboard.openSurveyOnWeb(surveyId)
 
   /** Makes [surveyId] the active survey and clears every selection scoped to the previous one. */
   private fun activateSurvey(surveyId: String) {
-    viewModel.launch { viewModel.surveyRepository.setActiveSurveyId(surveyId) }
-    data.surveyConfigs[surveyId]?.primaryFormXml?.let { xml ->
-      selectedWorkbenchExampleForm =
-        WorkbenchExampleForm.entries.firstOrNull { it.xformsXml == xml }
-      customXFormsXml = xml
-      customFormDef = XFormsParseCache.formDef(xml)
-      xformsXmlError = null
-    }
-    selectedEntityId = null
-    selectedSubmissionId = null
-    selectedLayerDatasetId = null
-    activeDataCollectionEntityId = null
-    activeDataCollectionFormId = null
-    activeFormWizardController = null
-    isAvailableFormsSheetOpen = false
-    isEntityBottomSheetExpanded = false
+    dataHolder.launch { dataHolder.surveyRepository.setActiveSurveyId(surveyId) }
+    dashboard.clearLayerSelection()
+    clearSelectionsForActivatedSurvey(surveyId)
+  }
+
+  /**
+   * Clears every shell selection scoped to the survey active before [surveyId] (map feature,
+   * submission, open form) and loads the survey's primary form into the XForms workbench.
+   */
+  private fun clearSelectionsForActivatedSurvey(surveyId: String) {
+    dataCollection.onSurveyActivated()
+    workbench.onSurveyActivated(surveyId)
   }
 
   /** Whether the active survey exists in the store, so survey pages can open it. */
   val hasOpenableActiveSurvey: Boolean
-    get() = surveys.any { it.id == activeSurveyId }
+    get() = dashboardState.hasOpenableActiveSurvey
 
   /**
    * Creates a new, empty survey owned by the signed-in user, optionally in [organizationId], makes
    * it active, and returns its ID. The caller normally opens the Survey editor next.
    */
-  fun createSurvey(title: String, organizationId: String? = null): String {
-    val trimmedTitle = title.trim().ifBlank { "Untitled survey" }
-    val surveyId = uniqueSurveyId(trimmedTitle)
-    val organization = organization(organizationId)
-    val survey =
-      SurveyPreviewItem(
-        id = surveyId,
-        title = trimmedTitle,
-        description = "",
-        location = organization?.name ?: "No survey area yet",
-        coordinatesLabel = "",
-        offlineSizeLabel = "0 MB",
-        isDownloaded = false,
-        thumbnailTheme = MapThumbnailTheme.entries[surveys.size % MapThumbnailTheme.entries.size],
-        entityCount = 0,
-        ownerEmail = signedInUserEmail,
-        organizationId = organization?.id,
-      )
-    viewModel.launch {
-      viewModel.transactionRunner {
-        viewModel.surveyRepository.setSurveys(surveys + survey)
-        viewModel.surveyEditorRepository.saveDraft(
-          surveyId,
-          SurveyEditorDraft.blank(surveyId, title = trimmedTitle).let { draft ->
-            draft.copy(
-              details = draft.details.copy(organizationId = organization?.id),
-              sharing =
-                draft.sharing.copy(
-                  ownerEmail = signedInUserEmail,
-                  ownerProfile = CachedProfile(signedInUserName),
-                ),
-            )
-          },
-        )
-      }
-    }
-    activateSurvey(surveyId)
-    activeSurveyNotice = "Created survey \"$trimmedTitle\"."
-    return surveyId
-  }
-
-  /** A survey ID derived from [title] (`survey-<slug>`), made unique with a numeric suffix. */
-  private fun uniqueSurveyId(title: String): String {
-    val slug =
-      title
-        .lowercase()
-        .map { if (it.isLetterOrDigit()) it else '-' }
-        .joinToString("")
-        .trim('-')
-        .replace(Regex("-+"), "-")
-        .ifBlank { "survey" }
-    val base = "survey-$slug"
-    if (surveys.none { it.id == base }) return base
-    var n = 2
-    while (surveys.any { it.id == "$base-$n" }) n++
-    return "$base-$n"
-  }
+  fun createSurvey(title: String, organizationId: String? = null): String =
+    dashboard.createSurvey(title, organizationId)
 
   /** Updates the title and description of the currently active survey. */
-  fun updateActiveSurveyDetails(title: String, description: String) {
-    storeSurveys(
-      surveys.map { item ->
-        if (item.id == activeSurveyId) {
-          item.copy(
-            title = title.ifBlank { item.title },
-            description = description.ifBlank { item.description },
-          )
-        } else {
-          item
-        }
-      }
-    )
-  }
+  fun updateActiveSurveyDetails(title: String, description: String) =
+    workbench.updateActiveSurveyDetails(title, description)
 
   /** Toggles the downloaded status of a survey (for UX prototyping & testing). */
-  fun toggleSurveyDownloaded(surveyId: String) {
-    storeSurveys(
-      surveys.map { item ->
-        if (item.id == surveyId) {
-          val nextState = !item.isDownloaded
-          activeSurveyNotice =
-            if (nextState) {
-              "Downloaded \"${item.title}\" (${item.offlineSizeLabel}) for offline use."
-            } else {
-              "Removed offline copy of \"${item.title}\"."
-            }
-          item.copy(isDownloaded = nextState)
-        } else {
-          item
-        }
-      }
-    )
-  }
+  fun toggleSurveyDownloaded(surveyId: String) = workbench.toggleSurveyDownloaded(surveyId)
 
-  /**
-   * Prompts the user before removing a downloaded survey from the device. If the survey is not
-   * downloaded, downloads it immediately.
-   */
-  fun promptRemoveDownloadedSurvey(surveyId: String) {
-    val survey = surveys.firstOrNull { it.id == surveyId }
-    if (survey != null && survey.isDownloaded) {
-      pendingRemovalSurveyId = surveyId
-    } else {
-      downloadSurvey(surveyId)
-    }
-  }
+  /** Asks before removing [surveyId]'s offline copy; downloads it instead if not downloaded. */
+  fun promptRemoveDownloadedSurvey(surveyId: String) =
+    onboarding.promptRemoveDownloadedSurvey(surveyId)
 
   /** Confirms removal of the pending downloaded survey from the device and dismisses the dialog. */
-  fun confirmRemoveDownloadedSurvey() {
-    val surveyId = pendingRemovalSurveyId
-    pendingRemovalSurveyId = null
-    if (surveyId != null) {
-      storeSurveys(
-        surveys.map { item ->
-          if (item.id == surveyId) {
-            activeSurveyNotice = "Removed offline copy of \"${item.title}\"."
-            item.copy(isDownloaded = false)
-          } else {
-            item
-          }
-        }
-      )
-    }
-  }
+  fun confirmRemoveDownloadedSurvey() = onboarding.confirmRemoveDownloadedSurvey()
 
-  /** Dismisses/cancels the pending downloaded survey removal dialog. */
-  fun dismissRemoveDownloadedSurvey() {
-    pendingRemovalSurveyId = null
-  }
+  /** Dismisses the remove-downloaded-survey confirmation dialog without changes. */
+  fun dismissRemoveDownloadedSurvey() = onboarding.dismissRemoveDownloadedSurvey()
 
   // --- Main Survey UI Actions ---
 
@@ -2303,12 +1897,11 @@ class PrototypeAppState(
     mainViewMode = mode
     activeDrawerSubView = MainDrawerSubView.NONE
     if (mode == MainSurveyViewMode.LIST) {
-      selectedEntityId = null
-      selectedSubmissionId = null
-      isEntityBottomSheetExpanded = true
-      isLayersSheetOpen = false
+      dataCollection.clearSelection()
+      surveyMap.updateEntityBottomSheetExpanded(true)
+      surveyMap.updateLayersSheetOpen(false)
     } else {
-      isEntityBottomSheetExpanded = false
+      surveyMap.updateEntityBottomSheetExpanded(false)
     }
   }
 
@@ -2318,139 +1911,56 @@ class PrototypeAppState(
   }
 
   /** Toggles the "Layers" visibility popover sheet on the Map view. */
-  fun updateLayersSheetOpen(open: Boolean) {
-    isLayersSheetOpen = open
-  }
+  fun updateLayersSheetOpen(open: Boolean) = surveyMap.updateLayersSheetOpen(open)
 
   /**
    * Selects between `Normal` (`BasemapType.NORMAL`) and `Satellite` (`BasemapType.SATELLITE`)
    * basemap.
    */
-  fun selectBasemapType(type: BasemapType) {
-    selectedBasemapType = type
-    offlineBasemapStyle =
-      if (type == BasemapType.SATELLITE) {
-        OfflineBasemapStyle.SATELLITE_HYBRID
-      } else {
-        OfflineBasemapStyle.VECTOR_TOPO
-      }
-  }
+  fun selectBasemapType(type: BasemapType) = surveyMap.selectBasemapType(type)
 
   /** Toggles between `Normal` and `Satellite` basemap. */
-  fun toggleBasemapType() {
-    selectBasemapType(
-      if (selectedBasemapType == BasemapType.SATELLITE) {
-        BasemapType.NORMAL
-      } else {
-        BasemapType.SATELLITE
-      }
-    )
-  }
+  fun toggleBasemapType() = surveyMap.toggleBasemapType()
 
   /** Toggles visibility of the downloaded Mapbox offline basemap in the `Layers` dialog. */
-  fun toggleOfflineBasemapVisibility() {
-    isOfflineBasemapVisible = !isOfflineBasemapVisible
-  }
+  fun toggleOfflineBasemapVisibility() = surveyMap.toggleOfflineBasemapVisibility()
 
   /** Updates the offline basemap rendering style (`SATELLITE_HYBRID` vs `VECTOR_TOPO`). */
-  fun updateOfflineBasemapStyle(style: OfflineBasemapStyle) {
-    offlineBasemapStyle = style
-    selectedBasemapType =
-      if (style == OfflineBasemapStyle.SATELLITE_HYBRID) {
-        BasemapType.SATELLITE
-      } else {
-        BasemapType.NORMAL
-      }
-    isOfflineBasemapVisible = true
-  }
+  fun updateOfflineBasemapStyle(style: OfflineBasemapStyle) =
+    surveyMap.updateOfflineBasemapStyle(style)
 
   /**
    * Selects a submission geometry polygon on the map and opens its submission (and parent entity if
    * attached, or standalone submission card if unattached).
    */
-  fun selectSubmissionGeometry(geometryId: String) {
-    val geom = submissionGeometries.firstOrNull { it.id == geometryId } ?: return
-    clearSelectedPlace()
-    selectedEntityId = geom.entityId.takeIf { it.isNotBlank() }
-    selectedSubmissionId = geom.submissionId
-    isEntityBottomSheetExpanded = true
-    isLayersSheetOpen = false
-  }
+  fun selectSubmissionGeometry(geometryId: String) =
+    dataCollection.selectSubmissionGeometry(geometryId)
 
-  /** Toggles visibility of a specific `LayerDef` on the survey map. */
-  fun toggleLayerVisibility(layerId: String) {
-    storeMapLayers(
-      mapLayers.map { layer ->
-        if (layer.id == layerId) {
-          val nextVisible = !layer.isVisible
-          if (!nextVisible && selectedEntity?.layerId == layerId) {
-            selectedEntityId = null
-            selectedSubmissionId = null
-            isEntityBottomSheetExpanded = false
-          }
-          layer.copy(isVisible = nextVisible)
-        } else {
-          layer
-        }
-      }
-    )
-  }
+  /**
+   * Toggles visibility of a specific `LayerDef` on the survey map. Hiding the selected map
+   * feature's layer clears the selection (see [onSurveyMapEvent]).
+   */
+  fun toggleLayerVisibility(layerId: String) = surveyMap.toggleLayerVisibility(layerId)
 
-  /** Selects a Geospatial Entity on the map to open its bottom sheet in collapsed/peek state. */
-  fun selectEntity(entityId: String?) {
-    clearSelectedPlace()
-    selectedEntityId = entityId
-    selectedSubmissionId = null
-    selectedLayerDatasetId = null
-    entityDetailsPane = EntityDetailsPane.PROPERTIES
-    isEntityBottomSheetExpanded = false
-    mainViewMode = MainSurveyViewMode.MAP
-    if (entityId != null) {
-      isLayersSheetOpen = false
-      entitySelectionEpoch++
-      followSelectionInDashboardTable(entityId)
-      if (!isDashboardTableExpanded) {
-        isDetailsPanelExpanded = true
-      }
-    }
-  }
+  /**
+   * Selects a Geospatial Entity on the map to open its bottom sheet in collapsed/peek state. The
+   * rest of the shell (list selection, details pane, dashboard table) follows via
+   * [SurveyMapEvent.EntitySelected].
+   */
+  fun selectEntity(entityId: String?) = surveyMap.selectEntity(entityId)
 
   /**
    * Selects a Geospatial Entity from the bottom sheet list. The map pans and zooms to the entity,
    * and the sheet settles at its peek height showing the entity's details, so both the framed
    * entity and its details are visible. Dragging the sheet up reveals the rest of the details.
    */
-  fun selectEntityFromList(entityId: String) {
-    clearSelectedPlace()
-    selectedEntityId = entityId
-    selectedSubmissionId = null
-    selectedLayerDatasetId = null
-    entityDetailsPane = EntityDetailsPane.PROPERTIES
-    isEntityBottomSheetExpanded = false
-    mainViewMode = MainSurveyViewMode.MAP
-    isLayersSheetOpen = false
-    entitySelectionEpoch++
-    followSelectionInDashboardTable(entityId)
-    if (!isDashboardTableExpanded) {
-      isDetailsPanelExpanded = true
-    }
-  }
-
-  /** Switches the web dashboard's bottom table to the dataset of the entity with [entityId]. */
-  private fun followSelectionInDashboardTable(entityId: String) {
-    entities.firstOrNull { it.id == entityId }?.let { dashboardTableDatasetId = it.datasetId }
-  }
+  fun selectEntityFromList(entityId: String) = surveyMap.selectEntity(entityId)
 
   /** Shows the selected entity's `1:N` submissions in its details surface. */
-  fun showEntitySubmissions() {
-    entityDetailsPane = EntityDetailsPane.SUBMISSIONS
-  }
+  fun showEntitySubmissions() = dashboard.showEntitySubmissions()
 
   /** Returns the selected entity's details surface to its properties. */
-  fun showEntityProperties() {
-    entityDetailsPane = EntityDetailsPane.PROPERTIES
-    selectedSubmissionId = null
-  }
+  fun showEntityProperties() = dataCollection.showEntityProperties()
 
   /**
    * Selects a tab of the web dashboard's entity details card: `Data`
@@ -2458,41 +1968,26 @@ class PrototypeAppState(
    * [showEntityProperties], an opened submission stays open, so switching back to `History` shows
    * it again.
    */
-  fun selectEntityDetailsTab(pane: EntityDetailsPane) {
-    entityDetailsPane = pane
-  }
+  fun selectEntityDetailsTab(pane: EntityDetailsPane) = dashboard.selectEntityDetailsTab(pane)
+
+  /** Whether a map feature or submission is selected, so collapsing the table shows its details. */
+  private val hasSelectedRecord: Boolean
+    get() = dataCollectionState.hasSelectedRecord
 
   /** Expands or collapses the web dashboard's bottom data table. */
-  fun updateDashboardTableExpanded(expanded: Boolean) {
-    val wasExpanded = isDashboardTableExpanded
-    isDashboardTableExpanded = expanded
-    if (expanded && !wasExpanded) {
-      isDetailsPanelExpanded = false
-    } else if (
-      !expanded &&
-        wasExpanded &&
-        (selectedEntityId != null || selectedSubmissionId != null || selectedLayerDatasetId != null)
-    ) {
-      isDetailsPanelExpanded = true
-    }
-  }
+  fun updateDashboardTableExpanded(expanded: Boolean) =
+    dashboard.updateDashboardTableExpanded(expanded, hasSelection = hasSelectedRecord)
 
   /**
    * Entity dataset IDs whose map features are collapsed (hidden) under their dataset header row in
    * the web dashboard's left-hand panel list. Toggled with the chevron left of the dataset name.
    */
-  var collapsedListDatasetIds by mutableStateOf<Set<String>>(emptySet())
-    private set
+  val collapsedListDatasetIds: Set<String>
+    get() = dashboardState.collapsedListDatasetIds
 
   /** Collapses or expands the map features of the entity dataset with [datasetId] in the list. */
-  fun toggleListDatasetCollapsed(datasetId: String) {
-    collapsedListDatasetIds =
-      if (datasetId in collapsedListDatasetIds) {
-        collapsedListDatasetIds - datasetId
-      } else {
-        collapsedListDatasetIds + datasetId
-      }
-  }
+  fun toggleListDatasetCollapsed(datasetId: String) =
+    dashboard.toggleListDatasetCollapsed(datasetId)
 
   /**
    * Whether the map features of the entity dataset with [datasetId] are currently hidden in the
@@ -2500,7 +1995,7 @@ class PrototypeAppState(
    * hidden; the stored collapsed state is restored once the query is cleared.
    */
   fun isListDatasetCollapsed(datasetId: String): Boolean =
-    listSearchQuery.isBlank() && datasetId in collapsedListDatasetIds
+    dashboardState.isListDatasetCollapsed(datasetId)
 
   /**
    * Selects the map layer or data table of the entity dataset with [datasetId] in the web
@@ -2508,35 +2003,22 @@ class PrototypeAppState(
    * clears any selected map feature, submission, or place.
    */
   fun selectLayer(datasetId: String?) {
-    selectedLayerDatasetId = datasetId
+    dashboard.selectLayer(datasetId)
     if (datasetId != null) {
       clearSelectedPlace()
-      selectedEntityId = null
-      selectedSubmissionId = null
-      entityDetailsPane = EntityDetailsPane.PROPERTIES
-      dashboardTableDatasetId = datasetId
-      if (!isDashboardTableExpanded) {
-        isDetailsPanelExpanded = true
-      }
+      dataCollection.clearSelection()
     }
   }
 
   /** "Show in table": expands the web dashboard's bottom data table on the selected layer. */
-  fun showSelectedLayerInTable() {
-    val datasetId = selectedLayerDatasetId ?: return
-    selectDashboardTable(datasetId)
-    updateDashboardTableExpanded(true)
-  }
+  fun showSelectedLayerInTable() = dashboard.showSelectedLayerInTable()
 
   /** Toggles the web dashboard's bottom data table between expanded and collapsed. */
-  fun toggleDashboardTableExpanded() {
-    updateDashboardTableExpanded(!isDashboardTableExpanded)
-  }
+  fun toggleDashboardTableExpanded() =
+    dashboard.toggleDashboardTableExpanded(hasSelection = hasSelectedRecord)
 
   /** Activates the bottom data table tab for the dataset with [datasetId]. */
-  fun selectDashboardTable(datasetId: String) {
-    dashboardTableDatasetId = datasetId
-  }
+  fun selectDashboardTable(datasetId: String) = dashboard.selectDashboardTable(datasetId)
 
   /**
    * "Show in table": expands the web dashboard's bottom data table on the selected entity's
@@ -2544,8 +2026,7 @@ class PrototypeAppState(
    */
   fun showSelectedEntityInTable() {
     val entity = selectedEntity ?: return
-    dashboardTableDatasetId = entity.datasetId
-    updateDashboardTableExpanded(true)
+    dashboard.showDatasetInTable(entity.datasetId)
   }
 
   /**
@@ -2556,81 +2037,36 @@ class PrototypeAppState(
    */
   fun selectPlace(placeId: String) {
     val place = findPlaceById(placeId) ?: return
-    val parsedCoords = parsePlaceCoordinates(place.coordinatesLabel)
-    val hasDefaultFallbackCoords =
-      kotlin.math.abs(place.longitude - 36.9512) < 1e-6 &&
-        kotlin.math.abs(place.latitude - (-0.4198)) < 1e-6
-    val lat =
-      if (hasDefaultFallbackCoords && parsedCoords != null) parsedCoords.first else place.latitude
-    val lng =
-      if (hasDefaultFallbackCoords && parsedCoords != null) parsedCoords.second else place.longitude
-    val resolvedZoom = place.targetZoom.coerceIn(2.0f, 18.5f)
-    val resolvedPlace = place.copy(longitude = lng, latitude = lat, targetZoom = resolvedZoom)
-    lastSelectedPlace = resolvedPlace
-    selectedPlaceId = resolvedPlace.id
-    selectedEntityId = null
-    selectedSubmissionId = null
-    selectedLayerDatasetId = null
-    isCameraFollowingUser = false
-    locationLockState = LocationLockState.PANNED
-    val (placeNx, placeNy) = activeSurveyAnchor.toNormalized(LatLng(lat, lng))
-    mapPanOffsetX = (userGpsNormalizedX - placeNx).toFloat()
-    mapPanOffsetY = (userGpsNormalizedY - placeNy).toFloat()
-    mapZoomDelta = (resolvedZoom - activeSurveyAnchor.zoom.toFloat()).coerceIn(-13.0f, 3.2f)
-    isEntityBottomSheetExpanded = false
-    mainViewMode = MainSurveyViewMode.MAP
-    isLayersSheetOpen = false
-    activeSurveyNotice = "Centered map on ${resolvedPlace.name} (${resolvedPlace.coordinatesLabel})"
+    surveyMap.selectPlace(place)
   }
 
   /** Clears the currently selected place on the map. */
-  fun clearSelectedPlace() {
-    selectedPlaceId = null
-    lastSelectedPlace = null
-  }
+  fun clearSelectedPlace() = surveyMap.clearSelectedPlace()
 
   /**
    * Clears the selected entity or submission and returns to the expanded searchable list inside the
    * persistent bottom sheet.
    */
-  fun returnToBottomSheetList() {
-    selectedEntityId = null
-    selectedSubmissionId = null
-    entityDetailsPane = EntityDetailsPane.PROPERTIES
-    isEntityBottomSheetExpanded = true
-    mainViewMode = MainSurveyViewMode.LIST
-    isLayersSheetOpen = false
-  }
+  fun returnToBottomSheetList() = dataCollection.returnToBottomSheetList()
 
   /** Toggles the Entity Bottom Sheet between expanded and collapsed (peek) state. */
-  fun toggleEntityBottomSheetExpanded() {
-    isEntityBottomSheetExpanded = !isEntityBottomSheetExpanded
-  }
+  fun toggleEntityBottomSheetExpanded() = surveyMap.toggleEntityBottomSheetExpanded()
 
   /** Explicitly expands or collapses the Entity Bottom Sheet. */
-  fun updateEntityBottomSheetExpanded(expanded: Boolean) {
-    isEntityBottomSheetExpanded = expanded
-  }
+  fun updateEntityBottomSheetExpanded(expanded: Boolean) =
+    surveyMap.updateEntityBottomSheetExpanded(expanded)
 
   /** Toggles the web dashboard's left-hand side panel between expanded and collapsed states. */
-  fun toggleSidePanel() {
-    isSidePanelExpanded = !isSidePanelExpanded
-  }
+  fun toggleSidePanel() = dashboard.toggleSidePanel()
 
   /** Expands the web dashboard's left-hand side panel. */
-  fun expandSidePanel() {
-    isSidePanelExpanded = true
-  }
+  fun expandSidePanel() = dashboard.expandSidePanel()
 
   /** Collapses the web dashboard's left-hand side panel. */
-  fun collapseSidePanel() {
-    isSidePanelExpanded = false
-  }
+  fun collapseSidePanel() = dashboard.collapseSidePanel()
 
   /** Explicitly expands or collapses the web dashboard's left-hand side panel. */
-  fun updateSidePanelExpanded(expanded: Boolean) {
-    isSidePanelExpanded = expanded
-  }
+  fun updateSidePanelExpanded(expanded: Boolean) = dashboard.updateSidePanelExpanded(expanded)
 
   /** Alias for [toggleSidePanel]. */
   fun toggleDashboardSidePanel() = toggleSidePanel()
@@ -2648,30 +2084,19 @@ class PrototypeAppState(
    * Sets the web dashboard's left-hand panel width to [widthDp], clamped to
    * [MIN_SIDE_PANEL_WIDTH_DP]..[MAX_SIDE_PANEL_WIDTH_DP]. Non-finite values are ignored.
    */
-  fun updateSidePanelWidth(widthDp: Float) {
-    if (!widthDp.isFinite()) return
-    sidePanelWidthDp = widthDp.coerceIn(MIN_SIDE_PANEL_WIDTH_DP, MAX_SIDE_PANEL_WIDTH_DP)
-  }
+  fun updateSidePanelWidth(widthDp: Float) = dashboard.updateSidePanelWidth(widthDp)
 
   /** Toggles the web dashboard's right-hand details panel between expanded and collapsed states. */
-  fun toggleDetailsPanel() {
-    isDetailsPanelExpanded = !isDetailsPanelExpanded
-  }
+  fun toggleDetailsPanel() = dashboard.toggleDetailsPanel()
 
   /** Expands the web dashboard's right-hand details panel. */
-  fun expandDetailsPanel() {
-    isDetailsPanelExpanded = true
-  }
+  fun expandDetailsPanel() = dashboard.expandDetailsPanel()
 
   /** Collapses the web dashboard's right-hand details panel. */
-  fun collapseDetailsPanel() {
-    isDetailsPanelExpanded = false
-  }
+  fun collapseDetailsPanel() = dashboard.collapseDetailsPanel()
 
   /** Explicitly expands or collapses the web dashboard's right-hand details panel. */
-  fun updateDetailsPanelExpanded(expanded: Boolean) {
-    isDetailsPanelExpanded = expanded
-  }
+  fun updateDetailsPanelExpanded(expanded: Boolean) = dashboard.updateDetailsPanelExpanded(expanded)
 
   /** Alias for [toggleDetailsPanel]. */
   fun toggleDashboardDetailsPanel() = toggleDetailsPanel()
@@ -2698,32 +2123,15 @@ class PrototypeAppState(
   fun updateRightPanelExpanded(expanded: Boolean) = updateDetailsPanelExpanded(expanded)
 
   /** Opens full details for a specific submission (from a 1:N entity bottom sheet or List view). */
-  fun selectSubmissionDetail(submissionId: String?) {
-    selectedSubmissionId = submissionId
-    if (submissionId != null) {
-      selectedLayerDatasetId = null
-      isEntityBottomSheetExpanded = true
-      val parentEntity = entities.firstOrNull { e -> e.submissions.any { it.id == submissionId } }
-      if (parentEntity != null && parentEntity.id != selectedEntityId) {
-        // Opening a submission of another map feature (e.g. from `Uploads`) frames that feature.
-        entitySelectionEpoch++
-        dashboardTableDatasetId = parentEntity.datasetId
-      }
-      selectedEntityId = parentEntity?.id
-      // Closing the submission returns to the list of the feature's submissions it came from.
-      entityDetailsPane = EntityDetailsPane.SUBMISSIONS
-      if (!isDashboardTableExpanded) {
-        isDetailsPanelExpanded = true
-      }
-    }
-  }
+  fun selectSubmissionDetail(submissionId: String?) =
+    dataCollection.selectSubmissionDetail(submissionId)
 
   /**
    * Updates the search query in the Main Survey searchable bottom sheet and queries the Mapbox
    * Places API (`mapbox.places`) when online (`!isAirplaneMode`).
    */
   fun updateListSearchQuery(query: String) {
-    listSearchQuery = query
+    dashboard.updateListSearchQuery(query)
     val trimmed = query.trim()
     if (isAirplaneMode || trimmed.isEmpty()) {
       isMapboxPlacesSearching = false
@@ -2735,7 +2143,7 @@ class PrototypeAppState(
 
   /** Clears the search query in the Main Survey `List` view. */
   fun clearListSearchQuery() {
-    listSearchQuery = ""
+    dashboard.clearListSearchQuery()
     isMapboxPlacesSearching = false
     mapboxPlacesApiResults = emptyList()
   }
@@ -2752,7 +2160,7 @@ class PrototypeAppState(
         "Device offline: Places search is not available offline. Searching local $activeEntitiesCountNoun only."
       return
     }
-    listFilterTab = tab
+    dashboard.selectListFilterTab(tab)
   }
 
   /**
@@ -2765,12 +2173,12 @@ class PrototypeAppState(
    *   search is not available offline.
    */
   fun updateAirplaneMode(enabled: Boolean) {
-    isAirplaneMode = enabled
+    surveyMap.updateAirplaneMode(enabled)
     if (enabled) {
       isMapboxPlacesSearching = false
       mapboxPlacesApiResults = emptyList()
       if (listFilterTab == ListFilterTab.PLACES) {
-        listFilterTab = ListFilterTab.ALL
+        dashboard.selectListFilterTab(ListFilterTab.ALL)
       }
       activeSurveyNotice =
         "Device offline: Places search disabled. Searching local $activeEntitiesCountNoun only."
@@ -2796,17 +2204,31 @@ class PrototypeAppState(
     }
     isMapboxPlacesSearching = true
     val (surveyLng, surveyLat) = activeSurveyBaseLngLat()
-    viewModel.placeRepository.searchRemotePlaces(
+    searchPlaces(
       surveyId = activeSurveyId,
       query = query,
-      isAirplaneMode = isAirplaneMode,
-      defaultRegionSubtitle = activeSurvey.location,
-      centerLongitude = surveyLng,
-      centerLatitude = surveyLat,
+      regionSubtitle = activeSurvey.location,
+      center =
+        org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.LatLng(
+          lat = surveyLat,
+          lng = surveyLng,
+        ),
     ) { results ->
       onPlacesSearchResults(query, results)
     }
   }
+
+  /**
+   * Looks up places matching [query] near [center] for [surveyId] through the place repository, for
+   * callers outside the main list search (such as the Survey editor's area picker).
+   */
+  fun searchPlaces(
+    surveyId: String,
+    query: String,
+    regionSubtitle: String,
+    center: org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.LatLng,
+    onResults: (List<SurveyPlaceItem>) -> Unit,
+  ) = surveyMap.searchPlaces(surveyId, query, regionSubtitle, center, onResults)
 
   /** Shows geocoder [results] for [query] unless the query changed or airplane mode is on. */
   internal fun onPlacesSearchResults(query: String, results: List<SurveyPlaceItem>) {
@@ -2817,144 +2239,40 @@ class PrototypeAppState(
   }
 
   /** Opens the Available Forms modal bottom sheet triggered by the bottom-centered FAB. */
-  fun openAvailableFormsSheet() {
-    isAvailableFormsSheetOpen = true
-    isLayersSheetOpen = false
-    isDrawerOpen = false
-  }
+  fun openAvailableFormsSheet() = dataCollection.openAvailableFormsSheet()
 
   /** Closes the Available Forms modal bottom sheet. */
-  fun closeAvailableFormsSheet() {
-    isAvailableFormsSheetOpen = false
-  }
+  fun closeAvailableFormsSheet() = dataCollection.closeAvailableFormsSheet()
 
   /** Toggles the Available Forms modal bottom sheet open or closed. */
-  fun toggleAvailableFormsSheet() {
-    if (isAvailableFormsSheetOpen) {
-      closeAvailableFormsSheet()
-    } else {
-      openAvailableFormsSheet()
-    }
-  }
+  fun toggleAvailableFormsSheet() = dataCollection.toggleAvailableFormsSheet()
 
   /**
    * Switches the `entityref` step picker between `MainSurveyViewMode.MAP` and
    * `MainSurveyViewMode.LIST`.
    */
-  fun updateEntityRefSelectorViewMode(mode: MainSurveyViewMode) {
-    entityRefSelectorViewMode = mode
-  }
+  fun updateEntityRefSelectorViewMode(mode: MainSurveyViewMode) =
+    dataCollection.updateEntityRefSelectorViewMode(mode)
 
   /** Updates the search query in the `entityref` step's `List` selector. */
-  fun updateEntityRefSearchQuery(query: String) {
-    entityRefSearchQuery = query
-  }
+  fun updateEntityRefSearchQuery(query: String) = dataCollection.updateEntityRefSearchQuery(query)
 
   /** Clears the search query in the `entityref` step's `List` selector. */
-  fun clearEntityRefSearchQuery() {
-    entityRefSearchQuery = ""
-  }
+  fun clearEntityRefSearchQuery() = dataCollection.clearEntityRefSearchQuery()
 
   /**
    * Selects a target Geospatial Entity ([entityId]) at the `entityref` step (`/data/target_entity`)
    * during data collection when the form was launched without a pre-selected entity from the map.
-   *
-   * Updates [activeDataCollectionEntityId], [selectedEntityId], and populates
-   * [ENTITY_REF_FIELD_PATH] (`/data/target_entity`) in [activeFormWizardController]. When the map
-   * feature has geometry, the map camera is centered on it and [entityRefFramingEpoch] is bumped so
-   * the step's map pans and zooms to fit the feature.
    */
-  fun selectEntityRefForActiveForm(entityId: String) {
-    val entity = entities.firstOrNull { it.id == entityId } ?: return
-    val form = activeDataCollectionForm
-    if (form != null && form.requiresEntity) {
-      if (entity.datasetId != form.targetDatasetId || !isFormButtonEnabled(entity, form)) return
-    }
-    activeDataCollectionEntityId = entity.id
-    selectedEntityId = entity.id
-    if (entity.hasGeometry) {
-      recenterMapOnEntity(entity)
-      entityRefFramingEpoch++
-    }
-    activeFormWizardController?.updateString(ENTITY_REF_FIELD_PATH, entity.id)
-    if (
-      activeFormWizardController?.formState?.fieldStates?.containsKey("/data/sample_plot_entity") ==
-        true
-    ) {
-      activeFormWizardController?.updateString("/data/sample_plot_entity", entity.id)
-    }
-    if (
-      activeFormWizardController?.formState?.fieldStates?.containsKey("/data/past_individual_id") ==
-        true
-    ) {
-      activeFormWizardController?.updateString("/data/past_individual_id", entity.id)
-    }
-    if (
-      activeFormWizardController
-        ?.formState
-        ?.fieldStates
-        ?.containsKey("/data/primary_respondent_id") == true
-    ) {
-      activeFormWizardController?.updateString("/data/primary_respondent_id", entity.id)
-    }
-  }
+  fun selectEntityRefForActiveForm(entityId: String) =
+    dataCollection.selectEntityRefForActiveForm(entityId)
 
   /**
    * Updates [customXFormsXml], parses [FormDef] via [XFormsXmlSerializer.deserializeFormDef], and
    * updates [customFormDef] and [xformsXmlError]. If a form runner is currently open and the new
-   * [FormDef] is valid, refreshes [activeFormWizardController] with the new [FormDef].
+   * [FormDef] is valid, [DataCollectionViewModel] refreshes [activeFormWizardController] with it.
    */
-  fun updateCustomXFormsXml(xml: String) {
-    customXFormsXml = xml
-    selectedWorkbenchExampleForm =
-      WorkbenchExampleForm.entries.firstOrNull { it.xformsXml.trim() == xml.trim() }
-        ?: if (xml.trim() == DEFAULT_PROTOTYPE_XFORMS_XML.trim()) {
-          WorkbenchExampleForm.ALL_FIELD_TYPES
-        } else {
-          null
-        }
-    if (xml.isBlank()) {
-      customFormDef = null
-      xformsXmlError = null
-      if (activeFormWizardController != null) {
-        val currentForm = activeDataCollectionForm ?: forms.first()
-        val fallbackFormDef =
-          resolveFormDefForLaunch(
-            customFormDef = null,
-            form = currentForm,
-            candidateEntities = eligibleEntitiesForForm(currentForm),
-            defaultSelectedEntityId = activeDataCollectionEntityId.orEmpty(),
-            includeEntityRefStep = wasFormLaunchedWithoutEntity && currentForm.requiresEntity,
-          )
-        activeFormWizardController = FormWizardController(formDef = fallbackFormDef)
-      }
-      return
-    }
-    try {
-      val parsed = XFormsXmlSerializer.deserializeFormDef(xml)
-      customFormDef = parsed
-      xformsXmlError = null
-      if (activeFormWizardController != null) {
-        val currentForm = activeDataCollectionForm ?: forms.first()
-        val shouldIncludeEntityRefStep =
-          wasFormLaunchedWithoutEntity &&
-            currentForm.requiresEntity &&
-            (selectedWorkbenchExampleForm == null)
-        val refreshedFormDef =
-          resolveFormDefForLaunch(
-            customFormDef = parsed,
-            form = currentForm,
-            candidateEntities = eligibleEntitiesForForm(currentForm),
-            defaultSelectedEntityId = activeDataCollectionEntityId.orEmpty(),
-            includeEntityRefStep = shouldIncludeEntityRefStep,
-          )
-        activeFormWizardController = FormWizardController(formDef = refreshedFormDef)
-      }
-    } catch (e: Exception) {
-      customFormDef = null
-      xformsXmlError = e.message ?: "Invalid XForms XML"
-    }
-  }
+  fun updateCustomXFormsXml(xml: String) = workbench.updateCustomXFormsXml(xml)
 
   /**
    * Swaps the active example survey & form in the workbench to [example], switching to the
@@ -2965,425 +2283,125 @@ class PrototypeAppState(
   fun selectWorkbenchExampleForm(
     example: WorkbenchExampleForm,
     launchImmediately: Boolean = false,
-  ) {
-    val targetSurveyId = surveyIdForExampleForm(example) ?: return
-    openSurvey(targetSurveyId)
-    selectedWorkbenchExampleForm = example
-    activeSurveyNotice =
-      "Switched to survey \"${activeSurvey.title}\" (${entities.size} entities, ${allSubmissions.size} preloaded submissions)."
-    if (launchImmediately) {
-      launchActiveOrDefaultFormForTesting()
-    }
-  }
+  ) = workbench.selectWorkbenchExampleForm(example, launchImmediately)
 
   /** Restores the default sample XForms XML definition (`DEFAULT_PROTOTYPE_XFORMS_XML`). */
-  fun resetDefaultXFormsXml() {
-    if (activeSurveyId != "survey-kenya-coffee") {
-      openSurvey("survey-kenya-coffee")
-    }
-    updateCustomXFormsXml(DEFAULT_PROTOTYPE_XFORMS_XML)
-    selectedWorkbenchExampleForm = WorkbenchExampleForm.ALL_FIELD_TYPES
-  }
+  fun resetDefaultXFormsXml() = workbench.resetDefaultXFormsXml()
 
   /**
    * Launches data collection for [formId] from the bottom-centered Floating Action Button (FAB)
-   * list of available forms (**with no entity pre-selected from the map**).
-   *
-   * Because no geospatial entity was selected on the map prior to triggering the form, if the form
-   * requires a geospatial entity (`form.requiresEntity == true`), [activeDataCollectionEntityId]
-   * starts as `null` and the form wizard includes the required `entityref` step (`
-   * [ENTITY_REF_FIELD_PATH] = "/data/target_entity"`). At that step in the data collection process,
-   * the user is presented with the interactive **Map or List** selector to choose the target
-   * entity.
+   * list of available forms (**with no entity pre-selected from the map**): if the form requires a
+   * geospatial entity, the wizard includes the `entityref` step whose **Map or List** picker opens
+   * in the current [mainViewMode].
    */
-  fun launchFormFromFab(formId: String) {
-    val form = forms.firstOrNull { it.id == formId } ?: return
-    val candidates = eligibleEntitiesForForm(form)
-    val resolvedFormDef =
-      resolveFormDefForLaunch(
-        customFormDef = customFormDef,
-        form = form,
-        candidateEntities = candidates,
-        defaultSelectedEntityId = "",
-        includeEntityRefStep = form.requiresEntity,
-      )
-    val controller = FormWizardController(formDef = resolvedFormDef)
-
-    isAvailableFormsSheetOpen = false
-    wasFormLaunchedWithoutEntity = true
-    entityRefSelectorViewMode = mainViewMode
-    entityRefSearchQuery = ""
-    activeDataCollectionEntityId = null
-    activeDataCollectionFormId = form.id
-    activeFormWizardController = controller
-    isLayersSheetOpen = false
-    isDrawerOpen = false
-    activeDrawerSubView = MainDrawerSubView.NONE
-    if (currentScreen != PrototypeScreen.MAIN_SURVEY) {
-      currentScreen = PrototypeScreen.MAIN_SURVEY
-    }
-  }
+  fun launchFormFromFab(formId: String) =
+    dataCollection.launchFormFromFab(formId, pickerMode = mainViewMode)
 
   /**
    * Launches the embedded [org.groundplatform.v2.core.forms.ui.MobileFormRunner] (`
    * [FormWizardController]`) for [formId] on [entityId] when the organizer-defined form button
    * (`ctaLabel`) is tapped in the entity bottom sheet or triggered from the UX Chrome tester.
    */
-  fun launchFormForEntity(entityId: String, formId: String) {
-    val entity = entities.firstOrNull { it.id == entityId } ?: return
-    val form = forms.firstOrNull { it.id == formId } ?: return
-    if (!isFormButtonEnabled(entity, form)) return
-
-    val resolvedFormDef = resolveFormDefForLaunch(customFormDef, form)
-    val controller = FormWizardController(formDef = resolvedFormDef)
-    if (controller.formState.fieldStates.containsKey(ENTITY_REF_FIELD_PATH)) {
-      controller.updateString(ENTITY_REF_FIELD_PATH, entity.id)
-    }
-    if (controller.formState.fieldStates.containsKey("/data/sample_plot_entity")) {
-      controller.updateString("/data/sample_plot_entity", entity.id)
-    }
-    if (controller.formState.fieldStates.containsKey("/data/past_individual_id")) {
-      controller.updateString("/data/past_individual_id", entity.id)
-    }
-    if (controller.formState.fieldStates.containsKey("/data/primary_respondent_id")) {
-      controller.updateString("/data/primary_respondent_id", entity.id)
-    }
-
-    isAvailableFormsSheetOpen = false
-    wasFormLaunchedWithoutEntity = false
-    selectedEntityId = entity.id
-    activeDataCollectionEntityId = entity.id
-    activeDataCollectionFormId = form.id
-    activeFormWizardController = controller
-    isLayersSheetOpen = false
-    isDrawerOpen = false
-    activeDrawerSubView = MainDrawerSubView.NONE
-    if (currentScreen != PrototypeScreen.MAIN_SURVEY) {
-      currentScreen = PrototypeScreen.MAIN_SURVEY
-    }
-  }
+  fun launchFormForEntity(entityId: String, formId: String) =
+    dataCollection.launchFormForEntity(entityId, formId)
 
   /**
    * Convenience trigger used by the `▶ Test / Launch Form Now` button in the Prototype App Chrome
    * (`XFormsFormDefChromeSection`) to launch the active XForms `FormDef` on the currently selected
    * entity (or as a standalone form when the survey has no predefined entities).
    */
-  fun launchActiveOrDefaultFormForTesting() {
-    if (entities.isEmpty()) {
-      val standaloneForm = forms.firstOrNull { !it.requiresEntity } ?: forms.firstOrNull() ?: return
-      launchFormFromFab(standaloneForm.id)
-      return
-    }
-    val currentEntity =
-      selectedEntity
-        ?: entities.firstOrNull { it.id == "entity-shade-201" }
-        ?: entities.firstOrNull()
-    if (currentEntity != null) {
-      val enabledFormOnCurrent =
-        formsForEntity(currentEntity).firstOrNull { isFormButtonEnabled(currentEntity, it) }
-      if (enabledFormOnCurrent != null) {
-        launchFormForEntity(currentEntity.id, enabledFormOnCurrent.id)
-        return
-      }
-    }
-    val fallbackEntity = entities.firstOrNull { ent ->
-      formsForEntity(ent).any { isFormButtonEnabled(ent, it) }
-    }
-    if (fallbackEntity != null) {
-      val fallbackForm =
-        formsForEntity(fallbackEntity).firstOrNull { isFormButtonEnabled(fallbackEntity, it) }
-          ?: return
-      launchFormForEntity(fallbackEntity.id, fallbackForm.id)
-      return
-    }
-    val standaloneFallback = forms.firstOrNull() ?: return
-    launchFormFromFab(standaloneFallback.id)
-  }
+  fun launchActiveOrDefaultFormForTesting() = dataCollection.launchActiveOrDefaultFormForTesting()
 
   /**
    * Completes the active form submission when the user clicks `Submit ✓` in `MobileFormRunner` (or
-   * when invoked programmatically with a finalized [recordInstance]).
-   *
-   * Extracts all answered fields from [recordInstance] (and
-   * `activeFormWizardController?.formState`) using `formatFieldValueForDisplay` into
-   * `List<SubmissionFieldEntry>`, appends a new [SubmissionPreviewItem] to the target entity's
-   * `submissions` list, updates [activeSurveyNotice], and closes the active form runner.
+   * when invoked programmatically with a finalized [recordInstance]): records the submission,
+   * updates [activeSurveyNotice], and closes the active form runner.
    */
   fun completeActiveFormSubmission(
-    recordInstance: RecordInstance =
-      activeFormWizardController?.formState?.recordInstance ?: RecordInstance(),
-    entityStates: List<EntityState> =
-      activeFormWizardController?.formState?.entityStates ?: emptyList(),
-  ) {
-    syncViewModelState()
-    val controller = activeFormWizardController
-    viewModel.launch {
-      val result =
-        viewModel.completeFormSubmissionUseCase(
-          recordInstance = recordInstance,
-          entityStates = entityStates,
-          controller = controller,
-          activeDataCollectionFormId = activeDataCollectionFormId,
-          activeDataCollectionEntityId = activeDataCollectionEntityId,
-          wasFormLaunchedWithoutEntity = wasFormLaunchedWithoutEntity,
-          selectedEntityId = selectedEntityId,
-          customFormDef = customFormDef,
-          gnssStatusChipLabel = gnssStatusChipLabel,
-          signedInUserName = signedInUserName,
-          signedInUserEmail = signedInUserEmail,
-          userGpsCoordinatesLabel = userGpsCoordinatesLabel,
-          userGpsNormalizedX = userGpsNormalizedX,
-          userGpsNormalizedY = userGpsNormalizedY,
-        ) ?: return@launch
-      selectedEntityId = result.selectedEntityId
-      if (result.updateSelectedSubmissionId) {
-        selectedSubmissionId = result.selectedSubmissionId
-      }
-      activeSurveyNotice = result.noticeMessage
-      closeActiveFormRunner()
-    }
-  }
+    recordInstance: RecordInstance? = null,
+    entityStates: List<EntityState>? = null,
+  ) = dataCollection.completeActiveFormSubmission(recordInstance, entityStates)
 
   /**
    * Updates the [SyncStatus] of a specific [GeospatialEntityItem] ([entityId]) and synchronizes its
    * submissions accordingly when marked [SyncStatus.SYNCED].
    */
-  fun updateEntitySyncStatus(entityId: String, newStatus: SyncStatus) {
-    storeEntities(
-      entities.map { item ->
-        if (item.id == entityId) {
-          val updatedSubmissions =
-            if (newStatus == SyncStatus.SYNCED) {
-              item.submissions.map { sub -> sub.copy(syncStatus = SyncStatus.SYNCED) }
-            } else {
-              item.submissions
-            }
-          item.copy(submissions = updatedSubmissions, syncStatus = newStatus)
-        } else {
-          item
-        }
-      }
-    )
-    val entity = entities.firstOrNull { it.id == entityId } ?: return
-    activeSurveyNotice = "${entity.label}: Sync status set to ${newStatus.label}"
-  }
+  fun updateEntitySyncStatus(entityId: String, newStatus: SyncStatus) =
+    workbench.updateEntitySyncStatus(entityId, newStatus)
 
   /**
    * Cycles the [SyncStatus] of a specific [GeospatialEntityItem] ([entityId]) (`Uploading` ->
    * `Synced` -> `Failed` -> `Uploading`), or retries failed uploads immediately.
    */
-  fun cycleEntitySyncStatus(entityId: String) {
-    val entity = entities.firstOrNull { it.id == entityId } ?: return
-    updateEntitySyncStatus(entityId, entity.syncStatus.next())
-  }
+  fun cycleEntitySyncStatus(entityId: String) = workbench.cycleEntitySyncStatus(entityId)
 
   /**
    * Updates the [SyncStatus] of a specific [SubmissionPreviewItem] ([submissionId]) and recomputes
    * the parent entity's aggregate [SyncStatus] (or updates [standaloneSubmissions]).
    */
-  fun updateSubmissionSyncStatus(submissionId: String, newStatus: SyncStatus) {
-    var updatedSubTitle: String? = null
-    storeEntities(
-      entities.map { item ->
-        val hasTarget = item.submissions.any { it.id == submissionId }
-        if (hasTarget) {
-          val updatedSubmissions =
-            item.submissions.map { sub ->
-              if (sub.id == submissionId) {
-                updatedSubTitle = sub.formTitle
-                sub.copy(syncStatus = newStatus)
-              } else {
-                sub
-              }
-            }
-          item.copy(
-            submissions = updatedSubmissions,
-            syncStatus =
-              deriveEntitySyncStatus(
-                updatedSubmissions,
-                fallback =
-                  if (newStatus == SyncStatus.SYNCED) SyncStatus.SYNCED else item.syncStatus,
-              ),
-          )
-        } else {
-          item
-        }
-      }
-    )
-    if (standaloneSubmissions.any { it.id == submissionId }) {
-      storeStandaloneSubmissions(
-        standaloneSubmissions.map { sub ->
-          if (sub.id == submissionId) {
-            updatedSubTitle = sub.formTitle
-            sub.copy(syncStatus = newStatus)
-          } else {
-            sub
-          }
-        }
-      )
-    }
-    if (updatedSubTitle != null) {
-      activeSurveyNotice = "$updatedSubTitle: Sync status set to ${newStatus.label}"
-    }
-  }
+  fun updateSubmissionSyncStatus(submissionId: String, newStatus: SyncStatus) =
+    workbench.updateSubmissionSyncStatus(submissionId, newStatus)
 
   /**
    * Cycles the [SyncStatus] of a specific [SubmissionPreviewItem] ([submissionId]) (`Uploading` ->
    * `Synced` -> `Failed` -> `Uploading`).
    */
-  fun cycleSubmissionSyncStatus(submissionId: String) {
-    val submission = allSubmissions.firstOrNull { it.id == submissionId } ?: return
-    updateSubmissionSyncStatus(submissionId, submission.syncStatus.next())
-  }
+  fun cycleSubmissionSyncStatus(submissionId: String) =
+    workbench.cycleSubmissionSyncStatus(submissionId)
 
   /** Closes the active `MobileFormRunner` and returns to the survey map/list screen. */
-  fun closeActiveFormRunner() {
-    activeFormWizardController = null
-    activeDataCollectionEntityId = null
-    activeDataCollectionFormId = null
-    wasFormLaunchedWithoutEntity = false
-    entityRefSearchQuery = ""
-  }
+  fun closeActiveFormRunner() = dataCollection.closeActiveFormRunner()
 
   /** Opens the scannable S2 GeoID / Entity QR code modal dialog for [entityId]. */
-  fun openEntityQrCode(entityId: String) {
-    activeQrCodeEntityId = entityId
-  }
+  fun openEntityQrCode(entityId: String) = dataCollection.openEntityQrCode(entityId)
 
   /** Closes the active Entity QR code modal dialog. */
-  fun closeEntityQrCode() {
-    activeQrCodeEntityId = null
-  }
+  fun closeEntityQrCode() = dataCollection.closeEntityQrCode()
 
   /**
    * Generates a PDF report for the map feature [entityId] on the device (offline): its status,
    * details, location, properties, and submissions. Returns `null` for unknown IDs.
    */
-  internal fun generateEntityPdf(entityId: String): GeneratedPdf? {
-    val entity = entities.firstOrNull { it.id == entityId } ?: return null
-    return RecordPdfReports.entityReport(
-      entity = entity,
-      surveyTitle = activeSurvey.title,
-      geometry = EntityGeometry.of(entity, activeSurveyAnchor),
-      unitSystem = unitSystem,
-      generatedAtEpochMillis = platformEpochMillis(),
-      relatedLabelFor = { value -> relatedEntityForPropertyValue(entity, value)?.label },
-    )
-  }
+  internal fun generateEntityPdf(entityId: String): GeneratedPdf? =
+    dataCollection.generateEntityPdf(entityId)
 
   /** Generates a PDF report for the submission [submissionId] on the device (offline). */
-  internal fun generateSubmissionPdf(submissionId: String): GeneratedPdf? {
-    val submission = allSubmissions.firstOrNull { it.id == submissionId } ?: return null
-    return RecordPdfReports.submissionReport(
-      submission = submission,
-      surveyTitle = activeSurvey.title,
-      entity = entities.firstOrNull { it.id == submission.entityId },
-      generatedAtEpochMillis = platformEpochMillis(),
-    )
-  }
+  internal fun generateSubmissionPdf(submissionId: String): GeneratedPdf? =
+    dataCollection.generateSubmissionPdf(submissionId)
 
   /**
    * Generates the map feature's PDF and opens the Share PDF sheet to share, save, or preview it.
    */
-  fun shareEntityPdf(entityId: String) {
-    val entity = entities.firstOrNull { it.id == entityId } ?: return
-    val pdf = generateEntityPdf(entityId) ?: return
-    openPdfSheet(
-      pdf,
-      SharedPdfSheetState(
-        targetId = entity.id,
-        title = "${entity.singularTypeLabel} report",
-        subtitle = "${entity.label} • GeoID ${entity.geoId}",
-        pdfFileName = pdf.fileName,
-        targetKindLabel = "${entity.singularTypeLabel} report",
-        pageCount = pdf.pageCount,
-        fileSizeLabel = pdf.sizeLabel,
-      ),
-    )
-  }
+  fun shareEntityPdf(entityId: String) = dataCollection.shareEntityPdf(entityId)
 
   /** Generates the submission's PDF and opens the Share PDF sheet to share, save, or preview it. */
-  fun shareSubmissionPdf(submissionId: String) {
-    val sub = allSubmissions.firstOrNull { it.id == submissionId } ?: return
-    val pdf = generateSubmissionPdf(submissionId) ?: return
-    openPdfSheet(
-      pdf,
-      SharedPdfSheetState(
-        targetId = sub.id,
-        title = "${sub.formTitle} submission",
-        subtitle = "${sub.collectorName} • ${sub.timestamp}",
-        pdfFileName = pdf.fileName,
-        targetKindLabel = "${sub.formTitle} submission",
-        pageCount = pdf.pageCount,
-        fileSizeLabel = pdf.sizeLabel,
-      ),
-    )
-  }
+  fun shareSubmissionPdf(submissionId: String) = dataCollection.shareSubmissionPdf(submissionId)
 
   /** Generates the map feature's PDF and saves it straight away (web dashboard). */
-  fun downloadEntityPdf(entityId: String) {
-    generateEntityPdf(entityId)?.let(::savePdf)
-  }
+  fun downloadEntityPdf(entityId: String) = dataCollection.downloadEntityPdf(entityId)
 
   /** Generates the submission's PDF and saves it straight away (web dashboard). */
-  fun downloadSubmissionPdf(submissionId: String) {
-    generateSubmissionPdf(submissionId)?.let(::savePdf)
-  }
+  fun downloadSubmissionPdf(submissionId: String) =
+    dataCollection.downloadSubmissionPdf(submissionId)
 
   /** True when the platform can hand files to other apps via the system share sheet. */
   val canSharePdfFiles: Boolean
-    get() = platformCanShareFiles()
+    get() = dataCollectionState.canSharePdfFiles
 
   /** Opens the system share sheet for the PDF in the Share PDF sheet. */
-  fun shareActivePdf() {
-    val pdf = activePdf ?: return
-    val title = activeSharedPdfSheet?.title ?: pdf.fileName
-    platformSharePdf(pdf.fileName, title, pdf.bytes) { result ->
-      when (result) {
-        PdfExportResult.SHARED -> closeSharePdfSheet()
-        PdfExportResult.SAVED -> {
-          closeSharePdfSheet()
-          pdfExportMessage = "Saved ${pdf.fileName}"
-        }
-        PdfExportResult.CANCELLED -> Unit
-        PdfExportResult.FAILED -> pdfExportMessage = "Couldn't share ${pdf.fileName}"
-      }
-    }
-  }
+  fun shareActivePdf() = dataCollection.shareActivePdf()
 
   /** Saves the PDF in the Share PDF sheet to the device. */
-  fun saveActivePdf() {
-    val pdf = activePdf ?: return
-    savePdf(pdf)
-    closeSharePdfSheet()
-  }
+  fun saveActivePdf() = dataCollection.saveActivePdf()
 
   /** Opens the PDF in the Share PDF sheet in the platform's viewer. */
-  fun previewActivePdf() {
-    val pdf = activePdf ?: return
-    platformPreviewPdf(pdf.fileName, pdf.bytes)
-  }
+  fun previewActivePdf() = dataCollection.previewActivePdf()
 
   /** Closes the active Share PDF modal sheet. */
-  fun closeSharePdfSheet() {
-    activeSharedPdfSheet = null
-    activePdf = null
-  }
+  fun closeSharePdfSheet() = dataCollection.closeSharePdfSheet()
 
   /** Clears [pdfExportMessage] once it has been shown. */
-  fun dismissPdfExportMessage() {
-    pdfExportMessage = null
-  }
-
-  private fun openPdfSheet(pdf: GeneratedPdf, sheet: SharedPdfSheetState) {
-    activePdf = pdf
-    activeSharedPdfSheet = sheet
-  }
-
-  private fun savePdf(pdf: GeneratedPdf) {
-    platformSavePdf(pdf.fileName, pdf.bytes)
-    pdfExportMessage = "Saved ${pdf.fileName} (${pdf.summaryLabel})"
-  }
+  fun dismissPdfExportMessage() = dataCollection.dismissPdfExportMessage()
 
   // --- Hamburger Navigation Drawer Actions ---
 
@@ -3400,39 +2418,27 @@ class PrototypeAppState(
    * Drawer option: "Uploads" — opens the unified screen listing all mutations with status filter
    * chips (`Pending`, `In progress`, `Uploaded`, `Failed`).
    */
-  fun drawerOpenUploads(filter: UploadStatusFilter? = null) {
-    isDrawerOpen = false
-    selectedUploadStatusFilter = filter
-    uploadsEntityFilterId = null
-    activeDrawerSubView = MainDrawerSubView.UPLOADS
-  }
+  fun drawerOpenUploads(filter: UploadStatusFilter? = null) = dashboard.showUploads(filter)
 
   /** Selects or clears the active [UploadStatusFilter] chip on the `Uploads` screen. */
-  fun selectUploadStatusFilter(filter: UploadStatusFilter?) {
-    selectedUploadStatusFilter = filter
-  }
+  fun selectUploadStatusFilter(filter: UploadStatusFilter?) =
+    dashboard.selectUploadStatusFilter(filter)
 
   /** Toggles [filter] on the `Uploads` screen (selecting it, or clearing it if already active). */
-  fun toggleUploadStatusFilter(filter: UploadStatusFilter) {
-    selectedUploadStatusFilter =
-      if (selectedUploadStatusFilter == filter) {
-        null
-      } else {
-        filter
-      }
-  }
+  fun toggleUploadStatusFilter(filter: UploadStatusFilter) =
+    dashboard.toggleUploadStatusFilter(filter)
 
   /** Legacy helper: opens the `Outbox` sub-view (rendered by the unified `Uploads` screen). */
   fun drawerOpenOutbox() {
     isDrawerOpen = false
-    selectedUploadStatusFilter = null
+    dashboard.selectUploadStatusFilter(null)
     activeDrawerSubView = MainDrawerSubView.OUTBOX
   }
 
   /** Legacy helper: opens the `Uploaded` sub-view (rendered by the unified `Uploads` screen). */
   fun drawerOpenUploaded() {
     isDrawerOpen = false
-    selectedUploadStatusFilter = UploadStatusFilter.UPLOADED
+    dashboard.selectUploadStatusFilter(UploadStatusFilter.UPLOADED)
     activeDrawerSubView = MainDrawerSubView.UPLOADED
   }
 
@@ -3440,31 +2446,19 @@ class PrototypeAppState(
    * Synchronizes a single Outbox mutation ([mutationId]), transitioning its state to
    * [MutationSyncState.UPLOADED] with a completed timestamp and moving it into `Uploaded`.
    */
-  fun syncMutationNow(mutationId: String) {
-    viewModel.launch {
-      val notice = viewModel.syncMutationsUseCase.syncSingleMutation(mutationId) ?: return@launch
-      activeSurveyNotice = notice
-    }
-  }
+  fun syncMutationNow(mutationId: String) = dashboard.syncMutationNow(mutationId)
 
   /**
    * Synchronizes all currently pending/in-progress mutations in the `Outbox`, transitioning them to
    * [MutationSyncState.UPLOADED] with completed timestamps.
    */
-  fun syncAllOutboxMutations() {
-    val surveyId = activeSurveyId
-    viewModel.launch {
-      val notice = viewModel.syncMutationsUseCase.syncAllOutboxMutations(surveyId) ?: return@launch
-      activeSurveyNotice = notice
-    }
-  }
+  fun syncAllOutboxMutations() = dashboard.syncAllOutboxMutations()
 
   /** Navigates from the "Surveys" screen to the full "Download survey" directory screen. */
   fun openDownloadMoreSurveysScreen() {
     isDrawerOpen = false
     activeDrawerSubView = MainDrawerSubView.NONE
-    downloadSurveyEntryOrigin = DownloadSurveyEntryOrigin.SURVEY_LIST
-    isDownloadSurveySignOutPromptOpen = false
+    onboarding.setEntryOrigin(DownloadSurveyEntryOrigin.SURVEY_LIST)
     currentScreen = PrototypeScreen.DOWNLOAD_SURVEY
   }
 
@@ -3491,7 +2485,7 @@ class PrototypeAppState(
    */
   fun closeDrawerSubView() {
     activeDrawerSubView = MainDrawerSubView.NONE
-    uploadsEntityFilterId = null
+    dashboard.clearUploadsEntityFilter()
   }
 
   /** Drawer option 4: View Terms of Service. */
@@ -3505,7 +2499,7 @@ class PrototypeAppState(
   fun drawerSignOut() {
     isDrawerOpen = false
     activeDrawerSubView = MainDrawerSubView.NONE
-    isSignedIn = false
+    onboarding.signOut()
     currentScreen = PrototypeScreen.SIGN_IN
   }
 
@@ -3515,142 +2509,65 @@ class PrototypeAppState(
   }
 
   /** Toggles download status of an offline Mapbox basemap tile package. */
-  fun toggleOfflineTilePackage(packageId: String) {
-    storeOfflineTilePackages(
-      offlineTilePackages.map { pkg ->
-        if (pkg.id == packageId) pkg.copy(isDownloaded = !pkg.isDownloaded) else pkg
-      }
-    )
-  }
+  fun toggleOfflineTilePackage(packageId: String) = settings.toggleOfflineTilePackage(packageId)
 
   /**
    * Prompts the user before removing an offline map tile package from the device. If the package is
    * not downloaded, downloads it immediately.
    */
-  fun promptRemoveOfflineTilePackage(packageId: String) {
-    val pkg = offlineTilePackages.firstOrNull { it.id == packageId }
-    if (pkg != null && pkg.isDownloaded) {
-      pendingRemovalTilePackageId = packageId
-    } else {
-      toggleOfflineTilePackage(packageId)
-    }
-  }
+  fun promptRemoveOfflineTilePackage(packageId: String) =
+    settings.promptRemoveOfflineTilePackage(packageId)
 
   /**
    * Confirms removal of the pending offline tile package from the device and dismisses the dialog.
    */
-  fun confirmRemoveOfflineTilePackage() {
-    val packageId = pendingRemovalTilePackageId
-    pendingRemovalTilePackageId = null
-    if (packageId != null) {
-      storeOfflineTilePackages(
-        offlineTilePackages.map { pkg ->
-          if (pkg.id == packageId) pkg.copy(isDownloaded = false) else pkg
-        }
-      )
-    }
-  }
+  fun confirmRemoveOfflineTilePackage() = settings.confirmRemoveOfflineTilePackage()
 
   /** Dismisses/cancels the pending offline tile package removal dialog. */
-  fun dismissRemoveOfflineTilePackage() {
-    pendingRemovalTilePackageId = null
-  }
+  fun dismissRemoveOfflineTilePackage() = settings.dismissRemoveOfflineTilePackage()
 
   /** Updates the measurement unit preference (`METRIC` vs `IMPERIAL`). */
-  fun updateUnitSystem(system: MeasurementUnitSystem) {
-    storeUserSettings(userSettings.copy(measurementUnits = system))
-  }
+  fun updateUnitSystem(system: MeasurementUnitSystem) = settings.updateMeasurementUnits(system)
 
   /**
    * Updates the active application & survey language using either a language code (e.g. `"en"`,
-   * `"fr"`, `"es"`, `"pt"`, `"vi"`, `"th"`, `"lo"`, `"km"`, `"sw"`) or a formatted locale string
-   * (e.g. `"fr (Français)"`). Synchronizes both [selectedLanguageCode] and [selectedLanguageLocale]
-   * .
+   * `"fr"`) or a formatted locale string (e.g. `"fr (Français)"`). Synchronizes both
+   * [selectedLanguageCode] and [selectedLanguageLocale].
    */
-  fun updateSelectedLanguage(languageCodeOrLocale: String) {
-    val trimmed = languageCodeOrLocale.trim()
-    val codeCandidate = trimmed.substringBefore(" ").lowercase()
-    val matched = GROUND_LANGUAGE_OPTIONS.firstOrNull {
-      it.code.equals(trimmed, ignoreCase = true) ||
-        it.code.equals(codeCandidate, ignoreCase = true) ||
-        it.label.equals(trimmed, ignoreCase = true) ||
-        "${it.code} (${it.label})".equals(trimmed, ignoreCase = true)
-    }
-    if (matched != null) {
-      storeUserSettings(userSettings.copy(language = matched.code))
-      selectedLanguageLocale = "${matched.code} (${matched.label})"
-    } else {
-      storeUserSettings(userSettings.copy(language = codeCandidate.ifEmpty { "en" }))
-      selectedLanguageLocale = trimmed.ifEmpty { "en (English)" }
-    }
-  }
+  fun updateSelectedLanguage(languageCodeOrLocale: String) =
+    settings.updateLanguage(languageCodeOrLocale)
 
   /** Updates the active in-app language locale (delegates to [updateSelectedLanguage]). */
-  fun updateLanguageLocale(locale: String) {
-    updateSelectedLanguage(locale)
-  }
+  fun updateLanguageLocale(locale: String) = updateSelectedLanguage(locale)
 
-  /**
-   * Updates the "Upload photos over Wi-Fi only" preference (matching `SettingsViewModel` in
-   * `ground-android`).
-   */
-  fun updateUploadMediaOverUnmeteredConnectionOnly(enabled: Boolean) {
-    storeUserSettings(userSettings.copy(shouldUploadPhotosOnWifiOnly = enabled))
-  }
+  /** Updates the "Upload photos over Wi-Fi only" preference. */
+  fun updateUploadMediaOverUnmeteredConnectionOnly(enabled: Boolean) =
+    settings.updateUploadMediaOverUnmeteredConnectionOnly(enabled)
 
-  /**
-   * Records a click on "Visit website" (`https://groundplatform.org/`) in the Settings Help
-   * section.
-   */
-  fun visitGroundWebsite(url: String = GROUND_WEBSITE_URL) {
-    visitedWebsiteUrl = url
-    activeSurveyNotice = "Opened $url"
-  }
+  /** Records a click on "Visit website" (`https://groundplatform.org/`) in Settings > Help. */
+  fun visitGroundWebsite(url: String = GROUND_WEBSITE_URL) = settings.visitWebsite(url)
 
   /** Evicts uploaded media attachments from local device cache (per `00-index.md`). */
-  fun evictUploadedMediaCache() {
-    mediaCacheCleared = true
-    viewModel.launch { viewModel.settingsRepository.evictUploadedMediaCache() }
-  }
+  fun evictUploadedMediaCache() = settings.evictUploadedMediaCache()
 
   /**
    * Selects the device preview form factor (`Mobile` vs `Tablet`) in the prototype wrapper page.
    */
-  fun selectDeviceFormFactor(formFactor: DeviceFormFactor) {
-    deviceFormFactor = formFactor
-    deviceOrientation = formFactor.defaultOrientation
-  }
+  fun selectDeviceFormFactor(formFactor: DeviceFormFactor) =
+    workbench.selectDeviceFormFactor(formFactor)
 
   /** Toggles between `Mobile` and `Tablet` form factors in the prototype wrapper page. */
-  fun toggleDeviceFormFactor() {
-    val nextFormFactor =
-      if (deviceFormFactor == DeviceFormFactor.MOBILE) {
-        DeviceFormFactor.TABLET
-      } else {
-        DeviceFormFactor.MOBILE
-      }
-    selectDeviceFormFactor(nextFormFactor)
-  }
+  fun toggleDeviceFormFactor() = workbench.toggleDeviceFormFactor()
 
   /** Rotates the simulated device between `Portrait` and `Landscape` orientation (`90°` swap). */
-  fun rotateDevice() {
-    deviceOrientation =
-      if (deviceOrientation == DeviceOrientation.PORTRAIT) {
-        DeviceOrientation.LANDSCAPE
-      } else {
-        DeviceOrientation.PORTRAIT
-      }
-  }
+  fun rotateDevice() = workbench.rotateDevice()
 
   /** Alias for [rotateDevice]: toggles between `Portrait` and `Landscape` device orientation. */
-  fun toggleDeviceOrientation() {
-    rotateDevice()
-  }
+  fun toggleDeviceOrientation() = workbench.toggleDeviceOrientation()
 
   /** Explicitly sets the simulated device orientation (`Portrait` or `Landscape`). */
-  fun selectDeviceOrientation(orientation: DeviceOrientation) {
-    deviceOrientation = orientation
-  }
+  fun selectDeviceOrientation(orientation: DeviceOrientation) =
+    workbench.selectDeviceOrientation(orientation)
 
   /**
    * Pans (drags) the survey map viewport by normalized deltas `(deltaNormalizedX,
@@ -3660,57 +2577,34 @@ class PrototypeAppState(
    * [locationLockState] = [LocationLockState.PANNED]), causing the Google Maps-style `"Recenter"`
    * button to appear on the map.
    */
-  fun panMap(deltaNormalizedX: Float, deltaNormalizedY: Float) {
-    if (deltaNormalizedX == 0f && deltaNormalizedY == 0f) return
-    isCameraFollowingUser = false
-    locationLockState = LocationLockState.PANNED
-    mapPanOffsetX = (mapPanOffsetX + deltaNormalizedX).coerceIn(-10000f, 10000f)
-    mapPanOffsetY = (mapPanOffsetY + deltaNormalizedY).coerceIn(-10000f, 10000f)
-  }
+  fun panMap(deltaNormalizedX: Float, deltaNormalizedY: Float) =
+    surveyMap.panMap(deltaNormalizedX, deltaNormalizedY)
 
   /**
    * Recenters the map camera on the user's current GPS location (`(0.50f, 0.50f)` screen center)
    * and re-enables automatic GPS camera following ([isCameraFollowingUser] = `true`,
    * [locationLockState] = [LocationLockState.LOCKED]).
    */
-  fun recenterMapOnUser() {
-    isCameraFollowingUser = true
-    locationLockState = LocationLockState.LOCKED
-    mapPanOffsetX = 0f
-    mapPanOffsetY = 0f
-  }
+  fun recenterMapOnUser() = surveyMap.recenterMapOnUser()
 
   /**
    * Recenters the map camera on [entity], adjusting the normalized vertical screen center to
    * [targetScreenY] (defaults to `0.50f` screen center) to account for reduced visible viewport
    * area (such as an expanded bottom table in the web dashboard).
    */
-  fun recenterMapOnEntity(entity: GeospatialEntityItem, targetScreenY: Float = 0.50f) {
-    isCameraFollowingUser = false
-    locationLockState = LocationLockState.PANNED
-    mapPanOffsetX = (userGpsNormalizedX - entity.normalizedX).coerceIn(-10000f, 10000f)
-    mapPanOffsetY =
-      ((userGpsNormalizedY - entity.normalizedY) + (targetScreenY - 0.50f)).coerceIn(
-        -10000f,
-        10000f,
-      )
-  }
+  fun recenterMapOnEntity(entity: GeospatialEntityItem, targetScreenY: Float = 0.50f) =
+    surveyMap.recenterMapOnEntity(entity, targetScreenY)
 
   /**
    * Recenters the map camera on the entity with [entityId], adjusting the normalized vertical
    * screen center to [targetScreenY] (defaults to `0.50f` screen center).
    */
-  fun recenterMapOnEntity(entityId: String, targetScreenY: Float = 0.50f) {
-    val entity = entities.firstOrNull { it.id == entityId } ?: return
-    recenterMapOnEntity(entity, targetScreenY)
-  }
+  fun recenterMapOnEntity(entityId: String, targetScreenY: Float = 0.50f) =
+    surveyMap.recenterMapOnEntity(entityId, targetScreenY)
 
   /** Resolves the geographic coordinates `(lng, lat)` for [entity] in the active survey. */
-  fun resolveEntityLngLat(entity: GeospatialEntityItem): Pair<Double, Double> {
-    val position =
-      activeSurveyAnchor.toLatLng(entity.normalizedX.toDouble(), entity.normalizedY.toDouble())
-    return position.longitude to position.latitude
-  }
+  fun resolveEntityLngLat(entity: GeospatialEntityItem): Pair<Double, Double> =
+    surveyMap.resolveEntityLngLat(entity)
 
   /**
    * Resolves the geographic bounds of [entity]'s geometry in the active survey (see
@@ -3723,137 +2617,51 @@ class PrototypeAppState(
    * The camera the survey map should show: the user's GPS position shifted by the pan offset
    * ([mapPanOffsetX], [mapPanOffsetY]), at the survey's zoom plus [mapZoomDelta].
    */
-  fun desiredMapCamera(): CameraPosition {
-    val anchor = activeSurveyAnchor
-    val center =
-      anchor.toLatLng(
-        (userGpsNormalizedX - mapPanOffsetX).toDouble(),
-        (userGpsNormalizedY - mapPanOffsetY).toDouble(),
-      )
-    return CameraPosition(
-      center =
-        LatLng(
-          center.latitude.coerceIn(-MAX_MAP_LATITUDE, MAX_MAP_LATITUDE),
-          ((center.longitude + 540) % 360) - 180,
-        ),
-      zoom = anchor.zoom + mapZoomDelta,
-    )
-  }
+  fun desiredMapCamera(): CameraPosition = surveyMap.desiredMapCamera()
 
   /**
    * Updates the pan offset and zoom delta to match where the map [camera] settled after a gesture
    * or an explicit camera move. Moving the center stops following the user's GPS location.
    */
-  fun syncMapCamera(camera: CameraPosition) {
-    val anchor = activeSurveyAnchor
-    val (nx, ny) = anchor.toNormalized(camera.center)
-    val panX = (userGpsNormalizedX - nx).toFloat().coerceIn(-10000f, 10000f)
-    val panY = (userGpsNormalizedY - ny).toFloat().coerceIn(-10000f, 10000f)
-    val moved =
-      abs(panX - mapPanOffsetX) > MAP_SYNC_TOLERANCE ||
-        abs(panY - mapPanOffsetY) > MAP_SYNC_TOLERANCE
-    if (moved) {
-      isCameraFollowingUser = false
-      locationLockState = LocationLockState.PANNED
-      mapPanOffsetX = panX
-      mapPanOffsetY = panY
-    }
-    syncMapZoomDelta((camera.zoom - anchor.zoom).toFloat())
-  }
+  fun syncMapCamera(camera: CameraPosition) = surveyMap.syncMapCamera(camera)
 
   /**
    * Syncs [mapZoomDelta] after the map camera changed its own zoom (e.g. fitting a selected map
    * feature), so clustering and the scale bar follow the camera.
    */
-  fun syncMapZoomDelta(zoomDelta: Float) {
-    if (zoomDelta.isNaN()) return
-    mapZoomDelta = zoomDelta.coerceIn(-13.0f, 3.7f)
-    if (!isMapClusteringActive) {
-      selectedClusterId = null
-    }
-  }
+  fun syncMapZoomDelta(zoomDelta: Float) = surveyMap.syncMapZoomDelta(zoomDelta)
 
   /** Adjusts the Mapbox zoom level by [deltaZoom] (clamped to `[-5.0f, +3.7f]`). */
-  fun zoomMapBy(deltaZoom: Float) {
-    if (deltaZoom == 0f) return
-    mapZoomDelta = (mapZoomDelta + deltaZoom).coerceIn(-5.0f, 3.7f)
-    if (!isMapClusteringActive) {
-      selectedClusterId = null
-    }
-  }
+  fun zoomMapBy(deltaZoom: Float) = surveyMap.zoomMapBy(deltaZoom)
 
   /** Zooms the Mapbox map in by one step (`+0.75` zoom levels). */
-  fun zoomInMap() {
-    zoomMapBy(0.75f)
-  }
+  fun zoomInMap() = surveyMap.zoomInMap()
 
   /** Zooms the Mapbox map out by one step (`-0.75` zoom levels). */
-  fun zoomOutMap() {
-    zoomMapBy(-0.75f)
-  }
+  fun zoomOutMap() = surveyMap.zoomOutMap()
 
   /** Resets the Mapbox zoom level to the active survey's default (`15.3z`). */
-  fun resetMapZoom() {
-    mapZoomDelta = 0f
-    selectedClusterId = null
-  }
+  fun resetMapZoom() = surveyMap.resetMapZoom()
 
   /**
    * Formats the count of map features in a cluster using the active domain noun (e.g. `"5 map
    * features"`, `"1 map feature"`, or `"5 coffee parcels"`).
    */
-  fun formatClusterSitesCountLabel(siteCount: Int): String {
-    val noun =
-      if (siteCount == 1) {
-        activeEntitiesCountNoun.removeSuffix("s")
-      } else {
-        activeEntitiesCountNoun
-      }
-    return "$siteCount $noun"
-  }
+  fun formatClusterSitesCountLabel(siteCount: Int): String =
+    mapState.formatClusterSitesCountLabel(siteCount)
 
   /**
    * Selects a zoomed-out [MapFeatureCluster] balloon by [clusterId] (or clears selection when
    * `null`). If the same cluster is tapped a second time while already selected, zooms in toward
    * that cluster.
    */
-  fun selectCluster(clusterId: String?) {
-    if (clusterId == null) {
-      selectedClusterId = null
-      return
-    }
-    if (selectedClusterId == clusterId) {
-      zoomIntoCluster(clusterId)
-      return
-    }
-    val target = mapFeatureClusters.firstOrNull { it.id == clusterId }
-    selectedClusterId = clusterId
-    if (target != null) {
-      selectedEntityId = null
-      selectedSubmissionId = null
-      activeSurveyNotice = formatClusterSitesCountLabel(target.siteCount)
-    }
-  }
+  fun selectCluster(clusterId: String?) = surveyMap.selectCluster(clusterId)
 
   /**
    * Centers the map viewport on the specified [clusterId] and zooms in one step (`+0.75z`) to
    * expand the cluster.
    */
-  fun zoomIntoCluster(clusterId: String) {
-    val target = mapFeatureClusters.firstOrNull { it.id == clusterId }
-    if (target != null) {
-      isCameraFollowingUser = false
-      locationLockState = LocationLockState.PANNED
-      mapPanOffsetX = (userGpsNormalizedX - target.normalizedX).coerceIn(-10000f, 10000f)
-      mapPanOffsetY = (userGpsNormalizedY - target.normalizedY).coerceIn(-10000f, 10000f)
-    }
-    zoomInMap()
-    val refreshed = mapFeatureClusters.firstOrNull {
-      target != null &&
-        hypot(it.normalizedX - target.normalizedX, it.normalizedY - target.normalizedY) < 0.08f
-    }
-    selectedClusterId = refreshed?.id
-  }
+  fun zoomIntoCluster(clusterId: String) = surveyMap.zoomIntoCluster(clusterId)
 
   /**
    * Updates the user's current GPS location (`userGpsNormalizedX`, `userGpsNormalizedY`).
@@ -3867,107 +2675,31 @@ class PrototypeAppState(
     newNormalizedX: Float,
     newNormalizedY: Float,
     coordinatesLabel: String? = null,
-  ) {
-    val clampedX = newNormalizedX.coerceIn(0.10f, 0.90f)
-    val clampedY = newNormalizedY.coerceIn(0.10f, 0.90f)
-    val dx = clampedX - userGpsNormalizedX
-    val dy = clampedY - userGpsNormalizedY
-    userGpsNormalizedX = clampedX
-    userGpsNormalizedY = clampedY
-    if (coordinatesLabel != null) {
-      userGpsCoordinatesLabel = coordinatesLabel
-    }
-    if (!isCameraFollowingUser) {
-      mapPanOffsetX = (mapPanOffsetX + dx).coerceIn(-10000f, 10000f)
-      mapPanOffsetY = (mapPanOffsetY + dy).coerceIn(-10000f, 10000f)
-    }
-  }
+  ) = surveyMap.updateUserGpsLocation(newNormalizedX, newNormalizedY, coordinatesLabel)
 
-  // --- Straight-Line Wayfinding Navigation Actions ---
+  // --- Straight-Line Wayfinding Navigation Actions (see [SurveyMapViewModel]) ---
 
   /**
    * Starts straight-line navigation from the collector's current GPS position to [entityId],
    * ensuring its layer is visible, selecting the entity in collapsed bottom-sheet peek mode, and
    * switching to the Map view with GPS auto-centering enabled.
    */
-  fun startNavigationToEntity(entityId: String) {
-    val entity = entities.firstOrNull { it.id == entityId } ?: return
-    storeMapLayers(
-      mapLayers.map { layer ->
-        if (layer.id == entity.layerId) layer.copy(isVisible = true) else layer
-      }
-    )
-    navigationTargetKind = NavigationTargetKind.ENTITY
-    navigationTargetId = entity.id
-    selectedEntityId = entity.id
-    selectedSubmissionId = null
-    isEntityBottomSheetExpanded = false
-    isLayersSheetOpen = false
-    isDrawerOpen = false
-    activeDrawerSubView = MainDrawerSubView.NONE
-    mainViewMode = MainSurveyViewMode.MAP
-    if (currentScreen != PrototypeScreen.MAIN_SURVEY) {
-      currentScreen = PrototypeScreen.MAIN_SURVEY
-    }
-    recenterMapOnUser()
-    val badge = formattedWayfindingBadgeForEntity(entity.id)
-    activeSurveyNotice = "Straight-line navigation to ${entity.label} ($badge)"
-  }
+  fun startNavigationToEntity(entityId: String) = surveyMap.startNavigationToEntity(entityId)
 
   /**
    * Starts straight-line navigation from the collector's current GPS position to [submissionId]
    * (targeting its recorded geometry polygon or parent entity location), ensuring the parent
    * entity's map layer is visible, selecting the submission, and switching to Map view.
    */
-  fun startNavigationToSubmission(submissionId: String) {
-    val sub = allSubmissions.firstOrNull { it.id == submissionId } ?: return
-    val parentEntity = entities.firstOrNull { it.id == sub.entityId }
-    storeMapLayers(
-      mapLayers.map { layer ->
-        if (parentEntity != null && layer.id == parentEntity.layerId) {
-          layer.copy(isVisible = true)
-        } else {
-          layer
-        }
-      }
-    )
-    navigationTargetKind = NavigationTargetKind.SUBMISSION
-    navigationTargetId = sub.id
-    selectedEntityId = parentEntity?.id
-    selectedSubmissionId = sub.id
-    isEntityBottomSheetExpanded = false
-    isLayersSheetOpen = false
-    isDrawerOpen = false
-    activeDrawerSubView = MainDrawerSubView.NONE
-    mainViewMode = MainSurveyViewMode.MAP
-    if (currentScreen != PrototypeScreen.MAIN_SURVEY) {
-      currentScreen = PrototypeScreen.MAIN_SURVEY
-    }
-    recenterMapOnUser()
-    val badge = formattedWayfindingBadgeForSubmission(sub.id)
-    val contextLabel =
-      parentEntity?.label?.substringBefore(" •")
-        ?: sub.coordinatesLabel.ifBlank { "Standalone Field Log" }
-    activeSurveyNotice = "Straight-line navigation to ${sub.formTitle} • $contextLabel ($badge)"
-  }
+  fun startNavigationToSubmission(submissionId: String) =
+    surveyMap.startNavigationToSubmission(submissionId)
 
   /** Toggles straight-line navigation to [entityId] on or off. */
-  fun toggleNavigationToEntity(entityId: String) {
-    if (isNavigatingToEntity(entityId)) {
-      stopNavigation()
-    } else {
-      startNavigationToEntity(entityId)
-    }
-  }
+  fun toggleNavigationToEntity(entityId: String) = surveyMap.toggleNavigationToEntity(entityId)
 
   /** Toggles straight-line navigation to [submissionId] on or off. */
-  fun toggleNavigationToSubmission(submissionId: String) {
-    if (isNavigatingToSubmission(submissionId)) {
-      stopNavigation()
-    } else {
-      startNavigationToSubmission(submissionId)
-    }
-  }
+  fun toggleNavigationToSubmission(submissionId: String) =
+    surveyMap.toggleNavigationToSubmission(submissionId)
 
   /**
    * Starts straight-line navigation from the collector's current GPS position to [placeId] and
@@ -3975,23 +2707,7 @@ class PrototypeAppState(
    */
   fun startNavigationToPlace(placeId: String) {
     val place = findPlaceById(placeId) ?: return
-    navigationTargetKind = NavigationTargetKind.PLACE
-    navigationTargetId = place.id
-    selectedPlaceId = place.id
-    lastSelectedPlace = place
-    selectedEntityId = null
-    selectedSubmissionId = null
-    isEntityBottomSheetExpanded = false
-    isLayersSheetOpen = false
-    isDrawerOpen = false
-    activeDrawerSubView = MainDrawerSubView.NONE
-    mainViewMode = MainSurveyViewMode.MAP
-    if (currentScreen != PrototypeScreen.MAIN_SURVEY) {
-      currentScreen = PrototypeScreen.MAIN_SURVEY
-    }
-    recenterMapOnUser()
-    val badge = formattedWayfindingBadgeForPlace(place.id)
-    activeSurveyNotice = "Straight-line navigation to ${place.name} ($badge)"
+    surveyMap.startNavigationToPlace(place)
   }
 
   /** Toggles straight-line navigation to [placeId] on or off. */
@@ -4004,126 +2720,38 @@ class PrototypeAppState(
   }
 
   /** Stops active straight-line navigation and clears the navigation line & HUD banner. */
-  fun stopNavigation() {
-    navigationTargetKind = null
-    navigationTargetId = null
-    activeSurveyNotice = null
-  }
+  fun stopNavigation() = surveyMap.stopNavigation()
 
   /**
    * Advances the collector's simulated GPS blue dot along the active straight-line navigation
    * vector toward the target entity or submission by [stepFraction] (`0.40f` by default, snapping
    * directly onto the destination when within `12` meters).
    */
-  fun stepUserTowardNavigationTarget(stepFraction: Float = 0.40f) {
-    val nav = activeNavigation ?: return
-    val targetX = nav.vector.toNormalizedX
-    val targetY = nav.vector.toNormalizedY
-    val dx = targetX - userGpsNormalizedX
-    val dy = targetY - userGpsNormalizedY
-    val fraction = stepFraction.coerceIn(0.10f, 1.0f)
-    val nextX =
-      if (nav.vector.distanceMeters <= 18) {
-        targetX
-      } else {
-        userGpsNormalizedX + dx * fraction
-      }
-    val nextY =
-      if (nav.vector.distanceMeters <= 18) {
-        targetY
-      } else {
-        userGpsNormalizedY + dy * fraction
-      }
-    updateUserGpsLocation(nextX, nextY)
-  }
+  fun stepUserTowardNavigationTarget(stepFraction: Float = 0.40f) =
+    surveyMap.stepUserTowardNavigationTarget(stepFraction)
 
   /** Toggles between Light and Dark Ground Material 3 themes. */
-  fun toggleDarkTheme() {
-    isDarkTheme = !isDarkTheme
-  }
+  fun toggleDarkTheme() = settings.toggleDarkTheme()
 
   /**
    * Randomly generates and appends [count] polygon map features (`GeospatialEntityItem`) across the
    * active survey region to benchmark Mapbox GL WebGL polygon & marker scaling at 5,000, 10,000,
    * 15,000+ map features.
    */
-  fun addRandomSites(count: Int = 5_000) {
-    if (count <= 0) return
-    syncViewModelState()
-    viewModel.launch { viewModel.generateRandomSitesUseCase(count) }
-    val totalCount = entities.size
-    currentScreen = PrototypeScreen.MAIN_SURVEY
-    mainViewMode = MainSurveyViewMode.MAP
-    activeDrawerSubView = MainDrawerSubView.NONE
-    activeSurveyNotice = "Added $count random polygon features ($totalCount total map features)"
-  }
+  fun addRandomSites(count: Int = 5_000) = workbench.addRandomSites(count)
 
   /** Resets the onboarding and prototype state back to the initial Sign In screen. */
-  fun resetPrototypeFlow() {
-    currentScreen = PrototypeScreen.SIGN_IN
-    isSignedIn = false
-    hasAcceptedTerms = false
-    downloadSurveyEntryOrigin = DownloadSurveyEntryOrigin.AFTER_TOS
-    isDownloadSurveySignOutPromptOpen = false
-    termsCheckboxChecked = true
-    searchQuery = ""
-    activeSurveyNotice = null
-    mainViewMode = MainSurveyViewMode.MAP
-    isDrawerOpen = false
-    activeDrawerSubView = MainDrawerSubView.NONE
-    isLayersSheetOpen = false
-    isAvailableFormsSheetOpen = false
-    isOfflineBasemapVisible = true
-    offlineBasemapStyle = OfflineBasemapStyle.SATELLITE_HYBRID
-    enabledImagerySourceIds = emptySet()
-    viewModel.launch { viewModel.sampleDataRepository.resetToSampleData() }
-    dataResetCount++
-    selectedPlaceId = null
-    lastSelectedPlace = null
-    isAirplaneMode = false
-    mapboxPlacesApiResults = emptyList()
-    isMapboxPlacesSearching = false
-    selectedEntityId = null
-    isEntityBottomSheetExpanded = false
-    isSidePanelExpanded = true
-    sidePanelWidthDp = DEFAULT_SIDE_PANEL_WIDTH_DP
-    isDetailsPanelExpanded = true
-    selectedSubmissionId = null
-    selectedLayerDatasetId = null
-    entityDetailsPane = EntityDetailsPane.PROPERTIES
-    isDashboardTableExpanded = false
-    dashboardTableDatasetId = null
-    uploadsEntityFilterId = null
-    navigationTargetKind = null
-    navigationTargetId = null
-    listSearchQuery = ""
-    listFilterTab = ListFilterTab.ALL
-    userGpsNormalizedX = 0.50f
-    userGpsNormalizedY = 0.50f
-    userGpsCoordinatesLabel = "-0.4198°, 36.9512° (±3.2m GPS)"
-    isCameraFollowingUser = true
-    locationLockState = LocationLockState.LOCKED
-    mapPanOffsetX = 0f
-    mapPanOffsetY = 0f
-    closeActiveFormRunner()
-    resetDefaultXFormsXml()
-  }
+  fun resetPrototypeFlow() = workbench.resetPrototypeFlow()
 
   companion object {
-    /** Web Mercator's latitude limit, for camera centers. */
-    private const val MAX_MAP_LATITUDE = 85.0
-
-    /** Pan offset change (normalized) below which a settled camera counts as not moved. */
-    private const val MAP_SYNC_TOLERANCE = 1e-4f
-
     /** Default width of the web dashboard's left-hand panel, in dp. */
-    const val DEFAULT_SIDE_PANEL_WIDTH_DP = 300f
+    const val DEFAULT_SIDE_PANEL_WIDTH_DP = DashboardUiState.DEFAULT_SIDE_PANEL_WIDTH_DP
 
     /** Narrowest the web dashboard's left-hand panel can be dragged, in dp. */
-    const val MIN_SIDE_PANEL_WIDTH_DP = 240f
+    const val MIN_SIDE_PANEL_WIDTH_DP = DashboardUiState.MIN_SIDE_PANEL_WIDTH_DP
 
     /** Widest the web dashboard's left-hand panel can be dragged, in dp. */
-    const val MAX_SIDE_PANEL_WIDTH_DP = 560f
+    const val MAX_SIDE_PANEL_WIDTH_DP = DashboardUiState.MAX_SIDE_PANEL_WIDTH_DP
   }
 
   /**
@@ -4131,38 +2759,28 @@ class PrototypeAppState(
    * survey uses it.
    */
   fun surveyIdForExampleForm(example: WorkbenchExampleForm): String? =
-    data.surveys.firstOrNull { data.surveyConfigs[it.id]?.primaryFormXml == example.xformsXml }?.id
+    workbenchState.surveyIdForExampleForm(example)
 
   /** Incremented when the sample data is reset, so views holding local copies reload them. */
-  var dataResetCount by mutableStateOf(0)
-    private set
+  val dataResetCount: Int
+    get() = workbenchState.dataResetCount
 
-  /** The Survey editor's draft of the active survey, from the local data store. */
+  /**
+   * The Survey editor's draft of the active survey: its stored draft, or one derived from the
+   * survey's Forms, Map layers, and map features when it has never been edited.
+   */
   val activeSurveyEditorDraft: SurveyEditorDraft
-    get() =
-      SurveyEditorDraft.forSurvey(
-        surveyId = activeSurveyId,
-        stored = data.content.editorDraft,
-        survey = surveys.firstOrNull { it.id == activeSurveyId },
-      )
+    get() = data.editorDraft
 
   /** Saves the Survey editor's [draft] of [surveyId] to the local data store. */
   fun saveSurveyEditorDraft(surveyId: String, draft: SurveyEditorDraft) {
-    viewModel.launch { viewModel.surveyEditorRepository.saveDraft(surveyId, draft) }
+    dataHolder.launch { dataHolder.surveyEditorRepository.saveDraft(surveyId, draft) }
   }
 
   /** Number of map features stored for [surveyId]. */
-  fun entityCountForSurvey(surveyId: String): Int = data.surveyStats[surveyId]?.entityCount ?: 0
+  fun entityCountForSurvey(surveyId: String): Int = workbenchState.entityCountForSurvey(surveyId)
 
   /** Number of submissions stored for [surveyId]. */
   fun submissionCountForSurvey(surveyId: String): Int =
-    data.surveyStats[surveyId]?.submissionCount ?: 0
+    workbenchState.submissionCountForSurvey(surveyId)
 }
-
-private val defaultClusterMapFeaturesUseCase = ClusterMapFeaturesUseCase()
-
-/** Performs deterministic spatial clustering on [features] using [ClusterMapFeaturesUseCase]. */
-internal fun computeMapFeatureClusters(
-  features: List<MapClusterFeatureItem>,
-  radiusNormalized: Float,
-): List<MapFeatureCluster> = defaultClusterMapFeaturesUseCase(features, radiusNormalized)

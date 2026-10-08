@@ -51,6 +51,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -69,7 +70,10 @@ import org.groundplatform.v2.devtools.prototypeapp.WebHeaderContext
 import org.groundplatform.v2.devtools.prototypeapp.WebHeaderSupportingText
 import org.groundplatform.v2.devtools.prototypeapp.WebMobilePrototypeButton
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.Organization
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.OrganizationRelation
 import org.groundplatform.v2.devtools.prototypeapp.surveyeditor.ProfileAvatar
+import org.groundplatform.v2.devtools.prototypeapp.ui.state.OrganizationUiState
+import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.OrganizationActions
 
 internal val OrganizationCardWidth = 320.dp
 internal val OrganizationPageMaxWidth = 1240.dp
@@ -84,39 +88,60 @@ internal fun OrganizationsPage(
   state: PrototypeAppState,
   onSignOut: () -> Unit = { state.signOut() },
 ) {
+  val uiState by state.organization.uiState.collectAsState()
+  OrganizationsPage(
+    uiState = uiState,
+    actions = state.organization,
+    header = { onCreateOrganizationClick ->
+      WebAppHeader(
+        state = state,
+        onSignOut = onSignOut,
+        navigationIcon = {
+          IconButton(onClick = { state.selectWorkbenchPage(PrototypeWorkbenchPage.WEB_SURVEYS) }) {
+            Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = "Back to surveys")
+          }
+        },
+        context = {
+          WebHeaderContext(title = "Organizations") {
+            WebHeaderSupportingText(
+              "${uiState.signedInUserOrganizations.size} yours · ${uiState.organizations.size} total"
+            )
+          }
+        },
+        actions = {
+          WebMobilePrototypeButton(state)
+          WebHeaderButton(
+            text = "Create organization",
+            icon = Icons.Outlined.Add,
+            onClick = onCreateOrganizationClick,
+            tonal = true,
+          )
+        },
+      )
+    },
+  )
+}
+
+/**
+ * Stateless organizations directory: the signed-in user's organizations and the listed ones they
+ * can ask to join from [uiState], with search, the notice banner, and the "Create organization"
+ * dialog.
+ *
+ * @param header the page header; it receives the click handler of its "Create organization" button.
+ */
+@Composable
+internal fun OrganizationsPage(
+  uiState: OrganizationUiState,
+  actions: OrganizationActions,
+  header: @Composable (onCreateOrganizationClick: () -> Unit) -> Unit,
+) {
   var query by remember { mutableStateOf("") }
   var isCreating by remember { mutableStateOf(false) }
-  val email = state.signedInUserEmail
-  val mine = OrganizationPages.search(OrganizationPages.mine(state.organizations, email), query)
-  val others =
-    OrganizationPages.search(OrganizationPages.discoverable(state.organizations, email), query)
+  val mine = uiState.searchMyOrganizations(query)
+  val others = uiState.searchDiscoverableOrganizations(query)
 
   Column(modifier = Modifier.fillMaxSize()) {
-    WebAppHeader(
-      state = state,
-      onSignOut = onSignOut,
-      navigationIcon = {
-        IconButton(onClick = { state.selectWorkbenchPage(PrototypeWorkbenchPage.WEB_SURVEYS) }) {
-          Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = "Back to surveys")
-        }
-      },
-      context = {
-        WebHeaderContext(title = "Organizations") {
-          WebHeaderSupportingText(
-            "${state.signedInUserOrganizations.size} yours · ${state.organizations.size} total"
-          )
-        }
-      },
-      actions = {
-        WebMobilePrototypeButton(state)
-        WebHeaderButton(
-          text = "Create organization",
-          icon = Icons.Outlined.Add,
-          onClick = { isCreating = true },
-          tonal = true,
-        )
-      },
-    )
+    header { isCreating = true }
     HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
     Box(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
@@ -127,8 +152,8 @@ internal fun OrganizationsPage(
             .padding(horizontal = 32.dp, vertical = 24.dp),
         verticalArrangement = Arrangement.spacedBy(24.dp),
       ) {
-        state.organizationNotice?.let { notice ->
-          OrganizationNotice(notice, onDismiss = state::dismissOrganizationNotice)
+        uiState.notice?.let { notice ->
+          OrganizationNotice(notice, onDismiss = actions::dismissNotice)
         }
         OutlinedTextField(
           value = query,
@@ -158,7 +183,8 @@ internal fun OrganizationsPage(
               "None of your organizations match your search."
             },
           organizations = mine,
-          state = state,
+          uiState = uiState,
+          actions = actions,
         )
         OrganizationSection(
           title = "Other organizations",
@@ -166,7 +192,8 @@ internal fun OrganizationsPage(
             if (query.isBlank()) "No other listed organizations."
             else "No other organizations match your search.",
           organizations = others,
-          state = state,
+          uiState = uiState,
+          actions = actions,
         )
       }
     }
@@ -176,7 +203,7 @@ internal fun OrganizationsPage(
     CreateOrganizationDialog(
       onCreate = { name, description, isListed ->
         isCreating = false
-        state.createOrganization(name, description, isListed)
+        actions.createOrganization(name, description, isListed)
       },
       onDismiss = { isCreating = false },
     )
@@ -214,7 +241,8 @@ private fun OrganizationSection(
   title: String,
   emptyText: String,
   organizations: List<Organization>,
-  state: PrototypeAppState,
+  uiState: OrganizationUiState,
+  actions: OrganizationActions,
 ) {
   Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
     Row(
@@ -242,10 +270,10 @@ private fun OrganizationSection(
       organizations.forEach { organization ->
         OrganizationCard(
           organization = organization,
-          relation = OrganizationPages.relationOf(organization, state.signedInUserEmail),
-          surveyCount = state.surveysInOrganization(organization.id).size,
-          onOpen = { state.openOrganization(organization.id) },
-          onRequestToJoin = { state.requestToJoinOrganization(organization.id) },
+          relation = uiState.relationTo(organization),
+          surveyCount = uiState.surveyCountInOrganization(organization.id),
+          onOpen = { actions.openOrganization(organization.id) },
+          onRequestToJoin = { actions.requestToJoin(organization.id) },
         )
       }
     }

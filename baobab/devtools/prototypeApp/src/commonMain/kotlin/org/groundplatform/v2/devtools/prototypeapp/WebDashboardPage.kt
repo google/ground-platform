@@ -87,6 +87,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -109,6 +110,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import org.groundplatform.v2.devtools.prototypeapp.map.framingInsets
 import org.groundplatform.v2.devtools.prototypeapp.map.rememberSurveyMapCamera
+import org.groundplatform.v2.devtools.prototypeapp.ui.state.DashboardUiState
+import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.DashboardActions
 
 /** Kind of tabular view shown in the web dashboard's data table panel. */
 internal enum class DashboardDataTableKind {
@@ -285,9 +288,32 @@ internal fun WebDashboardPage(
   onOpenSurveyEditor: () -> Unit = {},
   onSignOut: () -> Unit = { state.signOut() },
 ) {
-  val activeQrEntity = state.activeQrCodeEntity
-  val activePdfSheet = state.activeSharedPdfSheet
-  val isSidePanelExpanded = state.isSidePanelExpanded
+  val uiState by state.dashboard.uiState.collectAsState()
+  WebDashboardPage(
+    uiState = uiState,
+    actions = state.dashboard,
+    state = state,
+    onOpenSurveyEditor = onOpenSurveyEditor,
+    onSignOut = onSignOut,
+  )
+}
+
+/**
+ * Dashboard page driven by [uiState] and [actions] for its layout (side panel, details panel, data
+ * tables, layer selection). [state] still backs the toolbar, the live map, the floating cards, and
+ * the modal dialogs, which have not moved to feature view models yet.
+ */
+@Composable
+internal fun WebDashboardPage(
+  uiState: DashboardUiState,
+  actions: DashboardActions,
+  state: PrototypeAppState,
+  onOpenSurveyEditor: () -> Unit = {},
+  onSignOut: () -> Unit = { state.signOut() },
+) {
+  val activeQrEntity = state.dataCollectionUiState.activeQrCodeEntity
+  val activePdfSheet = state.dataCollectionUiState.activeSharedPdfSheet
+  val isSidePanelExpanded = uiState.isSidePanelExpanded
   // One animated fraction scales the user-chosen width, so collapsing, expanding, and dragging all
   // drive the same layout and the panel's contents keep their full width while sliding.
   val expandedFraction by
@@ -295,7 +321,7 @@ internal fun WebDashboardPage(
       targetValue = if (isSidePanelExpanded) 1f else 0f,
       label = "sidePanelExpandedFraction",
     )
-  val fullPanelWidth = state.sidePanelWidthDp.dp
+  val fullPanelWidth = uiState.sidePanelWidthDp.dp
   val panelWidth = fullPanelWidth * expandedFraction
   val isPanelShown = expandedFraction > 0f
   val borderEnd = if (isPanelShown) panelWidth + SidePanelSeparatorWidth else 0.dp
@@ -317,32 +343,46 @@ internal fun WebDashboardPage(
               )
             }
             SidePanelSeparator(
-              widthDp = state.sidePanelWidthDp,
-              onWidthChange = state::updateSidePanelWidth,
+              widthDp = uiState.sidePanelWidthDp,
+              onWidthChange = actions::updateSidePanelWidth,
               enabled = isSidePanelExpanded,
               modifier = Modifier.width(SidePanelSeparatorWidth).fillMaxHeight(),
             )
           }
-          DashboardMapArea(state = state, modifier = Modifier.weight(1f).fillMaxHeight())
+          DashboardMapArea(
+            uiState = uiState,
+            actions = actions,
+            state = state,
+            modifier = Modifier.weight(1f).fillMaxHeight(),
+          )
         }
         DashboardSidePanelToggleTab(
           isExpanded = isSidePanelExpanded,
-          onToggle = { state.toggleSidePanel() },
+          onToggle = { actions.toggleSidePanel() },
           modifier = Modifier.align(Alignment.CenterStart).offset(x = borderEnd),
         )
       }
     }
 
     if (state.isLayersSheetOpen) {
-      LayersControlDialog(state = state)
+      val mapUiState by state.surveyMap.uiState.collectAsState()
+      LayersControlDialog(uiState = mapUiState, actions = state.surveyMap)
     }
     if (activeQrEntity != null) {
-      EntityQrCodeModalDialog(state = state, entity = activeQrEntity, isWeb = true)
+      EntityQrCodeModalDialog(actions = state.dataCollection, entity = activeQrEntity, isWeb = true)
     }
     if (activePdfSheet != null) {
-      SharePdfToAppModalDialog(state = state, sheet = activePdfSheet)
+      SharePdfToAppModalDialog(
+        uiState = state.dataCollectionUiState,
+        actions = state.dataCollection,
+        sheet = activePdfSheet,
+      )
     }
-    PdfExportMessageSnackbar(state = state, modifier = Modifier.align(Alignment.BottomCenter))
+    PdfExportMessageSnackbar(
+      uiState = state.dataCollectionUiState,
+      actions = state.dataCollection,
+      modifier = Modifier.align(Alignment.BottomCenter),
+    )
   }
 }
 
@@ -470,11 +510,19 @@ private fun DashboardSidePanelToggleTab(
  * basemap toggle and scale bar (lower left), and the data table panel (bottom).
  */
 @Composable
-private fun DashboardMapArea(state: PrototypeAppState, modifier: Modifier = Modifier) {
-  val selectedEntity = state.selectedEntity
-  val selectedSubmission = state.selectedSubmission
-  val isTableExpanded = state.isDashboardTableExpanded
-  val hasTables = state.entities.isNotEmpty()
+private fun DashboardMapArea(
+  uiState: DashboardUiState,
+  actions: DashboardActions,
+  state: PrototypeAppState,
+  modifier: Modifier = Modifier,
+) {
+  val dataCollectionUiState = state.dataCollectionUiState
+  val selectedEntity = dataCollectionUiState.selectedEntity
+  val selectedSubmission = dataCollectionUiState.selectedSubmission
+  val hasSelection = selectedEntity != null || selectedSubmission != null
+  val isFormOpen = dataCollectionUiState.isDataCollectionFormOpen
+  val isTableExpanded = uiState.isDashboardTableExpanded
+  val hasTables = uiState.entities.isNotEmpty()
   var lastFramedSelectionEpoch by remember { mutableStateOf(-1L) }
   val mapCamera =
     rememberSurveyMapCamera(desired = state::desiredMapCamera, onSettled = state::syncMapCamera)
@@ -488,7 +536,7 @@ private fun DashboardMapArea(state: PrototypeAppState, modifier: Modifier = Modi
         else -> DashboardTableTabsHeight
       }
 
-    val isDetailsExpanded = state.isDetailsPanelExpanded
+    val isDetailsExpanded = uiState.isDetailsPanelExpanded
 
     // Fit a newly selected entity into the part of the map not covered by the floating card or the
     // table. Expanding or collapsing the table re-centers without zooming. Records without geometry
@@ -498,7 +546,7 @@ private fun DashboardMapArea(state: PrototypeAppState, modifier: Modifier = Modi
       state.entitySelectionEpoch,
       isTableExpanded,
       isDetailsExpanded,
-      state.isDataCollectionFormOpen,
+      isFormOpen,
     ) {
       val entity = selectedEntity ?: return@LaunchedEffect
       if (!entity.hasGeometry) return@LaunchedEffect
@@ -515,7 +563,7 @@ private fun DashboardMapArea(state: PrototypeAppState, modifier: Modifier = Modi
 
       val rightPanel =
         when {
-          state.isDataCollectionFormOpen -> WebFormPanelWidth + DashboardOverlayMargin * 2
+          isFormOpen -> WebFormPanelWidth + DashboardOverlayMargin * 2
           isDetailsExpanded -> DashboardDetailsCardWidth + DashboardOverlayMargin * 2
           else -> DashboardOverlayMargin
         }
@@ -532,12 +580,11 @@ private fun DashboardMapArea(state: PrototypeAppState, modifier: Modifier = Modi
 
     // Zoom to fit from a geometry question card: centre the geometry in the part of the map not
     // covered by the form panel or the table, the way a selected feature is framed.
-    val framingRequest = state.webMapFramingRequest
+    val framingRequest = dataCollectionUiState.webMapFramingRequest
     LaunchedEffect(framingRequest) {
       val request = framingRequest ?: return@LaunchedEffect
       val rightPanel =
-        if (state.isDataCollectionFormOpen) WebFormPanelWidth + DashboardOverlayMargin * 2
-        else DashboardOverlayMargin
+        if (isFormOpen) WebFormPanelWidth + DashboardOverlayMargin * 2 else DashboardOverlayMargin
       mapCamera.run {
         val insets = framingInsets(it.viewportSize, bottom = tablePanelHeight, right = rightPanel)
         it.fitBounds(request.bounds, insets, maxZoom = request.maxZoom)
@@ -553,13 +600,14 @@ private fun DashboardMapArea(state: PrototypeAppState, modifier: Modifier = Modi
     )
 
     // Floating instructions while a form's geometry question is being drawn on the map.
-    val draft = state.webMapDraftGeometry
-    if (draft != null) {
+    val webMapDrawing = dataCollectionUiState.webMapDrawing
+    val draft = dataCollectionUiState.webMapDraftGeometry
+    if (draft != null && webMapDrawing != null) {
       WebMapDrawingHint(
         draft = draft,
-        onUndo = { state.webMapDrawing.undoVertex() },
-        onDone = { state.webMapDrawing.stopDrawing() },
-        onCancel = { state.webMapDrawing.cancelDrawing() },
+        onUndo = { webMapDrawing.undoVertex() },
+        onDone = { webMapDrawing.stopDrawing() },
+        onCancel = { webMapDrawing.cancelDrawing() },
         modifier = Modifier.align(Alignment.TopCenter).padding(DashboardOverlayMargin),
       )
     }
@@ -575,23 +623,24 @@ private fun DashboardMapArea(state: PrototypeAppState, modifier: Modifier = Modi
         size = 64.dp,
       )
       if (state.isMapClusteringActive && state.selectedCluster != null) {
-        Box(modifier = Modifier.width(360.dp)) { MapClusterBalloonsOverlay(state = state) }
+        Box(modifier = Modifier.width(360.dp)) {
+          MapClusterBalloonsOverlay(uiState = state.surveyMapUiState, actions = state.surveyMap)
+        }
       }
     }
 
     // Floating details card or compact collapsed pill, kept clear of the data table panel.
-    val allEntities = state.entities
-    val selectedLayerDatasetId = state.selectedLayerDatasetId
+    val allEntities = uiState.entities
+    val selectedLayerDatasetId = uiState.selectedLayerDatasetId
     val layerSummary =
       remember(allEntities, selectedLayerDatasetId) {
         selectedLayerDatasetId?.let { buildDashboardLayerSummary(allEntities, it) }
       }
     val summaryLayer = layerSummary?.let { summary ->
       val layerId = allEntities.firstOrNull { it.datasetId == summary.datasetId }?.layerId
-      state.mapLayers.firstOrNull { it.id == layerId }
+      uiState.mapLayers.firstOrNull { it.id == layerId }
     }
     val hasDetails = selectedEntity != null || selectedSubmission != null || layerSummary != null
-    val isFormOpen = state.isDataCollectionFormOpen
     val cardMaxHeight =
       (maxHeight - tablePanelHeight - DashboardOverlayMargin * 2).coerceAtLeast(160.dp)
     val cardModifier =
@@ -607,7 +656,9 @@ private fun DashboardMapArea(state: PrototypeAppState, modifier: Modifier = Modi
       modifier = Modifier.align(Alignment.TopEnd),
     ) {
       WebDataCollectionCard(
-        state = state,
+        uiState = dataCollectionUiState,
+        actions = state.dataCollection,
+        userGpsCoordinatesLabel = state.userGpsCoordinatesLabel,
         modifier =
           Modifier.padding(DashboardOverlayMargin)
             .width(WebFormPanelWidth)
@@ -625,14 +676,14 @@ private fun DashboardMapArea(state: PrototypeAppState, modifier: Modifier = Modi
           WebEntityDetailsCard(
             entity = selectedEntity,
             state = state,
-            onCollapse = { state.collapseDetailsPanel() },
+            onCollapse = { actions.collapseDetailsPanel() },
             modifier = cardModifier,
           )
         selectedSubmission != null ->
           WebSubmissionDetailsCard(
             submission = selectedSubmission,
             state = state,
-            onCollapse = { state.collapseDetailsPanel() },
+            onCollapse = { actions.collapseDetailsPanel() },
             modifier = cardModifier,
           )
         layerSummary != null ->
@@ -640,7 +691,7 @@ private fun DashboardMapArea(state: PrototypeAppState, modifier: Modifier = Modi
             summary = layerSummary,
             layer = summaryLayer,
             state = state,
-            onCollapse = { state.collapseDetailsPanel() },
+            onCollapse = { actions.collapseDetailsPanel() },
             modifier = cardModifier,
           )
       }
@@ -656,18 +707,18 @@ private fun DashboardMapArea(state: PrototypeAppState, modifier: Modifier = Modi
         CollapsedLayerDetailsPill(
           title = layerSummary.title,
           layer = summaryLayer,
-          onExpand = { state.expandDetailsPanel() },
-          onClose = { state.selectLayer(null) },
+          onExpand = { actions.expandDetailsPanel() },
+          onClose = { actions.selectLayer(null) },
           modifier = Modifier.padding(DashboardOverlayMargin),
         )
       } else {
         CollapsedDetailsPill(
           entity = selectedEntity,
           submission = selectedSubmission,
-          onExpand = { state.expandDetailsPanel() },
+          onExpand = { actions.expandDetailsPanel() },
           onClose = {
             if (selectedSubmission != null && selectedEntity == null) {
-              state.selectSubmissionDetail(null)
+              state.dataCollection.selectSubmissionDetail(null)
             } else {
               state.selectEntity(null)
             }
@@ -685,7 +736,14 @@ private fun DashboardMapArea(state: PrototypeAppState, modifier: Modifier = Modi
         modifier = Modifier.padding(12.dp),
       )
       if (hasTables) {
-        DashboardDataTablesPanel(state = state, expandedTableHeight = expandedTableHeight)
+        DashboardDataTablesPanel(
+          uiState = uiState,
+          actions = actions,
+          selectedEntityId = selectedEntity?.id,
+          hasSelection = hasSelection,
+          onRowClick = { row -> state.selectEntity(row.id) },
+          expandedTableHeight = expandedTableHeight,
+        )
       }
     }
   }
@@ -764,30 +822,58 @@ private fun CollapsedDetailsPill(
  * [DashboardDataTable]). It stays collapsed until the user expands it (▲ toggle, a tab, or the
  * details card's "Show in table" button), and follows the selected entity's dataset.
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun DashboardDataTablesPanel(
   state: PrototypeAppState,
   expandedTableHeight: Dp,
   modifier: Modifier = Modifier,
 ) {
-  val allEntities = state.entities
-  val selectedEntityId = state.selectedEntityId
-  val isExpanded = state.isDashboardTableExpanded
+  val uiState by state.dashboard.uiState.collectAsState()
+  val dataCollectionUiState = state.dataCollectionUiState
+  DashboardDataTablesPanel(
+    uiState = uiState,
+    actions = state.dashboard,
+    selectedEntityId = dataCollectionUiState.selectedEntityId,
+    hasSelection = dataCollectionUiState.hasSelectedRecord,
+    onRowClick = { row -> state.selectEntity(row.id) },
+    expandedTableHeight = expandedTableHeight,
+    modifier = modifier,
+  )
+}
+
+/**
+ * Stateless data table panel: one table per entity dataset in [uiState], with the row of
+ * [selectedEntityId] highlighted. Tab, expand, and collapse intents go to [actions]; clicking a row
+ * reports it through [onRowClick]. [hasSelection] tells whether a map feature or submission is
+ * selected, so collapsing the panel can bring its details card back.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+internal fun DashboardDataTablesPanel(
+  uiState: DashboardUiState,
+  actions: DashboardActions,
+  selectedEntityId: String?,
+  hasSelection: Boolean,
+  onRowClick: (DashboardDataTableRow) -> Unit,
+  expandedTableHeight: Dp,
+  modifier: Modifier = Modifier,
+) {
+  val allEntities = uiState.entities
+  val isExpanded = uiState.isDashboardTableExpanded
   val tables =
     remember(allEntities, selectedEntityId) {
       buildDashboardDataTables(
         entities = allEntities,
         selectedEntityId = selectedEntityId,
         relatedLabel = { entity, value ->
-          state.relatedEntityForPropertyValue(entity, value)?.label
+          uiState.relatedEntityForPropertyValue(entity, value)?.label
         },
       )
     }
   if (tables.isEmpty()) return
 
   val selectedIndex =
-    tables.indexOfFirst { it.datasetId == state.dashboardTableDatasetId }.coerceAtLeast(0)
+    tables.indexOfFirst { it.datasetId == uiState.dashboardTableDatasetId }.coerceAtLeast(0)
   val table = tables[selectedIndex]
   val expandedFraction by
     animateFloatAsState(
@@ -830,8 +916,8 @@ internal fun DashboardDataTablesPanel(
             Tab(
               selected = index == selectedIndex,
               onClick = {
-                state.selectDashboardTable(tab.datasetId)
-                state.updateDashboardTableExpanded(true)
+                actions.selectDashboardTable(tab.datasetId)
+                actions.updateDashboardTableExpanded(true, hasSelection)
               },
               text = {
                 Text(
@@ -861,7 +947,7 @@ internal fun DashboardDataTablesPanel(
             Icon(imageVector = Icons.Outlined.Download, contentDescription = "Download CSV")
           }
         }
-        IconButton(onClick = { state.toggleDashboardTableExpanded() }) {
+        IconButton(onClick = { actions.toggleDashboardTableExpanded(hasSelection) }) {
           Icon(
             imageVector =
               if (isExpanded) Icons.Outlined.KeyboardArrowDown else Icons.Outlined.KeyboardArrowUp,
@@ -881,7 +967,7 @@ internal fun DashboardDataTablesPanel(
             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
             DashboardDataTableView(
               table = table,
-              onRowClick = { row -> state.selectEntity(row.id) },
+              onRowClick = onRowClick,
               modifier = Modifier.fillMaxWidth().weight(1f),
             )
           }

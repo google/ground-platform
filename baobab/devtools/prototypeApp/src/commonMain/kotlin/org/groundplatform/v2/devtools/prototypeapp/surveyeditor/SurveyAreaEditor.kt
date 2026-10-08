@@ -79,10 +79,22 @@ import org.groundplatform.v2.core.geo.io.GeoIssueSeverity
 import org.groundplatform.v2.core.geo.io.GeoReadResult
 import org.groundplatform.v2.devtools.prototypeapp.TextFilePickResult
 import org.groundplatform.v2.devtools.prototypeapp.TextFilePicker
-import org.groundplatform.v2.devtools.prototypeapp.data.datasource.remote.MapboxPlacesDataSource
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyPlaceItem
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.DatasetKind
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EntityDataset
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EntityProperty
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EntityRow
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.FormDatasetLinks
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.GeometryKind
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.LatLng
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.LayerStyle
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SurveyArea
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SurveyAreaGeometry
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.formatFixed
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.toLatLng
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.parsePlaceCoordinates
 import org.groundplatform.v2.devtools.prototypeapp.openPlatformTextFilePicker
+import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.MapFeatureEditor
 import org.groundplatform.v2.map.CameraPosition
 
 /** File types offered by the Upload tab's file picker. */
@@ -106,7 +118,7 @@ data class UploadedGeometry(val fileName: String, val result: GeoReadResult)
  * State of the survey area editor (everything except the place search, which lives in the
  * composable). Plain and platform-independent so the Draw and Upload flows can be unit tested.
  *
- * The Draw tab edits parts as polygon features of a scratch [SurveyEditorState], so it reuses the
+ * The Draw tab edits parts as polygon features of a scratch [DrawnPartsEditor], so it reuses the
  * Map layer editor's drawing and vertex-editing interaction ([InteractiveLayerMapCard]).
  */
 class SurveyAreaEditorState(val initial: SurveyArea?) {
@@ -115,16 +127,12 @@ class SurveyAreaEditorState(val initial: SurveyArea?) {
   // Draw ---------------------------------------------------------------------------------------
 
   /** Scratch editor holding one polygon feature per drawn part. */
-  internal val drawEditor: SurveyEditorState =
-    SurveyEditorState(
-      SurveyEditorDraft.blank(surveyId = "survey_area")
-        .copy(datasets = listOf(partsDataset(initial)), nextKeyId = 1_000)
-    )
+  internal val drawEditor: DrawnPartsEditor = DrawnPartsEditor(partsDataset(initial))
 
   internal val partsDatasetKey: String = PARTS_DATASET_KEY
 
   internal val partsDataset: EntityDataset
-    get() = drawEditor.datasets.first { it.key == PARTS_DATASET_KEY }
+    get() = drawEditor.dataset
 
   var drawName by mutableStateOf(initial?.name ?: "Drawn area")
 
@@ -244,6 +252,40 @@ class SurveyAreaEditorState(val initial: SurveyArea?) {
 }
 
 /**
+ * A single scratch polygon Map layer backing the Draw tab, exposed to [InteractiveLayerMapCard]
+ * through [MapFeatureEditor]. Rows get keys `r1000`, `r1001`, ... and IDs `PAR-n`.
+ */
+internal class DrawnPartsEditor(initial: EntityDataset) : MapFeatureEditor {
+  var dataset: EntityDataset by mutableStateOf(initial)
+    private set
+
+  private var nextKeyId = 1_000
+
+  override fun addRow(key: String, at: LatLng?, geometry: List<LatLng>?): String {
+    val d = dataset
+    if (key != d.key) return ""
+    val rowKey = "r${nextKeyId++}"
+    val id = "${d.id.take(3).uppercase()}-${d.rows.size + 1}"
+    val shape = geometry ?: FormDatasetLinks.defaultGeometry(d, at)
+    dataset = d.copy(rows = d.rows + EntityRow(rowKey, mapOf(d.keyProperty to id), shape))
+    return rowKey
+  }
+
+  override fun updateGeometry(key: String, rowKey: String, geometry: List<LatLng>) {
+    val d = dataset
+    if (key != d.key) return
+    dataset =
+      d.copy(rows = d.rows.map { if (it.key == rowKey) it.copy(geometry = geometry) else it })
+  }
+
+  fun removeRow(key: String, rowKey: String) {
+    val d = dataset
+    if (key != d.key) return
+    dataset = d.copy(rows = d.rows.filterNot { it.key == rowKey })
+  }
+}
+
+/**
  * Full-size dialog for setting the survey area by place search, by drawing parts on a map, or by
  * uploading a GeoJSON or KML file. A Shapefile option is shown but not supported yet.
  *
@@ -255,6 +297,7 @@ internal fun SurveyAreaEditorDialog(
   surveyLocationLabel: String,
   current: SurveyArea?,
   localPlaces: List<SurveyPlaceItem>,
+  searchPlaces: PlaceSearch,
   onSave: (SurveyArea) -> Unit,
   onDismiss: () -> Unit,
   pickTextFile: TextFilePicker = ::openPlatformTextFilePicker,
@@ -315,6 +358,7 @@ internal fun SurveyAreaEditorDialog(
                 surveyCenter = surveyCenter,
                 currentAreaName = current?.name,
                 localPlaces = localPlaces,
+                searchPlaces = searchPlaces,
                 onSelect = { place ->
                   onSave(placeToSurveyArea(place))
                   onDismiss()
@@ -367,7 +411,22 @@ internal fun areaSummary(area: SurveyArea): String {
 // Search
 // ---------------------------------------------------------------------------------------------
 
-/** Mapbox places search (or raw coordinates) plus the local gazetteer, as before. */
+/**
+ * Looks up places matching [query] near [center] for [surveyId]; [regionSubtitle] labels results
+ * without a region of their own. Results are delivered to [onResults], which may be called after
+ * this returns.
+ */
+internal fun interface PlaceSearch {
+  fun search(
+    surveyId: String,
+    query: String,
+    regionSubtitle: String,
+    center: LatLng,
+    onResults: (List<SurveyPlaceItem>) -> Unit,
+  )
+}
+
+/** Remote places search (or raw coordinates) plus the local gazetteer, as before. */
 @Composable
 private fun SearchTab(
   surveyId: String,
@@ -375,12 +434,12 @@ private fun SearchTab(
   surveyCenter: LatLng,
   currentAreaName: String?,
   localPlaces: List<SurveyPlaceItem>,
+  searchPlaces: PlaceSearch,
   onSelect: (SurveyPlaceItem) -> Unit,
 ) {
   var searchQuery by remember { mutableStateOf("") }
   var isSearching by remember { mutableStateOf(false) }
   var remotePlaces by remember { mutableStateOf<List<SurveyPlaceItem>>(emptyList()) }
-  val placesDataSource = remember { MapboxPlacesDataSource() }
 
   // Query live Mapbox Places API when user types a query (with debounce)
   LaunchedEffect(searchQuery, surveyId) {
@@ -392,14 +451,7 @@ private fun SearchTab(
     }
     isSearching = true
     delay(250) // Debounce rapid keystrokes
-    placesDataSource.searchPlaces(
-      surveyId = surveyId,
-      query = q,
-      isAirplaneMode = false,
-      defaultRegionSubtitle = surveyLocationLabel,
-      centerLongitude = surveyCenter.lng,
-      centerLatitude = surveyCenter.lat,
-    ) { results ->
+    searchPlaces.search(surveyId, q, surveyLocationLabel, surveyCenter) { results ->
       remotePlaces = results
       isSearching = false
     }
@@ -624,7 +676,7 @@ private fun DrawTab(editor: SurveyAreaEditorState, center: LatLng, zoom: Double)
   val dataset = editor.partsDataset
   Row(modifier = Modifier.fillMaxSize(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
     InteractiveLayerMapCard(
-      state = editor.drawEditor,
+      editor = editor.drawEditor,
       dataset = dataset,
       selectedRow = selectedPart,
       onSelectRow = { selectedPart = it },

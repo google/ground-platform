@@ -17,6 +17,13 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EditorFormTemplates
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EditorQuestionType
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EditorXFormsGenerator
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.FormEditorValidator
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.FormIds
+import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.formEditorViewModel
+import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.ui
 
 class FormIdsTest {
 
@@ -36,11 +43,11 @@ class FormIdsTest {
 
   @Test
   fun formId_isStableAcrossEdits() {
-    val state = FormEditorState()
-    val id = state.form.formId
+    val state = formEditorViewModel()
+    val id = state.ui.form.formId
     state.updateTitle("Renamed form")
     state.addQuestion(EditorQuestionType.INTEGER)
-    assertEquals(id, state.form.formId)
+    assertEquals(id, state.ui.form.formId)
   }
 
   @Test

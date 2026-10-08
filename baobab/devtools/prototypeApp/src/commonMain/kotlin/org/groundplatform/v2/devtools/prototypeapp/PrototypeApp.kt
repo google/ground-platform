@@ -87,7 +87,6 @@ import org.groundplatform.v2.core.forms.ui.GroundTonalBadge
 import org.groundplatform.v2.devtools.prototypeapp.organization.OrganizationPage
 import org.groundplatform.v2.devtools.prototypeapp.organization.OrganizationsPage
 import org.groundplatform.v2.devtools.prototypeapp.surveyeditor.SurveyEditorPage
-import org.groundplatform.v2.devtools.prototypeapp.surveyeditor.SurveyEditorState
 
 /** Top-level pages of the prototype web app, addressable via the URL hash (e.g. `#dashboard`). */
 enum class PrototypeWorkbenchPage(val label: String, val hash: String) {
@@ -174,28 +173,18 @@ fun PrototypeApp(
     }
   }
 
-  // The Survey editor edits a draft of the active survey, loaded from the local data store. Edits
-  // are saved back to the store only when the user publishes them.
-  val activeSurveyId = state.activeSurveyId
-  val surveyEditorState =
-    remember(activeSurveyId, state.dataResetCount) {
-      SurveyEditorState(
-        state.activeSurveyEditorDraft,
-        // Submissions on features of a dataset block regenerating its sample plots.
-        submissionCount = { datasetId ->
-          state.entities.filter { it.datasetId == datasetId }.sumOf { it.submissions.size }
-        },
-      )
-    }
+  val dataCollectionUiState = state.dataCollectionUiState
   val isEntityRefMapShowing =
-    state.isDataCollectionFormOpen &&
-      state.isCurrentFormStepEntityRef &&
-      state.entityRefSelectorViewMode == MainSurveyViewMode.MAP
+    dataCollectionUiState.isDataCollectionFormOpen &&
+      dataCollectionUiState.isCurrentFormStepEntityRef &&
+      dataCollectionUiState.entityRefSelectorViewMode == MainSurveyViewMode.MAP
   val isMobileMapShowing =
     page == PrototypeWorkbenchPage.MOBILE_PROTOTYPE &&
       state.currentScreen == PrototypeScreen.MAIN_SURVEY &&
       state.activeDrawerSubView == MainDrawerSubView.NONE &&
-      (!state.isDataCollectionFormOpen || state.isCurrentFormStepGeoPoint || isEntityRefMapShowing)
+      (!dataCollectionUiState.isDataCollectionFormOpen ||
+        dataCollectionUiState.isCurrentFormStepGeoPoint ||
+        isEntityRefMapShowing)
   // The Mapbox basemap renders behind the Compose canvas, so the root surface must stay transparent
   // whenever a page shows it.
   val isMapShowing =
@@ -270,20 +259,7 @@ fun PrototypeApp(
               },
             )
           resolvedPage == PrototypeWorkbenchPage.SURVEY_EDITOR ->
-            SurveyEditorPage(
-              state = surveyEditorState,
-              appState = state,
-              isDarkTheme = state.isDarkTheme,
-              onPublish = {
-                state.saveSurveyEditorDraft(activeSurveyId, surveyEditorState.toDraft())
-                surveyEditorState.markPublished()
-                state.selectWorkbenchPage(PrototypeWorkbenchPage.WEB_DASHBOARD)
-              },
-              onClose = {
-                surveyEditorState.discardChanges()
-                state.selectWorkbenchPage(PrototypeWorkbenchPage.WEB_DASHBOARD)
-              },
-            )
+            SurveyEditorPage(state = state, isDarkTheme = state.isDarkTheme)
           resolvedPage == PrototypeWorkbenchPage.WEB_DASHBOARD ->
             WebDashboardPage(
               state = state,
@@ -329,8 +305,8 @@ private fun MobilePrototypePage(state: PrototypeAppState, isMapShowing: Boolean)
         isScreenTransparent = isMapShowing,
         formFactor = state.deviceFormFactor,
         orientation = state.deviceOrientation,
-        onSelectFormFactor = { state.selectDeviceFormFactor(it) },
-        onRotateDevice = { state.rotateDevice() },
+        onSelectFormFactor = state.workbench::selectDeviceFormFactor,
+        onRotateDevice = state.workbench::rotateDevice,
         state = state,
       ) {
         MobileScreenHost(state)
@@ -708,7 +684,7 @@ private fun UxDesignerInspectorPanel(state: PrototypeAppState, modifier: Modifie
             ),
         )
         FilledTonalButton(
-          onClick = { state.addRandomSites(5_000) },
+          onClick = { state.workbench.addRandomSites(5_000) },
           modifier = Modifier.height(30.dp),
           contentPadding = ButtonDefaults.TextButtonContentPadding,
         ) {
@@ -773,7 +749,7 @@ private fun UxDesignerInspectorPanel(state: PrototypeAppState, modifier: Modifie
               {
                 state.navigateTo(PrototypeScreen.MAIN_SURVEY)
                 state.setMainSurveyViewMode(MainSurveyViewMode.MAP)
-                state.selectSubmissionDetail("sub-standalone-pest-01")
+                state.dataCollection.selectSubmissionDetail("sub-standalone-pest-01")
               },
             ),
             Triple(
@@ -961,7 +937,7 @@ private fun UxDesignerInspectorPanel(state: PrototypeAppState, modifier: Modifie
         OutlinedCard(
           onClick = {
             state.navigateTo(PrototypeScreen.DOWNLOAD_SURVEY)
-            state.toggleSurveyDownloaded(survey.id)
+            state.workbench.toggleSurveyDownloaded(survey.id)
           },
           modifier = Modifier.fillMaxWidth(),
           shape = MaterialTheme.shapes.small,

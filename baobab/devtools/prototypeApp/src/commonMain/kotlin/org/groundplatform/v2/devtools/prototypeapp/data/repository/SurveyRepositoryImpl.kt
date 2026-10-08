@@ -49,10 +49,9 @@ class SurveyRepositoryImpl(private val store: LocalStore) : SurveyRepository {
       combine(
         store.observeSubmissionGeometries(surveyId),
         store.observeSurveyConfig(surveyId),
-        store.observeSurveyEditorDraft(surveyId),
-        ::Triple,
+        ::Pair,
       ),
-    ) { forms, layers, entities, standalone, (geometries, config, editorDraft) ->
+    ) { forms, layers, entities, standalone, (geometries, config) ->
       SurveyContent(
         forms = forms,
         mapLayers = layers,
@@ -60,7 +59,6 @@ class SurveyRepositoryImpl(private val store: LocalStore) : SurveyRepository {
         standaloneSubmissions = standalone,
         submissionGeometries = geometries,
         config = config,
-        editorDraft = editorDraft,
       )
     }
 
