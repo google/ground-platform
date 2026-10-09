@@ -36,6 +36,7 @@ Following its transition from a Google-incubated initiative to a community-gover
 
 *   **[XForms Integration & Entity-First Map Architecture](xforms-integration.md)**: Architectural specification for Ground 2.0's Entity-only map model, automatic 1-Form-to-1-Entity provisioning, `save_to` schema synchronization, and XLSForm/ODK Entities mappings.
 *   **[Global Impact & Deployments](impacts.md)**: Case studies, field metrics, and partner pipelines across Ghana, Burundi, Kenya, and Viet Nam.
+*   **[Impact Measurement](impact-measurement.md)**: Proposed approach for measuring MAP impact with minimal field burden—Purpose Packs, semantic indicator tags, spatial overlays, outcome events, partner ledgers, and an attribution rubric.
 *   **[Open Foris Ground Community Charter](https://docs.google.com/document/d/1pjllfws_HMuHrDDbGokPZCATgok_8vxufkSmyVM4p_Q/edit#heading=h.14535shxk14t)**: Governance model, steering committee bylaws, and institutional partnership charter.
 *   **[Ground 1.0 PRD](https://docs.google.com/document/u/0/d/1-ARlIjK4VImSrWju_5D_wZiMMCl4vAGMm4Bozdnwj30/edit)**: Baseline Ground 1.0 workflows and task model.
 *   **[Ground 2026 Strategic Priorities](https://docs.google.com/document/u/0/d/18PKj2Qu3wRLwVS2Y8y3pdf7Zse1egIfu9JjvBX5wwR4/edit)**: Strategic roadmap for multiplatform parity, XLSForm alignment, and institutional scale.
@@ -187,6 +188,7 @@ Ground 2.0 integrates **Collect Earth Online (CEO)** directly into the Web Conso
         *   **Adaptation**: Smallholder farmers and cooperatives registered, climate-resilient agroforestry adoption, and market-access readiness.
         *   **Protection**: Intact forest and buffer hectares monitored, deforestation-free plot boundaries verified (e.g., EUDR), disturbance alerts ground-truthed, and community tenure mapped.
     *   Powers live **Organization & Survey MAP Dashboards** in the Web Console, a **Public Anonymized MAP Dashboard**, and **Automated Monthly Sponsor Digests**.
+    *   See **[Impact Measurement](impact-measurement.md)** for the proposed measurement approach.
 
 
 ## Scale, Quotas, & Service Guardrails

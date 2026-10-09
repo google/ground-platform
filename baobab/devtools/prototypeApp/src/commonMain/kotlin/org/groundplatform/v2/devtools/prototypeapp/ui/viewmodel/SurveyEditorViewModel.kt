@@ -35,16 +35,20 @@ import kotlinx.coroutines.launch
 import org.groundplatform.v2.core.sampling.SampleEstimate
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.Organization
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyPlaceItem
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.ChoiceSource
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.CollaboratorRole
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.DatasetKind
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EditorForm
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EditorFormTemplates
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EntityDataset
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EntityIdSource
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EntityProperty
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EntityRow
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.FormDatasetLinks
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.FormEditorValidator
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.FormIds
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.GeometryKind
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.ImportedForm
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.LatLng
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.LayerStyle
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.MapLayerImportPlan
@@ -63,6 +67,7 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SharingPo
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SharingSettings
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SurveyArea
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SurveyDetails
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SurveyEditorDerivation
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SurveyEditorDraft
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SurveyEditorForm
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.isoUtc
@@ -205,6 +210,12 @@ interface SurveyEditorActions : MapFeatureEditor {
 
   /** Adds a blank Form with a linked Map layer or Data table and opens it. */
   fun addForm()
+
+  /**
+   * Adds [imported] as a new Form, linking or creating its target dataset as appropriate, and opens
+   * it. Returns the new Form's key.
+   */
+  fun importForm(imported: ImportedForm): String
 
   /**
    * Creates a new Map layer or Data table backed by and linked to [formKey]. [kind] defaults to a
@@ -851,6 +862,115 @@ class SurveyEditorViewModel(
     datasets = datasets + linkedDataset
     forms = forms + SurveyEditorForm(formKey, blankForm)
     section = SurveyEditorSection.Form(formKey)
+  }
+
+  override fun importForm(imported: ImportedForm): String {
+    var formKey = ""
+    edit {
+      formKey = newKey("f")
+      val title =
+        FormDatasetLinks.uniqueTitle(
+          imported.form.title.ifBlank { "Imported form" },
+          forms.map { it.form.title },
+        )
+      val baseId =
+        imported.form.formId.takeIf { it.isNotBlank() && it != "data" } ?: FormIds.newFormId()
+      val formId = FormDatasetLinks.uniqueId(baseId, forms.map { it.form.formId })
+      val datasetIds = datasets.map { it.id }.toSet()
+      val questions =
+        imported.form.questions.map { q ->
+          if (
+            q.choiceDatasetId != null && q.choiceDatasetId !in datasetIds && q.choices.isNotEmpty()
+          ) {
+            q.copy(
+              choiceDatasetId = null,
+              choiceSource = ChoiceSource.MANUAL,
+              allowAddEntity = false,
+            )
+          } else {
+            q
+          }
+        }
+      var form = imported.form.copy(formId = formId, title = title, questions = questions)
+      if (form.saveTo.mode == SaveToMode.UPDATE) {
+        val requestedId = form.saveTo.targetDatasetId
+        val targetIndex =
+          datasets.indexOfFirst { it.id == requestedId }.takeIf { it >= 0 }
+            ?: datasets.indexOfFirst { !it.isGenerated }.takeIf { it >= 0 }
+            ?: datasets.indices.firstOrNull()
+        if (targetIndex != null) {
+          val targetDataset = datasets[targetIndex]
+          val targetId = targetDataset.id
+          if (targetId != requestedId) {
+            val validProps = targetDataset.properties.map { it.name }.toSet()
+            val validMatch =
+              imported.idMatchColumn in setOf("name", "label") ||
+                imported.idMatchColumn in validProps
+            form =
+              form.copy(
+                saveTo =
+                  form.saveTo.copy(
+                    idSource =
+                      if (validMatch) form.saveTo.idSource else EntityIdSource.SELECTED_FEATURE,
+                    idQuestionKey = if (validMatch) form.saveTo.idQuestionKey else null,
+                    mappings = form.saveTo.mappings.filter { it.property in validProps },
+                  )
+              )
+          }
+          form =
+            form.copy(
+              saveTo =
+                SurveyEditorDerivation.updateSaveTo(form, imported, formKey, datasets, targetId)
+            )
+          if (targetId == requestedId) {
+            datasets =
+              datasets.toMutableList().apply {
+                set(
+                  targetIndex,
+                  SurveyEditorDerivation.withMappedProperties(get(targetIndex), form),
+                )
+              }
+          }
+        }
+      } else {
+        val linkIndex =
+          imported.createDatasetId?.let { id ->
+            datasets
+              .indexOfFirst { it.id == id && it.linkedFormKey == null && !it.isGenerated }
+              .takeIf { it >= 0 }
+          }
+        if (linkIndex != null) {
+          datasets =
+            datasets.toMutableList().apply {
+              val linked = get(linkIndex).copy(linkedFormKey = formKey)
+              set(linkIndex, FormDatasetLinks.syncedWithForm(linked, form))
+            }
+        } else {
+          val kind = FormDatasetLinks.datasetKindFor(form)
+          val datasetTitle = FormDatasetLinks.uniqueTitle(title, datasets.map { it.displayName })
+          val preferredId =
+            imported.createDatasetId?.takeIf { FormEditorValidator.isValidName(it) }
+              ?: slugify(datasetTitle)
+          val properties = FormDatasetLinks.linkedProperties(form)
+          val linkedDataset =
+            EntityDataset(
+              key = newKey("d"),
+              kind = kind,
+              id = FormDatasetLinks.uniqueId(preferredId, datasets.map { it.id }),
+              displayName = datasetTitle,
+              geometryKind = FormDatasetLinks.geometryKindFor(form),
+              keyProperty = properties.first().name,
+              labelProperty = properties.getOrNull(1)?.name ?: properties.first().name,
+              linkedFormKey = formKey,
+              properties = properties,
+            )
+          datasets = datasets + linkedDataset
+        }
+      }
+      forms = forms + SurveyEditorForm(formKey, form)
+      section = SurveyEditorSection.Form(formKey)
+    }
+    return formKey
   }
 
   override fun createDatasetForForm(formKey: String, kind: DatasetKind?, open: Boolean) = edit {

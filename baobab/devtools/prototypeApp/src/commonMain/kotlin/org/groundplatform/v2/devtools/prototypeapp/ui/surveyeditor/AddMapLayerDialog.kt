@@ -201,7 +201,7 @@ private fun ImportPreviewDialog(
 }
 
 @Composable
-private fun AddOption(
+internal fun AddOption(
   icon: ImageVector,
   title: String,
   body: String,

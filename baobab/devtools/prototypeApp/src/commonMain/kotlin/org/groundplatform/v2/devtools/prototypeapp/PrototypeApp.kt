@@ -20,6 +20,8 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -39,7 +41,9 @@ import androidx.compose.material.icons.automirrored.outlined.List
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.outlined.CloudUpload
+import androidx.compose.material.icons.outlined.DarkMode
 import androidx.compose.material.icons.outlined.Layers
+import androidx.compose.material.icons.outlined.LightMode
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.Map
 import androidx.compose.material.icons.outlined.Menu
@@ -320,6 +324,7 @@ private fun MobilePrototypePage(state: PrototypeAppState, isMapShowing: Boolean)
         orientation = state.deviceOrientation,
         onSelectFormFactor = state.workbench::selectDeviceFormFactor,
         onRotateDevice = state.workbench::rotateDevice,
+        onToggleDarkTheme = state::toggleDarkTheme,
         state = state,
       ) {
         MobileScreenHost(state)
@@ -334,6 +339,7 @@ private fun MobilePrototypePage(state: PrototypeAppState, isMapShowing: Boolean)
 /**
  * Realistic Mobile or Tablet hardware device frame embedding the Compose Multiplatform UI preview.
  */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun MobileDevicePreviewFrame(
   deviceTitle: String,
@@ -343,6 +349,7 @@ fun MobileDevicePreviewFrame(
   orientation: DeviceOrientation = formFactor.defaultOrientation,
   onSelectFormFactor: (DeviceFormFactor) -> Unit = {},
   onRotateDevice: () -> Unit = {},
+  onToggleDarkTheme: () -> Unit = {},
   state: PrototypeAppState? = null,
   modifier: Modifier = Modifier,
   content: @Composable () -> Unit,
@@ -352,121 +359,167 @@ fun MobileDevicePreviewFrame(
   val dimensionsLabel = formFactor.dimensionsLabelForOrientation(orientation)
   val isRotated = orientation != formFactor.defaultOrientation
 
+  val titleBlock: @Composable (Modifier) -> Unit = { titleModifier ->
+    Column(modifier = titleModifier) {
+      Text(
+        text = deviceTitle,
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
+        style = MaterialTheme.typography.labelMedium,
+        color = MaterialTheme.colorScheme.primary,
+        fontWeight = FontWeight.Bold,
+      )
+      Text(
+        text = "Viewport: ${formFactor.label} • ${orientation.label} ($dimensionsLabel)",
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
+        style =
+          MaterialTheme.typography.labelSmall.copy(
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+          ),
+      )
+    }
+  }
+
+  val controlsRow: @Composable () -> Unit = {
+    FlowRow(
+      horizontalArrangement = Arrangement.spacedBy(6.dp),
+      verticalArrangement = Arrangement.spacedBy(6.dp),
+      itemVerticalAlignment = Alignment.CenterVertically,
+    ) {
+      // Segmented Form Factor Switcher right above the device frame
+      SingleChoiceSegmentedButtonRow {
+        DeviceFormFactor.entries.forEachIndexed { index, factor ->
+          val isSelected = formFactor == factor
+          val icon =
+            if (factor == DeviceFormFactor.MOBILE) {
+              Icons.Outlined.Smartphone
+            } else {
+              Icons.Outlined.Tablet
+            }
+          SegmentedButton(
+            selected = isSelected,
+            onClick = { onSelectFormFactor(factor) },
+            shape =
+              SegmentedButtonDefaults.itemShape(
+                index = index,
+                count = DeviceFormFactor.entries.size,
+              ),
+            icon = {
+              Icon(
+                imageVector = icon,
+                contentDescription = factor.label,
+                modifier = Modifier.size(14.dp),
+              )
+            },
+            label = {
+              Text(
+                text = factor.label,
+                maxLines = 1,
+                softWrap = false,
+                style = MaterialTheme.typography.labelSmall,
+              )
+            },
+          )
+        }
+      }
+
+      // Rotate Device Widget right next to the Form Factor switcher
+      GroundFilterChip(
+        selected = isRotated,
+        onClick = { onRotateDevice() },
+        leadingIcon = {
+          Icon(
+            imageVector = Icons.Outlined.ScreenRotation,
+            contentDescription = "Rotate device",
+            modifier = Modifier.size(14.dp),
+          )
+        },
+        label = {
+          Text(
+            text = "Rotate",
+            maxLines = 1,
+            softWrap = false,
+            style = MaterialTheme.typography.labelSmall,
+          )
+        },
+      )
+
+      // Dark / Light mode toggle for the mobile app preview
+      GroundFilterChip(
+        selected = isDarkTheme,
+        onClick = { onToggleDarkTheme() },
+        leadingIcon = {
+          Icon(
+            imageVector = if (isDarkTheme) Icons.Outlined.DarkMode else Icons.Outlined.LightMode,
+            contentDescription = if (isDarkTheme) "Switch to light mode" else "Switch to dark mode",
+            modifier = Modifier.size(14.dp),
+          )
+        },
+        label = {
+          Text(
+            text = if (isDarkTheme) "Dark" else "Light",
+            maxLines = 1,
+            softWrap = false,
+            style = MaterialTheme.typography.labelSmall,
+          )
+        },
+      )
+
+      if (state != null) {
+        OutlinedButton(
+          onClick = { state.selectWorkbenchPage(PrototypeWorkbenchPage.WEB_SURVEYS) },
+          contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
+          modifier = Modifier.height(32.dp),
+        ) {
+          Icon(
+            imageVector = Icons.Outlined.Map,
+            contentDescription = null,
+            modifier = Modifier.size(14.dp),
+          )
+          Spacer(modifier = Modifier.width(4.dp))
+          Text(
+            text = "Web app",
+            style = MaterialTheme.typography.labelSmall,
+            fontWeight = FontWeight.SemiBold,
+            maxLines = 1,
+          )
+        }
+
+        PrototypeDebugToolsButton(state = state)
+      }
+    }
+  }
+
   Column(
     modifier = modifier,
     horizontalAlignment = Alignment.CenterHorizontally,
     verticalArrangement = Arrangement.spacedBy(8.dp),
   ) {
-    // Stage Header with Device Title + Inline Mobile / Tablet Form Factor Toggle + Rotate Device
-    // Widget
-    Row(
+    // Stage Header card with Device Title + Inline Mobile / Tablet Form Factor Toggle + Rotate +
+    // Dark / Light Theme Toggle
+    ElevatedCard(
       modifier = Modifier.width(frameWidthDp.dp),
-      horizontalArrangement = Arrangement.SpaceBetween,
-      verticalAlignment = Alignment.CenterVertically,
+      shape = MaterialTheme.shapes.large,
+      colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.surface),
+      elevation = CardDefaults.elevatedCardElevation(defaultElevation = 2.dp),
     ) {
-      Column(modifier = Modifier.weight(1f).padding(end = 10.dp)) {
-        Text(
-          text = deviceTitle,
-          maxLines = 1,
-          overflow = TextOverflow.Ellipsis,
-          style = MaterialTheme.typography.labelMedium,
-          color = MaterialTheme.colorScheme.primary,
-          fontWeight = FontWeight.Bold,
-        )
-        Text(
-          text = "Viewport: ${formFactor.label} • ${orientation.label} ($dimensionsLabel)",
-          maxLines = 1,
-          overflow = TextOverflow.Ellipsis,
-          style =
-            MaterialTheme.typography.labelSmall.copy(
-              color = MaterialTheme.colorScheme.onSurfaceVariant
-            ),
-        )
-      }
-
-      Row(
-        horizontalArrangement = Arrangement.spacedBy(6.dp),
-        verticalAlignment = Alignment.CenterVertically,
-      ) {
-        // Segmented Form Factor Switcher right above the device frame
-        SingleChoiceSegmentedButtonRow {
-          DeviceFormFactor.entries.forEachIndexed { index, factor ->
-            val isSelected = formFactor == factor
-            val icon =
-              if (factor == DeviceFormFactor.MOBILE) {
-                Icons.Outlined.Smartphone
-              } else {
-                Icons.Outlined.Tablet
-              }
-            SegmentedButton(
-              selected = isSelected,
-              onClick = { onSelectFormFactor(factor) },
-              shape =
-                SegmentedButtonDefaults.itemShape(
-                  index = index,
-                  count = DeviceFormFactor.entries.size,
-                ),
-              icon = {
-                Icon(
-                  imageVector = icon,
-                  contentDescription = factor.label,
-                  modifier = Modifier.size(14.dp),
-                )
-              },
-              label = {
-                Text(
-                  text = factor.label,
-                  maxLines = 1,
-                  softWrap = false,
-                  style = MaterialTheme.typography.labelSmall,
-                )
-              },
-            )
-          }
+      if (frameWidthDp < 640) {
+        Column(
+          modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 10.dp),
+          verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+          titleBlock(Modifier.fillMaxWidth())
+          controlsRow()
         }
-
-        // Rotate Device Widget right next to the Form Factor switcher
-        GroundFilterChip(
-          selected = isRotated,
-          onClick = { onRotateDevice() },
-          leadingIcon = {
-            Icon(
-              imageVector = Icons.Outlined.ScreenRotation,
-              contentDescription = "Rotate device",
-              modifier = Modifier.size(14.dp),
-            )
-          },
-          label = {
-            Text(
-              text = "Rotate",
-              maxLines = 1,
-              softWrap = false,
-              style = MaterialTheme.typography.labelSmall,
-            )
-          },
-        )
-
-        if (state != null) {
-          OutlinedButton(
-            onClick = { state.selectWorkbenchPage(PrototypeWorkbenchPage.WEB_SURVEYS) },
-            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
-            modifier = Modifier.height(32.dp),
-          ) {
-            Icon(
-              imageVector = Icons.Outlined.Map,
-              contentDescription = null,
-              modifier = Modifier.size(14.dp),
-            )
-            Spacer(modifier = Modifier.width(4.dp))
-            Text(
-              text = "Web app",
-              style = MaterialTheme.typography.labelSmall,
-              fontWeight = FontWeight.SemiBold,
-              maxLines = 1,
-            )
-          }
-
-          PrototypeDebugToolsButton(state = state)
+      } else {
+        Row(
+          modifier = Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 10.dp),
+          horizontalArrangement = Arrangement.SpaceBetween,
+          verticalAlignment = Alignment.CenterVertically,
+        ) {
+          titleBlock(Modifier.weight(1f).padding(end = 10.dp))
+          controlsRow()
         }
       }
     }
@@ -484,90 +537,92 @@ fun MobileDevicePreviewFrame(
           .border(2.dp, Color(0xFF374151), outerShape)
           .padding(if (formFactor == DeviceFormFactor.TABLET) 12.dp else 10.dp)
     ) {
-      Column(
-        modifier =
-          Modifier.fillMaxSize()
-            .clip(innerShape)
-            .background(
-              if (isScreenTransparent) {
-                Color.Transparent
-              } else {
-                MaterialTheme.colorScheme.surface
-              }
-            )
-      ) {
-        // Device Status Bar
-        Surface(
-          color = MaterialTheme.colorScheme.surfaceContainerHighest,
-          contentColor = MaterialTheme.colorScheme.onSurface,
-          modifier = Modifier.fillMaxWidth(),
-        ) {
-          Row(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 6.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-          ) {
-            Text(
-              text =
-                if (
-                  formFactor == DeviceFormFactor.TABLET ||
-                    orientation == DeviceOrientation.LANDSCAPE
-                ) {
-                  "09:41 • Wed Sep 19"
+      GroundTheme(darkTheme = isDarkTheme) {
+        Column(
+          modifier =
+            Modifier.fillMaxSize()
+              .clip(innerShape)
+              .background(
+                if (isScreenTransparent) {
+                  Color.Transparent
                 } else {
-                  "09:41"
-                },
-              style = MaterialTheme.typography.labelSmall,
-              fontWeight = FontWeight.Bold,
-            )
-            // Camera punch-hole notch (Mobile) or slim landscape bezel sensor (Tablet)
-            if (formFactor == DeviceFormFactor.MOBILE) {
-              Box(
-                modifier =
-                  Modifier.width(68.dp)
-                    .height(11.dp)
-                    .clip(CircleShape)
-                    .background(Color(0xFF061B12))
+                  MaterialTheme.colorScheme.surface
+                }
               )
-            } else {
-              Box(modifier = Modifier.size(8.dp).clip(CircleShape).background(Color(0xFF061B12)))
-            }
-            Text(
-              text = "5G • 100%",
-              style = MaterialTheme.typography.labelSmall,
-              fontWeight = FontWeight.SemiBold,
-            )
-          }
-        }
-
-        // Embedded Compose Multiplatform Screen Content
-        Box(modifier = Modifier.weight(1f).fillMaxWidth()) { content() }
-
-        // Bottom Gesture Navigation Bar
-        Surface(
-          color = MaterialTheme.colorScheme.surfaceContainer,
-          modifier = Modifier.fillMaxWidth(),
         ) {
-          Box(
-            modifier = Modifier.fillMaxWidth().padding(vertical = 7.dp),
-            contentAlignment = Alignment.Center,
+          // Device Status Bar
+          Surface(
+            color = MaterialTheme.colorScheme.surfaceContainerHighest,
+            contentColor = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.fillMaxWidth(),
+          ) {
+            Row(
+              modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 6.dp),
+              horizontalArrangement = Arrangement.SpaceBetween,
+              verticalAlignment = Alignment.CenterVertically,
+            ) {
+              Text(
+                text =
+                  if (
+                    formFactor == DeviceFormFactor.TABLET ||
+                      orientation == DeviceOrientation.LANDSCAPE
+                  ) {
+                    "09:41 • Wed Sep 19"
+                  } else {
+                    "09:41"
+                  },
+                style = MaterialTheme.typography.labelSmall,
+                fontWeight = FontWeight.Bold,
+              )
+              // Camera punch-hole notch (Mobile) or slim landscape bezel sensor (Tablet)
+              if (formFactor == DeviceFormFactor.MOBILE) {
+                Box(
+                  modifier =
+                    Modifier.width(68.dp)
+                      .height(11.dp)
+                      .clip(CircleShape)
+                      .background(Color(0xFF061B12))
+                )
+              } else {
+                Box(modifier = Modifier.size(8.dp).clip(CircleShape).background(Color(0xFF061B12)))
+              }
+              Text(
+                text = "5G • 100%",
+                style = MaterialTheme.typography.labelSmall,
+                fontWeight = FontWeight.SemiBold,
+              )
+            }
+          }
+
+          // Embedded Compose Multiplatform Screen Content
+          Box(modifier = Modifier.weight(1f).fillMaxWidth()) { content() }
+
+          // Bottom Gesture Navigation Bar
+          Surface(
+            color = MaterialTheme.colorScheme.surfaceContainer,
+            modifier = Modifier.fillMaxWidth(),
           ) {
             Box(
-              modifier =
-                Modifier.width(
-                    if (
-                      formFactor == DeviceFormFactor.TABLET ||
-                        orientation == DeviceOrientation.LANDSCAPE
-                    ) {
-                      160.dp
-                    } else {
-                      116.dp
-                    }
-                  )
-                  .height(4.dp)
-                  .clip(CircleShape)
-                  .background(MaterialTheme.colorScheme.outline)
-            )
+              modifier = Modifier.fillMaxWidth().padding(vertical = 7.dp),
+              contentAlignment = Alignment.Center,
+            ) {
+              Box(
+                modifier =
+                  Modifier.width(
+                      if (
+                        formFactor == DeviceFormFactor.TABLET ||
+                          orientation == DeviceOrientation.LANDSCAPE
+                      ) {
+                        160.dp
+                      } else {
+                        116.dp
+                      }
+                    )
+                    .height(4.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.outline)
+              )
+            }
           }
         }
       }

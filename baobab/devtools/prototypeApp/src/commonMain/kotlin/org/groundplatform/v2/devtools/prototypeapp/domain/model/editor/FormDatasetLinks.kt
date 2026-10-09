@@ -194,9 +194,7 @@ fun EditorForm.withRenamedTargetDataset(oldId: String, newId: String): EditorFor
   copy(
     saveTo = if (saveTo.targetDatasetId == oldId) saveTo.copy(targetDatasetId = newId) else saveTo,
     questions =
-      questions.map { q ->
-        if (q.choiceDatasetId == oldId) q.copy(choiceDatasetId = newId) else q
-      },
+      questions.map { q -> if (q.choiceDatasetId == oldId) q.copy(choiceDatasetId = newId) else q },
   )
 
 /**

@@ -18,6 +18,7 @@ import groundplatform.v2.forms.ControlType
 import groundplatform.v2.forms.DataType
 import groundplatform.v2.forms.FieldBinding
 import groundplatform.v2.forms.FormDef
+import groundplatform.v2.forms.ItemsetDef
 import groundplatform.v2.forms.LabelDef
 import groundplatform.v2.forms.ViewComponent
 import org.groundplatform.v2.core.forms.serialization.XFormsXmlSerializer
@@ -55,7 +56,7 @@ object FormImport {
   /** Imports [xml]. Returns `null` when the XML can't be parsed by the form engine. */
   fun fromXml(
     xml: String,
-    formId: String,
+    formId: String = "",
     fallbackTitle: String = "",
     availability: FormAvailability = FormAvailability.MOBILE,
   ): ImportedForm? {
@@ -65,7 +66,15 @@ object FormImport {
       } catch (e: Exception) {
         return null
       }
-    return fromFormDef(formDef, formId, fallbackTitle, availability)
+    if (
+      formDef.view?.components.isNullOrEmpty() &&
+        formDef.model?.bindings.isNullOrEmpty() &&
+        formDef.title.isBlank()
+    ) {
+      return null
+    }
+    val resolvedFormId = formId.ifBlank { formDef.form_id.takeIf { it != "data" }.orEmpty() }
+    return fromFormDef(formDef, resolvedFormId, fallbackTitle, availability)
   }
 
   /** Imports [formDef] as a Form with ID [formId] (defaults to the XForms form ID). */
@@ -78,6 +87,8 @@ object FormImport {
 
   private class Importer(private val formDef: FormDef) {
     private val model = formDef.model
+    private val rootName: String =
+      model?.primary_instance?.record_schema?.name?.ifBlank { "data" } ?: "data"
     private val bindings: Map<String, FieldBinding> =
       model?.bindings.orEmpty().associateBy { it.field_path }
     private val instances = model?.secondary_instances.orEmpty().associateBy { it.id }
@@ -91,11 +102,13 @@ object FormImport {
     private val notes = mutableListOf<String>()
     private val questions = mutableListOf<EditorQuestion>()
     private val keyByPath = mutableMapOf<String, String>()
+    private val pathByKey = mutableMapOf<String, String>()
     private val usedNames = mutableSetOf<String>()
     private val relevanceByKey = mutableMapOf<String, String>()
+    private val relevanceContextByKey = mutableMapOf<String, String>()
 
     fun run(formId: String, fallbackTitle: String, availability: FormAvailability): ImportedForm {
-      walk(formDef.view?.components.orEmpty(), enclosing = "")
+      walk(formDef.view?.components.orEmpty(), enclosing = "", enclosingRelevance = null)
       val resolved = questions.map { it.copy(relevance = relevanceOf(it)) }
       val entity = model?.entities?.firstOrNull()
       val isUpdate = entity != null && entity.update_condition.isNotBlank()
@@ -108,16 +121,18 @@ object FormImport {
         val idExpr = entity.entity_id_expression.trim()
         val byQuestion = ID_BY_QUESTION.matchEntire(idExpr)
         val direct = REF.matchEntire(idExpr)
+        val byQuestionPath = byQuestion?.let { resolvePath(it.groupValues[3], "") }
+        val directPath = direct?.let { resolvePath(it.groupValues[1], "") }
         when {
           idExpr.contains(SaveToRules.TARGET_ENTITY_FIELD) -> Unit
-          byQuestion != null && keyByPath.containsKey(byQuestion.groupValues[3]) -> {
+          byQuestion != null && byQuestionPath != null && keyByPath.containsKey(byQuestionPath) -> {
             idSource = EntityIdSource.QUESTION
-            idQuestionKey = keyByPath[byQuestion.groupValues[3]]
+            idQuestionKey = keyByPath[byQuestionPath]
             idMatchColumn = byQuestion.groupValues[2]
           }
-          direct != null && keyByPath.containsKey(direct.groupValues[1]) -> {
+          directPath != null && keyByPath.containsKey(directPath) -> {
             idSource = EntityIdSource.QUESTION
-            idQuestionKey = keyByPath[direct.groupValues[1]]
+            idQuestionKey = keyByPath[directPath]
             idMatchColumn = "name"
           }
           else ->
@@ -145,10 +160,11 @@ object FormImport {
         } else {
           availability
         }
+      val effectiveFormId = formId.ifBlank { FormIds.newFormId() }
       val form =
         EditorForm(
-          formId = formId,
-          title = formDef.title.ifBlank { fallbackTitle }.ifBlank { formId },
+          formId = effectiveFormId,
+          title = formDef.title.ifBlank { fallbackTitle }.ifBlank { effectiveFormId },
           questions = resolved,
           saveTo =
             EditorSaveTo(
@@ -169,16 +185,38 @@ object FormImport {
       )
     }
 
-    private fun walk(components: List<ViewComponent>, enclosing: String) {
+    private data class RelevanceContext(val expression: String, val contextPath: String)
+
+    private fun walk(
+      components: List<ViewComponent>,
+      enclosing: String,
+      enclosingRelevance: RelevanceContext?,
+    ) {
       components.forEach { component ->
-        component.control?.let { importControl(it, enclosing) }
+        component.control?.let { importControl(it, enclosing, enclosingRelevance) }
         component.group?.let { group ->
-          walk(group.components, join(enclosing, group.field_ref))
+          val groupPath = join(enclosing, group.field_ref)
+          val groupRel = bindings[groupPath]?.relevant_expression?.trim().orEmpty()
+          val nextRel =
+            if (groupRel.isNotEmpty() && !isTrue(groupRel)) {
+              RelevanceContext(groupRel, groupPath)
+            } else {
+              enclosingRelevance
+            }
+          walk(group.components, groupPath, nextRel)
         }
         component.repeat?.let { repeat ->
           notes +=
             "Repeat \"${text(repeat.label) ?: repeat.field_ref}\" was imported as plain questions."
-          walk(repeat.components, join(enclosing, repeat.field_ref))
+          val repeatPath = join(enclosing, repeat.field_ref)
+          val repeatRel = bindings[repeatPath]?.relevant_expression?.trim().orEmpty()
+          val nextRel =
+            if (repeatRel.isNotEmpty() && !isTrue(repeatRel)) {
+              RelevanceContext(repeatRel, repeatPath)
+            } else {
+              enclosingRelevance
+            }
+          walk(repeat.components, repeatPath, nextRel)
         }
       }
     }
@@ -192,7 +230,11 @@ object FormImport {
       }
     }
 
-    private fun importControl(control: ControlDef, enclosing: String) {
+    private fun importControl(
+      control: ControlDef,
+      enclosing: String,
+      enclosingRelevance: RelevanceContext?,
+    ) {
       val path = join(enclosing, control.field_ref)
       if (path.isEmpty()) {
         notes += "A control without a field reference was skipped."
@@ -219,7 +261,7 @@ object FormImport {
       var choiceDatasetId: String? = null
       if (choices.isEmpty()) {
         control.itemset?.let { itemset ->
-          choices = choicesFromInstance(itemset.instance_id)
+          choices = choicesFromInstance(itemset)
           val instance = instances[itemset.instance_id]
           if (itemset.instance_id.isNotBlank() && (instance == null || instance.uri.isNotBlank())) {
             choiceDatasetId = itemset.instance_id
@@ -239,9 +281,18 @@ object FormImport {
           }
         }
       }
-      val relevant = binding?.relevant_expression.orEmpty().trim()
-      if (relevant.isNotEmpty()) relevanceByKey[key] = relevant
-      val validation = validationOf(type, binding, label ?: name)
+      val ownRelevant = binding?.relevant_expression.orEmpty().trim()
+      when {
+        ownRelevant.isNotEmpty() && !isTrue(ownRelevant) -> {
+          relevanceByKey[key] = ownRelevant
+          relevanceContextByKey[key] = path
+        }
+        enclosingRelevance != null -> {
+          relevanceByKey[key] = enclosingRelevance.expression
+          relevanceContextByKey[key] = enclosingRelevance.contextPath
+        }
+      }
+      val validation = validationOf(type, binding, path, label ?: name)
       questions +=
         EditorQuestion(
           key = key,
@@ -271,6 +322,7 @@ object FormImport {
             },
         )
       keyByPath[path] = key
+      pathByKey[key] = path
     }
 
     private fun uniqueName(rawName: String, path: String): String {
@@ -355,78 +407,429 @@ object FormImport {
       }
     }
 
-    /** Imports a numeric range constraint; other constraints are reported in the notes. */
+    /**
+     * Imports numeric range, text length/pattern, date, or selection count constraints; unsupported
+     * constraints are reported in [notes].
+     */
     private fun validationOf(
       type: EditorQuestionType,
       binding: FieldBinding?,
+      path: String,
       label: String,
     ): EditorValidation? {
-      val constraint = binding?.constraint_expression?.trim().orEmpty()
+      val constraint = stripOuterParens(binding?.constraint_expression.orEmpty())
       if (binding == null || constraint.isEmpty()) return null
-      if (type.isNumeric) {
-        var min = ""
-        var max = ""
-        var recognized = true
-        constraint.split(" and ").forEach { part ->
-          val m = BOUND.matchEntire(part.trim())
-          when {
-            m == null -> recognized = false
-            m.groupValues[1] == ">=" -> min = m.groupValues[2]
-            else -> max = m.groupValues[2]
+      val message = constraintMessage(binding, path)
+      val clauses =
+        constraint.split(AND_SPLIT).map { stripOuterParens(it) }.filter { it.isNotEmpty() }
+      when (ValidationKind.of(type)) {
+        ValidationKind.NUMBER_RANGE -> {
+          var min = ""
+          var max = ""
+          var recognized = true
+          clauses.forEach { part ->
+            val m = BOUND.matchEntire(part)
+            val rev = if (m == null) REVERSED_BOUND.matchEntire(part) else null
+            when {
+              m != null ->
+                when (m.groupValues[1]) {
+                  ">=",
+                  ">" -> min = m.groupValues[2]
+                  "<=",
+                  "<" -> max = m.groupValues[2]
+                  "=" -> {
+                    min = m.groupValues[2]
+                    max = m.groupValues[2]
+                  }
+                  else -> recognized = false
+                }
+              rev != null ->
+                when (rev.groupValues[2]) {
+                  "<=",
+                  "<" -> min = rev.groupValues[1]
+                  ">=",
+                  ">" -> max = rev.groupValues[1]
+                  "=" -> {
+                    min = rev.groupValues[1]
+                    max = rev.groupValues[1]
+                  }
+                  else -> recognized = false
+                }
+              else -> recognized = false
+            }
+          }
+          if (recognized && (min.isNotEmpty() || max.isNotEmpty())) {
+            return EditorValidation(min = min, max = max, message = message)
           }
         }
-        if (recognized && (min.isNotEmpty() || max.isNotEmpty())) {
-          return EditorValidation(min = min, max = max, message = binding.constraint_message)
+        ValidationKind.TEXT -> {
+          var min = ""
+          var max = ""
+          var pattern: TextPattern? = null
+          var customPattern = ""
+          var recognized = true
+          clauses.forEach { part ->
+            val lenMatch = STRING_LENGTH_BOUND.matchEntire(part)
+            val regexMatch = if (lenMatch == null) REGEX_CALL.matchEntire(part) else null
+            when {
+              lenMatch != null -> {
+                val op = lenMatch.groupValues[1]
+                val n = lenMatch.groupValues[2].toIntOrNull()
+                if (n == null) {
+                  recognized = false
+                } else {
+                  when (op) {
+                    ">=" -> min = n.toString()
+                    ">" -> min = (n + 1).toString()
+                    "<=" -> max = n.toString()
+                    "<" -> if (n > 0) max = (n - 1).toString() else recognized = false
+                    "=" -> {
+                      min = n.toString()
+                      max = n.toString()
+                    }
+                    else -> recognized = false
+                  }
+                }
+              }
+              regexMatch != null -> {
+                val rawRegex = unquote(regexMatch.groupValues[1])
+                val preset = TextPattern.entries.firstOrNull { it.regex == rawRegex }
+                if (preset != null) {
+                  pattern = preset
+                  customPattern = ""
+                } else {
+                  pattern = TextPattern.CUSTOM
+                  customPattern = rawRegex
+                }
+              }
+              else -> recognized = false
+            }
+          }
+          if (recognized && (min.isNotEmpty() || max.isNotEmpty() || pattern != null)) {
+            return EditorValidation(
+              min = min,
+              max = max,
+              pattern = pattern,
+              customPattern = customPattern,
+              message = message,
+            )
+          }
         }
+        ValidationKind.DATE -> {
+          if (clauses.size == 1 && DATE_TODAY.matches(clauses[0])) {
+            val op = DATE_TODAY.matchEntire(clauses[0])!!.groupValues[1]
+            val rule =
+              when (op) {
+                "<=",
+                "<" -> DateRule.NOT_IN_FUTURE
+                ">=",
+                ">" -> DateRule.NOT_IN_PAST
+                else -> null
+              }
+            if (rule != null) {
+              return EditorValidation(dateRule = rule, message = message)
+            }
+          }
+          var min = ""
+          var max = ""
+          var recognized = true
+          clauses.forEach { part ->
+            val m = DATE_BOUND.matchEntire(part)
+            val iso = m?.let { unquote(it.groupValues[2]) }
+            when {
+              m == null || iso == null || !ValidationRules.isValidDate(iso) -> recognized = false
+              m.groupValues[1] == ">=" || m.groupValues[1] == ">" -> min = iso
+              m.groupValues[1] == "<=" || m.groupValues[1] == "<" -> max = iso
+              m.groupValues[1] == "=" -> {
+                min = iso
+                max = iso
+              }
+              else -> recognized = false
+            }
+          }
+          if (recognized && (min.isNotEmpty() || max.isNotEmpty())) {
+            return EditorValidation(
+              min = min,
+              max = max,
+              dateRule = DateRule.BETWEEN,
+              message = message,
+            )
+          }
+        }
+        ValidationKind.SELECTION_COUNT -> {
+          var min = ""
+          var max = ""
+          var recognized = true
+          clauses.forEach { part ->
+            val m = COUNT_SELECTED_BOUND.matchEntire(part)
+            val n = m?.groupValues?.get(2)?.toIntOrNull()
+            if (m == null || n == null) {
+              recognized = false
+            } else {
+              when (m.groupValues[1]) {
+                ">=" -> min = n.toString()
+                ">" -> min = (n + 1).toString()
+                "<=" -> max = n.toString()
+                "<" -> if (n > 0) max = (n - 1).toString() else recognized = false
+                "=" -> {
+                  min = n.toString()
+                  max = n.toString()
+                }
+                else -> recognized = false
+              }
+            }
+          }
+          if (recognized && (min.isNotEmpty() || max.isNotEmpty())) {
+            return EditorValidation(min = min, max = max, message = message)
+          }
+        }
+        null -> Unit
       }
       notes += "Constraint \"$constraint\" on \"$label\" isn't supported by the editor."
       return null
     }
 
+    private fun constraintMessage(binding: FieldBinding, path: String): String {
+      val raw = binding.constraint_message.trim()
+      if (raw.isNotEmpty()) {
+        val itextMatch = JR_ITEXT.matchEntire(raw)
+        if (itextMatch != null) {
+          val id = unquote(itextMatch.groupValues[1])
+          return strings[id]?.trim() ?: raw
+        }
+        return raw
+      }
+      return strings["/$rootName/$path:jr:constraintMsg"]?.trim()
+        ?: strings["/data/$path:jr:constraintMsg"]?.trim()
+        ?: strings["$path:jr:constraintMsg"]?.trim()
+        ?: ""
+    }
+
     private fun relevanceOf(question: EditorQuestion): EditorRelevance? {
-      val expression = relevanceByKey[question.key] ?: return null
+      val rawExpression = relevanceByKey[question.key] ?: return null
+      val expression = stripOuterParens(rawExpression)
+      val contextPath = relevanceContextByKey[question.key] ?: pathByKey[question.key].orEmpty()
       val index = questions.indexOfFirst { it.key == question.key }
-      fun source(path: String): EditorQuestion? {
-        val key = keyByPath[path] ?: return null
+      fun source(rawRef: String): EditorQuestion? {
+        val resolvedPath = resolvePath(rawRef, contextPath) ?: return null
+        val key = keyByPath[resolvedPath] ?: return null
         val sourceIndex = questions.indexOfFirst { it.key == key }
         return if (sourceIndex in 0 until index) questions[sourceIndex] else null
       }
-      val relevance =
-        COMPARISON.matchEntire(expression)?.let { m ->
-          val src = source(m.groupValues[1]) ?: return@let null
-          val operator =
-            when (m.groupValues[2]) {
-              "=" -> RelevanceOperator.EQUALS
-              "!=" -> RelevanceOperator.NOT_EQUALS
-              ">" -> RelevanceOperator.GREATER_THAN
-              else -> RelevanceOperator.LESS_THAN
-            }
-          EditorRelevance(src.key, operator, unquote(m.groupValues[3]))
+      fun mapSelected(src: EditorQuestion, literal: String, negated: Boolean): EditorRelevance? {
+        val value = unquote(literal)
+        val available = RelevanceOperator.availableFor(src.type)
+        if (value.isEmpty()) {
+          val op = if (negated) RelevanceOperator.IS_ANSWERED else RelevanceOperator.EQUALS
+          return if (op in available) EditorRelevance(src.key, op, "") else null
         }
-          ?: SELECTED.matchEntire(expression)?.let { m ->
-            source(m.groupValues[1])?.let {
-              EditorRelevance(it.key, RelevanceOperator.INCLUDES, unquote(m.groupValues[2]))
+        val op =
+          if (negated) {
+            if (RelevanceOperator.NOT_EQUALS in available) RelevanceOperator.NOT_EQUALS else null
+          } else {
+            when {
+              src.type == EditorQuestionType.SELECT_MULTIPLE &&
+                RelevanceOperator.INCLUDES in available -> RelevanceOperator.INCLUDES
+              RelevanceOperator.EQUALS in available -> RelevanceOperator.EQUALS
+              RelevanceOperator.INCLUDES in available -> RelevanceOperator.INCLUDES
+              else -> null
             }
           }
+        return op?.let { EditorRelevance(src.key, it, value) }
+      }
+      fun mapComparison(src: EditorQuestion, opToken: String, literal: String): EditorRelevance? {
+        val value = unquote(literal)
+        val available = RelevanceOperator.availableFor(src.type)
+        if (value.isEmpty() && opToken == "!=") {
+          return if (RelevanceOperator.IS_ANSWERED in available) {
+            EditorRelevance(src.key, RelevanceOperator.IS_ANSWERED)
+          } else {
+            null
+          }
+        }
+        val operator =
+          when (opToken) {
+            "=" -> RelevanceOperator.EQUALS
+            "!=" -> RelevanceOperator.NOT_EQUALS
+            ">",
+            ">=" -> RelevanceOperator.GREATER_THAN
+            "<",
+            "<=" -> RelevanceOperator.LESS_THAN
+            else -> return null
+          }
+        return if (operator in available) EditorRelevance(src.key, operator, value) else null
+      }
+      val relevance =
+        NOT_SELECTED.matchEntire(expression)?.let { m ->
+          source(m.groupValues[1])?.let { mapSelected(it, m.groupValues[2], negated = true) }
+        }
+          ?: SELECTED.matchEntire(expression)?.let { m ->
+            source(m.groupValues[1])?.let { mapSelected(it, m.groupValues[2], negated = false) }
+          }
           ?: ANSWERED.matchEntire(expression)?.let { m ->
-            source(m.groupValues[1])?.let { EditorRelevance(it.key, RelevanceOperator.IS_ANSWERED) }
+            source(m.groupValues[1])?.let { src ->
+              if (RelevanceOperator.IS_ANSWERED in RelevanceOperator.availableFor(src.type)) {
+                EditorRelevance(src.key, RelevanceOperator.IS_ANSWERED)
+              } else {
+                null
+              }
+            }
+          }
+          ?: COUNT_SELECTED_ANSWERED.matchEntire(expression)?.let { m ->
+            source(m.groupValues[1])?.let { src ->
+              if (RelevanceOperator.IS_ANSWERED in RelevanceOperator.availableFor(src.type)) {
+                EditorRelevance(src.key, RelevanceOperator.IS_ANSWERED)
+              } else {
+                null
+              }
+            }
+          }
+          ?: COMPARISON.matchEntire(expression)?.let { m ->
+            val lhs = m.groupValues[1].trim()
+            val op = m.groupValues[2]
+            val rhs = m.groupValues[3].trim()
+            source(lhs)?.let { mapComparison(it, op, rhs) }
+              ?: source(rhs)?.let { mapComparison(it, flipOperator(op), lhs) }
+          }
+          ?: source(expression)?.let { src ->
+            if (RelevanceOperator.IS_ANSWERED in RelevanceOperator.availableFor(src.type)) {
+              EditorRelevance(src.key, RelevanceOperator.IS_ANSWERED)
+            } else {
+              null
+            }
           }
       if (relevance == null) {
         notes +=
-          "Display logic \"$expression\" on \"${question.label}\" isn't supported by the editor."
+          "Display logic \"$rawExpression\" on \"${question.label}\" isn't supported by the editor."
       }
       return relevance
     }
 
-    private fun choicesFromInstance(instanceId: String): List<EditorChoice> {
-      val data = instances[instanceId]?.inline_data.orEmpty()
+    private fun resolvePath(rawRef: String, contextPath: String): String? {
+      var ref = stripOuterParens(rawRef)
+      if (ref.isEmpty()) return null
+      if (ref.startsWith("'") || ref.startsWith("\"")) return null
+      if (ref.startsWith("\${") && ref.endsWith("}")) {
+        val varName = ref.substring(2, ref.length - 1).trim()
+        return resolveByShortName(varName, contextPath)
+      }
+      if (ref.startsWith("current()/")) {
+        ref = ref.removePrefix("current()/")
+      } else if (ref == "current()") {
+        ref = "."
+      }
+      val resolved =
+        if (ref.startsWith("/")) {
+          val trimmed = ref.removePrefix("/")
+          when {
+            trimmed.startsWith("$rootName/") -> trimmed.removePrefix("$rootName/")
+            trimmed.startsWith("data/") -> trimmed.removePrefix("data/")
+            else -> trimmed
+          }
+        } else if (ref.startsWith("$rootName/") && !keyByPath.containsKey(join(contextPath, ref))) {
+          ref.removePrefix("$rootName/")
+        } else if (ref.startsWith("data/") && !keyByPath.containsKey(join(contextPath, ref))) {
+          ref.removePrefix("data/")
+        } else {
+          val baseSegments = contextPath.split('/').filter { it.isNotEmpty() }.toMutableList()
+          val relSegments = ref.split('/').filter { it.isNotEmpty() }
+          // In XForms `<bind nodeset="foo" relevant="../bar"/>`, `..` steps to the parent of `foo`.
+          if (relSegments.firstOrNull() == ".." || relSegments.firstOrNull() == ".") {
+            if (baseSegments.isNotEmpty()) baseSegments.removeAt(baseSegments.lastIndex)
+          }
+          for (seg in relSegments) {
+            when (seg) {
+              "." -> Unit
+              ".." -> if (baseSegments.isNotEmpty()) baseSegments.removeAt(baseSegments.lastIndex)
+              else -> baseSegments.add(seg)
+            }
+          }
+          baseSegments.joinToString("/")
+        }
+      if (keyByPath.containsKey(resolved)) return resolved
+      return resolveByShortName(resolved, contextPath)
+    }
+
+    private fun resolveByShortName(name: String, contextPath: String): String? {
+      if (keyByPath.containsKey(name)) return name
+      val parent = contextPath.substringBeforeLast('/', "")
+      if (parent.isNotEmpty()) {
+        val sibling = "$parent/$name"
+        if (keyByPath.containsKey(sibling)) return sibling
+      }
+      val suffixMatches = keyByPath.keys.filter { it.endsWith("/$name") }
+      return suffixMatches.singleOrNull()
+    }
+
+    private fun stripOuterParens(expr: String): String {
+      var s = expr.trim()
+      while (s.length >= 2 && s.first() == '(' && s.last() == ')') {
+        var depth = 0
+        var inSingle = false
+        var inDouble = false
+        var wrapsAll = true
+        for (i in 0 until s.length - 1) {
+          val c = s[i]
+          when {
+            c == '\'' && !inDouble -> inSingle = !inSingle
+            c == '"' && !inSingle -> inDouble = !inDouble
+            !inSingle && !inDouble -> {
+              if (c == '(') depth++
+              else if (c == ')') {
+                depth--
+                if (depth == 0) {
+                  wrapsAll = false
+                  break
+                }
+              }
+            }
+          }
+        }
+        if (wrapsAll && depth == 1) {
+          s = s.substring(1, s.length - 1).trim()
+        } else {
+          break
+        }
+      }
+      return s
+    }
+
+    private fun flipOperator(op: String): String =
+      when (op) {
+        ">" -> "<"
+        ">=" -> "<="
+        "<" -> ">"
+        "<=" -> ">="
+        else -> op
+      }
+
+    private fun choicesFromInstance(itemset: ItemsetDef): List<EditorChoice> {
+      val data = instances[itemset.instance_id]?.inline_data.orEmpty()
       if (data.isBlank()) return emptyList()
-      return ITEM.findAll(data)
-        .mapNotNull { item ->
-          val body = item.groupValues[1]
-          val value = element(body, "name") ?: return@mapNotNull null
+      val valueTag = itemset.value_ref.trim().ifEmpty { "name" }
+      val rawLabelRef = itemset.label_ref.trim().ifEmpty { "label" }
+      val itextColumnMatch = JR_ITEXT.matchEntire(rawLabelRef)
+      val itextColumn = itextColumnMatch?.let { unquote(it.groupValues[1]) }
+      val labelTag = itextColumn ?: rawLabelRef
+      val itemElements =
+        ITEM.findAll(data)
+          .map { it.groupValues[1] }
+          .toList()
+          .ifEmpty { customRecordsFromInstanceXml(data) }
+      return itemElements
+        .mapNotNull { body ->
+          val value = element(body, valueTag) ?: element(body, "name") ?: return@mapNotNull null
           val label =
-            element(body, "label") ?: element(body, "itextId")?.let { strings[it] } ?: value
+            if (itextColumn != null) {
+              element(body, itextColumn)?.let { strings[it] ?: it }
+                ?: element(body, "label")
+                ?: value
+            } else {
+              element(body, labelTag)
+                ?: element(body, "label")
+                ?: element(body, "itextId")?.let { strings[it] }
+                ?: value
+            }
           EditorChoice(
             value = value,
             label = label,
@@ -436,8 +839,14 @@ object FormImport {
         .toList()
     }
 
+    private fun customRecordsFromInstanceXml(xml: String): List<String> {
+      val rootMatch = OUTER_TAG.find(xml.trim()) ?: return emptyList()
+      val inner = rootMatch.groupValues[2].trim()
+      return CHILD_RECORD.findAll(inner).map { it.groupValues[2] }.toList()
+    }
+
     private fun element(xml: String, name: String): String? =
-      Regex("<$name>(.*?)</$name>", RegexOption.DOT_MATCHES_ALL)
+      Regex("<${Regex.escape(name)}>(.*?)</${Regex.escape(name)}>", RegexOption.DOT_MATCHES_ALL)
         .find(xml)
         ?.groupValues
         ?.get(1)
@@ -479,15 +888,29 @@ object FormImport {
         .replace("&amp;", "&")
 
     private companion object {
-      val REF = Regex("""^/data/([A-Za-z_][A-Za-z0-9_.\-/]*)$""")
-      val COMPARISON = Regex("""^/data/([A-Za-z_][A-Za-z0-9_.\-/]*) (=|!=|>|<) (.+)$""")
-      val SELECTED = Regex("""^selected\(/data/([A-Za-z_][A-Za-z0-9_.\-/]*), (.+)\)$""")
-      val ANSWERED = Regex("""^string-length\(/data/([A-Za-z_][A-Za-z0-9_.\-/]*)\) > 0$""")
-      val BOUND = Regex("""^\. (>=|<=) (-?\d+(?:\.\d+)?)$""")
+      val REF = Regex("""^/?([A-Za-z_][A-Za-z0-9_.\-/]*)$""")
+      val COMPARISON = Regex("""^(.+?)\s*(!=|>=|<=|=|>|<)\s*(.+)$""")
+      val SELECTED = Regex("""^selected\(\s*([^,]+?)\s*,\s*(.+?)\s*\)$""")
+      val NOT_SELECTED = Regex("""^not\(\s*selected\(\s*([^,]+?)\s*,\s*(.+?)\s*\)\s*\)$""")
+      val ANSWERED = Regex("""^string-length\(\s*(.+?)\s*\)\s*(?:>|!=)\s*0$""")
+      val COUNT_SELECTED_ANSWERED = Regex("""^count-selected\(\s*(.+?)\s*\)\s*(?:>|!=)\s*0$""")
+      val AND_SPLIT = Regex("""\s+and\s+""")
+      val BOUND = Regex("""^\.\s*(>=|<=|>|<|=)\s*(-?(?:\d+(?:\.\d*)?|\.\d+))$""")
+      val REVERSED_BOUND = Regex("""^(-?(?:\d+(?:\.\d*)?|\.\d+))\s*(>=|<=|>|<|=)\s*\.$""")
+      val STRING_LENGTH_BOUND = Regex("""^string-length\(\s*\.\s*\)\s*(>=|<=|>|<|=)\s*(\d+)$""")
+      val REGEX_CALL = Regex("""^regex\(\s*\.\s*,\s*(.+?)\s*\)$""")
+      val DATE_TODAY = Regex("""^\.\s*(<=|<|>=|>)\s*today\(\s*\)$""")
+      val DATE_BOUND = Regex("""^\.\s*(>=|<=|>|<|=)\s*date\(\s*(.+?)\s*\)$""")
+      val COUNT_SELECTED_BOUND = Regex("""^count-selected\(\s*\.\s*\)\s*(>=|<=|>|<|=)\s*(\d+)$""")
+      val JR_ITEXT = Regex("""^jr:itext\(\s*(.+?)\s*\)$""")
       val ITEM = Regex("""<item>(.*?)</item>""", RegexOption.DOT_MATCHES_ALL)
+      val OUTER_TAG =
+        Regex("""^<([A-Za-z_][A-Za-z0-9_.\-:]*)[^>]*>(.*)</\1>$""", RegexOption.DOT_MATCHES_ALL)
+      val CHILD_RECORD =
+        Regex("""<([A-Za-z_][A-Za-z0-9_.\-:]*)[^>]*>(.*?)</\1>""", RegexOption.DOT_MATCHES_ALL)
       val ID_BY_QUESTION =
         Regex(
-          """^instance\('([^']+)'\)/root/item\[([A-Za-z_][A-Za-z0-9_.\-]*) = /data/([A-Za-z_][A-Za-z0-9_.\-/]*)\]/name$"""
+          """^instance\('([^']+)'\)/root/item\[([A-Za-z_][A-Za-z0-9_.\-]*)\s*=\s*([^\]]+)\]/name$"""
         )
     }
   }

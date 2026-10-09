@@ -33,7 +33,14 @@ kotlin {
       dependencies { implementation("androidx.activity:activity-compose:1.10.0") }
     }
     val commonMain by getting {
-      dependencies { implementation("org.groundplatform.v2:mobile:2.0.0-SNAPSHOT") }
+      dependencies {
+        implementation("org.groundplatform.v2:mobile:2.0.0-SNAPSHOT")
+        implementation("org.groundplatform.v2.devtools:prototypeApp:2.0.0-SNAPSHOT")
+        implementation(compose.runtime)
+        implementation(compose.foundation)
+        implementation(compose.material3)
+        implementation(compose.ui)
+      }
     }
   }
 }
@@ -47,6 +54,13 @@ android {
     targetSdk = 35
     versionCode = 1
     versionName = "1.0"
+  }
+  buildTypes {
+    release {
+      // Sign prototype release bundles with the standard debug key so the .aab can be
+      // installed via bundletool or shared internally without a production keystore.
+      signingConfig = signingConfigs.getByName("debug")
+    }
   }
   compileOptions {
     sourceCompatibility = JavaVersion.VERSION_17

@@ -16,38 +16,71 @@ package org.groundplatform.v2.devtools.prototypeapp.ui.common
 import androidx.compose.ui.input.pointer.PointerIcon
 
 /**
- * Compose for Web only exposes the common cursors, so the resize cursor comes from
- * [showPlatformHorizontalResizeCursor].
+ * Compose for Web only exposes the common cursors, so `col-resize`, `grab`, and `grabbing` cursors
+ * come from [showPlatformHorizontalResizeCursor], [showPlatformGrabCursor], and
+ * [showPlatformGrabbingCursor].
  */
 internal actual val HorizontalResizePointerIcon: PointerIcon = PointerIcon.Default
 
+internal actual val GrabPointerIcon: PointerIcon = PointerIcon.Default
+
+internal actual val GrabbingPointerIcon: PointerIcon = PointerIcon.Default
+
 /**
- * Shows or hides the `col-resize` cursor across the page. A stylesheet rule with `!important` wins
- * over the inline `cursor` Compose writes on its canvas. Compose for Web renders into a canvas
- * inside an open shadow root (`ComposeViewport`), which document styles don't reach, so the rule is
- * also added to every open shadow root and the class is toggled on the canvases there. `<html>`
- * gets the class too, for the map and any other light-DOM element under the pointer while dragging.
+ * Toggles a cursor utility class (`ground-col-resize`, `ground-grab`, or `ground-grabbing`) across
+ * the page and every open shadow root (`ComposeViewport`).
+ *
+ * - `.ground-col-resize` and `.ground-grabbing` force `col-resize` / `grabbing` everywhere while an
+ *   active drag is in progress, so the cursor doesn't flicker when the pointer moves across child
+ *   elements or runs ahead of the dragged target.
+ * - `canvas.ground-grab` applies `cursor: grab !important` only when Compose has not set a more
+ *   specific inline cursor (`pointer`, `text`, or `crosshair`) on the canvas and no active drag
+ *   (`.ground-grabbing` / `.ground-col-resize`) is underway. This lets the pannable canvas and `⋮⋮`
+ *   drag handles (which use [GrabPointerIcon] / `default`) show `grab`, while selectable question
+ *   cards and buttons inside the canvas (which use [PointerIcon.Hand] / `pointer`) show `pointer`.
  */
 @JsFun(
-  """(show) => {
-    const id = 'ground-col-resize-style';
-    const css = '.ground-col-resize, .ground-col-resize * { cursor: col-resize !important; }';
+  """(className, show) => {
+    const id = 'ground-cursor-style';
+    const css = [
+      'canvas.ground-grab:not(.ground-grabbing):not(.ground-col-resize):not([style*="pointer"]):not([style*="text"]):not([style*="crosshair"]) { cursor: grab !important; }',
+      '.ground-grabbing, .ground-grabbing * { cursor: grabbing !important; }',
+      '.ground-col-resize, .ground-col-resize * { cursor: col-resize !important; }'
+    ].join('\n');
     const roots = [document];
     document.querySelectorAll('*').forEach((el) => { if (el.shadowRoot) roots.push(el.shadowRoot); });
     for (const root of roots) {
-      if (!root.getElementById(id)) {
+      const existing = root.getElementById(id);
+      if (!existing) {
         const style = document.createElement('style');
         style.id = id;
         style.textContent = css;
         (root === document ? document.head : root).appendChild(style);
+      } else if (existing.textContent !== css) {
+        existing.textContent = css;
       }
-      root.querySelectorAll('canvas').forEach((c) => c.classList.toggle('ground-col-resize', show));
+      root.querySelectorAll('canvas').forEach((c) => c.classList.toggle(className, show));
     }
-    document.documentElement.classList.toggle('ground-col-resize', show);
+    document.documentElement.classList.toggle(className, show);
   }"""
 )
-private external fun jsShowColResizeCursor(show: Boolean)
+private external fun jsToggleCursorClass(className: String, show: Boolean)
+
+private var colResizeHolders = 0
+private var grabHolders = 0
+private var grabbingHolders = 0
 
 internal actual fun showPlatformHorizontalResizeCursor(show: Boolean) {
-  jsShowColResizeCursor(show)
+  colResizeHolders = (colResizeHolders + if (show) 1 else -1).coerceAtLeast(0)
+  jsToggleCursorClass("ground-col-resize", colResizeHolders > 0)
+}
+
+internal actual fun showPlatformGrabCursor(show: Boolean) {
+  grabHolders = (grabHolders + if (show) 1 else -1).coerceAtLeast(0)
+  jsToggleCursorClass("ground-grab", grabHolders > 0)
+}
+
+internal actual fun showPlatformGrabbingCursor(show: Boolean) {
+  grabbingHolders = (grabbingHolders + if (show) 1 else -1).coerceAtLeast(0)
+  jsToggleCursorClass("ground-grabbing", grabbingHolders > 0)
 }

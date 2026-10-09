@@ -30,6 +30,7 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
@@ -38,6 +39,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -59,6 +61,7 @@ import androidx.compose.material.icons.outlined.AddPhotoAlternate
 import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.outlined.Close
+import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material.icons.outlined.DateRange
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Description
@@ -113,6 +116,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
@@ -134,6 +138,8 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.PointerEventType
+import androidx.compose.ui.input.pointer.PointerIcon
+import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.positionChange
 import androidx.compose.ui.layout.ContentScale
@@ -146,6 +152,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.zIndex
 import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
@@ -188,9 +196,13 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.friendlyD
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.isoDateToUtcMillis
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.utcMillisToIsoDate
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.hasGeometry
+import org.groundplatform.v2.devtools.prototypeapp.ui.common.GrabPointerIcon
+import org.groundplatform.v2.devtools.prototypeapp.ui.common.GrabbingPointerIcon
 import org.groundplatform.v2.devtools.prototypeapp.ui.common.PlatformPickResult
 import org.groundplatform.v2.devtools.prototypeapp.ui.common.isPlatformMediaPickerAvailable
 import org.groundplatform.v2.devtools.prototypeapp.ui.common.openPlatformMediaPicker
+import org.groundplatform.v2.devtools.prototypeapp.ui.common.showPlatformGrabCursor
+import org.groundplatform.v2.devtools.prototypeapp.ui.common.showPlatformGrabbingCursor
 import org.groundplatform.v2.devtools.prototypeapp.ui.dashboard.SidePanelSeparator
 import org.groundplatform.v2.devtools.prototypeapp.ui.dashboard.SidePanelSeparatorWidth
 import org.groundplatform.v2.devtools.prototypeapp.ui.state.FormEditorUiState
@@ -433,6 +445,7 @@ private fun AddQuestionMenu(
           onAdd(type, atIndex)
           onDismiss()
         },
+        modifier = Modifier.pointerHoverIcon(PointerIcon.Hand),
       )
     }
   }
@@ -582,6 +595,17 @@ private fun FlowHorizontalScrollBar(
       val thumbOffsetDp = with(LocalDensity.current) { thumbOffsetPx.toDp() }
       val thumbWidthDp = with(LocalDensity.current) { thumbWidthPx.toDp() }
 
+      var isThumbHovered by remember { mutableStateOf(false) }
+      var isThumbDragging by remember { mutableStateOf(false) }
+      DisposableEffect(isThumbHovered) {
+        if (isThumbHovered) showPlatformGrabCursor(true)
+        onDispose { if (isThumbHovered) showPlatformGrabCursor(false) }
+      }
+      DisposableEffect(isThumbDragging) {
+        if (isThumbDragging) showPlatformGrabbingCursor(true)
+        onDispose { if (isThumbDragging) showPlatformGrabbingCursor(false) }
+      }
+
       Box(
         modifier =
           Modifier.offset(x = thumbOffsetDp)
@@ -589,8 +613,24 @@ private fun FlowHorizontalScrollBar(
             .height(10.dp)
             .clip(CircleShape)
             .background(colors.outline.copy(alpha = 0.65f))
+            .pointerHoverIcon(if (isThumbDragging) GrabbingPointerIcon else GrabPointerIcon)
+            .pointerInput(Unit) {
+              awaitPointerEventScope {
+                while (true) {
+                  val event = awaitPointerEvent()
+                  when (event.type) {
+                    PointerEventType.Enter -> isThumbHovered = true
+                    PointerEventType.Exit -> isThumbHovered = false
+                  }
+                }
+              }
+            }
             .pointerInput(maxScroll, trackWidthPx, thumbWidthPx) {
-              detectHorizontalDragGestures { change, dragAmount ->
+              detectHorizontalDragGestures(
+                onDragStart = { isThumbDragging = true },
+                onDragEnd = { isThumbDragging = false },
+                onDragCancel = { isThumbDragging = false },
+              ) { change, dragAmount ->
                 change.consume()
                 val scrollableTrack = trackWidthPx - thumbWidthPx
                 if (scrollableTrack > 0f) {
@@ -672,6 +712,18 @@ private fun FlowCanvas(
 
   val colors = MaterialTheme.colorScheme
   val drag = remember { DragReorderState() }
+  var isPanning by remember { mutableStateOf(false) }
+  var isCanvasHovered by remember { mutableStateOf(false) }
+  val isGrabbing = isPanning || drag.isDragging
+  val showGrab = isCanvasHovered && uiState.isEnabledOnPreviewTarget
+  DisposableEffect(showGrab) {
+    if (showGrab) showPlatformGrabCursor(true)
+    onDispose { if (showGrab) showPlatformGrabCursor(false) }
+  }
+  DisposableEffect(isGrabbing) {
+    if (isGrabbing) showPlatformGrabbingCursor(true)
+    onDispose { if (isGrabbing) showPlatformGrabbingCursor(false) }
+  }
   val pitchPx = with(density) { (CardWidth + SlotGap).toPx() }
   val cardWidthPx = with(density) { CardWidth.toPx() }
   val edgeZonePx = with(density) { 56.dp.toPx() }
@@ -679,6 +731,21 @@ private fun FlowCanvas(
   Box(
     modifier =
       modifier
+        .pointerHoverIcon(
+          icon = if (isGrabbing) GrabbingPointerIcon else GrabPointerIcon,
+          overrideDescendants = isGrabbing,
+        )
+        .pointerInput(Unit) {
+          awaitPointerEventScope {
+            while (true) {
+              val event = awaitPointerEvent()
+              when (event.type) {
+                PointerEventType.Enter -> isCanvasHovered = true
+                PointerEventType.Exit -> isCanvasHovered = false
+              }
+            }
+          }
+        }
         .horizontalScroll(horizontalScroll)
         .verticalScroll(rememberScrollState())
         .pointerInput(drag.isDragging) {
@@ -691,10 +758,15 @@ private fun FlowCanvas(
               val (start, travel) =
                 awaitDragPastSlop(down, dragSlopFor(down), DragAxis.HORIZONTAL)
                   ?: return@awaitEachGesture
-              horizontalScroll.dispatchRawDelta(-travel.x)
-              horizontalDrag(start.id) { change ->
-                horizontalScroll.dispatchRawDelta(-change.positionChange().x)
-                change.consume()
+              isPanning = true
+              try {
+                horizontalScroll.dispatchRawDelta(-travel.x)
+                horizontalDrag(start.id) { change ->
+                  horizontalScroll.dispatchRawDelta(-change.positionChange().x)
+                  change.consume()
+                }
+              } finally {
+                isPanning = false
               }
             }
           }
@@ -876,7 +948,10 @@ private fun AddQuestionAffordance(
       contentColor =
         if (alwaysVisible && !isHovered) colors.onSecondaryContainer else colors.onSecondary,
       shadowElevation = if (isHovered || menuExpanded) 4.dp else if (visible) 1.dp else 0.dp,
-      modifier = Modifier.size(buttonSize).graphicsLayer { alpha = if (visible) 1f else 0f },
+      modifier =
+        Modifier.size(buttonSize)
+          .graphicsLayer { alpha = if (visible) 1f else 0f }
+          .pointerHoverIcon(if (visible) PointerIcon.Hand else GrabPointerIcon),
     ) {
       Box(contentAlignment = Alignment.Center) {
         Icon(
@@ -964,7 +1039,7 @@ private fun TerminalNode(
   if (onClick != null) {
     Surface(
       onClick = onClick,
-      modifier = sized,
+      modifier = sized.pointerHoverIcon(PointerIcon.Hand),
       shape = shape,
       color = colors.secondaryContainer,
       contentColor = colors.onSecondaryContainer,
@@ -998,9 +1073,12 @@ private fun ScreenPreviewCard(
   val colors = MaterialTheme.colorScheme
   // Subtle selection using GroundTheme's muted secondary roles (the same treatment as selected
   // list rows elsewhere in the app) rather than the bright primaryContainer accent.
+  // Hovering the card body shows a pointer cursor (click to select), while hovering the drag
+  // handle icon shows an open-hand grab cursor (drag to reorder); active dragging switches the
+  // whole canvas to a closed-hand grabbing cursor.
   OutlinedCard(
     onClick = onClick,
-    modifier = modifier.width(CardWidth).height(CardHeight),
+    modifier = modifier.width(CardWidth).height(CardHeight).pointerHoverIcon(PointerIcon.Hand),
     shape = MaterialTheme.shapes.medium,
     colors =
       CardDefaults.outlinedCardColors(
@@ -1034,7 +1112,7 @@ private fun ScreenPreviewCard(
               isDragged -> colors.onSurface
               else -> colors.onSurfaceVariant
             },
-          modifier = Modifier.size(16.dp),
+          modifier = Modifier.size(16.dp).pointerHoverIcon(GrabPointerIcon),
         )
         GroundTonalBadge(text = "Q${index + 1}", tone = GroundBadgeTone.NEUTRAL)
         Icon(
@@ -1436,38 +1514,77 @@ private fun QuestionProperties(
     modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(20.dp),
     verticalArrangement = Arrangement.spacedBy(14.dp),
   ) {
-    Column {
-      Text(
-        text = "Question ${index + 1} of ${form.questions.size}",
-        style = MaterialTheme.typography.titleMedium,
-        fontWeight = FontWeight.Bold,
-      )
-    }
+    var menuExpanded by remember { mutableStateOf(false) }
     Row(
       modifier = Modifier.fillMaxWidth(),
       horizontalArrangement = Arrangement.spacedBy(4.dp),
       verticalAlignment = Alignment.CenterVertically,
     ) {
-      IconButton(onClick = { actions.moveQuestion(key, -1) }, enabled = index > 0) {
-        Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = "Move earlier")
-      }
-      IconButton(
-        onClick = { actions.moveQuestion(key, 1) },
-        enabled = index < form.questions.lastIndex,
-      ) {
-        Icon(Icons.AutoMirrored.Outlined.ArrowForward, contentDescription = "Move later")
-      }
+      Text(
+        text = "Question ${index + 1} of ${form.questions.size}",
+        style = MaterialTheme.typography.titleMedium,
+        fontWeight = FontWeight.Bold,
+      )
       Spacer(Modifier.weight(1f))
-      TextButton(onClick = { actions.duplicateQuestion(key) }) { Text("Duplicate") }
-      TextButton(onClick = { actions.deleteQuestion(key) }) {
+      TextButton(
+        onClick = { actions.select(form.questions.getOrNull(index - 1)?.key) },
+        enabled = index > 0,
+      ) {
         Icon(
-          Icons.Outlined.Delete,
+          Icons.AutoMirrored.Outlined.ArrowBack,
           contentDescription = null,
-          tint = MaterialTheme.colorScheme.error,
           modifier = Modifier.size(18.dp),
         )
         Spacer(Modifier.width(4.dp))
-        Text("Delete", color = MaterialTheme.colorScheme.error)
+        Text("Previous")
+      }
+      TextButton(
+        onClick = { actions.select(form.questions.getOrNull(index + 1)?.key) },
+        enabled = index < form.questions.lastIndex,
+      ) {
+        Text("Next")
+        Spacer(Modifier.width(4.dp))
+        Icon(
+          Icons.AutoMirrored.Outlined.ArrowForward,
+          contentDescription = null,
+          modifier = Modifier.size(18.dp),
+        )
+      }
+      Box {
+        IconButton(onClick = { menuExpanded = true }) {
+          Icon(Icons.Outlined.MoreVert, contentDescription = "Question options")
+        }
+        DropdownMenu(expanded = menuExpanded, onDismissRequest = { menuExpanded = false }) {
+          DropdownMenuItem(
+            text = { Text("Duplicate") },
+            leadingIcon = {
+              Icon(
+                Icons.Outlined.ContentCopy,
+                contentDescription = null,
+                modifier = Modifier.size(18.dp),
+              )
+            },
+            onClick = {
+              menuExpanded = false
+              actions.duplicateQuestion(key)
+            },
+          )
+          DropdownMenuItem(
+            text = { Text("Delete", color = MaterialTheme.colorScheme.error) },
+            leadingIcon = {
+              Icon(
+                Icons.Outlined.Delete,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.error,
+                modifier = Modifier.size(18.dp),
+              )
+            },
+            onClick = {
+              menuExpanded = false
+              actions.deleteQuestion(key)
+            },
+          )
+        }
       }
     }
 
@@ -2337,9 +2454,7 @@ private fun ChoiceImageButton(
 @OptIn(ExperimentalResourceApi::class, ExperimentalEncodingApi::class)
 @Composable
 internal fun rememberChoiceImageBitmap(image: EditorChoiceImage): ImageBitmap? =
-  remember(image) {
-    runCatching { Base64.decode(image.base64).decodeToImageBitmap() }.getOrNull()
-  }
+  remember(image) { runCatching { Base64.decode(image.base64).decodeToImageBitmap() }.getOrNull() }
 
 @Composable
 private fun DisplayLogicEditor(
@@ -2509,18 +2624,23 @@ internal fun <T> DropdownSelector(
 // ---------------------------------------------------------------------------------------------
 
 @Composable
-private fun ModalScrim(content: @Composable () -> Unit) {
-  Box(
-    modifier =
-      Modifier.fillMaxSize()
-        .background(MaterialTheme.colorScheme.scrim.copy(alpha = 0.55f))
-        .clickable(
-          indication = null,
-          interactionSource = remember { MutableInteractionSource() },
-        ) {},
-    contentAlignment = Alignment.Center,
+private fun ModalScrim(onDismiss: () -> Unit, content: @Composable () -> Unit) {
+  Dialog(
+    onDismissRequest = onDismiss,
+    properties = DialogProperties(usePlatformDefaultWidth = false),
   ) {
-    content()
+    Box(
+      modifier =
+        Modifier.fillMaxSize()
+          .background(MaterialTheme.colorScheme.scrim.copy(alpha = 0.55f))
+          .clickable(
+            indication = null,
+            interactionSource = remember { MutableInteractionSource() },
+          ) {},
+      contentAlignment = Alignment.Center,
+    ) {
+      content()
+    }
   }
 }
 
@@ -2533,54 +2653,67 @@ private fun FormPreviewOverlay(
   val controller = uiState.previewController
   var formFactor by remember { mutableStateOf(DeviceFormFactor.MOBILE) }
   var orientation by remember { mutableStateOf(DeviceFormFactor.MOBILE.defaultOrientation) }
-  ModalScrim {
-    Row(
-      modifier =
-        Modifier.fillMaxSize()
-          .verticalScroll(rememberScrollState())
-          .horizontalScroll(rememberScrollState())
-          .padding(24.dp),
-      horizontalArrangement = Arrangement.spacedBy(24.dp, Alignment.CenterHorizontally),
-      verticalAlignment = Alignment.Top,
-    ) {
-      if (controller != null && uiState.previewTarget == FormPreviewTarget.WEB) {
-        WebPreviewBrowserFrame(uiState = uiState, actions = actions, controller = controller)
-      } else if (controller != null) {
-        MobileDevicePreviewFrame(
-          deviceTitle = "Preview • ${uiState.form.title}",
-          isDarkTheme = isDarkTheme,
-          formFactor = formFactor,
-          orientation = orientation,
-          onSelectFormFactor = {
-            formFactor = it
-            orientation = it.defaultOrientation
-          },
-          onRotateDevice = {
-            orientation =
-              if (orientation == DeviceOrientation.PORTRAIT) DeviceOrientation.LANDSCAPE
-              else DeviceOrientation.PORTRAIT
-          },
-        ) {
-          key(controller) {
-            MobileFormRunner(
-              controller = controller,
-              modifier = Modifier.fillMaxSize(),
-              onClose = actions::closePreview,
-              onSubmitted = { actions.markPreviewSubmitted() },
-            )
+  var previewDarkTheme by remember(isDarkTheme) { mutableStateOf(isDarkTheme) }
+  ModalScrim(onDismiss = actions::closePreview) {
+    BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+      val maxPanelHeight = (maxHeight - 48.dp).coerceAtLeast(320.dp)
+      Row(
+        modifier =
+          Modifier.fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .horizontalScroll(rememberScrollState())
+            .padding(24.dp),
+        horizontalArrangement = Arrangement.spacedBy(24.dp, Alignment.CenterHorizontally),
+        verticalAlignment = Alignment.Top,
+      ) {
+        if (controller != null && uiState.previewTarget == FormPreviewTarget.WEB) {
+          WebPreviewBrowserFrame(uiState = uiState, actions = actions, controller = controller)
+        } else if (controller != null) {
+          MobileDevicePreviewFrame(
+            deviceTitle = "Preview • ${uiState.form.title}",
+            isDarkTheme = previewDarkTheme,
+            formFactor = formFactor,
+            orientation = orientation,
+            onSelectFormFactor = {
+              formFactor = it
+              orientation = it.defaultOrientation
+            },
+            onRotateDevice = {
+              orientation =
+                if (orientation == DeviceOrientation.PORTRAIT) DeviceOrientation.LANDSCAPE
+                else DeviceOrientation.PORTRAIT
+            },
+            onToggleDarkTheme = { previewDarkTheme = !previewDarkTheme },
+          ) {
+            key(controller) {
+              MobileFormRunner(
+                controller = controller,
+                modifier = Modifier.fillMaxSize(),
+                onClose = actions::closePreview,
+                onSubmitted = { actions.markPreviewSubmitted() },
+              )
+            }
           }
         }
+        PreviewSidePanel(
+          uiState = uiState,
+          actions = actions,
+          modifier = Modifier.heightIn(max = maxPanelHeight),
+        )
       }
-      PreviewSidePanel(uiState, actions)
     }
   }
 }
 
 @Composable
-private fun PreviewSidePanel(uiState: FormEditorUiState, actions: FormEditorActions) {
+private fun PreviewSidePanel(
+  uiState: FormEditorUiState,
+  actions: FormEditorActions,
+  modifier: Modifier = Modifier,
+) {
   val controller = uiState.previewController
   val colors = MaterialTheme.colorScheme
-  ElevatedCard(modifier = Modifier.width(340.dp)) {
+  ElevatedCard(modifier = modifier.width(340.dp)) {
     Column(modifier = Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
       Row(verticalAlignment = Alignment.CenterVertically) {
         Text(
@@ -2593,77 +2726,82 @@ private fun PreviewSidePanel(uiState: FormEditorUiState, actions: FormEditorActi
           Icon(Icons.Outlined.Close, contentDescription = "Close preview")
         }
       }
-      val error = uiState.previewError
-      if (error != null) {
-        Text(
-          text = "The generated XForms couldn't be loaded:\n$error",
-          style = MaterialTheme.typography.bodySmall,
-          color = colors.error,
-        )
-      }
-      if (controller != null) {
-        Text(
-          text =
-            if (uiState.previewTarget == FormPreviewTarget.WEB) {
-              "Questions update live as you answer: conditional cards appear or disappear based on display logic."
-            } else {
-              "Screens update live as you answer: conditional questions appear or disappear based on display logic."
-            },
-          style = MaterialTheme.typography.bodySmall,
-          color = colors.onSurfaceVariant,
-        )
-        if (uiState.previewSubmitted) {
-          Surface(
-            color = colors.primaryContainer,
-            contentColor = colors.onPrimaryContainer,
-            shape = MaterialTheme.shapes.small,
-          ) {
-            Row(
-              modifier = Modifier.fillMaxWidth().padding(10.dp),
-              verticalAlignment = Alignment.CenterVertically,
+      Column(
+        modifier = Modifier.weight(1f, fill = false).verticalScroll(rememberScrollState()),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+      ) {
+        val error = uiState.previewError
+        if (error != null) {
+          Text(
+            text = "The generated XForms couldn't be loaded:\n$error",
+            style = MaterialTheme.typography.bodySmall,
+            color = colors.error,
+          )
+        }
+        if (controller != null) {
+          Text(
+            text =
+              if (uiState.previewTarget == FormPreviewTarget.WEB) {
+                "Questions update live as you answer: conditional cards appear or disappear based on display logic."
+              } else {
+                "Screens update live as you answer: conditional questions appear or disappear based on display logic."
+              },
+            style = MaterialTheme.typography.bodySmall,
+            color = colors.onSurfaceVariant,
+          )
+          if (uiState.previewSubmitted) {
+            Surface(
+              color = colors.primaryContainer,
+              contentColor = colors.onPrimaryContainer,
+              shape = MaterialTheme.shapes.small,
             ) {
-              // Filled: indicates the validation-passed uiState.
-              Icon(
-                Icons.Filled.CheckCircle,
-                contentDescription = null,
-                tint = colors.onPrimaryContainer,
-              )
-              Spacer(Modifier.width(8.dp))
-              Text(
-                "Submission passed validation.",
-                style = MaterialTheme.typography.bodyMedium,
-                color = colors.onPrimaryContainer,
-              )
+              Row(
+                modifier = Modifier.fillMaxWidth().padding(10.dp),
+                verticalAlignment = Alignment.CenterVertically,
+              ) {
+                // Filled: indicates the validation-passed uiState.
+                Icon(
+                  Icons.Filled.CheckCircle,
+                  contentDescription = null,
+                  tint = colors.onPrimaryContainer,
+                )
+                Spacer(Modifier.width(8.dp))
+                Text(
+                  "Submission passed validation.",
+                  style = MaterialTheme.typography.bodyMedium,
+                  color = colors.onPrimaryContainer,
+                )
+              }
             }
           }
-        }
-        SectionLabel("Current path")
-        controller.steps.forEachIndexed { i, step ->
-          val isCurrent = i == controller.currentStepIndex
-          Row(
-            modifier =
-              Modifier.fillMaxWidth()
-                .clip(MaterialTheme.shapes.small)
-                .background(if (isCurrent) colors.secondaryContainer else Color.Transparent)
-                .clickable { controller.jumpToStep(i) }
-                .padding(horizontal = 8.dp, vertical = 6.dp),
-            verticalAlignment = Alignment.CenterVertically,
-          ) {
-            Text(
-              text = if (step is FormWizardStep.SummaryStep) "✓" else "${i + 1}",
-              style = MaterialTheme.typography.labelMedium,
-              fontWeight = FontWeight.Bold,
-              color = if (isCurrent) colors.onSecondaryContainer else colors.primary,
-              modifier = Modifier.width(24.dp),
-            )
-            Text(
-              text = step.title,
-              style = MaterialTheme.typography.bodySmall,
-              color = if (isCurrent) colors.onSecondaryContainer else colors.onSurface,
-              fontWeight = if (isCurrent) FontWeight.Bold else FontWeight.Normal,
-              maxLines = 1,
-              overflow = TextOverflow.Ellipsis,
-            )
+          SectionLabel("Current path")
+          controller.steps.forEachIndexed { i, step ->
+            val isCurrent = i == controller.currentStepIndex
+            Row(
+              modifier =
+                Modifier.fillMaxWidth()
+                  .clip(MaterialTheme.shapes.small)
+                  .background(if (isCurrent) colors.secondaryContainer else Color.Transparent)
+                  .clickable { controller.jumpToStep(i) }
+                  .padding(horizontal = 8.dp, vertical = 6.dp),
+              verticalAlignment = Alignment.CenterVertically,
+            ) {
+              Text(
+                text = if (step is FormWizardStep.SummaryStep) "✓" else "${i + 1}",
+                style = MaterialTheme.typography.labelMedium,
+                fontWeight = FontWeight.Bold,
+                color = if (isCurrent) colors.onSecondaryContainer else colors.primary,
+                modifier = Modifier.width(24.dp),
+              )
+              Text(
+                text = step.title,
+                style = MaterialTheme.typography.bodySmall,
+                color = if (isCurrent) colors.onSecondaryContainer else colors.onSurface,
+                fontWeight = if (isCurrent) FontWeight.Bold else FontWeight.Normal,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+              )
+            }
           }
         }
       }
@@ -2691,7 +2829,7 @@ private fun XFormsXmlOverlay(uiState: FormEditorUiState, actions: FormEditorActi
         e.message ?: e.toString()
       }
     }
-  ModalScrim {
+  ModalScrim(onDismiss = { actions.setXmlViewerOpen(false) }) {
     ElevatedCard(modifier = Modifier.width(820.dp).fillMaxHeight(0.85f)) {
       Column(modifier = Modifier.fillMaxSize().padding(20.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {

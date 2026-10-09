@@ -624,9 +624,7 @@ class SurveyEditorTest {
     assertTrue(
       state.ui.datasets
         .filter { it.linkedFormKey == entry.key }
-        .all {
-          it.geometryKind == GeometryKind.LINE
-        }
+        .all { it.geometryKind == GeometryKind.LINE }
     )
   }
 
@@ -851,5 +849,98 @@ class SurveyEditorTest {
     assertEquals(SharingPolicy.ORGANIZATION, state.ui.sharing.policy)
     assertNotNull(state.ui.details.organizationId)
     assertEquals(0, state.ui.issueCount)
+  }
+
+  // Form import -------------------------------------------------------------------------------
+
+  @Test
+  fun importForm_createMode_createsLinkedMapLayerAndSelectsForm() {
+    val state = surveyEditorViewModel()
+    val initialForms = state.ui.forms.size
+    val initialLayers = state.ui.mapLayers.size
+    val xml =
+      """
+      <?xml version="1.0"?>
+      <h:html xmlns="http://www.w3.org/2002/xforms"
+              xmlns:h="http://www.w3.org/1999/xhtml"
+              xmlns:jr="http://openrosa.org/javarosa">
+        <h:head>
+          <h:title>Water source check</h:title>
+          <model>
+            <instance>
+              <data id="water_source_check">
+                <source_name/>
+                <source_location/>
+                <flow_lpm/>
+              </data>
+            </instance>
+            <bind nodeset="/data/source_name" type="string" required="true()"/>
+            <bind nodeset="/data/source_location" type="geopoint"/>
+            <bind nodeset="/data/flow_lpm" type="decimal"/>
+          </model>
+        </h:head>
+        <h:body>
+          <input ref="/data/source_name"><label>Source name</label></input>
+          <input ref="/data/source_location"><label>Source location</label></input>
+          <input ref="/data/flow_lpm"><label>Flow rate (L/min)</label></input>
+        </h:body>
+      </h:html>
+      """
+        .trimIndent()
+
+    val preview = FormImportPreview.of("water_source_check.xml", xml)
+    val imported = assertNotNull(preview.imported)
+    val formKey = state.importForm(imported)
+
+    assertEquals(initialForms + 1, state.ui.forms.size)
+    assertEquals(initialLayers + 1, state.ui.mapLayers.size)
+    assertEquals(SurveyEditorSection.Form(formKey), state.ui.section)
+    val form = state.formEditor(formKey).ui.form
+    assertEquals("Water source check", form.title)
+    assertEquals("water_source_check", form.formId)
+    assertEquals(3, form.questions.size)
+    val linkedLayer = assertNotNull(state.ui.mapLayers.firstOrNull { it.linkedFormKey == formKey })
+    assertEquals("Water source check", linkedLayer.displayName)
+    assertTrue(linkedLayer.properties.any { it.name == "source_name" })
+    assertTrue(linkedLayer.properties.any { it.name == "flow_lpm" })
+    assertEquals(0, state.ui.issueCount)
+    assertTrue(state.ui.canPublish)
+  }
+
+  @Test
+  fun importForm_updateMode_linksToTargetDatasetAndDeduplicatesTitleAndId() {
+    val state = surveyEditorViewModel()
+    val existingKey = state.ui.forms.first().key
+    state.setFormSaveToMode(existingKey, SaveToMode.UPDATE)
+    val existingUpdateEntry = state.ui.forms.first { it.key == existingKey }
+    val xml = state.ui.draft.publishedFormXml(existingUpdateEntry)
+
+    val preview = FormImportPreview.of("parcel_check.xml", xml)
+    val imported = assertNotNull(preview.imported)
+    val formKey = state.importForm(imported)
+
+    val form = state.formEditor(formKey).ui.form
+    assertNotEquals(existingUpdateEntry.form.title, form.title)
+    assertNotEquals(existingUpdateEntry.form.formId, form.formId)
+    assertEquals(SaveToMode.UPDATE, form.saveTo.mode)
+    assertEquals("coffee_parcels", form.saveTo.targetDatasetId)
+    assertEquals(SurveyEditorSection.Form(formKey), state.ui.section)
+    assertEquals(0, state.ui.issueCount)
+    assertTrue(state.ui.canPublish)
+  }
+
+  @Test
+  fun formImportPreview_rejectsInvalidOrEmptyXml() {
+    assertNull(FormImportPreview.of("bad.xml", "not xml at all").imported)
+    assertNull(FormImportPreview.of("kml.xml", "<kml><Document/></kml>").imported)
+    val emptyXForm =
+      """
+      <h:html xmlns="http://www.w3.org/2002/xforms" xmlns:h="http://www.w3.org/1999/xhtml">
+        <h:head><h:title>Empty</h:title><model><instance><data id="empty"/></model></h:head>
+        <h:body/>
+      </h:html>
+      """
+        .trimIndent()
+    assertNull(FormImportPreview.of("empty.xml", emptyXForm).imported)
   }
 }

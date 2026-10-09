@@ -27,11 +27,18 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -41,6 +48,9 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -55,6 +65,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.vector.PathParser
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -130,8 +144,16 @@ fun MobileFormRunner(
                   ),
                 contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
               ) {
+                if (!controller.isOverviewOpen) {
+                  Icon(
+                    imageVector = Icons.Default.Menu,
+                    contentDescription = null,
+                    modifier = Modifier.size(16.dp),
+                  )
+                  Spacer(modifier = Modifier.width(6.dp))
+                }
                 Text(
-                  text = if (controller.isOverviewOpen) "Close List" else "☰ Steps ($totalSteps)",
+                  text = if (controller.isOverviewOpen) "Close List" else "Steps ($totalSteps)",
                   style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
                   maxLines = 1,
                   overflow = TextOverflow.Ellipsis,
@@ -139,14 +161,14 @@ fun MobileFormRunner(
                 )
               }
               if (onClose != null) {
-                Spacer(modifier = Modifier.width(6.dp))
-                TextButton(
+                Spacer(modifier = Modifier.width(4.dp))
+                IconButton(
                   onClick = onClose,
-                  colors = ButtonDefaults.textButtonColors(contentColor = onAppBar),
+                  colors = IconButtonDefaults.iconButtonColors(contentColor = onAppBar),
                 ) {
-                  Text(
-                    text = "✕",
-                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                  Icon(
+                    imageVector = Icons.Default.Close,
+                    contentDescription = "Close form",
                   )
                 }
               }
@@ -169,10 +191,11 @@ fun MobileFormRunner(
               horizontalArrangement = Arrangement.spacedBy(8.dp),
               verticalAlignment = Alignment.CenterVertically,
             ) {
-              Text(
-                text = "🌐",
-                style = MaterialTheme.typography.labelMedium,
-                color = onAppBarSecondary,
+              Icon(
+                imageVector = LanguageIcon,
+                contentDescription = "Language",
+                tint = onAppBarSecondary,
+                modifier = Modifier.size(18.dp),
               )
               state.availableLanguages.forEach { lang ->
                 val isActive = lang == state.activeLanguage
@@ -227,7 +250,13 @@ fun MobileFormRunner(
             onClick = { controller.previousStep() },
             enabled = controller.canGoBack,
           ) {
-            Text("← Back", maxLines = 1, overflow = TextOverflow.Ellipsis, softWrap = false)
+            Icon(
+              imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+              contentDescription = null,
+              modifier = Modifier.size(16.dp),
+            )
+            Spacer(modifier = Modifier.width(6.dp))
+            Text("Back", maxLines = 1, overflow = TextOverflow.Ellipsis, softWrap = false)
           }
 
           Text(
@@ -267,10 +296,16 @@ fun MobileFormRunner(
                 enabled = !controller.isCurrentStepWaitingForLocationCapture,
               ) {
                 Text(
-                  if (isLastQuestionBeforeSummary) "Review →" else "Next →",
+                  if (isLastQuestionBeforeSummary) "Review" else "Next",
                   maxLines = 1,
                   overflow = TextOverflow.Ellipsis,
                   softWrap = false,
+                )
+                Spacer(modifier = Modifier.width(6.dp))
+                Icon(
+                  imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                  contentDescription = null,
+                  modifier = Modifier.size(16.dp),
                 )
               }
             }
@@ -379,11 +414,17 @@ fun MobileFormRunner(
                   border = BorderStroke(1.dp, colors.onErrorContainer.copy(alpha = 0.5f)),
                 ) {
                   Text(
-                    "Skip →",
+                    "Skip",
                     style = MaterialTheme.typography.labelSmall,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     softWrap = false,
+                  )
+                  Spacer(modifier = Modifier.width(4.dp))
+                  Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                    contentDescription = null,
+                    modifier = Modifier.size(14.dp),
                   )
                 }
               }
@@ -439,8 +480,14 @@ private fun BreadcrumbBar(
                 onClick = { controller.addRepeatInstanceAndOpen(repeatContext.repeatGroupPath) },
                 contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
               ) {
+                Icon(
+                  imageVector = Icons.Default.Add,
+                  contentDescription = null,
+                  modifier = Modifier.size(14.dp),
+                )
+                Spacer(modifier = Modifier.width(4.dp))
                 Text(
-                  text = "+ Add ${repeatContext.repeatGroupLabel}",
+                  text = "Add ${repeatContext.repeatGroupLabel}",
                   style = MaterialTheme.typography.labelSmall,
                   maxLines = 1,
                   overflow = TextOverflow.Ellipsis,
@@ -594,8 +641,14 @@ private fun RepeatHubScreenContent(
           onClick = { controller.addRepeatInstanceAndOpen(repeatGroup.canonicalPath) },
           modifier = Modifier.fillMaxWidth(),
         ) {
+          Icon(
+            imageVector = Icons.Default.Add,
+            contentDescription = null,
+            modifier = Modifier.size(18.dp),
+          )
+          Spacer(modifier = Modifier.width(6.dp))
           Text(
-            "+ Add Another $groupLabel",
+            "Add Another $groupLabel",
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             softWrap = false,
@@ -1007,4 +1060,35 @@ fun MobilePhoneFrame(
       }
     }
   }
+}
+
+private val LanguageIcon: ImageVector by lazy {
+  ImageVector.Builder(
+      name = "Ground.Language",
+      defaultWidth = 24.dp,
+      defaultHeight = 24.dp,
+      viewportWidth = 24f,
+      viewportHeight = 24f,
+    )
+    .addPath(
+      pathData =
+        PathParser()
+          .parsePathString(
+            "M11.99,2C6.47,2 2,6.48 2,12s4.47,10 9.99,10C17.52,22 22,17.52 22,12S17.52,2 11.99,2z" +
+              "M18.92,8h-2.95c-0.32,-1.25 -0.78,-2.45 -1.38,-3.56 1.84,0.63 3.37,1.91 4.33,3.56z" +
+              "M12,4.04c0.83,1.2 1.48,2.53 1.91,3.96h-3.82c0.43,-1.43 1.08,-2.76 1.91,-3.96z" +
+              "M4.26,14C4.1,13.36 4,12.69 4,12s0.1,-1.36 0.26,-2h3.38c-0.08,0.66 -0.14,1.32 -0.14,2" +
+              " 0,0.68 0.06,1.34 0.14,2H4.26zM5.08,16h2.95c0.32,1.25 0.78,2.45 1.38,3.56" +
+              " -1.84,-0.63 -3.37,-1.9 -4.33,-3.56zM8.03,8H5.08c0.96,-1.66 2.49,-2.93 4.33,-3.56" +
+              "C8.81,5.55 8.35,6.75 8.03,8zM12,19.96c-0.83,-1.2 -1.48,-2.53 -1.91,-3.96h3.82" +
+              "c-0.43,1.43 -1.08,2.76 -1.91,3.96zM14.34,14H9.66c-0.09,-0.66 -0.16,-1.32 -0.16,-2" +
+              " 0,-0.68 0.07,-1.35 0.16,-2h4.68c0.09,0.65 0.16,1.32 0.16,2 0,0.68 -0.07,1.34 -0.16,2z" +
+              "M14.59,19.56c0.6,-1.11 1.06,-2.31 1.38,-3.56h2.95c-0.96,1.65 -2.49,2.93 -4.33,3.56z" +
+              "M16.36,14c0.08,-0.66 0.14,-1.32 0.14,-2 0,-0.68 -0.06,-1.34 -0.14,-2h3.38" +
+              "c0.16,0.64 0.26,1.31 0.26,2s-0.1,1.36 -0.26,2h-3.38z"
+          )
+          .toNodes(),
+      fill = SolidColor(Color.Black),
+    )
+    .build()
 }

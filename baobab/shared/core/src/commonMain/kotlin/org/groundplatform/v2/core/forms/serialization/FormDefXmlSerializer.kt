@@ -350,7 +350,11 @@ internal object FormDefXmlSerializer {
       val typeStr = mapDataTypeToXFormsType(binding.type)
       if (typeStr.isNotEmpty()) put("type", typeStr)
 
-      if (binding.read_only) put("readonly", "true()")
+      if (binding.read_only_expression.isNotEmpty()) {
+        put("readonly", binding.read_only_expression)
+      } else if (binding.read_only) {
+        put("readonly", "true()")
+      }
       if (binding.required_expression.isNotEmpty()) put("required", binding.required_expression)
       if (binding.relevant_expression.isNotEmpty()) put("relevant", binding.relevant_expression)
       if (binding.constraint_expression.isNotEmpty()) {
@@ -460,6 +464,9 @@ internal object FormDefXmlSerializer {
 
     val nextEnclosing = if (fullPath.isNotEmpty()) fullPath else enclosingPath
     val repeatChildren = buildList {
+      for (action in repeat.actions) {
+        add(buildActionElement(action, rootName))
+      }
       for (childComp in repeat.components) {
         buildComponentElement(childComp, rootName, nextEnclosing)?.let { add(it) }
       }
@@ -586,8 +593,9 @@ internal object FormDefXmlSerializer {
   }
 
   private fun buildItemsetElement(itemset: ItemsetDef): XmlElement {
+    val itemPath = itemset.nodeset_path.ifEmpty { "root/item" }.removePrefix("/")
     val base = buildString {
-      append("instance('").append(itemset.instance_id).append("')/root/item")
+      append("instance('").append(itemset.instance_id).append("')/").append(itemPath)
       if (itemset.nodeset_filter.isNotEmpty()) {
         append('[').append(itemset.nodeset_filter).append(']')
       }

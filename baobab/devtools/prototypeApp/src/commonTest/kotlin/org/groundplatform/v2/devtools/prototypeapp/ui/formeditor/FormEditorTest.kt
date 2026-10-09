@@ -974,9 +974,7 @@ class FormEditorTest {
     assertEquals(false, state.ui.form.find("q3")?.allowAddEntity)
     state.setAllowAddEntity("q3", true)
     assertTrue(
-      state.ui.issues.any {
-        it.questionKey == "q3" && "generated and can't be added" in it.message
-      }
+      state.ui.issues.any { it.questionKey == "q3" && "generated and can't be added" in it.message }
     )
 
     // If the dataset has no creation form, validator reports an issue.

@@ -24,6 +24,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -33,6 +34,7 @@ import androidx.compose.foundation.relocation.BringIntoViewRequester
 import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material.icons.outlined.KeyboardArrowDown
@@ -848,7 +850,13 @@ private fun CompactRepeatHub(
           enabled = !readOnly,
           contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
         ) {
-          Text("+ Add", style = MaterialTheme.typography.labelSmall, softWrap = false)
+          Icon(
+            imageVector = Icons.Default.Add,
+            contentDescription = null,
+            modifier = Modifier.size(14.dp),
+          )
+          Spacer(modifier = Modifier.width(4.dp))
+          Text("Add", style = MaterialTheme.typography.labelSmall, softWrap = false)
         }
       }
     }

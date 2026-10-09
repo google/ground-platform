@@ -697,9 +697,7 @@ object SaveToValidator {
                   "Choose a ${target?.featureNoun ?: "feature"} property for the status rule.",
                 )
             form.saveTo.mode == SaveToMode.CREATE &&
-              form.questions.none {
-                it.name == prop.name && it.type != EditorQuestionType.NOTE
-              } ->
+              form.questions.none { it.name == prop.name && it.type != EditorQuestionType.NOTE } ->
               issues +=
                 EditorIssue(
                   null,

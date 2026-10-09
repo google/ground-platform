@@ -26,7 +26,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Check
+import androidx.compose.material.icons.outlined.PlayArrow
 import androidx.compose.material.icons.outlined.Refresh
+import androidx.compose.material.icons.outlined.Stop
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CardDefaults
@@ -248,8 +251,9 @@ fun PrototypeXFormsWorkbenchPanel(
                 Spacer(modifier = Modifier.width(8.dp))
 
                 GroundTonalBadge(
-                  text = if (isSelected) "✓ Active Survey" else "Open Survey",
+                  text = if (isSelected) "Active Survey" else "Open Survey",
                   tone = if (isSelected) GroundBadgeTone.PRIMARY else GroundBadgeTone.SECONDARY,
+                  icon = if (isSelected) Icons.Outlined.Check else null,
                 )
               }
 
@@ -310,12 +314,18 @@ fun PrototypeXFormsWorkbenchPanel(
                 },
             ),
         ) {
+          Icon(
+            imageVector = if (isFormOpen) Icons.Outlined.Stop else Icons.Outlined.PlayArrow,
+            contentDescription = null,
+            modifier = Modifier.size(16.dp),
+          )
+          Spacer(modifier = Modifier.width(6.dp))
           Text(
             text =
               if (isFormOpen) {
-                "■ Close Active Form Runner"
+                "Close Active Form Runner"
               } else {
-                "▶ Test / Launch Form Now"
+                "Test / Launch Form Now"
               },
             style = MaterialTheme.typography.labelMedium,
             fontWeight = FontWeight.Bold,

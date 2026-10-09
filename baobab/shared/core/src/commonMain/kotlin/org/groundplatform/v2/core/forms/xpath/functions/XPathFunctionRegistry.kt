@@ -658,18 +658,26 @@ internal object XPathFunctionRegistry {
         XPathValue.Number(GeoUtils.calculateAreaSquareMeters(points))
       }
       "distance" -> {
-        checkEagerArgCount(name, args, 1..2)
-        if (args.size == 2) {
-          val p1 = GeoUtils.extractPoints(args[0]).firstOrNull()
-          val p2 = GeoUtils.extractPoints(args[1]).firstOrNull()
-          if (p1 != null && p2 != null) {
-            XPathValue.Number(GeoUtils.haversineDistanceMeters(p1, p2))
-          } else {
-            XPathValue.Number(0.0)
-          }
-        } else {
+        checkEagerArgCount(name, args, 1..Int.MAX_VALUE)
+        if (args.size == 1) {
           val points = GeoUtils.extractPoints(args[0])
           XPathValue.Number(GeoUtils.totalDistanceMeters(points))
+        } else {
+          val points = mutableListOf<groundplatform.v2.forms.GeoPoint>()
+          var missingArg = false
+          for (arg in args) {
+            val extracted = GeoUtils.extractPoints(arg)
+            if (extracted.isEmpty()) {
+              missingArg = true
+              break
+            }
+            points.addAll(extracted)
+          }
+          if (missingArg || points.size < 2) {
+            XPathValue.Number(0.0)
+          } else {
+            XPathValue.Number(GeoUtils.totalDistanceMeters(points))
+          }
         }
       }
       "geofence" -> {
@@ -798,23 +806,6 @@ internal object XPathFunctionRegistry {
   ): XPathValue {
     // Supports both JavaRosa/XForms signature: jr:choice-name(choice_val, 'field_path')
     // and ProtoForms doc signature: jr:choice-name(node_target, choice_val)
-    val choiceVal: String
-    val fieldPath: String
-    if (arg0 is XPathValue.NodeSet && arg0.nodes.isNotEmpty()) {
-      fieldPath = arg0.nodes.first().name
-      choiceVal = arg1.toXPathString()
-    } else {
-      val s0 = arg0.toXPathString()
-      val s1 = arg1.toXPathString()
-      if (s1.startsWith("/") || s1.contains("/")) {
-        choiceVal = s0
-        fieldPath = s1
-      } else {
-        fieldPath = s0
-        choiceVal = s1
-      }
-    }
-
     val controls = mutableListOf<ControlDef>()
     fun collectControls(components: List<ViewComponent>) {
       for (comp in components) {
@@ -824,6 +815,38 @@ internal object XPathFunctionRegistry {
       }
     }
     context.formDef?.view?.components?.let { collectControls(it) }
+
+    val choiceVal: String
+    val fieldPath: String
+    if (arg0 is XPathValue.NodeSet && arg0.nodes.isNotEmpty()) {
+      val s1 = arg1.toXPathString().trim()
+      if (s1.startsWith("/") || s1.startsWith(".") || s1.contains("/")) {
+        choiceVal = arg0.toXPathString().trim()
+        fieldPath = s1
+      } else {
+        fieldPath = arg0.nodes.first().name
+        choiceVal = s1
+      }
+    } else {
+      val s0 = arg0.toXPathString().trim()
+      val s1 = arg1.toXPathString().trim()
+      if (s1.startsWith("/") || s1.startsWith(".") || s1.contains("/")) {
+        choiceVal = s0
+        fieldPath = s1
+      } else if (s0.startsWith("/") || s0.startsWith(".") || s0.contains("/")) {
+        fieldPath = s0
+        choiceVal = s1
+      } else if (
+        controls.any { it.field_ref == s1 || it.field_ref.substringAfterLast('/') == s1 } &&
+          controls.none { it.field_ref == s0 || it.field_ref.substringAfterLast('/') == s0 }
+      ) {
+        choiceVal = s0
+        fieldPath = s1
+      } else {
+        fieldPath = s0
+        choiceVal = s1
+      }
+    }
 
     val targetFieldName = fieldPath.substringAfterLast('/')
     val matchingControl = controls.find {
@@ -840,6 +863,58 @@ internal object XPathFunctionRegistry {
         if (label.text.isNotEmpty()) return XPathValue.Str(label.text)
       }
     }
+
+    // Fallback to dynamic <itemset> lookup on secondary instance
+    val itemset = matchingControl?.itemset
+    if (itemset != null && itemset.instance_id.isNotEmpty() && choiceVal.isNotEmpty()) {
+      val valCol = itemset.value_ref.ifEmpty { "name" }
+      val rawLabelRef = itemset.label_ref.ifEmpty { "label" }
+      val isItextCall = rawLabelRef.startsWith("jr:itext(") && rawLabelRef.endsWith(")")
+      val labelCol =
+        if (isItextCall) {
+          rawLabelRef.removePrefix("jr:itext(").removeSuffix(")").trim()
+        } else {
+          rawLabelRef
+        }
+
+      val pushdownRows =
+        context.secondaryInstanceProvider.lookupByEquality(itemset.instance_id, valCol, choiceVal)
+      val rawLabelVal: String? =
+        if (pushdownRows != null) {
+          pushdownRows.firstOrNull()?.get(labelCol)?.let {
+            XPathValue.fromTypedValue(it).toXPathString()
+          }
+        } else {
+          val root = context.secondaryInstanceProvider.resolveRoot(itemset.instance_id)
+          val allItems =
+            if (root == null) {
+              emptyList()
+            } else if (itemset.nodeset_path.isNotEmpty()) {
+              var curr = listOf(root)
+              for (seg in itemset.nodeset_path.split('/').filter { it.isNotEmpty() }) {
+                curr = curr.flatMap { it.children(seg) }
+              }
+              curr
+            } else {
+              root
+                .children("root")
+                .flatMap { it.children("item") }
+                .ifEmpty {
+                  root.children("item")
+                }
+            }
+          val matchNode = allItems.find { node ->
+            node.children(valCol).firstOrNull()?.extractValue()?.toXPathString() == choiceVal
+          }
+          matchNode?.children(labelCol)?.firstOrNull()?.extractValue()?.toXPathString()
+        }
+
+      if (!rawLabelVal.isNullOrEmpty()) {
+        val itextResolved = resolveItext(rawLabelVal, context)
+        return XPathValue.Str(itextResolved.ifEmpty { rawLabelVal })
+      }
+    }
+
     return XPathValue.Str(choiceVal)
   }
 

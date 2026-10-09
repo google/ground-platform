@@ -355,12 +355,22 @@ internal fun WebPreviewBrowserFrame(
 ) {
   val colors = MaterialTheme.colorScheme
   Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
-    Text(
-      text = "Preview • ${uiState.form.title} • Web",
-      style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
-      color = colors.onSurfaceVariant,
-      modifier = Modifier.padding(bottom = 8.dp),
-    )
+    ElevatedCard(
+      modifier = Modifier.width(1040.dp).padding(bottom = 12.dp),
+      shape = MaterialTheme.shapes.large,
+      colors = CardDefaults.elevatedCardColors(containerColor = colors.surface),
+    ) {
+      Row(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp),
+        verticalAlignment = Alignment.CenterVertically,
+      ) {
+        Text(
+          text = "Preview • ${uiState.form.title} • Web",
+          style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
+          color = colors.onSurface,
+        )
+      }
+    }
     Surface(
       modifier = Modifier.width(1040.dp).height(720.dp),
       shape = MaterialTheme.shapes.extraLarge,

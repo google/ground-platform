@@ -171,6 +171,7 @@ object TextProtoSerializer {
       addEnum("preload", msg.preload.name)
     }
     addString("preload_param", msg.preload_param)
+    addString("read_only_expression", msg.read_only_expression)
   }
 
   private fun encodeTranslationCatalog(msg: TranslationCatalog): TextProtoMessage = buildMessage {
@@ -311,6 +312,7 @@ object TextProtoSerializer {
     addString("label_ref", msg.label_ref)
     addBoolean("randomize", msg.randomize)
     addString("random_seed_expression", msg.random_seed_expression)
+    addString("nodeset_path", msg.nodeset_path)
   }
 
   private fun encodeRangeConfig(msg: RangeConfig): TextProtoMessage = buildMessage {
@@ -363,6 +365,7 @@ object TextProtoSerializer {
     addString("count_expression", msg.count_expression)
     addBoolean("no_add_remove", msg.no_add_remove)
     msg.components.forEach { addMessage("components", encodeViewComponent(it)) }
+    msg.actions.forEach { addMessage("actions", encodeActionDef(it)) }
   }
 
   // ===========================================================================
@@ -584,6 +587,7 @@ object TextProtoSerializer {
       max_pixels = node.getInt("max_pixels"),
       preload = parseEnum(node.getIdentifierOrNull("preload"), PreloadType.PRELOAD_UNSPECIFIED),
       preload_param = node.getString("preload_param"),
+      read_only_expression = node.getString("read_only_expression"),
     )
 
   private fun decodeTranslationCatalog(node: TextProtoMessage): TranslationCatalog =
@@ -727,6 +731,7 @@ object TextProtoSerializer {
       label_ref = node.getString("label_ref"),
       randomize = node.getBoolean("randomize"),
       random_seed_expression = node.getString("random_seed_expression"),
+      nodeset_path = node.getString("nodeset_path"),
     )
 
   private fun decodeRangeConfig(node: TextProtoMessage): RangeConfig =
@@ -777,6 +782,7 @@ object TextProtoSerializer {
       count_expression = node.getString("count_expression"),
       no_add_remove = node.getBoolean("no_add_remove"),
       components = node.getMessages("components").map { decodeViewComponent(it) },
+      actions = node.getMessages("actions").map { decodeActionDef(it) },
     )
 
   // ===========================================================================

@@ -260,9 +260,7 @@ internal fun OrganizationPage(
                 },
             ) {
               NoticeSlot(uiState, actions)
-              SurveysPane(uiState, organization, isMember, onOpenSurvey) {
-                isCreatingSurvey = true
-              }
+              SurveysPane(uiState, organization, isMember, onOpenSurvey) { isCreatingSurvey = true }
             }
           OrganizationTab.MEMBERS ->
             PaneScaffold(
@@ -624,9 +622,7 @@ private fun MembersPane(
                   {
                     PendingInviteLinkRow(
                       token = token,
-                      onResetLink = {
-                        actions.resetInviteLink(organization.id, person.email)
-                      },
+                      onResetLink = { actions.resetInviteLink(organization.id, person.email) },
                       onOpenAsInvitee = { acceptingEmail = person.email },
                     )
                   }
@@ -806,9 +802,7 @@ private fun ImagerySourceRow(
   var editName by remember(source.id, source.name) { mutableStateOf(source.name) }
   var editUrl by remember(source.id, source.urlTemplate) { mutableStateOf(source.urlTemplate) }
   var editOffline by
-    remember(source.id, source.allowOfflineDownload) {
-      mutableStateOf(source.allowOfflineDownload)
-    }
+    remember(source.id, source.allowOfflineDownload) { mutableStateOf(source.allowOfflineDownload) }
   var editError by remember(source.id) { mutableStateOf<String?>(null) }
 
   OutlinedCard(
@@ -944,11 +938,7 @@ private fun ImagerySourceRow(
               IconButton(onClick = onStartEdit) {
                 Icon(Icons.Outlined.Edit, contentDescription = "Edit ${source.name}")
               }
-              IconButton(
-                onClick = {
-                  actions.removeImagerySource(organization.id, source.id)
-                }
-              ) {
+              IconButton(onClick = { actions.removeImagerySource(organization.id, source.id) }) {
                 Icon(Icons.Outlined.Close, contentDescription = "Remove ${source.name}")
               }
             }

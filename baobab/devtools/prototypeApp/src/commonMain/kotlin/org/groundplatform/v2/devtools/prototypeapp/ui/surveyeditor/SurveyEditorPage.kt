@@ -354,6 +354,8 @@ internal fun SurveyNavigation(
   actions: SurveyEditorActions,
   modifier: Modifier = Modifier,
 ) {
+  var showAddForm by remember { mutableStateOf(false) }
+  if (showAddForm) AddFormDialog(actions, onDismiss = { showAddForm = false })
   Surface(modifier = modifier, color = MaterialTheme.colorScheme.surfaceContainerLow) {
     Column(
       modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(12.dp),
@@ -374,7 +376,7 @@ internal fun SurveyNavigation(
         hasIssues = uiState.sharingIssues.isNotEmpty(),
       )
 
-      NavHeading("Forms", addDescription = "Add form", onAdd = actions::addForm)
+      NavHeading("Forms", addDescription = "Add form", onAdd = { showAddForm = true })
       if (uiState.forms.isEmpty()) NavEmpty("No forms yet")
       ReorderableNavList(items = uiState.forms, keyOf = { it.key }, onMove = actions::moveForm) {
         entry,
@@ -1085,14 +1087,10 @@ internal fun surveyAreaThumbnailContent(area: SurveyArea, boundaryColor: Color):
   val parts =
     SurveyAreaGeometry.displayParts(area.parts)
       .filter { it.size >= 3 }
-      .map { part ->
-        part.map { it.toMapLatLng() }
-      }
+      .map { part -> part.map { it.toMapLatLng() } }
   val showVertices = parts.sumOf { it.size } <= THUMBNAIL_MAX_VERTEX_DOTS
   val features = buildList {
-    parts.forEachIndexed { i, part ->
-      add(MapFeature("part-$i", Geometry.Polygon(listOf(part))))
-    }
+    parts.forEachIndexed { i, part -> add(MapFeature("part-$i", Geometry.Polygon(listOf(part)))) }
     if (showVertices) {
       var v = 0
       parts.forEach { part ->

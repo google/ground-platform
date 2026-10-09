@@ -28,6 +28,10 @@ dependencyResolutionManagement {
   repositories {
     google()
     mavenCentral()
+    // Mapbox Maps SDK for Android (androidMain). Public; no credentials needed.
+    maven("https://api.mapbox.com/downloads/v2/releases/maven") {
+      content { includeGroupByRegex("com\\.mapbox\\..*") }
+    }
   }
 }
 
@@ -37,4 +41,8 @@ includeBuild("../shared/core")
 
 includeBuild("../shared/ui")
 
+includeBuild("../shared/map")
+
 includeBuild("../shared/mobile")
+
+includeBuild("../devtools/prototypeApp")

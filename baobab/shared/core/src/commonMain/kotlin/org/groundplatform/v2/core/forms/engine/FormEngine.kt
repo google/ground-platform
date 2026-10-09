@@ -144,9 +144,7 @@ object FormEngine {
       add(EventType.EVENT_INSTANCE_LOAD)
     }
     val modelActions =
-      (formDef.model?.actions ?: emptyList()).filter { action ->
-        action.events.any { it in startupEvents }
-      }
+      compiled.startupActions.filter { action -> action.events.any { it in startupEvents } }
     if (modelActions.isNotEmpty()) {
       val afterActions =
         executeActions(
@@ -500,8 +498,7 @@ object FormEngine {
     var workingRawNode = rawRecordNode
     var workingMetadata = baseRecord.metadata ?: RecordMetadata()
     val allPendingRequests = pendingRequests.toMutableList()
-    val secondaryProvider =
-      environment.secondaryInstanceProvider ?: compiled.inlineSecondaryInstanceProvider
+    val secondaryProvider = resolveSecondaryProvider(compiled, environment)
 
     var relevancyMap = linkedMapOf<String, Boolean>()
     var prunedNode = workingRawNode
@@ -792,8 +789,7 @@ object FormEngine {
   ): Pair<RecordNode, RecordMetadata?> {
     var currentRaw = rawNode
     var currentMeta = metadata
-    val secondaryProvider =
-      environment.secondaryInstanceProvider ?: compiled.inlineSecondaryInstanceProvider
+    val secondaryProvider = resolveSecondaryProvider(compiled, environment)
 
     for (action in actions) {
       val targetCanonical =
@@ -809,6 +805,19 @@ object FormEngine {
       when {
         action.type == ActionType.ACTION_SET_GEOPOINT -> {
           pendingRequests.add(PlatformEffectRequest.SetGeopointRequest(targetCanonical))
+          val location = environment.locationProvider?.invoke()
+          if (location != null) {
+            val (nextRaw, nextMeta) =
+              RecordMutator.setFieldValue(
+                rootNode = currentRaw,
+                metadata = currentMeta,
+                rootAliases = compiled.rootAliases,
+                canonicalPath = targetCanonical,
+                newValue = FieldValue(scalar_value = TypedValue(geopoint_value = location)),
+              )
+            currentRaw = nextRaw
+            currentMeta = nextMeta
+          }
         }
         action.type == ActionType.ACTION_SET_VALUE ||
           action.value_expression.isNotEmpty() ||
@@ -896,7 +905,7 @@ object FormEngine {
       for (parentCanonical in parentCanonicalPaths) {
         val repeatCanonicalPath = "$parentCanonical/$repeatName"
         val tempRecord = baseRecord.copy(metadata = currentMeta, data_ = prunedNode)
-        val evalCtx =
+        val parentCtx =
           createEvaluationContext(
             compiled = compiled,
             recordInstance = tempRecord,
@@ -904,6 +913,20 @@ object FormEngine {
             secondaryProvider = secondaryProvider,
             environment = environment,
             contextCanonicalPath = parentCanonical,
+          )
+        val parentNode = parentCtx.contextNode
+        val repeatContextNode =
+          XPathNode.SecondaryInstanceNode(
+            name = repeatName,
+            parent = parentNode,
+            childrenProvider = { _, nameFilter ->
+              if (nameFilter == null) parentNode.children() else parentNode.children(nameFilter)
+            },
+          )
+        val evalCtx =
+          parentCtx.copy(
+            contextNode = repeatContextNode,
+            currentQuestionNode = repeatContextNode,
           )
         val countDouble = countExpr.evaluateNumber(evalCtx)
         val targetCount = if (countDouble.isNaN()) 0 else max(0, countDouble.roundToInt())
@@ -1119,11 +1142,15 @@ object FormEngine {
 
     // Index any RangeConfig from ViewDef controls by relative path
     val rangeConfigsByRelPath = collectRangeConfigs(compiled)
+    val rootCanonical = "/${compiled.rootName}"
+    val readOnlyMap = linkedMapOf<String, Boolean>()
+    readOnlyMap[rootCanonical] = false
 
     val allRelativePaths =
       (compiled.schemaByRelativePath.keys + compiled.bindingsByRelativePath.keys)
         .filter { it.isNotEmpty() }
         .distinct()
+        .sortedBy { it.count { ch -> ch == '/' } }
 
     for (relPath in allRelativePaths) {
       val compiledBinding = compiled.bindingsByRelativePath[relPath]
@@ -1166,7 +1193,23 @@ object FormEngine {
           } else {
             false
           }
-        val isReadOnly = binding?.read_only == true
+        val parentCanonical = canonicalPath.substringBeforeLast('/', rootCanonical)
+        val parentReadOnly = readOnlyMap[parentCanonical] ?: false
+        val ownReadOnly =
+          when {
+            binding?.read_only == true -> true
+            isRelevant && compiledBinding?.readOnlyExpr != null ->
+              compiledBinding.readOnlyExpr.evaluateBoolean(nodeCtx)
+            else -> false
+          }
+        val isReadOnly = parentReadOnly || ownReadOnly
+        readOnlyMap[canonicalPath] = isReadOnly
+        if (canonicalPath.endsWith("[1]")) {
+          val unindexed = canonicalPath.removeSuffix("[1]")
+          if (!readOnlyMap.containsKey(unindexed)) {
+            readOnlyMap[unindexed] = isReadOnly
+          }
+        }
         val isCalculated = compiledBinding?.calculateExpr != null
 
         val fieldErrors = mutableListOf<ValidationError>()
@@ -1177,6 +1220,8 @@ object FormEngine {
               resolveBindingMessage(
                 rawMessage = binding?.required_message ?: "",
                 defaultMessage = "This field is required.",
+                relPath = relPath,
+                messageTypeSuffix = "requiredMsg",
                 compiled = compiled,
                 evalContext = nodeCtx,
                 activeLanguage = activeLanguage,
@@ -1198,6 +1243,8 @@ object FormEngine {
                 resolveBindingMessage(
                   rawMessage = binding?.constraint_message ?: "",
                   defaultMessage = "Value violates constraint: ${binding?.constraint_expression}",
+                  relPath = relPath,
+                  messageTypeSuffix = "constraintMsg",
                   compiled = compiled,
                   evalContext = nodeCtx,
                   activeLanguage = activeLanguage,
@@ -1272,6 +1319,7 @@ object FormEngine {
     parentCanonicalPath: String,
     parentRelativePath: String,
     parentRelevant: Boolean,
+    parentReadOnly: Boolean = false,
     fieldStates: Map<String, FieldState>,
     relevancyMap: Map<String, Boolean>,
     dynamicRepeatCounts: Map<String, Int>,
@@ -1299,7 +1347,7 @@ object FormEngine {
               "$parentCanonicalPath/_control_$idx"
             }
 
-          val fieldState =
+          val baseFieldState =
             fieldStates[canonicalPath]
               ?: FieldState(
                 canonicalPath = canonicalPath,
@@ -1311,10 +1359,16 @@ object FormEngine {
                 isEmpty = true,
                 isRelevant = parentRelevant && (relevancyMap[canonicalPath] ?: true),
                 isRequired = false,
-                isReadOnly = control.type == ControlType.CONTROL_TRIGGER,
+                isReadOnly = parentReadOnly || control.type == ControlType.CONTROL_TRIGGER,
                 isCalculated = false,
                 validationStatus = ValidationStatus.Valid,
               )
+          val fieldState =
+            if (parentReadOnly && !baseFieldState.isReadOnly) {
+              baseFieldState.copy(isReadOnly = true)
+            } else {
+              baseFieldState
+            }
 
           val isRelevant = parentRelevant && fieldState.isRelevant
           val nodeCtx = positionContextAtPath(rootEvalContext, canonicalPath)
@@ -1366,6 +1420,10 @@ object FormEngine {
           val groupOwnRelevant =
             if (group.field_ref.isNotEmpty()) (relevancyMap[canonicalPath] ?: true) else true
           val isRelevant = parentRelevant && groupOwnRelevant
+          val groupOwnReadOnly =
+            if (group.field_ref.isNotEmpty()) (fieldStates[canonicalPath]?.isReadOnly ?: false)
+            else false
+          val isGroupReadOnly = parentReadOnly || groupOwnReadOnly
           val nodeCtx = positionContextAtPath(rootEvalContext, canonicalPath)
           val resolvedLabel = resolveLabel(group.label, compiled, nodeCtx, activeLanguage)
           val resolvedIntent = group.intent?.let { resolveIntentConfig(it, compiled, nodeCtx) }
@@ -1376,6 +1434,7 @@ object FormEngine {
               parentCanonicalPath = canonicalPath,
               parentRelativePath = relPath,
               parentRelevant = isRelevant,
+              parentReadOnly = isGroupReadOnly,
               fieldStates = fieldStates,
               relevancyMap = relevancyMap,
               dynamicRepeatCounts = dynamicRepeatCounts,
@@ -1409,6 +1468,8 @@ object FormEngine {
             )
           val repeatOwnRelevant = relevancyMap[canonicalPath] ?: true
           val isRelevant = parentRelevant && repeatOwnRelevant
+          val repeatOwnReadOnly = fieldStates[canonicalPath]?.isReadOnly ?: false
+          val isRepeatReadOnly = parentReadOnly || repeatOwnReadOnly
           val nodeCtx = positionContextAtPath(rootEvalContext, canonicalPath)
           val resolvedLabel = resolveLabel(repeat.label, compiled, nodeCtx, activeLanguage)
 
@@ -1428,6 +1489,8 @@ object FormEngine {
             val idx1 = idx + 1
             val instancePath = "$canonicalPath[$idx1]"
             val instanceRelevant = isRelevant && (relevancyMap[instancePath] ?: true)
+            val instanceReadOnly =
+              isRepeatReadOnly || (fieldStates[instancePath]?.isReadOnly ?: false)
             val instanceCtx =
               positionContextAtPath(
                 baseContext = rootEvalContext,
@@ -1443,6 +1506,7 @@ object FormEngine {
                 parentCanonicalPath = instancePath,
                 parentRelativePath = relPath,
                 parentRelevant = instanceRelevant,
+                parentReadOnly = instanceReadOnly,
                 fieldStates = fieldStates,
                 relevancyMap = relevancyMap,
                 dynamicRepeatCounts = dynamicRepeatCounts,
@@ -1518,10 +1582,24 @@ object FormEngine {
       controlContext.secondaryInstanceProvider.resolveRoot(itemset.instance_id)
         ?: return emptyList()
     val allItems =
-      instanceRoot
-        .children("root")
-        .flatMap { it.children("item") }
-        .ifEmpty { instanceRoot.children("item") }
+      if (itemset.nodeset_path.isNotEmpty()) {
+        val segments = itemset.nodeset_path.split('/').filter { it.isNotEmpty() }
+        var currentNodes = listOf(instanceRoot)
+        for (seg in segments) {
+          currentNodes = currentNodes.flatMap { it.children(seg) }
+        }
+        currentNodes.ifEmpty {
+          instanceRoot
+            .children("root")
+            .flatMap { it.children("item") }
+            .ifEmpty { instanceRoot.children("item") }
+        }
+      } else {
+        instanceRoot
+          .children("root")
+          .flatMap { it.children("item") }
+          .ifEmpty { instanceRoot.children("item") }
+      }
 
     val filterExpr = compiled.compileExpression(itemset.nodeset_filter)
     val filteredItems =
@@ -1564,13 +1642,8 @@ object FormEngine {
             val itemCtx = controlContext.withContextNode(itemNode)
             argExpr?.evaluateString(itemCtx)?.takeIf { it.isNotEmpty() } ?: valStr
           } else {
-            val cellStr =
-              itemNode.children(itemset.label_ref).firstOrNull()?.extractValue()?.toXPathString()
-                ?: valStr
-            // Check if cellStr is a translation text_id key in TranslationCatalog
-            lookupLocalizedString(compiled.formDef.model?.translations, activeLanguage, cellStr)
-              ?.value_
-              ?.takeIf { it.isNotEmpty() } ?: cellStr
+            itemNode.children(itemset.label_ref).firstOrNull()?.extractValue()?.toXPathString()
+              ?: valStr
           }
         } else {
           valStr
@@ -1799,20 +1872,58 @@ object FormEngine {
   private fun resolveBindingMessage(
     rawMessage: String,
     defaultMessage: String,
+    relPath: String,
+    messageTypeSuffix: String,
     compiled: CompiledForm,
     evalContext: EvaluationContext,
     activeLanguage: String,
   ): String {
     val trimmed = rawMessage.trim()
-    if (trimmed.isEmpty()) return defaultMessage
+    val catalog = compiled.formDef.model?.translations
+    if (trimmed.isEmpty()) {
+      if (catalog != null && relPath.isNotEmpty()) {
+        val candidates =
+          listOf(
+            "/${compiled.rootName}/$relPath:jr:$messageTypeSuffix",
+            "/${compiled.rootName}/$relPath:$messageTypeSuffix",
+            "$relPath:jr:$messageTypeSuffix",
+            "$relPath:$messageTypeSuffix",
+          )
+        for (candidate in candidates) {
+          val match = lookupLocalizedString(catalog, activeLanguage, candidate)?.value_
+          if (!match.isNullOrEmpty()) return match
+        }
+      }
+      return defaultMessage
+    }
     if (trimmed.startsWith("jr:itext(")) {
       val expr = compiled.compileExpression(trimmed)
       val evaluated = expr?.evaluateString(evalContext)
       if (!evaluated.isNullOrEmpty()) return evaluated
     }
-    val localized =
-      lookupLocalizedString(compiled.formDef.model?.translations, activeLanguage, trimmed)
+    val localized = lookupLocalizedString(catalog, activeLanguage, trimmed)
     return localized?.value_?.takeIf { it.isNotEmpty() } ?: trimmed
+  }
+
+  private fun resolveSecondaryProvider(
+    compiled: CompiledForm,
+    environment: FormEnvironment,
+  ): SecondaryInstanceProvider {
+    val envProvider =
+      environment.secondaryInstanceProvider ?: return compiled.inlineSecondaryInstanceProvider
+    val inlineProvider = compiled.inlineSecondaryInstanceProvider
+    return object : SecondaryInstanceProvider {
+      override fun lookupByEquality(
+        instanceId: String,
+        keyField: String,
+        keyValue: String,
+      ): List<Map<String, TypedValue>>? =
+        envProvider.lookupByEquality(instanceId, keyField, keyValue)
+          ?: inlineProvider.lookupByEquality(instanceId, keyField, keyValue)
+
+      override fun resolveRoot(instanceId: String): XPathNode? =
+        envProvider.resolveRoot(instanceId) ?: inlineProvider.resolveRoot(instanceId)
+    }
   }
 
   private fun resolveIntentConfig(

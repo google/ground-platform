@@ -15,6 +15,7 @@
  */
 package org.groundplatform.v2.core.forms.engine
 
+import groundplatform.v2.forms.GeoPoint
 import kotlin.random.Random
 import org.groundplatform.v2.core.forms.xpath.EvaluationContext
 import org.groundplatform.v2.core.forms.xpath.SecondaryInstanceProvider
@@ -49,6 +50,12 @@ data class FormEnvironment(
   val secondaryInstanceProvider: SecondaryInstanceProvider? = null,
   /** Additional named variables accessible in XPath expressions via `$var`. */
   val variables: Map<String, XPathValue> = emptyMap(),
+  /**
+   * Optional synchronous location provider for `odk:setgeopoint` (`ACTION_SET_GEOPOINT`) actions.
+   * When provided, `odk:setgeopoint` populates the target field immediately in addition to emitting
+   * a [ org.groundplatform.v2.core.forms.model.PlatformEffectRequest.SetGeopointRequest ].
+   */
+  val locationProvider: (() -> GeoPoint?)? = null,
 ) {
   /** Resolves a device property case-insensitively (supporting aliases like `device_id`). */
   fun getDeviceProperty(param: String): String? {

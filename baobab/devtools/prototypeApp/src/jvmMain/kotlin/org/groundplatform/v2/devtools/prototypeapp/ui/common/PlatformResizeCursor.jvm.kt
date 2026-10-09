@@ -19,4 +19,12 @@ import java.awt.Cursor
 internal actual val HorizontalResizePointerIcon: PointerIcon =
   PointerIcon(Cursor(Cursor.E_RESIZE_CURSOR))
 
+internal actual val GrabPointerIcon: PointerIcon = PointerIcon(Cursor(Cursor.MOVE_CURSOR))
+
+internal actual val GrabbingPointerIcon: PointerIcon = PointerIcon(Cursor(Cursor.MOVE_CURSOR))
+
 internal actual fun showPlatformHorizontalResizeCursor(show: Boolean) {}
+
+internal actual fun showPlatformGrabCursor(show: Boolean) {}
+
+internal actual fun showPlatformGrabbingCursor(show: Boolean) {}

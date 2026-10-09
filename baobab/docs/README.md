@@ -21,33 +21,43 @@ for Ground 2.0.
 
 ## Sections
 
--   **[`architecture.md`](architecture.md)**: Ground 2.0 Kotlin Clean Architecture,
-    MVVM pattern with Compose Multiplatform, dependency rules, and hardware/service
-    client communication guidelines.
--   **[`design/`](design/)**:
-    -   [`prd.md`](design/prd.md): Ground 2.0 Product Requirements, system
+-   **[`product/`](product/)**:
+    -   [`prd.md`](product/prd.md): Ground 2.0 Product Requirements, system
         architecture, and end-to-end technical design.
-    -   [`xforms-integration.md`](design/xforms-integration.md): XForms & ODK
+    -   [`xforms-integration.md`](product/xforms-integration.md): XForms & ODK
         Entities integration architecture, Entity-only map model, default
         1-Form-to-1-Entity provisioning, and automatic `save_to` schema
         synchronization.
-    -   [`concept-brief.md`](design/concept-brief.md): Condensed summary of the
+    -   [`concept-brief.md`](product/concept-brief.md): Condensed summary of the
         Ground 2.0 objective, key improvements over 1.0, scope, and roles.
-    -   [`ceo-integration.md`](design/ceo-integration.md): Collect Earth Online
+    -   [`ceo-integration.md`](product/ceo-integration.md): Collect Earth Online
         (CEO) functional inventory, desk-to-field plot flagging integration
         architecture, and specification delta analysis.
-    -   [`impacts.md`](design/impacts.md): Platform impact analysis.
-    -   [`website-outline.md`](design/website-outline.md): Public documentation
+    -   [`terminology.md`](product/terminology.md): Ground 2.0 terminology and
+        cross-platform parity with CEO, ODK, KoboToolbox, XLSForm, Survey123,
+        and Open Foris Arena.
+    -   [`impacts.md`](product/impacts.md): Platform impact analysis.
+    -   [`impact-measurement.md`](product/impact-measurement.md): Proposed MAP
+        impact measurement approach (Purpose Packs, indicator tags, spatial
+        overlays, outcome events, and attribution rubric).
+    -   [`website-outline.md`](product/website-outline.md): Public documentation
         and portal outline.
-    -   [`future-work.md`](design/future-work.md): Future roadmap and
+    -   [`future-work.md`](product/future-work.md): Future roadmap and
         extensibility plans.
--   **[`model/`](model/)**:
-    -   [`forms/`](model/forms/00-introduction.md): ProtoForms (`FormDef`,
-        `RecordInstance`) specification and XForms mapping.
-    -   [`survey/`](model/survey/00-introduction.md): Survey definitions
-        (`SurveyDef`), entity datasets, map configurations, and ACL/quotas.
-    -   [`data/`](model/data/01-entity-records.md): Operational entity,
-        submission, and audit record specifications.
+-   **[`technical/`](technical/)**:
+    -   [`client/architecture.md`](technical/client/architecture.md): Ground 2.0
+        Kotlin Clean Architecture, MVVM pattern with Compose Multiplatform,
+        dependency rules, and hardware/service client communication
+        guidelines.
+    -   [`model/`](technical/model/README.md): Protocol Buffer data model
+        overview.
+        -   [`forms/`](technical/model/forms/00-introduction.md): ProtoForms
+            (`FormDef`, `RecordInstance`) specification and XForms mapping.
+        -   [`survey/`](technical/model/survey/00-introduction.md): Survey
+            definitions (`SurveyDef`), entity datasets, map configurations, and
+            ACL/quotas.
+        -   [`data/`](technical/model/data/01-entity-records.md): Operational
+            entity, submission, and audit record specifications.
 -   **[`ux/`](ux/)**:
     -   [`content-guidelines.md`](ux/content-guidelines.md): Ground 2.0 UX
         writing standards, voice and tone, domain terminology, and content
@@ -55,7 +65,7 @@ for Ground 2.0.
 
 ## Summary: Mental Model & Terminology Mapping to XForms
 
-See [`design/xforms-integration.md`](design/xforms-integration.md) for full
+See [`product/xforms-integration.md`](product/xforms-integration.md) for full
 details.
 
 ### The Core Mental Model

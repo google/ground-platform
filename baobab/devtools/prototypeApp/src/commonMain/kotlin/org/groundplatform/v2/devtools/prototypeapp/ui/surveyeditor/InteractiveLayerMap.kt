@@ -55,7 +55,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.CornerRadius
@@ -67,7 +66,7 @@ import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.pointer.PointerEventType
-import androidx.compose.ui.input.pointer.onPointerEvent
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.font.FontFamily
@@ -147,7 +146,6 @@ internal const val LAYER_EDITOR_SELECTED = "selected"
  * @param showLabels whether to draw feature labels when zoomed in.
  * @param emptyCamera where the map starts when the layer has no features yet.
  */
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 internal fun InteractiveLayerMapCard(
   editor: MapFeatureEditor,
@@ -366,13 +364,22 @@ internal fun InteractiveLayerMapCard(
             .padding(start = 12.dp, end = 12.dp, bottom = 12.dp)
             .clip(MaterialTheme.shapes.medium)
             // Observed here rather than on the map so hover never interferes with map gestures.
-            .onPointerEvent(PointerEventType.Move) { event ->
-              hover =
-                event.changes.firstOrNull()?.position?.let {
-                  ScreenPoint(it.x / density.toDouble(), it.y / density.toDouble())
+            .pointerInput(density) {
+              awaitPointerEventScope {
+                while (true) {
+                  val event = awaitPointerEvent()
+                  when (event.type) {
+                    PointerEventType.Move ->
+                      hover =
+                        event.changes.firstOrNull()?.position?.let {
+                          ScreenPoint(it.x / density.toDouble(), it.y / density.toDouble())
+                        }
+                    PointerEventType.Exit -> hover = null
+                    else -> Unit
+                  }
                 }
+              }
             }
-            .onPointerEvent(PointerEventType.Exit) { hover = null }
       ) {
         GroundMap(
           content = content,

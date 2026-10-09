@@ -53,7 +53,7 @@ kotlin {
     }
     val androidMain by getting {
       dependencies {
-        implementation("com.mapbox.maps:android:11.31.1")
+        implementation("com.mapbox.maps:android-ndk27:11.31.1")
         implementation("com.caverock:androidsvg-aar:1.4")
       }
     }

@@ -188,6 +188,11 @@ message FieldBinding {
   // Typed extension messages for proprietary, vendor, or experimental binding
   // attributes.
   repeated google.protobuf.Any custom_extensions = 15;
+
+  // Dynamic boolean expression determining whether user editing is disabled
+  // (e.g., `readonly="/data/first_question < 4"`). When non-empty, evaluated at
+  // runtime in addition to the static `read_only` flag.
+  string read_only_expression = 16;
 }
 
 // Media attachment references for prompt images, audio clips, and instructional
@@ -516,6 +521,10 @@ message ItemsetDef {
   // Optional expression or field reference supplying a deterministic PRNG seed
   // for reproducible randomization.
   string random_seed_expression = 6;
+
+  // Optional custom element path inside the secondary instance when not using
+  // the default `root/item` hierarchy (e.g., `"counties/county"`).
+  string nodeset_path = 7;
 }
 
 // Configuration parameters for CONTROL_RANGE slider and picker widgets.
@@ -666,6 +675,10 @@ message RepeatDef {
 
   // Ordered sequence of child components rendered inside each repeat instance.
   repeated ViewComponent components = 6;
+
+  // Lifecycle actions nested directly inside the repeat block (e.g.,
+  // `<setvalue event="odk-new-repeat"/>` or `<odk:setgeopoint event="odk-new-repeat"/>`).
+  repeated ActionDef actions = 7;
 }
 
 // Polymorphic UI element within the form view hierarchy.

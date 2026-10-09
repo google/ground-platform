@@ -40,9 +40,7 @@ class DashboardDataTablesPanelAnimationTest {
       val firstRowLabel = state.entities.first().label
 
       setContent {
-        MaterialTheme {
-          DashboardDataTablesPanel(state = state, expandedTableHeight = 240.dp)
-        }
+        MaterialTheme { DashboardDataTablesPanel(state = state, expandedTableHeight = 240.dp) }
       }
       waitForIdle()
       onNodeWithText(firstRowLabel).assertExists()

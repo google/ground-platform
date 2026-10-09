@@ -48,6 +48,7 @@ import androidx.compose.material.icons.outlined.Menu
 import androidx.compose.material.icons.outlined.MyLocation
 import androidx.compose.material.icons.outlined.Navigation
 import androidx.compose.material.icons.outlined.SatelliteAlt
+import androidx.compose.material.icons.outlined.ZoomIn
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.Button
@@ -588,8 +589,15 @@ internal fun SelectedClusterBalloonDetailCard(
             contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
             modifier = Modifier.height(26.dp),
           ) {
+            Icon(
+              imageVector = Icons.Outlined.ZoomIn,
+              contentDescription = null,
+              tint = MaterialTheme.colorScheme.inversePrimary,
+              modifier = Modifier.size(14.dp),
+            )
+            Spacer(modifier = Modifier.width(4.dp))
             Text(
-              text = "Zoom in +",
+              text = "Zoom in",
               style = MaterialTheme.typography.labelSmall,
               color = MaterialTheme.colorScheme.inversePrimary,
               fontWeight = FontWeight.Bold,

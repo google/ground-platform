@@ -22,13 +22,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
+import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performMouseInput
 import androidx.compose.ui.test.runDesktopComposeUiTest
 import androidx.compose.ui.unit.dp
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import org.groundplatform.v2.devtools.prototypeapp.ui.common.TextFilePickResult
 import org.groundplatform.v2.devtools.prototypeapp.ui.state.SurveyEditorSection
 import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.SurveyEditorViewModel
 import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.surveyEditorViewModel
@@ -95,4 +100,67 @@ class SurveyEditorClickTest {
     assertEquals(SurveyEditorSection.Details, state.ui.section)
     assertEquals(first.key, state.ui.forms[1].key)
   }
+
+  @Test
+  fun addFormButtonOpensDialogAndEmptyFormCreatesForm() = withNavigation { state ->
+    val initialCount = state.ui.forms.size
+    onNodeWithContentDescription("Add form").performClick()
+    waitForIdle()
+
+    onNodeWithText("Empty form").assertIsDisplayed()
+    onNodeWithText("Use a template").assertIsDisplayed()
+    onNodeWithText("Import from XML").assertIsDisplayed()
+
+    onNodeWithText("Empty form").performClick()
+    waitForIdle()
+
+    assertEquals(initialCount + 1, state.ui.forms.size)
+    assertEquals("New form", state.ui.selectedForm?.form?.title)
+  }
+
+  @Test
+  fun addFormDialogImportsFromXmlAfterPreview() =
+    runDesktopComposeUiTest(width = 800, height = 800) {
+      val state = surveyEditorViewModel()
+      val initialCount = state.ui.forms.size
+      val xml =
+        """
+        <h:html xmlns="http://www.w3.org/2002/xforms" xmlns:h="http://www.w3.org/1999/xhtml">
+          <h:head>
+            <h:title>Imported tree survey</h:title>
+            <model>
+              <instance><data id="imported_tree_survey"><species/></data></instance>
+              <bind nodeset="/data/species" type="string"/>
+            </model>
+          </h:head>
+          <h:body>
+            <input ref="/data/species"><label>Tree species</label></input>
+          </h:body>
+        </h:html>
+        """
+          .trimIndent()
+      setContent {
+        MaterialTheme {
+          AddFormDialog(
+            actions = state,
+            onDismiss = {},
+            pickTextFile = { _, onResult ->
+              onResult(TextFilePickResult.Picked("tree_survey.xml", xml))
+            },
+          )
+        }
+      }
+
+      onNodeWithText(FORM_TEMPLATES_COMING_SOON).assertIsDisplayed()
+      onNodeWithText("Import from XML").performClick()
+      waitForIdle()
+
+      onNodeWithText("Import tree_survey.xml").assertIsDisplayed()
+      onNodeWithText("Imported tree survey").assertIsDisplayed()
+      onNodeWithText("Import").performClick()
+      waitForIdle()
+
+      assertEquals(initialCount + 1, state.ui.forms.size)
+      assertEquals("Imported tree survey", state.ui.selectedForm?.form?.title)
+    }
 }

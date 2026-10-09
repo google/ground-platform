@@ -15,9 +15,14 @@
   limitations under the License.
 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+  <uses-permission android:name="android.permission.INTERNET" />
+
   <application
       android:allowBackup="true"
-      android:label="Ground">
+      android:icon="@mipmap/ic_launcher"
+      android:roundIcon="@mipmap/ic_launcher_round"
+      android:label="Ground"
+      android:theme="@android:style/Theme.Material.Light.NoActionBar">
     <activity
         android:name=".MainActivity"
         android:exported="true">

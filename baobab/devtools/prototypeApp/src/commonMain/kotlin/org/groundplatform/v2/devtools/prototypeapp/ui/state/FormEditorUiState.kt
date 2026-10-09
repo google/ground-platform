@@ -125,9 +125,7 @@ data class FormEditorUiState(
   fun choiceDatasetFor(question: EditorQuestion): EditorDataset? =
     question.choiceDatasetId
       ?.takeIf { it.isNotBlank() }
-      ?.let { id ->
-        datasets.firstOrNull { it.id == id }
-      }
+      ?.let { id -> datasets.firstOrNull { it.id == id } }
 
   val issues: List<EditorIssue>
     get() = FormEditorValidator.validate(form, datasets) + SaveToValidator.validate(form, datasets)

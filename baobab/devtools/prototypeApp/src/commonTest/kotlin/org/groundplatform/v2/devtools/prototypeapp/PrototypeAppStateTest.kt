@@ -2404,9 +2404,7 @@ class PrototypeAppStateTest {
       map.content.sources
         .first { it.id == SurveyMapContent.OVERLAY_SOURCE }
         .features
-        .associateBy {
-          it.id
-        }
+        .associateBy { it.id }
     val pointFeature = assertNotNull(overlay[SurveyMapIds.formGeometry("/data/plot_center_gps")])
     assertEquals(
       SurveyMapContent.KIND_FORM_POINT,

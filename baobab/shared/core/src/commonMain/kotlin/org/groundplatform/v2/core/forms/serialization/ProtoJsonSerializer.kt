@@ -257,6 +257,7 @@ object ProtoJsonSerializer {
         addEnum("preload", msg.preload.name)
       }
       addString("preload_param", msg.preload_param)
+      addString("read_only_expression", msg.read_only_expression)
     }
 
   private fun encodeTranslationCatalog(msg: TranslationCatalog, snake: Boolean): JsonObject =
@@ -402,6 +403,7 @@ object ProtoJsonSerializer {
       addString("label_ref", msg.label_ref)
       addBoolean("randomize", msg.randomize)
       addString("random_seed_expression", msg.random_seed_expression)
+      addString("nodeset_path", msg.nodeset_path)
     }
 
   private fun encodeRangeConfig(msg: RangeConfig, snake: Boolean): JsonObject =
@@ -443,6 +445,7 @@ object ProtoJsonSerializer {
       addString("count_expression", msg.count_expression)
       addBoolean("no_add_remove", msg.no_add_remove)
       addObjectList("components", msg.components) { encodeViewComponent(it, snake) }
+      addObjectList("actions", msg.actions) { encodeActionDef(it, snake) }
     }
 
   // ===========================================================================
@@ -699,6 +702,7 @@ object ProtoJsonSerializer {
       max_pixels = obj.getProtoInt("max_pixels"),
       preload = parseEnum(obj.getProtoStringOrNull("preload"), PreloadType.PRELOAD_UNSPECIFIED),
       preload_param = obj.getProtoString("preload_param"),
+      read_only_expression = obj.getProtoString("read_only_expression"),
     )
 
   private fun decodeTranslationCatalog(obj: JsonObject): TranslationCatalog =
@@ -849,6 +853,7 @@ object ProtoJsonSerializer {
       label_ref = obj.getProtoString("label_ref"),
       randomize = obj.getProtoBoolean("randomize"),
       random_seed_expression = obj.getProtoString("random_seed_expression"),
+      nodeset_path = obj.getProtoString("nodeset_path"),
     )
 
   private fun decodeRangeConfig(obj: JsonObject): RangeConfig =
@@ -890,6 +895,7 @@ object ProtoJsonSerializer {
       count_expression = obj.getProtoString("count_expression"),
       no_add_remove = obj.getProtoBoolean("no_add_remove"),
       components = obj.getProtoObjects("components").map { decodeViewComponent(it) },
+      actions = obj.getProtoObjects("actions").map { decodeActionDef(it) },
     )
 
   // ===========================================================================

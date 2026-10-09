@@ -324,9 +324,8 @@ object SurveyEditorDerivation {
       notes = listOf("The XForms of \"${form.title}\" couldn't be parsed."),
     )
 
-  /** Save-to logic of a Form that updates a feature of dataset [targetId]. */
   /** Adds properties that [form]'s save-to mappings write but [dataset] does not declare. */
-  private fun withMappedProperties(dataset: EntityDataset, form: EditorForm): EntityDataset {
+  internal fun withMappedProperties(dataset: EntityDataset, form: EditorForm): EntityDataset {
     val known = dataset.properties.map { it.name }.toSet()
     val questions = form.questions.associateBy { it.key }
     val missing =
@@ -352,7 +351,8 @@ object SurveyEditorDerivation {
     else dataset.copy(properties = dataset.properties + missing)
   }
 
-  private fun updateSaveTo(
+  /** Save-to logic of a Form that updates a feature of dataset [targetId]. */
+  internal fun updateSaveTo(
     form: EditorForm,
     imported: ImportedForm,
     formKey: String,

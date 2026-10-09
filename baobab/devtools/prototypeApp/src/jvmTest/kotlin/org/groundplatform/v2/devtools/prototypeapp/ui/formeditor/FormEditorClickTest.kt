@@ -471,4 +471,63 @@ class FormEditorClickTest {
       assertEquals("d1", unlinkedDatasetKey)
       onNodeWithText("Create map layer").assertExists()
     }
+
+  @Test
+  fun previewOverlayTogglesDarkThemeAndScrollsLongFlowList() = withEditor { state ->
+    runOnIdle {
+      repeat(15) { i ->
+        state.addQuestion(EditorQuestionType.LONG_TEXT)
+        val key = state.ui.selectedKey!!
+        state.updateQuestion(key) { it.copy(label = "Extra step ${i + 1}") }
+      }
+      state.startPreview()
+    }
+    waitForIdle()
+
+    // Mobile device preview frame starts in light theme and toggles to dark theme when clicked.
+    onNodeWithText("Light").assertExists().performClick()
+    waitForIdle()
+    onNodeWithText("Dark").assertExists().performClick()
+    waitForIdle()
+    onNodeWithText("Light").assertExists()
+
+    // Flow preview card keeps its footer buttons visible while scrolling its internal step list.
+    onAllNodesWithText("Extra step 15").onLast().performScrollTo().performClick()
+    waitForIdle()
+    onNodeWithText("Back to editor").assertExists().performClick()
+    waitForIdle()
+    assertEquals(null, state.ui.previewController)
+  }
+
+  @Test
+  fun previousAndNextButtonsAndOverflowMenuManageQuestionInPropertiesPanel() = withEditor { state ->
+    val initialOrder = state.ui.form.questions.map { it.key }
+    runOnIdle { state.select("q1") }
+    waitForIdle()
+    assertEquals("q1", state.ui.selectedKey)
+
+    onAllNodesWithText("Next").onLast().performClick()
+    waitForIdle()
+    assertEquals("q2", state.ui.selectedKey)
+    assertEquals(initialOrder, state.ui.form.questions.map { it.key })
+
+    onNodeWithText("Previous").performClick()
+    waitForIdle()
+    assertEquals("q1", state.ui.selectedKey)
+    assertEquals(initialOrder, state.ui.form.questions.map { it.key })
+
+    // Duplicate and Delete are in the question options overflow menu.
+    val initialCount = state.ui.form.questions.size
+    onNodeWithContentDescription("Question options").performClick()
+    waitForIdle()
+    onNodeWithText("Duplicate").performClick()
+    waitForIdle()
+    assertEquals(initialCount + 1, state.ui.form.questions.size)
+
+    onNodeWithContentDescription("Question options").performClick()
+    waitForIdle()
+    onNodeWithText("Delete").performClick()
+    waitForIdle()
+    assertEquals(initialCount, state.ui.form.questions.size)
+  }
 }

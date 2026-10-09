@@ -79,6 +79,12 @@ class CompiledForm internal constructor(val formDef: FormDef) {
    */
   val repeatInsertActionsByRepeatPath: Map<String, List<ActionDef>> = buildRepeatInsertActionIndex()
 
+  /**
+   * Actions triggered on `EVENT_INSTANCE_FIRST_LOAD` or `EVENT_INSTANCE_LOAD`, collected from model
+   * and view definitions.
+   */
+  val startupActions: List<ActionDef> = buildStartupActionIndex()
+
   /** Resolves the [DataType] for a relative path from its binding or schema definition. */
   fun resolveDataType(relativePath: String): DataType {
     val bindingType = bindingsByRelativePath[relativePath]?.binding?.type
@@ -120,6 +126,7 @@ class CompiledForm internal constructor(val formDef: FormDef) {
             calculateExpr = compileExpression(b.calculate_expression),
             constraintExpr = compileExpression(b.constraint_expression),
             requiredExpr = compileExpression(b.required_expression),
+            readOnlyExpr = compileExpression(b.read_only_expression),
           )
       }
     }
@@ -309,6 +316,11 @@ class CompiledForm internal constructor(val formDef: FormDef) {
           comp.repeat != null -> {
             val r = comp.repeat
             val rPath = resolveComponentRelativePath(r.field_ref, parentPath)
+            for (action in r.actions) {
+              if (EventType.EVENT_REPEAT_INSERT in action.events && rPath.isNotEmpty()) {
+                map.getOrPut(rPath) { mutableListOf() }.add(action)
+              }
+            }
             visit(r.components, rPath, rPath)
           }
         }
@@ -316,6 +328,39 @@ class CompiledForm internal constructor(val formDef: FormDef) {
     }
     visit(formDef.view?.components ?: emptyList(), "", null)
     return map
+  }
+
+  private fun buildStartupActionIndex(): List<ActionDef> {
+    val result = mutableListOf<ActionDef>()
+    fun isStartup(action: ActionDef): Boolean =
+      EventType.EVENT_INSTANCE_FIRST_LOAD in action.events ||
+        EventType.EVENT_INSTANCE_LOAD in action.events
+
+    for (action in formDef.model?.actions ?: emptyList()) {
+      if (isStartup(action)) {
+        result.add(action)
+      }
+    }
+    fun visit(components: List<ViewComponent>) {
+      for (comp in components) {
+        when {
+          comp.control != null -> {
+            for (action in comp.control.actions) {
+              if (isStartup(action)) result.add(action)
+            }
+          }
+          comp.group != null -> visit(comp.group.components)
+          comp.repeat != null -> {
+            for (action in comp.repeat.actions) {
+              if (isStartup(action)) result.add(action)
+            }
+            visit(comp.repeat.components)
+          }
+        }
+      }
+    }
+    visit(formDef.view?.components ?: emptyList())
+    return result
   }
 
   internal fun resolveComponentRelativePath(fieldRef: String, parentRelativePath: String): String {
@@ -340,6 +385,7 @@ class CompiledFieldBinding(
   val calculateExpr: CompiledXPathExpression?,
   val constraintExpr: CompiledXPathExpression?,
   val requiredExpr: CompiledXPathExpression?,
+  val readOnlyExpr: CompiledXPathExpression? = null,
 )
 
 /**

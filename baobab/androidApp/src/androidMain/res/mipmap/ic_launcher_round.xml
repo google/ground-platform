@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright 2026 The Ground Authors.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="48dp"
+    android:height="48dp"
+    android:viewportWidth="576"
+    android:viewportHeight="576">
+  <path
+      android:fillColor="#F7FBF2"
+      android:pathData="M288,0 a288,288 0 1,0 0,576 a288,288 0 1,0 0,-576 Z" />
+  <group
+      android:translateX="32"
+      android:translateY="32">
+    <path
+        android:fillColor="#E59A0C"
+        android:pathData="M169,386 a99,99 0 1,0 198,0 a99,99 0 1,0 -198,0 Z" />
+    <path
+        android:fillColor="#F7FBF2"
+        android:pathData="M0,368 L84,368 C180,402 340,400 432,364 L512,364 L512,512 L0,512 Z" />
+    <path
+        android:fillColor="#F7FBF2"
+        android:pathData="M191,406 C211,362 227,316 233,244 L291,244 C285,316 281,362 301,406 Z" />
+    <path
+        android:fillColor="#E59A0C"
+        android:strokeColor="#E59A0C"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:strokeWidth="3"
+        android:pathData="M150,438 C146,437 146,433 150,433 C224,450 308,448 376,428 C380,427 381,431 378,433 C308,468 220,470 150,438 Z" />
+    <path
+        android:fillColor="#1B4D2E"
+        android:strokeColor="#1B4D2E"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:strokeWidth="4"
+        android:pathData="M118,264 C74,256 48,218 56,172 C64,128 106,98 156,106 C188,56 250,34 314,48 C380,62 436,112 450,176 C458,214 436,248 398,254 C393,255 391,249 396,247 C424,236 436,208 428,176 C416,124 368,82 308,70 C252,58 196,78 170,124 C167,129 160,131 154,129 C114,118 82,140 76,176 C70,212 92,244 122,256 C127,258 124,265 118,264 Z" />
+    <path
+        android:fillColor="#1B4D2E"
+        android:strokeColor="#1B4D2E"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:strokeWidth="4"
+        android:pathData="M214,402 C232,362 248,316 252,268 C228,248 192,224 158,188 C154,184 159,179 164,183 C198,212 230,232 254,246 C262,204 286,164 326,128 C330,124 336,129 332,134 C298,170 278,206 270,242 C296,226 326,208 358,184 C362,181 367,186 363,190 C332,218 300,240 268,258 C264,310 266,360 280,402 Z" />
+    <path
+        android:fillColor="#1B4D2E"
+        android:strokeColor="#1B4D2E"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:strokeWidth="4"
+        android:pathData="M78,390 C74,388 76,383 80,384 C176,410 338,406 432,376 C436,375 438,380 434,382 C340,430 174,434 78,390 Z" />
+  </group>
+</vector>

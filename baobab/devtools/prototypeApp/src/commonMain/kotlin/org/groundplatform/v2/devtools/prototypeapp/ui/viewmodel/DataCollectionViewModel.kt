@@ -808,8 +808,6 @@ class DataCollectionViewModel(
 
   private fun savePdf(pdf: GeneratedPdf) {
     pdfExportClient.save(pdf.fileName, pdf.bytes)
-    session.update {
-      it.copy(pdfExportMessage = "Saved ${pdf.fileName} (${pdf.summaryLabel})")
-    }
+    session.update { it.copy(pdfExportMessage = "Saved ${pdf.fileName} (${pdf.summaryLabel})") }
   }
 }

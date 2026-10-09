@@ -35,9 +35,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Place
@@ -224,16 +227,29 @@ fun QuestionControlCard(
           contentColor = colors.onSecondaryContainer,
         ) {
           Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp)) {
-            Text(
-              text =
-                if (isGuidanceExpanded) "▼ Hide Enumerator Guidance"
-                else "▶ Show Enumerator Guidance",
-              style =
-                MaterialTheme.typography.labelMedium.copy(
-                  fontWeight = FontWeight.SemiBold,
-                  color = colors.onSecondaryContainer,
-                ),
-            )
+            Row(
+              verticalAlignment = Alignment.CenterVertically,
+              horizontalArrangement = Arrangement.spacedBy(6.dp),
+            ) {
+              Icon(
+                imageVector =
+                  if (isGuidanceExpanded) Icons.Default.KeyboardArrowUp
+                  else Icons.Default.KeyboardArrowDown,
+                contentDescription = null,
+                tint = colors.onSecondaryContainer,
+                modifier = Modifier.size(16.dp),
+              )
+              Text(
+                text =
+                  if (isGuidanceExpanded) "Hide Enumerator Guidance"
+                  else "Show Enumerator Guidance",
+                style =
+                  MaterialTheme.typography.labelMedium.copy(
+                    fontWeight = FontWeight.SemiBold,
+                    color = colors.onSecondaryContainer,
+                  ),
+              )
+            }
             if (isGuidanceExpanded) {
               Spacer(modifier = Modifier.height(4.dp))
               Text(
@@ -255,6 +271,9 @@ fun QuestionControlCard(
         ) {
           if (media.image_uri.isNotBlank()) {
             GroundTonalBadge(media.image_uri, GroundBadgeTone.PRIMARY)
+          }
+          if (media.big_image_uri.isNotBlank()) {
+            GroundTonalBadge(media.big_image_uri, GroundBadgeTone.PRIMARY)
           }
           if (media.audio_uri.isNotBlank()) {
             GroundTonalBadge(media.audio_uri, GroundBadgeTone.SECONDARY)
@@ -1432,13 +1451,11 @@ private fun GeoPointInteractiveMapBox(viewportState: GeoPointMapViewportState) {
         border = BorderStroke(1.dp, Color(0xFF2D5944)),
       ) {
         Box(contentAlignment = Alignment.Center) {
-          Text(
-            text = "+",
-            style =
-              MaterialTheme.typography.titleSmall.copy(
-                color = Color.White,
-                fontWeight = FontWeight.Bold,
-              ),
+          Icon(
+            imageVector = Icons.Default.Add,
+            contentDescription = "Zoom in",
+            tint = Color.White,
+            modifier = Modifier.size(16.dp),
           )
         }
       }
@@ -1452,13 +1469,11 @@ private fun GeoPointInteractiveMapBox(viewportState: GeoPointMapViewportState) {
         border = BorderStroke(1.dp, Color(0xFF2D5944)),
       ) {
         Box(contentAlignment = Alignment.Center) {
-          Text(
-            text = "−",
-            style =
-              MaterialTheme.typography.titleSmall.copy(
-                color = Color.White,
-                fontWeight = FontWeight.Bold,
-              ),
+          Icon(
+            imageVector = RemoveIcon,
+            contentDescription = "Zoom out",
+            tint = Color.White,
+            modifier = Modifier.size(16.dp),
           )
         }
       }
@@ -2020,13 +2035,11 @@ private fun GeoGeometryDrawingWidget(
             border = BorderStroke(1.dp, Color(0xFF2D5944)),
           ) {
             Box(contentAlignment = Alignment.Center) {
-              Text(
-                text = "+",
-                style =
-                  MaterialTheme.typography.titleSmall.copy(
-                    color = Color.White,
-                    fontWeight = FontWeight.Bold,
-                  ),
+              Icon(
+                imageVector = Icons.Default.Add,
+                contentDescription = "Zoom in",
+                tint = Color.White,
+                modifier = Modifier.size(16.dp),
               )
             }
           }
@@ -2040,13 +2053,11 @@ private fun GeoGeometryDrawingWidget(
             border = BorderStroke(1.dp, Color(0xFF2D5944)),
           ) {
             Box(contentAlignment = Alignment.Center) {
-              Text(
-                text = "−",
-                style =
-                  MaterialTheme.typography.titleSmall.copy(
-                    color = Color.White,
-                    fontWeight = FontWeight.Bold,
-                  ),
+              Icon(
+                imageVector = RemoveIcon,
+                contentDescription = "Zoom out",
+                tint = Color.White,
+                modifier = Modifier.size(16.dp),
               )
             }
           }
@@ -2462,7 +2473,13 @@ private fun AddInlineEntitySection(
       onClick = { isAdding = true },
       modifier = Modifier.fillMaxWidth(),
     ) {
-      Text("+ Add new")
+      Icon(
+        imageVector = Icons.Default.Add,
+        contentDescription = null,
+        modifier = Modifier.size(16.dp),
+      )
+      Spacer(modifier = Modifier.width(6.dp))
+      Text("Add new")
     }
     return
   }
@@ -2571,7 +2588,10 @@ private fun ChoiceCardRow(
             ),
         )
       }
-      Column(modifier = Modifier.weight(1f)) {
+      Column(
+        modifier = Modifier.weight(1f),
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+      ) {
         Text(
           text = option.label.text,
           style =
@@ -2580,6 +2600,34 @@ private fun ChoiceCardRow(
               color = if (isSelected) colors.onPrimaryContainer else colors.onSurface,
             ),
         )
+        if (!option.label.guidanceText.isNullOrBlank()) {
+          Text(
+            text = option.label.guidanceText.orEmpty(),
+            style =
+              MaterialTheme.typography.bodySmall.copy(
+                color =
+                  if (isSelected) colors.onPrimaryContainer.copy(alpha = 0.8f)
+                  else colors.onSurfaceVariant
+              ),
+          )
+        }
+        val media = option.label.media
+        if (media != null) {
+          Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            if (media.image_uri.isNotBlank()) {
+              GroundTonalBadge(media.image_uri, GroundBadgeTone.PRIMARY)
+            }
+            if (media.big_image_uri.isNotBlank()) {
+              GroundTonalBadge(media.big_image_uri, GroundBadgeTone.PRIMARY)
+            }
+            if (media.audio_uri.isNotBlank()) {
+              GroundTonalBadge(media.audio_uri, GroundBadgeTone.SECONDARY)
+            }
+            if (media.video_uri.isNotBlank()) {
+              GroundTonalBadge(media.video_uri, GroundBadgeTone.TERTIARY)
+            }
+          }
+        }
       }
     }
   }
@@ -2706,8 +2754,13 @@ private fun RankControlWidget(
               }
             },
             enabled = index > 0,
+            contentPadding = PaddingValues(horizontal = 10.dp),
           ) {
-            Text("↑", style = MaterialTheme.typography.labelMedium)
+            Icon(
+              imageVector = Icons.Default.KeyboardArrowUp,
+              contentDescription = "Move up",
+              modifier = Modifier.size(18.dp),
+            )
           }
           OutlinedButton(
             onClick = {
@@ -2720,8 +2773,13 @@ private fun RankControlWidget(
               }
             },
             enabled = index < orderedOptions.lastIndex,
+            contentPadding = PaddingValues(horizontal = 10.dp),
           ) {
-            Text("↓", style = MaterialTheme.typography.labelMedium)
+            Icon(
+              imageVector = Icons.Default.KeyboardArrowDown,
+              contentDescription = "Move down",
+              modifier = Modifier.size(18.dp),
+            )
           }
         }
       }
@@ -2842,4 +2900,22 @@ internal fun parseIntegerInput(raw: String, dataType: DataType): IntegerInput {
     return IntegerInput.Invalid("Enter a value between ${Int.MIN_VALUE} and ${Int.MAX_VALUE}")
   }
   return IntegerInput.Valid(parsed)
+}
+
+private val RemoveIcon: ImageVector by lazy {
+  ImageVector.Builder(
+      name = "Ground.Remove",
+      defaultWidth = 24.dp,
+      defaultHeight = 24.dp,
+      viewportWidth = 24f,
+      viewportHeight = 24f,
+    )
+    .path(fill = SolidColor(Color.Black)) {
+      moveTo(19f, 13f)
+      horizontalLineTo(5f)
+      verticalLineTo(11f)
+      horizontalLineTo(19f)
+      close()
+    }
+    .build()
 }

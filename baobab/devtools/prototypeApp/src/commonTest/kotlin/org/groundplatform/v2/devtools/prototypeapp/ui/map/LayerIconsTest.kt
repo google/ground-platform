@@ -66,9 +66,7 @@ class LayerIconsTest {
     SurveyEditorSamples.draft()
       .datasets
       .mapNotNull { it.style.iconName }
-      .forEach {
-        assertTrue(LayerIcons.forName(it) != null, it)
-      }
+      .forEach { assertTrue(LayerIcons.forName(it) != null, it) }
   }
 
   @Test

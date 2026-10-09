@@ -219,9 +219,7 @@ class DashboardViewModelTest {
     assertEquals("Places", f.uiState.tabLabelFor(ListFilterTab.PLACES))
     val layers = f.uiState.entityDatasetLayers
     assertTrue(layers.size > 1)
-    runNow {
-      layers.drop(1).forEach { f.surveyRepository.toggleLayerVisibility(it.id) }
-    }
+    runNow { layers.drop(1).forEach { f.surveyRepository.toggleLayerVisibility(it.id) } }
     assertEquals(listOf(layers.first().id), f.uiState.visibleEntityDatasetLayers.map { it.id })
     assertEquals(layers.first().pluralDomainLabel, f.uiState.activeEntitiesTabLabel)
   }

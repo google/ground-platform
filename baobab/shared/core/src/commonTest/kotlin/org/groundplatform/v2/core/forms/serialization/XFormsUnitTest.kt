@@ -20,6 +20,7 @@ import groundplatform.v2.forms.EventType
 import groundplatform.v2.forms.PreloadType
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
@@ -294,5 +295,110 @@ class XFormsUnitTest {
     val serializedXml = XFormsXmlSerializer.serialize(formDef)
     val deserialized = XFormsXmlSerializer.deserializeFormDef(serializedXml)
     assertEquals(formDef, deserialized)
+  }
+
+  @Test
+  fun testDynamicReadonlyBindIdsCustomItemsetPathsAndRepeatActions() {
+    val xml =
+      """
+      <?xml version="1.0" encoding="UTF-8"?>
+      <h:html xmlns="http://www.w3.org/2002/xforms" xmlns:h="http://www.w3.org/1999/xhtml" xmlns:jr="http://openrosa.org/javarosa" xmlns:odk="http://www.opendatakit.org/xforms">
+        <h:head>
+          <h:title>Sample Forms Parity</h:title>
+          <model odk:xforms-version="1.0.0">
+            <instance>
+              <data id="sample_parity" version="1" odk:prefix="par" odk:delimiter="#">
+                <locked/>
+                <state/>
+                <county/>
+                <count>2</count>
+                <rep jr:template="">
+                  <seq/>
+                  <item_name/>
+                </rep>
+              </data>
+            </instance>
+            <instance id="counties">
+              <counties>
+                <county>
+                  <state>WA</state>
+                  <name>king</name>
+                  <label>King County</label>
+                </county>
+              </counties>
+            </instance>
+            <bind id="b_locked" nodeset="/data/locked" type="string" odk:tag="lck"/>
+            <bind id="b_state" nodeset="/data/state" type="string" readonly="/data/locked = 'yes'"/>
+            <bind id="b_county" nodeset="/data/county" type="string"/>
+            <bind id="b_count" nodeset="/data/count" type="int"/>
+            <bind id="b_seq" nodeset="/data/rep/seq" type="int"/>
+            <bind id="b_item_name" nodeset="/data/rep/item_name" type="string"/>
+          </model>
+        </h:head>
+        <h:body>
+          <input bind="b_locked">
+            <label>Locked?</label>
+          </input>
+          <input bind="b_state">
+            <label>State</label>
+          </input>
+          <select1 bind="b_county">
+            <label>County</label>
+            <itemset nodeset="instance('counties')/counties/county[state = /data/state]">
+              <value ref="name"/>
+              <label ref="label"/>
+            </itemset>
+          </select1>
+          <repeat nodeset="/data/rep" jr:count="current()/../count">
+            <setvalue event="odk-new-repeat" bind="b_seq" value="position(..)"/>
+            <input ref="current()/item_name">
+              <label>Item Name</label>
+            </input>
+          </repeat>
+        </h:body>
+      </h:html>
+      """
+        .trimIndent()
+
+    val formDef = XFormsXmlSerializer.deserializeFormDef(xml)
+    val model = formDef.model
+    assertNotNull(model)
+    assertEquals("par", model.primary_instance?.record_schema?.sms_prefix)
+    assertEquals("#", model.primary_instance?.record_schema?.sms_delimiter)
+
+    val lockedBind = model.bindings.first { it.field_path == "locked" }
+    assertEquals("lck", lockedBind.sms_tag)
+
+    val stateBind = model.bindings.first { it.field_path == "state" }
+    assertFalse(stateBind.read_only)
+    assertEquals("/data/locked = 'yes'", stateBind.read_only_expression)
+
+    val countyControl =
+      formDef.view?.components?.mapNotNull { it.control }?.first { it.field_ref == "county" }
+    assertNotNull(countyControl)
+    assertEquals("counties", countyControl.itemset?.instance_id)
+    assertEquals("counties/county", countyControl.itemset?.nodeset_path)
+    assertEquals("state = /data/state", countyControl.itemset?.nodeset_filter)
+
+    val repeat = formDef.view?.components?.mapNotNull { it.repeat }?.first()
+    assertNotNull(repeat)
+    assertEquals("rep", repeat.field_ref)
+    assertEquals("current()/../count", repeat.count_expression)
+    assertEquals(1, repeat.actions.size)
+    assertEquals("rep/seq", repeat.actions.first().target_field)
+    assertEquals("item_name", repeat.components.first().control?.field_ref)
+
+    // Verify full round-trip through XML, ProtoJson, and TextProto
+    val roundTrippedXml =
+      XFormsXmlSerializer.deserializeFormDef(XFormsXmlSerializer.serialize(formDef))
+    assertEquals(formDef, roundTrippedXml)
+
+    val roundTrippedJson =
+      ProtoJsonSerializer.deserializeFormDef(ProtoJsonSerializer.serializeFormDef(formDef))
+    assertEquals(formDef, roundTrippedJson)
+
+    val roundTrippedTextProto =
+      TextProtoSerializer.deserializeFormDef(TextProtoSerializer.serializeFormDef(formDef))
+    assertEquals(formDef, roundTrippedTextProto)
   }
 }

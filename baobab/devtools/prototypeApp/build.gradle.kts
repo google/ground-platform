@@ -15,6 +15,7 @@ plugins {
   kotlin("multiplatform") version "2.4.20"
   id("org.jetbrains.compose") version "1.12.0"
   id("org.jetbrains.kotlin.plugin.compose") version "2.4.20"
+  id("com.android.library") version "8.5.2"
   id("com.ncorti.ktfmt.gradle") version "0.27.0"
 }
 
@@ -29,6 +30,10 @@ ktfmt { googleStyle() }
 val devServerPort = project.findProperty("port")?.toString()?.toIntOrNull() ?: 8091
 
 kotlin {
+  androidTarget {
+    compilerOptions { jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17) }
+  }
+
   jvm { testRuns["test"].executionTask.configure { useJUnitPlatform() } }
 
   @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
@@ -56,9 +61,9 @@ kotlin {
   sourceSets {
     val commonMain by getting {
       dependencies {
-        implementation("org.groundplatform.v2:protoforms:2.0.0-SNAPSHOT")
-        implementation("org.groundplatform.v2:protoforms-ui:2.0.0-SNAPSHOT")
-        implementation("org.groundplatform.v2:map:2.0.0-SNAPSHOT")
+        api("org.groundplatform.v2:protoforms:2.0.0-SNAPSHOT")
+        api("org.groundplatform.v2:protoforms-ui:2.0.0-SNAPSHOT")
+        api("org.groundplatform.v2:map:2.0.0-SNAPSHOT")
         implementation(compose.runtime)
         implementation(compose.foundation)
         implementation(compose.material3)
@@ -135,5 +140,15 @@ tasks.withType<ProcessResources>().configureEach {
   duplicatesStrategy = DuplicatesStrategy.EXCLUDE
   from(file("../../shared/ui/src/commonMain/composeResources")) {
     into("composeResources/org.groundplatform.v2.core.forms.ui.resources")
+  }
+}
+
+android {
+  namespace = "org.groundplatform.v2.devtools.prototypeapp"
+  compileSdk = 35
+  defaultConfig { minSdk = 24 }
+  compileOptions {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
   }
 }

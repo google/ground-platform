@@ -91,8 +91,16 @@ internal object FormDefXmlDeserializer {
     val rootName = primaryRootEl?.localName ?: "data"
     val formId = primaryRootEl?.attr("id") ?: rootName
     val version = primaryRootEl?.attr("version") ?: primaryRootEl?.attr("orx:version") ?: ""
-    val smsPrefix = primaryRootEl?.attr("prefix") ?: primaryRootEl?.attr("jr:prefix") ?: ""
-    val smsDelimiter = primaryRootEl?.attr("delimiter") ?: primaryRootEl?.attr("jr:delimiter") ?: ""
+    val smsPrefix =
+      primaryRootEl?.attr("prefix")
+        ?: primaryRootEl?.attr("jr:prefix")
+        ?: primaryRootEl?.attr("odk:prefix")
+        ?: ""
+    val smsDelimiter =
+      primaryRootEl?.attr("delimiter")
+        ?: primaryRootEl?.attr("jr:delimiter")
+        ?: primaryRootEl?.attr("odk:delimiter")
+        ?: ""
 
     // Secondary instances
     val secondaryInstances =
@@ -112,6 +120,15 @@ internal object FormDefXmlDeserializer {
 
     // Bindings (<bind>)
     val bindElements = modelEl?.childrenNamed("bind") ?: emptyList()
+    val bindIdToNodeset = buildMap {
+      for (b in bindElements) {
+        val id = b.attr("id")
+        val ns = b.attr("nodeset") ?: b.attr("ref")
+        if (!id.isNullOrEmpty() && !ns.isNullOrEmpty()) {
+          put(id, ns)
+        }
+      }
+    }
     val rawBindings = bindElements.map { parseFieldBinding(it, rootName) }
 
     // Model-level actions (<setvalue>, <odk:setgeopoint>)
@@ -119,7 +136,14 @@ internal object FormDefXmlDeserializer {
       modelEl
         ?.childElements
         ?.filter { it.localName == "setvalue" || it.localName == "setgeopoint" }
-        ?.map { parseActionDef(it, rootName) } ?: emptyList()
+        ?.map {
+          parseActionDef(
+            actionEl = it,
+            rootName = rootName,
+            enclosingPath = "",
+            bindIdToNodeset = bindIdToNodeset,
+          )
+        } ?: emptyList()
 
     // Parse view hierarchy (<h:body>) first so we can infer Repeat/Select types and control
     // bindings
@@ -132,6 +156,7 @@ internal object FormDefXmlDeserializer {
         parseViewDef(
           bodyEl = it,
           rootName = rootName,
+          bindIdToNodeset = bindIdToNodeset,
           repeatPaths = repeatPaths,
           selectOnePaths = selectOnePaths,
           selectMultiplePaths = selectMultiplePaths,
@@ -301,7 +326,14 @@ internal object FormDefXmlDeserializer {
     val fieldPath = stripRootPrefix(rawNodeset, rootName)
     val typeStr = bindEl.attr("type") ?: ""
     val dataType = mapXFormsTypeToDataType(typeStr)
-    val readOnly = parseBoolExpr(bindEl.attr("readonly"))
+    val rawReadOnly = bindEl.attr("readonly")?.trim() ?: ""
+    val readOnly = parseBoolExpr(rawReadOnly)
+    val readOnlyExpr =
+      if (!readOnly && rawReadOnly.isNotEmpty() && !isStaticFalseExpr(rawReadOnly)) {
+        rawReadOnly
+      } else {
+        ""
+      }
     val relevantExpr = bindEl.attr("relevant") ?: ""
     val calculateExpr = bindEl.attr("calculate") ?: ""
     val constraintExpr = bindEl.attr("constraint") ?: ""
@@ -313,6 +345,7 @@ internal object FormDefXmlDeserializer {
         ?: bindEl.attr("jr:smsTag")
         ?: bindEl.attr("tag")
         ?: bindEl.attr("jr:tag")
+        ?: bindEl.attr("odk:tag")
         ?: ""
     val entitySaveTo = bindEl.attr("saveto") ?: bindEl.attr("entities:saveto") ?: ""
     val maxPixels = (bindEl.attr("max-pixels") ?: bindEl.attr("orx:max-pixels"))?.toIntOrNull() ?: 0
@@ -324,6 +357,7 @@ internal object FormDefXmlDeserializer {
       field_path = fieldPath,
       type = dataType,
       read_only = readOnly,
+      read_only_expression = readOnlyExpr,
       relevant_expression = relevantExpr,
       calculate_expression = calculateExpr,
       constraint_expression = constraintExpr,
@@ -338,12 +372,21 @@ internal object FormDefXmlDeserializer {
     )
   }
 
-  private fun parseActionDef(actionEl: XmlElement, rootName: String): ActionDef {
+  private fun parseActionDef(
+    actionEl: XmlElement,
+    rootName: String,
+    enclosingPath: String = "",
+    bindIdToNodeset: Map<String, String> = emptyMap(),
+  ): ActionDef {
     val eventStr = actionEl.attr("event") ?: actionEl.attr("ev:event") ?: ""
     val events =
       eventStr.split(WHITESPACE_REGEX).filter { it.isNotEmpty() }.mapNotNull { mapEventType(it) }
-    val rawRef = actionEl.attr("ref") ?: actionEl.attr("target") ?: ""
-    val targetField = stripRootPrefix(rawRef, rootName)
+    val rawRef =
+      actionEl.attr("ref")
+        ?: actionEl.attr("target")
+        ?: actionEl.attr("bind")?.let { bindIdToNodeset[it] }
+        ?: ""
+    val targetField = resolveNodeFullPath(rawRef, rootName, enclosingPath)
 
     return when (actionEl.localName) {
       "setgeopoint" ->
@@ -516,6 +559,7 @@ internal object FormDefXmlDeserializer {
   private fun parseViewDef(
     bodyEl: XmlElement,
     rootName: String,
+    bindIdToNodeset: Map<String, String>,
     repeatPaths: MutableSet<String>,
     selectOnePaths: MutableSet<String>,
     selectMultiplePaths: MutableSet<String>,
@@ -525,6 +569,7 @@ internal object FormDefXmlDeserializer {
         containerEl = bodyEl,
         rootName = rootName,
         enclosingPath = "",
+        bindIdToNodeset = bindIdToNodeset,
         repeatPaths = repeatPaths,
         selectOnePaths = selectOnePaths,
         selectMultiplePaths = selectMultiplePaths,
@@ -536,6 +581,7 @@ internal object FormDefXmlDeserializer {
     containerEl: XmlElement,
     rootName: String,
     enclosingPath: String,
+    bindIdToNodeset: Map<String, String>,
     repeatPaths: MutableSet<String>,
     selectOnePaths: MutableSet<String>,
     selectMultiplePaths: MutableSet<String>,
@@ -554,13 +600,20 @@ internal object FormDefXmlDeserializer {
               nonLabelChildren.first() === directRepeat
           ) {
             val groupLabel = child.firstChildNamed("label")?.let { parseLabelDef(it) }
+            val wrapperRef =
+              child.attr("ref")
+                ?: child.attr("nodeset")
+                ?: child.attr("bind")?.let { bindIdToNodeset[it] }
+                ?: ""
             val repeatDef =
               parseRepeatDef(
                 repeatEl = directRepeat,
                 wrapperLabel = groupLabel,
                 wrapperAppearance = child.attr("appearance") ?: "",
+                wrapperRef = wrapperRef,
                 rootName = rootName,
                 enclosingPath = enclosingPath,
+                bindIdToNodeset = bindIdToNodeset,
                 repeatPaths = repeatPaths,
                 selectOnePaths = selectOnePaths,
                 selectMultiplePaths = selectMultiplePaths,
@@ -572,6 +625,7 @@ internal object FormDefXmlDeserializer {
                 groupEl = child,
                 rootName = rootName,
                 enclosingPath = enclosingPath,
+                bindIdToNodeset = bindIdToNodeset,
                 repeatPaths = repeatPaths,
                 selectOnePaths = selectOnePaths,
                 selectMultiplePaths = selectMultiplePaths,
@@ -585,8 +639,10 @@ internal object FormDefXmlDeserializer {
               repeatEl = child,
               wrapperLabel = null,
               wrapperAppearance = "",
+              wrapperRef = "",
               rootName = rootName,
               enclosingPath = enclosingPath,
+              bindIdToNodeset = bindIdToNodeset,
               repeatPaths = repeatPaths,
               selectOnePaths = selectOnePaths,
               selectMultiplePaths = selectMultiplePaths,
@@ -605,6 +661,7 @@ internal object FormDefXmlDeserializer {
               controlEl = child,
               rootName = rootName,
               enclosingPath = enclosingPath,
+              bindIdToNodeset = bindIdToNodeset,
               selectOnePaths = selectOnePaths,
               selectMultiplePaths = selectMultiplePaths,
             )
@@ -618,12 +675,17 @@ internal object FormDefXmlDeserializer {
     groupEl: XmlElement,
     rootName: String,
     enclosingPath: String,
+    bindIdToNodeset: Map<String, String>,
     repeatPaths: MutableSet<String>,
     selectOnePaths: MutableSet<String>,
     selectMultiplePaths: MutableSet<String>,
   ): GroupDef {
-    val rawRef = groupEl.attr("ref") ?: groupEl.attr("nodeset") ?: ""
-    val fullPath = stripRootPrefix(rawRef, rootName)
+    val rawRef =
+      groupEl.attr("ref")
+        ?: groupEl.attr("nodeset")
+        ?: groupEl.attr("bind")?.let { bindIdToNodeset[it] }
+        ?: ""
+    val fullPath = resolveNodeFullPath(rawRef, rootName, enclosingPath)
     val relativeRef = relativizePath(fullPath, enclosingPath)
     val nextEnclosingPath = if (fullPath.isNotEmpty()) fullPath else enclosingPath
 
@@ -637,6 +699,7 @@ internal object FormDefXmlDeserializer {
         containerEl = groupEl,
         rootName = rootName,
         enclosingPath = nextEnclosingPath,
+        bindIdToNodeset = bindIdToNodeset,
         repeatPaths = repeatPaths,
         selectOnePaths = selectOnePaths,
         selectMultiplePaths = selectMultiplePaths,
@@ -655,14 +718,20 @@ internal object FormDefXmlDeserializer {
     repeatEl: XmlElement,
     wrapperLabel: LabelDef?,
     wrapperAppearance: String,
+    wrapperRef: String,
     rootName: String,
     enclosingPath: String,
+    bindIdToNodeset: Map<String, String>,
     repeatPaths: MutableSet<String>,
     selectOnePaths: MutableSet<String>,
     selectMultiplePaths: MutableSet<String>,
   ): RepeatDef {
-    val rawNodeset = repeatEl.attr("nodeset") ?: repeatEl.attr("ref") ?: ""
-    val fullPath = stripRootPrefix(rawNodeset, rootName)
+    val rawNodeset =
+      repeatEl.attr("nodeset")
+        ?: repeatEl.attr("ref")
+        ?: repeatEl.attr("bind")?.let { bindIdToNodeset[it] }
+        ?: wrapperRef
+    val fullPath = resolveNodeFullPath(rawNodeset, rootName, enclosingPath)
     if (fullPath.isNotEmpty()) {
       repeatPaths.add(fullPath)
     }
@@ -674,11 +743,24 @@ internal object FormDefXmlDeserializer {
     val countExpr = repeatEl.attr("count") ?: repeatEl.attr("jr:count") ?: ""
     val noAddRemove = parseBoolExpr(repeatEl.attr("noAddRemove") ?: repeatEl.attr("jr:noAddRemove"))
 
+    val actions =
+      repeatEl.childElements
+        .filter { it.localName == "setvalue" || it.localName == "setgeopoint" }
+        .map {
+          parseActionDef(
+            actionEl = it,
+            rootName = rootName,
+            enclosingPath = nextEnclosingPath,
+            bindIdToNodeset = bindIdToNodeset,
+          )
+        }
+
     val children =
       parseViewComponents(
         containerEl = repeatEl,
         rootName = rootName,
         enclosingPath = nextEnclosingPath,
+        bindIdToNodeset = bindIdToNodeset,
         repeatPaths = repeatPaths,
         selectOnePaths = selectOnePaths,
         selectMultiplePaths = selectMultiplePaths,
@@ -691,6 +773,7 @@ internal object FormDefXmlDeserializer {
       count_expression = countExpr,
       no_add_remove = noAddRemove,
       components = children,
+      actions = actions,
     )
   }
 
@@ -698,11 +781,16 @@ internal object FormDefXmlDeserializer {
     controlEl: XmlElement,
     rootName: String,
     enclosingPath: String,
+    bindIdToNodeset: Map<String, String>,
     selectOnePaths: MutableSet<String>,
     selectMultiplePaths: MutableSet<String>,
   ): ControlDef {
-    val rawRef = controlEl.attr("ref") ?: controlEl.attr("nodeset") ?: ""
-    val fullPath = stripRootPrefix(rawRef, rootName)
+    val rawRef =
+      controlEl.attr("ref")
+        ?: controlEl.attr("nodeset")
+        ?: controlEl.attr("bind")?.let { bindIdToNodeset[it] }
+        ?: ""
+    val fullPath = resolveNodeFullPath(rawRef, rootName, enclosingPath)
     val relativeRef = relativizePath(fullPath, enclosingPath)
 
     val controlType =
@@ -778,7 +866,14 @@ internal object FormDefXmlDeserializer {
     val actions =
       controlEl.childElements
         .filter { it.localName == "setvalue" || it.localName == "setgeopoint" }
-        .map { parseActionDef(it, rootName) }
+        .map {
+          parseActionDef(
+            actionEl = it,
+            rootName = rootName,
+            enclosingPath = enclosingPath,
+            bindIdToNodeset = bindIdToNodeset,
+          )
+        }
 
     return ControlDef(
       field_ref = relativeRef,
@@ -841,6 +936,7 @@ internal object FormDefXmlDeserializer {
     val seedExpr = if (commaIdx != -1) unwrapped.substring(commaIdx + 1).trim() else ""
 
     val instanceId = extractInstanceId(nodeset)
+    val nodesetPath = extractInstanceNodesetPath(nodeset)
     val bracketStart = nodeset.indexOf('[')
     val bracketEnd = nodeset.lastIndexOf(']')
     val filter =
@@ -860,6 +956,7 @@ internal object FormDefXmlDeserializer {
       label_ref = labelRef,
       randomize = isRandomize,
       random_seed_expression = seedExpr,
+      nodeset_path = nodesetPath,
     )
   }
 
@@ -872,6 +969,23 @@ internal object FormDefXmlDeserializer {
     val quoteEnd = nodeset.indexOf(quoteChar, quoteStart + 1)
     if (quoteEnd == -1) return ""
     return nodeset.substring(quoteStart + 1, quoteEnd)
+  }
+
+  private fun extractInstanceNodesetPath(nodeset: String): String {
+    val instStart = nodeset.indexOf("instance(")
+    if (instStart == -1) return ""
+    val closeParen = nodeset.indexOf(')', instStart + 9)
+    if (closeParen == -1) return ""
+    val afterInstance = nodeset.substring(closeParen + 1).trim()
+    val bracketStart = afterInstance.indexOf('[')
+    val rawPath =
+      if (bracketStart != -1) {
+        afterInstance.substring(0, bracketStart).trim()
+      } else {
+        afterInstance
+      }
+    val cleaned = rawPath.removePrefix("/").removeSuffix("/")
+    return if (cleaned == "root/item" || cleaned.isEmpty()) "" else cleaned
   }
 
   private fun findTopLevelComma(input: String): Int {
@@ -917,12 +1031,45 @@ internal object FormDefXmlDeserializer {
   }
 
   internal fun stripRootPrefix(path: String, rootName: String): String {
-    val trimmed = path.trim()
+    var trimmed = path.trim()
+    if (trimmed.startsWith("current()/")) {
+      trimmed = trimmed.removePrefix("current()/")
+    }
+    if (trimmed.startsWith("./")) {
+      trimmed = trimmed.removePrefix("./")
+    }
     val prefix = "/$rootName/"
     return when {
       trimmed.startsWith(prefix) -> trimmed.removePrefix(prefix)
       trimmed == "/$rootName" -> ""
       else -> trimmed.removePrefix("/")
+    }
+  }
+
+  private fun resolveNodeFullPath(
+    rawRef: String,
+    rootName: String,
+    enclosingPath: String,
+  ): String {
+    var cleaned = rawRef.trim()
+    if (cleaned.isEmpty()) return ""
+    if (cleaned.startsWith("current()/")) {
+      cleaned = cleaned.removePrefix("current()/")
+    }
+    if (cleaned.startsWith("./")) {
+      cleaned = cleaned.removePrefix("./")
+    }
+    if (cleaned == "." || cleaned == "current()") {
+      return enclosingPath
+    }
+    val rootPrefix = "/$rootName/"
+    return when {
+      cleaned.startsWith(rootPrefix) -> cleaned.removePrefix(rootPrefix)
+      cleaned == "/$rootName" -> ""
+      cleaned.startsWith("/") -> cleaned.removePrefix("/")
+      enclosingPath.isNotEmpty() && !cleaned.startsWith("$enclosingPath/") ->
+        "$enclosingPath/$cleaned"
+      else -> cleaned
     }
   }
 
@@ -991,6 +1138,14 @@ internal object FormDefXmlDeserializer {
       "true()",
       "true",
       "1" -> true
+      else -> false
+    }
+
+  private fun isStaticFalseExpr(expr: String?): Boolean =
+    when (expr?.trim()?.lowercase()) {
+      "false()",
+      "false",
+      "0" -> true
       else -> false
     }
 

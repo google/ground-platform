@@ -26,6 +26,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -282,10 +286,20 @@ private fun PlaceChip(place: SurveyMarker.Place) {
       Modifier.size(16.dp).background(Color(0xFF00ACC1), CircleShape),
       contentAlignment = Alignment.Center,
     ) {
-      MarkerText("★", Color.White, 9.5.sp, FontWeight.ExtraBold)
+      Icon(
+        imageVector = Icons.Filled.Star,
+        contentDescription = null,
+        tint = Color.White,
+        modifier = Modifier.size(11.dp),
+      )
     }
     MarkerText(place.name, Color.White, 10.sp, FontWeight.Bold)
-    MarkerText("×", Color.White.copy(alpha = 0.82f), 12.sp, FontWeight.Bold)
+    Icon(
+      imageVector = Icons.Filled.Close,
+      contentDescription = "Clear selected place",
+      tint = Color.White.copy(alpha = 0.82f),
+      modifier = Modifier.size(12.dp),
+    )
   }
 }
 

@@ -1031,9 +1031,7 @@ private fun StatusRuleCard(
               selectedText = rule.operator.label,
               options = RelevanceOperator.availableFor(question.type),
               optionText = { it.label },
-              onSelect = { op ->
-                actions.updateStatusRule(index) { it.copy(operator = op) }
-              },
+              onSelect = { op -> actions.updateStatusRule(index) { it.copy(operator = op) } },
             )
             if (rule.operator.needsValue) {
               val questionChoices = question.resolvedChoices(uiState.datasets)
@@ -1045,16 +1043,12 @@ private fun StatusRuleCard(
                       ?: rule.value.ifBlank { "Pick a choice" },
                   options = questionChoices,
                   optionText = { "${it.label} (${it.value})" },
-                  onSelect = { c ->
-                    actions.updateStatusRule(index) { it.copy(value = c.value) }
-                  },
+                  onSelect = { c -> actions.updateStatusRule(index) { it.copy(value = c.value) } },
                 )
               } else {
                 OutlinedTextField(
                   value = rule.value,
-                  onValueChange = { v ->
-                    actions.updateStatusRule(index) { it.copy(value = v) }
-                  },
+                  onValueChange = { v -> actions.updateStatusRule(index) { it.copy(value = v) } },
                   label = { Text("Value") },
                   singleLine = true,
                   modifier = Modifier.fillMaxWidth(),
@@ -1084,16 +1078,12 @@ private fun StatusRuleCard(
               selectedText = rule.operator.label,
               options = SaveToRules.operatorsForProperty(prop.kind),
               optionText = { it.label },
-              onSelect = { op ->
-                actions.updateStatusRule(index) { it.copy(operator = op) }
-              },
+              onSelect = { op -> actions.updateStatusRule(index) { it.copy(operator = op) } },
             )
             if (rule.operator.needsValue) {
               OutlinedTextField(
                 value = rule.value,
-                onValueChange = { v ->
-                  actions.updateStatusRule(index) { it.copy(value = v) }
-                },
+                onValueChange = { v -> actions.updateStatusRule(index) { it.copy(value = v) } },
                 label = { Text("Value") },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
