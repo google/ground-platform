@@ -32,7 +32,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
@@ -44,9 +43,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.ClipOp
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathEffect
@@ -55,7 +54,6 @@ import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.clipPath
-import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -127,122 +125,131 @@ fun MobileScreenHost(state: PrototypeAppState) {
 }
 
 /**
- * Renders the Ground 2.0 Bichromatic "Windswept Savanna Cloud-Acacia" vector logo
- * (`shared/assets/logo.svg` • `viewBox="0 0 512 512"`).
+ * Renders the Ground 2.0 3-Tone World Lens Badge "Windswept Savanna & Tapered-Wingtip Base" vector
+ * logo (`shared/assets/logo.svg` • Variant 1C-4 • `viewBox="0 0 512 512"`).
  */
 @Composable
 fun CloudAcaciaLogo(modifier: Modifier = Modifier) {
-  val isOnDarkSurface = LocalContentColor.current.luminance() > 0.5f
-  val primaryForest = if (isOnDarkSurface) Color(0xFFA3D9A8) else Color(0xFF1B4D2E)
-  val accentAmber = Color(0xFFE59A0C)
-
   Canvas(modifier = modifier) {
     val s = size.minDimension / 512f
     fun sx(x: Float) = x * s
     fun sy(y: Float) = y * s
 
-    val mediumStroke = Stroke(width = sx(4f), cap = StrokeCap.Round, join = StrokeJoin.Round)
-    val accentStroke = Stroke(width = sx(3f), cap = StrokeCap.Round, join = StrokeJoin.Round)
+    val deepWoodland = Color(0xFF153B1E)
+    val softSageSky = Color(0xFF9CD49F)
+    val savannaSunAmber = Color(0xFFFFE082)
 
-    // Negative-space exclusion masks for the horizon sunrise dome
-    val horizonMaskPath =
+    val aboveGroundClipPath =
       Path().apply {
-        moveTo(sx(0f), sy(368f))
-        lineTo(sx(84f), sy(368f))
-        cubicTo(sx(180f), sy(402f), sx(340f), sy(400f), sx(432f), sy(364f))
-        lineTo(sx(512f), sy(364f))
-        lineTo(sx(512f), sy(512f))
-        lineTo(sx(0f), sy(512f))
+        moveTo(sx(0f), sy(0f))
+        lineTo(sx(512f), sy(0f))
+        lineTo(sx(512f), sy(436f))
+        cubicTo(sx(340f), sy(398f), sx(172f), sy(402f), sx(0f), sy(444f))
         close()
       }
 
-    val trunkMoatMaskPath =
+    val lensClipPath =
       Path().apply {
-        moveTo(sx(191f), sy(406f))
-        cubicTo(sx(211f), sy(362f), sx(227f), sy(316f), sx(233f), sy(244f))
-        lineTo(sx(291f), sy(244f))
-        cubicTo(sx(285f), sy(316f), sx(281f), sy(362f), sx(301f), sy(406f))
-        close()
-      }
-
-    // 1. Accent Color (#E59A0C): Off-Center Horizon Sunrise Dome (Split by Curved Moat)
-    clipPath(horizonMaskPath, clipOp = ClipOp.Difference) {
-      clipPath(trunkMoatMaskPath, clipOp = ClipOp.Difference) {
-        drawCircle(
-          color = accentAmber,
-          radius = sx(99f),
-          center = Offset(sx(268f), sy(386f)),
+        addOval(
+          Rect(
+            left = sx(40f),
+            top = sy(40f),
+            right = sx(472f),
+            bottom = sy(472f),
+          )
         )
+      }
+
+    clipPath(aboveGroundClipPath) {
+      // 1. Tone 1 (#153B1E): Outer World Lens Ring (cx=256, cy=256, r=236)
+      drawCircle(
+        color = deepWoodland,
+        radius = sx(236f),
+        center = Offset(sx(256f), sy(256f)),
+      )
+
+      clipPath(lensClipPath) {
+        // 2. Tone 2 (#9CD49F): Soft Sage Sky Lens (cx=256, cy=256, r=216)
+        drawCircle(
+          color = softSageSky,
+          radius = sx(216f),
+          center = Offset(sx(256f), sy(256f)),
+        )
+
+        // 3. Tone 3 (#FFE082): Soft Savanna Sun-Amber Disc (cx=256, cy=288, r=142)
+        drawCircle(
+          color = savannaSunAmber,
+          radius = sx(142f),
+          center = Offset(sx(256f), sy(288f)),
+        )
+
+        // 4. Tone 1 (#153B1E): Windswept Umbrella Acacia Upper Crown
+        val upperCrownPath =
+          Path().apply {
+            moveTo(sx(94f), sy(186f))
+            cubicTo(sx(88f), sy(168f), sx(120f), sy(122f), sx(180f), sy(126f))
+            cubicTo(sx(208f), sy(94f), sx(272f), sy(90f), sx(310f), sy(122f))
+            cubicTo(sx(354f), sy(110f), sx(416f), sy(134f), sx(430f), sy(174f))
+            cubicTo(sx(434f), sy(186f), sx(420f), sy(194f), sx(394f), sy(192f))
+            cubicTo(sx(330f), sy(184f), sx(206f), sy(186f), sx(124f), sy(194f))
+            cubicTo(sx(104f), sy(196f), sx(96f), sy(194f), sx(94f), sy(186f))
+            close()
+          }
+        drawPath(path = upperCrownPath, color = deepWoodland)
+
+        // 5. Tone 1 (#153B1E): Windswept Lower-Left Cloud Bough
+        val lowerLeftBoughPath =
+          Path().apply {
+            moveTo(sx(68f), sy(260f))
+            cubicTo(sx(64f), sy(242f), sx(92f), sy(212f), sx(136f), sy(216f))
+            cubicTo(sx(172f), sy(208f), sx(210f), sy(226f), sx(218f), sy(250f))
+            cubicTo(sx(222f), sy(264f), sx(206f), sy(272f), sx(184f), sy(270f))
+            cubicTo(sx(152f), sy(266f), sx(116f), sy(268f), sx(88f), sy(272f))
+            cubicTo(sx(74f), sy(274f), sx(70f), sy(268f), sx(68f), sy(260f))
+            close()
+          }
+        drawPath(path = lowerLeftBoughPath, color = deepWoodland)
+
+        // 6. Tone 1 (#153B1E): Windswept S-Curve Trunk & Crescent Left Branch
+        val trunkPath =
+          Path().apply {
+            moveTo(sx(200f), sy(412f))
+            cubicTo(sx(222f), sy(376f), sx(235f), sy(340f), sx(240f), sy(308f))
+            cubicTo(sx(200f), sy(302f), sx(164f), sy(288f), sx(138f), sy(264f))
+            lineTo(sx(154f), sy(264f))
+            cubicTo(sx(178f), sy(280f), sx(212f), sy(286f), sx(246f), sy(286f))
+            cubicTo(sx(254f), sy(250f), sx(266f), sy(214f), sx(278f), sy(182f))
+            lineTo(sx(296f), sy(182f))
+            cubicTo(sx(282f), sy(218f), sx(273f), sy(256f), sx(271f), sy(298f))
+            cubicTo(sx(269f), sy(340f), sx(278f), sy(376f), sx(300f), sy(412f))
+            close()
+          }
+        drawPath(path = trunkPath, color = deepWoodland)
       }
     }
 
-    // 2. Accent Color (#E59A0C): Medium Tapered Crescent Community Underline
-    val communityUnderlinePath =
+    // 7. Tone 1 (#153B1E): Tapered-Wingtip Wide Savanna Base Arch (x=16..496)
+    val baseArchPath =
       Path().apply {
-        moveTo(sx(150f), sy(438f))
-        cubicTo(sx(146f), sy(437f), sx(146f), sy(433f), sx(150f), sy(433f))
-        cubicTo(sx(224f), sy(450f), sx(308f), sy(448f), sx(376f), sy(428f))
-        cubicTo(sx(380f), sy(427f), sx(381f), sy(431f), sx(378f), sy(433f))
-        cubicTo(sx(308f), sy(468f), sx(220f), sy(470f), sx(150f), sy(438f))
+        moveTo(sx(16f), sy(458f))
+        cubicTo(sx(16f), sy(442f), sx(156f), sy(384f), sx(256f), sy(382f))
+        cubicTo(sx(356f), sy(380f), sx(496f), sy(434f), sx(496f), sy(450f))
+        cubicTo(sx(496f), sy(464f), sx(472f), sy(468f), sx(436f), sy(462f))
+        cubicTo(sx(340f), sy(444f), sx(172f), sy(448f), sx(76f), sy(468f))
+        cubicTo(sx(40f), sy(474f), sx(16f), sy(470f), sx(16f), sy(458f))
         close()
       }
-    drawPath(path = communityUnderlinePath, color = accentAmber)
-    drawPath(path = communityUnderlinePath, color = accentAmber, style = accentStroke)
+    drawPath(path = baseArchPath, color = deepWoodland)
 
-    // 3. Primary Color (#1B4D2E): Asymmetric 2-Dome Windswept Cloud-Canopy Ribbon
-    val cloudCanopyPath =
+    // 8. Tone 2 (#9CD49F): Tapered Horizontal Sage Accent Line
+    val horizonAccentPath =
       Path().apply {
-        moveTo(sx(118f), sy(264f))
-        cubicTo(sx(74f), sy(256f), sx(48f), sy(218f), sx(56f), sy(172f))
-        cubicTo(sx(64f), sy(128f), sx(106f), sy(98f), sx(156f), sy(106f))
-        cubicTo(sx(188f), sy(56f), sx(250f), sy(34f), sx(314f), sy(48f))
-        cubicTo(sx(380f), sy(62f), sx(436f), sy(112f), sx(450f), sy(176f))
-        cubicTo(sx(458f), sy(214f), sx(436f), sy(248f), sx(398f), sy(254f))
-        cubicTo(sx(393f), sy(255f), sx(391f), sy(249f), sx(396f), sy(247f))
-        cubicTo(sx(424f), sy(236f), sx(436f), sy(208f), sx(428f), sy(176f))
-        cubicTo(sx(416f), sy(124f), sx(368f), sy(82f), sx(308f), sy(70f))
-        cubicTo(sx(252f), sy(58f), sx(196f), sy(78f), sx(170f), sy(124f))
-        cubicTo(sx(167f), sy(129f), sx(160f), sy(131f), sx(154f), sy(129f))
-        cubicTo(sx(114f), sy(118f), sx(82f), sy(140f), sx(76f), sy(176f))
-        cubicTo(sx(70f), sy(212f), sx(92f), sy(244f), sx(122f), sy(256f))
-        cubicTo(sx(127f), sy(258f), sx(124f), sy(265f), sx(118f), sy(264f))
+        moveTo(sx(96f), sy(446f))
+        cubicTo(sx(186f), sy(408f), sx(322f), sy(404f), sx(412f), sy(438f))
+        cubicTo(sx(322f), sy(420f), sx(188f), sy(424f), sx(96f), sy(446f))
         close()
       }
-    drawPath(path = cloudCanopyPath, color = primaryForest)
-    drawPath(path = cloudCanopyPath, color = primaryForest, style = mediumStroke)
-
-    // 4. Primary Color (#1B4D2E): S-Curve Acacia Trunk & Asymmetric Branches
-    val acaciaTrunkPath =
-      Path().apply {
-        moveTo(sx(214f), sy(402f))
-        cubicTo(sx(232f), sy(362f), sx(248f), sy(316f), sx(252f), sy(268f))
-        cubicTo(sx(228f), sy(248f), sx(192f), sy(224f), sx(158f), sy(188f))
-        cubicTo(sx(154f), sy(184f), sx(159f), sy(179f), sx(164f), sy(183f))
-        cubicTo(sx(198f), sy(212f), sx(230f), sy(232f), sx(254f), sy(246f))
-        cubicTo(sx(262f), sy(204f), sx(286f), sy(164f), sx(326f), sy(128f))
-        cubicTo(sx(330f), sy(124f), sx(336f), sy(129f), sx(332f), sy(134f))
-        cubicTo(sx(298f), sy(170f), sx(278f), sy(206f), sx(270f), sy(242f))
-        cubicTo(sx(296f), sy(226f), sx(326f), sy(208f), sx(358f), sy(184f))
-        cubicTo(sx(362f), sy(181f), sx(367f), sy(186f), sx(363f), sy(190f))
-        cubicTo(sx(332f), sy(218f), sx(300f), sy(240f), sx(268f), sy(258f))
-        cubicTo(sx(264f), sy(310f), sx(266f), sy(360f), sx(280f), sy(402f))
-        close()
-      }
-    drawPath(path = acaciaTrunkPath, color = primaryForest)
-    drawPath(path = acaciaTrunkPath, color = primaryForest, style = mediumStroke)
-
-    // 5. Primary Color (#1B4D2E): Asymmetric Tapered Crescent Earth Horizon
-    val earthHorizonPath =
-      Path().apply {
-        moveTo(sx(78f), sy(390f))
-        cubicTo(sx(74f), sy(388f), sx(76f), sy(383f), sx(80f), sy(384f))
-        cubicTo(sx(176f), sy(410f), sx(338f), sy(406f), sx(432f), sy(376f))
-        cubicTo(sx(436f), sy(375f), sx(438f), sy(380f), sx(434f), sy(382f))
-        cubicTo(sx(340f), sy(430f), sx(174f), sy(434f), sx(78f), sy(390f))
-        close()
-      }
-    drawPath(path = earthHorizonPath, color = primaryForest)
-    drawPath(path = earthHorizonPath, color = primaryForest, style = mediumStroke)
+    drawPath(path = horizonAccentPath, color = softSageSky)
   }
 }
 
