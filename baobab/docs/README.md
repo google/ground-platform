@@ -58,6 +58,9 @@ for Ground 2.0.
             ACL/quotas.
         -   [`data/`](technical/model/data/01-entity-records.md): Operational
             entity, submission, and audit record specifications.
+        -   [`library/`](technical/model/library/00-introduction.md):
+            Organization libraries—concepts (the dictionary), form templates,
+            Purpose Packs, and export profiles.
 -   **[`ux/`](ux/)**:
     -   [`content-guidelines.md`](ux/content-guidelines.md): Ground 2.0 UX
         writing standards, voice and tone, domain terminology, and content

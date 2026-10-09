@@ -17,7 +17,7 @@
 # Product Requirements
 
 Authors: [Gino Miceli](https://github.com/gino-m) \
-Last modified: 2026-09-24
+Last modified: 2026-10-09
 
 ## Overview
 
@@ -105,7 +105,7 @@ To support both single-visit surveys and multi-year monitoring campaigns (such a
 *   **Visual WYSIWYG Form Designer**:
     *   Build and reorder questions, nested groups, and repeating loops visually with contextual guidance cards—no coding or spreadsheet editing required.
     *   **Automatic Entity Sync**: Creating or editing a form automatically provisions and updates its backing Map feature schema (`save_to` bindings) behind the scenes, while allowing multi-form surveys to target shared site layers.
-    *   **Quick-Start & Organizational Templates**: Launch simple point-drop or boundary-walk surveys in seconds using global starter templates, or save custom organizational templates to standardize surveys across teams.
+    *   **Quick-Start & Organizational Templates**: Launch simple point-drop or boundary-walk surveys in seconds using global starter templates, or save custom organizational templates (with their dictionary links) to standardize surveys across teams. Templates live in organization libraries alongside purposes and dictionary concepts.
     *   **Cross-Survey Form Copy/Paste**: Duplicate entire forms (preserving logic, choices, and styling) within a survey or across different surveys.
     *   **Custom Map Layer Styling**: Configure layer order, default visibility, fill/stroke colors, and marker symbols for site layers.
 *   **Live Interactive Dual Previews (Mobile & Web)**:
@@ -183,12 +183,14 @@ Ground 2.0 integrates **Collect Earth Online (CEO)** directly into the Web Conso
     *   **Google Drive-Style Access Controls**: Share surveys as **`Restricted`** (explicit email ACL with bulk paste and automated email invites), **`Accessible via Link / QR Code`** (instant onboarding by scanning a QR code in the field), or **`Public`** (open directory for citizen science).
     *   **Peer Visibility & Consent**: Organizers control whether collectors can see peers' submissions on the map or only their own, and can embed custom informed-consent questions directly inside forms without rigid app-level onboarding hurdles.
 *   **Built-In Impact Measurement (MAP Framework)**:
-    *   Organizers tag surveys and bind spatial metrics or calculated fields to the **MAP pillars**:
+    *   Organizers choose one or more **purposes** when creating a survey (e.g., *EUDR due diligence*, *Restoration monitoring (FERM)*, *Producer registration*). Each purpose (*Purpose Pack*) seeds starter forms whose questions are linked to standard **dictionary concepts**, and Ground maps purposes and concepts to the **MAP pillars** behind the scenes:
         *   **Mitigation**: Hectares under restoration/afforestation, multi-wave tree survival rates, canopy density, and carbon/biomass indicators.
         *   **Adaptation**: Smallholder farmers and cooperatives registered, climate-resilient agroforestry adoption, and market-access readiness.
         *   **Protection**: Intact forest and buffer hectares monitored, deforestation-free plot boundaries verified (e.g., EUDR), disturbance alerts ground-truthed, and community tenure mapped.
+    *   **Dictionary Linking**: While typing a question label in the Form Designer, organizers see non-intrusive suggestions from the dictionary; selecting one links the question (and fills in the type and choices for new questions) so its answers aggregate consistently across surveys and languages.
+    *   **Organization Libraries**: Purposes, form templates, and dictionary concepts are defined per organization. The **"All users"** organization holds the global library that applies to every survey, curated by its Managers; organizations can add their own entries and hide global templates they don't use.
     *   Powers live **Organization & Survey MAP Dashboards** in the Web Console, a **Public Anonymized MAP Dashboard**, and **Automated Monthly Sponsor Digests**.
-    *   See **[Impact Measurement](impact-measurement.md)** for the proposed measurement approach.
+    *   See **[Impact Measurement](impact-measurement.md)** for the measurement approach and the **[library specification](../technical/model/library/00-introduction.md)** for the data model.
 
 
 ## Scale, Quotas, & Service Guardrails

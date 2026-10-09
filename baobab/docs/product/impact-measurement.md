@@ -17,11 +17,11 @@
 # Impact Measurement
 
 Authors: [Gino Miceli](https://github.com/gino-m) \
-Last modified: 2026-10-08
+Last modified: 2026-10-09
 
 ## Summary
 
-Ask about *purpose* once, when an organizer creates a survey, and give them something useful in return: a template, validation rules, an export profile, and a dashboard. Everything else can be worked out with **no extra questions in the field**. That means semantic tags on template questions, spatial overlays done on the server, "data was used" events (exports, FERM and Whisp pushes, receipts, DOIs), and checking our numbers against partner registries. Each survey then gets a 1–5 attribution score, so numbers move up a ladder: hectares mapped (output) → data used for a decision or report (outcome) → avoided loss, restored hectares, ecological integrity (impact).
+Ask about *purpose* once, when an organizer creates a survey, and give them something useful in return: a template, validation rules, an export profile, and a dashboard. Everything else can be worked out with **no extra questions in the field**. That means questions linked to a shared dictionary of standard fields, spatial overlays done on the server, "data was used" events (exports, FERM and Whisp pushes, receipts, DOIs), and checking our numbers against partner registries. Each survey then gets a 1–5 attribution score, so numbers move up a ladder: hectares mapped (output) → data used for a decision or report (outcome) → avoided loss, restored hectares, ecological integrity (impact).
 
 This document expands on the **Built-In Impact Measurement (MAP Framework)** requirement in the [Product Requirements](prd.md#governance-sharing--map-impact-dashboards).
 
@@ -37,11 +37,11 @@ This document expands on the **Built-In Impact Measurement (MAP Framework)** req
 
 ## Design Principles
 
-*   **Purposes, not pillars, in the UI.** Organizers think "EUDR due diligence" or "FERM restoration report", not "Mitigation". Ground maps each purpose to a MAP pillar behind the scenes. This proposal replaces the current PRD wording in which organizers tag MAP pillars directly.
+*   **Purposes, not pillars, in the UI.** Organizers think "EUDR due diligence" or "FERM restoration report", not "Mitigation". Ground maps each purpose to a MAP pillar behind the scenes.
 *   **Tagging must pay for itself.** Choosing a purpose unlocks something the organizer wants anyway: a starter form, compliance checks, a partner export, a funder report. If it feels like a tax, people will pick "Other".
 *   **Field collectors never answer Ground's questions.** Field-side signals come only from questions the organizer wanted anyway (via templates) or from passive metadata.
 *   **Count unique hectares, not cumulative ones.** Use GeoID to remove duplicates across monitoring waves, surveys, and organizations so the same plot is never counted twice.
-*   **Aggregate before data leaves the organization.** Only cell-level areas and counts (e.g., H3 cells) feed platform-wide metrics. Raw geometries stay with the organization.
+*   **Aggregate before data leaves the organization.** Only cell-level areas and counts (S2 cells) feed platform-wide metrics. Raw geometries stay with the organization.
 
 ## The Measurement Ladder
 
@@ -59,7 +59,7 @@ flowchart LR
 
 ### Purpose Packs at Survey Creation
 
-One multi-select step in the Survey Designer: **"What will this data be used for?"** Each choice is a *Purpose Pack*: a starter form, semantic tags, validation rules, an export profile, and a hidden MAP mapping.
+One multi-select step in the Survey Designer: **"What will this data be used for?"** Each choice is a *Purpose Pack*: starter forms with dictionary-linked questions, validation rules, an export profile, and a hidden MAP mapping. The global packs below are available to everyone; organizations can add their own (see [Organization Libraries](#organization-libraries)).
 
 <!-- mdformat off -->
 
@@ -76,11 +76,24 @@ One multi-select step in the Survey Designer: **"What will this data be used for
 
 <!-- mdformat on -->
 
-### Semantic Indicator Tags on Template Questions
+### Dictionary-Linked Questions
 
-*   Template questions carry a machine-readable tag (an XLSForm custom column such as `ground::indicator`, e.g., `ferm.area_under_restoration`, `eudr.commodity`, `pame.threat_type`, `restoration.trees_surviving`).
-*   Organizers can change labels, languages, and logic freely. As long as the tag stays, Ground can roll answers up across thousands of different surveys without asking anything new.
-*   Tags line up with external vocabularies so they mean something outside Ground: FERM indicators, EUDR Article 9 fields, METT-4 items, and FAO LCCS / FRA classes.
+*   Template questions are linked to **concepts** in the dictionary (e.g., `eudr.commodity`, `ferm.area_under_restoration_ha`, `pame.threat_type`, `ferm.trees_surviving`). In forms, a link is a `ground:concept` bind attribute (XLSForm column `bind::ground:concept`); other XForms tools ignore it, so forms stay portable.
+*   Organizers can change labels, languages, and logic freely. As long as the link stays, Ground can roll answers up across thousands of different surveys without asking anything new.
+*   Organizers can also link their own questions: typing a question label shows non-intrusive suggestions from the dictionary, and selecting one links the question (and, for new questions, fills in the type and choices).
+*   Concepts line up with external vocabularies so they mean something outside Ground: FERM indicators, EUDR Article 9 fields, METT-4 items, FAO LCCS / FRA classes, HS codes, and AGROVOC.
+
+See [Concepts and the Dictionary](../technical/model/library/01-concepts.md) for the schema.
+
+### Organization Libraries
+
+Purpose Packs, form templates, and dictionary concepts live in **organization libraries**. The synthetic **"All users"** organization holds the **global library**, which applies to every survey; each organization can add its own entries on top. Managers of "All users" curate the global library.
+
+*   **Resolution**: a survey sees its organization's entries plus the global ones; personal surveys see only global entries.
+*   **Hiding**: organizations can hide global templates (and the Purpose Packs built on them) they don't use.
+*   **Organization concepts** use an `org.<organization_id>.` prefix, so they can never redefine a global concept. They feed the organization's own dashboards. If an organization suggests a MAP goal for one of its concepts, the global dashboard reports it separately under **Organization-suggested indicators**, never added to the main goal totals. Widely used organization concepts can be promoted to the global library.
+
+See the [library specification](../technical/model/library/00-introduction.md) for details.
 
 ### Server-Side Spatial Overlays (No User Input)
 
@@ -176,16 +189,21 @@ Give each survey a 1–5 score automatically, using its purpose, outcome signals
 ## Guardrails
 
 *   **Open-source telemetry**: aggregate impact metrics must be documented, disclosed in the privacy policy, approved through Open Foris governance, and possible to turn off. Self-hosted instances report nothing unless they opt in.
-*   **Sensitive locations**: blur or suppress patrol routes, protected area threat reports, and IPLC sacred sites in any public dashboard (poaching and land-grab risk). Apply k-anonymity thresholds to H3 cells.
+*   **Sensitive locations**: blur or suppress patrol routes, protected area threat reports, and IPLC sacred sites in any public dashboard (poaching and land-grab risk). Apply k-anonymity thresholds to S2 cells.
 *   **Shared credit**: agree on counting rules with FAO and SIG up front, so Google's sustainability goals, FAO reporting, and funder digests use the same deduplicated numbers and nobody double-claims.
 
 ## Recommended Short List for Ground 2.0
 
 1.  **Purpose Packs** at survey creation, mapped to pillars behind the scenes. This replaces "organizers tag MAP pillars".
-2.  **Semantic indicator tags** in starter templates, plus GeoID-deduplicated aggregation.
+2.  **Organization libraries and the dictionary**: global and organization-level concepts, templates, and packs; dictionary-linked questions with label autocomplete; GeoID-deduplicated aggregation.
 3.  **Server-side overlays** (WDPCA, forest baseline, IPLC lands, admin boundaries) computed in Earth Engine.
 4.  **Outcome event logging** plus the one-tap **close-out question**.
 5.  **Quarterly partner-ledger check** (FERM, Whisp, UNFCCC / FRA, Zenodo) and the 1–5 attribution score.
+
+## Future Research
+
+*   **Embedding-assisted linking**: semantic and cross-language suggestions when linking questions to the dictionary, and suggested links for questions nobody linked (Ground 1.0 data, imported forms). Official totals would still count only explicit or confirmed links.
+*   **Clustering for dictionary growth**: grouping unlinked questions across surveys to find candidate global concepts, complementing the promotion of organization concepts.
 
 ## Open Questions
 

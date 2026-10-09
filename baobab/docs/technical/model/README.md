@@ -16,7 +16,7 @@
 
 # Ground 2.0 Data Model
 
-The Ground 2.0 data model is defined as Protocol Buffer (`proto3`) schemas under [`shared/protos/`](../../../shared/protos/) across three packages: **`groundplatform.v2.survey`** (surveys, map layers, entity datasets, and access control), **`groundplatform.v2.forms`** (XForms/XLSForm-compatible form definitions), and **`groundplatform.v2.data`** (stateful entity records, immutable submission records, and audit logs).
+The Ground 2.0 data model is defined as Protocol Buffer (`proto3`) schemas under [`shared/protos/`](../../../shared/protos/) across three packages: **`groundplatform.v2.survey`** (surveys, map layers, entity datasets, and access control), **`groundplatform.v2.forms`** (XForms/XLSForm-compatible form definitions), and **`groundplatform.v2.data`** (stateful entity records, immutable submission records, and audit logs). A fourth package, **`groundplatform.v2.library`**, defines organization-owned concepts (the dictionary), form templates, and Purpose Packs used by the Survey Designer.
 
 At its core, the model separates **Current State** (**Map layers** and **Data tables**, represented by `EntityDatasetDef` and `EntityRecord`) from **Immutable Transactions** (**Forms** and **Submissions**, represented by `FormDef` and `SubmissionRecord`).
 
@@ -101,3 +101,9 @@ flowchart TD
 - **[Entity Records](data/01-entity-records.md)**: `EntityRecord` stateful instances, geometries, and properties.
 - **[Submission Records](data/02-submission-records.md)**: `SubmissionRecord` transactions, `RecordMetadata`, and `RecordInstance` payloads.
 - **[Audit Records and Provenance](data/03-audit-records.md)**: `AuditInfo`, `AuditRecord`, and `FieldDelta` mutation history.
+
+### Library & Dictionary (`groundplatform.v2.library`)
+
+- **[Introduction](library/00-introduction.md)**: Organization libraries, the global "All users" library, resolution rules, and permissions.
+- **[Concepts and the Dictionary](library/01-concepts.md)**: `ConceptDef`, `CodeList`, IDs and versioning, `ConceptRef` field linking, and XForms/XLSForm serialization.
+- **[Templates and Purpose Packs](library/02-templates-and-purpose-packs.md)**: `FormTemplateDef`, `PurposePackDef`, `ExportProfileDef`, survey purposes, and hiding global entries.
