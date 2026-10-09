@@ -218,11 +218,13 @@ internal fun GeoPointFormMap(
   viewportState: GeoPointMapViewportState,
   modifier: Modifier = Modifier,
 ) {
+  val currentMapUiState by rememberUpdatedState(mapUiState)
   val viewport by rememberUpdatedState(viewportState)
   val camera =
     rememberSurveyMapCamera(
-      desired = { geoPointCamera(mapUiState, viewport) },
-      onSettled = { writeBackGeoPointCamera(mapUiState, viewport, it) },
+      desired = { geoPointCamera(currentMapUiState, viewport) },
+      onSettled = { writeBackGeoPointCamera(currentMapUiState, viewport, it) },
+      isFollowingUser = { !viewport.isPanned },
     )
   SurveyGroundMap(
     map =
@@ -277,11 +279,7 @@ internal fun EntityRefFormMap(
   pendingIds: Set<String>,
   modifier: Modifier = Modifier,
 ) {
-  val camera =
-    rememberSurveyMapCamera(
-      desired = mapActions::desiredMapCamera,
-      onSettled = mapActions::syncMapCamera,
-    )
+  val camera = rememberSurveyMapCamera(uiState = mapUiState, actions = mapActions)
   val selected = uiState.activeDataCollectionEntity
   LaunchedEffect(selected?.id, uiState.entityRefFramingEpoch) {
     val entity = selected ?: return@LaunchedEffect

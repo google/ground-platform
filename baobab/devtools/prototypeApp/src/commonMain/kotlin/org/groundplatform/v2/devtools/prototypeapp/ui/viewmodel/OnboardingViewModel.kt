@@ -33,6 +33,7 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.Organization
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyPreviewItem
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyStats
 import org.groundplatform.v2.devtools.prototypeapp.domain.repository.AuthRepository
+import org.groundplatform.v2.devtools.prototypeapp.domain.repository.ConnectivityRepository
 import org.groundplatform.v2.devtools.prototypeapp.domain.repository.OrganizationRepository
 import org.groundplatform.v2.devtools.prototypeapp.domain.repository.SurveyRepository
 import org.groundplatform.v2.devtools.prototypeapp.ui.state.OnboardingEvent
@@ -89,6 +90,7 @@ class OnboardingViewModel(
   private val surveyRepository: SurveyRepository,
   private val organizationRepository: OrganizationRepository,
   private val scope: CoroutineScope,
+  private val connectivityRepository: ConnectivityRepository = ConnectivityRepository(),
 ) : OnboardingActions {
   private data class Session(
     val hasAcceptedTerms: Boolean = false,
@@ -163,6 +165,14 @@ class OnboardingViewModel(
   }
 
   override fun signInWithGoogle() {
+    if (!connectivityRepository.isOnline()) {
+      emit(
+        OnboardingEvent.Notice(
+          "Cannot sign in while offline. Connect to the internet and try again."
+        )
+      )
+      return
+    }
     scope.launch {
       authRepository.signInWithGoogle()
       val next =
@@ -225,6 +235,14 @@ class OnboardingViewModel(
   override fun clearSearchQuery() = updateSearchQuery("")
 
   override fun downloadSurvey(surveyId: String) {
+    if (!connectivityRepository.isOnline()) {
+      emit(
+        OnboardingEvent.Notice(
+          "Cannot download survey while offline. Connect to the internet and try again."
+        )
+      )
+      return
+    }
     scope.launch {
       val survey =
         surveyRepository.setSurveyDownloaded(surveyId, downloaded = true) ?: return@launch
@@ -260,9 +278,22 @@ class OnboardingViewModel(
   }
 
   override fun openSurvey(surveyId: String) {
+    val existing = uiState.value.surveys.firstOrNull { it.id == surveyId }
+    if (existing != null && !existing.isDownloaded && !connectivityRepository.isOnline()) {
+      emit(
+        OnboardingEvent.Notice(
+          "Cannot download survey while offline. Connect to the internet and try again."
+        )
+      )
+      return
+    }
     scope.launch {
       val survey =
-        surveyRepository.setSurveyDownloaded(surveyId, downloaded = true) ?: return@launch
+        if (existing?.isDownloaded == true) {
+          existing
+        } else {
+          surveyRepository.setSurveyDownloaded(surveyId, downloaded = true) ?: return@launch
+        }
       surveyRepository.setActiveSurveyId(surveyId)
       val stats = surveyRepository.observeSurveyStats().first()[surveyId] ?: SurveyStats(0, 0)
       emit(

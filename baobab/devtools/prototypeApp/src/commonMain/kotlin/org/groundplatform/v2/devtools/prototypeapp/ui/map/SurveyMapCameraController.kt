@@ -33,6 +33,8 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import org.groundplatform.v2.devtools.prototypeapp.ui.state.SurveyMapUiState
+import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.SurveyMapActions
 import org.groundplatform.v2.map.CameraPosition
 import org.groundplatform.v2.map.MapCameraState
 import org.groundplatform.v2.map.MapEvent
@@ -53,6 +55,7 @@ internal class SurveyMapCameraController(
   private val scope: CoroutineScope,
   private val desired: () -> CameraPosition,
   private val onSettled: (CameraPosition) -> Unit,
+  private val isFollowingUser: () -> Boolean = { false },
 ) {
   private var explicitMove: Job? = null
   private var gestureInProgress = false
@@ -82,7 +85,18 @@ internal class SurveyMapCameraController(
   /** Follows [desired] until cancelled; launched by [rememberSurveyMapCamera]. */
   internal suspend fun follow() {
     launchGestureTracking()
-    snapshotFlow { desired() }.collectLatest { followDesired() }
+    var wasFollowingUser = isFollowingUser()
+    snapshotFlow { desired() to isFollowingUser() }
+      .collectLatest { (_, followingUser) ->
+        val resumedFollowing = !wasFollowingUser && followingUser
+        wasFollowingUser = followingUser
+        if (resumedFollowing) {
+          explicitMove?.cancel()
+          explicitMove = null
+          gestureInProgress = false
+        }
+        followDesired()
+      }
   }
 
   private fun launchGestureTracking() {
@@ -124,20 +138,53 @@ internal class SurveyMapCameraController(
 }
 
 /**
+ * Remembers a [SurveyMapCameraController] for a map driven by [uiState] and [actions].
+ *
+ * Reading [uiState] subscribes the controller's [snapshotFlow] to Compose state updates from
+ * [SurveyMapActions] (such as [SurveyMapActions.recenterMapOnUser], [SurveyMapActions.panMap],
+ * [SurveyMapActions.zoomMapBy], and [SurveyMapActions.updateUserGpsLocation]), while querying
+ * [SurveyMapActions.desiredMapCamera] reads the latest synchronous camera target.
+ */
+@Composable
+internal fun rememberSurveyMapCamera(
+  uiState: SurveyMapUiState,
+  actions: SurveyMapActions,
+): SurveyMapCameraController {
+  val currentUiState by rememberUpdatedState(uiState)
+  val currentActions by rememberUpdatedState(actions)
+  return rememberSurveyMapCamera(
+    desired = {
+      currentUiState
+      currentActions.desiredMapCamera()
+    },
+    onSettled = { currentActions.syncMapCamera(it) },
+    isFollowingUser = { currentUiState.isCameraFollowingUser },
+  )
+}
+
+/**
  * Remembers a [SurveyMapCameraController] starting at [desired], following it while in composition.
  */
 @Composable
 internal fun rememberSurveyMapCamera(
   desired: () -> CameraPosition,
   onSettled: (CameraPosition) -> Unit,
+  isFollowingUser: () -> Boolean = { false },
 ): SurveyMapCameraController {
   val currentDesired by rememberUpdatedState(desired)
   val currentOnSettled by rememberUpdatedState(onSettled)
+  val currentIsFollowingUser by rememberUpdatedState(isFollowingUser)
   val camera = rememberMapCameraState(desired())
   val scope = rememberCoroutineScope()
   val controller =
     remember(camera, scope) {
-      SurveyMapCameraController(camera, scope, { currentDesired() }, { currentOnSettled(it) })
+      SurveyMapCameraController(
+        camera = camera,
+        scope = scope,
+        desired = { currentDesired() },
+        onSettled = { currentOnSettled(it) },
+        isFollowingUser = { currentIsFollowingUser() },
+      )
     }
   LaunchedEffect(controller) { controller.follow() }
   return controller

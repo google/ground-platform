@@ -22,6 +22,7 @@ import io.ktor.http.isSuccess
 import kotlin.coroutines.cancellation.CancellationException
 import kotlin.math.abs
 import kotlin.math.round
+import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
@@ -45,12 +46,13 @@ internal expect fun createPlacesHttpClient(): HttpClient?
 internal expect fun mapboxAccessToken(): String?
 
 /**
- * Searches places near a survey with the Mapbox Geocoding API when a public token is configured,
- * otherwise with OpenStreetMap Nominatim. Failures yield no results rather than errors.
+ * Searches places near a survey with the Mapbox Geocoding API when a public token is configured.
+ * Network errors, missing tokens, and timeouts yield no results rather than errors.
  */
 class PlacesGeocoder(
   private val httpClient: HttpClient? = createPlacesHttpClient(),
   private val accessToken: () -> String? = ::mapboxAccessToken,
+  private val timeoutMillis: Long = REQUEST_TIMEOUT_MS,
 ) {
   suspend fun search(
     query: String,
@@ -60,12 +62,14 @@ class PlacesGeocoder(
     val client = httpClient ?: return emptyList()
     val q = query.trim()
     if (q.isEmpty()) return emptyList()
-    val token = accessToken()?.takeIf { it.startsWith("pk.") }
-    val url = if (token != null) mapboxUrl(q, token, near.center) else nominatimUrl(q)
+    val token = accessToken()?.takeIf { it.startsWith("pk.") } ?: return emptyList()
+    val url = mapboxUrl(q, token, near.center)
     return try {
-      val response = client.get(url)
-      if (!response.status.isSuccess()) return emptyList()
-      PlacesResponseMapper.map(response.bodyAsText(), q, near, defaultSubtitle)
+      withTimeoutOrNull(timeoutMillis) {
+        val response = client.get(url)
+        if (!response.status.isSuccess()) return@withTimeoutOrNull emptyList()
+        PlacesResponseMapper.map(response.bodyAsText(), q, near, defaultSubtitle)
+      } ?: emptyList()
     } catch (e: CancellationException) {
       throw e
     } catch (_: Exception) {
@@ -87,14 +91,9 @@ class PlacesGeocoder(
       }
       .buildString()
 
-  private fun nominatimUrl(query: String): String =
-    URLBuilder("https://nominatim.openstreetmap.org/search")
-      .apply {
-        parameters.append("format", "geojson")
-        parameters.append("limit", "6")
-        parameters.append("q", query)
-      }
-      .buildString()
+  companion object {
+    const val REQUEST_TIMEOUT_MS: Long = 5_000L
+  }
 }
 
 /**

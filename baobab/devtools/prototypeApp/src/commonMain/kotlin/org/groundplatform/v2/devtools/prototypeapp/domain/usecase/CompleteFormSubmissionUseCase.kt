@@ -152,9 +152,15 @@ class CompleteFormSubmissionUseCase(
         ?: forms.firstOrNull()?.id
         ?: return null
     val form = forms.firstOrNull { it.id == formId } ?: forms.first()
+    val surveyConfig = surveyRepository.getSurveyConfig(activeSurveyId)
 
     val resolvedFormDef =
-      controller?.formState?.formDef ?: resolveFormDefForLaunchUseCase(customFormDef, form)
+      controller?.formState?.formDef
+        ?: resolveFormDefForLaunchUseCase(
+          customFormDef = customFormDef,
+          form = form,
+          surveyConfig = surveyConfig,
+        )
 
     val extractedFields =
       extractSubmissionFieldsFromRecord(

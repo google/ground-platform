@@ -347,8 +347,6 @@ class SurveyEditorViewModel(
   private val generateSamplePlots: GenerateSamplePlotsUseCase =
     GenerateSamplePlotsUseCase(now = { isoUtc(platformEpochMillis()) }),
   private val inviteCollaboratorUseCase: InviteCollaboratorUseCase = InviteCollaboratorUseCase(),
-  /** Whether the prototype's simulated Airplane mode is on, which disables remote place search. */
-  private val isAirplaneMode: () -> Boolean = { false },
   private val scope: CoroutineScope,
 ) : SurveyEditorActions {
   /** Everything the editor reads from the local data store. */
@@ -775,7 +773,6 @@ class SurveyEditorViewModel(
     placeRepository.searchRemotePlaces(
       surveyId = surveyId,
       query = query,
-      isAirplaneMode = isAirplaneMode(),
       defaultRegionSubtitle = regionSubtitle,
       centerLongitude = center.lng,
       centerLatitude = center.lat,

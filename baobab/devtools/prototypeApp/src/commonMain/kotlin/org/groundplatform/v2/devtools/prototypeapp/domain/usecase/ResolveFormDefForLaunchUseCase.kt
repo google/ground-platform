@@ -18,6 +18,7 @@ import org.groundplatform.v2.core.forms.serialization.XFormsXmlSerializer
 import org.groundplatform.v2.core.forms.ui.WorkbenchExampleForm
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.FormPreviewItem
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.GeospatialEntityItem
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyConfig
 
 /**
  * Domain use case resolving the [FormDef] to execute for a given [FormPreviewItem] and injecting
@@ -31,9 +32,14 @@ class ResolveFormDefForLaunchUseCase {
     candidateEntities: List<GeospatialEntityItem> = emptyList(),
     defaultSelectedEntityId: String = "",
     includeEntityRefStep: Boolean = false,
+    surveyConfig: SurveyConfig? = null,
   ): FormDef {
+    val storedFormXml = surveyConfig?.formXmlById?.get(form.id)?.takeIf { it.isNotBlank() }
     val base =
-      customFormDef ?: XFormsXmlSerializer.deserializeFormDef(builtInFallbackXFormsXmlForForm(form))
+      customFormDef
+        ?: XFormsXmlSerializer.deserializeFormDef(
+          storedFormXml ?: builtInFallbackXFormsXmlForForm(form)
+        )
     return if (includeEntityRefStep && form.requiresEntity) {
       ensureEntityRefStepInFormDef(
         baseFormDef = base,

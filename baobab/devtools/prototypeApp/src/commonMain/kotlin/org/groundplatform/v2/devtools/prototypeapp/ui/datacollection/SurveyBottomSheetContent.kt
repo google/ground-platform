@@ -480,14 +480,14 @@ internal fun BottomSheetSearchableListContent(
 ) {
   val allPlaces = state.places
   val apiPlaces = state.mapboxPlacesApiResults
-  val isAirplaneMode = state.isAirplaneMode
+  val isOnline = state.isOnline
   val allEntities = state.entities
   val listTab = state.listFilterTab
   val listQuery = state.listSearchQuery
   val mapLayers = state.mapLayers
 
   val matchedPlaces =
-    remember(allPlaces, apiPlaces, listTab, listQuery, isAirplaneMode) { state.filteredListPlaces }
+    remember(allPlaces, apiPlaces, listTab, listQuery, isOnline) { state.filteredListPlaces }
   val matchedEntities = remember(allEntities, listTab, listQuery) { state.filteredListEntities }
   val groupedEntities = remember(matchedEntities, mapLayers) { state.groupedFilteredListEntities }
 
@@ -546,9 +546,9 @@ internal fun BottomSheetSearchableListContent(
         }
       }
 
-      // Offline / Airplane mode banner in the bottom sheet explaining that search is only in local
-      // map features and that Places search is not available offline.
-      if (isAirplaneMode) {
+      // Offline banner in the bottom sheet explaining that search is only in local map features
+      // and that Places search is not available offline.
+      if (!isOnline) {
         Surface(
           shape = MaterialTheme.shapes.small,
           color = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.85f),
@@ -559,48 +559,27 @@ internal fun BottomSheetSearchableListContent(
           Row(
             modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp, vertical = 7.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
           ) {
-            Row(
-              modifier = Modifier.weight(1f),
-              verticalAlignment = Alignment.CenterVertically,
-              horizontalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-              Icon(
-                imageVector = Icons.Outlined.CloudOff,
-                contentDescription = "Device offline",
-                tint = MaterialTheme.colorScheme.onErrorContainer,
-                modifier = Modifier.size(16.dp),
-              )
-              Column(modifier = Modifier.weight(1f)) {
-                Text(
-                  text = "Device offline • Searching local ${state.activeEntitiesCountNoun} only",
-                  style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                  color = MaterialTheme.colorScheme.onErrorContainer,
-                )
-                Text(
-                  text =
-                    "Search is only in local ${state.activeEntitiesCountNoun}. Places search is not available offline.",
-                  style = MaterialTheme.typography.labelSmall,
-                  color = MaterialTheme.colorScheme.onErrorContainer.copy(alpha = 0.9f),
-                )
-              }
-            }
-
-            Spacer(modifier = Modifier.width(6.dp))
-
-            AssistChip(
-              onClick = { state.updateAirplaneMode(false) },
-              label = {
-                Text(
-                  text = "Turn Off",
-                  style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                  maxLines = 1,
-                  overflow = TextOverflow.Ellipsis,
-                  softWrap = false,
-                )
-              },
+            Icon(
+              imageVector = Icons.Outlined.CloudOff,
+              contentDescription = "Device offline",
+              tint = MaterialTheme.colorScheme.onErrorContainer,
+              modifier = Modifier.size(16.dp),
             )
+            Column(modifier = Modifier.weight(1f)) {
+              Text(
+                text = "Device offline • Searching local ${state.activeEntitiesCountNoun} only",
+                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                color = MaterialTheme.colorScheme.onErrorContainer,
+              )
+              Text(
+                text =
+                  "Search is only in local ${state.activeEntitiesCountNoun}. Places search is not available offline.",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onErrorContainer.copy(alpha = 0.9f),
+              )
+            }
           }
         }
       }
@@ -828,8 +807,8 @@ internal fun BottomSheetSearchableListContent(
       // entries
       // (Currently no non-spatial tabular datasets configured in the active survey)
 
-      // 3. PLACES SECTION — only available when online (!isAirplaneMode) and entries match
-      if (!isAirplaneMode && matchedPlaces.isNotEmpty()) {
+      // 3. PLACES SECTION — only available when online (isOnline) and entries match
+      if (isOnline && matchedPlaces.isNotEmpty()) {
         if (groupedEntities.isNotEmpty()) {
           HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
         }
@@ -1018,7 +997,7 @@ internal fun BottomSheetSearchableListContent(
           Text(
             text =
               when {
-                isAirplaneMode ->
+                !isOnline ->
                   "No local map layers match \"${state.listSearchQuery}\". Places search is not available offline."
                 else -> "No map layers or places match \"${state.listSearchQuery}\"."
               },

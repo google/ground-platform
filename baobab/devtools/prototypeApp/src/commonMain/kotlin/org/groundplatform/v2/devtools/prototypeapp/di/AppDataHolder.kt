@@ -26,7 +26,9 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import org.groundplatform.v2.devtools.prototypeapp.data.datasource.local.store.InMemoryLocalStore
 import org.groundplatform.v2.devtools.prototypeapp.data.datasource.local.store.LocalStore
+import org.groundplatform.v2.devtools.prototypeapp.data.datasource.remote.MapboxPlacesDataSource
 import org.groundplatform.v2.devtools.prototypeapp.data.repository.AuthRepositoryImpl
+import org.groundplatform.v2.devtools.prototypeapp.data.repository.ConnectivityRepositoryImpl
 import org.groundplatform.v2.devtools.prototypeapp.data.repository.LocalStoreTransactionRunner
 import org.groundplatform.v2.devtools.prototypeapp.data.repository.LocationRepositoryImpl
 import org.groundplatform.v2.devtools.prototypeapp.data.repository.MutationRepositoryImpl
@@ -47,6 +49,7 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.UserSettings
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SurveyEditorDraft
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.isoUtc
 import org.groundplatform.v2.devtools.prototypeapp.domain.repository.AuthRepository
+import org.groundplatform.v2.devtools.prototypeapp.domain.repository.ConnectivityRepository
 import org.groundplatform.v2.devtools.prototypeapp.domain.repository.LocationRepository
 import org.groundplatform.v2.devtools.prototypeapp.domain.repository.MediaCacheInfo
 import org.groundplatform.v2.devtools.prototypeapp.domain.repository.MutationRepository
@@ -112,10 +115,15 @@ data class AppData(
 class AppDataHolder(
   val localStore: LocalStore = InMemoryLocalStore(),
   val scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Unconfined),
+  val connectivityRepository: ConnectivityRepository = ConnectivityRepositoryImpl(),
   val surveyRepository: SurveyRepository = SurveyRepositoryImpl(localStore),
   val mutationRepository: MutationRepository = MutationRepositoryImpl(localStore),
   val settingsRepository: SettingsRepository = SettingsRepositoryImpl(localStore),
-  val placeRepository: PlaceRepository = PlaceRepositoryImpl(localStore),
+  val placeRepository: PlaceRepository =
+    PlaceRepositoryImpl(
+      store = localStore,
+      remoteDataSource = MapboxPlacesDataSource(isOnline = connectivityRepository::isOnline),
+    ),
   val organizationRepository: OrganizationRepository = OrganizationRepositoryImpl(localStore),
   val locationRepository: LocationRepository = LocationRepositoryImpl(),
   val authRepository: AuthRepository = AuthRepositoryImpl(),
@@ -137,6 +145,7 @@ class AppDataHolder(
       mutationRepository = mutationRepository,
       surveyRepository = surveyRepository,
       transactionRunner = transactionRunner,
+      connectivityRepository = connectivityRepository,
     ),
   val createSurveyUseCase: CreateSurveyUseCase =
     CreateSurveyUseCase(

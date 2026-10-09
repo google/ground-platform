@@ -272,7 +272,6 @@ class SurveyMapViewModelTest {
     f.viewModel.panMap(0.1f, 0.1f)
     f.viewModel.zoomOutMap()
     f.viewModel.toggleBasemapType()
-    f.viewModel.updateAirplaneMode(true)
     f.viewModel.selectEntity("entity-nyr-104")
 
     f.viewModel.reset()
@@ -283,7 +282,7 @@ class SurveyMapViewModelTest {
     assertTrue(f.uiState.isCameraFollowingUser)
     assertEquals(0f, f.uiState.mapZoomDelta)
     assertEquals(BasemapType.SATELLITE, f.uiState.selectedBasemapType)
-    assertFalse(f.uiState.isAirplaneMode)
+    assertTrue(f.uiState.isOnline)
     assertNull(f.uiState.selectedEntityId)
   }
 }

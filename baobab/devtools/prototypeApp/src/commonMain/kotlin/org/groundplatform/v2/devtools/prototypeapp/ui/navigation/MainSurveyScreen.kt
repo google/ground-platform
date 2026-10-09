@@ -318,8 +318,7 @@ internal fun SurveyMapView(state: PrototypeAppState) {
     }
   }
 
-  val mapCamera =
-    rememberSurveyMapCamera(desired = actions::desiredMapCamera, onSettled = actions::syncMapCamera)
+  val mapCamera = rememberSurveyMapCamera(uiState = uiState, actions = actions)
 
   BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
     // With a map feature selected, the sheet peeks at about half the screen: enough to show the

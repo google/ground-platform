@@ -139,6 +139,7 @@ class PrototypeAppState(
       surveyRepository = dataHolder.surveyRepository,
       organizationRepository = dataHolder.organizationRepository,
       scope = dataHolder.scope,
+      connectivityRepository = dataHolder.connectivityRepository,
     )
 
   private var onboardingState by mutableStateOf(onboarding.uiState.value)
@@ -153,6 +154,7 @@ class PrototypeAppState(
       surveyRepository = dataHolder.surveyRepository,
       mutationRepository = dataHolder.mutationRepository,
       scope = dataHolder.scope,
+      connectivityRepository = dataHolder.connectivityRepository,
     )
 
   private var settingsState by mutableStateOf(settings.uiState.value)
@@ -171,6 +173,7 @@ class PrototypeAppState(
       locationRepository = dataHolder.locationRepository,
       placeRepository = dataHolder.placeRepository,
       scope = dataHolder.scope,
+      connectivityRepository = dataHolder.connectivityRepository,
       clusterMapFeatures = dataHolder.clusterMapFeaturesUseCase,
       computeWayfindingNavigation = dataHolder.computeWayfindingNavigationUseCase,
     )
@@ -233,7 +236,6 @@ class PrototypeAppState(
       placeRepository = dataHolder.placeRepository,
       generateSamplePlots = dataHolder.generateSamplePlotsUseCase,
       inviteCollaboratorUseCase = dataHolder.inviteCollaboratorUseCase,
-      isAirplaneMode = { mapState.isAirplaneMode },
       scope = dataHolder.scope,
     )
 
@@ -254,6 +256,7 @@ class PrototypeAppState(
       locationRepository = dataHolder.locationRepository,
       completeFormSubmission = dataHolder.completeFormSubmissionUseCase,
       launchForm = dataHolder.launchFormUseCase,
+      connectivityRepository = dataHolder.connectivityRepository,
       scope = dataHolder.scope,
     )
 
@@ -273,6 +276,7 @@ class PrototypeAppState(
       sampleDataRepository = dataHolder.sampleDataRepository,
       generateRandomSitesUseCase = dataHolder.generateRandomSitesUseCase,
       scope = dataHolder.scope,
+      connectivityRepository = dataHolder.connectivityRepository,
     )
 
   private var workbenchState by mutableStateOf(workbench.uiState.value)
@@ -345,6 +349,23 @@ class PrototypeAppState(
         activeDrawerSubView = MainDrawerSubView.NONE
         mapboxPlacesApiResults = emptyList()
         isMapboxPlacesSearching = false
+      }
+      is WorkbenchEvent.ConnectivityChanged -> {
+        if (!event.isOnline) {
+          isMapboxPlacesSearching = false
+          mapboxPlacesApiResults = emptyList()
+          if (listFilterTab == ListFilterTab.PLACES) {
+            dashboard.selectListFilterTab(ListFilterTab.ALL)
+          }
+          activeSurveyNotice =
+            "Device offline: Places search disabled. Searching local $activeEntitiesCountNoun only."
+        } else {
+          activeSurveyNotice = "Device online: Places API search enabled."
+          val trimmed = listSearchQuery.trim()
+          if (trimmed.isNotEmpty()) {
+            triggerMapboxPlacesApiSearch(trimmed)
+          }
+        }
       }
       is WorkbenchEvent.Notice -> activeSurveyNotice = event.message
     }
@@ -1650,20 +1671,20 @@ class PrototypeAppState(
     get() = allSubmissions.count { it.syncStatus == SyncStatus.FAILED }
 
   /**
-   * Simulates device Airplane mode (`Offline`) in the UX Workbench.
+   * Whether the device currently has an active network connection.
    *
-   * When `true`, Mapbox Places API search is disabled (`filteredListPlaces` returns `emptyList()`)
-   * and the bottom sheet shows an offline notice explaining that search is restricted to local map
-   * features and that Places search is not available offline.
+   * When `false` (offline), Mapbox Places API search is disabled (`filteredListPlaces` returns
+   * `emptyList()`) and the bottom sheet shows an offline notice explaining that search is
+   * restricted to local map features and that Places search is not available offline.
    */
-  val isAirplaneMode: Boolean
-    get() = mapState.isAirplaneMode
+  val isOnline: Boolean
+    get() = mapState.isOnline
 
-  /** Whether online Mapbox Places API search is currently available (`!isAirplaneMode`). */
+  /** Whether online Mapbox Places API search is currently available (`isOnline`). */
   val isPlacesSearchAvailable: Boolean
     get() = mapState.isPlacesSearchAvailable
 
-  /** Live place results returned by [PlacesGeocoder] (Mapbox Geocoding or Nominatim). */
+  /** Live place results returned by [PlacesGeocoder] (Mapbox Geocoding). */
   var mapboxPlacesApiResults by mutableStateOf<List<SurveyPlaceItem>>(emptyList())
     private set
 
@@ -1679,15 +1700,15 @@ class PrototypeAppState(
    * Filtered Places ([SurveyPlaceItem]s) in the Main Survey searchable bottom sheet returned by the
    * Mapbox Places API (`mapbox.places`) and regional place gazetteer matching [listSearchQuery].
    *
-   * Returns `emptyList()` when [listSearchQuery] is blank or when [isAirplaneMode] is `true`
-   * because Places results only appear when the user enters a search query while online.
+   * Returns `emptyList()` when [listSearchQuery] is blank or when [!isOnline] because Places
+   * results only appear when the user enters a search query while online.
    */
   val filteredListPlaces: List<SurveyPlaceItem>
     get() {
       val (surveyLng, surveyLat) = activeSurveyBaseLngLat()
       return dataHolder.searchPlacesUseCase(
         query = listSearchQuery,
-        isAirplaneMode = isAirplaneMode,
+        isOnline = isOnline,
         listFilterTab = listFilterTab,
         localPlaces = places,
         remoteApiPlaces = mapboxPlacesApiResults,
@@ -1799,13 +1820,13 @@ class PrototypeAppState(
 
   /**
    * Submissions of [entity] available to show, grouped by form. Seeing the full list requires a
-   * connection: while offline ([isAirplaneMode]) only submissions stored on the device are listed.
+   * connection: while offline (`!isOnline`) only submissions stored on the device are listed.
    */
   fun availableGroupedSubmissionsForEntity(
     entity: GeospatialEntityItem
   ): List<FormSubmissionsGroup> {
     val groups = groupedSubmissionsForEntity(entity)
-    if (!isAirplaneMode) return groups
+    if (isOnline) return groups
     return groups
       .map { group ->
         group.copy(submissions = group.submissions.filter(::isSubmissionStoredOnDevice))
@@ -2172,12 +2193,12 @@ class PrototypeAppState(
 
   /**
    * Updates the search query in the Main Survey searchable bottom sheet and queries the Mapbox
-   * Places API (`mapbox.places`) when online (`!isAirplaneMode`).
+   * Places API (`mapbox.places`) when online ([isOnline]).
    */
   fun updateListSearchQuery(query: String) {
     dashboard.updateListSearchQuery(query)
     val trimmed = query.trim()
-    if (isAirplaneMode || trimmed.isEmpty()) {
+    if (!isOnline || trimmed.isEmpty()) {
       isMapboxPlacesSearching = false
       mapboxPlacesApiResults = emptyList()
     } else {
@@ -2195,11 +2216,11 @@ class PrototypeAppState(
   /**
    * Updates the active category filter tab (`All`, `Places`, `Map features`).
    *
-   * When [isAirplaneMode] is `true` (Offline), selecting [ListFilterTab.PLACES] is blocked and
-   * surfaces an offline notice.
+   * When offline (`!isOnline`), selecting [ListFilterTab.PLACES] is blocked and surfaces an offline
+   * notice.
    */
   fun selectListFilterTab(tab: ListFilterTab) {
-    if (isAirplaneMode && tab == ListFilterTab.PLACES) {
+    if (!isOnline && tab == ListFilterTab.PLACES) {
       activeSurveyNotice =
         "Device offline: Places search is not available offline. Searching local $activeEntitiesCountNoun only."
       return
@@ -2207,41 +2228,8 @@ class PrototypeAppState(
     dashboard.selectListFilterTab(tab)
   }
 
-  /**
-   * Enables or disables **Airplane mode** (`Offline` simulator) in the UX Workbench.
-   *
-   * When enabled (`true`):
-   * - Disables Mapbox Places API search (`filteredListPlaces` becomes empty).
-   * - Switches [listFilterTab] away from [ListFilterTab.PLACES] if currently selected.
-   * - Shows a message in the bottom sheet that search is only in local map features and Places
-   *   search is not available offline.
-   */
-  fun updateAirplaneMode(enabled: Boolean) {
-    surveyMap.updateAirplaneMode(enabled)
-    if (enabled) {
-      isMapboxPlacesSearching = false
-      mapboxPlacesApiResults = emptyList()
-      if (listFilterTab == ListFilterTab.PLACES) {
-        dashboard.selectListFilterTab(ListFilterTab.ALL)
-      }
-      activeSurveyNotice =
-        "Device offline: Places search disabled. Searching local $activeEntitiesCountNoun only."
-    } else {
-      activeSurveyNotice = "Device online: Places API search enabled."
-      val trimmed = listSearchQuery.trim()
-      if (trimmed.isNotEmpty()) {
-        triggerMapboxPlacesApiSearch(trimmed)
-      }
-    }
-  }
-
-  /** Toggles [isAirplaneMode] between Online (`false`) and Offline (`true`). */
-  fun toggleAirplaneMode() {
-    updateAirplaneMode(!isAirplaneMode)
-  }
-
   private fun triggerMapboxPlacesApiSearch(query: String) {
-    if (isAirplaneMode || query.isBlank()) {
+    if (!isOnline || query.isBlank()) {
       isMapboxPlacesSearching = false
       mapboxPlacesApiResults = emptyList()
       return
@@ -2274,9 +2262,9 @@ class PrototypeAppState(
     onResults: (List<SurveyPlaceItem>) -> Unit,
   ) = surveyMap.searchPlaces(surveyId, query, regionSubtitle, center, onResults)
 
-  /** Shows geocoder [results] for [query] unless the query changed or airplane mode is on. */
+  /** Shows geocoder [results] for [query] unless the query changed or the device is offline. */
   internal fun onPlacesSearchResults(query: String, results: List<SurveyPlaceItem>) {
-    if (!isAirplaneMode && listSearchQuery.trim() == query.trim()) {
+    if (isOnline && listSearchQuery.trim() == query.trim()) {
       mapboxPlacesApiResults = results
     }
     isMapboxPlacesSearching = false
@@ -2660,7 +2648,10 @@ class PrototypeAppState(
    * The camera the survey map should show: the user's GPS position shifted by the pan offset
    * ([mapPanOffsetX], [mapPanOffsetY]), at the survey's zoom plus [mapZoomDelta].
    */
-  fun desiredMapCamera(): CameraPosition = surveyMap.desiredMapCamera()
+  fun desiredMapCamera(): CameraPosition {
+    mapState
+    return surveyMap.desiredMapCamera()
+  }
 
   /**
    * Updates the pan offset and zoom delta to match where the map [camera] settled after a gesture

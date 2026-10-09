@@ -61,9 +61,9 @@ fun PrototypeDebugToolsButton(
 ) {
   PrototypeDebugToolsButton(
     isDarkTheme = state.isDarkTheme,
-    isAirplaneMode = state.isAirplaneMode,
+    isAirplaneMode = state.workbenchUiState.isAirplaneMode,
     onToggleDarkTheme = state::toggleDarkTheme,
-    onToggleAirplaneMode = state::toggleAirplaneMode,
+    onToggleAirplaneMode = state.workbench::toggleAirplaneMode,
     onResetFlow = state.workbench::resetPrototypeFlow,
     modifier = modifier,
     iconTint = iconTint,
@@ -114,9 +114,9 @@ fun PrototypeDebugToolsDropdown(
 ) {
   PrototypeDebugToolsDropdown(
     isDarkTheme = state.isDarkTheme,
-    isAirplaneMode = state.isAirplaneMode,
+    isAirplaneMode = state.workbenchUiState.isAirplaneMode,
     onToggleDarkTheme = state::toggleDarkTheme,
-    onToggleAirplaneMode = state::toggleAirplaneMode,
+    onToggleAirplaneMode = state.workbench::toggleAirplaneMode,
     onResetFlow = state.workbench::resetPrototypeFlow,
     expanded = expanded,
     onDismissRequest = onDismissRequest,

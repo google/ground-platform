@@ -38,7 +38,6 @@ class PlaceRepositoryImpl(
   override fun searchRemotePlaces(
     surveyId: String,
     query: String,
-    isAirplaneMode: Boolean,
     defaultRegionSubtitle: String,
     centerLongitude: Double,
     centerLatitude: Double,
@@ -47,7 +46,6 @@ class PlaceRepositoryImpl(
     remoteDataSource.searchPlaces(
       surveyId = surveyId,
       query = query,
-      isAirplaneMode = isAirplaneMode,
       defaultRegionSubtitle = defaultRegionSubtitle,
       centerLongitude = centerLongitude,
       centerLatitude = centerLatitude,

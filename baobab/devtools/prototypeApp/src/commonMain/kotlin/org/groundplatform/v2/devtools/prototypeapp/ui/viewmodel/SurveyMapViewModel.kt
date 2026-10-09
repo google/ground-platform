@@ -50,6 +50,7 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyPreviewIte
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.LatLng
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.toLatLng
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.toClusterFeatures
+import org.groundplatform.v2.devtools.prototypeapp.domain.repository.ConnectivityRepository
 import org.groundplatform.v2.devtools.prototypeapp.domain.repository.DeviceLocationSnapshot
 import org.groundplatform.v2.devtools.prototypeapp.domain.repository.LocationRepository
 import org.groundplatform.v2.devtools.prototypeapp.domain.repository.OrganizationRepository
@@ -145,9 +146,6 @@ interface SurveyMapActions {
 
   fun clearSelectedPlace()
 
-  /** Simulates device Airplane mode, which disables online Places search. */
-  fun updateAirplaneMode(enabled: Boolean)
-
   // --- Straight-line wayfinding ---
 
   fun startNavigationToEntity(entityId: String)
@@ -185,6 +183,7 @@ class SurveyMapViewModel(
   private val locationRepository: LocationRepository,
   private val placeRepository: PlaceRepository,
   private val scope: CoroutineScope,
+  private val connectivityRepository: ConnectivityRepository = ConnectivityRepository(),
   private val clusterMapFeatures: ClusterMapFeaturesUseCase = ClusterMapFeaturesUseCase(),
   private val computeWayfindingNavigation: ComputeWayfindingNavigationUseCase =
     ComputeWayfindingNavigationUseCase(),
@@ -197,6 +196,7 @@ class SurveyMapViewModel(
     val organizations: List<Organization> = emptyList(),
     val unitSystem: MeasurementUnitSystem = MeasurementUnitSystem.METRIC,
     val localPlaces: List<SurveyPlaceItem> = emptyList(),
+    val isOnline: Boolean = true,
   ) {
     val anchor: SurveyMapAnchor
       get() = SurveyMapAnchor.forSurvey(activeSurveyId)
@@ -239,7 +239,6 @@ class SurveyMapViewModel(
     val selectedClusterId: String? = null,
     val selectedPlaceId: String? = null,
     val lastSelectedPlace: SurveyPlaceItem? = null,
-    val isAirplaneMode: Boolean = false,
     val navigationTargetKind: NavigationTargetKind? = null,
     val navigationTargetId: String? = null,
     /** Snapshot of the place being navigated to, so it resolves after search results change. */
@@ -285,21 +284,27 @@ class SurveyMapViewModel(
 
   private val data: StateFlow<Data> =
     combine(
-        surveyRepository.observeSurveys(),
-        surveyRepository.observeActiveSurveyId().flatMapLatest { id ->
-          surveyRepository.observeSurveyContent(id).map { id to it }
+        combine(
+          surveyRepository.observeSurveys(),
+          surveyRepository.observeActiveSurveyId().flatMapLatest { id ->
+            surveyRepository.observeSurveyContent(id).map { id to it }
+          },
+          organizationRepository.observeOrganizations(),
+        ) { surveys, (activeId, content), organizations ->
+          Triple(surveys, activeId to content, organizations)
         },
-        organizationRepository.observeOrganizations(),
         settingsRepository.observeUserSettings(),
         placeRepository.observeLocalPlaces(),
-      ) { surveys, (activeId, content), organizations, settings, places ->
+        connectivityRepository.observeIsOnline(),
+      ) { (surveys, activePair, organizations), settings, places, isOnline ->
         Data(
           surveys = surveys,
-          activeSurveyId = activeId,
-          content = content,
+          activeSurveyId = activePair.first,
+          content = activePair.second,
           organizations = organizations,
           unitSystem = settings.measurementUnits,
           localPlaces = places,
+          isOnline = isOnline,
         )
       }
       .stateIn(scope, SharingStarted.Eagerly, Data())
@@ -383,7 +388,7 @@ class SurveyMapViewModel(
       isEntityBottomSheetExpanded = session.isEntityBottomSheetExpanded,
       selectedClusterId = session.selectedClusterId,
       selectedPlace = session.selectedPlaceId?.let { findPlaceById(it, data, session) },
-      isAirplaneMode = session.isAirplaneMode,
+      isOnline = data.isOnline,
       navigationTargetKind = session.navigationTargetKind,
       navigationTargetId = session.navigationTargetId,
       activeNavigation = activeNavigation(data, session),
@@ -435,6 +440,7 @@ class SurveyMapViewModel(
 
   /** Returns session state to its defaults and the device location to its default reading. */
   fun reset() {
+    connectivityRepository.reset()
     session.value = Session(location = locationRepository.resetToDefaults())
   }
 
@@ -733,13 +739,9 @@ class SurveyMapViewModel(
     session.update { it.withoutPlace() }
   }
 
-  override fun updateAirplaneMode(enabled: Boolean) {
-    session.update { it.copy(isAirplaneMode = enabled) }
-  }
-
   /**
    * Looks up places matching [query] near [center] for [surveyId] through the place repository
-   * (returning nothing while in Airplane mode), delivering them to [onResults].
+   * (returning nothing while offline), delivering them to [onResults].
    */
   fun searchPlaces(
     surveyId: String,
@@ -748,10 +750,13 @@ class SurveyMapViewModel(
     center: LatLng,
     onResults: (List<SurveyPlaceItem>) -> Unit,
   ) {
+    if (!data.value.isOnline) {
+      onResults(emptyList())
+      return
+    }
     placeRepository.searchRemotePlaces(
       surveyId = surveyId,
       query = query,
-      isAirplaneMode = session.value.isAirplaneMode,
       defaultRegionSubtitle = regionSubtitle,
       centerLongitude = center.lng,
       centerLatitude = center.lat,

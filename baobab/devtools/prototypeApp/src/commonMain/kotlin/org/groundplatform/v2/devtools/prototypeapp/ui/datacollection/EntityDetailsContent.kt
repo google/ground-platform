@@ -755,7 +755,7 @@ private fun EntityDataCollectionLaunchers(
  */
 @Composable
 private fun EntitySubmissionsLink(entity: GeospatialEntityItem, state: PrototypeAppState) {
-  val isOffline = state.isAirplaneMode
+  val isOffline = !state.isOnline
   val availableCount =
     if (isOffline) {
       state.availableGroupedSubmissionsForEntity(entity).sumOf { it.submissions.size }
@@ -806,7 +806,7 @@ internal fun EntitySubmissionsPane(
   state: PrototypeAppState,
   isWeb: Boolean,
 ) {
-  val isOffline = !isWeb && state.isAirplaneMode
+  val isOffline = !isWeb && !state.isOnline
   val groups =
     if (isWeb) {
       state.groupedSubmissionsForEntity(entity)

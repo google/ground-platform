@@ -19,6 +19,7 @@ import org.groundplatform.v2.core.forms.ui.FormWizardController
 import org.groundplatform.v2.core.forms.ui.FormWizardStep
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.FormPreviewItem
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.GeospatialEntityItem
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyConfig
 
 /**
  * Opens a Form for data collection: resolves the [FormDef] to run (the workbench's custom
@@ -51,6 +52,7 @@ class LaunchFormUseCase(
     candidateEntities: List<GeospatialEntityItem> = emptyList(),
     includeEntityRefStep: Boolean = entity == null,
     defaultSelectedEntityId: String = entity?.id.orEmpty(),
+    surveyConfig: SurveyConfig? = null,
   ): FormWizardController {
     val formDef =
       resolveFormDef(
@@ -59,6 +61,7 @@ class LaunchFormUseCase(
         candidateEntities = candidateEntities,
         defaultSelectedEntityId = defaultSelectedEntityId,
         includeEntityRefStep = includeEntityRefStep && entity == null,
+        surveyConfig = surveyConfig,
       )
     val controller = FormWizardController(formDef = formDef)
     if (entity != null) prepopulateEntityReference(controller, entity.id)

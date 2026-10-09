@@ -33,6 +33,7 @@ import org.groundplatform.v2.devtools.prototypeapp.ui.workbench.XFormsParseCache
 data class WorkbenchUiState(
   val deviceFormFactor: DeviceFormFactor = DeviceFormFactor.MOBILE,
   val deviceOrientation: DeviceOrientation = DeviceFormFactor.MOBILE.defaultOrientation,
+  val isAirplaneMode: Boolean = false,
   val customXFormsXml: String = DEFAULT_PROTOTYPE_XFORMS_XML,
   val selectedWorkbenchExampleForm: WorkbenchExampleForm? = WorkbenchExampleForm.ALL_FIELD_TYPES,
   val xformsXmlError: String? = null,
@@ -122,6 +123,9 @@ sealed interface WorkbenchEvent {
 
   /** The prototype flow was reset to sample data; reset all feature ViewModels and shell state. */
   data object PrototypeReset : WorkbenchEvent
+
+  /** Simulated connectivity changed via the workbench airplane mode toggle. */
+  data class ConnectivityChanged(val isOnline: Boolean) : WorkbenchEvent
 
   /** A transient notice message to surface on the active survey screen. */
   data class Notice(val message: String) : WorkbenchEvent

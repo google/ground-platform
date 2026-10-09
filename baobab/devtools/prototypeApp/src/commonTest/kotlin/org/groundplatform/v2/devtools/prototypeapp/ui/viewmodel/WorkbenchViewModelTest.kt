@@ -199,7 +199,10 @@ class WorkbenchViewModelTest {
     assertEquals(initialEntityCount + 10, f.uiState.entities.size)
 
     val beforeResetCount = f.uiState.dataResetCount
+    f.viewModel.updateAirplaneMode(true)
+    assertTrue(f.uiState.isAirplaneMode)
     f.viewModel.resetPrototypeFlow()
+    assertFalse(f.uiState.isAirplaneMode)
     assertEquals(beforeResetCount + 1, f.uiState.dataResetCount)
     assertEquals(initialEntityCount, f.uiState.entities.size)
     assertTrue(f.events.contains(WorkbenchEvent.PrototypeReset))

@@ -38,6 +38,7 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyPreviewIte
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyStats
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SyncStatus
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.deriveEntitySyncStatus
+import org.groundplatform.v2.devtools.prototypeapp.domain.repository.ConnectivityRepository
 import org.groundplatform.v2.devtools.prototypeapp.domain.repository.SampleDataRepository
 import org.groundplatform.v2.devtools.prototypeapp.domain.repository.SurveyContent
 import org.groundplatform.v2.devtools.prototypeapp.domain.repository.SurveyRepository
@@ -66,6 +67,12 @@ interface WorkbenchActions {
 
   /** Explicitly sets the simulated device orientation (`Portrait` or `Landscape`). */
   fun selectDeviceOrientation(orientation: DeviceOrientation)
+
+  /** Explicitly sets the workbench offline simulation (`isAirplaneMode`) state. */
+  fun updateAirplaneMode(enabled: Boolean)
+
+  /** Toggles the workbench offline simulation (`isAirplaneMode`) state. */
+  fun toggleAirplaneMode()
 
   /**
    * Updates the workbench's custom XForms XML, parses it into a [FormDef], and notifies
@@ -123,6 +130,7 @@ class WorkbenchViewModel(
   private val sampleDataRepository: SampleDataRepository,
   private val generateRandomSitesUseCase: GeneratePrototypeRandomSitesUseCase,
   private val scope: CoroutineScope,
+  private val connectivityRepository: ConnectivityRepository = ConnectivityRepository(),
 ) : WorkbenchActions {
   private data class Data(
     val surveys: List<SurveyPreviewItem> = emptyList(),
@@ -130,6 +138,7 @@ class WorkbenchViewModel(
     val content: SurveyContent = SurveyContent(),
     val surveyConfigs: Map<String, SurveyConfig> = emptyMap(),
     val surveyStats: Map<String, SurveyStats> = emptyMap(),
+    val isOnline: Boolean = true,
   )
 
   private data class Session(
@@ -150,13 +159,15 @@ class WorkbenchViewModel(
         },
         surveyRepository.observeSurveyConfigs(),
         surveyRepository.observeSurveyStats(),
-      ) { surveys, (activeId, content), configs, stats ->
+        connectivityRepository.observeIsOnline(),
+      ) { surveys, (activeId, content), configs, stats, isOnline ->
         Data(
           surveys = surveys,
           activeSurveyId = activeId,
           content = content,
           surveyConfigs = configs,
           surveyStats = stats,
+          isOnline = isOnline,
         )
       }
       .stateIn(scope, SharingStarted.Eagerly, Data())
@@ -180,6 +191,7 @@ class WorkbenchViewModel(
     WorkbenchUiState(
       deviceFormFactor = session.deviceFormFactor,
       deviceOrientation = session.deviceOrientation,
+      isAirplaneMode = !data.isOnline,
       customXFormsXml = session.customXFormsXml,
       selectedWorkbenchExampleForm = session.selectedWorkbenchExampleForm,
       xformsXmlError = session.xformsXmlError,
@@ -251,6 +263,16 @@ class WorkbenchViewModel(
 
   override fun selectDeviceOrientation(orientation: DeviceOrientation) {
     session.update { it.copy(deviceOrientation = orientation) }
+  }
+
+  override fun updateAirplaneMode(enabled: Boolean) {
+    val isOnline = !enabled
+    connectivityRepository.setOnline(isOnline)
+    emit(WorkbenchEvent.ConnectivityChanged(isOnline = isOnline))
+  }
+
+  override fun toggleAirplaneMode() {
+    updateAirplaneMode(!ui.isAirplaneMode)
   }
 
   override fun updateCustomXFormsXml(xml: String) {
@@ -461,6 +483,7 @@ class WorkbenchViewModel(
   }
 
   override fun resetPrototypeFlow() {
+    connectivityRepository.reset()
     emit(WorkbenchEvent.PrototypeReset)
     scope.launch { sampleDataRepository.resetToSampleData() }
     session.update { it.copy(dataResetCount = it.dataResetCount + 1) }

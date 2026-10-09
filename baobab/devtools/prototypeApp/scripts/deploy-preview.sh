@@ -112,7 +112,7 @@ export GOOGLE_APPLICATION_CREDENTIALS="${TEMP_KEY_FILE}"
   max_attempts=3
   attempt=1
   while [[ ${attempt} -le ${max_attempts} ]]; do
-    if npx firebase-tools hosting:channel:deploy "${CHANNEL}" \
+    if npx --yes firebase-tools hosting:channel:deploy "${CHANNEL}" \
       --project "${PROJECT_ID}" \
       --expires "${EXPIRES}"; then
       break

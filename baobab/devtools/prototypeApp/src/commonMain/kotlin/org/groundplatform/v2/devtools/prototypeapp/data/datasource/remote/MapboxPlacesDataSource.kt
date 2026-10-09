@@ -29,6 +29,7 @@ import org.groundplatform.v2.map.LatLng
  */
 class MapboxPlacesDataSource(
   private val geocoder: PlacesGeocoder = PlacesGeocoder(),
+  private val isOnline: () -> Boolean = { true },
   private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default),
 ) {
   private var inFlight: Job? = null
@@ -36,14 +37,13 @@ class MapboxPlacesDataSource(
   fun searchPlaces(
     surveyId: String,
     query: String,
-    isAirplaneMode: Boolean,
     defaultRegionSubtitle: String,
     centerLongitude: Double,
     centerLatitude: Double,
     onResults: (List<SurveyPlaceItem>) -> Unit,
   ) {
     inFlight?.cancel()
-    if (isAirplaneMode || query.isBlank()) {
+    if (!isOnline() || query.isBlank()) {
       onResults(emptyList())
       return
     }

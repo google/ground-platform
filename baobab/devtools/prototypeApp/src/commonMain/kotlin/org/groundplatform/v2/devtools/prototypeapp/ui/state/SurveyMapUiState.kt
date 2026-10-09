@@ -105,8 +105,8 @@ data class SurveyMapUiState(
   val selectedClusterId: String? = null,
   /** The place picked from Place search that the map is centered on, if any. */
   val selectedPlace: SurveyPlaceItem? = null,
-  /** Simulated device Airplane mode: online Places search is unavailable while `true`. */
-  val isAirplaneMode: Boolean = false,
+  /** Whether the device currently has an active network connection. */
+  val isOnline: Boolean = true,
   // --- Straight-line wayfinding ---
   val navigationTargetKind: NavigationTargetKind? = null,
   val navigationTargetId: String? = null,
@@ -141,9 +141,9 @@ data class SurveyMapUiState(
 
   fun isImagerySourceEnabled(sourceId: String): Boolean = sourceId in enabledImagerySourceIds
 
-  /** Whether online Places search is currently available (`!isAirplaneMode`). */
+  /** Whether online Places search is currently available (`isOnline`). */
   val isPlacesSearchAvailable: Boolean
-    get() = !isAirplaneMode
+    get() = isOnline
 
   /** Formatted horizontal GNSS accuracy (`±2.1 m` or `±6.8 ft`). */
   val gnssAccuracyFormatted: String

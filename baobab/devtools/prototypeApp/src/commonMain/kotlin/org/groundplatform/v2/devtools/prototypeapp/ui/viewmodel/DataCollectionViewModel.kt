@@ -47,6 +47,7 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyPreviewIte
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.hasGeometry
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.relatedEntityForPropertyValue
 import org.groundplatform.v2.devtools.prototypeapp.domain.repository.AuthRepository
+import org.groundplatform.v2.devtools.prototypeapp.domain.repository.ConnectivityRepository
 import org.groundplatform.v2.devtools.prototypeapp.domain.repository.LocationRepository
 import org.groundplatform.v2.devtools.prototypeapp.domain.repository.SettingsRepository
 import org.groundplatform.v2.devtools.prototypeapp.domain.repository.SurveyContent
@@ -230,6 +231,7 @@ class DataCollectionViewModel(
   private val launchForm: LaunchFormUseCase = LaunchFormUseCase(),
   private val pdfExportClient: PdfExportClient = PlatformPdfExportClient(),
   private val now: () -> Long = { platformEpochMillis() },
+  private val connectivityRepository: ConnectivityRepository = ConnectivityRepository(),
   private val scope: CoroutineScope,
 ) : DataCollectionActions {
   /** Everything data collection reads from the local data store. */
@@ -481,6 +483,7 @@ class DataCollectionViewModel(
         entity = null,
         candidateEntities = current.eligibleEntitiesForForm(form),
         includeEntityRefStep = form.requiresEntity,
+        surveyConfig = data.value.content.config,
       )
     setController(controller)
     session.update {
@@ -502,7 +505,13 @@ class DataCollectionViewModel(
     val entity = current.entities.firstOrNull { it.id == entityId } ?: return
     val form = current.forms.firstOrNull { it.id == formId } ?: return
     if (!current.isFormButtonEnabled(entity, form)) return
-    val controller = launchForm(customFormDef = current.customFormDef, form = form, entity = entity)
+    val controller =
+      launchForm(
+        customFormDef = current.customFormDef,
+        form = form,
+        entity = entity,
+        surveyConfig = data.value.content.config,
+      )
     setController(controller)
     session.update {
       it.copy(
@@ -623,6 +632,7 @@ class DataCollectionViewModel(
         includeEntityRefStep = includeEntityRefStep,
         // The refreshed form keeps pointing at the feature already picked, if any.
         defaultSelectedEntityId = current.activeDataCollectionEntityId.orEmpty(),
+        surveyConfig = data.value.content.config,
       )
     )
   }
@@ -702,13 +712,27 @@ class DataCollectionViewModel(
     val current = data.value
     val entities = current.content.entities
     val entity = entities.firstOrNull { it.id == entityId } ?: return null
+    val effectiveEntity =
+      if (connectivityRepository.isOnline()) {
+        entity
+      } else {
+        val email = current.profile.email
+        entity.copy(
+          submissions =
+            entity.submissions.filter { sub ->
+              email.isNotBlank() && sub.collectorEmail.equals(email, ignoreCase = true)
+            }
+        )
+      }
     return RecordPdfReports.entityReport(
-      entity = entity,
+      entity = effectiveEntity,
       surveyTitle = current.activeSurvey?.title.orEmpty(),
-      geometry = EntityGeometry.of(entity, current.anchor),
+      geometry = EntityGeometry.of(effectiveEntity, current.anchor),
       unitSystem = current.unitSystem,
       generatedAtEpochMillis = now(),
-      relatedLabelFor = { value -> entities.relatedEntityForPropertyValue(entity, value)?.label },
+      relatedLabelFor = { value ->
+        entities.relatedEntityForPropertyValue(effectiveEntity, value)?.label
+      },
     )
   }
 

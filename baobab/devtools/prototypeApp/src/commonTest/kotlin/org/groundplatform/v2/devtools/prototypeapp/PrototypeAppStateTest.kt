@@ -376,28 +376,30 @@ class PrototypeAppStateTest {
       }
     )
 
-    // Airplane mode disables Mapbox Places search while keeping local map features
+    // Workbench offline simulation disables Mapbox Places search while keeping local map features
     // searchable
     state.selectListFilterTab(ListFilterTab.PLACES)
     assertEquals(ListFilterTab.PLACES, state.listFilterTab)
-    state.updateAirplaneMode(true)
-    assertTrue(state.isAirplaneMode)
+    state.workbench.updateAirplaneMode(true)
+    assertTrue(state.workbenchUiState.isAirplaneMode)
+    assertFalse(state.isOnline)
     assertFalse(state.isPlacesSearchAvailable)
     assertEquals(ListFilterTab.ALL, state.listFilterTab)
     assertTrue(state.filteredListPlaces.isEmpty())
     state.selectListFilterTab(ListFilterTab.PLACES)
     assertEquals(ListFilterTab.ALL, state.listFilterTab)
 
-    // Searching local features ("Kamau") works while in Airplane mode
+    // Searching local features ("Kamau") works while offline
     state.updateListSearchQuery("Kamau")
     assertTrue(state.filteredListPlaces.isEmpty())
     assertEquals(1, state.filteredListEntities.size)
     assertEquals("Plot NYR-104 • Kamau Family Parcel", state.filteredListEntities.first().label)
 
-    // Turning Airplane mode back off restores Places search availability (empty when query blank,
-    // populated when query entered)
-    state.toggleAirplaneMode()
-    assertFalse(state.isAirplaneMode)
+    // Turning Airplane mode back off in the workbench restores Places search availability (empty
+    // when query blank, populated when query entered)
+    state.workbench.toggleAirplaneMode()
+    assertFalse(state.workbenchUiState.isAirplaneMode)
+    assertTrue(state.isOnline)
     assertTrue(state.isPlacesSearchAvailable)
     state.clearListSearchQuery()
     assertEquals(0, state.filteredListPlaces.size)
@@ -2167,11 +2169,41 @@ class PrototypeAppStateTest {
       state.availableGroupedSubmissionsForEntity(entity).sumOf { it.submissions.size },
     )
 
-    state.updateAirplaneMode(true)
+    state.workbench.updateAirplaneMode(true)
     val offline = state.availableGroupedSubmissionsForEntity(entity).flatMap { it.submissions }
     assertTrue(offline.isNotEmpty())
     assertTrue(offline.size < entity.submissions.size)
     assertTrue(offline.all { state.isSubmissionStoredOnDevice(it) })
+
+    // Other collectors' submissions (e.g. Samuel Kariuki on entity-nyr-108) require connectivity
+    val nyr108 = state.entities.first { it.id == "entity-nyr-108" }
+    assertTrue(state.availableGroupedSubmissionsForEntity(nyr108).isEmpty())
+  }
+
+  @Test
+  fun offlineMode_preventsOnlineOnlyFlows_forDownloadsAndUploads() {
+    val state = PrototypeAppState(initialScreen = PrototypeScreen.MAIN_SURVEY)
+    state.workbench.updateAirplaneMode(true)
+    assertFalse(state.isOnline)
+
+    // 1. Outbox uploads are prevented while offline
+    val initialOutboxCount = state.outboxMutationCount
+    state.syncMutationNow("mut-outbox-04")
+    assertEquals(initialOutboxCount, state.outboxMutationCount)
+    state.syncAllOutboxMutations()
+    assertEquals(initialOutboxCount, state.outboxMutationCount)
+    assertTrue(state.activeSurveyNotice?.contains("offline", ignoreCase = true) == true)
+
+    // 2. Downloading an undownloaded survey is prevented while offline, whereas opening an already
+    // downloaded survey succeeds
+    val undownloadedSurvey = state.surveys.first { !it.isDownloaded }
+    state.downloadSurvey(undownloadedSurvey.id)
+    assertFalse(state.surveys.first { it.id == undownloadedSurvey.id }.isDownloaded)
+
+    // 3. Downloading an undownloaded offline tile package is prevented while offline
+    val undownloadedTilePkg = state.offlineTilePackages.first { !it.isDownloaded }
+    state.toggleOfflineTilePackage(undownloadedTilePkg.id)
+    assertFalse(state.offlineTilePackages.first { it.id == undownloadedTilePkg.id }.isDownloaded)
   }
 
   @Test

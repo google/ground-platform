@@ -37,6 +37,7 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.MutationLogItem
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.OfflineTilePackageItem
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.UserSettings
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.WEBSITE_URL
+import org.groundplatform.v2.devtools.prototypeapp.domain.repository.ConnectivityRepository
 import org.groundplatform.v2.devtools.prototypeapp.domain.repository.MutationRepository
 import org.groundplatform.v2.devtools.prototypeapp.domain.repository.SettingsRepository
 import org.groundplatform.v2.devtools.prototypeapp.domain.repository.SurveyRepository
@@ -87,6 +88,7 @@ class SettingsViewModel(
   private val surveyRepository: SurveyRepository,
   mutationRepository: MutationRepository,
   private val scope: CoroutineScope,
+  private val connectivityRepository: ConnectivityRepository = ConnectivityRepository(),
   private val estimateDeviceStorage: EstimateDeviceStorageUseCase = EstimateDeviceStorageUseCase(),
 ) : SettingsActions {
   private data class Session(
@@ -172,6 +174,14 @@ class SettingsViewModel(
   }
 
   override fun visitWebsite(url: String) {
+    if (!connectivityRepository.isOnline()) {
+      _events.tryEmit(
+        SettingsEvent.Notice(
+          "Cannot open website while offline. Connect to the internet and try again."
+        )
+      )
+      return
+    }
     session.update { it.copy(visitedWebsiteUrl = url) }
     _events.tryEmit(SettingsEvent.Notice("Opened $url"))
   }
@@ -187,6 +197,14 @@ class SettingsViewModel(
 
   override fun toggleOfflineTilePackage(packageId: String) {
     val tilePackage = uiState.value.offlineTilePackages.firstOrNull { it.id == packageId } ?: return
+    if (!tilePackage.isDownloaded && !connectivityRepository.isOnline()) {
+      _events.tryEmit(
+        SettingsEvent.Notice(
+          "Cannot download offline imagery while offline. Connect to the internet and try again."
+        )
+      )
+      return
+    }
     scope.launch {
       surveyRepository.setOfflineTilePackageDownloaded(packageId, !tilePackage.isDownloaded)
     }

@@ -21,12 +21,12 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.parsePlaceCoordi
 
 /**
  * Domain use case combining local survey place gazetteer search, raw GPS coordinate query parsing,
- * and remote Mapbox Places API results while respecting offline (`isAirplaneMode`) rules.
+ * and remote Mapbox Places API results while respecting network connectivity (`isOnline`) rules.
  */
 class SearchPlacesUseCase {
   operator fun invoke(
     query: String,
-    isAirplaneMode: Boolean,
+    isOnline: Boolean = true,
     listFilterTab: ListFilterTab,
     localPlaces: List<SurveyPlaceItem>,
     remoteApiPlaces: List<SurveyPlaceItem>,
@@ -34,7 +34,7 @@ class SearchPlacesUseCase {
     surveyBaseLng: Double,
     surveyBaseLat: Double,
   ): List<SurveyPlaceItem> {
-    if (isAirplaneMode) {
+    if (!isOnline) {
       return emptyList()
     }
     if (listFilterTab != ListFilterTab.ALL && listFilterTab != ListFilterTab.PLACES) {

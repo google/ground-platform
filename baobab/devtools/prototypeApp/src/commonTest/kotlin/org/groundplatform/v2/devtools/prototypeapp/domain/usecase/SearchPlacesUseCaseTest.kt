@@ -30,7 +30,7 @@ class SearchPlacesUseCaseTest {
     val coordMatches =
       useCase(
         query = "-0.4210, 36.9505",
-        isAirplaneMode = false,
+        isOnline = true,
         listFilterTab = ListFilterTab.ALL,
         localPlaces = placeRepo.getLocalPlaces(),
         remoteApiPlaces = emptyList(),

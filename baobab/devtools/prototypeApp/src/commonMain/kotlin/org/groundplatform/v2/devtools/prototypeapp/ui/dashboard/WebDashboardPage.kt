@@ -561,7 +561,7 @@ private fun DashboardMapArea(
   val hasTables = uiState.entities.isNotEmpty()
   var lastFramedSelectionEpoch by remember { mutableStateOf(-1L) }
   val mapCamera =
-    rememberSurveyMapCamera(desired = state::desiredMapCamera, onSettled = state::syncMapCamera)
+    rememberSurveyMapCamera(uiState = state.surveyMapUiState, actions = state.surveyMap)
 
   BoxWithConstraints(modifier = modifier) {
     val expandedTableHeight = (maxHeight * 0.42f).coerceAtLeast(160.dp)

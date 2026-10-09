@@ -30,7 +30,6 @@ interface PlaceRepository {
   fun searchRemotePlaces(
     surveyId: String,
     query: String,
-    isAirplaneMode: Boolean,
     defaultRegionSubtitle: String,
     centerLongitude: Double,
     centerLatitude: Double,
