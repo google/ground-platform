@@ -19,5 +19,5 @@
 *.aab
 *.apk
 
-# Android SDK location (machine-specific, must not be committed)
+# Android SDK location and local API tokens (machine-specific, must not be committed)
 local.properties

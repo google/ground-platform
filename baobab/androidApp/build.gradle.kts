@@ -12,6 +12,8 @@
  * the License.
  */
 // Placeholder Android application build script wrapping `org.groundplatform.v2:mobile`.
+import java.util.Properties
+
 plugins {
   id("com.android.application") version "8.5.2"
   kotlin("multiplatform") version "2.4.20"
@@ -45,6 +47,21 @@ kotlin {
   }
 }
 
+val localProperties = Properties()
+
+listOf(rootProject.file("../local.properties"), rootProject.file("local.properties"))
+  .filter { it.isFile }
+  .forEach { file -> file.inputStream().use(localProperties::load) }
+
+val mapboxAccessToken =
+  (localProperties.getProperty("MAPBOX_ACCESS_TOKEN")
+      ?: localProperties.getProperty("mapbox.access.token")
+      ?: providers.gradleProperty("MAPBOX_ACCESS_TOKEN").orNull
+      ?: providers.gradleProperty("mapbox.access.token").orNull
+      ?: System.getenv("MAPBOX_ACCESS_TOKEN")
+      ?: "")
+    .trim()
+
 android {
   namespace = "org.groundplatform.v2.android"
   compileSdk = 35
@@ -54,6 +71,7 @@ android {
     targetSdk = 35
     versionCode = 1
     versionName = "1.0"
+    resValue("string", "mapbox_access_token", mapboxAccessToken)
   }
   buildTypes {
     release {

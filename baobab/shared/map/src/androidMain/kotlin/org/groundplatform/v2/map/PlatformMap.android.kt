@@ -79,12 +79,31 @@ internal actual fun PlatformMap(
   gestures: MapGestureOptions,
   modifier: Modifier,
 ) {
-  val hasToken = remember { runCatching { MapboxOptions.accessToken }.getOrNull()?.isNotEmpty() }
-  if (hasToken != true) {
+  val context = LocalContext.current
+  val hasToken =
+    remember(context) {
+      val existing = runCatching { MapboxOptions.accessToken }.getOrNull().orEmpty().trim()
+      if (existing.isNotEmpty()) {
+        true
+      } else {
+        val resId =
+          context.resources.getIdentifier("mapbox_access_token", "string", context.packageName)
+        val fromRes =
+          (if (resId != 0) context.getString(resId).trim() else "").ifEmpty {
+            System.getProperty("ground.mapbox.accessToken").orEmpty().trim()
+          }
+        if (fromRes.isNotEmpty()) {
+          runCatching { MapboxOptions.accessToken = fromRes }
+          true
+        } else {
+          false
+        }
+      }
+    }
+  if (!hasToken) {
     PreviewMap(content, cameraState, onEvent, gestures, modifier)
     return
   }
-  val context = LocalContext.current
   val density = LocalDensity.current.density
   val currentContent by rememberUpdatedState(content)
   val currentOnEvent by rememberUpdatedState(onEvent)

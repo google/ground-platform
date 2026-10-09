@@ -14,8 +14,9 @@
 package org.groundplatform.v2.devtools.prototypeapp.client.places
 
 import io.ktor.client.HttpClient
+import io.ktor.client.engine.cio.CIO
 
-/** Offline prototype fallback when no Mapbox Places HTTP client or token is configured. */
-internal actual fun createPlacesHttpClient(): HttpClient? = null
+internal actual fun createPlacesHttpClient(): HttpClient? = HttpClient(CIO)
 
-internal actual fun mapboxAccessToken(): String? = null
+internal actual fun mapboxAccessToken(): String? =
+  System.getProperty("ground.mapbox.accessToken")?.trim()?.ifEmpty { null }

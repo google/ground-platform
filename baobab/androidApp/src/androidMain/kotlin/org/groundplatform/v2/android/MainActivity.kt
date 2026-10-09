@@ -35,6 +35,10 @@ import org.groundplatform.v2.devtools.prototypeapp.ui.onboarding.MobileScreenHos
 class MainActivity : ComponentActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
+    val token = getString(R.string.mapbox_access_token).trim()
+    if (token.isNotEmpty()) {
+      System.setProperty("ground.mapbox.accessToken", token)
+    }
     enableEdgeToEdge()
     setContent { MainActivityContent() }
   }

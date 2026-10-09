@@ -75,6 +75,9 @@ kotlin {
         implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.11.0")
       }
     }
+    val androidMain by getting {
+      dependencies { implementation("io.ktor:ktor-client-cio:3.6.0") }
+    }
     val wasmJsMain by getting { dependencies { implementation("io.ktor:ktor-client-js:3.6.0") } }
     val commonTest by getting { dependencies { implementation(kotlin("test")) } }
     val jvmTest by getting {
