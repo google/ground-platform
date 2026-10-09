@@ -13,61 +13,19 @@
  */
 package org.groundplatform.v2.devtools.prototypeapp.data.seed
 
+import org.groundplatform.v2.core.forms.model.FormDefinition
 import org.groundplatform.v2.core.forms.ui.WorkbenchExampleForm
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.FormPreviewItem
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.MapThumbnailTheme
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyPreviewItem
+import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.ResolveFormDefForLaunchUseCase
 
 /** Hardcoded sample surveys, forms, and XForms presets for the prototype app. */
 internal object PrototypeFakeSurveysData {
-  fun builtInFallbackXFormsXmlForForm(form: FormPreviewItem): String {
-    when (form.id) {
-      "form-single-point-land-use" -> return WorkbenchExampleForm.SINGLE_POINT_LAND_USE.xformsXml
-      "form-sample-plots-forest" ->
-        return WorkbenchExampleForm.SAMPLE_PLOTS_FOREST_ASSESSMENT.xformsXml
-      "form-commodity-perimeter-center" ->
-        return WorkbenchExampleForm.COMMODITY_PERIMETER_AND_CENTER.xformsXml
-      "form-household-past-individuals" ->
-        return WorkbenchExampleForm.HOUSEHOLD_SURVEY_PAST_INDIVIDUALS.xformsXml
-      "form-coffee-parcel" -> return WorkbenchExampleForm.ALL_FIELD_TYPES.xformsXml
-    }
-    val escapedTitle = form.title.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
-    val safeFormId = form.id.replace('-', '_')
-    return """<h:html xmlns="http://www.w3.org/2002/xforms"
-      xmlns:h="http://www.w3.org/1999/xhtml"
-      xmlns:jr="http://openrosa.org/javarosa">
-  <h:head>
-  <h:title>$escapedTitle</h:title>
-  <model>
-    <instance>
-      <data id="$safeFormId" version="${form.version}">
-        <meta>
-          <instanceID/>
-        </meta>
-        <organizer_action_cta>Verified in field (${form.ctaLabel})</organizer_action_cta>
-        <collector_observation>Field verification complete</collector_observation>
-        <canopy_or_parcel_metric>94</canopy_or_parcel_metric>
-      </data>
-    </instance>
-    <bind nodeset="/data/meta/instanceID" type="string" jr:preload="uid"/>
-    <bind nodeset="/data/organizer_action_cta" type="string" required="true()"/>
-    <bind nodeset="/data/collector_observation" type="string"/>
-    <bind nodeset="/data/canopy_or_parcel_metric" type="int"/>
-  </model>
-  </h:head>
-  <h:body>
-  <input ref="/data/organizer_action_cta">
-    <label>Completed Form Action (${form.ctaLabel})</label>
-  </input>
-  <input ref="/data/collector_observation">
-    <label>Field Observation Notes</label>
-  </input>
-  <input ref="/data/canopy_or_parcel_metric">
-    <label>Measured Field Metric / Score (%)</label>
-  </input>
-  </h:body>
-</h:html>"""
-  }
+  private val resolveFormDef = ResolveFormDefForLaunchUseCase()
+
+  fun builtInFallbackFormForForm(form: FormPreviewItem): FormDefinition =
+    resolveFormDef.builtInFallbackFormForForm(form)
 
   /**
    * Default sample surveys shared with the user, including the 5 swappable Workbench Example

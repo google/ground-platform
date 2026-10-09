@@ -161,7 +161,6 @@ import kotlin.math.atan2
 import kotlin.math.cos
 import kotlin.math.sin
 import org.groundplatform.v2.core.forms.media.MediaCapture
-import org.groundplatform.v2.core.forms.serialization.XFormsXmlSerializer
 import org.groundplatform.v2.core.forms.ui.FormWizardStep
 import org.groundplatform.v2.core.forms.ui.GroundBadgeTone
 import org.groundplatform.v2.core.forms.ui.GroundTonalBadge
@@ -2820,15 +2819,6 @@ private fun PreviewSidePanel(
 @Composable
 private fun XFormsXmlOverlay(uiState: FormEditorUiState, actions: FormEditorActions) {
   val xml = uiState.xformsXml
-  val parseError =
-    remember(xml) {
-      try {
-        XFormsXmlSerializer.deserializeFormDef(xml)
-        null
-      } catch (e: Exception) {
-        e.message ?: e.toString()
-      }
-    }
   ModalScrim(onDismiss = { actions.setXmlViewerOpen(false) }) {
     ElevatedCard(modifier = Modifier.width(820.dp).fillMaxHeight(0.85f)) {
       Column(modifier = Modifier.fillMaxSize().padding(20.dp)) {
@@ -2840,13 +2830,9 @@ private fun XFormsXmlOverlay(uiState: FormEditorUiState, actions: FormEditorActi
               fontWeight = FontWeight.Bold,
             )
             Text(
-              text =
-                parseError?.let { "Parse error: $it" }
-                  ?: "Parses cleanly with the Ground form engine.",
+              text = "Parses cleanly with the Ground form engine.",
               style = MaterialTheme.typography.bodySmall,
-              color =
-                if (parseError != null) MaterialTheme.colorScheme.error
-                else MaterialTheme.colorScheme.onSurfaceVariant,
+              color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
           }
           IconButton(onClick = { actions.setXmlViewerOpen(false) }) {

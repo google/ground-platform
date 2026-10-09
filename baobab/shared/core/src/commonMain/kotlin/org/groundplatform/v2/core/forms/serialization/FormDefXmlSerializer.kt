@@ -39,7 +39,6 @@ import groundplatform.v2.forms.TypedValue
 import groundplatform.v2.forms.ViewComponent
 import org.groundplatform.v2.core.forms.serialization.xml.XmlElement
 import org.groundplatform.v2.core.forms.serialization.xml.XmlNode
-import org.groundplatform.v2.core.forms.serialization.xml.XmlParser
 import org.groundplatform.v2.core.forms.serialization.xml.XmlText
 import org.groundplatform.v2.core.forms.serialization.xml.XmlWriter
 
@@ -219,7 +218,12 @@ internal object FormDefXmlSerializer {
 
     for (binding in metaBindings) {
       val subName = binding.field_path.substringAfter("meta/")
-      if (subName.isNotEmpty() && subName !in addedTags && !subName.startsWith("entity")) {
+      if (
+        subName.isNotEmpty() &&
+          subName !in addedTags &&
+          !subName.startsWith("entity") &&
+          !subName.startsWith("entities:entity")
+      ) {
         addedTags.add(subName)
         metaChildren.add(XmlElement(name = subName))
       }
@@ -266,12 +270,22 @@ internal object FormDefXmlSerializer {
       if (sec.uri.isNotEmpty()) put("src", sec.uri)
     }
     val children =
-      if (sec.inline_data.isNotEmpty()) {
-        try {
-          listOf(XmlParser.parse(sec.inline_data))
-        } catch (_: Exception) {
-          emptyList()
-        }
+      if (sec.rows.isNotEmpty() || sec.root_name.isNotEmpty()) {
+        val rootTag = sec.root_name.ifEmpty { "root" }
+        val itemTag = sec.item_name.ifEmpty { "item" }
+        val itemElements =
+          sec.rows.map { row ->
+            val colElements =
+              row.fields.map { (colName, fieldVal) ->
+                val text = formatFieldValue(fieldVal)
+                XmlElement(
+                  name = colName,
+                  children = if (text.isNotEmpty()) listOf(XmlText(text)) else emptyList(),
+                )
+              }
+            XmlElement(name = itemTag, children = colElements)
+          }
+        listOf(XmlElement(name = rootTag, children = itemElements))
       } else {
         emptyList()
       }

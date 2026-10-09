@@ -281,7 +281,7 @@ class FormEditorTest {
     assertFalse("<itext>" in xml)
     // No Ground-only attributes or namespaces: color exists only as instance data.
     assertFalse("color=" in xml)
-    assertEquals(4, Regex("xmlns").findAll(xml).count())
+    assertEquals(6, Regex("xmlns").findAll(xml).count())
 
     val formDef = XFormsXmlSerializer.deserializeFormDef(xml)
     assertTrue(formDef.model!!.secondary_instances.any { it.id == "has_shade_trees" })

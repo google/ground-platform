@@ -234,7 +234,9 @@ object ProtoJsonSerializer {
     buildProtoJsonObject(snake) {
       addString("id", msg.id)
       addString("uri", msg.uri)
-      addString("inline_data", msg.inline_data)
+      addString("root_name", msg.root_name)
+      addString("item_name", msg.item_name)
+      addObjectList("rows", msg.rows) { encodeRecordNode(it, snake) }
     }
 
   private fun encodeFieldBinding(msg: FieldBinding, snake: Boolean): JsonObject =
@@ -683,7 +685,9 @@ object ProtoJsonSerializer {
     SecondaryInstance(
       id = obj.getProtoString("id"),
       uri = obj.getProtoString("uri"),
-      inline_data = obj.getProtoString("inline_data"),
+      root_name = obj.getProtoString("root_name"),
+      item_name = obj.getProtoString("item_name"),
+      rows = obj.getProtoObjects("rows").map { decodeRecordNode(it, emptyMap()) },
     )
 
   private fun decodeFieldBinding(obj: JsonObject): FieldBinding =

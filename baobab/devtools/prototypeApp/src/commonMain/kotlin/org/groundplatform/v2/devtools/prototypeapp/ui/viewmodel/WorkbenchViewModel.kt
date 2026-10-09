@@ -214,12 +214,13 @@ class WorkbenchViewModel(
 
   /**
    * Called by the app shell when [surveyId] becomes the active survey: loads the survey's primary
-   * form XML into the workbench editor and notifies `DataCollectionViewModel`.
+   * form into the workbench editor and notifies `DataCollectionViewModel`.
    */
   fun onSurveyActivated(surveyId: String) {
-    val xml = data.value.surveyConfigs[surveyId]?.primaryFormXml ?: return
-    val example = WorkbenchExampleForm.entries.firstOrNull { it.xformsXml == xml }
-    val formDef = XFormsParseCache.formDef(xml)
+    val primaryForm = data.value.surveyConfigs[surveyId]?.primaryForm ?: return
+    val example = WorkbenchExampleForm.entries.firstOrNull { it.formDefinition == primaryForm }
+    val formDef = primaryForm.proto
+    val xml = example?.xformsXml ?: XFormsXmlSerializer.serialize(formDef, prettyPrint = true)
     session.update {
       it.copy(
         selectedWorkbenchExampleForm = example,

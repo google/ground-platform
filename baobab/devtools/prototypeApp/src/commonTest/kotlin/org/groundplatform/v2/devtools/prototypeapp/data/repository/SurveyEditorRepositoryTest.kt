@@ -152,6 +152,6 @@ class SurveyEditorRepositoryTest {
     val forms = runNow { store.transaction { forms(surveyId) } }
     assertTrue(forms.none { it.id == dropped.form.formId })
     val config = runNow { store.transaction { surveyConfig(surveyId) } }
-    assertNull(config?.formXmlById?.get(dropped.form.formId))
+    assertNull(config?.formsById?.get(dropped.form.formId))
   }
 }

@@ -21,7 +21,7 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.MeasurementUnitS
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.PrototypeScreen
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.UserSettings
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.DatasetKind
-import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.publishedFormXml
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.publishedForm
 import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.surveyEditorViewModel
 import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.ui
 
@@ -129,15 +129,16 @@ class LocalStoreAppStateTest {
     editor.addForm()
     state.saveSurveyEditorDraft("survey-kenya-coffee", editor.ui.draft)
 
-    // The title is shown in the survey list; generated XForms are published to the survey config.
+    // The title is shown in the survey list; generated FormDefinitions are published to the survey
+    // config.
     assertEquals("Renamed survey", state.activeSurvey.title)
     val config = state.dataHolder.appData.value.content.config
     val draft = editor.ui.draft
     val newEntry = draft.forms.last()
-    val publishedXml = config?.formXmlById?.get(newEntry.form.formId)
-    assertEquals(draft.publishedFormXml(newEntry), publishedXml)
+    val publishedForm = config?.formsById?.get(newEntry.form.formId)
+    assertEquals(draft.publishedForm(newEntry), publishedForm)
     // New Forms add rows to their linked Data table by default.
-    assertTrue(publishedXml.orEmpty().contains("create=\"1\""))
+    assertEquals("1", publishedForm?.proto?.model?.entities?.firstOrNull()?.create_condition)
 
     state.openSurvey("survey-sample-plots-forest")
     state.openSurvey("survey-kenya-coffee")

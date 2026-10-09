@@ -147,14 +147,24 @@ class XPathParameterizedTest {
           listOf(
             SecondaryInstance(
               id = "cities",
-              inline_data =
-                """
-                code,name,country
-                ZRH,Zurich,CH
-                GVA,Geneva,CH
-                MUC,Munich,DE
-                """
-                  .trimIndent(),
+              rows =
+                listOf(
+                  org.groundplatform.v2.core.forms.model.secondaryInstanceRow(
+                    "code" to "ZRH",
+                    "name" to "Zurich",
+                    "country" to "CH",
+                  ),
+                  org.groundplatform.v2.core.forms.model.secondaryInstanceRow(
+                    "code" to "GVA",
+                    "name" to "Geneva",
+                    "country" to "CH",
+                  ),
+                  org.groundplatform.v2.core.forms.model.secondaryInstanceRow(
+                    "code" to "MUC",
+                    "name" to "Munich",
+                    "country" to "DE",
+                  ),
+                ),
             )
           ),
         translations =

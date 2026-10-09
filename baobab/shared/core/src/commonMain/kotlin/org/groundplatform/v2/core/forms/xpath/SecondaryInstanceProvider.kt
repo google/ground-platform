@@ -14,7 +14,6 @@
 package org.groundplatform.v2.core.forms.xpath
 
 import groundplatform.v2.forms.FormDef
-import groundplatform.v2.forms.SecondaryInstance
 import groundplatform.v2.forms.TypedValue
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
@@ -122,73 +121,19 @@ class InMemorySecondaryInstanceProvider(
       return InMemorySecondaryInstanceProvider(typedTables)
     }
 
-    /** Parses inline CSV, XML, or GeoJSON datasets from `FormDef.model.secondary_instances`. */
+    /** Extracts structured inline rows from `FormDef.model.secondary_instances`. */
     fun fromFormDef(formDef: FormDef): InMemorySecondaryInstanceProvider {
       val secondaryInstances = formDef.model?.secondary_instances ?: emptyList()
       val parsed = mutableMapOf<String, List<Map<String, TypedValue>>>()
       for (sec in secondaryInstances) {
-        if (sec.id.isNotEmpty() && sec.inline_data.isNotEmpty()) {
-          parsed[sec.id] = parseInlineData(sec)
+        if (sec.id.isNotEmpty() && sec.rows.isNotEmpty()) {
+          parsed[sec.id] =
+            sec.rows.map { row ->
+              row.fields.mapValues { (_, fv) -> fv.scalar_value ?: TypedValue(string_value = "") }
+            }
         }
       }
       return InMemorySecondaryInstanceProvider(parsed)
-    }
-
-    private fun parseInlineData(sec: SecondaryInstance): List<Map<String, TypedValue>> {
-      val trimmed = sec.inline_data.trim()
-      if (trimmed.isEmpty()) return emptyList()
-      if (trimmed.startsWith("{")) {
-        val geoRows = parseGeoJsonData(trimmed)
-        if (geoRows.isNotEmpty()) return geoRows
-      }
-      if (trimmed.startsWith("<")) {
-        try {
-          val rootEl = org.groundplatform.v2.core.forms.serialization.xml.XmlParser.parse(trimmed)
-          val itemElements =
-            rootEl.childrenNamed("item").ifEmpty {
-              if (rootEl.localName == "item") listOf(rootEl) else rootEl.childElements
-            }
-          val multiRowItems = itemElements.mapNotNull { itemEl ->
-            if (itemEl.childElements.isEmpty()) {
-              null
-            } else {
-              itemEl.childElements.associate { colEl ->
-                colEl.localName to TypedValue(string_value = colEl.textContent.trim())
-              }
-            }
-          }
-          if (multiRowItems.isNotEmpty()) {
-            return multiRowItems
-          }
-          // Single-record XML fallback (e.g., <data><item>val</item><count>3</count></data>)
-          if (rootEl.childElements.isNotEmpty()) {
-            return listOf(
-              rootEl.childElements.associate { colEl ->
-                colEl.localName to TypedValue(string_value = colEl.textContent.trim())
-              }
-            )
-          }
-          return emptyList()
-        } catch (_: Exception) {
-          // Fall back to CSV parser if XML parsing fails
-        }
-      }
-      val lines =
-        sec.inline_data.lineSequence().map { it.trim() }.filter { it.isNotEmpty() }.toList()
-      if (lines.isEmpty()) return emptyList()
-      val delimiter =
-        when {
-          lines.first().contains('\t') -> '\t'
-          lines.first().contains(';') -> ';'
-          else -> ','
-        }
-      val headers = splitCsvLine(lines.first(), delimiter)
-      return lines.drop(1).map { line ->
-        val values = splitCsvLine(line, delimiter)
-        headers
-          .mapIndexed { idx, col -> col to TypedValue(string_value = values.getOrElse(idx) { "" }) }
-          .toMap()
-      }
     }
 
     internal fun parseGeoJsonData(jsonText: String): List<Map<String, TypedValue>> {

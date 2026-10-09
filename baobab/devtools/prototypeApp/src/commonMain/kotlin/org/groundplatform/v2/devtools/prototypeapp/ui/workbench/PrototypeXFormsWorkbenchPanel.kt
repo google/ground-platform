@@ -55,6 +55,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import groundplatform.v2.forms.FormDef
+import org.groundplatform.v2.core.forms.model.FormDefinition
 import org.groundplatform.v2.core.forms.serialization.ProtoJsonSerializer
 import org.groundplatform.v2.core.forms.serialization.TextProtoSerializer
 import org.groundplatform.v2.core.forms.serialization.XFormsXmlSerializer
@@ -72,11 +73,11 @@ private val defaultResolveFormDefUseCase =
   org.groundplatform.v2.devtools.prototypeapp.domain.usecase.ResolveFormDefForLaunchUseCase()
 
 /**
- * Built-in fallback XForms `<h:html>` XML definitions keyed by [FormPreviewItem.id], used when
+ * Built-in fallback [FormDefinition] keyed by [FormPreviewItem.id], used when
  * [WorkbenchUiState.customXFormsXml] is cleared/blank.
  */
-fun builtInFallbackXFormsXmlForForm(form: FormPreviewItem): String =
-  defaultResolveFormDefUseCase.builtInFallbackXFormsXmlForForm(form)
+fun builtInFallbackFormForForm(form: FormPreviewItem): FormDefinition =
+  defaultResolveFormDefUseCase.builtInFallbackFormForForm(form)
 
 /** Parses the initial default XForms XML into a [FormDef] via [XFormsXmlSerializer]. */
 fun parseDefaultPrototypeFormDef(): FormDef =

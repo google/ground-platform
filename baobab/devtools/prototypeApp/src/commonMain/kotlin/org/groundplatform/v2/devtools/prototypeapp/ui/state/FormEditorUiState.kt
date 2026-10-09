@@ -13,7 +13,7 @@
  */
 package org.groundplatform.v2.devtools.prototypeapp.ui.state
 
-import org.groundplatform.v2.core.forms.serialization.XFormsXmlSerializer
+import org.groundplatform.v2.core.forms.model.FormDefinition
 import org.groundplatform.v2.core.forms.ui.FormWizardController
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.ChoiceSource
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EditorDataset
@@ -140,17 +140,17 @@ data class FormEditorUiState(
   val xformsXml: String
     get() = EditorXFormsGenerator.toXml(form, saveTarget, datasets = datasets)
 
-  /** XForms run by the preview, with the target's features embedded. */
-  val previewXml: String
-    get() = EditorXFormsGenerator.toXml(form, saveTarget, inlineRows = true, datasets = datasets)
+  /** Compiled [FormDefinition] run by the preview, with the target's features embedded. */
+  val previewForm: FormDefinition
+    get() = EditorXFormsGenerator.compile(form, saveTarget, inlineRows = true, datasets = datasets)
 
   /**
-   * Parses the current [previewXml] into a fresh [FormWizardController] for the web canvas and the
-   * preview. Returns the parse error instead when the generated XForms don't load. Callers cache
-   * the result per XML (e.g. `remember(previewXml)`), so the canvas tracks every edit.
+   * Builds a fresh [FormWizardController] from the current [previewForm] for the web canvas and the
+   * preview. Callers cache the result per [previewForm] (e.g. `remember(previewForm)`), so the
+   * canvas tracks every edit.
    */
   fun parsePreviewController(): Result<FormWizardController> = runCatching {
-    FormWizardController(formDef = XFormsXmlSerializer.deserializeFormDef(previewXml))
+    FormWizardController(formDef = previewForm.proto)
   }
 
   /**

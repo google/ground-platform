@@ -97,7 +97,7 @@ abstract class LocalStoreContractTest {
             PrototypeFakeSubmissionsData.standaloneSubmissionsForSurvey(survey.id),
             standaloneSubmissions(survey.id),
           )
-          assertTrue(surveyConfig(survey.id)!!.primaryFormXml.isNotBlank())
+          assertNotNull(surveyConfig(survey.id)!!.primaryForm)
         }
         assertEquals(SampleDataSeeder.DEFAULT_ACTIVE_SURVEY_ID, preferences().activeSurveyId)
         assertEquals(SampleDataSeeder.SEED_VERSION, preferences().seedVersion)

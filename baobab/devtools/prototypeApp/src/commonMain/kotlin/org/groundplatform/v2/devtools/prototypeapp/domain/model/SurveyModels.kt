@@ -13,6 +13,8 @@
  */
 package org.groundplatform.v2.devtools.prototypeapp.domain.model
 
+import org.groundplatform.v2.core.forms.model.FormDefinition
+
 /** Visual color/feature theme for a survey's placeholder map thumbnail. */
 enum class MapThumbnailTheme(
   val primaryTerrainHex: Long,
@@ -77,10 +79,10 @@ data class SurveyPreviewItem(
 
 /** Survey-level form definitions stored alongside a survey's data. */
 data class SurveyConfig(
-  /** XForms XML of the survey's primary form, used by the form runner and workbench. */
-  val primaryFormXml: String,
-  /** XForms XML for each form in the survey, keyed by form ID. */
-  val formXmlById: Map<String, String> = emptyMap(),
+  /** Primary [FormDefinition] of the survey, used by the form runner and workbench. */
+  val primaryForm: FormDefinition? = null,
+  /** [FormDefinition] for each form in the survey, keyed by form ID. */
+  val formsById: Map<String, FormDefinition> = emptyMap(),
 )
 
 /** Number of map features and submissions stored for a survey. */

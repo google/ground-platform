@@ -578,14 +578,24 @@ class FormEngineUnitTest {
               listOf(
                 SecondaryInstance(
                   id = "cities",
-                  inline_data =
-                    """
-                    name,country,label
-                    nairobi,KE,Nairobi
-                    mombasa,KE,Mombasa
-                    dar,TZ,Dar es Salaam
-                    """
-                      .trimIndent(),
+                  rows =
+                    listOf(
+                      org.groundplatform.v2.core.forms.model.secondaryInstanceRow(
+                        "name" to "nairobi",
+                        "country" to "KE",
+                        "label" to "Nairobi",
+                      ),
+                      org.groundplatform.v2.core.forms.model.secondaryInstanceRow(
+                        "name" to "mombasa",
+                        "country" to "KE",
+                        "label" to "Mombasa",
+                      ),
+                      org.groundplatform.v2.core.forms.model.secondaryInstanceRow(
+                        "name" to "dar",
+                        "country" to "TZ",
+                        "label" to "Dar es Salaam",
+                      ),
+                    ),
                 )
               ),
             translations =
@@ -1209,7 +1219,17 @@ class FormEngineUnitTest {
               listOf(
                 SecondaryInstance(
                   id = "trees",
-                  inline_data = "name,itextId\noak,oak_id\npine,pine_id",
+                  rows =
+                    listOf(
+                      org.groundplatform.v2.core.forms.model.secondaryInstanceRow(
+                        "name" to "oak",
+                        "itextId" to "oak_id",
+                      ),
+                      org.groundplatform.v2.core.forms.model.secondaryInstanceRow(
+                        "name" to "pine",
+                        "itextId" to "pine_id",
+                      ),
+                    ),
                 )
               ),
             bindings =
@@ -1333,7 +1353,8 @@ class FormEngineUnitTest {
                   ),
                 default_values = buildRecordNode { string("station", "station_a") },
               ),
-            secondary_instances = listOf(SecondaryInstance(id = "stations", inline_data = geoJson)),
+            secondary_instances =
+              listOf(SecondaryInstance(id = "stations", uri = "jr://file/stations.geojson")),
             bindings =
               listOf(
                 FieldBinding(field_path = "station", type = DataType.TYPE_SELECT_ONE),
@@ -1379,7 +1400,17 @@ class FormEngineUnitTest {
           ),
       )
 
-    val session = FormSession(formDef)
+    val session =
+      FormSession(
+        formDef,
+        environment =
+          FormEnvironment(
+            secondaryInstanceProvider =
+              org.groundplatform.v2.core.forms.xpath.InMemorySecondaryInstanceProvider.fromGeoJson(
+                mapOf("stations" to geoJson)
+              )
+          ),
+      )
     session.updateGeoPoint("p1", 0.0, 0.0)
     session.updateGeoPoint("p2", 0.0, 1.0)
     session.updateGeoPoint("p3", 1.0, 1.0)
@@ -1428,7 +1459,13 @@ class FormEngineUnitTest {
                 SecondaryInstance(
                   id = "last-saved",
                   uri = "jr://instance/last-saved",
-                  inline_data = "<data><item>CarriedOver</item></data>",
+                  root_name = "data",
+                  rows =
+                    listOf(
+                      org.groundplatform.v2.core.forms.model.secondaryInstanceRow(
+                        "item" to "CarriedOver"
+                      )
+                    ),
                 )
               ),
             bindings =

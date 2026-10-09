@@ -261,8 +261,8 @@ internal fun WebLayoutCanvasPanel(
   modifier: Modifier = Modifier,
 ) {
   val form = uiState.form
-  val xml = uiState.previewXml
-  val parsed = remember(xml) { uiState.parsePreviewController() }
+  val previewForm = uiState.previewForm
+  val parsed = remember(previewForm) { uiState.parsePreviewController() }
   val controller = parsed.getOrNull()
   val error = parsed.exceptionOrNull()?.let { it.message ?: it.toString() }
   val colors = MaterialTheme.colorScheme

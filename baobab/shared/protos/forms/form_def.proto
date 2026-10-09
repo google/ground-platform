@@ -123,9 +123,19 @@ message SecondaryInstance {
   // descriptor for XForms/XLSForm round-tripping.
   string uri = 2;
 
-  // Inline data payload (CSV, JSON, or textproto) embedded directly within
-  // the form definition when external files are not used.
-  string inline_data = 3;
+  reserved 3;
+  reserved "inline_data";
+
+  // Optional custom container element name when imported from XForms XML
+  // (defaults to "root" when empty).
+  string root_name = 4;
+
+  // Optional custom row element name when imported from XForms XML
+  // (defaults to "item" when empty).
+  string item_name = 5;
+
+  // Structured inline rows embedded directly within the form definition.
+  repeated RecordNode rows = 6;
 }
 
 // Binding rule attaching data types, validation logic, reactive calculations,

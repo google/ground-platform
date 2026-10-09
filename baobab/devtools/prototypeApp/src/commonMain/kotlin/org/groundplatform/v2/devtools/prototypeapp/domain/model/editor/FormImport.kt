@@ -20,7 +20,9 @@ import groundplatform.v2.forms.FieldBinding
 import groundplatform.v2.forms.FormDef
 import groundplatform.v2.forms.ItemsetDef
 import groundplatform.v2.forms.LabelDef
+import groundplatform.v2.forms.RecordNode
 import groundplatform.v2.forms.ViewComponent
+import org.groundplatform.v2.core.forms.model.FormDefinition
 import org.groundplatform.v2.core.forms.serialization.XFormsXmlSerializer
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.FormAvailability
 
@@ -77,6 +79,25 @@ object FormImport {
     return fromFormDef(formDef, resolvedFormId, fallbackTitle, availability)
   }
 
+  /** Imports [formDefinition] as a Form with ID [formId] (defaults to the form's ID). */
+  fun fromFormDefinition(
+    formDefinition: FormDefinition,
+    formId: String = formDefinition.id,
+    fallbackTitle: String = "",
+    availability: FormAvailability = FormAvailability.MOBILE,
+  ): ImportedForm? {
+    val formDef = formDefinition.proto
+    if (
+      formDef.view?.components.isNullOrEmpty() &&
+        formDef.model?.bindings.isNullOrEmpty() &&
+        formDef.title.isBlank()
+    ) {
+      return null
+    }
+    val resolvedFormId = formId.ifBlank { formDef.form_id.takeIf { it != "data" }.orEmpty() }
+    return fromFormDef(formDef, resolvedFormId, fallbackTitle, availability)
+  }
+
   /** Imports [formDef] as a Form with ID [formId] (defaults to the XForms form ID). */
   fun fromFormDef(
     formDef: FormDef,
@@ -117,7 +138,7 @@ object FormImport {
       var idMatchColumn: String? = null
       var idSource = EntityIdSource.SELECTED_FEATURE
       var idQuestionKey: String? = null
-      if (isUpdate && entity != null) {
+      if (isUpdate) {
         val idExpr = entity.entity_id_expression.trim()
         val byQuestion = ID_BY_QUESTION.matchEntire(idExpr)
         val direct = REF.matchEntire(idExpr)
@@ -169,7 +190,7 @@ object FormImport {
           saveTo =
             EditorSaveTo(
               mode = if (isUpdate) SaveToMode.UPDATE else SaveToMode.CREATE,
-              targetDatasetId = if (isUpdate) entity?.dataset?.ifBlank { null } else null,
+              targetDatasetId = if (isUpdate) entity.dataset.ifBlank { null } else null,
               idSource = idSource,
               idQuestionKey = idQuestionKey,
               mappings = mappings,
@@ -804,54 +825,38 @@ object FormImport {
       }
 
     private fun choicesFromInstance(itemset: ItemsetDef): List<EditorChoice> {
-      val data = instances[itemset.instance_id]?.inline_data.orEmpty()
-      if (data.isBlank()) return emptyList()
+      val rows = instances[itemset.instance_id]?.rows.orEmpty()
+      if (rows.isEmpty()) return emptyList()
       val valueTag = itemset.value_ref.trim().ifEmpty { "name" }
       val rawLabelRef = itemset.label_ref.trim().ifEmpty { "label" }
       val itextColumnMatch = JR_ITEXT.matchEntire(rawLabelRef)
       val itextColumn = itextColumnMatch?.let { unquote(it.groupValues[1]) }
       val labelTag = itextColumn ?: rawLabelRef
-      val itemElements =
-        ITEM.findAll(data)
-          .map { it.groupValues[1] }
-          .toList()
-          .ifEmpty { customRecordsFromInstanceXml(data) }
-      return itemElements
-        .mapNotNull { body ->
-          val value = element(body, valueTag) ?: element(body, "name") ?: return@mapNotNull null
+      return rows
+        .mapNotNull { row ->
+          val value = rowField(row, valueTag) ?: rowField(row, "name") ?: return@mapNotNull null
           val label =
             if (itextColumn != null) {
-              element(body, itextColumn)?.let { strings[it] ?: it }
-                ?: element(body, "label")
+              rowField(row, itextColumn)?.let { strings[it] ?: it }
+                ?: rowField(row, "label")
                 ?: value
             } else {
-              element(body, labelTag)
-                ?: element(body, "label")
-                ?: element(body, "itextId")?.let { strings[it] }
+              rowField(row, labelTag)
+                ?: rowField(row, "label")
+                ?: rowField(row, "itextId")?.let { strings[it] }
                 ?: value
             }
           EditorChoice(
             value = value,
             label = label,
-            colorHex = element(body, EditorXFormsGenerator.CHOICE_COLOR_COLUMN),
+            colorHex = rowField(row, EditorXFormsGenerator.CHOICE_COLOR_COLUMN),
           )
         }
         .toList()
     }
 
-    private fun customRecordsFromInstanceXml(xml: String): List<String> {
-      val rootMatch = OUTER_TAG.find(xml.trim()) ?: return emptyList()
-      val inner = rootMatch.groupValues[2].trim()
-      return CHILD_RECORD.findAll(inner).map { it.groupValues[2] }.toList()
-    }
-
-    private fun element(xml: String, name: String): String? =
-      Regex("<${Regex.escape(name)}>(.*?)</${Regex.escape(name)}>", RegexOption.DOT_MATCHES_ALL)
-        .find(xml)
-        ?.groupValues
-        ?.get(1)
-        ?.let(::unescape)
-        ?.trim()
+    private fun rowField(row: RecordNode, name: String): String? =
+      row.fields[name]?.scalar_value?.string_value?.trim()?.takeIf { it.isNotEmpty() }
 
     private fun text(label: LabelDef?): String? {
       if (label == null) return null
@@ -879,14 +884,6 @@ object FormImport {
       }
     }
 
-    private fun unescape(text: String): String =
-      text
-        .replace("&lt;", "<")
-        .replace("&gt;", ">")
-        .replace("&quot;", "\"")
-        .replace("&apos;", "'")
-        .replace("&amp;", "&")
-
     private companion object {
       val REF = Regex("""^/?([A-Za-z_][A-Za-z0-9_.\-/]*)$""")
       val COMPARISON = Regex("""^(.+?)\s*(!=|>=|<=|=|>|<)\s*(.+)$""")
@@ -903,11 +900,6 @@ object FormImport {
       val DATE_BOUND = Regex("""^\.\s*(>=|<=|>|<|=)\s*date\(\s*(.+?)\s*\)$""")
       val COUNT_SELECTED_BOUND = Regex("""^count-selected\(\s*\.\s*\)\s*(>=|<=|>|<|=)\s*(\d+)$""")
       val JR_ITEXT = Regex("""^jr:itext\(\s*(.+?)\s*\)$""")
-      val ITEM = Regex("""<item>(.*?)</item>""", RegexOption.DOT_MATCHES_ALL)
-      val OUTER_TAG =
-        Regex("""^<([A-Za-z_][A-Za-z0-9_.\-:]*)[^>]*>(.*)</\1>$""", RegexOption.DOT_MATCHES_ALL)
-      val CHILD_RECORD =
-        Regex("""<([A-Za-z_][A-Za-z0-9_.\-:]*)[^>]*>(.*?)</\1>""", RegexOption.DOT_MATCHES_ALL)
       val ID_BY_QUESTION =
         Regex(
           """^instance\('([^']+)'\)/root/item\[([A-Za-z_][A-Za-z0-9_.\-]*)\s*=\s*([^\]]+)\]/name$"""

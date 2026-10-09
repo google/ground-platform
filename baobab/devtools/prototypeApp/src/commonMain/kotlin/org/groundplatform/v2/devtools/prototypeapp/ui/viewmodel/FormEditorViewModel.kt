@@ -20,7 +20,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
-import org.groundplatform.v2.core.forms.serialization.XFormsXmlSerializer
 import org.groundplatform.v2.core.forms.ui.FormWizardController
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.FormAvailability
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.ChoiceColors
@@ -842,9 +841,7 @@ class FormEditorViewModel(
   override fun startPreview() {
     val controller =
       try {
-        FormWizardController(
-          formDef = XFormsXmlSerializer.deserializeFormDef(uiState.value.previewXml)
-        )
+        FormWizardController(formDef = uiState.value.previewForm.proto)
       } catch (e: Exception) {
         session.update {
           it.copy(

@@ -20,7 +20,6 @@ import kotlin.test.assertNull
 import org.groundplatform.v2.devtools.prototypeapp.data.seed.FormEditorSamples
 import org.groundplatform.v2.devtools.prototypeapp.data.seed.PrototypeFakeSurveysData
 import org.groundplatform.v2.devtools.prototypeapp.data.seed.SurveyEditorSamples
-import org.groundplatform.v2.devtools.prototypeapp.ui.workbench.builtInFallbackXFormsXmlForForm
 
 /** `EditorForm` → published XForms XML → [FormImport] → the same Form. */
 class FormImportRoundTripTest {
@@ -82,8 +81,9 @@ class FormImportRoundTripTest {
   fun derivedSampleForms_areStableAcrossPublishAndImport() {
     for (survey in PrototypeFakeSurveysData.defaultSampleSurveys()) {
       for (form in PrototypeFakeSurveysData.formsForSurvey(survey.id)) {
-        val xml = PrototypeFakeSurveysData.builtInFallbackXFormsXmlForForm(form)
-        val imported = assertNotNull(FormImport.fromXml(xml, form.id, form.title), form.id).form
+        val def = PrototypeFakeSurveysData.builtInFallbackFormForForm(form)
+        val imported =
+          assertNotNull(FormImport.fromFormDefinition(def, form.id, form.title), form.id).form
         assertSameQuestions(imported, roundTrip(imported))
       }
     }

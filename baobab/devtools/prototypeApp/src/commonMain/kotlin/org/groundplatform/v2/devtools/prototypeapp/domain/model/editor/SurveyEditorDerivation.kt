@@ -13,6 +13,7 @@
  */
 package org.groundplatform.v2.devtools.prototypeapp.domain.model.editor
 
+import org.groundplatform.v2.core.forms.model.FormDefinition
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.EntityShape
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.EntityShapeKind
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.FormPreviewItem
@@ -56,15 +57,15 @@ object SurveyEditorDerivation {
   val PRESENTATION_KEYS: Set<String> = setOf("marker-symbol", "marker-color", "stroke", "fill")
 
   /**
-   * Derives the editor draft of [surveyId] from its runtime data. [formXml] returns the XForms of a
-   * Form (or `null` when it has none, in which case a placeholder Form is created so the Form is
-   * never dropped).
+   * Derives the editor draft of [surveyId] from its runtime data. [formDefinition] returns the
+   * [FormDefinition] of a Form (or `null` when it has none, in which case a placeholder Form is
+   * created so the Form is never dropped).
    */
   fun derive(
     surveyId: String,
     survey: SurveyPreviewItem?,
     forms: List<FormPreviewItem>,
-    formXml: (FormPreviewItem) -> String?,
+    formDefinition: (FormPreviewItem) -> FormDefinition?,
     mapLayers: List<MapLayerItem>,
     entities: List<GeospatialEntityItem>,
   ): SurveyEditorDraft {
@@ -75,8 +76,9 @@ object SurveyEditorDerivation {
         .toMutableList()
     val editorForms = forms.map { form ->
       val imported =
-        formXml(form)?.let { FormImport.fromXml(it, form.id, form.title, form.availability) }
-          ?: placeholder(form)
+        formDefinition(form)?.let {
+          FormImport.fromFormDefinition(it, form.id, form.title, form.availability)
+        } ?: placeholder(form)
       val key = form.id
       // The Form list is the source of truth for the title; the XML may carry an older one.
       var editor = imported.form.copy(title = form.title.ifBlank { imported.form.title })

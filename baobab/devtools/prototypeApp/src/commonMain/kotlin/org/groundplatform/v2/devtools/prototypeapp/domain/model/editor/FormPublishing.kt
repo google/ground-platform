@@ -13,9 +13,12 @@
  */
 package org.groundplatform.v2.devtools.prototypeapp.domain.model.editor
 
+import org.groundplatform.v2.core.forms.model.FormDefinition
+import org.groundplatform.v2.core.forms.serialization.XFormsXmlSerializer
+
 /**
  * Projections from the Survey editor's entity datasets to the Form editor's catalog and the
- * published XForms of a Form.
+ * published [FormDefinition] of a Form.
  */
 
 /** The Form editor's view of this dataset, from the point of view of Form [formKey]. */
@@ -60,15 +63,22 @@ internal fun EntityDataset.toEditorDataset(
   )
 
 /**
- * XForms published for [entry], including its save-to logic. Features of an updated dataset are
- * embedded, since published Forms have no CSV attachments in this prototype.
+ * Compiled [FormDefinition] published for [entry], including its save-to logic. Features of an
+ * updated dataset are embedded, since published Forms have no CSV attachments in this prototype.
  */
-fun SurveyEditorDraft.publishedFormXml(entry: SurveyEditorForm): String {
+fun SurveyEditorDraft.publishedForm(entry: SurveyEditorForm): FormDefinition {
   val catalog = datasets.map { it.toEditorDataset(entry.key, forms) }
-  return EditorXFormsGenerator.toXml(
+  return EditorXFormsGenerator.compile(
     entry.form,
     SaveToRules.saveTarget(entry.form, catalog),
     inlineRows = true,
     datasets = catalog,
   )
 }
+
+/**
+ * XForms XML exported for [entry], including its save-to logic. Features of an updated dataset are
+ * embedded, since published Forms have no CSV attachments in this prototype.
+ */
+fun SurveyEditorDraft.publishedFormXml(entry: SurveyEditorForm): String =
+  XFormsXmlSerializer.serialize(publishedForm(entry).proto, prettyPrint = true)

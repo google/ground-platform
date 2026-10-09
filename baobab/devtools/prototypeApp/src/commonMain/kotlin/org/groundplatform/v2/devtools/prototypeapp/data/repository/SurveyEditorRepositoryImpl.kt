@@ -27,7 +27,7 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyPreviewIte
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SurveyEditorDerivation
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SurveyEditorDraft
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SurveyEditorProjection
-import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.publishedFormXml
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.publishedForm
 import org.groundplatform.v2.devtools.prototypeapp.domain.repository.SurveyEditorRepository
 import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.ResolveFormDefForLaunchUseCase
 
@@ -70,15 +70,15 @@ class SurveyEditorRepositoryImpl(
       val previous = previous ?: surveyEditorDraft(surveyId) ?: currentDraft(surveyId)
       putSurveyEditorDraft(surveyId, draft)
 
-      // Publish each Form's XForms; Forms removed from the draft lose theirs.
-      val config = surveyConfig(surveyId) ?: SurveyConfig(primaryFormXml = "")
-      val editorXml = draft.forms.associate { it.form.formId to draft.publishedFormXml(it) }
+      // Publish each Form's FormDefinition; Forms removed from the draft lose theirs.
+      val config = surveyConfig(surveyId) ?: SurveyConfig()
+      val editorForms = draft.forms.associate { it.form.formId to draft.publishedForm(it) }
       val removedIds =
         (previous.forms.map { it.form.formId } + forms(surveyId).map { it.id }).toSet() -
-          editorXml.keys
+          editorForms.keys
       putSurveyConfig(
         surveyId,
-        config.copy(formXmlById = config.formXmlById - removedIds + editorXml),
+        config.copy(formsById = config.formsById - removedIds + editorForms),
       )
 
       // Project the draft onto the runtime collections the rest of the app reads.
@@ -139,8 +139,8 @@ class SurveyEditorRepositoryImpl(
         surveyId = surveyId,
         survey = survey,
         forms = forms,
-        formXml = { form ->
-          config?.formXmlById?.get(form.id) ?: fallbackForms.builtInFallbackXFormsXmlForForm(form)
+        formDefinition = { form ->
+          config?.formsById?.get(form.id) ?: fallbackForms.builtInFallbackFormForForm(form)
         },
         mapLayers = layers,
         entities = entities,

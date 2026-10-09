@@ -73,11 +73,11 @@ data class WorkbenchUiState(
     get() = entities.flatMap { it.submissions } + standaloneSubmissions
 
   /**
-   * ID of the stored survey whose primary XForms definition is [example]'s, or `null` if no stored
+   * ID of the stored survey whose primary [FormDefinition] is [example]'s, or `null` if no stored
    * survey uses it.
    */
   fun surveyIdForExampleForm(example: WorkbenchExampleForm): String? =
-    surveys.firstOrNull { surveyConfigs[it.id]?.primaryFormXml == example.xformsXml }?.id
+    surveys.firstOrNull { surveyConfigs[it.id]?.primaryForm == example.formDefinition }?.id
 
   /** Number of map features stored for [surveyId]. */
   fun entityCountForSurvey(surveyId: String): Int = surveyStats[surveyId]?.entityCount ?: 0

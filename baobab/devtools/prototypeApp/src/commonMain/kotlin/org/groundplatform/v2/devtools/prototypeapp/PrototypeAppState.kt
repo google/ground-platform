@@ -20,7 +20,6 @@ import groundplatform.v2.forms.FormDef
 import groundplatform.v2.forms.RecordInstance
 import kotlinx.coroutines.launch
 import org.groundplatform.v2.core.forms.model.EntityState
-import org.groundplatform.v2.core.forms.serialization.XFormsXmlSerializer
 import org.groundplatform.v2.core.forms.ui.FormWizardController
 import org.groundplatform.v2.core.forms.ui.WorkbenchExampleForm
 import org.groundplatform.v2.devtools.prototypeapp.di.AppDataHolder
@@ -1324,13 +1323,13 @@ class PrototypeAppState(
   /**
    * Custom XForms `<h:html>` definition editable in the Prototype App Chrome
    * (`UxDesignerInspectorPanel`). Initialized to a rich EUDR / Shade-Tree Field Survey XForms XML
-   * that parses cleanly with [XFormsXmlSerializer.deserializeFormDef].
+   * that parses cleanly with `XFormsXmlSerializer.deserializeFormDef`.
    */
   val customXFormsXml: String
     get() = workbenchState.customXFormsXml
 
   /**
-   * Parse error message from [XFormsXmlSerializer.deserializeFormDef] when [customXFormsXml] is
+   * Parse error message from `XFormsXmlSerializer.deserializeFormDef` when [customXFormsXml] is
    * invalid, or `null` when valid.
    */
   val xformsXmlError: String?
@@ -2300,7 +2299,7 @@ class PrototypeAppState(
     dataCollection.selectEntityRefForActiveForm(entityId)
 
   /**
-   * Updates [customXFormsXml], parses [FormDef] via [XFormsXmlSerializer.deserializeFormDef], and
+   * Updates [customXFormsXml], parses [FormDef] via `XFormsXmlSerializer.deserializeFormDef`, and
    * updates [customFormDef] and [xformsXmlError]. If a form runner is currently open and the new
    * [FormDef] is valid, [DataCollectionViewModel] refreshes [activeFormWizardController] with it.
    */

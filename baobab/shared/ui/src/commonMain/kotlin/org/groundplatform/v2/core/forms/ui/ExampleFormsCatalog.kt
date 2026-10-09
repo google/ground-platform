@@ -15,6 +15,10 @@
  */
 package org.groundplatform.v2.core.forms.ui
 
+import org.groundplatform.v2.core.forms.model.FormDefinition
+import org.groundplatform.v2.core.forms.model.FormRecordInstance
+import org.groundplatform.v2.core.forms.serialization.XFormsXmlSerializer
+
 /**
  * Catalog of swappable workbench example forms for the Ground 2.0 Prototype App and Form Debugger.
  *
@@ -1040,6 +1044,21 @@ enum class WorkbenchExampleForm(
       """
         .trimIndent(),
   );
+
+  /** Parsed [FormDefinition] domain wrapper for this example form. */
+  val formDefinition: FormDefinition by lazy {
+    FormDefinition(XFormsXmlSerializer.deserializeFormDef(xformsXml))
+  }
+
+  /** Parsed [FormRecordInstance] domain wrapper for this example form's sample submission. */
+  val sampleRecordInstance: FormRecordInstance by lazy {
+    FormRecordInstance(
+      XFormsXmlSerializer.deserializeRecordInstance(
+        xml = sampleInstanceXml,
+        formDef = formDefinition.proto,
+      )
+    )
+  }
 
   companion object {
     fun fromIdOrDefault(

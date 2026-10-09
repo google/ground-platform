@@ -1817,8 +1817,11 @@ class PrototypeAppStateTest {
     val samplePlotsFormDef = state.customFormDef!!
     assertEquals("Sample Plot Entity & Forest Stand Assessment", samplePlotsFormDef.title)
     assertTrue(
-      samplePlotsFormDef.model?.secondary_instances?.any {
-        it.id == "sample_plots" && it.inline_data.contains("plot_sp01")
+      samplePlotsFormDef.model?.secondary_instances?.any { sec ->
+        sec.id == "sample_plots" &&
+          sec.rows.any { row ->
+            row.fields["name"]?.scalar_value?.string_value == "plot_sp01"
+          }
       } == true
     )
     val plotSelectCtrl =

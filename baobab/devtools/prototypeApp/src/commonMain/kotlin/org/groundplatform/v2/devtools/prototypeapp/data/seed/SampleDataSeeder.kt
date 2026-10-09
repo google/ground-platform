@@ -72,10 +72,10 @@ class SampleDataSeeder(private val store: LocalStore) {
         putSurveyConfig(
           surveyId,
           SurveyConfig(
-            primaryFormXml = PrototypeFakeSurveysData.exampleFormForSurveyId(surveyId).xformsXml,
-            formXmlById =
+            primaryForm = PrototypeFakeSurveysData.exampleFormForSurveyId(surveyId).formDefinition,
+            formsById =
               forms.associate {
-                it.id to PrototypeFakeSurveysData.builtInFallbackXFormsXmlForForm(it)
+                it.id to PrototypeFakeSurveysData.builtInFallbackFormForForm(it)
               },
           ),
         )
@@ -114,14 +114,14 @@ class SampleDataSeeder(private val store: LocalStore) {
     /** Derives the Survey editor draft for [surveyId] from the data already written. */
     private fun LocalStoreTransaction.deriveEditorDraft(surveyId: String): SurveyEditorDraft {
       val forms = PrototypeFakeSurveysData.formsForSurvey(surveyId)
-      val formXml = forms.associate {
-        it.id to PrototypeFakeSurveysData.builtInFallbackXFormsXmlForForm(it)
+      val formsById = forms.associate {
+        it.id to PrototypeFakeSurveysData.builtInFallbackFormForForm(it)
       }
       return SurveyEditorDerivation.derive(
         surveyId = surveyId,
         survey = PrototypeFakeSurveysData.defaultSampleSurveys().firstOrNull { it.id == surveyId },
         forms = forms,
-        formXml = { formXml[it.id] },
+        formDefinition = { formsById[it.id] },
         mapLayers = PrototypeFakeMapLayersData.mapLayersForSurvey(surveyId),
         entities = PrototypeFakeEntitiesData.entitiesForSurvey(surveyId),
       )

@@ -238,13 +238,54 @@ internal object FormDefXmlDeserializer {
   private fun parseSecondaryInstance(el: XmlElement): SecondaryInstance {
     val id = el.attr("id") ?: ""
     val src = el.attr("src") ?: ""
-    val inlineData =
-      if (el.childElements.isNotEmpty()) {
-        el.childElements.first().toXmlString(prettyPrint = false)
-      } else {
-        ""
+    val rootEl = el.childElements.firstOrNull() ?: return SecondaryInstance(id = id, uri = src)
+    val itemElements = rootEl.childElements
+    if (itemElements.isEmpty()) {
+      return SecondaryInstance(
+        id = id,
+        uri = src,
+        root_name = if (rootEl.localName == "root") "" else rootEl.localName,
+      )
+    }
+    val hasNestedColumns = itemElements.any { it.childElements.isNotEmpty() }
+    return if (hasNestedColumns) {
+      val firstItemName = itemElements.first().localName
+      val rows = itemElements.mapNotNull { itemEl ->
+        if (itemEl.childElements.isEmpty()) {
+          null
+        } else {
+          RecordNode(
+            fields =
+              itemEl.childElements.associate { colEl ->
+                colEl.localName to
+                  FieldValue(scalar_value = TypedValue(string_value = colEl.textContent.trim()))
+              }
+          )
+        }
       }
-    return SecondaryInstance(id = id, uri = src, inline_data = inlineData)
+      SecondaryInstance(
+        id = id,
+        uri = src,
+        root_name = if (rootEl.localName == "root") "" else rootEl.localName,
+        item_name = if (firstItemName == "item") "" else firstItemName,
+        rows = rows,
+      )
+    } else {
+      val singleRow =
+        RecordNode(
+          fields =
+            itemElements.associate { colEl ->
+              colEl.localName to
+                FieldValue(scalar_value = TypedValue(string_value = colEl.textContent.trim()))
+            }
+        )
+      SecondaryInstance(
+        id = id,
+        uri = src,
+        root_name = if (rootEl.localName == "root") "" else rootEl.localName,
+        rows = listOf(singleRow),
+      )
+    }
   }
 
   private fun parseTranslations(itextEl: XmlElement): TranslationCatalog {

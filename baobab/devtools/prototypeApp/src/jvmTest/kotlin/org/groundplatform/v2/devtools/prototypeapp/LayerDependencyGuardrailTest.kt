@@ -107,4 +107,34 @@ class LayerDependencyGuardrailTest {
         bad.joinToString("\n"),
     )
   }
+
+  @Test
+  fun xmlSerializationIsRestrictedToImportExportAndWorkbenchBoundaries() {
+    val allowedFiles =
+      setOf(
+        "domain/model/editor/FormEditorModels.kt",
+        "domain/model/editor/FormPublishing.kt",
+        "domain/model/editor/FormImport.kt",
+        "ui/workbench/PrototypeXFormsWorkbenchPanel.kt",
+        "ui/workbench/WorkbenchXFormsPresets.kt",
+        "ui/viewmodel/WorkbenchViewModel.kt",
+      )
+    val files =
+      kotlinFiles().filterNot { file ->
+        file.relativeTo(mainRoot).invariantSeparatorsPath in allowedFiles
+      }
+    val forbidden =
+      listOf(
+        "org.groundplatform.v2.core.forms.serialization.XFormsXmlSerializer",
+        "org.groundplatform.v2.core.forms.serialization.FormDefXmlSerializer",
+        "org.groundplatform.v2.core.forms.serialization.FormDefXmlDeserializer",
+        "org.groundplatform.v2.core.forms.serialization.InstanceXmlSerializer",
+      )
+    val bad = offenders(files, forbidden)
+    assertTrue(
+      bad.isEmpty(),
+      "XML serialization must only be used at import/export and XForms workbench boundaries:\n" +
+        bad.joinToString("\n"),
+    )
+  }
 }

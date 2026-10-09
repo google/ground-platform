@@ -149,7 +149,9 @@ object TextProtoSerializer {
   private fun encodeSecondaryInstance(msg: SecondaryInstance): TextProtoMessage = buildMessage {
     addString("id", msg.id)
     addString("uri", msg.uri)
-    addString("inline_data", msg.inline_data)
+    addString("root_name", msg.root_name)
+    addString("item_name", msg.item_name)
+    msg.rows.forEach { addMessage("rows", encodeRecordNode(it)) }
   }
 
   private fun encodeFieldBinding(msg: FieldBinding): TextProtoMessage = buildMessage {
@@ -568,7 +570,9 @@ object TextProtoSerializer {
     SecondaryInstance(
       id = node.getString("id"),
       uri = node.getString("uri"),
-      inline_data = node.getString("inline_data"),
+      root_name = node.getString("root_name"),
+      item_name = node.getString("item_name"),
+      rows = node.getMessages("rows").map { decodeRecordNode(it) },
     )
 
   private fun decodeFieldBinding(node: TextProtoMessage): FieldBinding =
