@@ -45,6 +45,10 @@ for Ground 2.0.
     -   [`future-work.md`](product/future-work.md): Future roadmap and
         extensibility plans.
 -   **[`technical/`](technical/)**:
+    -   [`backend/impact-aggregation.md`](technical/backend/impact-aggregation.md):
+        Design for the impact aggregation job and the optional Earth Engine
+        spatial overlay pipeline (deduplication, thresholds, attribution score,
+        hosting options, and reference-layer licensing).
     -   [`client/architecture.md`](technical/client/architecture.md): Ground 2.0
         Kotlin Clean Architecture, MVVM pattern with Compose Multiplatform,
         dependency rules, and hardware/service client communication

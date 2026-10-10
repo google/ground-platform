@@ -97,7 +97,7 @@ See the [library specification](../technical/model/library/00-introduction.md) f
 
 ### Server-Side Spatial Overlays (No User Input)
 
-Intersect each map feature's footprint (with duplicates removed by GeoID) with authoritative layers in Earth Engine:
+Intersect each map feature's footprint (with duplicates removed by GeoID) with authoritative layers in Earth Engine (see the [aggregation and overlay design](../technical/backend/impact-aggregation.md)):
 
 <!-- mdformat off -->
 
