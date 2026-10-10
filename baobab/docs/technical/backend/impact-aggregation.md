@@ -75,9 +75,12 @@ processing terms, and reference-layer licensing as explicit decisions.
 
 <!-- mdformat on -->
 
-A new boolean, `Organization.exclude_from_platform_aggregates`, records the
-organization-level opt-out described in the product doc. Opted-out
-organizations keep their own dashboards.
+A new boolean, `Organization.exclude_from_platform_aggregates` (field 12),
+records the organization-level opt-out described in the product doc. An
+opted-out organization's surveys are kept out of global, country, and grid cell
+aggregates and organization-suggested indicators; its own survey and
+organization dashboards are unaffected. Personal surveys (no organization)
+always count toward platform-wide aggregates.
 
 ## Architecture
 
@@ -123,7 +126,11 @@ are written atomically per scope so dashboards never read a partial run.
     resolved concept links (survey-level links are authoritative).
 2.  Resolve each linked concept against the survey's resolved library (global
     plus the owning organization's entries). Links to unknown or deprecated
-    concepts are skipped and counted in run diagnostics.
+    concepts, and to concepts owned by another organization (or by any
+    organization, for personal surveys), are skipped and recorded once per
+    survey and concept in run diagnostics (`UNKNOWN`, `DEPRECATED`,
+    `NOT_IN_LIBRARY`). Values a feature carries for concepts its survey doesn't
+    link are ignored.
 3.  Classify each concept: **global** (owned by `org-all-users`) or
     **organization**; note suggested goals on organization concepts.
 
@@ -132,14 +139,23 @@ are written atomically per scope so dashboards never read a partial run.
 *   Each feature's GeoID is the deterministic AgStack-style identifier already
     computed by clients (`AgStackGeoId`). Features without a GeoID (e.g.,
     tabular rows) are counted individually.
-*   Within a scope, features sharing a GeoID count once. The **winning record**
-    is the most recently updated feature; its geometry provides area and its
-    properties provide values. Ties break by entity ID for determinism.
+*   Within a scope, features sharing a GeoID (compared after trimming) count
+    once. The **winning record** is the most recently updated feature; its
+    geometry provides area and its properties provide values. Ties break by
+    the smallest entity ID, then the smallest survey ID, so the winner never
+    depends on input order.
+*   Only the winner's values count: values are never merged across
+    duplicates. If the winner's survey doesn't link a concept (or the winner
+    has no value for it), the plot has no value for that concept in that
+    scope, even when a losing duplicate has one.
 *   Deduplication is applied per scope: a plot mapped by two organizations
     counts once in global totals and once in each organization's own
-    dashboard.
-*   Area is the geodesic area of the winning geometry (WGS84), unless the
-    survey links `core.area_ha`, in which case the linked value is reported
+    dashboard. Country and grid cell scopes group the global winners, so each
+    plot counts in exactly one country and one cell.
+*   Area is the geodesic area of the winning geometry (WGS84; a polygon's
+    exterior ring minus its holes; points and lines have none). When the
+    geometry is missing or has no area, the feature's precomputed area is
+    used. If the survey links `core.area_ha`, the linked value is reported
     alongside the computed area for comparison.
 
 ### Concept Aggregation
@@ -151,54 +167,89 @@ Each concept's `aggregation` rule determines the computation:
 | Rule | Computation | Output |
 | :--- | :--- | :--- |
 | `COUNT_DISTINCT_FEATURES` | Deduplicated features with a non-empty value | `feature_count`, `area_ha` |
-| `COUNT_BY_CODE` | Deduplicated features per code-list value (`ground_code`) | One row per code |
-| `SHARE_BY_CODE` | As above, divided by features with any value | One row per code |
-| `SUM` | Sum of numeric values over deduplicated features | `value` |
-| `MEAN` | Mean of numeric values over deduplicated features | `value`, `feature_count` |
+| `COUNT_BY_CODE` | Deduplicated features per code-list value (`ground_code`); a select-multiple value counts once for each of its space-separated codes | One row per code (`feature_count`, `area_ha`), ordered by code |
+| `SHARE_BY_CODE` | As above, divided by features with any value | One row per code; `value` is the share (0–1) |
+| `SUM` | Sum of numeric values over deduplicated features | `value`; `feature_count` and `area_ha` of contributing features |
+| `MEAN` | Mean of numeric values over deduplicated features | `value` (0 without values), `feature_count` |
 | `NONE` | Not aggregated (names, identifiers) | — |
 
 <!-- mdformat on -->
 
 Values are normalized to the concept's unit (UCUM) before aggregation; values
-that cannot be normalized are skipped and counted in diagnostics.
+that cannot be normalized are skipped and counted in diagnostics
+(`NOT_A_NUMBER` for text that isn't a decimal number, `UNSUPPORTED_UNIT` for
+a unit that isn't supported or can't be converted). A value without a unit is
+already in the concept's unit. Supported conversions use case-sensitive UCUM
+codes: area `m2`, `har`, `km2`; mass `g`, `kg`, `t`; length `cm`, `m`, `km`;
+volume `L` (or `l`), `m3`. Any code converts to itself.
+
+Besides concept rows, every scope has a `FEATURES` row (all deduplicated
+features and their area), and one `DISTINCT_VALUES` row counts the distinct
+values (trimmed, case-insensitive) of the first configured identifying concept
+the scope links, such as `core.producer_id` or `core.producer_name`, as
+"producers registered", regardless of its aggregation rule. Privacy rules apply
+to it like any other concept.
 
 ### Scope Rules
 
 <!-- mdformat off -->
 
-| Concept | Survey and organization scope | Global scope |
+| Concept | Survey and organization scope | Global and country scope |
 | :--- | :--- | :--- |
 | Global | Included | Main goal totals |
 | Organization, no suggested goal | Included | Excluded |
-| Organization, suggested goal | Included | **Organization-suggested indicators**, grouped by suggested goal and organization; never added to main totals |
+| Organization, suggested goal | Included | Global scope only: **organization-suggested indicators**, one set of rows per suggested goal and organization, computed over that organization's own deduplicated features; never added to main totals |
 | Any `SENSITIVE` concept | Included (organization only) | Excluded |
 | Any concept from an opted-out organization | Included | Excluded |
 
 <!-- mdformat on -->
 
-### Events, Outcomes, and Attribution
-
-*   Impact events are counted per type, per survey and organization, with
-    feature coverage and area taken from the event (already GeoID-deduplicated
-    at recording time).
-*   Survey outcomes are counted per outcome kind; "Not yet" is reported
-    separately from unanswered.
-*   The **attribution score** (1–5) is a deterministic function of the survey's
-    purposes, events, and outcome:
+Each scope reads a defined set of surveys:
 
 <!-- mdformat off -->
 
-| Score | Condition (highest that applies) |
-| :--- | :--- |
-| 5 | Outcome includes an official or regulatory submission (EUDR DDS, FERM report, protected area management assessment) |
-| 4 | A partner push event, or an outcome confirming use in a partner system |
-| 3 | An export event using a purpose-enabled export profile |
-| 2 | Data collected (at least one feature or submission), outcome unknown |
-| 1 | Test or exploratory survey (no purposes and fewer than a minimum number of features) |
+| Scope | `scope_id` | Surveys and features | Concepts |
+| :--- | :--- | :--- | :--- |
+| `SURVEY` | Survey ID | The survey's features | Every resolved link, including `SENSITIVE` and organization concepts |
+| `ORGANIZATION` | Organization ID | All the organization's surveys, deduplicated together (personal surveys have no organization scope) | Union of the surveys' resolved links |
+| `GLOBAL` | Empty | Surveys of organizations that didn't opt out, plus personal surveys, deduplicated together | Global, non-`SENSITIVE` links (`AGGREGATE_PUBLIC` and `ORG_ONLY`), plus organization-suggested rows |
+| `COUNTRY` | ISO 3166-1 alpha-2 code | Global winners grouped by the feature's country, else its organization's; features with neither are left out | Global, non-`SENSITIVE` links of the surveys contributing winners; no organization-suggested rows |
+| `CELL` | S2 token | Global winners with a geometry | None (`FEATURES` rows only) |
 
 <!-- mdformat on -->
 
-Only global purposes count toward the platform-wide distribution of scores.
+### Events, Outcomes, and Attribution
+
+*   Impact events are counted per type at survey, organization, and global
+    scope (`value` is the event count), with feature coverage and area summed
+    from the events (already GeoID-deduplicated at recording time, so not
+    deduplicated again). Types without events have no row.
+*   Survey outcomes are counted per outcome kind at the same scopes (`value` is
+    the number of surveys). A closed survey with no answer counts as
+    `UNANSWERED`; an empty answer or one with only `NOT_YET` counts as
+    `NOT_YET`; otherwise each answered kind counts once (`NOT_YET` mixed with
+    other kinds is ignored). Open surveys count an answer only if they already
+    have one.
+*   The **attribution score** (1–5) is a deterministic function of the survey's
+    purposes, events, outcome, and data:
+
+<!-- mdformat off -->
+
+| Score | Basis | Condition (first that applies) |
+| :--- | :--- | :--- |
+| 5 | `OFFICIAL_SUBMISSION` | Outcome includes `SUBMITTED_EUDR_DDS`, `REPORTED_FERM`, or `PROTECTED_AREA_MANAGEMENT` |
+| 4 | `PARTNER_USE` | A `PARTNER_PUSH` event, or outcome includes `SHARED_WITH_BUYERS`, `LAND_TITLING`, or `TRAINED_OR_VALIDATED_MODEL` |
+| 3 | `PURPOSE_EXPORT` | An `EXPORT` event whose export profile one of the survey's purposes enables |
+| 1 | `EXPLORATORY` | No purposes and fewer than a minimum number of features (default 5) |
+| 2 | `DATA_COLLECTED` | At least one feature or submission |
+| 1 | `EXPLORATORY` | Otherwise (no data yet) |
+
+<!-- mdformat on -->
+
+`ATTRIBUTION` rows report one row per survey at survey scope and the
+distribution of scores (surveys per score) at organization and global scope.
+Only surveys with at least one global purpose, from organizations that didn't
+opt out, count toward the platform-wide distribution.
 
 ### Grid Cells and Thresholding
 
@@ -206,34 +257,76 @@ Only global purposes count toward the platform-wide distribution of scores.
     `shared/core`). Proposed levels: **level 10** (cells of roughly 80 km²) for
     organization dashboards and **level 7** (roughly 5,000 km²) for public
     views.
-*   A cell aggregate is published beyond the organization only if it covers at
-    least **k = 10 features from at least 2 organizations**; otherwise it is
-    merged into its parent cell or suppressed.
-*   Country aggregates require at least 10 features. Suppressed values are
-    reported as "fewer than 10" rather than omitted, so totals remain honest.
+*   Each global winner with a geometry falls in the cell containing its
+    representative point: a point's position, the mean of a line's vertices, or
+    the mean of a polygon's exterior ring vertices (without the closing
+    vertex).
+*   A fine (level 10) cell is published beyond the organization only if it
+    covers at least **k = 10 features from at least 2 organizations**, counting
+    each winner's organization (personal surveys share one organization key).
+    Features of unpublished fine cells merge into their level-7 ancestor, which
+    is published under the same thresholds or else emitted as one suppressed
+    row. Published cell feature counts plus suppressed cell features always
+    equal the features with a geometry.
+*   Country aggregates require at least 10 features. A country below the
+    threshold has only a suppressed `FEATURES` row.
+*   Suppressed rows have `suppressed` set and zeroed counts; dashboards show
+    them as "fewer than 10" rather than omitting them, so totals remain honest.
+    Run diagnostics record the number of suppressed cells, their features, and
+    the number of suppressed countries.
 
 ### Output Schema
 
+Rows are `ImpactAggregate` messages (`shared/protos/data/impact_aggregate.proto`):
+
 ```protobuf
 message ImpactAggregate {
+  enum ScopeType {
+    SCOPE_TYPE_UNSPECIFIED = 0;
+    SURVEY = 1;
+    ORGANIZATION = 2;
+    COUNTRY = 3;
+    GLOBAL = 4;
+    CELL = 5;
+  }
+
+  enum Metric {
+    METRIC_UNSPECIFIED = 0;
+    FEATURES = 1;         // all deduplicated features of the scope
+    CONCEPT = 2;          // a linked concept, per its aggregation rule
+    DISTINCT_VALUES = 3;  // distinct values of an identifying concept
+    EVENT = 4;            // impact events of one type
+    OUTCOME = 5;          // surveys per outcome kind
+    ATTRIBUTION = 6;      // surveys per attribution score
+  }
+
   string run_id = 1;
   int32 pipeline_version = 2;
   google.protobuf.Timestamp computed_at = 3;
 
-  ScopeType scope_type = 4;   // SURVEY, ORGANIZATION, COUNTRY, GLOBAL, CELL
-  string scope_id = 5;        // survey ID, organization ID, ISO code, S2 token
-  string concept_id = 6;      // empty for event and outcome rows
+  ScopeType scope_type = 4;
+  string scope_id = 5;        // survey ID, organization ID, ISO code, S2 token, or empty
+  string concept_id = 6;      // CONCEPT and DISTINCT_VALUES rows
   string code = 7;            // code-list value for *_BY_CODE rules
   ImpactEventType event_type = 8;
-  string outcome_kind = 9;
+  string outcome_kind = 9;    // SurveyOutcome.Outcome name or UNANSWERED
 
   int64 feature_count = 10;
   double area_ha = 11;
-  double value = 12;
+  double value = 12;          // sum, mean, share, distinct values, events, or surveys
   bool suppressed = 13;
   bool organization_suggested = 14;
+  int32 attribution_score = 15;
+  string organization_id = 16; // concept owner for organization-suggested rows
+  string goal = 17;            // suggested goal for organization-suggested rows
+  Metric metric = 18;
 }
 ```
+
+Rows are ordered by scope (surveys by ID, organizations by ID, countries by
+code, global, cells by token), then by metric: `FEATURES`, concept rows (by
+concept ID and code), organization-suggested rows, `DISTINCT_VALUES`, events
+(by type), outcomes, and attribution scores (ascending).
 
 ## Spatial Overlay Pipeline
 
@@ -300,8 +393,10 @@ redistribution of derived products.
     cells regardless of thresholds.
 *   **IPLC data**: IPLC land overlays follow CARE principles; results are shown
     only to the mapping organization unless it opts in to wider reporting.
-*   **Opt-out**: honored at every run; opting out removes the organization from
-    all subsequent platform-wide aggregates.
+*   **Opt-out**: honored at every run; opting out
+    (`exclude_from_platform_aggregates`) removes the organization from all
+    subsequent platform-wide aggregates: global, country, and grid cell rows,
+    and organization-suggested indicators.
 *   **Auditability**: each run records inputs counts, skipped links, suppressed
     cells, and pipeline version, so any published number can be traced.
 *   **Access**: aggregates inherit the read permissions of their scope
@@ -327,13 +422,23 @@ deployment once hosting, terms, and licenses are settled.
 
 *   Aggregation rules, deduplication, scope rules, thresholding, and the
     attribution score are implemented as pure Kotlin Multiplatform functions in
-    `shared/core`, used by both the backend job (JVM) and the prototype, so
-    dashboards match across environments.
+    `shared/core` (`ImpactAggregator.run` in
+    `org.groundplatform.v2.core.impact`), used by both the backend job (JVM)
+    and the prototype, so dashboards match across environments. A run is
+    deterministic (same input, same rows in the same order) and runs in
+    O(n log n) in the number of features, so clients can recompute on every
+    change. The prototype (`devtools/prototypeApp`, `ComputeImpactUseCase`)
+    recomputes shortly after its data changes and backs the survey,
+    organization, and platform-wide Impact views and PDF summaries with it.
 *   Golden fixtures: the prototype's seeded surveys (Kenya coffee, EUDR
     plots, restoration monitoring) with expected aggregates at each scope.
-*   Property tests: deduplication is idempotent; totals never decrease when
-    suppression merges cells upward; opted-out organizations never appear in
-    global outputs.
+*   Property tests (seeded random inputs): deduplication is idempotent (copying
+    every GeoID feature into another survey of the same organization leaves
+    organization and platform-wide feature rows unchanged); totals never
+    decrease when suppression merges cells upward (published plus suppressed
+    cell features equal the located features); opted-out organizations never
+    appear in global outputs (removing their surveys leaves global, country,
+    and cell rows unchanged).
 *   Overlay pipeline: integration tests against small synthetic layers, plus a
     dry-run mode that reports quotas and batch sizes without writing results.
 

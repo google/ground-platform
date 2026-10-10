@@ -85,6 +85,11 @@ distinction between stateful master tables and immutable encounter logs:
         (`SubmissionRecord`).
     -   `audit_record.proto`: Append-only resource mutation audit logs
         (`AuditRecord`, `FieldDelta`, `AuditInfo`).
+    -   `impact_event.proto`: Append-only "data was used" signals for impact
+        measurement (`ImpactEvent`, `ImpactEventType`).
+    -   `impact_aggregate.proto`: Privacy-safe rows produced by the impact
+        aggregation job (`ImpactAggregate`), per survey, organization, country,
+        global, or grid cell scope.
     -   `data_service.proto`: `DataService` gRPC definition for entity and
         submission retrieval (`GetEntity`, `ListEntities`, `GetSubmission`,
         `ListSubmissions`) and idempotent batched data mutations (`MutateData`).

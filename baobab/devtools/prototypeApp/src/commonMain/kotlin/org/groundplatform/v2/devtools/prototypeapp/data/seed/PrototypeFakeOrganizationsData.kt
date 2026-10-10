@@ -191,6 +191,8 @@ internal object PrototypeFakeOrganizationsData {
         createdOn = "2025-09-01",
         // A global community of practice: no single country.
         organizationType = OrganizationType.OTHER,
+        // Keeps its data out of platform-wide impact numbers (its own dashboards are unaffected).
+        excludeFromPlatformAggregates = true,
         members =
           listOf(
             OrganizationMember(

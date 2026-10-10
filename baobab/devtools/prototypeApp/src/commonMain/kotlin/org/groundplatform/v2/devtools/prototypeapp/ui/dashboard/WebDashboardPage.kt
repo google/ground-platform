@@ -62,8 +62,10 @@ import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowRight
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.Description
 import androidx.compose.material.icons.outlined.ExpandContent
+import androidx.compose.material.icons.outlined.Insights
 import androidx.compose.material.icons.outlined.KeyboardArrowDown
 import androidx.compose.material.icons.outlined.KeyboardArrowUp
+import androidx.compose.material.icons.outlined.Map
 import androidx.compose.material.icons.outlined.TableRows
 import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -73,9 +75,11 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalMinimumInteractiveComponentSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.PrimaryScrollableTabRow
+import androidx.compose.material3.Snackbar
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.VerticalDragHandle
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -122,6 +126,7 @@ import org.groundplatform.v2.devtools.prototypeapp.ui.datacollection.WebDataColl
 import org.groundplatform.v2.devtools.prototypeapp.ui.datacollection.WebEntityDetailsCard
 import org.groundplatform.v2.devtools.prototypeapp.ui.datacollection.WebFormPanelWidth
 import org.groundplatform.v2.devtools.prototypeapp.ui.datacollection.WebSubmissionDetailsCard
+import org.groundplatform.v2.devtools.prototypeapp.ui.impact.SurveyImpactPane
 import org.groundplatform.v2.devtools.prototypeapp.ui.map.BasemapPreviewCard
 import org.groundplatform.v2.devtools.prototypeapp.ui.map.SurveyMainMap
 import org.groundplatform.v2.devtools.prototypeapp.ui.map.WebMapDrawingHint
@@ -350,41 +355,54 @@ internal fun WebDashboardPage(
   val isPanelShown = expandedFraction > 0f
   val borderEnd = if (isPanelShown) panelWidth + SidePanelSeparatorWidth else 0.dp
 
+  var view by remember(uiState.activeSurveyId) { mutableStateOf(DashboardView.MAP) }
+
   Box(modifier = Modifier.fillMaxSize()) {
     Column(modifier = Modifier.fillMaxSize()) {
       WebTopToolbar(state = state, onOpenSurveyEditor = onOpenSurveyEditor, onSignOut = onSignOut)
+      DashboardViewTabs(selected = view, onSelect = { view = it })
       HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-      Box(modifier = Modifier.fillMaxWidth().weight(1f)) {
-        Row(modifier = Modifier.fillMaxSize()) {
-          if (isPanelShown) {
-            Box(modifier = Modifier.width(panelWidth).fillMaxHeight().clipToBounds()) {
-              DashboardSidePanel(
-                state = state,
-                modifier =
-                  Modifier.wrapContentWidth(Alignment.End, unbounded = true)
-                    .width(fullPanelWidth)
-                    .fillMaxHeight(),
+      if (view == DashboardView.IMPACT) {
+        val impactState by state.impact.uiState.collectAsState()
+        SurveyImpactPane(
+          summary = impactState.surveys[uiState.activeSurveyId],
+          isLoading = impactState.isLoading,
+          onDownload = { state.impact.downloadSurveySummary(uiState.activeSurveyId) },
+          modifier = Modifier.fillMaxWidth().weight(1f),
+        )
+      } else {
+        Box(modifier = Modifier.fillMaxWidth().weight(1f)) {
+          Row(modifier = Modifier.fillMaxSize()) {
+            if (isPanelShown) {
+              Box(modifier = Modifier.width(panelWidth).fillMaxHeight().clipToBounds()) {
+                DashboardSidePanel(
+                  state = state,
+                  modifier =
+                    Modifier.wrapContentWidth(Alignment.End, unbounded = true)
+                      .width(fullPanelWidth)
+                      .fillMaxHeight(),
+                )
+              }
+              SidePanelSeparator(
+                widthDp = uiState.sidePanelWidthDp,
+                onWidthChange = actions::updateSidePanelWidth,
+                enabled = isSidePanelExpanded,
+                modifier = Modifier.width(SidePanelSeparatorWidth).fillMaxHeight(),
               )
             }
-            SidePanelSeparator(
-              widthDp = uiState.sidePanelWidthDp,
-              onWidthChange = actions::updateSidePanelWidth,
-              enabled = isSidePanelExpanded,
-              modifier = Modifier.width(SidePanelSeparatorWidth).fillMaxHeight(),
+            DashboardMapArea(
+              uiState = uiState,
+              actions = actions,
+              state = state,
+              modifier = Modifier.weight(1f).fillMaxHeight(),
             )
           }
-          DashboardMapArea(
-            uiState = uiState,
-            actions = actions,
-            state = state,
-            modifier = Modifier.weight(1f).fillMaxHeight(),
+          DashboardSidePanelToggleTab(
+            isExpanded = isSidePanelExpanded,
+            onToggle = { actions.toggleSidePanel() },
+            modifier = Modifier.align(Alignment.CenterStart).offset(x = borderEnd),
           )
         }
-        DashboardSidePanelToggleTab(
-          isExpanded = isSidePanelExpanded,
-          onToggle = { actions.toggleSidePanel() },
-          modifier = Modifier.align(Alignment.CenterStart).offset(x = borderEnd),
-        )
       }
     }
 
@@ -407,6 +425,56 @@ internal fun WebDashboardPage(
       actions = state.dataCollection,
       modifier = Modifier.align(Alignment.BottomCenter),
     )
+    ImpactMessageSnackbar(state, modifier = Modifier.align(Alignment.BottomCenter))
+  }
+}
+
+/** What the dashboard's main area shows. */
+internal enum class DashboardView(val label: String) {
+  MAP("Map"),
+  IMPACT("Impact"),
+}
+
+/** Tabs switching the dashboard between the live map and the survey's Impact numbers. */
+@Composable
+private fun DashboardViewTabs(selected: DashboardView, onSelect: (DashboardView) -> Unit) {
+  PrimaryScrollableTabRow(
+    selectedTabIndex = selected.ordinal,
+    edgePadding = 16.dp,
+    divider = {},
+  ) {
+    DashboardView.entries.forEach { view ->
+      Tab(
+        selected = view == selected,
+        onClick = { onSelect(view) },
+        text = { Text(view.label) },
+        icon = {
+          Icon(
+            imageVector =
+              if (view == DashboardView.MAP) Icons.Outlined.Map else Icons.Outlined.Insights,
+            contentDescription = null,
+            modifier = Modifier.size(18.dp),
+          )
+        },
+      )
+    }
+  }
+}
+
+/** Snackbar confirming an impact summary download, shared by the Impact views. */
+@Composable
+internal fun ImpactMessageSnackbar(state: PrototypeAppState, modifier: Modifier = Modifier) {
+  val impactState by state.impact.uiState.collectAsState()
+  val message = impactState.message ?: return
+  LaunchedEffect(message) {
+    kotlinx.coroutines.delay(4_000)
+    state.impact.dismissMessage()
+  }
+  Snackbar(
+    modifier = modifier.padding(16.dp),
+    action = { TextButton(onClick = state.impact::dismissMessage) { Text("Dismiss") } },
+  ) {
+    Text(message)
   }
 }
 

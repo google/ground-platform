@@ -69,6 +69,12 @@ message Organization {
   // upper case (e.g., `KE` for Kenya). Empty when not specified, and always
   // empty for the synthetic "All users" organization.
   string country_code = 11;
+
+  // Whether the organization opted out of platform-wide impact aggregation.
+  // Its data is kept out of global, country, and grid cell aggregates and
+  // organization-suggested indicators; its own dashboards are unaffected. See
+  // docs/technical/backend/impact-aggregation.md.
+  bool exclude_from_platform_aggregates = 12;
 }
 
 // Kind of organization, optionally set on an `Organization`'s profile.

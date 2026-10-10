@@ -269,6 +269,31 @@ class OrganizationViewModelTest {
   }
 
   @Test
+  fun excludeFromPlatformAggregates_isOffByDefault_andOnlyManagersChangeIt() {
+    val f = Fixture()
+    assertFalse(f.kfs.excludeFromPlatformAggregates)
+    // The sample Open Foris Community keeps its data out of platform-wide numbers.
+    assertTrue(
+      f.organization(PrototypeFakeOrganizationsData.OPEN_FORIS_COMMUNITY)
+        .excludeFromPlatformAggregates
+    )
+
+    f.viewModel.setExcludeFromPlatformAggregates(f.kfs.id, true)
+    assertTrue(f.kfs.excludeFromPlatformAggregates)
+    f.viewModel.setExcludeFromPlatformAggregates(f.kfs.id, false)
+    assertFalse(f.kfs.excludeFromPlatformAggregates)
+
+    // The signed-in user is only a Member of the Mekong alliance, and "All users" never opts out.
+    val mekong = PrototypeFakeOrganizationsData.MEKONG_MANGROVE_ALLIANCE
+    f.viewModel.setExcludeFromPlatformAggregates(mekong, true)
+    assertFalse(f.organization(mekong).excludeFromPlatformAggregates)
+    f.viewModel.setExcludeFromPlatformAggregates(PrototypeFakeOrganizationsData.ALL_USERS, true)
+    assertFalse(
+      f.organization(PrototypeFakeOrganizationsData.ALL_USERS).excludeFromPlatformAggregates
+    )
+  }
+
+  @Test
   fun deleteOrganization_returnsToTheDirectory_andNotices() {
     val f = Fixture()
     val name = f.kfs.name

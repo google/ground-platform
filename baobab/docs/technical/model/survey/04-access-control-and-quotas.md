@@ -112,6 +112,11 @@ top of per-survey ACLs rather than replacing them:
     other) and the country it's based in (`country_code`, an ISO 3166-1
     alpha-2 code such as `KE`). Both are informational only and grant no
     access. The synthetic "All users" organization leaves them unset.
+*   `exclude_from_platform_aggregates` opts the organization out of
+    platform-wide impact aggregation: its surveys are kept out of global,
+    country, and grid cell aggregates and organization-suggested indicators,
+    while its own dashboards are unaffected (see
+    [Impact Aggregation](../../backend/impact-aggregation.md)).
 
 A person's effective role in a survey is the strongest of: owner →
 `SURVEY_ORGANIZER`; accepted ACL role; organization Manager →

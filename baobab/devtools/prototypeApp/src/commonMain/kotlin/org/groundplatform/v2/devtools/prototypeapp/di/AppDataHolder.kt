@@ -67,6 +67,7 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.repository.SurveyRepos
 import org.groundplatform.v2.devtools.prototypeapp.domain.repository.TransactionRunner
 import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.ClusterMapFeaturesUseCase
 import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.CompleteFormSubmissionUseCase
+import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.ComputeImpactUseCase
 import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.ComputeWayfindingNavigationUseCase
 import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.CreateOrganizationUseCase
 import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.CreateSurveyUseCase
@@ -186,6 +187,8 @@ class AppDataHolder(
     ManageImagerySourcesUseCase(organizationRepository),
   val manageLibraryUseCase: ManageLibraryUseCase = ManageLibraryUseCase(libraryRepository),
   val resolveLibraryUseCase: ResolveLibraryUseCase = ResolveLibraryUseCase(),
+  val computeImpactUseCase: ComputeImpactUseCase =
+    ComputeImpactUseCase(resolveLibrary = resolveLibraryUseCase),
   val searchConceptsUseCase: SearchConceptsUseCase = SearchConceptsUseCase(),
   val computeWayfindingNavigationUseCase: ComputeWayfindingNavigationUseCase =
     ComputeWayfindingNavigationUseCase(),

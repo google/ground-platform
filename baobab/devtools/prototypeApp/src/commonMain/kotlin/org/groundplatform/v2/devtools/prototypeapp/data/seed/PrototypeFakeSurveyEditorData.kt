@@ -16,6 +16,7 @@ package org.groundplatform.v2.devtools.prototypeapp.data.seed
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.CachedProfile
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.ConceptLink
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.InvitationStatus
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.LibraryIds
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.Collaborator
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.CollaboratorRole
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.DatasetKind
@@ -56,8 +57,11 @@ internal object PrototypeFakeSurveyEditorData {
     )
 
   /**
-   * Coffee parcels' owner is linked to the global producer name concept, so the EUDR GeoJSON export
-   * finds it (its commodity and country aren't collected, which the export warns about).
+   * Coffee parcels' columns linked to standard fields, so the EUDR GeoJSON export finds them (the
+   * country isn't collected, which the export warns about) and the Impact views add them up: the
+   * owner (global producer name), commodity and deforestation-free status (global EUDR concepts),
+   * and shade trees and cherry delivered (Kenya Forest Service concepts; shade trees suggests the
+   * ecosystem restoration goal).
    */
   private fun withKenyaConceptLinks(dataset: EntityDataset): EntityDataset =
     if (dataset.id != "coffee_parcels") {
@@ -66,11 +70,22 @@ internal object PrototypeFakeSurveyEditorData {
       dataset.copy(
         properties =
           dataset.properties.map {
-            if (it.name == "farmer_owner") it.copy(conceptLink = ConceptLink("core.producer_name"))
-            else it
+            val conceptId =
+              when {
+                it.name == "farmer_owner" -> "core.producer_name"
+                it.label == "Commodity" -> "eudr.commodity"
+                it.label == "Deforestation-free" -> "eudr.deforestation_free"
+                it.label == "Shade trees" -> kfsConceptId("shade_tree_count")
+                it.label == "Cherry delivered (kg)" -> kfsConceptId("cherry_delivery_kg")
+                else -> null
+              }
+            if (conceptId != null) it.copy(conceptLink = ConceptLink(conceptId)) else it
           }
       )
     }
+
+  private fun kfsConceptId(name: String) =
+    LibraryIds.organizationEntryId(PrototypeFakeOrganizationsData.KENYA_FOREST_SERVICE, name)
 
   /**
    * The seeded draft for [ORGANIZATION_SHARED_SURVEY_ID]: [derived], owned by a Mekong Mangrove

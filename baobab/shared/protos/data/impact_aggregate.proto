@@ -1,0 +1,141 @@
+/*
+ * Copyright 2026 The Ground Authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto3";
+
+package groundplatform.v2.data;
+
+import "google/protobuf/timestamp.proto";
+import "shared/protos/data/impact_event.proto";
+
+// One row produced by the impact aggregation job: a privacy-safe aggregate of
+// deduplicated map features, concept values, impact events, survey outcomes,
+// or attribution scores for one scope. Rows never carry geometry, property
+// values, or personal data. Computed by `ImpactAggregator` in `shared/core`.
+// See docs/technical/backend/impact-aggregation.md.
+message ImpactAggregate {
+  // Kind of scope a row describes.
+  enum ScopeType {
+    // Unspecified scope.
+    SCOPE_TYPE_UNSPECIFIED = 0;
+
+    // One survey (`scope_id` is `SurveyDef.id`). Includes every concept the
+    // survey links, including `SENSITIVE` and organization concepts.
+    SURVEY = 1;
+
+    // One organization (`scope_id` is `Organization.organization_id`): all its
+    // surveys, deduplicated together.
+    ORGANIZATION = 2;
+
+    // One country (`scope_id` is an ISO 3166-1 alpha-2 code): platform-wide
+    // features located there, thresholded.
+    COUNTRY = 3;
+
+    // The whole deployment (`scope_id` is empty), excluding organizations that
+    // set `Organization.exclude_from_platform_aggregates`.
+    GLOBAL = 4;
+
+    // One S2 grid cell (`scope_id` is its token), thresholded and merged into
+    // its parent cell when too small.
+    CELL = 5;
+  }
+
+  // What a row measures.
+  enum Metric {
+    // Unspecified metric.
+    METRIC_UNSPECIFIED = 0;
+
+    // All deduplicated features of the scope (`concept_id` is empty).
+    FEATURES = 1;
+
+    // A linked concept, per its aggregation rule (`concept_id`, and `code` for
+    // `*_BY_CODE` rules).
+    CONCEPT = 2;
+
+    // Distinct values of an identifying concept (e.g., producers registered)
+    // in `value`.
+    DISTINCT_VALUES = 3;
+
+    // Impact events of one type (`event_type`); `value` is the event count.
+    EVENT = 4;
+
+    // Surveys per outcome kind (`outcome_kind`); `value` is the survey count.
+    OUTCOME = 5;
+
+    // Surveys per attribution score (`attribution_score`); `value` is the
+    // survey count.
+    ATTRIBUTION = 6;
+  }
+
+  // Aggregation run that produced the row; rows of one run are published
+  // atomically per scope.
+  string run_id = 1;
+
+  // Version of the aggregation logic, so figures can be traced and recomputed.
+  int32 pipeline_version = 2;
+
+  google.protobuf.Timestamp computed_at = 3;
+
+  ScopeType scope_type = 4;
+
+  // Survey ID, organization ID, ISO 3166-1 alpha-2 code, S2 cell token, or
+  // empty for `GLOBAL`.
+  string scope_id = 5;
+
+  // Concept ID for `CONCEPT` and `DISTINCT_VALUES` rows; empty otherwise.
+  string concept_id = 6;
+
+  // Code-list value (`ground_code`) for `COUNT_BY_CODE` and `SHARE_BY_CODE`
+  // concept rows.
+  string code = 7;
+
+  // Event type for `EVENT` rows.
+  ImpactEventType event_type = 8;
+
+  // `SurveyOutcome.Outcome` name, or `UNANSWERED` for closed surveys nobody
+  // answered, for `OUTCOME` rows.
+  string outcome_kind = 9;
+
+  // Deduplicated features counted by the row (for `EVENT` rows, the sum
+  // recorded on the events).
+  int64 feature_count = 10;
+
+  // Area of those features in hectares (geodesic, WGS 84).
+  double area_ha = 11;
+
+  // Sum, mean, share (0–1), distinct-value count, event count, or survey
+  // count, depending on `metric` and the concept's aggregation rule.
+  double value = 12;
+
+  // Below the publication threshold: counts are zeroed and shown as "fewer
+  // than 10" rather than omitted.
+  bool suppressed = 13;
+
+  // An organization concept's row under one of its suggested goals (`GLOBAL`
+  // scope only). Never added to main goal totals.
+  bool organization_suggested = 14;
+
+  // Attribution score (1–5) for `ATTRIBUTION` rows.
+  int32 attribution_score = 15;
+
+  // Owning organization of `concept_id` for organization-suggested rows.
+  string organization_id = 16;
+
+  // Suggested goal for organization-suggested rows.
+  string goal = 17;
+
+  Metric metric = 18;
+}

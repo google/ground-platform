@@ -39,6 +39,7 @@ import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Flag
 import androidx.compose.material.icons.outlined.Group
 import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material.icons.outlined.Insights
 import androidx.compose.material.icons.outlined.Layers
 import androidx.compose.material.icons.outlined.Map
 import androidx.compose.material.icons.outlined.PersonAdd
@@ -81,12 +82,16 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.canChangeMember
 import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.ResolvedLibrary
 import org.groundplatform.v2.devtools.prototypeapp.ui.dashboard.CreateSurveyDialog
 import org.groundplatform.v2.devtools.prototypeapp.ui.dashboard.CreateSurveyRequest
+import org.groundplatform.v2.devtools.prototypeapp.ui.dashboard.ImpactMessageSnackbar
 import org.groundplatform.v2.devtools.prototypeapp.ui.dashboard.SidePanelSeparator
 import org.groundplatform.v2.devtools.prototypeapp.ui.dashboard.SidePanelSeparatorWidth
 import org.groundplatform.v2.devtools.prototypeapp.ui.dashboard.WebSurveyCard
 import org.groundplatform.v2.devtools.prototypeapp.ui.dashboard.WebSurveysList
 import org.groundplatform.v2.devtools.prototypeapp.ui.formeditor.DropdownSelector
 import org.groundplatform.v2.devtools.prototypeapp.ui.formeditor.SectionLabel
+import org.groundplatform.v2.devtools.prototypeapp.ui.impact.GlobalImpactPane
+import org.groundplatform.v2.devtools.prototypeapp.ui.impact.OrganizationImpactPane
+import org.groundplatform.v2.devtools.prototypeapp.ui.state.ImpactUiState
 import org.groundplatform.v2.devtools.prototypeapp.ui.state.OrganizationLibraryUiState
 import org.groundplatform.v2.devtools.prototypeapp.ui.state.OrganizationUiState
 import org.groundplatform.v2.devtools.prototypeapp.ui.surveyeditor.AcceptInviteDialog
@@ -95,6 +100,7 @@ import org.groundplatform.v2.devtools.prototypeapp.ui.surveyeditor.PaneScaffold
 import org.groundplatform.v2.devtools.prototypeapp.ui.surveyeditor.PendingInviteLinkRow
 import org.groundplatform.v2.devtools.prototypeapp.ui.surveyeditor.PersonRow
 import org.groundplatform.v2.devtools.prototypeapp.ui.surveyeditor.ProfileAvatar
+import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.ImpactActions
 import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.OrganizationActions
 import org.groundplatform.v2.devtools.prototypeapp.ui.workbench.WebAppHeader
 import org.groundplatform.v2.devtools.prototypeapp.ui.workbench.WebHeaderButton
@@ -118,52 +124,58 @@ internal fun OrganizationPage(
 ) {
   val uiState by state.organization.uiState.collectAsState()
   val dashboardState by state.dashboard.uiState.collectAsState()
-  OrganizationPage(
-    uiState = uiState,
-    actions = state.organization,
-    sidePanelWidthDp = dashboardState.sidePanelWidthDp,
-    onSidePanelWidthChange = state.dashboard::updateSidePanelWidth,
-    onOpenSurvey = onOpenSurvey,
-    onCreateSurvey = onCreateSurvey,
-    surveyLibrary = dashboardState::surveyLibrary,
-    header = { onCreateSurveyClick ->
-      val organization = uiState.openOrganization
-      WebAppHeader(
-        state = state,
-        onSignOut = onSignOut,
-        navigationIcon = {
-          IconButton(onClick = { state.organization.openOrganizations() }) {
-            Icon(
-              Icons.AutoMirrored.Outlined.ArrowBack,
-              contentDescription = "Back to organizations",
-            )
-          }
-        },
-        context = {
-          if (organization != null) {
-            OrganizationHeaderContext(
-              organization = organization,
-              surveyCount = uiState.surveyCountInOrganization(organization.id),
-            )
-          } else {
-            WebHeaderContext(title = "Organization")
-          }
-        },
-        actions = {
-          WebMobilePrototypeButton(state)
-          // Nobody creates surveys in "All users": isMemberOf is false for it.
-          if (organization != null && uiState.isMemberOf(organization)) {
-            WebHeaderButton(
-              text = "Create survey",
-              icon = Icons.Outlined.Add,
-              onClick = onCreateSurveyClick,
-              tonal = true,
-            )
-          }
-        },
-      )
-    },
-  )
+  val impactState by state.impact.uiState.collectAsState()
+  Box(modifier = Modifier.fillMaxSize()) {
+    OrganizationPage(
+      uiState = uiState,
+      actions = state.organization,
+      impactState = impactState,
+      impactActions = state.impact,
+      sidePanelWidthDp = dashboardState.sidePanelWidthDp,
+      onSidePanelWidthChange = state.dashboard::updateSidePanelWidth,
+      onOpenSurvey = onOpenSurvey,
+      onCreateSurvey = onCreateSurvey,
+      surveyLibrary = dashboardState::surveyLibrary,
+      header = { onCreateSurveyClick ->
+        val organization = uiState.openOrganization
+        WebAppHeader(
+          state = state,
+          onSignOut = onSignOut,
+          navigationIcon = {
+            IconButton(onClick = { state.organization.openOrganizations() }) {
+              Icon(
+                Icons.AutoMirrored.Outlined.ArrowBack,
+                contentDescription = "Back to organizations",
+              )
+            }
+          },
+          context = {
+            if (organization != null) {
+              OrganizationHeaderContext(
+                organization = organization,
+                surveyCount = uiState.surveyCountInOrganization(organization.id),
+              )
+            } else {
+              WebHeaderContext(title = "Organization")
+            }
+          },
+          actions = {
+            WebMobilePrototypeButton(state)
+            // Nobody creates surveys in "All users": isMemberOf is false for it.
+            if (organization != null && uiState.isMemberOf(organization)) {
+              WebHeaderButton(
+                text = "Create survey",
+                icon = Icons.Outlined.Add,
+                onClick = onCreateSurveyClick,
+                tonal = true,
+              )
+            }
+          },
+        )
+      },
+    )
+    ImpactMessageSnackbar(state, modifier = Modifier.align(Alignment.BottomCenter))
+  }
 }
 
 /** The organization's logo, name, and summary line in the web header. */
@@ -210,6 +222,8 @@ internal fun OrganizationPage(
   onCreateSurvey: (CreateSurveyRequest) -> Unit,
   surveyLibrary: (organizationId: String?) -> ResolvedLibrary,
   header: @Composable (onCreateSurveyClick: () -> Unit) -> Unit,
+  impactState: ImpactUiState = ImpactUiState(),
+  impactActions: ImpactActions? = null,
 ) {
   val organization = uiState.openOrganization
   val isManager = organization != null && uiState.managesOrganization(organization)
@@ -232,6 +246,7 @@ internal fun OrganizationPage(
         surveyCount = uiState.surveyCountInOrganization(organization.id),
         library = uiState.library,
         isManager = isManager,
+        showsImpact = showsImpact(organization, isManager, isMember, impactActions),
         selected = tab,
         onSelect = { tab = it },
         modifier = Modifier.width(sidePanelWidthDp.dp).fillMaxHeight(),
@@ -272,6 +287,26 @@ internal fun OrganizationPage(
             ) {
               NoticeSlot(uiState, actions)
               SurveysPane(uiState, organization, isMember, onOpenSurvey) { isCreatingSurvey = true }
+            }
+          OrganizationTab.IMPACT ->
+            if (organization.isSynthetic) {
+              GlobalImpactPane(
+                summary = impactState.global,
+                isLoading = impactState.isLoading,
+                onDownload = { impactActions?.downloadGlobalSummary() },
+              )
+            } else {
+              OrganizationImpactPane(
+                state = impactState.organizations[organization.id],
+                isLoading = impactState.isLoading,
+                onSurveyFilterChange = {
+                  impactActions?.setOrganizationSurveyFilter(organization.id, it)
+                },
+                onCountryFilterChange = {
+                  impactActions?.setOrganizationCountryFilter(organization.id, it)
+                },
+                onDownload = { impactActions?.downloadOrganizationSummary(organization.id) },
+              )
             }
           OrganizationTab.MEMBERS ->
             PaneScaffold(
@@ -381,6 +416,7 @@ private fun OrganizationNavigation(
   surveyCount: Int,
   library: OrganizationLibraryUiState,
   isManager: Boolean,
+  showsImpact: Boolean,
   selected: OrganizationTab,
   onSelect: (OrganizationTab) -> Unit,
   modifier: Modifier = Modifier,
@@ -405,6 +441,14 @@ private fun OrganizationNavigation(
         onClick = { onSelect(OrganizationTab.SURVEYS) },
         trailing = "$surveyCount",
       )
+      if (showsImpact) {
+        NavItem(
+          label = OrganizationTab.IMPACT.label,
+          icon = Icons.Outlined.Insights,
+          selected = selected == OrganizationTab.IMPACT,
+          onClick = { onSelect(OrganizationTab.IMPACT) },
+        )
+      }
       NavItem(
         label = OrganizationTab.MEMBERS.label,
         icon = Icons.Outlined.Group,
@@ -445,6 +489,18 @@ private fun OrganizationNavigation(
 }
 
 internal val OrganizationPaneMaxWidth = 760.dp
+
+/**
+ * Whether the Impact tab is shown: to members of a real organization, and, for the synthetic `"All
+ * users"` organization, only to its Managers (the platform-wide view).
+ */
+private fun showsImpact(
+  organization: Organization,
+  isManager: Boolean,
+  isMember: Boolean,
+  impactActions: ImpactActions?,
+): Boolean =
+  impactActions != null && if (organization.isSynthetic) isManager else isMember || isManager
 
 @Composable
 private fun MissingOrganization(onBack: () -> Unit) {
@@ -791,6 +847,51 @@ private fun DetailsPane(
       }
     } else {
       ReadOnlyDetailsCard(organization)
+    }
+    if (!organization.isSynthetic) {
+      PlatformNumbersCard(
+        organization = organization,
+        isManager = isManager,
+        onExcludeChange = { actions.setExcludeFromPlatformAggregates(organization.id, it) },
+      )
+    }
+  }
+}
+
+/**
+ * Whether the organization's data counts toward platform-wide impact numbers
+ * (`Organization.exclude_from_platform_aggregates`). Managers switch it; others see it.
+ */
+@Composable
+private fun PlatformNumbersCard(
+  organization: Organization,
+  isManager: Boolean,
+  onExcludeChange: (Boolean) -> Unit,
+) {
+  DetailsCard("Platform-wide numbers") {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+      Column(modifier = Modifier.weight(1f)) {
+        Text("Keep our data out of platform totals", style = MaterialTheme.typography.bodyMedium)
+        Text(
+          "Your surveys still count in your own Impact numbers; only totals across all of Ground " +
+            "leave them out.",
+          style = MaterialTheme.typography.bodySmall,
+          color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+      }
+      Spacer(Modifier.width(12.dp))
+      Switch(
+        checked = organization.excludeFromPlatformAggregates,
+        onCheckedChange = if (isManager) onExcludeChange else null,
+        enabled = isManager,
+      )
+    }
+    if (!isManager) {
+      Text(
+        "Ask a Manager to change this.",
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+      )
     }
   }
 }

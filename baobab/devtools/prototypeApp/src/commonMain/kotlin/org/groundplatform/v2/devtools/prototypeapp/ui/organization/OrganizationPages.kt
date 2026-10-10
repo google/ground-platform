@@ -21,6 +21,7 @@ package org.groundplatform.v2.devtools.prototypeapp.ui.organization
 enum class OrganizationTab(val label: String) {
   DETAILS("Organization details"),
   SURVEYS("Surveys"),
+  IMPACT("Impact"),
   MEMBERS("Members"),
   IMAGERY_SOURCES("Imagery sources"),
   PURPOSES("Purposes"),

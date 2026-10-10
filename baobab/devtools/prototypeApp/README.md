@@ -150,7 +150,8 @@ surveys in it and find them in their list.
 -   **Organization page**: Laid out like the survey editor, with a resizable
     left panel that switches between **Organization details**, **Surveys**
     (cards like the Surveys page, plus **Create survey** for members),
-    **Members**, **Imagery sources**, and the organization's library:
+    **Impact**, **Members**, **Imagery sources**, and the organization's
+    library:
     **Purposes**, **Dictionary**, and **Templates**. Each pane opens with a
     heading that explains what it is for, and the header labels the page as an
     *Organization*.
@@ -164,6 +165,16 @@ surveys in it and find them in their list.
         Managers edit them in place with **Save** / **Discard** and
         can **Delete organization** (its surveys become personal surveys of
         their owners; no data is deleted); everyone else sees them read-only.
+        A **Platform-wide numbers** card has the **Keep our data out of
+        platform totals** switch (`Organization.exclude_from_platform_aggregates`,
+        off by default): Managers flip it, everyone else sees it disabled. The
+        organization's own Impact numbers are unaffected. The sample Open Foris
+        Community has it on.
+    -   **Impact**: Members' view of what the organization's surveys add up to
+        (see [Impact Views](#impact-views)), with **Survey** and **Country**
+        filters, a **Your indicators** section for the organization's own
+        concepts, and **Download PDF summary**. For **"All users"**, the tab is
+        the platform-wide view and only its Managers see it.
     -   **Members**: Managers see *Requests to join* (**Approve** / **Decline**),
         can invite people by email as Member or Manager (each invite gets an
         invite link with **Copy link**, **New link**, and **Open as invitee**
@@ -212,6 +223,59 @@ canonical `shared/assets/library/<vocabulary>.textproto` files;
 `./gradlew jvmTest -PregenerateLibrarySeed` rewrites the files from the Kotlin
 copy.
 
+## Impact Views
+
+What survey data adds up to, computed in the browser by the shared impact
+aggregation job (`shared/core` `org.groundplatform.v2.core.impact`, see
+`docs/technical/backend/impact-aggregation.md`), so the prototype and the
+backend agree. `ComputeImpactUseCase` (`domain/usecase/`) maps every survey's
+map features, editor draft (layer columns and form questions linked to
+concepts), purposes, outcome, impact events, libraries, and organizations onto
+the job's inputs, and describes the rows in plain language (`ImpactSummary`,
+`domain/model/ImpactSummaryModels.kt`). `ImpactViewModel` recomputes 300 ms
+after the data stops changing, so exporting, creating a receipt, closing a
+survey, linking a column, or opting out updates the numbers right away.
+
+-   **Survey Impact** (web dashboard **Impact** tab), **Organization Impact**
+    (organization page **Impact** tab, filterable by survey and country), and
+    **Platform impact** (the **Impact** tab of **"All users"**, for its
+    Managers only; no public dashboard and no map overlays).
+-   **Cards**: Unique hectares mapped and plots (plots that share a GeoID count
+    once, with the duplicates called out), producers registered (distinct
+    producer IDs or names), then one section per goal in plain language (e.g.
+    *Deforestation-free supply chains*) with a card per linked global concept:
+    counts by code with bars (e.g. commodity), shares (e.g. 67% deforestation
+    free), sums, and averages. **Your indicators** lists the organization's own
+    concepts; the platform view shows them only under
+    **Organization-suggested indicators** (by suggested goal and organization),
+    never in the main totals, and leaves out sensitive concepts and opted-out
+    organizations.
+-   **How the data was used**: Downloads, receipts created and shared (plus
+    partner pushes and DOIs when there are any), answers to *What happened with
+    this data?* ("Not yet" apart from closed surveys nobody answered), and how
+    directly the data contributed (1–5, with a one-line explanation; a
+    distribution for organizations and the platform, where only surveys with a
+    global purpose count).
+-   **Platform view extras**: Countries (fewer than 10 map features shows as
+    *Fewer than 10*), how many map areas are kept private (S2 cells below 10 map
+    features from 2 organizations), and how many organizations opted out.
+-   **Diagnostics and empty states**: A discreet *N linked fields couldn't be
+    counted · Why?* line explains skipped links and values that aren't numbers
+    or use an unsupported unit; empty states say how to get numbers (collect
+    data, pick a purpose, link fields to standard fields).
+-   **PDF summary**: **Download PDF summary** saves the same numbers as a PDF
+    (`client/pdf/ImpactPdfReports.kt`, using the PDF writer of
+    [PDF Reports](#pdf-reports)), including the organization filter.
+-   **Sample data**: The Kenya coffee parcels link *Commodity*,
+    *Deforestation-free*, and the owner to global concepts and *Shade trees*
+    (suggests *Ecosystem restoration*) and *Cherry delivered (kg)* to Kenya
+    Forest Service concepts (one parcel's *Not weighed* shows a diagnostic). The
+    Mekong survey maps the same five plots, so the platform view counts them
+    once, and the Open Foris Community is opted out.
+
+The prototype's map shapes are illustrative, so features pass their recorded
+area and a representative point instead of their drawn outline.
+
 ## Web Dashboard Page (`#dashboard`)
 
 Open a survey from the **Surveys** page, or deep-link to
@@ -222,7 +286,8 @@ prototype, so selections and survey changes carry over.
     **survey switcher** dropdown (other surveys grouped by organization, plus
     **All surveys…**), with its organization and location below it, a
     **Manage survey** button to enter the **Survey editor**, and user profile
-    controls.
+    controls. **Map** and **Impact** tabs below it switch the main area between
+    the live map and the survey's numbers (see [Impact Views](#impact-views)).
 -   **Left panel**: The searchable list of map features and places. Each map
     feature is a single line: a geometry icon (point, line, polygon, or none
     for data table records), its label, and its marker circle (filled

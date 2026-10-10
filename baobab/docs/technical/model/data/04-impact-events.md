@@ -26,6 +26,10 @@ carry these signals:
 *   **`SurveyOutcome`** (`survey_def.proto`): the organizer's one-tap answer to
     "What happened with this data?" when a survey is closed or archived.
 
+The impact aggregation job rolls both up, with dictionary-linked answers, into
+privacy-safe **`ImpactAggregate`** rows (`impact_aggregate.proto`); see
+[Impact Aggregation](../../backend/impact-aggregation.md).
+
 ## Impact Events
 
 ```protobuf

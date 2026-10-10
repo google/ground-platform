@@ -96,6 +96,13 @@ interface OrganizationActions {
     countryCode: String?,
   )
 
+  /**
+   * Keeps organization [organizationId]'s data out of platform-wide impact numbers when [exclude]
+   * is true (`Organization.exclude_from_platform_aggregates`). Only Managers may call this; ignored
+   * for the synthetic `"All users"` organization.
+   */
+  fun setExcludeFromPlatformAggregates(organizationId: String, exclude: Boolean)
+
   /** Deletes the organization; its surveys become personal surveys. Returns to the directory. */
   fun deleteOrganization(organizationId: String)
 
@@ -448,6 +455,12 @@ class OrganizationViewModel(
         countryCode = Countries.normalizeCode(countryCode),
       )
     }
+  }
+
+  override fun setExcludeFromPlatformAggregates(organizationId: String, exclude: Boolean) {
+    val organization = organization(organizationId) ?: return
+    if (organization.isSynthetic || !organization.isManager(signedInEmail)) return
+    updateOrganization(organizationId) { it.copy(excludeFromPlatformAggregates = exclude) }
   }
 
   override fun deleteOrganization(organizationId: String) {

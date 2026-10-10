@@ -83,12 +83,16 @@ class DashboardExportTest {
     assertTrue(parcels.hasGeometry)
     val plan = parcels.profilePlans.single()
     assertEquals("eudr_geojson", plan.profile.id)
-    // The seeded coffee parcels link the owner to the producer name concept.
+    // The seeded coffee parcels link the owner and commodity to standard fields, not the country.
     assertEquals(
       "farmer_owner",
       plan.fields.first { it.outputField == "producer_name" }.propertyName,
     )
-    assertTrue(plan.warnings.any { "Commodity" in it && "Country" in it }, plan.warnings.toString())
+    assertTrue(plan.fields.first { it.conceptId == "eudr.commodity" }.isMapped)
+    assertTrue(
+      plan.warnings.any { "Country" in it && "Commodity" !in it },
+      plan.warnings.toString(),
+    )
     val farmers = assertNotNull(ui.exportOptions["farmers"])
     assertFalse(farmers.hasGeometry)
     assertTrue(farmers.profilePlans.isEmpty())

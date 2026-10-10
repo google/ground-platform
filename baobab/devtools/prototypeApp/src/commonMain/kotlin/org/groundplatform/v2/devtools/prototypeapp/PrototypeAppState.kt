@@ -94,6 +94,7 @@ import org.groundplatform.v2.devtools.prototypeapp.ui.state.WorkbenchEvent
 import org.groundplatform.v2.devtools.prototypeapp.ui.state.WorkbenchUiState
 import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.DashboardViewModel
 import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.DataCollectionViewModel
+import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.ImpactViewModel
 import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.OnboardingViewModel
 import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.OrganizationViewModel
 import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.SettingsViewModel
@@ -271,6 +272,23 @@ class PrototypeAppState(
     )
 
   /**
+   * ViewModel of the Impact views: the web dashboard's survey Impact tab, the organization Impact
+   * tab, and the platform-wide view for Managers of "All users". Its panes observe
+   * [ImpactViewModel.uiState] directly.
+   */
+  val impact: ImpactViewModel =
+    ImpactViewModel(
+      surveyRepository = dataHolder.surveyRepository,
+      organizationRepository = dataHolder.organizationRepository,
+      libraryRepository = dataHolder.libraryRepository,
+      impactEventRepository = dataHolder.impactEventRepository,
+      authRepository = dataHolder.authRepository,
+      scope = dataHolder.scope,
+      surveyEditorRepository = dataHolder.surveyEditorRepository,
+      computeImpact = dataHolder.computeImpactUseCase,
+    )
+
+  /**
    * ViewModel of data collection: the selected record (map feature and / or submission), the open
    * form and its `entityref` step, the web dashboard's draw-on-map session, and the GeoID QR code
    * and PDF export dialogs. It is the one owner of record selection; the map viewport mirrors it.
@@ -373,6 +391,7 @@ class PrototypeAppState(
         organization.reset()
         surveyEditor.reset()
         surveyOutcomePrompt.reset()
+        impact.reset()
         dataCollection.reset()
         activeSurveyNotice = null
         mainViewMode = MainSurveyViewMode.MAP

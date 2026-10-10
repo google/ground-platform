@@ -186,9 +186,12 @@ Give each survey a 1–5 score automatically, using its purpose, outcome signals
 
 <!-- mdformat on -->
 
+The exact conditions, and how scores are counted platform-wide (only surveys with a global purpose), are in [Impact Aggregation and Spatial Overlays](../technical/backend/impact-aggregation.md#events-outcomes-and-attribution).
+
 ## Guardrails
 
 *   **Open-source telemetry**: aggregate impact metrics must be documented, disclosed in the privacy policy, approved through Open Foris governance, and possible to turn off. Self-hosted instances report nothing unless they opt in.
+*   **Organization opt-out**: an organization's Managers can keep its data out of platform-wide numbers (global, country, and map-area totals and organization-suggested indicators) with `Organization.exclude_from_platform_aggregates`. Its own dashboards are unaffected.
 *   **Sensitive locations**: blur or suppress patrol routes, protected area threat reports, and IPLC sacred sites in any public dashboard (poaching and land-grab risk). Apply k-anonymity thresholds to S2 cells.
 *   **Shared credit**: agree on counting rules with FAO and SIG up front, so Google's sustainability goals, FAO reporting, and funder digests use the same deduplicated numbers and nobody double-claims.
 

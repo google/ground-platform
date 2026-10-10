@@ -51,7 +51,8 @@ metadata), and `groundplatform.v2.data` (user data records):
 *   **`survey/organization.proto`** (`groundplatform.v2.survey`): Defines
     `Organization`, the optional multi-tenant owner of surveys
     (`SurveyDef.organization_id`), its optional profile (`OrganizationType`
-    and ISO 3166-1 alpha-2 `country_code`), and its memberships
+    and ISO 3166-1 alpha-2 `country_code`), its opt-out from platform-wide
+    impact aggregates (`exclude_from_platform_aggregates`), and its memberships
     (`OrganizationMember` with `OrganizationRole` Member / Manager and
     `MembershipStatus`).
 *   **`data/entity_record.proto`** (`groundplatform.v2.data`): Defines

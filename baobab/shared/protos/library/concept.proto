@@ -55,7 +55,8 @@ message ConceptDef {
   // Localized synonyms used by Survey Designer search.
   repeated LocalizedText keywords = 6;
 
-  // Suggested data type and unit (UCUM code, e.g., "ha", "m3", "kg").
+  // Suggested data type and unit (UCUM code, e.g., "har" for hectares, "m3",
+  // "kg").
   groundplatform.v2.forms.DataType data_type = 7;
   string unit = 8;
 

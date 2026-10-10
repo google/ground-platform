@@ -1072,6 +1072,10 @@ internal object PrototypeFakeEntitiesData {
             "Washing Station" to "entity-station-01",
             "Primary Cultivar" to "SL28 & Ruiru 11",
             "Elevation" to "1,820 m",
+            "Commodity" to "Coffee",
+            "Deforestation-free" to "Yes",
+            "Shade trees" to "38",
+            "Cherry delivered (kg)" to "640",
           ),
         submissions =
           listOf(
@@ -1280,6 +1284,10 @@ internal object PrototypeFakeEntitiesData {
             "Washing Station" to "entity-station-01",
             "Primary Cultivar" to "Batian & SL34",
             "Elevation" to "1,795 m",
+            "Commodity" to "Coffee",
+            "Deforestation-free" to "Yes",
+            "Shade trees" to "52",
+            "Cherry delivered (kg)" to "910",
           ),
         submissions =
           listOf(
@@ -1349,6 +1357,10 @@ internal object PrototypeFakeEntitiesData {
             "Washing Station" to "entity-station-01",
             "Primary Cultivar" to "SL28 & Batian",
             "Elevation" to "1,845 m",
+            "Commodity" to "Coffee",
+            "Deforestation-free" to "Unknown",
+            "Shade trees" to "27",
+            "Cherry delivered (kg)" to "Not weighed",
           ),
         submissions = emptyList(),
         syncStatus = SyncStatus.FAILED,

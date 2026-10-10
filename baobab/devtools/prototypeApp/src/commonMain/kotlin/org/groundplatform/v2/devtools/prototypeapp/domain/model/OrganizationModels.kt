@@ -136,6 +136,13 @@ data class Organization(
    */
   val countryCode: String? = null,
   /**
+   * Whether the organization's data is kept out of platform-wide impact numbers
+   * (`Organization.exclude_from_platform_aggregates`): global, country, and grid cell totals and
+   * organization-suggested indicators. Its own dashboards are unaffected. Always false for `"All
+   * users"`.
+   */
+  val excludeFromPlatformAggregates: Boolean = false,
+  /**
    * True for the synthetic `"All users"` organization, which holds the platform-wide imagery
    * sources and the global library rather than survey memberships.
    *

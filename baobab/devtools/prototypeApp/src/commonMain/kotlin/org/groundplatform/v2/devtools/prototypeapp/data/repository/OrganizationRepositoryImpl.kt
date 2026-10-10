@@ -69,6 +69,7 @@ class OrganizationRepositoryImpl(private val store: LocalStore) : OrganizationRe
           isSynthetic = true,
           organizationType = null,
           countryCode = null,
+          excludeFromPlatformAggregates = false,
         )
       } else {
         updated
