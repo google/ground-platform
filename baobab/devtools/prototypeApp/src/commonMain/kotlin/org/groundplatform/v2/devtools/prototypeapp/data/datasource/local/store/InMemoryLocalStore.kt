@@ -29,6 +29,7 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.MapLayerItem
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.MutationLogItem
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.OfflineTilePackageItem
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.Organization
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.OrganizationLibrary
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SubmissionGeometryPolygon
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SubmissionPreviewItem
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyConfig
@@ -53,6 +54,9 @@ class InMemoryLocalStore : LocalStore {
 
   override fun observeOrganizations(): Flow<List<Organization>> =
     state.map { it.organizations }.distinctUntilChanged { a, b -> a === b }
+
+  override fun observeLibraries(): Flow<Map<String, OrganizationLibrary>> =
+    state.map { it.libraries }.distinctUntilChanged { a, b -> a === b }
 
   override fun observeForms(surveyId: String): Flow<List<FormPreviewItem>> =
     observeSurvey(surveyId) { it.forms }
@@ -146,6 +150,7 @@ class InMemoryLocalStore : LocalStore {
     val surveys: List<SurveyPreviewItem> = emptyList(),
     val surveyData: Map<String, SurveyData> = emptyMap(),
     val organizations: List<Organization> = emptyList(),
+    val libraries: Map<String, OrganizationLibrary> = emptyMap(),
     val mutations: List<MutationLogItem> = emptyList(),
     val places: List<SurveyPlaceItem> = emptyList(),
     val offlineTilePackages: List<OfflineTilePackageItem> = emptyList(),
@@ -215,11 +220,18 @@ class InMemoryLocalStore : LocalStore {
       working =
         working.copy(
           organizations = working.organizations.filterNot { it.id == organizationId },
+          libraries = working.libraries - organizationId,
           surveys =
             working.surveys.map {
               if (it.organizationId == organizationId) it.copy(organizationId = null) else it
             },
         )
+    }
+
+    override fun libraries(): Map<String, OrganizationLibrary> = working.libraries
+
+    override fun putLibrary(library: OrganizationLibrary) {
+      working = working.copy(libraries = working.libraries + (library.organizationId to library))
     }
 
     override fun surveyConfig(surveyId: String): SurveyConfig? = data(surveyId).config

@@ -26,6 +26,7 @@ Following the Dependency Inversion Principle, repository contracts are owned by 
 - `SurveyEditorRepository`: Load, observe (`observeDraft`), and save (`saveDraft`) `SurveyEditorDraft` instances with automatic runtime projection.
 - `MutationRepository`: Observe and update the offline upload/mutation queue.
 - `OrganizationRepository`: Observe and mutate organizations, members, roles, and imagery sources.
+- `LibraryRepository`: Observe and update each organization's library (concepts, Form templates, Purpose Packs, export profiles, and hidden global entries); the `"All users"` library is the global library.
 - `AuthRepository`: Observe authentication state and trigger sign-in/sign-out transitions.
 - `SettingsRepository`: Observe and update user preferences, units, theme, and offline basemap settings.
 - `LocationRepository`: Query and update device GNSS/GPS location state.

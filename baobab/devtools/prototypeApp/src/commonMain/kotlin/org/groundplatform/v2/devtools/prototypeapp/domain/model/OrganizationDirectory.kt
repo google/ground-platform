@@ -29,9 +29,14 @@ data class OrganizationMembersView(
   val active: List<OrganizationMember>,
 )
 
-/** [email]'s relation to this organization. Everyone manages the synthetic organization. */
+/**
+ * [email]'s relation to this organization. Everyone is implicitly a member of the synthetic
+ * organization; only its explicit Managers manage it.
+ */
 fun Organization.relationTo(email: String): OrganizationRelation {
-  if (isSynthetic) return OrganizationRelation.MANAGER
+  if (isSynthetic) {
+    return if (isManager(email)) OrganizationRelation.MANAGER else OrganizationRelation.MEMBER
+  }
   val member = member(email) ?: return OrganizationRelation.NONE
   return when (member.status) {
     MembershipStatus.ACTIVE ->
@@ -47,7 +52,7 @@ fun Organization.relationTo(email: String): OrganizationRelation {
  * present), with synthetic first, then the ones they manage, then by name.
  */
 fun List<Organization>.organizationsOf(email: String): List<Organization> = filter {
-  it.isSynthetic || it.isMember(email)
+  it.isVisibleTo(email)
 }
   .sortedWith(compareBy({ !it.isSynthetic }, { !it.isManager(email) }, { it.name.lowercase() }))
 

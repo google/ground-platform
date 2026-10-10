@@ -96,7 +96,7 @@ object TextProtoSerializer {
   // FormDef Encoding
   // ===========================================================================
 
-  private fun encodeFormDef(msg: FormDef): TextProtoMessage = buildMessage {
+  internal fun encodeFormDef(msg: FormDef): TextProtoMessage = buildMessage {
     addString("form_id", msg.form_id)
     addString("title", msg.title)
     addString("version", msg.version)
@@ -517,7 +517,7 @@ object TextProtoSerializer {
   // FormDef Decoding
   // ===========================================================================
 
-  private fun decodeFormDef(node: TextProtoMessage): FormDef =
+  internal fun decodeFormDef(node: TextProtoMessage): FormDef =
     FormDef(
       form_id = node.getString("form_id"),
       title = node.getString("title"),

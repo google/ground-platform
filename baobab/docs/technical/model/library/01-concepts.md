@@ -24,7 +24,18 @@ consistently across surveys, organizations, and languages.
 
 ## Concept Schema (`ConceptDef`)
 
+Library entries are translated independently of any form, so their text uses
+`LocalizedText`, a map from BCP-47 language tag to text, rather than
+`groundplatform.v2.forms.LocalizedString` (which holds a single language's
+variants inside a form's `TranslationCatalog`).
+
 ```protobuf
+// Text in one or more languages.
+message LocalizedText {
+  // BCP-47 language tag (e.g., "en", "fr", "es", "vi", "sw") to text.
+  map<string, string> values = 1;
+}
+
 message ConceptDef {
   // Stable ID. Global concepts use `<vocabulary>.<name>` (e.g.,
   // "eudr.commodity"); organization concepts use
@@ -35,17 +46,19 @@ message ConceptDef {
   // increment the version; a change in meaning requires a new ID.
   int32 version = 2;
 
-  // Owning library ("all-users" for global concepts).
+  // Owning library ("org-all-users" for global concepts). Omitted in global
+  // seed files, where it is implied.
   string organization_id = 3;
 
   // Localized display label and description.
-  groundplatform.v2.forms.LocalizedString label = 4;
-  groundplatform.v2.forms.LocalizedString description = 5;
+  LocalizedText label = 4;
+  LocalizedText description = 5;
 
   // Localized synonyms used by Survey Designer search.
-  repeated groundplatform.v2.forms.LocalizedString keywords = 6;
+  repeated LocalizedText keywords = 6;
 
-  // Suggested data type and unit (UCUM code, e.g., "ha", "m3", "kg").
+  // Suggested data type and unit (UCUM code, e.g., "har" for hectares, "m3",
+  // "kg").
   groundplatform.v2.forms.DataType data_type = 7;
   string unit = 8;
 
@@ -82,7 +95,7 @@ message CodeList {
 message CodeListItem {
   // Language-independent value (e.g., "coffee").
   string code = 1;
-  groundplatform.v2.forms.LocalizedString label = 2;
+  LocalizedText label = 2;
 
   // External identifiers (e.g., HS code, AGROVOC URI).
   map<string, string> external_ids = 3;
@@ -140,11 +153,21 @@ enum LibraryStatus {
 
 ## Linking Form Fields (`ConceptRef`)
 
-Questions link to concepts through a `ConceptRef` on the question's
-`FieldBinding`. Entity properties carry the same reference, so aggregation can
-read the current state of map features directly.
+Questions link to concepts through a `ConceptRef`. Concept links are
+meaningful only to Ground, so, following the ProtoForms compatibility boundary
+in `baobab/GEMINI.md`, they are **not** a typed field of
+`groundplatform.v2.forms`. Instead, two complementary mechanisms carry them:
+
+*   **Typed survey-level links (authoritative)**: `SurveyDef` stores the links
+    for each of its forms, keyed by field path. Validation, exports, and
+    aggregation read these.
+*   **Generic foreign-attribute preservation (portable)**: ProtoForms preserves
+    any foreign-namespace attribute it does not model, so the
+    `ground:concept` attribute travels with a standalone `FormDef` and
+    round-trips through XForms and XLSForm like any other tool's extension.
 
 ```protobuf
+// groundplatform.v2.library
 message ConceptRef {
   // Concept ID, including the `org.<organization_id>.` prefix for
   // organization concepts.
@@ -152,32 +175,61 @@ message ConceptRef {
   int32 version = 2;
 }
 
-message FieldBinding {
-  // ... fields 1–16 ...
-  ConceptRef concept_ref = 17;
+// groundplatform.v2.survey
+message FormConceptLinks {
+  string form_id = 1;
+  // Field path (e.g., "/data/commodity") to concept.
+  map<string, groundplatform.v2.library.ConceptRef> field_concepts = 2;
+}
+
+message SurveyDef {
+  // ... fields 1–20 ...
+  repeated FormConceptLinks form_concept_links = 21;
 }
 
 message EntityPropertyDefinition {
   // ... fields 1–4 ...
-  ConceptRef concept_ref = 5;
+  groundplatform.v2.library.ConceptRef concept_ref = 5;
+}
+
+// groundplatform.v2.forms (generic XForms round-trip fidelity)
+message ForeignAttribute {
+  string namespace_uri = 1;
+  // Qualified name as written in the source document (e.g.,
+  // "ground:concept").
+  string qualified_name = 2;
+  string value = 3;
+}
+
+message FieldBinding {
+  // ... fields 1–16 ...
+  repeated ForeignAttribute foreign_attributes = 17;
 }
 ```
 
+*   **Keeping the two in sync**: survey-level links are authoritative inside
+    Ground. On export, Ground writes each link as a `ground:concept`
+    attribute. On import, `ground:concept` attributes found among a binding's
+    foreign attributes populate the survey-level links after validation against
+    the survey's resolved library. Unknown concept IDs remain as foreign
+    attributes and are reported by the form validator.
 *   **Choices**: each `ChoiceItem` of a linked select question maps to a
     code-list value through `ChoiceItem.properties["ground_code"]` (e.g., the
-    choice labeled "Café" maps to `coffee`). Choices without a mapping are
-    reported by the form validator.
+    choice labeled "Café" maps to `coffee`), the same generic extra-column
+    mechanism used for choice colors. Choices without a mapping are reported by
+    the form validator.
 *   **`save_to` inheritance**: when a linked question saves to an entity
     property (`FieldBinding.entity_saveto`), the Survey Designer copies its
-    `concept_ref` to the matching `EntityPropertyDefinition`.
-*   **Runtime**: form engines ignore `concept_ref`. It affects design-time
+    concept to the matching `EntityPropertyDefinition.concept_ref`.
+*   **Runtime**: form engines ignore concept links. They affect design-time
     validation, exports, and server-side aggregation only.
 
 ## XForms and XLSForm Serialization
 
-Concept references round-trip as a namespaced bind attribute. ODK Collect,
-Enketo, KoboToolbox, and ArcGIS Survey123 ignore unknown bind attributes, so
-forms remain portable.
+Concept references round-trip as a namespaced bind attribute, carried by the
+generic foreign-attribute preservation described above. ODK Collect, Enketo,
+KoboToolbox, and ArcGIS Survey123 ignore unknown namespaced attributes, so forms
+remain portable.
 
 <!-- mdformat off -->
 
@@ -185,7 +237,7 @@ forms remain portable.
 | :--- | :--- |
 | XForms | `<bind nodeset="/data/commodity" type="string" ground:concept="eudr.commodity@1"/>` with `xmlns:ground="http://groundplatform.org/xforms"` on the root element |
 | XForms choices | A `ground_code` child element on each item of the choice list's secondary instance (`<item><name>cafe</name><label>Café</label><ground_code>coffee</ground_code></item>`), like any other extra choice column |
-| XLSForm `survey` sheet | `bind::ground:concept` column (e.g., `eudr.commodity@1`) |
+| XLSForm `survey` sheet | `bind::ground:concept` column (e.g., `eudr.commodity@1`), with `ground="http://groundplatform.org/xforms"` in the `namespaces` column of the `settings` sheet |
 | XLSForm `choices` sheet | `ground_code` column (an underscore rather than a colon, because extra choice columns become XML element names) |
 
 <!-- mdformat on -->

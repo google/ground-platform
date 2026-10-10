@@ -1,0 +1,1099 @@
+# Copyright 2026 The Ground Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# proto-file: shared/protos/library/library_bundle.proto
+# proto-message: groundplatform.v2.library.LibraryBundle
+#
+# Global library seed: the `eudr` vocabulary. Bootstraps the "All users"
+# organization's library on a new deployment; entries omit organization_id,
+# which the loader sets to the "All users" organization.
+#
+# The prototype app embeds a Kotlin copy (GlobalLibrarySeedData.kt), and its
+# GlobalLibrarySeedTest fails when the two differ. Template questions don't
+# carry concept links yet (FieldBinding has no concept_ref field).
+
+concepts {
+  id: "eudr.commodity"
+  version: 1
+  label {
+    values {
+      key: "en"
+      value: "Commodity"
+    }
+    values {
+      key: "fr"
+      value: "Produit de base"
+    }
+    values {
+      key: "es"
+      value: "Producto básico"
+    }
+    values {
+      key: "vi"
+      value: "Mặt hàng"
+    }
+    values {
+      key: "sw"
+      value: "Bidhaa"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Relevant commodity produced on the plot, as listed in the EU Deforestation Regulation."
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "crop"
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "product"
+    }
+  }
+  keywords {
+    values {
+      key: "fr"
+      value: "culture"
+    }
+  }
+  keywords {
+    values {
+      key: "fr"
+      value: "produit"
+    }
+  }
+  keywords {
+    values {
+      key: "es"
+      value: "cultivo"
+    }
+  }
+  keywords {
+    values {
+      key: "es"
+      value: "producto"
+    }
+  }
+  keywords {
+    values {
+      key: "vi"
+      value: "cây trồng"
+    }
+  }
+  keywords {
+    values {
+      key: "vi"
+      value: "nông sản"
+    }
+  }
+  keywords {
+    values {
+      key: "sw"
+      value: "zao"
+    }
+  }
+  data_type: TYPE_SELECT_ONE
+  code_list {
+    items {
+      code: "cattle"
+      label {
+        values {
+          key: "en"
+          value: "Cattle"
+        }
+        values {
+          key: "fr"
+          value: "Bovins"
+        }
+        values {
+          key: "es"
+          value: "Ganado bovino"
+        }
+        values {
+          key: "vi"
+          value: "Gia súc"
+        }
+        values {
+          key: "sw"
+          value: "Ng'ombe"
+        }
+      }
+      external_ids {
+        key: "hs"
+        value: "0102"
+      }
+    }
+    items {
+      code: "cocoa"
+      label {
+        values {
+          key: "en"
+          value: "Cocoa"
+        }
+        values {
+          key: "fr"
+          value: "Cacao"
+        }
+        values {
+          key: "es"
+          value: "Cacao"
+        }
+        values {
+          key: "vi"
+          value: "Ca cao"
+        }
+        values {
+          key: "sw"
+          value: "Kakao"
+        }
+      }
+      external_ids {
+        key: "hs"
+        value: "1801"
+      }
+    }
+    items {
+      code: "coffee"
+      label {
+        values {
+          key: "en"
+          value: "Coffee"
+        }
+        values {
+          key: "fr"
+          value: "Café"
+        }
+        values {
+          key: "es"
+          value: "Café"
+        }
+        values {
+          key: "vi"
+          value: "Cà phê"
+        }
+        values {
+          key: "sw"
+          value: "Kahawa"
+        }
+      }
+      external_ids {
+        key: "hs"
+        value: "0901"
+      }
+    }
+    items {
+      code: "oil_palm"
+      label {
+        values {
+          key: "en"
+          value: "Oil palm"
+        }
+        values {
+          key: "fr"
+          value: "Palmier à huile"
+        }
+        values {
+          key: "es"
+          value: "Palma aceitera"
+        }
+        values {
+          key: "vi"
+          value: "Cọ dầu"
+        }
+        values {
+          key: "sw"
+          value: "Mchikichi"
+        }
+      }
+    }
+    items {
+      code: "rubber"
+      label {
+        values {
+          key: "en"
+          value: "Rubber"
+        }
+        values {
+          key: "fr"
+          value: "Caoutchouc"
+        }
+        values {
+          key: "es"
+          value: "Caucho"
+        }
+        values {
+          key: "vi"
+          value: "Cao su"
+        }
+        values {
+          key: "sw"
+          value: "Mpira"
+        }
+      }
+      external_ids {
+        key: "hs"
+        value: "4001"
+      }
+    }
+    items {
+      code: "soya"
+      label {
+        values {
+          key: "en"
+          value: "Soya"
+        }
+        values {
+          key: "fr"
+          value: "Soja"
+        }
+        values {
+          key: "es"
+          value: "Soja"
+        }
+        values {
+          key: "vi"
+          value: "Đậu tương"
+        }
+        values {
+          key: "sw"
+          value: "Soya"
+        }
+      }
+      external_ids {
+        key: "hs"
+        value: "1201"
+      }
+    }
+    items {
+      code: "wood"
+      label {
+        values {
+          key: "en"
+          value: "Wood"
+        }
+        values {
+          key: "fr"
+          value: "Bois"
+        }
+        values {
+          key: "es"
+          value: "Madera"
+        }
+        values {
+          key: "vi"
+          value: "Gỗ"
+        }
+        values {
+          key: "sw"
+          value: "Mbao"
+        }
+      }
+      external_ids {
+        key: "hs"
+        value: "44"
+      }
+    }
+  }
+  aggregation: COUNT_BY_CODE
+  privacy_class: AGGREGATE_PUBLIC
+  goals: "deforestation_free_supply_chains"
+  pillar: MITIGATION
+  references: "https://eur-lex.europa.eu/eli/reg/2023/1115/oj"
+  status: STABLE
+}
+concepts {
+  id: "eudr.production_place"
+  version: 1
+  label {
+    values {
+      key: "en"
+      value: "Production place"
+    }
+    values {
+      key: "fr"
+      value: "Lieu de production"
+    }
+    values {
+      key: "es"
+      value: "Lugar de producción"
+    }
+    values {
+      key: "vi"
+      value: "Nơi sản xuất"
+    }
+    values {
+      key: "sw"
+      value: "Mahali pa uzalishaji"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Boundary of the plot of land where the commodity was produced."
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "plot"
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "parcel"
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "farm"
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "geolocation"
+    }
+  }
+  keywords {
+    values {
+      key: "fr"
+      value: "parcelle"
+    }
+  }
+  keywords {
+    values {
+      key: "es"
+      value: "parcela"
+    }
+  }
+  keywords {
+    values {
+      key: "es"
+      value: "finca"
+    }
+  }
+  keywords {
+    values {
+      key: "vi"
+      value: "lô đất"
+    }
+  }
+  keywords {
+    values {
+      key: "vi"
+      value: "thửa đất"
+    }
+  }
+  keywords {
+    values {
+      key: "sw"
+      value: "shamba"
+    }
+  }
+  data_type: TYPE_GEOSHAPE
+  aggregation: COUNT_DISTINCT_FEATURES
+  privacy_class: ORG_ONLY
+  goals: "deforestation_free_supply_chains"
+  pillar: MITIGATION
+  references: "https://eur-lex.europa.eu/eli/reg/2023/1115/oj"
+  status: STABLE
+}
+concepts {
+  id: "eudr.harvest_date_range"
+  version: 1
+  label {
+    values {
+      key: "en"
+      value: "Harvest date range"
+    }
+    values {
+      key: "fr"
+      value: "Période de récolte"
+    }
+    values {
+      key: "es"
+      value: "Período de cosecha"
+    }
+    values {
+      key: "vi"
+      value: "Thời gian thu hoạch"
+    }
+    values {
+      key: "sw"
+      value: "Kipindi cha mavuno"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Date or time range of production, as an ISO 8601 interval (2026-01-01/2026-03-31)."
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "harvest"
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "production date"
+    }
+  }
+  keywords {
+    values {
+      key: "es"
+      value: "cosecha"
+    }
+  }
+  data_type: TYPE_STRING
+  aggregation: NONE
+  privacy_class: ORG_ONLY
+  goals: "deforestation_free_supply_chains"
+  references: "https://eur-lex.europa.eu/eli/reg/2023/1115/oj"
+  status: STABLE
+}
+concepts {
+  id: "eudr.plot_over_4ha"
+  version: 1
+  label {
+    values {
+      key: "en"
+      value: "Plot larger than 4 ha"
+    }
+    values {
+      key: "fr"
+      value: "Parcelle de plus de 4 ha"
+    }
+    values {
+      key: "es"
+      value: "Parcela de más de 4 ha"
+    }
+    values {
+      key: "vi"
+      value: "Lô đất lớn hơn 4 ha"
+    }
+    values {
+      key: "sw"
+      value: "Shamba kubwa kuliko ha 4"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Whether the plot is larger than 4 hectares, so its boundary must be a polygon."
+    }
+  }
+  data_type: TYPE_SELECT_ONE
+  code_list {
+    items {
+      code: "yes"
+      label {
+        values {
+          key: "en"
+          value: "Yes"
+        }
+        values {
+          key: "fr"
+          value: "Oui"
+        }
+        values {
+          key: "es"
+          value: "Sí"
+        }
+        values {
+          key: "vi"
+          value: "Có"
+        }
+        values {
+          key: "sw"
+          value: "Ndiyo"
+        }
+      }
+    }
+    items {
+      code: "no"
+      label {
+        values {
+          key: "en"
+          value: "No"
+        }
+        values {
+          key: "fr"
+          value: "Non"
+        }
+        values {
+          key: "es"
+          value: "No"
+        }
+        values {
+          key: "vi"
+          value: "Không"
+        }
+        values {
+          key: "sw"
+          value: "Hapana"
+        }
+      }
+    }
+  }
+  aggregation: SHARE_BY_CODE
+  privacy_class: AGGREGATE_PUBLIC
+  goals: "deforestation_free_supply_chains"
+  references: "https://eur-lex.europa.eu/eli/reg/2023/1115/oj"
+  status: STABLE
+}
+concepts {
+  id: "eudr.quantity_kg"
+  version: 1
+  label {
+    values {
+      key: "en"
+      value: "Quantity (kg)"
+    }
+    values {
+      key: "fr"
+      value: "Quantité (kg)"
+    }
+    values {
+      key: "es"
+      value: "Cantidad (kg)"
+    }
+    values {
+      key: "vi"
+      value: "Khối lượng (kg)"
+    }
+    values {
+      key: "sw"
+      value: "Kiasi (kg)"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Net mass of the commodity delivered, in kilograms."
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "weight"
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "volume"
+    }
+  }
+  keywords {
+    values {
+      key: "es"
+      value: "peso"
+    }
+  }
+  keywords {
+    values {
+      key: "fr"
+      value: "poids"
+    }
+  }
+  data_type: TYPE_DOUBLE
+  unit: "kg"
+  aggregation: SUM
+  privacy_class: ORG_ONLY
+  goals: "deforestation_free_supply_chains"
+  references: "https://eur-lex.europa.eu/eli/reg/2023/1115/oj"
+  status: STABLE
+}
+concepts {
+  id: "eudr.deforestation_free"
+  version: 1
+  label {
+    values {
+      key: "en"
+      value: "Deforestation-free"
+    }
+    values {
+      key: "fr"
+      value: "Zéro déforestation"
+    }
+    values {
+      key: "es"
+      value: "Libre de deforestación"
+    }
+    values {
+      key: "vi"
+      value: "Không gây mất rừng"
+    }
+    values {
+      key: "sw"
+      value: "Bila ukataji wa misitu"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Whether the plot has been free of deforestation since 31 December 2020."
+    }
+  }
+  data_type: TYPE_SELECT_ONE
+  code_list {
+    items {
+      code: "yes"
+      label {
+        values {
+          key: "en"
+          value: "Yes"
+        }
+        values {
+          key: "fr"
+          value: "Oui"
+        }
+        values {
+          key: "es"
+          value: "Sí"
+        }
+        values {
+          key: "vi"
+          value: "Có"
+        }
+        values {
+          key: "sw"
+          value: "Ndiyo"
+        }
+      }
+    }
+    items {
+      code: "no"
+      label {
+        values {
+          key: "en"
+          value: "No"
+        }
+        values {
+          key: "fr"
+          value: "Non"
+        }
+        values {
+          key: "es"
+          value: "No"
+        }
+        values {
+          key: "vi"
+          value: "Không"
+        }
+        values {
+          key: "sw"
+          value: "Hapana"
+        }
+      }
+    }
+    items {
+      code: "unknown"
+      label {
+        values {
+          key: "en"
+          value: "Unknown"
+        }
+        values {
+          key: "fr"
+          value: "Inconnu"
+        }
+        values {
+          key: "es"
+          value: "Desconocido"
+        }
+        values {
+          key: "vi"
+          value: "Không rõ"
+        }
+        values {
+          key: "sw"
+          value: "Haijulikani"
+        }
+      }
+    }
+  }
+  aggregation: SHARE_BY_CODE
+  privacy_class: AGGREGATE_PUBLIC
+  goals: "deforestation_free_supply_chains"
+  pillar: MITIGATION
+  references: "https://eur-lex.europa.eu/eli/reg/2023/1115/oj"
+  status: STABLE
+}
+concepts {
+  id: "eudr.supplier_name"
+  version: 1
+  label {
+    values {
+      key: "en"
+      value: "Supplier name"
+    }
+    values {
+      key: "fr"
+      value: "Nom du fournisseur"
+    }
+    values {
+      key: "es"
+      value: "Nombre del proveedor"
+    }
+    values {
+      key: "vi"
+      value: "Tên nhà cung cấp"
+    }
+    values {
+      key: "sw"
+      value: "Jina la msambazaji"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Name of the business or person that supplied the commodity."
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "vendor"
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "trader"
+    }
+  }
+  keywords {
+    values {
+      key: "es"
+      value: "proveedor"
+    }
+  }
+  data_type: TYPE_STRING
+  aggregation: NONE
+  privacy_class: SENSITIVE
+  references: "https://eur-lex.europa.eu/eli/reg/2023/1115/oj"
+  status: STABLE
+}
+form_templates {
+  id: "eudr_plot_registration"
+  title {
+    values {
+      key: "en"
+      value: "EUDR plot registration"
+    }
+    values {
+      key: "fr"
+      value: "Enregistrement de parcelle RDUE"
+    }
+    values {
+      key: "es"
+      value: "Registro de parcela EUDR"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Records the geolocation and commodity of each production plot for due diligence."
+    }
+  }
+  form {
+    form_id: "eudr_plot_registration"
+    title: "EUDR plot registration"
+    version: "1"
+    model {
+      primary_instance {
+        record_schema {
+          name: "data"
+          title: "EUDR plot registration"
+          fields {
+            name: "commodity"
+            type: TYPE_SELECT_ONE
+          }
+          fields {
+            name: "production_place"
+            type: TYPE_GEOSHAPE
+          }
+          fields {
+            name: "area_ha"
+            type: TYPE_DOUBLE
+          }
+          fields {
+            name: "plot_over_4ha"
+            type: TYPE_SELECT_ONE
+          }
+          fields {
+            name: "producer_id"
+            type: TYPE_STRING
+          }
+          fields {
+            name: "harvest_date_range"
+            type: TYPE_STRING
+          }
+          fields {
+            name: "deforestation_free"
+            type: TYPE_SELECT_ONE
+          }
+        }
+      }
+      bindings {
+        field_path: "commodity"
+        type: TYPE_SELECT_ONE
+        required_expression: "true()"
+      }
+      bindings {
+        field_path: "production_place"
+        type: TYPE_GEOSHAPE
+        required_expression: "true()"
+      }
+      bindings {
+        field_path: "area_ha"
+        type: TYPE_DOUBLE
+      }
+      bindings {
+        field_path: "plot_over_4ha"
+        type: TYPE_SELECT_ONE
+      }
+      bindings {
+        field_path: "producer_id"
+        type: TYPE_STRING
+        required_expression: "true()"
+      }
+      bindings {
+        field_path: "harvest_date_range"
+        type: TYPE_STRING
+      }
+      bindings {
+        field_path: "deforestation_free"
+        type: TYPE_SELECT_ONE
+      }
+    }
+    view {
+      components {
+        control {
+          field_ref: "commodity"
+          type: CONTROL_SELECT_ONE
+          label {
+            text: "Commodity"
+          }
+          choices {
+            value: "cattle"
+            label {
+              text: "Cattle"
+            }
+          }
+          choices {
+            value: "cocoa"
+            label {
+              text: "Cocoa"
+            }
+          }
+          choices {
+            value: "coffee"
+            label {
+              text: "Coffee"
+            }
+          }
+          choices {
+            value: "oil_palm"
+            label {
+              text: "Oil palm"
+            }
+          }
+          choices {
+            value: "rubber"
+            label {
+              text: "Rubber"
+            }
+          }
+          choices {
+            value: "soya"
+            label {
+              text: "Soya"
+            }
+          }
+          choices {
+            value: "wood"
+            label {
+              text: "Wood"
+            }
+          }
+        }
+      }
+      components {
+        control {
+          field_ref: "production_place"
+          type: CONTROL_INPUT
+          label {
+            text: "Production place"
+          }
+          hint {
+            text: "Walk or draw the plot boundary."
+          }
+          appearance: "placement-map"
+        }
+      }
+      components {
+        control {
+          field_ref: "area_ha"
+          type: CONTROL_INPUT
+          label {
+            text: "Area (ha)"
+          }
+        }
+      }
+      components {
+        control {
+          field_ref: "plot_over_4ha"
+          type: CONTROL_SELECT_ONE
+          label {
+            text: "Plot larger than 4 ha"
+          }
+          choices {
+            value: "yes"
+            label {
+              text: "Yes"
+            }
+          }
+          choices {
+            value: "no"
+            label {
+              text: "No"
+            }
+          }
+        }
+      }
+      components {
+        control {
+          field_ref: "producer_id"
+          type: CONTROL_INPUT
+          label {
+            text: "Producer ID"
+          }
+        }
+      }
+      components {
+        control {
+          field_ref: "harvest_date_range"
+          type: CONTROL_INPUT
+          label {
+            text: "Harvest date range"
+          }
+          hint {
+            text: "For example 2026-01-01/2026-03-31."
+          }
+        }
+      }
+      components {
+        control {
+          field_ref: "deforestation_free"
+          type: CONTROL_SELECT_ONE
+          label {
+            text: "Deforestation-free"
+          }
+          choices {
+            value: "yes"
+            label {
+              text: "Yes"
+            }
+          }
+          choices {
+            value: "no"
+            label {
+              text: "No"
+            }
+          }
+          choices {
+            value: "unknown"
+            label {
+              text: "Unknown"
+            }
+          }
+        }
+      }
+    }
+  }
+  status: STABLE
+}
+purpose_packs {
+  id: "eudr_due_diligence"
+  title {
+    values {
+      key: "en"
+      value: "EUDR due diligence"
+    }
+    values {
+      key: "fr"
+      value: "Diligence raisonnée RDUE"
+    }
+    values {
+      key: "es"
+      value: "Diligencia debida EUDR"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Collect plot geolocation and commodity data for EU Deforestation Regulation statements."
+    }
+  }
+  icon: "verified"
+  form_template_ids: "eudr_plot_registration"
+  export_profile_ids: "eudr_geojson"
+  program_ids: "eudr"
+  goals: "deforestation_free_supply_chains"
+  pillar: MITIGATION
+  status: STABLE
+}
+export_profiles {
+  id: "eudr_geojson"
+  title {
+    values {
+      key: "en"
+      value: "EUDR GeoJSON"
+    }
+  }
+  format: "geojson"
+  field_concepts {
+    key: "production_place"
+    value: "eudr.production_place"
+  }
+  field_concepts {
+    key: "commodity"
+    value: "eudr.commodity"
+  }
+  field_concepts {
+    key: "area_ha"
+    value: "core.area_ha"
+  }
+  field_concepts {
+    key: "producer_name"
+    value: "core.producer_name"
+  }
+  field_concepts {
+    key: "country"
+    value: "core.country"
+  }
+  status: STABLE
+}

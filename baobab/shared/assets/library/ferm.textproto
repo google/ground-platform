@@ -1,0 +1,620 @@
+# Copyright 2026 The Ground Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# proto-file: shared/protos/library/library_bundle.proto
+# proto-message: groundplatform.v2.library.LibraryBundle
+#
+# Global library seed: the `ferm` vocabulary. Bootstraps the "All users"
+# organization's library on a new deployment; entries omit organization_id,
+# which the loader sets to the "All users" organization.
+#
+# The prototype app embeds a Kotlin copy (GlobalLibrarySeedData.kt), and its
+# GlobalLibrarySeedTest fails when the two differ. Template questions don't
+# carry concept links yet (FieldBinding has no concept_ref field).
+
+concepts {
+  id: "ferm.intervention_type"
+  version: 1
+  label {
+    values {
+      key: "en"
+      value: "Restoration intervention"
+    }
+    values {
+      key: "fr"
+      value: "Type d'intervention"
+    }
+    values {
+      key: "es"
+      value: "Tipo de intervención"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Main restoration approach used on the site."
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "approach"
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "method"
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "restoration type"
+    }
+  }
+  data_type: TYPE_SELECT_ONE
+  code_list {
+    items {
+      code: "natural_regeneration"
+      label {
+        values {
+          key: "en"
+          value: "Natural regeneration"
+        }
+      }
+    }
+    items {
+      code: "assisted_natural_regeneration"
+      label {
+        values {
+          key: "en"
+          value: "Assisted natural regeneration"
+        }
+      }
+    }
+    items {
+      code: "tree_planting"
+      label {
+        values {
+          key: "en"
+          value: "Tree planting"
+        }
+      }
+    }
+    items {
+      code: "agroforestry"
+      label {
+        values {
+          key: "en"
+          value: "Agroforestry"
+        }
+      }
+    }
+    items {
+      code: "mangrove_restoration"
+      label {
+        values {
+          key: "en"
+          value: "Mangrove restoration"
+        }
+      }
+    }
+    items {
+      code: "other"
+      label {
+        values {
+          key: "en"
+          value: "Other"
+        }
+      }
+    }
+  }
+  aggregation: COUNT_BY_CODE
+  privacy_class: AGGREGATE_PUBLIC
+  goals: "ecosystem_restoration"
+  pillar: MITIGATION
+  status: STABLE
+}
+concepts {
+  id: "ferm.area_under_restoration_ha"
+  version: 1
+  label {
+    values {
+      key: "en"
+      value: "Area under restoration (ha)"
+    }
+    values {
+      key: "fr"
+      value: "Superficie en restauration (ha)"
+    }
+    values {
+      key: "es"
+      value: "Área en restauración (ha)"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Area where restoration activities are underway, in hectares."
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "restored area"
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "hectares restored"
+    }
+  }
+  data_type: TYPE_DOUBLE
+  unit: "har"
+  aggregation: SUM
+  privacy_class: AGGREGATE_PUBLIC
+  goals: "ecosystem_restoration"
+  pillar: MITIGATION
+  status: STABLE
+}
+concepts {
+  id: "ferm.start_date"
+  version: 1
+  label {
+    values {
+      key: "en"
+      value: "Restoration start date"
+    }
+    values {
+      key: "fr"
+      value: "Date de début"
+    }
+    values {
+      key: "es"
+      value: "Fecha de inicio"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Date restoration activities started on the site."
+    }
+  }
+  data_type: TYPE_DATE
+  aggregation: NONE
+  privacy_class: AGGREGATE_PUBLIC
+  goals: "ecosystem_restoration"
+  status: STABLE
+}
+concepts {
+  id: "ferm.trees_planted"
+  version: 1
+  label {
+    values {
+      key: "en"
+      value: "Trees planted"
+    }
+    values {
+      key: "fr"
+      value: "Arbres plantés"
+    }
+    values {
+      key: "es"
+      value: "Árboles plantados"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Number of trees or seedlings planted."
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "seedlings"
+    }
+  }
+  keywords {
+    values {
+      key: "es"
+      value: "plántulas"
+    }
+  }
+  keywords {
+    values {
+      key: "fr"
+      value: "plants"
+    }
+  }
+  data_type: TYPE_INT32
+  aggregation: SUM
+  privacy_class: AGGREGATE_PUBLIC
+  goals: "ecosystem_restoration"
+  pillar: MITIGATION
+  status: STABLE
+}
+concepts {
+  id: "ferm.trees_surviving"
+  version: 1
+  label {
+    values {
+      key: "en"
+      value: "Trees surviving"
+    }
+    values {
+      key: "fr"
+      value: "Arbres survivants"
+    }
+    values {
+      key: "es"
+      value: "Árboles sobrevivientes"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Number of planted trees or seedlings still alive at the monitoring visit."
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "survival"
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "alive"
+    }
+  }
+  keywords {
+    values {
+      key: "es"
+      value: "supervivencia"
+    }
+  }
+  data_type: TYPE_INT32
+  aggregation: SUM
+  privacy_class: AGGREGATE_PUBLIC
+  goals: "ecosystem_restoration"
+  pillar: MITIGATION
+  status: STABLE
+}
+concepts {
+  id: "ferm.survival_rate_pct"
+  version: 1
+  label {
+    values {
+      key: "en"
+      value: "Survival rate (%)"
+    }
+    values {
+      key: "fr"
+      value: "Taux de survie (%)"
+    }
+    values {
+      key: "es"
+      value: "Tasa de supervivencia (%)"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Share of planted trees still alive, as a percentage."
+    }
+  }
+  data_type: TYPE_DOUBLE
+  unit: "%"
+  aggregation: MEAN
+  privacy_class: AGGREGATE_PUBLIC
+  goals: "ecosystem_restoration"
+  status: STABLE
+}
+concepts {
+  id: "ferm.ecosystem_type"
+  version: 1
+  label {
+    values {
+      key: "en"
+      value: "Ecosystem type"
+    }
+    values {
+      key: "fr"
+      value: "Type d'écosystème"
+    }
+    values {
+      key: "es"
+      value: "Tipo de ecosistema"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Ecosystem being restored."
+    }
+  }
+  data_type: TYPE_SELECT_ONE
+  code_list {
+    items {
+      code: "forest"
+      label {
+        values {
+          key: "en"
+          value: "Forest"
+        }
+      }
+    }
+    items {
+      code: "mangrove"
+      label {
+        values {
+          key: "en"
+          value: "Mangrove"
+        }
+      }
+    }
+    items {
+      code: "grassland"
+      label {
+        values {
+          key: "en"
+          value: "Grassland or savanna"
+        }
+      }
+    }
+    items {
+      code: "wetland"
+      label {
+        values {
+          key: "en"
+          value: "Wetland"
+        }
+      }
+    }
+    items {
+      code: "cropland"
+      label {
+        values {
+          key: "en"
+          value: "Cropland"
+        }
+      }
+    }
+    items {
+      code: "other"
+      label {
+        values {
+          key: "en"
+          value: "Other"
+        }
+      }
+    }
+  }
+  aggregation: COUNT_BY_CODE
+  privacy_class: AGGREGATE_PUBLIC
+  goals: "ecosystem_restoration"
+  status: STABLE
+}
+form_templates {
+  id: "ferm_monitoring_wave"
+  title {
+    values {
+      key: "en"
+      value: "Restoration monitoring wave"
+    }
+    values {
+      key: "fr"
+      value: "Suivi de la restauration"
+    }
+    values {
+      key: "es"
+      value: "Monitoreo de restauración"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Repeat visit recording restoration progress and tree survival."
+    }
+  }
+  form {
+    form_id: "ferm_monitoring_wave"
+    title: "Restoration monitoring wave"
+    version: "1"
+    model {
+      primary_instance {
+        record_schema {
+          name: "data"
+          title: "Restoration monitoring wave"
+          fields {
+            name: "intervention_type"
+            type: TYPE_SELECT_ONE
+          }
+          fields {
+            name: "area_under_restoration_ha"
+            type: TYPE_DOUBLE
+          }
+          fields {
+            name: "start_date"
+            type: TYPE_DATE
+          }
+          fields {
+            name: "trees_planted"
+            type: TYPE_INT32
+          }
+          fields {
+            name: "trees_surviving"
+            type: TYPE_INT32
+          }
+          fields {
+            name: "site_photo"
+            type: TYPE_BINARY
+          }
+        }
+      }
+      bindings {
+        field_path: "intervention_type"
+        type: TYPE_SELECT_ONE
+        required_expression: "true()"
+      }
+      bindings {
+        field_path: "area_under_restoration_ha"
+        type: TYPE_DOUBLE
+      }
+      bindings {
+        field_path: "start_date"
+        type: TYPE_DATE
+      }
+      bindings {
+        field_path: "trees_planted"
+        type: TYPE_INT32
+      }
+      bindings {
+        field_path: "trees_surviving"
+        type: TYPE_INT32
+      }
+      bindings {
+        field_path: "site_photo"
+        type: TYPE_BINARY
+      }
+    }
+    view {
+      components {
+        control {
+          field_ref: "intervention_type"
+          type: CONTROL_SELECT_ONE
+          label {
+            text: "Restoration intervention"
+          }
+          choices {
+            value: "natural_regeneration"
+            label {
+              text: "Natural regeneration"
+            }
+          }
+          choices {
+            value: "assisted_natural_regeneration"
+            label {
+              text: "Assisted natural regeneration"
+            }
+          }
+          choices {
+            value: "tree_planting"
+            label {
+              text: "Tree planting"
+            }
+          }
+          choices {
+            value: "agroforestry"
+            label {
+              text: "Agroforestry"
+            }
+          }
+          choices {
+            value: "mangrove_restoration"
+            label {
+              text: "Mangrove restoration"
+            }
+          }
+          choices {
+            value: "other"
+            label {
+              text: "Other"
+            }
+          }
+        }
+      }
+      components {
+        control {
+          field_ref: "area_under_restoration_ha"
+          type: CONTROL_INPUT
+          label {
+            text: "Area under restoration (ha)"
+          }
+        }
+      }
+      components {
+        control {
+          field_ref: "start_date"
+          type: CONTROL_INPUT
+          label {
+            text: "Restoration start date"
+          }
+        }
+      }
+      components {
+        control {
+          field_ref: "trees_planted"
+          type: CONTROL_INPUT
+          label {
+            text: "Trees planted"
+          }
+        }
+      }
+      components {
+        control {
+          field_ref: "trees_surviving"
+          type: CONTROL_INPUT
+          label {
+            text: "Trees surviving"
+          }
+        }
+      }
+      components {
+        control {
+          field_ref: "site_photo"
+          type: CONTROL_UPLOAD
+          label {
+            text: "Site photo"
+          }
+          media_type: "image/*"
+        }
+      }
+    }
+  }
+  status: STABLE
+}
+purpose_packs {
+  id: "ferm_restoration"
+  title {
+    values {
+      key: "en"
+      value: "Restoration (FERM)"
+    }
+    values {
+      key: "fr"
+      value: "Restauration (FERM)"
+    }
+    values {
+      key: "es"
+      value: "Restauración (FERM)"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Monitor ecosystem restoration with indicators aligned to the Framework for Ecosystem Restoration Monitoring."
+    }
+  }
+  icon: "forest"
+  form_template_ids: "ferm_monitoring_wave"
+  program_ids: "ferm"
+  goals: "ecosystem_restoration"
+  pillar: MITIGATION
+  status: STABLE
+}

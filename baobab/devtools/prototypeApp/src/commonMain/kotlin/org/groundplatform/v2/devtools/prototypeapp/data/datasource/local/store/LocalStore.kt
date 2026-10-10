@@ -20,6 +20,7 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.MapLayerItem
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.MutationLogItem
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.OfflineTilePackageItem
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.Organization
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.OrganizationLibrary
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SubmissionGeometryPolygon
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SubmissionPreviewItem
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyConfig
@@ -51,6 +52,9 @@ interface LocalStore {
    * All organizations known to the user (ones they belong to or can discover), in display order.
    */
   fun observeOrganizations(): Flow<List<Organization>>
+
+  /** Organization libraries (concepts, templates, Purpose Packs), keyed by organization ID. */
+  fun observeLibraries(): Flow<Map<String, OrganizationLibrary>>
 
   /** Forms in [surveyId]. */
   fun observeForms(surveyId: String): Flow<List<FormPreviewItem>>
@@ -154,8 +158,20 @@ interface LocalStoreTransaction {
     return updated
   }
 
-  /** Deletes an organization. Surveys that belonged to it become personal surveys. */
+  /**
+   * Deletes an organization and its library. Surveys that belonged to it become personal surveys.
+   */
   fun deleteOrganization(organizationId: String)
+
+  // Organization libraries ----------------------------------------------------------------------
+
+  /** Stored libraries, keyed by organization ID. */
+  fun libraries(): Map<String, OrganizationLibrary>
+
+  fun library(organizationId: String): OrganizationLibrary? = libraries()[organizationId]
+
+  /** Inserts or replaces the library of [OrganizationLibrary.organizationId]. */
+  fun putLibrary(library: OrganizationLibrary)
 
   // Forms ---------------------------------------------------------------------------------------
 

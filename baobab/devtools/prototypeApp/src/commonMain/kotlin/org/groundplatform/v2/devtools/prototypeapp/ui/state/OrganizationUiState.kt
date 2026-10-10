@@ -45,6 +45,8 @@ data class OrganizationUiState(
   val openOrganizationId: String? = null,
   /** Notice from the last organization action (e.g. a refused change), shown on the pages. */
   val notice: String? = null,
+  /** Library of the open organization (Dictionary, Templates, and Purposes tabs). */
+  val library: OrganizationLibraryUiState = OrganizationLibraryUiState(),
 ) {
   /** The organization shown on the organization page, if it still exists. */
   val openOrganization: Organization?

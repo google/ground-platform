@@ -36,7 +36,7 @@ product rationale.
 ## Organization Libraries
 
 Every [`Organization`](../survey/00-introduction.md) owns a library. The
-synthetic **"All users"** organization (`all-users`) owns the **global
+synthetic **"All users"** organization (`org-all-users`) owns the **global
 library**, which applies to every survey on the deployment. This mirrors how
 platform-wide imagery sources are already held by "All users" and combined with
 organization-specific sources.
@@ -115,20 +115,39 @@ references embedded in forms, which the form engine ignores at runtime.
     while existing references keep working.
 *   All library mutations are recorded in the audit log
     ([Audit Records and Provenance](../data/03-audit-records.md)).
-*   On a new deployment, the global library is bootstrapped from
-    `library/<vocabulary>.textproto` seed files in the repository. After
-    bootstrap, the "All users" library is the source of truth.
+*   On a new deployment, the global library is bootstrapped from the seed files
+    `shared/assets/library/<vocabulary>.textproto` (vocabularies `core`,
+    `eudr`, `ferm`, `pame`, `iplc`, `lulc`, and `timber`). Each file is one
+    `LibraryBundle` and omits `organization_id`, which the loader sets to the
+    "All users" organization. After bootstrap, the "All users" library is the
+    source of truth.
 
 ## Package and File Architecture
 
 Library schemas reside under `shared/protos/library/` in the
 `groundplatform.v2.library` package:
 
-*   **`library/concept.proto`**: `ConceptDef`, `CodeList`, `CodeListItem`,
-    `Aggregation`, `PrivacyClass`, and `LibraryStatus`.
+*   **`library/concept.proto`**: `LocalizedText`, `ConceptDef`, `CodeList`,
+    `CodeListItem`, `Aggregation`, `PrivacyClass`, `Pillar`, and
+    `LibraryStatus`.
 *   **`library/template.proto`**: `FormTemplateDef`.
 *   **`library/purpose_pack.proto`**: `PurposePackDef` and `ExportProfileDef`.
 *   **`library/library_settings.proto`**: `OrganizationLibrarySettings`.
+*   **`library/library_bundle.proto`**: `LibraryBundle`, a set of entries
+    exchanged as one unit: the top-level message of each seed file, and of
+    library imports and exports.
+
+```protobuf
+message LibraryBundle {
+  repeated ConceptDef concepts = 1;
+  repeated FormTemplateDef form_templates = 2;
+  repeated PurposePackDef purpose_packs = 3;
+  repeated ExportProfileDef export_profiles = 4;
+}
+```
+
+`LibraryTextProtoSerializer` (in `shared/core`) reads and writes bundles and
+library settings as Protocol Buffer Text Format.
 
 Entries are stored as per-organization collections
 (`organizations/{organization_id}/concepts`, `/form_templates`,

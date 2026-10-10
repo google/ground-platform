@@ -26,9 +26,13 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import org.groundplatform.v2.devtools.prototypeapp.data.datasource.local.store.seededStore
 import org.groundplatform.v2.devtools.prototypeapp.data.repository.AuthRepositoryImpl
+import org.groundplatform.v2.devtools.prototypeapp.data.repository.LibraryRepositoryImpl
 import org.groundplatform.v2.devtools.prototypeapp.data.repository.OrganizationRepositoryImpl
 import org.groundplatform.v2.devtools.prototypeapp.data.repository.SurveyRepositoryImpl
 import org.groundplatform.v2.devtools.prototypeapp.data.seed.PrototypeFakeOrganizationsData
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.ConceptDataType
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.LibraryConcept
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.LocalizedText
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.MembershipStatus
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.Organization
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.OrganizationRelation
@@ -37,6 +41,9 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.relationTo
 import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.CreateOrganizationUseCase
 import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.InviteOrganizationMemberUseCase
 import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.ManageImagerySourcesUseCase
+import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.ManageLibraryUseCase
+import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.ResolveLibraryUseCase
+import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.SearchConceptsUseCase
 import org.groundplatform.v2.devtools.prototypeapp.ui.state.OrganizationEvent
 
 /** See [OnboardingViewModelTest] for why fixtures are built outside `runNow`. */
@@ -45,6 +52,7 @@ class OrganizationViewModelTest {
     val store = seededStore()
     val scope = CoroutineScope(Dispatchers.Unconfined + Job())
     val organizationRepository = OrganizationRepositoryImpl(store)
+    val libraryRepository = LibraryRepositoryImpl(store)
     val authRepository = AuthRepositoryImpl()
     val viewModel =
       OrganizationViewModel(
@@ -54,6 +62,10 @@ class OrganizationViewModelTest {
         createOrganizationUseCase = CreateOrganizationUseCase(organizationRepository),
         inviteMemberUseCase = InviteOrganizationMemberUseCase(organizationRepository),
         manageImagerySourcesUseCase = ManageImagerySourcesUseCase(organizationRepository),
+        libraryRepository = libraryRepository,
+        manageLibraryUseCase = ManageLibraryUseCase(libraryRepository),
+        resolveLibraryUseCase = ResolveLibraryUseCase(),
+        searchConceptsUseCase = SearchConceptsUseCase(),
         scope = scope,
       )
     val events = mutableListOf<OrganizationEvent>()
@@ -318,5 +330,145 @@ class OrganizationViewModelTest {
     f.viewModel.reset()
     assertNull(f.uiState.openOrganizationId)
     assertNull(f.uiState.notice)
+  }
+
+  // --- Library tabs ---
+
+  @Test
+  fun library_ofAnOrganization_listsItsEntriesFirst_andGlobalOnesReadOnly() {
+    val f = Fixture()
+    f.viewModel.openOrganization(f.kfs.id)
+    val library = f.uiState.library
+    assertEquals(f.kfs.id, library.organizationId)
+    assertFalse(library.isGlobalLibrary)
+    assertTrue(library.canEdit)
+    assertEquals(
+      listOf(
+        "org.org-kenya-forest-service.cherry_delivery_kg",
+        "org.org-kenya-forest-service.shade_tree_count",
+      ),
+      library.organizationConcepts.map { it.entry.id },
+    )
+    assertTrue(library.organizationConcepts.all { it.canEdit && !it.isGlobal })
+    assertTrue(library.globalConcepts.isNotEmpty())
+    assertTrue(library.globalConcepts.all { it.isGlobal && !it.canEdit && !it.canHide })
+    assertEquals(library.concepts.size, library.totalConceptCount)
+    // Global templates and packs can be hidden (not edited) by this organization's Managers.
+    val globalTemplate = library.formTemplates.first { it.isGlobal }
+    assertTrue(globalTemplate.canHide && !globalTemplate.canEdit && !globalTemplate.isHidden)
+    assertEquals(
+      "org.org-kenya-forest-service.coop_member_plot_audit",
+      library.formTemplates.first().entry.id,
+    )
+    assertEquals(
+      "Coop member plot audit",
+      library.templateTitles[library.formTemplates.first().entry.id],
+    )
+  }
+
+  @Test
+  fun library_ofAllUsers_isTheEditableGlobalLibrary_forPlatformAdminsOnly() {
+    val f = Fixture()
+    f.viewModel.openOrganization(Organization.ALL_USERS_ID)
+    val library = f.uiState.library
+    assertTrue(library.isGlobalLibrary)
+    assertTrue(library.canEdit) // The signed-in demo user is an "All users" Manager.
+    assertTrue(library.globalConcepts.isEmpty())
+    assertTrue(library.organizationConcepts.all { it.isGlobal && it.canEdit })
+    assertTrue(library.formTemplates.all { it.canEdit && !it.canHide })
+    assertEquals("eudr.commodity", library.newConceptId("commodity", "eudr"))
+  }
+
+  @Test
+  fun library_isReadOnlyForNonManagers() {
+    val f = Fixture()
+    val mekong = PrototypeFakeOrganizationsData.MEKONG_MANGROVE_ALLIANCE
+    f.viewModel.openOrganization(mekong)
+    val library = f.uiState.library
+    assertFalse(library.canEdit)
+    assertTrue(library.formTemplates.none { it.canEdit || it.canHide })
+    assertNotNull(f.viewModel.renameTemplate(mekong, "eudr_plot_registration", "Mine", ""))
+    f.viewModel.setGlobalEntryHidden(mekong, "eudr_plot_registration", true)
+    assertTrue(f.uiState.library.formTemplates.none { it.isHidden })
+  }
+
+  @Test
+  fun dictionaryQuery_filtersConceptsAcrossLanguages() {
+    val f = Fixture()
+    f.viewModel.openOrganization(f.kfs.id)
+    f.viewModel.setDictionaryQuery("cultivo")
+    assertEquals("eudr.commodity", f.uiState.library.concepts.first().entry.id)
+    assertTrue(f.uiState.library.concepts.size < f.uiState.library.totalConceptCount)
+    f.viewModel.setDictionaryQuery("coffee cherry")
+    assertEquals(
+      "org.org-kenya-forest-service.cherry_delivery_kg",
+      f.uiState.library.concepts.first().entry.id,
+    )
+    f.viewModel.setDictionaryQuery("")
+    assertEquals(f.uiState.library.totalConceptCount, f.uiState.library.concepts.size)
+  }
+
+  @Test
+  fun saveConcept_validatesThenStoresIt_andDeleteOnlyRemovesDrafts() {
+    val f = Fixture()
+    f.viewModel.openOrganization(f.kfs.id)
+    val id = f.uiState.library.newConceptId(f.uiState.library.suggestedName("Drying days"))
+    assertEquals("org.org-kenya-forest-service.drying_days", id)
+    val concept =
+      LibraryConcept(id, f.kfs.id, LocalizedText.en("Drying days"), ConceptDataType.INTEGER)
+    assertNotNull(f.viewModel.saveConcept(concept.copy(label = LocalizedText()), isNew = true))
+    assertNotNull(f.viewModel.saveConcept(concept.copy(id = "core.drying_days"), isNew = true))
+    assertNull(f.viewModel.saveConcept(concept, isNew = true))
+    assertTrue(f.uiState.library.organizationConcepts.any { it.entry.id == id })
+
+    assertNotNull(
+      f.viewModel.deleteConcept(f.kfs.id, "org.org-kenya-forest-service.cherry_delivery_kg")
+    )
+    assertNull(f.viewModel.deleteConcept(f.kfs.id, id))
+    assertTrue(f.uiState.library.organizationConcepts.none { it.entry.id == id })
+  }
+
+  @Test
+  fun hidingAGlobalTemplate_marksItHidden_andCanBeUndone() {
+    val f = Fixture()
+    f.viewModel.openOrganization(f.kfs.id)
+    f.viewModel.setGlobalEntryHidden(f.kfs.id, "ferm_monitoring_wave", true)
+    assertTrue(
+      f.uiState.library.formTemplates.first { it.entry.id == "ferm_monitoring_wave" }.isHidden
+    )
+    f.viewModel.setGlobalEntryHidden(f.kfs.id, "ferm_monitoring_wave", false)
+    assertFalse(
+      f.uiState.library.formTemplates.first { it.entry.id == "ferm_monitoring_wave" }.isHidden
+    )
+  }
+
+  @Test
+  fun renameAndDelete_organizationTemplatesAndPacks() {
+    val f = Fixture()
+    val templateId = "org.org-kenya-forest-service.coop_member_plot_audit"
+    val packId = "org.org-kenya-forest-service.coop_certification_audit"
+    f.viewModel.openOrganization(f.kfs.id)
+    assertEquals("Enter a title.", f.viewModel.renameTemplate(f.kfs.id, templateId, " ", ""))
+    assertNull(f.viewModel.renameTemplate(f.kfs.id, templateId, "Plot audit", ""))
+    assertEquals("Plot audit", f.uiState.library.templateTitles[templateId])
+    assertNull(f.viewModel.renamePurposePack(f.kfs.id, packId, "Certification", "Yearly"))
+    assertEquals(
+      "Certification",
+      f.uiState.library.purposePacks.first { it.entry.id == packId }.entry.title.text,
+    )
+    f.viewModel.deleteTemplate(f.kfs.id, templateId)
+    f.viewModel.deletePurposePack(f.kfs.id, packId)
+    assertTrue(f.uiState.library.formTemplates.none { it.entry.id == templateId })
+    assertTrue(f.uiState.library.purposePacks.none { it.entry.id == packId })
+  }
+
+  @Test
+  fun allUsers_onlyInvitesManagers_andRefusesDemotionWithANotice() {
+    val f = Fixture()
+    val allUsers = Organization.ALL_USERS_ID
+    assertNotNull(f.viewModel.inviteMember(allUsers, "new@example.org", OrganizationRole.MEMBER))
+    assertNull(f.viewModel.inviteMember(allUsers, "new@example.org", OrganizationRole.MANAGER))
+    f.viewModel.setMemberRole(allUsers, f.me, OrganizationRole.MEMBER)
+    assertTrue(f.uiState.notice!!.startsWith("Everyone is already a member"))
   }
 }

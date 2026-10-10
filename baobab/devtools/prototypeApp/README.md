@@ -123,9 +123,11 @@ surveys in it and find them in their list.
     listing; the creator becomes its first Manager).
 -   **Organization page**: Laid out like the survey editor, with a resizable
     left panel that switches between **Organization details**, **Surveys**
-    (cards like the Surveys page, plus **Create survey** for members), and
-    **Members**. Each pane opens with a heading that explains what it is for,
-    and the header labels the page as an *Organization*.
+    (cards like the Surveys page, plus **Create survey** for members),
+    **Members**, **Imagery sources**, and the organization's library:
+    **Purposes**, **Dictionary**, and **Templates**. Each pane opens with a
+    heading that explains what it is for, and the header labels the page as an
+    *Organization*.
     -   **Organization details**: Name, description, website, and directory
         listing. Managers edit them in place with **Save** / **Discard** and
         can **Delete organization** (its surveys become personal surveys of
@@ -136,13 +138,46 @@ surveys in it and find them in their list.
         to simulate acceptance, as on the Sharing page), change roles, and
         remove people. Anyone can **Leave organization**. The last Manager
         can't be demoted, removed, or leave; the page says why.
+    -   **Dictionary**: A search field (accent- and case-insensitive; labels,
+        keywords, and list values in every language, with typo tolerance) over
+        the organization's concepts, then the global concepts. Managers **Add
+        concept** and edit or delete their organization's concepts in a dialog
+        (name, English label and description, data type, unit, list values,
+        aggregation, privacy, goals, pillar, and Draft / Stable / Deprecated
+        status). Only drafts can be deleted, list values can't be removed, and
+        a stable concept's type, unit, or aggregation can't change. Global
+        concepts open read-only.
+    -   **Templates** and **Purposes**: The organization's Form templates and
+        Purpose Packs (Managers can rename or delete them; authoring templates
+        comes later with **Save as template**), then the global ones, which
+        Managers can **Hide** from the organization's pickers. A global purpose
+        whose templates are all hidden is hidden too.
+    -   **"All users"**: Its library is the global library, so its Managers
+        (the platform admins; the prototype's signed-in user is one) edit
+        global concepts, templates, and purposes, and its global imagery
+        sources. Everyone else is implicitly a read-only member: it's never
+        listed, nobody can request to join or leave, and invites are for
+        Managers only.
 
 Code lives in `ui/organization/` (`OrganizationsPage.kt`, `OrganizationPage.kt`,
-and `OrganizationPages.kt` for the page's tabs). Both pages are stateless
-`(uiState, actions)` screens driven by `OrganizationViewModel`
-(`ui/viewmodel/`); the directory, relation, and member-grouping rules live in
-`domain/model/OrganizationDirectory.kt`, and the matching methods on
-`PrototypeAppState` are one-line delegates to the view model.
+`OrganizationLibraryPanes.kt` for the library tabs, and `OrganizationPages.kt`
+for the page's tabs). Both pages are stateless `(uiState, actions)` screens
+driven by `OrganizationViewModel` (`ui/viewmodel/`); the directory, relation,
+and member-grouping rules live in `domain/model/OrganizationDirectory.kt`, and
+the matching methods on `PrototypeAppState` are one-line delegates to the view
+model.
+
+The library model (`domain/model/LibraryModels.kt`: concepts, Form templates,
+Purpose Packs, export profiles, library settings, and ID rules) is stored per
+organization through `LibraryRepository` (`data/repository/LibraryRepositoryImpl.kt`
+on the `LocalStore`). `ResolveLibraryUseCase` combines a survey's organization
+library with the global one, `SearchConceptsUseCase` searches it, and
+`ManageLibraryUseCase` validates and applies edits. The global library is
+seeded from `data/seed/GlobalLibrarySeedData.kt`, a Kotlin copy of the
+canonical `shared/assets/library/<vocabulary>.textproto` files;
+`GlobalLibrarySeedTest` (jvmTest) fails when they differ, and
+`./gradlew jvmTest -PregenerateLibrarySeed` rewrites the files from the Kotlin
+copy.
 
 ## Web Dashboard Page (`#dashboard`)
 

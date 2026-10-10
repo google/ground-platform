@@ -1,0 +1,263 @@
+# Copyright 2026 The Ground Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# proto-file: shared/protos/library/library_bundle.proto
+# proto-message: groundplatform.v2.library.LibraryBundle
+#
+# Global library seed: the `lulc` vocabulary. Bootstraps the "All users"
+# organization's library on a new deployment; entries omit organization_id,
+# which the loader sets to the "All users" organization.
+#
+# The prototype app embeds a Kotlin copy (GlobalLibrarySeedData.kt), and its
+# GlobalLibrarySeedTest fails when the two differ. Template questions don't
+# carry concept links yet (FieldBinding has no concept_ref field).
+
+concepts {
+  id: "lulc.land_cover_class"
+  version: 1
+  label {
+    values {
+      key: "en"
+      value: "Land cover class"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Land cover category, following the FAO Global Forest Resources Assessment."
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "land cover"
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "vegetation"
+    }
+  }
+  keywords {
+    values {
+      key: "es"
+      value: "cobertura"
+    }
+  }
+  data_type: TYPE_SELECT_ONE
+  code_list {
+    items {
+      code: "forest"
+      label {
+        values {
+          key: "en"
+          value: "Forest"
+        }
+      }
+    }
+    items {
+      code: "other_wooded_land"
+      label {
+        values {
+          key: "en"
+          value: "Other wooded land"
+        }
+      }
+    }
+    items {
+      code: "other_land_with_tree_cover"
+      label {
+        values {
+          key: "en"
+          value: "Other land with tree cover"
+        }
+      }
+    }
+    items {
+      code: "other_land"
+      label {
+        values {
+          key: "en"
+          value: "Other land"
+        }
+      }
+    }
+    items {
+      code: "inland_water"
+      label {
+        values {
+          key: "en"
+          value: "Inland water bodies"
+        }
+      }
+    }
+  }
+  aggregation: COUNT_BY_CODE
+  privacy_class: AGGREGATE_PUBLIC
+  goals: "deforestation_free_supply_chains"
+  pillar: MITIGATION
+  status: STABLE
+}
+concepts {
+  id: "lulc.canopy_cover_pct"
+  version: 1
+  label {
+    values {
+      key: "en"
+      value: "Canopy cover (%)"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Share of the ground covered by tree crowns, as a percentage."
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "tree cover"
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "crown cover"
+    }
+  }
+  data_type: TYPE_DOUBLE
+  unit: "%"
+  aggregation: MEAN
+  privacy_class: AGGREGATE_PUBLIC
+  pillar: MITIGATION
+  status: STABLE
+}
+concepts {
+  id: "lulc.tree_height_m"
+  version: 1
+  label {
+    values {
+      key: "en"
+      value: "Tree height (m)"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Height of the dominant trees, in meters."
+    }
+  }
+  data_type: TYPE_DOUBLE
+  unit: "m"
+  aggregation: MEAN
+  privacy_class: AGGREGATE_PUBLIC
+  status: STABLE
+}
+concepts {
+  id: "lulc.land_use"
+  version: 1
+  label {
+    values {
+      key: "en"
+      value: "Land use"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Main use of the land."
+    }
+  }
+  data_type: TYPE_SELECT_ONE
+  code_list {
+    items {
+      code: "cropland"
+      label {
+        values {
+          key: "en"
+          value: "Cropland"
+        }
+      }
+    }
+    items {
+      code: "grazing"
+      label {
+        values {
+          key: "en"
+          value: "Grazing"
+        }
+      }
+    }
+    items {
+      code: "forestry"
+      label {
+        values {
+          key: "en"
+          value: "Forestry"
+        }
+      }
+    }
+    items {
+      code: "settlement"
+      label {
+        values {
+          key: "en"
+          value: "Settlement"
+        }
+      }
+    }
+    items {
+      code: "conservation"
+      label {
+        values {
+          key: "en"
+          value: "Conservation"
+        }
+      }
+    }
+    items {
+      code: "other"
+      label {
+        values {
+          key: "en"
+          value: "Other"
+        }
+      }
+    }
+  }
+  aggregation: COUNT_BY_CODE
+  privacy_class: AGGREGATE_PUBLIC
+  status: STABLE
+}
+concepts {
+  id: "lulc.observation_date"
+  version: 1
+  label {
+    values {
+      key: "en"
+      value: "Observation date"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Date the land cover was observed."
+    }
+  }
+  data_type: TYPE_DATE
+  aggregation: NONE
+  privacy_class: AGGREGATE_PUBLIC
+  status: STABLE
+}

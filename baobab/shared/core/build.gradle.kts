@@ -105,6 +105,7 @@ wire {
     include("shared/protos/forms/*.proto")
     include("shared/protos/data/*.proto")
     include("shared/protos/survey/*.proto")
+    include("shared/protos/library/*.proto")
   }
   sourcePath {
     srcJar("com.google.api.grpc:proto-google-common-protos:2.48.0")

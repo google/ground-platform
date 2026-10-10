@@ -28,6 +28,7 @@ While ViewModels may call single repository methods directly for simple CRUD or 
 - **Survey & Organization Authoring**:
   - `CreateSurveyUseCase`: Constructs and persists a new survey along with its initial forms and map layers.
   - `CreateOrganizationUseCase` & `ManageOrganizationMembersUseCase`: Validates and executes organization creation, member invitations, and role updates.
+  - `ManageLibraryUseCase`, `ResolveLibraryUseCase` & `SearchConceptsUseCase`: Validate and apply organization library edits (concepts, templates, Purpose Packs, hidden global entries), resolve a survey's library (its organization's entries, then global ones), and search concepts across languages with accent folding and typo tolerance.
   - `GenerateSamplePlotsUseCase`: Computes systematic grid or random sample plot geometries within a survey area polygon.
 - **Map, Wayfinding & Synchronization**:
   - `ClusterMapFeaturesUseCase`: Groups nearby geospatial entities into zoom-dependent map clusters.

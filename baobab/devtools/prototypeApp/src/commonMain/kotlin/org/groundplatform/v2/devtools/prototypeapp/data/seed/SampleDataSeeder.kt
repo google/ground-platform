@@ -45,7 +45,7 @@ class SampleDataSeeder(private val store: LocalStore) {
 
   companion object {
     /** Bump when the sample data changes shape, so existing stores are reseeded. */
-    const val SEED_VERSION: Int = 7
+    const val SEED_VERSION: Int = 8
 
     /** Survey opened by default on first launch. */
     const val DEFAULT_ACTIVE_SURVEY_ID: String = "survey-kenya-coffee"
@@ -53,6 +53,9 @@ class SampleDataSeeder(private val store: LocalStore) {
     /** Writes all sample data inside an existing transaction. */
     fun LocalStoreTransaction.writeSampleData() {
       PrototypeFakeOrganizationsData.defaultOrganizations().forEach { upsertOrganization(it) }
+      // The global library bootstraps the "All users" organization's library.
+      putLibrary(GlobalLibrarySeedData.library())
+      PrototypeFakeLibraryData.defaultOrganizationLibraries().forEach { putLibrary(it) }
       val surveys = PrototypeFakeSurveysData.defaultSampleSurveys()
       surveys.forEach { upsertSurvey(it) }
       for (survey in surveys) {

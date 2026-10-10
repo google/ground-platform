@@ -15,11 +15,15 @@ package org.groundplatform.v2.devtools.prototypeapp.ui.organization
 
 /**
  * Sections of the web organization page, in the order they appear in its left panel. Everyone sees
- * all tabs; Details and Imagery sources are read-only for anyone who isn't a Manager.
+ * all tabs; Details, Imagery sources, and the library tabs (Purposes, Dictionary, and Templates)
+ * are read-only for anyone who isn't a Manager.
  */
 enum class OrganizationTab(val label: String) {
   DETAILS("Organization details"),
   SURVEYS("Surveys"),
   MEMBERS("Members"),
   IMAGERY_SOURCES("Imagery sources"),
+  PURPOSES("Purposes"),
+  DICTIONARY("Dictionary"),
+  TEMPLATES("Templates"),
 }

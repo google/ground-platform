@@ -32,8 +32,8 @@ message FormTemplateDef {
   string id = 1;
   string organization_id = 2;
 
-  groundplatform.v2.forms.LocalizedString title = 3;
-  groundplatform.v2.forms.LocalizedString description = 4;
+  LocalizedText title = 3;
+  LocalizedText description = 4;
 
   // The form, including concept links and translations.
   groundplatform.v2.forms.FormDef form = 5;
@@ -66,8 +66,8 @@ message PurposePackDef {
   string id = 1;
   string organization_id = 2;
 
-  groundplatform.v2.forms.LocalizedString title = 3;
-  groundplatform.v2.forms.LocalizedString description = 4;
+  LocalizedText title = 3;
+  LocalizedText description = 4;
   string icon = 5;
 
   // Templates added to a new survey that selects this pack.
@@ -119,7 +119,7 @@ records an impact event for the survey.
 message ExportProfileDef {
   string id = 1;
   string organization_id = 2;
-  groundplatform.v2.forms.LocalizedString title = 3;
+  LocalizedText title = 3;
 
   // Output format (e.g., "geojson", "csv", "shapefile").
   string format = 4;

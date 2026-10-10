@@ -1,0 +1,212 @@
+# Copyright 2026 The Ground Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# proto-file: shared/protos/library/library_bundle.proto
+# proto-message: groundplatform.v2.library.LibraryBundle
+#
+# Global library seed: the `timber` vocabulary. Bootstraps the "All users"
+# organization's library on a new deployment; entries omit organization_id,
+# which the loader sets to the "All users" organization.
+#
+# The prototype app embeds a Kotlin copy (GlobalLibrarySeedData.kt), and its
+# GlobalLibrarySeedTest fails when the two differ. Template questions don't
+# carry concept links yet (FieldBinding has no concept_ref field).
+
+concepts {
+  id: "timber.species"
+  version: 1
+  label {
+    values {
+      key: "en"
+      value: "Tree species"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Scientific name of the tree species, matching the AGROVOC thesaurus where possible."
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "species"
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "timber species"
+    }
+  }
+  keywords {
+    values {
+      key: "es"
+      value: "especie"
+    }
+  }
+  data_type: TYPE_STRING
+  aggregation: NONE
+  privacy_class: AGGREGATE_PUBLIC
+  goals: "legal_timber"
+  status: STABLE
+}
+concepts {
+  id: "timber.log_id"
+  version: 1
+  label {
+    values {
+      key: "en"
+      value: "Log ID"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Identifier marked on the log (tag or barcode)."
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "tag"
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "barcode"
+    }
+  }
+  data_type: TYPE_STRING
+  aggregation: NONE
+  privacy_class: ORG_ONLY
+  goals: "legal_timber"
+  status: STABLE
+}
+concepts {
+  id: "timber.volume_m3"
+  version: 1
+  label {
+    values {
+      key: "en"
+      value: "Volume (m³)"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Volume of the log or harvest, in cubic meters."
+    }
+  }
+  data_type: TYPE_DOUBLE
+  unit: "m3"
+  aggregation: SUM
+  privacy_class: ORG_ONLY
+  goals: "legal_timber"
+  status: STABLE
+}
+concepts {
+  id: "timber.harvest_unit"
+  version: 1
+  label {
+    values {
+      key: "en"
+      value: "Harvest unit"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Compartment or cutting block the timber comes from."
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "compartment"
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "cutting block"
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "coupe"
+    }
+  }
+  data_type: TYPE_STRING
+  aggregation: NONE
+  privacy_class: ORG_ONLY
+  goals: "legal_timber"
+  status: STABLE
+}
+concepts {
+  id: "timber.diameter_cm"
+  version: 1
+  label {
+    values {
+      key: "en"
+      value: "Diameter (cm)"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Log or stem diameter, in centimeters."
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "dbh"
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "girth"
+    }
+  }
+  data_type: TYPE_DOUBLE
+  unit: "cm"
+  aggregation: MEAN
+  privacy_class: ORG_ONLY
+  status: STABLE
+}
+concepts {
+  id: "timber.felling_date"
+  version: 1
+  label {
+    values {
+      key: "en"
+      value: "Felling date"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Date the tree was felled."
+    }
+  }
+  data_type: TYPE_DATE
+  aggregation: NONE
+  privacy_class: ORG_ONLY
+  goals: "legal_timber"
+  status: STABLE
+}

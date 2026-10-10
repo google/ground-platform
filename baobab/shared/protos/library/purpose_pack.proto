@@ -1,0 +1,73 @@
+/*
+ * Copyright 2026 The Ground Authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto3";
+
+package groundplatform.v2.library;
+
+import "shared/protos/data/audit_record.proto";
+import "shared/protos/library/concept.proto";
+
+// One choice in the survey-creation step "What will this data be used for?".
+message PurposePackDef {
+  // Global: "<name>" (e.g., "eudr_due_diligence");
+  // organization: "org.<organization_id>.<name>".
+  string id = 1;
+
+  // Owning library. Omitted in global seed files, where it is implied.
+  string organization_id = 2;
+
+  LocalizedText title = 3;
+  LocalizedText description = 4;
+  string icon = 5;
+
+  // Templates added to a new survey that selects this pack.
+  repeated string form_template_ids = 6;
+
+  // Export profiles enabled by default for surveys with this purpose.
+  repeated string export_profile_ids = 7;
+
+  // Programs offered as an optional follow-up (e.g., "eudr", "uk_frc").
+  repeated string program_ids = 8;
+
+  // Goal mapping and pillar. For organization packs these are suggestions,
+  // reported separately in the global dashboard.
+  repeated string goals = 9;
+  Pillar pillar = 10;
+
+  LibraryStatus status = 11;
+  groundplatform.v2.data.AuditInfo audit_info = 12;
+}
+
+// A named export with a fixed output schema. Using a profile records an impact
+// event for the survey.
+message ExportProfileDef {
+  string id = 1;
+
+  // Owning library. Omitted in global seed files, where it is implied.
+  string organization_id = 2;
+
+  LocalizedText title = 3;
+
+  // Output format (e.g., "geojson", "csv", "shapefile").
+  string format = 4;
+
+  // Output field name to concept ID. Questions are located through their
+  // concept links, so the profile works across differently worded forms.
+  map<string, string> field_concepts = 5;
+
+  LibraryStatus status = 6;
+}

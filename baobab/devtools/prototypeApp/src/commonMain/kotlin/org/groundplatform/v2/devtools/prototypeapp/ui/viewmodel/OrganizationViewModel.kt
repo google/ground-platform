@@ -28,16 +28,25 @@ import kotlinx.coroutines.launch
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.AuthProfile
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.CachedProfile
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.ImagerySourceType
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.LibraryConcept
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.LibraryIds
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.Organization
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.OrganizationLibrary
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.OrganizationRole
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyPreviewItem
 import org.groundplatform.v2.devtools.prototypeapp.domain.repository.AuthRepository
+import org.groundplatform.v2.devtools.prototypeapp.domain.repository.LibraryRepository
 import org.groundplatform.v2.devtools.prototypeapp.domain.repository.OrganizationRepository
 import org.groundplatform.v2.devtools.prototypeapp.domain.repository.SurveyRepository
 import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.CreateOrganizationUseCase
 import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.InviteOrganizationMemberUseCase
 import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.ManageImagerySourcesUseCase
+import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.ManageLibraryUseCase
+import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.ResolveLibraryUseCase
+import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.SearchConceptsUseCase
+import org.groundplatform.v2.devtools.prototypeapp.ui.state.LibraryEntryRow
 import org.groundplatform.v2.devtools.prototypeapp.ui.state.OrganizationEvent
+import org.groundplatform.v2.devtools.prototypeapp.ui.state.OrganizationLibraryUiState
 import org.groundplatform.v2.devtools.prototypeapp.ui.state.OrganizationUiState
 
 /**
@@ -139,18 +148,59 @@ interface OrganizationActions {
 
   /** Removes the imagery source with [sourceId] from [organizationId]. */
   fun removeImagerySource(organizationId: String, sourceId: String)
+
+  // --- Library (Dictionary, Templates, and Purposes tabs) ---
+
+  /** Filters the Dictionary tab by [query] (labels and keywords in every language). */
+  fun setDictionaryQuery(query: String)
+
+  /**
+   * Creates ([isNew]) or updates [concept] in its organization's library. Returns a validation
+   * error message, or `null` when it was saved. Only Managers may call this.
+   */
+  fun saveConcept(concept: LibraryConcept, isNew: Boolean): String?
+
+  /** Deletes a draft concept. Returns an error message (e.g. it isn't a draft), or `null`. */
+  fun deleteConcept(organizationId: String, conceptId: String): String?
+
+  /** Renames a template. Returns a validation error message, or `null`. */
+  fun renameTemplate(
+    organizationId: String,
+    templateId: String,
+    title: String,
+    description: String,
+  ): String?
+
+  /** Deletes a template and removes it from the organization's Purpose Packs. */
+  fun deleteTemplate(organizationId: String, templateId: String)
+
+  /** Renames a Purpose Pack. Returns a validation error message, or `null`. */
+  fun renamePurposePack(
+    organizationId: String,
+    packId: String,
+    title: String,
+    description: String,
+  ): String?
+
+  /** Deletes a Purpose Pack. */
+  fun deletePurposePack(organizationId: String, packId: String)
+
+  /** Hides or shows a global template or Purpose Pack in [organizationId]'s pickers. */
+  fun setGlobalEntryHidden(organizationId: String, globalEntryId: String, hidden: Boolean)
 }
 
 /**
  * ViewModel of the web organizations directory (`#organizations`) and organization page
- * (`#organization/<id>`: details, surveys, members, and imagery sources).
+ * (`#organization/<id>`: details, surveys, members, imagery sources, and the library's Purposes,
+ * Dictionary, and Templates).
  *
- * Organizations come from [OrganizationRepository], surveys from [SurveyRepository], and the
- * signed-in user from [AuthRepository]. Creating an organization runs through
- * [CreateOrganizationUseCase], invites through [InviteOrganizationMemberUseCase], and imagery
- * sources through [ManageImagerySourcesUseCase]; simple membership changes pass straight to the
- * repository. Page navigation and map side effects are published as [OrganizationEvent]s for the
- * app shell.
+ * Organizations come from [OrganizationRepository], libraries from [LibraryRepository], surveys
+ * from [SurveyRepository], and the signed-in user from [AuthRepository]. Creating an organization
+ * runs through [CreateOrganizationUseCase], invites through [InviteOrganizationMemberUseCase],
+ * imagery sources through [ManageImagerySourcesUseCase], and library edits through
+ * [ManageLibraryUseCase]; the Dictionary tab lists concepts from [ResolveLibraryUseCase] filtered
+ * by [SearchConceptsUseCase]. Simple membership changes pass straight to the repository. Page
+ * navigation and map side effects are published as [OrganizationEvent]s for the app shell.
  */
 class OrganizationViewModel(
   private val organizationRepository: OrganizationRepository,
@@ -159,6 +209,10 @@ class OrganizationViewModel(
   private val createOrganizationUseCase: CreateOrganizationUseCase,
   private val inviteMemberUseCase: InviteOrganizationMemberUseCase,
   private val manageImagerySourcesUseCase: ManageImagerySourcesUseCase,
+  libraryRepository: LibraryRepository,
+  private val manageLibraryUseCase: ManageLibraryUseCase,
+  private val resolveLibraryUseCase: ResolveLibraryUseCase,
+  private val searchConceptsUseCase: SearchConceptsUseCase,
   private val scope: CoroutineScope,
 ) : OrganizationActions {
   /** Everything the organization pages read from the local data store. */
@@ -168,10 +222,15 @@ class OrganizationViewModel(
     val activeSurveyId: String = "",
     val isSignedIn: Boolean = false,
     val profile: AuthProfile = AuthProfile("", "", ""),
+    val libraries: Map<String, OrganizationLibrary> = emptyMap(),
   )
 
   /** Session (non-persisted) state of the organization pages. */
-  private data class Session(val openOrganizationId: String? = null, val notice: String? = null)
+  private data class Session(
+    val openOrganizationId: String? = null,
+    val notice: String? = null,
+    val dictionaryQuery: String = "",
+  )
 
   private val data: StateFlow<Data> =
     combine(
@@ -179,13 +238,15 @@ class OrganizationViewModel(
         surveyRepository.observeSurveys(),
         surveyRepository.observeActiveSurveyId(),
         authRepository.observeSession(),
-      ) { organizations, surveys, activeSurveyId, auth ->
+        libraryRepository.observeLibraries(),
+      ) { organizations, surveys, activeSurveyId, auth, libraries ->
         Data(
           organizations = organizations,
           surveys = surveys,
           activeSurveyId = activeSurveyId,
           isSignedIn = auth.isSignedIn,
           profile = auth.profile,
+          libraries = libraries,
         )
       }
       .stateIn(scope, SharingStarted.Eagerly, Data())
@@ -215,7 +276,62 @@ class OrganizationViewModel(
       signedInUserName = data.profile.displayName,
       openOrganizationId = session.openOrganizationId,
       notice = session.notice,
+      library = buildLibraryState(data, session),
     )
+
+  /** Library tabs of the open organization: its own entries first, then global ones. */
+  private fun buildLibraryState(data: Data, session: Session): OrganizationLibraryUiState {
+    val organization =
+      data.organizations.firstOrNull { it.id == session.openOrganizationId }
+        ?: return OrganizationLibraryUiState(dictionaryQuery = session.dictionaryQuery)
+    val isGlobalLibrary = LibraryIds.isGlobalLibrary(organization.id)
+    val canEdit = data.isSignedIn && manageLibraryUseCase.canEdit(organization, data.profile.email)
+    val global =
+      data.libraries[Organization.ALL_USERS_ID] ?: OrganizationLibrary(Organization.ALL_USERS_ID)
+    val own = data.libraries[organization.id] ?: OrganizationLibrary(organization.id)
+    val hidden = if (isGlobalLibrary) emptySet() else own.settings.hiddenGlobalEntryIds
+    // Global entries are editable only on "All users"; other organizations can only hide them.
+    fun <T> row(entry: T, isGlobal: Boolean, hideable: Boolean, id: String) =
+      LibraryEntryRow(
+        entry = entry,
+        isGlobal = isGlobal,
+        canEdit = canEdit && isGlobal == isGlobalLibrary,
+        canHide = canEdit && hideable && isGlobal && !isGlobalLibrary,
+        isHidden = isGlobal && id in hidden,
+      )
+    // Concepts: the resolved library (organization concepts, then global ones).
+    val resolved =
+      resolveLibraryUseCase(global = global, organization = own.takeUnless { isGlobalLibrary })
+    val matches =
+      searchConceptsUseCase(
+        resolved.concepts,
+        session.dictionaryQuery,
+        SearchConceptsUseCase.SearchOptions(
+          limit = Int.MAX_VALUE,
+          includeDeprecated = true,
+          organizationId = organization.id.takeUnless { isGlobalLibrary },
+        ),
+      )
+    // Templates and packs: hidden global entries stay listed so they can be shown again.
+    val ownTemplates = if (isGlobalLibrary) emptyList() else own.formTemplates
+    val ownPacks = if (isGlobalLibrary) emptyList() else own.purposePacks
+    return OrganizationLibraryUiState(
+      organizationId = organization.id,
+      isGlobalLibrary = isGlobalLibrary,
+      canEdit = canEdit,
+      dictionaryQuery = session.dictionaryQuery,
+      concepts =
+        matches.map { row(it.concept, it.concept.isGlobal, hideable = false, it.concept.id) },
+      totalConceptCount = resolved.concepts.size,
+      formTemplates =
+        ownTemplates.map { row(it, isGlobal = false, hideable = false, it.id) } +
+          global.formTemplates.map { row(it, isGlobal = true, hideable = true, it.id) },
+      purposePacks =
+        ownPacks.map { row(it, isGlobal = false, hideable = false, it.id) } +
+          global.purposePacks.map { row(it, isGlobal = true, hideable = true, it.id) },
+      templateTitles = (ownTemplates + global.formTemplates).associate { it.id to it.title.text },
+    )
+  }
 
   /** Returns session state to its defaults (used by the prototype's Reset). */
   fun reset() {
@@ -306,7 +422,7 @@ class OrganizationViewModel(
     email: String,
     role: OrganizationRole,
   ): String? {
-    inviteMemberUseCase.inviteError(organization(organizationId), email)?.let {
+    inviteMemberUseCase.inviteError(organization(organizationId), email, role)?.let {
       return it
     }
     scope.launch { inviteMemberUseCase(organizationId, email, role) }
@@ -344,12 +460,14 @@ class OrganizationViewModel(
     scope.launch {
       val updated = organizationRepository.setMemberRole(organizationId, email, role)
       if (updated == null) {
-        session.update {
-          it.copy(
-            notice =
-              "An organization needs at least one Manager. Make someone else a Manager first."
-          )
-        }
+        val organization = organization(organizationId)
+        val notice =
+          if (organization?.isSynthetic == true && role != OrganizationRole.MANAGER) {
+            "Everyone is already a member of ${organization.name}. Remove the Manager instead."
+          } else {
+            "An organization needs at least one Manager. Make someone else a Manager first."
+          }
+        session.update { it.copy(notice = notice) }
       }
     }
   }
@@ -435,5 +553,97 @@ class OrganizationViewModel(
   override fun removeImagerySource(organizationId: String, sourceId: String) {
     _events.tryEmit(OrganizationEvent.ImagerySourceRemoved(sourceId))
     scope.launch { manageImagerySourcesUseCase.remove(organizationId, sourceId) }
+  }
+
+  // --- Library ---
+
+  /** Why the signed-in user can't edit [organizationId]'s library, or `null` if they can. */
+  private fun libraryEditError(organizationId: String): String? {
+    val organization = organization(organizationId) ?: return "Organization not found."
+    return if (data.value.isSignedIn && manageLibraryUseCase.canEdit(organization, signedInEmail)) {
+      null
+    } else {
+      "Only Managers of ${organization.name} can change its library."
+    }
+  }
+
+  private fun library(organizationId: String): OrganizationLibrary =
+    data.value.libraries[organizationId] ?: OrganizationLibrary(organizationId)
+
+  override fun setDictionaryQuery(query: String) {
+    session.update { it.copy(dictionaryQuery = query) }
+  }
+
+  override fun saveConcept(concept: LibraryConcept, isNew: Boolean): String? {
+    libraryEditError(concept.organizationId)?.let {
+      return it
+    }
+    manageLibraryUseCase.conceptError(concept, library(concept.organizationId), isNew)?.let {
+      return it
+    }
+    scope.launch { manageLibraryUseCase.saveConcept(concept) }
+    return null
+  }
+
+  override fun deleteConcept(organizationId: String, conceptId: String): String? {
+    libraryEditError(organizationId)?.let {
+      return it
+    }
+    manageLibraryUseCase.deleteConceptError(library(organizationId), conceptId)?.let {
+      return it
+    }
+    scope.launch { manageLibraryUseCase.deleteConcept(organizationId, conceptId) }
+    return null
+  }
+
+  override fun renameTemplate(
+    organizationId: String,
+    templateId: String,
+    title: String,
+    description: String,
+  ): String? {
+    (libraryEditError(organizationId) ?: manageLibraryUseCase.titleError(title))?.let {
+      return it
+    }
+    scope.launch {
+      manageLibraryUseCase.renameTemplate(organizationId, templateId, title, description)
+    }
+    return null
+  }
+
+  override fun deleteTemplate(organizationId: String, templateId: String) {
+    if (libraryEditError(organizationId) != null) return
+    scope.launch { manageLibraryUseCase.deleteTemplate(organizationId, templateId) }
+  }
+
+  override fun renamePurposePack(
+    organizationId: String,
+    packId: String,
+    title: String,
+    description: String,
+  ): String? {
+    (libraryEditError(organizationId) ?: manageLibraryUseCase.titleError(title))?.let {
+      return it
+    }
+    scope.launch {
+      manageLibraryUseCase.renamePurposePack(organizationId, packId, title, description)
+    }
+    return null
+  }
+
+  override fun deletePurposePack(organizationId: String, packId: String) {
+    if (libraryEditError(organizationId) != null) return
+    scope.launch { manageLibraryUseCase.deletePurposePack(organizationId, packId) }
+  }
+
+  override fun setGlobalEntryHidden(
+    organizationId: String,
+    globalEntryId: String,
+    hidden: Boolean,
+  ) {
+    if (libraryEditError(organizationId) != null) return
+    scope.launch {
+      manageLibraryUseCase.setGlobalEntryHidden(organizationId, globalEntryId, hidden)
+    }
   }
 }

@@ -1,0 +1,46 @@
+/*
+ * Copyright 2026 The Ground Authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto3";
+
+package groundplatform.v2.library;
+
+import "shared/protos/data/audit_record.proto";
+import "shared/protos/forms/form_def.proto";
+import "shared/protos/library/concept.proto";
+import "shared/protos/survey/survey_def.proto";
+
+// A reusable form in an organization's library. Adding a template to a survey
+// copies it; later template edits do not change existing surveys.
+message FormTemplateDef {
+  // Global: "<name>"; organization: "org.<organization_id>.<name>".
+  string id = 1;
+
+  // Owning library. Omitted in global seed files, where it is implied.
+  string organization_id = 2;
+
+  LocalizedText title = 3;
+  LocalizedText description = 4;
+
+  // The form, including concept links and translations.
+  groundplatform.v2.forms.FormDef form = 5;
+
+  // Default backing map layer or data table created with the form.
+  groundplatform.v2.survey.EntityDatasetDef default_dataset = 6;
+
+  LibraryStatus status = 7;
+  groundplatform.v2.data.AuditInfo audit_info = 8;
+}

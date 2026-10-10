@@ -204,8 +204,8 @@ class PrototypeAppState(
 
   /**
    * ViewModel of the web organizations directory and organization page (details, surveys, members,
-   * imagery sources). Its pages observe [OrganizationViewModel.uiState] directly; this class
-   * mirrors it for the rest of the UI and applies its [OrganizationEvent]s to the app shell.
+   * imagery sources, and library). Its pages observe [OrganizationViewModel.uiState] directly; this
+   * class mirrors it for the rest of the UI and applies its [OrganizationEvent]s to the app shell.
    */
   val organization: OrganizationViewModel =
     OrganizationViewModel(
@@ -215,6 +215,10 @@ class PrototypeAppState(
       createOrganizationUseCase = dataHolder.createOrganizationUseCase,
       inviteMemberUseCase = dataHolder.inviteOrganizationMemberUseCase,
       manageImagerySourcesUseCase = dataHolder.manageImagerySourcesUseCase,
+      libraryRepository = dataHolder.libraryRepository,
+      manageLibraryUseCase = dataHolder.manageLibraryUseCase,
+      resolveLibraryUseCase = dataHolder.resolveLibraryUseCase,
+      searchConceptsUseCase = dataHolder.searchConceptsUseCase,
       scope = dataHolder.scope,
     )
 

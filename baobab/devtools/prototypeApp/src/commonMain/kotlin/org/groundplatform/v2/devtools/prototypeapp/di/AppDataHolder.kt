@@ -29,6 +29,7 @@ import org.groundplatform.v2.devtools.prototypeapp.data.datasource.local.store.L
 import org.groundplatform.v2.devtools.prototypeapp.data.datasource.remote.MapboxPlacesDataSource
 import org.groundplatform.v2.devtools.prototypeapp.data.repository.AuthRepositoryImpl
 import org.groundplatform.v2.devtools.prototypeapp.data.repository.ConnectivityRepositoryImpl
+import org.groundplatform.v2.devtools.prototypeapp.data.repository.LibraryRepositoryImpl
 import org.groundplatform.v2.devtools.prototypeapp.data.repository.LocalStoreTransactionRunner
 import org.groundplatform.v2.devtools.prototypeapp.data.repository.LocationRepositoryImpl
 import org.groundplatform.v2.devtools.prototypeapp.data.repository.MutationRepositoryImpl
@@ -50,6 +51,7 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SurveyEdi
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.isoUtc
 import org.groundplatform.v2.devtools.prototypeapp.domain.repository.AuthRepository
 import org.groundplatform.v2.devtools.prototypeapp.domain.repository.ConnectivityRepository
+import org.groundplatform.v2.devtools.prototypeapp.domain.repository.LibraryRepository
 import org.groundplatform.v2.devtools.prototypeapp.domain.repository.LocationRepository
 import org.groundplatform.v2.devtools.prototypeapp.domain.repository.MediaCacheInfo
 import org.groundplatform.v2.devtools.prototypeapp.domain.repository.MutationRepository
@@ -72,7 +74,10 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.InviteCollabor
 import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.InviteOrganizationMemberUseCase
 import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.LaunchFormUseCase
 import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.ManageImagerySourcesUseCase
+import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.ManageLibraryUseCase
 import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.ResolveFormDefForLaunchUseCase
+import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.ResolveLibraryUseCase
+import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.SearchConceptsUseCase
 import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.SearchPlacesUseCase
 import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.SyncMutationsUseCase
 import org.groundplatform.v2.devtools.prototypeapp.ui.common.platformEpochMillis
@@ -125,6 +130,7 @@ class AppDataHolder(
       remoteDataSource = MapboxPlacesDataSource(isOnline = connectivityRepository::isOnline),
     ),
   val organizationRepository: OrganizationRepository = OrganizationRepositoryImpl(localStore),
+  val libraryRepository: LibraryRepository = LibraryRepositoryImpl(localStore),
   val locationRepository: LocationRepository = LocationRepositoryImpl(),
   val authRepository: AuthRepository = AuthRepositoryImpl(),
   val sampleDataRepository: SampleDataRepository = SampleDataRepositoryImpl(localStore),
@@ -159,6 +165,9 @@ class AppDataHolder(
     InviteOrganizationMemberUseCase(organizationRepository),
   val manageImagerySourcesUseCase: ManageImagerySourcesUseCase =
     ManageImagerySourcesUseCase(organizationRepository),
+  val manageLibraryUseCase: ManageLibraryUseCase = ManageLibraryUseCase(libraryRepository),
+  val resolveLibraryUseCase: ResolveLibraryUseCase = ResolveLibraryUseCase(),
+  val searchConceptsUseCase: SearchConceptsUseCase = SearchConceptsUseCase(),
   val computeWayfindingNavigationUseCase: ComputeWayfindingNavigationUseCase =
     ComputeWayfindingNavigationUseCase(),
   val clusterMapFeaturesUseCase: ClusterMapFeaturesUseCase = ClusterMapFeaturesUseCase(),

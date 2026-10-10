@@ -1,0 +1,145 @@
+/*
+ * Copyright 2026 The Ground Authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto3";
+
+package groundplatform.v2.library;
+
+import "shared/protos/data/audit_record.proto";
+import "shared/protos/forms/types.proto";
+
+// Text in one or more languages.
+//
+// `groundplatform.v2.forms.LocalizedString` holds a single language's variants
+// (inside a form's `TranslationCatalog`), so library entries, which are
+// translated independently of any form, carry their own map.
+message LocalizedText {
+  // BCP-47 language tag (e.g., "en", "fr", "es", "vi", "sw") to text.
+  map<string, string> values = 1;
+}
+
+// A standard field definition (dictionary entry) in an organization's library.
+// Linking a form question to a concept tells Ground what the answer means, so
+// answers can be validated, exported, and aggregated consistently.
+message ConceptDef {
+  // Stable ID. Global concepts use `<vocabulary>.<name>` (e.g.,
+  // "eudr.commodity"); organization concepts use
+  // `org.<organization_id>.<name>`.
+  string id = 1;
+
+  // Revision of this concept's metadata. Clarifications and new translations
+  // increment the version; a change in meaning requires a new ID.
+  int32 version = 2;
+
+  // Owning library (the "All users" organization for global concepts). Omitted
+  // in global seed files, where it is implied.
+  string organization_id = 3;
+
+  // Localized display label and description.
+  LocalizedText label = 4;
+  LocalizedText description = 5;
+
+  // Localized synonyms used by Survey Designer search.
+  repeated LocalizedText keywords = 6;
+
+  // Suggested data type and unit (UCUM code, e.g., "ha", "m3", "kg").
+  groundplatform.v2.forms.DataType data_type = 7;
+  string unit = 8;
+
+  // Allowed values for select concepts.
+  CodeList code_list = 9;
+
+  // How dashboards roll up answers.
+  Aggregation aggregation = 10;
+
+  // What may leave the organization and what is suppressed publicly.
+  PrivacyClass privacy_class = 11;
+
+  // Goal mapping (e.g., "deforestation_free_supply_chains") and MAP pillar.
+  // For organization concepts these are suggestions, reported separately.
+  repeated string goals = 12;
+  Pillar pillar = 13;
+
+  // Source framework references (e.g., regulation article URLs).
+  repeated string references = 14;
+
+  LibraryStatus status = 15;
+
+  // For promoted concepts: the previous organization concept IDs that now
+  // resolve to this concept.
+  repeated string aliases = 16;
+
+  groundplatform.v2.data.AuditInfo audit_info = 17;
+}
+
+// Allowed values of a select concept.
+message CodeList {
+  repeated CodeListItem items = 1;
+}
+
+// One allowed value of a select concept.
+message CodeListItem {
+  // Language-independent value (e.g., "coffee").
+  string code = 1;
+  LocalizedText label = 2;
+
+  // External identifiers (e.g., HS code, AGROVOC URI), keyed by scheme
+  // (e.g., "hs", "agrovoc").
+  map<string, string> external_ids = 3;
+}
+
+// How dashboards roll up answers to a concept.
+enum Aggregation {
+  AGGREGATION_UNSPECIFIED = 0;
+  // Count distinct map features with a non-empty answer.
+  COUNT_DISTINCT_FEATURES = 1;
+  // Count distinct map features per code-list value.
+  COUNT_BY_CODE = 2;
+  SUM = 3;
+  MEAN = 4;
+  // Share of map features with each code-list value.
+  SHARE_BY_CODE = 5;
+  // Not aggregated (e.g., names and identifiers).
+  NONE = 6;
+}
+
+// What may leave the owning organization and what is suppressed publicly.
+enum PrivacyClass {
+  PRIVACY_CLASS_UNSPECIFIED = 0;
+  // Aggregates may appear in platform-wide and public dashboards.
+  AGGREGATE_PUBLIC = 1;
+  // Aggregates are visible only within the owning organization.
+  ORG_ONLY = 2;
+  // Excluded from all cross-organization and public aggregates.
+  SENSITIVE = 3;
+}
+
+// Impact pillar used to group goals in dashboards.
+enum Pillar {
+  PILLAR_UNSPECIFIED = 0;
+  MITIGATION = 1;
+  ADAPTATION = 2;
+  PROTECTION = 3;
+}
+
+// Lifecycle of a library entry. Deprecated entries are hidden from pickers and
+// autocomplete, while existing references keep working.
+enum LibraryStatus {
+  LIBRARY_STATUS_UNSPECIFIED = 0;
+  DRAFT = 1;
+  STABLE = 2;
+  DEPRECATED = 3;
+}

@@ -1,0 +1,304 @@
+# Copyright 2026 The Ground Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# proto-file: shared/protos/library/library_bundle.proto
+# proto-message: groundplatform.v2.library.LibraryBundle
+#
+# Global library seed: the `pame` vocabulary. Bootstraps the "All users"
+# organization's library on a new deployment; entries omit organization_id,
+# which the loader sets to the "All users" organization.
+#
+# The prototype app embeds a Kotlin copy (GlobalLibrarySeedData.kt), and its
+# GlobalLibrarySeedTest fails when the two differ. Template questions don't
+# carry concept links yet (FieldBinding has no concept_ref field).
+
+concepts {
+  id: "pame.threat_type"
+  version: 1
+  label {
+    values {
+      key: "en"
+      value: "Threat type"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Threats to the protected area observed at the site."
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "pressure"
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "disturbance"
+    }
+  }
+  keywords {
+    values {
+      key: "es"
+      value: "amenaza"
+    }
+  }
+  data_type: TYPE_SELECT_MULTIPLE
+  code_list {
+    items {
+      code: "logging"
+      label {
+        values {
+          key: "en"
+          value: "Logging"
+        }
+      }
+    }
+    items {
+      code: "poaching"
+      label {
+        values {
+          key: "en"
+          value: "Poaching"
+        }
+      }
+    }
+    items {
+      code: "fire"
+      label {
+        values {
+          key: "en"
+          value: "Fire"
+        }
+      }
+    }
+    items {
+      code: "encroachment"
+      label {
+        values {
+          key: "en"
+          value: "Encroachment"
+        }
+      }
+    }
+    items {
+      code: "mining"
+      label {
+        values {
+          key: "en"
+          value: "Mining"
+        }
+      }
+    }
+    items {
+      code: "grazing"
+      label {
+        values {
+          key: "en"
+          value: "Grazing"
+        }
+      }
+    }
+    items {
+      code: "other"
+      label {
+        values {
+          key: "en"
+          value: "Other"
+        }
+      }
+    }
+  }
+  aggregation: COUNT_BY_CODE
+  privacy_class: AGGREGATE_PUBLIC
+  goals: "effective_protected_areas"
+  pillar: PROTECTION
+  status: STABLE
+}
+concepts {
+  id: "pame.threat_severity"
+  version: 1
+  label {
+    values {
+      key: "en"
+      value: "Threat severity"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "How severe the observed threat is."
+    }
+  }
+  data_type: TYPE_SELECT_ONE
+  code_list {
+    items {
+      code: "low"
+      label {
+        values {
+          key: "en"
+          value: "Low"
+        }
+      }
+    }
+    items {
+      code: "medium"
+      label {
+        values {
+          key: "en"
+          value: "Medium"
+        }
+      }
+    }
+    items {
+      code: "high"
+      label {
+        values {
+          key: "en"
+          value: "High"
+        }
+      }
+    }
+  }
+  aggregation: SHARE_BY_CODE
+  privacy_class: AGGREGATE_PUBLIC
+  goals: "effective_protected_areas"
+  pillar: PROTECTION
+  status: STABLE
+}
+concepts {
+  id: "pame.patrol_effort_km"
+  version: 1
+  label {
+    values {
+      key: "en"
+      value: "Patrol effort (km)"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Distance covered by the patrol, in kilometers."
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "distance"
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "ranger patrol"
+    }
+  }
+  data_type: TYPE_DOUBLE
+  unit: "km"
+  aggregation: SUM
+  privacy_class: AGGREGATE_PUBLIC
+  goals: "effective_protected_areas"
+  pillar: PROTECTION
+  status: STABLE
+}
+concepts {
+  id: "pame.patrol_date"
+  version: 1
+  label {
+    values {
+      key: "en"
+      value: "Patrol date"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Date of the patrol."
+    }
+  }
+  data_type: TYPE_DATE
+  aggregation: NONE
+  privacy_class: AGGREGATE_PUBLIC
+  goals: "effective_protected_areas"
+  status: STABLE
+}
+concepts {
+  id: "pame.ranger_count"
+  version: 1
+  label {
+    values {
+      key: "en"
+      value: "Rangers on patrol"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Number of rangers taking part in the patrol."
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "staff"
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "team size"
+    }
+  }
+  data_type: TYPE_INT32
+  aggregation: SUM
+  privacy_class: AGGREGATE_PUBLIC
+  goals: "effective_protected_areas"
+  pillar: PROTECTION
+  status: STABLE
+}
+concepts {
+  id: "pame.species_observed"
+  version: 1
+  label {
+    values {
+      key: "en"
+      value: "Species observed"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Scientific or common name of wildlife observed."
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "wildlife"
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "sighting"
+    }
+  }
+  data_type: TYPE_STRING
+  aggregation: NONE
+  privacy_class: SENSITIVE
+  goals: "effective_protected_areas"
+  status: STABLE
+}

@@ -29,13 +29,22 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.repository.Organizatio
  */
 class InviteOrganizationMemberUseCase(private val organizationRepository: OrganizationRepository) {
   /**
-   * Why [email] can't be invited to [organization], or `null` when it can: the address is invalid,
-   * the organization is missing, or the person is already a member, invitee, or requester.
+   * Why [email] can't be invited to [organization] as [role], or `null` when it can: the address is
+   * invalid, the organization is missing, the person is already a member, invitee, or requester, or
+   * [role] is [OrganizationRole.MEMBER] in the synthetic `"All users"` organization (everyone is
+   * already implicitly a member of it).
    */
-  fun inviteError(organization: Organization?, email: String): String? {
+  fun inviteError(
+    organization: Organization?,
+    email: String,
+    role: OrganizationRole = OrganizationRole.MEMBER,
+  ): String? {
     val normalized = normalizeEmail(email)
     if (!EMAIL_PATTERN.matches(normalized)) return "Enter a valid email address."
     if (organization == null) return "Organization not found."
+    if (organization.isSynthetic && role != OrganizationRole.MANAGER) {
+      return "Everyone is already a member of ${organization.name}. Invite people as Managers."
+    }
     val existing = organization.member(normalized) ?: return null
     return when (existing.status) {
       MembershipStatus.ACTIVE -> "${existing.displayName} is already a member."

@@ -121,6 +121,11 @@ class OrganizationPagesTest {
   fun tabs_detailsComesFirstAndIncludesImagerySources() {
     assertEquals(OrganizationTab.DETAILS, OrganizationTab.entries.first())
     assertTrue(OrganizationTab.IMAGERY_SOURCES in OrganizationTab.entries)
+    // The library tabs follow Imagery sources.
+    assertEquals(
+      listOf(OrganizationTab.PURPOSES, OrganizationTab.DICTIONARY, OrganizationTab.TEMPLATES),
+      OrganizationTab.entries.dropWhile { it != OrganizationTab.IMAGERY_SOURCES }.drop(1),
+    )
   }
 
   @Test
@@ -138,7 +143,14 @@ class OrganizationPagesTest {
       withAllUsers.organizationsOf(me).map { it.id },
     )
     assertFalse(withAllUsers.discoverableBy(me).any { it.id == Organization.ALL_USERS_ID })
-    assertEquals(OrganizationRelation.MANAGER, allUsers.relationTo(me))
+    // Everyone is implicitly a read-only member; only explicit Managers manage it.
+    assertEquals(OrganizationRelation.MEMBER, allUsers.relationTo(me))
+    assertFalse(allUsers.isManager(me))
+    val managed =
+      allUsers.copy(members = listOf(OrganizationMember(me, role = OrganizationRole.MANAGER)))
+    assertEquals(OrganizationRelation.MANAGER, managed.relationTo(me))
+    assertTrue(managed.isManager(me))
+    assertFalse(managed.isMember(me))
   }
 
   @Test

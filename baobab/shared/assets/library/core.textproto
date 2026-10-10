@@ -1,0 +1,1074 @@
+# Copyright 2026 The Ground Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# proto-file: shared/protos/library/library_bundle.proto
+# proto-message: groundplatform.v2.library.LibraryBundle
+#
+# Global library seed: the `core` vocabulary. Bootstraps the "All users"
+# organization's library on a new deployment; entries omit organization_id,
+# which the loader sets to the "All users" organization.
+#
+# The prototype app embeds a Kotlin copy (GlobalLibrarySeedData.kt), and its
+# GlobalLibrarySeedTest fails when the two differ. Template questions don't
+# carry concept links yet (FieldBinding has no concept_ref field).
+
+concepts {
+  id: "core.area_ha"
+  version: 1
+  label {
+    values {
+      key: "en"
+      value: "Area (ha)"
+    }
+    values {
+      key: "fr"
+      value: "Superficie (ha)"
+    }
+    values {
+      key: "es"
+      value: "Superficie (ha)"
+    }
+    values {
+      key: "vi"
+      value: "Diện tích (ha)"
+    }
+    values {
+      key: "sw"
+      value: "Eneo (ha)"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Area of the plot or site in hectares."
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "size"
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "hectares"
+    }
+  }
+  keywords {
+    values {
+      key: "fr"
+      value: "surface"
+    }
+  }
+  keywords {
+    values {
+      key: "es"
+      value: "área"
+    }
+  }
+  keywords {
+    values {
+      key: "es"
+      value: "hectáreas"
+    }
+  }
+  keywords {
+    values {
+      key: "vi"
+      value: "héc ta"
+    }
+  }
+  keywords {
+    values {
+      key: "sw"
+      value: "ukubwa"
+    }
+  }
+  data_type: TYPE_DOUBLE
+  unit: "har"
+  aggregation: SUM
+  privacy_class: AGGREGATE_PUBLIC
+  status: STABLE
+}
+concepts {
+  id: "core.geoid"
+  version: 1
+  label {
+    values {
+      key: "en"
+      value: "GeoID"
+    }
+    values {
+      key: "fr"
+      value: "GeoID"
+    }
+    values {
+      key: "es"
+      value: "GeoID"
+    }
+    values {
+      key: "vi"
+      value: "GeoID"
+    }
+    values {
+      key: "sw"
+      value: "GeoID"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Unique identifier of a field boundary in a public geospatial asset registry."
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "field id"
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "plot id"
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "asset registry"
+    }
+  }
+  data_type: TYPE_STRING
+  aggregation: NONE
+  privacy_class: ORG_ONLY
+  status: STABLE
+}
+concepts {
+  id: "core.producer_id"
+  version: 1
+  label {
+    values {
+      key: "en"
+      value: "Producer ID"
+    }
+    values {
+      key: "fr"
+      value: "Identifiant du producteur"
+    }
+    values {
+      key: "es"
+      value: "ID del productor"
+    }
+    values {
+      key: "vi"
+      value: "Mã người sản xuất"
+    }
+    values {
+      key: "sw"
+      value: "Kitambulisho cha mzalishaji"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Identifier of the farmer, producer, or supplier, unique within the organization."
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "farmer id"
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "member number"
+    }
+  }
+  keywords {
+    values {
+      key: "es"
+      value: "código del productor"
+    }
+  }
+  data_type: TYPE_STRING
+  aggregation: NONE
+  privacy_class: SENSITIVE
+  status: STABLE
+}
+concepts {
+  id: "core.producer_name"
+  version: 1
+  label {
+    values {
+      key: "en"
+      value: "Producer name"
+    }
+    values {
+      key: "fr"
+      value: "Nom du producteur"
+    }
+    values {
+      key: "es"
+      value: "Nombre del productor"
+    }
+    values {
+      key: "vi"
+      value: "Tên người sản xuất"
+    }
+    values {
+      key: "sw"
+      value: "Jina la mzalishaji"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Full name of the farmer, producer, or supplier."
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "farmer"
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "grower"
+    }
+  }
+  keywords {
+    values {
+      key: "fr"
+      value: "agriculteur"
+    }
+  }
+  keywords {
+    values {
+      key: "es"
+      value: "agricultor"
+    }
+  }
+  keywords {
+    values {
+      key: "vi"
+      value: "nông dân"
+    }
+  }
+  keywords {
+    values {
+      key: "sw"
+      value: "mkulima"
+    }
+  }
+  data_type: TYPE_STRING
+  aggregation: NONE
+  privacy_class: SENSITIVE
+  status: STABLE
+}
+concepts {
+  id: "core.country"
+  version: 1
+  label {
+    values {
+      key: "en"
+      value: "Country"
+    }
+    values {
+      key: "fr"
+      value: "Pays"
+    }
+    values {
+      key: "es"
+      value: "País"
+    }
+    values {
+      key: "vi"
+      value: "Quốc gia"
+    }
+    values {
+      key: "sw"
+      value: "Nchi"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Country as an ISO 3166-1 alpha-2 code (for example KE)."
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "nation"
+    }
+  }
+  keywords {
+    values {
+      key: "fr"
+      value: "nation"
+    }
+  }
+  keywords {
+    values {
+      key: "es"
+      value: "nación"
+    }
+  }
+  data_type: TYPE_STRING
+  aggregation: COUNT_DISTINCT_FEATURES
+  privacy_class: AGGREGATE_PUBLIC
+  status: STABLE
+}
+concepts {
+  id: "core.admin_area"
+  version: 1
+  label {
+    values {
+      key: "en"
+      value: "Administrative area"
+    }
+    values {
+      key: "fr"
+      value: "Division administrative"
+    }
+    values {
+      key: "es"
+      value: "Área administrativa"
+    }
+    values {
+      key: "vi"
+      value: "Đơn vị hành chính"
+    }
+    values {
+      key: "sw"
+      value: "Eneo la utawala"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Province, county, district, or other administrative area."
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "province"
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "county"
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "district"
+    }
+  }
+  keywords {
+    values {
+      key: "fr"
+      value: "région"
+    }
+  }
+  keywords {
+    values {
+      key: "es"
+      value: "provincia"
+    }
+  }
+  keywords {
+    values {
+      key: "es"
+      value: "municipio"
+    }
+  }
+  keywords {
+    values {
+      key: "vi"
+      value: "tỉnh"
+    }
+  }
+  keywords {
+    values {
+      key: "vi"
+      value: "huyện"
+    }
+  }
+  keywords {
+    values {
+      key: "sw"
+      value: "kaunti"
+    }
+  }
+  keywords {
+    values {
+      key: "sw"
+      value: "wilaya"
+    }
+  }
+  data_type: TYPE_STRING
+  aggregation: NONE
+  privacy_class: AGGREGATE_PUBLIC
+  status: STABLE
+}
+concepts {
+  id: "core.producer_gender"
+  version: 1
+  label {
+    values {
+      key: "en"
+      value: "Producer gender"
+    }
+    values {
+      key: "fr"
+      value: "Genre du producteur"
+    }
+    values {
+      key: "es"
+      value: "Género del productor"
+    }
+    values {
+      key: "vi"
+      value: "Giới tính người sản xuất"
+    }
+    values {
+      key: "sw"
+      value: "Jinsia ya mzalishaji"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Gender of the producer, as they describe it."
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "sex"
+    }
+  }
+  keywords {
+    values {
+      key: "fr"
+      value: "sexe"
+    }
+  }
+  keywords {
+    values {
+      key: "es"
+      value: "sexo"
+    }
+  }
+  data_type: TYPE_SELECT_ONE
+  code_list {
+    items {
+      code: "female"
+      label {
+        values {
+          key: "en"
+          value: "Female"
+        }
+        values {
+          key: "fr"
+          value: "Femme"
+        }
+        values {
+          key: "es"
+          value: "Mujer"
+        }
+        values {
+          key: "vi"
+          value: "Nữ"
+        }
+        values {
+          key: "sw"
+          value: "Mwanamke"
+        }
+      }
+    }
+    items {
+      code: "male"
+      label {
+        values {
+          key: "en"
+          value: "Male"
+        }
+        values {
+          key: "fr"
+          value: "Homme"
+        }
+        values {
+          key: "es"
+          value: "Hombre"
+        }
+        values {
+          key: "vi"
+          value: "Nam"
+        }
+        values {
+          key: "sw"
+          value: "Mwanamume"
+        }
+      }
+    }
+    items {
+      code: "other"
+      label {
+        values {
+          key: "en"
+          value: "Other"
+        }
+        values {
+          key: "fr"
+          value: "Autre"
+        }
+        values {
+          key: "es"
+          value: "Otro"
+        }
+        values {
+          key: "vi"
+          value: "Khác"
+        }
+        values {
+          key: "sw"
+          value: "Nyingine"
+        }
+      }
+    }
+    items {
+      code: "prefer_not_to_say"
+      label {
+        values {
+          key: "en"
+          value: "Prefer not to say"
+        }
+        values {
+          key: "fr"
+          value: "Préfère ne pas répondre"
+        }
+        values {
+          key: "es"
+          value: "Prefiere no responder"
+        }
+        values {
+          key: "vi"
+          value: "Không muốn trả lời"
+        }
+        values {
+          key: "sw"
+          value: "Hapendi kujibu"
+        }
+      }
+    }
+  }
+  aggregation: SHARE_BY_CODE
+  privacy_class: SENSITIVE
+  status: STABLE
+}
+concepts {
+  id: "core.household_size"
+  version: 1
+  label {
+    values {
+      key: "en"
+      value: "Household size"
+    }
+    values {
+      key: "fr"
+      value: "Taille du ménage"
+    }
+    values {
+      key: "es"
+      value: "Tamaño del hogar"
+    }
+    values {
+      key: "vi"
+      value: "Số người trong hộ"
+    }
+    values {
+      key: "sw"
+      value: "Idadi ya watu wa kaya"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Number of people living in the producer's household."
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "family size"
+    }
+  }
+  keywords {
+    values {
+      key: "es"
+      value: "familia"
+    }
+  }
+  keywords {
+    values {
+      key: "fr"
+      value: "famille"
+    }
+  }
+  data_type: TYPE_INT32
+  aggregation: MEAN
+  privacy_class: ORG_ONLY
+  status: STABLE
+}
+concepts {
+  id: "core.collection_date"
+  version: 1
+  label {
+    values {
+      key: "en"
+      value: "Collection date"
+    }
+    values {
+      key: "fr"
+      value: "Date de collecte"
+    }
+    values {
+      key: "es"
+      value: "Fecha de recolección"
+    }
+    values {
+      key: "vi"
+      value: "Ngày thu thập"
+    }
+    values {
+      key: "sw"
+      value: "Tarehe ya ukusanyaji"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Date the data was collected in the field."
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "visit date"
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "survey date"
+    }
+  }
+  data_type: TYPE_DATE
+  aggregation: NONE
+  privacy_class: AGGREGATE_PUBLIC
+  status: STABLE
+}
+concepts {
+  id: "core.site_photo"
+  version: 1
+  label {
+    values {
+      key: "en"
+      value: "Site photo"
+    }
+    values {
+      key: "fr"
+      value: "Photo du site"
+    }
+    values {
+      key: "es"
+      value: "Foto del sitio"
+    }
+    values {
+      key: "vi"
+      value: "Ảnh hiện trường"
+    }
+    values {
+      key: "sw"
+      value: "Picha ya eneo"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Photo of the plot or site."
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "picture"
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "image"
+    }
+  }
+  keywords {
+    values {
+      key: "es"
+      value: "fotografía"
+    }
+  }
+  data_type: TYPE_BINARY
+  aggregation: NONE
+  privacy_class: ORG_ONLY
+  status: STABLE
+}
+concepts {
+  id: "core.data_consent"
+  version: 1
+  label {
+    values {
+      key: "en"
+      value: "Consent to data collection"
+    }
+    values {
+      key: "fr"
+      value: "Consentement à la collecte de données"
+    }
+    values {
+      key: "es"
+      value: "Consentimiento para la recolección de datos"
+    }
+    values {
+      key: "vi"
+      value: "Đồng ý thu thập dữ liệu"
+    }
+    values {
+      key: "sw"
+      value: "Ridhaa ya ukusanyaji wa data"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Whether the person agreed to have their data collected and stored."
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "permission"
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "agreement"
+    }
+  }
+  keywords {
+    values {
+      key: "es"
+      value: "permiso"
+    }
+  }
+  data_type: TYPE_SELECT_ONE
+  code_list {
+    items {
+      code: "yes"
+      label {
+        values {
+          key: "en"
+          value: "Yes"
+        }
+        values {
+          key: "fr"
+          value: "Oui"
+        }
+        values {
+          key: "es"
+          value: "Sí"
+        }
+        values {
+          key: "vi"
+          value: "Có"
+        }
+        values {
+          key: "sw"
+          value: "Ndiyo"
+        }
+      }
+    }
+    items {
+      code: "no"
+      label {
+        values {
+          key: "en"
+          value: "No"
+        }
+        values {
+          key: "fr"
+          value: "Non"
+        }
+        values {
+          key: "es"
+          value: "No"
+        }
+        values {
+          key: "vi"
+          value: "Không"
+        }
+        values {
+          key: "sw"
+          value: "Hapana"
+        }
+      }
+    }
+  }
+  aggregation: SHARE_BY_CODE
+  privacy_class: ORG_ONLY
+  status: STABLE
+}
+form_templates {
+  id: "producer_profile"
+  title {
+    values {
+      key: "en"
+      value: "Producer profile"
+    }
+    values {
+      key: "fr"
+      value: "Profil du producteur"
+    }
+    values {
+      key: "es"
+      value: "Perfil del productor"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Registers a farmer or producer with their household details."
+    }
+  }
+  form {
+    form_id: "producer_profile"
+    title: "Producer profile"
+    version: "1"
+    model {
+      primary_instance {
+        record_schema {
+          name: "data"
+          title: "Producer profile"
+          fields {
+            name: "data_consent"
+            type: TYPE_SELECT_ONE
+          }
+          fields {
+            name: "producer_name"
+            type: TYPE_STRING
+          }
+          fields {
+            name: "producer_id"
+            type: TYPE_STRING
+          }
+          fields {
+            name: "producer_gender"
+            type: TYPE_SELECT_ONE
+          }
+          fields {
+            name: "household_size"
+            type: TYPE_INT32
+          }
+          fields {
+            name: "country"
+            type: TYPE_STRING
+          }
+          fields {
+            name: "admin_area"
+            type: TYPE_STRING
+          }
+        }
+      }
+      bindings {
+        field_path: "data_consent"
+        type: TYPE_SELECT_ONE
+        required_expression: "true()"
+      }
+      bindings {
+        field_path: "producer_name"
+        type: TYPE_STRING
+        required_expression: "true()"
+      }
+      bindings {
+        field_path: "producer_id"
+        type: TYPE_STRING
+      }
+      bindings {
+        field_path: "producer_gender"
+        type: TYPE_SELECT_ONE
+      }
+      bindings {
+        field_path: "household_size"
+        type: TYPE_INT32
+      }
+      bindings {
+        field_path: "country"
+        type: TYPE_STRING
+      }
+      bindings {
+        field_path: "admin_area"
+        type: TYPE_STRING
+      }
+    }
+    view {
+      components {
+        control {
+          field_ref: "data_consent"
+          type: CONTROL_SELECT_ONE
+          label {
+            text: "Consent to data collection"
+          }
+          choices {
+            value: "yes"
+            label {
+              text: "Yes"
+            }
+          }
+          choices {
+            value: "no"
+            label {
+              text: "No"
+            }
+          }
+        }
+      }
+      components {
+        control {
+          field_ref: "producer_name"
+          type: CONTROL_INPUT
+          label {
+            text: "Producer name"
+          }
+        }
+      }
+      components {
+        control {
+          field_ref: "producer_id"
+          type: CONTROL_INPUT
+          label {
+            text: "Producer ID"
+          }
+        }
+      }
+      components {
+        control {
+          field_ref: "producer_gender"
+          type: CONTROL_SELECT_ONE
+          label {
+            text: "Producer gender"
+          }
+          choices {
+            value: "female"
+            label {
+              text: "Female"
+            }
+          }
+          choices {
+            value: "male"
+            label {
+              text: "Male"
+            }
+          }
+          choices {
+            value: "other"
+            label {
+              text: "Other"
+            }
+          }
+          choices {
+            value: "prefer_not_to_say"
+            label {
+              text: "Prefer not to say"
+            }
+          }
+        }
+      }
+      components {
+        control {
+          field_ref: "household_size"
+          type: CONTROL_INPUT
+          label {
+            text: "Household size"
+          }
+        }
+      }
+      components {
+        control {
+          field_ref: "country"
+          type: CONTROL_INPUT
+          label {
+            text: "Country"
+          }
+        }
+      }
+      components {
+        control {
+          field_ref: "admin_area"
+          type: CONTROL_INPUT
+          label {
+            text: "Administrative area"
+          }
+        }
+      }
+    }
+  }
+  status: STABLE
+}
+purpose_packs {
+  id: "producer_registration"
+  title {
+    values {
+      key: "en"
+      value: "Producer registration"
+    }
+    values {
+      key: "fr"
+      value: "Enregistrement des producteurs"
+    }
+    values {
+      key: "es"
+      value: "Registro de productores"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Build a register of the farmers and producers you work with."
+    }
+  }
+  icon: "person_add"
+  form_template_ids: "producer_profile"
+  status: STABLE
+}

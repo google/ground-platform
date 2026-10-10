@@ -88,6 +88,20 @@ distinction between stateful master tables and immutable encounter logs:
     -   `data_service.proto`: `DataService` gRPC definition for entity and
         submission retrieval (`GetEntity`, `ListEntities`, `GetSubmission`,
         `ListSubmissions`) and idempotent batched data mutations (`MutateData`).
+-   **[`library/`](library/)** (`groundplatform.v2.library`): Organization
+    libraries (see
+    [`docs/technical/model/library/`](../../docs/technical/model/library/)).
+    -   `concept.proto`: Dictionary concepts (`ConceptDef`), code lists
+        (`CodeList`, `CodeListItem`), multilingual `LocalizedText`, and the
+        `Aggregation`, `PrivacyClass`, `Pillar`, and `LibraryStatus` enums.
+    -   `template.proto`: Reusable form templates (`FormTemplateDef`).
+    -   `purpose_pack.proto`: Survey-creation purposes (`PurposePackDef`) and
+        export profiles (`ExportProfileDef`).
+    -   `library_settings.proto`: Per-organization settings
+        (`OrganizationLibrarySettings`), such as hidden global entries.
+    -   `library_bundle.proto`: `LibraryBundle`, the top-level message of the
+        global seed files (`shared/assets/library/<vocabulary>.textproto`) and
+        of library imports and exports.
 
 
 ## gRPC Backend Services (`SurveyService` & `DataService`)

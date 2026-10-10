@@ -1,0 +1,275 @@
+# Copyright 2026 The Ground Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# proto-file: shared/protos/library/library_bundle.proto
+# proto-message: groundplatform.v2.library.LibraryBundle
+#
+# Global library seed: the `iplc` vocabulary. Bootstraps the "All users"
+# organization's library on a new deployment; entries omit organization_id,
+# which the loader sets to the "All users" organization.
+#
+# The prototype app embeds a Kotlin copy (GlobalLibrarySeedData.kt), and its
+# GlobalLibrarySeedTest fails when the two differ. Template questions don't
+# carry concept links yet (FieldBinding has no concept_ref field).
+
+concepts {
+  id: "iplc.community_type"
+  version: 1
+  label {
+    values {
+      key: "en"
+      value: "Community type"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Whether the community identifies as Indigenous Peoples or a local community."
+    }
+  }
+  data_type: TYPE_SELECT_ONE
+  code_list {
+    items {
+      code: "indigenous_peoples"
+      label {
+        values {
+          key: "en"
+          value: "Indigenous Peoples"
+        }
+      }
+    }
+    items {
+      code: "local_community"
+      label {
+        values {
+          key: "en"
+          value: "Local community"
+        }
+      }
+    }
+    items {
+      code: "other"
+      label {
+        values {
+          key: "en"
+          value: "Other"
+        }
+      }
+    }
+  }
+  aggregation: COUNT_BY_CODE
+  privacy_class: ORG_ONLY
+  goals: "iplc_rights_and_tenure"
+  pillar: PROTECTION
+  status: STABLE
+}
+concepts {
+  id: "iplc.community_name"
+  version: 1
+  label {
+    values {
+      key: "en"
+      value: "Community name"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Name of the community, as the community uses it."
+    }
+  }
+  data_type: TYPE_STRING
+  aggregation: NONE
+  privacy_class: SENSITIVE
+  goals: "iplc_rights_and_tenure"
+  status: STABLE
+}
+concepts {
+  id: "iplc.tenure_type"
+  version: 1
+  label {
+    values {
+      key: "en"
+      value: "Land tenure type"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "How rights to the land are held."
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "land rights"
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "ownership"
+    }
+  }
+  data_type: TYPE_SELECT_ONE
+  code_list {
+    items {
+      code: "customary"
+      label {
+        values {
+          key: "en"
+          value: "Customary"
+        }
+      }
+    }
+    items {
+      code: "communal"
+      label {
+        values {
+          key: "en"
+          value: "Communal"
+        }
+      }
+    }
+    items {
+      code: "private"
+      label {
+        values {
+          key: "en"
+          value: "Private"
+        }
+      }
+    }
+    items {
+      code: "public"
+      label {
+        values {
+          key: "en"
+          value: "Public"
+        }
+      }
+    }
+    items {
+      code: "other"
+      label {
+        values {
+          key: "en"
+          value: "Other"
+        }
+      }
+    }
+  }
+  aggregation: COUNT_BY_CODE
+  privacy_class: ORG_ONLY
+  goals: "iplc_rights_and_tenure"
+  pillar: PROTECTION
+  status: STABLE
+}
+concepts {
+  id: "iplc.fpic_consent"
+  version: 1
+  label {
+    values {
+      key: "en"
+      value: "Free, prior and informed consent"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Status of the community's free, prior and informed consent (FPIC)."
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "fpic"
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "consent"
+    }
+  }
+  data_type: TYPE_SELECT_ONE
+  code_list {
+    items {
+      code: "given"
+      label {
+        values {
+          key: "en"
+          value: "Given"
+        }
+      }
+    }
+    items {
+      code: "withheld"
+      label {
+        values {
+          key: "en"
+          value: "Withheld"
+        }
+      }
+    }
+    items {
+      code: "pending"
+      label {
+        values {
+          key: "en"
+          value: "Pending"
+        }
+      }
+    }
+  }
+  aggregation: SHARE_BY_CODE
+  privacy_class: SENSITIVE
+  goals: "iplc_rights_and_tenure"
+  pillar: PROTECTION
+  status: STABLE
+}
+concepts {
+  id: "iplc.territory_boundary"
+  version: 1
+  label {
+    values {
+      key: "en"
+      value: "Territory boundary"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Boundary of the community's territory, mapped with the community."
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "territory"
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "community land"
+    }
+  }
+  data_type: TYPE_GEOSHAPE
+  aggregation: COUNT_DISTINCT_FEATURES
+  privacy_class: SENSITIVE
+  goals: "iplc_rights_and_tenure"
+  pillar: PROTECTION
+  status: STABLE
+}

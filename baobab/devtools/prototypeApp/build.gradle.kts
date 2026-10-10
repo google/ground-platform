@@ -90,6 +90,15 @@ kotlin {
   }
 }
 
+// `./gradlew jvmTest -PregenerateLibrarySeed` rewrites the global library seed files
+// (shared/assets/library/*.textproto) from the app's Kotlin copy; see GlobalLibrarySeedTest.
+tasks.withType<Test>().configureEach {
+  if (project.hasProperty("regenerateLibrarySeed")) {
+    systemProperty("regenerateLibrarySeed", "true")
+    outputs.upToDateWhen { false }
+  }
+}
+
 tasks.withType<org.jetbrains.kotlin.gradle.targets.js.ir.KotlinJsIrLink>().configureEach {
   compilerOptions.sourceMapEmbedSources.set(
     org.jetbrains.kotlin.gradle.dsl.JsSourceMapEmbedMode.SOURCE_MAP_SOURCE_CONTENT_ALWAYS

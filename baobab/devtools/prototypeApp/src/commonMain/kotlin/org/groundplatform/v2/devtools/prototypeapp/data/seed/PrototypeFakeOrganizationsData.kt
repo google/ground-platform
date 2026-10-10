@@ -43,12 +43,23 @@ internal object PrototypeFakeOrganizationsData {
         id = ALL_USERS,
         name = "All users",
         description =
-          "Synthetic platform-wide organization providing shared imagery sources to every " +
-            "Ground user across all surveys.",
+          "Synthetic platform-wide organization providing shared imagery sources and the global " +
+            "library to every Ground user across all surveys.",
         logoUrl = "avatar:2",
         isListed = false,
         isSynthetic = true,
         createdOn = "2025-01-01",
+        // Its Managers are the platform admins. The prototype's signed-in user is one, so the demo
+        // can edit the global imagery sources and library; everyone else is a read-only member.
+        members =
+          listOf(
+            OrganizationMember(
+              email = SIGNED_IN_EMAIL,
+              role = OrganizationRole.MANAGER,
+              profile = signedInProfile,
+              userId = "uid-maya-lin",
+            )
+          ),
         imagerySources =
           listOf(
             ImagerySource(

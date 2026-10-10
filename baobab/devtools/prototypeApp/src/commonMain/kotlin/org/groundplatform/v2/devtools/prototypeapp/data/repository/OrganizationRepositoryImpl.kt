@@ -59,9 +59,11 @@ class OrganizationRepositoryImpl(private val store: LocalStore) : OrganizationRe
     organizationId: String,
     transform: (Organization) -> Organization,
   ): Organization? = store.transaction {
-    // Profile edits must not change the identity or membership through this path.
+    // Profile edits must not change the identity or membership through this path, and the
+    // synthetic "All users" organization always stays unlisted.
     updateOrganization(organizationId) { existing ->
-      transform(existing).copy(id = existing.id, members = existing.members)
+      val updated = transform(existing).copy(id = existing.id, members = existing.members)
+      if (existing.isSynthetic) updated.copy(isListed = false, isSynthetic = true) else updated
     }
   }
 
@@ -74,7 +76,11 @@ class OrganizationRepositoryImpl(private val store: LocalStore) : OrganizationRe
     email: String,
     role: OrganizationRole,
     token: String,
-  ): Organization? =
+  ): Organization? = store.transaction {
+    // Everyone is implicitly a member of "All users"; only Managers are invited explicitly.
+    if (organization(organizationId)?.isSynthetic == true && role != OrganizationRole.MANAGER) {
+      return@transaction null
+    }
     editMembers(organizationId) { members ->
       if (members.any { it.email.equals(email, ignoreCase = true) }) return@editMembers null
       members +
@@ -85,6 +91,7 @@ class OrganizationRepositoryImpl(private val store: LocalStore) : OrganizationRe
           inviteToken = token,
         )
     }
+  }
 
   override suspend fun acceptInvite(
     organizationId: String,
@@ -106,7 +113,9 @@ class OrganizationRepositoryImpl(private val store: LocalStore) : OrganizationRe
     organizationId: String,
     email: String,
     profile: CachedProfile?,
-  ): Organization? =
+  ): Organization? = store.transaction {
+    // Nobody asks to join "All users": everyone is implicitly a member.
+    if (organization(organizationId)?.isSynthetic == true) return@transaction null
     editMembers(organizationId) { members ->
       if (members.any { it.email.equals(email, ignoreCase = true) }) return@editMembers null
       members +
@@ -117,6 +126,7 @@ class OrganizationRepositoryImpl(private val store: LocalStore) : OrganizationRe
           profile = profile,
         )
     }
+  }
 
   override suspend fun approveRequest(organizationId: String, email: String): Organization? =
     editMember(organizationId, email) { member ->
@@ -134,6 +144,8 @@ class OrganizationRepositoryImpl(private val store: LocalStore) : OrganizationRe
     if (member.isActiveManager && role != OrganizationRole.MANAGER && org.managers.size == 1) {
       return@transaction null
     }
+    // "All users" has explicit Managers only; everyone else is implicitly a member.
+    if (org.isSynthetic && role != OrganizationRole.MANAGER) return@transaction null
     updateOrganization(organizationId) { o ->
       o.copy(members = o.members.map { if (it === member) it.copy(role = role) else it })
     }

@@ -115,8 +115,13 @@ data class Organization(
   /** Custom imagery sources configured in the organization editor's `Imagery sources` tab. */
   val imagerySources: List<ImagerySource> = emptyList(),
   /**
-   * True for the synthetic `"All users"` organization, which holds platform-wide imagery sources
-   * shared across every Ground user rather than survey memberships.
+   * True for the synthetic `"All users"` organization, which holds the platform-wide imagery
+   * sources and the global library rather than survey memberships.
+   *
+   * Everyone is implicitly a read-only member of it: people can't leave, ask to join, or be invited
+   * as [OrganizationRole.MEMBER], and it's never listed in the directory. Its explicit
+   * [OrganizationRole.MANAGER]s are the deployment's platform admins: they edit the global library
+   * and imagery sources, and get no access to other organizations' surveys.
    */
   val isSynthetic: Boolean = false,
 ) {
@@ -136,9 +141,24 @@ data class Organization(
   /** Role of [email] if they are an active member, otherwise `null`. */
   fun roleOf(email: String): OrganizationRole? = member(email)?.takeIf { it.isActive }?.role
 
-  fun isManager(email: String): Boolean = isSynthetic || roleOf(email) == OrganizationRole.MANAGER
+  /**
+   * Whether [email] is an active Manager. For the synthetic `"All users"` organization, these are
+   * the platform admins.
+   */
+  fun isManager(email: String): Boolean = roleOf(email) == OrganizationRole.MANAGER
 
-  fun isMember(email: String): Boolean = roleOf(email) != null
+  /**
+   * Whether [email] is an active member who can see and create surveys in this organization. Always
+   * false for the synthetic `"All users"` organization, which hosts no surveys: everyone is
+   * implicitly a read-only member of it (see [isVisibleTo]), and its Managers are platform admins
+   * (see [isManager]), not survey members.
+   */
+  fun isMember(email: String): Boolean = !isSynthetic && roleOf(email) != null
+
+  /**
+   * Whether [email] can see this organization: its members, plus everyone for the synthetic one.
+   */
+  fun isVisibleTo(email: String): Boolean = isSynthetic || isMember(email)
 
   companion object {
     /** Stable ID of the synthetic `"All users"` organization. */

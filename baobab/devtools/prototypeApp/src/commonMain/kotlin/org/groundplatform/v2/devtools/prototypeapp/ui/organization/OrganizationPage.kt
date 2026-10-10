@@ -31,9 +31,12 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.Book
 import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.Close
+import androidx.compose.material.icons.outlined.Description
 import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material.icons.outlined.Flag
 import androidx.compose.material.icons.outlined.Group
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Layers
@@ -81,6 +84,7 @@ import org.groundplatform.v2.devtools.prototypeapp.ui.dashboard.WebSurveyCard
 import org.groundplatform.v2.devtools.prototypeapp.ui.dashboard.WebSurveysList
 import org.groundplatform.v2.devtools.prototypeapp.ui.formeditor.DropdownSelector
 import org.groundplatform.v2.devtools.prototypeapp.ui.formeditor.SectionLabel
+import org.groundplatform.v2.devtools.prototypeapp.ui.state.OrganizationLibraryUiState
 import org.groundplatform.v2.devtools.prototypeapp.ui.state.OrganizationUiState
 import org.groundplatform.v2.devtools.prototypeapp.ui.surveyeditor.AcceptInviteDialog
 import org.groundplatform.v2.devtools.prototypeapp.ui.surveyeditor.NavItem
@@ -97,10 +101,10 @@ import org.groundplatform.v2.devtools.prototypeapp.ui.workbench.WebMobilePrototy
 
 /**
  * One organization, laid out like the survey editor: a resizable left panel switches between
- * Organization details, Surveys, and Members, and the content pane shows the selected section.
- * Members can create surveys in it; Managers can also edit and delete the organization, invite
- * people, approve join requests, change roles, and remove members. The last Manager can't be
- * demoted or removed.
+ * Organization details, Surveys, Members, Imagery sources, and the library's Purposes, Dictionary,
+ * and Templates, and the content pane shows the selected section. Members can create surveys in it;
+ * Managers can also edit and delete the organization, invite people, approve join requests, change
+ * roles, remove members, and edit its library. The last Manager can't be demoted or removed.
  */
 @Composable
 internal fun OrganizationPage(
@@ -143,6 +147,7 @@ internal fun OrganizationPage(
         },
         actions = {
           WebMobilePrototypeButton(state)
+          // Nobody creates surveys in "All users": isMemberOf is false for it.
           if (organization != null && uiState.isMemberOf(organization)) {
             WebHeaderButton(
               text = "Create survey",
@@ -220,6 +225,7 @@ internal fun OrganizationPage(
       OrganizationNavigation(
         organization = organization,
         surveyCount = uiState.surveyCountInOrganization(organization.id),
+        library = uiState.library,
         isManager = isManager,
         selected = tab,
         onSelect = { tab = it },
@@ -290,6 +296,50 @@ internal fun OrganizationPage(
               NoticeSlot(uiState, actions)
               ImagerySourcesPane(actions, organization, isManager)
             }
+          OrganizationTab.PURPOSES ->
+            PaneScaffold(
+              title = "Purposes",
+              subtitle =
+                if (organization.isSynthetic) {
+                  "Choices every organization sees for \"What will this data be used for?\" when " +
+                    "creating a survey. Each purpose adds its templates to the new survey."
+                } else {
+                  "Choices offered for \"What will this data be used for?\" when creating a survey " +
+                    "in ${organization.name}: its own purposes first, then global ones."
+                },
+            ) {
+              NoticeSlot(uiState, actions)
+              PurposesPane(uiState.library, actions, organization)
+            }
+          OrganizationTab.DICTIONARY ->
+            PaneScaffold(
+              title = "Dictionary",
+              subtitle =
+                if (organization.isSynthetic) {
+                  "Global concepts: standard fields that link form questions to a shared meaning, " +
+                    "so answers can be compared and added up across surveys and languages."
+                } else {
+                  "Concepts available to surveys in ${organization.name}: standard fields that " +
+                    "give form questions a shared meaning, so answers can be compared and added up."
+                },
+            ) {
+              NoticeSlot(uiState, actions)
+              DictionaryPane(uiState.library, actions, organization)
+            }
+          OrganizationTab.TEMPLATES ->
+            PaneScaffold(
+              title = "Templates",
+              subtitle =
+                if (organization.isSynthetic) {
+                  "Global form templates that every organization can add to its surveys."
+                } else {
+                  "Form templates available to surveys in ${organization.name}: its own " +
+                    "templates first, then global ones."
+                },
+            ) {
+              NoticeSlot(uiState, actions)
+              TemplatesPane(uiState.library, actions, organization)
+            }
         }
       }
     }
@@ -322,6 +372,7 @@ private fun NoticeSlot(uiState: OrganizationUiState, actions: OrganizationAction
 private fun OrganizationNavigation(
   organization: Organization,
   surveyCount: Int,
+  library: OrganizationLibraryUiState,
   isManager: Boolean,
   selected: OrganizationTab,
   onSelect: (OrganizationTab) -> Unit,
@@ -361,11 +412,32 @@ private fun OrganizationNavigation(
         onClick = { onSelect(OrganizationTab.IMAGERY_SOURCES) },
         trailing = "${organization.imagerySources.size}",
       )
+      NavItem(
+        label = OrganizationTab.PURPOSES.label,
+        icon = Icons.Outlined.Flag,
+        selected = selected == OrganizationTab.PURPOSES,
+        onClick = { onSelect(OrganizationTab.PURPOSES) },
+        trailing = "${library.purposePacks.size}",
+      )
+      NavItem(
+        label = OrganizationTab.DICTIONARY.label,
+        icon = Icons.Outlined.Book,
+        selected = selected == OrganizationTab.DICTIONARY,
+        onClick = { onSelect(OrganizationTab.DICTIONARY) },
+        trailing = "${library.totalConceptCount}",
+      )
+      NavItem(
+        label = OrganizationTab.TEMPLATES.label,
+        icon = Icons.Outlined.Description,
+        selected = selected == OrganizationTab.TEMPLATES,
+        onClick = { onSelect(OrganizationTab.TEMPLATES) },
+        trailing = "${library.formTemplates.size}",
+      )
     }
   }
 }
 
-private val OrganizationPaneMaxWidth = 760.dp
+internal val OrganizationPaneMaxWidth = 760.dp
 
 @Composable
 private fun MissingOrganization(onBack: () -> Unit) {
@@ -556,6 +628,14 @@ private fun MembersPane(
 
     MembersCard("Members") {
       if (isManager) InviteMemberRow(actions, organization)
+      if (organization.isSynthetic) {
+        Text(
+          "Everyone is a read-only member of ${organization.name}. Its Managers are the platform " +
+            "admins: they edit the global library and imagery sources.",
+          style = MaterialTheme.typography.bodySmall,
+          color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+      }
       view.active.forEach { person ->
         key(person.email) {
           val isSelf = uiState.isSelf(person.email)
@@ -573,7 +653,9 @@ private fun MembersPane(
                 DropdownSelector(
                   label = "Role",
                   selectedText = person.role.label,
-                  options = OrganizationRole.entries,
+                  options =
+                    if (organization.isSynthetic) listOf(OrganizationRole.MANAGER)
+                    else OrganizationRole.entries,
                   optionText = { it.label },
                   onSelect = { actions.setMemberRole(organization.id, person.email, it) },
                 )
@@ -662,8 +744,11 @@ private fun MembersCard(title: String, content: @Composable () -> Unit) {
 
 @Composable
 private fun InviteMemberRow(actions: OrganizationActions, organization: Organization) {
+  // Everyone is implicitly a member of "All users", so only Managers are invited to it.
+  val roles =
+    if (organization.isSynthetic) listOf(OrganizationRole.MANAGER) else OrganizationRole.entries
   var email by remember { mutableStateOf("") }
-  var role by remember { mutableStateOf(OrganizationRole.MEMBER) }
+  var role by remember(organization.id) { mutableStateOf(roles.first()) }
   var error by remember { mutableStateOf<String?>(null) }
   Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.Top) {
     OutlinedTextField(
@@ -682,7 +767,7 @@ private fun InviteMemberRow(actions: OrganizationActions, organization: Organiza
       DropdownSelector(
         label = "Role",
         selectedText = role.label,
-        options = OrganizationRole.entries,
+        options = roles,
         optionText = { it.label },
         onSelect = { role = it },
       )
@@ -1131,19 +1216,21 @@ private fun EditableDetailsCard(actions: OrganizationActions, organization: Orga
       singleLine = true,
       modifier = Modifier.fillMaxWidth(),
     )
-    Row(verticalAlignment = Alignment.CenterVertically) {
-      Checkbox(checked = isListed, onCheckedChange = { isListed = it })
-      Spacer(Modifier.width(4.dp))
-      Column {
-        Text("List in the directory", style = MaterialTheme.typography.bodyMedium)
-        Text(
-          "Anyone can find the organization and ask to join. Unlisted organizations are " +
-            "invite-only.",
-          style = MaterialTheme.typography.bodySmall,
-          color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
+    // "All users" is never listed in the directory.
+    if (!organization.isSynthetic)
+      Row(verticalAlignment = Alignment.CenterVertically) {
+        Checkbox(checked = isListed, onCheckedChange = { isListed = it })
+        Spacer(Modifier.width(4.dp))
+        Column {
+          Text("List in the directory", style = MaterialTheme.typography.bodyMedium)
+          Text(
+            "Anyone can find the organization and ask to join. Unlisted organizations are " +
+              "invite-only.",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+          )
+        }
       }
-    }
     Row(
       horizontalArrangement = Arrangement.spacedBy(12.dp),
       verticalAlignment = Alignment.CenterVertically,
@@ -1268,7 +1355,7 @@ private fun DangerZoneCard(
 }
 
 @Composable
-private fun DetailsCard(title: String, content: @Composable () -> Unit) {
+internal fun DetailsCard(title: String, content: @Composable () -> Unit) {
   ElevatedCard(
     colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.surface)
   ) {
