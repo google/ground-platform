@@ -78,6 +78,9 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.MembershipStatus
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.Organization
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.OrganizationRole
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.canChangeMember
+import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.ResolvedLibrary
+import org.groundplatform.v2.devtools.prototypeapp.ui.dashboard.CreateSurveyDialog
+import org.groundplatform.v2.devtools.prototypeapp.ui.dashboard.CreateSurveyRequest
 import org.groundplatform.v2.devtools.prototypeapp.ui.dashboard.SidePanelSeparator
 import org.groundplatform.v2.devtools.prototypeapp.ui.dashboard.SidePanelSeparatorWidth
 import org.groundplatform.v2.devtools.prototypeapp.ui.dashboard.WebSurveyCard
@@ -110,7 +113,7 @@ import org.groundplatform.v2.devtools.prototypeapp.ui.workbench.WebMobilePrototy
 internal fun OrganizationPage(
   state: PrototypeAppState,
   onOpenSurvey: (surveyId: String) -> Unit,
-  onCreateSurvey: (title: String, organizationId: String) -> Unit,
+  onCreateSurvey: (CreateSurveyRequest) -> Unit,
   onSignOut: () -> Unit = { state.signOut() },
 ) {
   val uiState by state.organization.uiState.collectAsState()
@@ -122,6 +125,7 @@ internal fun OrganizationPage(
     onSidePanelWidthChange = state.dashboard::updateSidePanelWidth,
     onOpenSurvey = onOpenSurvey,
     onCreateSurvey = onCreateSurvey,
+    surveyLibrary = dashboardState::surveyLibrary,
     header = { onCreateSurveyClick ->
       val organization = uiState.openOrganization
       WebAppHeader(
@@ -203,7 +207,8 @@ internal fun OrganizationPage(
   sidePanelWidthDp: Float,
   onSidePanelWidthChange: (Float) -> Unit,
   onOpenSurvey: (surveyId: String) -> Unit,
-  onCreateSurvey: (title: String, organizationId: String) -> Unit,
+  onCreateSurvey: (CreateSurveyRequest) -> Unit,
+  surveyLibrary: (organizationId: String?) -> ResolvedLibrary,
   header: @Composable (onCreateSurveyClick: () -> Unit) -> Unit,
 ) {
   val organization = uiState.openOrganization
@@ -346,13 +351,15 @@ internal fun OrganizationPage(
   }
 
   if (isCreatingSurvey && organization != null) {
-    CreateSurveyInOrganizationDialog(
-      organization = organization,
-      onCreate = { title ->
+    CreateSurveyDialog(
+      organizations = listOf(organization),
+      surveyLibrary = surveyLibrary,
+      onCreate = { request ->
         isCreatingSurvey = false
-        onCreateSurvey(title, organization.id)
+        onCreateSurvey(request)
       },
       onDismiss = { isCreatingSurvey = false },
+      organization = organization,
     )
   }
 }
@@ -494,40 +501,6 @@ private fun SurveysPane(
       )
     }
   }
-}
-
-@Composable
-private fun CreateSurveyInOrganizationDialog(
-  organization: Organization,
-  onCreate: (title: String) -> Unit,
-  onDismiss: () -> Unit,
-) {
-  var title by remember { mutableStateOf("") }
-  AlertDialog(
-    onDismissRequest = onDismiss,
-    title = { Text("Create survey in ${organization.name}") },
-    text = {
-      Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        OutlinedTextField(
-          value = title,
-          onValueChange = { title = it },
-          label = { Text("Survey title") },
-          singleLine = true,
-          modifier = Modifier.fillMaxWidth(),
-        )
-        Text(
-          "You stay the owner. Managers of ${organization.name} can also edit this survey, " +
-            "manage sharing, and export data.",
-          style = MaterialTheme.typography.bodySmall,
-          color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-      }
-    },
-    confirmButton = {
-      Button(onClick = { onCreate(title) }, enabled = title.isNotBlank()) { Text("Create") }
-    },
-    dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } },
-  )
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -792,8 +765,9 @@ private fun InviteMemberRow(actions: OrganizationActions, organization: Organiza
 // ---------------------------------------------------------------------------------------------
 
 /**
- * Name, description, website, and directory listing. Managers edit them in place and **Save** (or
- * **Discard**) their changes, and can delete the organization; everyone else sees them read-only.
+ * Name, description, website, type, country, and directory listing (the synthetic `"All users"`
+ * organization has no type or country). Managers edit them in place and **Save** (or **Discard**)
+ * their changes, and can delete the organization; everyone else sees them read-only.
  */
 @Composable
 private fun DetailsPane(
@@ -1185,11 +1159,19 @@ private fun EditableDetailsCard(actions: OrganizationActions, organization: Orga
     remember(organization.id, organization.websiteUrl) { mutableStateOf(organization.websiteUrl) }
   var isListed by
     remember(organization.id, organization.isListed) { mutableStateOf(organization.isListed) }
+  var type by
+    remember(organization.id, organization.organizationType) {
+      mutableStateOf(organization.organizationType)
+    }
+  var countryCode by
+    remember(organization.id, organization.countryCode) { mutableStateOf(organization.countryCode) }
   val isDirty =
     name != organization.name ||
       description != organization.description ||
       websiteUrl != organization.websiteUrl ||
-      isListed != organization.isListed
+      isListed != organization.isListed ||
+      type != organization.organizationType ||
+      countryCode != organization.countryCode
 
   DetailsCard("Profile") {
     OutlinedTextField(
@@ -1216,6 +1198,11 @@ private fun EditableDetailsCard(actions: OrganizationActions, organization: Orga
       singleLine = true,
       modifier = Modifier.fillMaxWidth(),
     )
+    // "All users" is platform-wide, so it has no type or country.
+    if (organization.hasTypeAndCountry) {
+      OrganizationTypeDropdown(type = type, onTypeChange = { type = it })
+      CountryPicker(countryCode = countryCode, onCountryCodeChange = { countryCode = it })
+    }
     // "All users" is never listed in the directory.
     if (!organization.isSynthetic)
       Row(verticalAlignment = Alignment.CenterVertically) {
@@ -1243,6 +1230,8 @@ private fun EditableDetailsCard(actions: OrganizationActions, organization: Orga
             description = description,
             websiteUrl = websiteUrl,
             isListed = isListed,
+            organizationType = type,
+            countryCode = countryCode,
           )
         },
         enabled = isDirty && name.isNotBlank(),
@@ -1255,6 +1244,8 @@ private fun EditableDetailsCard(actions: OrganizationActions, organization: Orga
           description = organization.description
           websiteUrl = organization.websiteUrl
           isListed = organization.isListed
+          type = organization.organizationType
+          countryCode = organization.countryCode
         },
         enabled = isDirty,
       ) {
@@ -1277,6 +1268,10 @@ private fun ReadOnlyDetailsCard(organization: Organization) {
     DetailRow("Name", organization.name)
     DetailRow("Description", organization.description.ifBlank { "No description yet." })
     DetailRow("Website", organization.websiteUrl.ifBlank { "Not provided." })
+    if (organization.hasTypeAndCountry) {
+      DetailRow("Type", organizationTypeText(organization.organizationType))
+      DetailRow("Country", countryText(organization.countryCode))
+    }
     DetailRow(
       "Directory",
       if (organization.isListed) "Listed · anyone can find it and ask to join"

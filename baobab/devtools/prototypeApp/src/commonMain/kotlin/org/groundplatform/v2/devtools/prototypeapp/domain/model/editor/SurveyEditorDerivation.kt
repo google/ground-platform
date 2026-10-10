@@ -70,6 +70,8 @@ object SurveyEditorDerivation {
     mapLayers: List<MapLayerItem>,
     entities: List<GeospatialEntityItem>,
     conceptLinks: List<FormConceptLinks> = emptyList(),
+    purposeIds: List<String> = emptyList(),
+    programIds: List<String> = emptyList(),
   ): SurveyEditorDraft {
     val anchor = SurveyMapAnchor.forSurvey(surveyId)
     val datasets =
@@ -107,10 +109,15 @@ object SurveyEditorDerivation {
       }
       SurveyEditorForm(key, editor)
     }
+    val blank = SurveyEditorDraft.blank(surveyId)
     return SurveyEditorDraft.forSurvey(
       surveyId = surveyId,
       stored =
-        SurveyEditorDraft.blank(surveyId).copy(forms = editorForms, datasets = datasets.toList()),
+        blank.copy(
+          details = blank.details.copy(purposeIds = purposeIds, programIds = programIds),
+          forms = editorForms,
+          datasets = datasets.toList(),
+        ),
       survey = survey,
     )
   }

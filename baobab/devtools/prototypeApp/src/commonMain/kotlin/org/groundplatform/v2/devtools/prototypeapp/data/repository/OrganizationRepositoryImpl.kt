@@ -60,10 +60,19 @@ class OrganizationRepositoryImpl(private val store: LocalStore) : OrganizationRe
     transform: (Organization) -> Organization,
   ): Organization? = store.transaction {
     // Profile edits must not change the identity or membership through this path, and the
-    // synthetic "All users" organization always stays unlisted.
+    // synthetic "All users" organization always stays unlisted, with no type or country.
     updateOrganization(organizationId) { existing ->
       val updated = transform(existing).copy(id = existing.id, members = existing.members)
-      if (existing.isSynthetic) updated.copy(isListed = false, isSynthetic = true) else updated
+      if (existing.isSynthetic) {
+        updated.copy(
+          isListed = false,
+          isSynthetic = true,
+          organizationType = null,
+          countryCode = null,
+        )
+      } else {
+        updated
+      }
     }
   }
 

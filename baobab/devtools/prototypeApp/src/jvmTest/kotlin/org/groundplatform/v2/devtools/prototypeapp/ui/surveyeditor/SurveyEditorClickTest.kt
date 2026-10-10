@@ -108,7 +108,7 @@ class SurveyEditorClickTest {
     waitForIdle()
 
     onNodeWithText("Empty form").assertIsDisplayed()
-    onNodeWithText("Use a template").assertIsDisplayed()
+    onNodeWithText("From template…").assertIsDisplayed()
     onNodeWithText("Import from XML").assertIsDisplayed()
 
     onNodeWithText("Empty form").performClick()
@@ -151,7 +151,7 @@ class SurveyEditorClickTest {
         }
       }
 
-      onNodeWithText(FORM_TEMPLATES_COMING_SOON).assertIsDisplayed()
+      onNodeWithText("From template…").assertIsDisplayed()
       onNodeWithText("Import from XML").performClick()
       waitForIdle()
 

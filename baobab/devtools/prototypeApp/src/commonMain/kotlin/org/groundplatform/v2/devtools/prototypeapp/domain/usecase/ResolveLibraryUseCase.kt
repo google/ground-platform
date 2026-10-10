@@ -57,6 +57,21 @@ data class ResolvedLibrary(
 
   val pickablePurposePacks: List<PurposePack>
     get() = purposePacks.filter { it.status != LibraryStatus.DEPRECATED }
+
+  /**
+   * Templates of the Purpose Packs [packIds] (in pack, then template order, each once). Packs and
+   * templates not in this library (hidden, or from another organization) are skipped.
+   */
+  fun templatesForPurposes(packIds: List<String>): List<FormTemplate> =
+    packIds
+      .mapNotNull(::purposePack)
+      .flatMap { it.formTemplateIds }
+      .distinct()
+      .mapNotNull(::formTemplate)
+
+  /** Concepts linked by the templates of the Purpose Packs [packIds]. */
+  fun conceptIdsForPurposes(packIds: List<String>): Set<String> =
+    templatesForPurposes(packIds).flatMap { it.conceptIds }.toSet()
 }
 
 /**

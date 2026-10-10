@@ -93,9 +93,15 @@ message SurveyDef {
   // Survey-specific launch and CTA configurations for forms in `forms`.
   repeated FormLaunchConfig form_launch_configs = 18;
 
-  // Fields 19 and 20 are planned for the survey's purposes and programs
-  // (`purpose_ids`, `program_ids`); see
+  // Purpose Packs selected for this survey ("What will this data be used
+  // for?"): global pack IDs (e.g., "eudr_due_diligence") or organization pack
+  // IDs ("org.<organization_id>.<name>"). Editable in Survey details; see
   // docs/technical/model/library/02-templates-and-purpose-packs.md.
+  repeated string purpose_ids = 19;
+
+  // Programs the survey reports to (e.g., "eudr", "uk_frc"), offered from the
+  // selected Purpose Packs' `program_ids`.
+  repeated string program_ids = 20;
 
   // Dictionary concept linked to each form question, per form. Authoritative
   // inside Ground: on export each link is also written as a `ground:concept`

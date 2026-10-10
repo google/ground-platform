@@ -24,6 +24,7 @@ import org.groundplatform.v2.devtools.prototypeapp.data.datasource.local.store.s
 import org.groundplatform.v2.devtools.prototypeapp.data.repository.OrganizationRepositoryImpl
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.CachedProfile
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.Organization
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.OrganizationType
 
 class CreateOrganizationUseCaseTest {
   @Test
@@ -83,5 +84,90 @@ class CreateOrganizationUseCaseTest {
 
     // The ID is now taken.
     assertNull(runNow { useCase(org, "maya@example.org", null) })
+  }
+
+  @Test
+  fun newOrganization_keepsTheType_andNormalizesTheCountryCode() {
+    val useCase = CreateOrganizationUseCase(OrganizationRepositoryImpl(seededStore()))
+
+    val org =
+      useCase.newOrganization("Co-op", "", true, emptyList(), OrganizationType.COOPERATIVE, " ke ")
+    assertEquals(OrganizationType.COOPERATIVE, org.organizationType)
+    assertEquals("KE", org.countryCode)
+
+    val unspecified = useCase.newOrganization("Lab", "", true, emptyList(), null, "   ")
+    assertNull(unspecified.organizationType)
+    assertNull(unspecified.countryCode)
+    // Both default to not specified.
+    assertNull(useCase.newOrganization("Lab", "", true, emptyList()).countryCode)
+  }
+
+  @Test
+  fun invoke_persistsTheTypeAndCountry() {
+    val repository = OrganizationRepositoryImpl(seededStore())
+    val useCase = CreateOrganizationUseCase(repository)
+    val existing = runNow { repository.getOrganizations() }
+    val org =
+      useCase.newOrganization(
+        "Andes Research",
+        "",
+        true,
+        existing,
+        OrganizationType.RESEARCH,
+        countryCode = "pe",
+      )
+
+    val stored = assertNotNull(runNow { useCase(org, "maya@example.org", null) })
+    assertEquals(OrganizationType.RESEARCH, stored.organizationType)
+    assertEquals("PE", stored.countryCode)
+    val reloaded = assertNotNull(runNow { repository.getOrganization(org.id) })
+    assertEquals(OrganizationType.RESEARCH, reloaded.organizationType)
+    assertEquals("PE", reloaded.countryCode)
+    assertEquals("Peru (PE)", reloaded.country?.label)
+  }
+
+  @Test
+  fun invoke_acceptsABlankCountry_asNotSpecified() {
+    val repository = OrganizationRepositoryImpl(seededStore())
+    val useCase = CreateOrganizationUseCase(repository)
+
+    val stored =
+      assertNotNull(
+        runNow {
+          useCase(Organization(id = "org-x", name = "X", countryCode = " "), "a@b.org", null)
+        }
+      )
+    assertNull(stored.countryCode)
+    assertNull(stored.organizationType)
+  }
+
+  @Test
+  fun invoke_refusesAnUnknownCountryCode_andStoresNothing() {
+    val repository = OrganizationRepositoryImpl(seededStore())
+    val useCase = CreateOrganizationUseCase(repository)
+    val before = runNow { repository.getOrganizations() }.size
+
+    for (code in listOf("XX", "Kenya", "KEN", "UK")) {
+      val org = Organization(id = "org-$code", name = code, countryCode = code)
+      assertNull(runNow { useCase(org, "a@b.org", null) }, code)
+    }
+    assertEquals(before, runNow { repository.getOrganizations() }.size)
+  }
+
+  @Test
+  fun countryCodeError_allowsBlankAndIsoCodes_andRejectsAnythingElse() {
+    assertNull(CreateOrganizationUseCase.countryCodeError(null))
+    assertNull(CreateOrganizationUseCase.countryCodeError(""))
+    assertNull(CreateOrganizationUseCase.countryCodeError("  "))
+    assertNull(CreateOrganizationUseCase.countryCodeError("KE"))
+    assertNull(CreateOrganizationUseCase.countryCodeError(" vn "))
+    assertEquals(
+      CreateOrganizationUseCase.INVALID_COUNTRY_ERROR,
+      CreateOrganizationUseCase.countryCodeError("ZZ"),
+    )
+    assertEquals(
+      CreateOrganizationUseCase.INVALID_COUNTRY_ERROR,
+      CreateOrganizationUseCase.countryCodeError("Kenya (KE)"),
+    )
   }
 }

@@ -13,6 +13,7 @@
  */
 package org.groundplatform.v2.devtools.prototypeapp.domain.usecase
 
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.FormTemplate
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.LibraryConcept
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.LibraryIds
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.LibraryStatus
@@ -133,6 +134,39 @@ class ManageLibraryUseCase(private val libraryRepository: LibraryRepository) {
 
   /** Why [title] isn't a valid template or Purpose Pack title, or `null`. */
   fun titleError(title: String): String? = if (title.isBlank()) "Enter a title." else null
+
+  /**
+   * The ID of a new template titled [title] in [library]: `org.<organizationId>.<name>` (or
+   * `<name>` in the global library), with `_2`, `_3`, … added when a template or Purpose Pack
+   * already uses it (they share hidden-entry IDs).
+   */
+  fun newTemplateId(library: OrganizationLibrary, title: String): String {
+    val name = LibraryIds.nameFrom(title, "template")
+    val taken = (library.formTemplates.map { it.id } + library.purposePacks.map { it.id }).toSet()
+    fun idFor(candidate: String) =
+      if (library.isGlobal) candidate
+      else LibraryIds.organizationEntryId(library.organizationId, candidate)
+    var candidate = name
+    var n = 2
+    // "org" is reserved for organization IDs, so it can't be a global entry ID.
+    while (
+      idFor(candidate) in taken ||
+        LibraryIds.entryIdError(idFor(candidate), library.organizationId) != null
+    ) {
+      candidate = "${name}_${n++}"
+    }
+    return idFor(candidate)
+  }
+
+  /**
+   * Adds [template] (a new ID from [newTemplateId]) to its organization's library. Returns the
+   * stored library, or `null` if it couldn't be saved.
+   */
+  suspend fun saveTemplate(template: FormTemplate): OrganizationLibrary? =
+    libraryRepository.updateLibrary(template.organizationId) { library ->
+      if (library.formTemplate(template.id) != null) library
+      else library.copy(formTemplates = library.formTemplates + template)
+    }
 
   /** Renames the template [templateId] and replaces its English description. */
   suspend fun renameTemplate(

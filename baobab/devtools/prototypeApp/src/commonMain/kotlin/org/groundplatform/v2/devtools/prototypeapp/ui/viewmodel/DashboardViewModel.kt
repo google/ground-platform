@@ -24,6 +24,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -33,6 +34,7 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.EntityDetailsPan
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.ListFilterTab
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.MutationLogItem
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.Organization
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.OrganizationLibrary
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyPreviewItem
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.UploadStatusFilter
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.matchesUploadsFilters
@@ -40,11 +42,13 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.newestFirst
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.outboxNewestFirst
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.uploadedNewestFirst
 import org.groundplatform.v2.devtools.prototypeapp.domain.repository.AuthRepository
+import org.groundplatform.v2.devtools.prototypeapp.domain.repository.LibraryRepository
 import org.groundplatform.v2.devtools.prototypeapp.domain.repository.MutationRepository
 import org.groundplatform.v2.devtools.prototypeapp.domain.repository.OrganizationRepository
 import org.groundplatform.v2.devtools.prototypeapp.domain.repository.SurveyContent
 import org.groundplatform.v2.devtools.prototypeapp.domain.repository.SurveyRepository
 import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.CreateSurveyUseCase
+import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.ResolveLibraryUseCase
 import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.SyncMutationsUseCase
 import org.groundplatform.v2.devtools.prototypeapp.ui.state.DashboardEvent
 import org.groundplatform.v2.devtools.prototypeapp.ui.state.DashboardUiState
@@ -66,7 +70,12 @@ interface DashboardActions {
    * Creates a new, empty survey owned by the signed-in user, optionally in [organizationId], makes
    * it active, and returns its ID. The caller normally opens the Survey editor next.
    */
-  fun createSurvey(title: String, organizationId: String? = null): String
+  fun createSurvey(
+    title: String,
+    organizationId: String? = null,
+    purposeIds: List<String> = emptyList(),
+    programIds: List<String> = emptyList(),
+  ): String
 
   // --- Left-hand side panel ---
 
@@ -186,6 +195,9 @@ class DashboardViewModel(
   private val createSurveyUseCase: CreateSurveyUseCase,
   private val syncMutationsUseCase: SyncMutationsUseCase,
   private val scope: CoroutineScope,
+  /** Organization libraries, whose Purpose Packs the Create survey dialog offers. */
+  libraryRepository: LibraryRepository? = null,
+  private val resolveLibraryUseCase: ResolveLibraryUseCase = ResolveLibraryUseCase(),
 ) : DashboardActions {
   /** Everything the dashboard reads from the local data store. */
   private data class Data(
@@ -195,6 +207,7 @@ class DashboardViewModel(
     val organizations: List<Organization> = emptyList(),
     val profile: AuthProfile = AuthProfile("", "", ""),
     val mutations: List<MutationLogItem> = emptyList(),
+    val libraries: Map<String, OrganizationLibrary> = emptyMap(),
   )
 
   /** Session (non-persisted) state of the dashboard slice. */
@@ -215,22 +228,27 @@ class DashboardViewModel(
 
   private val data: StateFlow<Data> =
     combine(
-        surveyRepository.observeSurveys(),
-        surveyRepository.observeActiveSurveyId().flatMapLatest { id ->
-          surveyRepository.observeSurveyContent(id).map { id to it }
+        combine(
+          surveyRepository.observeSurveys(),
+          surveyRepository.observeActiveSurveyId().flatMapLatest { id ->
+            surveyRepository.observeSurveyContent(id).map { id to it }
+          },
+          organizationRepository.observeOrganizations(),
+          authRepository.observeSession(),
+          mutationRepository.observeMutations(),
+        ) { surveys, (activeId, content), organizations, auth, mutations ->
+          Data(
+            surveys = surveys,
+            activeSurveyId = activeId,
+            content = content,
+            organizations = organizations,
+            profile = auth.profile,
+            mutations = mutations,
+          )
         },
-        organizationRepository.observeOrganizations(),
-        authRepository.observeSession(),
-        mutationRepository.observeMutations(),
-      ) { surveys, (activeId, content), organizations, auth, mutations ->
-        Data(
-          surveys = surveys,
-          activeSurveyId = activeId,
-          content = content,
-          organizations = organizations,
-          profile = auth.profile,
-          mutations = mutations,
-        )
+        libraryRepository?.observeLibraries() ?: flowOf(emptyMap()),
+      ) { data, libraries ->
+        data.copy(libraries = libraries)
       }
       .stateIn(scope, SharingStarted.Eagerly, Data())
 
@@ -251,11 +269,17 @@ class DashboardViewModel(
 
   private fun buildUiState(data: Data, session: Session): DashboardUiState {
     val mutations = data.mutations
+    val memberOrganizationIds =
+      data.organizations.filter { it.isMember(data.profile.email) }.map { it.id }
     return DashboardUiState(
       surveys = data.surveys,
       activeSurveyId = data.activeSurveyId,
       organizations = data.organizations,
       signedInUserEmail = data.profile.email,
+      surveyLibraries =
+        (listOf<String?>(null) + memberOrganizationIds).associate { id ->
+          id.orEmpty() to resolveLibraryUseCase.forOrganization(data.libraries, id)
+        },
       entities = data.content.entities,
       mapLayers = data.content.mapLayers,
       mutations = mutations,
@@ -344,7 +368,12 @@ class DashboardViewModel(
     _events.tryEmit(DashboardEvent.SurveyActivated(surveyId))
   }
 
-  override fun createSurvey(title: String, organizationId: String?): String {
+  override fun createSurvey(
+    title: String,
+    organizationId: String?,
+    purposeIds: List<String>,
+    programIds: List<String>,
+  ): String {
     val current = data.value
     val survey =
       createSurveyUseCase.newSurvey(
@@ -354,7 +383,14 @@ class DashboardViewModel(
           organizationId?.let { id -> current.organizations.firstOrNull { it.id == id } },
         ownerEmail = current.profile.email,
       )
-    scope.launch { createSurveyUseCase(survey, ownerName = current.profile.displayName) }
+    scope.launch {
+      createSurveyUseCase(
+        survey,
+        ownerName = current.profile.displayName,
+        purposeIds = purposeIds,
+        programIds = programIds,
+      )
+    }
     session.update { it.copy(selectedLayerDatasetId = null) }
     _events.tryEmit(DashboardEvent.SurveyActivated(survey.id))
     _events.tryEmit(DashboardEvent.Notice("Created survey \"${survey.title}\"."))

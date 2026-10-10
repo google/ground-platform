@@ -44,7 +44,10 @@ interface OrganizationRepository {
     creatorProfile: CachedProfile? = null,
   ): Organization?
 
-  /** Replaces the organization's profile fields (name, description, URL, logo, listing). */
+  /**
+   * Replaces the organization's profile fields (name, description, URL, logo, listing, type, and
+   * country). The synthetic `"All users"` organization stays unlisted, with no type or country.
+   */
   suspend fun updateOrganization(
     organizationId: String,
     transform: (Organization) -> Organization,

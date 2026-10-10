@@ -24,6 +24,7 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyPreviewIte
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.UploadStatusFilter
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.entityDatasetLayersIn
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.relatedEntityForPropertyValue
+import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.ResolvedLibrary
 
 /**
  * Screen state of the web dashboard (panel layout, data tables, layer selection, entity details
@@ -36,6 +37,11 @@ data class DashboardUiState(
   val activeSurveyId: String = "",
   val organizations: List<Organization> = emptyList(),
   val signedInUserEmail: String = "",
+  /**
+   * Resolved library of a new survey in each organization the signed-in user belongs to, keyed by
+   * organization ID (`""` for a personal survey), for the Create survey dialog's Purpose Packs.
+   */
+  val surveyLibraries: Map<String, ResolvedLibrary> = emptyMap(),
   /** Map features of the active survey (every record, with or without geometry). */
   val entities: List<GeospatialEntityItem> = emptyList(),
   /** The active survey's map layers, styled with the published Survey editor draft (if any). */
@@ -93,6 +99,13 @@ data class DashboardUiState(
   /** Whether the active survey exists in the store, so survey pages can open it. */
   val hasOpenableActiveSurvey: Boolean
     get() = surveys.any { it.id == activeSurveyId }
+
+  /**
+   * Resolved library of a new survey in [organizationId] (or a personal survey when `null`): its
+   * pickable Purpose Packs are the organization's, then the global ones not hidden.
+   */
+  fun surveyLibrary(organizationId: String?): ResolvedLibrary =
+    surveyLibraries[organizationId.orEmpty()] ?: ResolvedLibrary(organizationId = organizationId)
 
   /** Organizations the signed-in user is an active member of. */
   val signedInUserOrganizations: List<Organization>

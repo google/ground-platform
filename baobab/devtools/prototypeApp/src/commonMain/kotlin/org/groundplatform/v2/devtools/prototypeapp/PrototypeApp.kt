@@ -250,8 +250,8 @@ fun PrototypeApp(
                 state.openSurveyOnWeb(surveyId)
                 state.selectWorkbenchPage(PrototypeWorkbenchPage.WEB_DASHBOARD)
               },
-              onCreateSurvey = { title, organizationId ->
-                state.createSurvey(title = title, organizationId = organizationId)
+              onCreateSurvey = { request ->
+                state.createSurvey(request)
                 state.selectWorkbenchPage(PrototypeWorkbenchPage.SURVEY_EDITOR)
               },
               onSignOut = {
@@ -266,8 +266,8 @@ fun PrototypeApp(
                 state.openSurveyOnWeb(surveyId)
                 state.selectWorkbenchPage(PrototypeWorkbenchPage.WEB_DASHBOARD)
               },
-              onCreateSurvey = { title, organizationId ->
-                state.createSurvey(title = title, organizationId = organizationId)
+              onCreateSurvey = { request ->
+                state.createSurvey(request)
                 state.selectWorkbenchPage(PrototypeWorkbenchPage.SURVEY_EDITOR)
               },
               onSignOut = {

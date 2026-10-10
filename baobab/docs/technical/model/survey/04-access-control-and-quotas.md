@@ -106,6 +106,12 @@ top of per-survey ACLs rather than replacing them:
 *   There is no organization owner. The last Manager cannot be demoted or
     removed. Deleting an organization clears `organization_id` on its surveys,
     which become personal surveys of their owners; no survey data is deleted.
+*   Besides its name, description, website, and logo, an organization's profile
+    optionally records its kind (`organization_type`: government agency,
+    cooperative, IPLC organization, NGO, company, research institution, or
+    other) and the country it's based in (`country_code`, an ISO 3166-1
+    alpha-2 code such as `KE`). Both are informational only and grant no
+    access. The synthetic "All users" organization leaves them unset.
 
 A person's effective role in a survey is the strongest of: owner →
 `SURVEY_ORGANIZER`; accepted ACL role; organization Manager →

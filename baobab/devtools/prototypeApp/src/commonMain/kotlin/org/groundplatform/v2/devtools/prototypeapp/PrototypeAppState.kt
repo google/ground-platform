@@ -73,6 +73,7 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.parsePlaceCoordi
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.relatedEntityForPropertyValue
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.singularTypeLabelOf
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.toClusterFeatures
+import org.groundplatform.v2.devtools.prototypeapp.ui.dashboard.CreateSurveyRequest
 import org.groundplatform.v2.devtools.prototypeapp.ui.map.DraftGeometry
 import org.groundplatform.v2.devtools.prototypeapp.ui.map.EntityGeometry
 import org.groundplatform.v2.devtools.prototypeapp.ui.map.FormGeometryOverlay
@@ -198,6 +199,8 @@ class PrototypeAppState(
       createSurveyUseCase = dataHolder.createSurveyUseCase,
       syncMutationsUseCase = dataHolder.syncMutationsUseCase,
       scope = dataHolder.scope,
+      libraryRepository = dataHolder.libraryRepository,
+      resolveLibraryUseCase = dataHolder.resolveLibraryUseCase,
     )
 
   private var dashboardState by mutableStateOf(dashboard.uiState.value)
@@ -1940,6 +1943,15 @@ class PrototypeAppState(
    */
   fun createSurvey(title: String, organizationId: String? = null): String =
     dashboard.createSurvey(title, organizationId)
+
+  /** Creates a survey from the Create survey dialog, seeded with its Purpose Packs' forms. */
+  fun createSurvey(request: CreateSurveyRequest): String =
+    dashboard.createSurvey(
+      title = request.title,
+      organizationId = request.organizationId,
+      purposeIds = request.purposeIds,
+      programIds = request.programIds,
+    )
 
   /** Updates the title and description of the currently active survey. */
   fun updateActiveSurveyDetails(title: String, description: String) =

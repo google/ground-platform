@@ -27,7 +27,7 @@ While ViewModels may call single repository methods directly for simple CRUD or 
   - `CompleteFormSubmissionUseCase`: Extracts geometries and properties from completed form answers and atomically writes the new record/submission, updates entity status/geometry, and appends an upload mutation inside `TransactionRunner`.
 - **Survey & Organization Authoring**:
   - `CreateSurveyUseCase`: Constructs and persists a new survey along with its initial forms and map layers.
-  - `CreateOrganizationUseCase` & `ManageOrganizationMembersUseCase`: Validates and executes organization creation, member invitations, and role updates.
+  - `CreateOrganizationUseCase` & `ManageOrganizationMembersUseCase`: Validates and executes organization creation (including the optional type and ISO 3166-1 alpha-2 country code, refusing unknown codes), member invitations, and role updates.
   - `ManageLibraryUseCase`, `ResolveLibraryUseCase` & `SearchConceptsUseCase`: Validate and apply organization library edits (concepts, templates, Purpose Packs, hidden global entries), resolve a survey's library (its organization's entries, then global ones), and search concepts across languages with accent folding and typo tolerance.
   - `GenerateSamplePlotsUseCase`: Computes systematic grid or random sample plot geometries within a survey area polygon.
 - **Map, Wayfinding & Synchronization**:

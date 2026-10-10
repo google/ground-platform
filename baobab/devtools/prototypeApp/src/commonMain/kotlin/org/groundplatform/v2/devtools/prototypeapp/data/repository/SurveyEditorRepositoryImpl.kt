@@ -84,6 +84,8 @@ class SurveyEditorRepositoryImpl(
         config.copy(
           formsById = config.formsById - removedIds + editorForms,
           formConceptLinks = FormConceptLinkSync.toFormConceptLinks(draft.forms.map { it.form }),
+          purposeIds = draft.details.purposeIds,
+          programIds = draft.details.programIds,
         ),
       )
 
@@ -151,6 +153,8 @@ class SurveyEditorRepositoryImpl(
         mapLayers = layers,
         entities = entities,
         conceptLinks = config?.formConceptLinks.orEmpty(),
+        purposeIds = config?.purposeIds.orEmpty(),
+        programIds = config?.programIds.orEmpty(),
       )
     }
 }

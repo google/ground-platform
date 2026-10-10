@@ -37,6 +37,7 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.MembershipStatus
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.Organization
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.OrganizationRelation
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.OrganizationRole
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.OrganizationType
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.relationTo
 import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.CreateOrganizationUseCase
 import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.InviteOrganizationMemberUseCase
@@ -156,12 +157,115 @@ class OrganizationViewModelTest {
       " Forests ",
       " https://kfs.go.ke ",
       false,
+      OrganizationType.GOVERNMENT_AGENCY,
+      "KE",
     )
     val updated = f.kfs
     assertEquals("KFS", updated.name)
     assertEquals("Forests", updated.description)
     assertEquals("https://kfs.go.ke", updated.websiteUrl)
     assertFalse(updated.isListed)
+  }
+
+  @Test
+  fun createOrganization_persistsTheTypeAndCountry() {
+    val f = Fixture()
+    val id =
+      f.viewModel.createOrganization(
+        name = "Sahel Growers",
+        description = "",
+        isListed = true,
+        organizationType = OrganizationType.COOPERATIVE,
+        countryCode = "sn",
+      )
+    val created = f.organization(id)
+    assertEquals(OrganizationType.COOPERATIVE, created.organizationType)
+    assertEquals("SN", created.countryCode)
+    assertEquals("Senegal (SN)", created.country?.label)
+
+    // Both are optional.
+    val plain = f.organization(f.viewModel.createOrganization("Plain", "", true))
+    assertNull(plain.organizationType)
+    assertNull(plain.countryCode)
+  }
+
+  @Test
+  fun createOrganization_withAnUnknownCountry_storesNothing_andNotices() {
+    val f = Fixture()
+    val before = f.uiState.organizations.size
+    val id = f.viewModel.createOrganization("Nowhere", "", true, OrganizationType.OTHER, "QQ")
+    assertNull(f.uiState.organization(id))
+    assertEquals(before, f.uiState.organizations.size)
+    assertEquals("Couldn't create \"Nowhere\". Choose a country from the list.", f.uiState.notice)
+    assertNull(f.uiState.openOrganizationId)
+  }
+
+  @Test
+  fun updateOrganizationDetails_persistsTypeAndCountry_andBlankClearsTheCountry() {
+    val f = Fixture()
+    val kfs = f.kfs
+    f.viewModel.updateOrganizationDetails(
+      kfs.id,
+      kfs.name,
+      kfs.description,
+      kfs.websiteUrl,
+      kfs.isListed,
+      OrganizationType.RESEARCH,
+      " ug ",
+    )
+    assertEquals(OrganizationType.RESEARCH, f.kfs.organizationType)
+    assertEquals("UG", f.kfs.countryCode)
+
+    f.viewModel.updateOrganizationDetails(
+      kfs.id,
+      kfs.name,
+      kfs.description,
+      kfs.websiteUrl,
+      kfs.isListed,
+      null,
+      "",
+    )
+    assertNull(f.kfs.organizationType)
+    assertNull(f.kfs.countryCode)
+  }
+
+  @Test
+  fun updateOrganizationDetails_withAnUnknownCountry_savesNothing_andNotices() {
+    val f = Fixture()
+    val before = f.kfs
+    f.viewModel.updateOrganizationDetails(
+      before.id,
+      "Renamed",
+      before.description,
+      before.websiteUrl,
+      before.isListed,
+      OrganizationType.NGO,
+      "Kenya",
+    )
+    assertEquals(before, f.kfs)
+    assertEquals("Couldn't save. Choose a country from the list.", f.uiState.notice)
+  }
+
+  @Test
+  fun allUsers_hidesTypeAndCountry_andIgnoresEditsToThem() {
+    val f = Fixture()
+    val allUsers = f.organization(PrototypeFakeOrganizationsData.ALL_USERS)
+    assertFalse(allUsers.hasTypeAndCountry)
+    assertTrue(f.kfs.hasTypeAndCountry)
+
+    f.viewModel.updateOrganizationDetails(
+      allUsers.id,
+      allUsers.name,
+      "Platform-wide",
+      allUsers.websiteUrl,
+      allUsers.isListed,
+      OrganizationType.NGO,
+      "KE",
+    )
+    val updated = f.organization(PrototypeFakeOrganizationsData.ALL_USERS)
+    assertEquals("Platform-wide", updated.description)
+    assertNull(updated.organizationType)
+    assertNull(updated.countryCode)
   }
 
   @Test

@@ -237,4 +237,25 @@ class SurveyEditorRepositoryTest {
     )
     assertTrue(questions.filter { it.name != question.name }.all { it.conceptLink == null })
   }
+
+  @Test
+  fun purposes_arePublishedToTheConfig_andDerivedBack() {
+    val surveyId = "survey-household-past-individuals"
+    val opened = draft(surveyId)
+    val withPurposes =
+      opened.copy(
+        details =
+          opened.details.copy(purposeIds = listOf("ferm_restoration"), programIds = listOf("ferm"))
+      )
+    runNow { repository.saveDraft(surveyId, withPurposes) }
+    val config = assertNotNull(runNow { store.transaction { surveyConfig(surveyId) } })
+    assertEquals(listOf("ferm_restoration"), config.purposeIds)
+    assertEquals(listOf("ferm"), config.programIds)
+
+    val fresh = seededStore()
+    runNow { fresh.transaction { putSurveyConfig(surveyId, config) } }
+    val derived = runNow { SurveyEditorRepositoryImpl(fresh).getDraft(surveyId) }
+    assertEquals(listOf("ferm_restoration"), derived.details.purposeIds)
+    assertEquals(listOf("ferm"), derived.details.programIds)
+  }
 }

@@ -1364,6 +1364,7 @@ purpose_packs {
   form_template_ids: "eudr_plot_registration"
   export_profile_ids: "eudr_geojson"
   program_ids: "eudr"
+  program_ids: "uk_frc"
   goals: "deforestation_free_supply_chains"
   pillar: MITIGATION
   status: STABLE

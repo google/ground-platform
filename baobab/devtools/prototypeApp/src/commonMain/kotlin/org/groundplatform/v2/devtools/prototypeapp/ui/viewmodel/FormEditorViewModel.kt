@@ -292,6 +292,15 @@ interface FormEditorActions {
   fun linkImportMatches()
 
   fun dismissImportMatches()
+
+  // --- Templates ---
+
+  /**
+   * Saves a copy of this Form, with its concept links and choice codes, as a template titled
+   * [title] in the survey organization's library (or the global library when [toGlobal]). Returns
+   * why it can't be saved, or `null`.
+   */
+  fun saveAsTemplate(title: String, description: String, toGlobal: Boolean = false): String?
 }
 
 /**
@@ -321,6 +330,15 @@ class FormEditorViewModel(
     "This survey has no organization dictionary."
   },
   private val searchConcepts: SearchConceptsUseCase = SearchConceptsUseCase(),
+  /**
+   * Saves a Form as a template (form, title, description, to the global library); returns an error
+   * message, or `null` when it was saved.
+   */
+  private val saveTemplate:
+    (form: EditorForm, title: String, description: String, toGlobal: Boolean) -> String? =
+    { _, _, _, _ ->
+      "Templates can only be saved from a survey in an organization."
+    },
 ) : FormEditorActions {
   /** Session (non-persisted) state of the Form editor. */
   private data class Session(
@@ -1182,6 +1200,9 @@ class FormEditorViewModel(
   override fun dismissImportMatches() {
     session.update { it.copy(importMatches = emptyList()) }
   }
+
+  override fun saveAsTemplate(title: String, description: String, toGlobal: Boolean): String? =
+    saveTemplate(form, title, description, toGlobal)
 
   // --- Helpers ---
 

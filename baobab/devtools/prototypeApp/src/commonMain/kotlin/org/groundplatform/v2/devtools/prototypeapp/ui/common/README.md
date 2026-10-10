@@ -24,6 +24,7 @@ Components in `ui/common/` have no coupling to a single feature's `*UiState` or 
 
 - **Design System & Visual Widgets**:
   - `GroundChips.kt`, `GeoIdText.kt`, `GoogleLogo.kt`: Shared typography, status chips, formatted Geo ID badges, and branding elements.
+  - `PurposePickers.kt`: Purpose Pack card grid and program chips, shared by the Create survey dialog and Survey details.
   - `HorizontalScrollWithMouseDrag.kt`: Pointer-input modifier enabling click-and-drag horizontal scrolling on desktop/web targets.
 - **Foreground UI Platform Bridges (`expect` / `actual`)**:
   - `PlatformFileDownload.kt` & `PlatformTextFilePicker.kt`: Browser/JVM file save and open dialogs triggered directly by user gestures (e.g., GeoJSON layer import or XForms XML download).

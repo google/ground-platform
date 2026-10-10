@@ -26,8 +26,13 @@ data class FormLibraryContext(
   val library: ResolvedLibrary = ResolvedLibrary(organizationId = null),
   /** Name of the survey's organization, or `null` for a personal survey. */
   val organizationName: String? = null,
-  /** Whether the signed-in user manages the survey's organization (and so its dictionary). */
+  /**
+   * Whether the signed-in user manages the survey's organization, and so may add concepts and
+   * templates to its library.
+   */
   val canAddToDictionary: Boolean = false,
+  /** Whether the signed-in user manages `"All users"`, and so may add to the global library. */
+  val canSaveToGlobalLibrary: Boolean = false,
   /** Language that concept labels and code-list values are shown in (the survey's default). */
   val language: String = LocalizedText.DEFAULT_LANGUAGE,
   /** Concepts used by the survey's purposes, ranked first in suggestions. */

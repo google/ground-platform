@@ -105,6 +105,7 @@ import org.groundplatform.v2.core.forms.ui.GroundBadgeTone
 import org.groundplatform.v2.core.forms.ui.GroundTonalBadge
 import org.groundplatform.v2.devtools.prototypeapp.PrototypeAppState
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.InvitationStatus
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.LibraryPrograms
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.Organization
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyPlaceItem
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.CollaboratorRole
@@ -115,6 +116,8 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.PeerDataV
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SharingPolicy
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SurveyArea
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SurveyAreaGeometry
+import org.groundplatform.v2.devtools.prototypeapp.ui.common.ProgramChips
+import org.groundplatform.v2.devtools.prototypeapp.ui.common.PurposePackGrid
 import org.groundplatform.v2.devtools.prototypeapp.ui.dashboard.SidePanelSeparator
 import org.groundplatform.v2.devtools.prototypeapp.ui.dashboard.SidePanelSeparatorWidth
 import org.groundplatform.v2.devtools.prototypeapp.ui.formeditor.DragAxis
@@ -355,7 +358,9 @@ internal fun SurveyNavigation(
   modifier: Modifier = Modifier,
 ) {
   var showAddForm by remember { mutableStateOf(false) }
-  if (showAddForm) AddFormDialog(actions, onDismiss = { showAddForm = false })
+  if (showAddForm) {
+    AddFormDialog(actions, onDismiss = { showAddForm = false }, library = uiState.library)
+  }
   Surface(modifier = modifier, color = MaterialTheme.colorScheme.surfaceContainerLow) {
     Column(
       modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(12.dp),
@@ -655,6 +660,7 @@ private fun SurveyDetailsPane(uiState: SurveyEditorUiState, actions: SurveyEdito
         modifier = Modifier.fillMaxWidth(),
       )
       OrganizationSection(uiState = uiState, actions = actions)
+      PurposesSection(uiState = uiState, actions = actions)
       LanguageSelectorSection(uiState = uiState, actions = actions)
       SurveyAreaSection(
         uiState = uiState,
@@ -770,6 +776,77 @@ private fun OrganizationSection(uiState: SurveyEditorUiState, actions: SurveyEdi
           }
         }
       }
+    }
+  }
+}
+
+/**
+ * The survey's purposes and programs (`SurveyDef.purpose_ids` / `program_ids`), chosen at creation
+ * and editable here with the same cards and chips. Changing them doesn't add or remove Forms.
+ */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun PurposesSection(uiState: SurveyEditorUiState, actions: SurveyEditorActions) {
+  val context = uiState.library
+  val packs = context.library.pickablePurposePacks
+  val details = uiState.details
+  val unavailable = details.purposeIds.filter { id -> packs.none { it.id == id } }
+  val offeredPrograms =
+    LibraryPrograms.offeredFor(packs.filter { it.id in details.purposeIds }, details.programIds)
+  Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+    Text("Purposes", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
+    Text(
+      "What this survey's data will be used for. Standard fields of its purposes are suggested " +
+        "first when you write questions. Changing purposes doesn't add or remove forms.",
+      style = MaterialTheme.typography.bodySmall,
+      color = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
+    if (packs.isEmpty()) {
+      Text(
+        "No purposes are available for this survey.",
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+      )
+    } else {
+      PurposePackGrid(
+        packs = packs,
+        library = context.library,
+        organizationName = context.organizationName,
+        language = context.language,
+        selectedIds = details.purposeIds,
+        onToggle = actions::togglePurpose,
+      )
+    }
+    if (unavailable.isNotEmpty()) {
+      Text(
+        "No longer available in this survey's library:",
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+      )
+      FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        unavailable.forEach { id ->
+          InputChip(
+            selected = false,
+            onClick = { actions.togglePurpose(id) },
+            label = { Text(id) },
+            trailingIcon = {
+              Icon(
+                Icons.Outlined.Close,
+                contentDescription = "Remove $id",
+                modifier = Modifier.size(18.dp),
+              )
+            },
+          )
+        }
+      }
+    }
+    if (offeredPrograms.isNotEmpty()) {
+      Text("Programs", style = MaterialTheme.typography.labelLarge)
+      ProgramChips(
+        programIds = offeredPrograms,
+        selectedIds = details.programIds,
+        onToggle = actions::toggleProgram,
+      )
     }
   }
 }

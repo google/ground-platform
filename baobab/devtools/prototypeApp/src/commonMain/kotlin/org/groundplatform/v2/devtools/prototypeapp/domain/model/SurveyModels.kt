@@ -89,6 +89,10 @@ data class SurveyConfig(
    * Authoritative over the `ground:concept` attributes in [formsById].
    */
   val formConceptLinks: List<FormConceptLinks> = emptyList(),
+  /** Purpose Packs selected for the survey (`SurveyDef.purpose_ids`). */
+  val purposeIds: List<String> = emptyList(),
+  /** Programs the survey reports to (`SurveyDef.program_ids`). */
+  val programIds: List<String> = emptyList(),
 )
 
 /** Number of map features and submissions stored for a survey. */

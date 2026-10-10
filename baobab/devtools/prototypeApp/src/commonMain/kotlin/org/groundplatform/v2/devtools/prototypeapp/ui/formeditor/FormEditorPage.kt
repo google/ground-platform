@@ -58,6 +58,7 @@ import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.outlined.AccountCircle
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.AddPhotoAlternate
+import androidx.compose.material.icons.outlined.BookmarkAdd
 import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.outlined.Close
@@ -313,6 +314,10 @@ private fun FormEditorToolbar(
   onDelete: (() -> Unit)?,
 ) {
   var overflowExpanded by remember { mutableStateOf(false) }
+  var savingTemplate by remember { mutableStateOf(false) }
+  if (savingTemplate) {
+    SaveAsTemplateDialog(uiState, actions, onDismiss = { savingTemplate = false })
+  }
   Surface(
     modifier = Modifier.fillMaxWidth(),
     color = MaterialTheme.colorScheme.surfaceContainer,
@@ -365,6 +370,17 @@ private fun FormEditorToolbar(
           Text(if (uiState.form.hasGeometry) "Create map layer" else "Create data table")
         }
       }
+      if (uiState.canSaveAsTemplate) {
+        OutlinedButton(onClick = { savingTemplate = true }) {
+          Icon(
+            Icons.Outlined.BookmarkAdd,
+            contentDescription = null,
+            modifier = Modifier.size(18.dp),
+          )
+          Spacer(Modifier.width(6.dp))
+          Text("Save as template")
+        }
+      }
       Button(onClick = actions::startPreview) {
         Icon(Icons.Outlined.PlayArrow, contentDescription = null, modifier = Modifier.size(18.dp))
         Spacer(Modifier.width(6.dp))
@@ -387,6 +403,33 @@ private fun FormEditorToolbar(
             onClick = {
               overflowExpanded = false
               actions.setXmlViewerOpen(true)
+            },
+          )
+          val unavailable = uiState.saveAsTemplateUnavailableReason
+          DropdownMenuItem(
+            text = {
+              Column {
+                Text("Save as template…")
+                if (unavailable != null) {
+                  Text(
+                    unavailable,
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier.widthIn(max = 260.dp),
+                  )
+                }
+              }
+            },
+            leadingIcon = {
+              Icon(
+                Icons.Outlined.BookmarkAdd,
+                contentDescription = null,
+                modifier = Modifier.size(18.dp),
+              )
+            },
+            enabled = unavailable == null,
+            onClick = {
+              overflowExpanded = false
+              savingTemplate = true
             },
           )
         }

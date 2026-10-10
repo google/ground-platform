@@ -20,6 +20,7 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.MembershipStatus
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.Organization
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.OrganizationMember
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.OrganizationRole
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.OrganizationType
 
 /**
  * Sample organizations for the prototype. Includes the synthetic [ALL_USERS] organization (whose
@@ -81,6 +82,8 @@ internal object PrototypeFakeOrganizationsData {
         logoUrl = "avatar:0",
         isListed = true,
         createdOn = "2026-01-12",
+        organizationType = OrganizationType.GOVERNMENT_AGENCY,
+        countryCode = "KE",
         imagerySources =
           listOf(
             ImagerySource(
@@ -142,6 +145,8 @@ internal object PrototypeFakeOrganizationsData {
         logoUrl = "avatar:4",
         isListed = true,
         createdOn = "2025-11-03",
+        organizationType = OrganizationType.NGO,
+        countryCode = "VN",
         imagerySources =
           listOf(
             ImagerySource(
@@ -184,6 +189,8 @@ internal object PrototypeFakeOrganizationsData {
         logoUrl = "avatar:8",
         isListed = true,
         createdOn = "2025-09-01",
+        // A global community of practice: no single country.
+        organizationType = OrganizationType.OTHER,
         members =
           listOf(
             OrganizationMember(

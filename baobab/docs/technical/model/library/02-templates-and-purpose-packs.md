@@ -52,7 +52,10 @@ message FormTemplateDef {
     existing surveys.
 *   **Save as template**: organization Managers can save any form, with its
     concept links, to their organization's library. "All users" Managers can
-    also save to the global library.
+    also save to the global library. The template drops the form's
+    survey-specific `save_to` target (a survey adding it gets its own default
+    dataset), and global templates keep only links to global concepts, since
+    global entries can't reference organization entries.
 
 ## Purpose Packs (`PurposePackDef`)
 

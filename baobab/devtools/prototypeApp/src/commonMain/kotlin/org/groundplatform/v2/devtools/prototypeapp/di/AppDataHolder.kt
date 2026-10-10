@@ -158,6 +158,7 @@ class AppDataHolder(
       surveyRepository = surveyRepository,
       surveyEditorRepository = surveyEditorRepository,
       transactionRunner = transactionRunner,
+      libraryRepository = libraryRepository,
     ),
   val createOrganizationUseCase: CreateOrganizationUseCase =
     CreateOrganizationUseCase(organizationRepository),

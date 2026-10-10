@@ -60,6 +60,42 @@ message Organization {
   // Custom imagery sources configured for this organization (or the synthetic
   // "All users" organization) that may be toggled in the basemap layers dialog.
   repeated ImagerySource imagery_sources = 9;
+
+  // Kind of organization, shown on the organization page and in the
+  // directory. Unset for the synthetic "All users" organization.
+  OrganizationType organization_type = 10;
+
+  // Country the organization is based in, as an ISO 3166-1 alpha-2 code in
+  // upper case (e.g., `KE` for Kenya). Empty when not specified, and always
+  // empty for the synthetic "All users" organization.
+  string country_code = 11;
+}
+
+// Kind of organization, optionally set on an `Organization`'s profile.
+enum OrganizationType {
+  // Not specified.
+  ORGANIZATION_TYPE_UNSPECIFIED = 0;
+
+  // National or subnational government agency or ministry.
+  GOVERNMENT_AGENCY = 1;
+
+  // Producer or community cooperative.
+  COOPERATIVE = 2;
+
+  // Indigenous Peoples' or local community (IPLC) organization.
+  IPLC_ORGANIZATION = 3;
+
+  // Non-governmental or nonprofit organization.
+  NGO = 4;
+
+  // Private company.
+  COMPANY = 5;
+
+  // University, research institute, or other research institution.
+  RESEARCH = 6;
+
+  // Any other kind of organization.
+  OTHER = 7;
 }
 
 // Kind of imagery source an organization can configure.

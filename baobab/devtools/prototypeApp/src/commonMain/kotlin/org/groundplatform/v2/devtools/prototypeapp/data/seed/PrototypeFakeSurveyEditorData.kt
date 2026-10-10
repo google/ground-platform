@@ -47,6 +47,8 @@ internal object PrototypeFakeSurveyEditorData {
         derived.details.copy(
           supportedLanguages = listOf("en", "sw"),
           surveyArea = kenyaSurveyArea(),
+          purposeIds = listOf("eudr_due_diligence"),
+          programIds = listOf("eudr"),
         ),
       sharing = kenyaSharing(),
       datasets = derived.datasets + listOf(farmers(), treeSpecies()),

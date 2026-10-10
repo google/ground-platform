@@ -366,6 +366,7 @@ class DashboardViewModelTest {
         activeSurveyId = "",
         organizations = emptyList(),
         signedInUserEmail = "",
+        surveyLibraries = emptyMap(),
         entities = emptyList(),
         mapLayers = emptyList(),
         mutations = emptyList(),

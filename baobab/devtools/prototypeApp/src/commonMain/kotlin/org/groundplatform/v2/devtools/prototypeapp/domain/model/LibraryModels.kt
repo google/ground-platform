@@ -249,6 +249,34 @@ data class PurposePack(
 }
 
 /**
+ * Programs a survey can report to (`SurveyDef.program_ids`), offered from its Purpose Packs'
+ * [PurposePack.programIds].
+ */
+object LibraryPrograms {
+  private val LABELS =
+    mapOf(
+      "eudr" to "EU Deforestation Regulation (EUDR)",
+      "uk_frc" to "UK Forest Risk Commodities",
+      "ferm" to "Framework for Ecosystem Restoration Monitoring (FERM)",
+      "pame" to "Protected area management effectiveness",
+      "redd_plus" to "REDD+",
+      "tfff" to "Tropical Forest Forever Facility (TFFF)",
+    )
+
+  /** Display name of program [id], or [id] itself for programs without one. */
+  fun label(id: String): String = LABELS[id] ?: id
+
+  /**
+   * Programs offered for [packs] (in order, without duplicates), followed by any of [selected] they
+   * don't offer, so programs chosen earlier stay visible.
+   */
+  fun offeredFor(packs: List<PurposePack>, selected: List<String> = emptyList()): List<String> {
+    val offered = packs.flatMap { it.programIds }.distinct()
+    return offered + selected.filterNot { it in offered }
+  }
+}
+
+/**
  * A named export with a fixed output schema (`groundplatform.v2.library.ExportProfileDef`).
  * Questions are located through their concept links, so a profile works across differently worded
  * Forms.

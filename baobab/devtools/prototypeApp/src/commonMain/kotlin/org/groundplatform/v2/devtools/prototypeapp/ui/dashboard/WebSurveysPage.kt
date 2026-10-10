@@ -20,10 +20,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -36,8 +34,6 @@ import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.Groups
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.Search
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -47,7 +43,6 @@ import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -65,7 +60,6 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.Organization
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.OrganizationRole
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyPreviewItem
 import org.groundplatform.v2.devtools.prototypeapp.ui.common.GroundFilterChip
-import org.groundplatform.v2.devtools.prototypeapp.ui.formeditor.DropdownSelector
 import org.groundplatform.v2.devtools.prototypeapp.ui.onboarding.SurveyMapThumbnail
 import org.groundplatform.v2.devtools.prototypeapp.ui.state.DashboardUiState
 import org.groundplatform.v2.devtools.prototypeapp.ui.surveyeditor.ProfileAvatar
@@ -88,7 +82,7 @@ private val PageMaxWidth = 1240.dp
 internal fun WebSurveysPage(
   state: PrototypeAppState,
   onOpenSurvey: (surveyId: String) -> Unit,
-  onCreateSurvey: (title: String, organizationId: String?) -> Unit,
+  onCreateSurvey: (CreateSurveyRequest) -> Unit,
   onSignOut: () -> Unit = { state.signOut() },
 ) {
   val uiState by state.dashboard.uiState.collectAsState()
@@ -131,7 +125,7 @@ internal fun WebSurveysPage(
 internal fun WebSurveysPage(
   uiState: DashboardUiState,
   onOpenSurvey: (surveyId: String) -> Unit,
-  onCreateSurvey: (title: String, organizationId: String?) -> Unit,
+  onCreateSurvey: (CreateSurveyRequest) -> Unit,
   header: @Composable (onCreateSurveyClick: () -> Unit) -> Unit,
 ) {
   var filter by remember { mutableStateOf<SurveyListFilter>(SurveyListFilter.All) }
@@ -184,9 +178,10 @@ internal fun WebSurveysPage(
   if (isCreating) {
     CreateSurveyDialog(
       organizations = uiState.signedInUserOrganizations,
-      onCreate = { title, organizationId ->
+      surveyLibrary = uiState::surveyLibrary,
+      onCreate = { request ->
         isCreating = false
-        onCreateSurvey(title, organizationId)
+        onCreateSurvey(request)
       },
       onDismiss = { isCreating = false },
     )
@@ -428,57 +423,4 @@ internal fun WebSurveyCard(
       }
     }
   }
-}
-
-/** Title and optional organization for a new survey. */
-@Composable
-private fun CreateSurveyDialog(
-  organizations: List<Organization>,
-  onCreate: (title: String, organizationId: String?) -> Unit,
-  onDismiss: () -> Unit,
-) {
-  var title by remember { mutableStateOf("") }
-  var organization by remember { mutableStateOf<Organization?>(null) }
-  val options: List<Organization?> = listOf(null) + organizations
-  AlertDialog(
-    onDismissRequest = onDismiss,
-    title = { Text("Create survey") },
-    text = {
-      Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        OutlinedTextField(
-          value = title,
-          onValueChange = { title = it },
-          label = { Text("Survey title") },
-          singleLine = true,
-          modifier = Modifier.fillMaxWidth(),
-        )
-        DropdownSelector(
-          label = "Organization",
-          selectedText = organization?.name ?: "None (personal survey)",
-          options = options,
-          optionText = { it?.name ?: "None (personal survey)" },
-          onSelect = { organization = it },
-          modifier = Modifier.fillMaxWidth(),
-        )
-        Text(
-          text =
-            if (organization == null) {
-              "Only people you share it with can open a personal survey."
-            } else {
-              "You stay the owner. Managers of ${organization?.name} can also edit this survey, " +
-                "manage sharing, and export data."
-            },
-          style = MaterialTheme.typography.bodySmall,
-          color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        Spacer(modifier = Modifier.height(0.dp))
-      }
-    },
-    confirmButton = {
-      Button(onClick = { onCreate(title, organization?.id) }, enabled = title.isNotBlank()) {
-        Text("Create")
-      }
-    },
-    dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } },
-  )
 }

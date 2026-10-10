@@ -102,8 +102,20 @@ to `http://localhost:8091/#surveys`. Web pages are gated behind a simple
     surveys**, and one chip per organization the user belongs to.
 -   **Create survey**: Opens a dialog for the title and an optional
     organization (any organization the user is a member of; Managers of that
-    organization inherit survey organizer access), then opens the new, empty
-    survey in the **Survey editor**.
+    organization inherit survey organizer access). **Next** asks **What will
+    this data be used for?**: a multi-select card grid of the Purpose Packs
+    available in that organization (its own first, then the global ones it
+    hasn't hidden; global only for a personal survey), refreshed when the
+    organization changes, with optional program chips (e.g. **EU
+    Deforestation Regulation (EUDR)**) offered by the selected packs.
+    **Create survey** seeds the draft with a copy of each selected pack's
+    Form templates (questions, standard field links, choice codes, and a
+    linked Map layer or Data table) and records the purposes and programs
+    (`SurveyDetails.purposeIds` / `programIds`, mirroring
+    `SurveyDef.purpose_ids` / `program_ids`); **Skip** creates an empty
+    survey as before (`CreateSurveyUseCase`, `ui/dashboard/CreateSurveyDialog.kt`).
+    The new survey opens in the **Survey editor**. The organization page's
+    **Create survey** uses the same dialog with the organization fixed.
 -   The Web dashboard and Survey editor redirect here when there is no survey
     to open, and **Sign out** from any web page returns here.
 
@@ -119,8 +131,9 @@ surveys in it and find them in their list.
 -   **Organizations list**: *Your organizations* (Managers first, with member,
     survey, and pending-request counts) and *Other organizations* (listed ones
     you can **Request to join**; unlisted organizations are invite-only), with
-    search and a **Create organization** dialog (name, description, directory
-    listing; the creator becomes its first Manager).
+    search and a **Create organization** dialog (name, description, optional
+    **Type** and **Country**, directory listing; the creator becomes its first
+    Manager).
 -   **Organization page**: Laid out like the survey editor, with a resizable
     left panel that switches between **Organization details**, **Surveys**
     (cards like the Surveys page, plus **Create survey** for members),
@@ -128,8 +141,14 @@ surveys in it and find them in their list.
     **Purposes**, **Dictionary**, and **Templates**. Each pane opens with a
     heading that explains what it is for, and the header labels the page as an
     *Organization*.
-    -   **Organization details**: Name, description, website, and directory
-        listing. Managers edit them in place with **Save** / **Discard** and
+    -   **Organization details**: Name, description, website, type, country,
+        and directory listing. **Type** is an exposed dropdown (government
+        agency, cooperative, Indigenous Peoples or local community
+        organization, NGO, company, research institution, other, or *Not
+        specified*); **Country** is a searchable dropdown over the ISO 3166-1
+        alpha-2 list (`domain/model/Countries.kt`) that filters by name or code
+        and shows plain text like *Kenya (KE)*. "All users" has neither.
+        Managers edit them in place with **Save** / **Discard** and
         can **Delete organization** (its surveys become personal surveys of
         their owners; no data is deleted); everyone else sees them read-only.
     -   **Members**: Managers see *Requests to join* (**Approve** / **Decline**),
@@ -148,8 +167,8 @@ surveys in it and find them in their list.
         a stable concept's type, unit, or aggregation can't change. Global
         concepts open read-only.
     -   **Templates** and **Purposes**: The organization's Form templates and
-        Purpose Packs (Managers can rename or delete them; authoring templates
-        comes later with **Save as template**), then the global ones, which
+        Purpose Packs (Managers can rename or delete them; templates are created
+        with the Form editor's **Save as template**), then the global ones, which
         Managers can **Hide** from the organization's pickers. A global purpose
         whose templates are all hidden is hidden too.
     -   **"All users"**: Its library is the global library, so its Managers
@@ -160,8 +179,9 @@ surveys in it and find them in their list.
         Managers only.
 
 Code lives in `ui/organization/` (`OrganizationsPage.kt`, `OrganizationPage.kt`,
-`OrganizationLibraryPanes.kt` for the library tabs, and `OrganizationPages.kt`
-for the page's tabs). Both pages are stateless `(uiState, actions)` screens
+`OrganizationLibraryPanes.kt` for the library tabs, `OrganizationProfileFields.kt`
+for the Type and Country pickers, and `OrganizationPages.kt` for the page's
+tabs). Both pages are stateless `(uiState, actions)` screens
 driven by `OrganizationViewModel` (`ui/viewmodel/`); the directory, relation,
 and member-grouping rules live in `domain/model/OrganizationDirectory.kt`, and
 the matching methods on `PrototypeAppState` are one-line delegates to the view
@@ -292,8 +312,12 @@ the survey editor header or via the debug tools menu), or deep-link
 directly to `http://localhost:8091/#survey-editor` (`#form-editor` also works).
 The left-hand navigation lists:
 
--   **Survey details**: Title, description, survey ID, organization, and
-    languages, plus summary cards that link to each section.
+-   **Survey details**: Title, description, survey ID, organization,
+    purposes, and languages, plus summary cards that link to each section.
+    -   **Purposes** edits the survey's Purpose Packs and programs with the
+        same cards and chips as survey creation. Changing them doesn't add or
+        remove Forms; their templates' standard fields rank first in the Form
+        editor's label suggestions (`FormLibraryContext.purposeConceptIds`).
     -   **Organization** moves the survey into one of the organizations the
         signed-in user belongs to, or keeps it personal. The owner stays the
         owner; Managers of the organization inherit Survey organizer access.
@@ -325,6 +349,22 @@ The left-hand navigation lists:
 -   **Forms**, **Map layers**, **Data tables**: Headings list the survey's
     items. Use **+** to add a new one, and drag items to reorder them within
     their heading (screen readers get **Move up** / **Move down** actions).
+    -   **+** next to **Forms** offers **Empty form**, **From template…**, and
+        **Import from XML**. **From template…** lists the templates of the
+        survey's resolved library (organization first, then global ones not
+        hidden) with their source and linked-field counts; choosing one copies
+        it into the survey (`SurveyFormTemplates.addTemplate`: new Form ID,
+        unique title, its own linked dataset), so later template edits don't
+        change it.
+    -   **Save as template** in the Form editor toolbar (also in its **⋮**
+        menu, where it's disabled with the reason for non-Managers and
+        personal surveys) saves a copy of the Form, with its standard field
+        links and choice codes, to the survey organization's library as a
+        Draft template `org.<organizationId>.<name>` (unique; `_2`, `_3`, …
+        when taken). "All users" Managers can save to the global library
+        instead, which drops links to organization fields. The template then
+        appears in the organization's **Templates** tab and in **From
+        template…**.
     -   Each **Map layer** opens an entity editor with:
         -   An interactive map with a live Satellite / Terrain basemap (web
             builds). Drag to pan; scroll, double-click, or use **+ / −** to

@@ -15,16 +15,23 @@ package org.groundplatform.v2.devtools.prototypeapp.ui.surveyeditor
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Description
+import androidx.compose.material.icons.outlined.Link
 import androidx.compose.material.icons.outlined.UploadFile
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -32,8 +39,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import org.groundplatform.v2.core.forms.ui.GroundBadgeTone
+import org.groundplatform.v2.core.forms.ui.GroundTonalBadge
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.FormDatasetLinks
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.FormImport
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.ImportedForm
@@ -41,13 +51,15 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SaveToMod
 import org.groundplatform.v2.devtools.prototypeapp.ui.common.TextFilePickResult
 import org.groundplatform.v2.devtools.prototypeapp.ui.common.TextFilePicker
 import org.groundplatform.v2.devtools.prototypeapp.ui.common.openPlatformTextFilePicker
+import org.groundplatform.v2.devtools.prototypeapp.ui.state.FormLibraryContext
 import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.SurveyEditorActions
 
 /** File types offered by the XForms XML file picker. */
 internal const val XFORMS_FILE_ACCEPT = ".xml,application/xml,text/xml"
 
-/** Shown in the Add form dialog for the disabled template option. */
-internal const val FORM_TEMPLATES_COMING_SOON = "Start from a reusable form template. Coming soon."
+/** Body of the Add form dialog's template option. */
+internal const val FORM_TEMPLATES_BODY =
+  "Start from a reusable form, with standard fields, from your organization or the global library."
 
 /** A file read for import as a Form, with the parsed [ImportedForm] (`null` if unreadable). */
 data class FormImportPreview(val fileName: String, val imported: ImportedForm?) {
@@ -64,18 +76,32 @@ data class FormImportPreview(val fileName: String, val imported: ImportedForm?) 
 }
 
 /**
- * Asks how to add a Form: start from an empty form, use a template (disabled, TBD), or import from
- * an XForms XML file. Imports are previewed (with any notes from the importer) before the Form is
- * created.
+ * Asks how to add a Form: start from an empty form, copy a template from the survey's resolved
+ * [library], or import from an XForms XML file. Imports are previewed (with any notes from the
+ * importer) before the Form is created.
  */
 @Composable
 internal fun AddFormDialog(
   actions: SurveyEditorActions,
   onDismiss: () -> Unit,
+  library: FormLibraryContext = FormLibraryContext(),
   pickTextFile: TextFilePicker = ::openPlatformTextFilePicker,
 ) {
   var preview by remember { mutableStateOf<FormImportPreview?>(null) }
   var message by remember { mutableStateOf<String?>(null) }
+  var choosingTemplate by remember { mutableStateOf(false) }
+
+  if (choosingTemplate) {
+    TemplatePickerDialog(
+      library = library,
+      onPick = { templateId ->
+        actions.addFormFromTemplate(templateId)
+        onDismiss()
+      },
+      onBack = { choosingTemplate = false },
+    )
+    return
+  }
 
   val current = preview
   if (current != null) {
@@ -107,12 +133,15 @@ internal fun AddFormDialog(
             onDismiss()
           },
         )
+        val templateCount = library.library.pickableFormTemplates.size
         AddOption(
           icon = Icons.Outlined.Description,
-          title = "Use a template",
-          body = FORM_TEMPLATES_COMING_SOON,
-          enabled = false,
-          onClick = {},
+          title = "From template…",
+          body =
+            if (templateCount == 0) "No templates are available for this survey yet."
+            else FORM_TEMPLATES_BODY,
+          enabled = templateCount > 0,
+          onClick = { choosingTemplate = true },
         )
         AddOption(
           icon = Icons.Outlined.UploadFile,
@@ -192,4 +221,94 @@ private fun saveToSummary(imported: ImportedForm): String {
     val target = imported.createDatasetId
     if (target != null) "Adds to $target" else "Adds to a new $kind"
   }
+}
+
+/**
+ * Lists the templates of the survey's resolved library (the organization's first, then global ones
+ * it hasn't hidden), each with its source and how many of its questions link to standard fields.
+ */
+@Composable
+private fun TemplatePickerDialog(
+  library: FormLibraryContext,
+  onPick: (templateId: String) -> Unit,
+  onBack: () -> Unit,
+) {
+  val templates = library.library.pickableFormTemplates
+  AlertDialog(
+    onDismissRequest = onBack,
+    title = { Text("Add form from template") },
+    text = {
+      Column(
+        modifier =
+          Modifier.widthIn(max = 560.dp)
+            .heightIn(max = 520.dp)
+            .verticalScroll(rememberScrollState()),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+      ) {
+        Text(
+          "The form is copied into this survey. Later changes to the template don't affect it.",
+          style = MaterialTheme.typography.bodySmall,
+          color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        templates.forEach { template ->
+          val questions = template.form.questions.size
+          val linked = template.linkedQuestionCount
+          OutlinedCard(onClick = { onPick(template.id) }, modifier = Modifier.fillMaxWidth()) {
+            Column(
+              modifier = Modifier.padding(12.dp),
+              verticalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
+              Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+              ) {
+                Text(
+                  template.title.get(library.language),
+                  style = MaterialTheme.typography.titleSmall,
+                  modifier = Modifier.weight(1f, fill = false),
+                )
+                GroundTonalBadge(
+                  text =
+                    if (library.library.isOrganizationEntry(template.id)) {
+                      library.organizationName ?: "Organization"
+                    } else {
+                      "Global"
+                    },
+                  tone =
+                    if (library.library.isOrganizationEntry(template.id)) GroundBadgeTone.TERTIARY
+                    else GroundBadgeTone.NEUTRAL,
+                )
+              }
+              template.description
+                .get(library.language)
+                .takeIf { it.isNotBlank() }
+                ?.let {
+                  Text(it, style = MaterialTheme.typography.bodySmall)
+                }
+              Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+              ) {
+                if (linked > 0) {
+                  Icon(
+                    Icons.Outlined.Link,
+                    contentDescription = null,
+                    modifier = Modifier.size(14.dp),
+                  )
+                }
+                Text(
+                  "$questions ${if (questions == 1) "question" else "questions"}" +
+                    if (linked > 0) " · $linked linked to standard fields" else "",
+                  style = MaterialTheme.typography.labelSmall,
+                  color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+              }
+            }
+          }
+        }
+      }
+    },
+    confirmButton = {},
+    dismissButton = { TextButton(onClick = onBack) { Text("Back") } },
+  )
 }

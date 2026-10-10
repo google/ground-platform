@@ -15,6 +15,7 @@ package org.groundplatform.v2.devtools.prototypeapp.data.repository
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
@@ -25,6 +26,7 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.CachedProfile
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.MembershipStatus
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.Organization
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.OrganizationRole
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.OrganizationType
 
 class OrganizationRepositoryTest {
   private val kfs = PrototypeFakeOrganizationsData.KENYA_FOREST_SERVICE
@@ -86,6 +88,71 @@ class OrganizationRepositoryTest {
     assertEquals("Renamed", after.name)
     assertEquals(false, after.isListed)
     assertEquals(before.members, after.members)
+  }
+
+  @Test
+  fun seededOrganizations_haveSensibleTypesAndCountries() = runNow {
+    val repo = repo()
+    val kenya = repo.getOrganization(kfs)!!
+    assertEquals(OrganizationType.GOVERNMENT_AGENCY, kenya.organizationType)
+    assertEquals("Kenya (KE)", kenya.country?.label)
+    val mekong = repo.getOrganization(PrototypeFakeOrganizationsData.MEKONG_MANGROVE_ALLIANCE)!!
+    assertEquals(OrganizationType.NGO, mekong.organizationType)
+    assertEquals("VN", mekong.countryCode)
+    val allUsers = repo.getOrganization(PrototypeFakeOrganizationsData.ALL_USERS)!!
+    assertNull(allUsers.organizationType)
+    assertNull(allUsers.countryCode)
+    assertFalse(allUsers.hasTypeAndCountry)
+    assertTrue(kenya.hasTypeAndCountry)
+  }
+
+  @Test
+  fun createThenGet_roundTripsTypeAndCountry() = runNow {
+    val repo = repo()
+    repo.createOrganization(
+      Organization(
+        id = "org-coop",
+        name = "Coffee Co-op",
+        organizationType = OrganizationType.COOPERATIVE,
+        countryCode = "CO",
+      ),
+      creatorEmail = "coop@example.org",
+    )
+    val stored = repo.getOrganization("org-coop")!!
+    assertEquals(OrganizationType.COOPERATIVE, stored.organizationType)
+    assertEquals("CO", stored.countryCode)
+    assertEquals(stored, repo.getOrganizations().single { it.id == "org-coop" })
+  }
+
+  @Test
+  fun updateOrganization_persistsAndClearsTypeAndCountry() = runNow {
+    val repo = repo()
+    repo.updateOrganization(kfs) {
+      it.copy(organizationType = OrganizationType.RESEARCH, countryCode = "TZ")
+    }
+    repo.getOrganization(kfs)!!.let {
+      assertEquals(OrganizationType.RESEARCH, it.organizationType)
+      assertEquals("TZ", it.countryCode)
+    }
+
+    repo.updateOrganization(kfs) { it.copy(organizationType = null, countryCode = null) }
+    repo.getOrganization(kfs)!!.let {
+      assertNull(it.organizationType)
+      assertNull(it.countryCode)
+    }
+  }
+
+  @Test
+  fun updateOrganization_neverGivesAllUsersATypeOrCountry() = runNow {
+    val repo = repo()
+    val updated =
+      repo.updateOrganization(PrototypeFakeOrganizationsData.ALL_USERS) {
+        it.copy(name = "Everyone", organizationType = OrganizationType.NGO, countryCode = "KE")
+      }!!
+    assertEquals("Everyone", updated.name)
+    assertNull(updated.organizationType)
+    assertNull(updated.countryCode)
+    assertTrue(updated.isSynthetic)
   }
 
   @Test

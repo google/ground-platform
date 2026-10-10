@@ -75,6 +75,7 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SurveyDet
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SurveyEditorDerivation
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SurveyEditorDraft
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SurveyEditorForm
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SurveyFormTemplates
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.isoUtc
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.slugify
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.toEditorDataset
@@ -227,6 +228,21 @@ interface SurveyEditorActions : MapFeatureEditor {
   fun importForm(imported: ImportedForm): String
 
   /**
+   * Adds a copy of template [templateId] from the survey's resolved library (with a linked Map
+   * layer or Data table, like [addForm]) and opens it. Later edits to the template don't change the
+   * copy. Returns the new Form's key, or `null` if the template isn't available.
+   */
+  fun addFormFromTemplate(templateId: String): String?
+
+  // --- Purposes ---
+
+  /** Selects or clears Purpose Pack [packId] for the survey (`SurveyDef.purpose_ids`). */
+  fun togglePurpose(packId: String)
+
+  /** Selects or clears program [programId] for the survey (`SurveyDef.program_ids`). */
+  fun toggleProgram(programId: String)
+
+  /**
    * Creates a new Map layer or Data table backed by and linked to [formKey]. [kind] defaults to a
    * Map layer if the form has a geometry question, otherwise a Data table. When [open] is true, the
    * new dataset is selected.
@@ -372,6 +388,8 @@ class SurveyEditorViewModel(
     val signedInUserEmail: String = "",
     val localPlaces: List<SurveyPlaceItem> = emptyList(),
     val submissionCountByDatasetId: Map<String, Int> = emptyMap(),
+    /** Every stored organization library, keyed by organization ID. */
+    val libraries: Map<String, OrganizationLibrary> = emptyMap(),
   )
 
   /** Session (non-persisted) state of the editor. */
@@ -407,7 +425,8 @@ class SurveyEditorViewModel(
         organizationRepository.observeOrganizations(),
         authRepository.observeSession(),
         placeRepository.observeLocalPlaces(),
-      ) { (surveyId, draft, counts), organizations, auth, places ->
+        libraryRepository?.observeLibraries() ?: flowOf(emptyMap()),
+      ) { (surveyId, draft, counts), organizations, auth, places, libraries ->
         Data(
           surveyId = surveyId,
           liveDraft = draft,
@@ -415,6 +434,7 @@ class SurveyEditorViewModel(
           signedInUserEmail = auth.profile.email,
           localPlaces = places,
           submissionCountByDatasetId = counts,
+          libraries = libraries,
         )
       }
       .stateIn(scope, SharingStarted.Eagerly, Data())
@@ -434,19 +454,12 @@ class SurveyEditorViewModel(
     combine(data, session, ::buildUiState)
       .stateIn(scope, SharingStarted.Eagerly, SurveyEditorUiState())
 
-  /** Every stored organization library, keyed by organization ID. */
-  private val libraries: StateFlow<Map<String, OrganizationLibrary>> =
-    (libraryRepository?.observeLibraries() ?: flowOf(emptyMap())).stateIn(
-      scope,
-      SharingStarted.Eagerly,
-      emptyMap(),
-    )
-
   /** The dictionary the Form editors link questions to: the survey's resolved library. */
   private val libraryContext: StateFlow<FormLibraryContext> =
-    combine(uiState, libraries, ::libraryContextFor)
+    uiState
+      .map { it.library }
       .distinctUntilChanged()
-      .stateIn(scope, SharingStarted.Eagerly, libraryContextFor(uiState.value, libraries.value))
+      .stateIn(scope, SharingStarted.Eagerly, uiState.value.library)
 
   private val formEditors = mutableMapOf<String, Pair<FormEditorViewModel, Job>>()
 
@@ -468,18 +481,28 @@ class SurveyEditorViewModel(
     }
   }
 
+  /**
+   * The survey's resolved library (its organization's, then the global one), who may add to it, and
+   * the concepts of its purposes, which rank first in label suggestions.
+   */
   private fun libraryContextFor(
-    state: SurveyEditorUiState,
+    details: SurveyDetails,
+    organizations: List<Organization>,
+    email: String,
     libraries: Map<String, OrganizationLibrary>,
   ): FormLibraryContext {
-    val organizationId = state.draft.details.organizationId
-    val organization = state.organizations.firstOrNull { it.id == organizationId }
+    val organization = organizations.firstOrNull { it.id == details.organizationId }
+    val library = resolveLibraryUseCase.forOrganization(libraries, organization?.id)
+    val canManage = manageLibraryUseCase != null
     return FormLibraryContext(
-      library = resolveLibraryUseCase.forOrganization(libraries, organization?.id),
+      library = library,
       organizationName = organization?.name,
-      canAddToDictionary =
-        manageLibraryUseCase != null && organization?.isManager(state.signedInUserEmail) == true,
-      language = state.draft.details.defaultLanguage.ifEmpty { LocalizedText.DEFAULT_LANGUAGE },
+      canAddToDictionary = canManage && organization?.isManager(email) == true,
+      canSaveToGlobalLibrary =
+        canManage &&
+          organizations.any { it.id == Organization.ALL_USERS_ID && it.isManager(email) },
+      language = details.defaultLanguage.ifEmpty { LocalizedText.DEFAULT_LANGUAGE },
+      purposeConceptIds = library.conceptIdsForPurposes(details.purposeIds),
     )
   }
 
@@ -490,7 +513,7 @@ class SurveyEditorViewModel(
   private fun addOrganizationConcept(concept: LibraryConcept): String? {
     val manage = manageLibraryUseCase ?: return "This survey has no organization dictionary."
     val organizationLibrary =
-      libraries.value[concept.organizationId] ?: OrganizationLibrary(concept.organizationId)
+      data.value.libraries[concept.organizationId] ?: OrganizationLibrary(concept.organizationId)
     manage.conceptError(concept, organizationLibrary, isNew = true)?.let {
       return it
     }
@@ -500,10 +523,18 @@ class SurveyEditorViewModel(
 
   private fun buildUiState(data: Data, session: Session): SurveyEditorUiState {
     val edits = session.takeIf { it.surveyId == data.surveyId && it.draft != null }
+    val draft = edits?.draft ?: data.liveDraft
     return SurveyEditorUiState(
       surveyId = data.surveyId,
       opened = edits?.opened ?: data.liveDraft,
-      draft = edits?.draft ?: data.liveDraft,
+      draft = draft,
+      library =
+        libraryContextFor(
+          draft.details,
+          data.organizations,
+          data.signedInUserEmail,
+          data.libraries,
+        ),
       organizations = data.organizations,
       signedInUserEmail = data.signedInUserEmail,
       localPlaces = data.localPlaces,
@@ -547,7 +578,7 @@ class SurveyEditorViewModel(
     var datasets: List<EntityDataset> = draft.datasets
     var section: SurveyEditorSection = session.section
     var organizationNotice: String? = session.organizationNotice
-    private var nextId = draft.nextKeyId
+    var nextId = draft.nextKeyId
 
     fun newKey(prefix: String) = "$prefix${nextId++}"
 
@@ -745,6 +776,7 @@ class SurveyEditorViewModel(
             scope = formScope,
             libraryFlow = libraryContext,
             addOrganizationConcept = ::addOrganizationConcept,
+            saveTemplate = ::saveFormAsTemplate,
           )
         viewModel to job
       }
@@ -924,6 +956,75 @@ class SurveyEditorViewModel(
     datasets = datasets + linkedDataset
     forms = forms + SurveyEditorForm(formKey, blankForm)
     section = SurveyEditorSection.Form(formKey)
+  }
+
+  override fun addFormFromTemplate(templateId: String): String? {
+    val template = libraryContext.value.library.formTemplate(templateId) ?: return null
+    var formKey: String? = null
+    edit {
+      val (updated, key) = SurveyFormTemplates.addTemplate(toDraft(), template)
+      forms = updated.forms
+      datasets = updated.datasets
+      nextId = updated.nextKeyId
+      section = SurveyEditorSection.Form(key)
+      formKey = key
+    }
+    return formKey
+  }
+
+  override fun togglePurpose(packId: String) = updateDetails { d ->
+    d.copy(
+      purposeIds = if (packId in d.purposeIds) d.purposeIds - packId else d.purposeIds + packId
+    )
+  }
+
+  override fun toggleProgram(programId: String) = updateDetails { d ->
+    d.copy(
+      programIds =
+        if (programId in d.programIds) d.programIds - programId else d.programIds + programId
+    )
+  }
+
+  /**
+   * Saves a copy of [form] as a template titled [title] in the survey organization's library, or
+   * the global library when [toGlobal]. Returns why it can't be saved, or `null` (the library
+   * updates when the save completes).
+   */
+  private fun saveFormAsTemplate(
+    form: EditorForm,
+    title: String,
+    description: String,
+    toGlobal: Boolean,
+  ): String? {
+    val manage = manageLibraryUseCase ?: return "Templates can't be saved here."
+    val context = libraryContext.value
+    val organizationId =
+      if (toGlobal) {
+        if (!context.canSaveToGlobalLibrary) {
+          return "Only Managers of All users can add to the global library."
+        }
+        Organization.ALL_USERS_ID
+      } else {
+        val id = context.library.organizationId
+        if (!context.canAddToDictionary || id == null) {
+          return "Only Managers of this survey's organization can save templates."
+        }
+        id
+      }
+    manage.titleError(title)?.let {
+      return it
+    }
+    val library = data.value.libraries[organizationId] ?: OrganizationLibrary(organizationId)
+    val template =
+      SurveyFormTemplates.templateFrom(
+        form = form,
+        id = manage.newTemplateId(library, title),
+        organizationId = organizationId,
+        title = title,
+        description = description,
+      )
+    scope.launch { manage.saveTemplate(template) }
+    return null
   }
 
   override fun importForm(imported: ImportedForm): String {

@@ -66,6 +66,7 @@ import org.groundplatform.v2.devtools.prototypeapp.PrototypeAppState
 import org.groundplatform.v2.devtools.prototypeapp.PrototypeWorkbenchPage
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.Organization
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.OrganizationRelation
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.OrganizationType
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.relationTo
 import org.groundplatform.v2.devtools.prototypeapp.ui.state.OrganizationUiState
 import org.groundplatform.v2.devtools.prototypeapp.ui.surveyeditor.ProfileAvatar
@@ -202,9 +203,9 @@ internal fun OrganizationsPage(
 
   if (isCreating) {
     CreateOrganizationDialog(
-      onCreate = { name, description, isListed ->
+      onCreate = { name, description, isListed, type, countryCode ->
         isCreating = false
-        actions.createOrganization(name, description, isListed)
+        actions.createOrganization(name, description, isListed, type, countryCode)
       },
       onDismiss = { isCreating = false },
     )
@@ -406,14 +407,23 @@ internal fun RelationBadge(relation: OrganizationRelation) {
   }
 }
 
-/** Name, description, and directory listing for a new organization. */
+/** Name, description, optional type and country, and directory listing for a new organization. */
 @Composable
 private fun CreateOrganizationDialog(
-  onCreate: (name: String, description: String, isListed: Boolean) -> Unit,
+  onCreate:
+    (
+      name: String,
+      description: String,
+      isListed: Boolean,
+      type: OrganizationType?,
+      countryCode: String?,
+    ) -> Unit,
   onDismiss: () -> Unit,
 ) {
   var name by remember { mutableStateOf("") }
   var description by remember { mutableStateOf("") }
+  var type by remember { mutableStateOf<OrganizationType?>(null) }
+  var countryCode by remember { mutableStateOf<String?>(null) }
   var isListed by remember { mutableStateOf(true) }
   AlertDialog(
     onDismissRequest = onDismiss,
@@ -434,6 +444,8 @@ private fun CreateOrganizationDialog(
           minLines = 2,
           modifier = Modifier.fillMaxWidth(),
         )
+        OrganizationTypeDropdown(type = type, onTypeChange = { type = it })
+        CountryPicker(countryCode = countryCode, onCountryCodeChange = { countryCode = it })
         Row(verticalAlignment = Alignment.CenterVertically) {
           Checkbox(checked = isListed, onCheckedChange = { isListed = it })
           Spacer(Modifier.width(4.dp))
@@ -456,7 +468,10 @@ private fun CreateOrganizationDialog(
       }
     },
     confirmButton = {
-      Button(onClick = { onCreate(name, description, isListed) }, enabled = name.isNotBlank()) {
+      Button(
+        onClick = { onCreate(name, description, isListed, type, countryCode) },
+        enabled = name.isNotBlank(),
+      ) {
         Text("Create")
       }
     },

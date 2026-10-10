@@ -28,7 +28,8 @@ Domain models represent the canonical Ground 2.0 vocabulary (Surveys, Forms, Map
   - `MapLayerModels.kt`: `MapLayerItem`, `DatasetKind` (Map layer vs. Data table), geometry types, and styling metadata.
   - `GeospatialEntityModels.kt`: `GeospatialEntityItem`, `EntitySubmissionItem` (Records), geometries, properties, and collection statuses.
   - `MutationModels.kt`: `UploadMutationItem`, `MutationSyncStatus`, and offline queue records.
-  - `OrganizationModels.kt`: `OrganizationItem`, `OrganizationMember`, `OrganizationRole`, and `ImagerySourceItem`.
+  - `OrganizationModels.kt`: `OrganizationItem`, `OrganizationMember`, `OrganizationRole`, `OrganizationType` (optional profile type with sentence-case labels), and `ImagerySourceItem`.
+  - `Countries.kt`: `Country` and the static ISO 3166-1 alpha-2 list (`Countries.all`, 249 codes with English names) used for an organization's optional country, with code lookup/validation and accent-insensitive name-or-code search for the country picker.
   - `AuthModels.kt`, `SettingsModels.kt`, `LocationModels.kt`, `PlaceModels.kt`, `NavigationModels.kt`, `MapClusterModels.kt`: User profiles, app preferences, GNSS fixes, geocoded places, wayfinding metrics, and map cluster structures.
 - **Survey & Form Editor Domain (`editor/`)**:
   - `SurveyEditorDraft.kt`, `SurveyEditorModels.kt`, `FormEditorModels.kt`: Authoring models for survey details, forms, questions, save-to bindings, datasets, sampling designs, and sharing rules.
@@ -36,6 +37,7 @@ Domain models represent the canonical Ground 2.0 vocabulary (Surveys, Forms, Map
   - `SurveyEditorProjection.kt` & `FormPublishing.kt`: Write-time projection from edited drafts back into runtime `FormPreviewItem`, `MapLayerItem`, `GeospatialEntityItem`, and XForms XML.
   - `FormValidationRules.kt` & `FormDatasetLinks.kt`: Pure validation rules and entity-to-form pre-population mapping logic.
   - `FormConceptLinks.kt`: Links between questions and dictionary concepts: `ground:concept` bind attributes (`ConceptLinkAttributes`), survey-level links keyed by field path (`FormConceptLinkSync`), linking with default-state autofill and choice codes (`ConceptLinking`), and non-blocking link warnings (`ConceptLinkValidator`).
+  - `SurveyFormTemplates.kt`: Copying a library Form template into a survey (new Form ID, unique title, linked dataset) and saving a survey Form as a template.
 
 ## Role in the Overall Architecture
 

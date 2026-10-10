@@ -667,7 +667,7 @@ object GlobalLibrarySeedData {
       icon = "verified",
       formTemplateIds = listOf("eudr_plot_registration"),
       exportProfileIds = listOf("eudr_geojson"),
-      programIds = listOf("eudr"),
+      programIds = listOf("eudr", "uk_frc"),
       goals = listOf(GOAL_DEFORESTATION_FREE),
       pillar = ImpactPillar.MITIGATION,
       status = LibraryStatus.STABLE,

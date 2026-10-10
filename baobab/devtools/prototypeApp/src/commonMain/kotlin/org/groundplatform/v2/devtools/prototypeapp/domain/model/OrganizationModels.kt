@@ -94,6 +94,20 @@ data class ImagerySource(
 }
 
 /**
+ * Kind of [Organization], optionally recorded on its profile (`Organization.organization_type`).
+ * [label] is the sentence-case text shown in the Type dropdown and on the Details tab.
+ */
+enum class OrganizationType(val label: String) {
+  GOVERNMENT_AGENCY("Government agency"),
+  COOPERATIVE("Cooperative"),
+  IPLC_ORGANIZATION("Indigenous Peoples or local community organization"),
+  NGO("NGO"),
+  COMPANY("Company"),
+  RESEARCH("Research institution"),
+  OTHER("Other"),
+}
+
+/**
  * Multi-tenant organization that surveys can optionally belong to (`SurveyDef.organization_id`): a
  * ministry, university lab, NGO, or community of practice. Mirrors Collect Earth Online
  * institutions.
@@ -114,6 +128,13 @@ data class Organization(
   val createdOn: String = "",
   /** Custom imagery sources configured in the organization editor's `Imagery sources` tab. */
   val imagerySources: List<ImagerySource> = emptyList(),
+  /** Kind of organization, or `null` when not specified (always `null` for `"All users"`). */
+  val organizationType: OrganizationType? = null,
+  /**
+   * Upper-case ISO 3166-1 alpha-2 code of the country the organization is based in (see
+   * [Countries]), or `null` when not specified (always `null` for `"All users"`).
+   */
+  val countryCode: String? = null,
   /**
    * True for the synthetic `"All users"` organization, which holds the platform-wide imagery
    * sources and the global library rather than survey memberships.
@@ -133,6 +154,17 @@ data class Organization(
 
   val pendingRequests: List<OrganizationMember>
     get() = members.filter { it.status == MembershipStatus.REQUESTED }
+
+  /**
+   * Whether the profile has [organizationType] and [countryCode]. False for the synthetic `"All
+   * users"` organization, which is platform-wide rather than a real-world organization.
+   */
+  val hasTypeAndCountry: Boolean
+    get() = !isSynthetic
+
+  /** The [Country] for [countryCode], or `null` when not specified or not a known code. */
+  val country: Country?
+    get() = Countries.byCode(countryCode)
 
   fun member(email: String): OrganizationMember? = members.firstOrNull {
     it.email.equals(email, ignoreCase = true)

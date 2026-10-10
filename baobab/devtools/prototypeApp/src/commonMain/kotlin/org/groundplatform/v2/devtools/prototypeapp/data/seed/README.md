@@ -28,7 +28,7 @@ To make `prototypeApp` self-contained for UX evaluation and automated testing wi
 - `PrototypeFakeMapLayersData`: Seed map layers and data tables per survey.
 - `PrototypeFakeEntitiesData`: Seed geospatial entities, geometries, properties, and historical form submissions/records.
 - `PrototypeFakeMutationsData`: Seed offline upload/mutation queue entries.
-- `PrototypeFakeOrganizationsData`: Seed organizations, member rosters, and imagery sources.
+- `PrototypeFakeOrganizationsData`: Seed organizations (with sample types and countries), member rosters, and imagery sources.
 - `SurveyEditorSampleData`: Supplemental editor-only fixtures (collaborator rosters, sample design configurations, and survey area polygons) merged into derived drafts at seed time.
 
 ## Role in the Overall Architecture

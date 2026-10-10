@@ -53,6 +53,13 @@ data class SurveyDetails(
    * survey. Managers of the organization inherit survey organizer access.
    */
   val organizationId: String? = null,
+  /**
+   * Purpose Packs selected for the survey (`SurveyDef.purpose_ids`): global pack IDs or
+   * `org.<organizationId>.<name>` IDs of the organization's packs.
+   */
+  val purposeIds: List<String> = emptyList(),
+  /** Programs the survey reports to (`SurveyDef.program_ids`), e.g. `"eudr"`. */
+  val programIds: List<String> = emptyList(),
 )
 
 /** Collaborator roles (mirrors `groundplatform.v2.survey.Role`). */

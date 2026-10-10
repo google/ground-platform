@@ -68,6 +68,11 @@ data class SurveyEditorUiState(
   val localPlaces: List<SurveyPlaceItem> = emptyList(),
   /** Submissions that reference each dataset's features, by dataset ID. */
   val submissionCountByDatasetId: Map<String, Int> = emptyMap(),
+  /**
+   * The survey's resolved library (Purpose Packs, templates, and concepts), who may add to it, and
+   * its purposes' concepts.
+   */
+  val library: FormLibraryContext = FormLibraryContext(),
 
   // --- Session ---
   /** Whether [draft] holds edits made since [opened] (even ones that cancel out). */

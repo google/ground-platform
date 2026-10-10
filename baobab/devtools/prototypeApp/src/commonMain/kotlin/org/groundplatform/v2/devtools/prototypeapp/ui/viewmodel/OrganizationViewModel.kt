@@ -27,12 +27,14 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.AuthProfile
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.CachedProfile
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.Countries
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.ImagerySourceType
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.LibraryConcept
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.LibraryIds
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.Organization
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.OrganizationLibrary
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.OrganizationRole
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.OrganizationType
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyPreviewItem
 import org.groundplatform.v2.devtools.prototypeapp.domain.repository.AuthRepository
 import org.groundplatform.v2.devtools.prototypeapp.domain.repository.LibraryRepository
@@ -68,17 +70,30 @@ interface OrganizationActions {
 
   /**
    * Creates an organization managed by the signed-in user, opens it once it's stored, and returns
-   * its ID.
+   * its ID. [organizationType] and the ISO 3166-1 alpha-2 [countryCode] are optional (`null` or
+   * blank means not specified); an unknown country code stores nothing and shows a notice instead.
    */
-  fun createOrganization(name: String, description: String, isListed: Boolean): String
+  fun createOrganization(
+    name: String,
+    description: String,
+    isListed: Boolean,
+    organizationType: OrganizationType? = null,
+    countryCode: String? = null,
+  ): String
 
-  /** Saves the organization's profile fields. Only Managers may call this. */
+  /**
+   * Saves the organization's profile fields. Only Managers may call this. A blank [countryCode]
+   * clears the country; an unknown one saves nothing and shows a notice instead. Type and country
+   * are ignored for the synthetic `"All users"` organization.
+   */
   fun updateOrganizationDetails(
     organizationId: String,
     name: String,
     description: String,
     websiteUrl: String,
     isListed: Boolean,
+    organizationType: OrganizationType?,
+    countryCode: String?,
   )
 
   /** Deletes the organization; its surveys become personal surveys. Returns to the directory. */
@@ -371,16 +386,33 @@ class OrganizationViewModel(
 
   // --- Organization lifecycle ---
 
-  override fun createOrganization(name: String, description: String, isListed: Boolean): String {
+  override fun createOrganization(
+    name: String,
+    description: String,
+    isListed: Boolean,
+    organizationType: OrganizationType?,
+    countryCode: String?,
+  ): String {
     val organization =
       createOrganizationUseCase.newOrganization(
         name = name,
         description = description,
         isListed = isListed,
         existingOrganizations = data.value.organizations,
+        organizationType = organizationType,
+        countryCode = countryCode,
       )
     scope.launch {
-      createOrganizationUseCase(organization, signedInEmail, signedInProfile)
+      if (createOrganizationUseCase(organization, signedInEmail, signedInProfile) == null) {
+        val reason =
+          if (CreateOrganizationUseCase.countryCodeError(organization.countryCode) != null) {
+            " Choose a country from the list."
+          } else {
+            ""
+          }
+        session.update { it.copy(notice = "Couldn't create \"${organization.name}\".$reason") }
+        return@launch
+      }
       // Open it only once it's in the store, so the organization page never sees it missing.
       openOrganization(organization.id)
       session.update { it.copy(notice = "Created organization \"${organization.name}\".") }
@@ -399,15 +431,24 @@ class OrganizationViewModel(
     description: String,
     websiteUrl: String,
     isListed: Boolean,
-  ) =
+    organizationType: OrganizationType?,
+    countryCode: String?,
+  ) {
+    if (CreateOrganizationUseCase.countryCodeError(countryCode) != null) {
+      session.update { it.copy(notice = "Couldn't save. Choose a country from the list.") }
+      return
+    }
     updateOrganization(organizationId) {
       it.copy(
         name = name.trim(),
         description = description.trim(),
         websiteUrl = websiteUrl.trim(),
         isListed = isListed,
+        organizationType = organizationType,
+        countryCode = Countries.normalizeCode(countryCode),
       )
     }
+  }
 
   override fun deleteOrganization(organizationId: String) {
     val name = organization(organizationId)?.name

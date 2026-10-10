@@ -50,8 +50,10 @@ metadata), and `groundplatform.v2.data` (user data records):
     Auth UIDs).
 *   **`survey/organization.proto`** (`groundplatform.v2.survey`): Defines
     `Organization`, the optional multi-tenant owner of surveys
-    (`SurveyDef.organization_id`), and its memberships (`OrganizationMember`
-    with `OrganizationRole` Member / Manager and `MembershipStatus`).
+    (`SurveyDef.organization_id`), its optional profile (`OrganizationType`
+    and ISO 3166-1 alpha-2 `country_code`), and its memberships
+    (`OrganizationMember` with `OrganizationRole` Member / Manager and
+    `MembershipStatus`).
 *   **`data/entity_record.proto`** (`groundplatform.v2.data`): Defines
     `EntityRecord`, representing a persistent, versioned tabular or geospatial
     entity instance within an Entity Dataset.
