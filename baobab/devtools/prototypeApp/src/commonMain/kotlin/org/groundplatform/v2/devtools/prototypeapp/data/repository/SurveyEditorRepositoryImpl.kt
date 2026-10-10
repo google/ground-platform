@@ -24,6 +24,7 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.GeospatialEntity
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.MapLayerItem
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyConfig
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyPreviewItem
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.FormConceptLinkSync
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SurveyEditorDerivation
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SurveyEditorDraft
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SurveyEditorProjection
@@ -76,9 +77,14 @@ class SurveyEditorRepositoryImpl(
       val removedIds =
         (previous.forms.map { it.form.formId } + forms(surveyId).map { it.id }).toSet() -
           editorForms.keys
+      // Survey-level concept links are authoritative; the published forms also carry them as
+      // `ground:concept` bind attributes.
       putSurveyConfig(
         surveyId,
-        config.copy(formsById = config.formsById - removedIds + editorForms),
+        config.copy(
+          formsById = config.formsById - removedIds + editorForms,
+          formConceptLinks = FormConceptLinkSync.toFormConceptLinks(draft.forms.map { it.form }),
+        ),
       )
 
       // Project the draft onto the runtime collections the rest of the app reads.
@@ -144,6 +150,7 @@ class SurveyEditorRepositoryImpl(
         },
         mapLayers = layers,
         entities = entities,
+        conceptLinks = config?.formConceptLinks.orEmpty(),
       )
     }
 }

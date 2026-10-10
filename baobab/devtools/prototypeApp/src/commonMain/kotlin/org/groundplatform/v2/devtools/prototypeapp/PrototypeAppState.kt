@@ -240,6 +240,9 @@ class PrototypeAppState(
       generateSamplePlots = dataHolder.generateSamplePlotsUseCase,
       inviteCollaboratorUseCase = dataHolder.inviteCollaboratorUseCase,
       scope = dataHolder.scope,
+      libraryRepository = dataHolder.libraryRepository,
+      manageLibraryUseCase = dataHolder.manageLibraryUseCase,
+      resolveLibraryUseCase = dataHolder.resolveLibraryUseCase,
     )
 
   private var surveyEditorState by mutableStateOf(surveyEditor.uiState.value)

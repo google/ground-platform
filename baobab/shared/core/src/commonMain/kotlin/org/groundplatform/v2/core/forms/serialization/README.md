@@ -40,6 +40,20 @@ representations defined in the `groundplatform.v2.forms` schema:
     values, coordinates/geometries, select lists, and metadata—to and from
     `groundplatform.v2.forms.RecordInstance` messages.
 
+### Foreign-Namespace Attributes
+
+`<bind>` attributes in namespaces ProtoForms doesn't model (another tool's
+extension, or Ground's `ground:concept`) are preserved as
+`FieldBinding.foreign_attributes` (namespace URI, qualified name as written,
+value) instead of being dropped. Unprefixed attributes, `xmlns` declarations,
+and the XForms, XHTML, `jr`, `odk`, `orx`, `entities`, `ev`, and `xsd`
+namespaces are modeled and never preserved this way. On serialization, foreign
+attributes follow the modeled ones and each distinct prefix → URI pair is
+declared once on `<h:html>`; a prefix already bound to a different URI is
+renamed to `<prefix>2`, `<prefix>3`, and so on. The namespace URI constants
+(including `GROUND_XFORMS_NAMESPACE`) live in `XFormsNamespaces.kt`. See
+`docs/technical/model/forms/04-bindings.md` ("Foreign Attributes").
+
 
 ## Supported Targets
 

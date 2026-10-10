@@ -56,8 +56,8 @@ class GlobalLibrarySeedTest {
     |# which the loader sets to the "All users" organization.
     |#
     |# The prototype app embeds a Kotlin copy (GlobalLibrarySeedData.kt), and its
-    |# GlobalLibrarySeedTest fails when the two differ. Template questions don't
-    |# carry concept links yet (FieldBinding has no concept_ref field).
+    |# GlobalLibrarySeedTest fails when the two differ. Template questions carry
+    |# their concept links as `ground:concept` foreign attributes on their bindings.
     |
     |"""
       .trimMargin()
@@ -112,8 +112,12 @@ class GlobalLibrarySeedTest {
     for ((seed, parsed) in kotlin.formTemplates.zip(templates)) {
       assertEquals(seed.title, parsed.title)
       assertEquals(
-        seed.form.questions.map { listOf(it.name, it.type, it.label, it.required, it.choices) },
-        parsed.form.questions.map { listOf(it.name, it.type, it.label, it.required, it.choices) },
+        seed.form.questions.map {
+          listOf(it.name, it.type, it.label, it.required, it.choices, it.conceptLink)
+        },
+        parsed.form.questions.map {
+          listOf(it.name, it.type, it.label, it.required, it.choices, it.conceptLink)
+        },
       )
     }
     assertTrue(loaded.all { library -> library.integrityError() == null })

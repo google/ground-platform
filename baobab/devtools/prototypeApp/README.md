@@ -505,6 +505,49 @@ for tests:
     `update="1"`, plus `entities:saveto` binds). Previews and published Forms
     embed the target's features in its secondary instance; the exported XML
     references `jr://file-csv/<dataset>.csv` instead.
+-   **Standard fields (concept links)**: Questions can be linked to concepts of
+    the survey's dictionary, the resolved library of its organization
+    (`FormLibraryContext`, built by `SurveyEditorViewModel` from
+    `ResolveLibraryUseCase`; see
+    `docs/technical/model/library/01-concepts.md`, "Linking Form Fields").
+    When typing in a **Label** pauses (after at least 3 characters), up to 5
+    suggestions appear under the field (type-compatible ones first, each with its
+    type icon, an organization or vocabulary badge, and description). The list
+    never takes focus or links by itself; Esc or clicking elsewhere closes it.
+    Choosing one links the question (`ConceptLinking.link`): a question still
+    in its default state (`ConceptLinking.isDefaultState`: default name, no
+    hint, not required, default choices, no validation or display logic) also
+    gets the concept's type, a name from its ID, its code list as choices
+    (labels in the survey's default language), a unit hint, and a `≥ 0`
+    minimum for numbers. The label is always kept; **Use standard label**
+    replaces it. A linked question shows a `<Source> · <Label>` chip (its
+    tooltip has the definition, unit, and references) with **Unlink**, and a
+    link icon on its canvas card. **Link to standard field…** in the Advanced
+    section searches the dictionary explicitly. Managers of the survey's
+    organization also get **Add "<label>" to <Org> dictionary**, which saves a
+    draft organization concept (`ManageLibraryUseCase`) and links it. Manual
+    choices of a linked select question each get a **Standard value**
+    dropdown mapping them to code-list values
+    (`ChoiceItem.properties["ground_code"]`, a `ground_code` column in the
+    choice instance). The
+    validator's concept warnings (`ConceptLinkValidator`: type mismatch,
+    unmatched choices, one concept on several questions, deprecated or
+    unknown concepts) show in amber and never block publishing. Deleting a
+    linked question asks for confirmation, naming the impact reports it feeds.
+    After **Import Form**, `ground:concept` links to concepts in the
+    dictionary stay linked (others are kept as foreign attributes and
+    reported), and a "We found N fields that match standard definitions" card
+    offers links for unlinked questions, with exact and prefix matches
+    pre-checked. On publish, links are stored per survey in
+    `SurveyConfig.formConceptLinks` (the prototype's mirror of
+    `SurveyDef.form_concept_links`, keyed by field path `/data/<name>`;
+    authoritative) and written into the published XForms as
+    `ground:concept="<id>@<version>"` bind attributes
+    (`FieldBinding.foreign_attributes`). Properties that linked questions save
+    to inherit their concepts (`SaveToRules.inheritConcepts`,
+    `EntityProperty.conceptLink`). Code is in
+    `domain/model/editor/FormConceptLinks.kt` and
+    `ui/formeditor/ConceptLinkingUi.kt`.
 
 ## Local Data Store
 

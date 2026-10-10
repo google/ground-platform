@@ -37,6 +37,7 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EditorFor
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EditorFormTemplates
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.FormIds
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SurveyEditorDraft
+import org.groundplatform.v2.devtools.prototypeapp.domain.repository.LibraryRepository
 import org.groundplatform.v2.devtools.prototypeapp.domain.repository.SurveyContent
 import org.groundplatform.v2.devtools.prototypeapp.domain.repository.SurveyEditorRepository
 import org.groundplatform.v2.devtools.prototypeapp.domain.repository.SurveyRepository
@@ -103,6 +104,7 @@ internal fun surveyEditorViewModel(
 internal fun seededSurveyEditorViewModel(
   store: LocalStore,
   scope: CoroutineScope = testScope(),
+  libraryRepository: LibraryRepository? = null,
 ): SurveyEditorViewModel =
   SurveyEditorViewModel(
     surveyRepository = SurveyRepositoryImpl(store),
@@ -111,6 +113,7 @@ internal fun seededSurveyEditorViewModel(
     authRepository = AuthRepositoryImpl(),
     placeRepository = PlaceRepositoryImpl(store),
     scope = scope,
+    libraryRepository = libraryRepository,
   )
 
 /**

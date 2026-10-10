@@ -23,6 +23,7 @@ import "google/protobuf/timestamp.proto";
 import "shared/protos/data/audit_record.proto";
 import "shared/protos/forms/form_def.proto";
 import "shared/protos/forms/types.proto";
+import "shared/protos/library/concept.proto";
 
 // Top-level Ground 2.0 Survey Definition.
 //
@@ -91,6 +92,16 @@ message SurveyDef {
 
   // Survey-specific launch and CTA configurations for forms in `forms`.
   repeated FormLaunchConfig form_launch_configs = 18;
+
+  // Fields 19 and 20 are planned for the survey's purposes and programs
+  // (`purpose_ids`, `program_ids`); see
+  // docs/technical/model/library/02-templates-and-purpose-packs.md.
+
+  // Dictionary concept linked to each form question, per form. Authoritative
+  // inside Ground: on export each link is also written as a `ground:concept`
+  // foreign attribute on the question's binding (see
+  // docs/technical/model/library/01-concepts.md).
+  repeated FormConceptLinks form_concept_links = 21;
 }
 
 // Configures how a form is surfaced and launched by data collectors in the
@@ -98,6 +109,14 @@ message SurveyDef {
 //
 // Decouples survey-level workflow entry points and multilingual CTA labels
 // from the portable, XForms-compatible `FormDef` schema.
+// Dictionary concepts linked to the questions of one form.
+message FormConceptLinks {
+  string form_id = 1;
+
+  // Field path (e.g., "/data/commodity") to concept.
+  map<string, groundplatform.v2.library.ConceptRef> field_concepts = 2;
+}
+
 message FormLaunchConfig {
   // Target form identifier (`FormDef.form_id`).
   string form_id = 1;
@@ -450,6 +469,11 @@ message EntityPropertyDefinition {
 
   // Whether this property is mandatory during field entity registration.
   bool required = 4;
+
+  // Dictionary concept of this property, copied from the linked question that
+  // saves to it (`FieldBinding.entity_saveto`), so aggregation can read the
+  // current state of map features.
+  groundplatform.v2.library.ConceptRef concept_ref = 5;
 }
 
 // Visual styling attributes for map layers, form geometries, and geospatial

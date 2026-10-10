@@ -13,6 +13,7 @@
  */
 package org.groundplatform.v2.devtools.prototypeapp.domain.model
 
+import groundplatform.v2.survey.FormConceptLinks
 import org.groundplatform.v2.core.forms.model.FormDefinition
 
 /** Visual color/feature theme for a survey's placeholder map thumbnail. */
@@ -83,6 +84,11 @@ data class SurveyConfig(
   val primaryForm: FormDefinition? = null,
   /** [FormDefinition] for each form in the survey, keyed by form ID. */
   val formsById: Map<String, FormDefinition> = emptyMap(),
+  /**
+   * Dictionary concepts linked to each form's questions (`SurveyDef.form_concept_links`).
+   * Authoritative over the `ground:concept` attributes in [formsById].
+   */
+  val formConceptLinks: List<FormConceptLinks> = emptyList(),
 )
 
 /** Number of map features and submissions stored for a survey. */

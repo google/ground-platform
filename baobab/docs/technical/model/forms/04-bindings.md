@@ -177,6 +177,53 @@ The following fields are supported on `FieldBinding`:
 :                      :                   : when publishing to an       :
 :                      :                   : Entity Dataset (see         :
 :                      :                   : [Entities](#entities)).     :
+| `foreign_attributes` | `repeated         | `<bind>` attributes in      |
+:                      : ForeignAttribute` : namespaces ProtoForms       :
+:                      :                   : doesn't model (e.g.,        :
+:                      :                   : `ground:concept`), kept for :
+:                      :                   : round-trip fidelity. See    :
+:                      :                   : Foreign Attributes below.   :
+
+## Foreign Attributes
+
+`FieldBinding.foreign_attributes` (field 17) preserves every `<bind>` attribute
+in a namespace ProtoForms doesn't model, so another tool's extensions (and
+Ground's own `ground:concept`, see
+[Concepts](../library/01-concepts.md#xforms-and-xlsform-serialization)) survive
+XForms → ProtoForms → XForms. Each `ForeignAttribute` records the namespace URI,
+the qualified name as written (e.g., `ground:concept`), and the value.
+
+*   **Modeled namespaces are not foreign**: unprefixed attributes, namespace
+    declarations, and attributes in the XForms, XHTML, `jr`, `odk`, `orx`,
+    `entities`, `ev`, and `xsd` namespaces are handled by the typed fields (or
+    deliberately ignored) and never appear in `foreign_attributes`.
+*   **Namespace resolution**: prefixes resolve against the `xmlns:<prefix>`
+    declarations in scope on the `<bind>` (on the element itself or any
+    ancestor). A prefix without a declaration is kept with an empty
+    `namespace_uri` and re-emitted as written.
+*   **Serialization**: foreign attributes are written after the modeled ones, in
+    their original order, and each distinct prefix → URI pair is declared once
+    on the root `<h:html>` element. If a prefix is already bound to a different
+    URI, the first binding wins and the later one is renamed to `<prefix>2`,
+    `<prefix>3`, and so on; the attribute's namespace and value are unchanged.
+
+```xml
+<h:html xmlns="http://www.w3.org/2002/xforms" xmlns:ground="http://groundplatform.org/xforms" ...>
+  ...
+  <bind nodeset="/data/commodity" type="string" ground:concept="eudr.commodity@1"/>
+```
+
+```textproto
+bindings {
+  field_path: "commodity"
+  type: STRING
+  foreign_attributes {
+    namespace_uri: "http://groundplatform.org/xforms"
+    qualified_name: "ground:concept"
+    value: "eudr.commodity@1"
+  }
+}
+```
 
 ## Data Types
 

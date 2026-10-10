@@ -24,6 +24,7 @@ import groundplatform.v2.forms.EventType
 import groundplatform.v2.forms.FieldBinding
 import groundplatform.v2.forms.FieldDefinition
 import groundplatform.v2.forms.FieldValue
+import groundplatform.v2.forms.ForeignAttribute
 import groundplatform.v2.forms.FormDef
 import groundplatform.v2.forms.GeoPoint
 import groundplatform.v2.forms.GroupDef
@@ -61,35 +62,112 @@ internal object FormDefXmlSerializer {
       (model?.entities?.isNotEmpty() == true) ||
         (model?.bindings?.any { it.entity_saveto.isNotEmpty() } == true)
 
-    val rootAttrs = buildMap {
-      put("xmlns", "http://www.w3.org/2002/xforms")
-      put("xmlns:h", "http://www.w3.org/1999/xhtml")
-      put("xmlns:jr", "http://openrosa.org/javarosa")
-      put("xmlns:orx", "http://openrosa.org/xforms")
-      put("xmlns:odk", "http://www.opendatakit.org/xforms")
-      put("xmlns:ev", "http://www.w3.org/2001/xml-events")
+    val standardPrefixes = buildMap {
+      put("h", XHTML_NAMESPACE)
+      put("jr", JAVAROSA_NAMESPACE)
+      put("orx", OPENROSA_XFORMS_NAMESPACE)
+      put("odk", ODK_XFORMS_NAMESPACE)
+      put("ev", XML_EVENTS_NAMESPACE)
       if (hasEntities) {
-        put("xmlns:entities", "http://www.opendatakit.org/xforms/entities")
+        put("entities", ODK_ENTITIES_NAMESPACE)
       }
     }
+    val foreignNamespaces = ForeignNamespaceDeclarations(standardPrefixes)
+    // Assign prefixes up front so the root element can declare them before the binds are built.
+    model?.bindings?.forEach { binding ->
+      binding.foreign_attributes.forEach { foreignNamespaces.qualifiedName(it) }
+    }
 
-    val headEl = buildHeadElement(formDef, rootName)
+    val rootAttrs = buildMap {
+      put("xmlns", XFORMS_NAMESPACE)
+      for ((prefix, uri) in standardPrefixes) put("xmlns:$prefix", uri)
+      for ((prefix, uri) in foreignNamespaces.addedDeclarations) put("xmlns:$prefix", uri)
+    }
+
+    val headEl = buildHeadElement(formDef, rootName, foreignNamespaces)
     val bodyEl = buildBodyElement(formDef, rootName)
 
     return XmlElement(name = "h:html", attributes = rootAttrs, children = listOf(headEl, bodyEl))
   }
 
-  private fun buildHeadElement(formDef: FormDef, rootName: String): XmlElement {
+  /**
+   * Assigns the prefixes under which `FieldBinding.foreign_attributes` are re-emitted, and collects
+   * the `xmlns:<prefix>` declarations they need on the root element.
+   *
+   * Each attribute keeps the prefix of its `qualified_name` when that prefix is free or already
+   * bound to the same namespace URI (so each distinct prefix→URI pair is declared once). When the
+   * prefix is already bound to a *different* URI (by a standard XForms declaration or an earlier
+   * foreign attribute), the first binding wins and the later one is renamed deterministically to
+   * the first of `<prefix>2`, `<prefix>3`, ... that is free or already bound to the same URI; an
+   * empty or `xmlns` prefix uses the base `ns` (`ns1`, `ns2`, ...). Renaming preserves meaning
+   * (Namespaces in XML 1.0, section 4: an attribute's expanded name is its namespace URI plus local
+   * name), so the re-parsed `qualified_name` changes but the attribute does not; a second round
+   * trip is stable.
+   *
+   * Attributes with an empty `namespace_uri` (undeclared prefix in the source document) and the
+   * reserved `xml` prefix are emitted as written, without a declaration.
+   */
+  private class ForeignNamespaceDeclarations(standardPrefixes: Map<String, String>) {
+    private val boundPrefixes = LinkedHashMap(standardPrefixes)
+    private val assignedPrefixes = mutableMapOf<Pair<String, String>, String>()
+
+    /** Declarations added for foreign attributes (prefix → URI), in first-use order. */
+    val addedDeclarations = LinkedHashMap<String, String>()
+
+    /** Returns the qualified name under which [attr] is emitted. */
+    fun qualifiedName(attr: ForeignAttribute): String {
+      val uri = attr.namespace_uri
+      val prefix = attr.qualified_name.substringBefore(':', missingDelimiterValue = "")
+      if (uri.isEmpty() || prefix == "xml") return attr.qualified_name
+      val localName = attr.qualified_name.substringAfter(':')
+      val assigned = assignedPrefixes.getOrPut(prefix to uri) { assignPrefix(prefix, uri) }
+      return "$assigned:$localName"
+    }
+
+    private fun assignPrefix(prefix: String, uri: String): String {
+      val usable = prefix.isNotEmpty() && prefix != "xmlns"
+      if (usable) {
+        val boundUri = boundPrefixes[prefix]
+        if (boundUri == uri) return prefix
+        if (boundUri == null) return declare(prefix, uri)
+      }
+      val base = if (usable) prefix else "ns"
+      var suffix = if (usable) 2 else 1
+      while (true) {
+        val candidate = "$base$suffix"
+        val boundUri = boundPrefixes[candidate]
+        if (boundUri == uri) return candidate
+        if (boundUri == null) return declare(candidate, uri)
+        suffix++
+      }
+    }
+
+    private fun declare(prefix: String, uri: String): String {
+      boundPrefixes[prefix] = uri
+      addedDeclarations[prefix] = uri
+      return prefix
+    }
+  }
+
+  private fun buildHeadElement(
+    formDef: FormDef,
+    rootName: String,
+    foreignNamespaces: ForeignNamespaceDeclarations,
+  ): XmlElement {
     val titleEl =
       XmlElement(
         name = "h:title",
         children = if (formDef.title.isNotEmpty()) listOf(XmlText(formDef.title)) else emptyList(),
       )
-    val modelEl = buildModelElement(formDef, rootName)
+    val modelEl = buildModelElement(formDef, rootName, foreignNamespaces)
     return XmlElement(name = "h:head", children = listOf(titleEl, modelEl))
   }
 
-  private fun buildModelElement(formDef: FormDef, rootName: String): XmlElement {
+  private fun buildModelElement(
+    formDef: FormDef,
+    rootName: String,
+    foreignNamespaces: ForeignNamespaceDeclarations,
+  ): XmlElement {
     val model = formDef.model
     val modelChildren = buildList {
       // 1. Primary instance
@@ -112,7 +190,7 @@ internal object FormDefXmlSerializer {
 
       // 5. Bindings (<bind>)
       for (binding in model?.bindings ?: emptyList()) {
-        add(buildBindElement(binding, rootName))
+        add(buildBindElement(binding, rootName, foreignNamespaces))
       }
 
       // 6. Model actions (<setvalue>, <odk:setgeopoint>)
@@ -356,7 +434,11 @@ internal object FormDefXmlSerializer {
     return XmlElement(name = "submission", attributes = attrs)
   }
 
-  private fun buildBindElement(binding: FieldBinding, rootName: String): XmlElement {
+  private fun buildBindElement(
+    binding: FieldBinding,
+    rootName: String,
+    foreignNamespaces: ForeignNamespaceDeclarations,
+  ): XmlElement {
     val cleanPath = binding.field_path.removePrefix("/")
     val attrs = buildMap {
       put("nodeset", "/$rootName/$cleanPath")
@@ -386,6 +468,13 @@ internal object FormDefXmlSerializer {
       if (binding.max_pixels > 0) put("orx:max-pixels", binding.max_pixels.toString())
       if (binding.entity_saveto.isNotEmpty()) put("entities:saveto", binding.entity_saveto)
       if (binding.sms_tag.isNotEmpty()) put("jr:smsTag", binding.sms_tag)
+
+      // Foreign-namespace attributes, after the modeled ones, in their original order. A foreign
+      // attribute never replaces a modeled one (XML 1.0 section 3.1: attribute names are unique).
+      for (attr in binding.foreign_attributes) {
+        val name = foreignNamespaces.qualifiedName(attr)
+        if (name !in this) put(name, attr.value_)
+      }
     }
 
     return XmlElement(name = "bind", attributes = attrs)

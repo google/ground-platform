@@ -15,6 +15,7 @@ package org.groundplatform.v2.devtools.prototypeapp.data.seed
 
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.ConceptAggregation
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.ConceptDataType
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.ConceptLink
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.FormTemplate
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.ImpactPillar
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.LibraryConcept
@@ -86,17 +87,17 @@ internal object PrototypeFakeLibraryData {
                   name = "cherry_delivery_kg",
                   type = EditorQuestionType.DECIMAL,
                   label = "Cherry delivered (kg)",
+                  conceptLink = ConceptLink.to(cherryDelivery),
                 ),
                 EditorQuestion(
                   key = "shade_tree_count",
                   name = "shade_tree_count",
                   type = EditorQuestionType.INTEGER,
                   label = "Shade trees",
+                  conceptLink = ConceptLink.to(shadeTrees),
                 ),
               ),
           ),
-        questionConcepts =
-          mapOf("cherry_delivery_kg" to cherryDelivery.id, "shade_tree_count" to shadeTrees.id),
         status = LibraryStatus.STABLE,
       )
     return OrganizationLibrary(

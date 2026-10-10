@@ -16,6 +16,7 @@ package org.groundplatform.v2.devtools.prototypeapp.data.seed
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.CodeListItem
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.ConceptAggregation
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.ConceptDataType
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.ConceptLink
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.ExportProfile
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.FormTemplate
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.ImpactPillar
@@ -41,8 +42,8 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.GeometryC
  * `GlobalLibrarySeedTest` (jvmTest) parses the seed files and fails if they differ. Run it with
  * `-PregenerateLibrarySeed` to rewrite them from this file.
  *
- * Template concept links ([FormTemplate.questionConcepts]) exist only here until
- * `FieldBinding.concept_ref` is added; the seed files carry the templates' Forms without them.
+ * Template questions carry their concept links, which the seed files store as `ground:concept` bind
+ * attributes.
  */
 object GlobalLibrarySeedData {
   private const val GLOBAL = Organization.ALL_USERS_ID
@@ -175,7 +176,10 @@ object GlobalLibrarySeedData {
       label = concept.label.text,
       hint = hint,
       required = required,
-      choices = concept.codeList.map { EditorChoice(value = it.code, label = it.label.text) },
+      choices =
+        concept.codeList.map {
+          EditorChoice(value = it.code, label = it.label.text, code = it.code)
+        },
       capture = capture,
     )
 
@@ -190,8 +194,12 @@ object GlobalLibrarySeedData {
       organizationId = GLOBAL,
       title = title,
       description = description,
-      form = EditorForm(formId = id, title = title.text, questions = questions.map { it.first }),
-      questionConcepts = questions.associate { (q, c) -> q.key to c.id },
+      form =
+        EditorForm(
+          formId = id,
+          title = title.text,
+          questions = questions.map { (q, c) -> q.copy(conceptLink = ConceptLink.to(c)) },
+        ),
       status = LibraryStatus.STABLE,
     )
 

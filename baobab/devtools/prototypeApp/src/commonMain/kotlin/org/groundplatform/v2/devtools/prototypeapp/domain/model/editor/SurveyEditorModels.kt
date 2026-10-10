@@ -14,6 +14,7 @@
 package org.groundplatform.v2.devtools.prototypeapp.domain.model.editor
 
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.CachedProfile
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.ConceptLink
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.InvitationStatus
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.geometryKind
 
@@ -146,6 +147,11 @@ data class EntityProperty(
   val label: String,
   val type: PropertyType = PropertyType.TEXT,
   val required: Boolean = false,
+  /**
+   * Dictionary concept of this property (`EntityPropertyDefinition.concept_ref`), copied from the
+   * linked question that saves to it (see [SaveToRules.inheritConcepts]).
+   */
+  val conceptLink: ConceptLink? = null,
 )
 
 data class LatLng(val lat: Double, val lng: Double)

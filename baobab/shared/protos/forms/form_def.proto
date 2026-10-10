@@ -203,6 +203,23 @@ message FieldBinding {
   // (e.g., `readonly="/data/first_question < 4"`). When non-empty, evaluated at
   // runtime in addition to the static `read_only` flag.
   string read_only_expression = 16;
+
+  // Attributes of the `<bind>` element in namespaces ProtoForms doesn't model
+  // (e.g., `ground:concept`, or another tool's extension), preserved so they
+  // round-trip through XForms and XLSForm (`bind::<prefix>:<name>` columns).
+  repeated ForeignAttribute foreign_attributes = 17;
+}
+
+// An XML attribute in a namespace ProtoForms doesn't model, preserved as
+// written for round-trip fidelity.
+message ForeignAttribute {
+  // Namespace URI (e.g., "http://groundplatform.org/xforms").
+  string namespace_uri = 1;
+
+  // Qualified name as written in the source document (e.g., "ground:concept").
+  string qualified_name = 2;
+
+  string value = 3;
 }
 
 // Media attachment references for prompt images, audio clips, and instructional

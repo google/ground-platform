@@ -33,6 +33,7 @@ import groundplatform.v2.forms.EventType
 import groundplatform.v2.forms.FieldBinding
 import groundplatform.v2.forms.FieldDefinition
 import groundplatform.v2.forms.FieldValue
+import groundplatform.v2.forms.ForeignAttribute
 import groundplatform.v2.forms.FormDef
 import groundplatform.v2.forms.GeoConfig
 import groundplatform.v2.forms.GeoPoint
@@ -260,6 +261,16 @@ object ProtoJsonSerializer {
       }
       addString("preload_param", msg.preload_param)
       addString("read_only_expression", msg.read_only_expression)
+      addObjectList("foreign_attributes", msg.foreign_attributes) {
+        encodeForeignAttribute(it, snake)
+      }
+    }
+
+  private fun encodeForeignAttribute(msg: ForeignAttribute, snake: Boolean): JsonObject =
+    buildProtoJsonObject(snake) {
+      addString("namespace_uri", msg.namespace_uri)
+      addString("qualified_name", msg.qualified_name)
+      addString("value", msg.value_)
     }
 
   private fun encodeTranslationCatalog(msg: TranslationCatalog, snake: Boolean): JsonObject =
@@ -707,6 +718,15 @@ object ProtoJsonSerializer {
       preload = parseEnum(obj.getProtoStringOrNull("preload"), PreloadType.PRELOAD_UNSPECIFIED),
       preload_param = obj.getProtoString("preload_param"),
       read_only_expression = obj.getProtoString("read_only_expression"),
+      foreign_attributes =
+        obj.getProtoObjects("foreign_attributes").map { decodeForeignAttribute(it) },
+    )
+
+  private fun decodeForeignAttribute(obj: JsonObject): ForeignAttribute =
+    ForeignAttribute(
+      namespace_uri = obj.getProtoString("namespace_uri"),
+      qualified_name = obj.getProtoString("qualified_name"),
+      value_ = obj.getProtoString("value"),
     )
 
   private fun decodeTranslationCatalog(obj: JsonObject): TranslationCatalog =

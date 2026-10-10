@@ -13,6 +13,8 @@
  */
 package org.groundplatform.v2.devtools.prototypeapp.data.repository
 
+import groundplatform.v2.library.ConceptRef
+import groundplatform.v2.survey.FormConceptLinks
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -21,7 +23,9 @@ import kotlin.test.assertTrue
 import kotlinx.coroutines.flow.first
 import org.groundplatform.v2.devtools.prototypeapp.data.datasource.local.store.runNow
 import org.groundplatform.v2.devtools.prototypeapp.data.datasource.local.store.seededStore
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.ConceptLink
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.FormAvailability
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyConfig
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.DatasetKind
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EntityRow
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.LatLng
@@ -153,5 +157,84 @@ class SurveyEditorRepositoryTest {
     assertTrue(forms.none { it.id == dropped.form.formId })
     val config = runNow { store.transaction { surveyConfig(surveyId) } }
     assertNull(config?.formsById?.get(dropped.form.formId))
+  }
+
+  @Test
+  fun saveDraft_writesSurveyLevelConceptLinks_andPublishesGroundConcept() {
+    val surveyId = "survey-kenya-coffee"
+    val opened = draft(surveyId)
+    val entry = opened.forms.first()
+    val question = entry.form.questions.first()
+    val linked =
+      opened.copy(
+        forms =
+          opened.forms.map { f ->
+            if (f.key != entry.key) {
+              f
+            } else {
+              f.copy(
+                form =
+                  f.form.copy(
+                    questions =
+                      f.form.questions.map {
+                        if (it.key == question.key)
+                          it.copy(conceptLink = ConceptLink("eudr.commodity", 2))
+                        else it
+                      }
+                  )
+              )
+            }
+          }
+      )
+    runNow { repository.saveDraft(surveyId, linked) }
+
+    val config = assertNotNull(runNow { store.transaction { surveyConfig(surveyId) } })
+    val links = config.formConceptLinks.single()
+    assertEquals(entry.form.formId, links.form_id)
+    assertEquals(
+      mapOf("/data/${question.name}" to ConceptRef("eudr.commodity", 2)),
+      links.field_concepts,
+    )
+    val binding =
+      assertNotNull(config.formsById[entry.form.formId]).proto.model?.bindings.orEmpty().first {
+        it.field_path.substringAfterLast('/') == question.name
+      }
+    assertEquals(
+      listOf("ground:concept" to "eudr.commodity@2"),
+      binding.foreign_attributes.map { it.qualified_name to it.value_ },
+    )
+  }
+
+  @Test
+  fun getDraft_appliesSurveyLevelConceptLinksToDerivedForms() {
+    val surveyId = "survey-household-past-individuals"
+    val derived = draft(surveyId)
+    val form = derived.forms.first().form
+    val question = form.questions.first()
+    val fresh = seededStore()
+    runNow {
+      fresh.transaction {
+        val config = surveyConfig(surveyId) ?: SurveyConfig()
+        putSurveyConfig(
+          surveyId,
+          config.copy(
+            formConceptLinks =
+              listOf(
+                FormConceptLinks(
+                  form_id = form.formId,
+                  field_concepts = mapOf("/data/${question.name}" to ConceptRef("core.notes", 1)),
+                )
+              )
+          ),
+        )
+      }
+    }
+    val reopened = runNow { SurveyEditorRepositoryImpl(fresh).getDraft(surveyId) }
+    val questions = reopened.forms.first { it.form.formId == form.formId }.form.questions
+    assertEquals(
+      ConceptLink("core.notes", 1),
+      questions.first { it.name == question.name }.conceptLink,
+    )
+    assertTrue(questions.filter { it.name != question.name }.all { it.conceptLink == null })
   }
 }

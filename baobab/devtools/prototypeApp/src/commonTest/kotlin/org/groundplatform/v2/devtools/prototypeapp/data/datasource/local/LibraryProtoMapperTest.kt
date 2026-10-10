@@ -37,7 +37,7 @@ class LibraryProtoMapperTest {
   }
 
   @Test
-  fun templates_roundTripTheirForms_butNotConceptLinksYet() {
+  fun templates_roundTripTheirForms_includingConceptLinks() {
     val back =
       LibraryProtoMapper.fromBundle(LibraryProtoMapper.toBundle(global), global.organizationId)
     for ((seed, parsed) in global.formTemplates.zip(back.formTemplates)) {
@@ -46,8 +46,11 @@ class LibraryProtoMapperTest {
       assertEquals(seed.form.questions.map { it.name }, parsed.form.questions.map { it.name })
       assertEquals(seed.form.questions.map { it.type }, parsed.form.questions.map { it.type })
       assertEquals(seed.form.questions.map { it.choices }, parsed.form.questions.map { it.choices })
-      assertTrue(seed.questionConcepts.isNotEmpty())
-      assertTrue(parsed.questionConcepts.isEmpty())
+      assertTrue(seed.conceptIds.isNotEmpty())
+      assertEquals(
+        seed.form.questions.map { it.conceptLink },
+        parsed.form.questions.map { it.conceptLink },
+      )
     }
   }
 

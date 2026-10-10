@@ -53,6 +53,7 @@ object FormDatasetLinks {
               else -> PropertyType.TEXT
             },
           required = q.required,
+          conceptLink = q.conceptLink,
         )
       }
 

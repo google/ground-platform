@@ -30,6 +30,7 @@ import groundplatform.v2.forms.EventType
 import groundplatform.v2.forms.FieldBinding
 import groundplatform.v2.forms.FieldDefinition
 import groundplatform.v2.forms.FieldValue
+import groundplatform.v2.forms.ForeignAttribute
 import groundplatform.v2.forms.FormDef
 import groundplatform.v2.forms.GeoConfig
 import groundplatform.v2.forms.GeoPoint
@@ -129,7 +130,8 @@ internal object FormDefXmlDeserializer {
         }
       }
     }
-    val rawBindings = bindElements.map { parseFieldBinding(it, rootName) }
+    val modelNamespaces = inScopeNamespaces(listOfNotNull(root, head, modelEl))
+    val rawBindings = bindElements.map { parseFieldBinding(it, rootName, modelNamespaces) }
 
     // Model-level actions (<setvalue>, <odk:setgeopoint>)
     val modelActions =
@@ -362,7 +364,21 @@ internal object FormDefXmlDeserializer {
     )
   }
 
-  private fun parseFieldBinding(bindEl: XmlElement, rootName: String): FieldBinding {
+  private fun parseFieldBinding(
+    rawBindEl: XmlElement,
+    rootName: String,
+    inheritedNamespaces: Map<String, String>,
+  ): FieldBinding {
+    val foreignAttributes =
+      extractForeignAttributes(
+        rawBindEl,
+        inheritedNamespaces + inScopeNamespaces(listOf(rawBindEl)),
+      )
+    // Hide foreign attributes from the modeled lookups below: XmlElement.attr() falls back to
+    // matching by local name, so e.g. `acme:required` would otherwise be read as `required`.
+    val foreignNames = foreignAttributes.map { it.qualified_name }.toSet()
+    val bindEl =
+      rawBindEl.copy(attributes = rawBindEl.attributes.filterKeys { it !in foreignNames })
     val rawNodeset = bindEl.attr("nodeset") ?: bindEl.attr("ref") ?: ""
     val fieldPath = stripRootPrefix(rawNodeset, rootName)
     val typeStr = bindEl.attr("type") ?: ""
@@ -410,7 +426,57 @@ internal object FormDefXmlDeserializer {
       max_pixels = maxPixels,
       preload = preloadType,
       preload_param = preloadParam,
+      foreign_attributes = foreignAttributes,
     )
+  }
+
+  /**
+   * Collects the `xmlns:<prefix>` declarations on [path] (outermost element first), with inner
+   * declarations overriding outer ones (Namespaces in XML 1.0, section 6.1: scoping).
+   */
+  private fun inScopeNamespaces(path: List<XmlElement>): Map<String, String> = buildMap {
+    for (el in path) {
+      for ((name, value) in el.attributes) {
+        if (name.startsWith("xmlns:")) put(name.removePrefix("xmlns:"), value)
+      }
+    }
+  }
+
+  /**
+   * Returns [bindEl]'s attributes in namespaces ProtoForms doesn't model, in document order, so
+   * they round-trip as `FieldBinding.foreign_attributes` (e.g. `ground:concept`, see
+   * `docs/technical/model/library/01-concepts.md`, "Linking Form Fields").
+   *
+   * Not foreign:
+   * - Unprefixed attributes. Namespaces in XML 1.0, section 6.2: they are in no namespace and are
+   *   interpreted by the element (`nodeset`, `type`, `required`, ...).
+   * - Namespace declarations (`xmlns`, `xmlns:*`). The serializer re-declares the namespaces it
+   *   needs on the root element.
+   * - Attributes in [MODELED_XFORMS_NAMESPACES] (XForms, `jr`, `odk`, `orx`, `entities`, `h`, `ev`,
+   *   `xsd`), including ones the parser doesn't read: those namespaces are part of the ODK XForms
+   *   surface that ProtoForms owns.
+   * - Undeclared [CONVENTIONAL_XFORMS_PREFIXES] (e.g. `jr:` without `xmlns:jr`), treated as their
+   *   conventional namespace.
+   *
+   * Any other prefix without an in-scope declaration is preserved with an empty `namespace_uri` and
+   * re-emitted as written, without a declaration.
+   */
+  private fun extractForeignAttributes(
+    bindEl: XmlElement,
+    namespaces: Map<String, String>,
+  ): List<ForeignAttribute> = buildList {
+    for ((name, value) in bindEl.attributes) {
+      if (name == "xmlns" || name.startsWith("xmlns:")) continue
+      val prefix = name.substringBefore(':', missingDelimiterValue = "")
+      if (prefix.isEmpty()) continue
+      val namespaceUri =
+        when (prefix) {
+          "xml" -> XML_NAMESPACE
+          else -> namespaces[prefix] ?: CONVENTIONAL_XFORMS_PREFIXES[prefix] ?: ""
+        }
+      if (namespaceUri in MODELED_XFORMS_NAMESPACES) continue
+      add(ForeignAttribute(namespace_uri = namespaceUri, qualified_name = name, value_ = value))
+    }
   }
 
   private fun parseActionDef(

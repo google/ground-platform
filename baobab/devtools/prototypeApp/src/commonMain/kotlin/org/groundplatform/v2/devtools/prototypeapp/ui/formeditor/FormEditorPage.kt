@@ -252,6 +252,11 @@ fun FormEditorPage(
           },
         onDelete = onDelete,
       )
+      ImportMatchesCard(
+        uiState = uiState,
+        actions = actions,
+        modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp),
+      )
       Row(
         modifier = Modifier.fillMaxSize().padding(16.dp),
         horizontalArrangement = Arrangement.spacedBy(4.dp),
@@ -294,6 +299,7 @@ fun FormEditorPage(
     if (uiState.isXmlViewerOpen) {
       XFormsXmlOverlay(uiState, actions)
     }
+    ConceptSearchDialog(uiState, actions)
   }
 }
 
@@ -831,6 +837,7 @@ private fun FlowCanvas(
             datasets = uiState.datasets,
             isSelected = question.key == uiState.selectedKey,
             hasIssues = uiState.issuesFor(question.key).isNotEmpty(),
+            isLinked = question.conceptLink != null,
             isDragged = isDragged,
             onClick = { actions.select(question.key) },
             modifier =
@@ -1067,6 +1074,7 @@ private fun ScreenPreviewCard(
   hasIssues: Boolean,
   isDragged: Boolean,
   onClick: () -> Unit,
+  isLinked: Boolean = false,
   modifier: Modifier = Modifier,
 ) {
   val colors = MaterialTheme.colorScheme
@@ -1128,6 +1136,14 @@ private fun ScreenPreviewCard(
           maxLines = 1,
           overflow = TextOverflow.Ellipsis,
         )
+        if (isLinked) {
+          Icon(
+            Icons.Outlined.Link,
+            contentDescription = "Linked to a standard field",
+            tint = if (isSelected) colors.onSecondaryContainer else colors.primary,
+            modifier = Modifier.size(14.dp),
+          )
+        }
         if (hasIssues) {
           Icon(
             Icons.Outlined.Warning,
@@ -1514,6 +1530,17 @@ private fun QuestionProperties(
     verticalArrangement = Arrangement.spacedBy(14.dp),
   ) {
     var menuExpanded by remember { mutableStateOf(false) }
+    var deleteWarning by remember { mutableStateOf<String?>(null) }
+    deleteWarning?.let { message ->
+      DeleteLinkedQuestionDialog(
+        message = message,
+        onConfirm = {
+          deleteWarning = null
+          actions.deleteQuestion(key)
+        },
+        onDismiss = { deleteWarning = null },
+      )
+    }
     Row(
       modifier = Modifier.fillMaxWidth(),
       horizontalArrangement = Arrangement.spacedBy(4.dp),
@@ -1580,7 +1607,9 @@ private fun QuestionProperties(
             },
             onClick = {
               menuExpanded = false
-              actions.deleteQuestion(key)
+              // Linked questions feed reports: confirm first (softly; never blocked).
+              val warning = uiState.deleteWarningFor(question)
+              if (warning == null) actions.deleteQuestion(key) else deleteWarning = warning
             },
           )
         }
@@ -1602,6 +1631,7 @@ private fun QuestionProperties(
         }
       }
     }
+    ConceptWarnings(uiState.warningsFor(key))
 
     DropdownSelector(
       label = "Question type",
@@ -1619,13 +1649,8 @@ private fun QuestionProperties(
       MediaSourceSelector(uiState, actions, question)
     }
 
-    OutlinedTextField(
-      value = question.label,
-      onValueChange = { v -> actions.updateQuestion(key) { it.copy(label = v) } },
-      label = { Text(if (question.type == EditorQuestionType.NOTE) "Note text" else "Label") },
-      minLines = 2,
-      modifier = Modifier.fillMaxWidth(),
-    )
+    ConceptLabelField(uiState, actions, question)
+    ConceptLinkChip(uiState, actions, question)
     OutlinedTextField(
       value = question.hint,
       onValueChange = { v -> actions.updateQuestion(key) { it.copy(hint = v) } },
@@ -1778,6 +1803,7 @@ private fun AdvancedSection(
       )
     }
     if (expanded) {
+      LinkToStandardFieldButton(actions, question)
       OutlinedTextField(
         value = question.name,
         onValueChange = { v -> actions.updateQuestion(key) { it.copy(name = v.trim()) } },
@@ -2025,6 +2051,8 @@ private fun ChoicesEditor(
     }
     when (effectiveSource) {
       ChoiceSource.MANUAL -> {
+        // A linked question maps each choice to a value of the concept's code list.
+        val concept = uiState.conceptOf(question)?.takeIf { it.codeList.isNotEmpty() }
         question.choices.forEachIndexed { i, choice ->
           Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -2070,6 +2098,15 @@ private fun ChoicesEditor(
                 modifier = Modifier.size(18.dp),
               )
             }
+          }
+          if (concept != null) {
+            ChoiceCodeSelector(
+              concept = concept,
+              choice = choice,
+              language = uiState.library.language,
+              onSelect = { actions.setChoiceCode(key, i, it) },
+              modifier = Modifier.padding(start = 72.dp, end = 36.dp),
+            )
           }
         }
         imageError?.let {

@@ -28,6 +28,7 @@ In Unidirectional Data Flow (UDF), each feature ViewModel exposes a single `Stat
 - `DashboardUiState.kt`: Web dashboard split-pane layout, entity/record filter tabs, upload status filters, collapsed dataset state, and mutation sync counts.
 - `OrganizationUiState.kt`: Organization list, selected organization details, member roster, role editor dialogs, and organization-scoped imagery sources.
 - `SurveyEditorUiState.kt`: Active `SurveyEditorDraft`, dirty/saving indicators, selected editor section, validation issues, sampling design state, and nested `FormEditorUiState`.
+- `FormConceptUiState.kt`: The Form editor's dictionary (`FormLibraryContext`: the survey's resolved library, organization name, and whether the user may add to it), label autocomplete suggestions (`ConceptSuggestionsState`), and post-import matches (`ImportMatch`).
 - `DataCollectionUiState.kt`: Active form wizard state, eligible entities for form launch, selected entity/record details, active PDF report sheet, QR code modal state, and `WebMapDrawingHost` (transient interactive vertex drawing state for web form geometry questions).
 - `WorkbenchUiState.kt`: Prototype workbench tooling state (XForms XML editor, parse errors, device simulator frame dimensions/orientation, and debug toggles).
 

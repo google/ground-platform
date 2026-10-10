@@ -20,8 +20,8 @@
 # which the loader sets to the "All users" organization.
 #
 # The prototype app embeds a Kotlin copy (GlobalLibrarySeedData.kt), and its
-# GlobalLibrarySeedTest fails when the two differ. Template questions don't
-# carry concept links yet (FieldBinding has no concept_ref field).
+# GlobalLibrarySeedTest fails when the two differ. Template questions carry
+# their concept links as `ground:concept` foreign attributes on their bindings.
 
 concepts {
   id: "iplc.community_type"

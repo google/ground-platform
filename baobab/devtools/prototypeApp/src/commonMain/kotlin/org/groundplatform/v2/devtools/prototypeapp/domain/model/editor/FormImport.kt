@@ -277,6 +277,7 @@ object FormImport {
             value = choice.value_,
             label = text(choice.label) ?: choice.value_,
             colorHex = choice.properties[EditorXFormsGenerator.CHOICE_COLOR_COLUMN],
+            code = choice.properties[EditorXFormsGenerator.CHOICE_CODE_COLUMN],
           )
         }
       var choiceDatasetId: String? = null
@@ -314,6 +315,9 @@ object FormImport {
         }
       }
       val validation = validationOf(type, binding, path, label ?: name)
+      // `ground:concept` becomes the question's concept link (checked against the survey's library
+      // later); other foreign attributes are kept as they are.
+      val (conceptLink, foreignAttributes) = ConceptLinkAttributes.fromBinding(binding)
       questions +=
         EditorQuestion(
           key = key,
@@ -341,6 +345,8 @@ object FormImport {
             } else {
               MediaSource.CAPTURE_OR_UPLOAD
             },
+          conceptLink = conceptLink,
+          foreignAttributes = foreignAttributes,
         )
       keyByPath[path] = key
       pathByKey[key] = path
@@ -850,6 +856,7 @@ object FormImport {
             value = value,
             label = label,
             colorHex = rowField(row, EditorXFormsGenerator.CHOICE_COLOR_COLUMN),
+            code = rowField(row, EditorXFormsGenerator.CHOICE_CODE_COLUMN),
           )
         }
         .toList()

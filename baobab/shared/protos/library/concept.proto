@@ -85,6 +85,16 @@ message ConceptDef {
   groundplatform.v2.data.AuditInfo audit_info = 17;
 }
 
+// A link from a form question or entity property to a concept.
+message ConceptRef {
+  // Concept ID, including the `org.<organization_id>.` prefix for
+  // organization concepts.
+  string concept_id = 1;
+
+  // Concept version the link was made against.
+  int32 version = 2;
+}
+
 // Allowed values of a select concept.
 message CodeList {
   repeated CodeListItem items = 1;

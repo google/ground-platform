@@ -20,8 +20,8 @@
 # which the loader sets to the "All users" organization.
 #
 # The prototype app embeds a Kotlin copy (GlobalLibrarySeedData.kt), and its
-# GlobalLibrarySeedTest fails when the two differ. Template questions don't
-# carry concept links yet (FieldBinding has no concept_ref field).
+# GlobalLibrarySeedTest fails when the two differ. Template questions carry
+# their concept links as `ground:concept` foreign attributes on their bindings.
 
 concepts {
   id: "core.area_ha"
@@ -911,35 +911,232 @@ form_templates {
           }
         }
       }
+      secondary_instances {
+        id: "data_consent"
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "yes"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Yes"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "yes"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "no"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "No"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "no"
+              }
+            }
+          }
+        }
+      }
+      secondary_instances {
+        id: "producer_gender"
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "female"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Female"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "female"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "male"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Male"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "male"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "other"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Other"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "other"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "prefer_not_to_say"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Prefer not to say"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "prefer_not_to_say"
+              }
+            }
+          }
+        }
+      }
       bindings {
         field_path: "data_consent"
         type: TYPE_SELECT_ONE
         required_expression: "true()"
+        foreign_attributes {
+          namespace_uri: "http://groundplatform.org/xforms"
+          qualified_name: "ground:concept"
+          value: "core.data_consent@1"
+        }
       }
       bindings {
         field_path: "producer_name"
         type: TYPE_STRING
         required_expression: "true()"
+        foreign_attributes {
+          namespace_uri: "http://groundplatform.org/xforms"
+          qualified_name: "ground:concept"
+          value: "core.producer_name@1"
+        }
       }
       bindings {
         field_path: "producer_id"
         type: TYPE_STRING
+        foreign_attributes {
+          namespace_uri: "http://groundplatform.org/xforms"
+          qualified_name: "ground:concept"
+          value: "core.producer_id@1"
+        }
       }
       bindings {
         field_path: "producer_gender"
         type: TYPE_SELECT_ONE
+        foreign_attributes {
+          namespace_uri: "http://groundplatform.org/xforms"
+          qualified_name: "ground:concept"
+          value: "core.producer_gender@1"
+        }
       }
       bindings {
         field_path: "household_size"
         type: TYPE_INT32
+        foreign_attributes {
+          namespace_uri: "http://groundplatform.org/xforms"
+          qualified_name: "ground:concept"
+          value: "core.household_size@1"
+        }
       }
       bindings {
         field_path: "country"
         type: TYPE_STRING
+        foreign_attributes {
+          namespace_uri: "http://groundplatform.org/xforms"
+          qualified_name: "ground:concept"
+          value: "core.country@1"
+        }
       }
       bindings {
         field_path: "admin_area"
         type: TYPE_STRING
+        foreign_attributes {
+          namespace_uri: "http://groundplatform.org/xforms"
+          qualified_name: "ground:concept"
+          value: "core.admin_area@1"
+        }
       }
     }
     view {
@@ -950,17 +1147,11 @@ form_templates {
           label {
             text: "Consent to data collection"
           }
-          choices {
-            value: "yes"
-            label {
-              text: "Yes"
-            }
-          }
-          choices {
-            value: "no"
-            label {
-              text: "No"
-            }
+          itemset {
+            instance_id: "data_consent"
+            value_ref: "name"
+            label_ref: "label"
+            nodeset_path: "/root/item"
           }
         }
       }
@@ -989,29 +1180,11 @@ form_templates {
           label {
             text: "Producer gender"
           }
-          choices {
-            value: "female"
-            label {
-              text: "Female"
-            }
-          }
-          choices {
-            value: "male"
-            label {
-              text: "Male"
-            }
-          }
-          choices {
-            value: "other"
-            label {
-              text: "Other"
-            }
-          }
-          choices {
-            value: "prefer_not_to_say"
-            label {
-              text: "Prefer not to say"
-            }
+          itemset {
+            instance_id: "producer_gender"
+            value_ref: "name"
+            label_ref: "label"
+            nodeset_path: "/root/item"
           }
         }
       }

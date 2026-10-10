@@ -14,6 +14,7 @@
 package org.groundplatform.v2.devtools.prototypeapp.domain.model
 
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EditorForm
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EditorQuestion
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EditorQuestionType
 
 /**
@@ -120,6 +121,36 @@ enum class ConceptDataType(
     get() = this == SELECT_ONE || this == SELECT_MULTIPLE
 }
 
+/**
+ * A link from a form question or entity property to a [LibraryConcept]
+ * (`groundplatform.v2.library.ConceptRef`): the concept ID and the version it was linked against.
+ */
+data class ConceptLink(val conceptId: String, val version: Int = 1) {
+  /** The `ground:concept` attribute value, `<conceptId>@<version>` (e.g. `eudr.commodity@1`). */
+  val encoded: String
+    get() = "$conceptId@$version"
+
+  companion object {
+    /** A link to [concept]'s current version. */
+    fun to(concept: LibraryConcept): ConceptLink = ConceptLink(concept.id, concept.version)
+
+    /**
+     * Parses a `ground:concept` value (`<conceptId>@<version>`, or a bare ID meaning version 1).
+     * Returns `null` for blank values, malformed versions, or IDs with whitespace.
+     */
+    fun parse(value: String): ConceptLink? {
+      val trimmed = value.trim()
+      val id = trimmed.substringBefore('@')
+      if (id.isEmpty() || id.any { it.isWhitespace() }) return null
+      val version =
+        if ('@' in trimmed)
+          trimmed.substringAfter('@').toIntOrNull()?.takeIf { it > 0 } ?: return null
+        else 1
+      return ConceptLink(id, version)
+    }
+  }
+}
+
 /** One allowed value of a select [LibraryConcept]. */
 data class CodeListItem(
   /** Language-independent value (e.g. `"coffee"`). */
@@ -170,9 +201,9 @@ data class LibraryConcept(
 
 /**
  * A reusable Form in an organization's library (`groundplatform.v2.library.FormTemplateDef`).
- * Adding it to a survey copies [form]; later template edits don't change existing surveys.
- *
- * Until `FieldBinding.concept_ref` exists, concept links live only here, in [questionConcepts].
+ * Adding it to a survey copies [form]; later template edits don't change existing surveys. Its
+ * questions' concept links ([EditorQuestion.conceptLink]) travel in the template's `FormDef` as
+ * `ground:concept` bind attributes.
  */
 data class FormTemplate(
   val id: String,
@@ -180,8 +211,6 @@ data class FormTemplate(
   val title: LocalizedText,
   val form: EditorForm,
   val description: LocalizedText = LocalizedText(),
-  /** Concept ID linked to each question, keyed by [EditorForm] question key. */
-  val questionConcepts: Map<String, String> = emptyMap(),
   val status: LibraryStatus = LibraryStatus.DRAFT,
 ) {
   val isGlobal: Boolean
@@ -189,7 +218,11 @@ data class FormTemplate(
 
   /** IDs of every concept the template's questions link to. */
   val conceptIds: Set<String>
-    get() = questionConcepts.values.toSet()
+    get() = form.questions.mapNotNull { it.conceptLink?.conceptId }.toSet()
+
+  /** Number of questions linked to a concept. */
+  val linkedQuestionCount: Int
+    get() = form.questions.count { it.conceptLink != null }
 }
 
 /**

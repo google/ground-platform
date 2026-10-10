@@ -21,9 +21,17 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import org.groundplatform.v2.core.forms.ui.FormWizardController
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.CodeListItem
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.ConceptAggregation
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.ConceptLink
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.FormAvailability
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.LibraryConcept
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.LibraryIds
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.LibraryStatus
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.LocalizedText
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.ChoiceColors
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.ChoiceSource
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.ConceptLinking
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EditorChoice
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EditorChoiceImage
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EditorDataset
@@ -50,7 +58,13 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.Validatio
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.slugify
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.withRenamedTargetDataset
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.withRenamedTargetProperty
+import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.ConceptMatchKind
+import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.SearchConceptsUseCase
+import org.groundplatform.v2.devtools.prototypeapp.ui.state.ConceptSuggestion
+import org.groundplatform.v2.devtools.prototypeapp.ui.state.ConceptSuggestionsState
 import org.groundplatform.v2.devtools.prototypeapp.ui.state.FormEditorUiState
+import org.groundplatform.v2.devtools.prototypeapp.ui.state.FormLibraryContext
+import org.groundplatform.v2.devtools.prototypeapp.ui.state.ImportMatch
 
 /** User intents of the Form editor page. Implemented by [FormEditorViewModel]. */
 interface FormEditorActions {
@@ -228,6 +242,56 @@ interface FormEditorActions {
   fun markPreviewSubmitted()
 
   fun closePreview()
+
+  // --- Dictionary (concept links) ---
+
+  /**
+   * Suggests standard fields for question [key] while its label is being typed (debounced by the
+   * view): opens the top 5 matches for [query] once it has 3 or more characters, otherwise closes
+   * the list. Never links anything by itself.
+   */
+  fun requestConceptSuggestions(key: String, query: String)
+
+  /** Opens **Link to standard field…** for [key], searching its current label. */
+  fun openConceptSearch(key: String)
+
+  /** Updates the query of the open **Link to standard field…** search. */
+  fun updateConceptSearchQuery(query: String)
+
+  fun dismissConceptSuggestions()
+
+  /**
+   * Links [key] to [conceptId]. A question still in its default state also gets the concept's type,
+   * name, choices, unit hint, and simple validation; the label is kept.
+   */
+  fun linkConcept(key: String, conceptId: String)
+
+  fun unlinkConcept(key: String)
+
+  /** Replaces [key]'s label with its linked concept's label (in the survey's language). */
+  fun useStandardLabel(key: String)
+
+  /**
+   * Adds [key]'s label as a draft concept to the survey organization's dictionary (Managers only),
+   * built from the question's type and choices, and links it. Returns an error message, or `null`.
+   */
+  fun addLabelToDictionary(key: String): String?
+
+  /** Maps choice [index] of linked question [key] to code-list value [code], or clears it. */
+  fun setChoiceCode(key: String, index: Int, code: String?)
+
+  /**
+   * Opens the "We found N fields that match standard definitions" card for unlinked questions (used
+   * after an import). Only exact or near-exact matches are pre-checked.
+   */
+  fun suggestImportMatches()
+
+  fun setImportMatchChecked(key: String, checked: Boolean)
+
+  /** Links every checked import match and closes the card. */
+  fun linkImportMatches()
+
+  fun dismissImportMatches()
 }
 
 /**
@@ -247,6 +311,16 @@ class FormEditorViewModel(
   private val datasetsFlow: StateFlow<List<EditorDataset>>,
   private val updateForm: (transform: (EditorForm) -> EditorForm) -> Unit,
   scope: CoroutineScope,
+  /** The survey's dictionary; empty for the standalone editor. */
+  private val libraryFlow: StateFlow<FormLibraryContext> = MutableStateFlow(FormLibraryContext()),
+  /**
+   * Adds a draft concept to the survey organization's dictionary; returns an error message, or
+   * `null` when it was added.
+   */
+  private val addOrganizationConcept: (LibraryConcept) -> String? = {
+    "This survey has no organization dictionary."
+  },
+  private val searchConcepts: SearchConceptsUseCase = SearchConceptsUseCase(),
 ) : FormEditorActions {
   /** Session (non-persisted) state of the Form editor. */
   private data class Session(
@@ -258,6 +332,8 @@ class FormEditorViewModel(
     val isXmlViewerOpen: Boolean = false,
     val isAdvancedExpanded: Boolean = false,
     val sidePanelWidthDp: Float = FormEditorUiState.DEFAULT_SIDE_PANEL_WIDTH_DP,
+    val conceptSuggestions: ConceptSuggestionsState? = null,
+    val importMatches: List<ImportMatch> = emptyList(),
   )
 
   private val session =
@@ -266,7 +342,7 @@ class FormEditorViewModel(
   private var nextKeyId = formFlow.value.questions.size + 1
 
   val uiState: StateFlow<FormEditorUiState> =
-    combine(formFlow, datasetsFlow, session) { form, datasets, session ->
+    combine(formFlow, datasetsFlow, session, libraryFlow) { form, datasets, session, library ->
         FormEditorUiState(
           form = form,
           datasets = datasets,
@@ -278,6 +354,9 @@ class FormEditorViewModel(
           isXmlViewerOpen = session.isXmlViewerOpen,
           isAdvancedExpanded = session.isAdvancedExpanded,
           sidePanelWidthDp = session.sidePanelWidthDp,
+          library = library,
+          conceptSuggestions = session.conceptSuggestions,
+          importMatches = session.importMatches,
         )
       }
       .stateIn(
@@ -287,6 +366,7 @@ class FormEditorViewModel(
           form = formFlow.value,
           datasets = datasetsFlow.value,
           selectedKey = session.value.selectedKey,
+          library = libraryFlow.value,
         ),
       )
 
@@ -869,6 +949,240 @@ class FormEditorViewModel(
     }
   }
 
+  // --- Dictionary (concept links) ---
+
+  private val library: FormLibraryContext
+    get() = libraryFlow.value
+
+  /** Top concepts for [query] for [question]: type-compatible ones first. */
+  private fun suggestionsFor(question: EditorQuestion, query: String): List<ConceptSuggestion> {
+    val context = library
+    val results =
+      searchConcepts(
+        context.library.concepts,
+        query,
+        SearchConceptsUseCase.SearchOptions(
+          limit = SUGGESTION_POOL,
+          organizationId = context.library.organizationId,
+          boostedConceptIds = context.purposeConceptIds,
+        ),
+      )
+    return results
+      .map { it.concept }
+      .sortedBy { !it.dataType.isCompatibleWith(question.type) }
+      .take(MAX_SUGGESTIONS)
+      .map { concept ->
+        ConceptSuggestion(
+          concept = concept,
+          sourceLabel = context.sourceLabel(concept),
+          label = concept.label.get(context.language),
+          description = concept.description.get(context.language),
+          isTypeCompatible = concept.dataType.isCompatibleWith(question.type),
+        )
+      }
+  }
+
+  private fun addToDictionaryLabel(query: String): String? =
+    query.trim().takeIf {
+      it.isNotEmpty() && library.canAddToDictionary && library.library.organizationId != null
+    }
+
+  override fun requestConceptSuggestions(key: String, query: String) {
+    val question = form.find(key) ?: return
+    val current = session.value.conceptSuggestions
+    if (current?.isExplicitSearch == true && current.questionKey == key) return
+    val trimmed = query.trim()
+    if (trimmed.length < MIN_SUGGESTION_QUERY || question.conceptLink != null) {
+      if (current?.questionKey == key) session.update { it.copy(conceptSuggestions = null) }
+      return
+    }
+    val suggestions = suggestionsFor(question, trimmed)
+    session.update {
+      it.copy(
+        conceptSuggestions =
+          if (suggestions.isEmpty() && addToDictionaryLabel(trimmed) == null) null
+          else
+            ConceptSuggestionsState(
+              questionKey = key,
+              query = trimmed,
+              suggestions = suggestions,
+              addToDictionaryLabel = addToDictionaryLabel(trimmed),
+            )
+      )
+    }
+  }
+
+  override fun openConceptSearch(key: String) {
+    val question = form.find(key) ?: return
+    session.update {
+      it.copy(
+        conceptSuggestions =
+          ConceptSuggestionsState(
+            questionKey = key,
+            query = question.label,
+            suggestions = suggestionsFor(question, question.label),
+            isExplicitSearch = true,
+            addToDictionaryLabel = addToDictionaryLabel(question.label),
+          )
+      )
+    }
+  }
+
+  override fun updateConceptSearchQuery(query: String) {
+    val current = session.value.conceptSuggestions ?: return
+    val question = form.find(current.questionKey) ?: return
+    session.update {
+      it.copy(
+        conceptSuggestions =
+          current.copy(
+            query = query,
+            suggestions = suggestionsFor(question, query),
+            addToDictionaryLabel = addToDictionaryLabel(question.label),
+          )
+      )
+    }
+  }
+
+  override fun dismissConceptSuggestions() {
+    session.update { it.copy(conceptSuggestions = null) }
+  }
+
+  override fun linkConcept(key: String, conceptId: String) {
+    val concept = library.concept(conceptId) ?: return
+    val takenNames = form.questions.map { it.name }.toSet()
+    updateQuestion(key) { q -> ConceptLinking.link(q, concept, takenNames, library.language) }
+    session.update { it.copy(conceptSuggestions = null) }
+  }
+
+  override fun unlinkConcept(key: String) =
+    updateQuestion(key) { q ->
+      q.copy(conceptLink = null, choices = q.choices.map { it.copy(code = null) })
+    }
+
+  override fun useStandardLabel(key: String) {
+    val question = form.find(key) ?: return
+    val concept = library.concept(question.conceptLink?.conceptId) ?: return
+    updateQuestion(key) { it.copy(label = concept.label.get(library.language)) }
+  }
+
+  override fun addLabelToDictionary(key: String): String? {
+    val question = form.find(key) ?: return "Question not found."
+    val organizationId = library.library.organizationId
+    if (!library.canAddToDictionary || organizationId == null) {
+      return "Only Managers of this survey's organization can add to its dictionary."
+    }
+    val label = question.label.trim()
+    if (label.isEmpty()) return "Enter a label first."
+    val dataType = ConceptLinking.conceptTypeFor(question.type) ?: return "Notes can't be linked."
+    val name = LibraryIds.nameFrom(label)
+    val codeList =
+      if (dataType.hasCodeList && !question.usesDatasetChoices) {
+        question.choices.map { choice ->
+          CodeListItem(
+            code =
+              choice.code ?: LibraryIds.nameFrom(choice.value.ifBlank { choice.label }, "value"),
+            label = LocalizedText.en(choice.label.ifBlank { choice.value }),
+          )
+        }
+      } else {
+        emptyList()
+      }
+    val concept =
+      LibraryConcept(
+        id = LibraryIds.organizationEntryId(organizationId, name),
+        organizationId = organizationId,
+        label = LocalizedText.en(label),
+        dataType = dataType,
+        description =
+          LocalizedText.en(question.hint.trim()).takeUnless { question.hint.isBlank() }
+            ?: LocalizedText(),
+        codeList = codeList,
+        aggregation =
+          when {
+            dataType.hasCodeList -> ConceptAggregation.COUNT_BY_CODE
+            question.type.isNumeric -> ConceptAggregation.SUM
+            else -> ConceptAggregation.NONE
+          },
+        status = LibraryStatus.DRAFT,
+      )
+    addOrganizationConcept(concept)?.let {
+      return it
+    }
+    updateQuestion(key) { q ->
+      q.copy(
+        conceptLink = ConceptLink.to(concept),
+        choices =
+          if (codeList.isEmpty()) q.choices
+          else q.choices.mapIndexed { i, c -> c.copy(code = codeList.getOrNull(i)?.code) },
+      )
+    }
+    session.update { it.copy(conceptSuggestions = null) }
+    return null
+  }
+
+  override fun setChoiceCode(key: String, index: Int, code: String?) =
+    updateChoiceAt(key, index) { it.copy(code = code?.takeIf { c -> c.isNotBlank() }) }
+
+  override fun suggestImportMatches() {
+    val context = library
+    val matches =
+      form.questions
+        .filter { it.conceptLink == null && it.type != EditorQuestionType.NOTE }
+        .mapNotNull { question ->
+          val best =
+            searchConcepts(
+                context.library.concepts,
+                question.label,
+                SearchConceptsUseCase.SearchOptions(
+                  questionType = question.type,
+                  limit = 1,
+                  organizationId = context.library.organizationId,
+                  boostedConceptIds = context.purposeConceptIds,
+                ),
+              )
+              .firstOrNull()
+              ?: searchConcepts(
+                  context.library.concepts,
+                  question.name.replace('_', ' '),
+                  SearchConceptsUseCase.SearchOptions(questionType = question.type, limit = 1),
+                )
+                .firstOrNull()
+              ?: return@mapNotNull null
+          if (best.kind == ConceptMatchKind.FUZZY && best.score < MIN_IMPORT_FUZZY_SCORE) {
+            return@mapNotNull null
+          }
+          ImportMatch(
+            questionKey = question.key,
+            questionLabel = question.label,
+            concept = best.concept,
+            sourceLabel = context.sourceLabel(best.concept),
+            isStrong = best.kind == ConceptMatchKind.EXACT || best.kind == ConceptMatchKind.PREFIX,
+          )
+        }
+        .distinctBy { it.concept.id }
+    session.update { it.copy(importMatches = matches) }
+  }
+
+  override fun setImportMatchChecked(key: String, checked: Boolean) {
+    session.update { s ->
+      s.copy(
+        importMatches =
+          s.importMatches.map { if (it.questionKey == key) it.copy(isChecked = checked) else it }
+      )
+    }
+  }
+
+  override fun linkImportMatches() {
+    session.value.importMatches
+      .filter { it.isChecked }
+      .forEach { linkConcept(it.questionKey, it.concept.id) }
+    dismissImportMatches()
+  }
+
+  override fun dismissImportMatches() {
+    session.update { it.copy(importMatches = emptyList()) }
+  }
+
   // --- Helpers ---
 
   private fun newKey(): String {
@@ -892,6 +1206,17 @@ class FormEditorViewModel(
     listOf(EditorChoice("option_1", "Option 1"), EditorChoice("option_2", "Option 2"))
 
   companion object {
+    /** Characters typed into a label before standard fields are suggested. */
+    const val MIN_SUGGESTION_QUERY = 3
+
+    /** Suggestions shown under the Label field. */
+    const val MAX_SUGGESTIONS = 5
+
+    private const val SUGGESTION_POOL = 25
+
+    /** Weakest fuzzy match offered after an import (a single typo in a label word). */
+    private const val MIN_IMPORT_FUZZY_SCORE = 18.0
+
     /**
      * A Form editor over its own copy of [initialForm] with a fixed dataset catalog, for the
      * standalone Form editor and tests. Edits stay in the returned ViewModel.

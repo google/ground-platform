@@ -28,12 +28,16 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.groundplatform.v2.core.sampling.SampleEstimate
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.LibraryConcept
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.LocalizedText
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.Organization
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.OrganizationLibrary
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyPlaceItem
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.ChoiceSource
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.CollaboratorRole
@@ -44,6 +48,7 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EntityDat
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EntityIdSource
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EntityProperty
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EntityRow
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.FormConceptLinkSync
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.FormDatasetLinks
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.FormEditorValidator
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.FormIds
@@ -77,14 +82,18 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.withRenam
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.withRenamedTargetProperty
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.geometryKind
 import org.groundplatform.v2.devtools.prototypeapp.domain.repository.AuthRepository
+import org.groundplatform.v2.devtools.prototypeapp.domain.repository.LibraryRepository
 import org.groundplatform.v2.devtools.prototypeapp.domain.repository.OrganizationRepository
 import org.groundplatform.v2.devtools.prototypeapp.domain.repository.PlaceRepository
 import org.groundplatform.v2.devtools.prototypeapp.domain.repository.SurveyEditorRepository
 import org.groundplatform.v2.devtools.prototypeapp.domain.repository.SurveyRepository
 import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.GenerateSamplePlotsUseCase
 import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.InviteCollaboratorUseCase
+import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.ManageLibraryUseCase
+import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.ResolveLibraryUseCase
 import org.groundplatform.v2.devtools.prototypeapp.ui.common.platformEpochMillis
 import org.groundplatform.v2.devtools.prototypeapp.ui.formeditor.moved
+import org.groundplatform.v2.devtools.prototypeapp.ui.state.FormLibraryContext
 import org.groundplatform.v2.devtools.prototypeapp.ui.state.SurveyEditorEvent
 import org.groundplatform.v2.devtools.prototypeapp.ui.state.SurveyEditorSection
 import org.groundplatform.v2.devtools.prototypeapp.ui.state.SurveyEditorUiState
@@ -348,6 +357,12 @@ class SurveyEditorViewModel(
     GenerateSamplePlotsUseCase(now = { isoUtc(platformEpochMillis()) }),
   private val inviteCollaboratorUseCase: InviteCollaboratorUseCase = InviteCollaboratorUseCase(),
   private val scope: CoroutineScope,
+  /** Organization libraries; the Form editor links questions to their concepts. */
+  libraryRepository: LibraryRepository? = null,
+  /** Adds concepts to an organization's dictionary from the Form editor (Managers only). */
+  private val manageLibraryUseCase: ManageLibraryUseCase? =
+    libraryRepository?.let(::ManageLibraryUseCase),
+  private val resolveLibraryUseCase: ResolveLibraryUseCase = ResolveLibraryUseCase(),
 ) : SurveyEditorActions {
   /** Everything the editor reads from the local data store. */
   private data class Data(
@@ -419,6 +434,20 @@ class SurveyEditorViewModel(
     combine(data, session, ::buildUiState)
       .stateIn(scope, SharingStarted.Eagerly, SurveyEditorUiState())
 
+  /** Every stored organization library, keyed by organization ID. */
+  private val libraries: StateFlow<Map<String, OrganizationLibrary>> =
+    (libraryRepository?.observeLibraries() ?: flowOf(emptyMap())).stateIn(
+      scope,
+      SharingStarted.Eagerly,
+      emptyMap(),
+    )
+
+  /** The dictionary the Form editors link questions to: the survey's resolved library. */
+  private val libraryContext: StateFlow<FormLibraryContext> =
+    combine(uiState, libraries, ::libraryContextFor)
+      .distinctUntilChanged()
+      .stateIn(scope, SharingStarted.Eagerly, libraryContextFor(uiState.value, libraries.value))
+
   private val formEditors = mutableMapOf<String, Pair<FormEditorViewModel, Job>>()
 
   /** Set by [cancelGeneration]; polled between generated chunks. */
@@ -437,6 +466,36 @@ class SurveyEditorViewModel(
           }
         }
     }
+  }
+
+  private fun libraryContextFor(
+    state: SurveyEditorUiState,
+    libraries: Map<String, OrganizationLibrary>,
+  ): FormLibraryContext {
+    val organizationId = state.draft.details.organizationId
+    val organization = state.organizations.firstOrNull { it.id == organizationId }
+    return FormLibraryContext(
+      library = resolveLibraryUseCase.forOrganization(libraries, organization?.id),
+      organizationName = organization?.name,
+      canAddToDictionary =
+        manageLibraryUseCase != null && organization?.isManager(state.signedInUserEmail) == true,
+      language = state.draft.details.defaultLanguage.ifEmpty { LocalizedText.DEFAULT_LANGUAGE },
+    )
+  }
+
+  /**
+   * Adds draft [concept] to its organization's dictionary; returns why it can't be added, or `null`
+   * (the library updates when the save completes).
+   */
+  private fun addOrganizationConcept(concept: LibraryConcept): String? {
+    val manage = manageLibraryUseCase ?: return "This survey has no organization dictionary."
+    val organizationLibrary =
+      libraries.value[concept.organizationId] ?: OrganizationLibrary(concept.organizationId)
+    manage.conceptError(concept, organizationLibrary, isNew = true)?.let {
+      return it
+    }
+    scope.launch { manage.saveConcept(concept) }
+    return null
   }
 
   private fun buildUiState(data: Data, session: Session): SurveyEditorUiState {
@@ -684,6 +743,8 @@ class SurveyEditorViewModel(
                 .stateIn(formScope, SharingStarted.Eagerly, initial.datasetCatalog(formKey)),
             updateForm = { transform -> updateForm(formKey, transform) },
             scope = formScope,
+            libraryFlow = libraryContext,
+            addOrganizationConcept = ::addOrganizationConcept,
           )
         viewModel to job
       }
@@ -699,6 +760,10 @@ class SurveyEditorViewModel(
     if (updated == entry.form) return@edit
     forms = forms.map { if (it.key == formKey) it.copy(form = updated) else it }
     if (updated.questions != entry.form.questions) syncDatasetsLinkedToForm(formKey)
+    // Properties that linked questions save to inherit their concepts.
+    if (updated.questions != entry.form.questions || updated.saveTo != entry.form.saveTo) {
+      datasets = SaveToRules.inheritConcepts(updated, formKey, datasets)
+    }
   }
 
   /** Synchronizes the schema of all datasets linked to Form [formKey] with its questions. */
@@ -888,7 +953,14 @@ class SurveyEditorViewModel(
             q
           }
         }
-      var form = imported.form.copy(formId = formId, title = title, questions = questions)
+      // Imported `ground:concept` links stay linked only when the concept is in the dictionary.
+      val library = libraryContext.value.library
+      var form =
+        FormConceptLinkSync.reconcileImported(
+          imported.form.copy(formId = formId, title = title, questions = questions)
+        ) {
+          library.concept(it) != null
+        }
       if (form.saveTo.mode == SaveToMode.UPDATE) {
         val requestedId = form.saveTo.targetDatasetId
         val targetIndex =
@@ -964,9 +1036,12 @@ class SurveyEditorViewModel(
           datasets = datasets + linkedDataset
         }
       }
+      datasets = SaveToRules.inheritConcepts(form, formKey, datasets)
       forms = forms + SurveyEditorForm(formKey, form)
       section = SurveyEditorSection.Form(formKey)
     }
+    // Offer links for unlinked questions that match standard fields.
+    formEditor(formKey).suggestImportMatches()
     return formKey
   }
 

@@ -763,7 +763,7 @@ private fun TemplateRow(
 ) {
   val template = row.entry
   val questionCount = template.form.questions.size
-  val linkedCount = template.questionConcepts.size
+  val linkedCount = template.linkedQuestionCount
   EntryRowLayout(
     title = template.title.text,
     id = template.id,

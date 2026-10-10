@@ -33,6 +33,7 @@ import groundplatform.v2.forms.EventType
 import groundplatform.v2.forms.FieldBinding
 import groundplatform.v2.forms.FieldDefinition
 import groundplatform.v2.forms.FieldValue
+import groundplatform.v2.forms.ForeignAttribute
 import groundplatform.v2.forms.FormDef
 import groundplatform.v2.forms.GeoConfig
 import groundplatform.v2.forms.GeoPoint
@@ -174,6 +175,15 @@ object TextProtoSerializer {
     }
     addString("preload_param", msg.preload_param)
     addString("read_only_expression", msg.read_only_expression)
+    msg.foreign_attributes.forEach {
+      addMessage("foreign_attributes", encodeForeignAttribute(it))
+    }
+  }
+
+  private fun encodeForeignAttribute(msg: ForeignAttribute): TextProtoMessage = buildMessage {
+    addString("namespace_uri", msg.namespace_uri)
+    addString("qualified_name", msg.qualified_name)
+    addString("value", msg.value_)
   }
 
   private fun encodeTranslationCatalog(msg: TranslationCatalog): TextProtoMessage = buildMessage {
@@ -592,6 +602,15 @@ object TextProtoSerializer {
       preload = parseEnum(node.getIdentifierOrNull("preload"), PreloadType.PRELOAD_UNSPECIFIED),
       preload_param = node.getString("preload_param"),
       read_only_expression = node.getString("read_only_expression"),
+      foreign_attributes =
+        node.getMessages("foreign_attributes").map { decodeForeignAttribute(it) },
+    )
+
+  private fun decodeForeignAttribute(node: TextProtoMessage): ForeignAttribute =
+    ForeignAttribute(
+      namespace_uri = node.getString("namespace_uri"),
+      qualified_name = node.getString("qualified_name"),
+      value_ = node.getString("value"),
     )
 
   private fun decodeTranslationCatalog(node: TextProtoMessage): TranslationCatalog =

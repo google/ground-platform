@@ -47,9 +47,8 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.FormImpor
  * Maps organization library domain models to and from their `groundplatform.v2.library` protos
  * (`LibraryBundle` and `OrganizationLibrarySettings`), for seed files, imports, exports, and sync.
  *
- * Template Forms go through [EditorXFormsGenerator.compile] and [FormImport]. Concept links on
- * template questions ([FormTemplate.questionConcepts]) have no proto field until
- * `FieldBinding.concept_ref` exists, so they're dropped by [toBundle] and empty after [fromBundle].
+ * Template Forms go through [EditorXFormsGenerator.compile] and [FormImport], so their questions'
+ * concept links round-trip as `ground:concept` bind attributes.
  */
 object LibraryProtoMapper {
   /**

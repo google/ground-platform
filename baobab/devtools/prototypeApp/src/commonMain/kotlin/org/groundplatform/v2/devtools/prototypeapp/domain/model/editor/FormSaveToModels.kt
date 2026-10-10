@@ -13,6 +13,7 @@
  */
 package org.groundplatform.v2.devtools.prototypeapp.domain.model.editor
 
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.ConceptLink
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.hasGeometry
 
 /**
@@ -286,6 +287,46 @@ object SaveToRules {
       target.isMapLayer -> "Update existing map feature"
       else -> "Update existing table row"
     }
+
+  /**
+   * [datasets] with concepts inherited from [form]'s linked questions (`save_to` inheritance; see
+   * `docs/technical/model/library/01-concepts.md`): each property a linked question saves to gets
+   * the question's concept. Covers the dataset [form] (key [formKey]) adds features to, whose
+   * properties are named after its questions, and the dataset it updates through its field
+   * mappings. Properties of unlinked questions keep their concept.
+   */
+  fun inheritConcepts(
+    form: EditorForm,
+    formKey: String,
+    datasets: List<EntityDataset>,
+  ): List<EntityDataset> {
+    val isUpdate = form.saveTo.mode == SaveToMode.UPDATE
+    return datasets.map { dataset ->
+      val propertyConcepts: Map<String, ConceptLink> =
+        when {
+          isUpdate && dataset.id == form.saveTo.targetDatasetId ->
+            form.saveTo.mappings
+              .mapNotNull { m ->
+                val link = form.find(m.questionKey)?.conceptLink
+                if (m.property != null && link != null) m.property to link else null
+              }
+              .toMap()
+          !isUpdate && dataset.linkedFormKey == formKey ->
+            form.questions.mapNotNull { q -> q.conceptLink?.let { q.name to it } }.toMap()
+          else -> emptyMap()
+        }
+      if (propertyConcepts.isEmpty()) {
+        dataset
+      } else {
+        dataset.copy(
+          properties =
+            dataset.properties.map { p ->
+              propertyConcepts[p.name]?.let { p.copy(conceptLink = it) } ?: p
+            }
+        )
+      }
+    }
+  }
 
   /** Short description of what a submission does, shown under the flow's end node. */
   fun outcome(form: EditorForm, target: EditorDataset?): String =

@@ -15,7 +15,9 @@ package org.groundplatform.v2.devtools.prototypeapp.ui.state
 
 import org.groundplatform.v2.core.forms.model.FormDefinition
 import org.groundplatform.v2.core.forms.ui.FormWizardController
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.LibraryConcept
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.ChoiceSource
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.ConceptLinkValidator
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EditorDataset
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EditorForm
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EditorFormTemplates
@@ -74,6 +76,17 @@ data class FormEditorUiState(
    * [MIN_SIDE_PANEL_WIDTH_DP]..[MAX_SIDE_PANEL_WIDTH_DP].
    */
   val sidePanelWidthDp: Float = DEFAULT_SIDE_PANEL_WIDTH_DP,
+
+  // --- Dictionary (concept links) ---
+  /** The survey's resolved library and who may add to it. */
+  val library: FormLibraryContext = FormLibraryContext(),
+  /** Concept suggestions open for a question, or `null`. */
+  val conceptSuggestions: ConceptSuggestionsState? = null,
+  /**
+   * Questions of a just-imported Form that match standard fields ("We found N fields that match
+   * standard definitions"), or empty when the card is closed.
+   */
+  val importMatches: List<ImportMatch> = emptyList(),
 ) {
   val selectedQuestion: EditorQuestion?
     get() = form.find(selectedKey)
@@ -129,6 +142,40 @@ data class FormEditorUiState(
 
   val issues: List<EditorIssue>
     get() = FormEditorValidator.validate(form, datasets) + SaveToValidator.validate(form, datasets)
+
+  /** Concept link warnings, which never block publishing. */
+  val warnings: List<EditorIssue>
+    get() = ConceptLinkValidator.validate(form) { library.concept(it) }
+
+  fun warningsFor(key: String): List<EditorIssue> = warnings.filter { it.questionKey == key }
+
+  /** The concept [question] is linked to, if it's in the survey's library. */
+  fun conceptOf(question: EditorQuestion): LibraryConcept? =
+    library.concept(question.conceptLink?.conceptId)
+
+  /**
+   * Why deleting linked [question] matters, for the soft confirmation (e.g. "This field feeds your
+   * impact report for EUDR due diligence."), or `null` when it isn't linked.
+   */
+  fun deleteWarningFor(question: EditorQuestion): String? {
+    val link = question.conceptLink ?: return null
+    val concept = library.concept(link.conceptId)
+    val purposes =
+      library.library.pickablePurposePacks
+        .filter { pack ->
+          pack.formTemplateIds.any { id ->
+            library.library.formTemplate(id)?.conceptIds?.contains(link.conceptId) == true
+          }
+        }
+        .map { it.title.get(library.language) }
+    val name = concept?.label?.get(library.language) ?: link.conceptId
+    return if (purposes.isNotEmpty()) {
+      "This field feeds your impact report for ${purposes.joinToString(" and ")}."
+    } else {
+      "This field is linked to the standard field \"$name\", so its answers count toward impact " +
+        "reports."
+    }
+  }
 
   /** Issues that aren't about a single question, shown in Form properties. */
   val formIssues: List<EditorIssue>

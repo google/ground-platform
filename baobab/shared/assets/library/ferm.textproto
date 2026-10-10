@@ -20,8 +20,8 @@
 # which the loader sets to the "All users" organization.
 #
 # The prototype app embeds a Kotlin copy (GlobalLibrarySeedData.kt), and its
-# GlobalLibrarySeedTest fails when the two differ. Template questions don't
-# carry concept links yet (FieldBinding has no concept_ref field).
+# GlobalLibrarySeedTest fails when the two differ. Template questions carry
+# their concept links as `ground:concept` foreign attributes on their bindings.
 
 concepts {
   id: "ferm.intervention_type"
@@ -467,30 +467,219 @@ form_templates {
           }
         }
       }
+      secondary_instances {
+        id: "intervention_type"
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "natural_regeneration"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Natural regeneration"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "natural_regeneration"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "assisted_natural_regeneration"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Assisted natural regeneration"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "assisted_natural_regeneration"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "tree_planting"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Tree planting"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "tree_planting"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "agroforestry"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Agroforestry"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "agroforestry"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "mangrove_restoration"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Mangrove restoration"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "mangrove_restoration"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "other"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Other"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "other"
+              }
+            }
+          }
+        }
+      }
       bindings {
         field_path: "intervention_type"
         type: TYPE_SELECT_ONE
         required_expression: "true()"
+        foreign_attributes {
+          namespace_uri: "http://groundplatform.org/xforms"
+          qualified_name: "ground:concept"
+          value: "ferm.intervention_type@1"
+        }
       }
       bindings {
         field_path: "area_under_restoration_ha"
         type: TYPE_DOUBLE
+        foreign_attributes {
+          namespace_uri: "http://groundplatform.org/xforms"
+          qualified_name: "ground:concept"
+          value: "ferm.area_under_restoration_ha@1"
+        }
       }
       bindings {
         field_path: "start_date"
         type: TYPE_DATE
+        foreign_attributes {
+          namespace_uri: "http://groundplatform.org/xforms"
+          qualified_name: "ground:concept"
+          value: "ferm.start_date@1"
+        }
       }
       bindings {
         field_path: "trees_planted"
         type: TYPE_INT32
+        foreign_attributes {
+          namespace_uri: "http://groundplatform.org/xforms"
+          qualified_name: "ground:concept"
+          value: "ferm.trees_planted@1"
+        }
       }
       bindings {
         field_path: "trees_surviving"
         type: TYPE_INT32
+        foreign_attributes {
+          namespace_uri: "http://groundplatform.org/xforms"
+          qualified_name: "ground:concept"
+          value: "ferm.trees_surviving@1"
+        }
       }
       bindings {
         field_path: "site_photo"
         type: TYPE_BINARY
+        foreign_attributes {
+          namespace_uri: "http://groundplatform.org/xforms"
+          qualified_name: "ground:concept"
+          value: "core.site_photo@1"
+        }
       }
     }
     view {
@@ -501,41 +690,11 @@ form_templates {
           label {
             text: "Restoration intervention"
           }
-          choices {
-            value: "natural_regeneration"
-            label {
-              text: "Natural regeneration"
-            }
-          }
-          choices {
-            value: "assisted_natural_regeneration"
-            label {
-              text: "Assisted natural regeneration"
-            }
-          }
-          choices {
-            value: "tree_planting"
-            label {
-              text: "Tree planting"
-            }
-          }
-          choices {
-            value: "agroforestry"
-            label {
-              text: "Agroforestry"
-            }
-          }
-          choices {
-            value: "mangrove_restoration"
-            label {
-              text: "Mangrove restoration"
-            }
-          }
-          choices {
-            value: "other"
-            label {
-              text: "Other"
-            }
+          itemset {
+            instance_id: "intervention_type"
+            value_ref: "name"
+            label_ref: "label"
+            nodeset_path: "/root/item"
           }
         }
       }

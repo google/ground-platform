@@ -13,6 +13,7 @@
  */
 package org.groundplatform.v2.devtools.prototypeapp.domain.model.editor
 
+import groundplatform.v2.survey.FormConceptLinks
 import org.groundplatform.v2.core.forms.model.FormDefinition
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.EntityShape
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.EntityShapeKind
@@ -68,6 +69,7 @@ object SurveyEditorDerivation {
     formDefinition: (FormPreviewItem) -> FormDefinition?,
     mapLayers: List<MapLayerItem>,
     entities: List<GeospatialEntityItem>,
+    conceptLinks: List<FormConceptLinks> = emptyList(),
   ): SurveyEditorDraft {
     val anchor = SurveyMapAnchor.forSurvey(surveyId)
     val datasets =
@@ -80,8 +82,13 @@ object SurveyEditorDerivation {
           FormImport.fromFormDefinition(it, form.id, form.title, form.availability)
         } ?: placeholder(form)
       val key = form.id
-      // The Form list is the source of truth for the title; the XML may carry an older one.
-      var editor = imported.form.copy(title = form.title.ifBlank { imported.form.title })
+      // The Form list is the source of truth for the title; the XML may carry an older one. The
+      // survey-level concept links are authoritative over `ground:concept` attributes.
+      var editor =
+        FormConceptLinkSync.applyLinks(
+          imported.form.copy(title = form.title.ifBlank { imported.form.title }),
+          conceptLinks.firstOrNull { it.form_id == form.id },
+        )
       val targetId = form.targetDatasetId.ifBlank { null }
       val target = datasets.indexOfFirst { it.id == targetId }.takeIf { it >= 0 }
       if (targetId != null && form.requiresEntity) {

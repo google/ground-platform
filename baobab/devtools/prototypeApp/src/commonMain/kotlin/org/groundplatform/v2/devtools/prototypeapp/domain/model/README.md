@@ -35,6 +35,7 @@ Domain models represent the canonical Ground 2.0 vocabulary (Surveys, Forms, Map
   - `SurveyEditorDerivation.kt` & `FormImport.kt`: Pure derivation of `SurveyEditorDraft` and `EditorForm` from runtime survey data and XForms XML.
   - `SurveyEditorProjection.kt` & `FormPublishing.kt`: Write-time projection from edited drafts back into runtime `FormPreviewItem`, `MapLayerItem`, `GeospatialEntityItem`, and XForms XML.
   - `FormValidationRules.kt` & `FormDatasetLinks.kt`: Pure validation rules and entity-to-form pre-population mapping logic.
+  - `FormConceptLinks.kt`: Links between questions and dictionary concepts: `ground:concept` bind attributes (`ConceptLinkAttributes`), survey-level links keyed by field path (`FormConceptLinkSync`), linking with default-state autofill and choice codes (`ConceptLinking`), and non-blocking link warnings (`ConceptLinkValidator`).
 
 ## Role in the Overall Architecture
 

@@ -18,6 +18,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.ConceptDataType
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.ConceptLink
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.ExportProfile
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.FormTemplate
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.LibraryConcept
@@ -28,6 +29,8 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.OrganizationLibr
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.OrganizationLibrarySettings
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.PurposePack
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EditorForm
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EditorQuestion
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EditorQuestionType
 
 class ResolveLibraryUseCaseTest {
   private val resolve = ResolveLibraryUseCase()
@@ -42,8 +45,19 @@ class ResolveLibraryUseCaseTest {
       id,
       owner,
       LocalizedText.en(id),
-      EditorForm(id, id, emptyList()),
-      questionConcepts = concepts,
+      EditorForm(
+        id,
+        id,
+        concepts.map { (key, conceptId) ->
+          EditorQuestion(
+            key,
+            key,
+            EditorQuestionType.TEXT,
+            key,
+            conceptLink = ConceptLink(conceptId),
+          )
+        },
+      ),
     )
 
   private fun pack(
@@ -136,8 +150,10 @@ class ResolveLibraryUseCaseTest {
     val resolved = resolve(global, coop)
     // Global templates keep only global concept links.
     assertEquals(
-      mapOf("q1" to "eudr.commodity"),
-      resolved.formTemplate("eudr_plots")!!.questionConcepts,
+      mapOf("q1" to "eudr.commodity", "q2" to null),
+      resolved.formTemplate("eudr_plots")!!.form.questions.associate {
+        it.key to it.conceptLink?.conceptId
+      },
     )
     // Global packs keep only global templates and export profiles.
     assertEquals(listOf("eudr_plots"), resolved.purposePack("mixed")!!.formTemplateIds)

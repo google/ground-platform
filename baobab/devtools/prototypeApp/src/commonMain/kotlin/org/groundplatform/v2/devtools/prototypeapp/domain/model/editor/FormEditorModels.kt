@@ -41,6 +41,7 @@ import groundplatform.v2.forms.ViewDef
 import org.groundplatform.v2.core.forms.model.FormDefinition
 import org.groundplatform.v2.core.forms.model.secondaryInstanceRow
 import org.groundplatform.v2.core.forms.serialization.XFormsXmlSerializer
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.ConceptLink
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.FormAvailability
 
 /**
@@ -156,12 +157,28 @@ enum class GeometryCapture(val label: String, val description: String, val appea
  *   form (XLSForm `media::image` column).
  * @property colorHex optional `#RRGGBB` display color. Ground-specific, so it is never written to
  *   XForms.
+ * @property code code-list value of the question's linked concept that this choice stands for (e.g.
+ *   the choice "Café" → `coffee`), exported as the `ground_code` extra choice column
+ *   (`ChoiceItem.properties["ground_code"]`), or `null` when unmapped.
  */
 data class EditorChoice(
   val value: String,
   val label: String,
   val image: EditorChoiceImage? = null,
   val colorHex: String? = null,
+  val code: String? = null,
+)
+
+/**
+ * An attribute of a question's XForms `<bind>` in a namespace the editor doesn't model (another
+ * tool's extension, or a `ground:concept` naming a concept outside the survey's library), kept so
+ * it round-trips (`FieldBinding.foreign_attributes`).
+ */
+data class EditorForeignAttribute(
+  val namespaceUri: String,
+  /** Qualified name as written (e.g. `acme:hint-style`). */
+  val qualifiedName: String,
+  val value: String,
 )
 
 /** A small image attached to an [EditorChoice], stored inline as base64. */
@@ -308,6 +325,14 @@ data class EditorQuestion(
    * for other types. Exported as the body `appearance` (`new` for capture only).
    */
   val mediaSource: MediaSource = MediaSource.CAPTURE_OR_UPLOAD,
+  /**
+   * Dictionary concept this question is linked to, or `null`. Stored in the survey's
+   * `form_concept_links` and exported as a `ground:concept` bind attribute (see
+   * `docs/technical/model/library/01-concepts.md`).
+   */
+  val conceptLink: ConceptLink? = null,
+  /** Unmodeled `<bind>` attributes kept for round-trip fidelity. */
+  val foreignAttributes: List<EditorForeignAttribute> = emptyList(),
 ) {
   val isConditional: Boolean
     get() = relevance != null
@@ -496,7 +521,12 @@ object FormFlowGraph {
 }
 
 /** A problem that prevents the Form from generating valid, unambiguous XForms. */
-data class EditorIssue(val questionKey: String?, val message: String)
+data class EditorIssue(
+  val questionKey: String?,
+  val message: String,
+  /** Whether this is advice that never blocks publishing (e.g. concept link warnings). */
+  val isWarning: Boolean = false,
+)
 
 /** Structural validation of an [EditorForm]. */
 object FormEditorValidator {
@@ -646,6 +676,12 @@ object EditorXFormsGenerator {
   const val CHOICE_COLOR_COLUMN = "color"
 
   /**
+   * Element name of the extra choices column carrying [EditorChoice.code] (an underscore rather
+   * than a colon, because extra choice columns become XML element names).
+   */
+  const val CHOICE_CODE_COLUMN = "ground_code"
+
+  /**
    * Body `appearance` token indicating that data collectors can add a new map feature or table row
    * inline while selecting from a dataset-backed choice list.
    */
@@ -653,13 +689,13 @@ object EditorXFormsGenerator {
 
   /**
    * Whether [question]'s choices are exported as an internal secondary instance plus `itemset`
-   * rather than inline `<item>`s: needed as soon as any choice carries extra columns (color) or
-   * media (image) when the choices are defined manually on the question.
+   * rather than inline `<item>`s: needed as soon as any choice carries extra columns (color, code)
+   * or media (image) when the choices are defined manually on the question.
    */
   fun usesChoiceInstance(question: EditorQuestion): Boolean =
     question.type.hasChoices &&
       !question.usesDatasetChoices &&
-      question.choices.any { it.colorHex != null || it.image != null }
+      question.choices.any { it.colorHex != null || it.image != null || it.code != null }
 
   /** Secondary instance id (XLSForm `list_name`) for [question]'s choices. */
   fun choiceListName(question: EditorQuestion): String = question.name
@@ -822,6 +858,7 @@ object EditorXFormsGenerator {
                 put("label", choice.label)
               }
               choice.colorHex?.let { color -> put(CHOICE_COLOR_COLUMN, color) }
+              choice.code?.let { code -> put(CHOICE_CODE_COLUMN, code) }
             }
             secondaryInstanceRow(cols)
           }
@@ -863,6 +900,7 @@ object EditorXFormsGenerator {
             constraint_expression = constraintExpr,
             constraint_message = constraintMsg,
             entity_saveto = entity?.saveTo?.get(question.key).orEmpty(),
+            foreign_attributes = ConceptLinkAttributes.bindAttributes(question),
           )
         )
       }

@@ -108,8 +108,18 @@ class ResolveLibraryUseCase {
         ?.formTemplates
         .orEmpty()
         .filter { it.isGlobal && it.id !in hidden }
-        .map {
-          it.copy(questionConcepts = it.questionConcepts.filterValues(LibraryIds::isGlobalId))
+        .map { template ->
+          template.copy(
+            form =
+              template.form.copy(
+                questions =
+                  template.form.questions.map { q ->
+                    val link = q.conceptLink
+                    if (link == null || LibraryIds.isGlobalId(link.conceptId)) q
+                    else q.copy(conceptLink = null)
+                  }
+              )
+          )
         }
     val globalPacks =
       globalLibrary
