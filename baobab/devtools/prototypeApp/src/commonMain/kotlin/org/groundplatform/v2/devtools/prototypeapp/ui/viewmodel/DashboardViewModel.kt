@@ -35,29 +35,52 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.ListFilterTab
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.MutationLogItem
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.Organization
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.OrganizationLibrary
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyMapAnchor
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyPreviewItem
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.UploadStatusFilter
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.DatasetKind
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SurveyEditorDraft
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.matchesUploadsFilters
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.newestFirst
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.outboxNewestFirst
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.uploadedNewestFirst
 import org.groundplatform.v2.devtools.prototypeapp.domain.repository.AuthRepository
+import org.groundplatform.v2.devtools.prototypeapp.domain.repository.ImpactEventRepository
 import org.groundplatform.v2.devtools.prototypeapp.domain.repository.LibraryRepository
 import org.groundplatform.v2.devtools.prototypeapp.domain.repository.MutationRepository
 import org.groundplatform.v2.devtools.prototypeapp.domain.repository.OrganizationRepository
 import org.groundplatform.v2.devtools.prototypeapp.domain.repository.SurveyContent
+import org.groundplatform.v2.devtools.prototypeapp.domain.repository.SurveyEditorRepository
 import org.groundplatform.v2.devtools.prototypeapp.domain.repository.SurveyRepository
 import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.CreateSurveyUseCase
+import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.ExportFile
+import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.ExportSurveyDataUseCase
 import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.ResolveLibraryUseCase
+import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.ResolvedLibrary
 import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.SyncMutationsUseCase
 import org.groundplatform.v2.devtools.prototypeapp.ui.state.DashboardEvent
 import org.groundplatform.v2.devtools.prototypeapp.ui.state.DashboardUiState
+import org.groundplatform.v2.devtools.prototypeapp.ui.state.DatasetExportOptions
 
 /**
  * User intents of the web dashboard, the web Surveys page, the searchable list's filters, and the
  * `Uploads` drawer sub-screen. Implemented by [DashboardViewModel].
  */
 interface DashboardActions {
+  // --- Exports ---
+
+  /** Records a CSV download of dataset [datasetId] as an export event. */
+  fun recordCsvExport(datasetId: String) {}
+
+  /** Dataset [datasetId] as GeoJSON (recorded as an export event), or `null` if it has no map. */
+  fun exportGeoJson(datasetId: String): ExportFile? = null
+
+  /**
+   * Dataset [datasetId] exported through export profile [profileId] (recorded as an export event
+   * with the profile), or `null` if the profile isn't available for it.
+   */
+  fun exportWithProfile(datasetId: String, profileId: String): ExportFile? = null
+
   // --- Surveys (web) ---
 
   /**
@@ -198,6 +221,11 @@ class DashboardViewModel(
   /** Organization libraries, whose Purpose Packs the Create survey dialog offers. */
   libraryRepository: LibraryRepository? = null,
   private val resolveLibraryUseCase: ResolveLibraryUseCase = ResolveLibraryUseCase(),
+  /** Activity records (e.g. receipts) waiting to upload, shown on the `Uploads` screen. */
+  impactEventRepository: ImpactEventRepository? = null,
+  /** The active survey's editor draft: dataset schemas and concept links for export profiles. */
+  surveyEditorRepository: SurveyEditorRepository? = null,
+  private val exportSurveyData: ExportSurveyDataUseCase = ExportSurveyDataUseCase(),
 ) : DashboardActions {
   /** Everything the dashboard reads from the local data store. */
   private data class Data(
@@ -208,6 +236,8 @@ class DashboardViewModel(
     val profile: AuthProfile = AuthProfile("", "", ""),
     val mutations: List<MutationLogItem> = emptyList(),
     val libraries: Map<String, OrganizationLibrary> = emptyMap(),
+    val pendingActivityRecordCount: Int = 0,
+    val draft: SurveyEditorDraft? = null,
   )
 
   /** Session (non-persisted) state of the dashboard slice. */
@@ -247,8 +277,19 @@ class DashboardViewModel(
           )
         },
         libraryRepository?.observeLibraries() ?: flowOf(emptyMap()),
-      ) { data, libraries ->
-        data.copy(libraries = libraries)
+        impactEventRepository?.observeEvents()?.map { events -> events.count { !it.isUploaded } }
+          ?: flowOf(0),
+        surveyRepository.observeActiveSurveyId().flatMapLatest { id ->
+          surveyEditorRepository?.observeDraft(id)?.map<SurveyEditorDraft, SurveyEditorDraft?> {
+            it
+          } ?: flowOf(null)
+        },
+      ) { data, libraries, pendingActivityRecords, draft ->
+        data.copy(
+          libraries = libraries,
+          pendingActivityRecordCount = pendingActivityRecords,
+          draft = draft,
+        )
       }
       .stateIn(scope, SharingStarted.Eagerly, Data())
 
@@ -272,6 +313,7 @@ class DashboardViewModel(
     val memberOrganizationIds =
       data.organizations.filter { it.isMember(data.profile.email) }.map { it.id }
     return DashboardUiState(
+      exportOptions = exportOptions(data),
       surveys = data.surveys,
       activeSurveyId = data.activeSurveyId,
       organizations = data.organizations,
@@ -307,7 +349,84 @@ class DashboardViewModel(
       uploadedMutations = mutations.uploadedNewestFirst(),
       pendingUploadEntityIds =
         mutations.filter { it.isOutbox }.mapTo(mutableSetOf()) { it.entityId },
+      pendingActivityRecordCount = data.pendingActivityRecordCount,
     )
+  }
+
+  // --- Exports ---
+
+  /** The active survey's resolved library. */
+  private fun activeLibrary(data: Data): ResolvedLibrary {
+    val organizationId = data.surveys.firstOrNull { it.id == data.activeSurveyId }?.organizationId
+    return resolveLibraryUseCase.forOrganization(data.libraries, organizationId)
+  }
+
+  /** Export choices for each dataset of the active survey. */
+  private fun exportOptions(data: Data): Map<String, DatasetExportOptions> {
+    val draft = data.draft ?: return emptyMap()
+    val library = activeLibrary(data)
+    val profiles = exportSurveyData.enabledProfiles(library, draft.details.purposeIds)
+    return draft.datasets.associate { dataset ->
+      val isMap = dataset.kind == DatasetKind.MAP_LAYER
+      dataset.id to
+        DatasetExportOptions(
+          datasetId = dataset.id,
+          hasGeometry = isMap,
+          profilePlans =
+            if (!isMap) {
+              emptyList()
+            } else {
+              profiles.map { profile ->
+                exportSurveyData.plan(
+                  profile = profile,
+                  dataset = dataset,
+                  forms = draft.forms,
+                  library = library,
+                  entities = data.content.entities,
+                  language = draft.details.defaultLanguage,
+                )
+              }
+            },
+        )
+    }
+  }
+
+  private fun datasetEntities(datasetId: String) =
+    data.value.content.entities.filter { it.datasetId == datasetId }
+
+  override fun recordCsvExport(datasetId: String) {
+    val surveyId = data.value.activeSurveyId
+    val entities = datasetEntities(datasetId)
+    scope.launch { exportSurveyData.recordExport(surveyId, entities) }
+  }
+
+  override fun exportGeoJson(datasetId: String): ExportFile? {
+    val current = data.value
+    val dataset = current.draft?.datasets?.firstOrNull { it.id == datasetId } ?: return null
+    if (dataset.kind != DatasetKind.MAP_LAYER) return null
+    val entities = datasetEntities(datasetId)
+    val file =
+      exportSurveyData.geoJson(dataset, entities, SurveyMapAnchor.forSurvey(current.activeSurveyId))
+    scope.launch { exportSurveyData.recordExport(current.activeSurveyId, entities) }
+    return file
+  }
+
+  override fun exportWithProfile(datasetId: String, profileId: String): ExportFile? {
+    val current = data.value
+    val dataset = current.draft?.datasets?.firstOrNull { it.id == datasetId } ?: return null
+    val plan =
+      exportOptions(current)[datasetId]?.profilePlans?.firstOrNull { it.profile.id == profileId }
+        ?: return null
+    val entities = datasetEntities(datasetId)
+    val file =
+      exportSurveyData.profileGeoJson(
+        plan,
+        dataset,
+        entities,
+        SurveyMapAnchor.forSurvey(current.activeSurveyId),
+      )
+    scope.launch { exportSurveyData.recordExport(current.activeSurveyId, entities, profileId) }
+    return file
   }
 
   /** Returns session state to its defaults (used by the prototype's Reset). */

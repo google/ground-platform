@@ -21,6 +21,8 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.OfflineTilePacka
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SubmissionGeometryPolygon
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SubmissionPreviewItem
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyConfig
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyLifecycleState
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyOutcome
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyPreviewItem
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyStats
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SyncStatus
@@ -70,6 +72,19 @@ interface SurveyRepository {
   ): SurveyPreviewItem?
 
   suspend fun setSurveyDownloaded(surveyId: String, downloaded: Boolean): SurveyPreviewItem?
+
+  /**
+   * Sets the lifecycle [state] of survey [surveyId] and when it was closed ([closedAt], ISO 8601
+   * UTC, or `null` when it's published again).
+   */
+  suspend fun setSurveyState(
+    surveyId: String,
+    state: SurveyLifecycleState,
+    closedAt: String?,
+  ): SurveyPreviewItem?
+
+  /** Stores the answer to "What happened with this data?" for survey [surveyId]. */
+  suspend fun setSurveyOutcome(surveyId: String, outcome: SurveyOutcome?): SurveyPreviewItem?
 
   suspend fun getSurveyConfig(surveyId: String): SurveyConfig?
 

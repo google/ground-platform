@@ -32,6 +32,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.Groups
+import androidx.compose.material.icons.outlined.Lightbulb
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.CardDefaults
@@ -55,14 +56,19 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import org.groundplatform.v2.core.forms.ui.GroundBadgeTone
+import org.groundplatform.v2.core.forms.ui.GroundTonalBadge
 import org.groundplatform.v2.devtools.prototypeapp.PrototypeAppState
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.Organization
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.OrganizationRole
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyPreviewItem
 import org.groundplatform.v2.devtools.prototypeapp.ui.common.GroundFilterChip
+import org.groundplatform.v2.devtools.prototypeapp.ui.common.SurveyOutcomeDialog
 import org.groundplatform.v2.devtools.prototypeapp.ui.onboarding.SurveyMapThumbnail
 import org.groundplatform.v2.devtools.prototypeapp.ui.state.DashboardUiState
+import org.groundplatform.v2.devtools.prototypeapp.ui.state.SurveyOutcomePromptUiState
 import org.groundplatform.v2.devtools.prototypeapp.ui.surveyeditor.ProfileAvatar
+import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.SurveyOutcomePromptActions
 import org.groundplatform.v2.devtools.prototypeapp.ui.workbench.WebAppHeader
 import org.groundplatform.v2.devtools.prototypeapp.ui.workbench.WebHeaderButton
 import org.groundplatform.v2.devtools.prototypeapp.ui.workbench.WebHeaderContext
@@ -86,10 +92,13 @@ internal fun WebSurveysPage(
   onSignOut: () -> Unit = { state.signOut() },
 ) {
   val uiState by state.dashboard.uiState.collectAsState()
+  val outcomePrompt by state.surveyOutcomePrompt.uiState.collectAsState()
   WebSurveysPage(
     uiState = uiState,
     onOpenSurvey = onOpenSurvey,
     onCreateSurvey = onCreateSurvey,
+    outcomePrompt = outcomePrompt,
+    outcomeActions = state.surveyOutcomePrompt,
     header = { onCreateSurveyClick ->
       WebAppHeader(
         state = state,
@@ -119,6 +128,9 @@ internal fun WebSurveysPage(
  * Stateless Surveys landing page: the survey cards grouped by organization from [uiState], with
  * search and filter chips and the "Create survey" dialog.
  *
+ * Closed surveys whose outcome question is due again ([SurveyOutcomePromptUiState.dueSurveyIds])
+ * show a "Was this data used?" badge that opens the "What happened with this data?" card.
+ *
  * @param header the page header; it receives the click handler of its "Create survey" button.
  */
 @Composable
@@ -127,6 +139,8 @@ internal fun WebSurveysPage(
   onOpenSurvey: (surveyId: String) -> Unit,
   onCreateSurvey: (CreateSurveyRequest) -> Unit,
   header: @Composable (onCreateSurveyClick: () -> Unit) -> Unit,
+  outcomePrompt: SurveyOutcomePromptUiState = SurveyOutcomePromptUiState(),
+  outcomeActions: SurveyOutcomePromptActions? = null,
 ) {
   var filter by remember { mutableStateOf<SurveyListFilter>(SurveyListFilter.All) }
   var query by remember { mutableStateOf("") }
@@ -169,6 +183,9 @@ internal fun WebSurveysPage(
             organizations = organizations,
             activeSurveyId = uiState.activeSurveyId,
             onOpenSurvey = onOpenSurvey,
+            outcomePromptSurveyIds =
+              if (outcomeActions != null) outcomePrompt.dueSurveyIds else emptySet(),
+            onOutcomePromptClick = { surveyId -> outcomeActions?.openOutcomeCard(surveyId) },
           )
         }
       }
@@ -186,6 +203,9 @@ internal fun WebSurveysPage(
       onDismiss = { isCreating = false },
     )
   }
+
+  val card = outcomePrompt.card
+  if (card != null && outcomeActions != null) SurveyOutcomeDialog(card, outcomeActions)
 }
 
 @Composable
@@ -256,6 +276,8 @@ private fun SurveySection(
   organizations: List<Organization>,
   activeSurveyId: String,
   onOpenSurvey: (String) -> Unit,
+  outcomePromptSurveyIds: Set<String>,
+  onOutcomePromptClick: (String) -> Unit,
 ) {
   Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
     SectionHeading(section = section, userEmail = userEmail)
@@ -269,6 +291,8 @@ private fun SurveySection(
           access = WebSurveysList.accessLabel(survey, organizations, userEmail),
           isActive = survey.id == activeSurveyId,
           onClick = { onOpenSurvey(survey.id) },
+          showOutcomePrompt = survey.id in outcomePromptSurveyIds,
+          onOutcomePromptClick = { onOutcomePromptClick(survey.id) },
         )
       }
     }
@@ -319,13 +343,19 @@ private fun SectionHeading(section: SurveyListSection, userEmail: String) {
   }
 }
 
-/** One survey on the web surveys page (and, later, on an organization's Surveys tab). */
+/**
+ * One survey on the web surveys page (and, later, on an organization's Surveys tab). Closed and
+ * archived surveys are labeled; [showOutcomePrompt] adds the "Was this data used?" badge, which
+ * runs [onOutcomePromptClick].
+ */
 @Composable
 internal fun WebSurveyCard(
   survey: SurveyPreviewItem,
   access: SurveyAccessLabel,
   isActive: Boolean,
   onClick: () -> Unit,
+  showOutcomePrompt: Boolean = false,
+  onOutcomePromptClick: () -> Unit = {},
 ) {
   OutlinedCard(
     onClick = onClick,
@@ -397,20 +427,28 @@ internal fun WebSurveyCard(
         val badgeContentColor =
           if (isOwner) MaterialTheme.colorScheme.onPrimaryContainer
           else MaterialTheme.colorScheme.onSurfaceVariant
-        Surface(
-          shape = MaterialTheme.shapes.extraSmall,
-          color =
-            if (isOwner) MaterialTheme.colorScheme.primaryContainer
-            else MaterialTheme.colorScheme.surfaceContainerHigh,
-          contentColor = badgeContentColor,
+        Row(
+          horizontalArrangement = Arrangement.spacedBy(6.dp),
+          verticalAlignment = Alignment.CenterVertically,
         ) {
-          Text(
-            text = access.label,
-            style = MaterialTheme.typography.labelSmall,
-            color = badgeContentColor,
-            fontWeight = FontWeight.Medium,
-            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
-          )
+          Surface(
+            shape = MaterialTheme.shapes.extraSmall,
+            color =
+              if (isOwner) MaterialTheme.colorScheme.primaryContainer
+              else MaterialTheme.colorScheme.surfaceContainerHigh,
+            contentColor = badgeContentColor,
+          ) {
+            Text(
+              text = access.label,
+              style = MaterialTheme.typography.labelSmall,
+              color = badgeContentColor,
+              fontWeight = FontWeight.Medium,
+              modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+            )
+          }
+          if (survey.isClosed) {
+            GroundTonalBadge(text = survey.state.label, tone = GroundBadgeTone.NEUTRAL)
+          }
         }
         Text(
           text = if (isActive) "Open now" else "${survey.entityCount} locations",
@@ -421,6 +459,38 @@ internal fun WebSurveyCard(
           fontWeight = if (isActive) FontWeight.Bold else FontWeight.Normal,
         )
       }
+      if (showOutcomePrompt) OutcomePromptBadge(onClick = onOutcomePromptClick)
     }
   }
 }
+
+/** Gentle tonal badge asking whether a closed survey's data was used; opens the outcome card. */
+@Composable
+private fun OutcomePromptBadge(onClick: () -> Unit) {
+  Surface(
+    onClick = onClick,
+    shape = MaterialTheme.shapes.small,
+    color = MaterialTheme.colorScheme.tertiaryContainer,
+    contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
+  ) {
+    Row(
+      modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+      horizontalArrangement = Arrangement.spacedBy(6.dp),
+      verticalAlignment = Alignment.CenterVertically,
+    ) {
+      Icon(
+        imageVector = Icons.Outlined.Lightbulb,
+        contentDescription = null,
+        modifier = Modifier.size(16.dp),
+      )
+      Text(
+        text = OUTCOME_PROMPT_LABEL,
+        style = MaterialTheme.typography.labelMedium,
+        fontWeight = FontWeight.Medium,
+      )
+    }
+  }
+}
+
+/** Label of the badge on closed surveys whose outcome question is due again. */
+internal const val OUTCOME_PROMPT_LABEL = "Was this data used?"

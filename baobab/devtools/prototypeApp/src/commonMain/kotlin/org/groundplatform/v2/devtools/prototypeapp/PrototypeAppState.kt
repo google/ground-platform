@@ -99,6 +99,7 @@ import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.OrganizationView
 import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.SettingsViewModel
 import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.SurveyEditorViewModel
 import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.SurveyMapViewModel
+import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.SurveyOutcomePromptViewModel
 import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.WorkbenchViewModel
 import org.groundplatform.v2.devtools.prototypeapp.ui.workbench.parseDefaultPrototypeFormDef
 import org.groundplatform.v2.map.CameraPosition
@@ -201,6 +202,9 @@ class PrototypeAppState(
       scope = dataHolder.scope,
       libraryRepository = dataHolder.libraryRepository,
       resolveLibraryUseCase = dataHolder.resolveLibraryUseCase,
+      impactEventRepository = dataHolder.impactEventRepository,
+      surveyEditorRepository = dataHolder.surveyEditorRepository,
+      exportSurveyData = dataHolder.exportSurveyDataUseCase,
     )
 
   private var dashboardState by mutableStateOf(dashboard.uiState.value)
@@ -246,9 +250,25 @@ class PrototypeAppState(
       libraryRepository = dataHolder.libraryRepository,
       manageLibraryUseCase = dataHolder.manageLibraryUseCase,
       resolveLibraryUseCase = dataHolder.resolveLibraryUseCase,
+      surveyLifecycle = dataHolder.surveyLifecycleUseCase,
+      impactEventRepository = dataHolder.impactEventRepository,
     )
 
   private var surveyEditorState by mutableStateOf(surveyEditor.uiState.value)
+
+  /**
+   * ViewModel of the "Was this data used?" badge on the web surveys page: closed surveys whose
+   * outcome question is due again, and the card opened from one. Its page observes
+   * [SurveyOutcomePromptViewModel.uiState] directly.
+   */
+  val surveyOutcomePrompt: SurveyOutcomePromptViewModel =
+    SurveyOutcomePromptViewModel(
+      surveyRepository = dataHolder.surveyRepository,
+      organizationRepository = dataHolder.organizationRepository,
+      authRepository = dataHolder.authRepository,
+      surveyLifecycle = dataHolder.surveyLifecycleUseCase,
+      scope = dataHolder.scope,
+    )
 
   /**
    * ViewModel of data collection: the selected record (map feature and / or submission), the open
@@ -267,6 +287,7 @@ class PrototypeAppState(
       launchForm = dataHolder.launchFormUseCase,
       connectivityRepository = dataHolder.connectivityRepository,
       scope = dataHolder.scope,
+      recordImpactEvent = dataHolder.recordImpactEventUseCase,
     )
 
   private var dataCollectionState by mutableStateOf(dataCollection.uiState.value)
@@ -351,6 +372,7 @@ class PrototypeAppState(
         dashboard.reset()
         organization.reset()
         surveyEditor.reset()
+        surveyOutcomePrompt.reset()
         dataCollection.reset()
         activeSurveyNotice = null
         mainViewMode = MainSurveyViewMode.MAP

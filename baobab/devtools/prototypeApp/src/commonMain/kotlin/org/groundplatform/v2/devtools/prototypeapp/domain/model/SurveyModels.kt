@@ -76,7 +76,17 @@ data class SurveyPreviewItem(
   val ownerEmail: String = "",
   /** Organization the survey belongs to (`SurveyDef.organization_id`), or `null` if personal. */
   val organizationId: String? = null,
-)
+  /** Lifecycle state (`SurveyDef.state`); closed and archived surveys are read-only. */
+  val state: SurveyLifecycleState = SurveyLifecycleState.PUBLISHED,
+  /** When the survey stopped collecting data (ISO 8601 UTC), or `null` while it's published. */
+  val closedAt: String? = null,
+  /** Answer to "What happened with this data?" (`SurveyDef.outcome`), or `null` if not answered. */
+  val outcome: SurveyOutcome? = null,
+) {
+  /** Whether the survey is closed or archived, so it can't be edited or collect data. */
+  val isClosed: Boolean
+    get() = state != SurveyLifecycleState.PUBLISHED
+}
 
 /** Survey-level form definitions stored alongside a survey's data. */
 data class SurveyConfig(

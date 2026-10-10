@@ -115,10 +115,13 @@ internal fun WebTopToolbar(
           onClick = onOpenSurveyEditor,
         )
       }
-      WebCollectDataMenuButton(
-        uiState = state.dataCollectionUiState,
-        actions = state.dataCollection,
-      )
+      // Closed and archived surveys don't collect data.
+      if (!state.activeSurvey.isClosed) {
+        WebCollectDataMenuButton(
+          uiState = state.dataCollectionUiState,
+          actions = state.dataCollection,
+        )
+      }
     },
   )
 }

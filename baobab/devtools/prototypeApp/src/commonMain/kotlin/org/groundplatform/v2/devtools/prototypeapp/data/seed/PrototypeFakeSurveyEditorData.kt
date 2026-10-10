@@ -14,6 +14,7 @@
 package org.groundplatform.v2.devtools.prototypeapp.data.seed
 
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.CachedProfile
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.ConceptLink
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.InvitationStatus
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.Collaborator
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.CollaboratorRole
@@ -51,8 +52,25 @@ internal object PrototypeFakeSurveyEditorData {
           programIds = listOf("eudr"),
         ),
       sharing = kenyaSharing(),
-      datasets = derived.datasets + listOf(farmers(), treeSpecies()),
+      datasets = derived.datasets.map(::withKenyaConceptLinks) + listOf(farmers(), treeSpecies()),
     )
+
+  /**
+   * Coffee parcels' owner is linked to the global producer name concept, so the EUDR GeoJSON export
+   * finds it (its commodity and country aren't collected, which the export warns about).
+   */
+  private fun withKenyaConceptLinks(dataset: EntityDataset): EntityDataset =
+    if (dataset.id != "coffee_parcels") {
+      dataset
+    } else {
+      dataset.copy(
+        properties =
+          dataset.properties.map {
+            if (it.name == "farmer_owner") it.copy(conceptLink = ConceptLink("core.producer_name"))
+            else it
+          }
+      )
+    }
 
   /**
    * The seeded draft for [ORGANIZATION_SHARED_SURVEY_ID]: [derived], owned by a Mekong Mangrove

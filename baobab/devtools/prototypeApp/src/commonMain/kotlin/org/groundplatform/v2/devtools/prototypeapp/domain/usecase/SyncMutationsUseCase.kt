@@ -16,6 +16,7 @@ package org.groundplatform.v2.devtools.prototypeapp.domain.usecase
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.MutationSyncState
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SyncStatus
 import org.groundplatform.v2.devtools.prototypeapp.domain.repository.ConnectivityRepository
+import org.groundplatform.v2.devtools.prototypeapp.domain.repository.ImpactEventRepository
 import org.groundplatform.v2.devtools.prototypeapp.domain.repository.MutationRepository
 import org.groundplatform.v2.devtools.prototypeapp.domain.repository.SurveyRepository
 import org.groundplatform.v2.devtools.prototypeapp.domain.repository.TransactionRunner
@@ -30,6 +31,8 @@ class SyncMutationsUseCase(
   private val surveyRepository: SurveyRepository,
   private val transactionRunner: TransactionRunner,
   private val connectivityRepository: ConnectivityRepository = ConnectivityRepository(),
+  /** Impact events recorded offline upload with the outbox. */
+  private val impactEventRepository: ImpactEventRepository? = null,
 ) {
   /**
    * Synchronizes a single Outbox mutation ([mutationId]), transitioning its state to
@@ -70,10 +73,14 @@ class SyncMutationsUseCase(
   suspend fun syncAllOutboxMutations(activeSurveyId: String): String? = transactionRunner tx@{
     val allMutations = mutationRepository.getMutations()
     val outboxCount = allMutations.count { it.surveyId == activeSurveyId && it.isOutbox }
-    if (outboxCount == 0) return@tx null
+    val pendingEvents = impactEventRepository?.getEvents()?.count { !it.isUploaded } ?: 0
+    if (outboxCount == 0 && pendingEvents == 0) return@tx null
     if (!connectivityRepository.isOnline()) {
       return@tx OFFLINE_UPLOAD_NOTICE
     }
+    // Impact events recorded offline (e.g. receipts) upload with the outbox.
+    impactEventRepository?.markAllUploaded()
+    if (outboxCount == 0) return@tx "Uploaded $pendingEvents activity record(s) to Ground Cloud"
     val completed = "2026-09-19 09:42:10 UTC"
     mutationRepository.setMutations(
       allMutations.map { item ->

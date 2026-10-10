@@ -16,6 +16,7 @@ package org.groundplatform.v2.devtools.prototypeapp.data.datasource.local.store
 import kotlinx.coroutines.flow.Flow
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.FormPreviewItem
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.GeospatialEntityItem
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.ImpactEvent
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.MapLayerItem
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.MutationLogItem
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.OfflineTilePackageItem
@@ -85,6 +86,9 @@ interface LocalStore {
 
   /** Local mutation log (outbox and uploaded history) across all surveys. */
   fun observeMutations(): Flow<List<MutationLogItem>>
+
+  /** Impact events recorded on this device, oldest first. */
+  fun observeImpactEvents(): Flow<List<ImpactEvent>>
 
   /** Searchable places and landmarks. */
   fun observePlaces(): Flow<List<SurveyPlaceItem>>
@@ -233,6 +237,13 @@ interface LocalStoreTransaction {
 
   /** Replaces the whole mutation log. */
   fun putMutations(mutations: List<MutationLogItem>)
+
+  // Impact events -------------------------------------------------------------------------------
+
+  /** Impact events recorded on this device, oldest first (append-only). */
+  fun impactEvents(): List<ImpactEvent>
+
+  fun putImpactEvents(events: List<ImpactEvent>)
 
   // Places --------------------------------------------------------------------------------------
 

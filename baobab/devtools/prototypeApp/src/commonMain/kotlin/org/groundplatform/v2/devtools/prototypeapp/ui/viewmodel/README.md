@@ -24,6 +24,7 @@ Each feature area in `prototypeApp` is backed by a focused ViewModel that implem
 
 - `OnboardingViewModel` (`OnboardingActions`): Authentication, Terms of Service acceptance, and initial survey selection.
 - `SettingsViewModel` (`SettingsActions`): App preferences, offline basemap management, and storage diagnostics via `EstimateDeviceStorageUseCase`.
+- `SurveyOutcomePromptViewModel` (`SurveyOutcomePromptActions`): The "Was this data used?" badge on the web surveys page (closed surveys whose outcome question is due again, via `SurveyOutcomePrompt.isDue` and an injectable clock) and the "What happened with this data?" card it opens. The Survey editor shows the same card after closing a survey; both use `SurveyOutcomeCardHolder` (`SurveyOutcomeActions.kt`).
 - `SurveyMapViewModel` (`SurveyMapActions`): Map viewport, camera follow, basemap/imagery toggles, layer visibility, feature clustering (`ClusterMapFeaturesUseCase`), wayfinding (`ComputeWayfindingNavigationUseCase`), and place search (`SearchPlacesUseCase`).
 - `DashboardViewModel` (`DashboardActions`): Web survey list, dashboard split-pane layout, entity/record filtering, survey creation (`CreateSurveyUseCase`), and offline mutation synchronization (`SyncMutationsUseCase`).
 - `OrganizationViewModel` (`OrganizationActions`): Organization directory, organization creation (`CreateOrganizationUseCase`), member invitations and role management (`ManageOrganizationMembersUseCase`), and organization imagery sources.

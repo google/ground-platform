@@ -13,7 +13,9 @@
  */
 package org.groundplatform.v2.devtools.prototypeapp.ui.state
 
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.ImpactEvent
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.Organization
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyLifecycleState
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyPlaceItem
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.DatasetIssue
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.DatasetKind
@@ -73,6 +75,17 @@ data class SurveyEditorUiState(
    * its purposes' concepts.
    */
   val library: FormLibraryContext = FormLibraryContext(),
+  /** Lifecycle state of the survey; closed and archived surveys are read-only. */
+  val lifecycleState: SurveyLifecycleState = SurveyLifecycleState.PUBLISHED,
+  /** When the survey was closed (ISO 8601 UTC), or `null` while it's published. */
+  val closedAt: String? = null,
+  /**
+   * Whether the signed-in user can manage the survey (close, archive, or reopen it); see
+   * [SurveyAccess.canManage].
+   */
+  val canManageSurvey: Boolean = false,
+  /** "Data was used" events recorded for the survey, newest first (the Activity list). */
+  val activity: List<ImpactEvent> = emptyList(),
 
   // --- Session ---
   /** Whether [draft] holds edits made since [opened] (even ones that cancel out). */
@@ -94,7 +107,20 @@ data class SurveyEditorUiState(
    * changed back to "Restricted"), or `null`.
    */
   val organizationNotice: String? = null,
+  /** The "What happened with this data?" card shown after closing the survey, or `null`. */
+  val outcomeCard: SurveyOutcomeCardState? = null,
 ) {
+  /** Whether the survey is closed or archived, so edits are ignored until it's reopened. */
+  val isReadOnly: Boolean
+    get() = lifecycleState != SurveyLifecycleState.PUBLISHED
+
+  /** Why the survey can't be edited (e.g. "This survey is closed…"), or `null` if it can. */
+  val readOnlyMessage: String?
+    get() =
+      if (isReadOnly)
+        "This survey is ${lifecycleState.label.lowercase()}. Reopen it to make changes."
+      else null
+
   val details: SurveyDetails
     get() = draft.details
 
@@ -127,9 +153,12 @@ data class SurveyEditorUiState(
         forms.sumOf { formIssues(it).size } +
         datasets.sumOf { datasetIssues(it).size }
 
-  /** Whether the draft can be published: it has unpublished changes and no validation issues. */
+  /**
+   * Whether the draft can be published: the survey is published (not closed or archived), and the
+   * draft has unpublished changes and no validation issues.
+   */
   val canPublish: Boolean
-    get() = hasUnpublishedChanges && issueCount == 0 && !isSaving
+    get() = !isReadOnly && hasUnpublishedChanges && issueCount == 0 && !isSaving
 
   val mapLayers: List<EntityDataset>
     get() = datasets.filter { it.kind == DatasetKind.MAP_LAYER }

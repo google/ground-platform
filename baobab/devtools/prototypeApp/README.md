@@ -100,6 +100,19 @@ to `http://localhost:8091/#surveys`. Web pages are gated behind a simple
 -   **Search and filters**: Free-text search over title, description,
     location, and organization name, plus filter chips for **All**, **My
     surveys**, and one chip per organization the user belongs to.
+-   **Closed surveys**: Closed and archived surveys carry a *Closed* /
+    *Archived* label. When one's outcome question is due again, people who
+    manage it (its owner and its organization's Managers) see a gentle
+    **Was this data used?** badge on its card, which opens the **What happened
+    with this data?** card as a dialog (Save or Skip). The rule is
+    `SurveyOutcomePrompt.isDue` (`domain/model/SurveyOutcomePrompt.kt`): the
+    survey is closed or archived, its outcome is missing or *Not yet*, and 90
+    days have passed since it was closed or since the last *Not yet* answer,
+    whichever is later (so answering *Not yet* again restarts the wait;
+    Skip changes nothing). Any other answer hides the badge for good. The
+    badge is driven by `SurveyOutcomePromptViewModel` (`ui/viewmodel/`) with an
+    injectable clock. The seeded **Household Panel Survey (Past Individuals)**
+    was closed on 2026-05-29 without an answer, so its card shows the badge.
 -   **Create survey**: Opens a dialog for the title and an optional
     organization (any organization the user is a member of; Managers of that
     organization inherit survey organizer access). **Next** asks **What will
@@ -301,6 +314,24 @@ prototype, so selections and survey changes carry over.
     opens on its own: expand it with its arrow button, a tab, or the card's
     **Show in table** button. Click a row to select that record. Submissions
     are never shown in tables, since their data can be hierarchical.
+-   **Export** (download icon in the table header): **Download CSV** for the
+    selected tab, **Download GeoJSON** for Map layers, and the export
+    profiles enabled by the survey's purposes (their Purpose Packs'
+    `exportProfileIds`), such as **EUDR GeoJSON** for surveys with the EUDR
+    due diligence purpose (`ExportSurveyDataUseCase`,
+    `ui/dashboard/DashboardExportMenu.kt`). A profile's output fields are found
+    through concept links: a property that inherited the field's concept, or
+    the property a linked question saves to; geometry concepts use the feature
+    geometry. EUDR GeoJSON writes WGS84 coordinates with 6 decimal places,
+    boundaries as polygons and point plots as points, and select answers as
+    their standard codes. When fields aren't linked, a dialog lists them (and
+    point plots over 4 ha) before **Export anyway**; an unlinked area falls
+    back to each plot's mapped area. The seeded Kenya coffee survey links its
+    parcels' owner to **Producer name**, so its EUDR export shows the warning
+    for **Commodity** and **Country**. Every download records an `EXPORT`
+    impact event (profile ID when used, feature count, and area, counting
+    plots that share a GeoID once; see
+    `docs/technical/model/data/04-impact-events.md`).
 
 Code lives in `ui/dashboard/WebDashboardPage.kt`.
 
@@ -380,6 +411,27 @@ The left-hand navigation lists:
     -   Both share the dataset settings (ID, key and label properties, adding
         in the field) and property schema editing. They mirror
         `EntityDatasetDef` / `EntityRecord`.
+
+**Close, archive, and reopen** (`SurveyLifecycleUseCase`, mirroring
+`SurveyDef.state`): people who can manage the survey find **Close survey** and
+**Archive survey** in the top bar's **⋮** menu (Archive only, once closed), each
+behind a short confirmation that mentions unpublished changes are discarded.
+Closed and archived surveys are read-only: a banner says "This survey is
+closed. Reopen it to make changes." with **Reopen** (also in the top bar),
+edits are ignored, **Publish changes** stays off, and the web toolbar's
+**Collect data** button and the mobile `+` FAB are hidden. Leaving the
+published state stamps the survey's closed time, records a `SURVEY_CLOSED`
+impact event covering its map features (counting plots that share a GeoID
+once), and then shows the inline **What happened with this data?** card
+(`ui/common/SurveyOutcomeCard.kt`): multi-select chips for the outcomes (*Not
+yet* can't be combined with the others), an optional "Compared with your
+previous method, this took…" choice (less, about the same, or more time and
+cost), **Save**, and **Skip**. The survey is closed before the card appears,
+so closing never waits on it. Saving stores a `SurveyOutcome` (answer time and
+the signed-in user) on the survey. Archiving a closed survey keeps its closed
+time and doesn't ask again; reopening clears the closed time but keeps the
+answer. Survey details ends with a read-only **Activity** list of the survey's
+impact events (what happened, date, map features, area, and export profile).
 
 The editor edits the same survey the rest of the app runs on. The Forms, Map
 layers, and map features it shows are **derived** from the survey's runtime data
@@ -738,6 +790,16 @@ and look the same on web and mobile.
     `DataCollectionViewModel` generates them and hands them to
     `PdfExportClient` (`client/pdf/`), the only platform-specific code:
     `pdf-export-bridge.js` on web and the temp directory on the JVM.
+-   **Receipt activity**: Each generated report records a **Receipt created**
+    activity record, and sharing or saving it records **Receipt shared**
+    ([impact measurement](../../docs/product/impact-measurement.md), "Data Was
+    Used" events). A record holds the survey, its organization and Purpose
+    Packs, and the map feature count and area (1 feature for a map feature
+    report or a submission on one; 0 for a standalone submission). It holds no
+    geometry or personal details. Records made offline stay on the device and
+    upload with the next **Sync all** on the `Uploads` screen, which shows
+    `N activity records waiting to sync` (and **Sync all**) while any are
+    pending, even with an empty outbox. Previewing a PDF records nothing.
 -   **Limitation**: The standard fonts only cover Windows-1252 (Western European)
     characters. Common symbols are replaced with ASCII (`≤` → `<=`, `📷` →
     `[photo]`); other scripts render as `?`. Embedding a Unicode font (for

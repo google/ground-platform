@@ -34,11 +34,16 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.groundplatform.v2.core.sampling.SampleEstimate
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.EffortComparison
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.ImpactEvent
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.LibraryConcept
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.LocalizedText
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.Organization
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.OrganizationLibrary
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyLifecycleState
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyOutcomeKind
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyPlaceItem
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyPreviewItem
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.ChoiceSource
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.CollaboratorRole
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.DatasetKind
@@ -70,6 +75,7 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SaveToMod
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SaveToRules
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SharingPolicy
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SharingSettings
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SurveyAccess
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SurveyArea
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SurveyDetails
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SurveyEditorDerivation
@@ -83,6 +89,7 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.withRenam
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.withRenamedTargetProperty
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.geometryKind
 import org.groundplatform.v2.devtools.prototypeapp.domain.repository.AuthRepository
+import org.groundplatform.v2.devtools.prototypeapp.domain.repository.ImpactEventRepository
 import org.groundplatform.v2.devtools.prototypeapp.domain.repository.LibraryRepository
 import org.groundplatform.v2.devtools.prototypeapp.domain.repository.OrganizationRepository
 import org.groundplatform.v2.devtools.prototypeapp.domain.repository.PlaceRepository
@@ -92,12 +99,14 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.GenerateSample
 import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.InviteCollaboratorUseCase
 import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.ManageLibraryUseCase
 import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.ResolveLibraryUseCase
+import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.SurveyLifecycleUseCase
 import org.groundplatform.v2.devtools.prototypeapp.ui.common.platformEpochMillis
 import org.groundplatform.v2.devtools.prototypeapp.ui.formeditor.moved
 import org.groundplatform.v2.devtools.prototypeapp.ui.state.FormLibraryContext
 import org.groundplatform.v2.devtools.prototypeapp.ui.state.SurveyEditorEvent
 import org.groundplatform.v2.devtools.prototypeapp.ui.state.SurveyEditorSection
 import org.groundplatform.v2.devtools.prototypeapp.ui.state.SurveyEditorUiState
+import org.groundplatform.v2.devtools.prototypeapp.ui.state.SurveyOutcomeCardState
 
 /**
  * Map feature edits made by drawing on an interactive map: the subset of [SurveyEditorActions] that
@@ -118,10 +127,18 @@ interface MapFeatureEditor {
 }
 
 /** User intents of the Survey editor page. Implemented by [SurveyEditorViewModel]. */
-interface SurveyEditorActions : MapFeatureEditor {
+interface SurveyEditorActions : MapFeatureEditor, SurveyOutcomeActions {
   // --- Navigation, layout & lifecycle ---
 
   fun select(section: SurveyEditorSection)
+
+  /**
+   * Closes, archives, or reopens the survey (people who can manage it only). Closing or archiving a
+   * published survey discards unpublished edits, records that it was closed, and then offers the
+   * "What happened with this data?" card ([SurveyEditorUiState.outcomeCard]); it never waits for
+   * the answer. Closed and archived surveys are read-only until reopened.
+   */
+  fun setLifecycleState(state: SurveyLifecycleState)
 
   /**
    * Sets the editor's left-hand navigation panel width to [widthDp], clamped to
@@ -364,7 +381,7 @@ interface SurveyEditorActions : MapFeatureEditor {
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 class SurveyEditorViewModel(
-  surveyRepository: SurveyRepository,
+  private val surveyRepository: SurveyRepository,
   private val surveyEditorRepository: SurveyEditorRepository,
   organizationRepository: OrganizationRepository,
   authRepository: AuthRepository,
@@ -379,6 +396,10 @@ class SurveyEditorViewModel(
   private val manageLibraryUseCase: ManageLibraryUseCase? =
     libraryRepository?.let(::ManageLibraryUseCase),
   private val resolveLibraryUseCase: ResolveLibraryUseCase = ResolveLibraryUseCase(),
+  /** Closes, archives, and reopens the survey; `null` turns those actions off. */
+  private val surveyLifecycle: SurveyLifecycleUseCase? = null,
+  /** "Data was used" events, for the survey's Activity list. */
+  impactEventRepository: ImpactEventRepository? = null,
 ) : SurveyEditorActions {
   /** Everything the editor reads from the local data store. */
   private data class Data(
@@ -390,6 +411,10 @@ class SurveyEditorViewModel(
     val submissionCountByDatasetId: Map<String, Int> = emptyMap(),
     /** Every stored organization library, keyed by organization ID. */
     val libraries: Map<String, OrganizationLibrary> = emptyMap(),
+    /** The survey's list entry (lifecycle state and outcome), or `null` if it isn't stored. */
+    val survey: SurveyPreviewItem? = null,
+    /** "Data was used" events of the survey, newest first. */
+    val activity: List<ImpactEvent> = emptyList(),
   )
 
   /** Session (non-persisted) state of the editor. */
@@ -418,28 +443,48 @@ class SurveyEditorViewModel(
                 .groupBy { it.datasetId }
                 .mapValues { (_, entities) -> entities.sumOf { it.submissions.size } }
             },
-          ) { draft, counts ->
-            Triple(id, draft, counts)
+            surveyRepository.observeSurveys().map { surveys ->
+              surveys.firstOrNull { it.id == id }
+            },
+            impactEventRepository?.observeEvents()?.map { events ->
+              events.filter { it.surveyId == id }.sortedByDescending { it.occurredAt }
+            } ?: flowOf(emptyList()),
+          ) { draft, counts, survey, activity ->
+            ActiveSurvey(id, draft, counts, survey, activity)
           }
         },
         organizationRepository.observeOrganizations(),
         authRepository.observeSession(),
         placeRepository.observeLocalPlaces(),
         libraryRepository?.observeLibraries() ?: flowOf(emptyMap()),
-      ) { (surveyId, draft, counts), organizations, auth, places, libraries ->
+      ) { active, organizations, auth, places, libraries ->
         Data(
-          surveyId = surveyId,
-          liveDraft = draft,
+          surveyId = active.surveyId,
+          liveDraft = active.draft,
           organizations = organizations,
           signedInUserEmail = auth.profile.email,
           localPlaces = places,
-          submissionCountByDatasetId = counts,
+          submissionCountByDatasetId = active.submissionCounts,
           libraries = libraries,
+          survey = active.survey,
+          activity = active.activity,
         )
       }
       .stateIn(scope, SharingStarted.Eagerly, Data())
 
+  /** What the editor reads about the active survey. */
+  private data class ActiveSurvey(
+    val surveyId: String,
+    val draft: SurveyEditorDraft,
+    val submissionCounts: Map<String, Int>,
+    val survey: SurveyPreviewItem?,
+    val activity: List<ImpactEvent>,
+  )
+
   private val session = MutableStateFlow(Session())
+
+  /** The "What happened with this data?" card, offered after closing the survey. */
+  private val outcomeCard = SurveyOutcomeCardHolder(surveyLifecycle, scope)
 
   private val _events =
     MutableSharedFlow<SurveyEditorEvent>(
@@ -451,7 +496,7 @@ class SurveyEditorViewModel(
   val events: Flow<SurveyEditorEvent> = _events.asSharedFlow()
 
   val uiState: StateFlow<SurveyEditorUiState> =
-    combine(data, session, ::buildUiState)
+    combine(data, session, outcomeCard.card, ::buildUiState)
       .stateIn(scope, SharingStarted.Eagerly, SurveyEditorUiState())
 
   /** The dictionary the Form editors link questions to: the survey's resolved library. */
@@ -475,6 +520,7 @@ class SurveyEditorViewModel(
         .collect { surveyId ->
           if (session.value.surveyId != surveyId) {
             session.value = Session(surveyId = surveyId)
+            outcomeCard.dismiss()
             clearFormEditors()
           }
         }
@@ -521,7 +567,11 @@ class SurveyEditorViewModel(
     return null
   }
 
-  private fun buildUiState(data: Data, session: Session): SurveyEditorUiState {
+  private fun buildUiState(
+    data: Data,
+    session: Session,
+    outcomeCard: SurveyOutcomeCardState?,
+  ): SurveyEditorUiState {
     val edits = session.takeIf { it.surveyId == data.surveyId && it.draft != null }
     val draft = edits?.draft ?: data.liveDraft
     return SurveyEditorUiState(
@@ -535,6 +585,16 @@ class SurveyEditorViewModel(
           data.signedInUserEmail,
           data.libraries,
         ),
+      lifecycleState = data.survey?.state ?: SurveyLifecycleState.PUBLISHED,
+      closedAt = data.survey?.closedAt,
+      canManageSurvey =
+        SurveyAccess.canManage(
+          email = data.signedInUserEmail,
+          sharing = data.liveDraft.sharing,
+          organization =
+            data.organizations.firstOrNull { it.id == data.liveDraft.details.organizationId },
+        ),
+      activity = data.activity,
       organizations = data.organizations,
       signedInUserEmail = data.signedInUserEmail,
       localPlaces = data.localPlaces,
@@ -546,12 +606,14 @@ class SurveyEditorViewModel(
       generation = session.generation,
       generationErrors = session.generationErrors,
       organizationNotice = session.organizationNotice,
+      outcomeCard = outcomeCard?.takeIf { it.surveyId == data.surveyId },
     )
   }
 
   /** Returns session state to its defaults (used by the prototype's Reset). */
   fun reset() {
     session.value = Session(surveyId = data.value.surveyId)
+    outcomeCard.dismiss()
     clearFormEditors()
     hashCache.clear()
   }
@@ -659,9 +721,10 @@ class SurveyEditorViewModel(
   /**
    * Applies [block] to a working copy of the draft and stores the result as the edited draft,
    * freezing the opened snapshot on the first edit. A block that changes nothing leaves the session
-   * as it is.
+   * as it is. Ignored while the survey is closed or archived.
    */
   private fun edit(block: Edits.() -> Unit) {
+    if (uiState.value.isReadOnly) return
     val current = session.value
     val before = draft
     val openedBefore = opened
@@ -705,7 +768,7 @@ class SurveyEditorViewModel(
   }
 
   override fun publish() {
-    if (session.value.isSaving) return
+    if (session.value.isSaving || uiState.value.isReadOnly) return
     val surveyId = data.value.surveyId
     val toSave = draft
     val previous = opened
@@ -752,6 +815,30 @@ class SurveyEditorViewModel(
     discardChanges()
     _events.tryEmit(SurveyEditorEvent.Closed)
   }
+
+  override fun setLifecycleState(state: SurveyLifecycleState) {
+    val current = uiState.value
+    val lifecycle = surveyLifecycle ?: return
+    if (!current.canManageSurvey || current.lifecycleState == state) return
+    val surveyId = current.surveyId
+    // A closed survey is read-only, so unpublished edits can't be kept.
+    if (state != SurveyLifecycleState.PUBLISHED) discardChanges() else outcomeCard.dismiss()
+    scope.launch {
+      val stoppedCollecting = lifecycle.setState(surveyId, state)
+      if (stoppedCollecting) {
+        surveyRepository.getSurveys().firstOrNull { it.id == surveyId }?.let(outcomeCard::open)
+      }
+    }
+  }
+
+  override fun toggleOutcome(kind: SurveyOutcomeKind) = outcomeCard.toggleOutcome(kind)
+
+  override fun setEffortComparison(comparison: EffortComparison?) =
+    outcomeCard.setEffortComparison(comparison)
+
+  override fun saveOutcome() = outcomeCard.saveOutcome()
+
+  override fun skipOutcome() = outcomeCard.skipOutcome()
 
   override fun formEditor(formKey: String): FormEditorViewModel =
     formEditors
@@ -1487,6 +1574,9 @@ class SurveyEditorViewModel(
   suspend fun generateSample(datasetKey: String): SampleGenerationOutcome {
     if (session.value.generation != null) {
       return SampleGenerationOutcome.Failed("Sample plots are already being generated.")
+    }
+    uiState.value.readOnlyMessage?.let {
+      return SampleGenerationOutcome.Failed(it)
     }
     val current = draft
     val dataset =

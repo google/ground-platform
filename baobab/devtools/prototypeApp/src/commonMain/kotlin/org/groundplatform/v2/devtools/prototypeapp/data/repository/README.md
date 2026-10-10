@@ -25,6 +25,7 @@ Each repository implementation owns a cohesive domain aggregate and coordinates 
 - `SurveyRepositoryImpl`: Reactive queries and mutations for surveys, forms, map layers, geospatial entities, and records/submissions.
 - `SurveyEditorRepositoryImpl`: Loads, observes, derives, and transactionally saves `SurveyEditorDraft` changes, projecting published editor drafts back into runtime forms, map layers, and entities.
 - `MutationRepositoryImpl`: Manages the local offline mutation queue and synchronization status transitions.
+- `ImpactEventRepositoryImpl`: Stores impact events in the `LocalStore`, ignoring duplicate IDs.
 - `OrganizationRepositoryImpl`: Manages organization metadata, member rosters, role assignments, and organization-scoped imagery sources.
 - `LibraryRepositoryImpl`: Stores one `OrganizationLibrary` per organization in `LocalStore`, refusing changes that break the library ownership and ID rules.
 - `AuthRepositoryImpl`: Coordinates sign-in/sign-out flows and active user profile state across `PrototypeAuthDataSource` and `LocalStore`.

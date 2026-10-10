@@ -24,6 +24,7 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyPreviewIte
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.UploadStatusFilter
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.entityDatasetLayersIn
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.relatedEntityForPropertyValue
+import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.ProfileExportPlan
 import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.ResolvedLibrary
 
 /**
@@ -32,6 +33,8 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.ResolvedLibrar
  * sub-screen (mutation log and sync), observed as an immutable snapshot.
  */
 data class DashboardUiState(
+  /** Export choices for each dataset of the active survey, by dataset ID. */
+  val exportOptions: Map<String, DatasetExportOptions> = emptyMap(),
   // --- Data (from the local data store) ---
   val surveys: List<SurveyPreviewItem> = emptyList(),
   val activeSurveyId: String = "",
@@ -93,6 +96,8 @@ data class DashboardUiState(
   val uploadedMutations: List<MutationLogItem> = emptyList(),
   /** IDs of map features with at least one not-yet-uploaded mutation. */
   val pendingUploadEntityIds: Set<String> = emptySet(),
+  /** Activity records (e.g. PDF receipts) recorded offline and waiting to upload on sync. */
+  val pendingActivityRecordCount: Int = 0,
 ) {
   // --- Surveys ---
 
@@ -214,3 +219,13 @@ sealed interface DashboardEvent {
 
   data class Notice(val message: String) : DashboardEvent
 }
+
+/**
+ * How a dataset of the active survey can be exported: CSV always, GeoJSON for Map layers, and the
+ * export profiles its survey's purposes enable (with how their fields map and what's missing).
+ */
+data class DatasetExportOptions(
+  val datasetId: String,
+  val hasGeometry: Boolean,
+  val profilePlans: List<ProfileExportPlan> = emptyList(),
+)

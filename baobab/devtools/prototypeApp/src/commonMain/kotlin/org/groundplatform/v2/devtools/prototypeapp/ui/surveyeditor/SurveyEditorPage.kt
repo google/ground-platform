@@ -55,13 +55,17 @@ import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Language
 import androidx.compose.material.icons.outlined.Layers
 import androidx.compose.material.icons.outlined.LocationOn
+import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material.icons.outlined.Map
+import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.Warning
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -101,12 +105,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+import kotlin.math.roundToLong
 import org.groundplatform.v2.core.forms.ui.GroundBadgeTone
 import org.groundplatform.v2.core.forms.ui.GroundTonalBadge
 import org.groundplatform.v2.devtools.prototypeapp.PrototypeAppState
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.ImpactEvent
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.InvitationStatus
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.LibraryPrograms
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.Organization
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyLifecycleState
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyPlaceItem
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.CollaboratorRole
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.DatasetKind
@@ -118,6 +125,7 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SurveyAre
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SurveyAreaGeometry
 import org.groundplatform.v2.devtools.prototypeapp.ui.common.ProgramChips
 import org.groundplatform.v2.devtools.prototypeapp.ui.common.PurposePackGrid
+import org.groundplatform.v2.devtools.prototypeapp.ui.common.SurveyOutcomeCard
 import org.groundplatform.v2.devtools.prototypeapp.ui.dashboard.SidePanelSeparator
 import org.groundplatform.v2.devtools.prototypeapp.ui.dashboard.SidePanelSeparatorWidth
 import org.groundplatform.v2.devtools.prototypeapp.ui.formeditor.DragAxis
@@ -206,6 +214,14 @@ fun SurveyEditorPage(
   Column(modifier = modifier.fillMaxSize()) {
     SurveyEditorTopBar(uiState, actions, header)
     HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+    uiState.readOnlyMessage?.let { message -> ReadOnlyBanner(message, uiState, actions) }
+    uiState.outcomeCard?.let { card ->
+      SurveyOutcomeCard(
+        card = card,
+        actions = actions,
+        modifier = Modifier.padding(horizontal = 24.dp, vertical = 12.dp).widthIn(max = 760.dp),
+      )
+    }
     Row(modifier = Modifier.weight(1f).fillMaxWidth()) {
       SurveyNavigation(
         uiState = uiState,
@@ -284,6 +300,7 @@ private fun SurveyEditorTopBar(
   val hasChanges = uiState.hasUnpublishedChanges
   val issueCount = uiState.issueCount
   var isConfirmingDiscard by remember { mutableStateOf(false) }
+  var confirmingState by remember { mutableStateOf<SurveyLifecycleState?>(null) }
 
   header(
     {
@@ -304,6 +321,7 @@ private fun SurveyEditorTopBar(
           WebHeaderSupportingText("·")
         }
         when {
+          uiState.isReadOnly -> WebHeaderSupportingText(uiState.lifecycleState.label)
           issueCount > 0 ->
             WebHeaderSupportingText(
               "Fix $issueCount ${if (issueCount == 1) "issue" else "issues"} to publish",
@@ -315,10 +333,30 @@ private fun SurveyEditorTopBar(
       }
     },
     {
+      if (uiState.isReadOnly && uiState.canManageSurvey) {
+        OutlinedButton(onClick = { actions.setLifecycleState(SurveyLifecycleState.PUBLISHED) }) {
+          Text("Reopen")
+        }
+      }
       TextButton(onClick = { isConfirmingDiscard = true }, enabled = hasChanges) { Text("Discard") }
       Button(onClick = actions::publish, enabled = uiState.canPublish) { Text("Publish changes") }
+      if (uiState.canManageSurvey) {
+        SurveyLifecycleMenu(uiState, onSelect = { confirmingState = it })
+      }
     },
   )
+
+  confirmingState?.let { state ->
+    ConfirmLifecycleDialog(
+      state = state,
+      hasUnpublishedChanges = hasChanges,
+      onConfirm = {
+        confirmingState = null
+        actions.setLifecycleState(state)
+      },
+      onDismiss = { confirmingState = null },
+    )
+  }
 
   if (isConfirmingDiscard) {
     AlertDialog(
@@ -344,6 +382,101 @@ private fun SurveyEditorTopBar(
         TextButton(onClick = { isConfirmingDiscard = false }) { Text("Keep editing") }
       },
     )
+  }
+}
+
+/**
+ * Overflow menu with the survey's lifecycle actions: Close survey and Archive survey while it's
+ * published, Archive survey while it's closed. Reopening is the top bar's Reopen button.
+ */
+@Composable
+private fun SurveyLifecycleMenu(
+  uiState: SurveyEditorUiState,
+  onSelect: (SurveyLifecycleState) -> Unit,
+) {
+  val options =
+    when (uiState.lifecycleState) {
+      SurveyLifecycleState.PUBLISHED ->
+        listOf(SurveyLifecycleState.CLOSED to "Close survey", ARCHIVE_OPTION)
+      SurveyLifecycleState.CLOSED -> listOf(ARCHIVE_OPTION)
+      SurveyLifecycleState.ARCHIVED -> emptyList()
+    }
+  if (options.isEmpty()) return
+  var isOpen by remember { mutableStateOf(false) }
+  Box {
+    IconButton(onClick = { isOpen = true }) {
+      Icon(Icons.Outlined.MoreVert, contentDescription = "More survey actions")
+    }
+    DropdownMenu(expanded = isOpen, onDismissRequest = { isOpen = false }) {
+      options.forEach { (state, label) ->
+        DropdownMenuItem(
+          text = { Text(label) },
+          onClick = {
+            isOpen = false
+            onSelect(state)
+          },
+        )
+      }
+    }
+  }
+}
+
+private val ARCHIVE_OPTION = SurveyLifecycleState.ARCHIVED to "Archive survey"
+
+/** Asks before closing or archiving the survey. */
+@Composable
+private fun ConfirmLifecycleDialog(
+  state: SurveyLifecycleState,
+  hasUnpublishedChanges: Boolean,
+  onConfirm: () -> Unit,
+  onDismiss: () -> Unit,
+) {
+  val isArchive = state == SurveyLifecycleState.ARCHIVED
+  val discardNote = if (hasUnpublishedChanges) " Unpublished changes will be discarded." else ""
+  AlertDialog(
+    onDismissRequest = onDismiss,
+    title = { Text(if (isArchive) "Archive this survey?" else "Close this survey?") },
+    text = {
+      Text(
+        (if (isArchive) {
+          "Archived surveys are kept for reference. No one can collect data or make changes."
+        } else {
+          "Data collectors can't add new data, and no one can make changes."
+        }) + " You can reopen it at any time." + discardNote
+      )
+    },
+    confirmButton = {
+      TextButton(onClick = onConfirm) { Text(if (isArchive) "Archive" else "Close survey") }
+    },
+    dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } },
+  )
+}
+
+/** Banner shown while the survey is closed or archived, with Reopen for people who manage it. */
+@Composable
+private fun ReadOnlyBanner(
+  message: String,
+  uiState: SurveyEditorUiState,
+  actions: SurveyEditorActions,
+) {
+  Surface(
+    color = MaterialTheme.colorScheme.secondaryContainer,
+    contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+    modifier = Modifier.fillMaxWidth(),
+  ) {
+    Row(
+      modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp),
+      verticalAlignment = Alignment.CenterVertically,
+      horizontalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+      Icon(Icons.Outlined.Lock, contentDescription = null, modifier = Modifier.size(20.dp))
+      Text(message, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.weight(1f))
+      if (uiState.canManageSurvey) {
+        TextButton(onClick = { actions.setLifecycleState(SurveyLifecycleState.PUBLISHED) }) {
+          Text("Reopen")
+        }
+      }
+    }
   }
 }
 
@@ -687,8 +820,54 @@ private fun SurveyDetailsPane(uiState: SurveyEditorUiState, actions: SurveyEdito
         actions.select(SurveyEditorSection.Sharing)
       }
     }
+
+    if (uiState.activity.isNotEmpty()) ActivitySection(uiState.activity)
   }
 }
+
+/**
+ * Read-only list of the survey's "data was used" events (exports, receipts, closing): what
+ * happened, when, how many map features and how much area it covered, and the export profile.
+ */
+@Composable
+private fun ActivitySection(events: List<ImpactEvent>) {
+  SectionLabel("Activity")
+  OutlinedCard(modifier = Modifier.widthIn(max = 760.dp).fillMaxWidth()) {
+    Column {
+      events.forEachIndexed { index, event ->
+        if (index > 0) HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+        Row(
+          modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp),
+          verticalAlignment = Alignment.CenterVertically,
+          horizontalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+          Column(modifier = Modifier.weight(1f)) {
+            Text(event.type.label, style = MaterialTheme.typography.bodyMedium)
+            Text(
+              activitySummary(event),
+              style = MaterialTheme.typography.bodySmall,
+              color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+          }
+          Text(
+            event.occurredAt.take(10),
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+          )
+        }
+      }
+    }
+  }
+}
+
+/** "12 map features · 3.4 ha · Profile: eudr", leaving out what the event didn't record. */
+internal fun activitySummary(event: ImpactEvent): String = buildList {
+  val n = event.featureCount
+  add("$n ${if (n == 1) "map feature" else "map features"}")
+  if (event.areaHa > 0.0) add("${(event.areaHa * 10).roundToLong() / 10.0} ha")
+  event.exportProfileId?.let { add("Profile: $it") }
+}
+  .joinToString(" · ")
 
 @Composable
 private fun SummaryCard(label: String, count: Int, onClick: () -> Unit) {

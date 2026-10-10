@@ -25,6 +25,7 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.FormPreviewItem
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.GeospatialEntityItem
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.ImpactEvent
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.MapLayerItem
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.MutationLogItem
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.OfflineTilePackageItem
@@ -104,6 +105,9 @@ class InMemoryLocalStore : LocalStore {
   override fun observeMutations(): Flow<List<MutationLogItem>> =
     state.map { it.mutations }.distinctUntilChanged { a, b -> a === b }
 
+  override fun observeImpactEvents(): Flow<List<ImpactEvent>> =
+    state.map { it.impactEvents }.distinctUntilChanged { a, b -> a === b }
+
   override fun observePlaces(): Flow<List<SurveyPlaceItem>> =
     state.map { it.places }.distinctUntilChanged { a, b -> a === b }
 
@@ -152,6 +156,7 @@ class InMemoryLocalStore : LocalStore {
     val organizations: List<Organization> = emptyList(),
     val libraries: Map<String, OrganizationLibrary> = emptyMap(),
     val mutations: List<MutationLogItem> = emptyList(),
+    val impactEvents: List<ImpactEvent> = emptyList(),
     val places: List<SurveyPlaceItem> = emptyList(),
     val offlineTilePackages: List<OfflineTilePackageItem> = emptyList(),
     val preferences: StoredPreferences = StoredPreferences(),
@@ -312,6 +317,12 @@ class InMemoryLocalStore : LocalStore {
     ) = editSurvey(surveyId) { it.copy(submissionGeometries = geometries.toList()) }
 
     override fun mutations(): List<MutationLogItem> = working.mutations
+
+    override fun impactEvents(): List<ImpactEvent> = working.impactEvents
+
+    override fun putImpactEvents(events: List<ImpactEvent>) {
+      working = working.copy(impactEvents = events.toList())
+    }
 
     override fun putMutations(mutations: List<MutationLogItem>) {
       working = working.copy(mutations = mutations.toList())

@@ -26,6 +26,8 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.OfflineTilePacka
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SubmissionGeometryPolygon
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SubmissionPreviewItem
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyConfig
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyLifecycleState
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyOutcome
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyPreviewItem
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyStats
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SyncStatus
@@ -93,6 +95,17 @@ class SurveyRepositoryImpl(private val store: LocalStore) : SurveyRepository {
     surveyId: String,
     downloaded: Boolean,
   ): SurveyPreviewItem? = updateSurvey(surveyId) { it.copy(isDownloaded = downloaded) }
+
+  override suspend fun setSurveyState(
+    surveyId: String,
+    state: SurveyLifecycleState,
+    closedAt: String?,
+  ): SurveyPreviewItem? = updateSurvey(surveyId) { it.copy(state = state, closedAt = closedAt) }
+
+  override suspend fun setSurveyOutcome(
+    surveyId: String,
+    outcome: SurveyOutcome?,
+  ): SurveyPreviewItem? = updateSurvey(surveyId) { it.copy(outcome = outcome) }
 
   override suspend fun getSurveyConfig(surveyId: String): SurveyConfig? = store.transaction {
     surveyConfig(surveyId)

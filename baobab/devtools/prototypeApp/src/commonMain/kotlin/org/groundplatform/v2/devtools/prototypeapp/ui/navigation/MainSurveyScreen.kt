@@ -468,8 +468,8 @@ internal fun SurveyMapView(state: PrototypeAppState) {
         }
 
         // Bottom-centered data collection entry point FAB on mobile (only visible when sheet is
-        // collapsed)
-        if (!isSheetExpanded) {
+        // collapsed). Closed and archived surveys don't collect data.
+        if (!isSheetExpanded && !state.activeSurvey.isClosed) {
           Box(
             modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = peekHeight + 10.dp),
             contentAlignment = Alignment.Center,

@@ -17,6 +17,7 @@ import org.groundplatform.v2.core.forms.model.FormDefinition
 import org.groundplatform.v2.core.forms.ui.WorkbenchExampleForm
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.FormPreviewItem
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.MapThumbnailTheme
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyLifecycleState
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyPreviewItem
 import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.ResolveFormDefForLaunchUseCase
 
@@ -33,6 +34,12 @@ internal object PrototypeFakeSurveysData {
    * XForms definition) plus a remote undownloaded survey for offline download testing. Each is
    * owned by a person and optionally belongs to an organization ([PrototypeFakeOrganizationsData]).
    */
+  /** The sample survey that's already closed (its outcome question is due). */
+  const val CLOSED_SURVEY_ID = "survey-household-past-individuals"
+
+  /** When [CLOSED_SURVEY_ID] was closed: more than 90 days before the prototype's dates. */
+  const val CLOSED_SURVEY_CLOSED_AT = "2026-05-29T14:00:00Z"
+
   fun defaultSampleSurveys(): List<SurveyPreviewItem> =
     listOf(
         SurveyPreviewItem(
@@ -82,6 +89,10 @@ internal object PrototypeFakeSurveysData {
           isDownloaded = true,
           thumbnailTheme = MapThumbnailTheme.COASTAL_DELTA,
           entityCount = 6,
+          // Closed months ago without answering "What happened with this data?", so the web
+          // surveys page shows the "Was this data used?" badge.
+          state = SurveyLifecycleState.CLOSED,
+          closedAt = CLOSED_SURVEY_CLOSED_AT,
         ),
         SurveyPreviewItem(
           id = "survey-kenya-coffee",

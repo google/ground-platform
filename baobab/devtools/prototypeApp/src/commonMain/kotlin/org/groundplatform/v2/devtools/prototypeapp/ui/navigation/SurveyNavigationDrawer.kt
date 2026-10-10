@@ -1023,7 +1023,7 @@ internal fun UploadsMutationsSubScreen(
         horizontalArrangement = Arrangement.spacedBy(6.dp),
         verticalAlignment = Alignment.CenterVertically,
       ) {
-        if (uiState.outboxMutationCount > 0) {
+        if (uiState.outboxMutationCount > 0 || uiState.pendingActivityRecordCount > 0) {
           FilledTonalButton(
             onClick = { actions.syncAllOutboxMutations() },
             shape = MaterialTheme.shapes.small,
@@ -1036,7 +1036,12 @@ internal fun UploadsMutationsSubScreen(
             )
             Spacer(modifier = Modifier.width(4.dp))
             Text(
-              text = "Sync all (${uiState.outboxMutationCount})",
+              text =
+                if (uiState.outboxMutationCount > 0) {
+                  "Sync all (${uiState.outboxMutationCount})"
+                } else {
+                  "Sync all"
+                },
               style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
             )
           }
@@ -1056,6 +1061,21 @@ internal fun UploadsMutationsSubScreen(
           Text("Back", style = MaterialTheme.typography.labelSmall)
         }
       }
+    }
+
+    // Activity records (e.g. PDF receipts) saved offline upload with the next sync.
+    val pendingActivityRecords = uiState.pendingActivityRecordCount
+    if (pendingActivityRecords > 0) {
+      Text(
+        text =
+          if (pendingActivityRecords == 1) {
+            "1 activity record waiting to sync"
+          } else {
+            "$pendingActivityRecords activity records waiting to sync"
+          },
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+      )
     }
 
     // Status Filter Chips Row: Pending | In progress | Uploaded | Failed

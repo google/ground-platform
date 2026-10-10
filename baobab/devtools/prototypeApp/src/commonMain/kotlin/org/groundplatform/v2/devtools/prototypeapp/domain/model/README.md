@@ -28,6 +28,8 @@ Domain models represent the canonical Ground 2.0 vocabulary (Surveys, Forms, Map
   - `MapLayerModels.kt`: `MapLayerItem`, `DatasetKind` (Map layer vs. Data table), geometry types, and styling metadata.
   - `GeospatialEntityModels.kt`: `GeospatialEntityItem`, `EntitySubmissionItem` (Records), geometries, properties, and collection statuses.
   - `MutationModels.kt`: `UploadMutationItem`, `MutationSyncStatus`, and offline queue records.
+  - `ImpactModels.kt`: `ImpactEvent`, `ImpactCoverage` (GeoID-deduplicated counts and area), survey lifecycle states, and `SurveyOutcome`.
+  - `SurveyOutcomePrompt.kt`: When to ask "What happened with this data?" again (90 days after closing or the last "Not yet"), the outcome chips' "Not yet" exclusivity, and an ISO 8601 UTC parser.
   - `OrganizationModels.kt`: `OrganizationItem`, `OrganizationMember`, `OrganizationRole`, `OrganizationType` (optional profile type with sentence-case labels), and `ImagerySourceItem`.
   - `Countries.kt`: `Country` and the static ISO 3166-1 alpha-2 list (`Countries.all`, 249 codes with English names) used for an organization's optional country, with code lookup/validation and accent-insensitive name-or-code search for the country picker.
   - `AuthModels.kt`, `SettingsModels.kt`, `LocationModels.kt`, `PlaceModels.kt`, `NavigationModels.kt`, `MapClusterModels.kt`: User profiles, app preferences, GNSS fixes, geocoded places, wayfinding metrics, and map cluster structures.

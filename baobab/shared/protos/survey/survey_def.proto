@@ -108,6 +108,63 @@ message SurveyDef {
   // foreign attribute on the question's binding (see
   // docs/technical/model/library/01-concepts.md).
   repeated FormConceptLinks form_concept_links = 21;
+
+  // What happened with the survey's data, asked once when it's closed or
+  // archived ("What happened with this data?"). Unset until answered; see
+  // docs/technical/model/data/04-impact-events.md.
+  SurveyOutcome outcome = 22;
+}
+
+// The organizer's answer to "What happened with this data?" when a survey is
+// closed or archived. Optional and never required to close a survey.
+message SurveyOutcome {
+  // A use of the survey's data.
+  enum Outcome {
+    // Unspecified outcome.
+    OUTCOME_UNSPECIFIED = 0;
+
+    // Submitted in an EU Deforestation Regulation due diligence statement.
+    SUBMITTED_EUDR_DDS = 1;
+
+    // Reported to the Framework for Ecosystem Restoration Monitoring.
+    REPORTED_FERM = 2;
+
+    // Used for land titling or tenure recognition.
+    LAND_TITLING = 3;
+
+    // Shared with buyers.
+    SHARED_WITH_BUYERS = 4;
+
+    // Used to train or validate a model (e.g., a land cover map).
+    TRAINED_OR_VALIDATED_MODEL = 5;
+
+    // Used for protected area management.
+    PROTECTED_AREA_MANAGEMENT = 6;
+
+    // Not used yet; the organizer may be asked again later.
+    NOT_YET = 7;
+  }
+
+  // Time and cost compared with the organization's previous method.
+  enum EffortComparison {
+    // Not answered.
+    EFFORT_COMPARISON_UNSPECIFIED = 0;
+
+    LESS = 1;
+    SAME = 2;
+    MORE = 3;
+  }
+
+  repeated Outcome outcomes = 1;
+
+  // Optional answer to "Compared with your previous method, this took less,
+  // the same, or more time and cost."
+  EffortComparison effort_comparison = 2;
+
+  google.protobuf.Timestamp answered_at = 3;
+
+  // User ID of the person who answered.
+  string answered_by = 4;
 }
 
 // Configures how a form is surfaced and launched by data collectors in the

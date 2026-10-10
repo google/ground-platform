@@ -57,7 +57,8 @@ for Ground 2.0.
             definitions (`SurveyDef`), entity datasets, map configurations, and
             ACL/quotas.
         -   [`data/`](technical/model/data/01-entity-records.md): Operational
-            entity, submission, and audit record specifications.
+            entity, submission, and audit record specifications, plus
+            [impact events and survey outcomes](technical/model/data/04-impact-events.md).
         -   [`library/`](technical/model/library/00-introduction.md):
             Organization libraries—concepts (the dictionary), form templates,
             Purpose Packs, and export profiles.

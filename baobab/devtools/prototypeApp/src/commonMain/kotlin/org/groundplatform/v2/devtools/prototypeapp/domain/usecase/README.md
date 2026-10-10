@@ -35,6 +35,9 @@ While ViewModels may call single repository methods directly for simple CRUD or 
   - `ComputeWayfindingNavigationUseCase`: Calculates bearing, distance, and step progression from user GNSS coordinates to a target entity.
   - `SearchPlacesUseCase`: Normalizes and executes geocoding queries against `PlaceRepository`.
   - `SyncMutationsUseCase`: Transitions pending offline mutations through upload synchronization states.
+  - `RecordImpactEventUseCase`: Records a "data was used" event with the survey's organization, purposes, and actor; offline events upload with `SyncMutationsUseCase`.
+  - `SurveyLifecycleUseCase`: Closes, archives, and reopens surveys (recording `SURVEY_CLOSED` with GeoID-deduplicated coverage when a survey stops collecting data) and stores the "What happened with this data?" answer as its `SurveyOutcome`.
+  - `ExportSurveyDataUseCase`: GeoJSON and export profile (EUDR GeoJSON) exports mapped through concept links, recorded as export events.
 - **Diagnostics & Prototype Utilities**:
   - `EstimateDeviceStorageUseCase`: Computes storage footprints for surveys, offline basemaps, and pending media.
   - `GeneratePrototypeRandomSitesUseCase`: Generates synthetic geospatial entities for prototype stress-testing.

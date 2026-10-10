@@ -19,13 +19,17 @@ import org.groundplatform.v2.devtools.prototypeapp.client.pdf.PdfExportResult
 import org.groundplatform.v2.devtools.prototypeapp.data.datasource.local.store.InMemoryLocalStore
 import org.groundplatform.v2.devtools.prototypeapp.data.datasource.local.store.seededStore
 import org.groundplatform.v2.devtools.prototypeapp.data.repository.AuthRepositoryImpl
+import org.groundplatform.v2.devtools.prototypeapp.data.repository.ImpactEventRepositoryImpl
 import org.groundplatform.v2.devtools.prototypeapp.data.repository.LocalStoreTransactionRunner
 import org.groundplatform.v2.devtools.prototypeapp.data.repository.LocationRepositoryImpl
 import org.groundplatform.v2.devtools.prototypeapp.data.repository.MutationRepositoryImpl
 import org.groundplatform.v2.devtools.prototypeapp.data.repository.SettingsRepositoryImpl
+import org.groundplatform.v2.devtools.prototypeapp.data.repository.SurveyEditorRepositoryImpl
 import org.groundplatform.v2.devtools.prototypeapp.data.repository.SurveyRepositoryImpl
+import org.groundplatform.v2.devtools.prototypeapp.domain.repository.ConnectivityRepository
 import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.CompleteFormSubmissionUseCase
 import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.LaunchFormUseCase
+import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.RecordImpactEventUseCase
 import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.ResolveFormDefForLaunchUseCase
 import org.groundplatform.v2.devtools.prototypeapp.ui.state.DataCollectionEvent
 
@@ -60,8 +64,9 @@ internal class RecordingPdfExportClient(override val canShareFiles: Boolean = tr
 }
 
 /**
- * A [DataCollectionViewModel] over the seeded sample data with a [RecordingPdfExportClient] and a
- * recorder of its [DataCollectionEvent]s. Build it outside `runNow`, like other ViewModel fixtures.
+ * A [DataCollectionViewModel] over the seeded sample data with a [RecordingPdfExportClient], a
+ * [RecordImpactEventUseCase] writing to the same store, and a recorder of its
+ * [DataCollectionEvent]s. Build it outside `runNow`, like other ViewModel fixtures.
  */
 internal class DataCollectionFixture(
   val store: InMemoryLocalStore = seededStore(),
@@ -70,12 +75,26 @@ internal class DataCollectionFixture(
   val scope = testScope()
   val surveyRepository = SurveyRepositoryImpl(store)
   val locationRepository = LocationRepositoryImpl()
+  val connectivity = ConnectivityRepository()
+  val authRepository = AuthRepositoryImpl()
+  val impactEventRepository = ImpactEventRepositoryImpl(store)
+  private var nextImpactEventId = 0
+  val recordImpactEvent =
+    RecordImpactEventUseCase(
+      impactEventRepository = impactEventRepository,
+      surveyRepository = surveyRepository,
+      surveyEditorRepository = SurveyEditorRepositoryImpl(store),
+      authRepository = authRepository,
+      connectivityRepository = connectivity,
+      now = { "2026-10-01T09:00:00Z" },
+      newId = { "impact-${++nextImpactEventId}" },
+    )
   private val resolveFormDef = ResolveFormDefForLaunchUseCase()
   val viewModel =
     DataCollectionViewModel(
       surveyRepository = surveyRepository,
       settingsRepository = SettingsRepositoryImpl(store),
-      authRepository = AuthRepositoryImpl(),
+      authRepository = authRepository,
       locationRepository = locationRepository,
       completeFormSubmission =
         CompleteFormSubmissionUseCase(
@@ -87,7 +106,9 @@ internal class DataCollectionFixture(
       launchForm = LaunchFormUseCase(resolveFormDef),
       pdfExportClient = pdfExportClient,
       now = { 1_700_000_000_000L },
+      connectivityRepository = connectivity,
       scope = scope,
+      recordImpactEvent = recordImpactEvent,
     )
   val events = mutableListOf<DataCollectionEvent>()
 

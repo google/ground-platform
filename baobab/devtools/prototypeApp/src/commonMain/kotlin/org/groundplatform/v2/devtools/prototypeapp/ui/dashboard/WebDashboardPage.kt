@@ -61,7 +61,6 @@ import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowRight
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.Description
-import androidx.compose.material.icons.outlined.Download
 import androidx.compose.material.icons.outlined.ExpandContent
 import androidx.compose.material.icons.outlined.KeyboardArrowDown
 import androidx.compose.material.icons.outlined.KeyboardArrowUp
@@ -73,16 +72,11 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalMinimumInteractiveComponentSize
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.PrimaryScrollableTabRow
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
-import androidx.compose.material3.TooltipAnchorPosition
-import androidx.compose.material3.TooltipBox
-import androidx.compose.material3.TooltipDefaults
 import androidx.compose.material3.VerticalDragHandle
-import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
@@ -119,7 +113,6 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.maxFramingZoom
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.relatedEntityForPropertyValue
 import org.groundplatform.v2.devtools.prototypeapp.ui.common.HorizontalResizePointerIcon
 import org.groundplatform.v2.devtools.prototypeapp.ui.common.appendGeoId
-import org.groundplatform.v2.devtools.prototypeapp.ui.common.downloadTextFile
 import org.groundplatform.v2.devtools.prototypeapp.ui.common.geoIdInlineContent
 import org.groundplatform.v2.devtools.prototypeapp.ui.common.showPlatformHorizontalResizeCursor
 import org.groundplatform.v2.devtools.prototypeapp.ui.datacollection.BottomSheetSearchableListContent
@@ -965,24 +958,11 @@ internal fun DashboardDataTablesPanel(
             )
           }
         }
-        TooltipBox(
-          positionProvider =
-            TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
-          tooltip = { PlainTooltip { Text("Download CSV") } },
-          state = rememberTooltipState(),
-        ) {
-          IconButton(
-            onClick = {
-              downloadTextFile(
-                fileName = dashboardTableCsvFileName(table),
-                mimeType = "text/csv;charset=utf-8",
-                content = buildDashboardTableCsv(table),
-              )
-            }
-          ) {
-            Icon(imageVector = Icons.Outlined.Download, contentDescription = "Download CSV")
-          }
-        }
+        DashboardExportButton(
+          table = table,
+          options = uiState.exportOptions[table.datasetId],
+          actions = actions,
+        )
         IconButton(onClick = { actions.toggleDashboardTableExpanded(hasSelection) }) {
           Icon(
             imageVector =

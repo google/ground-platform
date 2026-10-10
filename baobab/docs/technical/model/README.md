@@ -101,6 +101,7 @@ flowchart TD
 - **[Entity Records](data/01-entity-records.md)**: `EntityRecord` stateful instances, geometries, and properties.
 - **[Submission Records](data/02-submission-records.md)**: `SubmissionRecord` transactions, `RecordMetadata`, and `RecordInstance` payloads.
 - **[Audit Records and Provenance](data/03-audit-records.md)**: `AuditInfo`, `AuditRecord`, and `FieldDelta` mutation history.
+- **[Impact Events and Survey Outcomes](data/04-impact-events.md)**: `ImpactEvent` "data was used" signals, `SurveyOutcome`, and export profile field mapping.
 
 ### Library & Dictionary (`groundplatform.v2.library`)
 
