@@ -224,6 +224,7 @@ class ExportSurveyDataUseCase(private val recordImpactEvent: RecordImpactEventUs
       surveyId = surveyId,
       coverage = ImpactCoverage.of(entities),
       exportProfileId = exportProfileId,
+      ignoreOffline = true,
     )
   }
 

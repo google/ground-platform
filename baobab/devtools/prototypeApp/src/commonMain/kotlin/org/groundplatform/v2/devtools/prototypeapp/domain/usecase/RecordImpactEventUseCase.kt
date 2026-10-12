@@ -47,6 +47,7 @@ class RecordImpactEventUseCase(
     surveyId: String,
     coverage: ImpactCoverage = ImpactCoverage(),
     exportProfileId: String? = null,
+    ignoreOffline: Boolean = false,
   ): ImpactEvent {
     val survey = surveyRepository.getSurveys().firstOrNull { it.id == surveyId }
     val purposeIds = surveyEditorRepository.getDraft(surveyId).details.purposeIds
@@ -63,7 +64,7 @@ class RecordImpactEventUseCase(
         occurredAt = now(),
         // The prototype identifies users by email; Ground stores the account's user ID.
         actorUserId = authRepository.getSession().profile.email,
-        isUploaded = connectivityRepository.isOnline(),
+        isUploaded = ignoreOffline || connectivityRepository.isOnline(),
       )
     impactEventRepository.append(event)
     return event

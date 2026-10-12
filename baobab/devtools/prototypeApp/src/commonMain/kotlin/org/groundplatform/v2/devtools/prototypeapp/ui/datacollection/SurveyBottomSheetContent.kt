@@ -480,7 +480,7 @@ internal fun BottomSheetSearchableListContent(
 ) {
   val allPlaces = state.places
   val apiPlaces = state.mapboxPlacesApiResults
-  val isOnline = state.isOnline
+  val isOnline = isSidePanel || state.isOnline
   val allEntities = state.entities
   val listTab = state.listFilterTab
   val listQuery = state.listSearchQuery
@@ -582,7 +582,7 @@ internal fun BottomSheetSearchableListContent(
 
       // Offline banner in the bottom sheet explaining that search is only in local map features
       // and that Places search is not available offline.
-      if (!isOnline && (isSidePanel || state.isEntityBottomSheetExpanded)) {
+      if (!isOnline && !isSidePanel && state.isEntityBottomSheetExpanded) {
         Surface(
           shape = MaterialTheme.shapes.small,
           color = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.85f),

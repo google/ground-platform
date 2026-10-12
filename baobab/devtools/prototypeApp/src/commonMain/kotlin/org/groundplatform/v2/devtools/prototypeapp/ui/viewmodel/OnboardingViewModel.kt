@@ -190,8 +190,10 @@ class OnboardingViewModel(
     scope.launch { authRepository.signOut() }
   }
 
-  override fun signInWithGoogle() {
-    if (!connectivityRepository.isOnline()) {
+  override fun signInWithGoogle() = signInWithGoogle(ignoreOffline = false)
+
+  fun signInWithGoogle(ignoreOffline: Boolean) {
+    if (!ignoreOffline && !connectivityRepository.isOnline()) {
       emit(
         OnboardingEvent.Notice(
           "Cannot sign in while offline. Connect to the internet and try again."

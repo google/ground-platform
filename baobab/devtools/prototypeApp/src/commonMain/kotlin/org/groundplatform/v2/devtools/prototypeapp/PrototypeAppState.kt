@@ -427,10 +427,12 @@ class PrototypeAppState(
       }
       is WorkbenchEvent.ConnectivityChanged -> {
         if (!event.isOnline) {
-          isMapboxPlacesSearching = false
-          mapboxPlacesApiResults = emptyList()
-          if (listFilterTab == ListFilterTab.PLACES) {
-            dashboard.selectListFilterTab(ListFilterTab.ALL)
+          if (!activeWorkbenchPage.isWebApp) {
+            isMapboxPlacesSearching = false
+            mapboxPlacesApiResults = emptyList()
+            if (listFilterTab == ListFilterTab.PLACES) {
+              dashboard.selectListFilterTab(ListFilterTab.ALL)
+            }
           }
           activeSurveyNotice =
             "Device offline: Places search disabled. Searching local $activeEntitiesCountNoun only."
@@ -628,7 +630,21 @@ class PrototypeAppState(
 
   /** Switches the active workbench page and notifies listeners. */
   fun selectWorkbenchPage(page: PrototypeWorkbenchPage) {
+    val wasOnline = isOnline
     activeWorkbenchPage = page
+    val nowOnline = isOnline
+    if (!wasOnline && nowOnline) {
+      val trimmed = listSearchQuery.trim()
+      if (trimmed.isNotEmpty()) {
+        triggerMapboxPlacesApiSearch(trimmed)
+      }
+    } else if (wasOnline && !nowOnline) {
+      isMapboxPlacesSearching = false
+      mapboxPlacesApiResults = emptyList()
+      if (listFilterTab == ListFilterTab.PLACES) {
+        dashboard.selectListFilterTab(ListFilterTab.ALL)
+      }
+    }
     onWorkbenchPageChanged?.invoke(page)
   }
 
@@ -1841,18 +1857,20 @@ class PrototypeAppState(
     get() = allSubmissions.count { it.syncStatus == SyncStatus.FAILED }
 
   /**
-   * Whether the device currently has an active network connection.
+   * Whether the active view currently has an active network connection.
    *
-   * When `false` (offline), Mapbox Places API search is disabled (`filteredListPlaces` returns
-   * `emptyList()`) and the bottom sheet shows an offline notice explaining that search is
-   * restricted to local map features and that Places search is not available offline.
+   * Airplane mode is only simulated on the mobile prototype; the web application is always treated
+   * as online (`activeWorkbenchPage.isWebApp == true`). When `false` (offline on mobile), Mapbox
+   * Places API search is disabled (`filteredListPlaces` returns `emptyList()`) and the bottom sheet
+   * shows an offline notice explaining that search is restricted to local map features and that
+   * Places search is not available offline.
    */
   val isOnline: Boolean
-    get() = mapState.isOnline
+    get() = activeWorkbenchPage.isWebApp || mapState.isOnline
 
   /** Whether online Mapbox Places API search is currently available (`isOnline`). */
   val isPlacesSearchAvailable: Boolean
-    get() = mapState.isPlacesSearchAvailable
+    get() = activeWorkbenchPage.isWebApp || mapState.isPlacesSearchAvailable
 
   /** Live place results returned by [PlacesGeocoder] (Mapbox Geocoding). */
   var mapboxPlacesApiResults by mutableStateOf<List<SurveyPlaceItem>>(emptyList())
@@ -2037,7 +2055,7 @@ class PrototypeAppState(
   }
 
   /** Authenticates with Google and advances to the Terms of Service screen. */
-  fun signInWithGoogle() = onboarding.signInWithGoogle()
+  fun signInWithGoogle() = onboarding.signInWithGoogle(ignoreOffline = activeWorkbenchPage.isWebApp)
 
   /** Updates the Terms of Service agreement checkbox state. */
   fun setTermsChecked(checked: Boolean) = onboarding.setTermsChecked(checked)
@@ -2459,7 +2477,15 @@ class PrototypeAppState(
     regionSubtitle: String,
     center: org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.LatLng,
     onResults: (List<SurveyPlaceItem>) -> Unit,
-  ) = surveyMap.searchPlaces(surveyId, query, regionSubtitle, center, onResults)
+  ) =
+    surveyMap.searchPlaces(
+      surveyId = surveyId,
+      query = query,
+      regionSubtitle = regionSubtitle,
+      center = center,
+      ignoreOffline = activeWorkbenchPage.isWebApp,
+      onResults = onResults,
+    )
 
   /** Shows geocoder [results] for [query] unless the query changed or the device is offline. */
   internal fun onPlacesSearchResults(query: String, results: List<SurveyPlaceItem>) {
@@ -2598,7 +2624,8 @@ class PrototypeAppState(
    * Generates a PDF report for the map feature [entityId] on the device (offline): its status,
    * details, location, properties, and submissions. Returns `null` for unknown IDs.
    */
-  internal fun generateEntityPdf(entityId: String) = dataCollection.generateEntityPdf(entityId)
+  internal fun generateEntityPdf(entityId: String) =
+    dataCollection.generateEntityPdf(entityId, ignoreOffline = activeWorkbenchPage.isWebApp)
 
   /** Generates a PDF report for the submission [submissionId] on the device (offline). */
   internal fun generateSubmissionPdf(submissionId: String) =
@@ -2613,11 +2640,12 @@ class PrototypeAppState(
   fun shareSubmissionPdf(submissionId: String) = dataCollection.shareSubmissionPdf(submissionId)
 
   /** Generates the map feature's PDF and saves it straight away (web dashboard). */
-  fun downloadEntityPdf(entityId: String) = dataCollection.downloadEntityPdf(entityId)
+  fun downloadEntityPdf(entityId: String) =
+    dataCollection.downloadEntityPdf(entityId, ignoreOffline = activeWorkbenchPage.isWebApp)
 
   /** Generates the submission's PDF and saves it straight away (web dashboard). */
   fun downloadSubmissionPdf(submissionId: String) =
-    dataCollection.downloadSubmissionPdf(submissionId)
+    dataCollection.downloadSubmissionPdf(submissionId, ignoreOffline = activeWorkbenchPage.isWebApp)
 
   /** True when the platform can hand files to other apps via the system share sheet. */
   val canSharePdfFiles: Boolean

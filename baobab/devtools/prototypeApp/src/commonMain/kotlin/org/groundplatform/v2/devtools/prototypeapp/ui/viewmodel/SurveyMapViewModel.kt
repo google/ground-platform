@@ -748,9 +748,10 @@ class SurveyMapViewModel(
     query: String,
     regionSubtitle: String,
     center: LatLng,
+    ignoreOffline: Boolean = false,
     onResults: (List<SurveyPlaceItem>) -> Unit,
   ) {
-    if (!data.value.isOnline) {
+    if (!ignoreOffline && !data.value.isOnline) {
       onResults(emptyList())
       return
     }

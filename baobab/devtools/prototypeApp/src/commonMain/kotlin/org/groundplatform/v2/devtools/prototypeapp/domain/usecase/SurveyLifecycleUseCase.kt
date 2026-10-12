@@ -66,6 +66,7 @@ class SurveyLifecycleUseCase(
         type = ImpactEventType.SURVEY_CLOSED,
         surveyId = surveyId,
         coverage = ImpactCoverage.of(entities),
+        ignoreOffline = true,
       )
     }
     return stopsCollecting

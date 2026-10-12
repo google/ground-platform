@@ -2679,4 +2679,50 @@ class PrototypeAppStateTest {
       )
     assertEquals("51.0", tree2Dbh.answerValue)
   }
+
+  @Test
+  fun airplaneMode_isIgnoredOnWebPages_andRestoredOnMobile() {
+    val state = PrototypeAppState(initialScreen = PrototypeScreen.MAIN_SURVEY)
+    val entity =
+      state.entities.first { e ->
+        e.submissions.any { state.isSubmissionStoredOnDevice(it) } &&
+          e.submissions.any { !state.isSubmissionStoredOnDevice(it) }
+      }
+
+    // Enable airplane mode in the mobile UI
+    state.workbench.updateAirplaneMode(true)
+    assertFalse(state.isOnline)
+    assertFalse(state.isPlacesSearchAvailable)
+
+    // Switch to the Web Dashboard: airplane mode is ignored on web
+    state.selectWorkbenchPage(PrototypeWorkbenchPage.WEB_DASHBOARD)
+    assertTrue(state.isOnline)
+    assertTrue(state.isPlacesSearchAvailable)
+
+    // Full submission history (including other collectors' submissions) is visible on web
+    assertEquals(
+      entity.submissions.size,
+      state.availableGroupedSubmissionsForEntity(entity).sumOf { it.submissions.size },
+    )
+
+    // Places search and PLACES filter tab remain available on web
+    state.selectListFilterTab(ListFilterTab.PLACES)
+    assertEquals(ListFilterTab.PLACES, state.listFilterTab)
+    state.updateListSearchQuery("Othaya")
+    assertTrue(state.filteredListPlaces.isNotEmpty())
+
+    // Signing out and signing back in on web succeeds even when mobile airplane mode is set
+    state.signOut()
+    assertFalse(state.isSignedIn)
+    state.selectWorkbenchPage(PrototypeWorkbenchPage.WEB_SURVEYS)
+    state.signInWithGoogle()
+    assertTrue(state.isSignedIn)
+
+    // Switching back to Mobile prototype restores offline behavior from mobile airplane mode
+    state.selectWorkbenchPage(PrototypeWorkbenchPage.MOBILE_PROTOTYPE)
+    assertFalse(state.isOnline)
+    assertFalse(state.isPlacesSearchAvailable)
+    assertEquals(ListFilterTab.ALL, state.listFilterTab)
+    assertTrue(state.filteredListPlaces.isEmpty())
+  }
 }

@@ -131,10 +131,7 @@ class AppDataHolder(
   val mutationRepository: MutationRepository = MutationRepositoryImpl(localStore),
   val settingsRepository: SettingsRepository = SettingsRepositoryImpl(localStore),
   val placeRepository: PlaceRepository =
-    PlaceRepositoryImpl(
-      store = localStore,
-      remoteDataSource = MapboxPlacesDataSource(isOnline = connectivityRepository::isOnline),
-    ),
+    PlaceRepositoryImpl(store = localStore, remoteDataSource = MapboxPlacesDataSource()),
   val organizationRepository: OrganizationRepository = OrganizationRepositoryImpl(localStore),
   val libraryRepository: LibraryRepository = LibraryRepositoryImpl(localStore),
   val locationRepository: LocationRepository = LocationRepositoryImpl(),

@@ -799,12 +799,12 @@ class DataCollectionViewModel(
    * Generates a PDF report for the map feature [entityId] on the device (offline): its status,
    * details, location, properties, and submissions. Returns `null` for unknown IDs.
    */
-  internal fun generateEntityPdf(entityId: String): GeneratedPdf? {
+  internal fun generateEntityPdf(entityId: String, ignoreOffline: Boolean = false): GeneratedPdf? {
     val current = data.value
     val entities = current.content.entities
     val entity = entities.firstOrNull { it.id == entityId } ?: return null
     val effectiveEntity =
-      if (connectivityRepository.isOnline()) {
+      if (ignoreOffline || connectivityRepository.isOnline()) {
         entity
       } else {
         val email = current.profile.email
@@ -877,15 +877,37 @@ class DataCollectionViewModel(
     )
   }
 
-  override fun downloadEntityPdf(entityId: String) {
-    val pdf = generateEntityPdf(entityId) ?: return
-    savePdf(pdf, recordReceiptGenerated(ui.entities.firstOrNull { it.id == entityId }))
+  override fun downloadEntityPdf(entityId: String) =
+    downloadEntityPdf(entityId, ignoreOffline = false)
+
+  fun downloadEntityPdf(entityId: String, ignoreOffline: Boolean) {
+    val pdf = generateEntityPdf(entityId, ignoreOffline = ignoreOffline) ?: return
+    savePdf(
+      pdf = pdf,
+      receipt =
+        recordReceiptGenerated(
+          entity = ui.entities.firstOrNull { it.id == entityId },
+          ignoreOffline = ignoreOffline,
+        ),
+      ignoreOffline = ignoreOffline,
+    )
   }
 
-  override fun downloadSubmissionPdf(submissionId: String) {
+  override fun downloadSubmissionPdf(submissionId: String) =
+    downloadSubmissionPdf(submissionId, ignoreOffline = false)
+
+  fun downloadSubmissionPdf(submissionId: String, ignoreOffline: Boolean) {
     val pdf = generateSubmissionPdf(submissionId) ?: return
     val entityId = ui.allSubmissions.firstOrNull { it.id == submissionId }?.entityId
-    savePdf(pdf, recordReceiptGenerated(ui.entities.firstOrNull { it.id == entityId }))
+    savePdf(
+      pdf = pdf,
+      receipt =
+        recordReceiptGenerated(
+          entity = ui.entities.firstOrNull { it.id == entityId },
+          ignoreOffline = ignoreOffline,
+        ),
+      ignoreOffline = ignoreOffline,
+    )
   }
 
   override fun shareActivePdf() {
@@ -936,9 +958,9 @@ class DataCollectionViewModel(
   }
 
   /** Saves [pdf] to the device, recording it as a shared [receipt]. */
-  private fun savePdf(pdf: GeneratedPdf, receipt: Receipt?) {
+  private fun savePdf(pdf: GeneratedPdf, receipt: Receipt?, ignoreOffline: Boolean = false) {
     pdfExportClient.save(pdf.fileName, pdf.bytes)
-    recordReceiptShared(receipt)
+    recordReceiptShared(receipt, ignoreOffline = ignoreOffline)
     session.update { it.copy(pdfExportMessage = "Saved ${pdf.fileName} (${pdf.summaryLabel})") }
   }
 
@@ -950,20 +972,31 @@ class DataCollectionViewModel(
    * the receipt to record again when it's shared. Only counts and area are recorded, no geometry or
    * personal details. Recorded offline, it uploads on the next sync.
    */
-  private fun recordReceiptGenerated(entity: GeospatialEntityItem?): Receipt {
+  private fun recordReceiptGenerated(
+    entity: GeospatialEntityItem?,
+    ignoreOffline: Boolean = false,
+  ): Receipt {
     val receipt = Receipt(data.value.activeSurveyId, ImpactCoverage.of(listOfNotNull(entity)))
-    recordReceiptEvent(ImpactEventType.RECEIPT_GENERATED, receipt)
+    recordReceiptEvent(ImpactEventType.RECEIPT_GENERATED, receipt, ignoreOffline = ignoreOffline)
     return receipt
   }
 
   /** Records that the PDF report [receipt] was shared or saved to the device. */
-  private fun recordReceiptShared(receipt: Receipt?) {
-    receipt?.let { recordReceiptEvent(ImpactEventType.RECEIPT_SHARED, it) }
+  private fun recordReceiptShared(receipt: Receipt?, ignoreOffline: Boolean = false) {
+    receipt?.let {
+      recordReceiptEvent(ImpactEventType.RECEIPT_SHARED, it, ignoreOffline = ignoreOffline)
+    }
   }
 
-  private fun recordReceiptEvent(type: ImpactEventType, receipt: Receipt) {
+  private fun recordReceiptEvent(
+    type: ImpactEventType,
+    receipt: Receipt,
+    ignoreOffline: Boolean = false,
+  ) {
     val record = recordImpactEvent ?: return
     if (receipt.surveyId.isBlank()) return
-    scope.launch { record(type, receipt.surveyId, receipt.coverage) }
+    scope.launch {
+      record(type, receipt.surveyId, receipt.coverage, ignoreOffline = ignoreOffline)
+    }
   }
 }
