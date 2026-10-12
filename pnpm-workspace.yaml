@@ -25,9 +25,9 @@ catalogs:
   default:
     '@angular/animations': ^20.3.15
     '@angular/cdk': ^20.2.14
-    '@angular/common': ^20.3.25
-    '@angular/compiler': ^20.3.25
-    '@angular/core': ^20.3.25
+    '@angular/common': ^20.3.28
+    '@angular/compiler': ^22.2.2
+    '@angular/core': ^20.3.28
     '@angular/fire': ^20.0.1
     '@angular/forms': ^20.3.15
     '@angular/google-maps': ^20.2.14
@@ -35,11 +35,11 @@ catalogs:
     '@angular/material': ^20.2.14
     '@angular/platform-browser': ^20.3.15
     '@angular/platform-browser-dynamic': ^20.3.15
-    '@angular/router': ^20.3.15
+    '@angular/router': ^20.3.32
     '@fast-csv/format': ^4.3.5
     '@google-cloud/firestore': ^7.7.0
     '@google-cloud/functions-framework': ^5.0.2
-    '@grpc/grpc-js': ^1.14.4
+    '@grpc/grpc-js': ^1.14.5
     '@iplab/ngx-file-upload': ^20.0.1
     '@terraformer/wkt': ^2.1.2
     angularx-qrcode: ^20.0.0
@@ -56,10 +56,10 @@ catalogs:
     module-alias: ^2.2.2
     ngx-autosize-input: ^20.0.5
     ngx-color: ^10.1.0
-    nodemailer: ^9.0.1
+    nodemailer: ^10.0.9
     protobufjs: ^7.6.3
     rxjs: ^7.8.2
-    sanitize-html: ^2.17.4
+    sanitize-html: ^2.17.7
     selenium-webdriver: ^4.19.0
     zone.js: ^0.15.0
   dev:
@@ -109,7 +109,7 @@ catalogs:
     karma-jasmine: ^5.1.0
     karma-jasmine-html-reporter: ^2.1.0
     mock-cloud-firestore: ^0.12.0
-    nx: ^22.2.1
+    nx: ^22.7.10
     picocolors: ^1.1.1
     prettier: ^3.8.3
     protobufjs-cli: ^1.3.2
