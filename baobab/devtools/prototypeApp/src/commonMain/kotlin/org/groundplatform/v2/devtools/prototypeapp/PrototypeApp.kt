@@ -43,9 +43,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import org.groundplatform.v2.app.domain.model.DeviceFormFactor
 import org.groundplatform.v2.app.domain.model.DeviceOrientation
-import org.groundplatform.v2.app.domain.model.MainDrawerSubView
-import org.groundplatform.v2.app.domain.model.MainSurveyViewMode
-import org.groundplatform.v2.app.domain.model.PrototypeScreen
 import org.groundplatform.v2.app.ui.common.DevicePreviewFrame
 import org.groundplatform.v2.core.forms.ui.GroundTheme
 import org.groundplatform.v2.mobile.ui.onboarding.MobileScreenHost
@@ -95,19 +92,7 @@ fun PrototypeApp(
   }
   val page = state.activeWebPage
 
-  val mobile = state.mobile
-  val dataCollectionUiState = mobile.dataCollectionUiState
-  val isEntityRefMapShowing =
-    dataCollectionUiState.isDataCollectionFormOpen &&
-      dataCollectionUiState.isCurrentFormStepEntityRef &&
-      dataCollectionUiState.entityRefSelectorViewMode == MainSurveyViewMode.MAP
-  val isMobileMapShowing =
-    page == null &&
-      mobile.currentScreen == PrototypeScreen.MAIN_SURVEY &&
-      mobile.activeDrawerSubView == MainDrawerSubView.NONE &&
-      (!dataCollectionUiState.isDataCollectionFormOpen ||
-        dataCollectionUiState.isCurrentFormStepGeoPoint ||
-        isEntityRefMapShowing)
+  val isMobileMapShowing = page == null && state.mobile.isMapShowing
   // The Mapbox basemap renders behind the Compose canvas, so the root surface must stay transparent
   // whenever a page shows it.
   val isMapShowing = isMobileMapShowing || (page == WebPage.WEB_DASHBOARD && web.isSignedIn)

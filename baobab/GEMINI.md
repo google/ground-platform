@@ -67,7 +67,7 @@ These rules govern all AI-assisted research, design, and code changes within Gro
   * [`shared/core/`](shared/core/): Pure KMP runtime (`commonMain`) targeting Android/JVM, iOS, JS, and WasmJS (serialization, XPath/XForms evaluation, reactive form engine). Keep `commonMain` free of platform-specific imports.
   * [`shared/ui/`](shared/ui/): Shared Compose Multiplatform (`commonMain`) theme (`GroundTheme`) and form/UI components targeting Android/JVM, iOS, JS, and WasmJS.
   * [`shared/app/`](shared/app/): Shared application core (`commonMain`) targeting Android/JVM and WasmJS: domain models, use cases, repositories, data sources, platform clients, and the UI state, ViewModels, and components used by both the mobile app and the web console.
-  * [`shared/mobile/`](shared/mobile/): Shared mobile application core (`commonMain`) targeting Android and iOS (local persistence, offline sync, GNSS tracking, mobile screens, and ViewModels).
+  * [`shared/mobile/`](shared/mobile/): The mobile app (`commonMain`): screens, `MobileAppState`, and the `GroundMobileApp()` root shared by every mobile host. Targets Android/JVM and WasmJS; iOS is opt-in (`-Pground.ios=true`) until `shared/app` gets iOS targets.
 * **Thin Platform Wrappers**: Keep [`androidApp/`](androidApp/), [`iosApp/`](iosApp/), and [`webApp/`](webApp/) as thin platform entry points and host integrations. Do not duplicate business logic, state machines, validation, or shared UI components across platform targets; use `expect`/`actual` abstractions only where native OS capabilities are required.
 
 ## User Interface: Material Design 3 & Compose Multiplatform

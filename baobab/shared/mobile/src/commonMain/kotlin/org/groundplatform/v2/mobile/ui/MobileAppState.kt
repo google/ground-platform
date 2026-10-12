@@ -299,6 +299,26 @@ class MobileAppState(
     drawerSignOut()
   }
 
+  // --- Basemap visibility ---
+
+  /**
+   * Whether the current screen shows the survey basemap. On web the Mapbox basemap renders behind
+   * the Compose canvas, so hosts keep their root surface transparent while this is true.
+   */
+  val isMapShowing: Boolean
+    get() {
+      val dataCollection = dataCollectionUiState
+      val isEntityRefMapShowing =
+        dataCollection.isDataCollectionFormOpen &&
+          dataCollection.isCurrentFormStepEntityRef &&
+          dataCollection.entityRefSelectorViewMode == MainSurveyViewMode.MAP
+      return currentScreen == PrototypeScreen.MAIN_SURVEY &&
+        activeDrawerSubView == MainDrawerSubView.NONE &&
+        (!dataCollection.isDataCollectionFormOpen ||
+          dataCollection.isCurrentFormStepGeoPoint ||
+          isEntityRefMapShowing)
+    }
+
   // --- System Back ---
 
   /** Whether the system Back gesture has something to close or go back from. */

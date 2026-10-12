@@ -30,7 +30,7 @@ for **Ground 2.0**.
 │   ├── ui/                      # Shared Compose theme & form runner widgets (Android/JVM, iOS, JS, WasmJS)
 │   ├── map/                     # Shared map rendering (Mapbox) & geometry
 │   ├── app/                     # Shared domain, data, clients & UI for the mobile and web apps (Android/JVM, WasmJS)
-│   └── mobile/                  # Shared Mobile services, data & Compose UI (Android & iOS ONLY)
+│   └── mobile/                  # Mobile app screens, state & GroundMobileApp() root (Android/JVM, WasmJS; iOS opt-in)
 │       └── src/commonMain/.../mobile/
 │           ├── data/            # Local SQLite/Room persistence, offline queues & tile cache
 │           ├── services/        # Offline sync engine, GPS/geotrace tracking & media management
@@ -83,7 +83,8 @@ for **Ground 2.0**.
     fixtures for it and its dependents are in `shared/app/testing/`
     (`org.groundplatform.v2:app-testing`).
 -   **[`shared/mobile/`](shared/mobile/)**: Shared Mobile application module
-    (`org.groundplatform.v2:mobile`) targeting **only Android/JVM and iOS**.
+    (`org.groundplatform.v2:mobile`) targeting Android/JVM and WasmJS, with iOS
+    opt-in (`-Pground.ios=true`) until `shared/app` gets iOS targets.
     Contains mobile-specific local persistence (`data/`), domain services such
     as offline sync and GPS tracking (`services/`), and mobile Compose screens &
     ViewModels (`ui/`) shared identically by `androidApp` and `iosApp`. Exports

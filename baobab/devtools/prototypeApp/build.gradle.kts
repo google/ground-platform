@@ -65,6 +65,7 @@ kotlin {
         api("org.groundplatform.v2:protoforms-ui:2.0.0-SNAPSHOT")
         api("org.groundplatform.v2:map:2.0.0-SNAPSHOT")
         api("org.groundplatform.v2:app:2.0.0-SNAPSHOT")
+        api("org.groundplatform.v2:mobile:2.0.0-SNAPSHOT")
         implementation(compose.runtime)
         implementation(compose.foundation)
         implementation(compose.material3)

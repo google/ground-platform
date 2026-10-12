@@ -28,6 +28,10 @@ dependencyResolutionManagement {
   repositories {
     google()
     mavenCentral()
+    // Mapbox Maps SDK for Android (pulled in through shared/map). Public; no credentials needed.
+    maven("https://api.mapbox.com/downloads/v2/releases/maven") {
+      content { includeGroupByRegex("com\\.mapbox\\..*") }
+    }
   }
 }
 
@@ -39,3 +43,5 @@ includeBuild("../ui")
 
 // GroundMap for iOS; exported through the GroundMobile framework (see build.gradle.kts).
 includeBuild("../map")
+
+includeBuild("../app")

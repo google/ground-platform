@@ -39,7 +39,6 @@ import org.groundplatform.v2.app.domain.model.MutationSyncState
 import org.groundplatform.v2.app.domain.model.NavigationTargetKind
 import org.groundplatform.v2.app.domain.model.OfflineBasemapStyle
 import org.groundplatform.v2.app.domain.model.PrototypeScreen
-import org.groundplatform.v2.app.domain.model.SurveyPlaceItem
 import org.groundplatform.v2.app.domain.model.SyncStatus
 import org.groundplatform.v2.app.domain.model.UploadStatusFilter
 import org.groundplatform.v2.app.domain.model.UserSettings
@@ -48,7 +47,6 @@ import org.groundplatform.v2.app.domain.model.geometryKind
 import org.groundplatform.v2.app.domain.model.groupClusterFeaturesByMarkerSymbol
 import org.groundplatform.v2.app.domain.model.hasGeometry
 import org.groundplatform.v2.app.domain.model.maxFramingZoom
-import org.groundplatform.v2.app.domain.model.parsePlaceCoordinates
 import org.groundplatform.v2.app.domain.model.relatedEntityForPropertyValue
 import org.groundplatform.v2.app.ui.map.SurveyMap
 import org.groundplatform.v2.app.ui.map.SurveyMapContent
@@ -58,7 +56,6 @@ import org.groundplatform.v2.app.ui.state.formGeometryBounds
 import org.groundplatform.v2.app.ui.state.maxFramingZoom
 import org.groundplatform.v2.core.forms.ui.MapDrawingKind
 import org.groundplatform.v2.map.LngLatBounds
-import org.groundplatform.v2.workbench.ui.WorkbenchState
 
 class MobileAppStateTest {
 
@@ -131,21 +128,6 @@ class MobileAppStateTest {
     // Clearing search restores full shared list
     state.clearSearchQuery()
     assertEquals(6, state.filteredSurveys.size)
-  }
-
-  @Test
-  fun downloadSurvey_marksSurveyAsDownloaded() {
-    val workbench = WorkbenchState(MobileAppState(initialScreen = PrototypeScreen.DOWNLOAD_SURVEY))
-    val state = workbench.mobile
-    val targetId = "survey-serengeti-corridor"
-    assertFalse(state.surveys.first { it.id == targetId }.isDownloaded)
-
-    state.downloadSurvey(targetId)
-    assertTrue(state.surveys.first { it.id == targetId }.isDownloaded)
-
-    // Toggle downloaded indicator off and back on
-    workbench.toggleSurveyDownloaded(targetId)
-    assertFalse(state.surveys.first { it.id == targetId }.isDownloaded)
   }
 
   @Test
@@ -237,171 +219,6 @@ class MobileAppStateTest {
     assertEquals("Maya Lin", detail.collectorName)
     assertEquals("2026-09-19 08:45 UTC", detail.timestamp)
     assertTrue(detail.fields.any { it.questionName == "surviving_saplings_count" })
-  }
-
-  @Test
-  fun listViewSearch_filtersPlacesAndEntitiesAndRemovesFormSubmissionSearch() {
-    val workbench = WorkbenchState(MobileAppState(initialScreen = PrototypeScreen.MAIN_SURVEY))
-    val state = workbench.mobile
-    state.setMainSurveyViewMode(MainSurveyViewMode.LIST)
-
-    // ListFilterTab contains ALL, PLACES ("Places"), ENTITIES ("Map features")
-    assertEquals(
-      listOf(ListFilterTab.ALL, ListFilterTab.PLACES, ListFilterTab.ENTITIES),
-      ListFilterTab.entries,
-    )
-    assertEquals("Places", ListFilterTab.PLACES.label)
-    assertEquals("Map features", ListFilterTab.ENTITIES.label)
-    assertEquals("Map features", state.activeEntitiesTabLabel)
-    assertEquals("map features", state.activeEntitiesCountNoun)
-    assertEquals("Coffee Parcel", state.entitySingularTypeLabel("entity-nyr-104"))
-    assertEquals("Shade Tree Monitoring Plot", state.entitySingularTypeLabel("entity-shade-201"))
-    assertEquals("Cooperative Washing Station", state.entitySingularTypeLabel("entity-station-01"))
-
-    // When filtered down to a single visible entity dataset layer, dynamic domain naming activates
-    state.toggleLayerVisibility("layer-shade-transects")
-    state.toggleLayerVisibility("layer-water-points")
-    assertEquals("Coffee Parcels", state.activeEntitiesTabLabel)
-    assertEquals("coffee parcels", state.activeEntitiesCountNoun)
-    state.toggleLayerVisibility("layer-shade-transects")
-    state.toggleLayerVisibility("layer-water-points")
-    assertEquals("Map features", state.activeEntitiesTabLabel)
-
-    // Unfiltered counts: 0 places when search query is blank, 5 entities grouped across 3 datasets;
-    // form submission search is removed since there is no unique key to identify them with
-    assertEquals(0, state.filteredListPlaces.size)
-    assertTrue(state.filteredListPlaces.isEmpty())
-    assertEquals(5, state.filteredListEntities.size)
-    assertEquals(3, state.groupedFilteredListEntities.size)
-    assertTrue(state.filteredListSubmissions.isEmpty())
-    assertTrue(state.groupedFilteredListSubmissions.isEmpty())
-
-    // Search for a geographic place ("Karima Hill" / "Karima Hill Forest Reserve")
-    state.updateListSearchQuery("Karima Hill")
-    assertEquals(1, state.filteredListPlaces.size)
-    assertEquals("Karima Hill Forest Reserve", state.filteredListPlaces.first().name)
-    assertTrue(state.filteredListEntities.isEmpty())
-
-    // Verify coordinate parsing helper handles both degree/cardinal and signed decimal strings
-    val parsedCardinal = assertNotNull(state.parsePlaceCoordinates("0.5012° S, 36.9324° E"))
-    assertEquals(-0.5012, parsedCardinal.first, 0.0001)
-    assertEquals(36.9324, parsedCardinal.second, 0.0001)
-    val parsedDecimal = assertNotNull(state.parsePlaceCoordinates("-0.5012, 36.9324"))
-    assertEquals(-0.5012, parsedDecimal.first, 0.0001)
-    assertEquals(36.9324, parsedDecimal.second, 0.0001)
-
-    // Selecting a place centers/zooms the map on the place's bounds, switches locationLockState to
-    // PANNED,
-    // and collapses the bottom sheet. A country zooms out much farther than a village/forest.
-    state.selectPlace("place-kenya-country")
-    val kenyaZoom = assertNotNull(state.selectedPlace).targetZoom
-    val kenyaZoomDelta = state.mapZoomDelta
-    assertTrue(kenyaZoom < 6.0f)
-
-    state.selectPlace("place-iriaini-market")
-    val villageZoom = assertNotNull(state.selectedPlace).targetZoom
-    val villageZoomDelta = state.mapZoomDelta
-    assertTrue(villageZoom > 13.0f)
-    assertTrue(villageZoom > kenyaZoom)
-    assertTrue(villageZoomDelta > kenyaZoomDelta)
-
-    // Clicking away on the map (selectEntity(null)) dismisses the selected place chip
-    state.selectEntity(null)
-    assertEquals(null, state.selectedPlace)
-
-    state.selectPlace("place-karima-forest")
-    assertEquals("place-karima-forest", state.selectedPlace?.id)
-    assertEquals(MainSurveyViewMode.MAP, state.mainViewMode)
-    assertEquals(LocationLockState.PANNED, state.locationLockState)
-    assertFalse(state.isCameraFollowingUser)
-    assertFalse(state.isEntityBottomSheetExpanded)
-
-    // Straight-line wayfinding to a place works
-    state.startNavigationToPlace("place-karima-forest")
-    val placeNav = assertNotNull(state.activeNavigation)
-    assertEquals(NavigationTargetKind.PLACE, placeNav.targetKind)
-    assertEquals("place-karima-forest", placeNav.targetId)
-    state.stopNavigation()
-    state.clearSelectedPlace()
-
-    // Search for decimal coordinates creates an ad-hoc coordinate place match
-    state.updateListSearchQuery("-0.4210, 36.9520")
-    assertTrue(state.filteredListPlaces.any { it.categoryLabel == "GPS Coordinates" })
-
-    // Search for "Kamau" (matches entity label & owner property)
-    state.updateListSearchQuery("Kamau")
-    assertEquals(1, state.filteredListEntities.size)
-    assertEquals("Plot NYR-104 • Kamau Family Parcel", state.filteredListEntities.first().label)
-
-    // Filtering by ListFilterTab.PLACES hides entities; places remain empty when query is blank
-    state.clearListSearchQuery()
-    state.selectListFilterTab(ListFilterTab.PLACES)
-    assertEquals(0, state.filteredListPlaces.size)
-    assertTrue(state.filteredListEntities.isEmpty())
-    state.updateListSearchQuery("Nyeri")
-    assertTrue(state.filteredListPlaces.isNotEmpty())
-    assertTrue(state.filteredListEntities.isEmpty())
-    state.clearListSearchQuery()
-
-    state.selectListFilterTab(ListFilterTab.ENTITIES)
-    assertTrue(state.filteredListPlaces.isEmpty())
-    assertEquals(5, state.filteredListEntities.size)
-    state.selectListFilterTab(ListFilterTab.ALL)
-
-    // Live Places search results merge into filteredListPlaces
-    state.updateListSearchQuery("Aberdare National Park")
-    state.onPlacesSearchResults(
-      query = "Aberdare National Park",
-      results =
-        listOf(
-          SurveyPlaceItem(
-            id = "place.aberdare.901",
-            name = "Aberdare National Park",
-            categoryLabel = "National Park",
-            regionSubtitle = "Nyeri County, Kenya",
-            coordinatesLabel = "0.3833° S, 36.7000° E",
-            normalizedX = 0.05f,
-            normalizedY = 0.05f,
-            longitude = 36.7,
-            latitude = -0.3833,
-          )
-        ),
-    )
-    assertTrue(
-      state.filteredListPlaces.any {
-        it.name == "Aberdare National Park" && it.sourceLabel == "Places API"
-      }
-    )
-
-    // Workbench offline simulation disables Mapbox Places search while keeping local map features
-    // searchable
-    state.selectListFilterTab(ListFilterTab.PLACES)
-    assertEquals(ListFilterTab.PLACES, state.listFilterTab)
-    workbench.updateAirplaneMode(true)
-    assertTrue(workbench.uiState.isAirplaneMode)
-    assertFalse(state.isOnline)
-    assertFalse(state.isPlacesSearchAvailable)
-    assertEquals(ListFilterTab.ALL, state.listFilterTab)
-    assertTrue(state.filteredListPlaces.isEmpty())
-    state.selectListFilterTab(ListFilterTab.PLACES)
-    assertEquals(ListFilterTab.ALL, state.listFilterTab)
-
-    // Searching local features ("Kamau") works while offline
-    state.updateListSearchQuery("Kamau")
-    assertTrue(state.filteredListPlaces.isEmpty())
-    assertEquals(1, state.filteredListEntities.size)
-    assertEquals("Plot NYR-104 • Kamau Family Parcel", state.filteredListEntities.first().label)
-
-    // Turning Airplane mode back off in the workbench restores Places search availability (empty
-    // when query blank, populated when query entered)
-    workbench.toggleAirplaneMode()
-    assertFalse(workbench.uiState.isAirplaneMode)
-    assertTrue(state.isOnline)
-    assertTrue(state.isPlacesSearchAvailable)
-    state.clearListSearchQuery()
-    assertEquals(0, state.filteredListPlaces.size)
-    state.updateListSearchQuery("36.9")
-    assertEquals(6, state.filteredListPlaces.size)
   }
 
   @Test
@@ -599,52 +416,6 @@ class MobileAppStateTest {
     // Selecting from list also increments entitySelectionEpoch
     state.selectEntityFromList(entity.id)
     assertEquals(3L, state.entitySelectionEpoch)
-  }
-
-  @Test
-  fun launchFormForEntity_opensFormWizardController_andCompletesSubmissionWithFormattedAnswers() {
-    // The workbench loads its XForms preset into the mobile app.
-    val state = WorkbenchState(MobileAppState(initialScreen = PrototypeScreen.MAIN_SURVEY)).mobile
-    val initialShadeSubs = state.entities.first { it.id == "entity-shade-201" }.submissions.size
-    assertEquals(3, initialShadeSubs)
-    assertFalse(state.isDataCollectionFormOpen)
-    assertEquals(null, state.activeFormWizardController)
-
-    // Launch form on 1:N entity `entity-shade-201`
-    state.launchFormForEntity(entityId = "entity-shade-201", formId = "form-shade-canopy-audit")
-
-    assertTrue(state.isDataCollectionFormOpen)
-    assertEquals("entity-shade-201", state.activeDataCollectionEntityId)
-    assertEquals("form-shade-canopy-audit", state.activeDataCollectionFormId)
-    val controller = state.activeFormWizardController!!
-    assertEquals("EUDR & Shade-Tree Field Survey", controller.formState.formDef.title)
-
-    // Modify an answer via FormWizardController before finalizing
-    controller.updateString("/data/dominant_shade_species", "Cordia africana & Grevillea")
-    controller.updateInt("/data/surviving_saplings_count", 196)
-
-    // Finalize and submit recordInstance
-    state.completeActiveFormSubmission(controller.formState.recordInstance)
-
-    // Form runner closes and the entity's submissions list grows by 1 with the answered fields
-    assertFalse(state.isDataCollectionFormOpen)
-    assertEquals(null, state.activeFormWizardController)
-    val updatedEntity = state.entities.first { it.id == "entity-shade-201" }
-    assertEquals(4, updatedEntity.submissions.size)
-    val latestSubmission = updatedEntity.submissions.first()
-    assertEquals("EUDR & Shade-Tree Field Survey", latestSubmission.formTitle)
-    assertTrue(
-      latestSubmission.fields.any {
-        it.questionName == "dominant_shade_species" &&
-          it.answerValue == "Cordia africana & Grevillea"
-      }
-    )
-    assertTrue(
-      latestSubmission.fields.any {
-        it.questionName == "surviving_saplings_count" && it.answerValue == "196"
-      }
-    )
-    assertTrue(state.activeSurveyNotice?.contains("Submitted") == true)
   }
 
   @Test
@@ -1152,83 +923,6 @@ class MobileAppStateTest {
       assertEquals("entity-nyr-108", state.activeDataCollectionEntityId)
       assertEquals(camera.center, state.desiredMapCamera().center)
     }
-  }
-
-  @Test
-  fun syncStatusIndicators_showUploadingSyncedAndFailedOnEntitiesAndSubmissionsInLists() {
-    val workbench = WorkbenchState(MobileAppState(initialScreen = PrototypeScreen.MAIN_SURVEY))
-    val state = workbench.mobile
-    state.setMainSurveyViewMode(MainSurveyViewMode.LIST)
-
-    // 1. Default entities cover Uploading, Synced, and Failed states
-    val nyr104 = state.entities.first { it.id == "entity-nyr-104" }
-    val shade201 = state.entities.first { it.id == "entity-shade-201" }
-    val nyr108 = state.entities.first { it.id == "entity-nyr-108" }
-    val nyr112 = state.entities.first { it.id == "entity-nyr-112" }
-    val station01 = state.entities.first { it.id == "entity-station-01" }
-
-    assertEquals(SyncStatus.SYNCED, nyr104.syncStatus)
-    assertTrue(nyr104.isSynced)
-    assertEquals(SyncStatus.UPLOADING, shade201.syncStatus)
-    assertTrue(shade201.isUploading)
-    assertEquals(SyncStatus.UPLOADING, nyr108.syncStatus)
-    assertEquals(SyncStatus.FAILED, nyr112.syncStatus)
-    assertTrue(nyr112.isFailed)
-    assertEquals(SyncStatus.FAILED, station01.syncStatus)
-
-    assertEquals(2, state.uploadingEntityCount)
-    assertEquals(1, state.syncedEntityCount)
-    assertEquals(2, state.failedEntityCount)
-
-    // 2. Default submissions cover Uploading, Synced, and Failed states
-    val subNyr104 = state.allSubmissions.first { it.id == "sub-nyr-104-baseline" }
-    val subShadeWave3 = state.allSubmissions.first { it.id == "sub-shade-201-wave3" }
-    val subShadeWave2 = state.allSubmissions.first { it.id == "sub-shade-201-wave2" }
-    val subWshSep = state.allSubmissions.first { it.id == "sub-wsh-01-sep" }
-
-    assertEquals(SyncStatus.SYNCED, subNyr104.syncStatus)
-    assertTrue(subNyr104.isSynced)
-    assertEquals(SyncStatus.UPLOADING, subShadeWave3.syncStatus)
-    assertTrue(subShadeWave3.isUploading)
-    assertEquals(SyncStatus.SYNCED, subShadeWave2.syncStatus)
-    assertEquals(SyncStatus.FAILED, subWshSep.syncStatus)
-    assertTrue(subWshSep.isFailed)
-
-    assertEquals(3, state.uploadingSubmissionCount)
-    assertEquals(5, state.syncedSubmissionCount)
-    assertEquals(1, state.failedSubmissionCount)
-
-    // 3. Filtering lists by syncStatus label ("Uploading", "Synced", "Failed") filters entities
-    // (form submission search is removed)
-    state.updateListSearchQuery("Uploading")
-    assertEquals(2, state.filteredListEntities.size)
-    assertTrue(state.filteredListEntities.all { it.syncStatus == SyncStatus.UPLOADING })
-    assertTrue(state.filteredListSubmissions.isEmpty())
-
-    state.updateListSearchQuery("Failed")
-    assertEquals(2, state.filteredListEntities.size)
-    assertTrue(state.filteredListEntities.all { it.syncStatus == SyncStatus.FAILED })
-    assertTrue(state.filteredListSubmissions.isEmpty())
-
-    state.updateListSearchQuery("Synced")
-    assertEquals(1, state.filteredListEntities.size)
-    assertEquals("entity-nyr-104", state.filteredListEntities.first().id)
-    assertTrue(state.filteredListSubmissions.isEmpty())
-    state.clearListSearchQuery()
-
-    // 4. Cycling / updating submission and entity sync statuses updates parent entity aggregate
-    // state
-    state.cycleSubmissionSyncStatus("sub-shade-201-wave3")
-    assertEquals(
-      SyncStatus.SYNCED,
-      state.allSubmissions.first { it.id == "sub-shade-201-wave3" }.syncStatus,
-    )
-    assertEquals(SyncStatus.SYNCED, state.entities.first { it.id == "entity-shade-201" }.syncStatus)
-
-    // 5. Syncing all Outbox mutations transitions remaining Uploading/Failed items to Synced
-    state.syncAllOutboxMutations()
-    assertTrue(state.entities.all { it.syncStatus == SyncStatus.SYNCED })
-    assertTrue(state.allSubmissions.all { it.syncStatus == SyncStatus.SYNCED })
   }
 
   @Test
@@ -1824,59 +1518,6 @@ class MobileAppStateTest {
   }
 
   @Test
-  fun availableSubmissions_offlineShowsOnlySubmissionsStoredOnDevice() {
-    val workbench = WorkbenchState(MobileAppState(initialScreen = PrototypeScreen.MAIN_SURVEY))
-    val state = workbench.mobile
-    val entity =
-      state.entities.first { e ->
-        e.submissions.any { state.isSubmissionStoredOnDevice(it) } &&
-          e.submissions.any { !state.isSubmissionStoredOnDevice(it) }
-      }
-
-    assertEquals(
-      entity.submissions.size,
-      state.availableGroupedSubmissionsForEntity(entity).sumOf { it.submissions.size },
-    )
-
-    workbench.updateAirplaneMode(true)
-    val offline = state.availableGroupedSubmissionsForEntity(entity).flatMap { it.submissions }
-    assertTrue(offline.isNotEmpty())
-    assertTrue(offline.size < entity.submissions.size)
-    assertTrue(offline.all { state.isSubmissionStoredOnDevice(it) })
-
-    // Other collectors' submissions (e.g. Samuel Kariuki on entity-nyr-108) require connectivity
-    val nyr108 = state.entities.first { it.id == "entity-nyr-108" }
-    assertTrue(state.availableGroupedSubmissionsForEntity(nyr108).isEmpty())
-  }
-
-  @Test
-  fun offlineMode_preventsOnlineOnlyFlows_forDownloadsAndUploads() {
-    val workbench = WorkbenchState(MobileAppState(initialScreen = PrototypeScreen.MAIN_SURVEY))
-    val state = workbench.mobile
-    workbench.updateAirplaneMode(true)
-    assertFalse(state.isOnline)
-
-    // 1. Outbox uploads are prevented while offline
-    val initialOutboxCount = state.outboxMutationCount
-    state.syncMutationNow("mut-outbox-04")
-    assertEquals(initialOutboxCount, state.outboxMutationCount)
-    state.syncAllOutboxMutations()
-    assertEquals(initialOutboxCount, state.outboxMutationCount)
-    assertTrue(state.activeSurveyNotice?.contains("offline", ignoreCase = true) == true)
-
-    // 2. Downloading an undownloaded survey is prevented while offline, whereas opening an already
-    // downloaded survey succeeds
-    val undownloadedSurvey = state.surveys.first { !it.isDownloaded }
-    state.downloadSurvey(undownloadedSurvey.id)
-    assertFalse(state.surveys.first { it.id == undownloadedSurvey.id }.isDownloaded)
-
-    // 3. Downloading an undownloaded offline tile package is prevented while offline
-    val undownloadedTilePkg = state.offlineTilePackages.first { !it.isDownloaded }
-    state.toggleOfflineTilePackage(undownloadedTilePkg.id)
-    assertFalse(state.offlineTilePackages.first { it.id == undownloadedTilePkg.id }.isDownloaded)
-  }
-
-  @Test
   fun openUploadsForEntity_filtersUploadsToThatEntityUntilCleared() {
     val state = MobileAppState(initialScreen = PrototypeScreen.MAIN_SURVEY)
     val entityId = state.mutations.first().entityId
@@ -1996,55 +1637,5 @@ class MobileAppStateTest {
       "Participant (identity hidden)",
       state.displayCollectorAttribution(samuelSubmission),
     )
-  }
-
-  @Test
-  fun repeatGroupQuestions_savedInCompletedSubmissionAcrossInstances() {
-    // The workbench loads its XForms preset into the mobile app.
-    val state = WorkbenchState(MobileAppState(initialScreen = PrototypeScreen.MAIN_SURVEY)).mobile
-    state.launchFormForEntity(entityId = "entity-shade-201", formId = "form-shade-canopy-audit")
-    val controller = assertNotNull(state.activeFormWizardController)
-
-    // Edit Repeat #1 answers and add Repeat #2
-    controller.updateString("/data/sampled_trees[1]/tree_tag", "TREE-101")
-    controller.updateDouble("/data/sampled_trees[1]/stem_dbh_cm", 44.5)
-
-    controller.addRepeatInstanceAndOpen("/data/sampled_trees")
-    controller.updateString("/data/sampled_trees[2]/tree_tag", "TREE-102")
-    controller.updateDouble("/data/sampled_trees[2]/stem_dbh_cm", 51.0)
-
-    state.completeActiveFormSubmission()
-
-    val updatedPlot = state.entities.first { it.id == "entity-shade-201" }
-    val latestSubmission = updatedPlot.submissions.first()
-
-    // Ensure no group/repeat container nodes were emitted as "(Unanswered)"
-    assertFalse(latestSubmission.fields.any { it.answerValue == "(Unanswered)" })
-
-    val tree1Tag =
-      assertNotNull(
-        latestSubmission.fields.firstOrNull { it.questionName == "sampled_trees[1]/tree_tag" }
-      )
-    assertEquals("TREE-101", tree1Tag.answerValue)
-    assertTrue(tree1Tag.questionLabel.contains("#1"))
-
-    val tree1Dbh =
-      assertNotNull(
-        latestSubmission.fields.firstOrNull { it.questionName == "sampled_trees[1]/stem_dbh_cm" }
-      )
-    assertEquals("44.5", tree1Dbh.answerValue)
-
-    val tree2Tag =
-      assertNotNull(
-        latestSubmission.fields.firstOrNull { it.questionName == "sampled_trees[2]/tree_tag" }
-      )
-    assertEquals("TREE-102", tree2Tag.answerValue)
-    assertTrue(tree2Tag.questionLabel.contains("#2"))
-
-    val tree2Dbh =
-      assertNotNull(
-        latestSubmission.fields.firstOrNull { it.questionName == "sampled_trees[2]/stem_dbh_cm" }
-      )
-    assertEquals("51.0", tree2Dbh.answerValue)
   }
 }

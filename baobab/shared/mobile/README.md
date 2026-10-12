@@ -16,14 +16,15 @@
 
 # Ground 2.0 Shared Mobile Module (`shared/mobile`)
 
-`org.groundplatform.v2:mobile` contains all shared **Android + iOS** mobile
-functionality—spanning **mobile-specific services and business logic** as well
-as **Compose Multiplatform mobile UI and ViewModels**.
+`org.groundplatform.v2:mobile` contains the Ground 2.0 mobile app: its screens,
+state (`MobileAppState`), and root composable (`GroundMobileApp()`), built on
+the domain, data, and shared UI in [`../app/`](../app/). Every mobile host runs
+the same `GroundMobileApp()`: `androidApp`, `iosApp`, and the Wasm mobile build
+used for testing in a browser.
 
-Because `androidApp` and `iosApp` implement identical offline field data
-collection functionality while `webApp` is a separate survey management and data
-exploration console, this module targets **only Mobile platforms** (`jvm`/Android,
-`iosArm64`, `iosSimulatorArm64`).
+The module targets Android, JVM (for tests), and WasmJS. iOS targets are
+opt-in with `-Pground.ios=true`, and are paused until `shared/app` gets iOS
+targets of its own.
 
 ## Internal Package Structure (`org.groundplatform.v2.mobile`)
 

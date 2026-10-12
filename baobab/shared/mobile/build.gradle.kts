@@ -17,11 +17,18 @@ plugins {
   id("org.jetbrains.compose") version "1.12.0"
   id("org.jetbrains.kotlin.plugin.compose") version "2.4.20"
   id("com.android.library") version "8.5.2"
+  id("com.ncorti.ktfmt.gradle") version "0.27.0"
 }
 
 group = "org.groundplatform.v2"
 
 version = "2.0.0-SNAPSHOT"
+
+ktfmt { googleStyle() }
+
+// iOS targets are opt-in while iOS work is paused: `./gradlew -Pground.ios=true ...` builds the
+// GroundMobile framework for iosApp. The shared/app module doesn't have iOS targets yet.
+val iosEnabled = providers.gradleProperty("ground.ios").orNull == "true"
 
 kotlin {
   androidTarget {
@@ -30,12 +37,24 @@ kotlin {
 
   jvm { testRuns["test"].executionTask.configure { useJUnitPlatform() } }
 
-  listOf(iosArm64(), iosSimulatorArm64()).forEach { iosTarget ->
-    iosTarget.binaries.framework {
-      baseName = "GroundMobile"
-      isStatic = true
-      // iosApp implements GroundMap's Mapbox view (MapboxIosView) in Swift.
-      export("org.groundplatform.v2:map:2.0.0-SNAPSHOT")
+  @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
+  wasmJs {
+    browser()
+    compilerOptions {
+      sourceMapEmbedSources.set(
+        org.jetbrains.kotlin.gradle.dsl.JsSourceMapEmbedMode.SOURCE_MAP_SOURCE_CONTENT_ALWAYS
+      )
+    }
+  }
+
+  if (iosEnabled) {
+    listOf(iosArm64(), iosSimulatorArm64()).forEach { iosTarget ->
+      iosTarget.binaries.framework {
+        baseName = "GroundMobile"
+        isStatic = true
+        // iosApp implements GroundMap's Mapbox view (MapboxIosView) in Swift.
+        export("org.groundplatform.v2:map:2.0.0-SNAPSHOT")
+      }
     }
   }
 
@@ -44,15 +63,34 @@ kotlin {
       dependencies {
         api("org.groundplatform.v2:protoforms:2.0.0-SNAPSHOT")
         api("org.groundplatform.v2:protoforms-ui:2.0.0-SNAPSHOT")
+        api("org.groundplatform.v2:app:2.0.0-SNAPSHOT")
         implementation(compose.runtime)
         implementation(compose.foundation)
         implementation(compose.material3)
         implementation(compose.ui)
+        implementation("org.jetbrains.compose.material:material-icons-core:1.7.3")
+        implementation("org.jetbrains.compose.material:material-icons-extended:1.7.3")
+        implementation(compose.components.resources)
       }
     }
-    iosMain.dependencies { api("org.groundplatform.v2:map:2.0.0-SNAPSHOT") }
-    val commonTest by getting { dependencies { implementation(kotlin("test")) } }
-    val jvmTest by getting { dependencies { implementation(kotlin("test-junit5")) } }
+    if (iosEnabled) {
+      iosMain.dependencies { api("org.groundplatform.v2:map:2.0.0-SNAPSHOT") }
+    }
+    val commonTest by getting {
+      dependencies {
+        implementation(kotlin("test"))
+        implementation("org.groundplatform.v2:app-testing:2.0.0-SNAPSHOT")
+      }
+    }
+    val jvmTest by getting {
+      dependencies {
+        implementation(kotlin("test-junit5"))
+        // Headless Compose UI tests (runComposeUiTest) for interaction regressions.
+        @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
+        implementation(compose.uiTest)
+        implementation(compose.desktop.currentOs)
+      }
+    }
   }
 }
 

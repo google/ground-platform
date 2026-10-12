@@ -43,3 +43,5 @@ includeBuild("../../shared/ui")
 includeBuild("../../shared/map")
 
 includeBuild("../../shared/app")
+
+includeBuild("../../shared/mobile")

@@ -16,37 +16,33 @@ package org.groundplatform.v2.mobile
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.graphics.Color
 import org.groundplatform.v2.core.forms.ui.GroundTheme
-import org.groundplatform.v2.core.forms.ui.LocalGroundBrandFontFamily
+import org.groundplatform.v2.mobile.ui.MobileAppState
+import org.groundplatform.v2.mobile.ui.onboarding.MobileScreenHost
 
-/** Root Compose Multiplatform entry point shared identically by `androidApp` and `iosApp`. */
+/**
+ * Root of the Ground 2.0 mobile app, shared by every mobile host (`androidApp`, `iosApp`, and the
+ * Wasm mobile build): `Sign In` → `Terms of Service` → `Download survey` → `Main Survey UI`.
+ *
+ * Hosts wire the system Back gesture to [MobileAppState.canHandleBack] and
+ * [MobileAppState.handleBack]. The root surface turns transparent while the basemap shows, because
+ * on web the Mapbox basemap renders behind the Compose canvas.
+ */
 @Composable
-fun GroundMobileApp() {
-  GroundTheme {
-    val brandFont = LocalGroundBrandFontFamily.current
-    Surface(modifier = Modifier.fillMaxSize()) {
-      Box(contentAlignment = Alignment.Center) {
-        Text(
-          text =
-            buildAnnotatedString {
-              withStyle(SpanStyle(fontFamily = brandFont, fontWeight = FontWeight.ExtraBold)) {
-                append("Ground")
-              }
-              append(" 2.0 Mobile")
-            },
-          style = MaterialTheme.typography.headlineMedium,
-        )
-      }
+fun GroundMobileApp(state: MobileAppState = remember { MobileAppState() }) {
+  GroundTheme(darkTheme = state.isDarkTheme) {
+    Surface(
+      modifier = Modifier.fillMaxSize(),
+      color = if (state.isMapShowing) Color.Transparent else MaterialTheme.colorScheme.surface,
+    ) {
+      Box(modifier = Modifier.fillMaxSize().safeDrawingPadding()) { MobileScreenHost(state) }
     }
   }
 }

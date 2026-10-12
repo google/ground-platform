@@ -41,11 +41,15 @@ view (`ContentView.swift`).
 
 ## How to Build and Run (macOS only)
 
+> [!NOTE]
+> iOS work is paused. `shared/mobile` now depends on `shared/app`, which has no
+> iOS targets yet, so the `-Pground.ios=true` builds below fail until it does.
+
 1.  **Build the Kotlin native framework**:
     You need to compile the Kotlin multiplatform code into an iOS framework first.
     ```sh
     cd ../shared/mobile
-    ./gradlew linkDebugFrameworkIosSimulatorArm64 --offline
+    ./gradlew -Pground.ios=true linkDebugFrameworkIosSimulatorArm64 --offline
     ```
 2.  **Generate the Xcode project**:
     Use [XcodeGen](https://github.com/yonaskolb/XcodeGen) to generate the project file.
@@ -110,7 +114,7 @@ renderer and its UIKit and Skia calls (it can't link the framework):
 
 ```sh
 cd ../shared/map && ./gradlew compileKotlinIosSimulatorArm64 compileKotlinIosArm64
-cd ../mobile && ./gradlew compileKotlinIosSimulatorArm64
+cd ../mobile && ./gradlew -Pground.ios=true compileKotlinIosSimulatorArm64
 ```
 
 ### Status and first run on a Mac
