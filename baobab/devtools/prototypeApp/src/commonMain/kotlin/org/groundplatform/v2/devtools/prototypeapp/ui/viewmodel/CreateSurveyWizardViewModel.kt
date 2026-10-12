@@ -65,6 +65,8 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.WizardMap
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.WizardStartMethod
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.slugify
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.toEditorDataset
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.geometryKind
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.hasGeometry
 import org.groundplatform.v2.devtools.prototypeapp.domain.repository.AuthRepository
 import org.groundplatform.v2.devtools.prototypeapp.domain.repository.LibraryRepository
 import org.groundplatform.v2.devtools.prototypeapp.domain.repository.OrganizationRepository
@@ -172,6 +174,8 @@ class CreateSurveyWizardViewModel(
     val importErrorMessage: String? = null,
     val collectionMode: SurveyCollectionMode = SurveyCollectionMode.FIELD_SURVEY,
     val mapFeatureSource: WizardMapFeatureSource = WizardMapFeatureSource.FIELD_FREEFORM,
+    val userOverrodeMapFeatureSource: Boolean = false,
+    val userOverrodeGeometryKind: Boolean = false,
     val eudrPlotsUnderFourHaConfirmed: Boolean = false,
     val collectorConsentRequired: Boolean = false,
     val collectorConsentText: String = "",
@@ -564,25 +568,20 @@ class CreateSurveyWizardViewModel(
   }
 
   /**
-   * Ensures the working draft has at least one primary `MAP_LAYER` and one primary `EditorForm`
-   * configured according to the selected [SurveyCollectionMode], [WizardMapFeatureSource], and
-   * active Purpose Packs.
+   * Ensures the working draft has a single primary `MAP_LAYER` and a single starting `EditorForm`
+   * configured according to the selected Purpose Pack and [WizardMapFeatureSource].
    */
   private fun ensurePrimaryLayerAndForm() {
     val s = session.value
-    val mode = s.collectionMode
     val library = uiState.value.library
-
-    // Seed forms from newly selected Purpose Packs that haven't been seeded yet.
     val currentPurposeIds = surveyEditor.uiState.value.draft.details.purposeIds
-    val unseeded = currentPurposeIds.filterNot {
-      it in s.seededPurposeIds || it == SurveyWizardRules.OTHER_PURPOSE_ID
-    }
-    if (unseeded.isNotEmpty() && s.startMethod == WizardStartMethod.FROM_SCRATCH) {
-      val templates = library.templatesForPurposes(unseeded)
-      templates.forEach { template -> surveyEditor.addFormFromTemplate(template.id) }
-      session.update { it.copy(seededPurposeIds = s.seededPurposeIds + unseeded) }
-    }
+    val effectiveMode =
+      if (s.userOverrodeMapFeatureSource) {
+        s.collectionMode
+      } else {
+        SurveyWizardRules.defaultCollectionMode(currentPurposeIds, s.mapFeatureSource)
+      }
+    val purposeSelectionChanged = currentPurposeIds.toSet() != s.seededPurposeIds
 
     surveyEditor.replaceWorkingDraft({ current ->
       var datasets = current.datasets
@@ -590,15 +589,67 @@ class CreateSurveyWizardViewModel(
       var nextId = current.nextKeyId
       fun newKey(prefix: String) = "$prefix${nextId++}"
 
-      val requiresEudr = SurveyWizardRules.requiresEudrPolygonGuardrail(current.details.purposeIds)
       val defaultGeomKind =
-        when {
-          requiresEudr && !s.eudrPlotsUnderFourHaConfirmed -> GeometryKind.POLYGON
-          s.mapFeatureSource == WizardMapFeatureSource.SAMPLE_PLOTS -> GeometryKind.POLYGON
-          else -> GeometryKind.POINT
-        }
+        SurveyWizardRules.defaultGeometryKind(
+          purposeIds = current.details.purposeIds,
+          mapFeatureSource = s.mapFeatureSource,
+          eudrPlotsUnderFourHaConfirmed = s.eudrPlotsUnderFourHaConfirmed,
+        )
 
-      // 1. Ensure a primary Map layer exists.
+      // 1. Seed or replace the single starting Form when Purpose selection changes in FROM_SCRATCH.
+      if (purposeSelectionChanged && s.startMethod == WizardStartMethod.FROM_SCRATCH) {
+        val nonOtherIds =
+          current.details.purposeIds.filter { it != SurveyWizardRules.OTHER_PURPOSE_ID }
+        val templates = library.templatesForPurposes(nonOtherIds)
+        if (templates.isNotEmpty()) {
+          val language = current.details.defaultLanguage.ifBlank { "en" }
+          val primaryTemplate = templates.first()
+          val baseTitle =
+            primaryTemplate.title
+              .get(language)
+              .ifBlank { primaryTemplate.form.title }
+              .ifBlank { "Site assessment" }
+          val mergedQuestions = buildList {
+            val seenNames = mutableSetOf<String>()
+            templates.forEach { tmpl ->
+              tmpl.form.questions.forEach { q ->
+                if (seenNames.add(q.name)) {
+                  add(
+                    if (q.choiceDatasetId != null && datasets.none { it.id == q.choiceDatasetId }) {
+                      q.copy(
+                        choiceDatasetId = null,
+                        choiceSource =
+                          org.groundplatform.v2.devtools.prototypeapp.domain.model.editor
+                            .ChoiceSource
+                            .MANUAL,
+                        allowAddEntity = false,
+                      )
+                    } else {
+                      q
+                    }
+                  )
+                }
+              }
+            }
+          }
+          val existingFormKey = forms.firstOrNull()?.key ?: newKey("f")
+          val seededForm =
+            primaryTemplate.form.copy(
+              formId = forms.firstOrNull()?.form?.formId ?: FormIds.newFormId(),
+              title = baseTitle,
+              questions = mergedQuestions,
+              saveTo = EditorSaveTo(),
+            )
+          forms = listOf(SurveyEditorForm(existingFormKey, seededForm))
+          // Keep only the primary map layer when reseeding from scratch.
+          datasets = datasets.filter { it.kind == DatasetKind.MAP_LAYER }.take(1)
+        } else if (s.seededPurposeIds.isNotEmpty()) {
+          forms = emptyList()
+          datasets = datasets.filter { it.kind == DatasetKind.MAP_LAYER }.take(1)
+        }
+      }
+
+      // 2. Ensure a primary Map layer exists and matches the selected mapFeatureSource.
       var primaryLayer = datasets.firstOrNull { it.kind == DatasetKind.MAP_LAYER }
       if (primaryLayer == null) {
         val layerTitle =
@@ -618,7 +669,7 @@ class CreateSurveyWizardViewModel(
               geometryKind = SampleDesignConfig().geometryKind,
               keyProperty = SamplePlotProperties.PLOT_ID,
               labelProperty = SamplePlotProperties.PLOT_ID,
-              fieldCreationEnabled = mode.defaultFieldCreationEnabled,
+              fieldCreationEnabled = effectiveMode.defaultFieldCreationEnabled,
               properties = SamplePlotProperties.schema,
               style = LayerStyle(colorHex = "#F9A825", fillOpacity = 0.15),
               generator = SampleDesignConfig(),
@@ -632,28 +683,67 @@ class CreateSurveyWizardViewModel(
               geometryKind = defaultGeomKind,
               keyProperty = "id",
               labelProperty = "id",
-              fieldCreationEnabled = mode.defaultFieldCreationEnabled,
+              fieldCreationEnabled = effectiveMode.defaultFieldCreationEnabled,
               properties = listOf(EntityProperty("id", "ID", PropertyType.TEXT, required = true)),
             )
           }
-        datasets = listOf(primaryLayer) + datasets
+        datasets = listOf(primaryLayer) + datasets.filter { it.kind == DatasetKind.MAP_LAYER }
+      } else if (
+        s.mapFeatureSource == WizardMapFeatureSource.SAMPLE_PLOTS && !primaryLayer.isGenerated
+      ) {
+        val design = SampleDesignConfig()
+        primaryLayer =
+          primaryLayer.copy(
+            displayName =
+              if (primaryLayer.displayName == "Survey sites" || primaryLayer.displayName.isBlank())
+                "Sample plots"
+              else primaryLayer.displayName,
+            description = "Sample plots generated from a statistical sample design.",
+            geometryKind = design.geometryKind,
+            keyProperty = SamplePlotProperties.PLOT_ID,
+            labelProperty = SamplePlotProperties.PLOT_ID,
+            fieldCreationEnabled = false,
+            linkedFormKey = null,
+            properties = SamplePlotProperties.schema,
+            rows = emptyList(),
+            generator = design,
+          )
+        datasets = datasets.map { if (it.key == primaryLayer.key) primaryLayer else it }
+      } else if (
+        s.mapFeatureSource != WizardMapFeatureSource.SAMPLE_PLOTS && primaryLayer.isGenerated
+      ) {
+        primaryLayer =
+          primaryLayer.copy(
+            displayName = current.details.title.ifBlank { "Survey sites" },
+            geometryKind = defaultGeomKind,
+            keyProperty = "id",
+            labelProperty = "id",
+            fieldCreationEnabled = true,
+            properties = listOf(EntityProperty("id", "ID", PropertyType.TEXT, required = true)),
+            rows = emptyList(),
+            generator = null,
+          )
+        datasets = datasets.map { if (it.key == primaryLayer.key) primaryLayer else it }
+      } else if (!primaryLayer.isGenerated && !s.userOverrodeGeometryKind) {
+        primaryLayer = primaryLayer.copy(geometryKind = defaultGeomKind)
+        datasets = datasets.map { if (it.key == primaryLayer.key) primaryLayer else it }
       }
 
-      // 2. Ensure a primary Form exists.
+      // 3. Ensure a primary Form exists.
       if (forms.isEmpty()) {
         val formKey = newKey("f")
         val formId = FormIds.newFormId()
         val formTitle =
-          when (mode) {
+          when (effectiveMode) {
             SurveyCollectionMode.VISUAL_CLASSIFICATION -> "Plot interpretation"
             else -> current.details.title.ifBlank { "Site assessment" }
           }
         val baseForm =
-          if (mode == SurveyCollectionMode.VISUAL_CLASSIFICATION) {
+          if (effectiveMode == SurveyCollectionMode.VISUAL_CLASSIFICATION) {
             EditorForm(
               formId = formId,
               title = formTitle,
-              availability = mode.formAvailability,
+              availability = effectiveMode.formAvailability,
               questions =
                 listOf(
                   EditorQuestion(
@@ -681,22 +771,57 @@ class CreateSurveyWizardViewModel(
                 ),
             )
           } else {
-            EditorFormTemplates.blank(formId, formTitle).copy(availability = mode.formAvailability)
+            EditorFormTemplates.blank(formId, formTitle)
+              .copy(availability = effectiveMode.formAvailability)
           }
         forms = listOf(SurveyEditorForm(formKey, baseForm))
       }
 
-      // 3. Synchronize mode-specific form availability, geometry capture, and save_to wiring.
+      // 4. Synchronize form availability, geometry capture, and save_to wiring with activeLayer.
       val activeLayer = datasets.first { it.kind == DatasetKind.MAP_LAYER }
+      val usesUpdateMode =
+        s.mapFeatureSource == WizardMapFeatureSource.SAMPLE_PLOTS ||
+          s.mapFeatureSource == WizardMapFeatureSource.IMPORT_FILE ||
+          effectiveMode.defaultSaveToMode == SaveToMode.UPDATE
+
       forms = forms.mapIndexed { index, entry ->
-        var updatedForm = entry.form.copy(availability = mode.formAvailability)
+        var updatedForm = entry.form.copy(availability = effectiveMode.formAvailability)
+        if (
+          index == 0 &&
+            !usesUpdateMode &&
+            s.startMethod == WizardStartMethod.FROM_SCRATCH &&
+            !updatedForm.hasGeometry
+        ) {
+          val geomType =
+            when (activeLayer.geometryKind) {
+              GeometryKind.POINT -> EditorQuestionType.LOCATION
+              GeometryKind.LINE -> EditorQuestionType.LINE
+              GeometryKind.POLYGON -> EditorQuestionType.POLYGON
+            }
+          val geomLabel =
+            when (activeLayer.geometryKind) {
+              GeometryKind.POLYGON -> "Record plot boundary"
+              GeometryKind.LINE -> "Record transect line"
+              GeometryKind.POINT -> "Record site location"
+            }
+          val geomQuestion =
+            EditorQuestion(
+              key = newKey("q"),
+              name = "location",
+              type = geomType,
+              label = geomLabel,
+              required = true,
+              capture = effectiveMode.defaultGeometryCapture,
+            )
+          updatedForm = updatedForm.copy(questions = listOf(geomQuestion) + updatedForm.questions)
+        }
         if (updatedForm.availability.includesWeb) {
           updatedForm =
             updatedForm.copy(
               questions =
                 updatedForm.questions.map { q ->
                   if (q.type.isGeometry) {
-                    q.copy(capture = mode.defaultGeometryCapture)
+                    q.copy(capture = effectiveMode.defaultGeometryCapture)
                   } else {
                     q
                   }
@@ -704,10 +829,7 @@ class CreateSurveyWizardViewModel(
             )
         }
         if (index == 0) {
-          if (
-            s.mapFeatureSource == WizardMapFeatureSource.SAMPLE_PLOTS ||
-              mode.defaultSaveToMode == SaveToMode.UPDATE
-          ) {
+          if (usesUpdateMode) {
             val targetEditorDataset = activeLayer.toEditorDataset(entry.key, forms)
             val mappings =
               SaveToRules.autoMap(updatedForm, targetEditorDataset).filter { it.property != null }
@@ -733,17 +855,24 @@ class CreateSurveyWizardViewModel(
         if (d.key != activeLayer.key) d
         else if (firstForm.form.saveTo.mode == SaveToMode.CREATE && !d.isGenerated) {
           FormDatasetLinks.syncedWithForm(
-            d.copy(
-              linkedFormKey = firstForm.key,
-              fieldCreationEnabled = mode.defaultFieldCreationEnabled,
-            ),
-            firstForm.form,
-          )
+              d.copy(
+                linkedFormKey = firstForm.key,
+                fieldCreationEnabled = effectiveMode.defaultFieldCreationEnabled,
+              ),
+              firstForm.form,
+            )
+            .copy(
+              kind = DatasetKind.MAP_LAYER,
+              geometryKind =
+                if (firstForm.form.hasGeometry) FormDatasetLinks.geometryKindFor(firstForm.form)
+                else activeLayer.geometryKind,
+            )
         } else {
           val withMapped = SurveyEditorDerivation.withMappedProperties(d, firstForm.form)
           withMapped.copy(
+            kind = DatasetKind.MAP_LAYER,
             linkedFormKey = null,
-            fieldCreationEnabled = mode.defaultFieldCreationEnabled,
+            fieldCreationEnabled = effectiveMode.defaultFieldCreationEnabled,
           )
         }
       }
@@ -751,6 +880,10 @@ class CreateSurveyWizardViewModel(
 
       current.copy(forms = forms, datasets = datasets, nextKeyId = nextId)
     })
+
+    if (purposeSelectionChanged) {
+      session.update { it.copy(seededPurposeIds = currentPurposeIds.toSet()) }
+    }
   }
 
   private fun maybeApplyCareDefaultsOnSharingStep() {
@@ -854,26 +987,56 @@ class CreateSurveyWizardViewModel(
       it.copy(
         collectionMode = mode,
         mapFeatureSource = mode.defaultFeatureSource,
+        userOverrodeMapFeatureSource = true,
       )
     }
   }
 
   override fun togglePurposePack(packId: String) {
     val currentIds = surveyEditor.uiState.value.draft.details.purposeIds
-    val adding = packId !in currentIds
-    surveyEditor.togglePurpose(packId)
-    if (packId == SurveyWizardRules.OTHER_PURPOSE_ID) return
-    if (adding) {
-      val pack = uiState.value.library.purposePack(packId)
-      pack?.programIds?.forEach { progId ->
-        if (progId !in surveyEditor.uiState.value.draft.details.programIds) {
-          surveyEditor.toggleProgram(progId)
+    val alreadySelected = currentIds == listOf(packId)
+    val newPurposeIds = if (alreadySelected) emptyList() else listOf(packId)
+    val selectedPack =
+      if (!alreadySelected && packId != SurveyWizardRules.OTHER_PURPOSE_ID) {
+        uiState.value.library.purposePack(packId)
+      } else {
+        null
+      }
+    val newProgramIds = selectedPack?.programIds.orEmpty()
+    surveyEditor.updateDetails {
+      it.copy(
+        purposeIds = newPurposeIds,
+        programIds = newProgramIds,
+      )
+    }
+    session.update { current ->
+      val nextSource =
+        if (current.userOverrodeMapFeatureSource) {
+          current.mapFeatureSource
+        } else {
+          SurveyWizardRules.defaultMapFeatureSource(newPurposeIds)
         }
-      }
-      // If EUDR Due Diligence is enabled, default to Polygon capture unless plots <= 4 ha.
-      if (packId == "eudr_due_diligence" && !session.value.eudrPlotsUnderFourHaConfirmed) {
-        updatePrimaryLayerGeometryKind(GeometryKind.POLYGON)
-      }
+      val nextMode =
+        if (current.userOverrodeMapFeatureSource) {
+          current.collectionMode
+        } else {
+          SurveyWizardRules.defaultCollectionMode(newPurposeIds, nextSource)
+        }
+      current.copy(
+        mapFeatureSource = nextSource,
+        collectionMode = nextMode,
+        userOverrodeGeometryKind = false,
+      )
+    }
+    if (
+      !alreadySelected &&
+        packId == "eudr_due_diligence" &&
+        !session.value.eudrPlotsUnderFourHaConfirmed
+    ) {
+      updatePrimaryLayerGeometryKind(GeometryKind.POLYGON)
+    }
+    if (surveyEditor.uiState.value.draft.datasets.any { it.kind == DatasetKind.MAP_LAYER }) {
+      ensurePrimaryLayerAndForm()
     }
   }
 
@@ -886,7 +1049,15 @@ class CreateSurveyWizardViewModel(
   }
 
   override fun selectMapFeatureSource(source: WizardMapFeatureSource) {
-    session.update { it.copy(mapFeatureSource = source) }
+    val purposeIds = surveyEditor.uiState.value.draft.details.purposeIds
+    val nextMode = SurveyWizardRules.defaultCollectionMode(purposeIds, source)
+    session.update {
+      it.copy(
+        mapFeatureSource = source,
+        collectionMode = nextMode,
+        userOverrodeMapFeatureSource = true,
+      )
+    }
     val draft = surveyEditor.uiState.value.draft
     val primaryLayer = draft.datasets.firstOrNull { it.kind == DatasetKind.MAP_LAYER }
     when (source) {
@@ -918,14 +1089,11 @@ class CreateSurveyWizardViewModel(
             d.copy(
               displayName = draft.details.title.ifBlank { "Survey sites" },
               geometryKind =
-                if (
-                  SurveyWizardRules.requiresEudrPolygonGuardrail(draft.details.purposeIds) &&
-                    !session.value.eudrPlotsUnderFourHaConfirmed
-                ) {
-                  GeometryKind.POLYGON
-                } else {
-                  GeometryKind.POINT
-                },
+                SurveyWizardRules.defaultGeometryKind(
+                  purposeIds = draft.details.purposeIds,
+                  mapFeatureSource = source,
+                  eudrPlotsUnderFourHaConfirmed = session.value.eudrPlotsUnderFourHaConfirmed,
+                ),
               keyProperty = "id",
               labelProperty = "id",
               fieldCreationEnabled = true,
@@ -946,6 +1114,9 @@ class CreateSurveyWizardViewModel(
         }
       }
     }
+    if (surveyEditor.uiState.value.draft.datasets.any { it.kind == DatasetKind.MAP_LAYER }) {
+      ensurePrimaryLayerAndForm()
+    }
   }
 
   override fun updatePrimaryLayerDisplayName(name: String) {
@@ -956,6 +1127,7 @@ class CreateSurveyWizardViewModel(
   }
 
   override fun updatePrimaryLayerGeometryKind(kind: GeometryKind) {
+    session.update { it.copy(userOverrodeGeometryKind = true) }
     val draft = surveyEditor.uiState.value.draft
     val primary = draft.datasets.firstOrNull { it.kind == DatasetKind.MAP_LAYER } ?: return
     surveyEditor.updateDataset(primary.key) { it.copy(geometryKind = kind) }

@@ -31,8 +31,8 @@ enum class CreateSurveyWizardStep(
   ),
   MODE_AND_PURPOSE(
     stepNumber = 2,
-    label = "Mode & purpose",
-    subtitle = "Collection mode, purpose packs, and reporting programs",
+    label = "Purpose",
+    subtitle = "Survey goal, purpose pack, and reporting programs",
   ),
   SURVEY_AREA(
     stepNumber = 3,
@@ -186,7 +186,10 @@ object SurveyWizardRules {
    * Orders [library] Purpose Packs with organization-defined packs first, followed by global packs
    * sorted by their affinity to [mode].
    */
-  fun sortPurposePacks(library: ResolvedLibrary, mode: SurveyCollectionMode): List<PurposePack> {
+  fun sortPurposePacks(
+    library: ResolvedLibrary,
+    mode: SurveyCollectionMode = SurveyCollectionMode.FIELD_SURVEY,
+  ): List<PurposePack> {
     val affinityOrder =
       when (mode) {
         SurveyCollectionMode.FIELD_SURVEY -> FIELD_AFFINITY_ORDER
@@ -202,6 +205,49 @@ object SurveyWizardRules {
         .thenBy { it.id }
     )
   }
+
+  /**
+   * Default [WizardMapFeatureSource] for the primary Map layer driven by the selected [purposeIds].
+   */
+  fun defaultMapFeatureSource(purposeIds: List<String>): WizardMapFeatureSource =
+    when {
+      "lulc_training_data" in purposeIds || "redd_plus_tfff" in purposeIds ->
+        WizardMapFeatureSource.SAMPLE_PLOTS
+      else -> WizardMapFeatureSource.FIELD_FREEFORM
+    }
+
+  /**
+   * Default [GeometryKind] for the primary Map layer driven by [purposeIds] and [mapFeatureSource].
+   */
+  fun defaultGeometryKind(
+    purposeIds: List<String>,
+    mapFeatureSource: WizardMapFeatureSource,
+    eudrPlotsUnderFourHaConfirmed: Boolean = false,
+  ): GeometryKind =
+    when {
+      requiresEudrPolygonGuardrail(purposeIds) && !eudrPlotsUnderFourHaConfirmed ->
+        GeometryKind.POLYGON
+      mapFeatureSource == WizardMapFeatureSource.SAMPLE_PLOTS -> GeometryKind.POLYGON
+      purposeIds.any { it == "ferm_restoration" || it.endsWith(".coop_certification_audit") } ->
+        GeometryKind.POLYGON
+      else -> GeometryKind.POINT
+    }
+
+  /**
+   * Resolves the effective [SurveyCollectionMode] (form availability, geometry capture, preview
+   * target, and save-to defaults) from the selected [purposeIds] and [mapFeatureSource].
+   */
+  fun defaultCollectionMode(
+    purposeIds: List<String>,
+    mapFeatureSource: WizardMapFeatureSource,
+  ): SurveyCollectionMode =
+    when {
+      "lulc_training_data" in purposeIds -> SurveyCollectionMode.VISUAL_CLASSIFICATION
+      "redd_plus_tfff" in purposeIds -> SurveyCollectionMode.BOTH
+      mapFeatureSource == WizardMapFeatureSource.SAMPLE_PLOTS ->
+        SurveyCollectionMode.VISUAL_CLASSIFICATION
+      else -> SurveyCollectionMode.FIELD_SURVEY
+    }
 
   /**
    * Returns true when [purposeIds] includes `eudr_due_diligence`, activating the EUDR Article 9

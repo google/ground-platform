@@ -52,10 +52,7 @@ import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material.icons.outlined.ErrorOutline
 import androidx.compose.material.icons.outlined.GridOn
 import androidx.compose.material.icons.outlined.Info
-import androidx.compose.material.icons.outlined.Layers
-import androidx.compose.material.icons.outlined.SatelliteAlt
 import androidx.compose.material.icons.outlined.Shield
-import androidx.compose.material.icons.outlined.Smartphone
 import androidx.compose.material.icons.outlined.UploadFile
 import androidx.compose.material.icons.outlined.Verified
 import androidx.compose.material3.AlertDialog
@@ -802,7 +799,7 @@ private fun OverviewStepContent(
 }
 
 // ---------------------------------------------------------------------------------------------
-// Step 2: Mode & purpose
+// Step 2: Purpose
 // ---------------------------------------------------------------------------------------------
 
 @Composable
@@ -833,57 +830,16 @@ private fun ModeAndPurposeStepContent(
 
   Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
     Text(
-      text = "Mode & purpose",
+      text = "Purpose",
       style = MaterialTheme.typography.headlineSmall,
       fontWeight = FontWeight.Bold,
     )
     Text(
       text =
-        "Choose how data will be collected and what outcomes or reporting standards this survey supports.",
+        "Choose what outcomes or reporting standards this survey supports to pre-configure its map layer and starting form.",
       style = MaterialTheme.typography.bodyMedium,
       color = MaterialTheme.colorScheme.onSurfaceVariant,
     )
-  }
-
-  ElevatedCard(
-    colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.surface)
-  ) {
-    Column(
-      modifier = Modifier.fillMaxWidth().padding(20.dp),
-      verticalArrangement = Arrangement.spacedBy(14.dp),
-    ) {
-      SectionLabel("How will data be collected?")
-      Row(
-        modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Max),
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
-      ) {
-        SurveyCollectionMode.entries.forEach { mode ->
-          val icon =
-            when (mode) {
-              SurveyCollectionMode.FIELD_SURVEY -> Icons.Outlined.Smartphone
-              SurveyCollectionMode.VISUAL_CLASSIFICATION -> Icons.Outlined.SatelliteAlt
-              SurveyCollectionMode.BOTH -> Icons.Outlined.Layers
-            }
-          val badge =
-            when (mode) {
-              SurveyCollectionMode.FIELD_SURVEY -> "Mobile GPS & offline"
-              SurveyCollectionMode.VISUAL_CLASSIFICATION -> "Web imagery & sample plots"
-              SurveyCollectionMode.BOTH -> "Sample plots + field visits"
-            }
-          SelectableChoiceCard(
-            title = mode.label,
-            description = mode.summary,
-            icon = icon,
-            tags = mode.tags,
-            badgeText = badge,
-            selected = uiState.collectionMode == mode,
-            onClick = { actions.selectCollectionMode(mode) },
-            modifier = Modifier.weight(1f),
-            graphic = { CollectionModeCardGraphic(mode = mode) },
-          )
-        }
-      }
-    }
   }
 
   ElevatedCard(
@@ -910,7 +866,7 @@ private fun ModeAndPurposeStepContent(
       SectionLabel("What will this data be used for? *")
       Text(
         text =
-          "Select at least one purpose so Collect One can tailor your survey's recommended forms, standard library concepts, data governance guardrails (such as EUDR or CARE sovereignty), and one-click export profiles. Choose \"Other\" if your goal isn't listed. Packs matching ${uiState.collectionMode.label.lowercase()} are listed first.",
+          "Select a purpose so Collect One can tailor your survey's map layer defaults, starting form, standard library concepts, data governance guardrails (such as EUDR or CARE sovereignty), and one-click export profiles. Choose \"Other\" if your goal isn't listed.",
         style = MaterialTheme.typography.bodySmall,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
       )
@@ -924,6 +880,7 @@ private fun ModeAndPurposeStepContent(
         otherPurposeText = editorUiState.details.otherPurpose,
         onOtherPurposeTextChange = actions::updateOtherPurpose,
         isError = uiState.isPurposeInvalid,
+        singleSelect = true,
         onOtherInputPositioned = { otherInputY = it },
       )
 

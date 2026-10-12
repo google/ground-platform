@@ -134,11 +134,13 @@ fun PurposePackGrid(
   otherPurposeText: String = "",
   onOtherPurposeTextChange: ((String) -> Unit)? = null,
   isError: Boolean = false,
+  singleSelect: Boolean = false,
   onOtherInputPositioned: ((Int) -> Unit)? = null,
 ) {
   val otherSelected = SurveyWizardRules.OTHER_PURPOSE_ID in selectedIds
   val otherBlankError = isError && otherSelected && otherPurposeText.isBlank()
   val otherFocusRequester = remember { FocusRequester() }
+  val selectionRole = if (singleSelect) Role.RadioButton else Role.Checkbox
 
   LaunchedEffect(otherSelected, otherBlankError) {
     if (otherSelected && (otherPurposeText.isBlank() || otherBlankError)) {
@@ -153,7 +155,11 @@ fun PurposePackGrid(
     if (isError && selectedIds.isEmpty()) {
       ValidationErrorBanner(
         message =
-          "Select at least one purpose (or choose \"Other\" and describe your goal) to continue."
+          if (singleSelect) {
+            "Select a purpose (or choose \"Other\" and describe your goal) to continue."
+          } else {
+            "Select at least one purpose (or choose \"Other\" and describe your goal) to continue."
+          }
       )
     }
 
@@ -171,11 +177,13 @@ fun PurposePackGrid(
             else "Global",
           language = language,
           selected = pack.id in selectedIds,
+          role = selectionRole,
           onClick = { onToggle(pack.id) },
         )
       }
       OtherPurposeCard(
         selected = otherSelected,
+        role = selectionRole,
         onClick = { onToggle(SurveyWizardRules.OTHER_PURPOSE_ID) },
       )
     }
@@ -211,6 +219,7 @@ fun PurposePackGrid(
 @Composable
 private fun OtherPurposeCard(
   selected: Boolean,
+  role: Role = Role.Checkbox,
   onClick: () -> Unit,
 ) {
   val colors = MaterialTheme.colorScheme
@@ -218,7 +227,7 @@ private fun OtherPurposeCard(
     onClick = onClick,
     modifier =
       Modifier.width(232.dp).height(188.dp).semantics {
-        role = Role.Checkbox
+        this.role = role
         this.selected = selected
       },
     colors =
@@ -288,6 +297,7 @@ private fun PurposePackCard(
   sourceLabel: String,
   language: String,
   selected: Boolean,
+  role: Role = Role.Checkbox,
   onClick: () -> Unit,
 ) {
   val colors = MaterialTheme.colorScheme
@@ -304,7 +314,7 @@ private fun PurposePackCard(
     onClick = onClick,
     modifier =
       Modifier.width(232.dp).height(188.dp).semantics {
-        role = Role.Checkbox
+        this.role = role
         this.selected = selected
       },
     colors =

@@ -136,7 +136,7 @@ data class CreateSurveyWizardUiState(
           if (!isPurposeInvalid) {
             null
           } else if (purposeIds.isEmpty()) {
-            "Select at least one purpose (or choose \"Other\" and describe your goal) to continue."
+            "Select a purpose (or choose \"Other\" and describe your goal) to continue."
           } else {
             "Please describe the purpose of this survey to continue."
           }

@@ -115,6 +115,53 @@ class CreateSurveyWizardViewModelTest {
   }
 
   @Test
+  fun purposeSelection_isSingleSelect_andDrivesMapFeatureSourceAndPrimaryLayerDefaults() {
+    val state = PrototypeAppState()
+    state.openCreateSurveyWizard(PrototypeFakeOrganizationsData.KENYA_FOREST_SERVICE)
+    val wizard = state.createSurveyWizard
+
+    wizard.updateTitle("Purpose-Driven Survey")
+    wizard.nextStep() // PURPOSE
+    assertEquals("Purpose", CreateSurveyWizardStep.MODE_AND_PURPOSE.label)
+
+    // 1. Selecting LULC Training Data sets SAMPLE_PLOTS automatically.
+    wizard.togglePurposePack("lulc_training_data")
+    assertEquals(listOf("lulc_training_data"), wizard.uiState.value.purposeIds)
+    assertEquals(WizardMapFeatureSource.SAMPLE_PLOTS, wizard.uiState.value.mapFeatureSource)
+
+    // 2. Selecting Producer Registration replaces LULC (single-select) and switches to
+    // FIELD_FREEFORM + POINT.
+    wizard.togglePurposePack("producer_registration")
+    assertEquals(listOf("producer_registration"), wizard.uiState.value.purposeIds)
+    assertEquals(WizardMapFeatureSource.FIELD_FREEFORM, wizard.uiState.value.mapFeatureSource)
+
+    wizard.nextStep() // SURVEY_AREA
+    state.surveyEditor.setSurveyArea(PrototypeFakeSurveyEditorData.kenyaSurveyArea())
+    wizard.nextStep() // MAP_FEATURES
+
+    val producerLayer = assertNotNull(wizard.uiState.value.primaryMapLayer)
+    assertFalse(producerLayer.isGenerated)
+    assertEquals(GeometryKind.POINT, producerLayer.geometryKind)
+    val producerForm = assertNotNull(wizard.uiState.value.primaryForm)
+    assertEquals("Producer profile", producerForm.form.title)
+    assertEquals(SaveToMode.CREATE, producerForm.form.saveTo.mode)
+    assertEquals(1, state.surveyEditor.uiState.value.forms.size)
+
+    // 3. Going back to Step 2 and switching to FERM Restoration updates the primary layer to
+    // POLYGON and replaces the single starting form.
+    wizard.selectStep(CreateSurveyWizardStep.MODE_AND_PURPOSE)
+    wizard.togglePurposePack("ferm_restoration")
+    assertEquals(listOf("ferm_restoration"), wizard.uiState.value.purposeIds)
+    wizard.selectStep(CreateSurveyWizardStep.MAP_FEATURES)
+
+    val fermLayer = assertNotNull(wizard.uiState.value.primaryMapLayer)
+    assertEquals(GeometryKind.POLYGON, fermLayer.geometryKind)
+    val fermForm = assertNotNull(wizard.uiState.value.primaryForm)
+    assertEquals("Restoration monitoring wave", fermForm.form.title)
+    assertEquals(1, state.surveyEditor.uiState.value.forms.size)
+  }
+
+  @Test
   fun eudrPurposePack_enforcesPolygonGuardrail_andComputesExportReadiness() {
     val state = PrototypeAppState()
     state.openCreateSurveyWizard(PrototypeFakeOrganizationsData.KENYA_FOREST_SERVICE)
