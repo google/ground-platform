@@ -21,14 +21,12 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.GeospatialEntity
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SubmissionPreviewItem
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyConfig
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyPreviewItem
-import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyStats
 import org.groundplatform.v2.devtools.prototypeapp.ui.workbench.DEFAULT_PROTOTYPE_XFORMS_XML
 import org.groundplatform.v2.devtools.prototypeapp.ui.workbench.XFormsParseCache
 
 /**
  * Immutable UI state for the prototype workbench chrome: the simulated device frame (`Mobile` vs
- * `Tablet`, `Portrait` vs `Landscape`), the XForms `<h:html>` workbench editor & example survey
- * switcher, and prototype debug/reset state.
+ * `Tablet`, `Portrait` vs `Landscape`), XForms preset state, and prototype debug/reset state.
  */
 data class WorkbenchUiState(
   val deviceFormFactor: DeviceFormFactor = DeviceFormFactor.MOBILE,
@@ -42,7 +40,6 @@ data class WorkbenchUiState(
   val activeSurveyId: String = "",
   val surveys: List<SurveyPreviewItem> = emptyList(),
   val surveyConfigs: Map<String, SurveyConfig> = emptyMap(),
-  val surveyStats: Map<String, SurveyStats> = emptyMap(),
   val entities: List<GeospatialEntityItem> = emptyList(),
   val standaloneSubmissions: List<SubmissionPreviewItem> = emptyList(),
 ) {
@@ -78,12 +75,6 @@ data class WorkbenchUiState(
    */
   fun surveyIdForExampleForm(example: WorkbenchExampleForm): String? =
     surveys.firstOrNull { surveyConfigs[it.id]?.primaryForm == example.formDefinition }?.id
-
-  /** Number of map features stored for [surveyId]. */
-  fun entityCountForSurvey(surveyId: String): Int = surveyStats[surveyId]?.entityCount ?: 0
-
-  /** Number of submissions stored for [surveyId]. */
-  fun submissionCountForSurvey(surveyId: String): Int = surveyStats[surveyId]?.submissionCount ?: 0
 }
 
 /**

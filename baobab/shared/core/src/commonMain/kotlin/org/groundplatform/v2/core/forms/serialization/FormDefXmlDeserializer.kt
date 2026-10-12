@@ -611,7 +611,10 @@ internal object FormDefXmlDeserializer {
               nestedFieldsMap[cd.name] = cd
             }
           }
-          if (!isTemplateNode && childParsed.defaultNode.fields.isNotEmpty()) {
+          if (
+            !isTemplateNode &&
+              (hasTemplate || elements.size > 1 || childParsed.defaultNode.fields.isNotEmpty())
+          ) {
             repeatNodes.add(childParsed.defaultNode)
           }
         }
@@ -911,7 +914,10 @@ internal object FormDefXmlDeserializer {
           if (fullPath.isNotEmpty()) selectMultiplePaths.add(fullPath)
           ControlType.CONTROL_SELECT_MULTIPLE
         }
-        "rank" -> ControlType.CONTROL_RANK
+        "rank" -> {
+          if (fullPath.isNotEmpty()) selectMultiplePaths.add(fullPath)
+          ControlType.CONTROL_RANK
+        }
         "range" -> ControlType.CONTROL_RANGE
         "upload" -> ControlType.CONTROL_UPLOAD
         "trigger" -> ControlType.CONTROL_TRIGGER
@@ -1206,7 +1212,8 @@ internal object FormDefXmlDeserializer {
       "geoshape" -> DataType.TYPE_GEOSHAPE
       "binary" -> DataType.TYPE_BINARY
       "select1" -> DataType.TYPE_SELECT_ONE
-      "select" -> DataType.TYPE_SELECT_MULTIPLE
+      "select",
+      "rank" -> DataType.TYPE_SELECT_MULTIPLE
       else -> DataType.DATA_TYPE_UNSPECIFIED
     }
   }

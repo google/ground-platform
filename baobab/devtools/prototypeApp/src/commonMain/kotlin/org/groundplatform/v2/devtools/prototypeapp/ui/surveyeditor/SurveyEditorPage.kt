@@ -16,8 +16,12 @@ package org.groundplatform.v2.devtools.prototypeapp.ui.surveyeditor
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.spring
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
@@ -40,14 +44,14 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.List
 import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.ArrowDropDown
 import androidx.compose.material.icons.outlined.Close
-import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Description
 import androidx.compose.material.icons.outlined.DragIndicator
 import androidx.compose.material.icons.outlined.Edit
@@ -57,13 +61,13 @@ import androidx.compose.material.icons.outlined.Layers
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material.icons.outlined.Map
-import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.Warning
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ElevatedCard
@@ -77,7 +81,6 @@ import androidx.compose.material3.NavigationDrawerItemDefaults
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -92,16 +95,24 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.customActions
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
@@ -111,6 +122,7 @@ import org.groundplatform.v2.core.forms.ui.GroundTonalBadge
 import org.groundplatform.v2.devtools.prototypeapp.PrototypeAppState
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.ImpactEvent
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.InvitationStatus
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.InviteLinks
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.LibraryPrograms
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.Organization
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyLifecycleState
@@ -121,11 +133,15 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EntityDat
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.FormEditorValidator
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.PeerDataVisibility
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SharingPolicy
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SharingSettings
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SurveyArea
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SurveyAreaGeometry
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SurveyWizardRules
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.surveyUrl
 import org.groundplatform.v2.devtools.prototypeapp.ui.common.ProgramChips
 import org.groundplatform.v2.devtools.prototypeapp.ui.common.PurposePackGrid
 import org.groundplatform.v2.devtools.prototypeapp.ui.common.SurveyOutcomeCard
+import org.groundplatform.v2.devtools.prototypeapp.ui.common.ValidationErrorBanner
 import org.groundplatform.v2.devtools.prototypeapp.ui.dashboard.SidePanelSeparator
 import org.groundplatform.v2.devtools.prototypeapp.ui.dashboard.SidePanelSeparatorWidth
 import org.groundplatform.v2.devtools.prototypeapp.ui.formeditor.DragAxis
@@ -281,9 +297,9 @@ fun SurveyEditorPage(
 // ---------------------------------------------------------------------------------------------
 
 /**
- * Close button and survey title on the left; draft status, Discard, and Publish changes on the
- * right. Close and Discard both run [SurveyEditorActions.close], asking for confirmation first if
- * there are unpublished changes.
+ * Close button, survey title, and clickable lifecycle status badge on the left; Discard and Save
+ * draft / Publish changes on the right. Close and Discard both run [SurveyEditorActions.close],
+ * asking for confirmation first if there are uncommitted changes.
  */
 @Composable
 private fun SurveyEditorTopBar(
@@ -300,7 +316,6 @@ private fun SurveyEditorTopBar(
   val hasChanges = uiState.hasUnpublishedChanges
   val issueCount = uiState.issueCount
   var isConfirmingDiscard by remember { mutableStateOf(false) }
-  var confirmingState by remember { mutableStateOf<SurveyLifecycleState?>(null) }
 
   header(
     {
@@ -313,7 +328,17 @@ private fun SurveyEditorTopBar(
       }
     },
     {
-      WebHeaderContext(title = uiState.details.title.ifBlank { "Untitled survey" }) {
+      WebHeaderContext(
+        title = uiState.details.title.ifBlank { "Untitled survey" },
+        titleTrailing = {
+          SurveyStatusBadgeMenu(
+            lifecycleState = uiState.lifecycleState,
+            canManageSurvey = uiState.canManageSurvey,
+            hasUnpublishedChanges = hasChanges,
+            onSelectState = actions::setLifecycleState,
+          )
+        },
+      ) {
         WebHeaderSupportingText("Survey editor", color = MaterialTheme.colorScheme.primary)
         WebHeaderSupportingText("·")
         uiState.organization(uiState.details.organizationId)?.let { organization ->
@@ -324,11 +349,15 @@ private fun SurveyEditorTopBar(
           uiState.isReadOnly -> WebHeaderSupportingText(uiState.lifecycleState.label)
           issueCount > 0 ->
             WebHeaderSupportingText(
-              "Fix $issueCount ${if (issueCount == 1) "issue" else "issues"} to publish",
+              "Fix $issueCount ${if (issueCount == 1) "issue" else "issues"} to ${if (uiState.isDraft) "save" else "publish"}",
               color = MaterialTheme.colorScheme.error,
             )
-          hasChanges -> WebHeaderSupportingText("Unpublished changes")
-          else -> WebHeaderSupportingText("All changes published")
+          hasChanges ->
+            WebHeaderSupportingText(
+              if (uiState.isDraft) "Unsaved changes" else "Unpublished changes"
+            )
+          else ->
+            WebHeaderSupportingText(if (uiState.isDraft) "Draft saved" else "All changes published")
         }
       }
     },
@@ -339,33 +368,29 @@ private fun SurveyEditorTopBar(
         }
       }
       TextButton(onClick = { isConfirmingDiscard = true }, enabled = hasChanges) { Text("Discard") }
-      Button(onClick = actions::publish, enabled = uiState.canPublish) { Text("Publish changes") }
-      if (uiState.canManageSurvey) {
-        SurveyLifecycleMenu(uiState, onSelect = { confirmingState = it })
+      val canSaveOrPublish =
+        if (uiState.isDraft) !uiState.isReadOnly && issueCount == 0 && !uiState.isSaving
+        else uiState.canPublish
+      Button(onClick = actions::publish, enabled = canSaveOrPublish) {
+        Text(uiState.saveActionLabel)
       }
     },
   )
 
-  confirmingState?.let { state ->
-    ConfirmLifecycleDialog(
-      state = state,
-      hasUnpublishedChanges = hasChanges,
-      onConfirm = {
-        confirmingState = null
-        actions.setLifecycleState(state)
-      },
-      onDismiss = { confirmingState = null },
-    )
-  }
-
   if (isConfirmingDiscard) {
     AlertDialog(
       onDismissRequest = { isConfirmingDiscard = false },
-      title = { Text("Discard unpublished changes?") },
+      title = {
+        Text(if (uiState.isDraft) "Discard unsaved changes?" else "Discard unpublished changes?")
+      },
       text = {
         Text(
-          "Changes you've made since this survey was last published will be lost. Data " +
-            "collectors will keep seeing the published version."
+          if (uiState.isDraft) {
+            "Changes you've made since this draft was last saved will be lost."
+          } else {
+            "Changes you've made since this survey was last published will be lost. Data " +
+              "collectors will keep seeing the published version."
+          }
         )
       },
       confirmButton = {
@@ -385,43 +410,229 @@ private fun SurveyEditorTopBar(
   }
 }
 
+/** Semantic badge tone for each [SurveyLifecycleState]. */
+internal fun SurveyLifecycleState.badgeTone(): GroundBadgeTone =
+  when (this) {
+    SurveyLifecycleState.DRAFT -> GroundBadgeTone.WARNING
+    SurveyLifecycleState.PUBLISHED -> GroundBadgeTone.PRIMARY
+    SurveyLifecycleState.CLOSED -> GroundBadgeTone.SECONDARY
+    SurveyLifecycleState.ARCHIVED -> GroundBadgeTone.NEUTRAL
+  }
+
+/** Plain-language summary of what a [SurveyLifecycleState] means for organizers and collectors. */
+internal fun SurveyLifecycleState.statusDescription(): String =
+  when (this) {
+    SurveyLifecycleState.DRAFT ->
+      "Editable by organizers. Hidden from mobile data collectors until published."
+    SurveyLifecycleState.PUBLISHED -> "Live for field and web data collection."
+    SurveyLifecycleState.CLOSED ->
+      "Data collection has ended and the survey is read-only until reopened."
+    SurveyLifecycleState.ARCHIVED -> "Retired and kept read-only for long-term reference."
+  }
+
+/** One lifecycle transition offered in [SurveyStatusBadgeMenu] and `Survey details`. */
+internal data class SurveyLifecycleActionOption(
+  val targetState: SurveyLifecycleState,
+  val label: String,
+  val description: String,
+  val requiresConfirmation: Boolean = false,
+)
+
+/** Available lifecycle state transitions from [current]. */
+internal fun lifecycleActionOptions(
+  current: SurveyLifecycleState
+): List<SurveyLifecycleActionOption> =
+  when (current) {
+    SurveyLifecycleState.DRAFT ->
+      listOf(
+        SurveyLifecycleActionOption(
+          targetState = SurveyLifecycleState.PUBLISHED,
+          label = "Publish survey",
+          description = "Make live for data collection on mobile and web",
+        ),
+        SurveyLifecycleActionOption(
+          targetState = SurveyLifecycleState.ARCHIVED,
+          label = "Archive survey",
+          description = "Retire and keep read-only for reference",
+          requiresConfirmation = true,
+        ),
+      )
+    SurveyLifecycleState.PUBLISHED ->
+      listOf(
+        SurveyLifecycleActionOption(
+          targetState = SurveyLifecycleState.DRAFT,
+          label = "Switch to draft",
+          description = "Pause field visibility while continuing to edit",
+        ),
+        SurveyLifecycleActionOption(
+          targetState = SurveyLifecycleState.CLOSED,
+          label = "Close survey",
+          description = "End data collection and make read-only",
+          requiresConfirmation = true,
+        ),
+        SurveyLifecycleActionOption(
+          targetState = SurveyLifecycleState.ARCHIVED,
+          label = "Archive survey",
+          description = "Retire and keep read-only for reference",
+          requiresConfirmation = true,
+        ),
+      )
+    SurveyLifecycleState.CLOSED ->
+      listOf(
+        SurveyLifecycleActionOption(
+          targetState = SurveyLifecycleState.PUBLISHED,
+          label = "Reopen survey",
+          description = "Resume data collection and editing",
+        ),
+        SurveyLifecycleActionOption(
+          targetState = SurveyLifecycleState.DRAFT,
+          label = "Switch to draft",
+          description = "Unlock editing in draft mode before republishing",
+        ),
+        SurveyLifecycleActionOption(
+          targetState = SurveyLifecycleState.ARCHIVED,
+          label = "Archive survey",
+          description = "Retire and keep read-only for reference",
+          requiresConfirmation = true,
+        ),
+      )
+    SurveyLifecycleState.ARCHIVED ->
+      listOf(
+        SurveyLifecycleActionOption(
+          targetState = SurveyLifecycleState.PUBLISHED,
+          label = "Reopen survey",
+          description = "Restore for active data collection and editing",
+        ),
+        SurveyLifecycleActionOption(
+          targetState = SurveyLifecycleState.DRAFT,
+          label = "Switch to draft",
+          description = "Restore in draft mode for editing",
+        ),
+      )
+  }
+
 /**
- * Overflow menu with the survey's lifecycle actions: Close survey and Archive survey while it's
- * published, Archive survey while it's closed. Reopening is the top bar's Reopen button.
+ * Tonal status pill shown next to the survey title in the top banner (`Draft`, `Published`,
+ * `Closed`, `Archived`). When [canManageSurvey] is `true`, clicking it opens a dropdown menu with
+ * options to publish or change the survey's lifecycle state.
  */
 @Composable
-private fun SurveyLifecycleMenu(
-  uiState: SurveyEditorUiState,
-  onSelect: (SurveyLifecycleState) -> Unit,
+internal fun SurveyStatusBadgeMenu(
+  lifecycleState: SurveyLifecycleState,
+  canManageSurvey: Boolean,
+  hasUnpublishedChanges: Boolean = false,
+  onSelectState: (SurveyLifecycleState) -> Unit,
+  modifier: Modifier = Modifier,
 ) {
-  val options =
-    when (uiState.lifecycleState) {
-      SurveyLifecycleState.PUBLISHED ->
-        listOf(SurveyLifecycleState.CLOSED to "Close survey", ARCHIVE_OPTION)
-      SurveyLifecycleState.CLOSED -> listOf(ARCHIVE_OPTION)
-      SurveyLifecycleState.ARCHIVED -> emptyList()
-    }
-  if (options.isEmpty()) return
+  val options = remember(lifecycleState) { lifecycleActionOptions(lifecycleState) }
   var isOpen by remember { mutableStateOf(false) }
-  Box {
-    IconButton(onClick = { isOpen = true }) {
-      Icon(Icons.Outlined.MoreVert, contentDescription = "More survey actions")
+  var confirmingState by remember { mutableStateOf<SurveyLifecycleState?>(null) }
+
+  if (!canManageSurvey || options.isEmpty()) {
+    GroundTonalBadge(
+      text = lifecycleState.label,
+      tone = lifecycleState.badgeTone(),
+      modifier = modifier,
+    )
+    return
+  }
+
+  val colors = MaterialTheme.colorScheme
+  val (containerColor, contentColor) =
+    when (lifecycleState.badgeTone()) {
+      GroundBadgeTone.PRIMARY -> colors.primaryContainer to colors.onPrimaryContainer
+      GroundBadgeTone.SECONDARY -> colors.secondaryContainer to colors.onSecondaryContainer
+      GroundBadgeTone.TERTIARY,
+      GroundBadgeTone.WARNING -> colors.tertiaryContainer to colors.onTertiaryContainer
+      GroundBadgeTone.ERROR -> colors.errorContainer to colors.onErrorContainer
+      GroundBadgeTone.NEUTRAL -> colors.surfaceContainerHigh to colors.onSurfaceVariant
     }
-    DropdownMenu(expanded = isOpen, onDismissRequest = { isOpen = false }) {
-      options.forEach { (state, label) ->
+
+  Box(modifier = modifier) {
+    Surface(
+      shape = CircleShape,
+      color = containerColor,
+      contentColor = contentColor,
+      modifier =
+        Modifier.clip(CircleShape)
+          .clickable { isOpen = !isOpen }
+          .semantics {
+            contentDescription = "Survey status: ${lifecycleState.label}. Click to change status"
+          },
+    ) {
+      Row(
+        modifier = Modifier.padding(start = 10.dp, end = 6.dp, top = 3.dp, bottom = 3.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(2.dp),
+      ) {
+        Text(
+          text = lifecycleState.label,
+          style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
+          maxLines = 1,
+          softWrap = false,
+        )
+        Icon(
+          imageVector = Icons.Outlined.ArrowDropDown,
+          contentDescription = null,
+          modifier = Modifier.size(16.dp),
+        )
+      }
+    }
+
+    DropdownMenu(
+      expanded = isOpen,
+      onDismissRequest = { isOpen = false },
+      modifier = Modifier.width(300.dp),
+    ) {
+      Text(
+        text = "Survey status: ${lifecycleState.label}",
+        style = MaterialTheme.typography.labelSmall,
+        fontWeight = FontWeight.Bold,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
+      )
+      HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+      options.forEach { option ->
         DropdownMenuItem(
-          text = { Text(label) },
+          text = {
+            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+              Text(
+                text = option.label,
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.SemiBold,
+              )
+              Text(
+                text = option.description,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+              )
+            }
+          },
           onClick = {
             isOpen = false
-            onSelect(state)
+            if (option.requiresConfirmation) {
+              confirmingState = option.targetState
+            } else {
+              onSelectState(option.targetState)
+            }
           },
         )
       }
     }
   }
-}
 
-private val ARCHIVE_OPTION = SurveyLifecycleState.ARCHIVED to "Archive survey"
+  confirmingState?.let { state ->
+    ConfirmLifecycleDialog(
+      state = state,
+      hasUnpublishedChanges = hasUnpublishedChanges,
+      onConfirm = {
+        confirmingState = null
+        onSelectState(state)
+      },
+      onDismiss = { confirmingState = null },
+    )
+  }
+}
 
 /** Asks before closing or archiving the survey. */
 @Composable
@@ -432,7 +643,7 @@ private fun ConfirmLifecycleDialog(
   onDismiss: () -> Unit,
 ) {
   val isArchive = state == SurveyLifecycleState.ARCHIVED
-  val discardNote = if (hasUnpublishedChanges) " Unpublished changes will be discarded." else ""
+  val discardNote = if (hasUnpublishedChanges) " Unsaved changes will be discarded." else ""
   AlertDialog(
     onDismissRequest = onDismiss,
     title = { Text(if (isArchive) "Archive this survey?" else "Close this survey?") },
@@ -504,6 +715,7 @@ internal fun SurveyNavigation(
         icon = Icons.Outlined.Info,
         selected = uiState.section == SurveyEditorSection.Details,
         onClick = { actions.select(SurveyEditorSection.Details) },
+        hasIssues = uiState.detailsIssues.isNotEmpty(),
       )
       NavItem(
         label = "Sharing",
@@ -792,6 +1004,7 @@ private fun SurveyDetailsPane(uiState: SurveyEditorUiState, actions: SurveyEdito
         textStyle = MaterialTheme.typography.bodyLarge.copy(fontFamily = FontFamily.Monospace),
         modifier = Modifier.fillMaxWidth(),
       )
+      SurveyStatusSection(uiState = uiState, actions = actions)
       OrganizationSection(uiState = uiState, actions = actions)
       PurposesSection(uiState = uiState, actions = actions)
       LanguageSelectorSection(uiState = uiState, actions = actions)
@@ -883,6 +1096,60 @@ private fun SummaryCard(label: String, count: Int, onClick: () -> Unit) {
   }
 }
 
+/**
+ * Shows the survey's current lifecycle state under "Survey details" with an interactive status
+ * badge menu and a direct action button to publish a draft or reopen a closed/archived survey.
+ */
+@Composable
+private fun SurveyStatusSection(uiState: SurveyEditorUiState, actions: SurveyEditorActions) {
+  Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+    Text(
+      "Survey status",
+      style = MaterialTheme.typography.titleSmall,
+      fontWeight = FontWeight.SemiBold,
+    )
+    OutlinedCard(modifier = Modifier.fillMaxWidth()) {
+      Row(
+        modifier = Modifier.fillMaxWidth().padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
+      ) {
+        Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+          Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+          ) {
+            SurveyStatusBadgeMenu(
+              lifecycleState = uiState.lifecycleState,
+              canManageSurvey = uiState.canManageSurvey,
+              hasUnpublishedChanges = uiState.hasUnpublishedChanges,
+              onSelectState = actions::setLifecycleState,
+            )
+          }
+          Text(
+            text = uiState.lifecycleState.statusDescription(),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+          )
+        }
+        if (uiState.canManageSurvey) {
+          if (uiState.isDraft) {
+            Button(onClick = { actions.setLifecycleState(SurveyLifecycleState.PUBLISHED) }) {
+              Text("Publish survey")
+            }
+          } else if (uiState.isReadOnly) {
+            OutlinedButton(
+              onClick = { actions.setLifecycleState(SurveyLifecycleState.PUBLISHED) }
+            ) {
+              Text("Reopen survey")
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
 /** Sentinel for the "None (personal survey)" entry of the organization dropdown. */
 private val NoOrganization = Organization(id = "", name = "None (personal survey)")
 
@@ -969,7 +1236,10 @@ private fun PurposesSection(uiState: SurveyEditorUiState, actions: SurveyEditorA
   val context = uiState.library
   val packs = context.library.pickablePurposePacks
   val details = uiState.details
-  val unavailable = details.purposeIds.filter { id -> packs.none { it.id == id } }
+  val unavailable =
+    details.purposeIds.filter { id ->
+      id != SurveyWizardRules.OTHER_PURPOSE_ID && packs.none { it.id == id }
+    }
   val offeredPrograms =
     LibraryPrograms.offeredFor(packs.filter { it.id in details.purposeIds }, details.programIds)
   Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -994,6 +1264,8 @@ private fun PurposesSection(uiState: SurveyEditorUiState, actions: SurveyEditorA
         language = context.language,
         selectedIds = details.purposeIds,
         onToggle = actions::togglePurpose,
+        otherPurposeText = details.otherPurpose,
+        onOtherPurposeTextChange = actions::updateOtherPurpose,
       )
     }
     if (unavailable.isNotEmpty()) {
@@ -1032,7 +1304,7 @@ private fun PurposesSection(uiState: SurveyEditorUiState, actions: SurveyEditorA
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun LanguageSelectorSection(uiState: SurveyEditorUiState, actions: SurveyEditorActions) {
+internal fun LanguageSelectorSection(uiState: SurveyEditorUiState, actions: SurveyEditorActions) {
   val details = uiState.details
   val supported = details.supportedLanguages
   val defaultLang = details.defaultLanguage
@@ -1115,11 +1387,12 @@ private fun LanguageSelectorSection(uiState: SurveyEditorUiState, actions: Surve
 }
 
 @Composable
-private fun SurveyAreaSection(
+internal fun SurveyAreaSection(
   uiState: SurveyEditorUiState,
   actions: SurveyEditorActions,
   localPlaces: List<SurveyPlaceItem>,
   searchPlaces: PlaceSearch,
+  isError: Boolean = uiState.detailsIssues.isNotEmpty(),
 ) {
   val area = uiState.details.surveyArea
   var showEditor by remember { mutableStateOf(false) }
@@ -1144,7 +1417,7 @@ private fun SurveyAreaSection(
     ) {
       Column {
         Text(
-          "Survey area",
+          "Survey area *",
           style = MaterialTheme.typography.titleSmall,
           fontWeight = FontWeight.SemiBold,
         )
@@ -1215,24 +1488,21 @@ private fun SurveyAreaSection(
                 Spacer(Modifier.width(6.dp))
                 Text("Edit survey area")
               }
-              OutlinedButton(
-                onClick = { actions.setSurveyArea(null) },
-                shape = RoundedCornerShape(8.dp),
-              ) {
-                Icon(
-                  Icons.Outlined.Delete,
-                  contentDescription = null,
-                  modifier = Modifier.size(16.dp),
-                )
-                Spacer(Modifier.width(6.dp))
-                Text("Remove")
-              }
             }
           }
         }
       }
     } else {
-      OutlinedCard(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp)) {
+      if (isError) {
+        ValidationErrorBanner(message = "Select or draw a survey area to continue.")
+      }
+      OutlinedCard(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(12.dp),
+        border =
+          if (isError) BorderStroke(1.5.dp, MaterialTheme.colorScheme.error)
+          else CardDefaults.outlinedCardBorder(),
+      ) {
         Row(
           modifier = Modifier.fillMaxWidth().padding(16.dp),
           horizontalArrangement = Arrangement.spacedBy(16.dp),
@@ -1260,6 +1530,9 @@ private fun SurveyAreaSection(
               text = "No survey area set",
               style = MaterialTheme.typography.titleSmall,
               fontWeight = FontWeight.SemiBold,
+              color =
+                if (isError) MaterialTheme.colorScheme.error
+                else MaterialTheme.colorScheme.onSurface,
             )
             Text(
               text =
@@ -1422,7 +1695,7 @@ private fun LanguagePickerDialog(
           contentDescription = null,
           tint = MaterialTheme.colorScheme.primary,
         )
-        Text("Select Language")
+        Text("Select language")
       }
     },
     text = {
@@ -1528,7 +1801,29 @@ private fun LanguagePickerDialog(
 // ---------------------------------------------------------------------------------------------
 
 @Composable
-private fun SharingPane(uiState: SurveyEditorUiState, actions: SurveyEditorActions) {
+internal fun SharingPane(uiState: SurveyEditorUiState, actions: SurveyEditorActions) {
+  PaneScaffold(
+    title = "Sharing",
+    subtitle = "Choose who can open this survey and what data collectors can see.",
+  ) {
+    SharingContent(
+      uiState = uiState,
+      actions = actions,
+      modifier = Modifier.widthIn(max = 760.dp),
+    )
+  }
+}
+
+/**
+ * Scroll-free body of the Sharing pane (people with access, organization managers, general access
+ * policy, and peer data visibility), reused inside [SharingPane] and the Survey Creation Wizard.
+ */
+@Composable
+internal fun SharingContent(
+  uiState: SurveyEditorUiState,
+  actions: SurveyEditorActions,
+  modifier: Modifier = Modifier,
+) {
   val sharing = uiState.sharing
   val organization = uiState.organization(uiState.details.organizationId)
   var acceptingEmail by remember { mutableStateOf<String?>(null) }
@@ -1542,155 +1837,648 @@ private fun SharingPane(uiState: SurveyEditorUiState, actions: SurveyEditorActio
         onDismiss = { acceptingEmail = null },
       )
     }
-  PaneScaffold(
-    title = "Sharing",
-    subtitle = "Choose who can open this survey and what data collectors can see.",
+  Column(
+    modifier = modifier,
+    verticalArrangement = Arrangement.spacedBy(20.dp),
   ) {
-    Column(
-      modifier = Modifier.widthIn(max = 760.dp),
-      verticalArrangement = Arrangement.spacedBy(20.dp),
+    ElevatedCard(
+      colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
-      ElevatedCard(
-        colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.surface)
+      Column(
+        modifier = Modifier.padding(20.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
       ) {
-        Column(
-          modifier = Modifier.padding(20.dp),
-          verticalArrangement = Arrangement.spacedBy(12.dp),
+        SectionLabel("People with access")
+        InviteRow(uiState, actions)
+        PersonRow(
+          displayName = sharing.ownerProfile?.displayName ?: sharing.ownerEmail,
+          email = sharing.ownerEmail,
+          photoUrl = sharing.ownerProfile?.photoUrl,
+          detail = "Survey owner",
         ) {
-          SectionLabel("People with access")
-          InviteRow(uiState, actions)
-          PersonRow(
-            displayName = sharing.ownerProfile?.displayName ?: sharing.ownerEmail,
-            email = sharing.ownerEmail,
-            photoUrl = sharing.ownerProfile?.photoUrl,
-            detail = "Survey owner",
-          ) {
-            Text(
-              "Owner",
-              style = MaterialTheme.typography.labelLarge,
-              color = MaterialTheme.colorScheme.onSurfaceVariant,
-              modifier = Modifier.padding(top = 10.dp, end = 12.dp),
-            )
-          }
-          sharing.collaborators.forEach { person ->
-            key(person.email) {
-              val pending = person.status == InvitationStatus.PENDING
-              PersonRow(
-                displayName = person.displayName,
-                email = person.email,
-                photoUrl = person.profile?.photoUrl,
-                pending = pending,
-                detail =
-                  when {
-                    pending -> "Waiting for them to accept their invite link"
-                    person.profile?.cachedOn.isNullOrBlank() -> "Joined just now"
-                    else -> "Joined ${person.profile?.cachedOn}"
+          Text(
+            "Owner",
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(top = 10.dp, end = 12.dp),
+          )
+        }
+        sharing.collaborators.forEach { person ->
+          key(person.email) {
+            val pending = person.status == InvitationStatus.PENDING
+            PersonRow(
+              displayName = person.displayName,
+              email = person.email,
+              photoUrl = person.profile?.photoUrl,
+              pending = pending,
+              detail =
+                when {
+                  pending -> "Waiting for them to accept their invite link"
+                  person.profile?.cachedOn.isNullOrBlank() -> "Joined just now"
+                  else -> "Joined ${person.profile?.cachedOn}"
+                },
+              footer =
+                person.inviteToken
+                  ?.takeIf { pending }
+                  ?.let { token ->
+                    {
+                      PendingInviteLinkRow(
+                        token = token,
+                        onResetLink = { actions.resetInviteLink(person.email) },
+                        onOpenAsInvitee = { acceptingEmail = person.email },
+                      )
+                    }
                   },
-                footer =
-                  person.inviteToken
-                    ?.takeIf { pending }
-                    ?.let { token ->
-                      {
-                        PendingInviteLinkRow(
-                          token = token,
-                          onResetLink = { actions.resetInviteLink(person.email) },
-                          onOpenAsInvitee = { acceptingEmail = person.email },
-                        )
-                      }
-                    },
-              ) {
-                Box(modifier = Modifier.width(190.dp)) {
-                  DropdownSelector(
-                    label = "Role",
-                    selectedText = person.role.label,
-                    options = CollaboratorRole.entries,
-                    optionText = { it.label },
-                    onSelect = { actions.setCollaboratorRole(person.email, it) },
-                  )
-                }
-                IconButton(onClick = { actions.removeCollaborator(person.email) }) {
-                  Icon(Icons.Outlined.Close, contentDescription = "Remove ${person.displayName}")
-                }
+            ) {
+              Box(modifier = Modifier.width(190.dp)) {
+                DropdownSelector(
+                  label = "Role",
+                  selectedText = person.role.label,
+                  options = CollaboratorRole.entries,
+                  optionText = { it.label },
+                  onSelect = { actions.setCollaboratorRole(person.email, it) },
+                )
+              }
+              IconButton(onClick = { actions.removeCollaborator(person.email) }) {
+                Icon(Icons.Outlined.Close, contentDescription = "Remove ${person.displayName}")
               }
             }
           }
-          Text(
-            "Names and photos come from each person's account. Ground saves them when they " +
-              "accept their invite link, and refreshes them when they sign in.",
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-          )
         }
+        Text(
+          "Names and photos come from each person's account. Collect One saves them when they " +
+            "accept their invite link, and refreshes them when they sign in.",
+          style = MaterialTheme.typography.bodySmall,
+          color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
       }
+    }
 
-      if (organization != null) InheritedManagersCard(organization)
+    if (organization != null) InheritedManagersCard(organization)
 
-      ElevatedCard(
-        colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.surface)
+    ElevatedCard(
+      colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.surface)
+    ) {
+      Column(
+        modifier = Modifier.padding(20.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
       ) {
-        Column(
-          modifier = Modifier.padding(20.dp),
-          verticalArrangement = Arrangement.spacedBy(4.dp),
-        ) {
-          SectionLabel("General access")
-          uiState.sharingIssues.forEach { issue ->
-            Row(
-              verticalAlignment = Alignment.CenterVertically,
-              horizontalArrangement = Arrangement.spacedBy(8.dp),
-              modifier = Modifier.padding(bottom = 8.dp),
-            ) {
-              Icon(
-                Icons.Outlined.Warning,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.error,
-                modifier = Modifier.size(18.dp),
-              )
-              Text(
-                issue,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.error,
-              )
-            }
-          }
-          SharingPolicy.entries.forEach { policy ->
-            val isOrganizationPolicy = policy == SharingPolicy.ORGANIZATION
-            RadioOption(
-              title =
-                if (isOrganizationPolicy && organization != null) "Anyone in ${organization.name}"
-                else policy.label,
-              description =
-                if (isOrganizationPolicy && organization == null) {
-                  "Available once the survey belongs to an organization (see Survey details)."
-                } else {
-                  policy.description
-                },
-              selected = sharing.policy == policy,
-              enabled = !isOrganizationPolicy || organization != null,
-              onSelect = { actions.updateSharing { it.copy(policy = policy) } },
+        SectionLabel("General access")
+        uiState.sharingIssues.forEach { issue ->
+          Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+          ) {
+            Icon(
+              Icons.Outlined.Warning,
+              contentDescription = null,
+              tint = MaterialTheme.colorScheme.error,
+              modifier = Modifier.size(18.dp),
+            )
+            Text(
+              issue,
+              style = MaterialTheme.typography.bodySmall,
+              color = MaterialTheme.colorScheme.error,
             )
           }
         }
+        GeneralAccessPermissionSliders(
+          sharing = sharing,
+          organization = organization,
+          onUpdateSharing = actions::updateSharing,
+          surveyId = uiState.surveyId,
+          surveyTitle = uiState.details.title,
+        )
       }
+    }
+  }
+}
 
-      ElevatedCard(
-        colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.surface)
-      ) {
+private enum class AccessAudienceStop(val label: String) {
+  CONTRIBUTORS_AND_ORGANIZERS("Contributors & organizers"),
+  INVITED_PEOPLE("Invited people"),
+  ANYONE_IN_ORGANIZATION("Anyone in your organization"),
+  ANYONE("Anyone"),
+}
+
+private val PermissionLabelWidth = 176.dp
+
+/**
+ * Google Groups-style stepped permission sliders for **Who can view data** and **Who can collect
+ * data**, plus a **Who can find this survey** selector and share link / QR code card when the
+ * survey is open to **Anyone**.
+ */
+@Composable
+private fun GeneralAccessPermissionSliders(
+  sharing: SharingSettings,
+  organization: Organization?,
+  onUpdateSharing: ((SharingSettings) -> SharingSettings) -> Unit,
+  surveyId: String = "",
+  surveyTitle: String = "",
+) {
+  val visibleStops =
+    remember(organization != null) {
+      if (organization != null) {
+        AccessAudienceStop.entries
+      } else {
+        AccessAudienceStop.entries.filterNot { it == AccessAudienceStop.ANYONE_IN_ORGANIZATION }
+      }
+    }
+  val collectStop =
+    when (sharing.policy) {
+      SharingPolicy.RESTRICTED -> AccessAudienceStop.INVITED_PEOPLE
+      SharingPolicy.ORGANIZATION ->
+        if (organization != null) AccessAudienceStop.ANYONE_IN_ORGANIZATION
+        else AccessAudienceStop.INVITED_PEOPLE
+      SharingPolicy.ANYONE_WITH_LINK,
+      SharingPolicy.PUBLIC -> AccessAudienceStop.ANYONE
+    }
+  val viewStop =
+    if (sharing.peerDataVisibility == PeerDataVisibility.OWN_ONLY) {
+      AccessAudienceStop.CONTRIBUTORS_AND_ORGANIZERS
+    } else {
+      collectStop
+    }
+  val orgDisplayName = organization?.name ?: "your organization"
+
+  val viewHint =
+    when (viewStop) {
+      AccessAudienceStop.CONTRIBUTORS_AND_ORGANIZERS ->
+        "Data collectors only see their own submissions. Survey organizers can view all " +
+          "submissions and contributor identities."
+      AccessAudienceStop.INVITED_PEOPLE ->
+        "People added above can view all map features, answers, photos, and other uploaded " +
+          "media. Only survey organizers can view contributor identities."
+      AccessAudienceStop.ANYONE_IN_ORGANIZATION ->
+        if (organization != null) {
+          "Anyone in ${organization.name} can view all map features, answers, photos, and other " +
+            "uploaded media. Only survey organizers can view contributor identities."
+        } else {
+          "Anyone in your organization can view all map features, answers, photos, and other " +
+            "uploaded media. Choose an organization in Survey details."
+        }
+      AccessAudienceStop.ANYONE ->
+        "Anyone can view all map features, answers, photos, and other uploaded media. Only " +
+          "survey organizers can view contributor identities. Participants must accept a consent " +
+          "notice before collecting data."
+    }
+
+  val collectHint =
+    when (collectStop) {
+      AccessAudienceStop.CONTRIBUTORS_AND_ORGANIZERS,
+      AccessAudienceStop.INVITED_PEOPLE ->
+        "Only people added above can open this survey and collect data."
+      AccessAudienceStop.ANYONE_IN_ORGANIZATION ->
+        if (organization != null) {
+          "Members of $orgDisplayName can open this survey and collect data. " +
+            "Managers of ${organization.name} can also edit the survey."
+        } else {
+          "Members of your organization can open this survey and collect data. " +
+            "Choose an organization in Survey details."
+        }
+      AccessAudienceStop.ANYONE -> "Anyone can open this survey and submit data."
+    }
+
+  Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+    // Shared audience column headers
+    Row(
+      modifier = Modifier.fillMaxWidth().padding(start = PermissionLabelWidth),
+      verticalAlignment = Alignment.Bottom,
+    ) {
+      visibleStops.forEach { stop ->
         Column(
-          modifier = Modifier.padding(20.dp),
-          verticalArrangement = Arrangement.spacedBy(4.dp),
+          modifier = Modifier.weight(1f).padding(horizontal = 4.dp),
+          horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-          SectionLabel("What data collectors can see")
-          PeerDataVisibility.entries.forEach { visibility ->
-            RadioOption(
-              title = visibility.label,
-              description = visibility.description,
-              selected = sharing.peerDataVisibility == visibility,
-              onSelect = { actions.updateSharing { it.copy(peerDataVisibility = visibility) } },
+          Text(
+            text = stop.label,
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
+          )
+          Spacer(Modifier.height(6.dp))
+          Box(
+            modifier =
+              Modifier.width(1.dp).height(8.dp).background(MaterialTheme.colorScheme.outlineVariant)
+          )
+        }
+      }
+    }
+
+    PermissionRangeSliderRow(
+      title = "Who can view data",
+      selectedStop = viewStop,
+      stops = visibleStops,
+      hint = viewHint,
+      onSelectStop = { target ->
+        onUpdateSharing { current ->
+          val openPolicy =
+            if (current.policy == SharingPolicy.ANYONE_WITH_LINK) {
+              SharingPolicy.ANYONE_WITH_LINK
+            } else {
+              SharingPolicy.PUBLIC
+            }
+          when (target) {
+            AccessAudienceStop.CONTRIBUTORS_AND_ORGANIZERS ->
+              current.copy(peerDataVisibility = PeerDataVisibility.OWN_ONLY)
+            AccessAudienceStop.INVITED_PEOPLE ->
+              current.copy(
+                policy = SharingPolicy.RESTRICTED,
+                peerDataVisibility = PeerDataVisibility.ALL,
+              )
+            AccessAudienceStop.ANYONE_IN_ORGANIZATION ->
+              current.copy(
+                policy = SharingPolicy.ORGANIZATION,
+                peerDataVisibility = PeerDataVisibility.ALL,
+              )
+            AccessAudienceStop.ANYONE ->
+              current.copy(
+                policy = openPolicy,
+                peerDataVisibility = PeerDataVisibility.ALL,
+              )
+          }
+        }
+      },
+    )
+
+    PermissionRangeSliderRow(
+      title = "Who can collect data",
+      selectedStop = collectStop,
+      stops = visibleStops,
+      hint = collectHint,
+      onSelectStop = { rawTarget ->
+        val target =
+          if (rawTarget == AccessAudienceStop.CONTRIBUTORS_AND_ORGANIZERS) {
+            AccessAudienceStop.INVITED_PEOPLE
+          } else {
+            rawTarget
+          }
+        onUpdateSharing { current ->
+          val openPolicy =
+            if (current.policy == SharingPolicy.ANYONE_WITH_LINK) {
+              SharingPolicy.ANYONE_WITH_LINK
+            } else {
+              SharingPolicy.PUBLIC
+            }
+          when (target) {
+            AccessAudienceStop.CONTRIBUTORS_AND_ORGANIZERS,
+            AccessAudienceStop.INVITED_PEOPLE -> current.copy(policy = SharingPolicy.RESTRICTED)
+            AccessAudienceStop.ANYONE_IN_ORGANIZATION ->
+              current.copy(policy = SharingPolicy.ORGANIZATION)
+            AccessAudienceStop.ANYONE -> {
+              val wasOpenToAnyone = current.policy.isOpenToAnyone
+              current.copy(
+                policy = openPolicy,
+                peerDataVisibility =
+                  if (wasOpenToAnyone) current.peerDataVisibility else PeerDataVisibility.OWN_ONLY,
+              )
+            }
+          }
+        }
+      },
+    )
+
+    if (sharing.policy.isOpenToAnyone) {
+      HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+      val directoryOptions = listOf(SharingPolicy.PUBLIC, SharingPolicy.ANYONE_WITH_LINK)
+      val policyOptionLabel: (SharingPolicy) -> String = { policy ->
+        if (policy == SharingPolicy.ANYONE_WITH_LINK) {
+          "Only people with a link or QR code (unlisted)"
+        } else {
+          "Anyone in the survey directory"
+        }
+      }
+      DropdownSelector(
+        label = "Who can find this survey",
+        selectedText = policyOptionLabel(sharing.policy),
+        options = directoryOptions,
+        optionText = policyOptionLabel,
+        onSelect = { selectedPolicy -> onUpdateSharing { it.copy(policy = selectedPolicy) } },
+      )
+      Text(
+        text =
+          if (sharing.policy == SharingPolicy.ANYONE_WITH_LINK) {
+            "Unlisted: only people who have the direct link or scan the QR code below can find " +
+              "and open this survey."
+          } else {
+            "Listed: anyone browsing the public survey directory can discover and open this " +
+              "survey, or use the direct link and QR code below."
+          },
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+      )
+      SurveyShareLinkAndQrCard(
+        surveyId = surveyId,
+        surveyTitle = surveyTitle,
+        isUnlisted = sharing.policy == SharingPolicy.ANYONE_WITH_LINK,
+      )
+    }
+  }
+}
+
+@Composable
+internal fun SurveyShareLinkAndQrCard(
+  surveyId: String,
+  surveyTitle: String,
+  isUnlisted: Boolean,
+  modifier: Modifier = Modifier,
+) {
+  val shareUrl = remember(surveyId) { InviteLinks.surveyUrl(surveyId) }
+  val clipboard = LocalClipboardManager.current
+  var copied by remember(shareUrl) { mutableStateOf(false) }
+  var showQrDialog by remember { mutableStateOf(false) }
+
+  OutlinedCard(
+    modifier = modifier.fillMaxWidth(),
+    colors =
+      CardDefaults.outlinedCardColors(
+        containerColor = MaterialTheme.colorScheme.surfaceContainerLow
+      ),
+  ) {
+    Row(
+      modifier = Modifier.fillMaxWidth().padding(14.dp),
+      horizontalArrangement = Arrangement.spacedBy(14.dp),
+      verticalAlignment = Alignment.CenterVertically,
+    ) {
+      SurveyQrCodeCanvas(
+        data = shareUrl,
+        modifier =
+          Modifier.size(56.dp).clip(RoundedCornerShape(8.dp)).clickable { showQrDialog = true },
+      )
+      Column(
+        modifier = Modifier.weight(1f),
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+      ) {
+        Row(
+          horizontalArrangement = Arrangement.spacedBy(8.dp),
+          verticalAlignment = Alignment.CenterVertically,
+        ) {
+          Text(
+            text = "Share link & QR code",
+            style = MaterialTheme.typography.titleSmall,
+            fontWeight = FontWeight.SemiBold,
+          )
+          GroundTonalBadge(
+            text = if (isUnlisted) "Unlisted" else "Public directory",
+            tone = if (isUnlisted) GroundBadgeTone.NEUTRAL else GroundBadgeTone.PRIMARY,
+          )
+        }
+        Text(
+          text = shareUrl,
+          style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
+          color = MaterialTheme.colorScheme.onSurfaceVariant,
+          maxLines = 1,
+          overflow = TextOverflow.Ellipsis,
+        )
+      }
+      Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        OutlinedButton(
+          onClick = {
+            clipboard.setText(AnnotatedString(shareUrl))
+            copied = true
+          }
+        ) {
+          Text(if (copied) "Copied" else "Copy link")
+        }
+        OutlinedButton(onClick = { showQrDialog = true }) { Text("Show QR code") }
+      }
+    }
+  }
+
+  if (showQrDialog) {
+    AlertDialog(
+      onDismissRequest = { showQrDialog = false },
+      title = {
+        Text(
+          text =
+            if (surveyTitle.isNotBlank()) "Share “$surveyTitle”" else "Survey share link & QR code"
+        )
+      },
+      text = {
+        Column(
+          modifier = Modifier.fillMaxWidth(),
+          horizontalAlignment = Alignment.CenterHorizontally,
+          verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+          SurveyQrCodeCanvas(
+            data = shareUrl,
+            modifier =
+              Modifier.size(216.dp)
+                .clip(RoundedCornerShape(12.dp))
+                .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(12.dp)),
+          )
+          Text(
+            text =
+              "Data collectors can scan this QR code with their phone camera or the Ground app " +
+                "to open the survey directly.",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
+          )
+          Surface(
+            shape = RoundedCornerShape(6.dp),
+            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f),
+            modifier = Modifier.fillMaxWidth(),
+          ) {
+            Text(
+              text = shareUrl,
+              style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
+              color = MaterialTheme.colorScheme.onSurface,
+              textAlign = TextAlign.Center,
+              modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+            )
+          }
+        }
+      },
+      confirmButton = {
+        Button(
+          onClick = {
+            clipboard.setText(AnnotatedString(shareUrl))
+            copied = true
+          }
+        ) {
+          Text(if (copied) "Copied" else "Copy link")
+        }
+      },
+      dismissButton = { TextButton(onClick = { showQrDialog = false }) { Text("Close") } },
+    )
+  }
+}
+
+@Composable
+private fun SurveyQrCodeCanvas(data: String, modifier: Modifier = Modifier) {
+  val matrixSize = 21
+  Canvas(modifier = modifier.background(Color.White)) {
+    val quietZone = 2
+    val totalModules = matrixSize + quietZone * 2
+    val cellSize = size.minDimension / totalModules.toFloat()
+    val seed = data.fold(5381) { acc, ch -> ((acc shl 5) + acc) xor ch.code }
+
+    fun isFinderModule(r: Int, c: Int, topR: Int, topC: Int): Boolean? {
+      val dr = r - topR
+      val dc = c - topC
+      if (dr !in -1..7 || dc !in -1..7) return null
+      if (dr == -1 || dr == 7 || dc == -1 || dc == 7) return false
+      if (dr == 0 || dr == 6 || dc == 0 || dc == 6) return true
+      if (dr in 2..4 && dc in 2..4) return true
+      return false
+    }
+
+    for (r in 0 until matrixSize) {
+      for (c in 0 until matrixSize) {
+        val finder =
+          isFinderModule(r, c, 0, 0)
+            ?: isFinderModule(r, c, 0, matrixSize - 7)
+            ?: isFinderModule(r, c, matrixSize - 7, 0)
+        val isDark =
+          when {
+            finder != null -> finder
+            r == 6 -> c % 2 == 0
+            c == 6 -> r % 2 == 0
+            else -> {
+              val charCode =
+                if (data.isNotEmpty()) data[(r * matrixSize + c) % data.length].code else 0
+              val mix = (seed xor (r * 131 + c * 313) xor (charCode * 17))
+              (mix and 1) == 0
+            }
+          }
+        if (isDark) {
+          drawRect(
+            color = Color(0xFF111827),
+            topLeft = Offset((c + quietZone) * cellSize, (r + quietZone) * cellSize),
+            size = Size(cellSize, cellSize),
+          )
+        }
+      }
+    }
+  }
+}
+
+@Composable
+private fun PermissionRangeSliderRow(
+  title: String,
+  selectedStop: AccessAudienceStop,
+  stops: List<AccessAudienceStop> = AccessAudienceStop.entries,
+  hint: String,
+  onSelectStop: (AccessAudienceStop) -> Unit,
+) {
+  val selectedIndex = stops.indexOf(selectedStop).let { if (it >= 0) it else 0 }
+  val activeColor = MaterialTheme.colorScheme.primary
+  val inactiveColor = MaterialTheme.colorScheme.surfaceVariant
+  val outlineColor = MaterialTheme.colorScheme.outline
+  val currentOnSelectStop by androidx.compose.runtime.rememberUpdatedState(onSelectStop)
+  var trackWidthPx by remember { mutableStateOf(0) }
+
+  Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+    Row(
+      modifier = Modifier.fillMaxWidth(),
+      verticalAlignment = Alignment.CenterVertically,
+    ) {
+      Text(
+        text = title,
+        style = MaterialTheme.typography.bodyLarge,
+        fontWeight = FontWeight.Medium,
+        color = MaterialTheme.colorScheme.onSurface,
+        modifier = Modifier.width(PermissionLabelWidth).padding(end = 12.dp),
+      )
+      Row(
+        modifier =
+          Modifier.weight(1f)
+            .height(36.dp)
+            .onSizeChanged { trackWidthPx = it.width }
+            .pointerInput(stops.size) {
+              var dragX = 0f
+              detectHorizontalDragGestures(
+                onDragStart = { offset -> dragX = offset.x },
+                onHorizontalDrag = { change, dragAmount ->
+                  change.consume()
+                  dragX += dragAmount
+                  if (trackWidthPx > 0) {
+                    val colWidth = trackWidthPx.toFloat() / stops.size
+                    val index = ((dragX / colWidth).toInt()).coerceIn(0, stops.lastIndex)
+                    currentOnSelectStop(stops[index])
+                  }
+                },
+              )
+            },
+        verticalAlignment = Alignment.CenterVertically,
+      ) {
+        stops.forEachIndexed { index, stop ->
+          val isFilled = index <= selectedIndex
+          val isSelected = index == selectedIndex
+          val leftFilled = index > 0 && index <= selectedIndex
+          val rightFilled = index < selectedIndex
+          Box(
+            modifier =
+              Modifier.weight(1f)
+                .fillMaxHeight()
+                .clickable(
+                  role = Role.RadioButton,
+                  onClick = { currentOnSelectStop(stop) },
+                )
+                .semantics(mergeDescendants = true) {
+                  contentDescription = "$title: ${stop.label}"
+                },
+            contentAlignment = Alignment.Center,
+          ) {
+            Row(
+              modifier = Modifier.fillMaxWidth(),
+              verticalAlignment = Alignment.CenterVertically,
+            ) {
+              Box(
+                modifier =
+                  Modifier.weight(1f)
+                    .height(if (leftFilled) 8.dp else 4.dp)
+                    .background(
+                      color =
+                        if (index == 0) Color.Transparent
+                        else if (leftFilled) activeColor else inactiveColor,
+                      shape =
+                        if (index == 1 && leftFilled) {
+                          RoundedCornerShape(topStart = 4.dp, bottomStart = 4.dp)
+                        } else {
+                          RoundedCornerShape(0.dp)
+                        },
+                    )
+              )
+              Box(
+                modifier =
+                  Modifier.weight(1f)
+                    .height(if (rightFilled) 8.dp else 4.dp)
+                    .background(
+                      color =
+                        if (index == stops.lastIndex) Color.Transparent
+                        else if (rightFilled) activeColor else inactiveColor,
+                      shape =
+                        if (index == stops.lastIndex - 1 && !rightFilled) {
+                          RoundedCornerShape(topEnd = 2.dp, bottomEnd = 2.dp)
+                        } else {
+                          RoundedCornerShape(0.dp)
+                        },
+                    )
+              )
+            }
+            Box(
+              modifier =
+                Modifier.size(if (isSelected) 20.dp else 14.dp)
+                  .clip(CircleShape)
+                  .background(if (isFilled) activeColor else MaterialTheme.colorScheme.surface)
+                  .border(
+                    width = 2.dp,
+                    color = if (isFilled) activeColor else outlineColor,
+                    shape = CircleShape,
+                  )
             )
           }
         }
       }
     }
+    Text(
+      text = hint,
+      style = MaterialTheme.typography.bodySmall,
+      color = MaterialTheme.colorScheme.onSurfaceVariant,
+      modifier = Modifier.padding(start = PermissionLabelWidth),
+    )
   }
 }
 
@@ -1735,38 +2523,33 @@ private fun InviteRow(uiState: SurveyEditorUiState, actions: SurveyEditorActions
 }
 
 @Composable
-private fun RadioOption(
+private fun CheckboxOption(
   title: String,
   description: String,
-  selected: Boolean,
-  onSelect: () -> Unit,
-  enabled: Boolean = true,
+  checked: Boolean,
+  onCheckedChange: (Boolean) -> Unit,
+  modifier: Modifier = Modifier,
 ) {
-  val textColor =
-    if (enabled) MaterialTheme.colorScheme.onSurface
-    else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
   Row(
     modifier =
-      Modifier.fillMaxWidth()
-        .selectable(
-          selected = selected,
-          enabled = enabled,
-          onClick = onSelect,
-          role = Role.RadioButton,
-        )
+      modifier
+        .fillMaxWidth()
+        .clickable(role = Role.Checkbox) { onCheckedChange(!checked) }
         .padding(vertical = 6.dp),
     verticalAlignment = Alignment.CenterVertically,
   ) {
-    RadioButton(selected = selected, onClick = null, enabled = enabled)
+    Checkbox(checked = checked, onCheckedChange = null)
     Spacer(Modifier.width(12.dp))
     Column {
-      Text(title, style = MaterialTheme.typography.bodyLarge, color = textColor)
+      Text(
+        title,
+        style = MaterialTheme.typography.bodyLarge,
+        color = MaterialTheme.colorScheme.onSurface,
+      )
       Text(
         description,
         style = MaterialTheme.typography.bodySmall,
-        color =
-          if (enabled) MaterialTheme.colorScheme.onSurfaceVariant
-          else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.38f),
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
       )
     }
   }

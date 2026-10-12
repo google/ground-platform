@@ -60,6 +60,7 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.RecordImpactEv
 import org.groundplatform.v2.devtools.prototypeapp.ui.common.platformEpochMillis
 import org.groundplatform.v2.devtools.prototypeapp.ui.datacollection.ENTITY_REF_FIELD_PATH
 import org.groundplatform.v2.devtools.prototypeapp.ui.map.EntityGeometry
+import org.groundplatform.v2.devtools.prototypeapp.ui.state.CollectorConsentPrompt
 import org.groundplatform.v2.devtools.prototypeapp.ui.state.DataCollectionEvent
 import org.groundplatform.v2.devtools.prototypeapp.ui.state.DataCollectionUiState
 import org.groundplatform.v2.devtools.prototypeapp.ui.state.FormFocusRequest
@@ -141,6 +142,15 @@ interface DataCollectionActions : FormMapInteraction {
 
   /** Closes the open form without recording anything. */
   fun closeActiveFormRunner()
+
+  /**
+   * Accepts the active survey's informed consent prompt
+   * ([DataCollectionUiState.pendingCollectorConsent]) and proceeds to open the requested form.
+   */
+  fun acceptCollectorConsent()
+
+  /** Dismisses the informed consent prompt without opening a form. */
+  fun dismissCollectorConsent()
 
   /**
    * Records the open form's submission from the finalized [recordInstance] and [entityStates]
@@ -255,6 +265,13 @@ class DataCollectionViewModel(
       get() = SurveyMapAnchor.forSurvey(activeSurveyId)
   }
 
+  /** Deferred form launch waiting for the participant to accept informed consent. */
+  private sealed interface PendingFormLaunch {
+    data class FromFab(val formId: String, val pickerMode: MainSurveyViewMode) : PendingFormLaunch
+
+    data class ForEntity(val entityId: String, val formId: String) : PendingFormLaunch
+  }
+
   /** Session (non-persisted) state of data collection. */
   private data class Session(
     val selectedEntityId: String? = null,
@@ -277,6 +294,10 @@ class DataCollectionViewModel(
     /** What [activePdf] is a receipt for, to record when it's shared or saved. */
     val activeReceipt: Receipt? = null,
     val pdfExportMessage: String? = null,
+    /** Survey IDs for which the user has accepted informed consent in this session. */
+    val consentedSurveyIds: Set<String> = emptySet(),
+    /** Pending form launch paused while the informed consent dialog is displayed. */
+    val pendingConsentLaunch: PendingFormLaunch? = null,
   )
 
   /** The survey and map feature coverage a generated PDF report is a receipt for. */
@@ -330,15 +351,29 @@ class DataCollectionViewModel(
   private var framingToken = 0L
   private var focusToken = 0L
 
-  private fun buildUiState(data: Data, session: Session): DataCollectionUiState =
-    DataCollectionUiState(
+  private fun buildUiState(data: Data, session: Session): DataCollectionUiState {
+    val activeSurvey = data.activeSurvey
+    return DataCollectionUiState(
       activeSurveyId = data.activeSurveyId,
-      activeSurveyTitle = data.activeSurvey?.title.orEmpty(),
+      activeSurveyTitle = activeSurvey?.title.orEmpty(),
       forms = data.content.forms,
       entities = data.content.entities,
       standaloneSubmissions = data.content.standaloneSubmissions,
       submissionGeometries = data.content.submissionGeometries,
       collectorName = data.profile.displayName,
+      isActiveSurveyPublicData = activeSurvey?.isPublicData == true,
+      isActiveSurveyPrivateSubmissions = activeSurvey?.isPrivateSubmissions == true,
+      pendingCollectorConsent =
+        if (session.pendingConsentLaunch != null && activeSurvey != null) {
+          CollectorConsentPrompt(
+            surveyId = activeSurvey.id,
+            surveyTitle = activeSurvey.title,
+            isPublicData = activeSurvey.isPublicData,
+            customConsentText = activeSurvey.collectorConsentText,
+          )
+        } else {
+          null
+        },
       selectedEntityId = session.selectedEntityId,
       selectedSubmissionId = session.selectedSubmissionId,
       activeFormWizardController = session.controller,
@@ -358,6 +393,7 @@ class DataCollectionViewModel(
       pdfExportMessage = session.pdfExportMessage,
       canSharePdfFiles = pdfExportClient.canShareFiles,
     )
+  }
 
   private val ui: DataCollectionUiState
     get() = uiState.value
@@ -385,6 +421,7 @@ class DataCollectionViewModel(
         activeEntityId = null,
         activeFormId = null,
         isAvailableFormsSheetOpen = false,
+        pendingConsentLaunch = null,
       )
     }
     emit(DataCollectionEvent.EntityHighlighted(null))
@@ -484,9 +521,43 @@ class DataCollectionViewModel(
     if (ui.isAvailableFormsSheetOpen) closeAvailableFormsSheet() else openAvailableFormsSheet()
   }
 
+  private fun requiresConsentBeforeLaunch(): Boolean {
+    val survey = data.value.activeSurvey ?: return false
+    return survey.requiresCollectorConsent && survey.id !in session.value.consentedSurveyIds
+  }
+
+  override fun acceptCollectorConsent() {
+    val pending = session.value.pendingConsentLaunch ?: return
+    val surveyId = data.value.activeSurvey?.id ?: data.value.activeSurveyId
+    session.update {
+      it.copy(
+        consentedSurveyIds =
+          if (surveyId.isNotBlank()) it.consentedSurveyIds + surveyId else it.consentedSurveyIds,
+        pendingConsentLaunch = null,
+      )
+    }
+    when (pending) {
+      is PendingFormLaunch.FromFab -> launchFormFromFab(pending.formId, pending.pickerMode)
+      is PendingFormLaunch.ForEntity -> launchFormForEntity(pending.entityId, pending.formId)
+    }
+  }
+
+  override fun dismissCollectorConsent() {
+    session.update { it.copy(pendingConsentLaunch = null) }
+  }
+
   override fun launchFormFromFab(formId: String, pickerMode: MainSurveyViewMode) {
     val current = ui
     val form = current.forms.firstOrNull { it.id == formId } ?: return
+    if (requiresConsentBeforeLaunch()) {
+      session.update {
+        it.copy(
+          isAvailableFormsSheetOpen = false,
+          pendingConsentLaunch = PendingFormLaunch.FromFab(formId, pickerMode),
+        )
+      }
+      return
+    }
     val controller =
       launchForm(
         customFormDef = current.customFormDef,
@@ -516,6 +587,15 @@ class DataCollectionViewModel(
     val entity = current.entities.firstOrNull { it.id == entityId } ?: return
     val form = current.forms.firstOrNull { it.id == formId } ?: return
     if (!current.isFormButtonEnabled(entity, form)) return
+    if (requiresConsentBeforeLaunch()) {
+      session.update {
+        it.copy(
+          isAvailableFormsSheetOpen = false,
+          pendingConsentLaunch = PendingFormLaunch.ForEntity(entityId, formId),
+        )
+      }
+      return
+    }
     val controller =
       launchForm(
         customFormDef = current.customFormDef,

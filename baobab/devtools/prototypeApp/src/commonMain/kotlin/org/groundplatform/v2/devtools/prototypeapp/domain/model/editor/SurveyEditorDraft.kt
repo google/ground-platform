@@ -51,6 +51,7 @@ data class SurveyEditorDraft(
     ): SurveyEditorDraft {
       val base = stored ?: blank(surveyId)
       if (survey == null) return base
+      val inheritSharingFromSurvey = stored == null || base.sharing.ownerEmail.isBlank()
       return base.copy(
         details =
           base.details.copy(
@@ -59,8 +60,17 @@ data class SurveyEditorDraft(
             organizationId = survey.organizationId,
           ),
         sharing =
-          if (base.sharing.ownerEmail.isBlank()) base.sharing.copy(ownerEmail = survey.ownerEmail)
-          else base.sharing,
+          if (inheritSharingFromSurvey) {
+            base.sharing.copy(
+              ownerEmail = survey.ownerEmail,
+              policy = survey.sharingPolicy,
+              peerDataVisibility = survey.peerDataVisibility,
+              collectorConsentRequired = survey.collectorConsentRequired,
+              collectorConsentText = survey.collectorConsentText,
+            )
+          } else {
+            base.sharing
+          },
       )
     }
   }

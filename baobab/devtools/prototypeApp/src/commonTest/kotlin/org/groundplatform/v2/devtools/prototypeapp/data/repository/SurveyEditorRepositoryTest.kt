@@ -258,4 +258,40 @@ class SurveyEditorRepositoryTest {
     assertEquals(listOf("ferm_restoration"), derived.details.purposeIds)
     assertEquals(listOf("ferm"), derived.details.programIds)
   }
+
+  @Test
+  fun saveDraft_projectsCustomAndDefaultFormCtaLabels() {
+    val surveyId = "survey-kenya-coffee"
+    val opened = draft(surveyId)
+    val firstForm = opened.forms[0].form
+    val secondForm = opened.forms[1].form
+    // Seeded forms start with their custom button labels derived from FormPreviewItem.
+    assertEquals("Register baseline parcel", firstForm.ctaLabel)
+    assertEquals("Interview household", secondForm.ctaLabel)
+
+    val edited =
+      opened.copy(
+        forms =
+          opened.forms.mapIndexed { index, entry ->
+            when (index) {
+              // Update custom button label on the first form.
+              0 -> entry.copy(form = entry.form.copy(ctaLabel = "Start parcel registration"))
+              // Clear custom button label on the second form so it falls back to its title.
+              1 -> entry.copy(form = entry.form.copy(ctaLabel = ""))
+              else -> entry
+            }
+          }
+      )
+    runNow { repository.saveDraft(surveyId, edited) }
+
+    val projectedForms = runNow { store.transaction { forms(surveyId) } }
+    assertEquals(
+      "Start parcel registration",
+      projectedForms.first { it.id == firstForm.formId }.ctaLabel,
+    )
+    assertEquals(
+      secondForm.title,
+      projectedForms.first { it.id == secondForm.formId }.ctaLabel,
+    )
+  }
 }

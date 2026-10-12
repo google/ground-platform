@@ -20,6 +20,7 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EditorForm
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EditorQuestion
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EditorQuestionType
 
 class LibraryModelsTest {
@@ -133,8 +134,18 @@ class LibraryModelsTest {
 
   @Test
   fun conceptDataType_compatibility() {
-    assertTrue(ConceptDataType.DECIMAL.isCompatibleWith(EditorQuestionType.INTEGER))
-    assertFalse(ConceptDataType.INTEGER.isCompatibleWith(EditorQuestionType.DECIMAL))
+    assertTrue(ConceptDataType.DECIMAL.isCompatibleWith(EditorQuestionType.NUMBER))
+    assertTrue(ConceptDataType.INTEGER.isCompatibleWith(EditorQuestionType.NUMBER))
+    assertTrue(
+      ConceptDataType.INTEGER.isCompatibleWith(
+        EditorQuestion("q1", "count", EditorQuestionType.NUMBER, "Count", decimalPlaces = 0)
+      )
+    )
+    assertFalse(
+      ConceptDataType.INTEGER.isCompatibleWith(
+        EditorQuestion("q1", "area", EditorQuestionType.NUMBER, "Area", decimalPlaces = 2)
+      )
+    )
     assertTrue(ConceptDataType.TEXT.isCompatibleWith(EditorQuestionType.LONG_TEXT))
     assertTrue(ConceptDataType.MEDIA.isCompatibleWith(EditorQuestionType.PHOTO))
     assertFalse(ConceptDataType.SELECT_ONE.isCompatibleWith(EditorQuestionType.TEXT))

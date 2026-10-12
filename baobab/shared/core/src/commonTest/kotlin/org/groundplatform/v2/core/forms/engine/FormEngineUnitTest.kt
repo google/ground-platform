@@ -59,6 +59,7 @@ import org.groundplatform.v2.core.forms.model.ComponentState
 import org.groundplatform.v2.core.forms.model.FinalizationResult
 import org.groundplatform.v2.core.forms.model.PlatformEffectRequest
 import org.groundplatform.v2.core.forms.model.ValidationErrorKind
+import org.groundplatform.v2.core.forms.serialization.XFormsXmlSerializer
 
 class FormEngineUnitTest {
 
@@ -1556,5 +1557,95 @@ class FormEngineUnitTest {
       2,
       session.state.findFieldState("/data/rep[2]/seq_num")?.value?.scalar_value?.int32_value,
     )
+  }
+
+  @Test
+  fun repeatInstanceOneAndTwoControls_bindToEvaluatedFieldStateAndPreserveBlankInitialRepeat() {
+    val xml =
+      """
+      <h:html xmlns="http://www.w3.org/2002/xforms"
+              xmlns:h="http://www.w3.org/1999/xhtml"
+              xmlns:jr="http://openrosa.org/javarosa">
+        <h:head>
+          <h:title>Repeat Group Saving Test</h:title>
+          <model>
+            <instance>
+              <data id="repeat_save_test">
+                <trees jr:template="">
+                  <species/>
+                  <dbh_cm/>
+                </trees>
+                <trees>
+                  <species/>
+                  <dbh_cm/>
+                </trees>
+              </data>
+            </instance>
+            <bind nodeset="/data/trees/species" type="select1" required="true()"/>
+            <bind nodeset="/data/trees/dbh_cm" type="decimal"/>
+          </model>
+        </h:head>
+        <h:body>
+          <group ref="/data/trees">
+            <label>Sampled Tree</label>
+            <repeat nodeset="/data/trees">
+              <select1 ref="/data/trees/species">
+                <label>Species</label>
+                <item><label>Cordia</label><value>cordia</value></item>
+                <item><label>Grevillea</label><value>grevillea</value></item>
+              </select1>
+              <input ref="/data/trees/dbh_cm">
+                <label>DBH (cm)</label>
+              </input>
+            </repeat>
+          </group>
+        </h:body>
+      </h:html>
+      """
+        .trimIndent()
+
+    val formDef = XFormsXmlSerializer.deserializeFormDef(xml)
+    val session = FormSession(formDef)
+
+    // Non-template blank initial repeat instance in XML must be preserved as instance #1
+    val repeatGroup0 = session.state.rootComponents.first() as ComponentState.RepeatGroupState
+    assertEquals(1, repeatGroup0.instances.size)
+    val inst1Controls0 =
+      repeatGroup0.instances[0].children.filterIsInstance<ComponentState.ControlState>()
+    assertEquals("/data/trees[1]/species", inst1Controls0[0].canonicalPath)
+    assertEquals("/data/trees[1]/dbh_cm", inst1Controls0[1].canonicalPath)
+    assertTrue(inst1Controls0[0].fieldState.isRequired)
+
+    // Update Repeat #1 fields via their control canonicalPaths and verify ControlState.fieldState
+    // reflects the saved answers
+    session.updateString(inst1Controls0[0].canonicalPath, "cordia")
+    session.updateDouble(inst1Controls0[1].canonicalPath, 28.5)
+
+    // Add Repeat #2 and populate its answers
+    session.addRepeatInstance("/data/trees")
+    val repeatGroup1 = session.state.rootComponents.first() as ComponentState.RepeatGroupState
+    assertEquals(2, repeatGroup1.instances.size)
+    val inst2Controls =
+      repeatGroup1.instances[1].children.filterIsInstance<ComponentState.ControlState>()
+    assertEquals("/data/trees[2]/species", inst2Controls[0].canonicalPath)
+    assertEquals("/data/trees[2]/dbh_cm", inst2Controls[1].canonicalPath)
+    session.updateString(inst2Controls[0].canonicalPath, "grevillea")
+    session.updateDouble(inst2Controls[1].canonicalPath, 41.0)
+
+    val finalRepeat = session.state.rootComponents.first() as ComponentState.RepeatGroupState
+    val finalInst1 =
+      finalRepeat.instances[0].children.filterIsInstance<ComponentState.ControlState>()
+    val finalInst2 =
+      finalRepeat.instances[1].children.filterIsInstance<ComponentState.ControlState>()
+
+    assertEquals("cordia", finalInst1[0].fieldState.value?.scalar_value?.string_value)
+    assertFalse(finalInst1[0].fieldState.isEmpty)
+    assertEquals(28.5, finalInst1[1].fieldState.value?.scalar_value?.double_value)
+    assertFalse(finalInst1[1].fieldState.isEmpty)
+
+    assertEquals("grevillea", finalInst2[0].fieldState.value?.scalar_value?.string_value)
+    assertFalse(finalInst2[0].fieldState.isEmpty)
+    assertEquals(41.0, finalInst2[1].fieldState.value?.scalar_value?.double_value)
+    assertFalse(finalInst2[1].fieldState.isEmpty)
   }
 }

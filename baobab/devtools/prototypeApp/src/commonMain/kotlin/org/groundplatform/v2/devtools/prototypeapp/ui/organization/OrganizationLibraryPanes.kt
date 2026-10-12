@@ -172,9 +172,7 @@ internal fun DictionaryPane(
             else -> "No concepts yet."
           },
         onEdit = { editing = it },
-        onDelete = { concept ->
-          deleteError = actions.deleteConcept(organization.id, concept.id)
-        },
+        onDelete = { concept -> deleteError = actions.deleteConcept(organization.id, concept.id) },
       )
       if (library.canEdit) {
         OutlinedButton(onClick = { creating = true }) {
@@ -766,7 +764,6 @@ private fun TemplateRow(
   val linkedCount = template.linkedQuestionCount
   EntryRowLayout(
     title = template.title.text,
-    id = template.id,
     description = template.description.text,
     badges = listOfNotNull("Hidden".takeIf { row.isHidden }, statusBadge(template.status)),
     summary =
@@ -908,7 +905,6 @@ private fun PurposeRow(
   val templates = pack.formTemplateIds.joinToString { library.templateTitles[it] ?: it }
   EntryRowLayout(
     title = pack.title.text,
-    id = pack.id,
     description = pack.description.text,
     badges =
       listOfNotNull(
@@ -943,7 +939,7 @@ private fun statusBadge(status: LibraryStatus): String? =
 @Composable
 private fun EntryRowLayout(
   title: String,
-  id: String,
+  id: String? = null,
   description: String,
   badges: List<String>,
   summary: String,
@@ -958,7 +954,9 @@ private fun EntryRowLayout(
     Row(verticalAlignment = Alignment.Top) {
       Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
         EntryTitleRow(title = title, badges = badges, dimmed = dimmed)
-        MonospaceId(id)
+        if (id != null) {
+          MonospaceId(id)
+        }
         if (description.isNotBlank()) {
           Text(description, style = MaterialTheme.typography.bodySmall)
         }

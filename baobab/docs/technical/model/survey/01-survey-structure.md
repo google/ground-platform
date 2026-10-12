@@ -36,7 +36,7 @@ A survey transitions through five lifecycle states:
 ## Sharing Policies (`SharingPolicy`) and Visibility (`PeerDataVisibility`)
 
 Survey organizers control general access via `SharingPolicy` (mirroring the
-Google Drive sharing model) and enumerator peer visibility via
+Google Drive sharing model) and data collector peer visibility via
 `PeerDataVisibility`:
 
 *   **`SharingPolicy`**:

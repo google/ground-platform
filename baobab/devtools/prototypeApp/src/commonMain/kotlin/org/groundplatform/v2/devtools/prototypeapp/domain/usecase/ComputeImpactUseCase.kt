@@ -457,7 +457,7 @@ class ComputeImpactUseCase(
       summarize(
         scope = ImpactSummaryScope.GLOBAL,
         scopeId = "",
-        title = "All Ground users",
+        title = "All Collect One users",
         rows = rows.filterNot { it.organizationSuggested },
         snapshot = snapshot,
         mappedCount = eligible.sumOf { it.features.size }.toLong(),
@@ -534,9 +534,7 @@ class ComputeImpactUseCase(
             ?.goals
             .orEmpty()
             .ifEmpty { listOf("") }
-            .map {
-              it to indicator
-            }
+            .map { it to indicator }
         }
         .groupBy({ it.first }, { it.second })
         .map { (goal, list) -> ImpactGoalSection(goal, ImpactGoals.label(goal), list) }

@@ -19,6 +19,9 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.FormPreviewItem
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.MapThumbnailTheme
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyLifecycleState
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyPreviewItem
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyThumbnailGenerator
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.PeerDataVisibility
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SharingPolicy
 import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.ResolveFormDefForLaunchUseCase
 
 /** Hardcoded sample surveys, forms, and XForms presets for the prototype app. */
@@ -53,6 +56,8 @@ internal object PrototypeFakeSurveysData {
           isDownloaded = true,
           thumbnailTheme = MapThumbnailTheme.SAVANNA,
           entityCount = 3,
+          sharingPolicy = SharingPolicy.PUBLIC,
+          peerDataVisibility = PeerDataVisibility.ALL,
         ),
         SurveyPreviewItem(
           id = "survey-sample-plots-forest",
@@ -77,6 +82,8 @@ internal object PrototypeFakeSurveysData {
           isDownloaded = true,
           thumbnailTheme = MapThumbnailTheme.WATERSHED,
           entityCount = 3,
+          sharingPolicy = SharingPolicy.ANYONE_WITH_LINK,
+          peerDataVisibility = PeerDataVisibility.OWN_ONLY,
         ),
         SurveyPreviewItem(
           id = "survey-household-past-individuals",
@@ -117,12 +124,27 @@ internal object PrototypeFakeSurveysData {
           isDownloaded = false,
           thumbnailTheme = MapThumbnailTheme.PEATLAND,
           entityCount = 204,
+          sharingPolicy = SharingPolicy.ORGANIZATION,
+          peerDataVisibility = PeerDataVisibility.ALL,
         ),
       )
       .map { survey ->
+        val surveyArea =
+          if (survey.id == SampleDataSeeder.DEFAULT_ACTIVE_SURVEY_ID) {
+            PrototypeFakeSurveyEditorData.kenyaSurveyArea()
+          } else {
+            null
+          }
         survey.copy(
           ownerEmail = PrototypeFakeOrganizationsData.ownerEmailForSurvey(survey.id),
           organizationId = PrototypeFakeOrganizationsData.organizationIdForSurvey(survey.id),
+          thumbnail =
+            SurveyThumbnailGenerator.fromRuntime(
+              surveyId = survey.id,
+              surveyArea = surveyArea,
+              mapLayers = PrototypeFakeMapLayersData.mapLayersForSurvey(survey.id),
+              entities = PrototypeFakeEntitiesData.entitiesForSurvey(survey.id),
+            ),
         )
       }
 

@@ -122,11 +122,15 @@ data class SampleDesignConfig(
         },
       plotSizeM = plotSizeM,
       subPlot =
-        when (subPlot) {
-          SubPlotMode.NONE -> SubPlotLayout.None
-          SubPlotMode.CENTER -> SubPlotLayout.Center
-          SubPlotMode.GRID -> SubPlotLayout.Grid(subPlotGridN, subPlotSpacingM)
-          SubPlotMode.RANDOM -> SubPlotLayout.Random(subPlotRandomCount)
+        if (plotShape == PlotShapeOption.POINT) {
+          SubPlotLayout.None
+        } else {
+          when (subPlot) {
+            SubPlotMode.NONE -> SubPlotLayout.None
+            SubPlotMode.CENTER -> SubPlotLayout.Center
+            SubPlotMode.GRID -> SubPlotLayout.Grid(subPlotGridN, subPlotSpacingM)
+            SubPlotMode.RANDOM -> SubPlotLayout.Random(subPlotRandomCount)
+          }
         },
       shuffle = shuffle,
       seed = seed,

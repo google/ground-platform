@@ -110,11 +110,11 @@ import org.groundplatform.v2.devtools.prototypeapp.ui.navigation.SurveyMapView
  * ```
  *    [SubmissionFullDetailsCard] with a back button returning to the searchable list.
  * ```
- * 3. When no specific item is selected, renders [SurveyListView] — peeking at the bottom of the map
+ * 3. When no specific item is selected, renders [BottomSheetSearchableListContent] — peeking at the
  *
  * ```
- *    with a Search bar and category filter chips (`All`, `Places`, `Map features`) and expanding
- *    into the full grouped list.
+ *    bottom of the map with the survey title and area name (on mobile) or a Search bar (in the web
+ *    side panel), and expanding into the full grouped list.
  * ```
  *
  * When [isSidePanel] is `true` (the web dashboard's left-hand panel), the sheet expand/collapse
@@ -283,7 +283,7 @@ internal fun FormGroupedSubmissionsSection(
                     modifier = Modifier.size(13.dp),
                   )
                   Text(
-                    text = sub.collectorName,
+                    text = state.displayCollectorName(sub),
                     style =
                       if (showTargetEntityLabel) {
                         MaterialTheme.typography.labelSmall
@@ -458,19 +458,19 @@ private fun ListSearchField(
 /**
  * Searchable List content embedded inside the unified persistent bottom sheet (
  * [SurveyPersistentBottomSheetContent]) when no specific entity or submission is selected:
- * - Peeks at the bottom of the map with the Search bar (`"Search..."`) and an Expand/Collapse sheet
- *   button.
+ * - On mobile, peeks at the bottom of the map with the active survey title and area name in the
+ *   bottom card heading alongside an Expand/Collapse sheet button.
  * - Expands to display **Map layers** (grouped by spatial layer with un-nested entity records,
  *   reusing [EntitySummaryHeader] and [EntityMetadataAndActionsRow]), **Data tables** (tabular
  *   datasets), and **Places** (geographic places, landmarks, and coordinates in the survey region).
  *
- * When [isSidePanel] is `true` (the web dashboard's left-hand panel), the Expand/Collapse sheet
- * button is hidden and the list uses a denser, mouse-oriented layout: dataset header rows and map
- * feature rows share one compact [SidePanelListRowHeight], each dataset header has a chevron left
- * of its name that collapses or expands its map features
- * ([PrototypeAppState.toggleListDatasetCollapsed]; all datasets show expanded while searching), and
- * the layer visibility toggle appears only while the header row is hovered or focused, or while the
- * layer is hidden.
+ * When [isSidePanel] is `true` (the web dashboard's left-hand panel), the header displays the
+ * compact search field ([ListSearchField]), the Expand/Collapse sheet button is hidden, and the
+ * list uses a denser, mouse-oriented layout: dataset header rows and map feature rows share one
+ * compact [SidePanelListRowHeight], each dataset header has a chevron left of its name that
+ * collapses or expands its map features ([PrototypeAppState.toggleListDatasetCollapsed]; all
+ * datasets show expanded while searching), and the layer visibility toggle appears only while the
+ * header row is hovered or focused, or while the layer is hidden.
  */
 @Composable
 internal fun BottomSheetSearchableListContent(
@@ -492,16 +492,13 @@ internal fun BottomSheetSearchableListContent(
   val groupedEntities = remember(matchedEntities, mapLayers) { state.groupedFilteredListEntities }
 
   Column(modifier = modifier) {
-    // Sticky Peek Header: Search Bar + Expand/Collapse Toggle
+    // Sticky Peek Header: on mobile, Survey Title + Area Name + Expand/Collapse Toggle;
+    // on web side panel, compact Search Bar.
     Column(
       modifier = Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 4.dp),
       verticalArrangement = Arrangement.spacedBy(6.dp),
     ) {
-      Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-      ) {
+      if (isSidePanel) {
         ListSearchField(
           query = state.listSearchQuery,
           onQueryChange = {
@@ -511,11 +508,48 @@ internal fun BottomSheetSearchableListContent(
             }
           },
           onClear = { state.clearListSearchQuery() },
-          compact = isSidePanel,
-          modifier = Modifier.weight(1f),
+          compact = true,
+          modifier = Modifier.fillMaxWidth(),
         )
+      } else {
+        Row(
+          modifier = Modifier.fillMaxWidth(),
+          verticalAlignment = Alignment.CenterVertically,
+          horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+          Column(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(2.dp),
+          ) {
+            Text(
+              text = state.activeSurvey.title,
+              style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+              color = MaterialTheme.colorScheme.onSurface,
+              maxLines = 1,
+              overflow = TextOverflow.Ellipsis,
+            )
+            if (state.activeSurvey.location.isNotBlank()) {
+              Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(3.dp),
+              ) {
+                Icon(
+                  imageVector = Icons.Outlined.LocationOn,
+                  contentDescription = null,
+                  tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                  modifier = Modifier.size(13.dp),
+                )
+                Text(
+                  text = state.activeSurvey.location,
+                  style = MaterialTheme.typography.labelMedium,
+                  color = MaterialTheme.colorScheme.onSurfaceVariant,
+                  maxLines = 1,
+                  overflow = TextOverflow.Ellipsis,
+                )
+              }
+            }
+          }
 
-        if (!isSidePanel) {
           IconButton(
             onClick = {
               if (state.isEntityBottomSheetExpanded) {
@@ -548,7 +582,7 @@ internal fun BottomSheetSearchableListContent(
 
       // Offline banner in the bottom sheet explaining that search is only in local map features
       // and that Places search is not available offline.
-      if (!isOnline) {
+      if (!isOnline && (isSidePanel || state.isEntityBottomSheetExpanded)) {
         Surface(
           shape = MaterialTheme.shapes.small,
           color = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.85f),
@@ -1147,7 +1181,7 @@ internal fun SubmissionFullDetailsCard(
             modifier = Modifier.size(12.dp),
           )
           Text(
-            text = "Data Collector: ${submission.collectorName} (${submission.collectorEmail})",
+            text = "Data collector: ${state.displayCollectorAttribution(submission)}",
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
           )

@@ -13,7 +13,10 @@
  */
 package org.groundplatform.v2.core.forms.ui
 
+import groundplatform.v2.forms.DataType
+import groundplatform.v2.forms.FieldValue
 import groundplatform.v2.forms.GeoPoint
+import groundplatform.v2.forms.TypedValue
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -340,5 +343,139 @@ class FormWizardControllerTest {
     assertEquals(2, controller.currentStepIndex)
     val step2 = assertIs<FormWizardStep.QuestionStep>(controller.currentStep)
     assertEquals("/data/notes", step2.control.canonicalPath)
+  }
+
+  @Test
+  fun booleanInputOptionsAndDisplay_usesYesAndNoWithoutTrueOrFalse() {
+    assertEquals(listOf(true to "Yes", false to "No"), BooleanInputOptions)
+    assertEquals(
+      "Yes",
+      formatFieldValueForDisplay(
+        FieldValue(scalar_value = TypedValue(bool_value = true)),
+        DataType.TYPE_BOOLEAN,
+      ),
+    )
+    assertEquals(
+      "No",
+      formatFieldValueForDisplay(
+        FieldValue(scalar_value = TypedValue(bool_value = false)),
+        DataType.TYPE_BOOLEAN,
+      ),
+    )
+    assertEquals("(Unanswered)", formatFieldValueForDisplay(null, DataType.TYPE_BOOLEAN))
+  }
+
+  @Test
+  fun stepValidationBlockerMessage_omitsSkipPromptForRequiredQuestions() {
+    val formDef = XFormsXmlSerializer.deserializeFormDef(sampleFormXml)
+    val controller = FormWizardController(formDef = formDef)
+
+    // Step 0 (/data/species) is required -> cannot skip, message must not mention skipping
+    assertFalse(controller.isCurrentStepOptional)
+    assertFalse(controller.nextStep(enforceValidation = true))
+    assertTrue(controller.showCurrentStepValidationWarning)
+    assertEquals(
+      "Please resolve validation errors above to continue.",
+      stepValidationBlockerMessage(
+        isWaitingForLocationCapture = controller.isCurrentStepWaitingForLocationCapture,
+        isStepOptional = controller.isCurrentStepOptional,
+      ),
+    )
+
+    // Answer step 0 and advance to step 1 (/data/height_m), which is optional with a constraint
+    controller.updateString("/data/species", "Adansonia digitata")
+    assertTrue(controller.nextStep(enforceValidation = true))
+    assertTrue(controller.isCurrentStepOptional)
+
+    // Enter invalid value (-5.0 violates . > 0) -> optional question mentions skipping
+    controller.updateDouble("/data/height_m", -5.0)
+    assertFalse(controller.nextStep(enforceValidation = true))
+    assertTrue(controller.showCurrentStepValidationWarning)
+    assertEquals(
+      "Please resolve validation errors above or skip to continue.",
+      stepValidationBlockerMessage(
+        isWaitingForLocationCapture = controller.isCurrentStepWaitingForLocationCapture,
+        isStepOptional = controller.isCurrentStepOptional,
+      ),
+    )
+
+    // Waiting for location capture takes precedence
+    assertEquals(
+      "Please capture a location or drop a pin before proceeding.",
+      stepValidationBlockerMessage(isWaitingForLocationCapture = true, isStepOptional = false),
+    )
+    assertEquals(
+      "Please capture a location or drop a pin before proceeding.",
+      stepValidationBlockerMessage(isWaitingForLocationCapture = true, isStepOptional = true),
+    )
+  }
+
+  @Test
+  fun repeatGroupQuestionSteps_bindAndRetainAnswersAcrossInstances() {
+    val formDef = WorkbenchExampleForm.ALL_FIELD_TYPES.formDefinition.proto
+    val controller = FormWizardController(formDef = formDef)
+
+    // Repeat #1 steps must carry [1] in their canonicalPath and "#1" in instanceLabel
+    val repeat1Steps =
+      controller.steps.filterIsInstance<FormWizardStep.QuestionStep>().filter {
+        it.repeatContext?.repeatIndex == 1
+      }
+    assertTrue(repeat1Steps.isNotEmpty())
+    assertTrue(repeat1Steps.all { it.control.canonicalPath.contains("/sampled_trees[1]/") })
+    assertEquals(
+      "Individual Tree Measurements (Repeat Group) #1",
+      repeat1Steps.first().repeatContext?.instanceLabel,
+    )
+
+    // Update Repeat #1 answers via controller and verify the recomputed QuestionSteps retain them
+    controller.updateString("/data/sampled_trees[1]/tree_tag", "T-101")
+    controller.updateDouble("/data/sampled_trees[1]/stem_dbh_cm", 36.4)
+
+    // Add Repeat #2 and populate its answers
+    controller.addRepeatInstanceAndOpen("/data/sampled_trees")
+    controller.updateString("/data/sampled_trees[2]/tree_tag", "T-102")
+    controller.updateDouble("/data/sampled_trees[2]/stem_dbh_cm", 22.0)
+
+    val stepsByPath =
+      controller.steps.filterIsInstance<FormWizardStep.QuestionStep>().associateBy {
+        it.control.canonicalPath
+      }
+
+    assertEquals(
+      "T-101",
+      stepsByPath["/data/sampled_trees[1]/tree_tag"]
+        ?.control
+        ?.fieldState
+        ?.value
+        ?.scalar_value
+        ?.string_value,
+    )
+    assertEquals(
+      36.4,
+      stepsByPath["/data/sampled_trees[1]/stem_dbh_cm"]
+        ?.control
+        ?.fieldState
+        ?.value
+        ?.scalar_value
+        ?.double_value,
+    )
+    assertEquals(
+      "T-102",
+      stepsByPath["/data/sampled_trees[2]/tree_tag"]
+        ?.control
+        ?.fieldState
+        ?.value
+        ?.scalar_value
+        ?.string_value,
+    )
+    assertEquals(
+      22.0,
+      stepsByPath["/data/sampled_trees[2]/stem_dbh_cm"]
+        ?.control
+        ?.fieldState
+        ?.value
+        ?.scalar_value
+        ?.double_value,
+    )
   }
 }

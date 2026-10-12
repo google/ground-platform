@@ -98,7 +98,13 @@ object GlobalLibrarySeedData {
         )
       "pame" -> OrganizationLibrary(GLOBAL, concepts = pameConcepts())
       "iplc" -> OrganizationLibrary(GLOBAL, concepts = iplcConcepts())
-      "lulc" -> OrganizationLibrary(GLOBAL, concepts = lulcConcepts())
+      "lulc" ->
+        OrganizationLibrary(
+          GLOBAL,
+          concepts = lulcConcepts(),
+          formTemplates = listOf(lulcGroundTruthTemplate(), reddPlusForestAssessmentTemplate()),
+          purposePacks = listOf(lulcTrainingDataPack(), reddPlusTfffPack()),
+        )
       "timber" -> OrganizationLibrary(GLOBAL, concepts = timberConcepts())
       else -> throw IllegalArgumentException("Unknown vocabulary $name")
     }
@@ -180,6 +186,9 @@ object GlobalLibrarySeedData {
         concept.codeList.map {
           EditorChoice(value = it.code, label = it.label.text, code = it.code)
         },
+      decimalPlaces =
+        if (concept.dataType == ConceptDataType.DECIMAL) EditorQuestion.DEFAULT_DECIMAL_PLACES
+        else 0,
       capture = capture,
     )
 
@@ -423,7 +432,7 @@ object GlobalLibrarySeedData {
             "producer_gender",
             EditorQuestionType.SELECT_ONE,
           ) to c.byId("core.producer_gender"),
-          question(c.byId("core.household_size"), "household_size", EditorQuestionType.INTEGER) to
+          question(c.byId("core.household_size"), "household_size", EditorQuestionType.NUMBER) to
             c.byId("core.household_size"),
           question(c.byId("core.country"), "country", EditorQuestionType.TEXT) to
             c.byId("core.country"),
@@ -634,7 +643,7 @@ object GlobalLibrarySeedData {
             hint = "Walk or draw the plot boundary.",
             capture = GeometryCapture.GPS_OR_MAP,
           ) to e.byId("eudr.production_place"),
-          question(c.byId("core.area_ha"), "area_ha", EditorQuestionType.DECIMAL) to
+          question(c.byId("core.area_ha"), "area_ha", EditorQuestionType.NUMBER) to
             c.byId("core.area_ha"),
           question(e.byId("eudr.plot_over_4ha"), "plot_over_4ha", EditorQuestionType.SELECT_ONE) to
             e.byId("eudr.plot_over_4ha"),
@@ -814,13 +823,13 @@ object GlobalLibrarySeedData {
           question(
             f.byId("ferm.area_under_restoration_ha"),
             "area_under_restoration_ha",
-            EditorQuestionType.DECIMAL,
+            EditorQuestionType.NUMBER,
           ) to f.byId("ferm.area_under_restoration_ha"),
           question(f.byId("ferm.start_date"), "start_date", EditorQuestionType.DATE) to
             f.byId("ferm.start_date"),
-          question(f.byId("ferm.trees_planted"), "trees_planted", EditorQuestionType.INTEGER) to
+          question(f.byId("ferm.trees_planted"), "trees_planted", EditorQuestionType.NUMBER) to
             f.byId("ferm.trees_planted"),
-          question(f.byId("ferm.trees_surviving"), "trees_surviving", EditorQuestionType.INTEGER) to
+          question(f.byId("ferm.trees_surviving"), "trees_surviving", EditorQuestionType.NUMBER) to
             f.byId("ferm.trees_surviving"),
           question(c.byId("core.site_photo"), "site_photo", EditorQuestionType.PHOTO) to
             c.byId("core.site_photo"),
@@ -1077,6 +1086,129 @@ object GlobalLibrarySeedData {
         ConceptAggregation.NONE,
         PrivacyClass.AGGREGATE_PUBLIC,
       ),
+    )
+
+  private fun lulcGroundTruthTemplate(): FormTemplate {
+    val l = lulcConcepts()
+    return template(
+      id = "lulc_ground_truth",
+      title =
+        text(
+          "LULC ground-truth classification",
+          "Classification de la couverture terrestre",
+          "Clasificación de cobertura del suelo",
+        ),
+      description =
+        text(
+          "Visual or field plot classification of land cover, land use, canopy cover, and observation date."
+        ),
+      questions =
+        listOf(
+          question(
+            l.byId("lulc.land_cover_class"),
+            "land_cover_class",
+            EditorQuestionType.SELECT_ONE,
+            true,
+          ) to l.byId("lulc.land_cover_class"),
+          question(l.byId("lulc.land_use"), "land_use", EditorQuestionType.SELECT_ONE) to
+            l.byId("lulc.land_use"),
+          question(
+            l.byId("lulc.canopy_cover_pct"),
+            "canopy_cover_pct",
+            EditorQuestionType.NUMBER,
+          ) to l.byId("lulc.canopy_cover_pct"),
+          question(
+            l.byId("lulc.observation_date"),
+            "observation_date",
+            EditorQuestionType.DATE,
+          ) to l.byId("lulc.observation_date"),
+        ),
+    )
+  }
+
+  private fun reddPlusForestAssessmentTemplate(): FormTemplate {
+    val l = lulcConcepts()
+    val c = coreConcepts()
+    return template(
+      id = "redd_plus_forest_assessment",
+      title =
+        text(
+          "REDD+ & TFFF forest assessment",
+          "Évaluation forestière REDD+ & TFFF",
+          "Evaluación forestal REDD+ y TFFF",
+        ),
+      description =
+        text(
+          "Forest cover, canopy structure, and observation records for REDD+ and Tropical Forest Forever Facility monitoring."
+        ),
+      questions =
+        listOf(
+          question(
+            l.byId("lulc.land_cover_class"),
+            "land_cover_class",
+            EditorQuestionType.SELECT_ONE,
+            true,
+          ) to l.byId("lulc.land_cover_class"),
+          question(
+            l.byId("lulc.canopy_cover_pct"),
+            "canopy_cover_pct",
+            EditorQuestionType.NUMBER,
+            true,
+          ) to l.byId("lulc.canopy_cover_pct"),
+          question(l.byId("lulc.tree_height_m"), "tree_height_m", EditorQuestionType.NUMBER) to
+            l.byId("lulc.tree_height_m"),
+          question(
+            l.byId("lulc.observation_date"),
+            "observation_date",
+            EditorQuestionType.DATE,
+          ) to l.byId("lulc.observation_date"),
+          question(c.byId("core.site_photo"), "site_photo", EditorQuestionType.PHOTO) to
+            c.byId("core.site_photo"),
+        ),
+    )
+  }
+
+  private fun lulcTrainingDataPack() =
+    PurposePack(
+      id = "lulc_training_data",
+      organizationId = GLOBAL,
+      title =
+        text(
+          "LULC training & validation data",
+          "Données d'entraînement et de validation LULC",
+          "Datos de entrenamiento y validación LULC",
+        ),
+      description =
+        text(
+          "Classify sample plots or field sites with FAO-aligned land cover and land use labels for map training and accuracy assessment."
+        ),
+      icon = "layers",
+      formTemplateIds = listOf("lulc_ground_truth"),
+      goals = listOf(GOAL_DEFORESTATION_FREE),
+      pillar = ImpactPillar.MITIGATION,
+      status = LibraryStatus.STABLE,
+    )
+
+  private fun reddPlusTfffPack() =
+    PurposePack(
+      id = "redd_plus_tfff",
+      organizationId = GLOBAL,
+      title =
+        text(
+          "REDD+ / TFFF forest monitoring",
+          "Suivi forestier REDD+ / TFFF",
+          "Monitoreo forestal REDD+ / TFFF",
+        ),
+      description =
+        text(
+          "Measure forest cover, canopy cover, and tree height for REDD+ MRV and Tropical Forest Forever Facility reporting."
+        ),
+      icon = "public",
+      formTemplateIds = listOf("redd_plus_forest_assessment"),
+      programIds = listOf("redd_plus", "tfff"),
+      goals = listOf(GOAL_DEFORESTATION_FREE, GOAL_PROTECTED_AREAS),
+      pillar = ImpactPillar.MITIGATION,
+      status = LibraryStatus.STABLE,
     )
 
   // --- timber ---------------------------------------------------------------------------------

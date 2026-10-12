@@ -58,6 +58,10 @@ data class SurveyDetails(
    * `org.<organizationId>.<name>` IDs of the organization's packs.
    */
   val purposeIds: List<String> = emptyList(),
+  /**
+   * Free-text description when [SurveyWizardRules.OTHER_PURPOSE_ID] is selected in [purposeIds].
+   */
+  val otherPurpose: String = "",
   /** Programs the survey reports to (`SurveyDef.program_ids`), e.g. `"eudr"`. */
   val programIds: List<String> = emptyList(),
 )
@@ -87,14 +91,26 @@ data class Collaborator(
 
 /** Mirrors `groundplatform.v2.survey.SharingPolicy`. */
 enum class SharingPolicy(val label: String, val description: String) {
-  RESTRICTED("Restricted", "Only people added below can open the survey."),
+  RESTRICTED("Restricted", "Only people added above can open this survey."),
   /** Only valid when the survey belongs to an organization ([SurveyDetails.organizationId]). */
   ORGANIZATION(
     "Anyone in the organization",
     "Members of the survey's organization can collect data. Managers can also edit the survey.",
   ),
-  ANYONE_WITH_LINK("Anyone with the link", "Anyone with the link or QR code can collect data."),
-  PUBLIC("Public", "Listed in the public directory. Anyone can collect data."),
+  ANYONE_WITH_LINK(
+    "Link or QR code required",
+    "Users need a link or QR code to access this survey and collect data.",
+  ),
+  PUBLIC(
+    "Listed in the directory",
+    "Listed in the directory so anyone can find this survey and collect data.",
+  );
+
+  val isOpenToAnyone: Boolean
+    get() = this == ANYONE_WITH_LINK || this == PUBLIC
+
+  val isListedInDirectory: Boolean
+    get() = this == PUBLIC
 }
 
 /** Mirrors `groundplatform.v2.survey.PeerDataVisibility`. */
@@ -109,7 +125,24 @@ data class SharingSettings(
   val peerDataVisibility: PeerDataVisibility = PeerDataVisibility.ALL,
   val collaborators: List<Collaborator> = emptyList(),
   val ownerProfile: CachedProfile? = null,
-)
+  val collectorConsentRequired: Boolean = false,
+  val collectorConsentText: String = "",
+) {
+  val isOpenToAnyone: Boolean
+    get() = policy.isOpenToAnyone
+
+  val isListedInDirectory: Boolean
+    get() = policy.isListedInDirectory
+
+  val isPublicData: Boolean
+    get() = policy.isOpenToAnyone && peerDataVisibility == PeerDataVisibility.ALL
+
+  val isPrivateSubmissions: Boolean
+    get() = policy.isOpenToAnyone && peerDataVisibility == PeerDataVisibility.OWN_ONLY
+
+  val requiresCollectorConsent: Boolean
+    get() = isPublicData || collectorConsentRequired
+}
 
 /** Whether an entity dataset is a spatial Map layer or a non-spatial Data table. */
 enum class DatasetKind(val singular: String, val plural: String) {

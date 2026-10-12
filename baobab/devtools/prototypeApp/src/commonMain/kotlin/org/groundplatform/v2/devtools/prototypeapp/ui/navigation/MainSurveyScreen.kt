@@ -30,6 +30,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -37,13 +38,13 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.Description
 import androidx.compose.material.icons.outlined.Explore
-import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.Menu
 import androidx.compose.material.icons.outlined.MyLocation
 import androidx.compose.material.icons.outlined.Navigation
@@ -66,8 +67,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.runtime.Composable
@@ -79,6 +78,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -100,7 +100,10 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.formatClusterSit
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.geometryKind
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.hasGeometry
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.maxFramingZoom
+import org.groundplatform.v2.devtools.prototypeapp.ui.common.UserAvatarButton
+import org.groundplatform.v2.devtools.prototypeapp.ui.common.UserProfileSidePanelOverlay
 import org.groundplatform.v2.devtools.prototypeapp.ui.common.horizontalScrollWithMouseDrag
+import org.groundplatform.v2.devtools.prototypeapp.ui.datacollection.CollectorConsentModalDialog
 import org.groundplatform.v2.devtools.prototypeapp.ui.datacollection.SurveyPersistentBottomSheetContent
 import org.groundplatform.v2.devtools.prototypeapp.ui.map.BasemapOptionOrder
 import org.groundplatform.v2.devtools.prototypeapp.ui.map.BasemapOptionRow
@@ -112,11 +115,11 @@ import org.groundplatform.v2.devtools.prototypeapp.ui.state.DataCollectionUiStat
 import org.groundplatform.v2.devtools.prototypeapp.ui.state.SurveyMapUiState
 import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.DataCollectionActions
 import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.SurveyMapActions
-import org.groundplatform.v2.devtools.prototypeapp.ui.workbench.PrototypeDebugToolsButton
 
 /**
  * 5. Main Survey UI screen (`PrototypeScreen.MAIN_SURVEY`) providing:
- * - Top App Bar with Hamburger Menu and active survey title.
+ * - **Top Search Bar**: Floating search bar at the top of the screen with the Hamburger menu button
+ *   on the left and the user avatar account menu on the right.
  * - **Map View**: Displays Ground geospatial entities on the map, a basemap preview card that opens
  *   the basemap selector, and an interactive **Entity Bottom Sheet** when an entity is clicked:
  * ```
@@ -126,16 +129,16 @@ import org.groundplatform.v2.devtools.prototypeapp.ui.workbench.PrototypeDebugTo
  * ```
  * - **Unified Persistent Bottom Sheet (`SurveyPersistentBottomSheetContent`)**:
  * ```
- *     - When no map feature is selected, peeks at the bottom of the map with a Search bar and category
- *       filter chips (`All`, `Places`, `Map features`) and expands into the full
- *       searchable list of grouped map features and places.
+ *     - When no map feature is selected, peeks at the bottom of the map with the active survey
+ *       title and area name in its heading and expands into the full searchable list of grouped map
+ *       features and places.
  *
  *     - When a map feature is selected (via map tap or list selection), transitions in-place to
  *       `EntityBottomSheetCard` showing its `simplestyle-spec` marker, baseline properties, form
  *       launchers, and `1:N` submission history.
  * ```
- * - **Hamburger Navigation Drawer**: Options for Surveys, Outbox, Uploaded, Offline maps, Change
- *   settings, View Terms of Service, and Sign out.
+ * - **Hamburger Navigation Drawer**: Options for Surveys, Uploads, Offline maps, Change settings,
+ *   and View Terms of Service.
  */
 @Composable
 fun MainSurveyScreen(state: PrototypeAppState) {
@@ -146,22 +149,17 @@ fun MainSurveyScreen(state: PrototypeAppState) {
   val activePdfSheet = dataCollectionUiState.activeSharedPdfSheet
 
   Box(modifier = Modifier.fillMaxSize().background(surfaceColor)) {
-    Column(modifier = Modifier.fillMaxSize()) {
-      // Top App Bar with Hamburger button, Survey Title, and quick sheet toggle
-      MainSurveyTopAppBar(state)
-
-      // Main Body: either a Drawer Sub-View (Switch Surveys / Uploads / Offline Maps / Settings)
-      // or the unified Map + Persistent Bottom Sheet View
-      Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
-        when (state.activeDrawerSubView) {
-          MainDrawerSubView.SWITCH_SURVEYS -> SwitchDownloadedSurveysSubScreen(state)
-          MainDrawerSubView.UPLOADS,
-          MainDrawerSubView.OUTBOX,
-          MainDrawerSubView.UPLOADED -> UploadsMutationsSubScreen(state)
-          MainDrawerSubView.MANAGE_OFFLINE_MAPS -> ManageOfflineMapsSubScreen(state)
-          MainDrawerSubView.SETTINGS -> SurveySettingsSubScreen(state)
-          MainDrawerSubView.NONE -> SurveyMapView(state)
-        }
+    // Main Body: either a Drawer Sub-View (Switch Surveys / Uploads / Offline Maps / Settings)
+    // or the unified Map + Top Search Bar + Persistent Bottom Sheet View
+    Box(modifier = Modifier.fillMaxSize()) {
+      when (state.activeDrawerSubView) {
+        MainDrawerSubView.SWITCH_SURVEYS -> SwitchDownloadedSurveysSubScreen(state)
+        MainDrawerSubView.UPLOADS,
+        MainDrawerSubView.OUTBOX,
+        MainDrawerSubView.UPLOADED -> UploadsMutationsSubScreen(state)
+        MainDrawerSubView.MANAGE_OFFLINE_MAPS -> ManageOfflineMapsSubScreen(state)
+        MainDrawerSubView.SETTINGS -> SurveySettingsSubScreen(state)
+        MainDrawerSubView.NONE -> SurveyMapView(state)
       }
     }
 
@@ -181,6 +179,18 @@ fun MainSurveyScreen(state: PrototypeAppState) {
       MainSurveyNavigationDrawerOverlay(state)
     }
 
+    // Slide-over Right-Hand User Account Panel Overlay
+    if (state.isUserProfileOpen) {
+      UserProfileSidePanelOverlay(
+        userName = state.signedInUserName,
+        userEmail = state.signedInUserEmail,
+        userInitials = state.signedInUserInitials,
+        organization = state.signedInOrganization,
+        onDismissRequest = { state.updateUserProfileOpen(false) },
+        onSignOut = state::signOut,
+      )
+    }
+
     // Scannable Entity GeoID QR Code Modal Overlay
     if (activeQrEntity != null) {
       EntityQrCodeModalDialog(actions = state.dataCollection, entity = activeQrEntity)
@@ -195,6 +205,14 @@ fun MainSurveyScreen(state: PrototypeAppState) {
       )
     }
 
+    // Just-in-time Informed Consent Modal Overlay
+    if (dataCollectionUiState.pendingCollectorConsent != null) {
+      CollectorConsentModalDialog(
+        uiState = dataCollectionUiState,
+        actions = state.dataCollection,
+      )
+    }
+
     PdfExportMessageSnackbar(
       uiState = state.dataCollectionUiState,
       actions = state.dataCollection,
@@ -203,83 +221,111 @@ fun MainSurveyScreen(state: PrototypeAppState) {
   }
 }
 
-/** Top App Bar for the Main Survey UI with Hamburger Menu button and Survey Title/Location. */
-@OptIn(ExperimentalMaterial3Api::class)
+/**
+ * Floating search bar at the top of the mobile map screen containing the Hamburger navigation
+ * drawer button on the left, the live search input in the center, and the user avatar account menu
+ * on the right.
+ */
 @Composable
-internal fun MainSurveyTopAppBar(state: PrototypeAppState) {
-  val topBarContainer =
-    if (state.isDarkTheme) {
-      MaterialTheme.colorScheme.primaryContainer
-    } else {
-      MaterialTheme.colorScheme.primary
-    }
-  val onTopBarContainer =
-    if (state.isDarkTheme) {
-      MaterialTheme.colorScheme.onPrimaryContainer
-    } else {
-      MaterialTheme.colorScheme.onPrimary
-    }
-
-  TopAppBar(
-    navigationIcon = {
-      IconButton(onClick = { state.updateDrawerOpen(true) }) {
+internal fun MobileMapSearchBar(state: PrototypeAppState, modifier: Modifier = Modifier) {
+  val query = state.listSearchQuery
+  Surface(
+    modifier = modifier.fillMaxWidth(),
+    shape = MaterialTheme.shapes.extraLarge,
+    color = MaterialTheme.colorScheme.surfaceContainerHigh,
+    contentColor = MaterialTheme.colorScheme.onSurface,
+    shadowElevation = 4.dp,
+    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+  ) {
+    Row(
+      modifier = Modifier.fillMaxWidth().height(48.dp).padding(start = 4.dp, end = 8.dp),
+      verticalAlignment = Alignment.CenterVertically,
+    ) {
+      IconButton(
+        onClick = { state.updateDrawerOpen(true) },
+        modifier = Modifier.size(40.dp),
+      ) {
         Icon(
           imageVector = Icons.Outlined.Menu,
           contentDescription = "Open Navigation Drawer",
-          tint = onTopBarContainer,
+          tint = MaterialTheme.colorScheme.onSurface,
+          modifier = Modifier.size(22.dp),
         )
       }
-    },
-    title = {
-      Column {
-        Text(
-          text = state.activeSurvey.title,
-          style = MaterialTheme.typography.titleSmall,
-          color = onTopBarContainer,
-          fontWeight = FontWeight.Bold,
-          maxLines = 1,
-          overflow = TextOverflow.Ellipsis,
-        )
-        Row(
-          verticalAlignment = Alignment.CenterVertically,
-          horizontalArrangement = Arrangement.spacedBy(3.dp),
-        ) {
-          Icon(
-            imageVector = Icons.Outlined.LocationOn,
-            contentDescription = null,
-            tint = onTopBarContainer.copy(alpha = 0.85f),
-            modifier = Modifier.size(12.dp),
-          )
+
+      Box(
+        modifier = Modifier.weight(1f).padding(horizontal = 4.dp),
+        contentAlignment = Alignment.CenterStart,
+      ) {
+        if (query.isEmpty()) {
           Text(
-            text = state.activeSurvey.location,
-            style = MaterialTheme.typography.labelSmall,
-            color = onTopBarContainer.copy(alpha = 0.85f),
+            text = "Search...",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
           )
         }
+        BasicTextField(
+          value = query,
+          onValueChange = {
+            state.updateListSearchQuery(it)
+            if (it.isNotEmpty()) {
+              if (
+                state.dataCollectionUiState.selectedEntity != null ||
+                  state.dataCollectionUiState.selectedSubmission != null
+              ) {
+                state.dataCollection.returnToBottomSheetList()
+              }
+              if (!state.isEntityBottomSheetExpanded) {
+                state.updateEntityBottomSheetExpanded(true)
+              }
+            }
+          },
+          singleLine = true,
+          textStyle =
+            MaterialTheme.typography.bodyLarge.copy(color = MaterialTheme.colorScheme.onSurface),
+          cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+          modifier = Modifier.fillMaxWidth(),
+        )
       }
-    },
-    actions = { PrototypeDebugToolsButton(state = state, iconTint = onTopBarContainer) },
-    colors =
-      TopAppBarDefaults.topAppBarColors(
-        containerColor = topBarContainer,
-        titleContentColor = onTopBarContainer,
-        navigationIconContentColor = onTopBarContainer,
-        actionIconContentColor = onTopBarContainer,
-      ),
-  )
+
+      if (query.isNotEmpty()) {
+        IconButton(
+          onClick = { state.clearListSearchQuery() },
+          modifier = Modifier.size(36.dp),
+        ) {
+          Icon(
+            imageVector = Icons.Outlined.Close,
+            contentDescription = "Clear Search",
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.size(18.dp),
+          )
+        }
+      }
+
+      UserAvatarButton(
+        userName = state.signedInUserName,
+        userInitials = state.signedInUserInitials,
+        onClick = { state.updateUserProfileOpen(true) },
+        avatarSize = 32.dp,
+        modifier = Modifier.padding(start = 2.dp),
+      )
+    }
+  }
 }
 
 /**
  * Interactive Map View showing:
+ * - Floating top search bar ([MobileMapSearchBar]) with Hamburger menu and user profile avatar
  * - Toggleable **Offline Basemap** (`Satellite + Contours` or `Vector Topographic`)
  * - Ground **Geospatial Entities** (`EntityType.GEOSPATIAL`, rendered with solid polygon outlines)
  * - A basemap preview card ([BasemapPreviewCard]) that opens the layers sheet
  *   ([LayersControlSheet]) to select the basemap
- * - A unified persistent bottom sheet (`SurveyPersistentBottomSheetContent`) that peeks with a
- *   search bar by default, expands into the searchable list of map layers, data tables, and places,
- *   and transitions in-place to `EntityBottomSheetCard` when a map feature is selected.
+ * - A unified persistent bottom sheet (`SurveyPersistentBottomSheetContent`) that peeks with the
+ *   active survey title and area name by default, expands into the searchable list of map layers,
+ *   data tables, and places, and transitions in-place to `EntityBottomSheetCard` when a map feature
+ *   is selected.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -319,6 +365,7 @@ internal fun SurveyMapView(state: PrototypeAppState) {
   }
 
   val mapCamera = rememberSurveyMapCamera(uiState = uiState, actions = actions)
+  val topSearchBarReservedHeight = 66.dp
 
   BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
     // With a map feature selected, the sheet peeks at about half the screen: enough to show the
@@ -327,8 +374,9 @@ internal fun SurveyMapView(state: PrototypeAppState) {
       if (selectedEntity != null || state.dataCollectionUiState.selectedSubmission != null) {
         (maxHeight * 0.45f).coerceAtLeast(152.dp)
       } else {
-        122.dp
+        104.dp
       }
+    val maxExpandedSheetHeight = (maxHeight - topSearchBarReservedHeight).coerceAtLeast(160.dp)
 
     // Fit a newly selected map feature into the map area above the sheet. Mobile has no side
     // details panel, so only the sheet is compensated for (vertically); the feature stays centered
@@ -363,7 +411,8 @@ internal fun SurveyMapView(state: PrototypeAppState) {
       sheetContent = {
         SurveyPersistentBottomSheetContent(
           state = state,
-          modifier = Modifier.fillMaxWidth().fillMaxHeight(0.84f),
+          modifier =
+            Modifier.fillMaxWidth().heightIn(max = maxExpandedSheetHeight).fillMaxHeight(0.84f),
         )
       },
     ) {
@@ -379,10 +428,13 @@ internal fun SurveyMapView(state: PrototypeAppState) {
           modifier = Modifier.fillMaxSize(),
         )
 
-        // 3. Top Map Overlay: Docked Navigation HUD Banner (flush with toolbar) + Floating Map
-        // Chips
-        Column(modifier = Modifier.align(Alignment.TopCenter).fillMaxWidth()) {
-          // Straight-Line Navigation HUD Banner docked to the top of the screen like Google Maps
+        // Top Map Overlay below the floating search bar: Navigation HUD Banner + Floating Map Chips
+        Column(
+          modifier =
+            Modifier.align(Alignment.TopCenter)
+              .fillMaxWidth()
+              .padding(top = topSearchBarReservedHeight)
+        ) {
           val activeNav = uiState.activeNavigation
           if (activeNav != null) {
             StraightLineNavigationHudBanner(
@@ -395,7 +447,7 @@ internal fun SurveyMapView(state: PrototypeAppState) {
 
           // Floating Map Chips: GPS Accuracy Chip + "Layers" Button
           Column(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 10.dp),
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 6.dp),
             verticalArrangement = Arrangement.spacedBy(6.dp),
           ) {
             Row(
@@ -479,6 +531,13 @@ internal fun SurveyMapView(state: PrototypeAppState) {
         }
       }
     }
+
+    // Floating Search Bar pinned to the top of the mobile screen above the map and bottom sheet
+    MobileMapSearchBar(
+      state = state,
+      modifier =
+        Modifier.align(Alignment.TopCenter).padding(start = 12.dp, top = 10.dp, end = 12.dp),
+    )
   }
 }
 
@@ -744,7 +803,7 @@ internal fun AvailableFormsModalSheet(
       ) {
         Column(modifier = Modifier.weight(1f)) {
           Text(
-            text = "Available Data Collection Forms",
+            text = "Available data collection forms",
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold,
           )
@@ -832,10 +891,9 @@ internal fun AvailableFormsModalSheet(
 }
 
 /**
- * Interactive Straight-Line Navigation HUD Banner docked to the top of the Map View (like Google
- * Maps) using the toolbar background color whenever straight-line navigation to a Geospatial Entity
- * (`NavigationTargetKind.ENTITY`) or a Form Submission (`NavigationTargetKind.SUBMISSION`) is
- * active.
+ * Interactive Straight-Line Navigation HUD Banner shown below the top search bar on the Map View
+ * whenever straight-line navigation to a Geospatial Entity (`NavigationTargetKind.ENTITY`), Place
+ * (`NavigationTargetKind.PLACE`), or Form Submission (`NavigationTargetKind.SUBMISSION`) is active.
  */
 @Composable
 internal fun StraightLineNavigationHudBanner(
@@ -865,22 +923,19 @@ internal fun StraightLineNavigationHudBanner(
     }
   val kindLabel =
     when (navState.targetKind) {
-      NavigationTargetKind.ENTITY -> "${targetTypeLabel.uppercase()} WAYFINDING"
-      NavigationTargetKind.PLACE -> "PLACE WAYFINDING"
-      NavigationTargetKind.SUBMISSION -> "SUBMISSION WAYFINDING"
+      NavigationTargetKind.ENTITY -> "$targetTypeLabel wayfinding"
+      NavigationTargetKind.PLACE -> "Place wayfinding"
+      NavigationTargetKind.SUBMISSION -> "Submission wayfinding"
     }
 
   Surface(
-    modifier = Modifier.fillMaxWidth(),
-    shape = RoundedCornerShape(bottomStart = 16.dp, bottomEnd = 16.dp),
+    modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 4.dp),
+    shape = RoundedCornerShape(16.dp),
     color = topBarContainer,
     contentColor = onTopBarContainer,
     shadowElevation = 6.dp,
   ) {
     Column(modifier = Modifier.fillMaxWidth()) {
-      // Subtle top divider separating the docked navigation banner from the top toolbar
-      HorizontalDivider(color = onTopBarContainer.copy(alpha = 0.16f))
-
       Column(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 10.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -976,7 +1031,7 @@ internal fun StraightLineNavigationHudBanner(
             Text(
               text =
                 if (navState.vector.isArrived) {
-                  "ARRIVED (≤ 8 m)"
+                  "Arrived (≤ 8 m)"
                 } else {
                   "~${navState.vector.estimatedWalkMinutes} min walk"
                 },
@@ -1030,7 +1085,7 @@ internal fun StraightLineNavigationHudBanner(
                     modifier = Modifier.size(14.dp),
                   )
                   Text(
-                    text = "Walk Closer",
+                    text = "Walk closer",
                     style = MaterialTheme.typography.labelSmall,
                     color = colors.onSecondaryContainer,
                     fontWeight = FontWeight.Bold,
@@ -1177,7 +1232,7 @@ internal fun GoogleMapsScaleBarWidget(
   }
 }
 
-/** Small uppercase primary-colored section heading in the basemap selector (`TYPE`, ...). */
+/** Small primary-colored section heading in the basemap selector (`Type`, ...). */
 @Composable
 private fun BasemapSectionHeading(text: String, modifier: Modifier = Modifier) {
   Text(
@@ -1197,7 +1252,7 @@ private fun BasemapSectionHeading(text: String, modifier: Modifier = Modifier) {
  * the web dashboard's dialog ([LayersControlDialog]). Map layer visibility is not set here: mobile
  * toggles it in the bottom sheet and the web dashboard in its left-hand panel.
  * 1. Basemap type options (`Satellite` and `Map`)
- * 2. `"All users"` and survey-specific organization imagery layers (XYZ tile URLs)
+ * 2. Custom imagery layers (XYZ tile URLs) available for the survey
  * 3. Downloaded (offline) basemap overlay toggle, when [showOfflineBasemap] (mobile only)
  */
 @Composable
@@ -1207,13 +1262,11 @@ internal fun LayersSelectorContent(
   modifier: Modifier = Modifier,
   showOfflineBasemap: Boolean = true,
 ) {
-  val allUsersSources = uiState.allUsersImagerySources
-  val surveyOrgName = uiState.activeSurveyOrganizationName
-  val surveyOrgSources = uiState.activeSurveyOrganizationImagerySources
+  val imagerySources = uiState.availableImagerySources
 
   Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
     Column(modifier = Modifier.fillMaxWidth().selectableGroup()) {
-      BasemapSectionHeading(text = "TYPE", modifier = Modifier.padding(bottom = 4.dp))
+      BasemapSectionHeading(text = "Type", modifier = Modifier.padding(bottom = 4.dp))
       BasemapOptionOrder.forEach { basemap ->
         BasemapOptionRow(
           type = basemap,
@@ -1223,28 +1276,12 @@ internal fun LayersSelectorContent(
       }
     }
 
-    if (allUsersSources.isNotEmpty()) {
+    if (imagerySources.isNotEmpty()) {
       Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        BasemapSectionHeading(text = "IMAGERY · ALL USERS")
-        allUsersSources.forEach { source ->
+        BasemapSectionHeading(text = "Imagery")
+        imagerySources.forEach { source ->
           ImagerySourceLayerCard(
             source = source,
-            organizationName = "All users",
-            isEnabled = uiState.isImagerySourceEnabled(source.id),
-            isMobile = showOfflineBasemap,
-            onToggle = { actions.toggleImagerySource(source.id) },
-          )
-        }
-      }
-    }
-
-    if (surveyOrgName != null && surveyOrgSources.isNotEmpty()) {
-      Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        BasemapSectionHeading(text = "IMAGERY · ${surveyOrgName.uppercase()}")
-        surveyOrgSources.forEach { source ->
-          ImagerySourceLayerCard(
-            source = source,
-            organizationName = surveyOrgName,
             isEnabled = uiState.isImagerySourceEnabled(source.id),
             isMobile = showOfflineBasemap,
             onToggle = { actions.toggleImagerySource(source.id) },
@@ -1254,7 +1291,7 @@ internal fun LayersSelectorContent(
     }
 
     if (showOfflineBasemap) {
-      BasemapSectionHeading(text = "DOWNLOADED BASEMAPS")
+      BasemapSectionHeading(text = "Downloaded basemaps")
       // Offline Basemap Tile Package Overlay Toggle
       OutlinedCard(
         onClick = { actions.toggleOfflineBasemapVisibility() },
@@ -1272,7 +1309,7 @@ internal fun LayersSelectorContent(
         ) {
           Column(modifier = Modifier.weight(1f)) {
             Text(
-              text = "Offline Basemap Overlay (Nyeri Sector Tiles)",
+              text = "Offline basemap overlay (Nyeri sector tiles)",
               style = MaterialTheme.typography.labelMedium,
               fontWeight = FontWeight.SemiBold,
             )
@@ -1295,19 +1332,16 @@ internal fun LayersSelectorContent(
 @Composable
 private fun ImagerySourceLayerCard(
   source: ImagerySource,
-  organizationName: String,
   isEnabled: Boolean,
   isMobile: Boolean,
   onToggle: () -> Unit,
 ) {
   val subtitle =
     if (isMobile) {
-      val offlineStatus =
-        if (source.allowOfflineDownload) "Offline download permitted"
-        else "Online only · offline download disabled"
-      "$organizationName · $offlineStatus"
+      if (source.allowOfflineDownload) "Offline download permitted"
+      else "Online only · offline download disabled"
     } else {
-      "$organizationName · ${source.type.label}"
+      source.type.label
     }
   OutlinedCard(
     onClick = onToggle,
@@ -1340,8 +1374,8 @@ private fun ImagerySourceLayerCard(
 
 /**
  * Material 3 modal bottom sheet opened by the mobile map's [BasemapPreviewCard] to select the
- * **Basemap Type (`Map` vs `Satellite`)**, toggle organization imagery layers, and toggle the
- * **Offline Basemap (`Mapbox Offline Tiles`)**.
+ * **Basemap Type (`Map` vs `Satellite`)**, toggle imagery layers, and toggle the **Offline Basemap
+ * (`Mapbox Offline Tiles`)**.
  */
 @Composable
 internal fun LayersControlSheet(uiState: SurveyMapUiState, actions: SurveyMapActions) {
@@ -1365,7 +1399,7 @@ internal fun LayersControlSheet(uiState: SurveyMapUiState, actions: SurveyMapAct
             fontWeight = FontWeight.Bold,
           )
           Text(
-            text = "Select basemap type, organization imagery, and offline tile overlays",
+            text = "Select basemap type, imagery, and offline tile overlays",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
           )
@@ -1386,8 +1420,8 @@ internal fun LayersControlSheet(uiState: SurveyMapUiState, actions: SurveyMapAct
 
 /**
  * Modal dialog opened by the web dashboard's [BasemapPreviewCard] to select the basemap type (`Map`
- * vs `Satellite`) and toggle `"All users"` and survey-specific organization imagery layers. Offline
- * maps are a mobile-only feature, so their toggle is left out.
+ * vs `Satellite`) and toggle imagery layers. Offline maps are a mobile-only feature, so their
+ * toggle is left out.
  */
 @Composable
 internal fun LayersControlDialog(uiState: SurveyMapUiState, actions: SurveyMapActions) {

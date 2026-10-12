@@ -38,7 +38,7 @@ internal object RecordMutator {
     /** 1-based repeat index if explicitly specified (`[1]`), or `null` otherwise. */
     val repeatIndex: Int? = null,
   ) {
-    fun format(includeDefaultRepeatIndex: Boolean = false): String =
+    fun format(includeDefaultRepeatIndex: Boolean = true): String =
       when {
         repeatIndex != null && (repeatIndex > 1 || includeDefaultRepeatIndex) ->
           "$name[$repeatIndex]"

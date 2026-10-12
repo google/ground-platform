@@ -59,6 +59,17 @@ class GroundPinTest {
   }
 
   @Test
+  fun svg_plainPinInnerSquareIsAlwaysWhite() {
+    val onDark = GroundPin.svg("#2E7D32", null, isPending = false)
+    val onSamplePlotAmber = GroundPin.svg("#F9A825", null, isPending = false)
+    val onLight = GroundPin.svg("#FFEB3B", null, isPending = false)
+
+    assertContains(onDark, """<rect fill="#FFFFFF"""")
+    assertContains(onSamplePlotAmber, """<rect fill="#FFFFFF"""")
+    assertContains(onLight, """<rect fill="#FFFFFF"""")
+  }
+
+  @Test
   fun svg_escapesXml() {
     val svg = GroundPin.svg("\"red\"", null, isPending = false)
 

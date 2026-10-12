@@ -92,10 +92,11 @@ embedded inside web developer tools such as `devtools/formdebugger`.
 
 3.  **Per-Screen Validation vs. Whole-Form Submission**:
 
-    -   Tapping **`Next →`** validates only the controls on the current screen
-        (`isCurrentStepValid()`). If a required field is empty or a `constraint`
-        fails, an inline error banner is displayed with an option to fix the
-        answer or explicitly **`Skip →`** while continuing drafts.
+    -   Tapping **`Next →`** validates only the controls on the current screen.
+        If a required field is empty or a `constraint` fails, an inline error
+        banner is displayed requiring the user to resolve the validation errors
+        to continue (or, for optional questions, offering an explicit **`Skip
+        →`** action).
     -   Tapping **`Submit`** on the `SummaryStep` invokes
         `FormSession.finalize()`, which updates `end` timestamp preloads
         (`RecordMetadata.end_time`), re-evaluates any dependent calculations,
@@ -122,12 +123,12 @@ embedded inside web developer tools such as `devtools/formdebugger`.
 : `TYPE_DOUBLE`             :                        : validation with `-0.5`  :
 :                           :                        : / `+0.5` stepper        :
 :                           :                        : buttons                 :
-| `CONTROL_INPUT` +         | `BooleanInputWidget`   | Two-card toggle (`Yes   |
-: `TYPE_BOOLEAN`            :                        : (True)` / `No (False)`) :
+| `CONTROL_INPUT` +         | `BooleanInputWidget`   | Two-card toggle (`Yes`  |
+: `TYPE_BOOLEAN`            :                        : / `No`)                 :
 | `CONTROL_INPUT` +         | `DateInputWidget`      | `YYYY-MM-DD` input with |
-: `TYPE_DATE`               :                        : `Today`, `-1 Day`, `+1  :
-:                           :                        : Day`, and `+1 Month`    :
-:                           :                        : shortcuts               :
+: `TYPE_DATE`               :                        : Material 3              :
+:                           :                        : `DatePickerDialog`      :
+:                           :                        : calendar widget         :
 | `CONTROL_INPUT` +         | `TimeInputWidget`      | `HH:MM:SS` input with   |
 : `TYPE_TIME`               :                        : `Now` shortcut          :
 | `CONTROL_INPUT` +         | `TimestampInputWidget` | ISO/Epoch timestamp     |
@@ -145,8 +146,9 @@ embedded inside web developer tools such as `devtools/formdebugger`.
 :                           :                        : (`GEOSHAPE`)            :
 | `CONTROL_SELECT_ONE`      | `SelectOneWidget`      | Single-choice radio     |
 :                           :                        : cards, `likert`         :
-:                           :                        : horizontal scale, and   :
-:                           :                        : `quick` auto-advance    :
+:                           :                        : vertical ordinal scale, :
+:                           :                        : and `quick`             :
+:                           :                        : auto-advance            :
 | `CONTROL_SELECT_MULTIPLE` | `SelectMultipleWidget` | Multi-choice checkbox   |
 :                           :                        : cards backed by         :
 :                           :                        : `TypedValueList`        :

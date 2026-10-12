@@ -162,7 +162,7 @@ While automatic `1:1` form-to-entity syncing handles simple surveys effortlessly
 
 ### Visual Workflow State Progression on the Map (`○` → `◐` → `✓`)
 
-*   **Scenario**: Supervisors and field enumerators need immediate visual feedback on the map showing which preloaded sites are **Pending (`○`)**, **In Progress (`◐`)**, or **Completed (`✓`)**.
+*   **Scenario**: Supervisors and field data collectors need immediate visual feedback on the map showing which preloaded sites are **Pending (`○`)**, **In Progress (`◐`)**, or **Completed (`✓`)**.
 *   **Resolution**:
     *   Because the map renders Entities styled via [`simplestyle-spec` properties](https://github.com/mapbox/simplestyle-spec) (`marker-symbol`, `marker-color`, `stroke`, `fill`), forms automatically include calculated `entity_saveto` bindings that update the target Entity's visual status property upon submission—transitioning a site from **Pending (`○`, `#E65100`)** to **In Progress (`◐`, `#F9AB00`)** to **Completed (`✓`, `#1E8E3E`)** completely offline.
 

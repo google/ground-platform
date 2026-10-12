@@ -69,7 +69,7 @@ To empower survey organizers, M&E coordinators, and institutional sponsors with
 actionable operational intelligence without requiring external BI tools:
 
 *   **Interactive Operational Dashboards**: Real-time dashboards embedded in the
-    Web Console visualizing campaign progress, enumerator productivity,
+    Web Console visualizing campaign progress, data collector productivity,
     daily/weekly submission velocity, and target completion rates against
     preloaded baseline entity registries (e.g., % of cooperative plots mapped).
 *   **Geospatial Coverage & Heatmap Analysis**: Map-centric analytics surfacing
@@ -106,7 +106,7 @@ submissions:
     are certified or marked final.
 *   **Field-Return & Re-Collection Feedback Loop**: The ability for supervisors
     to reject or flag questionable submissions and route them back to the
-    originating field enumerator's mobile queue with targeted reviewer notes.
+    originating field data collector's mobile queue with targeted reviewer notes.
     The Mobile App notifies the collector and provides an actionable "Needs
     Revision" inbox to re-verify responses, re-photograph subjects, or re-walk
     errant boundary perimeters without creating duplicate submissions.

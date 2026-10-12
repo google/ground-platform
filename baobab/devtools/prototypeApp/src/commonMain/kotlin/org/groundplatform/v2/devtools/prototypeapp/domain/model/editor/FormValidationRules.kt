@@ -28,8 +28,7 @@ enum class ValidationKind {
     /** Rule family for [type], or `null` if the type has no basic validation rules. */
     fun of(type: EditorQuestionType): ValidationKind? =
       when (type) {
-        EditorQuestionType.INTEGER,
-        EditorQuestionType.DECIMAL -> NUMBER_RANGE
+        EditorQuestionType.NUMBER -> NUMBER_RANGE
         EditorQuestionType.TEXT,
         EditorQuestionType.LONG_TEXT -> TEXT
         EditorQuestionType.DATE -> DATE

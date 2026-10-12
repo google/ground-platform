@@ -47,6 +47,11 @@ class SurveyEditorDerivationTest {
       assertEquals(forms.map { it.id }, draft.forms.map { it.form.formId }, survey.id)
       assertEquals(forms.map { it.title }, draft.forms.map { it.form.title }, survey.id)
       assertEquals(
+        forms.map { it.ctaLabel },
+        draft.forms.map { it.form.effectiveCtaLabel },
+        survey.id,
+      )
+      assertEquals(
         layers.map { it.datasetId ?: it.id },
         draft.datasets.filter { it.kind == DatasetKind.MAP_LAYER }.map { it.id },
         survey.id,

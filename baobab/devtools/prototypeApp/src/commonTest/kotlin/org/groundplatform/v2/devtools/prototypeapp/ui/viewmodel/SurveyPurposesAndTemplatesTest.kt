@@ -68,6 +68,8 @@ class SurveyPurposesAndTemplatesTest {
     editor.togglePurpose("eudr_due_diligence")
     assertEquals(listOf("ferm_restoration"), editor.ui.details.purposeIds)
     assertFalse("eudr.commodity" in editor.ui.library.purposeConceptIds)
+    editor.updateOtherPurpose("Watershed monitoring")
+    assertEquals("Watershed monitoring", editor.ui.details.otherPurpose)
     editor.toggleProgram("ferm")
     editor.toggleProgram("eudr")
     assertEquals(listOf("ferm"), editor.ui.details.programIds)

@@ -121,11 +121,33 @@ class OrganizationPagesTest {
   fun tabs_detailsComesFirstAndIncludesImagerySources() {
     assertEquals(OrganizationTab.DETAILS, OrganizationTab.entries.first())
     assertTrue(OrganizationTab.IMAGERY_SOURCES in OrganizationTab.entries)
-    // The library tabs follow Imagery sources.
+    assertEquals("Imagery", OrganizationTab.IMAGERY_SOURCES.label)
+    // The library tabs follow Imagery.
     assertEquals(
       listOf(OrganizationTab.PURPOSES, OrganizationTab.DICTIONARY, OrganizationTab.TEMPLATES),
       OrganizationTab.entries.dropWhile { it != OrganizationTab.IMAGERY_SOURCES }.drop(1),
     )
+  }
+
+  @Test
+  fun showsImpact_onlyForOrganizers() {
+    val actions =
+      object : org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.ImpactActions {
+        override fun setOrganizationSurveyFilter(organizationId: String, surveyId: String?) {}
+
+        override fun setOrganizationCountryFilter(organizationId: String, countryCode: String?) {}
+
+        override fun downloadSurveySummary(surveyId: String) {}
+
+        override fun downloadOrganizationSummary(organizationId: String) {}
+
+        override fun downloadGlobalSummary() {}
+
+        override fun dismissMessage() {}
+      }
+    assertTrue(showsImpact(isManager = true, impactActions = actions))
+    assertFalse(showsImpact(isManager = false, impactActions = actions))
+    assertFalse(showsImpact(isManager = true, impactActions = null))
   }
 
   @Test

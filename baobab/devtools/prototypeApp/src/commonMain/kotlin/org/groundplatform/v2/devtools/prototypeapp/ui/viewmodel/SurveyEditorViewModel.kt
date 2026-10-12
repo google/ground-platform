@@ -256,6 +256,9 @@ interface SurveyEditorActions : MapFeatureEditor, SurveyOutcomeActions {
   /** Selects or clears Purpose Pack [packId] for the survey (`SurveyDef.purpose_ids`). */
   fun togglePurpose(packId: String)
 
+  /** Updates the free-text description for the "Other" purpose option. */
+  fun updateOtherPurpose(text: String)
+
   /** Selects or clears program [programId] for the survey (`SurveyDef.program_ids`). */
   fun toggleProgram(programId: String)
 
@@ -540,6 +543,12 @@ class SurveyEditorViewModel(
     val organization = organizations.firstOrNull { it.id == details.organizationId }
     val library = resolveLibraryUseCase.forOrganization(libraries, organization?.id)
     val canManage = manageLibraryUseCase != null
+    val defaultLanguage = details.defaultLanguage.ifEmpty { LocalizedText.DEFAULT_LANGUAGE }
+    val supportedLanguages =
+      (listOf(defaultLanguage) + details.supportedLanguages)
+        .map { it.trim() }
+        .filter { it.isNotEmpty() }
+        .distinctBy { it.lowercase() }
     return FormLibraryContext(
       library = library,
       organizationName = organization?.name,
@@ -547,7 +556,8 @@ class SurveyEditorViewModel(
       canSaveToGlobalLibrary =
         canManage &&
           organizations.any { it.id == Organization.ALL_USERS_ID && it.isManager(email) },
-      language = details.defaultLanguage.ifEmpty { LocalizedText.DEFAULT_LANGUAGE },
+      language = defaultLanguage,
+      supportedLanguages = supportedLanguages,
       purposeConceptIds = library.conceptIdsForPurposes(details.purposeIds),
     )
   }
@@ -625,10 +635,14 @@ class SurveyEditorViewModel(
 
   /** The draft the editor opened and the draft under edit, for the active survey. */
   private val draft: SurveyEditorDraft
-    get() = uiState.value.draft
+    get() =
+      session.value.takeIf { it.surveyId == data.value.surveyId && it.draft != null }?.draft
+        ?: data.value.liveDraft
 
   private val opened: SurveyEditorDraft
-    get() = uiState.value.opened
+    get() =
+      session.value.takeIf { it.surveyId == data.value.surveyId && it.draft != null }?.opened
+        ?: data.value.liveDraft
 
   // --- Draft edits ---
 
@@ -662,6 +676,18 @@ class SurveyEditorViewModel(
 
     /** The survey's datasets as seen by the save-to logic of Form [formKey]. */
     fun catalog(formKey: String) = datasets.map { it.toEditorDataset(formKey, forms) }
+
+    fun updateForm(formKey: String, transform: (EditorForm) -> EditorForm) {
+      val entry = form(formKey) ?: return
+      val updated = transform(entry.form)
+      if (updated == entry.form) return
+      forms = forms.map { if (it.key == formKey) it.copy(form = updated) else it }
+      if (updated.questions != entry.form.questions) syncDatasetsLinkedToForm(formKey)
+      // Properties that linked questions save to inherit their concepts.
+      if (updated.questions != entry.form.questions || updated.saveTo != entry.form.saveTo) {
+        datasets = SaveToRules.inheritConcepts(updated, formKey, datasets)
+      }
+    }
 
     fun updateDataset(key: String, transform: (EntityDataset) -> EntityDataset) {
       val old = dataset(key) ?: return
@@ -748,6 +774,76 @@ class SurveyEditorViewModel(
     }
   }
 
+  /**
+   * Runs [edit] and records the resulting survey draft mutation on [formKey]'s
+   * [FormEditorViewModel] so that Form-scoped actions handled at the Survey editor level can be
+   * undone and redone.
+   */
+  private fun editForForm(formKey: String, block: Edits.() -> Unit) {
+    val before = draft
+    edit(block)
+    val after = draft
+    if (after != before && after.forms.any { it.key == formKey }) {
+      formEditor(formKey).recordExternalSurveyMutation(before, after)
+    }
+  }
+
+  private fun applyFormUndoRedoDraft(after: SurveyEditorDraft) {
+    if (uiState.value.isReadOnly) return
+    val openedBefore = opened
+    session.update {
+      it.copy(
+        surveyId = data.value.surveyId,
+        opened = openedBefore,
+        draft = after,
+      )
+    }
+  }
+
+  private fun clearFormEditorUndoRedo() {
+    formEditors.values.forEach { (editor, _) -> editor.clearUndoRedo() }
+  }
+
+  /** Replaces the working draft in the current session, freezing [opened] on the first edit. */
+  internal fun replaceWorkingDraft(
+    transform: (SurveyEditorDraft) -> SurveyEditorDraft,
+    section: SurveyEditorSection? = null,
+  ) {
+    if (uiState.value.isReadOnly) return
+    val before = draft
+    val openedBefore = opened
+    val after = transform(before)
+    session.update {
+      it.copy(
+        surveyId = data.value.surveyId,
+        opened = openedBefore,
+        draft = after,
+        section = section ?: it.section,
+      )
+    }
+  }
+
+  /** Saves the current working draft to the repository without emitting a leave-editor event. */
+  internal suspend fun saveWorkingDraftNow(): SurveyEditorDraft? {
+    val surveyId = data.value.surveyId
+    if (surveyId.isBlank()) return null
+    val previous = opened
+    generatePendingSamplePlots()
+    val toSave = draft
+    surveyEditorRepository.saveDraft(surveyId, toSave, previous = previous)
+    clearFormEditorUndoRedo()
+    session.update {
+      it.copy(
+        draft = null,
+        opened = null,
+        isSaving = false,
+        generationErrors = emptyMap(),
+        organizationNotice = null,
+      )
+    }
+    return toSave
+  }
+
   // --- Navigation, layout & lifecycle ---
 
   override fun select(section: SurveyEditorSection) {
@@ -770,13 +866,15 @@ class SurveyEditorViewModel(
   override fun publish() {
     if (session.value.isSaving || uiState.value.isReadOnly) return
     val surveyId = data.value.surveyId
-    val toSave = draft
     val previous = opened
     session.update { it.copy(isSaving = true) }
     scope.launch {
       try {
+        generatePendingSamplePlots()
+        val toSave = draft
         surveyEditorRepository.saveDraft(surveyId, toSave, previous = previous)
       } finally {
+        clearFormEditorUndoRedo()
         session.update {
           it.copy(
             draft = null,
@@ -793,6 +891,7 @@ class SurveyEditorViewModel(
 
   override fun discardChanges() {
     val live = data.value.liveDraft
+    clearFormEditorUndoRedo()
     session.update { s ->
       val current = s.section
       val stillExists =
@@ -821,9 +920,17 @@ class SurveyEditorViewModel(
     val lifecycle = surveyLifecycle ?: return
     if (!current.canManageSurvey || current.lifecycleState == state) return
     val surveyId = current.surveyId
-    // A closed survey is read-only, so unpublished edits can't be kept.
-    if (state != SurveyLifecycleState.PUBLISHED) discardChanges() else outcomeCard.dismiss()
+    val closesOrArchives =
+      state == SurveyLifecycleState.CLOSED || state == SurveyLifecycleState.ARCHIVED
+    // A closed or archived survey is read-only, so uncommitted edits can't be kept.
+    if (closesOrArchives) discardChanges() else outcomeCard.dismiss()
     scope.launch {
+      if (
+        state == SurveyLifecycleState.PUBLISHED &&
+          (current.canPublish || draft.datasets.any(::needsSampleGeneration))
+      ) {
+        saveWorkingDraftNow()
+      }
       val stoppedCollecting = lifecycle.setState(surveyId, state)
       if (stoppedCollecting) {
         surveyRepository.getSurveys().firstOrNull { it.id == surveyId }?.let(outcomeCard::open)
@@ -859,11 +966,15 @@ class SurveyEditorViewModel(
               uiState
                 .map { it.datasetCatalog(formKey) }
                 .stateIn(formScope, SharingStarted.Eagerly, initial.datasetCatalog(formKey)),
-            updateForm = { transform -> updateForm(formKey, transform) },
+            updateForm = { transform -> edit { updateForm(formKey, transform) } },
             scope = formScope,
             libraryFlow = libraryContext,
             addOrganizationConcept = ::addOrganizationConcept,
             saveTemplate = ::saveFormAsTemplate,
+            formKey = formKey,
+            currentSurveyDraft = { draft },
+            applySurveyDraft = ::applyFormUndoRedoDraft,
+            isSurveyReadOnly = { uiState.value.isReadOnly },
           )
         viewModel to job
       }
@@ -873,20 +984,12 @@ class SurveyEditorViewModel(
    * Replaces Form [formKey] with [transform] of it. Datasets linked to the Form follow its
    * questions.
    */
-  internal fun updateForm(formKey: String, transform: (EditorForm) -> EditorForm) = edit {
-    val entry = form(formKey) ?: return@edit
-    val updated = transform(entry.form)
-    if (updated == entry.form) return@edit
-    forms = forms.map { if (it.key == formKey) it.copy(form = updated) else it }
-    if (updated.questions != entry.form.questions) syncDatasetsLinkedToForm(formKey)
-    // Properties that linked questions save to inherit their concepts.
-    if (updated.questions != entry.form.questions || updated.saveTo != entry.form.saveTo) {
-      datasets = SaveToRules.inheritConcepts(updated, formKey, datasets)
-    }
-  }
+  internal fun updateForm(formKey: String, transform: (EditorForm) -> EditorForm) =
+    editForForm(formKey) { updateForm(formKey, transform) }
 
   /** Synchronizes the schema of all datasets linked to Form [formKey] with its questions. */
-  fun syncDatasetsLinkedToForm(formKey: String) = edit { syncDatasetsLinkedToForm(formKey) }
+  fun syncDatasetsLinkedToForm(formKey: String) =
+    editForForm(formKey) { syncDatasetsLinkedToForm(formKey) }
 
   // --- Survey details ---
 
@@ -1065,6 +1168,8 @@ class SurveyEditorViewModel(
     )
   }
 
+  override fun updateOtherPurpose(text: String) = updateDetails { d -> d.copy(otherPurpose = text) }
+
   override fun toggleProgram(programId: String) = updateDetails { d ->
     d.copy(
       programIds =
@@ -1233,32 +1338,44 @@ class SurveyEditorViewModel(
     return formKey
   }
 
-  override fun createDatasetForForm(formKey: String, kind: DatasetKind?, open: Boolean) = edit {
-    createDatasetForForm(formKey, kind, open)
-  }
+  override fun createDatasetForForm(formKey: String, kind: DatasetKind?, open: Boolean) =
+    editForForm(formKey) { createDatasetForForm(formKey, kind, open) }
 
-  override fun createFormForDataset(datasetKey: String, open: Boolean) = edit {
-    val dataset = dataset(datasetKey) ?: return@edit
-    val formKey = newKey("f")
-    val title =
-      FormDatasetLinks.uniqueTitle("${dataset.displayName} form", forms.map { it.form.title })
-    val form =
-      EditorForm(
-        formId = FormIds.newFormId(),
-        title = title,
-        questions = FormDatasetLinks.questionsFor(dataset),
-      )
-    // Update dataset to link to this form.
-    updateDataset(datasetKey) { it.copy(linkedFormKey = formKey) }
-    forms = forms + SurveyEditorForm(formKey, form)
-    if (open) section = SurveyEditorSection.Form(formKey)
+  override fun createFormForDataset(datasetKey: String, open: Boolean) {
+    val activeFormKey =
+      if (!open) (session.value.section as? SurveyEditorSection.Form)?.key else null
+    val block: Edits.() -> Unit = {
+      val dataset = dataset(datasetKey)
+      if (dataset != null) {
+        val formKey = newKey("f")
+        val title =
+          FormDatasetLinks.uniqueTitle("${dataset.displayName} form", forms.map { it.form.title })
+        val form =
+          EditorForm(
+            formId = FormIds.newFormId(),
+            title = title,
+            questions = FormDatasetLinks.questionsFor(dataset),
+          )
+        // Update dataset to link to this form.
+        updateDataset(datasetKey) { it.copy(linkedFormKey = formKey) }
+        forms = forms + SurveyEditorForm(formKey, form)
+        if (open) section = SurveyEditorSection.Form(formKey)
+      }
+    }
+    if (activeFormKey != null) {
+      editForForm(activeFormKey, block)
+    } else {
+      edit(block)
+    }
   }
 
   override fun setFormSaveToMode(formKey: String, mode: SaveToMode) {
     if (draft.forms.none { it.key == formKey }) return
-    // Pick the update target while the form's own dataset is still linked, so it isn't chosen.
-    formEditor(formKey).setSaveToMode(mode)
-    edit {
+    editForForm(formKey) {
+      val entry = form(formKey) ?: return@editForForm
+      // Pick the update target while the form's own dataset is still linked, so it isn't chosen.
+      val updatedSaveTo = formEditor(formKey).saveToForMode(entry.form, catalog(formKey), mode)
+      updateForm(formKey) { it.copy(saveTo = updatedSaveTo) }
       when (mode) {
         SaveToMode.UPDATE -> {
           val linked = datasets.filter { it.linkedFormKey == formKey }
@@ -1338,8 +1455,16 @@ class SurveyEditorViewModel(
     updateDataset(key, transform)
   }
 
-  override fun unlinkDataset(datasetKey: String) =
-    updateDataset(datasetKey) { it.copy(linkedFormKey = null) }
+  override fun unlinkDataset(datasetKey: String) {
+    val targetFormKey =
+      draft.datasets.firstOrNull { it.key == datasetKey }?.linkedFormKey
+        ?: (session.value.section as? SurveyEditorSection.Form)?.key
+    if (targetFormKey != null) {
+      editForForm(targetFormKey) { updateDataset(datasetKey) { it.copy(linkedFormKey = null) } }
+    } else {
+      updateDataset(datasetKey) { it.copy(linkedFormKey = null) }
+    }
+  }
 
   override fun moveDataset(key: String, toIndex: Int) = edit {
     val kind = dataset(key)?.kind ?: return@edit
@@ -1557,6 +1682,20 @@ class SurveyEditorViewModel(
   override fun isDesignStale(dataset: EntityDataset): Boolean {
     val lastRun = dataset.generator?.lastRun ?: return false
     return currentInputHash(dataset) != lastRun.inputHash
+  }
+
+  private fun needsSampleGeneration(dataset: EntityDataset): Boolean {
+    val config = dataset.generator ?: return false
+    if (uiState.value.regenerateBlockedReason(dataset) != null) return false
+    if (samplingArea(config) !is SamplingAreaResult.Ready) return false
+    return dataset.rows.isEmpty() || config.lastRun == null || isDesignStale(dataset)
+  }
+
+  private suspend fun generatePendingSamplePlots() {
+    val keys = draft.datasets.filter(::needsSampleGeneration).map { it.key }
+    for (key in keys) {
+      generateSample(key)
+    }
   }
 
   override fun generateSamplePlots(datasetKey: String) {

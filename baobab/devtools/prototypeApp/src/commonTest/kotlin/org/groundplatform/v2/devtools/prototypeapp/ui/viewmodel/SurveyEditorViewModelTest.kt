@@ -29,7 +29,9 @@ import org.groundplatform.v2.devtools.prototypeapp.data.seed.SurveyEditorSamples
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.CollaboratorRole
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.DatasetKind
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EditorQuestionType
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SaveToMode
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SharingPolicy
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SurveyEditorMutation
 import org.groundplatform.v2.devtools.prototypeapp.ui.state.SurveyEditorEvent
 import org.groundplatform.v2.devtools.prototypeapp.ui.state.SurveyEditorSection
 import org.groundplatform.v2.devtools.prototypeapp.ui.state.SurveyEditorUiState
@@ -239,5 +241,78 @@ class SurveyEditorViewModelTest {
     assertEquals(otherId, viewModel.uiState.value.surveyId)
     assertEquals(otherId, viewModel.uiState.value.details.surveyId)
     assertFalse(viewModel.uiState.value.isDirty)
+  }
+
+  @Test
+  fun formEditorUndoRedo_rewindsAndReplaysSurveyDraftAndLinkedDatasets() {
+    val f = Fixture()
+    f.viewModel.addForm()
+    val formKey = (f.uiState.section as SurveyEditorSection.Form).key
+    val linked = f.uiState.datasets.single { it.linkedFormKey == formKey }
+    assertEquals(DatasetKind.DATA_TABLE, linked.kind)
+
+    val editor = f.viewModel.formEditor(formKey)
+    assertFalse(editor.ui.canUndo)
+    assertFalse(editor.ui.canRedo)
+
+    // 1. Add a LOCATION question: mutates both the form and the linked dataset (DATA_TABLE ->
+    // MAP_LAYER).
+    editor.addQuestion(EditorQuestionType.LOCATION)
+    val locationKey = assertNotNull(editor.ui.selectedKey)
+    assertEquals(DatasetKind.MAP_LAYER, f.uiState.dataset(linked.key)?.kind)
+    assertTrue(f.uiState.dataset(linked.key)!!.properties.any { it.name == "location" })
+    assertTrue(editor.ui.canUndo)
+
+    // 2. Switch save-to mode via SurveyEditorViewModel: drops the empty linked dataset and switches
+    // the form to UPDATE mode in a single undoable mutation.
+    f.viewModel.setFormSaveToMode(formKey, SaveToMode.UPDATE)
+    assertEquals(SaveToMode.UPDATE, editor.ui.form.saveTo.mode)
+    assertNull(f.uiState.dataset(linked.key))
+    assertEquals(2, editor.ui.undoStack.size)
+
+    // Undo step 2: restores CREATE mode and the linked MAP_LAYER dataset.
+    editor.undo()
+    assertEquals(SaveToMode.CREATE, editor.ui.form.saveTo.mode)
+    assertEquals(DatasetKind.MAP_LAYER, f.uiState.dataset(linked.key)?.kind)
+    assertEquals(locationKey, editor.ui.selectedKey)
+    assertTrue(editor.ui.canUndo)
+    assertTrue(editor.ui.canRedo)
+
+    // Undo step 1: removes the LOCATION question and rewinds the linked dataset back to DATA_TABLE.
+    editor.undo()
+    assertNull(editor.ui.form.questions.firstOrNull { it.key == locationKey })
+    assertEquals(DatasetKind.DATA_TABLE, f.uiState.dataset(linked.key)?.kind)
+    assertFalse(f.uiState.dataset(linked.key)!!.properties.any { it.name == "location" })
+    assertFalse(editor.ui.canUndo)
+    assertTrue(editor.ui.canRedo)
+
+    // Redo step 1 and step 2.
+    editor.redo()
+    assertNotNull(editor.ui.form.questions.firstOrNull { it.key == locationKey })
+    assertEquals(DatasetKind.MAP_LAYER, f.uiState.dataset(linked.key)?.kind)
+    editor.redo()
+    assertEquals(SaveToMode.UPDATE, editor.ui.form.saveTo.mode)
+    assertNull(f.uiState.dataset(linked.key))
+    assertFalse(editor.ui.canRedo)
+
+    // Discarding survey changes clears the form editor's undo/redo stacks.
+    f.viewModel.discardChanges()
+    assertFalse(editor.ui.canUndo)
+    assertFalse(editor.ui.canRedo)
+  }
+
+  @Test
+  fun surveyEditorMutation_betweenRewindsAndReplaysCompositeSurveyChanges() {
+    val f = Fixture()
+    val before = f.uiState.draft
+    f.viewModel.updateDetails { it.copy(title = "Updated Survey Title") }
+    f.viewModel.addForm()
+    f.viewModel.addDataset(DatasetKind.DATA_TABLE)
+    val after = f.uiState.draft
+
+    val mutation = assertNotNull(SurveyEditorMutation.between(before, after, formKey = "f1"))
+    assertTrue(mutation.steps.isNotEmpty())
+    assertEquals(before, mutation.rewind(after))
+    assertEquals(after, mutation.replay(before))
   }
 }

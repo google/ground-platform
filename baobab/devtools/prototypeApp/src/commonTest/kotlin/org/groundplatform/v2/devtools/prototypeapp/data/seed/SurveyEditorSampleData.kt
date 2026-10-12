@@ -250,7 +250,7 @@ internal object FormEditorSamples {
           EditorQuestion(
             key = "q4",
             name = "shade_tree_count",
-            type = EditorQuestionType.INTEGER,
+            type = EditorQuestionType.NUMBER,
             label = "How many shade trees?",
             required = true,
             relevance = EditorRelevance("q3", RelevanceOperator.EQUALS, "yes"),

@@ -88,8 +88,8 @@ sealed interface FormWizardStep {
   ) : FormWizardStep
 
   /**
-   * Repeat group management screen allowing enumerators to inspect existing iterations, jump to a
-   * specific repeat instance, remove an instance, or add a new repeat instance.
+   * Repeat group management screen allowing data collectors to inspect existing iterations, jump to
+   * a specific repeat instance, remove an instance, or add a new repeat instance.
    */
   data class RepeatHubStep(
     override val stepKey: String,
@@ -105,7 +105,7 @@ sealed interface FormWizardStep {
    */
   data class SummaryStep(
     override val stepKey: String = "__summary__",
-    override val title: String = "Review & Submit",
+    override val title: String = "Review & submit",
     override val breadcrumbs: List<String> = emptyList(),
     override val repeatContext: RepeatStepContext? = null,
   ) : FormWizardStep
@@ -566,7 +566,7 @@ class FormWizardController(
                   result.add(
                     FormWizardStep.FieldListGroupStep(
                       stepKey = "group:${component.canonicalPath}",
-                      title = groupTitle ?: "Question Group",
+                      title = groupTitle ?: "Question group",
                       breadcrumbs = breadcrumbs,
                       repeatContext = repeatContext,
                       controls = directControls,
@@ -580,13 +580,17 @@ class FormWizardController(
             is ComponentState.RepeatGroupState -> {
               val repeatTitle =
                 component.label?.text?.takeIf { it.isNotBlank() }
-                  ?: component.canonicalPath.substringAfterLast('/').ifEmpty { "Repeat Section" }
+                  ?: component.canonicalPath.substringAfterLast('/').ifEmpty { "Repeat section" }
               val relevantInstances = component.instances.filter { it.isRelevant }
 
               for (instance in relevantInstances) {
+                val dynamicLabel = instance.label?.text?.trim()
                 val instanceTitle =
-                  instance.label?.text?.takeIf { it.isNotBlank() }
-                    ?: "$repeatTitle #${instance.repeatIndex}"
+                  if (!dynamicLabel.isNullOrBlank() && dynamicLabel != repeatTitle) {
+                    dynamicLabel
+                  } else {
+                    "$repeatTitle #${instance.repeatIndex}"
+                  }
                 val instanceContext =
                   RepeatStepContext(
                     repeatGroupPath = component.canonicalPath,

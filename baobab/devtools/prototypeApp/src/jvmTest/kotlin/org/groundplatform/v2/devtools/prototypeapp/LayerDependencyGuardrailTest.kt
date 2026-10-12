@@ -115,7 +115,6 @@ class LayerDependencyGuardrailTest {
         "domain/model/editor/FormEditorModels.kt",
         "domain/model/editor/FormPublishing.kt",
         "domain/model/editor/FormImport.kt",
-        "ui/workbench/PrototypeXFormsWorkbenchPanel.kt",
         "ui/workbench/WorkbenchXFormsPresets.kt",
         "ui/viewmodel/WorkbenchViewModel.kt",
       )

@@ -110,16 +110,20 @@ import org.groundplatform.v2.devtools.prototypeapp.ui.workbench.WebMobilePrototy
 
 /**
  * One organization, laid out like the survey editor: a resizable left panel switches between
- * Organization details, Surveys, Members, Imagery sources, and the library's Purposes, Dictionary,
- * and Templates, and the content pane shows the selected section. Members can create surveys in it;
- * Managers can also edit and delete the organization, invite people, approve join requests, change
- * roles, remove members, and edit its library. The last Manager can't be demoted or removed.
+ * Organization details, Surveys, Impact (for Managers), Members, Imagery, and the library's
+ * Purposes, Dictionary, and Templates, and the content pane shows the selected section. Members can
+ * create surveys in it; Managers can also edit and delete the organization, invite people, approve
+ * join requests, change roles, remove members, and edit its library. The last Manager can't be
+ * demoted or removed.
  */
 @Composable
 internal fun OrganizationPage(
   state: PrototypeAppState,
   onOpenSurvey: (surveyId: String) -> Unit,
   onCreateSurvey: (CreateSurveyRequest) -> Unit,
+  onOpenCreateSurveyWizard: ((organizationId: String?) -> Unit)? = { orgId ->
+    state.openCreateSurveyWizard(orgId)
+  },
   onSignOut: () -> Unit = { state.signOut() },
 ) {
   val uiState by state.organization.uiState.collectAsState()
@@ -135,6 +139,7 @@ internal fun OrganizationPage(
       onSidePanelWidthChange = state.dashboard::updateSidePanelWidth,
       onOpenSurvey = onOpenSurvey,
       onCreateSurvey = onCreateSurvey,
+      onOpenCreateSurveyWizard = onOpenCreateSurveyWizard,
       surveyLibrary = dashboardState::surveyLibrary,
       header = { onCreateSurveyClick ->
         val organization = uiState.openOrganization
@@ -222,6 +227,7 @@ internal fun OrganizationPage(
   onCreateSurvey: (CreateSurveyRequest) -> Unit,
   surveyLibrary: (organizationId: String?) -> ResolvedLibrary,
   header: @Composable (onCreateSurveyClick: () -> Unit) -> Unit,
+  onOpenCreateSurveyWizard: ((organizationId: String?) -> Unit)? = null,
   impactState: ImpactUiState = ImpactUiState(),
   impactActions: ImpactActions? = null,
 ) {
@@ -231,8 +237,16 @@ internal fun OrganizationPage(
   var tab by remember(organization?.id) { mutableStateOf(OrganizationTab.DETAILS) }
   var isCreatingSurvey by remember { mutableStateOf(false) }
 
+  val triggerCreateSurvey: () -> Unit = {
+    if (onOpenCreateSurveyWizard != null) {
+      onOpenCreateSurveyWizard(organization?.id)
+    } else {
+      isCreatingSurvey = true
+    }
+  }
+
   Column(modifier = Modifier.fillMaxSize()) {
-    header { isCreatingSurvey = true }
+    header(triggerCreateSurvey)
     HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
     if (organization == null) {
@@ -246,7 +260,7 @@ internal fun OrganizationPage(
         surveyCount = uiState.surveyCountInOrganization(organization.id),
         library = uiState.library,
         isManager = isManager,
-        showsImpact = showsImpact(organization, isManager, isMember, impactActions),
+        showsImpact = showsImpact(isManager, impactActions),
         selected = tab,
         onSelect = { tab = it },
         modifier = Modifier.width(sidePanelWidthDp.dp).fillMaxHeight(),
@@ -286,7 +300,7 @@ internal fun OrganizationPage(
                 },
             ) {
               NoticeSlot(uiState, actions)
-              SurveysPane(uiState, organization, isMember, onOpenSurvey) { isCreatingSurvey = true }
+              SurveysPane(uiState, organization, isMember, onOpenSurvey, triggerCreateSurvey)
             }
           OrganizationTab.IMPACT ->
             if (organization.isSynthetic) {
@@ -320,10 +334,10 @@ internal fun OrganizationPage(
             }
           OrganizationTab.IMAGERY_SOURCES ->
             PaneScaffold(
-              title = "Imagery sources",
+              title = "Imagery",
               subtitle =
                 if (organization.isSynthetic) {
-                  "Custom basemap imagery layers available to all Ground users across every " +
+                  "Custom basemap imagery layers available to all Collect One users across every " +
                     "survey in the basemap layers dialog on mobile and web."
                 } else if (isManager) {
                   "Custom basemap imagery layers available in the basemap layers dialog on " +
@@ -490,17 +504,11 @@ private fun OrganizationNavigation(
 
 internal val OrganizationPaneMaxWidth = 760.dp
 
-/**
- * Whether the Impact tab is shown: to members of a real organization, and, for the synthetic `"All
- * users"` organization, only to its Managers (the platform-wide view).
- */
-private fun showsImpact(
-  organization: Organization,
+/** Whether the Impact tab is shown: only to Organization Managers (Organizers). */
+internal fun showsImpact(
   isManager: Boolean,
-  isMember: Boolean,
   impactActions: ImpactActions?,
-): Boolean =
-  impactActions != null && if (organization.isSynthetic) isManager else isMember || isManager
+): Boolean = impactActions != null && isManager
 
 @Composable
 private fun MissingOrganization(onBack: () -> Unit) {
@@ -873,8 +881,8 @@ private fun PlatformNumbersCard(
       Column(modifier = Modifier.weight(1f)) {
         Text("Keep our data out of platform totals", style = MaterialTheme.typography.bodyMedium)
         Text(
-          "Your surveys still count in your own Impact numbers; only totals across all of Ground " +
-            "leave them out.",
+          "Your surveys still count in your own Impact numbers; only totals across all of " +
+            "Collect One leave them out.",
           style = MaterialTheme.typography.bodySmall,
           color = MaterialTheme.colorScheme.onSurfaceVariant,
         )

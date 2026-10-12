@@ -39,13 +39,16 @@ import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.Map
+import androidx.compose.material.icons.outlined.Public
 import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material.icons.outlined.Shield
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SegmentedButton
@@ -73,6 +76,7 @@ import org.groundplatform.v2.core.forms.model.FormState
 import org.groundplatform.v2.core.forms.ui.FormWizardController
 import org.groundplatform.v2.core.forms.ui.FormWizardStep
 import org.groundplatform.v2.core.forms.ui.GeoPointMapViewportState
+import org.groundplatform.v2.core.forms.ui.GroundAlertDialogOverlay
 import org.groundplatform.v2.core.forms.ui.GroundBadgeTone
 import org.groundplatform.v2.core.forms.ui.GroundTonalBadge
 import org.groundplatform.v2.core.forms.ui.MobileFormRunner
@@ -222,7 +226,7 @@ fun DataCollectionFormScreen(
   val resolvedTitle =
     controller.formState.formDef.title.takeIf { it.isNotBlank() }
       ?: form?.title
-      ?: "Data Collection Form"
+      ?: "Data collection form"
 
   Column(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
     // Compact target entity & form context banner at the top of the device screen
@@ -271,7 +275,7 @@ fun DataCollectionFormScreen(
                       append("${entity.label} • ")
                       appendGeoId(entity)
                     } else if (form != null && !form.requiresEntity) {
-                      append("Standalone Field Log • $userGpsCoordinatesLabel")
+                      append("Standalone field log • $userGpsCoordinatesLabel")
                     } else {
                       append(
                         "Select ${form?.targetSingularTypeLabel ?: "Feature"} (${form?.targetDatasetName ?: "Required"})"
@@ -335,6 +339,10 @@ fun DataCollectionFormScreen(
           modifier = Modifier.height(32.dp),
         )
       }
+    }
+
+    if (uiState.isActiveSurveyPublicData) {
+      PublicDataInFormBanner()
     }
 
     if (uiState.isCurrentFormStepEntityRef && form != null) {
@@ -418,7 +426,7 @@ private fun EntityRefStepMapOrListSelector(
             verticalArrangement = Arrangement.spacedBy(6.dp),
           ) {
             GroundTonalBadge(
-              text = "STEP $currentStepNum OF $totalSteps • REQUIRED",
+              text = "Step $currentStepNum of $totalSteps • Required",
               tone = GroundBadgeTone.PRIMARY,
             )
             GroundTonalBadge(text = form.targetDatasetName, tone = GroundBadgeTone.SECONDARY)
@@ -464,9 +472,9 @@ private fun EntityRefStepMapOrListSelector(
                   Text(
                     text =
                       if (mode == MainSurveyViewMode.MAP) {
-                        "Select on Map"
+                        "Select on map"
                       } else {
-                        "Select from List (${allDatasetCandidates.size})"
+                        "Select from list (${allDatasetCandidates.size})"
                       },
                     style = MaterialTheme.typography.labelMedium,
                     fontWeight = FontWeight.Bold,
@@ -562,7 +570,7 @@ private fun EntityRefStepMapOrListSelector(
               verticalArrangement = Arrangement.spacedBy(6.dp),
             ) {
               Text(
-                text = "${form.targetDatasetName.uppercase()} ON MAP",
+                text = "${form.targetDatasetName} on map",
                 style = MaterialTheme.typography.labelSmall,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.primary,
@@ -811,4 +819,147 @@ private fun EntityRefCandidateOptionCard(
 @Composable
 fun PrototypeDataCollectionFormScreen(state: PrototypeAppState) {
   DataCollectionFormScreen(state)
+}
+
+/**
+ * Persistent reminder banner shown inside an open data collection form when the active survey uses
+ * **Public data** (`isPublicData == true`).
+ */
+@Composable
+internal fun PublicDataInFormBanner(modifier: Modifier = Modifier) {
+  Surface(
+    color = MaterialTheme.colorScheme.tertiaryContainer,
+    contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
+    modifier = modifier.fillMaxWidth(),
+  ) {
+    Row(
+      modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
+      horizontalArrangement = Arrangement.spacedBy(8.dp),
+      verticalAlignment = Alignment.CenterVertically,
+    ) {
+      Icon(
+        imageVector = Icons.Outlined.Public,
+        contentDescription = null,
+        modifier = Modifier.size(16.dp),
+      )
+      Text(
+        text =
+          "Public data survey: Anyone can view answers, photos, and locations. Don't include personal or sensitive details.",
+        style = MaterialTheme.typography.labelSmall,
+        fontWeight = FontWeight.Medium,
+      )
+    }
+  }
+}
+
+/**
+ * Just-in-time informed consent dialog shown once per survey when a participant starts collecting
+ * data in a **Public data** survey or a survey with custom organizer consent terms.
+ */
+@Composable
+internal fun CollectorConsentModalDialog(
+  uiState: DataCollectionUiState,
+  actions: DataCollectionActions,
+) {
+  val prompt = uiState.pendingCollectorConsent ?: return
+
+  GroundAlertDialogOverlay(
+    onDismissRequest = { actions.dismissCollectorConsent() },
+    icon = {
+      Icon(
+        imageVector = if (prompt.isPublicData) Icons.Outlined.Public else Icons.Outlined.Shield,
+        contentDescription = null,
+        tint = MaterialTheme.colorScheme.primary,
+      )
+    },
+    title = {
+      Text(
+        text =
+          if (prompt.isPublicData) {
+            "Data in this survey is public"
+          } else {
+            "Before you collect data"
+          },
+        style = MaterialTheme.typography.titleMedium,
+        fontWeight = FontWeight.Bold,
+      )
+    },
+    text = {
+      Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        if (prompt.isPublicData) {
+          Text(
+            text =
+              "You're about to contribute to \"${prompt.surveyTitle}\". Because this survey uses public data:",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+          )
+          ConsentBulletItem(
+            title = "What is public",
+            body =
+              "Anyone can view the map features, GPS coordinates, answers, and photos you submit.",
+          )
+          ConsentBulletItem(
+            title = "Your identity is hidden",
+            body =
+              "Your name and email address are hidden from other participants and visible only to survey organizers.",
+          )
+          ConsentBulletItem(
+            title = "Protect privacy",
+            body =
+              "Don't include faces, license plates, or personal details in photos or text answers.",
+          )
+        }
+        if (prompt.customConsentText.isNotBlank()) {
+          Surface(
+            shape = MaterialTheme.shapes.small,
+            color = MaterialTheme.colorScheme.surfaceContainerHigh,
+            modifier = Modifier.fillMaxWidth(),
+          ) {
+            Column(
+              modifier = Modifier.padding(10.dp),
+              verticalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
+              Text(
+                text = "Survey organizer terms",
+                style = MaterialTheme.typography.labelSmall,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface,
+              )
+              Text(
+                text = prompt.customConsentText,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+              )
+            }
+          }
+        }
+      }
+    },
+    confirmButton = {
+      Button(onClick = { actions.acceptCollectorConsent() }) {
+        Text("I understand, continue", fontWeight = FontWeight.Bold)
+      }
+    },
+    dismissButton = {
+      OutlinedButton(onClick = { actions.dismissCollectorConsent() }) { Text("Cancel") }
+    },
+  )
+}
+
+@Composable
+private fun ConsentBulletItem(title: String, body: String) {
+  Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+    Text(
+      text = "• $title",
+      style = MaterialTheme.typography.labelMedium,
+      fontWeight = FontWeight.Bold,
+      color = MaterialTheme.colorScheme.onSurface,
+    )
+    Text(
+      text = body,
+      style = MaterialTheme.typography.bodySmall,
+      color = MaterialTheme.colorScheme.onSurfaceVariant,
+      modifier = Modifier.padding(start = 10.dp),
+    )
+  }
 }

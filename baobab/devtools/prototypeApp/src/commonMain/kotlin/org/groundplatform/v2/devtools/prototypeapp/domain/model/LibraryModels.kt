@@ -99,9 +99,9 @@ enum class ConceptDataType(
   val compatibleQuestionTypes: Set<EditorQuestionType>,
 ) {
   TEXT("Text", setOf(EditorQuestionType.TEXT, EditorQuestionType.LONG_TEXT)),
-  INTEGER("Integer", setOf(EditorQuestionType.INTEGER)),
-  /** Whole-number answers are valid decimals, so integer questions can link to decimal concepts. */
-  DECIMAL("Decimal", setOf(EditorQuestionType.DECIMAL, EditorQuestionType.INTEGER)),
+  INTEGER("Integer", setOf(EditorQuestionType.NUMBER)),
+  /** Whole-number answers are valid decimals, so number questions can link to decimal concepts. */
+  DECIMAL("Decimal", setOf(EditorQuestionType.NUMBER)),
   DATE("Date", setOf(EditorQuestionType.DATE)),
   SELECT_ONE("Select one", setOf(EditorQuestionType.SELECT_ONE)),
   SELECT_MULTIPLE("Select multiple", setOf(EditorQuestionType.SELECT_MULTIPLE)),
@@ -115,6 +115,16 @@ enum class ConceptDataType(
 
   /** Whether a question of [type] can be linked to a concept of this data type. */
   fun isCompatibleWith(type: EditorQuestionType): Boolean = type in compatibleQuestionTypes
+
+  /**
+   * Whether [question] can be linked to a concept of this data type; for [INTEGER], requires a
+   * [EditorQuestionType.NUMBER] question with `0` decimal places.
+   */
+  fun isCompatibleWith(question: EditorQuestion): Boolean =
+    when (this) {
+      INTEGER -> question.type == EditorQuestionType.NUMBER && question.decimalPlaces <= 0
+      else -> isCompatibleWith(question.type)
+    }
 
   /** Whether concepts of this type carry a code list. */
   val hasCodeList: Boolean

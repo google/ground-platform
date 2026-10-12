@@ -24,6 +24,7 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.GeospatialEntity
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.MapLayerItem
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyConfig
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyPreviewItem
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyThumbnailGenerator
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.FormConceptLinkSync
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SurveyEditorDerivation
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SurveyEditorDraft
@@ -103,13 +104,25 @@ class SurveyEditorRepositoryImpl(
       putMapLayers(surveyId, projected.mapLayers)
       putEntities(surveyId, projected.entities)
 
-      // The survey list owns the title, description, and organization; copy edits there.
+      // The survey list owns the title, description, organization, sharing/consent summary, and
+      // satellite map thumbnail; copy edits there.
       updateSurvey(surveyId) { item ->
         item.copy(
           title = draft.details.title.ifBlank { item.title },
           description = draft.details.description.ifBlank { item.description },
           organizationId = draft.details.organizationId,
+          sharingPolicy = draft.sharing.policy,
+          peerDataVisibility = draft.sharing.peerDataVisibility,
+          collectorConsentRequired = draft.sharing.collectorConsentRequired,
+          collectorConsentText = draft.sharing.collectorConsentText,
           entityCount = projected.entities.size,
+          thumbnail =
+            SurveyThumbnailGenerator.fromDraftAndRuntime(
+              surveyId = surveyId,
+              draft = draft,
+              mapLayers = projected.mapLayers,
+              entities = projected.entities,
+            ),
         )
       }
     }

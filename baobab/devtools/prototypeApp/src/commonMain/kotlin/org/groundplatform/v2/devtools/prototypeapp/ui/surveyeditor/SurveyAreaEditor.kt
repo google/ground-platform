@@ -33,6 +33,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Error
@@ -468,7 +469,7 @@ private fun SearchTab(
           SurveyPlaceItem(
             id = "custom-coords",
             name = "GPS: ${formatFixed(lat, 4)}°, ${formatFixed(lng, 4)}°",
-            categoryLabel = "Custom Coordinates",
+            categoryLabel = "Custom coordinates",
             regionSubtitle = "Direct coordinates input",
             coordinatesLabel = "${formatFixed(lat, 4)}, ${formatFixed(lng, 4)}",
             normalizedX = 0.5f,
@@ -675,6 +676,9 @@ internal fun placeToSurveyArea(place: SurveyPlaceItem): SurveyArea {
 private fun DrawTab(editor: SurveyAreaEditorState, center: LatLng, zoom: Double) {
   var selectedPart by remember { mutableStateOf<String?>(null) }
   val dataset = editor.partsDataset
+  var drawRequestToken by remember { mutableStateOf(0) }
+  var isDrawing by remember { mutableStateOf(dataset.rows.isEmpty()) }
+  var draftVertexCount by remember { mutableStateOf(0) }
   Row(modifier = Modifier.fillMaxSize(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
     InteractiveLayerMapCard(
       editor = editor.drawEditor,
@@ -685,6 +689,13 @@ private fun DrawTab(editor: SurveyAreaEditorState, center: LatLng, zoom: Double)
       featureNoun = "part",
       showLabels = false,
       emptyCamera = CameraPosition(center.toMapLatLng(), zoom),
+      startInDrawMode = dataset.rows.isEmpty(),
+      showAddButtonInHeader = false,
+      drawRequestToken = drawRequestToken,
+      onDrawStateChange = { drawing, count ->
+        isDrawing = drawing
+        draftVertexCount = count
+      },
     )
     Column(
       modifier = Modifier.width(280.dp).fillMaxHeight().verticalScroll(rememberScrollState()),
@@ -698,11 +709,11 @@ private fun DrawTab(editor: SurveyAreaEditorState, center: LatLng, zoom: Double)
         modifier = Modifier.fillMaxWidth(),
       )
       InfoLine(
-        "Select Add part and click the map to draw each polygon. Click a part to select it, then " +
-          "drag its corners to reshape it."
+        "Click the map to place corners for the boundary. Click an existing part to select it, " +
+          "then drag its corners to reshape it."
       )
       Text("Parts", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
-      if (dataset.rows.isEmpty()) {
+      if (dataset.rows.isEmpty() && !isDrawing) {
         Text(
           "No parts yet. Draw at least one part to save the survey area.",
           style = MaterialTheme.typography.bodySmall,
@@ -766,6 +777,45 @@ private fun DrawTab(editor: SurveyAreaEditorState, center: LatLng, zoom: Double)
             )
           }
         }
+      }
+      if (isDrawing) {
+        Row(
+          modifier =
+            Modifier.fillMaxWidth()
+              .background(
+                MaterialTheme.colorScheme.secondaryContainer,
+                MaterialTheme.shapes.small,
+              )
+              .padding(horizontal = 12.dp, vertical = 10.dp),
+          verticalAlignment = Alignment.CenterVertically,
+        ) {
+          Column(modifier = Modifier.weight(1f)) {
+            Text(
+              "Part ${dataset.rows.size + 1}",
+              style = MaterialTheme.typography.bodyMedium,
+              fontWeight = FontWeight.SemiBold,
+              color = MaterialTheme.colorScheme.onSecondaryContainer,
+            )
+            Text(
+              if (draftVertexCount == 0) {
+                "Click the map to draw boundary…"
+              } else {
+                "Drawing ($draftVertexCount ${if (draftVertexCount == 1) "corner" else "corners"})"
+              },
+              style = MaterialTheme.typography.bodySmall,
+              color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.85f),
+            )
+          }
+        }
+      }
+      OutlinedButton(
+        onClick = { drawRequestToken++ },
+        enabled = !isDrawing,
+        modifier = Modifier.fillMaxWidth(),
+      ) {
+        Icon(Icons.Outlined.Add, contentDescription = null, modifier = Modifier.size(18.dp))
+        Spacer(Modifier.width(6.dp))
+        Text("Add part")
       }
     }
   }

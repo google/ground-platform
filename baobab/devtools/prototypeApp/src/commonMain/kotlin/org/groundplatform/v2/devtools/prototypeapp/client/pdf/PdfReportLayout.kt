@@ -153,11 +153,11 @@ internal class PdfReportLayout(
     }
   }
 
-  /** Uppercase section heading with a rule below; never left alone at the bottom of a page. */
+  /** Section heading with a rule below; never left alone at the bottom of a page. */
   fun sectionHeading(text: String) {
     ensureSpace(64f)
     y += 14f
-    page.text(left, y + 9f, text.uppercase(), PdfFont.BOLD, 9.5f, PdfPalette.primary)
+    page.text(left, y + 9f, text, PdfFont.BOLD, 9.5f, PdfPalette.primary)
     y += 14f
     page.line(left, y, right, y, PdfPalette.primary, 0.9f)
     y += 6f

@@ -45,7 +45,7 @@ internal object PrototypeFakeOrganizationsData {
         name = "All users",
         description =
           "Synthetic platform-wide organization providing shared imagery sources and the global " +
-            "library to every Ground user across all surveys.",
+            "library to every Collect One user across all surveys.",
         logoUrl = "avatar:2",
         isListed = false,
         isSynthetic = true,

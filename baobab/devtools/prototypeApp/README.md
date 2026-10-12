@@ -17,8 +17,8 @@
 # Ground 2.0 UI Prototype App (`devtools/prototypeApp`)
 
 A Kotlin Multiplatform (KMP) and Compose Multiplatform (CMP) web application
-that embeds a live mobile device preview of the Ground 2.0 Mobile UI alongside a
-UX Co-Design Workbench for rapid iteration with UX designers.
+that embeds a live mobile and tablet device preview of the Ground 2.0 Mobile UI
+alongside the unified Ground Web application.
 
 ## Prototype Screens Included
 
@@ -39,11 +39,15 @@ UX Co-Design Workbench for rapid iteration with UX designers.
         **map thumbnail** (stylized placeholder), and a **`✓ Downloaded`**
         indicator badge on surveys already downloaded for offline use.
 4.  **Main Survey UI (`PrototypeScreen.MAIN_SURVEY` in `MainSurveyScreen.kt`)**
+    -   **Floating Top Search Bar (`MobileMapSearchBar`)**: Floating pill bar at
+        the top of the map canvas containing the navigation drawer menu button,
+        live search input (`Search...`), clear action, and user profile avatar.
     -   **Unified Persistent Bottom Sheet (`SurveyPersistentBottomSheetContent`)**:
         Replaces separate `Map | List` screens with a single multi-stage bottom
         sheet over the live Mapbox canvas:
         -   **Default / Peek State (No site selected)**: Peeks at the bottom of
-            the map with the **Search bar** and expands into the full
+            the map with the **survey title and area name** in the card heading
+            and expands into the full
             searchable list (`BottomSheetSearchableListContent`), with one line
             per map feature (`EntityListRow`: geometry icon, label, and marker
             circle, filled with the `marker-color` and holding the

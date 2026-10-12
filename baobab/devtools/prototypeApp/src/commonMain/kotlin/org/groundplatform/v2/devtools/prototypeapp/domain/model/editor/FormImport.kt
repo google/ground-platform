@@ -20,10 +20,12 @@ import groundplatform.v2.forms.FieldBinding
 import groundplatform.v2.forms.FormDef
 import groundplatform.v2.forms.ItemsetDef
 import groundplatform.v2.forms.LabelDef
+import groundplatform.v2.forms.MediaRef
 import groundplatform.v2.forms.RecordNode
 import groundplatform.v2.forms.ViewComponent
 import org.groundplatform.v2.core.forms.model.FormDefinition
 import org.groundplatform.v2.core.forms.serialization.XFormsXmlSerializer
+import org.groundplatform.v2.core.forms.ui.ChoiceImageRegistry
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.FormAvailability
 
 /**
@@ -113,11 +115,25 @@ object FormImport {
     private val bindings: Map<String, FieldBinding> =
       model?.bindings.orEmpty().associateBy { it.field_path }
     private val instances = model?.secondary_instances.orEmpty().associateBy { it.id }
+    private val orderedLanguages =
+      model?.translations?.languages.orEmpty().let { languages ->
+        languages.filter { it.is_default } + languages.filterNot { it.is_default }
+      }
+    private val nonDefaultLanguages = orderedLanguages.drop(1)
     private val strings: Map<String, String> = buildMap {
-      val languages = model?.translations?.languages.orEmpty()
       // Later languages don't override the default one.
-      (languages.filter { it.is_default } + languages.filterNot { it.is_default }).forEach { lang ->
+      orderedLanguages.forEach { lang ->
         lang.strings.forEach { (id, text) -> if (id !in this) put(id, text.value_) }
+      }
+    }
+    private val mediaByTextId: Map<String, MediaRef> = buildMap {
+      orderedLanguages.forEach { lang ->
+        lang.strings.forEach { (id, text) ->
+          val media = text.media
+          if (id !in this && media != null && media.image_uri.isNotBlank()) {
+            put(id, media)
+          }
+        }
       }
     }
     private val notes = mutableListOf<String>()
@@ -278,6 +294,7 @@ object FormImport {
             label = text(choice.label) ?: choice.value_,
             colorHex = choice.properties[EditorXFormsGenerator.CHOICE_COLOR_COLUMN],
             code = choice.properties[EditorXFormsGenerator.CHOICE_CODE_COLUMN],
+            labelTranslations = translations(choice.label),
           )
         }
       var choiceDatasetId: String? = null
@@ -315,6 +332,12 @@ object FormImport {
         }
       }
       val validation = validationOf(type, binding, path, label ?: name)
+      val decimalPlaces =
+        if (type == EditorQuestionType.NUMBER && binding?.type == DataType.TYPE_DOUBLE) {
+          EditorQuestion.DEFAULT_DECIMAL_PLACES
+        } else {
+          0
+        }
       // `ground:concept` becomes the question's concept link (checked against the survey's library
       // later); other foreign attributes are kept as they are.
       val (conceptLink, foreignAttributes) = ConceptLinkAttributes.fromBinding(binding)
@@ -333,6 +356,7 @@ object FormImport {
               choiceDatasetId != null &&
               EditorXFormsGenerator.ADD_ENTITY_APPEARANCE in appearance,
           validation = validation,
+          decimalPlaces = decimalPlaces,
           capture =
             if (type.isGeometry && GeometryCapture.GPS_OR_MAP.appearance in appearance) {
               GeometryCapture.GPS_OR_MAP
@@ -347,6 +371,8 @@ object FormImport {
             },
           conceptLink = conceptLink,
           foreignAttributes = foreignAttributes,
+          labelTranslations = translations(control.label),
+          hintTranslations = translations(control.hint),
         )
       keyByPath[path] = key
       pathByKey[key] = path
@@ -395,8 +421,7 @@ object FormImport {
         }
         ControlType.CONTROL_RANGE -> {
           notes += "\"$label\" is a range slider; imported as a number."
-          if (dataType == DataType.TYPE_DOUBLE) EditorQuestionType.DECIMAL
-          else EditorQuestionType.INTEGER
+          EditorQuestionType.NUMBER
         }
         ControlType.CONTROL_TRIGGER -> {
           notes += "\"$label\" is an acknowledgement; imported as Select one."
@@ -405,8 +430,8 @@ object FormImport {
         else ->
           when (dataType) {
             DataType.TYPE_INT32,
-            DataType.TYPE_INT64 -> EditorQuestionType.INTEGER
-            DataType.TYPE_DOUBLE -> EditorQuestionType.DECIMAL
+            DataType.TYPE_INT64,
+            DataType.TYPE_DOUBLE -> EditorQuestionType.NUMBER
             DataType.TYPE_DATE -> EditorQuestionType.DATE
             DataType.TYPE_TIME,
             DataType.TYPE_DATETIME -> {
@@ -841,22 +866,34 @@ object FormImport {
       return rows
         .mapNotNull { row ->
           val value = rowField(row, valueTag) ?: rowField(row, "name") ?: return@mapNotNull null
+          val itextId =
+            if (itextColumn != null) {
+              rowField(row, itextColumn)
+            } else {
+              rowField(row, "itextId")
+            }
           val label =
             if (itextColumn != null) {
-              rowField(row, itextColumn)?.let { strings[it] ?: it }
-                ?: rowField(row, "label")
-                ?: value
+              itextId?.let { strings[it] ?: it } ?: rowField(row, "label") ?: value
             } else {
               rowField(row, labelTag)
                 ?: rowField(row, "label")
-                ?: rowField(row, "itextId")?.let { strings[it] }
+                ?: itextId?.let { strings[it] }
                 ?: value
             }
+          val imageUri = itextId?.let { mediaByTextId[it]?.image_uri }?.takeIf { it.isNotBlank() }
+          val choiceImage = imageUri?.let { uri ->
+            ChoiceImageRegistry.lookup(uri)?.let { media ->
+              EditorChoiceImage(mimeType = media.mimeType, base64 = media.base64)
+            }
+          }
           EditorChoice(
             value = value,
             label = label,
             colorHex = rowField(row, EditorXFormsGenerator.CHOICE_COLOR_COLUMN),
+            image = choiceImage,
             code = rowField(row, EditorXFormsGenerator.CHOICE_CODE_COLUMN),
+            labelTranslations = translationsForTextId(itextId),
           )
         }
         .toList()
@@ -870,6 +907,31 @@ object FormImport {
       val direct = label.text.trim()
       if (direct.isNotEmpty()) return direct
       return label.text_id.takeIf { it.isNotEmpty() }?.let { strings[it] }?.trim()?.ifEmpty { null }
+    }
+
+    private fun translations(label: LabelDef?): Map<String, String> =
+      translationsForTextId(label?.text_id)
+
+    private fun translationsForTextId(textId: String?): Map<String, String> {
+      val id = textId?.trim()?.takeIf { it.isNotEmpty() } ?: return emptyMap()
+      if (nonDefaultLanguages.isEmpty()) return emptyMap()
+      return buildMap {
+        nonDefaultLanguages.forEach { lang ->
+          val translated = lang.strings[id]?.value_?.trim()?.takeIf { it.isNotEmpty() }
+          if (translated != null) {
+            val tag = normalizeLanguageTag(lang.language)
+            if (tag.isNotEmpty() && tag !in this) {
+              put(tag, translated)
+            }
+          }
+        }
+      }
+    }
+
+    private fun normalizeLanguageTag(raw: String): String {
+      val trimmed = raw.trim()
+      val match = PARENTHESIZED_LANG_CODE.matchEntire(trimmed)
+      return match?.groupValues?.get(1) ?: trimmed
     }
 
     private fun isTrue(expression: String?): Boolean =
@@ -907,6 +969,7 @@ object FormImport {
       val DATE_BOUND = Regex("""^\.\s*(>=|<=|>|<|=)\s*date\(\s*(.+?)\s*\)$""")
       val COUNT_SELECTED_BOUND = Regex("""^count-selected\(\s*\.\s*\)\s*(>=|<=|>|<|=)\s*(\d+)$""")
       val JR_ITEXT = Regex("""^jr:itext\(\s*(.+?)\s*\)$""")
+      val PARENTHESIZED_LANG_CODE = Regex("""^.*\(([A-Za-z]{2,3}(?:-[A-Za-z0-9]+)*)\)$""")
       val ID_BY_QUESTION =
         Regex(
           """^instance\('([^']+)'\)/root/item\[([A-Za-z_][A-Za-z0-9_.\-]*)\s*=\s*([^\]]+)\]/name$"""

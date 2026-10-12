@@ -388,7 +388,7 @@ internal fun AcceptInviteDialog(
           }
         }
         Text(
-          "Ground saves your name and photo so organizers can recognize you on the " +
+          "Collect One saves your name and photo so organizers can recognize you on the " +
             "$peopleListName. They're refreshed whenever you sign in.",
           style = MaterialTheme.typography.bodySmall,
           color = MaterialTheme.colorScheme.onSurfaceVariant,

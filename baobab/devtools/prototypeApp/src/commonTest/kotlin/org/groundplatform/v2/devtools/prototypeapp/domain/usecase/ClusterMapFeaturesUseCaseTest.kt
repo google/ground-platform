@@ -49,12 +49,150 @@ class ClusterMapFeaturesUseCaseTest {
       )
     val clusters = useCase(features, radiusNormalized = 0.10f)
     assertEquals(1, clusters.size)
-    assertEquals(2, clusters.first().siteCount)
+    val cluster = clusters.first()
+    assertEquals(2, cluster.siteCount)
+    assertEquals(0.305f, cluster.normalizedX, 1e-4f)
+    assertEquals(0.305f, cluster.normalizedY, 1e-4f)
+    assertEquals(0.30f, cluster.minNormalizedX, 1e-4f)
+    assertEquals(0.31f, cluster.maxNormalizedX, 1e-4f)
+    assertEquals(0.30f, cluster.minNormalizedY, 1e-4f)
+    assertEquals(0.31f, cluster.maxNormalizedY, 1e-4f)
+    assertTrue(cluster.diameterNormalized > 0f)
+  }
+
+  @Test
+  fun clusterRadiusNormalized_doublesForEachZoomLevelOutFromClusteringThreshold() {
+    val onsetRadius =
+      useCase.clusterRadiusNormalized(ClusterMapFeaturesUseCase.CLUSTERING_ZOOM_DELTA)
+    val oneLevelOut =
+      useCase.clusterRadiusNormalized(ClusterMapFeaturesUseCase.CLUSTERING_ZOOM_DELTA - 1.0f)
+    val twoLevelsOut =
+      useCase.clusterRadiusNormalized(ClusterMapFeaturesUseCase.CLUSTERING_ZOOM_DELTA - 2.0f)
+
+    assertEquals(ClusterMapFeaturesUseCase.BASE_CLUSTER_RADIUS_NORMALIZED, onsetRadius, 1e-4f)
+    assertEquals(onsetRadius * 2.0f, oneLevelOut, 1e-4f)
+    assertEquals(onsetRadius * 4.0f, twoLevelsOut, 1e-4f)
+  }
+
+  @Test
+  fun invoke_progressivelyCoversBroaderAreaAndReducesClusterCountAsUserZoomsOut() {
+    // Build a multi-scale distribution: 4 regional quadrants across [-1.5, 2.5] x [-1.5, 2.5],
+    // each containing 2 sub-villages of 3 nearby plots.
+    val regionCenters =
+      listOf(
+        -1.0f to -1.0f,
+        2.0f to -1.0f,
+        -1.0f to 2.0f,
+        2.0f to 2.0f,
+      )
+    val villageOffsets = listOf(-0.28f to -0.20f, 0.28f to 0.20f)
+    val plotOffsets = listOf(-0.04f to -0.03f, 0.0f to 0.02f, 0.04f to -0.02f)
+
+    var nextId = 1
+    val features = buildList {
+      for ((rx, ry) in regionCenters) {
+        for ((vx, vy) in villageOffsets) {
+          for ((px, py) in plotOffsets) {
+            add(
+              MapClusterFeatureItem(
+                id = "f-${nextId++}",
+                kind = MapFeatureKind.ENTITY,
+                label = "Plot $nextId",
+                colorHex = 0xFF1E8E3EL,
+                colorCss = "#1E8E3E",
+                markerSymbol = "✓",
+                normalizedX = rx + vx + px,
+                normalizedY = ry + vy + py,
+              )
+            )
+          }
+        }
+      }
+    }
+
+    val zoomLevels = listOf(-2.35f, -3.00f, -3.75f, -4.50f, -5.25f, -6.00f, -6.75f)
+    val clustersByZoom = zoomLevels.map { zoomDelta ->
+      useCase(features, useCase.clusterRadiusNormalized(zoomDelta))
+    }
+
+    // Every zoom level preserves total feature count
+    clustersByZoom.forEach { clusters ->
+      assertEquals(features.size, clusters.sumOf { it.totalCount })
+    }
+
+    // As the user zooms out, cluster count monotonically decreases while max cluster spatial span
+    // monotonically increases across 4 hierarchy levels:
+    // - At -2.35f: 8 village clusters (3 plots each)
+    // - At -4.50f: 4 regional clusters (6 plots each)
+    // - At -6.00f: 2 macro-region clusters (12 plots each)
+    // - At -6.75f: 1 global cluster covering all 24 plots
+    assertEquals(8, clustersByZoom[0].size)
+    assertEquals(4, clustersByZoom[3].size)
+    assertEquals(2, clustersByZoom[5].size)
+    assertEquals(1, clustersByZoom[6].size)
+    for (i in 0 until clustersByZoom.lastIndex) {
+      val finer = clustersByZoom[i]
+      val coarser = clustersByZoom[i + 1]
+      assertTrue(
+        coarser.size <= finer.size,
+        "Expected cluster count to decrease or stay equal when zooming out: ${finer.size} -> ${coarser.size}",
+      )
+      val finerMaxDiameter = finer.maxOf { it.diameterNormalized }
+      val coarserMaxDiameter = coarser.maxOf { it.diameterNormalized }
+      assertTrue(
+        coarserMaxDiameter >= finerMaxDiameter - 1e-4f,
+        "Expected cluster spatial coverage to grow or stay equal when zooming out: $finerMaxDiameter -> $coarserMaxDiameter",
+      )
+    }
+  }
+
+  @Test
+  fun invoke_preventsUnboundedChainingAcrossUniformGrid() {
+    // 11 x 11 uniform grid across [0.0, 2.0] x [0.0, 2.0] (spacing = 0.20, total span = 2.0).
+    // At radius = 0.22, adjacent points are within 1 radius, but bounded-diameter clustering must
+    // partition the grid into multiple local clusters rather than chaining all 121 points into 1.
+    var id = 1
+    val gridFeatures = buildList {
+      for (ix in 0..10) {
+        for (iy in 0..10) {
+          add(
+            MapClusterFeatureItem(
+              id = "grid-${id++}",
+              kind = MapFeatureKind.ENTITY,
+              label = "Grid $id",
+              colorHex = 0xFF1E8E3EL,
+              colorCss = "#1E8E3E",
+              markerSymbol = "✓",
+              normalizedX = ix * 0.20f,
+              normalizedY = iy * 0.20f,
+            )
+          )
+        }
+      }
+    }
+
+    val radius = 0.22f
+    val clusters = useCase(gridFeatures, radiusNormalized = radius)
+    assertTrue(clusters.size > 4, "Uniform grid should not snowball into a single cluster")
+    assertEquals(gridFeatures.size, clusters.sumOf { it.totalCount })
+    val maxAllowedSpanX =
+      radius *
+        ClusterMapFeaturesUseCase.BALLOON_ASPECT_X *
+        ClusterMapFeaturesUseCase.MAX_CLUSTER_DIAMETER_FACTOR + 1e-3f
+    val maxAllowedSpanY = radius * ClusterMapFeaturesUseCase.MAX_CLUSTER_DIAMETER_FACTOR + 1e-3f
+    clusters.forEach { cluster ->
+      assertTrue(cluster.spanNormalizedX <= maxAllowedSpanX)
+      assertTrue(cluster.spanNormalizedY <= maxAllowedSpanY)
+    }
   }
 
   @Test
   fun computeScaleBarSpec_formatsMetricDistanceForSurvey() {
     val scaleBar = useCase.computeScaleBarSpec("survey-kenya-coffee", 0f)
     assertTrue(scaleBar.label.endsWith("m"))
+
+    val regionalScaleBar = useCase.computeScaleBarSpec("survey-kenya-coffee", -6.0f)
+    assertTrue(regionalScaleBar.label.endsWith("km"))
+    assertTrue(regionalScaleBar.distanceMeters > scaleBar.distanceMeters)
   }
 }

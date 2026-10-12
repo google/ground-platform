@@ -282,9 +282,7 @@ private fun TemplatePickerDialog(
               template.description
                 .get(library.language)
                 .takeIf { it.isNotBlank() }
-                ?.let {
-                  Text(it, style = MaterialTheme.typography.bodySmall)
-                }
+                ?.let { Text(it, style = MaterialTheme.typography.bodySmall) }
               Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(4.dp),

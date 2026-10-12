@@ -180,7 +180,7 @@ class DataCollectionReceiptEventsTest {
 
     // A survey with no mutations: only the queued activity record uploads.
     val notice = runNow { f.syncMutations().syncAllOutboxMutations("survey-without-mutations") }
-    assertEquals("Uploaded 1 activity record(s) to Ground Cloud", notice)
+    assertEquals("Uploaded 1 activity record(s) to Collect One Cloud", notice)
     assertTrue(f.recorded.single().isUploaded)
 
     // Nothing left to upload.

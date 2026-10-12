@@ -13,9 +13,6 @@
  */
 package org.groundplatform.v2.devtools.prototypeapp.ui.workbench
 
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -29,20 +26,14 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.List
-import androidx.compose.material.icons.automirrored.outlined.Logout
 import androidx.compose.material.icons.outlined.ArrowDropDown
 import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.Edit
-import androidx.compose.material.icons.outlined.Groups
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.Map
 import androidx.compose.material.icons.outlined.Smartphone
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FilledTonalButton
@@ -71,9 +62,11 @@ import androidx.compose.ui.unit.sp
 import org.groundplatform.v2.core.forms.ui.LocalGroundBrandFontFamily
 import org.groundplatform.v2.devtools.prototypeapp.PrototypeAppState
 import org.groundplatform.v2.devtools.prototypeapp.PrototypeWorkbenchPage
+import org.groundplatform.v2.devtools.prototypeapp.ui.common.UserAvatarProfileMenu
 import org.groundplatform.v2.devtools.prototypeapp.ui.dashboard.WebSurveysList
 import org.groundplatform.v2.devtools.prototypeapp.ui.datacollection.WebCollectDataMenuButton
 import org.groundplatform.v2.devtools.prototypeapp.ui.onboarding.CloudAcaciaLogo
+import org.groundplatform.v2.devtools.prototypeapp.ui.surveyeditor.SurveyStatusBadgeMenu
 
 /**
  * Top navigation and context toolbar for the Ground 2.0 Web dashboard: the shared [WebAppHeader]
@@ -92,18 +85,29 @@ internal fun WebTopToolbar(
     onSignOut = onSignOut,
     modifier = modifier,
     context = {
-      WebSurveySwitcher(state = state) {
-        state.activeSurveyOrganization?.let { organization ->
-          WebHeaderSupportingText(organization.name, color = MaterialTheme.colorScheme.primary)
-          WebHeaderSupportingText("·")
+      Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+      ) {
+        WebSurveySwitcher(state = state) {
+          state.activeSurveyOrganization?.let { organization ->
+            WebHeaderSupportingText(organization.name, color = MaterialTheme.colorScheme.primary)
+            WebHeaderSupportingText("·")
+          }
+          Icon(
+            imageVector = Icons.Outlined.LocationOn,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.size(12.dp),
+          )
+          WebHeaderSupportingText(state.activeSurvey.location)
         }
-        Icon(
-          imageVector = Icons.Outlined.LocationOn,
-          contentDescription = null,
-          tint = MaterialTheme.colorScheme.primary,
-          modifier = Modifier.size(12.dp),
+        SurveyStatusBadgeMenu(
+          lifecycleState = state.activeSurvey.state,
+          canManageSurvey = state.canManageActiveSurvey,
+          hasUnpublishedChanges = state.surveyEditor.uiState.value.hasUnpublishedChanges,
+          onSelectState = state.surveyEditor::setLifecycleState,
         )
-        WebHeaderSupportingText(state.activeSurvey.location)
       }
     },
     actions = {
@@ -223,9 +227,10 @@ internal fun WebAppHeader(
   state: PrototypeAppState,
   modifier: Modifier = Modifier,
   onSignOut: (() -> Unit)? = { state.signOut() },
+  showDebugTools: Boolean = true,
   navigationIcon: (@Composable () -> Unit)? = null,
   context: @Composable () -> Unit = {},
-  actions: @Composable RowScope.() -> Unit = {},
+  actions: (@Composable RowScope.() -> Unit)? = null,
 ) {
   val brandFont = LocalGroundBrandFontFamily.current
 
@@ -251,16 +256,30 @@ internal fun WebAppHeader(
       ) {
         navigationIcon?.invoke()
         CloudAcaciaLogo(modifier = Modifier.size(32.dp))
-        Text(
-          text = "Ground",
-          style =
-            MaterialTheme.typography.titleLarge.copy(
-              fontFamily = brandFont,
-              fontWeight = FontWeight.ExtraBold,
-              letterSpacing = 0.5.sp,
-            ),
-          color = MaterialTheme.colorScheme.onSurface,
-        )
+        Column(verticalArrangement = Arrangement.spacedBy(0.dp)) {
+          Text(
+            text = "OPEN FORIS",
+            style =
+              MaterialTheme.typography.labelSmall.copy(
+                fontSize = 9.sp,
+                lineHeight = 10.sp,
+                fontWeight = FontWeight.Bold,
+                letterSpacing = 1.1.sp,
+              ),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+          )
+          Text(
+            text = "Collect One",
+            style =
+              MaterialTheme.typography.titleMedium.copy(
+                fontFamily = brandFont,
+                fontWeight = FontWeight.ExtraBold,
+                letterSpacing = 0.4.sp,
+                lineHeight = 20.sp,
+              ),
+            color = MaterialTheme.colorScheme.onSurface,
+          )
+        }
         VerticalDivider(
           modifier = Modifier.height(28.dp).padding(horizontal = 4.dp),
           color = MaterialTheme.colorScheme.outlineVariant,
@@ -275,40 +294,62 @@ internal fun WebAppHeader(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp),
       ) {
-        actions()
+        if (actions != null) {
+          actions()
 
-        VerticalDivider(
-          modifier = Modifier.height(24.dp),
-          color = MaterialTheme.colorScheme.outlineVariant,
-        )
+          if (onSignOut != null || showDebugTools) {
+            VerticalDivider(
+              modifier = Modifier.height(24.dp),
+              color = MaterialTheme.colorScheme.outlineVariant,
+            )
+          }
+        }
 
         if (onSignOut != null) {
           WebUserAvatarProfileWidget(state = state, onSignOut = onSignOut)
 
-          VerticalDivider(
-            modifier = Modifier.height(24.dp),
-            color = MaterialTheme.colorScheme.outlineVariant,
-          )
+          if (showDebugTools) {
+            VerticalDivider(
+              modifier = Modifier.height(24.dp),
+              color = MaterialTheme.colorScheme.outlineVariant,
+            )
+          }
         }
 
-        PrototypeDebugToolsButton(state = state)
+        if (showDebugTools) {
+          PrototypeDebugToolsButton(state = state)
+        }
       }
     }
   }
 }
 
-/** Page context for [WebAppHeader]: a [title] above a row of [supporting] content. */
+/**
+ * Page context for [WebAppHeader]: a [title] (and optional [titleTrailing] badge) above a row of
+ * [supporting] content.
+ */
 @Composable
-internal fun WebHeaderContext(title: String, supporting: @Composable RowScope.() -> Unit = {}) {
+internal fun WebHeaderContext(
+  title: String,
+  titleTrailing: (@Composable RowScope.() -> Unit)? = null,
+  supporting: @Composable RowScope.() -> Unit = {},
+) {
   Column(verticalArrangement = Arrangement.spacedBy(1.dp)) {
-    Text(
-      text = title,
-      style = MaterialTheme.typography.titleMedium,
-      fontWeight = FontWeight.SemiBold,
-      color = MaterialTheme.colorScheme.onSurface,
-      maxLines = 1,
-      overflow = TextOverflow.Ellipsis,
-    )
+    Row(
+      verticalAlignment = Alignment.CenterVertically,
+      horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+      Text(
+        text = title,
+        style = MaterialTheme.typography.titleMedium,
+        fontWeight = FontWeight.SemiBold,
+        color = MaterialTheme.colorScheme.onSurface,
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
+        modifier = Modifier.weight(1f, fill = false),
+      )
+      titleTrailing?.invoke(this)
+    }
     Row(
       verticalAlignment = Alignment.CenterVertically,
       horizontalArrangement = Arrangement.spacedBy(4.dp),
@@ -382,174 +423,15 @@ internal fun WebUserAvatarProfileWidget(
   onSignOut: () -> Unit,
   modifier: Modifier = Modifier,
 ) {
-  var isProfileOpen by remember { mutableStateOf(false) }
-
-  Box(modifier = modifier) {
-    // Clickable avatar icon button
-    Box(
-      modifier =
-        Modifier.size(36.dp)
-          .clip(CircleShape)
-          .background(MaterialTheme.colorScheme.primaryContainer)
-          .border(1.5.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.5f), CircleShape)
-          .clickable { isProfileOpen = !isProfileOpen },
-      contentAlignment = Alignment.Center,
-    ) {
-      Text(
-        text = state.signedInUserInitials,
-        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
-        color = MaterialTheme.colorScheme.onPrimaryContainer,
-      )
-    }
-
-    // Standard User Profile Card dropdown
-    DropdownMenu(
-      expanded = isProfileOpen,
-      onDismissRequest = { isProfileOpen = false },
-      modifier =
-        Modifier.width(320.dp)
-          .background(MaterialTheme.colorScheme.surfaceContainerLow)
-          .padding(4.dp),
-    ) {
-      UserProfileCard(
-        userName = state.signedInUserName,
-        userEmail = state.signedInUserEmail,
-        userInitials = state.signedInUserInitials,
-        organization = state.signedInOrganization,
-        onOpenOrganizations = {
-          isProfileOpen = false
-          state.openOrganizations()
-        },
-        onSignOut = {
-          isProfileOpen = false
-          onSignOut()
-        },
-      )
-    }
-  }
-}
-
-/**
- * Standard user profile card showing avatar, user name, email, organizations (a link to the
- * organizations page when [onOpenOrganizations] is given), and sign out link.
- */
-@Composable
-internal fun UserProfileCard(
-  userName: String,
-  userEmail: String,
-  userInitials: String,
-  organization: String,
-  onSignOut: () -> Unit,
-  modifier: Modifier = Modifier,
-  onOpenOrganizations: (() -> Unit)? = null,
-) {
-  Card(
-    modifier = modifier.fillMaxWidth(),
-    colors = CardDefaults.cardColors(containerColor = Color.Transparent),
-  ) {
-    Column(
-      modifier = Modifier.fillMaxWidth().padding(16.dp),
-      verticalArrangement = Arrangement.spacedBy(14.dp),
-    ) {
-      // Profile Header: Large Avatar + Name & Email
-      Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(14.dp),
-      ) {
-        Box(
-          modifier =
-            Modifier.size(48.dp)
-              .clip(CircleShape)
-              .background(MaterialTheme.colorScheme.primaryContainer)
-              .border(1.5.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.6f), CircleShape),
-          contentAlignment = Alignment.Center,
-        ) {
-          Text(
-            text = userInitials,
-            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-            color = MaterialTheme.colorScheme.onPrimaryContainer,
-          )
-        }
-        Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-          Text(
-            text = userName,
-            style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
-            color = MaterialTheme.colorScheme.onSurface,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-          )
-          Text(
-            text = userEmail,
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-          )
-        }
-      }
-
-      // Organization badge
-      if (organization.isNotBlank()) {
-        Surface(
-          shape = MaterialTheme.shapes.small,
-          color = MaterialTheme.colorScheme.surfaceContainerHigh,
-        ) {
-          Text(
-            text = organization,
-            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Medium),
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-          )
-        }
-      }
-
-      if (onOpenOrganizations != null) {
-        OutlinedButton(
-          onClick = onOpenOrganizations,
-          modifier = Modifier.fillMaxWidth().height(40.dp),
-          shape = MaterialTheme.shapes.small,
-          border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
-        ) {
-          Icon(
-            imageVector = Icons.Outlined.Groups,
-            contentDescription = null,
-            modifier = Modifier.size(16.dp),
-          )
-          Spacer(modifier = Modifier.width(8.dp))
-          Text(
-            text = "Manage organizations",
-            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
-          )
-        }
-      }
-
-      HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-
-      // Sign Out Action Link
-      OutlinedButton(
-        onClick = onSignOut,
-        modifier = Modifier.fillMaxWidth().height(40.dp),
-        shape = MaterialTheme.shapes.small,
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
-        colors =
-          ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error),
-      ) {
-        Icon(
-          imageVector = Icons.AutoMirrored.Outlined.Logout,
-          contentDescription = null,
-          modifier = Modifier.size(16.dp),
-          tint = MaterialTheme.colorScheme.error,
-        )
-        Spacer(modifier = Modifier.width(8.dp))
-        Text(
-          text = "Sign out",
-          style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
-          color = MaterialTheme.colorScheme.error,
-        )
-      }
-    }
-  }
+  UserAvatarProfileMenu(
+    userName = state.signedInUserName,
+    userEmail = state.signedInUserEmail,
+    userInitials = state.signedInUserInitials,
+    organization = state.signedInOrganization,
+    onSignOut = onSignOut,
+    modifier = modifier,
+    avatarSize = 36.dp,
+    dropdownWidth = 320.dp,
+    onOpenOrganizations = state::openOrganizations,
+  )
 }

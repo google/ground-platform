@@ -110,9 +110,21 @@ data class SurveyEditorUiState(
   /** The "What happened with this data?" card shown after closing the survey, or `null`. */
   val outcomeCard: SurveyOutcomeCardState? = null,
 ) {
+  /** Whether the survey is in draft mode and not yet published for field collection. */
+  val isDraft: Boolean
+    get() = lifecycleState == SurveyLifecycleState.DRAFT
+
   /** Whether the survey is closed or archived, so edits are ignored until it's reopened. */
   val isReadOnly: Boolean
-    get() = lifecycleState != SurveyLifecycleState.PUBLISHED
+    get() =
+      lifecycleState == SurveyLifecycleState.CLOSED ||
+        lifecycleState == SurveyLifecycleState.ARCHIVED
+
+  /**
+   * Label of the primary header button that commits working changes and returns to the dashboard.
+   */
+  val saveActionLabel: String
+    get() = if (isDraft) "Save draft" else "Publish changes"
 
   /** Why the survey can't be edited (e.g. "This survey is closed…"), or `null` if it can. */
   val readOnlyMessage: String?
@@ -140,22 +152,37 @@ data class SurveyEditorUiState(
   val hasUnpublishedChanges: Boolean
     get() = draft.copy(nextKeyId = 0) != opened.copy(nextKeyId = 0)
 
+  /** Problems in the survey details (e.g. a missing survey area). */
+  val detailsIssues: List<String>
+    get() {
+      val area = details.surveyArea
+      return if (area == null || area.parts.isEmpty()) {
+        listOf("A survey area is required.")
+      } else {
+        emptyList()
+      }
+    }
+
   /**
    * Problems in the sharing settings (e.g. an organization-only policy without an organization).
    */
   val sharingIssues: List<String>
     get() = SurveyAccess.issues(sharing, details.organizationId)
 
-  /** Number of validation issues across sharing and all Forms, Map layers, and Data tables. */
+  /**
+   * Number of validation issues across survey details, sharing, and all Forms, Map layers, and Data
+   * tables.
+   */
   val issueCount: Int
     get() =
-      sharingIssues.size +
+      detailsIssues.size +
+        sharingIssues.size +
         forms.sumOf { formIssues(it).size } +
         datasets.sumOf { datasetIssues(it).size }
 
   /**
-   * Whether the draft can be published: the survey is published (not closed or archived), and the
-   * draft has unpublished changes and no validation issues.
+   * Whether the draft can be saved/published: the survey is editable (draft or published, not
+   * closed or archived), and the draft has uncommitted changes and no validation issues.
    */
   val canPublish: Boolean
     get() = !isReadOnly && hasUnpublishedChanges && issueCount == 0 && !isSaving

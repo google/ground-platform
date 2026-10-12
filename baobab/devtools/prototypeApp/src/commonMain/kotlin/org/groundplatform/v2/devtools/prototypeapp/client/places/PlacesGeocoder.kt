@@ -34,6 +34,7 @@ import kotlinx.serialization.json.jsonObject
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.PlaceFraming
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyMapAnchor
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyPlaceItem
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyThumbnailPlaceLabel
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.bbox
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.roundTo
 import org.groundplatform.v2.map.LatLng
@@ -69,6 +70,47 @@ class PlacesGeocoder(
         val response = client.get(url)
         if (!response.status.isSuccess()) return@withTimeoutOrNull emptyList()
         PlacesResponseMapper.map(response.bodyAsText(), q, near, defaultSubtitle)
+      } ?: emptyList()
+    } catch (e: CancellationException) {
+      throw e
+    } catch (_: Exception) {
+      emptyList()
+    }
+  }
+
+  /**
+   * Queries the Mapbox Reverse Geocoding API (`mapbox.places`) around [center] when a public token
+   * (`pk.…`) is configured, returning up to [limit] place labels for thumbnail rendering.
+   */
+  suspend fun reverseGeocodePlaceLabels(
+    center: LatLng,
+    limit: Int = 2,
+  ): List<SurveyThumbnailPlaceLabel> {
+    val client = httpClient ?: return emptyList()
+    val token = accessToken()?.takeIf { it.startsWith("pk.") } ?: return emptyList()
+    val url =
+      URLBuilder("https://api.mapbox.com")
+        .apply {
+          appendPathSegments(
+            "geocoding",
+            "v5",
+            "mapbox.places",
+            "${center.longitude},${center.latitude}.json",
+          )
+          parameters.append("access_token", token)
+          parameters.append("limit", "4")
+          parameters.append("types", "neighborhood,locality,place,district,poi")
+        }
+        .buildString()
+    val near = SurveyMapAnchor(center, 14.5, "")
+    return try {
+      withTimeoutOrNull(timeoutMillis) {
+        val response = client.get(url)
+        if (!response.status.isSuccess()) return@withTimeoutOrNull emptyList()
+        PlacesResponseMapper.map(response.bodyAsText(), "", near, "")
+          .filter { it.name.isNotBlank() }
+          .take(limit)
+          .map { SurveyThumbnailPlaceLabel(it.name, LatLng(it.latitude, it.longitude)) }
       } ?: emptyList()
     } catch (e: CancellationException) {
       throw e

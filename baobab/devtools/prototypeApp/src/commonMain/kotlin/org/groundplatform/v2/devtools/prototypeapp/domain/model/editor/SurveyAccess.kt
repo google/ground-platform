@@ -14,6 +14,7 @@
 package org.groundplatform.v2.devtools.prototypeapp.domain.model.editor
 
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.InvitationStatus
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.InviteLinks
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.Organization
 
 /**
@@ -28,6 +29,10 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.Organization
  * 5. With [SharingPolicy.ANYONE_WITH_LINK] or [SharingPolicy.PUBLIC], anyone can collect data.
  */
 object SurveyAccess {
+  private const val SURVEY_BASE_URL = "https://ground.example.org/surveys/"
+
+  /** Direct URL for opening or sharing a survey by [surveyId]. */
+  fun surveyUrl(surveyId: String): String = "$SURVEY_BASE_URL${surveyId.ifBlank { "draft" }}"
 
   /**
    * The strongest role [email] has in a survey with [sharing] that belongs to [organization] (or
@@ -78,3 +83,6 @@ object SurveyAccess {
     }
   }
 }
+
+/** Direct URL for opening or sharing a survey by [surveyId]. */
+fun InviteLinks.surveyUrl(surveyId: String): String = SurveyAccess.surveyUrl(surveyId)

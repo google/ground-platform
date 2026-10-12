@@ -95,9 +95,26 @@ internal object PrototypeFakeSurveyEditorData {
     derived.copy(
       details =
         derived.details.copy(
-          organizationId = PrototypeFakeOrganizationsData.MEKONG_MANGROVE_ALLIANCE
+          organizationId = PrototypeFakeOrganizationsData.MEKONG_MANGROVE_ALLIANCE,
+          surveyArea = derived.details.surveyArea ?: serengetiSurveyArea(),
         ),
       sharing = organizationSharing(),
+    )
+
+  fun serengetiSurveyArea() =
+    SurveyArea(
+      name = "Western Serengeti, Mara",
+      center = LatLng(-2.3333, 34.8328),
+      zoom = 14.8,
+      parts =
+        listOf(
+          listOf(
+            LatLng(-2.3243, 34.8258),
+            LatLng(-2.3243, 34.8398),
+            LatLng(-2.3423, 34.8398),
+            LatLng(-2.3423, 34.8258),
+          )
+        ),
     )
 
   fun kenyaSurveyArea() =

@@ -63,7 +63,7 @@ Ground 2.0 pairs a browser-based **Web Console** for survey design, visual satel
 
 | Capability | Web Console (Browser) | Mobile App (Android & iOS) |
 | :--- | :--- | :--- |
-| **Primary Personas** | Survey organizers, project supervisors, remote-sensing interpreters, desktop data clerks | Field enumerators, community rangers, agricultural extension agents, field supervisors |
+| **Primary Personas** | Survey organizers, project supervisors, remote-sensing interpreters, desktop data clerks | Field data collectors, community rangers, agricultural extension agents, field supervisors |
 | **Connectivity** | Online / hybrid desktop workspace (Chrome, Firefox, Safari, Edge) | 100% offline-first execution on phones and tablets with background auto-sync |
 | **Survey & Form Design** | Visual WYSIWYG Form Designer, live Mobile & Web dual previews, starter/org templates, form copy/paste, XLSForm import/export, and `Draft` / `Active` / `Closed` lifecycle controls | Executes published forms offline; automatically adapts UI complexity to the survey |
 | **Visual Classification (CEO)** | Integrated satellite photo-interpretation: probabilistic sample design, multi-temporal imagery comparison (Planet NICFI, Sentinel-2, Earth Engine), spectral time series, and multi-interpreter QA/QC | Not supported; satellite visual interpretation is a desktop workflow (flagged plots can be verified in the field) |
@@ -172,7 +172,7 @@ Ground 2.0 integrates **Collect Earth Online (CEO)** directly into the Web Conso
     *   **Automatic Version Harmonization**: Exports automatically align submissions from older form versions to the latest published schema, with a one-click toggle to include or exclude soft-deleted questions.
 *   **Standardized Summary PDFs & Offline Farmer Receipts**:
     *   Generate clean, publication-ready summary PDFs for any site or submission—featuring a high-contrast map snapshot, GeoID, calculated area/perimeter, and formatted responses.
-    *   Available as individual or bulk PDF/ZIP downloads in the Web Console, and generated **100% offline on the Mobile App** so enumerators can share digital receipts via WhatsApp/Bluetooth or print physical receipts on portable Bluetooth printers at the farm gate.
+    *   Available as individual or bulk PDF/ZIP downloads in the Web Console, and generated **100% offline on the Mobile App** so data collectors can share digital receipts via WhatsApp/Bluetooth or print physical receipts on portable Bluetooth printers at the farm gate.
 *   **Partner Platform APIs & Webhooks**:
     *   Native bi-directional integration with **FAO FERM** (Framework for Ecosystem Restoration Monitoring) and **Open Foris Arena**, plus configurable real-time **Webhooks** with custom auth headers to stream incoming records into external national registries or enterprise pipelines.
 

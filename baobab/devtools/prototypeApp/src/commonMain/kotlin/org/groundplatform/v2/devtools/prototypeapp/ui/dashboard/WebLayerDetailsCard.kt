@@ -228,7 +228,7 @@ internal fun WebLayerDetailsCard(
         }
 
         Text(
-          text = "BY STATUS",
+          text = "By status",
           style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
           color = MaterialTheme.colorScheme.primary,
         )

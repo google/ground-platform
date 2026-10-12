@@ -46,7 +46,7 @@ class FormIdsTest {
     val state = formEditorViewModel()
     val id = state.ui.form.formId
     state.updateTitle("Renamed form")
-    state.addQuestion(EditorQuestionType.INTEGER)
+    state.addQuestion(EditorQuestionType.NUMBER)
     assertEquals(id, state.ui.form.formId)
   }
 

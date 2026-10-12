@@ -454,11 +454,11 @@ internal fun DetailsOverflowMenu(
   }
 }
 
-/** Uppercase section heading inside an entity's details surface. */
+/** Section heading inside an entity's details surface. */
 @Composable
 private fun DetailsSectionHeading(text: String) {
   Text(
-    text = text.uppercase(),
+    text = text,
     style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
     color = MaterialTheme.colorScheme.primary,
     modifier = Modifier.padding(top = 4.dp),

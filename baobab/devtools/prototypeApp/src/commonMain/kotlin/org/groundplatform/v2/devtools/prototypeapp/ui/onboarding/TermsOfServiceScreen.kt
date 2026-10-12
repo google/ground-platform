@@ -53,7 +53,6 @@ import androidx.compose.ui.unit.sp
 import org.groundplatform.v2.devtools.prototypeapp.PrototypeAppState
 import org.groundplatform.v2.devtools.prototypeapp.ui.state.OnboardingUiState
 import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.OnboardingActions
-import org.groundplatform.v2.devtools.prototypeapp.ui.workbench.PrototypeDebugToolsButton
 
 /** 2. Terms of Service screen. */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -61,8 +60,6 @@ import org.groundplatform.v2.devtools.prototypeapp.ui.workbench.PrototypeDebugTo
 fun TermsOfServiceScreen(
   uiState: OnboardingUiState,
   actions: OnboardingActions,
-  /** Prototype-only tools shown in the top bar (none in production). */
-  debugTools: @Composable () -> Unit = {},
 ) {
   val onSurfaceColor = MaterialTheme.colorScheme.onSurface
 
@@ -88,7 +85,6 @@ fun TermsOfServiceScreen(
             Icon(imageVector = Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = "Back")
           }
         },
-        actions = { debugTools() },
         colors =
           TopAppBarDefaults.topAppBarColors(
             containerColor = MaterialTheme.colorScheme.surface,
@@ -122,7 +118,7 @@ fun TermsOfServiceScreen(
             shape = MaterialTheme.shapes.medium,
           ) {
             Text(
-              text = "Agree & Continue",
+              text = "Agree & continue",
               style = MaterialTheme.typography.labelLarge,
               fontWeight = FontWeight.Bold,
             )
@@ -142,7 +138,8 @@ fun TermsOfServiceScreen(
       verticalArrangement = Arrangement.spacedBy(14.dp),
     ) {
       Text(
-        text = "Please review and accept the Ground Terms of Service before downloading surveys.",
+        text =
+          "Please review and accept the Collect One Terms of Service before downloading surveys.",
         style = MaterialTheme.typography.bodyMedium,
         color = onSurfaceColor,
         fontWeight = FontWeight.SemiBold,
@@ -162,28 +159,28 @@ fun TermsOfServiceScreen(
         ) {
           TermsSectionItem(
             number = "1",
-            title = "Survey Data Collection & Sharing",
+            title = "Survey data collection & sharing",
             body =
-              "Field observations, GPS coordinates, geometries, and photos collected in Ground are shared with the survey organizers who granted you access to each survey.",
+              "Field observations, GPS coordinates, geometries, and photos collected in Collect One are shared with the survey organizers who granted you access to each survey.",
           )
           HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
           TermsSectionItem(
             number = "2",
-            title = "Offline Storage & Synchronization",
+            title = "Offline storage & synchronization",
             body =
               "Downloaded survey definitions and map tiles are cached locally on your device for offline field work and automatically synchronized when connectivity is restored.",
           )
           HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
           TermsSectionItem(
             number = "3",
-            title = "Location & Sensor Permissions",
+            title = "Location & sensor permissions",
             body =
-              "Ground uses device location services when capturing points, polygons, or transects during active data collection tasks.",
+              "Collect One uses device location services when capturing points, polygons, or transects during active data collection tasks.",
           )
           HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
           TermsSectionItem(
             number = "4",
-            title = "Privacy & Responsible Use",
+            title = "Privacy & responsible use",
             body =
               "Do not record sensitive personal data unless explicitly authorized and consented to under your organization's survey governance protocol.",
           )
@@ -205,7 +202,7 @@ fun TermsOfServiceScreen(
         )
         Spacer(modifier = Modifier.width(6.dp))
         Text(
-          text = "I have read and agree to the Ground Terms of Service.",
+          text = "I have read and agree to the Collect One Terms of Service.",
           style = MaterialTheme.typography.bodySmall,
           color = onSurfaceColor,
         )
@@ -239,6 +236,5 @@ fun GroundTermsOfServiceScreen(state: PrototypeAppState) {
   TermsOfServiceScreen(
     uiState = uiState,
     actions = state.onboarding,
-    debugTools = { PrototypeDebugToolsButton(state = state) },
   )
 }

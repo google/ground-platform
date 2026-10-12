@@ -155,6 +155,22 @@ class SurveyLifecycleUseCaseTest {
   }
 
   @Test
+  fun draftToPublishedAndBack_keepsClosedTimeNull_andRecordsNoClosedEvents() {
+    val f = SurveyLifecycleFixture()
+    // Switch from PUBLISHED to DRAFT: does not set closedAt or record SURVEY_CLOSED.
+    assertFalse(runNow { f.lifecycle.setState(surveyId, SurveyLifecycleState.DRAFT) })
+    assertEquals(SurveyLifecycleState.DRAFT, f.survey(surveyId).state)
+    assertNull(f.survey(surveyId).closedAt)
+    assertTrue(f.closedEvents(surveyId).isEmpty())
+
+    // Switch from DRAFT to PUBLISHED: does not set closedAt or record SURVEY_CLOSED.
+    assertFalse(runNow { f.lifecycle.setState(surveyId, SurveyLifecycleState.PUBLISHED) })
+    assertEquals(SurveyLifecycleState.PUBLISHED, f.survey(surveyId).state)
+    assertNull(f.survey(surveyId).closedAt)
+    assertTrue(f.closedEvents(surveyId).isEmpty())
+  }
+
+  @Test
   fun unknownSurvey_isIgnored() {
     val f = SurveyLifecycleFixture()
     assertFalse(runNow { f.lifecycle.setState("missing", SurveyLifecycleState.CLOSED) })

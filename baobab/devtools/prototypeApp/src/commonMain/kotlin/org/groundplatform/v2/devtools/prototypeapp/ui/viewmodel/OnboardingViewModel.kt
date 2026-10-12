@@ -13,6 +13,7 @@
  */
 package org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel
 
+import io.ktor.client.HttpClient
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.Flow
@@ -26,18 +27,37 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.groundplatform.v2.devtools.prototypeapp.client.places.PlacesGeocoder
+import org.groundplatform.v2.devtools.prototypeapp.client.places.createPlacesHttpClient
+import org.groundplatform.v2.devtools.prototypeapp.client.places.mapboxAccessToken
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.AppScreen
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.AuthSession
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.DownloadSurveyEntryOrigin
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.Organization
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyPreviewItem
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyStats
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyThumbnailPlaceLabel
 import org.groundplatform.v2.devtools.prototypeapp.domain.repository.AuthRepository
 import org.groundplatform.v2.devtools.prototypeapp.domain.repository.ConnectivityRepository
 import org.groundplatform.v2.devtools.prototypeapp.domain.repository.OrganizationRepository
 import org.groundplatform.v2.devtools.prototypeapp.domain.repository.SurveyRepository
 import org.groundplatform.v2.devtools.prototypeapp.ui.state.OnboardingEvent
 import org.groundplatform.v2.devtools.prototypeapp.ui.state.OnboardingUiState
+import org.groundplatform.v2.map.LatLng
+
+/** Creates the HTTP client used to fetch survey map thumbnail tiles. */
+internal fun createThumbnailHttpClient(): HttpClient? = createPlacesHttpClient()
+
+/** Resolves the public Mapbox token (`pk.*`) for survey map thumbnails, if configured. */
+internal fun resolveMapboxPublicToken(): String? =
+  mapboxAccessToken()?.takeIf { it.startsWith("pk.") }
+
+/** Reverse-geocodes place labels around [center] for survey map thumbnails. */
+internal suspend fun reverseGeocodeThumbnailLabels(
+  center: LatLng,
+  limit: Int = 2,
+): List<SurveyThumbnailPlaceLabel> =
+  PlacesGeocoder().reverseGeocodePlaceLabels(center, limit = limit)
 
 /** User intents of the onboarding screens. Implemented by [OnboardingViewModel]. */
 interface OnboardingActions {
@@ -129,6 +149,11 @@ class OnboardingViewModel(
     session: Session,
   ): OnboardingUiState {
     val organizationNames = organizations.associate { it.id to it.name }
+    val userOrganization =
+      organizations
+        .filter { it.isMember(auth.profile.email) }
+        .joinToString(" • ") { it.name }
+        .ifBlank { auth.profile.organizationName }
     return OnboardingUiState(
       isSignedIn = auth.isSignedIn,
       profile = auth.profile,
@@ -141,6 +166,7 @@ class OnboardingViewModel(
       filteredSurveys = filterSurveys(surveys, session.searchQuery, organizationNames),
       downloadedSurveyCount = surveys.count { it.isDownloaded },
       organizationNames = organizationNames,
+      userOrganization = userOrganization,
       pendingRemovalSurveyId = session.pendingRemovalSurveyId,
     )
   }

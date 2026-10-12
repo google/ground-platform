@@ -208,6 +208,14 @@ class InMemoryLocalStore : LocalStore {
       working = working.copy(surveys = updated)
     }
 
+    override fun deleteSurvey(surveyId: String) {
+      working =
+        working.copy(
+          surveys = working.surveys.filterNot { it.id == surveyId },
+          surveyData = working.surveyData - surveyId,
+        )
+    }
+
     override fun organizations(): List<Organization> = working.organizations
 
     override fun upsertOrganization(organization: Organization) {

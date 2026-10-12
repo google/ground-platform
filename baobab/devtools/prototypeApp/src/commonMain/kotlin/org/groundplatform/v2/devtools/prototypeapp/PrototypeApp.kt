@@ -13,7 +13,6 @@
  */
 package org.groundplatform.v2.devtools.prototypeapp
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.horizontalScroll
@@ -25,7 +24,6 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -37,34 +35,19 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.List
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.outlined.CheckCircle
-import androidx.compose.material.icons.outlined.CloudUpload
+import androidx.compose.material.icons.outlined.AirplanemodeActive
+import androidx.compose.material.icons.outlined.AirplanemodeInactive
 import androidx.compose.material.icons.outlined.DarkMode
-import androidx.compose.material.icons.outlined.Layers
 import androidx.compose.material.icons.outlined.LightMode
-import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.Map
-import androidx.compose.material.icons.outlined.Menu
-import androidx.compose.material.icons.outlined.MyLocation
-import androidx.compose.material.icons.outlined.Navigation
 import androidx.compose.material.icons.outlined.ScreenRotation
-import androidx.compose.material.icons.outlined.Search
-import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.Smartphone
 import androidx.compose.material.icons.outlined.Tablet
-import androidx.compose.material.icons.outlined.Timeline
-import androidx.compose.material3.AssistChip
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.FilledTonalButton
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
@@ -80,21 +63,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import org.groundplatform.v2.core.forms.ui.GroundBadgeTone
 import org.groundplatform.v2.core.forms.ui.GroundTheme
-import org.groundplatform.v2.core.forms.ui.GroundTonalBadge
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.DeviceFormFactor
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.DeviceOrientation
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.MainDrawerSubView
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.MainSurveyViewMode
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.PrototypeScreen
 import org.groundplatform.v2.devtools.prototypeapp.ui.common.GroundFilterChip
-import org.groundplatform.v2.devtools.prototypeapp.ui.common.horizontalScrollWithMouseDrag
 import org.groundplatform.v2.devtools.prototypeapp.ui.dashboard.WebDashboardPage
 import org.groundplatform.v2.devtools.prototypeapp.ui.dashboard.WebSurveysPage
 import org.groundplatform.v2.devtools.prototypeapp.ui.onboarding.MobileScreenHost
@@ -102,14 +80,15 @@ import org.groundplatform.v2.devtools.prototypeapp.ui.onboarding.WebSignInPage
 import org.groundplatform.v2.devtools.prototypeapp.ui.organization.OrganizationPage
 import org.groundplatform.v2.devtools.prototypeapp.ui.organization.OrganizationsPage
 import org.groundplatform.v2.devtools.prototypeapp.ui.surveyeditor.SurveyEditorPage
-import org.groundplatform.v2.devtools.prototypeapp.ui.workbench.PrototypeDebugToolsButton
-import org.groundplatform.v2.devtools.prototypeapp.ui.workbench.PrototypeXFormsWorkbenchPanel
+import org.groundplatform.v2.devtools.prototypeapp.ui.wizard.CreateSurveyWizardPage
 
 /** Top-level pages of the prototype web app, addressable via the URL hash (e.g. `#dashboard`). */
 enum class PrototypeWorkbenchPage(val label: String, val hash: String) {
   MOBILE_PROTOTYPE("Mobile prototype", "prototype"),
   /** Web landing page: the surveys the signed-in user can open, grouped by organization. */
   WEB_SURVEYS("Surveys", "surveys"),
+  /** Full-page 6-step Survey Creation Wizard (`#create-survey`). */
+  CREATE_SURVEY("Create survey", "create-survey"),
   WEB_DASHBOARD("Web dashboard", "dashboard"),
   SURVEY_EDITOR("Survey editor", "survey-editor"),
   /** The organizations the signed-in user belongs to, and listed ones they can ask to join. */
@@ -176,6 +155,11 @@ fun PrototypeApp(
     page = initialPage
     if (initialPage == PrototypeWorkbenchPage.ORGANIZATION && initialOrganizationId != null) {
       state.openOrganization(initialOrganizationId)
+    } else if (
+      initialPage == PrototypeWorkbenchPage.CREATE_SURVEY &&
+        state.createSurveyWizard.uiState.value.workingSurveyId.isBlank()
+    ) {
+      state.openCreateSurveyWizard(initialOrganizationId)
     } else {
       state.selectWorkbenchPage(initialPage)
     }
@@ -254,6 +238,7 @@ fun PrototypeApp(
                 state.createSurvey(request)
                 state.selectWorkbenchPage(PrototypeWorkbenchPage.SURVEY_EDITOR)
               },
+              onOpenCreateSurveyWizard = { orgId -> state.openCreateSurveyWizard(orgId) },
               onSignOut = {
                 state.signOut()
                 state.selectWorkbenchPage(PrototypeWorkbenchPage.WEB_SURVEYS)
@@ -270,6 +255,16 @@ fun PrototypeApp(
                 state.createSurvey(request)
                 state.selectWorkbenchPage(PrototypeWorkbenchPage.SURVEY_EDITOR)
               },
+              onOpenCreateSurveyWizard = { state.openCreateSurveyWizard() },
+              onSignOut = {
+                state.signOut()
+                state.selectWorkbenchPage(PrototypeWorkbenchPage.WEB_SURVEYS)
+              },
+            )
+          resolvedPage == PrototypeWorkbenchPage.CREATE_SURVEY ->
+            CreateSurveyWizardPage(
+              state = state,
+              isDarkTheme = state.isDarkTheme,
               onSignOut = {
                 state.signOut()
                 state.selectWorkbenchPage(PrototypeWorkbenchPage.WEB_SURVEYS)
@@ -295,44 +290,36 @@ fun PrototypeApp(
   }
 }
 
-/** Device preview stage plus the UX co-design inspector panel. */
+/** Mobile and tablet device preview stage. */
 @Composable
 private fun MobilePrototypePage(state: PrototypeAppState, isMapShowing: Boolean) {
-  Row(
-    modifier = Modifier.fillMaxSize().padding(16.dp),
-    horizontalArrangement = Arrangement.spacedBy(20.dp),
+  val verticalScrollState = rememberScrollState()
+  val horizontalScrollState = rememberScrollState()
+
+  Box(
+    modifier =
+      Modifier.fillMaxSize()
+        .padding(horizontal = 16.dp, vertical = 8.dp)
+        .verticalScroll(verticalScrollState)
+        .horizontalScroll(horizontalScrollState),
+    contentAlignment = Alignment.TopCenter,
   ) {
-    val previewStageWeight = if (state.effectiveFrameWidthDp >= 600) 1.55f else 1.15f
-    val verticalScrollState = rememberScrollState()
-    val horizontalScrollState = rememberScrollState()
-
-    // Left / Center stage: Embedded Mobile or Tablet Device Preview
-    Box(
-      modifier =
-        Modifier.weight(previewStageWeight)
-          .fillMaxHeight()
-          .verticalScroll(verticalScrollState)
-          .horizontalScroll(horizontalScrollState),
-      contentAlignment = Alignment.TopCenter,
+    MobileDevicePreviewFrame(
+      deviceTitle =
+        "Open Foris Collect One ${state.deviceFormFactor.label} UI • ${state.currentScreen.title}",
+      isDarkTheme = state.isDarkTheme,
+      isScreenTransparent = isMapShowing,
+      formFactor = state.deviceFormFactor,
+      orientation = state.deviceOrientation,
+      onSelectFormFactor = state.workbench::selectDeviceFormFactor,
+      onRotateDevice = state.workbench::rotateDevice,
+      onToggleDarkTheme = state::toggleDarkTheme,
+      isAirplaneMode = state.workbenchUiState.isAirplaneMode,
+      onToggleAirplaneMode = state.workbench::toggleAirplaneMode,
+      state = state,
     ) {
-      MobileDevicePreviewFrame(
-        deviceTitle =
-          "Ground 2.0 ${state.deviceFormFactor.label} UI • Step ${state.currentScreen.stepNumber}/4: ${state.currentScreen.title}",
-        isDarkTheme = state.isDarkTheme,
-        isScreenTransparent = isMapShowing,
-        formFactor = state.deviceFormFactor,
-        orientation = state.deviceOrientation,
-        onSelectFormFactor = state.workbench::selectDeviceFormFactor,
-        onRotateDevice = state.workbench::rotateDevice,
-        onToggleDarkTheme = state::toggleDarkTheme,
-        state = state,
-      ) {
-        MobileScreenHost(state)
-      }
+      MobileScreenHost(state)
     }
-
-    // Right panel: UX Designer Flow & State Controls
-    UxDesignerInspectorPanel(state = state, modifier = Modifier.weight(0.85f).fillMaxHeight())
   }
 }
 
@@ -350,6 +337,8 @@ fun MobileDevicePreviewFrame(
   onSelectFormFactor: (DeviceFormFactor) -> Unit = {},
   onRotateDevice: () -> Unit = {},
   onToggleDarkTheme: () -> Unit = {},
+  isAirplaneMode: Boolean = false,
+  onToggleAirplaneMode: () -> Unit = {},
   state: PrototypeAppState? = null,
   modifier: Modifier = Modifier,
   content: @Composable () -> Unit,
@@ -361,17 +350,19 @@ fun MobileDevicePreviewFrame(
 
   val titleBlock: @Composable (Modifier) -> Unit = { titleModifier ->
     Column(modifier = titleModifier) {
-      Text(
-        text = deviceTitle,
-        maxLines = 1,
-        overflow = TextOverflow.Ellipsis,
-        style = MaterialTheme.typography.labelMedium,
-        color = MaterialTheme.colorScheme.primary,
-        fontWeight = FontWeight.Bold,
-      )
+      if (deviceTitle.isNotBlank()) {
+        Text(
+          text = deviceTitle,
+          maxLines = 2,
+          overflow = TextOverflow.Ellipsis,
+          style = MaterialTheme.typography.labelMedium,
+          color = MaterialTheme.colorScheme.primary,
+          fontWeight = FontWeight.Bold,
+        )
+      }
       Text(
         text = "Viewport: ${formFactor.label} • ${orientation.label} ($dimensionsLabel)",
-        maxLines = 1,
+        maxLines = 2,
         overflow = TextOverflow.Ellipsis,
         style =
           MaterialTheme.typography.labelSmall.copy(
@@ -381,149 +372,11 @@ fun MobileDevicePreviewFrame(
     }
   }
 
-  val controlsRow: @Composable () -> Unit = {
-    FlowRow(
-      horizontalArrangement = Arrangement.spacedBy(6.dp),
-      verticalArrangement = Arrangement.spacedBy(6.dp),
-      itemVerticalAlignment = Alignment.CenterVertically,
-    ) {
-      // Segmented Form Factor Switcher right above the device frame
-      SingleChoiceSegmentedButtonRow {
-        DeviceFormFactor.entries.forEachIndexed { index, factor ->
-          val isSelected = formFactor == factor
-          val icon =
-            if (factor == DeviceFormFactor.MOBILE) {
-              Icons.Outlined.Smartphone
-            } else {
-              Icons.Outlined.Tablet
-            }
-          SegmentedButton(
-            selected = isSelected,
-            onClick = { onSelectFormFactor(factor) },
-            shape =
-              SegmentedButtonDefaults.itemShape(
-                index = index,
-                count = DeviceFormFactor.entries.size,
-              ),
-            icon = {
-              Icon(
-                imageVector = icon,
-                contentDescription = factor.label,
-                modifier = Modifier.size(14.dp),
-              )
-            },
-            label = {
-              Text(
-                text = factor.label,
-                maxLines = 1,
-                softWrap = false,
-                style = MaterialTheme.typography.labelSmall,
-              )
-            },
-          )
-        }
-      }
-
-      // Rotate Device Widget right next to the Form Factor switcher
-      GroundFilterChip(
-        selected = isRotated,
-        onClick = { onRotateDevice() },
-        leadingIcon = {
-          Icon(
-            imageVector = Icons.Outlined.ScreenRotation,
-            contentDescription = "Rotate device",
-            modifier = Modifier.size(14.dp),
-          )
-        },
-        label = {
-          Text(
-            text = "Rotate",
-            maxLines = 1,
-            softWrap = false,
-            style = MaterialTheme.typography.labelSmall,
-          )
-        },
-      )
-
-      // Dark / Light mode toggle for the mobile app preview
-      GroundFilterChip(
-        selected = isDarkTheme,
-        onClick = { onToggleDarkTheme() },
-        leadingIcon = {
-          Icon(
-            imageVector = if (isDarkTheme) Icons.Outlined.DarkMode else Icons.Outlined.LightMode,
-            contentDescription = if (isDarkTheme) "Switch to light mode" else "Switch to dark mode",
-            modifier = Modifier.size(14.dp),
-          )
-        },
-        label = {
-          Text(
-            text = if (isDarkTheme) "Dark" else "Light",
-            maxLines = 1,
-            softWrap = false,
-            style = MaterialTheme.typography.labelSmall,
-          )
-        },
-      )
-
-      if (state != null) {
-        OutlinedButton(
-          onClick = { state.selectWorkbenchPage(PrototypeWorkbenchPage.WEB_SURVEYS) },
-          contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
-          modifier = Modifier.height(32.dp),
-        ) {
-          Icon(
-            imageVector = Icons.Outlined.Map,
-            contentDescription = null,
-            modifier = Modifier.size(14.dp),
-          )
-          Spacer(modifier = Modifier.width(4.dp))
-          Text(
-            text = "Web app",
-            style = MaterialTheme.typography.labelSmall,
-            fontWeight = FontWeight.SemiBold,
-            maxLines = 1,
-          )
-        }
-
-        PrototypeDebugToolsButton(state = state)
-      }
-    }
-  }
-
-  Column(
+  Row(
     modifier = modifier,
-    horizontalAlignment = Alignment.CenterHorizontally,
-    verticalArrangement = Arrangement.spacedBy(8.dp),
+    horizontalArrangement = Arrangement.spacedBy(16.dp),
+    verticalAlignment = Alignment.Top,
   ) {
-    // Stage Header card with Device Title + Inline Mobile / Tablet Form Factor Toggle + Rotate +
-    // Dark / Light Theme Toggle
-    ElevatedCard(
-      modifier = Modifier.width(frameWidthDp.dp),
-      shape = MaterialTheme.shapes.large,
-      colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.surface),
-      elevation = CardDefaults.elevatedCardElevation(defaultElevation = 2.dp),
-    ) {
-      if (frameWidthDp < 640) {
-        Column(
-          modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 10.dp),
-          verticalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-          titleBlock(Modifier.fillMaxWidth())
-          controlsRow()
-        }
-      } else {
-        Row(
-          modifier = Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 10.dp),
-          horizontalArrangement = Arrangement.SpaceBetween,
-          verticalAlignment = Alignment.CenterVertically,
-        ) {
-          titleBlock(Modifier.weight(1f).padding(end = 10.dp))
-          controlsRow()
-        }
-      }
-    }
-
     // Outer Device Hardware Bezel (dynamically sized for Mobile vs Tablet and Portrait vs
     // Landscape)
     val outerShape = RoundedCornerShape(formFactor.outerCornerRadiusDp.dp)
@@ -627,416 +480,152 @@ fun MobileDevicePreviewFrame(
         }
       }
     }
-  }
-}
 
-/** Right-hand UX Designer Co-Design & Flow Inspector panel in the Web Prototype App. */
-@Composable
-private fun UxDesignerInspectorPanel(state: PrototypeAppState, modifier: Modifier = Modifier) {
-  ElevatedCard(
-    modifier = modifier,
-    shape = MaterialTheme.shapes.large,
-    colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.surface),
-    elevation = CardDefaults.elevatedCardElevation(defaultElevation = 2.dp),
-  ) {
-    Column(
-      modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(20.dp),
-      verticalArrangement = Arrangement.spacedBy(16.dp),
+    // Side Controls Card with Device Title + Mobile / Tablet Form Factor Toggle + Rotate +
+    // Dark / Light Theme Toggle + Airplane Mode Toggle
+    ElevatedCard(
+      modifier = Modifier.width(210.dp),
+      shape = MaterialTheme.shapes.large,
+      colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.surface),
+      elevation = CardDefaults.elevatedCardElevation(defaultElevation = 2.dp),
     ) {
-      Text(
-        text = "UX Co-Design & Flow Controls",
-        style = MaterialTheme.typography.titleMedium,
-        color = MaterialTheme.colorScheme.onSurface,
-        fontWeight = FontWeight.Bold,
-      )
-      Text(
-        text =
-          "Use this panel during UX review sessions to jump between onboarding and main survey screens, inspect single- vs multi-submission location bottom sheets, toggle layers, or test XForms FormDef XML data collection.",
-        style = MaterialTheme.typography.bodySmall,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-      )
+      Column(
+        modifier = Modifier.padding(14.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp),
+      ) {
+        titleBlock(Modifier.fillMaxWidth())
 
-      // Live XForms FormDef XML Tester Section
-      PrototypeXFormsWorkbenchPanel(state)
-
-      HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-
-      // 1. Interactive Screen Stepper
-      Text(
-        text = "1. ONBOARDING & SURVEY FLOW SCREENS",
-        style =
-          MaterialTheme.typography.labelSmall.copy(
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.primary,
-            letterSpacing = 0.6.sp,
-          ),
-      )
-
-      PrototypeScreen.entries.forEach { screen ->
-        val isActive = state.currentScreen == screen
-        OutlinedCard(
-          onClick = { state.navigateTo(screen) },
-          modifier = Modifier.fillMaxWidth(),
-          shape = MaterialTheme.shapes.medium,
-          colors =
-            CardDefaults.outlinedCardColors(
-              containerColor =
-                if (isActive) {
-                  MaterialTheme.colorScheme.primaryContainer
-                } else {
-                  MaterialTheme.colorScheme.surfaceContainerLow
-                }
-            ),
-          border =
-            BorderStroke(
-              width = if (isActive) 1.5.dp else 1.dp,
-              color =
-                if (isActive) {
-                  MaterialTheme.colorScheme.primary
-                } else {
-                  MaterialTheme.colorScheme.outlineVariant
-                },
-            ),
-        ) {
-          Row(
-            modifier = Modifier.fillMaxWidth().padding(12.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-          ) {
-            Column(modifier = Modifier.weight(1f)) {
-              Text(
-                text = "Step ${screen.stepNumber}: ${screen.title}",
-                style = MaterialTheme.typography.labelLarge,
-                color =
-                  if (isActive) {
-                    MaterialTheme.colorScheme.onPrimaryContainer
-                  } else {
-                    MaterialTheme.colorScheme.onSurface
-                  },
-                fontWeight = FontWeight.Bold,
-              )
-              Text(
-                text = screen.subtitle,
-                style = MaterialTheme.typography.bodySmall,
-                color =
-                  if (isActive) {
-                    MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
-                  } else {
-                    MaterialTheme.colorScheme.onSurfaceVariant
-                  },
-              )
-            }
-            if (isActive) {
-              GroundTonalBadge(text = "ACTIVE", tone = GroundBadgeTone.PRIMARY)
-            }
+        // Segmented Form Factor Switcher
+        SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
+          DeviceFormFactor.entries.forEachIndexed { index, factor ->
+            val isSelected = formFactor == factor
+            val icon =
+              if (factor == DeviceFormFactor.MOBILE) {
+                Icons.Outlined.Smartphone
+              } else {
+                Icons.Outlined.Tablet
+              }
+            SegmentedButton(
+              selected = isSelected,
+              onClick = { onSelectFormFactor(factor) },
+              shape =
+                SegmentedButtonDefaults.itemShape(
+                  index = index,
+                  count = DeviceFormFactor.entries.size,
+                ),
+              icon = {
+                Icon(
+                  imageVector = icon,
+                  contentDescription = factor.label,
+                  modifier = Modifier.size(14.dp),
+                )
+              },
+              label = {
+                Text(
+                  text = factor.label,
+                  maxLines = 1,
+                  softWrap = false,
+                  style = MaterialTheme.typography.labelSmall,
+                )
+              },
+            )
           }
         }
-      }
 
-      HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-
-      // 2. Main Survey UI Quick State Shortcuts (Map, List, Layers, ○ → ◐ → ✓ Marker States,
-      // Drawer)
-      Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically,
-      ) {
-        Text(
-          text = "2. MAIN SURVEY UI QUICK INSPECTOR (STEP 4)",
-          style =
-            MaterialTheme.typography.labelSmall.copy(
-              fontWeight = FontWeight.Bold,
-              color = MaterialTheme.colorScheme.primary,
-              letterSpacing = 0.6.sp,
-            ),
-        )
-        FilledTonalButton(
-          onClick = { state.workbench.addRandomSites(5_000) },
-          modifier = Modifier.height(30.dp),
-          contentPadding = ButtonDefaults.TextButtonContentPadding,
+        FlowRow(
+          horizontalArrangement = Arrangement.spacedBy(6.dp),
+          verticalArrangement = Arrangement.spacedBy(6.dp),
+          itemVerticalAlignment = Alignment.CenterVertically,
         ) {
-          Icon(
-            imageVector = Icons.Outlined.Layers,
-            contentDescription = null,
-            modifier = Modifier.size(13.dp),
-          )
-          Spacer(modifier = Modifier.width(4.dp))
-          Text(
-            text = "+5,000 Random Features (${state.entities.size})",
-            style = MaterialTheme.typography.labelSmall,
-            fontWeight = FontWeight.Bold,
-          )
-        }
-      }
-      Row(
-        modifier = Modifier.fillMaxWidth().horizontalScrollWithMouseDrag(rememberScrollState()),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-      ) {
-        val mainShortcuts: List<Triple<ImageVector, String, () -> Unit>> =
-          listOf(
-            Triple(
-              Icons.Outlined.Map,
-              "○ Pending Parcel (NYR-112)",
-              {
-                state.navigateTo(PrototypeScreen.MAIN_SURVEY)
-                state.setMainSurveyViewMode(MainSurveyViewMode.MAP)
-                state.selectEntity("entity-nyr-112")
-              },
-            ),
-            Triple(
-              Icons.Outlined.Map,
-              "◐ In Progress (NYR-108)",
-              {
-                state.navigateTo(PrototypeScreen.MAIN_SURVEY)
-                state.setMainSurveyViewMode(MainSurveyViewMode.MAP)
-                state.selectEntity("entity-nyr-108")
-              },
-            ),
-            Triple(
-              Icons.Filled.CheckCircle, // Filled: indicates the completed state.
-              "✓ Completed (NYR-104)",
-              {
-                state.navigateTo(PrototypeScreen.MAIN_SURVEY)
-                state.setMainSurveyViewMode(MainSurveyViewMode.MAP)
-                state.selectEntity("entity-nyr-104")
-              },
-            ),
-            Triple(
-              Icons.Outlined.Timeline,
-              "✓ Transect Line (SHD-201)",
-              {
-                state.navigateTo(PrototypeScreen.MAIN_SURVEY)
-                state.setMainSurveyViewMode(MainSurveyViewMode.MAP)
-                state.selectEntity("entity-shade-201")
-              },
-            ),
-            Triple(
-              Icons.Outlined.CheckCircle,
-              "Standalone Submission (No Feature)",
-              {
-                state.navigateTo(PrototypeScreen.MAIN_SURVEY)
-                state.setMainSurveyViewMode(MainSurveyViewMode.MAP)
-                state.dataCollection.selectSubmissionDetail("sub-standalone-pest-01")
-              },
-            ),
-            Triple(
-              Icons.Outlined.Navigation,
-              "Navigate to Feature",
-              {
-                state.navigateTo(PrototypeScreen.MAIN_SURVEY)
-                state.startNavigationToEntity("entity-nyr-104")
-              },
-            ),
-            Triple(
-              Icons.Outlined.Layers,
-              "Layers Sheet",
-              {
-                state.navigateTo(PrototypeScreen.MAIN_SURVEY)
-                state.setMainSurveyViewMode(MainSurveyViewMode.MAP)
-                state.updateLayersSheetOpen(!state.isLayersSheetOpen)
-              },
-            ),
-            Triple(
-              Icons.AutoMirrored.Outlined.List,
-              "Searchable List View",
-              {
-                state.navigateTo(PrototypeScreen.MAIN_SURVEY)
-                state.setMainSurveyViewMode(MainSurveyViewMode.LIST)
-              },
-            ),
-            Triple(
-              Icons.Outlined.Menu,
-              "Navigation Drawer",
-              {
-                state.navigateTo(PrototypeScreen.MAIN_SURVEY)
-                state.updateDrawerOpen(true)
-              },
-            ),
-            Triple(
-              Icons.Outlined.CloudUpload,
-              "Uploads (${state.mutations.size})",
-              {
-                state.navigateTo(PrototypeScreen.MAIN_SURVEY)
-                state.drawerOpenUploads()
-              },
-            ),
-            Triple(
-              Icons.Outlined.Settings,
-              "Settings Screen",
-              {
-                state.navigateTo(PrototypeScreen.MAIN_SURVEY)
-                state.drawerOpenSettings()
-              },
-            ),
-            Triple(
-              Icons.Outlined.Map,
-              "Offline Maps & Storage",
-              {
-                state.navigateTo(PrototypeScreen.MAIN_SURVEY)
-                state.drawerManageOfflineMaps()
-              },
-            ),
-            Triple(
-              Icons.Outlined.MyLocation,
-              if (state.isCameraFollowingUser) "Simulate Map Pan" else "Recenter GPS",
-              {
-                state.navigateTo(PrototypeScreen.MAIN_SURVEY)
-                state.setMainSurveyViewMode(MainSurveyViewMode.MAP)
-                if (state.isCameraFollowingUser) {
-                  state.panMap(deltaNormalizedX = 0.16f, deltaNormalizedY = -0.12f)
-                } else {
-                  state.recenterMapOnUser()
-                }
-              },
-            ),
-            Triple(
-              Icons.Outlined.LocationOn,
-              "Simulate GPS Walk",
-              {
-                state.navigateTo(PrototypeScreen.MAIN_SURVEY)
-                state.setMainSurveyViewMode(MainSurveyViewMode.MAP)
-                val nextX =
-                  if (state.userGpsNormalizedX > 0.62f) 0.36f else state.userGpsNormalizedX + 0.08f
-                val nextY =
-                  if (state.userGpsNormalizedY > 0.60f) 0.38f else state.userGpsNormalizedY + 0.06f
-                state.updateUserGpsLocation(nextX, nextY)
-              },
-            ),
-          )
-        mainShortcuts.forEach { (icon, label, action) ->
-          AssistChip(
-            onClick = action,
-            leadingIcon = {
-              Icon(imageVector = icon, contentDescription = null, modifier = Modifier.size(14.dp))
-            },
-            label = {
-              Text(
-                text = label,
-                style = MaterialTheme.typography.labelSmall,
-                fontWeight = FontWeight.Bold,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                softWrap = false,
-              )
-            },
-          )
-        }
-      }
-
-      HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-
-      // 3. Quick Search Presets (Name or Location)
-      Text(
-        text = "3. DOWNLOAD SURVEY SEARCH PRESETS (NAME OR LOCATION)",
-        style =
-          MaterialTheme.typography.labelSmall.copy(
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.primary,
-            letterSpacing = 0.6.sp,
-          ),
-      )
-      Row(
-        modifier = Modifier.fillMaxWidth().horizontalScrollWithMouseDrag(rememberScrollState()),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-      ) {
-        val sampleQueries =
-          listOf(
-            "All" to "",
-            "Brazil" to "Brazil",
-            "Kenya" to "Kenya",
-            "Vietnam" to "Vietnam",
-            "Mangrove" to "Mangrove",
-            "Watershed" to "Watershed",
-          )
-        sampleQueries.forEach { (label, query) ->
-          val selected = state.searchQuery == query
+          // Rotate Device Widget
           GroundFilterChip(
-            selected = selected,
-            onClick = {
-              state.navigateTo(PrototypeScreen.DOWNLOAD_SURVEY)
-              state.updateSearchQuery(query)
+            selected = isRotated,
+            onClick = { onRotateDevice() },
+            leadingIcon = {
+              Icon(
+                imageVector = Icons.Outlined.ScreenRotation,
+                contentDescription = "Rotate device",
+                modifier = Modifier.size(14.dp),
+              )
             },
-            leadingIcon =
-              if (query.isNotEmpty()) {
-                {
-                  Icon(
-                    imageVector = Icons.Outlined.Search,
-                    contentDescription = null,
-                    modifier = Modifier.size(14.dp),
-                  )
-                }
-              } else {
-                null
-              },
             label = {
               Text(
-                text = if (query.isEmpty()) "Show All (${state.surveys.size})" else "\"$label\"",
-                style = MaterialTheme.typography.labelSmall,
-                fontWeight = FontWeight.SemiBold,
+                text = "Rotate",
                 maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
                 softWrap = false,
+                style = MaterialTheme.typography.labelSmall,
+              )
+            },
+          )
+
+          // Dark / Light mode toggle for the mobile app preview
+          GroundFilterChip(
+            selected = isDarkTheme,
+            onClick = { onToggleDarkTheme() },
+            leadingIcon = {
+              Icon(
+                imageVector =
+                  if (isDarkTheme) Icons.Outlined.DarkMode else Icons.Outlined.LightMode,
+                contentDescription =
+                  if (isDarkTheme) "Switch to light mode" else "Switch to dark mode",
+                modifier = Modifier.size(14.dp),
+              )
+            },
+            label = {
+              Text(
+                text = if (isDarkTheme) "Dark" else "Light",
+                maxLines = 1,
+                softWrap = false,
+                style = MaterialTheme.typography.labelSmall,
+              )
+            },
+          )
+
+          // Airplane mode (offline simulation) toggle
+          GroundFilterChip(
+            selected = isAirplaneMode,
+            onClick = { onToggleAirplaneMode() },
+            leadingIcon = {
+              Icon(
+                imageVector =
+                  if (isAirplaneMode) {
+                    Icons.Outlined.AirplanemodeActive
+                  } else {
+                    Icons.Outlined.AirplanemodeInactive
+                  },
+                contentDescription =
+                  if (isAirplaneMode) "Disable airplane mode" else "Enable airplane mode",
+                modifier = Modifier.size(14.dp),
+              )
+            },
+            label = {
+              Text(
+                text = "Airplane mode",
+                maxLines = 1,
+                softWrap = false,
+                style = MaterialTheme.typography.labelSmall,
               )
             },
           )
         }
-      }
 
-      HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-
-      // 4. Survey Download State Toggles
-      Text(
-        text = "4. DOWNLOADED INDICATOR STATE SIMULATOR",
-        style =
-          MaterialTheme.typography.labelSmall.copy(
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.primary,
-            letterSpacing = 0.6.sp,
-          ),
-      )
-      Text(
-        text = "Toggle which surveys are marked as already downloaded on the device:",
-        style = MaterialTheme.typography.bodySmall,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-      )
-
-      state.surveys.forEach { survey ->
-        OutlinedCard(
-          onClick = {
-            state.navigateTo(PrototypeScreen.DOWNLOAD_SURVEY)
-            state.workbench.toggleSurveyDownloaded(survey.id)
-          },
-          modifier = Modifier.fillMaxWidth(),
-          shape = MaterialTheme.shapes.small,
-          colors =
-            CardDefaults.outlinedCardColors(
-              containerColor = MaterialTheme.colorScheme.surfaceContainerLow
-            ),
-        ) {
-          Row(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp, vertical = 8.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
+        if (state != null) {
+          FilledTonalButton(
+            onClick = { state.selectWorkbenchPage(PrototypeWorkbenchPage.WEB_SURVEYS) },
+            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
+            modifier = Modifier.height(32.dp),
           ) {
-            Column(modifier = Modifier.weight(1f)) {
-              Text(
-                text = survey.title,
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurface,
-                fontWeight = FontWeight.SemiBold,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-              )
-              Text(
-                text = survey.location,
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-              )
-            }
-            GroundTonalBadge(
-              text = if (survey.isDownloaded) "Downloaded" else "Not Downloaded",
-              tone = if (survey.isDownloaded) GroundBadgeTone.PRIMARY else GroundBadgeTone.NEUTRAL,
+            Icon(
+              imageVector = Icons.Outlined.Map,
+              contentDescription = null,
+              modifier = Modifier.size(14.dp),
+            )
+            Spacer(modifier = Modifier.width(4.dp))
+            Text(
+              text = "Web app",
+              style = MaterialTheme.typography.labelSmall,
+              fontWeight = FontWeight.SemiBold,
+              maxLines = 1,
             )
           }
         }

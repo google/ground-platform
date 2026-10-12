@@ -19,15 +19,18 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.InvitationStatus
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.InviteLinks
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.MembershipStatus
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.Organization
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.OrganizationMember
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.OrganizationRole
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.Collaborator
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.CollaboratorRole
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.PeerDataVisibility
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SharingPolicy
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SharingSettings
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SurveyAccess
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.surveyUrl
 
 class SurveyAccessTest {
   private val owner = "owner@example.org"
@@ -136,5 +139,59 @@ class SurveyAccessTest {
     assertEquals(1, SurveyAccess.issues(shared, organizationId = null).size)
     assertEquals(emptyList(), SurveyAccess.issues(shared, organizationId = "org"))
     assertEquals(emptyList(), SurveyAccess.issues(sharing, organizationId = null))
+  }
+
+  @Test
+  fun sharingSettings_distinguishesPrivateSubmissionsAndPublicDataAcrossLinkAndPublic() {
+    val restrictedAll =
+      sharing.copy(
+        policy = SharingPolicy.RESTRICTED,
+        peerDataVisibility = PeerDataVisibility.ALL,
+      )
+    assertFalse(restrictedAll.isOpenToAnyone)
+    assertFalse(restrictedAll.isPublicData)
+    assertFalse(restrictedAll.isPrivateSubmissions)
+    assertFalse(restrictedAll.requiresCollectorConsent)
+
+    val linkPrivate =
+      sharing.copy(
+        policy = SharingPolicy.ANYONE_WITH_LINK,
+        peerDataVisibility = PeerDataVisibility.OWN_ONLY,
+      )
+    assertTrue(linkPrivate.isOpenToAnyone)
+    assertFalse(linkPrivate.isListedInDirectory)
+    assertTrue(linkPrivate.isPrivateSubmissions)
+    assertFalse(linkPrivate.isPublicData)
+    assertFalse(linkPrivate.requiresCollectorConsent)
+
+    val linkPublicData =
+      sharing.copy(
+        policy = SharingPolicy.ANYONE_WITH_LINK,
+        peerDataVisibility = PeerDataVisibility.ALL,
+      )
+    assertTrue(linkPublicData.isOpenToAnyone)
+    assertFalse(linkPublicData.isListedInDirectory)
+    assertFalse(linkPublicData.isPrivateSubmissions)
+    assertTrue(linkPublicData.isPublicData)
+    assertTrue(linkPublicData.requiresCollectorConsent)
+
+    val directoryPublicData =
+      sharing.copy(
+        policy = SharingPolicy.PUBLIC,
+        peerDataVisibility = PeerDataVisibility.ALL,
+      )
+    assertTrue(directoryPublicData.isOpenToAnyone)
+    assertTrue(directoryPublicData.isListedInDirectory)
+    assertTrue(directoryPublicData.isPublicData)
+    assertTrue(directoryPublicData.requiresCollectorConsent)
+  }
+
+  @Test
+  fun surveyUrl_buildsDirectShareLinkForSurveyId() {
+    assertEquals(
+      "https://ground.example.org/surveys/survey-123",
+      InviteLinks.surveyUrl("survey-123"),
+    )
+    assertEquals("https://ground.example.org/surveys/draft", SurveyAccess.surveyUrl(""))
   }
 }

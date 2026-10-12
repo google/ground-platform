@@ -37,7 +37,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
-import androidx.compose.material.icons.automirrored.outlined.Logout
 import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.outlined.Close
@@ -131,10 +130,12 @@ import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.SettingsActions
 /**
  * Hamburger Navigation Drawer overlay providing options to:
  * 1. Surveys (downloaded surveys screen with button to browse & download more surveys)
- * 2. Offline maps
- * 3. Change settings
- * 4. View Terms of Service
- * 5. Sign out
+ * 2. Uploads
+ * 3. Offline maps
+ * 4. Change settings
+ * 5. View Terms of Service
+ *
+ * User profile details and Sign out live in the top-right user avatar account menu.
  */
 @Composable
 internal fun MainSurveyNavigationDrawerOverlay(state: PrototypeAppState) {
@@ -155,7 +156,7 @@ internal fun MainSurveyNavigationDrawerOverlay(state: PrototypeAppState) {
     ) {
       Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.SpaceBetween) {
         Column(modifier = Modifier.fillMaxWidth()) {
-          // User Profile & Organization Header with naturalistic Ground landscape background
+          // Brand Header with naturalistic Ground landscape background
           Surface(
             modifier = Modifier.fillMaxWidth(),
             color = MaterialTheme.colorScheme.primaryContainer,
@@ -168,85 +169,54 @@ internal fun MainSurveyNavigationDrawerOverlay(state: PrototypeAppState) {
                 modifier = Modifier.matchParentSize(),
               )
 
-              Column(
-                modifier = Modifier.padding(horizontal = 18.dp, vertical = 20.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
+              Row(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 18.dp, vertical = 20.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
               ) {
                 Row(
-                  modifier = Modifier.fillMaxWidth(),
-                  horizontalArrangement = Arrangement.SpaceBetween,
                   verticalAlignment = Alignment.CenterVertically,
+                  horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
-                  Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                  ) {
-                    CloudAcaciaLogo(modifier = Modifier.size(30.dp))
+                  CloudAcaciaLogo(modifier = Modifier.size(30.dp))
+                  Column(verticalArrangement = Arrangement.spacedBy(0.dp)) {
                     Text(
-                      text = "Ground",
+                      text = "OPEN FORIS",
+                      style =
+                        MaterialTheme.typography.labelSmall.copy(
+                          fontSize = 9.sp,
+                          lineHeight = 10.sp,
+                          fontWeight = FontWeight.Bold,
+                          letterSpacing = 1.1.sp,
+                        ),
+                      color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f),
+                    )
+                    Text(
+                      text = "Collect One",
                       style =
                         MaterialTheme.typography.titleLarge.copy(
                           fontFamily = brandFont,
                           fontWeight = FontWeight.ExtraBold,
                           letterSpacing = 0.5.sp,
+                          lineHeight = 22.sp,
                         ),
                       color = MaterialTheme.colorScheme.onPrimaryContainer,
                     )
                   }
-                  IconButton(
-                    onClick = { state.updateDrawerOpen(false) },
-                    modifier =
-                      Modifier.size(32.dp)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.55f)),
-                  ) {
-                    Icon(
-                      imageVector = Icons.Outlined.Close,
-                      contentDescription = "Close Drawer",
-                      tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                      modifier = Modifier.size(18.dp),
-                    )
-                  }
                 }
-
-                Row(
-                  verticalAlignment = Alignment.CenterVertically,
-                  horizontalArrangement = Arrangement.spacedBy(10.dp),
+                IconButton(
+                  onClick = { state.updateDrawerOpen(false) },
+                  modifier =
+                    Modifier.size(32.dp)
+                      .clip(CircleShape)
+                      .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.55f)),
                 ) {
-                  Box(
-                    modifier =
-                      Modifier.size(40.dp)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.primary),
-                    contentAlignment = Alignment.Center,
-                  ) {
-                    Text(
-                      text = "ML",
-                      style =
-                        MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.ExtraBold),
-                      color = MaterialTheme.colorScheme.onPrimary,
-                    )
-                  }
-                  Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                    Text(
-                      text = state.signedInUserName,
-                      style =
-                        MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                      color = MaterialTheme.colorScheme.onPrimaryContainer,
-                    )
-                    Text(
-                      text = state.signedInUserEmail,
-                      style =
-                        MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Medium),
-                      color = MaterialTheme.colorScheme.onPrimaryContainer,
-                    )
-                    Text(
-                      text = state.signedInOrganization,
-                      style =
-                        MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
-                      color = MaterialTheme.colorScheme.onPrimaryContainer,
-                    )
-                  }
+                  Icon(
+                    imageVector = Icons.Outlined.Close,
+                    contentDescription = "Close Drawer",
+                    tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                    modifier = Modifier.size(18.dp),
+                  )
                 }
               }
             }
@@ -325,20 +295,6 @@ internal fun MainSurveyNavigationDrawerOverlay(state: PrototypeAppState) {
               selected = false,
               onClick = { state.drawerViewTermsOfService() },
             )
-
-            HorizontalDivider(
-              modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-              color = MaterialTheme.colorScheme.outlineVariant,
-            )
-
-            DrawerMenuItem(
-              icon = Icons.AutoMirrored.Outlined.Logout,
-              title = "Sign out",
-              subtitle = "Disconnect ${state.signedInUserEmail}",
-              selected = false,
-              isDestructive = true,
-              onClick = { state.drawerSignOut() },
-            )
           }
 
           // Footer version note
@@ -347,9 +303,9 @@ internal fun MainSurveyNavigationDrawerOverlay(state: PrototypeAppState) {
               buildAnnotatedString {
                 append("Open Foris ")
                 withStyle(SpanStyle(fontFamily = brandFont, fontWeight = FontWeight.Bold)) {
-                  append("Ground")
+                  append("Collect One")
                 }
-                append(" 2.0 • Offline-First Core")
+                append(" • Offline-First Core")
               },
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -1567,7 +1523,7 @@ internal fun EntityQrCodeModalDialog(
         }
         Text(
           text =
-            "Scan with Ground or any EUDR compliance reader to verify ${entity.singularTypeLabel.lowercase()} geometry & GeoID.",
+            "Scan with Collect One or any EUDR compliance reader to verify ${entity.singularTypeLabel.lowercase()} geometry & GeoID.",
           style = MaterialTheme.typography.labelSmall,
           color = MaterialTheme.colorScheme.onSurfaceVariant,
           textAlign = TextAlign.Center,

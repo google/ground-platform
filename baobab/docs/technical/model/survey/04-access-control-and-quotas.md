@@ -30,7 +30,7 @@ rather than email addresses. Each collaborator is assigned a `Role`:
 | `VIEWER`           | Read-only access enabling map navigation, entity       |
 :                    : inspection, and submission viewing while               :
 :                    : hiding/disabling collection and editing actions.       :
-| `DATA_COLLECTOR`   | Field enumerator or desk photo-interpreter authorized to collect submissions and |
+| `DATA_COLLECTOR`   | Field data collector or desk photo-interpreter authorized to collect submissions and |
 :                    : register ad-hoc geospatial entities.                   :
 | `SURVEY_ORGANIZER` | Project supervisor/manager authorized to edit forms,   |
 :                    : manage ACLs, publish schemas, review conflicts, and    :
@@ -75,18 +75,67 @@ entries {
 }
 ```
 
-## General Access (`SharingPolicy`) and Organizations
+## General Access (`SharingPolicy`), Data Visibility (`PeerDataVisibility`), and Organizations
 
-Beyond the explicit ACL, `SurveyAcl.sharing_policy` grants general access in
-the Google Drive sharing style:
+Beyond the explicit ACL, `SurveyAcl.sharing_policy` and
+`SurveyAcl.peer_data_visibility` govern who can open a survey and what data
+participants can see:
 
 | Policy             | Who can open the survey and collect data                  |
 | ------------------ | --------------------------------------------------------- |
 | `RESTRICTED`       | Only the owner and accepted ACL entries.                  |
 | `ORGANIZATION`     | Additionally every active member of the survey's          |
 :                    : organization. Invalid when `organization_id` is empty.    :
-| `ANYONE_WITH_LINK` | Anyone with the survey link or QR code.                   |
-| `PUBLIC`           | Anyone; the survey is listed in the public directory.     |
+| `ANYONE_WITH_LINK` | Anyone with a link or QR code (unlisted).                 |
+| `PUBLIC`           | Anyone; the survey is listed in the directory.            |
+
+To avoid conflating open participation with public data visibility, the Survey
+editor's **General access** card presents two Google Groups-style stepped
+permission sliders across four constant-width audience columns (**Contributors &
+organizers**, **Invited people**, **Anyone in your organization**, and
+**Anyone**), plus a **Hide from survey directory** option when the survey is
+open to **Anyone**:
+
+*   **Who can view data**:
+    *   Across all sharing policies, contributor identities (names and email
+        addresses) on submissions are visible **only to survey organizers** (and
+        to each contributor on their own submissions). Non-organizer
+        participants see `"Participant (identity hidden)"` on other
+        contributors' submissions.
+    *   **Contributors & organizers** (`PeerDataVisibility.OWN_ONLY`): Data
+        collectors only see their own submissions. Survey organizers can view
+        all submissions and contributor identities.
+    *   **Invited people** (`PeerDataVisibility.ALL` + `RESTRICTED`): People
+        added to the ACL can view all map features, answers, and photos. Only
+        survey organizers can view contributor identities.
+    *   **Anyone in your organization** (`PeerDataVisibility.ALL` +
+        `ORGANIZATION`): Active members of the survey's organization can view
+        all map features, answers, and photos. Only survey organizers can view
+        contributor identities. The hint below the slider names the specific
+        organization.
+    *   **Anyone** (`PeerDataVisibility.ALL` + `PUBLIC` or `ANYONE_WITH_LINK`):
+        Anyone can view all map features, answers, and photos. Only survey
+        organizers can view contributor identities. Participants must accept a
+        just-in-time informed consent notice before collecting data, and forms
+        display a persistent public-data reminder banner.
+*   **Who can collect data**:
+    *   **Invited people** (`RESTRICTED`): Only people added to the ACL (and
+        survey organizers) can open the survey and collect data.
+    *   **Anyone in your organization** (`ORGANIZATION`): Members of the
+        survey's organization can open the survey and collect data; managers of
+        the organization can also edit the survey.
+    *   **Anyone** (`PUBLIC` by default, or `ANYONE_WITH_LINK` when hidden from
+        the directory): Anyone can open the survey and submit data. Expanding
+        **Who can collect data** to **Anyone** defaults **Who can view data** to
+        **Contributors & organizers** (*Private submissions*) so organizers must
+        explicitly slide **Who can view data** to **Anyone** to make collected
+        data public.
+*   **Hide from survey directory** (shown when open to **Anyone**):
+    *   **Unchecked** (`PUBLIC`): The survey is listed in the survey directory
+        so anyone can find and access it.
+    *   **Checked** (`ANYONE_WITH_LINK`): Users need a link or QR code to access
+        the survey. Both modes share identical data visibility, contributor
+        identity hiding, and informed consent behavior.
 
 A survey may optionally belong to an **Organization** (`organization.proto`),
 the counterpart of a Collect Earth Online institution. Organizations layer on

@@ -261,3 +261,785 @@ concepts {
   privacy_class: AGGREGATE_PUBLIC
   status: STABLE
 }
+form_templates {
+  id: "lulc_ground_truth"
+  title {
+    values {
+      key: "en"
+      value: "LULC ground-truth classification"
+    }
+    values {
+      key: "fr"
+      value: "Classification de la couverture terrestre"
+    }
+    values {
+      key: "es"
+      value: "Clasificación de cobertura del suelo"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Visual or field plot classification of land cover, land use, canopy cover, and observation date."
+    }
+  }
+  form {
+    form_id: "lulc_ground_truth"
+    title: "LULC ground-truth classification"
+    version: "1"
+    model {
+      primary_instance {
+        record_schema {
+          name: "data"
+          title: "LULC ground-truth classification"
+          fields {
+            name: "land_cover_class"
+            type: TYPE_SELECT_ONE
+          }
+          fields {
+            name: "land_use"
+            type: TYPE_SELECT_ONE
+          }
+          fields {
+            name: "canopy_cover_pct"
+            type: TYPE_DOUBLE
+          }
+          fields {
+            name: "observation_date"
+            type: TYPE_DATE
+          }
+        }
+      }
+      secondary_instances {
+        id: "land_cover_class"
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "forest"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Forest"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "forest"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "other_wooded_land"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Other wooded land"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "other_wooded_land"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "other_land_with_tree_cover"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Other land with tree cover"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "other_land_with_tree_cover"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "other_land"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Other land"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "other_land"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "inland_water"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Inland water bodies"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "inland_water"
+              }
+            }
+          }
+        }
+      }
+      secondary_instances {
+        id: "land_use"
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "cropland"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Cropland"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "cropland"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "grazing"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Grazing"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "grazing"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "forestry"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Forestry"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "forestry"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "settlement"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Settlement"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "settlement"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "conservation"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Conservation"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "conservation"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "other"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Other"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "other"
+              }
+            }
+          }
+        }
+      }
+      bindings {
+        field_path: "land_cover_class"
+        type: TYPE_SELECT_ONE
+        required_expression: "true()"
+        foreign_attributes {
+          namespace_uri: "http://groundplatform.org/xforms"
+          qualified_name: "ground:concept"
+          value: "lulc.land_cover_class@1"
+        }
+      }
+      bindings {
+        field_path: "land_use"
+        type: TYPE_SELECT_ONE
+        foreign_attributes {
+          namespace_uri: "http://groundplatform.org/xforms"
+          qualified_name: "ground:concept"
+          value: "lulc.land_use@1"
+        }
+      }
+      bindings {
+        field_path: "canopy_cover_pct"
+        type: TYPE_DOUBLE
+        foreign_attributes {
+          namespace_uri: "http://groundplatform.org/xforms"
+          qualified_name: "ground:concept"
+          value: "lulc.canopy_cover_pct@1"
+        }
+      }
+      bindings {
+        field_path: "observation_date"
+        type: TYPE_DATE
+        foreign_attributes {
+          namespace_uri: "http://groundplatform.org/xforms"
+          qualified_name: "ground:concept"
+          value: "lulc.observation_date@1"
+        }
+      }
+    }
+    view {
+      components {
+        control {
+          field_ref: "land_cover_class"
+          type: CONTROL_SELECT_ONE
+          label {
+            text: "Land cover class"
+          }
+          itemset {
+            instance_id: "land_cover_class"
+            value_ref: "name"
+            label_ref: "label"
+            nodeset_path: "/root/item"
+          }
+        }
+      }
+      components {
+        control {
+          field_ref: "land_use"
+          type: CONTROL_SELECT_ONE
+          label {
+            text: "Land use"
+          }
+          itemset {
+            instance_id: "land_use"
+            value_ref: "name"
+            label_ref: "label"
+            nodeset_path: "/root/item"
+          }
+        }
+      }
+      components {
+        control {
+          field_ref: "canopy_cover_pct"
+          type: CONTROL_INPUT
+          label {
+            text: "Canopy cover (%)"
+          }
+        }
+      }
+      components {
+        control {
+          field_ref: "observation_date"
+          type: CONTROL_INPUT
+          label {
+            text: "Observation date"
+          }
+        }
+      }
+    }
+  }
+  status: STABLE
+}
+form_templates {
+  id: "redd_plus_forest_assessment"
+  title {
+    values {
+      key: "en"
+      value: "REDD+ & TFFF forest assessment"
+    }
+    values {
+      key: "fr"
+      value: "Évaluation forestière REDD+ & TFFF"
+    }
+    values {
+      key: "es"
+      value: "Evaluación forestal REDD+ y TFFF"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Forest cover, canopy structure, and observation records for REDD+ and Tropical Forest Forever Facility monitoring."
+    }
+  }
+  form {
+    form_id: "redd_plus_forest_assessment"
+    title: "REDD+ & TFFF forest assessment"
+    version: "1"
+    model {
+      primary_instance {
+        record_schema {
+          name: "data"
+          title: "REDD+ & TFFF forest assessment"
+          fields {
+            name: "land_cover_class"
+            type: TYPE_SELECT_ONE
+          }
+          fields {
+            name: "canopy_cover_pct"
+            type: TYPE_DOUBLE
+          }
+          fields {
+            name: "tree_height_m"
+            type: TYPE_DOUBLE
+          }
+          fields {
+            name: "observation_date"
+            type: TYPE_DATE
+          }
+          fields {
+            name: "site_photo"
+            type: TYPE_BINARY
+          }
+        }
+      }
+      secondary_instances {
+        id: "land_cover_class"
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "forest"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Forest"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "forest"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "other_wooded_land"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Other wooded land"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "other_wooded_land"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "other_land_with_tree_cover"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Other land with tree cover"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "other_land_with_tree_cover"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "other_land"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Other land"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "other_land"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "inland_water"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Inland water bodies"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "inland_water"
+              }
+            }
+          }
+        }
+      }
+      bindings {
+        field_path: "land_cover_class"
+        type: TYPE_SELECT_ONE
+        required_expression: "true()"
+        foreign_attributes {
+          namespace_uri: "http://groundplatform.org/xforms"
+          qualified_name: "ground:concept"
+          value: "lulc.land_cover_class@1"
+        }
+      }
+      bindings {
+        field_path: "canopy_cover_pct"
+        type: TYPE_DOUBLE
+        required_expression: "true()"
+        foreign_attributes {
+          namespace_uri: "http://groundplatform.org/xforms"
+          qualified_name: "ground:concept"
+          value: "lulc.canopy_cover_pct@1"
+        }
+      }
+      bindings {
+        field_path: "tree_height_m"
+        type: TYPE_DOUBLE
+        foreign_attributes {
+          namespace_uri: "http://groundplatform.org/xforms"
+          qualified_name: "ground:concept"
+          value: "lulc.tree_height_m@1"
+        }
+      }
+      bindings {
+        field_path: "observation_date"
+        type: TYPE_DATE
+        foreign_attributes {
+          namespace_uri: "http://groundplatform.org/xforms"
+          qualified_name: "ground:concept"
+          value: "lulc.observation_date@1"
+        }
+      }
+      bindings {
+        field_path: "site_photo"
+        type: TYPE_BINARY
+        foreign_attributes {
+          namespace_uri: "http://groundplatform.org/xforms"
+          qualified_name: "ground:concept"
+          value: "core.site_photo@1"
+        }
+      }
+    }
+    view {
+      components {
+        control {
+          field_ref: "land_cover_class"
+          type: CONTROL_SELECT_ONE
+          label {
+            text: "Land cover class"
+          }
+          itemset {
+            instance_id: "land_cover_class"
+            value_ref: "name"
+            label_ref: "label"
+            nodeset_path: "/root/item"
+          }
+        }
+      }
+      components {
+        control {
+          field_ref: "canopy_cover_pct"
+          type: CONTROL_INPUT
+          label {
+            text: "Canopy cover (%)"
+          }
+        }
+      }
+      components {
+        control {
+          field_ref: "tree_height_m"
+          type: CONTROL_INPUT
+          label {
+            text: "Tree height (m)"
+          }
+        }
+      }
+      components {
+        control {
+          field_ref: "observation_date"
+          type: CONTROL_INPUT
+          label {
+            text: "Observation date"
+          }
+        }
+      }
+      components {
+        control {
+          field_ref: "site_photo"
+          type: CONTROL_UPLOAD
+          label {
+            text: "Site photo"
+          }
+          media_type: "image/*"
+        }
+      }
+    }
+  }
+  status: STABLE
+}
+purpose_packs {
+  id: "lulc_training_data"
+  title {
+    values {
+      key: "en"
+      value: "LULC training & validation data"
+    }
+    values {
+      key: "fr"
+      value: "Données d'entraînement et de validation LULC"
+    }
+    values {
+      key: "es"
+      value: "Datos de entrenamiento y validación LULC"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Classify sample plots or field sites with FAO-aligned land cover and land use labels for map training and accuracy assessment."
+    }
+  }
+  icon: "layers"
+  form_template_ids: "lulc_ground_truth"
+  goals: "deforestation_free_supply_chains"
+  pillar: MITIGATION
+  status: STABLE
+}
+purpose_packs {
+  id: "redd_plus_tfff"
+  title {
+    values {
+      key: "en"
+      value: "REDD+ / TFFF forest monitoring"
+    }
+    values {
+      key: "fr"
+      value: "Suivi forestier REDD+ / TFFF"
+    }
+    values {
+      key: "es"
+      value: "Monitoreo forestal REDD+ / TFFF"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Measure forest cover, canopy cover, and tree height for REDD+ MRV and Tropical Forest Forever Facility reporting."
+    }
+  }
+  icon: "public"
+  form_template_ids: "redd_plus_forest_assessment"
+  program_ids: "redd_plus"
+  program_ids: "tfff"
+  goals: "deforestation_free_supply_chains"
+  goals: "effective_protected_areas"
+  pillar: MITIGATION
+  status: STABLE
+}

@@ -976,6 +976,6 @@ class SurveyMapViewModel(
     val SYNC_ZOOM_RANGE = -13.0f..3.7f
 
     /** Zoom deltas reachable with the zoom buttons. */
-    val STEP_ZOOM_RANGE = -5.0f..3.7f
+    val STEP_ZOOM_RANGE = -8.0f..3.7f
   }
 }

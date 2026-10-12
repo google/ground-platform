@@ -36,6 +36,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import org.groundplatform.v2.core.forms.ui.LocalGroundBrandFontFamily
 import org.groundplatform.v2.devtools.prototypeapp.PrototypeAppState
 import org.groundplatform.v2.devtools.prototypeapp.ui.common.GoogleLogoIcon
 import org.groundplatform.v2.devtools.prototypeapp.ui.workbench.WebAppHeader
@@ -48,6 +50,8 @@ import org.groundplatform.v2.devtools.prototypeapp.ui.workbench.WebMobilePrototy
  */
 @Composable
 internal fun WebSignInPage(state: PrototypeAppState, onSignIn: () -> Unit) {
+  val brandFont = LocalGroundBrandFontFamily.current
+
   Column(modifier = Modifier.fillMaxSize()) {
     WebAppHeader(
       state = state,
@@ -64,11 +68,30 @@ internal fun WebSignInPage(state: PrototypeAppState, onSignIn: () -> Unit) {
           verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
           CloudAcaciaLogo(modifier = Modifier.size(56.dp))
-          Text(
-            text = "Welcome to Ground",
-            style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.Bold,
-          )
+          Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(2.dp),
+          ) {
+            Text(
+              text = "OPEN FORIS",
+              style =
+                MaterialTheme.typography.labelSmall.copy(
+                  color = MaterialTheme.colorScheme.onSurfaceVariant,
+                  fontWeight = FontWeight.Bold,
+                  letterSpacing = 1.4.sp,
+                ),
+            )
+            Text(
+              text = "Collect One",
+              style =
+                MaterialTheme.typography.headlineMedium.copy(
+                  fontFamily = brandFont,
+                  color = MaterialTheme.colorScheme.primary,
+                  fontWeight = FontWeight.ExtraBold,
+                  letterSpacing = 0.6.sp,
+                ),
+            )
+          }
           Text(
             text =
               "Map ecosystems, design field surveys, and verify ground observations with your organization.",

@@ -1,5 +1,5 @@
 /*
- * Copyright 2026 Google LLC
+ * Copyright 2026 The Ground Authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,6 +73,8 @@ class OnboardingViewModelTest {
     f.viewModel.signInWithGoogle()
     assertTrue(f.uiState.isSignedIn)
     assertTrue(f.uiState.profile.email.isNotBlank())
+    assertEquals("ML", f.uiState.profile.initials)
+    assertTrue(f.uiState.userOrganization.isNotBlank())
     assertEquals(OnboardingEvent.ShowScreen(AppScreen.TERMS_OF_SERVICE), f.lastEvent())
 
     f.viewModel.setTermsChecked(false)

@@ -77,6 +77,7 @@ import org.groundplatform.v2.devtools.prototypeapp.ui.dashboard.CreateSurveyRequ
 import org.groundplatform.v2.devtools.prototypeapp.ui.map.DraftGeometry
 import org.groundplatform.v2.devtools.prototypeapp.ui.map.EntityGeometry
 import org.groundplatform.v2.devtools.prototypeapp.ui.map.FormGeometryOverlay
+import org.groundplatform.v2.devtools.prototypeapp.ui.state.CreateSurveyWizardEvent
 import org.groundplatform.v2.devtools.prototypeapp.ui.state.DashboardEvent
 import org.groundplatform.v2.devtools.prototypeapp.ui.state.DashboardUiState
 import org.groundplatform.v2.devtools.prototypeapp.ui.state.DataCollectionEvent
@@ -92,6 +93,7 @@ import org.groundplatform.v2.devtools.prototypeapp.ui.state.SurveyMapUiState
 import org.groundplatform.v2.devtools.prototypeapp.ui.state.WebMapDrawingHost
 import org.groundplatform.v2.devtools.prototypeapp.ui.state.WorkbenchEvent
 import org.groundplatform.v2.devtools.prototypeapp.ui.state.WorkbenchUiState
+import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.CreateSurveyWizardViewModel
 import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.DashboardViewModel
 import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.DataCollectionViewModel
 import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.ImpactViewModel
@@ -102,7 +104,7 @@ import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.SurveyEditorView
 import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.SurveyMapViewModel
 import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.SurveyOutcomePromptViewModel
 import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.WorkbenchViewModel
-import org.groundplatform.v2.devtools.prototypeapp.ui.workbench.parseDefaultPrototypeFormDef
+import org.groundplatform.v2.devtools.prototypeapp.ui.workbench.XFormsParseCache
 import org.groundplatform.v2.map.CameraPosition
 import org.groundplatform.v2.map.LatLng
 import org.groundplatform.v2.map.LngLatBounds
@@ -258,6 +260,24 @@ class PrototypeAppState(
   private var surveyEditorState by mutableStateOf(surveyEditor.uiState.value)
 
   /**
+   * ViewModel of the 6-step Survey Creation Wizard (`#create-survey`), keeping its working survey
+   * synchronized with [surveyEditor].
+   */
+  val createSurveyWizard: CreateSurveyWizardViewModel =
+    CreateSurveyWizardViewModel(
+      surveyRepository = dataHolder.surveyRepository,
+      surveyEditorRepository = dataHolder.surveyEditorRepository,
+      organizationRepository = dataHolder.organizationRepository,
+      authRepository = dataHolder.authRepository,
+      libraryRepository = dataHolder.libraryRepository,
+      createSurveyUseCase = dataHolder.createSurveyUseCase,
+      surveyEditor = surveyEditor,
+      scope = dataHolder.scope,
+      resolveLibraryUseCase = dataHolder.resolveLibraryUseCase,
+      exportSurveyDataUseCase = dataHolder.exportSurveyDataUseCase,
+    )
+
+  /**
    * ViewModel of the "Was this data used?" badge on the web surveys page: closed surveys whose
    * outcome question is due again, and the card opened from one. Its page observes
    * [SurveyOutcomePromptViewModel.uiState] directly.
@@ -353,11 +373,15 @@ class PrototypeAppState(
     dataHolder.scope.launch { organization.events.collect(::onOrganizationEvent) }
     dataHolder.scope.launch { surveyEditor.uiState.collect { surveyEditorState = it } }
     dataHolder.scope.launch { surveyEditor.events.collect(::onSurveyEditorEvent) }
+    dataHolder.scope.launch { createSurveyWizard.events.collect(::onCreateSurveyWizardEvent) }
     dataHolder.scope.launch { dataCollection.uiState.collect { dataCollectionState = it } }
     dataHolder.scope.launch { dataCollection.events.collect(::onDataCollectionEvent) }
     dataHolder.scope.launch { workbench.uiState.collect { workbenchState = it } }
     dataHolder.scope.launch { workbench.events.collect(::onWorkbenchEvent) }
-    dataCollection.updateCustomFormDef(parseDefaultPrototypeFormDef(), isPreset = true)
+    dataCollection.updateCustomFormDef(
+      XFormsParseCache.formDef(WorkbenchExampleForm.ALL_FIELD_TYPES),
+      isPreset = true,
+    )
   }
 
   /** Applies a workbench outcome to other feature ViewModels and the app shell. */
@@ -396,6 +420,7 @@ class PrototypeAppState(
         activeSurveyNotice = null
         mainViewMode = MainSurveyViewMode.MAP
         isDrawerOpen = false
+        isUserProfileOpen = false
         activeDrawerSubView = MainDrawerSubView.NONE
         mapboxPlacesApiResults = emptyList()
         isMapboxPlacesSearching = false
@@ -434,12 +459,16 @@ class PrototypeAppState(
         surveyMap.updateEntityBottomSheetExpanded(event.expanded)
       DataCollectionEvent.LayersSheetClosed -> surveyMap.updateLayersSheetOpen(false)
       DataCollectionEvent.PlaceSelectionCleared -> surveyMap.clearSelectedPlace()
-      DataCollectionEvent.FormsSheetOpened -> isDrawerOpen = false
+      DataCollectionEvent.FormsSheetOpened -> {
+        isDrawerOpen = false
+        isUserProfileOpen = false
+      }
       is DataCollectionEvent.SubmissionOpened -> dashboard.onSubmissionOpened(event.tableDatasetId)
       DataCollectionEvent.DetailsReturnedToProperties -> dashboard.showEntityProperties()
       DataCollectionEvent.ListShown -> mainViewMode = MainSurveyViewMode.LIST
       DataCollectionEvent.FormOpened -> {
         isDrawerOpen = false
+        isUserProfileOpen = false
         activeDrawerSubView = MainDrawerSubView.NONE
         if (currentScreen != PrototypeScreen.MAIN_SURVEY) {
           currentScreen = PrototypeScreen.MAIN_SURVEY
@@ -456,6 +485,25 @@ class PrototypeAppState(
     when (event) {
       SurveyEditorEvent.Published,
       SurveyEditorEvent.Closed -> selectWorkbenchPage(PrototypeWorkbenchPage.WEB_DASHBOARD)
+    }
+  }
+
+  /**
+   * Applies a Survey Creation Wizard outcome to the app shell: opens the full Survey editor on
+   * completion/handoff, or returns to the previous page on cancel.
+   */
+  private fun onCreateSurveyWizardEvent(event: CreateSurveyWizardEvent) {
+    when (event) {
+      is CreateSurveyWizardEvent.OpenSurveyEditor -> {
+        openSurveyOnWeb(event.surveyId)
+        selectWorkbenchPage(PrototypeWorkbenchPage.SURVEY_EDITOR)
+      }
+      CreateSurveyWizardEvent.Cancelled -> {
+        val returnPage =
+          if (openOrganizationId != null) PrototypeWorkbenchPage.ORGANIZATION
+          else PrototypeWorkbenchPage.WEB_SURVEYS
+        selectWorkbenchPage(returnPage)
+      }
     }
   }
 
@@ -477,6 +525,7 @@ class PrototypeAppState(
       is DashboardEvent.SurveyActivated -> clearSelectionsForActivatedSurvey(event.surveyId)
       DashboardEvent.UploadsOpened -> {
         isDrawerOpen = false
+        isUserProfileOpen = false
         activeDrawerSubView = MainDrawerSubView.UPLOADS
       }
       is DashboardEvent.Notice -> activeSurveyNotice = event.message
@@ -509,6 +558,7 @@ class PrototypeAppState(
           submissionId = event.submissionId,
         )
         isDrawerOpen = false
+        isUserProfileOpen = false
         activeDrawerSubView = MainDrawerSubView.NONE
         mainViewMode = MainSurveyViewMode.MAP
         if (currentScreen != PrototypeScreen.MAIN_SURVEY) {
@@ -528,6 +578,7 @@ class PrototypeAppState(
         currentScreen = event.screen
         if (event.screen == PrototypeScreen.SIGN_IN) {
           isDrawerOpen = false
+          isUserProfileOpen = false
           activeDrawerSubView = MainDrawerSubView.NONE
           activeSurveyNotice = null
         }
@@ -536,17 +587,20 @@ class PrototypeAppState(
         activateSurvey(event.surveyId)
         currentScreen = PrototypeScreen.MAIN_SURVEY
         isDrawerOpen = false
+        isUserProfileOpen = false
         activeDrawerSubView = MainDrawerSubView.NONE
         activeSurveyNotice = event.notice
       }
       OnboardingEvent.ReturnToSurveyList -> {
         isDrawerOpen = false
+        isUserProfileOpen = false
         activeSurveyNotice = null
         currentScreen = PrototypeScreen.MAIN_SURVEY
         activeDrawerSubView = MainDrawerSubView.SWITCH_SURVEYS
       }
       OnboardingEvent.SignedOut -> {
         isDrawerOpen = false
+        isUserProfileOpen = false
         activeDrawerSubView = MainDrawerSubView.NONE
         activeSurveyNotice = null
       }
@@ -721,6 +775,69 @@ class PrototypeAppState(
           organization = activeSurveyOrganization,
         )
 
+  /**
+   * Whether [submission]'s contributor identity (name and email) should be hidden from the
+   * currently signed-in viewer. Contributor identities are always visible only to survey organizers
+   * and to the contributor themselves.
+   */
+  fun shouldHideContributorIdentity(submission: SubmissionPreviewItem): Boolean {
+    val isOrganizer =
+      SurveyAccess.canManage(
+        email = signedInUserEmail,
+        sharing = activeSurveyEditorDraft.sharing,
+        organization = activeSurveyOrganization,
+      )
+    if (isOrganizer) return false
+    val isOwnSubmission =
+      signedInUserEmail.isNotBlank() &&
+        submission.collectorEmail.equals(signedInUserEmail, ignoreCase = true)
+    return !isOwnSubmission
+  }
+
+  /**
+   * Display name for [submission]'s contributor. Contributor identities are visible only to survey
+   * organizers and to the contributor themselves.
+   */
+  fun displayCollectorName(submission: SubmissionPreviewItem): String {
+    if (shouldHideContributorIdentity(submission)) return "Participant (identity hidden)"
+    val isOrganizer =
+      SurveyAccess.canManage(
+        email = signedInUserEmail,
+        sharing = activeSurveyEditorDraft.sharing,
+        organization = activeSurveyOrganization,
+      )
+    val isOwnSubmission =
+      signedInUserEmail.isNotBlank() &&
+        submission.collectorEmail.equals(signedInUserEmail, ignoreCase = true)
+    return if (!isOrganizer && isOwnSubmission) {
+      "${submission.collectorName} (You)"
+    } else {
+      submission.collectorName
+    }
+  }
+
+  /**
+   * Full attribution string (`Name (email)`) for [submission]'s contributor in the detail view.
+   * Contributor identities are visible only to survey organizers and to the contributor themselves.
+   */
+  fun displayCollectorAttribution(submission: SubmissionPreviewItem): String {
+    if (shouldHideContributorIdentity(submission)) return "Participant (identity hidden)"
+    val isOrganizer =
+      SurveyAccess.canManage(
+        email = signedInUserEmail,
+        sharing = activeSurveyEditorDraft.sharing,
+        organization = activeSurveyOrganization,
+      )
+    val isOwnSubmission =
+      signedInUserEmail.isNotBlank() &&
+        submission.collectorEmail.equals(signedInUserEmail, ignoreCase = true)
+    return if (!isOrganizer && isOwnSubmission) {
+      "${submission.collectorName} (You)"
+    } else {
+      "${submission.collectorName} (${submission.collectorEmail})"
+    }
+  }
+
   // --- Organizations (web `#organizations` and `#organization/<id>` pages) ---
 
   /** ID of the organization shown on the web organization page, or `null`. */
@@ -873,6 +990,9 @@ class PrototypeAppState(
     private set
 
   var isDrawerOpen by mutableStateOf(false)
+    private set
+
+  var isUserProfileOpen by mutableStateOf(false)
     private set
 
   var activeDrawerSubView by mutableStateOf(MainDrawerSubView.NONE)
@@ -1372,9 +1492,9 @@ class PrototypeAppState(
     get() = workbenchState.selectedWorkbenchExampleForm
 
   /**
-   * Custom XForms `<h:html>` definition editable in the Prototype App Chrome
-   * (`UxDesignerInspectorPanel`). Initialized to a rich EUDR / Shade-Tree Field Survey XForms XML
-   * that parses cleanly with `XFormsXmlSerializer.deserializeFormDef`.
+   * Custom XForms `<h:html>` definition in the prototype workbench. Initialized to a rich EUDR /
+   * Shade-Tree Field Survey XForms XML that parses cleanly with
+   * `XFormsXmlSerializer.deserializeFormDef`.
    */
   val customXFormsXml: String
     get() = workbenchState.customXFormsXml
@@ -1994,6 +2114,15 @@ class PrototypeAppState(
       programIds = request.programIds,
     )
 
+  /**
+   * Starts a new 6-step Survey Creation Wizard session (`#create-survey`), optionally pre-selecting
+   * [organizationId], and navigates to [PrototypeWorkbenchPage.CREATE_SURVEY].
+   */
+  fun openCreateSurveyWizard(organizationId: String? = null) {
+    createSurveyWizard.startWizard(organizationId)
+    selectWorkbenchPage(PrototypeWorkbenchPage.CREATE_SURVEY)
+  }
+
   /** Updates the title and description of the currently active survey. */
   fun updateActiveSurveyDetails(title: String, description: String) =
     workbench.updateActiveSurveyDetails(title, description)
@@ -2032,6 +2161,17 @@ class PrototypeAppState(
   /** Opens or closes the Hamburger Navigation Drawer. */
   fun updateDrawerOpen(open: Boolean) {
     isDrawerOpen = open
+    if (open) {
+      isUserProfileOpen = false
+    }
+  }
+
+  /** Opens or closes the right-hand User Account Panel on mobile. */
+  fun updateUserProfileOpen(open: Boolean) {
+    isUserProfileOpen = open
+    if (open) {
+      isDrawerOpen = false
+    }
   }
 
   /** Toggles the "Layers" visibility popover sheet on the Map view. */
@@ -2396,10 +2536,15 @@ class PrototypeAppState(
   fun launchFormForEntity(entityId: String, formId: String) =
     dataCollection.launchFormForEntity(entityId, formId)
 
+  /** Accepts the pending collector informed consent prompt and opens the queued form. */
+  fun acceptCollectorConsent() = dataCollection.acceptCollectorConsent()
+
+  /** Dismisses the pending collector informed consent prompt without opening the form. */
+  fun dismissCollectorConsent() = dataCollection.dismissCollectorConsent()
+
   /**
-   * Convenience trigger used by the `▶ Test / Launch Form Now` button in the Prototype App Chrome
-   * (`XFormsFormDefChromeSection`) to launch the active XForms `FormDef` on the currently selected
-   * entity (or as a standalone form when the survey has no predefined entities).
+   * Launches the active XForms `FormDef` on the currently selected entity (or as a standalone form
+   * when the survey has no predefined entities).
    */
   fun launchActiveOrDefaultFormForTesting() = dataCollection.launchActiveOrDefaultFormForTesting()
 
@@ -2847,13 +2992,6 @@ class PrototypeAppState(
     const val MAX_SIDE_PANEL_WIDTH_DP = DashboardUiState.MAX_SIDE_PANEL_WIDTH_DP
   }
 
-  /**
-   * ID of the stored survey whose primary XForms definition is [example]'s, or `null` if no stored
-   * survey uses it.
-   */
-  fun surveyIdForExampleForm(example: WorkbenchExampleForm): String? =
-    workbenchState.surveyIdForExampleForm(example)
-
   /** Incremented when the sample data is reset, so views holding local copies reload them. */
   val dataResetCount: Int
     get() = workbenchState.dataResetCount
@@ -2869,11 +3007,4 @@ class PrototypeAppState(
   fun saveSurveyEditorDraft(surveyId: String, draft: SurveyEditorDraft) {
     dataHolder.launch { dataHolder.surveyEditorRepository.saveDraft(surveyId, draft) }
   }
-
-  /** Number of map features stored for [surveyId]. */
-  fun entityCountForSurvey(surveyId: String): Int = workbenchState.entityCountForSurvey(surveyId)
-
-  /** Number of submissions stored for [surveyId]. */
-  fun submissionCountForSurvey(surveyId: String): Int =
-    workbenchState.submissionCountForSurvey(surveyId)
 }

@@ -154,6 +154,19 @@ internal fun FormProperties(
       singleLine = true,
       modifier = Modifier.fillMaxWidth(),
     )
+    OutlinedTextField(
+      value = form.ctaLabel,
+      onValueChange = actions::updateCtaLabel,
+      label = { Text("Button label") },
+      placeholder = { Text(form.title.ifBlank { "Untitled form" }) },
+      supportingText = {
+        Text(
+          "Shown on buttons that start data collection for this form. Defaults to the form title."
+        )
+      },
+      singleLine = true,
+      modifier = Modifier.fillMaxWidth(),
+    )
     if (form.questions.isEmpty()) {
       Text(
         text = "This form has no questions yet. Use \"+\" on the canvas to add one.",

@@ -65,7 +65,17 @@ class FormConceptLinksTest {
     label: String = "New question",
     conceptLink: ConceptLink? = null,
     choices: List<EditorChoice> = emptyList(),
-  ) = EditorQuestion(key, name, type, label, choices = choices, conceptLink = conceptLink)
+    decimalPlaces: Int = 0,
+  ) =
+    EditorQuestion(
+      key,
+      name,
+      type,
+      label,
+      choices = choices,
+      decimalPlaces = decimalPlaces,
+      conceptLink = conceptLink,
+    )
 
   private fun form(vararg questions: EditorQuestion) =
     EditorForm(formId = "visit", title = "Visit", questions = questions.toList())
@@ -152,7 +162,13 @@ class FormConceptLinksTest {
       form(
         question("q1", "commodity", conceptLink = ConceptLink("eudr.commodity", 1)),
         question("q2", "notes"),
-        question("q3", "area", EditorQuestionType.DECIMAL, conceptLink = ConceptLink(area.id, 2)),
+        question(
+          "q3",
+          "area",
+          EditorQuestionType.NUMBER,
+          conceptLink = ConceptLink(area.id, 2),
+          decimalPlaces = EditorQuestion.DEFAULT_DECIMAL_PLACES,
+        ),
       )
     val links = assertNotNull(FormConceptLinkSync.toFormConceptLinks(linked))
     assertEquals("visit", links.form_id)
@@ -179,7 +195,13 @@ class FormConceptLinksTest {
   fun reconcileImported_keepsKnownLinks_andTurnsUnknownOnesIntoForeignAttributes() {
     val imported =
       form(
-        question("q1", "area", EditorQuestionType.DECIMAL, conceptLink = ConceptLink(area.id, 2)),
+        question(
+          "q1",
+          "area",
+          EditorQuestionType.NUMBER,
+          conceptLink = ConceptLink(area.id, 2),
+          decimalPlaces = EditorQuestion.DEFAULT_DECIMAL_PLACES,
+        ),
         question("q2", "species", conceptLink = ConceptLink("acme.species", 4)),
       )
     val reconciled = FormConceptLinkSync.reconcileImported(imported) { it in concepts }
@@ -239,7 +261,13 @@ class FormConceptLinksTest {
   fun inheritConcepts_updateMode_followsFieldMappings() {
     val linked =
       form(
-          question("q1", "area", EditorQuestionType.DECIMAL, conceptLink = ConceptLink(area.id, 2))
+          question(
+            "q1",
+            "area",
+            EditorQuestionType.NUMBER,
+            conceptLink = ConceptLink(area.id, 2),
+            decimalPlaces = EditorQuestion.DEFAULT_DECIMAL_PLACES,
+          )
         )
         .copy(
           saveTo =
@@ -284,9 +312,17 @@ class FormConceptLinksTest {
       linked.choices.map { Triple(it.value, it.label, it.code) },
     )
 
-    val number = question("q2", "amount", EditorQuestionType.DECIMAL, label = "Plot size")
+    val number =
+      question(
+        "q2",
+        "amount",
+        EditorQuestionType.NUMBER,
+        label = "Plot size",
+        decimalPlaces = EditorQuestion.DEFAULT_DECIMAL_PLACES,
+      )
     val linkedNumber = ConceptLinking.link(number, area, setOf("plot_area"), "en")
-    assertEquals(EditorQuestionType.DECIMAL, linkedNumber.type)
+    assertEquals(EditorQuestionType.NUMBER, linkedNumber.type)
+    assertEquals(EditorQuestion.DEFAULT_DECIMAL_PLACES, linkedNumber.decimalPlaces)
     assertEquals("plot_area_2", linkedNumber.name)
     assertEquals("Unit: ha", linkedNumber.hint)
     assertEquals("0", linkedNumber.validation?.min)
@@ -361,7 +397,7 @@ class FormConceptLinksTest {
     assertTrue(warnings.all { it.isWarning })
     assertEquals(
       listOf(
-        "q1" to "\"Commodity\" expects select one answers, but this is a text question.",
+        "q1" to "\"Commodity\" expects select one answers, but this is a short text question.",
         "q1" to "\"Commodity\" is linked to more than one question in this form.",
         "q2" to "\"Commodity\" is linked to more than one question in this form.",
         "q2" to "Match 1 choice to \"Commodity\" values so answers can be added up: X.",

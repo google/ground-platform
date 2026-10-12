@@ -95,10 +95,10 @@ class CompactFormRunnerTest {
     assertEquals("Site", heading.step.title)
     assertIs<CompactFormItem.RepeatHub>(items.last())
 
-    // The controller still ends with the "Review & Submit" step (submission relies on it), but the
+    // The controller still ends with the "Review & submit" step (submission relies on it), but the
     // compact stack has no entry for it.
     val review = assertIs<FormWizardStep.SummaryStep>(controller.steps.last())
-    assertEquals("Review & Submit", review.title)
+    assertEquals("Review & submit", review.title)
     assertTrue(
       items.none {
         val step =

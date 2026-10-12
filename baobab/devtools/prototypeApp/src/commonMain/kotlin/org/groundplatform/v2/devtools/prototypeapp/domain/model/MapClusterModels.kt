@@ -113,10 +113,28 @@ data class MapFeatureCluster(
   val normalizedY: Float,
   val features: List<MapClusterFeatureItem>,
   val symbolGroups: List<ClusterMarkerSymbolGroup>,
+  val minNormalizedX: Float = normalizedX,
+  val maxNormalizedX: Float = normalizedX,
+  val minNormalizedY: Float = normalizedY,
+  val maxNormalizedY: Float = normalizedY,
 ) {
   /** Total number of map features in this cluster across all marker symbol groups. */
   val totalCount: Int
     get() = features.size
+
+  /** Horizontal span of member features in normalized survey coordinates. */
+  val spanNormalizedX: Float
+    get() = (maxNormalizedX - minNormalizedX).coerceAtLeast(0f)
+
+  /** Vertical span of member features in normalized survey coordinates. */
+  val spanNormalizedY: Float
+    get() = (maxNormalizedY - minNormalizedY).coerceAtLeast(0f)
+
+  /**
+   * Diagonal spatial extent (`hypot(spanNormalizedX, spanNormalizedY)`) covered by this cluster.
+   */
+  val diameterNormalized: Float
+    get() = kotlin.math.hypot(spanNormalizedX, spanNormalizedY)
 
   /** Map feature (`MapFeatureKind.ENTITY`) features in this cluster. */
   val entityFeatures: List<MapClusterFeatureItem>

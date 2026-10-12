@@ -157,6 +157,11 @@ internal fun InteractiveLayerMapCard(
   featureNoun: String? = null,
   showLabels: Boolean = true,
   emptyCamera: CameraPosition = DEFAULT_EDITOR_CAMERA,
+  startInDrawMode: Boolean = false,
+  showAddButtonInHeader: Boolean = true,
+  drawRequestToken: Int = 0,
+  onDrawStateChange: ((isDrawing: Boolean, draftVertexCount: Int) -> Unit)? = null,
+  backdropPolygons: List<List<LatLng>> = emptyList(),
 ) {
   val colors = MaterialTheme.colorScheme
   val density = LocalDensity.current.density
@@ -168,7 +173,8 @@ internal fun InteractiveLayerMapCard(
   val cameraState = remember(dataset.key) { MapCameraState(emptyCamera) }
   var fitted by remember(dataset.key) { mutableStateOf(false) }
   var basemap by remember { mutableStateOf(EditorBasemap.SATELLITE) }
-  var tool by remember(dataset.key) { mutableStateOf(MapTool.SELECT) }
+  var tool by
+    remember(dataset.key) { mutableStateOf(if (startInDrawMode) MapTool.DRAW else MapTool.SELECT) }
   var draft by remember(dataset.key) { mutableStateOf(emptyList<LatLng>()) }
   var hover by remember { mutableStateOf<ScreenPoint?>(null) }
 
@@ -177,6 +183,27 @@ internal fun InteractiveLayerMapCard(
   val currentSelected by rememberUpdatedState(selectedRow)
   val currentOnSelect by rememberUpdatedState(onSelectRow)
   val currentEditable by rememberUpdatedState(geometryEditable)
+  val currentOnDrawStateChange by rememberUpdatedState(onDrawStateChange)
+
+  LaunchedEffect(drawRequestToken) {
+    if (drawRequestToken > 0) {
+      tool = MapTool.DRAW
+      draft = emptyList()
+      currentOnSelect(null)
+    }
+  }
+
+  LaunchedEffect(startInDrawMode, dataset.rows.isEmpty()) {
+    if (startInDrawMode && dataset.rows.isEmpty() && tool != MapTool.DRAW) {
+      tool = MapTool.DRAW
+      draft = emptyList()
+      currentOnSelect(null)
+    }
+  }
+
+  LaunchedEffect(tool, draft.size) {
+    currentOnDrawStateChange?.invoke(tool == MapTool.DRAW, draft.size)
+  }
 
   fun screenOf(p: MapLatLng): ScreenPoint = cameraState.project(p).toScreenPoint()
 
@@ -186,7 +213,8 @@ internal fun InteractiveLayerMapCard(
     cameraState.unproject(DpOffset(p.x.toFloat().dp, p.y.toFloat().dp)).toEditorLatLng()
 
   suspend fun fitAll(durationMs: Int = MapCameraState.DEFAULT_ANIMATION_MS) {
-    val points = currentDataset.rows.flatMap { it.geometry }.map { it.toMapLatLng() }
+    val rowPoints = currentDataset.rows.flatMap { it.geometry }.map { it.toMapLatLng() }
+    val points = rowPoints.ifEmpty { backdropPolygons.flatten().map { it.toMapLatLng() } }
     when {
       points.isEmpty() -> cameraState.animateTo(emptyCamera, durationMs)
       points.distinct().size == 1 ->
@@ -282,8 +310,9 @@ internal fun InteractiveLayerMapCard(
   // Fit to the layer's features once the viewport size is known (and when switching layers).
   val viewport = cameraState.viewportSize
   val viewportReady = viewport.width > 4.dp && viewport.height > 4.dp
-  LaunchedEffect(dataset.key, viewportReady) {
-    if (viewportReady && !fitted) {
+  val hasRows = dataset.rows.isNotEmpty()
+  LaunchedEffect(dataset.key, viewportReady, hasRows, backdropPolygons) {
+    if (viewportReady && (!fitted || (dataset.isGenerated && hasRows))) {
       fitAll(durationMs = 0)
       fitted = true
     }
@@ -317,20 +346,33 @@ internal fun InteractiveLayerMapCard(
     remember(dataset, selectedRow, layerColor, mapBasemap) {
       layerEditorContent(dataset, selectedRow, layerColor, mapBasemap)
     }
-  // Sample points of the selected plot go in a small overlay source, so they cost O(samples).
-  val selectedSamples =
+  val withBackdrop =
+    remember(baseContent, backdropPolygons, colors.primary) {
+      withBackdropPolygons(baseContent, backdropPolygons, colors.primary)
+    }
+  // Sample points of the selected plot (or the first 25 plots when none is selected) go in a small
+  // overlay source so sub-plot layouts are visible immediately on the preview map.
+  val samplePoints =
     remember(dataset.rows, selectedRow) {
-      dataset.rows
-        .firstOrNull { it.key == selectedRow }
-        ?.values
-        ?.get(SamplePlotProperties.SAMPLES)
-        .orEmpty()
+      if (selectedRow != null) {
+        val raw =
+          dataset.rows
+            .firstOrNull { it.key == selectedRow }
+            ?.values
+            ?.get(SamplePlotProperties.SAMPLES)
+            .orEmpty()
+        SamplePlotProperties.parseGeotrace(raw)
+      } else {
+        dataset.rows.take(25).flatMap { row ->
+          SamplePlotProperties.parseGeotrace(row.values[SamplePlotProperties.SAMPLES].orEmpty())
+        }
+      }
     }
   val content =
-    remember(baseContent, selectedSamples, layerColor) {
+    remember(withBackdrop, samplePoints, layerColor) {
       withSamplePointsOverlay(
-        baseContent,
-        SamplePlotProperties.parseGeotrace(selectedSamples),
+        withBackdrop,
+        samplePoints,
         layerColor,
       )
     }
@@ -344,6 +386,7 @@ internal fun InteractiveLayerMapCard(
         dataset = dataset,
         editable = geometryEditable,
         featureNoun = featureNoun,
+        showAddButtonInHeader = showAddButtonInHeader,
         tool = tool,
         draftSize = draft.size,
         onStartDrawing = {
@@ -584,6 +627,52 @@ internal fun layerEditorContent(
   )
 }
 
+internal const val LAYER_EDITOR_BACKDROP_SOURCE = "layer-editor-backdrop"
+
+/**
+ * Draws [polygons] (such as the survey area boundary) underneath the layer's own features so the
+ * organizer has spatial context while previewing or editing map features.
+ */
+internal fun withBackdropPolygons(
+  content: MapContent,
+  polygons: List<List<LatLng>>,
+  outlineColor: Color,
+): MapContent {
+  val validRings = polygons.filter { it.size >= 3 }
+  if (validRings.isEmpty()) return content
+  val features = validRings.mapIndexed { idx, ring ->
+    MapFeature(
+      id = "backdrop-${idx + 1}",
+      geometry = Geometry.Polygon(listOf(ring.map { it.toMapLatLng() })),
+    )
+  }
+  val backdropLayers =
+    listOf(
+      MapLayer.Fill(
+        id = "layer-editor-backdrop-fill",
+        sourceId = LAYER_EDITOR_BACKDROP_SOURCE,
+        color = StyleValue.Constant(outlineColor),
+        opacity = StyleValue.Constant(0.08f),
+      ),
+      MapLayer.Line(
+        id = "layer-editor-backdrop-casing",
+        sourceId = LAYER_EDITOR_BACKDROP_SOURCE,
+        color = StyleValue.Constant(Color.White.copy(alpha = 0.7f)),
+        width = StyleValue.Constant(3.dp),
+      ),
+      MapLayer.Line(
+        id = "layer-editor-backdrop-line",
+        sourceId = LAYER_EDITOR_BACKDROP_SOURCE,
+        color = StyleValue.Constant(outlineColor),
+        width = StyleValue.Constant(1.75.dp),
+      ),
+    )
+  return content.copy(
+    sources = listOf(GeoJsonSource(LAYER_EDITOR_BACKDROP_SOURCE, features)) + content.sources,
+    layers = backdropLayers + content.layers,
+  )
+}
+
 internal const val LAYER_EDITOR_SAMPLES_SOURCE = "layer-editor-samples"
 
 /**
@@ -657,6 +746,7 @@ private fun MapToolbar(
   dataset: EntityDataset,
   editable: Boolean,
   featureNoun: String?,
+  showAddButtonInHeader: Boolean,
   tool: MapTool,
   draftSize: Int,
   onStartDrawing: () -> Unit,
@@ -714,7 +804,7 @@ private fun MapToolbar(
         Spacer(Modifier.width(4.dp))
         Text("Cancel")
       }
-    } else {
+    } else if (showAddButtonInHeader) {
       GroundFilterChip(
         selected = false,
         onClick = onStartDrawing,

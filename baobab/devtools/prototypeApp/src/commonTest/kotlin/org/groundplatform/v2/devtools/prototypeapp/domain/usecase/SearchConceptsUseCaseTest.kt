@@ -123,7 +123,7 @@ class SearchConceptsUseCaseTest {
     assertTrue(results.none { it.concept.id == "core.area_ha" })
     assertTrue(results.all { it.concept.dataType == ConceptDataType.TEXT })
     val decimal =
-      search(global, "", SearchOptions(questionType = EditorQuestionType.INTEGER, limit = 100))
+      search(global, "", SearchOptions(questionType = EditorQuestionType.NUMBER, limit = 100))
     assertTrue(
       decimal.all { it.concept.dataType in setOf(ConceptDataType.INTEGER, ConceptDataType.DECIMAL) }
     )

@@ -16,7 +16,7 @@
 
 # Translations
 
-ProtoForms supports localized text for question labels, hints, and enumerator
+ProtoForms supports localized text for question labels, hints, and data collector
 guidance. Localized strings are organized into a strongly typed
 `TranslationCatalog` within `ModelDef.translations`, referenced by persistent
 `text_id` keys in the view controls.
@@ -50,7 +50,7 @@ message LocalizedString {
   // Optional abbreviated phrasing for compact displays, mobile cards, or summary tables.
   string short_value = 2;
 
-  // Optional guidance hint for enumerator training or collapsible info panels.
+  // Optional guidance hint for data collector training or collapsible info panels.
   string guidance_value = 3;
 
   // Multi-modal media associated with this localized entry (audio, images, videos).
@@ -157,7 +157,7 @@ model {
 :                  :                 : summary lists, review pages, or column :
 :                  :                 : headers in exports.                    :
 | `guidance_value` | `guidance`      | In-depth instructions or training      |
-:                  :                 : prompts for enumerators, typically     :
+:                  :                 : prompts for data collectors, typically :
 :                  :                 : rendered behind an info/expand toggle. :
 
 Multi-media attachments (images, audio prompts, and video clips) can also be

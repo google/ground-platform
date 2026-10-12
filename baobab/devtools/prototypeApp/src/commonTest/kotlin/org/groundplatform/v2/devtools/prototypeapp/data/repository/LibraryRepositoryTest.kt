@@ -48,7 +48,13 @@ class LibraryRepositoryTest {
     assertEquals(GlobalLibrarySeedData.library(), global)
     assertTrue(global.concepts.size in 45..55, "about 50 global concepts")
     assertEquals(
-      listOf("producer_registration", "eudr_due_diligence", "ferm_restoration"),
+      listOf(
+        "producer_registration",
+        "eudr_due_diligence",
+        "ferm_restoration",
+        "lulc_training_data",
+        "redd_plus_tfff",
+      ),
       global.purposePacks.map { it.id },
     )
     assertNull(global.integrityError())

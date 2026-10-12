@@ -78,17 +78,17 @@ class ImpactPdfReportsTest {
         "9.82 ha",
         "1 map feature mapped again elsewhere",
         "Producers registered",
-        "DEFORESTATION-FREE SUPPLY CHAINS",
+        "Deforestation-free supply chains",
         "Coffee",
-        "YOUR INDICATORS",
+        "Your indicators",
         "Shade trees",
-        "HOW THE DATA WAS USED",
+        "How the data was used",
         "3 map features",
         "Data collected",
-        "NOT COUNTED",
+        "Not counted",
       )
       .forEach { assertTrue(text.contains(drawn(it)), "Missing \"$it\"") }
-    assertFalse(text.contains(drawn("ORGANIZATION-SUGGESTED INDICATORS")))
+    assertFalse(text.contains(drawn("Organization-suggested indicators")))
   }
 
   /** [text] as it appears inside a drawn PDF string (part of a line). */
@@ -97,9 +97,12 @@ class ImpactPdfReportsTest {
   @Test
   fun fileName_isASlugOfTheTitle() {
     assertEquals(
-      "impact-summary-all-ground-users.pdf",
-      ImpactPdfReports.fileName(summary.copy(title = "All Ground users")),
+      "impact-summary-all-collect-one-users.pdf",
+      ImpactPdfReports.fileName(summary.copy(title = "All Collect One users")),
     )
-    assertEquals("impact-summary-ground.pdf", ImpactPdfReports.fileName(summary.copy(title = "…")))
+    assertEquals(
+      "impact-summary-collect-one.pdf",
+      ImpactPdfReports.fileName(summary.copy(title = "…")),
+    )
   }
 }

@@ -67,6 +67,8 @@ data class ImpactCoverage(val featureCount: Int = 0, val areaHa: Double = 0.0) {
 
 /** Lifecycle state of a survey (`groundplatform.v2.survey.SurveyState`). */
 enum class SurveyLifecycleState(val label: String) {
+  /** Under construction; editable by organizers and not yet live for field collection. */
+  DRAFT("Draft"),
   /** Collecting data. */
   PUBLISHED("Published"),
   /** Collection ended; the survey and its data are read-only. */

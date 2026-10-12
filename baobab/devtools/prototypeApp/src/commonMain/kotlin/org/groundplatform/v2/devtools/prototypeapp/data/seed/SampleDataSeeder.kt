@@ -45,7 +45,7 @@ class SampleDataSeeder(private val store: LocalStore) {
 
   companion object {
     /** Bump when the sample data changes shape, so existing stores are reseeded. */
-    const val SEED_VERSION: Int = 11
+    const val SEED_VERSION: Int = 15
 
     /** Survey opened by default on first launch. */
     const val DEFAULT_ACTIVE_SURVEY_ID: String = "survey-kenya-coffee"
@@ -77,9 +77,7 @@ class SampleDataSeeder(private val store: LocalStore) {
           SurveyConfig(
             primaryForm = PrototypeFakeSurveysData.exampleFormForSurveyId(surveyId).formDefinition,
             formsById =
-              forms.associate {
-                it.id to PrototypeFakeSurveysData.builtInFallbackFormForForm(it)
-              },
+              forms.associate { it.id to PrototypeFakeSurveysData.builtInFallbackFormForForm(it) },
           ),
         )
       }

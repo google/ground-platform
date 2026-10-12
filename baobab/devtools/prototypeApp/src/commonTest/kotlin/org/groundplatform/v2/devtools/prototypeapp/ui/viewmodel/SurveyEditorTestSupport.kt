@@ -124,7 +124,15 @@ internal fun formEditorViewModel(
     EditorFormTemplates.blank(formId = FormIds.newFormId(), title = "Untitled form"),
   datasets: List<EditorDataset> = emptyList(),
   scope: CoroutineScope = testScope(),
-): FormEditorViewModel = FormEditorViewModel.standalone(form, datasets, scope)
+  library: org.groundplatform.v2.devtools.prototypeapp.ui.state.FormLibraryContext =
+    org.groundplatform.v2.devtools.prototypeapp.ui.state.FormLibraryContext(),
+): FormEditorViewModel =
+  FormEditorViewModel.standalone(
+    initialForm = form,
+    datasets = datasets,
+    library = library,
+    scope = scope,
+  )
 
 /** The current UI state, for assertions. */
 internal val SurveyEditorViewModel.ui: SurveyEditorUiState

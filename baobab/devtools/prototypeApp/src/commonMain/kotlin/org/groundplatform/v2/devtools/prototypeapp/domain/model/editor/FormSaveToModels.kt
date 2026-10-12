@@ -361,13 +361,19 @@ object SaveToRules {
   }
 
   /** Whether an answer to a [type] question fits a [kind] property without conversion. */
-  fun isCompatible(type: EditorQuestionType, kind: EditorPropertyKind): Boolean =
+  fun isCompatible(
+    type: EditorQuestionType,
+    kind: EditorPropertyKind,
+    decimalPlaces: Int = 0,
+  ): Boolean =
     when (type) {
-      EditorQuestionType.INTEGER ->
-        kind in
-          setOf(EditorPropertyKind.INTEGER, EditorPropertyKind.DECIMAL, EditorPropertyKind.TEXT)
-      EditorQuestionType.DECIMAL ->
-        kind in setOf(EditorPropertyKind.DECIMAL, EditorPropertyKind.TEXT)
+      EditorQuestionType.NUMBER ->
+        if (decimalPlaces <= 0) {
+          kind in
+            setOf(EditorPropertyKind.INTEGER, EditorPropertyKind.DECIMAL, EditorPropertyKind.TEXT)
+        } else {
+          kind in setOf(EditorPropertyKind.DECIMAL, EditorPropertyKind.TEXT)
+        }
       EditorQuestionType.DATE -> kind in setOf(EditorPropertyKind.DATE, EditorPropertyKind.TEXT)
       EditorQuestionType.SELECT_ONE ->
         kind in setOf(EditorPropertyKind.TEXT, EditorPropertyKind.BOOLEAN)
@@ -382,7 +388,7 @@ object SaveToRules {
   ): String? {
     if (property == GEOMETRY_PROPERTY) return null
     val kind = target.property(property)?.kind ?: return null
-    if (isCompatible(question.type, kind)) return null
+    if (isCompatible(question.type, kind, question.decimalPlaces)) return null
     return "${question.type.label} answers may not fit the ${kind.label.lowercase()} property \"$property\"."
   }
 
@@ -417,12 +423,8 @@ object SaveToRules {
   fun defaultIdQuestion(form: EditorForm, target: EditorDataset): EditorQuestion? {
     val candidates =
       form.questions.filter {
-        it.type in
-          setOf(
-            EditorQuestionType.TEXT,
-            EditorQuestionType.INTEGER,
-            EditorQuestionType.SELECT_ONE,
-          )
+        (it.type == EditorQuestionType.NUMBER && it.decimalPlaces <= 0) ||
+          it.type in setOf(EditorQuestionType.TEXT, EditorQuestionType.SELECT_ONE)
       }
     return candidates.firstOrNull { it.name == target.keyProperty } ?: candidates.firstOrNull()
   }

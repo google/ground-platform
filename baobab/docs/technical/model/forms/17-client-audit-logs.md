@@ -20,7 +20,7 @@
 
 This specification defines the audit log telemetry recorded by ProtoForms
 clients when `AuditConfig` is enabled in `RecordMetadata`. Audit logs track
-enumerator interactions, question timing, edits, and location breadcrumbs for
+data collector interactions, question timing, edits, and location breadcrumbs for
 quality assurance and verification.
 
 ## Audit Log Protobuf Schema

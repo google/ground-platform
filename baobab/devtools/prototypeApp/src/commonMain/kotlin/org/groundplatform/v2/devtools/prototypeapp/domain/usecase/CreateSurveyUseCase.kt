@@ -18,7 +18,9 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.CachedProfile
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.FormTemplate
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.MapThumbnailTheme
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.Organization
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyLifecycleState
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyPreviewItem
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyThumbnailGenerator
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.FormIds
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SurveyEditorDraft
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SurveyFormTemplates
@@ -29,7 +31,8 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.repository.Transaction
 
 /**
  * Creates a new survey owned by the signed-in user, optionally in an organization, and makes it the
- * active survey. The survey starts with the templates of the Purpose Packs chosen for it, or empty.
+ * active survey. The survey starts in [SurveyLifecycleState.DRAFT] mode with the templates of the
+ * Purpose Packs chosen for it, or empty.
  *
  * Building the survey ([newSurvey]) is pure, so callers can hand out its ID right away; persisting
  * it ([invoke]) writes the survey list entry and a blank Survey editor draft in one transaction.
@@ -55,8 +58,9 @@ class CreateSurveyUseCase(
     ownerEmail: String,
   ): SurveyPreviewItem {
     val trimmedTitle = title.trim().ifBlank { DEFAULT_TITLE }
+    val id = uniqueSurveyId(trimmedTitle, existingSurveys.map { it.id }.toSet())
     return SurveyPreviewItem(
-      id = uniqueSurveyId(trimmedTitle, existingSurveys.map { it.id }.toSet()),
+      id = id,
       title = trimmedTitle,
       description = "",
       location = organization?.name ?: "No survey area yet",
@@ -66,8 +70,10 @@ class CreateSurveyUseCase(
       thumbnailTheme =
         MapThumbnailTheme.entries[existingSurveys.size % MapThumbnailTheme.entries.size],
       entityCount = 0,
+      thumbnail = SurveyThumbnailGenerator.forNewSurvey(id),
       ownerEmail = ownerEmail,
       organizationId = organization?.id,
+      state = SurveyLifecycleState.DRAFT,
     )
   }
 

@@ -75,11 +75,20 @@ private const val MAX_CUSTOM_STRATA_SHOWN = 30
  * (progressive disclosure), plot shape, sample points, ordering and seed, a live estimate, and
  * Generate / Regenerate with progress and Cancel.
  */
+internal fun sampleDesignActionLabel(isWizard: Boolean, hasGeneratedPlots: Boolean): String =
+  when {
+    isWizard && hasGeneratedPlots -> "Update preview"
+    isWizard -> "Show preview"
+    hasGeneratedPlots -> "Regenerate sample plots"
+    else -> "Generate sample plots"
+  }
+
 @Composable
 internal fun SamplingDesignPanel(
   uiState: SurveyEditorUiState,
   actions: SurveyEditorActions,
   dataset: EntityDataset,
+  isWizard: Boolean = false,
 ) {
   val config = dataset.generator ?: return
   val key = dataset.key
@@ -89,6 +98,7 @@ internal fun SamplingDesignPanel(
   val progress = uiState.generation?.takeIf { it.datasetKey == key }
   val busy = uiState.generation != null
   val lastRun = config.lastRun
+  val hasGeneratedPlots = lastRun != null && dataset.rows.isNotEmpty()
   val stale = actions.isDesignStale(dataset)
   val blockedReason = uiState.regenerateBlockedReason(dataset)
   val error = uiState.generationError(key)
@@ -101,8 +111,12 @@ internal fun SamplingDesignPanel(
     if (stale && blockedReason == null) {
       Banner(
         icon = Icons.Outlined.Warning,
-        title = "Design is out of date — regenerate",
-        body = "The design or its area changed after these sample plots were generated.",
+        title =
+          if (isWizard) "Preview is out of date — update preview"
+          else "Design is out of date — regenerate",
+        body =
+          if (isWizard) "The design or its area changed after this preview was generated."
+          else "The design or its area changed after these sample plots were generated.",
         container = MaterialTheme.colorScheme.tertiaryContainer,
         content = MaterialTheme.colorScheme.onTertiaryContainer,
       )
@@ -154,9 +168,17 @@ internal fun SamplingDesignPanel(
       selectedText = config.plotShape.label,
       options = PlotShapeOption.entries,
       optionText = { it.label },
-      onSelect = { s -> update { it.copy(plotShape = s) } },
+      onSelect = { s ->
+        update {
+          it.copy(
+            plotShape = s,
+            subPlot = if (s == PlotShapeOption.POINT) SubPlotMode.NONE else it.subPlot,
+          )
+        }
+      },
     )
-    if (config.plotShape != PlotShapeOption.POINT) {
+    val isPointPlot = config.plotShape == PlotShapeOption.POINT
+    if (!isPointPlot) {
       DecimalField(
         label =
           if (config.plotShape == PlotShapeOption.CIRCLE) "Plot diameter (m)" else "Plot side (m)",
@@ -168,38 +190,43 @@ internal fun SamplingDesignPanel(
 
     DropdownSelector(
       label = "Sample points in each plot",
-      selectedText = config.subPlot.label,
+      selectedText = if (isPointPlot) SubPlotMode.NONE.label else config.subPlot.label,
       options = SubPlotMode.entries,
       optionText = { it.label },
       onSelect = { m -> update { it.copy(subPlot = m) } },
+      enabled = !isPointPlot,
+      supportingText =
+        if (isPointPlot) "Sample points inside plots require square or circle plots." else null,
     )
-    when (config.subPlot) {
-      SubPlotMode.GRID -> {
-        IntegerField(
-          label = "Points per side",
-          value = config.subPlotGridN.toLong(),
-          min = 1,
-          max = 10,
-          supportingText = "${config.subPlotGridN * config.subPlotGridN} sample points per plot",
-          onValue = { v -> update { it.copy(subPlotGridN = v.toInt()) } },
-        )
-        DecimalField(
-          label = "Spacing between points (m)",
-          value = config.subPlotSpacingM,
-          min = 0.1,
-          onValue = { v -> update { it.copy(subPlotSpacingM = v) } },
-        )
+    if (!isPointPlot) {
+      when (config.subPlot) {
+        SubPlotMode.GRID -> {
+          IntegerField(
+            label = "Points per side",
+            value = config.subPlotGridN.toLong(),
+            min = 1,
+            max = 10,
+            supportingText = "${config.subPlotGridN * config.subPlotGridN} sample points per plot",
+            onValue = { v -> update { it.copy(subPlotGridN = v.toInt()) } },
+          )
+          DecimalField(
+            label = "Spacing between points (m)",
+            value = config.subPlotSpacingM,
+            min = 0.1,
+            onValue = { v -> update { it.copy(subPlotSpacingM = v) } },
+          )
+        }
+        SubPlotMode.RANDOM ->
+          IntegerField(
+            label = "Number of points",
+            value = config.subPlotRandomCount.toLong(),
+            min = 1,
+            max = 100,
+            onValue = { v -> update { it.copy(subPlotRandomCount = v.toInt()) } },
+          )
+        SubPlotMode.NONE,
+        SubPlotMode.CENTER -> Unit
       }
-      SubPlotMode.RANDOM ->
-        IntegerField(
-          label = "Number of points",
-          value = config.subPlotRandomCount.toLong(),
-          min = 1,
-          max = 100,
-          onValue = { v -> update { it.copy(subPlotRandomCount = v.toInt()) } },
-        )
-      SubPlotMode.NONE,
-      SubPlotMode.CENTER -> Unit
     }
 
     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -255,20 +282,22 @@ internal fun SamplingDesignPanel(
       }
     } else {
       Button(
-        onClick = {
-          if (lastRun != null && dataset.rows.isNotEmpty()) confirmRegenerate = true else generate()
-        },
+        onClick = { if (!isWizard && hasGeneratedPlots) confirmRegenerate = true else generate() },
         enabled = !busy && blockedReason == null && areaResult is SamplingAreaResult.Ready,
         modifier = Modifier.fillMaxWidth(),
       ) {
-        Text(if (lastRun == null) "Generate sample plots" else "Regenerate sample plots")
+        Text(sampleDesignActionLabel(isWizard = isWizard, hasGeneratedPlots = hasGeneratedPlots))
       }
     }
-    if (lastRun != null) {
+    if (lastRun != null && hasGeneratedPlots) {
       Text(
-        "${SurveyAreaGeometry.groupThousands(lastRun.featureCount.toLong())} plots generated " +
-          "${lastRun.generatedAt.replace('T', ' ').removeSuffix("Z")} UTC " +
-          "(engine version ${lastRun.engineVersion})",
+        if (isWizard) {
+          "Previewing ${SurveyAreaGeometry.groupThousands(lastRun.featureCount.toLong())} sample plots"
+        } else {
+          "${SurveyAreaGeometry.groupThousands(lastRun.featureCount.toLong())} plots generated " +
+            "${lastRun.generatedAt.replace('T', ' ').removeSuffix("Z")} UTC " +
+            "(engine version ${lastRun.engineVersion})"
+        },
         style = MaterialTheme.typography.bodySmall,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
       )
@@ -340,7 +369,7 @@ private fun AreaSourceSelector(
     label = "Stratum property",
     selectedText = layer.property(source.stratumProperty)?.label ?: "Choose…",
     options = layer.properties,
-    optionText = { "${it.label} (${it.name})" },
+    optionText = { it.label },
     onSelect = { p -> update { it.copy(areaSource = source.copy(stratumProperty = p.name)) } },
   )
   val strata = actions.strataIds(config)

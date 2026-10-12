@@ -77,7 +77,7 @@ object SurveyEditorProjection {
         targetDatasetId = target?.id.orEmpty(),
         targetDatasetName = target?.displayName.orEmpty(),
         questionCount = form.questions.size,
-        ctaLabel = existing?.ctaLabel ?: form.title,
+        ctaLabel = form.effectiveCtaLabel,
         requiresEntity = updates,
         availability = form.availability,
       )

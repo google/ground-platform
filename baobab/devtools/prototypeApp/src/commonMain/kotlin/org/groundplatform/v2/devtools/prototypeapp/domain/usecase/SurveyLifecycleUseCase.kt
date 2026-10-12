@@ -50,10 +50,12 @@ class SurveyLifecycleUseCase(
   suspend fun setState(surveyId: String, state: SurveyLifecycleState): Boolean {
     val survey = surveyRepository.getSurveys().firstOrNull { it.id == surveyId } ?: return false
     if (survey.state == state) return false
-    val stopsCollecting = survey.state == SurveyLifecycleState.PUBLISHED
+    val isClosedOrArchived =
+      state == SurveyLifecycleState.CLOSED || state == SurveyLifecycleState.ARCHIVED
+    val stopsCollecting = survey.state == SurveyLifecycleState.PUBLISHED && isClosedOrArchived
     val closedAt =
       when {
-        state == SurveyLifecycleState.PUBLISHED -> null
+        !isClosedOrArchived -> null
         stopsCollecting -> isoUtc(now())
         else -> survey.closedAt ?: isoUtc(now())
       }

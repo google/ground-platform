@@ -49,7 +49,7 @@ internal object ImpactPdfReports {
       PdfReportLayout(
         title = "Impact summary • ${summary.title}",
         subject = "$scopeLabel impact summary",
-        runningHeader = "Ground • Impact summary • ${summary.title}",
+        runningHeader = "Open Foris Collect One • Impact summary • ${summary.title}",
         footerNote = "Impact summary • Generated $generatedAt",
       )
     with(layout) {
@@ -211,7 +211,7 @@ internal object ImpactPdfReports {
         .filter { it.isNotEmpty() }
         .joinToString("-")
         .take(60)
-        .ifEmpty { "ground" }
+        .ifEmpty { "collect-one" }
     return "impact-summary-$slug.pdf"
   }
 }

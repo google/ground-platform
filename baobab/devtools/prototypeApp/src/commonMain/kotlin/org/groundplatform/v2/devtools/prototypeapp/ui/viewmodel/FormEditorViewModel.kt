@@ -53,9 +53,16 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.MediaSour
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.RelevanceOperator
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SaveToMode
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SaveToRules
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SharingSettings
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.StatusConditionSubject
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SurveyDetails
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SurveyEditorDraft
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SurveyEditorForm
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SurveyEditorMutation
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SurveyUndoRedoStack
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.ValidationRules
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.slugify
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.toEditorDataset
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.withRenamedTargetDataset
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.withRenamedTargetProperty
 import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.ConceptMatchKind
@@ -68,6 +75,14 @@ import org.groundplatform.v2.devtools.prototypeapp.ui.state.ImportMatch
 
 /** User intents of the Form editor page. Implemented by [FormEditorViewModel]. */
 interface FormEditorActions {
+  // --- Undo / redo ---
+
+  /** Rewinds the most recent survey mutation recorded in this Form editor, if any. */
+  fun undo()
+
+  /** Replays the most recently rewound survey mutation in this Form editor, if any. */
+  fun redo()
+
   // --- Selection & panels ---
 
   /** Selects question [key], or the Form itself when `null` or unknown. */
@@ -81,6 +96,9 @@ interface FormEditorActions {
 
   /** Switches the canvas and **Preview** between the mobile flow and the web layout. */
   fun selectPreviewTarget(target: FormPreviewTarget)
+
+  /** Switches the active language being edited and previewed in the Form editor. */
+  fun selectLanguage(language: String)
 
   fun setXmlViewerOpen(open: Boolean)
 
@@ -96,6 +114,9 @@ interface FormEditorActions {
   // --- Form ---
 
   fun updateTitle(title: String)
+
+  /** Sets the custom label shown on buttons that start data collection for this Form. */
+  fun updateCtaLabel(ctaLabel: String)
 
   /** Sets where collectors can open this Form (mobile, web, both, or neither). */
   fun updateAvailability(availability: FormAvailability)
@@ -135,6 +156,12 @@ interface FormEditorActions {
 
   fun updateQuestion(key: String, transform: (EditorQuestion) -> EditorQuestion)
 
+  /** Updates the label of question [key] in the currently active language. */
+  fun updateQuestionLabel(key: String, label: String)
+
+  /** Updates the hint of question [key] in the currently active language. */
+  fun updateQuestionHint(key: String, hint: String)
+
   /**
    * Changes the type of [key], seeding choices and dropping display logic, validation rules, and
    * type-specific settings (geometry capture, media source) that no longer fit.
@@ -146,6 +173,12 @@ interface FormEditorActions {
 
   /** Sets how collectors provide the media answer of [key] (ignored for non-media types). */
   fun updateMediaSource(key: String, source: MediaSource)
+
+  /**
+   * Sets the number of decimal places allowed for [key] (`0` for whole numbers / integer; ignored
+   * for non-numeric types).
+   */
+  fun updateDecimalPlaces(key: String, decimalPlaces: Int)
 
   /**
    * Updates the validation rule of [key]. A rule with no settings is stored as `null` so the
@@ -309,7 +342,11 @@ interface FormEditorActions {
  * The Form itself lives in the Survey editor's draft: it's read from [formFlow] and every edit goes
  * through [updateForm], so the Survey editor sees it at once (and its linked datasets follow). The
  * survey's Map layers and Data tables, which the save-to logic targets, come from [datasetsFlow].
- * Selection and the preview session are this ViewModel's own.
+ * Selection, the undo/redo stack, and the preview session are this ViewModel's own.
+ *
+ * Each change in the Form editor is tracked on [Session.undoRedo] as a [SurveyEditorMutation] of
+ * the enclosing [SurveyEditorDraft] so rewinding or replaying an edit restores both the Form and
+ * any datasets or Forms mutated alongside it.
  *
  * The preview's [FormWizardController] is UI infrastructure from `core.forms` (it runs the
  * generated XForms and holds the preview's answers); like the PDF export client, it's owned here
@@ -339,10 +376,25 @@ class FormEditorViewModel(
     { _, _, _, _ ->
       "Templates can only be saved from a survey in an organization."
     },
+  /** Key identifying this Form within its enclosing [SurveyEditorDraft]. */
+  private val formKey: String = DEFAULT_STANDALONE_FORM_KEY,
+  /**
+   * Returns the current [SurveyEditorDraft] backing this Form editor, or `null` when running
+   * standalone without an enclosing [SurveyEditorViewModel].
+   */
+  private val currentSurveyDraft: (() -> SurveyEditorDraft)? = null,
+  /**
+   * Replaces the enclosing [SurveyEditorViewModel]'s working [SurveyEditorDraft] when a
+   * [SurveyEditorMutation] is rewound or replayed, or `null` when running standalone.
+   */
+  private val applySurveyDraft: ((SurveyEditorDraft) -> Unit)? = null,
+  /** Whether the enclosing survey is read-only (closed or archived). */
+  private val isSurveyReadOnly: () -> Boolean = { false },
 ) : FormEditorActions {
   /** Session (non-persisted) state of the Form editor. */
   private data class Session(
     val selectedKey: String?,
+    val selectedLanguage: String? = null,
     val previewTarget: FormPreviewTarget = FormPreviewTarget.MOBILE,
     val previewController: FormWizardController? = null,
     val previewError: String? = null,
@@ -350,6 +402,7 @@ class FormEditorViewModel(
     val isXmlViewerOpen: Boolean = false,
     val isAdvancedExpanded: Boolean = false,
     val sidePanelWidthDp: Float = FormEditorUiState.DEFAULT_SIDE_PANEL_WIDTH_DP,
+    val undoRedo: SurveyUndoRedoStack = SurveyUndoRedoStack(),
     val conceptSuggestions: ConceptSuggestionsState? = null,
     val importMatches: List<ImportMatch> = emptyList(),
   )
@@ -359,12 +412,16 @@ class FormEditorViewModel(
 
   private var nextKeyId = formFlow.value.questions.size + 1
 
+  /** Guards against double-recording when [mutateForm], [undo], or [redo] invokes [updateForm]. */
+  private var isRecordingSuppressed = false
+
   val uiState: StateFlow<FormEditorUiState> =
     combine(formFlow, datasetsFlow, session, libraryFlow) { form, datasets, session, library ->
         FormEditorUiState(
           form = form,
           datasets = datasets,
           selectedKey = session.selectedKey,
+          selectedLanguage = session.selectedLanguage,
           previewTarget = session.previewTarget,
           previewController = session.previewController,
           previewError = session.previewError,
@@ -372,6 +429,8 @@ class FormEditorViewModel(
           isXmlViewerOpen = session.isXmlViewerOpen,
           isAdvancedExpanded = session.isAdvancedExpanded,
           sidePanelWidthDp = session.sidePanelWidthDp,
+          undoStack = session.undoRedo.undoStack,
+          redoStack = session.undoRedo.redoStack,
           library = library,
           conceptSuggestions = session.conceptSuggestions,
           importMatches = session.importMatches,
@@ -384,15 +443,22 @@ class FormEditorViewModel(
           form = formFlow.value,
           datasets = datasetsFlow.value,
           selectedKey = session.value.selectedKey,
+          selectedLanguage = session.value.selectedLanguage,
+          undoStack = session.value.undoRedo.undoStack,
+          redoStack = session.value.undoRedo.redoStack,
           library = libraryFlow.value,
         ),
       )
 
   private val form: EditorForm
-    get() = formFlow.value
+    get() =
+      currentSurveyDraft?.invoke()?.forms?.firstOrNull { it.key == formKey }?.form ?: formFlow.value
 
   private val datasets: List<EditorDataset>
-    get() = datasetsFlow.value
+    get() =
+      currentSurveyDraft?.invoke()?.let { draft ->
+        draft.datasets.map { it.toEditorDataset(formKey, draft.forms) }
+      } ?: datasetsFlow.value
 
   private val selectedIndex: Int
     get() = session.value.selectedKey?.let { form.indexOf(it) } ?: -1
@@ -402,6 +468,138 @@ class FormEditorViewModel(
 
   private val updateTargets: List<EditorDataset>
     get() = datasets.filterNot { it.isLinkedToThisForm }
+
+  private fun standaloneSurveyDraft(currentForm: EditorForm = formFlow.value): SurveyEditorDraft =
+    SurveyEditorDraft(
+      details = SurveyDetails(surveyId = "standalone", title = currentForm.title, description = ""),
+      sharing = SharingSettings(ownerEmail = ""),
+      forms = listOf(SurveyEditorForm(key = formKey, form = currentForm)),
+    )
+
+  private fun currentDraftSnapshot(): SurveyEditorDraft =
+    currentSurveyDraft?.invoke() ?: standaloneSurveyDraft()
+
+  /**
+   * Applies [transform] to this Form and records the resulting [SurveyEditorMutation] on
+   * [Session.undoRedo], clearing any redo history. A transform that changes nothing is ignored.
+   */
+  private fun mutateForm(
+    selectAfter: (EditorForm) -> String? = { session.value.selectedKey },
+    transform: (EditorForm) -> EditorForm,
+  ) {
+    if (isSurveyReadOnly()) return
+    val selectedBefore = session.value.selectedKey
+    val beforeDraft = currentDraftSnapshot()
+    val beforeForm = beforeDraft.forms.firstOrNull { it.key == formKey }?.form ?: formFlow.value
+    val updatedForm = transform(beforeForm)
+    if (updatedForm == beforeForm) return
+    isRecordingSuppressed = true
+    try {
+      updateForm { updatedForm }
+    } finally {
+      isRecordingSuppressed = false
+    }
+    val afterDraft = currentSurveyDraft?.invoke() ?: standaloneSurveyDraft(updatedForm)
+    val afterForm = afterDraft.forms.firstOrNull { it.key == formKey }?.form ?: updatedForm
+    val resolvedSelectedAfter = selectAfter(afterForm)?.takeIf { afterForm.indexOf(it) >= 0 }
+    val mutation =
+      SurveyEditorMutation.between(
+        before = beforeDraft,
+        after = afterDraft,
+        formKey = formKey,
+        selectedQuestionKeyBefore = selectedBefore,
+        selectedQuestionKeyAfter = resolvedSelectedAfter,
+      )
+    session.update { s ->
+      s.copy(
+        selectedKey = resolvedSelectedAfter,
+        undoRedo = if (mutation != null) s.undoRedo.record(mutation) else s.undoRedo,
+      )
+    }
+  }
+
+  /**
+   * Records a mutation of the enclosing [SurveyEditorDraft] that was initiated outside
+   * [FormEditorViewModel] (for example switching [SaveToMode], creating/unlinking a linked dataset,
+   * or creating a Form for a choice dataset from the Form editor).
+   */
+  internal fun recordExternalSurveyMutation(before: SurveyEditorDraft, after: SurveyEditorDraft) {
+    if (isRecordingSuppressed || isSurveyReadOnly()) return
+    val formBefore = before.forms.firstOrNull { it.key == formKey }?.form ?: form
+    val formAfter = after.forms.firstOrNull { it.key == formKey }?.form ?: form
+    val selectedBefore = session.value.selectedKey?.takeIf { formBefore.indexOf(it) >= 0 }
+    val selectedAfter = session.value.selectedKey?.takeIf { formAfter.indexOf(it) >= 0 }
+    val mutation =
+      SurveyEditorMutation.between(
+        before = before,
+        after = after,
+        formKey = formKey,
+        selectedQuestionKeyBefore = selectedBefore,
+        selectedQuestionKeyAfter = selectedAfter,
+      ) ?: return
+    session.update { it.copy(selectedKey = selectedAfter, undoRedo = it.undoRedo.record(mutation)) }
+  }
+
+  /** Clears the undo and redo stacks (used when draft changes are published or discarded). */
+  internal fun clearUndoRedo() {
+    session.update { it.copy(undoRedo = it.undoRedo.clear()) }
+  }
+
+  // --- Undo / redo ---
+
+  override fun undo() {
+    if (isSurveyReadOnly()) return
+    val currentDraft = currentDraftSnapshot()
+    val transition = session.value.undoRedo.undo(currentDraft) ?: return
+    val targetForm = transition.draft.forms.firstOrNull { it.key == formKey }?.form
+    isRecordingSuppressed = true
+    try {
+      if (applySurveyDraft != null) {
+        applySurveyDraft.invoke(transition.draft)
+      } else if (targetForm != null) {
+        updateForm { targetForm }
+      }
+    } finally {
+      isRecordingSuppressed = false
+    }
+    val formAfterUndo = targetForm ?: form
+    val restoredSelection =
+      transition.mutation.selectedQuestionKeyBefore?.takeIf { formAfterUndo.indexOf(it) >= 0 }
+    session.update {
+      it.copy(
+        selectedKey = restoredSelection,
+        undoRedo = transition.stack,
+        conceptSuggestions = null,
+      )
+    }
+  }
+
+  override fun redo() {
+    if (isSurveyReadOnly()) return
+    val currentDraft = currentDraftSnapshot()
+    val transition = session.value.undoRedo.redo(currentDraft) ?: return
+    val targetForm = transition.draft.forms.firstOrNull { it.key == formKey }?.form
+    isRecordingSuppressed = true
+    try {
+      if (applySurveyDraft != null) {
+        applySurveyDraft.invoke(transition.draft)
+      } else if (targetForm != null) {
+        updateForm { targetForm }
+      }
+    } finally {
+      isRecordingSuppressed = false
+    }
+    val formAfterRedo = targetForm ?: form
+    val restoredSelection =
+      transition.mutation.selectedQuestionKeyAfter?.takeIf { formAfterRedo.indexOf(it) >= 0 }
+    session.update {
+      it.copy(
+        selectedKey = restoredSelection,
+        undoRedo = transition.stack,
+        conceptSuggestions = null,
+      )
+    }
+  }
 
   // --- Selection & panels ---
 
@@ -417,6 +615,15 @@ class FormEditorViewModel(
 
   override fun selectPreviewTarget(target: FormPreviewTarget) {
     session.update { it.copy(previewTarget = target) }
+  }
+
+  override fun selectLanguage(language: String) {
+    val trimmed = language.trim()
+    session.update { it.copy(selectedLanguage = trimmed.ifEmpty { null }) }
+    val active = uiState.value.activeLanguage
+    if (active.isNotBlank()) {
+      session.value.previewController?.setLanguage(active)
+    }
   }
 
   override fun setXmlViewerOpen(open: Boolean) {
@@ -442,9 +649,11 @@ class FormEditorViewModel(
 
   // --- Form ---
 
-  override fun updateTitle(title: String) = updateForm { it.copy(title = title) }
+  override fun updateTitle(title: String) = mutateForm { it.copy(title = title) }
 
-  override fun updateAvailability(availability: FormAvailability) = updateForm {
+  override fun updateCtaLabel(ctaLabel: String) = mutateForm { it.copy(ctaLabel = ctaLabel) }
+
+  override fun updateAvailability(availability: FormAvailability) = mutateForm {
     it.copy(availability = availability)
   }
 
@@ -457,7 +666,7 @@ class FormEditorViewModel(
     )
   }
 
-  override fun makeGeometryQuestionsWebCompatible() = updateForm { form ->
+  override fun makeGeometryQuestionsWebCompatible() = mutateForm { form ->
     form.copy(
       questions =
         form.questions.map {
@@ -479,6 +688,7 @@ class FormEditorViewModel(
           if (type == EditorQuestionType.NOTE) "New note"
           else "New ${type.label.lowercase()} question",
         choices = if (type.hasChoices) defaultChoices() else emptyList(),
+        decimalPlaces = if (type.isNumeric) EditorQuestion.DEFAULT_DECIMAL_PLACES else 0,
       )
     val insertAt =
       when {
@@ -486,10 +696,9 @@ class FormEditorViewModel(
         selectedIndex >= 0 -> selectedIndex + 1
         else -> form.questions.size
       }
-    updateForm {
+    mutateForm(selectAfter = { key }) {
       it.copy(questions = it.questions.toMutableList().apply { add(insertAt, question) })
     }
-    session.update { it.copy(selectedKey = key) }
   }
 
   override fun duplicateQuestion(key: String) {
@@ -497,8 +706,9 @@ class FormEditorViewModel(
     if (index < 0) return
     val original = form.questions[index]
     val copy = original.copy(key = newKey(), name = uniqueName(original.name))
-    updateForm { it.copy(questions = it.questions.toMutableList().apply { add(index + 1, copy) }) }
-    session.update { it.copy(selectedKey = copy.key) }
+    mutateForm(selectAfter = { copy.key }) {
+      it.copy(questions = it.questions.toMutableList().apply { add(index + 1, copy) })
+    }
   }
 
   override fun deleteQuestion(key: String) {
@@ -508,11 +718,14 @@ class FormEditorViewModel(
       form.questions
         .filterNot { it.key == key }
         .map { if (it.relevance?.sourceQuestionKey == key) it.copy(relevance = null) else it }
-    updateForm { it.copy(questions = remaining, saveTo = it.saveTo.withoutQuestion(key)) }
-    if (session.value.selectedKey == key) {
-      session.update {
-        it.copy(selectedKey = remaining.getOrNull(index.coerceAtMost(remaining.lastIndex))?.key)
+    val nextSelectedKey =
+      if (session.value.selectedKey == key) {
+        remaining.getOrNull(index.coerceAtMost(remaining.lastIndex))?.key
+      } else {
+        session.value.selectedKey
       }
+    mutateForm(selectAfter = { nextSelectedKey }) {
+      it.copy(questions = remaining, saveTo = it.saveTo.withoutQuestion(key))
     }
   }
 
@@ -520,7 +733,7 @@ class FormEditorViewModel(
     val index = form.indexOf(key)
     val target = index + delta
     if (index < 0 || target !in form.questions.indices) return
-    updateForm { form ->
+    mutateForm { form ->
       val list = form.questions.toMutableList()
       val item = list.removeAt(index)
       list.add(target, item)
@@ -535,35 +748,52 @@ class FormEditorViewModel(
   }
 
   override fun updateQuestion(key: String, transform: (EditorQuestion) -> EditorQuestion) =
-    updateForm { form ->
+    mutateForm { form ->
       form.copy(questions = form.questions.map { if (it.key == key) transform(it) else it })
     }
 
+  override fun updateQuestionLabel(key: String, label: String) {
+    val state = uiState.value
+    updateQuestion(key) { it.withLabelIn(state.activeLanguage, state.defaultLanguage, label) }
+  }
+
+  override fun updateQuestionHint(key: String, hint: String) {
+    val state = uiState.value
+    updateQuestion(key) { it.withHintIn(state.activeLanguage, state.defaultLanguage, hint) }
+  }
+
   override fun changeType(key: String, type: EditorQuestionType) {
-    updateQuestion(key) { q ->
-      q.copy(
-        type = type,
-        choices = if (type.hasChoices && q.choices.isEmpty()) defaultChoices() else q.choices,
-        choiceDatasetId = if (type.hasChoices) q.choiceDatasetId else null,
-        choiceSource = if (type.hasChoices) q.choiceSource else ChoiceSource.MANUAL,
-        allowAddEntity = if (type.hasChoices) q.allowAddEntity else false,
-        required = q.required && !type.isReadOnly,
-        validation = ValidationRules.adaptToType(q.type, type, q.validation),
-        capture = if (type.isGeometry) q.capture else GeometryCapture.GPS_ONLY,
-        mediaSource = if (type.isMedia) q.mediaSource else MediaSource.CAPTURE_OR_UPLOAD,
-      )
-    }
     // Dependents whose operator is incompatible with the new type fall back to "is answered".
     val allowed = RelevanceOperator.availableFor(type)
-    updateForm { form ->
+    mutateForm { form ->
       form.copy(
         questions =
           form.questions.map { q ->
             val relevance = q.relevance
-            if (relevance?.sourceQuestionKey == key && relevance.operator !in allowed) {
-              q.copy(relevance = relevance.copy(operator = allowed.first(), value = ""))
-            } else {
-              q
+            when {
+              q.key == key ->
+                q.copy(
+                  type = type,
+                  choices =
+                    if (type.hasChoices && q.choices.isEmpty()) defaultChoices() else q.choices,
+                  choiceDatasetId = if (type.hasChoices) q.choiceDatasetId else null,
+                  choiceSource = if (type.hasChoices) q.choiceSource else ChoiceSource.MANUAL,
+                  allowAddEntity = if (type.hasChoices) q.allowAddEntity else false,
+                  required = q.required && !type.isReadOnly,
+                  validation = ValidationRules.adaptToType(q.type, type, q.validation),
+                  decimalPlaces =
+                    if (type.isNumeric) {
+                      if (q.type.isNumeric) q.decimalPlaces
+                      else EditorQuestion.DEFAULT_DECIMAL_PLACES
+                    } else {
+                      0
+                    },
+                  capture = if (type.isGeometry) q.capture else GeometryCapture.GPS_ONLY,
+                  mediaSource = if (type.isMedia) q.mediaSource else MediaSource.CAPTURE_OR_UPLOAD,
+                )
+              relevance?.sourceQuestionKey == key && relevance.operator !in allowed ->
+                q.copy(relevance = relevance.copy(operator = allowed.first(), value = ""))
+              else -> q
             }
           },
         saveTo = saveToAfterTypeChange(form.saveTo, key, type),
@@ -608,6 +838,11 @@ class FormEditorViewModel(
 
   override fun updateMediaSource(key: String, source: MediaSource) =
     updateQuestion(key) { it.copy(mediaSource = source) }
+
+  override fun updateDecimalPlaces(key: String, decimalPlaces: Int) {
+    val coerced = decimalPlaces.coerceIn(0, EditorQuestion.MAX_DECIMAL_PLACES)
+    updateQuestion(key) { it.copy(decimalPlaces = coerced) }
+  }
 
   override fun updateValidation(key: String, transform: (EditorValidation) -> EditorValidation) =
     updateQuestion(key) { q ->
@@ -693,16 +928,21 @@ class FormEditorViewModel(
   override fun updateChoiceLabel(key: String, index: Int, label: String) {
     val question = form.find(key) ?: return
     val old = question.choices.getOrNull(index) ?: return
-    val newValue =
-      if (old.value == slugify(old.label, old.value)) slugify(label, old.value) else old.value
-    updateChoice(key, index, old.copy(value = newValue, label = label))
+    val state = uiState.value
+    if (state.isDefaultLanguageSelected) {
+      val newValue =
+        if (old.value == slugify(old.label, old.value)) slugify(label, old.value) else old.value
+      updateChoice(key, index, old.copy(value = newValue, label = label))
+    } else {
+      updateChoice(key, index, old.withLabelIn(state.activeLanguage, state.defaultLanguage, label))
+    }
   }
 
   override fun updateChoice(key: String, index: Int, choice: EditorChoice) {
     val question = form.find(key) ?: return
     val old = question.choices.getOrNull(index) ?: return
     val choices = question.choices.toMutableList().apply { set(index, choice) }
-    updateForm { form ->
+    mutateForm { form ->
       form.copy(
         questions =
           form.questions.map { q ->
@@ -750,7 +990,19 @@ class FormEditorViewModel(
   override fun setChoiceColor(key: String, index: Int, colorHex: String?) {
     val color = colorHex?.uppercase()?.takeIf(ChoiceColors::isValidHex)
     if (colorHex != null && color == null) return
-    updateChoiceAt(key, index) { it.copy(colorHex = color) }
+    updateQuestion(key) { q ->
+      q.copy(
+        choices =
+          q.choices.mapIndexed { i, c ->
+            if (i == index) {
+              c.copy(colorHex = color, image = if (color != null) null else c.image)
+            } else {
+              // Selecting color for a choice removes images across the question
+              if (color != null) c.copy(image = null) else c
+            }
+          }
+      )
+    }
   }
 
   override fun setChoiceImage(key: String, index: Int, image: EditorChoiceImage?): Boolean {
@@ -761,7 +1013,19 @@ class FormEditorViewModel(
       return false
     }
     if (form.find(key)?.choices?.getOrNull(index) == null) return false
-    updateChoiceAt(key, index) { it.copy(image = image) }
+    updateQuestion(key) { q ->
+      q.copy(
+        choices =
+          q.choices.mapIndexed { i, c ->
+            if (i == index) {
+              c.copy(image = image, colorHex = if (image != null) null else c.colorHex)
+            } else {
+              // Selecting an image for a choice removes colors across the question
+              if (image != null) c.copy(colorHex = null) else c
+            }
+          }
+      )
+    }
     return true
   }
 
@@ -775,17 +1039,33 @@ class FormEditorViewModel(
   override fun setSaveToMode(mode: SaveToMode) {
     val saveTo = form.saveTo
     if (saveTo.mode == mode) return
-    val updated =
-      if (mode == SaveToMode.UPDATE) withUpdateDefaults(saveTo.copy(mode = mode))
-      else saveTo.copy(mode = mode)
-    updateForm { it.copy(saveTo = updated) }
+    val updated = saveToForMode(form, datasets, mode)
+    mutateForm { it.copy(saveTo = updated) }
+  }
+
+  /**
+   * Computes the [EditorSaveTo] for [currentForm] when switching to [mode] against [catalog], while
+   * any dataset linked to this Form is still marked as linked in [catalog].
+   */
+  internal fun saveToForMode(
+    currentForm: EditorForm,
+    catalog: List<EditorDataset>,
+    mode: SaveToMode,
+  ): EditorSaveTo {
+    val saveTo = currentForm.saveTo
+    if (saveTo.mode == mode) return saveTo
+    return if (mode == SaveToMode.UPDATE) {
+      withUpdateDefaults(currentForm, catalog, saveTo.copy(mode = mode))
+    } else {
+      saveTo.copy(mode = mode)
+    }
   }
 
   override fun setTargetDataset(datasetId: String) {
     val target = datasets.firstOrNull { it.id == datasetId } ?: return
     if (form.saveTo.targetDatasetId == datasetId) return
-    val updated = defaultsFor(form.saveTo, target)
-    updateForm { it.copy(saveTo = updated) }
+    val updated = defaultsFor(form, form.saveTo, target)
+    mutateForm { it.copy(saveTo = updated) }
   }
 
   override fun setIdSource(source: EntityIdSource) {
@@ -804,23 +1084,23 @@ class FormEditorViewModel(
       } else {
         saveTo.copy(idSource = source)
       }
-    updateForm { it.copy(saveTo = updated) }
+    mutateForm { it.copy(saveTo = updated) }
   }
 
-  override fun setIdQuestion(questionKey: String) = updateForm {
+  override fun setIdQuestion(questionKey: String) = mutateForm {
     it.copy(saveTo = it.saveTo.copy(idQuestionKey = questionKey))
   }
 
-  override fun setIdMatchProperty(property: String) = updateForm {
+  override fun setIdMatchProperty(property: String) = mutateForm {
     it.copy(saveTo = it.saveTo.copy(idMatchProperty = property))
   }
 
-  override fun setMapping(questionKey: String, property: String?) = updateForm {
+  override fun setMapping(questionKey: String, property: String?) = mutateForm {
     it.copy(saveTo = it.saveTo.withMapping(questionKey, property))
   }
 
   /** Follows a rename of dataset [oldId] so this Form keeps updating it. */
-  fun renameTargetDataset(oldId: String, newId: String) = updateForm {
+  fun renameTargetDataset(oldId: String, newId: String) = mutateForm {
     it.withRenamedTargetDataset(oldId, newId)
   }
 
@@ -830,10 +1110,10 @@ class FormEditorViewModel(
    */
   fun renameTargetProperty(datasetId: String, oldName: String, newName: String) {
     val target = saveTarget
-    updateForm { it.withRenamedTargetProperty(datasetId, oldName, newName, target) }
+    mutateForm { it.withRenamedTargetProperty(datasetId, oldName, newName, target) }
   }
 
-  override fun setStatusEnabled(enabled: Boolean) = updateForm { form ->
+  override fun setStatusEnabled(enabled: Boolean) = mutateForm { form ->
     val current = form.saveTo.status
     val rules =
       if (enabled && current.rules.isEmpty()) EditorStatusConfig.defaultRules() else current.rules
@@ -875,29 +1155,29 @@ class FormEditorViewModel(
       } == true
     val insertIndex = if (lastIsCatchAll) list.lastIndex else list.size
     list.add(insertIndex, newRule)
-    updateForm { it.copy(saveTo = it.saveTo.copy(status = current.copy(rules = list))) }
+    mutateForm { it.copy(saveTo = it.saveTo.copy(status = current.copy(rules = list))) }
   }
 
   override fun updateStatusRule(index: Int, transform: (EditorStatusRule) -> EditorStatusRule) =
-    updateForm { form ->
+    mutateForm { form ->
       val current = form.saveTo.status
-      if (index !in current.rules.indices) return@updateForm form
+      if (index !in current.rules.indices) return@mutateForm form
       val updated = current.rules.mapIndexed { i, r -> if (i == index) transform(r) else r }
       form.copy(saveTo = form.saveTo.copy(status = current.copy(rules = updated)))
     }
 
-  override fun removeStatusRule(index: Int) = updateForm { form ->
+  override fun removeStatusRule(index: Int) = mutateForm { form ->
     val current = form.saveTo.status
-    if (index !in current.rules.indices) return@updateForm form
+    if (index !in current.rules.indices) return@mutateForm form
     val updated = current.rules.filterIndexed { i, _ -> i != index }
     form.copy(saveTo = form.saveTo.copy(status = current.copy(rules = updated)))
   }
 
-  override fun moveStatusRule(index: Int, delta: Int) = updateForm { form ->
+  override fun moveStatusRule(index: Int, delta: Int) = mutateForm { form ->
     val current = form.saveTo.status
     val targetIndex = index + delta
     if (index !in current.rules.indices || targetIndex !in current.rules.indices) {
-      return@updateForm form
+      return@mutateForm form
     }
     val list = current.rules.toMutableList()
     val item = list.removeAt(index)
@@ -906,7 +1186,7 @@ class FormEditorViewModel(
   }
 
   override fun updateDefaultStatusBadge(transform: (EditorStatusBadge) -> EditorStatusBadge) =
-    updateForm { form ->
+    mutateForm { form ->
       val current = form.saveTo.status
       form.copy(
         saveTo =
@@ -914,32 +1194,44 @@ class FormEditorViewModel(
       )
     }
 
-  private fun withUpdateDefaults(saveTo: EditorSaveTo): EditorSaveTo {
-    val targets = updateTargets
+  private fun withUpdateDefaults(
+    currentForm: EditorForm,
+    catalog: List<EditorDataset>,
+    saveTo: EditorSaveTo,
+  ): EditorSaveTo {
+    val targets = catalog.filterNot { it.isLinkedToThisForm }
     if (targets.any { it.id == saveTo.targetDatasetId }) return saveTo
     val target = targets.firstOrNull() ?: return saveTo.copy(targetDatasetId = null)
-    return defaultsFor(saveTo, target)
+    return defaultsFor(currentForm, saveTo, target)
   }
 
   /** Map layers default to the feature selected on the map; Data tables to a question's answer. */
-  private fun defaultsFor(saveTo: EditorSaveTo, target: EditorDataset): EditorSaveTo {
-    val idQuestion = if (target.isMapLayer) null else SaveToRules.defaultIdQuestion(form, target)
+  private fun defaultsFor(
+    currentForm: EditorForm,
+    saveTo: EditorSaveTo,
+    target: EditorDataset,
+  ): EditorSaveTo {
+    val idQuestion =
+      if (target.isMapLayer) null else SaveToRules.defaultIdQuestion(currentForm, target)
     return saveTo.copy(
       targetDatasetId = target.id,
       idSource =
         if (target.isMapLayer) EntityIdSource.SELECTED_FEATURE else EntityIdSource.QUESTION,
       idQuestionKey = idQuestion?.key,
       idMatchProperty = target.keyProperty,
-      mappings = SaveToRules.autoMap(form, target, skipKey = idQuestion?.key),
+      mappings = SaveToRules.autoMap(currentForm, target, skipKey = idQuestion?.key),
     )
   }
 
   // --- Preview ---
 
   override fun startPreview() {
+    val state = uiState.value
     val controller =
       try {
-        FormWizardController(formDef = uiState.value.previewForm.proto)
+        FormWizardController(formDef = state.previewForm.proto).also {
+          if (state.activeLanguage.isNotBlank()) it.setLanguage(state.activeLanguage)
+        }
       } catch (e: Exception) {
         session.update {
           it.copy(
@@ -975,6 +1267,7 @@ class FormEditorViewModel(
   /** Top concepts for [query] for [question]: type-compatible ones first. */
   private fun suggestionsFor(question: EditorQuestion, query: String): List<ConceptSuggestion> {
     val context = library
+    val activeLang = uiState.value.activeLanguage
     val results =
       searchConcepts(
         context.library.concepts,
@@ -993,8 +1286,8 @@ class FormEditorViewModel(
         ConceptSuggestion(
           concept = concept,
           sourceLabel = context.sourceLabel(concept),
-          label = concept.label.get(context.language),
-          description = concept.description.get(context.language),
+          label = concept.label.get(activeLang),
+          description = concept.description.get(activeLang),
           isTypeCompatible = concept.dataType.isCompatibleWith(question.type),
         )
       }
@@ -1032,15 +1325,17 @@ class FormEditorViewModel(
 
   override fun openConceptSearch(key: String) {
     val question = form.find(key) ?: return
+    val state = uiState.value
+    val activeLabel = question.displayLabel(state.activeLanguage, state.defaultLanguage)
     session.update {
       it.copy(
         conceptSuggestions =
           ConceptSuggestionsState(
             questionKey = key,
-            query = question.label,
-            suggestions = suggestionsFor(question, question.label),
+            query = activeLabel,
+            suggestions = suggestionsFor(question, activeLabel),
             isExplicitSearch = true,
-            addToDictionaryLabel = addToDictionaryLabel(question.label),
+            addToDictionaryLabel = addToDictionaryLabel(activeLabel),
           )
       )
     }
@@ -1049,13 +1344,15 @@ class FormEditorViewModel(
   override fun updateConceptSearchQuery(query: String) {
     val current = session.value.conceptSuggestions ?: return
     val question = form.find(current.questionKey) ?: return
+    val state = uiState.value
+    val activeLabel = question.displayLabel(state.activeLanguage, state.defaultLanguage)
     session.update {
       it.copy(
         conceptSuggestions =
           current.copy(
             query = query,
             suggestions = suggestionsFor(question, query),
-            addToDictionaryLabel = addToDictionaryLabel(question.label),
+            addToDictionaryLabel = addToDictionaryLabel(activeLabel),
           )
       )
     }
@@ -1068,7 +1365,16 @@ class FormEditorViewModel(
   override fun linkConcept(key: String, conceptId: String) {
     val concept = library.concept(conceptId) ?: return
     val takenNames = form.questions.map { it.name }.toSet()
-    updateQuestion(key) { q -> ConceptLinking.link(q, concept, takenNames, library.language) }
+    val state = uiState.value
+    updateQuestion(key) { q ->
+      ConceptLinking.link(
+        question = q,
+        concept = concept,
+        takenNames = takenNames,
+        language = state.defaultLanguage,
+        supportedLanguages = state.supportedLanguages,
+      )
+    }
     session.update { it.copy(conceptSuggestions = null) }
   }
 
@@ -1080,7 +1386,14 @@ class FormEditorViewModel(
   override fun useStandardLabel(key: String) {
     val question = form.find(key) ?: return
     val concept = library.concept(question.conceptLink?.conceptId) ?: return
-    updateQuestion(key) { it.copy(label = concept.label.get(library.language)) }
+    val state = uiState.value
+    updateQuestion(key) {
+      it.withLabelIn(
+        state.activeLanguage,
+        state.defaultLanguage,
+        concept.label.get(state.activeLanguage),
+      )
+    }
   }
 
   override fun addLabelToDictionary(key: String): String? {
@@ -1091,7 +1404,9 @@ class FormEditorViewModel(
     }
     val label = question.label.trim()
     if (label.isEmpty()) return "Enter a label first."
-    val dataType = ConceptLinking.conceptTypeFor(question.type) ?: return "Notes can't be linked."
+    val dataType =
+      ConceptLinking.conceptTypeFor(question.type, question.decimalPlaces)
+        ?: return "Notes can't be linked."
     val name = LibraryIds.nameFrom(label)
     val codeList =
       if (dataType.hasCodeList && !question.usesDatasetChoices) {
@@ -1191,9 +1506,32 @@ class FormEditorViewModel(
   }
 
   override fun linkImportMatches() {
-    session.value.importMatches
-      .filter { it.isChecked }
-      .forEach { linkConcept(it.questionKey, it.concept.id) }
+    val checked = session.value.importMatches.filter { it.isChecked }
+    if (checked.isNotEmpty()) {
+      val state = uiState.value
+      mutateForm { currentForm ->
+        var updatedQuestions = currentForm.questions
+        for (match in checked) {
+          val concept = library.concept(match.concept.id) ?: continue
+          val takenNames = updatedQuestions.map { it.name }.toSet()
+          updatedQuestions = updatedQuestions.map { q ->
+            if (q.key == match.questionKey) {
+              ConceptLinking.link(
+                question = q,
+                concept = concept,
+                takenNames = takenNames,
+                language = state.defaultLanguage,
+                supportedLanguages = state.supportedLanguages,
+              )
+            } else {
+              q
+            }
+          }
+        }
+        currentForm.copy(questions = updatedQuestions)
+      }
+      session.update { it.copy(conceptSuggestions = null) }
+    }
     dismissImportMatches()
   }
 
@@ -1238,6 +1576,9 @@ class FormEditorViewModel(
     /** Weakest fuzzy match offered after an import (a single typo in a label word). */
     private const val MIN_IMPORT_FUZZY_SCORE = 18.0
 
+    /** Key used for the synthetic [SurveyEditorForm] in a standalone [FormEditorViewModel]. */
+    const val DEFAULT_STANDALONE_FORM_KEY = "standalone_form"
+
     /**
      * A Form editor over its own copy of [initialForm] with a fixed dataset catalog, for the
      * standalone Form editor and tests. Edits stay in the returned ViewModel.
@@ -1247,12 +1588,14 @@ class FormEditorViewModel(
         EditorFormTemplates.blank(formId = FormIds.newFormId(), title = "Untitled form"),
       datasets: List<EditorDataset> = emptyList(),
       scope: CoroutineScope,
+      library: FormLibraryContext = FormLibraryContext(),
     ): FormEditorViewModel {
       val form = MutableStateFlow(initialForm)
       return FormEditorViewModel(
         formFlow = form,
         datasetsFlow = MutableStateFlow(datasets),
         updateForm = { transform -> form.update(transform) },
+        libraryFlow = MutableStateFlow(library),
         scope = scope,
       )
     }

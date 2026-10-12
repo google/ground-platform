@@ -47,8 +47,8 @@ object FormDatasetLinks {
           label = q.label.ifBlank { q.name },
           type =
             when (q.type) {
-              EditorQuestionType.INTEGER -> PropertyType.INTEGER
-              EditorQuestionType.DECIMAL -> PropertyType.DECIMAL
+              EditorQuestionType.NUMBER ->
+                if (q.decimalPlaces <= 0) PropertyType.INTEGER else PropertyType.DECIMAL
               EditorQuestionType.DATE -> PropertyType.DATE
               else -> PropertyType.TEXT
             },
@@ -121,12 +121,14 @@ object FormDatasetLinks {
     dataset.properties.forEach { prop ->
       val qType =
         when (prop.type) {
-          PropertyType.INTEGER -> EditorQuestionType.INTEGER
-          PropertyType.DECIMAL -> EditorQuestionType.DECIMAL
+          PropertyType.INTEGER,
+          PropertyType.DECIMAL -> EditorQuestionType.NUMBER
           PropertyType.DATE -> EditorQuestionType.DATE
           PropertyType.BOOLEAN -> EditorQuestionType.SELECT_ONE
           PropertyType.TEXT -> EditorQuestionType.TEXT
         }
+      val decimalPlaces =
+        if (prop.type == PropertyType.DECIMAL) EditorQuestion.DEFAULT_DECIMAL_PLACES else 0
       val choices =
         if (prop.type == PropertyType.BOOLEAN) {
           listOf(EditorChoice("yes", "Yes"), EditorChoice("no", "No"))
@@ -141,6 +143,7 @@ object FormDatasetLinks {
           label = prop.label,
           required = prop.required,
           choices = choices,
+          decimalPlaces = decimalPlaces,
         )
     }
     return questions

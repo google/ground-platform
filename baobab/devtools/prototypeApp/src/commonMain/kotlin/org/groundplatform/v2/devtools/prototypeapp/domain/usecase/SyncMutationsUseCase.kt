@@ -50,7 +50,7 @@ class SyncMutationsUseCase(
     mutationRepository.updateMutation(mutationId) { item ->
       item.copy(
         state = MutationSyncState.UPLOADED,
-        stateDetail = "Synced to Ground Cloud • Commit rev #1052",
+        stateDetail = "Synced to Collect One Cloud • Commit rev #1052",
         startedTimestamp = started,
         completedTimestamp = completed,
       )
@@ -80,14 +80,16 @@ class SyncMutationsUseCase(
     }
     // Impact events recorded offline (e.g. receipts) upload with the outbox.
     impactEventRepository?.markAllUploaded()
-    if (outboxCount == 0) return@tx "Uploaded $pendingEvents activity record(s) to Ground Cloud"
+    if (outboxCount == 0) {
+      return@tx "Uploaded $pendingEvents activity record(s) to Collect One Cloud"
+    }
     val completed = "2026-09-19 09:42:10 UTC"
     mutationRepository.setMutations(
       allMutations.map { item ->
         if (item.isOutbox && item.surveyId == activeSurveyId) {
           item.copy(
             state = MutationSyncState.UPLOADED,
-            stateDetail = "Synced to Ground Cloud • Batch commit rev #1055",
+            stateDetail = "Synced to Collect One Cloud • Batch commit rev #1055",
             startedTimestamp = item.startedTimestamp ?: "2026-09-19 09:42:04 UTC",
             completedTimestamp = completed,
           )
@@ -97,7 +99,7 @@ class SyncMutationsUseCase(
       }
     )
     surveyRepository.markAllSynced()
-    "Uploaded all $outboxCount Outbox mutation(s) to Ground Cloud ($completed)"
+    "Uploaded all $outboxCount Outbox mutation(s) to Collect One Cloud ($completed)"
   }
 
   companion object {

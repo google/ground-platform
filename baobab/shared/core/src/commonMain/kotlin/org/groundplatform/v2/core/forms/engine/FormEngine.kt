@@ -1030,23 +1030,24 @@ object FormEngine {
       for (canonicalPath in concretePaths) {
         val parentCanonical = canonicalPath.substringBeforeLast('/', rootCanonical)
         val parentRelevant = relevancyMap[parentCanonical] ?: true
-        if (!parentRelevant) {
-          relevancyMap[canonicalPath] = false
-          continue
-        }
-        val relExpr = compiledBinding?.relevantExpr
-        if (relExpr == null) {
-          relevancyMap[canonicalPath] = true
-        } else {
-          val nodeCtx = positionContextAtPath(baseEvalCtx, canonicalPath)
-          val isRel = relExpr.evaluateBoolean(nodeCtx)
-          relevancyMap[canonicalPath] = isRel
-          // If this is a repeat group with 1 instance, also record unindexed path alias
-          if (canonicalPath.endsWith("[1]")) {
-            val unindexed = canonicalPath.removeSuffix("[1]")
-            if (!relevancyMap.containsKey(unindexed)) {
-              relevancyMap[unindexed] = isRel
+        val isRel =
+          if (!parentRelevant) {
+            false
+          } else {
+            val relExpr = compiledBinding?.relevantExpr
+            if (relExpr == null) {
+              true
+            } else {
+              val nodeCtx = positionContextAtPath(baseEvalCtx, canonicalPath)
+              relExpr.evaluateBoolean(nodeCtx)
             }
+          }
+        relevancyMap[canonicalPath] = isRel
+        // If this is a repeat group with 1 instance, also record unindexed path alias
+        if (canonicalPath.endsWith("[1]")) {
+          val unindexed = canonicalPath.removeSuffix("[1]")
+          if (!relevancyMap.containsKey(unindexed)) {
+            relevancyMap[unindexed] = isRel
           }
         }
       }

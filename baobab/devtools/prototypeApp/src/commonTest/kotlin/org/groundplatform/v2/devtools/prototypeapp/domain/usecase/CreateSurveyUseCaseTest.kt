@@ -17,6 +17,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 import org.groundplatform.v2.devtools.prototypeapp.data.datasource.local.store.runNow
 import org.groundplatform.v2.devtools.prototypeapp.data.datasource.local.store.seededStore
 import org.groundplatform.v2.devtools.prototypeapp.data.repository.LocalStoreTransactionRunner
@@ -25,6 +26,7 @@ import org.groundplatform.v2.devtools.prototypeapp.data.repository.SurveyEditorR
 import org.groundplatform.v2.devtools.prototypeapp.data.repository.SurveyRepositoryImpl
 import org.groundplatform.v2.devtools.prototypeapp.data.seed.PrototypeFakeOrganizationsData
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.MapThumbnailTheme
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyLifecycleState
 
 class CreateSurveyUseCaseTest {
   @Test
@@ -42,7 +44,7 @@ class CreateSurveyUseCaseTest {
   }
 
   @Test
-  fun newSurvey_isEmptyPersonalOrOrganizational_andCyclesThumbnailThemes() {
+  fun newSurvey_isEmptyPersonalOrOrganizational_startsInDraft_andCyclesThumbnailThemes() {
     val store = seededStore()
     val surveyRepository = SurveyRepositoryImpl(store)
     val useCase =
@@ -64,6 +66,9 @@ class CreateSurveyUseCaseTest {
     assertEquals("maya@example.org", inOrg.ownerEmail)
     assertEquals(0, inOrg.entityCount)
     assertFalse(inOrg.isDownloaded)
+    assertEquals(SurveyLifecycleState.DRAFT, inOrg.state)
+    assertTrue(inOrg.isDraft)
+    assertFalse(inOrg.isClosed)
     assertEquals(
       MapThumbnailTheme.entries[existing.size % MapThumbnailTheme.entries.size],
       inOrg.thumbnailTheme,
@@ -73,6 +78,7 @@ class CreateSurveyUseCaseTest {
     assertEquals(CreateSurveyUseCase.DEFAULT_TITLE, personal.title)
     assertNull(personal.organizationId)
     assertEquals("No survey area yet", personal.location)
+    assertEquals(SurveyLifecycleState.DRAFT, personal.state)
   }
 
   @Test

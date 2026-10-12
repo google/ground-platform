@@ -54,11 +54,8 @@ import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.clipPath
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.groundplatform.v2.core.forms.ui.LocalGroundBrandFontFamily
@@ -70,7 +67,6 @@ import org.groundplatform.v2.devtools.prototypeapp.ui.common.GoogleLogoIcon
 import org.groundplatform.v2.devtools.prototypeapp.ui.datacollection.DataCollectionFormScreen
 import org.groundplatform.v2.devtools.prototypeapp.ui.navigation.MainSurveyScreen
 import org.groundplatform.v2.devtools.prototypeapp.ui.settings.SignInLanguageSelector
-import org.groundplatform.v2.devtools.prototypeapp.ui.workbench.PrototypeDebugToolsButton
 import org.jetbrains.compose.resources.stringResource
 
 /**
@@ -110,7 +106,6 @@ fun MobileScreenHost(state: PrototypeAppState) {
       TermsOfServiceScreen(
         uiState = onboardingUiState,
         actions = onboarding,
-        debugTools = { PrototypeDebugToolsButton(state = state) },
       )
     AppScreen.DOWNLOAD_SURVEY ->
       DownloadSurveyScreen(
@@ -118,7 +113,6 @@ fun MobileScreenHost(state: PrototypeAppState) {
         actions = onboarding,
         notice = state.activeSurveyNotice,
         isDarkTheme = state.isDarkTheme,
-        debugTools = { PrototypeDebugToolsButton(state = state) },
       )
     AppScreen.MAIN_SURVEY -> MainSurveyScreen(state)
   }
@@ -263,7 +257,6 @@ fun SignInScreen(
   languageSelector: @Composable () -> Unit = {},
 ) {
   val surfaceColor = MaterialTheme.colorScheme.surface
-  val onSurfaceColor = MaterialTheme.colorScheme.onSurface
   val brandFont = LocalGroundBrandFontFamily.current
 
   Column(
@@ -282,28 +275,30 @@ fun SignInScreen(
     ) {
       Spacer(modifier = Modifier.height(4.dp))
       CloudAcaciaLogo(modifier = Modifier.size(68.dp))
-      Text(
-        text = "Ground",
-        style =
-          MaterialTheme.typography.headlineMedium.copy(
-            fontFamily = brandFont,
-            color = MaterialTheme.colorScheme.primary,
-            fontWeight = FontWeight.ExtraBold,
-            letterSpacing = 0.6.sp,
-          ),
-      )
-      Text(
-        text =
-          buildAnnotatedString {
-            append("Welcome to ")
-            withStyle(SpanStyle(fontFamily = brandFont, fontWeight = FontWeight.Bold)) {
-              append("Ground")
-            }
-          },
-        style = MaterialTheme.typography.titleLarge,
-        color = onSurfaceColor,
-        fontWeight = FontWeight.Bold,
-      )
+      Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(2.dp),
+      ) {
+        Text(
+          text = "OPEN FORIS",
+          style =
+            MaterialTheme.typography.labelSmall.copy(
+              color = MaterialTheme.colorScheme.onSurfaceVariant,
+              fontWeight = FontWeight.Bold,
+              letterSpacing = 1.4.sp,
+            ),
+        )
+        Text(
+          text = "Collect One",
+          style =
+            MaterialTheme.typography.headlineMedium.copy(
+              fontFamily = brandFont,
+              color = MaterialTheme.colorScheme.primary,
+              fontWeight = FontWeight.ExtraBold,
+              letterSpacing = 0.6.sp,
+            ),
+        )
+      }
       Text(
         text =
           "Collect field observations, map boundaries, and synchronize survey records offline.",

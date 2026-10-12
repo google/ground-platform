@@ -84,11 +84,16 @@ object SurveyEditorDerivation {
           FormImport.fromFormDefinition(it, form.id, form.title, form.availability)
         } ?: placeholder(form)
       val key = form.id
-      // The Form list is the source of truth for the title; the XML may carry an older one. The
-      // survey-level concept links are authoritative over `ground:concept` attributes.
+      // The Form list is the source of truth for the title and custom button label; the XML may
+      // carry an older title. The survey-level concept links are authoritative over
+      // `ground:concept`
+      // attributes.
       var editor =
         FormConceptLinkSync.applyLinks(
-          imported.form.copy(title = form.title.ifBlank { imported.form.title }),
+          imported.form.copy(
+            title = form.title.ifBlank { imported.form.title },
+            ctaLabel = form.ctaLabel.takeIf { it != form.title }.orEmpty(),
+          ),
           conceptLinks.firstOrNull { it.form_id == form.id },
         )
       val targetId = form.targetDatasetId.ifBlank { null }
@@ -114,11 +119,38 @@ object SurveyEditorDerivation {
       surveyId = surveyId,
       stored =
         blank.copy(
-          details = blank.details.copy(purposeIds = purposeIds, programIds = programIds),
+          details =
+            blank.details.copy(
+              surveyArea = defaultSurveyArea(survey, anchor),
+              purposeIds = purposeIds,
+              programIds = programIds,
+            ),
           forms = editorForms,
           datasets = datasets.toList(),
         ),
       survey = survey,
+    )
+  }
+
+  /** Default survey area derived from [anchor] for surveys without an explicit stored draft. */
+  fun defaultSurveyArea(survey: SurveyPreviewItem?, anchor: SurveyMapAnchor): SurveyArea {
+    val nw = anchor.toLatLng(0.0, 0.0)
+    val ne = anchor.toLatLng(1.0, 0.0)
+    val se = anchor.toLatLng(1.0, 1.0)
+    val sw = anchor.toLatLng(0.0, 1.0)
+    return SurveyArea(
+      name = survey?.location?.takeIf { it.isNotBlank() } ?: anchor.label,
+      center = LatLng(anchor.center.latitude, anchor.center.longitude),
+      zoom = anchor.zoom,
+      parts =
+        listOf(
+          listOf(
+            LatLng(nw.latitude, nw.longitude),
+            LatLng(ne.latitude, ne.longitude),
+            LatLng(se.latitude, se.longitude),
+            LatLng(sw.latitude, sw.longitude),
+          )
+        ),
     )
   }
 
@@ -336,6 +368,7 @@ object SurveyEditorDerivation {
               )
             ),
           availability = form.availability,
+          ctaLabel = form.ctaLabel.takeIf { it != form.title }.orEmpty(),
         ),
       notes = listOf("The XForms of \"${form.title}\" couldn't be parsed."),
     )
@@ -355,8 +388,8 @@ object SurveyEditorDerivation {
             label = question?.label?.ifBlank { null } ?: property,
             type =
               when (question?.type) {
-                EditorQuestionType.INTEGER -> PropertyType.INTEGER
-                EditorQuestionType.DECIMAL -> PropertyType.DECIMAL
+                EditorQuestionType.NUMBER ->
+                  if (question.decimalPlaces <= 0) PropertyType.INTEGER else PropertyType.DECIMAL
                 EditorQuestionType.DATE -> PropertyType.DATE
                 else -> PropertyType.TEXT
               },

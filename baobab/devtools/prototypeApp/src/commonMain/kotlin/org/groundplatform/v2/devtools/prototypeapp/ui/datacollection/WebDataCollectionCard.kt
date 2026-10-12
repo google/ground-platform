@@ -135,6 +135,9 @@ internal fun WebDataCollectionCard(
     onClose = { actions.closeActiveFormRunner() },
     modifier = modifier,
   ) {
+    if (uiState.isActiveSurveyPublicData) {
+      PublicDataInFormBanner()
+    }
     Column(
       modifier =
         Modifier.weight(1f, fill = false)
@@ -326,7 +329,7 @@ internal fun WebCollectDataMenuButton(
           text = {
             Column {
               Text(
-                text = form.title,
+                text = form.ctaLabel.ifBlank { form.title },
                 style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,

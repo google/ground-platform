@@ -15,6 +15,8 @@ package org.groundplatform.v2.devtools.prototypeapp.domain.model
 
 import groundplatform.v2.survey.FormConceptLinks
 import org.groundplatform.v2.core.forms.model.FormDefinition
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.PeerDataVisibility
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SharingPolicy
 
 /** Visual color/feature theme for a survey's placeholder map thumbnail. */
 enum class MapThumbnailTheme(
@@ -70,8 +72,10 @@ data class SurveyPreviewItem(
   val coordinatesLabel: String,
   val offlineSizeLabel: String,
   val isDownloaded: Boolean,
-  val thumbnailTheme: MapThumbnailTheme,
+  val thumbnailTheme: MapThumbnailTheme = MapThumbnailTheme.SAVANNA,
   val entityCount: Int,
+  /** Client-side generated satellite map thumbnail of the area of interest and map features. */
+  val thumbnail: SurveyThumbnail = SurveyThumbnail(),
   /** Email of the survey's owner (`SurveyDef.owner_id`), or empty if unknown. */
   val ownerEmail: String = "",
   /** Organization the survey belongs to (`SurveyDef.organization_id`), or `null` if personal. */
@@ -82,10 +86,38 @@ data class SurveyPreviewItem(
   val closedAt: String? = null,
   /** Answer to "What happened with this data?" (`SurveyDef.outcome`), or `null` if not answered. */
   val outcome: SurveyOutcome? = null,
+  /** General access tier (`SurveyAcl.policy`). */
+  val sharingPolicy: SharingPolicy = SharingPolicy.RESTRICTED,
+  /** Peer data visibility (`SurveyAcl.peer_data_visibility`). */
+  val peerDataVisibility: PeerDataVisibility = PeerDataVisibility.ALL,
+  /** Whether organizers enabled a custom informed consent step before data collection. */
+  val collectorConsentRequired: Boolean = false,
+  /** Custom consent text displayed before collecting data when configured. */
+  val collectorConsentText: String = "",
 ) {
+  /** Whether the survey is in draft mode and not yet published for field collection. */
+  val isDraft: Boolean
+    get() = state == SurveyLifecycleState.DRAFT
+
   /** Whether the survey is closed or archived, so it can't be edited or collect data. */
   val isClosed: Boolean
-    get() = state != SurveyLifecycleState.PUBLISHED
+    get() = state == SurveyLifecycleState.CLOSED || state == SurveyLifecycleState.ARCHIVED
+
+  /** Whether anyone who opens this survey can collect data (`ANYONE_WITH_LINK` or `PUBLIC`). */
+  val isOpenToAnyone: Boolean
+    get() = sharingPolicy.isOpenToAnyone
+
+  /** Whether anyone who opens this survey can view all collected submissions and map features. */
+  val isPublicData: Boolean
+    get() = sharingPolicy.isOpenToAnyone && peerDataVisibility == PeerDataVisibility.ALL
+
+  /** Whether anyone can collect data, but participants only see their own submissions. */
+  val isPrivateSubmissions: Boolean
+    get() = sharingPolicy.isOpenToAnyone && peerDataVisibility == PeerDataVisibility.OWN_ONLY
+
+  /** Whether participants must accept an informed consent notice before collecting data. */
+  val requiresCollectorConsent: Boolean
+    get() = isPublicData || collectorConsentRequired
 }
 
 /** Survey-level form definitions stored alongside a survey's data. */

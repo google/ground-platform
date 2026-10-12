@@ -32,7 +32,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -48,12 +48,13 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.automirrored.outlined.ArrowForward
 import androidx.compose.material.icons.automirrored.outlined.List
+import androidx.compose.material.icons.automirrored.outlined.Redo
+import androidx.compose.material.icons.automirrored.outlined.Undo
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.outlined.AccountCircle
 import androidx.compose.material.icons.outlined.Add
@@ -72,6 +73,7 @@ import androidx.compose.material.icons.outlined.ExpandLess
 import androidx.compose.material.icons.outlined.ExpandMore
 import androidx.compose.material.icons.outlined.FormatColorReset
 import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material.icons.outlined.Language
 import androidx.compose.material.icons.outlined.Layers
 import androidx.compose.material.icons.outlined.Link
 import androidx.compose.material.icons.outlined.LocationOn
@@ -86,9 +88,11 @@ import androidx.compose.material.icons.outlined.TableChart
 import androidx.compose.material.icons.outlined.Timeline
 import androidx.compose.material.icons.outlined.Videocam
 import androidx.compose.material.icons.outlined.Warning
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
@@ -138,6 +142,14 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.isCtrlPressed
+import androidx.compose.ui.input.key.isMetaPressed
+import androidx.compose.ui.input.key.isShiftPressed
+import androidx.compose.ui.input.key.key as eventKey
+import androidx.compose.ui.input.key.onPreviewKeyEvent
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
@@ -194,11 +206,13 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.Validatio
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.ValidationRules
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.friendlyDate
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.isoDateToUtcMillis
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.slugify
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.utcMillisToIsoDate
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.hasGeometry
 import org.groundplatform.v2.devtools.prototypeapp.ui.common.GrabPointerIcon
 import org.groundplatform.v2.devtools.prototypeapp.ui.common.GrabbingPointerIcon
 import org.groundplatform.v2.devtools.prototypeapp.ui.common.PlatformPickResult
+import org.groundplatform.v2.devtools.prototypeapp.ui.common.downloadTextFile
 import org.groundplatform.v2.devtools.prototypeapp.ui.common.isPlatformMediaPickerAvailable
 import org.groundplatform.v2.devtools.prototypeapp.ui.common.openPlatformMediaPicker
 import org.groundplatform.v2.devtools.prototypeapp.ui.common.showPlatformGrabCursor
@@ -206,12 +220,15 @@ import org.groundplatform.v2.devtools.prototypeapp.ui.common.showPlatformGrabbin
 import org.groundplatform.v2.devtools.prototypeapp.ui.dashboard.SidePanelSeparator
 import org.groundplatform.v2.devtools.prototypeapp.ui.dashboard.SidePanelSeparatorWidth
 import org.groundplatform.v2.devtools.prototypeapp.ui.state.FormEditorUiState
+import org.groundplatform.v2.devtools.prototypeapp.ui.surveyeditor.IsoLanguages
 import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.FormEditorActions
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.decodeToImageBitmap
 
 private val CardWidth = 184.dp
 private val CardHeight = 312.dp
+private val StartButtonWidth = 148.dp
+private val StartButtonHeight = 48.dp
 private val TerminalWidth = 104.dp
 private val TerminalHeight = 56.dp
 private val SlotGap = 72.dp
@@ -240,7 +257,29 @@ fun FormEditorPage(
   onOpenForm: ((String) -> Unit)? = null,
 ) {
   val linkedDataset = uiState.datasets.firstOrNull { it.isLinkedToThisForm }
-  Box(modifier = modifier.fillMaxSize()) {
+  Box(
+    modifier =
+      modifier.fillMaxSize().onPreviewKeyEvent { event ->
+        if (event.type != KeyEventType.KeyDown) return@onPreviewKeyEvent false
+        val primaryModifier = event.isCtrlPressed || event.isMetaPressed
+        if (!primaryModifier) return@onPreviewKeyEvent false
+        when {
+          event.eventKey == Key.Z && event.isShiftPressed -> {
+            if (uiState.canRedo) actions.redo()
+            true
+          }
+          event.eventKey == Key.Z && !event.isShiftPressed -> {
+            if (uiState.canUndo) actions.undo()
+            true
+          }
+          event.eventKey == Key.Y && !event.isShiftPressed -> {
+            if (uiState.canRedo) actions.redo()
+            true
+          }
+          else -> false
+        }
+      }
+  ) {
     Column(modifier = Modifier.fillMaxSize()) {
       FormEditorToolbar(
         uiState = uiState,
@@ -262,11 +301,15 @@ fun FormEditorPage(
         modifier = Modifier.fillMaxSize().padding(16.dp),
         horizontalArrangement = Arrangement.spacedBy(4.dp),
       ) {
-        when (uiState.previewTarget) {
-          FormPreviewTarget.MOBILE ->
-            FlowCanvasPanel(uiState, actions, Modifier.weight(1f).fillMaxHeight())
-          FormPreviewTarget.WEB ->
-            WebLayoutCanvasPanel(uiState, actions, Modifier.weight(1f).fillMaxHeight())
+        Box(modifier = Modifier.weight(1f).fillMaxHeight()) {
+          when (uiState.previewTarget) {
+            FormPreviewTarget.MOBILE -> FlowCanvasPanel(uiState, actions, Modifier.fillMaxSize())
+            FormPreviewTarget.WEB -> WebLayoutCanvasPanel(uiState, actions, Modifier.fillMaxSize())
+          }
+          FloatingAddQuestionButton(
+            onAdd = actions::addQuestion,
+            modifier = Modifier.align(Alignment.BottomEnd).padding(end = 20.dp, bottom = 24.dp),
+          )
         }
         SidePanelSeparator(
           widthDp = uiState.sidePanelWidthDp,
@@ -297,10 +340,38 @@ fun FormEditorPage(
     if (uiState.previewController != null || uiState.previewError != null) {
       FormPreviewOverlay(uiState, actions, isDarkTheme)
     }
-    if (uiState.isXmlViewerOpen) {
-      XFormsXmlOverlay(uiState, actions)
-    }
     ConceptSearchDialog(uiState, actions)
+  }
+}
+
+@Composable
+private fun FloatingAddQuestionButton(
+  onAdd: (EditorQuestionType, Int?) -> Unit,
+  modifier: Modifier = Modifier,
+) {
+  var addingQuestion by remember { mutableStateOf(false) }
+  Box(modifier = modifier) {
+    FilledTonalButton(
+      onClick = { addingQuestion = true },
+      shape = MaterialTheme.shapes.large,
+      contentPadding = PaddingValues(horizontal = 20.dp, vertical = 14.dp),
+      colors =
+        ButtonDefaults.filledTonalButtonColors(
+          containerColor = MaterialTheme.colorScheme.primaryContainer,
+          contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+        ),
+      elevation =
+        ButtonDefaults.filledTonalButtonElevation(defaultElevation = 6.dp, hoveredElevation = 8.dp),
+    ) {
+      Icon(Icons.Outlined.Add, contentDescription = null, modifier = Modifier.size(18.dp))
+      Spacer(Modifier.width(8.dp))
+      Text("Add question")
+    }
+    AddQuestionMenu(
+      expanded = addingQuestion,
+      onDismiss = { addingQuestion = false },
+      onAdd = onAdd,
+    )
   }
 }
 
@@ -315,8 +386,29 @@ private fun FormEditorToolbar(
 ) {
   var overflowExpanded by remember { mutableStateOf(false) }
   var savingTemplate by remember { mutableStateOf(false) }
+  var confirmingDeleteForm by remember { mutableStateOf(false) }
   if (savingTemplate) {
     SaveAsTemplateDialog(uiState, actions, onDismiss = { savingTemplate = false })
+  }
+  if (confirmingDeleteForm && onDelete != null) {
+    AlertDialog(
+      onDismissRequest = { confirmingDeleteForm = false },
+      title = { Text("Delete form?") },
+      text = {
+        Text("Delete \"${uiState.form.title.ifBlank { "Untitled form" }}\"? This can't be undone.")
+      },
+      confirmButton = {
+        TextButton(
+          onClick = {
+            confirmingDeleteForm = false
+            onDelete()
+          }
+        ) {
+          Text("Delete form", color = MaterialTheme.colorScheme.error)
+        }
+      },
+      dismissButton = { TextButton(onClick = { confirmingDeleteForm = false }) { Text("Cancel") } },
+    )
   }
   Surface(
     modifier = Modifier.fillMaxWidth(),
@@ -324,10 +416,7 @@ private fun FormEditorToolbar(
     tonalElevation = 1.dp,
   ) {
     Row(
-      modifier =
-        Modifier.fillMaxWidth()
-          .horizontalScroll(rememberScrollState())
-          .padding(horizontal = 20.dp, vertical = 12.dp),
+      modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 10.dp),
       horizontalArrangement = Arrangement.spacedBy(12.dp),
       verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -343,14 +432,23 @@ private fun FormEditorToolbar(
           text = "Design questions, display logic, and flows.",
           style = MaterialTheme.typography.bodySmall,
           color = MaterialTheme.colorScheme.onSurfaceVariant,
+          maxLines = 1,
+          overflow = TextOverflow.Ellipsis,
         )
+      }
+      Row(verticalAlignment = Alignment.CenterVertically) {
+        IconButton(onClick = actions::undo, enabled = uiState.canUndo) {
+          Icon(Icons.AutoMirrored.Outlined.Undo, contentDescription = "Undo")
+        }
+        IconButton(onClick = actions::redo, enabled = uiState.canRedo) {
+          Icon(Icons.AutoMirrored.Outlined.Redo, contentDescription = "Redo")
+        }
       }
       FilledTonalButton(onClick = actions::selectFormSettings) {
         Icon(Icons.Outlined.Settings, contentDescription = null, modifier = Modifier.size(18.dp))
         Spacer(Modifier.width(6.dp))
         Text("Form settings")
       }
-      PreviewTargetToggle(uiState, actions)
       Spacer(Modifier.weight(1f))
       if (uiState.form.saveTo.mode == SaveToMode.CREATE && linkedDataset != null) {
         FilledTonalButton(
@@ -370,17 +468,6 @@ private fun FormEditorToolbar(
           Text(if (uiState.form.hasGeometry) "Create map layer" else "Create data table")
         }
       }
-      if (uiState.canSaveAsTemplate) {
-        OutlinedButton(onClick = { savingTemplate = true }) {
-          Icon(
-            Icons.Outlined.BookmarkAdd,
-            contentDescription = null,
-            modifier = Modifier.size(18.dp),
-          )
-          Spacer(Modifier.width(6.dp))
-          Text("Save as template")
-        }
-      }
       Button(onClick = actions::startPreview) {
         Icon(Icons.Outlined.PlayArrow, contentDescription = null, modifier = Modifier.size(18.dp))
         Spacer(Modifier.width(6.dp))
@@ -392,7 +479,7 @@ private fun FormEditorToolbar(
         }
         DropdownMenu(expanded = overflowExpanded, onDismissRequest = { overflowExpanded = false }) {
           DropdownMenuItem(
-            text = { Text("Export XForms XML") },
+            text = { Text("Download XForms XML") },
             leadingIcon = {
               Icon(
                 Icons.Outlined.Description,
@@ -402,7 +489,13 @@ private fun FormEditorToolbar(
             },
             onClick = {
               overflowExpanded = false
-              actions.setXmlViewerOpen(true)
+              val baseName =
+                slugify(uiState.form.title.ifBlank { uiState.form.formId }, fallback = "form")
+              downloadTextFile(
+                fileName = "$baseName.xml",
+                mimeType = "application/xml",
+                content = uiState.xformsXml,
+              )
             },
           )
           val unavailable = uiState.saveAsTemplateUnavailableReason
@@ -432,19 +525,82 @@ private fun FormEditorToolbar(
               savingTemplate = true
             },
           )
+          if (onDelete != null) {
+            DropdownMenuItem(
+              text = { Text("Delete form", color = MaterialTheme.colorScheme.error) },
+              leadingIcon = {
+                Icon(
+                  Icons.Outlined.Delete,
+                  contentDescription = null,
+                  tint = MaterialTheme.colorScheme.error,
+                  modifier = Modifier.size(18.dp),
+                )
+              },
+              onClick = {
+                overflowExpanded = false
+                confirmingDeleteForm = true
+              },
+            )
+          }
         }
       }
-      if (onDelete != null) {
-        TextButton(onClick = onDelete) {
-          Icon(
-            Icons.Outlined.Delete,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.error,
-            modifier = Modifier.size(18.dp),
-          )
-          Spacer(Modifier.width(4.dp))
-          Text("Delete form", color = MaterialTheme.colorScheme.error)
-        }
+    }
+  }
+}
+
+internal fun languageDisplayName(code: String): String = IsoLanguages.findByCode(code)?.name ?: code
+
+/**
+ * Dropdown selector in the preview header that lets survey designers switch the active editing and
+ * preview language across all languages configured on the survey.
+ */
+@Composable
+internal fun FormLanguageSelector(
+  uiState: FormEditorUiState,
+  actions: FormEditorActions,
+  modifier: Modifier = Modifier,
+) {
+  var expanded by remember { mutableStateOf(false) }
+  val activeCode = uiState.activeLanguage
+  val activeName = languageDisplayName(activeCode)
+  Box(modifier = modifier) {
+    OutlinedButton(
+      onClick = { expanded = true },
+      modifier =
+        Modifier.height(36.dp).semantics { contentDescription = "Form language: $activeName" },
+      contentPadding = PaddingValues(horizontal = 12.dp, vertical = 0.dp),
+    ) {
+      Icon(Icons.Outlined.Language, contentDescription = null, modifier = Modifier.size(16.dp))
+      Spacer(Modifier.width(6.dp))
+      Text(activeName, style = MaterialTheme.typography.labelMedium, softWrap = false)
+      Spacer(Modifier.width(4.dp))
+      Icon(Icons.Outlined.ExpandMore, contentDescription = null, modifier = Modifier.size(16.dp))
+    }
+    DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+      uiState.supportedLanguages.forEach { code ->
+        val name = languageDisplayName(code)
+        val isDefault = code == uiState.defaultLanguage
+        val isSelected = code == activeCode
+        DropdownMenuItem(
+          text = { Text(if (isDefault) "$name • Default" else name) },
+          leadingIcon = {
+            if (isSelected) {
+              Icon(
+                Icons.Outlined.Check,
+                contentDescription = null,
+                modifier = Modifier.size(18.dp),
+                tint = MaterialTheme.colorScheme.primary,
+              )
+            } else {
+              Spacer(Modifier.size(18.dp))
+            }
+          },
+          onClick = {
+            expanded = false
+            actions.selectLanguage(code)
+          },
+          modifier = Modifier.pointerHoverIcon(PointerIcon.Hand),
+        )
       }
     }
   }
@@ -455,8 +611,7 @@ internal fun questionTypeIcon(type: EditorQuestionType): ImageVector =
   when (type) {
     EditorQuestionType.TEXT -> Icons.Outlined.Edit
     EditorQuestionType.LONG_TEXT -> Icons.Outlined.Description
-    EditorQuestionType.INTEGER -> Icons.AutoMirrored.Outlined.List
-    EditorQuestionType.DECIMAL -> Icons.AutoMirrored.Outlined.List
+    EditorQuestionType.NUMBER -> Icons.AutoMirrored.Outlined.List
     EditorQuestionType.SELECT_ONE -> Icons.Outlined.CheckCircle
     EditorQuestionType.SELECT_MULTIPLE -> Icons.Outlined.Check
     EditorQuestionType.DATE -> Icons.Outlined.DateRange
@@ -471,7 +626,7 @@ internal fun questionTypeIcon(type: EditorQuestionType): ImageVector =
 
 /** Dropdown menu listing all question types with their icons for insertion at [atIndex]. */
 @Composable
-private fun AddQuestionMenu(
+internal fun AddQuestionMenu(
   expanded: Boolean,
   onDismiss: () -> Unit,
   onAdd: (EditorQuestionType, Int?) -> Unit,
@@ -511,9 +666,19 @@ private class FlowLayout(questionCount: Int, edges: List<FlowEdge>) {
   val cardTop: Dp = CanvasPadding + maxRise + 8.dp
   val midY: Dp = cardTop + CardHeight / 2
 
-  fun isTerminal(slot: Int) = slot == 0 || slot == endSlot
+  fun width(slot: Int): Dp =
+    when (slot) {
+      0 -> StartButtonWidth
+      endSlot -> TerminalWidth
+      else -> CardWidth
+    }
 
-  fun width(slot: Int): Dp = if (isTerminal(slot)) TerminalWidth else CardWidth
+  fun height(slot: Int): Dp =
+    when (slot) {
+      0 -> StartButtonHeight
+      endSlot -> TerminalHeight
+      else -> CardHeight
+    }
 
   private val xs: List<Dp> = buildList {
     var x = CanvasPadding
@@ -525,8 +690,7 @@ private class FlowLayout(questionCount: Int, edges: List<FlowEdge>) {
 
   fun x(slot: Int): Dp = xs[slot]
 
-  fun top(slot: Int): Dp =
-    if (isTerminal(slot)) cardTop + (CardHeight - TerminalHeight) / 2 else cardTop
+  fun top(slot: Int): Dp = cardTop + (CardHeight - height(slot)) / 2
 
   val totalWidth: Dp = x(endSlot) + TerminalWidth + CanvasPadding
   val totalHeight: Dp = cardTop + CardHeight + CanvasPadding
@@ -551,55 +715,51 @@ private fun FlowCanvasPanel(
       ),
   ) {
     Column(modifier = Modifier.fillMaxSize()) {
-      // FlowRow so the legend moves to its own line when the header is too narrow (e.g. when the
-      // issues chip is shown) rather than squeezing labels into one-character-wide columns.
-      FlowRow(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
+      Row(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
-        verticalArrangement = Arrangement.spacedBy(4.dp),
-        itemVerticalAlignment = Alignment.CenterVertically,
+        verticalAlignment = Alignment.CenterVertically,
       ) {
-        Row(
-          horizontalArrangement = Arrangement.spacedBy(12.dp),
-          verticalAlignment = Alignment.CenterVertically,
-        ) {
-          Text(
-            text = "${form.questions.size} screens • ${uiState.pathCount} potential paths",
-            style = MaterialTheme.typography.titleSmall,
-            fontWeight = FontWeight.Bold,
-            softWrap = false,
+        Text(
+          text = "${form.questions.size} screens • ${uiState.pathCount} potential paths",
+          style = MaterialTheme.typography.titleSmall,
+          fontWeight = FontWeight.Bold,
+          softWrap = false,
+        )
+        if (issues.isNotEmpty()) {
+          AssistChip(
+            onClick = {
+              val firstKey = issues.first().questionKey
+              if (firstKey != null) actions.select(firstKey) else actions.selectForm()
+            },
+            label = {
+              Text(
+                "${issues.size} ${if (issues.size == 1) "issue" else "issues"}",
+                softWrap = false,
+              )
+            },
+            leadingIcon = {
+              Icon(
+                Icons.Outlined.Warning,
+                contentDescription = null,
+                modifier = Modifier.size(16.dp),
+              )
+            },
+            colors =
+              AssistChipDefaults.assistChipColors(
+                containerColor = MaterialTheme.colorScheme.errorContainer,
+                labelColor = MaterialTheme.colorScheme.onErrorContainer,
+                leadingIconContentColor = MaterialTheme.colorScheme.onErrorContainer,
+              ),
+            border = null,
           )
-          if (issues.isNotEmpty()) {
-            AssistChip(
-              onClick = {
-                val firstKey = issues.first().questionKey
-                if (firstKey != null) actions.select(firstKey) else actions.selectForm()
-              },
-              label = {
-                Text(
-                  "${issues.size} ${if (issues.size == 1) "issue" else "issues"}",
-                  softWrap = false,
-                )
-              },
-              leadingIcon = {
-                Icon(
-                  Icons.Outlined.Warning,
-                  contentDescription = null,
-                  modifier = Modifier.size(16.dp),
-                )
-              },
-              colors =
-                AssistChipDefaults.assistChipColors(
-                  containerColor = MaterialTheme.colorScheme.errorContainer,
-                  labelColor = MaterialTheme.colorScheme.onErrorContainer,
-                  leadingIconContentColor = MaterialTheme.colorScheme.onErrorContainer,
-                ),
-              border = null,
-            )
-          }
         }
         Spacer(Modifier.weight(1f))
         FlowLegend()
+        if (uiState.supportedLanguages.size > 1) {
+          FormLanguageSelector(uiState, actions)
+        }
+        PreviewTargetToggle(uiState, actions)
       }
       HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
       PlatformDisabledBanner(uiState, actions)
@@ -695,14 +855,12 @@ private fun FlowHorizontalScrollBar(
 @Composable
 private fun FlowLegend() {
   val colors = MaterialTheme.colorScheme
-  FlowRow(
+  Row(
     horizontalArrangement = Arrangement.spacedBy(14.dp),
-    verticalArrangement = Arrangement.spacedBy(4.dp),
-    itemVerticalAlignment = Alignment.CenterVertically,
+    verticalAlignment = Alignment.CenterVertically,
   ) {
     LegendItem("Always next", colors.outline, dashed = false)
     LegendItem("If condition is true", colors.primary, dashed = true)
-    LegendItem("If skipped", colors.tertiary, dashed = true)
   }
 }
 
@@ -776,6 +934,7 @@ private fun FlowCanvas(
   val cardWidthPx = with(density) { CardWidth.toPx() }
   val edgeZonePx = with(density) { 56.dp.toPx() }
   val edgeAlpha by animateFloatAsState(if (drag.isDragging) 0.15f else 1f)
+  val verticalScroll = rememberScrollState()
   Box(
     modifier =
       modifier
@@ -795,7 +954,7 @@ private fun FlowCanvas(
           }
         }
         .horizontalScroll(horizontalScroll)
-        .verticalScroll(rememberScrollState())
+        .verticalScroll(verticalScroll)
         .pointerInput(drag.isDragging) {
           // Pans the canvas. Like screen reordering, a pan only starts past [MouseDragSlop]:
           // Compose's default mouse slop (0.125 dp) turned slightly-moving clicks on screen cards
@@ -809,8 +968,11 @@ private fun FlowCanvas(
               isPanning = true
               try {
                 horizontalScroll.dispatchRawDelta(-travel.x)
+                verticalScroll.dispatchRawDelta(-travel.y)
                 horizontalDrag(start.id) { change ->
-                  horizontalScroll.dispatchRawDelta(-change.positionChange().x)
+                  val delta = change.positionChange()
+                  horizontalScroll.dispatchRawDelta(-delta.x)
+                  verticalScroll.dispatchRawDelta(-delta.y)
                   change.consume()
                 }
               } finally {
@@ -847,8 +1009,8 @@ private fun FlowCanvas(
         }
       }
 
-      TerminalNode(
-        text = "Start",
+      LaunchButtonNode(
+        text = form.effectiveCtaLabel.ifBlank { "Untitled form" },
         modifier = Modifier.offset(layout.x(0), layout.top(0)),
         isSelected = uiState.isFormSelected,
         onClick = actions::selectForm,
@@ -882,6 +1044,8 @@ private fun FlowCanvas(
             hasIssues = uiState.issuesFor(question.key).isNotEmpty(),
             isLinked = question.conceptLink != null,
             isDragged = isDragged,
+            activeLanguage = uiState.activeLanguage,
+            defaultLanguage = uiState.defaultLanguage,
             onClick = { actions.select(question.key) },
             modifier =
               Modifier.offset(layout.x(slot), layout.top(slot))
@@ -1063,7 +1227,56 @@ private fun DrawScope.drawArrowHead(tip: Offset, from: Offset, color: Color) {
   drawPath(path, color)
 }
 
-/** Start or end node of the flow; selecting either shows Form properties. */
+/**
+ * Start node of the flow: renders the data-collection launch button shown in the app using the
+ * user-specified button label (or form title when blank). Selecting it shows Form properties.
+ */
+@Composable
+private fun LaunchButtonNode(
+  text: String,
+  modifier: Modifier = Modifier,
+  isSelected: Boolean = false,
+  onClick: () -> Unit,
+) {
+  val colors = MaterialTheme.colorScheme
+  val sized =
+    modifier
+      .width(StartButtonWidth)
+      .height(StartButtonHeight)
+      .pointerHoverIcon(PointerIcon.Hand)
+      .semantics { contentDescription = "Start: $text" }
+  val border = if (isSelected) BorderStroke(2.dp, colors.onPrimaryContainer) else null
+  Surface(
+    onClick = onClick,
+    modifier = sized,
+    shape = MaterialTheme.shapes.small,
+    color = colors.primary,
+    contentColor = colors.onPrimary,
+    border = border,
+  ) {
+    Row(
+      modifier = Modifier.fillMaxSize().padding(horizontal = 12.dp),
+      horizontalArrangement = Arrangement.Center,
+      verticalAlignment = Alignment.CenterVertically,
+    ) {
+      Icon(
+        imageVector = Icons.Outlined.Description,
+        contentDescription = null,
+        modifier = Modifier.size(16.dp),
+      )
+      Spacer(modifier = Modifier.width(6.dp))
+      Text(
+        text = text,
+        style = MaterialTheme.typography.labelMedium,
+        fontWeight = FontWeight.Bold,
+        maxLines = 2,
+        overflow = TextOverflow.Ellipsis,
+      )
+    }
+  }
+}
+
+/** End node of the flow; selecting it shows Form properties. */
 @Composable
 private fun TerminalNode(
   text: String,
@@ -1118,6 +1331,8 @@ private fun ScreenPreviewCard(
   isDragged: Boolean,
   onClick: () -> Unit,
   isLinked: Boolean = false,
+  activeLanguage: String = "en",
+  defaultLanguage: String = "en",
   modifier: Modifier = Modifier,
 ) {
   val colors = MaterialTheme.colorScheme
@@ -1211,11 +1426,18 @@ private fun ScreenPreviewCard(
         modifier = Modifier.padding(top = 4.dp, bottom = 6.dp),
       )
 
-      MiniScreen(question, form.title, datasets, Modifier.weight(1f).fillMaxWidth())
+      MiniScreen(
+        question = question,
+        formTitle = form.title,
+        datasets = datasets,
+        activeLanguage = activeLanguage,
+        defaultLanguage = defaultLanguage,
+        modifier = Modifier.weight(1f).fillMaxWidth(),
+      )
 
       Text(
-        text = question.name + if (question.required) " *" else "",
-        style = MaterialTheme.typography.labelSmall.copy(fontFamily = FontFamily.Monospace),
+        text = question.type.label + if (question.required) " • Required" else "",
+        style = MaterialTheme.typography.labelSmall,
         color = if (isSelected) colors.onSecondaryContainer else colors.onSurfaceVariant,
         maxLines = 1,
         overflow = TextOverflow.Ellipsis,
@@ -1231,9 +1453,13 @@ private fun MiniScreen(
   question: EditorQuestion,
   formTitle: String,
   datasets: List<EditorDataset>,
+  activeLanguage: String = "en",
+  defaultLanguage: String = "en",
   modifier: Modifier = Modifier,
 ) {
   val colors = MaterialTheme.colorScheme
+  val displayLabel = question.displayLabel(activeLanguage, defaultLanguage)
+  val displayHint = question.displayHint(activeLanguage, defaultLanguage)
   Surface(
     modifier = modifier,
     shape = RoundedCornerShape(10.dp),
@@ -1261,16 +1487,16 @@ private fun MiniScreen(
         verticalArrangement = Arrangement.spacedBy(4.dp),
       ) {
         Text(
-          text = question.label.ifBlank { "(no label)" } + if (question.required) " *" else "",
+          text = displayLabel.ifBlank { "(no label)" } + if (question.required) " *" else "",
           style = MaterialTheme.typography.labelLarge,
           color = colors.onSurface,
           fontWeight = FontWeight.Bold,
           maxLines = 3,
           overflow = TextOverflow.Ellipsis,
         )
-        if (question.hint.isNotBlank()) {
+        if (displayHint.isNotBlank()) {
           Text(
-            text = question.hint,
+            text = displayHint,
             style = MaterialTheme.typography.labelSmall,
             color = colors.onSurfaceVariant,
             maxLines = 2,
@@ -1278,7 +1504,7 @@ private fun MiniScreen(
           )
         }
         Spacer(Modifier.height(2.dp))
-        MiniWidget(question, datasets)
+        MiniWidget(question, datasets, activeLanguage, defaultLanguage)
       }
       Row(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 6.dp),
@@ -1310,13 +1536,17 @@ private fun MiniButton(text: String, filled: Boolean) {
 }
 
 @Composable
-private fun MiniWidget(question: EditorQuestion, datasets: List<EditorDataset>) {
+private fun MiniWidget(
+  question: EditorQuestion,
+  datasets: List<EditorDataset>,
+  activeLanguage: String = "en",
+  defaultLanguage: String = "en",
+) {
   val colors = MaterialTheme.colorScheme
   when (question.type) {
     EditorQuestionType.TEXT -> MiniField("Answer", 26.dp)
     EditorQuestionType.LONG_TEXT -> MiniField("Answer", 52.dp)
-    EditorQuestionType.INTEGER -> MiniField("123", 26.dp)
-    EditorQuestionType.DECIMAL -> MiniField("1.5", 26.dp)
+    EditorQuestionType.NUMBER -> MiniField(if (question.decimalPlaces <= 0) "123" else "1.5", 26.dp)
     EditorQuestionType.DATE -> MiniField("YYYY-MM-DD", 26.dp, Icons.Outlined.DateRange)
     EditorQuestionType.SELECT_ONE,
     EditorQuestionType.SELECT_MULTIPLE -> {
@@ -1381,7 +1611,7 @@ private fun MiniWidget(question: EditorQuestion, datasets: List<EditorDataset>) 
             }
           }
           Text(
-            text = choice.label.ifBlank { choice.value },
+            text = choice.displayLabel(activeLanguage, defaultLanguage).ifBlank { choice.value },
             style = MaterialTheme.typography.labelSmall,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
@@ -1694,10 +1924,18 @@ private fun QuestionProperties(
 
     ConceptLabelField(uiState, actions, question)
     ConceptLinkChip(uiState, actions, question)
+    val activeLang = uiState.activeLanguage
+    val defaultLang = uiState.defaultLanguage
+    val isDefaultLang = uiState.isDefaultLanguageSelected
+    val activeLangName = languageDisplayName(activeLang)
     OutlinedTextField(
-      value = question.hint,
-      onValueChange = { v -> actions.updateQuestion(key) { it.copy(hint = v) } },
-      label = { Text("Hint (optional)") },
+      value = question.hintIn(activeLang, defaultLang),
+      onValueChange = { v -> actions.updateQuestionHint(key, v) },
+      label = {
+        Text(if (isDefaultLang) "Hint (optional)" else "Hint ($activeLangName, optional)")
+      },
+      placeholder =
+        if (!isDefaultLang && question.hint.isNotBlank()) ({ Text(question.hint) }) else null,
       modifier = Modifier.fillMaxWidth(),
     )
 
@@ -1737,6 +1975,35 @@ private fun QuestionProperties(
     HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
     AdvancedSection(uiState, actions, question)
   }
+}
+
+/**
+ * **Decimal places** setting of a [EditorQuestionType.NUMBER] question: `0` for whole numbers
+ * (integer), or `1`..[EditorQuestion.MAX_DECIMAL_PLACES] for decimal numbers.
+ */
+@Composable
+private fun DecimalPlacesSelector(actions: FormEditorActions, question: EditorQuestion) {
+  OutlinedTextField(
+    value = question.decimalPlaces.toString(),
+    onValueChange = { v ->
+      val parsed =
+        if (v.isBlank()) 0
+        else v.trim().toIntOrNull()?.coerceIn(0, EditorQuestion.MAX_DECIMAL_PLACES)
+      if (parsed != null) {
+        actions.updateDecimalPlaces(question.key, parsed)
+      }
+    },
+    label = { Text("Decimal places") },
+    supportingText = {
+      Text(
+        if (question.decimalPlaces <= 0) "0 for whole numbers (integer)."
+        else
+          "Up to ${question.decimalPlaces} decimal place${if (question.decimalPlaces == 1) "" else "s"}."
+      )
+    },
+    singleLine = true,
+    modifier = Modifier.fillMaxWidth(),
+  )
 }
 
 /**
@@ -1857,6 +2124,9 @@ private fun AdvancedSection(
         textStyle = MaterialTheme.typography.bodyLarge.copy(fontFamily = FontFamily.Monospace),
         modifier = Modifier.fillMaxWidth(),
       )
+      if (question.type.isNumeric) {
+        DecimalPlacesSelector(actions, question)
+      }
       ValidationEditor(uiState, actions, question)
     }
   }
@@ -2066,6 +2336,12 @@ private fun MinMaxFields(
   }
 }
 
+private enum class ChoiceVisualOption(val label: String) {
+  NONE("Text only"),
+  COLOR("Colors"),
+  IMAGE("Images"),
+}
+
 @Composable
 private fun ChoicesEditor(
   uiState: FormEditorUiState,
@@ -2094,42 +2370,106 @@ private fun ChoicesEditor(
     }
     when (effectiveSource) {
       ChoiceSource.MANUAL -> {
+        val hasImages = question.choices.any { it.image != null }
+        val hasColors = question.choices.any { it.colorHex != null }
+        var visualOverride by remember(question.key) { mutableStateOf<ChoiceVisualOption?>(null) }
+        val currentVisual =
+          visualOverride
+            ?: when {
+              hasImages -> ChoiceVisualOption.IMAGE
+              hasColors -> ChoiceVisualOption.COLOR
+              else -> ChoiceVisualOption.NONE
+            }
+
+        Row(
+          modifier = Modifier.fillMaxWidth(),
+          horizontalArrangement = Arrangement.SpaceBetween,
+          verticalAlignment = Alignment.CenterVertically,
+        ) {
+          Text(
+            text = "Visual style",
+            style = MaterialTheme.typography.bodySmall,
+            color = colors.onSurfaceVariant,
+          )
+          SingleChoiceSegmentedButtonRow(modifier = Modifier.height(32.dp)) {
+            ChoiceVisualOption.entries.forEachIndexed { index, visual ->
+              SegmentedButton(
+                selected = currentVisual == visual,
+                onClick = {
+                  visualOverride = visual
+                  when (visual) {
+                    ChoiceVisualOption.NONE -> {
+                      actions.updateQuestion(key) { q ->
+                        q.copy(choices = q.choices.map { it.copy(colorHex = null, image = null) })
+                      }
+                    }
+                    ChoiceVisualOption.COLOR -> {
+                      actions.updateQuestion(key) { q ->
+                        q.copy(
+                          choices =
+                            q.choices.mapIndexed { idx, c ->
+                              val color =
+                                c.colorHex
+                                  ?: ChoiceColors.palette[idx % ChoiceColors.palette.size].second
+                              c.copy(colorHex = color, image = null)
+                            }
+                        )
+                      }
+                    }
+                    ChoiceVisualOption.IMAGE -> {
+                      actions.updateQuestion(key) { q ->
+                        q.copy(choices = q.choices.map { it.copy(colorHex = null) })
+                      }
+                    }
+                  }
+                },
+                shape =
+                  SegmentedButtonDefaults.itemShape(
+                    index = index,
+                    count = ChoiceVisualOption.entries.size,
+                  ),
+                label = { Text(visual.label, style = MaterialTheme.typography.labelSmall) },
+              )
+            }
+          }
+        }
+
         // A linked question maps each choice to a value of the concept's code list.
         val concept = uiState.conceptOf(question)?.takeIf { it.codeList.isNotEmpty() }
+        val activeLang = uiState.activeLanguage
+        val defaultLang = uiState.defaultLanguage
+        val isDefaultLang = uiState.isDefaultLanguageSelected
+        val activeLangName = languageDisplayName(activeLang)
         question.choices.forEachIndexed { i, choice ->
           Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(4.dp),
           ) {
-            ChoiceColorButton(
-              colorHex = choice.colorHex,
-              onSelect = { actions.setChoiceColor(key, i, it) },
-            )
-            ChoiceImageButton(
-              image = choice.image,
-              onPicked = { image ->
-                imageError =
-                  if (actions.setChoiceImage(key, i, image)) null
-                  else "Choose an image file under ${EditorChoiceImage.MAX_BYTES / 1024} KB."
-              },
-              onRemove = { actions.setChoiceImage(key, i, null) },
-              onError = { imageError = it },
-            )
+            if (currentVisual == ChoiceVisualOption.COLOR) {
+              ChoiceColorButton(
+                colorHex = choice.colorHex,
+                onSelect = { actions.setChoiceColor(key, i, it) },
+              )
+            } else if (currentVisual == ChoiceVisualOption.IMAGE) {
+              ChoiceImageButton(
+                image = choice.image,
+                onPicked = { image ->
+                  imageError =
+                    if (actions.setChoiceImage(key, i, image)) null
+                    else "Choose an image file under ${EditorChoiceImage.MAX_BYTES / 1024} KB."
+                },
+                onRemove = { actions.setChoiceImage(key, i, null) },
+                onError = { imageError = it },
+              )
+            }
             OutlinedTextField(
-              value = choice.label,
+              value = choice.labelIn(activeLang, defaultLang),
               onValueChange = { actions.updateChoiceLabel(key, i, it) },
-              label = { Text("Label") },
+              label = { Text(if (isDefaultLang) "Label" else "Label ($activeLangName)") },
+              placeholder =
+                if (!isDefaultLang && choice.label.isNotBlank()) ({ Text(choice.label) }) else null,
               singleLine = true,
               modifier = Modifier.weight(1f),
-            )
-            OutlinedTextField(
-              value = choice.value,
-              onValueChange = { actions.updateChoice(key, i, choice.copy(value = it.trim())) },
-              label = { Text("Value") },
-              singleLine = true,
-              textStyle =
-                MaterialTheme.typography.bodyLarge.copy(fontFamily = FontFamily.Monospace),
-              modifier = Modifier.width(96.dp),
             )
             IconButton(
               onClick = { actions.removeChoice(key, i) },
@@ -2146,7 +2486,7 @@ private fun ChoicesEditor(
             ChoiceCodeSelector(
               concept = concept,
               choice = choice,
-              language = uiState.library.language,
+              language = uiState.activeLanguage,
               onSelect = { actions.setChoiceCode(key, i, it) },
               modifier = Modifier.padding(start = 72.dp, end = 36.dp),
             )
@@ -2159,7 +2499,29 @@ private fun ChoicesEditor(
             color = colors.error,
           )
         }
-        TextButton(onClick = { actions.addChoice(key) }) {
+        TextButton(
+          onClick = {
+            actions.addChoice(key)
+            if (currentVisual == ChoiceVisualOption.COLOR) {
+              actions.updateQuestion(key) { q ->
+                val lastIdx = q.choices.lastIndex
+                if (lastIdx >= 0) {
+                  val color = ChoiceColors.palette[lastIdx % ChoiceColors.palette.size].second
+                  q.copy(
+                    choices =
+                      q.choices.mapIndexed { idx, c ->
+                        if (idx == lastIdx && c.colorHex == null)
+                          c.copy(colorHex = color, image = null)
+                        else c
+                      }
+                  )
+                } else {
+                  q
+                }
+              }
+            }
+          }
+        ) {
           Icon(Icons.Outlined.Add, contentDescription = null, modifier = Modifier.size(18.dp))
           Spacer(Modifier.width(4.dp))
           Text("Add choice")
@@ -2189,7 +2551,7 @@ private fun ChoicesEditor(
                   ?: question.choiceDatasetId?.takeIf { it.isNotBlank() }
                   ?: "Choose",
               options = availableDatasets,
-              optionText = { "${it.displayName} (${it.id})" },
+              optionText = { it.displayName },
               optionIcon = ::datasetIcon,
               onSelect = { actions.setChoiceDataset(key, it.id) },
             )
@@ -2199,9 +2561,7 @@ private fun ChoicesEditor(
             val noun =
               if (count == 1) selectedDataset.featureNoun else selectedDataset.featureNounPlural
             Text(
-              text =
-                "Collectors choose from $count $noun in ${selectedDataset.displayName} " +
-                  "(value: ${selectedDataset.keyProperty}, label: ${selectedDataset.labelProperty}).",
+              text = "Data collectors choose from $count $noun in ${selectedDataset.displayName}.",
               style = MaterialTheme.typography.bodySmall,
               color = colors.onSurfaceVariant,
             )
@@ -2573,9 +2933,9 @@ private fun DisplayLogicEditor(
       val source = form.find(relevance.sourceQuestionKey)
       DropdownSelector(
         label = "Question",
-        selectedText = source?.let { "${it.name} — ${it.label}" } ?: "(missing question)",
+        selectedText = source?.let { it.label.ifBlank { it.name } } ?: "(missing question)",
         options = sources,
-        optionText = { "${it.name} — ${it.label}" },
+        optionText = { it.label.ifBlank { it.name } },
         onSelect = { picked ->
           val operator =
             relevance.operator.takeIf { it in RelevanceOperator.availableFor(picked.type) }
@@ -2605,7 +2965,7 @@ private fun DisplayLogicEditor(
                 sourceChoices.firstOrNull { it.value == relevance.value }?.label
                   ?: relevance.value.ifBlank { "Pick a choice" },
               options = sourceChoices,
-              optionText = { "${it.label} (${it.value})" },
+              optionText = { it.label },
               onSelect = { c ->
                 actions.updateQuestion(key) { it.copy(relevance = relevance.copy(value = c.value)) }
               },
@@ -2637,7 +2997,7 @@ private fun DisplayLogicEditor(
 @Composable
 internal fun SectionLabel(text: String) {
   Text(
-    text = text.uppercase(),
+    text = text,
     style = MaterialTheme.typography.labelSmall,
     fontWeight = FontWeight.Bold,
     color = MaterialTheme.colorScheme.primary,
@@ -2654,26 +3014,33 @@ internal fun <T> DropdownSelector(
   onSelect: (T) -> Unit,
   modifier: Modifier = Modifier,
   optionIcon: ((T) -> ImageVector)? = null,
+  enabled: Boolean = true,
+  supportingText: String? = null,
 ) {
   var expanded by remember { mutableStateOf(false) }
   // Standard M3 exposed dropdown: a read-only OutlinedTextField, so the label and value use the
   // same typography as every other input in the editors.
   ExposedDropdownMenuBox(
-    expanded = expanded,
-    onExpandedChange = { expanded = it },
+    expanded = expanded && enabled,
+    onExpandedChange = { if (enabled) expanded = it },
     modifier = modifier.fillMaxWidth(),
   ) {
     OutlinedTextField(
       value = selectedText,
       onValueChange = {},
       readOnly = true,
+      enabled = enabled,
       singleLine = true,
       label = { Text(label) },
-      trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+      supportingText = supportingText?.let { text -> { Text(text) } },
+      trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded && enabled) },
       modifier =
         Modifier.fillMaxWidth().menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable),
     )
-    ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+    ExposedDropdownMenu(
+      expanded = expanded && enabled,
+      onDismissRequest = { expanded = false },
+    ) {
       options.forEach { option ->
         DropdownMenuItem(
           text = { Text(optionText(option), maxLines = 1, overflow = TextOverflow.Ellipsis) },
@@ -2699,7 +3066,7 @@ internal fun <T> DropdownSelector(
 }
 
 // ---------------------------------------------------------------------------------------------
-// Overlays: flow preview and XForms XML
+// Overlays: flow preview
 // ---------------------------------------------------------------------------------------------
 
 @Composable
@@ -2809,6 +3176,18 @@ private fun PreviewSidePanel(
         modifier = Modifier.weight(1f, fill = false).verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.spacedBy(12.dp),
       ) {
+        if (uiState.supportedLanguages.size > 1) {
+          DropdownSelector(
+            label = "Language",
+            selectedText = languageDisplayName(uiState.activeLanguage),
+            options = uiState.supportedLanguages,
+            optionText = { code ->
+              val name = languageDisplayName(code)
+              if (code == uiState.defaultLanguage) "$name • Default" else name
+            },
+            onSelect = { actions.selectLanguage(it) },
+          )
+        }
         val error = uiState.previewError
         if (error != null) {
           Text(
@@ -2891,52 +3270,6 @@ private fun PreviewSidePanel(
           Text("Restart")
         }
         Button(onClick = actions::closePreview) { Text("Back to editor") }
-      }
-    }
-  }
-}
-
-@Composable
-private fun XFormsXmlOverlay(uiState: FormEditorUiState, actions: FormEditorActions) {
-  val xml = uiState.xformsXml
-  ModalScrim(onDismiss = { actions.setXmlViewerOpen(false) }) {
-    ElevatedCard(modifier = Modifier.width(820.dp).fillMaxHeight(0.85f)) {
-      Column(modifier = Modifier.fillMaxSize().padding(20.dp)) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-          Column(modifier = Modifier.weight(1f)) {
-            Text(
-              text = "Generated XForms",
-              style = MaterialTheme.typography.titleMedium,
-              fontWeight = FontWeight.Bold,
-            )
-            Text(
-              text = "Parses cleanly with the Ground form engine.",
-              style = MaterialTheme.typography.bodySmall,
-              color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-          }
-          IconButton(onClick = { actions.setXmlViewerOpen(false) }) {
-            Icon(Icons.Outlined.Close, contentDescription = "Close")
-          }
-        }
-        Spacer(Modifier.height(12.dp))
-        Surface(
-          color = MaterialTheme.colorScheme.surfaceContainerHigh,
-          shape = MaterialTheme.shapes.small,
-          modifier = Modifier.fillMaxSize(),
-        ) {
-          SelectionContainer {
-            Text(
-              text = xml,
-              style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
-              modifier =
-                Modifier.fillMaxSize()
-                  .verticalScroll(rememberScrollState())
-                  .horizontalScroll(rememberScrollState())
-                  .padding(12.dp),
-            )
-          }
-        }
       }
     }
   }

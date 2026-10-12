@@ -33,7 +33,7 @@ internal class PdfDocumentWriter(
   private val title: String = "",
   private val author: String = "",
   private val subject: String = "",
-  private val creator: String = "Ground",
+  private val creator: String = "Open Foris Collect One",
 ) {
   private val pages = mutableListOf<PdfPage>()
 
@@ -74,7 +74,7 @@ internal class PdfDocumentWriter(
     writeObject(
       3,
       buildString {
-        append("<< /Producer ").append(pdfLiteral("Ground PDF writer"))
+        append("<< /Producer ").append(pdfLiteral("Open Foris Collect One PDF writer"))
         append(" /Creator ").append(pdfLiteral(creator))
         if (title.isNotBlank()) append(" /Title ").append(pdfLiteral(title))
         if (author.isNotBlank()) append(" /Author ").append(pdfLiteral(author))

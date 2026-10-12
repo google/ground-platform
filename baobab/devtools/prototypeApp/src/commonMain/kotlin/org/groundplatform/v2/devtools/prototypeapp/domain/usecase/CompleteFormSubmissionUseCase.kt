@@ -29,6 +29,7 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.MutationOperatio
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.MutationSyncState
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SubmissionFieldEntry
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SubmissionPreviewItem
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyThumbnailGenerator
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SyncStatus
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.deriveEntitySyncStatus
 import org.groundplatform.v2.devtools.prototypeapp.domain.repository.MutationRepository
@@ -319,7 +320,20 @@ class CompleteFormSubmissionUseCase(
           syncStatus = SyncStatus.UPLOADING,
         )
 
-      surveyRepository.setEntities(listOf(newEntity) + entities)
+      val updatedEntities = listOf(newEntity) + entities
+      surveyRepository.setEntities(updatedEntities)
+      surveyRepository.updateSurvey(activeSurveyId) { item ->
+        item.copy(
+          entityCount = updatedEntities.size,
+          thumbnail =
+            SurveyThumbnailGenerator.updateFeatures(
+              existing = item.thumbnail,
+              surveyId = activeSurveyId,
+              mapLayers = mapLayers,
+              entities = updatedEntities,
+            ),
+        )
+      }
 
       val nextSeq = mutations.size + 1
       val seqSuffix = (nextSeq % 60).toString().padStart(2, '0')
@@ -407,7 +421,7 @@ class CompleteFormSubmissionUseCase(
           actorName = signedInUserName,
           state = MutationSyncState.UPLOADING,
           stateDetail =
-            "Uploading standalone submission (${extractedFields.size} fields) to Ground Cloud",
+            "Uploading standalone submission (${extractedFields.size} fields) to Collect One Cloud",
           operationTimestamp = opTime,
           startedTimestamp = startTime,
           completedTimestamp = null,
@@ -544,27 +558,56 @@ class CompleteFormSubmissionUseCase(
             .state
         }
 
-      val steps = controller?.steps ?: FormWizardController.buildSteps(evaluatedState)
+      val steps =
+        if (controller != null && controller.formState === evaluatedState) {
+          controller.steps
+        } else {
+          FormWizardController.buildSteps(evaluatedState)
+        }
       val controlLabelsByPath = mutableMapOf<String, String>()
+      val orderedPaths = mutableListOf<String>()
       steps.forEach { step ->
+        val repeatPrefix = step.repeatContext?.instanceLabel?.takeIf { it.isNotBlank() }
         when (step) {
           is FormWizardStep.QuestionStep -> {
-            controlLabelsByPath[step.control.canonicalPath] = step.title
+            val path = step.control.canonicalPath
+            val baseLabel = step.title
+            controlLabelsByPath[path] =
+              if (repeatPrefix != null) "$repeatPrefix • $baseLabel" else baseLabel
+            orderedPaths.add(path)
           }
           is FormWizardStep.FieldListGroupStep -> {
             step.controls.forEach { ctrl ->
-              val label =
-                ctrl.label?.text?.takeIf { it.isNotBlank() }
-                  ?: ctrl.canonicalPath.substringAfterLast('/')
-              controlLabelsByPath[ctrl.canonicalPath] = label
+              val path = ctrl.canonicalPath
+              val baseLabel =
+                ctrl.label?.text?.takeIf { it.isNotBlank() } ?: path.substringAfterLast('/')
+              controlLabelsByPath[path] =
+                if (repeatPrefix != null) "$repeatPrefix • $baseLabel" else baseLabel
+              orderedPaths.add(path)
             }
           }
           else -> {}
         }
       }
 
+      val seenCanonicalPaths = mutableSetOf<String>()
+      val orderedFieldStates = buildList {
+        for (path in orderedPaths) {
+          val fs = evaluatedState.fieldStates[path] ?: continue
+          if (seenCanonicalPaths.add(fs.canonicalPath)) {
+            add(fs)
+          }
+        }
+        for (fs in evaluatedState.fieldStates.values) {
+          if (seenCanonicalPaths.add(fs.canonicalPath)) {
+            add(fs)
+          }
+        }
+      }
+
       val entries = mutableListOf<SubmissionFieldEntry>()
-      evaluatedState.fieldStates.values.forEach { fs ->
+      orderedFieldStates.forEach { fs ->
+        val isContainerNode = fs.dataType == groundplatform.v2.forms.DataType.TYPE_MESSAGE
         val isMetaOrEntityRefField =
           fs.relativePath == "meta/instanceID" ||
             fs.relativePath.startsWith("meta/") ||
@@ -572,8 +615,15 @@ class CompleteFormSubmissionUseCase(
             fs.canonicalPath.endsWith("/meta/instanceID") ||
             fs.canonicalPath == ENTITY_REF_FIELD_PATH ||
             fs.relativePath == "target_entity"
-        if (fs.isRelevant && !fs.isEmpty && !isMetaOrEntityRefField) {
-          val questionName = fs.relativePath.ifBlank { fs.canonicalPath.trimStart('/') }
+        if (!isContainerNode && fs.isRelevant && !fs.isEmpty && !isMetaOrEntityRefField) {
+          val canonicalWithoutRoot =
+            fs.canonicalPath.trimStart('/').substringAfter('/', missingDelimiterValue = "")
+          val questionName =
+            if (canonicalWithoutRoot.contains('[')) {
+              canonicalWithoutRoot
+            } else {
+              fs.relativePath.ifBlank { fs.canonicalPath.trimStart('/') }
+            }
           val questionLabel =
             controlLabelsByPath[fs.canonicalPath]
               ?: fs.canonicalPath.substringAfterLast('/').replace('_', ' ')

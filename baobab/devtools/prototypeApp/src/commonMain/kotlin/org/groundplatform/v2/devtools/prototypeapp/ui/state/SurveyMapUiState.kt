@@ -156,7 +156,7 @@ data class SurveyMapUiState(
   /** Formatted current zoom level badge (e.g. `"15.3z"`). */
   val effectiveMapZoomLabel: String
     get() {
-      val rawZoom = (15.3f + mapZoomDelta).coerceIn(10.0f, 19.0f)
+      val rawZoom = (15.3f + mapZoomDelta).coerceIn(2.0f, 19.0f)
       val tenths = (rawZoom * 10f + 0.5f).toInt()
       return "${tenths / 10}.${tenths % 10}z"
     }

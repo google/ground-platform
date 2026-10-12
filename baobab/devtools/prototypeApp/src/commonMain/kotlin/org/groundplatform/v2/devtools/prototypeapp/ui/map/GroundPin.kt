@@ -40,7 +40,7 @@ object GroundPin {
   /**
    * Renders the pin SVG filled with the CSS [color]. Pending (unsynced) features get a lighter fill
    * with a dashed edge. The [iconName] icon is drawn inside in white, or near-black on light
-   * colors; pins without a known icon keep the pin's small square.
+   * colors; pins without a known icon keep the pin's small white square.
    */
   fun svg(color: String, iconName: String?, isPending: Boolean): String {
     val safeColor = escapeXml(color)
@@ -51,17 +51,17 @@ object GroundPin {
       } else {
         """<path d="$MASK_PATH" fill="$safeColor"></path>"""
       }
-    val argb = parseHexColorOrDefault(color, DEFAULT_COLOR)
-    val content = if (contentColorOnArgb(argb) == 0xFFFFFFFFL) "#FFFFFF" else "#1F1F1F"
     val icon = LayerIcons.forName(iconName)
     val glyph =
       if (icon != null) {
+        val argb = parseHexColorOrDefault(color, DEFAULT_COLOR)
+        val content = if (contentColorOnArgb(argb) == 0xFFFFFFFFL) "#FFFFFF" else "#1F1F1F"
         val offset = 8 - ICON_SIZE / 2
         """<g transform="translate($offset $offset) scale(${ICON_SIZE / 24})">""" +
           LayerIcons.svgPathElements(icon, content) +
           "</g>"
       } else {
-        """<rect fill="$content" x="6" y="6" width="4" height="4" rx="0.666666667"></rect>"""
+        """<rect fill="#FFFFFF" x="6" y="6" width="4" height="4" rx="0.666666667"></rect>"""
       }
     return """<svg width="22px" height="24px" viewBox="0 0 22 24" version="1.1" """ +
       """xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">""" +

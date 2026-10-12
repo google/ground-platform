@@ -17,7 +17,7 @@
 # Entity Datasets and Schemas
 
 Entity Datasets (`EntityDatasetDef` in `survey_def.proto`) define preloaded and
-field-created XForms Entity Lists (datasets) that enumerators can query, create,
+field-created XForms Entity Lists (datasets) that data collectors can query, create,
 or update during data collection. Ground manages Entity Datasets internally,
 which can be populated via CSV or GeoJSON imports.
 
@@ -36,7 +36,7 @@ Ground 2.0 distinguishes between two entity dataset classifications:
 
 Each `EntityDatasetDef` specifies its unique key property (`key_property`),
 human-readable label property (`label_property`), expected spatial geometry type
-(`geometry_type` for `GEOSPATIAL` datasets), whether field enumerators can
+(`geometry_type` for `GEOSPATIAL` datasets), whether field data collectors can
 register new entities on mobile (`field_creation_enabled`), and the typed
 property definitions (`EntityPropertyDefinition`):
 

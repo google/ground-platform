@@ -21,15 +21,15 @@
 During the Lacuna Fund Climate & Forests project (running from September 2024 to
 March 2025), Ground served as the primary field mapping tool for a consortium
 including CERSGIS, SERVIR West Africa, the University of Ghana, and the World
-Resources Institute (WRI). A team of approximately 30 enumerators—consisting of
+Resources Institute (WRI). A team of approximately 30 data collectors—consisting of
 CERSGIS staff, University of Ghana students, and YouthMappers from the
 University of Ghana and University of Cape Coast—mapped **21,031 cocoa
 polygons**.
 
 This effort gathered critical plot-level reference data, including management
 and shade tree attributes, which were subsequently used to train and validate
-Forest Data Partnership (FDaP) cocoa models and support Google's Sustainable
-Supply Chain (SuSo) initiatives. To support open science and data sharing, a
+Forest Data Partnership (FDaP) cocoa models and support sustainable supply
+chain initiatives. To support open science and data sharing, a
 subset of this high-quality field data was published on Zenodo under a CC-BY 4.0
 license, receiving **over 2,000 views and 280 downloads**.
 

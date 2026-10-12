@@ -126,7 +126,7 @@ These are the strongest passive outcome signals. Log each one with purpose, area
 
 The [client audit logs](../technical/model/forms/17-client-audit-logs.md) and submission metadata already let Ground estimate the following without asking anyone:
 
-*   Time per plot, plots per enumerator-day, and rework rate. Comparing against a paper or ODK baseline gives MRV cost and time savings.
+*   Time per plot, plots per data-collector-day, and rework rate. Comparing against a paper or ODK baseline gives MRV cost and time savings.
 *   Share of plots passing EUDR geometry checks, plus the GPS accuracy distribution. This shows the data is good enough to win market access.
 *   Days from field collection to partner submission (timeliness).
 
@@ -193,7 +193,7 @@ The exact conditions, and how scores are counted platform-wide (only surveys wit
 *   **Open-source telemetry**: aggregate impact metrics must be documented, disclosed in the privacy policy, approved through Open Foris governance, and possible to turn off. Self-hosted instances report nothing unless they opt in.
 *   **Organization opt-out**: an organization's Managers can keep its data out of platform-wide numbers (global, country, and map-area totals and organization-suggested indicators) with `Organization.exclude_from_platform_aggregates`. Its own dashboards are unaffected.
 *   **Sensitive locations**: blur or suppress patrol routes, protected area threat reports, and IPLC sacred sites in any public dashboard (poaching and land-grab risk). Apply k-anonymity thresholds to S2 cells.
-*   **Shared credit**: agree on counting rules with FAO and SIG up front, so Google's sustainability goals, FAO reporting, and funder digests use the same deduplicated numbers and nobody double-claims.
+*   **Shared credit**: agree on counting rules with FAO and SIG up front, so institutional sustainability goals, FAO reporting, and funder digests use the same deduplicated numbers and nobody double-claims.
 
 ## Recommended Short List for Ground 2.0
 
@@ -210,7 +210,7 @@ The exact conditions, and how scores are counted platform-wide (only surveys wit
 
 ## Open Questions
 
-*   **Primary audience**: Google's sustainability goals, FAO / Open Foris reporting, or funders? Attribution rules and how conservative the numbers are depend on the answer.
+*   **Primary audience**: institutional sustainability goals, FAO / Open Foris reporting, or funders? Attribution rules and how conservative the numbers are depend on the answer.
 *   **Telemetry posture**: is the Open Foris steering committee comfortable with aggregate impact telemetry being on by default, or should it be opt-in?
 *   **Pillar visibility**: should pillar labels appear anywhere in the open-source UI, or only in partner-side reporting?
 *   **Counterfactuals**: which goal deserves a rigorous evaluation (e.g., EII or matched-control deforestation for Ground-monitored protected areas) as a flagship evidence case?

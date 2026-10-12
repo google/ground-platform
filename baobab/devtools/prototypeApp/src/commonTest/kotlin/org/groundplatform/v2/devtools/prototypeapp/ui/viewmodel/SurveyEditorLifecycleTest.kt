@@ -35,6 +35,7 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SampleGen
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.isoUtc
 import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.SurveyLifecycleFixture
 import org.groundplatform.v2.devtools.prototypeapp.ui.state.SurveyEditorSection
+import org.groundplatform.v2.devtools.prototypeapp.ui.surveyeditor.lifecycleActionOptions
 
 /** Closing, archiving, and reopening a survey from the Survey editor, and the outcome card. */
 class SurveyEditorLifecycleTest {
@@ -199,6 +200,75 @@ class SurveyEditorLifecycleTest {
     assertEquals(PrototypeFakeSurveysData.CLOSED_SURVEY_CLOSED_AT, f.ui.closedAt)
     assertTrue(f.ui.isReadOnly)
     assertNull(f.ui.outcomeCard)
+  }
+
+  @Test
+  fun draftSurvey_isEditable_savesOnTransitionToPublished_andUpdatesSaveActionLabel() {
+    val f = Fixture()
+    assertEquals(SurveyLifecycleState.PUBLISHED, f.ui.lifecycleState)
+    assertFalse(f.ui.isDraft)
+    assertEquals("Publish changes", f.ui.saveActionLabel)
+
+    // Switch to DRAFT mode while holding a working edit: working edit is preserved.
+    f.viewModel.updateDetails { it.copy(title = "Draft title in progress") }
+    assertTrue(f.ui.hasUnpublishedChanges)
+    f.viewModel.setLifecycleState(SurveyLifecycleState.DRAFT)
+
+    assertEquals(SurveyLifecycleState.DRAFT, f.ui.lifecycleState)
+    assertTrue(f.ui.isDraft)
+    assertFalse(f.ui.isReadOnly)
+    assertEquals("Save draft", f.ui.saveActionLabel)
+    assertEquals("Draft title in progress", f.ui.details.title)
+    assertTrue(f.ui.hasUnpublishedChanges)
+
+    // Switching from DRAFT to PUBLISHED commits pending working edits and updates the save label.
+    f.viewModel.setLifecycleState(SurveyLifecycleState.PUBLISHED)
+    assertEquals(SurveyLifecycleState.PUBLISHED, f.ui.lifecycleState)
+    assertFalse(f.ui.isDraft)
+    assertEquals("Publish changes", f.ui.saveActionLabel)
+    assertEquals("Draft title in progress", f.ui.details.title)
+    assertFalse(f.ui.hasUnpublishedChanges)
+  }
+
+  @Test
+  fun lifecycleActionOptions_providesExpectedTransitionsForEachState() {
+    val draftOptions = lifecycleActionOptions(SurveyLifecycleState.DRAFT)
+    assertEquals(
+      listOf(SurveyLifecycleState.PUBLISHED, SurveyLifecycleState.ARCHIVED),
+      draftOptions.map { it.targetState },
+    )
+    assertEquals("Publish survey", draftOptions.first().label)
+    assertFalse(draftOptions.first().requiresConfirmation)
+
+    val publishedOptions = lifecycleActionOptions(SurveyLifecycleState.PUBLISHED)
+    assertEquals(
+      listOf(
+        SurveyLifecycleState.DRAFT,
+        SurveyLifecycleState.CLOSED,
+        SurveyLifecycleState.ARCHIVED,
+      ),
+      publishedOptions.map { it.targetState },
+    )
+    assertEquals("Switch to draft", publishedOptions.first().label)
+    assertFalse(publishedOptions.first().requiresConfirmation)
+
+    val closedOptions = lifecycleActionOptions(SurveyLifecycleState.CLOSED)
+    assertEquals(
+      listOf(
+        SurveyLifecycleState.PUBLISHED,
+        SurveyLifecycleState.DRAFT,
+        SurveyLifecycleState.ARCHIVED,
+      ),
+      closedOptions.map { it.targetState },
+    )
+    assertEquals("Reopen survey", closedOptions.first().label)
+
+    val archivedOptions = lifecycleActionOptions(SurveyLifecycleState.ARCHIVED)
+    assertEquals(
+      listOf(SurveyLifecycleState.PUBLISHED, SurveyLifecycleState.DRAFT),
+      archivedOptions.map { it.targetState },
+    )
+    assertEquals("Reopen survey", archivedOptions.first().label)
   }
 
   @Test

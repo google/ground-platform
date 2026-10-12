@@ -73,6 +73,7 @@ fun SurveyEditorDraft.publishedForm(entry: SurveyEditorForm): FormDefinition {
     SaveToRules.saveTarget(entry.form, catalog),
     inlineRows = true,
     datasets = catalog,
+    defaultLanguage = details.defaultLanguage,
   )
 }
 

@@ -167,8 +167,8 @@ object ConceptLinking {
   fun questionTypeFor(type: ConceptDataType): EditorQuestionType =
     when (type) {
       ConceptDataType.TEXT -> EditorQuestionType.TEXT
-      ConceptDataType.INTEGER -> EditorQuestionType.INTEGER
-      ConceptDataType.DECIMAL -> EditorQuestionType.DECIMAL
+      ConceptDataType.INTEGER,
+      ConceptDataType.DECIMAL -> EditorQuestionType.NUMBER
       ConceptDataType.DATE -> EditorQuestionType.DATE
       ConceptDataType.SELECT_ONE -> EditorQuestionType.SELECT_ONE
       ConceptDataType.SELECT_MULTIPLE -> EditorQuestionType.SELECT_MULTIPLE
@@ -179,9 +179,14 @@ object ConceptLinking {
     }
 
   /** Concept type matching a question of [type], or `null` for notes. */
-  fun conceptTypeFor(type: EditorQuestionType): ConceptDataType? =
-    ConceptDataType.entries.firstOrNull { questionTypeFor(it) == type }
-      ?: ConceptDataType.entries.firstOrNull { it.isCompatibleWith(type) }
+  fun conceptTypeFor(type: EditorQuestionType, decimalPlaces: Int = 0): ConceptDataType? =
+    when (type) {
+      EditorQuestionType.NUMBER ->
+        if (decimalPlaces > 0) ConceptDataType.DECIMAL else ConceptDataType.INTEGER
+      else ->
+        ConceptDataType.entries.firstOrNull { questionTypeFor(it) == type }
+          ?: ConceptDataType.entries.firstOrNull { it.isCompatibleWith(type) }
+    }
 
   private val DEFAULT_CHOICE_VALUES = listOf("option_1", "option_2")
 
@@ -191,12 +196,20 @@ object ConceptLinking {
    * logic, or link. Linking a concept to a question in this state also sets its settings.
    */
   fun isDefaultState(question: EditorQuestion): Boolean {
-    val defaultName = Regex("^${Regex.escape(question.type.defaultNamePrefix)}(_\\d+)?$")
+    val allowedPrefixes =
+      if (question.type == EditorQuestionType.NUMBER) {
+        setOf(question.type.defaultNamePrefix, "count", "amount")
+      } else {
+        setOf(question.type.defaultNamePrefix)
+      }
+    val defaultName = allowedPrefixes.any { prefix ->
+      Regex("^${Regex.escape(prefix)}(_\\d+)?$").matches(question.name)
+    }
     val defaultChoices =
       question.choices.isEmpty() ||
         (question.choices.map { it.value } == DEFAULT_CHOICE_VALUES &&
           question.choices.all { it.colorHex == null && it.image == null && it.code == null })
-    return defaultName.matches(question.name) &&
+    return defaultName &&
       question.hint.isBlank() &&
       !question.required &&
       defaultChoices &&
@@ -217,6 +230,7 @@ object ConceptLinking {
     concept: LibraryConcept,
     takenNames: Set<String>,
     language: String,
+    supportedLanguages: List<String> = emptyList(),
   ): EditorQuestion {
     val linked = question.copy(conceptLink = ConceptLink.to(concept))
     if (!isDefaultState(question)) {
@@ -225,11 +239,38 @@ object ConceptLinking {
     val type =
       if (concept.dataType.isCompatibleWith(question.type)) question.type
       else questionTypeFor(concept.dataType)
+    val decimalPlaces =
+      when (concept.dataType) {
+        ConceptDataType.DECIMAL ->
+          if (question.decimalPlaces > 0) question.decimalPlaces
+          else EditorQuestion.DEFAULT_DECIMAL_PLACES
+        ConceptDataType.INTEGER -> 0
+        else -> question.decimalPlaces
+      }
     val name = uniqueName(LibraryIds.nameOf(concept.id), takenNames - question.name)
+    val otherLanguages =
+      supportedLanguages
+        .map { it.trim() }
+        .filter { it.isNotEmpty() && !it.equals(language, ignoreCase = true) }
+        .distinct()
     val choices =
       if (type.hasChoices) {
-        concept.codeList.map {
-          EditorChoice(value = it.code, label = it.label.get(language), code = it.code)
+        concept.codeList.map { item ->
+          val translations =
+            otherLanguages
+              .mapNotNull { lang ->
+                val raw =
+                  item.label.values[lang]
+                    ?: item.label.values[lang.substringBefore('-').substringBefore('_').lowercase()]
+                raw?.takeIf { it.isNotBlank() }?.let { lang to it }
+              }
+              .toMap()
+          EditorChoice(
+            value = item.code,
+            label = item.label.get(language),
+            code = item.code,
+            labelTranslations = translations,
+          )
         }
       } else {
         emptyList()
@@ -239,6 +280,7 @@ object ConceptLinking {
       else null
     return linked.copy(
       type = type,
+      decimalPlaces = decimalPlaces,
       name = if (FormEditorValidator.isValidName(name)) name else question.name,
       choices = choices.ifEmpty { if (type.hasChoices) question.choices else emptyList() },
       hint = unitHint(concept.unit),
@@ -319,12 +361,18 @@ object ConceptLinkValidator {
         continue
       }
       val label = concept.label.text
-      if (!concept.dataType.isCompatibleWith(question.type)) {
+      if (!concept.dataType.isCompatibleWith(question)) {
+        val actualLabel =
+          if (question.type == EditorQuestionType.NUMBER && question.decimalPlaces > 0) {
+            "decimal"
+          } else {
+            question.type.label.lowercase()
+          }
         warnings +=
           warning(
             question,
             "\"$label\" expects ${concept.dataType.label.lowercase()} answers, but this is a " +
-              "${question.type.label.lowercase()} question.",
+              "$actualLabel question.",
           )
       }
       if (concept.isDeprecated) {

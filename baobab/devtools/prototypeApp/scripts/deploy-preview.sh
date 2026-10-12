@@ -67,7 +67,7 @@ done
 
 # Ensure node and npx are on PATH
 if ! command -v node &>/dev/null || ! command -v npx &>/dev/null; then
-  GRADLE_NODE_DIR="$(ls -d /usr/local/google/home/gmiceli/.gradle/nodejs/node-*/bin 2>/dev/null | head -n 1 || true)"
+  GRADLE_NODE_DIR="$(ls -d "${HOME}"/.gradle/nodejs/node-*/bin 2>/dev/null | head -n 1 || true)"
   if [[ -n "${GRADLE_NODE_DIR}" && -d "${GRADLE_NODE_DIR}" ]]; then
     export PATH="${GRADLE_NODE_DIR}:${PATH}"
   fi

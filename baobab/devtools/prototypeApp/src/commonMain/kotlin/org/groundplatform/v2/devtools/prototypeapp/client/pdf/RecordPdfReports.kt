@@ -49,7 +49,7 @@ internal object RecordPdfReports {
       PdfReportLayout(
         title = "${entity.label} • ${entity.singularTypeLabel}",
         subject = "$surveyTitle • ${entity.datasetName}",
-        runningHeader = "Ground • $surveyTitle",
+        runningHeader = "Open Foris Collect One • $surveyTitle",
         footerNote = "${entity.singularTypeLabel} report • Generated $generatedAt",
       )
     with(layout) {
@@ -67,7 +67,6 @@ internal object RecordPdfReports {
       field("Geometry", entityGeometrySummary(entity, unitSystem))
       field("GeoID", entity.geoId, mono = true)
       if (entity.coordinatesLabel.isNotBlank()) field("Coordinates", entity.coordinatesLabel)
-      field("Record ID", entity.id, mono = true)
 
       if (geometry != null && entity.geometryKind != EntityGeometryKind.NONE) {
         sectionHeading("Location")
@@ -95,7 +94,7 @@ internal object RecordPdfReports {
         sectionHeading("Properties")
         properties.forEach { (key, value) ->
           val related = relatedLabelFor(value)
-          field(key, if (related != null) "$related ($value)" else value)
+          field(key, related ?: value)
         }
       }
 
@@ -108,7 +107,7 @@ internal object RecordPdfReports {
           text = "${submission.formTitle} • ${submission.timestamp}",
           meta =
             "Collected by ${submission.collectorName} • " +
-              "Form version ${submission.formVersion} • ${submission.id}",
+              "Form version ${submission.formVersion}",
         )
         responses(submission.fields)
         spacer(6f)
@@ -129,8 +128,8 @@ internal object RecordPdfReports {
       PdfReportLayout(
         title = "${submission.formTitle} • ${submission.timestamp}",
         subject = surveyTitle,
-        runningHeader = "Ground • $surveyTitle",
-        footerNote = "Submission ${submission.id} • Generated $generatedAt",
+        runningHeader = "Open Foris Collect One • $surveyTitle",
+        footerNote = "Submission report • Generated $generatedAt",
       )
     with(layout) {
       title(submission.formTitle)
@@ -150,7 +149,6 @@ internal object RecordPdfReports {
       field("Data collector", "${submission.collectorName} (${submission.collectorEmail})")
       field("Collected", submission.timestamp)
       field("Form version", submission.formVersion, mono = true)
-      field("Submission ID", submission.id, mono = true)
 
       sectionHeading("Responses")
       if (submission.fields.isEmpty()) {

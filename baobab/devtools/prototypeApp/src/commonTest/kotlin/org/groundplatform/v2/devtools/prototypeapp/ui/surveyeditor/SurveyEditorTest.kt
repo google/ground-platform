@@ -341,9 +341,12 @@ class SurveyEditorTest {
     assertEquals("Othaya Sub-County, Nyeri", initialArea.name)
     assertEquals(4, initialArea.vertexCount)
 
-    // Clear survey area
+    // Clear survey area: flags a survey details validation issue and blocks publishing
     state.setSurveyArea(null)
     assertNull(state.ui.details.surveyArea)
+    assertEquals(listOf("A survey area is required."), state.ui.detailsIssues)
+    assertEquals(1, state.ui.issueCount)
+    assertFalse(state.ui.canPublish)
 
     // Set a new survey area
     val customArea =
@@ -367,6 +370,9 @@ class SurveyEditorTest {
     assertEquals(4, updated.vertexCount)
     assertEquals(-0.4258, updated.center.lat)
     assertEquals(36.9574, updated.center.lng)
+    assertEquals(emptyList(), state.ui.detailsIssues)
+    assertEquals(0, state.ui.issueCount)
+    assertTrue(state.ui.canPublish)
   }
 
   @Test
@@ -450,7 +456,7 @@ class SurveyEditorTest {
     state
       .formEditor(formEntry.key)
       .addQuestion(
-        org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EditorQuestionType.INTEGER
+        org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EditorQuestionType.NUMBER
       )
     val addedQuestion = state.formEditor(formEntry.key).ui.form.questions.last()
     state.syncDatasetsLinkedToForm(formEntry.key)
@@ -942,5 +948,19 @@ class SurveyEditorTest {
       """
         .trimIndent()
     assertNull(FormImportPreview.of("empty.xml", emptyXForm).imported)
+  }
+
+  @Test
+  fun formEditor_updateCtaLabelUpdatesDraft() {
+    val state = surveyEditorViewModel()
+    val formKey = state.ui.forms.first().key
+    val formEditor = state.formEditor(formKey)
+
+    formEditor.updateCtaLabel("Start shade tree audit")
+    assertTrue(state.ui.hasUnpublishedChanges)
+    assertEquals(
+      "Start shade tree audit",
+      state.ui.forms.first { it.key == formKey }.form.effectiveCtaLabel,
+    )
   }
 }

@@ -164,11 +164,13 @@ class ImpactViewModelTest {
       listOf(
         "impact-summary-all-form-field-types-showcase-kenya-coffee.pdf",
         "impact-summary-kenya-forest-service.pdf",
-        "impact-summary-all-ground-users.pdf",
+        "impact-summary-all-collect-one-users.pdf",
       ),
       f.pdf.saved,
     )
-    assertTrue(f.state.message.orEmpty().startsWith("Saved impact-summary-all-ground-users.pdf"))
+    assertTrue(
+      f.state.message.orEmpty().startsWith("Saved impact-summary-all-collect-one-users.pdf")
+    )
     f.viewModel.dismissMessage()
     assertNull(f.state.message)
   }

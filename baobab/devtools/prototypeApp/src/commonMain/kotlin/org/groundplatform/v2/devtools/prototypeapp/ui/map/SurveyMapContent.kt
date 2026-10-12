@@ -172,7 +172,7 @@ internal object SurveyMapContent {
   const val OVERLAY_SOURCE = "survey-overlay"
 
   /** Most cluster balloons drawn at once, to keep the marker layer light. */
-  private const val MAX_CLUSTER_MARKERS = 60
+  private const val MAX_CLUSTER_MARKERS = 120
 
   /** The main survey map (mobile and web dashboard), built from the app shell. */
   fun main(state: PrototypeAppState, showNavigation: Boolean): SurveyMap =

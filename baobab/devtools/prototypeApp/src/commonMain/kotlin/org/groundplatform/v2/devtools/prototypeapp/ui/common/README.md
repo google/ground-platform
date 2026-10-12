@@ -1,5 +1,5 @@
 <!--
- Copyright 2026 Google LLC
+ Copyright 2026 The Ground Authors.
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ Components in `ui/common/` have no coupling to a single feature's `*UiState` or 
 
 - **Design System & Visual Widgets**:
   - `GroundChips.kt`, `GeoIdText.kt`, `GoogleLogo.kt`: Shared typography, status chips, formatted Geo ID badges, and branding elements.
+  - `UserAvatarProfileMenu.kt`: Top-right circular user avatar button and `UserProfileCard` account popup menu (user name, email, organization affiliation, and sign-out action) shared across mobile and web app bars.
   - `PurposePickers.kt`: Purpose Pack card grid and program chips, shared by the Create survey dialog and Survey details.
   - `HorizontalScrollWithMouseDrag.kt`: Pointer-input modifier enabling click-and-drag horizontal scrolling on desktop/web targets.
 - **Foreground UI Platform Bridges (`expect` / `actual`)**:

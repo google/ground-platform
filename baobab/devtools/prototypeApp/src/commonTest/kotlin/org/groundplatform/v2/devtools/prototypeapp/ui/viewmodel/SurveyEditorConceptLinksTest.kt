@@ -86,8 +86,9 @@ class SurveyEditorConceptLinksTest {
             EditorQuestion(
               "q1",
               "area",
-              EditorQuestionType.DECIMAL,
+              EditorQuestionType.NUMBER,
               "Size",
+              decimalPlaces = EditorQuestion.DEFAULT_DECIMAL_PLACES,
               conceptLink = ConceptLink("core.area_ha", 1),
             ),
             EditorQuestion(

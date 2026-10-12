@@ -41,6 +41,7 @@ import groundplatform.v2.forms.ViewDef
 import org.groundplatform.v2.core.forms.model.FormDefinition
 import org.groundplatform.v2.core.forms.model.secondaryInstanceRow
 import org.groundplatform.v2.core.forms.serialization.XFormsXmlSerializer
+import org.groundplatform.v2.core.forms.ui.ChoiceImageRegistry
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.ConceptLink
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.FormAvailability
 
@@ -76,16 +77,15 @@ enum class EditorQuestionType(
    */
   val isGeometry: Boolean = false,
 ) {
-  TEXT("Text", "text", bindType = "string", bodyElement = "input"),
+  TEXT("Short text", "text", bindType = "string", bodyElement = "input"),
   LONG_TEXT(
-    "Long text",
+    "Paragraph",
     "notes",
     bindType = "string",
     bodyElement = "input",
     appearance = "multiline",
   ),
-  INTEGER("Integer", "count", bindType = "int", bodyElement = "input", isNumeric = true),
-  DECIMAL("Decimal", "amount", bindType = "decimal", bodyElement = "input", isNumeric = true),
+  NUMBER("Number", "number", bindType = "int", bodyElement = "input", isNumeric = true),
   SELECT_ONE(
     "Select one",
     "choice",
@@ -167,7 +167,35 @@ data class EditorChoice(
   val image: EditorChoiceImage? = null,
   val colorHex: String? = null,
   val code: String? = null,
-)
+  /** Translations of [label] keyed by language code (excluding the survey's default language). */
+  val labelTranslations: Map<String, String> = emptyMap(),
+) {
+  /**
+   * Returns the raw label authored for [language], or [label] when [language] is blank or matches
+   * [defaultLanguage].
+   */
+  fun labelIn(language: String, defaultLanguage: String = "default"): String =
+    if (isDefaultEditorLanguage(language, defaultLanguage)) {
+      label
+    } else {
+      lookupEditorTranslation(labelTranslations, language).orEmpty()
+    }
+
+  /**
+   * Returns the label to display in [language], falling back to the default [label] when no
+   * translation has been entered yet.
+   */
+  fun displayLabel(language: String, defaultLanguage: String = "default"): String =
+    labelIn(language, defaultLanguage).ifBlank { label }
+
+  /** Returns a copy with the label for [language] set to [value]. */
+  fun withLabelIn(language: String, defaultLanguage: String, value: String): EditorChoice =
+    if (isDefaultEditorLanguage(language, defaultLanguage)) {
+      copy(label = value)
+    } else {
+      copy(labelTranslations = updateEditorTranslationMap(labelTranslations, language, value))
+    }
+}
 
 /**
  * An attribute of a question's XForms `<bind>` in a namespace the editor doesn't model (another
@@ -316,6 +344,11 @@ data class EditorQuestion(
   /** Answer validation, exported as the bind `constraint` / `jr:constraintMsg`. */
   val validation: EditorValidation? = null,
   /**
+   * Number of decimal places allowed for a [EditorQuestionType.NUMBER] question (`0` means whole
+   * numbers / integer; `> 0` means decimal). Ignored for non-numeric question types.
+   */
+  val decimalPlaces: Int = 0,
+  /**
    * How collectors record the answer of a geometry question ([EditorQuestionType.isGeometry]);
    * ignored for other types. Exported as the body `appearance`.
    */
@@ -333,9 +366,84 @@ data class EditorQuestion(
   val conceptLink: ConceptLink? = null,
   /** Unmodeled `<bind>` attributes kept for round-trip fidelity. */
   val foreignAttributes: List<EditorForeignAttribute> = emptyList(),
+  /** Translations of [label] keyed by language code (excluding the survey's default language). */
+  val labelTranslations: Map<String, String> = emptyMap(),
+  /** Translations of [hint] keyed by language code (excluding the survey's default language). */
+  val hintTranslations: Map<String, String> = emptyMap(),
 ) {
+  /**
+   * Returns the raw label authored for [language], or [label] when [language] is blank or matches
+   * [defaultLanguage].
+   */
+  fun labelIn(language: String, defaultLanguage: String = "default"): String =
+    if (isDefaultEditorLanguage(language, defaultLanguage)) {
+      label
+    } else {
+      lookupEditorTranslation(labelTranslations, language).orEmpty()
+    }
+
+  /**
+   * Returns the label to display in [language], falling back to the default [label] when no
+   * translation has been entered yet.
+   */
+  fun displayLabel(language: String, defaultLanguage: String = "default"): String =
+    labelIn(language, defaultLanguage).ifBlank { label }
+
+  /** Returns a copy with the label for [language] set to [value]. */
+  fun withLabelIn(language: String, defaultLanguage: String, value: String): EditorQuestion =
+    if (isDefaultEditorLanguage(language, defaultLanguage)) {
+      copy(label = value)
+    } else {
+      copy(labelTranslations = updateEditorTranslationMap(labelTranslations, language, value))
+    }
+
+  /**
+   * Returns the raw hint authored for [language], or [hint] when [language] is blank or matches
+   * [defaultLanguage].
+   */
+  fun hintIn(language: String, defaultLanguage: String = "default"): String =
+    if (isDefaultEditorLanguage(language, defaultLanguage)) {
+      hint
+    } else {
+      lookupEditorTranslation(hintTranslations, language).orEmpty()
+    }
+
+  /**
+   * Returns the hint to display in [language], falling back to the default [hint] when no
+   * translation has been entered yet.
+   */
+  fun displayHint(language: String, defaultLanguage: String = "default"): String =
+    hintIn(language, defaultLanguage).ifBlank { hint }
+
+  /** Returns a copy with the hint for [language] set to [value]. */
+  fun withHintIn(language: String, defaultLanguage: String, value: String): EditorQuestion =
+    if (isDefaultEditorLanguage(language, defaultLanguage)) {
+      copy(hint = value)
+    } else {
+      copy(hintTranslations = updateEditorTranslationMap(hintTranslations, language, value))
+    }
+
   val isConditional: Boolean
     get() = relevance != null
+
+  /**
+   * Whether this is a [EditorQuestionType.NUMBER] question that only allows whole numbers (`0`
+   * decimal places).
+   */
+  val isInteger: Boolean
+    get() = type == EditorQuestionType.NUMBER && decimalPlaces <= 0
+
+  /** Whether this is a [EditorQuestionType.NUMBER] question that allows decimal places (`> 0`). */
+  val isDecimal: Boolean
+    get() = type == EditorQuestionType.NUMBER && decimalPlaces > 0
+
+  companion object {
+    /** Maximum number of decimal places configurable in the editor. */
+    const val MAX_DECIMAL_PLACES = 9
+
+    /** Default number of decimal places for decimal number questions. */
+    const val DEFAULT_DECIMAL_PLACES = MAX_DECIMAL_PLACES
+  }
 
   /**
    * Whether this question pulls its choices from a Map layer or Data table rather than [choices].
@@ -376,6 +484,39 @@ data class EditorQuestion(
     get() = type.isGeometry && capture == GeometryCapture.GPS_ONLY
 }
 
+private fun isDefaultEditorLanguage(language: String, defaultLanguage: String): Boolean =
+  language.isBlank() ||
+    language.equals("default", ignoreCase = true) ||
+    (defaultLanguage.isNotBlank() && language.equals(defaultLanguage, ignoreCase = true))
+
+private fun lookupEditorTranslation(map: Map<String, String>, language: String): String? {
+  if (map.isEmpty() || language.isBlank()) return null
+  map[language]?.let {
+    return it
+  }
+  map.entries
+    .firstOrNull { it.key.equals(language, ignoreCase = true) }
+    ?.value
+    ?.let {
+      return it
+    }
+  val base = language.substringBefore('-').substringBefore('_').lowercase()
+  return map.entries
+    .firstOrNull { it.key.substringBefore('-').substringBefore('_').lowercase() == base }
+    ?.value
+}
+
+private fun updateEditorTranslationMap(
+  map: Map<String, String>,
+  language: String,
+  value: String,
+): Map<String, String> {
+  val key = language.trim()
+  if (key.isEmpty()) return map
+  val filtered = map.filterKeys { !it.equals(key, ignoreCase = true) }
+  return if (value.isEmpty()) filtered else filtered + (key to value)
+}
+
 /** The whole Form being edited. */
 data class EditorForm(
   val formId: String,
@@ -388,7 +529,29 @@ data class EditorForm(
    * on web** in Form settings to offer the Form in the web dashboard too.
    */
   val availability: FormAvailability = FormAvailability.MOBILE,
+  /**
+   * Custom label shown on buttons that start data collection for this Form. When blank, buttons
+   * fall back to [title] via [effectiveCtaLabel].
+   */
+  val ctaLabel: String = "",
 ) {
+  /** Label shown on buttons that start data collection for this Form. */
+  val effectiveCtaLabel: String
+    get() = ctaLabel.trim().ifEmpty { title }
+
+  /** Language codes present in any question's or choice's non-blank translations. */
+  val translationLanguages: List<String>
+    get() =
+      questions
+        .flatMap { q ->
+          q.labelTranslations.filterValues { it.isNotBlank() }.keys +
+            q.hintTranslations.filterValues { it.isNotBlank() }.keys +
+            q.choices.flatMap { c -> c.labelTranslations.filterValues { it.isNotBlank() }.keys }
+        }
+        .map { it.trim() }
+        .filter { it.isNotEmpty() }
+        .distinct()
+
   fun indexOf(key: String): Int = questions.indexOfFirst { it.key == key }
 
   fun find(key: String?): EditorQuestion? = questions.firstOrNull { it.key == key }
@@ -672,6 +835,14 @@ object EditorXFormsGenerator {
   fun choiceImageFileName(question: EditorQuestion, choice: EditorChoice): String? =
     choice.image?.let { "${question.name}-${choice.value}.${it.fileExtension}" }
 
+  private fun choiceImageMediaRef(question: EditorQuestion, choice: EditorChoice): MediaRef? {
+    val img = choice.image ?: return null
+    val fileName = choiceImageFileName(question, choice) ?: return null
+    val imageUri = "jr://images/$fileName"
+    ChoiceImageRegistry.register(imageUri = imageUri, mimeType = img.mimeType, base64 = img.base64)
+    return MediaRef(image_uri = imageUri)
+  }
+
   /** Element name of the extra choices column carrying [EditorChoice.colorHex]. */
   const val CHOICE_COLOR_COLUMN = "color"
 
@@ -700,12 +871,32 @@ object EditorXFormsGenerator {
   /** Secondary instance id (XLSForm `list_name`) for [question]'s choices. */
   fun choiceListName(question: EditorQuestion): String = question.name
 
-  /** Whether [question]'s choice labels go through itext (`itextId`) because of media. */
-  private fun choicesRequireItext(question: EditorQuestion): Boolean =
-    question.choices.any { it.image != null }
+  /**
+   * Whether [question]'s choice labels go through itext (`itextId`) because of media or
+   * multi-language translations.
+   */
+  private fun choicesRequireItext(
+    question: EditorQuestion,
+    hasMultiLanguageTranslations: Boolean = false,
+  ): Boolean = hasMultiLanguageTranslations || question.choices.any { it.image != null }
 
   /** pyxform's positional itext id for choice [index] of [listName], e.g. `fruits-0`. */
   private fun choiceTextId(listName: String, index: Int): String = "$listName-$index"
+
+  private fun questionLabelId(question: EditorQuestion): String = "/data/${question.name}:label"
+
+  private fun questionHintId(question: EditorQuestion): String = "/data/${question.name}:hint"
+
+  private fun choiceInlineTextId(
+    question: EditorQuestion,
+    choice: EditorChoice,
+    index: Int,
+  ): String {
+    val baseVal = choice.value.ifBlank { index.toString() }
+    val suffix =
+      if (question.choices.count { it.value == choice.value } > 1) "${baseVal}_$index" else baseVal
+    return "/data/${question.name}/$suffix:label"
+  }
 
   /**
    * Entity declaration derived from a Form's save-to logic and its target dataset, following the
@@ -775,34 +966,135 @@ object EditorXFormsGenerator {
     target: EditorDataset? = null,
     inlineRows: Boolean = false,
     datasets: List<EditorDataset> = emptyList(),
+    defaultLanguage: String = "default",
   ): FormDefinition {
     val entity = target?.let { EntityPlan(form, it) }
     val choiceInstances = form.questions.filter(::usesChoiceInstance)
-    val itextQuestions = choiceInstances.filter(::choicesRequireItext)
+    val translatedLanguages =
+      form.questions
+        .flatMap { q ->
+          q.labelTranslations.filterValues { it.isNotBlank() }.keys +
+            q.hintTranslations.filterValues { it.isNotBlank() }.keys +
+            q.choices.flatMap { c -> c.labelTranslations.filterValues { it.isNotBlank() }.keys }
+        }
+        .map { it.trim() }
+        .filter { it.isNotEmpty() && !isDefaultEditorLanguage(it, defaultLanguage) }
+        .distinct()
+    val hasMultiLanguageTranslations = translatedLanguages.isNotEmpty()
+    val itextQuestions = choiceInstances.filter {
+      choicesRequireItext(it, hasMultiLanguageTranslations)
+    }
 
+    val effectiveDefaultLang = defaultLanguage.ifBlank { "default" }
     val translations =
-      if (itextQuestions.isNotEmpty()) {
-        val strings = buildMap {
-          itextQuestions.forEach { question ->
-            val listName = choiceListName(question)
-            question.choices.forEachIndexed { index, choice ->
-              val media =
-                choiceImageFileName(question, choice)?.let { fileName ->
-                  MediaRef(image_uri = "jr://images/$fileName")
+      when {
+        hasMultiLanguageTranslations -> {
+          val defaultStrings = buildMap {
+            form.questions.forEach { question ->
+              put(questionLabelId(question), LocalizedString(value_ = question.label))
+              if (
+                question.hint.isNotBlank() ||
+                  question.hintTranslations.any { it.value.isNotBlank() }
+              ) {
+                put(questionHintId(question), LocalizedString(value_ = question.hint))
+              }
+              if (question.type.hasChoices && !question.usesDatasetChoices) {
+                if (usesChoiceInstance(question)) {
+                  val listName = choiceListName(question)
+                  question.choices.forEachIndexed { index, choice ->
+                    val media = choiceImageMediaRef(question, choice)
+                    put(
+                      choiceTextId(listName, index),
+                      LocalizedString(value_ = choice.label, media = media),
+                    )
+                  }
+                } else {
+                  question.choices.forEachIndexed { index, choice ->
+                    put(
+                      choiceInlineTextId(question, choice, index),
+                      LocalizedString(value_ = choice.label),
+                    )
+                  }
                 }
-              put(
-                choiceTextId(listName, index),
-                LocalizedString(value_ = choice.label, media = media),
-              )
+              }
             }
           }
+          val otherTranslations = translatedLanguages.map { lang ->
+            val langStrings = buildMap {
+              form.questions.forEach { question ->
+                question
+                  .labelIn(lang, defaultLanguage)
+                  .takeIf { it.isNotBlank() }
+                  ?.let { put(questionLabelId(question), LocalizedString(value_ = it)) }
+                question
+                  .hintIn(lang, defaultLanguage)
+                  .takeIf { it.isNotBlank() }
+                  ?.let { put(questionHintId(question), LocalizedString(value_ = it)) }
+                if (question.type.hasChoices && !question.usesDatasetChoices) {
+                  if (usesChoiceInstance(question)) {
+                    val listName = choiceListName(question)
+                    question.choices.forEachIndexed { index, choice ->
+                      choice
+                        .labelIn(lang, defaultLanguage)
+                        .takeIf { it.isNotBlank() }
+                        ?.let { translated ->
+                          val media = choiceImageMediaRef(question, choice)
+                          put(
+                            choiceTextId(listName, index),
+                            LocalizedString(value_ = translated, media = media),
+                          )
+                        }
+                    }
+                  } else {
+                    question.choices.forEachIndexed { index, choice ->
+                      choice
+                        .labelIn(lang, defaultLanguage)
+                        .takeIf { it.isNotBlank() }
+                        ?.let { translated ->
+                          put(
+                            choiceInlineTextId(question, choice, index),
+                            LocalizedString(value_ = translated),
+                          )
+                        }
+                    }
+                  }
+                }
+              }
+            }
+            LanguageTranslation(language = lang, is_default = false, strings = langStrings)
+          }
+          TranslationCatalog(
+            languages =
+              listOf(
+                LanguageTranslation(
+                  language = effectiveDefaultLang,
+                  is_default = true,
+                  strings = defaultStrings,
+                )
+              ) + otherTranslations
+          )
         }
-        TranslationCatalog(
-          languages =
-            listOf(LanguageTranslation(language = "default", is_default = true, strings = strings))
-        )
-      } else {
-        null
+        itextQuestions.isNotEmpty() -> {
+          val strings = buildMap {
+            itextQuestions.forEach { question ->
+              val listName = choiceListName(question)
+              question.choices.forEachIndexed { index, choice ->
+                val media = choiceImageMediaRef(question, choice)
+                put(
+                  choiceTextId(listName, index),
+                  LocalizedString(value_ = choice.label, media = media),
+                )
+              }
+            }
+          }
+          TranslationCatalog(
+            languages =
+              listOf(
+                LanguageTranslation(language = "default", is_default = true, strings = strings)
+              )
+          )
+        }
+        else -> null
       }
 
     val schemaFields = buildList {
@@ -812,7 +1104,7 @@ object EditorXFormsGenerator {
         )
       }
       form.questions.forEach { question ->
-        add(FieldDefinition(name = question.name, type = dataTypeOf(question.type)))
+        add(FieldDefinition(name = question.name, type = dataTypeOf(question)))
       }
       if (entity?.hasStatus == true) {
         add(FieldDefinition(name = SaveToRules.STATUS_FIELD, type = DataType.TYPE_STRING))
@@ -846,7 +1138,7 @@ object EditorXFormsGenerator {
         }
       }
       choiceInstances.forEach { question ->
-        val requiresItext = choicesRequireItext(question)
+        val requiresItext = choicesRequireItext(question, hasMultiLanguageTranslations)
         val listName = choiceListName(question)
         val rows =
           question.choices.mapIndexed { index, choice ->
@@ -892,7 +1184,7 @@ object EditorXFormsGenerator {
         add(
           FieldBinding(
             field_path = question.name,
-            type = dataTypeOf(question.type),
+            type = dataTypeOf(question),
             required_expression =
               if (question.required && !question.type.isReadOnly) "true()" else "",
             read_only = question.type.isReadOnly,
@@ -959,7 +1251,7 @@ object EditorXFormsGenerator {
         add(ViewComponent(control = buildTargetPickerControl(entity.target)))
       }
       form.questions.forEach { question ->
-        add(ViewComponent(control = buildQuestionControl(question)))
+        add(ViewComponent(control = buildQuestionControl(question, hasMultiLanguageTranslations)))
       }
     }
 
@@ -969,6 +1261,7 @@ object EditorXFormsGenerator {
           form_id = form.formId,
           title = form.title,
           version = "1",
+          default_language = if (hasMultiLanguageTranslations) effectiveDefaultLang else "",
           model =
             ModelDef(
               primary_instance = primaryInstance,
@@ -992,19 +1285,27 @@ object EditorXFormsGenerator {
     target: EditorDataset? = null,
     inlineRows: Boolean = false,
     datasets: List<EditorDataset> = emptyList(),
+    defaultLanguage: String = "default",
   ): String =
     XFormsXmlSerializer.serialize(
-      compile(form = form, target = target, inlineRows = inlineRows, datasets = datasets).proto,
+      compile(
+          form = form,
+          target = target,
+          inlineRows = inlineRows,
+          datasets = datasets,
+          defaultLanguage = defaultLanguage,
+        )
+        .proto,
       prettyPrint = true,
     )
 
-  private fun dataTypeOf(type: EditorQuestionType): DataType =
-    when (type) {
+  private fun dataTypeOf(question: EditorQuestion): DataType =
+    when (question.type) {
       EditorQuestionType.TEXT,
       EditorQuestionType.LONG_TEXT,
       EditorQuestionType.NOTE -> DataType.TYPE_STRING
-      EditorQuestionType.INTEGER -> DataType.TYPE_INT32
-      EditorQuestionType.DECIMAL -> DataType.TYPE_DOUBLE
+      EditorQuestionType.NUMBER ->
+        if (question.decimalPlaces <= 0) DataType.TYPE_INT32 else DataType.TYPE_DOUBLE
       EditorQuestionType.SELECT_ONE -> DataType.TYPE_SELECT_ONE
       EditorQuestionType.SELECT_MULTIPLE -> DataType.TYPE_SELECT_MULTIPLE
       EditorQuestionType.DATE -> DataType.TYPE_DATE
@@ -1165,7 +1466,10 @@ object EditorXFormsGenerator {
     )
   }
 
-  private fun buildQuestionControl(question: EditorQuestion): ControlDef {
+  private fun buildQuestionControl(
+    question: EditorQuestion,
+    hasMultiLanguageTranslations: Boolean = false,
+  ): ControlDef {
     val type = question.type
     val choiceDatasetId =
       question.choiceDatasetId?.takeIf {
@@ -1185,23 +1489,48 @@ object EditorXFormsGenerator {
             instance_id = choiceListName(question),
             nodeset_path = "/root/item",
             value_ref = "name",
-            label_ref = if (choicesRequireItext(question)) "jr:itext(itextId)" else "label",
+            label_ref =
+              if (choicesRequireItext(question, hasMultiLanguageTranslations)) "jr:itext(itextId)"
+              else "label",
           )
         else -> null
       }
     val choices =
       if (type.hasChoices && !question.usesDatasetChoices && itemset == null) {
-        question.choices.map { choice ->
-          ChoiceItem(value_ = choice.value, label = LabelDef(text = choice.label))
+        question.choices.mapIndexed { index, choice ->
+          ChoiceItem(
+            value_ = choice.value,
+            label =
+              if (hasMultiLanguageTranslations) {
+                LabelDef(text_id = choiceInlineTextId(question, choice, index))
+              } else {
+                LabelDef(text = choice.label)
+              },
+          )
         }
       } else {
         emptyList()
       }
+    val hasHint =
+      question.hint.isNotBlank() ||
+        (hasMultiLanguageTranslations && question.hintTranslations.any { it.value.isNotBlank() })
     return ControlDef(
       field_ref = question.name,
       type = controlTypeOf(type),
-      label = LabelDef(text = question.label),
-      hint = question.hint.takeIf { it.isNotBlank() }?.let { LabelDef(text = it) },
+      label =
+        if (hasMultiLanguageTranslations) {
+          LabelDef(text_id = questionLabelId(question))
+        } else {
+          LabelDef(text = question.label)
+        },
+      hint =
+        if (!hasHint) {
+          null
+        } else if (hasMultiLanguageTranslations) {
+          LabelDef(text_id = questionHintId(question))
+        } else {
+          LabelDef(text = question.hint)
+        },
       appearance = bodyAppearance(question).orEmpty(),
       media_type = type.mediaType,
       choices = choices,

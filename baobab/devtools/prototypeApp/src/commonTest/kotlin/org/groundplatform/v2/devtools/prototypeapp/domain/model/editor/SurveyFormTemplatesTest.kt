@@ -123,7 +123,7 @@ class SurveyFormTemplatesTest {
             EditorQuestion(
               "q3",
               "shade_trees",
-              EditorQuestionType.INTEGER,
+              EditorQuestionType.NUMBER,
               "Shade trees",
               conceptLink = ConceptLink("org.$kfs.shade_tree_count"),
             ),

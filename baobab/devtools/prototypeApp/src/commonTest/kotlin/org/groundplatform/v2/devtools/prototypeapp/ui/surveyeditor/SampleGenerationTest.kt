@@ -171,6 +171,12 @@ class SampleGenerationTest {
     val dataset = state.dataset(key)
     assertEquals(GeometryKind.POINT, dataset.geometryKind)
     assertTrue(dataset.rows.all { it.geometry.size == 1 })
+    assertTrue(dataset.rows.all { it.values[SamplePlotProperties.SAMPLE_IDS] == "" })
+    assertTrue(
+      dataset.rows.all {
+        SamplePlotProperties.geotraceSize(it.values[SamplePlotProperties.SAMPLES]!!) == 0
+      }
+    )
   }
 
   @Test
@@ -330,6 +336,53 @@ class SampleGenerationTest {
     val preview =
       MapLayerImportPreview.of("empty.geojson", """{"type":"FeatureCollection","features":[]}""")
     assertNull(preview.plan)
+  }
+
+  @Test
+  fun sampleDesignActionLabel_usesShowAndUpdatePreviewInWizard() {
+    assertEquals(
+      "Show preview",
+      sampleDesignActionLabel(isWizard = true, hasGeneratedPlots = false),
+    )
+    assertEquals(
+      "Update preview",
+      sampleDesignActionLabel(isWizard = true, hasGeneratedPlots = true),
+    )
+    assertEquals(
+      "Generate sample plots",
+      sampleDesignActionLabel(isWizard = false, hasGeneratedPlots = false),
+    )
+    assertEquals(
+      "Regenerate sample plots",
+      sampleDesignActionLabel(isWizard = false, hasGeneratedPlots = true),
+    )
+  }
+
+  @Test
+  fun publish_generatesDeferredAndStaleSamplePlots() {
+    val state = newState()
+    val key = state.addGridLayer()
+
+    assertTrue(state.dataset(key).rows.isEmpty())
+    assertNull(state.dataset(key).generator?.lastRun)
+
+    state.publish()
+
+    val initialCount = state.dataset(key).rows.size
+    assertTrue(initialCount > 0)
+    assertNotNull(state.dataset(key).generator?.lastRun)
+    assertFalse(state.isDesignStale(state.dataset(key)))
+
+    // Changing the design marks it stale without regenerating until the draft is saved/published.
+    state.updateSampleDesign(key) { it.copy(gridSpacingM = 1500.0) }
+    assertEquals(initialCount, state.dataset(key).rows.size)
+    assertTrue(state.isDesignStale(state.dataset(key)))
+
+    state.publish()
+
+    val updatedCount = state.dataset(key).rows.size
+    assertTrue(updatedCount in 1..<initialCount)
+    assertFalse(state.isDesignStale(state.dataset(key)))
   }
 
   private class FailingEngine(private val message: String) : SamplingEngine {

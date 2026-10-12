@@ -129,7 +129,7 @@ class MediaCaptureWidgetsTest {
     assertEquals("0:05", formatMediaDuration(4_600))
     assertEquals("1:02:03", formatMediaDuration(3_723_000))
     assertEquals(
-      "Accepts image/* · Max 1024 px · Capture only · Front camera",
+      "Max 1024 px · Capture only · Front camera",
       describeMediaConstraints(
         MediaCaptureSpec(
           kind = MediaCaptureKind.PHOTO,
@@ -141,7 +141,7 @@ class MediaCaptureWidgetsTest {
       ),
     )
     assertEquals(
-      "Accepts video/*",
+      "",
       describeMediaConstraints(MediaCaptureSpec(MediaCaptureKind.VIDEO, "video/*")),
     )
     assertEquals("Capture only", mediaSourceModeLabel(captureOnly = true))

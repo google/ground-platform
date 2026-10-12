@@ -71,6 +71,9 @@ interface SurveyRepository {
     transform: (SurveyPreviewItem) -> SurveyPreviewItem,
   ): SurveyPreviewItem?
 
+  /** Deletes the survey with [surveyId] and all of its content. */
+  suspend fun deleteSurvey(surveyId: String)
+
   suspend fun setSurveyDownloaded(surveyId: String, downloaded: Boolean): SurveyPreviewItem?
 
   /**

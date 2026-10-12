@@ -83,6 +83,7 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EditorQue
 import org.groundplatform.v2.devtools.prototypeapp.ui.state.ConceptSuggestion
 import org.groundplatform.v2.devtools.prototypeapp.ui.state.ConceptSuggestionsState
 import org.groundplatform.v2.devtools.prototypeapp.ui.state.FormEditorUiState
+import org.groundplatform.v2.devtools.prototypeapp.ui.surveyeditor.IsoLanguages
 import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.FormEditorActions
 
 /** How long typing must pause before the label is searched for standard fields. */
@@ -102,23 +103,41 @@ internal fun ConceptLabelField(
 ) {
   val key = question.key
   val isNote = question.type == EditorQuestionType.NOTE
+  val activeLang = uiState.activeLanguage
+  val defaultLang = uiState.defaultLanguage
+  val isDefaultLang = uiState.isDefaultLanguageSelected
+  val currentLabel = question.labelIn(activeLang, defaultLang)
+  val activeLangName = IsoLanguages.findByCode(activeLang)?.name ?: activeLang
   // Only the designer's typing searches; selecting a question with a label doesn't.
-  var edited by remember(key) { mutableStateOf(false) }
-  LaunchedEffect(key, question.label, edited) {
+  var edited by remember(key, activeLang) { mutableStateOf(false) }
+  LaunchedEffect(key, activeLang, currentLabel, edited) {
     if (!edited || isNote) return@LaunchedEffect
     delay(SUGGESTION_DEBOUNCE_MS)
-    actions.requestConceptSuggestions(key, question.label)
+    actions.requestConceptSuggestions(key, currentLabel)
   }
   val suggestions =
     uiState.conceptSuggestions?.takeIf { it.questionKey == key && !it.isExplicitSearch }
   Box {
     OutlinedTextField(
-      value = question.label,
+      value = currentLabel,
       onValueChange = { v ->
         edited = true
-        actions.updateQuestion(key) { it.copy(label = v) }
+        actions.updateQuestionLabel(key, v)
       },
-      label = { Text(if (isNote) "Note text" else "Label") },
+      label = {
+        Text(
+          when {
+            isDefaultLang -> if (isNote) "Note text" else "Label"
+            else -> if (isNote) "Note text ($activeLangName)" else "Label ($activeLangName)"
+          }
+        )
+      },
+      placeholder =
+        if (!isDefaultLang && question.label.isNotBlank()) {
+          { Text(question.label) }
+        } else {
+          null
+        },
       minLines = 2,
       modifier =
         Modifier.fillMaxWidth().onPreviewKeyEvent { event ->
@@ -243,8 +262,9 @@ internal fun ConceptLinkChip(
 ) {
   val link = question.conceptLink ?: return
   val concept = uiState.conceptOf(question)
-  val language = uiState.library.language
+  val language = uiState.activeLanguage
   val standardLabel = concept?.label?.get(language)
+  val currentQuestionLabel = question.displayLabel(uiState.activeLanguage, uiState.defaultLanguage)
   Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
     Row(
       verticalAlignment = Alignment.CenterVertically,
@@ -283,7 +303,9 @@ internal fun ConceptLinkChip(
         Icon(Icons.Outlined.LinkOff, contentDescription = "Unlink standard field")
       }
     }
-    if (standardLabel != null && standardLabel.isNotBlank() && standardLabel != question.label) {
+    if (
+      standardLabel != null && standardLabel.isNotBlank() && standardLabel != currentQuestionLabel
+    ) {
       TextButton(onClick = { actions.useStandardLabel(question.key) }) {
         Text(
           "Use standard label \"$standardLabel\"",

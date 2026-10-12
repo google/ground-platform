@@ -89,6 +89,7 @@ internal fun WebSurveysPage(
   state: PrototypeAppState,
   onOpenSurvey: (surveyId: String) -> Unit,
   onCreateSurvey: (CreateSurveyRequest) -> Unit,
+  onOpenCreateSurveyWizard: (() -> Unit)? = { state.openCreateSurveyWizard() },
   onSignOut: () -> Unit = { state.signOut() },
 ) {
   val uiState by state.dashboard.uiState.collectAsState()
@@ -97,6 +98,7 @@ internal fun WebSurveysPage(
     uiState = uiState,
     onOpenSurvey = onOpenSurvey,
     onCreateSurvey = onCreateSurvey,
+    onOpenCreateSurveyWizard = onOpenCreateSurveyWizard,
     outcomePrompt = outcomePrompt,
     outcomeActions = state.surveyOutcomePrompt,
     header = { onCreateSurveyClick ->
@@ -139,6 +141,7 @@ internal fun WebSurveysPage(
   onOpenSurvey: (surveyId: String) -> Unit,
   onCreateSurvey: (CreateSurveyRequest) -> Unit,
   header: @Composable (onCreateSurveyClick: () -> Unit) -> Unit,
+  onOpenCreateSurveyWizard: (() -> Unit)? = null,
   outcomePrompt: SurveyOutcomePromptUiState = SurveyOutcomePromptUiState(),
   outcomeActions: SurveyOutcomePromptActions? = null,
 ) {
@@ -153,7 +156,13 @@ internal fun WebSurveysPage(
   val sections = WebSurveysList.sections(visible, organizations)
 
   Column(modifier = Modifier.fillMaxSize()) {
-    header { isCreating = true }
+    header {
+      if (onOpenCreateSurveyWizard != null) {
+        onOpenCreateSurveyWizard()
+      } else {
+        isCreating = true
+      }
+    }
     HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
     Box(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
@@ -380,7 +389,7 @@ internal fun WebSurveyCard(
       verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
       Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.Top) {
-        SurveyMapThumbnail(theme = survey.thumbnailTheme, isDownloaded = false)
+        SurveyMapThumbnail(thumbnail = survey.thumbnail, isDownloaded = false)
         Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
           Text(
             text = survey.title,
@@ -446,7 +455,14 @@ internal fun WebSurveyCard(
               modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
             )
           }
-          if (survey.isClosed) {
+          if (survey.isPublicData) {
+            GroundTonalBadge(text = "Public data", tone = GroundBadgeTone.WARNING)
+          } else if (survey.isPrivateSubmissions) {
+            GroundTonalBadge(text = "Private submissions", tone = GroundBadgeTone.SECONDARY)
+          }
+          if (survey.isDraft) {
+            GroundTonalBadge(text = survey.state.label, tone = GroundBadgeTone.WARNING)
+          } else if (survey.isClosed) {
             GroundTonalBadge(text = survey.state.label, tone = GroundBadgeTone.NEUTRAL)
           }
         }

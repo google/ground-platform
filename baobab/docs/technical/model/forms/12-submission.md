@@ -43,7 +43,7 @@ message SubmissionConfig {
   // If true, records and media attachments are immediately removed from client storage after successful submission.
   bool auto_delete = 5;
 
-  // If true, clients allow enumerators to reopen and edit finalized records before dispatch.
+  // If true, clients allow data collectors to reopen and edit finalized records before dispatch.
   bool client_editable = 6;
 }
 ```

@@ -41,13 +41,13 @@ class RecordPdfReportsTest {
     assertTrue(pdf.fileName.endsWith(".pdf"))
     assertTrue(text.contains(pdfLiteral(entity.label)), "Title should be drawn")
     assertTrue(text.contains(pdfLiteral(entity.geoId)), "GeoID should be listed")
-    assertTrue(text.contains(pdfLiteral("SUBMISSIONS")))
-    // Device-local upload state and summary counts are not printed.
+    assertTrue(text.contains(pdfLiteral("Submissions")))
+    // Device-local upload state, summary counts, and internal IDs are not printed.
     assertFalse(text.contains(pdfLiteral("Upload status")))
     assertFalse(text.contains(pdfLiteral(entity.syncStatus.label)))
-    assertFalse(text.contains(pdfLiteral("SUBMISSIONS (")))
-    assertTrue(text.contains(pdfLiteral("Record ID")))
-    assertTrue(text.contains(pdfLiteral("DETAILS")))
+    assertFalse(text.contains(pdfLiteral("Submissions (")))
+    assertFalse(text.contains(pdfLiteral("Record ID")))
+    assertTrue(text.contains(pdfLiteral("Details")))
   }
 
   @Test
@@ -60,8 +60,8 @@ class RecordPdfReportsTest {
 
     assertEquals(RecordPdfReports.submissionFileName(submission), pdf.fileName)
     assertTrue(text.contains(pdfLiteral(submission.formTitle)))
-    assertTrue(text.contains(pdfLiteral("RESPONSES")))
-    assertTrue(text.contains(pdfLiteral("Submission ID")))
+    assertTrue(text.contains(pdfLiteral("Responses")))
+    assertFalse(text.contains(pdfLiteral("Submission ID")))
     assertFalse(text.contains(pdfLiteral("Upload status")))
   }
 

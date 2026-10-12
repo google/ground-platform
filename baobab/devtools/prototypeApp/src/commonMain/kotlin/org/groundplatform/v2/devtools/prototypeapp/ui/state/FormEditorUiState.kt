@@ -31,6 +31,7 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.FormIds
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.FormPreviewTarget
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SaveToRules
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SaveToValidator
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SurveyEditorMutation
 
 /**
  * Screen state of the Form editor page: the [EditorForm] under edit, the selected screen, and the
@@ -54,6 +55,11 @@ data class FormEditorUiState(
   /** Selected question, or `null` when the Form itself is selected (Form properties). */
   val selectedKey: String? = null,
   /**
+   * Language tag currently being edited and previewed in the Form editor, or `null` to follow the
+   * survey's default language ([defaultLanguage]).
+   */
+  val selectedLanguage: String? = null,
+  /**
    * Which platform the editor's canvas and **Preview** reproduce: the mobile
    * one-question-per-screen flow, or the web dashboard's stacked read-only fields
    * ([FormPreviewTarget.WEB]).
@@ -76,6 +82,10 @@ data class FormEditorUiState(
    * [MIN_SIDE_PANEL_WIDTH_DP]..[MAX_SIDE_PANEL_WIDTH_DP].
    */
   val sidePanelWidthDp: Float = DEFAULT_SIDE_PANEL_WIDTH_DP,
+  /** Survey mutations recorded in this Form editor that can be rewound, oldest first. */
+  val undoStack: List<SurveyEditorMutation> = emptyList(),
+  /** Rewound survey mutations in this Form editor that can be replayed, oldest first. */
+  val redoStack: List<SurveyEditorMutation> = emptyList(),
 
   // --- Dictionary (concept links) ---
   /** The survey's resolved library and who may add to it. */
@@ -88,6 +98,40 @@ data class FormEditorUiState(
    */
   val importMatches: List<ImportMatch> = emptyList(),
 ) {
+  /** Primary (default) language of the survey, e.g. `"en"`. */
+  val defaultLanguage: String
+    get() = library.language.ifBlank { "en" }
+
+  /**
+   * Languages selected for the survey, starting with [defaultLanguage], plus any additional
+   * languages present in the Form's question or choice translations (e.g. from an imported XForm).
+   */
+  val supportedLanguages: List<String>
+    get() =
+      (listOf(defaultLanguage) + library.supportedLanguages + form.translationLanguages)
+        .map { it.trim() }
+        .filter { it.isNotEmpty() && !it.equals("default", ignoreCase = true) }
+        .distinctBy { it.lowercase() }
+
+  /** Language currently being edited and previewed in the Form editor. */
+  val activeLanguage: String
+    get() =
+      selectedLanguage?.let { sel ->
+        supportedLanguages.firstOrNull { it.equals(sel, ignoreCase = true) }
+      } ?: defaultLanguage
+
+  /** Whether the Form editor is currently editing the survey's default language. */
+  val isDefaultLanguageSelected: Boolean
+    get() = activeLanguage.equals(defaultLanguage, ignoreCase = true)
+
+  /** Whether there is at least one survey mutation to rewind. */
+  val canUndo: Boolean
+    get() = undoStack.isNotEmpty()
+
+  /** Whether there is at least one rewound survey mutation to replay. */
+  val canRedo: Boolean
+    get() = redoStack.isNotEmpty()
+
   val selectedQuestion: EditorQuestion?
     get() = form.find(selectedKey)
 
@@ -185,11 +229,24 @@ data class FormEditorUiState(
 
   /** Exported XForms; updates reference the target's features as a CSV attachment. */
   val xformsXml: String
-    get() = EditorXFormsGenerator.toXml(form, saveTarget, datasets = datasets)
+    get() =
+      EditorXFormsGenerator.toXml(
+        form,
+        saveTarget,
+        datasets = datasets,
+        defaultLanguage = defaultLanguage,
+      )
 
   /** Compiled [FormDefinition] run by the preview, with the target's features embedded. */
   val previewForm: FormDefinition
-    get() = EditorXFormsGenerator.compile(form, saveTarget, inlineRows = true, datasets = datasets)
+    get() =
+      EditorXFormsGenerator.compile(
+        form,
+        saveTarget,
+        inlineRows = true,
+        datasets = datasets,
+        defaultLanguage = defaultLanguage,
+      )
 
   /**
    * Builds a fresh [FormWizardController] from the current [previewForm] for the web canvas and the
@@ -197,7 +254,9 @@ data class FormEditorUiState(
    * canvas tracks every edit.
    */
   fun parsePreviewController(): Result<FormWizardController> = runCatching {
-    FormWizardController(formDef = previewForm.proto)
+    FormWizardController(formDef = previewForm.proto).also {
+      if (activeLanguage.isNotBlank()) it.setLanguage(activeLanguage)
+    }
   }
 
   /**

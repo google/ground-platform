@@ -15,6 +15,7 @@ package org.groundplatform.v2.devtools.prototypeapp.domain.usecase
 
 import kotlin.math.roundToInt
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.GeospatialEntityItem
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyThumbnailGenerator
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SyncStatus
 import org.groundplatform.v2.devtools.prototypeapp.domain.repository.SurveyRepository
 
@@ -100,9 +101,20 @@ class GeneratePrototypeRandomSitesUseCase(private val surveyRepository: SurveyRe
     }
 
     val updatedEntities = existingEntities + newFeatures
+    val mapLayers = surveyRepository.getMapLayers()
+    val activeSurveyId = surveyRepository.getActiveSurveyId()
     surveyRepository.upsertEntities(newFeatures)
-    surveyRepository.updateSurvey(surveyRepository.getActiveSurveyId()) {
-      it.copy(entityCount = updatedEntities.size)
+    surveyRepository.updateSurvey(activeSurveyId) {
+      it.copy(
+        entityCount = updatedEntities.size,
+        thumbnail =
+          SurveyThumbnailGenerator.updateFeatures(
+            existing = it.thumbnail,
+            surveyId = activeSurveyId,
+            mapLayers = mapLayers,
+            entities = updatedEntities,
+          ),
+      )
     }
     return GenerateRandomSitesResult(
       addedCount = count,

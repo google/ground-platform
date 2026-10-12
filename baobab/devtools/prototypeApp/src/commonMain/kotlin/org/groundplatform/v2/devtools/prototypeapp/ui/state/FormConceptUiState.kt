@@ -35,6 +35,8 @@ data class FormLibraryContext(
   val canSaveToGlobalLibrary: Boolean = false,
   /** Language that concept labels and code-list values are shown in (the survey's default). */
   val language: String = LocalizedText.DEFAULT_LANGUAGE,
+  /** Languages selected for the survey (always includes [language]). */
+  val supportedLanguages: List<String> = listOf(language),
   /** Concepts used by the survey's purposes, ranked first in suggestions. */
   val purposeConceptIds: Set<String> = emptySet(),
 ) {

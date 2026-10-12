@@ -40,13 +40,18 @@ import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Link
+import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material.icons.outlined.Warning
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -79,6 +84,7 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.DatasetKi
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EntityDataset
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EntityProperty
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.EntityRow
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.FormEditorValidator
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.GeometryKind
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.GeometryText
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.LatLng
@@ -86,6 +92,7 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.LayerStyl
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.PropertyType
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SamplePlotProperties
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.parseHexColor
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.slugify
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.geometryKind
 import org.groundplatform.v2.devtools.prototypeapp.ui.formeditor.DropdownSelector
 import org.groundplatform.v2.devtools.prototypeapp.ui.formeditor.SectionLabel
@@ -132,6 +139,7 @@ internal fun EntityDatasetEditor(
             selectedRow = selectedRow,
             onSelectRow = { selectedRow = it },
             modifier = Modifier.fillMaxWidth().weight(1.4f),
+            backdropPolygons = uiState.details.surveyArea?.parts.orEmpty(),
           )
         }
         RowsTableCard(
@@ -157,6 +165,20 @@ private fun DatasetHeader(
   issueCount: Int,
 ) {
   val itemsLabel = if (dataset.kind == DatasetKind.MAP_LAYER) "features" else "rows"
+  var menuOpen by remember { mutableStateOf(false) }
+  var confirmDelete by remember { mutableStateOf(false) }
+
+  if (confirmDelete) {
+    ConfirmDeleteDatasetDialog(
+      dataset = dataset,
+      onConfirm = {
+        confirmDelete = false
+        actions.deleteDataset(dataset.key)
+      },
+      onDismiss = { confirmDelete = false },
+    )
+  }
+
   Surface(
     modifier = Modifier.fillMaxWidth(),
     color = MaterialTheme.colorScheme.surfaceContainer,
@@ -209,18 +231,71 @@ private fun DatasetHeader(
           )
         }
       }
-      TextButton(onClick = { actions.deleteDataset(dataset.key) }) {
-        Icon(
-          Icons.Outlined.Delete,
-          contentDescription = null,
-          tint = MaterialTheme.colorScheme.error,
-          modifier = Modifier.size(18.dp),
-        )
-        Spacer(Modifier.width(4.dp))
-        Text("Delete ${dataset.kind.singular.lowercase()}", color = MaterialTheme.colorScheme.error)
+      Box {
+        IconButton(onClick = { menuOpen = true }) {
+          Icon(
+            Icons.Outlined.MoreVert,
+            contentDescription =
+              "More options for ${dataset.displayName.ifBlank { dataset.kind.singular }}",
+          )
+        }
+        DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
+          DropdownMenuItem(
+            text = {
+              Text(
+                "Delete ${dataset.kind.singular.lowercase()}…",
+                color = MaterialTheme.colorScheme.error,
+              )
+            },
+            leadingIcon = {
+              Icon(
+                Icons.Outlined.Delete,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.error,
+              )
+            },
+            onClick = {
+              menuOpen = false
+              confirmDelete = true
+            },
+          )
+        }
       }
     }
   }
+}
+
+@Composable
+private fun ConfirmDeleteDatasetDialog(
+  dataset: EntityDataset,
+  onConfirm: () -> Unit,
+  onDismiss: () -> Unit,
+) {
+  val kindLower = dataset.kind.singular.lowercase()
+  val itemsLabel = if (dataset.kind == DatasetKind.MAP_LAYER) "features" else "rows"
+  AlertDialog(
+    onDismissRequest = onDismiss,
+    title = { Text("Delete this $kindLower?") },
+    text = {
+      Text(
+        "“${dataset.displayName.ifBlank { "Untitled" }}” and its ${dataset.rows.size} $itemsLabel " +
+          "will be removed from this survey."
+      )
+    },
+    confirmButton = {
+      Button(
+        onClick = onConfirm,
+        colors =
+          ButtonDefaults.buttonColors(
+            containerColor = MaterialTheme.colorScheme.error,
+            contentColor = MaterialTheme.colorScheme.onError,
+          ),
+      ) {
+        Text("Delete $kindLower")
+      }
+    },
+    dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } },
+  )
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -553,6 +628,20 @@ private fun DatasetSettingsPanel(
 ) {
   val key = dataset.key
   val isMap = dataset.kind == DatasetKind.MAP_LAYER
+  var showAdvanced by remember(key) { mutableStateOf(!FormEditorValidator.isValidName(dataset.id)) }
+  var confirmDelete by remember(key) { mutableStateOf(false) }
+
+  if (confirmDelete) {
+    ConfirmDeleteDatasetDialog(
+      dataset = dataset,
+      onConfirm = {
+        confirmDelete = false
+        actions.deleteDataset(key)
+      },
+      onDismiss = { confirmDelete = false },
+    )
+  }
+
   ElevatedCard(
     modifier = modifier,
     colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.surface),
@@ -567,15 +656,6 @@ private fun DatasetSettingsPanel(
         onValueChange = { v -> actions.updateDataset(key) { it.copy(displayName = v) } },
         label = { Text("Name") },
         singleLine = true,
-        modifier = Modifier.fillMaxWidth(),
-      )
-      OutlinedTextField(
-        value = dataset.id,
-        onValueChange = { v -> actions.updateDataset(key) { it.copy(id = v.trim()) } },
-        label = { Text("ID") },
-        singleLine = true,
-        supportingText = { Text("Forms use this ID to look up records from this dataset.") },
-        textStyle = MaterialTheme.typography.bodyLarge.copy(fontFamily = FontFamily.Monospace),
         modifier = Modifier.fillMaxWidth(),
       )
       OutlinedTextField(
@@ -602,17 +682,17 @@ private fun DatasetSettingsPanel(
         label = "Key property (unique ID)",
         selectedText = dataset.property(dataset.keyProperty)?.label ?: "Choose…",
         options = dataset.properties,
-        optionText = { "${it.label} (${it.name})" },
+        optionText = { it.label },
         onSelect = { p -> actions.updateDataset(key) { it.copy(keyProperty = p.name) } },
       )
       DropdownSelector(
         label = "Label property (shown in lists)",
         selectedText = dataset.property(dataset.labelProperty)?.label ?: "Choose…",
         options = dataset.properties,
-        optionText = { "${it.label} (${it.name})" },
+        optionText = { it.label },
         onSelect = { p -> actions.updateDataset(key) { it.copy(labelProperty = p.name) } },
       )
-      SectionLabel("Field collection & Form")
+      SectionLabel("Field collection & form")
       val linkedForm = uiState.forms.firstOrNull { it.key == dataset.linkedFormKey }
       if (linkedForm != null) {
         Surface(
@@ -771,6 +851,40 @@ private fun DatasetSettingsPanel(
           Text("Add property")
         }
       }
+
+      HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+      Row(
+        modifier = Modifier.fillMaxWidth().clickable { showAdvanced = !showAdvanced },
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+      ) {
+        SectionLabel("Advanced")
+        TextButton(onClick = { showAdvanced = !showAdvanced }) {
+          Text(if (showAdvanced) "Hide" else "Show")
+        }
+      }
+      if (showAdvanced) {
+        OutlinedTextField(
+          value = dataset.id,
+          onValueChange = { v -> actions.updateDataset(key) { it.copy(id = v.trim()) } },
+          label = { Text("Dataset ID") },
+          singleLine = true,
+          supportingText = { Text("Forms use this ID to look up records from this dataset.") },
+          textStyle = MaterialTheme.typography.bodyLarge.copy(fontFamily = FontFamily.Monospace),
+          modifier = Modifier.fillMaxWidth(),
+        )
+        OutlinedButton(
+          onClick = { confirmDelete = true },
+          colors =
+            ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error),
+          border = BorderStroke(1.dp, MaterialTheme.colorScheme.error.copy(alpha = 0.5f)),
+          modifier = Modifier.fillMaxWidth(),
+        ) {
+          Icon(Icons.Outlined.Delete, contentDescription = null, modifier = Modifier.size(18.dp))
+          Spacer(Modifier.width(6.dp))
+          Text("Delete ${dataset.kind.singular.lowercase()}…")
+        }
+      }
     }
   }
 }
@@ -853,6 +967,9 @@ private fun PropertyEditor(
   onChange: (EntityProperty) -> Unit,
   onRemove: () -> Unit,
 ) {
+  val hasInvalidName =
+    !FormEditorValidator.isValidName(property.name) || property.name == "geometry"
+  var showAdvanced by remember { mutableStateOf(hasInvalidName) }
   Surface(
     color = MaterialTheme.colorScheme.surfaceContainerLow,
     contentColor = MaterialTheme.colorScheme.onSurface,
@@ -866,20 +983,40 @@ private fun PropertyEditor(
       ) {
         OutlinedTextField(
           value = property.label,
-          onValueChange = { onChange(property.copy(label = it)) },
+          onValueChange = { newLabel ->
+            val currentAutoSlug = slugify(property.label, fallback = property.name)
+            val shouldSyncName =
+              !showAdvanced &&
+                (property.name == currentAutoSlug || property.name.startsWith("property"))
+            val updatedName =
+              if (shouldSyncName) slugify(newLabel, fallback = property.name) else property.name
+            onChange(property.copy(label = newLabel, name = updatedName))
+          },
           label = { Text("Label") },
           singleLine = true,
           enabled = !readOnly,
           modifier = Modifier.weight(1f),
         )
+        if (!readOnly) {
+          TextButton(onClick = { showAdvanced = !showAdvanced }) {
+            Text(
+              text = if (showAdvanced) "Hide ID" else "Advanced",
+              style = MaterialTheme.typography.labelSmall,
+            )
+          }
+        }
+      }
+      if (showAdvanced || hasInvalidName) {
         OutlinedTextField(
           value = property.name,
           onValueChange = { onChange(property.copy(name = it.trim())) },
-          label = { Text("Name") },
+          label = { Text("Internal ID") },
           singleLine = true,
           enabled = !readOnly,
+          isError = hasInvalidName,
+          supportingText = { Text("Used in XForms expressions and GeoJSON exports.") },
           textStyle = MaterialTheme.typography.bodyLarge.copy(fontFamily = FontFamily.Monospace),
-          modifier = Modifier.width(120.dp),
+          modifier = Modifier.fillMaxWidth(),
         )
       }
       Row(verticalAlignment = Alignment.CenterVertically) {

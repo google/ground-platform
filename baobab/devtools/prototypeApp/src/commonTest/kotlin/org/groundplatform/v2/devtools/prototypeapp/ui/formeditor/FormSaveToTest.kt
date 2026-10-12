@@ -107,7 +107,7 @@ class FormSaveToTest {
       questions =
         listOf(
           q("q1", "location", EditorQuestionType.LOCATION),
-          q("q2", "canopy_pct", EditorQuestionType.INTEGER),
+          q("q2", "canopy_pct", EditorQuestionType.NUMBER),
           q("q3", "notes", EditorQuestionType.TEXT),
           q("q4", "farmer_id", EditorQuestionType.TEXT),
           q("q5", "intro", EditorQuestionType.NOTE),

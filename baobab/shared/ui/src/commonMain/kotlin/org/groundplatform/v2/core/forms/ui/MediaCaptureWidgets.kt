@@ -287,10 +287,13 @@ private fun MediaCaptureHeader(spec: MediaCaptureSpec) {
             color = colors.onSurface,
           ),
       )
-      Text(
-        text = describeMediaConstraints(spec),
-        style = MaterialTheme.typography.labelSmall.copy(color = colors.onSurfaceVariant),
-      )
+      val constraintsText = describeMediaConstraints(spec)
+      if (constraintsText.isNotEmpty()) {
+        Text(
+          text = constraintsText,
+          style = MaterialTheme.typography.labelSmall.copy(color = colors.onSurfaceVariant),
+        )
+      }
     }
     if (spec.kind != MediaCaptureKind.FILE) MediaSourceBadge(spec.requireNewCapture)
   }
@@ -435,11 +438,8 @@ internal fun captureUnavailableMessage(kind: MediaCaptureKind, captureOnly: Bool
     "This device can't capture or choose a ${kind.noun}."
   }
 
-/**
- * One-line summary of a question's capture constraints, e.g. `Accepts image/jpeg · Max 1024 px`.
- */
+/** One-line summary of a question's capture constraints, e.g. `Max 1024 px · Capture only`. */
 internal fun describeMediaConstraints(spec: MediaCaptureSpec): String = buildList {
-  add("Accepts ${spec.acceptedMediaType}")
   spec.maxPixels?.let { add("Max $it px") }
   if (spec.requireNewCapture) add("Capture only")
   if (spec.preferFrontCamera) add("Front camera")

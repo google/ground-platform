@@ -91,6 +91,10 @@ class SurveyRepositoryImpl(private val store: LocalStore) : SurveyRepository {
     transform: (SurveyPreviewItem) -> SurveyPreviewItem,
   ): SurveyPreviewItem? = store.transaction { updateSurvey(surveyId, transform) }
 
+  override suspend fun deleteSurvey(surveyId: String) {
+    store.transaction { deleteSurvey(surveyId) }
+  }
+
   override suspend fun setSurveyDownloaded(
     surveyId: String,
     downloaded: Boolean,

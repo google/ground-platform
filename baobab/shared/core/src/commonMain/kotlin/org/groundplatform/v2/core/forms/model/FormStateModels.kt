@@ -89,7 +89,23 @@ data class FormState(
       formDef.model?.primary_instance?.record_schema?.name?.takeIf { it.isNotEmpty() }
         ?: formDef.form_id.takeIf { it.isNotEmpty() }
         ?: "data"
-    return fieldStates["/$rootName/$trimmed"] ?: fieldStates["/data/$trimmed"]
+    val rootCandidate = "/$rootName/$trimmed"
+    val dataCandidate = "/data/$trimmed"
+    fieldStates[rootCandidate]?.let {
+      return it
+    }
+    fieldStates[dataCandidate]?.let {
+      return it
+    }
+    return fieldStates.entries
+      .firstOrNull { (key, state) ->
+        val unindexedKey = key.replace("[1]", "")
+        unindexedKey == path ||
+          unindexedKey == rootCandidate ||
+          unindexedKey == dataCandidate ||
+          state.relativePath == trimmed
+      }
+      ?.value
   }
 }
 

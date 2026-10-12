@@ -344,14 +344,14 @@ class FormEditorTest {
 
   @Test
   fun validation_compilesEachRuleKindToXPathAndSummary() {
-    val int = EditorQuestionType.INTEGER
+    val num = EditorQuestionType.NUMBER
     val range = EditorValidation(min = "0", max = "120")
-    assertEquals(". >= 0 and . <= 120", ValidationRules.constraintExpression(int, range))
-    assertEquals("Must be between 0 and 120.", ValidationRules.summary(int, range))
+    assertEquals(". >= 0 and . <= 120", ValidationRules.constraintExpression(num, range))
+    assertEquals("Must be between 0 and 120.", ValidationRules.summary(num, range))
     assertEquals(
       ". <= 5.5",
       ValidationRules.constraintExpression(
-        EditorQuestionType.DECIMAL,
+        EditorQuestionType.NUMBER,
         EditorValidation(max = "5.5"),
       ),
     )
@@ -389,13 +389,13 @@ class FormEditorTest {
 
     // Types without rules and empty rules produce nothing.
     assertNull(ValidationRules.constraintExpression(EditorQuestionType.PHOTO, range))
-    assertNull(ValidationRules.constraintExpression(int, EditorValidation()))
+    assertNull(ValidationRules.constraintExpression(num, EditorValidation()))
     // A custom message replaces the generated one.
     assertEquals(
       "Too many trees",
-      ValidationRules.message(int, range.copy(message = " Too many trees ")),
+      ValidationRules.message(num, range.copy(message = " Too many trees ")),
     )
-    assertEquals("Must be between 0 and 120.", ValidationRules.message(int, range))
+    assertEquals("Must be between 0 and 120.", ValidationRules.message(num, range))
   }
 
   @Test
@@ -413,7 +413,7 @@ class FormEditorTest {
     assertTrue("Maximum must be a number." in issues("q4"))
     assertNull(
       ValidationRules.constraintExpression(
-        EditorQuestionType.INTEGER,
+        EditorQuestionType.NUMBER,
         state.ui.form.find("q4")!!.validation,
       )
     )
@@ -438,10 +438,38 @@ class FormEditorTest {
   fun validation_changeTypeDropsRulesThatNoLongerApply() {
     val state = formEditorViewModel(FormEditorSamples.shadeTreeVisit())
     state.updateValidation("q4") { it.copy(min = "0", max = "120") }
-    state.changeType("q4", EditorQuestionType.DECIMAL)
+    state.updateDecimalPlaces("q4", 2)
     assertEquals(EditorValidation(min = "0", max = "120"), state.ui.form.find("q4")!!.validation)
+    assertEquals(2, state.ui.form.find("q4")!!.decimalPlaces)
     state.changeType("q4", EditorQuestionType.TEXT)
     assertNull(state.ui.form.find("q4")!!.validation)
+    assertEquals(0, state.ui.form.find("q4")!!.decimalPlaces)
+  }
+
+  @Test
+  fun numberQuestion_decimalPlacesSwitchesBetweenIntAndDecimalInXForms() {
+    val state = formEditorViewModel(FormEditorSamples.shadeTreeVisit())
+    assertEquals("Short text", EditorQuestionType.TEXT.label)
+    assertEquals("Paragraph", EditorQuestionType.LONG_TEXT.label)
+    assertEquals("Number", EditorQuestionType.NUMBER.label)
+
+    // 0 decimal places -> integer (type="int")
+    assertEquals(0, state.ui.form.find("q4")!!.decimalPlaces)
+    val intBind =
+      state.ui.xformsXml.lines().first { "/data/shade_tree_count\"" in it && "<bind" in it }
+    assertTrue("""type="int"""" in intBind, intBind)
+
+    // > 0 decimal places -> decimal (type="decimal")
+    state.updateDecimalPlaces("q4", 3)
+    assertEquals(3, state.ui.form.find("q4")!!.decimalPlaces)
+    val decBind =
+      state.ui.xformsXml.lines().first { "/data/shade_tree_count\"" in it && "<bind" in it }
+    assertTrue("""type="decimal"""" in decBind, decBind)
+
+    // Newly added NUMBER question defaults to MAX_DECIMAL_PLACES (9).
+    state.addQuestion(EditorQuestionType.NUMBER)
+    val added = assertNotNull(state.ui.selectedQuestion)
+    assertEquals(EditorQuestion.MAX_DECIMAL_PLACES, added.decimalPlaces)
   }
 
   @Test
@@ -1003,5 +1031,153 @@ class FormEditorTest {
     // Switching back to Manual list clears allowAddEntity.
     state.setChoiceSource("q3", ChoiceSource.MANUAL)
     assertEquals(false, state.ui.form.find("q3")?.allowAddEntity)
+  }
+
+  @Test
+  fun state_updateCtaLabelOverridesButtonLabelAndFallsBackToTitleWhenBlank() {
+    val state = formEditorViewModel(FormEditorSamples.shadeTreeVisit())
+    assertEquals("", state.ui.form.ctaLabel)
+    assertEquals("Shade Tree Farm Visit", state.ui.form.effectiveCtaLabel)
+
+    state.updateCtaLabel("Record shade visit")
+    assertEquals("Record shade visit", state.ui.form.ctaLabel)
+    assertEquals("Record shade visit", state.ui.form.effectiveCtaLabel)
+
+    state.updateTitle("Updated Shade Tree Visit")
+    assertEquals("Record shade visit", state.ui.form.effectiveCtaLabel)
+
+    state.updateCtaLabel("   ")
+    assertEquals("Updated Shade Tree Visit", state.ui.form.effectiveCtaLabel)
+  }
+
+  @Test
+  fun undoRedo_rewindsAndReplaysFormMutationsAndSelection_andClearsRedoOnNewEdit() {
+    val initialForm = FormEditorSamples.shadeTreeVisit()
+    val state = formEditorViewModel(initialForm)
+    assertFalse(state.ui.canUndo)
+    assertFalse(state.ui.canRedo)
+    assertTrue(state.ui.undoStack.isEmpty())
+    assertTrue(state.ui.redoStack.isEmpty())
+
+    // 1. Update form title.
+    state.updateTitle("Renamed Form")
+    assertTrue(state.ui.canUndo)
+    assertFalse(state.ui.canRedo)
+    assertEquals(1, state.ui.undoStack.size)
+    assertEquals("Renamed Form", state.ui.form.title)
+
+    // 2. Add a question (changes selection to the newly added question).
+    val selectedBeforeAdd = state.ui.selectedKey
+    state.addQuestion(EditorQuestionType.NUMBER)
+    val addedKey = assertNotNull(state.ui.selectedKey)
+    assertEquals(initialForm.questions.size + 1, state.ui.form.questions.size)
+    assertEquals(2, state.ui.undoStack.size)
+
+    // 3. Change question type (atomic single mutation).
+    state.changeType(addedKey, EditorQuestionType.TEXT)
+    assertEquals(EditorQuestionType.TEXT, state.ui.form.find(addedKey)?.type)
+    assertEquals(3, state.ui.undoStack.size)
+
+    // Undo step 3 (changeType): restores NUMBER type.
+    state.undo()
+    assertEquals(EditorQuestionType.NUMBER, state.ui.form.find(addedKey)?.type)
+    assertEquals(2, state.ui.undoStack.size)
+    assertEquals(1, state.ui.redoStack.size)
+    assertTrue(state.ui.canUndo)
+    assertTrue(state.ui.canRedo)
+
+    // Undo step 2 (addQuestion): removes added question and restores previous selection.
+    state.undo()
+    assertEquals(initialForm.questions.size, state.ui.form.questions.size)
+    assertEquals(selectedBeforeAdd, state.ui.selectedKey)
+    assertEquals(1, state.ui.undoStack.size)
+    assertEquals(2, state.ui.redoStack.size)
+
+    // Undo step 1 (updateTitle): restores initial form.
+    state.undo()
+    assertEquals(initialForm, state.ui.form)
+    assertFalse(state.ui.canUndo)
+    assertTrue(state.ui.canRedo)
+    assertEquals(3, state.ui.redoStack.size)
+
+    // Replay step 1 and step 2.
+    state.redo()
+    assertEquals("Renamed Form", state.ui.form.title)
+    state.redo()
+    assertEquals(initialForm.questions.size + 1, state.ui.form.questions.size)
+    assertEquals(addedKey, state.ui.selectedKey)
+    assertEquals(EditorQuestionType.NUMBER, state.ui.form.find(addedKey)?.type)
+    assertTrue(state.ui.canRedo)
+
+    // Making a new edit after undo clears the remaining redo stack.
+    state.updateCtaLabel("Fresh CTA")
+    assertFalse(state.ui.canRedo)
+    assertTrue(state.ui.redoStack.isEmpty())
+    assertEquals("Fresh CTA", state.ui.form.ctaLabel)
+  }
+
+  @Test
+  fun multiLanguageEditing_updatesTranslationsPreservesDefaultAndSyncsPreviewController() {
+    val state =
+      formEditorViewModel(
+        form = FormEditorSamples.shadeTreeVisit(),
+        library =
+          org.groundplatform.v2.devtools.prototypeapp.ui.state.FormLibraryContext(
+            language = "en",
+            supportedLanguages = listOf("en", "es"),
+          ),
+      )
+    assertEquals("en", state.ui.defaultLanguage)
+    assertEquals("en", state.ui.activeLanguage)
+    assertTrue(state.ui.isDefaultLanguageSelected)
+
+    // Switch to Spanish ("es") and translate Q1/Q2 labels/hints and Q3 label + choice labels.
+    state.selectLanguage("es")
+    assertEquals("es", state.ui.activeLanguage)
+    assertFalse(state.ui.isDefaultLanguageSelected)
+
+    state.updateQuestionLabel("q1", "Fecha de visita")
+    state.updateQuestionLabel("q2", "Registre la ubicación de la finca")
+    state.updateQuestionHint("q2", "Párese cerca del centro de la parcela.")
+    state.updateQuestionLabel("q3", "¿Hay árboles de sombra en la parcela?")
+    state.updateChoiceLabel("q3", 0, "Sí")
+    state.updateChoiceLabel("q3", 1, "No")
+
+    val q1 = assertNotNull(state.ui.form.find("q1"))
+    assertEquals("Visit date", q1.label)
+    assertEquals("Fecha de visita", q1.labelIn("es", "en"))
+
+    val q2 = assertNotNull(state.ui.form.find("q2"))
+    assertEquals("Farm location", q2.label)
+    assertEquals("Registre la ubicación de la finca", q2.labelIn("es", "en"))
+    assertEquals("Stand near the center of the plot.", q2.hint)
+    assertEquals("Párese cerca del centro de la parcela.", q2.hintIn("es", "en"))
+
+    val q3 = assertNotNull(state.ui.form.find("q3"))
+    assertEquals("Are shade trees present?", q3.label)
+    assertEquals("¿Hay árboles de sombra en la parcela?", q3.labelIn("es", "en"))
+    // Choice value and dependent relevance on q4 remain unchanged when translating choice labels.
+    assertEquals("yes", q3.choices[0].value)
+    assertEquals("Yes", q3.choices[0].label)
+    assertEquals("Sí", q3.choices[0].labelIn("es", "en"))
+    assertEquals("yes", state.ui.form.find("q4")?.relevance?.value)
+
+    // Generated XForms XML includes <itext> with both en (default) and es translations.
+    assertTrue("<itext>" in state.ui.xformsXml)
+    assertTrue("""<translation lang="en" default="true()">""" in state.ui.xformsXml)
+    assertTrue("""<translation lang="es">""" in state.ui.xformsXml)
+    assertTrue("Registre la ubicación de la finca" in state.ui.xformsXml)
+    assertTrue("¿Hay árboles de sombra en la parcela?" in state.ui.xformsXml)
+
+    // Starting preview while "es" is selected initializes the preview controller to "es" and
+    // switching back to "en" updates the preview controller's activeLanguage live.
+    state.startPreview()
+    val controller = assertNotNull(state.ui.previewController)
+    assertEquals("es", controller.formState.activeLanguage)
+    assertEquals("Fecha de visita", controller.steps.first().title)
+
+    state.selectLanguage("en")
+    assertEquals("en", controller.formState.activeLanguage)
+    assertEquals("Visit date", controller.steps.first().title)
   }
 }

@@ -34,7 +34,7 @@ entity:
 *   `encrypted_submission.proto`: Defines `EncryptedSubmissionManifest` and
     `EncryptedFile` envelopes for end-to-end encrypted submissions.
 *   `audit_log.proto`: Defines `AuditLog`, `AuditEvent`, and `AuditConfig` for
-    enumerator interaction telemetry and location breadcrumbs.
+    data collector interaction telemetry and location breadcrumbs.
 *   `types.proto`: Defines shared primitive data types (`DataType`), geospatial
     geometries (`GeoPoint`, `GeoTrace`, `GeoShape`), and literal value
     containers (`TypedValue`).

@@ -17,6 +17,9 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
+import org.groundplatform.v2.core.forms.ui.ChoiceImageRegistry
+import org.groundplatform.v2.core.forms.ui.WorkbenchExampleForm
 import org.groundplatform.v2.devtools.prototypeapp.data.seed.FormEditorSamples
 import org.groundplatform.v2.devtools.prototypeapp.data.seed.PrototypeFakeSurveysData
 import org.groundplatform.v2.devtools.prototypeapp.data.seed.SurveyEditorSamples
@@ -49,6 +52,14 @@ class FormImportRoundTripTest {
     assertEquals(
       expected.questions.map { q -> q.choices.map { it.value to it.label } },
       actual.questions.map { q -> q.choices.map { it.value to it.label } },
+    )
+    assertEquals(
+      expected.questions.map { q -> q.choices.map { it.colorHex } },
+      actual.questions.map { q -> q.choices.map { it.colorHex } },
+    )
+    assertEquals(
+      expected.questions.map { q -> q.choices.map { it.image } },
+      actual.questions.map { q -> q.choices.map { it.image } },
     )
   }
 
@@ -315,5 +326,131 @@ class FormImportRoundTripTest {
 
     val emailVal = assertNotNull(byName.getValue("Email").validation)
     assertEquals(TextPattern.EMAIL, emailVal.pattern)
+  }
+
+  @Test
+  fun multiLanguageLabelsHintsAndChoices_roundTripThroughItext() {
+    val draft =
+      SurveyEditorSamples.draft()
+        .copy(
+          details =
+            SurveyEditorSamples.draft()
+              .details
+              .copy(defaultLanguage = "en", supportedLanguages = listOf("en", "es", "fr"))
+        )
+    val base = FormEditorSamples.shadeTreeVisit()
+    val translated =
+      base.copy(
+        questions =
+          base.questions.map { q ->
+            when (q.name) {
+              "farm_location" ->
+                q.copy(
+                  labelTranslations = mapOf("es" to "Ubicación de la finca", "fr" to "Emplacement"),
+                  hintTranslations = mapOf("es" to "Párese cerca del centro."),
+                )
+              "has_shade_trees" ->
+                q.copy(
+                  labelTranslations = mapOf("es" to "¿Hay árboles de sombra?"),
+                  choices =
+                    q.choices.map { c ->
+                      when (c.value) {
+                        "yes" -> c.copy(labelTranslations = mapOf("es" to "Sí", "fr" to "Oui"))
+                        "no" -> c.copy(labelTranslations = mapOf("es" to "No", "fr" to "Non"))
+                        else -> c
+                      }
+                    },
+                )
+              else -> q
+            }
+          }
+      )
+    val entry = SurveyEditorForm("f1", translated)
+    val xml = draft.copy(forms = listOf(entry)).publishedFormXml(entry)
+    val imported =
+      assertNotNull(
+          FormImport.fromXml(xml, translated.formId, availability = translated.availability)
+        )
+        .form
+    assertSameQuestions(translated, imported)
+
+    val byName = imported.questions.associateBy { it.name }
+    val farmLoc = byName.getValue("farm_location")
+    assertEquals("Farm location", farmLoc.label)
+    assertEquals("Ubicación de la finca", farmLoc.labelIn("es", "en"))
+    assertEquals("Emplacement", farmLoc.labelIn("fr", "en"))
+    assertEquals("Stand near the center of the plot.", farmLoc.hint)
+    assertEquals("Párese cerca del centro.", farmLoc.hintIn("es", "en"))
+
+    val shadeTrees = byName.getValue("has_shade_trees")
+    assertEquals("Are shade trees present?", shadeTrees.label)
+    assertEquals("¿Hay árboles de sombra?", shadeTrees.labelIn("es", "en"))
+    val yesChoice = shadeTrees.choices.first { it.value == "yes" }
+    assertEquals("Yes", yesChoice.label)
+    assertEquals("Sí", yesChoice.labelIn("es", "en"))
+    assertEquals("Oui", yesChoice.labelIn("fr", "en"))
+  }
+
+  @Test
+  fun exampleFormsAndCustomChoices_preserveColorsAndImagesAcrossRoundTrip() {
+    var totalChoicesWithColor = 0
+    var totalChoicesWithImage = 0
+    for (example in WorkbenchExampleForm.entries) {
+      val imported =
+        assertNotNull(
+            FormImport.fromFormDefinition(example.formDefinition, example.id, example.title),
+            example.id,
+          )
+          .form
+      val manualChoiceQuestions =
+        imported.questions.filter { it.type.hasChoices && !it.usesDatasetChoices }
+      for (question in manualChoiceQuestions) {
+        val hasColors = question.choices.any { it.colorHex != null }
+        val hasImages = question.choices.any { it.image != null }
+        assertTrue(
+          !(hasColors && hasImages),
+          "${example.id} question ${question.name} must not mix colors and images",
+        )
+        for (choice in question.choices) {
+          assertTrue(
+            choice.colorHex == null || choice.image == null,
+            "${example.id} choice ${choice.value} must not have both color and image",
+          )
+          if (choice.colorHex != null) totalChoicesWithColor++
+          if (choice.image != null) totalChoicesWithImage++
+        }
+      }
+      val roundTripped = roundTrip(imported)
+      assertSameQuestions(imported, roundTripped)
+    }
+    assertTrue(totalChoicesWithColor > 0, "Expected example forms to contain choices with color")
+    assertTrue(totalChoicesWithImage > 0, "Expected example forms to contain choices with image")
+
+    val sampleIcon =
+      assertNotNull(ChoiceImageRegistry.lookup("jr://images/commodity_type-coffee.png"))
+    val customImage = EditorChoiceImage(mimeType = sampleIcon.mimeType, base64 = sampleIcon.base64)
+    val base = FormEditorSamples.shadeTreeVisit()
+    val withVisualChoices =
+      base.copy(
+        questions =
+          base.questions.map { q ->
+            when (q.name) {
+              "has_shade_trees" ->
+                q.copy(
+                  choices =
+                    q.choices.mapIndexed { idx, c ->
+                      c.copy(colorHex = if (idx == 0) "#2E7D32" else "#C62828", image = null)
+                    }
+                )
+              "observed_issues" ->
+                q.copy(
+                  choices = q.choices.map { c -> c.copy(colorHex = null, image = customImage) }
+                )
+              else -> q
+            }
+          }
+      )
+    val roundTripped = roundTrip(withVisualChoices)
+    assertSameQuestions(withVisualChoices, roundTripped)
   }
 }

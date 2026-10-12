@@ -85,14 +85,15 @@ internal object PrototypeFakeLibraryData {
                 EditorQuestion(
                   key = "cherry_delivery_kg",
                   name = "cherry_delivery_kg",
-                  type = EditorQuestionType.DECIMAL,
+                  type = EditorQuestionType.NUMBER,
                   label = "Cherry delivered (kg)",
+                  decimalPlaces = EditorQuestion.DEFAULT_DECIMAL_PLACES,
                   conceptLink = ConceptLink.to(cherryDelivery),
                 ),
                 EditorQuestion(
                   key = "shade_tree_count",
                   name = "shade_tree_count",
-                  type = EditorQuestionType.INTEGER,
+                  type = EditorQuestionType.NUMBER,
                   label = "Shade trees",
                   conceptLink = ConceptLink.to(shadeTrees),
                 ),

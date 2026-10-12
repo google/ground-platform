@@ -14,20 +14,17 @@
 package org.groundplatform.v2.devtools.prototypeapp.domain.model
 
 /** Screens in the Ground 2.0 Mobile UI onboarding and survey workflow. */
-enum class AppScreen(val stepNumber: Int, val title: String, val subtitle: String) {
-  SIGN_IN(stepNumber = 1, title = "Sign In", subtitle = "Google authentication entry point"),
+enum class AppScreen(val title: String, val subtitle: String) {
+  SIGN_IN(title = "Sign In", subtitle = "Google authentication entry point"),
   TERMS_OF_SERVICE(
-    stepNumber = 2,
     title = "Terms of Service",
     subtitle = "Data governance & platform terms acceptance",
   ),
   DOWNLOAD_SURVEY(
-    stepNumber = 3,
     title = "Download Survey",
     subtitle = "Browse shared surveys or search by name/location",
   ),
   MAIN_SURVEY(
-    stepNumber = 4,
     title = "Main Survey (Map & List)",
     subtitle =
       "Survey map, map layers, location & submission bottom sheets, searchable list & drawer",

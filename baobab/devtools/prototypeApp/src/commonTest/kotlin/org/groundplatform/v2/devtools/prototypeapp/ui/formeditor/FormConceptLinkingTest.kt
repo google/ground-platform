@@ -310,8 +310,14 @@ class FormConceptLinkingTest {
   fun importMatches_preCheckStrongMatches_andLinkOnlyCheckedOnes() {
     val vm =
       editor(
-        EditorQuestion("q1", "area", EditorQuestionType.DECIMAL, "Plot area"),
-        EditorQuestion("q2", "count", EditorQuestionType.INTEGER, "Trees (shade)"),
+        EditorQuestion(
+          "q1",
+          "area",
+          EditorQuestionType.NUMBER,
+          "Plot area",
+          decimalPlaces = EditorQuestion.DEFAULT_DECIMAL_PLACES,
+        ),
+        EditorQuestion("q2", "count", EditorQuestionType.NUMBER, "Trees (shade)"),
         EditorQuestion("q3", "remarks", EditorQuestionType.TEXT, "Zzyzx qwv"),
         EditorQuestion(
           "q4",

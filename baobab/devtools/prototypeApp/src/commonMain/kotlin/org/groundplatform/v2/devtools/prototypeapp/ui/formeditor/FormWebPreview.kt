@@ -262,7 +262,8 @@ internal fun WebLayoutCanvasPanel(
 ) {
   val form = uiState.form
   val previewForm = uiState.previewForm
-  val parsed = remember(previewForm) { uiState.parsePreviewController() }
+  val activeLanguage = uiState.activeLanguage
+  val parsed = remember(previewForm, activeLanguage) { uiState.parsePreviewController() }
   val controller = parsed.getOrNull()
   val error = parsed.exceptionOrNull()?.let { it.message ?: it.toString() }
   val colors = MaterialTheme.colorScheme
@@ -274,7 +275,7 @@ internal fun WebLayoutCanvasPanel(
   ) {
     Column(modifier = Modifier.fillMaxSize()) {
       Row(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalAlignment = Alignment.CenterVertically,
       ) {
@@ -287,11 +288,15 @@ internal fun WebLayoutCanvasPanel(
         GroundTonalBadge(text = "Read-only preview", tone = GroundBadgeTone.NEUTRAL)
         Spacer(Modifier.weight(1f))
         Text(
-          text =
-            "Click a question to edit it. Collectors fill these in from the dashboard's side panel.",
+          text = "Click a question to edit it.",
           style = MaterialTheme.typography.labelSmall,
           color = colors.onSurfaceVariant,
+          softWrap = false,
         )
+        if (uiState.supportedLanguages.size > 1) {
+          FormLanguageSelector(uiState, actions)
+        }
+        PreviewTargetToggle(uiState, actions)
       }
       HorizontalDivider(color = colors.outlineVariant)
       PlatformDisabledBanner(uiState, actions)
@@ -317,7 +322,7 @@ internal fun WebLayoutCanvasPanel(
           ) {
             Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
               if (controller != null) {
-                key(controller) {
+                key(controller, activeLanguage) {
                   CompactFormRunner(
                     controller = controller,
                     readOnly = true,

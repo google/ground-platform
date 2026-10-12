@@ -15,6 +15,7 @@ package org.groundplatform.v2.core.forms.ui
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -33,11 +34,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
@@ -51,10 +54,13 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedCard
@@ -68,6 +74,7 @@ import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.ProvidableCompositionLocal
@@ -89,6 +96,8 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -624,6 +633,8 @@ private fun DecimalInputWidget(
   )
 }
 
+internal val BooleanInputOptions: List<Pair<Boolean, String>> = listOf(true to "Yes", false to "No")
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun BooleanInputWidget(
@@ -632,7 +643,7 @@ private fun BooleanInputWidget(
   controller: FormWizardController,
 ) {
   val currentBool = fieldState.value?.scalar_value?.bool_value
-  val options = listOf(true to "Yes (True)", false to "No (False)")
+  val options = BooleanInputOptions
   SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
     options.forEachIndexed { index, (boolVal, label) ->
       SegmentedButton(
@@ -653,106 +664,125 @@ private fun BooleanInputWidget(
   }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun DateInputWidget(
   path: String,
   fieldState: FieldState,
   controller: FormWizardController,
 ) {
+  val colors = MaterialTheme.colorScheme
+  val focusManager = LocalFocusManager.current
   val dateProto = fieldState.value?.scalar_value?.date_value
-  val year = dateProto?.year?.takeIf { it > 0 } ?: 2026
-  val month = dateProto?.month?.takeIf { it in 1..12 } ?: 9
-  val day = dateProto?.day?.takeIf { it in 1..31 } ?: 18
   val formatted =
     if (dateProto != null && dateProto.year > 0) {
-      "${dateProto.year.toString().padStart(4, '0')}-${dateProto.month.toString().padStart(2, '0')}-${dateProto.day.toString().padStart(2, '0')}"
+      formatIsoDate(dateProto.year, dateProto.month, dateProto.day)
     } else {
       ""
     }
-  var text by remember(path, formatted) { mutableStateOf(formatted) }
+  var text by remember(path) { mutableStateOf(formatted) }
+  var parseError by remember(path) { mutableStateOf<String?>(null) }
+  var showDatePicker by remember(path) { mutableStateOf(false) }
+
+  LaunchedEffect(path, formatted) {
+    val currentParsed = parseDateInput(text)
+    if (formatted.isEmpty() && text.isNotEmpty() && parseError == null) {
+      text = ""
+    } else if (
+      formatted.isNotEmpty() &&
+        (currentParsed as? DateInput.Valid)?.let { formatIsoDate(it.year, it.month, it.day) } !=
+          formatted
+    ) {
+      text = formatted
+      parseError = null
+    }
+  }
 
   Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-    Row(
-      modifier = Modifier.fillMaxWidth(),
-      horizontalArrangement = Arrangement.spacedBy(8.dp),
-      verticalAlignment = Alignment.CenterVertically,
-    ) {
-      GroundOutlinedTextField(
-        value = text,
-        onValueChange = { raw ->
-          text = raw
-          val parts = raw.trim().split('-')
-          if (parts.size == 3) {
-            val y = parts[0].toIntOrNull()
-            val m = parts[1].toIntOrNull()
-            val d = parts[2].toIntOrNull()
-            if (y != null && m != null && d != null && m in 1..12 && d in 1..31) {
-              controller.updateDate(path, y, m, d)
-            }
-          } else if (raw.isBlank()) {
+    GroundOutlinedTextField(
+      value = text,
+      onValueChange = { raw ->
+        text = raw
+        when (val parsed = parseDateInput(raw)) {
+          is DateInput.Empty -> {
+            parseError = null
             controller.clearField(path)
           }
-        },
-        modifier = Modifier.weight(1f),
-        singleLine = true,
-        placeholder = { Text("YYYY-MM-DD") },
-      )
-      FilledTonalButton(
-        onClick = {
-          val epochDays = controller.session.environment.clockEpochMillis() / 86_400_000L
-          val z = epochDays + 719468L
-          val era = (if (z >= 0) z else z - 146096L) / 146097L
-          val doe = z - era * 146097L
-          val yoe = (doe - doe / 1460L + doe / 36524L - doe / 146096L) / 365L
-          val y = yoe + era * 400L
-          val doy = doe - (365L * yoe + yoe / 4L - yoe / 100L)
-          val mp = (5L * doy + 2L) / 153L
-          val d = (doy - (153L * mp + 2L) / 5L + 1L).toInt()
-          val m = (mp + (if (mp < 10L) 3L else -9L)).toInt()
-          val civilYear = (y + (if (m <= 2) 1L else 0L)).toInt()
-          controller.updateDate(path, civilYear, m, d)
+          is DateInput.Invalid -> {
+            parseError = parsed.message
+          }
+          is DateInput.Valid -> {
+            parseError = null
+            controller.updateDate(path, parsed.year, parsed.month, parsed.day)
+          }
         }
-      ) {
-        Text("Today", maxLines = 1, overflow = TextOverflow.Ellipsis, softWrap = false)
-      }
+      },
+      modifier = Modifier.fillMaxWidth(),
+      singleLine = true,
+      isError = parseError != null,
+      placeholder = { Text("YYYY-MM-DD") },
+      trailingIcon = {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+          if (text.isNotEmpty()) {
+            IconButton(
+              onClick = {
+                text = ""
+                parseError = null
+                controller.clearField(path)
+              }
+            ) {
+              Icon(imageVector = Icons.Default.Close, contentDescription = "Clear date")
+            }
+          }
+          IconButton(onClick = { showDatePicker = true }) {
+            Icon(imageVector = Icons.Default.DateRange, contentDescription = "Select date")
+          }
+        }
+      },
+    )
+    if (parseError != null) {
+      Text(
+        text = parseError ?: "",
+        style = MaterialTheme.typography.labelSmall.copy(color = colors.error),
+      )
     }
-    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-      OutlinedButton(
-        onClick = { controller.updateDate(path, year, month, (day - 1).coerceIn(1, 28)) },
-        modifier = Modifier.weight(1f),
+  }
+
+  if (showDatePicker) {
+    val initialSelectedMillis =
+      if (
+        dateProto != null &&
+          dateProto.year > 0 &&
+          dateProto.month in 1..12 &&
+          dateProto.day in 1..daysInMonth(dateProto.year, dateProto.month)
       ) {
-        Text(
-          "-1 Day",
-          style = MaterialTheme.typography.labelSmall,
-          maxLines = 1,
-          overflow = TextOverflow.Ellipsis,
-          softWrap = false,
-        )
+        civilDateToUtcMillis(dateProto.year, dateProto.month, dateProto.day)
+      } else {
+        null
       }
-      OutlinedButton(
-        onClick = { controller.updateDate(path, year, month, (day + 1).coerceIn(1, 28)) },
-        modifier = Modifier.weight(1f),
-      ) {
-        Text(
-          "+1 Day",
-          style = MaterialTheme.typography.labelSmall,
-          maxLines = 1,
-          overflow = TextOverflow.Ellipsis,
-          softWrap = false,
-        )
-      }
-      OutlinedButton(
-        onClick = { controller.updateDate(path, year, (month % 12) + 1, day) },
-        modifier = Modifier.weight(1f),
-      ) {
-        Text(
-          "+1 Month",
-          style = MaterialTheme.typography.labelSmall,
-          maxLines = 1,
-          overflow = TextOverflow.Ellipsis,
-          softWrap = false,
-        )
-      }
+    val pickerState = rememberDatePickerState(initialSelectedDateMillis = initialSelectedMillis)
+    DatePickerDialog(
+      onDismissRequest = { showDatePicker = false },
+      confirmButton = {
+        TextButton(
+          onClick = {
+            pickerState.selectedDateMillis?.let { millis ->
+              val picked = utcMillisToCivilDate(millis)
+              text = formatIsoDate(picked.year, picked.month, picked.day)
+              parseError = null
+              focusManager.clearFocus()
+              controller.updateDate(path, picked.year, picked.month, picked.day)
+            }
+            showDatePicker = false
+          },
+          enabled = pickerState.selectedDateMillis != null,
+        ) {
+          Text("OK")
+        }
+      },
+      dismissButton = { TextButton(onClick = { showDatePicker = false }) { Text("Cancel") } },
+    ) {
+      DatePicker(state = pickerState)
     }
   }
 }
@@ -2325,55 +2355,14 @@ private fun SelectOneWidget(
         style = MaterialTheme.typography.bodySmall.copy(color = colors.onSurfaceVariant),
       )
     } else if (isLikert) {
-      Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-        allOptions.forEach { option ->
-          val isSelected = selectedValue == option.value
-          OutlinedCard(
-            onClick = {
-              controller.updateString(path, option.value)
-              if (isQuick) controller.nextStep()
-            },
-            modifier = Modifier.weight(1f),
-            shape = MaterialTheme.shapes.medium,
-            colors =
-              CardDefaults.outlinedCardColors(
-                containerColor =
-                  if (isSelected) colors.primaryContainer else colors.surfaceContainerLow,
-                contentColor = if (isSelected) colors.onPrimaryContainer else colors.onSurface,
-              ),
-            border =
-              BorderStroke(
-                width = if (isSelected) 2.dp else 1.dp,
-                color = if (isSelected) colors.primary else colors.outlineVariant,
-              ),
-          ) {
-            Column(
-              modifier = Modifier.fillMaxWidth().padding(8.dp),
-              horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-              RadioButton(
-                selected = isSelected,
-                onClick = {
-                  controller.updateString(path, option.value)
-                  if (isQuick) controller.nextStep()
-                },
-                colors =
-                  RadioButtonDefaults.colors(
-                    selectedColor = colors.onPrimaryContainer,
-                    unselectedColor = colors.onSurfaceVariant,
-                  ),
-              )
-              Text(
-                text = option.label.text,
-                style =
-                  MaterialTheme.typography.labelSmall.copy(
-                    color = if (isSelected) colors.onPrimaryContainer else colors.onSurface
-                  ),
-              )
-            }
-          }
-        }
-      }
+      LikertScaleColumn(
+        options = allOptions,
+        selectedValue = selectedValue,
+        onSelect = { value ->
+          controller.updateString(path, value)
+          if (isQuick) controller.nextStep()
+        },
+      )
     } else {
       allOptions.forEach { option ->
         val isSelected = selectedValue == option.value
@@ -2395,6 +2384,208 @@ private fun SelectOneWidget(
           addedOptions = addedOptions + added
           controller.updateString(path, added.value)
         },
+      )
+    }
+  }
+}
+
+/**
+ * Strips a redundant leading 1-based ordinal prefix (such as `"1 - "`, `"1: "`, `"1. "`, `"1) "`,
+ * or `"(1) "`) from [rawLabel] when it matches [stepNumber], so a Likert option rendered beside a
+ * numbered step badge does not repeat the step number (for example, `"1 - Severe Dieback"` becomes
+ * `"Severe Dieback"`). Preserves hyphenated ranges like `"1-5 trees"` and labels that consist only
+ * of the number itself.
+ */
+internal fun formatLikertOptionLabel(rawLabel: String, stepNumber: Int): String {
+  val trimmed = rawLabel.trim()
+  if (trimmed.isEmpty() || stepNumber <= 0) return rawLabel
+  val step = stepNumber.toString()
+  val patterns =
+    listOf(
+      Regex("^\\($step\\)\\s+(.+)$"),
+      Regex("^$step[.):]\\s+(.+)$"),
+      Regex("^$step\\s+[-–—]\\s*(.+)$"),
+      Regex("^$step\\s*[-–—]\\s+(.+)$"),
+    )
+  for (pattern in patterns) {
+    val match = pattern.matchEntire(trimmed)
+    val remainder = match?.groupValues?.getOrNull(1)?.trim()
+    if (!remainder.isNullOrEmpty()) {
+      return remainder
+    }
+  }
+  return rawLabel
+}
+
+/**
+ * Vertical ordinal scale for `select1` controls with `appearance="likert"`.
+ *
+ * Stacks full-width option cards vertically so long or translated labels are completely readable
+ * before tapping, while visually connecting consecutive steps with a vertical continuum track
+ * aligned to each option's 1-based ordinal badge (`1`..`N`).
+ */
+@Composable
+private fun LikertScaleColumn(
+  options: List<ResolvedChoiceOption>,
+  selectedValue: String,
+  onSelect: (String) -> Unit,
+) {
+  val colors = MaterialTheme.colorScheme
+  Column(modifier = Modifier.fillMaxWidth()) {
+    options.forEachIndexed { index, option ->
+      val stepNumber = index + 1
+      val isSelected = selectedValue == option.value
+      LikertChoiceCardRow(
+        stepNumber = stepNumber,
+        option = option,
+        isSelected = isSelected,
+        onClick = { onSelect(option.value) },
+      )
+      if (index < options.lastIndex) {
+        // Center of the 28.dp badge inside a card with 1.dp border + 12.dp start padding is at
+        // 27.dp; a 2.dp connector line starting at 26.dp aligns directly with the badge center.
+        Box(
+          modifier =
+            Modifier.padding(start = 26.dp)
+              .width(2.dp)
+              .height(6.dp)
+              .background(colors.outlineVariant)
+        )
+      }
+    }
+  }
+}
+
+@Composable
+private fun LikertChoiceCardRow(
+  stepNumber: Int,
+  option: ResolvedChoiceOption,
+  isSelected: Boolean,
+  onClick: () -> Unit,
+) {
+  val colors = MaterialTheme.colorScheme
+  val choiceColor = ChoiceImageRegistry.parseChoiceColor(option.properties["color"])
+  val choiceBitmap = ChoiceImageRegistry.rememberChoiceImageBitmap(option.label.media?.image_uri)
+  val displayLabel = formatLikertOptionLabel(option.label.text, stepNumber)
+
+  OutlinedCard(
+    onClick = onClick,
+    modifier = Modifier.fillMaxWidth(),
+    shape = MaterialTheme.shapes.medium,
+    colors =
+      CardDefaults.outlinedCardColors(
+        containerColor = if (isSelected) colors.primaryContainer else colors.surfaceContainerLow,
+        contentColor = if (isSelected) colors.onPrimaryContainer else colors.onSurface,
+      ),
+    border =
+      BorderStroke(
+        width = if (isSelected) 2.dp else 1.dp,
+        color = if (isSelected) colors.primary else colors.outlineVariant,
+      ),
+  ) {
+    Row(
+      modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
+      verticalAlignment = Alignment.CenterVertically,
+      horizontalArrangement = Arrangement.spacedBy(10.dp),
+    ) {
+      Surface(
+        modifier = Modifier.size(28.dp),
+        shape = CircleShape,
+        color = if (isSelected) colors.primary else colors.secondaryContainer,
+        contentColor = if (isSelected) colors.onPrimary else colors.onSecondaryContainer,
+        border =
+          if (isSelected) {
+            null
+          } else {
+            BorderStroke(1.dp, colors.outlineVariant)
+          },
+      ) {
+        Box(contentAlignment = Alignment.Center) {
+          Text(
+            text = stepNumber.toString(),
+            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+            maxLines = 1,
+            softWrap = false,
+          )
+        }
+      }
+      if (choiceBitmap != null) {
+        Image(
+          bitmap = choiceBitmap,
+          contentDescription = displayLabel,
+          contentScale = ContentScale.Crop,
+          modifier =
+            Modifier.size(40.dp)
+              .clip(RoundedCornerShape(8.dp))
+              .border(1.dp, colors.outlineVariant, RoundedCornerShape(8.dp)),
+        )
+      }
+      if (choiceColor != null) {
+        Box(
+          modifier =
+            Modifier.size(16.dp)
+              .clip(CircleShape)
+              .background(choiceColor)
+              .border(1.dp, colors.outlineVariant, CircleShape)
+        )
+      }
+      Column(
+        modifier = Modifier.weight(1f),
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+      ) {
+        Text(
+          text = displayLabel,
+          style =
+            MaterialTheme.typography.bodyMedium.copy(
+              fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+              color = if (isSelected) colors.onPrimaryContainer else colors.onSurface,
+            ),
+        )
+        if (!option.label.guidanceText.isNullOrBlank()) {
+          Text(
+            text = option.label.guidanceText.orEmpty(),
+            style =
+              MaterialTheme.typography.bodySmall.copy(
+                color =
+                  if (isSelected) colors.onPrimaryContainer.copy(alpha = 0.8f)
+                  else colors.onSurfaceVariant
+              ),
+          )
+        }
+        val media = option.label.media
+        if (media != null) {
+          val showImageBadge = choiceBitmap == null && media.image_uri.isNotBlank()
+          val hasBadges =
+            showImageBadge ||
+              media.big_image_uri.isNotBlank() ||
+              media.audio_uri.isNotBlank() ||
+              media.video_uri.isNotBlank()
+          if (hasBadges) {
+            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+              if (showImageBadge) {
+                GroundTonalBadge(media.image_uri, GroundBadgeTone.PRIMARY)
+              }
+              if (media.big_image_uri.isNotBlank()) {
+                GroundTonalBadge(media.big_image_uri, GroundBadgeTone.PRIMARY)
+              }
+              if (media.audio_uri.isNotBlank()) {
+                GroundTonalBadge(media.audio_uri, GroundBadgeTone.SECONDARY)
+              }
+              if (media.video_uri.isNotBlank()) {
+                GroundTonalBadge(media.video_uri, GroundBadgeTone.TERTIARY)
+              }
+            }
+          }
+        }
+      }
+      RadioButton(
+        selected = isSelected,
+        onClick = onClick,
+        colors =
+          RadioButtonDefaults.colors(
+            selectedColor = colors.onPrimaryContainer,
+            unselectedColor = colors.onSurfaceVariant,
+          ),
       )
     }
   }
@@ -2546,6 +2737,8 @@ private fun ChoiceCardRow(
   onClick: () -> Unit,
 ) {
   val colors = MaterialTheme.colorScheme
+  val choiceColor = ChoiceImageRegistry.parseChoiceColor(option.properties["color"])
+  val choiceBitmap = ChoiceImageRegistry.rememberChoiceImageBitmap(option.label.media?.image_uri)
   OutlinedCard(
     onClick = onClick,
     modifier = Modifier.fillMaxWidth(),
@@ -2558,7 +2751,7 @@ private fun ChoiceCardRow(
     border =
       BorderStroke(
         width = if (isSelected) 2.dp else 1.dp,
-        color = if (isSelected) colors.primary else colors.outlineVariant,
+        color = if (isSelected) choiceColor ?: colors.primary else colors.outlineVariant,
       ),
   ) {
     Row(
@@ -2588,6 +2781,26 @@ private fun ChoiceCardRow(
             ),
         )
       }
+      if (choiceBitmap != null) {
+        Image(
+          bitmap = choiceBitmap,
+          contentDescription = option.label.text,
+          contentScale = ContentScale.Crop,
+          modifier =
+            Modifier.size(40.dp)
+              .clip(RoundedCornerShape(8.dp))
+              .border(1.dp, colors.outlineVariant, RoundedCornerShape(8.dp)),
+        )
+      }
+      if (choiceColor != null) {
+        Box(
+          modifier =
+            Modifier.size(16.dp)
+              .clip(CircleShape)
+              .background(choiceColor)
+              .border(1.dp, colors.outlineVariant, CircleShape)
+        )
+      }
       Column(
         modifier = Modifier.weight(1f),
         verticalArrangement = Arrangement.spacedBy(4.dp),
@@ -2613,18 +2826,26 @@ private fun ChoiceCardRow(
         }
         val media = option.label.media
         if (media != null) {
-          Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-            if (media.image_uri.isNotBlank()) {
-              GroundTonalBadge(media.image_uri, GroundBadgeTone.PRIMARY)
-            }
-            if (media.big_image_uri.isNotBlank()) {
-              GroundTonalBadge(media.big_image_uri, GroundBadgeTone.PRIMARY)
-            }
-            if (media.audio_uri.isNotBlank()) {
-              GroundTonalBadge(media.audio_uri, GroundBadgeTone.SECONDARY)
-            }
-            if (media.video_uri.isNotBlank()) {
-              GroundTonalBadge(media.video_uri, GroundBadgeTone.TERTIARY)
+          val showImageBadge = choiceBitmap == null && media.image_uri.isNotBlank()
+          val hasBadges =
+            showImageBadge ||
+              media.big_image_uri.isNotBlank() ||
+              media.audio_uri.isNotBlank() ||
+              media.video_uri.isNotBlank()
+          if (hasBadges) {
+            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+              if (showImageBadge) {
+                GroundTonalBadge(media.image_uri, GroundBadgeTone.PRIMARY)
+              }
+              if (media.big_image_uri.isNotBlank()) {
+                GroundTonalBadge(media.big_image_uri, GroundBadgeTone.PRIMARY)
+              }
+              if (media.audio_uri.isNotBlank()) {
+                GroundTonalBadge(media.audio_uri, GroundBadgeTone.SECONDARY)
+              }
+              if (media.video_uri.isNotBlank()) {
+                GroundTonalBadge(media.video_uri, GroundBadgeTone.TERTIARY)
+              }
             }
           }
         }
@@ -2700,94 +2921,6 @@ private fun RangeControlWidget(
 }
 
 @Composable
-private fun RankControlWidget(
-  control: ComponentState.ControlState,
-  controller: FormWizardController,
-) {
-  val colors = MaterialTheme.colorScheme
-  val path = control.canonicalPath
-  val currentRankedValues: List<String> =
-    control.fieldState.value
-      ?.list_value
-      ?.values
-      ?.mapNotNull { it.string_value }
-      ?.takeIf { it.isNotEmpty() } ?: control.options.map { it.value }
-
-  val orderedOptions =
-    currentRankedValues.mapNotNull { code -> control.options.find { it.value == code } } +
-      control.options.filter { opt -> opt.value !in currentRankedValues }
-
-  Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-    Text(
-      text = "Order items from highest (#1) to lowest priority:",
-      style = MaterialTheme.typography.labelMedium.copy(color = colors.onSurfaceVariant),
-    )
-    orderedOptions.forEachIndexed { index, option ->
-      OutlinedCard(
-        modifier = Modifier.fillMaxWidth(),
-        shape = MaterialTheme.shapes.medium,
-        colors = CardDefaults.outlinedCardColors(containerColor = colors.surfaceContainerLow),
-      ) {
-        Row(
-          modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
-          verticalAlignment = Alignment.CenterVertically,
-          horizontalArrangement = Arrangement.spacedBy(10.dp),
-        ) {
-          GroundTonalBadge(text = "#${index + 1}", tone = GroundBadgeTone.PRIMARY)
-          Text(
-            text = option.label.text,
-            style =
-              MaterialTheme.typography.bodyMedium.copy(
-                fontWeight = FontWeight.Medium,
-                color = colors.onSurface,
-              ),
-            modifier = Modifier.weight(1f),
-          )
-          OutlinedButton(
-            onClick = {
-              if (index > 0) {
-                val mutable = orderedOptions.map { it.value }.toMutableList()
-                val tmp = mutable[index - 1]
-                mutable[index - 1] = mutable[index]
-                mutable[index] = tmp
-                controller.updateMultiSelect(path, mutable)
-              }
-            },
-            enabled = index > 0,
-            contentPadding = PaddingValues(horizontal = 10.dp),
-          ) {
-            Icon(
-              imageVector = Icons.Default.KeyboardArrowUp,
-              contentDescription = "Move up",
-              modifier = Modifier.size(18.dp),
-            )
-          }
-          OutlinedButton(
-            onClick = {
-              if (index < orderedOptions.lastIndex) {
-                val mutable = orderedOptions.map { it.value }.toMutableList()
-                val tmp = mutable[index + 1]
-                mutable[index + 1] = mutable[index]
-                mutable[index] = tmp
-                controller.updateMultiSelect(path, mutable)
-              }
-            },
-            enabled = index < orderedOptions.lastIndex,
-            contentPadding = PaddingValues(horizontal = 10.dp),
-          ) {
-            Icon(
-              imageVector = Icons.Default.KeyboardArrowDown,
-              contentDescription = "Move down",
-              modifier = Modifier.size(18.dp),
-            )
-          }
-        }
-      }
-    }
-  }
-}
-
-@Composable
 private fun TriggerControlWidget(
   control: ComponentState.ControlState,
   controller: FormWizardController,
@@ -2832,7 +2965,7 @@ fun formatFieldValueForDisplay(value: FieldValue?, dataType: DataType): String {
   }
   val scalar = value.scalar_value ?: return "(Unanswered)"
   return when (dataType) {
-    DataType.TYPE_BOOLEAN -> scalar.bool_value?.toString() ?: "(Unanswered)"
+    DataType.TYPE_BOOLEAN -> scalar.bool_value?.let { if (it) "Yes" else "No" } ?: "(Unanswered)"
     DataType.TYPE_INT32 ->
       (scalar.int32_value ?: scalar.int64_value?.toInt())?.toString() ?: "(Unanswered)"
     DataType.TYPE_INT64 ->
@@ -2865,7 +2998,7 @@ fun formatFieldValueForDisplay(value: FieldValue?, dataType: DataType): String {
         ?: scalar.int64_value?.toString()
         ?: scalar.int32_value?.toString()
         ?: scalar.double_value?.toString()
-        ?: scalar.bool_value?.toString()
+        ?: scalar.bool_value?.let { if (it) "Yes" else "No" }
         ?: "(Unanswered)"
   }
 }
@@ -2900,6 +3033,107 @@ internal fun parseIntegerInput(raw: String, dataType: DataType): IntegerInput {
     return IntegerInput.Invalid("Enter a value between ${Int.MIN_VALUE} and ${Int.MAX_VALUE}")
   }
   return IntegerInput.Valid(parsed)
+}
+
+private const val MILLIS_PER_DAY = 86_400_000L
+
+/** Outcome of interpreting the raw text a user typed into a date control. */
+internal sealed interface DateInput {
+  /** The control is empty, so the underlying field should be cleared. */
+  data object Empty : DateInput
+
+  /** The text is not a valid calendar date in `YYYY-MM-DD` format; [message] explains why. */
+  data class Invalid(val message: String) : DateInput
+
+  /** The text parsed to a valid proleptic Gregorian calendar date. */
+  data class Valid(val year: Int, val month: Int, val day: Int) : DateInput
+}
+
+/** Formats [year], [month], and [day] as an ISO-8601 `YYYY-MM-DD` string. */
+internal fun formatIsoDate(year: Int, month: Int, day: Int): String =
+  "${year.toString().padStart(4, '0')}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}"
+
+/**
+ * Returns the number of days in [month] (`1..12`) of [year] in the proleptic Gregorian calendar.
+ */
+internal fun daysInMonth(year: Int, month: Int): Int =
+  when (month) {
+    1,
+    3,
+    5,
+    7,
+    8,
+    10,
+    12 -> 31
+    4,
+    6,
+    9,
+    11 -> 30
+    2 -> if (year % 4 == 0 && (year % 100 != 0 || year % 400 == 0)) 29 else 28
+    else -> 0
+  }
+
+/**
+ * Parses [raw] as an ISO-8601 calendar date (`YYYY-MM-DD`).
+ *
+ * Rejects malformed strings, out-of-range months, and non-existent calendar days (such as
+ * `2026-02-30`).
+ */
+internal fun parseDateInput(raw: String): DateInput {
+  if (raw.isBlank()) return DateInput.Empty
+  val trimmed = raw.trim()
+  val parts = trimmed.split('-')
+  if (parts.size != 3 || parts[0].length != 4 || parts[1].length != 2 || parts[2].length != 2) {
+    return DateInput.Invalid("Enter a valid date in YYYY-MM-DD format")
+  }
+  val year = parts[0].toIntOrNull()
+  val month = parts[1].toIntOrNull()
+  val day = parts[2].toIntOrNull()
+  if (
+    year == null ||
+      month == null ||
+      day == null ||
+      year !in 1..9999 ||
+      month !in 1..12 ||
+      day !in 1..daysInMonth(year, month)
+  ) {
+    return DateInput.Invalid("Enter a valid date in YYYY-MM-DD format")
+  }
+  return DateInput.Valid(year, month, day)
+}
+
+/**
+ * Converts a proleptic Gregorian date ([year], [month], [day]) to UTC midnight epoch milliseconds
+ * for Material 3 [DatePicker].
+ */
+internal fun civilDateToUtcMillis(year: Int, month: Int, day: Int): Long {
+  val y = (if (month <= 2) year - 1 else year).toLong()
+  val era = if (y >= 0) y / 400 else (y - 399) / 400
+  val yoe = y - era * 400
+  val mp = (month + if (month > 2) -3 else 9).toLong()
+  val doy = (153 * mp + 2) / 5 + day - 1
+  val doe = yoe * 365 + yoe / 4 - yoe / 100 + doy
+  val epochDays = era * 146097 + doe - 719468
+  return epochDays * MILLIS_PER_DAY
+}
+
+/**
+ * Converts UTC epoch milliseconds from Material 3 [DatePicker] to a proleptic Gregorian
+ * [DateInput.Valid] calendar date.
+ */
+internal fun utcMillisToCivilDate(utcMillis: Long): DateInput.Valid {
+  val epochDays = utcMillis.floorDiv(MILLIS_PER_DAY)
+  val z = epochDays + 719468L
+  val era = (if (z >= 0) z else z - 146096L) / 146097L
+  val doe = z - era * 146097L
+  val yoe = (doe - doe / 1460L + doe / 36524L - doe / 146096L) / 365L
+  val y = yoe + era * 400L
+  val doy = doe - (365L * yoe + yoe / 4L - yoe / 100L)
+  val mp = (5L * doy + 2L) / 153L
+  val d = (doy - (153L * mp + 2L) / 5L + 1L).toInt()
+  val m = (mp + (if (mp < 10L) 3L else -9L)).toInt()
+  val civilYear = (y + (if (m <= 2) 1L else 0L)).toInt()
+  return DateInput.Valid(civilYear, m, d)
 }
 
 private val RemoveIcon: ImageVector by lazy {

@@ -227,15 +227,20 @@ internal object RecordInstanceXmlSerializer {
           elements.any { it.attributes.containsKey("jr:template") }
 
       if (isRepeatGroup) {
-        val repeatNodes = elements.map { elem ->
-          parseRecordNode(
-            parentElement = elem,
-            currentPath = childPath,
-            fieldDefs = childFieldDefs,
-            bindingTypes = bindingTypes,
-            isRoot = false,
-          )
-        }
+        val repeatNodes =
+          elements
+            .filter {
+              !it.attributes.containsKey("jr:template") && !it.attributes.containsKey("template")
+            }
+            .map { elem ->
+              parseRecordNode(
+                parentElement = elem,
+                currentPath = childPath,
+                fieldDefs = childFieldDefs,
+                bindingTypes = bindingTypes,
+                isRoot = false,
+              )
+            }
         FieldValue(repeat_value = RecordNodeList(nodes = repeatNodes))
       } else {
         val singleElem = elements.first()

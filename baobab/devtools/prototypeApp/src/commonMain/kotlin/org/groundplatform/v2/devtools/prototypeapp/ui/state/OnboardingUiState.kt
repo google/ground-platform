@@ -39,6 +39,10 @@ data class OnboardingUiState(
   val downloadedSurveyCount: Int = 0,
   /** Organization display names by ID, for survey cards and search. */
   val organizationNames: Map<String, String> = emptyMap(),
+  /**
+   * Affiliation line for the signed-in user's profile card (their organizations joined by " • ").
+   */
+  val userOrganization: String = profile.organizationName,
   /** ID of a downloaded survey whose offline copy is pending removal confirmation. */
   val pendingRemovalSurveyId: String? = null,
 ) {

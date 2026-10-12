@@ -114,14 +114,25 @@ class SurveyMapViewModelTest {
     repeat(4) { f.viewModel.zoomOutMap() }
     assertEquals(-3.0f, f.uiState.mapZoomDelta)
     assertTrue(f.uiState.isMapClusteringActive)
-    assertTrue(f.uiState.mapFeatureClusters.isNotEmpty())
+    val clustersAt300 = f.uiState.mapFeatureClusters
+    assertTrue(clustersAt300.size > 1)
     assertEquals(
       f.uiState.visibleMapEntities.size,
-      f.uiState.mapFeatureClusters.sumOf { it.totalCount },
+      clustersAt300.sumOf { it.totalCount },
+    )
+
+    f.viewModel.zoomOutMap()
+    assertEquals(-3.75f, f.uiState.mapZoomDelta)
+    val clustersAt375 = f.uiState.mapFeatureClusters
+    assertTrue(clustersAt375.size < clustersAt300.size)
+    assertEquals(1, clustersAt375.size)
+    assertEquals(
+      f.uiState.visibleMapEntities.size,
+      clustersAt375.sumOf { it.totalCount },
     )
 
     repeat(10) { f.viewModel.zoomOutMap() }
-    assertEquals(-5.0f, f.uiState.mapZoomDelta)
+    assertEquals(-8.0f, f.uiState.mapZoomDelta)
     repeat(20) { f.viewModel.zoomInMap() }
     assertEquals(3.7f, f.uiState.mapZoomDelta)
     assertFalse(f.uiState.isMapClusteringActive)

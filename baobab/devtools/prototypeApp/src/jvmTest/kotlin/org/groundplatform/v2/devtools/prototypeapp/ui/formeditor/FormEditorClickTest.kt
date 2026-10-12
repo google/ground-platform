@@ -76,7 +76,18 @@ class FormEditorClickTest {
 
   @Test
   fun singleClickOnStartNodeOpensFormSettings() = withEditor { state ->
-    onNodeWithText("Start").performClick()
+    runOnIdle { state.select("q1") }
+    waitForIdle()
+    onNodeWithContentDescription("Start: Shade Tree Farm Visit").performClick()
+    waitForIdle()
+    assertTrue(state.ui.isFormSettingsSelected)
+
+    runOnIdle {
+      state.updateCtaLabel("Record farm visit")
+      state.select("q1")
+    }
+    waitForIdle()
+    onNodeWithContentDescription("Start: Record farm visit").performClick()
     waitForIdle()
     assertTrue(state.ui.isFormSettingsSelected)
   }
@@ -96,7 +107,7 @@ class FormEditorClickTest {
     onAllNodesWithContentDescription("Add question here").onFirst().performTouchInput { click() }
     waitForIdle()
     // The menu popup is composed last; earlier matches are screen cards.
-    onAllNodesWithText("Long text").onLast().performClick()
+    onAllNodesWithText("Paragraph").onLast().performClick()
     waitForIdle()
     assertEquals(EditorQuestionType.LONG_TEXT, state.ui.form.questions.first().type)
   }
@@ -201,6 +212,37 @@ class FormEditorClickTest {
     onNodeWithContentDescription("Clear Earliest date").performClick()
     waitForIdle()
     assertEquals(null, state.ui.form.find("q1")!!.validation?.min?.ifEmpty { null })
+  }
+
+  @Test
+  fun dateQuestionCalendarWidgetPicksAndClearsDateInFormRunner() = withEditor { state ->
+    runOnIdle { state.startPreview() }
+    waitForIdle()
+
+    onNodeWithContentDescription("Select date").performClick()
+    waitForIdle()
+    onAllNodesWithText(" 15, ", substring = true, useUnmergedTree = true).onFirst().performClick()
+    onNodeWithText("OK").performClick()
+    waitForIdle()
+
+    val expectedDate = java.time.LocalDate.now().withDayOfMonth(15)
+    val expectedIso = expectedDate.toString()
+    onNodeWithText(expectedIso, useUnmergedTree = true).assertExists()
+
+    val step =
+      state.ui.previewController!!.currentStep
+        as org.groundplatform.v2.core.forms.ui.FormWizardStep.QuestionStep
+    val dateProto = step.control.fieldState.value?.scalar_value?.date_value
+    assertEquals(expectedDate.year, dateProto?.year)
+    assertEquals(expectedDate.monthValue, dateProto?.month)
+    assertEquals(15, dateProto?.day)
+
+    onNodeWithContentDescription("Clear date").performClick()
+    waitForIdle()
+    val clearedStep =
+      state.ui.previewController!!.currentStep
+        as org.groundplatform.v2.core.forms.ui.FormWizardStep.QuestionStep
+    assertTrue(clearedStep.control.fieldState.isEmpty)
   }
 
   @Test
@@ -529,5 +571,142 @@ class FormEditorClickTest {
     onNodeWithText("Delete").performClick()
     waitForIdle()
     assertEquals(initialCount, state.ui.form.questions.size)
+  }
+
+  @Test
+  fun toolbarAddQuestionButtonAddsQuestionAndOverflowMenuConfirmsDeleteForm() =
+    runDesktopComposeUiTest(width = 1600, height = 1000) {
+      var deleted = false
+      val state = formEditorViewModel(FormEditorSamples.shadeTreeVisit())
+      setContent {
+        MaterialTheme {
+          val uiState by state.uiState.collectAsState()
+          FormEditorPage(
+            uiState = uiState,
+            actions = state,
+            isDarkTheme = false,
+            onDelete = { deleted = true },
+          )
+        }
+      }
+      val initialCount = state.ui.form.questions.size
+      onNodeWithText("Add question").performClick()
+      waitForIdle()
+      onAllNodesWithText("Number").onLast().performClick()
+      waitForIdle()
+      assertEquals(initialCount + 1, state.ui.form.questions.size)
+
+      // Delete form is inside the More options menu and asks for confirmation.
+      onNodeWithContentDescription("More options").performClick()
+      waitForIdle()
+      onNodeWithText("Download XForms XML").assertExists()
+      onNodeWithText("Delete form").performClick()
+      waitForIdle()
+      onNodeWithText("Delete form?").assertExists()
+      onNodeWithText("Cancel").performClick()
+      waitForIdle()
+      assertEquals(false, deleted)
+
+      onNodeWithContentDescription("More options").performClick()
+      waitForIdle()
+      onNodeWithText("Delete form").performClick()
+      waitForIdle()
+      onAllNodesWithText("Delete form").onLast().performClick()
+      waitForIdle()
+      assertEquals(true, deleted)
+    }
+
+  @Test
+  fun toolbarUndoAndRedoButtonsRewindAndReplayFormEdits() = withEditor { state ->
+    val initialCount = state.ui.form.questions.size
+    assertEquals(false, state.ui.canUndo)
+    assertEquals(false, state.ui.canRedo)
+
+    onNodeWithText("Add question").performClick()
+    waitForIdle()
+    onAllNodesWithText("Number").onLast().performClick()
+    waitForIdle()
+    assertEquals(initialCount + 1, state.ui.form.questions.size)
+    assertEquals(true, state.ui.canUndo)
+    assertEquals(false, state.ui.canRedo)
+
+    onNodeWithContentDescription("Undo").performClick()
+    waitForIdle()
+    assertEquals(initialCount, state.ui.form.questions.size)
+    assertEquals(false, state.ui.canUndo)
+    assertEquals(true, state.ui.canRedo)
+
+    onNodeWithContentDescription("Redo").performClick()
+    waitForIdle()
+    assertEquals(initialCount + 1, state.ui.form.questions.size)
+    assertEquals(true, state.ui.canUndo)
+    assertEquals(false, state.ui.canRedo)
+  }
+
+  @Test
+  fun toolbarLanguageSelectorSwitchesActiveLanguageAndEditsLocalizedLabels() =
+    runDesktopComposeUiTest(width = 1600, height = 1000) {
+      val state =
+        formEditorViewModel(
+          form = FormEditorSamples.shadeTreeVisit(),
+          library =
+            org.groundplatform.v2.devtools.prototypeapp.ui.state.FormLibraryContext(
+              language = "en",
+              supportedLanguages = listOf("en", "es"),
+            ),
+        )
+      setContent {
+        MaterialTheme {
+          val uiState by state.uiState.collectAsState()
+          FormEditorPage(uiState = uiState, actions = state, isDarkTheme = false)
+        }
+      }
+      waitForIdle()
+
+      // Language selector shows English by default.
+      onNodeWithContentDescription("Form language: English").assertExists().performClick()
+      waitForIdle()
+      onNodeWithText("English • Default").assertExists()
+      onNodeWithText("Spanish").assertExists().performClick()
+      waitForIdle()
+
+      assertEquals("es", state.ui.activeLanguage)
+      onNodeWithContentDescription("Form language: Spanish").assertExists()
+
+      // Select Q3 ("has_shade_trees") and verify the properties panel prompts for Spanish labels.
+      runOnIdle {
+        state.select("q3")
+        state.updateQuestionLabel("q3", "¿Hay árboles de sombra?")
+        state.updateChoiceLabel("q3", 0, "Sí")
+      }
+      waitForIdle()
+
+      onAllNodesWithText("¿Hay árboles de sombra?").onFirst().assertExists()
+      assertEquals("Are shade trees present?", state.ui.form.find("q3")?.label)
+      assertEquals("¿Hay árboles de sombra?", state.ui.form.find("q3")?.labelIn("es", "en"))
+      assertEquals("Yes", state.ui.form.find("q3")?.choices?.first()?.label)
+      assertEquals("Sí", state.ui.form.find("q3")?.choices?.first()?.labelIn("es", "en"))
+    }
+
+  @Test
+  fun previewTargetToggleAndFloatingAddQuestionWorkAcrossMobileAndWeb() = withEditor { state ->
+    val initialCount = state.ui.form.questions.size
+    // Switch to Web layout via the preview header's Mobile/Web toggle.
+    onNodeWithText("Web").performClick()
+    waitForIdle()
+    onNodeWithText("${initialCount} questions • Web layout").assertExists()
+
+    // Floating "Add question" button remains accessible in Web preview mode.
+    onNodeWithText("Add question").performClick()
+    waitForIdle()
+    onAllNodesWithText("Number").onLast().performClick()
+    waitForIdle()
+    assertEquals(initialCount + 1, state.ui.form.questions.size)
+    onNodeWithText("${initialCount + 1} questions • Web layout").assertExists()
+
+    // Switch back to Mobile flow canvas via the preview header's toggle.
+    onNodeWithText("Mobile").performClick()
+    waitForIdle()
+    onNodeWithText("${initialCount + 1} screens •", substring = true).assertExists()
   }
 }

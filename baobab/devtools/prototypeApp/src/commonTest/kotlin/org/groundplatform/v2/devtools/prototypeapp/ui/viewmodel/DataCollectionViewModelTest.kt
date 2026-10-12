@@ -25,8 +25,11 @@ import org.groundplatform.v2.core.forms.ui.FormWizardController
 import org.groundplatform.v2.core.forms.ui.MapDrawingKind
 import org.groundplatform.v2.core.forms.ui.WorkbenchExampleForm
 import org.groundplatform.v2.devtools.prototypeapp.client.pdf.PdfExportResult
+import org.groundplatform.v2.devtools.prototypeapp.data.datasource.local.store.runNow
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.MainSurveyViewMode
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SyncStatus
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.PeerDataVisibility
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SharingPolicy
 import org.groundplatform.v2.devtools.prototypeapp.domain.usecase.LaunchFormUseCase
 import org.groundplatform.v2.devtools.prototypeapp.ui.datacollection.ENTITY_REF_FIELD_PATH
 import org.groundplatform.v2.devtools.prototypeapp.ui.state.DataCollectionEvent
@@ -511,6 +514,87 @@ class DataCollectionViewModelTest {
   fun canSharePdfFiles_followsTheClient() {
     val f = DataCollectionFixture(pdfExportClient = RecordingPdfExportClient(canShareFiles = false))
     assertFalse(f.uiState.canSharePdfFiles)
+  }
+
+  @Test
+  fun publicDataSurvey_requiresConsentOncePerSurvey_beforeLaunchingForm() {
+    val f = DataCollectionFixture()
+    // Seeded "survey-single-point-land-use" is PUBLIC with PeerDataVisibility.ALL (Public data).
+    runNow { f.surveyRepository.setActiveSurveyId("survey-single-point-land-use") }
+    f.viewModel.onSurveyActivated()
+    assertTrue(f.uiState.isActiveSurveyPublicData)
+    assertFalse(f.uiState.isActiveSurveyPrivateSubmissions)
+
+    val formId = f.uiState.forms.first().id
+    f.viewModel.launchFormFromFab(formId)
+
+    // Form does not open yet; informed consent prompt is presented.
+    assertFalse(f.uiState.isDataCollectionFormOpen)
+    val prompt = assertNotNull(f.uiState.pendingCollectorConsent)
+    assertEquals("survey-single-point-land-use", prompt.surveyId)
+    assertTrue(prompt.isPublicData)
+
+    // Dismissing cancels the launch without opening the form.
+    f.viewModel.dismissCollectorConsent()
+    assertNull(f.uiState.pendingCollectorConsent)
+    assertFalse(f.uiState.isDataCollectionFormOpen)
+
+    // Launching again and accepting opens the form and remembers consent for this survey.
+    f.viewModel.launchFormFromFab(formId)
+    assertNotNull(f.uiState.pendingCollectorConsent)
+    f.viewModel.acceptCollectorConsent()
+    assertNull(f.uiState.pendingCollectorConsent)
+    assertTrue(f.uiState.isDataCollectionFormOpen)
+
+    // Subsequent launches in the same survey open immediately without re-prompting.
+    f.viewModel.closeActiveFormRunner()
+    f.viewModel.launchFormFromFab(formId)
+    assertNull(f.uiState.pendingCollectorConsent)
+    assertTrue(f.uiState.isDataCollectionFormOpen)
+  }
+
+  @Test
+  fun privateSubmissionsSurvey_opensFormDirectlyWithoutConsentPrompt() {
+    val f = DataCollectionFixture()
+    // Seeded "survey-commodity-perimeter-center" is ANYONE_WITH_LINK + OWN_ONLY (Private
+    // submissions).
+    runNow { f.surveyRepository.setActiveSurveyId("survey-commodity-perimeter-center") }
+    f.viewModel.onSurveyActivated()
+    assertFalse(f.uiState.isActiveSurveyPublicData)
+    assertTrue(f.uiState.isActiveSurveyPrivateSubmissions)
+
+    val formId = f.uiState.forms.first().id
+    f.viewModel.launchFormFromFab(formId)
+    assertNull(f.uiState.pendingCollectorConsent)
+    assertTrue(f.uiState.isDataCollectionFormOpen)
+  }
+
+  @Test
+  fun customOrganizerConsent_promptsEvenWhenSubmissionsArePrivate() {
+    val f = DataCollectionFixture()
+    val surveyId = f.uiState.activeSurveyId
+    runNow {
+      f.surveyRepository.updateSurvey(surveyId) {
+        it.copy(
+          sharingPolicy = SharingPolicy.RESTRICTED,
+          peerDataVisibility = PeerDataVisibility.OWN_ONLY,
+          collectorConsentRequired = true,
+          collectorConsentText = "Custom FPIC community agreement.",
+        )
+      }
+    }
+
+    val entity = f.uiState.entities.first { it.id == "entity-nyr-112" }
+    f.viewModel.launchFormForEntity(entity.id, "form-eudr-baseline")
+    assertFalse(f.uiState.isDataCollectionFormOpen)
+    val prompt = assertNotNull(f.uiState.pendingCollectorConsent)
+    assertFalse(prompt.isPublicData)
+    assertEquals("Custom FPIC community agreement.", prompt.customConsentText)
+
+    f.viewModel.acceptCollectorConsent()
+    assertNull(f.uiState.pendingCollectorConsent)
+    assertTrue(f.uiState.isDataCollectionFormOpen)
+    assertEquals(entity.id, f.uiState.activeDataCollectionEntityId)
   }
 }
 

@@ -1595,15 +1595,21 @@ class PrototypeAppStateTest {
     state.zoomOutMap()
     assertEquals(-3.0f, state.mapZoomDelta)
     assertTrue(state.isMapClusteringActive)
-    assertTrue(state.mapFeatureClusters.isNotEmpty())
-    assertEquals(5, state.mapFeatureClusters.sumOf { it.totalCount })
+    val initialClusters = state.mapFeatureClusters
+    assertTrue(initialClusters.size > 1)
+    assertEquals(5, initialClusters.sumOf { it.totalCount })
 
-    // 3. Zoom out further (-3.75f) so all 5 entity features merge into a single cluster balloon
+    // 3. Zoom out further (-3.75f) so local clusters cover a broader area and merge into a single
+    // survey-wide cluster balloon
     state.zoomOutMap()
     assertEquals(-3.75f, state.mapZoomDelta)
     assertEquals(1, state.mapFeatureClusters.size)
     val allCluster = state.mapFeatureClusters.first()
     assertEquals(5, allCluster.totalCount)
+    assertTrue(
+      allCluster.diameterNormalized > initialClusters.maxOf { it.diameterNormalized },
+      "Survey-wide cluster at -3.75f should cover a broader spatial area than local clusters at -3.0f",
+    )
 
     // Verify grouping by marker symbol for entity geometries
     assertEquals(3, allCluster.symbolGroups.size)
@@ -1700,28 +1706,51 @@ class PrototypeAppStateTest {
     assertEquals(10_005, state.activeSurvey.entityCount)
     assertTrue(state.entities.any { it.id == "entity-rnd-10005" })
 
-    // Verify spatial clustering handles >10,000 features when zoomed out and merges over larger
-    // areas as the user zooms out further to avoid overlapping cluster balloons
+    // Verify spatial clustering handles >10,000 features across [-2.2, 3.2] x [-2.2, 3.2] and
+    // progressively covers a broader and broader area as the user zooms out further
     repeat(3) { state.zoomOutMap() } // -2.25f: not yet clustered
     assertFalse(state.isMapClusteringActive)
+
     state.zoomOutMap() // -3.00f
     assertTrue(state.isMapClusteringActive)
     val clustersAtStep1 = state.mapFeatureClusters
-    assertTrue(clustersAtStep1.isNotEmpty())
+    assertTrue(clustersAtStep1.size > 10)
     assertEquals(state.visibleMapClusterFeatures.size, clustersAtStep1.sumOf { it.totalCount })
 
     state.zoomOutMap() // -3.75f
     val clustersAtStep2 = state.mapFeatureClusters
     assertTrue(clustersAtStep2.size < clustersAtStep1.size)
+    assertTrue(
+      clustersAtStep2.maxOf { it.diameterNormalized } >
+        clustersAtStep1.maxOf { it.diameterNormalized }
+    )
     assertEquals(state.visibleMapClusterFeatures.size, clustersAtStep2.sumOf { it.totalCount })
 
-    // Zoom all the way out (-4.50f, e.g. 10.8z): all 10,005 features across [-2.2, 3.2] merge into
-    // a single non-overlapping cluster balloon, including LineString transects
     state.zoomOutMap() // -4.50f
+    val clustersAtStep3 = state.mapFeatureClusters
+    assertTrue(clustersAtStep3.size < clustersAtStep2.size)
+    assertTrue(
+      clustersAtStep3.maxOf { it.diameterNormalized } >
+        clustersAtStep2.maxOf { it.diameterNormalized }
+    )
+    assertEquals(state.visibleMapClusterFeatures.size, clustersAtStep3.sumOf { it.totalCount })
+
+    state.zoomOutMap() // -5.25f
+    val clustersAtStep4 = state.mapFeatureClusters
+    assertTrue(clustersAtStep4.size <= clustersAtStep3.size)
+    assertEquals(state.visibleMapClusterFeatures.size, clustersAtStep4.sumOf { it.totalCount })
+
+    // Zoom out to regional view (-6.00f, ~9.3z): all 10,005 features across [-2.2, 3.2] merge into
+    // a single regional cluster balloon covering the entire 5.4 x 5.4 area, including LineStrings
+    state.zoomOutMap() // -6.00f
     val clustersAtDeepZoomOut = state.mapFeatureClusters
     assertEquals(1, clustersAtDeepZoomOut.size)
     assertEquals(10_005, clustersAtDeepZoomOut.first().siteCount)
     assertTrue(clustersAtDeepZoomOut.first().features.any { it.id == "entity-shade-201" })
+    assertTrue(
+      clustersAtDeepZoomOut.first().diameterNormalized >
+        clustersAtStep3.maxOf { it.diameterNormalized }
+    )
 
     val clusteredMap = SurveyMapContent.main(state, showNavigation = true)
     assertTrue(clusteredMap.entityFeatures().isEmpty())
@@ -1819,9 +1848,7 @@ class PrototypeAppStateTest {
     assertTrue(
       samplePlotsFormDef.model?.secondary_instances?.any { sec ->
         sec.id == "sample_plots" &&
-          sec.rows.any { row ->
-            row.fields["name"]?.scalar_value?.string_value == "plot_sp01"
-          }
+          sec.rows.any { row -> row.fields["name"]?.scalar_value?.string_value == "plot_sp01" }
       } == true
     )
     val plotSelectCtrl =
@@ -1911,6 +1938,7 @@ class PrototypeAppStateTest {
 
     // Launch the single-point land-use form from FAB (which does not require picking an entity)
     state.launchFormFromFab("form-single-point-land-use")
+    state.acceptCollectorConsent()
     assertTrue(state.isDataCollectionFormOpen)
     val ctrl = assertNotNull(state.activeFormWizardController)
 
@@ -2566,5 +2594,89 @@ class PrototypeAppStateTest {
     assertEquals(16.0, MapDrawingKind.POINT.maxFramingZoom)
     assertEquals(17.0, MapDrawingKind.LINE.maxFramingZoom)
     assertEquals(17.0, MapDrawingKind.POLYGON.maxFramingZoom)
+  }
+
+  @Test
+  fun contributorIdentities_alwaysHiddenFromNonOrganizersAcrossAllSharingPolicies() {
+    val state = PrototypeAppState(initialScreen = PrototypeScreen.MAIN_SURVEY)
+    val entity = state.entities.first { it.id == "entity-shade-201" }
+    val mayaSubmission =
+      entity.submissions.first { it.collectorEmail == "maya.lin@groundplatform.org" }
+    val samuelSubmission =
+      entity.submissions.first { it.collectorEmail == "s.kariuki@kenyaforestry.org" }
+
+    // 1. Default signed-in user (Maya Lin) is a survey organizer on survey-kenya-coffee:
+    //    organizers always see full contributor names and emails.
+    assertFalse(state.shouldHideContributorIdentity(mayaSubmission))
+    assertFalse(state.shouldHideContributorIdentity(samuelSubmission))
+    assertEquals("Maya Lin", state.displayCollectorName(mayaSubmission))
+    assertEquals("Samuel Kariuki", state.displayCollectorName(samuelSubmission))
+    assertEquals(
+      "Samuel Kariuki (s.kariuki@kenyaforestry.org)",
+      state.displayCollectorAttribution(samuelSubmission),
+    )
+
+    // 2. Switch to survey-serengeti-corridor, where Maya Lin is a regular organization MEMBER
+    //    (not an organizer): Maya sees her own name with "(You)", while Samuel's identity is
+    // hidden.
+    state.openSurvey("survey-serengeti-corridor")
+    assertFalse(state.shouldHideContributorIdentity(mayaSubmission))
+    assertTrue(state.shouldHideContributorIdentity(samuelSubmission))
+    assertEquals("Maya Lin (You)", state.displayCollectorName(mayaSubmission))
+    assertEquals("Maya Lin (You)", state.displayCollectorAttribution(mayaSubmission))
+    assertEquals("Participant (identity hidden)", state.displayCollectorName(samuelSubmission))
+    assertEquals(
+      "Participant (identity hidden)",
+      state.displayCollectorAttribution(samuelSubmission),
+    )
+  }
+
+  @Test
+  fun repeatGroupQuestions_savedInCompletedSubmissionAcrossInstances() {
+    val state = PrototypeAppState(initialScreen = PrototypeScreen.MAIN_SURVEY)
+    state.launchFormForEntity(entityId = "entity-shade-201", formId = "form-shade-canopy-audit")
+    val controller = assertNotNull(state.activeFormWizardController)
+
+    // Edit Repeat #1 answers and add Repeat #2
+    controller.updateString("/data/sampled_trees[1]/tree_tag", "TREE-101")
+    controller.updateDouble("/data/sampled_trees[1]/stem_dbh_cm", 44.5)
+
+    controller.addRepeatInstanceAndOpen("/data/sampled_trees")
+    controller.updateString("/data/sampled_trees[2]/tree_tag", "TREE-102")
+    controller.updateDouble("/data/sampled_trees[2]/stem_dbh_cm", 51.0)
+
+    state.completeActiveFormSubmission()
+
+    val updatedPlot = state.entities.first { it.id == "entity-shade-201" }
+    val latestSubmission = updatedPlot.submissions.first()
+
+    // Ensure no group/repeat container nodes were emitted as "(Unanswered)"
+    assertFalse(latestSubmission.fields.any { it.answerValue == "(Unanswered)" })
+
+    val tree1Tag =
+      assertNotNull(
+        latestSubmission.fields.firstOrNull { it.questionName == "sampled_trees[1]/tree_tag" }
+      )
+    assertEquals("TREE-101", tree1Tag.answerValue)
+    assertTrue(tree1Tag.questionLabel.contains("#1"))
+
+    val tree1Dbh =
+      assertNotNull(
+        latestSubmission.fields.firstOrNull { it.questionName == "sampled_trees[1]/stem_dbh_cm" }
+      )
+    assertEquals("44.5", tree1Dbh.answerValue)
+
+    val tree2Tag =
+      assertNotNull(
+        latestSubmission.fields.firstOrNull { it.questionName == "sampled_trees[2]/tree_tag" }
+      )
+    assertEquals("TREE-102", tree2Tag.answerValue)
+    assertTrue(tree2Tag.questionLabel.contains("#2"))
+
+    val tree2Dbh =
+      assertNotNull(
+        latestSubmission.fields.firstOrNull { it.questionName == "sampled_trees[2]/stem_dbh_cm" }
+      )
+    assertEquals("51.0", tree2Dbh.answerValue)
   }
 }

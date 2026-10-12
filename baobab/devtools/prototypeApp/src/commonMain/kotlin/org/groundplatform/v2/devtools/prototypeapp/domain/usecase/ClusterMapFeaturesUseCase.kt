@@ -36,14 +36,24 @@ class ClusterMapFeaturesUseCase {
   fun isClusteringActive(mapZoomDelta: Float): Boolean = mapZoomDelta <= CLUSTERING_ZOOM_DELTA
 
   /**
-   * Normalized world-space clustering radius (`[0.20, 12.0]`) scaled exponentially as the user
-   * zooms out (`2^(-mapZoomDelta)`). Returns `0f` when clustering is inactive.
+   * Normalized world-space clustering radius scaled exponentially as the user zooms out past
+   * [CLUSTERING_ZOOM_DELTA] (`BASE_CLUSTER_RADIUS_NORMALIZED * 2^(CLUSTERING_ZOOM_DELTA -
+   * mapZoomDelta)`).
+   *
+   * Following standard Web Mercator clustering practice (Supercluster / MarkerClusterer), a fixed
+   * screen-space cluster radius doubles in geographic / world radius with every zoom level out, so
+   * clusters progressively cover a broader and broader area as the user zooms out. Returns `0f`
+   * when clustering is inactive.
    */
   fun clusterRadiusNormalized(mapZoomDelta: Float): Float =
     if (!isClusteringActive(mapZoomDelta)) {
       0f
     } else {
-      (0.175f * 2.0.pow(-mapZoomDelta.toDouble()).toFloat()).coerceIn(0.20f, 12.0f)
+      val zoomOutLevels = (CLUSTERING_ZOOM_DELTA - mapZoomDelta).toDouble()
+      (BASE_CLUSTER_RADIUS_NORMALIZED * 2.0.pow(zoomOutLevels).toFloat()).coerceIn(
+        BASE_CLUSTER_RADIUS_NORMALIZED,
+        MAX_CLUSTER_RADIUS_NORMALIZED,
+      )
     }
 
   operator fun invoke(
@@ -52,83 +62,172 @@ class ClusterMapFeaturesUseCase {
   ): List<MapFeatureCluster> {
     if (features.isEmpty() || radiusNormalized <= 0f) return emptyList()
 
-    val sepX = (radiusNormalized * 2.85f).coerceAtLeast(radiusNormalized)
-    val sepY = (radiusNormalized * 1.30f).coerceAtLeast(radiusNormalized)
-
-    class MutableWorkingCluster(
+    class WorkingCluster(
       val members: MutableList<MapClusterFeatureItem>,
       var sumX: Float,
       var sumY: Float,
+      var minX: Float,
+      var maxX: Float,
+      var minY: Float,
+      var maxY: Float,
     ) {
       val cx: Float
         get() = sumX / members.size
 
       val cy: Float
         get() = sumY / members.size
+
+      fun absorb(other: WorkingCluster) {
+        members.addAll(other.members)
+        sumX += other.sumX
+        sumY += other.sumY
+        if (other.minX < minX) minX = other.minX
+        if (other.maxX > maxX) maxX = other.maxX
+        if (other.minY < minY) minY = other.minY
+        if (other.maxY > maxY) maxY = other.maxY
+      }
     }
 
-    val working: MutableList<MutableWorkingCluster> =
+    // 1. For large datasets (>64 features), pre-aggregate points into a fine sub-radius spatial
+    // hash grid (cell <= 0.25 * radiusNormalized) so points within the same micro-cell are
+    // combined in O(N) time without introducing coarse grid-boundary artifacts.
+    val fineCell = (radiusNormalized * 0.25f).coerceAtLeast(0.02f)
+    var working: MutableList<WorkingCluster> =
       if (features.size > 64) {
-        val cellX = (sepX * 0.75f).coerceAtLeast(0.15f)
-        val cellY = (sepY * 0.75f).coerceAtLeast(0.15f)
-        val buckets = LinkedHashMap<Long, MutableWorkingCluster>()
+        val buckets = LinkedHashMap<Long, WorkingCluster>()
         for (feat in features) {
-          val gx = floor(feat.normalizedX / cellX).toInt()
-          val gy = floor(feat.normalizedY / cellY).toInt()
+          val gx = floor(feat.normalizedX / fineCell).toInt()
+          val gy = floor(feat.normalizedY / fineCell).toInt()
           val key = (gx.toLong() shl 32) or (gy.toLong() and 0xFFFFFFFFL)
           val existing = buckets[key]
           if (existing != null) {
             existing.members.add(feat)
             existing.sumX += feat.normalizedX
             existing.sumY += feat.normalizedY
+            if (feat.normalizedX < existing.minX) existing.minX = feat.normalizedX
+            if (feat.normalizedX > existing.maxX) existing.maxX = feat.normalizedX
+            if (feat.normalizedY < existing.minY) existing.minY = feat.normalizedY
+            if (feat.normalizedY > existing.maxY) existing.maxY = feat.normalizedY
           } else {
             val list = ArrayList<MapClusterFeatureItem>()
             list.add(feat)
-            buckets[key] = MutableWorkingCluster(list, feat.normalizedX, feat.normalizedY)
+            buckets[key] =
+              WorkingCluster(
+                members = list,
+                sumX = feat.normalizedX,
+                sumY = feat.normalizedY,
+                minX = feat.normalizedX,
+                maxX = feat.normalizedX,
+                minY = feat.normalizedY,
+                maxY = feat.normalizedY,
+              )
           }
         }
         buckets.values.toMutableList()
       } else {
         features
           .map { feat ->
-            MutableWorkingCluster(mutableListOf(feat), feat.normalizedX, feat.normalizedY)
+            WorkingCluster(
+              members = mutableListOf(feat),
+              sumX = feat.normalizedX,
+              sumY = feat.normalizedY,
+              minX = feat.normalizedX,
+              maxX = feat.normalizedX,
+              minY = feat.normalizedY,
+              maxY = feat.normalizedY,
+            )
           }
           .toMutableList()
       }
 
-    while (working.size > 1) {
-      var bestI = -1
-      var bestJ = -1
-      var bestMetric = Float.MAX_VALUE
+    // 2. Build bottom-up hierarchical pyramid radii (stepping by 0.75 zoom levels = 2^0.75x) ending
+    // at radiusNormalized, matching Supercluster's fine-to-coarse zoom hierarchy.
+    val pyramidRadii = ArrayList<Float>()
+    var stepR = radiusNormalized
+    val minPyramidR = maxOf(BASE_CLUSTER_RADIUS_NORMALIZED, fineCell * 1.5f)
+    while (stepR > minPyramidR * 1.05f) {
+      pyramidRadii.add(stepR)
+      stepR *= ZOOM_STEP_RADIUS_DECAY
+    }
+    pyramidRadii.add(stepR.coerceAtMost(radiusNormalized))
+    pyramidRadii.reverse()
 
+    for (levelRadius in pyramidRadii) {
+      if (working.size <= 1) break
+      val rx = levelRadius * BALLOON_ASPECT_X
+      val ry = levelRadius
+      val maxSpanX = rx * MAX_CLUSTER_DIAMETER_FACTOR
+      val maxSpanY = ry * MAX_CLUSTER_DIAMETER_FACTOR
+
+      // Pass A: Density-seeded sphere-of-influence clustering (prevents centroid-drift chaining).
+      working.sortWith(
+        compareByDescending<WorkingCluster> { it.members.size }
+          .thenBy { (it.cy * 100f).toInt() }
+          .thenBy { (it.cx * 100f).toInt() }
+          .thenBy { it.members.first().id }
+      )
+      val absorbed = BooleanArray(working.size)
+      val seeded = ArrayList<WorkingCluster>(working.size)
       for (i in 0 until working.size) {
-        val ci = working[i]
+        if (absorbed[i]) continue
+        val seed = working[i]
+        val seedX = seed.cx
+        val seedY = seed.cy
         for (j in i + 1 until working.size) {
-          val cj = working[j]
-          val dx = abs(ci.cx - cj.cx)
-          val dy = abs(ci.cy - cj.cy)
-          val radialRatio = hypot(dx, dy) / radiusNormalized
-          val balloonOverlapRatio = maxOf(dx / sepX, dy / sepY)
-          val metric = minOf(radialRatio, balloonOverlapRatio)
-          if (metric <= 1.0f && metric < bestMetric) {
-            bestMetric = metric
-            bestI = i
-            bestJ = j
+          if (absorbed[j]) continue
+          val candidate = working[j]
+          val dx = abs(candidate.cx - seedX)
+          val dy = abs(candidate.cy - seedY)
+          if (dx <= rx && dy <= ry && hypot(dx / rx, dy / ry) <= 1.0f) {
+            val combinedSpanX = maxOf(seed.maxX, candidate.maxX) - minOf(seed.minX, candidate.minX)
+            val combinedSpanY = maxOf(seed.maxY, candidate.maxY) - minOf(seed.minY, candidate.minY)
+            if (combinedSpanX <= maxSpanX && combinedSpanY <= maxSpanY) {
+              seed.absorb(candidate)
+              absorbed[j] = true
+            }
           }
         }
+        seeded.add(seed)
       }
+      working = seeded
 
-      if (bestI < 0 || bestJ < 0) break
+      // Pass B: Bounded-diameter closest-pair consolidation (resolves close boundary pairs while
+      // enforcing maxSpanX / maxSpanY so clusters never snowball across the map).
+      while (working.size > 1) {
+        var bestI = -1
+        var bestJ = -1
+        var bestMetric = Float.MAX_VALUE
 
-      val target = working[bestI]
-      val absorbed = working.removeAt(bestJ)
-      target.members.addAll(absorbed.members)
-      target.sumX += absorbed.sumX
-      target.sumY += absorbed.sumY
+        for (i in 0 until working.size) {
+          val ci = working[i]
+          for (j in i + 1 until working.size) {
+            val cj = working[j]
+            val dx = abs(ci.cx - cj.cx)
+            val dy = abs(ci.cy - cj.cy)
+            if (dx > rx || dy > ry) continue
+            val metric = hypot(dx / rx, dy / ry)
+            if (metric <= 1.0f && metric < bestMetric) {
+              val combinedSpanX = maxOf(ci.maxX, cj.maxX) - minOf(ci.minX, cj.minX)
+              val combinedSpanY = maxOf(ci.maxY, cj.maxY) - minOf(ci.minY, cj.minY)
+              if (combinedSpanX <= maxSpanX && combinedSpanY <= maxSpanY) {
+                bestMetric = metric
+                bestI = i
+                bestJ = j
+              }
+            }
+          }
+        }
+
+        if (bestI < 0 || bestJ < 0) break
+
+        val target = working[bestI]
+        val merged = working.removeAt(bestJ)
+        target.absorb(merged)
+      }
     }
 
     return working
-      .sortedWith(compareBy<MutableWorkingCluster> { (it.cy * 10f).toInt() }.thenBy { it.cx })
+      .sortedWith(compareBy<WorkingCluster> { (it.cy * 10f).toInt() }.thenBy { it.cx })
       .mapIndexed { index, cluster ->
         MapFeatureCluster(
           id = "cluster-${index + 1}",
@@ -136,6 +235,10 @@ class ClusterMapFeaturesUseCase {
           normalizedY = cluster.cy,
           features = cluster.members,
           symbolGroups = groupClusterFeaturesByMarkerSymbol(cluster.members),
+          minNormalizedX = cluster.minX,
+          maxNormalizedX = cluster.maxX,
+          minNormalizedY = cluster.minY,
+          maxNormalizedY = cluster.maxY,
         )
       }
   }
@@ -148,11 +251,28 @@ class ClusterMapFeaturesUseCase {
         "survey-california-fire" -> 14.9f to 38.5449
         else -> 15.3f to -0.4198
       }
-    val effectiveZoom = (baseZoom + mapZoomDelta).coerceIn(10.0f, 19.0f).toDouble()
+    val effectiveZoom = (baseZoom + mapZoomDelta).coerceIn(2.0f, 19.0f).toDouble()
     val metersPerDp =
       (40075016.686 * cos(latitudeDeg * PI / 180.0)) / (512.0 * 2.0.pow(effectiveZoom))
     val candidateMeters =
-      listOf(5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000, 50000)
+      listOf(
+        5,
+        10,
+        20,
+        50,
+        100,
+        200,
+        500,
+        1000,
+        2000,
+        5000,
+        10000,
+        20000,
+        50000,
+        100000,
+        200000,
+        500000,
+      )
     val targetWidthDp = 72.0
     val chosenMeters =
       candidateMeters.minByOrNull { dist ->
@@ -181,5 +301,23 @@ class ClusterMapFeaturesUseCase {
      * clustered: about `12.95z`.
      */
     const val CLUSTERING_ZOOM_DELTA = -2.35f
+
+    /**
+     * Normalized world-space cluster radius at the onset of clustering ([CLUSTERING_ZOOM_DELTA]).
+     * Doubles with every full zoom level zoomed out (`2^(CLUSTERING_ZOOM_DELTA - mapZoomDelta)`).
+     */
+    const val BASE_CLUSTER_RADIUS_NORMALIZED = 0.215f
+
+    /** Upper bound on normalized cluster radius at deep regional/continental zoom-out. */
+    const val MAX_CLUSTER_RADIUS_NORMALIZED = 512.0f
+
+    /** Horizontal-to-vertical aspect ratio matching rendered cluster balloons on screen. */
+    const val BALLOON_ASPECT_X = 1.25f
+
+    /** Maximum member bounding span of a cluster relative to its directional radius. */
+    const val MAX_CLUSTER_DIAMETER_FACTOR = 2.15f
+
+    /** Radius multiplier per `0.75` zoom step (`2^(-0.75)`). */
+    private const val ZOOM_STEP_RADIUS_DECAY = 0.5946035f
   }
 }

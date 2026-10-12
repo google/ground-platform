@@ -133,6 +133,9 @@ interface LocalStoreTransaction {
     return updated
   }
 
+  /** Deletes the survey with [surveyId] and all of its survey-scoped data. */
+  fun deleteSurvey(surveyId: String)
+
   fun surveyConfig(surveyId: String): SurveyConfig?
 
   fun putSurveyConfig(surveyId: String, config: SurveyConfig)

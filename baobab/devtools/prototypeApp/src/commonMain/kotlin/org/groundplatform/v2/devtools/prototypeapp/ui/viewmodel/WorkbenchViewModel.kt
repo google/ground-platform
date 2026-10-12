@@ -35,7 +35,6 @@ import org.groundplatform.v2.devtools.prototypeapp.domain.model.DeviceFormFactor
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.DeviceOrientation
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyConfig
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyPreviewItem
-import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyStats
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.SyncStatus
 import org.groundplatform.v2.devtools.prototypeapp.domain.model.deriveEntitySyncStatus
 import org.groundplatform.v2.devtools.prototypeapp.domain.repository.ConnectivityRepository
@@ -49,8 +48,8 @@ import org.groundplatform.v2.devtools.prototypeapp.ui.workbench.DEFAULT_PROTOTYP
 import org.groundplatform.v2.devtools.prototypeapp.ui.workbench.XFormsParseCache
 
 /**
- * User intents for the prototype workbench chrome (device preview bezel, XForms `<h:html>` editor &
- * example survey switcher, and debug / simulation tools). Implemented by [WorkbenchViewModel].
+ * User intents for the prototype workbench chrome (device preview bezel, XForms `<h:html>` preset
+ * state, and debug / simulation tools). Implemented by [WorkbenchViewModel].
  */
 interface WorkbenchActions {
   /** Selects the simulated device preview form factor (`Mobile` vs `Tablet`). */
@@ -115,11 +114,11 @@ interface WorkbenchActions {
 }
 
 /**
- * ViewModel for the prototype-only workbench chrome (`PrototypeXFormsWorkbenchPanel`,
- * `PrototypeDebugTools`, and the device bezel in `PrototypeApp`):
+ * ViewModel for the prototype-only workbench chrome (`PrototypeDebugTools` and the device bezel in
+ * `PrototypeApp`):
  * - Simulated device form factor (`Mobile` vs `Tablet`) and orientation (`Portrait` vs
  *   `Landscape`).
- * - Live XForms `<h:html>` editor, parse validation, and swappable example survey presets.
+ * - XForms `<h:html>` parse validation and swappable example survey presets.
  * - Prototype simulation helpers (adding 5,000 random polygon features, cycling entity/submission
  *   sync status, toggling survey downloaded state, and resetting the prototype flow via
  *   [SampleDataRepository]).
@@ -137,7 +136,6 @@ class WorkbenchViewModel(
     val activeSurveyId: String = "",
     val content: SurveyContent = SurveyContent(),
     val surveyConfigs: Map<String, SurveyConfig> = emptyMap(),
-    val surveyStats: Map<String, SurveyStats> = emptyMap(),
     val isOnline: Boolean = true,
   )
 
@@ -158,15 +156,13 @@ class WorkbenchViewModel(
           surveyRepository.observeSurveyContent(id).map { id to it }
         },
         surveyRepository.observeSurveyConfigs(),
-        surveyRepository.observeSurveyStats(),
         connectivityRepository.observeIsOnline(),
-      ) { surveys, (activeId, content), configs, stats, isOnline ->
+      ) { surveys, (activeId, content), configs, isOnline ->
         Data(
           surveys = surveys,
           activeSurveyId = activeId,
           content = content,
           surveyConfigs = configs,
-          surveyStats = stats,
           isOnline = isOnline,
         )
       }
@@ -200,7 +196,6 @@ class WorkbenchViewModel(
       activeSurveyId = data.activeSurveyId,
       surveys = data.surveys,
       surveyConfigs = data.surveyConfigs,
-      surveyStats = data.surveyStats,
       entities = data.content.entities,
       standaloneSubmissions = data.content.standaloneSubmissions,
     )

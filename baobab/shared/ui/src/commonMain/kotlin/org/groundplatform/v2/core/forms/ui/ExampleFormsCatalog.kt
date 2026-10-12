@@ -79,6 +79,45 @@ enum class WorkbenchExampleForm(
                 </orx:meta>
               </data>
             </instance>
+            <instance id="land_use">
+              <root>
+                <item>
+                  <itextId>land_use-0</itextId>
+                  <name>primary_forest</name>
+                  <color>#1B5E20</color>
+                </item>
+                <item>
+                  <itextId>land_use-1</itextId>
+                  <name>secondary_forest</name>
+                  <color>#388E3C</color>
+                </item>
+                <item>
+                  <itextId>land_use-2</itextId>
+                  <name>agroforestry_shade</name>
+                  <color>#689F38</color>
+                </item>
+                <item>
+                  <itextId>land_use-3</itextId>
+                  <name>annual_cropland</name>
+                  <color>#FBC02D</color>
+                </item>
+                <item>
+                  <itextId>land_use-4</itextId>
+                  <name>pasture_grassland</name>
+                  <color>#AED581</color>
+                </item>
+                <item>
+                  <itextId>land_use-5</itextId>
+                  <name>wetland_riparian</name>
+                  <color>#0288D1</color>
+                </item>
+                <item>
+                  <itextId>land_use-6</itextId>
+                  <name>settlement</name>
+                  <color>#E64A19</color>
+                </item>
+              </root>
+            </instance>
             <itext>
               <translation lang="English (en)" default="true()">
                 <text id="/data/sample_point:label">
@@ -92,6 +131,27 @@ enum class WorkbenchExampleForm(
                 </text>
                 <text id="/data/land_use:hint">
                   <value>Select the dominant land cover / land use within a 20m radius of the point.</value>
+                </text>
+                <text id="land_use-0">
+                  <value>Primary / Intact Natural Forest</value>
+                </text>
+                <text id="land_use-1">
+                  <value>Secondary / Regenerating Forest</value>
+                </text>
+                <text id="land_use-2">
+                  <value>Agroforestry / Shade-Grown Tree Crop</value>
+                </text>
+                <text id="land_use-3">
+                  <value>Annual Cropland / Cultivated Agriculture</value>
+                </text>
+                <text id="land_use-4">
+                  <value>Grazing Pasture / Grassland</value>
+                </text>
+                <text id="land_use-5">
+                  <value>Wetland / Riparian Buffer</value>
+                </text>
+                <text id="land_use-6">
+                  <value>Built-Up / Rural Settlement</value>
                 </text>
                 <text id="/data/observer_note:label">
                   <value>Brief Field Note (Optional)</value>
@@ -122,34 +182,10 @@ enum class WorkbenchExampleForm(
           <select1 ref="/data/land_use">
             <label ref="jr:itext('/data/land_use:label')"/>
             <hint ref="jr:itext('/data/land_use:hint')"/>
-            <item>
-              <label>Primary / Intact Natural Forest</label>
-              <value>primary_forest</value>
-            </item>
-            <item>
-              <label>Secondary / Regenerating Forest</label>
-              <value>secondary_forest</value>
-            </item>
-            <item>
-              <label>Agroforestry / Shade-Grown Tree Crop</label>
-              <value>agroforestry_shade</value>
-            </item>
-            <item>
-              <label>Annual Cropland / Cultivated Agriculture</label>
-              <value>annual_cropland</value>
-            </item>
-            <item>
-              <label>Grazing Pasture / Grassland</label>
-              <value>pasture_grassland</value>
-            </item>
-            <item>
-              <label>Wetland / Riparian Buffer</label>
-              <value>wetland_riparian</value>
-            </item>
-            <item>
-              <label>Built-Up / Rural Settlement</label>
-              <value>settlement</value>
-            </item>
+            <itemset nodeset="instance('land_use')/root/item">
+              <value ref="name"/>
+              <label ref="jr:itext(itextId)"/>
+            </itemset>
           </select1>
           <input ref="/data/observer_note">
             <label ref="jr:itext('/data/observer_note:label')"/>
@@ -193,6 +229,7 @@ enum class WorkbenchExampleForm(
                 <selected_plot_stratum/>
                 <selected_plot_elevation/>
                 <canopy_photo>hemispherical_canopy_sp01.jpg</canopy_photo>
+                <canopy_stratum>canopy</canopy_stratum>
                 <canopy_cover_pct>75</canopy_cover_pct>
                 <dominant_species>Cordia africana</dominant_species>
                 <stand_basal_area_m2_ha>24.5</stand_basal_area_m2_ha>
@@ -239,7 +276,77 @@ enum class WorkbenchExampleForm(
                 </item>
               </root>
             </instance>
+            <instance id="disturbance_indicators">
+              <root>
+                <item>
+                  <name>none</name>
+                  <label>None — Undisturbed Stand</label>
+                  <color>#2E7D32</color>
+                </item>
+                <item>
+                  <name>selective_logging</name>
+                  <label>Selective Pole / Timber Cutting</label>
+                  <color>#8D6E63</color>
+                </item>
+                <item>
+                  <name>fire_charcoal</name>
+                  <label>Charcoal Kiln / Fire Scars</label>
+                  <color>#D84315</color>
+                </item>
+                <item>
+                  <name>livestock_grazing</name>
+                  <label>Livestock Browsing / Trampling</label>
+                  <color>#F9A825</color>
+                </item>
+                <item>
+                  <name>invasive_species</name>
+                  <label>Invasive Understory Shrubs (e.g., Lantana)</label>
+                  <color>#7B1FA2</color>
+                </item>
+              </root>
+            </instance>
+            <instance id="canopy_stratum">
+              <root>
+                <item>
+                  <itextId>canopy_stratum-0</itextId>
+                  <name>emergent</name>
+                </item>
+                <item>
+                  <itextId>canopy_stratum-1</itextId>
+                  <name>canopy</name>
+                </item>
+                <item>
+                  <itextId>canopy_stratum-2</itextId>
+                  <name>understory</name>
+                </item>
+                <item>
+                  <itextId>canopy_stratum-3</itextId>
+                  <name>ground_cover</name>
+                </item>
+              </root>
+            </instance>
+            <itext>
+              <translation lang="default" default="true()">
+                <text id="canopy_stratum-0">
+                  <value>Emergent Tree Canopy (&gt; 30m)</value>
+                  <value form="image">jr://images/canopy_stratum-emergent.png</value>
+                </text>
+                <text id="canopy_stratum-1">
+                  <value>Dominant Main Canopy (15-30m)</value>
+                  <value form="image">jr://images/canopy_stratum-canopy.png</value>
+                </text>
+                <text id="canopy_stratum-2">
+                  <value>Sub-Canopy / Understory (5-15m)</value>
+                  <value form="image">jr://images/canopy_stratum-understory.png</value>
+                </text>
+                <text id="canopy_stratum-3">
+                  <value>Ground Flora / Shrub Layer (&lt; 5m)</value>
+                  <value form="image">jr://images/canopy_stratum-ground_cover.png</value>
+                </text>
+              </translation>
+            </itext>
             <bind nodeset="/data/sample_plot_entity" type="select1" required="true()"/>
+            <bind nodeset="/data/canopy_stratum" type="select1" required="true()"/>
             <bind nodeset="/data/selected_plot_stratum"
                   type="string"
                   readonly="true()"
@@ -293,6 +400,14 @@ enum class WorkbenchExampleForm(
             <label>North-Facing Hemispherical Canopy Photo</label>
             <hint>Stand at the sample plot center stake and capture an upward canopy photo.</hint>
           </upload>
+          <select1 ref="/data/canopy_stratum">
+            <label>Dominant Overstory Canopy Stratum</label>
+            <hint>Identify the vertical forest layer with the highest crown density.</hint>
+            <itemset nodeset="instance('canopy_stratum')/root/item">
+              <value ref="name"/>
+              <label ref="jr:itext(itextId)"/>
+            </itemset>
+          </select1>
           <range ref="/data/canopy_cover_pct" start="0" end="100" step="5">
             <label>Measured Canopy Closure (%)</label>
             <hint>Estimate crown closure using spherical densiometer reading (0% to 100%).</hint>
@@ -312,26 +427,10 @@ enum class WorkbenchExampleForm(
           <select ref="/data/disturbance_indicators">
             <label>Observed Forest Disturbance Signs</label>
             <hint>Select all disturbance indicators observed within the sample plot boundary.</hint>
-            <item>
-              <label>None — Undisturbed Stand</label>
-              <value>none</value>
-            </item>
-            <item>
-              <label>Selective Pole / Timber Cutting</label>
-              <value>selective_logging</value>
-            </item>
-            <item>
-              <label>Charcoal Kiln / Fire Scars</label>
-              <value>fire_charcoal</value>
-            </item>
-            <item>
-              <label>Livestock Browsing / Trampling</label>
-              <value>livestock_grazing</value>
-            </item>
-            <item>
-              <label>Invasive Understory Shrubs (e.g., Lantana)</label>
-              <value>invasive_species</value>
-            </item>
+            <itemset nodeset="instance('disturbance_indicators')/root/item">
+              <value ref="name"/>
+              <label ref="label"/>
+            </itemset>
           </select>
           <input ref="/data/assessment_notes" appearance="multiline">
             <label>Silvicultural &amp; Biodiversity Notes</label>
@@ -346,6 +445,7 @@ enum class WorkbenchExampleForm(
       <data id="sample_plots_forest_assessment">
         <sample_plot_entity>plot_sp01</sample_plot_entity>
         <canopy_photo>hemispherical_canopy_sp01.jpg</canopy_photo>
+        <canopy_stratum>canopy</canopy_stratum>
         <canopy_cover_pct>75</canopy_cover_pct>
         <dominant_species>Cordia africana</dominant_species>
         <stand_basal_area_m2_ha>24.5</stand_basal_area_m2_ha>
@@ -378,6 +478,7 @@ enum class WorkbenchExampleForm(
             <instance>
               <data id="commodity_perimeter_and_center" version="2026092401">
                 <commodity_type>cocoa</commodity_type>
+                <soil_moisture_class>moist_well_drained</soil_moisture_class>
                 <producer_farm_id>EUDR-GH-2026-0419</producer_farm_id>
                 <plot_perimeter>-1.2921 36.8219 1680 3.5; -1.2925 36.8224 1681 3.8; -1.2918 36.8228 1682 3.2; -1.2915 36.8221 1680 3.4; -1.2921 36.8219 1680 3.5</plot_perimeter>
                 <plot_center_point>-1.29201 36.82228 1681.0 3.1</plot_center_point>
@@ -392,10 +493,94 @@ enum class WorkbenchExampleForm(
                 </orx:meta>
               </data>
             </instance>
+            <instance id="commodity_type">
+              <root>
+                <item>
+                  <itextId>commodity_type-0</itextId>
+                  <name>cocoa</name>
+                </item>
+                <item>
+                  <itextId>commodity_type-1</itextId>
+                  <name>coffee</name>
+                </item>
+                <item>
+                  <itextId>commodity_type-2</itextId>
+                  <name>oil_palm</name>
+                </item>
+                <item>
+                  <itextId>commodity_type-3</itextId>
+                  <name>rubber</name>
+                </item>
+                <item>
+                  <itextId>commodity_type-4</itextId>
+                  <name>soy</name>
+                </item>
+                <item>
+                  <itextId>commodity_type-5</itextId>
+                  <name>cattle</name>
+                </item>
+                <item>
+                  <itextId>commodity_type-6</itextId>
+                  <name>timber</name>
+                </item>
+              </root>
+            </instance>
+            <instance id="soil_moisture_class">
+              <root>
+                <item>
+                  <name>dry</name>
+                  <label>Dry / Well Drained</label>
+                  <color>#D84315</color>
+                </item>
+                <item>
+                  <name>moist_well_drained</name>
+                  <label>Moist Organic Loam</label>
+                  <color>#2E7D32</color>
+                </item>
+                <item>
+                  <name>saturated</name>
+                  <label>Waterlogged / Hydric</label>
+                  <color>#0277BD</color>
+                </item>
+              </root>
+            </instance>
+            <itext>
+              <translation lang="default" default="true()">
+                <text id="commodity_type-0">
+                  <value>Cocoa (Theobroma cacao)</value>
+                  <value form="image">jr://images/commodity_type-cocoa.png</value>
+                </text>
+                <text id="commodity_type-1">
+                  <value>Coffee (Coffea arabica / canephora)</value>
+                  <value form="image">jr://images/commodity_type-coffee.png</value>
+                </text>
+                <text id="commodity_type-2">
+                  <value>Oil Palm (Elaeis guineensis)</value>
+                  <value form="image">jr://images/commodity_type-oil_palm.png</value>
+                </text>
+                <text id="commodity_type-3">
+                  <value>Natural Rubber (Hevea brasiliensis)</value>
+                  <value form="image">jr://images/commodity_type-rubber.png</value>
+                </text>
+                <text id="commodity_type-4">
+                  <value>Soy (Glycine max)</value>
+                  <value form="image">jr://images/commodity_type-soy.png</value>
+                </text>
+                <text id="commodity_type-5">
+                  <value>Cattle / Grazing Pasture</value>
+                  <value form="image">jr://images/commodity_type-cattle.png</value>
+                </text>
+                <text id="commodity_type-6">
+                  <value>Timber / Wood Products</value>
+                  <value form="image">jr://images/commodity_type-timber.png</value>
+                </text>
+              </translation>
+            </itext>
             <bind nodeset="/data/commodity_type"
                   type="select1"
                   required="true()"
                   entities:saveto="commodity_type"/>
+            <bind nodeset="/data/soil_moisture_class" type="select1" required="true()"/>
             <bind nodeset="/data/producer_farm_id"
                   type="string"
                   required="true()"
@@ -431,34 +616,18 @@ enum class WorkbenchExampleForm(
           <select1 ref="/data/commodity_type">
             <label>Forest-Risk Commodity Crop</label>
             <hint>Select the regulated forest-risk commodity produced on this plot (EUDR Annex I).</hint>
-            <item>
-              <label>Cocoa (Theobroma cacao)</label>
-              <value>cocoa</value>
-            </item>
-            <item>
-              <label>Coffee (Coffea arabica / canephora)</label>
-              <value>coffee</value>
-            </item>
-            <item>
-              <label>Oil Palm (Elaeis guineensis)</label>
-              <value>oil_palm</value>
-            </item>
-            <item>
-              <label>Natural Rubber (Hevea brasiliensis)</label>
-              <value>rubber</value>
-            </item>
-            <item>
-              <label>Soy (Glycine max)</label>
-              <value>soy</value>
-            </item>
-            <item>
-              <label>Cattle / Grazing Pasture</label>
-              <value>cattle</value>
-            </item>
-            <item>
-              <label>Timber / Wood Products</label>
-              <value>timber</value>
-            </item>
+            <itemset nodeset="instance('commodity_type')/root/item">
+              <value ref="name"/>
+              <label ref="jr:itext(itextId)"/>
+            </itemset>
+          </select1>
+          <select1 ref="/data/soil_moisture_class">
+            <label>Soil Moisture &amp; Drainage Class</label>
+            <hint>Verify hydric / drainage conditions across the planting area.</hint>
+            <itemset nodeset="instance('soil_moisture_class')/root/item">
+              <value ref="name"/>
+              <label ref="label"/>
+            </itemset>
           </select1>
           <input ref="/data/producer_farm_id">
             <label>Producer Cooperative / Parcel Registry ID</label>
@@ -492,6 +661,7 @@ enum class WorkbenchExampleForm(
       """
       <data id="commodity_perimeter_and_center">
         <commodity_type>cocoa</commodity_type>
+        <soil_moisture_class>moist_well_drained</soil_moisture_class>
         <producer_farm_id>EUDR-GH-2026-0419</producer_farm_id>
         <plot_perimeter>-1.2921 36.8219 1680 3.5; -1.2925 36.8224 1681 3.8; -1.2918 36.8228 1682 3.2; -1.2915 36.8221 1680 3.4; -1.2921 36.8219 1680 3.5</plot_perimeter>
         <plot_center_point>-1.29201 36.82228 1681.0 3.1</plot_center_point>
@@ -583,6 +753,101 @@ enum class WorkbenchExampleForm(
                 </item>
               </root>
             </instance>
+            <instance id="respondent_residency_status">
+              <root>
+                <item>
+                  <name>resident_full_time</name>
+                  <label>Full-Time Resident (Present &gt;= 9 months/year)</label>
+                  <color>#2E7D32</color>
+                </item>
+                <item>
+                  <name>seasonal_migrant</name>
+                  <label>Seasonal Labor Migrant (Present 3-8 months/year)</label>
+                  <color>#F9A825</color>
+                </item>
+                <item>
+                  <name>relocated</name>
+                  <label>Relocated to Another Village / Urban Center</label>
+                  <color>#1565C0</color>
+                </item>
+              </root>
+            </instance>
+            <instance id="primary_livelihood_sources">
+              <root>
+                <item>
+                  <itextId>primary_livelihood_sources-0</itextId>
+                  <name>agroforestry_cocoa</name>
+                  <color>#388E3C</color>
+                </item>
+                <item>
+                  <itextId>primary_livelihood_sources-1</itextId>
+                  <name>annual_food_crops</name>
+                  <color>#FBC02D</color>
+                </item>
+                <item>
+                  <itextId>primary_livelihood_sources-2</itextId>
+                  <name>beekeeping</name>
+                  <color>#FFA000</color>
+                </item>
+                <item>
+                  <itextId>primary_livelihood_sources-3</itextId>
+                  <name>tree_nursery_pes</name>
+                  <color>#00897B</color>
+                </item>
+                <item>
+                  <itextId>primary_livelihood_sources-4</itextId>
+                  <name>off_farm_wage</name>
+                  <color>#5C6BC0</color>
+                </item>
+              </root>
+            </instance>
+            <instance id="clean_cooking_energy">
+              <root>
+                <item>
+                  <itextId>clean_cooking_energy-0</itextId>
+                  <name>improved_cookstove</name>
+                </item>
+                <item>
+                  <itextId>clean_cooking_energy-1</itextId>
+                  <name>lpg_biogas</name>
+                </item>
+                <item>
+                  <itextId>clean_cooking_energy-2</itextId>
+                  <name>three_stone_fire</name>
+                </item>
+              </root>
+            </instance>
+            <itext>
+              <translation lang="default" default="true()">
+                <text id="primary_livelihood_sources-0">
+                  <value>Shade Cocoa / Coffee Agroforestry</value>
+                </text>
+                <text id="primary_livelihood_sources-1">
+                  <value>Food Crops (Maize, Beans, Cassava)</value>
+                </text>
+                <text id="primary_livelihood_sources-2">
+                  <value>Apiculture / Forest Honey &amp; Non-Timber Products</value>
+                </text>
+                <text id="primary_livelihood_sources-3">
+                  <value>Tree Seedling Nursery / Restoration Payments (PES)</value>
+                </text>
+                <text id="primary_livelihood_sources-4">
+                  <value>Off-Farm Wage Employment / Trade</value>
+                </text>
+                <text id="clean_cooking_energy-0">
+                  <value>Improved Fuelwood Rocket / Clay Cookstove</value>
+                  <value form="image">jr://images/clean_cooking_energy-improved_cookstove.png</value>
+                </text>
+                <text id="clean_cooking_energy-1">
+                  <value>LPG / Biogas / Electric Clean Stove</value>
+                  <value form="image">jr://images/clean_cooking_energy-lpg_biogas.png</value>
+                </text>
+                <text id="clean_cooking_energy-2">
+                  <value>Traditional Three-Stone Firewood Hearth</value>
+                  <value form="image">jr://images/clean_cooking_energy-three_stone_fire.png</value>
+                </text>
+              </translation>
+            </itext>
             <bind nodeset="/data/primary_respondent_id" type="select1" required="true()"/>
             <bind nodeset="/data/preloaded_household_code"
                   type="string"
@@ -641,18 +906,10 @@ enum class WorkbenchExampleForm(
           </select>
           <select1 ref="/data/respondent_residency_status">
             <label>Primary Respondent Current Residency Status</label>
-            <item>
-              <label>Full-Time Resident (Present &gt;= 9 months/year)</label>
-              <value>resident_full_time</value>
-            </item>
-            <item>
-              <label>Seasonal Labor Migrant (Present 3-8 months/year)</label>
-              <value>seasonal_migrant</value>
-            </item>
-            <item>
-              <label>Relocated to Another Village / Urban Center</label>
-              <value>relocated</value>
-            </item>
+            <itemset nodeset="instance('respondent_residency_status')/root/item">
+              <value ref="name"/>
+              <label ref="label"/>
+            </itemset>
           </select1>
           <input ref="/data/current_household_size">
             <label>Total Current Household Members (All Ages)</label>
@@ -664,41 +921,17 @@ enum class WorkbenchExampleForm(
           </input>
           <select ref="/data/primary_livelihood_sources">
             <label>Household Livelihood &amp; Income Sources</label>
-            <item>
-              <label>Shade Cocoa / Coffee Agroforestry</label>
-              <value>agroforestry_cocoa</value>
-            </item>
-            <item>
-              <label>Food Crops (Maize, Beans, Cassava)</label>
-              <value>annual_food_crops</value>
-            </item>
-            <item>
-              <label>Apiculture / Forest Honey &amp; Non-Timber Products</label>
-              <value>beekeeping</value>
-            </item>
-            <item>
-              <label>Tree Seedling Nursery / Restoration Payments (PES)</label>
-              <value>tree_nursery_pes</value>
-            </item>
-            <item>
-              <label>Off-Farm Wage Employment / Trade</label>
-              <value>off_farm_wage</value>
-            </item>
+            <itemset nodeset="instance('primary_livelihood_sources')/root/item">
+              <value ref="name"/>
+              <label ref="jr:itext(itextId)"/>
+            </itemset>
           </select>
           <select1 ref="/data/clean_cooking_energy">
             <label>Primary Household Cooking Fuel / Stove Type</label>
-            <item>
-              <label>Improved Fuelwood Rocket / Clay Cookstove</label>
-              <value>improved_cookstove</value>
-            </item>
-            <item>
-              <label>LPG / Biogas / Electric Clean Stove</label>
-              <value>lpg_biogas</value>
-            </item>
-            <item>
-              <label>Traditional Three-Stone Firewood Hearth</label>
-              <value>three_stone_fire</value>
-            </item>
+            <itemset nodeset="instance('clean_cooking_energy')/root/item">
+              <value ref="name"/>
+              <label ref="jr:itext(itextId)"/>
+            </itemset>
           </select1>
           <input ref="/data/enumerator_notes" appearance="multiline">
             <label>Roster Reconciliation Notes (Optional)</label>
@@ -795,6 +1028,74 @@ enum class WorkbenchExampleForm(
                 </item>
               </root>
             </instance>
+            <instance id="canopy_health_rating">
+              <root>
+                <item>
+                  <name>very_poor</name>
+                  <label>1 - Severe Dieback</label>
+                  <color>#C62828</color>
+                </item>
+                <item>
+                  <name>poor</name>
+                  <label>2 - Moderate Stress</label>
+                  <color>#EF6C00</color>
+                </item>
+                <item>
+                  <name>fair</name>
+                  <label>3 - Acceptable</label>
+                  <color>#F9A825</color>
+                </item>
+                <item>
+                  <name>good</name>
+                  <label>4 - Vigorous Crown</label>
+                  <color>#689F38</color>
+                </item>
+                <item>
+                  <name>excellent</name>
+                  <label>5 - Optimal Closed Canopy</label>
+                  <color>#1B5E20</color>
+                </item>
+              </root>
+            </instance>
+            <instance id="certification_schemes">
+              <root>
+                <item>
+                  <itextId>certification_schemes-0</itextId>
+                  <name>rainforest_alliance</name>
+                </item>
+                <item>
+                  <itextId>certification_schemes-1</itextId>
+                  <name>organic_eu</name>
+                </item>
+                <item>
+                  <itextId>certification_schemes-2</itextId>
+                  <name>fairtrade</name>
+                </item>
+                <item>
+                  <itextId>certification_schemes-3</itextId>
+                  <name>carbon_verified</name>
+                </item>
+              </root>
+            </instance>
+            <instance id="soil_moisture_class">
+              <root>
+                <item>
+                  <name>dry</name>
+                  <label>Dry / Cracked Surface</label>
+                  <color>#D84315</color>
+                </item>
+                <item>
+                  <name>moist_well_drained</name>
+                  <label>Moist &amp; Well-Drained Loam</label>
+                  <color>#2E7D32</color>
+                </item>
+                <item>
+                  <name>saturated</name>
+                  <label>Waterlogged / Hydric</label>
+                  <color>#0277BD</color>
+                </item>
+              </root>
+            </instance>
             <itext>
               <translation lang="English (en)" default="true()">
                 <text id="/data/dominant_shade_species:label">
@@ -814,6 +1115,22 @@ enum class WorkbenchExampleForm(
                 </text>
                 <text id="/data/plot_boundary:hint">
                   <value>Closed polygon geometry (`geoshape`) with vertex list and area calculation.</value>
+                </text>
+                <text id="certification_schemes-0">
+                  <value>Rainforest Alliance / UTZ</value>
+                  <value form="image">jr://images/certification_schemes-rainforest_alliance.png</value>
+                </text>
+                <text id="certification_schemes-1">
+                  <value>EU / USDA Certified Organic</value>
+                  <value form="image">jr://images/certification_schemes-organic_eu.png</value>
+                </text>
+                <text id="certification_schemes-2">
+                  <value>Fairtrade International</value>
+                  <value form="image">jr://images/certification_schemes-fairtrade.png</value>
+                </text>
+                <text id="certification_schemes-3">
+                  <value>Plan Vivo / Gold Standard Carbon</value>
+                  <value form="image">jr://images/certification_schemes-carbon_verified.png</value>
                 </text>
               </translation>
             </itext>
@@ -885,46 +1202,18 @@ enum class WorkbenchExampleForm(
           <select1 ref="/data/canopy_health_rating" appearance="likert">
             <label>Crown Vigor &amp; Foliage Health (Select1 Likert Scale)</label>
             <hint>5-point Likert scale rating of upper-canopy leaf density.</hint>
-            <item>
-              <label>1 - Severe Dieback</label>
-              <value>very_poor</value>
-            </item>
-            <item>
-              <label>2 - Moderate Stress</label>
-              <value>poor</value>
-            </item>
-            <item>
-              <label>3 - Acceptable</label>
-              <value>fair</value>
-            </item>
-            <item>
-              <label>4 - Vigorous Crown</label>
-              <value>good</value>
-            </item>
-            <item>
-              <label>5 - Optimal Closed Canopy</label>
-              <value>excellent</value>
-            </item>
+            <itemset nodeset="instance('canopy_health_rating')/root/item">
+              <value ref="name"/>
+              <label ref="label"/>
+            </itemset>
           </select1>
           <select ref="/data/certification_schemes">
             <label>Active Sustainability Certifications (Multi-Select Checkboxes)</label>
             <hint>Select all sustainability standards verified for this parcel.</hint>
-            <item>
-              <label>Rainforest Alliance / UTZ</label>
-              <value>rainforest_alliance</value>
-            </item>
-            <item>
-              <label>EU / USDA Certified Organic</label>
-              <value>organic_eu</value>
-            </item>
-            <item>
-              <label>Fairtrade International</label>
-              <value>fairtrade</value>
-            </item>
-            <item>
-              <label>Plan Vivo / Gold Standard Carbon</label>
-              <value>carbon_verified</value>
-            </item>
+            <itemset nodeset="instance('certification_schemes')/root/item">
+              <value ref="name"/>
+              <label ref="jr:itext(itextId)"/>
+            </itemset>
           </select>
           <rank ref="/data/conservation_priority_rank">
             <label>Rank Conservation Interventions (Ordered Rank Control)</label>
@@ -978,18 +1267,10 @@ enum class WorkbenchExampleForm(
             <label>Site Microclimate &amp; Notes Group (field-list Page Group)</label>
             <select1 ref="/data/site_conditions_group/soil_moisture_class">
               <label>Topsoil Moisture Regime</label>
-              <item>
-                <label>Dry / Cracked Surface</label>
-                <value>dry</value>
-              </item>
-              <item>
-                <label>Moist &amp; Well-Drained Loam</label>
-                <value>moist_well_drained</value>
-              </item>
-              <item>
-                <label>Waterlogged / Hydric</label>
-                <value>saturated</value>
-              </item>
+              <itemset nodeset="instance('soil_moisture_class')/root/item">
+                <value ref="name"/>
+                <label ref="jr:itext(itextId)"/>
+              </itemset>
             </select1>
             <input ref="/data/site_conditions_group/field_notes" appearance="multiline">
               <label>Detailed Agronomist Observations (Multiline Textarea)</label>

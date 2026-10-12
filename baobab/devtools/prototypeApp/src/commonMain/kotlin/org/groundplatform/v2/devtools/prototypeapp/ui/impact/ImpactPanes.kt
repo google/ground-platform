@@ -235,9 +235,7 @@ internal fun ImpactSummaryContent(summary: ImpactSummary) {
   ) {
     if (summary.hints.isNotEmpty()) HintsCard(summary)
     Totals(summary)
-    summary.goals.forEach { goal ->
-      ImpactSection(goal.title) { IndicatorRow(goal.indicators) }
-    }
+    summary.goals.forEach { goal -> ImpactSection(goal.title) { IndicatorRow(goal.indicators) } }
     if (summary.ownIndicators.isNotEmpty()) {
       ImpactSection(
         "Your indicators",

@@ -94,6 +94,14 @@ data class DataCollectionUiState(
   val submissionGeometries: List<SubmissionGeometryPolygon> = emptyList(),
   /** The signed-in collector's name, shown on standalone records. */
   val collectorName: String = "",
+  /** Whether anyone who opens the active survey can view all submissions and map features. */
+  val isActiveSurveyPublicData: Boolean = false,
+  /** Whether anyone can collect data, but participants only see their own submissions. */
+  val isActiveSurveyPrivateSubmissions: Boolean = false,
+  /**
+   * Informed consent notice waiting for participant acceptance before opening a form, or `null`.
+   */
+  val pendingCollectorConsent: CollectorConsentPrompt? = null,
 
   // --- Selected record ---
   /** ID of the selected map feature (the entity bottom sheet / details card), or `null`. */
@@ -258,3 +266,14 @@ data class DataCollectionUiState(
       return formGeometryOverlays(controller, excludePath = webMapDrawing?.activeDrawingPath)
     }
 }
+
+/**
+ * Just-in-time informed consent prompt shown once per survey before a participant starts collecting
+ * data in a **Public data** survey or a survey with custom organizer consent terms.
+ */
+data class CollectorConsentPrompt(
+  val surveyId: String,
+  val surveyTitle: String,
+  val isPublicData: Boolean,
+  val customConsentText: String = "",
+)

@@ -133,6 +133,16 @@ The following matrix maps Ground 2.0 terminology against industry-standard data 
   * **Offline Sync Conflicts**: Accidental concurrent writes when two offline field devices edit the same entity's attributes. Resolved operationally by picking an authoritative edit.
   * **Consensus & Disagreement Review**: An intentional statistical workflow where multiple analysts independently evaluate the same plot. The 1:N relationship between an entity and submissions naturally stores every analyst's submission independently. The backend calculates agreement metrics (Peer Consensus and Source-of-Truth comparison) and routes disputed plots to a supervisor adjudication queue.
 
+### "Anyone" Access: "Who can view data" vs. "Who can collect data"
+* **The Confusion**: Using the word "Public" to describe both *who can participate in a survey* and *who can view the collected data* obscures whether a participant's submissions are private to the organizing team or visible to the world.
+* **Resolution**:
+  * Ground 2.0 presents **General access** as two Google Groups-style stepped permission sliders (**Who can view data** and **Who can collect data**) across four audience stops (**Contributors & organizers**, **Invited people**, **Anyone in your organization**, and **Anyone**), plus a **Hide from survey directory** option when open to **Anyone**:
+    * **Contributor identity privacy across all tiers**: Across all surveys, contributor names and email addresses on submissions are visible **only to survey organizers** (and to each contributor on their own submissions). Non-organizer viewers and data collectors see `"Participant (identity hidden)"` on other people's submissions.
+    * **Private submissions** (**Who can view data** set to `Contributors & organizers`): Data collectors only see their own submissions. Survey organizers can view all submissions and contributor identities.
+    * **Shared with invited people or organization** (**Who can view data** set to `Invited people` or `Anyone in your organization`): Invited people or organization members can view all map features, answers, and photos, while only survey organizers can view contributor identities.
+    * **Public data** (**Who can view data** set to `Anyone`): Anyone can view all map features, answers, and photos, while only survey organizers can view contributor identities. Participants must accept a just-in-time informed consent notice before collecting data, and open forms show a persistent reminder banner.
+    * **Hide from survey directory**: Controls whether an `Anyone` survey is listed in the survey directory (`SharingPolicy.PUBLIC` when unchecked) or requires a link or QR code to access (`SharingPolicy.ANYONE_WITH_LINK` when checked). Unlisted and listed `Anyone` surveys behave identically with respect to data visibility, contributor anonymity, and informed consent.
+
 ### Survey Lifecycle States
 To align with both CEO and enterprise field governance, Ground 2.0 adopts a 5-stage lifecycle:
 1. **`DRAFT`**: Authoring, logic testing in live preview, not visible for field synchronization.

@@ -33,9 +33,15 @@ import androidx.compose.ui.test.runDesktopComposeUiTest
 import androidx.compose.ui.unit.dp
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
+import org.groundplatform.v2.devtools.prototypeapp.data.datasource.local.store.seededStore
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.PeerDataVisibility
+import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SharingPolicy
 import org.groundplatform.v2.devtools.prototypeapp.ui.common.TextFilePickResult
 import org.groundplatform.v2.devtools.prototypeapp.ui.state.SurveyEditorSection
 import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.SurveyEditorViewModel
+import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.seededSurveyEditorViewModel
 import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.surveyEditorViewModel
 import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.ui
 
@@ -162,5 +168,71 @@ class SurveyEditorClickTest {
 
       assertEquals(initialCount + 1, state.ui.forms.size)
       assertEquals("Imported tree survey", state.ui.selectedForm?.form?.title)
+    }
+
+  @Test
+  fun generalAccessSlidersUpdateViewAndCollectPermissionsAndHideFromDirectory() =
+    runDesktopComposeUiTest(width = 1000, height = 1600) {
+      val state = seededSurveyEditorViewModel(seededStore())
+      state.select(SurveyEditorSection.Sharing)
+      setContent {
+        MaterialTheme {
+          val uiState by state.uiState.collectAsState()
+          SharingContent(uiState = uiState, actions = state)
+        }
+      }
+      waitForIdle()
+
+      // Column headers should be displayed with constant-length labels.
+      onNodeWithText("Contributors & organizers").assertIsDisplayed()
+      onNodeWithText("Invited people").assertIsDisplayed()
+      onNodeWithText("Anyone in your organization").assertIsDisplayed()
+      onNodeWithText("Anyone").assertIsDisplayed()
+
+      // Click "Anyone in your organization" on "Who can collect data".
+      onNodeWithContentDescription("Who can collect data: Anyone in your organization")
+        .performClick()
+      waitForIdle()
+      assertEquals(SharingPolicy.ORGANIZATION, state.ui.sharing.policy)
+      // Hints mention the organization name (Kenya Forest Service) and contributor identity rules.
+      onNodeWithText(
+          "Anyone in Kenya Forest Service can view all map features, answers, photos, and other " +
+            "uploaded media. Only survey organizers can view contributor identities."
+        )
+        .assertIsDisplayed()
+      onNodeWithText(
+          "Members of Kenya Forest Service can open this survey and collect data. " +
+            "Managers of Kenya Forest Service can also edit the survey."
+        )
+        .assertIsDisplayed()
+
+      // Click "Contributors & organizers" on "Who can view data" to restrict viewing to own data.
+      onNodeWithContentDescription("Who can view data: Contributors & organizers").performClick()
+      waitForIdle()
+      assertEquals(PeerDataVisibility.OWN_ONLY, state.ui.sharing.peerDataVisibility)
+      assertEquals(SharingPolicy.ORGANIZATION, state.ui.sharing.policy)
+
+      // Click "Anyone" on "Who can collect data" -> opens to PUBLIC with private submissions.
+      onNodeWithContentDescription("Who can collect data: Anyone").performClick()
+      waitForIdle()
+      assertEquals(SharingPolicy.PUBLIC, state.ui.sharing.policy)
+      assertEquals(PeerDataVisibility.OWN_ONLY, state.ui.sharing.peerDataVisibility)
+      assertTrue(state.ui.sharing.isPrivateSubmissions)
+      assertFalse(state.ui.sharing.isPublicData)
+
+      // Change "Who can find this survey" -> switches policy to ANYONE_WITH_LINK.
+      onNodeWithText("Who can find this survey").assertIsDisplayed()
+      onNodeWithText("Anyone in the survey directory").performClick()
+      waitForIdle()
+      onNodeWithText("Only people with a link or QR code (unlisted)").performClick()
+      waitForIdle()
+      assertEquals(SharingPolicy.ANYONE_WITH_LINK, state.ui.sharing.policy)
+
+      // Click "Anyone" on "Who can view data" -> makes data public while keeping ANYONE_WITH_LINK.
+      onNodeWithContentDescription("Who can view data: Anyone").performClick()
+      waitForIdle()
+      assertEquals(SharingPolicy.ANYONE_WITH_LINK, state.ui.sharing.policy)
+      assertEquals(PeerDataVisibility.ALL, state.ui.sharing.peerDataVisibility)
+      assertTrue(state.ui.sharing.isPublicData)
     }
 }

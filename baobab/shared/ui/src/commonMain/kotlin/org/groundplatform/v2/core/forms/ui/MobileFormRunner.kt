@@ -97,7 +97,7 @@ fun MobileFormRunner(
   val formTitle =
     state.formDef.title.takeIf { it.isNotBlank() }
       ?: state.formDef.form_id.takeIf { it.isNotBlank() }
-      ?: "Survey Form"
+      ?: "Survey form"
   val colors = MaterialTheme.colorScheme
   // The top bar is a saturated `primary` surface, so everything drawn on it is tinted from
   // `onPrimary` rather than the default surface roles. Deriving the de-emphasized variants by
@@ -125,7 +125,7 @@ fun MobileFormRunner(
                 Text(
                   text =
                     if (currentStep is FormWizardStep.SummaryStep) {
-                      "Review & Finalize (${controller.totalQuestionSteps} questions)"
+                      "Review & finalize (${controller.totalQuestionSteps} questions)"
                     } else {
                       "Step ${stepIndex + 1} of $totalSteps"
                     },
@@ -153,7 +153,7 @@ fun MobileFormRunner(
                   Spacer(modifier = Modifier.width(6.dp))
                 }
                 Text(
-                  text = if (controller.isOverviewOpen) "Close List" else "Steps ($totalSteps)",
+                  text = if (controller.isOverviewOpen) "Close list" else "Steps ($totalSteps)",
                   style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
                   maxLines = 1,
                   overflow = TextOverflow.Ellipsis,
@@ -393,11 +393,10 @@ fun MobileFormRunner(
             ) {
               Text(
                 text =
-                  if (controller.isCurrentStepWaitingForLocationCapture) {
-                    "Please capture a location or drop a pin before proceeding."
-                  } else {
-                    "Please resolve validation errors above or skip to continue."
-                  },
+                  stepValidationBlockerMessage(
+                    isWaitingForLocationCapture = controller.isCurrentStepWaitingForLocationCapture,
+                    isStepOptional = controller.isCurrentStepOptional,
+                  ),
                 style =
                   MaterialTheme.typography.bodySmall.copy(
                     color = colors.onErrorContainer,
@@ -548,7 +547,7 @@ private fun RepeatHubScreenContent(
       ) {
         Column(modifier = Modifier.weight(1f)) {
           Text(
-            text = "Repeat Group: $groupLabel",
+            text = "Repeat group: $groupLabel",
             style =
               MaterialTheme.typography.titleMedium.copy(
                 fontWeight = FontWeight.Bold,
@@ -562,7 +561,7 @@ private fun RepeatHubScreenContent(
         }
         if (repeatGroup.targetCount != null) {
           GroundTonalBadge(
-            text = "jr:count = ${repeatGroup.targetCount}",
+            text = "${repeatGroup.targetCount} required",
             tone = GroundBadgeTone.TERTIARY,
           )
         }
@@ -586,9 +585,13 @@ private fun RepeatHubScreenContent(
         }
       } else {
         repeatGroup.instances.forEach { instance ->
+          val dynamicLabel = instance.label?.text?.trim()
           val instTitle =
-            instance.label?.text?.takeIf { it.isNotBlank() }
-              ?: "$groupLabel #${instance.repeatIndex}"
+            if (!dynamicLabel.isNullOrBlank() && dynamicLabel != groupLabel) {
+              dynamicLabel
+            } else {
+              "$groupLabel #${instance.repeatIndex}"
+            }
           OutlinedCard(
             onClick = {
               val stepIdx =
@@ -648,7 +651,7 @@ private fun RepeatHubScreenContent(
           )
           Spacer(modifier = Modifier.width(6.dp))
           Text(
-            "Add Another $groupLabel",
+            "Add another $groupLabel",
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             softWrap = false,
@@ -682,7 +685,7 @@ private fun FormSummaryScreenContent(controller: FormWizardController) {
       ) {
         Column(modifier = Modifier.weight(1f)) {
           Text(
-            text = "Review Answers",
+            text = "Review answers",
             style =
               MaterialTheme.typography.titleMedium.copy(
                 fontWeight = FontWeight.Bold,
@@ -697,9 +700,9 @@ private fun FormSummaryScreenContent(controller: FormWizardController) {
         GroundTonalBadge(
           text =
             if (state.isValid) {
-              "✓ Ready to Submit"
+              "✓ Ready to submit"
             } else {
-              "${state.validationErrors.size} Issue(s)"
+              "${state.validationErrors.size} issue(s)"
             },
           tone = if (state.isValid) GroundBadgeTone.PRIMARY else GroundBadgeTone.ERROR,
         )
@@ -723,18 +726,12 @@ private fun FormSummaryScreenContent(controller: FormWizardController) {
                 verticalArrangement = Arrangement.spacedBy(4.dp),
               ) {
                 Text(
-                  text = "✓ Form Finalized Successfully!",
+                  text = "✓ Form finalized successfully",
                   style =
                     MaterialTheme.typography.bodyMedium.copy(
                       fontWeight = FontWeight.Bold,
                       color = colors.onPrimaryContainer,
                     ),
-                )
-                Text(
-                  text =
-                    "Instance ID: ${subResult.recordInstance.metadata?.instance_id ?: "(generated)"}",
-                  style =
-                    MaterialTheme.typography.labelSmall.copy(color = colors.onPrimaryContainer),
                 )
               }
             }
@@ -845,7 +842,7 @@ private fun FormSummaryScreenContent(controller: FormWizardController) {
       if (state.entityStates.isNotEmpty()) {
         HorizontalDivider(color = colors.outlineVariant)
         Text(
-          text = "Evaluated Entities (${state.entityStates.size})",
+          text = "Updated records (${state.entityStates.size})",
           style =
             MaterialTheme.typography.labelLarge.copy(
               fontWeight = FontWeight.Bold,
@@ -867,16 +864,21 @@ private fun FormSummaryScreenContent(controller: FormWizardController) {
               verticalArrangement = Arrangement.spacedBy(4.dp),
             ) {
               Text(
-                text =
-                  "Dataset: ${entity.dataset} (${if (entity.shouldCreate) "CREATE" else if (entity.shouldUpdate) "UPDATE" else "INACTIVE"})",
+                text = entity.label.ifBlank { entity.dataset },
                 style =
                   MaterialTheme.typography.labelMedium.copy(
                     fontWeight = FontWeight.Bold,
                     color = colors.onSecondaryContainer,
                   ),
               )
+              val actionLabel =
+                when {
+                  entity.shouldCreate -> "New record"
+                  entity.shouldUpdate -> "Updated record"
+                  else -> "Unchanged record"
+                }
               Text(
-                text = "ID: ${entity.entityId} | Label: ${entity.label}",
+                text = "$actionLabel in ${entity.dataset}",
                 style =
                   MaterialTheme.typography.labelSmall.copy(color = colors.onSecondaryContainer),
               )
@@ -896,7 +898,7 @@ private fun StepOverviewPanel(controller: FormWizardController, modifier: Modifi
     verticalArrangement = Arrangement.spacedBy(8.dp),
   ) {
     Text(
-      text = "All Form Steps (${controller.totalSteps})",
+      text = "All form steps (${controller.totalSteps})",
       style =
         MaterialTheme.typography.titleMedium.copy(
           fontWeight = FontWeight.Bold,
@@ -1092,3 +1094,17 @@ private val LanguageIcon: ImageVector by lazy {
     )
     .build()
 }
+
+/**
+ * Message displayed in the validation blocker banner when the collector taps Next on an incomplete
+ * or invalid step. Only optional steps mention skipping.
+ */
+internal fun stepValidationBlockerMessage(
+  isWaitingForLocationCapture: Boolean,
+  isStepOptional: Boolean,
+): String =
+  when {
+    isWaitingForLocationCapture -> "Please capture a location or drop a pin before proceeding."
+    isStepOptional -> "Please resolve validation errors above or skip to continue."
+    else -> "Please resolve validation errors above to continue."
+  }
