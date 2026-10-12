@@ -67,7 +67,7 @@ import org.groundplatform.v2.app.ui.state.SurveyOutcomePromptUiState
 import org.groundplatform.v2.app.ui.viewmodel.SurveyOutcomePromptActions
 import org.groundplatform.v2.core.forms.ui.GroundBadgeTone
 import org.groundplatform.v2.core.forms.ui.GroundTonalBadge
-import org.groundplatform.v2.devtools.prototypeapp.PrototypeAppState
+import org.groundplatform.v2.web.ui.WebAppState
 import org.groundplatform.v2.web.ui.common.WebAppHeader
 import org.groundplatform.v2.web.ui.common.WebHeaderButton
 import org.groundplatform.v2.web.ui.common.WebHeaderContext
@@ -86,7 +86,7 @@ private val PageMaxWidth = 1240.dp
  */
 @Composable
 internal fun WebSurveysPage(
-  state: PrototypeAppState,
+  state: WebAppState,
   onOpenSurvey: (surveyId: String) -> Unit,
   onCreateSurvey: (CreateSurveyRequest) -> Unit,
   onOpenCreateSurveyWizard: (() -> Unit)? = { state.openCreateSurveyWizard() },

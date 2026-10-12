@@ -20,15 +20,15 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 import org.groundplatform.v2.app.domain.model.BasemapType
-import org.groundplatform.v2.app.domain.model.MainDrawerSubView
-import org.groundplatform.v2.app.domain.model.PrototypeScreen
 import org.groundplatform.v2.app.domain.model.relatedEntityForPropertyValue
-import org.groundplatform.v2.devtools.prototypeapp.PrototypeAppState
-import org.groundplatform.v2.devtools.prototypeapp.PrototypeWorkbenchPage
+import org.groundplatform.v2.mobile.ui.MobileAppState
+import org.groundplatform.v2.web.ui.WebAppState
+import org.groundplatform.v2.web.ui.WebPage
+import org.groundplatform.v2.workbench.ui.WorkbenchState
 
 class WebDashboardPageTest {
 
-  private val state = PrototypeAppState()
+  private val state = WebAppState()
   private val entity = state.entities.first { it.submissions.isNotEmpty() }
   private val datasetEntities = state.entities.filter { it.datasetId == entity.datasetId }
 
@@ -44,31 +44,20 @@ class WebDashboardPageTest {
   @Test
   fun fromHash_resolvesDashboardPage() {
     assertEquals(
-      PrototypeWorkbenchPage.WEB_DASHBOARD,
-      PrototypeWorkbenchPage.fromHash("#dashboard"),
+      WebPage.WEB_DASHBOARD,
+      WebPage.fromHash("#dashboard"),
     )
-    assertEquals(PrototypeWorkbenchPage.WEB_DASHBOARD, PrototypeWorkbenchPage.fromHash("#web"))
-  }
-
-  @Test
-  fun webAppPages_combineSurveysDashboardAndSurveyEditorUnderWebTopBarTab() {
-    assertEquals(
-      listOf(PrototypeWorkbenchPage.MOBILE_PROTOTYPE, PrototypeWorkbenchPage.WEB_SURVEYS),
-      PrototypeWorkbenchPage.topBarPages,
-    )
-    assertFalse(PrototypeWorkbenchPage.MOBILE_PROTOTYPE.isWebApp)
-    assertTrue(PrototypeWorkbenchPage.WEB_SURVEYS.isWebApp)
-    assertTrue(PrototypeWorkbenchPage.WEB_DASHBOARD.isWebApp)
-    assertTrue(PrototypeWorkbenchPage.SURVEY_EDITOR.isWebApp)
+    assertEquals(WebPage.WEB_DASHBOARD, WebPage.fromHash("#web"))
   }
 
   @Test
   fun updateActiveSurveyDetails_updatesActiveSurveyTitleAndDescription() {
-    val testState = PrototypeAppState()
-    testState.updateActiveSurveyDetails(
-      title = "Updated Survey Title",
-      description = "Updated survey description from the survey editor.",
-    )
+    val testState = WebAppState()
+    WorkbenchState(MobileAppState(dataHolder = testState.dataHolder))
+      .updateActiveSurveyDetails(
+        title = "Updated Survey Title",
+        description = "Updated survey description from the survey editor.",
+      )
 
     assertEquals("Updated Survey Title", testState.activeSurvey.title)
     assertEquals(
@@ -135,7 +124,7 @@ class WebDashboardPageTest {
 
   @Test
   fun dashboardTable_staysCollapsedOnSelectionAndExpandsOnShowInTable() {
-    val testState = PrototypeAppState()
+    val testState = WebAppState()
     assertFalse(testState.isDashboardTableExpanded)
 
     testState.selectEntity(entity.id)
@@ -158,7 +147,7 @@ class WebDashboardPageTest {
 
   @Test
   fun recenterMapOnEntity_adjustsTargetScreenYForReducedViewport() {
-    val testState = PrototypeAppState()
+    val testState = WebAppState()
     testState.selectEntity(entity.id)
     assertEquals(entity.id, testState.selectedEntityId)
 
@@ -176,14 +165,14 @@ class WebDashboardPageTest {
 
   @Test
   fun sidePanel_startsExpandedByDefault() {
-    val testState = PrototypeAppState()
+    val testState = WebAppState()
     assertTrue(testState.isSidePanelExpanded)
     assertTrue(testState.isDashboardSidePanelExpanded)
   }
 
   @Test
   fun toggleSidePanel_togglesBetweenExpandedAndCollapsed() {
-    val testState = PrototypeAppState()
+    val testState = WebAppState()
     assertTrue(testState.isSidePanelExpanded)
 
     testState.toggleSidePanel()
@@ -197,7 +186,7 @@ class WebDashboardPageTest {
 
   @Test
   fun collapseAndExpandSidePanel_updatesStateExplicitly() {
-    val testState = PrototypeAppState()
+    val testState = WebAppState()
 
     testState.collapseSidePanel()
     assertFalse(testState.isSidePanelExpanded)
@@ -225,40 +214,34 @@ class WebDashboardPageTest {
   }
 
   @Test
-  fun resetPrototypeFlow_resetsSidePanelToExpanded() {
-    val testState = PrototypeAppState()
+  fun reset_resetsSidePanelToExpanded() {
+    val testState = WebAppState()
     testState.collapseSidePanel()
     assertFalse(testState.isSidePanelExpanded)
 
-    testState.resetPrototypeFlow()
+    testState.reset()
     assertTrue(testState.isSidePanelExpanded)
   }
 
   @Test
   fun signedInUserInitials_derivesTwoLetterInitialsCorrectly() {
-    val testState = PrototypeAppState()
+    val testState = WebAppState()
     assertEquals("ML", testState.signedInUserInitials)
   }
 
   @Test
-  fun signOut_resetsAuthenticationAndNavigatesToSignIn() {
-    val testState = PrototypeAppState()
+  fun signOut_resetsAuthentication() {
+    val testState = WebAppState()
     testState.signInWithGoogle()
-    testState.acceptTermsOfService()
-    testState.openSurvey(testState.surveys.first().id)
     assertTrue(testState.isSignedIn)
-    assertEquals(PrototypeScreen.MAIN_SURVEY, testState.currentScreen)
 
     testState.signOut()
     assertFalse(testState.isSignedIn)
-    assertEquals(PrototypeScreen.SIGN_IN, testState.currentScreen)
-    assertFalse(testState.isDrawerOpen)
-    assertEquals(MainDrawerSubView.NONE, testState.activeDrawerSubView)
   }
 
   @Test
   fun layersSheet_togglesStateAndControlsBasemapAndLayerVisibility() {
-    val testState = PrototypeAppState()
+    val testState = WebAppState()
     assertFalse(testState.isLayersSheetOpen)
 
     testState.updateLayersSheetOpen(true)
@@ -285,7 +268,7 @@ class WebDashboardPageTest {
 
   @Test
   fun detailsPanel_startsExpandedByDefault() {
-    val testState = PrototypeAppState()
+    val testState = WebAppState()
     assertTrue(testState.isDetailsPanelExpanded)
     assertTrue(testState.isDashboardDetailsPanelExpanded)
     assertTrue(testState.isRightPanelExpanded)
@@ -293,7 +276,7 @@ class WebDashboardPageTest {
 
   @Test
   fun toggleDetailsPanel_togglesBetweenExpandedAndCollapsed() {
-    val testState = PrototypeAppState()
+    val testState = WebAppState()
     assertTrue(testState.isDetailsPanelExpanded)
 
     testState.toggleDetailsPanel()
@@ -331,7 +314,7 @@ class WebDashboardPageTest {
 
   @Test
   fun openingTable_collapsesDetailsPanel() {
-    val testState = PrototypeAppState()
+    val testState = WebAppState()
     testState.selectEntity(entity.id)
     assertTrue(testState.isDetailsPanelExpanded)
     assertFalse(testState.isDashboardTableExpanded)
@@ -353,7 +336,7 @@ class WebDashboardPageTest {
 
   @Test
   fun selectingEntityWhileTableIsOpen_keepsDetailsPanelCollapsed() {
-    val testState = PrototypeAppState()
+    val testState = WebAppState()
     testState.updateDashboardTableExpanded(true)
     assertTrue(testState.isDashboardTableExpanded)
     assertFalse(testState.isDetailsPanelExpanded)
@@ -368,12 +351,12 @@ class WebDashboardPageTest {
   }
 
   @Test
-  fun resetPrototypeFlow_resetsDetailsPanelToExpanded() {
-    val testState = PrototypeAppState()
+  fun reset_resetsDetailsPanelToExpanded() {
+    val testState = WebAppState()
     testState.collapseDetailsPanel()
     assertFalse(testState.isDetailsPanelExpanded)
 
-    testState.resetPrototypeFlow()
+    testState.reset()
     assertTrue(testState.isDetailsPanelExpanded)
   }
 
@@ -456,7 +439,7 @@ class WebDashboardPageTest {
 
   @Test
   fun selectLayer_isMutuallyExclusiveWithEntitySelection() {
-    val testState = PrototypeAppState()
+    val testState = WebAppState()
     testState.selectEntity(entity.id)
 
     testState.selectLayer(entity.datasetId)
@@ -472,7 +455,7 @@ class WebDashboardPageTest {
 
   @Test
   fun showSelectedLayerInTable_expandsTableOnLayerDataset() {
-    val testState = PrototypeAppState()
+    val testState = WebAppState()
     testState.selectLayer(entity.datasetId)
 
     testState.showSelectedLayerInTable()
@@ -486,7 +469,7 @@ class WebDashboardPageTest {
 
   @Test
   fun dataTables_titlesNeverIncludeInternalDatasetIdsAcrossAllSurveys() {
-    val testState = PrototypeAppState()
+    val testState = WebAppState()
     for (survey in testState.surveys) {
       testState.openSurvey(survey.id)
       val tables =

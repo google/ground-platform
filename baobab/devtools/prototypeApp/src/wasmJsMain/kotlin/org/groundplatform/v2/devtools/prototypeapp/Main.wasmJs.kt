@@ -17,14 +17,15 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.window.ComposeViewport
 import kotlinx.browser.document
 import kotlinx.browser.window
+import org.groundplatform.v2.web.ui.WebPage
 
 @OptIn(ExperimentalComposeUiApi::class)
 fun main() {
   val container = document.getElementById("ComposeTarget") ?: document.body!!
   ComposeViewport(container) {
     PrototypeApp(
-      initialPage = PrototypeWorkbenchPage.fromHash(window.location.hash),
-      initialOrganizationId = PrototypeWorkbenchPage.organizationIdFromHash(window.location.hash),
+      initialPage = WebPage.fromHash(window.location.hash),
+      initialOrganizationId = WebPage.organizationIdFromHash(window.location.hash),
       onHashChanged = { window.location.hash = it },
     )
   }

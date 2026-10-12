@@ -212,7 +212,7 @@ for the Type and Country pickers, and `OrganizationPages.kt` for the page's
 tabs). Both pages are stateless `(uiState, actions)` screens
 driven by `OrganizationViewModel` (`ui/viewmodel/`); the directory, relation,
 and member-grouping rules live in `domain/model/OrganizationDirectory.kt`, and
-the matching methods on `PrototypeAppState` are one-line delegates to the view
+the matching methods on `WebAppState` are one-line delegates to the view
 model.
 
 The library model (`domain/model/LibraryModels.kt`: concepts, Form templates,
@@ -529,7 +529,7 @@ the Compose screens in `ui/surveyeditor/` (`SurveyEditorPage.kt`,
 `EntityDatasetEditor.kt`, `SamplingDesignPanel.kt`, `SurveyAreaEditor.kt`,
 `InteractiveLayerMap.kt`, `LayerEditorGeometry.kt`) take `(uiState, actions)`
 and hold only transient UI state such as dialogs and the selected table row.
-`SurveyEditorPage(state: PrototypeAppState, …)` is the thin shell that collects
+`SurveyEditorPage(state: WebAppState, …)` is the thin shell that collects
 the view model and renders the shared `WebAppHeader`. Drag-to-reorder for the
 navigation and the flow canvas shares `ui/formeditor/DragReorder.kt`.
 
@@ -720,7 +720,8 @@ fresh on every page load; on mobile it will become the persistent offline store.
     layers, map features with their submissions, standalone submissions,
     geometries, survey configs and editor drafts, mutations, places, offline
     tile packages, and preferences). `AppDataHolder.appData` combines them into
-    one `StateFlow`; `PrototypeAppState` and the feature view models read from
+    one `StateFlow`; the session states (`AppSession` and its mobile and web
+    subclasses) and the feature view models read from
     the repositories it wires.
 -   **Writes**: Repositories (`data/repository/`) write through `suspend`
     functions inside `LocalStore.transaction`, which is atomic and can be

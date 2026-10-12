@@ -66,8 +66,8 @@ import org.groundplatform.v2.app.domain.model.Organization
 import org.groundplatform.v2.app.domain.model.OrganizationRelation
 import org.groundplatform.v2.app.domain.model.OrganizationType
 import org.groundplatform.v2.app.domain.model.relationTo
-import org.groundplatform.v2.devtools.prototypeapp.PrototypeAppState
-import org.groundplatform.v2.devtools.prototypeapp.PrototypeWorkbenchPage
+import org.groundplatform.v2.web.ui.WebAppState
+import org.groundplatform.v2.web.ui.WebPage
 import org.groundplatform.v2.web.ui.common.WebAppHeader
 import org.groundplatform.v2.web.ui.common.WebHeaderButton
 import org.groundplatform.v2.web.ui.common.WebHeaderContext
@@ -87,7 +87,7 @@ internal val OrganizationPageMaxWidth = 1240.dp
  */
 @Composable
 internal fun OrganizationsPage(
-  state: PrototypeAppState,
+  state: WebAppState,
   onSignOut: () -> Unit = { state.signOut() },
 ) {
   val uiState by state.organization.uiState.collectAsState()
@@ -99,7 +99,7 @@ internal fun OrganizationsPage(
         state = state,
         onSignOut = onSignOut,
         navigationIcon = {
-          IconButton(onClick = { state.selectWorkbenchPage(PrototypeWorkbenchPage.WEB_SURVEYS) }) {
+          IconButton(onClick = { state.selectPage(WebPage.WEB_SURVEYS) }) {
             Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = "Back to surveys")
           }
         },

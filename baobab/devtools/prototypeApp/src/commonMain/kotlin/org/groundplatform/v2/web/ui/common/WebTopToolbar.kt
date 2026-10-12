@@ -63,8 +63,8 @@ import org.groundplatform.v2.app.ui.common.CloudAcaciaLogo
 import org.groundplatform.v2.app.ui.common.PrototypeDebugToolsButton
 import org.groundplatform.v2.app.ui.common.UserAvatarProfileMenu
 import org.groundplatform.v2.core.forms.ui.LocalGroundBrandFontFamily
-import org.groundplatform.v2.devtools.prototypeapp.PrototypeAppState
-import org.groundplatform.v2.devtools.prototypeapp.PrototypeWorkbenchPage
+import org.groundplatform.v2.web.ui.WebAppState
+import org.groundplatform.v2.web.ui.WebPage
 import org.groundplatform.v2.web.ui.dashboard.WebSurveysList
 import org.groundplatform.v2.web.ui.datacollection.WebCollectDataMenuButton
 import org.groundplatform.v2.web.ui.surveyeditor.SurveyStatusBadgeMenu
@@ -76,7 +76,7 @@ import org.groundplatform.v2.web.ui.surveyeditor.SurveyStatusBadgeMenu
  */
 @Composable
 internal fun WebTopToolbar(
-  state: PrototypeAppState,
+  state: WebAppState,
   onOpenSurveyEditor: () -> Unit = {},
   onSignOut: () -> Unit = { state.signOut() },
   modifier: Modifier = Modifier,
@@ -138,7 +138,7 @@ internal fun WebTopToolbar(
  */
 @Composable
 internal fun WebSurveySwitcher(
-  state: PrototypeAppState,
+  state: WebAppState,
   supporting: @Composable RowScope.() -> Unit = {},
 ) {
   var isOpen by remember { mutableStateOf(false) }
@@ -204,7 +204,7 @@ internal fun WebSurveySwitcher(
         leadingIcon = { Icon(Icons.AutoMirrored.Outlined.List, contentDescription = null) },
         onClick = {
           isOpen = false
-          state.selectWorkbenchPage(PrototypeWorkbenchPage.WEB_SURVEYS)
+          state.selectPage(WebPage.WEB_SURVEYS)
         },
       )
     }
@@ -225,7 +225,7 @@ internal fun WebSurveySwitcher(
  */
 @Composable
 internal fun WebAppHeader(
-  state: PrototypeAppState,
+  state: WebAppState,
   modifier: Modifier = Modifier,
   onSignOut: (() -> Unit)? = { state.signOut() },
   showDebugTools: Boolean = true,
@@ -407,20 +407,24 @@ internal fun WebHeaderButton(
   }
 }
 
-/** [WebAppHeader] action that switches the workbench to the mobile prototype. */
+/**
+ * [WebAppHeader] action that switches the workbench to the mobile prototype. Hidden when the web
+ * app runs without the workbench ([WebAppState.onShowMobilePrototype] is `null`).
+ */
 @Composable
-internal fun WebMobilePrototypeButton(state: PrototypeAppState) {
+internal fun WebMobilePrototypeButton(state: WebAppState) {
+  val onShowMobilePrototype = state.onShowMobilePrototype ?: return
   WebHeaderButton(
     text = "Mobile prototype",
     icon = Icons.Outlined.Smartphone,
-    onClick = { state.selectWorkbenchPage(PrototypeWorkbenchPage.MOBILE_PROTOTYPE) },
+    onClick = onShowMobilePrototype,
   )
 }
 
 /** Clickable user avatar icon that anchors and toggles the standard user profile card popup. */
 @Composable
 internal fun WebUserAvatarProfileWidget(
-  state: PrototypeAppState,
+  state: WebAppState,
   onSignOut: () -> Unit,
   modifier: Modifier = Modifier,
 ) {

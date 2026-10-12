@@ -57,7 +57,7 @@ import org.groundplatform.v2.app.domain.model.hasGeometry
 import org.groundplatform.v2.app.ui.datacollection.EntityStatusChip
 import org.groundplatform.v2.app.ui.map.LayerIcons
 import org.groundplatform.v2.app.ui.map.contentColorOnArgb
-import org.groundplatform.v2.devtools.prototypeapp.PrototypeAppState
+import org.groundplatform.v2.web.ui.WebAppState
 
 /** Number of map features in a layer sharing one status; [example] provides the chip styling. */
 internal data class DashboardLayerStatusCount(val example: GeospatialEntityItem, val count: Int) {
@@ -153,7 +153,7 @@ private fun LayerSwatch(layer: MapLayerItem?, size: Int) {
 internal fun WebLayerDetailsCard(
   summary: DashboardLayerSummary,
   layer: MapLayerItem?,
-  state: PrototypeAppState,
+  state: WebAppState,
   modifier: Modifier = Modifier,
   onCollapse: (() -> Unit)? = null,
 ) {

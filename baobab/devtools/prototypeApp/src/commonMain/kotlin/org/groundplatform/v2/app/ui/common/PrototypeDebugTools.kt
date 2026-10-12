@@ -43,7 +43,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import org.groundplatform.v2.devtools.prototypeapp.PrototypeAppState
+import org.groundplatform.v2.app.ui.AppSession
 
 /**
  * Reusable debug tools button with the bug icon that pops out the workbench tools in the web top
@@ -51,7 +51,7 @@ import org.groundplatform.v2.devtools.prototypeapp.PrototypeAppState
  */
 @Composable
 fun PrototypeDebugToolsButton(
-  state: PrototypeAppState,
+  state: AppSession,
   modifier: Modifier = Modifier,
   iconTint: Color = MaterialTheme.colorScheme.onSurface,
 ) {
@@ -94,7 +94,7 @@ fun PrototypeDebugToolsButton(
 /** Popout menu displaying the prototype workbench tools. */
 @Composable
 fun PrototypeDebugToolsDropdown(
-  state: PrototypeAppState,
+  state: AppSession,
   expanded: Boolean,
   onDismissRequest: () -> Unit,
   modifier: Modifier = Modifier,

@@ -19,11 +19,11 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 import org.groundplatform.v2.app.domain.model.SyncStatus
-import org.groundplatform.v2.devtools.prototypeapp.PrototypeAppState
+import org.groundplatform.v2.app.ui.AppSession
 
 class GeoIdTextTest {
 
-  private val entity = PrototypeAppState().entities.first()
+  private val entity = AppSession().entities.first()
 
   @Test
   fun syncedEntity_isNotPendingAndShowsGeoIdOnly() {

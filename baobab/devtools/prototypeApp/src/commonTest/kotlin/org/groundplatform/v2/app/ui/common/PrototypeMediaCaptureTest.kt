@@ -20,7 +20,6 @@ import kotlin.test.assertFalse
 import kotlin.test.assertIs
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
-import org.groundplatform.v2.app.domain.model.PrototypeScreen
 import org.groundplatform.v2.core.forms.media.MediaCaptureKind
 import org.groundplatform.v2.core.forms.media.MediaCaptureSpec
 import org.groundplatform.v2.core.forms.ui.FormWizardStep
@@ -28,7 +27,8 @@ import org.groundplatform.v2.core.forms.ui.MediaCaptureRequest
 import org.groundplatform.v2.core.forms.ui.MediaCaptureResult
 import org.groundplatform.v2.core.forms.ui.MediaCaptureSource
 import org.groundplatform.v2.core.forms.ui.WorkbenchExampleForm
-import org.groundplatform.v2.devtools.prototypeapp.PrototypeAppState
+import org.groundplatform.v2.mobile.ui.MobileAppState
+import org.groundplatform.v2.workbench.ui.WorkbenchState
 
 class PrototypeMediaCaptureTest {
 
@@ -174,8 +174,12 @@ class PrototypeMediaCaptureTest {
 
   @Test
   fun allFieldTypesForm_launchesWithPhotoVideoAndAudioQuestions() {
-    val state = PrototypeAppState(initialScreen = PrototypeScreen.MAIN_SURVEY)
-    state.selectWorkbenchExampleForm(WorkbenchExampleForm.ALL_FIELD_TYPES, launchImmediately = true)
+    val workbench = WorkbenchState(MobileAppState())
+    val state = workbench.mobile
+    workbench.selectWorkbenchExampleForm(
+      WorkbenchExampleForm.ALL_FIELD_TYPES,
+      launchImmediately = true,
+    )
     val kinds =
       state.activeFormWizardController!!
         .steps

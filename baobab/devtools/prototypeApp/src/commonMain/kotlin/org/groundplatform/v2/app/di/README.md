@@ -39,5 +39,5 @@ Repositories (data/repository/*) + Use Cases (domain/usecase/*) + Clients (clien
 
 ## Dependency Rules
 
-- **Inbound access**: Instantiated by the application shell (`PrototypeAppState`) and test harnesses.
+- **Inbound access**: Instantiated by the session states (`AppSession`, or shared by the mobile and web sessions of the combined `PrototypeAppState`) and test harnesses.
 - **Outbound dependencies**: Enforced by `LayerDependencyGuardrailTest`, `di/` is the **only** package outside `data/` permitted to import `data.*` (`LocalStore`, `*RepositoryImpl`, `SampleDataSeeder`). It exposes those dependencies via `domain/repository/` and `domain/usecase/` types so that `ui/viewmodel/` never imports `data.*`. `di/` never imports `ui/`.

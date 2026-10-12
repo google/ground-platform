@@ -1,0 +1,59 @@
+/*
+ * Copyright 2026 The Ground Authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.groundplatform.v2.web.ui
+
+/** Top-level pages of the web app, addressable via the URL hash (e.g. `#dashboard`). */
+enum class WebPage(val label: String, val hash: String) {
+  /** Web landing page: the surveys the signed-in user can open, grouped by organization. */
+  WEB_SURVEYS("Surveys", "surveys"),
+  /** Full-page 6-step Survey Creation Wizard (`#create-survey`). */
+  CREATE_SURVEY("Create survey", "create-survey"),
+  WEB_DASHBOARD("Web dashboard", "dashboard"),
+  SURVEY_EDITOR("Survey editor", "survey-editor"),
+  /** The organizations the signed-in user belongs to, and listed ones they can ask to join. */
+  ORGANIZATIONS("Organizations", "organizations"),
+  /** One organization's surveys, members, and settings (`#organization/<id>`). */
+  ORGANIZATION("Organization", "organization");
+
+  /** Whether this page shows one survey, and so needs an active survey to open. */
+  val needsActiveSurvey: Boolean
+    get() = this == WEB_DASHBOARD || this == SURVEY_EDITOR
+
+  companion object {
+    /** Legacy hashes kept working after pages were renamed. */
+    private val aliases = mapOf("form-editor" to SURVEY_EDITOR, "web" to WEB_DASHBOARD)
+
+    /**
+     * The page for a URL hash, ignoring any `/<id>` suffix (see [organizationIdFromHash]), or
+     * `null` when the hash names no web page.
+     */
+    fun fromHash(hash: String?): WebPage? {
+      val h = hash?.removePrefix("#")?.substringBefore('/')
+      return entries.firstOrNull { it.hash == h } ?: aliases[h]
+    }
+
+    /** The organization ID in an `#organization/<id>` hash, or `null` for any other hash. */
+    fun organizationIdFromHash(hash: String?): String? {
+      val h = hash?.removePrefix("#") ?: return null
+      if (fromHash(h) != ORGANIZATION) return null
+      return h.substringAfter('/', "").takeIf { it.isNotBlank() }
+    }
+
+    /** The URL hash for [page], including the organization ID for the organization page. */
+    fun hashFor(page: WebPage, organizationId: String?): String =
+      if (page == ORGANIZATION && !organizationId.isNullOrBlank()) "${page.hash}/$organizationId"
+      else page.hash
+  }
+}

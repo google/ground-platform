@@ -101,7 +101,7 @@ import org.groundplatform.v2.app.ui.viewmodel.SurveyMapActions
 import org.groundplatform.v2.core.forms.ui.GroundBadgeTone
 import org.groundplatform.v2.core.forms.ui.GroundModalBottomSheetOverlay
 import org.groundplatform.v2.core.forms.ui.GroundTonalBadge
-import org.groundplatform.v2.devtools.prototypeapp.PrototypeAppState
+import org.groundplatform.v2.mobile.ui.MobileAppState
 
 /**
  * 5. Main Survey UI screen (`PrototypeScreen.MAIN_SURVEY`) providing:
@@ -128,7 +128,7 @@ import org.groundplatform.v2.devtools.prototypeapp.PrototypeAppState
  *   and View Terms of Service.
  */
 @Composable
-fun MainSurveyScreen(state: PrototypeAppState) {
+fun MainSurveyScreen(state: MobileAppState) {
   val isMapShowing = state.activeDrawerSubView == MainDrawerSubView.NONE
   val surfaceColor = if (isMapShowing) Color.Transparent else MaterialTheme.colorScheme.surface
   val dataCollectionUiState = state.dataCollectionUiState
@@ -214,7 +214,7 @@ fun MainSurveyScreen(state: PrototypeAppState) {
  * on the right.
  */
 @Composable
-internal fun MobileMapSearchBar(state: PrototypeAppState, modifier: Modifier = Modifier) {
+internal fun MobileMapSearchBar(state: MobileAppState, modifier: Modifier = Modifier) {
   val query = state.listSearchQuery
   Surface(
     modifier = modifier.fillMaxWidth(),
@@ -316,7 +316,7 @@ internal fun MobileMapSearchBar(state: PrototypeAppState, modifier: Modifier = M
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-internal fun SurveyMapView(state: PrototypeAppState) {
+internal fun SurveyMapView(state: MobileAppState) {
   val uiState by state.surveyMap.uiState.collectAsState()
   val actions: SurveyMapActions = state.surveyMap
   val selectedEntity = uiState.selectedEntity
@@ -1018,6 +1018,6 @@ internal fun LayersControlSheet(uiState: SurveyMapUiState, actions: SurveyMapAct
 
 /** Backward-compatible alias for [MainSurveyScreen]. */
 @Composable
-fun GroundMainSurveyScreen(state: PrototypeAppState) {
+fun GroundMainSurveyScreen(state: MobileAppState) {
   MainSurveyScreen(state)
 }

@@ -133,7 +133,7 @@ import org.groundplatform.v2.app.ui.map.framingInsets
 import org.groundplatform.v2.app.ui.map.rememberSurveyMapCamera
 import org.groundplatform.v2.app.ui.state.DashboardUiState
 import org.groundplatform.v2.app.ui.viewmodel.DashboardActions
-import org.groundplatform.v2.devtools.prototypeapp.PrototypeAppState
+import org.groundplatform.v2.web.ui.WebAppState
 import org.groundplatform.v2.web.ui.common.WebTopToolbar
 import org.groundplatform.v2.web.ui.datacollection.WebDataCollectionCard
 import org.groundplatform.v2.web.ui.datacollection.WebEntityDetailsCard
@@ -297,8 +297,8 @@ private val DashboardOverlayMargin = 14.dp
  * Main page of the Ground web dashboard (`#dashboard`).
  * - **Left**: A collapsible side panel with the searchable list of map features (one line per
  *   record) and places ([BottomSheetSearchableListContent]). Drag its right border to resize it
- *   ([SidePanelSeparator], width kept in [PrototypeAppState.sidePanelWidthDp]); the tab centered on
- *   that border collapses it, and the same tab at the map's left edge expands it again
+ *   ([SidePanelSeparator], width kept in [WebAppState.sidePanelWidthDp]); the tab centered on that
+ *   border collapses it, and the same tab at the map's left edge expands it again
  *   ([DashboardSidePanelToggleTab]).
  * - **Main area**: The live survey map ([SurveyMainMap]). Selecting a map feature pans and zooms to
  *   it and opens its details in a floating card in the upper-right corner (
@@ -311,7 +311,7 @@ private val DashboardOverlayMargin = 14.dp
  */
 @Composable
 internal fun WebDashboardPage(
-  state: PrototypeAppState,
+  state: WebAppState,
   onOpenSurveyEditor: () -> Unit = {},
   onSignOut: () -> Unit = { state.signOut() },
 ) {
@@ -334,7 +334,7 @@ internal fun WebDashboardPage(
 internal fun WebDashboardPage(
   uiState: DashboardUiState,
   actions: DashboardActions,
-  state: PrototypeAppState,
+  state: WebAppState,
   onOpenSurveyEditor: () -> Unit = {},
   onSignOut: () -> Unit = { state.signOut() },
 ) {
@@ -422,7 +422,7 @@ internal fun WebDashboardPage(
 
 /** Snackbar confirming an impact summary download, shared by the Impact views. */
 @Composable
-internal fun ImpactMessageSnackbar(state: PrototypeAppState, modifier: Modifier = Modifier) {
+internal fun ImpactMessageSnackbar(state: WebAppState, modifier: Modifier = Modifier) {
   val impactState by state.impact.uiState.collectAsState()
   val message = impactState.message ?: return
   LaunchedEffect(message) {
@@ -439,7 +439,7 @@ internal fun ImpactMessageSnackbar(state: PrototypeAppState, modifier: Modifier 
 
 /** Left-hand panel: the searchable list of map features and places. */
 @Composable
-private fun DashboardSidePanel(state: PrototypeAppState, modifier: Modifier = Modifier) {
+private fun DashboardSidePanel(state: WebAppState, modifier: Modifier = Modifier) {
   Surface(modifier = modifier, color = MaterialTheme.colorScheme.surfaceContainerLow) {
     BottomSheetSearchableListContent(
       state = state,
@@ -569,7 +569,7 @@ private fun DashboardSidePanelToggleTab(
 private fun DashboardMapArea(
   uiState: DashboardUiState,
   actions: DashboardActions,
-  state: PrototypeAppState,
+  state: WebAppState,
   modifier: Modifier = Modifier,
 ) {
   val dataCollectionUiState = state.dataCollectionUiState
@@ -880,7 +880,7 @@ private fun CollapsedDetailsPill(
  */
 @Composable
 internal fun DashboardDataTablesPanel(
-  state: PrototypeAppState,
+  state: WebAppState,
   expandedTableHeight: Dp,
   modifier: Modifier = Modifier,
 ) {

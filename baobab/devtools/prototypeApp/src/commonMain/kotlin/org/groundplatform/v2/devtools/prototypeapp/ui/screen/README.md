@@ -28,7 +28,7 @@ While individual feature screens live in their own packages (`ui/onboarding/`, `
 
 ## Role in the Overall Architecture
 
-`ui/screen/` acts as the root UI router connecting the application shell (`PrototypeAppState`) to stateless feature Composables:
+`ui/screen/` acts as the root UI router connecting the combined prototype state (`PrototypeAppState`: the mobile, web, and workbench states) to stateless feature Composables:
 
 ```
 Application Shell (PrototypeApp / PrototypeAppState)

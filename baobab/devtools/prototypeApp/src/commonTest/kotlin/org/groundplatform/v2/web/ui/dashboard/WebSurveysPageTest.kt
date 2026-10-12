@@ -20,25 +20,22 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import org.groundplatform.v2.app.data.seed.PrototypeFakeOrganizationsData
 import org.groundplatform.v2.devtools.prototypeapp.PrototypeAppState
-import org.groundplatform.v2.devtools.prototypeapp.PrototypeWorkbenchPage
+import org.groundplatform.v2.web.ui.WebAppState
+import org.groundplatform.v2.web.ui.WebPage
 
 class WebSurveysPageTest {
-  private val state = PrototypeAppState()
+  private val state = WebAppState()
   private val user = state.signedInUserEmail
   private val kfs = state.organization(PrototypeFakeOrganizationsData.KENYA_FOREST_SERVICE)!!
   private val mekong = state.organization(PrototypeFakeOrganizationsData.MEKONG_MANGROVE_ALLIANCE)!!
 
   @Test
   fun surveysPage_isTheWebLandingPage() {
-    assertEquals(PrototypeWorkbenchPage.WEB_SURVEYS, PrototypeWorkbenchPage.fromHash("#surveys"))
-    assertTrue(PrototypeWorkbenchPage.WEB_SURVEYS.isWebApp)
-    assertFalse(PrototypeWorkbenchPage.WEB_SURVEYS.needsActiveSurvey)
-    assertTrue(PrototypeWorkbenchPage.WEB_DASHBOARD.needsActiveSurvey)
-    assertTrue(PrototypeWorkbenchPage.SURVEY_EDITOR.needsActiveSurvey)
-    assertEquals(
-      listOf(PrototypeWorkbenchPage.MOBILE_PROTOTYPE, PrototypeWorkbenchPage.WEB_SURVEYS),
-      PrototypeWorkbenchPage.topBarPages,
-    )
+    assertEquals(WebPage.WEB_SURVEYS, WebPage.fromHash("#surveys"))
+    assertFalse(WebPage.WEB_SURVEYS.needsActiveSurvey)
+    assertTrue(WebPage.WEB_DASHBOARD.needsActiveSurvey)
+    assertTrue(WebPage.SURVEY_EDITOR.needsActiveSurvey)
+    assertEquals(WebPage.WEB_SURVEYS, WebAppState().activePage)
   }
 
   @Test
@@ -111,13 +108,14 @@ class WebSurveysPageTest {
 
   @Test
   fun openSurveyOnWeb_switchesActiveSurveyWithoutTouchingMobileFlow() {
-    val testState = PrototypeAppState()
-    val screenBefore = testState.currentScreen
+    val prototype = PrototypeAppState()
+    val testState = prototype.web
+    val screenBefore = prototype.mobile.currentScreen
     val target = testState.surveys.first { it.id != testState.activeSurveyId }
     val wasDownloaded = target.isDownloaded
     testState.openSurveyOnWeb(target.id)
     assertEquals(target.id, testState.activeSurveyId)
-    assertEquals(screenBefore, testState.currentScreen)
+    assertEquals(screenBefore, prototype.mobile.currentScreen)
     assertEquals(wasDownloaded, testState.surveys.first { it.id == target.id }.isDownloaded)
     assertTrue(testState.hasOpenableActiveSurvey)
     // Unknown IDs are ignored.
@@ -127,7 +125,7 @@ class WebSurveysPageTest {
 
   @Test
   fun createSurvey_addsAnOwnedSurveyInTheChosenOrganizationAndOpensIt() {
-    val testState = PrototypeAppState()
+    val testState = WebAppState()
     val before = testState.surveys.size
     val id = testState.createSurvey(title = "Mangrove Nursery Audit", organizationId = kfs.id)
     assertEquals("survey-mangrove-nursery-audit", id)

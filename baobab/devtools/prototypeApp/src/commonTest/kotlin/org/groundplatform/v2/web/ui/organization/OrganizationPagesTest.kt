@@ -30,7 +30,7 @@ import org.groundplatform.v2.app.domain.model.membersViewFor
 import org.groundplatform.v2.app.domain.model.organizationsOf
 import org.groundplatform.v2.app.domain.model.relationTo
 import org.groundplatform.v2.app.domain.model.searchOrganizations
-import org.groundplatform.v2.devtools.prototypeapp.PrototypeWorkbenchPage
+import org.groundplatform.v2.web.ui.WebPage
 
 /** The directory and member-grouping rules live in `domain/model/OrganizationDirectory.kt`. */
 class OrganizationPagesTest {
@@ -204,24 +204,24 @@ class OrganizationPagesTest {
   @Test
   fun hashes_roundTripOrganizationPages() {
     assertEquals(
-      PrototypeWorkbenchPage.ORGANIZATIONS,
-      PrototypeWorkbenchPage.fromHash("#organizations"),
+      WebPage.ORGANIZATIONS,
+      WebPage.fromHash("#organizations"),
     )
     assertEquals(
-      PrototypeWorkbenchPage.ORGANIZATION,
-      PrototypeWorkbenchPage.fromHash("#organization/org-kfs"),
+      WebPage.ORGANIZATION,
+      WebPage.fromHash("#organization/org-kfs"),
     )
-    assertEquals("org-kfs", PrototypeWorkbenchPage.organizationIdFromHash("#organization/org-kfs"))
-    assertNull(PrototypeWorkbenchPage.organizationIdFromHash("#organization"))
-    assertNull(PrototypeWorkbenchPage.organizationIdFromHash("#surveys"))
+    assertEquals("org-kfs", WebPage.organizationIdFromHash("#organization/org-kfs"))
+    assertNull(WebPage.organizationIdFromHash("#organization"))
+    assertNull(WebPage.organizationIdFromHash("#surveys"))
     assertEquals(
       "organization/org-kfs",
-      PrototypeWorkbenchPage.hashFor(PrototypeWorkbenchPage.ORGANIZATION, "org-kfs"),
+      WebPage.hashFor(WebPage.ORGANIZATION, "org-kfs"),
     )
-    assertEquals("surveys", PrototypeWorkbenchPage.hashFor(PrototypeWorkbenchPage.WEB_SURVEYS, "x"))
+    assertEquals("surveys", WebPage.hashFor(WebPage.WEB_SURVEYS, "x"))
     assertEquals(
-      PrototypeWorkbenchPage.WEB_DASHBOARD,
-      PrototypeWorkbenchPage.fromHash("#dashboard"),
+      WebPage.WEB_DASHBOARD,
+      WebPage.fromHash("#dashboard"),
     )
   }
 }

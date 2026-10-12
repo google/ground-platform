@@ -109,7 +109,7 @@ import org.groundplatform.v2.core.forms.ui.GroundAlertDialogOverlay
 import org.groundplatform.v2.core.forms.ui.GroundBadgeTone
 import org.groundplatform.v2.core.forms.ui.GroundTonalBadge
 import org.groundplatform.v2.core.forms.ui.LocalGroundBrandFontFamily
-import org.groundplatform.v2.devtools.prototypeapp.PrototypeAppState
+import org.groundplatform.v2.mobile.ui.MobileAppState
 import org.groundplatform.v2.mobile.ui.settings.GroundSettingsScreen
 import org.groundplatform.v2.mobile.ui.settings.SettingsScreen
 
@@ -124,7 +124,7 @@ import org.groundplatform.v2.mobile.ui.settings.SettingsScreen
  * User profile details and Sign out live in the top-right user avatar account menu.
  */
 @Composable
-internal fun MainSurveyNavigationDrawerOverlay(state: PrototypeAppState) {
+internal fun MainSurveyNavigationDrawerOverlay(state: MobileAppState) {
   val brandFont = LocalGroundBrandFontFamily.current
   Box(modifier = Modifier.fillMaxSize()) {
     // Scrim backdrop
@@ -897,7 +897,7 @@ internal fun DrawerMenuItem(
  * filter chips (`Pending`, `In progress`, `Uploaded`, `Failed`).
  */
 @Composable
-internal fun UploadsMutationsSubScreen(state: PrototypeAppState) {
+internal fun UploadsMutationsSubScreen(state: MobileAppState) {
   val uiState by state.dashboard.uiState.collectAsState()
   UploadsMutationsSubScreen(
     uiState = uiState,
@@ -1269,7 +1269,7 @@ internal fun UploadMutationRowCard(
  * download more surveys"`) which navigates to the full `Download surveys` screen.
  */
 @Composable
-internal fun SwitchDownloadedSurveysSubScreen(state: PrototypeAppState) {
+internal fun SwitchDownloadedSurveysSubScreen(state: MobileAppState) {
   val downloadedList = state.downloadedSurveys
 
   Column(
@@ -1444,7 +1444,7 @@ internal fun SwitchDownloadedSurveysSubScreen(state: PrototypeAppState) {
  * Safeguards & Media Purging" — Mapbox vector & raster tiles and 500 MB storage guardrail).
  */
 @Composable
-internal fun ManageOfflineMapsSubScreen(state: PrototypeAppState) {
+internal fun ManageOfflineMapsSubScreen(state: MobileAppState) {
   val uiState by state.settings.uiState.collectAsState()
   ManageOfflineMapsSubScreen(
     uiState = uiState,
@@ -1622,7 +1622,7 @@ private fun RemoveOfflineTilePackageConfirmationDialog(
  * `org.groundplatform.android.ui.settings.SettingsScreen` in `github.com/google/ground-android`.
  */
 @Composable
-internal fun SurveySettingsSubScreen(state: PrototypeAppState) {
+internal fun SurveySettingsSubScreen(state: MobileAppState) {
   val uiState by state.settings.uiState.collectAsState()
   SettingsScreen(uiState = uiState, actions = state.settings, onBack = state::closeDrawerSubView)
 }

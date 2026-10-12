@@ -88,13 +88,13 @@ import org.groundplatform.v2.app.domain.model.GeospatialEntityItem
 import org.groundplatform.v2.app.domain.model.MainSurveyViewMode
 import org.groundplatform.v2.app.domain.model.SubmissionPreviewItem
 import org.groundplatform.v2.app.domain.model.SyncStatus
+import org.groundplatform.v2.app.ui.AppSession
 import org.groundplatform.v2.app.ui.common.GroundFilterChip
 import org.groundplatform.v2.app.ui.common.horizontalScrollWithMouseDrag
 import org.groundplatform.v2.app.ui.map.LayerVisibilityToggle
 import org.groundplatform.v2.app.ui.map.layerNameColor
 import org.groundplatform.v2.core.forms.ui.GroundBadgeTone
 import org.groundplatform.v2.core.forms.ui.GroundTonalBadge
-import org.groundplatform.v2.devtools.prototypeapp.PrototypeAppState
 
 /**
  * Unified Persistent Bottom Sheet content for the mobile map screen (`SurveyMapView`) (Option A):
@@ -122,7 +122,7 @@ import org.groundplatform.v2.devtools.prototypeapp.PrototypeAppState
  */
 @Composable
 internal fun SurveyPersistentBottomSheetContent(
-  state: PrototypeAppState,
+  state: AppSession,
   modifier: Modifier = Modifier,
   isSidePanel: Boolean = false,
 ) {
@@ -185,7 +185,7 @@ internal fun SurveyPersistentBottomSheetContent(
 @Composable
 internal fun FormGroupedSubmissionsSection(
   groups: List<FormSubmissionsGroup>,
-  state: PrototypeAppState,
+  state: AppSession,
   showTargetEntityLabel: Boolean,
   showFormActionSubtitle: Boolean,
   onSelectSubmission: (SubmissionPreviewItem) -> Unit,
@@ -467,19 +467,19 @@ private fun ListSearchField(
  * compact search field ([ListSearchField]), the Expand/Collapse sheet button is hidden, and the
  * list uses a denser, mouse-oriented layout: dataset header rows and map feature rows share one
  * compact [SidePanelListRowHeight], each dataset header has a chevron left of its name that
- * collapses or expands its map features ([PrototypeAppState.toggleListDatasetCollapsed]; all
- * datasets show expanded while searching), and the layer visibility toggle appears only while the
- * header row is hovered or focused, or while the layer is hidden.
+ * collapses or expands its map features ([AppSession.toggleListDatasetCollapsed]; all datasets show
+ * expanded while searching), and the layer visibility toggle appears only while the header row is
+ * hovered or focused, or while the layer is hidden.
  */
 @Composable
 internal fun BottomSheetSearchableListContent(
-  state: PrototypeAppState,
+  state: AppSession,
   modifier: Modifier = Modifier,
   isSidePanel: Boolean = false,
 ) {
   val allPlaces = state.places
   val apiPlaces = state.mapboxPlacesApiResults
-  val isOnline = isSidePanel || state.isOnline
+  val isOnline = state.isOnline
   val allEntities = state.entities
   val listTab = state.listFilterTab
   val listQuery = state.listSearchQuery
@@ -663,7 +663,7 @@ internal fun BottomSheetSearchableListContent(
           val isLayerSelected = isSidePanel && state.selectedLayerDatasetId == groupDatasetId
           // Collapsing a dataset's map features is only offered in the web side panel. While a
           // search query is active every dataset is shown expanded (see
-          // PrototypeAppState.isListDatasetCollapsed) and the chevron is disabled.
+          // AppSession.isListDatasetCollapsed) and the chevron is disabled.
           val isCollapsed = isSidePanel && state.isListDatasetCollapsed(groupDatasetId)
           key(groupDatasetId) {
             val headerInteractionSource = remember { MutableInteractionSource() }
@@ -1047,7 +1047,7 @@ internal fun BottomSheetSearchableListContent(
 @Composable
 internal fun SubmissionFullDetailsCard(
   submission: SubmissionPreviewItem,
-  state: PrototypeAppState,
+  state: AppSession,
   isDark: Boolean,
   textColor: Color,
   backLabel: String,

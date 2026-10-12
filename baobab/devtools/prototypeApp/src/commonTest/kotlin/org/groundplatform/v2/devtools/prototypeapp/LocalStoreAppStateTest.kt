@@ -26,44 +26,53 @@ import org.groundplatform.v2.web.ui.viewmodel.surveyEditorViewModel
 import org.groundplatform.v2.web.ui.viewmodel.ui
 
 /**
- * End-to-end checks that [PrototypeAppState] reads from and writes through the local data store,
- * which is the single source of truth for app data.
+ * End-to-end checks that the prototype's [PrototypeAppState] reads from and writes through the
+ * local data store, which is the single source of truth for app data.
  */
 class LocalStoreAppStateTest {
   @Test
   fun submittedForm_survivesSwitchingSurveysAndBack() {
     val state = PrototypeAppState(initialScreen = PrototypeScreen.MAIN_SURVEY)
-    assertEquals("survey-kenya-coffee", state.activeSurveyId)
-    val before = state.entities.first { it.id == "entity-nyr-112" }.submissions.size
+    assertEquals("survey-kenya-coffee", state.mobile.activeSurveyId)
+    val before = state.mobile.entities.first { it.id == "entity-nyr-112" }.submissions.size
 
-    state.launchFormForEntity(entityId = "entity-nyr-112", formId = "form-household-interview")
-    state.completeActiveFormSubmission()
-    assertEquals(before + 1, state.entities.first { it.id == "entity-nyr-112" }.submissions.size)
+    state.mobile.launchFormForEntity(
+      entityId = "entity-nyr-112",
+      formId = "form-household-interview",
+    )
+    state.mobile.completeActiveFormSubmission()
+    assertEquals(
+      before + 1,
+      state.mobile.entities.first { it.id == "entity-nyr-112" }.submissions.size,
+    )
 
-    state.openSurvey("survey-sample-plots-forest")
-    assertEquals("survey-sample-plots-forest", state.activeSurveyId)
-    assertTrue(state.entities.none { it.id == "entity-nyr-112" })
+    state.mobile.openSurvey("survey-sample-plots-forest")
+    assertEquals("survey-sample-plots-forest", state.mobile.activeSurveyId)
+    assertTrue(state.mobile.entities.none { it.id == "entity-nyr-112" })
 
-    state.openSurvey("survey-kenya-coffee")
-    assertEquals(before + 1, state.entities.first { it.id == "entity-nyr-112" }.submissions.size)
+    state.mobile.openSurvey("survey-kenya-coffee")
+    assertEquals(
+      before + 1,
+      state.mobile.entities.first { it.id == "entity-nyr-112" }.submissions.size,
+    )
   }
 
   @Test
   fun dataHolderAppData_mirrorsStoreData() {
     val state = PrototypeAppState(initialScreen = PrototypeScreen.MAIN_SURVEY)
-    state.addRandomSites(count = 25)
+    state.workbench.addRandomSites(count = 25)
     val appData = state.dataHolder.appData.value
-    assertEquals(state.entities, appData.content.entities)
-    assertEquals(state.mutations, appData.mutations)
-    assertEquals(state.activeSurveyId, appData.activeSurveyId)
+    assertEquals(state.mobile.entities, appData.content.entities)
+    assertEquals(state.mobile.mutations, appData.mutations)
+    assertEquals(state.mobile.activeSurveyId, appData.activeSurveyId)
   }
 
   @Test
   fun settings_areWrittenToTheStore() {
     val state = PrototypeAppState(initialScreen = PrototypeScreen.MAIN_SURVEY)
-    state.updateUnitSystem(MeasurementUnitSystem.IMPERIAL)
-    state.updateSelectedLanguage("fr")
-    state.updateUploadMediaOverUnmeteredConnectionOnly(true)
+    state.mobile.updateUnitSystem(MeasurementUnitSystem.IMPERIAL)
+    state.mobile.updateSelectedLanguage("fr")
+    state.mobile.updateUploadMediaOverUnmeteredConnectionOnly(true)
     assertEquals(
       UserSettings("fr", MeasurementUnitSystem.IMPERIAL, shouldUploadPhotosOnWifiOnly = true),
       state.dataHolder.appData.value.userSettings,
@@ -73,34 +82,34 @@ class LocalStoreAppStateTest {
   @Test
   fun reset_reseedsSampleData() {
     val state = PrototypeAppState(initialScreen = PrototypeScreen.MAIN_SURVEY)
-    val initialEntities = state.entities
-    state.addRandomSites(count = 10)
-    state.syncAllOutboxMutations()
-    assertEquals(initialEntities.size + 10, state.entities.size)
+    val initialEntities = state.mobile.entities
+    state.workbench.addRandomSites(count = 10)
+    state.mobile.syncAllOutboxMutations()
+    assertEquals(initialEntities.size + 10, state.mobile.entities.size)
 
-    state.resetPrototypeFlow()
-    assertEquals("survey-kenya-coffee", state.activeSurveyId)
-    assertEquals(initialEntities, state.entities)
-    assertTrue(state.mutations.any { it.isOutbox })
+    state.workbench.resetPrototypeFlow()
+    assertEquals("survey-kenya-coffee", state.mobile.activeSurveyId)
+    assertEquals(initialEntities, state.mobile.entities)
+    assertTrue(state.mobile.mutations.any { it.isOutbox })
   }
 
   @Test
   fun appStates_doNotShareData() {
     val first = PrototypeAppState(initialScreen = PrototypeScreen.MAIN_SURVEY)
     val second = PrototypeAppState(initialScreen = PrototypeScreen.MAIN_SURVEY)
-    first.addRandomSites(count = 10)
-    assertEquals(first.entities.size - 10, second.entities.size)
+    first.workbench.addRandomSites(count = 10)
+    assertEquals(first.mobile.entities.size - 10, second.mobile.entities.size)
   }
 
   @Test
   fun surveyEditor_loadsSampleDraftFromStore() {
     val state = PrototypeAppState(initialScreen = PrototypeScreen.MAIN_SURVEY)
-    val editor = surveyEditorViewModel(state.activeSurveyEditorDraft)
-    assertEquals(state.activeSurvey.title, editor.ui.details.title)
+    val editor = surveyEditorViewModel(state.mobile.activeSurveyEditorDraft)
+    assertEquals(state.mobile.activeSurvey.title, editor.ui.details.title)
     // Forms and Map layers are derived from the survey data; Data tables come from the seed.
-    assertEquals(state.forms.map { it.id }, editor.ui.draft.forms.map { it.form.formId })
+    assertEquals(state.mobile.forms.map { it.id }, editor.ui.draft.forms.map { it.form.formId })
     assertEquals(
-      state.mapLayers.map { it.datasetId ?: it.id },
+      state.mobile.mapLayers.map { it.datasetId ?: it.id },
       editor.ui.mapLayers.map { it.id },
     )
     assertEquals(
@@ -111,27 +120,27 @@ class LocalStoreAppStateTest {
 
     // Surveys without a stored draft still open with their Forms and Map layers.
     val other = PrototypeAppState(initialScreen = PrototypeScreen.MAIN_SURVEY)
-    other.openSurvey("survey-sample-plots-forest")
-    val derived = surveyEditorViewModel(other.activeSurveyEditorDraft)
-    assertEquals(other.activeSurvey.title, derived.ui.details.title)
-    assertEquals(other.forms.map { it.id }, derived.ui.draft.forms.map { it.form.formId })
-    assertEquals(other.mapLayers.size, derived.ui.mapLayers.size)
+    other.mobile.openSurvey("survey-sample-plots-forest")
+    val derived = surveyEditorViewModel(other.mobile.activeSurveyEditorDraft)
+    assertEquals(other.mobile.activeSurvey.title, derived.ui.details.title)
+    assertEquals(other.mobile.forms.map { it.id }, derived.ui.draft.forms.map { it.form.formId })
+    assertEquals(other.mobile.mapLayers.size, derived.ui.mapLayers.size)
     assertTrue(derived.ui.dataTables.isEmpty())
   }
 
   @Test
   fun surveyEditor_editsAreSavedToStoreAndSurviveSurveySwitches() {
     val state = PrototypeAppState(initialScreen = PrototypeScreen.MAIN_SURVEY)
-    val initial = state.activeSurveyEditorDraft
+    val initial = state.mobile.activeSurveyEditorDraft
     val editor = surveyEditorViewModel(initial)
     editor.updateDetails { it.copy(title = "Renamed survey") }
     editor.addDataset(DatasetKind.DATA_TABLE)
     editor.addForm()
-    state.saveSurveyEditorDraft("survey-kenya-coffee", editor.ui.draft)
+    state.mobile.saveSurveyEditorDraft("survey-kenya-coffee", editor.ui.draft)
 
     // The title is shown in the survey list; generated FormDefinitions are published to the survey
     // config.
-    assertEquals("Renamed survey", state.activeSurvey.title)
+    assertEquals("Renamed survey", state.mobile.activeSurvey.title)
     val config = state.dataHolder.appData.value.content.config
     val draft = editor.ui.draft
     val newEntry = draft.forms.last()
@@ -140,12 +149,29 @@ class LocalStoreAppStateTest {
     // New Forms add rows to their linked Data table by default.
     assertEquals("1", publishedForm?.proto?.model?.entities?.firstOrNull()?.create_condition)
 
-    state.openSurvey("survey-sample-plots-forest")
-    state.openSurvey("survey-kenya-coffee")
-    val reopened = surveyEditorViewModel(state.activeSurveyEditorDraft)
+    state.mobile.openSurvey("survey-sample-plots-forest")
+    state.mobile.openSurvey("survey-kenya-coffee")
+    val reopened = surveyEditorViewModel(state.mobile.activeSurveyEditorDraft)
     assertEquals(editor.ui.draft, reopened.ui.draft)
 
-    state.resetPrototypeFlow()
-    assertEquals(initial.datasets, state.activeSurveyEditorDraft.datasets)
+    state.workbench.resetPrototypeFlow()
+    assertEquals(initial.datasets, state.mobile.activeSurveyEditorDraft.datasets)
+  }
+
+  @Test
+  fun mobileAndWebApps_shareLiveData() {
+    val state = PrototypeAppState(initialScreen = PrototypeScreen.MAIN_SURVEY)
+    val entityId = "entity-nyr-112"
+    val before = state.web.entities.first { it.id == entityId }.submissions.size
+
+    state.mobile.launchFormForEntity(entityId = entityId, formId = "form-household-interview")
+    state.mobile.completeActiveFormSubmission()
+    assertEquals(before + 1, state.web.entities.first { it.id == entityId }.submissions.size)
+
+    // Selection stays per app.
+    val otherId = state.web.entities.first { it.id != entityId }.id
+    state.web.selectEntity(otherId)
+    assertEquals(otherId, state.web.selectedEntityId)
+    assertEquals(entityId, state.mobile.selectedEntityId)
   }
 }

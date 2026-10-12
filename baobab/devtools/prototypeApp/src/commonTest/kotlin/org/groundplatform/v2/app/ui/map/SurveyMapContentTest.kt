@@ -23,20 +23,23 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 import org.groundplatform.v2.app.domain.model.EntityGeometryKind
-import org.groundplatform.v2.app.domain.model.PrototypeScreen
 import org.groundplatform.v2.app.domain.model.editor.toLatLng
 import org.groundplatform.v2.app.domain.model.formatHexColorCss
 import org.groundplatform.v2.app.domain.model.geometryKind
-import org.groundplatform.v2.devtools.prototypeapp.PrototypeAppState
+import org.groundplatform.v2.app.ui.AppSession
 import org.groundplatform.v2.map.CameraPosition
 import org.groundplatform.v2.map.Geometry
 import org.groundplatform.v2.map.LatLng
+import org.groundplatform.v2.mobile.ui.MobileAppState
+import org.groundplatform.v2.web.ui.WebAppState
 import org.groundplatform.v2.web.ui.formeditor.moved
 import org.groundplatform.v2.web.ui.viewmodel.surveyEditorViewModel
 import org.groundplatform.v2.web.ui.viewmodel.ui
+import org.groundplatform.v2.workbench.ui.WorkbenchState
 
 class SurveyMapContentTest {
-  private val state = PrototypeAppState(initialScreen = PrototypeScreen.MAIN_SURVEY)
+  private val state = AppSession()
+  private val web by lazy { WebAppState(dataHolder = state.dataHolder) }
 
   private fun SurveyMap.entityFeatures() =
     content.sources.first { it.id == SurveyMapContent.ENTITY_SOURCE }.features
@@ -228,7 +231,7 @@ class SurveyMapContentTest {
 
   @Test
   fun main_labelsGeneratedEntitiesOnlyWhenSelected() {
-    state.addRandomSites(count = 20)
+    WorkbenchState(MobileAppState(dataHolder = state.dataHolder)).addRandomSites(count = 20)
     state.resetMapZoom()
     val generated = state.visibleMapEntities.first { EntityGeometry.isGenerated(it) }
 
@@ -367,7 +370,7 @@ class SurveyMapContentTest {
 
     // Add a new XYZ tile source to "All users" with offline download permitted toggled off.
     val err =
-      state.addOrganizationImagerySource(
+      web.addOrganizationImagerySource(
         organizationId = state.allUsersOrganization!!.id,
         name = "USGS Topo",
         urlTemplate =
@@ -377,7 +380,7 @@ class SurveyMapContentTest {
     assertEquals(null, err)
     val added = state.allUsersImagerySources.first { it.name == "USGS Topo" }
     assertFalse(added.allowOfflineDownload)
-    state.setOrganizationImagerySourceOfflineAllowed(
+    web.setOrganizationImagerySourceOfflineAllowed(
       organizationId = state.allUsersOrganization!!.id,
       sourceId = added.id,
       allowOfflineDownload = true,

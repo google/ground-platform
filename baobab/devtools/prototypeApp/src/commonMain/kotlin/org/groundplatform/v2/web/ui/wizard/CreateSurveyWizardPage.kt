@@ -118,7 +118,7 @@ import org.groundplatform.v2.app.ui.common.openPlatformTextFilePicker
 import org.groundplatform.v2.app.ui.state.SurveyMapUiState
 import org.groundplatform.v2.core.forms.ui.GroundBadgeTone
 import org.groundplatform.v2.core.forms.ui.GroundTonalBadge
-import org.groundplatform.v2.devtools.prototypeapp.PrototypeAppState
+import org.groundplatform.v2.web.ui.WebAppState
 import org.groundplatform.v2.web.ui.common.WebAppHeader
 import org.groundplatform.v2.web.ui.common.WebHeaderContext
 import org.groundplatform.v2.web.ui.common.WebHeaderSupportingText
@@ -152,7 +152,7 @@ private val NoOrganizationOption = Organization(id = "", name = "None (personal 
  */
 @Composable
 fun CreateSurveyWizardPage(
-  state: PrototypeAppState,
+  state: WebAppState,
   isDarkTheme: Boolean = state.isDarkTheme,
   onSignOut: () -> Unit = { state.signOut() },
   modifier: Modifier = Modifier,

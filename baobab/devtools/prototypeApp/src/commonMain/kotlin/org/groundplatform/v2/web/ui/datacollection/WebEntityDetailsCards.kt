@@ -57,7 +57,7 @@ import org.groundplatform.v2.app.ui.datacollection.EntitySubmissionsPane
 import org.groundplatform.v2.app.ui.datacollection.SubmissionFullDetailsCard
 import org.groundplatform.v2.app.ui.datacollection.downloadPdfMenuAction
 import org.groundplatform.v2.app.ui.viewmodel.DataCollectionActions
-import org.groundplatform.v2.devtools.prototypeapp.PrototypeAppState
+import org.groundplatform.v2.web.ui.WebAppState
 
 /** Secondary entity actions shown in the web header's overflow menu, sent to [actions]. */
 private fun entityOverflowActions(
@@ -71,7 +71,7 @@ private fun entityOverflowActions(
 
 /**
  * Web dashboard's floating details card (upper-right corner of the map) for the selected entity,
- * with two tabs backed by [PrototypeAppState.entityDetailsPane]:
+ * with two tabs backed by [WebAppState.entityDetailsPane]:
  * - `Data` ([EntityDetailsPane.PROPERTIES], default): a compact status chip and the entity's
  *   properties (its current state).
  * - `History` ([EntityDetailsPane.SUBMISSIONS]): the entity's submissions. An opened submission
@@ -82,7 +82,7 @@ private fun entityOverflowActions(
 @Composable
 internal fun WebEntityDetailsCard(
   entity: GeospatialEntityItem,
-  state: PrototypeAppState,
+  state: WebAppState,
   modifier: Modifier = Modifier,
   onCollapse: (() -> Unit)? = null,
 ) {
@@ -170,7 +170,7 @@ internal fun WebEntityDetailsCard(
 @Composable
 internal fun WebSubmissionDetailsCard(
   submission: SubmissionPreviewItem,
-  state: PrototypeAppState,
+  state: WebAppState,
   modifier: Modifier = Modifier,
   onCollapse: (() -> Unit)? = null,
 ) {

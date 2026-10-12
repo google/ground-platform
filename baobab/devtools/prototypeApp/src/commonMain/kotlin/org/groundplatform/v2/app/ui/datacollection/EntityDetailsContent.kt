@@ -97,13 +97,13 @@ import org.groundplatform.v2.app.domain.model.entityGeometrySummary
 import org.groundplatform.v2.app.domain.model.geometryKind
 import org.groundplatform.v2.app.domain.model.hasGeometry
 import org.groundplatform.v2.app.domain.model.relatedEntityForPropertyValue
+import org.groundplatform.v2.app.ui.AppSession
 import org.groundplatform.v2.app.ui.common.GeoIdText
 import org.groundplatform.v2.app.ui.common.GroundFilterChip
 import org.groundplatform.v2.app.ui.common.horizontalScrollWithMouseDrag
 import org.groundplatform.v2.app.ui.map.LayerIcons
 import org.groundplatform.v2.app.ui.state.DataCollectionUiState
 import org.groundplatform.v2.app.ui.viewmodel.DataCollectionActions
-import org.groundplatform.v2.devtools.prototypeapp.PrototypeAppState
 
 private val EntityGeometryKind.icon: ImageVector
   get() =
@@ -526,7 +526,7 @@ private fun RelatedRecordLink(related: GeospatialEntityItem, onClick: () -> Unit
 @Composable
 internal fun EntityPropertiesPane(
   entity: GeospatialEntityItem,
-  state: PrototypeAppState,
+  state: AppSession,
   isWeb: Boolean,
 ) {
   Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -604,7 +604,7 @@ internal fun downloadPdfMenuAction(onClick: () -> Unit): DetailsMenuAction =
 
 /** Row of mobile entity actions: `Navigate`, QR code, Share PDF, and `Uploads`. */
 @Composable
-private fun EntityActionsRow(entity: GeospatialEntityItem, state: PrototypeAppState) {
+private fun EntityActionsRow(entity: GeospatialEntityItem, state: AppSession) {
   Row(
     modifier = Modifier.fillMaxWidth().horizontalScrollWithMouseDrag(rememberScrollState()),
     horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -740,7 +740,7 @@ private fun EntityDataCollectionLaunchers(
  * web, submissions are in the details card's `History` tab instead.
  */
 @Composable
-private fun EntitySubmissionsLink(entity: GeospatialEntityItem, state: PrototypeAppState) {
+private fun EntitySubmissionsLink(entity: GeospatialEntityItem, state: AppSession) {
   val isOffline = !state.isOnline
   val availableCount =
     if (isOffline) {
@@ -789,7 +789,7 @@ private fun EntitySubmissionsLink(entity: GeospatialEntityItem, state: Prototype
 @Composable
 internal fun EntitySubmissionsPane(
   entity: GeospatialEntityItem,
-  state: PrototypeAppState,
+  state: AppSession,
   isWeb: Boolean,
 ) {
   val isOffline = !isWeb && !state.isOnline
@@ -885,7 +885,7 @@ internal fun EntitySubmissionsPane(
 @Composable
 internal fun EntityBottomSheetCard(
   entity: GeospatialEntityItem,
-  state: PrototypeAppState,
+  state: AppSession,
   modifier: Modifier = Modifier,
 ) {
   val selectedSubmission =

@@ -78,6 +78,7 @@ import org.groundplatform.v2.app.domain.model.SubmissionFieldEntry
 import org.groundplatform.v2.app.domain.usecase.CompleteFormSubmissionUseCase
 import org.groundplatform.v2.app.domain.usecase.LaunchFormUseCase
 import org.groundplatform.v2.app.domain.usecase.ResolveFormDefForLaunchUseCase
+import org.groundplatform.v2.app.ui.AppSession
 import org.groundplatform.v2.app.ui.common.GeoIdText
 import org.groundplatform.v2.app.ui.common.PrototypeMediaCaptureHandler
 import org.groundplatform.v2.app.ui.common.appendGeoId
@@ -95,7 +96,6 @@ import org.groundplatform.v2.core.forms.ui.GroundAlertDialogOverlay
 import org.groundplatform.v2.core.forms.ui.GroundBadgeTone
 import org.groundplatform.v2.core.forms.ui.GroundTonalBadge
 import org.groundplatform.v2.core.forms.ui.MobileFormRunner
-import org.groundplatform.v2.devtools.prototypeapp.PrototypeAppState
 
 /**
  * Canonical XForms `entityref` nodeset path (`/data/target_entity`) representing the geospatial
@@ -179,19 +179,19 @@ fun extractSubmissionFieldsFromRecord(
 
 /**
  * Embedded Data Collection Form overlay rendered inside the mobile/tablet device frame when
- * [PrototypeAppState.isDataCollectionFormOpen] is `true`.
+ * [AppSession.isDataCollectionFormOpen] is `true`.
  *
  * Uses the same [MobileFormRunner] and [FormWizardController] components as
  * `devtools/formdebugger`, preceded by a compact context banner displaying the target Geospatial
  * Entity name, GeoID, and active form title.
  *
  * When the form was launched from the bottom-centered FAB without a pre-selected entity and the
- * current wizard step requires an `entityref` (`[PrototypeAppState.isCurrentFormStepEntityRef]`),
- * presents an interactive **Map or List** entity selector right inside the data collection step so
- * the collector can choose the target geospatial entity.
+ * current wizard step requires an `entityref` (`[AppSession.isCurrentFormStepEntityRef]`), presents
+ * an interactive **Map or List** entity selector right inside the data collection step so the
+ * collector can choose the target geospatial entity.
  */
 @Composable
-fun DataCollectionFormScreen(state: PrototypeAppState) {
+fun DataCollectionFormScreen(state: AppSession) {
   DataCollectionFormScreen(
     uiState = state.dataCollectionUiState,
     actions = state.dataCollection,
@@ -817,7 +817,7 @@ private fun EntityRefCandidateOptionCard(
 
 /** Backward-compatible alias for [DataCollectionFormScreen]. */
 @Composable
-fun PrototypeDataCollectionFormScreen(state: PrototypeAppState) {
+fun PrototypeDataCollectionFormScreen(state: AppSession) {
   DataCollectionFormScreen(state)
 }
 

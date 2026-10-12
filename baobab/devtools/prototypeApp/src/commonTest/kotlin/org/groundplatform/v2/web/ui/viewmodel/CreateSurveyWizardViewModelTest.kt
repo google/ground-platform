@@ -33,20 +33,20 @@ import org.groundplatform.v2.app.domain.model.editor.SurveyWizardRules
 import org.groundplatform.v2.app.domain.model.editor.WizardMapFeatureSource
 import org.groundplatform.v2.app.domain.model.editor.WizardStartMethod
 import org.groundplatform.v2.app.domain.model.geometryKind
-import org.groundplatform.v2.devtools.prototypeapp.PrototypeAppState
-import org.groundplatform.v2.devtools.prototypeapp.PrototypeWorkbenchPage
+import org.groundplatform.v2.web.ui.WebAppState
+import org.groundplatform.v2.web.ui.WebPage
 
 class CreateSurveyWizardViewModelTest {
 
   @Test
   fun openCreateSurveyWizard_navigatesToCreateSurveyPage_andStartsOnOverview() {
-    val state = PrototypeAppState()
+    val state = WebAppState()
     state.openCreateSurveyWizard(PrototypeFakeOrganizationsData.KENYA_FOREST_SERVICE)
 
-    assertEquals(PrototypeWorkbenchPage.CREATE_SURVEY, state.activeWorkbenchPage)
+    assertEquals(WebPage.CREATE_SURVEY, state.activePage)
     assertEquals(
-      PrototypeWorkbenchPage.CREATE_SURVEY,
-      PrototypeWorkbenchPage.fromHash("#create-survey"),
+      WebPage.CREATE_SURVEY,
+      WebPage.fromHash("#create-survey"),
     )
     val ui = state.createSurveyWizard.uiState.value
     assertEquals(CreateSurveyWizardStep.OVERVIEW, ui.currentStep)
@@ -68,7 +68,7 @@ class CreateSurveyWizardViewModelTest {
 
   @Test
   fun modeAndPurpose_sortsPurposePacksByCollectionModeAffinity_andSeedsTemplates() {
-    val state = PrototypeAppState()
+    val state = WebAppState()
     state.openCreateSurveyWizard(PrototypeFakeOrganizationsData.KENYA_FOREST_SERVICE)
     val wizard = state.createSurveyWizard
 
@@ -116,7 +116,7 @@ class CreateSurveyWizardViewModelTest {
 
   @Test
   fun purposeSelection_isSingleSelect_andDrivesMapFeatureSourceAndPrimaryLayerDefaults() {
-    val state = PrototypeAppState()
+    val state = WebAppState()
     state.openCreateSurveyWizard(PrototypeFakeOrganizationsData.KENYA_FOREST_SERVICE)
     val wizard = state.createSurveyWizard
 
@@ -163,7 +163,7 @@ class CreateSurveyWizardViewModelTest {
 
   @Test
   fun eudrPurposePack_enforcesPolygonGuardrail_andComputesExportReadiness() {
-    val state = PrototypeAppState()
+    val state = WebAppState()
     state.openCreateSurveyWizard(PrototypeFakeOrganizationsData.KENYA_FOREST_SERVICE)
     val wizard = state.createSurveyWizard
 
@@ -201,7 +201,7 @@ class CreateSurveyWizardViewModelTest {
     )
     assertFalse(SurveyWizardRules.usesIplcCareDefaults(OrganizationType.NGO, emptySet()))
 
-    val state = PrototypeAppState()
+    val state = WebAppState()
     state.openCreateSurveyWizard(PrototypeFakeOrganizationsData.KENYA_FOREST_SERVICE)
     val wizard = state.createSurveyWizard
     wizard.updateTitle("Community Forest Tenure Survey")
@@ -214,7 +214,7 @@ class CreateSurveyWizardViewModelTest {
 
   @Test
   fun startMethod_copyExisting_and_importXForms_populateDraft() {
-    val state = PrototypeAppState()
+    val state = WebAppState()
     state.openCreateSurveyWizard(PrototypeFakeOrganizationsData.KENYA_FOREST_SERVICE)
     val wizard = state.createSurveyWizard
 
@@ -265,7 +265,7 @@ class CreateSurveyWizardViewModelTest {
     )
 
     wizard.finishWizard()
-    assertEquals(PrototypeWorkbenchPage.SURVEY_EDITOR, state.activeWorkbenchPage)
+    assertEquals(WebPage.SURVEY_EDITOR, state.activePage)
     assertEquals("Imported XForms Survey", state.surveyEditor.uiState.value.details.title)
     assertEquals(
       org.groundplatform.v2.app.domain.model.SurveyLifecycleState.DRAFT,
@@ -276,12 +276,12 @@ class CreateSurveyWizardViewModelTest {
 
     // Clicking "Save draft" (or "Publish changes") commits edits and transitions to WEB_DASHBOARD.
     state.surveyEditor.publish()
-    assertEquals(PrototypeWorkbenchPage.WEB_DASHBOARD, state.activeWorkbenchPage)
+    assertEquals(WebPage.WEB_DASHBOARD, state.activePage)
   }
 
   @Test
   fun modeAndPurpose_requiresAtLeastOnePurpose_orNonBlankOtherPurpose() {
-    val state = PrototypeAppState()
+    val state = WebAppState()
     state.openCreateSurveyWizard(PrototypeFakeOrganizationsData.KENYA_FOREST_SERVICE)
     val wizard = state.createSurveyWizard
 
@@ -325,7 +325,7 @@ class CreateSurveyWizardViewModelTest {
   fun surveyArea_isRequiredInAllModes_andCannotBeSkipped() {
     assertTrue(SurveyCollectionMode.entries.all { it.surveyAreaRequired })
 
-    val state = PrototypeAppState()
+    val state = WebAppState()
     state.openCreateSurveyWizard(PrototypeFakeOrganizationsData.KENYA_FOREST_SERVICE)
     val wizard = state.createSurveyWizard
 
@@ -371,7 +371,7 @@ class CreateSurveyWizardViewModelTest {
 
   @Test
   fun cancelWizard_discardsWorkingSurvey_andReturnsToPreviousPage() {
-    val state = PrototypeAppState()
+    val state = WebAppState()
     val initialSurveyIds = state.surveys.map { it.id }.toSet()
     state.openCreateSurveyWizard(PrototypeFakeOrganizationsData.KENYA_FOREST_SERVICE)
 
@@ -384,12 +384,12 @@ class CreateSurveyWizardViewModelTest {
 
     assertFalse(state.surveys.any { it.id == workingId })
     assertEquals(initialSurveyIds, state.surveys.map { it.id }.toSet())
-    assertEquals(PrototypeWorkbenchPage.WEB_SURVEYS, state.activeWorkbenchPage)
+    assertEquals(WebPage.WEB_SURVEYS, state.activePage)
   }
 
   @Test
   fun samplePlots_deferredUntilPreviewClickedOrWizardSaved() {
-    val state = PrototypeAppState()
+    val state = WebAppState()
     state.openCreateSurveyWizard(PrototypeFakeOrganizationsData.KENYA_FOREST_SERVICE)
     val wizard = state.createSurveyWizard
     val workingId = wizard.uiState.value.workingSurveyId

@@ -152,7 +152,7 @@ data class GeospatialEntityItem(
 
   /**
    * True when `marker-symbol` is in the initial empty circle (`"○"`) workflow state. Unrelated to
-   * upload state; see `PrototypeAppState.pendingUploadEntityIds` for unsynced changes.
+   * upload state; see `AppSession.pendingUploadEntityIds` for unsynced changes.
    */
   val isNotStarted: Boolean
     get() = markerSymbol == "○"

@@ -180,33 +180,6 @@ class LayerDependencyGuardrailTest {
      * Cross-module imports that predate the module split. Shrink this list as code moves to the
      * right module; the test fails on additions and on entries that no longer occur.
      */
-    val KNOWN_MODULE_VIOLATIONS: Set<String> =
-      setOf(
-        "app/ui/common/PrototypeDebugTools.kt: import org.groundplatform.v2.devtools.prototypeapp.PrototypeAppState",
-        "app/ui/datacollection/DataCollectionFormScreen.kt: import org.groundplatform.v2.devtools.prototypeapp.PrototypeAppState",
-        "app/ui/datacollection/EntityDetailsContent.kt: import org.groundplatform.v2.devtools.prototypeapp.PrototypeAppState",
-        "app/ui/datacollection/SurveyBottomSheetContent.kt: import org.groundplatform.v2.devtools.prototypeapp.PrototypeAppState",
-        "app/ui/map/LayerVisibilityToggle.kt: import org.groundplatform.v2.devtools.prototypeapp.PrototypeAppState",
-        "app/ui/map/SurveyMapContent.kt: import org.groundplatform.v2.devtools.prototypeapp.PrototypeAppState",
-        "app/ui/map/SurveyMapViews.kt: import org.groundplatform.v2.devtools.prototypeapp.PrototypeAppState",
-        "mobile/ui/navigation/MainSurveyScreen.kt: import org.groundplatform.v2.devtools.prototypeapp.PrototypeAppState",
-        "mobile/ui/navigation/SurveyNavigationDrawer.kt: import org.groundplatform.v2.devtools.prototypeapp.PrototypeAppState",
-        "mobile/ui/onboarding/DownloadSurveyScreen.kt: import org.groundplatform.v2.devtools.prototypeapp.PrototypeAppState",
-        "mobile/ui/onboarding/SignInScreen.kt: import org.groundplatform.v2.devtools.prototypeapp.PrototypeAppState",
-        "mobile/ui/onboarding/TermsOfServiceScreen.kt: import org.groundplatform.v2.devtools.prototypeapp.PrototypeAppState",
-        "mobile/ui/settings/SettingsScreen.kt: import org.groundplatform.v2.devtools.prototypeapp.PrototypeAppState",
-        "web/ui/common/WebTopToolbar.kt: import org.groundplatform.v2.devtools.prototypeapp.PrototypeAppState",
-        "web/ui/common/WebTopToolbar.kt: import org.groundplatform.v2.devtools.prototypeapp.PrototypeWorkbenchPage",
-        "web/ui/dashboard/WebDashboardPage.kt: import org.groundplatform.v2.devtools.prototypeapp.PrototypeAppState",
-        "web/ui/dashboard/WebLayerDetailsCard.kt: import org.groundplatform.v2.devtools.prototypeapp.PrototypeAppState",
-        "web/ui/dashboard/WebSurveysPage.kt: import org.groundplatform.v2.devtools.prototypeapp.PrototypeAppState",
-        "web/ui/datacollection/WebEntityDetailsCards.kt: import org.groundplatform.v2.devtools.prototypeapp.PrototypeAppState",
-        "web/ui/onboarding/WebSignInPage.kt: import org.groundplatform.v2.devtools.prototypeapp.PrototypeAppState",
-        "web/ui/organization/OrganizationPage.kt: import org.groundplatform.v2.devtools.prototypeapp.PrototypeAppState",
-        "web/ui/organization/OrganizationsPage.kt: import org.groundplatform.v2.devtools.prototypeapp.PrototypeAppState",
-        "web/ui/organization/OrganizationsPage.kt: import org.groundplatform.v2.devtools.prototypeapp.PrototypeWorkbenchPage",
-        "web/ui/surveyeditor/SurveyEditorPage.kt: import org.groundplatform.v2.devtools.prototypeapp.PrototypeAppState",
-        "web/ui/wizard/CreateSurveyWizardPage.kt: import org.groundplatform.v2.devtools.prototypeapp.PrototypeAppState",
-      )
+    val KNOWN_MODULE_VIOLATIONS: Set<String> = emptySet()
   }
 }

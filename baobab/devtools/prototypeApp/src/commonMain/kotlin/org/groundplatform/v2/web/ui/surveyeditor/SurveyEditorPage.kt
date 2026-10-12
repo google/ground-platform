@@ -143,7 +143,6 @@ import org.groundplatform.v2.app.ui.common.ValidationErrorBanner
 import org.groundplatform.v2.app.ui.map.SurveyBasemaps
 import org.groundplatform.v2.core.forms.ui.GroundBadgeTone
 import org.groundplatform.v2.core.forms.ui.GroundTonalBadge
-import org.groundplatform.v2.devtools.prototypeapp.PrototypeAppState
 import org.groundplatform.v2.map.CameraPosition
 import org.groundplatform.v2.map.FeatureFilter
 import org.groundplatform.v2.map.GeoJsonSource
@@ -157,6 +156,7 @@ import org.groundplatform.v2.map.MapFeature
 import org.groundplatform.v2.map.MapInsets
 import org.groundplatform.v2.map.MapLayer
 import org.groundplatform.v2.map.StyleValue
+import org.groundplatform.v2.web.ui.WebAppState
 import org.groundplatform.v2.web.ui.common.WebAppHeader
 import org.groundplatform.v2.web.ui.common.WebHeaderContext
 import org.groundplatform.v2.web.ui.common.WebHeaderSupportingText
@@ -173,12 +173,12 @@ import org.groundplatform.v2.web.ui.state.SurveyEditorUiState
 import org.groundplatform.v2.web.ui.viewmodel.SurveyEditorActions
 
 /**
- * Survey editor page for the active survey, driven by [PrototypeAppState.surveyEditor]: collects
- * its state and renders the stateless overload below with the shared [WebAppHeader].
+ * Survey editor page for the active survey, driven by [WebAppState.surveyEditor]: collects its
+ * state and renders the stateless overload below with the shared [WebAppHeader].
  */
 @Composable
 fun SurveyEditorPage(
-  state: PrototypeAppState,
+  state: WebAppState,
   isDarkTheme: Boolean,
   modifier: Modifier = Modifier,
 ) {

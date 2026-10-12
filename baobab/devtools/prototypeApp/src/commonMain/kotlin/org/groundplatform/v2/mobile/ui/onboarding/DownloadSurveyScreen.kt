@@ -84,7 +84,7 @@ import org.groundplatform.v2.app.ui.viewmodel.OnboardingActions
 import org.groundplatform.v2.core.forms.ui.GroundAlertDialogOverlay
 import org.groundplatform.v2.core.forms.ui.GroundBadgeTone
 import org.groundplatform.v2.core.forms.ui.GroundTonalBadge
-import org.groundplatform.v2.devtools.prototypeapp.PrototypeAppState
+import org.groundplatform.v2.mobile.ui.MobileAppState
 
 /**
  * 3. "Download survey" screen where users can see a list of all surveys shared with them, or search
@@ -648,7 +648,7 @@ private fun SurveyListItemCard(
 
 /** Backward-compatible alias for [DownloadSurveyScreen]. */
 @Composable
-fun GroundDownloadSurveyScreen(state: PrototypeAppState) {
+fun GroundDownloadSurveyScreen(state: MobileAppState) {
   val uiState by state.onboarding.uiState.collectAsState()
   DownloadSurveyScreen(
     uiState = uiState,

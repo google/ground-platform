@@ -18,14 +18,14 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
-import org.groundplatform.v2.devtools.prototypeapp.PrototypeAppState
+import org.groundplatform.v2.web.ui.WebAppState
 
 /** Tests collapsing entity datasets in the web dashboard's left-hand panel list. */
 class ListDatasetCollapseTest {
 
   @Test
   fun datasets_startExpanded() {
-    val state = PrototypeAppState()
+    val state = WebAppState()
 
     assertTrue(state.collapsedListDatasetIds.isEmpty())
     assertFalse(state.isListDatasetCollapsed("plots"))
@@ -33,7 +33,7 @@ class ListDatasetCollapseTest {
 
   @Test
   fun toggleListDatasetCollapsed_collapsesAndExpandsOnlyThatDataset() {
-    val state = PrototypeAppState()
+    val state = WebAppState()
 
     state.toggleListDatasetCollapsed("plots")
     assertTrue(state.isListDatasetCollapsed("plots"))
@@ -51,7 +51,7 @@ class ListDatasetCollapseTest {
 
   @Test
   fun activeSearchQuery_showsCollapsedDatasetsExpandedUntilCleared() {
-    val state = PrototypeAppState()
+    val state = WebAppState()
     state.toggleListDatasetCollapsed("plots")
 
     state.updateListSearchQuery("oak")

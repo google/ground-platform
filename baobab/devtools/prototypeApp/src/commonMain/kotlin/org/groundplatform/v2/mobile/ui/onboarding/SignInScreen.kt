@@ -50,7 +50,7 @@ import org.groundplatform.v2.app.ui.datacollection.DataCollectionFormScreen
 import org.groundplatform.v2.core.forms.ui.LocalGroundBrandFontFamily
 import org.groundplatform.v2.core.forms.ui.resources.Res
 import org.groundplatform.v2.core.forms.ui.resources.sign_in_with_google
-import org.groundplatform.v2.devtools.prototypeapp.PrototypeAppState
+import org.groundplatform.v2.mobile.ui.MobileAppState
 import org.groundplatform.v2.mobile.ui.navigation.MainSurveyScreen
 import org.groundplatform.v2.mobile.ui.settings.SignInLanguageSelector
 import org.jetbrains.compose.resources.stringResource
@@ -65,7 +65,7 @@ import org.jetbrains.compose.resources.stringResource
  *    ✓, and Navigation Drawer)
  */
 @Composable
-fun MobileScreenHost(state: PrototypeAppState) {
+fun MobileScreenHost(state: MobileAppState) {
   val dataCollectionUiState = state.dataCollectionUiState
   if (
     dataCollectionUiState.isDataCollectionFormOpen &&
@@ -238,7 +238,7 @@ fun SignInScreen(
 
 /** Backward-compatible alias for [MobileScreenHost]. */
 @Composable
-fun GroundMobilePrototypeScreenHost(state: PrototypeAppState) {
+fun GroundMobilePrototypeScreenHost(state: MobileAppState) {
   MobileScreenHost(state)
 }
 
@@ -250,7 +250,7 @@ fun GroundCloudAcaciaLogo(modifier: Modifier = Modifier) {
 
 /** Backward-compatible alias for [SignInScreen]. */
 @Composable
-fun GroundSignInScreen(state: PrototypeAppState) {
+fun GroundSignInScreen(state: MobileAppState) {
   val settingsUiState by state.settings.uiState.collectAsState()
   SignInScreen(
     onSignIn = state.onboarding::signInWithGoogle,

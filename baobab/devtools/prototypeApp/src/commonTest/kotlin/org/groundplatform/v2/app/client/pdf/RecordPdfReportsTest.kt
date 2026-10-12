@@ -20,7 +20,7 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import org.groundplatform.v2.app.domain.model.SubmissionFieldEntry
-import org.groundplatform.v2.devtools.prototypeapp.PrototypeAppState
+import org.groundplatform.v2.app.ui.AppSession
 
 /** Tests the entity and submission reports generated from the prototype's sample data. */
 class RecordPdfReportsTest {
@@ -29,7 +29,7 @@ class RecordPdfReportsTest {
 
   @Test
   fun entityReport_containsTheEntitysDetailsPropertiesAndSubmissions() {
-    val state = PrototypeAppState()
+    val state = AppSession()
     val entity = state.entities.first { it.submissions.isNotEmpty() }
 
     val pdf = assertNotNull(state.generateEntityPdf(entity.id))
@@ -52,7 +52,7 @@ class RecordPdfReportsTest {
 
   @Test
   fun submissionReport_listsEveryResponse() {
-    val state = PrototypeAppState()
+    val state = AppSession()
     val submission = state.allSubmissions.first { it.fields.isNotEmpty() }
 
     val pdf = assertNotNull(state.generateSubmissionPdf(submission.id))
@@ -67,7 +67,7 @@ class RecordPdfReportsTest {
 
   @Test
   fun longSubmissions_flowOntoMorePagesWithPageNumbers() {
-    val state = PrototypeAppState()
+    val state = AppSession()
     val base = state.allSubmissions.first()
     val longSubmission =
       base.copy(
@@ -92,7 +92,7 @@ class RecordPdfReportsTest {
 
   @Test
   fun unknownIds_generateNothing() {
-    val state = PrototypeAppState()
+    val state = AppSession()
 
     assertNull(state.generateEntityPdf("missing"))
     assertNull(state.generateSubmissionPdf("missing"))
@@ -100,7 +100,7 @@ class RecordPdfReportsTest {
 
   @Test
   fun shareEntityPdf_opensSheetWithTheGeneratedFile() {
-    val state = PrototypeAppState()
+    val state = AppSession()
     val entity = state.entities.first()
 
     state.shareEntityPdf(entity.id)
@@ -116,7 +116,7 @@ class RecordPdfReportsTest {
 
   @Test
   fun downloadPdf_reportsTheSavedFile() {
-    val state = PrototypeAppState()
+    val state = AppSession()
     val submission = state.allSubmissions.first()
 
     state.downloadSubmissionPdf(submission.id)

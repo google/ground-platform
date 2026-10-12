@@ -25,8 +25,8 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 import org.groundplatform.v2.app.data.seed.PrototypeFakeOrganizationsData
-import org.groundplatform.v2.devtools.prototypeapp.PrototypeAppState
-import org.groundplatform.v2.devtools.prototypeapp.PrototypeWorkbenchPage
+import org.groundplatform.v2.web.ui.WebAppState
+import org.groundplatform.v2.web.ui.WebPage
 
 @OptIn(ExperimentalTestApi::class)
 class CreateSurveyWizardPageTest {
@@ -34,7 +34,7 @@ class CreateSurveyWizardPageTest {
   @Test
   fun clickingCloseButtonPromptsConfirmationBeforeDiscardingSurvey() =
     runDesktopComposeUiTest(width = 1280, height = 900) {
-      val state = PrototypeAppState()
+      val state = WebAppState()
       state.openCreateSurveyWizard(PrototypeFakeOrganizationsData.KENYA_FOREST_SERVICE)
       val workingId = state.createSurveyWizard.uiState.value.workingSurveyId
 
@@ -49,14 +49,14 @@ class CreateSurveyWizardPageTest {
       onNodeWithText("Discard survey?").assertIsDisplayed()
       onNodeWithText("If you leave now, this survey and any changes you've made will be lost.")
         .assertIsDisplayed()
-      assertEquals(PrototypeWorkbenchPage.CREATE_SURVEY, state.activeWorkbenchPage)
+      assertEquals(WebPage.CREATE_SURVEY, state.activePage)
       assertTrue(state.surveys.any { it.id == workingId })
 
       // Clicking "Keep editing" dismisses the dialog and keeps the survey in the wizard.
       onNodeWithText("Keep editing").performClick()
       waitForIdle()
 
-      assertEquals(PrototypeWorkbenchPage.CREATE_SURVEY, state.activeWorkbenchPage)
+      assertEquals(WebPage.CREATE_SURVEY, state.activePage)
       assertTrue(state.surveys.any { it.id == workingId })
 
       // Clicking X again and confirming "Discard" discards the survey and leaves the wizard.
@@ -65,7 +65,7 @@ class CreateSurveyWizardPageTest {
       onNodeWithText("Discard").performClick()
       waitForIdle()
 
-      assertEquals(PrototypeWorkbenchPage.WEB_SURVEYS, state.activeWorkbenchPage)
+      assertEquals(WebPage.WEB_SURVEYS, state.activePage)
       assertFalse(state.surveys.any { it.id == workingId })
     }
 }

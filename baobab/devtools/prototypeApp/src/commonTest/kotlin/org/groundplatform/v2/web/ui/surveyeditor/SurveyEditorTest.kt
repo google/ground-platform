@@ -44,7 +44,7 @@ import org.groundplatform.v2.app.domain.model.editor.SurveyEditorForm
 import org.groundplatform.v2.app.domain.model.editor.publishedFormXml
 import org.groundplatform.v2.app.domain.model.geometryKind
 import org.groundplatform.v2.app.domain.model.hasGeometry
-import org.groundplatform.v2.devtools.prototypeapp.PrototypeWorkbenchPage
+import org.groundplatform.v2.web.ui.WebPage
 import org.groundplatform.v2.web.ui.state.SurveyEditorSection
 import org.groundplatform.v2.web.ui.viewmodel.surveyEditorViewModel
 import org.groundplatform.v2.web.ui.viewmodel.ui
@@ -180,14 +180,14 @@ class SurveyEditorTest {
   @Test
   fun pageHash_supportsLegacyFormEditorLink() {
     assertEquals(
-      PrototypeWorkbenchPage.SURVEY_EDITOR,
-      PrototypeWorkbenchPage.fromHash("#survey-editor"),
+      WebPage.SURVEY_EDITOR,
+      WebPage.fromHash("#survey-editor"),
     )
     assertEquals(
-      PrototypeWorkbenchPage.SURVEY_EDITOR,
-      PrototypeWorkbenchPage.fromHash("#form-editor"),
+      WebPage.SURVEY_EDITOR,
+      WebPage.fromHash("#form-editor"),
     )
-    assertEquals(PrototypeWorkbenchPage.MOBILE_PROTOTYPE, PrototypeWorkbenchPage.fromHash(""))
+    assertEquals(null, WebPage.fromHash(""))
   }
 
   @Test

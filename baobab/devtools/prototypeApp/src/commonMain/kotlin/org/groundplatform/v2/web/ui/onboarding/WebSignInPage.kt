@@ -41,7 +41,7 @@ import org.groundplatform.v2.app.ui.common.CloudAcaciaLogo
 import org.groundplatform.v2.app.ui.common.GoogleLogoIcon
 import org.groundplatform.v2.app.ui.common.GroundMissionGraphic
 import org.groundplatform.v2.core.forms.ui.LocalGroundBrandFontFamily
-import org.groundplatform.v2.devtools.prototypeapp.PrototypeAppState
+import org.groundplatform.v2.web.ui.WebAppState
 import org.groundplatform.v2.web.ui.common.WebAppHeader
 import org.groundplatform.v2.web.ui.common.WebHeaderContext
 import org.groundplatform.v2.web.ui.common.WebMobilePrototypeButton
@@ -51,7 +51,7 @@ import org.groundplatform.v2.web.ui.common.WebMobilePrototypeButton
  * Signing in returns to the page they were opening.
  */
 @Composable
-internal fun WebSignInPage(state: PrototypeAppState, onSignIn: () -> Unit) {
+internal fun WebSignInPage(state: WebAppState, onSignIn: () -> Unit) {
   val brandFont = LocalGroundBrandFontFamily.current
 
   Column(modifier = Modifier.fillMaxSize()) {

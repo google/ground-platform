@@ -46,9 +46,9 @@ Feature ViewModels (ui/viewmodel/*)
 Domain Use Cases (domain/usecase/*) & Domain Repositories (domain/repository/*)
 ```
 
-Cross-feature coordination (such as selecting an entity on the map and opening its details in the dashboard or data-collection sheet) happens via one-shot `*Event` flows collected by the application shell (`PrototypeAppState`).
+Cross-feature coordination (such as selecting an entity on the map and opening its details in the dashboard or data-collection sheet) happens via one-shot `*Event` flows collected by the session state (`AppSession`, with client-specific reactions in `MobileAppState` and `WebAppState`).
 
 ## Dependency Rules
 
-- **Inbound access**: Instantiated in the application shell (`PrototypeAppState`) using dependencies from `di/AppDataHolder`, and passed to Compose screens as `*Actions` alongside collected `*UiState`.
+- **Inbound access**: Instantiated in the session states (`AppSession`, `MobileAppState`, `WebAppState`, `WorkbenchState`) using dependencies from `di/AppDataHolder`, and passed to Compose screens as `*Actions` alongside collected `*UiState`.
 - **Outbound dependencies**: Depends on `ui/state/`, `domain/usecase/`, `domain/repository/`, and `domain/model/`. Enforced by `LayerDependencyGuardrailTest`, `ui/viewmodel/` **never** imports `data.*` (only `di/AppDataHolder` touches `data.*`). Foreground UI infrastructure exemptions (`FormWizardController` and `PdfExportClient`) are documented inline and guarded by `LayerDependencyGuardrailTest`.

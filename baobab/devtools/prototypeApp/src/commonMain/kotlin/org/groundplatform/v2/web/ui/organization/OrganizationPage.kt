@@ -79,7 +79,7 @@ import org.groundplatform.v2.app.domain.model.Organization
 import org.groundplatform.v2.app.domain.model.OrganizationRole
 import org.groundplatform.v2.app.domain.model.canChangeMember
 import org.groundplatform.v2.app.domain.usecase.ResolvedLibrary
-import org.groundplatform.v2.devtools.prototypeapp.PrototypeAppState
+import org.groundplatform.v2.web.ui.WebAppState
 import org.groundplatform.v2.web.ui.common.WebAppHeader
 import org.groundplatform.v2.web.ui.common.WebHeaderButton
 import org.groundplatform.v2.web.ui.common.WebHeaderContext
@@ -118,7 +118,7 @@ import org.groundplatform.v2.web.ui.viewmodel.OrganizationActions
  */
 @Composable
 internal fun OrganizationPage(
-  state: PrototypeAppState,
+  state: WebAppState,
   onOpenSurvey: (surveyId: String) -> Unit,
   onCreateSurvey: (CreateSurveyRequest) -> Unit,
   onOpenCreateSurveyWizard: ((organizationId: String?) -> Unit)? = { orgId ->

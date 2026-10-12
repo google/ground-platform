@@ -27,13 +27,13 @@ import org.groundplatform.v2.app.domain.model.editor.toLatLng
 import org.groundplatform.v2.app.domain.model.geometryKind
 import org.groundplatform.v2.app.domain.model.hasGeometry
 import org.groundplatform.v2.app.domain.model.maxFramingZoom
+import org.groundplatform.v2.app.ui.AppSession
 import org.groundplatform.v2.app.ui.state.DataCollectionUiState
 import org.groundplatform.v2.app.ui.state.SurveyMapUiState
 import org.groundplatform.v2.app.ui.viewmodel.DataCollectionActions
 import org.groundplatform.v2.app.ui.viewmodel.FormMapInteraction
 import org.groundplatform.v2.app.ui.viewmodel.SurveyMapActions
 import org.groundplatform.v2.core.forms.ui.GeoPointMapViewportState
-import org.groundplatform.v2.devtools.prototypeapp.PrototypeAppState
 import org.groundplatform.v2.map.CameraPosition
 import org.groundplatform.v2.map.GroundMap
 import org.groundplatform.v2.map.LatLng
@@ -49,7 +49,7 @@ private val PlaceFocusPadding = MapInsets(left = 40.dp, top = 68.dp, right = 40.
  */
 @Composable
 internal fun SurveyMainMap(
-  state: PrototypeAppState,
+  state: AppSession,
   camera: SurveyMapCameraController,
   modifier: Modifier = Modifier,
   collapseSheetOnBackgroundTap: Boolean = true,
@@ -190,7 +190,7 @@ internal fun SurveyMainMap(
 /** The map behind a form's GeoPoint question, built from the app shell. */
 @Composable
 internal fun GeoPointFormMap(
-  state: PrototypeAppState,
+  state: AppSession,
   viewportState: GeoPointMapViewportState,
   modifier: Modifier = Modifier,
 ) {
@@ -243,7 +243,7 @@ internal fun GeoPointFormMap(
 /** The map in a form's `entityref` step, built from the app shell. */
 @Composable
 internal fun EntityRefFormMap(
-  state: PrototypeAppState,
+  state: AppSession,
   form: FormPreviewItem,
   modifier: Modifier = Modifier,
 ) {

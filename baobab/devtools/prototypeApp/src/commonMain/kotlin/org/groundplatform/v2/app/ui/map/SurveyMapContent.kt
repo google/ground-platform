@@ -30,10 +30,10 @@ import org.groundplatform.v2.app.domain.model.editor.toLatLng
 import org.groundplatform.v2.app.domain.model.formatClusterSitesCountLabel
 import org.groundplatform.v2.app.domain.model.formatHexColorCss
 import org.groundplatform.v2.app.domain.model.geometryKind
+import org.groundplatform.v2.app.ui.AppSession
 import org.groundplatform.v2.app.ui.state.DataCollectionUiState
 import org.groundplatform.v2.app.ui.state.SurveyMapUiState
 import org.groundplatform.v2.core.forms.ui.MapDrawingKind
-import org.groundplatform.v2.devtools.prototypeapp.PrototypeAppState
 import org.groundplatform.v2.map.FeatureFilter
 import org.groundplatform.v2.map.GeoJsonSource
 import org.groundplatform.v2.map.Geometry
@@ -175,7 +175,7 @@ internal object SurveyMapContent {
   private const val MAX_CLUSTER_MARKERS = 120
 
   /** The main survey map (mobile and web dashboard), built from the app shell. */
-  fun main(state: PrototypeAppState, showNavigation: Boolean): SurveyMap =
+  fun main(state: AppSession, showNavigation: Boolean): SurveyMap =
     main(
       uiState = state.surveyMapUiState,
       dataCollection = state.dataCollectionUiState,
@@ -283,7 +283,7 @@ internal object SurveyMapContent {
     )
 
   /** The map behind a GeoPoint question, built from the app shell. */
-  fun geoPointForm(state: PrototypeAppState, isFollowingUser: Boolean): SurveyMap =
+  fun geoPointForm(state: AppSession, isFollowingUser: Boolean): SurveyMap =
     geoPointForm(
       uiState = state.surveyMapUiState,
       dataCollection = state.dataCollectionUiState,

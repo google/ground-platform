@@ -52,7 +52,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.groundplatform.v2.app.ui.state.OnboardingUiState
 import org.groundplatform.v2.app.ui.viewmodel.OnboardingActions
-import org.groundplatform.v2.devtools.prototypeapp.PrototypeAppState
+import org.groundplatform.v2.mobile.ui.MobileAppState
 
 /** 2. Terms of Service screen. */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -231,7 +231,7 @@ private fun TermsSectionItem(number: String, title: String, body: String) {
 
 /** Backward-compatible alias for [TermsOfServiceScreen]. */
 @Composable
-fun GroundTermsOfServiceScreen(state: PrototypeAppState) {
+fun GroundTermsOfServiceScreen(state: MobileAppState) {
   val uiState by state.onboarding.uiState.collectAsState()
   TermsOfServiceScreen(
     uiState = uiState,

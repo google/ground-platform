@@ -81,7 +81,7 @@ import org.groundplatform.v2.core.forms.ui.resources.select_units_title
 import org.groundplatform.v2.core.forms.ui.resources.settings_title
 import org.groundplatform.v2.core.forms.ui.resources.upload_media_title
 import org.groundplatform.v2.core.forms.ui.resources.visit_website_title
-import org.groundplatform.v2.devtools.prototypeapp.PrototypeAppState
+import org.groundplatform.v2.mobile.ui.MobileAppState
 import org.groundplatform.v2.mobile.ui.navigation.DeviceStorageBreakdownCard
 import org.groundplatform.v2.mobile.ui.onboarding.SignInScreen
 import org.jetbrains.compose.resources.stringResource
@@ -111,7 +111,7 @@ fun SettingsScreen(uiState: SettingsUiState, actions: SettingsActions, onBack: (
 /** Backward-compatible alias for [SettingsScreen] bound to the app shell. */
 @Composable
 fun GroundSettingsScreen(
-  state: PrototypeAppState,
+  state: MobileAppState,
   onBack: () -> Unit = { state.closeDrawerSubView() },
 ) {
   val uiState by state.settings.uiState.collectAsState()

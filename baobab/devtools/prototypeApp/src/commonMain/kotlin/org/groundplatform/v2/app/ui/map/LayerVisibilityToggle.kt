@@ -27,7 +27,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import org.groundplatform.v2.app.domain.model.MapLayerItem
-import org.groundplatform.v2.devtools.prototypeapp.PrototypeAppState
+import org.groundplatform.v2.app.ui.AppSession
 
 /**
  * Eye / eye-with-slash button that shows or hides a map layer on the map. Shared by the web
@@ -52,11 +52,11 @@ internal fun LayerVisibilityToggle(
   }
 }
 
-/** Shows or hides [layer] on the map via [PrototypeAppState.toggleLayerVisibility]. */
+/** Shows or hides [layer] on the map via [AppSession.toggleLayerVisibility]. */
 @Composable
 internal fun LayerVisibilityToggle(
   layer: MapLayerItem,
-  state: PrototypeAppState,
+  state: AppSession,
   modifier: Modifier = Modifier,
   buttonSize: Dp = 36.dp,
   iconSize: Dp = 20.dp,
