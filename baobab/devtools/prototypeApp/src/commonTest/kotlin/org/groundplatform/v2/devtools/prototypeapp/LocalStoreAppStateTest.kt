@@ -16,14 +16,14 @@ package org.groundplatform.v2.devtools.prototypeapp
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
-import org.groundplatform.v2.devtools.prototypeapp.data.seed.PrototypeFakeSurveyEditorData
-import org.groundplatform.v2.devtools.prototypeapp.domain.model.MeasurementUnitSystem
-import org.groundplatform.v2.devtools.prototypeapp.domain.model.PrototypeScreen
-import org.groundplatform.v2.devtools.prototypeapp.domain.model.UserSettings
-import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.DatasetKind
-import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.publishedForm
-import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.surveyEditorViewModel
-import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.ui
+import org.groundplatform.v2.app.data.seed.PrototypeFakeSurveyEditorData
+import org.groundplatform.v2.app.domain.model.MeasurementUnitSystem
+import org.groundplatform.v2.app.domain.model.PrototypeScreen
+import org.groundplatform.v2.app.domain.model.UserSettings
+import org.groundplatform.v2.app.domain.model.editor.DatasetKind
+import org.groundplatform.v2.app.domain.model.editor.publishedForm
+import org.groundplatform.v2.web.ui.viewmodel.surveyEditorViewModel
+import org.groundplatform.v2.web.ui.viewmodel.ui
 
 /**
  * End-to-end checks that [PrototypeAppState] reads from and writes through the local data store,

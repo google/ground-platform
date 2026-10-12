@@ -19,95 +19,95 @@ import androidx.compose.runtime.setValue
 import groundplatform.v2.forms.FormDef
 import groundplatform.v2.forms.RecordInstance
 import kotlinx.coroutines.launch
+import org.groundplatform.v2.app.di.AppDataHolder
+import org.groundplatform.v2.app.domain.model.BasemapType
+import org.groundplatform.v2.app.domain.model.DeviceFormFactor
+import org.groundplatform.v2.app.domain.model.DeviceOrientation
+import org.groundplatform.v2.app.domain.model.DeviceStorageInfo
+import org.groundplatform.v2.app.domain.model.DownloadSurveyEntryOrigin
+import org.groundplatform.v2.app.domain.model.EntityDatasetFeaturesGroup
+import org.groundplatform.v2.app.domain.model.EntityDetailsPane
+import org.groundplatform.v2.app.domain.model.FormPreviewItem
+import org.groundplatform.v2.app.domain.model.FormSubmissionsGroup
+import org.groundplatform.v2.app.domain.model.GROUND_LANGUAGE_OPTIONS
+import org.groundplatform.v2.app.domain.model.GROUND_WEBSITE_URL
+import org.groundplatform.v2.app.domain.model.GeospatialEntityItem
+import org.groundplatform.v2.app.domain.model.ImagerySource
+import org.groundplatform.v2.app.domain.model.ImagerySourceType
+import org.groundplatform.v2.app.domain.model.ListFilterTab
+import org.groundplatform.v2.app.domain.model.LocationLockState
+import org.groundplatform.v2.app.domain.model.MainDrawerSubView
+import org.groundplatform.v2.app.domain.model.MainSurveyViewMode
+import org.groundplatform.v2.app.domain.model.MapClusterFeatureItem
+import org.groundplatform.v2.app.domain.model.MapFeatureCluster
+import org.groundplatform.v2.app.domain.model.MapLayerItem
+import org.groundplatform.v2.app.domain.model.MapScaleBarSpec
+import org.groundplatform.v2.app.domain.model.MeasurementUnitSystem
+import org.groundplatform.v2.app.domain.model.MutationLogItem
+import org.groundplatform.v2.app.domain.model.MutationSyncState
+import org.groundplatform.v2.app.domain.model.NavigationTargetKind
+import org.groundplatform.v2.app.domain.model.OfflineBasemapStyle
+import org.groundplatform.v2.app.domain.model.OfflineTilePackageItem
+import org.groundplatform.v2.app.domain.model.Organization
+import org.groundplatform.v2.app.domain.model.OrganizationRole
+import org.groundplatform.v2.app.domain.model.PrototypeScreen
+import org.groundplatform.v2.app.domain.model.SharedPdfSheetState
+import org.groundplatform.v2.app.domain.model.StraightLineNavigationState
+import org.groundplatform.v2.app.domain.model.StraightLineVector
+import org.groundplatform.v2.app.domain.model.SubmissionFieldEntry
+import org.groundplatform.v2.app.domain.model.SubmissionGeometryPolygon
+import org.groundplatform.v2.app.domain.model.SubmissionPreviewItem
+import org.groundplatform.v2.app.domain.model.SurveyMapAnchor
+import org.groundplatform.v2.app.domain.model.SurveyPlaceItem
+import org.groundplatform.v2.app.domain.model.SurveyPreviewItem
+import org.groundplatform.v2.app.domain.model.SyncStatus
+import org.groundplatform.v2.app.domain.model.UploadStatusFilter
+import org.groundplatform.v2.app.domain.model.UserSettings
+import org.groundplatform.v2.app.domain.model.editor.SurveyAccess
+import org.groundplatform.v2.app.domain.model.editor.SurveyEditorDraft
+import org.groundplatform.v2.app.domain.model.formatClusterSitesCountLabel
+import org.groundplatform.v2.app.domain.model.parsePlaceCoordinates
+import org.groundplatform.v2.app.domain.model.relatedEntityForPropertyValue
+import org.groundplatform.v2.app.domain.model.singularTypeLabelOf
+import org.groundplatform.v2.app.domain.model.toClusterFeatures
+import org.groundplatform.v2.app.ui.map.DraftGeometry
+import org.groundplatform.v2.app.ui.map.EntityGeometry
+import org.groundplatform.v2.app.ui.map.FormGeometryOverlay
+import org.groundplatform.v2.app.ui.state.DashboardEvent
+import org.groundplatform.v2.app.ui.state.DashboardUiState
+import org.groundplatform.v2.app.ui.state.DataCollectionEvent
+import org.groundplatform.v2.app.ui.state.DataCollectionUiState
+import org.groundplatform.v2.app.ui.state.FormFocusRequest
+import org.groundplatform.v2.app.ui.state.MapFramingRequest
+import org.groundplatform.v2.app.ui.state.OnboardingEvent
+import org.groundplatform.v2.app.ui.state.SettingsEvent
+import org.groundplatform.v2.app.ui.state.SurveyMapEvent
+import org.groundplatform.v2.app.ui.state.SurveyMapUiState
+import org.groundplatform.v2.app.ui.state.WebMapDrawingHost
+import org.groundplatform.v2.app.ui.viewmodel.DashboardViewModel
+import org.groundplatform.v2.app.ui.viewmodel.DataCollectionViewModel
+import org.groundplatform.v2.app.ui.viewmodel.OnboardingViewModel
+import org.groundplatform.v2.app.ui.viewmodel.SettingsViewModel
+import org.groundplatform.v2.app.ui.viewmodel.SurveyMapViewModel
+import org.groundplatform.v2.app.ui.viewmodel.SurveyOutcomePromptViewModel
 import org.groundplatform.v2.core.forms.model.EntityState
 import org.groundplatform.v2.core.forms.ui.FormWizardController
 import org.groundplatform.v2.core.forms.ui.WorkbenchExampleForm
-import org.groundplatform.v2.devtools.prototypeapp.di.AppDataHolder
-import org.groundplatform.v2.devtools.prototypeapp.domain.model.BasemapType
-import org.groundplatform.v2.devtools.prototypeapp.domain.model.DeviceFormFactor
-import org.groundplatform.v2.devtools.prototypeapp.domain.model.DeviceOrientation
-import org.groundplatform.v2.devtools.prototypeapp.domain.model.DeviceStorageInfo
-import org.groundplatform.v2.devtools.prototypeapp.domain.model.DownloadSurveyEntryOrigin
-import org.groundplatform.v2.devtools.prototypeapp.domain.model.EntityDatasetFeaturesGroup
-import org.groundplatform.v2.devtools.prototypeapp.domain.model.EntityDetailsPane
-import org.groundplatform.v2.devtools.prototypeapp.domain.model.FormPreviewItem
-import org.groundplatform.v2.devtools.prototypeapp.domain.model.FormSubmissionsGroup
-import org.groundplatform.v2.devtools.prototypeapp.domain.model.GROUND_LANGUAGE_OPTIONS
-import org.groundplatform.v2.devtools.prototypeapp.domain.model.GROUND_WEBSITE_URL
-import org.groundplatform.v2.devtools.prototypeapp.domain.model.GeospatialEntityItem
-import org.groundplatform.v2.devtools.prototypeapp.domain.model.ImagerySource
-import org.groundplatform.v2.devtools.prototypeapp.domain.model.ImagerySourceType
-import org.groundplatform.v2.devtools.prototypeapp.domain.model.ListFilterTab
-import org.groundplatform.v2.devtools.prototypeapp.domain.model.LocationLockState
-import org.groundplatform.v2.devtools.prototypeapp.domain.model.MainDrawerSubView
-import org.groundplatform.v2.devtools.prototypeapp.domain.model.MainSurveyViewMode
-import org.groundplatform.v2.devtools.prototypeapp.domain.model.MapClusterFeatureItem
-import org.groundplatform.v2.devtools.prototypeapp.domain.model.MapFeatureCluster
-import org.groundplatform.v2.devtools.prototypeapp.domain.model.MapLayerItem
-import org.groundplatform.v2.devtools.prototypeapp.domain.model.MapScaleBarSpec
-import org.groundplatform.v2.devtools.prototypeapp.domain.model.MeasurementUnitSystem
-import org.groundplatform.v2.devtools.prototypeapp.domain.model.MutationLogItem
-import org.groundplatform.v2.devtools.prototypeapp.domain.model.MutationSyncState
-import org.groundplatform.v2.devtools.prototypeapp.domain.model.NavigationTargetKind
-import org.groundplatform.v2.devtools.prototypeapp.domain.model.OfflineBasemapStyle
-import org.groundplatform.v2.devtools.prototypeapp.domain.model.OfflineTilePackageItem
-import org.groundplatform.v2.devtools.prototypeapp.domain.model.Organization
-import org.groundplatform.v2.devtools.prototypeapp.domain.model.OrganizationRole
-import org.groundplatform.v2.devtools.prototypeapp.domain.model.PrototypeScreen
-import org.groundplatform.v2.devtools.prototypeapp.domain.model.SharedPdfSheetState
-import org.groundplatform.v2.devtools.prototypeapp.domain.model.StraightLineNavigationState
-import org.groundplatform.v2.devtools.prototypeapp.domain.model.StraightLineVector
-import org.groundplatform.v2.devtools.prototypeapp.domain.model.SubmissionFieldEntry
-import org.groundplatform.v2.devtools.prototypeapp.domain.model.SubmissionGeometryPolygon
-import org.groundplatform.v2.devtools.prototypeapp.domain.model.SubmissionPreviewItem
-import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyMapAnchor
-import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyPlaceItem
-import org.groundplatform.v2.devtools.prototypeapp.domain.model.SurveyPreviewItem
-import org.groundplatform.v2.devtools.prototypeapp.domain.model.SyncStatus
-import org.groundplatform.v2.devtools.prototypeapp.domain.model.UploadStatusFilter
-import org.groundplatform.v2.devtools.prototypeapp.domain.model.UserSettings
-import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SurveyAccess
-import org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.SurveyEditorDraft
-import org.groundplatform.v2.devtools.prototypeapp.domain.model.formatClusterSitesCountLabel
-import org.groundplatform.v2.devtools.prototypeapp.domain.model.parsePlaceCoordinates
-import org.groundplatform.v2.devtools.prototypeapp.domain.model.relatedEntityForPropertyValue
-import org.groundplatform.v2.devtools.prototypeapp.domain.model.singularTypeLabelOf
-import org.groundplatform.v2.devtools.prototypeapp.domain.model.toClusterFeatures
-import org.groundplatform.v2.devtools.prototypeapp.ui.dashboard.CreateSurveyRequest
-import org.groundplatform.v2.devtools.prototypeapp.ui.map.DraftGeometry
-import org.groundplatform.v2.devtools.prototypeapp.ui.map.EntityGeometry
-import org.groundplatform.v2.devtools.prototypeapp.ui.map.FormGeometryOverlay
-import org.groundplatform.v2.devtools.prototypeapp.ui.state.CreateSurveyWizardEvent
-import org.groundplatform.v2.devtools.prototypeapp.ui.state.DashboardEvent
-import org.groundplatform.v2.devtools.prototypeapp.ui.state.DashboardUiState
-import org.groundplatform.v2.devtools.prototypeapp.ui.state.DataCollectionEvent
-import org.groundplatform.v2.devtools.prototypeapp.ui.state.DataCollectionUiState
-import org.groundplatform.v2.devtools.prototypeapp.ui.state.FormFocusRequest
-import org.groundplatform.v2.devtools.prototypeapp.ui.state.MapFramingRequest
-import org.groundplatform.v2.devtools.prototypeapp.ui.state.OnboardingEvent
-import org.groundplatform.v2.devtools.prototypeapp.ui.state.OrganizationEvent
-import org.groundplatform.v2.devtools.prototypeapp.ui.state.SettingsEvent
-import org.groundplatform.v2.devtools.prototypeapp.ui.state.SurveyEditorEvent
-import org.groundplatform.v2.devtools.prototypeapp.ui.state.SurveyMapEvent
-import org.groundplatform.v2.devtools.prototypeapp.ui.state.SurveyMapUiState
-import org.groundplatform.v2.devtools.prototypeapp.ui.state.WebMapDrawingHost
-import org.groundplatform.v2.devtools.prototypeapp.ui.state.WorkbenchEvent
-import org.groundplatform.v2.devtools.prototypeapp.ui.state.WorkbenchUiState
-import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.CreateSurveyWizardViewModel
-import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.DashboardViewModel
-import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.DataCollectionViewModel
-import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.ImpactViewModel
-import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.OnboardingViewModel
-import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.OrganizationViewModel
-import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.SettingsViewModel
-import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.SurveyEditorViewModel
-import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.SurveyMapViewModel
-import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.SurveyOutcomePromptViewModel
-import org.groundplatform.v2.devtools.prototypeapp.ui.viewmodel.WorkbenchViewModel
-import org.groundplatform.v2.devtools.prototypeapp.ui.workbench.XFormsParseCache
 import org.groundplatform.v2.map.CameraPosition
 import org.groundplatform.v2.map.LatLng
 import org.groundplatform.v2.map.LngLatBounds
+import org.groundplatform.v2.web.ui.dashboard.CreateSurveyRequest
+import org.groundplatform.v2.web.ui.state.CreateSurveyWizardEvent
+import org.groundplatform.v2.web.ui.state.OrganizationEvent
+import org.groundplatform.v2.web.ui.state.SurveyEditorEvent
+import org.groundplatform.v2.web.ui.viewmodel.CreateSurveyWizardViewModel
+import org.groundplatform.v2.web.ui.viewmodel.ImpactViewModel
+import org.groundplatform.v2.web.ui.viewmodel.OrganizationViewModel
+import org.groundplatform.v2.web.ui.viewmodel.SurveyEditorViewModel
+import org.groundplatform.v2.workbench.ui.XFormsParseCache
+import org.groundplatform.v2.workbench.ui.state.WorkbenchEvent
+import org.groundplatform.v2.workbench.ui.state.WorkbenchUiState
+import org.groundplatform.v2.workbench.ui.viewmodel.WorkbenchViewModel
 
 /**
  * Application shell and navigation coordinator for the Ground 2.0 UI Prototype
@@ -1911,7 +1911,7 @@ class PrototypeAppState(
    * `"-0.5012, 36.9324"`) into a `(latitude, longitude)` pair.
    */
   fun parsePlaceCoordinates(coordinatesLabel: String): Pair<Double, Double>? =
-    org.groundplatform.v2.devtools.prototypeapp.domain.model.parsePlaceCoordinates(coordinatesLabel)
+    org.groundplatform.v2.app.domain.model.parsePlaceCoordinates(coordinatesLabel)
 
   /**
    * Parses a decimal coordinate query (e.g. `"-0.4210, 36.9505"` or `"0.4210° S, 36.9505° E"`) into
@@ -2458,7 +2458,7 @@ class PrototypeAppState(
       query = query,
       regionSubtitle = activeSurvey.location,
       center =
-        org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.LatLng(
+        org.groundplatform.v2.app.domain.model.editor.LatLng(
           lat = surveyLat,
           lng = surveyLng,
         ),
@@ -2475,7 +2475,7 @@ class PrototypeAppState(
     surveyId: String,
     query: String,
     regionSubtitle: String,
-    center: org.groundplatform.v2.devtools.prototypeapp.domain.model.editor.LatLng,
+    center: org.groundplatform.v2.app.domain.model.editor.LatLng,
     onResults: (List<SurveyPlaceItem>) -> Unit,
   ) =
     surveyMap.searchPlaces(

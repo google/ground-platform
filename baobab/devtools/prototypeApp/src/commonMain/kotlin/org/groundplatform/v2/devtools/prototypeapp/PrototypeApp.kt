@@ -66,21 +66,21 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import org.groundplatform.v2.app.domain.model.DeviceFormFactor
+import org.groundplatform.v2.app.domain.model.DeviceOrientation
+import org.groundplatform.v2.app.domain.model.MainDrawerSubView
+import org.groundplatform.v2.app.domain.model.MainSurveyViewMode
+import org.groundplatform.v2.app.domain.model.PrototypeScreen
+import org.groundplatform.v2.app.ui.common.GroundFilterChip
 import org.groundplatform.v2.core.forms.ui.GroundTheme
-import org.groundplatform.v2.devtools.prototypeapp.domain.model.DeviceFormFactor
-import org.groundplatform.v2.devtools.prototypeapp.domain.model.DeviceOrientation
-import org.groundplatform.v2.devtools.prototypeapp.domain.model.MainDrawerSubView
-import org.groundplatform.v2.devtools.prototypeapp.domain.model.MainSurveyViewMode
-import org.groundplatform.v2.devtools.prototypeapp.domain.model.PrototypeScreen
-import org.groundplatform.v2.devtools.prototypeapp.ui.common.GroundFilterChip
-import org.groundplatform.v2.devtools.prototypeapp.ui.dashboard.WebDashboardPage
-import org.groundplatform.v2.devtools.prototypeapp.ui.dashboard.WebSurveysPage
-import org.groundplatform.v2.devtools.prototypeapp.ui.onboarding.MobileScreenHost
-import org.groundplatform.v2.devtools.prototypeapp.ui.onboarding.WebSignInPage
-import org.groundplatform.v2.devtools.prototypeapp.ui.organization.OrganizationPage
-import org.groundplatform.v2.devtools.prototypeapp.ui.organization.OrganizationsPage
-import org.groundplatform.v2.devtools.prototypeapp.ui.surveyeditor.SurveyEditorPage
-import org.groundplatform.v2.devtools.prototypeapp.ui.wizard.CreateSurveyWizardPage
+import org.groundplatform.v2.mobile.ui.onboarding.MobileScreenHost
+import org.groundplatform.v2.web.ui.dashboard.WebDashboardPage
+import org.groundplatform.v2.web.ui.dashboard.WebSurveysPage
+import org.groundplatform.v2.web.ui.onboarding.WebSignInPage
+import org.groundplatform.v2.web.ui.organization.OrganizationPage
+import org.groundplatform.v2.web.ui.organization.OrganizationsPage
+import org.groundplatform.v2.web.ui.surveyeditor.SurveyEditorPage
+import org.groundplatform.v2.web.ui.wizard.CreateSurveyWizardPage
 
 /** Top-level pages of the prototype web app, addressable via the URL hash (e.g. `#dashboard`). */
 enum class PrototypeWorkbenchPage(val label: String, val hash: String) {

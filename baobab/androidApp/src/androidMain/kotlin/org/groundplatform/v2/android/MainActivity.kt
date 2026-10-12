@@ -26,11 +26,11 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import org.groundplatform.v2.app.domain.model.MainDrawerSubView
+import org.groundplatform.v2.app.domain.model.PrototypeScreen
 import org.groundplatform.v2.core.forms.ui.GroundTheme
 import org.groundplatform.v2.devtools.prototypeapp.PrototypeAppState
-import org.groundplatform.v2.devtools.prototypeapp.domain.model.MainDrawerSubView
-import org.groundplatform.v2.devtools.prototypeapp.domain.model.PrototypeScreen
-import org.groundplatform.v2.devtools.prototypeapp.ui.onboarding.MobileScreenHost
+import org.groundplatform.v2.mobile.ui.onboarding.MobileScreenHost
 
 class MainActivity : ComponentActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {

@@ -1,0 +1,512 @@
+/*
+ * Copyright 2026 The Ground Authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
+ */
+package org.groundplatform.v2.web.ui.dashboard
+
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.Close
+import androidx.compose.material.icons.outlined.Groups
+import androidx.compose.material.icons.outlined.Lightbulb
+import androidx.compose.material.icons.outlined.LocationOn
+import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedCard
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import org.groundplatform.v2.app.domain.model.Organization
+import org.groundplatform.v2.app.domain.model.OrganizationRole
+import org.groundplatform.v2.app.domain.model.SurveyPreviewItem
+import org.groundplatform.v2.app.ui.common.GroundFilterChip
+import org.groundplatform.v2.app.ui.common.SurveyOutcomeDialog
+import org.groundplatform.v2.app.ui.state.DashboardUiState
+import org.groundplatform.v2.app.ui.state.SurveyOutcomePromptUiState
+import org.groundplatform.v2.app.ui.viewmodel.SurveyOutcomePromptActions
+import org.groundplatform.v2.core.forms.ui.GroundBadgeTone
+import org.groundplatform.v2.core.forms.ui.GroundTonalBadge
+import org.groundplatform.v2.devtools.prototypeapp.PrototypeAppState
+import org.groundplatform.v2.mobile.ui.onboarding.SurveyMapThumbnail
+import org.groundplatform.v2.web.ui.common.WebAppHeader
+import org.groundplatform.v2.web.ui.common.WebHeaderButton
+import org.groundplatform.v2.web.ui.common.WebHeaderContext
+import org.groundplatform.v2.web.ui.common.WebHeaderSupportingText
+import org.groundplatform.v2.web.ui.common.WebMobilePrototypeButton
+import org.groundplatform.v2.web.ui.surveyeditor.ProfileAvatar
+
+private val SurveyCardWidth = 320.dp
+private val PageMaxWidth = 1240.dp
+
+/**
+ * Landing page of the Ground 2.0 web app: every survey the signed-in user can open, grouped by
+ * organization, with search and filter chips (`All`, `My surveys`, one per organization). Selecting
+ * a card opens the survey in the dashboard; "Create survey" opens a new survey in the Survey
+ * editor.
+ */
+@Composable
+internal fun WebSurveysPage(
+  state: PrototypeAppState,
+  onOpenSurvey: (surveyId: String) -> Unit,
+  onCreateSurvey: (CreateSurveyRequest) -> Unit,
+  onOpenCreateSurveyWizard: (() -> Unit)? = { state.openCreateSurveyWizard() },
+  onSignOut: () -> Unit = { state.signOut() },
+) {
+  val uiState by state.dashboard.uiState.collectAsState()
+  val outcomePrompt by state.surveyOutcomePrompt.uiState.collectAsState()
+  WebSurveysPage(
+    uiState = uiState,
+    onOpenSurvey = onOpenSurvey,
+    onCreateSurvey = onCreateSurvey,
+    onOpenCreateSurveyWizard = onOpenCreateSurveyWizard,
+    outcomePrompt = outcomePrompt,
+    outcomeActions = state.surveyOutcomePrompt,
+    header = { onCreateSurveyClick ->
+      WebAppHeader(
+        state = state,
+        onSignOut = onSignOut,
+        context = {
+          WebHeaderContext(title = "Surveys") {
+            WebHeaderSupportingText(
+              "${uiState.surveys.size} surveys · ${uiState.signedInUserOrganizations.size} organizations"
+            )
+          }
+        },
+        actions = {
+          WebMobilePrototypeButton(state)
+          WebHeaderButton(
+            text = "Create survey",
+            icon = Icons.Outlined.Add,
+            onClick = onCreateSurveyClick,
+            tonal = true,
+          )
+        },
+      )
+    },
+  )
+}
+
+/**
+ * Stateless Surveys landing page: the survey cards grouped by organization from [uiState], with
+ * search and filter chips and the "Create survey" dialog.
+ *
+ * Closed surveys whose outcome question is due again ([SurveyOutcomePromptUiState.dueSurveyIds])
+ * show a "Was this data used?" badge that opens the "What happened with this data?" card.
+ *
+ * @param header the page header; it receives the click handler of its "Create survey" button.
+ */
+@Composable
+internal fun WebSurveysPage(
+  uiState: DashboardUiState,
+  onOpenSurvey: (surveyId: String) -> Unit,
+  onCreateSurvey: (CreateSurveyRequest) -> Unit,
+  header: @Composable (onCreateSurveyClick: () -> Unit) -> Unit,
+  onOpenCreateSurveyWizard: (() -> Unit)? = null,
+  outcomePrompt: SurveyOutcomePromptUiState = SurveyOutcomePromptUiState(),
+  outcomeActions: SurveyOutcomePromptActions? = null,
+) {
+  var filter by remember { mutableStateOf<SurveyListFilter>(SurveyListFilter.All) }
+  var query by remember { mutableStateOf("") }
+  var isCreating by remember { mutableStateOf(false) }
+
+  val userEmail = uiState.signedInUserEmail
+  val organizations = uiState.organizations
+  val chips = SurveyListFilter.chipsFor(organizations, userEmail)
+  val visible = WebSurveysList.filter(uiState.surveys, organizations, userEmail, filter, query)
+  val sections = WebSurveysList.sections(visible, organizations)
+
+  Column(modifier = Modifier.fillMaxSize()) {
+    header {
+      if (onOpenCreateSurveyWizard != null) {
+        onOpenCreateSurveyWizard()
+      } else {
+        isCreating = true
+      }
+    }
+    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+
+    Box(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
+      Column(
+        modifier =
+          Modifier.widthIn(max = PageMaxWidth)
+            .align(Alignment.TopCenter)
+            .padding(horizontal = 32.dp, vertical = 24.dp),
+        verticalArrangement = Arrangement.spacedBy(24.dp),
+      ) {
+        SurveysToolbar(
+          query = query,
+          onQueryChange = { query = it },
+          chips = chips,
+          selected = filter,
+          onSelect = { filter = it },
+        )
+
+        if (sections.isEmpty()) {
+          EmptySurveysMessage(hasQuery = query.isNotBlank())
+        }
+
+        sections.forEach { section ->
+          SurveySection(
+            section = section,
+            userEmail = userEmail,
+            organizations = organizations,
+            activeSurveyId = uiState.activeSurveyId,
+            onOpenSurvey = onOpenSurvey,
+            outcomePromptSurveyIds =
+              if (outcomeActions != null) outcomePrompt.dueSurveyIds else emptySet(),
+            onOutcomePromptClick = { surveyId -> outcomeActions?.openOutcomeCard(surveyId) },
+          )
+        }
+      }
+    }
+  }
+
+  if (isCreating) {
+    CreateSurveyDialog(
+      organizations = uiState.signedInUserOrganizations,
+      surveyLibrary = uiState::surveyLibrary,
+      onCreate = { request ->
+        isCreating = false
+        onCreateSurvey(request)
+      },
+      onDismiss = { isCreating = false },
+    )
+  }
+
+  val card = outcomePrompt.card
+  if (card != null && outcomeActions != null) SurveyOutcomeDialog(card, outcomeActions)
+}
+
+@Composable
+private fun SurveysToolbar(
+  query: String,
+  onQueryChange: (String) -> Unit,
+  chips: List<SurveyListFilter>,
+  selected: SurveyListFilter,
+  onSelect: (SurveyListFilter) -> Unit,
+) {
+  Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+    OutlinedTextField(
+      value = query,
+      onValueChange = onQueryChange,
+      placeholder = { Text("Search surveys by name, location, or organization") },
+      leadingIcon = { Icon(Icons.Outlined.Search, contentDescription = null) },
+      trailingIcon =
+        query
+          .takeIf { it.isNotEmpty() }
+          ?.let {
+            {
+              IconButton(onClick = { onQueryChange("") }) {
+                Icon(Icons.Outlined.Close, contentDescription = "Clear search")
+              }
+            }
+          },
+      singleLine = true,
+      modifier = Modifier.widthIn(max = 560.dp).fillMaxWidth(),
+    )
+    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+      chips.forEach { chip ->
+        GroundFilterChip(
+          selected = chip == selected,
+          onClick = { onSelect(chip) },
+          label = { Text(chip.label) },
+          leadingIcon =
+            (chip as? SurveyListFilter.InOrganization)?.let { org ->
+              {
+                ProfileAvatar(
+                  nameOrEmail = org.organization.name,
+                  photoUrl = org.organization.logoUrl,
+                  size = 18.dp,
+                )
+              }
+            },
+        )
+      }
+    }
+  }
+}
+
+@Composable
+private fun EmptySurveysMessage(hasQuery: Boolean) {
+  Text(
+    text =
+      if (hasQuery) "No surveys match your search."
+      else "No surveys yet. Create one to get started.",
+    style = MaterialTheme.typography.bodyLarge,
+    color = MaterialTheme.colorScheme.onSurfaceVariant,
+  )
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun SurveySection(
+  section: SurveyListSection,
+  userEmail: String,
+  organizations: List<Organization>,
+  activeSurveyId: String,
+  onOpenSurvey: (String) -> Unit,
+  outcomePromptSurveyIds: Set<String>,
+  onOutcomePromptClick: (String) -> Unit,
+) {
+  Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+    SectionHeading(section = section, userEmail = userEmail)
+    FlowRow(
+      horizontalArrangement = Arrangement.spacedBy(16.dp),
+      verticalArrangement = Arrangement.spacedBy(16.dp),
+    ) {
+      section.surveys.forEach { survey ->
+        WebSurveyCard(
+          survey = survey,
+          access = WebSurveysList.accessLabel(survey, organizations, userEmail),
+          isActive = survey.id == activeSurveyId,
+          onClick = { onOpenSurvey(survey.id) },
+          showOutcomePrompt = survey.id in outcomePromptSurveyIds,
+          onOutcomePromptClick = { onOutcomePromptClick(survey.id) },
+        )
+      }
+    }
+  }
+}
+
+@Composable
+private fun SectionHeading(section: SurveyListSection, userEmail: String) {
+  val organization = section.organization
+  Row(
+    verticalAlignment = Alignment.CenterVertically,
+    horizontalArrangement = Arrangement.spacedBy(10.dp),
+  ) {
+    if (organization != null) {
+      ProfileAvatar(nameOrEmail = organization.name, photoUrl = organization.logoUrl, size = 28.dp)
+    } else {
+      Icon(
+        imageVector = Icons.Outlined.Groups,
+        contentDescription = null,
+        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = Modifier.size(28.dp),
+      )
+    }
+    Text(
+      text = section.title,
+      style = MaterialTheme.typography.titleMedium,
+      fontWeight = FontWeight.SemiBold,
+    )
+    organization?.roleOf(userEmail)?.let { role ->
+      Surface(
+        shape = MaterialTheme.shapes.extraSmall,
+        color = MaterialTheme.colorScheme.secondaryContainer,
+        contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+      ) {
+        Text(
+          text = if (role == OrganizationRole.MANAGER) "You manage" else "Member",
+          style = MaterialTheme.typography.labelSmall,
+          color = MaterialTheme.colorScheme.onSecondaryContainer,
+          modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+        )
+      }
+    }
+    Text(
+      text = "${section.surveys.size}",
+      style = MaterialTheme.typography.labelMedium,
+      color = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
+  }
+}
+
+/**
+ * One survey on the web surveys page (and, later, on an organization's Surveys tab). Closed and
+ * archived surveys are labeled; [showOutcomePrompt] adds the "Was this data used?" badge, which
+ * runs [onOutcomePromptClick].
+ */
+@Composable
+internal fun WebSurveyCard(
+  survey: SurveyPreviewItem,
+  access: SurveyAccessLabel,
+  isActive: Boolean,
+  onClick: () -> Unit,
+  showOutcomePrompt: Boolean = false,
+  onOutcomePromptClick: () -> Unit = {},
+) {
+  OutlinedCard(
+    onClick = onClick,
+    modifier = Modifier.width(SurveyCardWidth),
+    shape = MaterialTheme.shapes.large,
+    colors =
+      CardDefaults.outlinedCardColors(
+        containerColor =
+          if (isActive) MaterialTheme.colorScheme.surfaceContainerLow
+          else MaterialTheme.colorScheme.surface
+      ),
+    border =
+      BorderStroke(
+        width = if (isActive) 1.5.dp else 1.dp,
+        color =
+          if (isActive) MaterialTheme.colorScheme.primary
+          else MaterialTheme.colorScheme.outlineVariant,
+      ),
+  ) {
+    Column(
+      modifier = Modifier.fillMaxWidth().padding(12.dp),
+      verticalArrangement = Arrangement.spacedBy(10.dp),
+    ) {
+      Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.Top) {
+        SurveyMapThumbnail(thumbnail = survey.thumbnail, isDownloaded = false)
+        Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+          Text(
+            text = survey.title,
+            style = MaterialTheme.typography.titleSmall,
+            fontWeight = FontWeight.Bold,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
+          )
+          Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(3.dp),
+          ) {
+            Icon(
+              imageVector = Icons.Outlined.LocationOn,
+              contentDescription = null,
+              tint = MaterialTheme.colorScheme.primary,
+              modifier = Modifier.size(12.dp),
+            )
+            Text(
+              text = survey.location,
+              style = MaterialTheme.typography.labelSmall,
+              color = MaterialTheme.colorScheme.primary,
+              fontWeight = FontWeight.SemiBold,
+              maxLines = 1,
+              overflow = TextOverflow.Ellipsis,
+            )
+          }
+          Text(
+            text = survey.description.ifBlank { "No description yet." },
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            lineHeight = 16.sp,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
+          )
+        }
+      }
+      Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+      ) {
+        val isOwner = access == SurveyAccessLabel.OWNER
+        val badgeContentColor =
+          if (isOwner) MaterialTheme.colorScheme.onPrimaryContainer
+          else MaterialTheme.colorScheme.onSurfaceVariant
+        Row(
+          horizontalArrangement = Arrangement.spacedBy(6.dp),
+          verticalAlignment = Alignment.CenterVertically,
+        ) {
+          Surface(
+            shape = MaterialTheme.shapes.extraSmall,
+            color =
+              if (isOwner) MaterialTheme.colorScheme.primaryContainer
+              else MaterialTheme.colorScheme.surfaceContainerHigh,
+            contentColor = badgeContentColor,
+          ) {
+            Text(
+              text = access.label,
+              style = MaterialTheme.typography.labelSmall,
+              color = badgeContentColor,
+              fontWeight = FontWeight.Medium,
+              modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+            )
+          }
+          if (survey.isPublicData) {
+            GroundTonalBadge(text = "Public data", tone = GroundBadgeTone.WARNING)
+          } else if (survey.isPrivateSubmissions) {
+            GroundTonalBadge(text = "Private submissions", tone = GroundBadgeTone.SECONDARY)
+          }
+          if (survey.isDraft) {
+            GroundTonalBadge(text = survey.state.label, tone = GroundBadgeTone.WARNING)
+          } else if (survey.isClosed) {
+            GroundTonalBadge(text = survey.state.label, tone = GroundBadgeTone.NEUTRAL)
+          }
+        }
+        Text(
+          text = if (isActive) "Open now" else "${survey.entityCount} locations",
+          style = MaterialTheme.typography.labelSmall,
+          color =
+            if (isActive) MaterialTheme.colorScheme.primary
+            else MaterialTheme.colorScheme.onSurfaceVariant,
+          fontWeight = if (isActive) FontWeight.Bold else FontWeight.Normal,
+        )
+      }
+      if (showOutcomePrompt) OutcomePromptBadge(onClick = onOutcomePromptClick)
+    }
+  }
+}
+
+/** Gentle tonal badge asking whether a closed survey's data was used; opens the outcome card. */
+@Composable
+private fun OutcomePromptBadge(onClick: () -> Unit) {
+  Surface(
+    onClick = onClick,
+    shape = MaterialTheme.shapes.small,
+    color = MaterialTheme.colorScheme.tertiaryContainer,
+    contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
+  ) {
+    Row(
+      modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+      horizontalArrangement = Arrangement.spacedBy(6.dp),
+      verticalAlignment = Alignment.CenterVertically,
+    ) {
+      Icon(
+        imageVector = Icons.Outlined.Lightbulb,
+        contentDescription = null,
+        modifier = Modifier.size(16.dp),
+      )
+      Text(
+        text = OUTCOME_PROMPT_LABEL,
+        style = MaterialTheme.typography.labelMedium,
+        fontWeight = FontWeight.Medium,
+      )
+    }
+  }
+}
+
+/** Label of the badge on closed surveys whose outcome question is due again. */
+internal const val OUTCOME_PROMPT_LABEL = "Was this data used?"

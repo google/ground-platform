@@ -1,0 +1,3276 @@
+/*
+ * Copyright 2026 The Ground Authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
+ */
+package org.groundplatform.v2.web.ui.formeditor
+
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.snap
+import androidx.compose.animation.core.spring
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.foundation.gestures.horizontalDrag
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.ArrowBack
+import androidx.compose.material.icons.automirrored.outlined.ArrowForward
+import androidx.compose.material.icons.automirrored.outlined.List
+import androidx.compose.material.icons.automirrored.outlined.Redo
+import androidx.compose.material.icons.automirrored.outlined.Undo
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.outlined.AccountCircle
+import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.AddPhotoAlternate
+import androidx.compose.material.icons.outlined.BookmarkAdd
+import androidx.compose.material.icons.outlined.Check
+import androidx.compose.material.icons.outlined.CheckCircle
+import androidx.compose.material.icons.outlined.Close
+import androidx.compose.material.icons.outlined.ContentCopy
+import androidx.compose.material.icons.outlined.DateRange
+import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.icons.outlined.Description
+import androidx.compose.material.icons.outlined.DragIndicator
+import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material.icons.outlined.ExpandLess
+import androidx.compose.material.icons.outlined.ExpandMore
+import androidx.compose.material.icons.outlined.FormatColorReset
+import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material.icons.outlined.Language
+import androidx.compose.material.icons.outlined.Layers
+import androidx.compose.material.icons.outlined.Link
+import androidx.compose.material.icons.outlined.LocationOn
+import androidx.compose.material.icons.outlined.Mic
+import androidx.compose.material.icons.outlined.MoreVert
+import androidx.compose.material.icons.outlined.Pentagon
+import androidx.compose.material.icons.outlined.Photo
+import androidx.compose.material.icons.outlined.PlayArrow
+import androidx.compose.material.icons.outlined.Refresh
+import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material.icons.outlined.TableChart
+import androidx.compose.material.icons.outlined.Timeline
+import androidx.compose.material.icons.outlined.Videocam
+import androidx.compose.material.icons.outlined.Warning
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.AssistChip
+import androidx.compose.material3.AssistChipDefaults
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuAnchorType
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedCard
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SelectableDates
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberDatePickerState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.isCtrlPressed
+import androidx.compose.ui.input.key.isMetaPressed
+import androidx.compose.ui.input.key.isShiftPressed
+import androidx.compose.ui.input.key.key as eventKey
+import androidx.compose.ui.input.key.onPreviewKeyEvent
+import androidx.compose.ui.input.key.type
+import androidx.compose.ui.input.pointer.PointerEventType
+import androidx.compose.ui.input.pointer.PointerIcon
+import androidx.compose.ui.input.pointer.pointerHoverIcon
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.input.pointer.positionChange
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
+import androidx.compose.ui.zIndex
+import kotlin.io.encoding.Base64
+import kotlin.io.encoding.ExperimentalEncodingApi
+import kotlin.math.atan2
+import kotlin.math.cos
+import kotlin.math.sin
+import org.groundplatform.v2.app.domain.model.DeviceFormFactor
+import org.groundplatform.v2.app.domain.model.DeviceOrientation
+import org.groundplatform.v2.app.domain.model.editor.ChoiceColors
+import org.groundplatform.v2.app.domain.model.editor.ChoiceSource
+import org.groundplatform.v2.app.domain.model.editor.DateRule
+import org.groundplatform.v2.app.domain.model.editor.EditorChoiceImage
+import org.groundplatform.v2.app.domain.model.editor.EditorDataset
+import org.groundplatform.v2.app.domain.model.editor.EditorForm
+import org.groundplatform.v2.app.domain.model.editor.EditorQuestion
+import org.groundplatform.v2.app.domain.model.editor.EditorQuestionType
+import org.groundplatform.v2.app.domain.model.editor.EditorRelevance
+import org.groundplatform.v2.app.domain.model.editor.EditorValidation
+import org.groundplatform.v2.app.domain.model.editor.FlowEdge
+import org.groundplatform.v2.app.domain.model.editor.FlowEdgeKind
+import org.groundplatform.v2.app.domain.model.editor.FormEditorValidator
+import org.groundplatform.v2.app.domain.model.editor.FormFlowGraph
+import org.groundplatform.v2.app.domain.model.editor.FormPreviewTarget
+import org.groundplatform.v2.app.domain.model.editor.GeometryCapture
+import org.groundplatform.v2.app.domain.model.editor.MediaSource
+import org.groundplatform.v2.app.domain.model.editor.RelevanceOperator
+import org.groundplatform.v2.app.domain.model.editor.SaveToMode
+import org.groundplatform.v2.app.domain.model.editor.SaveToRules
+import org.groundplatform.v2.app.domain.model.editor.TextPattern
+import org.groundplatform.v2.app.domain.model.editor.ValidationKind
+import org.groundplatform.v2.app.domain.model.editor.ValidationRules
+import org.groundplatform.v2.app.domain.model.editor.friendlyDate
+import org.groundplatform.v2.app.domain.model.editor.isoDateToUtcMillis
+import org.groundplatform.v2.app.domain.model.editor.slugify
+import org.groundplatform.v2.app.domain.model.editor.utcMillisToIsoDate
+import org.groundplatform.v2.app.domain.model.hasGeometry
+import org.groundplatform.v2.app.ui.common.GrabPointerIcon
+import org.groundplatform.v2.app.ui.common.GrabbingPointerIcon
+import org.groundplatform.v2.app.ui.common.PlatformPickResult
+import org.groundplatform.v2.app.ui.common.downloadTextFile
+import org.groundplatform.v2.app.ui.common.isPlatformMediaPickerAvailable
+import org.groundplatform.v2.app.ui.common.openPlatformMediaPicker
+import org.groundplatform.v2.app.ui.common.showPlatformGrabCursor
+import org.groundplatform.v2.app.ui.common.showPlatformGrabbingCursor
+import org.groundplatform.v2.core.forms.media.MediaCapture
+import org.groundplatform.v2.core.forms.ui.FormWizardStep
+import org.groundplatform.v2.core.forms.ui.GroundBadgeTone
+import org.groundplatform.v2.core.forms.ui.GroundTonalBadge
+import org.groundplatform.v2.core.forms.ui.MobileFormRunner
+import org.groundplatform.v2.devtools.prototypeapp.MobileDevicePreviewFrame
+import org.groundplatform.v2.web.ui.dashboard.SidePanelSeparator
+import org.groundplatform.v2.web.ui.dashboard.SidePanelSeparatorWidth
+import org.groundplatform.v2.web.ui.state.FormEditorUiState
+import org.groundplatform.v2.web.ui.surveyeditor.IsoLanguages
+import org.groundplatform.v2.web.ui.viewmodel.FormEditorActions
+import org.jetbrains.compose.resources.ExperimentalResourceApi
+import org.jetbrains.compose.resources.decodeToImageBitmap
+
+private val CardWidth = 184.dp
+private val CardHeight = 312.dp
+private val StartButtonWidth = 148.dp
+private val StartButtonHeight = 48.dp
+private val TerminalWidth = 104.dp
+private val TerminalHeight = 56.dp
+private val SlotGap = 72.dp
+private val CanvasPadding = 32.dp
+private val ArcInset = 22.dp
+
+private fun arcRise(span: Int): Dp = 36.dp + 24.dp * (span - 2).coerceIn(0, 6)
+
+/**
+ * Visual Form editor page: a flow canvas previewing every screen of the Form, connected by arrows
+ * for each potential transition implied by display logic, plus a properties panel for the selected
+ * screen and an in-browser preview that runs the generated XForms through [MobileFormRunner].
+ */
+@Composable
+fun FormEditorPage(
+  uiState: FormEditorUiState,
+  actions: FormEditorActions,
+  isDarkTheme: Boolean,
+  modifier: Modifier = Modifier,
+  onCreateDataset: (() -> Unit)? = null,
+  onDelete: (() -> Unit)? = null,
+  onSaveToModeChange: ((SaveToMode) -> Unit)? = null,
+  onOpenDataset: ((String) -> Unit)? = null,
+  onUnlinkDataset: ((String) -> Unit)? = null,
+  onCreateFormForDataset: ((String) -> Unit)? = null,
+  onOpenForm: ((String) -> Unit)? = null,
+) {
+  val linkedDataset = uiState.datasets.firstOrNull { it.isLinkedToThisForm }
+  Box(
+    modifier =
+      modifier.fillMaxSize().onPreviewKeyEvent { event ->
+        if (event.type != KeyEventType.KeyDown) return@onPreviewKeyEvent false
+        val primaryModifier = event.isCtrlPressed || event.isMetaPressed
+        if (!primaryModifier) return@onPreviewKeyEvent false
+        when {
+          event.eventKey == Key.Z && event.isShiftPressed -> {
+            if (uiState.canRedo) actions.redo()
+            true
+          }
+          event.eventKey == Key.Z && !event.isShiftPressed -> {
+            if (uiState.canUndo) actions.undo()
+            true
+          }
+          event.eventKey == Key.Y && !event.isShiftPressed -> {
+            if (uiState.canRedo) actions.redo()
+            true
+          }
+          else -> false
+        }
+      }
+  ) {
+    Column(modifier = Modifier.fillMaxSize()) {
+      FormEditorToolbar(
+        uiState = uiState,
+        actions = actions,
+        linkedDataset = linkedDataset,
+        onOpenDataset = onOpenDataset,
+        onCreateDataset =
+          onCreateDataset.takeIf {
+            uiState.form.saveTo.mode == SaveToMode.CREATE && linkedDataset == null
+          },
+        onDelete = onDelete,
+      )
+      ImportMatchesCard(
+        uiState = uiState,
+        actions = actions,
+        modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp),
+      )
+      Row(
+        modifier = Modifier.fillMaxSize().padding(16.dp),
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+      ) {
+        Box(modifier = Modifier.weight(1f).fillMaxHeight()) {
+          when (uiState.previewTarget) {
+            FormPreviewTarget.MOBILE -> FlowCanvasPanel(uiState, actions, Modifier.fillMaxSize())
+            FormPreviewTarget.WEB -> WebLayoutCanvasPanel(uiState, actions, Modifier.fillMaxSize())
+          }
+          FloatingAddQuestionButton(
+            onAdd = actions::addQuestion,
+            modifier = Modifier.align(Alignment.BottomEnd).padding(end = 20.dp, bottom = 24.dp),
+          )
+        }
+        SidePanelSeparator(
+          widthDp = uiState.sidePanelWidthDp,
+          onWidthChange = actions::updateSidePanelWidth,
+          panelOnRight = true,
+          modifier =
+            Modifier.width(SidePanelSeparatorWidth)
+              .fillMaxHeight()
+              .clip(MaterialTheme.shapes.extraSmall),
+        )
+        QuestionPropertiesPanel(
+          uiState = uiState,
+          actions = actions,
+          onSaveToModeChange = onSaveToModeChange ?: actions::setSaveToMode,
+          onOpenDataset = onOpenDataset,
+          onCreateDataset =
+            onCreateDataset.takeIf {
+              uiState.form.saveTo.mode == SaveToMode.CREATE && linkedDataset == null
+            },
+          onUnlinkDataset = onUnlinkDataset,
+          onCreateFormForDataset = onCreateFormForDataset,
+          onOpenForm = onOpenForm,
+          modifier = Modifier.width(uiState.sidePanelWidthDp.dp).fillMaxHeight(),
+        )
+      }
+    }
+
+    if (uiState.previewController != null || uiState.previewError != null) {
+      FormPreviewOverlay(uiState, actions, isDarkTheme)
+    }
+    ConceptSearchDialog(uiState, actions)
+  }
+}
+
+@Composable
+private fun FloatingAddQuestionButton(
+  onAdd: (EditorQuestionType, Int?) -> Unit,
+  modifier: Modifier = Modifier,
+) {
+  var addingQuestion by remember { mutableStateOf(false) }
+  Box(modifier = modifier) {
+    FilledTonalButton(
+      onClick = { addingQuestion = true },
+      shape = MaterialTheme.shapes.large,
+      contentPadding = PaddingValues(horizontal = 20.dp, vertical = 14.dp),
+      colors =
+        ButtonDefaults.filledTonalButtonColors(
+          containerColor = MaterialTheme.colorScheme.primaryContainer,
+          contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+        ),
+      elevation =
+        ButtonDefaults.filledTonalButtonElevation(defaultElevation = 6.dp, hoveredElevation = 8.dp),
+    ) {
+      Icon(Icons.Outlined.Add, contentDescription = null, modifier = Modifier.size(18.dp))
+      Spacer(Modifier.width(8.dp))
+      Text("Add question")
+    }
+    AddQuestionMenu(
+      expanded = addingQuestion,
+      onDismiss = { addingQuestion = false },
+      onAdd = onAdd,
+    )
+  }
+}
+
+@Composable
+private fun FormEditorToolbar(
+  uiState: FormEditorUiState,
+  actions: FormEditorActions,
+  linkedDataset: EditorDataset?,
+  onOpenDataset: ((String) -> Unit)?,
+  onCreateDataset: (() -> Unit)?,
+  onDelete: (() -> Unit)?,
+) {
+  var overflowExpanded by remember { mutableStateOf(false) }
+  var savingTemplate by remember { mutableStateOf(false) }
+  var confirmingDeleteForm by remember { mutableStateOf(false) }
+  if (savingTemplate) {
+    SaveAsTemplateDialog(uiState, actions, onDismiss = { savingTemplate = false })
+  }
+  if (confirmingDeleteForm && onDelete != null) {
+    AlertDialog(
+      onDismissRequest = { confirmingDeleteForm = false },
+      title = { Text("Delete form?") },
+      text = {
+        Text("Delete \"${uiState.form.title.ifBlank { "Untitled form" }}\"? This can't be undone.")
+      },
+      confirmButton = {
+        TextButton(
+          onClick = {
+            confirmingDeleteForm = false
+            onDelete()
+          }
+        ) {
+          Text("Delete form", color = MaterialTheme.colorScheme.error)
+        }
+      },
+      dismissButton = { TextButton(onClick = { confirmingDeleteForm = false }) { Text("Cancel") } },
+    )
+  }
+  Surface(
+    modifier = Modifier.fillMaxWidth(),
+    color = MaterialTheme.colorScheme.surfaceContainer,
+    tonalElevation = 1.dp,
+  ) {
+    Row(
+      modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 10.dp),
+      horizontalArrangement = Arrangement.spacedBy(12.dp),
+      verticalAlignment = Alignment.CenterVertically,
+    ) {
+      Column(modifier = Modifier.widthIn(max = 320.dp)) {
+        Text(
+          text = uiState.form.title.ifBlank { "Untitled form" },
+          style = MaterialTheme.typography.titleMedium,
+          fontWeight = FontWeight.Bold,
+          maxLines = 1,
+          overflow = TextOverflow.Ellipsis,
+        )
+        Text(
+          text = "Design questions, display logic, and flows.",
+          style = MaterialTheme.typography.bodySmall,
+          color = MaterialTheme.colorScheme.onSurfaceVariant,
+          maxLines = 1,
+          overflow = TextOverflow.Ellipsis,
+        )
+      }
+      Row(verticalAlignment = Alignment.CenterVertically) {
+        IconButton(onClick = actions::undo, enabled = uiState.canUndo) {
+          Icon(Icons.AutoMirrored.Outlined.Undo, contentDescription = "Undo")
+        }
+        IconButton(onClick = actions::redo, enabled = uiState.canRedo) {
+          Icon(Icons.AutoMirrored.Outlined.Redo, contentDescription = "Redo")
+        }
+      }
+      FilledTonalButton(onClick = actions::selectFormSettings) {
+        Icon(Icons.Outlined.Settings, contentDescription = null, modifier = Modifier.size(18.dp))
+        Spacer(Modifier.width(6.dp))
+        Text("Form settings")
+      }
+      Spacer(Modifier.weight(1f))
+      if (uiState.form.saveTo.mode == SaveToMode.CREATE && linkedDataset != null) {
+        FilledTonalButton(
+          onClick = {
+            if (onOpenDataset != null) onOpenDataset(linkedDataset.id)
+            else actions.selectFormSettings()
+          }
+        ) {
+          Icon(Icons.Outlined.Link, contentDescription = null, modifier = Modifier.size(18.dp))
+          Spacer(Modifier.width(6.dp))
+          Text("Linked to ${linkedDataset.displayName}")
+        }
+      } else if (onCreateDataset != null) {
+        OutlinedButton(onClick = onCreateDataset) {
+          Icon(Icons.Outlined.Layers, contentDescription = null, modifier = Modifier.size(18.dp))
+          Spacer(Modifier.width(6.dp))
+          Text(if (uiState.form.hasGeometry) "Create map layer" else "Create data table")
+        }
+      }
+      Button(onClick = actions::startPreview) {
+        Icon(Icons.Outlined.PlayArrow, contentDescription = null, modifier = Modifier.size(18.dp))
+        Spacer(Modifier.width(6.dp))
+        Text("Preview")
+      }
+      Box {
+        IconButton(onClick = { overflowExpanded = true }) {
+          Icon(Icons.Outlined.MoreVert, contentDescription = "More options")
+        }
+        DropdownMenu(expanded = overflowExpanded, onDismissRequest = { overflowExpanded = false }) {
+          DropdownMenuItem(
+            text = { Text("Download XForms XML") },
+            leadingIcon = {
+              Icon(
+                Icons.Outlined.Description,
+                contentDescription = null,
+                modifier = Modifier.size(18.dp),
+              )
+            },
+            onClick = {
+              overflowExpanded = false
+              val baseName =
+                slugify(uiState.form.title.ifBlank { uiState.form.formId }, fallback = "form")
+              downloadTextFile(
+                fileName = "$baseName.xml",
+                mimeType = "application/xml",
+                content = uiState.xformsXml,
+              )
+            },
+          )
+          val unavailable = uiState.saveAsTemplateUnavailableReason
+          DropdownMenuItem(
+            text = {
+              Column {
+                Text("Save as template…")
+                if (unavailable != null) {
+                  Text(
+                    unavailable,
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier.widthIn(max = 260.dp),
+                  )
+                }
+              }
+            },
+            leadingIcon = {
+              Icon(
+                Icons.Outlined.BookmarkAdd,
+                contentDescription = null,
+                modifier = Modifier.size(18.dp),
+              )
+            },
+            enabled = unavailable == null,
+            onClick = {
+              overflowExpanded = false
+              savingTemplate = true
+            },
+          )
+          if (onDelete != null) {
+            DropdownMenuItem(
+              text = { Text("Delete form", color = MaterialTheme.colorScheme.error) },
+              leadingIcon = {
+                Icon(
+                  Icons.Outlined.Delete,
+                  contentDescription = null,
+                  tint = MaterialTheme.colorScheme.error,
+                  modifier = Modifier.size(18.dp),
+                )
+              },
+              onClick = {
+                overflowExpanded = false
+                confirmingDeleteForm = true
+              },
+            )
+          }
+        }
+      }
+    }
+  }
+}
+
+internal fun languageDisplayName(code: String): String = IsoLanguages.findByCode(code)?.name ?: code
+
+/**
+ * Dropdown selector in the preview header that lets survey designers switch the active editing and
+ * preview language across all languages configured on the survey.
+ */
+@Composable
+internal fun FormLanguageSelector(
+  uiState: FormEditorUiState,
+  actions: FormEditorActions,
+  modifier: Modifier = Modifier,
+) {
+  var expanded by remember { mutableStateOf(false) }
+  val activeCode = uiState.activeLanguage
+  val activeName = languageDisplayName(activeCode)
+  Box(modifier = modifier) {
+    OutlinedButton(
+      onClick = { expanded = true },
+      modifier =
+        Modifier.height(36.dp).semantics { contentDescription = "Form language: $activeName" },
+      contentPadding = PaddingValues(horizontal = 12.dp, vertical = 0.dp),
+    ) {
+      Icon(Icons.Outlined.Language, contentDescription = null, modifier = Modifier.size(16.dp))
+      Spacer(Modifier.width(6.dp))
+      Text(activeName, style = MaterialTheme.typography.labelMedium, softWrap = false)
+      Spacer(Modifier.width(4.dp))
+      Icon(Icons.Outlined.ExpandMore, contentDescription = null, modifier = Modifier.size(16.dp))
+    }
+    DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+      uiState.supportedLanguages.forEach { code ->
+        val name = languageDisplayName(code)
+        val isDefault = code == uiState.defaultLanguage
+        val isSelected = code == activeCode
+        DropdownMenuItem(
+          text = { Text(if (isDefault) "$name • Default" else name) },
+          leadingIcon = {
+            if (isSelected) {
+              Icon(
+                Icons.Outlined.Check,
+                contentDescription = null,
+                modifier = Modifier.size(18.dp),
+                tint = MaterialTheme.colorScheme.primary,
+              )
+            } else {
+              Spacer(Modifier.size(18.dp))
+            }
+          },
+          onClick = {
+            expanded = false
+            actions.selectLanguage(code)
+          },
+          modifier = Modifier.pointerHoverIcon(PointerIcon.Hand),
+        )
+      }
+    }
+  }
+}
+
+/** Standard icon representing each [EditorQuestionType]. */
+internal fun questionTypeIcon(type: EditorQuestionType): ImageVector =
+  when (type) {
+    EditorQuestionType.TEXT -> Icons.Outlined.Edit
+    EditorQuestionType.LONG_TEXT -> Icons.Outlined.Description
+    EditorQuestionType.NUMBER -> Icons.AutoMirrored.Outlined.List
+    EditorQuestionType.SELECT_ONE -> Icons.Outlined.CheckCircle
+    EditorQuestionType.SELECT_MULTIPLE -> Icons.Outlined.Check
+    EditorQuestionType.DATE -> Icons.Outlined.DateRange
+    EditorQuestionType.LOCATION -> Icons.Outlined.LocationOn
+    EditorQuestionType.LINE -> Icons.Outlined.Timeline
+    EditorQuestionType.POLYGON -> Icons.Outlined.Pentagon
+    EditorQuestionType.PHOTO -> Icons.Outlined.AccountCircle
+    EditorQuestionType.VIDEO -> Icons.Outlined.Videocam
+    EditorQuestionType.AUDIO -> Icons.Outlined.Mic
+    EditorQuestionType.NOTE -> Icons.Outlined.Info
+  }
+
+/** Dropdown menu listing all question types with their icons for insertion at [atIndex]. */
+@Composable
+internal fun AddQuestionMenu(
+  expanded: Boolean,
+  onDismiss: () -> Unit,
+  onAdd: (EditorQuestionType, Int?) -> Unit,
+  atIndex: Int? = null,
+) {
+  DropdownMenu(expanded = expanded, onDismissRequest = onDismiss) {
+    EditorQuestionType.entries.forEach { type ->
+      DropdownMenuItem(
+        text = { Text(type.label) },
+        leadingIcon = {
+          Icon(
+            questionTypeIcon(type),
+            contentDescription = null,
+            modifier = Modifier.size(18.dp),
+            tint = MaterialTheme.colorScheme.primary,
+          )
+        },
+        onClick = {
+          onAdd(type, atIndex)
+          onDismiss()
+        },
+        modifier = Modifier.pointerHoverIcon(PointerIcon.Hand),
+      )
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------------------------
+// Flow canvas
+// ---------------------------------------------------------------------------------------------
+
+/** Precomputed Dp geometry for every flow slot (Start, questions, End). */
+private class FlowLayout(questionCount: Int, edges: List<FlowEdge>) {
+  val slotCount = questionCount + 2
+  val endSlot = questionCount + 1
+  private val maxRise: Dp = edges.filter { it.span > 1 }.maxOfOrNull { arcRise(it.span) } ?: 0.dp
+  val cardTop: Dp = CanvasPadding + maxRise + 8.dp
+  val midY: Dp = cardTop + CardHeight / 2
+
+  fun width(slot: Int): Dp =
+    when (slot) {
+      0 -> StartButtonWidth
+      endSlot -> TerminalWidth
+      else -> CardWidth
+    }
+
+  fun height(slot: Int): Dp =
+    when (slot) {
+      0 -> StartButtonHeight
+      endSlot -> TerminalHeight
+      else -> CardHeight
+    }
+
+  private val xs: List<Dp> = buildList {
+    var x = CanvasPadding
+    for (slot in 0 until slotCount) {
+      add(x)
+      x += width(slot) + SlotGap
+    }
+  }
+
+  fun x(slot: Int): Dp = xs[slot]
+
+  fun top(slot: Int): Dp = cardTop + (CardHeight - height(slot)) / 2
+
+  val totalWidth: Dp = x(endSlot) + TerminalWidth + CanvasPadding
+  val totalHeight: Dp = cardTop + CardHeight + CanvasPadding
+}
+
+@Composable
+private fun FlowCanvasPanel(
+  uiState: FormEditorUiState,
+  actions: FormEditorActions,
+  modifier: Modifier = Modifier,
+) {
+  val form = uiState.form
+  val edges = uiState.flowEdges
+  val issues = uiState.issues
+  val horizontalScroll = rememberScrollState()
+  ElevatedCard(
+    modifier = modifier,
+    shape = MaterialTheme.shapes.large,
+    colors =
+      CardDefaults.elevatedCardColors(
+        containerColor = MaterialTheme.colorScheme.surfaceContainerLow
+      ),
+  ) {
+    Column(modifier = Modifier.fillMaxSize()) {
+      Row(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+      ) {
+        Text(
+          text = "${form.questions.size} screens • ${uiState.pathCount} potential paths",
+          style = MaterialTheme.typography.titleSmall,
+          fontWeight = FontWeight.Bold,
+          softWrap = false,
+        )
+        if (issues.isNotEmpty()) {
+          AssistChip(
+            onClick = {
+              val firstKey = issues.first().questionKey
+              if (firstKey != null) actions.select(firstKey) else actions.selectForm()
+            },
+            label = {
+              Text(
+                "${issues.size} ${if (issues.size == 1) "issue" else "issues"}",
+                softWrap = false,
+              )
+            },
+            leadingIcon = {
+              Icon(
+                Icons.Outlined.Warning,
+                contentDescription = null,
+                modifier = Modifier.size(16.dp),
+              )
+            },
+            colors =
+              AssistChipDefaults.assistChipColors(
+                containerColor = MaterialTheme.colorScheme.errorContainer,
+                labelColor = MaterialTheme.colorScheme.onErrorContainer,
+                leadingIconContentColor = MaterialTheme.colorScheme.onErrorContainer,
+              ),
+            border = null,
+          )
+        }
+        Spacer(Modifier.weight(1f))
+        FlowLegend()
+        if (uiState.supportedLanguages.size > 1) {
+          FormLanguageSelector(uiState, actions)
+        }
+        PreviewTargetToggle(uiState, actions)
+      }
+      HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+      PlatformDisabledBanner(uiState, actions)
+      UnavailablePreviewArea(uiState, actions, Modifier.weight(1f).fillMaxWidth()) {
+        FlowCanvas(uiState, actions, edges, horizontalScroll, Modifier.fillMaxSize())
+      }
+      FlowHorizontalScrollBar(
+        scrollState = horizontalScroll,
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+      )
+    }
+  }
+}
+
+@Composable
+private fun FlowHorizontalScrollBar(
+  scrollState: androidx.compose.foundation.ScrollState,
+  modifier: Modifier = Modifier,
+) {
+  val maxScroll = scrollState.maxValue
+  if (maxScroll <= 0) return
+
+  val coroutineScope = rememberCoroutineScope()
+  val colors = MaterialTheme.colorScheme
+
+  Box(
+    modifier =
+      modifier
+        .height(10.dp)
+        .clip(CircleShape)
+        .background(colors.surfaceContainerHighest.copy(alpha = 0.5f))
+  ) {
+    androidx.compose.foundation.layout.BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+      val trackWidthPx = with(LocalDensity.current) { maxWidth.toPx() }
+      val totalContentPx = trackWidthPx + maxScroll.toFloat()
+      val thumbWidthFraction = (trackWidthPx / totalContentPx).coerceIn(0.1f, 1f)
+      val thumbWidthPx = trackWidthPx * thumbWidthFraction
+      val scrollFraction =
+        if (maxScroll > 0) (scrollState.value.toFloat() / maxScroll).coerceIn(0f, 1f) else 0f
+      val thumbOffsetPx = scrollFraction * (trackWidthPx - thumbWidthPx)
+      val thumbOffsetDp = with(LocalDensity.current) { thumbOffsetPx.toDp() }
+      val thumbWidthDp = with(LocalDensity.current) { thumbWidthPx.toDp() }
+
+      var isThumbHovered by remember { mutableStateOf(false) }
+      var isThumbDragging by remember { mutableStateOf(false) }
+      DisposableEffect(isThumbHovered) {
+        if (isThumbHovered) showPlatformGrabCursor(true)
+        onDispose { if (isThumbHovered) showPlatformGrabCursor(false) }
+      }
+      DisposableEffect(isThumbDragging) {
+        if (isThumbDragging) showPlatformGrabbingCursor(true)
+        onDispose { if (isThumbDragging) showPlatformGrabbingCursor(false) }
+      }
+
+      Box(
+        modifier =
+          Modifier.offset(x = thumbOffsetDp)
+            .width(thumbWidthDp)
+            .height(10.dp)
+            .clip(CircleShape)
+            .background(colors.outline.copy(alpha = 0.65f))
+            .pointerHoverIcon(if (isThumbDragging) GrabbingPointerIcon else GrabPointerIcon)
+            .pointerInput(Unit) {
+              awaitPointerEventScope {
+                while (true) {
+                  val event = awaitPointerEvent()
+                  when (event.type) {
+                    PointerEventType.Enter -> isThumbHovered = true
+                    PointerEventType.Exit -> isThumbHovered = false
+                  }
+                }
+              }
+            }
+            .pointerInput(maxScroll, trackWidthPx, thumbWidthPx) {
+              detectHorizontalDragGestures(
+                onDragStart = { isThumbDragging = true },
+                onDragEnd = { isThumbDragging = false },
+                onDragCancel = { isThumbDragging = false },
+              ) { change, dragAmount ->
+                change.consume()
+                val scrollableTrack = trackWidthPx - thumbWidthPx
+                if (scrollableTrack > 0f) {
+                  val deltaScroll = (dragAmount / scrollableTrack) * maxScroll
+                  scrollState.dispatchRawDelta(deltaScroll)
+                }
+              }
+            }
+      )
+    }
+  }
+}
+
+@Composable
+private fun FlowLegend() {
+  val colors = MaterialTheme.colorScheme
+  Row(
+    horizontalArrangement = Arrangement.spacedBy(14.dp),
+    verticalAlignment = Alignment.CenterVertically,
+  ) {
+    LegendItem("Always next", colors.outline, dashed = false)
+    LegendItem("If condition is true", colors.primary, dashed = true)
+  }
+}
+
+@Composable
+private fun LegendItem(text: String, color: Color, dashed: Boolean) {
+  Row(verticalAlignment = Alignment.CenterVertically) {
+    Canvas(modifier = Modifier.width(28.dp).height(10.dp)) {
+      drawLine(
+        color = color,
+        start = Offset(0f, size.height / 2),
+        end = Offset(size.width, size.height / 2),
+        strokeWidth = 2.dp.toPx(),
+        pathEffect = if (dashed) PathEffect.dashPathEffect(floatArrayOf(8f, 6f)) else null,
+      )
+    }
+    Spacer(Modifier.width(6.dp))
+    Text(
+      text = text,
+      style = MaterialTheme.typography.labelSmall,
+      color = MaterialTheme.colorScheme.onSurfaceVariant,
+      softWrap = false,
+    )
+  }
+}
+
+@Composable
+private fun FlowCanvas(
+  uiState: FormEditorUiState,
+  actions: FormEditorActions,
+  edges: List<FlowEdge>,
+  horizontalScroll: androidx.compose.foundation.ScrollState,
+  modifier: Modifier,
+) {
+  val form = uiState.form
+  val layout = remember(form.questions.size, edges) { FlowLayout(form.questions.size, edges) }
+  val density = LocalDensity.current
+  val selectedSlot =
+    if (uiState.selectedIndex >= 0) FormFlowGraph.questionSlot(uiState.selectedIndex) else -1
+
+  // Keep the selected screen in view (e.g. after adding or reordering). This jumps rather than
+  // animating: while an animated scroll is in progress the scroll container consumes the next
+  // pointer down to stop it, which swallowed the user's next click on a screen card.
+  LaunchedEffect(selectedSlot, layout.slotCount) {
+    if (selectedSlot >= 0) {
+      val left = with(density) { (layout.x(selectedSlot) - SlotGap).roundToPx() }
+      val right = with(density) { (layout.x(selectedSlot) + CardWidth + SlotGap).roundToPx() }
+      val viewportEnd = horizontalScroll.value + horizontalScroll.viewportSize
+      when {
+        left < horizontalScroll.value -> horizontalScroll.scrollTo(left.coerceAtLeast(0))
+        right > viewportEnd && horizontalScroll.viewportSize > 0 ->
+          horizontalScroll.scrollTo(right - horizontalScroll.viewportSize)
+      }
+    }
+  }
+
+  val colors = MaterialTheme.colorScheme
+  val drag = remember { DragReorderState() }
+  var isPanning by remember { mutableStateOf(false) }
+  var isCanvasHovered by remember { mutableStateOf(false) }
+  val isGrabbing = isPanning || drag.isDragging
+  val showGrab = isCanvasHovered && uiState.isEnabledOnPreviewTarget
+  DisposableEffect(showGrab) {
+    if (showGrab) showPlatformGrabCursor(true)
+    onDispose { if (showGrab) showPlatformGrabCursor(false) }
+  }
+  DisposableEffect(isGrabbing) {
+    if (isGrabbing) showPlatformGrabbingCursor(true)
+    onDispose { if (isGrabbing) showPlatformGrabbingCursor(false) }
+  }
+  val pitchPx = with(density) { (CardWidth + SlotGap).toPx() }
+  val cardWidthPx = with(density) { CardWidth.toPx() }
+  val edgeZonePx = with(density) { 56.dp.toPx() }
+  val edgeAlpha by animateFloatAsState(if (drag.isDragging) 0.15f else 1f)
+  val verticalScroll = rememberScrollState()
+  Box(
+    modifier =
+      modifier
+        .pointerHoverIcon(
+          icon = if (isGrabbing) GrabbingPointerIcon else GrabPointerIcon,
+          overrideDescendants = isGrabbing,
+        )
+        .pointerInput(Unit) {
+          awaitPointerEventScope {
+            while (true) {
+              val event = awaitPointerEvent()
+              when (event.type) {
+                PointerEventType.Enter -> isCanvasHovered = true
+                PointerEventType.Exit -> isCanvasHovered = false
+              }
+            }
+          }
+        }
+        .horizontalScroll(horizontalScroll)
+        .verticalScroll(verticalScroll)
+        .pointerInput(drag.isDragging) {
+          // Pans the canvas. Like screen reordering, a pan only starts past [MouseDragSlop]:
+          // Compose's default mouse slop (0.125 dp) turned slightly-moving clicks on screen cards
+          // into pans that cancelled the click.
+          if (!drag.isDragging) {
+            awaitEachGesture {
+              val down = awaitFirstDown(requireUnconsumed = false)
+              val (start, travel) =
+                awaitDragPastSlop(down, dragSlopFor(down), DragAxis.HORIZONTAL)
+                  ?: return@awaitEachGesture
+              isPanning = true
+              try {
+                horizontalScroll.dispatchRawDelta(-travel.x)
+                verticalScroll.dispatchRawDelta(-travel.y)
+                horizontalDrag(start.id) { change ->
+                  val delta = change.positionChange()
+                  horizontalScroll.dispatchRawDelta(-delta.x)
+                  verticalScroll.dispatchRawDelta(-delta.y)
+                  change.consume()
+                }
+              } finally {
+                isPanning = false
+              }
+            }
+          }
+        }
+  ) {
+    // Clicking empty canvas selects the Form itself, showing Form properties.
+    Box(
+      modifier =
+        Modifier.width(layout.totalWidth)
+          .height(layout.totalHeight)
+          .clickable(
+            indication = null,
+            interactionSource = remember { MutableInteractionSource() },
+            onClick = actions::selectForm,
+          )
+    ) {
+      Canvas(modifier = Modifier.fillMaxSize().graphicsLayer { alpha = edgeAlpha }) {
+        edges.forEach { edge ->
+          val highlighted =
+            selectedSlot >= 0 && (edge.from == selectedSlot || edge.to == selectedSlot)
+          val baseColor =
+            when (edge.kind) {
+              FlowEdgeKind.NEXT -> colors.outline
+              FlowEdgeKind.CONDITIONAL -> colors.primary
+              FlowEdgeKind.SKIP -> colors.tertiary
+            }
+          val color =
+            if (selectedSlot >= 0 && !highlighted) baseColor.copy(alpha = 0.45f) else baseColor
+          drawFlowEdge(edge, layout, color, strokeWidthDp = if (highlighted) 3.dp else 2.dp)
+        }
+      }
+
+      LaunchButtonNode(
+        text = form.effectiveCtaLabel.ifBlank { "Untitled form" },
+        modifier = Modifier.offset(layout.x(0), layout.top(0)),
+        isSelected = uiState.isFormSelected,
+        onClick = actions::selectForm,
+      )
+
+      // Hoverable "+" between Start and Q1 (or Q0)
+      AddQuestionAffordance(
+        centerX = layout.x(0) + layout.width(0) + SlotGap / 2,
+        centerY = layout.midY,
+        atIndex = 0,
+        onAdd = actions::addQuestion,
+        alwaysVisible = false,
+      )
+
+      form.questions.forEachIndexed { index, question ->
+        val slot = FormFlowGraph.questionSlot(index)
+        key(question.key) {
+          val isDragged = drag.draggingKey == question.key
+          val shift by
+            animateFloatAsState(
+              targetValue = drag.shiftFor(index) * pitchPx,
+              animationSpec = if (drag.isDragging) spring() else snap(),
+            )
+          val slotLeftPx = with(density) { layout.x(slot).toPx() }
+          ScreenPreviewCard(
+            index = index,
+            question = question,
+            form = form,
+            datasets = uiState.datasets,
+            isSelected = question.key == uiState.selectedKey,
+            hasIssues = uiState.issuesFor(question.key).isNotEmpty(),
+            isLinked = question.conceptLink != null,
+            isDragged = isDragged,
+            activeLanguage = uiState.activeLanguage,
+            defaultLanguage = uiState.defaultLanguage,
+            onClick = { actions.select(question.key) },
+            modifier =
+              Modifier.offset(layout.x(slot), layout.top(slot))
+                .zIndex(if (isDragged) 1f else 0f)
+                .graphicsLayer {
+                  translationX = if (isDragged) drag.offset else shift
+                  val lift = if (isDragged) 1.04f else 1f
+                  scaleX = lift
+                  scaleY = lift
+                  shadowElevation = if (isDragged) 12.dp.toPx() else 0f
+                }
+                .dragToReorder(
+                  state = drag,
+                  key = question.key,
+                  index = index,
+                  count = form.questions.size,
+                  pitchPx = pitchPx,
+                  axis = DragAxis.HORIZONTAL,
+                  onMove = { key, to ->
+                    actions.moveQuestionTo(key, to)
+                    actions.select(key)
+                  },
+                  autoScroll = {
+                    val left = slotLeftPx + drag.offset - horizontalScroll.value
+                    val viewport = horizontalScroll.viewportSize.toFloat()
+                    val step =
+                      when {
+                        left < edgeZonePx -> -24f
+                        left + cardWidthPx > viewport - edgeZonePx -> 24f
+                        else -> 0f
+                      }
+                    if (step == 0f) 0f else horizontalScroll.dispatchRawDelta(step)
+                  },
+                ),
+          )
+
+          // Insertion affordance between question screens (hoverable),
+          // or permanent at the very end of questions (after last question)
+          val isLastQuestion = index == form.questions.lastIndex
+          AddQuestionAffordance(
+            centerX = layout.x(slot) + layout.width(slot) + SlotGap / 2,
+            centerY = layout.midY,
+            atIndex = index + 1,
+            onAdd = actions::addQuestion,
+            alwaysVisible = isLastQuestion,
+          )
+        }
+      }
+      TerminalNode(
+        text = "Review & submit",
+        isSelected = uiState.isFormSelected,
+        onClick = actions::selectForm,
+        modifier = Modifier.offset(layout.x(layout.endSlot), layout.top(layout.endSlot)),
+      )
+      Text(
+        text = SaveToRules.outcome(form, uiState.saveTarget),
+        style = MaterialTheme.typography.labelSmall,
+        color = colors.onSurfaceVariant,
+        textAlign = TextAlign.Center,
+        modifier =
+          Modifier.offset(
+              layout.x(layout.endSlot) - SlotGap / 2,
+              layout.top(layout.endSlot) + TerminalHeight + 8.dp,
+            )
+            .width(TerminalWidth + SlotGap),
+      )
+    }
+  }
+}
+
+@Composable
+private fun AddQuestionAffordance(
+  centerX: Dp,
+  centerY: Dp,
+  atIndex: Int,
+  onAdd: (EditorQuestionType, Int?) -> Unit,
+  alwaysVisible: Boolean = false,
+  modifier: Modifier = Modifier,
+) {
+  var isHovered by remember { mutableStateOf(false) }
+  var menuExpanded by remember { mutableStateOf(false) }
+  val colors = MaterialTheme.colorScheme
+
+  val buttonSize = 32.dp
+  val slotWidth = SlotGap
+  val slotHeight = 64.dp
+
+  Box(
+    modifier =
+      modifier
+        .offset(x = centerX - slotWidth / 2, y = centerY - slotHeight / 2)
+        .size(slotWidth, slotHeight)
+        .pointerInput(Unit) {
+          awaitPointerEventScope {
+            while (true) {
+              val event = awaitPointerEvent()
+              when (event.type) {
+                PointerEventType.Enter -> isHovered = true
+                PointerEventType.Exit -> isHovered = false
+              }
+            }
+          }
+        },
+    contentAlignment = Alignment.Center,
+  ) {
+    // The button is always composed and hit-testable, only transparent until hovered. Touch input
+    // has no hover, so composing it on hover alone meant the first tap merely revealed it.
+    val visible = alwaysVisible || isHovered || menuExpanded
+    Surface(
+      onClick = { menuExpanded = true },
+      shape = CircleShape,
+      color = if (alwaysVisible && !isHovered) colors.secondaryContainer else colors.secondary,
+      contentColor =
+        if (alwaysVisible && !isHovered) colors.onSecondaryContainer else colors.onSecondary,
+      shadowElevation = if (isHovered || menuExpanded) 4.dp else if (visible) 1.dp else 0.dp,
+      modifier =
+        Modifier.size(buttonSize)
+          .graphicsLayer { alpha = if (visible) 1f else 0f }
+          .pointerHoverIcon(if (visible) PointerIcon.Hand else GrabPointerIcon),
+    ) {
+      Box(contentAlignment = Alignment.Center) {
+        Icon(
+          Icons.Outlined.Add,
+          contentDescription = "Add question here",
+          modifier = Modifier.size(18.dp),
+        )
+      }
+    }
+    AddQuestionMenu(
+      expanded = menuExpanded,
+      onDismiss = { menuExpanded = false },
+      onAdd = onAdd,
+      atIndex = atIndex,
+    )
+  }
+}
+
+private fun DrawScope.drawFlowEdge(
+  edge: FlowEdge,
+  layout: FlowLayout,
+  color: Color,
+  strokeWidthDp: Dp,
+) {
+  val strokeWidth = strokeWidthDp.toPx()
+  val dash =
+    if (edge.kind == FlowEdgeKind.NEXT) null else PathEffect.dashPathEffect(floatArrayOf(12f, 8f))
+  if (edge.span == 1) {
+    val start = Offset((layout.x(edge.from) + layout.width(edge.from)).toPx(), layout.midY.toPx())
+    val end = Offset((layout.x(edge.to) - 2.dp).toPx(), layout.midY.toPx())
+    drawLine(color, start, end, strokeWidth = strokeWidth, pathEffect = dash)
+    drawArrowHead(tip = end, from = start, color = color)
+  } else {
+    val sx = (layout.x(edge.from) + layout.width(edge.from) - ArcInset).toPx()
+    val sy = layout.top(edge.from).toPx()
+    val ex = (layout.x(edge.to) + ArcInset).toPx()
+    val ey = (layout.top(edge.to) - 2.dp).toPx()
+    val apexY = (layout.cardTop - arcRise(edge.span)).toPx()
+    val path =
+      Path().apply {
+        moveTo(sx, sy)
+        cubicTo(sx, apexY, ex, apexY, ex, ey)
+      }
+    drawPath(path, color, style = Stroke(width = strokeWidth, pathEffect = dash))
+    drawArrowHead(tip = Offset(ex, ey), from = Offset(ex, apexY), color = color)
+  }
+}
+
+private fun DrawScope.drawArrowHead(tip: Offset, from: Offset, color: Color) {
+  val angle = atan2(tip.y - from.y, tip.x - from.x)
+  val length = 10.dp.toPx()
+  val spread = 0.45f
+  val path =
+    Path().apply {
+      moveTo(tip.x, tip.y)
+      lineTo(tip.x - length * cos(angle - spread), tip.y - length * sin(angle - spread))
+      lineTo(tip.x - length * cos(angle + spread), tip.y - length * sin(angle + spread))
+      close()
+    }
+  drawPath(path, color)
+}
+
+/**
+ * Start node of the flow: renders the data-collection launch button shown in the app using the
+ * user-specified button label (or form title when blank). Selecting it shows Form properties.
+ */
+@Composable
+private fun LaunchButtonNode(
+  text: String,
+  modifier: Modifier = Modifier,
+  isSelected: Boolean = false,
+  onClick: () -> Unit,
+) {
+  val colors = MaterialTheme.colorScheme
+  val sized =
+    modifier
+      .width(StartButtonWidth)
+      .height(StartButtonHeight)
+      .pointerHoverIcon(PointerIcon.Hand)
+      .semantics { contentDescription = "Start: $text" }
+  val border = if (isSelected) BorderStroke(2.dp, colors.onPrimaryContainer) else null
+  Surface(
+    onClick = onClick,
+    modifier = sized,
+    shape = MaterialTheme.shapes.small,
+    color = colors.primary,
+    contentColor = colors.onPrimary,
+    border = border,
+  ) {
+    Row(
+      modifier = Modifier.fillMaxSize().padding(horizontal = 12.dp),
+      horizontalArrangement = Arrangement.Center,
+      verticalAlignment = Alignment.CenterVertically,
+    ) {
+      Icon(
+        imageVector = Icons.Outlined.Description,
+        contentDescription = null,
+        modifier = Modifier.size(16.dp),
+      )
+      Spacer(modifier = Modifier.width(6.dp))
+      Text(
+        text = text,
+        style = MaterialTheme.typography.labelMedium,
+        fontWeight = FontWeight.Bold,
+        maxLines = 2,
+        overflow = TextOverflow.Ellipsis,
+      )
+    }
+  }
+}
+
+/** End node of the flow; selecting it shows Form properties. */
+@Composable
+private fun TerminalNode(
+  text: String,
+  modifier: Modifier = Modifier,
+  isSelected: Boolean = false,
+  onClick: (() -> Unit)? = null,
+) {
+  val colors = MaterialTheme.colorScheme
+  val content: @Composable () -> Unit = {
+    Box(contentAlignment = Alignment.Center, modifier = Modifier.padding(horizontal = 10.dp)) {
+      Text(
+        text = text,
+        style = MaterialTheme.typography.labelMedium,
+        fontWeight = FontWeight.Bold,
+        maxLines = 2,
+      )
+    }
+  }
+  val sized = modifier.width(TerminalWidth).height(TerminalHeight)
+  val shape = RoundedCornerShape(50)
+  val border = if (isSelected) BorderStroke(2.dp, colors.secondary) else null
+  if (onClick != null) {
+    Surface(
+      onClick = onClick,
+      modifier = sized.pointerHoverIcon(PointerIcon.Hand),
+      shape = shape,
+      color = colors.secondaryContainer,
+      contentColor = colors.onSecondaryContainer,
+      border = border,
+      content = content,
+    )
+  } else {
+    Surface(
+      modifier = sized,
+      shape = shape,
+      color = colors.secondaryContainer,
+      contentColor = colors.onSecondaryContainer,
+      border = border,
+      content = content,
+    )
+  }
+}
+
+@Composable
+private fun ScreenPreviewCard(
+  index: Int,
+  question: EditorQuestion,
+  form: EditorForm,
+  datasets: List<EditorDataset>,
+  isSelected: Boolean,
+  hasIssues: Boolean,
+  isDragged: Boolean,
+  onClick: () -> Unit,
+  isLinked: Boolean = false,
+  activeLanguage: String = "en",
+  defaultLanguage: String = "en",
+  modifier: Modifier = Modifier,
+) {
+  val colors = MaterialTheme.colorScheme
+  // Subtle selection using GroundTheme's muted secondary roles (the same treatment as selected
+  // list rows elsewhere in the app) rather than the bright primaryContainer accent.
+  // Hovering the card body shows a pointer cursor (click to select), while hovering the drag
+  // handle icon shows an open-hand grab cursor (drag to reorder); active dragging switches the
+  // whole canvas to a closed-hand grabbing cursor.
+  OutlinedCard(
+    onClick = onClick,
+    modifier = modifier.width(CardWidth).height(CardHeight).pointerHoverIcon(PointerIcon.Hand),
+    shape = MaterialTheme.shapes.medium,
+    colors =
+      CardDefaults.outlinedCardColors(
+        containerColor = if (isSelected) colors.secondaryContainer else colors.surface,
+        contentColor = if (isSelected) colors.onSecondaryContainer else colors.onSurface,
+      ),
+    border =
+      BorderStroke(
+        width = if (isSelected || isDragged) 2.dp else 1.dp,
+        color =
+          when {
+            isDragged -> colors.outline
+            hasIssues -> colors.error
+            isSelected -> colors.secondary
+            else -> colors.outlineVariant
+          },
+      ),
+  ) {
+    Column(modifier = Modifier.fillMaxSize().padding(8.dp)) {
+      Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
+      ) {
+        Icon(
+          Icons.Outlined.DragIndicator,
+          contentDescription = "Drag to reorder",
+          tint =
+            when {
+              isSelected -> colors.onSecondaryContainer
+              isDragged -> colors.onSurface
+              else -> colors.onSurfaceVariant
+            },
+          modifier = Modifier.size(16.dp).pointerHoverIcon(GrabPointerIcon),
+        )
+        GroundTonalBadge(text = "Q${index + 1}", tone = GroundBadgeTone.NEUTRAL)
+        Icon(
+          questionTypeIcon(question.type),
+          contentDescription = null,
+          modifier = Modifier.size(14.dp),
+          tint = if (isSelected) colors.onSecondaryContainer else colors.onSurfaceVariant,
+        )
+        Text(
+          text = question.type.label,
+          style = MaterialTheme.typography.labelSmall,
+          color = if (isSelected) colors.onSecondaryContainer else colors.onSurfaceVariant,
+          modifier = Modifier.weight(1f),
+          maxLines = 1,
+          overflow = TextOverflow.Ellipsis,
+        )
+        if (isLinked) {
+          Icon(
+            Icons.Outlined.Link,
+            contentDescription = "Linked to a standard field",
+            tint = if (isSelected) colors.onSecondaryContainer else colors.primary,
+            modifier = Modifier.size(14.dp),
+          )
+        }
+        if (hasIssues) {
+          Icon(
+            Icons.Outlined.Warning,
+            contentDescription = "Has issues",
+            tint = colors.error,
+            modifier = Modifier.size(14.dp),
+          )
+        }
+      }
+      Text(
+        text = form.describeRelevance(question, datasets) ?: "Always shown",
+        style = MaterialTheme.typography.labelSmall,
+        color =
+          when {
+            isSelected -> colors.onSecondaryContainer
+            question.isConditional -> colors.primary
+            else -> colors.onSurfaceVariant
+          },
+        fontWeight = if (question.isConditional) FontWeight.Bold else FontWeight.Normal,
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
+        modifier = Modifier.padding(top = 4.dp, bottom = 6.dp),
+      )
+
+      MiniScreen(
+        question = question,
+        formTitle = form.title,
+        datasets = datasets,
+        activeLanguage = activeLanguage,
+        defaultLanguage = defaultLanguage,
+        modifier = Modifier.weight(1f).fillMaxWidth(),
+      )
+
+      Text(
+        text = question.type.label + if (question.required) " • Required" else "",
+        style = MaterialTheme.typography.labelSmall,
+        color = if (isSelected) colors.onSecondaryContainer else colors.onSurfaceVariant,
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
+        modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
+      )
+    }
+  }
+}
+
+/** Static, scaled-down mock of how the question screen looks on a device. */
+@Composable
+private fun MiniScreen(
+  question: EditorQuestion,
+  formTitle: String,
+  datasets: List<EditorDataset>,
+  activeLanguage: String = "en",
+  defaultLanguage: String = "en",
+  modifier: Modifier = Modifier,
+) {
+  val colors = MaterialTheme.colorScheme
+  val displayLabel = question.displayLabel(activeLanguage, defaultLanguage)
+  val displayHint = question.displayHint(activeLanguage, defaultLanguage)
+  Surface(
+    modifier = modifier,
+    shape = RoundedCornerShape(10.dp),
+    color = colors.surfaceContainerLowest,
+    contentColor = colors.onSurface,
+    border = BorderStroke(1.dp, colors.outlineVariant),
+  ) {
+    Column(modifier = Modifier.fillMaxSize()) {
+      Box(
+        modifier =
+          Modifier.fillMaxWidth()
+            .background(colors.primary)
+            .padding(horizontal = 8.dp, vertical = 5.dp)
+      ) {
+        Text(
+          text = formTitle.ifBlank { "Untitled form" },
+          style = MaterialTheme.typography.labelSmall,
+          color = colors.onPrimary,
+          maxLines = 1,
+          overflow = TextOverflow.Ellipsis,
+        )
+      }
+      Column(
+        modifier = Modifier.weight(1f).fillMaxWidth().padding(8.dp),
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+      ) {
+        Text(
+          text = displayLabel.ifBlank { "(no label)" } + if (question.required) " *" else "",
+          style = MaterialTheme.typography.labelLarge,
+          color = colors.onSurface,
+          fontWeight = FontWeight.Bold,
+          maxLines = 3,
+          overflow = TextOverflow.Ellipsis,
+        )
+        if (displayHint.isNotBlank()) {
+          Text(
+            text = displayHint,
+            style = MaterialTheme.typography.labelSmall,
+            color = colors.onSurfaceVariant,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
+          )
+        }
+        Spacer(Modifier.height(2.dp))
+        MiniWidget(question, datasets, activeLanguage, defaultLanguage)
+      }
+      Row(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 6.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+      ) {
+        MiniButton("Back", filled = false)
+        MiniButton("Next", filled = true)
+      }
+    }
+  }
+}
+
+@Composable
+private fun MiniButton(text: String, filled: Boolean) {
+  val colors = MaterialTheme.colorScheme
+  Box(
+    modifier =
+      Modifier.clip(RoundedCornerShape(50))
+        .background(if (filled) colors.primary else Color.Transparent)
+        .border(1.dp, if (filled) colors.primary else colors.outline, RoundedCornerShape(50))
+        .padding(horizontal = 10.dp, vertical = 2.dp)
+  ) {
+    Text(
+      text = text,
+      style = MaterialTheme.typography.labelSmall,
+      color = if (filled) colors.onPrimary else colors.primary,
+    )
+  }
+}
+
+@Composable
+private fun MiniWidget(
+  question: EditorQuestion,
+  datasets: List<EditorDataset>,
+  activeLanguage: String = "en",
+  defaultLanguage: String = "en",
+) {
+  val colors = MaterialTheme.colorScheme
+  when (question.type) {
+    EditorQuestionType.TEXT -> MiniField("Answer", 26.dp)
+    EditorQuestionType.LONG_TEXT -> MiniField("Answer", 52.dp)
+    EditorQuestionType.NUMBER -> MiniField(if (question.decimalPlaces <= 0) "123" else "1.5", 26.dp)
+    EditorQuestionType.DATE -> MiniField("YYYY-MM-DD", 26.dp, Icons.Outlined.DateRange)
+    EditorQuestionType.SELECT_ONE,
+    EditorQuestionType.SELECT_MULTIPLE -> {
+      val round = question.type == EditorQuestionType.SELECT_ONE
+      val effectiveSource = question.effectiveChoiceSource(datasets)
+      val datasetId = question.choiceDatasetId
+      val dataset = datasetId?.let { id -> datasets.firstOrNull { it.id == id } }
+      if (question.usesDatasetChoices) {
+        val fallbackLabel =
+          if (effectiveSource == ChoiceSource.DATA_TABLE) "Choose data table"
+          else "Choose map layer"
+        val defaultIcon =
+          if (effectiveSource == ChoiceSource.DATA_TABLE) Icons.Outlined.TableChart
+          else Icons.Outlined.Layers
+        Row(
+          verticalAlignment = Alignment.CenterVertically,
+          horizontalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
+          Icon(
+            dataset?.let(::datasetIcon) ?: defaultIcon,
+            contentDescription = null,
+            tint = colors.primary,
+            modifier = Modifier.size(12.dp),
+          )
+          Text(
+            text = dataset?.displayName ?: datasetId.orEmpty().ifBlank { fallbackLabel },
+            style = MaterialTheme.typography.labelSmall,
+            color = colors.primary,
+            fontWeight = FontWeight.SemiBold,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+          )
+        }
+      }
+      val previewChoices = question.resolvedChoices(datasets)
+      val maxItems = if (question.usesDatasetChoices) 3 else 4
+      previewChoices.take(maxItems).forEach { choice ->
+        Row(verticalAlignment = Alignment.CenterVertically) {
+          Box(
+            modifier =
+              Modifier.size(10.dp)
+                .border(
+                  1.5.dp,
+                  colors.primary,
+                  if (round) CircleShape else RoundedCornerShape(2.dp),
+                )
+          )
+          Spacer(Modifier.width(6.dp))
+          if (choice.colorHex != null) {
+            ColorDot(colorHex = choice.colorHex, contentDescription = null, size = 8.dp)
+            Spacer(Modifier.width(4.dp))
+          }
+          choice.image?.let { image ->
+            rememberChoiceImageBitmap(image)?.let { bitmap ->
+              Image(
+                bitmap = bitmap,
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.size(14.dp).clip(RoundedCornerShape(2.dp)),
+              )
+              Spacer(Modifier.width(4.dp))
+            }
+          }
+          Text(
+            text = choice.displayLabel(activeLanguage, defaultLanguage).ifBlank { choice.value },
+            style = MaterialTheme.typography.labelSmall,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+          )
+        }
+      }
+      if (previewChoices.size > maxItems) {
+        Text(
+          text = "+${previewChoices.size - maxItems} more",
+          style = MaterialTheme.typography.labelSmall,
+          color = colors.onSurfaceVariant,
+        )
+      }
+      if (question.usesDatasetChoices && question.allowAddEntity) {
+        Text(
+          text = "+ Add new ${dataset?.featureNoun ?: "item"}",
+          style = MaterialTheme.typography.labelSmall,
+          color = colors.primary,
+          fontWeight = FontWeight.SemiBold,
+        )
+      }
+    }
+    EditorQuestionType.LOCATION ->
+      MiniPlaceholder(geometryPlaceholderText(question, "Capture point"), Icons.Outlined.LocationOn)
+    EditorQuestionType.LINE ->
+      MiniPlaceholder(geometryPlaceholderText(question, "Walk line"), Icons.Outlined.Timeline)
+    EditorQuestionType.POLYGON ->
+      MiniPlaceholder(geometryPlaceholderText(question, "Walk polygon"), Icons.Outlined.Pentagon)
+    EditorQuestionType.PHOTO ->
+      MiniPlaceholder(mediaPlaceholderText(question, "Take photo"), Icons.Outlined.Add)
+    EditorQuestionType.VIDEO ->
+      MiniPlaceholder(mediaPlaceholderText(question, "Record video"), Icons.Outlined.Videocam)
+    EditorQuestionType.AUDIO ->
+      MiniPlaceholder(mediaPlaceholderText(question, "Record audio"), Icons.Outlined.Mic)
+    EditorQuestionType.NOTE ->
+      Row(verticalAlignment = Alignment.CenterVertically) {
+        Icon(
+          Icons.Outlined.Info,
+          contentDescription = null,
+          tint = colors.onSurfaceVariant,
+          modifier = Modifier.size(12.dp),
+        )
+        Spacer(Modifier.width(4.dp))
+        Text(
+          text = "Read-only note",
+          style = MaterialTheme.typography.labelSmall,
+          color = colors.onSurfaceVariant,
+        )
+      }
+  }
+}
+
+@Composable
+private fun MiniField(
+  placeholder: String,
+  height: Dp,
+  icon: androidx.compose.ui.graphics.vector.ImageVector? = null,
+) {
+  val colors = MaterialTheme.colorScheme
+  Row(
+    modifier =
+      Modifier.fillMaxWidth()
+        .height(height)
+        .border(1.dp, colors.outline, RoundedCornerShape(4.dp))
+        .padding(horizontal = 6.dp, vertical = 4.dp),
+    verticalAlignment = Alignment.Top,
+  ) {
+    Text(
+      text = placeholder,
+      style = MaterialTheme.typography.labelSmall,
+      color = colors.onSurfaceVariant,
+      modifier = Modifier.weight(1f),
+    )
+    if (icon != null) {
+      Icon(
+        icon,
+        contentDescription = null,
+        modifier = Modifier.size(12.dp),
+        tint = colors.onSurfaceVariant,
+      )
+    }
+  }
+}
+
+/**
+ * Caption of a geometry question's mini widget: [gpsAction] when locked to GPS, or the map
+ * alternative when collectors may also draw on the map.
+ */
+private fun geometryPlaceholderText(question: EditorQuestion, gpsAction: String): String =
+  when (question.capture) {
+    GeometryCapture.GPS_ONLY -> "$gpsAction (GPS)"
+    GeometryCapture.GPS_OR_MAP -> "$gpsAction or draw on map"
+  }
+
+/**
+ * Caption of a media question's mini widget: [captureAction] alone when collectors must capture a
+ * fresh file, or the upload alternative when they may also pick one from their device.
+ */
+private fun mediaPlaceholderText(question: EditorQuestion, captureAction: String): String =
+  when (question.mediaSource) {
+    MediaSource.CAPTURE_ONLY -> captureAction
+    MediaSource.CAPTURE_OR_UPLOAD -> "$captureAction or upload"
+  }
+
+@Composable
+private fun MiniPlaceholder(text: String, icon: androidx.compose.ui.graphics.vector.ImageVector) {
+  val colors = MaterialTheme.colorScheme
+  Column(
+    modifier =
+      Modifier.fillMaxWidth()
+        .height(64.dp)
+        .clip(RoundedCornerShape(6.dp))
+        .background(colors.surfaceVariant),
+    horizontalAlignment = Alignment.CenterHorizontally,
+    verticalArrangement = Arrangement.Center,
+  ) {
+    Icon(
+      icon,
+      contentDescription = null,
+      tint = colors.onSurfaceVariant,
+      modifier = Modifier.size(18.dp),
+    )
+    Text(text = text, style = MaterialTheme.typography.labelSmall, color = colors.onSurfaceVariant)
+  }
+}
+
+// ---------------------------------------------------------------------------------------------
+// Properties panel
+// ---------------------------------------------------------------------------------------------
+
+/** Properties of the selected question, or of the Form itself when no question is selected. */
+@Composable
+private fun QuestionPropertiesPanel(
+  uiState: FormEditorUiState,
+  actions: FormEditorActions,
+  onSaveToModeChange: (SaveToMode) -> Unit,
+  onOpenDataset: ((String) -> Unit)?,
+  onCreateDataset: (() -> Unit)? = null,
+  onUnlinkDataset: ((String) -> Unit)? = null,
+  onCreateFormForDataset: ((String) -> Unit)? = null,
+  onOpenForm: ((String) -> Unit)? = null,
+  modifier: Modifier = Modifier,
+) {
+  ElevatedCard(
+    modifier = modifier,
+    shape = MaterialTheme.shapes.large,
+    colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.surface),
+  ) {
+    val question = uiState.selectedQuestion
+    if (question == null) {
+      FormProperties(
+        uiState = uiState,
+        actions = actions,
+        onSaveToModeChange = onSaveToModeChange,
+        onOpenDataset = onOpenDataset,
+        onCreateDataset = onCreateDataset,
+        onUnlinkDataset = onUnlinkDataset,
+      )
+      return@ElevatedCard
+    }
+    key(question.key) {
+      QuestionProperties(
+        uiState = uiState,
+        actions = actions,
+        question = question,
+        onOpenDataset = onOpenDataset,
+        onCreateFormForDataset = onCreateFormForDataset,
+        onOpenForm = onOpenForm,
+      )
+    }
+  }
+}
+
+@Composable
+private fun QuestionProperties(
+  uiState: FormEditorUiState,
+  actions: FormEditorActions,
+  question: EditorQuestion,
+  onOpenDataset: ((String) -> Unit)? = null,
+  onCreateFormForDataset: ((String) -> Unit)? = null,
+  onOpenForm: ((String) -> Unit)? = null,
+) {
+  val form = uiState.form
+  val index = uiState.selectedIndex
+  val key = question.key
+  val issues = uiState.issuesFor(key)
+  Column(
+    modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(20.dp),
+    verticalArrangement = Arrangement.spacedBy(14.dp),
+  ) {
+    var menuExpanded by remember { mutableStateOf(false) }
+    var deleteWarning by remember { mutableStateOf<String?>(null) }
+    deleteWarning?.let { message ->
+      DeleteLinkedQuestionDialog(
+        message = message,
+        onConfirm = {
+          deleteWarning = null
+          actions.deleteQuestion(key)
+        },
+        onDismiss = { deleteWarning = null },
+      )
+    }
+    Row(
+      modifier = Modifier.fillMaxWidth(),
+      horizontalArrangement = Arrangement.spacedBy(4.dp),
+      verticalAlignment = Alignment.CenterVertically,
+    ) {
+      Text(
+        text = "Question ${index + 1} of ${form.questions.size}",
+        style = MaterialTheme.typography.titleMedium,
+        fontWeight = FontWeight.Bold,
+      )
+      Spacer(Modifier.weight(1f))
+      TextButton(
+        onClick = { actions.select(form.questions.getOrNull(index - 1)?.key) },
+        enabled = index > 0,
+      ) {
+        Icon(
+          Icons.AutoMirrored.Outlined.ArrowBack,
+          contentDescription = null,
+          modifier = Modifier.size(18.dp),
+        )
+        Spacer(Modifier.width(4.dp))
+        Text("Previous")
+      }
+      TextButton(
+        onClick = { actions.select(form.questions.getOrNull(index + 1)?.key) },
+        enabled = index < form.questions.lastIndex,
+      ) {
+        Text("Next")
+        Spacer(Modifier.width(4.dp))
+        Icon(
+          Icons.AutoMirrored.Outlined.ArrowForward,
+          contentDescription = null,
+          modifier = Modifier.size(18.dp),
+        )
+      }
+      Box {
+        IconButton(onClick = { menuExpanded = true }) {
+          Icon(Icons.Outlined.MoreVert, contentDescription = "Question options")
+        }
+        DropdownMenu(expanded = menuExpanded, onDismissRequest = { menuExpanded = false }) {
+          DropdownMenuItem(
+            text = { Text("Duplicate") },
+            leadingIcon = {
+              Icon(
+                Icons.Outlined.ContentCopy,
+                contentDescription = null,
+                modifier = Modifier.size(18.dp),
+              )
+            },
+            onClick = {
+              menuExpanded = false
+              actions.duplicateQuestion(key)
+            },
+          )
+          DropdownMenuItem(
+            text = { Text("Delete", color = MaterialTheme.colorScheme.error) },
+            leadingIcon = {
+              Icon(
+                Icons.Outlined.Delete,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.error,
+                modifier = Modifier.size(18.dp),
+              )
+            },
+            onClick = {
+              menuExpanded = false
+              // Linked questions feed reports: confirm first (softly; never blocked).
+              val warning = uiState.deleteWarningFor(question)
+              if (warning == null) actions.deleteQuestion(key) else deleteWarning = warning
+            },
+          )
+        }
+      }
+    }
+
+    if (issues.isNotEmpty()) {
+      Surface(
+        color = MaterialTheme.colorScheme.errorContainer,
+        contentColor = MaterialTheme.colorScheme.onErrorContainer,
+        shape = MaterialTheme.shapes.small,
+        modifier = Modifier.fillMaxWidth(),
+      ) {
+        Column(
+          modifier = Modifier.padding(10.dp),
+          verticalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
+          issues.forEach { Text("• ${it.message}", style = MaterialTheme.typography.bodySmall) }
+        }
+      }
+    }
+    ConceptWarnings(uiState.warningsFor(key))
+
+    DropdownSelector(
+      label = "Question type",
+      selectedText = question.type.label,
+      options = EditorQuestionType.entries,
+      optionText = { it.label },
+      optionIcon = { questionTypeIcon(it) },
+      onSelect = { actions.changeType(key, it) },
+    )
+
+    if (question.type.isGeometry) {
+      GeometryCaptureSelector(uiState, actions, question)
+    }
+    if (question.type.isMedia) {
+      MediaSourceSelector(uiState, actions, question)
+    }
+
+    ConceptLabelField(uiState, actions, question)
+    ConceptLinkChip(uiState, actions, question)
+    val activeLang = uiState.activeLanguage
+    val defaultLang = uiState.defaultLanguage
+    val isDefaultLang = uiState.isDefaultLanguageSelected
+    val activeLangName = languageDisplayName(activeLang)
+    OutlinedTextField(
+      value = question.hintIn(activeLang, defaultLang),
+      onValueChange = { v -> actions.updateQuestionHint(key, v) },
+      label = {
+        Text(if (isDefaultLang) "Hint (optional)" else "Hint ($activeLangName, optional)")
+      },
+      placeholder =
+        if (!isDefaultLang && question.hint.isNotBlank()) ({ Text(question.hint) }) else null,
+      modifier = Modifier.fillMaxWidth(),
+    )
+
+    Row(verticalAlignment = Alignment.CenterVertically) {
+      Column(modifier = Modifier.weight(1f)) {
+        Text("Required", style = MaterialTheme.typography.bodyLarge)
+        Text(
+          text =
+            if (question.type.isReadOnly) "Notes can't be required."
+            else "Collectors must answer before continuing.",
+          style = MaterialTheme.typography.bodySmall,
+          color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+      }
+      Switch(
+        checked = question.required,
+        enabled = !question.type.isReadOnly,
+        onCheckedChange = { v -> actions.updateQuestion(key) { it.copy(required = v) } },
+      )
+    }
+
+    if (question.type.hasChoices) {
+      HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+      ChoicesEditor(
+        uiState = uiState,
+        actions = actions,
+        question = question,
+        onOpenDataset = onOpenDataset,
+        onCreateFormForDataset = onCreateFormForDataset,
+        onOpenForm = onOpenForm,
+      )
+    }
+
+    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+    DisplayLogicEditor(uiState, actions, question)
+
+    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+    AdvancedSection(uiState, actions, question)
+  }
+}
+
+/**
+ * **Decimal places** setting of a [EditorQuestionType.NUMBER] question: `0` for whole numbers
+ * (integer), or `1`..[EditorQuestion.MAX_DECIMAL_PLACES] for decimal numbers.
+ */
+@Composable
+private fun DecimalPlacesSelector(actions: FormEditorActions, question: EditorQuestion) {
+  OutlinedTextField(
+    value = question.decimalPlaces.toString(),
+    onValueChange = { v ->
+      val parsed =
+        if (v.isBlank()) 0
+        else v.trim().toIntOrNull()?.coerceIn(0, EditorQuestion.MAX_DECIMAL_PLACES)
+      if (parsed != null) {
+        actions.updateDecimalPlaces(question.key, parsed)
+      }
+    },
+    label = { Text("Decimal places") },
+    supportingText = {
+      Text(
+        if (question.decimalPlaces <= 0) "0 for whole numbers (integer)."
+        else
+          "Up to ${question.decimalPlaces} decimal place${if (question.decimalPlaces == 1) "" else "s"}."
+      )
+    },
+    singleLine = true,
+    modifier = Modifier.fillMaxWidth(),
+  )
+}
+
+/**
+ * **Capture** setting of a geometry question: GPS only, or GPS or draw on the map. Shows the chosen
+ * mode's description and, when GPS only would leave the Form unanswerable in the web dashboard, the
+ * incompatibility error (also listed in the question's issues).
+ */
+@Composable
+private fun GeometryCaptureSelector(
+  uiState: FormEditorUiState,
+  actions: FormEditorActions,
+  question: EditorQuestion,
+) {
+  val colors = MaterialTheme.colorScheme
+  Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+    DropdownSelector(
+      label = "Capture",
+      selectedText = question.capture.label,
+      options = GeometryCapture.entries,
+      optionText = { it.label },
+      onSelect = { actions.updateCapture(question.key, it) },
+    )
+    Text(
+      text = question.capture.description,
+      style = MaterialTheme.typography.bodySmall,
+      color = colors.onSurfaceVariant,
+      modifier = Modifier.padding(horizontal = 16.dp),
+    )
+    if (question.isWebIncompatible && uiState.form.availability.includesWeb) {
+      Text(
+        text = FormEditorValidator.webIncompatibleMessage(question),
+        style = MaterialTheme.typography.bodySmall,
+        color = colors.error,
+        modifier = Modifier.padding(horizontal = 16.dp),
+      )
+    }
+  }
+}
+
+/**
+ * **Media source** setting of a photo, video, or audio question: capture or upload (the ODK
+ * default), or capture only (the `new` appearance). Shows the chosen mode's description.
+ */
+@Composable
+private fun MediaSourceSelector(
+  uiState: FormEditorUiState,
+  actions: FormEditorActions,
+  question: EditorQuestion,
+) {
+  Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+    DropdownSelector(
+      label = "Media source",
+      selectedText = question.mediaSource.label,
+      options = MediaSource.entries,
+      optionText = { it.label },
+      onSelect = { actions.updateMediaSource(question.key, it) },
+    )
+    Text(
+      text = question.mediaSource.description,
+      style = MaterialTheme.typography.bodySmall,
+      color = MaterialTheme.colorScheme.onSurfaceVariant,
+      modifier = Modifier.padding(horizontal = 16.dp),
+    )
+  }
+}
+
+/**
+ * Collapsible section for settings most form authors don't need: the data column name and
+ * validation rules. Collapsed by default; expands automatically when it contains an error.
+ */
+@Composable
+private fun AdvancedSection(
+  uiState: FormEditorUiState,
+  actions: FormEditorActions,
+  question: EditorQuestion,
+) {
+  val key = question.key
+  val nameInvalid = !FormEditorValidator.isValidName(question.name)
+  val hasError = nameInvalid || ValidationRules.issues(question).isNotEmpty()
+  // Open/closed lives in the editor state so it persists across question selection.
+  val expanded = uiState.isAdvancedExpanded
+  LaunchedEffect(key, hasError) { if (hasError) actions.setAdvancedExpanded(true) }
+  Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+    Row(
+      modifier =
+        Modifier.fillMaxWidth()
+          .clip(MaterialTheme.shapes.small)
+          .clickable { actions.setAdvancedExpanded(!expanded) }
+          .padding(vertical = 4.dp),
+      verticalAlignment = Alignment.CenterVertically,
+      horizontalArrangement = Arrangement.spacedBy(6.dp),
+    ) {
+      SectionLabel("Advanced")
+      if (hasError) {
+        Icon(
+          Icons.Outlined.Warning,
+          contentDescription = "Advanced settings have errors",
+          tint = MaterialTheme.colorScheme.error,
+          modifier = Modifier.size(16.dp),
+        )
+      }
+      Spacer(Modifier.weight(1f))
+      Icon(
+        if (expanded) Icons.Outlined.ExpandLess else Icons.Outlined.ExpandMore,
+        contentDescription = if (expanded) "Collapse advanced" else "Expand advanced",
+        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+      )
+    }
+    if (expanded) {
+      LinkToStandardFieldButton(actions, question)
+      OutlinedTextField(
+        value = question.name,
+        onValueChange = { v -> actions.updateQuestion(key) { it.copy(name = v.trim()) } },
+        label = { Text("Name") },
+        singleLine = true,
+        isError = nameInvalid,
+        supportingText = { Text("Data column name. Letters, digits, _ . -") },
+        textStyle = MaterialTheme.typography.bodyLarge.copy(fontFamily = FontFamily.Monospace),
+        modifier = Modifier.fillMaxWidth(),
+      )
+      if (question.type.isNumeric) {
+        DecimalPlacesSelector(actions, question)
+      }
+      ValidationEditor(uiState, actions, question)
+    }
+  }
+}
+
+/**
+ * Structured validation rules, compiled to the XForms bind `constraint` and `jr:constraintMsg` (ODK
+ * XForms spec, "Bindings"). Only rules that apply to the question type are offered.
+ */
+@Composable
+private fun ValidationEditor(
+  uiState: FormEditorUiState,
+  actions: FormEditorActions,
+  question: EditorQuestion,
+) {
+  val key = question.key
+  val type = question.type
+  val validation = question.validation ?: EditorValidation()
+  fun update(transform: (EditorValidation) -> EditorValidation) =
+    actions.updateValidation(key, transform)
+  Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    Text("Validation", style = MaterialTheme.typography.titleSmall)
+    when (ValidationKind.of(type)) {
+      null ->
+        Text(
+          text = "No validation rules for this question type.",
+          style = MaterialTheme.typography.bodySmall,
+          color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+      ValidationKind.NUMBER_RANGE -> MinMaxFields("Minimum", "Maximum", validation, ::update)
+      ValidationKind.TEXT -> {
+        MinMaxFields("Min length", "Max length", validation, ::update)
+        DropdownSelector(
+          label = "Pattern",
+          selectedText = validation.pattern?.label ?: "None",
+          options = listOf<TextPattern?>(null) + TextPattern.entries,
+          optionText = { it?.label ?: "None" },
+          onSelect = { p -> update { it.copy(pattern = p) } },
+          modifier = Modifier.fillMaxWidth(),
+        )
+        if (validation.pattern == TextPattern.CUSTOM) {
+          OutlinedTextField(
+            value = validation.customPattern,
+            onValueChange = { v -> update { it.copy(customPattern = v) } },
+            label = { Text("Regular expression") },
+            singleLine = true,
+            textStyle = MaterialTheme.typography.bodyLarge.copy(fontFamily = FontFamily.Monospace),
+            modifier = Modifier.fillMaxWidth(),
+          )
+        }
+      }
+      ValidationKind.DATE -> {
+        DropdownSelector(
+          label = "Allowed dates",
+          selectedText = validation.dateRule?.label ?: "Any date",
+          options = listOf<DateRule?>(null) + DateRule.entries,
+          optionText = { it?.label ?: "Any date" },
+          onSelect = { r ->
+            update {
+              if (r == DateRule.BETWEEN) it.copy(dateRule = r)
+              else it.copy(dateRule = r, min = "", max = "")
+            }
+          },
+          modifier = Modifier.fillMaxWidth(),
+        )
+        if (validation.dateRule == DateRule.BETWEEN) {
+          DateRangeFields(validation, ::update)
+        }
+      }
+      ValidationKind.SELECTION_COUNT ->
+        MinMaxFields("Minimum selections", "Maximum selections", validation, ::update)
+    }
+    if (ValidationRules.isActive(type, question.validation)) {
+      val summary = ValidationRules.summary(type, question.validation).orEmpty()
+      Text(
+        text = summary,
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+      )
+      OutlinedTextField(
+        value = validation.message,
+        onValueChange = { v -> update { it.copy(message = v) } },
+        label = { Text("Error message (optional)") },
+        placeholder = { Text(summary) },
+        singleLine = true,
+        modifier = Modifier.fillMaxWidth(),
+      )
+    }
+  }
+}
+
+/**
+ * Earliest / latest date for [DateRule.BETWEEN], chosen with M3 date pickers. Values are stored as
+ * ISO `YYYY-MM-DD` (what XForms `date()` expects) and shown in a friendly format.
+ */
+@Composable
+private fun DateRangeFields(
+  validation: EditorValidation,
+  update: ((EditorValidation) -> EditorValidation) -> Unit,
+) {
+  val minMillis = isoDateToUtcMillis(validation.min)
+  val maxMillis = isoDateToUtcMillis(validation.max)
+  Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    DatePickerField(
+      label = "Earliest date",
+      iso = validation.min,
+      // Keep earliest ≤ latest.
+      isSelectable = { maxMillis == null || it <= maxMillis },
+      onPick = { v -> update { it.copy(min = v) } },
+    )
+    DatePickerField(
+      label = "Latest date",
+      iso = validation.max,
+      isSelectable = { minMillis == null || it >= minMillis },
+      onPick = { v -> update { it.copy(max = v) } },
+    )
+  }
+}
+
+/**
+ * Read-only field showing [iso] as e.g. "Mar 5, 2026"; the calendar icon opens a [DatePickerDialog]
+ * and the clear icon unsets the date. [onPick] receives ISO `YYYY-MM-DD`, or "" when cleared.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun DatePickerField(
+  label: String,
+  iso: String,
+  isSelectable: (utcMillis: Long) -> Boolean,
+  onPick: (String) -> Unit,
+) {
+  var open by remember { mutableStateOf(false) }
+  OutlinedTextField(
+    value = if (iso.isEmpty()) "" else friendlyDate(iso),
+    onValueChange = {},
+    readOnly = true,
+    singleLine = true,
+    label = { Text(label) },
+    placeholder = { Text("Not set") },
+    trailingIcon = {
+      Row {
+        if (iso.isNotEmpty()) {
+          IconButton(onClick = { onPick("") }) {
+            Icon(Icons.Outlined.Close, contentDescription = "Clear $label")
+          }
+        }
+        IconButton(onClick = { open = true }) {
+          Icon(Icons.Outlined.DateRange, contentDescription = "Pick $label")
+        }
+      }
+    },
+    modifier = Modifier.fillMaxWidth(),
+  )
+  if (open) {
+    val pickerState =
+      rememberDatePickerState(
+        initialSelectedDateMillis = isoDateToUtcMillis(iso),
+        selectableDates =
+          object : SelectableDates {
+            override fun isSelectableDate(utcTimeMillis: Long) = isSelectable(utcTimeMillis)
+          },
+      )
+    DatePickerDialog(
+      onDismissRequest = { open = false },
+      confirmButton = {
+        TextButton(
+          onClick = {
+            // DatePicker reports the selection as UTC midnight of the chosen day.
+            pickerState.selectedDateMillis?.let { onPick(utcMillisToIsoDate(it)) }
+            open = false
+          },
+          enabled = pickerState.selectedDateMillis != null,
+        ) {
+          Text("OK")
+        }
+      },
+      dismissButton = { TextButton(onClick = { open = false }) { Text("Cancel") } },
+    ) {
+      DatePicker(state = pickerState)
+    }
+  }
+}
+
+/** A pair of side-by-side fields editing [EditorValidation.min] and [EditorValidation.max]. */
+@Composable
+private fun MinMaxFields(
+  minLabel: String,
+  maxLabel: String,
+  validation: EditorValidation,
+  update: ((EditorValidation) -> EditorValidation) -> Unit,
+) {
+  Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+    OutlinedTextField(
+      value = validation.min,
+      onValueChange = { v -> update { it.copy(min = v.trim()) } },
+      label = { Text(minLabel) },
+      singleLine = true,
+      modifier = Modifier.weight(1f),
+    )
+    OutlinedTextField(
+      value = validation.max,
+      onValueChange = { v -> update { it.copy(max = v.trim()) } },
+      label = { Text(maxLabel) },
+      singleLine = true,
+      modifier = Modifier.weight(1f),
+    )
+  }
+}
+
+private enum class ChoiceVisualOption(val label: String) {
+  NONE("Text only"),
+  COLOR("Colors"),
+  IMAGE("Images"),
+}
+
+@Composable
+private fun ChoicesEditor(
+  uiState: FormEditorUiState,
+  actions: FormEditorActions,
+  question: EditorQuestion,
+  onOpenDataset: ((String) -> Unit)? = null,
+  onCreateFormForDataset: ((String) -> Unit)? = null,
+  onOpenForm: ((String) -> Unit)? = null,
+) {
+  val key = question.key
+  val colors = MaterialTheme.colorScheme
+  val effectiveSource = uiState.choiceSourceFor(question)
+  var imageError by remember { mutableStateOf<String?>(null) }
+  Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    SectionLabel("Choices")
+    SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
+      ChoiceSource.entries.forEachIndexed { index, source ->
+        SegmentedButton(
+          selected = effectiveSource == source,
+          onClick = { actions.setChoiceSource(key, source) },
+          shape =
+            SegmentedButtonDefaults.itemShape(index = index, count = ChoiceSource.entries.size),
+          label = { Text(source.label) },
+        )
+      }
+    }
+    when (effectiveSource) {
+      ChoiceSource.MANUAL -> {
+        val hasImages = question.choices.any { it.image != null }
+        val hasColors = question.choices.any { it.colorHex != null }
+        var visualOverride by remember(question.key) { mutableStateOf<ChoiceVisualOption?>(null) }
+        val currentVisual =
+          visualOverride
+            ?: when {
+              hasImages -> ChoiceVisualOption.IMAGE
+              hasColors -> ChoiceVisualOption.COLOR
+              else -> ChoiceVisualOption.NONE
+            }
+
+        Row(
+          modifier = Modifier.fillMaxWidth(),
+          horizontalArrangement = Arrangement.SpaceBetween,
+          verticalAlignment = Alignment.CenterVertically,
+        ) {
+          Text(
+            text = "Visual style",
+            style = MaterialTheme.typography.bodySmall,
+            color = colors.onSurfaceVariant,
+          )
+          SingleChoiceSegmentedButtonRow(modifier = Modifier.height(32.dp)) {
+            ChoiceVisualOption.entries.forEachIndexed { index, visual ->
+              SegmentedButton(
+                selected = currentVisual == visual,
+                onClick = {
+                  visualOverride = visual
+                  when (visual) {
+                    ChoiceVisualOption.NONE -> {
+                      actions.updateQuestion(key) { q ->
+                        q.copy(choices = q.choices.map { it.copy(colorHex = null, image = null) })
+                      }
+                    }
+                    ChoiceVisualOption.COLOR -> {
+                      actions.updateQuestion(key) { q ->
+                        q.copy(
+                          choices =
+                            q.choices.mapIndexed { idx, c ->
+                              val color =
+                                c.colorHex
+                                  ?: ChoiceColors.palette[idx % ChoiceColors.palette.size].second
+                              c.copy(colorHex = color, image = null)
+                            }
+                        )
+                      }
+                    }
+                    ChoiceVisualOption.IMAGE -> {
+                      actions.updateQuestion(key) { q ->
+                        q.copy(choices = q.choices.map { it.copy(colorHex = null) })
+                      }
+                    }
+                  }
+                },
+                shape =
+                  SegmentedButtonDefaults.itemShape(
+                    index = index,
+                    count = ChoiceVisualOption.entries.size,
+                  ),
+                label = { Text(visual.label, style = MaterialTheme.typography.labelSmall) },
+              )
+            }
+          }
+        }
+
+        // A linked question maps each choice to a value of the concept's code list.
+        val concept = uiState.conceptOf(question)?.takeIf { it.codeList.isNotEmpty() }
+        val activeLang = uiState.activeLanguage
+        val defaultLang = uiState.defaultLanguage
+        val isDefaultLang = uiState.isDefaultLanguageSelected
+        val activeLangName = languageDisplayName(activeLang)
+        question.choices.forEachIndexed { i, choice ->
+          Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+          ) {
+            if (currentVisual == ChoiceVisualOption.COLOR) {
+              ChoiceColorButton(
+                colorHex = choice.colorHex,
+                onSelect = { actions.setChoiceColor(key, i, it) },
+              )
+            } else if (currentVisual == ChoiceVisualOption.IMAGE) {
+              ChoiceImageButton(
+                image = choice.image,
+                onPicked = { image ->
+                  imageError =
+                    if (actions.setChoiceImage(key, i, image)) null
+                    else "Choose an image file under ${EditorChoiceImage.MAX_BYTES / 1024} KB."
+                },
+                onRemove = { actions.setChoiceImage(key, i, null) },
+                onError = { imageError = it },
+              )
+            }
+            OutlinedTextField(
+              value = choice.labelIn(activeLang, defaultLang),
+              onValueChange = { actions.updateChoiceLabel(key, i, it) },
+              label = { Text(if (isDefaultLang) "Label" else "Label ($activeLangName)") },
+              placeholder =
+                if (!isDefaultLang && choice.label.isNotBlank()) ({ Text(choice.label) }) else null,
+              singleLine = true,
+              modifier = Modifier.weight(1f),
+            )
+            IconButton(
+              onClick = { actions.removeChoice(key, i) },
+              modifier = Modifier.size(32.dp),
+            ) {
+              Icon(
+                Icons.Outlined.Close,
+                contentDescription = "Remove choice",
+                modifier = Modifier.size(18.dp),
+              )
+            }
+          }
+          if (concept != null) {
+            ChoiceCodeSelector(
+              concept = concept,
+              choice = choice,
+              language = uiState.activeLanguage,
+              onSelect = { actions.setChoiceCode(key, i, it) },
+              modifier = Modifier.padding(start = 72.dp, end = 36.dp),
+            )
+          }
+        }
+        imageError?.let {
+          Text(
+            text = it,
+            style = MaterialTheme.typography.bodySmall,
+            color = colors.error,
+          )
+        }
+        TextButton(
+          onClick = {
+            actions.addChoice(key)
+            if (currentVisual == ChoiceVisualOption.COLOR) {
+              actions.updateQuestion(key) { q ->
+                val lastIdx = q.choices.lastIndex
+                if (lastIdx >= 0) {
+                  val color = ChoiceColors.palette[lastIdx % ChoiceColors.palette.size].second
+                  q.copy(
+                    choices =
+                      q.choices.mapIndexed { idx, c ->
+                        if (idx == lastIdx && c.colorHex == null)
+                          c.copy(colorHex = color, image = null)
+                        else c
+                      }
+                  )
+                } else {
+                  q
+                }
+              }
+            }
+          }
+        ) {
+          Icon(Icons.Outlined.Add, contentDescription = null, modifier = Modifier.size(18.dp))
+          Spacer(Modifier.width(4.dp))
+          Text("Add choice")
+        }
+      }
+      ChoiceSource.MAP_LAYER,
+      ChoiceSource.DATA_TABLE -> {
+        val availableDatasets = uiState.choiceDatasetsFor(effectiveSource)
+        val selectedDataset =
+          uiState.choiceDatasetFor(question)?.takeIf {
+            it.isMapLayer == (effectiveSource == ChoiceSource.MAP_LAYER)
+          }
+        val pluralKind =
+          if (effectiveSource == ChoiceSource.MAP_LAYER) "map layers" else "data tables"
+        if (availableDatasets.isEmpty() && question.choiceDatasetId.isNullOrBlank()) {
+          Text(
+            text = "No $pluralKind are available in this survey yet.",
+            style = MaterialTheme.typography.bodySmall,
+            color = colors.onSurfaceVariant,
+          )
+        } else {
+          if (availableDatasets.isNotEmpty()) {
+            DropdownSelector(
+              label = effectiveSource.label,
+              selectedText =
+                selectedDataset?.displayName
+                  ?: question.choiceDatasetId?.takeIf { it.isNotBlank() }
+                  ?: "Choose",
+              options = availableDatasets,
+              optionText = { it.displayName },
+              optionIcon = ::datasetIcon,
+              onSelect = { actions.setChoiceDataset(key, it.id) },
+            )
+          }
+          if (selectedDataset != null) {
+            val count = selectedDataset.rows.size
+            val noun =
+              if (count == 1) selectedDataset.featureNoun else selectedDataset.featureNounPlural
+            Text(
+              text = "Data collectors choose from $count $noun in ${selectedDataset.displayName}.",
+              style = MaterialTheme.typography.bodySmall,
+              color = colors.onSurfaceVariant,
+            )
+            if (onOpenDataset != null) {
+              AssistChip(
+                onClick = { onOpenDataset(selectedDataset.id) },
+                label = { Text(selectedDataset.displayName) },
+                leadingIcon = {
+                  Icon(
+                    datasetIcon(selectedDataset),
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp),
+                  )
+                },
+              )
+            }
+            AllowAddEntityControl(
+              question = question,
+              dataset = selectedDataset,
+              actions = actions,
+              onCreateFormForDataset = onCreateFormForDataset,
+              onOpenForm = onOpenForm,
+            )
+          } else if (!question.choiceDatasetId.isNullOrBlank()) {
+            Text(
+              text = "Choices are loaded from external list \"${question.choiceDatasetId}\".",
+              style = MaterialTheme.typography.bodySmall,
+              color = colors.onSurfaceVariant,
+            )
+          }
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Lets the form designer allow collectors to add a new map feature or table row inline while
+ * selecting from [dataset]. Only datasets with a creation Form (or for which one can be generated)
+ * support adding items during collection; generated sample plots cannot be added by collectors.
+ */
+@Composable
+private fun AllowAddEntityControl(
+  question: EditorQuestion,
+  dataset: EditorDataset,
+  actions: FormEditorActions,
+  onCreateFormForDataset: ((String) -> Unit)?,
+  onOpenForm: ((String) -> Unit)?,
+) {
+  val colors = MaterialTheme.colorScheme
+  val key = question.key
+  when {
+    dataset.isGenerated -> {
+      Text(
+        text = "Sample plots are generated from a sample design and can't be added by collectors.",
+        style = MaterialTheme.typography.bodySmall,
+        color = colors.onSurfaceVariant,
+      )
+    }
+    dataset.hasCreationForm || (dataset.key.isEmpty() && dataset.linkedFormKey == null) -> {
+      val formLabel = dataset.linkedFormTitle?.takeIf { it.isNotBlank() }
+      Row(verticalAlignment = Alignment.CenterVertically) {
+        Column(modifier = Modifier.weight(1f)) {
+          Text(
+            text = "Allow collectors to add new ${dataset.featureNounPlural}",
+            style = MaterialTheme.typography.bodyMedium,
+          )
+          Text(
+            text =
+              if (formLabel != null) {
+                "Uses $formLabel to add new ${dataset.featureNounPlural}."
+              } else {
+                "Collectors can add a new ${dataset.featureNoun} while selecting."
+              },
+            style = MaterialTheme.typography.bodySmall,
+            color = colors.onSurfaceVariant,
+          )
+        }
+        Switch(
+          checked = question.allowAddEntity,
+          onCheckedChange = { actions.setAllowAddEntity(key, it) },
+        )
+      }
+      val linkedFormKey = dataset.linkedFormKey
+      if (onOpenForm != null && linkedFormKey != null) {
+        AssistChip(
+          onClick = { onOpenForm(linkedFormKey) },
+          label = { Text(formLabel ?: "Open form") },
+          leadingIcon = {
+            Icon(
+              Icons.Outlined.Description,
+              contentDescription = null,
+              modifier = Modifier.size(18.dp),
+            )
+          },
+        )
+      }
+    }
+    dataset.canCreateForm -> {
+      Surface(
+        color = colors.surfaceContainerLow,
+        shape = MaterialTheme.shapes.small,
+        border = BorderStroke(1.dp, colors.outlineVariant),
+        modifier = Modifier.fillMaxWidth(),
+      ) {
+        Column(
+          modifier = Modifier.padding(12.dp),
+          verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+          Text(
+            text = "Allow collectors to add new ${dataset.featureNounPlural}",
+            style = MaterialTheme.typography.bodyMedium,
+            fontWeight = FontWeight.Medium,
+          )
+          Text(
+            text =
+              "${dataset.displayName} doesn't have a form for adding new ${dataset.featureNounPlural} yet.",
+            style = MaterialTheme.typography.bodySmall,
+            color = colors.onSurfaceVariant,
+          )
+          if (onCreateFormForDataset != null && dataset.key.isNotEmpty()) {
+            OutlinedButton(
+              onClick = {
+                onCreateFormForDataset(dataset.key)
+                actions.setAllowAddEntity(key, true)
+              }
+            ) {
+              Icon(Icons.Outlined.Add, contentDescription = null, modifier = Modifier.size(18.dp))
+              Spacer(Modifier.width(6.dp))
+              Text("Create form for ${dataset.displayName}")
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+/** Color dot for a choice; opens a compact palette with a "No color" option. */
+@Composable
+private fun ChoiceColorButton(colorHex: String?, onSelect: (String?) -> Unit) {
+  var expanded by remember { mutableStateOf(false) }
+  val colors = MaterialTheme.colorScheme
+  Box {
+    IconButton(onClick = { expanded = true }, modifier = Modifier.size(32.dp)) {
+      ColorDot(
+        colorHex = colorHex,
+        contentDescription = "Choice color: ${ChoiceColors.nameOf(colorHex) ?: colorHex ?: "none"}",
+      )
+    }
+    DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+      Text(
+        text = "Choice color",
+        style = MaterialTheme.typography.labelMedium,
+        color = colors.onSurfaceVariant,
+        modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
+      )
+      ChoiceColors.palette.chunked(5).forEach { row ->
+        Row(
+          modifier = Modifier.padding(horizontal = 8.dp),
+          horizontalArrangement = Arrangement.spacedBy(2.dp),
+        ) {
+          row.forEach { (name, hex) ->
+            IconButton(
+              onClick = {
+                onSelect(hex)
+                expanded = false
+              },
+              modifier = Modifier.size(36.dp),
+            ) {
+              ColorDot(
+                colorHex = hex,
+                contentDescription = name,
+                isSelected = hex.equals(colorHex, ignoreCase = true),
+              )
+            }
+          }
+        }
+      }
+      DropdownMenuItem(
+        text = { Text("No color") },
+        leadingIcon = { Icon(Icons.Outlined.FormatColorReset, contentDescription = null) },
+        enabled = colorHex != null,
+        onClick = {
+          onSelect(null)
+          expanded = false
+        },
+      )
+    }
+  }
+}
+
+/** Filled swatch for [colorHex], or an outlined empty circle when there is no color. */
+@Composable
+internal fun ColorDot(
+  colorHex: String?,
+  contentDescription: String?,
+  modifier: Modifier = Modifier,
+  isSelected: Boolean = false,
+  size: Dp = 20.dp,
+) {
+  val colors = MaterialTheme.colorScheme
+  val fill = ChoiceColors.argb(colorHex)?.let { Color(it) }
+  Box(
+    modifier =
+      modifier
+        .size(size)
+        .clip(CircleShape)
+        .background(fill ?: Color.Transparent)
+        .border(
+          width = if (isSelected) 2.dp else 1.dp,
+          color = if (isSelected) colors.onSurface else colors.outline,
+          shape = CircleShape,
+        )
+        .semantics { contentDescription?.let { this.contentDescription = it } },
+    contentAlignment = Alignment.Center,
+  ) {
+    if (isSelected) {
+      val checkTint =
+        when {
+          fill == null -> colors.onSurface
+          fill.luminance() > 0.6f -> Color(0xFF181D18)
+          else -> Color.White
+        }
+      Icon(
+        Icons.Outlined.Check,
+        contentDescription = null,
+        tint = checkTint,
+        modifier = Modifier.size(size * 0.7f),
+      )
+    }
+  }
+}
+
+/**
+ * Attaches a small image to a choice using the platform picker (downscaled to
+ * [EditorChoiceImage.MAX_PIXELS] on the long edge). Shows a thumbnail with Replace / Remove once
+ * set.
+ */
+@Composable
+private fun ChoiceImageButton(
+  image: EditorChoiceImage?,
+  onPicked: (EditorChoiceImage) -> Unit,
+  onRemove: () -> Unit,
+  onError: (String) -> Unit,
+) {
+  var menuExpanded by remember { mutableStateOf(false) }
+  val pick = {
+    openPlatformMediaPicker(
+      accept = "image/*",
+      capture = "",
+      maxPixels = EditorChoiceImage.MAX_PIXELS,
+    ) { result ->
+      when (result) {
+        is PlatformPickResult.Picked -> {
+          val file = result.file
+          val mimeType =
+            file.mimeType.ifBlank { MediaCapture.mimeTypeForFileName(file.fileName).orEmpty() }
+          onPicked(EditorChoiceImage(mimeType, file.base64))
+        }
+        is PlatformPickResult.Failed -> onError(result.message)
+        PlatformPickResult.Cancelled -> Unit
+      }
+    }
+  }
+  if (image == null) {
+    IconButton(
+      onClick = pick,
+      enabled = isPlatformMediaPickerAvailable,
+      modifier = Modifier.size(32.dp),
+    ) {
+      Icon(
+        Icons.Outlined.AddPhotoAlternate,
+        contentDescription = "Add choice image",
+        modifier = Modifier.size(20.dp),
+      )
+    }
+    return
+  }
+  Box {
+    val bitmap = rememberChoiceImageBitmap(image)
+    Surface(
+      onClick = { menuExpanded = true },
+      shape = MaterialTheme.shapes.extraSmall,
+      color = MaterialTheme.colorScheme.surfaceContainerHigh,
+      border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+      modifier = Modifier.size(32.dp),
+    ) {
+      if (bitmap != null) {
+        Image(
+          bitmap = bitmap,
+          contentDescription = "Choice image",
+          contentScale = ContentScale.Crop,
+          modifier = Modifier.fillMaxSize(),
+        )
+      } else {
+        Box(contentAlignment = Alignment.Center) {
+          Icon(
+            Icons.Outlined.Photo,
+            contentDescription = "Choice image",
+            modifier = Modifier.size(18.dp),
+          )
+        }
+      }
+    }
+    DropdownMenu(expanded = menuExpanded, onDismissRequest = { menuExpanded = false }) {
+      DropdownMenuItem(
+        text = { Text("Replace image") },
+        leadingIcon = { Icon(Icons.Outlined.AddPhotoAlternate, contentDescription = null) },
+        enabled = isPlatformMediaPickerAvailable,
+        onClick = {
+          menuExpanded = false
+          pick()
+        },
+      )
+      DropdownMenuItem(
+        text = { Text("Remove image") },
+        leadingIcon = { Icon(Icons.Outlined.Delete, contentDescription = null) },
+        onClick = {
+          menuExpanded = false
+          onRemove()
+        },
+      )
+    }
+  }
+}
+
+/** Decodes [image] for display, or `null` if the bytes aren't a decodable bitmap. */
+@OptIn(ExperimentalResourceApi::class, ExperimentalEncodingApi::class)
+@Composable
+internal fun rememberChoiceImageBitmap(image: EditorChoiceImage): ImageBitmap? =
+  remember(image) { runCatching { Base64.decode(image.base64).decodeToImageBitmap() }.getOrNull() }
+
+@Composable
+private fun DisplayLogicEditor(
+  uiState: FormEditorUiState,
+  actions: FormEditorActions,
+  question: EditorQuestion,
+) {
+  val form = uiState.form
+  val key = question.key
+  val sources = form.eligibleRelevanceSources(key)
+  val relevance = question.relevance
+  Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+    SectionLabel("Display logic")
+    SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
+      SegmentedButton(
+        selected = relevance == null,
+        onClick = { actions.disableRelevance(key) },
+        shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2),
+        label = { Text("Always show") },
+      )
+      SegmentedButton(
+        selected = relevance != null,
+        onClick = { if (relevance == null) actions.enableRelevance(key) },
+        enabled = sources.isNotEmpty() || relevance != null,
+        shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2),
+        label = { Text("Show only if…") },
+      )
+    }
+    if (sources.isEmpty() && relevance == null) {
+      Text(
+        text = "Display logic can depend on earlier questions. Move this question later to use it.",
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+      )
+    }
+    if (relevance != null) {
+      val source = form.find(relevance.sourceQuestionKey)
+      DropdownSelector(
+        label = "Question",
+        selectedText = source?.let { it.label.ifBlank { it.name } } ?: "(missing question)",
+        options = sources,
+        optionText = { it.label.ifBlank { it.name } },
+        onSelect = { picked ->
+          val operator =
+            relevance.operator.takeIf { it in RelevanceOperator.availableFor(picked.type) }
+              ?: RelevanceOperator.availableFor(picked.type).first()
+          val value = picked.resolvedChoices(uiState.datasets).firstOrNull()?.value.orEmpty()
+          actions.updateQuestion(key) {
+            it.copy(relevance = EditorRelevance(picked.key, operator, value))
+          }
+        },
+      )
+      if (source != null) {
+        DropdownSelector(
+          label = "Condition",
+          selectedText = relevance.operator.label,
+          options = RelevanceOperator.availableFor(source.type),
+          optionText = { it.label },
+          onSelect = { op ->
+            actions.updateQuestion(key) { it.copy(relevance = relevance.copy(operator = op)) }
+          },
+        )
+        if (relevance.operator.needsValue) {
+          val sourceChoices = source.resolvedChoices(uiState.datasets)
+          if (source.type.hasChoices && sourceChoices.isNotEmpty()) {
+            DropdownSelector(
+              label = "Value",
+              selectedText =
+                sourceChoices.firstOrNull { it.value == relevance.value }?.label
+                  ?: relevance.value.ifBlank { "Pick a choice" },
+              options = sourceChoices,
+              optionText = { it.label },
+              onSelect = { c ->
+                actions.updateQuestion(key) { it.copy(relevance = relevance.copy(value = c.value)) }
+              },
+            )
+          } else {
+            OutlinedTextField(
+              value = relevance.value,
+              onValueChange = { v ->
+                actions.updateQuestion(key) { it.copy(relevance = relevance.copy(value = v)) }
+              },
+              label = { Text("Value") },
+              singleLine = true,
+              modifier = Modifier.fillMaxWidth(),
+            )
+          }
+        }
+      }
+      form.relevanceSummary(question, uiState.datasets)?.let { summary ->
+        Text(
+          text = summary,
+          style = MaterialTheme.typography.bodySmall,
+          color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+      }
+    }
+  }
+}
+
+@Composable
+internal fun SectionLabel(text: String) {
+  Text(
+    text = text,
+    style = MaterialTheme.typography.labelSmall,
+    fontWeight = FontWeight.Bold,
+    color = MaterialTheme.colorScheme.primary,
+  )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+internal fun <T> DropdownSelector(
+  label: String,
+  selectedText: String,
+  options: List<T>,
+  optionText: (T) -> String,
+  onSelect: (T) -> Unit,
+  modifier: Modifier = Modifier,
+  optionIcon: ((T) -> ImageVector)? = null,
+  enabled: Boolean = true,
+  supportingText: String? = null,
+) {
+  var expanded by remember { mutableStateOf(false) }
+  // Standard M3 exposed dropdown: a read-only OutlinedTextField, so the label and value use the
+  // same typography as every other input in the editors.
+  ExposedDropdownMenuBox(
+    expanded = expanded && enabled,
+    onExpandedChange = { if (enabled) expanded = it },
+    modifier = modifier.fillMaxWidth(),
+  ) {
+    OutlinedTextField(
+      value = selectedText,
+      onValueChange = {},
+      readOnly = true,
+      enabled = enabled,
+      singleLine = true,
+      label = { Text(label) },
+      supportingText = supportingText?.let { text -> { Text(text) } },
+      trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded && enabled) },
+      modifier =
+        Modifier.fillMaxWidth().menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable),
+    )
+    ExposedDropdownMenu(
+      expanded = expanded && enabled,
+      onDismissRequest = { expanded = false },
+    ) {
+      options.forEach { option ->
+        DropdownMenuItem(
+          text = { Text(optionText(option), maxLines = 1, overflow = TextOverflow.Ellipsis) },
+          leadingIcon =
+            optionIcon?.invoke(option)?.let { icon ->
+              {
+                Icon(
+                  icon,
+                  contentDescription = null,
+                  modifier = Modifier.size(18.dp),
+                  tint = MaterialTheme.colorScheme.primary,
+                )
+              }
+            },
+          onClick = {
+            onSelect(option)
+            expanded = false
+          },
+        )
+      }
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------------------------
+// Overlays: flow preview
+// ---------------------------------------------------------------------------------------------
+
+@Composable
+private fun ModalScrim(onDismiss: () -> Unit, content: @Composable () -> Unit) {
+  Dialog(
+    onDismissRequest = onDismiss,
+    properties = DialogProperties(usePlatformDefaultWidth = false),
+  ) {
+    Box(
+      modifier =
+        Modifier.fillMaxSize()
+          .background(MaterialTheme.colorScheme.scrim.copy(alpha = 0.55f))
+          .clickable(
+            indication = null,
+            interactionSource = remember { MutableInteractionSource() },
+          ) {},
+      contentAlignment = Alignment.Center,
+    ) {
+      content()
+    }
+  }
+}
+
+@Composable
+private fun FormPreviewOverlay(
+  uiState: FormEditorUiState,
+  actions: FormEditorActions,
+  isDarkTheme: Boolean,
+) {
+  val controller = uiState.previewController
+  var formFactor by remember { mutableStateOf(DeviceFormFactor.MOBILE) }
+  var orientation by remember { mutableStateOf(DeviceFormFactor.MOBILE.defaultOrientation) }
+  var previewDarkTheme by remember(isDarkTheme) { mutableStateOf(isDarkTheme) }
+  ModalScrim(onDismiss = actions::closePreview) {
+    BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+      val maxPanelHeight = (maxHeight - 48.dp).coerceAtLeast(320.dp)
+      Row(
+        modifier =
+          Modifier.fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .horizontalScroll(rememberScrollState())
+            .padding(24.dp),
+        horizontalArrangement = Arrangement.spacedBy(24.dp, Alignment.CenterHorizontally),
+        verticalAlignment = Alignment.Top,
+      ) {
+        if (controller != null && uiState.previewTarget == FormPreviewTarget.WEB) {
+          WebPreviewBrowserFrame(uiState = uiState, actions = actions, controller = controller)
+        } else if (controller != null) {
+          MobileDevicePreviewFrame(
+            deviceTitle = "Preview • ${uiState.form.title}",
+            isDarkTheme = previewDarkTheme,
+            formFactor = formFactor,
+            orientation = orientation,
+            onSelectFormFactor = {
+              formFactor = it
+              orientation = it.defaultOrientation
+            },
+            onRotateDevice = {
+              orientation =
+                if (orientation == DeviceOrientation.PORTRAIT) DeviceOrientation.LANDSCAPE
+                else DeviceOrientation.PORTRAIT
+            },
+            onToggleDarkTheme = { previewDarkTheme = !previewDarkTheme },
+          ) {
+            key(controller) {
+              MobileFormRunner(
+                controller = controller,
+                modifier = Modifier.fillMaxSize(),
+                onClose = actions::closePreview,
+                onSubmitted = { actions.markPreviewSubmitted() },
+              )
+            }
+          }
+        }
+        PreviewSidePanel(
+          uiState = uiState,
+          actions = actions,
+          modifier = Modifier.heightIn(max = maxPanelHeight),
+        )
+      }
+    }
+  }
+}
+
+@Composable
+private fun PreviewSidePanel(
+  uiState: FormEditorUiState,
+  actions: FormEditorActions,
+  modifier: Modifier = Modifier,
+) {
+  val controller = uiState.previewController
+  val colors = MaterialTheme.colorScheme
+  ElevatedCard(modifier = modifier.width(340.dp)) {
+    Column(modifier = Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+      Row(verticalAlignment = Alignment.CenterVertically) {
+        Text(
+          text = "Flow preview",
+          style = MaterialTheme.typography.titleMedium,
+          fontWeight = FontWeight.Bold,
+          modifier = Modifier.weight(1f),
+        )
+        IconButton(onClick = actions::closePreview) {
+          Icon(Icons.Outlined.Close, contentDescription = "Close preview")
+        }
+      }
+      Column(
+        modifier = Modifier.weight(1f, fill = false).verticalScroll(rememberScrollState()),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+      ) {
+        if (uiState.supportedLanguages.size > 1) {
+          DropdownSelector(
+            label = "Language",
+            selectedText = languageDisplayName(uiState.activeLanguage),
+            options = uiState.supportedLanguages,
+            optionText = { code ->
+              val name = languageDisplayName(code)
+              if (code == uiState.defaultLanguage) "$name • Default" else name
+            },
+            onSelect = { actions.selectLanguage(it) },
+          )
+        }
+        val error = uiState.previewError
+        if (error != null) {
+          Text(
+            text = "The generated XForms couldn't be loaded:\n$error",
+            style = MaterialTheme.typography.bodySmall,
+            color = colors.error,
+          )
+        }
+        if (controller != null) {
+          Text(
+            text =
+              if (uiState.previewTarget == FormPreviewTarget.WEB) {
+                "Questions update live as you answer: conditional cards appear or disappear based on display logic."
+              } else {
+                "Screens update live as you answer: conditional questions appear or disappear based on display logic."
+              },
+            style = MaterialTheme.typography.bodySmall,
+            color = colors.onSurfaceVariant,
+          )
+          if (uiState.previewSubmitted) {
+            Surface(
+              color = colors.primaryContainer,
+              contentColor = colors.onPrimaryContainer,
+              shape = MaterialTheme.shapes.small,
+            ) {
+              Row(
+                modifier = Modifier.fillMaxWidth().padding(10.dp),
+                verticalAlignment = Alignment.CenterVertically,
+              ) {
+                // Filled: indicates the validation-passed uiState.
+                Icon(
+                  Icons.Filled.CheckCircle,
+                  contentDescription = null,
+                  tint = colors.onPrimaryContainer,
+                )
+                Spacer(Modifier.width(8.dp))
+                Text(
+                  "Submission passed validation.",
+                  style = MaterialTheme.typography.bodyMedium,
+                  color = colors.onPrimaryContainer,
+                )
+              }
+            }
+          }
+          SectionLabel("Current path")
+          controller.steps.forEachIndexed { i, step ->
+            val isCurrent = i == controller.currentStepIndex
+            Row(
+              modifier =
+                Modifier.fillMaxWidth()
+                  .clip(MaterialTheme.shapes.small)
+                  .background(if (isCurrent) colors.secondaryContainer else Color.Transparent)
+                  .clickable { controller.jumpToStep(i) }
+                  .padding(horizontal = 8.dp, vertical = 6.dp),
+              verticalAlignment = Alignment.CenterVertically,
+            ) {
+              Text(
+                text = if (step is FormWizardStep.SummaryStep) "✓" else "${i + 1}",
+                style = MaterialTheme.typography.labelMedium,
+                fontWeight = FontWeight.Bold,
+                color = if (isCurrent) colors.onSecondaryContainer else colors.primary,
+                modifier = Modifier.width(24.dp),
+              )
+              Text(
+                text = step.title,
+                style = MaterialTheme.typography.bodySmall,
+                color = if (isCurrent) colors.onSecondaryContainer else colors.onSurface,
+                fontWeight = if (isCurrent) FontWeight.Bold else FontWeight.Normal,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+              )
+            }
+          }
+        }
+      }
+      Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        OutlinedButton(onClick = actions::restartPreview) {
+          Icon(Icons.Outlined.Refresh, contentDescription = null, modifier = Modifier.size(18.dp))
+          Spacer(Modifier.width(6.dp))
+          Text("Restart")
+        }
+        Button(onClick = actions::closePreview) { Text("Back to editor") }
+      }
+    }
+  }
+}
