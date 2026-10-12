@@ -22,9 +22,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.PointerType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.positionChange
-import org.groundplatform.v2.web.ui.formeditor.DragAxis
-import org.groundplatform.v2.web.ui.formeditor.awaitDragPastSlop
-import org.groundplatform.v2.web.ui.formeditor.dragSlopFor
 
 /**
  * [horizontalScroll] that can also be dragged with a mouse.

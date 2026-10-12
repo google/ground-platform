@@ -203,10 +203,14 @@ import org.groundplatform.v2.app.domain.model.editor.isoDateToUtcMillis
 import org.groundplatform.v2.app.domain.model.editor.slugify
 import org.groundplatform.v2.app.domain.model.editor.utcMillisToIsoDate
 import org.groundplatform.v2.app.domain.model.hasGeometry
+import org.groundplatform.v2.app.ui.common.DevicePreviewFrame
+import org.groundplatform.v2.app.ui.common.DragAxis
 import org.groundplatform.v2.app.ui.common.GrabPointerIcon
 import org.groundplatform.v2.app.ui.common.GrabbingPointerIcon
 import org.groundplatform.v2.app.ui.common.PlatformPickResult
+import org.groundplatform.v2.app.ui.common.awaitDragPastSlop
 import org.groundplatform.v2.app.ui.common.downloadTextFile
+import org.groundplatform.v2.app.ui.common.dragSlopFor
 import org.groundplatform.v2.app.ui.common.isPlatformMediaPickerAvailable
 import org.groundplatform.v2.app.ui.common.openPlatformMediaPicker
 import org.groundplatform.v2.app.ui.common.showPlatformGrabCursor
@@ -216,7 +220,6 @@ import org.groundplatform.v2.core.forms.ui.FormWizardStep
 import org.groundplatform.v2.core.forms.ui.GroundBadgeTone
 import org.groundplatform.v2.core.forms.ui.GroundTonalBadge
 import org.groundplatform.v2.core.forms.ui.MobileFormRunner
-import org.groundplatform.v2.devtools.prototypeapp.MobileDevicePreviewFrame
 import org.groundplatform.v2.web.ui.dashboard.SidePanelSeparator
 import org.groundplatform.v2.web.ui.dashboard.SidePanelSeparatorWidth
 import org.groundplatform.v2.web.ui.state.FormEditorUiState
@@ -3115,7 +3118,7 @@ private fun FormPreviewOverlay(
         if (controller != null && uiState.previewTarget == FormPreviewTarget.WEB) {
           WebPreviewBrowserFrame(uiState = uiState, actions = actions, controller = controller)
         } else if (controller != null) {
-          MobileDevicePreviewFrame(
+          DevicePreviewFrame(
             deviceTitle = "Preview • ${uiState.form.title}",
             isDarkTheme = previewDarkTheme,
             formFactor = formFactor,

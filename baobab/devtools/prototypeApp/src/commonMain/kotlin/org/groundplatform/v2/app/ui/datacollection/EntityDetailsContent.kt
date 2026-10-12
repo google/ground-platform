@@ -14,7 +14,6 @@
 package org.groundplatform.v2.app.ui.datacollection
 
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -64,9 +63,7 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.PlainTooltip
-import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TooltipAnchorPosition
 import androidx.compose.material3.TooltipBox
@@ -95,7 +92,6 @@ import org.groundplatform.v2.app.domain.model.EntityDetailsPane
 import org.groundplatform.v2.app.domain.model.EntityGeometryKind
 import org.groundplatform.v2.app.domain.model.GeospatialEntityItem
 import org.groundplatform.v2.app.domain.model.MapLayerItem
-import org.groundplatform.v2.app.domain.model.SubmissionPreviewItem
 import org.groundplatform.v2.app.domain.model.displayProperties
 import org.groundplatform.v2.app.domain.model.entityGeometrySummary
 import org.groundplatform.v2.app.domain.model.geometryKind
@@ -108,7 +104,6 @@ import org.groundplatform.v2.app.ui.map.LayerIcons
 import org.groundplatform.v2.app.ui.state.DataCollectionUiState
 import org.groundplatform.v2.app.ui.viewmodel.DataCollectionActions
 import org.groundplatform.v2.devtools.prototypeapp.PrototypeAppState
-import org.groundplatform.v2.web.ui.datacollection.WebDataCollectionCard
 
 private val EntityGeometryKind.icon: ImageVector
   get() =
@@ -607,16 +602,6 @@ internal fun EntityPropertiesPane(
 internal fun downloadPdfMenuAction(onClick: () -> Unit): DetailsMenuAction =
   DetailsMenuAction("Download PDF", Icons.Outlined.Download, onClick = onClick)
 
-/** Secondary entity actions shown in the web header's overflow menu, sent to [actions]. */
-private fun entityOverflowActions(
-  entity: GeospatialEntityItem,
-  actions: DataCollectionActions,
-): List<DetailsMenuAction> =
-  listOf(
-    DetailsMenuAction("QR code", Icons.Outlined.QrCode) { actions.openEntityQrCode(entity.id) },
-    downloadPdfMenuAction { actions.downloadEntityPdf(entity.id) },
-  )
-
 /** Row of mobile entity actions: `Navigate`, QR code, Share PDF, and `Uploads`. */
 @Composable
 private fun EntityActionsRow(entity: GeospatialEntityItem, state: PrototypeAppState) {
@@ -703,7 +688,7 @@ private fun EntityActionsRow(entity: GeospatialEntityItem, state: PrototypeAppSt
  * Organizer-defined data collection buttons for this entity's dataset, limited to the forms the
  * survey designer made available on the current platform ([uiState]). On mobile they open the
  * one-question-per-screen runner over the map; on web they open the same form in the right-hand
- * panel's compact layout ([WebDataCollectionCard]), both through [actions]. The optional [notice]
+ * panel's compact layout (`WebDataCollectionCard`), both through [actions]. The optional [notice]
  * (the active survey notice) is shown under the buttons.
  */
 @Composable
@@ -945,186 +930,6 @@ internal fun EntityBottomSheetCard(
         else -> EntityPropertiesPane(entity = entity, state = state, isWeb = false)
       }
       Spacer(modifier = Modifier.padding(bottom = 8.dp))
-    }
-  }
-}
-
-/**
- * Web dashboard's floating details card (upper-right corner of the map) for the selected entity,
- * with two tabs backed by [PrototypeAppState.entityDetailsPane]:
- * - `Data` ([EntityDetailsPane.PROPERTIES], default): a compact status chip and the entity's
- *   properties (its current state).
- * - `History` ([EntityDetailsPane.SUBMISSIONS]): the entity's submissions. An opened submission
- *   replaces the list in a document-style view, with back to the list. Opening a submission from
- *   elsewhere (e.g. `Uploads`) selects this tab, and switching to `Data` and back keeps it open.
- */
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-internal fun WebEntityDetailsCard(
-  entity: GeospatialEntityItem,
-  state: PrototypeAppState,
-  modifier: Modifier = Modifier,
-  onCollapse: (() -> Unit)? = null,
-) {
-  val submission =
-    state.dataCollectionUiState.selectedSubmission?.takeIf { it.entityId == entity.id }
-  val pane = state.entityDetailsPane
-  // Each tab (and an opened submission) starts scrolled to the top.
-  val scrollState = remember(entity.id, pane, submission?.id) { ScrollState(initial = 0) }
-
-  Surface(
-    modifier = modifier,
-    shape = MaterialTheme.shapes.large,
-    color = MaterialTheme.colorScheme.surfaceContainerLow,
-    shadowElevation = 6.dp,
-  ) {
-    Column {
-      EntityDetailsHeader(
-        entity = entity,
-        onClose = { state.selectEntity(null) },
-        onCollapse = onCollapse,
-        layer = state.mapLayerFor(entity),
-        // The status chip is shown, compact, at the top of the `Data` tab body instead.
-        showStatus = false,
-        trailingActions = {
-          DetailsOverflowMenu(
-            actions = entityOverflowActions(entity, state.dataCollection),
-            contentDescription = "More ${entity.singularTypeLabel.lowercase()} actions",
-          )
-        },
-        modifier = Modifier.padding(start = 16.dp, end = 8.dp, top = 12.dp, bottom = 4.dp),
-      )
-
-      PrimaryTabRow(selectedTabIndex = pane.ordinal, containerColor = Color.Transparent) {
-        EntityDetailsPane.entries.forEach { tabPane ->
-          Tab(
-            selected = pane == tabPane,
-            onClick = { state.selectEntityDetailsTab(tabPane) },
-            text = {
-              Text(
-                text =
-                  when (tabPane) {
-                    EntityDetailsPane.PROPERTIES -> "Data"
-                    EntityDetailsPane.SUBMISSIONS -> "History"
-                  },
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-              )
-            },
-          )
-        }
-      }
-
-      Column(
-        modifier =
-          Modifier.weight(1f, fill = false)
-            .fillMaxWidth()
-            .verticalScroll(scrollState)
-            .padding(16.dp)
-      ) {
-        when {
-          pane == EntityDetailsPane.PROPERTIES ->
-            EntityPropertiesPane(entity = entity, state = state, isWeb = true)
-          submission != null ->
-            SubmissionFullDetailsCard(
-              submission = submission,
-              state = state,
-              isDark = state.isDarkTheme,
-              textColor = MaterialTheme.colorScheme.onSurface,
-              backLabel = "Back to submissions",
-              onBack = { state.dataCollection.selectSubmissionDetail(null) },
-              onSharePdf = { state.dataCollection.downloadSubmissionPdf(submission.id) },
-              isSidePanel = true,
-            )
-          else -> EntitySubmissionsPane(entity = entity, state = state, isWeb = true)
-        }
-      }
-    }
-  }
-}
-
-/**
- * Web dashboard's floating card for a standalone submission (one without an attached map feature),
- * shown in the same document-style view.
- */
-@Composable
-internal fun WebSubmissionDetailsCard(
-  submission: SubmissionPreviewItem,
-  state: PrototypeAppState,
-  modifier: Modifier = Modifier,
-  onCollapse: (() -> Unit)? = null,
-) {
-  Surface(
-    modifier = modifier,
-    shape = MaterialTheme.shapes.large,
-    color = MaterialTheme.colorScheme.surfaceContainerLow,
-    shadowElevation = 6.dp,
-  ) {
-    Column {
-      Row(
-        modifier =
-          Modifier.fillMaxWidth().padding(start = 16.dp, end = 8.dp, top = 12.dp, bottom = 8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(4.dp),
-      ) {
-        IconButton(
-          onClick = { state.dataCollection.selectSubmissionDetail(null) },
-          modifier = Modifier.size(32.dp),
-        ) {
-          Icon(
-            imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
-            contentDescription = "Back",
-            modifier = Modifier.size(20.dp),
-          )
-        }
-        Column(modifier = Modifier.weight(1f).padding(horizontal = 4.dp)) {
-          Text(
-            text = submission.formTitle,
-            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-            color = MaterialTheme.colorScheme.onSurface,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-          )
-          Text(
-            text = submission.timestamp,
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-          )
-        }
-        DetailsOverflowMenu(
-          actions =
-            listOf(
-              downloadPdfMenuAction { state.dataCollection.downloadSubmissionPdf(submission.id) }
-            ),
-          contentDescription = "More submission actions",
-        )
-        if (onCollapse != null) {
-          IconButton(onClick = onCollapse, modifier = Modifier.size(32.dp)) {
-            Icon(
-              imageVector = Icons.Outlined.CollapseContent,
-              contentDescription = "Collapse details",
-              tint = MaterialTheme.colorScheme.onSurfaceVariant,
-              modifier = Modifier.size(22.dp),
-            )
-          }
-        }
-      }
-      HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-      Column(modifier = Modifier.verticalScroll(rememberScrollState()).padding(16.dp)) {
-        SubmissionFullDetailsCard(
-          submission = submission,
-          state = state,
-          isDark = state.isDarkTheme,
-          textColor = MaterialTheme.colorScheme.onSurface,
-          backLabel = "Back",
-          onBack = { state.dataCollection.selectSubmissionDetail(null) },
-          onSharePdf = { state.dataCollection.downloadSubmissionPdf(submission.id) },
-          isSidePanel = true,
-          showHeader = false,
-        )
-      }
     }
   }
 }

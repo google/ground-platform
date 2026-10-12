@@ -13,17 +13,13 @@
  */
 package org.groundplatform.v2.mobile.ui.navigation
 
-import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -35,7 +31,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -49,7 +44,6 @@ import androidx.compose.material.icons.outlined.Menu
 import androidx.compose.material.icons.outlined.MyLocation
 import androidx.compose.material.icons.outlined.Navigation
 import androidx.compose.material.icons.outlined.SatelliteAlt
-import androidx.compose.material.icons.outlined.ZoomIn
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.Button
@@ -64,9 +58,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.runtime.Composable
@@ -75,34 +67,30 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import org.groundplatform.v2.app.domain.model.BasemapType
-import org.groundplatform.v2.app.domain.model.ImagerySource
 import org.groundplatform.v2.app.domain.model.MainDrawerSubView
-import org.groundplatform.v2.app.domain.model.MapFeatureCluster
-import org.groundplatform.v2.app.domain.model.MapScaleBarSpec
 import org.groundplatform.v2.app.domain.model.NavigationTargetKind
 import org.groundplatform.v2.app.domain.model.StraightLineNavigationState
-import org.groundplatform.v2.app.domain.model.formatClusterSitesCountLabel
 import org.groundplatform.v2.app.domain.model.geometryKind
 import org.groundplatform.v2.app.domain.model.hasGeometry
 import org.groundplatform.v2.app.domain.model.maxFramingZoom
 import org.groundplatform.v2.app.ui.common.UserAvatarButton
 import org.groundplatform.v2.app.ui.common.UserProfileSidePanelOverlay
-import org.groundplatform.v2.app.ui.common.horizontalScrollWithMouseDrag
 import org.groundplatform.v2.app.ui.datacollection.CollectorConsentModalDialog
+import org.groundplatform.v2.app.ui.datacollection.EntityQrCodeModalDialog
+import org.groundplatform.v2.app.ui.datacollection.PdfExportMessageSnackbar
+import org.groundplatform.v2.app.ui.datacollection.SharePdfToAppModalDialog
 import org.groundplatform.v2.app.ui.datacollection.SurveyPersistentBottomSheetContent
-import org.groundplatform.v2.app.ui.map.BasemapOptionOrder
-import org.groundplatform.v2.app.ui.map.BasemapOptionRow
 import org.groundplatform.v2.app.ui.map.BasemapPreviewCard
+import org.groundplatform.v2.app.ui.map.GoogleMapsScaleBarWidget
+import org.groundplatform.v2.app.ui.map.LayersSelectorContent
+import org.groundplatform.v2.app.ui.map.MapClusterBalloonsOverlay
 import org.groundplatform.v2.app.ui.map.SurveyMainMap
 import org.groundplatform.v2.app.ui.map.framingInsets
 import org.groundplatform.v2.app.ui.map.rememberSurveyMapCamera
@@ -110,7 +98,6 @@ import org.groundplatform.v2.app.ui.state.DataCollectionUiState
 import org.groundplatform.v2.app.ui.state.SurveyMapUiState
 import org.groundplatform.v2.app.ui.viewmodel.DataCollectionActions
 import org.groundplatform.v2.app.ui.viewmodel.SurveyMapActions
-import org.groundplatform.v2.core.forms.ui.GroundAlertDialogOverlay
 import org.groundplatform.v2.core.forms.ui.GroundBadgeTone
 import org.groundplatform.v2.core.forms.ui.GroundModalBottomSheetOverlay
 import org.groundplatform.v2.core.forms.ui.GroundTonalBadge
@@ -590,160 +577,6 @@ internal fun GnssStatusChip(isFollowingUser: Boolean, gnssStatusLabel: String) {
 }
 
 /**
- * Renders the expanded callout card for the currently selected [MapFeatureCluster] balloon when a
- * geographically pinned Mapbox cluster balloon is tapped on the map.
- */
-@Composable
-internal fun MapClusterBalloonsOverlay(uiState: SurveyMapUiState, actions: SurveyMapActions) {
-  val selectedCluster = uiState.selectedCluster ?: return
-  SelectedClusterBalloonDetailCard(
-    sitesCountLabel = uiState.formatClusterSitesCountLabel(selectedCluster.siteCount),
-    cluster = selectedCluster,
-    onZoomIn = { actions.zoomIntoCluster(selectedCluster.id) },
-    onDismiss = { actions.selectCluster(null) },
-  )
-}
-
-/**
- * Expanded callout card for the currently selected [MapFeatureCluster] balloon showing the count of
- * map features and their workflow states.
- */
-@Composable
-internal fun SelectedClusterBalloonDetailCard(
-  sitesCountLabel: String,
-  cluster: MapFeatureCluster,
-  onZoomIn: () -> Unit,
-  onDismiss: () -> Unit,
-) {
-  Surface(
-    shape = MaterialTheme.shapes.medium,
-    color = MaterialTheme.colorScheme.inverseSurface.copy(alpha = 0.96f),
-    contentColor = MaterialTheme.colorScheme.inverseOnSurface,
-    border = BorderStroke(1.5.dp, MaterialTheme.colorScheme.inversePrimary),
-    shadowElevation = 6.dp,
-    modifier = Modifier.fillMaxWidth(),
-  ) {
-    Column(
-      modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
-      verticalArrangement = Arrangement.spacedBy(6.dp),
-    ) {
-      Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically,
-      ) {
-        Text(
-          text = sitesCountLabel,
-          style = MaterialTheme.typography.labelMedium,
-          color = MaterialTheme.colorScheme.inversePrimary,
-          fontWeight = FontWeight.Bold,
-        )
-        Row(
-          verticalAlignment = Alignment.CenterVertically,
-          horizontalArrangement = Arrangement.spacedBy(6.dp),
-        ) {
-          TextButton(
-            onClick = onZoomIn,
-            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
-            modifier = Modifier.height(26.dp),
-          ) {
-            Icon(
-              imageVector = Icons.Outlined.ZoomIn,
-              contentDescription = null,
-              tint = MaterialTheme.colorScheme.inversePrimary,
-              modifier = Modifier.size(14.dp),
-            )
-            Spacer(modifier = Modifier.width(4.dp))
-            Text(
-              text = "Zoom in",
-              style = MaterialTheme.typography.labelSmall,
-              color = MaterialTheme.colorScheme.inversePrimary,
-              fontWeight = FontWeight.Bold,
-              maxLines = 1,
-              overflow = TextOverflow.Ellipsis,
-              softWrap = false,
-            )
-          }
-          IconButton(onClick = onDismiss, modifier = Modifier.size(22.dp)) {
-            Icon(
-              imageVector = Icons.Outlined.Close,
-              contentDescription = "Dismiss cluster balloon",
-              tint = MaterialTheme.colorScheme.inverseOnSurface.copy(alpha = 0.8f),
-              modifier = Modifier.size(14.dp),
-            )
-          }
-        }
-      }
-
-      if (cluster.siteSymbolGroups.isNotEmpty()) {
-        Row(
-          modifier = Modifier.fillMaxWidth().horizontalScrollWithMouseDrag(rememberScrollState()),
-          horizontalArrangement = Arrangement.spacedBy(8.dp),
-          verticalAlignment = Alignment.CenterVertically,
-        ) {
-          cluster.siteSymbolGroups.forEach { group ->
-            val groupColor = Color(group.colorHex)
-            Surface(
-              shape = RoundedCornerShape(10.dp),
-              color = MaterialTheme.colorScheme.inverseOnSurface.copy(alpha = 0.10f),
-              contentColor = MaterialTheme.colorScheme.inverseOnSurface,
-              border = BorderStroke(1.dp, groupColor.copy(alpha = 0.85f)),
-            ) {
-              Row(
-                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(5.dp),
-              ) {
-                if (group.isNoSymbolGroup) {
-                  Box(
-                    modifier =
-                      Modifier.size(12.dp)
-                        .clip(CircleShape)
-                        .background(groupColor.copy(alpha = 0.28f))
-                        .border(1.5.dp, groupColor, CircleShape)
-                  )
-                } else {
-                  Box(
-                    modifier = Modifier.size(14.dp).clip(CircleShape).background(groupColor),
-                    contentAlignment = Alignment.Center,
-                  ) {
-                    Text(
-                      text = group.markerSymbol,
-                      style = MaterialTheme.typography.labelSmall.copy(fontSize = 8.5.sp),
-                      color = contentColorOnArgb(group.colorHex),
-                      fontWeight = FontWeight.ExtraBold,
-                    )
-                  }
-                }
-                Text(
-                  text =
-                    if (group.isNoSymbolGroup) {
-                      "Unmarked map feature: ${group.count}"
-                    } else {
-                      "${group.statusLabel}: ${group.count}"
-                    },
-                  style = MaterialTheme.typography.labelSmall,
-                  color = MaterialTheme.colorScheme.inverseOnSurface,
-                  fontWeight = FontWeight.SemiBold,
-                )
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-}
-
-private fun contentColorOnArgb(argb: Long): Color {
-  val r = ((argb shr 16) and 0xFF) / 255f
-  val g = ((argb shr 8) and 0xFF) / 255f
-  val b = (argb and 0xFF) / 255f
-  val luminance = 0.299f * r + 0.587f * g + 0.114f * b
-  return if (luminance > 0.6f) Color(0xFF181D18) else Color.White
-}
-
-/**
  * Floating Action Button (`FloatingActionButton`) on the Main Survey screen that opens the
  * [AvailableFormsModalSheet] list of available forms
  * ([DataCollectionActions.openAvailableFormsSheet]) to start data collection without requiring a
@@ -1138,241 +971,6 @@ internal fun StraightLineNavigationHudBanner(
 }
 
 /**
- * Google Maps-style horizontal scale bar widget rendered in the bottom-left corner of the map.
- * Displays the current ground distance label (`100 m`, `200 m`, `1 km`, etc.) alongside a
- * dynamically sized horizontal scale bracket (`|_________|`) that adapts to Map vs Satellite tiles.
- */
-@Composable
-internal fun GoogleMapsScaleBarWidget(
-  scaleSpec: MapScaleBarSpec,
-  isSatellite: Boolean,
-  modifier: Modifier = Modifier,
-) {
-  val animatedWidthDp by
-    animateDpAsState(
-      targetValue = scaleSpec.barWidthDp.dp,
-      animationSpec = tween(durationMillis = 180),
-      label = "googleMapsScaleBarWidth",
-    )
-  val bgColor =
-    if (isSatellite) {
-      MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.90f)
-    } else {
-      MaterialTheme.colorScheme.surface.copy(alpha = 0.92f)
-    }
-  val primaryColor = MaterialTheme.colorScheme.onSurface
-  val haloColor = MaterialTheme.colorScheme.surface
-
-  Surface(
-    modifier = modifier,
-    shape = MaterialTheme.shapes.small,
-    color = bgColor,
-    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
-    shadowElevation = 3.dp,
-  ) {
-    Row(
-      modifier = Modifier.padding(horizontal = 9.dp, vertical = 5.dp),
-      verticalAlignment = Alignment.CenterVertically,
-      horizontalArrangement = Arrangement.spacedBy(7.dp),
-    ) {
-      Text(
-        text = scaleSpec.label,
-        style = MaterialTheme.typography.labelSmall,
-        color = primaryColor,
-        fontWeight = FontWeight.Bold,
-      )
-
-      Canvas(modifier = Modifier.width(animatedWidthDp).height(9.dp)) {
-        val leftX = 1.dp.toPx()
-        val rightX = (size.width - 1.dp.toPx()).coerceAtLeast(leftX + 4f)
-        val topY = 1.dp.toPx()
-        val bottomY = size.height - 1.5.dp.toPx()
-        val haloStroke = 3.2.dp.toPx()
-        val mainStroke = 1.6.dp.toPx()
-
-        drawLine(
-          color = haloColor,
-          start = Offset(leftX, bottomY),
-          end = Offset(rightX, bottomY),
-          strokeWidth = haloStroke,
-        )
-        drawLine(
-          color = haloColor,
-          start = Offset(leftX, topY),
-          end = Offset(leftX, bottomY),
-          strokeWidth = haloStroke,
-        )
-        drawLine(
-          color = haloColor,
-          start = Offset(rightX, topY),
-          end = Offset(rightX, bottomY),
-          strokeWidth = haloStroke,
-        )
-
-        drawLine(
-          color = primaryColor,
-          start = Offset(leftX, bottomY),
-          end = Offset(rightX, bottomY),
-          strokeWidth = mainStroke,
-        )
-        drawLine(
-          color = primaryColor,
-          start = Offset(leftX, topY),
-          end = Offset(leftX, bottomY),
-          strokeWidth = mainStroke,
-        )
-        drawLine(
-          color = primaryColor,
-          start = Offset(rightX, topY),
-          end = Offset(rightX, bottomY),
-          strokeWidth = mainStroke,
-        )
-      }
-    }
-  }
-}
-
-/** Small primary-colored section heading in the basemap selector (`Type`, ...). */
-@Composable
-private fun BasemapSectionHeading(text: String, modifier: Modifier = Modifier) {
-  Text(
-    text = text,
-    style =
-      MaterialTheme.typography.labelSmall.copy(
-        fontWeight = FontWeight.Bold,
-        color = MaterialTheme.colorScheme.primary,
-        letterSpacing = 0.5.sp,
-      ),
-    modifier = modifier,
-  )
-}
-
-/**
- * Shared body of the basemap selector, used by the mobile layers sheet ([LayersControlSheet]) and
- * the web dashboard's dialog ([LayersControlDialog]). Map layer visibility is not set here: mobile
- * toggles it in the bottom sheet and the web dashboard in its left-hand panel.
- * 1. Basemap type options (`Satellite` and `Map`)
- * 2. Custom imagery layers (XYZ tile URLs) available for the survey
- * 3. Downloaded (offline) basemap overlay toggle, when [showOfflineBasemap] (mobile only)
- */
-@Composable
-internal fun LayersSelectorContent(
-  uiState: SurveyMapUiState,
-  actions: SurveyMapActions,
-  modifier: Modifier = Modifier,
-  showOfflineBasemap: Boolean = true,
-) {
-  val imagerySources = uiState.availableImagerySources
-
-  Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-    Column(modifier = Modifier.fillMaxWidth().selectableGroup()) {
-      BasemapSectionHeading(text = "Type", modifier = Modifier.padding(bottom = 4.dp))
-      BasemapOptionOrder.forEach { basemap ->
-        BasemapOptionRow(
-          type = basemap,
-          isSelected = uiState.selectedBasemapType == basemap,
-          onSelect = { actions.selectBasemapType(basemap) },
-        )
-      }
-    }
-
-    if (imagerySources.isNotEmpty()) {
-      Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        BasemapSectionHeading(text = "Imagery")
-        imagerySources.forEach { source ->
-          ImagerySourceLayerCard(
-            source = source,
-            isEnabled = uiState.isImagerySourceEnabled(source.id),
-            isMobile = showOfflineBasemap,
-            onToggle = { actions.toggleImagerySource(source.id) },
-          )
-        }
-      }
-    }
-
-    if (showOfflineBasemap) {
-      BasemapSectionHeading(text = "Downloaded basemaps")
-      // Offline Basemap Tile Package Overlay Toggle
-      OutlinedCard(
-        onClick = { actions.toggleOfflineBasemapVisibility() },
-        modifier = Modifier.fillMaxWidth(),
-        shape = MaterialTheme.shapes.medium,
-        colors =
-          CardDefaults.outlinedCardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainer
-          ),
-      ) {
-        Row(
-          modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
-          verticalAlignment = Alignment.CenterVertically,
-          horizontalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-          Column(modifier = Modifier.weight(1f)) {
-            Text(
-              text = "Offline basemap overlay (Nyeri sector tiles)",
-              style = MaterialTheme.typography.labelMedium,
-              fontWeight = FontWeight.SemiBold,
-            )
-            Text(
-              text = uiState.offlineBasemapStyle.tileDescription,
-              style = MaterialTheme.typography.labelSmall,
-              color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-          }
-          Switch(
-            checked = uiState.isOfflineBasemapVisible,
-            onCheckedChange = { actions.toggleOfflineBasemapVisibility() },
-          )
-        }
-      }
-    }
-  }
-}
-
-@Composable
-private fun ImagerySourceLayerCard(
-  source: ImagerySource,
-  isEnabled: Boolean,
-  isMobile: Boolean,
-  onToggle: () -> Unit,
-) {
-  val subtitle =
-    if (isMobile) {
-      if (source.allowOfflineDownload) "Offline download permitted"
-      else "Online only · offline download disabled"
-    } else {
-      source.type.label
-    }
-  OutlinedCard(
-    onClick = onToggle,
-    modifier = Modifier.fillMaxWidth(),
-    shape = MaterialTheme.shapes.medium,
-    colors =
-      CardDefaults.outlinedCardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
-  ) {
-    Row(
-      modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
-      verticalAlignment = Alignment.CenterVertically,
-      horizontalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-      Column(modifier = Modifier.weight(1f)) {
-        Text(
-          text = source.name,
-          style = MaterialTheme.typography.labelMedium,
-          fontWeight = FontWeight.SemiBold,
-        )
-        Text(
-          text = subtitle,
-          style = MaterialTheme.typography.labelSmall,
-          color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-      }
-      Switch(checked = isEnabled, onCheckedChange = { onToggle() })
-    }
-  }
-}
-
-/**
  * Material 3 modal bottom sheet opened by the mobile map's [BasemapPreviewCard] to select the
  * **Basemap Type (`Map` vs `Satellite`)**, toggle imagery layers, and toggle the **Offline Basemap
  * (`Mapbox Offline Tiles`)**.
@@ -1416,32 +1014,6 @@ internal fun LayersControlSheet(uiState: SurveyMapUiState, actions: SurveyMapAct
       Spacer(modifier = Modifier.height(12.dp))
     }
   }
-}
-
-/**
- * Modal dialog opened by the web dashboard's [BasemapPreviewCard] to select the basemap type (`Map`
- * vs `Satellite`) and toggle imagery layers. Offline maps are a mobile-only feature, so their
- * toggle is left out.
- */
-@Composable
-internal fun LayersControlDialog(uiState: SurveyMapUiState, actions: SurveyMapActions) {
-  GroundAlertDialogOverlay(
-    onDismissRequest = { actions.updateLayersSheetOpen(false) },
-    title = {
-      Text(
-        text = "Basemap",
-        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-      )
-    },
-    text = {
-      Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-        LayersSelectorContent(uiState = uiState, actions = actions, showOfflineBasemap = false)
-      }
-    },
-    confirmButton = {
-      TextButton(onClick = { actions.updateLayersSheetOpen(false) }) { Text("Done") }
-    },
-  )
 }
 
 /** Backward-compatible alias for [MainSurveyScreen]. */

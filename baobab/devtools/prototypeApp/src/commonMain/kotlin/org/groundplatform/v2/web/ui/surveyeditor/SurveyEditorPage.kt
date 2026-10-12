@@ -135,6 +135,7 @@ import org.groundplatform.v2.app.domain.model.editor.SurveyArea
 import org.groundplatform.v2.app.domain.model.editor.SurveyAreaGeometry
 import org.groundplatform.v2.app.domain.model.editor.SurveyWizardRules
 import org.groundplatform.v2.app.domain.model.editor.surveyUrl
+import org.groundplatform.v2.app.ui.common.DragAxis
 import org.groundplatform.v2.app.ui.common.ProgramChips
 import org.groundplatform.v2.app.ui.common.PurposePackGrid
 import org.groundplatform.v2.app.ui.common.SurveyOutcomeCard
@@ -162,7 +163,6 @@ import org.groundplatform.v2.web.ui.common.WebHeaderSupportingText
 import org.groundplatform.v2.web.ui.common.WebMobilePrototypeButton
 import org.groundplatform.v2.web.ui.dashboard.SidePanelSeparator
 import org.groundplatform.v2.web.ui.dashboard.SidePanelSeparatorWidth
-import org.groundplatform.v2.web.ui.formeditor.DragAxis
 import org.groundplatform.v2.web.ui.formeditor.DragReorderState
 import org.groundplatform.v2.web.ui.formeditor.DropdownSelector
 import org.groundplatform.v2.web.ui.formeditor.FormEditorPage

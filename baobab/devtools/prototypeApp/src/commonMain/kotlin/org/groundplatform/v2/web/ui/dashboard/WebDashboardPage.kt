@@ -119,10 +119,14 @@ import org.groundplatform.v2.app.ui.common.showPlatformHorizontalResizeCursor
 import org.groundplatform.v2.app.ui.datacollection.BottomSheetSearchableListContent
 import org.groundplatform.v2.app.ui.datacollection.CollectorConsentModalDialog
 import org.groundplatform.v2.app.ui.datacollection.EntityGeometryIcon
+import org.groundplatform.v2.app.ui.datacollection.EntityQrCodeModalDialog
 import org.groundplatform.v2.app.ui.datacollection.EntityStatusChip
-import org.groundplatform.v2.app.ui.datacollection.WebEntityDetailsCard
-import org.groundplatform.v2.app.ui.datacollection.WebSubmissionDetailsCard
+import org.groundplatform.v2.app.ui.datacollection.PdfExportMessageSnackbar
+import org.groundplatform.v2.app.ui.datacollection.SharePdfToAppModalDialog
 import org.groundplatform.v2.app.ui.map.BasemapPreviewCard
+import org.groundplatform.v2.app.ui.map.GoogleMapsScaleBarWidget
+import org.groundplatform.v2.app.ui.map.LayersControlDialog
+import org.groundplatform.v2.app.ui.map.MapClusterBalloonsOverlay
 import org.groundplatform.v2.app.ui.map.SurveyMainMap
 import org.groundplatform.v2.app.ui.map.WebMapDrawingHint
 import org.groundplatform.v2.app.ui.map.framingInsets
@@ -130,15 +134,11 @@ import org.groundplatform.v2.app.ui.map.rememberSurveyMapCamera
 import org.groundplatform.v2.app.ui.state.DashboardUiState
 import org.groundplatform.v2.app.ui.viewmodel.DashboardActions
 import org.groundplatform.v2.devtools.prototypeapp.PrototypeAppState
-import org.groundplatform.v2.mobile.ui.navigation.EntityQrCodeModalDialog
-import org.groundplatform.v2.mobile.ui.navigation.GoogleMapsScaleBarWidget
-import org.groundplatform.v2.mobile.ui.navigation.LayersControlDialog
-import org.groundplatform.v2.mobile.ui.navigation.MapClusterBalloonsOverlay
-import org.groundplatform.v2.mobile.ui.navigation.PdfExportMessageSnackbar
-import org.groundplatform.v2.mobile.ui.navigation.SharePdfToAppModalDialog
 import org.groundplatform.v2.web.ui.common.WebTopToolbar
 import org.groundplatform.v2.web.ui.datacollection.WebDataCollectionCard
+import org.groundplatform.v2.web.ui.datacollection.WebEntityDetailsCard
 import org.groundplatform.v2.web.ui.datacollection.WebFormPanelWidth
+import org.groundplatform.v2.web.ui.datacollection.WebSubmissionDetailsCard
 
 /** Kind of tabular view shown in the web dashboard's data table panel. */
 internal enum class DashboardDataTableKind {

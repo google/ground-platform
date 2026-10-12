@@ -95,10 +95,9 @@ import org.groundplatform.v2.app.ui.map.layerNameColor
 import org.groundplatform.v2.core.forms.ui.GroundBadgeTone
 import org.groundplatform.v2.core.forms.ui.GroundTonalBadge
 import org.groundplatform.v2.devtools.prototypeapp.PrototypeAppState
-import org.groundplatform.v2.mobile.ui.navigation.SurveyMapView
 
 /**
- * Unified Persistent Bottom Sheet content for [SurveyMapView] (Option A):
+ * Unified Persistent Bottom Sheet content for the mobile map screen (`SurveyMapView`) (Option A):
  * 1. When a [GeospatialEntityItem] is selected (via map tap or list selection), renders
  *
  * ```

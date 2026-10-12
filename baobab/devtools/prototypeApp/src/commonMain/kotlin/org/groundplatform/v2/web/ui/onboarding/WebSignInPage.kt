@@ -37,11 +37,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import org.groundplatform.v2.app.ui.common.CloudAcaciaLogo
 import org.groundplatform.v2.app.ui.common.GoogleLogoIcon
+import org.groundplatform.v2.app.ui.common.GroundMissionGraphic
 import org.groundplatform.v2.core.forms.ui.LocalGroundBrandFontFamily
 import org.groundplatform.v2.devtools.prototypeapp.PrototypeAppState
-import org.groundplatform.v2.mobile.ui.onboarding.CloudAcaciaLogo
-import org.groundplatform.v2.mobile.ui.onboarding.GroundMissionGraphic
 import org.groundplatform.v2.web.ui.common.WebAppHeader
 import org.groundplatform.v2.web.ui.common.WebHeaderContext
 import org.groundplatform.v2.web.ui.common.WebMobilePrototypeButton

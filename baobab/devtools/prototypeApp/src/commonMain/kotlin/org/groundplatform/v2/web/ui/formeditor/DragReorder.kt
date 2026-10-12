@@ -23,22 +23,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.input.pointer.AwaitPointerEventScope
-import androidx.compose.ui.input.pointer.PointerInputChange
-import androidx.compose.ui.input.pointer.PointerInputScope
-import androidx.compose.ui.input.pointer.PointerType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.positionChange
-import androidx.compose.ui.unit.dp
 import kotlin.coroutines.cancellation.CancellationException
-import kotlin.math.abs
 import kotlin.math.roundToInt
-
-/** Axis along which a [DragReorderState] list is laid out. */
-enum class DragAxis {
-  HORIZONTAL,
-  VERTICAL,
-}
+import org.groundplatform.v2.app.ui.common.DragAxis
+import org.groundplatform.v2.app.ui.common.MouseDragSlop
+import org.groundplatform.v2.app.ui.common.awaitDragPastSlop
+import org.groundplatform.v2.app.ui.common.dragSlopFor
 
 /**
  * Drag-and-drop reordering state for a list of equally spaced items.
@@ -123,51 +115,6 @@ fun dragShiftFor(index: Int, from: Int, target: Int): Int =
 fun <T> List<T>.moved(from: Int, to: Int): List<T> {
   if (from !in indices || to !in indices || from == to) return this
   return toMutableList().apply { add(to, removeAt(from)) }
-}
-
-/**
- * Mouse travel needed before a press turns into a drag.
- *
- * Compose's own drag detectors use a mouse slop of only 0.125 dp (`mouseSlop` in foundation's
- * `DragGestureDetector.kt`, applied as `touchSlop * mouseSlop / 18.dp` for `PointerType.Mouse`), so
- * the pixel or two a hand moves during an ordinary click starts a drag. The drag consumes the
- * pointer movement, which cancels the `clickable` underneath, and the click is lost: the user has
- * to click again holding the mouse perfectly still. Clickable items that can also be dragged use
- * this larger slop instead.
- */
-val MouseDragSlop = 8.dp
-
-/** Distance the pointer that went [down] must travel before a drag starts. */
-fun PointerInputScope.dragSlopFor(down: PointerInputChange): Float =
-  if (down.type == PointerType.Mouse) MouseDragSlop.toPx() else viewConfiguration.touchSlop
-
-/**
- * Waits until the pointer that went [down] travels past [slopPx] (measured along [axis], or in any
- * direction when `null`), without consuming anything before then so clicks underneath still
- * register. Returns the change that crossed the slop and the travel so far, or `null` if the
- * pointer was released or another gesture consumed the movement first.
- */
-suspend fun AwaitPointerEventScope.awaitDragPastSlop(
-  down: PointerInputChange,
-  slopPx: Float,
-  axis: DragAxis? = null,
-): Pair<PointerInputChange, Offset>? {
-  var travel = Offset.Zero
-  while (true) {
-    val change = awaitPointerEvent().changes.firstOrNull { it.id == down.id } ?: return null
-    if (!change.pressed || change.isConsumed) return null
-    travel += change.positionChange()
-    val distance =
-      when (axis) {
-        DragAxis.HORIZONTAL -> abs(travel.x)
-        DragAxis.VERTICAL -> abs(travel.y)
-        null -> travel.getDistance()
-      }
-    if (distance > slopPx) {
-      change.consume()
-      return change to travel
-    }
-  }
 }
 
 /**
