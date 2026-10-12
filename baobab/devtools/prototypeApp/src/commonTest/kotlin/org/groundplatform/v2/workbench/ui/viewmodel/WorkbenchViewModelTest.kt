@@ -31,12 +31,11 @@ import org.groundplatform.v2.app.domain.model.DeviceFormFactor
 import org.groundplatform.v2.app.domain.model.DeviceOrientation
 import org.groundplatform.v2.app.domain.model.SyncStatus
 import org.groundplatform.v2.app.domain.usecase.GeneratePrototypeRandomSitesUseCase
-import org.groundplatform.v2.app.ui.viewmodel.OnboardingViewModelTest
 import org.groundplatform.v2.core.forms.ui.WorkbenchExampleForm
 import org.groundplatform.v2.workbench.ui.DEFAULT_PROTOTYPE_XFORMS_XML
 import org.groundplatform.v2.workbench.ui.state.WorkbenchEvent
 
-/** See [OnboardingViewModelTest] for why fixtures are built outside `runNow`. */
+/** See `OnboardingViewModelTest` (shared/app) for why fixtures are built outside `runNow`. */
 class WorkbenchViewModelTest {
   private class Fixture {
     val store = seededStore()

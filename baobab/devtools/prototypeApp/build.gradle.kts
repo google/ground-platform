@@ -64,6 +64,7 @@ kotlin {
         api("org.groundplatform.v2:protoforms:2.0.0-SNAPSHOT")
         api("org.groundplatform.v2:protoforms-ui:2.0.0-SNAPSHOT")
         api("org.groundplatform.v2:map:2.0.0-SNAPSHOT")
+        api("org.groundplatform.v2:app:2.0.0-SNAPSHOT")
         implementation(compose.runtime)
         implementation(compose.foundation)
         implementation(compose.material3)
@@ -77,7 +78,12 @@ kotlin {
     }
     val androidMain by getting { dependencies { implementation("io.ktor:ktor-client-cio:3.6.0") } }
     val wasmJsMain by getting { dependencies { implementation("io.ktor:ktor-client-js:3.6.0") } }
-    val commonTest by getting { dependencies { implementation(kotlin("test")) } }
+    val commonTest by getting {
+      dependencies {
+        implementation(kotlin("test"))
+        implementation("org.groundplatform.v2:app-testing:2.0.0-SNAPSHOT")
+      }
+    }
     val jvmTest by getting {
       dependencies {
         implementation(kotlin("test-junit5"))
@@ -87,15 +93,6 @@ kotlin {
         implementation(compose.desktop.currentOs)
       }
     }
-  }
-}
-
-// `./gradlew jvmTest -PregenerateLibrarySeed` rewrites the global library seed files
-// (shared/assets/library/*.textproto) from the app's Kotlin copy; see GlobalLibrarySeedTest.
-tasks.withType<Test>().configureEach {
-  if (project.hasProperty("regenerateLibrarySeed")) {
-    systemProperty("regenerateLibrarySeed", "true")
-    outputs.upToDateWhen { false }
   }
 }
 
@@ -151,6 +148,8 @@ tasks.withType<ProcessResources>().configureEach {
   from(file("../../shared/ui/src/commonMain/composeResources")) {
     into("composeResources/org.groundplatform.v2.core.forms.ui.resources")
   }
+  // JS bridges loaded by index.html for the shared/app wasmJs actuals (PDF export, media capture).
+  from(file("../../shared/app/src/wasmJsMain/resources"))
 }
 
 android {

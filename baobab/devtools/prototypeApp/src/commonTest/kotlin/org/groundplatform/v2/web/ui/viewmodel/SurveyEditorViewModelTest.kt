@@ -32,6 +32,7 @@ import org.groundplatform.v2.app.domain.model.editor.EditorQuestionType
 import org.groundplatform.v2.app.domain.model.editor.SaveToMode
 import org.groundplatform.v2.app.domain.model.editor.SharingPolicy
 import org.groundplatform.v2.app.domain.model.editor.SurveyEditorMutation
+import org.groundplatform.v2.app.testing.testScope
 import org.groundplatform.v2.web.ui.state.SurveyEditorEvent
 import org.groundplatform.v2.web.ui.state.SurveyEditorSection
 import org.groundplatform.v2.web.ui.state.SurveyEditorUiState

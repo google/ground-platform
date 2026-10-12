@@ -22,16 +22,11 @@ import kotlin.test.assertTrue
  * Guards the inward dependency rule of `docs/technical/client/architecture.md` and the module
  * boundaries the prototype is being split along.
  *
- * Layers (all under `org.groundplatform.v2.app`):
- * - `domain/` imports nothing from `data/`, `client/`, `di/`, `ui/`, or Compose.
- * - `data/` imports nothing from `di/`, `ui/`, or Compose.
- * - Only `data/` and `di/` may import `data/` packages (neither Views nor ViewModels may import
- *   `data.*`).
- * - Views (everything outside `data/`, `client/`, `domain/`, `di/`, and `ui/viewmodel/`) never
- *   import `data/` or `client/` packages.
+ * The `app` layers live in `shared/app` (see its own guardrail test). Here:
+ * - Nothing here imports `app.data` (only `app`'s own `data/` and `di/` may).
+ * - Views (everything outside `ui/viewmodel/`) never import `app.data` or `app.client`.
  *
- * Modules (future `shared/app`, `shared/mobile`, `shared/web`, and the Wasm mobile workbench):
- * - `app` imports nothing from `mobile`, `web`, `workbench`, or the prototype host.
+ * Modules (future `shared/mobile`, `shared/web`, and the Wasm mobile workbench):
  * - `mobile` and `web` import only `app` (never each other, `workbench`, or the host).
  * - `workbench` imports `app` and `mobile`, never `web` or the host.
  *
@@ -63,32 +58,6 @@ class LayerDependencyGuardrailTest {
       .toList()
 
   private fun File.relToApp(): String = relativeTo(appRoot).invariantSeparatorsPath
-
-  @Test
-  fun domainImportsOnlyDomainAndSharedCore() {
-    assertTrue(appRoot.isDirectory, "Run from the prototypeApp project directory")
-    val forbidden =
-      listOf(
-        "$app.data.",
-        "$app.client.",
-        "$app.di.",
-        "$app.ui.",
-        "$mobile.",
-        "$web.",
-        "$workbench.",
-        "$host.",
-        "androidx.compose.",
-      )
-    val bad = offenders(kotlinFiles(File(appRoot, "domain")), forbidden)
-    assertTrue(bad.isEmpty(), "domain/ depends on outer layers:\n${bad.joinToString("\n")}")
-  }
-
-  @Test
-  fun dataLayerDoesNotImportPresentationOrDi() {
-    val forbidden = listOf("$app.di.", "$app.ui.", "androidx.compose.")
-    val bad = offenders(kotlinFiles(File(appRoot, "data")), forbidden)
-    assertTrue(bad.isEmpty(), "data/ depends on presentation or di:\n${bad.joinToString("\n")}")
-  }
 
   @Test
   fun uiDoesNotImportDataLayer() {
@@ -125,9 +94,6 @@ class LayerDependencyGuardrailTest {
   fun xmlSerializationIsRestrictedToImportExportAndWorkbenchBoundaries() {
     val allowedFiles =
       setOf(
-        "app/domain/model/editor/FormEditorModels.kt",
-        "app/domain/model/editor/FormPublishing.kt",
-        "app/domain/model/editor/FormImport.kt",
         "workbench/ui/WorkbenchXFormsPresets.kt",
         "workbench/ui/viewmodel/WorkbenchViewModel.kt",
       )
@@ -154,7 +120,6 @@ class LayerDependencyGuardrailTest {
   fun modulesOnlyDependOnAllowedModules() {
     val rules =
       mapOf(
-        "app" to listOf("$mobile.", "$web.", "$workbench.", "$host."),
         "mobile" to listOf("$web.", "$workbench.", "$host."),
         "web" to listOf("$mobile.", "$workbench.", "$host."),
         "workbench" to listOf("$web.", "$host."),

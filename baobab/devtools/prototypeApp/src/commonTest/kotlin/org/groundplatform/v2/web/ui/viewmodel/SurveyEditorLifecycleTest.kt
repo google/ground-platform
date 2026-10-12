@@ -34,6 +34,7 @@ import org.groundplatform.v2.app.domain.model.SurveyOutcomeKind
 import org.groundplatform.v2.app.domain.model.editor.SampleGenerationOutcome
 import org.groundplatform.v2.app.domain.model.editor.isoUtc
 import org.groundplatform.v2.app.domain.usecase.SurveyLifecycleFixture
+import org.groundplatform.v2.app.testing.testScope
 import org.groundplatform.v2.web.ui.state.SurveyEditorSection
 import org.groundplatform.v2.web.ui.surveyeditor.lifecycleActionOptions
 

@@ -44,6 +44,7 @@ import org.groundplatform.v2.app.domain.model.editor.SubPlotMode
 import org.groundplatform.v2.app.domain.model.editor.SurveyArea
 import org.groundplatform.v2.app.domain.model.editor.toGeoCoord
 import org.groundplatform.v2.app.domain.model.geometryKind
+import org.groundplatform.v2.app.testing.testScope
 import org.groundplatform.v2.core.sampling.GeneratedPlot
 import org.groundplatform.v2.core.sampling.SampleDesign
 import org.groundplatform.v2.core.sampling.SampleEstimate
@@ -56,7 +57,6 @@ import org.groundplatform.v2.web.ui.viewmodel.EntitiesOverrideSurveyRepository
 import org.groundplatform.v2.web.ui.viewmodel.SurveyEditorViewModel
 import org.groundplatform.v2.web.ui.viewmodel.fakeEntityWithSubmissions
 import org.groundplatform.v2.web.ui.viewmodel.surveyEditorViewModel
-import org.groundplatform.v2.web.ui.viewmodel.testScope
 import org.groundplatform.v2.web.ui.viewmodel.ui
 
 class SampleGenerationTest {

@@ -14,8 +14,6 @@
 package org.groundplatform.v2.web.ui.viewmodel
 
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -41,6 +39,7 @@ import org.groundplatform.v2.app.domain.repository.SurveyContent
 import org.groundplatform.v2.app.domain.repository.SurveyEditorRepository
 import org.groundplatform.v2.app.domain.repository.SurveyRepository
 import org.groundplatform.v2.app.domain.usecase.GenerateSamplePlotsUseCase
+import org.groundplatform.v2.app.testing.testScope
 import org.groundplatform.v2.core.sampling.SamplingEngine
 import org.groundplatform.v2.web.ui.state.FormEditorUiState
 import org.groundplatform.v2.web.ui.state.SurveyEditorUiState
@@ -67,9 +66,6 @@ internal class FakeSurveyEditorRepository(initial: SurveyEditorDraft) : SurveyEd
     drafts.update { draft }
   }
 }
-
-/** A scope whose coroutines run inline, like the ViewModels' production scope in tests. */
-internal fun testScope() = CoroutineScope(Dispatchers.Unconfined + Job())
 
 /**
  * A Survey editor over [draft] (by default the sample survey) backed by an empty store, with a

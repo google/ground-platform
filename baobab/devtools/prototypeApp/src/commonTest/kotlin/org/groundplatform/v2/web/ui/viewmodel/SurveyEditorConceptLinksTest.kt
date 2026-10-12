@@ -33,6 +33,7 @@ import org.groundplatform.v2.app.domain.model.editor.EditorQuestionType
 import org.groundplatform.v2.app.domain.model.editor.FormImport
 import org.groundplatform.v2.app.domain.model.editor.SurveyEditorForm
 import org.groundplatform.v2.app.domain.model.editor.publishedFormXml
+import org.groundplatform.v2.app.testing.testScope
 import org.groundplatform.v2.core.forms.serialization.GROUND_XFORMS_NAMESPACE
 
 /** The Survey editor gives its Form editors the survey's dictionary. */

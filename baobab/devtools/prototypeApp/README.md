@@ -223,9 +223,9 @@ library with the global one, `SearchConceptsUseCase` searches it, and
 `ManageLibraryUseCase` validates and applies edits. The global library is
 seeded from `data/seed/GlobalLibrarySeedData.kt`, a Kotlin copy of the
 canonical `shared/assets/library/<vocabulary>.textproto` files;
-`GlobalLibrarySeedTest` (jvmTest) fails when they differ, and
-`./gradlew jvmTest -PregenerateLibrarySeed` rewrites the files from the Kotlin
-copy.
+`GlobalLibrarySeedTest` (`shared/app` jvmTest) fails when they differ, and
+running `./gradlew jvmTest -PregenerateLibrarySeed` from `shared/app` rewrites
+the files from the Kotlin copy.
 
 ## Impact Views
 

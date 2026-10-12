@@ -38,6 +38,7 @@ import org.groundplatform.v2.app.domain.model.AuthSession
 import org.groundplatform.v2.app.domain.model.ImpactEvent
 import org.groundplatform.v2.app.domain.model.ImpactEventType
 import org.groundplatform.v2.app.domain.repository.AuthRepository
+import org.groundplatform.v2.app.testing.testScope
 import org.groundplatform.v2.app.ui.viewmodel.RecordingPdfExportClient
 
 class ImpactViewModelTest {

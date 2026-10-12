@@ -619,17 +619,12 @@ private fun SearchTab(
 internal fun placeToSurveyArea(place: SurveyPlaceItem): SurveyArea {
   val lat = place.latitude
   val lng = place.longitude
+  val minLng = place.bboxMinLng
+  val maxLng = place.bboxMaxLng
+  val minLat = place.bboxMinLat
+  val maxLat = place.bboxMaxLat
   val boundary =
-    if (
-      place.bboxMinLat != null &&
-        place.bboxMinLng != null &&
-        place.bboxMaxLat != null &&
-        place.bboxMaxLng != null
-    ) {
-      val minLng = place.bboxMinLng
-      val maxLng = place.bboxMaxLng
-      val minLat = place.bboxMinLat
-      val maxLat = place.bboxMaxLat
+    if (minLat != null && minLng != null && maxLat != null && maxLng != null) {
       // If a country bounding box spans global bounds [-180, 180], restrict the boundary
       // polygon to reasonable geographic extent centered around the place center
       // so it does not wrap the whole globe into an invalid full-world box.

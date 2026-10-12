@@ -45,10 +45,9 @@ import org.groundplatform.v2.app.domain.usecase.ManageImagerySourcesUseCase
 import org.groundplatform.v2.app.domain.usecase.ManageLibraryUseCase
 import org.groundplatform.v2.app.domain.usecase.ResolveLibraryUseCase
 import org.groundplatform.v2.app.domain.usecase.SearchConceptsUseCase
-import org.groundplatform.v2.app.ui.viewmodel.OnboardingViewModelTest
 import org.groundplatform.v2.web.ui.state.OrganizationEvent
 
-/** See [OnboardingViewModelTest] for why fixtures are built outside `runNow`. */
+/** See `OnboardingViewModelTest` (shared/app) for why fixtures are built outside `runNow`. */
 class OrganizationViewModelTest {
   private class Fixture {
     val store = seededStore()

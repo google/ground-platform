@@ -28,6 +28,8 @@ for **Ground 2.0**.
 │   ├── protos/                  # Protocol Buffer (.proto) schemas (forms, survey, data)
 │   ├── core/                    # Pure KMP runtime library (Android/JVM, iOS, JS, WasmJS)
 │   ├── ui/                      # Shared Compose theme & form runner widgets (Android/JVM, iOS, JS, WasmJS)
+│   ├── map/                     # Shared map rendering (Mapbox) & geometry
+│   ├── app/                     # Shared domain, data, clients & UI for the mobile and web apps (Android/JVM, WasmJS)
 │   └── mobile/                  # Shared Mobile services, data & Compose UI (Android & iOS ONLY)
 │       └── src/commonMain/.../mobile/
 │           ├── data/            # Local SQLite/Room persistence, offline queues & tile cache
@@ -74,6 +76,12 @@ for **Ground 2.0**.
     shared Material 3 theming (`GroundTheme`) and the single-question-per-screen
     form experience (`MobileFormRunner`, `MobilePhoneFrame`,
     `FormWizardController`, `QuestionControlCard`, and `ControlWidget`).
+-   **[`shared/app/`](shared/app/)**: Shared application module
+    (`org.groundplatform.v2:app`) targeting Android/JVM and WasmJS. Contains the
+    domain model, data layer, platform clients, and the UI state, ViewModels,
+    and components that the mobile app and the web console share. Test
+    fixtures for it and its dependents are in `shared/app/testing/`
+    (`org.groundplatform.v2:app-testing`).
 -   **[`shared/mobile/`](shared/mobile/)**: Shared Mobile application module
     (`org.groundplatform.v2:mobile`) targeting **only Android/JVM and iOS**.
     Contains mobile-specific local persistence (`data/`), domain services such

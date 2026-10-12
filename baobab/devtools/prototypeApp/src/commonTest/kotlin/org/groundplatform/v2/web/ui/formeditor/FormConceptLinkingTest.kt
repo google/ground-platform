@@ -33,9 +33,9 @@ import org.groundplatform.v2.app.domain.model.editor.EditorForm
 import org.groundplatform.v2.app.domain.model.editor.EditorQuestion
 import org.groundplatform.v2.app.domain.model.editor.EditorQuestionType
 import org.groundplatform.v2.app.domain.usecase.ResolvedLibrary
+import org.groundplatform.v2.app.testing.testScope
 import org.groundplatform.v2.web.ui.state.FormLibraryContext
 import org.groundplatform.v2.web.ui.viewmodel.FormEditorViewModel
-import org.groundplatform.v2.web.ui.viewmodel.testScope
 import org.groundplatform.v2.web.ui.viewmodel.ui
 
 /** Linking Form questions to dictionary concepts in the Form editor. */
