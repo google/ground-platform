@@ -46,5 +46,3 @@ includeBuild("../shared/map")
 includeBuild("../shared/app")
 
 includeBuild("../shared/mobile")
-
-includeBuild("../devtools/prototypeApp")

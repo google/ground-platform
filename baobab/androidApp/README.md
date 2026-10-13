@@ -23,10 +23,9 @@ for Ground 2.0.
 
 `androidApp` is intentionally a thin platform wrapper. All application UI,
 screens, navigation, ViewModels, and offline data collection logic live in shared
-Kotlin Multiplatform modules ([`../shared/mobile/`](../shared/mobile/),
-[`../shared/map/`](../shared/map/), and
-[`../devtools/prototypeApp/`](../devtools/prototypeApp/)) so that `androidApp`
-and [`../iosApp/`](../iosApp/) deliver consistent behavior.
+KMP modules ([`../shared/mobile/`](../shared/mobile/),
+[`../shared/app/`](../shared/app/), and [`../shared/map/`](../shared/map/)) so
+that `androidApp` and [`../iosApp/`](../iosApp/) deliver consistent behavior.
 
 ## Contents
 

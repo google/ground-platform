@@ -39,6 +39,7 @@ for **Ground 2.0**.
 ├── androidApp/                  # Runnable Android app wrapper (APK/AAB) -> depends on shared/mobile
 ├── iosApp/                      # Runnable iOS Xcode app wrapper (IPA)   -> embeds shared/mobile
 ├── webApp/                      # Runnable Web Console app (Wasm)        -> depends on shared/web
+├── mobileWebApp/                # Runnable mobile app for the browser (Wasm) + device workbench -> depends on shared/mobile
 ├── devtools/
 │   ├── formdebugger/            # Interactive Compose Web workbench for XForms, ProtoForms & XPath
 │   └── prototypeApp/            # Interactive Compose Web UX prototype embedding Ground Mobile UI
@@ -103,6 +104,11 @@ for **Ground 2.0**.
 -   **[`webApp/`](webApp/)**: Ground 2.0 Web Console application (`wasmJs`) for
     survey administration, map management, and data exploration. A thin host
     for `WebConsoleApp()` from `shared/web`.
+-   **[`mobileWebApp/`](mobileWebApp/)**: The mobile app (`GroundMobileApp()`)
+    running in the browser with Kotlin/Wasm, inside a simulated device
+    workbench by default or full-window with `?chrome=0`, for testing without
+    an Android or iOS build. Its `workbench/` library is shared with
+    `devtools/prototypeApp`.
 -   **[`devtools/formdebugger/`](devtools/formdebugger/)**: Single-page Compose
     Multiplatform Web application for interactive bidirectional editing of
     `FormDef` and `RecordInstance` (`XML` ↔ `textproto` / `JSON`), real-time

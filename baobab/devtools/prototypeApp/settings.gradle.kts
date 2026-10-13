@@ -47,3 +47,5 @@ includeBuild("../../shared/app")
 includeBuild("../../shared/mobile")
 
 includeBuild("../../shared/web")
+
+includeBuild("../../mobileWebApp")

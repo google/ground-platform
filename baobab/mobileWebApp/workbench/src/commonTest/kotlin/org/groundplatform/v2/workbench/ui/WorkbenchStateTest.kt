@@ -27,7 +27,6 @@ import org.groundplatform.v2.app.ui.map.SurveyMap
 import org.groundplatform.v2.app.ui.map.SurveyMapContent
 import org.groundplatform.v2.app.ui.map.SurveyMapIds
 import org.groundplatform.v2.mobile.ui.MobileAppState
-import org.groundplatform.v2.web.ui.viewmodel.ui
 
 class WorkbenchStateTest {
   private fun SurveyMap.entityFeatures() =

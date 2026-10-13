@@ -15,7 +15,6 @@ plugins {
   kotlin("multiplatform") version "2.4.20"
   id("org.jetbrains.compose") version "1.12.0"
   id("org.jetbrains.kotlin.plugin.compose") version "2.4.20"
-  id("com.android.library") version "8.5.2"
   id("com.ncorti.ktfmt.gradle") version "0.27.0"
 }
 
@@ -30,10 +29,6 @@ ktfmt { googleStyle() }
 val devServerPort = project.findProperty("port")?.toString()?.toIntOrNull() ?: 8091
 
 kotlin {
-  androidTarget {
-    compilerOptions { jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17) }
-  }
-
   jvm { testRuns["test"].executionTask.configure { useJUnitPlatform() } }
 
   @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
@@ -67,6 +62,7 @@ kotlin {
         api("org.groundplatform.v2:app:2.0.0-SNAPSHOT")
         api("org.groundplatform.v2:mobile:2.0.0-SNAPSHOT")
         api("org.groundplatform.v2:web:2.0.0-SNAPSHOT")
+        api("org.groundplatform.v2:workbench:2.0.0-SNAPSHOT")
         implementation(compose.runtime)
         implementation(compose.foundation)
         implementation(compose.material3)
@@ -78,7 +74,6 @@ kotlin {
         implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.11.0")
       }
     }
-    val androidMain by getting { dependencies { implementation("io.ktor:ktor-client-cio:3.6.0") } }
     val wasmJsMain by getting { dependencies { implementation("io.ktor:ktor-client-js:3.6.0") } }
     val commonTest by getting {
       dependencies {
@@ -153,14 +148,4 @@ tasks.withType<ProcessResources>().configureEach {
   }
   // JS bridges loaded by index.html for the shared/app wasmJs actuals (PDF export, media capture).
   from(file("../../shared/app/src/wasmJsMain/resources"))
-}
-
-android {
-  namespace = "org.groundplatform.v2.devtools.prototypeapp"
-  compileSdk = 35
-  defaultConfig { minSdk = 24 }
-  compileOptions {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
-  }
 }

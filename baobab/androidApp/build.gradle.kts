@@ -37,7 +37,6 @@ kotlin {
     val commonMain by getting {
       dependencies {
         implementation("org.groundplatform.v2:mobile:2.0.0-SNAPSHOT")
-        implementation("org.groundplatform.v2.devtools:prototypeApp:2.0.0-SNAPSHOT")
         implementation(compose.runtime)
         implementation(compose.foundation)
         implementation(compose.material3)
