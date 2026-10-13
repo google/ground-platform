@@ -24,7 +24,7 @@ import org.groundplatform.v2.app.data.repository.LocalStoreTransactionRunner
 import org.groundplatform.v2.app.data.repository.OrganizationRepositoryImpl
 import org.groundplatform.v2.app.data.repository.SurveyEditorRepositoryImpl
 import org.groundplatform.v2.app.data.repository.SurveyRepositoryImpl
-import org.groundplatform.v2.app.data.seed.PrototypeFakeOrganizationsData
+import org.groundplatform.v2.app.data.seed.SampleOrganizationsData
 import org.groundplatform.v2.app.domain.model.MapThumbnailTheme
 import org.groundplatform.v2.app.domain.model.SurveyLifecycleState
 
@@ -57,7 +57,7 @@ class CreateSurveyUseCaseTest {
     val kfs = runNow {
       OrganizationRepositoryImpl(store).getOrganizations()
     }
-      .first { it.id == PrototypeFakeOrganizationsData.KENYA_FOREST_SERVICE }
+      .first { it.id == SampleOrganizationsData.KENYA_FOREST_SERVICE }
 
     val inOrg = useCase.newSurvey("Mangrove Nursery Audit", existing, kfs, "maya@example.org")
     assertEquals("survey-mangrove-nursery-audit", inOrg.id)
@@ -92,7 +92,7 @@ class CreateSurveyUseCaseTest {
     val kfs = runNow {
       OrganizationRepositoryImpl(store).getOrganizations()
     }
-      .first { it.id == PrototypeFakeOrganizationsData.KENYA_FOREST_SERVICE }
+      .first { it.id == SampleOrganizationsData.KENYA_FOREST_SERVICE }
     val survey = useCase.newSurvey("Mangrove Nursery Audit", existing, kfs, "maya@example.org")
 
     runNow { useCase(survey, ownerName = "Maya Lin") }

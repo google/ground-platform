@@ -21,7 +21,7 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import org.groundplatform.v2.app.data.datasource.local.store.runNow
 import org.groundplatform.v2.app.data.repository.OrganizationRepositoryImpl
-import org.groundplatform.v2.app.data.seed.PrototypeFakeSurveysData
+import org.groundplatform.v2.app.data.seed.SampleSurveysData
 import org.groundplatform.v2.app.domain.model.SurveyLifecycleState
 import org.groundplatform.v2.app.domain.model.SurveyOutcomeKind
 import org.groundplatform.v2.app.domain.model.editor.isoUtc
@@ -31,9 +31,9 @@ import org.groundplatform.v2.web.domain.usecase.SurveyLifecycleFixture
 
 /** The "Was this data used?" badge on the web surveys page and the card it opens. */
 class SurveyOutcomePromptViewModelTest {
-  private val closedId = PrototypeFakeSurveysData.CLOSED_SURVEY_ID
+  private val closedId = SampleSurveysData.CLOSED_SURVEY_ID
   private val closedAtMillis =
-    checkNotNull(epochMillisOfIsoUtc(PrototypeFakeSurveysData.CLOSED_SURVEY_CLOSED_AT))
+    checkNotNull(epochMillisOfIsoUtc(SampleSurveysData.CLOSED_SURVEY_CLOSED_AT))
 
   private fun days(n: Int) = n * 86_400_000L
 

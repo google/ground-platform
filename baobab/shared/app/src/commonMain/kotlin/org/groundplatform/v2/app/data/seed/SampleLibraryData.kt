@@ -34,8 +34,8 @@ import org.groundplatform.v2.app.domain.model.editor.EditorQuestionType
  * Pack that combines it with the global EUDR template. The global library itself comes from
  * [GlobalLibrarySeedData].
  */
-object PrototypeFakeLibraryData {
-  private const val KFS = PrototypeFakeOrganizationsData.KENYA_FOREST_SERVICE
+object SampleLibraryData {
+  private const val KFS = SampleOrganizationsData.KENYA_FOREST_SERVICE
 
   private fun kfsId(name: String) = LibraryIds.organizationEntryId(KFS, name)
 

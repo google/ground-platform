@@ -38,7 +38,7 @@ import org.groundplatform.v2.app.domain.model.editor.SurveyEditorDraft
  * `SurveyEditorDerivation`; these extras are merged on top of that derived draft by
  * [SampleDataSeeder].
  */
-object PrototypeFakeSurveyEditorData {
+object SampleSurveyEditorData {
   /** ID of the sample survey shared with everyone in its organization. */
   const val ORGANIZATION_SHARED_SURVEY_ID: String = "survey-serengeti-corridor"
 
@@ -85,7 +85,7 @@ object PrototypeFakeSurveyEditorData {
     }
 
   private fun kfsConceptId(name: String) =
-    LibraryIds.organizationEntryId(PrototypeFakeOrganizationsData.KENYA_FOREST_SERVICE, name)
+    LibraryIds.organizationEntryId(SampleOrganizationsData.KENYA_FOREST_SERVICE, name)
 
   /**
    * The seeded draft for [ORGANIZATION_SHARED_SURVEY_ID]: [derived], owned by a Mekong Mangrove
@@ -95,7 +95,7 @@ object PrototypeFakeSurveyEditorData {
     derived.copy(
       details =
         derived.details.copy(
-          organizationId = PrototypeFakeOrganizationsData.MEKONG_MANGROVE_ALLIANCE,
+          organizationId = SampleOrganizationsData.MEKONG_MANGROVE_ALLIANCE,
           surveyArea = derived.details.surveyArea ?: serengetiSurveyArea(),
         ),
       sharing = organizationSharing(),
@@ -165,8 +165,7 @@ object PrototypeFakeSurveyEditorData {
 
   fun organizationSharing() =
     SharingSettings(
-      ownerEmail =
-        PrototypeFakeOrganizationsData.ownerEmailForSurvey(ORGANIZATION_SHARED_SURVEY_ID),
+      ownerEmail = SampleOrganizationsData.ownerEmailForSurvey(ORGANIZATION_SHARED_SURVEY_ID),
       ownerProfile = CachedProfile("Linh Tran", "avatar:6", "2026-02-11"),
       policy = SharingPolicy.ORGANIZATION,
     )

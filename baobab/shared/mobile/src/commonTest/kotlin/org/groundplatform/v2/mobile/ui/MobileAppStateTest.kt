@@ -21,11 +21,11 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import org.groundplatform.v2.app.domain.model.AppScreen
 import org.groundplatform.v2.app.domain.model.BasemapType
 import org.groundplatform.v2.app.domain.model.DownloadSurveyEntryOrigin
 import org.groundplatform.v2.app.domain.model.EntityDetailsPane
 import org.groundplatform.v2.app.domain.model.EntityGeometryKind
-import org.groundplatform.v2.app.domain.model.GROUND_WEBSITE_URL
 import org.groundplatform.v2.app.domain.model.LayerSourceType
 import org.groundplatform.v2.app.domain.model.ListFilterTab
 import org.groundplatform.v2.app.domain.model.LocationLockState
@@ -38,10 +38,10 @@ import org.groundplatform.v2.app.domain.model.MutationOperationKind
 import org.groundplatform.v2.app.domain.model.MutationSyncState
 import org.groundplatform.v2.app.domain.model.NavigationTargetKind
 import org.groundplatform.v2.app.domain.model.OfflineBasemapStyle
-import org.groundplatform.v2.app.domain.model.PrototypeScreen
 import org.groundplatform.v2.app.domain.model.SyncStatus
 import org.groundplatform.v2.app.domain.model.UploadStatusFilter
 import org.groundplatform.v2.app.domain.model.UserSettings
+import org.groundplatform.v2.app.domain.model.WEBSITE_URL
 import org.groundplatform.v2.app.domain.model.formatClusterSitesCountLabel
 import org.groundplatform.v2.app.domain.model.geometryKind
 import org.groundplatform.v2.app.domain.model.groupClusterFeaturesByMarkerSymbol
@@ -63,7 +63,7 @@ class MobileAppStateTest {
   fun initialState_startsOnSignInWithSampleSurveys() {
     val state = MobileAppState()
 
-    assertEquals(PrototypeScreen.SIGN_IN, state.currentScreen)
+    assertEquals(AppScreen.SIGN_IN, state.currentScreen)
     assertFalse(state.isSignedIn)
     assertFalse(state.hasAcceptedTerms)
     assertEquals(6, state.surveys.size)
@@ -76,34 +76,34 @@ class MobileAppStateTest {
     val state = MobileAppState()
 
     // 1. Initial Screen is Sign In
-    assertEquals(PrototypeScreen.SIGN_IN, state.currentScreen)
+    assertEquals(AppScreen.SIGN_IN, state.currentScreen)
 
     // 2. Sign In with Google -> Terms of Service
     state.signInWithGoogle()
     assertTrue(state.isSignedIn)
-    assertEquals(PrototypeScreen.TERMS_OF_SERVICE, state.currentScreen)
+    assertEquals(AppScreen.TERMS_OF_SERVICE, state.currentScreen)
 
     // 3. Accept Terms of Service -> Download Survey
     state.acceptTermsOfService()
     assertTrue(state.hasAcceptedTerms)
-    assertEquals(PrototypeScreen.DOWNLOAD_SURVEY, state.currentScreen)
+    assertEquals(AppScreen.DOWNLOAD_SURVEY, state.currentScreen)
   }
 
   @Test
   fun declineTermsOfService_returnsToSignInAndResetsAuth() {
     val state = MobileAppState()
     state.signInWithGoogle()
-    assertEquals(PrototypeScreen.TERMS_OF_SERVICE, state.currentScreen)
+    assertEquals(AppScreen.TERMS_OF_SERVICE, state.currentScreen)
 
     state.declineTermsOfService()
-    assertEquals(PrototypeScreen.SIGN_IN, state.currentScreen)
+    assertEquals(AppScreen.SIGN_IN, state.currentScreen)
     assertFalse(state.isSignedIn)
     assertFalse(state.hasAcceptedTerms)
   }
 
   @Test
   fun searchQuery_filtersSurveysByNameLocationAndOrganization() {
-    val state = MobileAppState(initialScreen = PrototypeScreen.DOWNLOAD_SURVEY)
+    val state = MobileAppState(initialScreen = AppScreen.DOWNLOAD_SURVEY)
 
     // Search by survey title keyword
     state.updateSearchQuery("Mangrove")
@@ -132,13 +132,13 @@ class MobileAppStateTest {
 
   @Test
   fun openSurvey_navigatesToMainSurveyScreenWithNoDefaultSelectedSite() {
-    val state = MobileAppState(initialScreen = PrototypeScreen.DOWNLOAD_SURVEY)
+    val state = MobileAppState(initialScreen = AppScreen.DOWNLOAD_SURVEY)
     assertEquals(null, state.selectedEntityId)
     assertEquals(null, state.selectedEntity)
 
     state.openSurvey("survey-kenya-coffee")
 
-    assertEquals(PrototypeScreen.MAIN_SURVEY, state.currentScreen)
+    assertEquals(AppScreen.MAIN_SURVEY, state.currentScreen)
     assertEquals(MainSurveyViewMode.MAP, state.mainViewMode)
     assertEquals("survey-kenya-coffee", state.activeSurvey.id)
     assertEquals(null, state.selectedEntityId)
@@ -148,7 +148,7 @@ class MobileAppStateTest {
 
   @Test
   fun toggleLayerVisibility_filtersVisibleMapEntitiesAndDeselectsHiddenEntity() {
-    val state = MobileAppState(initialScreen = PrototypeScreen.MAIN_SURVEY)
+    val state = MobileAppState(initialScreen = AppScreen.MAIN_SURVEY)
     assertEquals(5, state.visibleMapEntities.size)
     assertEquals(null, state.selectedEntityId)
 
@@ -169,7 +169,7 @@ class MobileAppStateTest {
 
   @Test
   fun selectEntities_supportsUnified1ToNSubmissionsAndSimplestyleMarkersAcrossGeometries() {
-    val state = MobileAppState(initialScreen = PrototypeScreen.MAIN_SURVEY)
+    val state = MobileAppState(initialScreen = AppScreen.MAIN_SURVEY)
 
     // 1. Stage 1 (Initialized Empty Circle "○") Polygon entity: `entity-nyr-112`
     val nyr112 = state.entities.first { it.id == "entity-nyr-112" }
@@ -223,7 +223,7 @@ class MobileAppStateTest {
 
   @Test
   fun entityBottomSheetFormButtons_allowAll1ToNSubmissions_andProgressMarkerFromEmptyToHalfToCheckmark() {
-    val state = MobileAppState(initialScreen = PrototypeScreen.MAIN_SURVEY)
+    val state = MobileAppState(initialScreen = AppScreen.MAIN_SURVEY)
 
     // All forms linked to an entity dataset follow 1:N cardinality and remain enabled
     val nyr104 = state.entities.first { it.id == "entity-nyr-104" }
@@ -263,7 +263,7 @@ class MobileAppStateTest {
 
   @Test
   fun navigationDrawerActions_switchSurveysManageOfflineMapsSettingsTosAndSignOut() {
-    val state = MobileAppState(initialScreen = PrototypeScreen.MAIN_SURVEY)
+    val state = MobileAppState(initialScreen = AppScreen.MAIN_SURVEY)
     state.updateDrawerOpen(true)
     assertTrue(state.isDrawerOpen)
 
@@ -285,18 +285,18 @@ class MobileAppStateTest {
 
     // Primary action button on Switch Surveys screen navigates to DOWNLOAD_SURVEY
     state.openDownloadMoreSurveysScreen()
-    assertEquals(PrototypeScreen.DOWNLOAD_SURVEY, state.currentScreen)
+    assertEquals(AppScreen.DOWNLOAD_SURVEY, state.currentScreen)
 
     // Sign out returns to SIGN_IN
     state.openSurvey("survey-kenya-coffee")
     state.drawerSignOut()
-    assertEquals(PrototypeScreen.SIGN_IN, state.currentScreen)
+    assertEquals(AppScreen.SIGN_IN, state.currentScreen)
     assertFalse(state.isSignedIn)
   }
 
   @Test
   fun qrCodeAndSharePdfModals_openForGeospatialEntitiesAndSubmissions() {
-    val state = MobileAppState(initialScreen = PrototypeScreen.MAIN_SURVEY)
+    val state = MobileAppState(initialScreen = AppScreen.MAIN_SURVEY)
 
     // GNSS satellite count and accuracy chip label
     assertEquals(18, state.gnssSatelliteCount)
@@ -323,7 +323,7 @@ class MobileAppStateTest {
 
   @Test
   fun mapLayersAndOfflineBasemap_toggleIndependentlyViaLayersSheet() {
-    val state = MobileAppState(initialScreen = PrototypeScreen.MAIN_SURVEY)
+    val state = MobileAppState(initialScreen = AppScreen.MAIN_SURVEY)
 
     // 3 entity dataset layers; submissions are not shown as map layers
     assertEquals(3, state.entityDatasetLayers.size)
@@ -358,7 +358,7 @@ class MobileAppStateTest {
 
   @Test
   fun mapCamera_autoCentersOnUserGpsByDefault_andShowsRecenterWhenDragged() {
-    val state = MobileAppState(initialScreen = PrototypeScreen.MAIN_SURVEY)
+    val state = MobileAppState(initialScreen = AppScreen.MAIN_SURVEY)
 
     // By default, camera follows user and keeps user's GPS location at center (0.50, 0.50)
     assertTrue(state.isCameraFollowingUser)
@@ -420,7 +420,7 @@ class MobileAppStateTest {
 
   @Test
   fun entityBottomSheet_startsCollapsedAndSupportsExpandAndCollapse() {
-    val state = MobileAppState(initialScreen = PrototypeScreen.MAIN_SURVEY)
+    val state = MobileAppState(initialScreen = AppScreen.MAIN_SURVEY)
 
     // No entity is selected by default so the bottom sheet is not visible
     assertEquals(null, state.selectedEntityId)
@@ -462,7 +462,7 @@ class MobileAppStateTest {
 
   @Test
   fun mapZoomControls_supportZoomInZoomOutAndReset() {
-    val state = MobileAppState(initialScreen = PrototypeScreen.MAIN_SURVEY)
+    val state = MobileAppState(initialScreen = AppScreen.MAIN_SURVEY)
     assertEquals(0f, state.mapZoomDelta)
     assertEquals("15.3z", state.effectiveMapZoomLabel)
     val initialScale = state.mapScaleBarSpec
@@ -494,7 +494,7 @@ class MobileAppStateTest {
 
   @Test
   fun groundSettingsAndSignInLanguageSelector_syncUserSettingsAndLocales() {
-    val state = MobileAppState(initialScreen = PrototypeScreen.SIGN_IN)
+    val state = MobileAppState(initialScreen = AppScreen.SIGN_IN)
 
     // Default settings match ground-android UserSettings defaults
     assertEquals("en", state.selectedLanguageCode)
@@ -535,13 +535,13 @@ class MobileAppStateTest {
 
     // Visit website action records https://groundplatform.org/
     state.visitGroundWebsite()
-    assertEquals(GROUND_WEBSITE_URL, state.visitedWebsiteUrl)
-    assertTrue(state.activeSurveyNotice?.contains(GROUND_WEBSITE_URL) == true)
+    assertEquals(WEBSITE_URL, state.visitedWebsiteUrl)
+    assertTrue(state.activeSurveyNotice?.contains(WEBSITE_URL) == true)
   }
 
   @Test
   fun mobileUiDataModels_doNotContain1To1Or1ToNIndicators() {
-    val state = MobileAppState(initialScreen = PrototypeScreen.MAIN_SURVEY)
+    val state = MobileAppState(initialScreen = AppScreen.MAIN_SURVEY)
 
     state.mapLayers.forEach { layer ->
       assertFalse(layer.label.contains("1:1"), "Unexpected 1:1 in layer label: ${layer.label}")
@@ -585,7 +585,7 @@ class MobileAppStateTest {
 
   @Test
   fun straightLineNavigation_toEntityAndSubmission_computesBearingDistanceAndStepsUser() {
-    val state = MobileAppState(initialScreen = PrototypeScreen.MAIN_SURVEY)
+    val state = MobileAppState(initialScreen = AppScreen.MAIN_SURVEY)
     assertEquals(null, state.activeNavigation)
 
     // 1. Start straight-line navigation to a Geospatial Entity
@@ -673,7 +673,7 @@ class MobileAppStateTest {
     state.acceptTermsOfService()
 
     // 1. Reached after ToS -> origin is AFTER_TOS
-    assertEquals(PrototypeScreen.DOWNLOAD_SURVEY, state.currentScreen)
+    assertEquals(AppScreen.DOWNLOAD_SURVEY, state.currentScreen)
     assertEquals(DownloadSurveyEntryOrigin.AFTER_TOS, state.downloadSurveyEntryOrigin)
     assertFalse(state.isDownloadSurveyAccessedFromSurveyList)
     assertFalse(state.isDownloadSurveySignOutPromptOpen)
@@ -681,13 +681,13 @@ class MobileAppStateTest {
     // Back action prompts first without immediately signing out
     state.navigateBackFromDownloadSurvey()
     assertTrue(state.isDownloadSurveySignOutPromptOpen)
-    assertEquals(PrototypeScreen.DOWNLOAD_SURVEY, state.currentScreen)
+    assertEquals(AppScreen.DOWNLOAD_SURVEY, state.currentScreen)
     assertTrue(state.isSignedIn)
 
     // Canceling prompt keeps user on Download surveys screen and signed in
     state.dismissDownloadSurveySignOutPrompt()
     assertFalse(state.isDownloadSurveySignOutPromptOpen)
-    assertEquals(PrototypeScreen.DOWNLOAD_SURVEY, state.currentScreen)
+    assertEquals(AppScreen.DOWNLOAD_SURVEY, state.currentScreen)
     assertTrue(state.isSignedIn)
 
     // Confirming sign out from prompt signs the user out and returns to Sign In screen
@@ -697,7 +697,7 @@ class MobileAppStateTest {
     assertFalse(state.isDownloadSurveySignOutPromptOpen)
     assertFalse(state.isSignedIn)
     assertFalse(state.hasAcceptedTerms)
-    assertEquals(PrototypeScreen.SIGN_IN, state.currentScreen)
+    assertEquals(AppScreen.SIGN_IN, state.currentScreen)
 
     // 2. Re-sign in, open a survey, and access Download surveys from the Survey list
     // (SWITCH_SURVEYS)
@@ -705,11 +705,11 @@ class MobileAppStateTest {
     state.acceptTermsOfService()
     state.openSurvey("survey-kenya-coffee")
     state.drawerSwitchSurveys()
-    assertEquals(PrototypeScreen.MAIN_SURVEY, state.currentScreen)
+    assertEquals(AppScreen.MAIN_SURVEY, state.currentScreen)
     assertEquals(MainDrawerSubView.SWITCH_SURVEYS, state.activeDrawerSubView)
 
     state.openDownloadMoreSurveysScreen()
-    assertEquals(PrototypeScreen.DOWNLOAD_SURVEY, state.currentScreen)
+    assertEquals(AppScreen.DOWNLOAD_SURVEY, state.currentScreen)
     assertEquals(DownloadSurveyEntryOrigin.SURVEY_LIST, state.downloadSurveyEntryOrigin)
     assertTrue(state.isDownloadSurveyAccessedFromSurveyList)
 
@@ -718,19 +718,19 @@ class MobileAppStateTest {
     state.navigateBackFromDownloadSurvey()
     assertFalse(state.isDownloadSurveySignOutPromptOpen)
     assertTrue(state.isSignedIn)
-    assertEquals(PrototypeScreen.MAIN_SURVEY, state.currentScreen)
+    assertEquals(AppScreen.MAIN_SURVEY, state.currentScreen)
     assertEquals(MainDrawerSubView.SWITCH_SURVEYS, state.activeDrawerSubView)
   }
 
   @Test
   fun userFacingTerminology_replacesEntityWithGenericOrDomainFocusedLanguage() {
-    val state = MobileAppState(initialScreen = PrototypeScreen.MAIN_SURVEY)
+    val state = MobileAppState(initialScreen = AppScreen.MAIN_SURVEY)
 
     assertEquals("Map features", ListFilterTab.ENTITIES.label)
     assertEquals("Places", ListFilterTab.PLACES.label)
     assertEquals("Survey Layer", LayerSourceType.ENTITY_DATASET.badgeLabel)
 
-    PrototypeScreen.entries.forEach { screen ->
+    AppScreen.entries.forEach { screen ->
       assertFalse(screen.title.contains("entity", ignoreCase = true))
       assertFalse(screen.subtitle.contains("entity", ignoreCase = true))
       assertFalse(screen.subtitle.contains("entities", ignoreCase = true))
@@ -761,7 +761,7 @@ class MobileAppStateTest {
 
   @Test
   fun submissionListsAndLayersSheet_groupSubmissionsByFormAndUseFormTitleInsteadOfWordForm() {
-    val state = MobileAppState(initialScreen = PrototypeScreen.MAIN_SURVEY)
+    val state = MobileAppState(initialScreen = AppScreen.MAIN_SURVEY)
 
     // 1. Main List View search no longer includes form submissions
     assertTrue(state.groupedFilteredListSubmissions.isEmpty())
@@ -813,7 +813,7 @@ class MobileAppStateTest {
 
   @Test
   fun bottomCenteredFab_opensAvailableForms_andPresentsMapOrListSelectorAtEntityRefStep() {
-    val state = MobileAppState(initialScreen = PrototypeScreen.MAIN_SURVEY)
+    val state = MobileAppState(initialScreen = AppScreen.MAIN_SURVEY)
     state.selectEntity(null)
     assertEquals(null, state.selectedEntityId)
     assertFalse(state.isAvailableFormsSheetOpen)
@@ -892,7 +892,7 @@ class MobileAppStateTest {
 
   @Test
   fun selectEntityRefForActiveForm_framesSelectedMapFeatureOnMap() {
-    val state = MobileAppState(initialScreen = PrototypeScreen.MAIN_SURVEY)
+    val state = MobileAppState(initialScreen = AppScreen.MAIN_SURVEY)
     state.selectEntity(null)
     state.launchFormFromFab("form-eudr-baseline")
     assertTrue(state.isCurrentFormStepEntityRef)
@@ -927,7 +927,7 @@ class MobileAppStateTest {
 
   @Test
   fun standaloneSubmissionsWithoutAttachedEntities_supportMapSelectionListInspectionWayfindingAndFabSubmission() {
-    val state = MobileAppState(initialScreen = PrototypeScreen.MAIN_SURVEY)
+    val state = MobileAppState(initialScreen = AppScreen.MAIN_SURVEY)
 
     // 1. Verify default sample standalone submissions exist without attached entities
     assertEquals(2, state.standaloneSubmissions.size)
@@ -986,7 +986,7 @@ class MobileAppStateTest {
 
   @Test
   fun outboxAndUploadedDrawerViews_listMutationsInReverseChronologicalOrderWithStateOperationTimeAndStartedOrCompletedTime() {
-    val state = MobileAppState(initialScreen = PrototypeScreen.MAIN_SURVEY)
+    val state = MobileAppState(initialScreen = AppScreen.MAIN_SURVEY)
 
     // 1. Open Outbox from Navigation Drawer
     state.updateDrawerOpen(true)
@@ -1070,7 +1070,7 @@ class MobileAppStateTest {
 
   @Test
   fun unifiedBottomSheet_supportsListExpansionEntityInspectionAndReturnToList() {
-    val state = MobileAppState(initialScreen = PrototypeScreen.MAIN_SURVEY)
+    val state = MobileAppState(initialScreen = AppScreen.MAIN_SURVEY)
 
     // Starts in collapsed Map peek mode with no entity selected
     assertEquals(MainSurveyViewMode.MAP, state.mainViewMode)
@@ -1101,7 +1101,7 @@ class MobileAppStateTest {
 
   @Test
   fun unifiedUploadsDrawerView_supportsStatusFilterChipsAndUserFriendlyLabels() {
-    val state = MobileAppState(initialScreen = PrototypeScreen.MAIN_SURVEY)
+    val state = MobileAppState(initialScreen = AppScreen.MAIN_SURVEY)
 
     // Verify user-friendly operation labels (Form submitted / modified / deleted, Map feature
     // modified)
@@ -1162,7 +1162,7 @@ class MobileAppStateTest {
 
   @Test
   fun mapZoomOut_clustersMapFeaturesByMarkerSymbolIncludingNoSymbolGroupInClusterBalloon() {
-    val state = MobileAppState(initialScreen = PrototypeScreen.MAIN_SURVEY)
+    val state = MobileAppState(initialScreen = AppScreen.MAIN_SURVEY)
 
     // 1. At default zoom (mapZoomDelta == 0f), clustering is inactive; only the 5 entities are
     // included (form submission geometries are not displayed on the map or in cluster chips)
@@ -1275,7 +1275,7 @@ class MobileAppStateTest {
 
   @Test
   fun resolveEntityLngLatBounds_coversLinesAndPolygonsAndCollapsesForPoints() {
-    val state = MobileAppState(initialScreen = PrototypeScreen.MAIN_SURVEY)
+    val state = MobileAppState(initialScreen = AppScreen.MAIN_SURVEY)
     val kinds = state.entities.groupBy { it.geometryKind }
 
     for (kind in listOf(EntityGeometryKind.POLYGON, EntityGeometryKind.LINE)) {
@@ -1295,7 +1295,7 @@ class MobileAppStateTest {
 
   @Test
   fun syncMapZoomDelta_followsFittedCameraAndExitsClustering() {
-    val state = MobileAppState(initialScreen = PrototypeScreen.MAIN_SURVEY)
+    val state = MobileAppState(initialScreen = AppScreen.MAIN_SURVEY)
     repeat(4) { state.zoomOutMap() }
     assertTrue(state.isMapClusteringActive)
     state.selectCluster(state.mapFeatureClusters.first().id)
@@ -1356,7 +1356,7 @@ class MobileAppStateTest {
 
   @Test
   fun deviceStorageInfo_calculatesStorageBreakdownAccurately() {
-    val state = MobileAppState(initialScreen = PrototypeScreen.MAIN_SURVEY)
+    val state = MobileAppState(initialScreen = AppScreen.MAIN_SURVEY)
     val storage = state.deviceStorageInfo
 
     // Verify storage figures exist and total is 64 GB
@@ -1395,7 +1395,7 @@ class MobileAppStateTest {
 
   @Test
   fun promptRemoveDownloadedSurvey_requiresConfirmationBeforeRemoval() {
-    val state = MobileAppState(initialScreen = PrototypeScreen.DOWNLOAD_SURVEY)
+    val state = MobileAppState(initialScreen = AppScreen.DOWNLOAD_SURVEY)
     val targetId = "survey-kenya-coffee"
     assertTrue(state.surveys.first { it.id == targetId }.isDownloaded)
 
@@ -1421,7 +1421,7 @@ class MobileAppStateTest {
 
   @Test
   fun promptRemoveDownloadedSurvey_downloadsImmediatelyIfNotAlreadyDownloaded() {
-    val state = MobileAppState(initialScreen = PrototypeScreen.DOWNLOAD_SURVEY)
+    val state = MobileAppState(initialScreen = AppScreen.DOWNLOAD_SURVEY)
     val targetId = "survey-serengeti-corridor"
     assertFalse(state.surveys.first { it.id == targetId }.isDownloaded)
 
@@ -1433,7 +1433,7 @@ class MobileAppStateTest {
 
   @Test
   fun promptRemoveOfflineTilePackage_requiresConfirmationBeforeRemoval() {
-    val state = MobileAppState(initialScreen = PrototypeScreen.MAIN_SURVEY)
+    val state = MobileAppState(initialScreen = AppScreen.MAIN_SURVEY)
     val downloadedPkg = state.offlineTilePackages.first { it.isDownloaded }
 
     // User clicks Downloaded button -> triggers prompt confirmation
@@ -1456,7 +1456,7 @@ class MobileAppStateTest {
 
   @Test
   fun promptRemoveOfflineTilePackage_downloadsImmediatelyIfNotAlreadyDownloaded() {
-    val state = MobileAppState(initialScreen = PrototypeScreen.MAIN_SURVEY)
+    val state = MobileAppState(initialScreen = AppScreen.MAIN_SURVEY)
     val nonDownloadedPkg = state.offlineTilePackages.first { !it.isDownloaded }
 
     state.promptRemoveOfflineTilePackage(nonDownloadedPkg.id)
@@ -1466,7 +1466,7 @@ class MobileAppStateTest {
 
   @Test
   fun entityDetails_openOnPropertiesWithSubmissionsOneClickAway() {
-    val state = MobileAppState(initialScreen = PrototypeScreen.MAIN_SURVEY)
+    val state = MobileAppState(initialScreen = AppScreen.MAIN_SURVEY)
     val entity = state.entities.first { it.submissions.isNotEmpty() }
 
     state.selectEntity(entity.id)
@@ -1493,7 +1493,7 @@ class MobileAppStateTest {
 
   @Test
   fun openingSubmissionOfAnotherEntity_framesThatEntity() {
-    val state = MobileAppState(initialScreen = PrototypeScreen.MAIN_SURVEY)
+    val state = MobileAppState(initialScreen = AppScreen.MAIN_SURVEY)
     val entities = state.entities.filter { it.submissions.isNotEmpty() }
     state.selectEntity(entities[0].id)
     val epoch = state.entitySelectionEpoch
@@ -1506,7 +1506,7 @@ class MobileAppStateTest {
 
   @Test
   fun relatedEntityForPropertyValue_resolvesReferencesToOtherRecords() {
-    val state = MobileAppState(initialScreen = PrototypeScreen.MAIN_SURVEY)
+    val state = MobileAppState(initialScreen = AppScreen.MAIN_SURVEY)
     val parcel = state.entities.first { it.properties["Washing Station"] != null }
     val station = state.entities.first { it.id == parcel.properties["Washing Station"] }
 
@@ -1519,7 +1519,7 @@ class MobileAppStateTest {
 
   @Test
   fun openUploadsForEntity_filtersUploadsToThatEntityUntilCleared() {
-    val state = MobileAppState(initialScreen = PrototypeScreen.MAIN_SURVEY)
+    val state = MobileAppState(initialScreen = AppScreen.MAIN_SURVEY)
     val entityId = state.mutations.first().entityId
     val expected = state.mutations.count { it.entityId == entityId }
 
@@ -1544,7 +1544,7 @@ class MobileAppStateTest {
 
   @Test
   fun surveyMap_marksOnlyEntitiesWithOutboxMutationsAsPending() {
-    val state = MobileAppState(initialScreen = PrototypeScreen.MAIN_SURVEY)
+    val state = MobileAppState(initialScreen = AppScreen.MAIN_SURVEY)
     val pendingIds = state.pendingUploadEntityIds
     val features =
       SurveyMapContent.main(state, showNavigation = true).entityFeatures().associateBy { it.id }
@@ -1606,7 +1606,7 @@ class MobileAppStateTest {
 
   @Test
   fun contributorIdentities_alwaysHiddenFromNonOrganizersAcrossAllSharingPolicies() {
-    val state = MobileAppState(initialScreen = PrototypeScreen.MAIN_SURVEY)
+    val state = MobileAppState(initialScreen = AppScreen.MAIN_SURVEY)
     val entity = state.entities.first { it.id == "entity-shade-201" }
     val mayaSubmission =
       entity.submissions.first { it.collectorEmail == "maya.lin@groundplatform.org" }

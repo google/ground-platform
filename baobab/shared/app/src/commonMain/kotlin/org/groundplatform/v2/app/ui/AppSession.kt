@@ -21,6 +21,7 @@ import groundplatform.v2.forms.FormDef
 import groundplatform.v2.forms.RecordInstance
 import kotlinx.coroutines.launch
 import org.groundplatform.v2.app.di.AppDataHolder
+import org.groundplatform.v2.app.domain.model.AppScreen
 import org.groundplatform.v2.app.domain.model.BasemapType
 import org.groundplatform.v2.app.domain.model.EntityDatasetFeaturesGroup
 import org.groundplatform.v2.app.domain.model.EntityDetailsPane
@@ -41,7 +42,6 @@ import org.groundplatform.v2.app.domain.model.NavigationTargetKind
 import org.groundplatform.v2.app.domain.model.OfflineBasemapStyle
 import org.groundplatform.v2.app.domain.model.OfflineTilePackageItem
 import org.groundplatform.v2.app.domain.model.Organization
-import org.groundplatform.v2.app.domain.model.PrototypeScreen
 import org.groundplatform.v2.app.domain.model.SharedPdfSheetState
 import org.groundplatform.v2.app.domain.model.StraightLineNavigationState
 import org.groundplatform.v2.app.domain.model.StraightLineVector
@@ -308,7 +308,7 @@ open class AppSession(
     when (event) {
       is OnboardingEvent.ShowScreen -> {
         onScreenRequested(event.screen)
-        if (event.screen == PrototypeScreen.SIGN_IN) {
+        if (event.screen == AppScreen.SIGN_IN) {
           activeSurveyNotice = null
         }
       }
@@ -332,7 +332,7 @@ open class AppSession(
   // --- Client hooks: overridden by the mobile and web sessions to update their own shells ---
 
   /** The onboarding flow asks to show [screen] (Sign In, Terms of Service, Download survey). */
-  protected open fun onScreenRequested(screen: PrototypeScreen) {}
+  protected open fun onScreenRequested(screen: AppScreen) {}
 
   /** A survey was opened from the onboarding flow or the survey list and is now active. */
   protected open fun onSurveyOpened() {}

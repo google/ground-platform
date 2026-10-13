@@ -522,7 +522,7 @@ private fun EstimateLine(
       Text(text, style = MaterialTheme.typography.bodySmall)
       if ((estimate?.estimatedPlotCount ?: 0) > LARGE_DESIGN_PLOTS) {
         Text(
-          "Large designs can be slow to generate and edit in this prototype.",
+          "Large designs can be slow to generate and edit.",
           style = MaterialTheme.typography.bodySmall,
           color = MaterialTheme.colorScheme.error,
         )

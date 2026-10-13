@@ -22,7 +22,7 @@ import kotlin.test.assertTrue
 import org.groundplatform.v2.app.data.datasource.local.store.runNow
 import org.groundplatform.v2.app.data.datasource.local.store.seededStore
 import org.groundplatform.v2.app.data.repository.OrganizationRepositoryImpl
-import org.groundplatform.v2.app.data.seed.PrototypeFakeOrganizationsData
+import org.groundplatform.v2.app.data.seed.SampleOrganizationsData
 import org.groundplatform.v2.app.domain.model.Organization
 import org.groundplatform.v2.app.domain.model.OrganizationRole
 import org.groundplatform.v2.web.domain.usecase.InviteOrganizationMemberUseCase
@@ -30,7 +30,7 @@ import org.groundplatform.v2.web.domain.usecase.InviteOrganizationMemberUseCase
 /** The `"All users"` organization: explicit Managers are platform admins; everyone else reads. */
 class AllUsersOrganizationTest {
   private val allUsersId = Organization.ALL_USERS_ID
-  private val admin = PrototypeFakeOrganizationsData.SIGNED_IN_EMAIL
+  private val admin = SampleOrganizationsData.SIGNED_IN_EMAIL
   private val someone = "field.lead@example.org"
 
   private fun repo() = OrganizationRepositoryImpl(seededStore())
@@ -79,7 +79,7 @@ class AllUsersOrganizationTest {
     val allUsers = repo.getOrganization(allUsersId)
     assertNotNull(useCase.inviteError(allUsers, "new@example.org", OrganizationRole.MEMBER))
     assertNull(useCase.inviteError(allUsers, "new@example.org", OrganizationRole.MANAGER))
-    val kfs = repo.getOrganization(PrototypeFakeOrganizationsData.KENYA_FOREST_SERVICE)
+    val kfs = repo.getOrganization(SampleOrganizationsData.KENYA_FOREST_SERVICE)
     assertNull(useCase.inviteError(kfs, "new@example.org", OrganizationRole.MEMBER))
   }
 

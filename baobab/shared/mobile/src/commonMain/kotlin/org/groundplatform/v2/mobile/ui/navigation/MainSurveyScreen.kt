@@ -104,7 +104,7 @@ import org.groundplatform.v2.core.forms.ui.GroundTonalBadge
 import org.groundplatform.v2.mobile.ui.MobileAppState
 
 /**
- * 5. Main Survey UI screen (`PrototypeScreen.MAIN_SURVEY`) providing:
+ * 5. Main Survey UI screen (`AppScreen.MAIN_SURVEY`) providing:
  * - **Top Search Bar**: Floating search bar at the top of the screen with the Hamburger menu button
  *   on the left and the user avatar account menu on the right.
  * - **Map View**: Displays Ground geospatial entities on the map, a basemap preview card that opens
@@ -1014,10 +1014,4 @@ internal fun LayersControlSheet(uiState: SurveyMapUiState, actions: SurveyMapAct
       Spacer(modifier = Modifier.height(12.dp))
     }
   }
-}
-
-/** Backward-compatible alias for [MainSurveyScreen]. */
-@Composable
-fun GroundMainSurveyScreen(state: MobileAppState) {
-  MainSurveyScreen(state)
 }

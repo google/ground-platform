@@ -26,7 +26,7 @@ import kotlinx.coroutines.flow.onEach
 import org.groundplatform.v2.app.data.datasource.local.store.runNow
 import org.groundplatform.v2.app.data.datasource.local.store.seededStore
 import org.groundplatform.v2.app.data.seed.GlobalLibrarySeedData
-import org.groundplatform.v2.app.data.seed.PrototypeFakeOrganizationsData
+import org.groundplatform.v2.app.data.seed.SampleOrganizationsData
 import org.groundplatform.v2.app.domain.model.ConceptDataType
 import org.groundplatform.v2.app.domain.model.LibraryConcept
 import org.groundplatform.v2.app.domain.model.LocalizedText
@@ -34,8 +34,8 @@ import org.groundplatform.v2.app.domain.model.Organization
 import org.groundplatform.v2.app.domain.model.OrganizationLibrary
 
 class LibraryRepositoryTest {
-  private val kfs = PrototypeFakeOrganizationsData.KENYA_FOREST_SERVICE
-  private val mekong = PrototypeFakeOrganizationsData.MEKONG_MANGROVE_ALLIANCE
+  private val kfs = SampleOrganizationsData.KENYA_FOREST_SERVICE
+  private val mekong = SampleOrganizationsData.MEKONG_MANGROVE_ALLIANCE
 
   private fun concept(id: String, owner: String) =
     LibraryConcept(id, owner, LocalizedText.en(id), ConceptDataType.TEXT)

@@ -26,7 +26,7 @@ import org.groundplatform.v2.core.forms.ui.MediaCaptureRequest
 import org.groundplatform.v2.core.forms.ui.MediaCaptureResult
 import org.groundplatform.v2.core.forms.ui.MediaCaptureSource
 
-class PrototypeMediaCaptureTest {
+class MediaCaptureTest {
 
   @Test
   fun browserPickResult_mapsBridgeCallbackArguments() {
@@ -50,7 +50,7 @@ class PrototypeMediaCaptureTest {
 
   @Test
   fun handler_fallsBackToSimulatedCaptureOffWeb() {
-    val handler = PrototypeMediaCaptureHandler()
+    val handler = PlatformMediaCaptureHandler()
     var result: MediaCaptureResult? = null
     handler.launch(
       MediaCaptureRequest(
@@ -113,7 +113,7 @@ class PrototypeMediaCaptureTest {
   @Test
   fun handler_supportsReflectsCapturePaths() {
     val desktopNoCamera =
-      PrototypeMediaCaptureHandler(
+      PlatformMediaCaptureHandler(
         pickerAvailable = true,
         liveAvailable = false,
         prefersFileInput = false,
@@ -122,7 +122,7 @@ class PrototypeMediaCaptureTest {
     assertTrue(desktopNoCamera.supports(MediaCaptureKind.PHOTO, MediaCaptureSource.EXISTING_FILE))
 
     val desktopWithCamera =
-      PrototypeMediaCaptureHandler(
+      PlatformMediaCaptureHandler(
         pickerAvailable = true,
         liveAvailable = true,
         prefersFileInput = false,
@@ -132,7 +132,7 @@ class PrototypeMediaCaptureTest {
     assertTrue(desktopWithCamera.supports(MediaCaptureKind.FILE, MediaCaptureSource.EXISTING_FILE))
 
     val mobile =
-      PrototypeMediaCaptureHandler(
+      PlatformMediaCaptureHandler(
         pickerAvailable = true,
         liveAvailable = false,
         prefersFileInput = true,
@@ -143,7 +143,7 @@ class PrototypeMediaCaptureTest {
   @Test
   fun handler_failsCaptureOnlyRequestWhenBrowserCannotCapture() {
     val handler =
-      PrototypeMediaCaptureHandler(
+      PlatformMediaCaptureHandler(
         pickerAvailable = true,
         liveAvailable = false,
         prefersFileInput = false,

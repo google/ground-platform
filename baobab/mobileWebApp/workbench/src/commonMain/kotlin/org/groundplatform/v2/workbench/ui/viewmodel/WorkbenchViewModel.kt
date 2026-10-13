@@ -41,7 +41,7 @@ import org.groundplatform.v2.app.domain.repository.SurveyContent
 import org.groundplatform.v2.app.domain.repository.SurveyRepository
 import org.groundplatform.v2.core.forms.serialization.XFormsXmlSerializer
 import org.groundplatform.v2.core.forms.ui.WorkbenchExampleForm
-import org.groundplatform.v2.workbench.ui.DEFAULT_PROTOTYPE_XFORMS_XML
+import org.groundplatform.v2.workbench.ui.DEFAULT_WORKBENCH_XFORMS_XML
 import org.groundplatform.v2.workbench.ui.XFormsParseCache
 import org.groundplatform.v2.workbench.ui.state.WorkbenchEvent
 import org.groundplatform.v2.workbench.ui.state.WorkbenchUiState
@@ -84,7 +84,7 @@ interface WorkbenchActions {
    */
   fun selectWorkbenchExampleForm(example: WorkbenchExampleForm, launchImmediately: Boolean = false)
 
-  /** Restores the default sample XForms XML definition (`DEFAULT_PROTOTYPE_XFORMS_XML`). */
+  /** Restores the default sample XForms XML definition (`DEFAULT_WORKBENCH_XFORMS_XML`). */
   fun resetDefaultXFormsXml()
 
   /** Updates the [SyncStatus] of entity [entityId] and synchronizes its submissions if `SYNCED`. */
@@ -105,18 +105,17 @@ interface WorkbenchActions {
   /** Updates the title and description of the currently active survey. */
   fun updateActiveSurveyDetails(title: String, description: String)
 
-  /** Resets the local data store to sample data and returns the prototype flow to Sign In. */
-  fun resetPrototypeFlow()
+  /** Resets the local data store to sample data and returns the mobile app to Sign In. */
+  fun resetSampleData()
 }
 
 /**
- * ViewModel for the prototype-only workbench chrome (`PrototypeDebugTools` and the device bezel in
- * `PrototypeApp`):
+ * ViewModel for the workbench chrome (the device bezel in `MobileWorkbenchPage`):
  * - Simulated device form factor (`Mobile` vs `Tablet`) and orientation (`Portrait` vs
  *   `Landscape`).
  * - XForms `<h:html>` parse validation and swappable example survey presets.
- * - Prototype simulation helpers (cycling entity/submission sync status, toggling survey downloaded
- *   state, and resetting the prototype flow via [SampleDataRepository]).
+ * - Simulation helpers (cycling entity/submission sync status, toggling survey downloaded state,
+ *   and resetting to the sample data via [SampleDataRepository]).
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 class WorkbenchViewModel(
@@ -136,7 +135,7 @@ class WorkbenchViewModel(
   private data class Session(
     val deviceFormFactor: DeviceFormFactor = DeviceFormFactor.MOBILE,
     val deviceOrientation: DeviceOrientation = DeviceFormFactor.MOBILE.defaultOrientation,
-    val customXFormsXml: String = DEFAULT_PROTOTYPE_XFORMS_XML,
+    val customXFormsXml: String = DEFAULT_WORKBENCH_XFORMS_XML,
     val selectedWorkbenchExampleForm: WorkbenchExampleForm? = WorkbenchExampleForm.ALL_FIELD_TYPES,
     val xformsXmlError: String? = null,
     val customFormDef: FormDef? = XFormsParseCache.formDef(WorkbenchExampleForm.ALL_FIELD_TYPES),
@@ -268,7 +267,7 @@ class WorkbenchViewModel(
   override fun updateCustomXFormsXml(xml: String) {
     val matchedExample =
       WorkbenchExampleForm.entries.firstOrNull { it.xformsXml.trim() == xml.trim() }
-        ?: if (xml.trim() == DEFAULT_PROTOTYPE_XFORMS_XML.trim()) {
+        ?: if (xml.trim() == DEFAULT_WORKBENCH_XFORMS_XML.trim()) {
           WorkbenchExampleForm.ALL_FIELD_TYPES
         } else {
           null
@@ -340,7 +339,7 @@ class WorkbenchViewModel(
     if (ui.activeSurveyId != "survey-kenya-coffee") {
       emit(WorkbenchEvent.DefaultSurveyRestored("survey-kenya-coffee"))
     }
-    updateCustomXFormsXml(DEFAULT_PROTOTYPE_XFORMS_XML)
+    updateCustomXFormsXml(DEFAULT_WORKBENCH_XFORMS_XML)
     session.update { it.copy(selectedWorkbenchExampleForm = WorkbenchExampleForm.ALL_FIELD_TYPES) }
   }
 
@@ -458,9 +457,9 @@ class WorkbenchViewModel(
     scope.launch { surveyRepository.setSurveys(updated) }
   }
 
-  override fun resetPrototypeFlow() {
+  override fun resetSampleData() {
     connectivityRepository.reset()
-    emit(WorkbenchEvent.PrototypeReset)
+    emit(WorkbenchEvent.SampleDataReset)
     scope.launch { sampleDataRepository.resetToSampleData() }
     session.update { it.copy(dataResetCount = it.dataResetCount + 1) }
     resetDefaultXFormsXml()

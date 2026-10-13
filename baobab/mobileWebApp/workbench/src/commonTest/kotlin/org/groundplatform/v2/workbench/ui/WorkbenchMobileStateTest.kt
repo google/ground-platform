@@ -19,11 +19,11 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
+import org.groundplatform.v2.app.domain.model.AppScreen
 import org.groundplatform.v2.app.domain.model.ListFilterTab
 import org.groundplatform.v2.app.domain.model.LocationLockState
 import org.groundplatform.v2.app.domain.model.MainSurveyViewMode
 import org.groundplatform.v2.app.domain.model.NavigationTargetKind
-import org.groundplatform.v2.app.domain.model.PrototypeScreen
 import org.groundplatform.v2.app.domain.model.SurveyPlaceItem
 import org.groundplatform.v2.app.domain.model.SyncStatus
 import org.groundplatform.v2.app.domain.model.parsePlaceCoordinates
@@ -34,7 +34,7 @@ class WorkbenchMobileStateTest {
 
   @Test
   fun downloadSurvey_marksSurveyAsDownloaded() {
-    val workbench = WorkbenchState(MobileAppState(initialScreen = PrototypeScreen.DOWNLOAD_SURVEY))
+    val workbench = WorkbenchState(MobileAppState(initialScreen = AppScreen.DOWNLOAD_SURVEY))
     val state = workbench.mobile
     val targetId = "survey-serengeti-corridor"
     assertFalse(state.surveys.first { it.id == targetId }.isDownloaded)
@@ -49,7 +49,7 @@ class WorkbenchMobileStateTest {
 
   @Test
   fun listViewSearch_filtersPlacesAndEntitiesAndRemovesFormSubmissionSearch() {
-    val workbench = WorkbenchState(MobileAppState(initialScreen = PrototypeScreen.MAIN_SURVEY))
+    val workbench = WorkbenchState(MobileAppState(initialScreen = AppScreen.MAIN_SURVEY))
     val state = workbench.mobile
     state.setMainSurveyViewMode(MainSurveyViewMode.LIST)
 
@@ -215,7 +215,7 @@ class WorkbenchMobileStateTest {
   @Test
   fun launchFormForEntity_opensFormWizardController_andCompletesSubmissionWithFormattedAnswers() {
     // The workbench loads its XForms preset into the mobile app.
-    val state = WorkbenchState(MobileAppState(initialScreen = PrototypeScreen.MAIN_SURVEY)).mobile
+    val state = WorkbenchState(MobileAppState(initialScreen = AppScreen.MAIN_SURVEY)).mobile
     val initialShadeSubs = state.entities.first { it.id == "entity-shade-201" }.submissions.size
     assertEquals(3, initialShadeSubs)
     assertFalse(state.isDataCollectionFormOpen)
@@ -260,7 +260,7 @@ class WorkbenchMobileStateTest {
 
   @Test
   fun syncStatusIndicators_showUploadingSyncedAndFailedOnEntitiesAndSubmissionsInLists() {
-    val workbench = WorkbenchState(MobileAppState(initialScreen = PrototypeScreen.MAIN_SURVEY))
+    val workbench = WorkbenchState(MobileAppState(initialScreen = AppScreen.MAIN_SURVEY))
     val state = workbench.mobile
     state.setMainSurveyViewMode(MainSurveyViewMode.LIST)
 
@@ -337,7 +337,7 @@ class WorkbenchMobileStateTest {
 
   @Test
   fun availableSubmissions_offlineShowsOnlySubmissionsStoredOnDevice() {
-    val workbench = WorkbenchState(MobileAppState(initialScreen = PrototypeScreen.MAIN_SURVEY))
+    val workbench = WorkbenchState(MobileAppState(initialScreen = AppScreen.MAIN_SURVEY))
     val state = workbench.mobile
     val entity =
       state.entities.first { e ->
@@ -363,7 +363,7 @@ class WorkbenchMobileStateTest {
 
   @Test
   fun offlineMode_preventsOnlineOnlyFlows_forDownloadsAndUploads() {
-    val workbench = WorkbenchState(MobileAppState(initialScreen = PrototypeScreen.MAIN_SURVEY))
+    val workbench = WorkbenchState(MobileAppState(initialScreen = AppScreen.MAIN_SURVEY))
     val state = workbench.mobile
     workbench.updateAirplaneMode(true)
     assertFalse(state.isOnline)
@@ -391,7 +391,7 @@ class WorkbenchMobileStateTest {
   @Test
   fun repeatGroupQuestions_savedInCompletedSubmissionAcrossInstances() {
     // The workbench loads its XForms preset into the mobile app.
-    val state = WorkbenchState(MobileAppState(initialScreen = PrototypeScreen.MAIN_SURVEY)).mobile
+    val state = WorkbenchState(MobileAppState(initialScreen = AppScreen.MAIN_SURVEY)).mobile
     state.launchFormForEntity(entityId = "entity-shade-201", formId = "form-shade-canopy-audit")
     val controller = assertNotNull(state.activeFormWizardController)
 

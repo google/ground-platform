@@ -70,7 +70,7 @@ import org.groundplatform.v2.web.ui.surveyeditor.SurveyStatusBadgeMenu
 /**
  * Top navigation and context toolbar for the Ground 2.0 Web dashboard: the shared [WebAppHeader]
  * showing the active survey (a [WebSurveySwitcher] dropdown) with its organization and location,
- * and "Mobile prototype", "Manage survey", and "Collect data" ([WebCollectDataMenuButton]) actions.
+ * and "Manage survey" and "Collect data" ([WebCollectDataMenuButton]) actions.
  */
 @Composable
 internal fun WebTopToolbar(
@@ -218,7 +218,7 @@ internal fun WebSurveySwitcher(
  * - Page [actions]
  * - User profile: clickable avatar opening the user profile card with sign out, shown only when
  *   [onSignOut] is given
- * - Prototype debug tools
+ * - Debug tools
  */
 @Composable
 internal fun WebAppHeader(
@@ -315,7 +315,7 @@ internal fun WebAppHeader(
         }
 
         if (showDebugTools) {
-          PrototypeDebugToolsButton(state = state)
+          DebugToolsButton(state = state)
         }
       }
     }

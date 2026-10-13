@@ -30,7 +30,7 @@ Components in `ui/common/` have no coupling to a single feature's `*UiState` or 
 - **Foreground UI Platform Bridges (`expect` / `actual`)**:
   - `PlatformFileDownload.kt` & `PlatformTextFilePicker.kt`: Browser/JVM file save and open dialogs triggered directly by user gestures (e.g., GeoJSON layer import or XForms XML download).
   - `PlatformResizeCursor.kt`: Split-pane resize pointer cursor styling on desktop/web.
-  - `PrototypeMediaCapture.kt`: Interactive camera/photo capture UI hook for form photo questions.
+  - `MediaCapture.kt`: Interactive camera/photo capture UI hook for form photo questions.
 
 ## Role in the Overall Architecture
 

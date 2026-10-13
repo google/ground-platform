@@ -17,7 +17,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import org.groundplatform.v2.app.data.datasource.local.store.LocalStore
-import org.groundplatform.v2.app.domain.model.GROUND_LANGUAGE_OPTIONS
+import org.groundplatform.v2.app.domain.model.LANGUAGE_OPTIONS
 import org.groundplatform.v2.app.domain.model.MeasurementUnitSystem
 import org.groundplatform.v2.app.domain.model.UserSettings
 import org.groundplatform.v2.app.domain.repository.MediaCacheInfo
@@ -43,7 +43,7 @@ class SettingsRepositoryImpl(private val store: LocalStore) : SettingsRepository
   }
 
   override suspend fun updateLanguage(languageCode: String): UserSettings {
-    val valid = GROUND_LANGUAGE_OPTIONS.any { it.code == languageCode }
+    val valid = LANGUAGE_OPTIONS.any { it.code == languageCode }
     return updateSettings { if (valid) it.copy(language = languageCode) else it }
   }
 

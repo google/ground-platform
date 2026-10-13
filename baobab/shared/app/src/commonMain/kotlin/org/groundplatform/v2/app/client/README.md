@@ -22,7 +22,7 @@
 
 This layer isolates low-level OS APIs, browser/JVM runtime intrinsics, and third-party network or file-format protocols from the rest of the application. It contains:
 
-- `auth/` (`PrototypeAuthClient`): Platform authentication bridge for Google sign-in and session token lifecycle.
+- `auth/` (`FakeAuthClient`): Platform authentication bridge for Google sign-in and session token lifecycle.
 - `location/` (`LocationClient`): Device GNSS/GPS location provider abstraction.
 - `places/` (`PlacesGeocoder`): Geocoding and reverse-geocoding client interface for map place search.
 - `pdf/` (`PdfExportClient`, `SimplePdfWriter`, `RecordPdfReports`, `PdfReportLayout`): Platform PDF file export delivery and standalone PDF document layout/rendering primitives.

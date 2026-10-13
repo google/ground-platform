@@ -28,7 +28,7 @@ Each repository implementation owns a cohesive domain aggregate and coordinates 
 - `ImpactEventRepositoryImpl`: Stores impact events in the `LocalStore`, ignoring duplicate IDs.
 - `OrganizationRepositoryImpl`: Manages organization metadata, member rosters, role assignments, and organization-scoped imagery sources.
 - `LibraryRepositoryImpl`: Stores one `OrganizationLibrary` per organization in `LocalStore`, refusing changes that break the library ownership and ID rules.
-- `AuthRepositoryImpl`: Coordinates sign-in/sign-out flows and active user profile state across `PrototypeAuthDataSource` and `LocalStore`.
+- `AuthRepositoryImpl`: Coordinates sign-in/sign-out flows and active user profile state across `FakeAuthDataSource` and `LocalStore`.
 - `SettingsRepositoryImpl`: Persists user preferences, offline basemap settings, and device diagnostics state.
 - `LocationRepositoryImpl`: Provides device GPS location updates via `DeviceLocationDataSource`.
 - `PlaceRepositoryImpl`: Executes geocoding and place search queries via `MapboxPlacesDataSource`.

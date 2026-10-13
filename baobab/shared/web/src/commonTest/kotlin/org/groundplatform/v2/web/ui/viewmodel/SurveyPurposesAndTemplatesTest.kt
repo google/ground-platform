@@ -31,7 +31,7 @@ import org.groundplatform.v2.app.data.repository.MutationRepositoryImpl
 import org.groundplatform.v2.app.data.repository.OrganizationRepositoryImpl
 import org.groundplatform.v2.app.data.repository.SurveyEditorRepositoryImpl
 import org.groundplatform.v2.app.data.repository.SurveyRepositoryImpl
-import org.groundplatform.v2.app.data.seed.PrototypeFakeOrganizationsData
+import org.groundplatform.v2.app.data.seed.SampleOrganizationsData
 import org.groundplatform.v2.app.domain.model.ConceptLink
 import org.groundplatform.v2.app.domain.model.Organization
 import org.groundplatform.v2.app.domain.usecase.CreateSurveyUseCase
@@ -45,8 +45,8 @@ import org.groundplatform.v2.web.ui.state.SurveyEditorSection
 
 /** Survey purposes, adding Forms from templates, and saving Forms as templates. */
 class SurveyPurposesAndTemplatesTest {
-  private val kfs = PrototypeFakeOrganizationsData.KENYA_FOREST_SERVICE
-  private val mekong = PrototypeFakeOrganizationsData.MEKONG_MANGROVE_ALLIANCE
+  private val kfs = SampleOrganizationsData.KENYA_FOREST_SERVICE
+  private val mekong = SampleOrganizationsData.MEKONG_MANGROVE_ALLIANCE
   private val store = seededStore()
   private val libraries = LibraryRepositoryImpl(store)
   private val editor = seededSurveyEditorViewModel(store, testScope(), libraries)

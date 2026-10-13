@@ -17,16 +17,16 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import org.groundplatform.v2.app.client.auth.AuthenticatedCollectorProfile
-import org.groundplatform.v2.app.client.auth.PrototypeAuthClient
+import org.groundplatform.v2.app.client.auth.FakeAuthClient
 import org.groundplatform.v2.app.domain.model.AuthProfile
 import org.groundplatform.v2.app.domain.model.AuthSession
 
 /**
- * Device data source wrapping [PrototypeAuthClient]: the only code that talks to the auth client.
- * Maps the client's profile type to the domain's [AuthProfile] and republishes the client's session
- * as a [StateFlow] so repositories can observe it.
+ * Device data source wrapping [FakeAuthClient]: the only code that talks to the auth client. Maps
+ * the client's profile type to the domain's [AuthProfile] and republishes the client's session as a
+ * [StateFlow] so repositories can observe it.
  */
-class PrototypeAuthDataSource(private val client: PrototypeAuthClient = PrototypeAuthClient()) {
+class FakeAuthDataSource(private val client: FakeAuthClient = FakeAuthClient()) {
   private val _session = MutableStateFlow(readSession())
 
   val session: StateFlow<AuthSession> = _session.asStateFlow()

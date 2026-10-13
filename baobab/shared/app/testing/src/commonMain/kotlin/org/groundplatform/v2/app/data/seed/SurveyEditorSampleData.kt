@@ -55,22 +55,22 @@ object SurveyEditorSamples {
       description =
         "Monitor shade tree cover and parcel boundaries across smallholder coffee farms.",
       supportedLanguages = listOf("en", "sw"),
-      organizationId = PrototypeFakeOrganizationsData.KENYA_FOREST_SERVICE,
-      surveyArea = PrototypeFakeSurveyEditorData.kenyaSurveyArea(),
+      organizationId = SampleOrganizationsData.KENYA_FOREST_SERVICE,
+      surveyArea = SampleSurveyEditorData.kenyaSurveyArea(),
     )
 
-  fun sharing() = PrototypeFakeSurveyEditorData.kenyaSharing()
+  fun sharing() = SampleSurveyEditorData.kenyaSharing()
 
   /** ID of the sample survey shared with everyone in its organization. */
   const val ORGANIZATION_SHARED_SURVEY_ID: String =
-    PrototypeFakeSurveyEditorData.ORGANIZATION_SHARED_SURVEY_ID
+    SampleSurveyEditorData.ORGANIZATION_SHARED_SURVEY_ID
 
   /**
    * A minimal draft for [ORGANIZATION_SHARED_SURVEY_ID]: owned by a Mekong Mangrove Alliance member
    * and open to everyone in that organization ([SharingPolicy.ORGANIZATION]).
    */
   fun organizationSharedDraft(): SurveyEditorDraft =
-    PrototypeFakeSurveyEditorData.organizationSharedDraft(
+    SampleSurveyEditorData.organizationSharedDraft(
       SurveyEditorDraft.blank(ORGANIZATION_SHARED_SURVEY_ID)
     )
 
@@ -179,9 +179,9 @@ object SurveyEditorSamples {
       style = LayerStyle(colorHex = "#2E7D32", iconName = "park"),
     )
 
-  fun farmers() = PrototypeFakeSurveyEditorData.farmers()
+  fun farmers() = SampleSurveyEditorData.farmers()
 
-  fun treeSpecies() = PrototypeFakeSurveyEditorData.treeSpecies()
+  fun treeSpecies() = SampleSurveyEditorData.treeSpecies()
 }
 
 /** Sample Forms for the Survey editor (fictional sample data). */

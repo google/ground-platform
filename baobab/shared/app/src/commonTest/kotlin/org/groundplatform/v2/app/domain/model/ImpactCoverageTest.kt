@@ -15,10 +15,10 @@ package org.groundplatform.v2.app.domain.model
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import org.groundplatform.v2.app.data.seed.PrototypeFakeEntitiesData
+import org.groundplatform.v2.app.data.seed.SampleEntitiesData
 
 class ImpactCoverageTest {
-  private val template = PrototypeFakeEntitiesData.defaultGeospatialEntities().first()
+  private val template = SampleEntitiesData.defaultGeospatialEntities().first()
 
   private fun plot(id: String, geoId: String, areaHa: Double) =
     template.copy(id = id, geoId = geoId, areaHectares = areaHa)

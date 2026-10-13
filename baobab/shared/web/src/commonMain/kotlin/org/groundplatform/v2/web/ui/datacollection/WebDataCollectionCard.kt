@@ -54,7 +54,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import org.groundplatform.v2.app.domain.model.FormPreviewItem
 import org.groundplatform.v2.app.ui.common.GeoIdText
-import org.groundplatform.v2.app.ui.common.PrototypeMediaCaptureHandler
+import org.groundplatform.v2.app.ui.common.PlatformMediaCaptureHandler
 import org.groundplatform.v2.app.ui.datacollection.EntityGeometryIcon
 import org.groundplatform.v2.app.ui.datacollection.PublicDataInFormBanner
 import org.groundplatform.v2.app.ui.datacollection.isWizardStepEntityRef
@@ -151,7 +151,7 @@ internal fun WebDataCollectionCard(
       if (needsEntity && form != null) {
         WebEntityRefPicker(uiState = uiState, actions = actions, form = form)
       } else {
-        val mediaCaptureHandler = remember { PrototypeMediaCaptureHandler() }
+        val mediaCaptureHandler = remember { PlatformMediaCaptureHandler() }
         CompositionLocalProvider(LocalMediaCaptureHandler provides mediaCaptureHandler) {
           CompactFormRunner(
             controller = controller,

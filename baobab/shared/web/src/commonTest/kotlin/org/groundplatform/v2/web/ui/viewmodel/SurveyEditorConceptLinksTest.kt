@@ -22,7 +22,7 @@ import kotlin.test.assertTrue
 import org.groundplatform.v2.app.data.datasource.local.store.runNow
 import org.groundplatform.v2.app.data.datasource.local.store.seededStore
 import org.groundplatform.v2.app.data.repository.LibraryRepositoryImpl
-import org.groundplatform.v2.app.data.seed.PrototypeFakeOrganizationsData
+import org.groundplatform.v2.app.data.seed.SampleOrganizationsData
 import org.groundplatform.v2.app.data.seed.SurveyEditorSamples
 import org.groundplatform.v2.app.domain.model.ConceptLink
 import org.groundplatform.v2.app.domain.model.LibraryStatus
@@ -47,7 +47,7 @@ class SurveyEditorConceptLinksTest {
     val editor = viewModel.formEditor(viewModel.ui.forms.first().key)
     val library = editor.ui.library
     assertEquals(
-      PrototypeFakeOrganizationsData.KENYA_FOREST_SERVICE,
+      SampleOrganizationsData.KENYA_FOREST_SERVICE,
       library.library.organizationId,
     )
     assertEquals("Kenya Forest Service", library.organizationName)
@@ -65,9 +65,9 @@ class SurveyEditorConceptLinksTest {
     editor.updateQuestion(key) { it.copy(label = "Canopy closure notes") }
     assertNull(editor.addLabelToDictionary(key))
 
-    val id = "org.${PrototypeFakeOrganizationsData.KENYA_FOREST_SERVICE}.canopy_closure_notes"
+    val id = "org.${SampleOrganizationsData.KENYA_FOREST_SERVICE}.canopy_closure_notes"
     val saved = runNow {
-      libraries.getLibrary(PrototypeFakeOrganizationsData.KENYA_FOREST_SERVICE)
+      libraries.getLibrary(SampleOrganizationsData.KENYA_FOREST_SERVICE)
     }
       .concept(id)
     assertEquals(LibraryStatus.DRAFT, assertNotNull(saved).status)

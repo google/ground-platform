@@ -14,15 +14,14 @@
 package org.groundplatform.v2.app.data.repository
 
 import kotlinx.coroutines.flow.Flow
-import org.groundplatform.v2.app.data.datasource.device.PrototypeAuthDataSource
+import org.groundplatform.v2.app.data.datasource.device.FakeAuthDataSource
 import org.groundplatform.v2.app.domain.model.AuthProfile
 import org.groundplatform.v2.app.domain.model.AuthSession
 import org.groundplatform.v2.app.domain.repository.AuthRepository
 
-/** [AuthRepository] backed by [PrototypeAuthDataSource]. */
-class AuthRepositoryImpl(
-  private val dataSource: PrototypeAuthDataSource = PrototypeAuthDataSource()
-) : AuthRepository {
+/** [AuthRepository] backed by [FakeAuthDataSource]. */
+class AuthRepositoryImpl(private val dataSource: FakeAuthDataSource = FakeAuthDataSource()) :
+  AuthRepository {
   override fun observeSession(): Flow<AuthSession> = dataSource.session
 
   override suspend fun getSession(): AuthSession = dataSource.session.value

@@ -107,7 +107,7 @@ fresh on every page load; on mobile it will become the persistent offline store.
     nested. Use cases that touch several repositories run in one transaction via
     `TransactionRunner`.
 -   **Sample data**: `data/seed/SampleDataSeeder` is the only code that reads the
-    hardcoded sample datasets (`PrototypeFake*Data`, `SurveyEditorSamples`,
+    hardcoded sample datasets (`Sample*Data`, `SurveyEditorSamples`,
     `FormEditorSamples`). It fills the store on first launch and again on
     **Reset**. `SampleDataGuardrailTest` keeps other code from reading them.
 -   **Layering**: `LayerDependencyGuardrailTest` checks imports against
@@ -124,7 +124,7 @@ fresh on every page load; on mobile it will become the persistent offline store.
     the screen calls. Screens take `(uiState, actions)` and hold no state of
     their own.
     `OnboardingViewModel` (Sign In → Terms of Service → Download survey) reads
-    the account from `AuthRepository` (over `PrototypeAuthClient`) and the
+    the account from `AuthRepository` (over `FakeAuthClient`) and the
     survey directory from `SurveyRepository` and `OrganizationRepository`, and
     publishes navigation and notices as `OnboardingEvent`s that the app shell
     applies. `SettingsViewModel` (Settings, Sign In language selector, Offline
@@ -202,7 +202,7 @@ fresh on every page load; on mobile it will become the persistent offline store.
     `SurveyConfig.formXmlById`), Map layer styles, map features (Submissions
     kept), and the title and description shown in the survey list. The seed
     only stores drafts for the two sample surveys with extras that cannot be
-    derived (`PrototypeFakeSurveyEditorData`: sharing people, survey area,
+    derived (`SampleSurveyEditorData`: sharing people, survey area,
     languages, Data tables).
 -   **Backends**: `InMemoryLocalStore` is the only backend today. A persistent
     backend (Room on `androidx.sqlite`) must pass `LocalStoreContractTest`.

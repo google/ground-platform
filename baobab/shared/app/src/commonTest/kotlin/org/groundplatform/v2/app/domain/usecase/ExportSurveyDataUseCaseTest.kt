@@ -25,7 +25,7 @@ import org.groundplatform.v2.app.data.repository.ImpactEventRepositoryImpl
 import org.groundplatform.v2.app.data.repository.LibraryRepositoryImpl
 import org.groundplatform.v2.app.data.repository.SurveyEditorRepositoryImpl
 import org.groundplatform.v2.app.data.repository.SurveyRepositoryImpl
-import org.groundplatform.v2.app.data.seed.PrototypeFakeOrganizationsData
+import org.groundplatform.v2.app.data.seed.SampleOrganizationsData
 import org.groundplatform.v2.app.domain.model.ConceptLink
 import org.groundplatform.v2.app.domain.model.GeospatialEntityItem
 import org.groundplatform.v2.app.domain.model.ImpactEventType
@@ -43,7 +43,7 @@ import org.groundplatform.v2.app.domain.repository.ConnectivityRepository
 
 /** Export profiles (EUDR GeoJSON), plain GeoJSON, and export impact events. */
 class ExportSurveyDataUseCaseTest {
-  private val kfs = PrototypeFakeOrganizationsData.KENYA_FOREST_SERVICE
+  private val kfs = SampleOrganizationsData.KENYA_FOREST_SERVICE
   private val store = seededStore()
   private val library =
     ResolveLibraryUseCase()

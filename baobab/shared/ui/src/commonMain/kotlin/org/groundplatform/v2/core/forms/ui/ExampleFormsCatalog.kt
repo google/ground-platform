@@ -20,7 +20,8 @@ import org.groundplatform.v2.core.forms.model.FormRecordInstance
 import org.groundplatform.v2.core.forms.serialization.XFormsXmlSerializer
 
 /**
- * Catalog of swappable workbench example forms for the Ground 2.0 Prototype App and Form Debugger.
+ * Catalog of swappable workbench example forms for the Ground 2.0 mobile workbench and Form
+ * Debugger.
  *
  * Covers the five core field data collection and entity-centric workflows:
  * 1. [SINGLE_POINT_LAND_USE]: Simple single-point collection (pan allowed, <=10m GPS accuracy) +

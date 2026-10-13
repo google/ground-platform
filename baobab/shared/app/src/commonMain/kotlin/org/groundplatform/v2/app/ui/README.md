@@ -46,7 +46,7 @@ Domain Use Cases & Repositories (domain/usecase/*, domain/repository/*)
 
 ## Dependency Rules
 
-- **Inbound access**: Entry point invoked by platform `Main` / `PrototypeApp` hosts.
+- **Inbound access**: Entry point invoked by the hosts' `Main` (`webApp`, `mobileWebApp`, `androidApp`, `iosApp`).
 - **Outbound dependencies**:
   - Compose Views (`ui/<feature>/*`, `ui/screen/*`, `ui/common/*`) depend on `ui/state/`, `ui/viewmodel/` (`*Actions` interfaces), and `domain/model/`.
   - Feature ViewModels (`ui/viewmodel/*`) depend on `ui/state/`, `domain/usecase/`, `domain/repository/`, and `domain/model/`.

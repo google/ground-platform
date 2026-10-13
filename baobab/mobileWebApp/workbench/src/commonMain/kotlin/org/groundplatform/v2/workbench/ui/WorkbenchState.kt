@@ -99,7 +99,7 @@ private constructor(
         }
       }
       is WorkbenchEvent.DefaultSurveyRestored -> mobile.openSurvey(event.surveyId)
-      WorkbenchEvent.PrototypeReset -> mobile.reset()
+      WorkbenchEvent.SampleDataReset -> mobile.reset()
       is WorkbenchEvent.ConnectivityChanged -> mobile.onConnectivityChanged(event.isOnline)
       is WorkbenchEvent.Notice -> mobile.showNotice(event.message)
     }

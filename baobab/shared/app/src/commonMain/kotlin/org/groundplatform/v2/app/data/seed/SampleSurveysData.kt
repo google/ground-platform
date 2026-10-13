@@ -25,7 +25,7 @@ import org.groundplatform.v2.core.forms.model.FormDefinition
 import org.groundplatform.v2.core.forms.ui.WorkbenchExampleForm
 
 /** Hardcoded sample surveys, forms, and XForms presets for the prototype app. */
-object PrototypeFakeSurveysData {
+object SampleSurveysData {
   private val resolveFormDef = ResolveFormDefForLaunchUseCase()
 
   fun builtInFallbackFormForForm(form: FormPreviewItem): FormDefinition =
@@ -35,7 +35,7 @@ object PrototypeFakeSurveysData {
    * Default sample surveys shared with the user, including the 5 swappable Workbench Example
    * Surveys (each with its own preloaded entities, sample submissions, geometries, map layers, and
    * XForms definition) plus a remote undownloaded survey for offline download testing. Each is
-   * owned by a person and optionally belongs to an organization ([PrototypeFakeOrganizationsData]).
+   * owned by a person and optionally belongs to an organization ([SampleOrganizationsData]).
    */
   /** The sample survey that's already closed (its outcome question is due). */
   const val CLOSED_SURVEY_ID = "survey-household-past-individuals"
@@ -131,19 +131,19 @@ object PrototypeFakeSurveysData {
       .map { survey ->
         val surveyArea =
           if (survey.id == SampleDataSeeder.DEFAULT_ACTIVE_SURVEY_ID) {
-            PrototypeFakeSurveyEditorData.kenyaSurveyArea()
+            SampleSurveyEditorData.kenyaSurveyArea()
           } else {
             null
           }
         survey.copy(
-          ownerEmail = PrototypeFakeOrganizationsData.ownerEmailForSurvey(survey.id),
-          organizationId = PrototypeFakeOrganizationsData.organizationIdForSurvey(survey.id),
+          ownerEmail = SampleOrganizationsData.ownerEmailForSurvey(survey.id),
+          organizationId = SampleOrganizationsData.organizationIdForSurvey(survey.id),
           thumbnail =
             SurveyThumbnailGenerator.fromRuntime(
               surveyId = survey.id,
               surveyArea = surveyArea,
-              mapLayers = PrototypeFakeMapLayersData.mapLayersForSurvey(survey.id),
-              entities = PrototypeFakeEntitiesData.entitiesForSurvey(survey.id),
+              mapLayers = SampleMapLayersData.mapLayersForSurvey(survey.id),
+              entities = SampleEntitiesData.entitiesForSurvey(survey.id),
             ),
         )
       }

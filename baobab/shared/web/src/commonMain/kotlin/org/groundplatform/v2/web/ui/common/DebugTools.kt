@@ -50,12 +50,12 @@ import org.groundplatform.v2.app.ui.AppSession
  * header.
  */
 @Composable
-fun PrototypeDebugToolsButton(
+fun DebugToolsButton(
   state: AppSession,
   modifier: Modifier = Modifier,
   iconTint: Color = MaterialTheme.colorScheme.onSurface,
 ) {
-  PrototypeDebugToolsButton(
+  DebugToolsButton(
     isDarkTheme = state.isDarkTheme,
     onToggleDarkTheme = state::toggleDarkTheme,
     modifier = modifier,
@@ -65,7 +65,7 @@ fun PrototypeDebugToolsButton(
 
 /** Stateless debug tools button driven by explicit state and callbacks. */
 @Composable
-fun PrototypeDebugToolsButton(
+fun DebugToolsButton(
   isDarkTheme: Boolean,
   onToggleDarkTheme: () -> Unit,
   modifier: Modifier = Modifier,
@@ -82,7 +82,7 @@ fun PrototypeDebugToolsButton(
       )
     }
 
-    PrototypeDebugToolsDropdown(
+    DebugToolsDropdown(
       isDarkTheme = isDarkTheme,
       onToggleDarkTheme = onToggleDarkTheme,
       expanded = isMenuOpen,
@@ -93,13 +93,13 @@ fun PrototypeDebugToolsButton(
 
 /** Popout menu displaying the prototype workbench tools. */
 @Composable
-fun PrototypeDebugToolsDropdown(
+fun DebugToolsDropdown(
   state: AppSession,
   expanded: Boolean,
   onDismissRequest: () -> Unit,
   modifier: Modifier = Modifier,
 ) {
-  PrototypeDebugToolsDropdown(
+  DebugToolsDropdown(
     isDarkTheme = state.isDarkTheme,
     onToggleDarkTheme = state::toggleDarkTheme,
     expanded = expanded,
@@ -110,7 +110,7 @@ fun PrototypeDebugToolsDropdown(
 
 /** Stateless popout menu displaying the prototype workbench tools. */
 @Composable
-fun PrototypeDebugToolsDropdown(
+fun DebugToolsDropdown(
   isDarkTheme: Boolean,
   onToggleDarkTheme: () -> Unit,
   expanded: Boolean,

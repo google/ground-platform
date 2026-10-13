@@ -25,9 +25,9 @@ import org.groundplatform.v2.app.domain.model.editor.SurveyEditorDraft
 /**
  * Fills a [LocalStore] with the prototype's sample data.
  *
- * This is the only code allowed to read the hardcoded sample datasets (`PrototypeFake*Data`); the
- * rest of the app reads everything from the store. Data for every sample survey is written up
- * front, so switching surveys never reloads (and never discards edits).
+ * This is the only code allowed to read the hardcoded sample datasets (`Sample*Data`); the rest of
+ * the app reads everything from the store. Data for every sample survey is written up front, so
+ * switching surveys never reloads (and never discards edits).
  */
 class SampleDataSeeder(private val store: LocalStore) {
   /** Seeds the store unless it already holds the current sample data version. */
@@ -52,32 +52,32 @@ class SampleDataSeeder(private val store: LocalStore) {
 
     /** Writes all sample data inside an existing transaction. */
     fun LocalStoreTransaction.writeSampleData() {
-      PrototypeFakeOrganizationsData.defaultOrganizations().forEach { upsertOrganization(it) }
+      SampleOrganizationsData.defaultOrganizations().forEach { upsertOrganization(it) }
       // The global library bootstraps the "All users" organization's library.
       putLibrary(GlobalLibrarySeedData.library())
-      PrototypeFakeLibraryData.defaultOrganizationLibraries().forEach { putLibrary(it) }
-      val surveys = PrototypeFakeSurveysData.defaultSampleSurveys()
+      SampleLibraryData.defaultOrganizationLibraries().forEach { putLibrary(it) }
+      val surveys = SampleSurveysData.defaultSampleSurveys()
       surveys.forEach { upsertSurvey(it) }
       for (survey in surveys) {
         val surveyId = survey.id
-        val forms = PrototypeFakeSurveysData.formsForSurvey(surveyId)
+        val forms = SampleSurveysData.formsForSurvey(surveyId)
         putForms(surveyId, forms)
-        putMapLayers(surveyId, PrototypeFakeMapLayersData.mapLayersForSurvey(surveyId))
-        putEntities(surveyId, PrototypeFakeEntitiesData.entitiesForSurvey(surveyId))
+        putMapLayers(surveyId, SampleMapLayersData.mapLayersForSurvey(surveyId))
+        putEntities(surveyId, SampleEntitiesData.entitiesForSurvey(surveyId))
         putStandaloneSubmissions(
           surveyId,
-          PrototypeFakeSubmissionsData.standaloneSubmissionsForSurvey(surveyId),
+          SampleSubmissionsData.standaloneSubmissionsForSurvey(surveyId),
         )
         putSubmissionGeometries(
           surveyId,
-          PrototypeFakeSubmissionsData.submissionGeometriesForSurvey(surveyId),
+          SampleSubmissionsData.submissionGeometriesForSurvey(surveyId),
         )
         putSurveyConfig(
           surveyId,
           SurveyConfig(
-            primaryForm = PrototypeFakeSurveysData.exampleFormForSurveyId(surveyId).formDefinition,
+            primaryForm = SampleSurveysData.exampleFormForSurveyId(surveyId).formDefinition,
             formsById =
-              forms.associate { it.id to PrototypeFakeSurveysData.builtInFallbackFormForForm(it) },
+              forms.associate { it.id to SampleSurveysData.builtInFallbackFormForForm(it) },
           ),
         )
       }
@@ -85,17 +85,17 @@ class SampleDataSeeder(private val store: LocalStore) {
       // extras that cannot be derived (sharing people, survey area, Data tables) store one.
       putSurveyEditorDraft(
         DEFAULT_ACTIVE_SURVEY_ID,
-        PrototypeFakeSurveyEditorData.kenyaCoffeeDraft(deriveEditorDraft(DEFAULT_ACTIVE_SURVEY_ID)),
+        SampleSurveyEditorData.kenyaCoffeeDraft(deriveEditorDraft(DEFAULT_ACTIVE_SURVEY_ID)),
       )
       putSurveyEditorDraft(
-        PrototypeFakeSurveyEditorData.ORGANIZATION_SHARED_SURVEY_ID,
-        PrototypeFakeSurveyEditorData.organizationSharedDraft(
-          deriveEditorDraft(PrototypeFakeSurveyEditorData.ORGANIZATION_SHARED_SURVEY_ID)
+        SampleSurveyEditorData.ORGANIZATION_SHARED_SURVEY_ID,
+        SampleSurveyEditorData.organizationSharedDraft(
+          deriveEditorDraft(SampleSurveyEditorData.ORGANIZATION_SHARED_SURVEY_ID)
         ),
       )
-      putMutations(PrototypeFakeMutationsData.defaultMutations())
-      putPlaces(PrototypeFakePlacesData.defaultSurveyPlaces())
-      putOfflineTilePackages(PrototypeFakeMapLayersData.defaultOfflineTilePackages())
+      putMutations(SampleMutationsData.defaultMutations())
+      putPlaces(SamplePlacesData.defaultSurveyPlaces())
+      putOfflineTilePackages(SampleMapLayersData.defaultOfflineTilePackages())
       putPreferences(
         StoredPreferences(
           activeSurveyId = DEFAULT_ACTIVE_SURVEY_ID,
@@ -114,17 +114,17 @@ class SampleDataSeeder(private val store: LocalStore) {
 
     /** Derives the Survey editor draft for [surveyId] from the data already written. */
     private fun LocalStoreTransaction.deriveEditorDraft(surveyId: String): SurveyEditorDraft {
-      val forms = PrototypeFakeSurveysData.formsForSurvey(surveyId)
+      val forms = SampleSurveysData.formsForSurvey(surveyId)
       val formsById = forms.associate {
-        it.id to PrototypeFakeSurveysData.builtInFallbackFormForForm(it)
+        it.id to SampleSurveysData.builtInFallbackFormForForm(it)
       }
       return SurveyEditorDerivation.derive(
         surveyId = surveyId,
-        survey = PrototypeFakeSurveysData.defaultSampleSurveys().firstOrNull { it.id == surveyId },
+        survey = SampleSurveysData.defaultSampleSurveys().firstOrNull { it.id == surveyId },
         forms = forms,
         formDefinition = { formsById[it.id] },
-        mapLayers = PrototypeFakeMapLayersData.mapLayersForSurvey(surveyId),
-        entities = PrototypeFakeEntitiesData.entitiesForSurvey(surveyId),
+        mapLayers = SampleMapLayersData.mapLayersForSurvey(surveyId),
+        entities = SampleEntitiesData.entitiesForSurvey(surveyId),
       )
     }
   }

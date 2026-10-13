@@ -21,7 +21,7 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import org.groundplatform.v2.app.data.datasource.local.store.runNow
 import org.groundplatform.v2.app.data.datasource.local.store.seededStore
-import org.groundplatform.v2.app.data.seed.PrototypeFakeOrganizationsData
+import org.groundplatform.v2.app.data.seed.SampleOrganizationsData
 import org.groundplatform.v2.app.domain.model.CachedProfile
 import org.groundplatform.v2.app.domain.model.MembershipStatus
 import org.groundplatform.v2.app.domain.model.Organization
@@ -29,8 +29,8 @@ import org.groundplatform.v2.app.domain.model.OrganizationRole
 import org.groundplatform.v2.app.domain.model.OrganizationType
 
 class OrganizationRepositoryTest {
-  private val kfs = PrototypeFakeOrganizationsData.KENYA_FOREST_SERVICE
-  private val maya = PrototypeFakeOrganizationsData.SIGNED_IN_EMAIL
+  private val kfs = SampleOrganizationsData.KENYA_FOREST_SERVICE
+  private val maya = SampleOrganizationsData.SIGNED_IN_EMAIL
 
   private fun repo() = OrganizationRepositoryImpl(seededStore())
 
@@ -39,21 +39,19 @@ class OrganizationRepositoryTest {
     val repo = repo()
     val mine = repo.getOrganizationsFor(maya)
     assertEquals(
-      listOf(kfs, PrototypeFakeOrganizationsData.MEKONG_MANGROVE_ALLIANCE),
+      listOf(kfs, SampleOrganizationsData.MEKONG_MANGROVE_ALLIANCE),
       mine.map { it.id },
     )
     assertTrue(repo.getOrganization(kfs)!!.isManager(maya))
     assertTrue(
-      !repo
-        .getOrganization(PrototypeFakeOrganizationsData.MEKONG_MANGROVE_ALLIANCE)!!
-        .isManager(maya)
+      !repo.getOrganization(SampleOrganizationsData.MEKONG_MANGROVE_ALLIANCE)!!.isManager(maya)
     )
     // Pending requests and invites don't count as membership.
     assertTrue(repo.getOrganizationsFor("james.otieno@example.org").isEmpty())
     assertTrue(repo.getOrganizationsFor("wanjiku.m@example.org").isEmpty())
 
     // The synthetic "All users" organization is seeded with a real XYZ tile URL.
-    val allUsers = assertNotNull(repo.getOrganization(PrototypeFakeOrganizationsData.ALL_USERS))
+    val allUsers = assertNotNull(repo.getOrganization(SampleOrganizationsData.ALL_USERS))
     assertEquals("All users", allUsers.name)
     assertTrue(allUsers.isSynthetic)
     assertTrue(allUsers.imagerySources.isNotEmpty())
@@ -96,10 +94,10 @@ class OrganizationRepositoryTest {
     val kenya = repo.getOrganization(kfs)!!
     assertEquals(OrganizationType.GOVERNMENT_AGENCY, kenya.organizationType)
     assertEquals("Kenya (KE)", kenya.country?.label)
-    val mekong = repo.getOrganization(PrototypeFakeOrganizationsData.MEKONG_MANGROVE_ALLIANCE)!!
+    val mekong = repo.getOrganization(SampleOrganizationsData.MEKONG_MANGROVE_ALLIANCE)!!
     assertEquals(OrganizationType.NGO, mekong.organizationType)
     assertEquals("VN", mekong.countryCode)
-    val allUsers = repo.getOrganization(PrototypeFakeOrganizationsData.ALL_USERS)!!
+    val allUsers = repo.getOrganization(SampleOrganizationsData.ALL_USERS)!!
     assertNull(allUsers.organizationType)
     assertNull(allUsers.countryCode)
     assertFalse(allUsers.hasTypeAndCountry)
@@ -146,7 +144,7 @@ class OrganizationRepositoryTest {
   fun updateOrganization_neverGivesAllUsersATypeOrCountry() = runNow {
     val repo = repo()
     val updated =
-      repo.updateOrganization(PrototypeFakeOrganizationsData.ALL_USERS) {
+      repo.updateOrganization(SampleOrganizationsData.ALL_USERS) {
         it.copy(name = "Everyone", organizationType = OrganizationType.NGO, countryCode = "KE")
       }!!
     assertEquals("Everyone", updated.name)

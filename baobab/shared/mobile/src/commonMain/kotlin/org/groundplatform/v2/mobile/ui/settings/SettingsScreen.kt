@@ -51,7 +51,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -81,7 +80,6 @@ import org.groundplatform.v2.core.forms.ui.resources.select_units_title
 import org.groundplatform.v2.core.forms.ui.resources.settings_title
 import org.groundplatform.v2.core.forms.ui.resources.upload_media_title
 import org.groundplatform.v2.core.forms.ui.resources.visit_website_title
-import org.groundplatform.v2.mobile.ui.MobileAppState
 import org.groundplatform.v2.mobile.ui.navigation.DeviceStorageBreakdownCard
 import org.groundplatform.v2.mobile.ui.onboarding.SignInScreen
 import org.jetbrains.compose.resources.stringResource
@@ -106,16 +104,6 @@ fun SettingsScreen(uiState: SettingsUiState, actions: SettingsActions, onBack: (
     onBack = onBack,
     visitedWebsiteNotice = uiState.visitedWebsiteUrl,
   )
-}
-
-/** Backward-compatible alias for [SettingsScreen] bound to the app shell. */
-@Composable
-fun GroundSettingsScreen(
-  state: MobileAppState,
-  onBack: () -> Unit = { state.closeDrawerSubView() },
-) {
-  val uiState by state.settings.uiState.collectAsState()
-  SettingsScreen(uiState = uiState, actions = state.settings, onBack = onBack)
 }
 
 /**

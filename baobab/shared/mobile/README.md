@@ -33,14 +33,14 @@ targets of its own.
 
 ## Screens
 
-1.  **Sign In Screen (`PrototypeScreen.SIGN_IN`)**
+1.  **Sign In Screen (`AppScreen.SIGN_IN`)**
     -   Displays the Ground welcome header, field survey map preview card, and a
         **Sign in with Google** button (only Google authentication enabled for
         now).
-2.  **Terms of Service Screen (`PrototypeScreen.TERMS_OF_SERVICE`)**
+2.  **Terms of Service Screen (`AppScreen.TERMS_OF_SERVICE`)**
     -   Displays the scrollable Terms of Service sections, agreement checkbox,
         and **Decline** / **Agree & Continue** actions.
-3.  **Download Survey Screen (`PrototypeScreen.DOWNLOAD_SURVEY`)**
+3.  **Download Survey Screen (`AppScreen.DOWNLOAD_SURVEY`)**
     -   Displays the list of all surveys shared with the signed-in user.
     -   Includes a live **Search bar** to filter surveys by **name** (title or
         description), **location** (region, country, or coordinates), or
@@ -49,7 +49,7 @@ targets of its own.
         (when the survey belongs to one), **description**,
         **map thumbnail** (stylized placeholder), and a **`✓ Downloaded`**
         indicator badge on surveys already downloaded for offline use.
-4.  **Main Survey UI (`PrototypeScreen.MAIN_SURVEY` in `MainSurveyScreen.kt`)**
+4.  **Main Survey UI (`AppScreen.MAIN_SURVEY` in `MainSurveyScreen.kt`)**
     -   **Floating Top Search Bar (`MobileMapSearchBar`)**: Floating pill bar at
         the top of the map canvas containing the navigation drawer menu button,
         live search input (`Search...`), clear action, and user profile avatar.

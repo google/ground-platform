@@ -20,7 +20,7 @@ import kotlin.test.assertNull
 import org.groundplatform.v2.app.data.datasource.local.store.runNow
 import org.groundplatform.v2.app.data.datasource.local.store.seededStore
 import org.groundplatform.v2.app.data.repository.OrganizationRepositoryImpl
-import org.groundplatform.v2.app.data.seed.PrototypeFakeOrganizationsData
+import org.groundplatform.v2.app.data.seed.SampleOrganizationsData
 import org.groundplatform.v2.app.domain.model.CachedProfile
 import org.groundplatform.v2.app.domain.model.MembershipStatus
 import org.groundplatform.v2.app.domain.model.Organization
@@ -88,7 +88,7 @@ class InviteOrganizationMemberUseCaseTest {
   fun invoke_resetInviteLink_andAcceptInvite_walkTheInviteLifecycle() {
     val repository = OrganizationRepositoryImpl(seededStore())
     val useCase = InviteOrganizationMemberUseCase(repository)
-    val orgId = PrototypeFakeOrganizationsData.KENYA_FOREST_SERVICE
+    val orgId = SampleOrganizationsData.KENYA_FOREST_SERVICE
 
     val invited =
       assertNotNull(runNow { useCase(orgId, " New.Person@Example.org ", OrganizationRole.MANAGER) })

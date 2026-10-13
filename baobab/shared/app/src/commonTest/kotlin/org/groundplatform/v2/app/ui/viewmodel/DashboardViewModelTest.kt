@@ -32,7 +32,7 @@ import org.groundplatform.v2.app.data.repository.MutationRepositoryImpl
 import org.groundplatform.v2.app.data.repository.OrganizationRepositoryImpl
 import org.groundplatform.v2.app.data.repository.SurveyEditorRepositoryImpl
 import org.groundplatform.v2.app.data.repository.SurveyRepositoryImpl
-import org.groundplatform.v2.app.data.seed.PrototypeFakeOrganizationsData
+import org.groundplatform.v2.app.data.seed.SampleOrganizationsData
 import org.groundplatform.v2.app.domain.model.EntityDetailsPane
 import org.groundplatform.v2.app.domain.model.ListFilterTab
 import org.groundplatform.v2.app.domain.model.MutationSyncState
@@ -88,7 +88,7 @@ class DashboardViewModelTest {
     assertTrue(f.uiState.hasOpenableActiveSurvey)
     assertTrue(f.uiState.entities.isNotEmpty())
     assertTrue(f.uiState.entityDatasetLayers.isNotEmpty())
-    assertEquals(PrototypeFakeOrganizationsData.SIGNED_IN_EMAIL, f.uiState.signedInUserEmail)
+    assertEquals(SampleOrganizationsData.SIGNED_IN_EMAIL, f.uiState.signedInUserEmail)
     assertTrue(f.uiState.signedInUserOrganizations.isNotEmpty())
     assertEquals(9, f.uiState.allMutationsSorted.size)
     assertEquals(4, f.uiState.outboxMutationCount)
@@ -313,8 +313,7 @@ class DashboardViewModelTest {
   fun createSurvey_addsAnOwnedSurveyInTheOrganization_opensIt_andNotifies() {
     val f = Fixture()
     val before = f.uiState.surveys.size
-    val kfs =
-      assertNotNull(f.uiState.organization(PrototypeFakeOrganizationsData.KENYA_FOREST_SERVICE))
+    val kfs = assertNotNull(f.uiState.organization(SampleOrganizationsData.KENYA_FOREST_SERVICE))
 
     val id = f.viewModel.createSurvey("Mangrove Nursery Audit", kfs.id)
     assertEquals("survey-mangrove-nursery-audit", id)
@@ -322,12 +321,12 @@ class DashboardViewModelTest {
     val created = f.uiState.surveys.last()
     assertEquals(id, created.id)
     assertEquals("Mangrove Nursery Audit", created.title)
-    assertEquals(PrototypeFakeOrganizationsData.SIGNED_IN_EMAIL, created.ownerEmail)
+    assertEquals(SampleOrganizationsData.SIGNED_IN_EMAIL, created.ownerEmail)
     assertEquals(kfs.id, created.organizationId)
     assertEquals(id, f.uiState.activeSurveyId)
     val draft = runNow { f.surveyEditorRepository.getDraft(id) }
     assertEquals(kfs.id, draft.details.organizationId)
-    assertEquals(PrototypeFakeOrganizationsData.SIGNED_IN_EMAIL, draft.sharing.ownerEmail)
+    assertEquals(SampleOrganizationsData.SIGNED_IN_EMAIL, draft.sharing.ownerEmail)
     assertEquals(DashboardEvent.SurveyActivated(id), f.events[f.events.size - 2])
     assertEquals(
       DashboardEvent.Notice("Created survey \"Mangrove Nursery Audit\"."),

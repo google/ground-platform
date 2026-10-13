@@ -26,7 +26,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import org.groundplatform.v2.app.data.datasource.device.PrototypeAuthDataSource
+import org.groundplatform.v2.app.data.datasource.device.FakeAuthDataSource
 import org.groundplatform.v2.app.data.datasource.local.store.runNow
 import org.groundplatform.v2.app.data.datasource.local.store.seededStore
 import org.groundplatform.v2.app.data.repository.AuthRepositoryImpl
@@ -48,7 +48,7 @@ class OnboardingViewModelTest {
     val surveyRepository = SurveyRepositoryImpl(store)
     val viewModel =
       OnboardingViewModel(
-        authRepository = AuthRepositoryImpl(PrototypeAuthDataSource()),
+        authRepository = AuthRepositoryImpl(FakeAuthDataSource()),
         surveyRepository = surveyRepository,
         organizationRepository = OrganizationRepositoryImpl(store),
         scope = scope,

@@ -26,7 +26,7 @@ import org.groundplatform.v2.app.data.repository.LocalStoreTransactionRunner
 import org.groundplatform.v2.app.data.repository.OrganizationRepositoryImpl
 import org.groundplatform.v2.app.data.repository.SurveyEditorRepositoryImpl
 import org.groundplatform.v2.app.data.repository.SurveyRepositoryImpl
-import org.groundplatform.v2.app.data.seed.PrototypeFakeOrganizationsData
+import org.groundplatform.v2.app.data.seed.SampleOrganizationsData
 import org.groundplatform.v2.app.domain.model.ConceptLink
 import org.groundplatform.v2.app.domain.model.FormTemplate
 import org.groundplatform.v2.app.domain.model.LibraryPrograms
@@ -42,8 +42,8 @@ import org.groundplatform.v2.app.domain.usecase.ResolveLibraryUseCase
 
 /** Purpose Packs seeding new surveys, and template IDs for Save as template. */
 class PurposePacksTest {
-  private val kfs = PrototypeFakeOrganizationsData.KENYA_FOREST_SERVICE
-  private val mekong = PrototypeFakeOrganizationsData.MEKONG_MANGROVE_ALLIANCE
+  private val kfs = SampleOrganizationsData.KENYA_FOREST_SERVICE
+  private val mekong = SampleOrganizationsData.MEKONG_MANGROVE_ALLIANCE
 
   private class Fixture {
     val store = seededStore()

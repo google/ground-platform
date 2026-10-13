@@ -31,7 +31,7 @@ import org.groundplatform.v2.app.domain.model.DeviceFormFactor
 import org.groundplatform.v2.app.domain.model.DeviceOrientation
 import org.groundplatform.v2.app.domain.model.SyncStatus
 import org.groundplatform.v2.core.forms.ui.WorkbenchExampleForm
-import org.groundplatform.v2.workbench.ui.DEFAULT_PROTOTYPE_XFORMS_XML
+import org.groundplatform.v2.workbench.ui.DEFAULT_WORKBENCH_XFORMS_XML
 import org.groundplatform.v2.workbench.ui.state.WorkbenchEvent
 
 /** See `OnboardingViewModelTest` (shared/app) for why fixtures are built outside `runNow`. */
@@ -155,7 +155,7 @@ class WorkbenchViewModelTest {
     f.viewModel.resetDefaultXFormsXml()
     assertTrue(f.events.contains(WorkbenchEvent.DefaultSurveyRestored("survey-kenya-coffee")))
     assertEquals(WorkbenchExampleForm.ALL_FIELD_TYPES, f.uiState.selectedWorkbenchExampleForm)
-    assertEquals(DEFAULT_PROTOTYPE_XFORMS_XML, f.uiState.customXFormsXml)
+    assertEquals(DEFAULT_WORKBENCH_XFORMS_XML, f.uiState.customXFormsXml)
   }
 
   @Test
@@ -185,7 +185,7 @@ class WorkbenchViewModelTest {
   }
 
   @Test
-  fun toggleSurveyDownloaded_andResetPrototypeFlow_restoreSampleData() {
+  fun toggleSurveyDownloaded_andResetSampleData_restoreSampleData() {
     val f = Fixture()
     val initialEntityCount = f.uiState.entities.size
     val targetSurvey = f.uiState.surveys.first()
@@ -203,10 +203,10 @@ class WorkbenchViewModelTest {
     val beforeResetCount = f.uiState.dataResetCount
     f.viewModel.updateAirplaneMode(true)
     assertTrue(f.uiState.isAirplaneMode)
-    f.viewModel.resetPrototypeFlow()
+    f.viewModel.resetSampleData()
     assertFalse(f.uiState.isAirplaneMode)
     assertEquals(beforeResetCount + 1, f.uiState.dataResetCount)
     assertEquals(initialEntityCount, f.uiState.entities.size)
-    assertTrue(f.events.contains(WorkbenchEvent.PrototypeReset))
+    assertTrue(f.events.contains(WorkbenchEvent.SampleDataReset))
   }
 }

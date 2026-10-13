@@ -18,13 +18,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import org.groundplatform.v2.app.di.AppDataHolder
+import org.groundplatform.v2.app.domain.model.AppScreen
 import org.groundplatform.v2.app.domain.model.DeviceStorageInfo
 import org.groundplatform.v2.app.domain.model.DownloadSurveyEntryOrigin
 import org.groundplatform.v2.app.domain.model.FormPreviewItem
 import org.groundplatform.v2.app.domain.model.FormSubmissionsGroup
-import org.groundplatform.v2.app.domain.model.GROUND_LANGUAGE_OPTIONS
-import org.groundplatform.v2.app.domain.model.GROUND_WEBSITE_URL
 import org.groundplatform.v2.app.domain.model.GeospatialEntityItem
+import org.groundplatform.v2.app.domain.model.LANGUAGE_OPTIONS
 import org.groundplatform.v2.app.domain.model.ListFilterTab
 import org.groundplatform.v2.app.domain.model.MainDrawerSubView
 import org.groundplatform.v2.app.domain.model.MainSurveyViewMode
@@ -32,12 +32,12 @@ import org.groundplatform.v2.app.domain.model.MapClusterFeatureItem
 import org.groundplatform.v2.app.domain.model.MapLayerItem
 import org.groundplatform.v2.app.domain.model.MeasurementUnitSystem
 import org.groundplatform.v2.app.domain.model.MutationLogItem
-import org.groundplatform.v2.app.domain.model.PrototypeScreen
 import org.groundplatform.v2.app.domain.model.SubmissionGeometryPolygon
 import org.groundplatform.v2.app.domain.model.SubmissionPreviewItem
 import org.groundplatform.v2.app.domain.model.SurveyPreviewItem
 import org.groundplatform.v2.app.domain.model.SyncStatus
 import org.groundplatform.v2.app.domain.model.UploadStatusFilter
+import org.groundplatform.v2.app.domain.model.WEBSITE_URL
 import org.groundplatform.v2.app.domain.model.singularTypeLabelOf
 import org.groundplatform.v2.app.domain.model.toClusterFeatures
 import org.groundplatform.v2.app.ui.AppSession
@@ -51,7 +51,7 @@ import org.groundplatform.v2.mobile.ui.state.SyncStatusSimulator
  * simulated device connectivity (airplane mode).
  */
 class MobileAppState(
-  initialScreen: PrototypeScreen = PrototypeScreen.SIGN_IN,
+  initialScreen: AppScreen = AppScreen.SIGN_IN,
   dataHolder: AppDataHolder = AppDataHolder(),
   settings: SettingsViewModel = createSettingsViewModel(dataHolder),
 ) : AppSession(dataHolder, settings) {
@@ -101,23 +101,23 @@ class MobileAppState(
     syncStatusSimulator?.cycleSubmissionSyncStatus(submissionId)
   }
 
-  override fun onScreenRequested(screen: PrototypeScreen) {
+  override fun onScreenRequested(screen: AppScreen) {
     currentScreen = screen
-    if (screen == PrototypeScreen.SIGN_IN) {
+    if (screen == AppScreen.SIGN_IN) {
       closeDrawerAndProfile()
       activeDrawerSubView = MainDrawerSubView.NONE
     }
   }
 
   override fun onSurveyOpened() {
-    currentScreen = PrototypeScreen.MAIN_SURVEY
+    currentScreen = AppScreen.MAIN_SURVEY
     closeDrawerAndProfile()
     activeDrawerSubView = MainDrawerSubView.NONE
   }
 
   override fun onReturnToSurveyList() {
     closeDrawerAndProfile()
-    currentScreen = PrototypeScreen.MAIN_SURVEY
+    currentScreen = AppScreen.MAIN_SURVEY
     activeDrawerSubView = MainDrawerSubView.SWITCH_SURVEYS
   }
 
@@ -127,10 +127,10 @@ class MobileAppState(
   }
 
   override fun onSignedOutElsewhere() {
-    if (currentScreen == PrototypeScreen.SIGN_IN) return
+    if (currentScreen == AppScreen.SIGN_IN) return
     closeDrawerAndProfile()
     activeDrawerSubView = MainDrawerSubView.NONE
-    currentScreen = PrototypeScreen.SIGN_IN
+    currentScreen = AppScreen.SIGN_IN
   }
 
   override fun onMapShown() {
@@ -141,7 +141,7 @@ class MobileAppState(
     closeDrawerAndProfile()
     activeDrawerSubView = MainDrawerSubView.NONE
     mainViewMode = MainSurveyViewMode.MAP
-    currentScreen = PrototypeScreen.MAIN_SURVEY
+    currentScreen = AppScreen.MAIN_SURVEY
   }
 
   override fun onUploadsOpened() {
@@ -160,7 +160,7 @@ class MobileAppState(
   override fun onFormOpened() {
     closeDrawerAndProfile()
     activeDrawerSubView = MainDrawerSubView.NONE
-    currentScreen = PrototypeScreen.MAIN_SURVEY
+    currentScreen = AppScreen.MAIN_SURVEY
   }
 
   private fun closeDrawerAndProfile() {
@@ -190,7 +190,7 @@ class MobileAppState(
   }
 
   override fun reset() {
-    currentScreen = PrototypeScreen.SIGN_IN
+    currentScreen = AppScreen.SIGN_IN
     super.reset()
     mainViewMode = MainSurveyViewMode.MAP
     isDrawerOpen = false
@@ -201,11 +201,11 @@ class MobileAppState(
   // --- Navigation ---
 
   /** Directly switches the active mobile screen (used by both flow buttons and UX workbench). */
-  fun navigateTo(screen: PrototypeScreen) {
-    if (screen == PrototypeScreen.DOWNLOAD_SURVEY) {
+  fun navigateTo(screen: AppScreen) {
+    if (screen == AppScreen.DOWNLOAD_SURVEY) {
       onboarding.setEntryOrigin(
         if (
-          currentScreen == PrototypeScreen.MAIN_SURVEY &&
+          currentScreen == AppScreen.MAIN_SURVEY &&
             activeDrawerSubView == MainDrawerSubView.SWITCH_SURVEYS
         ) {
           DownloadSurveyEntryOrigin.SURVEY_LIST
@@ -287,7 +287,7 @@ class MobileAppState(
     isDrawerOpen = false
     activeDrawerSubView = MainDrawerSubView.NONE
     onboarding.setEntryOrigin(DownloadSurveyEntryOrigin.SURVEY_LIST)
-    currentScreen = PrototypeScreen.DOWNLOAD_SURVEY
+    currentScreen = AppScreen.DOWNLOAD_SURVEY
   }
 
   /** Alias kept for compatibility: opens the "Surveys" sub-screen. */
@@ -320,7 +320,7 @@ class MobileAppState(
   fun drawerViewTermsOfService() {
     isDrawerOpen = false
     activeDrawerSubView = MainDrawerSubView.NONE
-    currentScreen = PrototypeScreen.TERMS_OF_SERVICE
+    currentScreen = AppScreen.TERMS_OF_SERVICE
   }
 
   /** Drawer option 5: Sign out. */
@@ -328,7 +328,7 @@ class MobileAppState(
     isDrawerOpen = false
     activeDrawerSubView = MainDrawerSubView.NONE
     super.signOut()
-    currentScreen = PrototypeScreen.SIGN_IN
+    currentScreen = AppScreen.SIGN_IN
   }
 
   /** Signs the user out of the application and returns to the Sign In screen. */
@@ -349,7 +349,7 @@ class MobileAppState(
         dataCollection.isDataCollectionFormOpen &&
           dataCollection.isCurrentFormStepEntityRef &&
           dataCollection.entityRefSelectorViewMode == MainSurveyViewMode.MAP
-      return currentScreen == PrototypeScreen.MAIN_SURVEY &&
+      return currentScreen == AppScreen.MAIN_SURVEY &&
         activeDrawerSubView == MainDrawerSubView.NONE &&
         (!dataCollection.isDataCollectionFormOpen ||
           dataCollection.isCurrentFormStepGeoPoint ||
@@ -366,8 +366,8 @@ class MobileAppState(
         isDrawerOpen ||
         selectedSubmissionId != null ||
         selectedEntityId != null ||
-        currentScreen == PrototypeScreen.DOWNLOAD_SURVEY ||
-        currentScreen == PrototypeScreen.TERMS_OF_SERVICE
+        currentScreen == AppScreen.DOWNLOAD_SURVEY ||
+        currentScreen == AppScreen.TERMS_OF_SERVICE
 
   /**
    * Handles the system Back gesture: closes the innermost open surface (form, drawer sub-screen,
@@ -381,8 +381,8 @@ class MobileAppState(
       isDrawerOpen -> updateDrawerOpen(false)
       selectedSubmissionId != null -> selectSubmissionDetail(null)
       selectedEntityId != null -> selectEntity(null)
-      currentScreen == PrototypeScreen.DOWNLOAD_SURVEY -> navigateBackFromDownloadSurvey()
-      currentScreen == PrototypeScreen.TERMS_OF_SERVICE -> declineTermsOfService()
+      currentScreen == AppScreen.DOWNLOAD_SURVEY -> navigateBackFromDownloadSurvey()
+      currentScreen == AppScreen.TERMS_OF_SERVICE -> declineTermsOfService()
     }
   }
 
@@ -453,8 +453,7 @@ class MobileAppState(
 
   /** Display label of the currently selected language (e.g. `"English"`, `"Français"`). */
   val selectedLanguageDisplayName: String
-    get() =
-      GROUND_LANGUAGE_OPTIONS.firstOrNull { it.code == selectedLanguageCode }?.label ?: "English"
+    get() = LANGUAGE_OPTIONS.firstOrNull { it.code == selectedLanguageCode }?.label ?: "English"
 
   /**
    * Device storage breakdown showing total device storage, free storage, storage occupied by
@@ -767,7 +766,7 @@ class MobileAppState(
     settings.updateUploadMediaOverUnmeteredConnectionOnly(enabled)
 
   /** Records a click on "Visit website" (`https://groundplatform.org/`) in Settings > Help. */
-  fun visitGroundWebsite(url: String = GROUND_WEBSITE_URL) = settings.visitWebsite(url)
+  fun visitGroundWebsite(url: String = WEBSITE_URL) = settings.visitWebsite(url)
 
   /**
    * Pans (drags) the survey map viewport by normalized deltas `(deltaNormalizedX,

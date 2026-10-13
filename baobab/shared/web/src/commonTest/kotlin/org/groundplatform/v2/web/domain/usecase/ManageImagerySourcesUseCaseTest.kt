@@ -22,7 +22,7 @@ import kotlin.test.assertTrue
 import org.groundplatform.v2.app.data.datasource.local.store.runNow
 import org.groundplatform.v2.app.data.datasource.local.store.seededStore
 import org.groundplatform.v2.app.data.repository.OrganizationRepositoryImpl
-import org.groundplatform.v2.app.data.seed.PrototypeFakeOrganizationsData
+import org.groundplatform.v2.app.data.seed.SampleOrganizationsData
 import org.groundplatform.v2.app.domain.model.ImagerySource
 import org.groundplatform.v2.app.domain.model.ImagerySourceType
 import org.groundplatform.v2.app.domain.model.Organization
@@ -90,7 +90,7 @@ class ManageImagerySourcesUseCaseTest {
   fun add_update_setOfflineAllowed_andRemove_writeThroughTheRepository() {
     val repository = OrganizationRepositoryImpl(seededStore())
     val useCase = ManageImagerySourcesUseCase(repository)
-    val orgId = PrototypeFakeOrganizationsData.KENYA_FOREST_SERVICE
+    val orgId = SampleOrganizationsData.KENYA_FOREST_SERVICE
     val source = ImagerySource("imagery-kfs-topo", "Topo", url, allowOfflineDownload = false)
 
     val added = assertNotNull(runNow { useCase.add(orgId, source) })

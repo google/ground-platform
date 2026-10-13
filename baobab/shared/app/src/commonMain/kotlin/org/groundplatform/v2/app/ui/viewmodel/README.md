@@ -30,7 +30,7 @@ Each shared feature area is backed by a focused ViewModel that implements a corr
 - `OrganizationViewModel` (`OrganizationActions`): Organization directory, organization creation (`CreateOrganizationUseCase`), member invitations and role management (`ManageOrganizationMembersUseCase`), and organization imagery sources.
 - `SurveyEditorViewModel` (`SurveyEditorActions`) & `FormEditorViewModel` (`FormEditorActions`): Reactive survey draft editing (`SurveyEditorRepository`), form question authoring, live form preview controller, validation, sample plot generation (`GenerateSamplePlotsUseCase`), and linking questions to the survey's dictionary (`LibraryRepository`, `ResolveLibraryUseCase`, `SearchConceptsUseCase`, `ManageLibraryUseCase`).
 - `DataCollectionViewModel` (`DataCollectionActions`): Form launch (`LaunchFormUseCase`), entity pre-population, interactive web geometry drawing, submission completion (`CompleteFormSubmissionUseCase`), entity/record selection ownership, QR code display, and PDF report export.
-- `WorkbenchViewModel` (`WorkbenchActions`): Prototype-only developer tooling (live XForms XML editor/presets, device frame simulator, synthetic site generation, sync-status cycling, and full prototype data reset).
+- `WorkbenchViewModel` (`WorkbenchActions`, in `mobileWebApp/workbench`): Workbench developer tooling (live XForms XML editor/presets, device frame simulator, sync-status cycling, and sample data reset).
 
 ## Role in the Overall Architecture
 

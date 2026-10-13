@@ -31,9 +31,6 @@ enum class AppScreen(val title: String, val subtitle: String) {
   ),
 }
 
-/** Backward-compatible alias for [AppScreen]. */
-typealias PrototypeScreen = AppScreen
-
 /** Primary view mode inside the Main Survey screen (`Map` vs `List`). */
 enum class MainSurveyViewMode(val label: String) {
   MAP("Map"),

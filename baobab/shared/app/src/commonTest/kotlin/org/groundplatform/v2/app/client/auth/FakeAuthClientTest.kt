@@ -18,10 +18,10 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
-class PrototypeAuthClientTest {
+class FakeAuthClientTest {
   @Test
   fun signInWithGoogle_andSignOut_togglesSessionAndReturnsProfile() {
-    val authClient = PrototypeAuthClient()
+    val authClient = FakeAuthClient()
     assertFalse(authClient.isSignedIn())
 
     val profile = authClient.signInWithGoogle()

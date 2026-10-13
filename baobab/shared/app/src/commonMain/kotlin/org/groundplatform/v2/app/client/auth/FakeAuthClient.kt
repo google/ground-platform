@@ -13,7 +13,7 @@
  */
 package org.groundplatform.v2.app.client.auth
 
-/** Authenticated collector profile returned by [PrototypeAuthClient]. */
+/** Authenticated collector profile returned by [FakeAuthClient]. */
 data class AuthenticatedCollectorProfile(
   val displayName: String,
   val email: String,
@@ -24,7 +24,7 @@ data class AuthenticatedCollectorProfile(
  * External service client (`client/auth/ *Client`) simulating OAuth / Google Sign-In authentication
  * for the prototype workbench per Sections 3 & 4 of `docs/technical/client/architecture.md`.
  */
-class PrototypeAuthClient {
+class FakeAuthClient {
   private var signedIn: Boolean = false
   private var profile: AuthenticatedCollectorProfile = DEFAULT_COLLECTOR_PROFILE
 

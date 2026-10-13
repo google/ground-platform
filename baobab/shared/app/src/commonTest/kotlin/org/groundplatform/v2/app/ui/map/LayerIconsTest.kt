@@ -19,7 +19,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
-import org.groundplatform.v2.app.data.seed.PrototypeFakeMapLayersData
+import org.groundplatform.v2.app.data.seed.SampleMapLayersData
 import org.groundplatform.v2.app.data.seed.SurveyEditorSamples
 
 class LayerIconsTest {
@@ -60,7 +60,7 @@ class LayerIconsTest {
 
   @Test
   fun seedLayers_useDistinctColorsAndKnownIcons() {
-    val layers = PrototypeFakeMapLayersData.defaultMapLayers()
+    val layers = SampleMapLayersData.defaultMapLayers()
     assertEquals(layers.size, layers.map { it.colorHex }.toSet().size)
     layers.forEach { assertTrue(LayerIcons.forName(it.iconName) != null, it.id) }
     SurveyEditorSamples.draft()
@@ -71,7 +71,7 @@ class LayerIconsTest {
 
   @Test
   fun pinIconName_isOnlyShownForPointLayers() {
-    val layers = PrototypeFakeMapLayersData.defaultMapLayers()
+    val layers = SampleMapLayersData.defaultMapLayers()
     layers.forEach { layer ->
       if (layer.geometryTypeLabel == "Point") {
         assertEquals(layer.iconName, layer.pinIconName, layer.id)

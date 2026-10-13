@@ -19,7 +19,7 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import org.groundplatform.v2.app.data.datasource.local.store.runNow
-import org.groundplatform.v2.app.data.seed.PrototypeFakeOrganizationsData
+import org.groundplatform.v2.app.data.seed.SampleOrganizationsData
 import org.groundplatform.v2.app.domain.model.EffortComparison
 import org.groundplatform.v2.app.domain.model.ImpactCoverage
 import org.groundplatform.v2.app.domain.model.ImpactEventType
@@ -46,7 +46,7 @@ class SurveyLifecycleUseCaseTest {
     assertTrue(coverage.featureCount > 0)
     assertEquals(coverage.featureCount, event.featureCount)
     assertEquals(coverage.areaHa, event.areaHa)
-    assertEquals(PrototypeFakeOrganizationsData.SIGNED_IN_EMAIL, event.actorUserId)
+    assertEquals(SampleOrganizationsData.SIGNED_IN_EMAIL, event.actorUserId)
   }
 
   @Test
@@ -102,7 +102,7 @@ class SurveyLifecycleUseCaseTest {
     assertEquals(setOf(SurveyOutcomeKind.SUBMITTED_EUDR_DDS), saved.outcomes)
     assertEquals(EffortComparison.LESS, saved.effortComparison)
     assertEquals(isoUtc(f.nowMillis), saved.answeredAt)
-    assertEquals(PrototypeFakeOrganizationsData.SIGNED_IN_EMAIL, saved.answeredBy)
+    assertEquals(SampleOrganizationsData.SIGNED_IN_EMAIL, saved.answeredBy)
     assertEquals(saved, f.survey(surveyId).outcome)
 
     val notYet = runNow {

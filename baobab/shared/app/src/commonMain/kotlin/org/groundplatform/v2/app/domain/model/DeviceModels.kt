@@ -13,19 +13,13 @@
  */
 package org.groundplatform.v2.app.domain.model
 
-/**
- * Screen orientation of the simulated device in the Prototype App wrapper (`Portrait` vs
- * `Landscape`).
- */
+/** Screen orientation of the simulated device in the workbench (`Portrait` vs `Landscape`). */
 enum class DeviceOrientation(val label: String) {
   PORTRAIT("Portrait"),
   LANDSCAPE("Landscape"),
 }
 
-/**
- * Device hardware bezel form factor selectable in the Prototype App wrapper page (`Mobile` vs
- * `Tablet`).
- */
+/** Device hardware bezel form factor selectable in the workbench (`Mobile` vs `Tablet`). */
 enum class DeviceFormFactor(
   val label: String,
   val dimensionsLabel: String,

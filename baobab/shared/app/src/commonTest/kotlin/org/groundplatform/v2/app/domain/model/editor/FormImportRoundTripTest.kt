@@ -19,7 +19,7 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import org.groundplatform.v2.app.data.seed.FormEditorSamples
-import org.groundplatform.v2.app.data.seed.PrototypeFakeSurveysData
+import org.groundplatform.v2.app.data.seed.SampleSurveysData
 import org.groundplatform.v2.app.data.seed.SurveyEditorSamples
 import org.groundplatform.v2.core.forms.ui.ChoiceImageRegistry
 import org.groundplatform.v2.core.forms.ui.WorkbenchExampleForm
@@ -90,9 +90,9 @@ class FormImportRoundTripTest {
 
   @Test
   fun derivedSampleForms_areStableAcrossPublishAndImport() {
-    for (survey in PrototypeFakeSurveysData.defaultSampleSurveys()) {
-      for (form in PrototypeFakeSurveysData.formsForSurvey(survey.id)) {
-        val def = PrototypeFakeSurveysData.builtInFallbackFormForForm(form)
+    for (survey in SampleSurveysData.defaultSampleSurveys()) {
+      for (form in SampleSurveysData.formsForSurvey(survey.id)) {
+        val def = SampleSurveysData.builtInFallbackFormForForm(form)
         val imported =
           assertNotNull(FormImport.fromFormDefinition(def, form.id, form.title), form.id).form
         assertSameQuestions(imported, roundTrip(imported))

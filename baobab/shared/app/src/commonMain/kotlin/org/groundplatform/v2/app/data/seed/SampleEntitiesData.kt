@@ -19,7 +19,7 @@ import org.groundplatform.v2.app.domain.model.SubmissionPreviewItem
 import org.groundplatform.v2.app.domain.model.SyncStatus
 
 /** Hardcoded sample geospatial entities for the prototype app. */
-object PrototypeFakeEntitiesData {
+object SampleEntitiesData {
   /** Returns the preloaded [GeospatialEntityItem] list for [surveyId]. */
   fun entitiesForSurvey(surveyId: String): List<GeospatialEntityItem> =
     when (surveyId) {

@@ -110,7 +110,6 @@ import org.groundplatform.v2.core.forms.ui.GroundBadgeTone
 import org.groundplatform.v2.core.forms.ui.GroundTonalBadge
 import org.groundplatform.v2.core.forms.ui.LocalGroundBrandFontFamily
 import org.groundplatform.v2.mobile.ui.MobileAppState
-import org.groundplatform.v2.mobile.ui.settings.GroundSettingsScreen
 import org.groundplatform.v2.mobile.ui.settings.SettingsScreen
 
 /**
@@ -1618,7 +1617,7 @@ private fun RemoveOfflineTilePackageConfirmationDialog(
 }
 
 /**
- * Drawer Sub-Screen: `Settings` — delegates to [GroundSettingsScreen], ported from
+ * Drawer Sub-Screen: `Settings` — delegates to [SettingsScreen], ported from
  * `org.groundplatform.android.ui.settings.SettingsScreen` in `github.com/google/ground-android`.
  */
 @Composable

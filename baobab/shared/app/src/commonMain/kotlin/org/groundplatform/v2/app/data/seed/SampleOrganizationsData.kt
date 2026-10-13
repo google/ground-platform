@@ -27,7 +27,7 @@ import org.groundplatform.v2.app.domain.model.OrganizationType
  * imagery sources are available across all surveys), plus [KENYA_FOREST_SERVICE],
  * [MEKONG_MANGROVE_ALLIANCE], and the listed [OPEN_FORIS_COMMUNITY].
  */
-object PrototypeFakeOrganizationsData {
+object SampleOrganizationsData {
   const val ALL_USERS = Organization.ALL_USERS_ID
   const val KENYA_FOREST_SERVICE = "org-kenya-forest-service"
   const val MEKONG_MANGROVE_ALLIANCE = "org-mekong-mangrove-alliance"

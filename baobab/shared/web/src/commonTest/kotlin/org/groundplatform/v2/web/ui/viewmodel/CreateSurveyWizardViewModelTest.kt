@@ -18,8 +18,8 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
-import org.groundplatform.v2.app.data.seed.PrototypeFakeOrganizationsData
-import org.groundplatform.v2.app.data.seed.PrototypeFakeSurveyEditorData
+import org.groundplatform.v2.app.data.seed.SampleOrganizationsData
+import org.groundplatform.v2.app.data.seed.SampleSurveyEditorData
 import org.groundplatform.v2.app.domain.model.OrganizationType
 import org.groundplatform.v2.app.domain.model.editor.FormPreviewTarget
 import org.groundplatform.v2.app.domain.model.editor.GeometryCapture
@@ -41,7 +41,7 @@ class CreateSurveyWizardViewModelTest {
   @Test
   fun openCreateSurveyWizard_navigatesToCreateSurveyPage_andStartsOnOverview() {
     val state = WebAppState()
-    state.openCreateSurveyWizard(PrototypeFakeOrganizationsData.KENYA_FOREST_SERVICE)
+    state.openCreateSurveyWizard(SampleOrganizationsData.KENYA_FOREST_SERVICE)
 
     assertEquals(WebPage.CREATE_SURVEY, state.activePage)
     assertEquals(
@@ -50,7 +50,7 @@ class CreateSurveyWizardViewModelTest {
     )
     val ui = state.createSurveyWizard.uiState.value
     assertEquals(CreateSurveyWizardStep.OVERVIEW, ui.currentStep)
-    assertEquals(PrototypeFakeOrganizationsData.KENYA_FOREST_SERVICE, ui.organizationId)
+    assertEquals(SampleOrganizationsData.KENYA_FOREST_SERVICE, ui.organizationId)
     assertFalse(ui.canProceedFromCurrentStep)
     assertFalse(ui.isTitleInvalid)
 
@@ -69,7 +69,7 @@ class CreateSurveyWizardViewModelTest {
   @Test
   fun modeAndPurpose_sortsPurposePacksByCollectionModeAffinity_andSeedsTemplates() {
     val state = WebAppState()
-    state.openCreateSurveyWizard(PrototypeFakeOrganizationsData.KENYA_FOREST_SERVICE)
+    state.openCreateSurveyWizard(SampleOrganizationsData.KENYA_FOREST_SERVICE)
     val wizard = state.createSurveyWizard
 
     wizard.updateTitle("Visual LULC Interpretation")
@@ -94,7 +94,7 @@ class CreateSurveyWizardViewModelTest {
     wizard.nextStep() // SURVEY_AREA
     assertFalse(wizard.uiState.value.canSkipCurrentStep)
     assertFalse(wizard.uiState.value.canProceedFromCurrentStep)
-    state.surveyEditor.setSurveyArea(PrototypeFakeSurveyEditorData.kenyaSurveyArea())
+    state.surveyEditor.setSurveyArea(SampleSurveyEditorData.kenyaSurveyArea())
     assertTrue(wizard.uiState.value.canProceedFromCurrentStep)
     wizard.nextStep() // MAP_FEATURES
 
@@ -117,7 +117,7 @@ class CreateSurveyWizardViewModelTest {
   @Test
   fun purposeSelection_isSingleSelect_andDrivesMapFeatureSourceAndPrimaryLayerDefaults() {
     val state = WebAppState()
-    state.openCreateSurveyWizard(PrototypeFakeOrganizationsData.KENYA_FOREST_SERVICE)
+    state.openCreateSurveyWizard(SampleOrganizationsData.KENYA_FOREST_SERVICE)
     val wizard = state.createSurveyWizard
 
     wizard.updateTitle("Purpose-Driven Survey")
@@ -136,7 +136,7 @@ class CreateSurveyWizardViewModelTest {
     assertEquals(WizardMapFeatureSource.FIELD_FREEFORM, wizard.uiState.value.mapFeatureSource)
 
     wizard.nextStep() // SURVEY_AREA
-    state.surveyEditor.setSurveyArea(PrototypeFakeSurveyEditorData.kenyaSurveyArea())
+    state.surveyEditor.setSurveyArea(SampleSurveyEditorData.kenyaSurveyArea())
     wizard.nextStep() // MAP_FEATURES
 
     val producerLayer = assertNotNull(wizard.uiState.value.primaryMapLayer)
@@ -164,7 +164,7 @@ class CreateSurveyWizardViewModelTest {
   @Test
   fun eudrPurposePack_enforcesPolygonGuardrail_andComputesExportReadiness() {
     val state = WebAppState()
-    state.openCreateSurveyWizard(PrototypeFakeOrganizationsData.KENYA_FOREST_SERVICE)
+    state.openCreateSurveyWizard(SampleOrganizationsData.KENYA_FOREST_SERVICE)
     val wizard = state.createSurveyWizard
 
     wizard.updateTitle("Kirinyaga EUDR Coffee Plots")
@@ -175,7 +175,7 @@ class CreateSurveyWizardViewModelTest {
     wizard.nextStep() // SURVEY_AREA (required in all collection modes)
     assertFalse(wizard.uiState.value.canSkipCurrentStep)
     assertFalse(wizard.uiState.value.canProceedFromCurrentStep)
-    state.surveyEditor.setSurveyArea(PrototypeFakeSurveyEditorData.kenyaSurveyArea())
+    state.surveyEditor.setSurveyArea(SampleSurveyEditorData.kenyaSurveyArea())
     wizard.nextStep() // MAP_FEATURES
 
     val layer = assertNotNull(wizard.uiState.value.primaryMapLayer)
@@ -202,7 +202,7 @@ class CreateSurveyWizardViewModelTest {
     assertFalse(SurveyWizardRules.usesIplcCareDefaults(OrganizationType.NGO, emptySet()))
 
     val state = WebAppState()
-    state.openCreateSurveyWizard(PrototypeFakeOrganizationsData.KENYA_FOREST_SERVICE)
+    state.openCreateSurveyWizard(SampleOrganizationsData.KENYA_FOREST_SERVICE)
     val wizard = state.createSurveyWizard
     wizard.updateTitle("Community Forest Tenure Survey")
     wizard.applyCareSovereigntyDefaults()
@@ -215,7 +215,7 @@ class CreateSurveyWizardViewModelTest {
   @Test
   fun startMethod_copyExisting_and_importXForms_populateDraft() {
     val state = WebAppState()
-    state.openCreateSurveyWizard(PrototypeFakeOrganizationsData.KENYA_FOREST_SERVICE)
+    state.openCreateSurveyWizard(SampleOrganizationsData.KENYA_FOREST_SERVICE)
     val wizard = state.createSurveyWizard
 
     wizard.updateTitle("Imported XForms Survey")
@@ -253,7 +253,7 @@ class CreateSurveyWizardViewModelTest {
     wizard.togglePurposePack(SurveyWizardRules.OTHER_PURPOSE_ID)
     wizard.updateOtherPurpose("Custom tree health inventory")
     wizard.nextStep() // SURVEY_AREA
-    state.surveyEditor.setSurveyArea(PrototypeFakeSurveyEditorData.kenyaSurveyArea())
+    state.surveyEditor.setSurveyArea(SampleSurveyEditorData.kenyaSurveyArea())
     wizard.nextStep() // MAP_FEATURES
     wizard.nextStep() // FORM_QUESTIONS
 
@@ -282,7 +282,7 @@ class CreateSurveyWizardViewModelTest {
   @Test
   fun modeAndPurpose_requiresAtLeastOnePurpose_orNonBlankOtherPurpose() {
     val state = WebAppState()
-    state.openCreateSurveyWizard(PrototypeFakeOrganizationsData.KENYA_FOREST_SERVICE)
+    state.openCreateSurveyWizard(SampleOrganizationsData.KENYA_FOREST_SERVICE)
     val wizard = state.createSurveyWizard
 
     wizard.updateTitle("Custom Biodiversity Baseline")
@@ -326,7 +326,7 @@ class CreateSurveyWizardViewModelTest {
     assertTrue(SurveyCollectionMode.entries.all { it.surveyAreaRequired })
 
     val state = WebAppState()
-    state.openCreateSurveyWizard(PrototypeFakeOrganizationsData.KENYA_FOREST_SERVICE)
+    state.openCreateSurveyWizard(SampleOrganizationsData.KENYA_FOREST_SERVICE)
     val wizard = state.createSurveyWizard
 
     wizard.updateTitle("Field Survey Requiring Area")
@@ -349,7 +349,7 @@ class CreateSurveyWizardViewModelTest {
     assertTrue(wizard.uiState.value.isSurveyAreaInvalid)
 
     // Setting a survey area clears validation error and allows advancing to Step 4.
-    state.surveyEditor.setSurveyArea(PrototypeFakeSurveyEditorData.kenyaSurveyArea())
+    state.surveyEditor.setSurveyArea(SampleSurveyEditorData.kenyaSurveyArea())
     assertTrue(wizard.uiState.value.isSurveyAreaValid)
     assertFalse(wizard.uiState.value.isSurveyAreaInvalid)
     assertTrue(wizard.uiState.value.canProceedFromCurrentStep)
@@ -373,7 +373,7 @@ class CreateSurveyWizardViewModelTest {
   fun cancelWizard_discardsWorkingSurvey_andReturnsToPreviousPage() {
     val state = WebAppState()
     val initialSurveyIds = state.surveys.map { it.id }.toSet()
-    state.openCreateSurveyWizard(PrototypeFakeOrganizationsData.KENYA_FOREST_SERVICE)
+    state.openCreateSurveyWizard(SampleOrganizationsData.KENYA_FOREST_SERVICE)
 
     val workingId = state.createSurveyWizard.uiState.value.workingSurveyId
     assertTrue(workingId.isNotBlank())
@@ -390,7 +390,7 @@ class CreateSurveyWizardViewModelTest {
   @Test
   fun samplePlots_deferredUntilPreviewClickedOrWizardSaved() {
     val state = WebAppState()
-    state.openCreateSurveyWizard(PrototypeFakeOrganizationsData.KENYA_FOREST_SERVICE)
+    state.openCreateSurveyWizard(SampleOrganizationsData.KENYA_FOREST_SERVICE)
     val wizard = state.createSurveyWizard
     val workingId = wizard.uiState.value.workingSurveyId
 
@@ -400,7 +400,7 @@ class CreateSurveyWizardViewModelTest {
     wizard.togglePurposePack(SurveyWizardRules.OTHER_PURPOSE_ID)
     wizard.updateOtherPurpose("Canopy interpretation")
     wizard.nextStep() // SURVEY_AREA
-    state.surveyEditor.setSurveyArea(PrototypeFakeSurveyEditorData.kenyaSurveyArea())
+    state.surveyEditor.setSurveyArea(SampleSurveyEditorData.kenyaSurveyArea())
     wizard.nextStep() // MAP_FEATURES
 
     val layerBeforeFinish = assertNotNull(wizard.uiState.value.primaryMapLayer)

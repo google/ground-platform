@@ -80,7 +80,7 @@ import org.groundplatform.v2.app.domain.usecase.LaunchFormUseCase
 import org.groundplatform.v2.app.domain.usecase.ResolveFormDefForLaunchUseCase
 import org.groundplatform.v2.app.ui.AppSession
 import org.groundplatform.v2.app.ui.common.GeoIdText
-import org.groundplatform.v2.app.ui.common.PrototypeMediaCaptureHandler
+import org.groundplatform.v2.app.ui.common.PlatformMediaCaptureHandler
 import org.groundplatform.v2.app.ui.common.appendGeoId
 import org.groundplatform.v2.app.ui.common.geoIdInlineContent
 import org.groundplatform.v2.app.ui.map.EntityRefFormMap
@@ -357,7 +357,7 @@ fun DataCollectionFormScreen(
       )
     } else {
       // Shared MobileFormRunner component from org.groundplatform.v2.core.forms.ui
-      val mediaCaptureHandler = remember { PrototypeMediaCaptureHandler() }
+      val mediaCaptureHandler = remember { PlatformMediaCaptureHandler() }
       androidx.compose.runtime.CompositionLocalProvider(
         org.groundplatform.v2.core.forms.ui.LocalGeoPointMapViewport provides
           { viewportState ->
@@ -813,12 +813,6 @@ private fun EntityRefCandidateOptionCard(
       }
     }
   }
-}
-
-/** Backward-compatible alias for [DataCollectionFormScreen]. */
-@Composable
-fun PrototypeDataCollectionFormScreen(state: AppSession) {
-  DataCollectionFormScreen(state)
 }
 
 /**

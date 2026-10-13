@@ -21,7 +21,7 @@ import org.groundplatform.v2.core.forms.ui.WorkbenchExampleForm
 // inputs, not survey data: survey forms live in the LocalStore.
 
 /** Default XForms XML loaded into the workbench (the `All field types` example form). */
-val DEFAULT_PROTOTYPE_XFORMS_XML: String = WorkbenchExampleForm.ALL_FIELD_TYPES.xformsXml
+val DEFAULT_WORKBENCH_XFORMS_XML: String = WorkbenchExampleForm.ALL_FIELD_TYPES.xformsXml
 
 /** Sample XForms XML for the workbench's `Baobab biometrics` preset. */
 const val BAOBAB_BIOMETRICS_SAMPLE_XFORMS_XML: String =

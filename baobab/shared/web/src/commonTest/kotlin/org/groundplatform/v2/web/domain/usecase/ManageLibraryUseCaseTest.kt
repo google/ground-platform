@@ -23,7 +23,7 @@ import org.groundplatform.v2.app.data.datasource.local.store.runNow
 import org.groundplatform.v2.app.data.datasource.local.store.seededStore
 import org.groundplatform.v2.app.data.repository.LibraryRepositoryImpl
 import org.groundplatform.v2.app.data.repository.OrganizationRepositoryImpl
-import org.groundplatform.v2.app.data.seed.PrototypeFakeOrganizationsData
+import org.groundplatform.v2.app.data.seed.SampleOrganizationsData
 import org.groundplatform.v2.app.domain.model.CodeListItem
 import org.groundplatform.v2.app.domain.model.ConceptAggregation
 import org.groundplatform.v2.app.domain.model.ConceptDataType
@@ -33,9 +33,9 @@ import org.groundplatform.v2.app.domain.model.LocalizedText
 import org.groundplatform.v2.app.domain.model.Organization
 
 class ManageLibraryUseCaseTest {
-  private val kfs = PrototypeFakeOrganizationsData.KENYA_FOREST_SERVICE
+  private val kfs = SampleOrganizationsData.KENYA_FOREST_SERVICE
   private val global = Organization.ALL_USERS_ID
-  private val maya = PrototypeFakeOrganizationsData.SIGNED_IN_EMAIL
+  private val maya = SampleOrganizationsData.SIGNED_IN_EMAIL
 
   private class Fixture {
     val store = seededStore()

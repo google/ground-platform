@@ -30,12 +30,12 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
-import org.groundplatform.v2.app.data.seed.PrototypeFakeEntitiesData
-import org.groundplatform.v2.app.data.seed.PrototypeFakeOrganizationsData
-import org.groundplatform.v2.app.data.seed.PrototypeFakeSubmissionsData
-import org.groundplatform.v2.app.data.seed.PrototypeFakeSurveyEditorData
-import org.groundplatform.v2.app.data.seed.PrototypeFakeSurveysData
 import org.groundplatform.v2.app.data.seed.SampleDataSeeder
+import org.groundplatform.v2.app.data.seed.SampleEntitiesData
+import org.groundplatform.v2.app.data.seed.SampleOrganizationsData
+import org.groundplatform.v2.app.data.seed.SampleSubmissionsData
+import org.groundplatform.v2.app.data.seed.SampleSurveyEditorData
+import org.groundplatform.v2.app.data.seed.SampleSurveysData
 import org.groundplatform.v2.app.domain.model.SyncStatus
 import org.groundplatform.v2.app.domain.model.editor.SurveyEditorDraft
 
@@ -58,16 +58,16 @@ abstract class LocalStoreContractTest {
   @Test
   fun seeder_writesEverySurveysSampleDataExactly() {
     val store = seededStore()
-    val surveys = PrototypeFakeSurveysData.defaultSampleSurveys()
+    val surveys = SampleSurveysData.defaultSampleSurveys()
     runNow {
       store.transaction {
         assertEquals(surveys, surveys())
-        assertEquals(PrototypeFakeOrganizationsData.defaultOrganizations(), organizations())
+        assertEquals(SampleOrganizationsData.defaultOrganizations(), organizations())
         for (survey in surveys) {
-          assertEquals(PrototypeFakeEntitiesData.entitiesForSurvey(survey.id), entities(survey.id))
-          assertEquals(PrototypeFakeSurveysData.formsForSurvey(survey.id), forms(survey.id))
+          assertEquals(SampleEntitiesData.entitiesForSurvey(survey.id), entities(survey.id))
+          assertEquals(SampleSurveysData.formsForSurvey(survey.id), forms(survey.id))
           assertEquals(
-            PrototypeFakeSubmissionsData.standaloneSubmissionsForSurvey(survey.id),
+            SampleSubmissionsData.standaloneSubmissionsForSurvey(survey.id),
             standaloneSubmissions(survey.id),
           )
           assertNotNull(surveyConfig(survey.id)!!.primaryForm)
@@ -79,7 +79,7 @@ abstract class LocalStoreContractTest {
           forms(SampleDataSeeder.DEFAULT_ACTIVE_SURVEY_ID).map { it.id },
           kenyaDraft.forms.map { it.form.formId },
         )
-        assertEquals(PrototypeFakeSurveyEditorData.kenyaSharing(), kenyaDraft.sharing)
+        assertEquals(SampleSurveyEditorData.kenyaSharing(), kenyaDraft.sharing)
       }
     }
   }
@@ -87,7 +87,7 @@ abstract class LocalStoreContractTest {
   @Test
   fun deleteOrganization_makesItsSurveysPersonal() {
     val store = seededStore()
-    val orgId = PrototypeFakeOrganizationsData.KENYA_FOREST_SERVICE
+    val orgId = SampleOrganizationsData.KENYA_FOREST_SERVICE
     runNow {
       store.transaction {
         assertTrue(surveys().any { it.organizationId == orgId })
@@ -95,10 +95,10 @@ abstract class LocalStoreContractTest {
         assertNull(organization(orgId))
         assertTrue(surveys().none { it.organizationId == orgId })
         // Other organizations and their surveys are untouched.
-        assertNotNull(organization(PrototypeFakeOrganizationsData.MEKONG_MANGROVE_ALLIANCE))
+        assertNotNull(organization(SampleOrganizationsData.MEKONG_MANGROVE_ALLIANCE))
         assertTrue(
           surveys().any {
-            it.organizationId == PrototypeFakeOrganizationsData.MEKONG_MANGROVE_ALLIANCE
+            it.organizationId == SampleOrganizationsData.MEKONG_MANGROVE_ALLIANCE
           }
         )
       }
@@ -196,7 +196,7 @@ abstract class LocalStoreContractTest {
       }
     }
     val count = runNow { store.transaction { entityCount(kenya) } }
-    assertEquals(PrototypeFakeEntitiesData.entitiesForSurvey(kenya).size - 1, count)
+    assertEquals(SampleEntitiesData.entitiesForSurvey(kenya).size - 1, count)
   }
 
   @Test
@@ -237,7 +237,7 @@ abstract class LocalStoreContractTest {
         store.transaction { surveyEditorDraft(SampleDataSeeder.DEFAULT_ACTIVE_SURVEY_ID) }
       }!!
     assertTrue(
-      kenyaDraft.datasets.any { it.id == PrototypeFakeSurveyEditorData.farmers().id },
+      kenyaDraft.datasets.any { it.id == SampleSurveyEditorData.farmers().id },
       "seeded Kenya draft keeps its Data tables",
     )
   }
@@ -247,7 +247,7 @@ abstract class LocalStoreContractTest {
     val store = seededStore()
     val configs = runNow { store.observeSurveyConfigs().first() }
     assertEquals(
-      PrototypeFakeSurveysData.defaultSampleSurveys().map { it.id }.toSet(),
+      SampleSurveysData.defaultSampleSurveys().map { it.id }.toSet(),
       configs.keys,
     )
   }
@@ -272,18 +272,18 @@ class LocalStoreTest : LocalStoreContractTest() {
           }
           .stateIn(scope, SharingStarted.Eagerly, -1)
       val kenya = SampleDataSeeder.DEFAULT_ACTIVE_SURVEY_ID
-      assertEquals(PrototypeFakeEntitiesData.entitiesForSurvey(kenya).size, activeEntityCount.value)
+      assertEquals(SampleEntitiesData.entitiesForSurvey(kenya).size, activeEntityCount.value)
 
       runNow { store.transaction { deleteEntity(kenya, entities(kenya).first().id) } }
       assertEquals(
-        PrototypeFakeEntitiesData.entitiesForSurvey(kenya).size - 1,
+        SampleEntitiesData.entitiesForSurvey(kenya).size - 1,
         activeEntityCount.value,
       )
 
       val forest = "survey-sample-plots-forest"
       runNow { store.transaction { updatePreferences { it.copy(activeSurveyId = forest) } } }
       assertEquals(
-        PrototypeFakeEntitiesData.entitiesForSurvey(forest).size,
+        SampleEntitiesData.entitiesForSurvey(forest).size,
         activeEntityCount.value,
       )
     } finally {

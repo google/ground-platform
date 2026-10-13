@@ -20,7 +20,7 @@ import org.groundplatform.v2.app.data.datasource.local.store.runNow
 import org.groundplatform.v2.app.data.datasource.local.store.seededStore
 import org.groundplatform.v2.app.data.repository.SurveyEditorRepositoryImpl
 import org.groundplatform.v2.app.data.repository.SurveyRepositoryImpl
-import org.groundplatform.v2.app.data.seed.PrototypeFakeSurveysData
+import org.groundplatform.v2.app.data.seed.SampleSurveysData
 import org.groundplatform.v2.app.domain.model.editor.DatasetKind
 import org.groundplatform.v2.app.domain.model.editor.EntityRow
 import org.groundplatform.v2.app.domain.model.editor.LatLng
@@ -29,7 +29,7 @@ import org.groundplatform.v2.app.domain.model.editor.SurveyArea
 class SurveyThumbnailTest {
   @Test
   fun seededSurveys_haveSatelliteThumbnailsWithAreaOfInterestAndMapFeatures() {
-    val surveys = PrototypeFakeSurveysData.defaultSampleSurveys()
+    val surveys = SampleSurveysData.defaultSampleSurveys()
     assertTrue(surveys.isNotEmpty())
     for (survey in surveys) {
       val thumbnail = survey.thumbnail
@@ -127,8 +127,7 @@ class SurveyThumbnailTest {
 
   @Test
   fun coveringTiles_computesValidWebMercatorTileGridAndUrls() {
-    val kenya =
-      PrototypeFakeSurveysData.defaultSampleSurveys().first { it.id == "survey-kenya-coffee" }
+    val kenya = SampleSurveysData.defaultSampleSurveys().first { it.id == "survey-kenya-coffee" }
     val tiles =
       WebMercatorThumbnailProjection.coveringTiles(
         bounds = kenya.thumbnail.bounds,

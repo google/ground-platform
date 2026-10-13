@@ -17,9 +17,9 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
-import org.groundplatform.v2.app.data.seed.PrototypeFakeEntitiesData
-import org.groundplatform.v2.app.data.seed.PrototypeFakeMapLayersData
-import org.groundplatform.v2.app.data.seed.PrototypeFakeSurveysData
+import org.groundplatform.v2.app.data.seed.SampleEntitiesData
+import org.groundplatform.v2.app.data.seed.SampleMapLayersData
+import org.groundplatform.v2.app.data.seed.SampleSurveysData
 import org.groundplatform.v2.app.data.seed.SurveyEditorSamples
 import org.groundplatform.v2.app.domain.model.editor.DatasetKind
 import org.groundplatform.v2.app.domain.model.editor.SurveyEditorDerivation
@@ -29,23 +29,23 @@ import org.groundplatform.v2.web.ui.viewmodel.ui
 
 class SurveyEditorDerivationTest {
   private fun derive(surveyId: String): SurveyEditorDraft {
-    val forms = PrototypeFakeSurveysData.formsForSurvey(surveyId)
+    val forms = SampleSurveysData.formsForSurvey(surveyId)
     return SurveyEditorDerivation.derive(
       surveyId = surveyId,
-      survey = PrototypeFakeSurveysData.defaultSampleSurveys().first { it.id == surveyId },
+      survey = SampleSurveysData.defaultSampleSurveys().first { it.id == surveyId },
       forms = forms,
-      formDefinition = { PrototypeFakeSurveysData.builtInFallbackFormForForm(it) },
-      mapLayers = PrototypeFakeMapLayersData.mapLayersForSurvey(surveyId),
-      entities = PrototypeFakeEntitiesData.entitiesForSurvey(surveyId),
+      formDefinition = { SampleSurveysData.builtInFallbackFormForForm(it) },
+      mapLayers = SampleMapLayersData.mapLayersForSurvey(surveyId),
+      entities = SampleEntitiesData.entitiesForSurvey(surveyId),
     )
   }
 
   @Test
   fun everySampleSurvey_derivesItsFormsAndMapLayers() {
-    for (survey in PrototypeFakeSurveysData.defaultSampleSurveys()) {
+    for (survey in SampleSurveysData.defaultSampleSurveys()) {
       val draft = derive(survey.id)
-      val forms = PrototypeFakeSurveysData.formsForSurvey(survey.id)
-      val layers = PrototypeFakeMapLayersData.mapLayersForSurvey(survey.id)
+      val forms = SampleSurveysData.formsForSurvey(survey.id)
+      val layers = SampleMapLayersData.mapLayersForSurvey(survey.id)
       assertTrue(draft.forms.isNotEmpty(), "${survey.id} derives at least one Form")
       assertEquals(forms.map { it.id }, draft.forms.map { it.form.formId }, survey.id)
       assertEquals(forms.map { it.title }, draft.forms.map { it.form.title }, survey.id)
@@ -82,8 +82,8 @@ class SurveyEditorDerivationTest {
   fun mapLayerRows_mirrorTheMapFeatures() {
     val surveyId = "survey-kenya-coffee"
     val draft = derive(surveyId)
-    val entities = PrototypeFakeEntitiesData.entitiesForSurvey(surveyId)
-    for (layer in PrototypeFakeMapLayersData.mapLayersForSurvey(surveyId)) {
+    val entities = SampleEntitiesData.entitiesForSurvey(surveyId)
+    for (layer in SampleMapLayersData.mapLayersForSurvey(surveyId)) {
       val dataset = draft.datasets.first { it.id == (layer.datasetId ?: layer.id) }
       val layerEntities = entities.filter { it.layerId == layer.id }
       assertEquals(layerEntities.map { it.id }, dataset.rows.map { it.key })
@@ -99,8 +99,8 @@ class SurveyEditorDerivationTest {
   @Test
   fun refresh_keepsStoredRowsAndFollowsRuntimeChanges() {
     val surveyId = "survey-kenya-coffee"
-    val layers = PrototypeFakeMapLayersData.mapLayersForSurvey(surveyId)
-    val entities = PrototypeFakeEntitiesData.entitiesForSurvey(surveyId)
+    val layers = SampleMapLayersData.mapLayersForSurvey(surveyId)
+    val entities = SampleEntitiesData.entitiesForSurvey(surveyId)
     val stored = derive(surveyId)
     val layer = layers.first()
     val dataset = stored.datasets.first { it.id == (layer.datasetId ?: layer.id) }
@@ -133,8 +133,8 @@ class SurveyEditorDerivationTest {
       SurveyEditorDerivation.refresh(
         stored,
         surveyId,
-        PrototypeFakeMapLayersData.mapLayersForSurvey(surveyId),
-        PrototypeFakeEntitiesData.entitiesForSurvey(surveyId),
+        SampleMapLayersData.mapLayersForSurvey(surveyId),
+        SampleEntitiesData.entitiesForSurvey(surveyId),
       )
     assertEquals(SurveyEditorSamples.farmers(), refreshed.datasets.last())
   }

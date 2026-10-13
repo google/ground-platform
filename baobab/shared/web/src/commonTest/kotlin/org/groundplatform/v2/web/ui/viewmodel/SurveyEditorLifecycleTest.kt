@@ -24,8 +24,8 @@ import org.groundplatform.v2.app.data.datasource.local.store.runNow
 import org.groundplatform.v2.app.data.repository.OrganizationRepositoryImpl
 import org.groundplatform.v2.app.data.repository.PlaceRepositoryImpl
 import org.groundplatform.v2.app.data.repository.SurveyEditorRepositoryImpl
-import org.groundplatform.v2.app.data.seed.PrototypeFakeOrganizationsData
-import org.groundplatform.v2.app.data.seed.PrototypeFakeSurveysData
+import org.groundplatform.v2.app.data.seed.SampleOrganizationsData
+import org.groundplatform.v2.app.data.seed.SampleSurveysData
 import org.groundplatform.v2.app.domain.model.EffortComparison
 import org.groundplatform.v2.app.domain.model.ImpactCoverage
 import org.groundplatform.v2.app.domain.model.ImpactEventType
@@ -148,7 +148,7 @@ class SurveyEditorLifecycleTest {
     )
     assertEquals(EffortComparison.SAME, outcome.effortComparison)
     assertEquals(isoUtc(f.lifecycle.nowMillis), outcome.answeredAt)
-    assertEquals(PrototypeFakeOrganizationsData.SIGNED_IN_EMAIL, outcome.answeredBy)
+    assertEquals(SampleOrganizationsData.SIGNED_IN_EMAIL, outcome.answeredBy)
   }
 
   @Test
@@ -196,9 +196,9 @@ class SurveyEditorLifecycleTest {
 
   @Test
   fun seededClosedSurvey_opensReadOnly() {
-    val f = Fixture(activeSurveyId = PrototypeFakeSurveysData.CLOSED_SURVEY_ID)
+    val f = Fixture(activeSurveyId = SampleSurveysData.CLOSED_SURVEY_ID)
     assertEquals(SurveyLifecycleState.CLOSED, f.ui.lifecycleState)
-    assertEquals(PrototypeFakeSurveysData.CLOSED_SURVEY_CLOSED_AT, f.ui.closedAt)
+    assertEquals(SampleSurveysData.CLOSED_SURVEY_CLOSED_AT, f.ui.closedAt)
     assertTrue(f.ui.isReadOnly)
     assertNull(f.ui.outcomeCard)
   }

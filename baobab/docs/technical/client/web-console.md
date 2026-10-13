@@ -285,10 +285,10 @@ Open a survey from the **Surveys** page, or deep-link to `#dashboard`.
     kind: point, line, or polygon) that centres that question's geometry in the
     visible part of the map, clear of the form panel and the table
     (`DataCollectionUiState.webMapFramingRequest`).
--   **Media capture on web** (`ui/common/PrototypeMediaCapture.kt`,
+-   **Media capture on web** (`ui/common/MediaCapture.kt`,
     `src/commonMain/resources/media-capture-bridge.js`): Photo, video, and
     audio questions use the shared `MediaCaptureWidget` with
-    `PrototypeMediaCaptureHandler`, which honours the organizer's per-question
+    `PlatformMediaCaptureHandler`, which honours the organizer's per-question
     source mode (**Capture only** vs **Capture or upload**, the ODK `new`
     appearance). A **capture** request is served by, in order: the native
     camera / recorder app via HTML Media Capture (`<input type="file"

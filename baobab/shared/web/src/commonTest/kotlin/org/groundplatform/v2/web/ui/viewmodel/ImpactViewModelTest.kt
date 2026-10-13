@@ -32,7 +32,7 @@ import org.groundplatform.v2.app.data.repository.LibraryRepositoryImpl
 import org.groundplatform.v2.app.data.repository.OrganizationRepositoryImpl
 import org.groundplatform.v2.app.data.repository.SurveyEditorRepositoryImpl
 import org.groundplatform.v2.app.data.repository.SurveyRepositoryImpl
-import org.groundplatform.v2.app.data.seed.PrototypeFakeOrganizationsData
+import org.groundplatform.v2.app.data.seed.SampleOrganizationsData
 import org.groundplatform.v2.app.domain.model.AuthProfile
 import org.groundplatform.v2.app.domain.model.AuthSession
 import org.groundplatform.v2.app.domain.model.ImpactEvent
@@ -92,7 +92,7 @@ class ImpactViewModelTest {
     assertEquals(3, kfs.surveys.size)
     assertEquals(listOf("KE"), kfs.countries.map { it.code })
     // The synthetic "All users" organization has no organization Impact view of its own.
-    assertNull(f.state.organizations[PrototypeFakeOrganizationsData.ALL_USERS])
+    assertNull(f.state.organizations[SampleOrganizationsData.ALL_USERS])
   }
 
   @Test
@@ -188,6 +188,6 @@ class ImpactViewModelTest {
 
   private companion object {
     const val KENYA = "survey-kenya-coffee"
-    const val KFS = PrototypeFakeOrganizationsData.KENYA_FOREST_SERVICE
+    const val KFS = SampleOrganizationsData.KENYA_FOREST_SERVICE
   }
 }

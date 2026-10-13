@@ -235,30 +235,3 @@ fun SignInScreen(
     }
   }
 }
-
-/** Backward-compatible alias for [MobileScreenHost]. */
-@Composable
-fun GroundMobilePrototypeScreenHost(state: MobileAppState) {
-  MobileScreenHost(state)
-}
-
-/** Backward-compatible alias for [CloudAcaciaLogo]. */
-@Composable
-fun GroundCloudAcaciaLogo(modifier: Modifier = Modifier) {
-  CloudAcaciaLogo(modifier)
-}
-
-/** Backward-compatible alias for [SignInScreen]. */
-@Composable
-fun GroundSignInScreen(state: MobileAppState) {
-  val settingsUiState by state.settings.uiState.collectAsState()
-  SignInScreen(
-    onSignIn = state.onboarding::signInWithGoogle,
-    languageSelector = {
-      SignInLanguageSelector(
-        languageCode = settingsUiState.languageCode,
-        onLanguageChange = state.settings::updateLanguage,
-      )
-    },
-  )
-}

@@ -20,7 +20,7 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import org.groundplatform.v2.app.data.datasource.local.store.runNow
-import org.groundplatform.v2.app.data.seed.PrototypeFakeSurveyEditorData
+import org.groundplatform.v2.app.data.seed.SampleSurveyEditorData
 import org.groundplatform.v2.app.domain.model.ListFilterTab
 import org.groundplatform.v2.app.domain.model.editor.DatasetKind
 import org.groundplatform.v2.app.domain.model.editor.publishedForm
@@ -44,10 +44,10 @@ class WebLocalStoreTest {
       editor.ui.mapLayers.map { it.id },
     )
     assertEquals(
-      PrototypeFakeSurveyEditorData.farmers().id to PrototypeFakeSurveyEditorData.treeSpecies().id,
+      SampleSurveyEditorData.farmers().id to SampleSurveyEditorData.treeSpecies().id,
       editor.ui.dataTables.map { it.id }.let { it[0] to it[1] },
     )
-    assertEquals(PrototypeFakeSurveyEditorData.kenyaSharing(), editor.ui.sharing)
+    assertEquals(SampleSurveyEditorData.kenyaSharing(), editor.ui.sharing)
 
     // Surveys without a stored draft still open with their Forms and Map layers.
     val other = WebAppState()

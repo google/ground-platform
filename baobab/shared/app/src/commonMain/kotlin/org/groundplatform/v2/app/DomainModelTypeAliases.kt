@@ -30,8 +30,6 @@ typealias MapScaleBarSpec = org.groundplatform.v2.app.domain.model.MapScaleBarSp
 
 typealias AppScreen = org.groundplatform.v2.app.domain.model.AppScreen
 
-typealias PrototypeScreen = org.groundplatform.v2.app.domain.model.AppScreen
-
 typealias MainSurveyViewMode = org.groundplatform.v2.app.domain.model.MainSurveyViewMode
 
 typealias EntityDetailsPane = org.groundplatform.v2.app.domain.model.EntityDetailsPane
@@ -59,8 +57,6 @@ typealias MutationLogItem = org.groundplatform.v2.app.domain.model.MutationLogIt
 typealias MeasurementUnitSystem = org.groundplatform.v2.app.domain.model.MeasurementUnitSystem
 
 typealias LanguageOption = org.groundplatform.v2.app.domain.model.LanguageOption
-
-typealias GroundLanguageOption = org.groundplatform.v2.app.domain.model.LanguageOption
 
 typealias UserSettings = org.groundplatform.v2.app.domain.model.UserSettings
 
@@ -136,11 +132,7 @@ typealias EntityGeometryKind = org.groundplatform.v2.app.domain.model.EntityGeom
 
 const val WEBSITE_URL = DOMAIN_WEBSITE_URL
 
-const val GROUND_WEBSITE_URL = DOMAIN_WEBSITE_URL
-
 val LANGUAGE_OPTIONS = DOMAIN_LANGUAGE_OPTIONS
-
-val GROUND_LANGUAGE_OPTIONS = DOMAIN_LANGUAGE_OPTIONS
 
 fun parsePlaceCoordinates(coordinatesLabel: String): Pair<Double, Double>? =
   domainParsePlaceCoordinates(coordinatesLabel)

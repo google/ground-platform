@@ -42,7 +42,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -52,7 +51,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.groundplatform.v2.app.ui.state.OnboardingUiState
 import org.groundplatform.v2.app.ui.viewmodel.OnboardingActions
-import org.groundplatform.v2.mobile.ui.MobileAppState
 
 /** 2. Terms of Service screen. */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -227,14 +225,4 @@ private fun TermsSectionItem(number: String, title: String, body: String) {
       lineHeight = 18.sp,
     )
   }
-}
-
-/** Backward-compatible alias for [TermsOfServiceScreen]. */
-@Composable
-fun GroundTermsOfServiceScreen(state: MobileAppState) {
-  val uiState by state.onboarding.uiState.collectAsState()
-  TermsOfServiceScreen(
-    uiState = uiState,
-    actions = state.onboarding,
-  )
 }

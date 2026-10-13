@@ -29,7 +29,7 @@ import org.groundplatform.v2.app.data.repository.AuthRepositoryImpl
 import org.groundplatform.v2.app.data.repository.LibraryRepositoryImpl
 import org.groundplatform.v2.app.data.repository.OrganizationRepositoryImpl
 import org.groundplatform.v2.app.data.repository.SurveyRepositoryImpl
-import org.groundplatform.v2.app.data.seed.PrototypeFakeOrganizationsData
+import org.groundplatform.v2.app.data.seed.SampleOrganizationsData
 import org.groundplatform.v2.app.domain.model.ConceptDataType
 import org.groundplatform.v2.app.domain.model.LibraryConcept
 import org.groundplatform.v2.app.domain.model.LocalizedText
@@ -86,7 +86,7 @@ class OrganizationViewModelTest {
     fun organization(id: String): Organization = uiState.organization(id)!!
 
     val kfs
-      get() = organization(PrototypeFakeOrganizationsData.KENYA_FOREST_SERVICE)
+      get() = organization(SampleOrganizationsData.KENYA_FOREST_SERVICE)
   }
 
   @Test
@@ -94,7 +94,7 @@ class OrganizationViewModelTest {
     val f = Fixture()
     assertTrue(f.uiState.organizations.isNotEmpty())
     assertTrue(f.uiState.surveys.isNotEmpty())
-    assertEquals(PrototypeFakeOrganizationsData.SIGNED_IN_EMAIL, f.me)
+    assertEquals(SampleOrganizationsData.SIGNED_IN_EMAIL, f.me)
     assertTrue(f.uiState.isSignedIn)
     assertNull(f.uiState.openOrganizationId)
     assertNull(f.uiState.openOrganization)
@@ -249,7 +249,7 @@ class OrganizationViewModelTest {
   @Test
   fun allUsers_hidesTypeAndCountry_andIgnoresEditsToThem() {
     val f = Fixture()
-    val allUsers = f.organization(PrototypeFakeOrganizationsData.ALL_USERS)
+    val allUsers = f.organization(SampleOrganizationsData.ALL_USERS)
     assertFalse(allUsers.hasTypeAndCountry)
     assertTrue(f.kfs.hasTypeAndCountry)
 
@@ -262,7 +262,7 @@ class OrganizationViewModelTest {
       OrganizationType.NGO,
       "KE",
     )
-    val updated = f.organization(PrototypeFakeOrganizationsData.ALL_USERS)
+    val updated = f.organization(SampleOrganizationsData.ALL_USERS)
     assertEquals("Platform-wide", updated.description)
     assertNull(updated.organizationType)
     assertNull(updated.countryCode)
@@ -274,8 +274,7 @@ class OrganizationViewModelTest {
     assertFalse(f.kfs.excludeFromPlatformAggregates)
     // The sample Open Foris Community keeps its data out of platform-wide numbers.
     assertTrue(
-      f.organization(PrototypeFakeOrganizationsData.OPEN_FORIS_COMMUNITY)
-        .excludeFromPlatformAggregates
+      f.organization(SampleOrganizationsData.OPEN_FORIS_COMMUNITY).excludeFromPlatformAggregates
     )
 
     f.viewModel.setExcludeFromPlatformAggregates(f.kfs.id, true)
@@ -284,13 +283,11 @@ class OrganizationViewModelTest {
     assertFalse(f.kfs.excludeFromPlatformAggregates)
 
     // The signed-in user is only a Member of the Mekong alliance, and "All users" never opts out.
-    val mekong = PrototypeFakeOrganizationsData.MEKONG_MANGROVE_ALLIANCE
+    val mekong = SampleOrganizationsData.MEKONG_MANGROVE_ALLIANCE
     f.viewModel.setExcludeFromPlatformAggregates(mekong, true)
     assertFalse(f.organization(mekong).excludeFromPlatformAggregates)
-    f.viewModel.setExcludeFromPlatformAggregates(PrototypeFakeOrganizationsData.ALL_USERS, true)
-    assertFalse(
-      f.organization(PrototypeFakeOrganizationsData.ALL_USERS).excludeFromPlatformAggregates
-    )
+    f.viewModel.setExcludeFromPlatformAggregates(SampleOrganizationsData.ALL_USERS, true)
+    assertFalse(f.organization(SampleOrganizationsData.ALL_USERS).excludeFromPlatformAggregates)
   }
 
   @Test
@@ -299,7 +296,7 @@ class OrganizationViewModelTest {
     val name = f.kfs.name
     f.viewModel.openOrganization(f.kfs.id)
     f.viewModel.deleteOrganization(f.kfs.id)
-    assertNull(f.uiState.organization(PrototypeFakeOrganizationsData.KENYA_FOREST_SERVICE))
+    assertNull(f.uiState.organization(SampleOrganizationsData.KENYA_FOREST_SERVICE))
     assertNull(f.uiState.openOrganizationId)
     assertEquals("Deleted organization \"$name\".", f.uiState.notice)
     assertEquals(OrganizationEvent.OrganizationsOpened, f.events.last())
@@ -511,7 +508,7 @@ class OrganizationViewModelTest {
   @Test
   fun library_isReadOnlyForNonManagers() {
     val f = Fixture()
-    val mekong = PrototypeFakeOrganizationsData.MEKONG_MANGROVE_ALLIANCE
+    val mekong = SampleOrganizationsData.MEKONG_MANGROVE_ALLIANCE
     f.viewModel.openOrganization(mekong)
     val library = f.uiState.library
     assertFalse(library.canEdit)

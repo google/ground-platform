@@ -44,9 +44,6 @@ enum class MeasurementUnitSystem(
  */
 data class LanguageOption(val code: String, val label: String)
 
-/** Backward-compatible alias for [LanguageOption]. */
-typealias GroundLanguageOption = LanguageOption
-
 /**
  * User settings model ported from `org.groundplatform.domain.model.settings.UserSettings` in
  * `github.com/google/ground-android`.
@@ -136,9 +133,6 @@ data class DeviceStorageInfo(
 
 const val WEBSITE_URL = "https://groundplatform.org/"
 
-/** Backward-compatible alias for [WEBSITE_URL]. */
-const val GROUND_WEBSITE_URL = WEBSITE_URL
-
 /**
  * Official language entries and entry values from `github.com/google/ground-android`
  * (`app/src/main/res/values/arrays.xml` and `strings-untranslated.xml`), plus Kiswahili (`sw`).
@@ -155,6 +149,3 @@ val LANGUAGE_OPTIONS: List<LanguageOption> =
     LanguageOption(code = "km", label = "ភាសាខ្មែរ"),
     LanguageOption(code = "sw", label = "Kiswahili"),
   )
-
-/** Backward-compatible alias for [LANGUAGE_OPTIONS]. */
-val GROUND_LANGUAGE_OPTIONS: List<LanguageOption> = LANGUAGE_OPTIONS

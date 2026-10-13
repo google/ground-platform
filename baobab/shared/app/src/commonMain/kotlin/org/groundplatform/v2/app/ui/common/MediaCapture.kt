@@ -91,7 +91,7 @@ internal expect fun openPlatformLiveCapture(
   onResult: (PlatformPickResult) -> Unit,
 )
 
-/** How [PrototypeMediaCaptureHandler] fulfils a [MediaCaptureRequest]; see [chooseCapturePath]. */
+/** How [PlatformMediaCaptureHandler] fulfils a [MediaCaptureRequest]; see [chooseCapturePath]. */
 enum class CapturePath {
   /** `<input type="file" capture=…>`: the native camera / recorder app on mobile browsers. */
   FILE_INPUT_CAPTURE,
@@ -142,7 +142,7 @@ fun chooseCapturePath(
  * never degraded to a file picker, so "capture only" questions hold on the web. Off the web it
  * falls back to [SimulatedMediaCaptureHandler].
  */
-class PrototypeMediaCaptureHandler(
+class PlatformMediaCaptureHandler(
   private val fallback: MediaCaptureHandler = SimulatedMediaCaptureHandler(),
   private val pickerAvailable: Boolean = isPlatformMediaPickerAvailable,
   private val liveAvailable: Boolean = isPlatformLiveCaptureAvailable,

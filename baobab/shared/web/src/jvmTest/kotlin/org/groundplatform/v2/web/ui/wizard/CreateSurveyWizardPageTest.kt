@@ -24,7 +24,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
-import org.groundplatform.v2.app.data.seed.PrototypeFakeOrganizationsData
+import org.groundplatform.v2.app.data.seed.SampleOrganizationsData
 import org.groundplatform.v2.web.ui.WebAppState
 import org.groundplatform.v2.web.ui.WebPage
 
@@ -35,7 +35,7 @@ class CreateSurveyWizardPageTest {
   fun clickingCloseButtonPromptsConfirmationBeforeDiscardingSurvey() =
     runDesktopComposeUiTest(width = 1280, height = 900) {
       val state = WebAppState()
-      state.openCreateSurveyWizard(PrototypeFakeOrganizationsData.KENYA_FOREST_SERVICE)
+      state.openCreateSurveyWizard(SampleOrganizationsData.KENYA_FOREST_SERVICE)
       val workingId = state.createSurveyWizard.uiState.value.workingSurveyId
 
       setContent { MaterialTheme { CreateSurveyWizardPage(state = state) } }

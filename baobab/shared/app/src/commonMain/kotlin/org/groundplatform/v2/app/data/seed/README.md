@@ -22,13 +22,13 @@
 
 To make the mobile app and web console self-contained for UX evaluation and automated testing without requiring a live backend, `data/seed/` defines realistic initial datasets and seeding logic:
 
-- `GlobalLibrarySeedData`: Kotlin copy of the canonical global library seed files (`shared/assets/library/<vocabulary>.textproto`), loaded into the `"All users"` library; `GlobalLibrarySeedTest` (jvmTest) keeps the two identical. `PrototypeFakeLibraryData` adds sample organization library entries.
+- `GlobalLibrarySeedData`: Kotlin copy of the canonical global library seed files (`shared/assets/library/<vocabulary>.textproto`), loaded into the `"All users"` library; `GlobalLibrarySeedTest` (jvmTest) keeps the two identical. `SampleLibraryData` adds sample organization library entries.
 - `SampleDataSeeder`: Populates `LocalStore` atomically at startup (when empty or when `SEED_VERSION` advances) and on explicit user reset (`SampleDataRepository.reseed()`).
-- `PrototypeFakeSurveysData`: Seed surveys, form metadata, and built-in XForms XML definitions.
-- `PrototypeFakeMapLayersData`: Seed map layers and data tables per survey.
-- `PrototypeFakeEntitiesData`: Seed geospatial entities, geometries, properties, and historical form submissions/records.
-- `PrototypeFakeMutationsData`: Seed offline upload/mutation queue entries.
-- `PrototypeFakeOrganizationsData`: Seed organizations (with sample types and countries), member rosters, and imagery sources.
+- `SampleSurveysData`: Seed surveys, form metadata, and built-in XForms XML definitions.
+- `SampleMapLayersData`: Seed map layers and data tables per survey.
+- `SampleEntitiesData`: Seed geospatial entities, geometries, properties, and historical form submissions/records.
+- `SampleMutationsData`: Seed offline upload/mutation queue entries.
+- `SampleOrganizationsData`: Seed organizations (with sample types and countries), member rosters, and imagery sources.
 - `SurveyEditorSampleData`: Supplemental editor-only fixtures (collaborator rosters, sample design configurations, and survey area polygons) merged into derived drafts at seed time.
 
 ## Role in the Overall Architecture
@@ -43,9 +43,9 @@ SampleDataSeeder (data/seed/)
 LocalStore (data/datasource/local/store/)
 ```
 
-Once seeded, all application features read and mutate data exclusively through `LocalStore` via repositories—never by reading `PrototypeFake*Data` constants directly.
+Once seeded, all application features read and mutate data exclusively through `LocalStore` via repositories—never by reading `Sample*Data` constants directly.
 
 ## Dependency Rules
 
-- **Inbound access**: Enforced by `SampleDataGuardrailTest`, **only** files inside `data/seed/` (and `SampleDataRepositoryImpl` / `AppDataHolder` referencing `SampleDataSeeder`) may reference `PrototypeFake*Data` or `SurveyEditorSamples`. UI components, ViewModels, Use Cases, and other Repositories are strictly forbidden from reading seed fixtures directly.
+- **Inbound access**: Enforced by `SampleDataGuardrailTest`, **only** files inside `data/seed/` (and `SampleDataRepositoryImpl` / `AppDataHolder` referencing `SampleDataSeeder`) may reference `Sample*Data` or `SurveyEditorSamples`. UI components, ViewModels, Use Cases, and other Repositories are strictly forbidden from reading seed fixtures directly.
 - **Outbound dependencies**: Depends only on `domain/model/` and `data/datasource/local/store/`. Never imports `di/` or `ui/`.

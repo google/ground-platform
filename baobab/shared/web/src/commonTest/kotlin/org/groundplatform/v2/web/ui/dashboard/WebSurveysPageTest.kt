@@ -18,15 +18,15 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
-import org.groundplatform.v2.app.data.seed.PrototypeFakeOrganizationsData
+import org.groundplatform.v2.app.data.seed.SampleOrganizationsData
 import org.groundplatform.v2.web.ui.WebAppState
 import org.groundplatform.v2.web.ui.WebPage
 
 class WebSurveysPageTest {
   private val state = WebAppState()
   private val user = state.signedInUserEmail
-  private val kfs = state.organization(PrototypeFakeOrganizationsData.KENYA_FOREST_SERVICE)!!
-  private val mekong = state.organization(PrototypeFakeOrganizationsData.MEKONG_MANGROVE_ALLIANCE)!!
+  private val kfs = state.organization(SampleOrganizationsData.KENYA_FOREST_SERVICE)!!
+  private val mekong = state.organization(SampleOrganizationsData.MEKONG_MANGROVE_ALLIANCE)!!
 
   @Test
   fun surveysPage_isTheWebLandingPage() {
@@ -101,7 +101,7 @@ class WebSurveysPageTest {
     assertNull(sections.last().organization)
     // Organizations without surveys get no section.
     assertTrue(
-      sections.none { it.organization?.id == PrototypeFakeOrganizationsData.OPEN_FORIS_COMMUNITY }
+      sections.none { it.organization?.id == SampleOrganizationsData.OPEN_FORIS_COMMUNITY }
     )
   }
 

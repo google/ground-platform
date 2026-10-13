@@ -19,7 +19,7 @@ import org.groundplatform.v2.app.domain.model.SubmissionPreviewItem
 import org.groundplatform.v2.app.domain.model.SyncStatus
 
 /** Hardcoded sample standalone submissions and submission geometries for the prototype app. */
-object PrototypeFakeSubmissionsData {
+object SampleSubmissionsData {
   /** Returns the preloaded standalone [SubmissionPreviewItem] list for [surveyId]. */
   fun standaloneSubmissionsForSurvey(surveyId: String): List<SubmissionPreviewItem> =
     when (surveyId) {

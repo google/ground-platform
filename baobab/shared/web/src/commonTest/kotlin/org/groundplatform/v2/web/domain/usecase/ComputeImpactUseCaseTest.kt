@@ -29,7 +29,7 @@ import org.groundplatform.v2.app.data.repository.LibraryRepositoryImpl
 import org.groundplatform.v2.app.data.repository.OrganizationRepositoryImpl
 import org.groundplatform.v2.app.data.repository.SurveyEditorRepositoryImpl
 import org.groundplatform.v2.app.data.repository.SurveyRepositoryImpl
-import org.groundplatform.v2.app.data.seed.PrototypeFakeOrganizationsData
+import org.groundplatform.v2.app.data.seed.SampleOrganizationsData
 import org.groundplatform.v2.app.domain.model.ImpactEvent
 import org.groundplatform.v2.app.domain.model.ImpactEventType
 import org.groundplatform.v2.app.domain.model.Organization
@@ -87,7 +87,7 @@ class ComputeImpactUseCaseTest {
     )
 
   @Test
-  fun allUsersIds_matchBetweenThePrototypeAndTheSharedJob() {
+  fun allUsersIds_matchBetweenTheAppAndTheSharedJob() {
     assertEquals(Organization.ALL_USERS_ID, ALL_USERS_ORGANIZATION_ID)
   }
 
@@ -236,7 +236,7 @@ class ComputeImpactUseCaseTest {
           SurveyOutcome(
             outcomes = setOf(SurveyOutcomeKind.SUBMITTED_EUDR_DDS),
             answeredAt = "2026-10-02T00:00:00Z",
-            answeredBy = PrototypeFakeOrganizationsData.SIGNED_IN_EMAIL,
+            answeredBy = SampleOrganizationsData.SIGNED_IN_EMAIL,
           ),
         )
     }
@@ -270,6 +270,6 @@ class ComputeImpactUseCaseTest {
 
   private companion object {
     const val KENYA = "survey-kenya-coffee"
-    const val KFS = PrototypeFakeOrganizationsData.KENYA_FOREST_SERVICE
+    const val KFS = SampleOrganizationsData.KENYA_FOREST_SERVICE
   }
 }

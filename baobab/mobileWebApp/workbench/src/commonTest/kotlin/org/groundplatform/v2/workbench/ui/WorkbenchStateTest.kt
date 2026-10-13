@@ -19,10 +19,10 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
+import org.groundplatform.v2.app.domain.model.AppScreen
 import org.groundplatform.v2.app.domain.model.DeviceFormFactor
 import org.groundplatform.v2.app.domain.model.DeviceOrientation
 import org.groundplatform.v2.app.domain.model.ListFilterTab
-import org.groundplatform.v2.app.domain.model.PrototypeScreen
 import org.groundplatform.v2.app.ui.map.SurveyMap
 import org.groundplatform.v2.app.ui.map.SurveyMapContent
 import org.groundplatform.v2.core.forms.media.MediaCaptureKind
@@ -103,7 +103,7 @@ class WorkbenchStateTest {
 
   @Test
   fun updateCustomXFormsXml_parsesValidAndInvalidXForms_andRefreshesActiveController() {
-    val workbench = WorkbenchState(MobileAppState(initialScreen = PrototypeScreen.MAIN_SURVEY))
+    val workbench = WorkbenchState(MobileAppState(initialScreen = AppScreen.MAIN_SURVEY))
     val state = workbench.mobile
     assertEquals(null, workbench.xformsXmlError)
     assertTrue(state.customFormDef != null)
@@ -145,7 +145,7 @@ class WorkbenchStateTest {
 
   @Test
   fun selectWorkbenchExampleForm_swapsAndValidatesAllFiveExampleForms() {
-    val workbench = WorkbenchState(MobileAppState(initialScreen = PrototypeScreen.MAIN_SURVEY))
+    val workbench = WorkbenchState(MobileAppState(initialScreen = AppScreen.MAIN_SURVEY))
     val state = workbench.mobile
     assertEquals(
       org.groundplatform.v2.core.forms.ui.WorkbenchExampleForm.ALL_FIELD_TYPES,
@@ -280,7 +280,7 @@ class WorkbenchStateTest {
 
   @Test
   fun geoPointStepInDataCollectionForm_showsMapAndSupportsCaptureLocationAndAddPointTriggers() {
-    val workbench = WorkbenchState(MobileAppState(initialScreen = PrototypeScreen.MAIN_SURVEY))
+    val workbench = WorkbenchState(MobileAppState(initialScreen = AppScreen.MAIN_SURVEY))
     val state = workbench.mobile
     workbench.selectWorkbenchExampleForm(
       org.groundplatform.v2.core.forms.ui.WorkbenchExampleForm.SINGLE_POINT_LAND_USE,
@@ -345,7 +345,7 @@ class WorkbenchStateTest {
 
   @Test
   fun reset_reseedsSampleData() {
-    val workbench = WorkbenchState(MobileAppState(initialScreen = PrototypeScreen.MAIN_SURVEY))
+    val workbench = WorkbenchState(MobileAppState(initialScreen = AppScreen.MAIN_SURVEY))
     val state = workbench.mobile
     val initialEntities = state.entities
     state.entities =
@@ -356,7 +356,7 @@ class WorkbenchStateTest {
     state.syncAllOutboxMutations()
     assertEquals(initialEntities.size + 10, state.entities.size)
 
-    workbench.resetPrototypeFlow()
+    workbench.resetSampleData()
     assertEquals("survey-kenya-coffee", state.activeSurveyId)
     assertEquals(initialEntities, state.entities)
     assertTrue(state.mutations.any { it.isOutbox })
@@ -364,7 +364,7 @@ class WorkbenchStateTest {
 
   @Test
   fun airplaneMode_takesTheMobileAppOffline() {
-    val workbench = WorkbenchState(MobileAppState(initialScreen = PrototypeScreen.MAIN_SURVEY))
+    val workbench = WorkbenchState(MobileAppState(initialScreen = AppScreen.MAIN_SURVEY))
     val mobile = workbench.mobile
 
     workbench.updateAirplaneMode(true)

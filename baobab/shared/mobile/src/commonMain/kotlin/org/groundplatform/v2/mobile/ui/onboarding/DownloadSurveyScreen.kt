@@ -61,7 +61,6 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -83,7 +82,6 @@ import org.groundplatform.v2.app.ui.viewmodel.OnboardingActions
 import org.groundplatform.v2.core.forms.ui.GroundAlertDialogOverlay
 import org.groundplatform.v2.core.forms.ui.GroundBadgeTone
 import org.groundplatform.v2.core.forms.ui.GroundTonalBadge
-import org.groundplatform.v2.mobile.ui.MobileAppState
 
 /**
  * 3. "Download survey" screen where users can see a list of all surveys shared with them, or search
@@ -643,16 +641,4 @@ private fun SurveyListItemCard(
       }
     }
   }
-}
-
-/** Backward-compatible alias for [DownloadSurveyScreen]. */
-@Composable
-fun GroundDownloadSurveyScreen(state: MobileAppState) {
-  val uiState by state.onboarding.uiState.collectAsState()
-  DownloadSurveyScreen(
-    uiState = uiState,
-    actions = state.onboarding,
-    notice = state.activeSurveyNotice,
-    isDarkTheme = state.isDarkTheme,
-  )
 }

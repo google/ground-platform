@@ -21,7 +21,7 @@ import org.groundplatform.v2.app.domain.model.SubmissionPreviewItem
 import org.groundplatform.v2.app.domain.model.SurveyConfig
 import org.groundplatform.v2.app.domain.model.SurveyPreviewItem
 import org.groundplatform.v2.core.forms.ui.WorkbenchExampleForm
-import org.groundplatform.v2.workbench.ui.DEFAULT_PROTOTYPE_XFORMS_XML
+import org.groundplatform.v2.workbench.ui.DEFAULT_WORKBENCH_XFORMS_XML
 import org.groundplatform.v2.workbench.ui.XFormsParseCache
 
 /**
@@ -32,7 +32,7 @@ data class WorkbenchUiState(
   val deviceFormFactor: DeviceFormFactor = DeviceFormFactor.MOBILE,
   val deviceOrientation: DeviceOrientation = DeviceFormFactor.MOBILE.defaultOrientation,
   val isAirplaneMode: Boolean = false,
-  val customXFormsXml: String = DEFAULT_PROTOTYPE_XFORMS_XML,
+  val customXFormsXml: String = DEFAULT_WORKBENCH_XFORMS_XML,
   val selectedWorkbenchExampleForm: WorkbenchExampleForm? = WorkbenchExampleForm.ALL_FIELD_TYPES,
   val xformsXmlError: String? = null,
   val customFormDef: FormDef? = XFormsParseCache.formDef(WorkbenchExampleForm.ALL_FIELD_TYPES),
@@ -105,8 +105,8 @@ sealed interface WorkbenchEvent {
    */
   data class DefaultSurveyRestored(val surveyId: String) : WorkbenchEvent
 
-  /** The prototype flow was reset to sample data; reset all feature ViewModels and shell state. */
-  data object PrototypeReset : WorkbenchEvent
+  /** The store was reset to sample data; reset all feature ViewModels and shell state. */
+  data object SampleDataReset : WorkbenchEvent
 
   /** Simulated connectivity changed via the workbench airplane mode toggle. */
   data class ConnectivityChanged(val isOnline: Boolean) : WorkbenchEvent

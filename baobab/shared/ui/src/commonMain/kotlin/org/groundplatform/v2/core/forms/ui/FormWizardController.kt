@@ -687,9 +687,6 @@ fun isWaitingForGeometryCapture(step: FormWizardStep): Boolean =
     else -> false
   }
 
-/** Backward-compatible alias for [isWaitingForGeometryCapture]. */
-fun isWaitingForGeoPointCapture(step: FormWizardStep): Boolean = isWaitingForGeometryCapture(step)
-
 /**
  * Returns `true` if [step] represents an optional question (all its input controls are not
  * required, not read-only, and not calculated).
