@@ -26,7 +26,6 @@ import androidx.compose.material.icons.outlined.Casino
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material.icons.outlined.Warning
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -37,7 +36,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -73,22 +71,19 @@ private const val MAX_CUSTOM_STRATA_SHOWN = 30
 /**
  * Sample design section of a generated Map layer's settings: area, method and its parameters
  * (progressive disclosure), plot shape, sample points, ordering and seed, a live estimate, and
- * Generate / Regenerate with progress and Cancel.
+ * Show / Update preview with progress and Cancel.
+ *
+ * Shared by the survey editor and the create-survey wizard. Previews only change the working
+ * draft; out-of-date designs are regenerated and committed when the draft is saved or published.
  */
-internal fun sampleDesignActionLabel(isWizard: Boolean, hasGeneratedPlots: Boolean): String =
-  when {
-    isWizard && hasGeneratedPlots -> "Update preview"
-    isWizard -> "Show preview"
-    hasGeneratedPlots -> "Regenerate sample plots"
-    else -> "Generate sample plots"
-  }
+internal fun sampleDesignActionLabel(hasGeneratedPlots: Boolean): String =
+  if (hasGeneratedPlots) "Update preview" else "Show preview"
 
 @Composable
 internal fun SamplingDesignPanel(
   uiState: SurveyEditorUiState,
   actions: SurveyEditorActions,
   dataset: EntityDataset,
-  isWizard: Boolean = false,
 ) {
   val config = dataset.generator ?: return
   val key = dataset.key
@@ -103,20 +98,13 @@ internal fun SamplingDesignPanel(
   val blockedReason = uiState.regenerateBlockedReason(dataset)
   val error = uiState.generationError(key)
   val areaResult = actions.samplingArea(config)
-  var confirmRegenerate by remember { mutableStateOf(false) }
-
-  fun generate() = actions.generateSamplePlots(key)
 
   Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
     if (stale && blockedReason == null) {
       Banner(
         icon = Icons.Outlined.Warning,
-        title =
-          if (isWizard) "Preview is out of date — update preview"
-          else "Design is out of date — regenerate",
-        body =
-          if (isWizard) "The design or its area changed after this preview was generated."
-          else "The design or its area changed after these sample plots were generated.",
+        title = "Preview is out of date — update preview",
+        body = "The design or its area changed after this preview was generated.",
         container = MaterialTheme.colorScheme.tertiaryContainer,
         content = MaterialTheme.colorScheme.onTertiaryContainer,
       )
@@ -282,52 +270,20 @@ internal fun SamplingDesignPanel(
       }
     } else {
       Button(
-        onClick = { if (!isWizard && hasGeneratedPlots) confirmRegenerate = true else generate() },
+        onClick = { actions.generateSamplePlots(key) },
         enabled = !busy && blockedReason == null && areaResult is SamplingAreaResult.Ready,
         modifier = Modifier.fillMaxWidth(),
       ) {
-        Text(sampleDesignActionLabel(isWizard = isWizard, hasGeneratedPlots = hasGeneratedPlots))
+        Text(sampleDesignActionLabel(hasGeneratedPlots = hasGeneratedPlots))
       }
     }
     if (lastRun != null && hasGeneratedPlots) {
       Text(
-        if (isWizard) {
-          "Previewing ${SurveyAreaGeometry.groupThousands(lastRun.featureCount.toLong())} sample plots"
-        } else {
-          "${SurveyAreaGeometry.groupThousands(lastRun.featureCount.toLong())} plots generated " +
-            "${lastRun.generatedAt.replace('T', ' ').removeSuffix("Z")} UTC " +
-            "(engine version ${lastRun.engineVersion})"
-        },
+        "Previewing ${SurveyAreaGeometry.groupThousands(lastRun.featureCount.toLong())} sample plots",
         style = MaterialTheme.typography.bodySmall,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
       )
     }
-  }
-
-  if (confirmRegenerate) {
-    AlertDialog(
-      onDismissRequest = { confirmRegenerate = false },
-      title = { Text("Regenerate sample plots?") },
-      text = {
-        Text(
-          "This replaces all ${SurveyAreaGeometry.groupThousands(dataset.rows.size.toLong())} " +
-            "sample plots. Values in columns you added are kept for plots with the same plot ID."
-        )
-      },
-      confirmButton = {
-        TextButton(
-          onClick = {
-            confirmRegenerate = false
-            generate()
-          }
-        ) {
-          Text("Regenerate")
-        }
-      },
-      dismissButton = {
-        TextButton(onClick = { confirmRegenerate = false }) { Text("Keep current plots") }
-      },
-    )
   }
 }
 
