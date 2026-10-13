@@ -23,9 +23,9 @@ import org.groundplatform.v2.app.domain.model.OrganizationRole
 import org.groundplatform.v2.app.domain.model.OrganizationType
 
 /**
- * Sample organizations for the prototype. Includes the synthetic [ALL_USERS] organization (whose
- * imagery sources are available across all surveys), plus [KENYA_FOREST_SERVICE],
- * [MEKONG_MANGROVE_ALLIANCE], and the listed [OPEN_FORIS_COMMUNITY].
+ * Sample organizations. Includes the synthetic [ALL_USERS] organization (whose imagery sources are
+ * available across all surveys), plus [KENYA_FOREST_SERVICE], [MEKONG_MANGROVE_ALLIANCE], and the
+ * listed [OPEN_FORIS_COMMUNITY].
  */
 object SampleOrganizationsData {
   const val ALL_USERS = Organization.ALL_USERS_ID
@@ -33,7 +33,7 @@ object SampleOrganizationsData {
   const val MEKONG_MANGROVE_ALLIANCE = "org-mekong-mangrove-alliance"
   const val OPEN_FORIS_COMMUNITY = "org-open-foris-community"
 
-  /** Email of the prototype's signed-in user. */
+  /** Email of the sample signed-in user. */
   const val SIGNED_IN_EMAIL = "maya.lin@groundplatform.org"
 
   private val signedInProfile = CachedProfile("Maya Lin", "avatar:2", "2026-02-10")
@@ -50,7 +50,7 @@ object SampleOrganizationsData {
         isListed = false,
         isSynthetic = true,
         createdOn = "2025-01-01",
-        // Its Managers are the platform admins. The prototype's signed-in user is one, so the demo
+        // Its Managers are the platform admins. The sample signed-in user is one, so they
         // can edit the global imagery sources and library; everyone else is a read-only member.
         members =
           listOf(

@@ -24,7 +24,7 @@ The Data layer is responsible for persisting, retrieving, synchronizing, and see
 
 - `datasource/`: Encapsulates storage engines (`LocalStore` / `InMemoryLocalStore`), device data providers (`DeviceLocationDataSource`, `FakeAuthDataSource`), and remote API data sources (`MapboxPlacesDataSource`).
 - `repository/`: Concrete `*RepositoryImpl` implementations of `domain/repository/` interfaces and `LocalStoreTransactionRunner`.
-- `seed/`: Initial sample datasets (`Sample*Data`, `SurveyEditorSampleData`) and `SampleDataSeeder`, which populates `LocalStore` on initial startup or prototype reset.
+- `seed/`: Initial sample datasets (`Sample*Data`, `SurveyEditorSampleData`) and `SampleDataSeeder`, which populates `LocalStore` on initial startup or when the workbench resets to sample data.
 
 ## Role in the Overall Architecture
 

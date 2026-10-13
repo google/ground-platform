@@ -22,7 +22,7 @@ import kotlin.test.assertTrue
  * Guards the dependency rules of `docs/technical/client/architecture.md` for the workbench:
  * - Nothing here imports `app.data` (only `shared/app`'s own `data/` and `di/` may).
  * - Views (everything outside `ui/viewmodel/`) never import `app.data` or `app.client`.
- * - Workbench code never imports the web console or the prototype host.
+ * - Workbench code never imports the web console or the developer tools.
  *
  * Imports are checked textually so the test needs no classpath scanning on any platform.
  */

@@ -101,8 +101,8 @@ open class AppSession(
   val dataHolder: AppDataHolder = AppDataHolder(),
   /**
    * ViewModel of user settings, the session theme, and offline tile packages. Its screens observe
-   * [SettingsViewModel.uiState] directly; this class mirrors it for the rest of the UI. Sessions of
-   * one prototype may share it so they share one theme.
+   * [SettingsViewModel.uiState] directly; this class mirrors it for the rest of the UI. Sessions
+   * sharing one data holder may share it so they share one theme.
    */
   val settings: SettingsViewModel = createSettingsViewModel(dataHolder),
 ) {
@@ -1551,8 +1551,8 @@ open class AppSession(
   }
 
   /**
-   * Resets every ViewModel of the session and the session's own state, as when the prototype is
-   * reset to its sample data.
+   * Resets every ViewModel of the session and the session's own state, as when the workbench resets
+   * the store to its sample data.
    */
   open fun reset() {
     onboarding.reset()

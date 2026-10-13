@@ -178,7 +178,7 @@ class OnboardingViewModel(
     session.update { it.copy(entryOrigin = origin, isSignOutPromptOpen = false) }
   }
 
-  /** Returns the flow to its initial state (used by the prototype's Reset). */
+  /** Returns the flow to its initial state (used by the workbench's Reset). */
   fun reset() {
     session.value = Session()
     scope.launch { authRepository.signOut() }

@@ -32,7 +32,7 @@ Each repository implementation owns a cohesive domain aggregate and coordinates 
 - `SettingsRepositoryImpl`: Persists user preferences, offline basemap settings, and device diagnostics state.
 - `LocationRepositoryImpl`: Provides device GPS location updates via `DeviceLocationDataSource`.
 - `PlaceRepositoryImpl`: Executes geocoding and place search queries via `MapboxPlacesDataSource`.
-- `SampleDataRepositoryImpl`: Triggers initial seeding and full prototype state resets via `SampleDataSeeder`.
+- `SampleDataRepositoryImpl`: Triggers initial seeding and full resets to sample data via `SampleDataSeeder`.
 - `LocalStoreTransactionRunner`: Implements `TransactionRunner` to execute multi-repository domain use cases inside a single atomic `LocalStore` transaction.
 
 ## Role in the Overall Architecture

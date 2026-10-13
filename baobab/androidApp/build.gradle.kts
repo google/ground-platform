@@ -74,7 +74,8 @@ android {
   }
   buildTypes {
     release {
-      // Sign prototype release bundles with the standard debug key so the .aab can be
+      // Sign release bundles with the standard debug key, until there's a production keystore, so
+      // the .aab can be
       // installed via bundletool or shared internally without a production keystore.
       signingConfig = signingConfigs.getByName("debug")
     }

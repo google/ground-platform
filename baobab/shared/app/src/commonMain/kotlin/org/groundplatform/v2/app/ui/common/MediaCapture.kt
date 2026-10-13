@@ -136,7 +136,7 @@ fun chooseCapturePath(
   }
 
 /**
- * [MediaCaptureHandler] for the prototype app. On the web, capture requests open an in-page live
+ * [MediaCaptureHandler] for the Ground clients. On the web, capture requests open an in-page live
  * camera / microphone overlay on desktop browsers and the native camera / recorder (HTML Media
  * Capture) on mobile browsers; existing-file requests open a file picker. Capture requests are
  * never degraded to a file picker, so "capture only" questions hold on the web. Off the web it

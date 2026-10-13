@@ -55,7 +55,7 @@ class GlobalLibrarySeedTest {
     |# organization's library on a new deployment; entries omit organization_id,
     |# which the loader sets to the "All users" organization.
     |#
-    |# The prototype app embeds a Kotlin copy (GlobalLibrarySeedData.kt), and its
+    |# The clients embed a Kotlin copy (GlobalLibrarySeedData.kt), and its
     |# GlobalLibrarySeedTest fails when the two differ. Template questions carry
     |# their concept links as `ground:concept` foreign attributes on their bindings.
     |

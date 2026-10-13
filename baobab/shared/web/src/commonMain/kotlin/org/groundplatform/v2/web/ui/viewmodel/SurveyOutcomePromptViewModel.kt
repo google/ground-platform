@@ -106,6 +106,6 @@ class SurveyOutcomePromptViewModel(
 
   override fun skipOutcome() = outcomeCard.skipOutcome()
 
-  /** Hides the card (used by the prototype's Reset). */
+  /** Hides the card (used by session resets). */
   fun reset() = outcomeCard.dismiss()
 }

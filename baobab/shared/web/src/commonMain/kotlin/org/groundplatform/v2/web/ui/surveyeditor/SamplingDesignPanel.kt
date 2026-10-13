@@ -64,7 +64,7 @@ import org.groundplatform.v2.web.ui.formeditor.DropdownSelector
 import org.groundplatform.v2.web.ui.state.SurveyEditorUiState
 import org.groundplatform.v2.web.ui.viewmodel.SurveyEditorActions
 
-/** Above this many plots the prototype warns that generating and editing may be slow. */
+/** Above this many plots the editor warns that generating and editing may be slow. */
 private const val LARGE_DESIGN_PLOTS = 20_000
 
 /** Custom allocations list at most this many strata; the rest keep their current counts. */

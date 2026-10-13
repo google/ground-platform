@@ -40,7 +40,7 @@ import org.groundplatform.v2.app.domain.model.roundTo
 import org.groundplatform.v2.map.LatLng
 import org.groundplatform.v2.map.LngLatBounds
 
-/** HTTP client for place search, or `null` on platforms where the prototype has no network. */
+/** HTTP client for place search, or `null` on platforms without a network client yet. */
 internal expect fun createPlacesHttpClient(): HttpClient?
 
 /** A Mapbox public access token (`pk.…`) configured for this session, if any. */

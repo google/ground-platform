@@ -15,7 +15,7 @@ package org.groundplatform.v2.app.data.seed
 
 import org.groundplatform.v2.app.domain.model.SurveyPlaceItem
 
-/** Hardcoded sample places gazetteer for the prototype app. */
+/** Hardcoded sample places gazetteer for the sample data. */
 object SamplePlacesData {
   /** Alias for [defaultSurveyPlaces]. */
   fun defaultPlaces(): List<SurveyPlaceItem> = defaultSurveyPlaces()

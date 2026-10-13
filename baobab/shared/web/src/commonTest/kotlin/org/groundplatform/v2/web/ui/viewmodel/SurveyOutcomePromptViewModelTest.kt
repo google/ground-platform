@@ -61,7 +61,7 @@ class SurveyOutcomePromptViewModelTest {
 
   @Test
   fun seededClosedSurvey_showsTheBadgeToday() {
-    // The prototype's current dates (October 2026) are well past 90 days after the seed's close.
+    // The sample data's current dates (October 2026) are well past 90 days after the seed's close.
     val f = Fixture()
     val today = checkNotNull(epochMillisOfIsoUtc("2026-10-10T00:00:00Z"))
     val state = f.viewModel(today).uiState.value

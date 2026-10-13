@@ -43,7 +43,7 @@ class MainActivity : ComponentActivity() {
 }
 
 /**
- * Android launcher entry point hosting the full-screen Ground 2.0 mobile prototype UI
+ * Android launcher entry point hosting the full-screen Ground 2.0 mobile app UI
  * ([MobileScreenHost]).
  */
 @Composable

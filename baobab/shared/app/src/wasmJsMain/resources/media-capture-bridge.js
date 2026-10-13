@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-// Browser bridge used by the Ground prototype app to answer photo, video, and audio questions.
+// Browser bridge used by the Ground web clients to answer photo, video, and audio questions.
 //
 // Two entry points share one callback contract so Kotlin (JS or Wasm) can treat them alike:
 //

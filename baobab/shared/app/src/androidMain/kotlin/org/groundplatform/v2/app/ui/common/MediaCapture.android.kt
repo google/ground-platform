@@ -15,7 +15,7 @@ package org.groundplatform.v2.app.ui.common
 
 import org.groundplatform.v2.core.forms.media.MediaCaptureKind
 
-/** Falls back to the prototype's simulated camera/microphone capture on Android. */
+/** Falls back to the simulated camera/microphone capture on Android. */
 actual val isPlatformMediaPickerAvailable: Boolean = false
 
 internal actual val isPlatformLiveCaptureAvailable: Boolean = false

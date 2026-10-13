@@ -47,8 +47,8 @@ import org.groundplatform.v2.workbench.ui.state.WorkbenchEvent
 import org.groundplatform.v2.workbench.ui.state.WorkbenchUiState
 
 /**
- * User intents for the prototype workbench chrome (device preview bezel, XForms `<h:html>` preset
- * state, and debug / simulation tools). Implemented by [WorkbenchViewModel].
+ * User intents for the workbench chrome (device preview bezel, XForms `<h:html>` preset state, and
+ * debug / simulation tools). Implemented by [WorkbenchViewModel].
  */
 interface WorkbenchActions {
   /** Selects the simulated device preview form factor (`Mobile` vs `Tablet`). */

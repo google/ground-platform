@@ -91,7 +91,7 @@ fun DebugToolsButton(
   }
 }
 
-/** Popout menu displaying the prototype workbench tools. */
+/** Popout menu displaying the web console's debug tools. */
 @Composable
 fun DebugToolsDropdown(
   state: AppSession,
@@ -108,7 +108,7 @@ fun DebugToolsDropdown(
   )
 }
 
-/** Stateless popout menu displaying the prototype workbench tools. */
+/** Stateless popout menu displaying the web console's debug tools. */
 @Composable
 fun DebugToolsDropdown(
   isDarkTheme: Boolean,

@@ -35,9 +35,9 @@ enum class EntityShapeKind {
 }
 
 /**
- * The vertices the prototype draws for a map feature. Sample entities only carry a normalized
- * center, so lines and polygons are synthesized around it with fixed shapes. This is the single
- * definition used by map drawing, camera framing, and the Survey editor's Map layer rows.
+ * The vertices the app draws for a map feature. Sample entities only carry a normalized center, so
+ * lines and polygons are synthesized around it with fixed shapes. This is the single definition
+ * used by map drawing, camera framing, and the Survey editor's Map layer rows.
  */
 object EntityShape {
   /**

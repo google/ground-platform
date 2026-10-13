@@ -17,7 +17,6 @@
 // and fakes. Depend on this from `commonTest` only.
 plugins {
   kotlin("multiplatform")
-  id("com.android.library")
   id("com.ncorti.ktfmt.gradle")
 }
 
@@ -28,10 +27,6 @@ version = "2.0.0-SNAPSHOT"
 ktfmt { googleStyle() }
 
 kotlin {
-  androidTarget {
-    compilerOptions { jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17) }
-  }
-
   jvm()
 
   @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class) wasmJs { browser() }
@@ -44,15 +39,5 @@ kotlin {
         implementation(kotlin("test"))
       }
     }
-  }
-}
-
-android {
-  namespace = "org.groundplatform.v2.web.testing"
-  compileSdk = 35
-  defaultConfig { minSdk = 24 }
-  compileOptions {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
   }
 }

@@ -48,8 +48,8 @@ processing terms, and reference-layer licensing as explicit decisions.
     and compute the 1–5 attribution score per survey.
 *   Produce overlay statistics (e.g., hectares inside protected areas) without
     publishing any feature geometry.
-*   Share aggregation logic with the prototype so dashboards behave the same in
-    demos and production.
+*   Share aggregation logic with the clients so dashboards behave the same in
+    the web console and the backend.
 
 ### Non-Goals
 
@@ -430,7 +430,7 @@ deployment once hosting, terms, and licenses are settled.
     change. The web console (`shared/web`, `ComputeImpactUseCase`)
     recomputes shortly after its data changes and backs the survey,
     organization, and platform-wide Impact views and PDF summaries with it.
-*   Golden fixtures: the prototype's seeded surveys (Kenya coffee, EUDR
+*   Golden fixtures: the clients' sample surveys (Kenya coffee, EUDR
     plots, restoration monitoring) with expected aggregates at each scope.
 *   Property tests (seeded random inputs): deduplication is idempotent (copying
     every GeoID feature into another survey of the same organization leaves

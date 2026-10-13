@@ -402,7 +402,7 @@ class DataCollectionViewModel(
     _events.tryEmit(event)
   }
 
-  /** Returns session state to its defaults (used by the prototype's Reset). */
+  /** Returns session state to its defaults (used by the workbench's Reset). */
   fun reset() {
     setController(null)
     session.value = Session(customFormDef = session.value.customFormDef)

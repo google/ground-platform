@@ -17,7 +17,7 @@ import org.groundplatform.v2.app.domain.model.MutationLogItem
 import org.groundplatform.v2.app.domain.model.MutationOperationKind
 import org.groundplatform.v2.app.domain.model.MutationSyncState
 
-/** Hardcoded sample mutation log records for the prototype app. */
+/** Hardcoded sample mutation log records for the sample data. */
 object SampleMutationsData {
   /**
    * Sample local mutations (`DataMutation` items) spanning `Pending`, `In progress`, `Uploaded`,

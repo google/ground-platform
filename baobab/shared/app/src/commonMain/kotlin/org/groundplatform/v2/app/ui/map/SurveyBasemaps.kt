@@ -19,9 +19,9 @@ import org.groundplatform.v2.map.Basemap
 import org.groundplatform.v2.map.RasterTileLayer
 
 /**
- * The prototype's basemaps: Esri's public raster tiles, which the web build can show without a
- * Mapbox access token (Mapbox GL JS v1 only needs one for `mapbox://` resources). Fine for a local
- * prototype; a production app should use a basemap its terms allow, such as
+ * The survey map's basemaps: Esri's public raster tiles, which the web build can show without a
+ * Mapbox access token (Mapbox GL JS v1 only needs one for `mapbox://` resources). Fine for
+ * development and testing; a production release should use a basemap its terms allow, such as
  * [Basemap.MapboxOutdoors].
  */
 object SurveyBasemaps {

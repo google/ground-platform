@@ -32,7 +32,7 @@ Following the Dependency Inversion Principle, repository contracts are owned by 
 - `SettingsRepository`: Observe and update user preferences, units, theme, and offline basemap settings.
 - `LocationRepository`: Query and update device GNSS/GPS location state.
 - `PlaceRepository`: Search geocoded places for map navigation and survey area selection.
-- `SampleDataRepository`: Seed or reset the prototype data store.
+- `SampleDataRepository`: Seed the local data store with sample data, or reset it to them.
 - `TransactionRunner`: Execute multi-repository writes atomically within a single transaction.
 
 ## Role in the Overall Architecture

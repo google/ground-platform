@@ -64,7 +64,7 @@ fun EntityDataset.toEditorDataset(
 
 /**
  * Compiled [FormDefinition] published for [entry], including its save-to logic. Features of an
- * updated dataset are embedded, since published Forms have no CSV attachments in this prototype.
+ * updated dataset are embedded, since published Forms don't carry CSV attachments yet.
  */
 fun SurveyEditorDraft.publishedForm(entry: SurveyEditorForm): FormDefinition {
   val catalog = datasets.map { it.toEditorDataset(entry.key, forms) }
@@ -79,7 +79,7 @@ fun SurveyEditorDraft.publishedForm(entry: SurveyEditorForm): FormDefinition {
 
 /**
  * XForms XML exported for [entry], including its save-to logic. Features of an updated dataset are
- * embedded, since published Forms have no CSV attachments in this prototype.
+ * embedded, since published Forms don't carry CSV attachments yet.
  */
 fun SurveyEditorDraft.publishedFormXml(entry: SurveyEditorForm): String =
   XFormsXmlSerializer.serialize(publishedForm(entry).proto, prettyPrint = true)

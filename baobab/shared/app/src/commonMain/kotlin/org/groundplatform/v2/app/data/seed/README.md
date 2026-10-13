@@ -16,7 +16,7 @@
 
 # Sample Data & Seeding
 
-**TL;DR:** The `data/seed` package encapsulates all built-in prototype fixture datasets and `SampleDataSeeder`, which populates `LocalStore` on initial app launch or prototype reset.
+**TL;DR:** The `data/seed` package encapsulates all built-in sample datasets and `SampleDataSeeder`, which populates `LocalStore` on initial app launch or a reset to sample data.
 
 ## Scope & Purpose
 

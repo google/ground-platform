@@ -22,7 +22,7 @@ import kotlin.test.assertTrue
 import org.groundplatform.v2.app.domain.model.SubmissionFieldEntry
 import org.groundplatform.v2.app.ui.AppSession
 
-/** Tests the entity and submission reports generated from the prototype's sample data. */
+/** Tests the entity and submission reports generated from the sample data. */
 class RecordPdfReportsTest {
 
   private val generatedAt = 1_790_000_000_000L // 2026-09-21 14:13 UTC

@@ -23,7 +23,7 @@ import org.groundplatform.v2.core.impact.Fx.feature
 import org.groundplatform.v2.core.impact.Fx.square
 
 /**
- * Golden fixture mirroring the prototype's seeded surveys (docs/technical/backend/
+ * Golden fixture mirroring the clients' sample surveys (docs/technical/backend/
  * impact-aggregation.md, "Shared Logic and Testing"): a Kenyan coffee cooperative's EUDR survey
  * with three polygon parcels, one of which a buyer's audit survey maps again later; an organization
  * concept with the suggested goal `ecosystem_restoration`; and an organization that opted out of

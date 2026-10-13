@@ -429,7 +429,7 @@ class DashboardViewModel(
     return file
   }
 
-  /** Returns session state to its defaults (used by the prototype's Reset). */
+  /** Returns session state to its defaults (used by the workbench's Reset). */
   fun reset() {
     session.value = Session()
   }

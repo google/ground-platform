@@ -251,7 +251,7 @@ class ImpactViewModel(
     return parts.joinToString(" · ").ifEmpty { null }
   }
 
-  /** Clears filters and messages (used by the prototype's Reset). */
+  /** Clears filters and messages (used by session resets). */
   fun reset() {
     filters.value = emptyMap()
     message.value = null

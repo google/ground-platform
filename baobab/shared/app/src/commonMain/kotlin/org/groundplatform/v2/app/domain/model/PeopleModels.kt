@@ -28,7 +28,7 @@ enum class InvitationStatus(val label: String) {
  * Name and photo copied from the invitee's account when they accept the invite link, so people
  * lists can show them by name without querying the identity provider every time.
  *
- * [photoUrl] is normally an HTTPS URL. The prototype uses `avatar:<n>` placeholders, which are
+ * [photoUrl] is normally an HTTPS URL. The sample data uses `avatar:<n>` placeholders, which are
  * drawn as illustrated portraits (see `ProfileAvatar`).
  */
 data class CachedProfile(

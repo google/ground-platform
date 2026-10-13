@@ -24,7 +24,7 @@ import org.groundplatform.v2.app.domain.model.OfflineTilePackageItem
  * imagery cache plus downloaded tile packages, and a data footprint that grows with the number of
  * mutations and entities on the device.
  *
- * The prototype has no real file system, so sizes are modelled rather than measured.
+ * There is no device file system to measure yet, so sizes are modelled rather than measured.
  */
 class EstimateDeviceStorageUseCase {
   operator fun invoke(

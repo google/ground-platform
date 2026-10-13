@@ -31,7 +31,7 @@ class CreateOrganizationUseCase(private val organizationRepository: Organization
   /**
    * A new listed-or-unlisted organization named [name] (or `"Untitled organization"` when blank)
    * with an ID unique among [existingOrganizations] and a placeholder logo that cycles through the
-   * prototype's avatars. [countryCode] is trimmed and upper-cased; blank means not specified.
+   * placeholder avatars. [countryCode] is trimmed and upper-cased; blank means not specified.
    */
   fun newOrganization(
     name: String,
@@ -83,7 +83,7 @@ class CreateOrganizationUseCase(private val organizationRepository: Organization
       Countries.normalizeCode(countryCode) != null && !Countries.isValidCode(countryCode)
     }
 
-    /** Number of placeholder `avatar:<n>` images the prototype cycles through. */
+    /** Number of placeholder `avatar:<n>` images new organizations cycle through. */
     private const val AVATAR_COUNT = 9
 
     /** An organization ID derived from [name] (`org-<slug>`), made unique among [takenIds]. */

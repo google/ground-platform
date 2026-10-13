@@ -22,7 +22,7 @@ import kotlin.test.assertTrue
  * Guards the dependency rules of `docs/technical/client/architecture.md` for the mobile app:
  * - Nothing here imports `app.data` (only `shared/app`'s own `data/` and `di/` may).
  * - Views (everything outside `ui/viewmodel/`) never import `app.data` or `app.client`.
- * - Mobile code never imports the web console, the workbench, or the prototype host.
+ * - Mobile code never imports the web console, the workbench, or the developer tools.
  *
  * Imports are checked textually so the test needs no classpath scanning on any platform.
  */

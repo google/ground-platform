@@ -17,7 +17,7 @@ import org.groundplatform.v2.app.domain.model.LayerSourceType
 import org.groundplatform.v2.app.domain.model.MapLayerItem
 import org.groundplatform.v2.app.domain.model.OfflineTilePackageItem
 
-/** Hardcoded sample map layers and offline tile packages for the prototype app. */
+/** Hardcoded sample map layers and offline tile packages for the sample data. */
 object SampleMapLayersData {
   /** Returns the preloaded [MapLayerItem] list for [surveyId]. */
   fun mapLayersForSurvey(surveyId: String): List<MapLayerItem> =

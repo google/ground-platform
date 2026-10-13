@@ -82,7 +82,7 @@ fun WebConsoleApp(
  * survey.
  */
 @Composable
-fun WebConsolePages(web: WebAppState, page: WebPage) {
+internal fun WebConsolePages(web: WebAppState, page: WebPage) {
   val resolvedPage =
     when {
       page.needsActiveSurvey && !web.hasOpenableActiveSurvey -> WebPage.WEB_SURVEYS

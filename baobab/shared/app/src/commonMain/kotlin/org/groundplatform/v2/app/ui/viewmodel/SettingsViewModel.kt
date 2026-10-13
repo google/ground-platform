@@ -144,7 +144,7 @@ class SettingsViewModel(
       selectedLanguageLocale = session.selectedLanguageLocale,
     )
 
-  /** Returns session-only state to its defaults (used by the prototype's Reset). */
+  /** Returns session-only state to its defaults (used by the workbench's Reset). */
   fun reset() {
     session.value = Session()
   }

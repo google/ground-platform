@@ -56,7 +56,7 @@ import org.groundplatform.v2.mobile.ui.settings.SignInLanguageSelector
 import org.jetbrains.compose.resources.stringResource
 
 /**
- * Host composable that switches between the 4 Ground Mobile UI prototype screens:
+ * Host composable that switches between the 4 Ground mobile app screens:
  * 1. Sign In Screen (Sign in with Google only)
  * 2. Terms of Service Screen
  * 3. Download Survey Screen (with search by name or location, map thumbnail, and downloaded

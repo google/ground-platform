@@ -168,7 +168,7 @@ class MobileAppState(
     isUserProfileOpen = false
   }
 
-  // --- Simulated device connectivity and prototype tools ---
+  // --- Simulated device connectivity and workbench tools ---
 
   /**
    * Applies a change of the simulated device connectivity: going offline stops Places search (and

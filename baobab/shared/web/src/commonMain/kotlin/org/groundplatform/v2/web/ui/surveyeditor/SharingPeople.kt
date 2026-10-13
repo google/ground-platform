@@ -60,7 +60,7 @@ import org.groundplatform.v2.app.domain.model.editor.Collaborator
 import org.groundplatform.v2.core.forms.ui.GroundBadgeTone
 import org.groundplatform.v2.core.forms.ui.GroundTonalBadge
 
-/** Prefix of the placeholder photo URLs the prototype draws as illustrated portraits. */
+/** Prefix of the placeholder photo URLs drawn as illustrated portraits. */
 internal const val AVATAR_SCHEME = "avatar:"
 
 private data class PortraitPalette(
@@ -147,7 +147,8 @@ internal fun ProfileAvatar(
 }
 
 /**
- * Placeholder "photo": a simple head-and-shoulders portrait (no network images in the prototype).
+ * Placeholder "photo": a simple head-and-shoulders portrait (used until profile photos are loaded
+ * from the network).
  */
 @Composable
 private fun IllustratedPortrait(p: PortraitPalette) {

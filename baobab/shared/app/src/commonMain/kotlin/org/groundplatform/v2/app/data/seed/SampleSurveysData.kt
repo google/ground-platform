@@ -24,7 +24,7 @@ import org.groundplatform.v2.app.domain.usecase.ResolveFormDefForLaunchUseCase
 import org.groundplatform.v2.core.forms.model.FormDefinition
 import org.groundplatform.v2.core.forms.ui.WorkbenchExampleForm
 
-/** Hardcoded sample surveys, forms, and XForms presets for the prototype app. */
+/** Hardcoded sample surveys, forms, and XForms presets for the sample data. */
 object SampleSurveysData {
   private val resolveFormDef = ResolveFormDefForLaunchUseCase()
 
@@ -40,7 +40,7 @@ object SampleSurveysData {
   /** The sample survey that's already closed (its outcome question is due). */
   const val CLOSED_SURVEY_ID = "survey-household-past-individuals"
 
-  /** When [CLOSED_SURVEY_ID] was closed: more than 90 days before the prototype's dates. */
+  /** When [CLOSED_SURVEY_ID] was closed: more than 90 days before the sample data's dates. */
   const val CLOSED_SURVEY_CLOSED_AT = "2026-05-29T14:00:00Z"
 
   fun defaultSampleSurveys(): List<SurveyPreviewItem> =

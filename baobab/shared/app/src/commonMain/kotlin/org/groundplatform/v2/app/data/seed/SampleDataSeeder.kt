@@ -23,7 +23,7 @@ import org.groundplatform.v2.app.domain.model.editor.SurveyEditorDerivation
 import org.groundplatform.v2.app.domain.model.editor.SurveyEditorDraft
 
 /**
- * Fills a [LocalStore] with the prototype's sample data.
+ * Fills a [LocalStore] with the sample data.
  *
  * This is the only code allowed to read the hardcoded sample datasets (`Sample*Data`); the rest of
  * the app reads everything from the store. Data for every sample survey is written up front, so

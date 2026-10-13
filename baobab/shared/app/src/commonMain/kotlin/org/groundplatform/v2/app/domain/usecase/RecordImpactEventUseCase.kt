@@ -62,7 +62,7 @@ class RecordImpactEventUseCase(
         featureCount = coverage.featureCount,
         areaHa = coverage.areaHa,
         occurredAt = now(),
-        // The prototype identifies users by email; Ground stores the account's user ID.
+        // The fake auth client identifies users by email; Ground stores the account's user ID.
         actorUserId = authRepository.getSession().profile.email,
         isUploaded = ignoreOffline || connectivityRepository.isOnline(),
       )

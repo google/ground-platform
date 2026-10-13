@@ -27,7 +27,7 @@ import androidx.compose.ui.unit.dp
 /**
  * The standard four-colour Google "G" used on *Sign in with Google* buttons, as specified by the
  * Google Identity branding guidelines. Drawn as a vector so it stays crisp at any size and needs no
- * image asset on either the web or mobile prototype.
+ * image asset on either the web console or the mobile app.
  */
 val GoogleLogo: ImageVector by lazy {
   ImageVector.Builder(

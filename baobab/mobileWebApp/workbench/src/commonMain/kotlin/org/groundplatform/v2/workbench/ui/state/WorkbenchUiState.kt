@@ -25,8 +25,8 @@ import org.groundplatform.v2.workbench.ui.DEFAULT_WORKBENCH_XFORMS_XML
 import org.groundplatform.v2.workbench.ui.XFormsParseCache
 
 /**
- * Immutable UI state for the prototype workbench chrome: the simulated device frame (`Mobile` vs
- * `Tablet`, `Portrait` vs `Landscape`), XForms preset state, and prototype debug/reset state.
+ * Immutable UI state for the workbench chrome: the simulated device frame (`Mobile` vs `Tablet`,
+ * `Portrait` vs `Landscape`), XForms preset state, and debug/reset state.
  */
 data class WorkbenchUiState(
   val deviceFormFactor: DeviceFormFactor = DeviceFormFactor.MOBILE,

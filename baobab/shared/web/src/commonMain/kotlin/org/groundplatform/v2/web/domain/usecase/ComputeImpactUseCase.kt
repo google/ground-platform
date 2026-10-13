@@ -110,14 +110,14 @@ data class ImpactSnapshot(
 
 /**
  * Computes impact numbers with the shared aggregation job (`org.groundplatform.v2.core.impact`, see
- * `docs/technical/backend/impact-aggregation.md`) from the prototype's surveys, map features,
- * libraries, impact events, and survey outcomes, and describes them in plain language for the
- * survey, organization, and platform-wide Impact views and PDF summaries.
+ * `docs/technical/backend/impact-aggregation.md`) from the local data store's surveys, map
+ * features, libraries, impact events, and survey outcomes, and describes them in plain language for
+ * the survey, organization, and platform-wide Impact views and PDF summaries.
  *
  * Linked values come from map feature properties whose layer column is linked to a concept, or that
- * a linked form question saves to; choice answers are written as their standard codes. The
- * prototype's map shapes are illustrative, so each feature passes its recorded area and a
- * representative point (for grid cells) rather than its drawn outline.
+ * a linked form question saves to; choice answers are written as their standard codes. The sample
+ * data's map shapes are illustrative, so each feature passes its recorded area and a representative
+ * point (for grid cells) rather than its drawn outline.
  */
 class ComputeImpactUseCase(
   private val config: ImpactConfig = ImpactConfig(),

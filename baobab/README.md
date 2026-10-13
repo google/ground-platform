@@ -30,7 +30,7 @@ for **Ground 2.0**.
 │   ├── ui/                      # Shared Compose theme & form runner widgets (Android/JVM, iOS, JS, WasmJS)
 │   ├── map/                     # Shared map rendering (Mapbox) & geometry
 │   ├── app/                     # Shared domain, data, clients & UI for the mobile and web apps (Android/JVM, WasmJS)
-│   ├── web/                     # Web console pages, state & WebConsoleApp() root (Android/JVM, WasmJS)
+│   ├── web/                     # Web console pages, state & WebConsoleApp() root (JVM for tests, WasmJS)
 │   └── mobile/                  # Mobile app screens, state & GroundMobileApp() root (Android/JVM, WasmJS; iOS opt-in)
 │       └── src/commonMain/.../mobile/
 │           ├── data/            # Local SQLite/Room persistence, offline queues & tile cache

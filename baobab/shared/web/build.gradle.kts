@@ -16,7 +16,6 @@ plugins {
   kotlin("multiplatform") version "2.4.20"
   id("org.jetbrains.compose") version "1.12.0"
   id("org.jetbrains.kotlin.plugin.compose") version "2.4.20"
-  id("com.android.library") version "8.5.2"
   id("com.ncorti.ktfmt.gradle") version "0.27.0"
 }
 
@@ -29,10 +28,6 @@ version = "2.0.0-SNAPSHOT"
 ktfmt { googleStyle() }
 
 kotlin {
-  androidTarget {
-    compilerOptions { jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17) }
-  }
-
   jvm { testRuns["test"].executionTask.configure { useJUnitPlatform() } }
 
   @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
@@ -77,15 +72,5 @@ kotlin {
         implementation(compose.desktop.currentOs)
       }
     }
-  }
-}
-
-android {
-  namespace = "org.groundplatform.v2.web"
-  compileSdk = 35
-  defaultConfig { minSdk = 24 }
-  compileOptions {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
   }
 }

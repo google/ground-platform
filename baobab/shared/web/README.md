@@ -21,8 +21,8 @@ wizard, and impact views), its state (`WebAppState`, with `WebPage` routing),
 and its root composable (`WebConsoleApp()`). It's built on the domain, data, and
 shared UI in [`../app/`](../app/), and hosted by [`../../webApp/`](../../webApp/).
 
-The module targets WasmJS, plus JVM for the headless Compose UI tests and
-Android.
+The module targets WasmJS, plus JVM for the headless Compose UI tests. It has
+no Android target: nothing that builds for Android depends on it.
 
 The pages and their behavior are described in
 [`docs/technical/client/web-console.md`](../../docs/technical/client/web-console.md).

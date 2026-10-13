@@ -24,9 +24,9 @@ import org.groundplatform.v2.map.LatLng
 import org.groundplatform.v2.map.LngLatBounds
 
 /**
- * The geometry the prototype draws for a map feature, built from the vertices [EntityShape]
- * synthesizes around the entity's normalized center, so drawing, camera framing, and the Survey
- * editor all agree on a feature's shape.
+ * The geometry the app draws for a map feature, built from the vertices [EntityShape] synthesizes
+ * around the entity's normalized center, so drawing, camera framing, and the Survey editor all
+ * agree on a feature's shape.
  */
 object EntityGeometry {
   /** [entity]'s geometry in the survey at [anchor], or `null` for records without geometry. */

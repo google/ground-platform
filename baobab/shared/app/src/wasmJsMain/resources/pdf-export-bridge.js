@@ -12,7 +12,7 @@
  * the License.
  */
 
-// Browser bridge used by the Ground prototype app to save, preview, and share PDFs generated
+// Browser bridge used by the Ground web clients to save, preview, and share PDFs generated
 // client-side in Kotlin (`pdf/` package). PDFs arrive as base64 so Kotlin/JS and Kotlin/Wasm can
 // share one implementation.
 //

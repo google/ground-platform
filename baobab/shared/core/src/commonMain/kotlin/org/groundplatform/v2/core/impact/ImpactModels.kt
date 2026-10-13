@@ -19,7 +19,7 @@ package org.groundplatform.v2.core.impact
  * Inputs and outputs of the impact aggregation job (docs/technical/backend/impact-aggregation.md).
  *
  * The inputs are plain snapshots so the same pure functions run in the backend job (JVM) and in
- * clients (the prototype computes them on demand), and dashboards match across environments.
+ * clients (the web console computes them on demand), and dashboards match across environments.
  */
 
 /** ID of the `"All users"` organization, which owns the global library. */

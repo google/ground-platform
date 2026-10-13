@@ -25,7 +25,7 @@ import kotlin.test.assertTrue
  *   Compose.
  * - Views (everything outside `client/`, `domain/`, `di/`, and `ui/viewmodel/`) never import
  *   `app.data` or `app.client`.
- * - Web console code never imports the mobile app, the workbench, or the prototype host.
+ * - Web console code never imports the mobile app, the workbench, or the developer tools.
  *
  * Imports are checked textually so the test needs no classpath scanning on any platform.
  */

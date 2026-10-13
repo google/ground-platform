@@ -88,7 +88,7 @@ class SurveyLifecycleUseCase(
         outcomes = used.ifEmpty { outcomes },
         effortComparison = effortComparison,
         answeredAt = isoUtc(now()),
-        // The prototype identifies users by email; Ground stores the account's user ID.
+        // The fake auth client identifies users by email; Ground stores the account's user ID.
         answeredBy = authRepository.getSession().profile.email,
       )
     surveyRepository.setSurveyOutcome(surveyId, outcome)

@@ -23,7 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
 /**
- * A [FilterChip] tuned for the prototype's web and desktop targets.
+ * A [FilterChip] tuned for the web and desktop targets.
  *
  * Material 3 chips raise their elevation while hovered. On the web (Skiko/wasm) renderer that
  * shadow is painted beneath the chip's transparent container and shows through as a solid grey

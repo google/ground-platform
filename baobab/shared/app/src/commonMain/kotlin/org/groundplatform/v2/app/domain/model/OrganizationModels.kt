@@ -120,7 +120,7 @@ data class Organization(
   val name: String,
   val description: String = "",
   val websiteUrl: String = "",
-  /** Logo image URL, or an `avatar:<n>` placeholder in the prototype. */
+  /** Logo image URL, or an `avatar:<n>` placeholder until logos can be uploaded. */
   val logoUrl: String? = null,
   /** Whether the organization appears in the public directory, where anyone can ask to join. */
   val isListed: Boolean = true,

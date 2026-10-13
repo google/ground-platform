@@ -33,7 +33,7 @@ data class ProjectedSurveyData(
  * Publishes a [SurveyEditorDraft] to the survey's runtime data (the inverse of
  * [SurveyEditorDerivation]): Forms become [FormPreviewItem]s, Map layers become [MapLayerItem]s,
  * and their rows become [GeospatialEntityItem]s. Data tables have no runtime counterpart in the
- * prototype and stay in the draft.
+ * clients yet and stay in the draft.
  *
  * Collected data is preserved: a map feature whose row is still in the draft keeps its submissions,
  * sync status, GeoID, and measurements, and only its label, properties, and (when moved) center

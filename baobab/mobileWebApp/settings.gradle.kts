@@ -37,8 +37,8 @@ dependencyResolutionManagement {
 
 rootProject.name = "mobileWebApp"
 
-// The workbench (device preview chrome, XForms presets, and simulation tools) is a library so the
-// prototype host can embed it too. Published as `org.groundplatform.v2:workbench`.
+// The workbench (device preview chrome, XForms presets, and simulation tools) is a library, kept
+// apart from the Wasm host. Published as `org.groundplatform.v2:workbench`.
 include(":workbench")
 
 includeBuild("../shared/core")

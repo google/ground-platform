@@ -64,8 +64,8 @@ sealed interface SampleAreaSource {
 }
 
 /**
- * Prototype mirror of `EntityDatasetDef.generator` (`SamplingDesign`): the engine's [SampleDesign]
- * plus the area it's drawn from and provenance of the last generation.
+ * Client-side mirror of `EntityDatasetDef.generator` (`SamplingDesign`): the engine's
+ * [SampleDesign] plus the area it's drawn from and provenance of the last generation.
  *
  * Parameters for every method are kept (flat), so switching methods back and forth doesn't lose
  * values the organizer typed.

@@ -13,7 +13,7 @@
  */
 package org.groundplatform.v2.app.domain.repository
 
-/** Loads the prototype's sample data into the local data store. */
+/** Loads the sample data into the local data store. */
 interface SampleDataRepository {
   /** Writes the sample data unless the store already holds it. */
   suspend fun seedIfNeeded()

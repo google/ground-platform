@@ -114,7 +114,7 @@ class InviteOrganizationMemberUseCase(private val organizationRepository: Organi
 
     fun normalizeEmail(email: String): String = email.trim().lowercase()
 
-    /** The prototype's stand-in account ID for [email] (`uid-<local part>`). */
+    /** The fake auth client's stand-in account ID for [email] (`uid-<local part>`). */
     fun userIdFor(email: String): String = "uid-${email.substringBefore('@').replace('.', '-')}"
   }
 }

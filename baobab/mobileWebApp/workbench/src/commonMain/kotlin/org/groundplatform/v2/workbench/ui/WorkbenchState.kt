@@ -29,9 +29,9 @@ import org.groundplatform.v2.workbench.ui.viewmodel.WorkbenchActions
 import org.groundplatform.v2.workbench.ui.viewmodel.WorkbenchViewModel
 
 /**
- * State holder of the prototype workbench around the [mobile] app preview: the simulated device
- * (form factor, orientation, airplane mode), the live XForms editor and example survey switcher,
- * and the simulation and reset tools ([WorkbenchViewModel]).
+ * State holder of the workbench around the [mobile] app preview: the simulated device (form factor,
+ * orientation, airplane mode), the live XForms editor and example survey switcher, and the
+ * simulation and reset tools ([WorkbenchViewModel]).
  *
  * The workbench drives the [mobile] app: it applies its form definition, upload simulator, and
  * resets to it.

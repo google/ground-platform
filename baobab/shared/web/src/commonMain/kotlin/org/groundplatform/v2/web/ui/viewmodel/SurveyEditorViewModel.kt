@@ -620,7 +620,7 @@ class SurveyEditorViewModel(
     )
   }
 
-  /** Returns session state to its defaults (used by the prototype's Reset). */
+  /** Returns session state to its defaults (used by session resets). */
   fun reset() {
     session.value = Session(surveyId = data.value.surveyId)
     outcomeCard.dismiss()

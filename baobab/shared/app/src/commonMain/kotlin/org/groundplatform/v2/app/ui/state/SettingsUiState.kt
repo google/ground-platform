@@ -37,7 +37,7 @@ data class SettingsUiState(
   val visitedWebsiteUrl: String? = null,
   /** True once uploaded media attachments were evicted from the device cache. */
   val mediaCacheCleared: Boolean = false,
-  /** Light vs. dark Ground Material 3 theme (prototype session preference, not persisted). */
+  /** Light vs. dark Ground Material 3 theme (session preference, not persisted yet). */
   val isDarkTheme: Boolean = false,
   /** Formatted locale of the selected language, e.g. `"fr (Français)"`. */
   val selectedLanguageLocale: String = "en (English)",

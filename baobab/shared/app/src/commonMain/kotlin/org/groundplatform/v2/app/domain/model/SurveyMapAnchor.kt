@@ -17,7 +17,7 @@ import kotlin.math.round
 import org.groundplatform.v2.map.LatLng
 
 /**
- * Where a prototype survey sits on the real map. Fake map features are stored in normalized survey
+ * Where a sample survey sits on the real map. Sample map features are stored in normalized survey
  * coordinates (`nx`, `ny` in `[0, 1]`, `y` down) and placed on the map relative to this anchor.
  *
  * This table is the single source of survey positions.

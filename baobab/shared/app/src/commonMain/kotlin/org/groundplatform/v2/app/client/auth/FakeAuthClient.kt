@@ -22,7 +22,8 @@ data class AuthenticatedCollectorProfile(
 
 /**
  * External service client (`client/auth/ *Client`) simulating OAuth / Google Sign-In authentication
- * for the prototype workbench per Sections 3 & 4 of `docs/technical/client/architecture.md`.
+ * until the clients sign in with a real account, per Sections 3 & 4 of
+ * `docs/technical/client/architecture.md`.
  */
 class FakeAuthClient {
   private var signedIn: Boolean = false
