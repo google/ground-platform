@@ -31,7 +31,6 @@ import org.groundplatform.v2.app.domain.model.DeviceFormFactor
 import org.groundplatform.v2.app.domain.model.DeviceOrientation
 import org.groundplatform.v2.app.domain.model.SyncStatus
 import org.groundplatform.v2.core.forms.ui.WorkbenchExampleForm
-import org.groundplatform.v2.workbench.domain.usecase.GeneratePrototypeRandomSitesUseCase
 import org.groundplatform.v2.workbench.ui.DEFAULT_PROTOTYPE_XFORMS_XML
 import org.groundplatform.v2.workbench.ui.state.WorkbenchEvent
 
@@ -42,18 +41,27 @@ class WorkbenchViewModelTest {
     val scope = CoroutineScope(Dispatchers.Unconfined + Job())
     val surveyRepository = SurveyRepositoryImpl(store)
     val sampleDataRepository = SampleDataRepositoryImpl(store)
-    val generateRandomSitesUseCase = GeneratePrototypeRandomSitesUseCase(surveyRepository)
     val viewModel =
       WorkbenchViewModel(
         surveyRepository = surveyRepository,
         sampleDataRepository = sampleDataRepository,
-        generateRandomSitesUseCase = generateRandomSitesUseCase,
         scope = scope,
       )
     val events = mutableListOf<WorkbenchEvent>()
 
     init {
       scope.launch { viewModel.events.collect { events += it } }
+    }
+
+    /** Appends [count] map features (copies of the first, without submissions) to the store. */
+    fun addEntities(count: Int) = runNow {
+      val entities = surveyRepository.getEntities()
+      surveyRepository.setEntities(
+        entities +
+          List(count) { i ->
+            entities.first().copy(id = "entity-extra-$i", submissions = emptyList())
+          }
+      )
     }
 
     val uiState
@@ -151,14 +159,8 @@ class WorkbenchViewModelTest {
   }
 
   @Test
-  fun addRandomSites_andSyncStatusCycling_updateRepositoryAndEmitNotices() {
+  fun syncStatusCycling_updatesRepository() {
     val f = Fixture()
-    val beforeCount = f.uiState.entities.size
-    f.viewModel.addRandomSites(count = 15)
-    assertEquals(beforeCount + 15, f.uiState.entities.size)
-    val randomEvent = f.events.last() as WorkbenchEvent.RandomSitesAdded
-    assertEquals(15, randomEvent.count)
-    assertEquals(beforeCount + 15, randomEvent.totalCount)
 
     // Cycle entity sync status
     val firstEntity = f.uiState.entities.first()
@@ -195,7 +197,7 @@ class WorkbenchViewModelTest {
       f.uiState.surveys.first { it.id == targetSurvey.id }.isDownloaded,
     )
 
-    f.viewModel.addRandomSites(count = 10)
+    f.addEntities(count = 10)
     assertEquals(initialEntityCount + 10, f.uiState.entities.size)
 
     val beforeResetCount = f.uiState.dataResetCount

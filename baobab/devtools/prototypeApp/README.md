@@ -810,12 +810,10 @@ fresh on every page load; on mobile it will become the persistent offline store.
     `PdfExportClient` (`client/pdf/`), the platform file delivery.
     `WorkbenchViewModel` (the prototype workbench chrome: simulated device form
     factor and orientation, the XForms `<h:html>` editor and example survey
-    switcher, and debug/simulation tools such as adding 5,000 random polygon
-    features, cycling sync status, and resetting the prototype flow) observes
-    surveys and survey content through `SurveyRepository`, reseeds via
-    `SampleDataRepository`, and generates benchmark features with
-    `GeneratePrototypeRandomSitesUseCase`; cross-feature outcomes are published
-    as `WorkbenchEvent`s that the shell applies.
+    switcher, and debug/simulation tools such as cycling sync status and
+    resetting the prototype flow) observes surveys and survey content through
+    `SurveyRepository` and reseeds via `SampleDataRepository`; cross-feature
+    outcomes are published as `WorkbenchEvent`s that the shell applies.
 -   **Survey switching**: Every survey's data is in the store, so switching
     surveys keeps edits. Use **Reset** to go back to the sample data.
 -   **Survey editor**: `SurveyEditorRepositoryImpl` serves the stored draft

@@ -160,14 +160,6 @@ class MobileAppState(
     }
   }
 
-  /** Shows the active survey's map with [notice] (e.g. after the workbench added map features). */
-  fun showSurveyMap(notice: String?) {
-    currentScreen = PrototypeScreen.MAIN_SURVEY
-    mainViewMode = MainSurveyViewMode.MAP
-    activeDrawerSubView = MainDrawerSubView.NONE
-    showNotice(notice)
-  }
-
   override fun reset() {
     currentScreen = PrototypeScreen.SIGN_IN
     super.reset()

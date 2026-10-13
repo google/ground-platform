@@ -30,6 +30,16 @@ import org.groundplatform.v2.web.ui.viewmodel.ui
  * local data store, which is the single source of truth for app data.
  */
 class LocalStoreAppStateTest {
+  /** Appends [count] map features (copies of the first, without submissions) through the store. */
+  private fun PrototypeAppState.addEntities(count: Int) {
+    val entities = mobile.entities
+    mobile.entities =
+      entities +
+        List(count) { i ->
+          entities.first().copy(id = "entity-extra-$i", submissions = emptyList())
+        }
+  }
+
   @Test
   fun submittedForm_survivesSwitchingSurveysAndBack() {
     val state = PrototypeAppState(initialScreen = PrototypeScreen.MAIN_SURVEY)
@@ -60,7 +70,7 @@ class LocalStoreAppStateTest {
   @Test
   fun dataHolderAppData_mirrorsStoreData() {
     val state = PrototypeAppState(initialScreen = PrototypeScreen.MAIN_SURVEY)
-    state.workbench.addRandomSites(count = 25)
+    state.addEntities(count = 25)
     val appData = state.dataHolder.appData.value
     assertEquals(state.mobile.entities, appData.content.entities)
     assertEquals(state.mobile.mutations, appData.mutations)
@@ -83,7 +93,7 @@ class LocalStoreAppStateTest {
   fun reset_reseedsSampleData() {
     val state = PrototypeAppState(initialScreen = PrototypeScreen.MAIN_SURVEY)
     val initialEntities = state.mobile.entities
-    state.workbench.addRandomSites(count = 10)
+    state.addEntities(count = 10)
     state.mobile.syncAllOutboxMutations()
     assertEquals(initialEntities.size + 10, state.mobile.entities.size)
 
@@ -97,7 +107,7 @@ class LocalStoreAppStateTest {
   fun appStates_doNotShareData() {
     val first = PrototypeAppState(initialScreen = PrototypeScreen.MAIN_SURVEY)
     val second = PrototypeAppState(initialScreen = PrototypeScreen.MAIN_SURVEY)
-    first.workbench.addRandomSites(count = 10)
+    first.addEntities(count = 10)
     assertEquals(first.mobile.entities.size - 10, second.mobile.entities.size)
   }
 

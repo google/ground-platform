@@ -29,8 +29,6 @@ import org.groundplatform.v2.map.LngLatBounds
  * editor all agree on a feature's shape.
  */
 object EntityGeometry {
-  fun isGenerated(entity: GeospatialEntityItem): Boolean = EntityShape.isGenerated(entity)
-
   /** [entity]'s geometry in the survey at [anchor], or `null` for records without geometry. */
   fun of(entity: GeospatialEntityItem, anchor: SurveyMapAnchor): Geometry? {
     val vertices = EntityShape.vertices(entity, anchor)

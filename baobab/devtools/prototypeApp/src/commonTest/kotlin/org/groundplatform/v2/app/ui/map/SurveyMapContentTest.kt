@@ -30,12 +30,10 @@ import org.groundplatform.v2.app.ui.AppSession
 import org.groundplatform.v2.map.CameraPosition
 import org.groundplatform.v2.map.Geometry
 import org.groundplatform.v2.map.LatLng
-import org.groundplatform.v2.mobile.ui.MobileAppState
 import org.groundplatform.v2.web.ui.WebAppState
 import org.groundplatform.v2.web.ui.formeditor.moved
 import org.groundplatform.v2.web.ui.viewmodel.surveyEditorViewModel
 import org.groundplatform.v2.web.ui.viewmodel.ui
-import org.groundplatform.v2.workbench.ui.WorkbenchState
 
 class SurveyMapContentTest {
   private val state = AppSession()
@@ -227,20 +225,6 @@ class SurveyMapContentTest {
     assertEquals(SurveyMapIds.entity(target.id), polygons.last().id)
     val variant = polygons.last().properties.getValue(SurveyMapContent.PROP_VARIANT)
     assertTrue(variant.startsWith(SurveyMapContent.Variant.SELECTED))
-  }
-
-  @Test
-  fun main_labelsGeneratedEntitiesOnlyWhenSelected() {
-    WorkbenchState(MobileAppState(dataHolder = state.dataHolder)).addRandomSites(count = 20)
-    state.surveyMap.resetMapZoom()
-    val generated = state.visibleMapEntities.first { EntityGeometry.isGenerated(it) }
-
-    val before = SurveyMapContent.main(state, showNavigation = true)
-    assertFalse(SurveyMapIds.entity(generated.id) in before.markers)
-
-    state.selectEntity(generated.id)
-    val after = SurveyMapContent.main(state, showNavigation = true)
-    assertTrue(SurveyMapIds.entity(generated.id) in after.markers)
   }
 
   @Test

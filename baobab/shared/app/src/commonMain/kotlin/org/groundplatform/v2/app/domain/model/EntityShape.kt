@@ -40,11 +40,6 @@ enum class EntityShapeKind {
  * definition used by map drawing, camera framing, and the Survey editor's Map layer rows.
  */
 object EntityShape {
-  /** Prefix of the bulk-generated sample entities, drawn smaller and without labels. */
-  const val GENERATED_ID_PREFIX = "entity-rnd-"
-
-  fun isGenerated(entity: GeospatialEntityItem): Boolean = entity.id.startsWith(GENERATED_ID_PREFIX)
-
   /**
    * Vertices of [entity]'s shape in the survey at [anchor]: one point for points, an open ring for
    * polygons, and an empty list for records without geometry.
@@ -55,7 +50,6 @@ object EntityShape {
       normalizedX = entity.normalizedX.toDouble(),
       normalizedY = entity.normalizedY.toDouble(),
       anchor = anchor,
-      small = isGenerated(entity),
     )
 
   /** Vertices of a [kind] shape centered on normalized survey coordinates. */
@@ -64,12 +58,12 @@ object EntityShape {
     normalizedX: Double,
     normalizedY: Double,
     anchor: SurveyMapAnchor,
-    small: Boolean = false,
   ): List<LatLng> {
     fun at(dx: Double, dy: Double): LatLng = anchor.toLatLng(normalizedX + dx, normalizedY + dy)
     return when (kind) {
       EntityShapeKind.POLYGON -> {
-        val (w, h) = if (small) 0.022 to 0.015 else 0.22 to 0.11
+        val w = 0.22
+        val h = 0.11
         listOf(
           at(-w * 0.48, -h * 0.42),
           at(w * 0.45, -h * 0.5),

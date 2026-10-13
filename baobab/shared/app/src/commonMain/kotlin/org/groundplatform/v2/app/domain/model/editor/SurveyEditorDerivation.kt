@@ -321,7 +321,6 @@ object SurveyEditorDerivation {
         normalizedX = entity.normalizedX.toDouble(),
         normalizedY = entity.normalizedY.toDouble(),
         anchor = anchor,
-        small = EntityShape.isGenerated(entity),
       )
       .map { LatLng(it.latitude, it.longitude) }
 

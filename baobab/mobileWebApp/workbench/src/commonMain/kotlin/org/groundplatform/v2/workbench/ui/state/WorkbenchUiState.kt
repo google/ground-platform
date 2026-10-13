@@ -105,13 +105,6 @@ sealed interface WorkbenchEvent {
    */
   data class DefaultSurveyRestored(val surveyId: String) : WorkbenchEvent
 
-  /**
-   * Random benchmark sites were added to the active survey; switch to the Main Survey map view and
-   * show a notice.
-   */
-  data class RandomSitesAdded(val count: Int, val totalCount: Int, val noticeMessage: String) :
-    WorkbenchEvent
-
   /** The prototype flow was reset to sample data; reset all feature ViewModels and shell state. */
   data object PrototypeReset : WorkbenchEvent
 

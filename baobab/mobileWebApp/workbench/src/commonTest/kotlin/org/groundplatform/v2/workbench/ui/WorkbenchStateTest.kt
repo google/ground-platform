@@ -21,11 +21,9 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 import org.groundplatform.v2.app.domain.model.DeviceFormFactor
 import org.groundplatform.v2.app.domain.model.DeviceOrientation
-import org.groundplatform.v2.app.domain.model.MainSurveyViewMode
 import org.groundplatform.v2.app.domain.model.PrototypeScreen
 import org.groundplatform.v2.app.ui.map.SurveyMap
 import org.groundplatform.v2.app.ui.map.SurveyMapContent
-import org.groundplatform.v2.app.ui.map.SurveyMapIds
 import org.groundplatform.v2.mobile.ui.MobileAppState
 
 class WorkbenchStateTest {
@@ -139,78 +137,6 @@ class WorkbenchStateTest {
     )
     state.closeActiveFormRunner()
     assertFalse(state.isDataCollectionFormOpen)
-  }
-
-  @Test
-  fun addRandomSites_appendsFiveThousandPolygonsEachClickAndScalesClustering() {
-    val workbench = WorkbenchState(MobileAppState(initialScreen = PrototypeScreen.MAIN_SURVEY))
-    val state = workbench.mobile
-    assertEquals(5, state.entities.size)
-
-    // First click: +5,000 features -> 5,005 total features
-    workbench.addRandomSites(count = 5_000)
-    assertEquals(5_005, state.entities.size)
-    assertEquals(5_005, state.activeSurvey.entityCount)
-    assertEquals(PrototypeScreen.MAIN_SURVEY, state.currentScreen)
-    assertEquals(MainSurveyViewMode.MAP, state.mainViewMode)
-    assertTrue(state.entities.any { it.id == "entity-rnd-6" && it.geometryTypeLabel == "Polygon" })
-    assertTrue(state.activeSurveyNotice?.contains("5000") == true)
-
-    // Second click: +5,000 features -> 10,005 total features (>10,000 polygons)
-    workbench.addRandomSites(count = 5_000)
-    assertEquals(10_005, state.entities.size)
-    assertEquals(10_005, state.activeSurvey.entityCount)
-    assertTrue(state.entities.any { it.id == "entity-rnd-10005" })
-
-    // Verify spatial clustering handles >10,000 features across [-2.2, 3.2] x [-2.2, 3.2] and
-    // progressively covers a broader and broader area as the user zooms out further
-    repeat(3) { state.zoomOutMap() } // -2.25f: not yet clustered
-    assertFalse(state.isMapClusteringActive)
-
-    state.zoomOutMap() // -3.00f
-    assertTrue(state.isMapClusteringActive)
-    val clustersAtStep1 = state.mapFeatureClusters
-    assertTrue(clustersAtStep1.size > 10)
-    assertEquals(state.visibleMapClusterFeatures.size, clustersAtStep1.sumOf { it.totalCount })
-
-    state.zoomOutMap() // -3.75f
-    val clustersAtStep2 = state.mapFeatureClusters
-    assertTrue(clustersAtStep2.size < clustersAtStep1.size)
-    assertTrue(
-      clustersAtStep2.maxOf { it.diameterNormalized } >
-        clustersAtStep1.maxOf { it.diameterNormalized }
-    )
-    assertEquals(state.visibleMapClusterFeatures.size, clustersAtStep2.sumOf { it.totalCount })
-
-    state.zoomOutMap() // -4.50f
-    val clustersAtStep3 = state.mapFeatureClusters
-    assertTrue(clustersAtStep3.size < clustersAtStep2.size)
-    assertTrue(
-      clustersAtStep3.maxOf { it.diameterNormalized } >
-        clustersAtStep2.maxOf { it.diameterNormalized }
-    )
-    assertEquals(state.visibleMapClusterFeatures.size, clustersAtStep3.sumOf { it.totalCount })
-
-    state.zoomOutMap() // -5.25f
-    val clustersAtStep4 = state.mapFeatureClusters
-    assertTrue(clustersAtStep4.size <= clustersAtStep3.size)
-    assertEquals(state.visibleMapClusterFeatures.size, clustersAtStep4.sumOf { it.totalCount })
-
-    // Zoom out to regional view (-6.00f, ~9.3z): all 10,005 features across [-2.2, 3.2] merge into
-    // a single regional cluster balloon covering the entire 5.4 x 5.4 area, including LineStrings
-    state.zoomOutMap() // -6.00f
-    val clustersAtDeepZoomOut = state.mapFeatureClusters
-    assertEquals(1, clustersAtDeepZoomOut.size)
-    assertEquals(10_005, clustersAtDeepZoomOut.first().siteCount)
-    assertTrue(clustersAtDeepZoomOut.first().features.any { it.id == "entity-shade-201" })
-    assertTrue(
-      clustersAtDeepZoomOut.first().diameterNormalized >
-        clustersAtStep3.maxOf { it.diameterNormalized }
-    )
-
-    val clusteredMap = SurveyMapContent.main(state, showNavigation = true)
-    assertTrue(clusteredMap.entityFeatures().isEmpty())
-    assertTrue(clusteredMap.markers.keys.any { SurveyMapIds.clusterIdOf(it) != null })
   }
 
   @Test

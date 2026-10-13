@@ -24,7 +24,6 @@ import org.groundplatform.v2.app.ui.AppSession
 import org.groundplatform.v2.app.ui.state.SyncStatusSimulator
 import org.groundplatform.v2.core.forms.ui.WorkbenchExampleForm
 import org.groundplatform.v2.mobile.ui.MobileAppState
-import org.groundplatform.v2.workbench.domain.usecase.GeneratePrototypeRandomSitesUseCase
 import org.groundplatform.v2.workbench.ui.state.WorkbenchEvent
 import org.groundplatform.v2.workbench.ui.state.WorkbenchUiState
 import org.groundplatform.v2.workbench.ui.viewmodel.WorkbenchActions
@@ -56,10 +55,6 @@ private constructor(
       WorkbenchViewModel(
         surveyRepository = mobile.dataHolder.surveyRepository,
         sampleDataRepository = mobile.dataHolder.sampleDataRepository,
-        generateRandomSitesUseCase =
-          GeneratePrototypeRandomSitesUseCase(
-            surveyRepository = mobile.dataHolder.surveyRepository
-          ),
         scope = mobile.dataHolder.scope,
         connectivityRepository = mobile.dataHolder.connectivityRepository,
       ),
@@ -115,7 +110,6 @@ private constructor(
         }
       }
       is WorkbenchEvent.DefaultSurveyRestored -> mobile.openSurvey(event.surveyId)
-      is WorkbenchEvent.RandomSitesAdded -> mobile.showSurveyMap(event.noticeMessage)
       WorkbenchEvent.PrototypeReset -> sessions.forEach { it.reset() }
       is WorkbenchEvent.ConnectivityChanged -> mobile.onConnectivityChanged(event.isOnline)
       is WorkbenchEvent.Notice -> mobile.showNotice(event.message)

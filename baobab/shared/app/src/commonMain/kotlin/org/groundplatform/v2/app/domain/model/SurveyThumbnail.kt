@@ -106,7 +106,7 @@ data class SurveyThumbnailTileCoord(
  * layers, and map features (either from an editor [SurveyEditorDraft] or from runtime collections).
  */
 object SurveyThumbnailGenerator {
-  /** Cap stored thumbnail features so 5K-site stress-test layers keep thumbnails lightweight. */
+  /** Cap stored thumbnail features so large layers keep thumbnails lightweight. */
   const val MAX_THUMBNAIL_FEATURES: Int = 150
 
   /** Max vertices per simplified area-of-interest polygon ring stored on the thumbnail. */

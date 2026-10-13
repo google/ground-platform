@@ -33,9 +33,7 @@ testing and UX review without an Android or iOS build.
     workbench: `WorkbenchState`, the simulated device page
     (`MobileWorkbenchPage`, `MobileDevicePreviewFrame`), the root
     `MobileWorkbenchApp()`, XForms presets, and the simulation and reset tools
-    (`WorkbenchViewModel`, with the random map feature generator
-    `GeneratePrototypeRandomSitesUseCase` that only it uses).
-    `devtools/prototypeApp` embeds it too.
+    (`WorkbenchViewModel`). `devtools/prototypeApp` embeds it too.
 -   **`src/wasmJsMain/`**: The thin host: `Main.wasmJs.kt` and `index.html`
     (Mapbox GL, token lookup, and the JS bridges copied from
     [`../shared/app/`](../shared/app/)).

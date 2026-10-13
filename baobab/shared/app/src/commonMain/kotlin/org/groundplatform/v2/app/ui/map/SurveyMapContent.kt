@@ -388,13 +388,11 @@ object SurveyMapContent {
       val geometry = EntityGeometry.of(entity, anchor) ?: continue
       val selected = entity.id == selectedEntityId
       val pending = entity.id in pendingIds
-      val generated = EntityGeometry.isGenerated(entity)
       val variant =
         when {
           selected && pending -> Variant.SELECTED_PENDING
           selected -> Variant.SELECTED
           pending -> Variant.PENDING
-          generated -> Variant.GENERATED
           else -> Variant.NORMAL
         }
       val layer = layersById[entity.layerId]
@@ -427,20 +425,17 @@ object SurveyMapContent {
                   PROP_FILL to colorKey(layerColor),
                 ),
             )
-          if (!generated || selected) {
-            val size = (if (isPolygon) "polygon" else "line") + if (selected) "-selected" else ""
-            EntityGeometry.vertices(geometry).forEachIndexed { i, vertex ->
-              entityFeatures +=
-                MapFeature(
-                  SurveyMapIds.vertex(entity.id, i),
-                  Geometry.Point(vertex),
-                  common + mapOf(PROP_KIND to KIND_VERTEX, PROP_VERTEX_SIZE to size),
-                )
-            }
+          val size = (if (isPolygon) "polygon" else "line") + if (selected) "-selected" else ""
+          EntityGeometry.vertices(geometry).forEachIndexed { i, vertex ->
+            entityFeatures +=
+              MapFeature(
+                SurveyMapIds.vertex(entity.id, i),
+                Geometry.Point(vertex),
+                common + mapOf(PROP_KIND to KIND_VERTEX, PROP_VERTEX_SIZE to size),
+              )
           }
         }
       }
-      if (generated && !selected) continue
       val label = entity.label.substringBefore(" •").ifBlank { entity.id }
       val color = Color(layerColor)
       val status =
@@ -872,11 +867,7 @@ object SurveyMapContent {
   private val outlineWidth =
     StyleValue.Match(
       PROP_VARIANT,
-      mapOf(
-        Variant.SELECTED to 3.8.dp,
-        Variant.SELECTED_PENDING to 3.8.dp,
-        Variant.GENERATED to 1.6.dp,
-      ),
+      mapOf(Variant.SELECTED to 3.8.dp, Variant.SELECTED_PENDING to 3.8.dp),
       2.3.dp,
     )
 
@@ -908,7 +899,6 @@ object SurveyMapContent {
     const val SELECTED = "selected"
     const val SELECTED_PENDING = "selected-pending"
     const val PENDING = "pending"
-    const val GENERATED = "generated"
     const val NORMAL = "normal"
   }
 }

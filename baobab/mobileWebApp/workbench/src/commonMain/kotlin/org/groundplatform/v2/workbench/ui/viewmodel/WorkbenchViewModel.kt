@@ -41,7 +41,6 @@ import org.groundplatform.v2.app.domain.repository.SurveyContent
 import org.groundplatform.v2.app.domain.repository.SurveyRepository
 import org.groundplatform.v2.core.forms.serialization.XFormsXmlSerializer
 import org.groundplatform.v2.core.forms.ui.WorkbenchExampleForm
-import org.groundplatform.v2.workbench.domain.usecase.GeneratePrototypeRandomSitesUseCase
 import org.groundplatform.v2.workbench.ui.DEFAULT_PROTOTYPE_XFORMS_XML
 import org.groundplatform.v2.workbench.ui.XFormsParseCache
 import org.groundplatform.v2.workbench.ui.state.WorkbenchEvent
@@ -88,9 +87,6 @@ interface WorkbenchActions {
   /** Restores the default sample XForms XML definition (`DEFAULT_PROTOTYPE_XFORMS_XML`). */
   fun resetDefaultXFormsXml()
 
-  /** Randomly generates and appends [count] polygon map features across the active survey. */
-  fun addRandomSites(count: Int = 5_000)
-
   /** Updates the [SyncStatus] of entity [entityId] and synchronizes its submissions if `SYNCED`. */
   fun updateEntitySyncStatus(entityId: String, newStatus: SyncStatus)
 
@@ -119,15 +115,13 @@ interface WorkbenchActions {
  * - Simulated device form factor (`Mobile` vs `Tablet`) and orientation (`Portrait` vs
  *   `Landscape`).
  * - XForms `<h:html>` parse validation and swappable example survey presets.
- * - Prototype simulation helpers (adding 5,000 random polygon features, cycling entity/submission
- *   sync status, toggling survey downloaded state, and resetting the prototype flow via
- *   [SampleDataRepository]).
+ * - Prototype simulation helpers (cycling entity/submission sync status, toggling survey downloaded
+ *   state, and resetting the prototype flow via [SampleDataRepository]).
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 class WorkbenchViewModel(
   private val surveyRepository: SurveyRepository,
   private val sampleDataRepository: SampleDataRepository,
-  private val generateRandomSitesUseCase: GeneratePrototypeRandomSitesUseCase,
   private val scope: CoroutineScope,
   private val connectivityRepository: ConnectivityRepository = ConnectivityRepository(),
 ) : WorkbenchActions {
@@ -348,20 +342,6 @@ class WorkbenchViewModel(
     }
     updateCustomXFormsXml(DEFAULT_PROTOTYPE_XFORMS_XML)
     session.update { it.copy(selectedWorkbenchExampleForm = WorkbenchExampleForm.ALL_FIELD_TYPES) }
-  }
-
-  override fun addRandomSites(count: Int) {
-    if (count <= 0) return
-    scope.launch {
-      val result = generateRandomSitesUseCase(count) ?: return@launch
-      emit(
-        WorkbenchEvent.RandomSitesAdded(
-          count = result.addedCount,
-          totalCount = result.totalEntityCount,
-          noticeMessage = result.noticeMessage,
-        )
-      )
-    }
   }
 
   override fun updateEntitySyncStatus(entityId: String, newStatus: SyncStatus) {
