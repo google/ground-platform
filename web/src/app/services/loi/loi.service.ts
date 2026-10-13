@@ -17,7 +17,7 @@
 import { Injectable } from '@angular/core';
 import { List } from 'immutable';
 import { Observable, of } from 'rxjs';
-import { map, switchMap } from 'rxjs/operators';
+import { map, shareReplay, switchMap } from 'rxjs/operators';
 
 import { GeometryType } from 'app/models/geometry/geometry';
 import { LocationOfInterest } from 'app/models/loi.model';
@@ -46,36 +46,56 @@ export class LocationOfInterestService {
     private surveyService: SurveyService
   ) {}
 
+  /**
+   * Sorted LOI streams, shared by everyone asking for the same survey.
+   *
+   * Each stream holds a Firestore listener over the whole `lois` collection,
+   * and attaching one re-reads every LOI. Sharing it means a component that is
+   * created while another already watches the survey (e.g. moving between jobs
+   * in the survey editor) reuses the live listener instead of attaching a new
+   * one. With `refCount`, the listener is still detached when nobody listens.
+   */
+  private readonly loisBySurvey = new Map<
+    string,
+    Observable<List<LocationOfInterest>>
+  >();
+
   getLocationsOfInterest$(
     survey: Survey
   ): Observable<List<LocationOfInterest>> {
-    return this.authService.getUser$().pipe(
-      switchMap(user =>
-        !survey || survey.state === SurveyState.UNSAVED
-          ? of(List<LocationOfInterest>())
-          : this.dataStore.getAccessibleLois$(
-              survey,
-              user.id,
-              this.surveyService.canManageSurvey(survey) ||
-                survey.dataVisibility ===
-                  SurveyDataVisibility.ALL_SURVEY_PARTICIPANTS
+    const unsaved = !survey || survey.state === SurveyState.UNSAVED;
+    if (unsaved) return of(List<LocationOfInterest>());
+
+    const canViewAll =
+      this.surveyService.canManageSurvey(survey) ||
+      survey.dataVisibility === SurveyDataVisibility.ALL_SURVEY_PARTICIPANTS;
+    const key = `${survey.id}:${canViewAll}`;
+
+    let lois$ = this.loisBySurvey.get(key);
+    if (!lois$) {
+      lois$ = this.authService.getUser$().pipe(
+        switchMap(user =>
+          this.dataStore.getAccessibleLois$(survey, user.id, canViewAll)
+        ),
+        map(lois =>
+          lois
+            .map(loi => ({
+              loi,
+              name: LocationOfInterestService.getDisplayName(loi),
+            }))
+            .sort((a, b) =>
+              LocationOfInterestService.displayNameCollator.compare(
+                a.name,
+                b.name
+              )
             )
-      ),
-      map(lois =>
-        lois
-          .map(loi => ({
-            loi,
-            name: LocationOfInterestService.getDisplayName(loi),
-          }))
-          .sort((a, b) =>
-            LocationOfInterestService.displayNameCollator.compare(
-              a.name,
-              b.name
-            )
-          )
-          .map(({ loi }) => loi)
-      )
-    );
+            .map(({ loi }) => loi)
+        ),
+        shareReplay({ bufferSize: 1, refCount: true })
+      );
+      this.loisBySurvey.set(key, lois$);
+    }
+    return lois$;
   }
 
   getPredefinedLoisByJobId$(

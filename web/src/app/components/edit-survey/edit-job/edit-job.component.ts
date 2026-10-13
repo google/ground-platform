@@ -106,6 +106,8 @@ export class EditJobComponent {
 
     if (!this.job) return;
 
+    this.loisSubscription.unsubscribe();
+    this.loisSubscription = new Subscription();
     this.loisSubscription.add(
       this.loiService
         .getPredefinedLoisByJobId$(
