@@ -17,7 +17,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import org.groundplatform.v2.app.domain.model.BasemapType
-import org.groundplatform.v2.app.domain.model.EntityGeometryKind
 import org.groundplatform.v2.app.domain.model.FormPreviewItem
 import org.groundplatform.v2.app.domain.model.GeospatialEntityItem
 import org.groundplatform.v2.app.domain.model.ImagerySource
@@ -29,7 +28,6 @@ import org.groundplatform.v2.app.domain.model.SurveyPlaceItem
 import org.groundplatform.v2.app.domain.model.editor.toLatLng
 import org.groundplatform.v2.app.domain.model.formatClusterSitesCountLabel
 import org.groundplatform.v2.app.domain.model.formatHexColorCss
-import org.groundplatform.v2.app.domain.model.geometryKind
 import org.groundplatform.v2.app.ui.AppSession
 import org.groundplatform.v2.app.ui.state.DataCollectionUiState
 import org.groundplatform.v2.app.ui.state.SurveyMapUiState
@@ -76,13 +74,11 @@ data class FormGeometryOverlay(
 /** Compose-drawn map annotations; see `SurveyMapMarkers.kt` for their UI. */
 sealed interface SurveyMarker {
   /**
-   * Name pill at the middle of a line or polygon, filled with its layer's [color], with the
-   * geometry glyph before the label and a [status] badge after it. Layer pin icons are only for
-   * points.
+   * Name pill at the middle of a line or polygon, filled with its layer's [color], with a [status]
+   * badge after the label. Layer pin icons are only for points.
    */
   data class GeometryPill(
     val label: String,
-    val kind: EntityGeometryKind,
     val color: Color,
     val selected: Boolean,
     val pending: Boolean,
@@ -457,15 +453,7 @@ object SurveyMapContent {
             SurveyMapIds.entity(entity.id),
             at(entity.normalizedX, entity.normalizedY),
             MarkerAnchor.CENTER,
-          ) to
-            SurveyMarker.GeometryPill(
-              label,
-              entity.geometryKind,
-              color,
-              selected,
-              pending,
-              status,
-            )
+          ) to SurveyMarker.GeometryPill(label, color, selected, pending, status)
         }
     }
 

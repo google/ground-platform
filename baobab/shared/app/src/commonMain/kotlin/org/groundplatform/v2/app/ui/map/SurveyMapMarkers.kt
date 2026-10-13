@@ -50,7 +50,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import org.groundplatform.v2.app.domain.model.EntityGeometryKind
 import org.groundplatform.v2.core.forms.ui.MapDrawingKind
 
 private val MapInk = Color(0xFF0E2219)
@@ -110,12 +109,6 @@ internal fun SurveyMarkerView(marker: SurveyMarker) {
 @Composable
 private fun GeometryPill(pill: SurveyMarker.GeometryPill) {
   val onLayerColor = Color(contentColorOnArgb(pill.color.toArgbLong()))
-  val prefix =
-    when (pill.kind) {
-      EntityGeometryKind.POLYGON -> "▱ "
-      EntityGeometryKind.LINE -> "╱ "
-      else -> "● "
-    }
   Row(
     Modifier.layerChipSurface(pill.color, onLayerColor, pill.selected, pill.pending, 16.dp, 3.dp)
       .padding(
@@ -127,7 +120,7 @@ private fun GeometryPill(pill: SurveyMarker.GeometryPill) {
     horizontalArrangement = Arrangement.spacedBy(4.dp),
     verticalAlignment = Alignment.CenterVertically,
   ) {
-    MarkerText(prefix + pill.label, onLayerColor, 10.sp, FontWeight.Bold)
+    MarkerText(pill.label, onLayerColor, 10.sp, FontWeight.Bold)
     pill.status?.let { StatusBadge(it, outline = onLayerColor) }
   }
 }

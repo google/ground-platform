@@ -112,6 +112,7 @@ class SurveyMapContentTest {
     map.markers.forEach { (id, marker) ->
       val entity = SurveyMapIds.entityIdOf(id)?.let { entitiesById[it] } ?: return@forEach
       val expected = Color(entity.mapColorHex(state.mapLayerFor(entity)))
+      val expectedLabel = entity.label.substringBefore(" •").ifBlank { entity.id }
       val expectedStatus =
         if (entity.hasMarkerSymbol) {
           SurveyMarker.StatusBadge(entity.markerSymbol, Color(entity.markerColorHex))
@@ -120,10 +121,12 @@ class SurveyMapContentTest {
         }
       when (marker) {
         is SurveyMarker.PinLabel -> {
+          assertEquals(expectedLabel, marker.label)
           assertEquals(expected, marker.color)
           assertEquals(expectedStatus, marker.status)
         }
         is SurveyMarker.GeometryPill -> {
+          assertEquals(expectedLabel, marker.label)
           assertEquals(expected, marker.color)
           assertEquals(expectedStatus, marker.status)
         }
