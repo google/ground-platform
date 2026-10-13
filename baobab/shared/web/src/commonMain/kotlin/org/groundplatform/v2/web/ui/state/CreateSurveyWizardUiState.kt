@@ -16,17 +16,17 @@ package org.groundplatform.v2.web.ui.state
 import org.groundplatform.v2.app.domain.model.Organization
 import org.groundplatform.v2.app.domain.model.PurposePack
 import org.groundplatform.v2.app.domain.model.SurveyPreviewItem
-import org.groundplatform.v2.app.domain.model.editor.CreateSurveyWizardStep
 import org.groundplatform.v2.app.domain.model.editor.EntityDataset
 import org.groundplatform.v2.app.domain.model.editor.ImportedForm
 import org.groundplatform.v2.app.domain.model.editor.SurveyArea
-import org.groundplatform.v2.app.domain.model.editor.SurveyCollectionMode
 import org.groundplatform.v2.app.domain.model.editor.SurveyEditorForm
-import org.groundplatform.v2.app.domain.model.editor.SurveyWizardRules
-import org.groundplatform.v2.app.domain.model.editor.WizardMapFeatureSource
-import org.groundplatform.v2.app.domain.model.editor.WizardStartMethod
 import org.groundplatform.v2.app.domain.usecase.ProfileExportPlan
 import org.groundplatform.v2.app.domain.usecase.ResolvedLibrary
+import org.groundplatform.v2.web.domain.model.editor.CreateSurveyWizardStep
+import org.groundplatform.v2.web.domain.model.editor.SurveyCollectionMode
+import org.groundplatform.v2.web.domain.model.editor.SurveyWizardRules
+import org.groundplatform.v2.web.domain.model.editor.WizardMapFeatureSource
+import org.groundplatform.v2.web.domain.model.editor.WizardStartMethod
 
 /** Live impact and export readiness summary displayed in Step 5 and Step 6 of the wizard. */
 data class WizardImpactReadiness(

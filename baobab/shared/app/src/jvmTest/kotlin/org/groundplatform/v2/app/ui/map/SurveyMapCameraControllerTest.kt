@@ -59,7 +59,7 @@ class SurveyMapCameraControllerTest {
 
       val mapCamera = assertNotNull(controller)
       val gpsCenter =
-        state.mapAnchor.toLatLng(
+        state.surveyMapUiState.anchor.toLatLng(
           state.userGpsNormalizedX.toDouble(),
           state.userGpsNormalizedY.toDouble(),
         )
@@ -80,7 +80,7 @@ class SurveyMapCameraControllerTest {
       assertNear(pannedPosition.center.longitude, mapCamera.camera.position.center.longitude)
 
       // Tap "Recenter" on mobile: camera must animate back to the user's GPS location.
-      state.recenterMapOnUser()
+      state.surveyMap.recenterMapOnUser()
       mainClock.advanceTimeBy(1_000)
       waitForIdle()
 
@@ -110,7 +110,7 @@ class SurveyMapCameraControllerTest {
       val mapCamera = assertNotNull(controller)
       val entity = state.visibleMapEntities.first { it.hasGeometry }
       val gpsCenter =
-        state.mapAnchor.toLatLng(
+        state.surveyMapUiState.anchor.toLatLng(
           state.userGpsNormalizedX.toDouble(),
           state.userGpsNormalizedY.toDouble(),
         )
@@ -130,7 +130,7 @@ class SurveyMapCameraControllerTest {
       assertFalse(state.isCameraFollowingUser)
 
       // Recenter while the entity framing move is still in flight.
-      state.recenterMapOnUser()
+      state.surveyMap.recenterMapOnUser()
       mainClock.advanceTimeBy(1_000)
       mainClock.autoAdvance = true
       waitForIdle()
@@ -159,11 +159,11 @@ class SurveyMapCameraControllerTest {
       waitForIdle()
 
       val mapCamera = assertNotNull(controller)
-      state.updateUserGpsLocation(0.35f, 0.65f)
+      state.surveyMap.updateUserGpsLocation(0.35f, 0.65f)
       mainClock.advanceTimeBy(1_000)
       waitForIdle()
 
-      val expectedGps = state.mapAnchor.toLatLng(0.35, 0.65)
+      val expectedGps = state.surveyMapUiState.anchor.toLatLng(0.35, 0.65)
       assertNear(expectedGps.latitude, mapCamera.camera.position.center.latitude)
       assertNear(expectedGps.longitude, mapCamera.camera.position.center.longitude)
     }

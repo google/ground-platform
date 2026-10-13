@@ -35,8 +35,8 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.unit.dp
-import org.groundplatform.v2.app.domain.model.editor.SurveyCollectionMode
-import org.groundplatform.v2.app.domain.model.editor.WizardMapFeatureSource
+import org.groundplatform.v2.web.domain.model.editor.SurveyCollectionMode
+import org.groundplatform.v2.web.domain.model.editor.WizardMapFeatureSource
 
 /**
  * Panoramic hero illustration for Step 1 (`Overview`) of the Survey Creation Wizard.

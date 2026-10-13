@@ -25,7 +25,6 @@ import org.groundplatform.v2.app.domain.model.editor.EntityDataset
 import org.groundplatform.v2.app.domain.model.editor.EntityDatasetValidator
 import org.groundplatform.v2.app.domain.model.editor.FormEditorValidator
 import org.groundplatform.v2.app.domain.model.editor.GeometryKind
-import org.groundplatform.v2.app.domain.model.editor.SampleGenerationProgress
 import org.groundplatform.v2.app.domain.model.editor.SaveToMode
 import org.groundplatform.v2.app.domain.model.editor.SaveToValidator
 import org.groundplatform.v2.app.domain.model.editor.SharingSettings
@@ -35,7 +34,7 @@ import org.groundplatform.v2.app.domain.model.editor.SurveyEditorDraft
 import org.groundplatform.v2.app.domain.model.editor.SurveyEditorForm
 import org.groundplatform.v2.app.domain.model.editor.toEditorDataset
 import org.groundplatform.v2.app.domain.model.geometryKind
-import org.groundplatform.v2.app.ui.state.SurveyOutcomeCardState
+import org.groundplatform.v2.web.domain.model.editor.SampleGenerationProgress
 
 /** Which pane of the Survey editor is showing. */
 sealed interface SurveyEditorSection {

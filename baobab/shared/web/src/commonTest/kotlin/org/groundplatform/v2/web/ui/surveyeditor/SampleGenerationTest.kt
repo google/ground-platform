@@ -37,8 +37,6 @@ import org.groundplatform.v2.app.domain.model.editor.LatLng
 import org.groundplatform.v2.app.domain.model.editor.PlotShapeOption
 import org.groundplatform.v2.app.domain.model.editor.SampleAreaSource
 import org.groundplatform.v2.app.domain.model.editor.SampleDesignConfig
-import org.groundplatform.v2.app.domain.model.editor.SampleDesignInputs
-import org.groundplatform.v2.app.domain.model.editor.SampleGenerationOutcome
 import org.groundplatform.v2.app.domain.model.editor.SamplePlotProperties
 import org.groundplatform.v2.app.domain.model.editor.SubPlotMode
 import org.groundplatform.v2.app.domain.model.editor.SurveyArea
@@ -52,6 +50,8 @@ import org.groundplatform.v2.core.sampling.SamplingArea
 import org.groundplatform.v2.core.sampling.SamplingEngine
 import org.groundplatform.v2.core.sampling.SamplingException
 import org.groundplatform.v2.core.sampling.SamplingResult
+import org.groundplatform.v2.web.domain.model.editor.SampleDesignInputs
+import org.groundplatform.v2.web.domain.model.editor.SampleGenerationOutcome
 import org.groundplatform.v2.web.ui.state.SurveyEditorSection
 import org.groundplatform.v2.web.ui.viewmodel.EntitiesOverrideSurveyRepository
 import org.groundplatform.v2.web.ui.viewmodel.SurveyEditorViewModel

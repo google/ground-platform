@@ -160,7 +160,7 @@ class SurveyMapContentTest {
     val entity = state.visibleMapEntities.first { it.geometryKind == EntityGeometryKind.POINT }
     val map =
       SurveyMapContent.build(
-        anchor = state.mapAnchor,
+        anchor = state.surveyMapUiState.anchor,
         basemapType = state.selectedBasemapType,
         showOfflineSector = false,
         entities = listOf(entity),
@@ -186,7 +186,7 @@ class SurveyMapContentTest {
     editor.updateDataset(plots.key) {
       it.copy(style = it.style.copy(colorHex = "#AD1457", iconName = "flag"))
     }
-    state.saveSurveyEditorDraft(state.activeSurveyId, editor.ui.draft)
+    web.saveSurveyEditorDraft(state.activeSurveyId, editor.ui.draft)
 
     val layer = state.mapLayers.first { it.datasetId == "shade_monitoring_plots" }
     assertEquals(0xFFAD1457, layer.colorHex)
@@ -232,7 +232,7 @@ class SurveyMapContentTest {
   @Test
   fun main_labelsGeneratedEntitiesOnlyWhenSelected() {
     WorkbenchState(MobileAppState(dataHolder = state.dataHolder)).addRandomSites(count = 20)
-    state.resetMapZoom()
+    state.surveyMap.resetMapZoom()
     val generated = state.visibleMapEntities.first { EntityGeometry.isGenerated(it) }
 
     val before = SurveyMapContent.main(state, showNavigation = true)
@@ -266,7 +266,7 @@ class SurveyMapContentTest {
 
   @Test
   fun entityGeometry_boundsMatchTheDrawnShape() {
-    val anchor = state.mapAnchor
+    val anchor = state.surveyMapUiState.anchor
     for (entity in state.entities) {
       val geometry = EntityGeometry.of(entity, anchor) ?: continue
       val bounds = EntityGeometry.bounds(entity, anchor)
@@ -281,12 +281,12 @@ class SurveyMapContentTest {
   @Test
   fun desiredMapCamera_followsGpsAndZoomDelta() {
     val camera = state.desiredMapCamera()
-    val gps = state.mapAnchor.toLatLng(0.5, 0.5)
+    val gps = state.surveyMapUiState.anchor.toLatLng(0.5, 0.5)
     assertNear(gps.latitude, camera.center.latitude)
     assertNear(gps.longitude, camera.center.longitude)
 
-    state.zoomInMap()
-    assertNear(state.mapAnchor.zoom + 0.75, state.desiredMapCamera().zoom)
+    state.surveyMap.zoomInMap()
+    assertNear(state.surveyMapUiState.anchor.zoom + 0.75, state.desiredMapCamera().zoom)
   }
 
   @Test
@@ -343,8 +343,8 @@ class SurveyMapContentTest {
 
   @Test
   fun imagerySources_fromAllUsersAndSurveyOrgCanBeToggledAndRenderedOnBasemap() {
-    val allUsersSource = state.allUsersImagerySources.single()
-    val surveyOrgSource = state.activeSurveyOrganizationImagerySources.single()
+    val allUsersSource = web.allUsersImagerySources.single()
+    val surveyOrgSource = web.activeSurveyOrganizationImagerySources.single()
     assertTrue(allUsersSource.isValidXyzUrl)
     assertTrue(surveyOrgSource.isValidXyzUrl)
 
@@ -371,21 +371,21 @@ class SurveyMapContentTest {
     // Add a new XYZ tile source to "All users" with offline download permitted toggled off.
     val err =
       web.addOrganizationImagerySource(
-        organizationId = state.allUsersOrganization!!.id,
+        organizationId = web.allUsersOrganization!!.id,
         name = "USGS Topo",
         urlTemplate =
           "https://basemap.nationalmap.gov/arcgis/rest/services/USGSTopo/MapServer/tile/{z}/{y}/{x}",
         allowOfflineDownload = false,
       )
     assertEquals(null, err)
-    val added = state.allUsersImagerySources.first { it.name == "USGS Topo" }
+    val added = web.allUsersImagerySources.first { it.name == "USGS Topo" }
     assertFalse(added.allowOfflineDownload)
     web.setOrganizationImagerySourceOfflineAllowed(
-      organizationId = state.allUsersOrganization!!.id,
+      organizationId = web.allUsersOrganization!!.id,
       sourceId = added.id,
       allowOfflineDownload = true,
     )
-    assertTrue(state.allUsersImagerySources.first { it.id == added.id }.allowOfflineDownload)
+    assertTrue(web.allUsersImagerySources.first { it.id == added.id }.allowOfflineDownload)
   }
 
   private fun assertNear(expected: Double, actual: Double, tolerance: Double = 1e-9) =

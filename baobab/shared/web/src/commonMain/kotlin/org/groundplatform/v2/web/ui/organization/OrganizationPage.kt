@@ -77,8 +77,8 @@ import org.groundplatform.v2.app.domain.model.ImagerySourceType
 import org.groundplatform.v2.app.domain.model.MembershipStatus
 import org.groundplatform.v2.app.domain.model.Organization
 import org.groundplatform.v2.app.domain.model.OrganizationRole
-import org.groundplatform.v2.app.domain.model.canChangeMember
 import org.groundplatform.v2.app.domain.usecase.ResolvedLibrary
+import org.groundplatform.v2.web.domain.model.canChangeMember
 import org.groundplatform.v2.web.ui.WebAppState
 import org.groundplatform.v2.web.ui.common.WebAppHeader
 import org.groundplatform.v2.web.ui.common.WebHeaderButton

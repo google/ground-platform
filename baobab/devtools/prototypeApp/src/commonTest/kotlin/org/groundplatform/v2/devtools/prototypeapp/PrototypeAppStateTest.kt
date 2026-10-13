@@ -92,7 +92,7 @@ class PrototypeAppStateTest {
     )
 
     // Places search and PLACES filter tab remain available on web
-    web.selectListFilterTab(ListFilterTab.PLACES)
+    web.dashboard.selectListFilterTab(ListFilterTab.PLACES)
     assertEquals(ListFilterTab.PLACES, web.listFilterTab)
     web.updateListSearchQuery("Othaya")
     assertTrue(web.filteredListPlaces.isNotEmpty())

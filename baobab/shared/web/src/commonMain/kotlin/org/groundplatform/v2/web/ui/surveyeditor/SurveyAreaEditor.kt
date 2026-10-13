@@ -86,9 +86,6 @@ import org.groundplatform.v2.app.domain.model.editor.formatFixed
 import org.groundplatform.v2.app.domain.model.editor.toLatLng
 import org.groundplatform.v2.app.domain.model.geometryKind
 import org.groundplatform.v2.app.domain.model.parsePlaceCoordinates
-import org.groundplatform.v2.app.ui.common.TextFilePickResult
-import org.groundplatform.v2.app.ui.common.TextFilePicker
-import org.groundplatform.v2.app.ui.common.openPlatformTextFilePicker
 import org.groundplatform.v2.core.forms.ui.GroundBadgeTone
 import org.groundplatform.v2.core.forms.ui.GroundTonalBadge
 import org.groundplatform.v2.core.geo.io.GeoFileReader
@@ -97,6 +94,9 @@ import org.groundplatform.v2.core.geo.io.GeoIssue
 import org.groundplatform.v2.core.geo.io.GeoIssueSeverity
 import org.groundplatform.v2.core.geo.io.GeoReadResult
 import org.groundplatform.v2.map.CameraPosition
+import org.groundplatform.v2.web.ui.common.TextFilePickResult
+import org.groundplatform.v2.web.ui.common.TextFilePicker
+import org.groundplatform.v2.web.ui.common.openPlatformTextFilePicker
 import org.groundplatform.v2.web.ui.viewmodel.MapFeatureEditor
 
 /** File types offered by the Upload tab's file picker. */

@@ -19,13 +19,20 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import kotlinx.coroutines.launch
 import org.groundplatform.v2.app.di.AppDataHolder
+import org.groundplatform.v2.app.domain.model.EntityDetailsPane
+import org.groundplatform.v2.app.domain.model.FormPreviewItem
+import org.groundplatform.v2.app.domain.model.ImagerySource
 import org.groundplatform.v2.app.domain.model.ImagerySourceType
 import org.groundplatform.v2.app.domain.model.Organization
 import org.groundplatform.v2.app.domain.model.OrganizationRole
 import org.groundplatform.v2.app.domain.model.SurveyPreviewItem
+import org.groundplatform.v2.app.domain.model.editor.SurveyAccess
+import org.groundplatform.v2.app.domain.model.editor.SurveyEditorDraft
 import org.groundplatform.v2.app.ui.AppSession
+import org.groundplatform.v2.app.ui.state.WebMapDrawingHost
 import org.groundplatform.v2.app.ui.viewmodel.SettingsViewModel
-import org.groundplatform.v2.app.ui.viewmodel.SurveyOutcomePromptViewModel
+import org.groundplatform.v2.map.LngLatBounds
+import org.groundplatform.v2.web.di.WebUseCases
 import org.groundplatform.v2.web.ui.dashboard.CreateSurveyRequest
 import org.groundplatform.v2.web.ui.state.CreateSurveyWizardEvent
 import org.groundplatform.v2.web.ui.state.OrganizationEvent
@@ -34,6 +41,7 @@ import org.groundplatform.v2.web.ui.viewmodel.CreateSurveyWizardViewModel
 import org.groundplatform.v2.web.ui.viewmodel.ImpactViewModel
 import org.groundplatform.v2.web.ui.viewmodel.OrganizationViewModel
 import org.groundplatform.v2.web.ui.viewmodel.SurveyEditorViewModel
+import org.groundplatform.v2.web.ui.viewmodel.SurveyOutcomePromptViewModel
 
 /**
  * State holder of the Ground web app: an [AppSession] plus the web-only ViewModels (organizations,
@@ -46,6 +54,8 @@ class WebAppState(
   dataHolder: AppDataHolder = AppDataHolder(),
   settings: SettingsViewModel = createSettingsViewModel(dataHolder),
   initialPage: WebPage = WebPage.WEB_SURVEYS,
+  /** The use cases only the web console uses, built from [dataHolder]'s repositories. */
+  val useCases: WebUseCases = WebUseCases(dataHolder),
 ) : AppSession(dataHolder, settings) {
 
   /**
@@ -58,13 +68,13 @@ class WebAppState(
       organizationRepository = dataHolder.organizationRepository,
       surveyRepository = dataHolder.surveyRepository,
       authRepository = dataHolder.authRepository,
-      createOrganizationUseCase = dataHolder.createOrganizationUseCase,
-      inviteMemberUseCase = dataHolder.inviteOrganizationMemberUseCase,
-      manageImagerySourcesUseCase = dataHolder.manageImagerySourcesUseCase,
+      createOrganizationUseCase = useCases.createOrganizationUseCase,
+      inviteMemberUseCase = useCases.inviteOrganizationMemberUseCase,
+      manageImagerySourcesUseCase = useCases.manageImagerySourcesUseCase,
       libraryRepository = dataHolder.libraryRepository,
-      manageLibraryUseCase = dataHolder.manageLibraryUseCase,
+      manageLibraryUseCase = useCases.manageLibraryUseCase,
       resolveLibraryUseCase = dataHolder.resolveLibraryUseCase,
-      searchConceptsUseCase = dataHolder.searchConceptsUseCase,
+      searchConceptsUseCase = useCases.searchConceptsUseCase,
       scope = dataHolder.scope,
     )
 
@@ -83,13 +93,13 @@ class WebAppState(
       organizationRepository = dataHolder.organizationRepository,
       authRepository = dataHolder.authRepository,
       placeRepository = dataHolder.placeRepository,
-      generateSamplePlots = dataHolder.generateSamplePlotsUseCase,
-      inviteCollaboratorUseCase = dataHolder.inviteCollaboratorUseCase,
+      generateSamplePlots = useCases.generateSamplePlotsUseCase,
+      inviteCollaboratorUseCase = useCases.inviteCollaboratorUseCase,
       scope = dataHolder.scope,
       libraryRepository = dataHolder.libraryRepository,
-      manageLibraryUseCase = dataHolder.manageLibraryUseCase,
+      manageLibraryUseCase = useCases.manageLibraryUseCase,
       resolveLibraryUseCase = dataHolder.resolveLibraryUseCase,
-      surveyLifecycle = dataHolder.surveyLifecycleUseCase,
+      surveyLifecycle = useCases.surveyLifecycleUseCase,
       impactEventRepository = dataHolder.impactEventRepository,
     )
 
@@ -123,7 +133,7 @@ class WebAppState(
       surveyRepository = dataHolder.surveyRepository,
       organizationRepository = dataHolder.organizationRepository,
       authRepository = dataHolder.authRepository,
-      surveyLifecycle = dataHolder.surveyLifecycleUseCase,
+      surveyLifecycle = useCases.surveyLifecycleUseCase,
       scope = dataHolder.scope,
     )
 
@@ -141,7 +151,7 @@ class WebAppState(
       authRepository = dataHolder.authRepository,
       scope = dataHolder.scope,
       surveyEditorRepository = dataHolder.surveyEditorRepository,
-      computeImpact = dataHolder.computeImpactUseCase,
+      computeImpact = useCases.computeImpactUseCase,
     )
 
   init {
@@ -377,5 +387,158 @@ class WebAppState(
   fun openCreateSurveyWizard(organizationId: String? = null) {
     createSurveyWizard.startWizard(organizationId)
     selectPage(WebPage.CREATE_SURVEY)
+  }
+
+  // --- Session state and actions only the web app uses ---
+
+  /** The synthetic `"All users"` organization, holding platform-wide imagery sources. */
+  val allUsersOrganization: Organization?
+    get() = organization(Organization.ALL_USERS_ID) ?: organizations.firstOrNull { it.isSynthetic }
+
+  /** Imagery sources configured on the synthetic `"All users"` organization. */
+  val allUsersImagerySources: List<ImagerySource>
+    get() = mapState.allUsersImagerySources
+
+  /**
+   * Imagery sources configured on the active survey's organization (excluding the synthetic `"All
+   * users"` organization so sources are never duplicated).
+   */
+  val activeSurveyOrganizationImagerySources: List<ImagerySource>
+    get() = mapState.activeSurveyOrganizationImagerySources
+
+  /**
+   * Whether the signed-in user may open the Survey editor for the active survey: they own it, are
+   * an accepted Survey organizer on its access list, or manage its organization (see
+   * [SurveyAccess]).
+   */
+  val canManageActiveSurvey: Boolean
+    get() =
+      isSignedIn &&
+        SurveyAccess.canManage(
+          email = signedInUserEmail,
+          sharing = activeSurveyEditorDraft.sharing,
+          organization = activeSurveyOrganization,
+        )
+
+  /** Forms collectors can start from the web dashboard's entry points. */
+  val webForms: List<FormPreviewItem>
+    get() = dataCollectionState.webForms
+
+  /** Alias for [isSidePanelExpanded] with dashboard prefix. */
+  val isDashboardSidePanelExpanded: Boolean
+    get() = isSidePanelExpanded
+
+  /** Alias for [isDetailsPanelExpanded] with dashboard prefix. */
+  val isDashboardDetailsPanelExpanded: Boolean
+    get() = isDetailsPanelExpanded
+
+  /** Alias for [isDetailsPanelExpanded]. */
+  val isRightPanelExpanded: Boolean
+    get() = isDetailsPanelExpanded
+
+  /**
+   * Web dashboard's "draw on the map" host for the compact form runner's geometry questions. See
+   * [addWebMapDrawingVertex] and [webMapDraftGeometry].
+   */
+  val webMapDrawing: WebMapDrawingHost
+    get() = dataCollection.webMapDrawing
+
+  /** Asks the main map to centre [bounds] in its visible area, zooming in at most to [maxZoom]. */
+  fun requestWebMapFraming(bounds: LngLatBounds, maxZoom: Double) =
+    dataCollection.requestWebMapFraming(bounds, maxZoom)
+
+  /** Clears [webFormFocusRequest] once the form panel has handled it. */
+  fun consumeWebFormFocusRequest() = dataCollection.consumeWebFormFocusRequest()
+
+  /** Whether the active survey exists in the store, so survey pages can open it. */
+  val hasOpenableActiveSurvey: Boolean
+    get() = dashboardState.hasOpenableActiveSurvey
+
+  /**
+   * Selects a tab of the web dashboard's entity details card: `Data`
+   * ([EntityDetailsPane.PROPERTIES]) or `History` ([EntityDetailsPane.SUBMISSIONS]). Unlike
+   * [showEntityProperties], an opened submission stays open, so switching back to `History` shows
+   * it again.
+   */
+  fun selectEntityDetailsTab(pane: EntityDetailsPane) = dashboard.selectEntityDetailsTab(pane)
+
+  /** Whether a map feature or submission is selected, so collapsing the table shows its details. */
+  private val hasSelectedRecord: Boolean
+    get() = dataCollectionState.hasSelectedRecord
+
+  /** Expands or collapses the web dashboard's bottom data table. */
+  fun updateDashboardTableExpanded(expanded: Boolean) =
+    dashboard.updateDashboardTableExpanded(expanded, hasSelection = hasSelectedRecord)
+
+  /** "Show in table": expands the web dashboard's bottom data table on the selected layer. */
+  fun showSelectedLayerInTable() = dashboard.showSelectedLayerInTable()
+
+  /** Toggles the web dashboard's bottom data table between expanded and collapsed. */
+  fun toggleDashboardTableExpanded() =
+    dashboard.toggleDashboardTableExpanded(hasSelection = hasSelectedRecord)
+
+  /** Activates the bottom data table tab for the dataset with [datasetId]. */
+  fun selectDashboardTable(datasetId: String) = dashboard.selectDashboardTable(datasetId)
+
+  /** Toggles the web dashboard's left-hand side panel between expanded and collapsed states. */
+  fun toggleSidePanel() = dashboard.toggleSidePanel()
+
+  /** Expands the web dashboard's left-hand side panel. */
+  fun expandSidePanel() = dashboard.expandSidePanel()
+
+  /** Collapses the web dashboard's left-hand side panel. */
+  fun collapseSidePanel() = dashboard.collapseSidePanel()
+
+  /** Explicitly expands or collapses the web dashboard's left-hand side panel. */
+  fun updateSidePanelExpanded(expanded: Boolean) = dashboard.updateSidePanelExpanded(expanded)
+
+  /** Alias for [toggleSidePanel]. */
+  fun toggleDashboardSidePanel() = toggleSidePanel()
+
+  /** Alias for [expandSidePanel]. */
+  fun expandDashboardSidePanel() = expandSidePanel()
+
+  /** Alias for [collapseSidePanel]. */
+  fun collapseDashboardSidePanel() = collapseSidePanel()
+
+  /** Alias for [updateSidePanelExpanded]. */
+  fun updateDashboardSidePanelExpanded(expanded: Boolean) = updateSidePanelExpanded(expanded)
+
+  /**
+   * Sets the web dashboard's left-hand panel width to [widthDp], clamped to
+   * [MIN_SIDE_PANEL_WIDTH_DP]..[MAX_SIDE_PANEL_WIDTH_DP]. Non-finite values are ignored.
+   */
+  fun updateSidePanelWidth(widthDp: Float) = dashboard.updateSidePanelWidth(widthDp)
+
+  /** Toggles the web dashboard's right-hand details panel between expanded and collapsed states. */
+  fun toggleDetailsPanel() = dashboard.toggleDetailsPanel()
+
+  /** Expands the web dashboard's right-hand details panel. */
+  fun expandDetailsPanel() = dashboard.expandDetailsPanel()
+
+  /** Collapses the web dashboard's right-hand details panel. */
+  fun collapseDetailsPanel() = dashboard.collapseDetailsPanel()
+
+  /** Explicitly expands or collapses the web dashboard's right-hand details panel. */
+  fun updateDetailsPanelExpanded(expanded: Boolean) = dashboard.updateDetailsPanelExpanded(expanded)
+
+  /** Alias for [toggleDetailsPanel]. */
+  fun toggleDashboardDetailsPanel() = toggleDetailsPanel()
+
+  /** Alias for [toggleDetailsPanel]. */
+  fun toggleRightPanel() = toggleDetailsPanel()
+
+  /** Alias for [expandDetailsPanel]. */
+  fun expandRightPanel() = expandDetailsPanel()
+
+  /** Alias for [collapseDetailsPanel]. */
+  fun collapseRightPanel() = collapseDetailsPanel()
+
+  /** Alias for [updateDetailsPanelExpanded]. */
+  fun updateRightPanelExpanded(expanded: Boolean) = updateDetailsPanelExpanded(expanded)
+
+  /** Saves the Survey editor's [draft] of [surveyId] to the local data store. */
+  fun saveSurveyEditorDraft(surveyId: String, draft: SurveyEditorDraft) {
+    dataHolder.launch { dataHolder.surveyEditorRepository.saveDraft(surveyId, draft) }
   }
 }

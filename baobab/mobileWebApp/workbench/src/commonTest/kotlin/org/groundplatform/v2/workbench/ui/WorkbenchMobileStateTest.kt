@@ -91,10 +91,10 @@ class WorkbenchMobileStateTest {
     assertTrue(state.filteredListEntities.isEmpty())
 
     // Verify coordinate parsing helper handles both degree/cardinal and signed decimal strings
-    val parsedCardinal = assertNotNull(state.parsePlaceCoordinates("0.5012° S, 36.9324° E"))
+    val parsedCardinal = assertNotNull(parsePlaceCoordinates("0.5012° S, 36.9324° E"))
     assertEquals(-0.5012, parsedCardinal.first, 0.0001)
     assertEquals(36.9324, parsedCardinal.second, 0.0001)
-    val parsedDecimal = assertNotNull(state.parsePlaceCoordinates("-0.5012, 36.9324"))
+    val parsedDecimal = assertNotNull(parsePlaceCoordinates("-0.5012, 36.9324"))
     assertEquals(-0.5012, parsedDecimal.first, 0.0001)
     assertEquals(36.9324, parsedDecimal.second, 0.0001)
 

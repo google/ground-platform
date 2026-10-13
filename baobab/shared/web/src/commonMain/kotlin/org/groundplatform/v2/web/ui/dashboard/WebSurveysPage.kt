@@ -60,20 +60,20 @@ import org.groundplatform.v2.app.domain.model.Organization
 import org.groundplatform.v2.app.domain.model.OrganizationRole
 import org.groundplatform.v2.app.domain.model.SurveyPreviewItem
 import org.groundplatform.v2.app.ui.common.GroundFilterChip
-import org.groundplatform.v2.app.ui.common.SurveyOutcomeDialog
 import org.groundplatform.v2.app.ui.map.SurveyMapThumbnail
 import org.groundplatform.v2.app.ui.state.DashboardUiState
-import org.groundplatform.v2.app.ui.state.SurveyOutcomePromptUiState
-import org.groundplatform.v2.app.ui.viewmodel.SurveyOutcomePromptActions
 import org.groundplatform.v2.core.forms.ui.GroundBadgeTone
 import org.groundplatform.v2.core.forms.ui.GroundTonalBadge
 import org.groundplatform.v2.web.ui.WebAppState
+import org.groundplatform.v2.web.ui.common.SurveyOutcomeDialog
 import org.groundplatform.v2.web.ui.common.WebAppHeader
 import org.groundplatform.v2.web.ui.common.WebHeaderButton
 import org.groundplatform.v2.web.ui.common.WebHeaderContext
 import org.groundplatform.v2.web.ui.common.WebHeaderSupportingText
 import org.groundplatform.v2.web.ui.common.WebMobilePrototypeButton
+import org.groundplatform.v2.web.ui.state.SurveyOutcomePromptUiState
 import org.groundplatform.v2.web.ui.surveyeditor.ProfileAvatar
+import org.groundplatform.v2.web.ui.viewmodel.SurveyOutcomePromptActions
 
 private val SurveyCardWidth = 320.dp
 private val PageMaxWidth = 1240.dp

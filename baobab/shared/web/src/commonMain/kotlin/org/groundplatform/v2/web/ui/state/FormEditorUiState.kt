@@ -29,9 +29,9 @@ import org.groundplatform.v2.app.domain.model.editor.FormIds
 import org.groundplatform.v2.app.domain.model.editor.FormPreviewTarget
 import org.groundplatform.v2.app.domain.model.editor.SaveToRules
 import org.groundplatform.v2.app.domain.model.editor.SaveToValidator
-import org.groundplatform.v2.app.domain.model.editor.SurveyEditorMutation
 import org.groundplatform.v2.core.forms.model.FormDefinition
 import org.groundplatform.v2.core.forms.ui.FormWizardController
+import org.groundplatform.v2.web.domain.model.editor.SurveyEditorMutation
 
 /**
  * Screen state of the Form editor page: the [EditorForm] under edit, the selected screen, and the

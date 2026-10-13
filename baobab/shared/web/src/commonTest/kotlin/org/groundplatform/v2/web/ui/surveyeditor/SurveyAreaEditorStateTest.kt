@@ -20,7 +20,7 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import org.groundplatform.v2.app.domain.model.editor.LatLng
 import org.groundplatform.v2.app.domain.model.editor.SurveyArea
-import org.groundplatform.v2.app.ui.common.TextFilePickResult
+import org.groundplatform.v2.web.ui.common.TextFilePickResult
 
 class SurveyAreaEditorStateTest {
   private val multiPolygon =

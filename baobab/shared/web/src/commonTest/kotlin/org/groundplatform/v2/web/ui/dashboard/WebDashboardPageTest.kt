@@ -141,8 +141,16 @@ class WebDashboardPageTest {
     val targetScreenY = (visibleViewportHeight / 2) / totalHeightDp
 
     testState.recenterMapOnEntity(entity, targetScreenY)
-    assertEquals(0.50f, entity.normalizedX + testState.mapWorldToScreenShiftX, 0.0001f)
-    assertEquals(targetScreenY, entity.normalizedY + testState.mapWorldToScreenShiftY, 0.0001f)
+    assertEquals(
+      0.50f,
+      entity.normalizedX + testState.surveyMapUiState.mapWorldToScreenShiftX,
+      0.0001f,
+    )
+    assertEquals(
+      targetScreenY,
+      entity.normalizedY + testState.surveyMapUiState.mapWorldToScreenShiftY,
+      0.0001f,
+    )
   }
 
   @Test
@@ -453,7 +461,7 @@ class WebDashboardPageTest {
   fun dataTables_titlesNeverIncludeInternalDatasetIdsAcrossAllSurveys() {
     val testState = WebAppState()
     for (survey in testState.surveys) {
-      testState.openSurvey(survey.id)
+      testState.onboarding.openSurvey(survey.id)
       val tables =
         buildDashboardDataTables(
           entities = testState.entities,

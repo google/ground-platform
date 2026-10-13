@@ -38,7 +38,7 @@ import kotlin.test.assertTrue
 import org.groundplatform.v2.app.data.datasource.local.store.seededStore
 import org.groundplatform.v2.app.domain.model.editor.PeerDataVisibility
 import org.groundplatform.v2.app.domain.model.editor.SharingPolicy
-import org.groundplatform.v2.app.ui.common.TextFilePickResult
+import org.groundplatform.v2.web.ui.common.TextFilePickResult
 import org.groundplatform.v2.web.ui.state.SurveyEditorSection
 import org.groundplatform.v2.web.ui.viewmodel.SurveyEditorViewModel
 import org.groundplatform.v2.web.ui.viewmodel.seededSurveyEditorViewModel

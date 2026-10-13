@@ -21,6 +21,14 @@ console share: the domain model, the data layer, device and network clients,
 and the UI pieces both apps use. It targets Android, JVM, and WasmJS. iOS
 targets will be added when iOS work resumes.
 
+Only code both apps use belongs here. Web-only domain models, use cases, and
+UI live in [`../web/`](../web/) and mobile-only state in
+[`../mobile/`](../mobile/) (or the [workbench](../../mobileWebApp/workbench/)
+when only the prototype workbench uses it), so each app's build includes only
+what it uses. The exceptions are the data layer (one local store shared by
+both apps, which only this module may import) and the small hooks the
+workbench sets on any session (`SampleDataRepository`, `SyncStatusSimulator`).
+
 ## Package Structure (`org.groundplatform.v2.app`)
 
 -   **`domain/`**: Domain models, repository interfaces, and use cases. Pure
@@ -30,8 +38,11 @@ targets will be added when iOS work resumes.
     `data.*`.
 -   **`client/`**: Platform clients (auth, location, network, PDF export, places
     search), with `expect`/`actual` implementations in `src/<platform>Main/`.
--   **`di/`**: The composition root (`AppDataHolder`) and the shared `AppSession`
-    that the app states are built on.
+-   **`di/`**: The composition root (`AppDataHolder`): the local store,
+    repositories, and the use cases both apps use. Each app wires its own
+    use cases from these repositories (`WebUseCases` in `shared/web`).
+-   **`ui/AppSession.kt`**: The base class of `MobileAppState` and
+    `WebAppState`, holding only the session state and actions both apps use.
 -   **`ui/`**: Shared presentation code: UI state (`ui/state/`), shared
     ViewModels (`ui/viewmodel/`), and components used by both apps (`ui/common/`,
     `ui/map/`, `ui/datacollection/`).
@@ -44,7 +55,7 @@ enforce these layer rules.
 The `:app-testing` subproject (`org.groundplatform.v2:app-testing`) contains
 fixtures shared by this module's tests and by the tests of modules built on it:
 seeded in-memory stores (`seededStore()`, `runNow`), survey and form editor
-samples, `DataCollectionFixture`, `SurveyLifecycleFixture`, and `testScope()`.
+samples, `DataCollectionFixture`, and `testScope()`.
 Depend on it from `commonTest` only.
 
 ## Web Hosts

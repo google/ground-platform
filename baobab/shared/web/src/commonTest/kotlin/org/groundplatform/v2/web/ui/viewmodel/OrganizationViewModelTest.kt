@@ -35,16 +35,16 @@ import org.groundplatform.v2.app.domain.model.LibraryConcept
 import org.groundplatform.v2.app.domain.model.LocalizedText
 import org.groundplatform.v2.app.domain.model.MembershipStatus
 import org.groundplatform.v2.app.domain.model.Organization
-import org.groundplatform.v2.app.domain.model.OrganizationRelation
 import org.groundplatform.v2.app.domain.model.OrganizationRole
 import org.groundplatform.v2.app.domain.model.OrganizationType
-import org.groundplatform.v2.app.domain.model.relationTo
-import org.groundplatform.v2.app.domain.usecase.CreateOrganizationUseCase
-import org.groundplatform.v2.app.domain.usecase.InviteOrganizationMemberUseCase
-import org.groundplatform.v2.app.domain.usecase.ManageImagerySourcesUseCase
-import org.groundplatform.v2.app.domain.usecase.ManageLibraryUseCase
 import org.groundplatform.v2.app.domain.usecase.ResolveLibraryUseCase
-import org.groundplatform.v2.app.domain.usecase.SearchConceptsUseCase
+import org.groundplatform.v2.web.domain.model.OrganizationRelation
+import org.groundplatform.v2.web.domain.model.relationTo
+import org.groundplatform.v2.web.domain.usecase.CreateOrganizationUseCase
+import org.groundplatform.v2.web.domain.usecase.InviteOrganizationMemberUseCase
+import org.groundplatform.v2.web.domain.usecase.ManageImagerySourcesUseCase
+import org.groundplatform.v2.web.domain.usecase.ManageLibraryUseCase
+import org.groundplatform.v2.web.domain.usecase.SearchConceptsUseCase
 import org.groundplatform.v2.web.ui.state.OrganizationEvent
 
 /** See `OnboardingViewModelTest` (shared/app) for why fixtures are built outside `runNow`. */

@@ -51,9 +51,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import org.groundplatform.v2.app.domain.usecase.ExportFile
 import org.groundplatform.v2.app.domain.usecase.ProfileExportPlan
-import org.groundplatform.v2.app.ui.common.downloadTextFile
 import org.groundplatform.v2.app.ui.state.DatasetExportOptions
 import org.groundplatform.v2.app.ui.viewmodel.DashboardActions
+import org.groundplatform.v2.web.ui.common.downloadTextFile
 
 /**
  * **Export** menu of a dashboard data table: CSV, GeoJSON (Map layers), and the export profiles the

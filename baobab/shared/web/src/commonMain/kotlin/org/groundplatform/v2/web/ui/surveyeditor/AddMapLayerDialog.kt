@@ -44,14 +44,14 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import org.groundplatform.v2.app.domain.model.editor.DatasetKind
-import org.groundplatform.v2.app.domain.model.editor.MapLayerImportPlan
-import org.groundplatform.v2.app.domain.model.editor.MapLayerImporter
 import org.groundplatform.v2.app.domain.model.geometryKind
-import org.groundplatform.v2.app.ui.common.TextFilePickResult
-import org.groundplatform.v2.app.ui.common.TextFilePicker
-import org.groundplatform.v2.app.ui.common.openPlatformTextFilePicker
 import org.groundplatform.v2.core.geo.io.GeoFileReader
 import org.groundplatform.v2.core.geo.io.GeoReadResult
+import org.groundplatform.v2.web.domain.model.editor.MapLayerImportPlan
+import org.groundplatform.v2.web.domain.model.editor.MapLayerImporter
+import org.groundplatform.v2.web.ui.common.TextFilePickResult
+import org.groundplatform.v2.web.ui.common.TextFilePicker
+import org.groundplatform.v2.web.ui.common.openPlatformTextFilePicker
 import org.groundplatform.v2.web.ui.state.SurveyEditorUiState
 import org.groundplatform.v2.web.ui.viewmodel.SurveyEditorActions
 

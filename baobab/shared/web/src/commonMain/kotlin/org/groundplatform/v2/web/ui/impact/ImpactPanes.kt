@@ -60,11 +60,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import org.groundplatform.v2.app.domain.model.ImpactAttributionLevel
-import org.groundplatform.v2.app.domain.model.ImpactFormat
-import org.groundplatform.v2.app.domain.model.ImpactIndicator
-import org.groundplatform.v2.app.domain.model.ImpactSummary
-import org.groundplatform.v2.app.domain.model.ImpactSummaryScope
+import org.groundplatform.v2.web.domain.model.ImpactAttributionLevel
+import org.groundplatform.v2.web.domain.model.ImpactFormat
+import org.groundplatform.v2.web.domain.model.ImpactIndicator
+import org.groundplatform.v2.web.domain.model.ImpactSummary
+import org.groundplatform.v2.web.domain.model.ImpactSummaryScope
 import org.groundplatform.v2.web.ui.formeditor.DropdownSelector
 import org.groundplatform.v2.web.ui.state.OrganizationImpactUiState
 

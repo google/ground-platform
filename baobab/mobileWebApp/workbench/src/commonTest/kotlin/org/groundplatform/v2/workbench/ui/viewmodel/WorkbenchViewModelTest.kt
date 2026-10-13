@@ -30,8 +30,8 @@ import org.groundplatform.v2.app.data.repository.SurveyRepositoryImpl
 import org.groundplatform.v2.app.domain.model.DeviceFormFactor
 import org.groundplatform.v2.app.domain.model.DeviceOrientation
 import org.groundplatform.v2.app.domain.model.SyncStatus
-import org.groundplatform.v2.app.domain.usecase.GeneratePrototypeRandomSitesUseCase
 import org.groundplatform.v2.core.forms.ui.WorkbenchExampleForm
+import org.groundplatform.v2.workbench.domain.usecase.GeneratePrototypeRandomSitesUseCase
 import org.groundplatform.v2.workbench.ui.DEFAULT_PROTOTYPE_XFORMS_XML
 import org.groundplatform.v2.workbench.ui.state.WorkbenchEvent
 

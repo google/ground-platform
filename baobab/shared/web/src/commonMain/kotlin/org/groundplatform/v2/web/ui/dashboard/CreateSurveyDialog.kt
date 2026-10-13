@@ -40,8 +40,8 @@ import org.groundplatform.v2.app.domain.model.LibraryPrograms
 import org.groundplatform.v2.app.domain.model.LocalizedText
 import org.groundplatform.v2.app.domain.model.Organization
 import org.groundplatform.v2.app.domain.usecase.ResolvedLibrary
-import org.groundplatform.v2.app.ui.common.ProgramChips
-import org.groundplatform.v2.app.ui.common.PurposePackGrid
+import org.groundplatform.v2.web.ui.common.ProgramChips
+import org.groundplatform.v2.web.ui.common.PurposePackGrid
 import org.groundplatform.v2.web.ui.formeditor.DropdownSelector
 
 /** What the Create survey dialog asks for. */

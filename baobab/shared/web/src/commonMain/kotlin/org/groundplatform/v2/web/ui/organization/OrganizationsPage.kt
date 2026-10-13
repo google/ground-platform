@@ -63,9 +63,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.groundplatform.v2.app.domain.model.Organization
-import org.groundplatform.v2.app.domain.model.OrganizationRelation
 import org.groundplatform.v2.app.domain.model.OrganizationType
-import org.groundplatform.v2.app.domain.model.relationTo
+import org.groundplatform.v2.web.domain.model.OrganizationRelation
+import org.groundplatform.v2.web.domain.model.relationTo
 import org.groundplatform.v2.web.ui.WebAppState
 import org.groundplatform.v2.web.ui.WebPage
 import org.groundplatform.v2.web.ui.common.WebAppHeader

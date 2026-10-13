@@ -124,7 +124,7 @@ internal class PdfDocumentWriter(
 }
 
 /** The standard 14 fonts used by Ground PDFs; none need embedding. */
-internal enum class PdfFont(val resourceName: String, val baseFont: String) {
+enum class PdfFont(val resourceName: String, val baseFont: String) {
   REGULAR("F1", "Helvetica"),
   BOLD("F2", "Helvetica-Bold"),
   MONO("F3", "Courier");
@@ -406,7 +406,7 @@ internal enum class PdfFont(val resourceName: String, val baseFont: String) {
 }
 
 /** An RGB color with components in `0f..1f`. */
-internal data class PdfColor(val red: Float, val green: Float, val blue: Float) {
+data class PdfColor(val red: Float, val green: Float, val blue: Float) {
   /** A lighter tint of this color, mixing in [amount] (`0f..1f`) of white. */
   fun tint(amount: Float): PdfColor =
     PdfColor(red + (1f - red) * amount, green + (1f - green) * amount, blue + (1f - blue) * amount)
@@ -446,7 +446,7 @@ internal data class PdfColor(val red: Float, val green: Float, val blue: Float) 
  * One page's content stream. All coordinates use a top-left origin with y growing downwards; text
  * positions refer to the baseline.
  */
-internal class PdfPage(val width: Float, val height: Float) {
+class PdfPage(val width: Float, val height: Float) {
   internal val content = StringBuilder()
 
   private fun y(top: Float): String = fmt(height - top)
@@ -740,7 +740,7 @@ internal object WinAnsi {
 }
 
 /** Encodes [text] as a PDF literal string with 7-bit ASCII escapes (ISO 32000-1 7.3.4.2). */
-internal fun pdfLiteral(text: String): String {
+fun pdfLiteral(text: String): String {
   val bytes = WinAnsi.encode(text)
   val sb = StringBuilder(bytes.size + 2)
   sb.append('(')

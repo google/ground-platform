@@ -38,9 +38,9 @@ import org.groundplatform.v2.app.domain.repository.LibraryRepository
 import org.groundplatform.v2.app.domain.repository.SurveyContent
 import org.groundplatform.v2.app.domain.repository.SurveyEditorRepository
 import org.groundplatform.v2.app.domain.repository.SurveyRepository
-import org.groundplatform.v2.app.domain.usecase.GenerateSamplePlotsUseCase
 import org.groundplatform.v2.app.testing.testScope
 import org.groundplatform.v2.core.sampling.SamplingEngine
+import org.groundplatform.v2.web.domain.usecase.GenerateSamplePlotsUseCase
 import org.groundplatform.v2.web.ui.state.FormEditorUiState
 import org.groundplatform.v2.web.ui.state.SurveyEditorUiState
 

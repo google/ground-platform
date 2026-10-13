@@ -136,7 +136,7 @@ class LocalStoreAppStateTest {
     editor.updateDetails { it.copy(title = "Renamed survey") }
     editor.addDataset(DatasetKind.DATA_TABLE)
     editor.addForm()
-    state.mobile.saveSurveyEditorDraft("survey-kenya-coffee", editor.ui.draft)
+    state.web.saveSurveyEditorDraft("survey-kenya-coffee", editor.ui.draft)
 
     // The title is shown in the survey list; generated FormDefinitions are published to the survey
     // config.

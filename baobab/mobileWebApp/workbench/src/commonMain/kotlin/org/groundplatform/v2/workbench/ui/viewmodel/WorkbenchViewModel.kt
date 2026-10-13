@@ -39,9 +39,9 @@ import org.groundplatform.v2.app.domain.repository.ConnectivityRepository
 import org.groundplatform.v2.app.domain.repository.SampleDataRepository
 import org.groundplatform.v2.app.domain.repository.SurveyContent
 import org.groundplatform.v2.app.domain.repository.SurveyRepository
-import org.groundplatform.v2.app.domain.usecase.GeneratePrototypeRandomSitesUseCase
 import org.groundplatform.v2.core.forms.serialization.XFormsXmlSerializer
 import org.groundplatform.v2.core.forms.ui.WorkbenchExampleForm
+import org.groundplatform.v2.workbench.domain.usecase.GeneratePrototypeRandomSitesUseCase
 import org.groundplatform.v2.workbench.ui.DEFAULT_PROTOTYPE_XFORMS_XML
 import org.groundplatform.v2.workbench.ui.XFormsParseCache
 import org.groundplatform.v2.workbench.ui.state.WorkbenchEvent

@@ -56,10 +56,10 @@ import org.groundplatform.v2.app.domain.model.editor.PlotShapeOption
 import org.groundplatform.v2.app.domain.model.editor.SampleAreaSource
 import org.groundplatform.v2.app.domain.model.editor.SampleDesignConfig
 import org.groundplatform.v2.app.domain.model.editor.SampleMethod
-import org.groundplatform.v2.app.domain.model.editor.SamplingAreaResult
 import org.groundplatform.v2.app.domain.model.editor.SubPlotMode
 import org.groundplatform.v2.app.domain.model.editor.SurveyArea
 import org.groundplatform.v2.app.domain.model.editor.SurveyAreaGeometry
+import org.groundplatform.v2.web.domain.model.editor.SamplingAreaResult
 import org.groundplatform.v2.web.ui.formeditor.DropdownSelector
 import org.groundplatform.v2.web.ui.state.SurveyEditorUiState
 import org.groundplatform.v2.web.ui.viewmodel.SurveyEditorActions

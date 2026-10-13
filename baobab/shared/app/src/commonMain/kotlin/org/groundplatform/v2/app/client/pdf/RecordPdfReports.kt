@@ -211,7 +211,7 @@ private fun Geometry.paths(): List<List<Pair<Double, Double>>> =
   }
 
 /** Formats Unix epoch milliseconds as `YYYY-MM-DD HH:MM UTC` (proleptic Gregorian calendar). */
-internal fun formatUtcTimestamp(epochMillis: Long): String {
+fun formatUtcTimestamp(epochMillis: Long): String {
   val totalMinutes = epochMillis.floorDiv(60_000L)
   val days = totalMinutes.floorDiv(1_440L)
   val minuteOfDay = totalMinutes.mod(1_440L).toInt()

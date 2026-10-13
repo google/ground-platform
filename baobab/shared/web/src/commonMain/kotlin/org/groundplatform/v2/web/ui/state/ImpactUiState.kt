@@ -16,8 +16,8 @@
 package org.groundplatform.v2.web.ui.state
 
 import org.groundplatform.v2.app.domain.model.Country
-import org.groundplatform.v2.app.domain.model.ImpactSummary
 import org.groundplatform.v2.app.domain.model.SurveyPreviewItem
+import org.groundplatform.v2.web.domain.model.ImpactSummary
 
 /** Survey and country filter of an organization's Impact view; `null` means all. */
 data class ImpactFilter(val surveyId: String? = null, val countryCode: String? = null) {

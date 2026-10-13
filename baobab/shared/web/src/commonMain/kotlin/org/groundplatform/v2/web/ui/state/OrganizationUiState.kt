@@ -15,15 +15,15 @@ package org.groundplatform.v2.web.ui.state
 
 import org.groundplatform.v2.app.domain.model.Organization
 import org.groundplatform.v2.app.domain.model.OrganizationMember
-import org.groundplatform.v2.app.domain.model.OrganizationMembersView
-import org.groundplatform.v2.app.domain.model.OrganizationRelation
 import org.groundplatform.v2.app.domain.model.SurveyPreviewItem
-import org.groundplatform.v2.app.domain.model.canChangeMember
-import org.groundplatform.v2.app.domain.model.discoverableBy
-import org.groundplatform.v2.app.domain.model.membersViewFor
-import org.groundplatform.v2.app.domain.model.organizationsOf
-import org.groundplatform.v2.app.domain.model.relationTo
-import org.groundplatform.v2.app.domain.model.searchOrganizations
+import org.groundplatform.v2.web.domain.model.OrganizationMembersView
+import org.groundplatform.v2.web.domain.model.OrganizationRelation
+import org.groundplatform.v2.web.domain.model.canChangeMember
+import org.groundplatform.v2.web.domain.model.discoverableBy
+import org.groundplatform.v2.web.domain.model.membersViewFor
+import org.groundplatform.v2.web.domain.model.organizationsOf
+import org.groundplatform.v2.web.domain.model.relationTo
+import org.groundplatform.v2.web.domain.model.searchOrganizations
 
 /**
  * Screen state of the web organizations directory (`#organizations`) and organization page

@@ -21,7 +21,10 @@ import kotlin.test.assertTrue
 /**
  * Guards the dependency rules of `docs/technical/client/architecture.md` for the web console:
  * - Nothing here imports `app.data` (only `shared/app`'s own `data/` and `di/` may).
- * - Views (everything outside `ui/viewmodel/`) never import `app.data` or `app.client`.
+ * - `domain/` (the web-only domain models and use cases) imports no client, di, or UI package, nor
+ *   Compose.
+ * - Views (everything outside `client/`, `domain/`, `di/`, and `ui/viewmodel/`) never import
+ *   `app.data` or `app.client`.
  * - Web console code never imports the mobile app, the workbench, or the prototype host.
  *
  * Imports are checked textually so the test needs no classpath scanning on any platform.
@@ -55,9 +58,31 @@ class LayerDependencyGuardrailTest {
   }
 
   @Test
-  fun viewsDoNotImportClients() {
+  fun domainImportsOnlyDomainAndSharedCore() {
     val bad =
-      offenders(listOf("org.groundplatform.v2.app.client.")) { it.contains("ui/viewmodel/") }
+      offenders(
+        listOf(
+          "org.groundplatform.v2.app.client.",
+          "org.groundplatform.v2.app.di.",
+          "org.groundplatform.v2.app.ui.",
+          "org.groundplatform.v2.web.client.",
+          "org.groundplatform.v2.web.di.",
+          "org.groundplatform.v2.web.ui.",
+          "androidx.compose.",
+        )
+      ) {
+        !it.startsWith("domain/")
+      }
+    assertTrue(bad.isEmpty(), "domain/ depends on outer layers:\n${bad.joinToString("\n")}")
+  }
+
+  @Test
+  fun viewsDoNotImportClients() {
+    val nonViewRoots = listOf("client/", "domain/", "di/")
+    val bad =
+      offenders(listOf("org.groundplatform.v2.app.client.")) { path ->
+        path.contains("ui/viewmodel/") || nonViewRoots.any { path.startsWith(it) }
+      }
     assertTrue(
       bad.isEmpty(),
       "Views reach past the ViewModel into client packages:\n${bad.joinToString("\n")}",

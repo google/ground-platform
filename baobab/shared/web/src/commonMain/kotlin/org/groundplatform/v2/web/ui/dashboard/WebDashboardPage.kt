@@ -112,10 +112,8 @@ import org.groundplatform.v2.app.domain.model.geometryKind
 import org.groundplatform.v2.app.domain.model.hasGeometry
 import org.groundplatform.v2.app.domain.model.maxFramingZoom
 import org.groundplatform.v2.app.domain.model.relatedEntityForPropertyValue
-import org.groundplatform.v2.app.ui.common.HorizontalResizePointerIcon
 import org.groundplatform.v2.app.ui.common.appendGeoId
 import org.groundplatform.v2.app.ui.common.geoIdInlineContent
-import org.groundplatform.v2.app.ui.common.showPlatformHorizontalResizeCursor
 import org.groundplatform.v2.app.ui.datacollection.BottomSheetSearchableListContent
 import org.groundplatform.v2.app.ui.datacollection.CollectorConsentModalDialog
 import org.groundplatform.v2.app.ui.datacollection.EntityGeometryIcon
@@ -128,17 +126,19 @@ import org.groundplatform.v2.app.ui.map.GoogleMapsScaleBarWidget
 import org.groundplatform.v2.app.ui.map.LayersControlDialog
 import org.groundplatform.v2.app.ui.map.MapClusterBalloonsOverlay
 import org.groundplatform.v2.app.ui.map.SurveyMainMap
-import org.groundplatform.v2.app.ui.map.WebMapDrawingHint
 import org.groundplatform.v2.app.ui.map.framingInsets
 import org.groundplatform.v2.app.ui.map.rememberSurveyMapCamera
 import org.groundplatform.v2.app.ui.state.DashboardUiState
 import org.groundplatform.v2.app.ui.viewmodel.DashboardActions
 import org.groundplatform.v2.web.ui.WebAppState
+import org.groundplatform.v2.web.ui.common.HorizontalResizePointerIcon
 import org.groundplatform.v2.web.ui.common.WebTopToolbar
+import org.groundplatform.v2.web.ui.common.showPlatformHorizontalResizeCursor
 import org.groundplatform.v2.web.ui.datacollection.WebDataCollectionCard
 import org.groundplatform.v2.web.ui.datacollection.WebEntityDetailsCard
 import org.groundplatform.v2.web.ui.datacollection.WebFormPanelWidth
 import org.groundplatform.v2.web.ui.datacollection.WebSubmissionDetailsCard
+import org.groundplatform.v2.web.ui.map.WebMapDrawingHint
 
 /** Kind of tabular view shown in the web dashboard's data table panel. */
 enum class DashboardDataTableKind {

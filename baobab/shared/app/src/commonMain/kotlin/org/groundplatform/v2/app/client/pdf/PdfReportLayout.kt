@@ -37,7 +37,7 @@ class GeneratedPdf(val fileName: String, val bytes: ByteArray, val pageCount: In
 }
 
 /** Palette used by Ground reports, aligned with `GroundTheme`'s light color scheme. */
-internal object PdfPalette {
+object PdfPalette {
   val primary = PdfColor.fromArgb(0xFF36693E)
   val onSurface = PdfColor.fromArgb(0xFF181D18)
   val onSurfaceVariant = PdfColor.fromArgb(0xFF424940)
@@ -80,7 +80,7 @@ internal fun wrapText(text: String, font: PdfFont, size: Float, maxWidth: Float)
  * status chips, and a geometry figure, with automatic page breaks plus a running header and a `Page
  * n of N` footer on every page.
  */
-internal class PdfReportLayout(
+class PdfReportLayout(
   title: String,
   subject: String,
   private val runningHeader: String,

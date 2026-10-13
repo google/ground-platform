@@ -21,18 +21,18 @@ import kotlin.test.assertTrue
 import org.groundplatform.v2.app.data.seed.PrototypeFakeOrganizationsData
 import org.groundplatform.v2.app.data.seed.PrototypeFakeSurveyEditorData
 import org.groundplatform.v2.app.domain.model.OrganizationType
-import org.groundplatform.v2.app.domain.model.editor.CreateSurveyWizardStep
 import org.groundplatform.v2.app.domain.model.editor.FormPreviewTarget
 import org.groundplatform.v2.app.domain.model.editor.GeometryCapture
 import org.groundplatform.v2.app.domain.model.editor.GeometryKind
 import org.groundplatform.v2.app.domain.model.editor.PeerDataVisibility
 import org.groundplatform.v2.app.domain.model.editor.SaveToMode
 import org.groundplatform.v2.app.domain.model.editor.SharingPolicy
-import org.groundplatform.v2.app.domain.model.editor.SurveyCollectionMode
-import org.groundplatform.v2.app.domain.model.editor.SurveyWizardRules
-import org.groundplatform.v2.app.domain.model.editor.WizardMapFeatureSource
-import org.groundplatform.v2.app.domain.model.editor.WizardStartMethod
 import org.groundplatform.v2.app.domain.model.geometryKind
+import org.groundplatform.v2.web.domain.model.editor.CreateSurveyWizardStep
+import org.groundplatform.v2.web.domain.model.editor.SurveyCollectionMode
+import org.groundplatform.v2.web.domain.model.editor.SurveyWizardRules
+import org.groundplatform.v2.web.domain.model.editor.WizardMapFeatureSource
+import org.groundplatform.v2.web.domain.model.editor.WizardStartMethod
 import org.groundplatform.v2.web.ui.WebAppState
 import org.groundplatform.v2.web.ui.WebPage
 

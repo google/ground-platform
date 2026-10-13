@@ -40,12 +40,12 @@ import org.groundplatform.v2.app.domain.repository.AuthRepository
 import org.groundplatform.v2.app.domain.repository.LibraryRepository
 import org.groundplatform.v2.app.domain.repository.OrganizationRepository
 import org.groundplatform.v2.app.domain.repository.SurveyRepository
-import org.groundplatform.v2.app.domain.usecase.CreateOrganizationUseCase
-import org.groundplatform.v2.app.domain.usecase.InviteOrganizationMemberUseCase
-import org.groundplatform.v2.app.domain.usecase.ManageImagerySourcesUseCase
-import org.groundplatform.v2.app.domain.usecase.ManageLibraryUseCase
 import org.groundplatform.v2.app.domain.usecase.ResolveLibraryUseCase
-import org.groundplatform.v2.app.domain.usecase.SearchConceptsUseCase
+import org.groundplatform.v2.web.domain.usecase.CreateOrganizationUseCase
+import org.groundplatform.v2.web.domain.usecase.InviteOrganizationMemberUseCase
+import org.groundplatform.v2.web.domain.usecase.ManageImagerySourcesUseCase
+import org.groundplatform.v2.web.domain.usecase.ManageLibraryUseCase
+import org.groundplatform.v2.web.domain.usecase.SearchConceptsUseCase
 import org.groundplatform.v2.web.ui.state.LibraryEntryRow
 import org.groundplatform.v2.web.ui.state.OrganizationEvent
 import org.groundplatform.v2.web.ui.state.OrganizationLibraryUiState

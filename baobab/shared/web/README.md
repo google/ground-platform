@@ -28,14 +28,29 @@ Android so the prototype host can still build its Android target.
 
 -   **`WebConsoleApp.kt`**: `WebConsoleApp()` (theme, URL hash routing) and
     `WebConsolePages()` (the page switch, also used by the prototype host).
--   **`ui/`**: `WebAppState`, `WebPage`, the pages by feature (`dashboard/`,
+-   **`domain/`**: Domain models and use cases only the web console uses
+    (organizations directory, impact summaries, survey outcome prompts, sample
+    plot generation, map layer import, survey editor mutations and wizard
+    rules, and the organization, library, collaborator, concept search, survey
+    lifecycle, and impact use cases). Pure Kotlin, like `app`'s `domain/`.
+-   **`client/`**: Web-only clients (the impact PDF report).
+-   **`di/`**: `WebUseCases`, which wires the web-only use cases from the
+    repositories in `app`'s `AppDataHolder`.
+-   **`ui/`**: `WebAppState` (with the session state and actions only the web
+    console uses), `WebPage`, the pages by feature (`dashboard/`,
     `organization/`, `surveyeditor/`, `formeditor/`, `wizard/`, `impact/`,
     `onboarding/`, `datacollection/`), the header (`common/WebTopToolbar.kt`),
-    and the console's ViewModels and UI state (`viewmodel/`, `state/`).
+    the console's ViewModels and UI state (`viewmodel/`, `state/`), and
+    web-only components (`common/`, `map/`) with their `expect`/`actual`
+    platform pieces in `src/<platform>Main/`.
 
 `LayerDependencyGuardrailTest` (in `jvmTest`) keeps this module from importing
-`app.data`, from reaching `app.client` outside ViewModels, and from importing
-the mobile app or the workbench.
+`app.data`, keeps `domain/` free of outer layers, keeps views from reaching
+`app.client`, and keeps the module from importing the mobile app or the
+workbench.
+
+The `:web-testing` subproject holds test fixtures for this module's tests
+(`SurveyEditorTestSupport`, `SurveyLifecycleFixture`).
 
 ## Building and Testing
 

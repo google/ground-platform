@@ -133,13 +133,8 @@ import org.groundplatform.v2.app.domain.model.editor.SharingPolicy
 import org.groundplatform.v2.app.domain.model.editor.SharingSettings
 import org.groundplatform.v2.app.domain.model.editor.SurveyArea
 import org.groundplatform.v2.app.domain.model.editor.SurveyAreaGeometry
-import org.groundplatform.v2.app.domain.model.editor.SurveyWizardRules
 import org.groundplatform.v2.app.domain.model.editor.surveyUrl
 import org.groundplatform.v2.app.ui.common.DragAxis
-import org.groundplatform.v2.app.ui.common.ProgramChips
-import org.groundplatform.v2.app.ui.common.PurposePackGrid
-import org.groundplatform.v2.app.ui.common.SurveyOutcomeCard
-import org.groundplatform.v2.app.ui.common.ValidationErrorBanner
 import org.groundplatform.v2.app.ui.map.SurveyBasemaps
 import org.groundplatform.v2.core.forms.ui.GroundBadgeTone
 import org.groundplatform.v2.core.forms.ui.GroundTonalBadge
@@ -156,7 +151,12 @@ import org.groundplatform.v2.map.MapFeature
 import org.groundplatform.v2.map.MapInsets
 import org.groundplatform.v2.map.MapLayer
 import org.groundplatform.v2.map.StyleValue
+import org.groundplatform.v2.web.domain.model.editor.SurveyWizardRules
 import org.groundplatform.v2.web.ui.WebAppState
+import org.groundplatform.v2.web.ui.common.ProgramChips
+import org.groundplatform.v2.web.ui.common.PurposePackGrid
+import org.groundplatform.v2.web.ui.common.SurveyOutcomeCard
+import org.groundplatform.v2.web.ui.common.ValidationErrorBanner
 import org.groundplatform.v2.web.ui.common.WebAppHeader
 import org.groundplatform.v2.web.ui.common.WebHeaderContext
 import org.groundplatform.v2.web.ui.common.WebHeaderSupportingText

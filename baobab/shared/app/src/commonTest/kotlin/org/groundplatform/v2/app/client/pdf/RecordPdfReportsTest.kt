@@ -32,7 +32,7 @@ class RecordPdfReportsTest {
     val state = AppSession()
     val entity = state.entities.first { it.submissions.isNotEmpty() }
 
-    val pdf = assertNotNull(state.generateEntityPdf(entity.id))
+    val pdf = assertNotNull(state.dataCollection.generateEntityPdf(entity.id))
     val text = pdf.bytes.decodeToString()
 
     assertTrue(text.startsWith("%PDF-1.4"))
@@ -55,7 +55,7 @@ class RecordPdfReportsTest {
     val state = AppSession()
     val submission = state.allSubmissions.first { it.fields.isNotEmpty() }
 
-    val pdf = assertNotNull(state.generateSubmissionPdf(submission.id))
+    val pdf = assertNotNull(state.dataCollection.generateSubmissionPdf(submission.id))
     val text = pdf.bytes.decodeToString()
 
     assertEquals(RecordPdfReports.submissionFileName(submission), pdf.fileName)
@@ -94,8 +94,8 @@ class RecordPdfReportsTest {
   fun unknownIds_generateNothing() {
     val state = AppSession()
 
-    assertNull(state.generateEntityPdf("missing"))
-    assertNull(state.generateSubmissionPdf("missing"))
+    assertNull(state.dataCollection.generateEntityPdf("missing"))
+    assertNull(state.dataCollection.generateSubmissionPdf("missing"))
   }
 
   @Test

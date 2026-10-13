@@ -67,24 +67,14 @@ import org.groundplatform.v2.app.domain.repository.SurveyRepository
 import org.groundplatform.v2.app.domain.repository.TransactionRunner
 import org.groundplatform.v2.app.domain.usecase.ClusterMapFeaturesUseCase
 import org.groundplatform.v2.app.domain.usecase.CompleteFormSubmissionUseCase
-import org.groundplatform.v2.app.domain.usecase.ComputeImpactUseCase
 import org.groundplatform.v2.app.domain.usecase.ComputeWayfindingNavigationUseCase
-import org.groundplatform.v2.app.domain.usecase.CreateOrganizationUseCase
 import org.groundplatform.v2.app.domain.usecase.CreateSurveyUseCase
 import org.groundplatform.v2.app.domain.usecase.ExportSurveyDataUseCase
-import org.groundplatform.v2.app.domain.usecase.GeneratePrototypeRandomSitesUseCase
-import org.groundplatform.v2.app.domain.usecase.GenerateSamplePlotsUseCase
-import org.groundplatform.v2.app.domain.usecase.InviteCollaboratorUseCase
-import org.groundplatform.v2.app.domain.usecase.InviteOrganizationMemberUseCase
 import org.groundplatform.v2.app.domain.usecase.LaunchFormUseCase
-import org.groundplatform.v2.app.domain.usecase.ManageImagerySourcesUseCase
-import org.groundplatform.v2.app.domain.usecase.ManageLibraryUseCase
 import org.groundplatform.v2.app.domain.usecase.RecordImpactEventUseCase
 import org.groundplatform.v2.app.domain.usecase.ResolveFormDefForLaunchUseCase
 import org.groundplatform.v2.app.domain.usecase.ResolveLibraryUseCase
-import org.groundplatform.v2.app.domain.usecase.SearchConceptsUseCase
 import org.groundplatform.v2.app.domain.usecase.SearchPlacesUseCase
-import org.groundplatform.v2.app.domain.usecase.SurveyLifecycleUseCase
 import org.groundplatform.v2.app.domain.usecase.SyncMutationsUseCase
 import org.groundplatform.v2.app.ui.common.platformEpochMillis
 
@@ -111,8 +101,10 @@ data class AppData(
 /**
  * Dependency container and reactive data holder for `devtools/prototypeApp` per
  * `docs/technical/client/architecture.md`:
- * - Owns the [LocalStore] (single source of truth), Domain Repository instances, Domain Use Cases,
- *   and the shared [scope].
+ * - Owns the [LocalStore] (single source of truth), Domain Repository instances, the Domain Use
+ *   Cases both the mobile app and the web console use, and the shared [scope]. Use cases only one
+ *   client uses are wired by that client (`WebUseCases` in `shared/web`, `WorkbenchState` in the
+ *   workbench) from the repositories exposed here.
  * - Combines repository flows into a single immutable [appData] [StateFlow].
  * - Holds no UI session state; each feature ViewModel (`OnboardingViewModel`, `SettingsViewModel`,
  *   `SurveyMapViewModel`, `DashboardViewModel`, `OrganizationViewModel`, `SurveyEditorViewModel`,
@@ -176,33 +168,11 @@ class AppDataHolder(
       transactionRunner = transactionRunner,
       libraryRepository = libraryRepository,
     ),
-  val createOrganizationUseCase: CreateOrganizationUseCase =
-    CreateOrganizationUseCase(organizationRepository),
-  val inviteOrganizationMemberUseCase: InviteOrganizationMemberUseCase =
-    InviteOrganizationMemberUseCase(organizationRepository),
-  val manageImagerySourcesUseCase: ManageImagerySourcesUseCase =
-    ManageImagerySourcesUseCase(organizationRepository),
-  val manageLibraryUseCase: ManageLibraryUseCase = ManageLibraryUseCase(libraryRepository),
   val resolveLibraryUseCase: ResolveLibraryUseCase = ResolveLibraryUseCase(),
-  val computeImpactUseCase: ComputeImpactUseCase =
-    ComputeImpactUseCase(resolveLibrary = resolveLibraryUseCase),
-  val searchConceptsUseCase: SearchConceptsUseCase = SearchConceptsUseCase(),
   val computeWayfindingNavigationUseCase: ComputeWayfindingNavigationUseCase =
     ComputeWayfindingNavigationUseCase(),
   val clusterMapFeaturesUseCase: ClusterMapFeaturesUseCase = ClusterMapFeaturesUseCase(),
   val searchPlacesUseCase: SearchPlacesUseCase = SearchPlacesUseCase(),
-  val generateRandomSitesUseCase: GeneratePrototypeRandomSitesUseCase =
-    GeneratePrototypeRandomSitesUseCase(surveyRepository = surveyRepository),
-  val generateSamplePlotsUseCase: GenerateSamplePlotsUseCase =
-    GenerateSamplePlotsUseCase(now = { isoUtc(platformEpochMillis()) }),
-  val inviteCollaboratorUseCase: InviteCollaboratorUseCase = InviteCollaboratorUseCase(),
-  val surveyLifecycleUseCase: SurveyLifecycleUseCase =
-    SurveyLifecycleUseCase(
-      surveyRepository = surveyRepository,
-      authRepository = authRepository,
-      recordImpactEvent = recordImpactEventUseCase,
-      now = { platformEpochMillis() },
-    ),
 ) {
   init {
     launch { sampleDataRepository.seedIfNeeded() }

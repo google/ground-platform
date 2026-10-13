@@ -22,6 +22,11 @@ the domain, data, and shared UI in [`../app/`](../app/). Every mobile host runs
 the same `GroundMobileApp()`: `androidApp`, `iosApp`, and the Wasm mobile build
 used for testing in a browser.
 
+`MobileAppState` holds the session state and actions only the mobile app uses
+(onboarding, downloaded surveys, uploads, offline maps, settings, GPS and
+wayfinding, and the map controls); what both apps use stays in `app`'s
+`AppSession`.
+
 The module targets Android, JVM (for tests), and WasmJS. iOS targets are
 opt-in with `-Pground.ios=true`, and are paused until `shared/app` gets iOS
 targets of its own.

@@ -60,16 +60,11 @@ import org.groundplatform.v2.app.domain.model.editor.GeometryKind
 import org.groundplatform.v2.app.domain.model.editor.ImportedForm
 import org.groundplatform.v2.app.domain.model.editor.LatLng
 import org.groundplatform.v2.app.domain.model.editor.LayerStyle
-import org.groundplatform.v2.app.domain.model.editor.MapLayerImportPlan
 import org.groundplatform.v2.app.domain.model.editor.PropertyType
 import org.groundplatform.v2.app.domain.model.editor.SampleAreaSource
 import org.groundplatform.v2.app.domain.model.editor.SampleDesignConfig
-import org.groundplatform.v2.app.domain.model.editor.SampleGenerationOutcome
-import org.groundplatform.v2.app.domain.model.editor.SampleGenerationProgress
 import org.groundplatform.v2.app.domain.model.editor.SampleMethod
 import org.groundplatform.v2.app.domain.model.editor.SamplePlotProperties
-import org.groundplatform.v2.app.domain.model.editor.SamplingAreaResult
-import org.groundplatform.v2.app.domain.model.editor.SamplingAreas
 import org.groundplatform.v2.app.domain.model.editor.SaveToMode
 import org.groundplatform.v2.app.domain.model.editor.SaveToRules
 import org.groundplatform.v2.app.domain.model.editor.SharingPolicy
@@ -94,21 +89,24 @@ import org.groundplatform.v2.app.domain.repository.OrganizationRepository
 import org.groundplatform.v2.app.domain.repository.PlaceRepository
 import org.groundplatform.v2.app.domain.repository.SurveyEditorRepository
 import org.groundplatform.v2.app.domain.repository.SurveyRepository
-import org.groundplatform.v2.app.domain.usecase.GenerateSamplePlotsUseCase
-import org.groundplatform.v2.app.domain.usecase.InviteCollaboratorUseCase
-import org.groundplatform.v2.app.domain.usecase.ManageLibraryUseCase
 import org.groundplatform.v2.app.domain.usecase.ResolveLibraryUseCase
-import org.groundplatform.v2.app.domain.usecase.SurveyLifecycleUseCase
 import org.groundplatform.v2.app.ui.common.platformEpochMillis
-import org.groundplatform.v2.app.ui.state.SurveyOutcomeCardState
-import org.groundplatform.v2.app.ui.viewmodel.SurveyOutcomeActions
-import org.groundplatform.v2.app.ui.viewmodel.SurveyOutcomeCardHolder
 import org.groundplatform.v2.core.sampling.SampleEstimate
+import org.groundplatform.v2.web.domain.model.editor.MapLayerImportPlan
+import org.groundplatform.v2.web.domain.model.editor.SampleGenerationOutcome
+import org.groundplatform.v2.web.domain.model.editor.SampleGenerationProgress
+import org.groundplatform.v2.web.domain.model.editor.SamplingAreaResult
+import org.groundplatform.v2.web.domain.model.editor.SamplingAreas
+import org.groundplatform.v2.web.domain.usecase.GenerateSamplePlotsUseCase
+import org.groundplatform.v2.web.domain.usecase.InviteCollaboratorUseCase
+import org.groundplatform.v2.web.domain.usecase.ManageLibraryUseCase
+import org.groundplatform.v2.web.domain.usecase.SurveyLifecycleUseCase
 import org.groundplatform.v2.web.ui.formeditor.moved
 import org.groundplatform.v2.web.ui.state.FormLibraryContext
 import org.groundplatform.v2.web.ui.state.SurveyEditorEvent
 import org.groundplatform.v2.web.ui.state.SurveyEditorSection
 import org.groundplatform.v2.web.ui.state.SurveyEditorUiState
+import org.groundplatform.v2.web.ui.state.SurveyOutcomeCardState
 
 /**
  * Map feature edits made by drawing on an interactive map: the subset of [SurveyEditorActions] that

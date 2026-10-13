@@ -22,14 +22,14 @@ import org.groundplatform.v2.app.domain.model.CachedProfile
 import org.groundplatform.v2.app.domain.model.MembershipStatus
 import org.groundplatform.v2.app.domain.model.Organization
 import org.groundplatform.v2.app.domain.model.OrganizationMember
-import org.groundplatform.v2.app.domain.model.OrganizationRelation
 import org.groundplatform.v2.app.domain.model.OrganizationRole
-import org.groundplatform.v2.app.domain.model.canChangeMember
-import org.groundplatform.v2.app.domain.model.discoverableBy
-import org.groundplatform.v2.app.domain.model.membersViewFor
-import org.groundplatform.v2.app.domain.model.organizationsOf
-import org.groundplatform.v2.app.domain.model.relationTo
-import org.groundplatform.v2.app.domain.model.searchOrganizations
+import org.groundplatform.v2.web.domain.model.OrganizationRelation
+import org.groundplatform.v2.web.domain.model.canChangeMember
+import org.groundplatform.v2.web.domain.model.discoverableBy
+import org.groundplatform.v2.web.domain.model.membersViewFor
+import org.groundplatform.v2.web.domain.model.organizationsOf
+import org.groundplatform.v2.web.domain.model.relationTo
+import org.groundplatform.v2.web.domain.model.searchOrganizations
 import org.groundplatform.v2.web.ui.WebPage
 
 /** The directory and member-grouping rules live in `domain/model/OrganizationDirectory.kt`. */

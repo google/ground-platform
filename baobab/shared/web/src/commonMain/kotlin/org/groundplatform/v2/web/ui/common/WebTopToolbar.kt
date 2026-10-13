@@ -60,7 +60,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.groundplatform.v2.app.ui.common.CloudAcaciaLogo
-import org.groundplatform.v2.app.ui.common.PrototypeDebugToolsButton
 import org.groundplatform.v2.app.ui.common.UserAvatarProfileMenu
 import org.groundplatform.v2.core.forms.ui.LocalGroundBrandFontFamily
 import org.groundplatform.v2.web.ui.WebAppState

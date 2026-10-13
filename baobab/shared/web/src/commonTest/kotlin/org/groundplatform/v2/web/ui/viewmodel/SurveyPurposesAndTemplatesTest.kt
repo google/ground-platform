@@ -35,10 +35,10 @@ import org.groundplatform.v2.app.data.seed.PrototypeFakeOrganizationsData
 import org.groundplatform.v2.app.domain.model.ConceptLink
 import org.groundplatform.v2.app.domain.model.Organization
 import org.groundplatform.v2.app.domain.usecase.CreateSurveyUseCase
-import org.groundplatform.v2.app.domain.usecase.ManageLibraryUseCase
 import org.groundplatform.v2.app.domain.usecase.SyncMutationsUseCase
 import org.groundplatform.v2.app.testing.testScope
 import org.groundplatform.v2.app.ui.viewmodel.DashboardViewModel
+import org.groundplatform.v2.web.domain.usecase.ManageLibraryUseCase
 import org.groundplatform.v2.web.ui.formeditor.canSaveAsTemplate
 import org.groundplatform.v2.web.ui.formeditor.saveAsTemplateUnavailableReason
 import org.groundplatform.v2.web.ui.state.SurveyEditorSection

@@ -31,10 +31,10 @@ import org.groundplatform.v2.app.domain.model.ImpactCoverage
 import org.groundplatform.v2.app.domain.model.ImpactEventType
 import org.groundplatform.v2.app.domain.model.SurveyLifecycleState
 import org.groundplatform.v2.app.domain.model.SurveyOutcomeKind
-import org.groundplatform.v2.app.domain.model.editor.SampleGenerationOutcome
 import org.groundplatform.v2.app.domain.model.editor.isoUtc
-import org.groundplatform.v2.app.domain.usecase.SurveyLifecycleFixture
 import org.groundplatform.v2.app.testing.testScope
+import org.groundplatform.v2.web.domain.model.editor.SampleGenerationOutcome
+import org.groundplatform.v2.web.domain.usecase.SurveyLifecycleFixture
 import org.groundplatform.v2.web.ui.state.SurveyEditorSection
 import org.groundplatform.v2.web.ui.surveyeditor.lifecycleActionOptions
 
