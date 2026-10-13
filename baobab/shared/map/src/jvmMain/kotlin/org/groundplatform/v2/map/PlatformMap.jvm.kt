@@ -16,6 +16,9 @@ package org.groundplatform.v2.map
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 
+/** Compose Desktop reports mouse wheel scroll in notches. */
+internal actual const val SCROLL_DELTA_PER_WHEEL_NOTCH = 1f
+
 /** Desktop/JVM has no native map SDK; the Canvas [PreviewMap] is the renderer. */
 @Composable
 internal actual fun PlatformMap(

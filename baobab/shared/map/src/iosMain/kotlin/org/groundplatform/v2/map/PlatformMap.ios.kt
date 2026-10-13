@@ -47,6 +47,9 @@ import platform.UIKit.UIScreen
 /** Tap tolerance for features, in points. */
 private const val TAP_RADIUS_PT = 6.0
 
+/** UIKit reports pointer scroll in notches. */
+internal actual const val SCROLL_DELTA_PER_WHEEL_NOTCH = 1f
+
 /**
  * Mapbox Maps SDK for iOS renderer, through the Swift [MapboxIosView] registered in [GroundMapIos].
  *

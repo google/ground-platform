@@ -435,6 +435,8 @@ internal fun InteractiveLayerMapCard(
             }
           },
           modifier = Modifier.fillMaxSize(),
+          // Quick clicks place vertices while drawing, so they mustn't zoom.
+          doubleTapZoomEnabled = tool != MapTool.DRAW,
           dragHandler = MapDragHandler { pickDrag(it.toScreenPoint()) },
         )
 

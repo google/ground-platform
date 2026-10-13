@@ -44,6 +44,9 @@ import androidx.compose.ui.unit.sp
  *
  * @param gesturesEnabled whether the user can pan, zoom, and tap the map; turn it off for static
  *   previews, e.g. inside a scrolling list.
+ * @param doubleTapZoomEnabled whether a double tap or double click zooms in. Turn it off where
+ *   quick repeated taps mean something else, e.g. placing vertices while drawing; single taps are
+ *   then reported without waiting for a possible second tap.
  * @param dragHandler takes over one-finger drags it claims, e.g. to move a vertex while editing.
  */
 @Composable
@@ -53,6 +56,7 @@ fun GroundMap(
   onEvent: (MapEvent) -> Unit,
   modifier: Modifier = Modifier,
   gesturesEnabled: Boolean = true,
+  doubleTapZoomEnabled: Boolean = true,
   dragHandler: MapDragHandler? = null,
   markerContent: @Composable (MapMarker) -> Unit = {},
 ) {
@@ -61,9 +65,10 @@ fun GroundMap(
   val currentDragHandler by rememberUpdatedState(dragHandler)
   val hasDragHandler = dragHandler != null
   val gestures =
-    remember(gesturesEnabled, hasDragHandler) {
+    remember(gesturesEnabled, doubleTapZoomEnabled, hasDragHandler) {
       MapGestureOptions(
         enabled = gesturesEnabled,
+        doubleTapZoom = doubleTapZoomEnabled,
         dragHandler =
           if (hasDragHandler) MapDragHandler { currentDragHandler?.onDragStart(it) } else null,
       )

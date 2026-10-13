@@ -34,9 +34,11 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.DpOffset
 import kotlin.math.abs
 import kotlin.math.log2
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.launch
 
 /** How long the camera must be still before [MapEvent.CameraIdle] is reported. */
 private const val IDLE_DELAY_MS = 250L
@@ -48,7 +50,21 @@ internal const val MAX_ZOOM = 22.0
 private const val WHEEL_ZOOM_STEP = 0.35
 
 /**
- * Pan, pinch, and wheel zoom that drive [cameraState] directly, plus taps reported to [onTap].
+ * How much [androidx.compose.ui.input.pointer.PointerInputChange.scrollDelta] one mouse wheel notch
+ * reports. Desktop and Android report notches, but the browser passes `WheelEvent.deltaY` through
+ * as CSS px, where a notch is about 100 px and a trackpad sends many small deltas.
+ */
+internal expect val SCROLL_DELTA_PER_WHEEL_NOTCH: Float
+
+/** Zoom levels added by a double tap or double click. */
+private const val DOUBLE_TAP_ZOOM_STEP = 1.0
+
+/** Duration of the double-tap zoom animation. */
+private const val DOUBLE_TAP_ZOOM_MS = 250
+
+/**
+ * Pan, pinch, wheel, and double-tap zoom that drive [cameraState] directly, plus taps reported to
+ * [onTap].
  *
  * Used by renderers whose native map is display-only (web, Android) or absent (preview), so
  * gestures behave the same everywhere and [MapCameraState] stays the single source of truth for the
@@ -128,7 +144,9 @@ internal fun Modifier.mapGestures(
           if (dy == 0f) continue
           cameraState.stopAnimation()
           val c = cameraState.position
-          val zoomed = c.copy(zoom = (c.zoom - dy * WHEEL_ZOOM_STEP).coerceIn(MIN_ZOOM, MAX_ZOOM))
+          val notches = dy / SCROLL_DELTA_PER_WHEEL_NOTCH
+          val zoomed =
+            c.copy(zoom = (c.zoom - notches * WHEEL_ZOOM_STEP).coerceIn(MIN_ZOOM, MAX_ZOOM))
           cameraState.updatePosition(
             zoomAround(cameraState, zoomed, change.position.toDpOffset(this)),
             byGesture = true,
@@ -137,7 +155,26 @@ internal fun Modifier.mapGestures(
         }
       }
     }
-    .pointerInput(cameraState) { detectTapGestures { onTap(it.toDpOffset(this)) } }
+    .pointerInput(cameraState, options.doubleTapZoom) {
+      coroutineScope {
+        detectTapGestures(
+          onDoubleTap =
+            if (options.doubleTapZoom) {
+              { at ->
+                // Zoom in one level around the tapped point, like Mapbox and Google Maps.
+                val c = cameraState.position
+                val zoomed =
+                  c.copy(zoom = (c.zoom + DOUBLE_TAP_ZOOM_STEP).coerceIn(MIN_ZOOM, MAX_ZOOM))
+                val target = zoomAround(cameraState, zoomed, at.toDpOffset(this@pointerInput))
+                launch { cameraState.animateByGesture(target, DOUBLE_TAP_ZOOM_MS) }
+              }
+            } else {
+              null
+            },
+          onTap = { onTap(it.toDpOffset(this@pointerInput)) },
+        )
+      }
+    }
 }
 
 /** Applies one step of a pan/pinch gesture: zoom by [zoom] around [centroid], then pan by [pan]. */

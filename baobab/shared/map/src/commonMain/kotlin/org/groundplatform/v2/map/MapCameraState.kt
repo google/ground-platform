@@ -89,7 +89,17 @@ class MapCameraState(initial: CameraPosition) {
    * Animates to [target], suspending until the animation ends or is interrupted by a gesture or
    * another camera move.
    */
-  suspend fun animateTo(target: CameraPosition, durationMs: Int = DEFAULT_ANIMATION_MS) {
+  suspend fun animateTo(target: CameraPosition, durationMs: Int = DEFAULT_ANIMATION_MS) =
+    animate(target, durationMs, byGesture = false)
+
+  /**
+   * Like [animateTo], but reports each frame as gesture-driven, for gestures that animate the
+   * camera (such as double-tap zoom) rather than tracking the pointer.
+   */
+  internal suspend fun animateByGesture(target: CameraPosition, durationMs: Int) =
+    animate(target, durationMs, byGesture = true)
+
+  private suspend fun animate(target: CameraPosition, durationMs: Int, byGesture: Boolean) {
     val r = renderer
     if (r != null) {
       r.animateTo(target, durationMs)
@@ -97,12 +107,12 @@ class MapCameraState(initial: CameraPosition) {
     }
     stopAnimation()
     if (durationMs <= 0 || coroutineContext[MonotonicFrameClock] == null) {
-      updatePosition(target, byGesture = false)
+      updatePosition(target, byGesture)
       return
     }
     coroutineScope {
       val job = launch {
-        WebMercator.animate(position, target, durationMs) { updatePosition(it, false) }
+        WebMercator.animate(position, target, durationMs) { updatePosition(it, byGesture) }
       }
       animation = job
       job.join()

@@ -60,6 +60,9 @@ private const val TAG = "GroundMap"
 /** Tap tolerance for features, in dp. */
 private const val TAP_RADIUS_DP = 6f
 
+/** Android reports mouse wheel scroll in notches. */
+internal actual const val SCROLL_DELTA_PER_WHEEL_NOTCH = 1f
+
 /**
  * Mapbox Maps SDK for Android renderer.
  *

@@ -43,5 +43,10 @@ interface MapDrag {
 internal data class MapGestureOptions(
   /** When `false` the map ignores input, so it can sit in a scrolling list as a preview. */
   val enabled: Boolean = true,
+  /**
+   * Whether a double tap or double click zooms in. Enabling it delays single taps until the
+   * double-tap timeout passes, and turns quick repeated taps into a zoom.
+   */
+  val doubleTapZoom: Boolean = true,
   val dragHandler: MapDragHandler? = null,
 )

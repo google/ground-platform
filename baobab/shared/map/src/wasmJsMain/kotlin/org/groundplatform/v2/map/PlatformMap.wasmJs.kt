@@ -38,6 +38,12 @@ import kotlinx.coroutines.await
 private const val TAP_RADIUS_PX = 6.0
 
 /**
+ * Compose passes `WheelEvent.deltaY` through in CSS px, and browsers report about 100 px per mouse
+ * wheel notch.
+ */
+internal actual const val SCROLL_DELTA_PER_WHEEL_NOTCH = 100f
+
+/**
  * Mapbox GL JS renderer.
  *
  * The browser can't host a DOM element inside the Compose canvas, so the map lives in a `div`
