@@ -339,23 +339,9 @@ class SampleGenerationTest {
   }
 
   @Test
-  fun sampleDesignActionLabel_usesShowAndUpdatePreviewInWizard() {
-    assertEquals(
-      "Show preview",
-      sampleDesignActionLabel(isWizard = true, hasGeneratedPlots = false),
-    )
-    assertEquals(
-      "Update preview",
-      sampleDesignActionLabel(isWizard = true, hasGeneratedPlots = true),
-    )
-    assertEquals(
-      "Generate sample plots",
-      sampleDesignActionLabel(isWizard = false, hasGeneratedPlots = false),
-    )
-    assertEquals(
-      "Regenerate sample plots",
-      sampleDesignActionLabel(isWizard = false, hasGeneratedPlots = true),
-    )
+  fun sampleDesignActionLabel_usesShowAndUpdatePreview() {
+    assertEquals("Show preview", sampleDesignActionLabel(hasGeneratedPlots = false))
+    assertEquals("Update preview", sampleDesignActionLabel(hasGeneratedPlots = true))
   }
 
   @Test

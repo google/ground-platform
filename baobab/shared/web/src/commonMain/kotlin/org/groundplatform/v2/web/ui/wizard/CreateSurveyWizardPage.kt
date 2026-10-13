@@ -1291,7 +1291,6 @@ private fun MapFeaturesStepContent(
                 uiState = editorUiState,
                 actions = editorActions,
                 dataset = primaryLayer,
-                isWizard = true,
               )
             }
 
