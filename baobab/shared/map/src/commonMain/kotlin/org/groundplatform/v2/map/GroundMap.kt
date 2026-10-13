@@ -14,7 +14,9 @@
 package org.groundplatform.v2.map
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.waitForUpOrCancellation
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.BasicText
@@ -27,12 +29,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.PointerEvent
+import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.node.ModifierNodeElement
+import androidx.compose.ui.node.PointerInputModifierNode
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.DpSize
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
@@ -149,9 +156,7 @@ private fun MarkerSlot(
       }
       .then(
         if (tappable) {
-          Modifier.pointerInput(marker.id) {
-            detectTapGestures { currentOnEvent(MapEvent.MarkerTapped(marker.id)) }
-          }
+          Modifier.markerTap(marker.id) { currentOnEvent(MapEvent.MarkerTapped(it)) }
         } else {
           Modifier
         }
@@ -159,4 +164,43 @@ private fun MarkerSlot(
   ) {
     content()
   }
+}
+
+/**
+ * Reports taps on [markerId] to [onTap] while sharing pointer input with siblings, so pan, pinch,
+ * and wheel-zoom gestures started over a marker still reach the sibling [PlatformMap] beneath it.
+ */
+private fun Modifier.markerTap(markerId: String, onTap: (String) -> Unit): Modifier =
+  this.sharePointerInput().pointerInput(markerId) {
+    awaitEachGesture {
+      // Consume down on Initial so PlatformMap's tap detector (which runs before us on Main)
+      // ignores it, while PlatformMap's pan/pinch loop (requireUnconsumed = false) still runs.
+      awaitFirstDown(pass = PointerEventPass.Initial).consume()
+      awaitPointerEvent(PointerEventPass.Final)
+      waitForUpOrCancellation()?.let {
+        it.consume()
+        onTap(markerId)
+      }
+    }
+  }
+
+/** Lets hits on a marker pass through to the sibling [PlatformMap] beneath it. */
+private fun Modifier.sharePointerInput(): Modifier = this then SharePointerInputElement
+
+private data object SharePointerInputElement : ModifierNodeElement<SharePointerInputNode>() {
+  override fun create() = SharePointerInputNode()
+
+  override fun update(node: SharePointerInputNode) {}
+}
+
+private class SharePointerInputNode : Modifier.Node(), PointerInputModifierNode {
+  override fun sharePointerInputWithSiblings(): Boolean = true
+
+  override fun onPointerEvent(
+    pointerEvent: PointerEvent,
+    pass: PointerEventPass,
+    bounds: IntSize,
+  ) {}
+
+  override fun onCancelPointerInput() {}
 }

@@ -20,16 +20,22 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performMouseInput
+import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.runDesktopComposeUiTest
+import androidx.compose.ui.test.swipe
 import androidx.compose.ui.unit.dp
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNotEquals
+import kotlin.test.assertTrue
 
 /**
  * Markers rendered in [GroundMap] must be clipped to the map's bounds and must not appear or accept
@@ -80,5 +86,22 @@ class GroundMapBoundsTest {
 
       onNodeWithTag("marker-inside").performClick()
       assertEquals(listOf("inside"), tappedIds)
+
+      val initialZoom = camera.position.zoom
+      onNodeWithTag("marker-inside").performMouseInput {
+        moveTo(this.center)
+        scroll(-1f)
+      }
+      waitForIdle()
+      assertTrue(camera.position.zoom > initialZoom, "Expected wheel scroll over marker to zoom in")
+
+      tappedIds.clear()
+      val centerBeforeDrag = camera.position.center
+      onNodeWithTag("marker-inside").performTouchInput {
+        swipe(start = this.center, end = this.center + Offset(100f, 0f))
+      }
+      waitForIdle()
+      assertNotEquals(centerBeforeDrag, camera.position.center, "Expected drag on marker to pan")
+      assertEquals(emptyList(), tappedIds)
     }
 }
