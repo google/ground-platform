@@ -21,10 +21,8 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 import org.groundplatform.v2.app.domain.model.BasemapType
 import org.groundplatform.v2.app.domain.model.relatedEntityForPropertyValue
-import org.groundplatform.v2.mobile.ui.MobileAppState
 import org.groundplatform.v2.web.ui.WebAppState
 import org.groundplatform.v2.web.ui.WebPage
-import org.groundplatform.v2.workbench.ui.WorkbenchState
 
 class WebDashboardPageTest {
 
@@ -48,22 +46,6 @@ class WebDashboardPageTest {
       WebPage.fromHash("#dashboard"),
     )
     assertEquals(WebPage.WEB_DASHBOARD, WebPage.fromHash("#web"))
-  }
-
-  @Test
-  fun updateActiveSurveyDetails_updatesActiveSurveyTitleAndDescription() {
-    val testState = WebAppState()
-    WorkbenchState(MobileAppState(dataHolder = testState.dataHolder))
-      .updateActiveSurveyDetails(
-        title = "Updated Survey Title",
-        description = "Updated survey description from the survey editor.",
-      )
-
-    assertEquals("Updated Survey Title", testState.activeSurvey.title)
-    assertEquals(
-      "Updated survey description from the survey editor.",
-      testState.activeSurvey.description,
-    )
   }
 
   @Test

@@ -141,7 +141,7 @@ import org.groundplatform.v2.web.ui.datacollection.WebFormPanelWidth
 import org.groundplatform.v2.web.ui.datacollection.WebSubmissionDetailsCard
 
 /** Kind of tabular view shown in the web dashboard's data table panel. */
-internal enum class DashboardDataTableKind {
+enum class DashboardDataTableKind {
   /** Records of a map layer (`EntityDatasetDef` with geometry / `EntityRecord`). */
   MAP_LAYER,
 
@@ -150,7 +150,7 @@ internal enum class DashboardDataTableKind {
 }
 
 /** One row of a [DashboardDataTable]; [id] is the entity record ID. */
-internal data class DashboardDataTableRow(
+data class DashboardDataTableRow(
   val id: String,
   val cells: List<String>,
   val isSelected: Boolean = false,
@@ -175,7 +175,7 @@ private val DashboardStatusColumnWidth = 140.dp
  * entity dataset. Submissions are never shown here: their data can be hierarchical, so they are
  * only shown in a document-style view.
  */
-internal data class DashboardDataTable(
+data class DashboardDataTable(
   val id: String,
   val datasetId: String,
   val title: String,
@@ -195,7 +195,7 @@ internal data class DashboardDataTable(
  * Presentation properties (marker and stroke styling) are left out; property values that reference
  * another record are shown as that record's label via [relatedLabel].
  */
-internal fun buildDashboardDataTables(
+fun buildDashboardDataTables(
   entities: List<GeospatialEntityItem>,
   selectedEntityId: String?,
   relatedLabel: (entity: GeospatialEntityItem, value: String) -> String? = { _, _ -> null },

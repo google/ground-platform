@@ -16,26 +16,33 @@ plugins {
   kotlin("multiplatform") version "2.4.20"
   id("org.jetbrains.compose") version "1.12.0"
   id("org.jetbrains.kotlin.plugin.compose") version "2.4.20"
+  id("com.ncorti.ktfmt.gradle") version "0.27.0"
 }
 
 group = "org.groundplatform.v2.web"
 
 version = "2.0.0-SNAPSHOT"
 
-kotlin {
-  js(IR) {
-    browser()
-    binaries.executable()
-    compilerOptions {
-      sourceMapEmbedSources.set(
-        org.jetbrains.kotlin.gradle.dsl.JsSourceMapEmbedMode.SOURCE_MAP_SOURCE_CONTENT_ALWAYS
-      )
-    }
-  }
+ktfmt { googleStyle() }
 
+// `./gradlew wasmJsBrowserDevelopmentRun -Pport=8095` overrides the dev server port.
+val devServerPort = project.findProperty("port")?.toString()?.toIntOrNull() ?: 8092
+
+kotlin {
   @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
   wasmJs {
-    browser()
+    browser {
+      commonWebpackConfig {
+        outputFileName = "webApp.js"
+        devServer =
+          (devServer
+              ?: org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpackConfig.DevServer())
+            .apply {
+              port = devServerPort
+              open = false
+            }
+      }
+    }
     binaries.executable()
     compilerOptions {
       sourceMapEmbedSources.set(
@@ -47,15 +54,13 @@ kotlin {
   sourceSets {
     val commonMain by getting {
       dependencies {
-        implementation("org.groundplatform.v2:protoforms:2.0.0-SNAPSHOT")
-        implementation("org.groundplatform.v2:protoforms-ui:2.0.0-SNAPSHOT")
+        implementation("org.groundplatform.v2:web:2.0.0-SNAPSHOT")
         implementation(compose.runtime)
         implementation(compose.foundation)
         implementation(compose.material3)
         implementation(compose.ui)
       }
     }
-    val commonTest by getting { dependencies { implementation(kotlin("test")) } }
   }
 }
 
@@ -111,4 +116,6 @@ tasks.withType<ProcessResources>().configureEach {
   from(file("../shared/ui/src/commonMain/composeResources")) {
     into("composeResources/org.groundplatform.v2.core.forms.ui.resources")
   }
+  // JS bridges loaded by index.html for the shared/app wasmJs actuals (PDF export, media capture).
+  from(file("../shared/app/src/wasmJsMain/resources"))
 }

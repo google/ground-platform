@@ -19,7 +19,6 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import org.groundplatform.v2.app.data.seed.PrototypeFakeOrganizationsData
-import org.groundplatform.v2.devtools.prototypeapp.PrototypeAppState
 import org.groundplatform.v2.web.ui.WebAppState
 import org.groundplatform.v2.web.ui.WebPage
 
@@ -104,23 +103,6 @@ class WebSurveysPageTest {
     assertTrue(
       sections.none { it.organization?.id == PrototypeFakeOrganizationsData.OPEN_FORIS_COMMUNITY }
     )
-  }
-
-  @Test
-  fun openSurveyOnWeb_switchesActiveSurveyWithoutTouchingMobileFlow() {
-    val prototype = PrototypeAppState()
-    val testState = prototype.web
-    val screenBefore = prototype.mobile.currentScreen
-    val target = testState.surveys.first { it.id != testState.activeSurveyId }
-    val wasDownloaded = target.isDownloaded
-    testState.openSurveyOnWeb(target.id)
-    assertEquals(target.id, testState.activeSurveyId)
-    assertEquals(screenBefore, prototype.mobile.currentScreen)
-    assertEquals(wasDownloaded, testState.surveys.first { it.id == target.id }.isDownloaded)
-    assertTrue(testState.hasOpenableActiveSurvey)
-    // Unknown IDs are ignored.
-    testState.openSurveyOnWeb("survey-missing")
-    assertEquals(target.id, testState.activeSurveyId)
   }
 
   @Test

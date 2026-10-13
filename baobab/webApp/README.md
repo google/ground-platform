@@ -14,29 +14,45 @@
   limitations under the License.
 -->
 
-# Ground 2.0 Web Console (`webApp`)
+# Ground 2.0 Web Console
 
-`org.groundplatform.v2.web` is the runnable Compose Multiplatform Web
-application (`wasmJs` / `js`) for Ground 2.0 survey administration, form
-authoring, map layer management, and submission data inspection.
+`webApp` is the runnable Ground 2.0 web console (Kotlin/Wasm): survey
+administration, organizations, survey and form authoring, map layers, and the
+survey dashboard. It's a thin host: `Main.wasmJs.kt` mounts `WebConsoleApp()`
+from [`../shared/web/`](../shared/web/) and keeps the page in sync with the URL
+hash (`#surveys`, `#dashboard`, `#survey-editor`, `#create-survey`,
+`#organizations`, `#organization/<id>`).
 
 ## Architecture
 
-Unlike [`../androidApp/`](../androidApp/) and [`../iosApp/`](../iosApp/)—which
-share the offline field data collection experience, services, and UI in
-[`../shared/mobile/`](../shared/mobile/)—`webApp` implements a separate desktop/web
-workflow and depends directly on the cross-platform foundation modules:
+-   [`../shared/web/`](../shared/web/) (`org.groundplatform.v2:web`): the web
+    console's pages, state (`WebAppState`), and root (`WebConsoleApp()`).
+-   [`../shared/app/`](../shared/app/) (`org.groundplatform.v2:app`): the
+    domain, data, and UI shared with the mobile app. Its JS bridges
+    (`pdf-export-bridge.js`, `media-capture-bridge.js`) are copied into this
+    bundle and loaded by `index.html`.
 
--   [`../shared/core/`](../shared/core/) (`org.groundplatform.v2:protoforms`)
-    for data models, serialization, XPath evaluation, and the `FormEngine`.
--   [`../shared/ui/`](../shared/ui/) (`org.groundplatform.v2:protoforms-ui`) for
-    shared Material 3 theming (`GroundTheme`) and interactive form previews
-    (`MobilePhoneFrame`, `MobileFormRunner`).
+Map labels and Places search need a Mapbox access token (basemap tiles don't).
+`index.html` reads it from the `mapbox_token` URL parameter,
+`window.MAPBOX_ACCESS_TOKEN`, or the `GROUND_MAPBOX_TOKEN` local storage key.
 
 ## Running Locally
 
-From `webApp/`:
+From `webApp/`, start the webpack dev server (port `8092` by default):
 
 ```bash
 ./gradlew wasmJsBrowserDevelopmentRun
+
+# Or on another port:
+./gradlew wasmJsBrowserDevelopmentRun -Pport=8095
+```
+
+## Deploying to a Firebase Hosting Preview Channel
+
+```bash
+# Build and update the default 'web-console' preview channel (7-day expiration):
+./scripts/deploy-preview.sh
+
+# Or pick a channel name and expiration, or skip the Gradle build:
+./scripts/deploy-preview.sh --channel my-feature --expires 14d --skip-build
 ```

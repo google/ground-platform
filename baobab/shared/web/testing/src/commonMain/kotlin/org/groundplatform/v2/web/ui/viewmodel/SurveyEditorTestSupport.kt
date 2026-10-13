@@ -49,7 +49,7 @@ import org.groundplatform.v2.web.ui.state.SurveyEditorUiState
  * hand-authored draft rather than the seeded store. Every survey ID shares the one draft; saving
  * replaces it and records the call in [saved].
  */
-internal class FakeSurveyEditorRepository(initial: SurveyEditorDraft) : SurveyEditorRepository {
+class FakeSurveyEditorRepository(initial: SurveyEditorDraft) : SurveyEditorRepository {
   val drafts = MutableStateFlow(initial)
   val saved = mutableListOf<Pair<SurveyEditorDraft, SurveyEditorDraft?>>()
 
@@ -71,7 +71,7 @@ internal class FakeSurveyEditorRepository(initial: SurveyEditorDraft) : SurveyEd
  * A Survey editor over [draft] (by default the sample survey) backed by an empty store, with a
  * [FakeSurveyEditorRepository]. Build it outside `runNow`, like other ViewModel fixtures.
  */
-internal fun surveyEditorViewModel(
+fun surveyEditorViewModel(
   draft: SurveyEditorDraft = SurveyEditorSamples.draft(),
   store: LocalStore = InMemoryLocalStore(),
   editorRepository: SurveyEditorRepository = FakeSurveyEditorRepository(draft),
@@ -97,7 +97,7 @@ internal fun surveyEditorViewModel(
   )
 
 /** A Survey editor over the seeded store's active survey, through the real repositories. */
-internal fun seededSurveyEditorViewModel(
+fun seededSurveyEditorViewModel(
   store: LocalStore,
   scope: CoroutineScope = testScope(),
   libraryRepository: LibraryRepository? = null,
@@ -115,7 +115,7 @@ internal fun seededSurveyEditorViewModel(
 /**
  * A standalone Form editor over [form] with [datasets], like the Form editor tests used to build.
  */
-internal fun formEditorViewModel(
+fun formEditorViewModel(
   form: EditorForm =
     EditorFormTemplates.blank(formId = FormIds.newFormId(), title = "Untitled form"),
   datasets: List<EditorDataset> = emptyList(),
@@ -131,18 +131,18 @@ internal fun formEditorViewModel(
   )
 
 /** The current UI state, for assertions. */
-internal val SurveyEditorViewModel.ui: SurveyEditorUiState
+val SurveyEditorViewModel.ui: SurveyEditorUiState
   get() = uiState.value
 
 /** The current UI state, for assertions. */
-internal val FormEditorViewModel.ui: FormEditorUiState
+val FormEditorViewModel.ui: FormEditorUiState
   get() = uiState.value
 
 /**
  * A [SurveyRepository] whose active survey's entities are replaced by [entities], so tests can
  * simulate submissions on Map layer features without seeding the store.
  */
-internal class EntitiesOverrideSurveyRepository(
+class EntitiesOverrideSurveyRepository(
   private val delegate: SurveyRepository,
   private val entities: StateFlow<List<GeospatialEntityItem>>,
 ) : SurveyRepository by delegate {
@@ -153,7 +153,7 @@ internal class EntitiesOverrideSurveyRepository(
 }
 
 /** A minimal map feature of [datasetId] with [submissionCount] submissions. */
-internal fun fakeEntityWithSubmissions(
+fun fakeEntityWithSubmissions(
   datasetId: String,
   submissionCount: Int,
 ): GeospatialEntityItem =

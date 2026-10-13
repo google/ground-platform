@@ -66,6 +66,7 @@ kotlin {
         api("org.groundplatform.v2:map:2.0.0-SNAPSHOT")
         api("org.groundplatform.v2:app:2.0.0-SNAPSHOT")
         api("org.groundplatform.v2:mobile:2.0.0-SNAPSHOT")
+        api("org.groundplatform.v2:web:2.0.0-SNAPSHOT")
         implementation(compose.runtime)
         implementation(compose.foundation)
         implementation(compose.material3)
@@ -83,6 +84,7 @@ kotlin {
       dependencies {
         implementation(kotlin("test"))
         implementation("org.groundplatform.v2:app-testing:2.0.0-SNAPSHOT")
+        implementation("org.groundplatform.v2:web-testing:2.0.0-SNAPSHOT")
       }
     }
     val jvmTest by getting {

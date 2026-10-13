@@ -46,24 +46,15 @@ import org.groundplatform.v2.app.domain.model.DeviceOrientation
 import org.groundplatform.v2.app.ui.common.DevicePreviewFrame
 import org.groundplatform.v2.core.forms.ui.GroundTheme
 import org.groundplatform.v2.mobile.ui.onboarding.MobileScreenHost
-import org.groundplatform.v2.web.ui.WebAppState
+import org.groundplatform.v2.web.WebConsolePages
 import org.groundplatform.v2.web.ui.WebPage
-import org.groundplatform.v2.web.ui.dashboard.WebDashboardPage
-import org.groundplatform.v2.web.ui.dashboard.WebSurveysPage
-import org.groundplatform.v2.web.ui.onboarding.WebSignInPage
-import org.groundplatform.v2.web.ui.organization.OrganizationPage
-import org.groundplatform.v2.web.ui.organization.OrganizationsPage
-import org.groundplatform.v2.web.ui.surveyeditor.SurveyEditorPage
-import org.groundplatform.v2.web.ui.wizard.CreateSurveyWizardPage
 
 /**
  * Root Compose Multiplatform Web application for `baobab/devtools/prototypeApp`.
  *
  * Renders an interactive UX design workbench that embeds a live Mobile or Tablet device preview of
  * the Ground 2.0 Compose Multiplatform UI (`Sign In` -> `Terms of Service` -> `Download survey` ->
- * `Main Survey UI`) and a unified web application: the [WebSurveysPage] landing page (surveys the
- * user can open, grouped by organization), the [WebDashboardPage] (survey map and data tables), and
- * the [SurveyEditorPage] (for designing surveys, Forms, Map layers, and Data tables).
+ * `Main Survey UI`) and the web console ([WebConsolePages] from `shared/web`).
  *
  * [initialPage] is the web page to open, or `null` for the mobile device preview.
  */
@@ -111,72 +102,10 @@ fun PrototypeApp(
         if (page == null) {
           MobilePrototypePage(state, isMobileMapShowing)
         } else {
-          WebApp(web, page)
+          WebConsolePages(web, page)
         }
       }
     }
-  }
-}
-
-/**
- * The web app's [page]. A survey page without an openable active survey falls back to the surveys
- * list, and the Survey editor falls back to the dashboard for people who can't manage the survey.
- */
-@Composable
-private fun WebApp(web: WebAppState, page: WebPage) {
-  val resolvedPage =
-    when {
-      page.needsActiveSurvey && !web.hasOpenableActiveSurvey -> WebPage.WEB_SURVEYS
-      page == WebPage.SURVEY_EDITOR && web.isSignedIn && !web.canManageActiveSurvey ->
-        WebPage.WEB_DASHBOARD
-      else -> page
-    }
-  LaunchedEffect(resolvedPage) { if (resolvedPage != page) web.selectPage(resolvedPage) }
-  val signOut = {
-    web.signOut()
-    web.selectPage(WebPage.WEB_SURVEYS)
-  }
-  when {
-    !web.isSignedIn -> WebSignInPage(state = web, onSignIn = { web.signInWithGoogle() })
-    resolvedPage == WebPage.ORGANIZATIONS -> OrganizationsPage(state = web, onSignOut = signOut)
-    resolvedPage == WebPage.ORGANIZATION ->
-      OrganizationPage(
-        state = web,
-        onOpenSurvey = { surveyId ->
-          web.openSurveyOnWeb(surveyId)
-          web.selectPage(WebPage.WEB_DASHBOARD)
-        },
-        onCreateSurvey = { request ->
-          web.createSurvey(request)
-          web.selectPage(WebPage.SURVEY_EDITOR)
-        },
-        onOpenCreateSurveyWizard = { orgId -> web.openCreateSurveyWizard(orgId) },
-        onSignOut = signOut,
-      )
-    resolvedPage == WebPage.WEB_SURVEYS ->
-      WebSurveysPage(
-        state = web,
-        onOpenSurvey = { surveyId ->
-          web.openSurveyOnWeb(surveyId)
-          web.selectPage(WebPage.WEB_DASHBOARD)
-        },
-        onCreateSurvey = { request ->
-          web.createSurvey(request)
-          web.selectPage(WebPage.SURVEY_EDITOR)
-        },
-        onOpenCreateSurveyWizard = { web.openCreateSurveyWizard() },
-        onSignOut = signOut,
-      )
-    resolvedPage == WebPage.CREATE_SURVEY ->
-      CreateSurveyWizardPage(state = web, isDarkTheme = web.isDarkTheme, onSignOut = signOut)
-    resolvedPage == WebPage.SURVEY_EDITOR ->
-      SurveyEditorPage(state = web, isDarkTheme = web.isDarkTheme)
-    resolvedPage == WebPage.WEB_DASHBOARD ->
-      WebDashboardPage(
-        state = web,
-        onOpenSurveyEditor = { web.selectPage(WebPage.SURVEY_EDITOR) },
-        onSignOut = signOut,
-      )
   }
 }
 

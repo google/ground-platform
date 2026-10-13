@@ -14,43 +14,21 @@
  */
 package org.groundplatform.v2.web
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.window.ComposeViewport
 import kotlinx.browser.document
-import org.groundplatform.v2.core.forms.ui.GroundTheme
-import org.groundplatform.v2.core.forms.ui.LocalGroundBrandFontFamily
+import kotlinx.browser.window
+import org.groundplatform.v2.web.ui.WebPage
 
+/** Mounts the web console ([WebConsoleApp]) and keeps the page in sync with the URL hash. */
 @OptIn(ExperimentalComposeUiApi::class)
 fun main() {
-  val body = document.body ?: return
-  ComposeViewport(body) {
-    GroundTheme {
-      val brandFont = LocalGroundBrandFontFamily.current
-      Surface(modifier = Modifier.fillMaxSize()) {
-        Box(contentAlignment = Alignment.Center) {
-          Text(
-            text =
-              buildAnnotatedString {
-                withStyle(SpanStyle(fontFamily = brandFont, fontWeight = FontWeight.ExtraBold)) {
-                  append("Ground")
-                }
-                append(" 2.0 Web Console")
-              },
-            style = MaterialTheme.typography.headlineMedium,
-          )
-        }
-      }
-    }
+  val container = document.getElementById("ComposeTarget") ?: document.body!!
+  ComposeViewport(container) {
+    WebConsoleApp(
+      initialPage = WebPage.fromHash(window.location.hash),
+      initialOrganizationId = WebPage.organizationIdFromHash(window.location.hash),
+      onHashChanged = { window.location.hash = it },
+    )
   }
 }

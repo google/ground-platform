@@ -30,6 +30,7 @@ for **Ground 2.0**.
 │   ├── ui/                      # Shared Compose theme & form runner widgets (Android/JVM, iOS, JS, WasmJS)
 │   ├── map/                     # Shared map rendering (Mapbox) & geometry
 │   ├── app/                     # Shared domain, data, clients & UI for the mobile and web apps (Android/JVM, WasmJS)
+│   ├── web/                     # Web console pages, state & WebConsoleApp() root (Android/JVM, WasmJS)
 │   └── mobile/                  # Mobile app screens, state & GroundMobileApp() root (Android/JVM, WasmJS; iOS opt-in)
 │       └── src/commonMain/.../mobile/
 │           ├── data/            # Local SQLite/Room persistence, offline queues & tile cache
@@ -37,7 +38,7 @@ for **Ground 2.0**.
 │           └── ui/              # Mobile screens, ViewModels & navigation
 ├── androidApp/                  # Runnable Android app wrapper (APK/AAB) -> depends on shared/mobile
 ├── iosApp/                      # Runnable iOS Xcode app wrapper (IPA)   -> embeds shared/mobile
-├── webApp/                      # Runnable Web Console app (Wasm/JS)     -> depends on shared/core & shared/ui
+├── webApp/                      # Runnable Web Console app (Wasm)        -> depends on shared/web
 ├── devtools/
 │   ├── formdebugger/            # Interactive Compose Web workbench for XForms, ProtoForms & XPath
 │   └── prototypeApp/            # Interactive Compose Web UX prototype embedding Ground Mobile UI
@@ -96,9 +97,12 @@ for **Ground 2.0**.
     hosts `GroundMobileApp()` from `shared/mobile`.
 -   **[`iosApp/`](iosApp/)**: Thin Xcode / SwiftUI application entry point that
     embeds `GroundMobile.framework` from `shared/mobile`.
--   **[`webApp/`](webApp/)**: Ground 2.0 Web Console application (`wasmJs` /
-    `js`) for survey administration, map management, and data exploration,
-    built directly on `shared/core` and `shared/ui`.
+-   **[`shared/web/`](shared/web/)**: Web console module
+    (`org.groundplatform.v2:web`): the console's pages, `WebAppState`, and the
+    `WebConsoleApp()` root, built on `shared/app`.
+-   **[`webApp/`](webApp/)**: Ground 2.0 Web Console application (`wasmJs`) for
+    survey administration, map management, and data exploration. A thin host
+    for `WebConsoleApp()` from `shared/web`.
 -   **[`devtools/formdebugger/`](devtools/formdebugger/)**: Single-page Compose
     Multiplatform Web application for interactive bidirectional editing of
     `FormDef` and `RecordInstance` (`XML` ↔ `textproto` / `JSON`), real-time
