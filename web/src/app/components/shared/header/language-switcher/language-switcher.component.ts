@@ -21,7 +21,7 @@ import { Component, Inject, LOCALE_ID } from '@angular/core';
 
 export interface Language {
   code: string;
-  /** Name of the language, translated into the current UI language. */
+  /** Name of the language in the language itself (not translated). */
   name: string;
 }
 
@@ -36,13 +36,13 @@ export const LANGUAGE_STORAGE_KEY = 'ground.language';
  * the list in index.html.
  */
 export const LANGUAGES: Language[] = [
-  { code: 'en', name: $localize`:@@app.labels.languages.en:English` },
-  { code: 'es', name: $localize`:@@app.labels.languages.es:Spanish` },
-  { code: 'fr', name: $localize`:@@app.labels.languages.fr:French` },
-  { code: 'lo', name: $localize`:@@app.labels.languages.lo:Lao` },
-  { code: 'pt', name: $localize`:@@app.labels.languages.pt:Portuguese` },
-  { code: 'th', name: $localize`:@@app.labels.languages.th:Thai` },
-  { code: 'vi', name: $localize`:@@app.labels.languages.vi:Vietnamese` },
+  { code: 'en', name: 'English' },
+  { code: 'es', name: 'Español' },
+  { code: 'fr', name: 'Français' },
+  { code: 'lo', name: 'ລາວ' },
+  { code: 'pt', name: 'Português' },
+  { code: 'th', name: 'ไทย' },
+  { code: 'vi', name: 'Tiếng Việt' },
 ];
 
 /**
