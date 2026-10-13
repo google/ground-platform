@@ -33,7 +33,6 @@ import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.Map
-import androidx.compose.material.icons.outlined.Smartphone
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FilledTonalButton
@@ -111,7 +110,6 @@ internal fun WebTopToolbar(
       }
     },
     actions = {
-      WebMobilePrototypeButton(state)
       if (state.canManageActiveSurvey) {
         WebHeaderButton(
           text = "Manage survey",
@@ -404,20 +402,6 @@ internal fun WebHeaderButton(
       content = content,
     )
   }
-}
-
-/**
- * [WebAppHeader] action that switches the workbench to the mobile prototype. Hidden when the web
- * app runs without the workbench ([WebAppState.onShowMobilePrototype] is `null`).
- */
-@Composable
-internal fun WebMobilePrototypeButton(state: WebAppState) {
-  val onShowMobilePrototype = state.onShowMobilePrototype ?: return
-  WebHeaderButton(
-    text = "Mobile prototype",
-    icon = Icons.Outlined.Smartphone,
-    onClick = onShowMobilePrototype,
-  )
 }
 
 /** Clickable user avatar icon that anchors and toggles the standard user profile card popup. */

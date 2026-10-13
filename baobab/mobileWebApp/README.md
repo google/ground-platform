@@ -31,9 +31,9 @@ testing and UX review without an Android or iOS build.
 
 -   **`workbench/`** (`org.groundplatform.v2:workbench`): A library with the
     workbench: `WorkbenchState`, the simulated device page
-    (`MobileWorkbenchPage`, `MobileDevicePreviewFrame`), the root
+    (`MobileWorkbenchPage`), the root
     `MobileWorkbenchApp()`, XForms presets, and the simulation and reset tools
-    (`WorkbenchViewModel`). `devtools/prototypeApp` embeds it too.
+    (`WorkbenchViewModel`).
 -   **`src/wasmJsMain/`**: The thin host: `Main.wasmJs.kt` and `index.html`
     (Mapbox GL, token lookup, and the JS bridges copied from
     [`../shared/app/`](../shared/app/)).

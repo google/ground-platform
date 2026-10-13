@@ -24,7 +24,7 @@ targets will be added when iOS work resumes.
 Only code both apps use belongs here. Web-only domain models, use cases, and
 UI live in [`../web/`](../web/) and mobile-only state in
 [`../mobile/`](../mobile/) (or the [workbench](../../mobileWebApp/workbench/)
-when only the prototype workbench uses it), so each app's build includes only
+when only the mobile workbench uses it), so each app's build includes only
 what it uses. The exceptions are the data layer (one local store shared by
 both apps, which only this module may import) and the small hooks the
 workbench sets on any session (`SampleDataRepository`, `SyncStatusSimulator`).
@@ -49,6 +49,56 @@ workbench sets on any session (`SampleDataRepository`, `SyncStatusSimulator`).
 
 `LayerDependencyGuardrailTest` and `SampleDataGuardrailTest` (in `jvmTest`)
 enforce these layer rules.
+
+## Local Data Store
+
+How the store, repositories, sample data, and feature view models fit
+together is described in
+[`docs/technical/client/local-data-store.md`](../../docs/technical/client/local-data-store.md).
+
+## PDF Reports
+
+Map features and submissions can be exported as PDF reports. The PDFs are
+generated on the device, in shared Kotlin (`client/pdf/`), so they work offline
+and look the same on web and mobile.
+
+-   **Mobile**: **Share PDF** (entity actions row, QR code dialog, and the
+    submission view) opens a sheet with the generated file (page count and
+    size). Tap the file to preview it. **Share** opens the system share sheet
+    (WhatsApp, Gmail, Drive, Bluetooth, and others) through the Web Share API.
+    Where the browser can't share files, the sheet offers **Download** instead.
+-   **Web dashboard**: **Download PDF** saves the file right away, with no
+    share sheet. It's in the overflow menu (⋮) of the map feature card and of an
+    opened submission, and in the QR code dialog. A snackbar confirms the
+    download.
+-   **Map feature report**: Workflow status chip (`marker-symbol` drawn as a
+    vector shape on the `marker-color`), details, a location figure with a north arrow,
+    scale bar, and vertex coordinates, properties (references show the related
+    record's label), and every submission with its responses.
+-   **Submission report**: Map feature or coordinates, data collector, time,
+    form version, and every response, grouped by XForms group. Reports leave
+    out upload (sync) status and submission counts.
+-   **Implementation**: `PdfDocumentWriter` is a small PDF 1.4 writer with no
+    dependencies. It uses the standard Helvetica and Courier fonts, which don't
+    need embedding. `PdfReportLayout` handles text wrapping, page breaks, and
+    `Page n of N` footers. `RecordPdfReports` builds the two reports.
+    `DataCollectionViewModel` generates them and hands them to
+    `PdfExportClient` (`client/pdf/`), the only platform-specific code:
+    `pdf-export-bridge.js` on web and the temp directory on the JVM.
+-   **Receipt activity**: Each generated report records a **Receipt created**
+    activity record, and sharing or saving it records **Receipt shared**
+    ([impact measurement](../../docs/product/impact-measurement.md), "Data Was
+    Used" events). A record holds the survey, its organization and Purpose
+    Packs, and the map feature count and area (1 feature for a map feature
+    report or a submission on one; 0 for a standalone submission). It holds no
+    geometry or personal details. Records made offline stay on the device and
+    upload with the next **Sync all** on the `Uploads` screen, which shows
+    `N activity records waiting to sync` (and **Sync all**) while any are
+    pending, even with an empty outbox. Previewing a PDF records nothing.
+-   **Limitation**: The standard fonts only cover Windows-1252 (Western European)
+    characters. Common symbols are replaced with ASCII (`≤` → `<=`, `📷` →
+    `[photo]`); other scripts render as `?`. Embedding a Unicode font (for
+    example Noto Sans) is the next step.
 
 ## Test Fixtures (`testing/`)
 

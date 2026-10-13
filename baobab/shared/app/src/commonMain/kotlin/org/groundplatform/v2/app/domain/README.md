@@ -16,7 +16,7 @@
 
 # Domain Layer
 
-**TL;DR:** The `domain` package is the innermost core of the Ground 2.0 `prototypeApp` Clean Architecture, containing pure Kotlin business models, repository contracts, and reusable use cases with zero dependencies on UI, storage, or platform frameworks.
+**TL;DR:** The `domain` package is the innermost core of the Ground 2.0 clients' Clean Architecture, containing pure Kotlin business models, repository contracts, and reusable use cases with zero dependencies on UI, storage, or platform frameworks.
 
 ## Scope & Purpose
 

@@ -44,7 +44,6 @@ import org.groundplatform.v2.core.forms.ui.LocalGroundBrandFontFamily
 import org.groundplatform.v2.web.ui.WebAppState
 import org.groundplatform.v2.web.ui.common.WebAppHeader
 import org.groundplatform.v2.web.ui.common.WebHeaderContext
-import org.groundplatform.v2.web.ui.common.WebMobilePrototypeButton
 
 /**
  * Sign-in gate for the web app, shown in place of any web page while the user is signed out.
@@ -59,7 +58,6 @@ internal fun WebSignInPage(state: WebAppState, onSignIn: () -> Unit) {
       state = state,
       onSignOut = null,
       context = { WebHeaderContext(title = "Sign in") },
-      actions = { WebMobilePrototypeButton(state) },
     )
     HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {

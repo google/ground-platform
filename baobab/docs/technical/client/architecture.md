@@ -240,32 +240,50 @@ flowchart TD
 
 ## Directory Structure & Module Placement
 
-Within Ground 2.0, clean layering is mapped across KMP modules:
+Within Ground 2.0, clean layering is mapped across KMP modules. Each module
+keeps the same layer names (`domain/`, `data/`, `client/`, `di/`, `ui/`) for the
+code it owns; code lives in the lowest module that every user of it depends
+on, so each app's build includes only what it uses.
 
 ```text
 ├── shared/
 │   ├── protos/           # Canonical Protocol Buffer schemas (ProtoForms, SurveyDef, DataRecords)
-│   ├── core/             # Pure KMP Domain: XForms/XPath evaluator, reactive FormEngine
-│   ├── ui/               # Shared CMP theme (GroundTheme), Question cards, Form wizard
-│   └── mobile/           # Shared Android + iOS Mobile Engine
-│       ├── domain/       # Use Cases, Domain Models, Repository Contracts
-│       │   ├── model/
-│       │   ├── repository/
-│       │   └── usecase/  # Non-trivial orchestration & business logic
-│       ├── data/         # Repositories, Data Sources, Database/Cache implementations
-│       │   ├── datasource/
-│       │   │   ├── local/
-│       │   │   ├── remote/
-│       │   │   └── device/   <-- DeviceLocationDataSource talks to LocationClient
-│       │   └── repository/
-│       ├── client/       # System/Hardware Client interfaces (expect/actual implementations)
-│       │   ├── location/     <-- LocationClient interface in commonMain, actuals in platformMain
-│       │   └── media/
-│       └── ui/           # Mobile Compose screens, ViewModels (MVVM)
+│   ├── core/             # Pure KMP runtime: XForms/XPath evaluator, reactive FormEngine, sampling, impact
+│   ├── ui/               # Shared CMP theme (GroundTheme), question cards, form wizard
+│   ├── map/              # Shared map rendering (Mapbox) and geometry
+│   ├── app/              # Code both clients use (org.groundplatform.v2.app)
+│   │   ├── domain/       # Use cases, domain models, repository contracts
+│   │   │   ├── model/
+│   │   │   ├── repository/
+│   │   │   └── usecase/  # Non-trivial orchestration and business logic
+│   │   ├── data/         # Repositories, data sources, the local store, sample data
+│   │   │   ├── datasource/
+│   │   │   │   ├── local/
+│   │   │   │   ├── remote/
+│   │   │   │   └── device/   ← DeviceLocationDataSource talks to LocationClient
+│   │   │   ├── repository/
+│   │   │   └── seed/
+│   │   ├── client/       # System/hardware client interfaces (expect/actual implementations)
+│   │   ├── di/           # Composition root (AppDataHolder): store, repositories, shared use cases
+│   │   └── ui/           # AppSession, shared ViewModels, UI state, and components
+│   ├── mobile/           # The mobile app: MobileAppState, screens, GroundMobileApp()
+│   └── web/              # The web console: WebAppState, pages, WebConsoleApp(),
+│                         #   web-only domain/use cases, and their wiring (di/WebUseCases)
 ├── androidApp/           # Thin Android entry point, platform initialization, native permissions
 ├── iosApp/               # Thin iOS entry point, Xcode app wrapper (links GroundMobile.xcframework)
-└── webApp/               # Compose Multiplatform Web application (WasmJS / JS)
+├── webApp/               # Wasm host of the web console (WebConsoleApp)
+├── mobileWebApp/         # Wasm host of the mobile app in the browser, for testing
+│   └── workbench/        # Simulated device, XForms editor, and sample data tools around it
+└── devtools/
+    └── formdebugger/     # XForms / ProtoForms / XPath debugger
 ```
+
+Dependencies point from the hosts inwards: `webApp` → `shared/web` → `shared/app`;
+`androidApp`, `iosApp`, and `mobileWebApp` (with `workbench`) → `shared/mobile` →
+`shared/app`; and `shared/app` → `shared/core`, `shared/ui`, `shared/map`. The
+web console and the mobile app never import each other, and only `shared/app`'s
+own `data/` and `di/` import `data.*`. Each module's `LayerDependencyGuardrailTest`
+enforces these rules.
 
 
 ## Summary Checklist for Code Reviews

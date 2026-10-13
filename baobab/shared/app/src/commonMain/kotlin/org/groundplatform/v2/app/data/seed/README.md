@@ -20,7 +20,7 @@
 
 ## Scope & Purpose
 
-To make `prototypeApp` self-contained for UX evaluation and automated testing without requiring a live backend, `data/seed/` defines realistic initial datasets and seeding logic:
+To make the mobile app and web console self-contained for UX evaluation and automated testing without requiring a live backend, `data/seed/` defines realistic initial datasets and seeding logic:
 
 - `GlobalLibrarySeedData`: Kotlin copy of the canonical global library seed files (`shared/assets/library/<vocabulary>.textproto`), loaded into the `"All users"` library; `GlobalLibrarySeedTest` (jvmTest) keeps the two identical. `PrototypeFakeLibraryData` adds sample organization library entries.
 - `SampleDataSeeder`: Populates `LocalStore` atomically at startup (when empty or when `SEED_VERSION` advances) and on explicit user reset (`SampleDataRepository.reseed()`).

@@ -84,7 +84,6 @@ import org.groundplatform.v2.web.ui.common.WebAppHeader
 import org.groundplatform.v2.web.ui.common.WebHeaderButton
 import org.groundplatform.v2.web.ui.common.WebHeaderContext
 import org.groundplatform.v2.web.ui.common.WebHeaderSupportingText
-import org.groundplatform.v2.web.ui.common.WebMobilePrototypeButton
 import org.groundplatform.v2.web.ui.dashboard.CreateSurveyDialog
 import org.groundplatform.v2.web.ui.dashboard.CreateSurveyRequest
 import org.groundplatform.v2.web.ui.dashboard.ImpactMessageSnackbar
@@ -165,7 +164,6 @@ internal fun OrganizationPage(
             }
           },
           actions = {
-            WebMobilePrototypeButton(state)
             // Nobody creates surveys in "All users": isMemberOf is false for it.
             if (organization != null && uiState.isMemberOf(organization)) {
               WebHeaderButton(

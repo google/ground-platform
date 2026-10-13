@@ -424,10 +424,10 @@ deployment once hosting, terms, and licenses are settled.
     attribution score are implemented as pure Kotlin Multiplatform functions in
     `shared/core` (`ImpactAggregator.run` in
     `org.groundplatform.v2.core.impact`), used by both the backend job (JVM)
-    and the prototype, so dashboards match across environments. A run is
+    and the web console, so dashboards match across environments. A run is
     deterministic (same input, same rows in the same order) and runs in
     O(n log n) in the number of features, so clients can recompute on every
-    change. The prototype (`devtools/prototypeApp`, `ComputeImpactUseCase`)
+    change. The web console (`shared/web`, `ComputeImpactUseCase`)
     recomputes shortly after its data changes and backs the survey,
     organization, and platform-wide Impact views and PDF summaries with it.
 *   Golden fixtures: the prototype's seeded surveys (Kenya coffee, EUDR

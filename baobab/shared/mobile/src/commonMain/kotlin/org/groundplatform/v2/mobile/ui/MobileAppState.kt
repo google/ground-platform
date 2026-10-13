@@ -42,6 +42,7 @@ import org.groundplatform.v2.app.domain.model.singularTypeLabelOf
 import org.groundplatform.v2.app.domain.model.toClusterFeatures
 import org.groundplatform.v2.app.ui.AppSession
 import org.groundplatform.v2.app.ui.viewmodel.SettingsViewModel
+import org.groundplatform.v2.mobile.ui.state.SyncStatusSimulator
 
 /**
  * State holder of the Ground mobile app: an [AppSession] plus the mobile app shell (the active
@@ -70,7 +71,35 @@ class MobileAppState(
   var activeDrawerSubView by mutableStateOf(MainDrawerSubView.NONE)
     private set
 
+  /**
+   * Called with the survey's ID whenever this app makes a survey active, so the workbench can load
+   * the survey's primary form into its XForms editor.
+   */
+  var surveyActivationListener: ((surveyId: String) -> Unit)? = null
+
+  /**
+   * The workbench's upload simulator behind the sync status badges of the record views, or `null`
+   * when the app runs outside the workbench (badges are then inert).
+   */
+  var syncStatusSimulator: SyncStatusSimulator? = null
+
+  /** Whether online Mapbox Places API search is currently available (`isOnline`). */
+  val isPlacesSearchAvailable: Boolean
+    get() = mapState.isPlacesSearchAvailable
+
   // --- Reactions to shared session events ---
+
+  override fun onSurveyActivated(surveyId: String) {
+    surveyActivationListener?.invoke(surveyId)
+  }
+
+  override fun cycleEntitySyncStatus(entityId: String) {
+    syncStatusSimulator?.cycleEntitySyncStatus(entityId)
+  }
+
+  override fun cycleSubmissionSyncStatus(submissionId: String) {
+    syncStatusSimulator?.cycleSubmissionSyncStatus(submissionId)
+  }
 
   override fun onScreenRequested(screen: PrototypeScreen) {
     currentScreen = screen

@@ -16,11 +16,11 @@
 
 # Dependency Injection & Wiring Layer
 
-**TL;DR:** The `di` package acts as the composition root for `prototypeApp`, instantiating data sources, concrete repositories, and domain use cases inside `AppDataHolder` and exposing domain-typed contracts to the UI layer.
+**TL;DR:** The `di` package acts as the composition root of both clients, instantiating data sources, concrete repositories, and domain use cases inside `AppDataHolder` and exposing domain-typed contracts to the UI layer.
 
 ## Scope & Purpose
 
-Rather than using a reflection-heavy DI framework, `prototypeApp` uses manual constructor injection centralized in `di/`:
+Rather than using a reflection-heavy DI framework, the clients use manual constructor injection centralized in `di/`:
 
 - `AppDataHolder`: Owns the shared `LocalStore` instance, constructs all `*RepositoryImpl` and data source instances, wires domain use cases (`CompleteFormSubmissionUseCase`, `SyncMutationsUseCase`, `ResolveFormDefForLaunchUseCase`, `EstimateDeviceStorageUseCase`, `SearchPlacesUseCase`, etc.), runs initial `SampleDataSeeder` population, and exposes a combined `StateFlow<AppData>` snapshot alongside domain repository interfaces.
 - `AppData`: Immutable aggregate of core reactive domain streams observed across the application.
@@ -39,5 +39,5 @@ Repositories (data/repository/*) + Use Cases (domain/usecase/*) + Clients (clien
 
 ## Dependency Rules
 
-- **Inbound access**: Instantiated by the session states (`AppSession`, or shared by the mobile and web sessions of the combined `PrototypeAppState`) and test harnesses.
+- **Inbound access**: Instantiated by the session states (`MobileAppState` and `WebAppState`, through `AppSession`) and test harnesses. Each client wires the use cases only it uses from the repositories `AppDataHolder` exposes (`WebUseCases` in `shared/web`).
 - **Outbound dependencies**: Enforced by `LayerDependencyGuardrailTest`, `di/` is the **only** package outside `data/` permitted to import `data.*` (`LocalStore`, `*RepositoryImpl`, `SampleDataSeeder`). It exposes those dependencies via `domain/repository/` and `domain/usecase/` types so that `ui/viewmodel/` never imports `data.*`. `di/` never imports `ui/`.

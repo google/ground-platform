@@ -99,7 +99,7 @@ data class AppData(
 )
 
 /**
- * Dependency container and reactive data holder for `devtools/prototypeApp` per
+ * Dependency container and reactive data holder of the mobile app and the web console per
  * `docs/technical/client/architecture.md`:
  * - Owns the [LocalStore] (single source of truth), Domain Repository instances, the Domain Use
  *   Cases both the mobile app and the web console use, and the shared [scope]. Use cases only one

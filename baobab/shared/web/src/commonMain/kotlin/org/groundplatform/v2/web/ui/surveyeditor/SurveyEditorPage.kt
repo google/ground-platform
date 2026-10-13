@@ -160,7 +160,6 @@ import org.groundplatform.v2.web.ui.common.ValidationErrorBanner
 import org.groundplatform.v2.web.ui.common.WebAppHeader
 import org.groundplatform.v2.web.ui.common.WebHeaderContext
 import org.groundplatform.v2.web.ui.common.WebHeaderSupportingText
-import org.groundplatform.v2.web.ui.common.WebMobilePrototypeButton
 import org.groundplatform.v2.web.ui.dashboard.SidePanelSeparator
 import org.groundplatform.v2.web.ui.dashboard.SidePanelSeparatorWidth
 import org.groundplatform.v2.web.ui.formeditor.DragReorderState
@@ -195,7 +194,6 @@ fun SurveyEditorPage(
         navigationIcon = navigationIcon,
         context = context,
         actions = {
-          WebMobilePrototypeButton(state)
           headerActions()
         },
       )

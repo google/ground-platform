@@ -20,7 +20,7 @@
 
 ## Scope & Purpose
 
-Each feature area in `prototypeApp` is backed by a focused ViewModel that implements a corresponding `*Actions` interface:
+Each shared feature area is backed by a focused ViewModel that implements a corresponding `*Actions` interface:
 
 - `OnboardingViewModel` (`OnboardingActions`): Authentication, Terms of Service acceptance, and initial survey selection.
 - `SettingsViewModel` (`SettingsActions`): App preferences, offline basemap management, and storage diagnostics via `EstimateDeviceStorageUseCase`.

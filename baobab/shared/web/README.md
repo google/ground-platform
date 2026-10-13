@@ -22,12 +22,15 @@ and its root composable (`WebConsoleApp()`). It's built on the domain, data, and
 shared UI in [`../app/`](../app/), and hosted by [`../../webApp/`](../../webApp/).
 
 The module targets WasmJS, plus JVM for the headless Compose UI tests and
-Android so the prototype host can still build its Android target.
+Android.
+
+The pages and their behavior are described in
+[`docs/technical/client/web-console.md`](../../docs/technical/client/web-console.md).
 
 ## Package Structure (`org.groundplatform.v2.web`)
 
 -   **`WebConsoleApp.kt`**: `WebConsoleApp()` (theme, URL hash routing) and
-    `WebConsolePages()` (the page switch, also used by the prototype host).
+    `WebConsolePages()` (the page switch).
 -   **`domain/`**: Domain models and use cases only the web console uses
     (organizations directory, impact summaries, survey outcome prompts, sample
     plot generation, map layer import, survey editor mutations and wizard

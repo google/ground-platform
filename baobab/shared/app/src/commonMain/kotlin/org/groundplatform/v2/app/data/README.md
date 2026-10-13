@@ -16,7 +16,7 @@
 
 # Data Layer
 
-**TL;DR:** The `data` package implements the domain repository contracts, coordinates local and remote data sources, and manages initial sample data seeding for the Ground 2.0 `prototypeApp`.
+**TL;DR:** The `data` package implements the domain repository contracts, coordinates local and remote data sources, and manages initial sample data seeding for the Ground 2.0 mobile app and web console.
 
 ## Scope & Purpose
 

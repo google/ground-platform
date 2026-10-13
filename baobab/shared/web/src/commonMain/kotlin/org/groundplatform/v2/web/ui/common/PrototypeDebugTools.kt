@@ -146,7 +146,7 @@ fun PrototypeDebugToolsDropdown(
           color = MaterialTheme.colorScheme.onSurface,
         )
         Text(
-          text = "devtools/prototypeApp",
+          text = "webApp",
           style = MaterialTheme.typography.labelSmall,
           color = MaterialTheme.colorScheme.onSurfaceVariant,
         )

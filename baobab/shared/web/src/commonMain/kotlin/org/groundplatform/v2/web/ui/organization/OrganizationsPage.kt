@@ -72,7 +72,6 @@ import org.groundplatform.v2.web.ui.common.WebAppHeader
 import org.groundplatform.v2.web.ui.common.WebHeaderButton
 import org.groundplatform.v2.web.ui.common.WebHeaderContext
 import org.groundplatform.v2.web.ui.common.WebHeaderSupportingText
-import org.groundplatform.v2.web.ui.common.WebMobilePrototypeButton
 import org.groundplatform.v2.web.ui.state.OrganizationUiState
 import org.groundplatform.v2.web.ui.surveyeditor.ProfileAvatar
 import org.groundplatform.v2.web.ui.viewmodel.OrganizationActions
@@ -111,7 +110,6 @@ internal fun OrganizationsPage(
           }
         },
         actions = {
-          WebMobilePrototypeButton(state)
           WebHeaderButton(
             text = "Create organization",
             icon = Icons.Outlined.Add,

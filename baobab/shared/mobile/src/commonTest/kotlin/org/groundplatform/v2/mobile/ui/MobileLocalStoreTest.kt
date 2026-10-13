@@ -1,0 +1,86 @@
+/*
+ * Copyright 2026 The Ground Authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.groundplatform.v2.mobile.ui
+
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
+import org.groundplatform.v2.app.domain.model.MeasurementUnitSystem
+import org.groundplatform.v2.app.domain.model.PrototypeScreen
+import org.groundplatform.v2.app.domain.model.UserSettings
+
+/**
+ * End-to-end checks that the mobile app reads from and writes through the local data store, which
+ * is the single source of truth for app data.
+ */
+class MobileLocalStoreTest {
+  /** Appends [count] map features (copies of the first, without submissions) through the store. */
+  private fun MobileAppState.addEntities(count: Int) {
+    val existing = entities
+    entities =
+      existing +
+        List(count) { i ->
+          existing.first().copy(id = "entity-extra-$i", submissions = emptyList())
+        }
+  }
+
+  @Test
+  fun submittedForm_survivesSwitchingSurveysAndBack() {
+    val state = MobileAppState(initialScreen = PrototypeScreen.MAIN_SURVEY)
+    assertEquals("survey-kenya-coffee", state.activeSurveyId)
+    val before = state.entities.first { it.id == "entity-nyr-112" }.submissions.size
+
+    state.launchFormForEntity(entityId = "entity-nyr-112", formId = "form-household-interview")
+    state.completeActiveFormSubmission()
+    assertEquals(before + 1, state.entities.first { it.id == "entity-nyr-112" }.submissions.size)
+
+    state.openSurvey("survey-sample-plots-forest")
+    assertEquals("survey-sample-plots-forest", state.activeSurveyId)
+    assertTrue(state.entities.none { it.id == "entity-nyr-112" })
+
+    state.openSurvey("survey-kenya-coffee")
+    assertEquals(before + 1, state.entities.first { it.id == "entity-nyr-112" }.submissions.size)
+  }
+
+  @Test
+  fun dataHolderAppData_mirrorsStoreData() {
+    val state = MobileAppState(initialScreen = PrototypeScreen.MAIN_SURVEY)
+    state.addEntities(count = 25)
+    val appData = state.dataHolder.appData.value
+    assertEquals(state.entities, appData.content.entities)
+    assertEquals(state.mutations, appData.mutations)
+    assertEquals(state.activeSurveyId, appData.activeSurveyId)
+  }
+
+  @Test
+  fun settings_areWrittenToTheStore() {
+    val state = MobileAppState(initialScreen = PrototypeScreen.MAIN_SURVEY)
+    state.updateUnitSystem(MeasurementUnitSystem.IMPERIAL)
+    state.updateSelectedLanguage("fr")
+    state.updateUploadMediaOverUnmeteredConnectionOnly(true)
+    assertEquals(
+      UserSettings("fr", MeasurementUnitSystem.IMPERIAL, shouldUploadPhotosOnWifiOnly = true),
+      state.dataHolder.appData.value.userSettings,
+    )
+  }
+
+  @Test
+  fun appStates_doNotShareData() {
+    val first = MobileAppState(initialScreen = PrototypeScreen.MAIN_SURVEY)
+    val second = MobileAppState(initialScreen = PrototypeScreen.MAIN_SURVEY)
+    first.addEntities(count = 10)
+    assertEquals(first.entities.size - 10, second.entities.size)
+  }
+}

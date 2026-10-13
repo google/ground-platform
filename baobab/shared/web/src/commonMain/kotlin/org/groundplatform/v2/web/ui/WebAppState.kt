@@ -172,12 +172,6 @@ class WebAppState(
   /** Listener invoked whenever a page is selected (e.g. to update the URL hash). */
   var onPageChanged: ((WebPage) -> Unit)? = null
 
-  /**
-   * Opens the prototype's mobile device preview from the web app's header, or `null` (hiding the
-   * header's `Mobile prototype` button) when the web app runs on its own.
-   */
-  var onShowMobilePrototype: (() -> Unit)? = null
-
   /** Switches the active page and notifies [onPageChanged]. */
   fun selectPage(page: WebPage) {
     activePage = page

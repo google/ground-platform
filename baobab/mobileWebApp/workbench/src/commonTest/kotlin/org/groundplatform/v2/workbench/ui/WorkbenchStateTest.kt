@@ -21,9 +21,13 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 import org.groundplatform.v2.app.domain.model.DeviceFormFactor
 import org.groundplatform.v2.app.domain.model.DeviceOrientation
+import org.groundplatform.v2.app.domain.model.ListFilterTab
 import org.groundplatform.v2.app.domain.model.PrototypeScreen
 import org.groundplatform.v2.app.ui.map.SurveyMap
 import org.groundplatform.v2.app.ui.map.SurveyMapContent
+import org.groundplatform.v2.core.forms.media.MediaCaptureKind
+import org.groundplatform.v2.core.forms.ui.FormWizardStep
+import org.groundplatform.v2.core.forms.ui.WorkbenchExampleForm
 import org.groundplatform.v2.mobile.ui.MobileAppState
 
 class WorkbenchStateTest {
@@ -301,5 +305,72 @@ class WorkbenchStateTest {
     // Advance to the next step (select1 land_use) -> isCurrentFormStepGeoPoint becomes false
     assertTrue(ctrl.nextStep())
     assertFalse(state.isCurrentFormStepGeoPoint)
+  }
+
+  @Test
+  fun allFieldTypesForm_launchesWithPhotoVideoAndAudioQuestions() {
+    val workbench = WorkbenchState(MobileAppState())
+    val state = workbench.mobile
+    workbench.selectWorkbenchExampleForm(
+      WorkbenchExampleForm.ALL_FIELD_TYPES,
+      launchImmediately = true,
+    )
+    val kinds =
+      state.activeFormWizardController!!
+        .steps
+        .filterIsInstance<FormWizardStep.QuestionStep>()
+        .mapNotNull { it.control.mediaCapture?.kind }
+    assertTrue(
+      kinds.containsAll(
+        listOf(MediaCaptureKind.PHOTO, MediaCaptureKind.VIDEO, MediaCaptureKind.AUDIO)
+      ),
+      kinds.toString(),
+    )
+  }
+
+  @Test
+  fun updateActiveSurveyDetails_updatesActiveSurveyTitleAndDescription() {
+    val workbench = WorkbenchState(MobileAppState())
+    workbench.updateActiveSurveyDetails(
+      title = "Updated Survey Title",
+      description = "Updated survey description from the survey editor.",
+    )
+
+    assertEquals("Updated Survey Title", workbench.mobile.activeSurvey.title)
+    assertEquals(
+      "Updated survey description from the survey editor.",
+      workbench.mobile.activeSurvey.description,
+    )
+  }
+
+  @Test
+  fun reset_reseedsSampleData() {
+    val workbench = WorkbenchState(MobileAppState(initialScreen = PrototypeScreen.MAIN_SURVEY))
+    val state = workbench.mobile
+    val initialEntities = state.entities
+    state.entities =
+      initialEntities +
+        List(10) { i ->
+          initialEntities.first().copy(id = "entity-extra-$i", submissions = emptyList())
+        }
+    state.syncAllOutboxMutations()
+    assertEquals(initialEntities.size + 10, state.entities.size)
+
+    workbench.resetPrototypeFlow()
+    assertEquals("survey-kenya-coffee", state.activeSurveyId)
+    assertEquals(initialEntities, state.entities)
+    assertTrue(state.mutations.any { it.isOutbox })
+  }
+
+  @Test
+  fun airplaneMode_takesTheMobileAppOffline() {
+    val workbench = WorkbenchState(MobileAppState(initialScreen = PrototypeScreen.MAIN_SURVEY))
+    val mobile = workbench.mobile
+
+    workbench.updateAirplaneMode(true)
+    assertFalse(mobile.isOnline)
+    assertFalse(mobile.isPlacesSearchAvailable)
+    assertEquals(ListFilterTab.ALL, mobile.listFilterTab)
+    assertTrue(mobile.filteredListPlaces.isEmpty())
   }
 }

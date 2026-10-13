@@ -20,10 +20,9 @@ import androidx.compose.runtime.setValue
 import kotlinx.coroutines.launch
 import org.groundplatform.v2.app.domain.model.DeviceFormFactor
 import org.groundplatform.v2.app.domain.model.DeviceOrientation
-import org.groundplatform.v2.app.ui.AppSession
-import org.groundplatform.v2.app.ui.state.SyncStatusSimulator
 import org.groundplatform.v2.core.forms.ui.WorkbenchExampleForm
 import org.groundplatform.v2.mobile.ui.MobileAppState
+import org.groundplatform.v2.mobile.ui.state.SyncStatusSimulator
 import org.groundplatform.v2.workbench.ui.state.WorkbenchEvent
 import org.groundplatform.v2.workbench.ui.state.WorkbenchUiState
 import org.groundplatform.v2.workbench.ui.viewmodel.WorkbenchActions
@@ -34,23 +33,20 @@ import org.groundplatform.v2.workbench.ui.viewmodel.WorkbenchViewModel
  * (form factor, orientation, airplane mode), the live XForms editor and example survey switcher,
  * and the simulation and reset tools ([WorkbenchViewModel]).
  *
- * The workbench drives the [mobile] app, and applies its form definition, upload simulator, and
- * resets to every one of [linkedSessions] too (e.g. the web app sharing the prototype's data).
+ * The workbench drives the [mobile] app: it applies its form definition, upload simulator, and
+ * resets to it.
  */
 class WorkbenchState
 private constructor(
   val mobile: MobileAppState,
-  linkedSessions: List<AppSession>,
   /** ViewModel of the workbench chrome. Its views observe [WorkbenchViewModel.uiState] directly. */
   val viewModel: WorkbenchViewModel,
 ) : WorkbenchActions by viewModel {
 
   constructor(
-    mobile: MobileAppState,
-    linkedSessions: List<AppSession> = emptyList(),
+    mobile: MobileAppState
   ) : this(
     mobile = mobile,
-    linkedSessions = linkedSessions,
     viewModel =
       WorkbenchViewModel(
         surveyRepository = mobile.dataHolder.surveyRepository,
@@ -59,9 +55,6 @@ private constructor(
         connectivityRepository = mobile.dataHolder.connectivityRepository,
       ),
   )
-
-  /** Every session the workbench drives: [mobile] first, then the linked sessions. */
-  private val sessions: List<AppSession> = listOf(mobile) + linkedSessions
 
   private var state by mutableStateOf(viewModel.uiState.value)
 
@@ -82,27 +75,23 @@ private constructor(
     val scope = mobile.dataHolder.scope
     scope.launch { viewModel.uiState.collect { state = it } }
     scope.launch { viewModel.events.collect(::onWorkbenchEvent) }
-    sessions.forEach { session ->
-      session.surveyActivationListener = viewModel::onSurveyActivated
-      session.syncStatusSimulator = syncStatusSimulator
-      session.dataCollection.updateCustomFormDef(
-        XFormsParseCache.formDef(WorkbenchExampleForm.ALL_FIELD_TYPES),
-        isPreset = true,
-      )
-    }
+    mobile.surveyActivationListener = viewModel::onSurveyActivated
+    mobile.syncStatusSimulator = syncStatusSimulator
+    mobile.dataCollection.updateCustomFormDef(
+      XFormsParseCache.formDef(WorkbenchExampleForm.ALL_FIELD_TYPES),
+      isPreset = true,
+    )
   }
 
   /** Applies a workbench outcome to the driven sessions. */
   private fun onWorkbenchEvent(event: WorkbenchEvent) {
     when (event) {
       is WorkbenchEvent.CustomFormDefChanged ->
-        sessions.forEach {
-          it.dataCollection.updateCustomFormDef(
-            formDef = event.formDef,
-            isPreset = event.isPreset,
-            relaunchOpenForm = event.relaunchOpenForm,
-          )
-        }
+        mobile.dataCollection.updateCustomFormDef(
+          formDef = event.formDef,
+          isPreset = event.isPreset,
+          relaunchOpenForm = event.relaunchOpenForm,
+        )
       is WorkbenchEvent.ExampleSurveySelected -> {
         mobile.openSurvey(event.surveyId)
         if (event.launchImmediately) {
@@ -110,7 +99,7 @@ private constructor(
         }
       }
       is WorkbenchEvent.DefaultSurveyRestored -> mobile.openSurvey(event.surveyId)
-      WorkbenchEvent.PrototypeReset -> sessions.forEach { it.reset() }
+      WorkbenchEvent.PrototypeReset -> mobile.reset()
       is WorkbenchEvent.ConnectivityChanged -> mobile.onConnectivityChanged(event.isOnline)
       is WorkbenchEvent.Notice -> mobile.showNotice(event.message)
     }

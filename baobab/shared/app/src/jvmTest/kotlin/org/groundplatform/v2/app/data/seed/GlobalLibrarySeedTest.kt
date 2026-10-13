@@ -64,7 +64,7 @@ class GlobalLibrarySeedTest {
 
   @Test
   fun seedFiles_matchTheKotlinCopy() {
-    assertTrue(seedDir.isDirectory, "Run from the prototypeApp project directory")
+    assertTrue(seedDir.isDirectory, "Run from the shared/app project directory")
     for (vocabulary in GlobalLibrarySeedData.VOCABULARIES) {
       val expected =
         LibraryProtoMapper.toBundle(

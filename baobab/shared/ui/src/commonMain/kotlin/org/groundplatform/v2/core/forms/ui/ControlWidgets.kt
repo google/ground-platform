@@ -117,8 +117,8 @@ import org.groundplatform.v2.core.forms.model.ValidationStatus
 
 /**
  * State passed to an optional host-provided map viewport ([LocalGeoPointMapViewport]) inside
- * [GeoPointInputWidget] so host apps (such as `devtools/prototypeApp`) can render a live Mapbox GL
- * JS basemap synchronized with the question's pan/zoom and GPS state.
+ * [GeoPointInputWidget] so host apps (such as the mobile app and the web console) can render a live
+ * Mapbox GL JS basemap synchronized with the question's pan/zoom and GPS state.
  */
 data class GeoPointMapViewportState(
   val path: String,
@@ -139,10 +139,10 @@ data class GeoPointMapViewportState(
 )
 
 /**
- * Optional composition local allowing a host application (such as `devtools/prototypeApp`) to
- * render a live platform basemap inside [GeoPointInputWidget]'s map viewport. When `null`,
- * [GeoPointInputWidget] renders its built-in interactive satellite/topographic Compose `Canvas`
- * basemap.
+ * Optional composition local allowing a host application (such as the mobile app and the web
+ * console) to render a live platform basemap inside [GeoPointInputWidget]'s map viewport. When
+ * `null`, [GeoPointInputWidget] renders its built-in interactive satellite/topographic Compose
+ * `Canvas` basemap.
  */
 val LocalGeoPointMapViewport:
   ProvidableCompositionLocal<(@Composable (GeoPointMapViewportState) -> Unit)?> =
@@ -1316,9 +1316,10 @@ private fun GeoPointInputWidget(
  * Interactive map viewport rendered inside [GeoPointInputWidget] for `TYPE_GEOPOINT` questions.
  *
  * Delegates basemap rendering to [LocalGeoPointMapViewport] when provided by the host (e.g., live
- * Mapbox GL JS basemap in `devtools/prototypeApp`), or renders a built-in interactive satellite and
- * topographic Compose `Canvas` basemap with drag-to-pan gestures, GPS blue dot + accuracy halo,
- * center target crosshair reticle, captured pin marker, zoom controls, and Recenter pill.
+ * Mapbox GL JS basemap in the mobile app and the web console), or renders a built-in interactive
+ * satellite and topographic Compose `Canvas` basemap with drag-to-pan gestures, GPS blue dot +
+ * accuracy halo, center target crosshair reticle, captured pin marker, zoom controls, and Recenter
+ * pill.
  */
 @Composable
 private fun GeoPointInteractiveMapBox(viewportState: GeoPointMapViewportState) {

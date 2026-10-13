@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 // The prototype workbench around the mobile app: simulated device chrome, XForms presets, and
-// simulation and reset tools. Used by the Wasm mobile build and by devtools/prototypeApp.
+// simulation and reset tools. Used by the Wasm mobile build.
 plugins {
   kotlin("multiplatform")
   id("org.jetbrains.compose")

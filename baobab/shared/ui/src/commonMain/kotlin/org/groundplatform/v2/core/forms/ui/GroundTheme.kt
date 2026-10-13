@@ -362,8 +362,8 @@ fun GroundTonalBadge(
 
 /**
  * Material 3 Modal Bottom Sheet rendered strictly within its parent container bounds (rather than a
- * root Window Popup), ensuring sheets stay inside `MobileDevicePreviewFrame` when running in the
- * Web UX Workbench.
+ * root Window Popup), ensuring sheets stay inside `DevicePreviewFrame` when running in the Web UX
+ * Workbench.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -405,7 +405,7 @@ fun GroundModalBottomSheetOverlay(
 
 /**
  * Material 3 AlertDialog rendered strictly within its parent container bounds (rather than a root
- * Window Dialog), ensuring dialogs stay centered inside `MobileDevicePreviewFrame`.
+ * Window Dialog), ensuring dialogs stay centered inside `DevicePreviewFrame`.
  */
 @Composable
 fun GroundAlertDialogOverlay(

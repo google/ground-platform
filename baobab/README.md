@@ -18,7 +18,7 @@
 
 This directory contains the Kotlin Multiplatform (KMP) and Compose Multiplatform
 (CMP) shared modules, Protocol Buffer data models, platform applications
-(`androidApp`, `iosApp`, `webApp`), developer tools, and technical documentation
+(`androidApp`, `iosApp`, `webApp`, `mobileWebApp`), developer tools, and technical documentation
 for **Ground 2.0**.
 
 ## Directory Structure
@@ -39,10 +39,10 @@ for **Ground 2.0**.
 ├── androidApp/                  # Runnable Android app wrapper (APK/AAB) -> depends on shared/mobile
 ├── iosApp/                      # Runnable iOS Xcode app wrapper (IPA)   -> embeds shared/mobile
 ├── webApp/                      # Runnable Web Console app (Wasm)        -> depends on shared/web
-├── mobileWebApp/                # Runnable mobile app for the browser (Wasm) + device workbench -> depends on shared/mobile
+├── mobileWebApp/                # Runnable mobile app for the browser (Wasm) -> depends on shared/mobile
+│   └── workbench/               # Simulated device, XForms editor & sample data tools around the mobile app
 ├── devtools/
-│   ├── formdebugger/            # Interactive Compose Web workbench for XForms, ProtoForms & XPath
-│   └── prototypeApp/            # Interactive Compose Web UX prototype embedding Ground Mobile UI
+│   └── formdebugger/            # Interactive Compose Web workbench for XForms, ProtoForms & XPath
 └── docs/                        # System architecture & Protocol Buffer data model specifications
 ```
 
@@ -107,17 +107,14 @@ for **Ground 2.0**.
 -   **[`mobileWebApp/`](mobileWebApp/)**: The mobile app (`GroundMobileApp()`)
     running in the browser with Kotlin/Wasm, inside a simulated device
     workbench by default or full-window with `?chrome=0`, for testing without
-    an Android or iOS build. Its `workbench/` library is shared with
-    `devtools/prototypeApp`.
+    an Android or iOS build. The workbench lives in its `workbench/` library.
+    The web console and the mobile app are independent Wasm apps, even when
+    they're hosted on the same site.
 -   **[`devtools/formdebugger/`](devtools/formdebugger/)**: Single-page Compose
     Multiplatform Web application for interactive bidirectional editing of
     `FormDef` and `RecordInstance` (`XML` ↔ `textproto` / `JSON`), real-time
     XPath expression evaluation, and an embedded mobile form runner (`▶ RUN`)
     powered by `shared/ui`.
--   **[`devtools/prototypeApp/`](devtools/prototypeApp/)**: Interactive Compose
-    Multiplatform Web application that embeds a live preview of the Ground 2.0
-    Mobile UI (`Splash / Loading`, `Sign In`, `Terms of Service`, and `Download
-    survey` screens) for UX co-design.
 -   **[`docs/`](docs/)**: Comprehensive architectural design and data model
     documentation.
 

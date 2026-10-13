@@ -71,7 +71,6 @@ import org.groundplatform.v2.app.ui.state.OnboardingEvent
 import org.groundplatform.v2.app.ui.state.SettingsEvent
 import org.groundplatform.v2.app.ui.state.SurveyMapEvent
 import org.groundplatform.v2.app.ui.state.SurveyMapUiState
-import org.groundplatform.v2.app.ui.state.SyncStatusSimulator
 import org.groundplatform.v2.app.ui.viewmodel.DashboardViewModel
 import org.groundplatform.v2.app.ui.viewmodel.DataCollectionViewModel
 import org.groundplatform.v2.app.ui.viewmodel.OnboardingViewModel
@@ -84,8 +83,7 @@ import org.groundplatform.v2.map.LatLng
 import org.groundplatform.v2.map.LngLatBounds
 
 /**
- * Shared state holder of one Ground client session (the mobile app or the web app) in the UI
- * prototype (`devtools/prototypeApp`).
+ * Shared state holder of one Ground client session (the mobile app or the web app).
  *
  * Wires the shared [AppDataHolder] (owning `LocalStore`, domain repositories, and use cases) to the
  * feature ViewModels both clients use (`OnboardingViewModel`, `SettingsViewModel`,
@@ -96,9 +94,8 @@ import org.groundplatform.v2.map.LngLatBounds
  * client's subclass, which reads the mirrored ViewModel state through the `protected` properties
  * below.
  *
- * Several sessions may share one [AppDataHolder] (the combined prototype runs a mobile and a web
- * session side by side), in which case data changes made in one are live in the other, while UI
- * state such as selection and navigation stays per session.
+ * Several sessions may share one [AppDataHolder], in which case data changes made in one are live
+ * in the other, while UI state such as selection and navigation stays per session.
  */
 open class AppSession(
   val dataHolder: AppDataHolder = AppDataHolder(),
@@ -215,18 +212,6 @@ open class AppSession(
   /** Latest [DataCollectionUiState], for views that build data collection from the app shell. */
   val dataCollectionUiState: DataCollectionUiState
     get() = dataCollectionState
-
-  /**
-   * Called with the survey's ID whenever this session makes a survey active, so the prototype
-   * workbench can load the survey's primary form into its XForms editor.
-   */
-  var surveyActivationListener: ((surveyId: String) -> Unit)? = null
-
-  /**
-   * Prototype-only upload simulator behind the sync status badges of the record views, or `null`
-   * when the session runs outside the prototype workbench (badges are then inert).
-   */
-  var syncStatusSimulator: SyncStatusSimulator? = null
 
   init {
     dataHolder.scope.launch { dataHolder.appData.collect { data = it } }
@@ -381,6 +366,9 @@ open class AppSession(
 
   /** A data collection form was opened. */
   protected open fun onFormOpened() {}
+
+  /** This session made the survey with [surveyId] active. */
+  protected open fun onSurveyActivated(surveyId: String) {}
 
   /** Writes the active survey's [entities] to the local data store. */
   private fun storeEntities(entities: List<GeospatialEntityItem>) {
@@ -1107,10 +1095,6 @@ open class AppSession(
   val isOnline: Boolean
     get() = isAlwaysOnline || mapState.isOnline
 
-  /** Whether online Mapbox Places API search is currently available (`isOnline`). */
-  val isPlacesSearchAvailable: Boolean
-    get() = isAlwaysOnline || mapState.isPlacesSearchAvailable
-
   /** Live place results returned by [PlacesGeocoder] (Mapbox Geocoding). */
   var mapboxPlacesApiResults by mutableStateOf<List<SurveyPlaceItem>>(emptyList())
     private set
@@ -1247,11 +1231,11 @@ open class AppSession(
 
   /**
    * Clears every selection scoped to the survey active before [surveyId] (map feature, submission,
-   * open form) and notifies [surveyActivationListener].
+   * open form) and notifies [onSurveyActivated].
    */
   private fun clearSelectionsForActivatedSurvey(surveyId: String) {
     dataCollection.onSurveyActivated()
-    surveyActivationListener?.invoke(surveyId)
+    onSurveyActivated(surveyId)
   }
 
   /**
@@ -1493,19 +1477,15 @@ open class AppSession(
 
   /**
    * Cycles the [SyncStatus] of a specific [GeospatialEntityItem] ([entityId]) (`Uploading` ->
-   * `Synced` -> `Failed` -> `Uploading`) through the [syncStatusSimulator], if any.
+   * `Synced` -> `Failed` -> `Uploading`) when the client simulates uploads (no-op by default).
    */
-  fun cycleEntitySyncStatus(entityId: String) {
-    syncStatusSimulator?.cycleEntitySyncStatus(entityId)
-  }
+  open fun cycleEntitySyncStatus(entityId: String) {}
 
   /**
    * Cycles the [SyncStatus] of a specific [SubmissionPreviewItem] ([submissionId]) (`Uploading` ->
-   * `Synced` -> `Failed` -> `Uploading`) through the [syncStatusSimulator], if any.
+   * `Synced` -> `Failed` -> `Uploading`) when the client simulates uploads (no-op by default).
    */
-  fun cycleSubmissionSyncStatus(submissionId: String) {
-    syncStatusSimulator?.cycleSubmissionSyncStatus(submissionId)
-  }
+  open fun cycleSubmissionSyncStatus(submissionId: String) {}
 
   /** Closes the active `MobileFormRunner` and returns to the survey map/list screen. */
   fun closeActiveFormRunner() = dataCollection.closeActiveFormRunner()

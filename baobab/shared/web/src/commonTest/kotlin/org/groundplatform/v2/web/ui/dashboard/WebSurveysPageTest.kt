@@ -129,4 +129,18 @@ class WebSurveysPageTest {
     assertEquals("Untitled survey", testState.surveys.first { it.id == personal }.title)
     assertNull(testState.surveys.first { it.id == personal }.organizationId)
   }
+
+  @Test
+  fun openSurveyOnWeb_switchesActiveSurveyWithoutDownloadingIt() {
+    val testState = WebAppState()
+    val target = testState.surveys.first { it.id != testState.activeSurveyId }
+    val wasDownloaded = target.isDownloaded
+    testState.openSurveyOnWeb(target.id)
+    assertEquals(target.id, testState.activeSurveyId)
+    assertEquals(wasDownloaded, testState.surveys.first { it.id == target.id }.isDownloaded)
+    assertTrue(testState.hasOpenableActiveSurvey)
+    // Unknown IDs are ignored.
+    testState.openSurveyOnWeb("survey-missing")
+    assertEquals(target.id, testState.activeSurveyId)
+  }
 }

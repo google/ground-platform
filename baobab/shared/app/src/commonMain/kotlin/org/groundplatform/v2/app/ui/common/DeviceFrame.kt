@@ -19,7 +19,6 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
@@ -190,7 +189,6 @@ fun DeviceFrame(
  * [DeviceFrame] with a side card showing [deviceTitle] and the current viewport, plus preview
  * controls: a Mobile / Tablet switcher ([onSelectFormFactor]), rotate ([onRotateDevice]), a dark /
  * light theme toggle ([onToggleDarkTheme]), and an airplane mode toggle ([onToggleAirplaneMode]).
- * [extraControls] are appended to the side card.
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -206,7 +204,6 @@ fun DevicePreviewFrame(
   isAirplaneMode: Boolean = false,
   onToggleAirplaneMode: () -> Unit = {},
   modifier: Modifier = Modifier,
-  extraControls: @Composable ColumnScope.() -> Unit = {},
   content: @Composable () -> Unit,
 ) {
   val dimensionsLabel = formFactor.dimensionsLabelForOrientation(orientation)
@@ -376,8 +373,6 @@ fun DevicePreviewFrame(
             },
           )
         }
-
-        extraControls()
       }
     }
   }
