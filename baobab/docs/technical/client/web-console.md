@@ -16,7 +16,7 @@
 
 # Web Console Features
 
-The pages of the Ground 2.0 web console ([`shared/web`](../../../shared/web/),
+The pages of the Open Foris Collect One web console ([`shared/web`](../../../shared/web/),
 hosted by [`webApp`](../../../webApp/)). Paths in this document are relative to
 `shared/web/src/commonMain/kotlin/org/groundplatform/v2/web/` for web-only code
 and to `shared/app/src/commonMain/kotlin/org/groundplatform/v2/app/` for code
@@ -72,7 +72,7 @@ The web console's landing page (`#surveys`). Web pages are gated behind a simple
 
 Open from **Manage organizations** in the user profile card (avatar in the web
 header), or deep-link to `#organizations`. Organizations
-are the Ground 2.0 counterpart of Collect Earth Online institutions: a survey
+are the Open Foris Collect One counterpart of Collect Earth Online institutions: a survey
 can optionally belong to one, and the organization's **Managers** inherit
 Survey organizer access to all of its surveys while **Members** can create
 surveys in it and find them in their list.

@@ -17,7 +17,7 @@
 # Survey Structure
 
 The top-level `SurveyDef` message (defined in `survey_def.proto`) is the root
-organizational container in Ground 2.0. It encapsulates one or more ProtoForms
+organizational container in Open Foris Collect One. It encapsulates one or more ProtoForms
 form definitions (`groundplatform.v2.forms.FormDef`), lookup tables, map
 configurations, and sharing policies.
 
@@ -55,7 +55,7 @@ Google Drive sharing model) and data collector peer visibility via
 ## Form Launch & Multilingual CTA Configuration (`FormLaunchConfig`)
 
 While XForms (`FormDef`) defines a single static `<h:title>` and has no
-native concept of a data-collection launch button, Ground 2.0 layers
+native concept of a data-collection launch button, Open Foris Collect One layers
 survey-specific form entry points and multilingual Call-to-Action (CTA) labels
 onto `SurveyDef` via `FormLaunchConfig` and `SurveyDef.translations`:
 

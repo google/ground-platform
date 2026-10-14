@@ -14,9 +14,9 @@
   limitations under the License.
 -->
 
-# Ground 2.0 Data Model
+# Open Foris Collect One Data Model
 
-The Ground 2.0 data model is defined as Protocol Buffer (`proto3`) schemas under [`shared/protos/`](../../../shared/protos/) across three packages: **`groundplatform.v2.survey`** (surveys, map layers, entity datasets, and access control), **`groundplatform.v2.forms`** (XForms/XLSForm-compatible form definitions), and **`groundplatform.v2.data`** (stateful entity records, immutable submission records, and audit logs). A fourth package, **`groundplatform.v2.library`**, defines organization-owned concepts (the dictionary), form templates, and Purpose Packs used by the Survey Designer.
+The Open Foris Collect One data model is defined as Protocol Buffer (`proto3`) schemas under [`shared/protos/`](../../../shared/protos/) across three packages: **`groundplatform.v2.survey`** (surveys, map layers, entity datasets, and access control), **`groundplatform.v2.forms`** (XForms/XLSForm-compatible form definitions), and **`groundplatform.v2.data`** (stateful entity records, immutable submission records, and audit logs). A fourth package, **`groundplatform.v2.library`**, defines organization-owned concepts (the dictionary), form templates, and Purpose Packs used by the Survey Designer.
 
 At its core, the model separates **Current State** (**Map layers** and **Data tables**, represented by `EntityDatasetDef` and `EntityRecord`) from **Immutable Transactions** (**Forms** and **Submissions**, represented by `FormDef` and `SubmissionRecord`).
 

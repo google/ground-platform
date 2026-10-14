@@ -90,8 +90,8 @@ workshops:
 
 ## Pipeline Expansion
 
-The demand for Ground 2.0’s structured, map-first features is reflected in a
-rapidly expanding institutional pipeline:
+The demand for Open Foris Collect One's structured, map-first and desk-to-field
+features is reflected in a rapidly expanding institutional pipeline:
 
 *   **DRSRS Kenya**: A planned coffee georeferencing campaign led by the
     Directorate of Resource Surveys and Remote Sensing (DRSRS) is backed by a

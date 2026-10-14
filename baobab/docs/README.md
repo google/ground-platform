@@ -14,28 +14,40 @@
   limitations under the License.
 -->
 
-# Ground 2.0 Documentation (`docs/`)
+# Open Foris Collect One Documentation
 
-Architectural design specifications and Protocol Buffer data model documentation
-for Ground 2.0.
+Architectural design specifications, product strategy, and Protocol Buffer data
+model documentation for **Open Foris Collect One** (referred to as **Collect
+One** for short).
+
+Open Foris Collect One is the natural evolution and convergence of **Open Foris
+Ground** and **Collect Earth Online (CEO)** (and the cloud-native successor to
+legacy desktop **Collect Earth**). Co-maintained by the **Food and Agriculture
+Organization of the United Nations (FAO)** and **Spatial Informatics Group
+(SIG)** with cross-platform engineering, cloud infrastructure, and geospatial AI
+support from **Google**, Collect One merges browser-based satellite visual
+interpretation and offline-first mobile field data collection into a single
+open-source platform.
 
 ## Sections
 
 -   **[`product/`](product/)**:
-    -   [`prd.md`](product/prd.md): Ground 2.0 Product Requirements, system
-        architecture, and end-to-end technical design.
+    -   [`prd.md`](product/prd.md): Open Foris Collect One Product Requirements,
+        system architecture, and end-to-end technical design.
     -   [`xforms-integration.md`](product/xforms-integration.md): XForms & ODK
         Entities integration architecture, Entity-only map model, default
         1-Form-to-1-Entity provisioning, and automatic `save_to` schema
         synchronization.
     -   [`concept-brief.md`](product/concept-brief.md): Condensed summary of the
-        Ground 2.0 objective, key improvements over 1.0, scope, and roles.
+        Open Foris Collect One objective, why FAO and SIG are uniting Ground and
+        CEO with Google's support, key improvements over Ground 1.0 and legacy
+        CEO, scope, and roles.
     -   [`ceo-integration.md`](product/ceo-integration.md): Collect Earth Online
         (CEO) functional inventory, desk-to-field plot flagging integration
         architecture, and specification delta analysis.
-    -   [`terminology.md`](product/terminology.md): Ground 2.0 terminology and
-        cross-platform parity with CEO, ODK, KoboToolbox, XLSForm, Survey123,
-        and Open Foris Arena.
+    -   [`terminology.md`](product/terminology.md): Open Foris Collect One
+        terminology and cross-platform parity with CEO, ODK, KoboToolbox,
+        XLSForm, Survey123, and Open Foris Arena.
     -   [`impacts.md`](product/impacts.md): Platform impact analysis.
     -   [`impact-measurement.md`](product/impact-measurement.md): Proposed MAP
         impact measurement approach (Purpose Packs, indicator tags, spatial
@@ -49,10 +61,10 @@ for Ground 2.0.
         Design for the impact aggregation job and the optional Earth Engine
         spatial overlay pipeline (deduplication, thresholds, attribution score,
         hosting options, and reference-layer licensing).
-    -   [`client/architecture.md`](technical/client/architecture.md): Ground 2.0
-        Kotlin Clean Architecture, MVVM pattern with Compose Multiplatform,
-        dependency rules, and hardware/service client communication
-        guidelines.
+    -   [`client/architecture.md`](technical/client/architecture.md): Open Foris
+        Collect One Kotlin Clean Architecture, MVVM pattern with Compose
+        Multiplatform, dependency rules, and hardware/service client
+        communication guidelines.
     -   [`model/`](technical/model/README.md): Protocol Buffer data model
         overview.
         -   [`forms/`](technical/model/forms/00-introduction.md): ProtoForms
@@ -67,9 +79,9 @@ for Ground 2.0.
             Organization libraries—concepts (the dictionary), form templates,
             Purpose Packs, and export profiles.
 -   **[`ux/`](ux/)**:
-    -   [`content-guidelines.md`](ux/content-guidelines.md): Ground 2.0 UX
-        writing standards, voice and tone, domain terminology, and content
-        guidelines for user-facing copy.
+    -   [`content-guidelines.md`](ux/content-guidelines.md): Open Foris Collect
+        One UX writing standards, voice and tone, domain terminology, and
+        content guidelines for user-facing copy.
 
 ## Summary: Mental Model & Terminology Mapping to XForms
 

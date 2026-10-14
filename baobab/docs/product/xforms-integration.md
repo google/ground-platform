@@ -21,31 +21,31 @@ Last modified: 2026-09-24
 
 ## Overview & Motivation
 
-**Ground 2.0** adopts the industry-standard **XForms / XLSForm** and **ODK Entities** specifications as its foundational data model (`ProtoForms`). This enables zero-configuration `.xlsx` and `.xml` round-tripping with ODK Central, KoboToolbox, ArcGIS Survey123, and Open Foris Arena while preserving Ground's hallmark **map-first, low-ceremony user experience**.
+**Open Foris Collect One** (referred to as **Collect One** for short) adopts the industry-standard **XForms / XLSForm** and **ODK Entities** specifications as its foundational data model (`ProtoForms`). This enables zero-configuration `.xlsx` and `.xml` round-tripping with ODK Central, KoboToolbox, ArcGIS Survey123, and Open Foris Arena while preserving Ground's hallmark **map-first, low-ceremony user experience** alongside Collect Earth Online's visual interpretation workflows.
 
-A central design question when marrying a map-centric field tool with XForms is: **What appears on the map—Map features (Entities), Form Submissions, or both?**
+A central design question when marrying a map-centric field and remote-sensing tool with XForms is: **What appears on the map—Map features (Entities), Form Submissions, or both?**
 
-### Why Ground 2.0 Uses an Entity-Only Map
+### Why Open Foris Collect One Uses an Entity-Only Map
 
 In early iterations of the XForms transition, map layers could point to either a **Geospatial Entity Dataset** (`entity_dataset_id`) or a **Form Submission Geometry Question** (`form_geometry`). In practice, showing both Entities and raw Submissions as separate map layers introduces severe UX friction:
 
 1.  **The "Double Pin / Wrong Layer" Problem**: If a form registers a new plot (`CREATE` entity) *and* records a polygon geometry in the submission, rendering both Entities and Submissions paints duplicate, overlapping polygons on the map. Conversely, if a simple survey only creates Submissions without an Entity Dataset, its features appear under a static "Submissions" layer that lacks site status, identity, or follow-up actions.
-2.  **Cognitive Overhead for Non-GIS Organizers**: Asking survey organizers to choose between configuring an XLSForm `entities` sheet with `save_to` mappings versus a standalone form just to get interactive pins on a map violates Ground's first guiding principle: **Proportional Complexity (Simple by Default, Powerful on Demand)**.
-3.  **Loss of Longitudinal Upgradeability**: In Ground 1.0, *every* feature on the map was a **Map feature (Location of Interest)**, and every submission was attached to a site. If a 2.0 survey initially collects raw submissions without backing Entities, the organizer cannot later add a follow-up inspection form (`Year 2 Survival Audit`) against those same plots without migrating data.
+2.  **Cognitive Overhead for Non-GIS Organizers**: Asking survey organizers to choose between configuring an XLSForm `entities` sheet with `save_to` mappings versus a standalone form just to get interactive pins on a map violates Collect One's first guiding principle: **Proportional Complexity (Simple by Default, Powerful on Demand)**.
+3.  **Loss of Longitudinal Upgradeability**: In Ground 1.0, *every* feature on the map was a **Map feature (Location of Interest)**, and every submission was attached to a site. If a Collect One survey initially collects raw submissions without backing Entities, the organizer cannot later add a follow-up inspection form (`Year 2 Survival Audit`) against those same plots without migrating data.
 
 ### The Architectural Decision
 
 To keep the user experience simple and unified:
 
 1.  **The Map Only Displays Entities (Map features)**: Every spatial feature rendered on the Web Console and Mobile App map represents a stateful **Entity** (`EntityRecord` in a `GEOSPATIAL` `EntityDatasetDef`). Raw `SubmissionRecord` geometries are never rendered as independent map layers.
-2.  **Default 1-Form-to-1-Entity Creation in the Survey Designer**: When an organizer creates a new form in the Survey Designer, Ground **automatically provisions a backing Entity Dataset** (`EntityDatasetDef`) and configures the form's `EntityDeclaration` to **append a new Entity on each submission** (`action: CREATE` with `save_to` / `entity_saveto` bindings).
-3.  **Automatic Schema Synchronization**: As questions are added, renamed, or modified in the Survey Designer, Ground automatically keeps the backing `EntityDatasetDef` schema and the form's `save_to` mappings in sync behind the scenes.
+2.  **Default 1-Form-to-1-Entity Creation in the Survey Designer**: When an organizer creates a new form in the Survey Designer, Collect One **automatically provisions a backing Entity Dataset** (`EntityDatasetDef`) and configures the form's `EntityDeclaration` to **append a new Entity on each submission** (`action: CREATE` with `save_to` / `entity_saveto` bindings).
+3.  **Automatic Schema Synchronization**: As questions are added, renamed, or modified in the Survey Designer, Collect One automatically keeps the backing `EntityDatasetDef` schema and the form's `save_to` mappings in sync behind the scenes.
 4.  **Submissions Live in the Entity History Timeline**: Every completed form still produces an immutable, timestamped `SubmissionRecord` linked to the Entity's UUID (`entity_id`). Tapping an Entity on the map opens its **current state** (from the Entity properties) alongside its chronological **Submission History** timeline and available follow-up forms (`[ + Inspect Site ]`, `[ + Update Info ]`).
 
 
 ## Prior Art Across the XForms Ecosystem
 
-Ground 2.0's automatic Entity provisioning and schema synchronization builds directly on proven patterns across leading XForms and XLSForm platforms:
+Open Foris Collect One's automatic Entity provisioning and schema synchronization builds directly on proven patterns across leading XForms and XLSForm platforms:
 
 <!-- mdformat off -->
 
@@ -61,11 +61,11 @@ Ground 2.0's automatic Entity provisioning and schema synchronization builds dir
 
 ## Terminology & XLSForm Mapping
 
-Ground 2.0 aligns its user-facing concepts directly with **XLSForm**, **ODK Entities**, **KoboToolbox**, and **ArcGIS Survey123** so surveys round-trip losslessly between Ground's visual WYSIWYG Designer and standard `.xlsx` / `.xml` files:
+Open Foris Collect One aligns its user-facing concepts directly with **XLSForm**, **ODK Entities**, **KoboToolbox**, and **ArcGIS Survey123** so surveys round-trip losslessly between Collect One's visual WYSIWYG Designer and standard `.xlsx` / `.xml` files:
 
 <!-- mdformat off -->
 
-| Ground 2.0 Term | Ground 1.0 Equivalent | ODK / XLSForm / Survey123 Equivalent | Purpose in Ground 2.0 |
+| Open Foris Collect One Term | Ground 1.0 Equivalent | ODK / XLSForm / Survey123 Equivalent | Purpose in Open Foris Collect One |
 | :--- | :--- | :--- | :--- |
 | **Survey** (`SurveyDef`) | Survey | Project / Workbook | Top-level organizational container managing permissions, forms, site tables, map layers, and quotas |
 | **Map features / Table** (`EntityDatasetDef` / `EntityRecord`) | Map feature (LOI) | Entity List (`entities` sheet / Feature Layer) | Stateful master dataset of real-world objects (plots, trees, clinics, or participants) rendered on the map |
@@ -77,7 +77,7 @@ Ground 2.0 aligns its user-facing concepts directly with **XLSForm**, **ODK Enti
 
 ### Form–Table Interaction Patterns in XLSForm
 
-Under the hood, every Ground 2.0 form interaction with a Site Table maps to standard XLSForm and ODK Entities constructs:
+Under the hood, every Collect One form interaction with a Site Table maps to standard XLSForm and ODK Entities constructs:
 
 1.  **Populate a Site Table (Create New Entity — *Default for Initial Form*)**:
     *   *User Experience*: Field collector drops a pin or walks a plot boundary and fills out the form; a new site appears immediately on the map.

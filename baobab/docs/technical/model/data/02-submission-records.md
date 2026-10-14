@@ -17,7 +17,7 @@
 # Submission Records
 
 `SubmissionRecord` (defined in `submission_record.proto`) represents a
-finalized, versioned form submission transaction in Ground 2.0. It links a form
+finalized, versioned form submission transaction in Open Foris Collect One. It links a form
 submission to its parent `SurveyDef`, specific `FormDef` version, and optional
 target `EntityRecord`.
 

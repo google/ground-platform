@@ -175,7 +175,7 @@ A person's effective role in a survey is the strongest of: owner →
 
 ## Tiered Resource Quotas (`QuotaTier` and `QuotaLimits`)
 
-Ground 2.0 enforces administrative and operational field collection limits
+Open Foris Collect One enforces administrative and operational field collection limits
 across two tiers (`BASIC` for community usage, `SPONSORED` for verified partner
 institutions):
 

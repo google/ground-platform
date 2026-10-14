@@ -23,7 +23,7 @@ which can be populated via CSV or GeoJSON imports.
 
 ## Entity Classifications (`EntityType`)
 
-Ground 2.0 distinguishes between two entity dataset classifications:
+Open Foris Collect One distinguishes between two entity dataset classifications:
 
 1.  **`TABULAR`**: Relational, non-spatial records (such as registries of
     farmers, cooperative member rosters, or species taxonomies). Queried using
